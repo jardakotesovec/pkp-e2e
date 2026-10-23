@@ -1284,7 +1284,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | Statistics: a refused date range shows a raw code like "api.stats.400.wrongDateFormat", not a sentence | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A15](#a15) | "Counter R5": the "Authors" column of the item reports names only each work's last author | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A16](#a16) | SUSHI "Item Master Report (IR)" gives authors without an ORCID iD the iD of an author listed before them | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
-| [A17](#a17) | Statistics › Articles: a Word galley's downloads are in no column, not "File Views", "Other" or "Total", while the chart's "Files" and "Download Files" count them | 🐞 | minor | — |
+| [A17](#a17) | Statistics › Articles leaves Word file downloads out of "Other", "File Views" and "Total" | 🐞 | medium | issues (claude), 2026-10-23 — re-verified |
 | [OJS2](#ojs2) | One view of an HTML galley counts once more for each picture or style sheet it names that was never uploaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OJS4](#ojs4) | Statistics › Issues: "Download Issues" leaves out every issue after the first 30, without saying so | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS5](#ojs5) | "Counter R5": "Journal Article Requests (IR_A1)" also lists investigation rows, which its "Metric_Types" line leaves out | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1557,24 +1557,28 @@ borrowed iD.
 Basis: probe, 2026-10-15. <sup>f-a16</sup>
 
 <a id="a17"></a>
-**A17 — Statistics › Articles: a Word galley's downloads are in no column, not "File Views", "Other" or "Total", while the chart's "Files" and "Download Files" count them** · 🐞 · minor.
-A reader downloads an article's Word galley (a .doc or .docx file).
-Once the day is processed, Statistics › "Articles" should count the
-download in "File Views" and "Total", under one of "PDF", "HTML" or
-"Other", as it counts a PDF download under "PDF". Instead the download
-is in none of these columns, on the page or in "Download Articles". The
-chart's "Files" counts it, and "Download Files" lists the Word file as
-"Primary File" with its count. For an article with one abstract view,
-one PDF download and one Word download, the row reads "File Views" 1
-and "Total" 2, while "Files" reads 2 for that day.
-
-The manager sees the Word downloads in the chart and in the file list
-but not in the article's figures, and nothing on the page says that
-Word files are left out. A program that asks the statistics API for
-an article's figures gets the same omission. The page's columns were
-built after Word files were already counted as a type of their own,
-and none of them takes that type: an oversight, not a choice.
-Since: 2019-05-01 (pkp/pkp-lib#3673) · Basis: probe, 2026-10-23. <sup>f-a17</sup>
+**A17 — Statistics › Articles leaves Word file downloads out of "Other", "File Views" and "Total"** · 🐞 · medium.
+A reader downloads the Word file (.doc or .docx) of an article, a book
+or a preprint: a journal's galley, a press's publication format or a
+preprint server's galley. Statistics › "Articles" ("Monographs",
+"Preprints") shows a day's visits from the next day on. It should then
+count the download under "Other", the column for every file that is
+neither PDF nor HTML, and so in "File Views" and "Total". Instead the
+download is in none of the item's columns, on the page, in "Download
+Articles" or in the statistics API. Word is the only file type left
+out: any other file that is not a PDF or HTML file counts under
+"Other".
+For an article with one abstract view, one PDF download and one Word
+download, the row should read "File Views" 2 ("PDF" 1, "Other" 1) and
+"Total" 3. It reads "File Views" 1, "Other" 0 and "Total" 2, and
+nothing on the page says that Word files are left out. The chart
+above the table, switched to its "Files" line, counts both downloads,
+and "Download Files" lists the Word file with its download, so a
+manager who looks there can add it to the row by hand.
+One filter in the shared statistics code leaves the Word file type out
+of "Other". The COUNTER R5 reports and their SUSHI service count Word
+downloads.
+Since: 2021-07-16 (pkp/pkp-lib#6782, about five years) · Basis: probe, 2026-10-23. <sup>f-a17</sup>
 
 <a id="a18"></a>
 **A18 — Statistics › Articles: Word downloads may place an article in the list, and above others, with no figure showing them** · ❓ · minor.

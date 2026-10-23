@@ -343,10 +343,13 @@ In French most of its headings and descriptions are raw codes
     Two made the same day share one name ⚠ [A9](#a9). <sup>i</sup>
 11b. **Creating a version by program.** Programs outside the apps can
     also create a version through the install's programming interface,
-    the one the workflow's own screens use, and may send a cover image
-    with it; no screen does ("Create New Version" sends none). A cover
-    the app refuses should refuse the whole request, with no version
-    created. Instead the program is told the request failed, yet the
+    the one the workflow's own screens use. The request is refused
+    unless it carries a version number, a field the app no longer keeps
+    and the interface's documentation (the API reference OJS ships)
+    does not list ⚠ [A17](#a17). It may carry a cover image; no screen
+    sends one ("Create New Version" sends another request, without a
+    cover). A cover the app refuses should refuse the whole request,
+    with no version created. Instead the program is told the request failed, yet the
     version is created, without the cover ⚠ [A12](#a12). A cover the
     app accepts should be stored with the new version; instead the
     program is told the request succeeded and the version is created
@@ -1132,6 +1135,8 @@ Left out of the scenarios above, by reason:
     picture under two languages; Rule 11d)
   - A16 (a version created through the programming interface with a
     cover image the app accepts; Rule 11b)
+  - A17 (a version created through the programming interface without
+    the version number the app no longer keeps; Rule 11b)
   - OJS2's second half (where only future issues exist, a Publication
     Settings save for another field recording "Don't Assign To An
     Issue"; Fields)
@@ -1215,6 +1220,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A program creating a version with a stage the app does not know gets a server error instead of a refusal | 🐞 | low · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A15](#a15) | A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture | 🐞 | latent · crash: server | — |
 | [A16](#a16) | A version created by program with a cover image the app accepts is created without the cover, and the picture is left unused | 🐞 | minor | — |
+| [A17](#a17) | A program creating a version is refused unless it sends a version number the API reference does not list and the app throws away | 🐞 | minor | — |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Editor publishing an article without an issue gets an error when a contributor has a verified ORCID iD | 🐞 | medium · crash: server | issues (claude), 2026-10-19 — re-verified |
@@ -1506,6 +1512,21 @@ pointing to it. Saving the cover on the version afterwards works, and
 an app's shared library takes the change (OJS's does not yet, OMP's and
 OPS's neither), and 3.5 since 2026-10-20.
 Since: 2026-10-20 (pkp/pkp-lib#13560; on 3.5 the same day) · Basis: probe, 2026-10-21. <sup>[f-a16](#fn-a16)</sup>
+
+<a id="a17"></a>
+**A17 — A program creating a version must send a version number the app throws away** · 🐞 · minor.
+A program that creates a new version through the install's programming
+interface (Rule 11b), sending the fields OJS's API reference lists
+for that request, expects the version to be created. Instead it is
+refused with "This field is required." for a field named "version",
+which the reference does not list. Sending "version" with any number
+lets the version through, but the number is dropped: versions are now
+numbered by stage and revision (Rule 12), and no version keeps that
+field. OMP and OPS ship no API reference, and refuse the same request
+the same way. "Create New Version" sends another request and is not
+affected. Only `main` has this: on 3.5 the version number is still a
+field every version keeps, and the reference lists it.
+Since: 2025-05-30 (pkp/pkp-lib#10669) · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
 
 ### OJS
 
@@ -2843,6 +2864,44 @@ OPS: `$publication->setData('coverImage', $value)` before that
 `edit()` (`checks/sync/pkp-lib-13561/fix.diff`): the cover stored.
 Report `docs/reports/2026-10-21-pkp-lib-13561.md`.
 
+<a id="fn-a17"></a>
+**f-a17** — lib/pkp `schemas/publication.json` on `main` keeps
+`"required": ["submissionId", "version"]` but has had no `version`
+property since pkp-lib `958592a159` (pkp/pkp-lib#10669, 2025-05-30),
+which replaced it with `versionStage`, `versionMajor` and
+`versionMinor`. The apps' own `schemas/publication.json` add
+`sectionId` (OJS, OPS) or nothing (OMP), and none has `version`.
+`PKPSubmissionController::addPublication()` (`POST
+{context}/api/v1/submissions/{id}/publications`) validates through the
+schema (`Repo::publication()->validate()`), so the required check
+fires. OJS's API reference, built from `docs/dev/swagger-source.json`
+by `lib/pkp/tools/buildSwagger.php`, documents that route's body as
+`PublicationEditable` with no `version` property and no `required`
+list (the build never copies a schema's `required`); OMP and OPS ship
+no reference source, and the build stops there with "Unable to find
+source files". Live-probed 2026-10-23 on PKP's default dataset
+(pkp/datasets `300c68e`, PostgreSQL), freshly loaded before each run,
+as `dbarnes`, OJS, OMP and OPS `main` (OJS `3cf9aa91a8`, OMP
+`178e8b34b`, OPS `5091e916d9`, lib/pkp `1f415a07ca`) and OJS
+`stable-3_5_0` (`0b1ae35f04`, lib/pkp `5b54f59ed7`), two runs per
+line, through a page fetch carrying the workflow window's
+`apiBaseUrl` and CSRF token, on the published submission (OJS 17, OMP
+14, OPS 2): the plain create with title, abstract and section (OMP
+series) and no `version` answered 400 `{"version":["This field is
+required."]}`; with `"version": 2` it answered 200 and the side menu
+gained "Unassigned version (2026-10-23)"; a GET of every publication,
+new and current, carries no `version` key. `POST
+…/publications/{id}/version` (what "Create New Version" sends) needs
+no body and ignores a `version` key: 200 with `{}` ("Version of
+Record 1.1", OPS "Author's Original 1.1") and with `{"version": 2}`
+("… 1.2"), on `main` and on 3.5. On 3.5 `version` is an integer
+property (minimum 1), required, and listed (not marked required) in
+the built reference's `PublicationEditable`; the plain create without
+it is refused the same way, and with it adds a version. The fix (code;
+not tried): drop `version` from `required` in lib/pkp
+`schemas/publication.json` on `main`. Kept check
+`shared/playwright/checks/U49/I23G/i23g.js` (`PART=api`).
+
 <a id="fn-ojs1"></a>
 **f-ojs1** — OJS1 (retired). Live 2026-08-28 (metadata spec, register A1): with
 "Require the author to provide a plain language summary…" on, the
@@ -3305,9 +3364,12 @@ is homed at
   roster
 - `ojs/classes/issue/enums/IssueAssignment.php` — the four assignment
   choices and their statuses
+- `lib/pkp/schemas/publication.json` — the publication's fields and
+  their `required` list
 - `lib/pkp/api/v1/submissions/PKPSubmissionController.php` —
   `publishPublication()`, `unpublishPublication()`,
-  `versionPublication()`, `createNewPublicationVersionAndNotify()`;
+  `versionPublication()`, `addPublication()`,
+  `createNewPublicationVersionAndNotify()`;
   `ojs/api/v1/submissions/SubmissionController.php`
   (`getIssueAssignmentStatus()`, issue/payment form components);
   `ops/api/v1/submissions/SubmissionController.php` (author-inclusive

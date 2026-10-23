@@ -203,7 +203,10 @@ Accept wizard (new invitee):
     button, "View All Users", returns the browser to Users & Roles. Each
     opening of the wizard, whether by "Invite to a role", "Edit
     Invitation" or a member's Edit in the users list, leaves warnings in
-    the server's error log, which no screen shows ⚠ [A14](#a14). <sup>g</sup>
+    the server's error log (the PHP error log the web server writes; no
+    screen shows it) ⚠ [A14](#a14); "Edit Invitation" on an invitation
+    sent with no Given Name adds `PHP Warning: Trying to access array
+    offset on null` ⚠ [A17](#a17). <sup>g</sup>
 16. Cancelling a pending invitation (from its row, behind a confirmation
     listing the invitee's details) deactivates the emailed links immediately.
     The recipient then sees the "Invitation Unavailable" page (Rule 4). <sup>q</sup>
@@ -778,6 +781,8 @@ Left out of the scenarios above, by reason:
     shown but not sent; Rule 15)
   - A16 (which day a past start date becomes when the invitation is
     accepted on a later day than it was sent; Rule 8)
+  - A17 (the extra error-log warning of "Edit Invitation" on an
+    invitation sent with no Given Name; Rule 15)
 - **No seed**:
   - a pending invitation past its deadline, the link stopped and no role
     granted (Rules 1, 2, 4): the test tooling cannot backdate a deadline
@@ -824,6 +829,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A13](#a13) | A newcomer whose chosen username was taken meanwhile presses "Accept And Continue" and nothing happens | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A15](#a15) | After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
+| [A17](#a17) | "Edit Invitation" on an invitation sent with no Given Name writes one more PHP warning to the server's error log | 🐞 | invisible | — |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
@@ -1022,13 +1028,16 @@ Each time a manager opens the invitation wizard, the server's error log
 gains PHP warnings `Undefined array key "invitation_id"`, two for each
 form language of the journal. It happens on all three ways in: "Invite
 to a role" on Users & Roles, a pending invitation's "Edit" › "Edit
-Invitation", and "Edit" on a member in the users list.
+Invitation", and "Edit" on a member in the users list. On an invitation
+sent with no Given Name, "Edit Invitation" writes one more warning, of
+another cause ([A17](#a17)).
 
 The warnings come from a real fault in the code, but its result is
 harmless: no screen shows them, and the wizard works. The invitation is
 sent and edited as usual, and its email links carry the invitation's
 id. No setting in the app turns them off.
 Basis: probe, 2026-10-15. <sup>[f-a14](#fn-a14)</sup>
+Report: refresh owed — claim check I23G (2026-10-23): the report's "exactly the composer's lines" holds only for an invitation with a given name; opening "Edit Invitation" on one without adds a warning of another cause (the new entry) (2026-10-23)
 
 <a id="a15"></a>
 **A15 — After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without** · 🐞 · low.
@@ -1061,6 +1070,17 @@ accepted, also when that is days after it was sent? Lean: yes, Rule 8
 stands: the email still names the typed date, so the date is not
 replaced when the invitation is sent.
 Basis: probe, 2026-10-22. <sup>[f-a16](#fn-a16)</sup>
+
+<a id="a17"></a>
+**A17 — "Edit Invitation" on an invitation sent with no Given Name writes one more PHP warning to the server's error log** · 🐞 · invisible.
+Each time a manager opens "Edit Invitation" on a pending invitation
+sent without a Given Name (the address alone, or a Family Name only),
+the server's error log gains the warning Rule 15 quotes, beside
+[A14](#a14)'s. The wizard opens and works, headed by the invitee's
+email address ("You are viewing {email}'s user details"). With a Given
+Name, the page is headed by the name and this warning is not written.
+Its cause is not A14's, and a fix for A14 leaves it.
+Since: 2025-04-11 · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
 
 ### OMP and OPS
 
@@ -1323,6 +1343,10 @@ typed into the finder, on OPS too, whose Manage Emails has no row for
 it (f-ops1); picking it opened no dialog and left the Subject "You are invited to new
 roles". A template a journal adds to this email was not tried. "Back"
 from "Enter details" to "Search User": f-a15.
+Claim check 2026-10-23, OJS, OMP and OPS on `main` and OJS on
+`stable-3_5_0`, two runs each: leaving "Edit Invitation" by typing
+another address, with a Given Name typed and not saved, raised no
+question and landed on Users & Roles, the Invitations row unchanged.
 
 <a id="fn-h"></a>
 **h** — `UserInvitationSearchFormStep.vue`: `GET users?searchPhrase=…&status=all`,
@@ -1925,7 +1949,12 @@ run of five wizard opens; none on the search step, "Save And Continue",
 422s included), the decline page or "Confirm Decline Invitation". No
 request failed. The `Undefined property …$emailSubject/$emailBody`
 warnings first seen beside them on 2026-10-02 did not appear
-(pkp/pkp-lib#13216, closed 2026-10-09).
+(pkp/pkp-lib#13216, closed 2026-10-09). Claim check 2026-10-23, OJS,
+OMP and OPS on `main` (lib/pkp `1f415a07ca`) and OJS on `stable-3_5_0`
+(`5b54f59ed7`), two runs each: the same four per opening of "Invite to
+a role" and of "Edit Invitation", none on the search, "Save And
+Continue" or "Invite user to the role"; on an invitation sent with no
+given name each "Edit Invitation" also wrote f-a17's warning.
 Where the warnings are read: the test install's PHP server output,
 `apps/<app>/playwright/.server-logs/server-<port>.log` (harness.md
 "Server output"; a probe server's is `server-<port>-probe.log`).
@@ -1973,6 +2002,29 @@ Edit pages "Copyeditor 2026-10-22 ---" and "Copyeditor 2026-12-01 ---"
 (OPS: "Moderator"). The observation that settles the question: an
 invitation with a past start date accepted on a later day than it was
 sent, its start date read on the member's Edit page.
+
+<a id="fn-a17"></a>
+**f-a17** — `PHP Warning: Trying to access array offset on null in
+lib/pkp/classes/invitation/invitations/userRoleAssignment/handlers/UserRoleAssignmentInviteUIController.php`:
+`UserRoleAssignmentInviteUIController::editHandle()` builds the page's
+`pageTitleDescription` from `$invitationPayload->givenName[Locale::getLocale()]`
+with no guard, so a null `givenName` warns before the expression falls
+back to `inviteeEmail`; the `pageTitle` just above checks `givenName &&
+familyName` first. A14's cause (`InvitationModel::id()`, note f-a14) and
+its fix (pkp/pkp-lib#13230) do not reach it. Since lib/pkp `8b428c8dee`
+("refactor invitation page handler", 2025-04-11), on `stable-3_5_0` as
+`92c8eb3bdd` (pkp/pkp-lib#11266), in every 3.5 release (3.5.0-0 to
+3.5.0-5). Claim check 2026-10-23, OJS, OMP and OPS on `main` (lib/pkp
+`1f415a07ca`) and OJS on `stable-3_5_0` (lib/pkp `5b54f59ed7`), two runs
+each, PKP's default test dataset, invitations sent by `rvaca` with one
+role row (Copyeditor; Moderator on OPS) and no names, with a Family Name
+only ("Onlyfamily"), and with both names ("Ines Both"); "Edit
+Invitation" opened twice on each, the server log marked around every
+opening: on the first two, one such warning per opening beside A14's
+four, the page reading "{address}" and "You are viewing {address}'s user
+details"; on the third, A14's four alone, the page reading "Ines Both"
+and "You are viewing Ines's user details". No response of 500 or more
+and no page error.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two

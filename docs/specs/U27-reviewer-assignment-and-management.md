@@ -1503,7 +1503,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A46](#a46) | "Resend Review Request" with the review due date before the response date shows a "Please try again" alert, and the window never states the date rule | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A47](#a47) | A late, unanswered re-sent review request is not marked "Overdue" and offers no "Send Reminder" | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A49](#a49) | Both XML entries of "Download Review Form" open a "not authorized" page until a review PDF is downloaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
-| [A50](#a50) | Picking the "No Matches" suggestion in "Enroll Existing User" and pressing "Add Reviewer" fails on the server: the window hangs on a spinner with no message | 🐞 | user-visible · crash: server | — |
+| [A50](#a50) | An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -2168,15 +2168,20 @@ dataset as loaded.
 Basis: probe, 2026-10-15. <sup>[f-a49](#fn-a49)</sup>
 
 <a id="a50"></a>
-**A50 — Picking the "No Matches" suggestion in "Enroll Existing User" and pressing "Add Reviewer" fails on the server: the window hangs on a spinner with no message** · 🐞 · user-visible · crash: server.
-In "Enroll Existing User", a name that matches no user without a
-reviewer role, a reviewer's own name included, lists the single
-suggestion "No Matches", and it can be picked like a name. It fills
-"Search By Name" with "No Matches". "Add Reviewer" then fails on the
-server: the window stays open with a spinner beside a greyed-out "Add
-Reviewer", nothing on screen says what happened, and after a reload the
-Reviewers panel shows that nobody was added. Expected: "No Matches"
-cannot be picked, or the field's own "This field is required." shows.
+**A50 — An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner** · 🐞 · medium · crash: server.
+When an editor enrolls "No Matches" as a reviewer, the app fails on the
+server. "Enroll Existing User" searches only people in the journal who
+are not yet reviewers. A name that finds nobody, a reviewer's name
+included, gets a single suggestion, "No Matches", and the editor can
+pick it, by a click or by Arrow Down and Enter, like a name. "Add
+Reviewer" then fails on the server: the window stays open with a spinner
+beside a greyed-out "Add Reviewer", nothing on screen says what
+happened, and after a reload the Reviewers panel shows that nobody was
+added.
+The editor expected either that "No Matches" could not be picked or that
+the form would say a user is needed, as it does when the box is empty.
+The editor has to leave the window, and a request letter they had already
+written is lost with it.
 Basis: probe, 2026-10-23. <sup>[f-a50](#fn-a50)</sup>
 
 ### OMP

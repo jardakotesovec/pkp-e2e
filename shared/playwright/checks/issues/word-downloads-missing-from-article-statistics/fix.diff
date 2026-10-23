@@ -1,0 +1,30 @@
+--- a/lib/pkp/classes/services/PKPStatsPublicationService.php
++++ b/lib/pkp/classes/services/PKPStatsPublicationService.php
+@@ -56,11 +56,12 @@
+ 
+     /**
+      * A callback to be used with array_filter() to return
+-     * records for Other (than PDF and HTML) file.
++     * records for Other (than PDF and HTML) file, Word files included.
+      */
+     public function filterRecordOther(object $record): bool
+     {
+-        return $record->assoc_type == Application::ASSOC_TYPE_SUBMISSION_FILE && $record->file_type == PKPStatisticsHelper::STATISTICS_FILE_TYPE_OTHER;
++        return $record->assoc_type == Application::ASSOC_TYPE_SUBMISSION_FILE
++            && in_array($record->file_type, [PKPStatisticsHelper::STATISTICS_FILE_TYPE_OTHER, PKPStatisticsHelper::STATISTICS_FILE_TYPE_DOC]);
+     }
+ 
+     /**
+@@ -200,10 +201,9 @@
+         if (!empty($htmlRecord)) {
+             $htmlViews = (int) current($htmlRecord)->metric;
+         }
++        // Other and Word are separate rows (grouped by file type): add them up
+         $otherRecord = array_filter($metricsByType, $this->filterRecordOther(...));
+-        if (!empty($otherRecord)) {
+-            $otherViews = (int) current($otherRecord)->metric;
+-        }
++        $otherViews = array_sum(array_map(fn (object $record) => (int) $record->metric, $otherRecord));
+         $suppFileRecord = array_filter($metricsByType, $this->filterRecordSuppFile(...));
+         if (!empty($suppFileRecord)) {
+             $suppFileViews = (int) current($suppFileRecord)->metric;

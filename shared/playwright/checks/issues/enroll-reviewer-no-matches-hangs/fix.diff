@@ -1,0 +1,99 @@
+--- a/lib/pkp/controllers/grid/users/reviewer/form/EnrollExistingReviewerForm.php
++++ b/lib/pkp/controllers/grid/users/reviewer/form/EnrollExistingReviewerForm.php
+@@ -22,6 +22,7 @@
+ use Illuminate\Support\Facades\Mail;
+ use PKP\db\DAORegistry;
+ use PKP\form\validation\FormValidator;
++use PKP\form\validation\FormValidatorCustom;
+ use PKP\security\Role;
+ use PKP\security\RoleDAO;
+ use PKP\submission\reviewer\suggestion\ReviewerSuggestion;
+@@ -40,6 +41,9 @@
+ 
+         $this->addCheck(new FormValidator($this, 'userGroupId', 'required', 'user.profile.form.usergroupRequired'));
+         $this->addCheck(new FormValidator($this, 'userId', 'required', 'manager.people.existingUserRequired'));
++        // Refuse what execute() cannot enroll as a form error, each field with its own message
++        $this->addCheck(new FormValidatorCustom($this, 'userGroupId', 'required', 'user.profile.form.usergroupRequired', fn ($userGroupId) => $this->isValidUserGroup((int) $userGroupId)));
++        $this->addCheck(new FormValidatorCustom($this, 'userId', 'required', 'manager.people.existingUserRequired', fn ($userId) => $this->isValidUser((int) $userId)));
+     }
+ 
+     /**
+@@ -120,6 +124,14 @@
+      */
+     protected function isValidUserAndGroup(int $userId, int $userGroupId): bool
+     {
++        return $this->isValidUser($userId) && $this->isValidUserGroup($userGroupId);
++    }
++
++    /**
++     * Checks if the user exists and doesn't already have a reviewer role in this context
++     */
++    protected function isValidUser(int $userId): bool
++    {
+         $context = Application::get()->getRequest()->getContext();
+ 
+         // User exists
+@@ -130,9 +142,15 @@
+ 
+         // Ensure user doesn't have a reviewer role
+         $roleDao = DAORegistry::getDAO('RoleDAO'); /** @var RoleDAO $roleDao */
+-        if ($roleDao->userHasRole($context->getId(), $user->getId(), Role::ROLE_ID_REVIEWER)) {
+-            return false;
+-        }
++        return !$roleDao->userHasRole($context->getId(), $user->getId(), Role::ROLE_ID_REVIEWER);
++    }
++
++    /**
++     * Checks if the user group is a reviewer group of this context
++     */
++    protected function isValidUserGroup(int $userGroupId): bool
++    {
++        $context = Application::get()->getRequest()->getContext();
+ 
+         // User Group exists
+         $userGroup = Repo::userGroup()->get($userGroupId);
+@@ -146,10 +164,6 @@
+         }
+ 
+         // User group refers to the right context
+-        if ((int) $userGroup->contextId != $context->getId()) {
+-            return false;
+-        }
+-
+-        return true;
++        return (int) $userGroup->contextId == $context->getId();
+     }
+ }
+--- a/lib/pkp/js/controllers/AutocompleteHandler.js
++++ b/lib/pkp/js/controllers/AutocompleteHandler.js
+@@ -140,7 +140,7 @@
+ 		// this allows us to return a 'no items' label with
+ 		// an empty value.
+ 
+-		if (ui.item.value !== '') {
++		if (!ui.item.noValue) {
+ 			$hiddenInput.val(ui.item.value);
+ 			$textInput.val(ui.item.label);
+ 		}
+@@ -166,7 +166,7 @@
+ 
+ 		$textInput = this.textInput;
+ 
+-		if (ui.item.value !== '') {
++		if (!ui.item.noValue) {
+ 			$textInput.val(ui.item.label);
+ 		}
+ 		return false;
+@@ -187,7 +187,11 @@
+ 		$textInput.addClass('spinner');
+ 		$.post(this.getAutocompleteUrl(), { term: request.term }, function(data) {
+ 			$textInput.removeClass('spinner');
+-			response(data.content);
++			// jQuery UI (1.11 and later) fills an empty value from the label, so
++			// mark a 'no items' entry here, before it does.
++			response($.map(data.content, function(item) {
++				return $.extend({}, item, {noValue: item.value === ''});
++			}));
+ 		}, 'json');
+ 	};
+ 
