@@ -2765,6 +2765,7 @@ again after `admin` deleted it, the `GET` answered 404
 not be installed."}` as `rvaca` and as `admin`; the context's
 `themePluginPath` kept the theme's folder name until a manager saved
 "Default Theme" ([Plugins management](U62-plugins-management.md#a8)).
+Issue report: [pkp-e2e#1066](https://github.com/jardakotesovec/pkp-e2e/issues/1066) ([docs/issues/U10-A23-theme-api-refusal-raw-placeholder.md](../issues/U10-A23-theme-api-refusal-raw-placeholder.md)).
 
 <a id="fn-f-a24"></a>
 **f-a24** — `PKPSiteController::getTheme()` (`GET
@@ -2786,6 +2787,7 @@ the site's `themePluginPath` stayed `default`; the site's Appearance ›
 "Theme" offered an empty list and the site's index page answered 200
 unstyled, listing both contexts. Ticked again, the `GET` answered 200
 with the site's options and `themePluginPath` `default`.
+Issue report: [pkp-e2e#1067](https://github.com/jardakotesovec/pkp-e2e/issues/1067) ([docs/issues/U10-A24-site-theme-api-server-error.md](../issues/U10-A24-site-theme-api-server-error.md)).
 
 <a id="fn-f-a25"></a>
 **f-a25** — Live-probed 2026-10-23 on PKP's default dataset, two runs
