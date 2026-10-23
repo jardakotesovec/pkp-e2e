@@ -6,6 +6,9 @@
 // its row's "Edit" > "Edit Invitation" (edit/{id}), and David Buskins's "Edit" in the users
 // list (management/settings/user/{id}). Each step marks the fleet's server log first and
 // records the PHP messages written since, pinned on the request line after them.
+// Control (steps 10-11, walk mode): a second newcomer invitation sent with no Given Name
+// (noname.hkq23p@mailinator.com) and its "Edit Invitation": the opening logs A14's lines plus
+// the unrelated `Trying to access array offset on null` of U06 A17 (another cause, its own report).
 //
 // Mode `nb` (neighbour, for the fix trial): a saved invitation's id still reaches every
 // reader. It sends the same newcomer invitation, reads the email's accept and decline links
@@ -13,17 +16,18 @@
 // accept link in a fresh browser, and records each.
 //
 // Run (main through the slot's app lock, one app per call; reset the fleet first):
-//   npm run fleet-prep -- --feature issues-h15k --dataset 1 --reset
-//   bin/app-lock.sh shared ojs -- env PROBE_FEATURE=issues-h15k PROBE_AGENT=h15k \
+//   npm run fleet-prep -- --feature issues-q23p --dataset 3 --reset
+//   bin/app-lock.sh shared ojs -- env PROBE_FEATURE=issues-q23p PROBE_AGENT=q23p \
 //       node bin/probe.js ojs shared/playwright/checks/issues/invitation-wizard-php-warnings/walk.js
 //   MODE=nb PROBE_RUN=nb-out … (the neighbour)
-//   PKP_E2E_LINE=stable-3_5_0 PROBE_FEATURE=issues-h15k-3_5 PROBE_RUN=r35 … node bin/probe.js all …
+//   PKP_E2E_LINE=stable-3_5_0 PROBE_FEATURE=issues-q23p-3_5 PROBE_RUN=r35 … node bin/probe.js ojs …
 const fs = require('fs');
 const {forEachApp, launch, signIn, screen, record, idle, serverLog} = require('../../../probe');
 
 const T = 30_000;
 const MODE = process.env.MODE || 'walk';
 const NEWCOMER = 'nora.h15k@mailinator.com';
+const NONAME = 'noname.hkq23p@mailinator.com';
 const flat = (s, n = 4000) => (s || '').replace(/\s+/g, ' ').trim().slice(0, n);
 const today = () => new Intl.DateTimeFormat('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date());
 const strip = (u) => u.replace(/^https?:\/\/[^/]+/, '').replace(/\?.*$/, '?…');
@@ -69,15 +73,15 @@ forEachApp(async (app) => {
         await page.locator('main h1').first().waitFor({timeout: T});
         await idle(page);
     };
-    const sendNewcomer = async () => {
-        await step('04-search', async () => {
-            await page.locator('input[name="search"]').fill(NEWCOMER);
+    const sendNewcomer = async (email = NEWCOMER, given = 'Nora', n = ['04', '05', '06', '07']) => {
+        await step(`${n[0]}-search`, async () => {
+            await page.locator('input[name="search"]').fill(email);
             await page.getByRole('button', {name: /^Search User/}).last().click();
             await page.getByRole('button', {name: /Save And Continue/i}).waitFor({timeout: T});
             await idle(page);
         });
-        await step('05-details', async () => {
-            await page.getByLabel(/^Given Name/).first().fill('Nora');
+        await step(`${n[1]}-details`, async () => {
+            if (given) await page.getByLabel(/^Given Name/).first().fill(given);
             const sel = page.locator('select[name="userGroupId"]').last();
             await sel.selectOption({label: 'Author'});
             const row = page.getByRole('row').filter({has: sel});
@@ -85,7 +89,7 @@ forEachApp(async (app) => {
             const ms = row.locator('select[name="masthead"]');
             if (await ms.count()) await ms.selectOption({label: 'Does not appear on the masthead'});
         });
-        await step('06-save-and-send', async () => {
+        await step(`${n[2]}-save-and-send`, async () => {
             await page.getByRole('button', {name: /Save And Continue/i}).click();
             await page.locator('input[name="subject"]').waitFor({timeout: T});
             await page.locator('.composer__loadingTemplateMask').waitFor({state: 'detached', timeout: T}).catch(() => {});
@@ -93,16 +97,16 @@ forEachApp(async (app) => {
             await page.getByRole('button', {name: 'Invite user to the role'}).click();
             const sent = page.getByRole('dialog').filter({hasText: 'Invitation Sent'});
             await sent.waitFor({timeout: T});
-            facts.sentDialog = flat(await sent.innerText(), 400);
+            facts[given ? 'sentDialog' : 'sentDialogNoName'] = flat(await sent.innerText(), 400);
         });
-        await step('07-view-all-users', async () => {
+        await step(`${n[3]}-view-all-users`, async () => {
             await page.getByRole('dialog').getByRole('button', {name: 'View All Users'}).click();
             await page.waitForURL(/management\/settings\/access/, {timeout: T}).catch(() => {});
             await idle(page);
         });
     };
-    const openEditInvitation = async () => {
-        const inv = page.getByRole('row').filter({hasText: NEWCOMER}).first();
+    const openEditInvitation = async (email = NEWCOMER) => {
+        const inv = page.getByRole('row').filter({hasText: email}).first();
         for (let i = 0; i < 10 && !(await inv.isVisible().catch(() => false)); i++) {
             await page.locator('main').getByRole('button', {name: /^Next/}).first().click();
             await idle(page);
@@ -116,7 +120,7 @@ forEachApp(async (app) => {
         await page.waitForURL(/invitation\/edit\/\d+/, {timeout: T});
         await page.getByRole('button', {name: /Save And Continue/i}).waitFor({timeout: T});
         await idle(page);
-        facts.editUrl = strip(page.url());
+        facts[email === NEWCOMER ? 'editUrl' : 'editUrlNoName'] = strip(page.url());
     };
     try {
         await step('01-sign-in', () => signIn(page, 'rvaca', {contextPath: app.contextPath}));
@@ -131,7 +135,7 @@ forEachApp(async (app) => {
         if (MODE === 'walk') record('wizard-create', await screen(page));
         await sendNewcomer();
         if (MODE === 'walk') {
-            await step('08-edit-invitation', openEditInvitation);
+            await step('08-edit-invitation', () => openEditInvitation());
             record('wizard-edit', await screen(page));
             await step('09a-users-and-roles', access);
             await step('09-member-edit', async () => {
@@ -147,6 +151,16 @@ forEachApp(async (app) => {
                 facts.memberUrl = strip(page.url());
             });
             record('wizard-member-edit', await screen(page));
+            // Control: an invitation sent with no Given Name, then its "Edit Invitation" (U06 A17's extra line).
+            await step('10a-users-and-roles', access);
+            await step('10b-invite-to-a-role', async () => {
+                await page.locator('main').getByRole('button').filter({hasText: /Invite to a role/}).first().click();
+                await page.locator('input[name="search"]').waitFor({timeout: T});
+                await idle(page);
+            });
+            await sendNewcomer(NONAME, null, ['10c', '10d', '10e', '10f']);
+            await step('11-edit-invitation-no-given-name', () => openEditInvitation(NONAME));
+            record('wizard-edit-no-given-name', await screen(page));
         } else {
             // Neighbour: the saved invitation's id reaches the email links, the edit wizard and the accept page.
             const msg = await app.fleetMail.find({to: NEWCOMER, since, timeoutMs: T});
@@ -156,7 +170,7 @@ forEachApp(async (app) => {
             const accept = link('accept'), decline = link('decline');
             facts.email = {subject: full.Subject, accept: accept && accept.replace(/key=[^&]+/, 'key=…'), decline: decline && decline.replace(/key=[^&]+/, 'key=…')};
             facts.linkId = accept ? (accept.match(/[?&]id=(\d+)/) || [])[1] || null : null;
-            await step('nb-edit-invitation', openEditInvitation);
+            await step('nb-edit-invitation', () => openEditInvitation());
             facts.editId = (facts.editUrl || '').match(/edit\/(\d+)/)?.[1] || null;
             facts.idsAgree = !!facts.linkId && facts.linkId === facts.editId;
             if (accept) {

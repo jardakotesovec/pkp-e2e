@@ -827,7 +827,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A11](#a11) | The invitation email promises a masthead listing for roles the masthead never lists, such as Author or Reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | The "Invite to a role" address with a wrong last word shows an empty page instead of "404 Not Found" | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | A newcomer whose chosen username was taken meanwhile presses "Accept And Continue" and nothing happens | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
+| [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A15](#a15) | After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A17](#a17) | "Edit Invitation" on an invitation sent with no Given Name writes one more PHP warning to the server's error log | 🐞 | invisible | — |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
@@ -1025,19 +1025,18 @@ Basis: probe, 2026-10-15. <sup>[f-a13](#fn-a13)</sup>
 <a id="a14"></a>
 **A14 — Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log** · 🐞 · low.
 Each time a manager opens the invitation wizard, the server's error log
-gains PHP warnings `Undefined array key "invitation_id"`, two for each
-form language of the journal. It happens on all three ways in: "Invite
-to a role" on Users & Roles, a pending invitation's "Edit" › "Edit
-Invitation", and "Edit" on a member in the users list. On an invitation
-sent with no Given Name, "Edit Invitation" writes one more warning, of
-another cause ([A17](#a17)).
-
-The warnings come from a real fault in the code, but its result is
-harmless: no screen shows them, and the wizard works. The invitation is
-sent and edited as usual, and its email links carry the invitation's
-id. No setting in the app turns them off.
-Basis: probe, 2026-10-15. <sup>[f-a14](#fn-a14)</sup>
-Report: refresh owed — claim check I23G (2026-10-23): the report's "exactly the composer's lines" holds only for an invitation with a given name; opening "Edit Invitation" on one without adds a warning of another cause (the new entry) (2026-10-23)
+gains PHP warnings `Undefined array key "invitation_id"`: two for each
+form language of the journal, so four on a journal with English and
+French. It happens on all three ways in: "Invite to a role" on Users &
+Roles, a pending invitation's "Edit" › "Edit Invitation", and "Edit" on
+a member in the users list.
+The fault behind the warnings changes nothing else: no screen shows
+them, and the wizard works. The invitation is sent and edited as usual,
+and its email links carry the invitation's id.
+Opening "Edit Invitation" on an invitation with no Given Name adds a
+fifth warning, of another cause ([A17](#a17)), which the fix
+proposed here does not reach.
+Basis: probe, 2026-10-23. <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
 **A15 — After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without** · 🐞 · low.
