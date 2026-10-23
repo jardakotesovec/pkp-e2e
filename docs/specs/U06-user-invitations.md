@@ -1958,6 +1958,7 @@ On `main`, the same "Back" with the same address searched again brought back
 already exists in the journal", no name boxes) the role row came back on
 OJS and OPS, and on OMP, where the member held the row's Author, the
 row's role was empty. No response of 500 or more and no page error.
+Issue report: [pkp-e2e#1064](https://github.com/jardakotesovec/pkp-e2e/issues/1064) ([docs/issues/U06-A15-invitation-back-names-shown-not-sent.md](../issues/U06-A15-invitation-back-names-shown-not-sent.md)).
 
 <a id="fn-a16"></a>
 **f-a16** — `UserRoleAssignmentReceiveController::finalize()` clamps a
