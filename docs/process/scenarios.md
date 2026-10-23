@@ -1489,6 +1489,9 @@ Keys:
   under "Editorial Activity"'s "Submissions Accepted", and after
   "Unpublish" it stands at the Submission stage (U65 claim check K2).
 - `author`: `{orcid, orcidIsVerified}` on the submitter's contributor record.
+  That record carries no Country (the user seed takes no `country`), and the
+  contributor form requires one, so a probe that opens its "Edit" and saves
+  picks a country first (rr1022a, 2026-10-22).
   `orcidIsVerified: true` stores what ORCID's own sign-in leaves when the
   emailed link completes, the verified mark plus a live permission: a
   fixture access token (`test-orcid-access-token-<tag>`, a fixture like the

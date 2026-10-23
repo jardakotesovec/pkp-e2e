@@ -618,6 +618,10 @@ no cleanup fixture.
   "Upload Files" with the later pills unreached, on all three apps), so a
   later step is reached by "Continue" (`continueTo()`) (U17, U72, U75
   claim checks; U42 claim check I29).
+- **A workflow Publication tab opened by address** takes
+  `workflowMenuKey=publication_{publicationId}_<tab>` (e.g.
+  `publication_12_issue`); a bare `publication_issue` falls back to
+  "Title & Abstract" without an error (rr1022c, 2026-10-22).
 - **`useFetch` tunnels DELETE and PUT via POST + `X-Http-Method-Override`, and
   unauthorized API calls return 401**, not 403. Match `waitForResponse` method
   predicates and status assertions accordingly.

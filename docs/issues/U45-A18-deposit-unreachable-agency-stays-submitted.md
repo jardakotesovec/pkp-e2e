@@ -10,7 +10,7 @@
   - 3.4: OJS, OPS (code)
   - 3.3: none (code; a deposit runs while the manager waits and sets no status first)
 - **Introduced** not traced; present since at least [72b6b76436](https://github.com/pkp/pkp-lib/commit/72b6b764361e966c240dcf5f076c372fa4e07d46) (2022-06-21), `pkp/pkp-lib#8021` for `pkp/pkp-lib#8020`, which queued every deposit and marks it "Submitted" before it runs
-- **Upstream** `pkp/crossref-ojs#16` (closed, OJS Crossref only). Its fix, `pkp/crossref-ojs#17` (2022), caught the wider `GuzzleException`, and a 2023 formatting commit put the narrow `RequestException` back. Even #17 still failed on `hasResponse()` for a connection failure, so no version ever recorded this case correctly, which is why the Kind is defect, not regression
+- **Upstream** `pkp/pkp-lib#13591` (open), the team's copy of this issue. Earlier: `pkp/crossref-ojs#16` (closed, OJS Crossref only). Its fix, `pkp/crossref-ojs#17` (2022), caught the wider `GuzzleException`, and a 2023 formatting commit put the narrow `RequestException` back. Even #17 still failed on `hasResponse()` for a connection failure, so no version ever recorded this case correctly, which is why the Kind is defect, not regression
 - **Tracked in** spec U45 [A18](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U45-dois.md#a18)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

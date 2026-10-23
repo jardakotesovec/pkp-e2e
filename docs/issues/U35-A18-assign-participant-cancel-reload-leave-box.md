@@ -23,8 +23,8 @@ a link, the browser's back button, closing the tab), the browser asks
 whether to leave, as if a form with unsaved changes were still open. No
 window is open and nothing is unsaved.
 
-The question comes once. When the editor chooses to leave, the page
-goes on as asked, and the "Participants" panel is unchanged.
+Once the box is accepted, the page goes on as asked, the
+"Participants" panel unchanged, and a second reload asks nothing.
 
 The same happens when "OK" was pressed first and refused: the editor
 picked a person, then a role that person does not hold, and "OK" showed
@@ -118,7 +118,7 @@ sends `formChanged`. `SiteHandler.registerUnsavedFormElement_()` then
 adds the filter to the page's list of unsaved forms. From then on
 `SiteHandler.pageUnloadHandler_()` answers `beforeunload` with
 `form.dataHasChanged` while the list is not empty. A page load starts a
-new list, which is why the box comes once.
+new list, which is why a second reload asks nothing.
 
 Only a "Search" takes the filter off that list: its submit sends
 `unregisterChangedForm`. "Cancel" takes off the window's own form alone.

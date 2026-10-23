@@ -5296,7 +5296,7 @@ Issue report: [pkp-e2e#229](https://github.com/jardakotesovec/pkp-e2e/issues/229
 failed with `GuzzleHttp\Exception\ConnectException` (three attempts),
 every deposit, OJS and OPS; the DOI status stayed 2 (submitted) and no
 error message was stored. Nothing on the DOIs page lists failed jobs.
-Issue report: [pkp-e2e#210](https://github.com/jardakotesovec/pkp-e2e/issues/210) ([docs/issues/U45-A18-deposit-unreachable-agency-stays-submitted.md](../issues/U45-A18-deposit-unreachable-agency-stays-submitted.md)).
+Issue report: [pkp-e2e#210](https://github.com/jardakotesovec/pkp-e2e/issues/210) ([docs/issues/U45-A18-deposit-unreachable-agency-stays-submitted.md](../issues/U45-A18-deposit-unreachable-agency-stays-submitted.md)). The team's copy is `pkp/pkp-lib#13591` (2026-10-23).
 
 <a id="fn-f-a19"></a>
 **f-a19** — `editDoiRegistrationAgencyPlugin()`'s `array_intersect()`

@@ -563,6 +563,14 @@ node bin/plugin-sandbox.js canary                     # the acceptance test of t
   app's Plugin Gallery reads it from the pod, and a release whose MD5 is
   a staged package's is served from the pod, so "Install" takes the
   app's own path, MD5 check included, without leaving the machine.
+  The gallery lists only a product's newest compatible release
+  (`PluginGalleryDAO::_compatibleFromElement`), so an upgrade drive
+  installs the older release through Installed Plugins › "Upload A New
+  Plugin" with its staged package, then upgrades from the gallery. On the
+  dataset's one-journal site Administration shows no site Plugins page
+  (`AdminHandler::siteSettingsAvailability`): the site grid is fetched at
+  `index/$$$call$$$/grid/admin/plugins/admin-plugin-grid/fetch-grid`, and
+  a plugin's "Delete" is offered to `admin` only (2026-10-22).
 - **Allowing a host** opens it for a few hours (`--hours`, default 4):
   its public addresses go into the rule, its name into the pod's
   `/etc/hosts`, and the call into the log. `down` withdraws every
