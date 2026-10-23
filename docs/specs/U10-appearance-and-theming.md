@@ -258,6 +258,18 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     `GET …/index/api/v1/site/theme`), made while "Default Theme" is
     unticked on the site's Plugins list, fails with a server error
     ⚠ [A24](#a24). <sup>k</sup>
+
+4b. **Saving while the theme is unticked.** While the theme the journal
+    uses is unticked under Settings › Website › "Plugins", the "Theme"
+    list under Settings › Website › "Appearance" › "Theme" is empty
+    ([Plugins management](U62-plugins-management.md#a8)). Pressing
+    "Save" there fails: the request answers 500 and the page shows "An
+    unexpected error has occurred. Please reload the page and try
+    again." ⚠ [A26](#a26). On a site hosting two or more
+    journals ([Site settings](U60-site-settings.md), Rule 2), the site's
+    Administration › "Site Settings" › "Appearance" › "Theme" does the
+    same while "Default Theme" is unticked on the site's Plugins list.
+    <sup>k</sup>
 5. **"Typography".** After "Save", the text and the headings of the
    public pages use the chosen fonts: a single name sets both; a pair
    ("Noto Serif/Noto Sans") sets the headings to the first and the text
@@ -1233,6 +1245,7 @@ Left out of the scenarios above, by reason:
   - A23 (a journal's theme switched off, a programming-interface read of it refused with its placeholder unfilled; Rule 4a)
   - A24 (the site's "Default Theme" switched off, a programming-interface read of the site's theme failing with a server error; Rule 4a)
   - A25 (a newly chosen theme's own home page not showing on a press or a preprint server; Rule 4)
+  - A26 (the theme in use unticked, "Save" under "Theme" failing with a server error, on a journal and on the site; Rule 4b)
   - OJS2 (a first issue created on a journal that never saved "Theme", the home page switching by itself {OJS}; Rule 10)
   - OJS3 (a published issue's articles absent from "Latest Publications", the list ordered by submission {OJS}; Rule 13)
   - OJS4 (the Settings Wizard showing another organization for a journal with no issue {OJS}; Rule 34; scenario 2 marks it)
@@ -1259,7 +1272,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-24; A10–A12
-2026-09-28; A13, A14 2026-09-29; A15–A20 2026-10-05; A21 2026-10-14; A22 2026-10-21; A23–A25 2026-10-23), unreviewed unless an entry notes
+2026-09-28; A13, A14 2026-09-29; A15–A20 2026-10-05; A21 2026-10-14; A22 2026-10-21; A23–A26 2026-10-23), unreviewed unless an entry notes
 otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -1281,6 +1294,7 @@ otherwise; the team settles them on spec review.
 | [A22](#a22) | A logo, thumbnail, homepage image or favicon replaced by another file type stays online at its old address | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A23](#a23) | A program reading a journal's, press's or server's switched-off theme gets "{$themePluginPath}" for its name | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A24](#a24) | A program reading the site's theme gets a server error while "Default Theme" is switched off on the site | 🐞 | low · crash: server | issues (claude), 2026-10-23 — re-verified |
+| [A26](#a26) | "Save" under "Theme" fails with a server error while the theme in use is unticked | 🐞 | user-visible · crash: server | — |
 | [OJS5](#ojs5) | Unticking every "Journal Content Organization" box says "Saved", but the home page keeps the current issue | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OJS6](#ojs6) | On a journal's home page, each "Latest Publications" title is a heading at the section's own level | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP2](#omp2) | A press's category page shows only its first page of books, with no way to the rest | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1673,8 +1687,8 @@ is not enabled and may not be installed.". The message is meant to name
 the theme; the theme's name is never passed to it, so the placeholder
 shows instead.
 Saving the theme settings never gives this message: the save is a
-different request, which in this state fails in its own way (a separate
-fault, not covered here).
+different request, which while the theme is unticked fails with a
+server error of its own ([A26](#a26)).
 Basis: probe, 2026-10-23. <sup>f-a23</sup>
 
 <a id="a24"></a>
@@ -1690,9 +1704,13 @@ returns it was lost when the API moved to the new router
 (`pkp/pkp-lib#9176` for `pkp/pkp-lib#7698`).
 Only the theme the site uses matters: on PKP's default installation
 that is "Default Theme". Saving the site's theme in the same state
-fails too, a separate fault not covered here. The site's home page
-still opens.
+fails too, with a server error of its own ([A26](#a26)). The site's
+own pages still open, unstyled: its sign-in page, and its home page
+where more than one journal is shown publicly. With only one journal
+shown publicly, the site's address opens that journal's home page,
+styled by the journal's own theme.
 Basis: probe, 2026-10-23. <sup>f-a24</sup>
+Report: refresh owed — claim check I23H (2026-10-23): the site's address does not always show the site's own home page while "Default Theme" is unticked on the site; with only one journal shown publicly (the second one created but its "…appear publicly on the site" box unticked) the site's address opens that journal's styled home page, so the site's own unstyled pages are its sign-in page always and its home page only where more than one journal is shown publicly (the report's "The site's home page still opens" and Evidence's "the site's home page answered 200"); the save's server error is now its own entry, A26 (`PKPSiteController::editTheme()`, `PKPHandler::getTargetContext()`) (2026-10-23)
 
 <a id="a25"></a>
 **A25 — On a press and a preprint server, a newly chosen theme's own home page did not show in one of two tries** · ❓ · user-visible.
@@ -1710,6 +1728,20 @@ application rather than of the test, since the theme was stored and the
 page was otherwise whole; but each app missed it in one try only, and
 repeated tries are needed to settle it. Basis: probe, 2026-10-23.
 <sup>f-a25</sup>
+
+<a id="a26"></a>
+**A26 — "Save" under "Theme" fails with a server error while the theme in use is unticked** · 🐞 · user-visible · crash: server.
+A Journal Manager unticks the theme the journal uses ("Default Theme"
+on PKP's default installation) under Settings › Website › "Plugins",
+then opens Settings › Website › "Appearance" › "Theme": the "Theme"
+list is empty. Pressing "Save" there fails: the request answers 500
+and the page shows "An unexpected error has occurred. Please reload the
+page and try again.", with no "Saved" and nothing saying the theme is
+switched off. The stored theme stays `default`, all the save asked to
+keep. On a site hosting two or more journals (Rule 4b), the Site
+Administrator gets the same after unticking "Default Theme" on the
+site's Plugins list. With the theme ticked again, "Save" shows "Saved".
+Basis: probe, 2026-10-23. <sup>f-a26</sup>
 
 ### OJS
 
@@ -2050,7 +2082,8 @@ whether its own home page showed is note f-a25. The same day
 lacks answered 400 `{"themePluginPath":["The theme you selected is not
 installed or enabled."]}` and stored nothing in the context's or the
 site's `themePluginPath`; the public home page was unaffected. The
-`GET` side of both routes is notes f-a23 and f-a24.
+`GET` side of both routes is notes f-a23 and f-a24; their save while
+the theme in use is unticked (Rule 4b) is note f-a26.
 
 <a id="fn-l"></a>
 **l — typography and colour.** `DefaultThemePlugin::init()` adds the font
@@ -2785,8 +2818,20 @@ getOptionValues() on null … PKPSiteController.php:139` (`:136` on
 `stable-3_5_0`); a `PUT` naming a missing theme was refused (note k);
 the site's `themePluginPath` stayed `default`; the site's Appearance ›
 "Theme" offered an empty list and the site's index page answered 200
-unstyled, listing both contexts. Ticked again, the `GET` answered 200
-with the site's options and `themePluginPath` `default`.
+unstyled, listing both contexts (so both were shown publicly). Ticked
+again, the `GET` answered 200 with the site's options and
+`themePluginPath` `default`. Live-probed again 2026-10-23 on OJS, OMP
+and OPS `main` and OJS `stable-3_5_0`, with the second context created
+on Administration › Hosted Journals › "Create Journal" ("Create
+Press", "Create Server"), whose "…appear publicly on the site" box
+stays unticked: with "Default Theme" unticked on the site, the site's
+address (`/index.php/index`) went to `publicknowledge/en`, styled by
+the journal's own theme, since `PKPHandler::getTargetContext()` sends a
+visitor to the one enabled context (with two or more, to the site's
+redirect choice, if any); the site's sign-in page
+(`/index.php/index/en/login`), signed out, loaded with no style sheet,
+a transparent header and "Times New Roman" until the theme was ticked
+again. The save in the same state is note f-a26.
 Issue report: [pkp-e2e#1067](https://github.com/jardakotesovec/pkp-e2e/issues/1067) ([docs/issues/U10-A24-site-theme-api-server-error.md](../issues/U10-A24-site-theme-api-server-error.md)).
 
 <a id="fn-f-a25"></a>
@@ -2806,6 +2851,39 @@ and the server log was empty. The three apps' runs overlapped in time.
 What would settle it: several fresh reads of the
 home page after the save, on OMP or OPS `main` alone, comparing the
 first read after the save with later ones.
+
+<a id="fn-f-a26"></a>
+**f-a26** — `PKPContextController::editTheme()` (`PUT
+…/api/v1/contexts/{id}/theme`) checks the sent `themePluginPath` only
+when it differs from the stored one, then looks the theme up among the
+enabled theme plugins alone (`PluginRegistry::loadCategory('themes',
+true)`) and calls `validateOptions()` on the `null` it finds;
+`PKPSiteController::editTheme()` (`PUT index/api/v1/site/theme`) has
+the same shape. The "Theme" select is filled from enabled themes only
+(note k), so it is empty, yet "Save" sends the stored value back: a
+`POST` with `X-Http-Method-Override: PUT` and the body
+`themePluginPath=default` alone. Code read 2026-10-23 (ojs `main` with
+pkp-lib `1f415a07ca`); `stable-3_4_0` and `stable-3_3_0` carry the same
+code (code read only). By the same lookup a deleted theme would fail
+alike; not driven. Live-probed 2026-10-23 (Rule 4b) on OJS, OMP and OPS
+`main` (three runs) and OJS `stable-3_5_0` (four runs), PKP's default
+dataset reset before each run: with `defaultthemeplugin` unticked on
+the context's Plugins list (as `rvaca` and as `admin`), and on
+Administration › Site Settings › "Plugins" after `admin` created a
+second context on screen, the select had no options; "Save" answered
+500 `{"error":"Call to a member function validateOptions() on null"}`
+on the context (as `rvaca` and as `admin`) and on the site (as
+`admin`), the server log naming `PKPContextController.php:521` and
+`PKPSiteController.php:224` (`:508` and `:221` on `stable-3_5_0`). The
+page showed the notice "An unexpected error has occurred. Please reload
+the page and try again.", with no field error, no "Saved" and no
+browser dialog; `themePluginPath` stayed `default` after the save and
+after a reload, which showed the empty list again. Ticked again (notice
+"The plugin "Default Theme" has been enabled."), the tab offered
+"Default Theme" chosen with its fields, and "Save" answered 200 with
+"Saved"; the context's home page and the site's sign-in page, unstyled
+while it was unticked (no style sheet, "Times New Roman"), loaded the
+theme's four style sheets again.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `journalContentOrganization` is added by OJS's
