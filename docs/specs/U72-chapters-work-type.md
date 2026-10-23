@@ -283,7 +283,9 @@ wizard on Review ⚠ [A5](#a5). <sup>h</sup>
     versions](U49-publish-schedule-and-versions.md)) copies every chapter
     into the new version with its title, subtitle, abstract, pages, date,
     license, "Chapter Page" box and place in the order, and with its
-    authors (the new version's copies of the same contributors). A proof
+    authors (the new version's copies of the same contributors) in the
+    chapter's own author order, whatever their order on the Contributors
+    list <sup>td22</sup>. A proof
     file of a publication format that the chapter held is copied with the
     format and belongs to the copied chapter. The chapter's other files
     stay with the earlier version's chapter, so the new version's chapter
@@ -683,16 +685,18 @@ footnote. <sup>s</sup>
 
 10. **A new version copies the chapters**
 
-    Given: Press manager, on a published Monograph with the chapters
-    "Tides", with the subtitle "A Study", the pages "1-24", "Chapter
-    Page" ticked and the author Ben Barrow, and "Harbours", with the pages
-    "25-40" and the author Ada Lovel.
+    Given: Press manager, on a published Monograph whose Contributors
+    list reads Ada Lovel, then Ben Barrow, with the chapters "Tides",
+    with the subtitle "A Study", the pages "1-24", "Chapter Page" ticked
+    and the author Ben Barrow, and "Harbours", with the pages "25-40" and
+    the authors Ben Barrow, then Ada Lovel.
 
     - **"Create New Version"**: create a version with the header's "Create
       New Version" ([Publish, schedule &
       versions](U49-publish-schedule-and-versions.md)): the new version's
       Chapters page lists "Tides" over Ben Barrow's row, then "Harbours"
-      over Ada Lovel's (Rule 15).
+      over Ben Barrow's row, then Ada Lovel's: the chapter's own author
+      order, not the Contributors list's (Rule 15).
     - **"Tides" copied**: open "Tides": its boxes hold Tides, A Study and
       1-24, "Chapter Page" is ticked, and Ben Barrow is ticked under "Add
       Contributor" (Rule 15). What its "Files" offers is [A3](#a3),
@@ -1782,7 +1786,10 @@ version), re-links authors through the old-to-new author map built by
 position, and re-points `chapterId` only on the files it copies itself,
 the publication formats' files (`$newSubmissionFiles`); every other file
 keeps the old chapter's id, which `ChapterForm::fetch()` then treats as
-held by another chapter. Live-probed 2026-09-28 (Rule 15): note td15.
+held by another chapter. Each re-linked author takes the old chapter's
+own `submission_chapter_authors` row, its `seq` and `primary_contact`
+(`Repo::author()->getChapterAuthorData()`, pkp/pkp-lib#10570). Live-probed
+2026-09-28 (Rule 15): note td15; the author order, note td22.
 
 <a id="fn-td15"></a>
 **td15** — Live-probed 2026-09-28 (Rule 15; A3). A published book whose
@@ -1796,6 +1803,25 @@ ticked as the new version's copy of him, and "Files" listed only the
 new copy of `replacement.pdf`, ticked; `article.pdf` was not listed, and
 the new "Harbours" had no "Files". The earlier version's "Tides" still
 held both files, ticked.
+
+<a id="fn-td22"></a>
+**td22** — Live-probed 2026-10-23 (Rule 15) on PKP's default dataset,
+book 14 (Contributors Dawson, Dupuis, Wilson), its "Chapter 2" holding
+Dupuis, then Dawson: before pkp/pkp-lib#10570, "Create New Version" gave
+each copied chapter author their Contributors-list place, so the new
+version's "Chapter 2" read Dawson, then Dupuis, and the copy of the
+book's primary contact was flagged as the chapter's; when the
+contributors all share one place, as on a 3.5 or 3.4 book whose
+Contributors list was never reordered, both copies took the same place
+and the database chose the order. At the PR heads, before their merge
+(pkp/omp#2523 `17062b2d2e` on `main`, #2522 `f7e0431720` on
+`stable-3_5_0`, #2521 `e607f1aeb8` on `stable-3_4_0`), the copy read
+Dupuis, then Dawson, at places 0 and 1, on all three lines and with
+shared places too. The Native XML export's `<chapterAuthor seq>` changed
+the same way (the Contributors-list place before, the chapter place at
+the heads), and the file imported back read Dawson, then Dupuis before
+and Dupuis, then Dawson at the heads.
+`checks/sync/pkp-lib-10570/walk.js`.
 
 <a id="fn-td18"></a>
 **td18** — Live-probed 2026-09-28 (Fields, the Review panel; Rule 16;
@@ -1867,8 +1893,12 @@ Barrow as the one contributor, and he and article.pdf on "Tides". Scenario 6: "T
 `enableChapterPublicationDates`. Scenarios 7, 9 and 10: `published:
 true`, which also makes the chapter DOIs, as a screen publish does.
 Scenario 10's "Tides" carries `subtitle: 'A Study'`, `pages: '1-24'`,
-`page: true` and Ben Barrow, its "Harbours" `pages: '25-40'` and Ada
-Lovel (both contributors). The chapters of scenarios 6, 7 and 9 have no
+`page: true` and Ben Barrow, its "Harbours" `pages: '25-40'` and Ben
+Barrow (both contributors, Ada Lovel first). The API ticks a chapter's
+authors in Contributors-list order, as "Add Chapter" saves them, so the
+test opens the published "Harbours" with "Edit Chapter", which lists
+Ben Barrow first, ticked, ticks Ada Lovel and saves: "Harbours" then
+reads Ben Barrow, then Ada Lovel, before the scenario starts. The chapters of scenarios 6, 7 and 9 have no
 author. Scenario 8 builds its scratch press the same way as scenarios 1,
 3 and 7, with no license (a new press has none); its three books take `decisions:
 ['skipExternalReview', 'sendToProduction']`, the first volume's

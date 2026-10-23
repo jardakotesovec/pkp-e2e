@@ -900,19 +900,27 @@ test.describe('Chapters & work type (U72)', () => {
     test('S10: A new version copies the chapters', async ({asUser, ompApi, appContext}, testInfo) => {
         const tag = makeTag('s10', testInfo);
         const {ada, ben} = people(tag);
-        // Given: a published Monograph with "Tides" (A Study, 1-24, Chapter
-        // Page ticked, Ben Barrow) and "Harbours" (25-40, Ada Lovel).
+        // Given: a published Monograph (Contributors Ada Lovel, then Ben
+        // Barrow) with "Tides" (A Study, 1-24, Chapter Page ticked, Ben
+        // Barrow) and "Harbours" (25-40, Ben Barrow, then Ada Lovel). The
+        // API ticks in Contributors-list order, so "Edit Chapter" adds Ada
+        // Lovel after Ben Barrow (footnote s).
         const book = await seedBook(ompApi, tag, {
             published: true,
             contributors: [ada, ben],
             chapters: [
                 {title: 'Tides', subtitle: 'A Study', pages: '1-24', page: true, authors: [ben.email]},
-                {title: 'Harbours', pages: '25-40', authors: [ada.email]},
+                {title: 'Harbours', pages: '25-40', authors: [ben.email]},
             ],
         });
         const {page} = await pageAs(asUser, MANAGER);
         const cp = new ChaptersPage(page, PRESS, {appContext});
         const {list} = cp;
+        await cp.gotoEditorial(book.submissionId, book.publicationId);
+        const harbours = await list.openEdit('Harbours');
+        await harbours.contributorBox('Ada Lovel').check();
+        await harbours.save();
+        await expect(list.authorNames('Harbours')).toHaveText([exactly('Ben Barrow'), exactly('Ada Lovel')]);
 
         // ── "Create New Version" (Rule 15) ────────────────────────────────
         await cp.frame.gotoEditorial(book.submissionId);
@@ -920,7 +928,7 @@ test.describe('Chapters & work type (U72)', () => {
         await cp.gotoEditorial(book.submissionId, newPublicationId);
         await expect(list.titleCells()).toHaveText([exactly('Tides'), exactly('Harbours')]);
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ben Barrow')]);
-        await expect(list.authorNames('Harbours')).toHaveText([exactly('Ada Lovel')]);
+        await expect(list.authorNames('Harbours')).toHaveText([exactly('Ben Barrow'), exactly('Ada Lovel')]);
 
         // ── "Tides" copied (Rule 15) ──────────────────────────────────────
         const win = await list.openEdit('Tides');
