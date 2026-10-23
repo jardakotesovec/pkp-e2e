@@ -66,7 +66,11 @@ regression verdict; what was filed)._
     - The bumps carry nothing else (`f94e49dafb`/`163c47f0` have the same trees as the library bases).
     - Walk: base `b8` with each app at its PR base and pointers, head `h8` with each app at its PR head. Same as round 7, with the subtitle now neutral on OMP and OPS too.
     - Port to `main` (asked): every commit except the bumps cherry-picks cleanly onto pkp-lib `e41e47b64c`, ui-library `c8cbb2b4` and the apps' `main` tips. The patch is line for line the same. The walk on the `main` checkouts gives identical results (`bm`/`hm`, `.reports/sync/pr13603m/`). Scratch branches deleted; checkouts back at the tips.
-    - App CI (each app's own matrix): see the thread.
+    - Merged 2026-10-23 20:20 UTC: pkp-lib `9a0212faff`, ui-library `a12b752338`, ojs `c6fc522052`, omp `8271c10425`, ops `83ef1c2ce3`. Each tree equals the round-8 head's, and the apps' follow-up bumps (ojs `c86112d31a`, omp `c1084b647`, ops `bd726f9b7a`) point at the merge commits (same trees). This review covers them; the daily read records them as reviewed here.
+    - App CI at the PR heads:
+      - OPS green except the MySQL upgrade job, still running at the merge.
+      - OMP `(8.3, pgsql, test)` red in `CallanSubmission.cy.js:168` (a file never listed in the publication format grid). The PR base `d3b82eef5e` went red on the same job and grid the same morning (run 39895462899), so the red is a flake class, not the PR.
+      - OJS's test and upgrade jobs and OMP's others were still running at the merge.
   - Security: nothing.
 - **2026-10-22 (merge step of the pkp/pkp-lib#13565 PR review, VM s0) — pkp-lib `ce67d3f62b..9cb93845fa` (1 and its merge), ojs `cbf80495db..f521b56ec9` (2 of 4), omp `60163fe0a..77e3acd8e` (2), ops `71ad98eb83..18506a5b4d` (2). Baselines advanced for pkp-lib, omp and ops; ojs not (below).**
   - pkp-lib `5b54f59ed7` (pkp/pkp-lib#13564, merged by bozana as `9cb93845fa`) → `stable-only`: the reviewed patch, rebased (`git range-diff f94e556856..e99f3e9c7b ce67d3f62b..5b54f59ed7` reads `=`). Re-walked at the new tips on the 3.5 dataset fleet, OJS and OMP: `checks/U36/H19/h19.js` read and copy, then `checks/sync/pkp-lib-10268/note-on-copy.js`; the copied file's Notes 200 with the form and "Earlier Revision Notes", a note added and deleted, no server error (`.reports/pr13565-merged/`). The pkp-lib#10268 row, the companion row and the report are deleted.
