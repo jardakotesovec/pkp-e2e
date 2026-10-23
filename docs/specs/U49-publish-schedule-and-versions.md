@@ -1199,7 +1199,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A6](#a6) | Creating a new version, still unpublished, makes the reader page say "Published {today} — Updated on {real date}" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | In French the "Create New Version" dialog and the Publication Settings / Preprint Entry page show raw codes; the versions to copy from cannot be told apart | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A version created through the programming interface with a cover image the app refuses is reported as failed, yet created without the cover | 🐞 | minor | — |
-| [A14](#a14) | A version created by program with a stage the app does not know fails with a server error instead of a refusal | 🐞 | latent · crash: server | — |
+| [A14](#a14) | A program creating a version with a stage the app does not know gets a server error instead of a refusal | 🐞 | low · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A15](#a15) | A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture | 🐞 | latent · crash: server | — |
 | [A16](#a16) | A version created by program with a cover image the app accepts is created without the cover, and the picture is left unused | 🐞 | minor | — |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -1450,16 +1450,22 @@ its type. Rename it to .png and upload it again.").
 Since: 2026-10-16 (pkp/pkp-lib#13512; on 3.5 2026-10-14) · Basis: probe, 2026-10-19. <sup>[f-a13](#fn-a13)</sup>
 
 <a id="a14"></a>
-**A14 — A version created by program with a stage the app does not know fails with a server error instead of a refusal** · 🐞 · latent · crash: server.
-A program that creates a version through the install's programming
-interface (Rule 11c) and names a stage the app does not have expects a
-message saying which stages are allowed. Instead the request fails with
-a server error. On a preprint server that happens for the codes of
-"Published Manuscript Under Review" and "Version of Record", the stages
-of a journal and a press; in every app for any other code. No
-version is created, so nothing is lost, and the screens' "Create New
-Version" offers only the app's own stages.
-Since: 2025-05-30 (pkp/pkp-lib#10669) · Basis: probe, 2026-10-21. <sup>[f-a14](#fn-a14)</sup>
+**A14 — A program creating a version with a stage the app does not know gets a server error instead of a refusal** · 🐞 · low · crash: server.
+A program can create a new version of a submission through the REST API
+(`POST /api/v1/submissions/{id}/publications`), naming the version's
+stage by a code in the `versionStage` field. When it sends a code the
+app does not have, it should be refused with a message on that field.
+Instead the request fails with a server error, and no version is
+created.
+A journal and a press have three stages: `AO` (Author's Original),
+`PMUR` (Published Manuscript Under Review) and `VoR` (Version of
+Record). A preprint server has only `AO`. So a preprint server fails on
+`PMUR` and `VoR`, and every app fails on any code outside its own set.
+The screens' "Create New Version" offers only the app's own stages, so
+only a program meets this.
+No release has version stages yet, so the missing check can be added
+before the first one ships them.
+Since: 2025-05-30 (pkp/pkp-lib#10669) · Basis: probe, 2026-10-23. <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
 **A15 — A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture** · 🐞 · latent · crash: server.

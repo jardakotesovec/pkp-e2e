@@ -1,0 +1,26 @@
+--- a/lib/pkp/classes/publication/Repository.php
++++ b/lib/pkp/classes/publication/Repository.php
+@@ -25,6 +25,7 @@
+ use Exception;
+ use Illuminate\Support\Collection;
+ use Illuminate\Support\Enumerable;
++use Illuminate\Validation\Rule;
+ use PKP\context\Context;
+ use PKP\core\Core;
+ use PKP\core\exceptions\StoreTemporaryFileException;
+@@ -156,9 +157,14 @@
+ 
+         $errors = [];
+ 
++        $rules = $this->schemaService->getValidationRules($this->dao->schema, $allowedLocales);
++        // The stage must be one of this application's VersionStage cases: the publications.version_stage
++        // column accepts no other value. The shared schema cannot list them, since they differ per application.
++        $rules['versionStage'][] = Rule::in(array_column(VersionStage::cases(), 'value'));
++
+         $validator = ValidatorFactory::make(
+             $props,
+-            $this->schemaService->getValidationRules($this->dao->schema, $allowedLocales),
++            $rules,
+             $this->getErrorMessageOverrides(),
+         );
+ 
