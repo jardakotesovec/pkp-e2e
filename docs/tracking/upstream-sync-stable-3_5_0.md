@@ -30,6 +30,11 @@ regression verdict; what was filed)._
     - The workflow's "Create New Reviewer" and "Enroll Existing User" forms still show "Appear on the masthead".
     - The wizard subtitle still says "along with appearing in the journal masthead".
     - The reviewer-listing setting is not read (code).
+  - Rounds 2 to 4 (same day): the PR gained `094e0cae26` (emails) and `26b12af270` (reviewer forms), the latter amended to `d2000d4618`. Round 3 found `26b12af270`'s templates reading `enableEnrollmentMastheadReviewer`, a setting that does not exist, so the forms lost the line even with reviewer listing on. A trial with the plural name restored it, and the author amended the commit to match. Base control: `b3` at `6accf87c49`. Head `h4` at `d2000d4618` on all three apps:
+    - With the masthead off, the emails have no masthead line.
+    - The reviewer forms show it only with both settings on.
+    - Round 1's fixes hold.
+  - Still open: the wizard subtitle; and, from the code only, a Reviewer invitation's row and email with the masthead on and reviewer listing off.
   - Security: nothing.
 - **2026-10-22 (merge step of the pkp/pkp-lib#13565 PR review, VM s0) — pkp-lib `ce67d3f62b..9cb93845fa` (1 and its merge), ojs `cbf80495db..f521b56ec9` (2 of 4), omp `60163fe0a..77e3acd8e` (2), ops `71ad98eb83..18506a5b4d` (2). Baselines advanced for pkp-lib, omp and ops; ojs not (below).**
   - pkp-lib `5b54f59ed7` (pkp/pkp-lib#13564, merged by bozana as `9cb93845fa`) → `stable-only`: the reviewed patch, rebased (`git range-diff f94e556856..e99f3e9c7b ce67d3f62b..5b54f59ed7` reads `=`). Re-walked at the new tips on the 3.5 dataset fleet, OJS and OMP: `checks/U36/H19/h19.js` read and copy, then `checks/sync/pkp-lib-10268/note-on-copy.js`; the copied file's Notes 200 with the form and "Earlier Revision Notes", a note added and deleted, no server error (`.reports/pr13565-merged/`). The pkp-lib#10268 row, the companion row and the report are deleted.

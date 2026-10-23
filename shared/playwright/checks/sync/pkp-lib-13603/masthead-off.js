@@ -6,6 +6,8 @@
 // it runs unchanged at the PR's base and head.
 //   on    the new-context default (box ticked): role form box, invitation
 //         row, email, reviewer forms' masthead line
+//   onrev the masthead on with "Enable listing of reviewers" ticked: the
+//         reviewer forms' masthead line (OJS, OMP)
 //   off   the box unticked through Appearance: role edit (stored value
 //         before/after a save), a new role, invitations to an editor role and
 //         to Reviewer, an invitation to a person who already holds a listed
@@ -255,6 +257,20 @@ forEachApp(async (app) => {
             out.invite.send = await composeAndSend(mp, `On${T}rd`, 'on-inv');
             out.invite.mail = await mailWith(mail('rd'), `On${T}rd`);
             out.reviewerForms = await reviewerForms(mp);
+        });
+
+        // ── onrev: the masthead on and "Enable listing of reviewers" ticked ─
+        facts.onrev = {};
+        if (REVIEWER[app.name]) await step('onrev', async () => {
+            const ws = new WebsiteSettings(mp, T);
+            await ws.goto();
+            await ws.openSideTab('appearance-masthead');
+            const form = mp.locator('[id="appearance-masthead"] form');
+            await form.getByText('Enable listing of reviewers on the masthead').click();
+            await form.getByRole('button', {name: 'Save', exact: true}).click();
+            await expect(form.locator('.pkpFormPage__status', {hasText: 'Saved'})).toBeVisible({timeout: 30_000});
+            facts.onrev.reviewersSetting = sql(app, `select coalesce((select setting_value from ${ctxSettings} where ${ctxId} = ${contextId} and setting_name = 'enableEnrollmentMastheadReviewers'), '<no row>')`);
+            facts.onrev.reviewerForms = await reviewerForms(mp);
         });
 
         // ── untick the enrollment masthead through the screen ───────────
