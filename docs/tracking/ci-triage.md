@@ -1538,8 +1538,8 @@ trips.
   dataset: Callan's six files exactly one second apart, 25 same-second
   groups in the dump), so two files sometimes share a second and the
   database picks their order; the failure screenshots show `chapter4.pdf`
-  and `chapter2.pdf` assigned instead. **Fixed upstream 2026-10-23** by
-  @asmecher: pkp-lib `800863b5dc` (`main`) and `0f3c36bc2f`
+  and `chapter2.pdf` assigned instead. **Fixed upstream 2026-10-23**
+  (commits by Alec Smecher): pkp-lib `800863b5dc` (`main`) and `0f3c36bc2f`
   (`stable-3_5_0`), "Make sort order for submission files stable", a
   `submission_file_id` tiebreaker, newest first; OJS and OMP point at them
   on both lines (omp `186107aafe`, `8cc73c71a5`), OPS left to take it with
