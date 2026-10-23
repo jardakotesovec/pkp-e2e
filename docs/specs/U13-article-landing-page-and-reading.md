@@ -366,6 +366,14 @@ Top to bottom: <sup>j</sup>
       page.
     - 13b. **No such galley.** A galley address that names no galley of
       the article answers the "404 Not Found" page.
+    - 13c. **A new version's galley by its number.** On a journal, the
+      galley of a version not yet published, typed by its number after
+      the version's own address, answers the "404 Not Found" page once
+      the galley has a URL Path, even to those who may open the version's
+      preview (Actors row 2), when the current version has no galley with
+      that URL Path [OJS14](#ojs14). The preview page links the galley by
+      its URL Path, and that link opens its reader (Rule 12a).
+      <sup>q10</sup>
 14. **The "Keywords:", "DOI:" and category lines follow the shown
     version.** An older version's page shows that version's keywords and
     categories; its DOI line is *DOIs*' rule. <sup>c</sup>
@@ -1277,8 +1285,9 @@ Left out of the scenarios above, by reason:
   - OPS3 (a galley's number address answering "404 Not Found" on a
     preprint server; Rule 13)
   - OJS14 (an older version's galley typed by its number under the
-    version's address, landing on the current version's galley {OJS};
-    Rule 13)
+    version's address, landing on the current version's galley, and a
+    new version's galley typed the same way answering "404 Not Found"
+    to its preview {OJS}; Rules 13, 13c)
   - OJS15 (an issue's XML galley with "eLife Lens Article Viewer" on
     {OJS}; Settings bullet 3)
   - A10 (an address in parentheses in a reference; Rule 18)
@@ -1853,13 +1862,23 @@ bookmark of version 1.0 reads the latest version without being told.
 The "Versions" list on the article's page still opens the older
 version.
 
-It takes an article with more than one published version, and a URL
-Path given to the older version's galley after the address was handed
-out. The address that downloads the galley is forwarded the same way,
-and so is either address with a file ID at its end. A preprint server
-answers "404 Not Found" to such an address, which has its own report,
-and a press forwards no addresses.
+It takes an article with more than one published version, and an
+older version's galley with a URL Path, reached by its ID: a link
+handed out before the galley got its URL Path, or the ID typed by hand
+(the older version's page links such a galley by its URL Path, which
+opens it). The address that downloads the galley is forwarded the same
+way, and so is either address with a file ID at its end. A preprint
+server answers "404 Not Found" to such an address, which has its own
+report, and a press forwards no addresses.
+
+A new version not yet published fares worse. Its galley, typed by its
+ID after the version's own address, answers the "404 Not Found" page
+once the galley has a URL Path, even to those who may open the
+version's preview (Actors row 2), when the current version has no
+galley with that URL Path. The preview page itself links the galley by
+its URL Path, which opens.
 Basis: probe, 2026-10-07. <sup>[f-ojs14](#fn-f-ojs14)</sup>
+Report: refresh owed — claim check I23F (2026-10-23) widened the entry: an older version's galley that had its URL Path from the start is forwarded the same way when typed by its ID (PKP's default test dataset, OJS main and 3.5), and an unpublished version's galley typed by its ID after the version's address answers "404 Not Found" to the editor previewing it when the current version has no galley of that URL Path; `ArticleHandler::initialize()`, `getBestGalleyId()`; the refresh also settles whether the download address the entry says is forwarded carries the version part, and where it lands (a persona read could not judge it) (2026-10-23)
 
 <a id="ojs15"></a>
 **OJS15 — With "eLife Lens Article Viewer" on, an issue's XML galley never opens in the Lens reader** · 🐞 · low · crash: server.
@@ -2502,7 +2521,21 @@ a version part opened the article's page for "Print" and answered "404
 Not Found" for "PDF", on both apps; every number address of a galley
 with a URL Path answered "404 Not Found" on the server, with or without
 a version part; `…/nosuchgalley` answered "404 Not Found" under the
-number and under the article's URL Path.
+number and under the article's URL Path. Live-probed 2026-10-23 (Rule
+13c; OJS14), OJS `main` and `stable-3_5_0`, two runs each, PKP's
+default test dataset, signed out and as `dbarnes`: submission 1 has
+1.0 published (galley 1, no URL Path) and 1.1 unpublished (galley 2,
+URL Path "pdf", "PDF Version 2"). As `dbarnes`,
+`…/article/view/1/version/2/2` was redirected to
+`…/article/view/mwandenga-signalling-theory/pdf`, with no version
+part, which answered "404 Not Found"; `…/version/2/pdf`, the link the
+preview page carries, opened 1.1's PDF reader (Rule 12a); signed out,
+both answered "404 Not Found" at the version address. Controls: with
+1.1 published, `…/version/2/2` was redirected to
+`…/article/view/mwandenga/pdf`, 1.1's own reader, and `…/version/1/1`
+(1.0's page links its galley by number) opened 1.0's reader under
+"This is an outdated version published on 2026-10-22. Read the most
+recent version."
 
 <a id="fn-h"></a>
 **h** — "How to Cite": `plugins/generic/citationStyleLanguage/CitationStyleLanguagePlugin.php`
@@ -3363,6 +3396,19 @@ page. Controls: `…/version/{v1}/pdf` and `…/version/{v1}/{Print
 number}` opened the older version's reader under "This is an outdated
 version published on 2026-10-05. Read the most recent version."; the
 server answered "404 Not Found" to every such address (note q10).
+Live-probed 2026-10-23, OJS `main` and `stable-3_5_0`, two runs each,
+PKP's default test dataset, signed out and as `dbarnes`: with
+submission 1's 1.1 (galley 2, URL Path "pdf" from the start) published
+and then a 1.2 made with "Create New Version" (its galley copying
+"pdf") published, `…/article/view/1/version/2/2` was redirected to
+`…/article/view/mwandenga/pdf`, 1.2's PDF reader with no notice, while
+`…/version/2/pdf`, the link 1.1's page carries, opened 1.1's reader
+under "This is an outdated version published on 2026-10-22. Read the
+most recent version."; before 1.1 was published, the same ID address
+answered "404 Not Found" to `dbarnes` (note q10). OMP served
+`catalog/view/5/version/5/2/41` (a format by number) as that version's
+own format; OPS answered "404 Not Found" to every ID address of a
+galley with a URL Path.
 Issue report: [pkp-e2e#939](https://github.com/jardakotesovec/pkp-e2e/issues/939) ([docs/issues/U13-OJS14-older-version-galley-id-link-opens-current.md](../issues/U13-OJS14-older-version-galley-id-link-opens-current.md)).
 
 <a id="fn-f-ojs15"></a>

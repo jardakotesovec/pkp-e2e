@@ -30,7 +30,10 @@ what the team's installs hold (harness.md "Dataset fleets").
   out the Site Settings tabs a second context brings ("Appearance",
   "Plugins", "Navigation" among them), and DOIs are on for the first kind
   with no prefix and no agency, so the DOIs "Setup" form refuses a save
-  until a prefix is set (U09, U19, U45, U54, U57, U63 issue walks).
+  until a prefix is set (U09, U19, U45, U54, U57, U63 issue walks);
+  "Enable announcements" is unticked in all three apps, so an
+  announcement's public page answers 404 until it is ticked (U49 claim
+  check I23F, 2026-10-23).
 - Name a submission by its ID and title ("open submission 7,
   'Developing efficacy beliefs in the classroom'"), and the context by its
   path, `publicknowledge` in all three apps. "(2 versions)" in the tables

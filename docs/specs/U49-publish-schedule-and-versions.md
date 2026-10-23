@@ -321,10 +321,20 @@ In French most of its headings and descriptions are raw codes
     published. Yet the reader page's date line changes at once: the
     unpublished draft's creation day appears as the public "Published"
     date ⚠ [A6](#a6). Nor can a reader reach the draft by address: on a
-    journal the draft's own version address answers the plain "404 Not
-    Found" page. A version address naming a number the article has no
-    version under (a mistyped one) fails with a blank server error rather
-    than that page ⚠ [OJS3](#ojs3). <sup>r</sup>
+    journal the draft's version address (the one "Preview" opens, with
+    the version's internal number, not the side menu's "1.1") answers the
+    plain "404 Not Found" page. A galley with a URL Path, typed after a
+    version's address by its internal number (read from its link before
+    the URL Path was set), is forwarded to the current version's address
+    with that URL Path (see
+    [Article landing page](U13-article-landing-page-and-reading.md#ojs14),
+    its Rule 13). So while no published version has a galley with that
+    URL Path, the draft's galley typed so answers "404 Not Found" even to
+    the roles that may preview the draft (Actors row 4); the draft's
+    preview links it by the URL Path, which opens. A version address
+    naming a number the article has no version under (a mistyped one)
+    fails with a blank server error rather than "404 Not Found"
+    ⚠ [OJS3](#ojs3). <sup>r</sup>
 11a. **How a version is named.** The side menu names a version by its
     stage and number ("Version of Record 2.0"). A stage-less version
     reads "Unassigned version ({date})": an item's first until given a
@@ -1185,6 +1195,9 @@ Left out of the scenarios above, by reason:
     dashboard*)
   - the preprint server's post-submission texts (Cross-feature
     interactions; *Submission wizard*)
+  - a version's galley typed by internal number after the version's
+    address, the draft's answering "404 Not Found" to the roles that may
+    preview it (Rule 11; *Article landing page*, its OJS14)
 
 ## Findings register
 
@@ -2169,7 +2182,23 @@ formats + chapters + chapter authors (OMP). `currentPublicationId`
 mature of any status — so an unpublished new version does not replace
 the published one publicly, though it may become the workflow's shown
 default. Email/notice are sent by the API layer only
-(`createNewPublicationVersionAndNotify`).
+(`createNewPublicationVersionAndNotify`). The draft's galley by number
+(Rule 11) live-probed 2026-10-23, OJS `main` and `stable-3_5_0`, two runs
+each, on the dataset's article 1: published 1.0 with a galley without
+URL Path, draft 1.1 (made by the screens) with galley 2, URL Path `pdf`.
+`…/version/2/2` as `dbarnes` 302 to `…/article/view/{urlPath}/pdf` (no
+`version/` part), then 404; `…/version/2/pdf` 200 with the draft's
+galley, the address the draft's preview page links; signed out, every
+draft address 404. With 1.1 published, `…/version/2/2` opened its
+galley; with a third version copying `pdf` published too, it landed on
+that newest version's galley with no outdated notice (Article landing
+page OJS14). The redirect is
+`ArticleHandler::initialize()` building `[getBestId(),
+getBestGalleyId()]`; then no published publication carries a galley
+`pdf`, so `NotFoundHttpException`. OMP: a format by number under
+`version/` opens that version's own format (no such redirect); OPS
+answers 404 to any number address of a galley with a URL Path (Article
+landing page OPS3).
 
 <a id="fn-s"></a>
 **s** — `VersionStage` enum per app: OJS/OMP AO/PMUR/VoR (order 1/2/3,
