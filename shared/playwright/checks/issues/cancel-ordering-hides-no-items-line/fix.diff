@@ -1,0 +1,13 @@
+--- a/lib/pkp/js/controllers/grid/CategoryGridHandler.js
++++ b/lib/pkp/js/controllers/grid/CategoryGridHandler.js
+@@ -257,6 +257,10 @@
+ 		if ($element.hasClass('category_grid_body')) {
+ 			// Return the grid empty element placeholder.
+ 			return this.getHtmlElement().find('.empty').not('.category_placeholder');
++		} else if ($element.hasClass('category')) {
++			// A category's own row is not one of its items: adding or moving
++			// it must leave the category's "No Items" placeholder as it is.
++			return $([]);
+ 		} else {
+ 			return /** @type {jQueryObject} */ (
+ 					this.parent('getEmptyElement', $element));

@@ -20,6 +20,8 @@ _Suspicions another session met and handed over, one line each; the
 upstream session works them (MAINTENANCE upstream session step 3) and
 deletes each once it is a report, a register entry or dismissed._
 
+- 2026-10-23 · housekeeping claim check I23B (U62 A8) · stable-3_5_0 only: with a theme that overrides the journal's home page template unticked (then deleted), OJS 3.5's home page answers 500 for every visitor (`Smarty: Unable to load template 'app:frontend/layout.tpl'`) until a theme is saved in Appearance or "Delete Template Cache" is pressed; `main` shows the page unstyled (no 500). The 3.5 compile id includes `themePluginPath`, which the untick never changes. A backport question for the stable line; evidence `.reports/U62/cc-I23B.md` in slot s0, kept script `shared/playwright/checks/U62/I23B/i23b.js` (+ `theme.js`, the test theme), U62 A8's footnote.
+
 
 
 

@@ -832,7 +832,7 @@ them on spec review.
 | [A11](#a11) | Submission wizard: "Order" pressed again, or "Done" twice, while ordering chapters or galleys sends the author to the first step | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A12](#a12) | Ordering a book's chapters: a dragged chapter with no authors leaves its "No Items" line under another chapter | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A13](#a13) | Submission wizard: after "Order", the Review step lists a book's chapters in the old order until a reload | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
-| [A14](#a14) | Ordering a book's chapters: "Cancel ordering" takes away a chapter's "No Items" line | 🐞 | minor | — |
+| [A14](#a14) | Ordering a book's chapters: "Cancel ordering" takes away the "No Items" line of a chapter with no authors | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A1](#a1) | The assistant roles may change a published version's chapters, though not an unpublished one's | ❓ | minor | — |
 | [A9](#a9) | A chapter added to a published Edited Volume may stay without a license | ❓ | minor | — |
 | [A6](#a6) | "Order" could not move a chapter: a dragged chapter stayed where it was | ✅ | retired | housekeeping (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#13453), walked on main |
@@ -1028,22 +1028,17 @@ hint why, until the page is reloaded.
 Basis: probe, 2026-10-19. <sup>f-a13</sup>
 
 <a id="a14"></a>
-**A14 — Ordering a book's chapters: "Cancel ordering" takes away a chapter's "No Items" line** · 🐞 · minor.
+**A14 — Ordering a book's chapters: "Cancel ordering" takes away the "No Items" line of a chapter with no authors** · 🐞 · low.
 A book's chapter list shows "No Items" under a chapter that has no
 authors. A press editor on the Chapters page, or an author on the
 submission wizard's "Details" step, presses "Order" and then "Cancel
 ordering", either without dragging anything or after dragging another
 chapter. The chapters go back to their order, but the chapter with no
-authors now shows its title with nothing under it. The "No Items"
-line comes back only once the page is loaded again (the Chapters page
-by its address, the wizard by a reload and back to "Details"). Nothing
-is saved or lost. When the chapter with no authors is the one dragged,
-"Cancel ordering" draws back under the chapter the line its drag left
-behind ([A12](#a12)). The fault shows only on a book that has a chapter
+authors now shows its title with nothing under it.
+Nothing is saved or lost, and the "No Items" line comes back once the
+page is loaded again. The fault shows only on a book that has a chapter
 without authors.
-Expected: after "Cancel ordering" each chapter without authors still
-shows "No Items" under its title.
-Basis: probe, 2026-10-21. <sup>f-a14</sup>
+Basis: probe, 2026-10-23. <sup>f-a14</sup>
 
 ### Retired
 

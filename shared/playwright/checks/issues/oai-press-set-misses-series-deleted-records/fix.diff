@@ -1,0 +1,16 @@
+--- a/classes/oai/omp/OAIDAO.php
++++ b/classes/oai/omp/OAIDAO.php
+@@ -264,7 +264,12 @@ class OAIDAO extends PKPOAIDAO
+                         return $query->addSelect([DB::raw('NULL AS series_id')]);
+                     })
+                     ->when(isset($set), function ($query) use ($set) {
+-                        return $query->where('dot.set_spec', '=', $set);
++                        // A press's set also holds the deleted records of its series ("{press}:{series}"),
++                        // as in OJS and OPS. Grouped, so the date and identifier filters below still apply.
++                        return $query->where(function ($query) use ($set) {
++                            $query->where('dot.set_spec', '=', $set)
++                                ->orWhere('dot.set_spec', 'like', $set . ':%');
++                        });
+                     })
+                     ->when($from, function ($query, $from) {
+                         return $query->whereDate('dot.date_deleted', '>=', \DateTime::createFromFormat('U', $from));

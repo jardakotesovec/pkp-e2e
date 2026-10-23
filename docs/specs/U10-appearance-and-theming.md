@@ -241,8 +241,23 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
    ([Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md),
    Rule 8). A stock install has "Default Theme" alone, so the list
    offers no other choice; further themes are installed and enabled as
-   plugins (*Plugins management*). Rules 5 to 10 describe the default
+   plugins (*Plugins management*). On a press and a preprint server, a
+   newly chosen theme that replaces the home page with one of its own
+   did not always show it ⚠ [A25](#a25). Rules 5 to 10 describe the default
    theme's fields. <sup>k</sup> <sup>td10</sup>
+
+4a. **A theme that is switched off.** A theme can be unticked or
+    deleted on the Plugins list while the journal still uses it
+    ([Plugins management](U62-plugins-management.md#a8)). While it is,
+    a read of the journal's theme and its fields through the programming
+    interface (`GET …/api/v1/contexts/{id}/theme`, which no screen sends)
+    is refused with "The active theme, {$themePluginPath}, is not
+    enabled and may not be installed.", the theme's name never filled in
+    ⚠ [A23](#a23). The same read of the site's own theme
+    ([Site settings](U60-site-settings.md), Rule 17;
+    `GET …/index/api/v1/site/theme`), made while "Default Theme" is
+    unticked on the site's Plugins list, fails with a server error
+    ⚠ [A24](#a24). <sup>k</sup>
 5. **"Typography".** After "Save", the text and the headings of the
    public pages use the chosen fonts: a single name sets both; a pair
    ("Noto Serif/Noto Sans") sets the headings to the first and the text
@@ -1215,6 +1230,9 @@ Left out of the scenarios above, by reason:
   - A19 (the French time written "a.m." on a discussion's messages and "AM" on a library file; Rule 3c)
   - A20 (a removed thumbnail's file still opening at its address; Side effects)
   - A22 (a logo, thumbnail or homepage image replaced by one of another file type, the old file still opening at its address; Side effects)
+  - A23 (a journal's theme switched off, a programming-interface read of it refused with its placeholder unfilled; Rule 4a)
+  - A24 (the site's "Default Theme" switched off, a programming-interface read of the site's theme failing with a server error; Rule 4a)
+  - A25 (a newly chosen theme's own home page not showing on a press or a preprint server; Rule 4)
   - OJS2 (a first issue created on a journal that never saved "Theme", the home page switching by itself {OJS}; Rule 10)
   - OJS3 (a published issue's articles absent from "Latest Publications", the list ordered by submission {OJS}; Rule 13)
   - OJS4 (the Settings Wizard showing another organization for a journal with no issue {OJS}; Rule 34; scenario 2 marks it)
@@ -1241,7 +1259,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-24; A10–A12
-2026-09-28; A13, A14 2026-09-29; A15–A20 2026-10-05; A21 2026-10-14; A22 2026-10-21), unreviewed unless an entry notes
+2026-09-28; A13, A14 2026-09-29; A15–A20 2026-10-05; A21 2026-10-14; A22 2026-10-21; A23–A25 2026-10-23), unreviewed unless an entry notes
 otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -1261,6 +1279,8 @@ otherwise; the team settles them on spec review.
 | [A18](#a18) | A "Custom" date pattern with "S" prints "17 Oct" on discussion messages and workflow file lists, "17th Oct" elsewhere | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A20](#a20) | A removed journal, press or server thumbnail stays online, or comes back when another language has one | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
 | [A22](#a22) | A logo, thumbnail or homepage image replaced by a picture of another file type stays online at its old address | 🐞 | minor | — |
+| [A23](#a23) | A programming-interface read of a journal's theme, refused while that theme is switched off, shows "{$themePluginPath}" where the theme's name belongs | 🐞 | latent | — |
+| [A24](#a24) | A programming-interface read of the site's theme fails with a server error while "Default Theme" is switched off on the site | 🐞 | latent · crash: server | — |
 | [OJS5](#ojs5) | Unticking every "Journal Content Organization" box says "Saved", but the home page keeps the current issue | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OJS6](#ojs6) | On a journal's home page, each "Latest Publications" title is a heading at the section's own level | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP2](#omp2) | A press's category page shows only its first page of books, with no way to the rest | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1269,6 +1289,7 @@ otherwise; the team settles them on spec review.
 | [A13](#a13) | Until a French "Date" is saved, a press's French pages write a book's date in the English order ("mars 5, 2024") | ❓ | minor | — |
 | [A14](#a14) | Before "Editorial Masthead" is first saved, roles of the same level change places between openings of the tab | ❓ | minor | — |
 | [A19](#a19) | In French (Canada), the same time reads "a.m." on a discussion's messages and "AM" on a library file | ❓ | minor | — |
+| [A25](#a25) | On a press and a preprint server, a newly chosen theme's own home page did not show in one of two tries | ❓ | user-visible | — |
 | [OJS2](#ojs2) | A journal's home page switches from its recent articles to an empty current-issue section when the first issue is created | ❓ | user-visible | — |
 | [OJS3](#ojs3) | "Include recent most published articles" lists only articles outside a published issue, by submission date | ❓ | minor | — |
 | [OJS4](#ojs4) | The Settings Wizard shows the current issue's table of contents ticked for a journal with no issue, and a save there stores it | ❓ | minor | — |
@@ -1637,6 +1658,47 @@ withdrawn. A replacement of the same file type takes the old file's
 place, so nothing is left behind. Basis: probe, 2026-10-21.
 <sup>f-a22</sup>
 
+<a id="a23"></a>
+**A23 — A programming-interface read of a journal's theme, refused while that theme is switched off, shows "{$themePluginPath}" where the theme's name belongs** · 🐞 · latent.
+While the theme a journal uses is unticked or deleted on the Plugins
+list (Rule 4a), a read of the journal's theme and its fields through
+the programming interface (`GET …/api/v1/contexts/{id}/theme`) is
+refused with "The active theme, {$themePluginPath}, is not
+enabled and may not be installed.". The message is meant to name the
+theme; it shows its placeholder instead, for a Journal Manager and for
+the Site Administrator alike. This is the English text, so it is not a
+missing translation. No screen sends this read. Basis: probe,
+2026-10-23. <sup>f-a23</sup>
+
+<a id="a24"></a>
+**A24 — A programming-interface read of the site's theme fails with a server error while "Default Theme" is switched off on the site** · 🐞 · latent · crash: server.
+On an installation with more than one journal, the Site Administrator
+unticks "Default Theme" on the site's own Plugins list (Administration ›
+Site Settings › "Plugins"), the theme the site uses. A read of the
+site's theme and its fields through the programming interface
+(`GET …/index/api/v1/site/theme`) then fails with a server error instead of
+being refused, as the same read for a journal is ([A23](#a23)). The
+site's theme stays "Default Theme": once it is ticked again, the read
+answers with it and its fields. No screen sends the read.
+Basis: probe, 2026-10-23. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — On a press and a preprint server, a newly chosen theme's own home page did not show in one of two tries** · ❓ · user-visible.
+A manager chooses under "Theme" a newly installed theme that replaces
+the home page with one of its own and presses "Save": "Saved", and the
+tab shows the theme chosen after a reload. On a journal the home page
+then shows the theme's own page, in both tries. On a press and on a
+preprint server it did so in one try of two. In the other, the home
+page kept the application's usual page, styled as under "Default
+Theme", for visitors signed in or not, while "Theme" still showed the
+new theme chosen.
+Question: does a press or a preprint server sometimes keep its usual
+home page after such a theme is chosen? Lean: yes, a fault of the
+application rather than of the test, since the theme was stored and the
+page was otherwise whole; but each app missed it in one try only, and
+repeated tries are needed to settle it. Basis: probe, 2026-10-23.
+<sup>f-a25</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -1949,10 +2011,10 @@ select from `PluginRegistry::loadCategory('themes', true)` (enabled theme
 plugins) and keeps each theme's option fields in `themeFields`;
 ui-library `ThemeForm.vue::changeTheme()` swaps the fields under "Theme"
 for the chosen theme's on a new choice, and "Save" switches the journal
-to it. That swap is known from the code alone: no test install has a second
-theme, and the Plugin Gallery that would install one answers a server
-error there (checked 2026-09-24). `PKPContextService::validate()`
-refuses a theme that is not installed and enabled
+to it. A stock test install has no second theme, and the Plugin
+Gallery that would install one answers a server error there (checked
+2026-09-24); a theme uploaded by hand is the probe at the end of this
+note. `PKPContextService::validate()` refuses a theme that is not installed and enabled
 (`manager.setup.theme.notFound`). The three checkouts ship
 `plugins/themes/default` alone; live-probed 2026-09-16 and 2026-09-24 on
 all three apps: the select offers "Default Theme" alone, under a plain
@@ -1960,6 +2022,23 @@ sentence (not a link), and Plugins › "Installed Plugins" lists it as the
 only theme plugin. `PKPTemplateManager` picks the active theme from the
 context's `themePluginPath` for frontend pages; `DefaultThemePlugin::init()`
 registers the menu areas `primary` and `user`.
+Live-probed 2026-10-23 (Rule 4; OJS, OMP and OPS `main` and OJS
+`stable-3_5_0`, two runs each, PKP's default dataset): a scratch theme
+of the campaign's own, uploaded by `admin` through Plugins › "Upload A
+New Plugin" and ticked by the manager `rvaca`, is offered beside
+"Default Theme" (`Default Theme=default`, `U62 I23B r1
+Theme=u62i23br1theme`); choosing it and "Save" (`PUT
+…/contexts/1/theme` 200, "Saved") stored it as the context's
+`themePluginPath`, and the reloaded tab showed it chosen. The scratch
+theme declares no fields of its own (its parent is `defaultthemeplugin`,
+whose fields it keeps), so the field swap above stays unprobed;
+whether its own home page showed is note f-a25. The same day
+(Rule 4a): `PUT …/contexts/{id}/theme` (as `rvaca` and as `admin`) and
+`PUT index/api/v1/site/theme` (as `admin`) naming a theme the install
+lacks answered 400 `{"themePluginPath":["The theme you selected is not
+installed or enabled."]}` and stored nothing in the context's or the
+site's `themePluginPath`; the public home page was unaffected. The
+`GET` side of both routes is notes f-a23 and f-a24.
 
 <a id="fn-l"></a>
 **l — typography and colour.** `DefaultThemePlugin::init()` adds the font
@@ -2653,6 +2732,65 @@ notice. Not driven: "Favicon" (by the code the same
 (`PKPSiteService::_saveFileParam()`). The A20 issue report names the
 logo and thumbnail case under its Reach as a separate fault its fix
 does not reach; the homepage image is a third box with it.
+
+<a id="fn-f-a23"></a>
+**f-a23** — `PKPContextController::getTheme()` (`GET
+…/api/v1/contexts/{id}/theme`, admitted to the Site Administrator and
+the manager) looks the context's `themePluginPath` up among the enabled
+theme plugins and, finding none, answers 404 with
+`__('api.themes.404.themeUnavailable')` called without the
+`themePluginPath` parameter its English text ("The active theme,
+{$themePluginPath}, is not enabled and may not be installed.") expects.
+No screen sends this `GET`: the Appearance form's save (`PUT`) is the
+only `…/theme` request in the run records. Code read 2026-10-23
+(ojs `main` with pkp-lib `1f415a07ca`); the incidental row of
+2026-10-21 read the same in 3.4. Live-probed 2026-10-23 on OJS, OMP and
+OPS `main` and OJS `stable-3_5_0`, two runs each, PKP's default
+dataset: with the journal's scratch theme unticked (as `rvaca`) and
+again after `admin` deleted it, the `GET` answered 404
+`{"error":"The active theme, {$themePluginPath}, is not enabled and may
+not be installed."}` as `rvaca` and as `admin`; the context's
+`themePluginPath` kept the theme's folder name until a manager saved
+"Default Theme" ([Plugins management](U62-plugins-management.md#a8)).
+
+<a id="fn-f-a24"></a>
+**f-a24** — `PKPSiteController::getTheme()` (`GET
+index/api/v1/site/theme`) builds the same 404 refusal as note f-a23
+when no enabled theme matches the site's `themePluginPath`, but without
+`return`, so it carries on and calls `getOptionValues()` on the `null`
+theme. The site's own Plugins list shows only on a site with more than
+one context ([Site settings](U60-site-settings.md), Rule 2). Code read 2026-10-23, `main` and
+`stable-3_5_0`. Live-probed 2026-10-23 on OJS, OMP and OPS `main` and
+OJS `stable-3_5_0`, two runs each, PKP's default dataset plus a second
+context: with `defaultthemeplugin` unticked on Administration › Site
+Settings › "Plugins" (the "Disable" window's "OK", notice "The plugin
+"Default Theme" has been disabled."), the `GET` as `admin` answered 500
+`{"error":"Call to a member function getOptionValues() on null"}`, the
+server log reading `production.ERROR: Call to a member function
+getOptionValues() on null … PKPSiteController.php:139` (`:136` on
+`stable-3_5_0`); a `PUT` naming a missing theme was refused (note k);
+the site's `themePluginPath` stayed `default`; the site's Appearance ›
+"Theme" offered an empty list and the site's index page answered 200
+unstyled, listing both contexts. Ticked again, the `GET` answered 200
+with the site's options and `themePluginPath` `default`.
+
+<a id="fn-f-a25"></a>
+**f-a25** — Live-probed 2026-10-23 on PKP's default dataset, two runs
+per app and line, with a scratch theme of the campaign's own: a child
+of `defaultthemeplugin` (`lazy-load` 1) whose only template replaces
+the home page (OJS `frontend/pages/indexJournal.tpl`, OMP
+`frontend/pages/index.tpl`, OPS `frontend/pages/indexServer.tpl`) with
+a copy of the app's own that also includes a template only the theme
+has, uploaded by `admin`, ticked and chosen by `rvaca` (note k). The
+theme's own line showed on the home page, signed out and signed in, on
+OJS `main` (both runs), OJS `stable-3_5_0` (both runs), OMP `main` run
+2 and OPS `main` run 1. On OMP `main` run 1 and OPS `main` run 2 it was
+absent from both reads: the page answered 200 with the default theme's
+style sheets, the context's `themePluginPath` named the scratch theme,
+and the server log was empty. The three apps' runs overlapped in time.
+What would settle it: several fresh reads of the
+home page after the save, on OMP or OPS `main` alone, comparing the
+first read after the save with later ones.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `journalContentOrganization` is added by OJS's

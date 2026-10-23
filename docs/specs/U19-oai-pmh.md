@@ -1388,7 +1388,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP3](#omp3) | Asked for a set it does not have, a press's OAI-PMH address lists every record of the press, or of every press | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OMP6](#omp6) | A press's OAI-PMH set list names every series that has no prefix with a leading space | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP8](#omp8) | A published book returned to the workflow leaves the press's OAI records with no deleted record | 🐞 | minor | — |
-| [OMP9](#omp9) | A press's set leaves out the deleted records of books in a series | 🐞 | user-visible | re-probe (claude), 2026-10-22 — confirmed (was ❓) |
+| [OMP9](#omp9) | A press's OAI-PMH set leaves out the deleted records of unpublished books that were in a series | 🐞 | medium | issues (claude), 2026-10-23 — re-verified |
 | [OPS1](#ops1) | A preprint server's OAI-PMH lists answer a server error whenever the harvester gives an "until" date | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS4](#ops4) | Removing a preprint server leaves no deleted records for its posted preprints at the site-wide OAI address | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OPS5](#ops5) | A posted preprint returned to the workflow is reported to harvesters as deleted | 🐞 | user-visible | — |
@@ -1855,18 +1855,16 @@ The readers' side, the book's page answering "404 Not Found", is
 Since: 2026-06-09 · Basis: probe, 2026-10-03. <sup>f-omp8</sup>
 
 <a id="omp9"></a>
-**OMP9 — A press's set leaves out the deleted records of books in a series** · 🐞 · user-visible.
-A harvester that asks a press for the press's set, at the press's OAI
-address or the site-wide one, expects the deleted record of every book
-unpublished in the press. A book in a series leaves a deleted record in
-the series' set, a book in no series one in the press's set (Rule 7d).
-Asked for the press's set, the press lists only the second kind, so a
-harvester of that set keeps a withdrawn book in a series and is not
-told. A preprint server lists a section's deleted record under the
-server's set.
-Re-checked: re-probe (claude), 2026-10-22 — confirmed (was ❓) on a
-second press once A1 was fixed, on `main` and 3.5.
-Basis: probe, 2026-10-22. <sup>f-omp9</sup>
+**OMP9 — A press's OAI-PMH set leaves out the deleted records of unpublished books that were in a series** · 🐞 · medium.
+When a press unpublishes a book that is in a series, a harvester that
+asks for the press's OAI-PMH set, at the press's address or the
+site-wide one, is not told: the list leaves out that book's deleted
+record. A book in no series, once unpublished, does get its deleted
+record in the press's set.
+A harvester of the press's set goes on holding the unpublished book as
+published, and nothing on screen shows the gap. The fault is one
+comparison in the deleted-records half of OMP's OAI list query.
+Basis: probe, 2026-10-23. <sup>f-omp9</sup>
 
 ### OPS
 

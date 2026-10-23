@@ -647,13 +647,15 @@ Left out of the scenarios above, by reason:
   - A3 (an upgrade refused for the same or an older version, blaming
     the gallery; Rule 19)
   - A4 ("Delete" on the rows whose box cannot be pressed and on the
-    theme in use; Rule 21)
+    theme in use, which leaves the journal with no theme chosen;
+    Rule 21)
   - A5 (a failed upgrade removing the plugin; Rule 20)
   - A6 and A9 (a Site Administrator with no manager-level role in the
     journal, whose ticks are refused with an alert, a raw code except
     on a press; Actors row 3)
   - A7 (the Delete notice's spelling; Rule 21; scenario 5 marks it)
-  - A8 (the theme in use unticked; Rule 12)
+  - A8 (the theme in use unticked, and a page that theme replaced;
+    Rule 12)
   - A10 (a file that is not a ".tar.gz" archive, refused in the
     server's own words; Rule 17)
 - **No seed**:
@@ -763,12 +765,18 @@ Basis: probe, 2026-10-02. <sup>f-a3</sup>
 The Site Administrator is offered "Delete" on every row, including the
 rows whose box cannot be pressed ("TinyMCE Plugin", "Usage event", the
 metadata and OAI formats) and the theme a journal uses; one "OK" removes
-the plugin's files for the whole installation.
+the plugin's files for the whole installation. A journal whose theme,
+one other than "Default Theme", is deleted (unticked first, Rule 12) is
+left with no working theme: its public pages show unstyled, and
+Settings › Website › "Appearance" › "Theme" offers "Default Theme" with
+nothing selected until a Journal Manager chooses it there and presses
+"Save". On OJS 3.5 a page that theme replaced comes up empty instead
+([A8](#a8)).
 Question: should "Delete" be offered on a plugin the application needs,
 or on a theme in use? Lean: no; hide it on the rows of Rule 10 and
 refuse it for a theme any journal or the site uses, since the list
 itself marks those plugins as not optional.
-Basis: probe. <sup>f-a4</sup>
+Basis: probe, 2026-10-23. <sup>f-a4</sup>
 
 <a id="a5"></a>
 **A5 — Plugins: an upgrade whose database step fails deletes the plugin, old version included, from every journal** · 🐞 · medium.
@@ -815,14 +823,27 @@ Basis: probe, 2026-10-02. <sup>f-a7</sup>
 <a id="a8"></a>
 **A8 — The theme in use can be switched off** · ❓ · user-visible.
 The list accepts unticking the theme a journal uses, with the ordinary
-"Disable" window and the notice "The plugin "Default Theme" has been
-disabled."; the journal's public pages then show with no styling, and Settings ›
-Website › "Appearance" › "Theme" offers an empty list. Ticked again,
-the pages are styled again.
+"Disable" window and the notice "The plugin "{plugin name}" has been
+disabled."; the journal's public pages then show with no styling.
+Settings › Website › "Appearance" › "Theme" then offers an empty list
+when "Default Theme" was the theme unticked, and "Default Theme" with
+nothing selected when another theme was. Ticked again, "Default Theme"
+styles the pages again; choosing "Default Theme" in "Appearance" ›
+"Theme" and pressing "Save" does the same. Where the theme unticked
+replaced the journal's home page with its own copy (one showing a line
+only that theme has), the home page shows the application's own
+version, unstyled, without that line.
+On OJS 3.5 the server fails on that page instead: from the untick on,
+and still after the theme is deleted ([A4](#a4)), every visitor, signed
+in or not, gets an empty page until a Journal Manager saves a theme in
+"Appearance" › "Theme" or the Site Administrator presses
+Administration › "Delete Template Cache"
+(*[System administration & jobs](U61-system-administration.md)*,
+Rule 11).
 Question: should the list refuse to disable the theme in use? Lean:
 yes; refuse with a line pointing to Settings › Website › "Appearance" ›
 "Theme", where another theme is chosen first.
-Basis: probe. <sup>f-a8</sup>
+Basis: probe, 2026-10-23. <sup>f-a8</sup>
 
 <a id="a9"></a>
 **A9 — A refused tick or untick is explained by a raw code, and "Disable" stays open with its spinner** · 🐞 · low.
@@ -1087,7 +1108,13 @@ theme only when `isActive()` (the context's or site's
 Display name `plugins.themes.default.name` "Default Theme". OJS's
 `IndexHandler` reads an option of the active theme only when there is
 one, falling back to the default home page content (OJS1, retired).
-Live-probed 2026-09-27 (Rule 12): td7.
+Live-probed 2026-09-27 (Rule 12): td7. Live-probed 2026-10-23 (Rule 12;
+OJS, OMP, OPS `main`, two runs each, PKP's default dataset), with a
+scratch theme in use in place of "Default Theme": after the
+"Disable" window's "OK" the home page answered 200 with no style sheet,
+signed out and signed in; OJS's showed "Current Issue", "Vol. 1 No. 2
+(2014)" and its articles, OMP's the press's header and menu, OPS's
+"Latest preprints" (f-a8).
 
 <a id="fn-j"></a>
 **j** — Row links. `PluginGridRow::initialize()` adds
@@ -1346,6 +1373,20 @@ Issue report: [pkp-e2e#508](https://github.com/jardakotesovec/pkp-e2e/issues/508
 <a id="fn-f-a4"></a>
 **f-a4** — fn-n: `deletePlugin()` and `PluginGridRow` check the role
 alone. Live-probed 2026-09-27: td17.
+Live-probed 2026-10-23 (A4; OJS, OMP and OPS `main` and OJS
+stable-3_5_0, two runs each, PKP's default dataset; `admin` and the
+manager `rvaca`): a scratch theme of our own (parent "Default Theme"),
+uploaded by `admin`, ticked and chosen in "Appearance" › "Theme" by the
+manager, then unticked. Its row's arrow still offered `admin` "Delete";
+"OK" gave "Plugin "U62 I23B r1 Theme" successfuly deleted" and the row
+left the list. The context's `themePluginPath` kept the deleted theme's
+folder name; the home page answered 200 with no style sheet on `main`
+(500 on 3.5, f-a8); "Appearance" › "Theme" offered `Default Theme`
+alone, nothing selected (select value empty, `selectedIndex` -1), for
+the manager and for `admin`. Choosing it and "Save" (`PUT
+…/contexts/1/theme` 200, "Saved") set `themePluginPath` to `default`
+and styled the page again. `deletePlugin()` neither resets
+`themePluginPath` nor clears the compiled templates.
 
 <a id="fn-f-a5"></a>
 **f-a5** — fn-m: the `catch` of `PluginHelper::upgradePlugin()` removes
@@ -1376,6 +1417,36 @@ Issue report: [pkp-e2e#507](https://github.com/jardakotesovec/pkp-e2e/issues/507
 
 <a id="fn-f-a8"></a>
 **f-a8** — fn-i. Live-probed 2026-09-27: td7.
+Live-probed 2026-10-23 (A8; the runs of f-a4): the scratch theme
+overrides `frontend/pages/indexJournal.tpl` with a copy that also
+includes `frontend/<theme>-only.tpl`, a template only it has; chosen
+and saved, the home page showed the theme's own line. The untick of the
+stored theme was accepted with no refusal everywhere. Site's list:
+"Default Theme" unticked there (an installation with two journals) left
+the site's "Appearance" › "Theme" with an empty select, three apps,
+`main` and 3.5. `main` (OJS, OMP, OPS; two runs each): after the untick
+and after the delete the home page answered 200, no style sheet, the
+theme's own line gone, the server log empty. OJS stable-3_5_0
+(`0b1ae35f04`, two runs): after the untick, signed out and signed in,
+`GET /index.php/publicknowledge/en` answered 500 with an empty page,
+server log `PHP Fatal error: Uncaught --> Smarty: Unable to load
+template 'app:frontend/u62i23bs1theme-only.tpl' in
+'frontend/pages/indexJournal.tpl' <--`; the same after the delete.
+Administration › "Delete Template Cache" alone (the confirm "Are you
+sure you want to clear the cache of compiled templates?" accepted)
+brought it back to 200, unstyled, with the current issue, while
+`themePluginPath` still named the deleted theme; "Default Theme" saved
+in "Appearance" gave the styled page. Mechanism: on 3.5
+`PKPTemplateManager::getCompileId()` appends the context's
+`themePluginPath` to the compile id and the `app:` resource keys the
+compiled file by the template's name, so with the theme off the app's
+own, older `indexJournal.tpl` loses Smarty's compile check to the
+newer compiled override, which includes the switched-off theme's
+template; on `main` `SmartyTemplate` resolves every template to a file
+path and renders it as `file:`, so the switched-off theme's compiled
+file is never reached. `PluginGridHandler::disable()` and
+`deletePlugin()` neither reset `themePluginPath` nor clear the compiled
+templates; the theme API's save does (`clearTemplateCache()`).
 
 <a id="fn-f-a9"></a>
 **f-a9** — fn-a: the site admin branch of `PluginAccessPolicy` refuses
