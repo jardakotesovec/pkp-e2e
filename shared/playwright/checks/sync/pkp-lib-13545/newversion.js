@@ -6,6 +6,7 @@
 //       "version two") and …/pdf on the new version; then each version's galleys, their files' text (database
 //       and files folder), and what a signed-out reader downloads for version 1's HTML galley
 //   S5, as `gcox` (Layout Editor on submission 5, Production): POST …/bodyText on submission 5
+// Round 3 adds: S5 also POST …/bodyText/pdf, and S2's v1 files' revisions after v2's exports
 // Run: PROBE_FEATURE=pr-13543 PROBE_AGENT=pr PROBE_RUN=<side> node bin/probe.js ojs <this file>
 const fs = require('fs');
 const path = require('path');
@@ -67,6 +68,7 @@ forEachApp(async (app) => {
             fact('S2 v2 POST pdf', pick(await call('POST', `${base}/17/publications/${v2}/bodyText/pdf`, pdf('version two'), 'application/pdf')));
             fact('S2 v2 galleys after', galleys(v2));
             fact('S2 v1 galleys after', galleys(v1));
+            fact('S2 revisions of v1 files', String(sql(app, `select coalesce(string_agg(g.submission_file_id || ':' || (select count(*) from submission_file_revisions r where r.submission_file_id = g.submission_file_id), ' ' order by g.galley_id), '-') from publication_galleys g where g.publication_id = ${v1}`)).trim());
             const ctx = await page.context().browser().newContext({storageState: {cookies: [], origins: []}});
             for (const g of galleys(v1)) {
                 const r = await ctx.request.get(app.url(`/index.php/${app.contextPath}/article/download/17/${g.id}`), {failOnStatusCode: false});
@@ -81,6 +83,8 @@ forEachApp(async (app) => {
         await home();
         const p5 = Number(String(sql(app, 'select current_publication_id from submissions where submission_id = 5')).trim());
         fact('S5 gcox POST html on 5', pick(await call('POST', `${base}/5/publications/${p5}/bodyText`, '<p>layout</p>', 'text/html; charset=UTF-8')));
+        fact('S5 gcox POST pdf on 5', pick(await call('POST', `${base}/5/publications/${p5}/bodyText/pdf`, pdf('layout'), 'application/pdf')));
+        fact('S5 gcox can_change_metadata on 5', String(sql(app, `select coalesce(string_agg(sa.can_change_metadata::text, ','), '-') from stage_assignments sa join users u on u.user_id = sa.user_id where sa.submission_id = 5 and u.username = 'gcox'`)).trim());
         fact('S5 gcox PUT bodyText on 5 (Save)', pick(await call('PUT', `${base}/5/publications/${p5}/bodyText`, JSON.stringify({}), 'application/json')));
     } catch (e) {
         fact('error', flat(e.stack || e.message, 800));

@@ -1,0 +1,11 @@
+--- a/lib/pkp/classes/bodyText/Repository.php
++++ b/lib/pkp/classes/bodyText/Repository.php
+@@ -227,6 +227,8 @@
+         $createdPaths = [];
+         try {
+             $galleyId = DB::transaction(function () use ($content, $mimeType, $submissionDir, &$createdPaths, $submission, $publication, $user, $context, $publicationId, $label, $extension, $genre) {
++                // Serialize concurrent exports so they cannot create duplicate galleys.
++                DB::table('publications')->where('publication_id', $publicationId)->lockForUpdate()->first();
+ 
+                 // Catch the images referenced in the HTML and rewrite their src attributes to point to the new image supplement file.
+                 $images = [];
