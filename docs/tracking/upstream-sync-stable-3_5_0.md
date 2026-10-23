@@ -35,6 +35,10 @@ regression verdict; what was filed)._
     - The reviewer forms show it only with both settings on.
     - Round 1's fixes hold.
   - Still open: the wizard subtitle; and, from the code only, a Reviewer invitation's row and email with the masthead on and reviewer listing off.
+  - Rounds 5 and 6: pkp-lib `aaf0d0db75` (reviewer listing read in the email and the invitation steps), ui-library `6fcd1421d4`, then force-pushed `141258f62d`, and the new ojs#5979 `d37edc7dc4` (English subtitle; base `0b1ae35f04`, which carries the line commits after `cbf80495db`: #13599 and the #13564 bump, unread here). There are no submodule bumps. Base `b5`; heads `h5` and `h6` on all three apps.
+    - `6fcd1421d4` showed every role as "Does not appear" on the invitee's review step when reviewer listing was off; `141258f62d` fixed that.
+    - Left open at `h6`: with the masthead on and reviewer listing off, a Reviewer row on the review step still reads "Appear on the masthead" (OJS, OMP), because the wizard sends reviewers as `masthead: true`. Fix suggested, not tried.
+    - OMP and OPS keep the subtitle until their PRs.
   - Security: nothing.
 - **2026-10-22 (merge step of the pkp/pkp-lib#13565 PR review, VM s0) — pkp-lib `ce67d3f62b..9cb93845fa` (1 and its merge), ojs `cbf80495db..f521b56ec9` (2 of 4), omp `60163fe0a..77e3acd8e` (2), ops `71ad98eb83..18506a5b4d` (2). Baselines advanced for pkp-lib, omp and ops; ojs not (below).**
   - pkp-lib `5b54f59ed7` (pkp/pkp-lib#13564, merged by bozana as `9cb93845fa`) → `stable-only`: the reviewed patch, rebased (`git range-diff f94e556856..e99f3e9c7b ce67d3f62b..5b54f59ed7` reads `=`). Re-walked at the new tips on the 3.5 dataset fleet, OJS and OMP: `checks/U36/H19/h19.js` read and copy, then `checks/sync/pkp-lib-10268/note-on-copy.js`; the copied file's Notes 200 with the form and "Earlier Revision Notes", a note added and deleted, no server error (`.reports/pr13565-merged/`). The pkp-lib#10268 row, the companion row and the report are deleted.

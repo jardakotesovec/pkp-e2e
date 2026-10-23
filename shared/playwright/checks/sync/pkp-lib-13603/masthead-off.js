@@ -6,8 +6,10 @@
 // it runs unchanged at the PR's base and head.
 //   on    the new-context default (box ticked): role form box, invitation
 //         row, email, reviewer forms' masthead line
+//         (and the invitee's review step), a Reviewer invitation with
+//         reviewer listing off (row, email, review step)
 //   onrev the masthead on with "Enable listing of reviewers" ticked: the
-//         reviewer forms' masthead line (OJS, OMP)
+//         reviewer forms' masthead line and a Reviewer invitation (OJS, OMP)
 //   off   the box unticked through Appearance: role edit (stored value
 //         before/after a save), a new role, invitations to an editor role and
 //         to Reviewer, an invitation to a person who already holds a listed
@@ -66,6 +68,8 @@ forEachApp(async (app) => {
             {username: `au${T}`, givenName: 'Aldo', familyName: 'Invitee', roles: ['author']},
             {username: `au2${T}`, givenName: 'Ada', familyName: 'Unsetcase', roles: ['author']},
             {username: `rd${T}`, givenName: 'Rhea', familyName: 'Readerinvite', roles: ['reader']},
+            {username: `rd2${T}`, givenName: 'Rory', familyName: 'Revdefault', roles: ['reader']},
+            {username: `rd3${T}`, givenName: 'Rita', familyName: 'Revlisted', roles: ['reader']},
             {username: `su${T}`, givenName: 'Sumi', familyName: 'Submitter', roles: ['author']},
         ];
         if (REVIEWER[app.name]) users.push({username: `rv${T}`, givenName: 'Ravi', familyName: 'Lastyear', roles: ['externalReviewer']});
@@ -183,6 +187,30 @@ forEachApp(async (app) => {
         out.payloads = [...payloads];
         return out;
     };
+    // The invitee opens the invitation from its email and reads the review
+    // step's role table (the step is not accepted).
+    const reviewStep = async (m, username, key) => {
+        const link = m && m.link;
+        if (!link) return {error: 'no invitation link in the email'};
+        await signIn(ip, username);
+        await ip.goto(link.replace(/&amp;/g, '&'));
+        await idle(ip);
+        await expect(ip.getByRole('columnheader').first()).toBeVisible({timeout: 30_000}).catch(() => {});
+        await snap(ip, key);
+        return {headers: await headers(ip), rows: (await ip.locator('tbody tr').allInnerTexts()).map((r) => flat(r, 200))};
+    };
+    // A Reviewer invitation: the row's masthead cell, the payload, the email
+    // line and the invitee's review step.
+    const inviteReviewer = async (who, key) => {
+        const out = await openFor(mp, mail(who), key);
+        out.row = await fillNewRow(mp, REVIEWER[app.name]);
+        out.headersFilled = await headers(mp);
+        await snap(mp, `${key}-02-row`);
+        out.send = await composeAndSend(mp, `${key}${T}${who}`, key);
+        out.mail = await mailWith(mail(who), `${key}${T}${who}`);
+        out.review = await reviewStep(out.mail, `${who}${T}`, `${key}-05-review`);
+        return out;
+    };
     const masthead = async (page, key) => {
         const resp = await page.goto(`/index.php/${T}/about/editorialMasthead`);
         await idle(page);
@@ -256,7 +284,9 @@ forEachApp(async (app) => {
             await snap(mp, 'on-inv-02-row');
             out.invite.send = await composeAndSend(mp, `On${T}rd`, 'on-inv');
             out.invite.mail = await mailWith(mail('rd'), `On${T}rd`);
+            out.invite.review = await reviewStep(out.invite.mail, `rd${T}`, 'on-inv-05-review');
             out.reviewerForms = await reviewerForms(mp);
+            if (REVIEWER[app.name]) out.reviewer = await inviteReviewer('rd2', 'onrv');
         });
 
         // ── onrev: the masthead on and "Enable listing of reviewers" ticked ─
@@ -271,6 +301,7 @@ forEachApp(async (app) => {
             await expect(form.locator('.pkpFormPage__status', {hasText: 'Saved'})).toBeVisible({timeout: 30_000});
             facts.onrev.reviewersSetting = sql(app, `select coalesce((select setting_value from ${ctxSettings} where ${ctxId} = ${contextId} and setting_name = 'enableEnrollmentMastheadReviewers'), '<no row>')`);
             facts.onrev.reviewerForms = await reviewerForms(mp);
+            facts.onrev.reviewer = await inviteReviewer('rd3', 'onlr');
         });
 
         // ── untick the enrollment masthead through the screen ───────────
