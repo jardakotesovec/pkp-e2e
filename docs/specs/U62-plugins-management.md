@@ -227,7 +227,8 @@ None of these is shown for a plugin with no compatible version.
     "Successfully installed version {version}" shows, and the plugin is
     listed under its category in every journal's list and the site's,
     unticked unless the plugin arrives switched on. <sup>k</sup>
-    <sup>td16</sup>
+    <sup>td16</sup> The application's own version stays as it was,
+    whatever version the plugin's installation file names. <sup>v</sup>
 17. **Upload refused.** Each of these closes the window, shows its
     notice at the top right and installs nothing: <sup>l</sup>
     - the same plugin already installed at the same or a newer version:
@@ -254,7 +255,9 @@ None of these is shown for a plugin with no compatible version.
 18. **"Upgrade".** A row's "Upgrade" opens the "Upgrade Plugin" window.
     "Save" with a newer version of the same plugin replaces it: the
     notice "Successfully upgraded to version {version}" shows and the row
-    keeps its box as it was. <sup>m</sup> <sup>td16</sup>
+    keeps its box as it was. <sup>m</sup> <sup>td16</sup> The
+    application's own version stays as it was, whatever version the
+    plugin's upgrade file names. <sup>v</sup>
 19. **Upgrade refused.** Each of these shows its notice and leaves the
     plugin as it was: another category's plugin "The uploaded plugin
     does not fit the category of the upgraded plugin."; another plugin
@@ -1316,6 +1319,19 @@ is on, and otherwise records `PLUGIN_ENABLE`, `PLUGIN_DISABLE`,
 `PLUGIN_INSTALL`, `PLUGIN_UPGRADE`, `PLUGIN_UNINSTALL` to the server's
 log channel. `config.TEMPLATE.inc.php` and the test installs'
 configuration leave `log_audit` commented out (off).
+
+<a id="fn-v"></a>
+**v** — The application's version through a plugin. `Installer::updateVersion()`
+records the descriptor's `<install version="…">` as a core version when it is newer
+than the current one, unless the installer runs for a plugin (`$isPlugin`, set by
+`PluginHelper::installPlugin()` and `upgradePlugin()`); the plugin's own row comes from
+its `version.xml`. Driven at the PR heads, before their merge (pkp/pkp-lib#13613
+`e89bd83caa` on `main`, OJS, OMP and OPS; #13612 `2aa7e4648c` on 3.5, #13611
+`5f64e33b70` on 3.4, #13610 `320ef31faa` on 3.3, OJS), through `PluginHelper` with a
+scratch plugin whose `upgrade.xml` and `install.xml` name the core's major.minor plus
+`.6.2` (`checks/sync/pkp-lib-13608/walk.js`, 2026-10-23): the core row stays, the
+plugin's rows and its descriptor steps are recorded. At each base the core version
+became the descriptor's (`ojs2 3.6.6.2`, `current=1`), the defect of pkp/pkp-lib#13608.
 
 <a id="fn-sc"></a>
 **sc** — Scenarios. Each scratch journal comes from `POST
