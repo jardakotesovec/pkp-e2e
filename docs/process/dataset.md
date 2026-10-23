@@ -33,7 +33,10 @@ what the team's installs hold (harness.md "Dataset fleets").
   until a prefix is set (U09, U19, U45, U54, U57, U63 issue walks);
   "Enable announcements" is unticked in all three apps, so an
   announcement's public page answers 404 until it is ticked (U49 claim
-  check I23F, 2026-10-23).
+  check I23F, 2026-10-23). A context created on screen is not public
+  until its "Enable this … to appear publicly on the site" box is
+  ticked, so until then the site's address still redirects to
+  `publicknowledge` (U10 claim check I23H, 2026-10-23).
 - Name a submission by its ID and title ("open submission 7,
   'Developing efficacy beliefs in the classroom'"), and the context by its
   path, `publicknowledge` in all three apps. "(2 versions)" in the tables

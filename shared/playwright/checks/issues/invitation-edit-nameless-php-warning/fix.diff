@@ -1,0 +1,36 @@
+--- a/lib/pkp/classes/invitation/invitations/userRoleAssignment/handlers/UserRoleAssignmentInviteUIController.php
++++ b/lib/pkp/classes/invitation/invitations/userRoleAssignment/handlers/UserRoleAssignmentInviteUIController.php
+@@ -184,6 +184,9 @@
+             'id' => 'invitationWizard',
+             'name' => __('invitation.wizard.pageTitle'),
+         ];
++        // A name may be missing (an invitation sent with no names) or not entered in the interface language
++        $givenName = $invitationPayload->givenName[Locale::getLocale()] ?? null;
++        $familyName = $invitationPayload->familyName[Locale::getLocale()] ?? null;
+         $steps = new SendInvitationStep();
+         $templateMgr->setState([
+             'steps' => $steps->getSteps($this->invitation, $context, $user),
+@@ -206,18 +209,11 @@
+                         $user,
+                         $request->getContext()
+                     ) : [],
+-            'pageTitle' =>
+-                ($invitationPayload->givenName && $invitationPayload->familyName) ?
+-                    $invitationPayload->givenName[Locale::getLocale()] . ' '
+-                    . $invitationPayload->familyName[Locale::getLocale()] : $invitationPayload->inviteeEmail
+-            ,
+-            'pageTitleDescription' =>
+-                __(
+-                    'invitation.wizard.viewPageTitleDescription',
+-                    ['name' =>
+-                        $invitationPayload->givenName[Locale::getLocale()] ?
+-                            $invitationPayload->givenName[Locale::getLocale()] : $invitationPayload->inviteeEmail]
+-                ),
++            'pageTitle' => ($givenName && $familyName) ? "{$givenName} {$familyName}" : $invitationPayload->inviteeEmail,
++            'pageTitleDescription' => __(
++                'invitation.wizard.viewPageTitleDescription',
++                ['name' => $givenName ?: $invitationPayload->inviteeEmail]
++            ),
+         ]);
+         $templateMgr->assign([
+             'pageComponent' => 'Page',

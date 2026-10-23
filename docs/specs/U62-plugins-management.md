@@ -833,9 +833,10 @@ styles the pages again; choosing "Default Theme" in "Appearance" ›
 replaced the journal's home page with its own copy (one showing a line
 only that theme has), the home page shows the application's own
 version, unstyled, without that line.
-On OJS 3.5 the server fails on that page instead: from the untick on,
-and still after the theme is deleted ([A4](#a4)), every visitor, signed
-in or not, gets an empty page until a Journal Manager saves a theme in
+On OJS 3.5 the server fails instead on a home page the unticked theme
+replaced: from the untick on, and still after the theme is deleted
+([A4](#a4)), every visitor, signed in or not, gets an empty page there
+until a Journal Manager saves a theme in
 "Appearance" › "Theme" or the Site Administrator presses
 Administration › "Delete Template Cache"
 (*[System administration & jobs](U61-system-administration.md)*,
@@ -1447,6 +1448,11 @@ path and renders it as `file:`, so the switched-off theme's compiled
 file is never reached. `PluginGridHandler::disable()` and
 `deletePlugin()` neither reset `themePluginPath` nor clear the compiled
 templates; the theme API's save does (`clearTemplateCache()`).
+Live-probed 2026-10-23 (claim check I23H, four runs on OJS
+stable-3_5_0): with "Default Theme" itself unticked, the home page
+answered 200 with its current issue, unstyled, signed in and signed
+out; the empty page is only the case of a home page the unticked theme
+replaced.
 
 <a id="fn-f-a9"></a>
 **f-a9** — fn-a: the site admin branch of `PluginAccessPolicy` refuses

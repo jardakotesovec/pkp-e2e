@@ -829,7 +829,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A13](#a13) | A newcomer whose chosen username was taken meanwhile presses "Accept And Continue" and nothing happens | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A15](#a15) | After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
-| [A17](#a17) | "Edit Invitation" on an invitation sent with no Given Name writes one more PHP warning to the server's error log | 🐞 | invisible | — |
+| [A17](#a17) | "Edit Invitation" logs a PHP warning when the invitee has no Given Name in the interface language | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
@@ -1071,15 +1071,22 @@ replaced when the invitation is sent.
 Basis: probe, 2026-10-22. <sup>[f-a16](#fn-a16)</sup>
 
 <a id="a17"></a>
-**A17 — "Edit Invitation" on an invitation sent with no Given Name writes one more PHP warning to the server's error log** · 🐞 · invisible.
+**A17 — "Edit Invitation" logs a PHP warning when the invitee has no Given Name in the interface language** · 🐞 · low.
 Each time a manager opens "Edit Invitation" on a pending invitation
 sent without a Given Name (the address alone, or a Family Name only),
-the server's error log gains the warning Rule 15 quotes, beside
-[A14](#a14)'s. The wizard opens and works, headed by the invitee's
-email address ("You are viewing {email}'s user details"). With a Given
-Name, the page is headed by the name and this warning is not written.
-Its cause is not A14's, and a fix for A14 leaves it.
-Since: 2025-04-11 · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
+the server's error log gains `PHP Warning: Trying to access array
+offset on null`. The wizard opens and works, headed by the invitee's
+email address. Inviting someone by their address alone is an ordinary
+path: the wizard does not require a name.
+The same code also fails when the invitation has names, but not in the
+interface language: names typed in English, then the page opened in
+French. There the page heading is empty where the name should stand, and
+the log gains three warnings.
+The cause is a missing null check where the page reads the name for its
+heading. The four warnings every opening of the wizard writes,
+whatever the name, have another cause and their own report
+([A14](#a14)).
+Since: 2024-10-24 (pkp/pkp-lib#9658, about a year) · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
 
 ### OMP and OPS
 
