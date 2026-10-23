@@ -22,6 +22,15 @@ one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `stable-only`; the
 regression verdict; what was filed)._
 
+- **2026-10-23 (PR review, VM s2; asked in the channel by @jarda.kotesovec) — pkp/pkp-lib#13603 (asmecher, `99a7bb36ee`, one commit on `6accf87c49`) and pkp/ui-library#1027 (asmecher, `171b406f01`, one commit on `2576e00afd`), issue pkp/pkp-lib#13370 part 2. There are no app PRs and no `main` PRs. Not merged; baselines not advanced. No companion: no spec, suite or CI follows the line.**
+  - Refs: OJS `cbf80495db`, OMP `60163fe0a`, OPS `71ad98eb83` (the line tips). For the base, `lib/pkp` sat at `6accf87c49` with ui-library `2576e00afd`; for the head, both PR heads with the apps' JS rebuilt. Each side had a freshly reset line fleet. The PR base carries the line commits `ce67d3f62b..6accf87c49`: #13564 (read at its merge step, below) and #13553 (unread, left to the daily read). The line checkouts were put back to their pointers afterwards.
+  - Kept walk `checks/sync/pkp-lib-13603/masthead-off.js` on OJS, OMP and OPS, both sides (`.reports/sync-3_5/pr13603/`, runs `b1` and `h1`). It covers three states: masthead on, unticked, and setting row deleted. **No regression.** With the masthead on, everything reads as at the base. Off or unset at the head: the role window's masthead box is gone, and an edit keeps the role's stored value. The masthead column is gone from "Invite to a role", "Edit user" and the acceptance review, and new non-reviewer roles go out as `masthead: false`.
+  - **Left open** (report `docs/reports/2026-09-29-pkp-lib-13370.md`, update 2026-10-23):
+    - The invitation email keeps a masthead line for every role. Held roles stored "appear" and Reviewer still read "Your name will appear …".
+    - The workflow's "Create New Reviewer" and "Enroll Existing User" forms still show "Appear on the masthead".
+    - The wizard subtitle still says "along with appearing in the journal masthead".
+    - The reviewer-listing setting is not read (code).
+  - Security: nothing.
 - **2026-10-22 (merge step of the pkp/pkp-lib#13565 PR review, VM s0) — pkp-lib `ce67d3f62b..9cb93845fa` (1 and its merge), ojs `cbf80495db..f521b56ec9` (2 of 4), omp `60163fe0a..77e3acd8e` (2), ops `71ad98eb83..18506a5b4d` (2). Baselines advanced for pkp-lib, omp and ops; ojs not (below).**
   - pkp-lib `5b54f59ed7` (pkp/pkp-lib#13564, merged by bozana as `9cb93845fa`) → `stable-only`: the reviewed patch, rebased (`git range-diff f94e556856..e99f3e9c7b ce67d3f62b..5b54f59ed7` reads `=`). Re-walked at the new tips on the 3.5 dataset fleet, OJS and OMP: `checks/U36/H19/h19.js` read and copy, then `checks/sync/pkp-lib-10268/note-on-copy.js`; the copied file's Notes 200 with the form and "Earlier Revision Notes", a note added and deleted, no server error (`.reports/pr13565-merged/`). The pkp-lib#10268 row, the companion row and the report are deleted.
   - ojs `4d17428f9b`, omp `6fcb74573`, ops `666b7b3727` → pointer bumps to `5b54f59ed7`; `f521b56ec9`, `77e3acd8e`, `18506a5b4d` → merges.
