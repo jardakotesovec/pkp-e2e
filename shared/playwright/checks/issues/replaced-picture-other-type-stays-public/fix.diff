@@ -1,0 +1,30 @@
+--- a/lib/pkp/classes/services/PKPContextService.php
++++ b/lib/pkp/classes/services/PKPContextService.php
+@@ -909,6 +909,12 @@
+         $fileName = $this->moveTemporaryFile($context, $temporaryFile, $settingName, $user, $localeKey, $isImage, $extension);
+ 
+         if ($fileName) {
++            // The new file replaces the stored one: remove the stored file unless the new one took its name
++            $storedFileName = $context->getData($settingName, $localeKey)['uploadName'] ?? null;
++            if ($storedFileName && $storedFileName !== $fileName) {
++                (new PublicFileManager())->removeContextFile($context->getId(), $storedFileName);
++            }
++
+             // Get the details for image uploads
+             if ($isImage) {
+                 $publicFileManager = new PublicFileManager();
+--- a/lib/pkp/classes/services/PKPSiteService.php
++++ b/lib/pkp/classes/services/PKPSiteService.php
+@@ -331,6 +331,12 @@
+         $fileName = $this->moveTemporaryFile($site, $temporaryFile, $settingName, $user, $localeKey, $isImage, $extension);
+ 
+         if ($fileName) {
++            // The new file replaces the stored one: remove the stored file unless the new one took its name
++            $storedFileName = $site->getData($settingName, $localeKey)['uploadName'] ?? null;
++            if ($storedFileName && $storedFileName !== $fileName) {
++                (new PublicFileManager())->removeSiteFile($storedFileName);
++            }
++
+             // Get the details for image uploads
+             if ($isImage) {
+                 $publicFileManager = new PublicFileManager();

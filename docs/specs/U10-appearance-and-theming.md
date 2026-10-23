@@ -1278,7 +1278,7 @@ otherwise; the team settles them on spec review.
 | [A17](#a17) | Screen readers hear "&quot;" or "&#039;" in the Sidebar arrows of a block named with a quote or apostrophe | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A18](#a18) | A "Custom" date pattern with "S" prints "17 Oct" on discussion messages and workflow file lists, "17th Oct" elsewhere | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A20](#a20) | A removed journal, press or server thumbnail stays online, or comes back when another language has one | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
-| [A22](#a22) | A logo, thumbnail or homepage image replaced by a picture of another file type stays online at its old address | 🐞 | minor | — |
+| [A22](#a22) | A logo, thumbnail, homepage image or favicon replaced by another file type stays online at its old address | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A23](#a23) | A programming-interface read of a journal's theme, refused while that theme is switched off, shows "{$themePluginPath}" where the theme's name belongs | 🐞 | latent | — |
 | [A24](#a24) | A programming-interface read of the site's theme fails with a server error while "Default Theme" is switched off on the site | 🐞 | latent · crash: server | — |
 | [OJS5](#ojs5) | Unticking every "Journal Content Organization" box says "Saved", but the home page keeps the current issue | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1644,18 +1644,22 @@ style sheet: [A5](#a5).)
 Basis: probe, 2026-10-19. <sup>f-a20</sup>
 
 <a id="a22"></a>
-**A22 — A logo, thumbnail or homepage image replaced by a picture of another file type stays online at its old address** · 🐞 · minor.
-A manager on Settings › Website › Appearance › "Setup" replaces the
-"Logo", the "Journal thumbnail" or the "Homepage Image" with a picture
-of another file type: "Remove", then "Upload File" with a JPEG where a
-PNG was, and "Save": "Saved". The manager expects the old picture to be
-gone. The box shows the new picture, and so does the public pages'
-header for a logo, but the old file stays in the journal's public files and still opens at its old
-address, for anyone, signed in or not. Nothing on screen shows that it
-is still there, and no screen can delete it; as with a removed style
-sheet ([A5](#a5)), it matters when the picture was meant to be
-withdrawn. A replacement of the same file type takes the old file's
-place, so nothing is left behind. Basis: probe, 2026-10-21.
+**A22 — A logo, thumbnail, homepage image or favicon replaced by another file type stays online at its old address** · 🐞 · low.
+A manager replaces the journal's "Logo", "Journal thumbnail" or
+"Homepage Image" (Settings › Website › "Appearance" › "Setup"), or its
+"Favicon" ("Appearance" › "Advanced"), with a picture of another file
+type. They press "Remove" under the PNG there, upload a JPEG (a GIF
+for the favicon) and press "Save", which answers "Saved".
+The upload field shows the new picture, and the public header shows
+the new logo. But the old PNG stays in the journal's public files and
+still opens at its old address, for anyone, signed in or not. The
+site administrator's "Logo" (Administration › Site Settings ›
+"Appearance" › "Setup") behaves the same way.
+Nothing on screen shows that the old picture is still there, and no
+screen can delete it. A new picture of the same file type overwrites
+the old file, so nothing is left behind, and "Remove" with nothing
+uploaded in its place deletes the logo's file.
+Basis: probe, 2026-10-23.
 <sup>f-a22</sup>
 
 <a id="a23"></a>
