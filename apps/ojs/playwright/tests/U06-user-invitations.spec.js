@@ -157,7 +157,9 @@ test.describe('user invitations', () => {
                 await expect(masthead).toHaveValue('');
                 await expect(row.getByRole('combobox')).toHaveCount(2);
                 await row.getByLabel(/^Select a new role/).selectOption({label: 'Reviewer'});
-                await expect(row.getByText('Appear on the masthead', {exact: true})).toBeVisible();
+                // Fixed text that follows "Enable listing of reviewers on the masthead",
+                // unticked on a new journal (pkp/pkp-lib#13370, 2026-10-23).
+                await expect(row.getByText('Does not appear on the masthead', {exact: true})).toBeVisible();
                 await expect(masthead).toHaveCount(0);
                 await expect(row.getByRole('combobox')).toHaveCount(1);
             },

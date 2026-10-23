@@ -488,13 +488,12 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const addModal = await openAddReviewer(page, modal);
 
         // "Create New Reviewer": the account fields appear above the
-        // request form; "Appear on the masthead" is ticked and disabled.
+        // request form; no "Appear on the masthead" box, as reviewers are
+        // not listed on a new press (pkp/pkp-lib#13370, 2026-10-23).
         await addModal.getByText('Create New Reviewer', {exact: true}).click();
         const givenName = addModal.locator('input[name^="givenName"]').first();
         await expect(givenName).toBeVisible({timeout: 20_000});
-        const masthead = addModal.getByRole('checkbox', {name: 'Appear on the masthead'});
-        await expect(masthead).toBeChecked();
-        await expect(masthead).toBeDisabled();
+        await expect(addModal.getByRole('checkbox', {name: 'Appear on the masthead'})).toHaveCount(0);
         // Control: one reviewer group serves the stage, so the create form
         // shows no reviewer role select (the username field beside it is
         // the positive control).
@@ -597,9 +596,9 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const modal = await openEditorial(page, tag, seeded.submissionId);
         let addModal = await openAddReviewer(page, modal);
 
-        // "Enroll Existing User": the form's heading, "Search By Name", the
-        // one-option reviewer role select and the ticked, disabled masthead
-        // box.
+        // "Enroll Existing User": the form's heading, "Search By Name" and the
+        // one-option reviewer role select; no masthead box while reviewers are
+        // not listed (pkp/pkp-lib#13370).
         await addModal.getByText('Enroll Existing User', {exact: true}).click();
         await expect(
             addModal.getByText('Enroll an Existing User as Reviewer')
@@ -609,9 +608,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await expect(roleSelect).toBeVisible();
         await expect(roleSelect.locator('option')).toHaveCount(1);
         await roleSelect.selectOption({label: 'External Reviewer'});
-        const masthead = addModal.getByRole('checkbox', {name: 'Appear on the masthead'});
-        await expect(masthead).toBeChecked();
-        await expect(masthead).toBeDisabled();
+        await expect(addModal.getByRole('checkbox', {name: 'Appear on the masthead'})).toHaveCount(0);
 
         // Submitting with the field empty: "This field is required." above
         // it (A14 retired: the message now belongs to an empty submit).

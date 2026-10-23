@@ -138,8 +138,10 @@ test.describe('User invitations (U6)', () => {
 
         // "Enter details": Given Name Nova; the role row's masthead select
         // starts blank once the offered role is picked. Picking External
-        // Reviewer instead shows "Appear on the masthead" as fixed text with
-        // no select (its positive control: the select just read on Author).
+        // Reviewer instead shows fixed text with no select (its positive
+        // control: the select just read on Author): "Does not appear on the
+        // masthead", as "Enable listing of reviewers on the masthead" is
+        // unticked on a new press (pkp/pkp-lib#13370, 2026-10-23).
         await mgrPage.getByLabel(/Given Name/).first().fill('Nova');
         await expect(wizard.newRoleRows()).toHaveCount(1);
         const roleRow = wizard.newRoleRows().first();
@@ -148,7 +150,7 @@ test.describe('User invitations (U6)', () => {
         await expect(wizard.rowMastheadSelect(roleRow)).toHaveValue('');
         await wizard.rowRoleSelect(roleRow).selectOption({label: 'External Reviewer'});
         await expect(wizard.rowMastheadSelect(roleRow)).toHaveCount(0);
-        await expect(roleRow).toContainText('Appear on the masthead');
+        await expect(roleRow).toContainText('Does not appear on the masthead');
         await wizard.fillRow(roleRow, {role: 'Author'});
         await expect(wizard.rowMastheadSelect(roleRow)).toHaveValue('true');
         await wizard.saveAndContinue();

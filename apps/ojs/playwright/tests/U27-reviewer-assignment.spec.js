@@ -471,8 +471,9 @@ test.describe('reviewer-assignment', () => {
         const modal = await openAddReviewerModal(managerPage);
         await modal.getByRole('link', {name: 'Create New Reviewer'}).click();
 
-        // The account fields appear above the request form; "Appear on the
-        // masthead" is ticked and disabled.
+        // The account fields appear above the request form; no "Appear on
+        // the masthead" box, as reviewers are not listed on a new journal
+        // (pkp/pkp-lib#13370, 2026-10-23).
         const createModal = managerPage
             .getByRole('dialog')
             .filter({has: managerPage.locator('form#createReviewerForm')});
@@ -481,9 +482,7 @@ test.describe('reviewer-assignment', () => {
         await expect(form.locator('#reviewerFormFooter')).toBeVisible();
         // Its file grid lands above "Add Reviewer" after the form: presses wait for it.
         await waitForLegacyFormSettled(managerPage, createModal);
-        const masthead = form.locator('input[name="masthead"]');
-        await expect(masthead).toBeChecked();
-        await expect(masthead).toBeDisabled();
+        await expect(form.locator('input[name="masthead"]')).toHaveCount(0);
 
         // Control: no reviewer role select, one reviewer group serving the
         // stage (the username box above is the same form's positive read).
@@ -613,9 +612,8 @@ test.describe('reviewer-assignment', () => {
         const roleSelect = form.locator('select[name="userGroupId"]');
         await expect(roleSelect).toBeVisible();
         await expect(roleSelect.locator('option')).toHaveCount(1);
-        const masthead = form.locator('input[name="masthead"]');
-        await expect(masthead).toBeChecked();
-        await expect(masthead).toBeDisabled();
+        // No masthead box while reviewers are not listed (pkp/pkp-lib#13370).
+        await expect(form.locator('input[name="masthead"]')).toHaveCount(0);
 
         // An empty field is refused with "This field is required." above it;
         // picking a name clears the message (the press once the footer's

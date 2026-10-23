@@ -60,7 +60,7 @@ user the personal fields show read-only.
 | Role (per row, "Select a new role") | at least one row | Roles the person already holds are not offered. A role already chosen in another row is listed but cannot be picked. From the second row on, a row's fields lose their screen-reader names ⚠ [A8](#a8) <sup>i</sup> |
 | Start Date (per role row) | yes | A date in the past takes effect as "today" at acceptance (Rule 8) ⚠ [A8](#a8) |
 | End Date (per role row) | no | Cannot be entered when inviting. An added role row's END DATE cell shows "---" and holds no input. The column only displays dates on an existing member's current roles (Rule 13) <sup>i</sup> |
-| Journal Masthead (per role row) | yes | The select starts blank ("Appear on the masthead" / "Does not appear on the masthead"). Leaving it empty blocks the step with "This field is required." On a journal or press (a preprint server's role select offers no reviewer role), choosing Reviewer replaces the select with the fixed text "Appear on the masthead", so there is no choice to make ⚠ [A8](#a8) <sup>i</sup> |
+| Journal Masthead (per role row) | yes | The select starts blank ("Appear on the masthead" / "Does not appear on the masthead"). Leaving it empty blocks the step with "This field is required." On a journal or press (a preprint server's role select offers no reviewer role), choosing Reviewer replaces the select with fixed text, so there is no choice to make: "Appear on the masthead" while "Enable listing of reviewers on the masthead" is ticked, "Does not appear on the masthead" otherwise (the default on a new journal or press). With the masthead not based on enrollments the column is gone ⚠ [A8](#a8) <sup>i</sup> |
 | Email subject & body (compose step) | prefilled | Freely editable for this send. On a default install the "Email Templates" › "Find Template" list offers "User Invited to Role Notification" alone, also after typing another email's template name such as "Password", and picking it leaves the subject as it was <sup>g</sup> |
 
 Accept wizard (new invitee):
@@ -350,8 +350,9 @@ addresses and the tooling recipe are in the footnote. <sup>s</sup>
      the offered role (the footnote names it per app), set Start Date to
      today, and choose "Appear on the masthead" in the masthead select,
      which starts blank. (On a journal or press, choosing Reviewer instead
-     shows that text fixed, with nothing to select; a preprint server
-     offers no reviewer role.) Continue to the compose step.
+     shows fixed text with nothing to select, "Does not appear on the
+     masthead" while reviewers are not listed, as on a new journal; a
+     preprint server offers no reviewer role.) Continue to the compose step.
    - **The compose step**: replace the subject with a marker of this run
      (the footnote names it) and press "Invite user to the role": an
      "Invitation Sent" dialog appears.
@@ -1378,9 +1379,14 @@ journal" on OJS, "…in this press" on OMP and "…in this server" on OPS.
 `UserInvitationDetailsFormStep.vue`: role select disables held/selected
 groups; masthead select (`invitation.masthead.show`/`.hidden`) starts with no
 value — inline "This field is required." until picked (claim check
-2026-07-31: OJS and OMP) — and is the fixed text "Appear on
-the masthead" for reviewer groups, with no select rendered (claim check
-2026-07-31; on-screen text only — the public masthead page was not probed);
+2026-07-31: OJS and OMP) — and is fixed text for reviewer groups, with
+no select rendered (claim check 2026-07-31; on-screen text only — the
+public masthead page was not probed). Since pkp/pkp-lib#13370's second
+part (ui-library#1027, merged 2026-10-23) that text follows
+`enableEnrollmentMastheadReviewers`: "Appear on the masthead" when ticked,
+"Does not appear on the masthead" when not (the new-context default), and
+the whole column goes while `enableEnrollmentMasthead` is off (walked on
+OJS, OMP and OPS, `main` and stable-3_5_0, by that PR review);
 an added
 row's END DATE cell renders "---" with no input (claim check 2026-07-31);
 disabled-user warning `userInvitation.user.disable*` (on the search path and,

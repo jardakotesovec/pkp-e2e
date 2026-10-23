@@ -109,7 +109,7 @@ Reviewer window) adds account fields above the shared form:
 | Username | yes | Hint: "The username must contain only lowercase letters, numbers, and hyphens/underscores.". A duplicate is refused with the toast "The selected username is already in use by another user.". "Suggest" fills a lowercase proposal from the given name <sup>e</sup> |
 | Email | yes | Must be a valid address. A duplicate is refused with the toast "The selected email address is already in use by another user." <sup>e</sup> |
 | Reviewer role select | yes | Shown only when more than one reviewer group serves the stage. Otherwise the single group is used silently <sup>e</sup> |
-| "Appear on the masthead" checkbox | — | Shown ticked and disabled. A new reviewer always appears on the masthead list of that group; the box is informational only <sup>e</sup> |
+| "Appear on the masthead" checkbox | — | Shown ticked and disabled only while the masthead is based on enrollments and "Enable listing of reviewers on the masthead" is ticked; absent otherwise, as on a new journal or press (pkp/pkp-lib#13370, 2026-10-23). Informational only <sup>e</sup> |
 
 **Enroll Existing User mode** (link "Enroll Existing User"; the form is
 headed "Enroll an Existing User as Reviewer"):
@@ -118,7 +118,7 @@ headed "Enroll an Existing User as Reviewer"):
 |------------------|-----------|-------|
 | "Search By Name" (user autocomplete) | yes | Searches users already enrolled in the journal who hold no reviewer role of any kind. On a press, membership in either stage's reviewer group excludes the user on both stages. A name that matches no such user, a reviewer's name included, lists a single suggestion, "No Matches", which can be picked like a name. Picked, it fills the box with "No Matches", and "Add Reviewer" then fails ⚠ [A50](#a50). "Add Reviewer" with the box empty is refused on the spot: the generic "This field is required." shows under the box, above its "Search By Name" label. A name typed and left without picking a suggestion is cleared when the box loses focus, so it is refused the same way. Picking a user clears the message and the submit succeeds ([A14](#a14), retired) <sup>e</sup> |
 | Reviewer role select | yes | Always shown. Even a single reviewer group renders as a one-option select, unlike Create New Reviewer, which then hides it <sup>e</sup> |
-| "Appear on the masthead" checkbox | — | Shown ticked and disabled, as in Create New Reviewer <sup>e</sup> |
+| "Appear on the masthead" checkbox | — | As in Create New Reviewer: shown ticked and disabled only while reviewers are listed on the masthead, absent otherwise <sup>e</sup> |
 
 **Closing the enroll form.** With a name typed in "Search By Name" but not
 picked, the window's top "Close" first asks "The data on this form has
@@ -923,7 +923,8 @@ are in the footnote. <sup>s</sup>
    fresh email address.
 
    - **"Create New Reviewer"**: choose it: the account fields appear above
-     the request form, and "Appear on the masthead" is ticked and disabled.
+     the request form, with no "Appear on the masthead" box (reviewers are
+     not listed on a new journal).
      Type "Petra" as the given name and the fresh address in Email, then
      press "Suggest" beside Username: a lowercase username appears.
    - **Duplicates refused**: replace the username with the Journal Manager's
@@ -950,8 +951,7 @@ are in the footnote. <sup>s</sup>
 
    - **"Enroll Existing User"**: choose it: the form is headed "Enroll an
      Existing User as Reviewer" with "Search By Name", a one-option
-     reviewer role select and the ticked, disabled "Appear on the masthead"
-     box. Press "Add Reviewer" with the field empty: "This field is
+     reviewer role select, and no "Appear on the masthead" box. Press "Add Reviewer" with the field empty: "This field is
      required." shows under the box. Type the Author's name and pick them:
      the message clears. Press "Add Reviewer": the row reads "Request Sent".
    - **The users list**: the journal's users list shows the user now also
@@ -2608,8 +2608,11 @@ value: ''}]`, and jQuery UI fills the empty value from the label, so
 (OJS + OMP, plus a two-group OJS scratch journal): the create-mode group
 select is hidden with one reviewer group and shown with two; the enroll
 form is headed "Enroll an Existing User as Reviewer" and always renders the
-group select; the "Appear on the masthead" checkbox is present, ticked and
-disabled in both modes; duplicate username/email refusals surface as toasts
+group select; the "Appear on the masthead" checkbox was present, ticked and
+disabled in both modes (since pkp/pkp-lib#13370's second part, merged
+2026-10-23, it shows only while the masthead is based on enrollments and
+reviewers are listed, both modes; walked on OJS and OMP, `main` and
+stable-3_5_0, by that PR review); duplicate username/email refusals surface as toasts
 (strings quoted in Fields); "Suggest" filled "petra" from given name Petra;
 the enroll autocomplete lists only users already enrolled in the context
 and excludes holders of ANY of its reviewer groups — on an OMP internal
