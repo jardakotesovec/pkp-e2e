@@ -1,0 +1,54 @@
+--- a/lib/pkp/classes/install/Installer.php
++++ b/lib/pkp/classes/install/Installer.php
+@@ -168,6 +168,10 @@
+             $this->currentVersion = $versionDao->getCurrentVersion();
+         }
+ 
++        if (!$this->isPlugin && $this->isUpgrade()) {
++            $this->dropCoreVersionsRecordedByPlugins();
++        }
++
+         if (!isset($this->locale)) {
+             $this->locale = Locale::getLocale();
+         }
+@@ -187,6 +191,40 @@
+     }
+ 
+     /**
++     * Drop core versions that a plugin's installer recorded (pkp/pkp-lib#13608): a plugin descriptor's
++     * version, newer than the code being upgraded, written as the core version within the minute the
++     * plugin's own version was written. The upgrade then resumes from the newest core version left.
++     */
++    protected function dropCoreVersionsRecordedByPlugins(): void
++    {
++        $codeVersion = VersionCheck::getCurrentCodeVersion();
++        if (!$codeVersion || $this->currentVersion->compare($codeVersion) <= 0) {
++            return;
++        }
++        $pluginTimes = DB::table('versions')->where('product_type', 'like', 'plugins.%')->pluck('date_installed')
++            ->map(fn ($date) => strtotime($date));
++        $product = Application::get()->getName();
++        foreach (DB::table('versions')->where('product_type', 'core')->where('product', $product)->get() as $row) {
++            $version = Version::fromString("{$row->major}.{$row->minor}.{$row->revision}.{$row->build}");
++            $installed = strtotime($row->date_installed);
++            if ($version->compare($codeVersion) > 0 && $pluginTimes->contains(fn ($time) => abs($time - $installed) <= 60)) {
++                $this->log(sprintf('drop core version %s recorded by a plugin upgrade', $version->getVersionString(false)));
++                DB::table('versions')->where('product_type', 'core')->where('product', $product)
++                    ->where('major', $row->major)->where('minor', $row->minor)->where('revision', $row->revision)->where('build', $row->build)
++                    ->delete();
++            }
++        }
++        $versionDao = DAORegistry::getDAO('VersionDAO'); /** @var VersionDAO $versionDao */
++        $latest = $versionDao->getVersionHistory()[0] ?? null;
++        if ($latest && $latest->compare($this->currentVersion) != 0) {
++            DB::table('versions')->where('product_type', 'core')->where('product', $product)
++                ->where('major', $latest->getMajor())->where('minor', $latest->getMinor())->where('revision', $latest->getRevision())->where('build', $latest->getBuild())
++                ->update(['current' => 1]);
++            $this->currentVersion = $latest;
++        }
++    }
++
++    /**
+      * Installation.
+      *
+      * @return bool
