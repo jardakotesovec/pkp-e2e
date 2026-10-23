@@ -2764,6 +2764,7 @@ range, as `rvaca`, gave `galleyViews` 1, `pdfViews` 1, `htmlViews` 0,
 `otherViews` 0. The PDF download counted under "File Views" and "PDF"
 in every run. No request failed. The article page's "Downloads" chart
 reads the same file records with no format filter: fn-x.
+Issue report: [pkp-e2e#1069](https://github.com/jardakotesovec/pkp-e2e/issues/1069) ([docs/issues/U64-A17-word-downloads-missing-from-article-statistics.md](../issues/U64-A17-word-downloads-missing-from-article-statistics.md)).
 
 <a id="fn-f-a18"></a>
 **f-a18** — Code read 2026-10-23, `main` and `stable-3_5_0`:

@@ -4202,6 +4202,7 @@ review this submission and sent an email notification." and a "Request
 Sent" row, kept after a reload). OPS has no review stage (no "Reviewers"
 panel, no "Add Reviewer" on a preprint). Kept script
 `shared/playwright/checks/U27/I23A/i23a.js`.
+Issue report: [pkp-e2e#1068](https://github.com/jardakotesovec/pkp-e2e/issues/1068) ([docs/issues/U27-A50-enroll-reviewer-no-matches-hangs.md](../issues/U27-A50-enroll-reviewer-no-matches-hangs.md)).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
