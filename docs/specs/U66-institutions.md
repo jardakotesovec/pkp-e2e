@@ -581,7 +581,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | A press or preprint server that holds an institution cannot be removed and is left half deleted | 🐞 | medium · crash: server | issues (claude), 2026-09-30 — re-verified |
 | [A9](#a9) | A long "IP ranges" line makes an institution's "Save" fail, adding duplicates or wiping its ranges | 🐞 | medium · crash: server | issues (claude), 2026-09-30 — re-verified |
 | [A12](#a12) | Through the programming interface, an institution's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [A13](#a13) | Asking the programming interface for an institution the journal does not hold answers as a success, with an error text | 🐞 | latent | — |
+| [A13](#a13) | REST API: asking a journal for an institution it does not hold answers "200 OK" with an error text | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A4](#a4) | Deleting an institution deletes the usage figures credited to it | ❓ | latent | — |
 | [A5](#a5) | The "ROR" box asks for an ID and refuses one | ❓ | minor | — |
 | [A6](#a6) | On a journal, a Site Administrator with no manager role is shown the page under an "Error" window and refused every change | ❓ | minor | — |
@@ -747,19 +747,18 @@ Journal Manager and the Site Administrator. The same fault as
 Since: 2021-06-03 · Basis: probe, 2026-10-15. <sup>f-a12</sup>
 
 <a id="a13"></a>
-**A13 — Asking the programming interface for an institution the journal does not hold answers as a success, with an error text** · 🐞 · latent.
-A program that asks the journal's programming interface, as the Journal
-Manager or the Site Administrator, for one institution by a number that
-no institution on the install has (another journal's institution was not
-tried) expects a "not found"
-answer, as the same interface gives when such an institution is edited
-or deleted. Instead the answer reports success and carries only the text
-"The institution you requested was not found.", so a program that trusts
-the answer's status takes that text for an institution. No screen asks
-for one institution on its own (Rule 8b). In 3.4 the same request
-answered "not found" (read from the code), so this is a regression of
-the 2023 rework of the interface, not a choice.
-Since: 2023-10-13, a date read from the code's history · Basis: probe, 2026-10-15. <sup>f-a13</sup>
+**A13 — REST API: asking a journal for an institution it does not hold answers "200 OK" with an error text** · 🐞 · low.
+A program asks the journal's REST API, as the Journal Manager or the
+Site Administrator, for one institution by a number no institution has.
+The API answers "200 OK" with a JSON body holding only an `error`
+property, "The institution you requested was not found.". A `PUT` or
+`DELETE` of the same unknown number answers "404 Not Found".
+The read of one ROR record (the registry entries behind the affiliation
+fields) answers an unknown number the same way. Authors may call it as
+well as editors.
+The fix is small: the two read handlers return 404, as edit and delete
+already do.
+Since: 2023-10-13, a date read from the code's history · Basis: probe, 2026-10-23. <sup>f-a13</sup>
 
 ---
 

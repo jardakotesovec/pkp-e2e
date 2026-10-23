@@ -1,0 +1,22 @@
+--- a/lib/pkp/api/v1/institutions/PKPInstitutionController.php
++++ b/lib/pkp/api/v1/institutions/PKPInstitutionController.php
+@@ -114,7 +114,7 @@
+         if (!Repo::institution()->exists((int) $illuminateRequest->route('institutionId'), $this->getRequest()->getContext()->getId())) {
+             return response()->json([
+                 'error' => __('api.institutions.404.institutionNotFound')
+-            ], Response::HTTP_OK);
++            ], Response::HTTP_NOT_FOUND);
+         }
+ 
+         $institution = Repo::institution()->get((int) $illuminateRequest->route('institutionId'));
+--- a/lib/pkp/api/v1/rors/PKPRorController.php
++++ b/lib/pkp/api/v1/rors/PKPRorController.php
+@@ -133,7 +133,7 @@
+         if (!Repo::ror()->exists((int) $illuminateRequest->route('rorId'))) {
+             return response()->json([
+                 'error' => __('api.rors.404.rorNotFound')
+-            ], Response::HTTP_OK);
++            ], Response::HTTP_NOT_FOUND);
+         }
+ 
+         $ror = Repo::ror()->get((int) $illuminateRequest->route('rorId'));
