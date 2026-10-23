@@ -12,7 +12,7 @@
  *   pair  chapter4.pdf and epilogue.pdf in the same second (the failed CI runs' shape)
  *   all   all six files in the same second
  * Reads fixed when every case's `first` is epilogue.pdf and `order` is by submission_file_id
- * descending (fix-<line>.diff). Run from the app root:
+ * descending (pkp-lib 800863b5dc on main, 0f3c36bc2f on stable-3_5_0). Run from the app root:
  *   PKP_CONFIG_FILE=$PWD/config.test.ds<n>.inc.php php <this file>
  */
 define('INDEX_FILE_LOCATION', getcwd() . '/index.php');

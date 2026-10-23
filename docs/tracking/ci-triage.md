@@ -1538,20 +1538,23 @@ trips.
   dataset: Callan's six files exactly one second apart, 25 same-second
   groups in the dump), so two files sometimes share a second and the
   database picks their order; the failure screenshots show `chapter4.pdf`
-  and `chapter2.pdf` assigned instead. Fix drafted (a `submission_file_id`
-  tiebreaker, newest first): `shared/playwright/checks/sync/omp-proof-file-order/`
-  (`fix-main.diff`, `fix-stable-3_5_0.diff`, the commits as
-  `0001-main.patch`, `0001-stable-3_5_0.patch`; the bot's token cannot
-  push to the `jardakotesovec/pkp-lib` fork, 403). `order.php` (the
+  and `chapter2.pdf` assigned instead. **Fixed upstream 2026-10-23** by
+  @asmecher: pkp-lib `800863b5dc` (`main`) and `0f3c36bc2f`
+  (`stable-3_5_0`), "Make sort order for submission files stable", a
+  `submission_file_id` tiebreaker, newest first; OJS and OMP point at them
+  on both lines (omp `186107aafe`, `8cc73c71a5`), OPS left to take it with
+  its next pointer update. Kept check
+  `shared/playwright/checks/sync/omp-proof-file-order/order.php` (the
   Collector's order with chapter4/epilogue or all six files tied, in a
-  rolled-back transaction, default dataset, PostgreSQL) reads `chapter4.pdf`
-  and `chapter3.pdf` first at the base on both lines and `epilogue.pdf`
-  with the fix. OMP's Cypress specs themselves not run with the fix. The
-  same runs' other reds are infrastructure: `pkp.sfu.ca/omp/xml/omp-version.xml`
+  rolled-back transaction, default dataset, PostgreSQL): `chapter4.pdf`
+  and `chapter3.pdf` first before the fix on both lines, `epilogue.pdf`
+  first at the merged tips on both lines. OMP's Cypress specs not run here.
+  The same runs' other reds are infrastructure: `pkp.sfu.ca/omp/xml/omp-version.xml`
   503 in the upgrade step (39604355752), nodejs.org's version index reset
   (39480881665), `setup-mariadb` (39810024130), Cypress's 120 s page load
-  (2026-10-09, 10-14). **Watch condition**: the patch merged upstream; then
-  a sighting of either signature is a new cause.
+  (2026-10-09, 10-14). **Watch condition**: pkp/omp's first runs at the
+  fix (`omp-stable-3_5_0` 40031724936, `omp-main` 40031753818, queued at
+  22:09 UTC); a sighting of either signature from then on is a new cause.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
