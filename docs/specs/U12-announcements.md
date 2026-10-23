@@ -2312,6 +2312,7 @@ in …/lib/pkp/api/v1/announcements/PKPAnnouncementController.php`; the
 screen's own "Add Announcement" beside it logged nothing; the
 announcement's page, signed out and as `rvaca`, showed its title, date
 and text and logged nothing.
+Issue report: [pkp-e2e#1070](https://github.com/jardakotesovec/pkp-e2e/issues/1070) ([docs/issues/U12-A20-api-announcement-add-logs-warning.md](../issues/U12-A20-api-announcement-add-logs-warning.md)).
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls
