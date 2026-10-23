@@ -3066,6 +3066,7 @@ used by the lookup's first step and by a lookup-off "Add" (note h), has
 the path class `[-a-zA-Z0-9@:%_\+.~\#?&//=]`, which holds no apostrophe,
 so the stored web address ends there; 3.5 picks no identifiers out of a
 reference. Live-probed 2026-10-21: note q26.
+Issue report: [pkp-e2e#1065](https://github.com/jardakotesovec/pkp-e2e/issues/1065) ([docs/issues/U42-A29-reference-url-cut-at-apostrophe.md](../issues/U42-A29-reference-url-cut-at-apostrophe.md)).
 
 <a id="fn-f-a30"></a>
 **f-a30 — A30 evidence.** `Citation::getRawCitationWithLinks()`'s
