@@ -1279,8 +1279,8 @@ otherwise; the team settles them on spec review.
 | [A18](#a18) | A "Custom" date pattern with "S" prints "17 Oct" on discussion messages and workflow file lists, "17th Oct" elsewhere | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A20](#a20) | A removed journal, press or server thumbnail stays online, or comes back when another language has one | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
 | [A22](#a22) | A logo, thumbnail, homepage image or favicon replaced by another file type stays online at its old address | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
-| [A23](#a23) | A programming-interface read of a journal's theme, refused while that theme is switched off, shows "{$themePluginPath}" where the theme's name belongs | 🐞 | latent | — |
-| [A24](#a24) | A programming-interface read of the site's theme fails with a server error while "Default Theme" is switched off on the site | 🐞 | latent · crash: server | — |
+| [A23](#a23) | A program reading a journal's, press's or server's switched-off theme gets "{$themePluginPath}" for its name | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
+| [A24](#a24) | A program reading the site's theme gets a server error while "Default Theme" is switched off on the site | 🐞 | low · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [OJS5](#ojs5) | Unticking every "Journal Content Organization" box says "Saved", but the home page keeps the current issue | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OJS6](#ojs6) | On a journal's home page, each "Latest Publications" title is a heading at the section's own level | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP2](#omp2) | A press's category page shows only its first page of books, with no way to the rest | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1663,27 +1663,35 @@ Basis: probe, 2026-10-23.
 <sup>f-a22</sup>
 
 <a id="a23"></a>
-**A23 — A programming-interface read of a journal's theme, refused while that theme is switched off, shows "{$themePluginPath}" where the theme's name belongs** · 🐞 · latent.
-While the theme a journal uses is unticked or deleted on the Plugins
-list (Rule 4a), a read of the journal's theme and its fields through
-the programming interface (`GET …/api/v1/contexts/{id}/theme`) is
-refused with "The active theme, {$themePluginPath}, is not
-enabled and may not be installed.". The message is meant to name the
-theme; it shows its placeholder instead, for a Journal Manager and for
-the Site Administrator alike. This is the English text, so it is not a
-missing translation. No screen sends this read. Basis: probe,
-2026-10-23. <sup>f-a23</sup>
+**A23 — A program reading a journal's, press's or server's switched-off theme gets "{$themePluginPath}" for its name** · 🐞 · low.
+A journal, press or preprint server can keep a theme as its own while
+that theme plugin is switched off (unticked under Settings › Website ›
+"Plugins") or deleted from the installation. A program that then reads
+the context's theme settings through the REST API is refused, as it
+should be, with "The active theme, {$themePluginPath},
+is not enabled and may not be installed.". The message is meant to name
+the theme; the theme's name is never passed to it, so the placeholder
+shows instead.
+Saving the theme settings never gives this message: the save is a
+different request, which in this state fails in its own way (a separate
+fault, not covered here).
+Basis: probe, 2026-10-23. <sup>f-a23</sup>
 
 <a id="a24"></a>
-**A24 — A programming-interface read of the site's theme fails with a server error while "Default Theme" is switched off on the site** · 🐞 · latent · crash: server.
-On an installation with more than one journal, the Site Administrator
-unticks "Default Theme" on the site's own Plugins list (Administration ›
-Site Settings › "Plugins"), the theme the site uses. A read of the
-site's theme and its fields through the programming interface
-(`GET …/index/api/v1/site/theme`) then fails with a server error instead of
-being refused, as the same read for a journal is ([A23](#a23)). The
-site's theme stays "Default Theme": once it is ticked again, the read
-answers with it and its fields. No screen sends the read.
+**A24 — A program reading the site's theme gets a server error while "Default Theme" is switched off on the site** · 🐞 · low · crash: server.
+On an installation with more than one journal (press, server), the
+Site Administrator unticks "Default Theme", the theme the site itself
+uses, under Administration › "Site Settings" › "Plugins". A program
+that then reads the site's theme settings through the REST API gets a
+server error instead of a refusal saying the theme is not enabled, which
+is what the same read for a journal answers.
+Up to 3.4 the site's read answered with that refusal. The step that
+returns it was lost when the API moved to the new router
+(`pkp/pkp-lib#9176` for `pkp/pkp-lib#7698`).
+Only the theme the site uses matters: on PKP's default installation
+that is "Default Theme". Saving the site's theme in the same state
+fails too, a separate fault not covered here. The site's home page
+still opens.
 Basis: probe, 2026-10-23. <sup>f-a24</sup>
 
 <a id="a25"></a>

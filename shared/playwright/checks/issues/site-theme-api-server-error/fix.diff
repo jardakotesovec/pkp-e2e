@@ -1,0 +1,11 @@
+--- a/lib/pkp/api/v1/site/PKPSiteController.php
++++ b/lib/pkp/api/v1/site/PKPSiteController.php
+@@ -130,7 +130,7 @@
+         }
+ 
+         if (!$activeTheme) {
+-            response()->json([
++            return response()->json([
+                 'error' => __('api.themes.404.themeUnavailable'),
+             ], Response::HTTP_NOT_FOUND);
+         }
