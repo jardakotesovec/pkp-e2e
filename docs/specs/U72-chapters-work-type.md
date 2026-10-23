@@ -2043,6 +2043,7 @@ none;"`; which of these calls hides it, and why not after the empty
 chapter's own drag, was not traced line by line. A code path other than
 A12's (no repositioning on a drop). Live-probed 2026-10-21 on OMP
 `main` and 3.5, two runs each, on both lists: note td21.
+Issue report: [pkp-e2e#1059](https://github.com/jardakotesovec/pkp-e2e/issues/1059) ([docs/issues/U72-A14-cancel-ordering-hides-no-items-line.md](../issues/U72-A14-cancel-ordering-hides-no-items-line.md)).
 
 ## Reference — entry points & surfaces
 
