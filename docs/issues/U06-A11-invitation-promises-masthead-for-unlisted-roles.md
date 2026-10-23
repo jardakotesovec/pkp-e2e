@@ -174,10 +174,11 @@ choice. The wizard sets a reviewer row to "Appear" with no select
 (`UserInvitationUserGroupsTable.vue`, "Auto-set masthead for reviewers
 since they are always displayed"); the server rule above does not make
 that exception. So the reviewer sentence ("… as a Reviewer.") is true
-or false regardless of the condition below. It belongs to the open
+or false regardless of the condition below. It belonged to the
 report on `pkp/pkp-lib#13370`
-([report](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/reports/2026-09-29-pkp-lib-13370.md)),
-which covers reviewer listing switched off, and to `pkp/pkp-lib#12628`
+([report](https://github.com/jardakotesovec/pkp-e2e/blob/45cd1a32ef61b9d29665cef315a41a7ac5245098/docs/reports/2026-09-29-pkp-lib-13370.md),
+retired 2026-10-23 when that issue's second part made the reviewer
+sentence follow reviewer listing), and to `pkp/pkp-lib#12628`
 (open), which covers the Reviewer role's box doing nothing.
 
 Reach:

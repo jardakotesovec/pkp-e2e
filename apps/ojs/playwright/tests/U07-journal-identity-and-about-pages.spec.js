@@ -23,8 +23,6 @@
  * - A9 🐞: S6 never follows a link of the default "For Readers" text.
  * - A10 ❓: S9 cancels no review.
  * - A11 🐞: no test edits a journal on Administration › Hosted Journals.
- * - A13 🐞: no test invites to a role or changes a masthead choice while
- *   the masthead is not based on enrollments.
  * - OMP1, OMP2, OPS1, OPS2, OPS3: other apps' territory.
  *
  * Seeding: scenario endpoints only. S1 and S2 read the seeded journal

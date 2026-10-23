@@ -518,11 +518,13 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
    changed later on the user's "Edit" page; *User invitations*). "Appear":
    listed (Rule 14b) while the masthead is based on enrollments (Rule
    14f). "Does not appear": left off the masthead and the history page.
-   While the masthead is not based on enrollments and lists nobody, the
-   invitation still offers the choice, and its email and the email a
-   change on the "Edit" page sends still promise the listing; in the
-   invitation a Reviewer role is fixed to "Appear on the masthead" and
-   promised a listing while the journal lists no reviewers ⚠ [A13](#a13). On a press or preprint server a change made on the
+   While the masthead is not based on enrollments, the invitation, the
+   invitee's review step and the user's "Edit" page show no masthead
+   column, the invitation email says nothing about the masthead, and a
+   new role is sent as "Does not appear". A Reviewer row reads "Appear on
+   the masthead" only while "Enable listing of reviewers on the masthead"
+   is ticked, otherwise "Does not appear on the masthead", and its email
+   line follows the same setting. On a press or preprint server a change made on the
    "Edit" page is saved behind an error window, which
    [User invitations](U06-user-invitations.md#omp1) records. <sup>e</sup>
 4. **The "Editorial Masthead" tab** (Settings › Website › "Appearance" ›
@@ -1048,6 +1050,7 @@ Left out of the scenarios above, by reason:
   - a new journal's and press's "Information For Readers" "Privacy Statement" link opening the "Privacy Statement" page {OJS OMP} (A9; the guard its issue report names)
   - the site-level "About Open Monograph Press" page of a site with two presses opening "This site uses" {OMP} (OMP2; Rule 20; the guard its issue report names)
   - the masthead not based on enrollments, "Present a masthead based on user enrollments" unticked: the masthead showing under its heading only the "Editorial History" text (and a manager's "Edit" link), or nothing with that text empty, the "Editorial History" address opening the masthead, the other two groups leaving the tab, and, ticked again, both pages listing as before in the saved role order (Rule 14f; Rules 16, 21; Settings bullet 4a)
+  - the masthead not based on enrollments: "Invite to a role", the user's "Edit" page and the invitee's review step without a masthead column, the invitation email without a masthead line, and the new role stored as "Does not appear"; a Reviewer row and its email reading "Does not appear" while reviewers are not listed, "Appear" once they are {OJS OMP} (Settings bullet 3; A13 retired)
   - "Enable listing of reviewers on the masthead" at its default: no "Peer Reviewers in Previous Year" although reviews were completed last year {OJS OMP} (Rule 15; Settings bullet 4c)
   - a disabled member staying listed on both pages and under "Peer Reviewers in Previous Year" (Rule 14e; A4 retired)
   - "Remove User" moving the member to "Editorial History" at the next load, and a member with a later start date listed from that date on (Rule 14e; A5 retired)
@@ -1073,7 +1076,6 @@ Left out of the scenarios above, by reason:
   - A9 (the default "For Readers" text's "Privacy Statement" link opening the "Submissions" page; Fields)
   - A10 (a reviewer whose submitted review was cancelled still listed under "Peer Reviewers in Previous Year"; Rule 15)
   - A11 (Hosted Journals "Edit" refused on a journal whose "Country" was never set; Settings bullet 8)
-  - A13 (the invitation and the role-change email promising a masthead listing the journal does not show; Settings bullet 3)
   - A14 (the page about the software in Russian on a press, Czech on a preprint server, and Hindi and Uzbek on a journal, showing the version's placeholder; Rule 20)
   - OMP1 (Settings › Press headed "Setup"; Rule 1; scenario 2 marks it)
   - OPS2 ("Sponsoring organization" used nowhere; Fields; Rule 10)
@@ -1108,7 +1110,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Reloading or bookmarking a Settings or Site Settings side tab opens the page's first tab | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | The default "For Readers" text's "Privacy Statement" link opens the Submissions page, not the Privacy Statement page {OJS OMP} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | Hosted Journals "Edit" refuses to save a journal whose "Country" was never set | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A13](#a13) | With the masthead not based on enrollments, invitations and masthead changes still promise "Your name will appear in the {journal}'s masthead"; reviewers are promised it while the journal lists none | 🐞 | minor | — |
 | [A14](#a14) | In six languages the page about the software shows a raw "{$…Version}" placeholder or a dead contact link | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OMP2](#omp2) | On a site hosting several presses, the site's "About Open Monograph Press" page says "This press uses" {OMP} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS3](#ops3) | A preprint server's French "Privacy Statement" default is the raw text "##default.contextSettings.privacyStatement##" {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
@@ -1121,6 +1122,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP1](#omp1) | The press's Settings › Press page is headed "Setup", not "Press Settings" {OMP} | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server's "Sponsoring organization" is saved and used nowhere {OPS} | ❓ | latent | — |
 | [OPS1](#ops1) | A preprint server has no "Information" tab, Information pages or Information block {OPS} | ✅ | minor | — |
+| [A13](#a13) | Retired: with the masthead not based on enrollments, invitations and masthead changes promised "Your name will appear in the {journal}'s masthead", and reviewers were promised a listing the journal did not show; the invitation screens and email now follow both settings | ✅ | retired | upstream change + walk (claude), 2026-10-23 |
 | [A12](#a12) | Retired: in French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes {OMP OPS} | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [A4](#a4) | Retired: a disabled member made "Editorial Masthead" and "Editorial History" fail with a server error; the member now stays listed and both pages open (Rule 14e) | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream |
 | [A5](#a5) | Retired: "Remove User" reached "Editorial History" only after an unrelated change, and a later start date was not known to list; both now show at the next load (Rule 14e) | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream, settled |
@@ -1243,24 +1245,6 @@ publicly on the site", until a country is picked. "Create Journal"
 refuses an empty "Country" the same way. *Hosted journals* owns the
 form ([A1](U59-hosted-journals.md#a1)). Basis: probe, 2026-10-02. <sup>f-a11</sup>
 
-<a id="a13"></a>
-**A13 — Invitations and masthead changes promise a listing the masthead does not give** · 🐞 · minor.
-With "Present a masthead based on user enrollments" unticked (Settings
-bullet 4a; every upgraded journal until a manager ticks it), "Editorial
-Masthead" lists nobody (Rule 14f), yet "Invite to a role" (Settings ›
-Users & Roles) still offers
-"Appear on the masthead", its email still says "Your name will appear in
-the {journal}'s masthead as a Section editor.", and a masthead change on
-a user's "Edit" page still mails "New setting: Appear on the masthead".
-With "Enable listing of reviewers on the masthead" unticked, as on every
-new journal and press {OJS OMP}, the invitation fixes a Reviewer role to
-"Appear on the masthead" and its email says "… as a Reviewer." while no reviewers
-are listed. The invitations work; only the promise is false, and
-reviewers are promised the very listing that was made optional to
-protect them. The older promise for roles the masthead never lists:
-[User invitations A11](U06-user-invitations.md#a11).
-Since: 2026-09-28 · Basis: probe + code reading. <sup>f-a13</sup>
-
 <a id="a14"></a>
 **A14 — In six languages the page about the software shows a raw "{$…Version}" placeholder or a dead contact link** · 🐞 · low.
 A visitor who opens the page about the software (the PKP logo in the
@@ -1352,6 +1336,9 @@ Basis: probe, 2026-10-01.
 <sup>f-ops4</sup>
 
 ### Retired
+
+<a id="a13"></a>
+**A13 — Invitations and masthead changes promise a listing the masthead does not give** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13370's second part: pkp-lib#13603, ui-library#1027, ojs#5979, omp#2524, ops#1460), merged 2026-10-23 on stable-3_5_0 and `main`. <sup>f-a13</sup>
 
 <a id="a4"></a>
 **A4 — Disabling a listed member breaks the masthead** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13387, 2026-09-24), verified 2026-09-29 on OJS, OMP and OPS: a disabled member stays listed on "Editorial Masthead", "Editorial History" and "Peer Reviewers in Previous Year", and both pages open for every visitor (Rule 14e). <sup>f-a4</sup>
@@ -2567,6 +2554,29 @@ reviewer role. Kept check
 Written up for the team in `docs/reports/2026-09-29-pkp-lib-13370.md` (a
 temporary report, deleted once acted on; git history keeps it); issue
 pkp/pkp-lib#13370.
+Retired 2026-10-23: fixed by pkp/pkp-lib#13603 and pkp/ui-library#1027
+with ojs#5979, omp#2524 and ops#1460 (merged on stable-3_5_0 as pkp-lib
+`9a0212faff` and ui-library `a12b752338`; on `main` as pkp-lib
+`49b94b3193`..`b90815748c` and ui-library `e3b822c2`, `1f9fb95e`). Their
+PR review walked eight rounds on the 3.5 line and a port to `main`. The
+kept walk ran again on both lines' merged tips (`main`: ojs `0686a5d520`,
+omp `2c31d88a7`, ops `6e100abcfc`; 3.5: ojs `c86112d31a`, omp
+`c1084b647`, ops `bd726f9b7a`) on OJS, OMP and OPS, one scratch context
+per app. With the enrollment box unticked, or its setting row deleted:
+- "Consider role in masthead list" is gone from the role window, and a
+  save keeps the role's stored value;
+- "Invite to a role", the user's "Edit" page and the invitee's review
+  step have no masthead column;
+- the invitation email has no masthead line, for new and held roles;
+- a new role is sent as "Does not appear";
+- the reviewer forms have no masthead line.
+With the box ticked and reviewer listing off, a Reviewer row reads "Does
+not appear on the masthead" and its email has no line. With listing on,
+both read "Appear" / "will appear", as does an editor invited to
+"Appear". The wizard's subtitle reads "You are inviting a user to take a
+role in OJS" (OMP, OPS likewise). The PR review's walk
+(`checks/sync/pkp-lib-13603/masthead-off.js`) and the kept check above
+were deleted with the report.
 
 <a id="fn-f-a14"></a>
 **f-a14** — Live-probed 2026-10-13 (Rule 20; OJS and OMP `main`, two

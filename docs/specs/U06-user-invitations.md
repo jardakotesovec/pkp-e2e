@@ -983,8 +983,12 @@ This happens on a default install, where the masthead lists only the editor
 roles and "Editorial Board Member" (on a preprint server, "Moderator" and
 "Editorial Board Member"). If the journal later ticks "Consider role in
 masthead list" for such a role, the people stored as "Appear" are listed,
-and the sentence becomes true. Reviewer rows are a separate case.
-Basis: probe, issue report walk, 2026-10-02. <sup>[f-a11](#fn-a11)</sup>
+and the sentence becomes true. Reviewer rows are a separate case. With the
+masthead not based on enrollments, the email has no masthead line at all
+(pkp/pkp-lib#13370, 2026-10-23), so this needs the masthead on, as on a
+default install.
+Basis: probe, issue report walk, 2026-10-02; walk re-run 2026-10-23 at the merged tips of `main` and stable-3_5_0, still shown. <sup>[f-a11](#fn-a11)</sup>
+Report: refresh owed — pkp/pkp-lib#13370's second part (pkp-lib#13603 / `main` `49b94b3193`..`b90815748c`, ui-library#1027, merged 2026-10-23) wrapped `UserRoleAssignmentInvitationNotify::getUserUserGroupSection()`'s sentence in `enableEnrollmentMasthead` and, for Reviewer, `enableEnrollmentMastheadReviewers`; it removed the masthead column from `UserInvitationUserGroupsTable.vue` and `AcceptInvitationUserRoles.vue` while the masthead is off, and made a Reviewer row follow reviewer listing. The report's Cause snippet, its proposed diff and `fix.diff` (context moved; re-try), its "Reviewers are out of scope" paragraph, the Reach bullets on the column and on #13370, and "What goes with it"'s #13370 bullet need rewriting. The walk still shows the defect with the masthead on (2026-10-23).
 
 <a id="a12"></a>
 **A12 — The "Invite to a role" address with a wrong last word shows an empty page instead of "404 Not Found"** · 🐞 · low · crash: server.
