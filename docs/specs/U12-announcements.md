@@ -981,7 +981,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | On a French press or preprint server, the new-announcement email's last sentence arrives in English {OMP OPS} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A15](#a15) | A journal's Atom and RSS 1.0 announcement feeds write every date with "%" signs ("%2026-%10-%03UTC%UTC%275") {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A19](#a19) | Through the programming interface, an announcement's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [A20](#a20) | An announcement added by program without the email choice leaves a warning in the server's error log | 🐞 | latent | — |
+| [A20](#a20) | REST API: an announcement added without the email choice writes a warning to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [OMP2](#omp2) | A press's home page shows the site's announcements, with links that lead nowhere {OMP} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | An announcement's type is printed nowhere a reader looks | ❓ | minor | — |
 | [A6](#a6) | A chosen "Announcement Type" cannot be cleared, only changed | ❓ | minor | — |
@@ -1246,14 +1246,16 @@ address fails as well.
 Since: 2021-06-03 · Basis: probe, 2026-10-15. <sup>f-a19</sup>
 
 <a id="a20"></a>
-**A20 — An announcement added by program without the email choice leaves a warning in the server's error log** · 🐞 · latent.
-The apps' own "Add Announcement" always says whether to send the email,
-so no user of the screens meets this. A program that adds a journal's
-announcement through the programming interface (Rule 19) and leaves
-that choice out expects "no email": the announcement is saved and
-nobody is emailed, as expected, but each such add leaves a warning in
-the server's error log (Side effects). Nothing is lost; the log gains
-noise an administrator has to sort from real faults.
+**A20 — REST API: an announcement added without the email choice writes a warning to the server's error log** · 🐞 · low.
+A program that adds an announcement through the REST API without
+`sendEmail` gets what it asked for: the announcement is saved and
+nobody is emailed. But each such add writes
+`PHP Warning:  Undefined array key "sendEmail"` to the server's PHP
+error log.
+This holds for a journal's, a press's and a preprint server's
+announcements, and, by the code, for the site's announcements too. The
+apps' own "Add Announcement" form always sends `sendEmail`, so only
+programs meet it. The fix is a one-line default.
 Basis: probe, 2026-10-23. <sup>f-a20</sup>
 
 ### OMP

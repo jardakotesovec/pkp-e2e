@@ -1,0 +1,11 @@
+--- a/lib/pkp/api/v1/announcements/PKPAnnouncementController.php
++++ b/lib/pkp/api/v1/announcements/PKPAnnouncementController.php
+@@ -223,7 +223,7 @@
+             ], Response::HTTP_BAD_REQUEST);
+         }
+ 
+-        $sendEmail = (bool) filter_var($params['sendEmail'], FILTER_VALIDATE_BOOLEAN);
++        $sendEmail = (bool) filter_var($params['sendEmail'] ?? false, FILTER_VALIDATE_BOOLEAN);
+ 
+         if ($context) {
+             $this->notifyUsers($request, $context, $announcement->id, $sendEmail);
