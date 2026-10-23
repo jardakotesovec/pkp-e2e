@@ -177,8 +177,10 @@ discards the changes. <sup>g</sup>
    dialog: "Are you sure you want to permanently delete the announcement
    {title}?" with "Yes" and "No". "Yes" removes the row and the
    announcement's pages; its image file stays in the journal's public
-   files ⚠ [A12](#a12). "No" closes the dialog and keeps everything.
-   <sup>c</sup> <sup>j</sup>
+   files, and every delete, with a picture or without, leaves a warning
+   in the server's error log (Side effects) ⚠ [A12](#a12). "No"
+   closes the dialog and keeps everything.
+   <sup>c</sup> <sup>j</sup> <sup>f-a12</sup>
 8. **Expiry.** An announcement with an "Expiry Date" is public until the
    day before that date: from the first moment of the expiry date it is
    gone from the Announcements page, the home page and the feed, and its
@@ -327,7 +329,12 @@ discards the changes. <sup>g</sup>
     the site instead of the journal, and the site refuses it; the
     journal's own address for the same announcement gives it ⚠
     [A19](#a19). The panel never reads one announcement on its own, so no
-    screen meets this. <sup>f-a19</sup>
+    screen meets this. The panel's add always says whether to send the
+    email; an add by program without that choice saves the announcement
+    as if "Send an email about this to all registered users." were
+    unticked, and leaves a warning in the server's error log (Side
+    effects) ⚠ [A20](#a20). <sup>f-a19</sup>
+    <sup>f-a20</sup>
 
 ## Side effects
 
@@ -361,9 +368,14 @@ discards the changes. <sup>g</sup>
   type (Rule 13) ⚠ [A1](#a1). <sup>l</sup>
 - **Deleting a journal** deletes its announcements, their images and its
   types with it (*Hosted journals* owns the deletion). <sup>a</sup>
-- Nothing is written to any log (no screen shows one); no task is raised:
-  after the jobs have run, the manager's Tasks panel reads "No Items".
-  <sup>f</sup>
+- No history entry is kept of an add, edit or delete, so no screen
+  shows one. Only the server's error log (the install's PHP error log,
+  the file the web server writes; no screen shows it) gains a warning
+  line each time: `Attempt to read property "image" on null` on a
+  delete ([A12](#a12); Rule 7), `Undefined array key "sendEmail"` on an
+  add by program without the email choice ([A20](#a20); Rule 19). No
+  task is raised: after the jobs have run, the manager's Tasks panel
+  reads "No Items". <sup>f</sup>
 
 ## Settings that modify behavior
 
@@ -889,8 +901,8 @@ Left out of the scenarios above, by reason:
   - the two queued jobs behind the notification and the email (Side
     effects): no screen shows the jobs; scenario 4 reads what it
     delivers
-  - nothing written to any log (Side effects): no screen shows one;
-    scenario 4 reads the Tasks panel
+  - no history entry for an add, edit or delete (Side effects): no
+    screen shows one; scenario 4 reads the Tasks panel
 - **Register carries it**:
   - A8 (the Announcements page reached by address, accepting
     announcements and sending the email while "Enable announcements" is
@@ -900,7 +912,8 @@ Left out of the scenarios above, by reason:
   - A13 (an edited type's old name shown until a reload; Rule 13;
     scenario 3 marks it)
   - A12 (the image file left in the public files after a delete, a
-    refused edit or a replacement of another type; Rules 7, 15)
+    refused edit or a replacement of another type, and every delete's
+    warning in the server's error log; Rules 7, 15)
   - A11 (an unsaved title left on the row after "Edit Announcement" is
     closed, and stored by the next "Save"; Rule 6)
   - A2 (an image refused on "Save" deleting the announcement on an edit;
@@ -921,6 +934,8 @@ Left out of the scenarios above, by reason:
     the site's panel and sending nothing; Rule 16; scenario 6 marks it)
   - A19 (a journal's announcement read on its own through the
     programming interface, at the address its list gives; Rule 19)
+  - A20 (the warning an add by program without the email choice
+    leaves; Rule 19)
   - OMP2 (a press's home page carrying the site's announcements while
     the press has no "Display on Homepage" count; Rule 11; scenario 6
     marks it)
@@ -966,6 +981,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | On a French press or preprint server, the new-announcement email's last sentence arrives in English {OMP OPS} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A15](#a15) | A journal's Atom and RSS 1.0 announcement feeds write every date with "%" signs ("%2026-%10-%03UTC%UTC%275") {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A19](#a19) | Through the programming interface, an announcement's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
+| [A20](#a20) | An announcement added by program without the email choice leaves a warning in the server's error log | 🐞 | latent | — |
 | [OMP2](#omp2) | A press's home page shows the site's announcements, with links that lead nowhere {OMP} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | An announcement's type is printed nowhere a reader looks | ❓ | minor | — |
 | [A6](#a6) | A chosen "Announcement Type" cannot be cleared, only changed | ❓ | minor | — |
@@ -1122,8 +1138,11 @@ files, so the manager is not told. On a journal, press or server,
 "Remove" then "Save" on the announcement before deleting it removes the
 file. The site's announcements leave their pictures the same way, and
 there "Remove" does not help: the file stays too, and on a press or
-preprint server the save fails with an error.
+preprint server the save fails with an error. The same fault leaves a
+warning in the server's error log (Side effects) on every delete, from
+the list's "Delete" or by program, with a picture or without.
 Basis: probe, 2026-10-03. <sup>f-a12</sup>
+Report: refresh owed — the fold of 2026-10-23 found the delete's warning on every delete, an announcement without a picture included, on OJS, OMP and OPS `main` and OJS `stable-3_5_0`, so the warning is no longer only a trace of the picture case (Observed, Cause); it touches `Announcement::delete()` and `Announcement::deleteImage()` (2026-10-23)
 
 <a id="a13"></a>
 **A13 — An edited announcement type keeps its old name in the Announcement Types table until a reload** · 🐞 · low · crash: server.
@@ -1225,6 +1244,17 @@ the Site Administrator. The same wrong address as
 *[Highlights](U11-highlights.md#a10)* A10, where the journal's own
 address fails as well.
 Since: 2021-06-03 · Basis: probe, 2026-10-15. <sup>f-a19</sup>
+
+<a id="a20"></a>
+**A20 — An announcement added by program without the email choice leaves a warning in the server's error log** · 🐞 · latent.
+The apps' own "Add Announcement" always says whether to send the email,
+so no user of the screens meets this. A program that adds a journal's
+announcement through the programming interface (Rule 19) and leaves
+that choice out expects "no email": the announcement is saved and
+nobody is emailed, as expected, but each such add leaves a warning in
+the server's error log (Side effects). Nothing is lost; the log gains
+noise an administrator has to sort from real faults.
+Basis: probe, 2026-10-23. <sup>f-a20</sup>
 
 ### OMP
 
@@ -1498,6 +1528,12 @@ screen: every scratch journal enrols `admin` as a manager and a journal
 manager cannot remove that role. Settings › Workflow › Emails lists "New
 Announcement" with the subject `{$announcementTitle}` and the body above, no
 footer in the template.
+Live-probed 2026-10-23 (Side effects, the server's error log; A12, A20),
+OJS, OMP and OPS `main` and OJS `stable-3_5_0`, two runs each, the log
+read from a mark before each request: the screen's "Add Announcement"
+and the public announcement page, signed out and as the manager, logged
+nothing; every delete and an add by program without `sendEmail` logged
+one PHP warning each (notes f-a12, f-a20).
 
 <a id="fn-g"></a>
 **g — the feed (OJS).** `plugins/generic/announcementFeed/` (OJS only;
@@ -2133,6 +2169,18 @@ OJS, OMP and OPS: `{id}.gif` still under `public/…/announcements/` after
 left their `{id}.png`; a GIF replacing a PNG left `{id}.png` beside
 `{id}.gif`, a PNG replacing the GIF overwrote `{id}.png`; "Remove" then
 "Save" removed the file. Nothing on a screen shows the folder.
+Live-probed 2026-10-23 (Rule 7; A12, the error log), OJS, OMP and OPS
+`main` and OJS `stable-3_5_0`, two runs each on PKP's default dataset
+with announcements switched on, two announcements without a picture
+(one added by program, one by the screen): each delete, the list's
+"Delete" › "Yes" (a POST with `X-Http-Method-Override: DELETE`, 200) and
+the same request for the other, logged `PHP Warning: Attempt to read
+property "image" on null in …/lib/pkp/classes/announcement/Announcement.php`
+from `Announcement::deleteImage()`, which `delete()` calls after
+`parent::delete()`, reading `$this->fresh()->image` of a row already gone
+(`fresh()` returns null): the cause of the file left behind, picture or
+not. Code read 2026-10-23, lib/pkp 1f415a07ca (`main`) and 5b54f59ed7
+(`stable-3_5_0`).
 Issue report: [pkp-e2e#771](https://github.com/jardakotesovec/pkp-e2e/issues/771) ([docs/issues/U12-A12-announcement-image-files-left-behind.md](../issues/U12-A12-announcement-image-files-left-behind.md)).
 
 <a id="fn-f-a13"></a>
@@ -2241,6 +2289,27 @@ found."; the author and a signed-out visitor 401 there too. Settings ›
 Announcements sent no request to the announcements API on landing. No
 server error in any run.
 Issue report: [pkp-e2e#974](https://github.com/jardakotesovec/pkp-e2e/issues/974) ([docs/issues/U11-A10-highlight-read-on-its-own-fails.md](../issues/U11-A10-highlight-read-on-its-own-fails.md)).
+
+<a id="fn-f-a20"></a>
+**f-a20 — Rule 19 and A20 evidence.** `PKPAnnouncementController::add()`
+reads `$params['sendEmail']` with no default
+(`(bool) filter_var($params['sendEmail'], FILTER_VALIDATE_BOOLEAN)`), so
+a request without the key raises PHP's "Undefined array key" warning;
+the null then reads as false and `notifyUsers()` runs without the email
+(code read, not driven to the mail catcher). The line is older than
+b0be24e79b (2023-11-08), which moved it. The panel's form always posts
+the key: `sendEmail=false` on `main`, `sendEmail=` on `stable-3_5_0`.
+Code read 2026-10-23, lib/pkp 1f415a07ca (`main`) and 5b54f59ed7
+(`stable-3_5_0`). Live-probed 2026-10-23 (Rule 19; A20), OJS, OMP and
+OPS `main` and OJS `stable-3_5_0`, two runs each on PKP's default
+dataset with "Enable announcements" ticked by `rvaca`: `POST
+{journal}/api/v1/announcements` as `rvaca` with a title, short
+description and text and no `sendEmail` answered 200 with the record,
+and the server log gained `PHP Warning: Undefined array key "sendEmail"
+in …/lib/pkp/api/v1/announcements/PKPAnnouncementController.php`; the
+screen's own "Add Announcement" beside it logged nothing; the
+announcement's page, signed out and as `rvaca`, showed its title, date
+and text and logged nothing.
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls
