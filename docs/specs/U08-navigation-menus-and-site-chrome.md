@@ -384,9 +384,14 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       "Dashboard" carry the number of unread tasks, as
       [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md)
       (Rule 4) describes.
-    - 19c. **On the site's pages.** The Site Administrator's "Dashboard"
-      opens the site's home page; every other user's opens the Profile
-      page.
+    - 19c. **On the site's pages.** Every user's "Dashboard", the Site
+      Administrator's included, opens the Profile page, the same page as
+      "View Profile". Whether that is a journal's Profile page or the
+      site's own follows [User profile](U03-user-profile.md) Rule 3.
+      The Site Administrator's "Dashboard" there carries their number
+      of unread tasks, as on a journal's pages (Rule 19b); no other
+      user's does, and no username on the site's pages carries one
+      ⚠ [A27](#a27).
 
 **Footer and page furniture**
 
@@ -1220,7 +1225,7 @@ Left out of the scenarios above, by reason:
   - the header's "About" list closed by a second press on "About" or by a press elsewhere (Rule 16)
   - a branch dragged back to "Unassigned Menu Items", its items arriving as entries of their own (Rule 5b)
   - the Site Administrator holding Reader alone: "Dashboard" opening the journal's home page (Rule 19a)
-  - "Dashboard" on the site's pages (Rule 19c)
+  - "Dashboard" on the site's pages, which opens the same page as "View Profile" for every user (Rule 19c)
   - "Administration" pressed on a journal with one interface language after the site's pages opened in French, opening in French too (Rule 18a)
   - the initials menu read with the interface in French, every entry in French (Rule 28; scenario 2 reads it in English)
   - the notice area while an editorial page is left (Rule 31)
@@ -1244,6 +1249,7 @@ Left out of the scenarios above, by reason:
   - A21 (two journals of the same name hiding each other in the switcher; Rule 29)
   - A22 (the Site Administrator holding Reader alone: the manager's side menu and an "Error" window; Rule 30a)
   - A25 (the initials menu left open by the Escape key; Rule 28)
+  - A27 (the Site Administrator's "Dashboard" on the site's pages showing a task count; Rule 19c)
   - OJS1 (no eye on "Subscriptions" and "My Subscriptions" {OJS}; Rule 7a)
   - OPS2 ("Posting Mode" not kept, so "Archives" stays {OPS}; Settings bullet 2)
   - OPS4 ("No server in context!" on a settings address opened at the site's level {OPS}; Rule 26c)
@@ -1302,6 +1308,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | A menu titled like another in other letter case is saved as a second menu | ❓ | minor | — |
 | [A14](#a14) | The site's "Add item" offers types the site has no page for | ❓ | minor | — |
 | [A25](#a25) | The editorial header's initials menu stays open when Escape is pressed | ❓ | minor | — |
+| [A27](#a27) | On the site's pages the Site Administrator's "Dashboard" shows a task count but opens the Profile page | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server's side menu has no "Content" group while public comments are off {OPS} | ✅ | minor | — |
 | [A11](#a11) | Retired: the item window's refused saves (no type, a bad path, a bad URL) were thought to say nothing; each shows its reason at the top right (Fields) | ✅ | retired | claim check (claude), 2026-10-07 — overturned |
 | [A17](#a17) | Retired: leaving the page after "Yes" discarded a menu change was thought to still ask about unsaved changes; it asks nothing (Rule 6a) | ✅ | retired | claim check (claude), 2026-10-07 — overturned |
@@ -1345,6 +1352,7 @@ header and after "Dashboard" in a narrow window
 ([Notifications center & email preferences](U05-notifications-center-and-email-preferences.md#a3)).
 It worked in 3.0 and broke in 3.1.
 Basis: probe, 2026-10-20. <sup>f-a2</sup>
+Report: refresh owed — pkp-lib `00ce12be77` (pkp/pkp-lib#13597 for #13553, 2026-10-22; `stable-3_5_0` `6accf87c49`, #13596) put a `$context &&` guard on the address check of `PKPNavigationMenuService::getDisplayStatus()` (`NMI_TYPE_USER_DASHBOARD`), so on the site's pages the site administrator now gets `user/profile`; the report's Cause quote of that check, its fix diff's "-" line and "(both places)", its site-level Reach bullet ("only the site administrator passes there") and its 3.5 backport line are out of date; the title check with `dashboardMenuItem.tpl` and `PKPPageRouter::getHomeUrl()` are unchanged (2026-10-23)
 
 <a id="a3"></a>
 **A3 — The access-denied page a signed-in user gets has an empty heading and an unnamed browser tab** · 🐞 · low.
@@ -1602,6 +1610,21 @@ menus cannot be deleted this way. All three apps.
 Since: 2026-01-22 · Basis: probe, 2026-09-30. <sup>f-a26</sup>
 Report: paused — its reporter stopped on a safety classifier in the maintainer's session (2026-10-05); not re-sent, waiting for the maintainer
 
+<a id="a27"></a>
+**A27 — On the site's pages the Site Administrator's "Dashboard" shows a task count but opens the Profile page** · ❓ · minor.
+On the site's home page, the Site Administrator's "Dashboard" under the
+username reads "Dashboard" followed by their number of unread tasks
+("Dashboard 2" with two unread, "Dashboard 0" with none), as on a
+journal's pages (Rule 19b). Pressed, it opens the Profile page, the same
+page as "View Profile", not the Dashboard the number belongs to (Rule
+19c). No other user's "Dashboard" on the site's pages carries a number,
+and no username there does, the Site Administrator's included.
+Question: should the number go now that the item opens the Profile
+page? Lean: yes, unintended; the change that sent the item to the
+Profile page left the number in place, and every other user's item that
+opens the Profile page has none.
+Since: 2026-10-22 · Basis: probe, 2026-10-23. <sup>f-a27</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -1794,10 +1817,18 @@ at `SITE_CONTEXT_ID`. Logout while logged in as another user: title
 `login/signOutAsUser`. Dashboard: when the user `hasRole([MANAGER,
 ASSISTANT, REVIEWER, AUTHOR], contextId)` or is site admin, the title is
 replaced by `frontend/components/navigationMenus/dashboardMenuItem.tpl`
-(title plus `<span class="task_count">{$unreadNotificationCount}</span>`)
-and the URL is `PageRouter::getHomeUrl()`; otherwise the URL is
-`user/profile`. `ROLE_ID_SUB_EDITOR` is absent from that list (A2).
-`getHomeUrl()`: no context → site `index`; no user group in the context,
+(title plus `<span class="task_count">{$unreadNotificationCount}</span>`),
+with no context check, so the site administrator's item keeps the count
+on the site's pages (A27). The URL is `PageRouter::getHomeUrl()` when
+there is a context and the same role test passes; otherwise, and with no
+context for everyone, the site administrator included, it is
+`user/profile` (the `$context &&` guard of pkp-lib `00ce12be77`,
+pkp/pkp-lib#13597 for #13553, 2026-10-22; on `stable-3_5_0`
+`6accf87c49`, #13596; the apps' `main` pointers, at lib/pkp
+`1f415a07ca` on 2026-10-23, do not carry it yet). `ROLE_ID_SUB_EDITOR`
+is absent from that list (A2).
+`getHomeUrl()`: no context → site `index` (no longer reached from the
+menu); no user group in the context,
 or Reader alone → the context's `index`; manager, site admin, sub editor
 or assistant → `dashboard/editorial`; reviewer →
 `dashboard/reviewAssignments`; author → `dashboard/mySubmissions`. The
@@ -2447,9 +2478,13 @@ the Section Editor, even with an unread task, or the Reader. `admin`
 holding Reader alone in a scratch journal was taken to its home page.
 "Administration" showed to `admin` alone and opened "Site
 Administration"; impersonating, "Logout as {username}" returned the
-administrator to their Dashboard. On the site's home page `admin`'s
-"Dashboard" opened the site's home page, and every other user's a
-Profile page. Signed out with registration closed: "Login" alone.
+administrator to their Dashboard. On the site's home page every user's
+"Dashboard", `admin`'s included, opened a Profile page (live-probed
+2026-10-23, two runs, all three apps, pkp-lib `00ce12be77`,
+pkp/pkp-lib#13553; until then `admin`'s opened the site's home page):
+for the seeded users, whose roles are in `publicknowledge` alone, that
+journal's, and the site's own for `admin` and for a scratch manager
+holding roles in two journals. Signed out with registration closed: "Login" alone.
 
 <a id="fn-r"></a>
 **r** — `footer.tpl`: the sidebar `{if empty($isFullWidth)}` from the
@@ -3024,6 +3059,26 @@ the grids, which add `CanAccessSettingsPolicy`
 no "Permit changes to Settings". Release check 2026-10-05 at the
 stable-3_5_0, stable-3_4_0 and stable-3_3_0 tips: none has the fault.
 Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
+
+<a id="fn-f-a27"></a>
+**f-a27** — Note e: in `PKPNavigationMenuService::getDisplayStatus()`
+the title check for `NMI_TYPE_USER_DASHBOARD` ("Adjust some titles")
+still passes a site administrator with no context and fetches
+`frontend/components/navigationMenus/dashboardMenuItem.tpl` with
+`{$unreadNotificationCount}`, while the URL check gained `$context &&`
+in pkp-lib `00ce12be77` (pkp/pkp-lib#13597 for #13553, 2026-10-22;
+`stable-3_5_0` `6accf87c49`, #13596, code read only). Live-probed
+2026-10-23, two runs, all three apps (lib/pkp `00ce12be77`; the apps'
+pointers at `1f415a07ca`), on the site's home page of a site with two
+or more enabled journals: `admin`'s item read "Dashboard 2" on OJS,
+the same number as the seeded journal's "Dashboard", and "Dashboard 0"
+on OMP and OPS, linked to `index/en/user/profile`, as "View Profile";
+the Journal Manager, the Editor, the Section Editor, the Copyeditor,
+the Funding Coordinator, the Reviewer, the Author and the Reader (OPS:
+the Journal Manager, the Moderator, the Editorial Board Member, the
+Author and the Reader) and two scratch users read "Dashboard" with no
+number; every username, `admin`'s
+included, linked to `#` and carried no number.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `NavigationMenuService` gives `NMI_TYPE_SUBSCRIPTIONS`

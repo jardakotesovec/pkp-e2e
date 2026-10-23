@@ -36,10 +36,18 @@
 //   crumbs  breadcrumbs with a middle step: announcement, article [OJS], category [OMP]
 //   search  C: the "Search" item placed in the primary menu (Rule 17)
 //   site    the site's "Page Footer" and logo set and restored (Rules 15a, 20)
+// The dash phase needs no seed: it seeds its own two enabled scratch contexts per run (so the
+// site's pages show a home page, which they do only with two or more enabled contexts),
+// kept in k3-site2[-<PROBE_RUN>]-<app>.json via outFile(); delete that file to reseed.
 // Run: PROBE_FEATURE=U08 PROBE_AGENT=ccK3 node bin/probe.js all shared/playwright/checks/U08/K3/k3.js
+// On the sync fleet, twice (2026-10-23 upstream sync, pkp-lib 00ce12be77):
+//   PHASES=dash PROBE_RUN=r1 PROBE_FEATURE=sync PROBE_NOTES_FEATURE=U08 PROBE_AGENT=ccK3 \
+//     node bin/probe.js all shared/playwright/checks/U08/K3/k3.js        (then PROBE_RUN=r2)
+// Outputs: dash-<role>-site*-<run>-<app>.json, facts-<run>-<app>.json, k3-log-<run>-<app>-*.txt.
+// The other phases need PHASES=seed first (state in k3-state-<app>.json, RESEED=1 to redo).
 const fs = require('fs');
 const path = require('path');
-const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir} =
+const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir, outFile, sql} =
     require('../../../probe');
 
 const ALL = ['pk', 'dash', 'denied', 'seed', 'edit', 'devby', 'skip', 'count', 'imp', 'admb', 'look', 'reg', 'msg', 'pages', 'crumbs', 'search', 'sitedash', 'narrow2', 'extra', 'site', 'sitelogo', 'layout', 'secount', 'series'];
@@ -188,6 +196,37 @@ forEachApp(async (app) => {
 
     const {page, context, close} = await launch(app);
     page.on('dialog', (d) => d.accept().catch(() => {}));
+    const snap0 = async (name) => { const s = await screen(page); record(name, s); return s; };
+    /** The site's own pages (Rule 19c): the user menu as `user` sees it, then each entry pressed. */
+    const siteMenu = async (role, user) => {
+        const SITE = app.url('/index.php/index/index');
+        const cs = await pub(page, SITE, `dash-${role}-site`, {shotIt: role === 'admin' || role === 'reader'});
+        const top = (cs.user || []).find((i) => i.children);
+        fact(`dash-${role}-site-menu`, {url: (cs.url || '').replace(/^https?:\/\/[^/]+/, ''), user: brief(cs).user, h1: cs.h1});
+        const sTop = page.locator('#navigationUser > li').filter({hasText: user}).first();
+        if (!(await sTop.count())) return;
+        const press = async (re, name) => {
+            await page.goto(SITE); await idle(page);
+            await page.locator('#navigationUser > li').filter({hasText: user}).first().hover(); await sleep(300);
+            const a = page.locator('#navigationUser > li > ul a').filter({hasText: re}).first();
+            if (!(await a.count())) return null;
+            const href = await a.getAttribute('href');
+            await a.click(); await idle(page);
+            await snap0(`dash-${role}-site-${name}-dest`);
+            return {href: (href || '').replace(/^https?:\/\/[^/]+/, ''), url: page.url().replace(/^https?:\/\/[^/]+/, ''), title: await page.title(), h1: await page.locator('h1').allInnerTexts().catch(() => [])};
+        };
+        const dest = {};
+        dest.dashboard = await press(/Dashboard/, 'dashboard');
+        dest.profile = await press(/View Profile/, 'profile');
+        if (top && top.children.some((x) => /Administration/.test(x.text))) dest.admin = await press(/Administration/, 'admin');
+        // the username itself: pressed after the theme's script, it opens the list
+        await page.goto(SITE); await idle(page);
+        const nameLink = page.locator('#navigationUser > li > a').filter({hasText: user}).first();
+        dest.usernameHref = ((await nameLink.getAttribute('href')) || '').replace(/^https?:\/\/[^/]+/, '');
+        await nameLink.click(); await idle(page); await sleep(300);
+        dest.username = {url: page.url().replace(/^https?:\/\/[^/]+/, ''), expanded: await nameLink.getAttribute('aria-expanded').catch(() => null)};
+        fact(`dash-${role}-site-dest`, dest);
+    };
     try {
         // ── pk: publicknowledge and the site signed out ─────────────────────────────
         if (on('pk')) {
@@ -310,6 +349,35 @@ forEachApp(async (app) => {
 
         // ── dash: the user menu per role ─────────────────────────────────────────────
         if (on('dash')) {
+            // The site's own pages show a home page only while two or more contexts are
+            // enabled (a reset fleet holds publicknowledge alone and redirects there):
+            // seed one enabled scratch context per run, with a manager who holds no role
+            // elsewhere (k3-site2[-<run>]-<app>.json through outFile()).
+            const ct = app.contextTables;
+            const enabledNow = () => Number(sql(app, `select count(*) from ${ct.table} where enabled = 1`));
+            const s2File = outFile('k3-site2.json');
+            let s2 = fs.existsSync(s2File) ? JSON.parse(fs.readFileSync(s2File, 'utf8')) : null;
+            if (!s2) {
+                const before = enabledNow();
+                const t = tag('u08k3s');
+                const r = await app.api.createContext({tag: t, context: {name: `U08 K3 site ${t}`, acronym: 'K3S', enabled: true},
+                    users: [{username: `${t}m`, roles: ['manager'], givenName: 'Sol', familyName: 'K3SiteManager'}, {username: `${t}r`, roles: ['reader'], givenName: 'Ria', familyName: 'K3SiteReader'}]});
+                s2 = {path: r.path, m: `${t}m`, r: `${t}r`, enabledBefore: before};
+                fs.writeFileSync(s2File, JSON.stringify(s2, null, 1));
+            }
+            if (!s2.p3) {
+                // a second scratch context where the first one's manager is a Reader too: the
+                // site's Profile address forwards to a user's one context only while they have
+                // one (ProfileHandler), so the manager is the two-context end of that axis
+                const t3 = tag('u08k3s');
+                const r3 = await app.api.createContext({tag: t3, context: {name: `U08 K3 site ${t3}`, acronym: 'K3T', enabled: true}, users: [{username: s2.m, roles: ['reader']}]});
+                s2.p3 = r3.path;
+                fs.writeFileSync(s2File, JSON.stringify(s2, null, 1));
+            }
+            fact('dash-site2', {...s2, enabledNow: enabledNow()});
+            await signOut(page).catch(() => {});
+            const so = await pub(page, app.url('/index.php/index/index'), 'dash-signedout-site', {shotIt: true});
+            fact('dash-signedout-site', {url: so.url, user: brief(so).user, h1: so.h1, main: flat(so.main, 300)});
             for (const [role, user] of roster(app)) {
                 await signIn(page, user, {contextPath: PK});
                 await idle(page);
@@ -343,22 +411,8 @@ forEachApp(async (app) => {
                     adminDest = {url: page.url(), title: await page.title()};
                 }
                 fact(`dash-${role}-dest`, {name: nameDest, dashboard: dashDest, profile: profDest, admin: adminDest});
-                // the site's pages
-                const cs = await pub(page, app.url('/index.php/index/index'), `dash-${role}-site`);
-                fact(`dash-${role}-site-menu`, brief(cs).user);
-                const sTop = page.locator('#navigationUser > li').filter({hasText: user}).first();
-                if (await sTop.count()) {
-                    await sTop.hover(); await sleep(300);
-                    const sd = page.locator('#navigationUser > li > ul a').filter({hasText: /Dashboard/}).first();
-                    if (await sd.count()) {
-                        await sd.click(); await idle(page);
-                        const s3 = await screen(page); record(`dash-${role}-site-dashboard-dest`, s3);
-                        fact(`dash-${role}-site-dashboard-dest`, {url: page.url(), title: await page.title()});
-                    }
-                    await page.goto(app.url('/index.php/index/index')); await idle(page);
-                    await page.locator('#navigationUser > li > a').filter({hasText: user}).first().click(); await idle(page);
-                    fact(`dash-${role}-site-username-dest`, {url: page.url(), title: await page.title()});
-                }
+                // the site's pages (Rule 19c): the menu, then every entry pressed
+                await siteMenu(role, user);
                 // Logout from the public menu
                 await page.goto(cUrl(PK, '')); await idle(page);
                 await page.locator('#navigationUser > li').filter({hasText: user}).first().hover(); await sleep(300);
@@ -366,6 +420,40 @@ forEachApp(async (app) => {
                 const out = await chrome(page);
                 fact(`dash-${role}-logout-dest`, {url: page.url(), user: brief({...out}).user});
             }
+            // users who hold roles only in scratch contexts: the manager (Manager in one, Reader in
+            // the other) and the reader (Reader in one)
+            for (const [role, user] of [['site2Manager', s2.m], ['site2Reader', s2.r]]) {
+                await signIn(page, user, {contextPath: s2.path}); await idle(page);
+                const c = await pub(page, cUrl(s2.path, ''), `dash-${role}-home`);
+                fact(`dash-${role}-menu`, {landed: page.url(), user: brief(c).user});
+                await siteMenu(role, user);
+            }
+            // signed in at the site's own login page: where admin lands, then the menu
+            await signIn(page, 'admin'); await idle(page);
+            await snap0('dash-admin-sitelogin-landed');
+            fact('dash-admin-sitelogin-landed', {url: page.url(), title: await page.title()});
+            // the Profile page reached from the site's "Dashboard", left with a change unsaved
+            await signIn(page, s2.r, {contextPath: s2.path}); await idle(page);
+            await page.goto(app.url('/index.php/index/index')); await idle(page);
+            await page.locator('#navigationUser > li').filter({hasText: s2.r}).first().hover(); await sleep(300);
+            await page.locator('#navigationUser > li > ul a').filter({hasText: /Dashboard/}).first().click(); await idle(page);
+            await snap0('dash-site2Reader-profile-before-edit');
+            const gn = page.locator('input[name^="givenName"]:visible').first();
+            const unsaved = {profileUrl: page.url(), field: await gn.count()};
+            if (unsaved.field) {
+                await gn.fill('RiaUnsaved'); await gn.blur();
+                const tabs = await page.getByRole('tab').allInnerTexts().catch(() => []);
+                unsaved.tabs = tabs.map((x) => flat(x, 40));
+                const other = page.getByRole('tab').nth(1);
+                if (await other.count()) { await other.click(); await idle(page); await sleep(600); unsaved.afterTab = {url: page.url(), selected: flat(await page.locator('[role="tab"][aria-selected="true"]').first().innerText().catch(() => ''), 40)}; }
+                await page.goto(app.url('/index.php/index/index')).catch((e) => { unsaved.leaveError = String(e.message || e).slice(0, 200); });
+                await idle(page).catch(() => {});
+                unsaved.afterLeave = page.url();
+                await page.goBack().catch(() => {}); await idle(page).catch(() => {});
+                await snap0('dash-site2Reader-profile-after-leave');
+                unsaved.givenNameAfter = await page.locator('input[name^="givenName"]:visible').first().inputValue().catch(() => null);
+            }
+            fact('dash-site2Reader-profile-unsaved', unsaved);
         }
 
         // ── denied: the access-denied page (td14) ───────────────────────────────────
@@ -1157,10 +1245,8 @@ forEachApp(async (app) => {
         }
 
         // merge into the facts file of earlier runs (one process per phase set)
-        const ff = path.join(outDir(), `facts-${app.name}.json`);
-        const prev = fs.existsSync(ff) ? JSON.parse(fs.readFileSync(ff, 'utf8')) : {};
-        record('facts', {...prev, ...facts});
-        fs.writeFileSync(path.join(outDir(), `k3-log-${app.name}-${Date.now()}.txt`), lines.join('\n'));
+        record('facts', facts, {merge: true});
+        fs.writeFileSync(outFile(`k3-log-${Date.now()}.txt`), lines.join('\n'));
     } finally {
         await close();
     }
