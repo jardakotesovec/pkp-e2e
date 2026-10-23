@@ -2736,6 +2736,7 @@ notice. Not driven: "Favicon" (by the code the same
 (`PKPSiteService::_saveFileParam()`). The A20 issue report names the
 logo and thumbnail case under its Reach as a separate fault its fix
 does not reach; the homepage image is a third box with it.
+Issue report: [pkp-e2e#1061](https://github.com/jardakotesovec/pkp-e2e/issues/1061) ([docs/issues/U10-A22-replaced-picture-other-type-stays-public.md](../issues/U10-A22-replaced-picture-other-type-stays-public.md)).
 
 <a id="fn-f-a23"></a>
 **f-a23** — `PKPContextController::getTheme()` (`GET
