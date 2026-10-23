@@ -1381,7 +1381,7 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [OJS9](#ojs9) | Readers opening an XML galley in the Lens reader see its TeX formulas as blanks | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [OJS10](#ojs10) | With "Recommend Similar Articles" on, article pages never show "Similar Articles" | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OJS12](#ojs12) | A review marked "Publicly Show Reviewer Comments" never shows on the published article's page | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
-| [OJS14](#ojs14) | A saved link to an older version's galley opens the current version, unannounced, once that galley gets a URL Path | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
+| [OJS14](#ojs14) | A saved link to an older version's galley opens the current version, unannounced, once that galley gets a URL Path | 🐞 | medium | issues (claude), 2026-10-23 — re-verified |
 | [OJS15](#ojs15) | With "eLife Lens Article Viewer" on, an issue's XML galley never opens in the Lens reader | 🐞 | low · crash: server | issues (claude), 2026-10-07 — re-verified |
 | [OPS1](#ops1) | Previewing a new version adds "This is an outdated version published on {the preview day or its saved date}." | 🐞 | low | issues (claude), 2026-10-06 — re-verified |
 | [OPS2](#ops2) | A preprint with a URL Path loses the galley or version part of its ID address; its HTML and other non-PDF downloads answer "404 Not Found" | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
@@ -1853,32 +1853,25 @@ version's ID and the galley's ID
 ("…/article/view/{article}/version/{version ID}/{galley ID}"), as long
 as the galley has no URL Path. Once the galley is given a URL Path,
 that address stops opening the older version.
-
-The reader lands on the article's page, which shows the current
-version. When the current version has a galley with the same URL Path,
-the reader lands on that galley instead. Neither page says that the
-link named another version, so a reader following a citation or a
-bookmark of version 1.0 reads the latest version without being told.
-The "Versions" list on the article's page still opens the older
-version.
-
-It takes an article with more than one published version, and an
-older version's galley with a URL Path, reached by its ID: a link
-handed out before the galley got its URL Path, or the ID typed by hand
-(the older version's page links such a galley by its URL Path, which
-opens it). The address that downloads the galley is forwarded the same
-way, and so is either address with a file ID at its end. A preprint
-server answers "404 Not Found" to such an address, which has its own
-report, and a press forwards no addresses.
-
-A new version not yet published fares worse. Its galley, typed by its
-ID after the version's own address, answers the "404 Not Found" page
-once the galley has a URL Path, even to those who may open the
-version's preview (Actors row 2), when the current version has no
-galley with that URL Path. The preview page itself links the galley by
-its URL Path, which opens.
-Basis: probe, 2026-10-07. <sup>[f-ojs14](#fn-f-ojs14)</sup>
-Report: refresh owed — claim check I23F (2026-10-23) widened the entry: an older version's galley that had its URL Path from the start is forwarded the same way when typed by its ID (PKP's default test dataset, OJS main and 3.5), and an unpublished version's galley typed by its ID after the version's address answers "404 Not Found" to the editor previewing it when the current version has no galley of that URL Path; `ArticleHandler::initialize()`, `getBestGalleyId()`; the refresh also settles whether the download address the entry says is forwarded carries the version part, and where it lands (a persona read could not judge it) (2026-10-23)
+The reader lands on the current version's galley with the same URL
+Path, or, when the current version has none, on the article's page,
+which shows the current version. Neither page says that the link named
+another version. A reader following a citation or a bookmark of
+version 1.0 reads the latest version, and neither they nor the
+journal's editors are told. The address that downloads the galley is
+forwarded the same way: it delivers the current version's file, or
+answers "404 Not Found" when the current version has no galley with
+that URL Path.
+It takes an article with more than one published version, and an older
+galley that now has a URL Path. The reader opens it through an ID
+address: one saved before the galley got its URL Path, or one typed by
+hand. The fix is a few lines in the one place that forwards these
+addresses.
+A lesser case: an editor who types the galley ID of an unpublished
+version into its preview address gets "404 Not Found" once that galley
+has a URL Path, unless a published version has a galley with the same
+URL Path.
+Basis: probe, 2026-10-23. <sup>[f-ojs14](#fn-f-ojs14)</sup>
 
 <a id="ojs15"></a>
 **OJS15 — With "eLife Lens Article Viewer" on, an issue's XML galley never opens in the Lens reader** · 🐞 · low · crash: server.
