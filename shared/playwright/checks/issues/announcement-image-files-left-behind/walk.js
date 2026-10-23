@@ -6,33 +6,39 @@
 // on screen. No screen shows the public files folder, so the walk lists it
 // after each step (`public/journals|presses|contexts/<id>/announcements/`
 // under the install's public files directory). Fact keys carry the report's
-// step numbers. Reset the fleet before each walk. Helpers come from
-// ../refused-image-deletes-announcement/lib.js (U12 A2's walk).
+// step numbers. Reset the fleet before each walk. Helpers and the pictures
+// sit beside this file (lib.js, photo.png, photo.gif). Every step records the
+// server log lines it caused.
 //
 // MODE=walk (default) the Steps (a GIF replaces the PNG, then the delete),
-//                     then the Control ("Remove" then "Save").
+//                     then the Control ("Remove" then "Save"), then an
+//                     announcement without a picture added and deleted
+//                     (P1, P2: the delete's log line on every delete).
 // MODE=neighbour      the fix's neighbour: a same-type replacement (a PNG
 //                     over a PNG) keeps the new file, a title-only edit
 //                     keeps the file, and "Remove" then "Save" still
 //                     deletes it.
+// MODE=refused       the refused picture on an edit: "Edit", "Remove",
+//                     "Upload File" renamed.jpg (a PNG named .jpg, which
+//                     the upload check refuses), "Save"; the answer, the
+//                     folder, the stored image and the announcement's page.
 // MODE=site           the site's announcements: as `admin`, a second
 //                     journal (press, server) created on screen so the
 //                     Site Settings show the "Announcements" tab; then
 //                     the same add, replacement by a GIF and delete there,
 //                     the site's folder (`public/site/announcements/`)
-//                     listed after each.
+//                     listed after each; then "Remove" and "Save" on a
+//                     second site announcement (S7, S8).
 //
 // Run (main, then stable-3_5_0):
-//   npm run fleet-prep -- --feature issues --dataset --reset
-//   PROBE_FEATURE=issues PROBE_AGENT=walk node bin/probe.js all shared/playwright/checks/issues/announcement-image-files-left-behind/walk.js
-//   PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-3_5 --dataset --reset
-//   PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-3_5 PROBE_AGENT=walk node bin/probe.js all shared/playwright/checks/issues/announcement-image-files-left-behind/walk.js
+//   npm run fleet-prep -- --feature <feature> --dataset <n> --reset
+//   PROBE_FEATURE=<feature> PROBE_AGENT=walk node bin/probe.js all shared/playwright/checks/issues/announcement-image-files-left-behind/walk.js
+//   PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature <feature>-3_5 --dataset <n> --reset
+//   PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=<feature>-3_5 PROBE_AGENT=walk node bin/probe.js all shared/playwright/checks/issues/announcement-image-files-left-behind/walk.js
 const {forEachApp, launch, signIn, screen, shot, record, sql, serverLog} = require('../../../probe');
-const L = require('../refused-image-deletes-announcement/lib.js');
+const L = require('./lib.js');
 
 const MODE = process.env.MODE || 'walk';
-
-const ctxLib = () => require('../all-dates-error-nothing-published/lib.js');
 
 forEachApp(async (app) => {
     if (MODE === 'site') return siteWalk(app);
@@ -111,6 +117,25 @@ forEachApp(async (app) => {
             });
             ls('C2', cid);
             fact('C whole folder', L.listFolder(folder).files);
+            // An announcement without a picture: its delete logs the same warning.
+            const p = await step('P1 Add Announcement "u12r2 Plain notice" without a picture', () =>
+                L.addAnnouncement(page, {title: 'u12r2 Plain notice'}));
+            fact('P1 stored', L.storedImage(app, sql, p && p.id));
+            await step('P2 Delete, Yes', () => L.deleteAnnouncement(page, 'u12r2 Plain notice'));
+            fact('P2 stored', L.storedImage(app, sql, p && p.id));
+            fact('P whole folder', L.listFolder(folder).files);
+        } else if (MODE === 'refused') {
+            await step('R1 Edit, Remove, Upload File renamed.jpg (refused), Save', () => editImage('u12r2 Spring notice', L.PICTURES.renamed));
+            await snap('after-refused-save');
+            ls('R1', id);
+            fact('R1 stored', L.storedImage(app, sql, id));
+            fact('R1 rows after reload', await L.reloadAnnouncements(app, page));
+            await step('R2 the announcement\'s page', async () => {
+                const v = await L.visit(app, page, `/index.php/${app.contextPath}/announcement/view/${id}`);
+                const imgs = await page.locator('main img, .pkp_structure_main img').evaluateAll((els) => els.map((i) => ({src: i.getAttribute('src'), loaded: i.complete && i.naturalWidth > 0}))).catch(() => []);
+                return {...v, images: imgs.map((i) => ({...i, src: L.rel(i.src)}))};
+            });
+            ls('R2', id);
         } else {
             await step('N1 Edit, Remove, Upload File photo.png (same type), Save', () => editImage('u12r2 Spring notice', L.PICTURES.png));
             ls('N1', id);
@@ -164,10 +189,9 @@ async function siteWalk(app) {
     L.useSiteScope(true);
     try {
         await step('S1 sign in as admin', async () => { await signIn(page, 'admin'); return true; });
-        await step('S2 Create a second context "u12r2 Second"', () => ctxLib().createContext(page, app,
+        await step('S2 Create a second context "u12r2 Second"', () => L.createContext(page, app,
             {name: 'u12r2 Second', initials: 'U12R2', path: 'u12r2second', email: 'u12r2second@mailinator.com'}));
-        const {enableSiteAnnouncements} = require('../edited-announcement-type-keeps-old-name/lib.js');
-        await step('S3 Site Settings › Announcements › Settings: Enable announcements', () => enableSiteAnnouncements(app, page));
+        await step('S3 Site Settings › Announcements › Settings: Enable announcements', () => L.enableSiteAnnouncements(app, page));
         await step('S4 the Announcements side tab', () => L.openSiteAnnouncements(app, page));
         const a = await step('S4 Add Announcement "u12r2 Site notice" with photo.png', () =>
             L.addAnnouncement(page, {title: 'u12r2 Site notice', picture: L.PICTURES.png}));
@@ -190,6 +214,24 @@ async function siteWalk(app) {
         ls('S6', id);
         fact('S6 stored', L.storedImage(app, sql, id));
         fact('S whole folder', L.listFolder(folder).files);
+        // The site's "Remove" then "Save" on a second announcement.
+        const r = await step('S7 Add Announcement "u12r2 Site remove" with photo.png', () =>
+            L.addAnnouncement(page, {title: 'u12r2 Site remove', picture: L.PICTURES.png}));
+        const rid = r && r.id;
+        ls('S7', rid);
+        await step('S8 Edit, Remove, Title to "u12r2 Site remove (edited)", Save', async () => {
+            const dialog = await L.openEdit(page, 'u12r2 Site remove');
+            const remove = await L.removeImage(page, dialog);
+            await dialog.locator('input[name="title-en"]').fill('u12r2 Site remove (edited)');
+            const save = await L.pressSave(page, dialog);
+            if (save.dialogOpen) save.closed = await L.closeDialog(page, dialog);
+            return {remove, save};
+        });
+        fact('S8 rows after reload', await L.reloadAnnouncements(app, page));
+        await snap('site-after-remove');
+        ls('S8', rid);
+        fact('S8 stored', L.storedImage(app, sql, rid));
+        fact('S8 title stored', sql(app, `SELECT setting_value FROM announcement_settings WHERE announcement_id = ${Number(rid)} AND setting_name = 'title'`));
     } finally {
         L.useSiteScope(false);
         record(`${key}-facts`, facts);

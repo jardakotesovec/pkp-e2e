@@ -1,6 +1,6 @@
 --- a/lib/pkp/classes/announcement/Announcement.php
 +++ b/lib/pkp/classes/announcement/Announcement.php
-@@ -95,9 +95,11 @@
+@@ -94,9 +94,11 @@
       */
      public function delete()
      {
@@ -13,7 +13,7 @@
          }
  
          return $deleted;
-@@ -111,6 +113,8 @@
+@@ -110,6 +112,8 @@
      public function save(array $options = [])
      {
          $newlyCreated = !$this->exists;
@@ -22,13 +22,13 @@
          $saved = parent::save($options);
  
          if (!$saved) {
-@@ -131,14 +135,14 @@
+@@ -130,14 +134,13 @@
  
          // The announcement is being updated, check if it contains new image
          if ($hasNewImage) {
 -            $this->deleteImage();
-+            $this->deleteImage($storedImage);
-             $this->handleImageUpload();
+-            $this->handleImageUpload();
++            $this->handleImageUpload($storedImage);
          }
  
          // If there is no new image and image data exists in DB and it's now removed as part of update
@@ -40,7 +40,7 @@
              DB::table($this->getSettingsTable())
                  ->where($this->getkeyName(), $this->getKey())
                  ->where('setting_name', 'image')
-@@ -295,16 +299,17 @@
+@@ -294,16 +297,17 @@
      }
  
      /**
@@ -64,3 +64,27 @@
                  : $publicFileManager->getSiteFilesPath();
  
              $publicFileManager->deleteByPath(
+@@ -319,9 +323,11 @@
+     /**
+      * Handle image uploads
+      *
++     * @param ?object $storedImage The image data as stored before the change, whose file the new one replaces
++     *
+      * @throws StoreTemporaryFileException Unable to store temporary file upload
+      */
+-    protected function handleImageUpload(): void
++    protected function handleImageUpload(?object $storedImage = null): void
+     {
+         $image = $this->getAttribute('image');
+ 
+@@ -338,6 +344,10 @@
+         }
+ 
+         if ($this->storeTemporaryFile($temporaryFile, $filePath, $user->getId())) {
++            // The new file is in place: remove the old one, unless the copy has just overwritten it
++            if (($storedImage->uploadName ?? null) !== basename($filePath)) {
++                $this->deleteImage($storedImage);
++            }
+             $this->setAttribute(
+                 'image',
+                 $this->getImageData($temporaryFile)

@@ -976,7 +976,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | A journal's announcement feeds with "Limit feed to" set carry the oldest announcements, never the newest {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | Ticking "Send an email about this to all registered users." when editing an announcement sends nothing | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | An unsaved title stays on the row after the panel is closed, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-09-30 — re-verified |
-| [A12](#a12) | A deleted announcement's picture, and a picture replaced by one of another type, stay on the server and online | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
+| [A12](#a12) | A deleted announcement's picture, and a picture replaced by one of another type, stay on the server and online | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A13](#a13) | An edited announcement type keeps its old name in the Announcement Types table until a reload | 🐞 | low · crash: server | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | On a French press or preprint server, the new-announcement email's last sentence arrives in English {OMP OPS} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A15](#a15) | A journal's Atom and RSS 1.0 announcement feeds write every date with "%" signs ("%2026-%10-%03UTC%UTC%275") {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1125,24 +1125,22 @@ puts the saved title back. The same as
 *[Highlights](U11-highlights.md#a4)* A4. Basis: probe, 2026-09-30. <sup>f-a11</sup>
 
 <a id="a12"></a>
-**A12 — A deleted announcement's picture, and a picture replaced by one of another type, stay on the server and online** · 🐞 · medium.
-A manager who deletes an announcement expects its picture to go with it.
-"Delete Announcement" › "Yes" removes the announcement and its pages,
-but the picture file stays on the server and is still served at its old
-address. That address is named after the announcement's number, so
-anyone can guess it. When a manager replaces a picture with one of
-another type, for example a GIF in place of a PNG, the old file stays
-beside the new one in the same way. A new picture of the same type
-overwrites the old file, as it should. Nothing on screen shows these
-files, so the manager is not told. On a journal, press or server,
-"Remove" then "Save" on the announcement before deleting it removes the
-file. The site's announcements leave their pictures the same way, and
-there "Remove" does not help: the file stays too, and on a press or
-preprint server the save fails with an error. The same fault leaves a
-warning in the server's error log (Side effects) on every delete, from
-the list's "Delete" or by program, with a picture or without.
-Basis: probe, 2026-10-03. <sup>f-a12</sup>
-Report: refresh owed — the fold of 2026-10-23 found the delete's warning on every delete, an announcement without a picture included, on OJS, OMP and OPS `main` and OJS `stable-3_5_0`, so the warning is no longer only a trace of the picture case (Observed, Cause); it touches `Announcement::delete()` and `Announcement::deleteImage()` (2026-10-23)
+**A12 — A deleted announcement's picture, and a picture replaced by one of another type, stay on the server and online** · 🐞 · medium · crash: server.
+"Delete Announcement" › "Yes" removes an announcement and its pages,
+but its picture file stays on the server and is still served at its
+old address. That address is named after the announcement's number, so
+anyone can guess it. Every delete, of an announcement with a picture or
+without, also writes a PHP warning to the server log.
+When a manager replaces a picture with one of another type, for
+example a GIF in place of a PNG, the old file stays beside the new one
+in the same way. A new picture of the same type overwrites the old file,
+as it should.
+Nothing on screen shows these files, so the manager is not told. The
+site's announcements leave their pictures the same way. There "Remove"
+then "Save" leaves the file too, and on a press or preprint server that
+save fails with a server error and the picture stays on the
+announcement.
+Basis: probe, 2026-10-23. <sup>f-a12</sup>
 
 <a id="a13"></a>
 **A13 — An edited announcement type keeps its old name in the Announcement Types table until a reload** · 🐞 · low · crash: server.

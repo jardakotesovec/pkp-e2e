@@ -3,53 +3,61 @@
 - **Severity** medium
 - **Effort** small
 - **Kind** regression
+- **Crash** server
 - **Affects**
   - main: OJS, OMP, OPS
   - 3.5: OJS, OMP, OPS
   - 3.4: none (code)
   - 3.3: none (code; no announcement picture)
-- **Introduced** `pkp/pkp-lib#10787` for `pkp/pkp-lib#10668` · [0b2ca57ed8](https://github.com/pkp/pkp-lib/commit/0b2ca57ed84822c48eb23c13de3726371623a02e) · 2025-01-09 · Touhidur Rahman (touhidurabir); the replacement since `pkp/pkp-lib#10382` for `pkp/pkp-lib#10328` · [070aa6f77b](https://github.com/pkp/pkp-lib/commit/070aa6f77b2b14e31b9089b5f82a48e8ba11c329) · 2024-09-30 · Vitalii Bezsheiko (Vitaliy-1)
-- **Upstream** none found (2026-10-03)
+- **Introduced** `pkp/pkp-lib#10787` for `pkp/pkp-lib#10668` · [0b2ca57ed8](https://github.com/pkp/pkp-lib/commit/0b2ca57ed84822c48eb23c13de3726371623a02e) · 2025-01-09 · Touhidur Rahman (touhidurabir); the file left by a replacement since `pkp/pkp-lib#10382` for `pkp/pkp-lib#10328` · [070aa6f77b](https://github.com/pkp/pkp-lib/commit/070aa6f77b2b14e31b9089b5f82a48e8ba11c329) · 2024-09-30 · Vitalii Bezsheiko (Vitaliy-1)
+- **Upstream** none found (2026-10-23)
 - **Tracked in** spec U12 [A12](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U12-announcements.md#a12)
-- **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-23, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-10-23: every delete of an announcement, with a picture or
+without, writes a PHP warning to the server log. Since
+`pkp/pkp-lib#13512` (2026-10-16) a refused picture on an edit no
+longer deletes the announcement, so the proposed fix now removes the
+old file only once the new one is copied. The site's "Remove" then
+"Save" is now walked, not only read in the code.
 
 ## Summary
 
-A manager who deletes an announcement expects its picture to go with
-it. "Delete Announcement" › "Yes" removes the announcement and its
-pages, but the picture file stays on the server and is still served at
-its old address. That address is named after the announcement's number,
-so anyone can guess it.
+"Delete Announcement" › "Yes" removes an announcement and its pages,
+but its picture file stays on the server and is still served at its
+old address. That address is named after the announcement's number, so
+anyone can guess it. Every delete, of an announcement with a picture or
+without, also writes a PHP warning to the server log.
 
 When a manager replaces a picture with one of another type, for
 example a GIF in place of a PNG, the old file stays beside the new one
 in the same way. A new picture of the same type overwrites the old file,
 as it should.
 
-Nothing on screen shows these files, so the manager is not told. On a
-journal, press or server, "Remove" then "Save" on the announcement
-before deleting it removes the file. The site's announcements leave
-their pictures the same way, and there "Remove" does not help: the
-file stays too, and on a press or preprint server the save fails with
-an error.
+Nothing on screen shows these files, so the manager is not told. The
+site's announcements leave their pictures the same way. There "Remove"
+then "Save" leaves the file too, and on a press or preprint server that
+save fails with a server error and the picture stays on the
+announcement.
 
 ## Impact
 
 - **Lost:** nothing on any page. A picture the journal took down with
-  its announcement is still online.
+  its announcement is still online. The server log gains a warning line
+  with every delete: log noise only.
 - **Who:** every journal, press and server that deletes an announcement
   with a picture, or changes a picture's type; and the site
   administrator, for the site's announcements.
 - **Way round:** on a journal, press or server, "Edit" › "Remove" ›
-  "Save" before "Delete". None for the site's announcements. Files
-  already left behind can only be removed on the server.
+  "Save" before "Delete" removes the file. None for the site's
+  announcements: on OMP and OPS that save answers 500 (a `TypeError`),
+  keeps the rest of the edit and keeps the picture; the fix mends it.
+  Files already left behind can only be removed on the server.
 
-Medium: on its own this is low, since nothing is lost and every page is
-right. But the delete looks complete while the deleted announcement's
-picture stays public at an address anyone can work out, and the silence
-rule lifts it a level. It would be low if the files left behind were
-not served.
+Medium: the delete looks complete, but the deleted announcement's
+picture stays public at an address anyone can work out, and the manager
+is not told. It would be low if the files left behind were not served.
 
 ## Steps to reproduce
 
@@ -61,9 +69,10 @@ Preconditions:
   `photo.gif`.
 - Access to the install's public files folder, where the pictures are
   stored: `public/journals/1/announcements/` (OMP `public/presses/1/…`,
-  OPS `public/contexts/1/…`).
+  OPS `public/contexts/1/…`), and `public/site/announcements/` for the
+  site's.
 
-Steps:
+A journal's announcements:
 
 1. Sign in as `rvaca`.
 2. Go to Settings › Website › Setup › "Announcements", tick "Enable
@@ -92,20 +101,50 @@ answers 200, but the folder still holds both files: the delete left
 log has, for the delete:
 
 ```
-PHP Warning:  Attempt to read property "image" on null in …/lib/pkp/classes/announcement/Announcement.php on line 302
+PHP Warning:  Attempt to read property "image" on null in …/lib/pkp/classes/announcement/Announcement.php on line 301
 ```
+
+Every delete logs this line: an announcement added without a picture
+("u12r2 Plain notice"), then "Delete" › "Yes", logs it too.
 
 Control: on a second announcement with `photo.png`, "Edit" › "Remove" ›
 "Save" deletes its file.
 
-The site's announcements (Administration › Site Settings ›
-"Announcements", shown once the site has a second journal) store their
-pictures in `public/site/announcements/` and leave them the same way.
+The site's announcements (the site shows its "Announcements" tab once
+it hosts a second journal, press or server):
+
+1. Sign in as `admin`.
+2. Administration › Hosted Journals › "Create Journal" (OMP "Hosted
+   Presses" › "Create Press", OPS "Hosted Servers" › "Create Server"):
+   name `u12r2 Second`, initials `U12R2`, contact `u12r2 Second`,
+   `u12r2second@mailinator.com`, country Canada, path `u12r2second`,
+   English, enabled; "Save".
+3. Administration › Site Settings › "Announcements" › "Settings": tick
+   "Enable announcements" and press "Save".
+4. The "Announcements" side tab › "Add Announcement": Title `u12r2 Site
+   notice`, `photo.png`; "Save". The folder holds `1.png`.
+5. On that row "Edit" › "Remove" › "Upload File" `photo.gif` › "Save".
+6. "Delete" on the row, then "Yes".
+7. "Add Announcement": Title `u12r2 Site remove`, `photo.png`; "Save"
+   (`2.png`). Then "Edit" › "Remove", change the title to `u12r2 Site
+   remove (edited)`, "Save".
+
+**Expected:** `1.gif` alone after step 5, no `1.*` after step 6, and
+after step 7 the save goes through and `2.png` is gone.
+
+**Observed:** after step 5 the folder holds `1.gif` and `1.png`, and
+after step 6 still both. In step 7 OJS saves (200) and clears the
+picture, but `2.png` stays. OMP and OPS answer 500, the panel stays
+open, and the announcement keeps both its new title and its picture:
+
+```
+{"error":"APP\\file\\PublicFileManager::getContextFilesPath(): Argument #1 ($contextId) must be of type int, null given, called in …/lib/pkp/classes/announcement/Announcement.php on line 306"}
+```
 
 ## Cause
 
 `Announcement::deleteImage()` in pkp-lib
-(`classes/announcement/Announcement.php`, line 302) finds the file to
+(`classes/announcement/Announcement.php`, line 301) finds the file to
 delete by reading the announcement back from the database:
 
 ```php
@@ -118,8 +157,8 @@ It has three call sites. Two of them run it after the database has
 already changed, so it reads the wrong picture or none:
 
 - `delete()` calls it after `parent::delete()`. `fresh()` on a deleted
-  model returns `null`, so `$image` is `null` (the warning above) and no
-  file is removed.
+  model returns `null`, so reading `->image` on it logs the warning
+  above on every delete, and `$image` is `null`: no file is removed.
 - `save()` calls it, for a new picture, after `parent::save()` has
   written the new picture data. That data holds only the upload's
   temporary file id and its alternate text, with no `uploadName`, so
@@ -145,10 +184,19 @@ Reach:
 
 - "Delete Announcement" on a journal's, press's or server's
   announcement, and on the site's (on screen, all three apps).
-- A replacement by a picture of another type, on both (on screen).
-- An announcement deleted because an edit's picture was refused
-  ([pkp-e2e#770](https://github.com/jardakotesovec/pkp-e2e/issues/770)):
-  its file stays (on screen).
+- A replacement by a picture of another type, on a journal's
+  announcements and on the site's (on screen).
+- The site's "Remove" then "Save" reaches `deleteImage()` with the old
+  picture, and fails on its folder test (see the Proposed fix): OJS
+  looks in `public/journals/0` and leaves the file, OMP and OPS throw
+  the `TypeError` above (on screen).
+- An edit whose new picture is refused (since `pkp/pkp-lib#13512`,
+  2026-10-16, the announcement survives it, with a 400 and "There was
+  an error uploading this image."): the old file stays (on screen).
+  `parent::save()` has already written the upload's temporary data
+  over the stored picture, so the page then shows a broken picture.
+  That overwrite is a fault of its own, before any file is touched, and
+  is left out of this fix.
 - Removing an announcement type, and deleting a journal, delete the
   announcements with a query (`Announcement::withTypeIds()->delete()` in
   `AnnouncementTypeDAO::deleteById()`, `Announcement::withContextIds()->delete()`
@@ -164,8 +212,9 @@ Reach:
 ## Proposed fix
 
 Take the picture to delete from the announcement as it was loaded,
-before the write, and pass it to `deleteImage()`; and pick the folder
-the way `storeTemporaryFile()` does
+before the write, and pass it to `deleteImage()`; on a replacement,
+remove the old file only once the new one is copied; and pick the
+folder the way `storeTemporaryFile()` does
 ([fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/announcement-image-files-left-behind/fix.diff)):
 
 ```diff
@@ -182,47 +231,44 @@ the way `storeTemporaryFile()` does
 
 - `save()` reads `$storedImage = $this->getOriginal('image')` before
   `parent::save()` (null for a new announcement). It passes it to
-  `deleteImage()` for a new picture, and uses it in place of
+  `handleImageUpload()` for a new picture, and uses it in place of
   `$this->fresh()->image` in the "Remove" condition.
-- `deleteImage(?object $image)` takes that picture and no longer calls
-  `fresh()`.
+- `handleImageUpload(?object $storedImage)` removes the stored file
+  only once the new file is copied, and only when its name differs
+  (a new picture of the same type has just overwritten it). A refused
+  picture or a failed copy leaves the old file in place.
+- `deleteImage(?object $image)` takes the picture to remove and no
+  longer calls `fresh()`, so a delete logs no warning.
 - `deleteImage()` picks the folder with `$this->assocId ?
   getContextFilesPath($this->assocId) : getSiteFilesPath()`, as
   `storeTemporaryFile()` does. Today it tests
   `$this->hasAttribute('assocId')`, which is always true because the
-  schema casts declare `assocId`. A site announcement, whose `assocId`
-  is null, would get `public/journals/0` on OJS, and a `TypeError` from
-  `getContextFilesPath(null)` on OMP and OPS. Today a site
-  announcement's delete and replacement never reach that line: on a
-  delete `$image` is null, and on a replacement it is the temporary
-  data, which names no file. With the first two changes both reach it.
-  The site's "Remove" then "Save" already reaches it today, because
-  `fresh()` still reads the old picture: OJS looks in
-  `public/journals/0` and leaves the file, and OMP and OPS answer 500
-  with the `TypeError` and keep it (code). The folder change mends that
-  path too.
+  schema casts declare `assocId`. So for a site announcement, whose
+  `assocId` is null, OJS looks in `public/journals/0`, and OMP and OPS
+  get the `TypeError` from `getContextFilesPath(null)`. Today only the
+  site's "Remove" then "Save" gets that far. With the `getOriginal()`
+  changes the site's delete and replacement do too, so the folder test
+  must change with them.
 
 `getOriginal()` returns the picture as the announcement was loaded with
 `find()`, which is how the edit and delete endpoints load it. After a
 save, Eloquent re-syncs the originals, so on an instance that was just
-saved it returns the new data. That happens on three paths: the nested
-`save()` in `handleImageUpload()` after a good copy, a failed copy in
-`handleImageUpload()`, and the refused-picture catch in the controller
-([pkp-e2e#770](https://github.com/jardakotesovec/pkp-e2e/issues/770)).
-It is harmless on all three. The nested save has no new picture and
-removes nothing, and on the other two `save()` has already removed the
-old file before `handleImageUpload()` runs. On its own, this fix therefore removes the old file on the
-refused-picture path, where the announcement is deleted too. Deleting
-the old file before `handleImageUpload()` writes the new one, as today,
-keeps a same-type replacement working.
+saved it returns the new data. Two paths do that, both inside
+`handleImageUpload()`, and neither removes a file it should keep: the
+nested `save()` after a good copy has no new picture, and a failed copy
+calls `$this->delete()`, whose original is by then the temporary data,
+which names no file.
 
 Tried on `main` in all three apps. The walk then showed the Expected:
-`1.gif` alone after the replacement, no file after the delete, and the
-picture's address answering 404. The site's announcements did the same
-(`public/site/announcements/` empty after the delete, every save and
-delete answering 200). As a neighbour check, a same-type replacement
-kept the new file, a title-only edit kept the file, and "Remove" then
-"Save" still deleted it, with the fix in and out.
+`1.gif` alone after the replacement, no file after the delete, the
+picture's address answering 404, and no warning. An edit whose new
+picture is refused (a PNG named `renamed.jpg`) kept `1.png`, with the
+fix in and out. As a neighbour check, a same-type replacement kept the
+new file, a title-only edit kept the file, and "Remove" then "Save"
+still deleted it, with the fix in and out. On the site's announcements
+(walked on OMP) the replacement left `1.gif` alone, the delete emptied
+the folder, and "Remove" then "Save" answered 200, kept the new title
+and removed `2.png`.
 
 **Alternatives:**
 
@@ -230,6 +276,9 @@ kept the new file, a title-only edit kept the file, and "Remove" then
   `parent::save()`. This fixes the two call sites, but deletes the old
   file even when the write then fails, and keeps a database read per
   call.
+- Remove the old file before `handleImageUpload()` copies the new one,
+  where `save()` calls `deleteImage()` today. Simpler, but a refused
+  picture or a failed copy then removes the old file as well.
 - Delete every `{id}.*` file in the folder. This would also clean up
   after past replacements, but it guesses at file names instead of
   reading the stored one.
@@ -259,47 +308,64 @@ kept the new file, a title-only edit kept the file, and "Remove" then
   change the same lines at the top of `save()`, so whichever lands
   second needs a trivial rebase.
 
-Small: three call sites, one signature and the folder test in one
+Small: three call sites, two signatures and the folder test in one
 class, with a test.
 
 ## Evidence
 
 - Kept script:
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/announcement-image-files-left-behind/walk.js)
-  (helpers and pictures in
-  `shared/playwright/checks/issues/refused-image-deletes-announcement/`),
-  run on an install freshly loaded with the default dataset:
+  (helpers in `lib.js` and the pictures beside it), run on an install
+  freshly loaded with the default dataset:
   `node bin/probe.js all shared/playwright/checks/issues/announcement-image-files-left-behind/walk.js`.
-  It lists the public files folder after each step and reads the
-  announcement's `image` setting from the database; the Control follows
-  the Steps. `MODE=neighbour` runs the neighbour check (a PNG replacing
-  the PNG, a title-only edit, then "Remove" and "Save"). `MODE=site`
-  walks the site's announcements: as `admin`, Administration › Hosted
+  It lists the public files folder after each step, reads the
+  announcement's `image` setting from the database, and records the
+  server log lines each step causes; the Control and the delete of an
+  announcement without a picture follow the Steps. `MODE=neighbour`
+  runs the neighbour check (a PNG replacing the PNG, a title-only edit,
+  then "Remove" and "Save"). `MODE=site` walks the site's
+  announcements: as `admin`, Administration › Hosted
   Journals › "Create Journal" for a second journal (`u12r2second`), Site
   Settings › "Announcements" › "Settings" › "Enable announcements", then
-  the same add, GIF replacement and delete, listing
-  `public/site/announcements/`.
-- Walked on `main` (OJS, OMP, OPS) and `stable-3_5_0` (OJS, OMP, OPS) on
-  PostgreSQL, with pkp/datasets 566bb1f (2026-10-03). Steps 6 and 8 (the
-  picture's address) were walked on `main` only; the 3.5 walk read the
-  folder. The site case (add, GIF replacement, delete) was walked on
-  `stable-3_5_0` and on `main` (with the fix in and out). The site's
-  "Remove" then "Save", today and with the fix, was read in the code,
-  not walked. `Announcement.php` is identical in the `main` and
-  `stable-3_5_0` lib/pkp commits below.
-- Tips: `main` OJS ff004d0973 (lib/pkp 987776cd04), OMP 3b0ecf794c and
-  OPS c8af945bb7 (lib/pkp 3dc90c81a6); `stable-3_5_0` OJS c1cee76b95
-  (lib/pkp 771474347e), OMP 9c5e24246c and OPS 38b61882d3 (lib/pkp
-  cf3f984335).
-- 3.4 and 3.3 (code): lib/pkp `stable-3_4_0` 767353f4fe and
-  `stable-3_3_0` ac3fa73402. 3.3's announcement schema has no image.
+  the same add, GIF replacement and delete, then "Remove" and "Save"
+  with a title change on a second announcement, listing
+  `public/site/announcements/` (the site Steps).
+- `MODE=refused` walks an edit whose new picture is refused
+  (`renamed.jpg`, a copy of `photo.png`): the answer, the folder, the
+  stored `image` setting and the announcement's page.
+- 2026-10-23, on PostgreSQL with pkp/datasets 300c68e (2026-10-22): the
+  journal Steps, the Control and the delete without a picture walked on
+  `main` and `stable-3_5_0` (OJS, OMP, OPS); the warning names line 301
+  on `main` and 302 on 3.5, whose file has one more `use` line. The
+  site Steps walked on `main` (OJS, OMP, OPS). The fix tried on `main`:
+  the journal Steps, the neighbour check and `MODE=refused` on all
+  three apps, the site Steps on OMP only (OPS runs the same code); the
+  neighbour check and `MODE=refused` also without the fix.
+- 2026-10-03, with pkp/datasets 566bb1f: the site's add, replacement
+  and delete walked on `stable-3_5_0`, and on `main` with the fix's
+  first version (which removed the old file before the copy). The
+  site's "Remove" then "Save" was not walked on 3.5.
+- Tips (2026-10-23): `main` OJS 3cf9aa91a8, OMP 178e8b34b2 and OPS
+  5091e916d9 (lib/pkp 1f415a07ca); `stable-3_5_0` OJS 0b1ae35f04, OMP
+  a150eee76b and OPS 18506a5b4d (lib/pkp 5b54f59ed7). Since 2026-10-03,
+  `pkp/pkp-lib#13512` (main 07bc43fe67, 2026-10-16; 3.5 092ec34b0f)
+  moved the image check into `FileManager::isValidImage()` and removed
+  `$announcement->delete()` from the `StoreTemporaryFileException`
+  catch in `PKPAnnouncementController::edit()`. It left `delete()`,
+  `save()` and `deleteImage()` as they were.
+- 3.4 and 3.3 (code): lib/pkp `stable-3_4_0` 366030b017 (its
+  `PKP\announcement\Repository::delete()` and `edit()` still remove the
+  file of the announcement as loaded) and `stable-3_3_0` 126b86bc2e
+  (its announcement schema has no image).
 - Introduced: `git blame` on `deleteImage()`'s `fresh()` line gives
   0b2ca57ed8 (PR `pkp/pkp-lib#10787`, merged 2025-01-23). At its parent,
   `deleteImage()` read `$this->getAttribute('image')`. That held the
-  stored picture on a delete, and the new one on a replacement. The edit
-  branch was gated on a top-level `temporaryFileId` in c9cda06979, which
-  the panel never sends. 070aa6f77b (2024-09-30) read it from the
-  picture, so replacements reached `deleteImage()`. Both commits are in
-  PR `pkp/pkp-lib#10382` (merged 2024-10-01).
-- Upstream: pkp/pkp-lib, pkp/ojs, pkp/omp, pkp/ops and pkp/ui-library
-  were searched by symptom words and by `deleteImage`.
+  stored picture on a delete, and the new one on a replacement, and
+  logged nothing; the `fresh()` call brought the warning with it. In
+  c9cda06979 the edit branch tested a top-level `temporaryFileId`,
+  which the panel never sends; 070aa6f77b read `temporaryFileId` from
+  the picture instead.
+- Upstream: searched by symptom words, by `deleteImage` and by the
+  warning's text. `pkp/pkp-lib#12744` (open) quotes the warning in its
+  server log, but it is about `.jpeg` pictures being refused, not about
+  the files or the warning.
