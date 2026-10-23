@@ -1170,7 +1170,7 @@ Basis: test run. <sup>f-ops1</sup>
 **A18 — Any signed-in account could comment by hand on unpublished submissions and learn their title and first author** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its heads `08024165dd`, 2026-10-16, and `9be1c9efb0`, 2026-10-21, before its merge, on the three apps): a comment on a version that is not published answers `422` "You are only allowed to comment on the most recently published publication.", every comments request is refused while "Enable Public Comments" is off, and nothing is kept or tasked; a comment on the published version with comments on, through the box and by request, is still accepted. Report: [U14-A18](../issues/U14-A18-comment-request-unpublished-submission.md). <sup>f-a18</sup>
 
 <a id="a19"></a>
-**A19 — Deleting all of a comment's reports at once failed with a server error unless it had exactly one** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its heads `08024165dd`, 2026-10-16, and `9be1c9efb0`, 2026-10-21, before its merge): `DELETE api/v1/comments/{id}/reports` now deletes every report and its tasks, for two reports, one and none alike. Report: [U14-A19](../issues/U14-A19-delete-all-comment-reports-fails.md). <sup>f-a19</sup>
+**A19 — Deleting all of a comment's reports at once failed with a server error unless it had exactly one** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its heads `08024165dd`, 2026-10-16, and `9be1c9efb0`, 2026-10-21, before its merge): `DELETE api/v1/comments/{id}/reports` now deletes every report and its tasks, for two reports, one and none alike. Merged 2026-10-23 and walked again at the merged tip; issue [pkp-e2e#973](https://github.com/jardakotesovec/pkp-e2e/issues/973) closed. <sup>f-a19</sup>
 
 
 <a id="a20"></a>
@@ -2428,7 +2428,7 @@ answered 200, its report and its two task rows gone. Control: `DELETE
 report and its tasks gone. The server log held one
 `[500]: DELETE …/api/v1/comments/{id}/reports` line per failing request
 and no other error.
-Issue report: [pkp-e2e#973](https://github.com/jardakotesovec/pkp-e2e/issues/973) ([docs/issues/U14-A19-delete-all-comment-reports-fails.md](../issues/U14-A19-delete-all-comment-reports-fails.md)).
+Issue report: [pkp-e2e#973](https://github.com/jardakotesovec/pkp-e2e/issues/973), closed 2026-10-23 at the merge of pkp/pkp-lib#13550 (`e41e47b64c`), its walk re-run at the merged tip (ojs `0686a5d520`, lib/pkp `b90815748c`): both reports and their tasks deleted with 200 and no server error; the report and its walk were deleted then (git history keeps them).
 
 <a id="fn-f-a20"></a>
 **f-a20 — A20 (retired).** Retired 2026-10-21: the ruling quoted under
