@@ -116,9 +116,15 @@ headed "Enroll an Existing User as Reviewer"):
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Search By Name" (user autocomplete) | yes | Searches users already enrolled in the journal who hold no reviewer role of any kind. On a press, membership in either stage's reviewer group excludes the user on both stages. Submitting with the field empty shows the generic "This field is required." above it. Picking a user clears the message and the submit succeeds ([A14](#a14), retired) <sup>e</sup> |
+| "Search By Name" (user autocomplete) | yes | Searches users already enrolled in the journal who hold no reviewer role of any kind. On a press, membership in either stage's reviewer group excludes the user on both stages. A name that matches no such user, a reviewer's name included, lists a single suggestion, "No Matches", which can be picked like a name. Picked, it fills the box with "No Matches", and "Add Reviewer" then fails ⚠ [A50](#a50). "Add Reviewer" with the box empty is refused on the spot: the generic "This field is required." shows under the box, above its "Search By Name" label. A name typed and left without picking a suggestion is cleared when the box loses focus, so it is refused the same way. Picking a user clears the message and the submit succeeds ([A14](#a14), retired) <sup>e</sup> |
 | Reviewer role select | yes | Always shown. Even a single reviewer group renders as a one-option select, unlike Create New Reviewer, which then hides it <sup>e</sup> |
 | "Appear on the masthead" checkbox | — | Shown ticked and disabled, as in Create New Reviewer <sup>e</sup> |
+
+**Closing the enroll form.** With a name typed in "Search By Name" but not
+picked, the window's top "Close" first asks "The data on this form has
+changed. Do you wish to continue without saving?", where the reviewer
+search just closes. "OK" closes it, nobody added (a picked user or "Cancel"
+not tried). <sup>e</sup>
 
 **Edit Review window** (row action "Edit"; title "Edit Review"): the two due
 dates, "Review Type" radios, "Public Visibility" checkbox, the "Files To Be
@@ -946,12 +952,13 @@ are in the footnote. <sup>s</sup>
      Existing User as Reviewer" with "Search By Name", a one-option
      reviewer role select and the ticked, disabled "Appear on the masthead"
      box. Press "Add Reviewer" with the field empty: "This field is
-     required." shows above it. Type the Author's name and pick them: the
-     message clears. Press "Add Reviewer": the row reads "Request Sent".
+     required." shows under the box. Type the Author's name and pick them:
+     the message clears. Press "Add Reviewer": the row reads "Request Sent".
    - **The users list**: the journal's users list shows the user now also
      holds the Reviewer role.
    - **Control**: typing the name of an existing reviewer into the same
-     autocomplete finds nothing. <sup>s</sup>
+     autocomplete finds no one: the list offers only "No Matches"
+     ([A50](#a50)). <sup>s</sup>
 
 5. **Deadlines are validated**
 
@@ -1168,13 +1175,15 @@ App-specific:
       Assert through the search, because the window's opening, unsearched
       list does not apply the split ⚠ [OMP2](#omp2).
     - **Internal Review's "Enroll Existing User"**: type the External
-      Reviewer's name into "Search By Name": nothing is found.
+      Reviewer's name into "Search By Name": no one is found, the list
+      offers only "No Matches".
     - **Control**: type the Author's name: found.
     - **External Review's "Add Reviewer"**: record "Send to External
       Review", press "Add Reviewer" there and repeat: now the External
       Reviewer is found and the Internal one is not [OMP1](#omp1).
     - **External Review's "Enroll Existing User"**: type the Internal
-      Reviewer's name: nothing is found; the Author's name is still found.
+      Reviewer's name: only "No Matches" is offered; the Author's name is
+      still found.
       <sup>o</sup> <sup>s</sup>
 
 14. **The recommendation runs through the table** {OJS}
@@ -1376,6 +1385,7 @@ Left out of the scenarios above, by reason:
   - "Resend Review Request" refusing inverted dates with the window kept open, and accepting equal ones (Fields, Rule 9): likely a bullet in scenario 12, before its send
   - the Add Reviewer window's top-bar "Close" with a reviewer picked closing at once, nothing asked and no reviewer added (Fields): likely a bullet in scenario 1, after its "Change"
   - the "Thank Reviewer" window's "Close" asking "The data on this form has changed. Do you wish to continue without saving?" after a changed message with "Do not send email to Reviewer." ticked as well, and "Cancel" keeping the window with the change (Fields): likely a bullet in scenario 9, which thanks the reviewer
+  - the "Enroll Existing User" form's top "Close" asking "The data on this form has changed. Do you wish to continue without saving?" with a name typed in "Search By Name" but not picked, "OK" closing it with nobody added; such a name cleared when the box loses focus and refused with "This field is required." (Fields, Enroll Existing User mode): likely bullets in scenario 4, which opens the form
 - **Rarely met**:
   - submitting a review for the reviewer: "Save Changes" in "Modify Review" on an unanswered, an accepted or a "Request Resent" row, with the row, its menu, the reviewer's side and the missing acceptance email after it, and {OJS} the save refused without a "Recommendation" (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a request with no review: "Request Sent:", "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", the empty blocks, and "Mark as Complete" disabled beside its recommendation message {OJS} or, with a review form, its incomplete-review message (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -1435,6 +1445,7 @@ Left out of the scenarios above, by reason:
   - A47 (a re-sent request past its response date never reading "Overdue", with no "Send Reminder"; Rule 2)
   - A48 (a review-form answer written as markup in the "View changes" window of a review-form change; Side effects)
   - A49 (both XML exports leading to an error page and no file until Rule 15's first download or upload; Rule 15)
+  - A50 (the "No Matches" suggestion picked in "Enroll Existing User" and "Add Reviewer" failing on the server, the window hanging on a spinner; Fields)
 - **No seed**:
   - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reviewer Reminded" and log stamps (Rule 13, Side effects, Settings)
   - a section's default "Review Form" preselected in the Add Reviewer window (Rule 10, Settings): the seed sets no default review form on a section
@@ -1492,6 +1503,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A46](#a46) | "Resend Review Request" with the review due date before the response date shows a "Please try again" alert, and the window never states the date rule | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A47](#a47) | A late, unanswered re-sent review request is not marked "Overdue" and offers no "Send Reminder" | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A49](#a49) | Both XML entries of "Download Review Form" open a "not authorized" page until a review PDF is downloaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
+| [A50](#a50) | Picking the "No Matches" suggestion in "Enroll Existing User" and pressing "Add Reviewer" fails on the server: the window hangs on a spinner with no message | 🐞 | user-visible · crash: server | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -2155,6 +2167,18 @@ at its first XML review download, and so does PKP's default test
 dataset as loaded.
 Basis: probe, 2026-10-15. <sup>[f-a49](#fn-a49)</sup>
 
+<a id="a50"></a>
+**A50 — Picking the "No Matches" suggestion in "Enroll Existing User" and pressing "Add Reviewer" fails on the server: the window hangs on a spinner with no message** · 🐞 · user-visible · crash: server.
+In "Enroll Existing User", a name that matches no user without a
+reviewer role, a reviewer's own name included, lists the single
+suggestion "No Matches", and it can be picked like a name. It fills
+"Search By Name" with "No Matches". "Add Reviewer" then fails on the
+server: the window stays open with a spinner beside a greyed-out "Add
+Reviewer", nothing on screen says what happened, and after a reload the
+Reviewers panel shows that nobody was added. Expected: "No Matches"
+cannot be picked, or the field's own "This field is required." shows.
+Basis: probe, 2026-10-23. <sup>[f-a50](#fn-a50)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -2566,8 +2590,15 @@ interests repository, group joined with masthead flag on. Welcome mail
 reply-to = journal principal contact; skipped by `skipEmail`.
 `EnrollExistingReviewerForm`: autocomplete op
 `getUsersNotAssignedAsReviewers` (excludes holders of any reviewer group in
-the context); validation `isValidUserAndGroup` (user exists, has no
-reviewer role, group is a reviewer group of this context); template
+the context); validation: `FormValidator` required on `userId` and
+`userGroupId` only; `isValidUserAndGroup` (user exists, has no reviewer
+role, group is a reviewer group of this context) runs in `execute()`
+after `(int)` casts and throws `invalid user or userGroup ID` (an
+uncaught 500, A50) rather than refusing the form;
+`GridHandler::noAutocompleteResults()` answers `[{label: 'No Matches',
+value: ''}]`, and jQuery UI fills the empty value from the label, so
+`AutocompleteHandler.itemSelected` writes "No Matches" into the hidden
+`userId` (main and `stable-3_5_0` identical); template
 `enrollExistingReviewerForm.tpl` (AFFW-631..633). Live-probed 2026-08-02
 (OJS + OMP, plus a two-group OJS scratch journal): the create-mode group
 select is hidden with one reviewer group and shown with two; the enroll
@@ -2584,7 +2615,19 @@ driven end-to-end on a scratch journal granted the role and produced a
 "Request Sent" row. Same probe: the welcome mail carried
 the username and generated password and first sign-in landed on the "Change
 Password" screen; an enrolled user held the reviewer role permanently
-afterwards (visible in the journal's users list).
+afterwards (visible in the journal's users list). Live-probed
+2026-10-23 (OJS and OMP `main`, OJS `stable-3_5_0`; PKP's default test
+dataset, the Journal editor or Press editor, two runs per app and line;
+note f-a50): the enroll form's frame as above, the select's one option
+"Reviewer" on OJS and "External Reviewer" on OMP's External Review; an
+empty "Add Reviewer" showed "This field is required." between the box
+and its "Search By Name *" label, which the legacy form prints below the
+field, with no request sent; a name typed and left unpicked was cleared
+on blur and refused the same way; a user picked after the refusal
+cleared the message and the add saved; with a name typed and unpicked,
+the top "Close" asked the question quoted in Fields, and "OK"
+closed the window (no Add Reviewer window left). The existing reviewer's
+name ("Janssen") listed only "No Matches".
 
 <a id="fn-f"></a>
 **f** — Due dates: `HasReviewDueDate` trait — context
@@ -4124,6 +4167,36 @@ submission wizard's, reviewers' and revision files go through
 does; OMP runs the same lib/pkp code. Kept script
 `shared/playwright/checks/U27/H19/h19.js`, `ORDER=sub|lib`.
 Issue report: [pkp-e2e#998](https://github.com/jardakotesovec/pkp-e2e/issues/998) ([docs/issues/U27-A49-review-form-xml-download-error-page.md](../issues/U27-A49-review-form-xml-download-error-page.md)).
+
+<a id="fn-a50"></a>
+**f-a50** — Live-probed 2026-10-23 (OJS and OMP `main`, OJS
+`stable-3_5_0` the same; PKP's default test dataset, the Journal editor
+or Press editor, OJS submission 12 in Review and OMP submission 2 in
+External Review, round 1; two runs per app and line). The autocomplete
+`GET …/reviewer-grid/get-users-not-assigned-as-reviewers` answered
+`{"status":true,"content":[{"label":"No Matches","value":""}]}` for a
+string nobody has ("Zqxwvu") and for a dataset reviewer's family name
+("Janssen"; on OMP an Internal Reviewer only, searched on External
+Review). Picking the entry wrote "No Matches" into the box and into the
+hidden `userId`, and leaving the box kept both. "Add Reviewer" sent
+`POST …/$$$call$$$/grid/users/reviewer/reviewer-grid/enroll-reviewer`,
+which answered 500 with an empty body, twice per run; the server log
+read `PHP Fatal error: Uncaught Exception: invalid user or userGroup ID`
+in `EnrollExistingReviewerForm.php` (`execute()`). Read 5 s later: the
+window open, a spinner beside the disabled "Add Reviewer", no field
+message, no notice; after a reload the Reviewers panel was unchanged.
+No page script error. Mechanism (main and 3.5 identical, note e): the
+form's only checks are `FormValidator` "required" on `userId` and
+`userGroupId`; `isValidUserAndGroup()` runs in `execute()` after `(int)`
+casts and throws; `GridHandler::noAutocompleteResults()` answers the
+entry with an empty `value`, jQuery UI's autocomplete fills an empty
+`value` from the label, and `AutocompleteHandler.itemSelected` writes it
+into the hidden field. Control, every run: a copyeditor of the dataset
+picked and submitted saved (200; the notice "{name} was assigned to
+review this submission and sent an email notification." and a "Request
+Sent" row, kept after a reload). OPS has no review stage (no "Reviewers"
+panel, no "Add Reviewer" on a preprint). Kept script
+`shared/playwright/checks/U27/I23A/i23a.js`.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
