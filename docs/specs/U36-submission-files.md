@@ -269,6 +269,18 @@ record what each role is offered once the list is on screen. <sup>b</sup>
       click on the shaded page beside the window and reloading the page
       with the window open also keep nothing, and nothing asks either
       ⚠ [A30](#a30). <sup>d11</sup>
+    - 10b. **Editing through the REST API.** A program can also edit a
+      file's details, signed in as an Editor with a back-office page's
+      CSRF token:
+      `PUT {journal}/api/v1/submissions/{id}/files/{fileId}?stageId=…`.
+      It too changes details only. A `fileStage` in it (move the file to
+      another list) or an `assocType` and `assocId` (attach it to another
+      item, a galley for one) is ignored without a message: the edit
+      succeeds, the file stays where it was and the rest is saved. The
+      file's "History" and the submission's Activity Log gain the line an
+      "Update File Details" save adds (Rule 13a). An edit asking for
+      nothing else, or nothing at all, also succeeds and adds that line.
+      No screen sends such a request. <sup>d23</sup>
 <a id="dependent-files"></a>
 11. **Dependent files.** An HTML or XML file carries its own "Dependent
     Files" list (images, style sheets, media the page needs), shown under
@@ -983,6 +995,7 @@ Left out of the scenarios above, by reason:
   - step 1 of the upload wizard before a component is chosen: the upload box absent from the accessibility snapshot, and each drop-down found by its role and label ([A9](#a9)): the guards the two issue reports propose
   - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes
   - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes
+  - the REST API edit with `fileStage`, or `assocType` and `assocId`, beside a new `name`: the file still on its list after a reload, under the new name, with one more "The metadata for file…" line in its "History" (Rule 10b)
 - **Nothing new to test**:
   - "Cancel" after revising a file renamed since its last upload: the previous file back, its rename kept, and no line of the cancelled upload in its "History" (Rule 9)
   - the header "Close" after a revision: the new file kept, the earlier version a "Download" in "History" (Rule 9)
@@ -2227,6 +2240,32 @@ list read "article.pdf" at once and after a reload, and "Update File Details"
 reopened on "article.pdf". "Cancel" with a changed name likewise raised no
 question and kept the old name (f-a18). A preprint server's workflow shows no
 file list and no "Update File Details".
+
+<a id="fn-d23"></a>
+**d23** — `PKPSubmissionFileController::edit()` unsets `submissionId`,
+`fileId`, `uploaderUserId`, `id`, `fileStage`, `assocType` and `assocId` from
+the request's params before `Repository::edit()` (pkp-lib `d43737309c`,
+pkp/pkp-lib#13581). `schemas/submissionFile.json` marks none of `fileStage`,
+`assocType`, `assocId` `readOnly` or `writeDisabledInApi` (`id` is
+`readOnly`), so `tools/buildSwagger.php` lists them under
+`SubmissionFileEditable`, the PUT body in the API reference ("All params are
+optional…"); whether the schema should mark them is the team's call. The
+params come from `$illuminateRequest->input()`, which merges the query
+string, so the required `stageId` keeps them non-empty and the
+`api.submissionsFiles.400.noParams` refusal never answers. Live-probed
+2026-10-23 (Rule 10b; OJS, OMP and OPS `main`, two runs each, the dataset's
+editor with the page's CSRF token, a different file each run; OJS and OMP a
+"Submission Files" file, OPS a galley's file): `PUT
+…/api/v1/submissions/{id}/files/{fileId}?stageId=…` with `{"fileStage":
+<another stage>}` alone, with `{"assocType": 520, "assocId": 1}`, with both
+and `name.en`, and with `{}`, and a POST with `X-Http-Method-Override: PUT`
+(what the screens send) with `fileStage` alone: 200 each. The response, a GET
+after and the database kept the stored `fileStage`, `assocType` and `assocId`
+(OJS and OMP: stage 2, no association; OPS: stage 10, galley association
+521); `updated_at` moved and `name.en` was saved. Each accepted edit wrote two
+`submission.event.fileEdited` ("The metadata for file "{file name}" was edited
+by {username}.") rows, one on the file and one on the submission, under the
+editor's name.
 
 <a id="fn-u"></a>
 **u** — `Repository::supportsDependentFiles()`: mimetype `text/html`,

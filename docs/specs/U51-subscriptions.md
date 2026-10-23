@@ -258,7 +258,8 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
    is not restricted. An article published with "Don't Assign To An
    Issue" ([Issues](U50-issues.md)) belongs to no issue; on a journal
    that requires subscriptions it is restricted like an article in a
-   restricted issue. Its galley link on the article's page shows the
+   restricted issue, and no screen can make it open access
+   ⚠ [A32](#a32). Its galley link on the article's page shows the
    padlock (Rule 10). A signed-out visitor pressing it is sent to the
    Login page, and a signed-in Reader without a subscription is turned
    away as Rule 12 says (on a journal whose payments are not set up, to
@@ -267,6 +268,7 @@ sidebar, Settings bullet 13), headed "Subscription"; its lines are Rule
    unless "Users must be registered and log in to view open access
    content." is ticked (Rule 13), when a signed-out visitor pressing one
    is sent to the Login page. <sup>e</sup> <sup>m</sup> <sup>f-a30</sup>
+   <sup>f-a32</sup>
 8. **What stays open.** Restriction covers the galleys only: an
    article's galleys (its additional files included) and the issue's
    "Full Issue" galleys. The article's page, with its title, authors,
@@ -1518,6 +1520,8 @@ Left out of the scenarios above, by reason:
   - A31 (the month and week lists, the fee on a locked link and a
     subscription's end date read in Uzbek (Latin); Fields, the "Access"
     tab and the "Subscription Policies" tab; Rules 10, 27, 33)
+  - A32 (an article published with no issue that no screen can make
+    open access; Rule 7)
   - OPS1 (a preprint server's "Posting Mode" not kept; Purpose;
     scenario 16 passes it)
 - **No seed**:
@@ -1579,6 +1583,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | "Publishing Mode" shows no choice on a new journal, which publishes as open access | ❓ | minor | — |
 | [A5](#a5) | Without payments set up, a signed-in reader pressing a locked galley lands on the home page with no word | ❓ | user-visible | — |
 | [A6](#a6) | With the manual method, a bought article or issue never opens | ❓ | user-visible | — |
+| [A32](#a32) | On a journal that requires subscriptions, an article published with no issue stays restricted, and no screen can make it open access | ❓ | user-visible | — |
 | [A2](#a2) | Retired: a "Cost" or "Duration" that is not a number is refused with a notice | ✅ | retired | — |
 | [A3](#a3) | Retired: "Subscription Policies" refuses an empty contact name, email or mailing address | ✅ | retired | — |
 | [A30](#a30) | Retired: an article published with no issue follows the journal's subscription and "registered readers" restrictions | ✅ | retired | — |
@@ -1965,6 +1970,22 @@ translated), so it prints raw. The fix is a corrected text in OJS's
 translation files.
 Basis: probe, 2026-10-21. <sup>f-a31</sup>
 
+<a id="a32"></a>
+**A32 — An article published with no issue cannot be made open access on a journal that requires subscriptions** · ❓ · user-visible.
+On a journal that requires subscriptions, every article published with
+"Don't Assign To An Issue" is restricted (Rule 7), and no screen offers
+a way to open it to everyone. The per-article "Open Access" box is on an
+issue's "Table of Contents" tab, which lists only that issue's articles.
+The publish window ("Review Publishing Details") and the article's
+Publication pages offer no access choice: the "Access" group of
+"Publication Settings" holds only "URL Path". So the article's galley
+shows the padlock and sends a signed-out visitor to the Login page for
+as long as the journal requires subscriptions. Question: should an
+article published with no issue have its own "Open Access" choice?
+Lean: yes; otherwise a journal that publishes articles outside issues
+can open none of them short of making the whole journal open access.
+Since: 2026-10-21 · Basis: probe, 2026-10-23. <sup>f-a32</sup>
+
 ### OPS
 
 <a id="ops1"></a>
@@ -2279,6 +2300,9 @@ Issue report: pkp-e2e-sec#4 (closed 2026-10-21); the report and its kept script 
 <a id="fn-f-a31"></a>
 **f-a31** — OJS `locale/uz_Latn/manager.po` writes `manager.subscriptionPolicies.xMonths` as "{$ x} oy" and `.xWeeks` as "{$ x} hafta"; OJS `locale/uz_Latn/locale.po` writes `reader.purchasePrice` as "({$ currency} {$ price})" and both `user.subscriptions.expires` and `user.subscriptions.expired` as "Muddati: {$ date}": each placeholder has a space after the `$`. lib/pkp `classes/i18n/translation/LocaleBundle.php::_format()` replaces only the exact `{$x}`, `{$currency}`, `{$price}`, `{$date}`, so the text prints as the file has it. The English strings and their callers: notes d and f-a15 (`AccessForm`, `SubscriptionPolicyForm`), l (`galley_link.tpl`), f (`userSubscriptions.tpl`) and k (the block's `block.tpl`). Live-probed 2026-10-09 (Fields, the "Access" tab and the "Subscription Policies" tab; Rules 10, 27, 33), OJS main (ojs `6d5b793c4e`, lib/pkp `d1bc3a9ecc`), two runs of each walk, each run on freshly loaded data and its own scratch journal, after the Site Administrator installed "Uzbek (Latin)/o‘zbek (lotin) (uz_Latn)" from the site's "Install Locale" window and the journal ticked it under "UI"; the interface was switched from the user menu (page language `uz-Latn`). The lists: "Delayed Open Access", labelled "Kechiktirilgan ochiq kirish", held 61 entries in two texts, "##common.disabled##" once and "{$ x} oy" 60 times, for the scratch Journal Manager and for the Site Administrator; the two month lists under "Obuna muddati tugashi haqida eslatmalar" read "##common.disabled##" and "{$ x} oy" twelve times, the two week lists "##common.disabled##" and "{$ x} hafta" three times, for the Journal Manager and for a scratch Subscription Manager. The fourth "Delayed Open Access" entry saved stored 3 and read "{$ x} oy" right after the save and after a reload, and "3 Months" in English; the third month entry and the second week entry saved on "Subscription Policies" stored 2 and 1, read "{$ x} oy" and "{$ x} hafta" after a reload, and "2 Months" and "1 Weeks" in English. The English controls on the same journals read 61, 13 and 4 different entries. The reader's side, on a scratch journal requiring subscriptions with payments set up, a "Purchase Article" fee of 10 USD, one subscriber running to 2026-12-31 and one ended on 2025-12-31: the galley link read "Requires Subscription or Fee PDF (USD 10)" in English and ended "({$ currency} {$ price})" in Uzbek (Latin), signed out on the article's page and the issue's page and as the ended subscriber on the article's page; "My Subscriptions" and the sidebar block read "Expires: 2026-12-31" and "Expired: 2025-12-31" in English and "Muddati: {$ date}" for both subscribers in Uzbek (Latin). The two Uzbek (Latin) strings are the same words, so with the date filled in the two lines would still read alike. A text the language lacks shows as its key (each list's first entry, "##common.disabled##") or in English, which is no finding. Not driven: `stable-3_5_0`, whose files (ojs `c6e2c3a879`) write the same five strings, the language not being installed on that line's install; a "Full Issue" galley's fee; a non-expiring subscription and an institutional row. Read in the files, not seen: no other language's `manager.po` writes the two list strings with a space (`uz` leaves them untranslated), and the OJS Uzbek (Latin) files write the placeholder this way in dozens of other strings, on other features' screens.
 Issue report: [pkp-e2e#1054](https://github.com/jardakotesovec/pkp-e2e/issues/1054) ([docs/issues/U51-A31-uzbek-subscription-texts-placeholders-raw.md](../issues/U51-A31-uzbek-subscription-texts-placeholders-raw.md)).
+
+<a id="fn-f-a32"></a>
+**f-a32** — Live-probed 2026-10-23 (Rule 7; A32), OJS main (ojs `3cf9aa91a8`, lib/pkp `1f415a07ca`), PKP's default test dataset (pkp/datasets `300c68e`), two runs, the data reset between them, as rvaca (Journal Manager). "The journal will require subscriptions…" saved on Settings › Distribution › "Access" (stored `publishingMode` 1). Article 17, published in "Vol. 1 No. 2 (2014)" with a PDF galley, was unpublished and published again from "Review Publishing Details" with "Don't Assign To An Issue" (the window had preselected "Assign To Current/Back Issue"); stored afterwards: status 3, `issue_id` NULL, `access_status` 0. Neither the publish window nor any Publication page of the published version ("Title & Abstract", "Contributors", "Metadata", "References", "Funding", "JATS XML", "Body Text", "Galleys", "Media", "Permissions & Disclosure", "Publication Settings") held an access checkbox, radio or list. "Publication Settings" showed the groups "Placement" ("Issue Assignment" with "Don't Assign To An Issue" selected, "Section", "Categories"), "Publication Timing", "Version and Updates", "Display" ("Cover Image", "Pages"), "Access" ("URL Path" alone) and "Identity"; "JATS XML"'s one box reads "Make available with publication". Neither issue's "Table of Contents" grid listed article 17. Signed out: the landing page's link `a.obj_galley_link.pdf.restricted` ("Requires Subscription PDF"); pressing it opened the Login page with `loginMessage=reader.subscriptionRequiredLoginText`, and `article/download/17/3` answered 302 there. Control: with the journal saved back to open access, the same link had no `restricted` class and the download answered 200 `application/pdf`. Code, OJS main `3cf9aa91a8`: `ArticleHandler::view()` and `userCanViewGalley()` already let through a publication whose `accessStatus` is `Submission::ARTICLE_ACCESS_OPEN`, with an issue or without (note e); the only screen that writes `accessStatus` is `TocGridHandler::setAccessStatus()` (note m), whose grid lists one issue's articles. The fix behind A30 (OJS `dde4cc70f4`) restricted such articles and added no setting to open them (note f-a30). Not driven: institutional (domain/IP) subscriptions and purchases on such an article (note f-a30 covers the subscriber and the Reader without one).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — Live-probed 2026-09-23 by the Navigation menus claim check (its OPS2): "Saved" shown, the next load with neither choice marked, "Archives" still in the header; the Search claim check saw every role still reach the Search page. Live-probed 2026-09-25 (td1) on a scratch server: "OPS will not be used…" and "The server will provide open access…" each saved with "Saved" and came back unselected; with the second saved, the visitor and the Reader still saw "Archives", the preprint page and its PDF. OPS `schemas/context.json` has no `publishingMode`, so the context API drops the value (note b); OPS `OpsServerMustPublishPolicy` and the archive header still read it.
