@@ -1,0 +1,35 @@
+From 1143997474c051edad00ba6e29fd6a5d341f1314 Mon Sep 17 00:00:00 2001
+From: Jarda Kotesovec <jarda_kotesovec@sfu.ca>
+Date: Sat, 24 Oct 2026 03:50:20 +0000
+Subject: [PATCH] Use Electron for pkp-lib integration tests on stable-3_3_0
+ (Chrome 144+ breaks)
+
+0bdd4bfe68 moved the stable-3_3_0 data suite (Cypress 5.6) to its bundled
+Electron, but the pkp-lib and plugin integration step still asked for
+Chrome, so Filenames.spec.js and Multilingual.spec.js fail on every
+stable-3_3_0 job that reaches them (Chrome 155 on the runners).
+---
+ .github/actions/run-pkp-lib-and-plugin-integration-tests.sh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/.github/actions/run-pkp-lib-and-plugin-integration-tests.sh b/.github/actions/run-pkp-lib-and-plugin-integration-tests.sh
+index 6a02c02..88cbe65 100755
+--- a/.github/actions/run-pkp-lib-and-plugin-integration-tests.sh
++++ b/.github/actions/run-pkp-lib-and-plugin-integration-tests.sh
+@@ -30,10 +30,11 @@ if [[ "$NODE_VERSION" -gt "13"  ]]; then
+   fi
+ fi
+ 
++# Cypress 5.6 (stable-3_3_0) breaks on Chrome 144+; use its bundled Electron instead.
+ if [[ "$NODE_VERSION" -lt "13"  ]]; then
+-    npx cypress run --headless --browser chrome  --config integrationFolder=lib/pkp/cypress/tests/integration
++    npx cypress run --headless --browser electron --config integrationFolder=lib/pkp/cypress/tests/integration
+   if [ -d "cypress/tests/integration" ]; then
+-    npx cypress run --headless --browser chrome --config integrationFolder=cypress/tests/integration
++    npx cypress run --headless --browser electron --config integrationFolder=cypress/tests/integration
+   fi
+ fi
+ 
+-- 
+2.53.0
+

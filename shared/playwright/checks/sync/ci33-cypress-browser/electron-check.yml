@@ -1,0 +1,44 @@
+# Throwaway check (asked in the channel by @jarda.kotesovec, 2026-10-24): does
+# pkp/pkp-github-actions@v1's pkp-lib integration step pass on stable-3_3_0
+# once its Node < 13 branch uses Cypress 5.6's bundled Electron instead of
+# Chrome, as 0bdd4bfe68 did for the data suite? Delete the branch afterwards.
+on:
+  push:
+    branches: ['tmp-ci33-electron-check']
+name: tmp-ci33-electron-check
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {application: omp, php-version: 8.2, database: pgsql, test: 'test'}
+          - {application: omp, php-version: 8.2, database: mysql, test: 'test'}
+          - {application: omp, php-version: 7.4, database: pgsql, test: 'test'}
+          - {application: ops, php-version: 8.2, database: pgsql, test: 'test'}
+          - {application: ojs, php-version: 8.2, database: mysql, test: 'test'}
+    name: ${{ matrix.application }} (${{ matrix.php-version }}, ${{ matrix.database }})
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: 'pkp/pkp-github-actions'
+          ref: v1
+          path: gha
+      - name: Patch the action (Electron for the pkp-lib step on Node < 13)
+        run: |
+          cd gha
+          git rev-parse HEAD
+          sed -i '/NODE_VERSION" -lt "13"/,/^fi/ s/--browser chrome/--browser electron/' .github/actions/run-pkp-lib-and-plugin-integration-tests.sh
+          # Keep the action's own checkout of v1 out of the way of the patched copy.
+          sed -i 's|^        path: pkp-github-actions$|        path: pkp-github-actions-upstream|' action.yml
+          git diff
+          cp -r . ../pkp-github-actions
+      - uses: ./gha
+        with:
+          repository: pkp
+          branch: stable-3_3_0
+          application: ${{ matrix.application }}
+          node_version: 12
+          dataset_branch: 'stable-3_3_0'
+          DEBUG_IN_TMATE: false

@@ -1,0 +1,64 @@
+# Throwaway check (asked in the channel by @jarda.kotesovec, 2026-10-24): do
+# the stable-3_3_0 Cypress 5.6 suites pass on a pinned Chrome 143 (before the
+# 144 break that 0bdd4bfe68 worked around with Electron), data suite and
+# pkp-lib step both? Delete the branch afterwards.
+on:
+  push:
+    branches: ['tmp-ci33-chrome143-check']
+name: tmp-ci33-chrome143-check
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {application: ojs, php-version: 8.2, database: pgsql, test: 'test'}
+          - {application: ojs, php-version: 8.2, database: mysql, test: 'test'}
+          - {application: omp, php-version: 8.2, database: pgsql, test: 'test'}
+          - {application: ops, php-version: 8.2, database: pgsql, test: 'test'}
+          - {application: ops, php-version: 8.2, database: mysql, test: 'test'}
+    name: ${{ matrix.application }} (${{ matrix.php-version }}, ${{ matrix.database }})
+    steps:
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          chrome-version: 143
+      - name: Put Chrome 143 first on PATH as google-chrome
+        run: |
+          mkdir -p $HOME/chrome143-bin
+          # Cypress 5.6 parses "Google Chrome for Testing 143…" as version "for";
+          # answer --version the way a stable Chrome does.
+          real="${{ steps.chrome.outputs.chrome-path }}"
+          ver=$("$real" --version | grep -oE '[0-9]+(\.[0-9]+)+')
+          printf '#!/bin/bash\nif [ "$1" = "--version" ]; then echo "Google Chrome %s"; exit 0; fi\nexec "%s" "$@"\n' "$ver" "$real" > $HOME/chrome143-bin/google-chrome
+          chmod +x $HOME/chrome143-bin/google-chrome
+          # setup-chrome also puts its own `chrome` on PATH, which Cypress probes too.
+          cp $HOME/chrome143-bin/google-chrome $HOME/chrome143-bin/chrome
+          cat $HOME/chrome143-bin/google-chrome
+          echo "$HOME/chrome143-bin" >> $GITHUB_PATH
+          "${{ steps.chrome.outputs.chrome-path }}" --version
+      - uses: actions/checkout@v4
+        with:
+          repository: 'pkp/pkp-github-actions'
+          ref: v1
+          path: gha
+      - name: Patch the action (Chrome for both Cypress steps on Node < 13)
+        run: |
+          cd gha
+          git rev-parse HEAD
+          # By path: the runner's /usr/bin/google-chrome (155) otherwise wins.
+          sed -i '/NODE_VERSION" -lt "13"/,/^fi/ s#--browser electron#--browser '"$HOME"'/chrome143-bin/google-chrome#' .github/actions/run-data-integration-tests.sh
+          sed -i '/NODE_VERSION" -lt "13"/,/^fi/ s#--browser chrome#--browser '"$HOME"'/chrome143-bin/google-chrome#' .github/actions/run-pkp-lib-and-plugin-integration-tests.sh
+          sed -i 's|^        path: pkp-github-actions$|        path: pkp-github-actions-upstream|' action.yml
+          git diff
+          cp -r . ../pkp-github-actions
+      - run: which -a google-chrome chrome; google-chrome --version; chrome --version
+      - uses: ./gha
+        with:
+          repository: pkp
+          branch: stable-3_3_0
+          application: ${{ matrix.application }}
+          node_version: 12
+          dataset_branch: 'stable-3_3_0'
+          DEBUG_IN_TMATE: false
