@@ -17,6 +17,11 @@ and no CI follows this branch. `main`'s baselines are in
 
 ## Read log
 
+- **2026-10-26 (PR review round 2, VM s0; asked in the channel by @jarda.kotesovec) — pkp/pkp-lib#10570: pkp/omp#2522 `efd0156176` (on round 1's base `d3b82eef5e`; the line tip `97faab2c4`, clean merge) and pkp/omp#2521 `62a58b8fc8` (on `95fefd0cf0`; the line tip `75173fe02`, clean merge), the same patch as each other. `~main 93c01ade7b`: the same round-2 change (no `primary_contact` copied, `getChapterAuthorSequences()`) without main's types. Not merged; baselines not advanced. No companion.**
+  - Driven in full at each line's tip (base) and the tip with the PR merged (head), both variants: base the Contributors order and the primary contact flagged, head the chapter's order in the copy, the export and the re-import, no flag. Line tips' commits since round 1 touch none of the PR's files.
+  - The PRs' own PHPUnit and upgrade matrices still queued at the report (round 1's were cancelled by the new pushes).
+  - Security: nothing.
+
 - **2026-10-26 — PDF.js fixes verified (asked in the channel, VM s2): ojs `18b464cafd..ea52e5f7d3` (pdfJsViewer `2e27262..ce6a128`), omp `dade65f368..97faab2c40` (`5ce120e6a`, `97faab2c4`), ops `bd726f9b7a..c3ca23385d` (pdfJsViewer `6d80e45..ce6a128`). Read in full; baselines advanced.**
   - `=main` in effect: the same commits as `main`'s (subjects and files), the `pdf.js` files byte-identical to `main`'s. Drives on the line's fleets: OMP's viewer script plain and `STRIP=1` reads fixed; the viewer opened directly on OJS, OMP and OPS 3.5, plain and emulated, renders (`upstream-sync.md`, the same date). Both reports retired. No regression.
   - Security: as on `main` (count only).
