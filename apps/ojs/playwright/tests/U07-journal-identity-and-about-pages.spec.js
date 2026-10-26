@@ -503,8 +503,8 @@ test.describe('journal identity & about pages', () => {
         );
 
         // The journal's next email: "Publication Published" to the Author,
-        // sent as the journal's title at the new address (Rule 9; Side
-        // effects), after a publish by "Assign To Future Issue and Publish
+        // sent as the journal's title at the new address (Side effects),
+        // after a publish by "Assign To Future Issue and Publish
         // Immediately" (U49 Rule 5).
         const pub = new PublishScreen(page, tag);
         await pub.gotoWorkflow(submissionId);

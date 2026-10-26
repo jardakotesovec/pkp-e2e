@@ -1044,6 +1044,10 @@ config-file settings.
   published, and no "Stages" filter of a submission list matches it.
   Native XML "Export" list, all three apps, 2026-09-27 (U63 claim check
   K2, `.reports/U63/cc-K2.md` K2-8).
+- A `published: true` seed on OMP or OPS sends no "Publication Published"
+  email (on OJS that email follows "Publish Issue" on screen), so a check
+  of a journal email's sender drives the submission wizard instead and
+  reads its acknowledgement (U07 drift sweep, ccSW1 and ccSW2, 2026-10-26).
 - The Roles grid (Settings › Users & Roles › Roles) has one live box per
   stage column and row: one click saves the change and shows its notice,
   but the box keeps its old look until the page is reloaded (a second

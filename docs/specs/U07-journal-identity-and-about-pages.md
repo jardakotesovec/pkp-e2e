@@ -72,7 +72,7 @@ refused after the press: the message sits under the box, the footer shows
 the same count, "Go to" links and "Jump to next error", "Save" is grayed
 out until the flagged boxes change, and a notice at the top right reads
 "The form was not saved because {n} error(s) were encountered. Please
-correct these errors and try again." for about ten seconds. A successful
+correct these errors and try again." for about five seconds. A successful
 save shows "Saved" beside the button, and the public pages show the change
 from their next load. <sup>f</sup> <sup>td4</sup>
 
@@ -81,7 +81,8 @@ uses for forms. With a second form language, each such field shows the
 primary language's box with "1/2 languages completed" under it; the other
 language's boxes ("Journal Title in French", "Affiliation in French")
 appear only after pressing that language's button ("French") at the top
-of the tab, and are hidden again on every return to the tab. Only
+of the tab, and stay shown while the user moves between the page's tabs;
+they are hidden again whenever the page is loaded. Only
 the primary language's box of a required field must be filled (Rule 11).
 <sup>f</sup> <sup>td4</sup>
 
@@ -93,7 +94,7 @@ to bottom: <sup>g</sup>
 |------------------|-----------|-------|
 | "Journal Title" (press "Press Name", preprint server "Server Title"), in the group "Journal Identity" ("Press Identity", "Preprint Server Identity") | yes, in the primary language | One line of plain text, per language. Shown to readers as the journal's name (Rule 7) <sup>g</sup> |
 | "Journal Initials" ("Press Initials", "Server Initials") | yes, in the primary language | A short box, per language. Where it shows: Rule 7 <sup>g</sup> |
-| "Journal Abbreviation" {OJS}; "Server Abbreviation" {OPS} | no | Plain text, per language. Shown to readers in one place: it replaces the journal's name in the article's (preprint's) "How to Cite" in the citation formats that abbreviate, ACS, AMA, IEEE and Vancouver on a journal, AMA on a preprint server (Rule 10). A press has no such field <sup>g</sup> <sup>aa</sup> |
+| "Journal Abbreviation" {OJS}; "Server Abbreviation" {OPS} | no | Plain text, per language. Shown to readers in one place: the "How to Cite" of an article (preprint), in the formats that abbreviate (ACS, AMA, IEEE and Vancouver on a journal, AMA on a preprint server), in place of the journal's name; with no abbreviation those formats print the "Journal Initials" ("Server Initials") (Rule 10). An article keeps the abbreviation or initials it was published with (Rule 7a). A press has no such field <sup>g</sup> <sup>aa</sup> |
 | "Sponsoring organization" {OPS} | no | Plain text, saved and shown again on the tab and used nowhere else ⚠ [OPS2](#ops2) <sup>g</sup> |
 | "Press Publisher Name", "Geographical Location", "Publisher Code Type", "Publisher Code" {OMP}, in the group "Publisher Identity" under "These fields are required to publish valid ONIX metadata." | no | Three text boxes and one list of publisher-code types. "Publisher Code Type" is blank on a new press, but its list offers only the 41 code types ("ARK (35)" … "Proprietary (Discontinued)") and no empty choice, so once a type is saved it can be changed and not removed. Shown on no reader page (Rule 10) <sup>g</sup> |
 | "Country", in the group "Publishing Details" under "These details may be included in metadata provided to third-party archival bodies." | yes | A list of countries under "Select the country where this journal is located, or the country of the mailing address for the journal or publisher." Empty on a new journal, so the first save of the tab asks for it <sup>g</sup> |
@@ -101,7 +102,7 @@ to bottom: <sup>g</sup>
 | "Online ISSN", "Print ISSN" {OJS} | no | A short box each. A value must read four digits, a hyphen, three digits and a check digit (0–9 or X) that matches the first seven; anything else is refused with "This is not a valid ISSN." <sup>g</sup> <sup>td4</sup> |
 | "Editorial History", in the group "Editorial Masthead" | no | Formatted text per language under "Please provide the editorial history, including the full name, affiliation, and start and end dates of each editor.", with bold, italic, superscript, subscript, a link, a block quote, bulleted and numbered lists, an inserted image and a source-code view. Empty by default. Shown at the foot of the "Editorial History" page (Rule 16) <sup>g</sup> |
 | "Journal Summary" ("Press Summary", "Server Summary"), in the group "Description" | no | Formatted text per language under "Offer a brief description of your journal to provide insight into its content and purpose.", with bold, italic, superscript, subscript and a link only. Empty by default. Where it shows: Rule 8 <sup>g</sup> |
-| "About the Journal" ("About the Press", "About the Server") | no | A tall formatted-text box per language under "Include any information about your journal which may be of interest to readers, authors or reviewers. …", with the same controls as "Editorial History". Empty by default. It is the whole body of the "About the Journal" page (Rule 13) <sup>g</sup> |
+| "About the Journal" ("About the Press", "About the Server") | no | A tall formatted-text box per language under "Include any information about your journal which may be of interest to readers, authors or reviewers. …" (on a press "… about your press …"; on a preprint server "Include any information about your server which may be of interest to readers or authors. …"), with the same controls as "Editorial History". Empty by default. It is the whole body of the "About the Journal" page (Rule 13) <sup>g</sup> |
 
 **The "Contact" tab** (Settings › Journal › "Contact"): <sup>h</sup>
 
@@ -260,6 +261,13 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
    ([Notifications center & email preferences](U05-notifications-center-and-email-preferences.md),
    Rule 2b); a manager of this journal alone sees no initials there. A
    save changes both from the next page load. <sup>n</sup> <sup>td8</sup>
+   - 7a. **A published article keeps the identity of its day.** After a
+     save, a published article's (book's, preprint's) page shows the new
+     name in its header and browser title, but its "How to Cite" and the
+     citation details the page gives search engines keep the journal's
+     name, and the abbreviation or initials and ISSNs where they appear,
+     as they were on the day it was published. Articles published after
+     the save carry the new ones. <sup>aa</sup>
 8. **Summary and About.** The "Journal Summary" is the short description
    shown under the journal's name in the site's list of journals and, when
    the theme is set to show it, on the journal's home page (*Appearance &
@@ -268,18 +276,20 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
    <sup>n</sup>
 9. **Contacts.** The principal contact's "Name" and "Email address" are
    shown on the "Contact" page. The "Email address" is also the address
-   the journal's own emails are sent from, with the journal's title as the
-   sender's name (Side effects). The technical support contact is shown
-   on the "Contact" page under "Support Contact" (Rule 17). <sup>h</sup>
-   <sup>x</sup>
+   the journal's own emails are sent from; Side effects gives four
+   emails' sender names, this spec no others. The technical support
+   contact is shown on the "Contact" page under "Support Contact"
+   (Rule 17). <sup>h</sup> <sup>x</sup>
 10. **Fields readers never see.** "Country", the "Publishing Details" of
     a journal and a press's "Publisher Identity" are saved and shown again
     on the tab, and appear on no public page of the journal; with the
     abbreviation they feed the metadata the journal hands to indexes,
     registration agencies and exports, which the features that produce
-    that metadata describe. The abbreviation's one place on a reader page
-    is the article's "How to Cite" (Masthead table; *Article landing page
-    & reading*). A preprint server's "Sponsoring organization" feeds
+    that metadata describe. The abbreviation, or the initials while it is
+    empty, shows on a reader page in one place, the article's "How to
+    Cite" (Masthead table; Rule 7a;
+    [→ How to Cite](U13-article-landing-page-and-reading.md#how-to-cite)).
+    A preprint server's "Sponsoring organization" feeds
     nothing [OPS2](#ops2). <sup>n</sup> <sup>aa</sup>
 11. **Languages.** When the journal uses more than one language for its
     forms, every per-language field takes a text in each, behind the
@@ -407,10 +417,9 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
     "Privacy Statement" item is gone. With "index" in place of the
     journal's path, the same address shows the site's statement, set
     by the Site Administrator (*Site settings*); a fresh site has none, so
-    that page answers "404 Not Found". When the installation is
-    configured for one site-wide statement, every journal's page shows the
-    site's statement instead of its own (Settings bullet 9). <sup>j</sup>
-    <sup>td16</sup>
+    that page answers "404 Not Found". <sup>j</sup> <sup>td16</sup>
+    Through a switch that no screen changes (Settings bullet 9), the
+    installation can show the site's statement on every journal's page instead of its own; this cannot be seen on the test installs.
 19. **The Information pages and block** {OJS OMP}. <sup>v</sup> <sup>td17</sup>
     - 19a. **The block.** Once a manager places the Information block in
       the sidebar (Settings bullet 6), every public page of the journal
@@ -472,13 +481,17 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
 ## Side effects
 
 - **Principal contact changed** (Rule 9): the journal's own emails to its
-  users (on a journal, for example, "Publication Published" to the
-  authors) go out from the new address, with the journal's title as the
-  sender's name, from the next email on; each email's own feature
-  describes when it is sent. The password reset is a site email: it comes
-  from the site ("Open Journal Systems", "Open Monograph Press", "Open
-  Preprint Systems", at the site's contact address) whatever the
-  journal's contact. <sup>x</sup>
+  users go out from the new address from the next email on; each email's
+  own feature describes when it is sent. The password reset is a site
+  email: it comes from the site ("Open Journal Systems", "Open Monograph
+  Press", "Open Preprint Systems", at the site's contact address) whatever
+  the journal's contact. The sender's name depends on the email:
+  <sup>x</sup>
+  - "Publication Published" to the authors: the journal's title;
+  - the author's "Thank you for your submission to {journal title}", the
+    managers' "A new submission needs an editor to be assigned" and, on a
+    preprint server, "New Version Posted Acknowledgement": the principal
+    contact's "Name". <sup>x</sup>
 - **Technical support contact** (Rule 9): the account-validation email of
   [Registration & account validation](U02-registration-and-account-validation.md)
   is sent from it; that spec describes what happens without one.
@@ -510,7 +523,9 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
    server). Ticked: the role's members set to "Appear on the masthead"
    are listed on the masthead (Rule 14a); unticked: the role and its members are left off the masthead and the
    history page. It has no effect on the Reviewer role, whose members are
-   listed by Rule 15 whatever the box says. *Roles configuration* owns the
+   listed by Rule 15 whatever the box says. While the masthead is not
+   based on enrollments (Settings bullet 4a), the role window has no
+   "Consider role in masthead list" box. *Roles configuration* owns the
    form. <sup>e</sup>
 3. **"Appear on the masthead" / "Does not appear on the masthead"** (the
    masthead choice of each role a user holds, made by the manager in the
@@ -623,8 +638,10 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
 - *Submission intake configuration* owns the "Submissions" About page and
   the "Disable Submissions" switch; this spec owns the notice it puts on
   the Settings pages (Rule 4a).
-- *Article landing page & reading* owns the article's "How to Cite",
-  where the journal abbreviation shows (Rule 10).
+- [Article landing page & reading](U13-article-landing-page-and-reading.md#how-to-cite)
+  owns the article's "How to Cite", where the journal abbreviation or
+  initials show (Rule 10); this spec owns which name, abbreviation or
+  initials a published article keeps after a save (Rule 7a).
 - *Custom pages & blocks* owns the upload of images placed in the
   formatted-text boxes.
 - *Site settings* owns the site's privacy statement; *Hosted journals*
@@ -661,9 +678,9 @@ in the footnote. <sup>y</sup>
      Masthead" come the role headings "Journal editor" and then "Section
      editor" ("Press editor" and "Series editor" on a press, "Moderator"
      and "Editorial Board Member" on a preprint server), and no "Reviewer"
-     heading; under each, its members ordered by family name, each entry
-     the year the role started followed by a dash and the member's name,
-     with no picture and no email; then the line "View Editorial History",
+     heading; under each come its members, each entry the year the role
+     started followed by a dash and the member's name, with no picture
+     and no email; then the line "View Editorial History",
      its last two words a link, and a horizontal rule, with no "Peer
      Reviewers in Previous Year" after it (Rules 14a, 14c, 14d, 15).
    - **"Editorial History"**: press "Editorial History" in that line: the
@@ -752,7 +769,7 @@ in the footnote. <sup>y</sup>
      to" links and "Jump to next error", "Save" is grayed out, and a notice
      at the top right reads "The form was not saved because 2 error(s)
      were encountered. Please correct these errors and try again." for
-     about ten seconds; replace the values with "0378-5955" and
+     about five seconds; replace the values with "0378-5955" and
      "https://example.org" (Fields).
    - **Saved**: press "Save": "Saved" shows beside the button (Fields).
    - **The public pages**: signed out, open "About the Journal": under the
@@ -1050,13 +1067,15 @@ Left out of the scenarios above, by reason:
   - a new journal's and press's "Information For Readers" "Privacy Statement" link opening the "Privacy Statement" page {OJS OMP} (A9; the guard its issue report names)
   - the site-level "About Open Monograph Press" page of a site with two presses opening "This site uses" {OMP} (OMP2; Rule 20; the guard its issue report names)
   - the masthead not based on enrollments, "Present a masthead based on user enrollments" unticked: the masthead showing under its heading only the "Editorial History" text (and a manager's "Edit" link), or nothing with that text empty, the "Editorial History" address opening the masthead, the other two groups leaving the tab, and, ticked again, both pages listing as before in the saved role order (Rule 14f; Rules 16, 21; Settings bullet 4a)
-  - the masthead not based on enrollments: "Invite to a role", the user's "Edit" page and the invitee's review step without a masthead column, the invitation email without a masthead line, and the new role stored as "Does not appear"; a Reviewer row and its email reading "Does not appear" while reviewers are not listed, "Appear" once they are {OJS OMP} (Settings bullet 3; A13 retired)
+  - the masthead not based on enrollments: the role window without "Consider role in masthead list", "Invite to a role", the user's "Edit" page and the invitee's review step without a masthead column, the invitation email without a masthead line, and the new role stored as "Does not appear"; a Reviewer row and its email reading "Does not appear" while reviewers are not listed, "Appear" once they are {OJS OMP} (Settings bullets 2, 3; A13 retired)
   - "Enable listing of reviewers on the masthead" at its default: no "Peer Reviewers in Previous Year" although reviews were completed last year {OJS OMP} (Rule 15; Settings bullet 4c)
   - a disabled member staying listed on both pages and under "Peer Reviewers in Previous Year" (Rule 14e; A4 retired)
   - "Remove User" moving the member to "Editorial History" at the next load, and a member with a later start date listed from that date on (Rule 14e; A5 retired)
   - "Merge user" of a listed member listing the kept account under the member's role (Rule 14e)
+  - a journal renamed after an article was published: the article's "How to Cite" keeping the old name (and, on a journal or preprint server, the abbreviation or initials it was published with), while an article published after the save carries the new ones (Rule 7a)
+  - after the "Contact" tab is saved, the author's "Thank you for your submission to {journal title}" and the managers' "A new submission needs an editor to be assigned" sent from the new address under the principal contact's "Name", and on a press or preprint server "Publication Published" under its title (Side effects; Rule 9)
 - **Nothing new to test**:
-  - a second form language: its boxes behind the language button, and each public page in the visitor's language with the primary language's text where that box is empty (Fields; Rule 11; Settings bullet 12)
+  - a second form language: its boxes behind the language button, shown across the page's tabs until the page is loaded again, and each public page in the visitor's language with the primary language's text where that box is empty (Fields; Rule 11; Settings bullet 12)
   - unsaved changes kept while moving between the tabs of a page, and lost without a warning on reloading or leaving it (Rule 5)
   - another order of the roles on Settings › Website › "Appearance" › "Editorial Masthead" (Rule 14a; Settings bullet 4b)
   - the abbreviation, the "Publishing Details", "Sponsoring organization" and "Publisher Identity" saved and shown again on the tab (Fields; Rule 10)
@@ -1088,12 +1107,12 @@ Left out of the scenarios above, by reason:
   - the site-wide privacy statement switch on (Rule 18; Settings bullet 9): no screen changes it
 - **Owned by another feature**:
   - where the abbreviation, the "Publishing Details" and "Publisher Identity" take effect: indexes, registration agencies and exports (Rule 10; the features that produce that metadata)
-  - the "Journal Abbreviation" in the article's "How to Cite" (Fields; Rule 10; *Article landing page & reading*)
+  - the "Journal Abbreviation", or the initials while it is empty, in the article's "How to Cite" (Fields; Rule 10; [Article landing page & reading](U13-article-landing-page-and-reading.md#how-to-cite))
   - the "Journal Summary" in the site's list of journals and on the home page (Rule 8; *Hosted journals*, *Appearance & theming*)
   - the other tabs of the five Settings pages (Rule 2; the features its table names)
   - the "Announcements", "Institutions" and "Comments" pages with their side-menu entries, and the users list's "Edit" (Rule 3; [Announcements](U12-announcements.md), [Institutions](U66-institutions.md), [Reader comments & moderation](U14-reader-comments-and-moderation.md) scenario 6, [User invitations](U06-user-invitations.md) scenario 8)
   - the error window of a masthead choice changed on a press or preprint server (Settings bullet 3; [User invitations](U06-user-invitations.md#omp1); scenario 8 passes it)
-  - which email of a press or preprint server carries the new principal contact as its sender (Rule 9; Side effects: each email's own feature says when it is sent; [Publish, schedule & versions](U49-publish-schedule-and-versions.md))
+  - when each of the journal's emails is sent (Side effects; each email's own feature, such as [Publish, schedule & versions](U49-publish-schedule-and-versions.md) for "Publication Published")
   - the technical support contact as the sender of the account-validation email ([Registration & account validation](U02-registration-and-account-validation.md) scenario 7)
   - the consent boxes leaving the Register page, the submission wizard and the reviewer's first step once the privacy statement is emptied (Side effects; [Registration & account validation](U02-registration-and-account-validation.md) scenario 4, [Submission wizard](U21-submission-wizard.md), [Reviewer's review](U28-reviewers-review.md))
   - "Users must be registered and log in to view the journal site." ticked, sending a signed-out visitor to Login from every About page and back to it after signing in (Settings bullet 7; Rule 22; *Roles configuration*)
@@ -1236,14 +1255,14 @@ count? Lean: no; the editor withdrew the request. Basis: probe. <sup>f-a10</sup>
 <a id="a11"></a>
 **A11 — Hosted Journals "Edit" refuses a journal with no country** · 🐞 · low.
 Administration › Hosted Journals › "Edit" leaves "Country" unmarked, as
-"Create Journal" does, yet on a journal with no country (every journal
-upgraded from 3.3 until a manager saves its "Masthead") "Save" answers
+"Create Journal" does, yet on a journal with no country "Save" answers
 "Please correct one error." with "This is not a valid string." and "This
-is not a valid country." under "Country". The Site Administrator cannot
-change anything there, for example untick "Enable this journal to appear
-publicly on the site", until a country is picked. "Create Journal"
-refuses an empty "Country" the same way. *Hosted journals* owns the
-form ([A1](U59-hosted-journals.md#a1)). Basis: probe, 2026-10-02. <sup>f-a11</sup>
+is not a valid country." under "Country".
+A journal upgraded from 3.3 has none until a manager saves its "Masthead" (this cannot be seen on the test installs).
+The Site Administrator cannot change anything there, for example untick
+"Enable this journal to appear publicly on the site", until a country is
+picked. "Create Journal" refuses an empty "Country" the same way.
+*Hosted journals* owns the form ([A1](U59-hosted-journals.md#a1)). Basis: probe, 2026-10-02. <sup>f-a11</sup>
 
 <a id="a14"></a>
 **A14 — In six languages the page about the software shows a raw "{$…Version}" placeholder or a dead contact link** · 🐞 · low.
@@ -1599,6 +1618,11 @@ I11800_AddUserRoleMastheadUpdateEmail needs to be run." (the request `POST
 api/v1/users/{id}/masthead/{id}` answering 500), and the choice was saved
 all the same and applied at the next load; [User
 invitations](U06-user-invitations.md#omp1) registers that window.
+Live-probed 2026-10-26 (Settings bullet 2; all three apps, two runs): with
+"Present a masthead based on user enrollments" unticked and saved, a
+role's "Edit" window had no "Consider role in masthead list" box; with it
+ticked, the box was there (as note f-a13 recorded at the box's
+retirement walk).
 
 <a id="fn-f"></a>
 **f** — Form mechanics (ui-library `components/Form/Form.vue`,
@@ -1624,8 +1648,15 @@ the ISSN check digit); `country` rule `country`. `acronym` and the
 support contact are required by the forms only. The Vue form sends PUT as
 a POST with `X-Http-Method-Override` (scenarios.md).
 Live-probed 2026-09-23 (Fields intro; all three apps): note td4. The
-notice after a refused press was on screen at once and gone ten seconds
-later.
+notice after a refused press was on screen at once.
+Live-probed 2026-10-26 (Fields, second paragraph; scenario 3; all three
+apps, two runs): the notice "The form was not saved because 2 error(s)
+were encountered. Please correct these errors and try again." (OJS
+"Masthead", "1234-5678" and "example.org") and "The form was not saved
+because 1 error(s) were encountered. …" ("Contact", "not-an-email") was
+still shown five seconds after "Save" and gone by six, the pointer off
+it; scenario 3's was gone 5.5 seconds after "Save" in both runs. The
+"about ten seconds" this note gave before was wrong.
 
 <a id="fn-td4"></a>
 **td4** — Live-probed 2026-09-23 (Fields; A3; all three apps): a scratch
@@ -1647,6 +1678,12 @@ the French title and initials left empty saved; the English title emptied
 was refused under the English box alone; the French boxes showed only
 after pressing "French", under "1/2 languages completed", and were hidden
 again on the next return to the tab.
+Live-probed 2026-10-26 (Fields, third paragraph; all three apps, two
+runs), which corrects that last reading: once "French" was pressed, the
+French boxes stayed shown after moving to the "Contact" tab and back, and
+were hidden again when the page was loaded again; "1/2 languages
+completed" under the title and initials, "Journal Title in French" and
+the other labels, and the saves as above held.
 
 <a id="fn-g"></a>
 **g** — `PKPMastheadForm` groups and fields: `identity`
@@ -1705,6 +1742,18 @@ those keys (`manager.setup.identity`, `manager.setup.selectCountry`, …)
 with an empty text, and an untranslated text is written as "##key##".
 Each load of Settings › Website answered the Plugin Gallery's server
 error of [Plugins management](U62-plugins-management.md#a1).
+Live-probed 2026-10-26 (Masthead table, "About the Journal" row; all
+three apps, two runs): the box's help line
+(`manager.setup.contextAbout.description`) read on a journal as the table
+quotes it; on a press
+"Include any information about your press which may be of interest to
+readers, authors or reviewers. This could include your open access
+policy, the focus and scope of the press, sponsorship disclosure, and the
+history of the press."; on a preprint server "Include any information
+about your server which may be of interest to readers or authors. This
+could include your open access policy, the focus and scope of the server,
+policies on moderation and screening, copyright notice, sponsorship
+disclosure, history of the server and a privacy statement."
 
 <a id="fn-aa"></a>
 **aa** — Live-probed 2026-09-23 (Masthead table; Rule 10; OJS, OPS): with
@@ -1720,6 +1769,29 @@ Privacy Statement, Submissions, the software page, search, the archive,
 catalog or preprint list, the article, book or preprint page, the
 Information pages); the OJS ISSNs sit in the article page's head as
 `citation_issn` and `DC.Source.ISSN`.
+The stamp (Rule 7a): since pkp/pkp-lib#7527 (lib/pkp `a7f5e3081b`,
+2026-09-15) `Repository::publish()` stamps a publication on its first
+publication with `PKPPublication::stampContextIdentity()`: `contextName`,
+`contextAbbreviation` (`Context::getAbbreviationOrAcronym()`, the
+abbreviation or else the initials) and `contextPrimaryLocale`, plus on OJS
+the ISSNs and publisher (`APP\publication\Publication`). The readers of
+`HasContextIdentityMetadata` (`getLocalizedContextName()`,
+`getLocalizedContextAbbreviation()`, …) return the stamped values, the
+live context's only for an item never stamped; a version inherits the
+stamp and a new major version is stamped again (`clearIdentityMetadata()`).
+Live-probed 2026-10-26 (Rules 7a, 10; Masthead table; all three apps, two
+runs, the plugin on): on a scratch context, an item published before an
+abbreviation was saved and the initials changed to "RPJ" printed the
+initials of its publication day, "SWM", in ACS, AMA, IEEE and Vancouver
+(OJS; AMA on OPS), its head reading `citation_journal_abbrev` "SWM" with
+no `citation_issn`; an item published after the save printed the new
+abbreviation there and carried the ISSNs in its head. After a rename to
+"Renamed Probe …", the item published before it showed the new name in
+its page header and browser title, while its "How to Cite" in APA, ABNT,
+ACM, Chicago, Harvard, MLA and Turabian and its head
+(`citation_journal_title` and `DC.Source` on OJS, `citation_publisher` on
+OMP and OPS) kept the old name "SW1 M …"; an item published after the
+rename carried the new one.
 
 <a id="fn-h"></a>
 **h** — `PKPContactForm` groups: `principal` (`manager.setup.principalContact`
@@ -2311,9 +2383,14 @@ same headings, paragraphs and links, the site's page reached from the
 PKP logo in the footer of the site's home; OMP's site had 11 presses.
 
 <a id="fn-x"></a>
-**x** — Senders: the journal's own mailables set their sender from the
-context's `contactEmail`, with the context's name as the sender's name;
-the password reset is sent as a site email. Email variables
+**x** — Senders: the journal's own emails are sent from the context's
+`contactEmail`, under a sender's name each sender sets:
+`NotifyAuthorOnPublication` ("Publication Published") the context's name
+(`getLocalizedName()`); `SendSubmissionAcknowledgement` (the author's
+acknowledgement), `AssignEditors` (`SubmissionNeedsEditor`, to the
+managers), OPS `SendPostedAcknowledgement` ("New Version Posted
+Acknowledgement"), `ReviewReminder` and `PKPReviewerReviewStep3Form` the
+context's `contactName`; the password reset is sent as a site email. Email variables
 `contactName`, `contactEmail`, `mailingAddress`, `contextName`,
 `contextAcronym` (`ContextEmailVariable`). Support contact:
 `ValidateRegisteredEmail` sends from `supportEmail` / `supportName`.
@@ -2337,6 +2414,18 @@ emptied, the consent box ("Yes, I agree to have my data collected and
 stored according to the privacy statement.") left the Register page, the
 wizard's start page and (OJS, OMP) the reviewer's first step. ORCID
 requests were not reached (ORCID is off on the test installs).
+Live-probed 2026-10-26 (Rule 9; Side effects; all three apps, two runs),
+which corrects the sender's name above: after the "Contact" tab was saved
+with "Pat Principal" and a new address, the author's wizard submission
+brought "Thank you for your submission to {journal title}" and the
+managers "A new submission needs an editor to be assigned: …", both from
+"Pat Principal" <{new address}> ("Site Admin" <admin@mail.test> before
+the save); a publish from the workflow brought "Publication Published"
+from "{journal title}" <{new address}>; on OPS "New Version Posted
+Acknowledgement" came from "Pat Principal". The password reset still came
+from "Open Journal Systems" ("Open Monograph Press", "Open Preprint
+Systems") <admin@mail.test>, and saving the "Contact" and "Masthead" tabs
+sent no email and left the Tasks count as it was.
 
 <a id="fn-y"></a>
 **y** — Where each scenario runs: scenarios 1, 2 and 12 on the seeded
@@ -2350,7 +2439,9 @@ base context has plain defaults"). The seeded team the masthead lists is
 the roster's `editor.diana` and three `sectioneditor.*` (OJS, OMP), the
 three `sectioneditor.*` and `assistant.rita` (OPS), every seeded role
 with "Appear on the masthead" (note e); the seed holds no submission, so no
-review. Scenarios 3–11 on a scratch context from `POST scenarios/context`
+review. The seeded Section editors (Series editors, Moderators) share the
+family name "Section Editor", so no order among them shows on the seeded
+journal; scenario 7 reads the family-name order. Scenarios 3–11 on a scratch context from `POST scenarios/context`
 with throwaway `users[]` (password the username twice, address
 `<username>@mail.test`, each mailbox read in the mail catcher by that
 address); a scratch context arrives with its title "Scratch context {tag}",
@@ -2498,6 +2589,12 @@ under "Country", the request answering 400; with a country picked the
 save went through. "Create Journal" lists "Country" without "Required".
 The form sends the empty "Country", which the server's `country` rule
 refuses (note f).
+Code read 2026-10-26 (the upgrade sentence): a context has had a
+`country` setting since 3.4 (`lib/pkp/schemas/context.json`; stable-3_3_0
+has none), and no upgrade migration under `classes/migration/upgrade`
+(lib/pkp or the apps) writes one, so a journal upgraded from 3.3 arrives
+without it; the test installs are never upgraded, so this was not
+driven.
 Issue report: [pkp-e2e#496](https://github.com/jardakotesovec/pkp-e2e/issues/496) ([docs/issues/U59-A1-journal-form-country-unmarked-refused.md](../issues/U59-A1-journal-form-country-unmarked-refused.md)).
 
 <a id="fn-f-a12"></a>
