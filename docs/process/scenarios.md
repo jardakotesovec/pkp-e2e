@@ -262,7 +262,8 @@ Keys:
   OJS issues' visits, after everything but `bulkEmails`, and refused as
   the submission scenario's `usage[]` below, without the place keys.
 - `users[]`: throwaway accounts. Each entry takes `username` and `roles`
-  (both required; roles empty only beside `pastRoles`, below), `givenName`, `familyName`, `email`
+  (both required; roles empty only beside `pastRoles`, below), `givenName`
+  (default: the username), `familyName` (default: none), `email`
   (default `<username>@mail.test`), `password` (default: the username
   twice), `sections` or `series` (sub-editor assignments, by section abbrev
   or series path), and `orcid` plus `orcidIsVerified` for a pre-set ORCID
