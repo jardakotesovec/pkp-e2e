@@ -3,14 +3,17 @@
 // (`GET index/api/v1/site/theme`) fails with a server error instead of a refusal.
 //
 // Runs on a dataset fleet (PKP's default dataset), reset before each walk:
-//   npm run fleet-prep -- --feature issues-q23h --dataset 2 --reset
-//   bin/app-lock.sh shared ojs -- env PROBE_FEATURE=issues-q23h PROBE_AGENT=q23h \
+//   npm run fleet-prep -- --feature <feature> --dataset <n> --reset
+//   bin/app-lock.sh shared ojs -- env PROBE_FEATURE=<feature> PROBE_AGENT=<id> \
 //     node bin/probe.js ojs shared/playwright/checks/issues/site-theme-api-server-error/walk.js
-//   (omp, ops alike; stable-3_5_0: PKP_E2E_LINE=stable-3_5_0 PROBE_FEATURE=issues-q23h-3_5 PROBE_RUN=r35)
+//   (omp, ops alike; stable-3_5_0: PKP_E2E_LINE=stable-3_5_0 PROBE_FEATURE=<feature>-3_5 PROBE_RUN=r35)
 // MODE=steps (default) takes the report's Steps: `admin` creates a second journal (press, server) on
 //   Administration › Hosted Journals › "Create Journal" (the site's Plugins list shows only with two), unticks
 //   "Default Theme" on Administration › Site Settings › "Plugins", opens the read's address, ticks the theme
-//   again and opens the address once more.
+//   again and opens the address once more. Beside step 4, while the theme is unticked, a second browser
+//   signed out records the site's address (`/index.php/index`: where it lands, its style sheets) and the
+//   site's sign-in page (the Summary's reach facts, not numbered steps). TAG names the created context
+//   (default hkq26c).
 // MODE=neighbour, on a freshly reset fleet: the site's read with the theme switched on (must stay 200 with
 //   the site's options), and the journal's read (`…/api/v1/contexts/1/theme`) as `admin`, also 200.
 // No assertions: the script records, the reader judges (facts in a24-<mode>[-<run>]-<app>.json).
@@ -18,6 +21,7 @@ const {forEachApp, launch, signIn, screen, shot, record, idle, sql, serverLog} =
 const {createContext, WORDS} = require('./lib');
 
 const MODE = process.env.MODE || 'steps';
+const TAG = process.env.TAG || 'hkq26c';
 const flat = (s, n = 600) => (s == null ? s : String(s).replace(/\s+/g, ' ').trim().slice(0, n));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const CTX = {ojs: ['journals', 'journal_id'], omp: ['presses', 'press_id'], ops: ['servers', 'server_id']};
@@ -69,20 +73,45 @@ forEachApp(async (app) => {
         return {...o, stored: stored()};
     };
 
+    /** Signed out, in a browser of its own: the site's address and its sign-in page, where each lands and how it is styled. */
+    const siteFaces = async (name) => {
+        const out = {};
+        const anon = await launch(app);
+        try {
+            for (const [key, address] of [['siteAddress', '/index.php/index'], ['signIn', '/index.php/index/en/login']]) {
+                const o = {address};
+                try {
+                    const r = await anon.page.goto(app.url(address));
+                    o.status = r && r.status();
+                    o.landed = anon.page.url().replace(app.baseURL, '');
+                    o.stylesheets = await anon.page.locator('link[rel="stylesheet"]').evaluateAll((ls) => ls.map((l) => l.getAttribute('href').replace(/^https?:\/\/[^/]+/, '').slice(0, 120)));
+                    o.bodyFont = await anon.page.evaluate(() => getComputedStyle(document.body).fontFamily);
+                    o.h1 = flat(await anon.page.locator('h1').first().innerText().catch(() => null), 120);
+                } catch (e) { o.error = flat(e.message, 200); }
+                record(`a24-${name}-${key}`, {...(await screen(anon.page).catch(() => ({}))), ...o});
+                await shot(anon.page, `a24-${name}-${key}`).catch(() => {});
+                out[key] = o;
+            }
+        } finally { await anon.close(); }
+        return out;
+    };
+
     try {
         // 1. admin signs in.
         await signIn(page, 'admin');
         await idle(page).catch(() => {});
         if (MODE === 'steps') {
             // 2. Administration › Hosted Journals › "Create Journal": a second context, so the site's lists show.
-            const name = `hkq23h Second ${WORDS[app.name].noun}`;
+            const name = `${TAG} Second ${WORDS[app.name].noun}`;
             let created;
-            try { created = await createContext(page, app, {name, initials: 'HKQ23H', path: 'hkq23h', email: 'hkq23h@mailinator.com'}); } catch (e) { created = `failed: ${flat(e.message, 300)}`; }
+            try { created = await createContext(page, app, {name, initials: TAG.toUpperCase(), path: TAG, email: `${TAG}@mailinator.com`}); } catch (e) { created = `failed: ${flat(e.message, 300)}`; }
             fact('create-context', {name, save: created, contexts: stored().contexts});
             // 3. Administration › Site Settings › "Plugins": untick "Default Theme", "OK".
             fact('untick', await pressDefault('3-site-default-unticked', true));
             // 4. The read's address.
             fact('read-site-off', await openRead('4-read-site-off'));
+            // Beside step 4: the site's own pages, signed out, while the theme is unticked.
+            fact('site-face-off', await siteFaces('4-site-face-off'));
             // 5. Tick it again, open the address once more.
             fact('retick', await pressDefault('5-site-default-ticked', false));
             fact('read-site-on', await openRead('5-read-site-on'));

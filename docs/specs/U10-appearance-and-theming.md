@@ -1293,7 +1293,7 @@ otherwise; the team settles them on spec review.
 | [A20](#a20) | A removed journal, press or server thumbnail stays online, or comes back when another language has one | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
 | [A22](#a22) | A logo, thumbnail, homepage image or favicon replaced by another file type stays online at its old address | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A23](#a23) | A program reading a journal's, press's or server's switched-off theme gets "{$themePluginPath}" for its name | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
-| [A24](#a24) | A program reading the site's theme gets a server error while "Default Theme" is switched off on the site | 🐞 | low · crash: server | issues (claude), 2026-10-23 — re-verified |
+| [A24](#a24) | A REST API client reading the site's theme gets a server error while "Default Theme" is switched off on the site | 🐞 | low · crash: server | issues (claude), 2026-10-26 — re-verified |
 | [A26](#a26) | "Save" under "Theme" fails with a server error while the theme in use is unticked | 🐞 | user-visible · crash: server | — |
 | [OJS5](#ojs5) | Unticking every "Journal Content Organization" box says "Saved", but the home page keeps the current issue | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OJS6](#ojs6) | On a journal's home page, each "Latest Publications" title is a heading at the section's own level | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1692,25 +1692,20 @@ server error of its own ([A26](#a26)).
 Basis: probe, 2026-10-23. <sup>f-a23</sup>
 
 <a id="a24"></a>
-**A24 — A program reading the site's theme gets a server error while "Default Theme" is switched off on the site** · 🐞 · low · crash: server.
+**A24 — A REST API client reading the site's theme gets a server error while "Default Theme" is switched off on the site** · 🐞 · low · crash: server.
 On an installation with more than one journal (press, server), the
 Site Administrator unticks "Default Theme", the theme the site itself
-uses, under Administration › "Site Settings" › "Plugins". A program
-that then reads the site's theme settings through the REST API gets a
-server error instead of a refusal saying the theme is not enabled, which
-is what the same read for a journal answers.
-Up to 3.4 the site's read answered with that refusal. The step that
-returns it was lost when the API moved to the new router
-(`pkp/pkp-lib#9176` for `pkp/pkp-lib#7698`).
-Only the theme the site uses matters: on PKP's default installation
-that is "Default Theme". Saving the site's theme in the same state
-fails too, with a server error of its own ([A26](#a26)). The site's
-own pages still open, unstyled: its sign-in page, and its home page
-where more than one journal is shown publicly. With only one journal
-shown publicly, the site's address opens that journal's home page,
-styled by the journal's own theme.
-Basis: probe, 2026-10-23. <sup>f-a24</sup>
-Report: refresh owed — claim check I23H (2026-10-23): the site's address does not always show the site's own home page while "Default Theme" is unticked on the site; with only one journal shown publicly (the second one created but its "…appear publicly on the site" box unticked) the site's address opens that journal's styled home page, so the site's own unstyled pages are its sign-in page always and its home page only where more than one journal is shown publicly (the report's "The site's home page still opens" and Evidence's "the site's home page answered 200"); the save's server error is now its own entry, A26 (`PKPSiteController::editTheme()`, `PKPHandler::getTargetContext()`) (2026-10-23)
+uses, under Administration › "Site Settings" › "Plugins". A REST API
+client that then reads the site's theme settings gets a server error
+(500) instead of the 404 refusal "The active theme, …, is not enabled
+and may not be installed.", which is what the same read for a journal
+answers. Up to 3.4 the site's read answered with that refusal too.
+Only switching off the theme the site uses triggers it: on PKP's
+default installation that is "Default Theme"; switching off another
+theme plugin does not. While it is off, the site's own pages, such as
+its sign-in page, show without styling; that is the expected result of
+switching the theme off, not part of this fault.
+Basis: probe, 2026-10-23; issue report refresh walk, 2026-10-26. <sup>f-a24</sup>
 
 <a id="a25"></a>
 **A25 — On a press and a preprint server, a newly chosen theme's own home page did not show in one of two tries** · ❓ · user-visible.
