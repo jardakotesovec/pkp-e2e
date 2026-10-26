@@ -2310,6 +2310,7 @@ head `f810cbba`, the same patch on `e47a4887`, with pkp-lib
 "Report Comment" window; at the bases (`e47a4887`, `1f415a07ca`) no
 dialog. Keeping the typed reason is left to a separate change (the
 ruling under the entry).
+Issue report: [pkp-e2e#1073](https://github.com/jardakotesovec/pkp-e2e/issues/1073) ([docs/issues/U14-A14-refused-comment-report-loses-reason.md](../issues/U14-A14-refused-comment-report-loses-reason.md)).
 
 <a id="fn-f-a15"></a>
 **f-a15 — A15.** pkp/pkp-lib#13422 ("For consistency the orcid is now
