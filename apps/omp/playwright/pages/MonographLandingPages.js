@@ -527,19 +527,19 @@ class ViewableFilePage extends BasePage {
         return this.page.frameLocator('#pdfCanvasContainer > iframe');
     }
 
-    /** The viewer toolbar's page count ("of 1"). */
+    /**
+     * The viewer toolbar's page count ("of 1"; PDF.js 6 wraps the number in
+     * Unicode isolation marks, U+2068 and U+2069). Empty until the file has
+     * loaded: PDF.js 6 has no error bar and reports a failed load only in the
+     * console.
+     */
     pdfPageCount() {
         return this.pdfViewer().locator('#numPages');
     }
 
-    /** The viewer's error bar, shown when the file cannot be loaded. */
-    pdfErrorBar() {
-        return this.pdfViewer().locator('#errorWrapper');
-    }
-
     /** The viewer toolbar's own download button. */
     pdfViewerDownload() {
-        return this.pdfViewer().locator('#download');
+        return this.pdfViewer().locator('#downloadButton');
     }
 
     /** The HTML file's frame element and its content. */

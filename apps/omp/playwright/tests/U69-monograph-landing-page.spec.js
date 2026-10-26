@@ -461,8 +461,7 @@ test.describe('Monograph landing page (U69)', () => {
         // "Download" saves article.pdf and the page stays as it is; the
         // viewer's own download button saves article.pdf too (Rule 13;
         // Fields, the PDF view page).
-        await expect(viewer.pdfPageCount()).toHaveText('of 1', {timeout: 30_000});
-        await expect(viewer.pdfErrorBar()).toBeHidden();
+        await expect(viewer.pdfPageCount()).toHaveText(/^of \u2068?1\u2069?$/, {timeout: 30_000});
         const viewUrl = page.url();
         const {download: barSaved} = await captureDownload(page, () => viewer.downloadLink().click());
         expect(barSaved.suggestedFilename()).toBe('article.pdf');
