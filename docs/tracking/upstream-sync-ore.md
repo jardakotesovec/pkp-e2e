@@ -13,10 +13,10 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `c232e19d6f` | 2026-10-23 | claude (daily maintenance session; before it `56ffbfcaf2`, 2026-10-22; before it `527daf7857`, the merge of pkp/ojs#5951, 2026-10-20; before it `42b0fa2b84`, 2026-10-19; before it `61ddd345bd`, 2026-10-16; before it `9f18cd1d46`, the branch point, 2026-10-13) |
+| ojs | `b6b4249a66` | 2026-10-26 | claude (daily maintenance session; before it `c232e19d6f`, 2026-10-23; before it `56ffbfcaf2`, 2026-10-22; before it `527daf7857`, the merge of pkp/ojs#5951, 2026-10-20; before it `42b0fa2b84`, 2026-10-19; before it `61ddd345bd`, 2026-10-16; before it `9f18cd1d46`, the branch point, 2026-10-13) |
 | pkp-lib | `6d2e143ee0` (the branch tip, ojs's pointer since `56ffbfcaf2`) | 2026-10-22 | claude (daily maintenance session; before it `86fac38a3d`, ojs's pointer, and the branch tip `82d1313c58`, 2026-10-21; before it the branch tip `c10ada7a5c`, 2026-10-20; before it `186654a359`, pkp/pkp-lib#13536, 2026-10-19; before it `6123e3c449`, the merge of pkp/pkp-lib#13542, 2026-10-16; before it `266505ecd8`, the branch point); ui-library `5ddd525f9f` (pkp/ui-library#1026, ojs's pointer, 2026-10-22; before it `62bbae1022`, pkp/ui-library#1022 for pkp/pkp-lib#13528; the branch tip `ce61763eca`, its merge, the same tree; before it `103b834dd5`, the merge of pkp/ui-library#1020, ojs at its head `95e7365005`; before it `c9889f00`, the branch point); ojs `plugins/generic/crossref` `7908654951` (the merge of pkp/crossref-ojs#114, as on `main`; before it `3a9f888d64`); ojs `plugins/generic/jatsTemplate` `8a08fa7635` and `plugins/generic/citationStyleLanguage` `f849f00fec` (2026-10-22, as on `main`) |
 
-pkp-e2e `ore` tip: `e2fead0a` (2026-10-22, the daily step's carry-over of U30, U48 and U01; before it `09332867`, 2026-10-21, companion `13595-ore`).
+pkp-e2e `ore` tip: `85ed48ee` (2026-10-26, companion `13607-ore` fast-forwarded; before it `e2fead0a`, 2026-10-22, the daily step's carry-over of U30, U48 and U01; before it `09332867`, 2026-10-21, companion `13595-ore`).
 
 ## Open
 
@@ -40,6 +40,11 @@ one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `ore-only`; the verdict;
 what the pkp-e2e `ore` branch took)._
 
+- **2026-10-26 (daily session, VM s2) — ojs `c232e19d6f..b6b4249a66` (1: pkp/ojs#5982), pkp-lib and ui-library unchanged (`6d2e143ee0`, `5ddd525f9f`; no new commits on either `ore` branch). Read in full; baseline advanced. pkp-e2e `ore` `e2fead0a..85ed48ee`.**
+  - Runs read first: the hook run on pkp/ojs `ore` at `b6b4249a66`, [39972533413](https://github.com/pkp/ojs/actions/runs/39972533413) (2026-10-23, with pkp-e2e `ore` `e2fead0a`): green. The pkp-e2e push since adds only a spec note and kept checks (no suite change), so the pair is covered; no dispatch.
+  - ojs `b6b4249a66` (pkp/ojs#5982, the jatsTemplate pointer to `2e50adacaa`, the reviewed #127 head; tree `=` the reviewed `a95be8302d`) → `=main 5a2666a43e` in effect (the same pointer move; `main` points at the merge `ab14051f2a`, the same tree). The PR review's verdict stands: no regression. Companion `13607-ore` (`85ed48ee`, U48 note h, kept checks `checks/sync/jatsTemplate-127/`) fast-forwarded into pkp-e2e `ore`, lint zero, pushed; the remote branch deleted.
+  - Carried over: today's `main` regressions are not on `ore`: OJS `ore` still points pdfJsViewer at `1d992590f0` (PDF.js 4.10.38), and OMP has no `ore`; the browser-floor report applies once `ore` takes `8ae9739`. Open rows: none re-run (no code moved).
+  - Security: nothing.
 - **2026-10-23 (daily session, VM s1) — ojs `56ffbfcaf2..c232e19d6f` (1: pkp/ojs#5971), pkp-lib and ui-library unchanged (`6d2e143ee0`, `5ddd525f9f`). Read in full; baseline advanced. pkp-e2e `ore` unchanged at `e2fead0a`.**
   - Runs read first: the hook run on pkp/ojs `ore` at `c232e19d6f`, [39782670802](https://github.com/pkp/ojs/actions/runs/39782670802) (2026-10-22 12:57, after pkp-e2e `ore` `e2fead0a` was pushed at 10:58): green 3/3, so the current pair is covered; no dispatch.
   - ojs `c232e19d6f` (pkp/pkp-lib#13599, DOAJ JSON mapping) → `=main 3274052add` (`git range-diff`: only the PR number in the message). `main`'s verdict stands (`upstream-sync.md` 2026-10-23: no regression, no security item); `main` accommodated nothing (no spec or test describes the deposit JSON), so nothing to cherry-pick.
