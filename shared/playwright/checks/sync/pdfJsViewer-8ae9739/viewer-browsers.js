@@ -1,7 +1,9 @@
 // pdfJsViewer 8ae9739 ("Update PDF.js to 6.4.299", pulled into OJS main by d054e2660d, stable-3_5_0 by
 // the same tree at 2e27262): the new generic build calls Map.prototype.getOrInsertComputed and URL.parse
 // with no polyfill, so a reader whose browser lacks either gets an empty viewer.
-// Report docs/reports/2026-10-26-pdfJsViewer-8ae9739.md. Kept from the regression read rr1026a.
+// Report docs/reports/2026-10-26-pdfJsViewer-8ae9739.md (deleted 2026-10-26: fixed by pdfJsViewer f24f761 / 3.5
+// ce6a128, the legacy build; git has it). Kept for OJS `ore`, whose pointer is still 1d992590f0 (4.10.38):
+// run S4 when `ore` takes PDF.js 6. Kept from the regression read rr1026a.
 //
 //   PROBE_FEATURE=sync PROBE_AGENT=<id> RUN=r1 node bin/probe.js ojs shared/playwright/checks/sync/pdfJsViewer-8ae9739/viewer-browsers.js
 //   OLD_BUILD=1d99259 serves the previous plugin tree at the same addresses (the before control).

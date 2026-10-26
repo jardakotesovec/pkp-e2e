@@ -20,6 +20,7 @@ pkp-e2e `ore` tip: `85ed48ee` (2026-10-26, companion `13607-ore` fast-forwarded;
 
 ## Open
 
+- When pkp/ojs `ore` moves pdfJsViewer past `1d992590f0` (PDF.js 4.10.38), run S4 of `checks/sync/pdfJsViewer-8ae9739/viewer-browsers.js` on the ore fleet: `main`'s first PDF.js 6 build (`8ae9739`) left older browsers with an empty viewer, fixed by the legacy build (`f24f761`) on 2026-10-26.
 - Phase 1 of the set-up (plan of 2026-10-16), the rest of it:
   `bin/line-range.js --branch ore`, `bin/report-models.mjs` reading
   `docs/reports/ore/`, REPORT.md "Affects" with an `ore` sub-item and
