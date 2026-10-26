@@ -26,6 +26,17 @@
  * evidence: docs/specs/U04-orcid-integration.md footnotes. The
  * unauthenticated link, the request-dialog helper, the About page and the
  * email-link reader were added on the 2026-09-13 revision.
+ *
+ * Added on the 2026-10-26 revision: the settings tab's refused-save
+ * readouts, its City box and its Users & Roles neighbours
+ * (`OrcidSettingsTab.saveRefused`, `cityInput`, `openSiblingTab`); the
+ * profile's "Confirm" window (`ProfileIdentityPage.deleteWindow`); the
+ * ORCID icon reader (`orcidIconKinds`, `expectOrcidIcons`: solid or
+ * hollow, by the icon's own drawing); the field's "Resend Verification
+ * Email" (`resendVerification`); the About page's footer
+ * (`AboutOrcidPage.footer`, `footerBrandLink`) and the member-API deposit
+ * sentence (`DEPOSIT_SENTENCE`); `leaveUsersAndRoles` (the side menu's
+ * Settings › Server, every question the page asks recorded).
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
@@ -47,7 +58,23 @@ exports.OrcidSettingsTab = class OrcidSettingsTab extends BasePage {
         this.apiSelect = this.panel.locator('select[name="orcidApiType"]');
         this.clientIdInput = this.panel.locator('input[name="orcidClientId"]');
         this.clientSecretInput = this.panel.locator('input[name="orcidClientSecret"]');
+        this.cityInput = this.panel.locator('input[name="orcidCity"]');
         this.saveButton = this.panel.getByRole('button', {name: 'Save', exact: true});
+        // A refused save: each flagged box's own line, and the form's summary.
+        this.clientIdError = this.panel
+            .locator('.pkpFormField')
+            .filter({has: page.locator('input[name="orcidClientId"]')})
+            .locator('.pkpFieldError');
+        this.clientSecretError = this.panel
+            .locator('.pkpFormField')
+            .filter({has: page.locator('input[name="orcidClientSecret"]')})
+            .locator('.pkpFieldError');
+        this.errorSummary = this.panel.getByText(/Please correct \d+ errors?\./);
+    }
+
+    /** The Users & Roles tab of that name ("Users", "Roles", "ORCID", …). */
+    tab(name) {
+        return this.page.getByRole('tab', {name, exact: true});
     }
 
     /** Settings → Users & Roles, tab "ORCID". */
@@ -65,6 +92,80 @@ exports.OrcidSettingsTab = class OrcidSettingsTab extends BasePage {
         await this.saveButton.click();
         await saved;
     }
+
+    /**
+     * Press "Save" on a form the browser refuses (a required box empty).
+     * Returns the context-API requests the press sent, read once the
+     * refusal's summary is on screen (the bound: the form answers in the
+     * page, without a request, ccI28 screen note).
+     *
+     * @returns {Promise<string[]>}
+     */
+    async saveRefused() {
+        const sent = [];
+        const listener = (request) => {
+            if (request.url().includes('/api/v1/contexts/') && request.method() !== 'GET') {
+                sent.push(`${request.method()} ${request.url()}`);
+            }
+        };
+        this.page.on('request', listener);
+        try {
+            await this.saveButton.click();
+            await expect(this.errorSummary).toBeVisible();
+        } finally {
+            this.page.off('request', listener);
+        }
+        return sent;
+    }
+
+    /**
+     * Open another tab of Users & Roles and come back to "ORCID", on the
+     * same page (no navigation).
+     *
+     * @param {string} name the other tab's name
+     */
+    async openSiblingTab(name) {
+        await this.tab(name).click();
+        await expect(this.tab(name)).toHaveAttribute('aria-selected', 'true');
+        await expect(this.enableCheckbox).toBeHidden();
+        await this.tab('ORCID').click();
+        await expect(this.tab('ORCID')).toHaveAttribute('aria-selected', 'true');
+        await expect(this.enableCheckbox).toBeVisible();
+    }
+};
+
+/**
+ * Leave Users & Roles through the side menu's Settings › Server
+ * (`management/settings/context`), recording every question the page
+ * asks on the way (a `beforeunload` or a `confirm()`, each accepted so
+ * the navigation completes). Returns the questions' messages and types;
+ * the arrival on the server's settings page bounds the read.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} contextPath
+ * @returns {Promise<string[]>}
+ */
+exports.leaveUsersAndRoles = async function leaveUsersAndRoles(page, contextPath) {
+    const asked = [];
+    const listener = async (dialog) => {
+        asked.push(`${dialog.type()}: ${dialog.message()}`);
+        await dialog.accept().catch(() => {});
+    };
+    page.on('dialog', listener);
+    try {
+        await page
+            .locator(`a[href$="/${contextPath}/management/settings/context"]`)
+            .filter({visible: true})
+            .first()
+            .click();
+        await page.waitForURL(/\/management\/settings\/context/, {waitUntil: 'commit'});
+        await expect(page.getByRole('tab', {name: 'Masthead', exact: true}).first()).toBeVisible({
+            timeout: 30_000,
+        });
+    } finally {
+        page.off('dialog', listener);
+    }
+    return asked;
 };
 
 exports.ProfileIdentityPage = class ProfileIdentityPage extends BasePage {
@@ -93,6 +194,11 @@ exports.ProfileIdentityPage = class ProfileIdentityPage extends BasePage {
             .locator('a[target="_blank"]')
             .filter({hasText: '(unauthenticated)'});
         this.deleteButton = this.form.locator('#deleteOrcidButton');
+        // The window "Delete" opens (Rule 6c): titled "Confirm", its question,
+        // "OK" and "Cancel".
+        this.deleteWindow = page
+            .getByRole('dialog', {name: 'Confirm', exact: true})
+            .filter({hasText: 'Are you sure you want to remove this ORCID?'});
     }
 
     /** The profile page opens on the Identity tab. */
@@ -239,6 +345,77 @@ exports.requestVerification = async function requestVerification(page, field, {s
     return dialogText;
 };
 
+/**
+ * Press "Resend Verification Email" on a contributor form's ORCID iD field
+ * (the requested state) and confirm its dialog with "Yes"; bounded by
+ * `orcid/requestAuthorVerification/…` answering OK, as the first request.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} field from orcidField()
+ * @returns {Promise<string>} the dialog's text, read before it was confirmed
+ */
+exports.resendVerification = async function resendVerification(page, field) {
+    await field.getByRole('button', {name: exports.RESEND_LINK_TEXT, exact: true}).click();
+    const dialog = exports.orcidRequestDialog(page);
+    await expect(dialog).toContainText('Request ORCID verification');
+    const dialogText = await dialog.innerText();
+    const requested = page.waitForResponse(
+        (response) =>
+            response.url().includes('/orcid/requestAuthorVerification/') && response.ok()
+    );
+    await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
+    await requested;
+    await expect(dialog).toHaveCount(0);
+    await expect(field).toContainText(exports.REQUESTED_TEXT);
+    return dialogText;
+};
+
+/**
+ * The ORCID icons drawn inside an element, in DOM order, each read by its
+ * own drawing: "solid" when its first shape is the filled green disc
+ * (ORCID's iD mark, `#A6CE39`), "hollow" when its first shape is a white
+ * disc inside a green ring (the unauthenticated mark, `#7FAA26`). Any
+ * other icon (a field's help mark) is skipped. Covers the profile's
+ * Smarty-drawn icons and the contributor field's Vue ones alike.
+ *
+ * @param {import('@playwright/test').Locator} root
+ * @returns {Promise<string[]>}
+ */
+exports.orcidIconKinds = async function orcidIconKinds(root) {
+    return root.evaluate((el) => {
+        const SOLID = 'rgb(166, 206, 57)';
+        const RING = 'rgb(127, 170, 38)';
+        const WHITE = 'rgb(255, 255, 255)';
+        return [...el.querySelectorAll('svg')]
+            .map((svg) => [...svg.querySelectorAll('path')].map((p) => getComputedStyle(p).fill))
+            .map((fills) => {
+                if (fills[0] === SOLID) {
+                    return 'solid';
+                }
+                if (fills[0] === WHITE && fills.slice(1).includes(RING)) {
+                    return 'hollow';
+                }
+                return null;
+            })
+            .filter((kind) => kind !== null);
+    });
+};
+
+/**
+ * Poll `orcidIconKinds` until it reads `kinds` (the icon renders with its
+ * element; a one-shot read could race a Vue re-render).
+ *
+ * @param {import('@playwright/test').Locator} root
+ * @param {string[]} kinds
+ */
+exports.expectOrcidIcons = async function expectOrcidIcons(root, kinds) {
+    await expect(root).toBeVisible();
+    await expect.poll(() => exports.orcidIconKinds(root)).toEqual(kinds);
+};
+
+/** Rule 10: the "How and why" sentence only a member-API context's page carries. */
+exports.DEPOSIT_SENTENCE = 'publication metadata will automatically be pushed to your ORCID record';
+
 /** The "What is ORCID?" public page (Rule 10; `{server}/orcid/about`). */
 exports.AboutOrcidPage = class AboutOrcidPage extends BasePage {
     /**
@@ -252,6 +429,21 @@ exports.AboutOrcidPage = class AboutOrcidPage extends BasePage {
             name: 'How and why we collect ORCID iDs?',
         });
         this.displayHeading = page.getByRole('heading', {name: 'Where are ORCID iDs displayed?'});
+        // The context's own header (its name) and footer (the theme's
+        // footer, whose brand link leads to the context's own "About this
+        // Publishing System" page).
+        this.header = page.getByRole('banner');
+        this.footer = page.getByRole('contentinfo');
+    }
+
+    /**
+     * The footer's brand link into this context's "About this Publishing
+     * System" page.
+     *
+     * @param {string} contextPath
+     */
+    footerBrandLink(contextPath) {
+        return this.footer.locator(`a[href*="/${contextPath}/about/aboutThisPublishingSystem"]`);
     }
 
     /**

@@ -2,20 +2,17 @@
 /**
  * @file playwright/tests/serial/U04-orcid-integration.spec.js
  *
- * ORCID integration — the one OPS canonical scenario that asserts on ORCID
- * request EMAIL (spec scenario 4). Every ORCID mailable is queued-job mail
+ * ORCID integration — the OPS canonical scenarios that assert on ORCID
+ * EMAIL (spec scenarios 4 and 11). Every ORCID mailable is queued-job mail
  * and the fleets run with `[queues] job_runner = Off`, so nothing reaches
  * Mailpit until `php lib/pkp/tools/jobs.php run` drains the queue — and that
  * drain pops the SHARED queue, so it must never run while parallel agents
- * seed. Hence the serial project (patterns.md parallel lesson 7).
+ * seed. Hence the serial project (patterns.md parallel lesson 7). S4 reads
+ * a "nothing yet, until the save" silence and runs `@solo`; S11's silence
+ * (an unpublished preprint sends nothing) holds whatever another drain runs.
  * Spec: docs/specs/U04-orcid-integration.md
  *
- * Not covered, by register ID (the parallel suite's header and the spec's
- * Coverage section are the record of everything else left out): OPS2 🐞
- * (the Emails settings screen's missing rows; the delivered request mail
- * asserted here is the spec's Rule 8 and Rule 14 contract, never the
- * roster gap itself). S4's emailed authorization link is recorded, never
- * followed: ORCID's sign-in cannot complete on the fleets.
+ * Not covered, by register ID: OPS2 🐞, A14 🐞, A21 🐞, A7 ❓.
  *
  * Mailpit is shared across fleets and workers: every assertion is scoped by
  * a unique throwaway recipient (the seeded contributor's address carries
@@ -31,17 +28,36 @@ const {
     orcidField,
     orcidEmailLinks,
     requestVerification,
+    resendVerification,
+    OrcidSettingsTab,
+    DEPOSIT_SENTENCE,
     REQUEST_QUESTION,
     REQUEST_WAITS_FOR_SAVE,
     REQUESTED_TEXT,
     RESEND_LINK_TEXT,
 } = require('../../pages/OrcidPages.js');
 const {ContributorsScreen} = require('../../pages/ContributorPages.js');
+const {postPreprint} = require('../../pages/PublicationPages.js');
 const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
 
-/** The Rule 14 subject lines: public API, member API. */
+/** The Rule 14 subject lines: public API, member API, re-authorization. */
 const SUBJECT_PUBLIC = 'Submission ORCID';
 const SUBJECT_MEMBER = 'Requesting ORCID record access';
+const SUBJECT_REAUTH = 'Requesting updated ORCID record access';
+
+/** A seedable verified iD (ORCID's own example iD, sandbox-hosted). */
+const TEST_ORCID = 'https://sandbox.orcid.org/0000-0002-1825-0097';
+
+/**
+ * A message's plain text as a reader sees it (Rule 14a reads): white space
+ * folded, and the " ( address )" Mailpit's text part writes after each
+ * link's words dropped.
+ */
+function flatText(message) {
+    return String(message.Text || '')
+        .replace(/\s+/g, ' ')
+        .replace(/ \( https?:\/\/[^ )]* \)/g, '');
+}
 
 /** Unique per-run tag: single alphanumeric token, carries app + scenario. */
 function makeTag(scenario, testInfo) {
@@ -54,8 +70,8 @@ function principalContact(tag) {
 }
 
 // Re-enabled 2026-08-26 (maintainer): the dead-port proxy + sandbox-only dummy
-// credentials stand — no real ORCID traffic is possible from these tests
-// (see header); S2's popup asserts the sandbox URL only, without driving it.
+// credentials stand — no real ORCID traffic is possible from these tests;
+// every emailed link is read, never followed.
 test.describe('ORCID integration (queued email)', () => {
     test('S4: "Request verification" emails the contributor an authorization link @solo', async ({asUser, opsApi, pkpMail}, testInfo) => {
         test.slow();
@@ -77,6 +93,7 @@ test.describe('ORCID integration (queued email)', () => {
                 tag: contextTag,
                 context: contextTag,
                 submitter: `aut${contextTag}`,
+                title: `Preprint ${contextTag}`,
             });
             return submissionId;
         };
@@ -153,6 +170,14 @@ test.describe('ORCID integration (queued email)', () => {
         expect(links.authorization).toContain('sandbox.orcid.org'); // leads to ORCID's (sandbox) site
         expect(links.about).toContain(`/${tag}/orcid/about`);
         // Recorded, never followed: OAuth cannot complete from this install.
+        // Rule 14a: the greeting by the contributor's name (the seed's, the
+        // username), the title in quotes, the default signature.
+        const text = flatText(full);
+        expect(text).toContain(`Dear ${author},`);
+        expect(text).toContain(
+            `You have been listed as an author on a manuscript submission "Preprint ${tag}" to Scratch context ${tag}.`
+        );
+        expect(text).toContain(`This is an automated message from Scratch context ${tag}.`);
 
         // The member-API server's contributor: "Requesting ORCID record
         // access", the same two links, From that server's contact (Rule 14).
@@ -163,6 +188,12 @@ test.describe('ORCID integration (queued email)', () => {
         const memberLinks = orcidEmailLinks(memberFull.HTML);
         expect(memberLinks.authorization).toContain('sandbox.orcid.org');
         expect(memberLinks.about).toContain(`/${tagMember}/orcid/about`);
+        const memberText = flatText(memberFull);
+        expect(memberText).toContain(`Dear ${memberAuthor},`);
+        expect(memberText).toContain(
+            `on the manuscript submission "Preprint ${tagMember}" to Scratch context ${tagMember}.`
+        );
+        expect(memberText).toContain(`This is an automated message from Scratch context ${tagMember}.`);
         expect(await pkpMail.count({to: recipient, subject: SUBJECT_MEMBER})).toBe(0);
         expect(await pkpMail.count({to: memberRecipient, subject: SUBJECT_PUBLIC})).toBe(0);
 
@@ -190,6 +221,8 @@ test.describe('ORCID integration (queued email)', () => {
         expect(publicHowAndWhy.length).toBeGreaterThan(0);
         expect(memberHowAndWhy.length).toBeGreaterThan(0);
         expect(memberHowAndWhy).not.toBe(publicHowAndWhy);
+        expect(memberHowAndWhy).toContain(DEPOSIT_SENTENCE);
+        expect(publicHowAndWhy).not.toContain(DEPOSIT_SENTENCE);
 
         // Control: save the new contributor (the server offers more than one
         // contributor role, so the required role choice is ticked); the next
@@ -202,5 +235,91 @@ test.describe('ORCID integration (queued email)', () => {
         expect(novaSummary.From.Address).toBe(`contact-${tag}@mail.test`);
         const novaFull = await pkpMail.fullMessage(novaSummary.ID);
         expect(orcidEmailLinks(novaFull.HTML).authorization).toContain('sandbox.orcid.org');
+
+        // "Resend Verification Email" on the reopened contributor: the same
+        // question; confirmed, a second "Submission ORCID" arrives (Rule 8).
+        // Pressed after the first request's drain: the request job is
+        // unique per contributor while it waits in the queue.
+        expect(await pkpMail.count({to: recipient, subject: SUBJECT_PUBLIC})).toBe(1);
+        modal = await openContributorEditor(managerPage, author);
+        const resendText = await resendVerification(managerPage, orcidField(modal));
+        expect(resendText).toContain(REQUEST_QUESTION);
+        expect(resendText).not.toContain(REQUEST_WAITS_FOR_SAVE);
+        runJobs();
+        await expect
+            .poll(() => pkpMail.count({to: recipient, subject: SUBJECT_PUBLIC}), {timeout: 20_000})
+            .toBe(2);
+    });
+
+    test('S11: a contributor verified under the public API is asked to re-authorize', async ({asUser, opsApi, pkpMail}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s11', testInfo);
+        const manager = `mgr${tag}`;
+        const first = `aut${tag}`;
+        const second = `bau${tag}`;
+        // A Public Sandbox server with a principal contact of its own; two
+        // unposted preprints, each by its own submitter whose iD was
+        // verified under that API (the seed stores the public scope).
+        await opsApi.createContext({
+            tag,
+            context: principalContact(tag),
+            users: [
+                {username: manager, roles: ['manager']},
+                {username: first, roles: ['author']},
+                {username: second, roles: ['author']},
+            ],
+            orcid: {},
+        });
+        const {submissionId: firstSubmission} = await opsApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: first,
+            title: `Preprint ${tag}`,
+            author: {orcid: TEST_ORCID, orcidIsVerified: true},
+        });
+        await opsApi.createSubmission({
+            tag: `${tag}b`,
+            context: tag,
+            submitter: second,
+            title: `Second ${tag}`,
+            author: {orcid: TEST_ORCID, orcidIsVerified: true},
+        });
+        const firstRecipient = `${first}@mail.test`;
+        const secondRecipient = `${second}@mail.test`;
+
+        // The "ORCID" tab: "Member Sandbox" under "ORCID API", saved.
+        const managerPage = await (await asUser(manager)).newPage();
+        const settings = new OrcidSettingsTab(managerPage, tag);
+        await settings.goto();
+        await expect(settings.enableCheckbox).toBeChecked();
+        await expect(settings.apiSelect.locator('option:checked')).toHaveText('Public Sandbox');
+        await settings.apiSelect.selectOption({label: 'Member Sandbox'});
+        await settings.save();
+        await settings.goto();
+        await expect(settings.apiSelect.locator('option:checked')).toHaveText('Member Sandbox');
+
+        // Publishing: the first preprint is posted on its workflow screen.
+        await openEditorialWorkflow(managerPage, tag, firstSubmission);
+        await postPreprint(managerPage);
+
+        // The drain runs the deposit, which pauses on the public scope and
+        // queues the re-authorization email, then the email itself.
+        runJobs();
+        const summary = await pkpMail.find({to: firstRecipient, subject: SUBJECT_REAUTH, timeoutMs: 30_000});
+        expect(summary.From.Address).toBe(`contact-${tag}@mail.test`);
+        expect(summary.From.Name).toBe(`ORCID Contact ${tag}`);
+        const full = await pkpMail.fullMessage(summary.ID);
+        const links = orcidEmailLinks(full.HTML);
+        // The personal authorization link leads to ORCID's (sandbox) site;
+        // read, never followed (A14).
+        expect(links.authorization).toContain('sandbox.orcid.org');
+        expect(links.about).toContain(`/${tag}/orcid/about`);
+
+        // Control: the unposted preprint's contributor received nothing —
+        // bounded by the first contributor's email from the same drain.
+        await pkpMail.expectNone({
+            to: secondRecipient,
+            afterControl: {to: firstRecipient, subject: SUBJECT_REAUTH},
+        });
     });
 });

@@ -26,6 +26,10 @@
  *   list and the contributor edit modal's "ORCID iD" field (FieldOrcid —
  *   the shared component, rendered identically on the press per
  *   probe-groupC items 10 and 14).
+ * - The ORCID icons (solidOrcidIcon / hollowOrcidIcon, by the drawing
+ *   itself), "Resend Verification Email" (resendVerification), the
+ *   request dialog's wording (REQUEST_QUESTION, REQUEST_ON_CREATE) and an
+ *   ORCID email's body as text (orcidEmailText) — the 2026-10-26 revision.
  *
  * The workflow itself is opened with the U26 helpers
  * (playwright/pages/ReviewStagePages.js — openEditorial).
@@ -50,7 +54,51 @@ exports.OrcidSettingsTab = class OrcidSettingsTab extends BasePage {
         this.apiSelect = this.panel.locator('select[name="orcidApiType"]');
         this.clientIdInput = this.panel.locator('input[name="orcidClientId"]');
         this.clientSecretInput = this.panel.locator('input[name="orcidClientSecret"]');
+        this.cityInput = this.panel.locator('input[name="orcidCity"]');
         this.saveButton = this.panel.getByRole('button', {name: 'Save', exact: true});
+        // A refused save (Vue form validation, nothing sent): the line under
+        // each empty required box and the form's own count.
+        this.requiredErrors = this.panel.getByText('This field is required.', {exact: true});
+    }
+
+    /** One of the tabs of Settings → Users & Roles ("Users", "Roles", "ORCID", …). */
+    tab(name) {
+        return this.page.getByRole('tab', {name, exact: true});
+    }
+
+    /** Switch to another tab of Users & Roles and back to "ORCID", with no page load. */
+    async visitTabAndBack(name) {
+        await this.tab(name).click();
+        await expect(this.tab(name)).toHaveAttribute('aria-selected', 'true');
+        await expect(this.panel).toBeHidden();
+        await this.tab('ORCID').click();
+        await expect(this.enableCheckbox).toBeVisible();
+    }
+
+    /**
+     * Press "Save" on a form the browser refuses (a required box empty):
+     * returns the non-GET context API requests the press sent, read once
+     * the refusal's own lines are on screen (an empty list is the
+     * "nothing is saved" read).
+     *
+     * @returns {Promise<string[]>}
+     */
+    async pressRefusedSave() {
+        const sent = [];
+        const listener = (request) => {
+            if (request.url().includes('/api/v1/contexts/') && request.method() !== 'GET') {
+                sent.push(`${request.method()} ${request.url()}`);
+            }
+        };
+        this.page.on('request', listener);
+        try {
+            await this.saveButton.click();
+            await expect(this.requiredErrors.first()).toBeVisible();
+            await expect(this.panel.getByText(/Please correct \d+ errors?\./)).toBeVisible();
+        } finally {
+            this.page.off('request', listener);
+        }
+        return sent;
     }
 
     /** Settings → Users & Roles, tab "ORCID". */
@@ -180,6 +228,9 @@ exports.AboutOrcidPage = class AboutOrcidPage extends BasePage {
             name: 'How and why we collect ORCID iDs?',
         });
         this.displayHeading = page.getByRole('heading', {name: 'Where are ORCID iDs displayed?'});
+        // The context's own chrome around the page (Rule 10; scenario 6).
+        this.header = page.locator('.pkp_structure_head');
+        this.footer = page.locator('.pkp_structure_footer_wrapper');
     }
 
     /** Open the page by its address (a context path, or an absolute link from an email). */
@@ -245,6 +296,80 @@ exports.requestVerification = async function requestVerification(page, field, {s
     await requested;
     await expect(dialog).toHaveCount(0);
     return dialogText;
+};
+
+/**
+ * "Resend Verification Email" beside the requested state (Rule 8): the
+ * same "Request ORCID verification" dialog, confirmed with "Yes", bounded
+ * by the request answering OK (a saved contributor's email leaves at once).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} field from orcidField()
+ * @returns {Promise<string>} the dialog's text, read before it was confirmed
+ */
+exports.resendVerification = async function resendVerification(page, field) {
+    await field.getByRole('button', {name: exports.RESEND_LINK_TEXT, exact: true}).click();
+    const dialog = exports.orcidRequestDialog(page);
+    await expect(dialog).toContainText('Request ORCID verification');
+    const dialogText = await dialog.innerText();
+    const requested = page.waitForResponse(
+        (response) => response.url().includes('/orcid/requestAuthorVerification/') && response.ok()
+    );
+    await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
+    await requested;
+    await expect(dialog).toHaveCount(0);
+    return dialogText;
+};
+
+/** The request dialog's question (Rule 8; Fields, the contributor's ORCID iD field). */
+exports.REQUEST_QUESTION = 'Would you like to send an email to this author requesting they verify their ORCID?';
+
+/** The add form's extra sentence in the same dialog (Rule 8). */
+exports.REQUEST_ON_CREATE = 'The email will be sent once the author has been created.';
+
+/**
+ * The ORCID icons told apart by their own drawing (Rule 5; Fields, the
+ * contributor's ORCID iD field): the hollow icon is the ring drawn on a
+ * 32-unit box (lib/pkp templates/images/orcid_unauthenticated.svg and the
+ * ui-library's OrcidUnauthenticated icon alike); the solid one is the
+ * filled disc, on a 256-unit box on the profile (templates/images/orcid.svg)
+ * and, in the contributor form, the ui-library's Orcid icon, whose disc is
+ * the one path filled #A6CE39 (its 24-unit box is every other icon's too,
+ * the field's tooltip included).
+ */
+const HOLLOW_ICON = 'svg[viewBox="0 0 32 32"]';
+const SOLID_ICON = 'svg[viewBox="0 0 256 256"], svg:has(path[fill="#A6CE39"])';
+
+/** The solid ORCID icon(s) inside `scope` (an iD link, a contributor field). */
+exports.solidOrcidIcon = function solidOrcidIcon(scope) {
+    return scope.locator(SOLID_ICON);
+};
+
+/** The hollow ORCID icon(s) inside `scope` (an iD link, a contributor field). */
+exports.hollowOrcidIcon = function hollowOrcidIcon(scope) {
+    return scope.locator(HOLLOW_ICON);
+};
+
+/**
+ * An ORCID email's body as plain text: tags dropped (a line break kept as
+ * a space), entities decoded, white space collapsed, so the wording of
+ * Rule 14a reads as one line.
+ *
+ * @param {string} html the message's HTML body
+ * @returns {string}
+ */
+exports.orcidEmailText = function orcidEmailText(html) {
+    return html
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&quot;|&#34;|&#x22;/g, '"')
+        .replace(/&#39;|&#x27;|&apos;/g, "'")
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/\s+/g, ' ')
+        .replace(/ ([.,])/g, '$1')
+        .trim();
 };
 
 /** The requested state of the field (Rule 8): the disabled button's text and the resend link. */

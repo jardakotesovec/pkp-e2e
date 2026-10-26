@@ -2,8 +2,10 @@
 /**
  * @file playwright/tests/serial/U04-orcid-integration.spec.js
  *
- * ORCID integration — the two OMP canonical scenarios that assert on ORCID
- * request EMAIL (spec scenarios 4 and 8, the {OJS OMP} accept-decision leg).
+ * ORCID integration — the OMP canonical scenarios that assert on ORCID
+ * request EMAIL (spec scenarios 4 and 8, the {OJS OMP} accept-decision leg),
+ * and scenario 11's absence on a press (it is {OJS OPS}: a press deposits
+ * nothing, OMP1, so no re-authorization request leaves it).
  * Every ORCID mailable is queued-job mail and the fleets run with
  * `[queues] job_runner = Off`, so nothing reaches Mailpit until
  * `php lib/pkp/tools/jobs.php run` drains the queue — and that drain pops
@@ -12,10 +14,7 @@
  * Spec: docs/specs/U04-orcid-integration.md
  *
  * Not covered, by register ID (the parallel suite's header and the spec's
- * Coverage section are the record of everything else left out): A6 (S8
- * asserts the toggle's accept-time behavior, never its label wording). S4's
- * emailed authorization link is recorded, never followed: ORCID's sign-in
- * cannot complete on the fleets.
+ * Coverage section are the record of everything else left out): A6.
  *
  * Mailpit is shared across fleets and workers: every assertion is scoped by
  * a unique throwaway recipient (the seeded contributor's address carries
@@ -25,11 +24,16 @@
 const {test, expect} = require('../../support/fixtures.js');
 const {
     AboutOrcidPage,
+    OrcidSettingsTab,
     openContributors,
     openContributorEditor,
     orcidField,
     orcidEmailLinks,
+    orcidEmailText,
     requestVerification,
+    resendVerification,
+    REQUEST_ON_CREATE,
+    REQUEST_QUESTION,
     REQUESTED_TEXT,
     RESEND_LINK_TEXT,
 } = require('../../pages/OrcidPages.js');
@@ -40,6 +44,8 @@ const {
     openEditorial,
     walkDecisionWizard,
 } = require('../../pages/ReviewStagePages.js');
+const {publishShownVersion} = require('../../pages/PublicationPages.js');
+const {WorkflowPage} = require('../../../../../shared/playwright/pages/WorkflowPage.js');
 const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
 
 /** A seedable test iD (ORCID's own example iD, sandbox-hosted). */
@@ -48,6 +54,11 @@ const TEST_ORCID = 'https://sandbox.orcid.org/0000-0002-1825-0097';
 /** The Rule 14 subject lines: public API, member API. */
 const SUBJECT_PUBLIC = 'Submission ORCID';
 const SUBJECT_MEMBER = 'Requesting ORCID record access';
+/** Rule 11's re-authorization request (journals and preprint servers; OMP1). */
+const SUBJECT_REAUTHORIZE = 'Requesting updated ORCID record access';
+
+/** The Member API's deposit sentence on the What-is-ORCID page (Rule 10). */
+const DEPOSIT_SENTENCE = 'publication metadata will automatically be pushed to your ORCID record';
 
 /** Unique per-run tag: single alphanumeric token, carries app + scenario. */
 function makeTag(scenario, testInfo) {
@@ -83,6 +94,7 @@ test.describe('ORCID integration (queued email)', () => {
                 tag: contextTag,
                 context: contextTag,
                 submitter: `aut${contextTag}`,
+                title: `Orcid Book ${contextTag}`,
             });
             return submissionId;
         };
@@ -103,7 +115,8 @@ test.describe('ORCID integration (queued email)', () => {
         // Rule 8 question; confirming flips the field to the requested state.
         const field = orcidField(modal);
         const dialogText = await requestVerification(managerPage, field);
-        expect(dialogText).not.toContain('The email will be sent once the author has been created.');
+        expect(dialogText).toContain(REQUEST_QUESTION);
+        expect(dialogText).not.toContain(REQUEST_ON_CREATE);
         await expect(field).toContainText(REQUESTED_TEXT);
         await expect(field.getByRole('button', {name: 'Request verification'})).toHaveCount(0);
         await expect(field.getByText(RESEND_LINK_TEXT)).toBeVisible();
@@ -117,6 +130,22 @@ test.describe('ORCID integration (queued email)', () => {
         modal = await openContributorEditor(managerPage, author);
         await expect(orcidField(modal)).toContainText(REQUESTED_TEXT);
         await expect(orcidField(modal).getByText(RESEND_LINK_TEXT)).toBeVisible();
+
+        // The saved contributor's email leaves at once (Rule 8): the queue
+        // worker runs it (on the fleets only an explicit drain does, and
+        // the request job is one per contributor while it waits, lib/pkp
+        // SendAuthorMail), so the mailbox holds one "Submission ORCID".
+        runJobs();
+        await pkpMail.find({to: recipient, subject: SUBJECT_PUBLIC});
+        expect(await pkpMail.count({to: recipient, subject: SUBJECT_PUBLIC})).toBe(1);
+
+        // "Resend Verification Email" on the reopened contributor asks the
+        // same question; confirming sends the request again (Rule 8), read
+        // below as a second "Submission ORCID" in the same mailbox.
+        const resendText = await resendVerification(managerPage, orcidField(modal));
+        expect(resendText).toContain(REQUEST_QUESTION);
+        expect(resendText).not.toContain(REQUEST_ON_CREATE);
+        await expect(orcidField(modal)).toContainText(REQUESTED_TEXT);
         await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
         await expect(modal).toHaveCount(0);
 
@@ -141,13 +170,14 @@ test.describe('ORCID integration (queued email)', () => {
         });
         const addField = orcidField(addDialog);
         const addDialogText = await requestVerification(managerPage, addField, {saved: false});
-        expect(addDialogText).toContain('Would you like to send an email to this author requesting they verify their ORCID?');
-        expect(addDialogText).toContain('The email will be sent once the author has been created.');
+        expect(addDialogText).toContain(REQUEST_QUESTION);
+        expect(addDialogText).toContain(REQUEST_ON_CREATE);
         await expect(addField).toContainText(REQUESTED_TEXT);
 
         // The mail is queued-job mail: drain the queue, then read the
         // contributors' mailboxes (recipient-scoped). The drain delivers the
-        // two saved contributors' requests; Nova's is still only remembered.
+        // resend and the member press's request; Nova's is still only
+        // remembered.
         runJobs();
         const summary = await pkpMail.find({to: recipient, subject: SUBJECT_PUBLIC});
         expect(summary.From.Address).toBe(`contact-${tag}@mail.test`);
@@ -157,6 +187,19 @@ test.describe('ORCID integration (queued email)', () => {
         expect(links.authorization).toContain('sandbox.orcid.org'); // leads to ORCID's (sandbox) site
         expect(links.about).toContain(`/${tag}/orcid/about`);
         // Recorded, never followed: OAuth cannot complete from this install.
+        // The wording (Rule 14a): greeted by name, the title in quotes, the
+        // press's default email signature at the close.
+        const pressName = `Scratch context ${tag}`;
+        const text = orcidEmailText(full.HTML);
+        expect(text).toMatch(new RegExp(`^Dear ${author},`));
+        expect(text).toContain(
+            `You have been listed as an author on a manuscript submission "Orcid Book ${tag}" to ${pressName}.`
+        );
+        expect(text).toMatch(new RegExp(`This is an automated message from ${pressName}\\.$`));
+        // The resend: a second "Submission ORCID" in the same mailbox (Rule 8).
+        await expect
+            .poll(() => pkpMail.count({to: recipient, subject: SUBJECT_PUBLIC}), {timeout: 20_000})
+            .toBe(2);
 
         // The member-API press's contributor: "Requesting ORCID record
         // access", the same two links, From that press's contact (Rule 14).
@@ -167,6 +210,13 @@ test.describe('ORCID integration (queued email)', () => {
         const memberLinks = orcidEmailLinks(memberFull.HTML);
         expect(memberLinks.authorization).toContain('sandbox.orcid.org');
         expect(memberLinks.about).toContain(`/${tagMember}/orcid/about`);
+        const memberPressName = `Scratch context ${tagMember}`;
+        const memberText = orcidEmailText(memberFull.HTML);
+        expect(memberText).toMatch(new RegExp(`^Dear ${memberAuthor},`));
+        expect(memberText).toContain(
+            `You have been listed as an author on the manuscript submission "Orcid Book ${tagMember}" to ${memberPressName}.`
+        );
+        expect(memberText).toMatch(new RegExp(`This is an automated message from ${memberPressName}\\.$`));
         expect(await pkpMail.count({to: recipient, subject: SUBJECT_MEMBER})).toBe(0);
         expect(await pkpMail.count({to: memberRecipient, subject: SUBJECT_PUBLIC})).toBe(0);
 
@@ -192,7 +242,8 @@ test.describe('ORCID integration (queued email)', () => {
         const memberHowAndWhy = await about.howAndWhyText();
         expect(publicHowAndWhy.length).toBeGreaterThan(0);
         expect(memberHowAndWhy.length).toBeGreaterThan(0);
-        expect(memberHowAndWhy).not.toBe(publicHowAndWhy);
+        expect(memberHowAndWhy).toContain(DEPOSIT_SENTENCE);
+        expect(publicHowAndWhy).not.toContain(DEPOSIT_SENTENCE);
 
         // Control: save the new contributor; the next drain delivers Nova's
         // request email (Rule 8).
@@ -294,5 +345,109 @@ test.describe('ORCID integration (queued email)', () => {
             subject: SUBJECT_PUBLIC,
             afterControl: {to: onRecipient, subject: SUBJECT_PUBLIC},
         });
+    });
+
+    test('S11 (absence): a press publishing for a contributor verified under the public API sends no re-authorization request', async ({asUser, ompApi, pkpMail}, testInfo) => {
+        test.slow();
+        // Scenario 11 is {OJS OPS}: a press deposits nothing (OMP1), so the
+        // re-authorization request it ends on never leaves a press. The same
+        // Given and steps as the spec's (footnote s), on a press; the
+        // positive control is a request the same drain delivers from the
+        // same press after its switch, "Requesting ORCID record access",
+        // which also shows the switch to the member API took.
+        const tag = makeTag('s11', testInfo);
+        const manager = `mgr${tag}`;
+        const first = `aut${tag}`;
+        const second = `bau${tag}`;
+        await ompApi.createContext({
+            tag,
+            context: principalContact(tag),
+            users: [
+                {username: manager, roles: ['manager']},
+                {username: first, roles: ['author']},
+                {username: second, roles: ['author']},
+            ],
+            orcid: {}, // Public Sandbox
+        });
+        // Two monographs not yet published, each by its own contributor
+        // whose iD was verified under the public API (the seed stores the
+        // public scope on a Public Sandbox press).
+        const published = await ompApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: first,
+            title: `Orcid Book ${tag}`,
+            decisions: ['skipExternalReview', 'sendToProduction'],
+            author: {orcid: TEST_ORCID, orcidIsVerified: true},
+        });
+        const {submissionId: unpublishedId} = await ompApi.createSubmission({
+            tag: `${tag}b`,
+            context: tag,
+            submitter: second,
+            title: `Orcid Book ${tag}b`,
+            decisions: ['skipExternalReview', 'sendToProduction'],
+            author: {orcid: TEST_ORCID, orcidIsVerified: true},
+        });
+        const firstRecipient = `${first}@mail.test`;
+        const secondRecipient = `${second}@mail.test`;
+        const novaRecipient = `nova-${tag}@mail.test`;
+
+        // The "ORCID" tab: "Member Sandbox" under "ORCID API", saved.
+        const managerPage = await (await asUser(manager)).newPage();
+        const settings = new OrcidSettingsTab(managerPage, tag);
+        await settings.goto();
+        await expect(settings.enableCheckbox).toBeChecked();
+        await expect(settings.apiSelect).toHaveValue('publicSandbox');
+        await settings.apiSelect.selectOption({label: 'Member Sandbox'});
+        await settings.save();
+        await settings.goto();
+        await expect(settings.apiSelect).toHaveValue('memberSandbox');
+
+        // The control's request: a contributor added to the unpublished
+        // monograph, its verification requested on the add form and sent
+        // with the save (Rule 8), under the member API now (Rule 14).
+        await openEditorial(managerPage, tag, unpublishedId);
+        await openContributors(managerPage);
+        const contributors = new ContributorsScreen(managerPage);
+        const addDialog = await contributors.openAdd();
+        await contributors.fillPersonFields(addDialog, {given: 'Nova', email: novaRecipient, country: 'Canada'});
+        await requestVerification(managerPage, orcidField(addDialog), {saved: false});
+        await contributors.setRole(addDialog, 'Author', true);
+        await contributors.savePanel(addDialog);
+        await expect(contributors.row('Nova')).toBeVisible();
+
+        // Publishing the first monograph on its publication's screen.
+        const workflow = new WorkflowPage(managerPage, tag);
+        await workflow.gotoEditorial(published.submissionId, {
+            menuKey: `publication_${published.publicationId}_titleAbstract`,
+        });
+        await expect(managerPage.getByRole('heading', {name: 'Publication: Title & Abstract'})).toBeVisible({
+            timeout: 30_000,
+        });
+        await publishShownVersion(managerPage);
+
+        // One drain runs whatever the publish and the request queued.
+        runJobs();
+
+        // Control: the added contributor's request arrived, the member-API
+        // subject line, from the press's principal contact.
+        const control = await pkpMail.find({to: novaRecipient, subject: SUBJECT_MEMBER});
+        expect(control.From.Address).toBe(`contact-${tag}@mail.test`);
+
+        // The published monograph's contributor: no re-authorization request
+        // (OMP1), nor any other ORCID request; the unpublished one's: none
+        // either.
+        for (const subject of [SUBJECT_REAUTHORIZE, SUBJECT_MEMBER, SUBJECT_PUBLIC]) {
+            await pkpMail.expectNone({
+                to: firstRecipient,
+                subject,
+                afterControl: {to: novaRecipient, subject: SUBJECT_MEMBER},
+            });
+            await pkpMail.expectNone({
+                to: secondRecipient,
+                subject,
+                afterControl: {to: novaRecipient, subject: SUBJECT_MEMBER},
+            });
+        }
     });
 });

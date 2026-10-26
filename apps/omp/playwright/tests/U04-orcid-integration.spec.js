@@ -5,23 +5,17 @@
  * ORCID integration — OMP suite, one test per canonical scenario the spec
  * runs on a press, in press vocabulary (glossary substitution: press,
  * monograph, Press Manager). Parallel-safe scenarios live here (S1–S3,
- * S5–S7, S10); the two scenarios that assert on queued-job ORCID email
- * (S4, S8) live in tests/serial/U04-orcid-integration.spec.js — ORCID mail
- * only reaches Mailpit after an explicit queue-worker run, which must never
- * happen while parallel agents seed (patterns.md parallel lesson 7). The
- * spec's scenario 9 is {OJS}-only (review deposits) and does not run on the
- * press. Spec: docs/specs/U04-orcid-integration.md
+ * S5–S7, S10); the scenarios that assert on queued-job ORCID email
+ * (S4, S8, and S11's absence on a press) live in
+ * tests/serial/U04-orcid-integration.spec.js — ORCID mail only reaches
+ * Mailpit after an explicit queue-worker run, which must never happen
+ * while parallel agents seed (patterns.md parallel lesson 7). The spec's
+ * scenario 9 is {OJS}-only (review deposits) and does not run on the press.
+ * Spec: docs/specs/U04-orcid-integration.md
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A8 (S6 asserts the failure explanation,
- * never the closing "journal manager" sentence), A1 (the Press Manager's
- * "Send Review To ORCID"; no test touches the Reviewers-table action), A4
- * (S2 asserts the connect button's popup only; the "What is ORCID?" link's
- * own page is S6's by URL), A2, A5, A3 (S7 registers without connecting
- * and asserts the block's presence only), A6 (serial S8 asserts the
- * toggle's behavior, never its label). Site-level ORCID stays off and
- * untouched: a shared singleton across every worker and fleet (the spec's
- * "No seed" lines; its entry A9 is retired).
+ * of everything else left out): A1, A2, A3, A4, A5, A6, A8, A13, A18, A19,
+ * A20.
  *
  * Every test seeds its own scratch press via the scenario endpoints
  * (publicknowledge and the seeded roster stay untouched); ORCID enablement
@@ -34,17 +28,22 @@
  */
 const {test, expect} = require('../support/fixtures.js');
 const {
+    AboutOrcidPage,
     OrcidSettingsTab,
     ProfileIdentityPage,
+    hollowOrcidIcon,
     openContributors,
     openContributorEditor,
     orcidField,
     requestVerification,
+    solidOrcidIcon,
+    REQUEST_QUESTION,
     REQUESTED_TEXT,
 } = require('../pages/OrcidPages.js');
 const {openEditorial} = require('../pages/ReviewStagePages.js');
 const {ContributorsScreen} = require('../pages/ContributorPages.js');
 const {RegisterPage, RegistrationCompletePage} = require('../pages/RegistrationPages.js');
+const {WebsitePluginsPage} = require('../../../../shared/playwright/pages/PluginsPages.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 const {
     STEPS,
@@ -71,31 +70,82 @@ function makeTag(scenario, testInfo) {
 // and its browser-side requests to ORCID are stubbed (support/orcid.js).
 test.describe('ORCID integration', () => {
     test('S1: turning ORCID on adds the profile block; off removes it', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
+        test.slow();
         const tag = makeTag('s1', testInfo);
         const manager = `mgr${tag}`;
         // No orcid passthrough here — the settings tab itself is under test.
         await ompApi.createContext({tag, users: [{username: manager, roles: ['manager']}]});
 
-        const managerPage = await (await asUser(manager)).newPage();
+        const managerSession = await asUser(manager);
+        const managerPage = await managerSession.newPage();
         const settings = new OrcidSettingsTab(managerPage, tag);
         await settings.goto();
+        // The profile's Identity tab, in another browser tab of the same
+        // session (footnote s).
+        const profile = new ProfileIdentityPage(await managerSession.newPage(), tag);
 
-        // Off by default; the API/credential fields only appear once ticked.
+        // Credentials empty: off by default; the API/credential fields only
+        // appear once ticked; "Save" with both credentials empty is refused
+        // in the browser and sends nothing (Fields "Client ID" / "Client
+        // Secret"), so the Identity tab still shows no ORCID field (Rules 1, 4).
         await expect(settings.enableCheckbox).not.toBeChecked();
         await expect(settings.apiSelect).toHaveCount(0);
         await settings.enableCheckbox.check();
         await expect(settings.apiSelect).toBeVisible();
+        await expect(settings.clientIdInput).toHaveValue('');
+        await expect(settings.clientSecretInput).toHaveValue('');
+        const refusedSave = await settings.pressRefusedSave();
+        await expect(settings.requiredErrors).toHaveCount(2);
+        await expect(settings.panel).toContainText('Please correct 2 errors.');
+        expect(refusedSave).toEqual([]);
+        await profile.goto();
+        await expect(profile.form.locator('input[name^="givenName"]')).toBeVisible();
+        await expect(profile.orcidContainer).toHaveCount(0);
+
+        // Credentials filled: Public Sandbox and the placeholder pair; the
+        // save does not check them against ORCID.
         await settings.apiSelect.selectOption({label: 'Public Sandbox'});
-        await settings.clientIdInput.fill('APP-U4S1TEST');
-        await settings.clientSecretInput.fill('u4s1-dummy-secret');
+        await settings.clientIdInput.fill('APP-TEST');
+        await settings.clientSecretInput.fill('test-secret');
         await settings.save();
 
-        // The profile's Identity tab now offers the connect block (Rule 5).
-        const profile = new ProfileIdentityPage(managerPage, tag);
+        // The profile's Identity tab, in the other browser tab, now offers
+        // the connect block (Rule 5).
         await profile.goto();
         await expect(profile.connectButton).toBeVisible();
         await expect(profile.connectButton).toContainText('Create or Connect your ORCID iD');
         await expect(profile.aboutLink).toBeVisible();
+
+        // A City left unsaved: it survives a trip to the "Roles" tab and
+        // back, and is dropped without a question once the manager leaves
+        // Users & Roles for Settings › Press (Rule 1).
+        await expect(settings.cityInput).toHaveValue('');
+        await settings.cityInput.fill('Vancouver');
+        await settings.visitTabAndBack('Roles');
+        await expect(settings.cityInput).toHaveValue('Vancouver');
+        const questions = [];
+        managerPage.on('dialog', (dialog) => {
+            questions.push(`${dialog.type()}: ${dialog.message()}`);
+            dialog.accept().catch(() => {});
+        });
+        await managerPage.goto(settings.contextUrl(tag, '/management/settings/context'));
+        await expect(managerPage).toHaveURL(/\/management\/settings\/context/);
+        await expect(managerPage.getByRole('heading', {level: 1})).toBeVisible();
+        expect(questions).toEqual([]);
+        await settings.goto();
+        await expect(settings.enableCheckbox).toBeChecked();
+        await expect(settings.cityInput).toHaveValue('');
+
+        // Settings › Website › Plugins, "Installed Plugins": no ORCID row
+        // (Rule 16); a row the list does show, searched the same way, is the
+        // positive control.
+        const plugins = new WebsitePluginsPage(managerPage, tag);
+        await plugins.goto();
+        await plugins.list.search({text: 'Dublin Core'});
+        await expect(plugins.list.pluginRows.filter({hasText: 'Dublin Core 1.1 metadata'})).toHaveCount(1);
+        await plugins.list.search({text: 'ORCID'});
+        await expect(plugins.list.pluginRows).toHaveCount(0);
+        await expect(plugins.list.grid.getByText(/ORCID/i)).toHaveCount(0);
 
         // Untick and save (control): the tab kept the saved state, and the
         // Identity tab shows no ORCID field at all (Rule 4).
@@ -155,11 +205,13 @@ test.describe('ORCID integration', () => {
         const profile = new ProfileIdentityPage(userPage, tag);
         await profile.goto();
 
-        // Verified state: the bare-iD link plus Delete; the connect button
-        // and the About link are gone (Rule 5).
+        // Verified state: the bare-iD link with the solid icon, plus Delete;
+        // the connect button and the About link are gone (Rule 5).
         await expect(profile.orcidLink).toBeVisible();
         await expect(profile.orcidLink).toHaveAttribute('href', TEST_ORCID);
         await expect(profile.orcidLink).not.toContainText('(unauthenticated)');
+        await expect(solidOrcidIcon(profile.orcidLink)).toBeVisible();
+        await expect(hollowOrcidIcon(profile.orcidLink)).toHaveCount(0);
         await expect(profile.deleteButton).toBeVisible();
         await expect(profile.connectButton).toHaveCount(0);
         await expect(profile.aboutLink).toHaveCount(0);
@@ -176,19 +228,24 @@ test.describe('ORCID integration', () => {
         await expect(secondProfile.unauthenticatedLink).toContainText(
             `${TEST_ORCID} (unauthenticated)`
         );
-        await expect(secondProfile.unauthenticatedLink.locator('svg.orcid_icon')).toBeVisible();
+        await expect(hollowOrcidIcon(secondProfile.unauthenticatedLink)).toBeVisible();
+        await expect(solidOrcidIcon(secondProfile.unauthenticatedLink)).toHaveCount(0);
         await expect(secondProfile.connectButton).toBeVisible();
         await expect(secondProfile.connectButton).toContainText('Authorize and Connect your ORCID iD');
+        // The "What is ORCID?" link beside it (Rules 5, 6a), the one the
+        // verified tab above no longer shows; where it leads is A4's.
+        await expect(secondProfile.aboutLink).toBeVisible();
         await expect(secondProfile.orcidLink).toHaveCount(0);
         await expect(secondProfile.deleteButton).toHaveCount(0);
 
-        // Delete asks for confirmation; confirming removes the iD at once —
-        // no separate save (Rule 6c).
+        // Delete opens a window titled "Confirm" with the question, "OK" and
+        // "Cancel"; "OK" removes the iD at once — no separate save (Rule 6c).
         await profile.deleteButton.click();
-        const dialog = userPage
-            .getByRole('dialog')
-            .filter({hasText: 'Are you sure you want to remove this ORCID?'});
+        const dialog = userPage.getByRole('dialog', {name: 'Confirm', exact: true});
         await expect(dialog).toBeVisible();
+        await expect(dialog).toContainText('Are you sure you want to remove this ORCID?');
+        await expect(dialog.getByRole('button', {name: 'OK', exact: true})).toBeVisible();
+        await expect(dialog.getByRole('button', {name: 'Cancel', exact: true})).toBeVisible();
         await dialog.getByRole('button', {name: 'OK', exact: true}).click();
 
         await expect(profile.connectButton).toBeVisible();
@@ -231,6 +288,8 @@ test.describe('ORCID integration', () => {
         const idLink = field.getByRole('link', {name: new RegExp(TEST_ORCID.split('/').pop())});
         await expect(idLink).toBeVisible();
         await expect(field).toContainText('(unauthenticated)');
+        await expect(hollowOrcidIcon(field)).toBeVisible();
+        await expect(solidOrcidIcon(field)).toHaveCount(0);
         await expect(field).toContainText(UNVERIFIED_NOTE);
 
         await field.getByRole('button', {name: 'Delete', exact: true}).click();
@@ -248,6 +307,7 @@ test.describe('ORCID integration', () => {
         await expect(field.getByRole('button', {name: 'Request verification'})).toBeVisible();
         await expect(idLink).toHaveCount(0);
         await expect(field).not.toContainText('(unauthenticated)');
+        await expect(hollowOrcidIcon(field)).toHaveCount(0);
     });
 
     test('S6: the public ORCID pages render by URL', async ({page, ompApi}, testInfo) => {
@@ -257,12 +317,19 @@ test.describe('ORCID integration', () => {
         // Signed-out visitor (the default page carries no session), addresses
         // typed directly — both render inside the press chrome (Rule 10;
         // Rule 9's failure landing).
-        await page.goto(`/index.php/${tag}/orcid/about`);
-        await expect(page.getByRole('heading', {name: 'What is ORCID?'})).toBeVisible();
-        await expect(page.getByText(`Scratch context ${tag}`).first()).toBeVisible();
-        await expect(
-            page.getByRole('heading', {name: 'How and why we collect ORCID iDs?'})
-        ).toBeVisible();
+        const about = new AboutOrcidPage(page);
+        await about.goto(tag);
+        await expect(about.header).toBeVisible();
+        await expect(about.header).toContainText(`Scratch context ${tag}`);
+        await expect(about.footer).toBeVisible();
+        // The page sits between the press's own header and footer.
+        const [headerBox, headingBox, footerBox] = await Promise.all([
+            about.header.boundingBox(),
+            about.heading.boundingBox(),
+            about.footer.boundingBox(),
+        ]);
+        expect(headerBox.y).toBeLessThan(headingBox.y);
+        expect(headingBox.y).toBeLessThan(footerBox.y);
 
         await page.goto(`/index.php/${tag}/orcid/verify`);
         await expect(page.getByRole('heading', {name: 'ORCID Authorization'})).toBeVisible();
@@ -435,7 +502,8 @@ test.describe('ORCID integration', () => {
         const wizardModal = await openContributorEdit(authorPage, author);
         const wizardField = orcidField(wizardModal);
         await expect(wizardField.getByRole('button', {name: 'Request verification'})).toBeVisible();
-        await requestVerification(authorPage, wizardField);
+        const wizardQuestion = await requestVerification(authorPage, wizardField);
+        expect(wizardQuestion).toContain(REQUEST_QUESTION);
         await expect(wizardField).toContainText(REQUESTED_TEXT);
         await expect(wizardField.getByRole('button', {name: 'Request verification'})).toHaveCount(0);
 
