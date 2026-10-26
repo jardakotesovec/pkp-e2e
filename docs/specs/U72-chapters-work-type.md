@@ -1787,8 +1787,10 @@ position, and re-points `chapterId` only on the files it copies itself,
 the publication formats' files (`$newSubmissionFiles`); every other file
 keeps the old chapter's id, which `ChapterForm::fetch()` then treats as
 held by another chapter. Each re-linked author takes the old chapter's
-own `submission_chapter_authors` row, its `seq` and `primary_contact`
-(`Repo::author()->getChapterAuthorData()`, pkp/pkp-lib#10570). Live-probed
+own `submission_chapter_authors` `seq`
+(`Repo::author()->getChapterAuthorSequences()`, pkp/pkp-lib#10570), with
+`primary_contact` false, as every other writer of the table sets it
+(nothing reads it). Live-probed
 2026-09-28 (Rule 15): note td15; the author order, note td22.
 
 <a id="fn-td15"></a>
@@ -1810,14 +1812,17 @@ book 14 (Contributors Dawson, Dupuis, Wilson), its "Chapter 2" holding
 Dupuis, then Dawson: before pkp/pkp-lib#10570, "Create New Version" gave
 each copied chapter author their Contributors-list place, so the new
 version's "Chapter 2" read Dawson, then Dupuis, and the copy of the
-book's primary contact was flagged as the chapter's; when the
+book's primary contact was flagged in the chapter row; when the
 contributors all share one place, as on a 3.5 or 3.4 book whose
 Contributors list was never reordered, both copies took the same place
 and the database chose the order. At the PR heads, before their merge
-(pkp/omp#2523 `17062b2d2e` on `main`, #2522 `f7e0431720` on
-`stable-3_5_0`, #2521 `e607f1aeb8` on `stable-3_4_0`), the copy read
+(round 1 on 2026-10-23: pkp/omp#2523 `17062b2d2e` on `main`, #2522
+`f7e0431720` on `stable-3_5_0`, #2521 `e607f1aeb8` on `stable-3_4_0`;
+round 2 on 2026-10-26, each merged onto its line's tip: #2523
+`93c01ade7b`, #2522 `efd0156176`, #2521 `62a58b8fc8`), the copy read
 Dupuis, then Dawson, at places 0 and 1, on all three lines and with
-shared places too. The Native XML export's `<chapterAuthor seq>` changed
+shared places too, with no flag (round 1 copied the old chapter row's,
+round 2 none). The Native XML export's `<chapterAuthor seq>` changed
 the same way (the Contributors-list place before, the chapter place at
 the heads), and the file imported back read Dawson, then Dupuis before
 and Dupuis, then Dawson at the heads.

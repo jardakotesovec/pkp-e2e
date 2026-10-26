@@ -20,6 +20,10 @@
 //   npm run fleet-prep -- --feature pr-10570 --dataset --reset --apps omp
 //   PROBE_FEATURE=pr-10570 PROBE_AGENT=w PROBE_RUN=<base|head>-sorted node bin/probe.js omp shared/playwright/checks/sync/pkp-lib-10570/walk.js
 //   (PKP_E2E_LINE=stable-3_5_0 / stable-3_4_0 and their own --feature in front for the lines)
+// 2026-10-23 (round 1, each PR head on its base) and 2026-10-26 (round 2, each line's tip with the
+// PR merged: #2523 93c01ade7b, #2522 efd0156176, #2521 62a58b8fc8), both variants on main, 3.5, 3.4:
+// every base verdict false (the Contributors order, the primary contact flagged), every head true;
+// round 2's copies carry no primary_contact flag (round 1 copied the old chapter row's).
 const fs = require('fs');
 const path = require('path');
 const {execFileSync} = require('child_process');
