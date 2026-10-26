@@ -14,6 +14,18 @@ index b66705f81f..6942ce3777 100644
   *
   * @brief Add date_completed, date_reverted columns to the review_round_author_responses table.
   */
+diff --git a/lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php b/lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php
+index 514fc49f25..8198d8a971 100644
+--- a/lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php
++++ b/lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php
+@@ -51,6 +51,7 @@ class AuthorResponse extends Model
+         'doiId' => 'int',
+         'dateCompleted' => 'datetime',
+         'dateReverted' => 'datetime',
++        'statusChangedByUserId' => 'int',
+     ];
+ 
+     /**
 diff --git a/ojs/dbscripts/xml/upgrade.xml b/ojs/dbscripts/xml/upgrade.xml
 index 22c4cde0e4..14f8750934 100644
 --- a/ojs/dbscripts/xml/upgrade.xml
