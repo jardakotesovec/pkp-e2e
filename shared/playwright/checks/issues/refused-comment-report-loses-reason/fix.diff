@@ -1,0 +1,76 @@
+--- a/lib/ui-library/src/frontend/components/PkpComments/usePkpCommentsStore.js
++++ b/lib/ui-library/src/frontend/components/PkpComments/usePkpCommentsStore.js
+@@ -289,12 +289,16 @@
+ 						if (reportText.value.trim() === '') {
+ 							return;
+ 						}
+-						await performCommentReport(
++						const result = await performCommentReport(
+ 							publicationId,
+ 							comment,
+ 							reportText.value,
+ 						);
+-						close();
++						// A failed report keeps this window and the typed reason under the
++						// error dialog, as addComment() keeps the comment text
++						if (result !== 'failed') {
++							close();
++						}
+ 					},
+ 				},
+ 				{
+@@ -306,34 +310,51 @@
+ 		});
+ 	}
+ 
+-	// Perform the actual comment report
++	// Perform the actual comment report: 'reported', 'gone' (the comment can no
++	// longer be reported) or 'failed'
+ 	async function performCommentReport(publicationId, comment, reportText) {
+ 		const currentUser = getCurrentUser();
+ 
+ 		if (!currentUser || !reportText.trim()) {
+-			return;
++			return 'failed';
+ 		}
+ 
+ 		const commentId = comment.id;
+ 		const {apiUrl} = useUrl(`comments/${commentId}/reports`);
+ 
++		let errorStatus = null;
+ 		const {fetch: postReport, isSuccess} = usePkpFetch(apiUrl, {
+ 			method: 'POST',
+ 			body: {
+ 				note: reportText,
+ 			},
++			// Note the status; the default error dialog still opens
++			onError: (e) => {
++				errorStatus = e?.status ?? null;
++			},
+ 		});
+ 
+ 		await postReport();
+ 
++		const versionState = getVersionState(publicationId);
+ 		if (isSuccess.value) {
+-			const versionState = getVersionState(publicationId);
+ 			versionState.comments.forEach((comment) => {
+ 				if (comment.id === commentId) {
+ 					comment.isReported = true;
+ 				}
+ 			});
++			return 'reported';
+ 		}
++
++		if (errorStatus === 404) {
++			// Hidden or deleted since the page loaded: drop it, as commentDelete() does
++			versionState.comments = versionState.comments.filter(
++				(c) => c.id !== commentId,
++			);
++			return 'gone';
++		}
++
++		return 'failed';
+ 	}
+ 
+ 	return {

@@ -852,6 +852,7 @@ and a preprint server. <sup>s0</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - the guard for A14 (issue report `docs/issues/U14-A14-refused-comment-report-loses-reason.md`): once fixed, a reader whose report is refused because the session ended keeps "Report Comment" open with the typed reason under the "Error" window, and a report on a comment hidden meanwhile drops the comment from the list.
   - the Comments page's browser tab reading "Comments | {journal}" on each of its lists and after a reload (Rule 10; A13)
   - the comment panel and the report panel for a writer and a reporter whose ORCID iD is not verified: the iD link's address is the bare iD (Fields, the comment panel; A6)
   - a comment's deletion leaving the tasks of a report numbered like it, and of a comment numbered like one of its reports, anywhere on the site (Side effects; A11, retired)
@@ -904,7 +905,7 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A6](#a6) | Comments page: the link to an unverified ORCID iD in the comment and report panels opens a wrong address | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A comment deleted with its article or its writer's merged account leaves blank, dead rows in every moderator's Tasks | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A13](#a13) | On the editorial Comments page, the browser tab shows only the journal's name, not "Comments" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A14](#a14) | A report the server refuses shows an "Error" window, but the "Report Comment" window closes behind it and the typed reason is lost | 🐞 | minor | @jarda.kotesovec 2026-10-22 · handled separately |
+| [A14](#a14) | A reader's comment report the server refuses closes the "Report Comment" window and loses the typed reason | 🐞 | low | @jarda.kotesovec 2026-10-22 · handled separately; issues (claude), 2026-10-26 — re-verified |
 | [A1](#a1) | A hidden comment reads to its writer exactly like one awaiting approval | ❓ | minor | — |
 | [A2](#a2) | Approving or hiding a comment leaves every moderator's "pending review" task in place | ❓ | minor | — |
 | [A3](#a3) | The report dialog neither refuses an empty reason with a message nor confirms a filed report, and the same person can report the same comment again | ❓ | minor | — |
@@ -1073,18 +1074,22 @@ after a reload.
 Basis: probe, 2026-10-04. <sup>f-a13</sup>
 
 <a id="a14"></a>
-**A14 — A refused report closes the "Report Comment" window and loses the reason** · 🐞 · minor.
-A signed-in reader reports a comment ("…" › "Report", a reason typed,
-"Submit") and the server refuses the report. An "Error" window names the
-failure ("The requested resource was not found.", for one), but the
-"Report Comment" window has already closed behind it, and the typed
-reason is gone: to try again the reader opens "Report" anew and types the
-reason a second time. A refused new comment keeps its text in the box
-under its "Error" window. Expected the "Report Comment" window to stay
-open with the reason, as the box keeps a refused comment; observed the
-window closed and the reason lost.
-Since: 2026-09-29 · Basis: probe, 2026-10-22, at the PR head `f810cbba` of pkp/ui-library#1024, before its merge. <sup>f-a14</sup>
-Report: refresh owed — pkp/ui-library#1024 (head `26de0d0c`, before its merge) drops the `closeTopDialog()` call from `performCommentReport()` (`src/frontend/components/PkpComments/usePkpCommentsStore.js`), so the `openDialogNetworkError` window `usePkpFetch` opens now stays and names the failure, while the "Submit" callback's `close()` still closes the report window and the reason is still lost (2026-10-21)
+**A14 — A reader's comment report the server refuses closes the "Report Comment" window and loses the typed reason** · 🐞 · low.
+A signed-in reader reports a comment under an article ("…" › "Report",
+a reason typed, "Submit") and the server refuses the report. An "Error"
+window opens with the server's message, and the "Report Comment" window
+under it closes at the same moment, taking the typed reason with it.
+The report is refused when the reader's session has ended since the
+page loaded (logged out in another tab, a week idle, or an address
+change), when the comment was hidden or deleted meanwhile, when public
+comments were switched off, and on a server error or a lost connection.
+After an ended session the message asks the reader to reload the page,
+and the reason is already gone. After a hidden comment the comment
+stays listed with "Report", and every new try is refused the same way.
+Reader comments are new in OJS 3.6: they run on `main` and on the `ore`
+branch the ORE project runs in production, and no 3.x release has them.
+OMP and OPS have no reader comments.
+Since: 2026-09-29 · Basis: probe, 2026-10-22, at the PR head `f810cbba` of pkp/ui-library#1024, before its merge; issue report walk, 2026-10-26, on `main` after its merge. <sup>f-a14</sup>
 
 > **Reviewed — @jarda.kotesovec, 2026-10-22**: confirmed 🐞. Ruling:
 > "preserving the typed reason for a report on failure will be handled
