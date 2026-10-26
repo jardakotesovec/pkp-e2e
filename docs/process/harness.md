@@ -385,7 +385,9 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   cookie of its own, the campaign's DB role and the fleet's DB name,
   files and public dirs, the cache path, SMTP to this slot's Mailpit, the
   dead-port `[proxy]`); everything else stays the team's (`job_runner`
-  and `task_runner` On, `enable_minified` Off, the dataset's `app_key`).
+  and `task_runner` On, the dataset's `app_key`; `enable_minified` Off on
+  `main` but On in the stable-3_5_0 dataset, so a `lib/pkp/js/` fix tried
+  there sets it Off after each reset, reporter q23f, 2026-10-23).
   Every reset writes the config afresh, so a walk that needs another
   value (`strict = On`, a short `session_lifetime`, an `api_key_secret`,
   which the dataset leaves empty so its emailed unsubscribe links open

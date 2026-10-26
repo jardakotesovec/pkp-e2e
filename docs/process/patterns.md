@@ -621,7 +621,9 @@ no cleanup fixture.
 - **A workflow Publication tab opened by address** takes
   `workflowMenuKey=publication_{publicationId}_<tab>` (e.g.
   `publication_12_issue`); a bare `publication_issue` falls back to
-  "Title & Abstract" without an error (rr1022c, 2026-10-22).
+  "Title & Abstract" without an error (rr1022c, 2026-10-22). On
+  stable-3_5_0 the key is rewritten to the stage view (`workflow_<n>`),
+  so a 3.5 walk presses the menu entry instead (cc23a, 2026-10-23).
 - **`useFetch` tunnels DELETE and PUT via POST + `X-Http-Method-Override`, and
   unauthorized API calls return 401**, not 403. Match `waitForResponse` method
   predicates and status assertions accordingly.
@@ -710,7 +712,9 @@ context table names (`{table, id, settings}`: `journals`, `journal_id`,
 `journal_settings` on OJS; presses and servers). `serverLog(app)` is the
 fleet's server log (harness.md "Server output"): `const log =
 serverLog(app), from = log.mark();` before a request, `log.since(from)`
-after it for the error, exception and 5xx lines written since, the
+after it for the lines written since that name an error, exception,
+fatal or warning, or a 5xx answer (a PHP "Deprecated" line only with
+`serverLog(app, {match})` naming it; cc23f, q23o, 2026-10-23), the
 crash line REPORT.md's Observed asks for, and the "Plugin … failed to
 handle the hook" line of a plugin failure the page swallowed (the
 exception's own text sits on the line under it, which `since()` leaves

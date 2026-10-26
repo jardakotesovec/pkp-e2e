@@ -2744,6 +2744,9 @@ These keys do not exist. They are ideas recorded from an earlier harness.
   assigned on screen; U44, U13, U16 claim checks).
 - Site: `POST site` `passwordUncompromisedEnabled` and `minPasswordLength` (Site Setup › Security, "Check passwords against compromised password databases" and "Minimum password length (characters)"); U03 S13 and U60 set them on the screen and put them back with the app's own `PUT index/api/v1/site` (U03 revision, 2026-10-16).
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
+- Context: `onlineIssn` and `printIssn` (Settings › Distribution › "Online ISSN" /
+  "Print ISSN"; the scratch-context spec refuses them today, sync rr1023a,
+  2026-10-23).
 - Submission: `tasks[].ageMinutes` (a seeded discussion or task whose
   headnote is older than the one-hour edit window, pkp/pkp-lib#12278; a
   walk past the window waits it out in wall time, sync rr13345,
