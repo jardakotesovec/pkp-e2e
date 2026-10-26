@@ -27,12 +27,14 @@
 //   N3 dbuskins and N4 dbarnes on a site-level public page ("About this Publishing System" at the site's
 //      address, /index.php/index/en/about/aboutThisPublishingSystem; with one journal the site's home page
 //      redirects to it): the page loads, the user menu, "Dashboard" opens the Profile page for both (Rule 19c)
+//   N5 admin (the site administrator) on the same site page: "Dashboard" opens the Profile page there since
+//      pkp-lib 00ce12be77 (pkp/pkp-lib#13553; 3.5 6accf87c49), which the fix keeps
 //
 // Guest editor: OJS steps 6-7 above (h20d, 2026-10-20). The fix trial for it: WALK_ONLY=guest PROBE_RUN=fix … ojs.
-// Reset first:  npm run fleet-prep -- --feature issues-u05r1 --dataset 1 --reset
-// Run (main):   PROBE_FEATURE=issues-u05r1 PROBE_AGENT=u05r1 node bin/probe.js all shared/playwright/checks/issues/section-editor-dashboard-opens-profile/walk.js
-// Run (3.5):    PKP_E2E_LINE=stable-3_5_0 … fleet-prep -- --feature issues-u05r1-3_5 --dataset 1 --reset
-//               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-u05r1-3_5 PROBE_AGENT=u05r1 node bin/probe.js all <this file>
+// Reset first:  npm run fleet-prep -- --feature issues-q26b --dataset 2 --reset
+// Run (main):   GUEST_TASK=1 PROBE_FEATURE=issues-q26b PROBE_AGENT=q26b node bin/probe.js all shared/playwright/checks/issues/section-editor-dashboard-opens-profile/walk.js
+// Run (3.5):    PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-q26b-3_5 --dataset 2 --reset
+//               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-q26b-3_5 PROBE_AGENT=q26b node bin/probe.js all <this file>
 // Neighbour:    WALK_MODE=neighbour PROBE_RUN=nb-out … (and nb-in with the fix applied)
 // Facts: .reports/<feature>/<agent>/facts[-<run>]-<app>.json
 const {forEachApp, launch, signIn, signOut, screen, shot, record} = require('../../../probe');
@@ -123,6 +125,7 @@ forEachApp(async (app) => {
             if (app.name !== 'ops') await walkUser('N2 jjanssen', 'jjanssen');
             await walkSite('N3 dbuskins site', 'dbuskins');
             await walkSite('N4 dbarnes site', 'dbarnes');
+            await walkSite('N5 admin site', 'admin');
         }
     } finally {
         record('facts', facts);

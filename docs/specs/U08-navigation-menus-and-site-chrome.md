@@ -1286,7 +1286,7 @@ an entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [A1](#a1) | Screen readers announce the editorial header's "i" (help) icon as "##common.help##" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A2](#a2) | A Section or Guest Editor's "Dashboard" in the public header opens the Profile page | 🐞 | low | issues (claude), 2026-10-20 — re-verified |
+| [A2](#a2) | A Section or Guest Editor's "Dashboard" on the journal's public pages opens the Profile page, with no task count | 🐞 | low | issues (claude), 2026-10-26 — re-verified |
 | [A3](#a3) | The access-denied page a signed-in user gets has an empty heading and an unnamed browser tab | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | Site Settings › "Navigation": "Add Menu" and a menu's "Edit" open nothing and leave the page dimmed | 🐞 | medium · crash: script | issues (claude), 2026-10-03 — re-verified |
 | [A6](#a6) | The "Privacy Statement" and "Contact" notices send the manager to the wrong Settings tab | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1338,21 +1338,26 @@ OPS") guide in a new tab.
 Since: 2025-04-10 · Basis: probe, 2026-10-03. <sup>f-a1</sup>
 
 <a id="a2"></a>
-**A2 — A Section or Guest Editor's "Dashboard" opens the Profile page** · 🐞 · low.
-On a journal's public pages, "Dashboard" under the username takes a
-Journal Manager, a Journal editor, an assistant, a Reviewer or an Author
-to the page they work from (Rule 19a). A Section Editor (Series Editor
-on a press, Moderator on a preprint server), or on OJS a Guest Editor,
-who holds no Author, Reviewer, assistant or manager role in the journal
-is taken to the
-Profile page instead, although signing in put them on the Dashboard;
-"Editor Dashboard" in the Profile page's side menu leads back. The same
-cause leaves them without their task count, beside their name in the
-header and after "Dashboard" in a narrow window
+**A2 — A Section or Guest Editor's "Dashboard" on the journal's public pages opens the Profile page, with no task count** · 🐞 · low.
+On a journal's public pages, "Dashboard" in the menu under the signed-in
+user's name takes a Journal Manager or Editor, an assistant, a Reviewer
+or an Author to the page they work from (Rule 19a). A Section Editor
+(Series Editor on a press, Moderator on a preprint server), or on OJS a
+Guest Editor, who holds none of those roles is taken to their Profile page
+instead, although signing in put them on the Dashboard.
+They never see their number of unread tasks on the public pages either.
+It is missing beside their name in the header. In a narrow window or on a
+phone, the header collapses into an "Open Menu" list, and its "Dashboard"
+entry has no number either. The other roles see the number in both places
 ([Notifications center & email preferences](U05-notifications-center-and-email-preferences.md#a3)).
-It worked in 3.0 and broke in 3.1.
-Basis: probe, 2026-10-20. <sup>f-a2</sup>
-Report: refresh owed — pkp-lib `00ce12be77` (pkp/pkp-lib#13597 for #13553, 2026-10-22; `stable-3_5_0` `6accf87c49`, #13596) put a `$context &&` guard on the address check of `PKPNavigationMenuService::getDisplayStatus()` (`NMI_TYPE_USER_DASHBOARD`), so on the site's pages the site administrator now gets `user/profile`; the report's Cause quote of that check, its fix diff's "-" line and "(both places)", its site-level Reach bullet ("only the site administrator passes there") and its 3.5 backport line are out of date; the title check with `dashboardMenuItem.tpl` and `PKPPageRouter::getHomeUrl()` are unchanged (2026-10-23)
+A separate fault hides every role's number beside the name when a journal
+has more than one language under "Forms"
+([Notifications center & email preferences](U05-notifications-center-and-email-preferences.md#a15) A15).
+On such a journal the other roles still see it after "Dashboard" in the
+narrow menu, and these editors do not.
+The Profile page's side menu leads back to the Dashboard in one press. It
+has been this way since 3.1 (2017); 3.0 took them to their submissions.
+Basis: probe, 2026-10-20; issue report refresh walk, 2026-10-26. <sup>f-a2</sup>
 
 <a id="a3"></a>
 **A3 — The access-denied page a signed-in user gets has an empty heading and an unnamed browser tab** · 🐞 · low.

@@ -1,8 +1,6 @@
 // Helpers of walk.js (issue report docs/issues/U08-A2-section-editor-dashboard-opens-profile.md).
 // Requiring this file runs nothing. Every helper presses what a person presses.
-const {idle} = require('../../../probe');
-// The invitation wizard and the accept wizard: ../newcomer-not-signed-in-after-accepting/lib.js.
-const N = require('../newcomer-not-signed-in-after-accepting/lib.js');
+const {idle, screen, record} = require('../../../probe');
 
 /** The Guest editor the steps invite on OJS (names tagged u08h20d; the password is the username twice). */
 const GUEST = {email: 'u08h20d@example.com', givenName: 'Gwen', familyName: 'Guest-u08h20d', username: 'u08h20d',
@@ -12,6 +10,8 @@ const T = 30_000;
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 const rel = (u) => String(u || '').replace(/^https?:\/\/[^/]+/, '');
 const flat = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+const is35 = (app) => app.line === 'stable-3_5_0';
+const today = () => new Intl.DateTimeFormat('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date());
 
 /** The editorial header's bell as it reads after signing in ("Tasks 2"), and the page it is on. */
 async function readBell(page) {
@@ -111,6 +111,105 @@ async function untickFrenchForms(page, ctx) {
     return {before, status: response ? response.status() : null, url: rel(response && response.url()), alerts, after};
 }
 
+// ---------------------------------------------------------------------------------------------
+// The invitation (Settings › Users & Roles › "Invite to a role") and the accept wizard it mails.
+
+/**
+ * "Invite to a role": search `email`, the names on "Enter details", one role row (role, today,
+ * "Appear on the masthead"), "Save And Continue", "Invite user to the role". Returns the sent dialog's text.
+ */
+async function invite(page, app, {email, givenName, familyName, role}) {
+    await page.goto(app.url(`/index.php/${app.contextPath}/en/management/settings/access`));
+    await page.getByRole('heading', {name: 'Users & Roles'}).first().waitFor({timeout: T});
+    await idle(page);
+    await page.getByRole('button', {name: 'Invite to a role'}).click();
+    await page.getByLabel(/Search for a user by email address/).fill(email);
+    await page.getByRole('button', {name: 'Search User', exact: true}).click();
+    const newRow = page.getByRole('row').filter({has: page.getByLabel(/^Select a new role/)}).last();
+    await newRow.waitFor({timeout: T});
+    await idle(page);
+    await page.getByLabel(/^Given Name/).first().fill(givenName);
+    await page.getByLabel(/^Family Name/).first().fill(familyName);
+    await newRow.getByLabel(/^Select a new role/).selectOption({label: role});
+    await newRow.getByRole('textbox').fill(today());
+    await newRow.getByRole('combobox').last().selectOption({label: 'Appear on the masthead'});
+    await page.getByRole('button', {name: 'Save And Continue'}).click();
+    await page.locator('input[name="subject"]').waitFor({timeout: T});
+    await page.locator('.composer__loadingTemplateMask').waitFor({state: 'detached', timeout: T}).catch(() => {});
+    await page.getByRole('button', {name: 'Invite user to the role'}).click();
+    const sent = page.getByRole('dialog').filter({hasText: 'Invitation Sent'});
+    await sent.waitFor({timeout: T});
+    const sentText = flat(await sent.innerText());
+    await sent.getByRole('button', {name: 'View All Users'}).click();
+    await idle(page);
+    return {email, sentText};
+}
+
+/** The accept link of the newest invitation email to `email` since `since` that points at this install. */
+async function acceptLink(app, email, since) {
+    const origin = new URL(app.baseURL).origin;
+    const deadline = Date.now() + 30_000;
+    while (Date.now() < deadline) {
+        const result = await app.mail._search({to: email, since});
+        for (const m of result.messages || []) {
+            const full = await app.mail.fullMessage(m.ID);
+            const found = (full.HTML || '').match(/href=['"]([^'"]*\/invitation\/accept\?[^'"]+)['"]/i);
+            const link = found ? found[1].replace(/&amp;/g, '&') : null;
+            if (link && link.startsWith(origin)) return {subject: full.Subject, accept: link};
+        }
+        await pause(500);
+    }
+    return {subject: null, accept: null};
+}
+
+/** The accept wizard's step heading ("STEP 1 - …"), or null. */
+async function stepHeading(page) {
+    const h = page.getByRole('heading', {name: /^STEP \d/});
+    return (await h.count()) ? (await h.first().innerText()).trim() : null;
+}
+
+/** Open the accept link; skip the ORCID step when shown. Returns the headings met. */
+async function openAccept(page, link) {
+    const met = [];
+    await page.goto(link);
+    await page.getByRole('heading', {name: /^STEP \d/}).first().waitFor({timeout: T});
+    await idle(page);
+    met.push(await stepHeading(page));
+    const skip = page.getByRole('button', {name: 'Skip ORCID verification'});
+    if (await skip.count()) {
+        await skip.click();
+        await idle(page);
+        met.push(await stepHeading(page));
+    }
+    return met;
+}
+
+/** "Accept And Continue to …", then the closing dialog's "View All Submissions". Never throws on the outcome. */
+async function acceptAndLeave(page) {
+    const out = {};
+    const answers = [];
+    const onResponse = (r) => {
+        if (/\/invitations\/\d+\/key\/[^/]+\/finalize/.test(r.url())) answers.push(r.status());
+    };
+    page.on('response', onResponse);
+    await page.getByRole('button', {name: /^Accept And Continue to/}).click();
+    const dialog = page.getByRole('dialog').filter({hasText: /assigned a new role/});
+    await dialog.waitFor({timeout: T}).catch(() => {});
+    out.dialog = (await dialog.count()) ? flat(await dialog.innerText()) : null;
+    out.finalize = answers.slice();
+    if (out.dialog) {
+        await Promise.all([
+            page.waitForURL((u) => !/\/invitation\/accept/.test(String(u)), {timeout: T}).catch(() => {}),
+            dialog.getByRole('button', {name: 'View All Submissions'}).click(),
+        ]);
+        await page.waitForLoadState('load').catch(() => {});
+        await idle(page);
+    }
+    page.off('response', onResponse);
+    out.landed = rel(page.url());
+    return out;
+}
+
 /**
  * As the signed-in manager: Settings › Users & Roles › "Invite to a role", the newcomer as Guest editor; then,
  * in a browser of their own, the email's accept link: username and password, the privacy box, the country,
@@ -118,13 +217,13 @@ async function untickFrenchForms(page, ctx) {
  */
 async function guestEditorJoins(page, app, launch) {
     const since = new Date();
-    const invited = await N.invite(page, app, {email: GUEST.email, givenName: GUEST.givenName, familyName: GUEST.familyName, role: GUEST.role});
-    const link = await N.acceptLink(app, GUEST.email, since);
+    const invited = await invite(page, app, {email: GUEST.email, givenName: GUEST.givenName, familyName: GUEST.familyName, role: GUEST.role});
+    const link = await acceptLink(app, GUEST.email, since);
     if (!link.accept) throw new Error('no invitation email with an accept link');
     const other = await launch(app);
     try {
         const p = other.page;
-        const met = await N.openAccept(p, link.accept);
+        const met = await openAccept(p, link.accept);
         await p.getByLabel(/^Username/).fill(GUEST.username);
         await p.getByLabel(/^Password/).fill(GUEST.password);
         await p.getByRole('checkbox').first().check();
@@ -135,7 +234,7 @@ async function guestEditorJoins(page, app, launch) {
         await p.getByRole('button', {name: 'Save and continue'}).click();
         await p.getByRole('heading', {name: /Review & create account/}).waitFor({timeout: T});
         await idle(p);
-        const accepted = await N.acceptAndLeave(p);
+        const accepted = await acceptAndLeave(p);
         return {invited: invited.sentText, subject: link.subject, met, accepted: {dialog: accepted.dialog, finalize: accepted.finalize}};
     } finally {
         await other.close();
@@ -147,13 +246,56 @@ const GUEST_TASK = {where: {id: 2, menuKey: 'workflow_3_2', panelTitle: 'Review 
     name: 'u08h20d question', message: 'u08h20d: a question for the Guest editor.'};
 
 /**
+ * "Review Tasks & Discussions" › "Add" on main's panel (3.5: the discussions grid's "Add discussion"): the name,
+ * the participant ticked, the message, "Save". Returns the save's status.
+ */
+async function addDiscussion(page, app, {id, menuKey, panelTitle}, {name, participant, participantName, message, label}) {
+    if (is35(app)) {
+        await page.goto(app.url(`/index.php/${app.contextPath}/dashboard/editorial?workflowSubmissionId=${id}&workflowMenuKey=${menuKey}`));
+        await idle(page);
+        const grid = page.locator('[id^="component-grid-queries-queriesgrid"]').first();
+        await grid.waitFor({timeout: T});
+        await idle(page);
+        await grid.getByText(/Add discussion/i).first().click();
+        const form = page.locator('form#queryForm').last();
+        await form.waitFor({timeout: T});
+        await idle(page);
+        await form.locator('label', {hasText: participantName}).locator('input[type="checkbox"]').first().check();
+        await form.locator('input[name="subject"]').fill(name);
+        const tid = await form.locator('textarea[name="comment"]').getAttribute('id');
+        await page.waitForFunction((i) => !!(window.tinymce && window.tinymce.get(i) && window.tinymce.get(i).initialized), tid, {timeout: T});
+        await page.frameLocator(`#${tid}_ifr`).locator('body').click();
+        await page.keyboard.type(message);
+        record(`${label}-add-filled`, await screen(page));
+        const resp = page.waitForResponse((r) => /update-?query/i.test(r.url()), {timeout: T}).catch(() => null);
+        await form.getByRole('button', {name: /^(Save|OK)$/}).last().click();
+        const r = await resp;
+        await pause(1500);
+        await idle(page);
+        return {status: r ? r.status() : null};
+    }
+    const {TasksDiscussionsPanel} = require('../../../pages/TasksDiscussionsPages.js');
+    const panel = new TasksDiscussionsPanel(page, app.contextPath, {title: panelTitle});
+    await panel.gotoEditorial(id, menuKey);
+    await idle(page);
+    const win = await panel.openAdd();
+    await win.nameField().fill(name);
+    await win.tick(participant);
+    await win.typeMessage(message);
+    record(`${label}-add-filled`, await screen(page));
+    const answer = await win.saveAndAnswer();
+    await win.root.waitFor({state: 'hidden', timeout: T}).catch(() => {});
+    await idle(page);
+    return {status: answer.status()};
+}
+
+/**
  * As the signed-in manager, on submission 2's review round: Participants › "Assign", role "Guest editor",
  * the Guest editor, "OK"; then "Review Tasks & Discussions" › "Add": a name, the Guest editor ticked, a
  * message, "Save". Returns the Participants rows after the assignment and the save's status.
  */
 async function guestEditorGetsTask(page, app) {
     const S = require('../../../pages/StageParticipantsPages.js');
-    const D = require('../merge-fails-for-discussion-opener/lib.js');
     const panel = new S.ParticipantsPanel(page, app.contextPath);
     await panel.goto(GUEST_TASK.where.id, {menuKey: GUEST_TASK.where.menuKey});
     const win = await panel.openAssign();
@@ -163,7 +305,7 @@ async function guestEditorGetsTask(page, app) {
     await win.ok();
     await idle(page);
     const rows = await panel.rowLines().catch((e) => String(e).slice(0, 200));
-    const discussion = await D.addDiscussion(page, app, GUEST_TASK.where, {name: GUEST_TASK.name, participant: GUEST.username,
+    const discussion = await addDiscussion(page, app, GUEST_TASK.where, {name: GUEST_TASK.name, participant: GUEST.username,
         participantName: `${GUEST.givenName} ${GUEST.familyName}`, message: GUEST_TASK.message, label: '7b-guest-task'});
     return {rows, discussion};
 }

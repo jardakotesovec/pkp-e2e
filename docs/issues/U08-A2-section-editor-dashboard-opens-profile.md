@@ -9,22 +9,27 @@
   - 3.4: OJS (Section and Guest Editor), OMP, OPS (code)
   - 3.3: OJS (Section and Guest Editor), OMP, OPS (code)
 - **Introduced** `pkp/pkp-lib#2917` for `pkp/pkp-lib#2910` · [39912fe](https://github.com/pkp/pkp-lib/commit/39912fe17912b83edfedb7897fb28a686a85e1c4) (the Profile address) and [03f1cbe](https://github.com/pkp/pkp-lib/commit/03f1cbea007f65c59ebf8812c66f3287ce46dd38) (the count) · 2017-10-23 · Dimitris Efstathiou (defstat)
-- **Upstream** none found (2026-10-20)
+- **Upstream** none found (2026-10-26)
 - **Tracked in** U08 [A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U08-navigation-menus-and-site-chrome.md#a2), U05 [A3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U05-notifications-center-and-email-preferences.md#a3)
-- **Checked** 2026-10-20, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-26, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
-Update 2026-10-20: a Guest Editor on OJS meets the same fault, and the
-report now covers them.
-
-Update 2026-10-14: the report now says where the task count shows, and
-the Steps take French out of the journal's "Forms" languages first.
+Update 2026-10-26: pkp-lib
+[00ce12b](https://github.com/pkp/pkp-lib/commit/00ce12be776175920847e3da4910617c47af290c)
+(`pkp/pkp-lib#13597` for `pkp/pkp-lib#13553`; on 3.5 `pkp/pkp-lib#13596`)
+sends the site administrator's "Dashboard" on the site's own pages to
+their Profile page. That is what it set out to do: `pkp/pkp-lib#13553`
+reported that the link led back to the same site page, and the team chose
+the Profile page, "as it does for the other users and did in 3.3". It
+changes nothing on a journal's pages, where this fault is, and the walks
+on `main` and 3.5 show the fault unchanged. The fix below now keeps that
+change.
 
 ## Summary
 
 On a journal's public pages, "Dashboard" in the menu under the signed-in
-user's name takes a Journal Manager, a Journal editor, an assistant, a
-Reviewer or an Author to the page they work from. A Section Editor
+user's name takes a Journal Manager or Editor, an assistant, a Reviewer
+or an Author to the page they work from. A Section Editor
 (Series Editor on a press, Moderator on a preprint server), or on OJS a
 Guest Editor, who holds none of those roles is taken to their Profile page
 instead, although signing in put them on the Dashboard.
@@ -32,19 +37,24 @@ instead, although signing in put them on the Dashboard.
 They never see their number of unread tasks on the public pages either.
 It is missing beside their name in the header. In a narrow window or on a
 phone, the header collapses into an "Open Menu" list, and its "Dashboard"
-entry has no number either. The other roles see theirs in both places (beside the name only when English
-is the journal's one "Forms" language, [U05 A15](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U05-notifications-center-and-email-preferences.md#a15)).
+entry has no number either. The other roles see the number in both places.
+
+A separate fault hides every role's number beside the name when a journal
+has more than one language under "Forms"
+([U05 A15](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U05-notifications-center-and-email-preferences.md#a15)).
+On such a journal the other roles still see it after "Dashboard" in the
+narrow menu, and these editors do not.
 
 The Profile page's side menu leads back to the Dashboard in one press. It
-worked in 3.0 and broke in 3.1.
+has been this way since 3.1 (2017); 3.0 took them to their submissions.
 
 ## Impact
 
 - **Lost**: nothing.
 - **Who**: a Section Editor, or on OJS a Guest Editor, who holds no
   Author, Reviewer, assistant or manager role in the journal, using the
-  menu under their name on its public pages. One who holds one of those
-  roles too gets the Dashboard and the count through it. Walked with the
+  menu under their name on its public pages. The address and the count
+  come from pkp-lib's menu code, not from the theme; walked with the
   default theme.
 - **Way round**: "Editor Dashboard" in the Profile page's side menu. The bell
   on every editorial page counts their tasks.
@@ -69,9 +79,6 @@ Preconditions:
   editor on OMP, Preprint Server manager on OPS) is compared with them.
 - The dataset holds no Guest Editor, so steps 7 to 9 invite one on OJS
   (a press and a preprint server have no such role) and give them a task.
-- The dataset's `config.inc.php` sends mail by SMTP to `localhost` port
-  1025, a local mail catcher such as Mailpit; step 8 reads the invitation
-  there.
 
 Steps:
 
@@ -144,9 +151,12 @@ made twice:
 
 ```php
 // line 215: the title with the unread count (dashboardMenuItem.tpl)
-// line 305: the address, PKPPageRouter::getHomeUrl(), else user/profile
 if ($currentUser->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR], $contextId)
     || $currentUser->hasRole([Role::ROLE_ID_SITE_ADMIN], PKPApplication::SITE_CONTEXT_ID)) {
+
+// line 305: the address, PKPPageRouter::getHomeUrl(), else user/profile
+if ($context && ($currentUser->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR], $contextId)
+    || $currentUser->hasRole([Role::ROLE_ID_SITE_ADMIN], PKPApplication::SITE_CONTEXT_ID))) {
 ```
 
 `Role::ROLE_ID_SUB_EDITOR` is missing from the list. It is stored for every
@@ -186,10 +196,6 @@ The PR was merged on 2017-10-23 (da7ee3a3a2) and released in 3.1.
 
 Reach:
 
-- On a journal with French under "Forms", the roles in the list see the
-  count only after "Dashboard" in a narrow window, since the theme hides
-  that entry's count at full width (on screen; the name's count is the
-  separate fault in the Preconditions).
 - A role a journal adds in Settings › Users & Roles › "Roles" with the
   "Permission level" "Section Editor" (read in the code, not walked).
 - Any menu a journal adds with an item of type "Dashboard" follows the same
@@ -197,12 +203,18 @@ Reach:
 - A Section Editor who also holds Manager, an assistant role, Reviewer or
   Author in the journal passes the check through that role, and
   `getHomeUrl()` then sends them to the Dashboard (in the code).
-- Site-level public pages: `$contextId` is the site's, which holds no
-  Section Editor group, so only the site administrator passes there, by
-  design (in the code; on screen, a Section Editor and the Journal editor
-  both reach the Profile page from there).
+- The site's own pages, outside any journal: there "Dashboard" opens the
+  Profile page for everyone, with or without the fix, because since
+  `00ce12b` the address check asks for a journal first (`$context &&`).
+  The count check asks for no journal, but there only the site
+  administrator holds a role it counts, so only theirs can carry the
+  count (in the code).
 - No other copy of this list exists in pkp-lib or the three apps (a search
-  for the role list and for `NMI_TYPE_USER_DASHBOARD`).
+  for the role list and for `NMI_TYPE_USER_DASHBOARD`). Each app's
+  `classes/services/NavigationMenuService.php` extends
+  `PKPNavigationMenuService` without overriding `getDisplayStatus()`; it
+  only adds its own item types through the `NavigationMenus::displaySettings`
+  hook, so the fix needs no app change.
 
 ## Proposed fix
 
@@ -211,13 +223,18 @@ one protected method on the service that returns whether the user works from
 a dashboard in this context, called by both checks. The context id is
 nullable because on site-level pages it is `PKPApplication::SITE_CONTEXT_ID`,
 which is `null` on `main` and 3.5, and `User::hasRole()` takes `?int`.
-Tried on `main` in all three apps:
+The address check keeps `pkp/pkp-lib#13553`'s `$context &&` in front.
+Tried on `main` in all three apps. The excerpt below shows only the
+changed lines; the patch to apply is
 [fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/section-editor-dashboard-opens-profile/fix.diff).
 
 ```diff
+                 // line 215, the title
 -                    if ($currentUser->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR], $contextId) || $currentUser->hasRole([Role::ROLE_ID_SITE_ADMIN], PKPApplication::SITE_CONTEXT_ID)) {
 +                    if ($this->hasDashboard($currentUser, $contextId)) {
- (both places)
+                 // line 305, the address
+-                    if ($context && ($currentUser->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_ASSISTANT, Role::ROLE_ID_REVIEWER, Role::ROLE_ID_AUTHOR], $contextId) || $currentUser->hasRole([Role::ROLE_ID_SITE_ADMIN], PKPApplication::SITE_CONTEXT_ID))) {
++                    if ($context && $this->hasDashboard($currentUser, $contextId)) {
 +    /**
 +     * Whether the user works from a dashboard in this context: the roles
 +     * PKPPageRouter::getHomeUrl() sends to one, and the site administrator.
@@ -229,14 +246,15 @@ Tried on `main` in all three apps:
 +    }
 ```
 
-With the fix in, the walk showed the Expected on all three apps. On OJS
-it did the same for a Guest Editor who had no task yet: their name and
-"Dashboard" carried "0", and "Dashboard" opened the Dashboard. In a
-neighbour check with the same diff, an Author and a Reviewer kept their count and their pages (My Submissions, the review
-assignments). A site-level public page ("About this Publishing System" at
-`/index.php/index/en/about/aboutThisPublishingSystem`) loaded for the
-Section Editor and the Journal editor, whose "Dashboard" still opened the
-Profile page. All of it was the same with the fix in and out.
+With the fix in, the walk showed the Expected on all three apps, the
+Guest Editor's "u08h20d 1" and "Dashboard 1" included. In a neighbour
+check, an Author and a Reviewer kept their count and their pages (My
+Submissions, the review assignments). On a site-level public page ("About
+this Publishing System" at
+`/index.php/index/en/about/aboutThisPublishingSystem`), "Dashboard" still
+opened the Profile page for the Section Editor, the Journal editor and the
+site administrator. All of the neighbour check was the same with the fix
+in and out.
 
 **Alternatives**
 
@@ -252,9 +270,14 @@ Profile page. All of it was the same with the fix in and out.
 
 - No stored data changes. The `NavigationMenus::displaySettings` hook still
   runs after the decision.
-- Backport: on 3.5 the diff applies as it stands. 3.4 and 3.3 need
-  `PKPApplication::CONTEXT_SITE` (3.3: the global `CONTEXT_SITE`,
-  `ROLE_ID_SUB_EDITOR` and `array()` syntax). There `getHomeUrl()` sends
+- Backport: on 3.5, which has `pkp/pkp-lib#13553` too, the diff applies
+  with line offsets. On 3.4 and 3.3 both checks have the same condition,
+  with no `$context &&`, so the helper replaces both as it is. There a
+  site page's context id is `CONTEXT_ID_NONE`, which is `0`, not `null`:
+  the helper's `?int` accepts it, and its site-administrator test takes
+  `PKPApplication::CONTEXT_SITE` (also `0`) in place of `SITE_CONTEXT_ID`.
+  3.3 also needs the global constants (`CONTEXT_SITE`,
+  `ROLE_ID_SUB_EDITOR`) and `array()` syntax. There `getHomeUrl()` sends
   every role but Reader to the `submissions` page, with no split by role,
   so the method's comment should not name `getHomeUrl()`; the role set is
   still the right one.
@@ -276,62 +299,67 @@ test.
   It takes the Steps as `dbarnes` and `dbuskins`, and on OJS as the
   invited Guest Editor `u08h20d` (the accept link read from the install's
   mail catcher), on an install freshly loaded from the default dataset
-  (pkp/datasets 35759b4c, 2026-10-19, PostgreSQL). From a pkp-e2e
+  (pkp/datasets d1d235a7, 2026-10-25, PostgreSQL). From a pkp-e2e
   checkout:
-  `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/section-editor-dashboard-opens-profile/walk.js`.
-  `GUEST_TASK=1` adds step 9 (the assignment and the discussion);
-  `WALK_ONLY=guest` (OJS) takes steps 1 and 7 to 10 alone;
-  `WALK_MODE=neighbour` walks the Author (`ccorino`, `aclark` on OMP), the
-  Reviewer (`jjanssen`; the OPS dataset has none) and the site-level page,
-  with French left under "Forms" (walked 2026-10-03 with the fix in and
-  out; the diff has not changed since).
-- Walks on 2026-10-20, each on a freshly loaded install:
-  - `main`: the Steps on all three apps, and on OJS the Guest Editor
-    with step 9 (`WALK_ONLY=guest GUEST_TASK=1`): bell "Tasks 1", the
-    name and "Dashboard" bare, the Profile page.
+  `GUEST_TASK=1 PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/section-editor-dashboard-opens-profile/walk.js`.
+  `GUEST_TASK=1` takes step 9. `WALK_MODE=neighbour` walks the Author (`ccorino`, `aclark` on OMP), the
+  Reviewer (`jjanssen`; the OPS dataset has none) and the site-level page
+  as `dbuskins`, `dbarnes` and `admin`, with French left under "Forms".
+- Walks on 2026-10-26, each on a freshly loaded install:
+  - `main`: the Steps on all three apps, step 9 included on OJS: the
+    Observed above, the Guest Editor's bell "Tasks 1".
   - 3.5: the same command with `PKP_E2E_LINE=stable-3_5_0` in front, on
     that line's dataset (`ojs/stable-3_5_0/pgsql` and the others), with
     the same result as `main`. The Guest Editor there was walked without
-    step 9 (bell "Tasks", the name and "Dashboard" bare, the Profile page)
-    and invited at `u08h20d@mailinator.com`, an address the mail catcher
-    receives like any other.
-  - The fix: `main` OJS with
+    step 9 (bell "Tasks", the name and "Dashboard" bare, the Profile page),
+    invited at `u08h20d@example.com` as the Steps say.
+  - The fix: `main`, all three apps, with
     [fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/section-editor-dashboard-opens-profile/fix.diff)
-    applied (`node bin/try-fix.js apply <fix.diff> ojs`, `WALK_ONLY=guest`
-    without step 9, reverted after). Not walked: the fix for a Guest
-    Editor who holds a task. The count comes from the same
-    `dashboardMenuItem.tpl` that printed `dbuskins`'s "2" with the fix in
-    (2026-10-14, all three apps, the same diff).
+    applied (`node bin/try-fix.js apply <fix.diff> ojs omp ops`): the
+    Steps with step 9, then `WALK_MODE=neighbour`; reverted, then
+    `WALK_MODE=neighbour` again on the unpatched code. On the site page,
+    "Dashboard" opened the Profile page for `dbuskins`, `dbarnes` and
+    `admin` both times.
   - No request failed and no page script failed, with the fix in or out.
-- Tips (2026-10-20): `main` OJS 6b4323ced7, OMP 5777025be and OPS
-  f048e747b4 (lib/pkp 042726ebf6); `stable-3_5_0` OJS b56f8b74ff, OMP
-  722d3e661 and OPS 110effdd6e (lib/pkp cd82be0528); `stable-3_4_0` OJS
-  0012bd1022 (lib/pkp a71d6bd2ca); `stable-3_3_0` OJS d7d9dd14ec (lib/pkp
-  5e84acd11b).
-- Code reads: `PKPNavigationMenuService.php` on `main` (lines 215 and 305)
-  and on 3.5 (213 and 303), the same lists; 3.4
+- Tips (2026-10-26): `main` OJS d054e2660d, OMP 38bf23300c and OPS
+  fbd57562f4 (lib/pkp 800863b5dc); `stable-3_5_0` OJS 18b464cafd and OMP
+  dade65f368 (lib/pkp 0f3c36bc2f), OPS bd726f9b7a (lib/pkp 9a0212faff);
+  `stable-3_4_0` OJS 90c26f8f68 (lib/pkp 83e78a85e5); `stable-3_3_0` OJS
+  3ef62492a4 (lib/pkp 93722c9179).
+- Code reads: `PKPNavigationMenuService.php` on 3.5, lines 213 and 303,
+  as on `main` (3.5 has the guard from `6accf87c49`); 3.4
   `classes/services/PKPNavigationMenuService.php` lines 210 and 300 and 3.3
   `classes/services/PKPNavigationMenuService.inc.php` lines 190 and 280, the
-  same lists, with the `submissions` page as the address. `getHomeUrl()` in
-  `PKPPageRouter.php` on `main`. The file is shared by the three apps through
-  pkp-lib, and no app overrides it. `dashboardMenuItem.tpl` and the
-  `{$loggedInUsername}` item in each app's `registry/navigationMenus.xml`
-  on `main`. All re-read on the 2026-10-20 tips: the lines and lists are
-  unchanged. OJS `registry/userGroups.xml` on `main`, 3.5, 3.4 and 3.3:
-  the Guest editor group has `roleId="0x00000011"` (`ROLE_ID_SUB_EDITOR`)
-  on every line; OMP's and OPS's registries hold no group with that role id
-  besides the Series editor and the Moderator.
+  same lists, with no such guard and the `submissions` page as the
+  address. `getHomeUrl()` in `PKPPageRouter.php` on `main` and 3.5, with
+  `ROLE_ID_SUB_EDITOR` among the roles sent to `dashboard/editorial`.
+  Each app's `classes/services/NavigationMenuService.php` on `main`.
+  `dashboardMenuItem.tpl` and the `{$loggedInUsername}` item in each
+  app's `registry/navigationMenus.xml` on `main`. OJS
+  `registry/userGroups.xml` on `main`, 3.5, 3.4 and 3.3: the Guest editor
+  group has `roleId="0x00000011"` (`ROLE_ID_SUB_EDITOR`) on every line;
+  OMP's and OPS's registries hold no group with that role id besides the
+  Series editor and the Moderator.
+- Introduced: `git blame` of line 305 now lands on `00ce12b`, which only
+  wrapped the existing check in `$context && (…)`; blame at its parent,
+  and of line 215, lands on abc36ccdc16 (2024), which only renamed the
+  site context constant; from there the trace reaches `39912fe` and
+  `03f1cbe` as before.
 - Not driven: a custom role with the permission level "Section Editor"
   (in the code), a user holding only Reader (the dataset has none; in the code
   Reader is not in the list, before or after the fix), a Section Editor who
   also holds Author or Reviewer (in the code), and themes other than the
   default.
-- Not walked: the fix on a journal with French under "Forms".
+- Not walked: the Steps with the fix in on a journal with French under
+  "Forms" (the neighbour check ran there).
 - Upstream: `pkp/pkp-lib#8971` ("Dashboard link goes to user Profile",
   closed) is the same link, but for an Author signed in at the site's
   address, not a Section Editor; not this fault. `pkp/pkp-lib#4340`
   (closed) is about links to contexts the user has no role in; not this
-  fault. Searched again on 2026-10-20, with "guest editor" added.
+  fault. `pkp/pkp-lib#13553` (closed, the site administrator on site
+  pages) and `pkp/pkp-lib#13443` (open, a fatal error for a disabled
+  user's session) touch the same method; neither is this fault. Searched
+  again on 2026-10-26, by the symptom's words, "guest editor",
+  `NMI_TYPE_USER_DASHBOARD`, `ROLE_ID_SUB_EDITOR` and
+  `PKPNavigationMenuService`, in pkp-lib, the three apps and ui-library.
 - Unverified: how many Guest Editors hold no other role in their journal.
-  A Guest Editor is often invited for one special issue, which suggests
-  many do; that is a reading of the role's purpose, not a count.
