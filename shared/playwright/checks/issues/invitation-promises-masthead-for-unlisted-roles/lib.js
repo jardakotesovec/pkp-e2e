@@ -26,6 +26,8 @@ const CASES = {
     },
 };
 const INVITER = 'rvaca';
+/** The app's short name on the accept page's "Accept And Continue to …" button. */
+const ACR = {ojs: 'OJS', omp: 'OMP', ops: 'OPS'};
 
 function today() {
     return new Intl.DateTimeFormat('en-CA', {year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date());
@@ -109,4 +111,19 @@ async function invitationEmail(app, to, since) {
     }
 }
 
-module.exports = {CASES, INVITER, flat, today, mastheadPage, invite, invitationEmail};
+/** Signed out: the emailed accept link, then "Accept And Continue to <app>"; the closing dialog. */
+async function accept(page, app, link) {
+    await page.goto(link);
+    const btn = page.getByRole('button', {name: new RegExp(`^Accept And Continue to ${ACR[app.name]}`)});
+    await btn.waitFor({timeout: T});
+    await idle(page);
+    const before = await screen(page);
+    await btn.click();
+    const dialog = page.getByRole('dialog');
+    await dialog.first().waitFor({timeout: T});
+    await idle(page);
+    const after = await screen(page);
+    return {before, after, dialogText: flat(after.text.dialog)};
+}
+
+module.exports = {CASES, INVITER, ACR, flat, today, mastheadPage, invite, invitationEmail, accept};

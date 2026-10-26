@@ -9,13 +9,12 @@
 // Clark), who holds Author and Reader with no masthead choice, invited to "Editorial Board
 // Member" with "Appear on the masthead"; the email read.
 //
-// Reset first:  npm run fleet-prep -- --feature issues-u06g --dataset 3 --reset
-// Run (main):   PROBE_FEATURE=issues-u06g PROBE_AGENT=u06g node bin/probe.js all shared/playwright/checks/issues/invitation-promises-masthead-for-unlisted-roles/walk.js [neighbour]
-// 3.5:          prefix both with PKP_E2E_LINE=stable-3_5_0 (feature issues-u06g-3_5), PROBE_RUN=r35
-// Facts: .reports/<feature>/u06g/walk[-<run>]-<app>.json (neighbour: neighbour[-<run>]-<app>.json)
+// Reset first:  npm run fleet-prep -- --feature <feature> --dataset <n> --reset
+// Run (main):   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/invitation-promises-masthead-for-unlisted-roles/walk.js [neighbour]
+// 3.5:          prefix both with PKP_E2E_LINE=stable-3_5_0 (a 3.5 feature), and the run with PROBE_RUN=r35
+// Facts: .reports/<feature>/<id>/walk[-<run>]-<app>.json (neighbour: neighbour[-<run>]-<app>.json)
 const {forEachApp, launch, signIn, signOut, record, serverLog} = require('../../../probe');
 const H = require('./lib.js');
-const A5 = require('../invitation-sent-promises-decision-updates/lib.js');
 
 const neighbour = process.argv.slice(2).includes('neighbour');
 
@@ -60,7 +59,7 @@ forEachApp(async (app) => {
         // 6. signed out, the accept link
         await signOut(page);
         if (facts.email1.accept) {
-            const acc = await A5.accept(page, app, facts.email1.accept);
+            const acc = await H.accept(page, app, facts.email1.accept);
             record('03-accept', {before: acc.before, after: acc.after});
             facts.accepted = acc.dialogText;
             save();

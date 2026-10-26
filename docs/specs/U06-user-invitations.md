@@ -825,7 +825,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A5](#a5) | "Invitation Sent" promises the inviter news of the person's decision, but nothing ever tells them | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | Small wording and untranslated-text defects across the invitation screens and emails | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | Role invitation wizard: a screen reader hears no field names in role rows after the first | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A11](#a11) | The invitation email promises a masthead listing for roles the masthead never lists, such as Author or Reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [A11](#a11) | The invitation email promises a masthead listing for roles the masthead never lists, such as Author or Reader | 🐞 | low | issues (claude), 2026-10-26 — re-verified |
 | [A12](#a12) | The "Invite to a role" address with a wrong last word shows an empty page instead of "404 Not Found" | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | A newcomer whose chosen username was taken meanwhile presses "Accept And Continue" and nothing happens | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
@@ -974,22 +974,20 @@ masthead", the invitation email says "Your name will appear in the
 {journal}'s masthead as a {role}." It says this even for roles the journal's
 "Editorial Masthead" page does not list (which roles it lists: [Journal
 identity & about pages](U07-journal-identity-and-about-pages.md) Rule 14a),
-such as Author, Reader or Copyeditor. The page itself stays correct, and the
-invitation works. The inviter cannot remove the sentence on its own: the
-role lines are filled in when the email is sent. Once the person accepts,
-the "Appear" choice is stored with the role. Every later invitation to them
-repeats the promise under "Already assigned roles", until a manager sets
-that role to "Does not appear on the masthead" on the person's "Edit" page.
-This happens on a default install, where the masthead lists only the editor
-roles and "Editorial Board Member" (on a preprint server, "Moderator" and
-"Editorial Board Member"). If the journal later ticks "Consider role in
-masthead list" for such a role, the people stored as "Appear" are listed,
-and the sentence becomes true. Reviewer rows are a separate case. With the
-masthead not based on enrollments, the email has no masthead line at all
-(pkp/pkp-lib#13370, 2026-10-23), so this needs the masthead on, as on a
-default install.
-Basis: probe, issue report walk, 2026-10-02; walk re-run 2026-10-23 at the merged tips of `main` and stable-3_5_0, still shown. <sup>[f-a11](#fn-a11)</sup>
-Report: refresh owed — pkp/pkp-lib#13370's second part (pkp-lib#13603 / `main` `49b94b3193`..`b90815748c`, ui-library#1027, merged 2026-10-23) wrapped `UserRoleAssignmentInvitationNotify::getUserUserGroupSection()`'s sentence in `enableEnrollmentMasthead` and, for Reviewer, `enableEnrollmentMastheadReviewers`; it removed the masthead column from `UserInvitationUserGroupsTable.vue` and `AcceptInvitationUserRoles.vue` while the masthead is off, and made a Reviewer row follow reviewer listing. The report's Cause snippet, its proposed diff and `fix.diff` (context moved; re-try), its "Reviewers are out of scope" paragraph, the Reach bullets on the column and on #13370, and "What goes with it"'s #13370 bullet need rewriting. The walk still shows the defect with the masthead on (2026-10-23).
+such as Author, Reader or Copyeditor.
+The manager cannot delete the sentence while editing the email before
+sending it: the role lines, this sentence included, are added only when
+the email is sent. Once the person accepts, the "Appear" choice is stored
+with the role. Every later invitation to them repeats the promise under
+"Already assigned roles".
+This happens while the masthead is based on user enrollments, as on a new
+install, where it lists only the editor roles and "Editorial Board Member"
+(on a preprint server, "Moderator" and "Editorial Board Member"). With that
+setting off, the email has no masthead line at all. If the journal later
+ticks "Consider role in masthead list" for such a role, the people stored as
+"Appear" are listed, and the sentence becomes true. Reviewer rows are a
+separate case and outside this report.
+Basis: probe, issue report walk, 2026-10-02; walk re-run 2026-10-23 at the merged tips of `main` and stable-3_5_0, and 2026-10-26 (the report's refresh), still shown. <sup>[f-a11](#fn-a11)</sup>
 
 <a id="a12"></a>
 **A12 — The "Invite to a role" address with a wrong last word shows an empty page instead of "404 Not Found"** · 🐞 · low · crash: server.
