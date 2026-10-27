@@ -255,9 +255,19 @@ None of these is shown for a plugin with no compatible version.
 18. **"Upgrade".** A row's "Upgrade" opens the "Upgrade Plugin" window.
     "Save" with a newer version of the same plugin replaces it: the
     notice "Successfully upgraded to version {version}" shows and the row
-    keeps its box as it was. <sup>m</sup> <sup>td16</sup> The
-    application's own version stays as it was, whatever version the
-    plugin's upgrade file names. <sup>v</sup>
+    keeps its box as it was. <sup>m</sup> <sup>td16</sup>
+
+    The new version's upgrade file lists the steps the upgrade runs,
+    such as changes to the database, and may limit a step to a range of
+    versions. "Save" runs every step that has no range; a step with a
+    range runs only when the application's version falls in it, whatever
+    the plugin version being replaced ⚠ [A11](#a11). No screen shows
+    which steps ran, and the notice reads the same either way: a tester
+    checks what a step leaves behind on the server, read in the
+    database or the server's files, such as a table its database change
+    adds or a line it writes to a file. <sup>m</sup> The application's
+    own version stays as it was, whatever version the upgrade file
+    names. <sup>v</sup>
 19. **Upgrade refused.** Each of these shows its notice and leaves the
     plugin as it was: another category's plugin "The uploaded plugin
     does not fit the category of the upgraded plugin."; another plugin
@@ -632,6 +642,10 @@ Left out of the scenarios above, by reason:
     `docs/issues/U62-A5-failed-upgrade-removes-plugin.md`): an upgrade through a row's "Upgrade" whose own upgrade step fails leaves the old version listed, ticked and working
   - Rule 12's journal home page with its theme unticked (OJS1,
     retired): it answers 200 and shows its current issue
+  - an upgrade's own steps (Rule 18): a newer version whose upgrade
+    file holds a step with no range and one limited to the
+    application's versions runs both, each checked by what it leaves
+    behind on the server (Rule 18)
 - **Nothing new to test**:
   - a tick made in the Settings Wizard's "Plugins" tab showing on the
     journal's own list, and the reverse (Rule 3)
@@ -661,6 +675,8 @@ Left out of the scenarios above, by reason:
     Rule 12)
   - A10 (a file that is not a ".tar.gz" archive, refused in the
     server's own words; Rule 17)
+  - A11 (an upgrade step limited to the plugin's own earlier versions,
+    skipped; Rule 18)
 - **No seed**:
   - browsing the Plugin Gallery, searching it and opening a plugin's
     details, since the test installs never reach PKP's site (Actors
@@ -712,6 +728,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Deleting a plugin: the notice that confirms it reads "successfuly deleted" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | A refused tick or untick is explained by a raw code, and "Disable" stays open with its spinner | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | Uploading a file that is not a plugin package shows PHP's archive error with a server path | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [A11](#a11) | Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success | 🐞 | minor | — |
 | [A4](#a4) | "Delete" is offered on plugins nobody can switch off, and on the theme in use | ❓ | minor | — |
 | [A6](#a6) | A Site Administrator with no manager role in a journal cannot switch its plugins | ❓ | minor | — |
 | [A8](#a8) | The theme a journal uses can be switched off | ❓ | user-visible | — |
@@ -876,6 +893,26 @@ exist".
 Nothing is installed, but the message does not tell the administrator
 what was wrong with the file or what to upload instead.
 Basis: probe, 2026-10-02. <sup>f-a10</sup>
+
+<a id="a11"></a>
+**A11 — Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success** · 🐞 · minor.
+A plugin's new version can limit a step of its upgrade file to a range
+of versions, such as a database change meant only for sites still on
+the plugin's 1.0.0.x. When the Site Administrator upgrades the plugin
+with its row's "Upgrade" (Rule 18), the range is compared with the
+application's version instead of the plugin version being replaced.
+Upgrading 1.0.0.0 to 1.0.1.0 skips a step limited to 1.0.0.0–1.0.0.9,
+and runs a step limited to versions 3.0 and later, since the
+application itself is past 3.0. The notice still reads "Successfully
+upgraded to version 1.0.1.0", so nothing tells the administrator that a
+step was skipped; only what the step should have left on the server
+shows it (Rule 18). Installing a plugin through "Upload A New Plugin"
+compares the ranges of its installation file with the plugin's own
+version. Expected: an upgrade compares each range with the plugin
+version it replaces.
+A plugin cannot limit an upgrade step to its own earlier versions, and
+what such a step should do is never done.
+Basis: probe, 2026-10-27. <sup>f-a11</sup>
 
 ### OMP
 
@@ -1202,6 +1239,15 @@ catch `rmtree()`s the destination again and rethrows
 Success: `manager.plugins.upgradeSuccessful` "Successfully upgraded to
 version {$versionString}". The `enabled` setting is untouched.
 Live-probed 2026-09-27 (Rules 18–20; three apps): td15, td16, f-a5.
+Which steps run: `Installer::preInstall()` fills `currentVersion`,
+when unset, from `VersionDAO::getCurrentVersion()` with no arguments
+(the application's row), and `Installer::parseInstallNodes()` runs an
+`<upgrade>` block's steps only when `currentVersion` lies within its
+`minversion`/`maxversion`; `PluginHelper::installPlugin()` calls
+`setCurrentVersion()` with the plugin's version before `execute()`,
+`upgradePlugin()` does not, so an upgrade's ranges meet the
+application's version (A11). Live-probed 2026-10-27 (Rule 18; OJS, OMP,
+OPS `main` and OJS stable-3_5_0): f-a11.
 
 <a id="fn-n"></a>
 **n** — Delete. `PluginGridRow` adds `delete` as a
@@ -1492,6 +1538,38 @@ Issue report: [pkp-e2e#511](https://github.com/jardakotesovec/pkp-e2e/issues/511
 **f-a10** — fn-l: `PharData`'s own exception message reaches the
 notice. Live-probed 2026-09-27: td14.
 Issue report: [pkp-e2e#506](https://github.com/jardakotesovec/pkp-e2e/issues/506) ([docs/issues/U62-A10-upload-plugin-not-archive-server-message.md](../issues/U62-A10-upload-plugin-not-archive-server-message.md)).
+
+<a id="fn-f-a11"></a>
+**f-a11** — fn-m: `upgradePlugin()` runs the new `upgrade.xml` through
+`Upgrade::execute()` without `setCurrentVersion()`, so
+`Installer::preInstall()` takes the application's row and
+`parseInstallNodes()` compares each `<upgrade minversion maxversion>`
+with it; `installPlugin()` sets the plugin's version first. The same on
+`main` (lib/pkp `c27153abdd`), stable-3_5_0, stable-3_4_0 and
+stable-3_3_0 (`Installer.inc.php`, `PluginHelper.inc.php` there); no
+app's `Upgrade` class overrides it. The gallery's "Upgrade" calls the
+same `upgradePlugin()` (fn-p; read from the code). The range test dates
+from 2008 (`821ebbf8e9`), plugin upgrade through the list from 2014
+(`ae6f666058`), and `upgradePlugin()` has never set the plugin's
+version. Live-probed 2026-10-27, two runs each, with a scratch plugin
+1.0.0.0 → 1.0.1.0 whose `upgrade.xml` holds five marker steps: one with
+no range, one at `minversion="3.0.0.0"`, one at 3.0.0.0–3.99.99.99, one
+at 1.0.0.0–1.0.0.9, one at `maxversion="1.0.0.9"` alone. OJS `main`
+through the screens as `admin` on a scratch journal ("Upload A New
+Plugin" gave "Successfully installed version 1.0.0.0", the row's
+"Upgrade" gave "Successfully upgraded to version 1.0.1.0"); OJS, OMP,
+OPS `main` and OJS stable-3_5_0 through `PluginHelper` itself
+(`shared/playwright/checks/U62/I27C/i27c.js`): everywhere the first
+three steps ran and the two plugin ranges did not, each step seeing the
+application's version (`3.6.0.0` on `main`, `3.5.0.5` on 3.5) as the
+current one; the application's row stayed current. The kept walk
+`checks/sync/pkp-lib-13608/walk.js`, rerun the same day on all four,
+showed the same for its 1.0.0.x step, while during its install the
+steps saw the plugin's own 1.0.0.0. A fix would call
+`$installer->setCurrentVersion()` with the installed plugin's version
+before `execute()` in `upgradePlugin()`. pkp/pln's `upgrade.xml` on
+its default branch has no `<upgrade>` block (read 2026-10-27); the
+other gallery plugins were not read.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-i. Live-probed 2026-09-27 (OJS, two runs): with
