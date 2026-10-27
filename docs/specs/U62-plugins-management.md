@@ -728,7 +728,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Deleting a plugin: the notice that confirms it reads "successfuly deleted" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | A refused tick or untick is explained by a raw code, and "Disable" stays open with its spinner | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | Uploading a file that is not a plugin package shows PHP's archive error with a server path | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A11](#a11) | Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success | 🐞 | minor | — |
+| [A11](#a11) | Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success | 🐞 | low | issues (claude), 2026-10-27 — re-verified |
 | [A4](#a4) | "Delete" is offered on plugins nobody can switch off, and on the theme in use | ❓ | minor | — |
 | [A6](#a6) | A Site Administrator with no manager role in a journal cannot switch its plugins | ❓ | minor | — |
 | [A8](#a8) | The theme a journal uses can be switched off | ❓ | user-visible | — |
@@ -895,23 +895,26 @@ what was wrong with the file or what to upload instead.
 Basis: probe, 2026-10-02. <sup>f-a10</sup>
 
 <a id="a11"></a>
-**A11 — Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success** · 🐞 · minor.
-A plugin's new version can limit a step of its upgrade file to a range
-of versions, such as a database change meant only for sites still on
-the plugin's 1.0.0.x. When the Site Administrator upgrades the plugin
-with its row's "Upgrade" (Rule 18), the range is compared with the
-application's version instead of the plugin version being replaced.
-Upgrading 1.0.0.0 to 1.0.1.0 skips a step limited to 1.0.0.0–1.0.0.9,
-and runs a step limited to versions 3.0 and later, since the
-application itself is past 3.0. The notice still reads "Successfully
-upgraded to version 1.0.1.0", so nothing tells the administrator that a
-step was skipped; only what the step should have left on the server
-shows it (Rule 18). Installing a plugin through "Upload A New Plugin"
-compares the ranges of its installation file with the plugin's own
-version. Expected: an upgrade compares each range with the plugin
-version it replaces.
-A plugin cannot limit an upgrade step to its own earlier versions, and
-what such a step should do is never done.
+**A11 — Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success** · 🐞 · low.
+A plugin's new version can limit a step of its upgrade to sites coming
+from certain plugin versions, such as a database change meant only for
+sites still on the plugin's 1.0.0.x. When the Site Administrator
+upgrades the plugin with its row's "Upgrade", that limit is compared
+with the application's version instead of the plugin version being
+replaced. Upgrading 1.0.0.0 to 1.0.1.0 skips a step limited to
+1.0.0.0–1.0.0.9. It also runs a step the plugin limited to its own 3.0
+and later, because the application (3.6) falls in that range.
+The notice still reads "Successfully upgraded to version 1.0.1.0".
+Nothing tells the administrator; only what the step should have left in
+the database shows it.
+This is the fault `pkp/pkp-lib#9545` reported in 2023, closed without a
+fix because the team preferred to replace `upgrade.xml` later. This
+report adds: the fault re-verified today on OJS, OMP and OPS, `main`
+and 3.5; its cause, one missing line; that line tried as a fix, with a
+second upgrade showing it runs exactly the steps meant for the version
+replaced; a read of every Plugin Gallery release; and the fix's
+dependence on the `pkp/pkp-lib#13608` guard, which no release carries
+yet (Proposed fix).
 Basis: probe, 2026-10-27. <sup>f-a11</sup>
 
 ### OMP
@@ -1570,6 +1573,7 @@ steps saw the plugin's own 1.0.0.0. A fix would call
 before `execute()` in `upgradePlugin()`. pkp/pln's `upgrade.xml` on
 its default branch has no `<upgrade>` block (read 2026-10-27); the
 other gallery plugins were not read.
+Issue report: [docs/issues/U62-A11-plugin-upgrade-skips-own-version-steps.md](../issues/U62-A11-plugin-upgrade-skips-own-version-steps.md).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-i. Live-probed 2026-09-27 (OJS, two runs): with

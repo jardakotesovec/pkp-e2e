@@ -1,0 +1,11 @@
+--- a/lib/pkp/classes/plugins/PluginHelper.php
++++ b/lib/pkp/classes/plugins/PluginHelper.php
+@@ -332,6 +332,8 @@
+                         'locale' => $site->getPrimaryLocale(),
+                         'additionalLocales' => $site->getSupportedLocales(),
+                     ], $upgradeFile, true);
++                    // The file's <upgrade> ranges name plugin versions: compare them with the one replaced
++                    $installer->setCurrentVersion($installedPlugin);
+                     // Run the upgrade/migration
+                     $installer->execute() || throw new Exception(__('manager.plugins.upgradeFailed', ['errorString' => $installer->getErrorString()]));
+                 }
