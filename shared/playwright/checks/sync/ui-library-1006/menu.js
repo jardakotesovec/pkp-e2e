@@ -17,6 +17,8 @@
 //   select    an item chosen with the mouse ("Email", a button action): the window it opens, the menu gone
 //   workflow  submission 1's workflow, Submission stage, a Participants row's "…", then a page-level Escape at once:
 //             whether the menu closed and the workflow window stayed
+//   disabled  the bundle served with a plugin's getItemActions extension appended (a disabled and an enabled
+//             link action): their markup, the arrow keys' path, a click on each (round 2: f7a5fa9174)
 const {forEachApp, launch, signIn, record, shot, idle} = require('../../../probe');
 
 const MENU = '[role="menu"]';
@@ -166,6 +168,58 @@ forEachApp(async (app) => {
         out.workflow = 'no participant menu';
         await shot(page, 'workflow-none');
     }
+
+    // disabled: the bundle served with a plugin's getItemActions extension appended (one disabled link
+    // action, one enabled), Users & Roles' first row: each item's markup, then a click on each
+    const about = '/index.php/publicknowledge/en/about';
+    await page.route('**/js/build.js*', async (route) => {
+        const res = await route.fetch();
+        const body = (await res.text()) + `;pkp.registry.storeExtendFn('userAccessManager', 'getItemActions', (actions) => [...actions,
+            {label: 'Disabled link', name: 'e2eDisabledLink', url: '${about}?disabled', disabled: true},
+            {label: 'Enabled link', name: 'e2eEnabledLink', url: '${about}?enabled'}]);`;
+        await route.fulfill({response: res, body});
+    });
+    await page.setViewportSize({width: 1280, height: 900});
+    const openFirst = async () => {
+        await page.goto('/index.php/publicknowledge/en/management/settings/access');
+        await idle(page);
+        const first = page.locator('main').getByRole('button', {name: triggerName}).first();
+        await first.waitFor({timeout: 30_000});
+        await first.click();
+        await page.waitForTimeout(400);
+    };
+    const linkFacts = (label) =>
+        page.locator(MENU).getByRole('menuitem', {name: label}).evaluate((i) => {
+            const a = i.tagName === 'A' ? i : i.querySelector('a');
+            return {
+                tag: i.tagName.toLowerCase(),
+                href: a ? a.getAttribute('href') : null,
+                ariaDisabled: i.getAttribute('aria-disabled'),
+                dataDisabled: i.hasAttribute('data-disabled'),
+                color: getComputedStyle(i).color,
+            };
+        }).catch((e) => `missing: ${e.message.split('\n')[0]}`);
+    await openFirst();
+    out.disabled = {items: (await page.locator(MENU).getByRole('menuitem').allInnerTexts()).map(fold)};
+    out.disabled.disabledItem = await linkFacts('Disabled link');
+    out.disabled.enabledItem = await linkFacts('Enabled link');
+    out.disabled.editItemColor = await page.locator(MENU).getByRole('menuitem').first().evaluate((i) => getComputedStyle(i).color);
+    await shot(page, 'disabled-menu');
+    // arrow keys skip a disabled item: walk the list from the top and note which items get highlighted
+    out.disabled.arrowPath = [];
+    for (let k = 0; k < 8; k++) {
+        await page.keyboard.press('ArrowDown');
+        out.disabled.arrowPath.push(await page.evaluate(() => document.querySelector('[role="menuitem"][data-highlighted]')?.innerText?.trim() || null));
+    }
+    await page.locator(MENU).getByRole('menuitem', {name: 'Disabled link'}).click({force: true});
+    await page.waitForTimeout(1500);
+    out.disabled.afterDisabledClick = {url: page.url().replace(/^https?:\/\/[^/]+/, ''), menuOpen: (await menuFacts(page)).open};
+    await openFirst();
+    await page.locator(MENU).getByRole('menuitem', {name: 'Enabled link'}).click();
+    await page.waitForLoadState('load').catch(() => {});
+    await page.waitForTimeout(1000);
+    out.disabled.afterEnabledClick = {url: page.url().replace(/^https?:\/\/[^/]+/, '')};
+    await page.unroute('**/js/build.js*');
 
     record('result', out);
     console.log(JSON.stringify(out, null, 1));
