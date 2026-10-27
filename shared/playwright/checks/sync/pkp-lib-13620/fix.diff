@@ -1,65 +1,24 @@
-diff --git a/lib/pkp/classes/migration/upgrade/v3_6_0/I13593_AddDateCompletedToReviewRoundAuthorResponses.php b/lib/pkp/classes/migration/upgrade/v3_6_0/I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses.php
-similarity index 93%
-rename from classes/migration/upgrade/v3_6_0/I13593_AddDateCompletedToReviewRoundAuthorResponses.php
-rename to classes/migration/upgrade/v3_6_0/I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses.php
-index b66705f81f..6942ce3777 100644
---- a/lib/pkp/classes/migration/upgrade/v3_6_0/I13593_AddDateCompletedToReviewRoundAuthorResponses.php
-+++ b/lib/pkp/classes/migration/upgrade/v3_6_0/I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses.php
-@@ -7,7 +7,7 @@
-  * Copyright (c) 2026 John Willinsky
-  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
-  *
-- * @class I13593_I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses
-+ * @class I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses
-  *
-  * @brief Add date_completed, date_reverted columns to the review_round_author_responses table.
-  */
-diff --git a/lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php b/lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php
-index 514fc49f25..8198d8a971 100644
---- a/lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php
-+++ b/lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php
-@@ -51,6 +51,7 @@ class AuthorResponse extends Model
-         'doiId' => 'int',
-         'dateCompleted' => 'datetime',
-         'dateReverted' => 'datetime',
-+        'statusChangedByUserId' => 'int',
-     ];
- 
-     /**
-diff --git a/ojs/dbscripts/xml/upgrade.xml b/ojs/dbscripts/xml/upgrade.xml
-index 22c4cde0e4..14f8750934 100644
---- a/ojs/dbscripts/xml/upgrade.xml
-+++ b/ojs/dbscripts/xml/upgrade.xml
-@@ -249,7 +249,7 @@
- 		<migration class="PKP\migration\upgrade\v3_6_0\I13213_TaskTemplateForeignConstraint"/>
- 		<migration class="PKP\migration\upgrade\v3_6_0\I12813_UpdateAuthorResponseAndSubmissionCommentTextType"/>
- 		<migration class="PKP\migration\upgrade\v3_6_0\I12994_CompetingInterestsDeclared" />
--		<migration class="PKP\migration\upgrade\v3_6_0\I13593_I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses"/>
-+		<migration class="PKP\migration\upgrade\v3_6_0\I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses"/>
- 		<migration class="APP\migration\upgrade\v3_6_0\I7527_IdentityMetadata" />
- 		<code function="rebuildSearchIndex" />
- 		<note file="docs/release-notes/README-3.6.0" />
 diff --git a/omp/dbscripts/xml/upgrade.xml b/omp/dbscripts/xml/upgrade.xml
-index 2c228507d..0c70c7055 100644
+index 2c228507d..f2797202f 100644
 --- a/omp/dbscripts/xml/upgrade.xml
 +++ b/omp/dbscripts/xml/upgrade.xml
 @@ -231,6 +231,7 @@
  		<migration class="PKP\migration\upgrade\v3_6_0\I13213_TaskTemplateForeignConstraint"/>
  		<migration class="PKP\migration\upgrade\v3_6_0\I12813_UpdateAuthorResponseAndSubmissionCommentTextType"/>
  		<migration class="PKP\migration\upgrade\v3_6_0\I12994_CompetingInterestsDeclared" />
-+		<migration class="PKP\migration\upgrade\v3_6_0\I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses"/>
++		<migration class="PKP\migration\upgrade\v3_6_0\I13593_AddDateConfirmedAndDateRevertedToReviewRoundAuthorResponses"/>
  		<migration class="APP\migration\upgrade\v3_6_0\I7527_IdentityMetadata" />
  		<migration class="APP\migration\upgrade\v3_6_0\I12593_DiscussionInternalReviewTemplate"/>
  		<code function="rebuildSearchIndex" />
 diff --git a/ops/dbscripts/xml/upgrade.xml b/ops/dbscripts/xml/upgrade.xml
-index 99a35d017d..1356e38cb6 100644
+index 99a35d017d..b2bc0c1ea5 100644
 --- a/ops/dbscripts/xml/upgrade.xml
 +++ b/ops/dbscripts/xml/upgrade.xml
 @@ -221,6 +221,7 @@
  		<migration class="PKP\migration\upgrade\v3_6_0\I13213_TaskTemplateForeignConstraint"/>
  		<migration class="PKP\migration\upgrade\v3_6_0\I12813_UpdateAuthorResponseAndSubmissionCommentTextType"/>
  		<migration class="PKP\migration\upgrade\v3_6_0\I12994_CompetingInterestsDeclared" />
-+		<migration class="PKP\migration\upgrade\v3_6_0\I13593_AddDateCompletedAndDateRevertedToReviewRoundAuthorResponses"/>
++		<migration class="PKP\migration\upgrade\v3_6_0\I13593_AddDateConfirmedAndDateRevertedToReviewRoundAuthorResponses"/>
          <migration class="APP\migration\upgrade\v3_4_0\I11759_RemoveDuplicateFilters"/>
  		<migration class="APP\migration\upgrade\v3_6_0\I7527_IdentityMetadata" />
  		<code function="rebuildSearchIndex" />

@@ -1,21 +1,25 @@
 // PR review check — pkp/pkp-lib#13593 on `main`: pkp-lib#13620 + ojs#5985. The PR adds
 //   GET {submissionId}/{reviewRoundId}/authorResponse/{responseId}             (assigned authors and editors, managers, admins)
-//   PUT {submissionId}/{reviewRoundId}/authorResponse/{responseId}/completion  {markAs: completed|reverted} (assigned editors, managers, admins)
-// on the journal's `reviews` API, `dateCompleted`, `dateReverted` and `statusChangedByUser` in the response's data,
+//   PUT {submissionId}/{reviewRoundId}/authorResponse/{responseId}/confirmation {markAs: confirmed|reverted} (assigned editors, managers, admins)
+// on the journal's `reviews` API, `dateConfirmed`, `dateReverted` and `confirmationChangedByUser` in the response's data,
 // and lists a round's response in the open peer review record (`peerReviews/open/submissions/{id}`) only when it
-// is public and completed (U30 A10's fix rides along: a response that is not public stays out).
+// is public and confirmed (U30 A10's fix rides along: a response that is not public stays out). Round 2 (head
+// b0145df8f5): "completed" became "confirmed"; confirming a confirmed response and reverting a reverted one
+// answer 200 and change nothing; reverting one never confirmed answers 422. Round 1 (head d7c6c3bc06) had
+// `/completion` and `completed`.
 //
 // On PKP's default test dataset (a dataset fleet, freshly reset before each run), OJS only. The round is set up on
 // screen with the kept walk of U30 A10 (its lib.js): on submission 1's Review round 1 the editor dbarnes makes the
 // reviews public (MODE=public: all three; MODE=mixed: Aisla McCrae's only), the three reviewers submit, dbarnes marks
 // them complete, requests the response, amwandenga submits it. Then, by API with each user's session:
-//   12 the record signed out (no completion yet)
+//   12 the record signed out (not confirmed yet)
 //   13 GET as dbarnes (manager), dbuskins (assigned section editor), amwandenga (assigned author), minoue (section
 //      editor not assigned), ccorino (author of another submission), amccrae (reviewer), signed out; mismatched ids
-//   14 PUT completion refused: amwandenga, minoue, a bad markAs, another submission's round
-//   15 PUT completed by dbuskins; the record; GET as amwandenga
-//   16 PUT reverted by dbarnes; the record
-//   17 PUT completed again by dbarnes; the record
+//   14 PUT confirmation refused: amwandenga, minoue, a bad markAs, another submission's round, a revert of a
+//      response never confirmed
+//   15 PUT confirmed by dbuskins; the record; GET as amwandenga; confirmed again by dbarnes (nothing changes)
+//   16 PUT reverted by dbarnes; the record; reverted again by dbuskins (nothing changes)
+//   17 PUT confirmed again by dbarnes; the record
 // At the PR base the two routes do not exist (the requests answer 404) and the record lists the response from step 12.
 // Facts go to <MODE>-<app>.json; no assertions.
 //
@@ -69,8 +73,8 @@ forEachApp(async (app) => {
         if (ctx) await ctx.dispose();
         if (user) await signOut(page);
         const keep = json && typeof json === 'object' && 'id' in json
-            ? {id: json.id, reviewRoundId: json.reviewRoundId, isPublic: json.isPublic, dateCompleted: json.dateCompleted,
-                dateReverted: json.dateReverted, statusChangedByUser: json.statusChangedByUser, response: json.response && L.plain(Object.values(json.response)[0])}
+            ? {id: json.id, reviewRoundId: json.reviewRoundId, isPublic: json.isPublic, dateConfirmed: json.dateConfirmed,
+                dateReverted: json.dateReverted, confirmationChangedByUser: json.confirmationChangedByUser, response: json.response && L.plain(Object.values(json.response)[0])}
             : (json || L.flat(text, 200));
         return {as: user || 'signed out', request: `${method} ${p}`, status: r.status(), body: keep};
     }
@@ -79,7 +83,8 @@ forEachApp(async (app) => {
         const rounds = (res.json && res.json.reviewRounds) || [];
         return {status: res.status, rounds: rounds.map((r) => ({roundId: r.roundId, reviews: (r.reviews || []).length,
             authorResponse: r.authorResponse ? {id: r.authorResponse.id, isPublic: r.authorResponse.isPublic,
-                dateCompleted: r.authorResponse.dateCompleted, response: L.plain(Object.values(r.authorResponse.response || {})[0])} : null}))};
+                dateConfirmed: r.authorResponse.dateConfirmed, dateReverted: r.authorResponse.dateReverted,
+                confirmationChangedByUser: r.authorResponse.confirmationChangedByUser, response: L.plain(Object.values(r.authorResponse.response || {})[0])} : null}))};
     }
 
     try {
@@ -106,22 +111,26 @@ forEachApp(async (app) => {
         out.ids.response = resp;
         const base = `reviews/${SUB}/${rid}/authorResponse/${resp}`;
 
-        await step('12 record, not completed', openRecord);
+        await step('12 record, not confirmed', openRecord);
         for (const u of ['dbarnes', 'dbuskins', AUTHOR.user, 'minoue', 'ccorino', 'amccrae', null]) await step(`13 GET ${u || 'signed out'}`, () => api(u, 'GET', base));
         await step('13 GET other submission round', () => api('dbarnes', 'GET', `reviews/${SUB}/${otherRid}/authorResponse/${resp}`));
         await step('13 GET round under other submission', () => api('dbarnes', 'GET', `reviews/${OTHER_SUB}/${rid}/authorResponse/${resp}`));
-        await step('14 PUT author', () => api(AUTHOR.user, 'PUT', `${base}/completion`, {markAs: 'completed'}));
-        await step('14 PUT minoue', () => api('minoue', 'PUT', `${base}/completion`, {markAs: 'completed'}));
-        await step('14 PUT bad markAs', () => api('dbarnes', 'PUT', `${base}/completion`, {markAs: 'published'}));
-        await step('14 PUT other round', () => api('dbarnes', 'PUT', `reviews/${SUB}/${otherRid}/authorResponse/${resp}/completion`, {markAs: 'completed'}));
+        await step('14 PUT author', () => api(AUTHOR.user, 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
+        await step('14 PUT minoue', () => api('minoue', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
+        await step('14 PUT bad markAs', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'published'}));
+        await step('14 PUT other round', () => api('dbarnes', 'PUT', `reviews/${SUB}/${otherRid}/authorResponse/${resp}/confirmation`, {markAs: 'confirmed'}));
+        await step('14 PUT revert never confirmed', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'reverted'}));
         await step('14 record after refusals', openRecord);
-        await step('15 PUT completed dbuskins', () => api('dbuskins', 'PUT', `${base}/completion`, {markAs: 'completed'}));
+        await step('15 PUT confirmed dbuskins', () => api('dbuskins', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
         await step('15 record', openRecord);
         await step('15 GET author', () => api(AUTHOR.user, 'GET', base));
-        await step('15 db row', async () => ({rows: sql(app, `SELECT response_id, date_completed IS NOT NULL AS completed, date_reverted IS NOT NULL AS reverted FROM review_round_author_responses WHERE response_id = ${resp}`)}));
-        await step('16 PUT reverted dbarnes', () => api('dbarnes', 'PUT', `${base}/completion`, {markAs: 'reverted'}));
+        await step('15 db row', async () => ({rows: sql(app, `SELECT response_id, date_confirmed, date_reverted FROM review_round_author_responses WHERE response_id = ${resp}`)}));
+        await step('15 PUT confirmed again dbarnes', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
+        await step('16 PUT reverted dbarnes', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'reverted'}));
         await step('16 record', openRecord);
-        await step('17 PUT completed dbarnes', () => api('dbarnes', 'PUT', `${base}/completion`, {markAs: 'completed'}));
+        await step('16 PUT reverted again dbuskins', () => api('dbuskins', 'PUT', `${base}/confirmation`, {markAs: 'reverted'}));
+        await step('16 db row', async () => ({rows: sql(app, `SELECT response_id, date_confirmed, date_reverted FROM review_round_author_responses WHERE response_id = ${resp}`)}));
+        await step('17 PUT confirmed dbarnes', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
         await step('17 record', openRecord);
     } finally {
         out.finishedAt = new Date().toISOString();
