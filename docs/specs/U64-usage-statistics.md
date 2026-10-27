@@ -1579,6 +1579,7 @@ One filter in the shared statistics code leaves the Word file type out
 of "Other". The COUNTER R5 reports and their SUSHI service count Word
 downloads.
 Since: 2021-07-16 (pkp/pkp-lib#6782, about five years) · Basis: probe, 2026-10-23. <sup>f-a17</sup>
+Report: refresh owed — the Article landing page claim check I27B (2026-10-27) drove the article page's "Downloads" chart: after one PDF and one Word download and the usage processing it reads 2 where "File Views" reads 1 ("PDF" 1, "Total" 2), one more surface that counts the Word download, for the report's Reach (2026-10-27)
 
 <a id="a18"></a>
 **A18 — Statistics › Articles: Word downloads may place an article in the list, and above others, with no figure showing them** · ❓ · minor.
