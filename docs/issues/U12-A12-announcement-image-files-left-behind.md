@@ -12,15 +12,18 @@
 - **Introduced** `pkp/pkp-lib#10787` for `pkp/pkp-lib#10668` · [0b2ca57ed8](https://github.com/pkp/pkp-lib/commit/0b2ca57ed84822c48eb23c13de3726371623a02e) · 2025-01-09 · Touhidur Rahman (touhidurabir); the file left by a replacement since `pkp/pkp-lib#10382` for `pkp/pkp-lib#10328` · [070aa6f77b](https://github.com/pkp/pkp-lib/commit/070aa6f77b2b14e31b9089b5f82a48e8ba11c329) · 2024-09-30 · Vitalii Bezsheiko (Vitaliy-1)
 - **Upstream** none found (2026-10-23)
 - **Tracked in** spec U12 [A12](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U12-announcements.md#a12)
-- **Checked** 2026-10-23, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-27, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
-Update 2026-10-23: every delete of an announcement, with a picture or
-without, writes a PHP warning to the server log. Since
-`pkp/pkp-lib#13512` (2026-10-16) a refused picture on an edit no
-longer deletes the announcement, so the proposed fix now removes the
-old file only once the new one is copied. The site's "Remove" then
-"Save" is now walked, not only read in the code.
+Update 2026-10-27: an edit whose new picture is refused is now stopped
+before anything is written, by the fix for
+[pkp-e2e#1076](https://github.com/jardakotesovec/pkp-e2e/issues/1076),
+merged in pkp-lib as
+[334906a436](https://github.com/pkp/pkp-lib/commit/334906a43628e679b4f57d2f47b0244b5c8a30a9) (`main`)
+and [c31cbe60f8](https://github.com/pkp/pkp-lib/commit/c31cbe60f8b81b6d584e3938b277273d8721bcc6)
+(`stable-3_5_0`), Alec Smecher (asmecher); see Reach. Walked again on
+`main` and 3.5: deletes and replacements still leave their files. The
+report now also says what a failed file copy on an edit leaves.
 
 ## Summary
 
@@ -44,8 +47,7 @@ announcement.
 ## Impact
 
 - **Lost:** nothing on any page. A picture the journal took down with
-  its announcement is still online. The server log gains a warning line
-  with every delete: log noise only.
+  its announcement is still online.
 - **Who:** every journal, press and server that deletes an announcement
   with a picture, or changes a picture's type; and the site
   administrator, for the site's announcements.
@@ -56,8 +58,7 @@ announcement.
   Files already left behind can only be removed on the server.
 
 Medium: the delete looks complete, but the deleted announcement's
-picture stays public at an address anyone can work out, and the manager
-is not told. It would be low if the files left behind were not served.
+picture stays public at an address anyone can work out. It would be low if the files left behind were not served.
 
 ## Steps to reproduce
 
@@ -121,8 +122,10 @@ it hosts a second journal, press or server):
    English, enabled; "Save".
 3. Administration › Site Settings › "Announcements" › "Settings": tick
    "Enable announcements" and press "Save".
-4. The "Announcements" side tab › "Add Announcement": Title `u12r2 Site
-   notice`, `photo.png`; "Save". The folder holds `1.png`.
+4. Reload the page, open the "Announcements" tab again, and in it the
+   "Announcements" tab beside "Settings", which holds the list. "Add
+   Announcement": Title `u12r2 Site notice`, `photo.png`; "Save". The
+   folder holds `1.png`.
 5. On that row "Edit" › "Remove" › "Upload File" `photo.gif` › "Save".
 6. "Delete" on the row, then "Yes".
 7. "Add Announcement": Title `u12r2 Site remove`, `photo.png`; "Save"
@@ -174,7 +177,8 @@ History. Until 3.4, `PKP\announcement\Repository` deleted the file from
 the announcement as loaded, before the edit or the delete. PR
 `pkp/pkp-lib#10382` (2024) moved the image handling into the model,
 where `deleteImage()` read the current attribute after the write. Within
-that PR, 070aa6f77b made a new picture on an edit reach that code, and
+that PR, 070aa6f77b made a new picture on an edit reach the
+`deleteImage()` call in `save()`'s edit branch, and
 replacements stopped removing the old file. 0b2ca57ed8
 (`pkp/pkp-lib#10787`) added the "Remove" branch and switched
 `deleteImage()` to `fresh()`, which stopped the delete from removing the
@@ -190,13 +194,12 @@ Reach:
   picture, and fails on its folder test (see the Proposed fix): OJS
   looks in `public/journals/0` and leaves the file, OMP and OPS throw
   the `TypeError` above (on screen).
-- An edit whose new picture is refused (since `pkp/pkp-lib#13512`,
-  2026-10-16, the announcement survives it, with a 400 and "There was
-  an error uploading this image."): the old file stays (on screen).
-  `parent::save()` has already written the upload's temporary data
-  over the stored picture, so the page then shows a broken picture.
-  That overwrite is a fault of its own, before any file is touched, and
-  is left out of this fix.
+- An edit whose new picture is refused never reaches `save()`:
+  `PKP\announcement\Repository::validate()` refuses it first (the fix
+  for pkp-e2e#1076, merged after this report was first filed), so the
+  stored picture, its file and the page stay as they were (on screen).
+  That fix changed only `Repository::validate()`, so it and this one do
+  not overlap.
 - Removing an announcement type, and deleting a journal, delete the
   announcements with a query (`Announcement::withTypeIds()->delete()` in
   `AnnouncementTypeDAO::deleteById()`, `Announcement::withContextIds()->delete()`
@@ -235,17 +238,16 @@ folder the way `storeTemporaryFile()` does
   `$this->fresh()->image` in the "Remove" condition.
 - `handleImageUpload(?object $storedImage)` removes the stored file
   only once the new file is copied, and only when its name differs
-  (a new picture of the same type has just overwritten it). A refused
-  picture or a failed copy leaves the old file in place.
+  (a new picture of the same type has just overwritten it). A failed
+  copy removes no file (what it does to the announcement is below).
 - `deleteImage(?object $image)` takes the picture to remove and no
   longer calls `fresh()`, so a delete logs no warning.
 - `deleteImage()` picks the folder with `$this->assocId ?
   getContextFilesPath($this->assocId) : getSiteFilesPath()`, as
   `storeTemporaryFile()` does. Today it tests
   `$this->hasAttribute('assocId')`, which is always true because the
-  schema casts declare `assocId`. So for a site announcement, whose
-  `assocId` is null, OJS looks in `public/journals/0`, and OMP and OPS
-  get the `TypeError` from `getContextFilesPath(null)`. Today only the
+  schema casts declare `assocId`, so a site announcement's folder is
+  picked wrong (Reach, the site's "Remove" then "Save"). Today only the
   site's "Remove" then "Save" gets that far. With the `getOriginal()`
   changes the site's delete and replacement do too, so the folder test
   must change with them.
@@ -253,17 +255,22 @@ folder the way `storeTemporaryFile()` does
 `getOriginal()` returns the picture as the announcement was loaded with
 `find()`, which is how the edit and delete endpoints load it. After a
 save, Eloquent re-syncs the originals, so on an instance that was just
-saved it returns the new data. Two paths do that, both inside
-`handleImageUpload()`, and neither removes a file it should keep: the
-nested `save()` after a good copy has no new picture, and a failed copy
-calls `$this->delete()`, whose original is by then the temporary data,
-which names no file.
+saved it returns the new data. Two paths inside `handleImageUpload()`
+call `save()` or `delete()` again on such an instance. The nested
+`save()` after a good copy has no new picture, so it removes nothing.
+A failed copy calls `$this->delete()`, whose original is by then the
+temporary data. On an edit this deletes the whole announcement and
+leaves its stored file on disk: the same leftover this report is about,
+on a path the fix does not cover. It is left out for two reasons. The
+copy into the public files folder fails only on a server-side fault (a
+full disk, the folder's permissions). And whether a failed copy on an
+edit should delete the announcement at all is a separate question,
+which the report on refused pictures (pkp-e2e#1076) raised; if that
+`delete()` stays, it should also remove `$storedImage`.
 
-Tried on `main` in all three apps. The walk then showed the Expected:
-`1.gif` alone after the replacement, no file after the delete, the
-picture's address answering 404, and no warning. An edit whose new
-picture is refused (a PNG named `renamed.jpg`) kept `1.png`, with the
-fix in and out. As a neighbour check, a same-type replacement kept the
+Tried on `main` in all three apps: the Steps then showed the Expected,
+and the delete logged no warning. A refused edit (Reach) kept `1.png`,
+with the fix in and out. As a neighbour check, a same-type replacement kept the
 new file, a title-only edit kept the file, and "Remove" then "Save"
 still deleted it, with the fix in and out. On the site's announcements
 (walked on OMP) the replacement left `1.gif` alone, the delete emptied
@@ -277,8 +284,8 @@ and removed `2.png`.
   file even when the write then fails, and keeps a database read per
   call.
 - Remove the old file before `handleImageUpload()` copies the new one,
-  where `save()` calls `deleteImage()` today. Simpler, but a refused
-  picture or a failed copy then removes the old file as well.
+  where `save()` calls `deleteImage()` today. Simpler, but a failed
+  copy then removes the old file as well.
 - Delete every `{id}.*` file in the folder. This would also clean up
   after past replacements, but it guesses at file names instead of
   reading the stored one.
@@ -295,18 +302,18 @@ and removed `2.png`.
   the announcements and call `delete()` on each
   (`->get()->each->delete()`) to remove the files.
 - `imageUrl()` builds the picture's address with the same
-  `hasAttribute('assocId')` test, so on OMP and OPS a page that prints a
-  site announcement's picture calls `getContextFilesPath(null)` and
-  throws the same `TypeError` (code; not walked). It is left out; the
-  same one-line change applies.
+  `hasAttribute('assocId')` test. `announcement_summary.tpl` and
+  `announcement_full.tpl` print it, so the site's Announcements page
+  (`/index.php/index/announcement`), a site announcement's own page
+  (`/index.php/index/announcement/view/{id}`) and the site's home page,
+  when it lists announcements, call `getContextFilesPath(null)` for a
+  site announcement with a picture. On OMP and OPS that throws the same
+  `TypeError` (code; not walked). It is left out; the same one-line
+  change applies.
 - Files left by earlier deletes and replacements stay. A cleanup would
   compare each `announcements/` folder with the stored `uploadName`s.
   It is not needed for the fix.
 - 3.5 takes the diff as written.
-- This diff and the one for a refused picture on an edit
-  ([pkp-e2e#1076](https://github.com/jardakotesovec/pkp-e2e/issues/1076))
-  change the same lines at the top of `save()`, so whichever lands
-  second needs a trivial rebase.
 
 Small: three call sites, two signatures and the folder test in one
 class, with a test.
@@ -323,36 +330,36 @@ class, with a test.
   server log lines each step causes; the Control and the delete of an
   announcement without a picture follow the Steps. `MODE=neighbour`
   runs the neighbour check (a PNG replacing the PNG, a title-only edit,
-  then "Remove" and "Save"). `MODE=site` walks the site's
-  announcements: as `admin`, Administration › Hosted
-  Journals › "Create Journal" for a second journal (`u12r2second`), Site
-  Settings › "Announcements" › "Settings" › "Enable announcements", then
-  the same add, GIF replacement and delete, then "Remove" and "Save"
-  with a title change on a second announcement, listing
-  `public/site/announcements/` (the site Steps).
-- `MODE=refused` walks an edit whose new picture is refused
-  (`renamed.jpg`, a copy of `photo.png`): the answer, the folder, the
-  stored `image` setting and the announcement's page.
+  then "Remove" and "Save"). `MODE=site` takes the site Steps, listing
+  `public/site/announcements/`.
+- `MODE=refused` walks the refused edit of Reach (`renamed.jpg`, a copy
+  of `photo.png`): the answer, the folder, the stored `image` setting
+  and the announcement's page.
 - 2026-10-23, on PostgreSQL with pkp/datasets 300c68e (2026-10-22): the
   journal Steps, the Control and the delete without a picture walked on
-  `main` and `stable-3_5_0` (OJS, OMP, OPS); the warning names line 301
-  on `main` and 302 on 3.5, whose file has one more `use` line. The
+  `main` and `stable-3_5_0` (OJS, OMP, OPS; `main` lib/pkp 1f415a07ca,
+  3.5 lib/pkp 5b54f59ed7); the warning names line 301 on `main` and 302
+  on 3.5, whose file has one more `use` line. The
   site Steps walked on `main` (OJS, OMP, OPS). The fix tried on `main`:
   the journal Steps, the neighbour check and `MODE=refused` on all
   three apps, the site Steps on OMP only (OPS runs the same code); the
   neighbour check and `MODE=refused` also without the fix.
 - 2026-10-03, with pkp/datasets 566bb1f: the site's add, replacement
-  and delete walked on `stable-3_5_0`, and on `main` with the fix's
-  first version (which removed the old file before the copy). The
-  site's "Remove" then "Save" was not walked on 3.5.
-- Tips (2026-10-23): `main` OJS 3cf9aa91a8, OMP 178e8b34b2 and OPS
-  5091e916d9 (lib/pkp 1f415a07ca); `stable-3_5_0` OJS 0b1ae35f04, OMP
-  a150eee76b and OPS 18506a5b4d (lib/pkp 5b54f59ed7). Since 2026-10-03,
-  `pkp/pkp-lib#13512` (main 07bc43fe67, 2026-10-16; 3.5 092ec34b0f)
-  moved the image check into `FileManager::isValidImage()` and removed
-  `$announcement->delete()` from the `StoreTemporaryFileException`
-  catch in `PKPAnnouncementController::edit()`. It left `delete()`,
-  `save()` and `deleteImage()` as they were.
+  and delete walked on `stable-3_5_0`. The site's "Remove" then "Save"
+  was not walked on 3.5.
+- 2026-10-27, on PostgreSQL with pkp/datasets accd72de (2026-10-26):
+  the journal Steps, the Control, the delete without a picture and
+  `MODE=refused` walked again on `main` and `stable-3_5_0` (OJS, OMP,
+  OPS); OMP and OPS with the #1076 fix applied, which their pkp-lib
+  pointers do not carry yet. The warning still names line 301 on `main` and 302
+  on 3.5. The fix tried again on `main`: the journal Steps, the
+  neighbour check and `MODE=refused` on all three apps and the site
+  Steps on OMP, the neighbour check and `MODE=refused` also without
+  it.
+- Tips (2026-10-27): `main` OJS 4227223332 (lib/pkp 334906a436), OMP
+  ceae6e275f and OPS 66a3bb98a5 (lib/pkp c27153abdd); `stable-3_5_0`
+  OJS b877c7e2a3 (lib/pkp c31cbe60f8), OMP 3c8c7c4964 (lib/pkp
+  3fd17879b3) and OPS 07926c35b4 (lib/pkp 9a0212faff).
 - 3.4 and 3.3 (code): lib/pkp `stable-3_4_0` 366030b017 (its
   `PKP\announcement\Repository::delete()` and `edit()` still remove the
   file of the announcement as loaded) and `stable-3_3_0` 126b86bc2e

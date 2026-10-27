@@ -983,7 +983,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | A journal's announcement feeds with "Limit feed to" set carry the oldest announcements, never the newest {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | Ticking "Send an email about this to all registered users." when editing an announcement sends nothing | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | An unsaved title stays on the row after the panel is closed, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-09-30 — re-verified |
-| [A12](#a12) | A deleted announcement's picture, and a picture replaced by one of another type, stay on the server and online | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
+| [A12](#a12) | A deleted announcement's picture, and a picture replaced by one of another type, stay on the server and online | 🐞 | medium · crash: server | issues (claude), 2026-10-27 — re-verified |
 | [A13](#a13) | An edited announcement type keeps its old name in the Announcement Types table until a reload | 🐞 | low · crash: server | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | On a French press or preprint server, the new-announcement email's last sentence arrives in English {OMP OPS} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A15](#a15) | A journal's Atom and RSS 1.0 announcement feeds write every date with "%" signs ("%2026-%10-%03UTC%UTC%275") {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1134,8 +1134,7 @@ site's announcements leave their pictures the same way. There "Remove"
 then "Save" leaves the file too, and on a press or preprint server that
 save fails with a server error and the picture stays on the
 announcement.
-Basis: probe, 2026-10-23. <sup>f-a12</sup>
-Report: refresh owed — A21 fixed by pkp-lib 334906a436 / c31cbe60f8 (2026-10-27, in `Repository::validate()`, not `save()`): A12's Reach bullet on the refused edit and its "whichever lands second" note no longer hold (2026-10-27)
+Basis: probe, 2026-10-27. <sup>f-a12</sup>
 
 <a id="a13"></a>
 **A13 — An edited announcement type keeps its old name in the Announcement Types table until a reload** · 🐞 · low · crash: server.
