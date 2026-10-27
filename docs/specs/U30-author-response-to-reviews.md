@@ -61,7 +61,7 @@ stage spec's row "Open the review stage". <sup>a</sup>
 | **Read a submitted response** | • Assigned author, the submitter or another: "View Submitted Response" on the card (Rule 9)<br>• Editorial roles; Funding Coordinator: row action "View" on the row of the author who submitted it (Rule 10) <sup>k</sup> |
 | **Edit a submitted response** | • Editorial roles: "Save" in the "Author Response to Reviews" window (Rule 10)<br>• Author: never; the window says so (Rule 9)<br>• Funding Coordinator: the window opens with the editors' note, but in place of "Save" it shows a "Submit Response" button that stays greyed [A3](#a3) <sup>k</sup> |
 | **Delete a submitted response** | • Editorial roles: row action "Delete" (Rule 11)<br>• Funding Coordinator: the action is offered like everyone else's, but "OK" in its dialog is refused with the dialog "Error" / "The current role does not have access to this operation." and the response stays [A3](#a3) <sup>l</sup> |
-| **Mark a response complete, or take that back** (no screen yet; the review API) | • Journal Manager, Editor, Site Administrator, and a Section or Guest Editor assigned to the review stage (Rule 15)<br>• Everyone else, the assigned author and the Funding Coordinator included: refused <sup>t</sup> |
+| **Confirm a response, or revert the confirmation** (no screen yet; the review API) | • Journal Manager, Editor, Site Administrator, and a Section or Guest Editor assigned to the review stage (Rule 15)<br>• Everyone else, the assigned author and the Funding Coordinator included: refused <sup>t</sup> |
 | **Read one response by its id** (the review API) | • Editorial roles and the assigned authors (Rule 15)<br>• Everyone else: refused <sup>t</sup> |
 | **Open the request page by its address** | • Editorial roles who may open the submission: the page opens for any of its rounds (Rule 14)<br>• Everyone else (an unassigned Section Editor or Guest Editor, Funding Coordinator, Author, Reviewer, Reader): the access-denied page (Rule 14) <sup>o</sup> |
 
@@ -313,18 +313,21 @@ form.
     dialog's control reads "View Submission" and does nothing
     ⚠ [A4](#a4). <sup>o</sup>
 
-<a id="completion"></a>
-15. **Completion.** An editor marks a response complete before it may be
-    published with the article, and may take that back. No screen offers
-    it yet: the confirmation step comes with pkp/pkp-lib#13524, and until
-    then only the review API does it (the Actors rows). Marking it
-    complete records the date, takes back any earlier revert date, and
-    names the editor; taking it back clears the completion date, records
-    the revert date, and names the editor who did ⚠ [A12](#a12). Each read of the
-    response (the single-response read, the editor's table data) then
-    carries the completion date, the revert date and that editor's name.
-    A response submitted, edited or kept from before the step existed
-    counts as not complete. <sup>t</sup>
+<a id="confirmation"></a>
+15. **Confirmation.** An editor confirms a response before it may be
+    published with the article, and may revert that. No screen offers it
+    yet: the confirmation step comes with pkp/pkp-lib#13524, and until
+    then only the review API does it (the Actors rows). Confirming
+    records the date, clears any earlier revert date, and names the
+    editor; reverting clears the confirmation date, records the revert
+    date, and names the editor who did. Confirming a confirmed response,
+    or reverting a reverted one, changes nothing, the date and the editor
+    named included. A response that is not confirmed cannot be reverted:
+    "Only confirmed author responses can be reverted.". Each read of the
+    response (the single-response read, the editor's table data) carries
+    the confirmation date, the revert date and that editor's name. A
+    response submitted, edited or kept from before the step existed
+    counts as not confirmed. <sup>t</sup>
 
 ## Side effects
 
@@ -371,8 +374,8 @@ form.
   review record (its public reviews, round by round, as data anyone can
   read at the record's own address without signing in; no screen shows
   it) carries the response only when it is marked public and an editor
-  has marked it complete (Rule 15); taken back, it leaves the record
-  again. A response that is not public stays out even when complete.
+  has confirmed it (Rule 15); reverted, it leaves the record again. A
+  response that is not public stays out even when confirmed.
   <sup>q</sup> <sup>t</sup>
 
 ## Settings that modify behavior
@@ -732,11 +735,12 @@ Left out of the scenarios above, by reason:
     get author responses: the "Author Response" table and card on both
     of a press's review stages, and the decision email's button opening
     the response form
-  - the completion step (Rule 15) once its screen lands
-    (pkp/pkp-lib#13524): the editor marks a public response complete and
-    the published article's open peer review record lists it; taken
-    back, the record drops it; a response that is not public stays out
-    of the record when complete (A10's guard, retired)
+  - the confirmation step (Rule 15) once its screen lands
+    (pkp/pkp-lib#13524): the editor confirms a public response and
+    the published article's open peer review record lists it; reverted,
+    the record drops it; confirmed again, the revert date is cleared
+    (A12, answered); a response that is not public stays out of the
+    record when confirmed (A10's guard, retired)
   - the guard for A11, retired (Rule 11): a Section Editor's and a
     Journal Manager's delete, edit and "Request Response" request that
     name a round of another submission, in the same journal and in
@@ -780,10 +784,10 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP1](#omp1) | Press author's "Submit Author Response" email button opens a review round with nothing to respond in | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A2](#a2) | Nobody is told when the author's response arrives | ❓ | user-visible | — |
 | [A6](#a6) | Under a minimum, the request email says every review is in while one is still due | ❓ | minor | — |
-| [A12](#a12) | Marking a response complete again forgets that it was taken back | ❓ | minor | — |
 | [A8](#a8) | A cancelled reviewer's effect on readiness and on the email was not seen | ❓ | minor | — |
 | [A9](#a9) | Retired: in French the "Author Response" table, the author's card, both windows and the request page show raw codes such as "##submission.reviewRound.authorResponse##" | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A10](#a10) | Retired: anyone, without signing in, could read an author's response that also answers reviews the editor kept private; the record now lists only a public, completed response (Rule 15) | ✅ | retired | PR review (claude), 2026-10-26 — fixed by pkp/pkp-lib#13620 (before its merge) |
+| [A10](#a10) | Retired: anyone, without signing in, could read an author's response that also answers reviews the editor kept private; the record now lists only a public, confirmed response (Rule 15) | ✅ | retired | PR review (claude), 2026-10-26 — fixed by pkp/pkp-lib#13620 (before its merge) |
+| [A12](#a12) | Retired: confirming a response again clears its revert date; intended | ✅ | retired | Jarda 2026-10-27 · answered (intended) |
 | [A11](#a11) | Retired: a Section Editor could delete, and another journal's manager delete or rewrite, an author's response to reviews; such requests are now refused (Rule 11) | ✅ | retired | housekeeping (claude), 2026-10-20 — fixed by pkp/pkp-lib#13510 |
 
 ### All apps
@@ -908,20 +912,6 @@ request of such a round leave the cell at "Ready to invite author" and the
 request page with one reviewer block? Lean: yes; the app drops a cancelled
 request wherever it drops a declined one. Basis: code. <sup>f-a8</sup>
 
-<a id="a12"></a>
-**A12 — Marking a response complete again forgets that it was taken back** · ❓ · minor.
-Rule 15 records the date an editor takes a completion back, but
-marking the response complete again clears that date, so a response
-completed, taken back and completed again reads as never taken back.
-A response never completed can also be "taken back", which records a
-revert date for it. The issue asks that both dates be recorded; the
-column's own description reads "Date the author response was last
-reverted from completed to not completed; null if never reverted".
-Question: should the revert date survive a later completion, and
-should taking back a response that was never completed be refused?
-Lean: yes to both, as the column describes. Basis: probe, 2026-10-26,
-at the PR head, before its merge. <sup>t</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -949,7 +939,10 @@ Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-omp1<
 **A9 — In French the Author Response screens show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a9</sup>
 
 <a id="a10"></a>
-**A10 — Anyone, without signing in, could read an author's response that also answers reviews the editor kept private** · ✅ · retired. Fixed by pkp/pkp-lib#13620 (for pkp/pkp-lib#13593, with pkp/ojs#5985), walked 2026-10-26 at the PR head `d7c6c3bc06`, before its merge, on the default dataset on OJS: a round with one public review of three keeps the response out of the open peer review record, before and after the editor marks it complete; at the base `4aab3a3443` the record listed it (Rule 15, Side effects). <sup>f-a10</sup>
+**A10 — Anyone, without signing in, could read an author's response that also answers reviews the editor kept private** · ✅ · retired. Fixed by pkp/pkp-lib#13620 (for pkp/pkp-lib#13593, with pkp/ojs#5985), walked 2026-10-26 and 2026-10-27 at the PR heads `d7c6c3bc06` and `b0145df8f5`, before its merge, on the default dataset on OJS: a round with one public review of three keeps the response out of the open peer review record, before and after the editor confirms it; at the base `4aab3a3443` the record listed it (Rule 15, Side effects). <sup>f-a10</sup>
+
+<a id="a12"></a>
+**A12 — Confirming a response again clears the date its confirmation was reverted** · ✅ · retired. Answered by Jarda, 2026-10-27, for the PR's round 2: intended. Confirming sets the confirmation date and clears the revert date; reverting does the reverse. Round 2 also refuses to revert a response that is not confirmed and leaves a repeated confirm or revert unchanged (Rule 15). <sup>t</sup>
 
 <a id="a11"></a>
 **A11 — A Section Editor could delete, and another journal's manager delete or rewrite, an author's response to reviews** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13510, for pkp/pkp-lib#13509, merged 2026-10-20), walked 2026-10-20 on the default dataset on OJS and OMP: a delete, an edit or a "Request Response" request that names another submission's round is refused and the response stays as it was (Rule 11). <sup>f-a11</sup>
@@ -1014,7 +1007,7 @@ Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-omp1<
 **s** — Scenario tooling. Ready accounts: `editor.diana` (Editor; manager level), `manager.maya` (Journal Manager), `sectioneditor.ana` (Section Editor of "Articles"), `assistant.rita` (Funding Coordinator, review-stage access), `reviewer.julia` and `reviewer.paul` (Reviewers), `author.alex` (submitter) and `author.bea` (co-author with an account, never a contributor); passwords per `docs/process/users.md`. A submission in review: `POST scenarios/submission` `{submitter: 'author.alex', decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}]}], participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]}`. A review that is in: `status: 'completed'`, with the optional `recommendation` (OJS only: `accept` by default, `pendingRevisions` = "Revisions Required") and `comments` (the "For author and editor" text; default "Seeded review comments for {tag}."); the seed runs the reviewer wizard's own steps, so the app's "Review complete…" and "Thank you for your submission…" emails go out and a mailbox count is matched by the submission title. The round id for a typed address comes from the seed response (`reviewRounds[].id`). Scenario 1: two submissions, one `accepted`, one `completed` with `recommendation: 'pendingRevisions', comments: 'The method needs a control group.'` beside `{username: 'reviewer.paul', status: 'declined'}` in the same `reviewers[]`; the seeded journal's review mode is anonymous, so the email's heading reads "Reviewer 1:"; a test waits for the composer (the iframe present and "Loading" gone) before "Submit Request", and reads the sent email by the submission title in `author.alex`'s mailbox. Scenario 2: scenario 1's ready submission after one request; the signed-out click on the email's button is a fresh browser context opening the href; `editor.diana`'s mailbox is counted by the submission title before and after. Scenario 3: scenario 2's state (the request sent and `author.alex`'s response submitted through the window); after "Delete" › "OK" a test polls the table for "Ready to invite author" (note l). Scenario 4: `decisions: ['sendExternalReview']` with the reviewer `completed` and `{username: 'author.bea', role: 'author'}` in `participants`, then the Request Revisions decision recorded by `manager.maya` through the wizard, as scenario 7's press decision is, which sends the decision email the Author's bullet reads in `author.alex`'s mailbox by the submission title (a seeded `requestRevisions` sends none); the co-author opens the round from My Submissions; the co-author is a stage assignment, not a contributor, so the "Authors" boxes show one name. Scenario 5: `POST scenarios/context` with `review: {numReviewsPerSubmission: 1, defaultReviewMode: 'open'}` and `users[]` holding a `manager`, two `externalReviewer`s and an `author`, then a submission with the first reviewer `completed` (`recommendation: 'pendingRevisions', comments: 'Shorten the introduction.'`) and the second `accepted`; a submission seeded after the mode is set carries open as its assignments' review type (seed-facts 2026-09-05), so the email's block is headed with the first reviewer's full name and no colon (note g); a roster reviewer named on a scratch context is assigned but not enrolled (seed-facts 2026-09-05), hence the throwaway reviewers. Scenario 6: scenario 1's ready shape without the declined reviewer (section "Articles", `sectioneditor.ana` assigned) plus `{username: 'assistant.rita', role: 'funding'}` and `{username: 'author.bea', role: 'author'}` in `participants`; the one request email is found in `author.alex`'s and `author.bea`'s mailboxes by the submission title (both addresses sit in its To header, note n); the wrong-round address uses `reviewRoundId=99999`; the Journal Manager's real-round address is opened without `ret`, hence the A4 aside. Scenario 7: OMP `decisions: ['sendExternalReview']` with `reviewRounds: [{stage: 'external', reviewers: [{username: 'reviewer.julia', status: 'completed'}]}]` (no `recommendation` on a press) and the Request Revisions decision recorded by `editor.diana` through the wizard ("Require New Review Round" › "Next", "Notify Authors", "Notify Reviewers", "Record Decision"), which sends the decision email the scenario reads; OPS a plain submitted preprint (OPS refuses `reviewRounds`), with `manager.maya` as Preprint Server Manager, `sectioneditor.ana` as Moderator and `author.alex` as its Author, the address typed with `stageId=3&reviewRoundId=1`. Scenario 8: `decisions: ['sendExternalReview']` with two `reviewRounds[]` entries, `[{reviewers: [{username: 'reviewer.julia', status: 'completed'}]}, {reviewers: [{username: 'reviewer.paul', status: 'accepted'}]}]`: the decision seeds the first entry into round 1 and the entry left over builds round 2 (the shape note m relies on; seed-facts 2026-09-06), so round 1 is the past round and round 2 the current one; the response is written through the window on round 1, never seeded; the request email is read in `author.alex`'s mailbox by the submission title. Emails are read in Mailpit by recipient address (PRINCIPLES A8; the roster mailboxes are shared, so a test matches the submission title in the subject line's body or uses a throwaway author). The request page's address: `…/reviewResponse/requestAuthorResponse?stageId=3&reviewRoundId={id}&submissionId={id}` (on a press `stageId=3` is External Review).
 
 <a id="fn-t"></a>
-**t** — At the PR head `d7c6c3bc06` (pkp/pkp-lib#13620, for pkp/pkp-lib#13593), before its merge. Routes in `PKPReviewController::getGroupRoutes()`: `GET {submissionId}/{reviewRoundId}/authorResponse/{responseId}` (`getAuthorResponse()`; role gate manager, site admin, sub editor, author, then the manager or site admin role, or a `StageAssignment` with `ROLE_ID_SUB_EDITOR` or `ROLE_ID_AUTHOR` on the round's stage) and `PUT …/{responseId}/completion` (`EditAuthorReviewResponseCompletion`: role gate manager, site admin, sub editor; `markAs` `completed` or `reverted`; the round must belong to the submission of the request's context and hold the response; then the manager or site admin role, or an assigned `ROLE_ID_SUB_EDITOR`). `editAuthorResponseCompletion()` writes `dateCompleted` now and `dateReverted` null, or `dateCompleted` null and `dateReverted` now, and the setting `statusChangedByUserId`; `ReviewRoundAuthorResponseResource` adds `dateCompleted`, `dateReverted` and `statusChangedByUser` (`userId`, `fullName`). `SubmissionPeerReviewResource` lists `authorResponse` only when `isPublic && isCompleted` (`AuthorResponse::isCompleted()` = `date_completed` set). Columns `date_completed`, `date_reverted` on `review_round_author_responses` (install migration; upgrade `I13593_…`). Walked 2026-10-26 on the default dataset, OJS (kept walk `shared/playwright/checks/sync/pkp-lib-13620/completion.js`): GET answers 200 to `dbarnes`, `dbuskins` (assigned Section Editor) and `amwandenga` (assigned author), 401 "The current role does not have access to this operation." to `minoue` (unassigned Section Editor), `ccorino` (another submission's author) and `amccrae` (reviewer), 401 signed out, 404 with another submission's round either way; PUT is refused to the author and to `minoue` (401), a `markAs` other than the two (422), another submission's round (422); `dbuskins` completes (200, the record lists the response), `dbarnes` takes it back (the record drops it) and completes again (listed). With one public review of three the record never lists it. At the base `4aab3a3443` (same walk) neither route exists (the GET answers 500 "The GET method is not supported for route …", the PUT 500 "The route … could not be found.") and the record lists the response from the start, with one public review of three too (`isPublic` false).
+**t** — At the PR heads `d7c6c3bc06` (round 1, 2026-10-26) and `b0145df8f5` (round 2, 2026-10-27) of pkp/pkp-lib#13620 (for pkp/pkp-lib#13593, with pkp/ojs#5985), before its merge; round 2's names below. Routes in `PKPReviewController::getGroupRoutes()`: `GET {submissionId}/{reviewRoundId}/authorResponse/{responseId}` (`getAuthorResponse()`; role gate manager, site admin, sub editor, author, then the manager or site admin role, or a `StageAssignment` with `ROLE_ID_SUB_EDITOR` or `ROLE_ID_AUTHOR` on the round's stage) and `PUT …/{responseId}/confirmation` (`EditAuthorReviewResponseConfirmation`: role gate manager, site admin, sub editor; `markAs` `confirmed` or `reverted`; the round must belong to the submission of the request's context and hold the response; then the manager or site admin role, or an assigned `ROLE_ID_SUB_EDITOR`). `editAuthorResponseConfirmation()` returns the response unchanged when confirming a confirmed one or reverting a reverted one, answers 422 `api.reviewRound.422.authorResponse.revert` for reverting one without `dateConfirmed`, else writes `dateConfirmed` now and `dateReverted` null, or `dateConfirmed` null and `dateReverted` now, and the setting `confirmationChangedByUserId` (cast `int`); `ReviewRoundAuthorResponseResource` adds `dateConfirmed`, `dateReverted` and `confirmationChangedByUser` (`userId`, `fullName`). `SubmissionPeerReviewResource` lists `authorResponse` only when `isPublic && isConfirmed`. Columns `date_confirmed`, `date_reverted` on `review_round_author_responses` (install migration; upgrade `I13593_AddDateConfirmedAndDateRevertedToReviewRoundAuthorResponses`, in OJS's `upgrade.xml` only). Walked both rounds on the default dataset, OJS (kept walk `shared/playwright/checks/sync/pkp-lib-13620/completion.js`): GET answers 200 to `dbarnes`, `dbuskins` (assigned Section Editor) and `amwandenga` (assigned author), 401 "The current role does not have access to this operation." to `minoue` (unassigned Section Editor), `ccorino` (another submission's author) and `amccrae` (reviewer), 401 signed out, 404 with another submission's round either way; PUT is refused to the author and to `minoue` (401), a `markAs` other than the two (422), another submission's round (422), and, round 2, a revert of a response never confirmed (422 "Only confirmed author responses can be reverted."); `dbuskins` confirms (200, the record lists the response), `dbarnes` confirms again (200, the same date and editor), reverts (the record drops it), `dbuskins` reverts again (200, unchanged), `dbarnes` confirms again (listed, revert date cleared). With one public review of three the record never lists it. At the base `4aab3a3443` (same walk) neither route exists (the GET answers 500 "The GET method is not supported for route …", the PUT 500 "The route … could not be found.") and the record lists the response from the start, with one public review of three too (`isPublic` false).
 
 <a id="fn-f-a1"></a>
 **f-a1** — Note e: neither `AuthorResponseRequestManagerCellStatus.vue` nor `canRequestReviewRoundAuthorResponse` reads `isAuthorResponseRequested`, and `PKPReviewController::requestAuthorResponse()` refuses only when a response exists, so a second `POST …/requestResponse` sends a second email and sets the flag again. The author's config (note c) does read the flag. Live-probed 2026-09-06: three sends on one round, each `POST …/requestResponse` 200, three Mailpit messages, three "Notifications" rows and three "An email has been sent" log rows, the table unchanged throughout.
