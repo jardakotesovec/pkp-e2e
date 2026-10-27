@@ -993,7 +993,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A15](#a15) | A journal's Atom and RSS 1.0 announcement feeds write every date with "%" signs ("%2026-%10-%03UTC%UTC%275") {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A19](#a19) | Through the programming interface, an announcement's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A20](#a20) | REST API: an announcement added without the email choice writes a warning to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
-| [A21](#a21) | An edit whose new picture is refused leaves the announcement with a broken picture, and every later "Save" of it is refused until the picture is removed | 🐞 | medium | — |
+| [A21](#a21) | An announcement edit whose new picture is refused breaks the announcement's picture, and every later "Save" fails | 🐞 | medium · crash: server | issues (claude), 2026-10-27 — re-verified |
 | [OMP2](#omp2) | A press's home page shows the site's announcements, with links that lead nowhere {OMP} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | An announcement's type is printed nowhere a reader looks | ❓ | minor | — |
 | [A6](#a6) | A chosen "Announcement Type" cannot be cleared, only changed | ❓ | minor | — |
@@ -1255,26 +1255,24 @@ programs meet it. The fix is a one-line default.
 Basis: probe, 2026-10-23. <sup>f-a20</sup>
 
 <a id="a21"></a>
-**A21 — An edit whose new picture is refused leaves the announcement with a broken picture, and every later "Save" of it is refused until the picture is removed** · 🐞 · medium.
+**A21 — An announcement edit whose new picture is refused breaks the announcement's picture, and every later "Save" fails** · 🐞 · medium · crash: server.
 A manager edits an announcement that has a picture and uploads a new
-one that passes the box but is refused on "Save" (Fields "Image"): a
-picture in a format "Save" does not keep, such as a BMP, an SVG or a
-TIFF, or a file whose content does not match its name, such
+one that the "Image" box lets in but "Save" does not accept: a BMP, SVG
+or TIFF picture, or a file whose content does not match its name, such
 as a PNG named "renamed.jpg". "Save" shows "There was an error
-uploading this image." under "Image" and the panel stays open; the
-announcement keeps its title, text and dates, so the manager expects
-the old picture to stay too. It does not: after a reload, the
-announcement's page and the public Announcements page show an empty
-picture with no alternate text where it was, and "Edit" shows no
-preview. Every later "Save" of the announcement is then refused with
-"There was an error uploading this image.", a change to the title alone
-included, although that new title is stored and shows after a reload.
-"Remove" then "Save" ends the refusals and leaves the announcement
-without a picture. Through both steps the old picture's file is kept:
-its earlier address still opens it ([Rule 15](#kept-file)). Only "Restore
-Original" then "Save" in the same panel, before it is closed, brings
-the old picture and its alternate text back; in a later "Edit",
-"Restore Original" then "Save" is refused like any other save.
+uploading this image." and says the form was not saved, so the manager
+expects the announcement to stay as it was.
+It does not: the picture is already gone. The announcement's page and
+the public Announcements page no longer show it, and "Edit" shows no
+preview. After that, no "Save" of the announcement succeeds, not even
+one that only changes the title, yet each failed save stores the new
+title. The manager who uploaded the refused file sees the same refusal
+again. Any other manager gets a server error: "An unexpected error has
+occurred. Please reload the page and try again.". There is a way round
+on screen.
+No release carries this yet: it is on `main` and on the 3.5 branch,
+and ships with 3.5's next patch release unless fixed first. Released
+3.5 versions delete the whole announcement on the same refusal instead.
 Basis: probe, 2026-10-27. <sup>f-a21</sup>
 
 ### OMP
@@ -2423,6 +2421,8 @@ Medium: the edit misleads and the page loses its picture silently, but
 "Restore Original" before closing, or "Remove" and a new upload, gets
 round it, and it takes a narrow input (a file whose name and content
 disagree).
+Live-probed 2026-10-27, OJS, OMP, OPS `main` and OJS `stable-3_5_0`: after `rvaca`'s refused edit, `admin`'s title-only "Save" answered PUT 500 `TypeError: Announcement::getImageFilename(): Argument #1 ($temporaryFile) must be of type PKP\file\TemporaryFile, null given` (line 335 on main, 336 on 3.5), with the title stored; `TemporaryFileManager::getFile()` looks the temporary file up for the user who saves (issue report walk, `reach.js`).
+Issue report: [docs/issues/U12-A21-refused-picture-edit-breaks-announcement-picture.md](../issues/U12-A21-refused-picture-edit-breaks-announcement-picture.md).
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls
