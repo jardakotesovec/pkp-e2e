@@ -2884,7 +2884,7 @@ after a reload, which showed the empty list again. Ticked again (notice
 "Saved"; the context's home page and the site's sign-in page, unstyled
 while it was unticked (no style sheet, "Times New Roman"), loaded the
 theme's four style sheets again.
-Issue report: [docs/issues/U10-A26-theme-save-server-error-theme-switched-off.md](../issues/U10-A26-theme-save-server-error-theme-switched-off.md).
+Issue report: [pkp-e2e#1074](https://github.com/jardakotesovec/pkp-e2e/issues/1074) ([docs/issues/U10-A26-theme-save-server-error-theme-switched-off.md](../issues/U10-A26-theme-save-server-error-theme-switched-off.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `journalContentOrganization` is added by OJS's
