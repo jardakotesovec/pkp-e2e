@@ -47,7 +47,7 @@ const menuFacts = (page) =>
 const triggerName = /management\.options|More Actions/i;
 
 forEachApp(async (app) => {
-    const {browser, page} = await launch(app);
+    const {page, close} = await launch(app);
     await page.setViewportSize({width: 1280, height: 600});
     await signIn(page, 'admin', {contextPath: 'publicknowledge'});
     const out = {};
@@ -152,8 +152,8 @@ forEachApp(async (app) => {
     await page.goto('/index.php/publicknowledge/en/dashboard/editorial?workflowSubmissionId=1');
     await idle(page);
     // submission 1 is published, so the window opens on its publication; its Submission stage has the panel
-    await page.getByRole('dialog').getByText('Submission', {exact: true}).first().click();
-    await idle(page);
+    // (OPS's window has no such stage entry: its participants sit beside the publication already)
+    await page.getByRole('dialog').getByText('Submission', {exact: true}).first().click({timeout: 10_000}).then(() => idle(page), () => {});
     const pbtn = page.locator('[data-cy="participant-manager"]').getByRole('button', {name: triggerName}).first();
     if (await pbtn.waitFor({timeout: 30_000}).then(() => true, () => false)) {
         await pbtn.click();
@@ -176,7 +176,9 @@ forEachApp(async (app) => {
         const res = await route.fetch();
         const body = (await res.text()) + `;pkp.registry.storeExtendFn('userAccessManager', 'getItemActions', (actions) => [...actions,
             {label: 'Disabled link', name: 'e2eDisabledLink', url: '${about}?disabled', disabled: true},
-            {label: 'Enabled link', name: 'e2eEnabledLink', url: '${about}?enabled'}]);`;
+            {label: 'Enabled link', name: 'e2eEnabledLink', url: '${about}?enabled'}]);
+            ['e2eDisabledLink', 'e2eEnabledLink'].forEach((n) => pkp.registry.storeAddFn('userAccessManager', n,
+                () => sessionStorage.setItem('e2eHandler', n)));`;
         await route.fulfill({response: res, body});
     });
     await page.setViewportSize({width: 1280, height: 900});
@@ -211,17 +213,34 @@ forEachApp(async (app) => {
         await page.keyboard.press('ArrowDown');
         out.disabled.arrowPath.push(await page.evaluate(() => document.querySelector('[role="menuitem"][data-highlighted]')?.innerText?.trim() || null));
     }
+    // the click as the window sees it after every handler ran (sessionStorage outlives a navigation)
+    await page.evaluate(() => {
+        sessionStorage.removeItem('e2eClick');
+        sessionStorage.removeItem('e2eHandler');
+        window.addEventListener('click', (e) => {
+            const t = e.target.closest('a,button');
+            sessionStorage.setItem('e2eClick', JSON.stringify({target: `${t?.tagName.toLowerCase()} ${t?.innerText?.trim()}`, defaultPrevented: e.defaultPrevented}));
+        });
+    });
     await page.locator(MENU).getByRole('menuitem', {name: 'Disabled link'}).click({force: true});
     await page.waitForTimeout(1500);
-    out.disabled.afterDisabledClick = {url: page.url().replace(/^https?:\/\/[^/]+/, ''), menuOpen: (await menuFacts(page)).open};
+    out.disabled.afterDisabledClick = {
+        url: page.url().replace(/^https?:\/\/[^/]+/, ''),
+        menuOpen: (await menuFacts(page)).open,
+        click: await page.evaluate(() => JSON.parse(sessionStorage.getItem('e2eClick') || 'null')),
+        handlerRan: await page.evaluate(() => sessionStorage.getItem('e2eHandler')),
+    };
     await openFirst();
     await page.locator(MENU).getByRole('menuitem', {name: 'Enabled link'}).click();
     await page.waitForLoadState('load').catch(() => {});
     await page.waitForTimeout(1000);
-    out.disabled.afterEnabledClick = {url: page.url().replace(/^https?:\/\/[^/]+/, '')};
+    out.disabled.afterEnabledClick = {
+        url: page.url().replace(/^https?:\/\/[^/]+/, ''),
+        handlerRan: await page.evaluate(() => sessionStorage.getItem('e2eHandler')),
+    };
     await page.unroute('**/js/build.js*');
 
     record('result', out);
     console.log(JSON.stringify(out, null, 1));
-    await browser.close();
+    await close();
 });
