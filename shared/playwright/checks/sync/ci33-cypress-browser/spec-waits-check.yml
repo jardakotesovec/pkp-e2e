@@ -1,0 +1,62 @@
+# Throwaway check (asked in the channel by @jarda.kotesovec, 2026-10-27): do
+# the waits in 0001-<app>-spec-waits.patch stop the stable-3_3_0 data-suite races
+# (keyword autosuggest typed before the field or its suggestions are ready; a
+# second confirm opened while the first is still in the DOM)? The action is
+# pkp/pkp-github-actions@v1 as pkp's own runs use it, with one step added that
+# applies the patch to the cloned app. Delete the branch afterwards.
+on:
+  push:
+    branches: ['tmp-ci33-spec-waits']
+name: tmp-ci33-spec-waits
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        application: [ojs, ops]
+        php-version: ['7.3', '7.4', '8.0', '8.1', '8.2']
+        database: [pgsql, mysql]
+        test: ['test']
+    name: ${{ matrix.application }} (${{ matrix.php-version }}, ${{ matrix.database }})
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: e2e
+      - uses: actions/checkout@v4
+        with:
+          repository: 'pkp/pkp-github-actions'
+          ref: v1
+          path: gha
+      - name: Add the patch step after the submodules
+        run: |
+          cd gha
+          git rev-parse HEAD
+          python3 - <<'PY'
+          p = 'action.yml'
+          s = open(p).read()
+          anchor = "        git submodule update --init --recursive\n      shell: bash\n"
+          assert s.count(anchor) == 1
+          # Built by concatenation: an expression written out here would be
+          # evaluated by this workflow, not by the action.
+          app = '$' + '{{ inputs.application }}'
+          ws = '$' + '{{ github.workspace }}'
+          step = (
+              "\n    - name: Apply the spec waits (throwaway check)\n"
+              "      run: |\n"
+              "        cd ~/" + app + "\n"
+              "        git log -1 --format='%H %s'\n"
+              "        git apply --verbose " + ws + "/e2e/shared/playwright/checks/sync/ci33-cypress-browser/0001-" + app + "-spec-waits.patch\n"
+              "      shell: bash\n"
+          )
+          open(p, 'w').write(s.replace(anchor, anchor + step))
+          PY
+          git diff
+      - uses: ./gha
+        with:
+          repository: pkp
+          branch: stable-3_3_0
+          application: ${{ matrix.application }}
+          node_version: 12
+          dataset_branch: 'stable-3_3_0'
+          DEBUG_IN_TMATE: false

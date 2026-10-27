@@ -1,0 +1,97 @@
+From 921e948b5c6a8b0905599cef2d0a736148c0a9c1 Mon Sep 17 00:00:00 2001
+From: Jarda Kotesovec <jarda_kotesovec@sfu.ca>
+Date: Tue, 27 Oct 2026 15:49:03 +0000
+Subject: [PATCH] Wait for the page in the stable-3_3_0 data specs that race it
+
+CcorinoSubmission and AmwandengaSubmission typed keywords right after
+opening the Metadata tab and pressed Enter after a fixed 500 ms, so the
+keyword was lost when the field was not ready or its suggestions had not
+arrived ("Professional Development" / "Social Transformation" never
+appear). They now wait for the workflow page's delayed grid load, for
+the field to be visible and enabled, and for the suggestion itself.
+CcorinoSubmission clicks both pre-existing suggestions: the arrow keys
+stay on the first item under Cypress, and cy.get('li').contains() kept
+the list items that existed before the suggestions came.
+
+VkarbasizaedSubmission opens the "Current Issue" confirmation after
+visits that only change the hash, so the page is not reloaded and the
+"Unpublish Issue" confirmation can still be in the DOM (two "OK"
+buttons). It now waits for that confirmation to leave.
+---
+ .../60-content/AmwandengaSubmission.spec.js     |  8 ++++++--
+ .../data/60-content/CcorinoSubmission.spec.js   | 17 +++++++++--------
+ .../60-content/VkarbasizaedSubmission.spec.js   |  3 +++
+ 3 files changed, 18 insertions(+), 10 deletions(-)
+
+diff --git a/cypress/tests/data/60-content/AmwandengaSubmission.spec.js b/cypress/tests/data/60-content/AmwandengaSubmission.spec.js
+index bf17c3c..de0f55b 100644
+--- a/cypress/tests/data/60-content/AmwandengaSubmission.spec.js
++++ b/cypress/tests/data/60-content/AmwandengaSubmission.spec.js
+@@ -76,13 +76,17 @@ describe('Data suite tests', function() {
+ 		cy.get('#titleAbstract [role="status"]').contains('Saved');
+ 
+ 		// Metadata
++		// The workflow page loads its grids a second after it mounts; let that pass
++		// before typing, or the typed keyword can be lost.
++		cy.get('#contributors-grid .pkp_controllers_grid');
+ 		cy.get('#metadata-button').click();
++		cy.get('#metadata-keywords-control-en_US').should('be.visible').and('be.enabled');
+ 		cy.get('#metadata-keywords-control-en_US').type('Professional Development', {delay: 0});
+-		cy.wait(500);
++		cy.contains('#metadata .autosuggest__results-item', 'Professional Development');
+ 		cy.get('#metadata-keywords-control-en_US').type('{enter}', {delay: 0});
+ 		cy.get('#metadata-keywords-selected-en_US').contains('Professional Development');
+ 		cy.get('#metadata-keywords-control-en_US').type('Social Transformation', {delay: 0});
+-		cy.wait(500);
++		cy.contains('#metadata .autosuggest__results-item', 'Social Transformation');
+ 		cy.get('#metadata-keywords-control-en_US').type('{enter}', {delay: 0});
+ 		cy.get('#metadata-keywords-selected-en_US').contains('Social Transformation');
+ 		cy.get('#metadata button').contains('Save').click();
+diff --git a/cypress/tests/data/60-content/CcorinoSubmission.spec.js b/cypress/tests/data/60-content/CcorinoSubmission.spec.js
+index d3106a9..7a3913d 100644
+--- a/cypress/tests/data/60-content/CcorinoSubmission.spec.js
++++ b/cypress/tests/data/60-content/CcorinoSubmission.spec.js
+@@ -34,17 +34,18 @@ describe('Data suite tests', function() {
+ 		cy.assignParticipant('Section editor', 'Minoti Inoue', true);
+ 
+ 		// Select pre-existing keywords
++		// The workflow page loads its grids a second after it mounts; let that pass
++		// before typing, or the typed keyword can be lost.
++		cy.get('#contributors-grid .pkp_controllers_grid');
+ 		cy.get('#publication-button').click();
+ 		cy.get('#metadata-button').click();
++		cy.get('#metadata-keywords-control-en_US').should('be.visible').and('be.enabled');
+ 		cy.get('#metadata-keywords-control-en_US').type('pr', {delay: 0, force: true});
+-		cy.wait(500);
+-		cy.get('li').contains('Professional Development').click({force: true});
+-		cy.wait(500);
+-		cy.get('#metadata-keywords-control-en_US').type('socia', {delay: 0, force: true});
+-		cy.wait(500);
+-		cy.contains('Social Transformation');
+-		cy.wait(500);
+-		cy.get('#metadata-keywords-control-en_US').type('l{downarrow}{downarrow}{enter}', {delay: 0});
++		cy.contains('#metadata .autosuggest__results-item', 'Professional Development').click({force: true});
++		cy.get('#metadata-keywords-selected-en_US').contains('Professional Development');
++		cy.get('#metadata-keywords-control-en_US').type('social', {delay: 0, force: true});
++		cy.contains('#metadata .autosuggest__results-item', 'Social Transformation').click({force: true});
++		cy.get('#metadata-keywords-selected-en_US').contains('Social Transformation');
+ 		cy.get('#metadata button').contains('Save').click();
+ 		cy.get('#metadata [role="status"]').contains('Saved');
+ 		cy.get('#metadata-keywords-selected-en_US').contains('Professional Development');
+diff --git a/cypress/tests/data/60-content/VkarbasizaedSubmission.spec.js b/cypress/tests/data/60-content/VkarbasizaedSubmission.spec.js
+index 9bf18db..b46cbc5 100644
+--- a/cypress/tests/data/60-content/VkarbasizaedSubmission.spec.js
++++ b/cypress/tests/data/60-content/VkarbasizaedSubmission.spec.js
+@@ -209,6 +209,9 @@ describe('Data suite tests', function() {
+ 		cy.get('span:contains("' + issueTitle + '")').prev('a.show_extras').click();
+ 		cy.get('tr:contains("' + issueTitle + '")').next().contains('a', 'Unpublish Issue').click();
+ 		cy.get('button:contains("OK")').click();
++		// The visits below only change the hash and do not reload the page, so
++		// wait for this confirmation to leave before another one opens.
++		cy.get('.pkp_modal_confirmation').should('not.exist');
+ 		cy.visit('index.php/publicknowledge/manageIssues#future');
+ 		cy.get('span:contains("' + issueTitle + '")');
+ 		// define the back issue as the current issue again
+-- 
+2.53.0
+

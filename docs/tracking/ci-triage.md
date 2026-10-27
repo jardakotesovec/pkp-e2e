@@ -1592,13 +1592,46 @@ trips.
   Chrome 143 (`chrome143-check.yml`, run
   [40058677404](https://github.com/jardakotesovec/pkp-e2e/actions/runs/40058677404))
   lowered the rate (4 of 5 green) without removing it; the cure is in the
-  specs (wait for the tab's field, for the modal to close, for the step's
-  form to be ready). No spec fix drafted. Kept: `electron-check.yml`,
-  `chrome143-check.yml` in `shared/playwright/checks/sync/ci33-cypress-browser/`.
+  specs. **Spec fix drafted 2026-10-27** (asked by @jarda.kotesovec), kept
+  as `0001-ojs-spec-waits.patch` and `0001-ops-spec-waits.patch` in
+  `shared/playwright/checks/sync/ci33-cypress-browser/` (the bot cannot
+  push to pkp; both apply on ojs `c6590e2012`, ops `8b6f5c77e2`): the
+  keyword steps wait for the workflow page's delayed grid load
+  (`#contributors-grid .pkp_controllers_grid`, a second after mount), for
+  the field to be visible and enabled, and for the suggestion
+  (`#metadata .autosuggest__results-item`) instead of `cy.wait(500)`;
+  Ccorino clicks both suggestions (`cy.get('li').contains()` held the
+  list items from before the suggestions arrived, and under Cypress the
+  arrow keys stay on the first item, so its `{downarrow}{downarrow}` path
+  could not be made deterministic) and keeps `force: true` on its typing
+  (the existing keywords' badges cover the input); Vkarbasizaed waits for
+  the "Unpublish Issue" confirmation to leave, since its `#future`/`#back`
+  visits only change the hash and do not reload. Tried with
+  `spec-waits-check.yml` (pkp-github-actions@v1 plus one `git apply` step,
+  full pkp matrix, throwaway branch since deleted): the final patch, run
+  40531000868, OJS 9 of 10 green and the data suite green on all 10 (base:
+  pkp's 40421695180 and 40424833415, 1 of 10 each); OPS's patch, unchanged
+  since run 40523904611, 10 of 10 there and 10 of 10 in 40527747804 (base
+  40425488414, 8 of 10). Two causes left, not in the patch: (a) the
+  shared `cy.assignParticipant` (lib/pkp `cypress/support/commands.js`)
+  clicks the user radio while the user-select grid refetches its rows
+  (`fetch-rows` with the search filters, the infinite-scrolling feature)
+  and the radio is detached (OJS `FpaglieriSubmission` 40523904611,
+  `AmwandengaSubmission` 40424833415); (b) newly visible now that jobs
+  reach the app integration step, OJS `Discussions.spec.js` #8097 (3 of
+  30 patched OJS jobs: 40527747804 twice, 40531000868): after the declined
+  close, "OK" sends no `update-query` request, so the new discussion never
+  appears; the workflow page's delayed grid loads land between typing the
+  subject and setting the TinyMCE comment in each, and both
+  `cy.on('window:confirm')` handlers register at the start of the test,
+  not in sequence; and `Crossref.spec.js` once (40527747804, `The handler
+  "$.pkp.controllers.TabHandler" has already been bound`). Kept:
+  `electron-check.yml`, `chrome143-check.yml`, `spec-waits-check.yml`.
   **Watch condition**: OMP's first `stable-3_3_0` run should pass the
   pkp-lib step; a `Filenames`/`Multilingual` red on 3.3 is now a new
-  cause, and the data suite's reds are this flake class until the specs
-  wait.
+  cause. Until the patches land, the data suite's reds are this flake
+  class; once they land, a keyword or two-"OK" red in those four specs is
+  a new cause, and the reds left are (a) and (b).
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

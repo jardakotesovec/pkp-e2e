@@ -1,0 +1,37 @@
+From 4276a1fded4be4395dc1a35e13695d68a896e2e4 Mon Sep 17 00:00:00 2001
+From: Jarda Kotesovec <jarda_kotesovec@sfu.ca>
+Date: Tue, 27 Oct 2026 15:49:03 +0000
+Subject: [PATCH] Wait for the page in CkwantesSubmission before typing a
+ keyword
+
+The spec typed "multinational" right after opening the Metadata tab and
+pressed Enter after a fixed 500 ms, so the keyword was lost when the
+field was still disabled or its suggestion had not arrived. It now waits
+for the workflow page's delayed grid load, for the field to be visible
+and enabled, and for the suggestion itself.
+---
+ cypress/tests/data/60-content/CkwantesSubmission.spec.js | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/cypress/tests/data/60-content/CkwantesSubmission.spec.js b/cypress/tests/data/60-content/CkwantesSubmission.spec.js
+index c29f1ed..cde5c92 100644
+--- a/cypress/tests/data/60-content/CkwantesSubmission.spec.js
++++ b/cypress/tests/data/60-content/CkwantesSubmission.spec.js
+@@ -30,9 +30,13 @@ describe('Data suite tests', function() {
+ 		cy.get('a').contains('Review this submission').click();
+ 
+ 		// Edit metadata
++		// The workflow page loads its grids a second after it mounts; let that pass
++		// before typing, or the typed keyword can be lost.
++		cy.get('#contributors-grid .pkp_controllers_grid');
+ 		cy.get('button#metadata-button').click();
++		cy.get('#metadata-keywords-control-en_US').should('be.visible').and('be.enabled');
+ 		cy.get('#metadata-keywords-control-en_US').type('multinational', {delay: 0});
+-		cy.wait(500);
++		cy.contains('#metadata .autosuggest__results-item', 'multinational');
+ 		cy.get('#metadata-keywords-control-en_US').type('{enter}', {delay: 0});
+ 		cy.get('#metadata button').contains('Save').click();
+ 		cy.get('#metadata-keywords-selected-en_US').contains('multinational');
+-- 
+2.53.0
+
