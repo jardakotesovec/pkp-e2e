@@ -198,8 +198,10 @@ Accept wizard (new invitee):
     Invite" returns to Users & Roles. Leaving the wizard any other way
     (following a link, typing another address) asks nothing, and the
     Invitations table gains no row. The final button reads "Invite user to
-    the role", and a success dialog ("Invitation Sent") confirms. ⚠ [A5](#a5)
-    That dialog promises updates about the recipient's decision. Its only
+    the role", and a success dialog ("Invitation Sent") confirms: "{email}
+    has been invited to a new role in OJS. The invitation is listed under
+    Invitations on the Users & Roles page while it awaits their answer." (a
+    press and a preprint server name OMP and OPS). Its only
     button, "View All Users", returns the browser to Users & Roles. Each
     opening of the wizard, whether by "Invite to a role", "Edit
     Invitation" or a member's Edit in the users list, leaves warnings in
@@ -272,7 +274,7 @@ Accept wizard (new invitee):
   visibility change itself sticks. A disabled member is emailed the same
   way, in words written for an active account ⚠ [A9](#a9). <sup>r</sup>
 - **No notice to the inviter**: nobody is emailed or notified when the
-  recipient accepts or declines ⚠ [A5](#a5). The pending row simply
+  recipient accepts or declines, and nothing on screen promises it. The pending row simply
   disappears. From the manager's screens, an acceptance and a decline can be
   told apart only by the new name an acceptance adds under Current
   Users. <sup>m</sup>
@@ -675,9 +677,8 @@ Left out of the scenarios above, by reason:
     `docs/issues/U06-A4-newcomer-not-signed-in-after-accepting.md`): a
     newcomer's "View All Submissions" after "Accept And Continue" opens the
     Dashboard signed in as the new account
-  - the guard for A5 (issue report
-    `docs/issues/U06-A5-invitation-sent-promises-decision-updates.md`): the
-    "Invitation Sent" dialog's text promises only what the app does
+  - the guard for retired A5: the "Invitation Sent" dialog's text promises
+    only what the app does
   - the guard for A12 (issue report
     `docs/issues/U06-A12-invitation-address-made-up-kind-empty-page.md`):
     the send wizard's address typed with a made-up last word and with
@@ -765,8 +766,6 @@ Left out of the scenarios above, by reason:
     13a, Side effects; scenarios 3 and 8 mark it)
   - A9 (the role-removal email telling a disabled user their account is
     still active; Rule 14, Side effects)
-  - A5 ("Invitation Sent" promising updates never delivered; Rule 15, Side
-    effects)
   - A7 (the email's wording slips; Side effects)
   - A8 (added role rows carrying no accessible field names)
   - A11 (the invitation email promising a masthead listing for roles the
@@ -822,7 +821,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 |----|-----------------------------|------|--------|--------|
 | [A3](#a3) | After a manager edits or re-sends a role invitation, the earlier email's links open a bare "404 Not Found" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A4](#a4) | A newcomer who accepts a role invitation is not signed in and lands on the sign-in screen | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A5](#a5) | "Invitation Sent" promises the inviter news of the person's decision, but nothing ever tells them | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | Small wording and untranslated-text defects across the invitation screens and emails | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | Role invitation wizard: a screen reader hears no field names in role rows after the first | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | The invitation email promises a masthead listing for roles the masthead never lists, such as Author or Reader | 🐞 | low | issues (claude), 2026-10-26 — re-verified |
@@ -836,6 +834,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
 | [A9](#a9) | The role-removal email tells a disabled user their account "is still active"; the active "Remove Role" and masthead select on their screen are intended | ❓ | minor | @beaug 2026-09-18 · controls intended, email wording open |
 | [A16](#a16) | A past start date reads as the acceptance day once accepted, while the email named the date typed; an acceptance on a later day than the send was not seen | ❓ | minor | — |
+| [A5](#a5) | Retired: "Invitation Sent" promised the inviter news of the person's decision, which never came; it now says the invitation waits under Invitations (Rule 15) | ✅ | retired | PR review (claude), 2026-10-27 — fixed upstream (pkp/ojs#5923, pkp/omp#2505, pkp/ops#1446) |
 | [A1](#a1) | Retired: the send wizard's address was gated more widely than the screen that offers it; it now lets in only those who open Users & Roles (Actors row 2) | ✅ | retired | upstream change + claim check (claude), 2026-10-02 — fixed upstream |
 | [A6](#a6) | Retired: Edit on a disabled member's row opened an error over an empty wizard; it now opens their details with the disabled-user warning (Rule 14) | ✅ | retired | upstream change + claim check (claude), 2026-09-18 — fixed upstream |
 | [A10](#a10) | Retired: some named newcomers were greeted "Dear {email},"; every name entered now reaches the greeting and the "To" line (Side effects) | ✅ | retired | PR review (claude), 2026-10-02 — fixed upstream (pkp/pkp-lib#13429) |
@@ -883,28 +882,14 @@ account exists and holds the role, and signing in on that screen leads on to
 the dashboard.
 Basis: probe, issue report walk, 2026-10-02. <sup>[f-a4](#fn-a4)</sup>
 
-<a id="a5"></a>
-**A5 — "Invitation Sent" promises the inviter news of the person's decision, but nothing ever tells them** · 🐞 · low.
-When someone sends an invitation with "Invite to a role" on Users & Roles,
-the "Invitation Sent" dialog says: "You can be updated about the user's
-decision on the Users & Roles page, your OJS notifications and/or your
-email" (a press and a preprint server name OMP and OPS). When the person
-accepts or declines, nothing tells the inviter. No notification arrives and
-no email is sent. The invitation's row just leaves the "Invitations" table.
-Nothing is lost, and an accepted invitation grants its roles correctly. The
-only sign of an acceptance is the new role in the person's "Roles" under
-Current Users. A decline leaves no trace on screen and looks the same as an
-invitation that was cancelled or ran out.
-Basis: probe, issue report walk, 2026-10-02. <sup>[f-a5](#fn-a5)</sup>
-
 <a id="a7"></a>
 **A7 — Small copy defects across these screens and emails** · 🐞 · low.
 The invitation email offers roles "as a Author", and a submission's Activity
 Log reads "was assigned to this submission as a Author.": a fixed "a" stands
-before every role name, also one starting with a vowel. The search step
-reads "Enter at least one details…" and "…invite to take a additional
-roles", the send wizard's cancel confirmation asks "Are you sure want to
-cancel this invitation?", and its email step mentions "GDPR polices". On OMP
+before every role name, also one starting with a vowel. The send wizard's
+cancel confirmation asks "Are you sure want to cancel this invitation?"
+(fixed by pkp/pkp-lib#13497, merged 2026-10-27; on the apps' `main` once
+their `lib/pkp` carries it). On OMP
 and OPS, the masthead confirmation reads "This will update whether this user
 appears on the journal masthead for the selected role." under a column named
 "Press Masthead" or "Server Masthead", and the "Invitation Unavailable" page
@@ -1129,6 +1114,9 @@ emails added since 3.4 never joined it.
 Basis: probe, issue report walk, 2026-10-02. <sup>[f-ops1](#fn-ops1)</sup>
 
 ### Retired
+
+<a id="a5"></a>
+**A5 — "Invitation Sent" promised news of the person's decision** · ✅ · retired. Fixed upstream for pkp/pkp-lib#12874 (pkp/ojs#5923, pkp/omp#2505 and pkp/ops#1446 on `main`, pkp/ojs#5922, pkp/omp#2504 and pkp/ops#1445 on `stable-3_5_0`, merged 2026-10-27), verified the same day at the merged tips on OJS, OMP and OPS, `main` and 3.5: the dialog reads "…has been invited to a new role in OJS. The invitation is listed under Invitations on the Users & Roles page while it awaits their answer." and promises nothing the app does not do. The inviter is still told nothing when the person answers (Side effects); that is the product's choice the report left open, not this entry. <sup>[f-a5](#fn-a5)</sup>
 
 <a id="a1"></a>
 **A1 — Wizard address wider than its screen** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13299, 2026-09-19), verified 2026-10-02 on OJS and 2026-10-06 on OMP and OPS: typing the send wizard's address opens it for exactly those who open Users & Roles, and anyone else signed in gets the access-denied page (Actors row 2). <sup>[f-a1](#fn-a1)</sup>
@@ -1761,8 +1749,14 @@ No accept/decline code path produces a notification or email to the inviter
 (notes m, n). Live-confirmed 2026-07-31 (live probe, accept and decline
 cases): bell/Tasks panel "No Items", inviter mailbox empty after both accept
 and decline; positive control — an invitation sent afterwards delivered
-normally.
-Issue report: [pkp-e2e#515](https://github.com/jardakotesovec/pkp-e2e/issues/515) ([docs/issues/U06-A5-invitation-sent-promises-decision-updates.md](../issues/U06-A5-invitation-sent-promises-decision-updates.md)).
+normally. Retired 2026-10-27: the app PRs of pkp/pkp-lib#12874 (pkp/ojs#5923 as
+`e421a8840c`, pkp/omp#2505 as `3f5ca963b5`, pkp/ops#1446 as `51a81686ab`; on
+`stable-3_5_0` pkp/ojs#5922 `a82e8a17ef`, pkp/omp#2504 `1dddb3ee11`,
+pkp/ops#1445 `30f5d57968`) give `userInvitation.modal.message` the sentence
+the issue report proposed. The report's walk at the merged tips, default
+dataset, all three apps and both lines: the dialog shows the new sentence;
+"Tasks" unchanged and the inviter's mailbox empty after an acceptance and a
+decline, as before. Issue [pkp-e2e#515](https://github.com/jardakotesovec/pkp-e2e/issues/515) closed.
 
 <a id="fn-a6"></a>
 **f-a6** — Users-grid Edit on a disabled member (live probe 2026-07-31): error
@@ -1820,7 +1814,14 @@ Review & create account"); it has no accessible name, a pointer press at
 its place lands on the step content, and Enter on it changed nothing.
 Present before and after "Accept And Continue". A newcomer's three-step
 wizard (1280 and 380 px) and the send wizard have no such text.
-Issue reports, one per cause: the wording slips ([pkp-e2e#540](https://github.com/jardakotesovec/pkp-e2e/issues/540), [docs/issues/U06-A7-invitation-wizard-typos.md](../issues/U06-A7-invitation-wizard-typos.md)); "as a Author" ([pkp-e2e#541](https://github.com/jardakotesovec/pkp-e2e/issues/541), [docs/issues/U06-A7-invitation-email-role-article.md](../issues/U06-A7-invitation-email-role-article.md)); the journal wording on OMP and OPS ([pkp-e2e#542](https://github.com/jardakotesovec/pkp-e2e/issues/542), [docs/issues/U06-A7-omp-ops-invitation-journal-wording.md](../issues/U06-A7-omp-ops-invitation-journal-wording.md)); the steps list's raw names ([pkp-e2e#543](https://github.com/jardakotesovec/pkp-e2e/issues/543), [docs/issues/U06-A7-invitation-steps-raw-labels.md](../issues/U06-A7-invitation-steps-raw-labels.md)); the invisible Tab stops ([pkp-e2e#544](https://github.com/jardakotesovec/pkp-e2e/issues/544), [docs/issues/U06-A7-accept-page-hidden-steps-button.md](../issues/U06-A7-accept-page-hidden-steps-button.md)). The Users & Roles row button's raw name joined [pkp-e2e#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) ([docs/issues/U53-A5-users-list-row-button-raw-key.md](../issues/U53-A5-users-list-row-button-raw-key.md)); "##common.help##" is U08 A1's.
+The wording slips were fixed for pkp/pkp-lib#12874 (merged 2026-10-27): the
+search step's grammar, "GDPR polices" and the ORCID step's "If you chose to
+skip it now" in the apps' own files (pkp/ojs#5923, pkp/omp#2505,
+pkp/ops#1446), read corrected at the merged tips on OJS, OMP and OPS; the
+cancel question and the given-name help's "tha part" in pkp-lib#13497
+(`fff0dbf60d`), read corrected on 3.5, where the apps' `lib/pkp` already
+carries it, and waiting on `main` for the apps' pointers. Issue reports, one
+per cause: the wording slips (pkp-e2e#540, closed 2026-10-27); "as a Author" ([pkp-e2e#541](https://github.com/jardakotesovec/pkp-e2e/issues/541), [docs/issues/U06-A7-invitation-email-role-article.md](../issues/U06-A7-invitation-email-role-article.md)); the journal wording on OMP and OPS ([pkp-e2e#542](https://github.com/jardakotesovec/pkp-e2e/issues/542), [docs/issues/U06-A7-omp-ops-invitation-journal-wording.md](../issues/U06-A7-omp-ops-invitation-journal-wording.md)); the steps list's raw names ([pkp-e2e#543](https://github.com/jardakotesovec/pkp-e2e/issues/543), [docs/issues/U06-A7-invitation-steps-raw-labels.md](../issues/U06-A7-invitation-steps-raw-labels.md)); the invisible Tab stops ([pkp-e2e#544](https://github.com/jardakotesovec/pkp-e2e/issues/544), [docs/issues/U06-A7-accept-page-hidden-steps-button.md](../issues/U06-A7-accept-page-hidden-steps-button.md)). The Users & Roles row button's raw name joined [pkp-e2e#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) ([docs/issues/U53-A5-users-list-row-button-raw-key.md](../issues/U53-A5-users-list-row-button-raw-key.md)); "##common.help##" is U08 A1's.
 
 <a id="fn-a8"></a>
 **f-a8** — Every added row in `UserInvitationUserGroupsTable.vue` renders

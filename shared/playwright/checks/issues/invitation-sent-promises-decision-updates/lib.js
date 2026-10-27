@@ -1,5 +1,5 @@
-// Helpers of walk.js here (issue report
-// docs/issues/U06-A5-invitation-sent-promises-decision-updates.md). Requiring this file runs nothing.
+// Invitation helpers first written for the walk of issue report U06 A5 (pkp-e2e#515, closed
+// 2026-10-27 with the walk), kept for the other walks that require them. Requiring this file runs nothing.
 // The send wizard is driven through invite() of the U54 A14 walk's lib (Settings > Users & Roles,
 // "Invite to a role", an existing account searched by email, one role, today, sent); the users list
 // through the U53 page object (shared/playwright/pages/UsersManagementPages.js).
