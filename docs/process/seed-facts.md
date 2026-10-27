@@ -1477,7 +1477,8 @@ config-file settings.
   the figures of the page's first opening for a day (a per-item data
   cache): open the page first after the figures exist, or press
   Administration › "Delete Data Caches" before reading it. OJS and OPS
-  `main`, OJS 3.5, 2026-10-27 (U13 claim check I27B-2).
+  `main`, OJS 3.5, 2026-10-27 (U13 claim check I27B-2); OMP `main` and
+  3.5 the same (U69 claim check I27D-2).
 - "All dates" on Statistics › "Articles" ("Monographs", "Preprints")
   starts at the context's first publication, so on a scratch context
   whose works were published today it shows none of the seeded past

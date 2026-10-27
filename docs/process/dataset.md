@@ -228,6 +228,8 @@ Acronym JPK; languages en, fr_CA (primary en); series Library & Information Stud
 | 17 | Open Development: Networked Innovations in International Development | Internal review, round 1: waiting for reviews |  | msmith |  | jjanssen r1 not responded, phudson r1 not responded |
 | 18 | Transformative Impact of AI Tools on Modern Education: Opportunities, Challenges, and Future Directions | Review, round 1: waiting for reviews |  | zzedd |  | jdoe r1 not responded, lvon r1 not responded, agallego r1 not responded, alzacharia r1 not responded, gcox r1 not responded, shellier r1 not responded, rsharif r1 not responded, cturner r1 not responded, gfavio r1 not responded |
 
+Book 5's only file belongs to a chapter, so its page has no side-column file list; book 14 has chapter files and two supplementary ones ("Table", "Other") in its side column. Both books' only version is dated the dataset's build day (Monograph landing page claim check I27D, 2026-10-27).
+
 ### OPS: `publicknowledge`, "Public Knowledge Preprint Server"
 
 Acronym JPKPKP; languages en, fr_CA (primary en); sections Preprints (PRE). 25 users, 19 submissions.

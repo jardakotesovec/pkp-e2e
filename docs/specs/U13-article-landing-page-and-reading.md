@@ -1251,6 +1251,15 @@ Left out of the scenarios above, by reason:
   - an older version's galley typed by its number with no version part:
     the article's page for a galley with no URL Path, the "404 Not
     Found" page for one with a URL Path (Rule 13a)
+  - the months of the "Downloads" chart: January of the first
+    version's year to the current month; an article first published
+    more than twelve months back showing the last twelve, "All time"
+    and "Last 12 months" (Rule 17a)
+  - the "Downloads" chart of an article with counted downloads, a Word
+    file's among them, reading what the "Files" line of Statistics ›
+    "Articles" reads (Rule 17b)
+  - the chart keeping its figures after downloads are processed (seeded
+    figures on a test install), until "Delete Data Caches" (Rule 17c)
 - **Rarely met**:
   - a galley whose component was made a dependent one after the galley
     was built, which the page no longer lists (Rule 10; Settings
@@ -1277,15 +1286,6 @@ Left out of the scenarios above, by reason:
     chart for usage statistics display.": the "Downloads" section with a
     line chart; scenario 7 reads the bar chart (Settings bullet 6;
     Rule 17)
-  - the months of the "Downloads" chart: January of the first
-    version's year to the current month; an article first published
-    more than twelve months back showing the last twelve, "All time"
-    and "Last 12 months" (Rule 17a)
-  - the "Downloads" chart of an article with counted downloads, a Word
-    file's among them, reading what the "Files" line of Statistics ›
-    "Articles" reads (Rule 17b)
-  - the chart keeping its figures after downloads are processed (seeded
-    figures on a test install), until "Delete Data Caches" (Rule 17c)
   - an article outside a published issue under a journal's "Latest
     Publications" {OJS}, its main galleys only while the home page also
     shows the current issue; scenario 9 reads the same filter under

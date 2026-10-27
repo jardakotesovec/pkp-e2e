@@ -122,7 +122,7 @@ The side column, top to bottom: <sup>d</sup>
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | **Cover** | — | The small copy of the version's "Cover Image" ([Catalog management](U70-catalog-management.md), its Rule 13f), or the press's default book picture when it has none. Not a link; a screen reader hears the cover's "Alternate text". <sup>d</sup> <sup>td24</sup> |
-| **Files** | — | The remote formats and the files of Rule 11, with no visible heading (a screen reader reads "Downloads"). |
+| **Files** | — | The remote formats and the files of Rule 11, with no visible heading (a screen reader reads "Downloads", a second heading of that name when the chart of Rule 20 shows, [A28](#a28)). |
 | **"Published"** ("Forthcoming") | — | The date line of Rule 8. |
 | **"Versions"** | — | The list of Rule 9. |
 | **"Series"** | — | The series' name with its prefix, a link to the series' page ([Catalog browse](U68-catalog-browse.md), Rule 1); under it "Online ISSN" and "Print ISSN", each with the series' number, when set ([Sections](U17-sections.md#omp-series)). <sup>d</sup> |
@@ -541,18 +541,33 @@ link, not a button. A journal's page puts the instructions under
       a chapter that version added ⚠ [A14](#a14).
 20. **The "Downloads" chart.** While "Usage statistics display options"
     (Settings bullet 5) is on a chart, the book's page carries a section
-    headed "Downloads" with a bar or a line chart of the book's
-    downloads by month, as an article's page does
+    headed "Downloads" ⚠ [A28](#a28) with a bar or a line chart of the
+    book's downloads by month, as an article's page does
     ([Article landing page & reading](U13-article-landing-page-and-reading.md),
     its Rule 17, and its [A3](U13-article-landing-page-and-reading.md#a3)).
     A chapter page has no chart. <sup>n</sup> <sup>td19</sup>
-    - 20a. **Months and files.** The chart shows the last twelve months.
-      When the book has downloads from earlier months, a button "All
-      time" under it widens the chart to every month from January of the
-      first year with downloads, and then reads "Last 12 months".
-      Downloads of a supplementary component's file, such as "Appendix",
-      are not charted ([Usage statistics](U64-usage-statistics.md), its
-      Rule 1).
+    - 20a. **Months and files.** Each bar is a month, labelled with the
+      month and year ("Oct 2026"). The chart runs from January of the
+      year the book was first published to the current month, the months
+      before publication at 0: a book first published this year shows
+      January to the current month. When that span is longer than twelve
+      months, the chart shows the last twelve, with a button "All time"
+      under it, even on a book with no downloads. "All time" widens it
+      to every month from that January and then reads "Last 12 months",
+      which narrows it back. Downloads of a supplementary component's
+      file, such as "Appendix", are not charted ([Usage
+      statistics](U64-usage-statistics.md), its Rule 1). <sup>n</sup>
+      <sup>td27</sup>
+    - 20b. **When downloads appear.** A download reaches the chart only
+      once the usage statistics have processed its day ([Usage
+      statistics](U64-usage-statistics.md), its Rules 2 and 5). Even then
+      the chart keeps the figures it read when any visitor first opened
+      the book's page. Downloads processed after that opening do not
+      show, on a reload or in another browser, until a Site
+      Administrator presses Administration › "Delete Data Caches"
+      ([System administration](U61-system-administration.md), its Rule
+      10); by the code the kept figures also lapse a day after that
+      first opening. <sup>n</sup> <sup>td27</sup>
 21. **The pages in French.** With French (Canada) as the interface
     language, two texts read wrong ⚠ [A15](#a15): <sup>o</sup> <sup>td20</sup>
     - in "Versions": each version's name, as "{date}
@@ -735,6 +750,8 @@ link, not a button. A journal's page puts the instructions under
   Rules 16, 17).
 - [Usage statistics](U64-usage-statistics.md): the views these pages
   count, the file views included.
+- [System administration](U61-system-administration.md): "Delete Data
+  Caches", which renews the "Downloads" chart's kept figures (Rule 20b).
 - [Publish, schedule & versions](U49-publish-schedule-and-versions.md):
   publishing, scheduling, "Create New Version", the version names, and its
   A6 (the date line rewritten by a new version).
@@ -848,7 +865,7 @@ tooling recipe are in the footnote. <sup>s</sup>
      (Rule 11).
    - **"Downloads"**: the main column holds a section headed "Downloads"
      with a bar chart of the book's downloads by month, over the last
-     twelve months (Rules 20, 20a).
+     twelve months (Rules 20, 20a; [A28](#a28)).
    - **"Tides"' page**: press "Tides": the address is "Coastlines"'
      address followed by "/chapter/" and the chapter's number, and the
      browser tab reads "Tides: Low and high | {press name}". The main
@@ -1098,6 +1115,11 @@ tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - the "Downloads" chart of a book first published in the current
+    year: January to the current month, and no "All time" (Rule 20a)
+  - the "Downloads" chart keeping its figures after downloads are
+    processed (seeded figures on a test install), until "Delete Data
+    Caches" (Rule 20b)
   - the guard for A20 (issue report
     `docs/issues/U69-A20-later-version-chapter-repeats-date.md`): a later
     version's chapter page printing one date when its two dates are
@@ -1191,8 +1213,8 @@ Left out of the scenarios above, by reason:
     role assigned to the book (Actors row 6)
   - a version with no date yet starting every date line with today
     (Rule 8a)
-  - "All time" and "Last 12 months" on a book with downloads older than
-    twelve months (Rule 20a)
+  - "All time" and "Last 12 months" pressed on a book first published
+    in an earlier year, such as scenario 2's books (Rule 20a)
   - a book with no contributor cited from its title (Rule 19a)
   - a signed-in Reader, or any other role, reading a published book's
     pages, which read as they do for a visitor (Actors row 1;
@@ -1240,6 +1262,8 @@ Left out of the scenarios above, by reason:
     nothing; Fields, the HTML view page)
   - A26 (a review made public, missing from the published book's page;
     Rule 22; Settings bullet 16)
+  - A28 (the two "Downloads" headings and the chart's missing text;
+    Rule 20; scenario 2 passes it)
 - **No seed**:
   - a purchase completed through PayPal (Rule 14)
 - **Owned by another feature**:
@@ -1311,6 +1335,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A21](#a21) | On a preview, "How to Cite" works only for the roles assigned to the book | ❓ | minor | — |
 | [A22](#a22) | "APA" prints a series position as a number of volumes | ❓ | minor | — |
 | [A14](#a14) | A chapter new in a later version is cited as older than it is | ❓ | minor | — |
+| [A28](#a28) | A screen reader meets two "Downloads" headings on a book's page, the chart's with nothing to read under it | ❓ | minor | — |
 | [A9](#a9) | Retired: on a press, a reader who opened a book's PDF got an empty viewer, and no download saved the file; every free file now opens or downloads (Rule 13) | ✅ | retired | upstream sync (claude), 2026-10-05 — fixed by omp `8c807c919` (pkp/pkp-lib#13444) |
 
 ### All apps
@@ -1688,6 +1713,26 @@ Basis: probe, 2026-10-13. <sup>f-a26</sup>
 An unassigned Series editor or assistant role opens an unpublished book's page by its address while the book is still in submission or review, or after it was declined, as on an article's page, where the full entry stands ([→ Article landing page & reading, A16](U13-article-landing-page-and-reading.md#a16)).
 Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 
+<a id="a28"></a>
+**A28 — A screen reader meets two "Downloads" headings, the chart's with nothing to read under it** · ❓ · minor.
+With a chart chosen (Settings bullet 5), a book's page carries two
+headings "Downloads": the chart's visible one (Rule 20) and the side
+column's hidden one over the files (Fields, the book's page, "Files").
+Nothing comes between them but the chart and, on a book first
+published in an earlier year, its "All time" button (Rule 20a). The
+chart is a picture with no text, so a screen reader announces a
+"Downloads" heading with nothing under it, then another "Downloads"
+over the files. A sighted reader sees one heading and the chart's bars.
+A book whose files all belong to its chapters has no file list in the
+side column, and so only the chart's heading. An article's page asks
+the same question
+([→ Article landing page & reading, A17](U13-article-landing-page-and-reading.md#a17)).
+Question: should the chart's heading differ from the file list's, and
+should the chart give its figures as text? Lean: yes (🐞); a
+screen-reader user gets none of the figures the chart shows, and two
+headings of one name leave them to guess which one lists the files.
+Basis: probe, 2026-10-27. <sup>f-a28</sup>
+
 ### Retired
 
 <a id="a9"></a>
@@ -1810,10 +1855,13 @@ Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
 **td18** — Live-probed 2026-09-28 (Actors row 6; Rule 19; A14, A21, A22): APA "Quillfeather, A., & Second, B. (2024). Tides (Vols. 3). K5 Press …. {address}"; MLA without the series; BibTeX "series={Monographs}", "volume={3}", RIS "T3 - Monographs"; an Edited Volume "Quillfeather, A. (2024). Edited Book (L. Editor, Ed.; T. Translator, Trans.)."; a chapter "Quillfeather, A. (2024). Tides: Low and high. In A. Quillfeather & B. Second, K5 Chapter Book (Vols. 3, pp. 1-20)."; an Edited Volume's chapter "In L. Editor (Ed.), & T. Translator (Trans.), Edited Book (pp. 1-10)"; a DOI link ends the citation where there is one; a download is named after the book's title, on a chapter page too ("Tides.bib"). A later version's chapter "Harbours", added in 2026: "(2026). Harbours. … (Original work published 2024)". A book a Press manager submitted without a contributor: "Manager Book. (2024). {press name}. {address}". On a preview, "MLA" changed the text and "BibTeX" downloaded for the Press manager, Press editor, Production editor, the Site Administrator and an assigned Series editor and Copyeditor; for the book's Author and an unassigned Series editor and Copyeditor the format's request answered 404 and "BibTeX" opened "404 Not Found".
 
 <a id="fn-n"></a>
-**n** — `monograph_full.tpl` `.item.downloads_chart` when the active theme's `displayStats` is not `none`, `displayUsageStatsGraph($monograph->getId())`, the canvas and `.usageStatsUnavailable` ("Download data is not yet available.") as on an article; `chapter.tpl` has no chart. Live-probed 2026-09-28: see td19.
+**n** — `monograph_full.tpl` `.item.downloads_chart` when the active theme's `displayStats` is not `none`, `displayUsageStatsGraph($monograph->getId())`, the canvas and `.usageStatsUnavailable` ("Download data is not yet available.") as on an article; `chapter.tpl` has no chart. The figures (Rules 20a, 20b): `ThemePlugin::getAllDownloadsStats()` reads `Cache::remember("downloadStats-{id}", 24 h)`, filled by `ThemePlugin::downloadStatsCacheMiss()` with the book's monthly file downloads from the first version's `datePublished`; nothing clears that copy when the usage statistics loader runs, `AdminHandler::clearDataCache()` does. `lib/pkp/js/usage-stats-chart.js` on `main` builds one entry per month from January of the first year the server returns to the current month, labelled `{month} {year}`, draws the last twelve and, past twelve, adds the button "All time" / "Last 12 months". On `stable-3_5_0` the chart always shows the last twelve months, labelled by the month alone ("Nov" … "Oct"), with no button; there the current year's months before publication carry no value and the previous year's 0, and neither draws a bar. Live-probed 2026-09-28: see td19; 2026-10-27: see td27.
 
 <a id="fn-td19"></a>
 **td19** — Live-probed 2026-09-28 (Rule 20; Settings bullet 5): with "bar", a book without downloads showed "Downloads" with a bar chart of zeros from January, and never "Download data is not yet available."; "line" drew a line chart; a chapter page had no chart. A book with downloads in July 2025 and September 2026 showed twelve months and "All time", which widened the chart to 21 months from "Jan 2025" and then read "Last 12 months". Seeded downloads, 2 and 1 of the "Book Manuscript" PDF and 5 of an "Appendix" file, charted 3. The OJS and OPS pages drew their zeros the same way.
+
+<a id="fn-td27"></a>
+**td27** — Live-probed 2026-10-27 (Rules 20, 20a, 20b; A28), OMP `main` and `stable-3_5_0`, two runs each, PKP's default test data, `rvaca` saving "Use bar type of the chart for usage statistics display.", read signed out. Book 5 ("Bomb Canada and Other Unkind Remarks in the American Media"), first published 2026-10-26, showed on `main` "Jan 2026" … "Oct 2026" (10 bars, no button). Book 14 ("From Bricks to Brains"), its only version's date set to 2025-06-01 in the database, showed "Nov 2025" … "Oct 2026" with "All time" before any download; pressed, "Jan 2025" … "Oct 2026" (22 bars, January to May 2025 at 0) and "Last 12 months"; pressed again, the twelve months and "All time". On `stable-3_5_0` both books showed twelve months "Nov" … "Oct" and no button. A reader opened book 5's chapter "PDF", book 14's chapter 1 "PDF" ("Book Manuscript") and its supplementary "Other" file; the next day's "Usage statistics file loader task", run by hand, counted one view of each. Both charts, first opened before the loader ran, still read 0 after it, on the page and on a reload; after `admin` pressed "Delete Data Caches" each read 1 for October, the supplementary file's view not charted. The chapter page `catalog/book/14/chapter/54` had no chart and no "Downloads" heading. Every PDF view page opened logged A23's script error and nothing else. The OJS and OPS pages, driven the same day on the same chart code, agree (Article landing page & reading, its Rule 17).
 
 <a id="fn-o"></a>
 **o** — OMP `locale/fr_CA`: empty `msgstr` for `submission.plainLanguageSummary`, `plugins.themes.default.displayStats.downloads`, `catalog.published`, `catalog.forthcoming`, `catalog.categories`, `catalog.manage.series.onlineIssn`, `catalog.manage.series.printIssn`, `catalog.viewableFile.title`, `catalog.viewableFile.return`, `doi.readerDisplayName`, `chapter.volume`, `chapter.pages`, `submission.chapterCreated`, `submission.withoutChapter`, `submission.editorName`, `submission.authorListSeparator`, `monograph.publicationFormatDetails`; `payment.directSales.purchase` reads "Achat ({$amount} {$currency})" with no format. Translated: `submission.synopsis` "Synopsis", `series.series` "Séries", lib/pkp's `submission.versions`, `common.keywords`, `submission.outdatedVersion`, `submission.viewingPreview`. Incidental (U10 claim check K1, 2026-09-24): "24.09.2026 (##publication.versionStage.display##)" and "##catalog.published##" on a press's book page, under a short date format other than the default. Live-probed 2026-09-28: see td20.
@@ -2018,6 +2066,9 @@ Issue report: [pkp-e2e#962](https://github.com/jardakotesovec/pkp-e2e/issues/962
 <a id="fn-f-a27"></a>
 **f-a27** — Note c: the same `canPreview()` role shortcut as U13 A16, with no stage check on `main` since pkp/pkp-lib#12245 (`768b0a3991`, Alec Smecher, 2026-02-18); the fix, the release check (3.5, 3.4 and 3.3 do not have it) and the evidence are there. Live-probed 2026-09-30, OMP `main`, seeded data: unassigned `mfritz` (Copyeditor) and `cturner` (Proofreader) opened books 3, 6 and 18, before copyediting. Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
 Issue report (with U13 A16): [pkp-e2e-sec#1](https://github.com/jardakotesovec/pkp-e2e-sec/issues/1) ([docs/issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md](../issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md)).
+
+<a id="fn-f-a28"></a>
+**f-a28** — `monograph_full.tpl`: `.item.downloads_chart` with `h2.label` (`plugins.themes.default.displayStats.downloads`) and `<canvas class="usageStatsGraph">`, with no `role`, `aria-label`, `aria-labelledby`, `aria-describedby`, `title` or fallback content; `.item.files` with `h2.pkp_screen_reader` (`submission.downloads`). Live-probed 2026-10-27 (td27; OMP `main` and `stable-3_5_0`, two runs each, signed out): book 14, with chapter files and two supplementary files ("Table", "Other") in its side column, read in heading order "Chapters" (screen reader), "Downloads" (the chart's), the button "All time" (`main` only), "Downloads" (screen reader, over the files), "Published"; the accessibility tree had no node for the chart. Book 5, whose only file belongs to a chapter, had one "Downloads". The article page's twin: Article landing page & reading, its A17.
 
 ## Reference — entry points & surfaces
 
