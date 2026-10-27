@@ -269,9 +269,11 @@ one-line description under its heading (Rule 6). <sup>m</sup>
       alone changes nothing. It keeps the templates whose name or text
       holds every word typed, in any case, also inside a longer word. Its
       clear control brings the whole list back; emptying the box by hand
-      keeps the last result until Enter is pressed. Any search holding
-      "discussion", "discussions", "task" or "tasks" fails ⚠ [A4](#a4).
-      <sup>q</sup> <sup>td3</sup>
+      keeps the last result until Enter is pressed. The word
+      "discussion", "discussions", "task" or "tasks" in a search keeps
+      only the templates of that kind, the other words narrowing them
+      as usual; "task" on a stage with no task template lists none.
+      <sup>q</sup> <sup>td3</sup> <sup>[f-a4](#fn-a4)</sup>
     - 10b. Pressing a template fills "Name" with its name, replaces the
       message with its text, ticks or unticks "Enter task information" to
       match it, sets "Due Date" to today plus the template's interval for
@@ -1371,7 +1373,7 @@ Left out of the scenarios above, by reason:
   - the "Select submission stage" list of "Workflow Files" offering the stages up to Production and never Done (Rule 14a): likely a bullet in scenario 1's "A workflow file", read before "Submission" is chosen
   - the browser's leave-page prompt while the window holds unsaved changes (Rule 11d)
   - an edit of the comments-box discussion, by the submitting Author within the hour and by the Journal Manager, and of the recommendation discussion, each replacing the first message in place (Rules 15a, 15c, 21)
-  - the guard for A4 (issue report `docs/issues/U37-A4-find-template-discussion-task-error.md`): a "Find Template" search for "task", "discussion" and a phrase holding one of them lists the matching templates of that kind, with no "Error" window (Rule 10a)
+  - a "Find Template" search for "task", "discussion" and a phrase holding one of them lists the matching templates of that kind, with no "Error" window (Rule 10a; A4 retired)
   - the guard for A16-A17 (issue report `docs/issues/U37-A16-A17-task-due-today-or-closed-reads-overdue.md`): scenario 4 closes its task three days past due and reads "Task closed by …" in "Activity", and a task due today shows a badge and a line that agree (Rules 2d, 2e)
   - the guard for A6 (issue report `docs/issues/U37-A6-task-owner-cannot-save-edit.md`): scenario 10's task owner (an assistant or the Author who did not write the first message) saves a new due date from "Edit", and a rewrite of the first message is still refused (Rule 15c)
   - the guard for OPS1 (issue report `docs/issues/U35-OPS2-preprint-assign-editor-message-not-filled.md`): on a preprint server, "Assign Editor" chosen in the "Add" window fills "Message" with its letter and saves (Rule 10d)
@@ -1402,7 +1404,6 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A1 (a press and a preprint server failing the notices as shipped; Side effects; scenario 1 marks it)
   - A3 (the writer's own copy of each message and its Tasks row; Side effects)
-  - A4 (a "Find Template" search holding "discussion" or "task" ending in an "Error" window; Rule 10a)
   - A6 and A7 (a task owner's refused edit, and the raw key a press and a preprint server show for it; Rule 15c; scenario 10 marks A6)
   - A8 (an Author's edit of a first message carrying an upload; Rule 15d)
   - A13 (a closed task that cannot be reopened; Rule 17c; scenario 4 marks it)
@@ -1448,7 +1449,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | On a press and a preprint server as shipped, saving a discussion or a reply ends in an error dialog, and nobody is emailed or told | 🐞 | user-visible · crash: server | — |
 | [A2](#a2) | The "Add" and "Edit" windows for a task or discussion show "Open for What? Open to What? Beyond Content" under the title | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A3](#a3) | Whoever opens a discussion or replies gets their own message back by email and as a Tasks row | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A4](#a4) | When adding a task or discussion, a "Find Template" search for "discussion" or "task" opens an "Error" window | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | Each template in the "Add" window says it fills "Participants", but choosing one never does | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | A task's owner is offered "Edit" but cannot save even a new due date on a task someone else opened | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | A press or preprint server refuses a discussion edit with a raw key, not the reason | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1484,6 +1484,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | Retired: leaving the page after a discarded window asks nothing | ✅ | retired | — |
 | [A24](#a24) | Retired: an assistant's "Workflow Files" offers stages that show nothing | ✅ | retired | re-probe (claude), 2026-10-05 — overturned |
 | [A9](#a9) | Retired: editing a discussion that "Notify" or "Assign" opened added a copy of its message instead of changing it; fixed by pkp/pkp-lib#13506 | ✅ | retired | PR review (claude), 2026-10-13 — fixed by pkp/pkp-lib#13506, merged |
+| [A4](#a4) | Retired: a "Find Template" search for "discussion" or "task" opened an "Error" window; fixed by pkp/pkp-lib#13614 | ✅ | retired | upstream sync (claude), 2026-10-27 — fixed by pkp/pkp-lib#13614 |
 
 ### All apps
 
@@ -1525,20 +1526,6 @@ preprint server users do not yet: there, saving a discussion or reply
 fails before anyone is told (`pkp/pkp-lib#13072`). Once that is fixed,
 they will meet it too.
 Since: 2026-02-10 · Basis: probe, 2026-10-02. <sup>[f-a3](#fn-a3)</sup>
-
-<a id="a4"></a>
-**A4 — When adding a task or discussion, a "Find Template" search for "discussion" or "task" opens an "Error" window** · 🐞 · low · crash: server.
-The application fails on the server when someone adding a task or a
-discussion searches the templates for "discussion", "discussions",
-"task" or "tasks", alone or with other words, even a template's full
-name such as "Discussion (Production)". A window "Error" opens over the
-"Add" window with a PHP error message, and the template list reads "No
-items found.". So typing "discussion" or "task" does not filter the list
-to only discussions or only tasks, although each template button starts
-with its kind ("DISCUSSION - …", "TASK - …"). After "OK" the "Add"
-window stays open; its list reads "No items found." until the next
-search, and a search by another word lists templates again.
-Basis: probe, 2026-10-02. <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
 **A5 — Each template in the "Add" window says it fills "Participants", but choosing one never does** · 🐞 · low.
@@ -1988,6 +1975,9 @@ Basis: probe. <sup>[f-ops2](#fn-ops2)</sup>
 <a id="a9"></a>
 **A9 — Editing a discussion that "Notify" or "Assign" opened adds a copy of its message instead of changing it** · ✅ · retired. Fixed by `pkp/pkp-lib#13506` (for `pkp/pkp-lib#13505`, the team's copy of the issue report), merged 2026-10-13 (pkp-lib `a4f625a068`; no app's `lib/pkp` carries it yet, pkp/ojs#5927 having closed unmerged), reviewed at the PR's head before the merge and walked at the merge the same day on OJS, OMP and OPS: "Edit" › "Save" on a discussion "Notify" or "Assign" opened keeps one first message, headed with the sender, and replaces its text in place (Rule 15e). <sup>[f-a9](#fn-a9)</sup>
 
+<a id="a4"></a>
+**A4 — When adding a task or discussion, a "Find Template" search for "discussion" or "task" opens an "Error" window** · ✅ · retired. Fixed by `pkp/pkp-lib#13614` (pkp-lib `889c945a85`, merged 2026-10-26 as `4aab3a3443`; OJS's, OMP's and OPS's `lib/pkp` at `c27153abdd` carry it), walked 2026-10-27 on OJS, OMP and OPS `main`: the searches answer 200 with no "Error" window, and the word "task" or "discussion" keeps only the templates of that kind (Rule 10a). Issue report closed ([pkp-e2e#417](https://github.com/jardakotesovec/pkp-e2e/issues/417)). <sup>[f-a4](#fn-a4)</sup>
+
 ---
 
 <a id="footnotes"></a>
@@ -2183,7 +2173,8 @@ Issue report: [pkp-e2e#420](https://github.com/jardakotesovec/pkp-e2e/issues/420
 
 <a id="fn-a4"></a>
 **f-a4** — `Template::scopeWithSearch()` maps the words `task(s)`/`discussion(s)` to a type and calls `$query->filterByType($typeFilter)`; the model has `scopeWithType()` and no `scopeFilterByType()`, so the query builder throws `BadMethodCallException` and `GET editTaskTemplates?search=…` fails. Live-probed 2026-09-23 (all three apps): each Enter sends `GET /api/v1/editTaskTemplates?stageId={4|5}&search=…` twice and each answers 500; the "Error" window reads "Call to undefined method PKP\core\SettingsBuilder::filterByType()" with "OK".
-Issue report: [pkp-e2e#417](https://github.com/jardakotesovec/pkp-e2e/issues/417) ([docs/issues/U37-A4-find-template-discussion-task-error.md](../issues/U37-A4-find-template-discussion-task-error.md)).
+Re-walked 2026-10-27 (OJS, OMP, OPS `main`; PKP's default dataset; lib/pkp `c27153abdd`, with pkp/pkp-lib `889c945a85`, which calls `withType()`): as `dbarnes` on the Production stage's "Add" window, "discussion", "Discussion (Production)", "task" and a control word each answered 200 with no "Error" window; "discussion" listed the discussion templates, "Discussion (Production)" that one, "task" "No items found." (the dataset has no task template). With a task template "u37r1 task template" added by `rvaca` under Settings › Workflow › "Tasks and Discussions" › Production: "task" listed "Task - u37r1 task template" alone, "discussion" the discussion templates alone, "discussion editor" the discussions holding "editor", and "Galleys", "editor", "u37r1" listed what they list without the type word.
+Issue report: [pkp-e2e#417](https://github.com/jardakotesovec/pkp-e2e/issues/417), closed 2026-10-27 with the fix.
 
 <a id="fn-a5"></a>
 **f-a5** — `Template::promote()` fills participants from the template's roles' stage assignments; `setValuesFromTemplate()` sets title, task box, due date, owner and message, never `participants`. Texts `discussion.template.discussionDescription` / `…taskDescription`. Live-probed 2026-09-23 on all three apps (td4).
