@@ -702,11 +702,13 @@ behind a line; that scratch is deleted after review.
   all three apps (`.reports/U12/ccK1`, `ccK3`).
 - An announcement's image is stored as
   `public/journals|presses|contexts/<id>/announcements/<announcementId>.<ext>`
-  and until 2026-09-24 the public pages printed its absolute disk path as
-  the image address, which never loaded (the relative `public_files_dir`
-  since, not re-driven for announcements): a test asserts the `alt` text
-  and the file, never the picture. Live-probed 2026-09-17, all three apps
-  (`.reports/U12/ccK2`, seen by K3 and K4 too).
+  and the page and the public list print the relative public files
+  address with a `?<timestamp>` (`/public-ds2/journals/1/announcements/1.png?…`
+  on a dataset fleet), and the picture loads. Until 2026-09-24 the pages
+  printed the absolute disk path, which never loaded. Live-probed
+  2026-09-17, all three apps (`.reports/U12/ccK2`); the relative address
+  re-driven 2026-10-27 on dataset fleets, `main` and 3.5, all three apps
+  (U12 claim check I27A; campaign fleets not re-driven).
 - The "Announcement Feed Plugin" is disabled on every fresh journal,
   `publicknowledge` included (its `settings.xml` is never installed);
   the feed rows' given is `plugins: {announcementfeedplugin: {enabled:

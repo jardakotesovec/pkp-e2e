@@ -65,7 +65,7 @@ at the top of the panel shows the second language's boxes, labelled
 | "Title" | yes, in the primary language | One line of plain text, the widest box on the panel. Empty on save: "This field is required." (with two or more form languages, on an edit: "You must complete this field in {language}.", naming the primary language). Shown as the row's name in the list, as the heading of the announcement's page and of its summary, as the browser title of its page and as the subject of the email <sup>h</sup> <sup>i</sup> |
 | "Short Description" | no | Formatted text under the hint "A brief description to appear along with the announcement title.", with bold, italic, superscript, subscript, a link, a block quote, bulleted and numbered lists, a picture and a source-code view. The picture button, "Insert/edit image", uploads and inserts a picture as every formatted text box with one does, the files it takes and refuses included ([→ pictures](U09-custom-pages-and-blocks.md#image-upload)). Shown under the title in every summary (the Announcements page, the home page's first item) and in the email; on the announcement's own page only when "Announcement" is empty (Rule 10) <sup>h</sup> <sup>i</sup> |
 | "Announcement" | no | Formatted text under the hint "The full text of the announcement.", the same controls as "Short Description" in a taller box. Shown on the announcement's own page alone (Rule 10) <sup>h</sup> |
-| "Image" | no | An upload box ("Upload File"; "Drop files here to upload") that takes image files only. Any other file is refused in the box, with "You can't upload files of this type." under its name and a "REMOVE FILE" link that clears it; until it is cleared the panel counts it as a form error ("Please correct one error.", "Save" and "Upload File" grayed out); a file over the server's upload limit is refused the same way with "File is too big ({size}MiB). Max filesize: {limit}MiB.". A chosen image shows a preview with an "Alternate text" box and "Remove"; on an edit, "Remove" clears the preview and offers "Restore Original", which brings the saved picture and its alternate text back. A GIF, JPEG or PNG whose file name ends in the matching lower-case extension (.gif, .jpg, .png) saves; a JPEG named ".jpeg" or any image with an upper-case extension is accepted in the box but refused on "Save" with "There was an error uploading this image." under "Image", and on an edit that refusal deletes the announcement ⚠ [A2](#a2). A saved image shows above the text on the announcement's page and beside the title in its summaries, with the alternate text as its description (Rule 15) <sup>j</sup> |
+| "Image" | no | An upload box ("Upload File"; "Drop files here to upload") that judges a file by its name and lets in any file named as a picture of any format (".bmp", ".svg" and ".tif" as much as ".png"), with no message. Any other file is refused in the box, with "You can't upload files of this type." under its name and a "REMOVE FILE" link that clears it; until it is cleared the panel counts it as a form error ("Please correct one error.", "Save" and "Upload File" grayed out); a file over the server's upload limit is refused the same way with "File is too big ({size}MiB). Max filesize: {limit}MiB.". A chosen image shows a preview with an "Alternate text" box and "Remove"; on an edit, "Remove" clears the preview and offers "Restore Original", which brings the saved picture and its alternate text back. "Save" keeps a GIF (".gif"), a JPEG (".jpg" or ".jpeg"), a PNG (".png") or a WebP (".webp") picture, and by the code an icon (".ico"), whose content is the type its name says, the extension in any letter case. Every other file the box let in is refused on "Save": a picture of another format, such as a BMP, an SVG or a TIFF, and a file whose content does not match its name, such as a PNG named ".jpg" or a text file named ".png" (listed under its name with "Alternate text", "Remove" and an empty preview). The refusal shows "There was an error uploading this image." under "Image", "Please correct one error." and the notice "The form was not saved because 1 error(s) were encountered. Please correct these errors and try again."; an "Add Announcement" so refused stores nothing, and an edit so refused keeps the announcement but leaves it with a broken picture and refuses every later "Save" ⚠ [A21](#a21). A saved image shows above the text on the announcement's page and beside the title in its summaries, with the alternate text as its description (Rule 15) <sup>j</sup> |
 | "Expiry Date" | no | A small plain-text box under the hint "The announcement will be displayed to readers until this date. Leave blank if the announcement should be displayed indefinitely.", typed as YYYY-MM-DD; any other shape is refused with "The date format is not valid. Enter each date in the format YYYY-MM-DD.". A past date is accepted. On "Edit Announcement" the box shows the saved date in the journal's short date format, which the save refuses unless that format is YYYY-MM-DD ⚠ [A3](#a3). What the date does: Rule 8 <sup>k</sup> |
 | "Announcement Type" | no | A list of round buttons, one per type of the journal (Rule 13), shown only while at least one type exists; nothing is chosen for a new announcement, and a chosen type cannot be cleared, only changed ⚠ [A6](#a6). The type shows nowhere to readers ⚠ [A5](#a5) <sup>l</sup> |
 | "Send Email" · "Send an email about this to all registered users." | no | A box, unticked by default. On "Add Announcement", ticked, it sends the email of Side effects to every user the journal notifies; on "Edit Announcement" the box is offered again, unticked, and does nothing ⚠ [A9](#a9) <sup>f</sup> |
@@ -266,11 +266,19 @@ discards the changes. <sup>g</sup>
 15. **The image.** A saved image is kept as a file of the journal's (or
     the site's) public files, one per announcement, and shown on the
     announcement's page and in its summaries with the "Alternate text" as
-    its description. On an edit, "Remove" then "Save" deletes the file
-    and leaves the pages text-only; a new upload of the same type
-    overwrites the file, and one of another type is written beside the
-    old file, which stays. Deleting the announcement leaves its file
-    behind too ([A12](#a12); Rule 7). <sup>j</sup>
+    its description. <a id="kept-file"></a>A tester sees whether a
+    picture's file is kept at the picture's own address, as the page
+    printed it before the change (the browser's "Copy image address"):
+    while the file is kept, that address still opens the picture, even
+    when the page shows a broken picture or none; once the file is
+    deleted, it no longer does. On an edit, "Remove" then "Save" deletes
+    the file and leaves the pages text-only; a new upload of the same
+    type overwrites the file, and one of another type is written beside
+    the old file, which stays. Deleting the announcement leaves its file
+    behind too ([A12](#a12); Rule 7). After an edit whose new picture
+    was refused (Fields "Image"), the pages show an empty picture where
+    the old one was, and "Remove" then "Save" leaves them text-only but
+    keeps the old file ([A21](#a21)). <sup>j</sup>
 16. **The site's announcements.** On a site with two or more journals the
     Site Settings show an "Announcements" tab with three side tabs:
     "Settings" (the same three fields as the journal's tab, Fields),
@@ -362,8 +370,10 @@ discards the changes. <sup>g</sup>
   Settings › Workflow › Emails as "New Announcement" (*Emails
   management*). <sup>f</sup>
 - **The image** is stored as a file in the journal's (or the site's)
-  public files directory and deleted on "Remove", not with the
-  announcement ([A12](#a12); Rule 15). <sup>j</sup>
+  public files directory. "Remove" then "Save" deletes it, except after
+  an edit whose new picture was refused ([A21](#a21)); deleting the
+  announcement does not ([A12](#a12)). How a tester sees a kept file:
+  [Rule 15](#kept-file). <sup>j</sup>
 - **Deleting an announcement type** deletes every announcement of that
   type (Rule 13) ⚠ [A1](#a1). <sup>l</sup>
 - **Deleting a journal** deletes its announcements, their images and its
@@ -872,8 +882,10 @@ Left out of the scenarios above, by reason:
   - the guard for A7 (issue report `docs/issues/U12-A7-announcement-feed-limit-keeps-oldest.md`): with "Limit feed to" set below the number of current announcements, the three feeds carry the newest ones and RSS 2.0's channel date is the newest's.
   - the guard for A15 (issue report `docs/issues/U12-A15-announcement-feed-dates-percent-signs.md`): the Atom and RSS 1.0 feeds' dates are well-formed RFC 3339 and W3CDTF values.
   - the guard for A3 (issue report `docs/issues/U12-A3-announcement-expiry-date-refused-on-edit.md`): an unchanged "Save" on "Edit Announcement" keeps the expiry date, with another "Date (Short)" and with a browser west of the install's time zone.
-  - the guard for A2 (issue report `docs/issues/U12-A2-refused-image-deletes-announcement.md`): an edit whose new picture is refused ("photo.jpeg") keeps the announcement, its text and its earlier picture.
-  - the guard for A12 (issue report `docs/issues/U12-A12-announcement-image-files-left-behind.md`): deleting an announcement with a picture, and replacing its picture with one of another type, leave no file behind, on a context and on the site.
+  - the guard for A21: an edit whose new picture is refused on "Save" (a PNG named ".jpg") keeps the announcement, its text and its earlier picture on its page, and a later "Save" of the title alone goes through.
+  - pictures that save since A2 retired (Fields "Image"): a JPEG named ".jpeg", a picture with an upper-case extension and a WebP picture save on "Add Announcement" and "Edit Announcement" and show on the announcement's page and its summaries.
+  - a text file named ".png" passing the "Image" box and refused on "Save" (Fields "Image"): on "Add Announcement" nothing is added.
+  - the guard for A12 (issue report `docs/issues/U12-A12-announcement-image-files-left-behind.md`): deleting an announcement with a picture, and replacing its picture with one of another type, leave no file behind: the picture's earlier address no longer opens it ([Rule 15](#kept-file)), on a context and on the site.
 - **Nothing new to test**:
   - an unsaved tick on the settings tab kept across a tab switch and
     lost on leaving the page (Fields)
@@ -911,13 +923,11 @@ Left out of the scenarios above, by reason:
     preprint server; Rule 14)
   - A13 (an edited type's old name shown until a reload; Rule 13;
     scenario 3 marks it)
-  - A12 (the image file left in the public files after a delete, a
-    refused edit or a replacement of another type, and every delete's
-    warning in the server's error log; Rules 7, 15)
+  - A12 (the image file left in the public files after a delete or a
+    replacement of another type, and every delete's warning in the
+    server's error log; Rules 7, 15)
   - A11 (an unsaved title left on the row after "Edit Announcement" is
     closed, and stored by the next "Save"; Rule 6)
-  - A2 (an image refused on "Save" deleting the announcement on an edit;
-    Fields "Image")
   - A9 ("Send an email about this to all registered users." ticked on an
     edit; Fields "Send Email")
   - A3 ("Date (Short)" set to another format; Settings)
@@ -936,6 +946,8 @@ Left out of the scenarios above, by reason:
     programming interface, at the address its list gives; Rule 19)
   - A20 (the warning an add by program without the email choice
     leaves; Rule 19)
+  - A21 (the broken picture and the refused later saves after an edit
+    whose new picture was refused; Fields "Image"; Rule 15)
   - OMP2 (a press's home page carrying the site's announcements while
     the press has no "Display on Homepage" count; Rule 11; scenario 6
     marks it)
@@ -971,7 +983,6 @@ an entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [A1](#a1) | Removing an announcement type deletes every announcement of that type, behind a dialog that names neither the type nor its announcements | 🐞 | high | issues (claude), 2026-10-03 — re-verified |
-| [A2](#a2) | Editing an announcement with a picture the upload check refuses deletes the announcement | 🐞 | high | issues (claude), 2026-10-03 — re-verified |
 | [A3](#a3) | "Edit Announcement" shows the expiry date in a format "Save" refuses, or one day early, which "Save" then stores | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A7](#a7) | A journal's announcement feeds with "Limit feed to" set carry the oldest announcements, never the newest {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | Ticking "Send an email about this to all registered users." when editing an announcement sends nothing | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -982,6 +993,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A15](#a15) | A journal's Atom and RSS 1.0 announcement feeds write every date with "%" signs ("%2026-%10-%03UTC%UTC%275") {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A19](#a19) | Through the programming interface, an announcement's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A20](#a20) | REST API: an announcement added without the email choice writes a warning to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
+| [A21](#a21) | An edit whose new picture is refused leaves the announcement with a broken picture, and every later "Save" of it is refused until the picture is removed | 🐞 | medium | — |
 | [OMP2](#omp2) | A press's home page shows the site's announcements, with links that lead nowhere {OMP} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | An announcement's type is printed nowhere a reader looks | ❓ | minor | — |
 | [A6](#a6) | A chosen "Announcement Type" cannot be cleared, only changed | ❓ | minor | — |
@@ -991,6 +1003,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | A short description entered in French alone printed under its English title on the English Announcements page, seen once | ❓ | minor | — |
 | [A18](#a18) | The site's "Add Announcement" and "Edit Announcement" offer "Send an email about this to all registered users.", which never sends anything there | ❓ | minor | — |
 | [OMP1](#omp1) | The settings tab labels the introduction "Additional Information" on a press, "Introduction" elsewhere | ✅ | minor | — |
+| [A2](#a2) | Editing an announcement with a picture the upload check refuses deletes the announcement | ✅ | retired | claim check (claude), 2026-10-27 — fixed upstream, did not reproduce on any app or line |
 | [A4](#a4) | The site's Announcements panel cannot save, edit, delete or search | ✅ | retired | claim check (claude), 2026-09-17 — did not reproduce on any app |
 
 ### All apps
@@ -1012,21 +1025,6 @@ cannot be brought back. It reaches only journals, presses and preprint
 servers that give their announcements a type.
 Basis: probe, 2026-10-03.
 <sup>f-a1</sup>
-
-<a id="a2"></a>
-**A2 — Editing an announcement with a picture the upload check refuses deletes the announcement** · 🐞 · high.
-A manager edits an announcement and uploads a new picture that the
-upload check refuses. The refused names are a JPEG named "photo.jpeg"
-and any picture whose name ends in an upper-case extension, such as a
-camera's "IMG_0001.JPG". The preview shows. On "Save" the panel shows
-"There was an error uploading this image." under "Image", as for any
-refused file. That "Save" also deletes the announcement. Its row stays
-in the list until the page is reloaded, then it is gone, with its public
-page. The manager loses its title, text, dates and picture, with no
-undo, and the message says nothing about it. Uploading the file alone
-deletes nothing. "Add Announcement" with the same picture only refuses
-the save.
-Basis: probe, 2026-10-03. <sup>f-a2</sup>
 
 <a id="a3"></a>
 **A3 — "Edit Announcement" shows the expiry date in a format "Save" refuses, or one day early, which "Save" then stores** · 🐞 · medium.
@@ -1256,6 +1254,29 @@ apps' own "Add Announcement" form always sends `sendEmail`, so only
 programs meet it. The fix is a one-line default.
 Basis: probe, 2026-10-23. <sup>f-a20</sup>
 
+<a id="a21"></a>
+**A21 — An edit whose new picture is refused leaves the announcement with a broken picture, and every later "Save" of it is refused until the picture is removed** · 🐞 · medium.
+A manager edits an announcement that has a picture and uploads a new
+one that passes the box but is refused on "Save" (Fields "Image"): a
+picture in a format "Save" does not keep, such as a BMP, an SVG or a
+TIFF, or a file whose content does not match its name, such
+as a PNG named "renamed.jpg". "Save" shows "There was an error
+uploading this image." under "Image" and the panel stays open; the
+announcement keeps its title, text and dates, so the manager expects
+the old picture to stay too. It does not: after a reload, the
+announcement's page and the public Announcements page show an empty
+picture with no alternate text where it was, and "Edit" shows no
+preview. Every later "Save" of the announcement is then refused with
+"There was an error uploading this image.", a change to the title alone
+included, although that new title is stored and shows after a reload.
+"Remove" then "Save" ends the refusals and leaves the announcement
+without a picture. Through both steps the old picture's file is kept:
+its earlier address still opens it ([Rule 15](#kept-file)). Only "Restore
+Original" then "Save" in the same panel, before it is closed, brings
+the old picture and its alternate text back; in a later "Edit",
+"Restore Original" then "Save" is refused like any other save.
+Basis: probe, 2026-10-27. <sup>f-a21</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1288,6 +1309,9 @@ in, carries the block, and so does a press with announcements on and
 Basis: test run, 2026-10-03. <sup>f-omp2</sup>
 
 ### Retired
+
+<a id="a2"></a>
+**A2 — Editing an announcement with a picture the upload check refuses deletes the announcement** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13512), 2026-10-16; verified 2026-10-27 on OJS, OMP and OPS `main` and 3.5: a picture refused on an edit keeps the announcement, and a ".jpeg" or upper-case name now saves (Fields "Image"); what a refused edit still does to the picture is [A21](#a21). <sup>f-a2</sup>
 
 <a id="a4"></a>
 **A4 — The site's panel cannot save** · ✅ · retired. Did not reproduce: the site's Announcements panel adds, edits, deletes and searches on OJS, OMP and OPS, and the site's pages show the result (Rule 16); live-probed 2026-09-17. <sup>f-a4</sup>
@@ -1675,22 +1699,58 @@ announcement's page only when "Announcement" is empty.
 **j — the image.** `FieldUploadImage` (`acceptedFiles: 'image/*'`,
 `maxFilesize` = PHP's `upload_max_filesize`; the Dropzone default
 messages print, as *Highlights* note g records) uploads to the
-`temporaryFiles` API; on save `Announcement::save()` →
-`handleImageUpload()` → `isValidImage()`: `getimagesize()` must succeed and
-`FileManager::getImageExtension(mime)` (`.gif`, `.jpg`, `.png`, `.ico`…)
-must equal `'.' . pathinfo(originalName, PATHINFO_EXTENSION)`, a
-case-sensitive string compare, so `photo.jpeg` (`.jpg` ≠ `.jpeg`) and
-`PHOTO.PNG` (`.png` ≠ `.PNG`) fail and throw `StoreTemporaryFileException`.
+`temporaryFiles` API; on save `Announcement::save()` runs `parent::save()`
+(which stores the request's `image` value, the temporary file reference)
+and then `handleImageUpload()` → `FileManager::isValidImage()`:
+`getimagesize()` must succeed and `FileManager::getImageExtension(mime)`
+(`.gif`, `.jpg`, `.png`, `.webp`, `.ico`…) must equal `'.'` plus the
+original name's extension lower-cased, with `jpeg` taken for `.jpg`;
+otherwise it throws `StoreTemporaryFileException`.
 `PKPAnnouncementController::add()` then destroys the just-created row and
 answers 400 `api.400.errorUploadingImage` under `image`; `edit()` catches
-the same exception with `$announcement->delete()` (its own comment: "TODO
-do we really need to delete an announcement if the image upload fails?")
-before answering the 400. A stored image is `public/…/announcements/{id}.{ext}`
+the same exception and only answers the 400 (A21: the stored temporary
+reference stays). A stored image is `public/…/announcements/{id}.{ext}`
 (`Announcement::IMAGE_SUBDIRECTORY`), replaced in place by a new upload
 (`deleteImage()` then `handleImageUpload()`), removed with its settings row
 when the field is emptied, and deleted by `delete()`. Code read
-2026-09-17.
-Live-probed 2026-09-17 (Fields "Image"; Rules 7, 15; A2, A12), OJS, OMP and
+2026-09-17; re-read 2026-10-27 at lib/pkp `c27153abdd` (`main`) and
+`3fd17879b3` (`stable-3_5_0`), after pkp/pkp-lib#13512 (`main`
+`07bc43fe67`, 3.5 `092ec34b0f`, 2026-10-16), which made the extension
+compare case-blind, accepted `.jpeg`, and removed `edit()`'s
+`$announcement->delete()` (A2).
+Live-probed 2026-10-27 (Fields "Image"; Rule 15; A2, A21), OJS, OMP and
+OPS `main` and `stable-3_5_0`, two runs each on PKP's default dataset, as
+`rvaca` (Journal Manager; `admin` for one refused edit): on an edit `photo.jpeg`,
+`PHOTO.PNG` and `IMG_0001.JPG` saved (PUT 200) as `{id}.jpg` / `{id}.png`,
+and "Add Announcement" with `photo.jpeg` or `PHOTO.PNG` saved (POST 200);
+each picture loaded on the announcement's page and the public
+Announcements page; a WebP saved as `{id}.webp` and loaded
+(`image/webp`), the earlier `{id}.png` left beside it. A PNG named
+`renamed.jpg` and a text file named `notapicture.png` uploaded (200), the
+text file listed with "Alternate text", "Remove" and a preview that did
+not load, and "Save" answered 400 `{"image":["There was an error
+uploading this image."]}` with "Please correct one error." and the page
+notice; a refused add stored nothing and was absent from the list after
+a reload. A PNG over `{id}.png` overwrote it.
+The box's file input carries `accept="image/*"` (`FieldUploadImage`
+`acceptedFiles`), which the browser and Dropzone match against the type
+the browser reads from the name; `PKPTemporaryFilesController::uploadFile()`
+checks no type. `getImageExtension()` knows, among image types, only GIF,
+JPEG (`image/jpeg`, `image/pjpeg`), PNG (`image/png`, `image/x-png`),
+the icon types (`.ico`) and WebP; BMP and TIFF have no entry, and
+`getimagesize()` cannot read an SVG. Live-probed 2026-10-27 (Fields
+"Image"; A21), OJS, OMP and OPS `main` and OJS `stable-3_5_0`, one run
+each on freshly reset dataset fleets as `rvaca`, identical on all four:
+`photo.bmp` (a 24-bit BMP), `photo.svg` and `photo.tif` (an RGB TIFF)
+were each let into the box with no refusal words ("photo.bmp REMOVE
+FILE", "Save" enabled), the temporary upload answered 200 with
+`image/bmp`, `image/svg+xml`, `image/tiff`; "Save" on "Add
+Announcement" answered POST 400 with the refusal, messages and notice
+above, nothing stored (no row after a reload, no database row, no file);
+"Save" on an edit answered PUT 400 the same and left A21's state. The
+`.ico` case is the code's alone, not driven.
+Live-probed 2026-09-17 (Fields "Image"; Rules 7, 15; A2, A12), before
+pkp/pkp-lib#13512, OJS, OMP and
 OPS: a `.txt` is listed in the box as "notes.txt REMOVE FILE" with "You
 can't upload files of this type.", "Save" and "Upload File" disabled, and
 "REMOVE FILE" clears it and re-enables both; `photo.gif`, `photo.jpg` and
@@ -2065,7 +2125,20 @@ next fetch. Code read 2026-09-17. Live-probed 2026-09-17 (A2), OJS, OMP and OPS:
 `photo.jpeg` and `PHOTO.PNG` on an edit answered the message (PUT 400); the
 row stayed until a reload, then was gone with its page; the announcement's
 `{id}.png` stayed on disk.
-Issue report: [pkp-e2e#770](https://github.com/jardakotesovec/pkp-e2e/issues/770) ([docs/issues/U12-A2-refused-image-deletes-announcement.md](../issues/U12-A2-refused-image-deletes-announcement.md)).
+Retired 2026-10-27: fixed by pkp/pkp-lib#13512 (`main` `07bc43fe67`, 3.5
+`092ec34b0f`, 2026-10-16), whose `edit()` catch no longer deletes and whose
+`isValidImage()` lower-cases the extension and takes `jpeg` for `.jpg`
+(note j). Live-probed 2026-10-27, OJS, OMP and OPS `main` (ojs
+`5153465178`, omp `ceae6e275f`, ops `66a3bb98a5`, lib/pkp `c27153abdd`)
+and `stable-3_5_0` (ojs `a9e01889b0`, omp `3c8c7c4964`, ops `07926c35b4`),
+two runs each on PKP's default dataset, as `rvaca` and as `admin`: an edit
+with `photo.jpeg`, `PHOTO.PNG` or `IMG_0001.JPG` saved (PUT 200); an edit
+with a picture still refused (`renamed.jpg`, `notapicture.png`) answered
+PUT 400 and the announcement stayed in the list and on its page after a
+reload (what it kept is A21); the report's kept walk, re-run on freshly
+reset fleets on both lines, saved at its refusal step (200) with the
+announcement kept.
+Issue report: [pkp-e2e#770](https://github.com/jardakotesovec/pkp-e2e/issues/770), closed 2026-10-27 at the retirement; the report and its walk were deleted then (git history keeps them).
 
 <a id="fn-f-a3"></a>
 **f-a3 — A3 evidence.** Note k: the edit modal prints through
@@ -2311,6 +2384,45 @@ screen's own "Add Announcement" beside it logged nothing; the
 announcement's page, signed out and as `rvaca`, showed its title, date
 and text and logged nothing.
 Issue report: [pkp-e2e#1070](https://github.com/jardakotesovec/pkp-e2e/issues/1070) ([docs/issues/U12-A20-api-announcement-add-logs-warning.md](../issues/U12-A20-api-announcement-add-logs-warning.md)).
+
+<a id="fn-f-a21"></a>
+**f-a21 — A21 evidence.** `Announcement::save()` calls `parent::save()`,
+which stores the request's `image` value (the temporary file reference),
+before `handleImageUpload()` runs `isValidImage()` (note j); on the
+refusal `PKPAnnouncementController::edit()` answers 400 and leaves that
+reference stored. `deleteImage()` reads `fresh()->image`, by then the
+reference with no `uploadName`, so no file is removed. The panel's next
+save sends the stored reference again, which is refused again. Code read
+2026-10-27, lib/pkp `c27153abdd` (`main`) and `3fd17879b3`
+(`stable-3_5_0`). Live-probed 2026-10-27, OJS, OMP and OPS `main` and
+`stable-3_5_0`, two runs each on PKP's default dataset, as `rvaca` and
+(one refused edit) `admin`: an edit with `renamed.jpg` (a PNG) or
+`notapicture.png` (a text file), after "Remove" or without it, answered
+PUT 400; `announcement_settings.image` went from
+`{"name":"photo.png","uploadName":"{id}.png",…,"altText":"…"}` to
+`{"temporaryFileId":N}`; the announcement's page and the public
+Announcements page printed `<img src="…/announcements/?" alt="">`, which
+answered 404, and the folder kept `{id}.png`. A title-only edit then
+answered 400 with the title stored. "Remove" then "Save" answered 200,
+deleted the setting and left `{id}.png`. "Restore Original" then "Save"
+in the refused panel answered 200 with the original setting back, the
+box still listing `renamed.jpg`; a later "Edit" with "Restore Original"
+then "Save" answered 400. No server error beyond the refusal's 400s.
+The kept file (Rule 15): live-probed 2026-10-27, OJS, OMP and OPS `main`
+and OJS `stable-3_5_0`, one run each on freshly reset dataset fleets as
+`rvaca`, identical on all four. The address the announcement's page
+printed after an add with `photo.png` (for example
+`/public-ds2/journals/1/announcements/7.png?…` on OJS; `presses/…` on
+OMP, `contexts/…` on OPS), fetched in the same browser, answered 200
+`image/png` (1850 bytes) after the add, again after the refused edit
+(page picture `…/announcements/?`, 404) and again after "Remove" then
+"Save" (page text-only, setting deleted); the folder kept `7.png`
+throughout. A BMP, SVG or TIFF refused on an edit left the same state
+as `renamed.jpg` (note j).
+Medium: the edit misleads and the page loses its picture silently, but
+"Restore Original" before closing, or "Remove" and a new upload, gets
+round it, and it takes a narrow input (a file whose name and content
+disagree).
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls
