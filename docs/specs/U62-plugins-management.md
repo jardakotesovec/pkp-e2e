@@ -1573,7 +1573,7 @@ steps saw the plugin's own 1.0.0.0. A fix would call
 before `execute()` in `upgradePlugin()`. pkp/pln's `upgrade.xml` on
 its default branch has no `<upgrade>` block (read 2026-10-27); the
 other gallery plugins were not read.
-Issue report: [docs/issues/U62-A11-plugin-upgrade-skips-own-version-steps.md](../issues/U62-A11-plugin-upgrade-skips-own-version-steps.md).
+Issue report: [pkp-e2e#1075](https://github.com/jardakotesovec/pkp-e2e/issues/1075) ([docs/issues/U62-A11-plugin-upgrade-skips-own-version-steps.md](../issues/U62-A11-plugin-upgrade-skips-own-version-steps.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-i. Live-probed 2026-09-27 (OJS, two runs): with
