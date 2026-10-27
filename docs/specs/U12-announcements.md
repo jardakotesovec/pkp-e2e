@@ -1274,7 +1274,6 @@ No release carries this yet: it is on `main` and on the 3.5 branch,
 and ships with 3.5's next patch release unless fixed first. Released
 3.5 versions delete the whole announcement on the same refusal instead.
 Basis: probe, 2026-10-27. <sup>f-a21</sup>
-Report: refresh owed — asked in the bot thread on Mattermost, 2026-10-27: "the proposed fix for https://github.com/jardakotesovec/pkp-e2e/issues/1076 adds controller concerns to the model class, which is an anti-pattern. Can you try an approach that keeps the interactions with the `Request` class in particular outside of the `Announcement` model class?" (2026-10-27)
 
 ### OMP
 

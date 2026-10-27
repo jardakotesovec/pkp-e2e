@@ -15,6 +15,12 @@
 - **Checked** 2026-10-27, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
+Update 2026-10-27: a team member asked for a fix that keeps request
+handling out of the `Announcement` model. The proposed fix now checks
+the new picture in `PKP\announcement\Repository::validate()`, before
+the write, and leaves the model unchanged; it was tried again on `main`
+with the same outcome.
+
 ## Summary
 
 A manager edits an announcement that has a picture and uploads a new
@@ -46,10 +52,10 @@ and ships with 3.5's next patch release unless fixed first. Released
   but no screen can put it back.
 - **Who:** a manager who uploads, on an edit, a file the "Image" box
   accepts and "Save" refuses (above); then every manager who edits that
-  announcement. The site's announcements run the same code.
-- **Way round:** "Restore Original" then "Save" before closing the
-  panel. Afterwards, "Remove" then "Save" (any manager can), and an
-  upload of an accepted picture.
+  announcement.
+- **Way round:** before closing the panel, "Restore Original" then
+  "Save". After closing it, any manager can press "Remove" then "Save",
+  and then upload an accepted picture.
 
 Medium: the edit misleads and the public pages lose the picture
 silently, but there is a way round on screen and it takes an unusual
@@ -199,81 +205,106 @@ the code):
 
 ## Proposed fix
 
-Check the new picture before anything is written, in
-`Announcement::save()`, the way the context, site and publication
-services check an upload before they update the row; and refuse a
-temporary file that cannot be found for the user who saves the same way
-as an invalid one
+Check a new picture in `PKP\announcement\Repository::validate()`, which
+`PKPAnnouncementController::add()` and `edit()` both call before
+`Announcement::create()` or `update()`. Resolve the temporary file there
+for the current user, and refuse a missing file or one that is not an
+image the announcement can store with the field error "There was an
+error uploading this image."
 ([fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/refused-picture-edit-breaks-announcement-picture/fix.diff)):
 
 ```diff
-     public function save(array $options = [])
-     {
-         $newlyCreated = !$this->exists;
-+        $hasNewImage = $this?->image?->temporaryFileId ?? null;
+ use PKP\context\Context;
++use PKP\file\TemporaryFileManager;
+ use PKP\plugins\Hook;
+…
+         ValidatorFactory::allowedLocales($validator, $this->schemaService->getMultilingualProps($schema), $allowedLocales);
+ 
++        // A new image must be the current user's upload and an image the announcement
++        // can store; check it here, before Announcement::save() writes anything
++        $validator->after(function ($validator) use ($props) {
++            $temporaryFileId = $props['image']['temporaryFileId'] ?? null;
++            if (!$temporaryFileId || $validator->errors()->get('image')) {
++                return;
++            }
++            $temporaryFileManager = new TemporaryFileManager();
++            $temporaryFile = $temporaryFileManager->getFile((int) $temporaryFileId, $this->request->getUser()?->getId());
++            if (!$temporaryFile || !$temporaryFileManager->isValidImage($temporaryFile)) {
++                $validator->errors()->add('image', __('api.400.errorUploadingImage'));
++            }
++        });
 +
-+        // Refuse a new image before anything is written, so that a refused
-+        // image leaves the stored announcement and its image as they were
-+        if ($hasNewImage) {
-+            $this->validateNewImage();
-+        }
-+
-         $saved = parent::save($options);
+         $errors = [];
 ```
 
-```php
-protected function validateNewImage(): void
-{
-    $user = Application::get()->getRequest()->getUser();
-    $temporaryFileManager = new TemporaryFileManager();
-    $temporaryFile = $temporaryFileManager->getFile((int) $this->image->temporaryFileId, $user?->getId());
-    // A missing file (another user's upload, or an expired one) is refused like an invalid one
-    if (!$temporaryFile || !$temporaryFileManager->isValidImage($temporaryFile)) {
-        throw new StoreTemporaryFileException($temporaryFile, static::IMAGE_SUBDIRECTORY, $user, $this);
-    }
-}
-```
-
-- `validateNewImage()` takes over the check `handleImageUpload()` makes
-  today. `handleImageUpload()` then only copies the file into the
-  public files folder and stores its name.
-- `StoreTemporaryFileException`'s constructor takes a nullable
-  `TemporaryFile` and words its message for a missing file.
-  `PKP\publication\Repository::_saveFileParam()` already throws it with
-  a missing file (`if (!$temporaryFile || …)`), which today fails with a
-  `TypeError` in the constructor (code); the change covers that caller
-  too.
+- The closest example is `PKP\publication\Repository::validate()`,
+  which adds `api.400.errorUploadingImage` to `coverImage` from a
+  `$validator->after()` rule (since 7269eaf6f0, `pkp/pkp-lib#13561`).
+  The context and site services and the highlight repository also check
+  in their `validate()` that an upload exists for the user of the
+  request (`ValidatorFactory::temporaryFilesExist()`).
+- The repository already holds the request (`$this->request`), so
+  `Announcement` gains no request or user lookup, and `save()` stays the
+  writer, unchanged.
+- The controller answers a validation error with its existing 400
+  (`{"image":["There was an error uploading this image."]}`), the same
+  body the panel shows today under "Image".
 - A refused edit then stores nothing: not the reference, and not the
   title or dates of the same edit, which matches the form's "The form
-  was not saved". The controller's 400 stays as it is.
+  was not saved".
 - A refused add is refused before the row is inserted, so the
   `Announcement::add` hook no longer fires for an announcement that is
-  then deleted, and `add()`'s clean-up finds no id to delete.
+  then deleted.
+- A second manager's save of an announcement already left with a
+  reference finds no temporary file for that manager, and is refused
+  with the same 400 instead of the `TypeError`.
+- `handleImageUpload()` keeps its own check and its
+  `Application::get()->getRequest()->getUser()` read. Taking the read
+  out would mean passing a user into `save()`, whose signature is
+  Eloquent's (reached through `create()` and `update()`), or looking the
+  file up by id alone and leaving its owner check to `validate()`, so
+  that a caller who skips `validate()` would attach any user's upload.
+  Either is a design change that goes beyond this fault. The read was
+  there before this fault, so the fix leaves it.
 
 Tried on `main` in all three apps: both groups of Steps then showed
 their Expected. On an announcement broken before the fix was applied,
 another manager's save was refused with "There was an error uploading
 this image." (400, no server error) and stored nothing, and that
-manager's "Remove" then "Save" still cleared the picture. As a neighbour check, with the fix in
-and out: a GIF replacing the picture saved and showed, a title-only
-edit kept the picture, "Add Announcement" with `renamed.jpg` was
-refused and added nothing, and "Restore Original" then "Save" after a
-refused save put the picture back.
+manager's "Remove" then "Save" still cleared the picture. As a neighbour
+check, with the fix in and out: a GIF replacing the picture saved and
+showed, a title-only edit kept the picture, "Add Announcement" with
+`renamed.jpg` was refused and added nothing, and "Restore Original" then
+"Save" after a refused save put the picture back.
 
 **Alternatives:**
 
+- Check the picture in `Announcement::save()` before `parent::save()`.
+  It covers callers who skip
+  `validate()`, but adds a request and user lookup to the model; the
+  repository's validation is where pkp-lib checks an upload before the
+  write.
+- `ValidatorFactory::temporaryFilesExist()` for the missing file, as
+  the context and site services and the highlight repository use. Its
+  error reads "The file you uploaded could not be found. Please try to
+  upload it again.", which is odd for a manager who uploaded nothing.
+  The proposed rule gives one message for both cases.
 - Wrap `$announcement->update($params)` in a database transaction in
-  `PKPAnnouncementController::edit()`. It undoes the write, but only for
-  that caller: a plugin or task that calls `save()` keeps the fault.
-- Restore the stored picture in `edit()`'s catch. The same one-caller
-  limit, and it keeps the rest of the refused edit.
+  `PKPAnnouncementController::edit()`, or restore the stored picture in
+  its catch. Both would undo the write for this one caller only.
+  Restoring the picture in the catch would also leave the rest of the
+  refused edit stored.
 
 **What goes with it:**
 
+- A caller that writes an announcement without `validate()` (a plugin,
+  a script) still meets the old order: `handleImageUpload()`'s check
+  runs after the write. pkp-lib leaves validation to its callers in the
+  same way for every repository.
 - An e2e guard in U12 (a Planned item there): an edit whose new picture
   is refused keeps the announcement's picture on its page, and a later
-  title-only "Save" goes through. Or a unit test of `save()` with an
-  invalid and with a missing temporary image.
+  title-only "Save" goes through. Or a unit test of `validate()` with an
+  invalid, a missing and another user's temporary image.
 - Announcements already left with a reference stay without a picture
   until a manager presses "Remove" then "Save"; with the fix, other
   saves of them are refused with the 400 instead of failing. Their old
@@ -281,13 +312,13 @@ refused save put the picture back.
   names the file to restore.
 - The fix for the picture files left behind by deletes and replacements
   ([pkp-e2e#771](https://github.com/jardakotesovec/pkp-e2e/issues/771))
-  changes the same opening lines of `save()`, so whichever lands second
-  needs a trivial rebase. With both in, a refused picture touches
-  neither the stored setting nor the old file.
+  changes `Announcement::save()`, which this fix leaves alone: the two
+  apply independently. With both in, a refused picture touches neither
+  the stored setting nor the old file.
 - 3.5 takes the diff as written.
 
-Small: one check moved ahead of the write in one class, and a nullable
-parameter in its exception, with a test.
+Small: one validation rule in one class, following the publication
+repository's pattern, with a test.
 
 ## Evidence
 
@@ -309,9 +340,10 @@ parameter in its exception, with a test.
   the Steps walked on `main` and `stable-3_5_0`, OJS, OMP and OPS; the
   second group on `main` (OJS, OMP, OPS) and OJS `stable-3_5_0`, where
   the `TypeError` names line 336 (the 3.5 file has one more `use`
-  line). The fix tried on `main` in all three apps: walk.js, reach.js
-  (whole, and `PART=other` on an announcement broken before the apply),
-  and `MODE=neighbour` with the fix in and out. Without the fix a
+  line). The fix (the `validate()` version) tried on `main` in all
+  three apps: walk.js, reach.js (whole, and `PART=other` on an
+  announcement broken before the apply), and `MODE=neighbour` with the
+  fix in and out. Without the fix a
   refused "Add Announcement" also logs `PHP Warning: Attempt to read
   property "image" on null in …/Announcement.php on line 301` (the
   delete's warning, pkp-e2e#771); with it, nothing.
@@ -343,8 +375,7 @@ parameter in its exception, with a test.
   `pkp/pkp-lib#12744` (open) is about ".jpeg" names being refused, not
   what a refusal leaves stored; `pkp/pkp-lib#10668` (closed) about a
   picture not saved on an add.
-- Not driven: the site's announcements, the REST API by a program, the
-  failed-copy branch, and the publication cover image's missing-file
-  case (code). Unverified: `TemporaryFileManager::_performPeriodicCleanup()`
+- Not driven: the site's announcements, the REST API by a program and
+  the failed-copy branch (code). Unverified: `TemporaryFileManager::_performPeriodicCleanup()`
   deletes expired temporary files, after which the reference's own
   manager would also meet the `TypeError` (code).
