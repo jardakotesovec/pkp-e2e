@@ -93,8 +93,8 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
         // The compose step's Message box is a TinyMCE iframe; its body is the
         // text the step shows (and what the sent email's body is compared to).
         this.bodyEditor = page.frameLocator('iframe').locator('body');
-        // The steps rail (its list carries the raw ##invitation.wizard.completeSteps##
-        // token as its name, register A7, so it is found by its content).
+        // The steps rail, found by its content: its list was named by the raw
+        // ##invitation.wizard.completeSteps## token until pkp/pkp-lib#13497 gave it a name.
         this.stepsList = page.locator('main').getByRole('list').filter({hasText: 'Enter details'});
         // Rule 13's immediate-action dialogs on an existing member's roles table.
         this.mastheadDialog = page.getByRole('dialog', {name: 'Confirm masthead visibility change'});
