@@ -11,6 +11,9 @@
 //   target    the same button's box, and what the pointer hits 4, 8 and 12 px outside its icon
 //   keyboard  the button focused, Enter: the menu open and where the focus is; ArrowDown; Escape: the
 //             menu gone and the focus back on the button
+//   tab       opened with Enter, then Tab: the menu open or closed, where the focus is (headlessui closed
+//             the menu and moved on; reka-ui's menu content swallows Tab)
+//   ctrl      a Ctrl+click on the button: the menu open or not
 //   select    an item chosen with the mouse ("Email", a button action): the window it opens, the menu gone
 //   workflow  submission 1's workflow, Submission stage, a Participants row's "…", then a page-level Escape at once:
 //             whether the menu closed and the workflow window stayed
@@ -101,6 +104,30 @@ forEachApp(async (app) => {
         menuOpen: (await menuFacts(page)).open,
         focusOnButton: await btn.evaluate((b) => document.activeElement === b),
     };
+
+    // tab
+    await btn.focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(400);
+    await page.keyboard.press('Tab');
+    await page.waitForTimeout(400);
+    out.tab = await page.evaluate((sel) => ({
+        menuOpen: [...document.querySelectorAll(sel)].some((e) => e.getClientRects().length),
+        focused: `${document.activeElement?.tagName.toLowerCase()} ${(document.activeElement?.getAttribute('aria-label') || document.activeElement?.innerText || '').trim().slice(0, 40)}`,
+    }), MENU);
+    if (out.tab.menuOpen) {
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(300);
+    }
+
+    // ctrl
+    await btn.click({modifiers: ['Control']});
+    await page.waitForTimeout(400);
+    out.ctrl = {menuOpen: (await menuFacts(page)).open};
+    if (out.ctrl.menuOpen) {
+        await page.locator(MENU).first().press('Escape');
+        await page.waitForTimeout(300);
+    }
 
     // select
     await btn.click();
