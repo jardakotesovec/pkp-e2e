@@ -18,8 +18,7 @@
  * (S3 removes the type "Event" and asserts the dialog, the notice, the row
  * gone and the untyped announcements kept; what becomes of the typed
  * "Workshop" is not asserted either way), A3 🐞 (the press keeps its
- * default "Date (Short)"), A21 🐞 (no edit uploads a picture "Save"
- * refuses), A9 🐞 (no edit ticks the email box), A11 🐞 (every panel is
+ * default "Date (Short)"), A9 🐞 (no edit ticks the email box), A11 🐞 (every panel is
  * closed by "Save" or its close control with nothing typed), A12 🐞 (S2
  * deletes an announcement whose picture was already removed, so no file is
  * left to read), A13 🐞 (S3 reloads before it reads the edited type's row),

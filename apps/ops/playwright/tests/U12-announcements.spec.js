@@ -22,8 +22,7 @@
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
  * (S3 asserts the remove dialog's sentence and the announcement gone with
  * its type, never that the dialog says nothing of it), A3 🐞 (the short
- * date format stays YYYY-MM-DD), A21 🐞 (no edit uploads a picture "Save"
- * refuses),
+ * date format stays YYYY-MM-DD),
  * A5 🐞 (S3 chooses a type and reads it chosen again, never that the
  * public pages print it nowhere), A6 ❓ (S3 presses no "none"), A7 🐞, A8 ❓
  * (no announcement is added while the box is unticked), A9 ❓ (no edit
