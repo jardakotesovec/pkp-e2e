@@ -1557,50 +1557,46 @@ trips.
   fix (`omp-stable-3_5_0` 40031724936, `omp-main` 40031753818, queued at
   22:09 UTC); a sighting of either signature from then on is a new cause.
 
-- **pkp/ojs, omp, ops `stable-3_3_0` Cypress (5.6): the pkp-lib step
-  still on Chrome, and timing races in the data suite** (every
-  `<app>-stable-3_3_0` push run, all ten DB jobs; investigated 2026-10-24,
-  asked by @jarda.kotesovec). Before 2026-10-21 every job died at login on
-  the runners' Chrome 144+; pkp/pkp-github-actions `0bdd4bfe68` (Alec
-  Smecher) moved `run-data-integration-tests.sh` to Cypress's bundled
-  Electron 85, and two causes showed behind it (runs 40044754020 ojs,
-  40044777999 omp, 40044832976 ops; 39787266156 ojs).
-  (1) Deterministic: `run-pkp-lib-and-plugin-integration-tests.sh` (lines
-  34, 36, the Node < 13 branch) still passes `--browser chrome`, logged as
-  Chrome 155: `Filenames.spec.js:113` (`a:contains("Assign")`) and
-  `Multilingual.spec.js:107` (`Setup`) land on the dashboard after the
-  sign-in and fail on every job that reaches the step (OMP 10/10, OPS 6/10,
-  OJS 2/10). Fix: the same switch to Electron, kept as
-  `shared/playwright/checks/sync/ci33-cypress-browser/0001-pkp-github-actions-electron.patch`
-  (the bot's token cannot push to pkp-github-actions). Tried with
-  `electron-check.yml` on a throwaway branch, run
-  [40057377979](https://github.com/jardakotesovec/pkp-e2e/actions/runs/40057377979):
-  both specs pass on all 4 jobs that reach the step (OMP 8.2 pgsql/mysql,
-  7.4 pgsql; OPS 8.2 pgsql). Control: an attempt where Cypress still
-  picked the runners' Chrome 155 (40057955556, OMP 8.2 pgsql) failed from
-  the first data spec on ("'admin' … never did"), the pre-0bdd4bfe68
-  signature.
-  (2) Flaky, test-side: the data specs act before the page settles.
-  OJS `CcorinoSubmission` and OPS `CkwantesSubmission` type into
-  `#metadata-keywords-control-en_US` right after clicking the Metadata tab
-  (the `#publication/metadata` URL change logs after the `type`):
-  "Professional Development" / "Social Transformation" / "multinational"
-  never appear, or "cy.type() failed because it targeted a disabled
-  element"; OJS `VkarbasizaedSubmission` clicks `button:contains("OK")`
-  while the previous confirm is still in the DOM (2 elements); OMP
-  `CompetingInterests.spec.js` (app integration, seen once in 40057377979)
-  visits `/login` while still signed in. On Electron these stop OJS in
-  17 of 20 jobs across its two runs above and OPS in 4 of 10, before the
-  pkp-lib step. Pinning Chrome 143 for both steps (`chrome143-check.yml`,
-  Chrome for Testing by path, run
+- **pkp/ojs, omp, ops `stable-3_3_0` Cypress (5.6): timing races in the
+  data suite** (every `<app>-stable-3_3_0` push run; investigated
+  2026-10-24, re-read 2026-10-27, both asked by @jarda.kotesovec). Before
+  2026-10-21 every job died at login on the runners' Chrome 144+; pkp/pkp-github-actions
+  `0bdd4bfe68` (Alec Smecher) moved `run-data-integration-tests.sh` to
+  Cypress's bundled Electron 85, and two causes showed behind it (runs
+  40044754020 ojs, 40044777999 omp, 40044832976 ops; 39787266156 ojs).
+  (1) Fixed upstream 2026-10-24: `run-pkp-lib-and-plugin-integration-tests.sh`
+  still passed `--browser chrome` (Chrome 155), so `Filenames.spec.js:113`
+  and `Multilingual.spec.js:107` landed on the dashboard after the sign-in
+  on every job that reached the step. pkp-github-actions `62823dc65d`
+  (Alec Smecher) is the same switch to Electron this entry proposed; in the
+  first runs after it (ojs 40421695180 and 40424833415, ops 40425488414,
+  2026-10-27, pushes of pkp-lib#13623's copyright escaping) every job that
+  reached the step passed both specs on Electron 85 (ojs 2, ops 8). OMP
+  has had no `stable-3_3_0` run since the fix (latest 40044777999,
+  2026-10-24 00:23 UTC, before it).
+  (2) Flaky, test-side, all of the 2026-10-27 reds (ojs 18 of 20 test jobs,
+  ops 2 of 10, close to 2026-10-24's 17 of 20 and 4 of 10): the data specs
+  act before the page settles. OJS `CcorinoSubmission` (14 jobs),
+  `AmwandengaSubmission` and OPS `CkwantesSubmission` type into
+  `#metadata-keywords-control-en_US` right after clicking the Metadata tab:
+  "Professional Development" / "Social Transformation" never appear, or
+  "cy.type() failed because it targeted a disabled element"; OJS
+  `VkarbasizaedSubmission` (3 jobs) clicks `button:contains("OK")` while
+  the previous confirm is still in the DOM (2 elements); OPS
+  `RbaiyewuSubmission` (new 2026-10-27, one job) clicks step 3's "Save and
+  continue" and no `saveStep/3` request follows, so `submitStep4Form`
+  never appears; OMP `CompetingInterests.spec.js` (app integration, seen
+  once in 40057377979) visits `/login` while still signed in. A pinned
+  Chrome 143 (`chrome143-check.yml`, run
   [40058677404](https://github.com/jardakotesovec/pkp-e2e/actions/runs/40058677404))
-  gave 4 of 5 green (OJS mysql, OMP pgsql, OPS pgsql and mysql); OJS pgsql
-  still hit the keyword race in `AmwandengaSubmission` and cascaded. So a
-  browser choice lowers the rate but does not remove the race; the cure is
-  in the specs (wait for the tab's field and for the modal to close). No
-  spec fix drafted. **Watch condition**: the patch applied upstream; then
-  a `Filenames`/`Multilingual` red on 3.3 is a new cause, and the data
-  suite's reds are this flake class until the specs wait.
+  lowered the rate (4 of 5 green) without removing it; the cure is in the
+  specs (wait for the tab's field, for the modal to close, for the step's
+  form to be ready). No spec fix drafted. Kept: `electron-check.yml`,
+  `chrome143-check.yml` in `shared/playwright/checks/sync/ci33-cypress-browser/`.
+  **Watch condition**: OMP's first `stable-3_3_0` run should pass the
+  pkp-lib step; a `Filenames`/`Multilingual` red on 3.3 is now a new
+  cause, and the data suite's reds are this flake class until the specs
+  wait.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
