@@ -165,7 +165,11 @@ No suite is meant to run on any of the three lines.
   or Production, then 500 on `updateCurrentPublication()`): a 3.5 drive
   seeds `decisions: ['skipExternalReview', 'sendToProduction']` and
   publishes on screen, as `checks/U63/I09/doaj35.js` `publish35` does
-  (U63, U17 claim checks, 2026-10-09). The suites' page objects follow
+  (U63, U17 claim checks, 2026-10-09). On OMP 3.5 an approved
+  `publicationFormats` entry answers 500 too ("SmartyException: Unknown
+  resource type 'plugins-N-plugins-pubIds-urn-pubIds-urn'"): seed it
+  `approved: false` and approve the format on screen (sync reporter,
+  2026-10-26). The suites' page objects follow
   `main`'s screens, and those the issue walks keep meeting differ on 3.5:
   the submission wizard opens on "Details", then "Upload Files"; "Create
   New Version" is a button in the publication page's header, confirmed
