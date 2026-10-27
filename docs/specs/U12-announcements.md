@@ -2422,7 +2422,7 @@ Medium: the edit misleads and the page loses its picture silently, but
 round it, and it takes a narrow input (a file whose name and content
 disagree).
 Live-probed 2026-10-27, OJS, OMP, OPS `main` and OJS `stable-3_5_0`: after `rvaca`'s refused edit, `admin`'s title-only "Save" answered PUT 500 `TypeError: Announcement::getImageFilename(): Argument #1 ($temporaryFile) must be of type PKP\file\TemporaryFile, null given` (line 335 on main, 336 on 3.5), with the title stored; `TemporaryFileManager::getFile()` looks the temporary file up for the user who saves (issue report walk, `reach.js`).
-Issue report: [docs/issues/U12-A21-refused-picture-edit-breaks-announcement-picture.md](../issues/U12-A21-refused-picture-edit-breaks-announcement-picture.md).
+Issue report: [pkp-e2e#1076](https://github.com/jardakotesovec/pkp-e2e/issues/1076) ([docs/issues/U12-A21-refused-picture-edit-breaks-announcement-picture.md](../issues/U12-A21-refused-picture-edit-breaks-announcement-picture.md)).
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls

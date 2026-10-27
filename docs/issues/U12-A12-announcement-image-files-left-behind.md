@@ -303,8 +303,8 @@ and removed `2.png`.
   compare each `announcements/` folder with the stored `uploadName`s.
   It is not needed for the fix.
 - 3.5 takes the diff as written.
-- This diff and the one for refused pictures
-  ([pkp-e2e#770](https://github.com/jardakotesovec/pkp-e2e/issues/770))
+- This diff and the one for a refused picture on an edit
+  ([pkp-e2e#1076](https://github.com/jardakotesovec/pkp-e2e/issues/1076))
   change the same lines at the top of `save()`, so whichever lands
   second needs a trivial rebase.
 
