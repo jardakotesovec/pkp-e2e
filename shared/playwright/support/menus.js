@@ -1,31 +1,31 @@
 /**
  * @file lib/pkp/playwright/support/menus.js
  *
- * Closing an open ui-library "More Actions" menu (`DropdownActions`, a
- * headlessui 1.7 Menu) without choosing an item.
+ * Closing an open ui-library "More Actions" menu (`DropdownActions`)
+ * without choosing an item.
  *
- * headlessui renders the menu at once on the button's click but hands
- * keyboard focus from the button to the menu only two animation frames
- * later (`MenuButton` onClick: `openMenu()`, then
- * `requestAnimationFrame(() => requestAnimationFrame(focus menu))`), and
- * only the menu element handles Escape (closes itself, stops the event).
- * An Escape sent through `page.keyboard` inside that window lands on the
- * button, which ignores it, and bubbles to the document: inside the
- * workflow panel or any other side window that is the reka-ui dialog's own
- * Escape, and the whole window closes (patterns.md locator pitfall 7). A
- * busy renderer (four workers, CI, a heavy dashboard behind the panel)
- * widens the window past the test's own reads of the items; U30 S4 lost
- * its workflow panel that way on CI and in most local OJS finals
- * (.reports/flake-s26/u30/diagnosis.md).
+ * `DropdownActions` is a reka-ui `DropdownMenu` (non-modal) since
+ * ui-library#1006 (pkp-lib#12647); before it, it was a headlessui 1.7
+ * Menu. The menu content renders inline beside its button, only while
+ * open, as `[data-reka-menu-content][role="menu"]`, and it is a reka-ui
+ * dismissable layer: Escape closes the topmost layer only, so an Escape
+ * pressed while the menu is open closes the menu and leaves the workflow
+ * panel or side window behind it open.
  *
- * `locator.press()` focuses the menu element before the key, so the Escape
- * reaches the menu's own handler whatever the frame timing.
+ * Under headlessui the focus reached the menu two animation frames after
+ * the button's click and only the menu element handled Escape; an Escape
+ * sent through `page.keyboard` in that window closed the enclosing reka-ui
+ * dialog instead (patterns.md locator pitfall 7; U30 S4,
+ * .reports/flake-s26/u30/diagnosis.md). `locator.press()` on the menu
+ * stays the one way to close it: it reaches the menu whatever the
+ * frame timing, and a menu that is not open fails the press instead of
+ * sending a stray Escape to the page.
  */
 const {expect} = require('@playwright/test');
 
-/** The open headlessui menu (its items container, `role="menu"`). */
+/** The open "More Actions" menu (reka-ui menu content, `role="menu"`). */
 function openMenu(page) {
-    return page.locator('[id^="headlessui-menu-items-"][role="menu"]');
+    return page.locator('[data-reka-menu-content][role="menu"]');
 }
 
 /**

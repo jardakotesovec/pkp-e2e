@@ -49,13 +49,17 @@ Each of these has bitten at least once.
    `aria-expanded`, the others carry none, so read a group by its header's
    `aria-controls` region and open it by pressing the header (U14 claim
    check K1, 2026-09-16).
-3. **Headlessui menus (More Actions).** Items are `role="menuitem"`, and the
-   menu portals to the document root. Scope to `page`, not to the row.
-   Close one with `closeMenu(page)` (`shared/playwright/support/menus.js`),
-   never a page-level Escape: focus enters the menu two animation frames
-   after the click, and an Escape before that closes whatever encloses the
-   menu, the workflow panel included (U01 S7, U30 S4; `npm run lint:suite`
-   flags page-level Escapes). A ui-library `Dropdown` (`.pkpDropdown__content`,
+3. **"More Actions" menus (`DropdownActions`).** A reka-ui `DropdownMenu`
+   since ui-library#1006 (pkp-lib#12647; a headlessui Menu before): the
+   open menu is `[data-reka-menu-content][role="menu"]`, rendered beside
+   its button only while open, its items `role="menuitem"`. Scope item
+   lookups to `page`, not to the row. Close one with `closeMenu(page)`
+   (`shared/playwright/support/menus.js`), never a page-level Escape: under
+   headlessui focus entered the menu two animation frames after the click
+   and an Escape before that closed whatever enclosed the menu, the
+   workflow panel included (U01 S7, U30 S4); reka-ui closes the topmost
+   layer only, but `closeMenu` also fails loudly when no menu is open
+   (`npm run lint:suite` flags page-level Escapes). A ui-library `Dropdown` (`.pkpDropdown__content`,
    the DOIs page's "Bulk Actions") closes only by a timer on its button's
    blur (100 ms, then once a second), and a window one of its items opens
    hands the focus back to that item when it closes: answered within that

@@ -9,10 +9,11 @@
  *    Playwright ignores the timeout of these (deprecated), so the call is a
  *    one-shot read, not a wait (U30's `openResponseWindow`). Use
  *    `locator.waitFor({state, timeout})` or a web-first assertion.
- * 2. `page.keyboard.press('Escape')`: right after a headlessui "More
- *    Actions" menu opens, focus moves into it two frames later, so an
- *    Escape sent to the page lands on the page and closes the enclosing
- *    workflow panel instead (U01 S7 2026-09-13, U30 S4 2026-09-26). Close
+ * 2. `page.keyboard.press('Escape')`: under headlessui (before
+ *    ui-library#1006) focus moved into an opened "More Actions" menu two
+ *    frames later, so an Escape sent to the page landed on the page and
+ *    closed the enclosing workflow panel instead (U01 S7 2026-09-13, U30 S4
+ *    2026-09-26); an Escape with no menu open still does. Close
  *    menus with `closeMenu()` (shared/playwright/support/menus.js). An
  *    Escape that is meant for the page carries `// lint-ok: escape <reason>`
  *    on its line or the line above.
