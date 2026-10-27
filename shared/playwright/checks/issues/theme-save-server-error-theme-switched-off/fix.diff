@@ -1,0 +1,65 @@
+--- a/lib/pkp/api/v1/contexts/PKPContextController.php
++++ b/lib/pkp/api/v1/contexts/PKPContextController.php
+@@ -486,18 +486,19 @@
+ 
+         $params = $illuminateRequest->input();
+ 
+-        // Validate the themePluginPath and allow themes to perform their own validation
++        // Validate the themePluginPath and allow themes to perform their own validation.
++        // Validate it even when unchanged: the stored theme may have been disabled or removed since.
+         $themePluginPath = empty($params['themePluginPath']) ? null : $params['themePluginPath'];
++        $errors = $contextService->validate(
++            EntityWriteInterface::VALIDATE_ACTION_EDIT,
++            ['themePluginPath' => $themePluginPath],
++            $context->getSupportedFormLocales(),
++            $context->getPrimaryLocale()
++        );
++        if (!empty($errors)) {
++            return response()->json($errors, Response::HTTP_BAD_REQUEST);
++        }
+         if ($themePluginPath !== $context->getData('themePluginPath')) {
+-            $errors = $contextService->validate(
+-                EntityWriteInterface::VALIDATE_ACTION_EDIT,
+-                ['themePluginPath' => $themePluginPath],
+-                $context->getSupportedFormLocales(),
+-                $context->getPrimaryLocale()
+-            );
+-            if (!empty($errors)) {
+-                return response()->json($errors, Response::HTTP_BAD_REQUEST);
+-            }
+             $newContext = $contextService->edit($context, ['themePluginPath' => $themePluginPath], $request);
+         }
+ 
+--- a/lib/pkp/api/v1/site/PKPSiteController.php
++++ b/lib/pkp/api/v1/site/PKPSiteController.php
+@@ -188,19 +188,20 @@
+ 
+         $params = $illuminateRequest->input();
+ 
+-        // Validate the themePluginPath and allow themes to perform their own validation
++        // Validate the themePluginPath and allow themes to perform their own validation.
++        // Validate it even when unchanged: the stored theme may have been disabled or removed since.
+         $themePluginPath = empty($params['themePluginPath']) ? null : $params['themePluginPath'];
+-        if ($themePluginPath !== $site->getData('themePluginPath')) {
+-            $errors = $siteService->validate(
+-                ['themePluginPath' => $themePluginPath],
+-                $site->getSupportedLocales(),
+-                $site->getPrimaryLocale()
+-            );
++        $errors = $siteService->validate(
++            ['themePluginPath' => $themePluginPath],
++            $site->getSupportedLocales(),
++            $site->getPrimaryLocale()
++        );
+ 
+-            if (!empty($errors)) {
+-                return response()->json($errors, Response::HTTP_BAD_REQUEST);
+-            }
++        if (!empty($errors)) {
++            return response()->json($errors, Response::HTTP_BAD_REQUEST);
++        }
+ 
++        if ($themePluginPath !== $site->getData('themePluginPath')) {
+             $newSite = $siteService->edit($site, ['themePluginPath' => $themePluginPath], $request);
+         }
+ 

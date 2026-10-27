@@ -1294,7 +1294,7 @@ otherwise; the team settles them on spec review.
 | [A22](#a22) | A logo, thumbnail, homepage image or favicon replaced by another file type stays online at its old address | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A23](#a23) | A program reading a journal's, press's or server's switched-off theme gets "{$themePluginPath}" for its name | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A24](#a24) | A REST API client reading the site's theme gets a server error while "Default Theme" is switched off on the site | 🐞 | low · crash: server | issues (claude), 2026-10-26 — re-verified |
-| [A26](#a26) | "Save" under "Theme" fails with a server error while the theme in use is unticked | 🐞 | user-visible · crash: server | — |
+| [A26](#a26) | "Save" under "Theme" fails with a server error while the theme in use is unticked | 🐞 | low · crash: server | issues (claude), 2026-10-27 — re-verified |
 | [OJS5](#ojs5) | Unticking every "Journal Content Organization" box says "Saved", but the home page keeps the current issue | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OJS6](#ojs6) | On a journal's home page, each "Latest Publications" title is a heading at the section's own level | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP2](#omp2) | A press's category page shows only its first page of books, with no way to the rest | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1725,18 +1725,23 @@ repeated tries are needed to settle it. Basis: probe, 2026-10-23.
 <sup>f-a25</sup>
 
 <a id="a26"></a>
-**A26 — "Save" under "Theme" fails with a server error while the theme in use is unticked** · 🐞 · user-visible · crash: server.
+**A26 — "Save" under "Theme" fails with a server error while the theme in use is unticked** · 🐞 · low · crash: server.
 A Journal Manager unticks the theme the journal uses ("Default Theme"
 on PKP's default installation) under Settings › Website › "Plugins",
 then opens Settings › Website › "Appearance" › "Theme": the "Theme"
 list is empty. Pressing "Save" there fails: the request answers 500
 and the page shows "An unexpected error has occurred. Please reload the
 page and try again.", with no "Saved" and nothing saying the theme is
-switched off. The stored theme stays `default`, all the save asked to
-keep. On a site hosting two or more journals (Rule 4b), the Site
-Administrator gets the same after unticking "Default Theme" on the
-site's Plugins list. With the theme ticked again, "Save" shows "Saved".
-Basis: probe, 2026-10-23. <sup>f-a26</sup>
+switched off. The stored theme stays `default`.
+The Site Administrator gets the same on Administration › "Site
+Settings" › "Appearance" › "Theme" after unticking "Default Theme" on
+"Site Settings" › "Plugins". Administration shows those two tabs only
+once a site hosts two or more journals, so a single-journal site never
+meets this half.
+Ticking the theme again ends it. When another theme plugin is enabled,
+the list offers it, and choosing it and pressing "Save" switches the
+journal (or the site) to it.
+Basis: probe, 2026-10-27. <sup>f-a26</sup>
 
 ### OJS
 
@@ -2879,6 +2884,7 @@ after a reload, which showed the empty list again. Ticked again (notice
 "Saved"; the context's home page and the site's sign-in page, unstyled
 while it was unticked (no style sheet, "Times New Roman"), loaded the
 theme's four style sheets again.
+Issue report: [docs/issues/U10-A26-theme-save-server-error-theme-switched-off.md](../issues/U10-A26-theme-save-server-error-theme-switched-off.md).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `journalContentOrganization` is added by OJS's
