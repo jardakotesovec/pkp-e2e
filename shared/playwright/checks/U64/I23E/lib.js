@@ -240,7 +240,8 @@ async function nextDay(app) {
         out.loaderError = flat(`${e.message} ${e.stdout || ''} ${e.stderr || ''}`, 500);
     }
     out.jobs = await runJobs(app, config).catch((e) => ({error: flat(e.message, 300)}));
-    out.metricsIssue = sql(app, 'select count(distinct issue_id), count(*), min(date), max(date), sum(metric) from metrics_issue');
+    // OJS only: a press or a preprint server has no metrics_issue table.
+    out.metricsIssue = app.name === 'ojs' ? sql(app, 'select count(distinct issue_id), count(*), min(date), max(date), sum(metric) from metrics_issue') : null;
     out.left = Object.fromEntries(['stage', 'processing', 'dispatch', 'reject', 'archive'].map((d) => [d, fs.existsSync(path.join(dir, d)) ? fs.readdirSync(path.join(dir, d)) : null]));
     return out;
 }

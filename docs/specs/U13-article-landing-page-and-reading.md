@@ -303,7 +303,8 @@ Top to bottom: <sup>j</sup>
     Stylesheet" and "Multimedia" are, and the galley upload offers none of
     them), or that has neither a file nor a remote address, is not
     listed. The two lists carry no visible heading; a
-    screen reader reads "Downloads" and "Additional Files". <sup>e</sup>
+    screen reader reads "Downloads" and "Additional Files" (with a
+    chart chosen, after the chart's own "Downloads" [A17](#a17)). <sup>e</sup>
     <sup>q7</sup>
     - 10a. **The link text.** Each link reads the galley's label. When the
       galley's language is not the language the page is shown in, the
@@ -428,11 +429,42 @@ Top to bottom: <sup>j</sup>
       the RIS file does not.
 17. **The "Downloads" chart.** While "Usage statistics display options"
     (Settings bullet 6) is on a chart, the main column carries a section
-    headed "Downloads" with a bar or a line chart of the article's
-    downloads by month. An article with no downloads yet shows an empty
-    chart; the sentence "Download data is not yet available." never
-    appears ⚠ [A3](#a3). What counts as a download is *Statistics —
-    usage*'s. <sup>l</sup>
+    headed "Downloads" ⚠ [A17](#a17) with a bar or a line chart of the
+    article's downloads, one bar (or point) per month (Rule 17a). An
+    article with no downloads yet shows an empty chart; the sentence
+    "Download data is not yet available." never appears ⚠ [A3](#a3).
+    <sup>l</sup>
+    - 17a. **The months.** Each bar is labelled with its month and year
+      ("Oct 2026"). The chart runs from January of the year the
+      article's first version was published to the current month, the
+      months before publication at 0: an article first published this
+      March shows January to the current month. When that span is longer
+      than twelve months, the chart shows the last twelve, with a button
+      "All time" under it. "All time" widens it to every month from that
+      January and then reads "Last 12 months", which narrows it back.
+      <sup>l</sup>
+    - 17b. **What it counts.** It counts what the "Files" line of the
+      Statistics › "Articles" chart counts: each download or reader
+      opening of a main galley's file (Rule 10), a Word file's included
+      ([Statistics — usage](U64-usage-statistics.md), its Rules 1 and
+      10). That page's "File Views" and "Total" leave a Word file out
+      ⚠ [→ Statistics — usage A17](U64-usage-statistics.md#a17), so for
+      the same days the chart can read more than "File Views".
+      <sup>l</sup>
+    - 17c. **When counted downloads appear.** A download reaches the
+      chart only once the usage statistics have processed its day: the
+      routine task "Usage statistics file loader task" does that once a
+      day for each finished day, and a test install never runs it, so there
+      a scenario seeds the figures instead
+      ([Statistics — usage](U64-usage-statistics.md), its Rules 2 and 5).
+      Even then the chart keeps the
+      figures it read when any visitor first opened the page. Downloads
+      the statistics count after that opening do not show, on a reload
+      or in another browser, until a Site Administrator presses
+      Administration › "Delete Data Caches"
+      ([System administration](U61-system-administration.md), its
+      Rule 10); by the code the kept figures also lapse a day after that
+      first opening. <sup>l</sup>
 <a id="references"></a>
 18. **The "References" block.** A section headed "References" lists the
     shown version's references, one paragraph each, in list order, with
@@ -545,9 +577,10 @@ notice above the title; that notice belongs to *Preprint relations*
 
 - **Usage statistics.** Each opening of an article's page and each galley
   download or reader opening is recorded for the journal's usage
-  statistics (*Statistics — usage*), which the "Downloads" chart and the
-  preprint summary's "Downloads: {count}" read once the statistics are
-  processed; the test installs never process them. <sup>l</sup>
+  statistics ([Statistics — usage](U64-usage-statistics.md)), which the
+  preprint summary's "Downloads: {count}" reads once the statistics are
+  processed, and the "Downloads" chart once they are processed and its
+  kept figures renewed (Rule 17c); the test installs never process them. <sup>l</sup>
 - **No email, no notice.** Reading the page, opening a galley or
   downloading a citation sends no email and leaves no notice. <sup>b</sup>
 - **The citation settings.** "OK" in the "Citation Style Language"
@@ -677,6 +710,8 @@ notice above the title; that notice belongs to *Preprint relations*
 - [JATS & Body Text](U48-jats-and-body-text.md): the "JATS XML" link.
 - [Statistics — usage](U64-usage-statistics.md): the counts behind the chart and the
   preprint summary.
+- [System administration](U61-system-administration.md): "Delete Data
+  Caches", which renews the chart's kept figures (Rule 17c).
 - [Plugins management](U62-plugins-management.md): the Plugins list where the plugins
   of Settings bullets 1 to 4 and 7 to 9 are switched.
 
@@ -1242,6 +1277,15 @@ Left out of the scenarios above, by reason:
     chart for usage statistics display.": the "Downloads" section with a
     line chart; scenario 7 reads the bar chart (Settings bullet 6;
     Rule 17)
+  - the months of the "Downloads" chart: January of the first
+    version's year to the current month; an article first published
+    more than twelve months back showing the last twelve, "All time"
+    and "Last 12 months" (Rule 17a)
+  - the "Downloads" chart of an article with counted downloads, a Word
+    file's among them, reading what the "Files" line of Statistics ›
+    "Articles" reads (Rule 17b)
+  - the chart keeping its figures after downloads are processed (seeded
+    figures on a test install), until "Delete Data Caches" (Rule 17c)
   - an article outside a published issue under a journal's "Latest
     Publications" {OJS}, its main galleys only while the home page also
     shows the current issue; scenario 9 reads the same filter under
@@ -1305,6 +1349,8 @@ Left out of the scenarios above, by reason:
     summary)
   - A3 (the empty chart without "Download data is not yet
     available."; Rule 17)
+  - A17 (the two "Downloads" headings a screen reader meets with a
+    chart chosen, the chart giving no text; Rules 10, 17)
   - OJS5 ("Publication Facts Label plugin" on, and a section marked
     "Will not be peer-reviewed", with no panel either way {OJS};
     Rule 19; Settings bullet 7)
@@ -1355,7 +1401,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-24; additions
-2026-09-28, 2026-10-02 and 2026-10-05), unreviewed unless an entry notes otherwise; the team settles them on spec review.
+2026-09-28, 2026-10-02, 2026-10-05 and 2026-10-27), unreviewed unless an entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
@@ -1394,6 +1440,7 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [A3](#a3) | An article with no downloads shows an empty chart instead of "Download data is not yet available." | ❓ | minor | — |
 | [A12](#a12) | Once the first version is unpublished, the page still opens its date line with that version's date | ❓ | minor | — |
 | [A14](#a14) | The "ABNT" citation shortens given names to initials and, on a journal, prints no address or access date | ❓ | minor | — |
+| [A17](#a17) | A screen reader meets two "Downloads" headings, the chart's with nothing to read under it | ❓ | minor | — |
 | [OJS11](#ojs11) | The IEEE citation shown first opens with the number "[1]" | ❓ | minor | — |
 | [OJS13](#ojs13) | "Similar Articles" would leave out an article that shares only some of the keywords | ❓ | latent | — |
 | [OPS4](#ops4) | A preprint server has no HTML or XML reader: those galleys download | ✅ | — | — |
@@ -1661,6 +1708,22 @@ before copyediting. The proposed fix keeps that for managers and for
 everyone assigned to the submission. It closes the page before
 copyediting only to staff who are not assigned.
 Since: 2026-02-18 (the earlier-stage preview change) · Basis: probe, 2026-10-05. <sup>[f-a16](#fn-f-a16)</sup>
+
+<a id="a17"></a>
+**A17 — A screen reader meets two "Downloads" headings, the chart's with nothing to read under it** · ❓ · minor.
+With a chart chosen (Settings bullet 6), the page carries two headings
+"Downloads": the chart's visible one (Rule 17) and, further down, the
+galley list's hidden one (Rule 10). On an article with no "Author
+Biographies" and no "References" they come one right after the other.
+The chart is a picture with no text, so a screen reader announces a
+"Downloads" heading with nothing under it, then another "Downloads" over
+the galley links. A sighted reader sees one heading and the chart's
+bars.
+Question: should the chart's heading differ from the galley list's, and
+should the chart give its figures as text? Lean: yes (🐞); a
+screen-reader user gets none of the figures the chart shows, and two
+headings of one name leave them to guess which one lists the files.
+Basis: probe, 2026-10-27. <sup>[f-a17](#fn-f-a17)</sup>
 
 ### OJS
 
@@ -2669,6 +2732,34 @@ gone once the chart drew; "Do not display…" again removed the section.
 Each page opening wrote one usage event and each PDF reader opening and
 "Download" one file event to the install's usage log; nothing processed
 them, the chart stayed empty and the server's home read "Downloads: 0".
+The chart's figures (Rules 17a to 17c): `ThemePlugin::getAllDownloadsStats()`
+reads `Cache::remember("downloadStats-{id}", 24 h)`, filled by
+`ThemePlugin::downloadStatsCacheMiss()` with
+`PKPStatsPublicationService::getTimeline('month', …)` for `assocTypes`
+[`ASSOC_TYPE_SUBMISSION_FILE`] and no file-type filter, from the first
+version's `datePublished`; the server fills each month with no figures
+with 0 (`getEmptyTimelineIntervals`). Nothing clears that copy when
+the loader runs; `AdminHandler::clearDataCache()` does.
+`lib/pkp/js/usage-stats-chart.js` on `main` (since pkp/pkp-lib#12929)
+builds one entry per month from January of the first year to the
+current month, labelled `{month} {year}`, draws the last twelve and,
+past twelve, adds `button.usageStatsToggle` ("All time" / "Last 12
+months"). On `stable-3_5_0` the chart always shows the last twelve
+months, labelled by the month alone ("Nov" … "Oct"), with no button.
+Live-probed 2026-10-27 (Rules 17a to 17c; Side effects), OJS `main` and
+`stable-3_5_0` two runs each, OPS `main` three, PKP's default test data,
+the theme set to bar: a signed-out reader downloaded a "Word" galley
+and opened the PDF in its reader, and the next day's "Usage statistics
+file loader task", run by hand for the next day, counted one of each.
+The chart, first opened before
+the loader ran, still read 0 after it, on the page, on a reload and in
+a fresh browser; after `admin` pressed "Delete Data Caches" it read 2
+for October, while Statistics › "Articles" read "File Views" 1, "PDF"
+1, "Other" 0 and its chart's "Files" 2 for the day. Months: an article
+and a preprint first published in 2026 showed "Jan 2026" … "Oct 2026"
+(10 bars, no button); a preprint dated 2025-06-01 showed "Nov 2025" …
+"Oct 2026" with "All time", which widened it to "Jan 2025" … "Oct 2026"
+(22 bars, 2025's at 0) and read "Last 12 months", then narrowed it back.
 
 <a id="fn-m"></a>
 **m** — References: OJS `article_details.tpl` and OPS
@@ -3218,6 +3309,17 @@ code. Security-shaped and unreleased: its issue report carries
 "- **Security** unreleased" (REPORT.md).
 Issue report: [pkp-e2e-sec#1](https://github.com/jardakotesovec/pkp-e2e-sec/issues/1) ([docs/issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md](../issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md)).
 
+<a id="fn-f-a17"></a>
+**f-a17** — Notes e and l: OJS `article_details.tpl` and OPS
+`preprint_details.tpl` head the chart's section with `h2.label`
+`plugins.themes.default.displayStats.downloads` "Downloads" and the
+galley list with `h2.pkp_screen_reader` `submission.downloads`
+"Downloads"; the chart is `<canvas class="usageStatsGraph">` with no
+role, label or fallback content. Live-probed 2026-10-27, OJS `main` and
+`stable-3_5_0` and OPS `main`, PKP's default test data with the theme
+set to bar: the page's accessibility tree read two consecutive level-2
+headings "Downloads" before the galley links, and no node for the chart.
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `CitationStyleLanguagePlugin::getTemplateData()` passes
 `issueId` only when `ArticleHandler` has an issue;
@@ -3528,7 +3630,7 @@ Issue report: [pkp-e2e#216](https://github.com/jardakotesovec/pkp-e2e/issues/216
 - OPS `templates/frontend/pages/preprint.tpl`, `templates/frontend/objects/preprint_details.tpl`, `preprint_summary.tpl`, `galley_link.tpl`, `templates/frontend/components/breadcrumbs_preprint.tpl`
 - `lib/pkp/classes/galley/Galley.php` (`getBestGalleyId()`, `getGalleyLabel()`, `isPdfGalley()`) · `lib/pkp/classes/submission/GenreDAO.php` (`getPrimaryByContextId()`, `getBySupplementaryAndContextId()`) · `registry/genres.xml`
 - `lib/pkp/classes/publication/Repository.php::getVersionString()` · `lib/pkp/classes/publication/helpers/PublicationVersionInfo.php` · `lib/pkp/classes/publication/DAO.php::fromRow()`
-- `lib/pkp/classes/plugins/ThemePlugin.php::displayUsageStatsGraph()` · `lib/pkp/js/usage-stats-chart.js`
+- `lib/pkp/classes/plugins/ThemePlugin.php` (`displayUsageStatsGraph()`, `getAllDownloadsStats()`, `downloadStatsCacheMiss()`) · `lib/pkp/classes/services/PKPStatsPublicationService.php::getTimeline()` · `lib/pkp/js/usage-stats-chart.js`
 - `lib/pkp/classes/services/PKPFileService.php::download()`
 - `plugins/generic/pdfJsViewer/` (`PdfJsViewerPlugin.php`, `templates/display.tpl`) — OJS and OPS
 - `plugins/generic/htmlArticleGalley/` (`HtmlArticleGalleyPlugin.php`, `classes/HtmlGalleyHelper.php`, `templates/display.tpl`) — OJS

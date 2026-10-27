@@ -1471,7 +1471,11 @@ config-file settings.
   chart then counts only file views dated on or after the work's first
   publication date, so a work seeded as published today charts 0; seed
   `datePublished` before the visit days. All three apps, 2026-09-27 (U10
-  claim check K1-6; U64 claim check K1, `c-work-chart-*`).
+  claim check K1-6; U64 claim check K1, `c-work-chart-*`). The chart keeps
+  the figures of the page's first opening for a day (a per-item data
+  cache): open the page first after the figures exist, or press
+  Administration › "Delete Data Caches" before reading it. OJS and OPS
+  `main`, OJS 3.5, 2026-10-27 (U13 claim check I27B-2).
 - "All dates" on Statistics › "Articles" ("Monographs", "Preprints")
   starts at the context's first publication, so on a scratch context
   whose works were published today it shows none of the seeded past
