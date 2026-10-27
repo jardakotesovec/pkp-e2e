@@ -7,12 +7,17 @@
   - main: OJS, OMP, OPS
   - 3.5: OJS, OMP, OPS
   - 3.4: OJS, OMP, OPS (code)
-  - 3.3: none (code; there "File Views" and "Total" count Word downloads, and only "Other" leaves them out)
+  - 3.3: OJS, OMP, OPS (code; "Other" alone: there "File Views" and "Total" count Word downloads)
 - **Introduced** `pkp/pkp-lib#8109` for `pkp/pkp-lib#6782` · [86acb07066](https://github.com/pkp/pkp-lib/commit/86acb0706615cf3217756418176987e8a599c4ac) · 2021-07-16 · Bozana Bokan (bozana)
 - **Upstream** `pkp/pkp-lib#13600` (open)
 - **Tracked in** spec U64 [A17](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U64-usage-statistics.md#a17)
-- **Checked** 2026-10-23, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-27, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-10-27: the "Downloads" chart that readers see on the
+item's own page, when the theme shows it, counts the Word download, so
+it reads more than the manager's "File Views" for the same downloads
+(step 9).
 
 ## Summary
 
@@ -32,28 +37,32 @@ download, the row should read "File Views" 2 ("PDF" 1, "Other" 1) and
 "Total" 3. It reads "File Views" 1, "Other" 0 and "Total" 2, and
 nothing on the page says that Word files are left out. The chart
 above the table, switched to its "Files" line, counts both downloads,
-and "Download Files" lists the Word file with its download, so a
-manager who looks there can add it to the row by hand.
+and so does the "Downloads" chart readers see on the item's own page.
 
 One filter in the shared statistics code leaves the Word file type out
-of "Other". The COUNTER R5 reports and their SUSHI service count Word
-downloads.
+of "Other".
 
 ## Impact
 
 - **Lost.** Correct "Other", "File Views" and "Total" figures on the
-  statistics page, in its spreadsheet and in the statistics API, for
-  every item with a Word file. Past days come right once the count is fixed.
+  statistics page, in "Download Articles" and in the statistics API,
+  for every item with a Word file. No data is lost: the downloads are
+  stored, and the fix corrects past figures too. Rankings by views
+  already count Word downloads (the table's default order, and OJS's
+  "Most read articles by the same author(s)").
 - **Who.** Managers and editors of journals, presses and servers that
   publish Word files, whenever they read or export the item figures,
-  and the programs that read the statistics API. What libraries
-  receive through COUNTER R5 and SUSHI is not affected.
+  and the programs that read the statistics API. Where the theme shows
+  the item page's "Downloads" chart, readers and authors see a higher
+  download count than "File Views" and "Total", with nothing to explain
+  the difference.
 - **Way round.** "Download Files" gives each Word file's downloads; no
   screen puts them back into the row.
 
 Medium: the item figures a journal, press or server reads and exports
-are silently low for its Word files, with a way round in "Download
-Files". It would be high if the COUNTER reports were wrong too.
+are silently low for its Word files. The COUNTER R5 reports and SUSHI,
+which libraries receive, count Word downloads; it would be high if they
+were wrong too.
 
 ## Steps to reproduce
 
@@ -94,8 +103,8 @@ On a press (OMP):
 3. On the "Word" row press "Change File": choose "Book Manuscript",
    upload `article.docx`, press "Continue", "Continue", "Complete".
 4. On the file's row press "Set Terms", choose "Open Access", "Save".
-   On the "Word" row press "Awaiting Approval", "OK", then "Not
-   Available", "OK". Sign out.
+   Approve the "Word" format (its "Awaiting Approval" button, "OK")
+   and make it available (its "Not Available" button, "OK"). Sign out.
 5. Open the book's page (`/index.php/publicknowledge/catalog/book/5`)
    and press "Word". The browser saves `article.docx`.
 
@@ -106,7 +115,11 @@ On a preprint server (OPS):
    production" (Production, not yet posted), then "Galleys".
 2. Press "Add galley", type "Word", "Save"; choose "Preprint Text",
    upload `article.docx`, press "Continue", "Continue", "Complete".
-3. Press "Post", then the window's "Post". Sign out.
+3. Open "Preprint entry", type yesterday's date as "Date Published"
+   and press "Save". Press "Post", then the window's "Post". Sign out.
+   [The date matters only for step 9 with step 6's same-day shortcut:
+   the item page's chart starts on the posting date, and the shortcut
+   dates the downloads to yesterday.]
 4. Open the preprint's page (`/index.php/publicknowledge/preprint/view/1`)
    and press "Word". The browser saves `article.docx`.
 5. Back on the preprint's page, press "PDF". The PDF opens in the
@@ -145,22 +158,31 @@ Then, on each:
    And Empirical Evidence").
 8. Above the chart press "Files", which switches the chart to file
    views by day. Then press "Download Report" › "Download Files".
+9. Open Settings › Website › Appearance › Theme. Under "Usage
+   statistics display options" choose "Use bar type of the chart for
+   usage statistics display." (the dataset has "Do not display
+   submission usage statistics chart for reader." chosen) and press
+   "Save". Sign out and open the item's page again. Hover the current
+   month's bar in its "Downloads" chart: the tooltip gives the month's
+   downloads (for example "Oct 2026", "All Downloads: 2"; [3.5: the
+   month alone, "Oct"]). [The chart
+   keeps the figures of its first opening for a day. It was off until
+   now, so this opening is its first and reads the counted day.]
 
-**Expected.** The Word download counts as a file view, under "Other",
-the column for files that are neither PDF nor HTML. On OJS and OPS the
+**Expected.** The Word download counts under "Other". On OJS and OPS the
 row reads "Abstract Views" 1, "File Views" 2, "PDF" 1, "HTML" 0,
 "Other" 1, "Total" 3; on OMP "Abstract Views" 1, "File Views" 1,
-"Other" 1, "Total" 2. That agrees with the chart's file views and
-with "Download Files".
+"Other" 1, "Total" 2. That agrees with the chart's file views, with
+"Download Files" and with the "Downloads" chart on the item's page.
 
 **Observed.** The row leaves the Word download out of every column, on
 `main` and 3.5 alike:
 
-| | Abstract Views | File Views | PDF | HTML | Other | Total | chart's file views that day |
-|---|---|---|---|---|---|---|---|
-| OJS (and "JATS" 0 on `main`) | 1 | 1 | 1 | 0 | 0 | 2 | 2 |
-| OMP | 1 | 0 | 0 | 0 | 0 | 1 | 1 |
-| OPS | 1 | 1 | 1 | 0 | 0 | 2 | 2 |
+| | Abstract Views | File Views | PDF | HTML | Other | Total | chart's file views that day | item page's "Downloads", October |
+|---|---|---|---|---|---|---|---|---|
+| OJS (and "JATS" 0 on `main`) | 1 | 1 | 1 | 0 | 0 | 2 | 2 | 2 |
+| OMP | 1 | 0 | 0 | 0 | 0 | 1 | 1 | 1 |
+| OPS | 1 | 1 | 1 | 0 | 0 | 2 | 2 | 2 |
 
 "Download Files" lists the Word file with its download, for example on
 OJS:
@@ -174,7 +196,7 @@ OJS:
 
 ```
 ID,Title,Authors,"Date Published",Total,"Abstract Views","File Views",PDF,HTML,Other,JATS
-1,"The The Signalling Theory Dividends Version 2","Mwandenga Version 2 et al.",2026-10-22,2,1,1,1,0,0,0
+1,"The The Signalling Theory Dividends Version 2","Mwandenga Version 2 et al.",2026-10-26,2,1,1,1,0,0,0
 ```
 
 `GET /api/v1/stats/publications/1?dateStart=…&dateEnd=…` (the page's
@@ -195,22 +217,23 @@ grouped by assoc type and file type and picks the PDF, HTML and Other
 sums with `filterRecordPdf()`, `filterRecordHtml()` and
 `filterRecordOther()`. `filterRecordOther()`, documented as "Other
 (than PDF and HTML)", matches type 3 alone
-([`classes/services/PKPStatsPublicationService.php` line 63](https://github.com/pkp/pkp-lib/blob/1f415a07ca8b0889950cb27b7ea9af7acf664ff2/classes/services/PKPStatsPublicationService.php#L63)):
+([`classes/services/PKPStatsPublicationService.php` line 63](https://github.com/pkp/pkp-lib/blob/c27153abddd3550740d20149d43711d3e1d61f6e/classes/services/PKPStatsPublicationService.php#L63)):
 
 ```php
 return $record->assoc_type == Application::ASSOC_TYPE_SUBMISSION_FILE && $record->file_type == PKPStatisticsHelper::STATISTICS_FILE_TYPE_OTHER;
 ```
 
-No filter takes type 4, so the Word sum is dropped. Every other
-mimetype is type 3 and counts under "Other".
+No filter takes type 4, so the Word sum is dropped.
+
 `PKPStatsPublicationController` then makes "File Views"
 (`galleyViews`) the sum of the three parts in `get()` (line 339),
 `getItemForCSV()` (line 914) and `getItemForJSON()` (line 947). Each
 "Total" is built on that sum: the spreadsheet's in `getItemForCSV()`
 (line 915, abstract views plus `galleyViews` plus JATS views), the
-page's in ui-library's `StatsPublicationsPage.vue` (line 412, the same
-sum in the browser). So the Word downloads reach neither "File Views"
-nor "Total".
+page's in ui-library's
+`src/components/Container/StatsPublicationsPage.vue` (line 412, the
+same sum in the browser). So the Word downloads reach neither "File
+Views" nor "Total".
 
 86acb07066 (`pkp/pkp-lib#6782`, the new usage statistics of 3.4)
 brought `getTotalsByType()` and the three-part sum. Before it, the
@@ -230,16 +253,23 @@ Reach of the cause:
   included, while the row's figures leave Word out. An item whose only
   file visits are Word downloads is listed with its file figures at 0,
   and Word downloads move an item up the list with no figure showing
-  them. Code, not walked.
-- The chart's file views (`timeline?type=files`), "Download Files"
-  (`getManyFiles()`) and OJS's "Downloads" chart on the article page
-  (`ThemePlugin`) count Word downloads, so they disagree with the
-  row's "File Views". Walked for the chart and "Download Files"; the
-  article page's chart read in the code.
-- COUNTER R5 and SUSHI: the day's processing compiles their figures
-  by assoc type alone (`PKPTemporaryItemRequestsDAO::compileCounterSubmissionDailyMetrics()`),
-  so they count Word downloads. OJS's COUNTER R4 report files type 4
-  under "other" (`CounterReport::getKeyForFiletype()`). Code.
+  them. OJS's "Recommend Articles by Author" plugin orders its "Most
+  read articles by the same author(s)" by `getTotals()` too. Code, not
+  walked.
+- The chart's file views (`timeline?type=files`) and "Download Files"
+  (`getManyFiles()`) count Word downloads, so they disagree with the
+  row's "File Views". Walked.
+- The "Downloads" chart on the item's own page (the default theme's
+  "Usage statistics display options" set to bar or line): the article,
+  book and preprint pages call `ThemePlugin::displayUsageStatsGraph()`,
+  whose `downloadStatsCacheMiss()` asks `getTimeline()` for every
+  `ASSOC_TYPE_SUBMISSION_FILE` record of the item from its first
+  publication on, with no file type filter, so it counts Word
+  downloads. Walked on OJS, OMP and OPS, `main` and 3.5.
+- COUNTER: the day's processing compiles the R5 figures by assoc type
+  alone (`PKPTemporaryItemRequestsDAO::compileCounterSubmissionDailyMetrics()`),
+  and OJS's R4 report files type 4 under "other"
+  (`CounterReport::getKeyForFiletype()`). Code.
 - OJS's `ArticleHandler::view()` hands `getTotalsByType()` to the
   article page's template as `metricsByType` for themes
   (`pkp/pkp-lib#12340`): its `other` misses Word too. No template in
@@ -300,12 +330,17 @@ which already files Word under "other". No other filter on the file
 type misses type 4. It keeps the intent of 86acb07066: three named
 parts that add up to "File Views".
 
+Both charts, the Statistics page's "Files" and the item page's
+"Downloads", read `getTimeline()`, which the diff does not touch. They
+keep counting Word downloads, and "File Views" then agrees with them.
+
 Tried on `main`, OJS, OMP and OPS: the walk's rows read "File Views" 2,
 "Other" 1, "Total" 3 on OJS and OPS and "File Views" 1, "Other" 1,
-"Total" 2 on OMP, matching the chart's file views. A neighbour check on OJS added a
-plain-text galley (type Other) beside the Word one: with the fix
-"Other" read 2, "File Views" 3, "Total" 4; without it "Other" 1, "File
-Views" 2, "Total" 3. The PDF stayed at 1 in both.
+"Total" 2 on OMP, matching the chart's file views. A control on OJS
+added a plain-text galley (an "Other" file) beside the Word one, to
+show that the fix adds the two without counting either twice: with
+the fix "Other" read 2, "File Views" 3, "Total" 4; without it "Other"
+1, "File Views" 2, "Total" 3. The PDF stayed at 1 in both.
 
 **Alternatives.**
 
@@ -326,56 +361,81 @@ Views" 2, "Total" 3. The PDF stayed at 1 in both.
 - Backport: the diff applies as it stands to `stable-3_5_0`. On
   `stable-3_4_0` the second hunk is written by hand (the filter is
   passed as `[$this, 'filterRecordOther']` there).
-- Test: a unit test of `getTotalsByType()` with a type-3 and a type-4
-  row for one item, and the e2e scenario planned in the spec (a
-  reader downloads an article's Word and PDF galleys; "File Views" and
-  "Total" count both).
+- Test: `getTotalsByType()` reads `metrics_submission` through the
+  query builder, so its test is a database test, the pattern of
+  lib/pkp's `DatabaseTestCase` (as `tests/classes/filter/FilterDAOTest.php`
+  uses it): `getAffectedTables()` names `metrics_submission`, which is
+  restored afterwards; the test seeds a type-3 and a type-4 row for one
+  submission and checks that `other` is their sum. No stats service
+  has a test yet, so it would be the first in
+  `tests/classes/services/`. Beside it, the e2e scenario planned in the
+  spec (a reader downloads an article's Word and PDF galleys; "File
+  Views" and "Total" count both).
 
-Small: two methods in one shared class, and a unit test.
+Small: two methods in one shared class, and a database test.
 
 ## Evidence
 
 - Kept script, which takes the Steps through the screens on installs
-  freshly loaded from PKP's default test dataset (pkp/datasets 300c68e,
-  2026-10-22, the `main` and `stable-3_5_0` PostgreSQL dumps):
+  freshly loaded from PKP's default test dataset (pkp/datasets accd72de,
+  2026-10-26, the `main` and `stable-3_5_0` PostgreSQL dumps; walked
+  2026-10-27, first 2026-10-23 on 300c68e):
   [`shared/playwright/checks/issues/word-downloads-missing-from-article-statistics/walk.js`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/word-downloads-missing-from-article-statistics/walk.js),
   with `lib.js`, `fix.diff`, `article.docx`, `notes-hkq23j.txt` and
   `data-hkq23j.csv` beside it (the folder stands alone; its header
-  gives the command that runs it, and `MODE=nb` the neighbour check).
-- Where the walk differs from the Steps: the reader's browser named
-  itself as an ordinary desktop Chrome. Step 6 was the script's
+  gives the command that runs it, and `MODE=nb` the fix trial's control).
+- Where the walk differs from the Steps: step 6 was the script's
   `nextDay()`, which moves the logs as the loop does and runs the same
-  task and job commands; the loop was checked against it on the walk's
-  own log, and its staged file came out byte for byte the same. On OMP
-  the book's page offers no "PDF" beside "Word": book 5's "PDF" format
+  task and job commands. The shell loop was run once on the walk's own
+  log, and the file it staged matched `nextDay()`'s byte for byte. On
+  OMP the book's page offers no "PDF" beside "Word": book 5's "PDF" format
   holds one chapter's file, which the page lists under that chapter,
   so the OMP walk has no PDF download to compare.
-- Fix trial: the diff applied to OJS, OMP and OPS `main`, the Steps
-  walked on each, then the neighbour check on OJS with the fix and
-  again without it. The neighbour's third galley, "Data"
-  (`data-hkq23j.csv`, "Data Set", a supplementary file), was added and
+- Step 9's reading: the walk reads the figures the page hands the
+  chart (`pkpUsageStats.data.Submission[<id>]`, its `total`) and what
+  the chart drew. The tooltip was read once, on OPS `main` after the
+  walk: "Oct 2026", "All Downloads: 2".
+- OPS step 3's date: walked first without it on `main` and 3.5, the
+  chart read 0 there (`publications.date_published` 2026-10-27, the
+  `metrics_submission` rows 2026-10-26); with it, 2.
+- Fix trial (2026-10-23, at the tips of that day): the diff applied to
+  OJS, OMP and OPS `main`, Steps 1 to 8 walked on each (step 9 came
+  later), then the control on OJS with the fix and again without it.
+  The control's third galley, "Data" (`data-hkq23j.csv`, "Data Set", a supplementary file), was added and
   published but not pressed: the article's page lists it among the
   supplementary links, which the script's reader does not read. The
   diff leaves `filterRecordSuppFile()` and its assoc type untouched
-  (code).
-- Branch tips: OJS `main` 3cf9aa91a8, OMP `main` 178e8b34b2, OPS
-  `main` 5091e916d9, each with lib/pkp 1f415a07ca; OJS `stable-3_5_0`
-  0b1ae35f04, OMP a150eee76b, OPS 18506a5b4d, each with lib/pkp
-  5b54f59ed7; `stable-3_4_0` OJS 3bedd21383, lib/pkp 366030b017;
-  `stable-3_3_0` OJS 06f01c8010, lib/pkp 126b86bc2e, the usageStats
-  plugin efdd448eee. The installs run PostgreSQL; the fault is in PHP
-  and does not depend on the database (MySQL not checked).
-- Server logs: nothing on `main`; on 3.5 only a sign-in warning
-  (`Undefined array key "redirectContextId"`) that is a separate
-  report's.
+  (code). The files it changes have no commit since that trial (lib/pkp
+  `git log 1f415a07ca..c27153abdd` on `PKPStatsPublicationService.php`,
+  `PKPStatsServiceTrait.php`, `api/v1/stats/publications` and
+  `ThemePlugin.php`), and the diff applies to today's `main` as it
+  stands. Its effect on the item page's chart is read in the code
+  (`getTimeline()` takes no file filter from the changed methods), not
+  walked.
+- Branch tips (2026-10-27): OJS `main` 5153465178, OMP `main`
+  ceae6e275f, OPS `main` 66a3bb98a5, each with lib/pkp c27153abdd and
+  ui-library 1f9fb95e53; OJS `stable-3_5_0` a9e01889b0 and OMP
+  3c8c7c4964 (lib/pkp 3fd17879b3), OPS 07926c35b4 (lib/pkp 9a0212faff),
+  ui-library a12b752338; `stable-3_4_0` OJS 6895dcb6d6, OMP e0263ebd1,
+  OPS 029b610a0f, lib/pkp 3a26bb98d6; `stable-3_3_0` OJS c6590e2012,
+  lib/pkp f80a52ed4d, the usageStats plugin efdd448eee. The installs
+  run PostgreSQL; the fault is in PHP and does not depend on the
+  database (MySQL not checked).
 - The robot list: lib/pkp's `lib/counterBots/generated/COUNTER_Robots_list.txt`
   holds a `HeadlessChrome` pattern on 3.5 and none that matches it on
   `main`.
 - 3.5 (walked, and read): the same rows as on `main` on all three apps
   (no "JATS" column: the plugin is off in that dataset); the same code.
+  The item page's chart read the same figures (2 on OJS and OPS, 1 on
+  OMP); the same `downloadStatsCacheMiss()` and `getTimeline()`.
 - 3.4 (code): lib/pkp `origin/stable-3_4_0`: the same code
   (`PKPStatsPublicationService`, `PKPStatsPublicationHandler`,
-  `LogUsageEvent`), in all three apps through lib/pkp.
+  `LogUsageEvent`), in all three apps through lib/pkp. Its
+  `ThemePlugin::downloadStatsCacheMiss()` reads `getTimeline()` with
+  `assocTypes` [`ASSOC_TYPE_SUBMISSION_FILE`] alone too (in a file
+  cache), and the three apps' item templates call
+  `displayUsageStatsGraph()`, so the item page's chart counts Word
+  there as well.
 - 3.3 (code): lib/pkp `origin/stable-3_3_0`,
   `api/v1/stats/publications/PKPStatsPublicationHandler.inc.php` sums
   every galley-file record into `galleyViews`, and
@@ -390,9 +450,12 @@ Small: two methods in one shared class, and a unit test.
   `galleyViews` sum is 27a6196b8d (`pkp/pkp-lib#3673`, Nate Wright,
   2019-05-01).
 - Upstream: searched 2026-10-23 in pkp/pkp-lib, pkp/ojs and
-  pkp/ui-library. `pkp/pkp-lib#13600` (opened 2026-10-22, no comments,
-  no PR) describes the same fault on OJS and proposes the same change;
-  no fix is in the checkouts.
-- Unverified: the list and order symptom (code only), and third-party
+  pkp/ui-library, and again 2026-10-27 in pkp/pkp-lib
+  (`filterRecordOther`; "download statistics chart word").
+  `pkp/pkp-lib#13600` (opened 2026-10-22, still open, no comments, no
+  PR on 2026-10-27) describes the same fault on OJS and proposes the
+  same change; no fix is in the checkouts.
+- Unverified: the list and order symptom and the "Most read articles
+  by the same author(s)" order (code only), and third-party
   themes or plugins that read `metricsByType` or the API's
   `otherViews` and might expect Word to be left out.

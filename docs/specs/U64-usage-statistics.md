@@ -1284,7 +1284,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | Statistics: a refused date range shows a raw code like "api.stats.400.wrongDateFormat", not a sentence | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A15](#a15) | "Counter R5": the "Authors" column of the item reports names only each work's last author | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A16](#a16) | SUSHI "Item Master Report (IR)" gives authors without an ORCID iD the iD of an author listed before them | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
-| [A17](#a17) | Statistics › Articles leaves Word file downloads out of "Other", "File Views" and "Total" | 🐞 | medium | issues (claude), 2026-10-23 — re-verified |
+| [A17](#a17) | Statistics › Articles leaves Word file downloads out of "Other", "File Views" and "Total" | 🐞 | medium | issues (claude), 2026-10-27 — re-verified |
 | [OJS2](#ojs2) | One view of an HTML galley counts once more for each picture or style sheet it names that was never uploaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OJS4](#ojs4) | Statistics › Issues: "Download Issues" leaves out every issue after the first 30, without saying so | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS5](#ojs5) | "Counter R5": "Journal Article Requests (IR_A1)" also lists investigation rows, which its "Metric_Types" line leaves out | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1573,13 +1573,10 @@ download, the row should read "File Views" 2 ("PDF" 1, "Other" 1) and
 "Total" 3. It reads "File Views" 1, "Other" 0 and "Total" 2, and
 nothing on the page says that Word files are left out. The chart
 above the table, switched to its "Files" line, counts both downloads,
-and "Download Files" lists the Word file with its download, so a
-manager who looks there can add it to the row by hand.
+and so does the "Downloads" chart readers see on the item's own page.
 One filter in the shared statistics code leaves the Word file type out
-of "Other". The COUNTER R5 reports and their SUSHI service count Word
-downloads.
-Since: 2021-07-16 (pkp/pkp-lib#6782, about five years) · Basis: probe, 2026-10-23. <sup>f-a17</sup>
-Report: refresh owed — the Article landing page claim check I27B (2026-10-27) drove the article page's "Downloads" chart: after one PDF and one Word download and the usage processing it reads 2 where "File Views" reads 1 ("PDF" 1, "Total" 2), one more surface that counts the Word download, for the report's Reach (2026-10-27)
+of "Other".
+Since: 2021-07-16 (pkp/pkp-lib#6782, about five years) · Basis: probe, 2026-10-27. <sup>f-a17</sup>
 
 <a id="a18"></a>
 **A18 — Statistics › Articles: Word downloads may place an article in the list, and above others, with no figure showing them** · ❓ · minor.

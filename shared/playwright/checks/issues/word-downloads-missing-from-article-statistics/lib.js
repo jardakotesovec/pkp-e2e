@@ -17,6 +17,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const flat = (s, n = 400) => (s == null ? s : String(s).replace(/\s+/g, ' ').trim().slice(0, n));
 const rel = (u) => (u == null ? u : String(u).replace(/^https?:\/\/[^/]+/, ''));
 const VISIBLE_DIALOG = '[role="dialog"]:visible';
+/** Yesterday's date (YYYY-MM-DD, local), the day nextDay() moves today's visits to. */
+const yesterday = () => { const d = new Date(Date.now() - 86_400_000); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 /** An ordinary desktop browser's name, so neither line's list of robots drops the reader's visit. */
 const READER_UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36';
@@ -197,6 +199,40 @@ async function openGalleys(page, app, submissionId) {
     const galleys = new GalleyManager(page, frame);
     await galleys.expectLoaded();
     return galleys;
+}
+
+/**
+ * A preprint server's "Preprint entry" of the submission's newest version (Preprint › "Preprint entry"):
+ * "Date Published" typed, "Save". Used so the item page's chart, which starts on that date, takes in
+ * downloads the same-day shortcut (nextDay) dates to the day before.
+ */
+async function setDatePublished(page, app, submissionId, date) {
+    const {WorkflowPage} = require('../../../pages/WorkflowPage.js');
+    const frame = new WorkflowPage(page, app.contextPath, {labels: {publicationGroup: 'Preprint'}});
+    await frame.gotoEditorial(submissionId);
+    await frame.expectVersionLoaded().catch(() => {});
+    await idle(page);
+    const link = frame.menuLink('Preprint entry');
+    if (!(await link.last().isVisible().catch(() => false))) {
+        if (app.line !== 'stable-3_5_0' && (await frame.latestVersionNode().isVisible().catch(() => false))) await frame.latestVersionNode().click();
+        else await frame.publicationGroup().click();
+    }
+    await expect(link.last()).toBeVisible({timeout: T});
+    await link.last().click();
+    await idle(page);
+    const box = page.locator('input[name="datePublished"]').first();
+    await box.waitFor({timeout: T});
+    await sleep(600);
+    const before = await box.inputValue().catch(() => null);
+    await box.fill(date);
+    await box.press('Tab').catch(() => {});
+    const w = page.waitForResponse((r) => /\/publications\/\d+/.test(r.url()) && ['POST', 'PUT'].includes(r.request().method()), {timeout: T}).catch(() => null);
+    await box.locator('xpath=ancestor::form[1]').getByRole('button', {name: 'Save', exact: true}).click();
+    const r = await w;
+    await idle(page);
+    await sleep(600);
+    record('ops-date-published', await screen(page));
+    return {before, typed: date, save: r ? r.status() : null, after: await box.inputValue().catch(() => null)};
 }
 
 /** The workflow's "Post" on a preprint server, confirmed with the window's "Post". */
@@ -492,5 +528,90 @@ async function nextDay(app) {
     return out;
 }
 
+// ---------------------------------------------------------------------------
+// The item page's "Downloads" chart (copied from the U13 claim check I27B, ../../U13/I27B/i27b.js
+// setBarChart and readChart, trimmed to the save and the read).
+
+/**
+ * Settings › Website › Appearance › Theme: "Usage statistics display options" set to "Use bar type of
+ * the chart for usage statistics display.", Save. Returns the field before and after, and the save's answer.
+ */
+async function setBarChart(page, app) {
+    const out = {};
+    const panel = () => page.locator('[role="tabpanel"]#theme').first();
+    const field = () => panel().locator('.pkpFormField').filter({hasText: /Usage statistics display options/}).first();
+    const readField = () => field().evaluate((f) => [...f.querySelectorAll('input[type=radio]')]
+        .map((i) => ({value: i.value, checked: i.checked}))).catch((e) => ({err: flat(e.message, 200)}));
+    await page.goto(app.url(`/index.php/${app.contextPath}/management/settings/website`));
+    await idle(page);
+    for (const id of ['appearance', 'theme']) {
+        const b = page.locator(`#${id}-button`).first();
+        await b.waitFor({timeout: T});
+        if ((await b.getAttribute('aria-selected')) !== 'true') { await b.click(); await idle(page); }
+    }
+    await panel().getByRole('radio').first().waitFor({timeout: T});
+    await sleep(400);
+    out.before = await readField();
+    await panel().getByRole('radio', {name: /^Use bar type/}).check();
+    const w = page.waitForResponse((r) => /^(PUT|POST)$/.test(r.request().method()) && /\/api\/v1\//.test(r.url()), {timeout: T}).catch(() => null);
+    await panel().getByRole('button', {name: 'Save', exact: true}).last().click();
+    const r = await w;
+    out.save = r ? {url: rel(r.url()).slice(0, 160), status: r.status()} : null;
+    await idle(page);
+    await sleep(800);
+    record('theme-saved', await screen(page));
+    out.after = await readField();
+    return out;
+}
+
+/** The item page's "Downloads" chart as the page holds it: heading, the figures handed to it, and what it drew. */
+async function readChart(page, itemId) {
+    return page.evaluate((id) => {
+        const t = (e) => (e ? e.innerText.replace(/\s+/g, ' ').trim() : null);
+        const canvas = document.querySelector('canvas.usageStatsGraph');
+        const section = canvas ? canvas.closest('section') : null;
+        const S = typeof pkpUsageStats === 'undefined' ? null : pkpUsageStats;
+        const data = S && S.data && S.data.Submission ? S.data.Submission[id] || null : null;
+        let drawn = null;
+        if (canvas && typeof Chart !== 'undefined' && Chart.getChart) {
+            const c = Chart.getChart(canvas);
+            if (c) drawn = {type: c.config.type, labels: c.data.labels, datasets: c.data.datasets.map((d) => ({label: d.label, data: d.data}))};
+        }
+        return {heading: t(section && section.querySelector('h2, h3')), canvas: !!canvas, data, drawn};
+    }, itemId).catch((e) => ({err: flat(e.message, 200)}));
+}
+
+/** Signed out, in an ordinary browser: the item's page and its "Downloads" chart. */
+async function chartVisit(page, app, itemId) {
+    await page.goto(app.url(`/index.php/${app.contextPath}/${WORDS[app.name].itemPath(itemId)}`));
+    await idle(page).catch(() => {});
+    await sleep(1500);
+    record('reader-chart', await screen(page));
+    await shot(page, 'reader-chart').catch(() => {});
+    const out = await readChart(page, itemId);
+    await page.locator('canvas.usageStatsGraph').scrollIntoViewIfNeeded().catch(() => {});
+    await sleep(400);
+    // The step's reading: hover the last (current) month's bar, then read the tooltip Chart.js drew.
+    out.tooltip = await page.evaluate(() => {
+        const c = typeof Chart !== 'undefined' && Chart.getChart ? Chart.getChart(document.querySelector('canvas.usageStatsGraph')) : null;
+        if (!c) return null;
+        const els = c.getDatasetMeta(0).data;
+        const el = els[els.length - 1];
+        const r = c.canvas.getBoundingClientRect();
+        return {x: r.left + el.x, y: r.top + (el.y + el.base) / 2};
+    }).then(async (pt) => {
+        if (!pt) return null;
+        await page.mouse.move(pt.x, pt.y);
+        await sleep(600);
+        await shot(page, 'reader-chart-hover').catch(() => {});
+        return page.evaluate(() => {
+            const t = Chart.getChart(document.querySelector('canvas.usageStatsGraph')).tooltip;
+            return t && t.opacity ? {title: t.title, body: (t.body || []).map((b) => b.lines.join(' '))} : {shown: false};
+        });
+    }).catch((e) => ({err: flat(e.message, 200)}));
+    return out;
+}
+
 module.exports = {T, sleep, flat, rel, READER_UA, WORDS, slimLines, readerVisits, readStats, openGalleys, post, addFormatFile,
-    addGalleyToLatestVersion, publishLatestVersion, filesDir, runJobs, nextDay};
+    addGalleyToLatestVersion, publishLatestVersion, filesDir, runJobs, nextDay,
+    setBarChart, readChart, chartVisit, setDatePublished, yesterday};

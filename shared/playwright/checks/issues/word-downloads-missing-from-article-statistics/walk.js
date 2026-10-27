@@ -11,12 +11,16 @@
 //        article.docx), "Set Terms" "Open Access", "Awaiting Approval" › "OK", "Not Available" › "OK";
 //        signed out, the book's page: "Word" (saved). (Book 5's "PDF" format holds a chapter's file alone, listed under the chapter.)
 //   OPS  submission 1 "The influence of lactation …" (Production, not posted): Preprint › "Galleys" ›
-//        "Add galley" "Word" (Preprint Text, article.docx), "Post"; signed out, the preprint's page:
+//        "Add galley" "Word" (Preprint Text, article.docx), "Preprint entry" "Date Published" set to
+//        yesterday (the page's chart starts on it), "Post"; signed out, the preprint's page:
 //        "Word" (saved), then "PDF" (the viewer).
 //   Then the night (nextDay() in lib.js: the day's usage log moved one day back into the loader's
 //   stage folder, the app's own "Usage statistics file loader task" and job queue run), and `rvaca`
 //   reads Statistics › the items' page: the row, the chart's "Files", "Download Report" › the items'
 //   and the files' spreadsheets, and GET /api/v1/stats/publications/{id} (no screen calls it).
+//   Last (steps mode), `rvaca` sets Settings › Website › Appearance › Theme "Usage statistics display
+//   options" to "Use bar type …" and a signed-out reader opens the item's page: its "Downloads" chart
+//   counts the Word download (fact 7-chart: data.total, the drawn bars).
 // MODE=nb (OJS alone; the fix's neighbour, walked with the fix in and out): galleys "Word" (.docx,
 // Article Text), "Text" (notes-hkq23j.txt, Article Text: an "Other" file) and "Data" (data-hkq23j.csv,
 // "Data Set": a supplementary file) added to version 1.1 and published; the reader presses "Word",
@@ -89,6 +93,8 @@ forEachApp(async (app) => {
                         await gm.addGalley(galleys[0]);
                         return {labels: await gm.labels()};
                     });
+                    // The page's chart starts on the posting date; nextDay() dates the downloads to yesterday.
+                    await step('2a-date published', () => L.setDatePublished(page, app, it.id, L.yesterday()));
                     await step('2-post', () => L.post(page));
                 } else {
                     await step('1-add format Word', () => L.addFormatFile(page, app, {submissionId: it.id, formatName: 'Word', file: WORD, fileName: 'article.docx'}));
@@ -134,6 +140,20 @@ forEachApp(async (app) => {
             try {
                 await signIn(page, MANAGER, {contextPath: app.contextPath});
                 await step('5-stats', () => L.readStats(page, app, it.id, it.title));
+                // 6. The item page's "Downloads" chart turned on (off in the dataset, so this is its first
+                // opening and it reads the processed figures, not a day-old kept copy).
+                if (MODE === 'steps') await step('6-theme bar chart', () => L.setBarChart(page, app));
+            } finally {
+                await close();
+            }
+        }
+        if (MODE === 'steps') {
+            const {page, close} = await launch(app);
+            try {
+                const cdp = await page.context().newCDPSession(page);
+                await cdp.send('Network.setUserAgentOverride', {userAgent: L.READER_UA});
+                await page.context().setExtraHTTPHeaders({'User-Agent': L.READER_UA});
+                await step('7-chart', () => L.chartVisit(page, app, it.id));
             } finally {
                 await close();
             }
