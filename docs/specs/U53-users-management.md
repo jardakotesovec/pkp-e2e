@@ -193,6 +193,12 @@ The Site Administrator's "Add User" (step 1) and "Edit User" windows
    | "Disable User", or "Enable User" on a disabled account | every row but the signed-in user's own |
    | "Merge user" | rows of users within the signed-in manager's [reach](#reach), never their own |
 
+   The menu opens under its button, or above it when the window has no
+   room below, and moves sideways rather than past the window's edge, so
+   every action stays in view on the last rows of the list. The button
+   takes a click a few pixels around its "…" icon, and it stays
+   highlighted while its menu is open. <sup>q</sup>
+
 8. **"Edit".** It opens the user's roles page for this journal: the
    breadcrumb "Users & Roles / Invite user to take a role", an empty page
    heading, the steps "1 Enter details" and "2 Review & invite for roles",
@@ -789,6 +795,9 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - the last rows' menus staying in the window (Rule 7): with a short
+    window, the "…" of the list's last row opens its menu above the
+    button, every action visible and pressable
   - the guard for A15 (issue report
     `docs/issues/U53-A15-merge-fails-for-discussion-opener.md`): a manager
     merges an account that opened a discussion on a submission into another
@@ -1899,6 +1908,20 @@ and guards: `useUserAccessManagerConfig::getItemActions()` (notes f, g, c,
 i, o). Live-probed 2026-09-25 (Rule 7; A5): every level's menus read on
 every kind of row, exactly the table's offers, in the order "Edit, Email,
 Login As, Remove User, Disable User, Merge user".
+Since ui-library#1006 (pkp/pkp-lib#12647, `main` only) `DropdownActions`
+is a reka-ui `DropdownMenu` (non-modal, `DropdownMenuContent` with
+`collision-padding` 8, `side-offset` 4), whose floating position flips
+the menu above the button and shifts it along the edge; the ellipsis
+button's `before:-inset-[6px]` pseudo-element extends its 24 px icon to a
+36 px target, and `data-[state=open]` keeps its hover background while
+open. Driven on OJS's default dataset at the PR head `08dcec3c4b`, before
+its merge, against the ui-library tip `1f9fb95e` as the base
+(`checks/sync/ui-library-1006/menu.js`; Rule 7): with the window 600 px
+tall and the last row's "…" 30 px above its bottom, the base opened the
+menu below the button, 193 px of it outside the window; the head opened
+it above, every item in view. A pointer 4 px outside the icon hit the
+button at the head and the table cell at the base; the items' text is
+14 px on both.
 
 <a id="fn-u"></a>
 **u** — The list's labels come from lib/pkp's locale files:
