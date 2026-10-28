@@ -1633,6 +1633,15 @@ trips.
   class; once they land, a keyword or two-"OK" red in those four specs is
   a new cause, and the reds left are (a) and (b).
 
+- **OJS U13 S2's JATS galley body text not shown in 30 s** (OJS, once,
+  pkp-e2e run 40632510803, the U05 revision branch, 2026-10-28, shard
+  2/3; green on the retry). `getByText('The body text of the JATS
+  fixture, one paragraph.')` found no element within 30 s on the
+  galley's view; the U05 change touches nothing on that page. The tally
+  of the last 40 runs per repo also counts one U13 S2 red each on OJS
+  and OPS on 2026-10-25 (the f1813 branches' mass red, not this
+  class). **Watch condition**: a second sighting on CI.
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull
