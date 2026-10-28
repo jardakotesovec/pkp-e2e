@@ -1,0 +1,46 @@
+diff -ru a/plugins/generic/datacite/DataciteExportPlugin.php b/plugins/generic/datacite/DataciteExportPlugin.php
+--- a/plugins/generic/datacite/DataciteExportPlugin.php
++++ b/plugins/generic/datacite/DataciteExportPlugin.php
+@@ -485,7 +485,7 @@
+                         'reviewId' => $object->getId(),
+                     ],
+                     null,
+-                    true,
++                    false,
+                     '',
+                 );
+                 break;
+diff -ru a/plugins/generic/datacite/filter/DataciteXmlFilter.php b/plugins/generic/datacite/filter/DataciteXmlFilter.php
+--- a/plugins/generic/datacite/filter/DataciteXmlFilter.php
++++ b/plugins/generic/datacite/filter/DataciteXmlFilter.php
+@@ -188,6 +188,12 @@
+ 
+         // Get the most recently published version
+         $publication = $article ? $article->getCurrentPublication() : null;
++        // A review relates to the version its round was opened on
++        if ($reviewAssignment) {
++            $reviewRoundDao = DAORegistry::getDAO('ReviewRoundDAO'); /** @var \PKP\submission\reviewRound\ReviewRoundDAO $reviewRoundDao */
++            $reviewRound = $reviewRoundDao->getById($reviewAssignment->getReviewRoundId());
++            $publication = $reviewRound ? Repo::publication()->get($reviewRound->getPublicationId()) : $publication;
++        }
+ 
+         // Identify the object locale.
+         $objectLocalePrecedence = $this->getObjectLocalePrecedence($context, $article, $publication, $galley);
+@@ -708,7 +714,7 @@
+                         $reviewRound,
+                         $allReviewsInRound,
+                         $publication,
+-                        Application::get()->getRequest()->getContext()->getPrimaryLocale()
++                        $this->getDeployment()->getContext()->getPrimaryLocale()
+                     );
+ 
+                     $titles = $fallback ? [$fallback] : [];
+@@ -778,7 +784,7 @@
+ 
+                 // Last modified date (for review assignments): last modified date.
+                 $lastModified = $reviewAssignment->getLastModified();
+-                if (!$lastModified) {
++                if ($lastModified) {
+                     $dates[DATACITE_DATE_UPDATED] = $lastModified;
+                 }
+                 break;

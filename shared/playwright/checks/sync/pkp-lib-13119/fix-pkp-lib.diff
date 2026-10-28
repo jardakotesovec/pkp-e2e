@@ -1,0 +1,45 @@
+diff -ru a/classes/submission/reviewAssignment/Repository.php b/classes/submission/reviewAssignment/Repository.php
+--- a/classes/submission/reviewAssignment/Repository.php
++++ b/classes/submission/reviewAssignment/Repository.php
+@@ -25,6 +25,7 @@
+ use PKP\doi\Doi;
+ use PKP\doi\exceptions\DoiException;
+ use PKP\facades\Locale;
++use PKP\i18n\interfaces\LocaleInterface;
+ use PKP\invitation\core\enums\InvitationStatus;
+ use PKP\invitation\invitations\reviewerAccess\ReviewerAccessInvite;
+ use PKP\invitation\models\InvitationModel;
+@@ -576,12 +577,14 @@
+ 
+         // Translate locale using Locale::getBundle()->translateSingular so that a `null` value is returned for missing locale instead of the ##locale.key## format.
+         // Useful in cases where we want to explicitly communicate that a translation is not available.
+-        return Locale::getBundle($locale)
+-            ->translateSingular('submission.doi.review.title', [
+-                'publicationTitle' => $publication->getLocalizedTitle($locale),
+-                'roundNumber' => $roundNumber,
+-                'reviewNumber' => $reviewNumber,
+-            ]);
++        $params = [
++            'publicationTitle' => $publication->getLocalizedTitle($locale),
++            'roundNumber' => $roundNumber,
++            'reviewNumber' => $reviewNumber,
++        ];
++        // A locale without the key yet falls back to English, so an export never goes out without a title
++        return Locale::getBundle($locale)->translateSingular('submission.doi.review.title', $params)
++            ?? Locale::getBundle(LocaleInterface::DEFAULT_LOCALE)->translateSingular('submission.doi.review.title', $params);
+     }
+ 
+     /**
+diff -ru a/jobs/doi/DepositSubmission.php b/jobs/doi/DepositSubmission.php
+--- a/jobs/doi/DepositSubmission.php
++++ b/jobs/doi/DepositSubmission.php
+@@ -104,7 +104,8 @@
+ 
+                 $doiId = $publication->getData('doiId');
+ 
+-                if ($doiId && Repo::doi()->get($doiId)?->getStatus() === Doi::STATUS_REGISTERED) {
++                // An agency's test mode leaves a deposited DOI "Submitted" (DataCite), so take that as deposited too
++                if ($doiId && in_array(Repo::doi()->get($doiId)?->getStatus(), [Doi::STATUS_REGISTERED, Doi::STATUS_SUBMITTED])) {
+                     dispatch(new DepositPeerReview($peerReviewId, $this->context->getId(), $this->submissionId));
+                 }
+             }
