@@ -1,0 +1,66 @@
+--- a/lib/pkp/classes/submissionFile/Repository.php
++++ b/lib/pkp/classes/submissionFile/Repository.php
+@@ -264,7 +264,7 @@
+     }
+ 
+     /** @copydoc DAO::insert() */
+-    public function add(SubmissionFile $submissionFile): int
++    public function add(SubmissionFile $submissionFile, bool $log = true): int
+     {
+         $submissionFile->setData('createdAt', Core::getCurrentDate());
+         $submissionFile->setData('updatedAt', Core::getCurrentDate());
+@@ -275,6 +275,11 @@
+ 
+         Hook::call('SubmissionFile::add', [$submissionFile]);
+ 
++        // A copy made by the system (a new version's files) is no upload: log nothing
++        if (!$log) {
++            return $submissionFileId;
++        }
++
+         $logData = $this->getSubmissionFileLogData($submissionFile);
+ 
+         $logEntry = Repo::eventLog()->newDataObject(array_merge(
+@@ -945,7 +950,7 @@
+         $newSubmissionFile->setData('fileId', $newFileId);
+ 
+         $submissionFileId = Repo::submissionFile()
+-            ->add($newSubmissionFile);
++            ->add($newSubmissionFile, false);
+ 
+         $submissionFile = Repo::submissionFile()
+             ->get($submissionFileId);
+--- a/classes/submissionFile/Repository.php
++++ b/classes/submissionFile/Repository.php
+@@ -54,9 +54,9 @@
+     }
+ 
+     /** @copydoc SubmissionFileRepository::add() */
+-    public function add(SubmissionFile $submissionFile): int
++    public function add(SubmissionFile $submissionFile, bool $log = true): int
+     {
+-        $submissionFileId = parent::add($submissionFile);
++        $submissionFileId = parent::add($submissionFile, $log);
+ 
+         // Only proof files of a publication format get a DOI
+         if (
+--- a/classes/publication/Repository.php
++++ b/classes/publication/Repository.php
+@@ -171,7 +171,7 @@
+                 if ($isDoiVersioningEnabled && !$isMinorVersion) {
+                     $newSubmissionFile->setData('doiId', null);
+                 }
+-                $newSubmissionFileId = Repo::submissionFile()->add($newSubmissionFile);
++                $newSubmissionFileId = Repo::submissionFile()->add($newSubmissionFile, false);
+                 $newSubmissionFile = Repo::submissionFile()->get($newSubmissionFileId);
+                 $newSubmissionFiles[] = $newSubmissionFile;
+ 
+@@ -189,7 +189,7 @@
+                     $newDependentFile = clone $dependentFile;
+                     $newDependentFile->setData('id', null);
+                     $newDependentFile->setData('assocId', $newSubmissionFile->getId());
+-                    Repo::submissionFile()->add($newDependentFile);
++                    Repo::submissionFile()->add($newDependentFile, false);
+                 }
+             }
+         }

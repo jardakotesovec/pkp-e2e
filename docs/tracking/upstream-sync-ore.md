@@ -13,7 +13,7 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `b6b4249a66` | 2026-10-27 | claude (daily maintenance session, no new commit; before it, 2026-10-26: daily maintenance session; before it `c232e19d6f`, 2026-10-23; before it `56ffbfcaf2`, 2026-10-22; before it `527daf7857`, the merge of pkp/ojs#5951, 2026-10-20; before it `42b0fa2b84`, 2026-10-19; before it `61ddd345bd`, 2026-10-16; before it `9f18cd1d46`, the branch point, 2026-10-13) |
+| ojs | `b6b4249a66` | 2026-10-28 | claude (daily maintenance session, no new commit; before it, 2026-10-27, the same; before it, 2026-10-26: daily maintenance session; before it `c232e19d6f`, 2026-10-23; before it `56ffbfcaf2`, 2026-10-22; before it `527daf7857`, the merge of pkp/ojs#5951, 2026-10-20; before it `42b0fa2b84`, 2026-10-19; before it `61ddd345bd`, 2026-10-16; before it `9f18cd1d46`, the branch point, 2026-10-13) |
 | pkp-lib | `25b7c8af49` (the branch tip; ojs's pointer still `6d2e143ee0`) | 2026-10-27 | claude (daily maintenance session; before it `6d2e143ee0`, the branch tip and ojs's pointer since `56ffbfcaf2`, 2026-10-22, daily maintenance session; before it `86fac38a3d`, ojs's pointer, and the branch tip `82d1313c58`, 2026-10-21; before it the branch tip `c10ada7a5c`, 2026-10-20; before it `186654a359`, pkp/pkp-lib#13536, 2026-10-19; before it `6123e3c449`, the merge of pkp/pkp-lib#13542, 2026-10-16; before it `266505ecd8`, the branch point); ui-library `5ddd525f9f` (pkp/ui-library#1026, ojs's pointer, 2026-10-22; before it `62bbae1022`, pkp/ui-library#1022 for pkp/pkp-lib#13528; the branch tip `ce61763eca`, its merge, the same tree; before it `103b834dd5`, the merge of pkp/ui-library#1020, ojs at its head `95e7365005`; before it `c9889f00`, the branch point); ojs `plugins/generic/crossref` `7908654951` (the merge of pkp/crossref-ojs#114, as on `main`; before it `3a9f888d64`); ojs `plugins/generic/jatsTemplate` `8a08fa7635` and `plugins/generic/citationStyleLanguage` `f849f00fec` (2026-10-22, as on `main`) |
 
 pkp-e2e `ore` tip: `85ed48ee` (2026-10-26, companion `13607-ore` fast-forwarded; before it `e2fead0a`, 2026-10-22, the daily step's carry-over of U30, U48 and U01; before it `09332867`, 2026-10-21, companion `13595-ore`).
@@ -41,6 +41,10 @@ _Newest first; one entry per read: the date and the range per repo, then
 one line per commit (sha → `=main <sha>` with the date of the `main` read /
 `~main <sha>` with what the backport changed / `ore-only`; the verdict;
 what the pkp-e2e `ore` branch took)._
+
+- **2026-10-28 (daily session, VM s2) — ojs unchanged (`b6b4249a66`), pkp-lib unchanged (`25b7c8af49`; ojs's pointer still `6d2e143ee0`), ui-library unchanged (`5ddd525f9f`). Nothing to read; baselines unchanged. pkp-e2e `ore` unchanged at `85ed48ee`.**
+  - Runs read first: the pair of tips (OJS `b6b4249a66`, pkp-e2e `ore` `85ed48ee`) is still the one [39972533413](https://github.com/pkp/ojs/actions/runs/39972533413) covers (green); no dispatch.
+  - Carried over: today's `main` regression (pkp/pkp-lib#13637, "Create New Version" logs a copied galley file as an upload) is not on `ore`: neither pkp/ojs `ore` nor pkp-lib `ore` carries #13637. U70 A3's widening is OMP's (no `ore`). Open rows: none re-run (no code moved).
 
 - **2026-10-27 (daily session, VM s1) — ojs unchanged (`b6b4249a66`), pkp-lib `ore` `6d2e143ee0..25b7c8af49` (3: `366b292ed9`, `32e2b5d885`, merge `25b7c8af49`, pkp/pkp-lib#13630; ojs's pointer still `6d2e143ee0`), ui-library unchanged (`5ddd525f9f`). Read in full; pkp-lib baseline advanced. pkp-e2e `ore` unchanged at `85ed48ee`.**
   - Runs read first: the pair of tips (OJS `b6b4249a66`, pkp-e2e `ore` `85ed48ee`) is the one the 2026-10-26 entry found covered by [39972533413](https://github.com/pkp/ojs/actions/runs/39972533413) (green; the pkp-e2e push since adds no suite change); no dispatch.

@@ -663,7 +663,8 @@ each scenario's seeding are in its footnote.
      manager, acting without a stage assignment, get neither (Side
      effects).
    - **The Activity Log**: adds "A new version was created." (Side
-     effects).
+     effects), and an upload line for each galley file (a press: each
+     format's file), which nobody uploaded ⚠ [A18](#a18).
    - **Control**: before the new version, the side menu listed the one
      published version and the reader page's date line carried no
      "Updated on" (Actors row 7; Rule 11). <sup>s4</sup>
@@ -1137,6 +1138,9 @@ Left out of the scenarios above, by reason:
     cover image the app accepts; Rule 11b)
   - A17 (a version created through the programming interface without
     the version number the app no longer keeps; Rule 11b)
+  - A18 (the upload lines "Create New Version" adds to the Activity Log
+    for each galley file; Side effects; scenario 4 reads the version
+    line)
   - OJS2's second half (where only future issues exist, a Publication
     Settings save for another field recording "Don't Assign To An
     Issue"; Fields)
@@ -1221,6 +1225,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A15](#a15) | A cover image sent by program with one uploaded picture under two languages fails with a server error and leaves a stray copy of the picture | 🐞 | latent · crash: server | — |
 | [A16](#a16) | A version created by program with a cover image the app accepts is created without the cover, and the picture is left unused | 🐞 | minor | — |
 | [A17](#a17) | A program creating a version is refused unless it sends a version number the app throws away | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
+| [A18](#a18) | "Create New Version" logs a file upload nobody made, under the editor's name | 🐞 | minor | — |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Editor publishing an article without an issue gets an error when a contributor has a verified ORCID iD | 🐞 | medium · crash: server | issues (claude), 2026-10-19 — re-verified |
@@ -1530,6 +1535,18 @@ different request, `POST …/publications/{id}/version`. No release
 carries this code yet, so it can be fixed before the first one that
 does.
 Since: 2025-05-30 (pkp/pkp-lib#10669) · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
+
+<a id="a18"></a>
+**A18 — "Create New Version" logs a file upload nobody made** · 🐞 · minor.
+An editor who creates a new version of a published article or posted
+preprint expects the Activity Log to add "A new version was created."
+It also adds "Revision "{file name}" was uploaded for file {n}." under
+the editor's own name, one line per galley file, though nobody uploaded
+anything: the new version received a copy of the galley's file. Nothing
+is lost, but the history credits the editor with an upload. Until
+2026-10-27 a journal and a preprint server logged only the version; a
+press has always logged its formats' files this way.
+Since: 2026-10-27 (pkp/pkp-lib#13637; on 3.5 the same day) · Basis: probe, 2026-10-28. <sup>[f-a18](#fn-a18)</sup>
 
 ### OJS
 
@@ -2905,6 +2922,38 @@ not tried): drop `version` from `required` in lib/pkp
 `schemas/publication.json` on `main`. Kept check
 `shared/playwright/checks/U49/I23G/i23g.js` (`PART=api`).
 Issue report: [pkp-e2e#1071](https://github.com/jardakotesovec/pkp-e2e/issues/1071) ([docs/issues/U49-A17-api-new-version-version-field-required.md](../issues/U49-A17-api-new-version-version-field-required.md)).
+
+<a id="fn-a18"></a>
+**f-a18** — OJS `c51c5caf1d` and OPS `ff72e607ef` (with pkp-lib
+`df42984b46`; PRs `pkp/ojs#5994`, `pkp/ops#1465`, `pkp/pkp-lib#13641`,
+for pkp/pkp-lib#13637 "Revise/fix galley file revision policies", Alec
+Smecher, 2026-10-27; on `stable-3_5_0` as OJS `dce1f05be5`, OPS
+`ef55e33bcd`, pkp-lib `a6ed3df00a`; on 3.4 and 3.3 too) make
+`version()` clone each galley's submission file onto the new galley,
+and its dependent files, through `Repo::submissionFile()->add()`
+(OJS `classes/publication/Repository.php` lines 189 and 202, OPS 149
+and 162). `add()` (lib/pkp `classes/submissionFile/Repository.php`
+267-306) always logs `submission.event.fileUploaded` on the new file
+and `submission.event.fileRevised` ("Revision "{$name}" was uploaded
+for file {$submissionFileId}.") on the submission, under the signed-in
+user. Before, the new galley reused the old submission file id and no
+file was added. OMP's `version()` has copied its formats' files through
+`add()` since 2020 (`edd395253`), and lib/pkp's
+`versionSubmissionFile()` copies an uploaded JATS file the same way
+(code). Live-probed 2026-10-28 on PKP's default dataset, freshly
+loaded, as `dbarnes`, OJS 17 and OPS 2, `main` (OJS `7705b2aeb8`, OPS
+`815fbaad1b`, lib/pkp `df42984b46`) and `stable-3_5_0` (OJS
+`851416bc2d`, OPS `bd0ef09fd6`, lib/pkp `a6ed3df00a`): "Create New
+Version" answered 200 and added the log line `Daniel Barnes |
+Revision "article.pdf" was uploaded for file 46.` (OPS: the PDF named
+after the preprint, file 20) beside "A new version was created.", with
+the two `event_log` rows by `dbarnes`; also on scratch contexts on OJS,
+OPS and OMP `main` (OMP: the long-standing same rows). Fix tried on
+OPS: a `bool $log = true` flag on `add()`, as `edit()` has, passed
+`false` by `version()` and `versionSubmissionFile()`
+(`checks/sync/pkp-lib-13637/fix.diff`): only the version's own lines,
+the copy kept. Kept check `checks/sync/pkp-lib-13637/version-log.js`.
+Report `docs/reports/2026-10-28-pkp-lib-13637.md`.
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — OJS1 (retired). Live 2026-08-28 (metadata spec, register A1): with

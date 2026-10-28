@@ -928,6 +928,7 @@ Order" puts the old order back at once, with no message. "Change File"
 and "Delete" work for the same Moderator, and once the preprint is
 posted everything on the page does. Basis: probe, 2026-10-02.
 <sup>f-ops2</sup>
+Report: refresh owed — pkp/pkp-lib#13637 (OPS `ff72e607ef`, 3.5 `ef55e33bcd`, 2026-10-27) gates `PreprintGalleyGridHandler` `deleteGalley` and `clearPubId` with `PreprintGalleyGridHandler::canEdit()`, so "Delete" now fails for the same Moderator too: the press answers `{"status":false}` with "This galley can not be edited because it has already been published.", the page shows "Error — An unexpected error has occurred. Please reload the page and try again." and the galley stays (walked on `main` and 3.5 by the daily sync's reader rr13637, 2026-10-28; "Permissions" ticked still deletes). "Change File" passes the new `canEditRepresentations()` (any non-author stage assignment) through `RepresentationUploadAccessPolicy` and `SubmissionFileAccessPolicy`, not re-driven. The Summary's "Change File and Delete work" and the list of what fails change (2026-10-28)
 
 <a id="ops3"></a>
 **OPS3 — A preprint's Author is offered "Change File" on every galley and refused on files others uploaded** · 🐞 · low.

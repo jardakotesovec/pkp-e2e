@@ -1,0 +1,72 @@
+--- a/lib/pkp/classes/submissionFile/Repository.php
++++ b/lib/pkp/classes/submissionFile/Repository.php
+@@ -264,7 +264,7 @@
+     }
+ 
+     /** @copydoc DAO::insert() */
+-    public function add(SubmissionFile $submissionFile): int
++    public function add(SubmissionFile $submissionFile, bool $log = true): int
+     {
+         $submissionFile->setData('createdAt', Core::getCurrentDate());
+         $submissionFile->setData('updatedAt', Core::getCurrentDate());
+@@ -275,6 +275,11 @@
+ 
+         Hook::call('SubmissionFile::add', [$submissionFile]);
+ 
++        // A copy made by the system (a new version's files) is no upload: log nothing
++        if (!$log) {
++            return $submissionFileId;
++        }
++
+         $logData = $this->getSubmissionFileLogData($submissionFile);
+ 
+         $logEntry = Repo::eventLog()->newDataObject(array_merge(
+@@ -945,7 +950,7 @@
+         $newSubmissionFile->setData('fileId', $newFileId);
+ 
+         $submissionFileId = Repo::submissionFile()
+-            ->add($newSubmissionFile);
++            ->add($newSubmissionFile, false);
+ 
+         $submissionFile = Repo::submissionFile()
+             ->get($submissionFileId);
+--- a/classes/submissionFile/Repository.php
++++ b/classes/submissionFile/Repository.php
+@@ -32,7 +32,7 @@
+         parent::delete($submissionFile);
+     }
+ 
+-    public function add(SubmissionFile $submissionFile): int
++    public function add(SubmissionFile $submissionFile, bool $log = true): int
+     {
+         $galley = null;
+ 
+@@ -45,7 +45,7 @@
+             }
+         }
+ 
+-        $submissionFileId = parent::add($submissionFile);
++        $submissionFileId = parent::add($submissionFile, $log);
+ 
+         if ($galley) {
+             Repo::galley()->edit($galley, ['submissionFileId' => $submissionFile->getId()]);
+--- a/classes/publication/Repository.php
++++ b/classes/publication/Repository.php
+@@ -146,7 +146,7 @@
+                     $newSubmissionFile->setData('id', null);
+                     $newSubmissionFile->setData('assocType', Application::ASSOC_TYPE_REPRESENTATION);
+                     $newSubmissionFile->setData('assocId', $newGalleyId);
+-                    $newSubmissionFileId = Repo::submissionFile()->add($newSubmissionFile);
++                    $newSubmissionFileId = Repo::submissionFile()->add($newSubmissionFile, false);
+ 
+                     $dependentFiles = Repo::submissionFile()
+                         ->getCollector()
+@@ -159,7 +159,7 @@
+                         $newDependentFile = clone $dependentFile;
+                         $newDependentFile->setData('id', null);
+                         $newDependentFile->setData('assocId', $newSubmissionFileId);
+-                        Repo::submissionFile()->add($newDependentFile);
++                        Repo::submissionFile()->add($newDependentFile, false);
+                     }
+                 }
+             }

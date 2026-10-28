@@ -893,6 +893,7 @@ default "Publication date (newest first)" sees no difference. Expected:
 each list in the order its setting names. The staff see the books in a
 different order than readers do.
 Basis: probe, 2026-10-03. <sup>f-a3</sup>
+Report: refresh owed — OMP `c3501fbed` (3.5 `6a876d4a37`, pkp/pkp-lib#13617, 2026-10-26/27) adds the upgrade migration `I13617_FixSeriesSort`, which rewrites every series `sortOption` left as `title-1` and the like in `series_settings` to `title-ASC` and the like, so a series carried over from 3.3 with an ascending order, which the Catalog filter listed right while it held the numeric value, now lists in reverse too once upgraded (`CatalogListPanel::getConfig()` still compares with `DAO::SORT_DIRECTION_ASC`; walked on `main` and 3.5 from PKP's 3.3 OMP data by the daily sync's reader rr13617, 2026-10-28). The Affects line "3.3: none … which the check matches" and the reach of "any series saved from 3.4 on" change (2026-10-28)
 
 <a id="a4"></a>
 **A4 — Catalog page: pressing "Featured in category" for a book's second category unfeatures it in the first** · 🐞 · medium.
