@@ -297,7 +297,12 @@ test.describe('Payments & APCs', () => {
         await expect(tab.currencySelect()).toBeVisible();
         expect(await tab.chosenOption(tab.currencySelect())).toBe('');
         expect(await tab.chosenOption(tab.pluginSelect())).toBe('');
-        await expect(tab.pluginSelect().locator('option')).toHaveText([TEXT.manualMethod, TEXT.paypalMethod]);
+        // The select's options follow the same disk order (run 40667951466,
+        // 2026-10-28, drew "Paypal Fee Payment" first), so a set too.
+        await expect(tab.pluginSelect().locator('option')).toHaveCount(2);
+        await expect.poll(async () => (await tab.pluginSelect().locator('option').allInnerTexts()).map((t) => t.trim()).sort()).toEqual(
+            [TEXT.manualMethod, TEXT.paypalMethod].sort()
+        );
         const manual = tab.group(TEXT.groups.manual);
         await expect(manual.locator('label.pkpFormFieldLabel')).toHaveText([TEXT.instructions]);
         await expect(tab.instructionsBox()).toHaveValue('');
