@@ -78,6 +78,10 @@ Operational facts:
   machine-wide test lock, so start long runs in the background. A slot is
   freed only when the session leaves this clone committed and pushed.
   `node bin/slot.js status`; harness.md "Slots".
+- Markdown, here and in `../pkp-e2e-sec`: keep every code span (text in
+  backticks) on one line when wrapping; break before or after it, never
+  inside. A continuation line that starts with `<script>` or another HTML
+  tag opens a raw HTML block on GitHub and swallows the rest of the page.
 - CI: `.github/workflows/e2e.yml` (the matrix) and `run-app.yml` (reusable,
   also called by the app repos' thin hooks at run time). A broken `main`
   here breaks every app PR check, so keep `main` green.
