@@ -34,7 +34,7 @@
 //   closed    restrict site access, then registration closed (Actors rows 3-4); put back
 //   extra     site header in French, switcher from Administration, the site's "Add Menu",
 //             highlights (Rule 30), the DOIs tab re-ticked with no prefix
-//   rdnone    submissions disabled: a Reader's side menu (Actors row 8)
+//   rdnone    submissions disabled: a Reader's side menu and {OJS} the Subscription Manager's (Actors row 8)
 // Irreversible or site-level: adm (A2 only), nothing site-wide is changed.
 // Run: PROBE_FEATURE=U08 PROBE_AGENT=ccK4 node bin/probe.js all shared/playwright/checks/U08/K4/k4.js
 const fs = require('fs');
@@ -450,7 +450,10 @@ forEachApp(async (app) => {
 
         // ── adm: the Site Administrator reduced to Reader in A2 ───────────────────────
         if (on('adm')) {
-            await as(page, U.m2, st.A2);
+            // As the Site Administrator itself, as k3's admb does: A2's manager opening the Site
+            // Administrator's "Edit" now sees no roles ("No Items"; on 2026-09-24 it listed them), so
+            // the role could not be removed that way (drift sweep 2026-10-28, ccSW).
+            await as(page, 'admin', st.A2);
             await go(page, cUrl(st.A2, '/management/settings/access'));
             await sleep(800);
             const row = page.locator('tr').filter({hasText: 'admin@mail.test'}).first();
@@ -518,8 +521,16 @@ forEachApp(async (app) => {
             const nav = await sideNav(page);
             const navEl = await page.locator('nav#app-nav').count();
             await snap(page, 'rdnone-reader-profile', {nav, navEl}, true);
+            // {OJS} the Subscription Manager in the same state, payments off (Actors row 8; drift sweep 2026-10-28)
+            let sm = null;
+            if (U.sm) {
+                await as(page, U.sm, st.A);
+                await go(page, cUrl(st.A, '/user/profile'));
+                sm = {nav: await sideNav(page), navEl: await page.locator('nav#app-nav').count()};
+                await snap(page, 'rdnone-subscriptionmanager-profile', sm, true);
+            }
             const s2 = await toggle(false);
-            fact('rdnone', {s1, s2, nav, navEl});
+            fact('rdnone', {s1, s2, nav, navEl, sm});
         }
 
         // ── imp: the initials menu while logged in as another user (Rule 28) ─────────
@@ -579,7 +590,9 @@ forEachApp(async (app) => {
             if (isOjs) starts.push(['payments', '/payments']);
             if (isOmp) starts.push(['catalog', '/manageCatalog']);
             for (const [k, p] of starts) {
-                await go(page, cUrl(PK, p));
+                // "Comments" from C, whose public comments are on until phase cond: publicknowledge has
+                // them off, and its Comments page answers the access-denied page (drift sweep 2026-10-28)
+                await go(page, cUrl(k === 'comments' ? st.C : PK, p));
                 const from = rel(page.url());
                 await openSwitcher(page);
                 const target = page.locator('header.app__header .app__contexts a').filter({hasText: aName}).first();

@@ -1320,8 +1320,9 @@ config-file settings.
   I30).
 - While the site has no "Site Name", Administration's editorial header shows
   the application's name ("Open Journal Systems", "Open Monograph Press",
-  "Open Preprint Systems") where the site's name would stand. All three
-  apps, 2026-09-23 (U08 claim check K1, K4).
+  "Open Preprint Systems") where the site's name would stand, as plain
+  text, not a link. All three apps, 2026-09-23 (U08 claim check K1, K4);
+  plain text 2026-10-28 (U08 drift sweep).
 - A stage whose panels an assigned participant's role may not open shows
   "You don't currently have access to that stage of the workflow." in
   place of the panels, the header's "Library" still offered; "The current

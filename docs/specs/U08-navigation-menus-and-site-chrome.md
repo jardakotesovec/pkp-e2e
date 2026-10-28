@@ -380,8 +380,9 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       everyone else, the Profile page: a Reader, and a Section Editor, who
       is sent there
       although the Dashboard is where they work ⚠ [A2](#a2).
-    - 19b. **The count.** For the first group of 19a, the username and
-      "Dashboard" carry the number of unread tasks, as
+    - 19b. **The count.** For the first group of 19a, the number of
+      unread tasks follows only the username in a wide window, and only
+      "Dashboard" in a narrow window's "Open Menu" list, as
       [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md)
       (Rule 4) describes.
     - 19c. **On the site's pages.** Every user's "Dashboard", the Site
@@ -522,7 +523,7 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       editorial screens (Administration) the site's name stands there,
       a link to the site's home page; while the site has no name, "Open
       Journal Systems" ("Open Monograph Press", "Open Preprint Systems")
-      stands in its place.
+      stands in its place, as plain text, not a link.
     - 27b. **Right.** An "i" icon that opens the application's
       documentation (PKP's "Learning OJS" guide, "Learning OMP", "Learning
       OPS") in a new browser tab, the Tasks bell
@@ -561,7 +562,11 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       or "Issues" {OJS}, gets the same page in the chosen journal; from
       any other page ("DOIs", "Payments" {OJS}, "Catalog" {OMP}, the
       submission wizard, the Profile page, Administration), the chosen
-      journal's landing page.
+      journal's landing page. From "Comments", while the chosen
+      journal's public comments are off, that page is the access-denied
+      page reading "Access denied."
+      ([Reader comments & moderation](U14-reader-comments-and-moderation.md),
+      Rule 2b).
 30. **The side menu.** Down the left of the editorial screens, for the
     users of Actors row 8. Its entries, top to bottom, each shown only to
     the roles and under the condition its row names: <sup>h</sup>
@@ -590,8 +595,10 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       Reader alone there, each editorial page of that journal opens with
       a window "Error", "The current role does not have access to this
       operation.", while the side menu still offers "Editor Dashboard"
-      (the search box alone), "DOIs", "Settings", "Content",
-      "Statistics", "Tools" and "Administration" ⚠ [A22](#a22). Where
+      (the search box alone), "Start A New Submission", "DOIs",
+      "Settings", "Content" (on a preprint server only while public
+      comments are on, [OPS1](#ops1)), "Statistics", "Tools" and
+      "Administration" ⚠ [A22](#a22). Where
       "Settings" then leads is
       [→ settings access](U07-journal-identity-and-about-pages.md#settings-access).
 31. **Notices while a page is left.** The top-right area where notices
@@ -683,7 +690,7 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
 14. **The menu depth limit** (the installation's configuration file; 2).
     Higher: the menu window lets items sit that many levels deep (Rule 5a),
     while the header still shows two (Rule 16). No screen changes it.
-    <sup>k</sup>
+    <sup>k</sup> <sup>z</sup>
 15. **"\"Developed By\" Block"** (Settings › Website › "Plugins" ›
     "Installed Plugins"; disabled) with **"Sidebar"** (Settings › Website ›
     "Appearance" › "Setup"; no block). Enabled and placed: the block of
@@ -1204,11 +1211,15 @@ Left out of the scenarios above, by reason:
   - the menu window with no items at all: neither panel claims items are assigned or sends the manager to drag (the guard [A16](#a16)'s issue report proposes)
   - the item window opened and closed with nothing typed: no "The data on this form has changed" box and no leave question (the guard of [A18](#a18)'s first issue report)
   - the item window after a refused "Save": the back arrow asks before closing and the entries stay until the manager answers (the guard of [A18](#a18)'s second issue report)
-  - the top-right notices scenario 5 states for "No type", "Not a web address", "A path with other characters" and "A path already used": the suite does not assert them yet (Fields)
-  - the menu window after a change discarded with "Yes": Settings › "Workflow" in the side menu, pressed a second later, asks nothing (Rule 6a)
+  - the top-right notices scenario 5 states for "No type", "Not a web address", "A path with other characters" and "A path already used": no suite asserts them yet (Fields; scenario 5)
+  - the menu window after a change discarded with "Yes": Settings › "Workflow" in the side menu, pressed a second later, asks nothing (Rule 6a; the guard of the retired [A17](#a17))
   - the journals switcher on a site with two journals of one name: each offers the other (Rule 29; the guard [A21](#a21)'s issue report proposes)
   - on a journal, the menu's "Edit" window: "Subscriptions" and "My Subscriptions" carry the crossed-out eye and open their notices (Rule 7a; the guard [OJS1](#ojs1)'s issue report proposes)
   - a preprint server's settings address typed with the site's path: the refusal names the missing server in words a user understands, as a journal's and a press's do (Rule 26c; the guard [OPS4](#ops4)'s issue report proposes)
+  - scenario 11's "Placed": "\"Developed By\" Block" ticked in the "Sidebar" list on screen and saved with "Save"; the suites place the block before the scenario starts (Rule 21; Settings bullet 15)
+  - scenario 2's Journal Manager: the number after the username is the Tasks bell's number; the suites check that a number is there, not which (Rule 19b)
+  - the Site Administrator's journals switcher on "Comments": the chosen journal's Comments page, and the access-denied page reading "Access denied." when that journal's public comments are off (Rule 29a)
+  - Administration's dark bar while the site has no name: "Open Journal Systems" ("Open Monograph Press", "Open Preprint Systems") as plain text, not a link (Rule 27a)
 - **Rarely met**:
   - "Publishing Mode" set to "OJS will not be used to publish the journal's contents online." {OJS}: "Current Issue" and "Archives" leaving the header (Settings bullet 2; item types table)
   - a Reader with no side menu while "Disable Submissions" is on (Actors row 8)
@@ -1355,9 +1366,12 @@ has more than one language under "Forms"
 ([Notifications center & email preferences](U05-notifications-center-and-email-preferences.md#a15) A15).
 On such a journal the other roles still see it after "Dashboard" in the
 narrow menu, and these editors do not.
-The Profile page's side menu leads back to the Dashboard in one press. It
-has been this way since 3.1 (2017); 3.0 took them to their submissions.
-Basis: probe, 2026-10-20; issue report refresh walk, 2026-10-26. <sup>f-a2</sup>
+On the Profile page the side menu's "Editor Dashboard" group is closed;
+pressing it, then one of its lists ("Assigned to me"), opens the
+Dashboard. The fault has been there since 3.1 (2017); 3.0 took them to
+their submissions.
+Basis: probe, 2026-10-28; issue report refresh walk, 2026-10-26. <sup>f-a2</sup>
+Report: refresh owed — the 2026-10-28 drift sweep found the way back from the Profile page takes two presses, not one: "Editor Dashboard" is a closed group there, and one of its lists ("Assigned to me") opens the Dashboard; the report's Summary, "Way round" and severity line ("the Dashboard one press away") say one press; no class or method the report names is touched (2026-10-28)
 
 <a id="a3"></a>
 **A3 — The access-denied page a signed-in user gets has an empty heading and an unnamed browser tab** · 🐞 · low.
@@ -1594,13 +1608,14 @@ Basis: probe, 2026-10-03. <sup>f-a22</sup>
 **A25 — The initials menu does not close on Escape** · ❓ · minor.
 In the editorial header, the menu the initials open (Rule 28) stays
 open when the Escape key is pressed; it closes only when the initials
-are pressed again or the focus moves off them. The public header's
+are pressed again or the focus leaves the menu (a Tab past its last
+entry, a press elsewhere on the page). The public header's
 "About" list (Rule 16) and the menu window (Rule 6) both close on
 Escape.
 Question: should the initials menu close on Escape too? Lean: yes;
 Escape is the key a keyboard or screen-reader user reaches for to close
 a menu, and the other menus here answer it.
-Basis: test run. <sup>f-a25</sup>
+Basis: probe, 2026-10-28. <sup>f-a25</sup>
 
 <a id="a26"></a>
 **A26 — A role kept out of Settings can still add, rename and rearrange the journal's navigation menus** · 🐞 · user-visible.
@@ -2483,7 +2498,14 @@ the Section Editor, even with an unread task, or the Reader. `admin`
 holding Reader alone in a scratch journal was taken to its home page.
 "Administration" showed to `admin` alone and opened "Site
 Administration"; impersonating, "Logout as {username}" returned the
-administrator to their Dashboard. On the site's home page every user's
+administrator to their Dashboard. Live-probed 2026-10-28, two runs
+(Rule 19b; all three apps), on a scratch journal's home page, its
+Journal Manager with one unread task and its Author with none: the page
+carries the number after both the username and "Dashboard"; in a window
+1280 px wide the username read "{username} 1" and the list under it
+"Dashboard" with no number shown, and in a 375 px window the "Open
+Menu" list read the username bare and "Dashboard 1" (the Author:
+"{username} 0", then "Dashboard 0"). On the site's home page every user's
 "Dashboard", `admin`'s included, opened a Profile page (live-probed
 2026-10-23, two runs, all three apps, pkp-lib `00ce12be77`,
 pkp/pkp-lib#13553; until then `admin`'s opened the site's home page):
@@ -2676,9 +2698,12 @@ and French, and the strip atop side windows, as note g records; the
 journal's name led to its home page, and on Administration the site's
 name to the site's home page. With the site unnamed, Administration's
 header read "Journals | Open Journal Systems" (seen once, on OJS, before
-the site was named); whether that text is a link was not recorded, and
-the test sites could not be unnamed again, since the form refuses an
-empty "Site Name".
+the site was named). Live-probed 2026-10-28, two runs (Rule 27a; all
+three apps), on freshly reset test sites, which have no "Site Name": on
+Administration, "Site Settings", "Hosted Journals" and "System
+Information" the sitemap icon (named "Journals", "Presses", "Servers")
+was followed by "Open Journal Systems" ("Open Monograph Press", "Open
+Preprint Systems") as plain text, no link.
 
 <a id="fn-td19"></a>
 **td19** — The initials menu is ui-library `Dropdown.vue` (inside
@@ -2690,8 +2715,12 @@ so Escape does nothing (A25). Test run 2026-09-26 (Rule 28; OJS,
 initials pressed, Escape pressed, the menu still shown 1 s later every
 time; the initials pressed again, the menu hidden every time. The same
 day scenarios 2 and 9, closing the menu by a second press on the
-initials, passed five times on each of OJS, OMP and OPS. On OMP and OPS
-Escape was not pressed; the claim rests on the shared component.
+initials, passed five times on each of OJS, OMP and OPS. Live-probed
+2026-10-28, two runs, all three apps (`manager.maya` on the Dashboard):
+the initials pressed, the menu opened; Escape, then 1 s later, and
+Escape again: still open; the initials pressed again: closed; reopened,
+Tab through "English", "français", "Edit Profile" and "Logout" on to
+"Editor Dashboard": closed; reopened, a press on the page: closed.
 
 <a id="fn-td16"></a>
 **td16** — Live-probed 2026-09-23 (Rule 29; A21; all three apps): the
@@ -2705,6 +2734,15 @@ Alpha. "Order", a drag and "Done" (`context-grid/save-sequence`, 200)
 put Alpha first in run 1 and Zeta first again in run 2, and the table,
 `admin`'s list and the Author's list followed each time. The
 screen-reader names read "Journals", "Presses", "Servers".
+Live-probed 2026-10-28, two runs (Rule 29a; all three apps), `admin`
+on the Comments page of a scratch journal with public comments on: the
+switcher's link to a second journal with them on opened its Comments
+page (`management/settings/userComments`); its link to a third with
+them off kept the same address and landed on
+`user/authorizationDenied?message=user.authorization.accessDenied`:
+the access-denied page with an empty heading and the text "Access
+denied.". The seeded journal's own Comments address, its comments off,
+gave the same page.
 
 <a id="fn-td17"></a>
 **td17** — Live-probed 2026-09-23 (Rule 30; all three apps): on the
@@ -2802,6 +2840,15 @@ ROLE_ID_ASSISTANT, ROLE_ID_REVIEWER, ROLE_ID_AUTHOR]` has had no
 `ROLE_ID_SUB_EDITOR` through every rewrite of the method (PSR-12 reformat
 2021-04-20 and later), while `PKPPageRouter::getHomeUrl()` sends a sub
 editor to `dashboard/editorial`. Seen on screen 2026-09-04 (note e).
+Live-probed 2026-10-28, two runs, all three apps (and the OJS Guest
+Editor), a scratch journal's Section Editor on the Profile page, also on
+a journal with French under "Forms": the side menu showed "Editor
+Dashboard" with its lists hidden; pressing it left the page as it was
+and showed the lists ("Search submissions", "Assigned to me", "Active
+submissions", …); "Assigned to me" opened
+`dashboard/editorial?currentViewId=assigned-to-me`. The name carried no
+number in a wide window, and "Dashboard" none in the narrow "Open Menu"
+list, where the Journal Manager and the Author showed theirs (Rule 19b).
 Issue report: [docs/issues/U08-A2-section-editor-dashboard-opens-profile.md](../issues/U08-A2-section-editor-dashboard-opens-profile.md), filed as [pkp-e2e#634](https://github.com/jardakotesovec/pkp-e2e/issues/634).
 
 <a id="fn-f-a3"></a>
@@ -2868,7 +2915,8 @@ Live-probed 2026-09-23 (note k, keyboard), all three apps.
 <a id="fn-f-a9"></a>
 **f-a9** — Note k (depth from the configuration) and note q (the header
 template draws two levels). No theme in the checkouts overrides
-`navigationMenu.tpl`. Not seen running: note z.
+`navigationMenu.tpl`. Not seen running: no screen changes the depth
+(note z).
 
 <a id="fn-f-a10"></a>
 **f-a10** — `PKPNavigationMenuController::validateNavigationMenu()`
@@ -2987,6 +3035,15 @@ Roles ("Remove Role"), leaving Reader; the side menu's calls for the
 submission views answered 401. The journal's Navigation tab opened
 behind the window; a press's and a server's gave the access-denied page
 ([Journal identity & about pages](U07-journal-identity-and-about-pages.md#a1)).
+Live-probed 2026-10-28, two runs (Rule 30a; all three apps), `admin`'s
+own manager row removed on a scratch journal's Users & Roles ("Remove
+Role", 200), Reader left: the Dashboard opened on the search view with
+the window "Error", "The current role does not have access to this
+operation.", "OK", and the side menu read "Editor Dashboard" (its one
+line the box "Search submissions", shown once the group was pressed),
+"Start A New Submission", "DOIs", "Settings", "Content" (OJS, OMP; none
+on OPS, the scratch server's public comments being off by default),
+"Statistics", "Tools", "Administration".
 Issue report: [docs/issues/U08-A22-admin-without-role-dashboard-error.md](../issues/U08-A22-admin-without-role-dashboard-error.md), filed as [pkp-e2e#639](https://github.com/jardakotesovec/pkp-e2e/issues/639).
 
 <a id="fn-f-a23"></a>
@@ -3029,11 +3086,13 @@ the Primary menu window's handles carried the `title`
 `##navigation.navigationMenus.newRelease##`.
 
 <a id="fn-f-a25"></a>
-**f-a25** — Note td19: `Dropdown.vue` has no Escape handler; the
-focus half of the symptom is read from `closeOnBlur()`, not run. The
-header's "About" list closes on Escape (note q), the menu window too
-(note td7). Test run 2026-09-26, OJS: Escape left the menu shown three
-times out of three; OMP and OPS share the component.
+**f-a25** — Note td19: `Dropdown.vue` has no Escape handler and closes
+on `closeOnBlur()`. The header's "About" list closes on Escape (note
+q), the menu window too (note td7). Test run 2026-09-26, OJS: Escape
+left the menu shown three times out of three. Live-probed 2026-10-28,
+two runs, all three apps: Escape, twice, left the menu open; a second
+press on the initials, Tab out of the menu and a press on the page each
+closed it (td19).
 
 <a id="fn-f-a26"></a>
 **f-a26** — On `main` (lib/pkp `a7f5e3081b`),
