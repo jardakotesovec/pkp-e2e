@@ -626,6 +626,17 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         return this.page.locator('main').getByRole('tab', {name, exact: true});
     }
 
+    /**
+     * Open the page by its address while public comments are off: the app
+     * refuses it and lands on the access-denied page (Rule 2b).
+     */
+    async gotoRefused() {
+        await this.page.goto(this.url());
+        await expect(this.page).toHaveURL(/\/user\/authorizationDenied/, {timeout: 30_000});
+        await expect(this.page.getByText('Access denied.')).toBeVisible();
+        await expect(this.heading()).toHaveCount(0);
+    }
+
     /** Press a tab and wait for its table to settle. */
     async openTab(name) {
         await this.tab(name).click();

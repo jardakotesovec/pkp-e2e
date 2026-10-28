@@ -1,0 +1,14 @@
+diff --git a/pages/management/ManagementHandler.php b/pages/management/ManagementHandler.php
+index 9032115235..d9c59191ce 100644
+--- a/pages/management/ManagementHandler.php
++++ b/pages/management/ManagementHandler.php
+@@ -105,7 +105,8 @@ class ManagementHandler extends Handler
+         }
+ 
+         // Deny access to the comments page if comments are disbaled
+-        if ($requestedArgs === ['userComments'] && !$request->getContext()->getData('enablePublicComments')) {
++        $context = $request->getContext();
++        if (($requestedArgs[0] ?? null) === 'userComments' && $context && !$context->getData('enablePublicComments')) {
+             return false;
+         }
+ 

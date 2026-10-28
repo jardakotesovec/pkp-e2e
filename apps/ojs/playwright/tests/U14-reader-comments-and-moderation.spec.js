@@ -14,7 +14,7 @@
  * (S5 asserts the "pending review" row staying after "Hide Comment", the
  * scenario's sentence), A3 ❓ (S9 asserts the dialog staying open on an
  * empty reason and "Report" offered again; no second report is filed),
- * A4 ❓ (S1 asserts the page opening by address with the comment listed),
+ * A4 ❓ (S1 asserts the page refused by address while the setting is off),
  * A5 ❓ (S1 asserts the reload onto Appearance › Theme and no "Saved"),
  * A6 🐞 (the comment panel's unverified iD link is never opened; S2's iD
  * is verified), A15 ❓ (the landing page's hollow icon is not read),
@@ -225,13 +225,9 @@ test.describe('reader comments & moderation', () => {
         await expect(landing.sidebarBlock()).toHaveCount(0);
         await expect(page.getByText('Comments on this publication')).toHaveCount(0);
 
-        // The page by address: still opens and lists the comment (A4's sentence).
-        await comments.goto();
-        await expect(comments.heading()).toBeVisible();
-        await comments.expectTab('All');
-        await expect(comments.row(commentText)).toHaveCount(1);
-        await comments.openTab('Approved');
-        await expect(comments.row(commentText)).toHaveCount(1);
+        // The page by address: refused while the setting is off, onto the
+        // access-denied page (A4's sentence).
+        await comments.gotoRefused();
 
         // Switching on again: the same reload; the menu entry and the blocks back.
         await settings.goto();
@@ -262,18 +258,13 @@ test.describe('reader comments & moderation', () => {
         expect(dialogs).toEqual([]);
 
         // Control: the fresh journal: box unticked, no Content › Comments,
-        // "No Items" under every tab of the page opened by address.
+        // and the page opened by address refused as well.
         const freshSettings = new CommentsSettingsTab(manager, freshTag);
         await freshSettings.goto();
         await expect(freshSettings.box()).not.toBeChecked();
         expect(await menu.contentEntries()).toEqual(['Issues']);
         const freshComments = new CommentsPage(manager, freshTag);
-        await freshComments.goto();
-        for (const tab of TABS) {
-            await freshComments.openTab(tab);
-            await expect(freshComments.noItems()).toBeVisible();
-            await expect(freshComments.rows()).toHaveCount(1);
-        }
+        await freshComments.gotoRefused();
     });
 
     test('S2: approving and hiding on the Comments page', async ({page, asUser, ojsApi}, testInfo) => {
