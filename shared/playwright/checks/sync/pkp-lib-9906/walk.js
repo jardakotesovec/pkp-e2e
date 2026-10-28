@@ -20,7 +20,8 @@
 // Facts go to facts.json; no assertions. At the line tips (base, 2026-10-28) no Thema anywhere: the setting is
 // ignored, no Thema suggestions, every code saved unchecked, ONIX keywords only. At the PR heads omp fb2adb7ced +
 // pkp-lib 8c521a4cfb everything as the issue asks, except step 4: the code "FJH" typed offers only free-text "FJH"
-// (ui-library filters the suggestions by description; fix-ui-library.diff, tried, lists FJH).
+// (ui-library filters the suggestions by description; fix-ui-library.diff, tried, lists FJH). Round 2 (omp 16a77d9fad,
+// ui-library#1029 fdf1b5a22b, the same lines as the tried fix): see upstream-sync-stable-3_5_0.md, 2026-10-28.
 const fs = require('fs');
 const path = require('path');
 const {spawnSync} = require('child_process');
@@ -175,6 +176,8 @@ forEachApp(async (app) => {
             await subjInput.pressSequentially('FJH', {delay: 60});
             await page.waitForTimeout(3000);
             fact('4 enable: options shown for the code "FJH"', await options(dlg));
+            const firstOption = await dlg.locator('.autosuggest__results-item').first().innerText().catch(() => '');
+            fact('4 enable: first option for the code (what Enter alone keeps)', firstOption.trim());
             await shot(page, '4-typed-code').catch(() => {});
             await subjInput.fill('');
             await subjInput.pressSequentially('adventure', {delay: 60});
@@ -231,6 +234,17 @@ forEachApp(async (app) => {
             fact('6 require: stored subjects untouched (not saved)', (await sessionApi(page, 'GET', api(`submissions/${SUB}/publications/${pid}`))).body.subjects);
             const chips = await dlg6.locator('[id*="subjects"]').locator('xpath=ancestor::*[contains(@class,"pkpFormField")][1]').first().innerText().catch(() => '');
             fact('6 require: field text after typing free text + Enter', chips.replace(/\s+/g, ' ').slice(0, 600));
+            // a code typed in require mode: listed (round 2, ui-library#1029), Enter picks it, Save stores it coded
+            await in6.click();
+            await in6.pressSequentially('FJM', {delay: 60});
+            await page.waitForTimeout(3000);
+            fact('6 require: options shown for the code "FJM"', await options(dlg6));
+            await page.keyboard.press('Enter');
+            await page.waitForTimeout(800);
+            await shot(page, '6-require-code').catch(() => {});
+            await dlg6.getByRole('button', {name: 'Save', exact: true}).first().click({timeout: T}).catch(() => {});
+            await page.waitForTimeout(2500);
+            fact('6 require: stored after Enter on "FJM" and Save', (await sessionApi(page, 'GET', api(`submissions/${SUB}/publications/${pid}`))).body.subjects);
         } else fact('6 require: workflow form', {notDone: 'no subjects input'});
 
         // 7: the wizard as aclark; subjects asked in the wizard ("request"), or its "For the Editors" step has no Subjects field
