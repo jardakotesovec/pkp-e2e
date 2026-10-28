@@ -13,4 +13,3 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
-2026-10-27 · sync · regression reader rr12647 · a probe script under `.reports/sync/<agent>/` failed on a guessed kit import depth (four `..` instead of three), and Playwright's `click()` on an `aria-disabled` menu item timed out 30 s as "not enabled" where a user's pointer click goes through · patterns.md "Probe kit" naming the `require('../../../shared/playwright/probe')` path for `.reports/<feature>/<agent>/` scripts, and a Locator pitfall line: to test what a pointer does on an aria-disabled element, click its box centre with `page.mouse.click`

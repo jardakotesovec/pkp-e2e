@@ -102,8 +102,11 @@ for (const f of specFiles) {
         // coverage a test can assert today.
         const open = new Set([...text.matchAll(/^\| \[([A-Z]{1,4}\d+)\]\(#[a-z0-9-]+\) \| .* \| 🐞 \|/gm)].map((x) => x[1]));
         const items = left[1].split(/^ {2}- /m).slice(1);
-        const waits = (i) => /guard|issue report|docs\/issues\/|once fixed/i.test(i)
-            && [...i.matchAll(/\b((?:A|OJS|OMP|OPS)\d+)\b/g)].some(([, id]) => open.has(id));
+        // An item "once <ID> is settled" waits while that entry is still a ❓.
+        const question = new Set([...text.matchAll(/^\| \[([A-Z]{1,4}\d+)\]\(#[a-z0-9-]+\) \| .* \| ❓ \|/gm)].map((x) => x[1]));
+        const waits = (i) => (/guard|issue report|docs\/issues\/|once fixed/i.test(i)
+            && [...i.matchAll(/\b((?:A|OJS|OMP|OPS)\d+)\b/g)].some(([, id]) => open.has(id)))
+            || [...i.matchAll(/\bonce ((?:A|OJS|OMP|OPS)\d+) is settled\b/g)].some(([, id]) => question.has(id));
         const ready = items.filter((i) => !waits(i)).length;
         if (items.length) planned.push({ spec, file: f, n: ready, waiting: items.length - ready });
     }
