@@ -24,24 +24,9 @@
  * (RUNBOOK multi-app rule 3, PRINCIPLES M4).
  * Spec: docs/specs/U05-notifications-center-and-email-preferences.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A3 🐞, A10 🐞, OPS2 🐞, OPS3 🐞, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓,
- * A9 ❓, A11 ❓, OPS1 ❓. Where a test passes through one it asserts the
- * effect the spec states and leaves the finding's own claim unasserted
- * either way: S1 presses a task's row and asserts what Rule 2c promises on
- * every app, that the browser leaves the window and the task is read, and
- * never where a preprint server lands (OPS3); S5 and S7 compare the tab's
- * rows and the Unsubscribe page's boxes with whitespace before punctuation
- * removed, so the new-preprint row's words are asserted and its spacing
- * neither way (OPS2); the reviewer row and the "Weekly email" row are
- * asserted as listed, nothing asserts they are ever raised (OPS1); S3 reads
- * Manager B's email as the control and never Manager A's mailbox (A10); S5
- * and S6 unsubscribe accounts whose tab is at its defaults (A2); the "needs
- * an editor" email is asserted by subject only, its footer neither asserted
- * nor denied (A8); no reader-side count is read for a Moderator (A3); the
- * site-level tab is read and never saved (A4). The spec's Coverage section
- * records everything else left out.
+ * Not covered, by register ID: A1 🐞, A2 🐞, A3 🐞, A10 🐞, A15 🐞, A16 🐞,
+ * OPS2 🐞, OPS3 🐞, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A9 ❓, A11 ❓, A12 ❓, A13 ❓,
+ * OPS1 ❓.
  *
  * Isolation: every test seeds its own scratch preprint server with
  * throwaway accounts through the scenario endpoint (unique tags naming the
@@ -67,9 +52,13 @@
  * window's rows, the site home's "Dashboard" number) are re-read together
  * when a parallel worker's seed lands between two reads, because `admin`
  * is a Preprint Server Manager of every scratch server. No hard-coded
- * waits: S3's "stays while the pointer rests on it" is bounded by the
- * toast's own disappearance once the pointer leaves, and S2's "newest
+ * waits: S3's and S5's "stays while the pointer rests on it" is bounded by
+ * the toast's own disappearance once the pointer leaves, and S2's "newest
  * first" by the clock's next second, the condition the order depends on.
+ * The narrow-window reads (S1, S7) set the test's own page below 992 px and
+ * back (no seed key; note s1). S4's Moderator is assigned on screen with
+ * "Assign" and "Message" left empty, never through `participants[]`, which
+ * would leave the "needs an editor" rows in place (note s4).
  */
 const {test, expect} = require('../support/fixtures.js');
 const {ProfilePage, SAVED_MESSAGE} = require('../../../../shared/playwright/pages/ProfilePage.js');
@@ -84,8 +73,14 @@ const {
     toastCloseButton,
     expectStackedBelow,
     expectStaysWhileHovered,
+    warningToasts,
+    expectToastLook,
+    narrowWindow,
+    widenWindow,
 } = require('../../../../shared/playwright/pages/NotificationsPages.js');
+const {ParticipantsPanel, NOTICES} = require('../../../../shared/playwright/pages/StageParticipantsPages.js');
 const {disableMotion} = require('../../../../shared/playwright/support/motion.js');
+const appContext = require('../support/app.context.js');
 const {wizardUrl, expectWizardOpen, completeAndSubmitDraft} = require('../pages/SubmissionWizardPages.js');
 const {RegisterPage, RegistrationCompletePage} = require('../pages/RegistrationPages.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
@@ -99,6 +94,10 @@ const DISCUSSION_SETTING = 'notificationNewQuery';
 const DISCUSSIONS_PANEL = 'Production Tasks & Discussions';
 const NEW_VERSION_OPENING = 'A new version of your submission';
 const COUNTRY = 'Iceland';
+/** The Moderator's role as the Participants panel and its "Assign" window spell it. */
+const MODERATOR_ROLE = 'Moderator';
+/** The workflow's one stage entry (Production) on a preprint server. */
+const PRODUCTION = 'workflow_5';
 const UNSUBSCRIBE_ERROR = (email) =>
     `There was an unexpected error and we could not unsubscribe the email address ${email}. You can unsubscribe from all email notifications in your user profile or contact us directly for help.`;
 const NOTIFICATIONS_INTRO =
@@ -204,6 +203,22 @@ async function submitViaWizard(opsApi, authorPage, serverPath, {tag, submitter, 
     await expectWizardOpen(authorPage);
     await completeAndSubmitDraft(authorPage);
     return submissionId;
+}
+
+/**
+ * Where a task's press lands, as compared between two presses (Rule 2c):
+ * the path and the two query keys either landing carries
+ * (`workflowSubmissionId` on the workflow, `message` on the denied page);
+ * any other query part is left out (note s1). Which page it is stays
+ * unasserted (OPS3).
+ */
+function landingOf(address) {
+    const url = new URL(address);
+    return {
+        path: url.pathname,
+        workflowSubmissionId: url.searchParams.get('workflowSubmissionId'),
+        message: url.searchParams.get('message'),
+    };
 }
 
 /** The editorial dashboard of a server (any editorial page carries the bell). */
@@ -420,6 +435,22 @@ test.describe('notifications center & email preferences', () => {
         expect(entries.some((entry) => entry.includes(NEEDS_EDITOR_TASK) || entry.includes(title))).toBe(false);
         await expect(header.wrapper).not.toContainText(title);
 
+        // The narrow window: below 992 px, "Open Menu" lists the name bare,
+        // with "Dashboard", "View Profile" and "Logout" under it, and the
+        // number follows "Dashboard": "Dashboard 1" (Rule 4b). The wide
+        // read above is the control on the same page; the window is
+        // widened back before the next page.
+        const wideSize = await narrowWindow(managerPage);
+        try {
+            const narrow = new ReaderHeader(managerPage);
+            await narrow.gotoNarrowAndOpenMenu(`/index.php/${server.path}/index`);
+            await narrow.expectNarrowBareName(manager);
+            expect(await narrow.narrowEntryTexts()).toEqual(['Dashboard 1', 'View Profile', 'Logout']);
+            await narrow.expectNarrowDashboardCount(1);
+        } finally {
+            await widenWindow(managerPage, wideSize);
+        }
+
         // The window: one bold row with the moderator sentence and the
         // title; the bell greyed out with no number while it is open (Rules
         // 2a, 2b).
@@ -448,6 +479,17 @@ test.describe('notifications center & email preferences', () => {
         const before = managerPage.url();
         await tasks.openTask(row);
         await managerPage.waitForURL((url) => url.href !== before, {waitUntil: 'commit', timeout: 30_000});
+        const landing = landingOf(managerPage.url());
+
+        // The blank space beside the sentence: back on an editorial page,
+        // the bell, then a press right of the sentence's end on its line:
+        // the same page opens as after the press on the sentence (Rule 2c).
+        await gotoEditorial(managerPage, server.path);
+        await tasks.open();
+        const editorialAddress = managerPage.url();
+        await tasks.pressBesideSentence(tasks.row(title));
+        await managerPage.waitForURL((url) => url.href !== editorialAddress, {waitUntil: 'commit', timeout: 30_000});
+        expect(landingOf(managerPage.url())).toEqual(landing);
 
         // Back on an editorial page: no number; the row is read now; the
         // server's home page reads "{name} 0" (Rule 4, Side effects).
@@ -501,6 +543,11 @@ test.describe('notifications center & email preferences', () => {
         await tasks.expectUnread(tasks.row(titles[0]));
         await tasks.expectUnread(tasks.row(titles[1]));
 
+        // The "Select" column: each row starts with a box (the positive
+        // control), and the column's header holds none, so no box ticks
+        // every row at once (Fields, "The Tasks panel").
+        await tasks.expectSelectHeaderWithoutBox();
+
         // "Mark Read" with nothing ticked changes nothing.
         await tasks.act('Mark Read', {expectRequest: false});
         await expect(tasks.rows()).toHaveCount(2);
@@ -518,16 +565,19 @@ test.describe('notifications center & email preferences', () => {
         await tasks.close();
         await tasks.expectCount(1);
 
-        // "Mark New" on the same row: bold again; the bell shows "2".
+        // "Mark New" on the same row: bold again.
         await tasks.open();
         await tasks.box(tasks.row(firstTitle)).check();
         await tasks.act('Mark New');
         await tasks.expectUnread(tasks.row(firstTitle));
-        await tasks.close();
+
+        // The Escape key: the window closes, and the bell shows "2" (Fields,
+        // "The Tasks panel").
+        await tasks.pressEscape();
         await tasks.expectCount(2);
 
-        // "Delete" on both: gone at once, "No Items", no number; a reload
-        // shows the same.
+        // "Delete" on both: gone at once, "No Items"; "Close": no number; a
+        // reload shows the same.
         await tasks.open();
         await tasks.box(tasks.row(titles[0])).check();
         await tasks.box(tasks.row(titles[1])).check();
@@ -654,15 +704,22 @@ test.describe('notifications center & email preferences', () => {
 
     test('S4: ticking "Do not send me an email…" keeps the task, stops the email', async ({asUser, opsApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(180_000);
+        test.setTimeout(300_000);
         const tag = makeTag('s4', testInfo);
         const managerA = `${tag}ma`;
         const managerB = `${tag}mb`;
+        const moderator = `${tag}se`;
         const author = `${tag}au`;
+        const moderatorPerson = {givenName: 'Sam', familyName: 'Moderator'};
         const title = `Title ${tag}`;
+        const secondTitle = `Again ${tag}`;
+        // The Section Editor of the given is a Moderator on a preprint
+        // server (`sectionEditor` in users[], scenarios.md), assigned to no
+        // submission.
         const server = await seedServer(opsApi, tag, [
             {username: managerA, roles: ['manager']},
             {username: managerB, roles: ['manager']},
+            {username: moderator, ...moderatorPerson, roles: ['sectionEditor']},
             {username: author, roles: ['author']},
         ]);
 
@@ -677,10 +734,12 @@ test.describe('notifications center & email preferences', () => {
 
         // The Author submits through the wizard.
         const authorPage = await (await asUser(author)).newPage();
-        await submitViaWizard(opsApi, authorPage, server.path, {tag, submitter: author, title});
+        const submissionId = await submitViaWizard(opsApi, authorPage, server.path, {tag, submitter: author, title});
 
         // Both Managers get the task (Rule 5b).
-        for (const [username, page] of [[managerA, pageA], [managerB, await (await asUser(managerB)).newPage()]]) {
+        const pageB = await (await asUser(managerB)).newPage();
+        pageB.on('dialog', (dialog) => dialog.accept()); // the leave-page prompt after "Assign"
+        for (const [username, page] of [[managerA, pageA], [managerB, pageB]]) {
             const tasks = new TasksPanel(page);
             await gotoEditorial(page, server.path);
             await tasks.expectCount(1);
@@ -690,8 +749,9 @@ test.describe('notifications center & email preferences', () => {
             await tasks.close();
         }
 
-        // Manager B's mailbox holds the email; once it has arrived, Manager
-        // A's holds none with that subject and title.
+        // Manager A's mailbox: once Manager B's email for this submission
+        // has arrived (the Control's email), it holds none with that subject
+        // and title.
         const control = {to: emailOf(managerB), subject: NEEDS_EDITOR_SUBJECT, contains: title};
         await pkpMail.find(control);
         await pkpMail.expectNone({
@@ -700,6 +760,77 @@ test.describe('notifications center & email preferences', () => {
             contains: title,
             afterControl: control,
         });
+
+        // Manager B assigns the Moderator with "Assign" on the submission's
+        // Participants panel ("Message" left empty, so no discussion and no
+        // discussion task go with it); the panel lists the Moderator (the
+        // assignment took). Neither Manager's window holds the row for this
+        // title any more, and the Moderator's window holds none for it
+        // either (Rules 1, 6).
+        const panel = new ParticipantsPanel(pageB, server.path, {appContext});
+        await panel.goto(submissionId, {menuKey: PRODUCTION});
+        const assign = await panel.openAssign();
+        await assign.chooseRole(MODERATOR_ROLE);
+        await assign.search();
+        await assign.choosePerson(`${moderatorPerson.givenName} ${moderatorPerson.familyName}`);
+        expect((await assign.messageText()).trim()).toBe('');
+        await assign.ok();
+        await expect
+            .poll(async () => (await panel.rowLines()).find((lines) => lines[1] === `${moderatorPerson.givenName} ${moderatorPerson.familyName}`), {timeout: 30_000})
+            .toEqual(ParticipantsPanel.lines(moderatorPerson, MODERATOR_ROLE));
+        for (const [username, page] of [[managerA, pageA], [managerB, pageB]]) {
+            const tasks = new TasksPanel(page);
+            await gotoEditorial(page, server.path);
+            await tasks.open();
+            await expect(tasks.grid()).toBeVisible();
+            await expect(tasks.row(title), `${username}'s row after the assignment`).toHaveCount(0);
+            await tasks.close();
+        }
+        const moderatorPage = await (await asUser(moderator)).newPage();
+        const moderatorTasks = new TasksPanel(moderatorPage);
+        await gotoEditorial(moderatorPage, server.path);
+        await moderatorTasks.open();
+        await expect(moderatorTasks.grid()).toBeVisible();
+        await expect(moderatorTasks.rows().or(moderatorTasks.noItems()).first()).toBeVisible();
+        await expect(moderatorTasks.row(title)).toHaveCount(0);
+        await moderatorTasks.close();
+
+        // Manager A unticks "Enable…" under the same row: the email box
+        // greys out and keeps its tick; "Save" (Rule 5c). No mailbox is read
+        // while "Enable…" is unticked (the email arrives regardless, A10).
+        await profileA.goto('notifications');
+        await expect(pairA.allow).toBeChecked();
+        await expect(pairA.email).toBeChecked();
+        await pairA.allow.uncheck();
+        await expect(pairA.email).toBeDisabled();
+        await expect(pairA.email).toBeChecked();
+        await profileA.save();
+        await expect(successToasts(pageA).filter({hasText: SAVED_MESSAGE}).first()).toBeVisible();
+
+        // The tab's next load: "Enable…" unticked, the email box greyed out
+        // and unticked (Rule 5c).
+        await profileA.goto('notifications');
+        await expect(pairA.allow).not.toBeChecked();
+        await expect(pairA.email).toBeDisabled();
+        await expect(pairA.email).not.toBeChecked();
+
+        // Manager A ticks "Enable…" back: the email box is offered again,
+        // unticked; "Save" (Rule 5c).
+        await pairA.allow.check();
+        await expect(pairA.email).toBeEnabled();
+        await expect(pairA.email).not.toBeChecked();
+        await profileA.save();
+        await expect(successToasts(pageA).filter({hasText: SAVED_MESSAGE}).first()).toBeVisible();
+
+        // The Author submits again: Manager A's mailbox holds the email
+        // with the second submission's title; the event's emails come again
+        // (Rule 5c).
+        await submitViaWizard(opsApi, authorPage, server.path, {tag, submitter: author, title: secondTitle});
+        await pkpMail.find({to: emailOf(managerA), subject: NEEDS_EDITOR_SUBJECT, contains: secondTitle});
+
+        // Control: Manager B's mailbox holds the email with the first
+        // submission's title: the box stopped Manager A's email alone.
+        await pkpMail.find(control);
     });
 
     test("S5: unsubscribing from an email's footer link", async ({browser, baseURL, asUser, opsApi, pkpMail}, testInfo) => {
@@ -828,6 +959,32 @@ test.describe('notifications center & email preferences', () => {
             // email stopped, the task kept (Rule 8c).
             await workflow.gotoEditorial(submissionId);
             await addDiscussion(managerPage, {name: secondName, participantUsername: author, ownUsername: manager, message: secondMessage});
+
+            // A toast over the "Notify" panel: on the same workflow page's
+            // Participants panel (landed afresh after the discussion's
+            // window, StageParticipantsPages), the Author's "More Actions" ›
+            // "Notify", "Message" left empty, "Notify": a pink-edged toast at
+            // the top right with the refusal (Rule 9a); it stays while the
+            // pointer rests on it and goes by itself after the pointer
+            // leaves, the "Notify" side panel open throughout (Rule 9b).
+            const panel = new ParticipantsPanel(managerPage, server.path, {appContext});
+            await panel.reland();
+            const notifyWindow = await panel.openNotify('Alba Authorson');
+            expect((await notifyWindow.messageText()).trim()).toBe('');
+            const refusal = warningToasts(managerPage).filter({hasText: NOTICES.notifyRefused});
+            await notifyWindow.notifyButton().click();
+            await expect(refusal).toHaveCount(1);
+            await expect(refusal).toBeVisible();
+            await expectToastLook(refusal, 'warning');
+            const toastBox = await refusal.boundingBox();
+            const viewport = managerPage.viewportSize();
+            expect(toastBox, 'the toast has a box').toBeTruthy();
+            expect(toastBox.x + toastBox.width, 'the toast sits at the right').toBeGreaterThan(viewport.width - 40);
+            expect(toastBox.x, 'the toast sits at the right').toBeGreaterThan(viewport.width / 2);
+            expect(toastBox.y, 'the toast sits at the top').toBeLessThan(150);
+            await expectStaysWhileHovered(managerPage, refusal, {keepsOpen: notifyWindow.notifyButton()});
+            await expect(notifyWindow.notifyButton()).toBeVisible();
+
             await pkpMail.expectNone({
                 to: emailOf(author),
                 subject: secondName,
@@ -855,6 +1012,9 @@ test.describe('notifications center & email preferences', () => {
         const manager = `${tag}mg`;
         const author = `${tag}au`;
         const name = `Discussion ${tag}`;
+        // Accounts of its own (not S5's), the Author's tab at its defaults;
+        // the submission lists a second author after the Author (a
+        // contributors[] entry, scenarios.md), so the Author stays first.
         const server = await seedServer(opsApi, tag, [
             {username: manager, givenName: 'Mona', familyName: 'Manager', roles: ['manager']},
             {username: author, givenName: 'Alba', familyName: 'Authorson', roles: ['author']},
@@ -864,6 +1024,7 @@ test.describe('notifications center & email preferences', () => {
             context: server.path,
             submitter: author,
             title: `Title ${tag}`,
+            contributors: [{givenName: 'Cora', familyName: 'Coauthor', email: `${tag}co@mail.test`}],
         });
 
         // The Manager's session is the test's own (it is signed out and in
@@ -874,14 +1035,26 @@ test.describe('notifications center & email preferences', () => {
             managerPage.on('dialog', (dialog) => dialog.accept());
             await signInAtServer(managerPage, server.path, manager);
 
-            // Scenario 5's link: a discussion with the Author.
+            // A discussion with the Author, as in scenario 5's first step.
             const workflow = new WorkflowPage(managerPage, server.path);
             await workflow.gotoEditorial(submissionId);
             await addDiscussion(managerPage, {name, participantUsername: author, ownUsername: manager, message: `Message ${tag}`});
-            const {link} = await discussionEmail(pkpMail, {to: emailOf(author), name});
+            const {full, link} = await discussionEmail(pkpMail, {to: emailOf(author), name});
             expect(link, 'the footer "unsubscribe" link').toBeTruthy();
 
-            // Signed in as the Manager, the page names the Author's address.
+            // The footer with two authors: "#{submission number} {authors}"
+            // reads the Author's family name followed by "et al." (Rule 7a;
+            // the link is read, not pressed, A16).
+            expect(full.Text).toMatch(
+                new RegExp(
+                    `Reply to this comment at #${submissionId} Authorson et al\\.[\\s(].*or unsubscribe.*from emails sent by ${escapeRegExp(server.name)}`,
+                    's'
+                )
+            );
+            expect(full.Text).not.toMatch(/Coauthor/);
+
+            // Signed in as the Manager, the "unsubscribe" link's page names
+            // the Author's address, not the Manager's (Rule 8b).
             const unsubscribe = new UnsubscribePage(managerPage);
             await unsubscribe.goto(link);
             await expect(unsubscribe.sentence()).toContainText(emailOf(author));
@@ -890,22 +1063,31 @@ test.describe('notifications center & email preferences', () => {
             // The stale page: sign out in another tab of the same browser,
             // then "Unsubscribe" on the old page: "We could not unsubscribe
             // you" with its sentence naming the Author's address (Rule 8d).
-            const otherTab = await managerContext.newPage();
-            await otherTab.goto(`/index.php/${server.path}/login/signOut`);
-            await otherTab.waitForURL((url) => !url.pathname.endsWith('/signOut'), {waitUntil: 'commit', timeout: 30_000});
-            await expect(new LoginPage(otherTab).form.or(otherTab.locator('#navigationUserWrapper')).first()).toBeVisible({timeout: 30_000});
-            await otherTab.close();
+            const signOutTab = await managerContext.newPage();
+            await signOutTab.goto(`/index.php/${server.path}/login/signOut`);
+            await signOutTab.waitForURL((url) => !url.pathname.endsWith('/signOut'), {waitUntil: 'commit', timeout: 30_000});
+            await expect(new LoginPage(signOutTab).form.or(signOutTab.locator('#navigationUserWrapper')).first()).toBeVisible({timeout: 30_000});
+            await signOutTab.close();
             await unsubscribe.unsubscribe();
             await expect(unsubscribe.errorHeading).toBeVisible();
             await expect(unsubscribe.successHeading).toHaveCount(0);
             await expect(unsubscribe.resultSentence()).toHaveText(UNSUBSCRIBE_ERROR(emailOf(author)));
 
-            // The link afresh: signed in as the Manager again, the page shows
-            // again with the Author's address; every box but "Discussion
-            // added." unticked, then "Unsubscribe": the success page.
-            await signInAtServer(managerPage, server.path, manager);
+            // The link afresh, still signed out: the page shows again with
+            // the Author's address (Rule 8d).
             await unsubscribe.goto(link);
             await expect(unsubscribe.sentence()).toContainText(emailOf(author));
+            await expect(unsubscribe.button()).toBeVisible();
+
+            // A sign-in in another tab: the page left open, the Manager
+            // signs in again in a second tab of the same browser; back on the
+            // page, every box but "Discussion added." unticked, then
+            // "Unsubscribe": the success page; a sign-in alone leaves the
+            // open page working (Rule 8d).
+            const signInTab = await managerContext.newPage();
+            await signInAtServer(signInTab, server.path, manager);
+            await expect(signInTab.locator('#navigationUserWrapper').or(new TasksPanel(signInTab).bell()).first()).toBeVisible({timeout: 30_000});
+            await signInTab.close();
             const boxCount = await unsubscribe.boxes().count();
             expect(boxCount).toBe(OPS_UNSUBSCRIBE_BOXES.length);
             for (let i = 0; i < boxCount; i++) {
@@ -914,9 +1096,13 @@ test.describe('notifications center & email preferences', () => {
             await unsubscribe.box(`email${DISCUSSION_SETTING.charAt(0).toUpperCase()}${DISCUSSION_SETTING.slice(1)}`).check();
             await unsubscribe.unsubscribe();
             await expect(unsubscribe.successHeading).toBeVisible();
+            await expect(unsubscribe.errorHeading).toHaveCount(0);
+            await expect(unsubscribe.resultSentence()).toContainText(
+                `The email address ${emailOf(author)} has been successfully unsubscribed.`
+            );
 
             // "user profile", signed in: the server's Profile page opens on
-            // "Identity" (Rule 8e).
+            // "Identity" (Rule 8e), the Manager's own.
             await unsubscribe.pressProfileLink();
             const managerProfile = new ProfilePage(managerPage, server.path);
             await managerProfile.expectOpen('identity');
@@ -924,7 +1110,7 @@ test.describe('notifications center & email preferences', () => {
             await expect(managerPage).toHaveURL(new RegExp(`/${server.path}/user/profile`));
 
             // The Author's tab: the email box ticked on "Discussion added."
-            // only, every "Enable…" ticked; the Manager's own tab is unchanged.
+            // only, every "Enable…" ticked.
             const authorPage = await (await asUser(author)).newPage();
             const authorProfile = await openNotificationsTab(authorPage, server.path);
             const allow = authorProfile.allowBoxes();
@@ -935,6 +1121,8 @@ test.describe('notifications center & email preferences', () => {
             }
             await expect(checkedEmailBoxes(authorProfile)).toHaveCount(1);
             await expect(authorProfile.notificationPair(DISCUSSION_SETTING).email).toBeChecked();
+
+            // Control: the Manager's own tab is unchanged.
             await managerProfile.goto('notifications');
             await expectTabState(managerProfile, {emailTicked: false});
         } finally {
@@ -1038,6 +1226,30 @@ test.describe('notifications center & email preferences', () => {
         };
         const count = await expectBetweenReads(readSiteBell, readDashboardEntry, {label: 'the "Dashboard" entry carries the bell\'s number'});
         expect(count).toBeGreaterThan(0);
+
+        // Control, narrow: below 992 px, after "Open Menu" on the site's own
+        // home page, the name is listed bare and the same entry displays
+        // the number, "Dashboard {n}" with {n} the number the bell shows
+        // (Rules 4b, 4d), read between two reads of the bell (parallel
+        // workers move `admin`'s count, note s7). The window is widened
+        // back for each bell read.
+        const readNarrowDashboard = async () => {
+            const wideSize = await narrowWindow(adminPage);
+            try {
+                const narrow = new ReaderHeader(adminPage);
+                await narrow.gotoNarrowAndOpenMenu('/index.php/index/index');
+                await narrow.expectNarrowBareName('admin');
+                await expect(narrow.narrowDashboardCount()).toBeVisible();
+                const entry = (await narrow.narrowEntryTexts()).find((text) => /^Dashboard/.test(text));
+                const match = /^Dashboard (\d+)$/.exec(entry || '');
+                expect(match, `the displayed entry reads "${entry}"`).not.toBeNull();
+                return Number(match[1]);
+            } finally {
+                await widenWindow(adminPage, wideSize);
+            }
+        };
+        const narrowCount = await expectBetweenReads(readSiteBell, readNarrowDashboard, {label: 'the displayed "Dashboard" entry carries the bell\'s number'});
+        expect(narrowCount).toBeGreaterThan(0);
     });
 
     test('S8: registration presets the email choice', async ({browser, baseURL, opsApi}, testInfo) => {
@@ -1132,14 +1344,9 @@ test.describe('notifications center & email preferences', () => {
         await gotoMySubmissions(authorPage, server.path);
         await authorTasks.expectCount(1);
 
-        // The Tasks window: one row, bold, opening "A new version of your
-        // submission" (Rules 2b, 6). The screen carries the title INSIDE the
-        // sentence, 'A new version of your submission, "{title}", was
-        // published.', and shows no title line under it, where the spec's
-        // bullet says "with the submission's title under it": recorded as
-        // T-ops-1 (.reports/U05/test-ops-findings.md; the press shows the
-        // same, T-omp-1); the read below is today's screen, not the spec's
-        // claim.
+        // The Tasks window: one row, bold, 'A new version of your
+        // submission, "{title}", was published.', the title inside the
+        // sentence and no title line under it (Rules 2b, 6).
         await authorTasks.open();
         await expect(authorTasks.rows()).toHaveCount(1);
         const row = authorTasks.rows().first();
@@ -1152,13 +1359,17 @@ test.describe('notifications center & email preferences', () => {
 
         // Control: the Preprint Server Manager's window holds no row opening
         // "A new version of your submission" for this title, while it holds
-        // the "needs a moderator" row the same submission raised (Rule 6).
+        // the "needs a moderator" row the same submission raised, with the
+        // title under it (Rule 2b; the positive control for the missing
+        // title line above): the task goes to every user holding an Author
+        // assignment on the submission (Rule 6).
         const managerPage = await (await asUser(manager)).newPage();
         const managerTasks = new TasksPanel(managerPage);
         await gotoEditorial(managerPage, server.path);
         await managerTasks.open();
         await expect(managerTasks.row(title)).toHaveCount(1);
         await expect(managerTasks.sentence(managerTasks.row(title))).toHaveText(NEEDS_EDITOR_TASK);
+        await expect(managerTasks.title(managerTasks.row(title))).toHaveText(title);
         await expect(managerTasks.rowsOpening(new RegExp(`^\\s*${escapeRegExp(NEW_VERSION_OPENING)}`))).toHaveCount(0);
     });
 });

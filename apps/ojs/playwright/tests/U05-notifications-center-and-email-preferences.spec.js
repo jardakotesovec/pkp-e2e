@@ -8,18 +8,8 @@
  * `serial/U05-notifications-center-and-email-preferences.spec.js`).
  * Spec: docs/specs/U05-notifications-center-and-email-preferences.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A3 🐞, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A9 ❓, A10 🐞, A11 ❓ (OPS1–OPS3
- * are a preprint server's). Where a test passes through one it asserts the
- * effect the spec states and leaves the finding's own claim unasserted
- * either way: S3 reads Manager B's "needs an editor" email as the control
- * and never reads Manager A's mailbox (A10, the "Both mailboxes" bullet's
- * marked half); S5 and S6 unsubscribe accounts whose tab is at its defaults
- * (A2); S7 reads the site-level tab and never saves it (A4); the footer
- * link is opened only while its task exists (A7) and the "needs an editor"
- * email is asserted by subject alone (A8). The spec's Coverage section
- * records everything else left out.
+ * Deliberately NOT covered (register IDs): A1, A2, A3, A4, A5, A6, A7, A8,
+ * A9, A10, A11, A12, A13, A15, A16 (OPS1–OPS3 are a preprint server's).
  *
  * Isolation: every test seeds its own scratch journal with throwaway
  * accounts through the scenario endpoint (unique tags of at most 12
@@ -30,7 +20,9 @@
  * (a seeded `submitted: true` submission raises the task but sends no
  * email, seed-facts); where only the task is needed, the seed suffices.
  * Mailpit reads are scoped by the throwaway recipient (PRINCIPLES A8) and
- * every silence claim rides on a positive control. The bell's number is
+ * every silence claim rides on a positive control. A narrow-window read
+ * (S1, S7) is the test's own viewport, set below 992 px before the page is
+ * opened and set back before the next page (spec note s1). The bell's number is
  * asserted on a freshly loaded page or after the window closed, never on
  * the page that was open when the task was raised (Rule 2a). Every session
  * a scenario ends (S6's sign-out in a second tab, S5's sign-in from the
@@ -42,8 +34,8 @@
  * worker's seed can raise a task between two reads); each pair of reads
  * is repeated until both agree, never asserted against a fixed value. No
  * hard-coded waits, except the one claim only the app's own toast timer
- * bounds (S3: "stays while the pointer rests on it", held for the toast's
- * 5-second lifetime read from `Page.vue`).
+ * bounds (S3 and S5: "stays while the pointer rests on it", held for the
+ * toast's 5-second lifetime read from `Page.vue`).
  */
 const {test, expect} = require('../support/fixtures.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
@@ -63,7 +55,12 @@ const {
     toastCloseButton,
     expectStackedBelow,
     expectStaysWhileHovered,
+    warningToasts,
+    expectToastLook,
+    narrowWindow,
+    widenWindow,
 } = require('../../../../shared/playwright/pages/NotificationsPages.js');
+const {ParticipantsPanel, NOTICES} = require('../../../../shared/playwright/pages/StageParticipantsPages.js');
 const {ReviewerAssignmentsPage, ReviewWizardPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
 const {SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
 const {RegisterPage, RegistrationCompletePage} = require('../pages/RegistrationPages.js');
@@ -79,6 +76,7 @@ const DISCUSSIONS_PANEL = 'Desk Review Tasks & Discussions';
 const VERSION_PUBLISHED_OPENING = /^\s*A new version of your submission/;
 const VERSION_PUBLISHED_TASK = (title) => `A new version of your submission, "${title}", was published.`;
 const REVIEW_COMPLETE_SUBJECT = 'Review complete';
+const SECTION_EDITOR_ROLE = 'Section editor';
 const UNSUBSCRIBE_LINK = /\/notification\/unsubscribe\?validate=[^&]+&id=\d+$/;
 const STALE_PAGE_SENTENCE = (email) =>
     `There was an unexpected error and we could not unsubscribe the email address ${email}. You can unsubscribe from all email notifications in your user profile or contact us directly for help.`;
@@ -362,6 +360,16 @@ test.describe('notifications center & email preferences', () => {
         await expect(header.wrapper).not.toContainText(NEEDS_EDITOR_TASK);
         await expect(header.wrapper).not.toContainText(title);
 
+        // The narrow window: below 992 px, "Open Menu" lists the name bare
+        // with "Dashboard 1", "View Profile" and "Logout" under it (Rule 4b);
+        // then the window is widened back.
+        const wide = await narrowWindow(managerPage);
+        await header.gotoNarrowAndOpenMenu(`/index.php/${journal.path}/index`);
+        await header.expectNarrowBareName(manager);
+        expect(await header.narrowEntryTexts()).toEqual(['Dashboard 1', 'View Profile', 'Logout']);
+        await header.expectNarrowDashboardCount(1);
+        await widenWindow(managerPage, wide);
+
         // The window: one bold row with the sentence and the title; the bell
         // greyed out with no number while it is open (Rules 2a, 2b).
         await gotoEditorial(managerPage, journal.path);
@@ -391,6 +399,22 @@ test.describe('notifications center & email preferences', () => {
         await workflow.expectOpen(submissionId);
         await expect(workflow.header()).toContainText('Authorson');
         await expect(workflow.titleLine()).toContainText(title);
+        const landing = managerPage.url();
+
+        // The blank space beside the sentence: back on an editorial page,
+        // the bell, then a press right of the row's sentence on its line:
+        // the same workflow opens (Rule 2c).
+        await gotoEditorial(managerPage, journal.path);
+        await tasks.open();
+        await tasks.pressBesideSentence(tasks.row(title));
+        await managerPage.waitForURL(new RegExp(`/${journal.path}/dashboard/editorial\\?.*workflowSubmissionId=${submissionId}`), {
+            waitUntil: 'commit',
+            timeout: 30_000,
+        });
+        await workflow.expectOpen(submissionId);
+        await expect(workflow.header()).toContainText('Authorson');
+        await expect(workflow.titleLine()).toContainText(title);
+        expect(new URL(managerPage.url()).pathname).toBe(new URL(landing).pathname);
 
         // Back on an editorial page: no number; the row is read now; the
         // journal's home page reads "{name} 0" (Rule 4).
@@ -437,6 +461,10 @@ test.describe('notifications center & email preferences', () => {
         await tasks.expectUnread(tasks.row(titles[0]));
         await tasks.expectUnread(tasks.row(titles[1]));
 
+        // The "Select" column: each row starts with a box, the column's
+        // header holds none (Fields & validation, "The Tasks panel").
+        await tasks.expectSelectHeaderWithoutBox();
+
         // "Mark Read" with nothing ticked changes nothing and shows no message.
         await tasks.act('Mark Read', {expectRequest: false});
         await expect(tasks.rows()).toHaveCount(2);
@@ -454,16 +482,19 @@ test.describe('notifications center & email preferences', () => {
         await tasks.close();
         await tasks.expectCount(1);
 
-        // "Mark New" on the same row: bold again; the bell shows "2".
+        // "Mark New" on the same row: bold again.
         await tasks.open();
         await tasks.box(tasks.row(firstTitle)).check();
         await tasks.act('Mark New');
         await tasks.expectUnread(tasks.row(firstTitle));
-        await tasks.close();
+
+        // The Escape key closes the window; the bell shows "2" (Fields &
+        // validation, "The Tasks panel").
+        await tasks.pressEscape();
         await tasks.expectCount(2);
 
-        // "Delete" on both: gone at once, "No Items", no number; a reload
-        // shows the same.
+        // "Delete" on both: gone at once, "No Items"; "Close": no number; a
+        // reload shows the same.
         await tasks.open();
         await tasks.box(tasks.row(titles[0])).check();
         await tasks.box(tasks.row(titles[1])).check();
@@ -591,16 +622,20 @@ test.describe('notifications center & email preferences', () => {
 
     test('S4: ticking "Do not send me an email…" keeps the task, stops the email', async ({asUser, ojsApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(180_000);
+        test.setTimeout(300_000);
         const tag = makeTag('s4', testInfo);
         const managerA = `${tag}ma`;
         const managerB = `${tag}mb`;
+        const sectionEditor = `${tag}se`;
+        const sectionEditorName = 'Sena Sectioneditor';
         const author = `${tag}au`;
         const title = `Title ${tag}`;
+        const secondTitle = `Second ${tag}`;
         const journal = await seedJournal(ojsApi, tag, [
             {username: managerA, roles: ['manager']},
             {username: managerB, roles: ['manager']},
-            {username: author, roles: ['author']},
+            {username: sectionEditor, givenName: 'Sena', familyName: 'Sectioneditor', roles: ['sectionEditor']},
+            {username: author, givenName: 'Alba', familyName: 'Authorson', roles: ['author']},
         ]);
 
         // Manager A ticks the email box under the needs-editor row and saves.
@@ -614,10 +649,11 @@ test.describe('notifications center & email preferences', () => {
 
         // The Author submits through the wizard.
         const authorPage = await (await asUser(author)).newPage();
-        await submitViaWizard(ojsApi, authorPage, journal.path, {tag, submitter: author, title});
+        const submissionId = await submitViaWizard(ojsApi, authorPage, journal.path, {tag, submitter: author, title});
 
         // Both Managers get the task (Rule 5b).
-        for (const [username, page] of [[managerA, pageA], [managerB, await (await asUser(managerB)).newPage()]]) {
+        const pageB = await (await asUser(managerB)).newPage();
+        for (const [username, page] of [[managerA, pageA], [managerB, pageB]]) {
             const tasks = new TasksPanel(page);
             await gotoEditorial(page, journal.path);
             await tasks.expectCount(1);
@@ -627,8 +663,8 @@ test.describe('notifications center & email preferences', () => {
             await tasks.close();
         }
 
-        // Manager B's mailbox holds the email; once it has arrived, Manager
-        // A's holds none with that subject and title.
+        // Manager B's mailbox holds the email (the Control); once it has
+        // arrived, Manager A's holds none with that subject and title.
         const control = {to: emailOf(managerB), subject: NEEDS_EDITOR_SUBJECT, contains: title};
         const mailB = await pkpMail.find(control);
         expect(mailB.Subject).toBe(`${NEEDS_EDITOR_SUBJECT}: "${title}"`);
@@ -638,6 +674,63 @@ test.describe('notifications center & email preferences', () => {
             contains: title,
             afterControl: control,
         });
+
+        // Manager B assigns the Section Editor with "Assign" on the
+        // submission's Participants panel: neither Manager's window holds the
+        // row for this title any more, and the Section Editor's holds none
+        // for it either (Rules 1, 6). Each window is read settled ("No
+        // Items" or a row), the rows both Managers held above being the
+        // positive control.
+        const panel = new ParticipantsPanel(pageB, journal.path);
+        await panel.goto(submissionId);
+        const assign = await panel.openAssign();
+        await assign.chooseRole(SECTION_EDITOR_ROLE);
+        await assign.search();
+        await assign.choosePerson(sectionEditorName);
+        await assign.ok();
+        await expect(panel.row(sectionEditorName)).toHaveCount(1);
+        const editorPage = await (await asUser(sectionEditor)).newPage();
+        for (const [username, page] of [[managerA, pageA], [managerB, pageB], [sectionEditor, editorPage]]) {
+            const tasks = new TasksPanel(page);
+            await gotoEditorial(page, journal.path);
+            await tasks.open();
+            await expect(tasks.noItems().or(tasks.rows().first()), `${username}'s window, settled`).toBeVisible();
+            await expect(tasks.row(title), `${username}'s row for the title`).toHaveCount(0);
+            await tasks.close();
+        }
+
+        // Manager A unticks "Enable…" under the same row: the email box greys
+        // out and keeps its tick; "Save" (Rule 5c). No mailbox is read while
+        // "Enable…" is unticked (A10).
+        await profileA.goto('notifications');
+        await expect(pairA.allow).toBeChecked();
+        await expect(pairA.email).toBeChecked();
+        await pairA.allow.uncheck();
+        await expect(pairA.email).toBeDisabled();
+        await expect(pairA.email).toBeChecked();
+        await profileA.save();
+        await expect(successToasts(pageA).filter({hasText: SAVED_MESSAGE}).first()).toBeVisible();
+
+        // The tab's next load: "Enable…" unticked, the email box greyed out
+        // and unticked (Rule 5c).
+        await profileA.goto('notifications');
+        await expect(pairA.allow).not.toBeChecked();
+        await expect(pairA.email).toBeDisabled();
+        await expect(pairA.email).not.toBeChecked();
+
+        // "Enable…" ticked back: the email box offered again, unticked;
+        // "Save" (Rule 5c).
+        await pairA.allow.check();
+        await expect(pairA.email).toBeEnabled();
+        await expect(pairA.email).not.toBeChecked();
+        await profileA.save();
+        await expect(successToasts(pageA).filter({hasText: SAVED_MESSAGE}).first()).toBeVisible();
+
+        // The Author submits again: Manager A's mailbox holds the email with
+        // the second title; the event's emails come again (Rule 5c).
+        await submitViaWizard(ojsApi, authorPage, journal.path, {tag, submitter: author, title: secondTitle});
+        const mailA = await pkpMail.find({to: emailOf(managerA), subject: NEEDS_EDITOR_SUBJECT, contains: secondTitle});
+        expect(mailA.Subject).toBe(`${NEEDS_EDITOR_SUBJECT}: "${secondTitle}"`);
     });
 
     test("S5: unsubscribing from an email's footer link", async ({browser, baseURL, asUser, ojsApi, pkpMail}, testInfo) => {
@@ -647,6 +740,7 @@ test.describe('notifications center & email preferences', () => {
         const manager = `${tag}mg`;
         const author = `${tag}au`;
         const managerName = 'Mona Manager';
+        const authorName = 'Alba Authorson';
         const firstName = `Discussion one ${tag}`;
         const secondName = `Discussion two ${tag}`;
         const firstMessage = `Opening message one ${tag}`;
@@ -756,6 +850,23 @@ test.describe('notifications center & email preferences', () => {
             // and the Author's Tasks window holds the new row (Rule 8c).
             await workflow.gotoEditorial(submissionId);
             await addDiscussion(managerPage, {name: secondName, opener: manager, participantUsername: author, message: secondMessage});
+
+            // A toast over the "Notify" panel: the Author's "More Actions" ›
+            // "Notify", "Message" left empty, "Notify": the pink-edged
+            // warning at the top right (Rule 9a); it stays while the pointer
+            // rests on it and goes by itself after the pointer leaves, the
+            // side panel open all along (Rule 9b).
+            const panel = new ParticipantsPanel(managerPage, journal.path);
+            await panel.goto(submissionId);
+            const notify = await panel.openNotify(authorName);
+            await notify.notifyButton().click();
+            const warning = warningToasts(managerPage).filter({hasText: NOTICES.notifyRefused});
+            await expect(warning).toHaveCount(1);
+            await expect(warning).toContainText(NOTICES.notifyRefused);
+            await expectToastLook(warning, 'warning');
+            await expectStaysWhileHovered(managerPage, warning, {keepsOpen: notify.notifyButton()});
+            await expect(warning).toHaveCount(0);
+
             await pkpMail.expectNone({
                 to: emailOf(author),
                 subject: secondName,
@@ -783,6 +894,8 @@ test.describe('notifications center & email preferences', () => {
         const manager = `${tag}mg`;
         const author = `${tag}au`;
         const name = `Discussion ${tag}`;
+        // Accounts of its own (note s6), and a second author after the
+        // Author on the submission (`contributors[]`).
         const journal = await seedJournal(ojsApi, tag, [
             {username: manager, givenName: 'Mona', familyName: 'Manager', roles: ['manager']},
             {username: author, givenName: 'Alba', familyName: 'Authorson', roles: ['author']},
@@ -792,18 +905,30 @@ test.describe('notifications center & email preferences', () => {
             context: journal.path,
             submitter: author,
             title: `Title ${tag}`,
+            contributors: [{givenName: 'Cora', familyName: 'Coauthor', email: `${tag}co@mail.test`}],
         });
 
         // The Manager, in a fresh session this scenario signs out and in
-        // again: scenario 5's link, a discussion with the Author.
+        // again, opens a discussion with the Author as in scenario 5.
         const {context: managerContext, page: managerPage} = await freshLogin(browser, baseURL, journal.path, manager);
         try {
             managerPage.on('dialog', (dialog) => dialog.accept());
             const workflow = new WorkflowPage(managerPage, journal.path);
             await workflow.gotoEditorial(submissionId);
             await addDiscussion(managerPage, {name, opener: manager, participantUsername: author, message: `Message ${tag}`});
-            const {link} = await discussionEmail(pkpMail, {to: emailOf(author), name});
+            const {full, link} = await discussionEmail(pkpMail, {to: emailOf(author), name});
             expect(link, 'the footer "unsubscribe" link').toMatch(UNSUBSCRIBE_LINK);
+
+            // The footer with two authors: "{authors}" reads the Author's
+            // family name followed by "et al." (Rule 7a; the link is read,
+            // not pressed, A16).
+            expect(full.Text).toMatch(
+                new RegExp(
+                    `Reply to this comment at #${submissionId} Authorson et al\\. \\( http\\S+ \\) or unsubscribe ` +
+                        `\\( ${escapeRegExp(link)} \\) from emails sent by ${escapeRegExp(journal.name)} ` +
+                        `\\( http\\S+/index\\.php/${journal.path}/? \\)\\.`
+                )
+            );
 
             // Signed in as the Manager, the page names the Author's address.
             const unsubscribe = new UnsubscribePage(managerPage);
@@ -820,16 +945,21 @@ test.describe('notifications center & email preferences', () => {
             await expect(unsubscribe.errorHeading).toBeVisible();
             await expect(unsubscribe.resultSentence()).toHaveText(STALE_PAGE_SENTENCE(emailOf(author)));
 
-            // The link afresh: signed in as the Manager again, the page shows
-            // again with the Author's address; every box but "Discussion
-            // added." unticked, "Unsubscribe": the success page.
+            // The link afresh, still signed out: the page shows again with
+            // the Author's address (Rule 8d).
+            await unsubscribe.goto(link);
+            await expect(unsubscribe.sentence()).toContainText(emailOf(author));
+
+            // A sign-in in another tab: the page left open, the Manager signs
+            // in again in the other tab (on its Login page since the sign-
+            // out); back on the page, every box but "Discussion added."
+            // unticked, "Unsubscribe": the success page (Rule 8d).
             // The sign-in returns at the dashboard's commit; the tab is closed
             // through closeTab, which waits for the renderer to have the page
             // (a close sent at the commit can be lost: support/tabs.js).
             await new LoginPage(otherTab).signIn(manager, getPassword(manager));
             await closeTab(otherTab);
-            await unsubscribe.goto(link);
-            await expect(unsubscribe.sentence()).toContainText(emailOf(author));
+            await expect(unsubscribe.form).toBeVisible();
             const boxCount = await unsubscribe.boxes().count();
             expect(boxCount).toBeGreaterThan(1);
             for (let i = 0; i < boxCount; i++) {
@@ -869,7 +999,7 @@ test.describe('notifications center & email preferences', () => {
 
     test('S7: the rows, per application, and the site-level tab', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
-        test.setTimeout(180_000);
+        test.setTimeout(240_000);
         // A scratch journal, so the site holds more than one journal (Rule
         // 5d), with one submission, so the Site Administrator (a Manager of
         // every scratch journal) holds an unread task of this test's own.
@@ -977,6 +1107,31 @@ test.describe('notifications center & email preferences', () => {
         expect(range[0]).toBeGreaterThan(0);
         expect(dashboardCount, `between the bell's ${range[0]} and ${range[1]}`).toBeGreaterThanOrEqual(range[0]);
         expect(dashboardCount, `between the bell's ${range[0]} and ${range[1]}`).toBeLessThanOrEqual(range[1]);
+
+        // The narrow window: below 992 px, after "Open Menu", the name is
+        // bare and the same entry displays the number the bell shows,
+        // "Dashboard {n}" (Rules 4b, 4d); read between two reads of the bell
+        // like the pair above, and the window widened back for each bell read.
+        let narrowRange = [];
+        let narrowCount = -2;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const before = await readBell();
+            const wide = await narrowWindow(adminPage);
+            await adminHeader.gotoNarrowAndOpenMenu('/index.php/index/en');
+            await adminHeader.expectNarrowBareName('admin');
+            await expect(adminHeader.narrowDashboardCount()).toBeVisible();
+            narrowCount = Number((await adminHeader.narrowDashboardCount().innerText()).trim());
+            await adminHeader.expectNarrowDashboardCount(narrowCount);
+            await widenWindow(adminPage, wide);
+            const after = await readBell();
+            narrowRange = [Math.min(before, after), Math.max(before, after)];
+            if (narrowCount >= narrowRange[0] && narrowCount <= narrowRange[1]) {
+                break;
+            }
+        }
+        expect(narrowRange[0]).toBeGreaterThan(0);
+        expect(narrowCount, `between the bell's ${narrowRange[0]} and ${narrowRange[1]}`).toBeGreaterThanOrEqual(narrowRange[0]);
+        expect(narrowCount, `between the bell's ${narrowRange[0]} and ${narrowRange[1]}`).toBeLessThanOrEqual(narrowRange[1]);
     });
 
     test('S8: registration presets the email choice', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {
@@ -1068,20 +1223,19 @@ test.describe('notifications center & email preferences', () => {
 
         // The window: one bold row opening "A new version of your
         // submission", the row's full wording carrying the title in place of
-        // "Title" (Rules 2b, 6). The bullet's "with the submission's title
-        // under it" is not asserted: the row shows no title line under the
-        // sentence (finding T-ojs-2 of this revision's run,
-        // `.reports/U05/test-ojs-findings.md`); the Manager's row below,
-        // which does carry one, is read the same way as the control.
+        // "Title", and no title line under it (Rules 2b, 6); the Manager's
+        // row below, which carries one, is read the same way as the control.
         await tasks.open();
         await expect(tasks.rows()).toHaveCount(1);
         const row = tasks.rows().first();
         await tasks.expectUnread(row);
         await expect(tasks.sentence(row)).toHaveText(VERSION_PUBLISHED_OPENING);
         await expect(tasks.sentence(row)).toHaveText(VERSION_PUBLISHED_TASK(title));
+        await expect(tasks.title(row)).toHaveCount(0);
 
         // Control: the Manager's window holds the "needs an editor" row for
-        // the title and none opening "A new version of your submission".
+        // the title, with the title under it (Rule 2b), and none opening "A
+        // new version of your submission" (Rule 6).
         const managerPage = await (await asUser(manager)).newPage();
         const managerTasks = new TasksPanel(managerPage);
         await gotoEditorial(managerPage, journal.path);

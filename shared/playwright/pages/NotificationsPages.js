@@ -56,7 +56,22 @@
  *   (Rule 2c; probed 2026-09-13, the window stayed open);
  * - a toast lives 5 s (`Page.vue` `expire: Date.now() + 5000`), swept every
  *   250 ms unless the pointer rests on the toast area (`:hover` on the
- *   container pauses the sweep for every toast).
+ *   container pauses the sweep for every toast);
+ * - the window's grid header is two `th` cells, "Select" and "Tasks", with
+ *   no box in either; Escape closes the window and the bell's badge is
+ *   refreshed as after "Close"; a row's `.message` is a block as wide as
+ *   the cell, so the blank space right of the sentence (x ≈ 1234 at
+ *   1280 px, the sentence ending near x 690) is still inside the row's link
+ *   (probed 2026-10-28, `.reports/U05/tojs` n1);
+ * - below 992 px the reader-facing header loads with a `button` "Open
+ *   Menu" (`button.pkp_site_nav_toggle`) and the user menu is NOT turned
+ *   into a dropdown: the name is `#navigationUser > li > a` with no
+ *   `data-toggle` and its `span.task_count` hidden, the entries are
+ *   `#navigationUser > li > ul a` with no `dropdown-menu` class, listed
+ *   under the name once "Open Menu" is pressed, the "Dashboard" entry's
+ *   `span.task_count` displayed (probed 2026-10-28, n1). The theme picks
+ *   the shape at page load, so a test narrows the window before opening
+ *   the page and widens it back before the next page.
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
@@ -117,19 +132,83 @@ async function expectStackedBelow(above, below) {
  * that only the app's own timer bounds: "stays while the pointer rests on
  * it"); then move the pointer off and wait for the toast to disappear by
  * itself. `lifetimeMs` is the app's constant, never a guess.
+ *
+ * `keepsOpen` (a locator inside a window open under the toast, Rule 9b:
+ * the "Notify" side panel's "Notify" button) is read visible at every read
+ * of the toast and again once the toast has gone: the window stays open.
  */
-async function expectStaysWhileHovered(page, toast, {lifetimeMs = TOAST_LIFETIME_MS} = {}) {
+async function expectStaysWhileHovered(page, toast, {lifetimeMs = TOAST_LIFETIME_MS, keepsOpen = null} = {}) {
     await toast.hover();
     const start = Date.now();
     while (Date.now() - start < lifetimeMs + 1000) {
         await expect(toast).toBeVisible();
+        if (keepsOpen) {
+            await expect(keepsOpen).toBeVisible();
+        }
         await page.waitForTimeout(250);
     }
     await page.mouse.move(0, 0);
     await expect(toast).toBeHidden({timeout: lifetimeMs + 10_000});
+    if (keepsOpen) {
+        await expect(keepsOpen).toBeVisible();
+    }
+}
+
+/**
+ * The warning toasts (pink left edge, `.pkpNotification--warning`; Rule 9a:
+ * a refused action or a server error).
+ */
+function warningToasts(page) {
+    return page.locator('.pkpNotification.pkpNotification--warning');
+}
+
+/** The left edge of each look (spec note g, live-probed 2026-09-04 and 2026-09-28). */
+const TOAST_EDGE = {
+    success: 'rgb(0, 178, 78)',
+    notice: 'rgb(0, 103, 152)',
+    warning: 'rgb(208, 10, 108)',
+};
+
+/**
+ * The toast has the look `type` ("success", "notice" or "warning"): its
+ * class and its left edge's colour (Rule 9a).
+ */
+async function expectToastLook(toast, type) {
+    await expect(toast).toHaveClass(new RegExp(`pkpNotification--${type}`));
+    await expect(toast).toHaveCSS('border-left-color', TOAST_EDGE[type]);
+}
+
+/**
+ * A narrow window (below the default theme's 992 px `@screen-desktop`) and
+ * the desktop width the suites read every other page at (spec notes s1, s7).
+ */
+const NARROW_WINDOW = {width: 800, height: 900};
+const WIDE_WINDOW = {width: 1280, height: 900};
+
+/**
+ * Narrow the page's window below 992 px (Rule 4b) and return the size it
+ * had, for `widenWindow`. The theme picks the header's shape at page load,
+ * so the caller opens the page after this.
+ */
+async function narrowWindow(page) {
+    const before = page.viewportSize() || WIDE_WINDOW;
+    await page.setViewportSize(NARROW_WINDOW);
+    return before;
+}
+
+/** Widen the window back (to `size`, the one `narrowWindow` returned, by default 1280 px). */
+async function widenWindow(page, size = WIDE_WINDOW) {
+    await page.setViewportSize(size.width >= 992 ? size : WIDE_WINDOW);
 }
 
 exports.DISCUSSION_TASK = DISCUSSION_TASK;
+exports.warningToasts = warningToasts;
+exports.TOAST_EDGE = TOAST_EDGE;
+exports.expectToastLook = expectToastLook;
+exports.NARROW_WINDOW = NARROW_WINDOW;
+exports.WIDE_WINDOW = WIDE_WINDOW;
+exports.narrowWindow = narrowWindow;
+exports.widenWindow = widenWindow;
 exports.TOAST_LIFETIME_MS = TOAST_LIFETIME_MS;
 exports.toasts = toasts;
 exports.successToasts = successToasts;
@@ -206,6 +285,38 @@ exports.TasksPanel = class TasksPanel extends BasePage {
     async close() {
         await this.dialog().getByRole('button', {name: 'Close', exact: true}).first().click();
         await expect(this.dialog()).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
+     * Press Escape: the window closes as with "Close" (*Fields &
+     * validation*, "The Tasks panel"); the caller reads the bell next.
+     */
+    async pressEscape() {
+        await expect(this.dialog()).toBeVisible();
+        await this.page.keyboard.press('Escape'); // lint-ok: escape S2 asserts that Escape closes the Tasks window
+        await expect(this.dialog()).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /** The grid's column header cell "Select" (the rows' box column). */
+    selectHeader() {
+        return this.dialog().getByRole('columnheader', {name: 'Select', exact: true});
+    }
+
+    /**
+     * The "Select" column's header holds no box, so no box ticks every row
+     * at once; each row's own box is the positive control, read the same way.
+     */
+    async expectSelectHeaderWithoutBox() {
+        await expect(this.selectHeader()).toBeVisible();
+        await expect(this.selectHeader()).toHaveText(/^\s*Select\s*$/);
+        await expect(this.selectHeader().locator('input')).toHaveCount(0);
+        await expect(this.dialog().locator('thead input[type="checkbox"]')).toHaveCount(0);
+        const rows = await this.rows().count();
+        expect(rows, 'rows to read the boxes on').toBeGreaterThan(0);
+        for (let i = 0; i < rows; i++) {
+            await expect(this.box(this.rows().nth(i))).toHaveCount(1);
+            await expect(this.box(this.rows().nth(i))).toBeVisible();
+        }
     }
 
     /** Every task row, newest first. */
@@ -290,8 +401,9 @@ exports.TasksPanel = class TasksPanel extends BasePage {
     }
 
     /**
-     * Press the blank part of the row (Rule 2c): the task cell's bottom-right
-     * corner, below the link that wraps the sentence and the title. Nothing
+     * Press the blank part of the row (Rule 2c): 4 px inside the task cell's
+     * bottom-right corner, below the link that wraps the sentence and the
+     * title. Nothing
      * happens: the window stays open with the row as it was, on the same
      * address; the caller's next press of the link is the positive control.
      */
@@ -304,6 +416,29 @@ exports.TasksPanel = class TasksPanel extends BasePage {
         await expect(this.dialog()).toBeVisible();
         await expect(row).toBeVisible();
         await expect(this.page).toHaveURL(address);
+    }
+
+    /**
+     * Press the blank space to the right of the row's sentence, on the
+     * sentence's line (Rule 2c): 30 px inside the link's right edge (x ≈ 1234
+     * at 1280 px, spec note s1), checked to lie right of where the sentence's
+     * text ends. The press opens the task as a press on the sentence does;
+     * the caller asserts the landing.
+     */
+    async pressBesideSentence(row) {
+        await expect(this.link(row)).toBeVisible();
+        const geometry = await row.evaluate((tr) => {
+            const link = tr.querySelector('a');
+            const message = tr.querySelector('.task .message');
+            const range = document.createRange();
+            range.selectNodeContents(message);
+            const text = range.getBoundingClientRect();
+            const box = link.getBoundingClientRect();
+            return {linkRight: box.right, textRight: text.right, textTop: text.top, textHeight: text.height};
+        });
+        const x = geometry.linkRight - 30;
+        expect(x, 'the press lies right of the sentence').toBeGreaterThan(geometry.textRight + 20);
+        await this.page.mouse.click(x, geometry.textTop + geometry.textHeight / 2);
     }
 
     // ---------------------------------------------------------------------
@@ -499,6 +634,77 @@ exports.ReaderHeader = class ReaderHeader extends BasePage {
     async entryTexts() {
         const texts = await this.menu.getByRole('link').allInnerTexts();
         return texts.map((text) => text.replace(/\s+/g, ' ').trim());
+    }
+
+    // ---------------------------------------------------------------------
+    // The narrow window (Rule 4b, 4d): below 992 px, "Open Menu"
+    // ---------------------------------------------------------------------
+
+    /** The header's "Open Menu" button (shown below 992 px). */
+    openMenuButton() {
+        return this.page.getByRole('button', {name: 'Open Menu', exact: true});
+    }
+
+    /** The signed-in name at any width (`#navigationUser > li > a`; a dropdown toggle only at desktop width). */
+    nameLink() {
+        return this.wrapper.locator('#navigationUser > li > a');
+    }
+
+    /** The entries under the name at any width (`#navigationUser > li > ul a`). */
+    entryLinks() {
+        return this.wrapper.locator('#navigationUser > li > ul a');
+    }
+
+    /** One entry under the name at any width, by the start of its text ("Dashboard" matches "Dashboard 1"). */
+    narrowEntry(name) {
+        return this.entryLinks().filter({hasText: new RegExp(`^\\s*${escapeRegExp(name)}(\\s+\\d+)?\\s*$`)});
+    }
+
+    /** The count after "Dashboard" at any width. */
+    narrowDashboardCount() {
+        return this.narrowEntry('Dashboard').locator('span.task_count');
+    }
+
+    /**
+     * Open the page at `url` in a window already narrowed (`narrowWindow`)
+     * and press "Open Menu": the name and the entries under it show.
+     */
+    async gotoNarrowAndOpenMenu(url) {
+        await this.page.goto(url);
+        await expect(this.openMenuButton()).toBeVisible({timeout: 30_000});
+        await this.openMenuButton().click();
+        await expect(this.nameLink()).toBeVisible({timeout: 30_000});
+        await expect(this.narrowEntry('View Profile')).toBeVisible();
+    }
+
+    /**
+     * The name is listed bare after "Open Menu" (Rules 4b, 4d): what the
+     * screen displays is the name alone, and any count the name carries in
+     * the page's source is not displayed.
+     */
+    async expectNarrowBareName(username) {
+        await expect(this.nameLink()).toBeVisible();
+        await expect(this.nameLink()).toHaveText(new RegExp(`^\\s*${escapeRegExp(username)}\\s*$`), {useInnerText: true});
+        const counts = this.nameLink().locator('span.task_count');
+        for (let i = 0; i < (await counts.count()); i++) {
+            await expect(counts.nth(i)).toBeHidden();
+        }
+    }
+
+    /** The entries under the name as the screen displays them (inner text, whitespace collapsed). */
+    async narrowEntryTexts() {
+        const texts = await this.entryLinks().allInnerTexts();
+        return texts.map((text) => text.replace(/\s+/g, ' ').trim());
+    }
+
+    /**
+     * "Dashboard {count}" is displayed after "Open Menu" (Rule 4b): the
+     * entry's own count shown, reading `count`.
+     */
+    async expectNarrowDashboardCount(count) {
+        await expect(this.narrowDashboardCount()).toBeVisible();
+        await expect(this.narrowDashboardCount()).toHaveText(new RegExp(`^\\s*${count}\\s*$`));
+        await expect(this.narrowEntry('Dashboard')).toHaveText(new RegExp(`^\\s*Dashboard\\s+${count}\\s*$`), {useInnerText: true});
     }
 };
 
