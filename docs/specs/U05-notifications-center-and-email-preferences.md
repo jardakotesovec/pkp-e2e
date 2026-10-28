@@ -510,7 +510,7 @@ defaults, and the Site Administrator is a Journal Manager of it, so every
 new submission's "needs an editor" task reaches them too (Rule 6). Its
 only "Forms" language is English, as on the seeded journal, and every
 page is read in a window 992 px or wider, so the unread count sits
-beside the name (Rules 4a, 4c).
+beside the name (Rules 4a, 4c), except where a step narrows the window.
 
 **When emails arrive.** Every email in scenarios 1–6 and 11 leaves at the
 moment of the action and is in its mailbox within a second. Where a
@@ -540,19 +540,28 @@ footnote says how) and judge both mailboxes only once they have run.
    - **The reader-side count**: on the journal's home page the Manager's
      name in the header reads "{name} 1"; under the name are "Dashboard"
      and "View Profile" and no list of tasks: it is a count only (Rule 4).
+   - **The narrow window**: narrow the browser window below 992 px and,
+     on the journal's home page, press "Open Menu": the Manager's name is
+     listed bare, with "Dashboard", "View Profile" and "Logout" under it,
+     and the number follows "Dashboard": "Dashboard 1" (Rule 4b). Widen
+     the window back to 992 px or more.
    - **The Tasks window**: back on an editorial page, press the bell: the
      "Tasks" window opens with one row, its sentence in bold, "A new
      article has been submitted to which an editor needs to be assigned."
      (worded per application as in Fields), with the submission's title
      under it; while the window is open the bell in the header is greyed
      out with no number.
-   - **The margin of the row**: press the row's bottom right-hand corner,
-     just above its border: nothing happens; the window stays as it is
+   - **The margin of the row**: press 4 px inside the row's bottom
+     right-hand corner: nothing happens; the window stays as it is
      (Rule 2c).
    - **Opening the task**: press the row's sentence: {OJS OMP} the
      submission's workflow opens over the submissions dashboard (Rule 2c);
      {OPS} a reader-facing page reading "A workflow stage was not
      specified." opens instead ⚠ [OPS3](#ops3).
+   - **The blank space beside the sentence**: back on an editorial page,
+     press the bell, then press the blank space to the right of the row's
+     sentence, on the sentence's line: the same page opens as after the
+     press on the sentence (Rule 2c).
    - **Control**: back on any editorial page the bell shows no number,
      opening the window again shows the row's sentence in regular type,
      and the journal's home page now reads "{name} 0" (Rule 4, *Side
@@ -571,17 +580,21 @@ footnote says how) and judge both mailboxes only once they have run.
    - **Newest first**: open the window: the first row carries the later
      submission's title under its sentence, the second row the earlier
      submission's (Rule 2b).
+   - **The "Select" column**: each row starts with a box, and the
+     column's header holds none, so no box ticks every row at once
+     (*Fields & validation*, "The Tasks panel").
    - **"Mark Read" with no box ticked**: press "Mark Read": both rows stay
      bold and no message appears (Rule 3).
    - **"Mark Read"**: tick the first row and press "Mark Read": the row's
      sentence turns to regular type and its box is unticked again. Press
      "Close": the bell shows "1".
    - **"Mark New"**: open the window again, tick the same row and press
-     "Mark New": the row is bold again; close the window: the bell shows
-     "2".
+     "Mark New": the row is bold again.
+   - **The Escape key**: press Escape: the window closes, and the bell
+     shows "2" (*Fields & validation*, "The Tasks panel").
    - **"Delete"**: open it again, tick both rows and press "Delete": both
      rows vanish at once with no question asked and the list reads "No
-     Items"; close the window: the bell shows no number. Reload the page:
+     Items"; press "Close": the bell shows no number. Reload the page:
      still no number, and the window is still empty.
    - **Control**: the second Journal Manager opens their own Tasks window:
      their two rows for the same submissions are still listed; what one
@@ -620,9 +633,9 @@ footnote says how) and judge both mailboxes only once they have run.
 
 4. **Ticking "Do not send me an email…" keeps the task, stops the email**
 
-   Given: two Journal Managers, A and B, and an Author, throwaway accounts
-   on the scratch journal; Manager A on Profile › "Notifications".
-   <sup>s4</sup>
+   Given: two Journal Managers, A and B, a Section Editor and an Author,
+   throwaway accounts on the scratch journal; Manager A on Profile ›
+   "Notifications". <sup>s4</sup>
 
    - **Manager A ticks the email box**: tick "Do not send me an email for
      these types of notifications." under "A new article has been
@@ -631,11 +644,32 @@ footnote says how) and judge both mailboxes only once they have run.
    - **The Author submits**: the Author submits a new submission.
    - **Both Tasks windows**: both managers get the task in their Tasks
      window (Rule 5b).
-   - **Manager A's mailbox**: once Manager B's email below has arrived,
-     holds no email with its subject ("When emails arrive").
+   - **Manager A's mailbox**: once Manager B's email for this submission
+     has arrived (Control), holds no email with its subject ("When emails
+     arrive").
+   - **Manager B assigns the Section Editor**: Manager B opens the
+     submission's workflow from the Dashboard and assigns the Section
+     Editor to it with "Assign" on its Participants panel (the window is
+     *[Stage participants](U35-stage-participants.md)*'): neither
+     Manager's Tasks window holds the row for this submission's title any
+     more, and the Section Editor's Tasks window holds no row for it
+     either (Rules 1, 6).
+   - **Manager A unticks "Enable…"**: back on Profile › "Notifications",
+     untick "Enable these types of notifications." under the same row:
+     its "Do not send me an email…" box greys out and keeps its tick;
+     press "Save" (Rule 5c).
+   - **The tab's next load**: open Profile › "Notifications" again: under
+     that row "Enable…" is unticked and the email box is greyed out and
+     unticked (Rule 5c).
+   - **Manager A ticks "Enable…" back**: tick it: the email box is offered
+     again, unticked; press "Save" (Rule 5c).
+   - **The Author submits again**: the Author submits a second new
+     submission: Manager A's mailbox holds the email whose subject is "A
+     new submission needs an editor to be assigned: "{title}"" with the
+     second submission's title; the event's emails come again (Rule 5c).
    - **Control**: Manager B's mailbox holds the email whose subject is "A
-     new submission needs an editor to be assigned: "{title}"" with this
-     submission's title: the box stopped Manager A's email alone.
+     new submission needs an editor to be assigned: "{title}"" with the
+     first submission's title: the box stopped Manager A's email alone.
 
 5. **Unsubscribing from an email's footer link**
 
@@ -684,29 +718,49 @@ footnote says how) and judge both mailboxes only once they have run.
      check" into "Name", the Author's box ticked, "Still reading?" under
      "Discussion", "Save"): the Manager's own mailbox holds the email
      whose subject is that new name.
-   - **Control**: once it has arrived, the Author's mailbox holds no email
-     with that subject (the first discussion's email is still there),
+   - **A toast over the "Notify" panel**: on the same workflow page's
+     Participants panel, press the Author's "More Actions" › "Notify",
+     leave "Message" empty and press "Notify": a pink-edged toast at the
+     top right reads "Please ensure that you have filled out the message
+     field and included someone other than yourself in the discussion."
+     (Rule 9a); it stays while the pointer rests on it and disappears by
+     itself a few seconds after the pointer leaves, while the "Notify"
+     side panel stays open (Rule 9b).
+   - **Control**: once the Manager's copy of the second discussion's email
+     has arrived, the Author's mailbox holds no email with the subject
+     "Second check" (the first discussion's email is still there),
      while the Author's Tasks window holds a new row reading "{the
      Manager's name} started a discussion: {the new name}: {the message}":
      the email stopped, the task kept (Rule 8c).
 
 6. **The link acts on the addressee, not on whoever is signed in**
 
-   Given: the Journal Manager and the Author of scenario 5, with scenario
-   5's link; the Manager signed in. <sup>s6</sup>
+   Given: a Journal Manager and an Author, throwaway accounts on the
+   scratch journal (not scenario 5's), a submission of the Author's there
+   that lists a second author after the Author, and in the Author's
+   mailbox the email of a discussion the Manager opened on it as in
+   scenario 5's first step; the Manager signed in. <sup>s6</sup>
 
-   - **The page, signed in as the Manager**: open the link: the page names
-     the Author's address, not the Manager's (Rule 8b).
+   - **The footer with two authors**: the Author's email ends "Reply to
+     this comment at #{submission number} {authors} or unsubscribe from
+     emails sent by {journal name}.", where {authors} reads the Author's
+     family name followed by "et al." (Rule 7a).
+   - **The page, signed in as the Manager**: open the email's
+     "unsubscribe" link: the page names the Author's address, not the
+     Manager's (Rule 8b).
    - **The stale page**: leave it open; in another tab of the same browser
      sign out; back on the old page press "Unsubscribe": "We could not
      unsubscribe you" with "There was an unexpected error and we could not
      unsubscribe the email address {the Author's address}. You can
      unsubscribe from all email notifications in your user profile or
      contact us directly for help." (Rule 8d).
-   - **The link afresh**: sign in as the Manager again and open the
-     emailed link afresh: the page shows again with the Author's address.
-     Untick every box but "Discussion added." and press "Unsubscribe": the
-     success page shows.
+   - **The link afresh**: still signed out, open the emailed link afresh:
+     the page shows again with the Author's address (Rule 8d).
+   - **A sign-in in another tab**: leave the page open; in another tab of
+     the same browser sign in as the Manager again; back on the page,
+     untick every box but "Discussion added." and press "Unsubscribe": the
+     success page shows; a sign-in alone leaves the open page working
+     (Rule 8d).
    - **"user profile", signed in**: press "user profile": the journal's
      Profile page opens on "Identity" (Rule 8e).
    - **The Author's tab**: now has "Do not send me an email…" ticked on
@@ -736,7 +790,9 @@ footnote says how) and judge both mailboxes only once they have run.
      entry in the list under it reads "Dashboard" alone; the number the
      bell shows is written after "Dashboard" in the page's source, where
      the browser's page inspector finds it, but not displayed
-     [A13](#a13) (Rule 4).
+     [A13](#a13) (Rule 4); with the window narrowed below 992 px and
+     "Open Menu" pressed, the same entry displays it, "Dashboard {n}" with
+     {n} the number the bell shows (Rules 4b, 4d).
 
 8. **Registration presets the email choice**
 
@@ -803,7 +859,8 @@ footnote says how) and judge both mailboxes only once they have run.
       (Rules 2b, 6).
     - **Control**: the Journal Manager's Tasks window holds no row opening
       "A new version of your submission" for this title, while it does
-      hold the "needs an editor" row the same submission raised: the task
+      hold the "needs an editor" row the same submission raised, with the
+      title under it (Rule 2b): the task
       goes to every user holding an Author assignment on the submission
       (Rule 6).
 
@@ -845,25 +902,13 @@ footnote says how) and judge both mailboxes only once they have run.
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - a toast over an open window staying while the pointer rests on it, the window open (Rule 9b; the "Notify" warning over its side panel)
   - a Section Editor's task count in the menu under their name on the public pages (Rule 4; the guard [A3](#a3)'s issue report proposes, shared with Navigation menus & site chrome A2)
   - the "needs an editor" email staying away for a manager who unticked "Enable…" on its row (Rule 5a; scenario 3 reads the mailbox; the guard [A10](#a10)'s issue report proposes)
   - a preprint server's "needs a moderator" task opening the preprint's workflow (Rule 2c; scenario 1 presses a task; the guard [OPS3](#ops3)'s issue report proposes)
   - a reply in a discussion with "Discussion activity." switched off reaching neither the Tasks window nor the mailbox, and with it on a row reading "… replied to …" (Rule 6; the guard [A1](#a1)'s issue report proposes)
   - unticking a box on the "Unsubscribe" page leaving the emails switched off before still off (Rule 8c; the guard [A2](#a2)'s issue report proposes)
   - a preprint server's new-preprint row on the Notifications tab reading "A new preprint, "Title", has been submitted." (*Fields & validation*; the guard [OPS2](#ops2)'s issue report proposes)
-  - in a window narrower than 992 px, after "Open Menu", the name bare and the unread count after "Dashboard", on a journal's home page and for the Site Administrator on the site's (Rules 4b, 4d)
-  - a ticked "Do not send me an email for these types of notifications." with its "Enable these types of notifications." unticked: greyed with its tick, unticked on the tab's next load after "Save", and the event's emails coming again once "Enable…" is ticked back (Rule 5c)
-  - the Escape key closing the Tasks window, and no box in the "Select" column's header (*Fields & validation*, "The Tasks panel")
-  - a press on the blank space to the right of a row's sentence opening the task (Rule 2c; scenario 1 presses the sentence and the row's margin)
-  - the "needs an editor" task leaving every manager's Tasks window once a Section Editor is assigned with "Assign" on the submission's Participants panel, the assigned Section Editor getting none (Rules 1, 6)
-  - "Enable…" unticked stopping the announcement email, on a scratch journal with announcements switched on (Rules 5a, 6)
-  - an Author's "Do not send me an email…" under "A new version of your submission, "Title", was published." stopping the "Publication Published" email while the task still arrives (Rule 5b; [A8](#a8))
-  - {OPS} "New Version Posted Acknowledgement" still reaching an author who ticked that box (Rule 6)
-  - the discussion footer naming the first author's family name followed by "et al." on a submission with more than one author (Rule 7a; scenario 5's submission has one author)
-  - a sign-in alone in another tab leaving the open Unsubscribe page working (Rule 8d; scenario 6 signs out)
   - {OMP} the review-complete email's subject reading "recommends None" (Rule 6; scenario 11 states it, the press's suite does not read it yet)
-  - {OJS} no title line under the published-version task (Rules 2b, 6; scenario 10 states it, the journal's suite does not read it yet)
 - **Rarely met**:
   - the Tasks window paged beyond 25 rows, "1 - 25 of 26 items" and "Items per page:" (Rule 2b): 26 tasks to raise for one account
   - the blue-edged notice toast (Rule 9a): the one screen that produces it is a plugin switch under Settings › Website › "Plugins", a Journal Manager's occasional act, not an editor's, author's or reviewer's week
@@ -908,6 +953,9 @@ Left out of the scenarios above, by reason:
   - the announcement's and the issue's email box and the open-access notification (*Settings*; *[Announcements](U12-announcements.md)*, *[Issues](U50-issues.md)*, *[Subscriptions & open access control](U51-subscriptions.md)*)
   - the announcements switch, which leaves an announcement's email going out (*Settings*; *[Announcements](U12-announcements.md#a8)*, its A8)
   - decision tasks landing in the panel with no box to switch them off (*Cross-feature interactions*; *Review stage & rounds*)
+  - "Enable…" unticked under "A new announcement has been created." ("New announcement." on a press) stopping the announcement email (Rules 5a, 6; *[Announcements](U12-announcements.md)*, scenario 4)
+  - an Author's "Do not send me an email…" under "A new version of your submission, "Title", was published." stopping the "Publication Published" email while the task still arrives (Rule 5b; *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*, scenario 5)
+  - {OPS} "New Version Posted Acknowledgement" still reaching an author who ticked that box (Rule 6, "Two emails are governed by no box"; *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*, scenario 5, whose Author ticks that box before the post)
 
 ## Findings register
 
@@ -1848,12 +1896,12 @@ wizard's final "Submit" raises both. Expected task text per app: Fields,
 author's name; the trailing query part after the id came and went between
 runs, so only the path and `workflowSubmissionId` are asserted); OPS
 `{context}/user/authorizationDenied?message=user.authorization.workflowStageRequired`
-(OPS3). The reader-side count is read on the scratch context's home page (`{context}/index`), `#navigationUserWrapper` `span.task_count` beside the name, and the entries under the name are the seeded user menu ("Dashboard", "View Profile", note c); after the task is opened the same page shows "0". The margin of the row is the strip of the `td` below the row's one `<a>`, which spans the cell's full width (`task.tpl`, note a): live-probed 2026-10-20 on OJS, OMP and OPS, two runs each, at 1280 px the link runs from x 171 to 1264, 44 px high in a 59.5 px cell; a press at x ≈ 1234 on the sentence's line, right of the sentence's end (x ≈ 690–727), left the window for the workflow (OJS, OMP) or the denied page (OPS), and a press in the cell's bottom-right corner (the suites' `pressBlankPart`) left the window open, the row unread and the address unchanged.
+(OPS3). The reader-side count is read on the scratch context's home page (`{context}/index`), `#navigationUserWrapper` `span.task_count` beside the name, and the entries under the name are the seeded user menu ("Dashboard", "View Profile", note c); after the task is opened the same page shows "0". The margin of the row is the strip of the `td` below the row's one `<a>`, which spans the cell's full width (`task.tpl`, note a): live-probed 2026-10-20 on OJS, OMP and OPS, two runs each, at 1280 px the link runs from x 171 to 1264, 44 px high in a 59.5 px cell; a press at x ≈ 1234 on the sentence's line, right of the sentence's end (x ≈ 690–727), left the window for the workflow (OJS, OMP) or the denied page (OPS), and a press 4 px inside the cell's bottom-right corner (the suites' `pressBlankPart`) left the window open, the row unread and the address unchanged. The suites press the sentence first and then, on the row now read, the blank space at x ≈ 1234 on the sentence's line. The narrow window is the test's own viewport, set below 992 px (no seed key): the header's "Open Menu" lists the bare name and the user menu with `span.task_count` after "Dashboard" (note c); the viewport is set back to 1280 px before the Tasks window is opened.
 
 <a id="fn-s2"></a>
 **s2** — Two tasks from two submissions on the same scratch context; the
 unread look is `div.task.unread` in `task.tpl`. Driven 2026-09-04 on all
-three apps as written. Newest first is the grid's creation-date order (note a): the later submission's title is the first row. The order is stamped to the second: on OMP on 2026-09-13 two seeded submissions landed inside one second and the earlier's row came first on two runs of three, and on 2026-10-20 same-second ties showed on all three apps (note f-a12), so the suites seed the second submission after the clock's next second and the green runs on all three apps list the later one first (A12). The control is a second throwaway `manager` of the same context (`admin` also qualifies), whose two rows survived the first Manager's "Delete" on 2026-09-04 (note a).
+three apps as written. Newest first is the grid's creation-date order (note a): the later submission's title is the first row. The order is stamped to the second: on OMP on 2026-09-13 two seeded submissions landed inside one second and the earlier's row came first on two runs of three, and on 2026-10-20 same-second ties showed on all three apps (note f-a12), so the suites seed the second submission after the clock's next second and the green runs on all three apps list the later one first (A12). The control is a second throwaway `manager` of the same context (`admin` also qualifies), whose two rows survived the first Manager's "Delete" on 2026-09-04 (note a). The "Select" header without a box and the Escape key closing the panel are note a's reads of the grid; each row's box is the positive control for the header's empty cell.
 
 <a id="fn-s3"></a>
 **s3** — Box names: `notificationEditorAssignmentRequired` and
@@ -1869,7 +1917,7 @@ never "No Items". The toast bullet is note g's probe: two saves in a row stacked
 <a id="fn-s4"></a>
 **s4** — Same accounts and box names as s3. Driven 2026-09-04 on all three
 apps: Manager A's mailbox count stayed at its earlier total while Manager
-B's email for the new title arrived.
+B's email for the new title arrived. The Section Editor is a `sectionEditor` in the context's `users[]` (on OPS the same key seeds a Moderator, scenarios.md). The assignment goes through the Participants panel's "Assign" on screen (*Stage participants*' window), never through the submission's `participants[]`: a seeded editor leaves the "needs an editor" rows in place, where the screen's "Assign" deletes them (scenarios.md). Every Manager of the context already holds rows from earlier submissions, so the windows are read by the submission's title, never by count. The Rule 5c bullets read no mailbox while "Enable…" is unticked, since the "needs an editor" email arrives regardless (A10); the second submission goes through the wizard, as a seeded one sends no email (note s1).
 
 <a id="fn-s5"></a>
 **s5** — The discussion is added through the workflow's tasks & discussions
@@ -1886,10 +1934,10 @@ the 2026-09-02 pkp tips the save fails with `Class
 "APP\notification\Notification" not found` until the campaign's overlay
 class is mounted (`docs/tracking/app-changes.md` row 12; the fleets run
 with it). Driven 2026-09-04 on all three apps up to and including the
-second discussion, with the Manager's own copy as the control. The email's From name is the Manager's (`From.Name` asserted by the three suites; the address was not recorded). The three broken links are Rule 8a's, built from the emailed address (`validate` cut, `id` cut, `id=999999999`), each answering the bare "404 Not Found" page signed in or out (note f). The text read is Mailpit's "Text" tab, its rendering of the HTML-only email (note s0). "No email confirms it": `count()` on the Author's address stays at 1 after the press. The "user profile" link on the form page is `{context}/user/profile`; signed out it led to Login and then to "Identity" (note f).
+second discussion, with the Manager's own copy as the control. The email's From name is the Manager's (`From.Name` asserted by the three suites; the address was not recorded). The three broken links are Rule 8a's, built from the emailed address (`validate` cut, `id` cut, `id=999999999`), each answering the bare "404 Not Found" page signed in or out (note f). The text read is Mailpit's "Text" tab, its rendering of the HTML-only email (note s0). "No email confirms it": `count()` on the Author's address stays at 1 after the press. The "user profile" link on the form page is `{context}/user/profile`; signed out it led to Login and then to "Identity" (note f). The toast over the "Notify" side panel is Rule 9a's warning, the panel and its wording *Stage participants*' (its scenario 6); only the hover, the toast's going and the open panel are this scenario's, read as scenario 3's toast is (note g).
 
 <a id="fn-s6"></a>
-**s6** — The addressee is `Notification::userId` of the link's notification;
+**s6** — Accounts of its own, so the Author's tab is at its defaults (scenario 5's Author has every email box ticked and gets no discussion email). The second author is a `contributors[]` entry on `POST scenarios/submission` (scenarios.md), added after the submitter, so the Author stays the first author; the discussion is added as in note s5. The "#{submission number} {authors}" link is read, not pressed (A16). The sign-in in another tab is a second Playwright page in the same browser context, the form left open in the first. The addressee is `Notification::userId` of the link's notification;
 the page's sentence prints `$userEmail` from that user, whatever the session.
 Driven 2026-09-04 on all three apps as written. The stale page: the form left open in one Playwright page while the same browser context signs out in another, then "Unsubscribe" pressed on the old page; the `FormValidatorCSRF` check fails and the POST answers 200 with the `.error` template (note f, 2026-09-04, all apps); the link opened afresh after a new sign-in shows the form again. The "user profile" link on the result page is the same `{context}/user/profile`, the signed-in Manager's own Identity tab.
 
@@ -1899,7 +1947,7 @@ default (seed-facts). Site-level address: `index/user/profile`, opened as
 `admin`: `manager.maya` holds a role in one journal only and is forwarded
 (*User profile* A1), and a scratch context must exist so the site has
 several journals. Driven 2026-09-04 on all three apps: rows as in Fields;
-`admin`'s site-level tab without the statistics row. The site's own home page is `index/en`: `manager.maya` shows the bare name there; `admin` the bare name and the count in the text of the "Dashboard" entry of the drop-down under it ("Dashboard 46" on 2026-09-04, "Dashboard 15" on 2026-09-13; its `span.task_count` is `display: none` at desktop width, note c, A13), asserted from the entry's text content as the number the bell shows on `admin`'s editorial pages, never as a fixed value and never as visible. The bell on `index/user/profile` opens the same grid (`TaskNotificationsGridHandler` with no context filter, note a); the first row's text is compared with the one the seeded journal's editorial page gives.
+`admin`'s site-level tab without the statistics row. The site's own home page is `index/en`: `manager.maya` shows the bare name there; `admin` the bare name and the count in the text of the "Dashboard" entry of the drop-down under it ("Dashboard 46" on 2026-09-04, "Dashboard 15" on 2026-09-13; its `span.task_count` is `display: none` at desktop width, note c, A13), asserted from the entry's text content as the number the bell shows on `admin`'s editorial pages, never as a fixed value and never as visible. The bell on `index/user/profile` opens the same grid (`TaskNotificationsGridHandler` with no context filter, note a); the first row's text is compared with the one the seeded journal's editorial page gives. The narrow read is the test's own viewport below 992 px on `index/en`: after "Open Menu" the entry's `span.task_count` is displayed, its number read between two reads of the bell, since parallel workers move `admin`'s count (note c).
 
 <a id="fn-s8"></a>
 **s8** — The Register page of a scratch context (registration open by
@@ -1935,9 +1983,9 @@ no `.details .submission` line under it (test runs of 2026-09-13 on OJS,
 OMP and OPS: the aria snapshot's row holds that one link and nothing
 else); the notification's `assocType` is `ASSOC_TYPE_PUBLICATION`, which
 `NotificationsGridCellProvider::_getTitle()` has no case for, so no title
-line is built. The three suites assert the full sentence; the OMP and OPS suites
-also assert the absence of the title line, the OJS suite not yet
-(2026-10-20). The seed also raises the "needs an editor" task for every
+line is built. The three suites assert the full sentence and the absence of the title
+line, with the Manager's "needs an editor" row and its title line as the
+positive control. The seed also raises the "needs an editor" task for every
 Manager of the context (seed-facts), which is the control's positive half:
 the Manager's window lists that row for the title and none opening "A new
 version of your submission".
