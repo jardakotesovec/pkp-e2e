@@ -873,7 +873,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A15](#a15) | A screen reader is never told which column the submissions list is sorted by, or in which direction | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
 | [A17](#a17) | With strict mode on, every search from the sidebar's "Search submissions" box fails and shows "Search Results (0)" | 🐞 | low · crash: server | — |
-| [A1](#a1) | Section Editors and assistants have no view listing declined (or published-and-gone) submissions; global search is their only way back | ❓ | user-visible | — |
+| [A1](#a1) | Section Editors and assistants have no "Declined" view, so a declined submission they are assigned to drops out of every view; on 3.5 nothing on the dashboard brings it back | 🐞 | medium | upstream sync (claude), 2026-10-28 — regression report |
 | [A2](#a2) | Editors are offered "Complete submission" on other people's incomplete submissions, landing them in the author's wizard | ❓ | minor | — |
 | [A3](#a3) | The author/reviewer conflict notice always says "as a Journal Manager", whoever is looking, on presses and preprint servers too | ❓ | minor | — |
 | [A7](#a7) | Declined and cancelled reviewers show no activity indicator at all to assigned Section Editors and assistants | ❓ | minor | — |
@@ -892,17 +892,19 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 ### All apps
 
 <a id="a1"></a>
-**A1 — No path back to finished submissions for assigned editors** · ❓ ·
+**A1 — Declined submissions drop out of assigned editors' dashboards** · 🐞 ·
 user-visible.
 The "Declined" view exists only for journal-wide accounts (Rule 3). A
-Section Editor or assistant whose assigned submission is
-declined loses it from every view on their dashboard. The same happens with
-other finished outcomes their views do not cover. Their global search still
-finds it (Rule 7), but nothing tells them so.
-Question: should assigned editors keep a view (or their "Declined" /
-"Published" entries) scoped to their own submissions? Lean: an intended
-reduction, since each view has a deliberate role list, but the silent
-disappearance is worth a product ruling.
+Section Editor (series editor, moderator) or assistant whose assigned
+submission is declined loses it from every view on their dashboard, and
+the decision's confirmation tells the manager it was "sent to the
+archives". On `main` their global search still finds it (Rule 7), but
+nothing tells them so; 3.5 has no such search box, so nothing on the
+dashboard brings it back. Until 3.4 the "Archived" tab listed it for
+them, and `pkp/pkp-lib#8887`, which introduced the views, scopes every
+view but "Assigned to Me" to the editor's own assignments: regression,
+not choice (it was a ❓ leaning "intended" until 2026-10-28). The fix
+is one role list (Cause in the report). Upstream: `pkp/pkp-lib#13347`.
 Basis: probe + code. <sup>a1</sup>
 
 <a id="a2"></a>
@@ -1843,7 +1845,16 @@ search surfaced declined and published rows side by side (fn-h). The last
 leg — a Section Editor's own global search returning *their* declined
 submission — was observed live 2026-08-26 in the scenario-11 walk (OJS):
 the search returned "Search Results (1)" listing the declined submission
-with its "Declined" stage label and its "View" button.
+with its "Declined" stage label and its "View" button. Re-walked
+2026-10-28 on PKP's default dataset, `main` and `stable-3_5_0`, OJS, OMP
+and OPS, with a Funding coordinator for the assistant (OJS, OMP): no
+"Declined" entry for either, the `main` search finds the submission, and
+3.5 has no search box. Introduced by `pkp/pkp-lib#9469` (`aafa2d56e5`,
+`0a492918f1`). Kept check
+`shared/playwright/checks/sync/pkp-lib-8887/declined-view.js`, fix
+`fix.diff` in the same folder. Tracked in ci-triage "Open regressions".
+Written up for the team in `docs/reports/2026-10-28-pkp-lib-8887.md` (a
+temporary report, deleted once acted on; git history keeps it).
 
 <a id="fn-a2"></a>
 **a2 — A2 evidence.** The `submissionProgress` branch of the editorial
