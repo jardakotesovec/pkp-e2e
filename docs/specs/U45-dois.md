@@ -783,7 +783,7 @@ links under the list. <sup>g</sup>
     | Agency | Accepts |
     |--------|---------|
     | Crossref, journal | "Articles", "Issues", "Peer Review" |
-    | DataCite, journal | "Articles", "Issues", "Article galleys, such as a published PDF" |
+    | DataCite, journal | "Articles", "Issues", "Article galleys, such as a published PDF", "Peer Review" <sup>p13062</sup> |
     | Crossref, preprint server | "Preprints" |
 
     When a kind the agency keeps comes after the dropped one (a journal
@@ -1949,9 +1949,9 @@ throwaway accounts. <sup>sc</sup>
       "Save": "A test DOI prefix is required when using the test system
       for DOI registration." [A5](#a5); type "10.5072" in "Test DOI
       Prefix" and press "Save": "Saved" (Fields).
-    - **The "Setup" tab**: "Items with DOIs" lists "Articles", "Issues"
-      and "Article galleys, such as a published PDF", and no "Peer Review"
-      (Rule 35).
+    - **The "Setup" tab**: "Items with DOIs" lists "Articles", "Issues",
+      "Article galleys, such as a published PDF" and "Peer Review"
+      (Rule 35). <sup>p13062</sup>
     - **The DOIs page**: the header carries "Deposit All", "Bulk Actions"
       offers "Export DOIs" and "Deposit DOIs", and "Axolotl limb memory"'s
       expanded view ends with a box naming "DataCite" and reading "The
@@ -3326,6 +3326,21 @@ reload. With "Immediately…" saved, "Custom pattern" and a pattern: 400,
 the same message under the list; after a reload "Immediately…" and
 "Default" as saved. CI run 37623109407 at the same heads read the same
 four options and the shown one on a new journal, press and server.
+
+<a id="fn-p13062"></a>
+**p13062** — DataCite takes "Peer Review" since pkp/ojs#5715 (issue
+pkp/pkp-lib#13062): `DatacitePlugin::getAllowedDoiTypes()` adds
+`TYPE_PEER_REVIEW`, and `exportPeerReviews()` / `depositPeerReviews()`
+build a `peerReview=>datacite-xml` record per review (resource type
+`PeerReview`, an anonymous or double-anonymous reviewer written as the
+creator `:unkn`, an open one by name, verified ORCID and affiliation, a
+`Reviews` relation to the article's DOI). Live-probed at the PR heads
+(ojs `2909063166`, lib/pkp `6fe60a84ef`), before their merge,
+2026-10-28: after "DataCite" is saved the Setup tab lists the four
+kinds with "Peer Review" kept ticked, and the DOIs page lists "Peer
+Review {number}" rows; S16 green there. The PR review's findings
+(`docs/reports/2026-10-28-pkp-lib-13062.md`) are not yet register
+entries: they wait for the merge.
 
 <a id="fn-d"></a>
 **d** — `lib/pkp/classes/components/forms/context/PKPDoiRegistrationSettingsForm.php`:
