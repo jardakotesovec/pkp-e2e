@@ -333,7 +333,12 @@ items" on an empty list). No text can be typed anywhere in the panel.
        to the submission's workflow: a Journal Manager who presses it
        lands there, while the submission's Author, signed in, lands on the
        page "The current role does not have access to this operation."
-       instead ⚠ [A16](#a16).
+       instead ⚠ [A16](#a16). To a person asked to review the submission
+       under "Anonymous Reviewer/Anonymous Author" (in any round, even a
+       request since cancelled), the authors are left out, and the
+       link reads "#{submission number}" alone; every other addressee of
+       the same discussion, and a reviewer under "Anonymous
+       Reviewer/Disclosed Author" or "Open", still reads the authors.
    - 7b. The link is personal and permanent: it names the addressee and the
      notification it came with, needs no sign-in, and keeps working every
      time it is opened. It stops working only if the notification it came
@@ -1767,7 +1772,26 @@ Journal Manager and refused the Author (A16). An Unsubscribe page opened
 signed out, then a sign-in alone in a second tab, then "Unsubscribe" on
 the old page: "You have been unsubscribed", the header then showing the
 signed-in Reader; signed in then signed out in the second tab, and
-cookies cleared: "We could not unsubscribe you".
+cookies cleared: "We could not unsubscribe you". The authors left out for an anonymous reviewer: at pkp/pkp-lib#13636's
+head `631be03740` (issue pkp/pkp-lib#12879), before its merge, read and
+live-probed 2026-10-28 on OJS, OMP and OPS
+(`checks/sync/pkp-lib-13636/walk.js`): `TemplateVariables` (the
+`Discussion` trait) passes the submission to
+`Unsubscribe::setupUnsubscribeFooter()`, which blanks `{$authors}` and
+`{$authorsShort}` when any recipient holds a
+`SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS` review assignment on the
+submission, whatever its round, stage or state. A discussion the Section
+Editor opened with an accepted reviewer: under "Anonymous
+Reviewer/Anonymous Author" the reviewer's mail read "Reply to this
+comment at #8 or unsubscribe …", its link text "#8 " (OMP "#11 "),
+and nothing else in the mail named the author; the Section Editor's own
+copy and their mail of the reviewer's reply read "#8 Author"; the
+reviewer's copy of their own reply was blanked too; a cancelled request
+of that type blanked it; "Anonymous Reviewer/Disclosed Author" and
+"Open" kept "Author"; a discussion with the Author on OPS kept it. At
+the apps' `lib/pkp` 67d844dfc0, the same walk had every one of those
+mails read "#{n} Author". The stable-3_4_0 and stable-3_5_0 ports
+(pkp/pkp-lib#12882, #12884) merged 2026-06-12.
 
 <a id="fn-g"></a>
 **g** — `layouts/backend.tpl` `.app__notifications` renders `Page.vue`'s

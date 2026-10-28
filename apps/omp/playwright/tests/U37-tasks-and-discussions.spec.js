@@ -1368,6 +1368,30 @@ test.describe('tasks and discussions', () => {
         await expect(se.panel.ownerLine(QUESTION)).toHaveText(`Created by: ${SECTION_EDITOR}`);
         await expect(se.panel.menuButton(QUESTION)).toHaveCount(1);
 
+        // The Reviewer's email of the first message: the footer's link leaves
+        // the author out (Notifications center Rule 7a), so the shared
+        // footer-mark search cannot find it; the workflow address picks it.
+        let reviewerMail = null;
+        const workflowAddress = new RegExp(`workflowSubmissionId=${submissionId}"`);
+        await expect
+            .poll(
+                async () => {
+                    const result = await pkpMail._search({to: mailOf(REVIEWER), subject: QUESTION, contains: 'Please look again at figure 2.'});
+                    for (const summary of result.messages || []) {
+                        const message = await pkpMail.fullMessage(summary.ID);
+                        if (workflowAddress.test(message.HTML)) {
+                            reviewerMail = message;
+                            break;
+                        }
+                    }
+                    return !!reviewerMail;
+                },
+                {timeout: 30_000, message: `the Reviewer's mail "${QUESTION}" about #${submissionId}`}
+            )
+            .toBe(true);
+        expect(flat(reviewerMail.Text)).toContain(`Reply to this comment at #${submissionId} (`);
+        expect(flat(reviewerMail.Text)).not.toContain(footerMark(submissionId));
+
         // The Reviewer's panel on step 3 of the review form, and the reply.
         const rvPage = await pageFor(asUser, REVIEWER);
         const wizard = new ReviewWizardPage(rvPage, PRESS);

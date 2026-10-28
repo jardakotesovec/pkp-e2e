@@ -1325,6 +1325,12 @@ App-specific:
       "Question for the reviewer" under "In progress", with "Created by:
       {the Section Editor's username}" and a "More Actions" button
       (Actors, "May manage the item"; Rule 3).
+    - **The Reviewer's email**: the first Reviewer receives "Please look
+      again at figure 2." by email under the subject "Question for the
+      reviewer"; its footer reads "Reply to this comment at #{submission
+      number} or unsubscribe …", with no author's name after the number
+      (*[Notifications center](U05-notifications-center-and-email-preferences.md)*
+      Rule 7a). <sup>ak</sup>
     - **The Reviewer's panel**: the first Reviewer: open the review and go
       on to step 3 of the review form: its "Review Tasks & Discussions"
       panel lists "Question for the reviewer"; open it, press "Add New
@@ -2090,6 +2096,9 @@ Basis: probe. <sup>[f-ops2](#fn-ops2)</sup>
 
 <a id="fn-aj"></a>
 **aj** — Live-probed 2026-09-23 (Cross-feature interactions; all three apps unless named): a Copyeditor assigned on Copyediting seeing the panel there and "You don't currently have access to that stage of the workflow." at the Submission stage's address (OJS, OMP); the Author's first-stage panel, and on a preprint server the publication menu's "Production Tasks & Discussions"; the review form's panel on steps 3 and 4, a completed reviewer landing on "4. Completion" (OJS, OMP); "Assign", "Notify", the comments box and the removals of Rule 23; the decision composer's "Find Template" listing email templates for "Decline" and nothing, or only email templates, for "Discussion", "Request Copyedit" and "Assign Editor"; Profile › Notifications listing "Discussion added." and "Discussion activity.", the footer and the unsubscribe page, no "Discussion activity." row after many replies; "Submission Files" still "No Items" after message files were attached (OJS, OMP); the Activity Log's one line per email; a French panel mixing French words and raw keys.
+
+<a id="fn-ak"></a>
+**ak** — The authors left out of an anonymous reviewer's footer: pkp/pkp-lib#13636 (issue pkp/pkp-lib#12879), `Unsubscribe::requiresAnonymization()`, called from the `Discussion` trait's footer with the submission: `{$authors}` and `{$authorsShort}` blanked when any recipient of the mailable holds a `SUBMISSION_REVIEW_METHOD_DOUBLEANONYMOUS` review assignment on the submission. `notifyParticipants()` (note ag) sends one mailable per participant, so only that participant's copy loses the names. At the PR head `631be03740`, before its merge, live-probed 2026-10-28 on OJS and OMP (`checks/sync/pkp-lib-13636/walk.js`): *[Notifications center](U05-notifications-center-and-email-preferences.md)* note f. A seeded `accepted` reviewer under the journal's default review type receives the opening message, so scenario 11 reads it there.
 
 <a id="fn-td1"></a>
 **td1** — Live-probed 2026-09-23 (Rule 7d; A14; OJS and OMP, twice each): under "Anonymous Reviewer/Anonymous Author" the Reviewer is offered themself "(Me)" and the assigned Section Editor; under "Anonymous Reviewer/Disclosed Author" themself, the Author and the Section Editor, the Author refused on "Save" with the quoted text under "Participants"; under "Open" themself, the Author and the Section Editor, never the other reviewer, and a save with the Author goes through.
