@@ -282,15 +282,27 @@ test.describe('Payments & APCs', () => {
         // "Setup" holds "Enable", "Currency" (none chosen) and "Payment
         // Plugins" (none chosen); then "Manual Fee Payment" with its
         // instructions and "Paypal Fee Payment" with "Test Mode", "Account
-        // Name", "Client ID" and "Secret" (masked) (Fields).
+        // Name", "Client ID" and "Secret" (masked) (Fields). The two plugin
+        // groups come in the order the plugin folders are read from disk, so
+        // they are asserted as a set: a fresh CI install once drew "Paypal Fee
+        // Payment" first (run 40511504733, 2026-10-27), as OMP's T-omp-1.
         await tab.enableBox().check();
-        await expect(tab.groupHeadings()).toHaveText([TEXT.groups.setup, TEXT.groups.manual, TEXT.groups.paypal]);
+        await expect(tab.groupHeadings()).toHaveCount(3);
+        await expect(tab.groupHeadings().first()).toHaveText(TEXT.groups.setup);
+        await expect.poll(async () => (await tab.groupHeadings().allInnerTexts()).map((t) => t.trim()).sort()).toEqual(
+            [TEXT.groups.setup, TEXT.groups.manual, TEXT.groups.paypal].sort()
+        );
         const setup = tab.group(TEXT.groups.setup);
         await expect(setup.locator('legend, label.pkpFormFieldLabel')).toHaveText([TEXT.enable, TEXT.currency, TEXT.plugins]);
         await expect(tab.currencySelect()).toBeVisible();
         expect(await tab.chosenOption(tab.currencySelect())).toBe('');
         expect(await tab.chosenOption(tab.pluginSelect())).toBe('');
-        await expect(tab.pluginSelect().locator('option')).toHaveText([TEXT.manualMethod, TEXT.paypalMethod]);
+        // The select's options follow the same disk order (run 40667951466,
+        // 2026-10-28, drew "Paypal Fee Payment" first), so a set too.
+        await expect(tab.pluginSelect().locator('option')).toHaveCount(2);
+        await expect.poll(async () => (await tab.pluginSelect().locator('option').allInnerTexts()).map((t) => t.trim()).sort()).toEqual(
+            [TEXT.manualMethod, TEXT.paypalMethod].sort()
+        );
         const manual = tab.group(TEXT.groups.manual);
         await expect(manual.locator('label.pkpFormFieldLabel')).toHaveText([TEXT.instructions]);
         await expect(tab.instructionsBox()).toHaveValue('');
