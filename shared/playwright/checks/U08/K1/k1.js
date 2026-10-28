@@ -7,7 +7,7 @@
 // Navigation side tab with publicknowledge alone); this script seeds scratch
 // contexts, after which that state is gone.
 //
-// Seeds per app, through POST scenarios/context (state file k1-state-<app>.json):
+// Seeds per app, through POST scenarios/context (state file k1-state[-<PROBE_RUN>]-<app>.json):
 //   A  menus: the fresh tables, both menus' windows and notices (td4, td5,
 //      td8), arranging (td6), leaving (td7), the keyboard (A8), saving (Rule
 //      6), "Add Menu" and its refusals (td1), a second menu, areas (Rule 8).
@@ -29,7 +29,7 @@
 // Run: PROBE_FEATURE=U08 PROBE_AGENT=ccK1 node bin/probe.js all shared/playwright/checks/U08/K1/k1.js
 const fs = require('fs');
 const path = require('path');
-const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir} =
+const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir, outFile} =
     require('../../../probe');
 
 const ALL = ['seed', 'pk', 'fresh', 'arrange', 'leave', 'keyboard', 'save', 'addmenu', 'areas',
@@ -39,7 +39,7 @@ const on = (p) => PHASES.includes(p);
 const log = (...a) => console.log('[k1]', ...a);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const T = 20_000;
-const stateFile = (app) => path.join(outDir(), `k1-state-${app.name}.json`);
+const stateFile = (app) => outFile(`k1-state.json`); // k1-state[-<PROBE_RUN>]-<app>.json
 
 // ---------------------------------------------------------------------------
 // helpers

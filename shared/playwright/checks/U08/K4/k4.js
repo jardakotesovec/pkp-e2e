@@ -4,7 +4,7 @@
 // 520–628, register A1 (650–655), OPS1 (736–741); footnotes a, b, c, d, e, f, g, h,
 // y, td15, td16, td17, td18, f-a1, f-ops1.
 //
-// Seeds per app (tag prefix u08k4; kept in k4-state-<app>.json, RESEED=1 to redo):
+// Seeds per app (tag prefix u08k4; kept in k4-state[-<PROBE_RUN>]-<app>.json, RESEED=1 to redo):
 //   A   one account per permission level (manager, editor and production editor
 //       [OJS/OMP], section editor, assistant, reviewer [OJS/OMP], author, reader,
 //       subscription manager [OJS]), English and French UI, one submission
@@ -15,7 +15,7 @@
 //       manager: disable submissions, DOIs, payments [OJS OMP], site access
 //   T1, T2  two contexts with the same name and one user enrolled in both (twin)
 // Phases (PHASES=a,b to narrow; all by default, in this order; seed first on a fresh run):
-//   seed      the contexts above (skipped while k4-state-<app>.json exists)
+//   seed      the contexts above (skipped while k4-state[-<PROBE_RUN>]-<app>.json exists)
 //   actors    per level on A: Profile side menu, the Settings address / Navigation tab,
 //             the About page's "Edit", the public user menu; signed out (Actors rows 1-5)
 //   pkside    td17 on publicknowledge per roster role; Administration as admin (Rule 30)
@@ -39,15 +39,15 @@
 // Run: PROBE_FEATURE=U08 PROBE_AGENT=ccK4 node bin/probe.js all shared/playwright/checks/U08/K4/k4.js
 const fs = require('fs');
 const path = require('path');
-const {forEachApp, launch, signOut, record, loc, note, idle, tag, outDir, shot} = require('../../../probe');
+const {forEachApp, launch, signOut, record, loc, note, idle, tag, outDir, outFile, shot} = require('../../../probe');
 const L = require('./lib');
 const {T, sleep, flat, rel, snap, as, edHeader, sideNav, navLine, openSwitcher, openInitials, publicUser, classify, go} = L;
 
 const ALL = ['seed', 'actors', 'pkside', 'header', 'site', 'switcher', 'swextra', 'twin', 'noroles', 'noroles2', 'adm', 'adm2', 'imp', 'cond', 'leave', 'leave2', 'unsaved', 'closed', 'extra', 'rdnone'];
 const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ALL;
 const on = (p) => PHASES.includes(p);
-const stateFile = (app) => path.join(outDir(), `k4-state-${app.name}.json`);
-const factsFile = (app) => path.join(outDir(), `k4-facts-${app.name}.json`);
+const stateFile = (app) => outFile(`k4-state.json`); // k4-state[-<PROBE_RUN>]-<app>.json
+const factsFile = (app) => outFile(`k4-facts.json`);
 const PK = 'publicknowledge';
 
 forEachApp(async (app) => {
@@ -719,7 +719,7 @@ forEachApp(async (app) => {
                         s.t = Date.now() - t0;
                         if (i % 3 === 0) {
                             const buf = await page.screenshot({clip: {x: 700, y: 0, width: 580, height: 200}, timeout: 2000}).catch(() => null);
-                            if (buf && s.notice && s.notice.includes('{{')) { fs.writeFileSync(path.join(outDir(), `leave-${k}-${i}-${app.name}.png`), buf); s.shot = `leave-${k}-${i}`; }
+                            if (buf && s.notice && s.notice.includes('{{')) { fs.writeFileSync(outFile(`leave-${k}-${i}.png`), buf); s.shot = `leave-${k}-${i}`; }
                         }
                         samples.push(s);
                         i++;

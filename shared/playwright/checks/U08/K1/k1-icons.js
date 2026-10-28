@@ -5,10 +5,10 @@
 // Run: PROBE_FEATURE=U08 PROBE_AGENT=ccK1 node bin/probe.js all shared/playwright/checks/U08/K1/k1-icons.js
 const fs = require('fs');
 const path = require('path');
-const {forEachApp, launch, signIn, screen, shot, record, idle, outDir} = require('../../../probe');
+const {forEachApp, launch, signIn, screen, shot, record, idle, outDir, outFile} = require('../../../probe');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 forEachApp(async (app) => {
-    const S = JSON.parse(fs.readFileSync(path.join(outDir(), `k1-state-${app.name}.json`)));
+    const S = JSON.parse(fs.readFileSync(outFile(`k1-state.json`)));
     const {page, close} = await launch(app);
     try {
         await signIn(page, S.I.users.mgr, {contextPath: S.I.path});

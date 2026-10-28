@@ -137,7 +137,7 @@ module.exports = async function more({app, S, on, log, sleep, T, helpers: H}) {
                 await popup.waitForLoadState().catch(() => {});
                 out.preview.url = popup.url();
                 out.preview.text = (await popup.locator('body').innerText().catch(() => '')).replace(/\s+/g, ' ').slice(0, 600);
-                await popup.screenshot({path: require('path').join(require('../../../probe').outDir(), `96-items-preview-${app.name}.png`)}).catch(() => {});
+                await popup.screenshot({path: require('../../../probe').outFile('96-items-preview.png')}).catch(() => {});
                 await popup.close();
             }
             out.saveCustom = await itemSave(page);

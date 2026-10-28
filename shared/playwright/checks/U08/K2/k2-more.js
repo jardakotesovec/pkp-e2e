@@ -156,7 +156,7 @@ module.exports = async function more({app, S, on, isOjs, isOps, removeRow, press
             const t = require('../../../probe').tag('u08k2m');
             await app.api.createContext({tag: t, users: [{username: `${t}mgr`, roles: ['manager']}], context: {supportedLocales: ['en', 'fr_CA']}});
             S.L2 = {path: t, users: {mgr: `${t}mgr`}};
-            fs.writeFileSync(pth.join(H.outDir(), `k2-state-${app.name}.json`), JSON.stringify(S, null, 1));
+            fs.writeFileSync(require('../../../probe').outFile('k2-state.json'), JSON.stringify(S, null, 1));
         }
         const L2 = S.L2;
         const {page, close} = await launch(app);

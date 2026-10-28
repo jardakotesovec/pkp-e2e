@@ -6,7 +6,7 @@
 // footnotes b, g, h, i, k, l, m, o, p, r, s, v, x, td5, td10, td11, td12,
 // f-a5, f-a6.
 //
-// Seeds per app through POST scenarios/context (state file k2-state-<app>.json
+// Seeds per app through POST scenarios/context (state file k2-state[-<PROBE_RUN>]-<app>.json
 // in the output folder; RESEED=1 makes new ones):
 //   B  Rule 10, Rule 11, side effects. Users mgr, ed (editor), pe
 //      (productionEditor), rd (reader); OPS: mgr, rd
@@ -27,14 +27,14 @@
 // (a full run passes 600 s: run one app per process, or a few phases at a time)
 const fs = require('fs');
 const path = require('path');
-const {forEachApp, launch, signOut, record, loc, note, idle, tag, outDir} = require('../../../probe');
+const {forEachApp, launch, signOut, record, loc, note, idle, tag, outDir, outFile} = require('../../../probe');
 const H = require('./lib');
 const {T, sleep, log, flat1, ctxUrl, snap, as, watchDialogs, openNav, grids, rowControls, rowAction, editor, menuWindow, openMenu, panels, brief, panelItem, drag, assignTop, dialogs, notice, pressWindowButton, saveMenu, itemWindow, openItemWindow, itemState, itemSave, closeItemWindow, setType, fillTitle, addItem, header, flat, hflat, readNav, sideMenu, openSettings, saveForm, mceSet, visibleBoxes} = H;
 
 const ALL = ['seed', 'items', 'edit', 'delete', 'cond', 'lang', 'lang2', 'flips', 'permit', 'depth', 'site'];
 const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ALL;
 const on = (p) => PHASES.includes(p);
-const stateFile = (app) => path.join(outDir(), `k2-state-${app.name}.json`);
+const stateFile = (app) => outFile(`k2-state.json`); // k2-state[-<PROBE_RUN>]-<app>.json
 const archivesLike = (app) => (app.name === 'omp' ? 'Catalog' : 'Archives');
 
 /** Remove a table row through its "Remove" and answer the confirmation. */

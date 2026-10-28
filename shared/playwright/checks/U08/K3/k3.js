@@ -4,7 +4,7 @@
 // A2 (658–665), A3 (668–673), A7 (705–709); footnotes d, e, f, q, r, s, t, u, v, w,
 // td13, td14, f-a2, f-a3, f-a7.
 //
-// Seeds per app (tag prefix u08k3; kept in k3-state-<app>.json, RESEED=1 to redo):
+// Seeds per app (tag prefix u08k3; kept in k3-state[-<PROBE_RUN>]-<app>.json, RESEED=1 to redo):
 //   A  the main scratch context: one account per permission level (manager, editor
 //      [OJS/OMP], production editor without "Permit changes to Settings" [OJS/OMP],
 //      section editor, assistant, reviewer [OJS/OMP], author, reader), the "Developed
@@ -44,7 +44,7 @@
 //   PHASES=dash PROBE_RUN=r1 PROBE_FEATURE=sync PROBE_NOTES_FEATURE=U08 PROBE_AGENT=ccK3 \
 //     node bin/probe.js all shared/playwright/checks/U08/K3/k3.js        (then PROBE_RUN=r2)
 // Outputs: dash-<role>-site*-<run>-<app>.json, facts-<run>-<app>.json, k3-log-<run>-<app>-*.txt.
-// The other phases need PHASES=seed first (state in k3-state-<app>.json, RESEED=1 to redo).
+// The other phases need PHASES=seed first (state in k3-state[-<PROBE_RUN>]-<app>.json, RESEED=1 to redo).
 const fs = require('fs');
 const path = require('path');
 const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir, outFile, sql} =
@@ -57,7 +57,7 @@ const on = (p) => PHASES.includes(p);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const T = 20_000;
 const flat = (s, n = 3000) => (s || '').replace(/\s+/g, ' ').trim().slice(0, n);
-const stateFile = (app) => path.join(outDir(), `k3-state-${app.name}.json`);
+const stateFile = (app) => outFile(`k3-state.json`); // k3-state[-<PROBE_RUN>]-<app>.json
 const PK = 'publicknowledge';
 
 // ---------------------------------------------------------------------------
