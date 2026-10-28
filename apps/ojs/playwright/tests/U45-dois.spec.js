@@ -111,7 +111,7 @@ const ISSUE_2_OPTION = /Vol\. 1 No\. 2 \(2026\)/;
 const GALLEYS = 'Article galleys, such as a published PDF';
 const KINDS = ['Articles', 'Issues', GALLEYS, 'Peer Review'];
 const CROSSREF_KINDS = ['Articles', 'Issues', 'Peer Review'];
-const DATACITE_KINDS = ['Articles', 'Issues', GALLEYS];
+const DATACITE_KINDS = ['Articles', 'Issues', GALLEYS, 'Peer Review'];
 const ENABLE_SENTENCE = 'Allow Digital Object Identifiers (DOIs) to be assigned to work published in this journal.';
 const IMMEDIATELY = TEXT.immediately;
 const COPYEDIT = 'Upon reaching the copyediting stage';
@@ -1439,10 +1439,9 @@ test.describe('DOIs', () => {
         await settings.field('testDOIPrefix').fill('10.5072');
         await settings.save(settings.registration);
 
-        // The "Setup" tab: DataCite's kinds, no "Peer Review" (Rule 35).
+        // The "Setup" tab: DataCite's kinds, "Peer Review" among them (Rule 35).
         await settings.goto('Setup');
         expect((await settings.kinds()).map((k) => k.label)).toEqual(DATACITE_KINDS);
-        await expect(settings.kindBox('Peer Review')).toHaveCount(0);
 
         // The DOIs page: "Deposit All", the agency's actions and panel
         // (Rules 30, 36).
