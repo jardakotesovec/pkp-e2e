@@ -1,0 +1,14 @@
+diff --git a/src/components/Form/fields/FieldControlledVocab.vue b/src/components/Form/fields/FieldControlledVocab.vue
+index d46e79cb..893e9189 100644
+--- a/src/components/Form/fields/FieldControlledVocab.vue
++++ b/src/components/Form/fields/FieldControlledVocab.vue
+@@ -105,7 +105,8 @@ export default {
+ 				(suggestion) =>
+ 					!this.inputValue ||
+ 					(this.inputValue !== suggestion.value.name &&
+-						suggestion.value.name.match(regex)),
++						(suggestion.value.name.match(regex) ||
++							suggestion.value.identifier?.match(regex))),
+ 			);
+ 		}, 250),
+ 	},
