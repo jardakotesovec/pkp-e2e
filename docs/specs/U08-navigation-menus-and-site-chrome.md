@@ -389,10 +389,13 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       Administrator's included, opens the Profile page, the same page as
       "View Profile". Whether that is a journal's Profile page or the
       site's own follows [User profile](U03-user-profile.md) Rule 3.
-      The Site Administrator's "Dashboard" there carries their number
-      of unread tasks, as on a journal's pages (Rule 19b); no other
-      user's does, and no username on the site's pages carries one
-      ⚠ [A27](#a27).
+      On the site's pages, in a narrow window's "Open Menu" list, the
+      Site Administrator's "Dashboard" reads "Dashboard" followed by
+      their number of unread tasks ("Dashboard 2", "Dashboard 0" with none), as on a
+      journal's pages (Rule 19b); no other user's "Dashboard" does. In
+      a wide window no number shows anywhere in the site's header: the
+      item's number is hidden there, as on a journal's pages, and no
+      username on the site's pages carries one ⚠ [A27](#a27).
 
 **Footer and page furniture**
 
@@ -1220,6 +1223,7 @@ Left out of the scenarios above, by reason:
   - scenario 2's Journal Manager: the number after the username is the Tasks bell's number; the suites check that a number is there, not which (Rule 19b)
   - the Site Administrator's journals switcher on "Comments": the chosen journal's Comments page, and the access-denied page reading "Access denied." when that journal's public comments are off (Rule 29a)
   - Administration's dark bar while the site has no name: "Open Journal Systems" ("Open Monograph Press", "Open Preprint Systems") as plain text, not a link (Rule 27a)
+  - the Site Administrator on the site's home page in a wide window: "Dashboard" in the username's list and the username itself show no number (Rule 19c)
 - **Rarely met**:
   - "Publishing Mode" set to "OJS will not be used to publish the journal's contents online." {OJS}: "Current Issue" and "Archives" leaving the header (Settings bullet 2; item types table)
   - a Reader with no side menu while "Disable Submissions" is on (Actors row 8)
@@ -1260,7 +1264,7 @@ Left out of the scenarios above, by reason:
   - A21 (two journals of the same name hiding each other in the switcher; Rule 29)
   - A22 (the Site Administrator holding Reader alone: the manager's side menu and an "Error" window; Rule 30a)
   - A25 (the initials menu left open by the Escape key; Rule 28)
-  - A27 (the Site Administrator's "Dashboard" on the site's pages showing a task count; Rule 19c)
+  - A27 (the Site Administrator's "Dashboard" on the site's pages showing a task count in a narrow window's "Open Menu" list; Rule 19c)
   - OJS1 (no eye on "Subscriptions" and "My Subscriptions" {OJS}; Rule 7a)
   - OPS2 ("Posting Mode" not kept, so "Archives" stays {OPS}; Settings bullet 2)
   - OPS4 ("No server in context!" on a settings address opened at the site's level {OPS}; Rule 26c)
@@ -1629,18 +1633,20 @@ Report: paused — its reporter stopped on a safety classifier in the maintainer
 
 <a id="a27"></a>
 **A27 — On the site's pages the Site Administrator's "Dashboard" shows a task count but opens the Profile page** · ❓ · minor.
-On the site's home page, the Site Administrator's "Dashboard" under the
-username reads "Dashboard" followed by their number of unread tasks
-("Dashboard 2" with two unread, "Dashboard 0" with none), as on a
-journal's pages (Rule 19b). Pressed, it opens the Profile page, the same
-page as "View Profile", not the Dashboard the number belongs to (Rule
-19c). No other user's "Dashboard" on the site's pages carries a number,
-and no username there does, the Site Administrator's included.
+On the site's home page, in a narrow window's "Open Menu" list, the
+Site Administrator's "Dashboard" reads "Dashboard" followed by their
+number of unread tasks ("Dashboard 2" with two unread, "Dashboard 0"
+with none), as on a journal's pages (Rule 19b); in a wide window the
+item shows no number. Pressed, at either width, it opens the Profile
+page, the same page as "View Profile", not the Dashboard the number
+belongs to (Rule 19c). No other user's "Dashboard" on the site's pages
+carries a number, and no username there does, the Site
+Administrator's included.
 Question: should the number go now that the item opens the Profile
 page? Lean: yes, unintended; the change that sent the item to the
 Profile page left the number in place, and every other user's item that
 opens the Profile page has none.
-Since: 2026-10-22 · Basis: probe, 2026-10-23. <sup>f-a27</sup>
+Since: 2026-10-22 · Basis: probe, 2026-10-29. <sup>f-a27</sup>
 
 ### OJS
 
@@ -1836,7 +1842,8 @@ ASSISTANT, REVIEWER, AUTHOR], contextId)` or is site admin, the title is
 replaced by `frontend/components/navigationMenus/dashboardMenuItem.tpl`
 (title plus `<span class="task_count">{$unreadNotificationCount}</span>`),
 with no context check, so the site administrator's item keeps the count
-on the site's pages (A27). The URL is `PageRouter::getHomeUrl()` when
+on the site's pages, where the theme shows it in the narrow list only
+(A27). The URL is `PageRouter::getHomeUrl()` when
 there is a context and the same role test passes; otherwise, and with no
 context for everyone, the site administrator included, it is
 `user/profile` (the `$context &&` guard of pkp-lib `00ce12be77`,
@@ -3139,7 +3146,18 @@ the Funding Coordinator, the Reviewer, the Author and the Reader (OPS:
 the Journal Manager, the Moderator, the Editorial Board Member, the
 Author and the Reader) and two scratch users read "Dashboard" with no
 number; every username, `admin`'s
-included, linked to `#` and carried no number.
+included, linked to `#` and carried no number. That read took the
+item's text, which holds the number at both widths. Live-probed
+2026-10-29, two runs per line, all three apps, `main` (lib/pkp
+`df42984b46`) and `stable-3_5_0` (lib/pkp `a6ed3df00a`), on PKP's
+default dataset with one enabled scratch context added: in a 1280 px
+window `admin`'s item rendered "Dashboard", its `.task_count` present
+with the number but `display: none` with the list closed and hovered
+open; at 375 px with "Open Menu" pressed it rendered "Dashboard 1",
+"Dashboard 2", "Dashboard 13", "Dashboard 14" and "Dashboard 0" (tasks
+marked read), visible; pressed at either width it opened
+`index/en/user/profile`; `dbarnes` read "Dashboard" with no number at
+both widths; the username carried none at either width.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `NavigationMenuService` gives `NMI_TYPE_SUBSCRIPTIONS`
