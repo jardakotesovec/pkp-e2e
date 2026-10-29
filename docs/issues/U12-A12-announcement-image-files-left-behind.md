@@ -3,7 +3,7 @@
 - **Severity** medium
 - **Effort** small
 - **Kind** regression
-- **Crash** server
+- **Crash** server (the site's "Remove" then "Save" on a press or a preprint server)
 - **Affects**
   - main: OJS, OMP, OPS
   - 3.5: OJS, OMP, OPS
@@ -12,7 +12,7 @@
 - **Introduced** `pkp/pkp-lib#10787` for `pkp/pkp-lib#10668` · [0b2ca57ed8](https://github.com/pkp/pkp-lib/commit/0b2ca57ed84822c48eb23c13de3726371623a02e) · 2025-01-09 · Touhidur Rahman (touhidurabir); the file left by a replacement since `pkp/pkp-lib#10382` for `pkp/pkp-lib#10328` · [070aa6f77b](https://github.com/pkp/pkp-lib/commit/070aa6f77b2b14e31b9089b5f82a48e8ba11c329) · 2024-09-30 · Vitalii Bezsheiko (Vitaliy-1)
 - **Upstream** none found (2026-10-23)
 - **Tracked in** spec U12 [A12](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U12-announcements.md#a12)
-- **Checked** 2026-10-27, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-29, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
 Update 2026-10-27: an edit whose new picture is refused is now stopped
@@ -24,6 +24,13 @@ and [c31cbe60f8](https://github.com/pkp/pkp-lib/commit/c31cbe60f8b81b6d584e3938b
 (`stable-3_5_0`), Alec Smecher (asmecher); see Reach. Walked again on
 `main` and 3.5: deletes and replacements still leave their files. The
 report now also says what a failed file copy on an edit leaves.
+
+Update 2026-10-29: on a press or a preprint server, a site announcement
+with a picture already takes the site's public pages down with a server
+error; that is its own report,
+[U12 A22](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U12-A22-site-announcement-picture-breaks-site-pages.md).
+The two fixes are independent: either can land alone, and both diffs
+apply together.
 
 ## Summary
 
@@ -129,8 +136,8 @@ it hosts a second journal, press or server):
 5. On that row "Edit" › "Remove" › "Upload File" `photo.gif` › "Save".
 6. "Delete" on the row, then "Yes".
 7. "Add Announcement": Title `u12r2 Site remove`, `photo.png`; "Save"
-   (`2.png`). Then "Edit" › "Remove", change the title to `u12r2 Site
-   remove (edited)`, "Save".
+   (`2.png`). Then "Edit" › "Remove", change the title to
+   `u12r2 Site remove (edited)`, "Save".
 
 **Expected:** `1.gif` alone after step 5, no `1.*` after step 6, and
 after step 7 the save goes through and `2.png` is gone.
@@ -242,8 +249,8 @@ folder the way `storeTemporaryFile()` does
   copy removes no file (what it does to the announcement is below).
 - `deleteImage(?object $image)` takes the picture to remove and no
   longer calls `fresh()`, so a delete logs no warning.
-- `deleteImage()` picks the folder with `$this->assocId ?
-  getContextFilesPath($this->assocId) : getSiteFilesPath()`, as
+- `deleteImage()` picks the folder with
+  `$this->assocId ? getContextFilesPath($this->assocId) : getSiteFilesPath()`, as
   `storeTemporaryFile()` does. Today it tests
   `$this->hasAttribute('assocId')`, which is always true because the
   schema casts declare `assocId`, so a site announcement's folder is
@@ -302,14 +309,9 @@ and removed `2.png`.
   the announcements and call `delete()` on each
   (`->get()->each->delete()`) to remove the files.
 - `imageUrl()` builds the picture's address with the same
-  `hasAttribute('assocId')` test. `announcement_summary.tpl` and
-  `announcement_full.tpl` print it, so the site's Announcements page
-  (`/index.php/index/announcement`), a site announcement's own page
-  (`/index.php/index/announcement/view/{id}`) and the site's home page,
-  when it lists announcements, call `getContextFilesPath(null)` for a
-  site announcement with a picture. On OMP and OPS that throws the same
-  `TypeError` (code; not walked). It is left out; the same one-line
-  change applies.
+  `hasAttribute('assocId')` test: that is
+  [U12 A22](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U12-A22-site-announcement-picture-breaks-site-pages.md),
+  whose diff changes only `imageUrl()`.
 - Files left by earlier deletes and replacements stay. A cleanup would
   compare each `announcements/` folder with the stored `uploadName`s.
   It is not needed for the fix.
@@ -338,8 +340,7 @@ class, with a test.
 - 2026-10-23, on PostgreSQL with pkp/datasets 300c68e (2026-10-22): the
   journal Steps, the Control and the delete without a picture walked on
   `main` and `stable-3_5_0` (OJS, OMP, OPS; `main` lib/pkp 1f415a07ca,
-  3.5 lib/pkp 5b54f59ed7); the warning names line 301 on `main` and 302
-  on 3.5, whose file has one more `use` line. The
+  3.5 lib/pkp 5b54f59ed7). The
   site Steps walked on `main` (OJS, OMP, OPS). The fix tried on `main`:
   the journal Steps, the neighbour check and `MODE=refused` on all
   three apps, the site Steps on OMP only (OPS runs the same code); the
@@ -351,18 +352,23 @@ class, with a test.
   the journal Steps, the Control, the delete without a picture and
   `MODE=refused` walked again on `main` and `stable-3_5_0` (OJS, OMP,
   OPS); OMP and OPS with the #1076 fix applied, which their pkp-lib
-  pointers do not carry yet. The warning still names line 301 on `main` and 302
-  on 3.5. The fix tried again on `main`: the journal Steps, the
+  pointers do not carry yet. The fix tried again on `main`: the journal Steps, the
   neighbour check and `MODE=refused` on all three apps and the site
   Steps on OMP, the neighbour check and `MODE=refused` also without
   it.
-- Tips (2026-10-27): `main` OJS 4227223332 (lib/pkp 334906a436), OMP
-  ceae6e275f and OPS 66a3bb98a5 (lib/pkp c27153abdd); `stable-3_5_0`
-  OJS b877c7e2a3 (lib/pkp c31cbe60f8), OMP 3c8c7c4964 (lib/pkp
-  3fd17879b3) and OPS 07926c35b4 (lib/pkp 9a0212faff).
-- 3.4 and 3.3 (code): lib/pkp `stable-3_4_0` 366030b017 (its
+- 2026-10-29, on PostgreSQL with pkp/datasets 2f0edb08 (2026-10-28):
+  the journal Steps, the Control and the delete without a picture
+  walked again on `main` and `stable-3_5_0` (OJS, OMP, OPS), with the
+  Observed above. The warning names line 301 on `main` and 302 on 3.5,
+  whose file has one more `use` line. The fix was not tried again:
+  `Announcement.php` on `main` has not changed in the methods it
+  touches, and the diff applies as it stands.
+- Tips (2026-10-29): `main` OJS 7705b2aeb8, OMP 3583c1bfd, OPS
+  815fbaad1b (lib/pkp df42984b46); `stable-3_5_0` OJS 851416bc2d, OMP
+  50b83d1e6, OPS bd0ef09fd6 (lib/pkp a6ed3df00a). Read in the code:
+  lib/pkp `stable-3_4_0` cbf5446d1b (its
   `PKP\announcement\Repository::delete()` and `edit()` still remove the
-  file of the announcement as loaded) and `stable-3_3_0` 126b86bc2e
+  file of the announcement as loaded) and `stable-3_3_0` fc94a53416
   (its announcement schema has no image).
 - Introduced: `git blame` on `deleteImage()`'s `fresh()` line gives
   0b2ca57ed8 (PR `pkp/pkp-lib#10787`, merged 2025-01-23). At its parent,

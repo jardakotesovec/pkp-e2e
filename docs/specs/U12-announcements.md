@@ -993,13 +993,13 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | A journal's announcement feeds with "Limit feed to" set carry the oldest announcements, never the newest {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | Ticking "Send an email about this to all registered users." when editing an announcement sends nothing | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | An unsaved title stays on the row after the panel is closed, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-09-30 — re-verified |
-| [A12](#a12) | A deleted announcement's picture, and a picture replaced by one of another type, stay on the server and online | 🐞 | medium · crash: server | issues (claude), 2026-10-27 — re-verified |
+| [A12](#a12) | A deleted announcement's picture, and a picture replaced by one of another type, stay on the server and online | 🐞 | medium · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A13](#a13) | An edited announcement type keeps its old name in the Announcement Types table until a reload | 🐞 | low · crash: server | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | On a French press or preprint server, the new-announcement email's last sentence arrives in English {OMP OPS} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A15](#a15) | A journal's Atom and RSS 1.0 announcement feeds write every date with "%" signs ("%2026-%10-%03UTC%UTC%275") {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A19](#a19) | Through the programming interface, an announcement's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A20](#a20) | REST API: an announcement added without the email choice writes a warning to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
-| [A22](#a22) | A site announcement with a picture takes the site's home page and Announcements page down on a press or a preprint server, and its picture never shows on a site that hosts journals | 🐞 | high · crash: server | — |
+| [A22](#a22) | A site announcement with a picture takes down the site's home and Announcements pages and a press's home page | 🐞 | high · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [OMP2](#omp2) | A press's home page shows the site's announcements, with links that lead nowhere {OMP} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | An announcement's type is printed nowhere a reader looks | ❓ | minor | — |
 | [A6](#a6) | A chosen "Announcement Type" cannot be cleared, only changed | ❓ | minor | — |
@@ -1146,8 +1146,7 @@ then "Save" leaves the file too, and on a press or preprint server that
 save fails with a server error and the picture stays on the
 announcement. The same cause breaks a site announcement's picture on
 the site's public pages: [A22](#a22).
-Basis: probe, 2026-10-27. <sup>f-a12</sup>
-Report: refresh owed — housekeeping fold 2026-10-29: the site announcement's picture was walked (claim check cc29b): on OMP and OPS the site's home, Announcements and announcement pages answer a server error, on OJS the picture's address answers not found; the Reach bullet on imageUrl() changes (2026-10-29)
+Basis: probe, 2026-10-27; issue report refresh walk, 2026-10-29. <sup>f-a12</sup>
 
 <a id="a13"></a>
 **A13 — An edited announcement type keeps its old name in the Announcement Types table until a reload** · 🐞 · low · crash: server.
@@ -1264,26 +1263,24 @@ programs meet it. The fix is a one-line default.
 Basis: probe, 2026-10-23. <sup>f-a20</sup>
 
 <a id="a22"></a>
-**A22 — A site announcement with a picture takes the site's home page and Announcements page down on a press or a preprint server, and its picture never shows on a site that hosts journals** · 🐞 · high · crash: server.
-A Site Administrator who adds a site announcement with a picture in
-"Image" (Administration › Site Settings › Announcements) expects it on
-the site's home page, the site's Announcements page and its own page,
-with the picture (Rules 15, 16). On a press or a preprint server those
-pages fail with a server error and the browser shows a blank page, for
-every visitor and for the Site Administrator, who lands on the site's
-home page after signing in. The home page fails while that announcement
-is the newest, the Announcements page while it is listed there, and its
-own page always. A newer announcement without a picture brings the home
-page back, which then lists the older one as a title alone; the
-Announcements page stays blank. Removing the picture ("Remove" then
-"Save") fails there too, so deleting the announcement is the way round.
-On a site that hosts journals the pages open, but the picture is
-printed at an address that answers "not found", so no picture shows and
-nothing stands in its place. The site's list panel shows no pictures,
-so nothing in Site Settings hints at the fault. The cause is the one
-behind the site's failed "Remove" in [A12](#a12), a different loss:
-there files stay on the server, here the site's public pages go down.
-Since: 2024-09-30 · Basis: probe, 2026-10-29. <sup>f-a22</sup>
+**A22 — A site announcement with a picture takes down the site's home and Announcements pages and a press's home page** · 🐞 · high · crash: server.
+On a site that hosts two or more presses or preprint servers, a site
+announcement with a picture makes the site's home page, the site's
+Announcements page and the announcement's own page fail with a server
+error and a blank page. The home page fails while that announcement is
+the newest. Visitors meet it, and so does the Site Administrator, who
+lands on the site's home page after signing in. A press whose own
+announcements are off, as on a new press, shows the site's
+announcements on its home page, so that page fails too.
+On a site that hosts journals the pages open, but the picture's address
+answers "not found", so no picture shows.
+Deleting the announcement, or adding it again without a picture, brings
+the pages back. The announcement list in Site Settings shows no
+pictures, so nothing there points to the cause.
+The cause is the one behind the site's failed "Remove" in [A12](#a12),
+a different loss: there files stay on the server, here the site's
+public pages go down.
+Since: 2024-09-30 · Basis: probe, 2026-10-29; issue report walk, 2026-10-29. <sup>f-a22</sup>
 
 ### OMP
 
@@ -2508,6 +2505,7 @@ the home page answered 200 on all three apps, listing the older ones as
 titles, and the Announcements page still answered 500 on OMP and OPS.
 The site's list panel showed only titles with "View", "Edit" and
 "Delete".
+Issue report: [docs/issues/U12-A22-site-announcement-picture-breaks-site-pages.md](../issues/U12-A22-site-announcement-picture-breaks-site-pages.md).
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls

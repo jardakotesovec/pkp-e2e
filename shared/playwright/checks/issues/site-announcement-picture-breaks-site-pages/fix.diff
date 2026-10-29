@@ -1,0 +1,28 @@
+--- a/lib/pkp/classes/announcement/Announcement.php
++++ b/lib/pkp/classes/announcement/Announcement.php
+@@ -259,10 +259,11 @@
+     {
+         return Attribute::make(
+             get: function () use ($withTimestamp) {
+-                if (!$this->hasAttribute('image')) {
++                // hasAttribute() is true for every schema property, set or not: test the values
++                $image = $this->getAttribute('image');
++                if (!isset($image->uploadName)) {
+                     return '';
+                 }
+-                $image = $this->getAttribute('image');
+ 
+                 $filename = $image->uploadName;
+                 if ($withTimestamp) {
+@@ -273,8 +274,9 @@
+ 
+                 return join('/', [
+                     Application::get()->getRequest()->getBaseUrl(),
+-                    $this->hasAttribute('assocId')
+-                        ? $publicFileManager->getContextFilesPath($this->getAttribute('assocId'))
++                    // As storeTemporaryFile() does: a site announcement has no assocId
++                    $this->assocId
++                        ? $publicFileManager->getContextFilesPath($this->assocId)
+                         : $publicFileManager->getSiteFilesPath(),
+                     static::IMAGE_SUBDIRECTORY,
+                     $filename
