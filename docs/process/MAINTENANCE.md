@@ -145,7 +145,12 @@ is left, the next morning picks up from the files.
      still in `docs/issues/` goes as "A report's life" says (only the
      maintainer can label or close there).
    - **New copies.** `gh search issues --owner pkp
-     'jardakotesovec/pkp-e2e in:body' --json url,createdAt`: a hit in a
+     'jardakotesovec/pkp-e2e in:body' --json url,createdAt`, and since
+     that search missed four copies on 2026-10-29 (one six days old),
+     each repo's issues of the last two weeks read directly (`gh api
+     'repos/pkp/<repo>/issues?state=all&since=<date>' --paginate`, for
+     pkp-lib, ojs, omp, ops and ui-library, the bodies grepped for
+     `jardakotesovec/pkp-e2e`; one copy can carry several reports): a hit in a
      pkp repo whose body links a filed issue, its report or its register
      entry, and which the report's Upstream bullet does not name yet, is
      the team's copy. The report's Upstream bullet names it (REPORT.md
