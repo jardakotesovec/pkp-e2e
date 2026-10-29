@@ -1631,7 +1631,7 @@ hands `onClose` `{dataChanged: …}` (ui-library `1afd40a9`,
 pkp/ui-library#853, 2026-09-24). A fix on 3.5: read
 `closeData?.dataChanged?.[0]` in the callback, or give the store
 `main`'s shape.
-Issue report: [docs/issues/U46-A9-galley-window-close-script-error.md](../issues/U46-A9-galley-window-close-script-error.md).
+Issue report: [pkp-e2e#1078](https://github.com/jardakotesovec/pkp-e2e/issues/1078) ([docs/issues/U46-A9-galley-window-close-script-error.md](../issues/U46-A9-galley-window-close-script-error.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — Live-probed 2026-09-24 (note q15), twice on OJS: the
