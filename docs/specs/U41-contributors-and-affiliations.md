@@ -151,6 +151,13 @@ screen, Rule 12): <sup>e</sup>
      read, each is kept.
    - **The contributor type left out.** On `main`, an edit not naming
      the type empties the contributor ⚠ [A31](#a31).
+   - **The contributor type sent empty.** On `main`, the edit is refused
+     with "This field is required." for the type, and nothing changes.
+   - **A contributor type no type has.** On `main` (PostgreSQL; MySQL
+     not driven), an edit naming a type other than the form's `PERSON`,
+     `ORGANIZATION` or `ANONYMOUS` (`person`, say) fails with a server
+     error. The change it sent is not saved, and the affiliations are
+     gone ⚠ [A33](#a33).
    - **The record sent back as read.** A contributor read and sent back
      unchanged is not saved, and nothing changes ⚠ [A32](#a32). Sent
      with the fields that entry names adjusted, the record saves and
@@ -895,6 +902,9 @@ Left out of the scenarios above, by reason:
     names the type and sends only a new given name, keeping the family
     name, email and country, and one that also resends the affiliations
     as read, keeping each (Rule 4a)
+  - a program's contributor edit that sends the type empty, refused with
+    "This field is required." and the contributor unchanged after a
+    reload (Rule 4a)
 - **Nothing new to test**:
   - Preferred Public Name (Fields): another text box on the form
     scenario 1 fills
@@ -957,6 +967,8 @@ Left out of the scenarios above, by reason:
     type emptying the contributor; Rule 4a)
   - A32 (a contributor sent back by a program as it was read refused,
     on `main` with a server error; Rule 4a)
+  - A33 (a program's edit on `main` naming a contributor type the
+    install does not have failing and deleting the affiliations; Rule 4a)
   - OPS2 (the Competing Interests label rendering raw on a preprint
     server; Fields)
 - **No seed**:
@@ -1018,8 +1030,9 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A27](#a27) | A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ" | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A29](#a29) | A program saving a contributor with an unknown CRediT degree gets a server error, and part of the change is kept | 🐞 | low · crash: server | issues (claude), 2026-10-15 — re-verified |
 | [A30](#a30) | A program that changes one field of a contributor through the REST API silently removes all their affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
-| [A31](#a31) | A program that edits a contributor through the REST API without the contributor type erases their name, email, country and affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
+| [A31](#a31) | A program that edits a contributor through the REST API without the contributor type erases the contributor's names, email, country, biography, homepage URL and affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A32](#a32) | A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved | 🐞 | low · crash: server | issues (claude), 2026-10-21 — re-verified |
+| [A33](#a33) | A program that names a contributor type the install does not have gets a server error, and the contributor's affiliations are deleted | 🐞 | low · crash: server | — |
 | [A2](#a2) | Deleting the primary contact silently leaves the publication with none | ❓ | user-visible | — |
 | [A16](#a16) | The auto-created contributor can arrive without a Country — every later edit is then refused until one is supplied | ❓ | user-visible | — |
 | [A4](#a4) | The organization contributor's "ROR ID" box accepts any text without a shape check | ❓ | minor | — |
@@ -1512,19 +1525,22 @@ page too.
 Basis: probe, 2026-10-21. <sup>f-a30</sup>
 
 <a id="a31"></a>
-**A31 — A program that edits a contributor through the REST API without the contributor type erases their name, email, country and affiliations** · 🐞 · medium.
+**A31 — A program that edits a contributor through the REST API without the contributor type erases the contributor's names, email, country, biography, homepage URL and affiliations** · 🐞 · medium.
 The REST API's contributor edit (`PUT …/contributors/{id}`) empties the
 contributor when the request does not name the contributor type
 ("Person", "Organization or group" or "Anonymous"), and answers success.
-The given and family names, the email, the country and every affiliation
-are blanked, even when the request resends the affiliations, and the new
-value it sent is not kept either. The Contributors list then shows a row
+The given, family and preferred public names, the email, the country,
+the "Bio Statement", the "Homepage URL" and every affiliation are
+blanked, even when the request resends the affiliations. The value the
+request changes (a new email, a new biography) is not kept either. The
+Contributors list then shows a row
 with no name, and on a published item the public page lists an author
 without a name. Every script written for 3.5, which has no contributor
 types, sends exactly such edits, so after an upgrade it erases each
 contributor it touches. The old values are gone; they can only be typed
 in again.
 Basis: probe, 2026-10-21. <sup>f-a31</sup>
+Report: refresh owed — housekeeping fold 2026-10-29: an API edit without contributorType also blanks the preferred public name, the biography and the homepage URL (claim check cc29a); the report's title, Summary and Impact take the wider field list, and its Evidence's "Not driven: … the unknown type (code only)" is now driven, a fault of its own with A29's fix (A33), as its Cause's `removeIrrelevantContributorTypeData()` bullet says (2026-10-29)
 
 <a id="a32"></a>
 **A32 — A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved** · 🐞 · low · crash: server.
@@ -1542,6 +1558,24 @@ message for each. Nothing is changed in any of these cases. Sent
 without those empty fields, and on `main` with the roles as numbers,
 the record saves and nothing is lost.
 Basis: probe, 2026-10-21. <sup>f-a32</sup>
+
+<a id="a33"></a>
+**A33 — A program that names a contributor type the install does not have gets a server error, and the contributor's affiliations are deleted** · 🐞 · low · crash: server.
+The contributor form's "Contributor Type" sends `PERSON`,
+`ORGANIZATION` or `ANONYMOUS` ("Person", "Organization or group",
+"Anonymous"). A program that edits a contributor through the install's
+programming interface (the REST API's contributor edit request) can
+send any other value as the type (`person`, for one). The program
+expects the edit to be refused with a message naming the field, and
+the contributor to stay as it was.
+
+Instead (PostgreSQL; MySQL not driven) the edit fails with a server
+error. The change it sent is not
+saved, and the names, email, country, "Bio Statement" and "Homepage
+URL" stay as they were, but every affiliation is deleted, even when the
+request resends them. Version 3.5 has no contributor types.
+Basis: probe, 2026-10-29. <sup>f-a33</sup>
+Report: refresh owed — housekeeping fold 2026-10-29: this entry is the contributor-type half of A29's fault (one cause, one fix), which the A29 report's Reach names from a code check of `Repo::author()->validate()` and `edit()`; driven now through the API on OJS, OMP and OPS, where the affiliations are deleted even when the request resends them, because `removeIrrelevantContributorTypeData()` nulls them before `author\DAO::update()` fails; the report's "Tracked in" lacks A33 (2026-10-29)
 
 ### OMP
 
@@ -2150,6 +2184,27 @@ form's own "Save" with the given name changed answered 200 and kept the
 affiliation, on both lines. Kept script
 `shared/playwright/checks/U41/H19/h19.js` (modes `roundtrip`,
 `onefield`).
+Re-probed 2026-10-29 (Rule 4a's type sent empty, A31, A33; the form's
+"Save" and Rule 4's "Close" re-read on the way): OJS, OMP and OPS on
+`main` (lib/pkp `df42984b46`; OJS `7705b2aeb8`, OMP `3583c1bfd7`, OPS
+`815fbaad1b`) and `stable-3_5_0` (lib/pkp `a6ed3df00a`; OJS
+`851416bc2d`, OMP `50b83d1e67`, OPS `bd0ef09fd6`), PKP's default
+dataset (pkp/datasets `2f0edb08`), `dbarnes` with the signed-in page's
+CSRF token, two runs per app and line, each on a fresh reset; the
+contributors OJS submission 6 / publication 7 / contributor 13 (Dana
+Phillips), OMP 1/1/1 (Arthur Clark) and OPS 1/1/1 (Carlo Corino), each
+refilled with every person field and one affiliation before each edit.
+The form's "Save" with a changed given name again sent
+`contributorType` (`PERSON`, on `main`) first, with every field and the
+affiliation, answered 200 and kept the rest; "Close" again asked
+nothing and the old given name was back on reopening.
+`{contributorType: null, email}` answered 400
+`{"contributorType":["This field is required."]}` and changed nothing
+(GET and stored rows), the log still carrying the three "Array to
+string conversion" warnings: `ValidatorFactory::required()` checks on an
+edit only the required keys present in the body, so the null is refused
+while a body without the key passes (A31). Kept script
+`shared/playwright/checks/U41/H29/h29.js`.
 
 <a id="fn-s1"></a>
 **s1 — scenario 1 seeding.** One scratch submission (any stage before
@@ -2972,6 +3027,24 @@ gap" bullet names this wipe (walked on OJS)
 ([docs/issues/U41-A29-contributor-unknown-credit-degree-server-error.md](../issues/U41-A29-contributor-unknown-credit-degree-server-error.md)).
 The dataset fleets' contributors left without affiliations on `main`
 most likely came from such edits.
+Re-probed 2026-10-29 (fn o for the installs and runs): on `main`,
+OJS, OMP and OPS, two runs, `{email}` alone and `{biography}` alone,
+each from a contributor with every person field filled, answered 200;
+the answer, a GET and the stored rows then held the given, family and
+preferred public names and the biography `""` in every locale, the
+email, country and URL `null`, no affiliation and no `author_settings`
+rows, `contributor_type` still `PERSON`, and the value sent not kept.
+After a reload the list row read "Author Primary Contact Edit Delete",
+and "Edit" showed "Person" still chosen, "Given Name", "Family Name",
+"Preferred Public Name", "Email", "Homepage URL" and "Country" empty,
+"Bio Statement" at "0/2 languages completed" and only the search row
+under "Affiliations". `rorId` and `organizationName` are nulled too
+(code: every field of `Author::CONTRIBUTOR_TYPE_FORM_FIELDS`; both were
+empty on these contributors, so their loss was not seen). The same
+edits naming the type (`contributorType: "PERSON"`) saved the value
+sent and kept every other field but the affiliations (A30). On
+`stable-3_5_0` the same two edits saved the value sent and kept every
+field but the affiliations (A30).
 Issue report: [pkp-e2e#1043](https://github.com/jardakotesovec/pkp-e2e/issues/1043) ([docs/issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md](../issues/U41-A31-api-contributor-edit-without-type-empties-contributor.md)).
 
 <a id="fn-f-a32"></a>
@@ -2993,6 +3066,39 @@ those keys, 200 and nothing lost. One server error per `main` run, none
 on 3.5.
 Issue report: [pkp-e2e#1044](https://github.com/jardakotesovec/pkp-e2e/issues/1044) ([docs/issues/U41-A32-api-contributor-roles-as-read-server-error.md](../issues/U41-A32-api-contributor-roles-as-read-server-error.md)).
 Issue report: [pkp-e2e#1045](https://github.com/jardakotesovec/pkp-e2e/issues/1045) ([docs/issues/U41-A32-api-contributor-read-empty-flags-refused.md](../issues/U41-A32-api-contributor-read-empty-flags-refused.md)).
+
+<a id="fn-f-a33"></a>
+**f-a33 — A33 evidence.** Live-probed 2026-10-29 (fn o for the
+installs, contributors and runs): on `main`, OJS, OMP and OPS, two runs
+each, `PUT …/contributors/{id}` with `{contributorType: "person",
+email}`, and the same with the affiliations resent as read, each
+answered 500, two server errors per run on each app and no page or
+console error. Read in the answer, a GET and the stored rows: the new
+email not saved; the given, family and preferred public names, email,
+country, biography, URL, contributor role and `contributor_type`
+(`PERSON`) kept; no affiliation left. The "Edit" form was not read
+after these edits. Server log: one error line per request, a database
+check violation on the `authors` row's contributor type. Observed on
+PostgreSQL; MySQL not driven. Mechanism (lib/pkp `df42984b46`):
+`schemas/author.json` types `contributorType` only as a nullable
+string, with no allowed values;
+`PKPSubmissionController::removeIrrelevantContributorTypeData()` finds
+no field list for "person" and nulls every field of
+`Author::CONTRIBUTOR_TYPE_FORM_FIELDS`, the affiliations included;
+`Repo::author()->validate()` passes; `author\DAO::update()` saves the
+emptied affiliation list (`Repo::affiliation()->saveAffiliations()`),
+the CRediT roles and the contributor roles before it writes the
+`authors` row, the column's check refuses that write, and no transaction
+wraps them. One fault with [A29](#a29): no allowed-values check on a
+contributor field the database constrains, ahead of writes that are not
+rolled back. A29's issue report names this value in its Reach (checked
+there by running `validate()` and `edit()` directly), and its proposed
+fix, `Rule::in(ContributorType::getTypes())` in
+`author\Repository::validate()`, refuses the type before anything is
+written. A31's fix (the stored type when none is sent) does not reach
+it, since the type is sent. Kept script
+`shared/playwright/checks/U41/H29/h29.js` (steps N4, N4b).
+Issue report: [pkp-e2e#978](https://github.com/jardakotesovec/pkp-e2e/issues/978) ([docs/issues/U41-A29-contributor-unknown-credit-degree-server-error.md](../issues/U41-A29-contributor-unknown-credit-degree-server-error.md)), A29's report.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** OMP
