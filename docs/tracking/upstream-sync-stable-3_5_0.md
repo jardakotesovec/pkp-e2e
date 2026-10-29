@@ -17,6 +17,7 @@ and no CI follows this branch. `main`'s baselines are in
 
 ## Read log
 
+- **2026-10-29 (PR review, VM s3; asked in the channel by @jarda.kotesovec) — pkp/pkp-lib#13650, precaution PRs: pkp/ojs#6001 (kaitlinnewson `13650-3_5_0`, `3842863962`, one commit on the line tip `851416bc2d`) and pkp/ops#1467 (`9ea1449056` on `bd0ef09fd6`), the one `writeDisabledInApi` line in `PubObjectsExportPlugin::addToSchema()`. Walked base and head on the line's dataset fleets: no regression; the publication-level copies stay writable (3.5's publication edit route never checks the flag; unread on the line). Detail in `upstream-sync.md` 2026-10-29 round 2. Not merged; baselines not advanced. No companion.**
 - **2026-10-29 (daily session, VM s2) — ojs (`851416bc2d`), omp (`50b83d1e67`), ops (`bd0ef09fd6`), pkp-lib (`a6ed3df00a`; ojs, omp and ops at it) and ui-library (`a12b752338`) unchanged on `stable-3_5_0`. Nothing to read; baselines unchanged.**
   - Carried over: `main` confirmed no regression today. Open stable-line rows: none re-run (no code moved). pkp/pkp-lib#9906's PRs (omp#2456, pkp-lib#13301, ui-library#1029, ojs#5809, ops#1395) still open.
 
