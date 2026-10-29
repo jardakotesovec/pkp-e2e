@@ -1,18 +1,25 @@
-# Before posting, a Moderator without "Permissions" cannot edit, add or reorder the galleys the page offers
+# Before posting, a Moderator without "Permissions" cannot edit, add, reorder or delete the galleys the page offers
 
 - **Severity** medium
-- **Effort** medium
+- **Effort** small
 - **Kind** regression
 - **Affects**
   - main: OPS
-  - 3.5: OPS
+  - 3.5: OPS ("Delete" on the branch only, in no release yet)
   - 3.4: none (code; the galley grid offers only what it allows)
   - 3.3: none (code; the galley grid offers only what it allows)
-- **Introduced** `pkp/ui-library#478` for `pkp/pkp-lib#10760` · [f9aca59b](https://github.com/pkp/ui-library/commit/f9aca59bf6e91142d96a91fc01b8e8d04b5aa4e8) · 2025-01-06 · Jarda Kotěšovec (jardakotesovec)
-- **Upstream** none found (2026-10-02)
+- **Introduced** `pkp/ui-library#478` for `pkp/pkp-lib#10760` · [f9aca59b](https://github.com/pkp/ui-library/commit/f9aca59bf6e91142d96a91fc01b8e8d04b5aa4e8) · 2025-01-06 · Jarda Kotěšovec (jardakotesovec); "Delete": `pkp/pkp-lib#13637` · [ff72e607ef](https://github.com/pkp/ops/commit/ff72e607efdb2e8b7961266d466a4f2857064b2f) (`main`), [ef55e33bcd](https://github.com/pkp/ops/commit/ef55e33bcd2fa605961567d5b23ba066f22488e3) (3.5) · 2026-10-27 · Alec Smecher (asmecher)
+- **Upstream** none found (2026-10-29)
 - **Tracked in** spec U46 [OPS2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U46-galleys.md#ops2)
-- **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-29, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-10-29: "Delete" now fails for this Moderator too, on
+`main` and the 3.5 branch; no 3.5 release carries that change yet, while
+the other failures are in released 3.5. "Edit", a new galley and "Save
+Order" still fail, and "Change File" still works. The recommended fix
+is now one call in one handler, to `canEditRepresentations()`, the
+check that already governs the galleys' files.
 
 ## Summary
 
@@ -20,27 +27,27 @@ On a preprint server, a Moderator whose assignment on the preprint has
 "Permissions" unticked (the box that allows changes to the
 publication) is offered the whole "Galleys" page before the preprint is
 posted: "Add galley", "Order", and "Edit", "Change File", "More
-Information" and "Delete" on each galley. Three of them fail. "Edit"
+Information" and "Delete" on each galley. Four of them fail. "Edit"
 opens the galley's window with every field and "Save" greyed out. A new
 galley's "Save" greys the "Create New Galley" window out, shows no
-message and adds nothing; at the next page load (a reload, say) a
-notice reads "This galley can not be edited because it has already been
-published." "Save Order" puts the old order back at once, with no
-message.
+message and adds nothing; at the next page load a notice reads "This
+galley can not be edited because it has already been published." "Save
+Order" puts the old order back at once, with no message. "Delete" shows
+"An unexpected error has occurred. Please reload the page and try
+again." and the galley stays.
 
-"Change File" and "Delete" work for the same Moderator, and once the
-preprint is posted everything on the page does.
+"Change File" works for the same Moderator, and once the preprint is
+posted everything on the page does.
 
 ## Impact
 
-- **Lost**: nothing stored. The Moderator's new order is dropped with
-  no message, and their new galley with a false notice.
+- **Lost**: nothing stored.
 - **Who**: a Moderator whose assignment on the preprint has
   "Permissions" unticked, before the preprint is posted. The box is
-  ticked for Moderators by default, so only assignments an editor
-  restricted meet it.
+  ticked for Moderators by default, so it affects only a Moderator
+  whose box an editor unticked.
 - **Way round**: a Preprint Server Manager makes the change, or ticks
-  the Moderator's "Permissions" box. After posting, the Moderator can.
+  the Moderator's "Permissions" box.
 
 Medium: the tasks fail without saying why, so the Moderator cannot tell
 they must ask, but a manager can do them and the setup is one an editor
@@ -57,6 +64,7 @@ Preconditions:
   not posted. Its one galley is "PDF", and its Moderators David Buskins
   (`dbuskins`) and Stephanie Berardo (`sberardo`) have "Permissions"
   ticked.
+- Any PDF file, named `u46w6-replacement.pdf` (step 10).
 - Steps 1–5 add a second galley (the order needs two), store the
   list's order and untick the box on `dbuskins`'s assignment.
 
@@ -89,15 +97,22 @@ As the Moderator:
    "Save". Then press the window's "Close" and reload the page.
 9. Press "Order", press the down arrow on the "PDF" row (the list reads
    `u46w6 Remote`, then "PDF") and press "Save Order". Reload the page.
+10. "More Actions" › "Change File" on "PDF". Upload
+    `u46w6-replacement.pdf`, press "Continue", "Continue" and
+    "Complete". Then press the "PDF" link in the list.
+11. "More Actions" › "Delete" on `u46w6 Remote` and press "OK". Reload
+    the page.
 
 **Expected**, as recommended below: what the page offers works. In step 7
 the window "Upload a File Ready for Publication" lets `dbuskins` change
 the label and has "Save" and "Cancel". In step 8 "Save" closes the
 window, the upload window opens for the new galley's file, and the list
 shows `u46w6 HTML`. In step 9 the list keeps `u46w6 Remote` above "PDF",
-also after the reload. (If the team decides that the box keeps a
-Moderator off the galleys before posting, the page should instead offer
-this Moderator a read-only "View", as it does the Author.)
+also after the reload. In step 10 the "PDF" link downloads `u46w6-replacement.pdf`.
+In step 11 `u46w6 Remote` leaves the list, also after the reload. (If
+the team decides that the box keeps a Moderator off the galleys before
+posting, the page should instead offer this Moderator a read-only
+"View", as it does the Author.)
 
 **Observed**: in step 6 "Order" and "Add galley" are there, and the
 row menu offers "Edit", "Change File", "More Information" and "Delete".
@@ -108,7 +123,12 @@ step 8 "Save" leaves "Create New Galley" open with every field and
 "PDF", `u46w6 Remote`, and a notice reads "This galley can not be
 edited because it has already been published." In step 9 the list goes
 back to "PDF", `u46w6 Remote` as soon as "Save Order" is pressed, and
-stays so after the reload. Both saves answer as if they succeeded:
+stays so after the reload. Step 10 works: the "PDF" link
+downloads `u46w6-replacement.pdf`. In step 11 a dialog "Error" reads "An
+unexpected error has occurred. Please reload the page and try again.",
+and after the reload `u46w6 Remote` is still listed. Both saves answer
+as if they succeeded, and the delete answers with the refusal the page
+does not show:
 
 ```
 POST /index.php/publicknowledge/$$$call$$$/grid/preprint-galleys/preprint-galley-grid/update-galley?submissionId=1&publicationId=1&representationId=
@@ -116,6 +136,9 @@ POST /index.php/publicknowledge/$$$call$$$/grid/preprint-galleys/preprint-galley
 
 POST /index.php/publicknowledge/$$$call$$$/grid/preprint-galleys/preprint-galley-grid/save-sequence?submissionId=1&publicationId=1
 200 {"status":true,"content":"","elementId":"0","events":[{"name":"dataChanged"}]}
+
+POST /index.php/publicknowledge/$$$call$$$/grid/preprint-galleys/preprint-galley-grid/delete-galley?submissionId=1&publicationId=1&representationId=21
+200 {"status":false,"content":"This galley can not be edited because it has already been published.","elementId":"0","events":[]}
 ```
 
 Control: `sberardo`, whose box is still ticked, gets the same window in
@@ -156,6 +179,18 @@ server: at e88d2d20 (`pkp/ui-library#445`), which brought it to the
 preprint server, a Moderator without the box got "View" as the grid
 gave. The two parted at f9aca59b.
 
+`pkp/pkp-lib#13637` then wrote a rule for the galleys' files that sides
+with the page. pkp-lib's new `Repo::submission()->canEditRepresentations()`
+(`classes/submission/Repository.php`,
+[df42984b46](https://github.com/pkp/pkp-lib/commit/df42984b467b6e76fa616eeeca43202f428744bc))
+lets through anyone with an editorial assignment on the submission, and
+holds the Author to `canEditPublication()`; its comment reads "Editorial
+users keep the access their stage assignments give them".
+`RepresentationUploadAccessPolicy` asks it, which is why "Change File"
+works for this Moderator. In the same change OPS put `canEdit()` in
+front of `deleteGalley` and `clearPubId`, so "Delete" now meets `canEdit()`'s check before posting, the box. The change's 3.4
+and 3.3 backports ask `canEditRepresentations()` there instead.
+
 `canEdit()` decides only some of the operations:
 
 - `editGalleyTab` and `updateGalley` pass it to `PreprintGalleyForm` as
@@ -166,16 +201,17 @@ gave. The two parted at f9aca59b.
 - `initFeatures()` adds `OrderGridItemsFeature` only when it is true.
   Without it `saveSequence` stores nothing and still answers
   `"status":true`.
+- `deleteGalley` answers `{"status":false}` with `galley.cantEditPublished`;
+  the page shows its generic "Error" dialog instead of that text.
 - `identifiers`, `updateIdentifiers` and `clearPubId` pass it to
-  `PublicIdentifiersForm`, so the "Identifiers" tab, shown when galley
-  identifiers are switched on, is read-only for this Moderator before
-  posting (code).
+  `PublicIdentifiersForm` or refuse with it, so the "Identifiers" tab,
+  shown when galley identifiers are switched on, is read-only for this
+  Moderator before posting (code).
 - `addGalley` renders the empty form without it, so "Create New
   Galley" opens editable and the refusal comes only with its save.
 
 Reach:
 
-- Steps 7, 8 and 9: on screen.
 - A Preprint Server Manager passes `canEditPublication()` without an
   assignment, and a site administrator passes `canEdit()` first: not
   affected (code).
@@ -189,99 +225,80 @@ Reach:
 
 ## Proposed fix
 
-Let `PreprintGalleyGridHandler::canEdit()` pass a manager or a
-Moderator whether or not the version is posted, the rule the page and
-`pkp/pkp-lib#13039` state, and keep the "Permissions" box and posting
-as the Author's gate. The diff is
+Let `PreprintGalleyGridHandler::canEdit()` return
+`Repo::submission()->canEditRepresentations()`, the rule
+`pkp/pkp-lib#13637` wrote for the same galleys' files, before and after
+posting. An editorial assignment on the preprint is then enough, as the
+page and `pkp/pkp-lib#13039` state. The Author keeps their gate: they
+may change the galleys while the submission is unsubmitted, after that
+only with "Permissions" ticked, and never once it is posted. The diff is
 [fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/moderator-galleys-offered-then-refused/fix.diff):
 
-```diff
---- a/controllers/grid/preprintGalleys/PreprintGalleyGridHandler.php
-+++ b/controllers/grid/preprintGalleys/PreprintGalleyGridHandler.php
-@@ -488,21 +489,16 @@
-         $userRoles = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_USER_ROLES);
- 
--
--        if (in_array(Role::ROLE_ID_SITE_ADMIN, $userRoles)) {
-+        if (
-+            in_array(Role::ROLE_ID_SITE_ADMIN, $userRoles) ||
-+            in_array(Role::ROLE_ID_MANAGER, $userRoles) ||
-+            in_array(Role::ROLE_ID_SUB_EDITOR, $userRoles)
-+        ) {
-             return true;
-         }
- 
--        // if it is published, allow managers or sub-editors
-+        // once posted, nobody else
-         if ($publication->getData('status') === PKPSubmission::STATUS_PUBLISHED) {
--            // allow these roles to edit galleys even if published
--            if (
--                in_array(Role::ROLE_ID_MANAGER, $userRoles) ||
--                in_array(Role::ROLE_ID_SUB_EDITOR, $userRoles)
--            ) {
--                return true;
--            }
--            // otherwise block
-             return false;
-         }
+```php
+    public function canEdit()
+    {
+        $user = Application::get()->getRequest()->getUser();
+        return Repo::submission()->canEditRepresentations($this->getPublication(), $user);
+    }
 ```
 
-(The diff also rewrites the method's comment to state the rule.) It
-moves the role check that `pkp/pkp-lib#10263` placed inside the posted
-branch to the top, so posting no longer widens a Moderator's rights.
+The diff replaces the method's body with this, drops the now unused
+`PKPSubmission` import and rewrites the method's comment to state the
+rule. It applies after posting too, so the method no longer reads the user's roles in the server
+(`ASSOC_TYPE_USER_ROLES`). After posting, `canEditRepresentations()`
+still passes the site administrator, a Preprint Server Manager (through
+`_canUserAccessUnassignedSubmissions()`, without an assignment) and
+every assigned Moderator, which keeps what `pkp/pkp-lib#10263` gave
+them; it refuses a user who is only the preprint's Author, because
+`canEditPublication()` locks a posted version for them.
 
-Tried on `main`, OPS: in step 7 the window is editable with "Save" and
-"Cancel"; in step 8 "Save" closes it, the upload window opens and the
-list shows `u46w6 HTML`; in step 9 the new order stays after the
-reload. With the fix and without it, the Author's rights stay as they
-were. `ccorino`, with his "Permissions" unticked before posting, is
-offered "View" alone and its window is read-only. So is `ckwantes` on
-her posted submission 2. A Moderator with the box unticked on posted
-submission 2 keeps the whole page, with and without the fix.
+Tried on `main`, OPS: every step gives the Expected. With the fix and
+without it, the Author's rights stay as they were: `ccorino`, with his
+"Permissions" unticked before posting, is offered "View" alone and its
+window is read-only, and so is `ckwantes` on her posted submission 2. A
+Moderator with the box unticked on posted submission 2 keeps the whole
+page, with and without the fix.
 
 **Alternatives**
 
+- Give managers and sub-editors a pass at the top of `canEdit()`,
+  posted or not (this report's earlier fix, also tried). It reads the
+  user's roles in the server rather than on the preprint, so a
+  Moderator of the server who is only a preprint's Author would pass
+  too, whatever their author assignment's box says.
+- Ask `canEditRepresentations()` in `deleteGalley` and `clearPubId`
+  only: "Delete" works again, but "Edit", a new galley and "Save Order"
+  stay refused.
 - Make the page follow `canEdit()`: offer a Moderator without the box a
   read-only "View" and "More Information" before posting. This keeps
   the 3.4 behaviour, but it goes against the `pkp/pkp-lib#13039`
-  ruleset, keeps a rule under which posting widens a Moderator's
-  rights, and "Change File" and "Delete" would then have to be held to
-  the same rule. The same question is open for the
-  "Media" page, whose report recommends the server's rule there
-  ([U47-A1-media-actions-offered-then-refused](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U47-A1-media-actions-offered-then-refused.md)):
-  the team may want to answer both at once.
-- Read the roles from the Production stage's assignments
-  (`ASSOC_TYPE_ACCESSIBLE_WORKFLOW_STAGES`) instead of the user's roles
-  in the server: closer to the page's own check, which counts only
-  roles assigned on the stage. A Moderator of the server who is only
-  the Author of a preprint would then be held to the Author's gate,
-  where the role check in the posted branch passes them today. Not
-  tried.
+  ruleset and the rule `canEditRepresentations()` states, and "Change
+  File" would then have to be refused too. The same question is open
+  for the "Media" page (`pkp/pkp-lib#13647`, which recommends the
+  server's rule there): the team may want to answer both at once.
 
 **What goes with it**
 
 - The "Identifiers" tab follows: with galley identifiers on, a
-  Moderator without the box can now save them before posting (code).
+  Moderator without the box can now save and clear them before posting
+  (code).
+- Narrower than today in one case: a Moderator of the server who is
+  only a preprint's Author is refused after posting, where the posted
+  branch passed them (code).
 - The refusal's missing message and its wording ("already been
   published" on a preprint not posted) stay for anyone still refused;
-  after the fix no screen offers a refused save.
-- Who else it widens: `ASSOC_TYPE_USER_ROLES` holds the user's roles in
-  the server, not on the preprint. A Moderator of the server assigned
-  to a preprint only as its Author would pass `canEdit()` before
-  posting too, whatever their author assignment's box says; today the
-  posted branch already passes them after posting. The second
-  alternative above closes both.
-- 3.5: the diff applies with fuzz (`patch --dry-run` on the 3.5
-  checkout). Its second hunk misses only because `main` has a second
-  blank line after `$userRoles` that 3.5 lacks; the method is otherwise
-  the same where the hunk falls.
+  after the fix no screen offers a refused save or delete.
+- 3.5: `canEditRepresentations()` is there too, but the diff's second
+  hunk, the method, does not apply: 3.5's `canEdit()` has one blank
+  line after `$userRoles` where `main` has two, and calls
+  `canEditPublication($submission->getId(), $user->getId())`. The same
+  replacement of the method's body fits there; the import hunk applies.
 - Guard: a scenario in spec U46 (a Moderator without "Permissions"
-  edits, adds and reorders galleys before posting). OPS has no unit
-  test of the galley grid to extend.
+  edits, adds, reorders and deletes galleys before posting). OPS has no
+  unit test of the galley grid to extend.
 
-Medium: the change is a few lines in one method, but it widens what a
-restricted Moderator may do before posting on three surfaces, which
-the team confirms first.
+Small: one method in one handler, now a single call to the check the
+same grid's uploads already use, and an e2e scenario.
 
 ## Evidence
 
@@ -289,28 +306,37 @@ the team confirms first.
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/moderator-galleys-offered-then-refused/walk.js)
   (helpers in
   [lib.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/moderator-galleys-offered-then-refused/lib.js))
-  takes steps 1–9 and the control on an install freshly loaded from the
+  takes steps 1–11 and the control on an install freshly loaded from the
   default dataset; `MODE=nb` takes the neighbour checks alone:
   `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js ops shared/playwright/checks/issues/moderator-galleys-offered-then-refused/walk.js`
   (`PKP_E2E_LINE=stable-3_5_0` in front for 3.5).
 - Walked on `main` and 3.5, OPS, on PostgreSQL; datasets pkp/datasets
-  e8dafbc (2026-10-02). On 3.5 the row menu has no "More Information"
-  and steps 7–9 show the same. The step 8 notice is a notification the server queues
-  for the user (`addError('', …)` on the form); it appeared on the next
-  page load on both versions.
-- Branch tips. `main`: OPS c8af945bb7, pkp-lib 3dc90c81a6, ui-library
-  280f98c5. 3.5: OPS 38b61882d3, pkp-lib cf3f984335, ui-library
-  d4e01883. 3.4: OPS acd8ae704b, pkp-lib 9e41f10273. 3.3: OPS
-  c5532e2161, pkp-lib ac3fa73402.
+  2f0edb08 (2026-10-28). On 3.5 the row menu has no "More Information"
+  and steps 7–11 show the same as on `main`. The step 8 notice is a
+  notification the server queues for the user (`addError('', …)` on the
+  form); it appeared on the next page load on both versions. Step 10:
+  the walks on `main` and 3.5 read the galley's stored file
+  (`u46w6-replacement.pdf`); the "PDF" link's download was read in the
+  fix trial's walk, which does not touch the upload path.
+- Branch tips. `main`: OPS 815fbaad1b, pkp-lib df42984b46, ui-library
+  b44825b0. 3.5: OPS bd0ef09fd6, pkp-lib a6ed3df00a, ui-library
+  a12b7523. 3.4: OPS 2e4bf7fd66, pkp-lib cbf5446d1b. 3.3: OPS
+  9f42eb0a52, pkp-lib fc94a53416.
 - Code reads. 3.5: `useGalleyManagerConfig.js` gives the editorial
-  roles the whole set (without "More Information") and `canEdit()` is
-  the same as on `main`. 3.4: `PreprintGalleyGridHandler` adds "Add
-  galley" and the ordering feature only when `canEdit()`, and
+  roles the whole set (without "More Information"), `canEdit()` is the
+  same as on `main` but for the `canEditPublication()` arguments, and
+  ef55e33bcd and pkp-lib a6ed3df00a are in no tag (the latest is
+  `3_5_0-5`). 3.4: `PreprintGalleyGridHandler` adds
+  "Add galley" and the ordering feature only when `canEdit()`, and
   `PreprintGalleyGridRow` offers "Edit" (else "View"), the upload and
   "Delete" only when editable; its `canEdit()` refuses everyone once
-  posted and asks `canEditPublication()` before. 3.3: the same in
+  posted and asks `canEditPublication()` before; b1fd1f06ee is the
+  backport the Cause names. 3.3: the same in
   `ArticleGalleyGridHandler.inc.php` and `ArticleGalleyGridRow.inc.php`
-  (OPS kept the journal's class names there).
+  (OPS kept the journal's class names there), backport 574b1b17e0.
+  Read with `git show upstream/stable-3_4_0:…` and
+  `upstream/stable-3_3_0` in the `main` OPS checkout and
+  `origin/stable-3_4_0`, `origin/stable-3_3_0` in its `lib/pkp`.
 - Introduced: at e88d2d20 (`pkp/ui-library#445`), which brought the
   GalleyManager to the preprint server, `workflowConfigEditorialOPS.js`
   passed `canEdit: permissions.canEditPublication`, and without it
@@ -322,13 +348,17 @@ the team confirms first.
   (`pkp/pkp-lib#5750`, 2020) for the `canEditPublication()` branch and
   to 7d9c84e9b6 (`pkp/pkp-lib#10263`) for the posted branch; ab4b990d96
   (`pkp/pkp-lib#13109`) only changed the call's arguments.
-- Upstream searches (pkp/pkp-lib, pkp/ops, pkp/ui-library): galley and
-  moderator, permission and order words, the notice's text,
-  `PreprintGalleyGridHandler`, `canCurrentUserEditPublication`. Found:
-  `pkp/pkp-lib#13039` (closed; the Author's access to the page, the
-  ruleset in a comment of 2026-07-27), `pkp/pkp-lib#13107` (closed; a
-  "Save Order" server error, fixed) and `pkp/pkp-lib#10760` (closed;
-  built the page, with the note quoted in the Cause). None is this
-  fault.
-- Not walked: the "Identifiers" tab, a Moderator who is also a
-  preprint's Author, the alternatives, and the fix on 3.5.
+- Upstream searches (pkp/pkp-lib, pkp/ops, pkp/ui-library; 2026-10-02
+  and again 2026-10-29): galley and moderator, delete, permission and
+  order words, the notice's text, `PreprintGalleyGridHandler`,
+  `canEdit`, `canEditRepresentations`, `canCurrentUserEditPublication`.
+  Found: `pkp/pkp-lib#13637` (closed; the change above, about the
+  galleys' files, not this fault), `pkp/pkp-lib#13647` (open; the
+  "Media" page's twin), `pkp/pkp-lib#13039` (closed; the Author's
+  access to the page, the ruleset in a comment of 2026-07-27),
+  `pkp/pkp-lib#13107` (closed; a "Save Order" server error, fixed) and
+  `pkp/pkp-lib#10760` (closed; built the page, with the note quoted in
+  the Cause). None is this fault.
+- Not walked: the "Identifiers" tab, a Moderator of the server who is
+  only a preprint's Author (before or after posting, with or without the
+  fix), the alternatives, and the fix on 3.5.

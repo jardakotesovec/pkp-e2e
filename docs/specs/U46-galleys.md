@@ -729,7 +729,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | A good "Save" in the galley window shows an earlier refused "URL Path" as a red notice | 🐞 | low || issues (claude), 2026-10-12 — re-verified |
 | [OJS1](#ojs1) | Deleting a published galley that a new version copied fails with an error | 🐞 | high · crash: server · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [OJS2](#ojs2) | One crafted visit decides what an HTML galley shows every later signed-out reader for a day, including markup that runs on the journal's site | 🐞 | user-visible | — |
-| [OPS2](#ops2) | Before posting, a Moderator without "Permissions" cannot edit, add or reorder the galleys the page offers | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
+| [OPS2](#ops2) | Before posting, a Moderator without "Permissions" cannot edit, add, reorder or delete the galleys the page offers | 🐞 | medium | issues (claude), 2026-10-29 — re-verified |
 | [OPS3](#ops3) | A preprint's Author is offered "Change File" on every galley and refused on files others uploaded | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A replaced HTML galley file reaches readers who are not signed in up to a day late | ❓ | user-visible | — |
 | [OPS1](#ops1) | A preprint's Author manages the galleys while they may edit the preprint; a journal's Author never does | ✅ | — | issue report (claude), 2026-10-02 — rescoped to the Author |
@@ -914,21 +914,23 @@ Re-checked: issue report (claude), 2026-10-02 — rescoped (the
 Moderator's half, once read as intended, moved to OPS2). <sup>f-ops1</sup>
 
 <a id="ops2"></a>
-**OPS2 — Before posting, a Moderator without "Permissions" cannot edit, add or reorder the galleys the page offers** · 🐞 · medium.
+**OPS2 — Before posting, a Moderator without "Permissions" cannot edit, add, reorder or delete the galleys the page offers** · 🐞 · medium.
 On a preprint server, a Moderator whose assignment on the preprint has
-"Permissions" unticked (the box that allows changes to the publication)
-is offered the whole "Galleys" page before the preprint is posted: "Add
-galley", "Order", and "Edit", "Change File", "More Information" and
-"Delete" on each galley. Three of them fail. "Edit" opens the galley's
-window with every field and "Save" greyed out. A new galley's "Save"
-greys the "Create New Galley" window out, shows no message and adds
-nothing; at the next page load (a reload, say) a notice reads "This
+"Permissions" unticked (the box that allows changes to the
+publication) is offered the whole "Galleys" page before the preprint is
+posted: "Add galley", "Order", and "Edit", "Change File", "More
+Information" and "Delete" on each galley. Four of them fail. "Edit"
+opens the galley's window with every field and "Save" greyed out. A new
+galley's "Save" greys the "Create New Galley" window out, shows no
+message and adds nothing; at the next page load a notice reads "This
 galley can not be edited because it has already been published." "Save
-Order" puts the old order back at once, with no message. "Change File"
-and "Delete" work for the same Moderator, and once the preprint is
-posted everything on the page does. Basis: probe, 2026-10-02.
+Order" puts the old order back at once, with no message. "Delete" shows
+"An unexpected error has occurred. Please reload the page and try
+again." and the galley stays.
+"Change File" works for the same Moderator, and once the preprint is
+posted everything on the page does.
+Basis: probe, 2026-10-02; issue report refresh walk, 2026-10-29.
 <sup>f-ops2</sup>
-Report: refresh owed — pkp/pkp-lib#13637 (OPS `ff72e607ef`, 3.5 `ef55e33bcd`, 2026-10-27) gates `PreprintGalleyGridHandler` `deleteGalley` and `clearPubId` with `PreprintGalleyGridHandler::canEdit()`, so "Delete" now fails for the same Moderator too: the press answers `{"status":false}` with "This galley can not be edited because it has already been published.", the page shows "Error — An unexpected error has occurred. Please reload the page and try again." and the galley stays (walked on `main` and 3.5 by the daily sync's reader rr13637, 2026-10-28; "Permissions" ticked still deletes). "Change File" passes the new `canEditRepresentations()` (any non-author stage assignment) through `RepresentationUploadAccessPolicy` and `SubmissionFileAccessPolicy`, not re-driven. The Summary's "Change File and Delete work" and the list of what fails change (2026-10-28)
 
 <a id="ops3"></a>
 **OPS3 — A preprint's Author is offered "Change File" on every galley and refused on files others uploaded** · 🐞 · low.

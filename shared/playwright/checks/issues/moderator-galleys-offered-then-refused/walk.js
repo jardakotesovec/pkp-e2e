@@ -1,6 +1,6 @@
 // Spec U46 OPS2 (docs/specs/U46-galleys.md#ops2): before posting, a Moderator whose assignment
 // has "Permissions" unticked is offered the whole "Galleys" page, and "Edit", a new galley's
-// "Save" and "Save Order" do not hold. Issue report:
+// "Save", "Save Order" and "Delete" do not hold, while "Change File" works. Issue report:
 // docs/issues/U46-OPS2-moderator-galleys-offered-then-refused.md.
 //
 // Starts from PKP's default test dataset (OPS), freshly loaded:
@@ -8,7 +8,7 @@
 // MODE=nb walks the neighbours alone: the Author with "Permissions" unticked before posting and
 // the Author of a posted preprint keep a read-only "View"; a Moderator with the box unticked on a
 // posted preprint keeps the whole page.
-const {forEachApp, launch, signIn, signOut, record, shot, idle} = require('../../../probe');
+const {forEachApp, launch, signIn, signOut, record, shot, idle, screen} = require('../../../probe');
 const L = require('./lib');
 
 const MODE = process.env.MODE || 'steps';
@@ -126,6 +126,49 @@ forEachApp(async (app) => {
                 const afterSave = await g.labels();
                 const g2 = await L.openGalleys(page, app, SUB);
                 return {before, moved, save: {status: r.status(), body}, afterSave, afterReload: await g2.labels(), stored: L.storedGalleys(app, PUB)};
+            });
+            // Report step 10: "Change File" on "PDF".
+            await step('10-change-file', async () => {
+                g = await L.openGalleys(page, app, SUB);
+                const before = L.storedFile(app, 'PDF', PUB);
+                const items = await g.menuOffers('PDF');
+                if (!items.includes('Change File')) return {items, changeFile: 'not offered'};
+                const wizard = await g.openChangeFile('PDF');
+                const opened = L.flat(await wizard.dialog().innerText().catch(() => null), 400);
+                const f = L.namedFile('replacement.pdf', 'u46w6-replacement.pdf');
+                await wizard.uploadOne({file: f.path, name: f.name});
+                await idle(page);
+                await L.sleep(800);
+                const seen = await screen(page);
+                // the step's check: the "PDF" link in the list downloads the new file
+                const g2 = await L.openGalleys(page, app, SUB);
+                const downloaded = await g2.downloadedName('PDF').catch((e) => ({error: L.flat(e.message, 200)}));
+                return {opened, screen: {dialog: seen.text.dialog, notices: seen.notices}, downloaded, before, after: L.storedFile(app, 'PDF', PUB)};
+            });
+            // Report step 11: "Delete" on the remote galley, "OK", then a reload.
+            await step('11-delete', async () => {
+                g = await L.openGalleys(page, app, SUB);
+                const before = await g.labels();
+                const items = await g.menuOffers(REMOTE);
+                if (!items.includes('Delete')) return {items, delete: 'not offered'};
+                const dlg = await g.openDelete(REMOTE);
+                const asked = L.flat(await dlg.innerText().catch(() => null), 300);
+                const answered = page.waitForResponse((r) => r.url().includes('delete-galley') && r.request().method() === 'POST', {timeout: L.T});
+                await dlg.getByRole('button', {name: 'OK', exact: true}).click();
+                const r = await answered;
+                const body = L.flat(await r.text().catch(() => null), 300);
+                await idle(page);
+                await L.sleep(1200);
+                const seen = await screen(page);
+                await shot(page, 'steps-11-after-delete');
+                const afterOk = await g.labels().catch(() => null);
+                const errorDialog = page.getByRole('dialog').filter({hasText: 'An unexpected error has occurred'});
+                if (await errorDialog.isVisible().catch(() => false)) {
+                    await errorDialog.getByRole('button', {name: 'OK', exact: true}).click().catch(() => {});
+                    await L.sleep(700);
+                }
+                const g2 = await L.openGalleys(page, app, SUB);
+                return {asked, request: {status: r.status(), body}, screen: {dialog: seen.text.dialog, notices: seen.notices}, before, afterOk, afterReload: await g2.labels(), stored: L.storedGalleys(app, PUB)};
             });
             await signOut(page);
 
