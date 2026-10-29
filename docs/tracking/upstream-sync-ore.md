@@ -20,6 +20,7 @@ pkp-e2e `ore` tip: `85ed48ee` (2026-10-26, companion `13607-ore` fast-forwarded;
 
 ## Open
 
+- pkp/ojs#5988 merged into `ore` (`a172d7a9dd`, 2026-10-28 22:13), but the pkp-e2e `ore` branch (`85ed48ee`) does not carry the companion `i13539-ore` (`9436e083`): the hook runs on pkp/ojs `ore` [40778350739](https://github.com/pkp/ojs/actions/runs/40778350739) and on `i13647_ore` [40813371957](https://github.com/pkp/ojs/actions/runs/40813371957) red on OJS U14 S1 and U52 S1 at both tries, the two tests the companion changed (U14's comments API change; U52 S1's set reads, `main`'s `7608f91d` and `4a62293e`). Fast-forward or cherry-pick the companion onto pkp-e2e `ore` (seen by the housekeeping session's flake tally, 2026-10-29).
 - When pkp/ojs `ore` moves `lib/pkp` to `25b7c8af49` or later (pkp-lib `ore` `32e2b5d885`, `=main 889c945a85`, pkp/pkp-lib#13614): cherry-pick `main`'s U37 A4 retirement (the 2026-10-27 daily sync commit: the spec, the three suite headers and the PROGRESS note) onto pkp-e2e `ore`, after the report's walk reads fixed on the ore fleet (the walk is deleted on `main`; restore it from git, `shared/playwright/checks/issues/find-template-discussion-task-error/`).
 - When pkp/ojs `ore` moves pdfJsViewer past `1d992590f0` (PDF.js 4.10.38), run S4 of `checks/sync/pdfJsViewer-8ae9739/viewer-browsers.js` on the ore fleet: `main`'s first PDF.js 6 build (`8ae9739`) left older browsers with an empty viewer, fixed by the legacy build (`f24f761`) on 2026-10-26.
 - Phase 1 of the set-up (plan of 2026-10-16), the rest of it:
