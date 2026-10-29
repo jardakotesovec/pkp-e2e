@@ -251,12 +251,14 @@ async function main() {
     writeConfig(app, port, configFile);
 
     let server = null;
+    let xvfb = null;
     let run = null;
     let done = false;
     const cleanup = (why) => {
         if (done) return;
         done = true;
         killGroup(run, why && 'the Cypress run');
+        killGroup(xvfb);
         if (!opts.keep) {
             killGroup(server);
             try {
@@ -290,6 +292,23 @@ async function main() {
         await new Promise((r) => setTimeout(r, 250));
     }
 
+    // Cypress would start an Xvfb on :99 itself, and fail when any other
+    // process on the host holds that display's abstract socket (a stale
+    // Xvfb in the bot's private tmp did, 2026-10-29); the run's own Xvfb on
+    // the display numbered like its port is unique and goes with the run.
+    const display = `:${port}`;
+    if (process.platform === 'linux') {
+        xvfb = spawn('Xvfb', [display, '-screen', '0', '1280x1024x24', '-nolisten', 'tcp'], {detached: true, stdio: 'ignore'});
+        const xDeadline = Date.now() + 10_000;
+        while (!fs.existsSync(`/tmp/.X11-unix/X${port}`)) {
+            if (xvfb.exitCode !== null || Date.now() > xDeadline) {
+                console.error(`cypress-line: Xvfb ${display} did not come up (apt install xvfb; /tmp/.X11-unix must exist)`);
+                process.exit(1);
+            }
+            await new Promise((r) => setTimeout(r, 100));
+        }
+    }
+
     const baseUrl = `http://127.0.0.1:${port}`;
     const env = [
         'DBTYPE=PostgreSQL',
@@ -320,7 +339,7 @@ async function main() {
         cwd: app.root,
         detached: true,
         stdio: ['ignore', 'pipe', out],
-        env: {...process.env, TERM: 'dumb', CYPRESS_CRASH_REPORTS: '0', CI: '1'},
+        env: {...process.env, ...(xvfb ? {DISPLAY: display} : {}), TERM: 'dumb', CYPRESS_CRASH_REPORTS: '0', CI: '1'},
     });
     const timer = setTimeout(() => {
         console.error(`cypress-line: --timeout ${opts.timeoutMin} min reached`);
