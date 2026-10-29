@@ -25,7 +25,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { REPO_ROOT, resolveApp } = require('./apps.js');
-const { loadGrid } = require('../shared/playwright/support/api-grids.js');
+const { loadGrid, registryRows } = require('../shared/playwright/support/api-grids.js');
 const { LABELS: PERSONA_LABELS } = require('../shared/playwright/support/personas.js');
 const APPS = ['ojs', 'omp', 'ops'];
 const FILE = 'docs/tracking/api-routes.md';
@@ -205,19 +205,11 @@ function scanCode() {
     return rows;
 }
 
-// ---- the tracking side: atlas atoms, feature claims, the file itself ----
+// ---- the tracking side: feature claims, the file itself ----
 
-function atlasAtoms() {
-    const map = new Map();
-    for (const [, id, apps, ptr, app] of read('docs/tracking/atlas/api.md').matchAll(/^\| (API-\d+) \| ([\w ]+) \| `([\w\\]+)`(?: \((\w+)\))? \|/gm)) {
-        map.set(ptr.startsWith('APP') ? `${app || apps}:${ptr}` : ptr, id);
-    }
-    return map;
-}
 
-function sectionTitle(cls, atoms) {
-    const atom = atoms.get(cls.key);
-    return `${cls.base} — ${cls.short}${cls.app ? ` [${cls.app}]` : ''}${atom ? ` (${atom})` : ''}`;
+function sectionTitle(cls) {
+    return `${cls.base} — ${cls.short}${cls.app ? ` [${cls.app}]` : ''}`;
 }
 
 function hasGrid(owner) {
@@ -231,27 +223,16 @@ function features() {
 }
 
 function parseFile() {
-    const kept = new Map();
-    if (!fs.existsSync(path.join(REPO_ROOT, FILE))) return kept;
-    let scope = 'pkp';
-    for (const line of read(FILE).split('\n')) {
-        const h = line.match(/^### .* — \w+(?: \[(\w+)\])?/);
-        if (h) { scope = h[1] || 'pkp'; continue; }
-        const c = line.split('|').map((s) => s.trim());
-        if (c.length !== 9 || !/^[A-Z]+$/.test(c[2])) continue;
-        const name = c[1].replace(/`/g, ''), p = c[3].replace(/`/g, '');
-        const key = name === '—' ? `${c[2]} ${p}` : name;
-        kept.set(`${scope}|${key}`, { line, method: c[2], path: p, apps: c[4], roles: c[5], owner: c[6], gate: c[7] });
-    }
-    return kept;
+    if (!fs.existsSync(path.join(REPO_ROOT, FILE))) return new Map();
+    return new Map(registryRows().map((r) => [`${r.scope}|${r.key}`, { ...r, apps: r.apps.join(' ') }]));
 }
 
 const cell = (r) => [r.name ? `\`${r.name}\`` : '—', r.method, `\`${r.path}\``, r.apps.join(' '), r.roles];
 
-function render(rows, kept, atoms) {
+function render(rows, kept) {
     const sections = new Map();
     for (const [id, r] of rows) {
-        const t = sectionTitle(r.cls, atoms);
+        const t = sectionTitle(r.cls);
         if (!sections.has(t)) sections.set(t, []);
         const k = kept.get(id);
         sections.get(t).push(`| ${[...cell(r), k?.owner ?? '', k?.gate || '—'].join(' | ')} |`.replace(/ {2}\|/g, ' |'));
@@ -270,7 +251,11 @@ function gateProblem(gate) {
     try {
         const grid = loadGrid(gate);
         const unknown = grid.rows.map((r) => r.persona).filter((p) => !PERSONA_LABELS.includes(p));
-        return unknown.length ? `has rows that are no persona: ${unknown.join(', ')}` : null;
+        if (unknown.length) return `has rows that are no persona: ${unknown.join(', ')}`;
+        // A column nobody may call would read every refusal as agreement,
+        // even one a broken maker caused (a wrong path answers 404).
+        const empty = grid.states.filter((s) => !grid.rows.some((r) => r.cells[s] === true));
+        return empty.length ? `has a column with no ✓: ${empty.join(', ')}` : null;
     } catch (e) {
         return e.message;
     }
@@ -299,18 +284,16 @@ function check(rows, kept) {
     return problems;
 }
 
-// The Gate column of the named routes, set in place.
+// The Gate column of the named routes (a name, or `METHOD path` for an
+// unnamed one), set in place.
 function setGate(gate, keys) {
-    const lines = read(FILE).split('\n');
+    let text = read(FILE);
     const done = new Set();
-    lines.forEach((line, i) => {
-        const m = line.match(/^\| `([^`]+)` \|/);
-        if (m && keys.includes(m[1])) {
-            lines[i] = line.replace(/\| [^|]+ \|$/, `| ${gate} |`);
-            done.add(m[1]);
-        }
-    });
-    fs.writeFileSync(path.join(REPO_ROOT, FILE), lines.join('\n'));
+    for (const row of registryRows().filter((r) => keys.includes(r.key))) {
+        text = text.replace(row.line, row.line.replace(/\| [^|]+ \|$/, `| ${gate} |`));
+        done.add(row.key);
+    }
+    fs.writeFileSync(path.join(REPO_ROOT, FILE), text);
     const missing = keys.filter((k) => !done.has(k));
     console.log(`gate ${gate} set on ${done.size} route(s)${missing.length ? `; no such route: ${missing.join(', ')}` : ''}`);
     if (missing.length) process.exit(1);
@@ -325,11 +308,9 @@ if (process.argv[2] === '--gate') {
 
 const rows = scanCode();
 const kept = parseFile();
-const atoms = atlasAtoms();
-for (const r of rows.values()) if (!atoms.has(r.cls.key)) odd.push(`no atom in atlas/api.md for ${r.cls.fqcn}${r.cls.app ? ` (${r.cls.app})` : ''}`);
 const mode = process.argv[2];
 if (mode === '--write') {
-    fs.writeFileSync(path.join(REPO_ROOT, FILE), render(rows, kept, atoms));
+    fs.writeFileSync(path.join(REPO_ROOT, FILE), render(rows, kept));
     console.log(`wrote ${FILE}`);
 }
 for (const o of [...new Set(odd)]) console.log(`note: ${o}`);

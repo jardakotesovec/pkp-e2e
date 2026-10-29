@@ -95,7 +95,7 @@ function detectWorkers() {
  */
 /** This clone's root, and the private matrix folder beside it (see projects). */
 const REPO_DIR = path.resolve(__dirname, '../..');
-const API_MATRIX_DIR = process.env.PKP_API_MATRIX_DIR || path.resolve(REPO_DIR, '../pkp-e2e-sec/api-matrix');
+const API_MATRIX_DIR = path.resolve(REPO_DIR, '../pkp-e2e-sec/api-matrix');
 
 const VALIDATION_PORT_OFFSET = 90;
 const REAUTH_PORT_OFFSET = 91;
@@ -210,6 +210,7 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
     suiteDir = suiteDir || path.join(appRoot, 'playwright');
 
     // base-test.js and subprocesses (installTest, reset) read these.
+    // The private matrix requires the harness from this clone through it.
     process.env.PKP_E2E_DIR = REPO_DIR;
     process.env.PKP_APP_NAME = appName;
     process.env.PKP_APP_ROOT = appRoot;

@@ -19,6 +19,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const { REPO_ROOT } = require('./apps.js');
+const { registryRows } = require('../shared/playwright/support/api-grids.js');
 const REPO = 'jardakotesovec/pkp-e2e';
 
 const args = process.argv.slice(2);
@@ -56,22 +57,16 @@ for (const dir of logDirs().filter((d) => fs.existsSync(d))) {
 
 // ---- the registry ----
 
-const routes = [];
-for (const line of fs.readFileSync(path.join(REPO_ROOT, 'docs/tracking/api-routes.md'), 'utf8').split('\n')) {
-    const cells = line.split('|').slice(1, -1).map((c) => c.trim().replace(/`/g, ''));
-    if (cells.length !== 7 || cells[0] === 'Route' || /^-+$/.test(cells[0])) continue;
-    const [key, method, routePath, apps, , owner, gate] = cells;
-    const pattern = routePath.split('/').map((seg) => (/^\{\w+\}$/.test(seg) ? '[^/]+' : seg.replace(/[.*+?^$()|[\]\\]/g, '\\$&'))).join('/');
-    routes.push({
-        key, method, path: routePath, apps: apps.split(' '), owner, gate,
-        re: new RegExp(`^${pattern}$`),
-        literal: routePath.replace(/\{\w+\}/g, '').length, // the more literal, the more specific
-        screens: new Map(), api: new Map(), statuses: new Set(), query: new Set(),
-    });
-}
+const routes = registryRows().map((r) => ({
+    ...r,
+    re: new RegExp(`^${r.path.split('/').map((seg) => (/^\{\w+\}$/.test(seg) ? '[^/]+' : seg.replace(/[.*+?^$()|[\]\\]/g, '\\$&'))).join('/')}$`),
+    literal: r.path.replace(/\{\w+\}/g, '').length, // the more literal, the more specific
+    screens: new Map(), api: new Map(), statuses: new Set(), query: new Set(),
+}));
 
 /** A roster username's role (`manager.maya` → manager); a scratch account is "scratch". */
-const role = (user) => (user === null ? 'nobody' : user === 'admin' ? 'admin' : user.includes('.') ? user.split('.')[0] : 'scratch');
+const role = (user) =>
+    user === null ? 'nobody' : user === '?' ? 'unknown' : user === 'admin' ? 'admin' : user.includes('.') ? user.split('.')[0] : 'scratch';
 
 const errors = [];
 const unmatched = new Map();

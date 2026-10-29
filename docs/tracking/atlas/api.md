@@ -65,7 +65,6 @@
 | API-047 | ojs omp ops | `PKP\API\v1\users\PKPUserController` | Users (base `users`): GET reviewers, GET report, GET {userId}, GET /, PUT {userId}/endRole/{userGroupId}, PUT {userId}/masthead/{userUserGroupId}. |
 | API-048 | ojs omp | `PKP\API\v1\vocabs\PKPInterestController` | Reviewer interests vocab (base `vocabs/interests`): GET /. OPS `vocabs` entry point mounts only PKPVocabController. Claimed by: reviewer-assignment-and-management. |
 | API-049 | ojs omp ops | `PKP\API\v1\vocabs\PKPVocabController` | Controlled vocabulary suggestions (base `vocabs`): GET /. Claimed by: publication-metadata. |
-| API-067 | ojs omp | `PKP\API\v1\submissions\reviewAssignments\ReviewAssignmentController` | Review assignment details (base `submissions/{submissionId}/reviewAssignments`): GET {reviewAssignmentId}, PUT {reviewAssignmentId}, PUT {reviewAssignmentId}/consider, GET {reviewAssignmentId}/review, PUT {reviewAssignmentId}/review. Mounted by the OJS and OMP `submissions` entry points, not by OPS. Added 2026-10-29: the controller postdates the sweep (pkp-lib `bab2688307`, pkp/pkp-lib#13111, 2026-08-05). Claimed by: reviewer-assignment-and-management. |
 
 ## OJS overlay (ojs-main/api)
 

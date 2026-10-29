@@ -1,36 +1,40 @@
 # API routes — every REST route and the feature that owns it
 
 This file lists every route the three apps register under `/api/v1/`, one
-section per controller, read straight from the controllers in the
-`checkouts/<app>` clones (the `_test` controllers, harness plumbing, are left
-out). Each route has one owner: the feature whose rule it implements, or
-`parked` when its atlas atom is parked in `UNASSIGNED.md`. A section title
-names the base path, the controller class (`[ojs]` marks an app's own
-subclass) and its atom in `atlas/api.md`.
+section per controller (its base path and class; `[ojs]` marks an app's own
+subclass), read straight from the controllers in the `checkouts/<app>`
+clones; the `_test` controllers, harness plumbing, are left out. How it is
+used: `docs/process/api.md`.
 
 The columns from Route to Roles are generated. **Route** is the route's name
 (its key here; an unnamed route is keyed by method and path), **Path** is
 relative to `/api/v1/`, **Apps** says which apps serve it, and **Roles** is
-the `roleAuthorizer` list of the middleware around it, as a hint for readers
-(`none`: no role middleware, so the handler checks access itself or the route
-is public). **Owner** and **Gate** are kept by hand. Gate names the
-permission grid the route follows, as `U40#edit-gate` for the table after
-`<a id="api-grid-edit-gate"></a>` in the U40 spec, or `—`.
+the `roleAuthorizer` list of the middleware around it, a hint for readers
+(`none`: no role middleware, so the handler checks access itself or the
+route is public). Two columns are kept by hand:
+
+- **Owner**: the feature whose rule the route implements, or `parked` while
+  its controller is parked in `UNASSIGNED.md`.
+- **Gate**: the permission grid the route follows, as `U40#edit-gate` for
+  the table after `<a id="api-grid-edit-gate"></a>` in the U40 spec;
+  `none: <reason>` when it has none on purpose; `—` not yet reviewed, which
+  a feature with grids may not leave.
 
 `npm run api-routes -- --write` regenerates the file and keeps both hand
-columns; a new route comes in with a blank Owner. `npm run api-routes -- --check`
-is the lint: it fails on routes missing here, rows no longer in code, an
-Owner that is not a feature, and a Gate whose grid does not parse. How the
-gates are used: `docs/process/api.md`.
+columns; a new route comes in with a blank Owner.
+`npm run api-routes -- --gate <gate> <route…>` sets a Gate.
+`npm run api-routes -- --check` is the lint: it fails on a route missing
+here, a row no longer in code, an Owner that is not a feature, a Gate whose
+grid does not parse, and a blank Gate on a feature with grids.
 
-### _dois — BackendDoiController [ojs] (API-050)
+### _dois — BackendDoiController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_doi.backend.issue.edit` | PUT | `_dois/issues/{issueId}` | ojs | admin manager | U45 | — |
 | `_doi.backend.galley.edit` | PUT | `_dois/galleys/{galleyId}` | ojs | admin manager | U45 | — |
 
-### _dois — BackendDoiController [omp] (API-058)
+### _dois — BackendDoiController [omp]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -38,13 +42,13 @@ gates are used: `docs/process/api.md`.
 | `_doi.backend.publication.format.edit` | PUT | `_dois/publicationFormats/{publicationFormatId}` | omp | admin manager | U45 | — |
 | `_doi.backend.submission.file.edit` | PUT | `_dois/submissionFiles/{submissionFileId}` | omp | admin manager | U45 | — |
 
-### _dois — BackendDoiController [ops] (API-063)
+### _dois — BackendDoiController [ops]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_doi.backend.galley.edit` | PUT | `_dois/galleys/{galleyId}` | ops | admin manager | U45 | — |
 
-### _dois — PKPBackendDoiController (API-001)
+### _dois — PKPBackendDoiController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -52,37 +56,37 @@ gates are used: `docs/process/api.md`.
 | `_doi.backend.peerReview.edit` | PUT | `_dois/peerReviews/{reviewId}` | ojs omp ops | admin manager | U45 | — |
 | `_doi.backend.authorResponse.edit` | PUT | `_dois/authorResponses/{responseId}` | ojs omp ops | admin manager | U45 | — |
 
-### _email — PKPEmailController (API-002)
+### _email — PKPEmailController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_email.create` | POST | `_email` | ojs omp ops | admin manager | U55 | — |
 
-### _i18n — I18nController (API-003)
+### _i18n — I18nController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_i18n.getTranslations` | GET | `_i18n/ui.js` | ojs omp ops | none | U57 | — |
 
-### _library — PKPLibraryController (API-004)
+### _library — PKPLibraryController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_library.getLibrary` | GET | `_library` | ojs omp ops | admin manager subEditor | U39 | — |
 
-### _payments — PKPBackendPaymentsSettingsController (API-005)
+### _payments — PKPBackendPaymentsSettingsController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_payment.backend.edit` | PUT | `_payments` | ojs omp | admin manager | U52 | — |
 
-### _submissions — BackendSubmissionsController [ojs] (API-051)
+### _submissions — BackendSubmissionsController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_submission.payment` | PUT | `_submissions/{submissionId}/payment` | ojs | admin manager subEditor assistant | U52 | — |
 
-### _submissions — BackendSubmissionsController [omp] (API-059)
+### _submissions — BackendSubmissionsController [omp]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -90,7 +94,7 @@ gates are used: `docs/process/api.md`.
 | `_submission.featuredOrder.save` | POST | `_submissions/saveFeaturedOrder` | omp | admin manager | U70 | — |
 | `_submission.catalog.addTo` | PUT | `_submissions/addToCatalog` | omp | admin manager | U70 | — |
 
-### _submissions — PKPBackendSubmissionsController (API-006)
+### _submissions — PKPBackendSubmissionsController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -102,13 +106,13 @@ gates are used: `docs/process/api.md`.
 | `_submission.getViewsCount` | GET | `_submissions/viewsCount` | ojs omp ops | manager subEditor assistant author reviewer | U23 | — |
 | `_submission.getReviewAssignments` | GET | `_submissions/reviewerAssignments` | ojs omp ops | reviewer | U28 | — |
 
-### _uploadPublicFile — PKPUploadPublicFileController (API-007)
+### _uploadPublicFile — PKPUploadPublicFileController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_uploadPublicFile.uploadFile` | POST | `_uploadPublicFile` | ojs omp ops | admin manager subEditor assistant author reviewer reader | U09 | — |
 
-### announcements — PKPAnnouncementController (API-008)
+### announcements — PKPAnnouncementController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -118,7 +122,7 @@ gates are used: `docs/process/api.md`.
 | `announcement.edit` | PUT | `announcements/{announcementId}` | ojs omp ops | admin manager | U12 | U12#announcements |
 | `announcement.delete` | DELETE | `announcements/{announcementId}` | ojs omp ops | admin manager | U12 | U12#announcements |
 
-### categories — CategoryCategoryController (API-010)
+### categories — CategoryCategoryController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -128,7 +132,7 @@ gates are used: `docs/process/api.md`.
 | — | PUT | `categories/{categoryId}` | ojs omp ops | admin manager | U16 | — |
 | — | DELETE | `categories/{categoryId}` | ojs omp ops | admin manager | U16 | — |
 
-### comments — UserCommentController (API-012)
+### comments — UserCommentController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -144,7 +148,7 @@ gates are used: `docs/process/api.md`.
 | `comment.getReports` | GET | `comments/{commentId}/reports` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
 | `comment.deleteReports` | DELETE | `comments/{commentId}/reports` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
 
-### contexts — PKPContextController (API-013)
+### contexts — PKPContextController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -157,7 +161,7 @@ gates are used: `docs/process/api.md`.
 | `context.add` | POST | `contexts` | ojs omp ops | admin | U59 | — |
 | `context.delete` | DELETE | `contexts/{contextId}` | ojs omp ops | admin | U59 | — |
 
-### contributorRoles — ContributorRoleController (API-014)
+### contributorRoles — ContributorRoleController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -168,7 +172,7 @@ gates are used: `docs/process/api.md`.
 | `contributorRole.editContributorRole` | PUT | `contributorRoles/{roleId}` | ojs omp ops | admin manager | U41 | U41#contributor-roles |
 | `contributorRole.deleteContributorRole` | DELETE | `contributorRoles/{roleId}` | ojs omp ops | admin manager | U41 | U41#contributor-roles |
 
-### dois — DoiController [ojs] (API-052)
+### dois — DoiController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -179,7 +183,7 @@ gates are used: `docs/process/api.md`.
 | `doi.issues.markUnregistered` | PUT | `dois/issues/markUnregistered` | ojs | admin manager | U45 | — |
 | `doi.issues.markStale` | PUT | `dois/issues/markStale` | ojs | admin manager | U45 | — |
 
-### dois — PKPDoiController (API-016)
+### dois — PKPDoiController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -197,7 +201,7 @@ gates are used: `docs/process/api.md`.
 | `doi.deposite.all` | PUT | `dois/depositAll` | ojs omp ops | admin manager | U45 | — |
 | `doi.delete` | DELETE | `dois/{doiId}` | ojs omp ops | admin manager | U45 | — |
 
-### editTaskTemplates — PKPEditTaskTemplateController (API-017)
+### editTaskTemplates — PKPEditTaskTemplateController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -207,7 +211,7 @@ gates are used: `docs/process/api.md`.
 | — | GET | `editTaskTemplates/variables` | ojs omp ops | admin manager | U37 | — |
 | — | GET | `editTaskTemplates` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
 
-### emailTemplates — PKPEmailTemplateController (API-019)
+### emailTemplates — PKPEmailTemplateController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -218,21 +222,21 @@ gates are used: `docs/process/api.md`.
 | `emailTemplate.restoreDefaults` | DELETE | `emailTemplates/restoreDefaults` | ojs omp ops | admin manager | U56 | — |
 | `emailTemplate.delete` | DELETE | `emailTemplates/{key}` | ojs omp ops | admin manager | U56 | — |
 
-### emails — PKPEmailController (API-018)
+### emails — PKPEmailController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `emails.getMany` | GET | `emails/authorEmails` | ojs omp ops | author | U38 | — |
 | `emails.getEmail` | GET | `emails/{emailId}` | ojs omp ops | manager subEditor author | U38 | — |
 
-### genres — GenreController (API-021)
+### genres — GenreController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `genre.getMany` | GET | `genres` | ojs omp ops | admin manager subEditor assistant author | U58 | — |
 | `genre.get` | GET | `genres/{genreId}` | ojs omp ops | admin manager subEditor assistant author | U58 | — |
 
-### highlights — HighlightsController (API-022)
+### highlights — HighlightsController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -243,7 +247,7 @@ gates are used: `docs/process/api.md`.
 | `highlight.order` | PUT | `highlights/order` | ojs omp ops | admin manager | U11 | U11#highlights |
 | `highlight.delete` | DELETE | `highlights/{highlightId}` | ojs omp ops | admin manager | U11 | U11#highlights |
 
-### institutions — PKPInstitutionController (API-023)
+### institutions — PKPInstitutionController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -253,7 +257,7 @@ gates are used: `docs/process/api.md`.
 | `institution.edit` | PUT | `institutions/{institutionId}` | ojs omp ops | manager | U66 | U66#institutions |
 | `institution.delete` | DELETE | `institutions/{institutionId}` | ojs omp ops | manager | U66 | U66#institutions |
 
-### invitations — InvitationController (API-024)
+### invitations — InvitationController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -269,7 +273,7 @@ gates are used: `docs/process/api.md`.
 | `invitation.refine` | PUT | `invitations/{invitationId}/key/{key}/refine` | ojs omp ops | none | U06 | — |
 | `invitation.decline` | PUT | `invitations/{invitationId}/key/{key}/decline` | ojs omp ops | none | U06 | — |
 
-### issues — IssueController [ojs] (API-053)
+### issues — IssueController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -278,7 +282,7 @@ gates are used: `docs/process/api.md`.
 | `issue.getIssue` | GET | `issues/{issueId}` | ojs | manager subEditor assistant author reviewer | U50 | — |
 | `issue.getAssignmentOptions` | GET | `issues/assignmentOptions` | ojs | manager subEditor assistant author reviewer | U50 | — |
 
-### jobs — PKPJobController (API-026)
+### jobs — PKPJobController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -288,14 +292,14 @@ gates are used: `docs/process/api.md`.
 | `job.redispatch` | POST | `jobs/redispatch/{jobId}` | ojs omp ops | admin | U61 | — |
 | `job.delete.failed` | DELETE | `jobs/failed/delete/{jobId}` | ojs omp ops | admin | U61 | — |
 
-### mailables — PKPMailableController (API-027)
+### mailables — PKPMailableController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `mailable.getMany` | GET | `mailables` | ojs omp ops | admin manager | U56 | — |
 | `mailable.getMailable` | GET | `mailables/{id}` | ojs omp ops | admin manager | U56 | — |
 
-### navigationMenus — PKPNavigationMenuController (API-028)
+### navigationMenus — PKPNavigationMenuController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -305,14 +309,14 @@ gates are used: `docs/process/api.md`.
 | `navigationMenu.add` | POST | `navigationMenus` | ojs omp ops | admin manager | U08 | — |
 | `navigationMenu.edit` | PUT | `navigationMenus/{navigationMenuId}` | ojs omp ops | admin manager | U08 | — |
 
-### orcid — OrcidController (API-029)
+### orcid — OrcidController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `orcid.requestAuthorVerification` | POST | `orcid/requestAuthorVerification/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | — |
 | `orcid.delete` | POST | `orcid/deleteForAuthor/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | — |
 
-### peerReviews — PeerReviewController (API-030)
+### peerReviews — PeerReviewController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -321,7 +325,7 @@ gates are used: `docs/process/api.md`.
 | `peerReviews.open.submissions.get` | GET | `peerReviews/open/submissions/{submissionId}` | ojs | none | parked | — |
 | `peerReviews.open.submissions.summary.get` | GET | `peerReviews/open/submissions/{submissionId}/summary` | ojs | none | parked | — |
 
-### reviewers/recommendations — ReviewerRecommendationController [ojs] (API-054)
+### reviewers/recommendations — ReviewerRecommendationController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -332,7 +336,7 @@ gates are used: `docs/process/api.md`.
 | `reviewer.recommendations.edit.status` | PUT | `reviewers/recommendations/{reviewerRecommendationId}/status` | ojs | admin manager subEditor | U29 | — |
 | `reviewer.recommendations.delete` | DELETE | `reviewers/recommendations/{reviewerRecommendationId}` | ojs | admin manager subEditor | U29 | — |
 
-### reviews — PKPReviewController (API-032)
+### reviews — PKPReviewController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -347,7 +351,7 @@ gates are used: `docs/process/api.md`.
 | `review.export.getFile` | GET | `reviews/{submissionId}/exports/{fileId}` | ojs omp | admin manager subEditor assistant | U27 | — |
 | `review.sendToOrcid` | POST | `reviews/{submissionId}/{reviewAssignmentId}/sendToOrcid` | ojs omp | admin manager subEditor | U04 | — |
 
-### rors — PKPRorController (API-033)
+### rors — PKPRorController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -355,14 +359,14 @@ gates are used: `docs/process/api.md`.
 | `ror.getMany` | GET | `rors` | ojs omp ops | manager subEditor assistant author | U41 | U41#registry-lookup |
 | `ror.addOrEdit` | POST | `rors` | ojs omp ops | manager subEditor assistant author | U41 | U41#registry-lookup |
 
-### sections — SectionController (API-034)
+### sections — SectionController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `section.getMany` | GET | `sections` | ojs | admin manager | U17 | — |
 | `section.getSection` | GET | `sections/{sectionId}` | ojs | admin manager | U17 | — |
 
-### site — PKPSiteController (API-035)
+### site — PKPSiteController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -371,7 +375,7 @@ gates are used: `docs/process/api.md`.
 | `site.edit` | PUT | `site` | ojs omp ops | admin | U60 | — |
 | `site.editTheme` | PUT | `site/theme` | ojs omp ops | admin | U60 | — |
 
-### stats/contexts — PKPStatsContextController (API-036)
+### stats/contexts — PKPStatsContextController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -380,14 +384,14 @@ gates are used: `docs/process/api.md`.
 | `stats.context.contextStat` | GET | `stats/contexts/{contextId}` | ojs omp ops | admin manager subEditor | U64 | — |
 | `stats.context.multipleContextStat` | GET | `stats/contexts` | ojs omp ops | admin manager subEditor | U64 | — |
 
-### stats/editorial — PKPStatsEditorialController (API-037)
+### stats/editorial — PKPStatsEditorialController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `stats.editorial.getEditorialStat` | GET | `stats/editorial` | ojs omp ops | admin manager subEditor | U65 | — |
 | `stats.editorial.getAverages` | GET | `stats/editorial/averages` | ojs omp ops | admin manager subEditor | U65 | — |
 
-### stats/issues — StatsIssueController [ojs] (API-056)
+### stats/issues — StatsIssueController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -396,7 +400,7 @@ gates are used: `docs/process/api.md`.
 | `stats.issue.getTimeline` | GET | `stats/issues/{issueId}/timeline` | ojs | admin manager subEditor | U64 | — |
 | `stats.issue.getMany` | GET | `stats/issues` | ojs | admin manager subEditor | U64 | — |
 
-### stats/publications — PKPStatsPublicationController (API-038)
+### stats/publications — PKPStatsPublicationController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -409,7 +413,7 @@ gates are used: `docs/process/api.md`.
 | `stats.publication.getRegions` | GET | `stats/publications/regions` | ojs omp ops | admin manager subEditor | U64 | — |
 | `stats.publication.getCities` | GET | `stats/publications/cities` | ojs omp ops | admin manager subEditor | U64 | — |
 
-### stats/sushi — PKPStatsSushiController (API-039)
+### stats/sushi — PKPStatsSushiController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -419,7 +423,7 @@ gates are used: `docs/process/api.md`.
 | `stats.sushi.getReportsPR` | GET | `stats/sushi/reports/pr` | ojs omp ops | ? | U64 | — |
 | `stats.sushi.getReportsPR1` | GET | `stats/sushi/reports/pr_p1` | ojs omp ops | ? | U64 | — |
 
-### stats/sushi — StatsSushiController [ojs] (API-055)
+### stats/sushi — StatsSushiController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -428,26 +432,26 @@ gates are used: `docs/process/api.md`.
 | `stats.sushi.getReportsIR` | GET | `stats/sushi/reports/ir` | ojs | ? | U64 | — |
 | `stats.sushi.getReportsIRA1` | GET | `stats/sushi/reports/ir_a1` | ojs | ? | U64 | — |
 
-### stats/sushi — StatsSushiController [omp] (API-060)
+### stats/sushi — StatsSushiController [omp]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `stats.sushi.getReportsTR` | GET | `stats/sushi/reports/tr` | omp | ? | U64 | — |
 | `stats.sushi.getReportsTRB3` | GET | `stats/sushi/reports/tr_b3` | omp | ? | U64 | — |
 
-### stats/sushi — StatsSushiController [ops] (API-064)
+### stats/sushi — StatsSushiController [ops]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `stats.sushi.getReportsIR` | GET | `stats/sushi/reports/ir` | ops | ? | U64 | — |
 
-### stats/users — PKPStatsUserController (API-040)
+### stats/users — PKPStatsUserController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `stats.user.getUserStat` | GET | `stats/users` | ojs omp ops | admin manager subEditor | U65 | — |
 
-### submissions — EditorialTaskController (API-044)
+### submissions — EditorialTaskController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -464,7 +468,7 @@ gates are used: `docs/process/api.md`.
 | `submission.note.delete` | DELETE | `submissions/{submissionId}/tasks/{taskId}/notes/{noteId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
 | `submission.task.participants.get` | GET | `submissions/{submissionId}/stages/{stageId}/tasks/participants` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
 
-### submissions — PKPSubmissionController (API-042)
+### submissions — PKPSubmissionController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -505,7 +509,7 @@ gates are used: `docs/process/api.md`.
 | `submission.submit` | PUT | `submissions/{submissionId}/submit` | ojs omp ops | manager subEditor author | U21 | — |
 | `submission.add` | POST | `submissions` | ojs omp ops | none | U21 | — |
 
-### submissions — SubmissionController [ojs] (API-057)
+### submissions — SubmissionController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -513,7 +517,7 @@ gates are used: `docs/process/api.md`.
 | `submission.publication._components.issue` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/issue` | ojs | admin manager subEditor assistant | U49 | — |
 | `submission.publication._components.submissionPayment` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/submissionPayment` | ojs | admin manager subEditor assistant | U52 | — |
 
-### submissions — SubmissionController [omp] (API-061)
+### submissions — SubmissionController [omp]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -521,14 +525,14 @@ gates are used: `docs/process/api.md`.
 | `submission.publication._components.catalogEntry` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/catalogEntry` | omp | admin manager subEditor assistant | U70 | — |
 | `submission.publication._components.publicationDates` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/publicationDates` | omp | admin manager subEditor assistant | U72 | — |
 
-### submissions — SubmissionController [ops] (API-065)
+### submissions — SubmissionController [ops]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `submission.publication.relate` | PUT | `submissions/{submissionId}/publications/{publicationId}/relate` | ops | admin manager subEditor assistant author | U75 | — |
 | `submission.publication._components.issue` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/issue` | ops | admin manager subEditor assistant | U49 | — |
 
-### submissions/{submissionId}/files — PKPSubmissionFileController (API-043)
+### submissions/{submissionId}/files — PKPSubmissionFileController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -540,7 +544,7 @@ gates are used: `docs/process/api.md`.
 | `submission.files.review` | GET | `submissions/{submissionId}/files/review/{reviewId}` | ojs omp ops | admin manager subEditor assistant reviewer | U27 | — |
 | `submission.files.copy` | PUT | `submissions/{submissionId}/files/{submissionFileId}/copy` | ojs omp ops | admin manager subEditor | U36 | — |
 
-### submissions/{submissionId}/publications/{publicationId}/bodyText — PKPBodyTextController (API-009)
+### submissions/{submissionId}/publications/{publicationId}/bodyText — PKPBodyTextController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -548,7 +552,7 @@ gates are used: `docs/process/api.md`.
 | `publication.bodyText.save` | PUT | `submissions/{submissionId}/publications/{publicationId}/bodyText` | ojs | admin manager subEditor assistant | U48 | — |
 | `publication.bodyText.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/bodyText` | ojs | admin manager subEditor assistant | U48 | — |
 
-### submissions/{submissionId}/publications/{publicationId}/citations — PKPCitationController (API-011)
+### submissions/{submissionId}/publications/{publicationId}/citations — PKPCitationController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -561,7 +565,7 @@ gates are used: `docs/process/api.md`.
 | `citation.deleteCitationsByPublicationId` | DELETE | `submissions/{submissionId}/publications/{publicationId}/citations/deleteCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | — |
 | `citation.reprocessCitationsByPublicationId` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/reprocessCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | — |
 
-### submissions/{submissionId}/publications/{publicationId}/dataCitations — PKPDataCitationController (API-015)
+### submissions/{submissionId}/publications/{publicationId}/dataCitations — PKPDataCitationController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -572,7 +576,7 @@ gates are used: `docs/process/api.md`.
 | `dataCitation.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/dataCitations/{dataCitationId}` | ojs omp ops | admin manager subEditor assistant author | U42 | — |
 | `dataCitation.order` | PUT | `submissions/{submissionId}/publications/{publicationId}/dataCitations/order` | ojs omp ops | admin manager subEditor assistant author | U42 | — |
 
-### submissions/{submissionId}/publications/{publicationId}/funders — PKPFunderController (API-020)
+### submissions/{submissionId}/publications/{publicationId}/funders — PKPFunderController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -583,7 +587,7 @@ gates are used: `docs/process/api.md`.
 | `funders.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/funders/{funderId}` | ojs omp ops | admin manager subEditor assistant author | U43 | U40#edit-gate |
 | `funders.order` | PUT | `submissions/{submissionId}/publications/{publicationId}/funders/order` | ojs omp ops | admin manager subEditor assistant author | U43 | U40#edit-gate |
 
-### submissions/{submissionId}/publications/{publicationId}/jats — PKPJatsController (API-025)
+### submissions/{submissionId}/publications/{publicationId}/jats — PKPJatsController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -592,7 +596,7 @@ gates are used: `docs/process/api.md`.
 | `publication.jats.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | — |
 | `publication.jats.setVisibility` | PUT | `submissions/{submissionId}/publications/{publicationId}/jats/visibility` | ojs | admin manager subEditor assistant | U48 | — |
 
-### submissions/{submissionId}/publications/{publicationId}/mediaFiles — MediaFilesController (API-041)
+### submissions/{submissionId}/publications/{publicationId}/mediaFiles — MediaFilesController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -603,7 +607,7 @@ gates are used: `docs/process/api.md`.
 | `mediaFiles.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant | U47 | — |
 | `mediaFiles.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant | U47 | — |
 
-### submissions/{submissionId}/reviewAssignments — ReviewAssignmentController (API-067)
+### submissions/{submissionId}/reviewAssignments — ReviewAssignmentController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -613,7 +617,7 @@ gates are used: `docs/process/api.md`.
 | `submission.reviewAssignment.review.getReview` | GET | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}/review` | ojs omp | admin manager subEditor assistant | U27 | — |
 | `submission.reviewAssignment.review.editReview` | PUT | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}/review` | ojs omp | admin manager subEditor | U27 | — |
 
-### submissions/{submissionId}/reviewers/suggestions — ReviewerSuggestionController (API-031)
+### submissions/{submissionId}/reviewers/suggestions — ReviewerSuggestionController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -623,19 +627,19 @@ gates are used: `docs/process/api.md`.
 | `reviewer.suggestions.edit` | PUT | `submissions/{submissionId}/reviewers/suggestions/{suggestionId}` | ojs omp | admin manager subEditor assistant author | U31 | — |
 | `reviewer.suggestions.delete` | DELETE | `submissions/{submissionId}/reviewers/suggestions/{suggestionId}` | ojs omp | admin manager subEditor assistant author | U31 | — |
 
-### temporaryFiles — PKPTemporaryFilesController (API-045)
+### temporaryFiles — PKPTemporaryFilesController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `temporaryFile.uploadFile` | POST | `temporaryFiles` | ojs omp ops | admin manager subEditor assistant author reviewer | U36 | — |
 
-### userGroups — UserGroupController (API-046)
+### userGroups — UserGroupController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `userGroups.getMany` | GET | `userGroups` | ojs omp ops | admin manager subEditor assistant author reviewer | U54 | — |
 
-### users — PKPUserController (API-047)
+### users — PKPUserController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
@@ -646,13 +650,13 @@ gates are used: `docs/process/api.md`.
 | `user.endRole` | PUT | `users/{userId}/endRole/{userGroupId}` | ojs omp ops | admin manager | U53 | — |
 | `user.masthead` | PUT | `users/{userId}/masthead/{userUserGroupId}` | ojs omp ops | admin manager | U53 | — |
 
-### vocabs — PKPVocabController (API-049)
+### vocabs — PKPVocabController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `vocab.getMany` | GET | `vocabs` | ojs omp ops | admin manager subEditor assistant author | U40 | none: it suggests only terms already public on published versions; no role rule (API4 holds its scope) |
 
-### vocabs/interests — PKPInterestController (API-048)
+### vocabs/interests — PKPInterestController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|

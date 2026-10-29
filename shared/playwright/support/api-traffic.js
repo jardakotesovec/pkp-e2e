@@ -44,7 +44,9 @@ function record({method, url, status, user, via}) {
         q: [...new Set(parsed.searchParams.keys())].sort(),
         c: match[1],
         s: status,
-        u: user || null,
+        // null: nobody signed in; '?': a context the test signed in itself
+        // (a login form), whose user no fixture knows.
+        u: user === undefined ? '?' : user,
         f: current.file,
         via,
     });

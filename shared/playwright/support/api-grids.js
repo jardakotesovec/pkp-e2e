@@ -30,22 +30,46 @@ function tableRows(lines) {
 }
 
 /**
- * Every registry route whose Gate is set.
+ * Every row of the route registry, in file order. `key` is the route's
+ * name, or `METHOD path` for an unnamed route; `scope` the app whose own
+ * controller subclass lists it (`pkp` for the shared ones); `line` the row
+ * as written.
  *
- * @returns {{key: string, method: string, path: string, apps: string[], owner: string, gate: string}[]}
+ * @returns {{scope: string, key: string, method: string, path: string, apps: string[], roles: string, owner: string, gate: string, line: string}[]}
  */
-function gatedRoutes(registryFile = REGISTRY) {
-    const routes = [];
-    for (const cells of tableRows(fs.readFileSync(registryFile, 'utf8').split('\n'))) {
-        if (cells.length !== 7 || cells[0] === 'Route' || /^-+$/.test(cells[0])) {
+function registryRows(registryFile = REGISTRY) {
+    const rows = [];
+    let scope = 'pkp';
+    for (const line of fs.readFileSync(registryFile, 'utf8').split('\n')) {
+        const heading = line.match(/^### .* — \w+(?: \[(\w+)\])?/);
+        if (heading) {
+            scope = heading[1] || 'pkp';
             continue;
         }
-        const [key, method, routePath, apps, , owner, gate] = cells.map((cell) => cell.replace(/`/g, ''));
-        if (gate && gate !== '—' && !gate.startsWith('none: ')) {
-            routes.push({key, method, path: routePath, apps: apps.split(/\s+/), owner, gate});
+        const c = line.split('|').map((cell) => cell.trim());
+        if (c.length !== 9 || !/^[A-Z]+$/.test(c[2])) {
+            continue;
         }
+        const name = c[1].replace(/`/g, '');
+        const routePath = c[3].replace(/`/g, '');
+        rows.push({
+            scope,
+            key: name === '—' ? `${c[2]} ${routePath}` : name,
+            method: c[2],
+            path: routePath,
+            apps: c[4].split(/\s+/),
+            roles: c[5],
+            owner: c[6],
+            gate: c[7],
+            line,
+        });
     }
-    return routes;
+    return rows;
+}
+
+/** The routes a permission grid covers: a Gate that is neither `—` nor `none: …`. */
+function gatedRoutes(registryFile = REGISTRY) {
+    return registryRows(registryFile).filter((r) => r.gate && r.gate !== '—' && !r.gate.startsWith('none: '));
 }
 
 const CELL = {'✓': true, '—': false, '?': null};
@@ -86,4 +110,4 @@ function loadGrid(ref, specsDir = path.join(REPO, 'docs/specs')) {
     return {ref, file, states, rows};
 }
 
-module.exports = {gatedRoutes, loadGrid};
+module.exports = {registryRows, gatedRoutes, loadGrid};

@@ -60,7 +60,10 @@ The scheduled prompt only points here; this section is the day's order.
    report, a register entry or is dismissed, and its line is deleted).
 4. Check the latest `e2e-tests.yml` run on each app's `main` (harness.md
    "CI") and triage anything red against `ci-triage.md` before calling it
-   new. A daily check also catches a red nobody has reported yet.
+   new. A daily check also catches a red nobody has reported yet. Then the
+   server errors the suites met: `npm run api-traffic -- <run-id>` on the
+   latest pkp-e2e `main` run, its "Server errors" section; a 5xx no spec
+   records is a finding (`api.md` "Keeping it true").
 5. Merge any companion whose app PR has merged ("A developer's PR fails
    the suite", step 5).
 6. Read the stable line for regressions ("The stable line:
@@ -269,7 +272,9 @@ is left, the next morning picks up from the files.
    is the upstream session's interrupt, its diagnosis this session's.
 11. **Stale artifacts and CI balance.** Fix what the day's work showed
    stale, and refresh the shard timings when they drifted ("Keep CI
-   balanced").
+   balanced"). On Mondays, the whole API matrix on the three apps
+   (`api.md` "The matrix"), so a maker an upstream change broke does not
+   rot unseen.
 12. **Quiet mornings.** When the day's steps left nothing open:
    - **Drift sweep of one spec**, the one whose PROGRESS note carries the
      oldest "Swept" date (none counts as oldest). Its kept checks
@@ -588,13 +593,13 @@ The apps move; the suite follows. The baselines live in
    The behavior the app now shows is coverage owed: the entry's "Register
    carries it" item goes, and the path becomes a bullet or a **Planned**
    item as above, because a test never asserted it while it was a bug.
-   **API routes** (`api.md`): a diff that touches an `api/` folder runs
-   `npm run api-routes -- --write`; each new route gets its Owner the same
-   day, and its Gate when an existing grid states its rule, and `--check`
-   passes. A diff that touches a gated route or its grid's rule runs the
-   matrix for that gate on the apps it reaches; a cell that now disagrees
-   is judged as `api.md` "The matrix" says, a security one through the
-   private repo like any other.
+   **API routes** (`api.md` "Keeping it true"): a diff that touches an
+   `api/` folder runs `npm run api-routes -- --write`; each new route gets
+   its Owner the same day, and on a feature with grids its Gate or
+   `none: <reason>`, until `--check` passes; then the whole matrix runs on
+   the three apps, and a cell that now disagrees is judged as `api.md`
+   "The matrix" says, a security one through the private repo like any
+   other.
 5. **Hunt regressions.** Reviewing the diff IS a QA review of the team's
    recent work, and step 3's question ("does the suite care?") is not the
    same as "does this break something?". Ask the second question of every

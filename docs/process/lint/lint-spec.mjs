@@ -9,7 +9,7 @@
 // REFERENCE INTEGRITY ONLY (maintainer, 2026-07-31 — wording, vocabulary and the leak rule
 // are the writer's judgment, never linted): campaign identifiers a reader cannot resolve
 // (TEMPLATE rule 5) · register anatomy · link/anchor/footnote resolution.
-// Checks: campaign · shape · coverage · register · links; --tests: scenarios vs suites. Findings print "file:line — check — excerpt"; exit 1.
+// Checks: campaign · shape · coverage · register · links; --tests: scenarios vs suites, API checks vs their tests. Findings print "file:line — check — excerpt"; exit 1.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -492,6 +492,53 @@ function scenariosOf(doc) {
     return out;
 }
 
+// The spec's API checks ("### Through the API" at the end of Canonical
+// scenarios: `API<n>. **Title** {badge}`) and the tests that run them, one
+// app-neutral file per feature in shared/playwright/tests/api/, each titled
+// `API<n>: <the item's title>` (docs/process/api.md "API checks").
+function apiChecksOf(doc) {
+    const out = [];
+    for (let i = 0; i < doc.tailStart; i++) {
+        if (doc.skip[i] || !/^Canonical scenarios/.test(doc.h2[i])) continue;
+        const m = doc.lines[i].match(/^API(\d+)\.\s+\*\*(.+?)\*\*/);
+        if (m) out.push({ n: Number(m[1]), line: i + 1, title: m[2].trim() });
+    }
+    return out;
+}
+
+function apiTests(feature, root) {
+    const dir = path.join(root, '..', 'shared', 'playwright', 'tests', 'api');
+    const tests = [];
+    if (!fs.existsSync(dir)) return tests;
+    for (const f of fs.readdirSync(dir).filter((x) => x.startsWith(feature + '-') && x.endsWith('.api.spec.js')).sort()) {
+        const file = path.join(dir, f);
+        fs.readFileSync(file, 'utf8').split('\n').forEach((l, i) => {
+            const m = l.match(/^\s*test\(\s*(['"`])((?:\\.|(?!\1).)*)\1/);
+            if (m) tests.push({ file, line: i + 1, title: m[2].replace(/\\(.)/g, '$1') });
+        });
+    }
+    return tests;
+}
+
+function checkApiTests(file, feature, doc, root) {
+    const out = [];
+    const checks = apiChecksOf(doc);
+    const byN = new Map(checks.map((c) => [c.n, c]));
+    const seen = new Map();
+    for (const t of apiTests(feature, root)) {
+        const at = { file: t.file, line: t.line };
+        const m = t.title.match(/^API(\d+): (.+)$/);
+        if (!m) { out.push({ ...at, msg: `"${excerpt(t.title, 50)}" names no API check; an API test title opens API<n>: ` }); continue; }
+        const c = byN.get(Number(m[1]));
+        if (!c) { out.push({ ...at, msg: `API${m[1]}: the spec has no API check ${m[1]}` }); continue; }
+        if (m[2] !== c.title) out.push({ ...at, msg: `API${m[1]}: the title differs from the spec's "${excerpt(c.title, 60)}"` });
+        seen.set(c.n, (seen.get(c.n) || 0) + 1);
+        if (seen.get(c.n) > 1) out.push({ ...at, msg: `two tests on API${c.n}; one test per API check` });
+    }
+    for (const c of checks) if (!seen.has(c.n)) out.push({ file, line: c.line, msg: `API check ${c.n} "${excerpt(c.title, 40)}" has no API${c.n} test in shared/playwright/tests/api/` });
+    return out;
+}
+
 function suiteTests(feature, app, root) {
     const tests = [];
     for (const dir of [path.join(root, app, 'playwright', 'tests'), path.join(root, app, 'playwright', 'tests', 'serial')]) {
@@ -541,6 +588,7 @@ function checkTests(file, root = APPS_ROOT) {
         }
         for (const s of expected) if (!covered.has(s.n)) out.push({ file, line: s.line, msg: `scenario ${s.n} "${excerpt(s.title, 40)}" has no S${s.n} test in ${app}` });
     }
+    out.push(...checkApiTests(file, feature, doc, root));
     return out.sort((a, b) => (a.file === b.file ? a.line - b.line : a.file === file ? -1 : b.file === file ? 1 : a.file.localeCompare(b.file)));
 }
 
@@ -552,7 +600,7 @@ function runTests(files, root = APPS_ROOT) {
         total += findings.length;
         for (const f of findings) console.log(`${rel(f.file)}:${f.line} — tests — ${excerpt(f.msg, 160)}`);
     }
-    if (total === 0) console.log(`OK — ${files.length} spec(s): every scenario has its S<n> test in every app its badge names`);
+    if (total === 0) console.log(`OK — ${files.length} spec(s): every scenario has its S<n> test in every app its badge names, every API check its API<n> test`);
     else console.log(`\n${total} finding(s) in ${files.length} spec(s)`);
     return total === 0 ? 0 : 1;
 }
