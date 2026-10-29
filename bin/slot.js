@@ -35,6 +35,7 @@
  * A release (free or blocked), reconcile and free also stop the slot's
  * `php -S` servers (stopSlotServers): the probe, validation and dataset
  * servers outlive their scripts on purpose, and nothing else stopped them.
+ * The browsers a run of the slot left behind go with them.
  *
  * acquire, release, reconcile and free belong to the bot and the operator: a
  * Claude session (CLAUDECODE set) that runs one is refused, since a release
@@ -414,9 +415,25 @@ function acquire({thread, session, resume, dir, title, 'fresh-session': freshSes
  * leader takes its group down (the loop and `php -S` together: killing
  * `php -S` alone lets the loop start it again); anything else goes alone.
  * SIGTERM, then SIGKILL after 3 s. The probe servers' pid files go too.
+ *
+ * The slot's browsers go the same way: a `chrome`, `Cypress`, its crashpad
+ * handler or an `Xvfb` whose working directory lies in the clone (both
+ * Playwright and an app's Cypress start the browser from the checkout or
+ * the suite dir). A run killed mid-way leaves them, and nothing else
+ * stops them: three Chromes of a crashed Cypress 5.6 run lived eight days
+ * on the VM (2026-10-21). bin/orphan-sweep.sh is the net under this.
  */
 function stopSlotServers(dir) {
     const inSlot = (p) => typeof p === 'string' && [`${dir}/`, `${oreDir(dir)}/`].some((d) => p.replace(/^"/, '').startsWith(d));
+    const BROWSERS = new Set(['chrome', 'Cypress', 'chrome_crashpad', 'Xvfb']); // comm, 15 chars
+    const isSlotBrowser = (pid) => {
+        try {
+            if (!BROWSERS.has(fs.readFileSync(`/proc/${pid}/comm`, 'utf8').trim())) return false;
+            return inSlot(fs.readlinkSync(`/proc/${pid}/cwd`));
+        } catch {
+            return false;
+        }
+    };
     const isServer = (argv) => {
         const bin = path.basename(argv[0] || '');
         if (/^php/.test(bin)) {
@@ -442,7 +459,7 @@ function stopSlotServers(dir) {
         const pid = Number(e);
         try {
             const argv = fs.readFileSync(`/proc/${pid}/cmdline`, 'utf8').split('\0');
-            if (!isServer(argv)) continue;
+            if (!isServer(argv) && !isSlotBrowser(pid)) continue;
             const stat = fs.readFileSync(`/proc/${pid}/stat`, 'utf8');
             matches.push({pid, pgid: Number(stat.slice(stat.lastIndexOf(')') + 2).split(' ')[2])});
         } catch {

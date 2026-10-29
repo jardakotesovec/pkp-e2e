@@ -20,6 +20,7 @@
     "dataset-facts": "node bin/dataset-facts.js",
     "probe-servers": "node bin/probe-servers.js",
     "fleet-prep": "node bin/fleet-prep.js",
+    "cypress": "node bin/cypress-line.js",
     "test:final": "node bin/test-final.js",
     "shard-timings": "node bin/shard-timings.js",
     "lint:suite": "node bin/lint-suite.js",

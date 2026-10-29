@@ -227,6 +227,47 @@ No suite is meant to run on any of the three lines.
   PKP_E2E_LINE=stable-3_4_0 PROBE_FEATURE=issues-3_4 PROBE_AGENT=x node bin/probe.js all shared/playwright/checks/harness/lines/lines.js
   ```
 
+- **The apps' own Cypress suites.** pkp's CI runs each branch's Cypress
+  data suite (pkp-github-actions `run-data-integration-tests.sh`: a fresh
+  install through the installer, then a context, users, issues and
+  submissions through the screens). `npm run cypress -- <app>` runs it
+  here on the line `PKP_E2E_LINE` names (`main` unset), as a tool for
+  reading an upstream CI red on a branch or a PR that touches those
+  tests, never as a standing step:
+
+  ```bash
+  PKP_E2E_LINE=stable-3_3_0 npm run cypress -- ojs                    # the whole data suite, ~20 min on Electron
+  PKP_E2E_LINE=stable-3_3_0 npm run cypress -- ojs --spec cypress/tests/data/10-Installation.spec.js,cypress/tests/data/20-CreateContext.spec.js
+  npm run cypress -- ojs --cft 143 --label c143                       # the same on Chrome for Testing 143, for a bisect
+  ```
+
+  Each run is its own install: a scratch database `<test db>_cy_<label>`
+  on the campaign's role, a `php -S` at +80 (`--n` picks +81 … +89)
+  serving the checkout with a config derived from
+  `config.TEMPLATE.inc.php` in the run's dir, files, screenshots and
+  downloads there too (`.reports/cypress/<line>-<app>-<label>/`,
+  `cypress.log` and `server.log` beside them), the line's Node and PHP
+  first on `PATH`. The browser is Cypress's bundled Electron unless
+  `--browser <path>` names one or `--cft <version|major>` fetches a
+  Chrome for Testing build once into `~/.cache/cft/`, wrapped so that
+  `--version` prints "Google Chrome N" (Cypress 5.6 reads "for Testing"
+  as the version, drops `--proxy-bypass-list`, and the browser never
+  connects). The run ends with its browser's process group, server and
+  database gone, on a normal end, a signal or `--timeout` (90 min) alike,
+  and with the `cypress/logs` and `cypress/screenshots` Cypress writes
+  into the checkout removed; `--keep` keeps the database and the server
+  for a look. No test lock: like a probe it has its own port and
+  database, but it shares the cores. A new machine needs the Cypress
+  binaries' libraries, `apt install libgtk2.0-0t64 libgtk-3-0t64 libgbm1
+  libnotify4 libnss3 libxss1 libasound2t64 libxtst6 libxcursor1
+  libgdk-pixbuf-2.0-0 libpangocairo-1.0-0 xauth xvfb` (the VM since
+  2026-10-29; `npx cypress verify` in a checkout proves it), and
+  `/tmp/.X11-unix` for Xvfb (`systemd-tmpfiles --create` makes it).
+  The branches pin Cypress 5.6 (3.3), 12 (3.4), 15 (3.5) and 14 (`main`);
+  3.3's fails from Chrome 144 on (141–143 and Electron 85 pass, the
+  data suite 24 specs, 43 tests, 2026-10-21), which is why
+  pkp-github-actions runs its Node 12 branch on Electron since `0bdd4bfe`.
+
 ### The ore worktree
 
 Beside each slot clone sits an **ore worktree**, `<clone>-ore`: a git
@@ -495,6 +536,7 @@ listen there:
 | +0 … +19 | the runner's workers, one `php -S` each | Playwright `webServer` |
 | +50 | the probe server (`patterns.md` "Probe kit") | `npm run probe-servers -- --start` |
 | +61 … +69 | dataset fleet 1 … 9 ("Dataset fleets") | `npm run fleet-prep -- --dataset n` |
+| +80 … +89 | an app's own Cypress run 0 … 9 ("The stable lines") | `npm run cypress -- <app> --n n` |
 | +90 | the validation variant (below) | Playwright, or `probe-servers --start` when nothing answers |
 | +91 | the reauth variant (below) | Playwright, or `probe-servers --start` when nothing answers |
 
@@ -734,7 +776,14 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   (`stopSlotServers()` in `bin/slot.js`): the probe, validation and
   dataset servers are kept between scripts on purpose and stop only
   there, so a resumed session starts them again (`probe-servers
-  --start`, `fleet-prep --dataset n`).
+  --start`, `fleet-prep --dataset n`). The slot's browsers go with them:
+  a `chrome`, `Cypress`, its crashpad handler or an `Xvfb` whose working
+  directory lies in the clone, which a run killed mid-way leaves behind
+  (three Chromes of a crashed Cypress run lived eight days unnoticed,
+  2026-10-21). The VM's hourly `e2e-orphan-sweep.timer` (`sudo
+  bin/orphan-sweep.sh --install`) is the net under it, slot or no slot:
+  such a browser older than two hours that no process owns any more
+  (parent pid 1) is killed and logged as `orphan-sweep`.
 - **Provisioning a slot**: clone `origin` to `/home/e2e/pkp-e2e-s<n>`, write
   `.env` with `PKP_E2E_SLOT=<n>` and the relative `<APP>_ROOT`s (`.env.example`),
   `npm ci`, `npm run fetch-apps -- --reference /home/e2e/pkp-e2e` (borrows
