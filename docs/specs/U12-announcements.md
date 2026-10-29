@@ -47,6 +47,30 @@ account. <sup>b</sup>
 | **Be told about a new announcement** | • every user holding a role in that journal, the person who posted it included, unless the "A new announcement has been created." row ("New announcement." on a press) of their profile's Notifications tab says otherwise (Side effects); a Site Administrator with no role in the journal is not told, a case that cannot be seen on a test install, whose administrator holds a role in every journal<br>• nobody for a site announcement (Rule 16) <sup>f</sup> |
 | **Read the announcement feed** {OJS} | • any visitor, through the feed links, while announcements are on and a manager has enabled the "Announcement Feed Plugin", which a fresh journal has off (Rule 18) <sup>g</sup> |
 
+<a id="api-grid-announcements"></a>
+**Permission grid: managing announcements.** Rows 2 and 3 above, cell by
+cell, as the API checks read it (`docs/process/api.md` names the personas
+and how they are seeded). Every announcements route of the programming
+interface (list, read one, add, edit, delete; Rule 19) follows it; the
+route registry (`docs/tracking/api-routes.md`) lists them in its Gate
+column. "Allowed" calls the routes on a journal, for the journal's own
+announcements; "Site" calls them on the site, for the site's
+announcements (Rule 16). Reading announcements publicly (row 4) goes
+through the public pages, not through these routes. The types (Rule 13)
+have no route. ✓ allowed, — refused, ? an open question.
+
+| Persona | Allowed | Site |
+|---|---|---|
+| manager | ✓ | — |
+| section editor | — | — |
+| assistant {OJS OMP} | — | — |
+| author | — | — |
+| reviewer {OJS OMP} | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 The "Add Announcement" and "Edit Announcement" side panels carry the same
@@ -138,7 +162,8 @@ discards the changes. <sup>g</sup>
    its title and the buttons "View", "Edit" and "Delete"; above the list a
    "Search" box and "Add Announcement". With no announcements the list
    reads "No items found.". Thirty rows fill a page; a longer list gets
-   page controls under it. Typing a phrase in "Search" and pressing Enter
+   page controls under it, which are gone once the second page is open,
+   until the page is reloaded ⚠ [A23](#a23). Typing a phrase in "Search" and pressing Enter
    filters the list to the announcements whose title, short description
    or full text contains every word typed, in any case, all the words in
    the same one of those three texts ("june call" finds nothing when
@@ -148,6 +173,7 @@ discards the changes. <sup>g</sup>
    found.". "View" opens the announcement's public page in the same
    window (an expired one: the Announcements page instead, Rule 8; with
    announcements off: "404 Not Found", Rule 2). <sup>c</sup> <sup>n</sup>
+   <sup>f-a23</sup>
 5. **Adding.** "Add Announcement" opens the "Add Announcement" panel
    (Fields & validation). "Save" closes the panel and the new announcement
    appears as the first row of the list with no reload; the row shows its
@@ -347,8 +373,14 @@ discards the changes. <sup>g</sup>
     email; an add by program without that choice saves the announcement
     as if "Send an email about this to all registered users." were
     unticked, and leaves a warning in the server's error log (Side
-    effects) ⚠ [A20](#a20). <sup>f-a19</sup>
-    <sup>f-a20</sup>
+    effects) ⚠ [A20](#a20). Beyond what the panel sends, the interface
+    filters the list by type and reads one announcement on its own at the
+    journal's address; another journal's announcement is out of reach
+    there, to read, edit or delete. It stores a type of another journal
+    on an announcement, and fails with a server error on a type that does
+    not exist ⚠ [A24](#a24); and it takes a posted date on an add or an
+    edit, which the lists and pages then sort by and print ⚠ [A25](#a25).
+    <sup>f-a19</sup> <sup>f-a20</sup> <sup>f-a24</sup> <sup>f-a25</sup>
 
 ## Side effects
 
@@ -869,6 +901,58 @@ footnote.
    "Announcement Feed Plugin" there, so the scenario has no analogue on
    OMP or OPS beyond that absence (Rule 18).
 
+### Through the API
+
+The checks below send what no screen sends; who may call the
+announcements routes is the [announcements grid](#api-grid-announcements)'s,
+checked apart (`docs/process/api.md`).
+
+API1. **One announcement read back at the journal's own address** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with one announcement "Call
+   for papers" (short description "Deadline 1 June.", an expiry date).
+
+   - **Read on its own**: the announcement read through the API at the
+     journal's address answers it, with its title, short description,
+     expiry date and posted date. No screen reads one announcement on its
+     own (Rule 19); the address the list gives for it is [A19](#a19)'s.
+   - **Unknown**: a number no announcement has answers 404.
+
+API2. **The list filtered by type** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with the types "Conference"
+   and "Event", and the announcements "Workshop" (Event), "Summit"
+   (Conference) and "Notice" (no type).
+
+   - **One type**: the list asked for "Event" alone holds "Workshop" alone,
+     and its total reads 1. No screen filters by type (Rules 4, 13).
+   - **Two types**: asked for both, it holds "Summit" and "Workshop".
+   - **Control**: unfiltered, it holds all three.
+
+API3. **Another journal's announcement is out of reach from this journal's address** {OJS OMP OPS}
+
+   Given: two scratch journals, each with a Journal Manager and one
+   announcement ("Our notice", "Their notice").
+
+   - **Foreign number**: through the first journal's address, as its
+     manager, "Their notice" is refused to a read (400), an edit (403) and
+     a delete (403), and the second journal still lists it unchanged (Rule
+     1). The panel only sends its own journal's announcements.
+   - **Foreign journal named**: an add through the first journal's address
+     that names the second journal as the announcement's owner is stored
+     in the first; the second journal's list is unchanged.
+
+API4. **A text in a language the journal's forms do not offer is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal whose forms offer English
+   alone, with no announcements.
+
+   - **French title**: an add whose title is given in English and in
+     French is refused (400) with an error on the French title, and the
+     list stays empty. The panel offers only the forms' languages (Rule
+     14).
+   - **Control**: the same add in English alone is stored and listed.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -954,6 +1038,10 @@ Left out of the scenarios above, by reason:
     leaves; Rule 19)
   - A22 (a site announcement with a picture on the site's home page,
     Announcements page and its own page; Rules 15, 16)
+  - A23 (the page controls gone on the list's second page; Rule 4)
+  - A24 (another journal's type stored, an unknown type's server error,
+    through the API; Rule 19)
+  - A25 (a posted date set or changed through the API; Rule 19)
   - OMP2 (a press's home page carrying the site's announcements while
     the press has no "Display on Homepage" count; Rule 11; scenario 6
     marks it)
@@ -1000,6 +1088,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [A19](#a19) | Through the programming interface, an announcement's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A20](#a20) | REST API: an announcement added without the email choice writes a warning to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A22](#a22) | A site announcement with a picture takes down the site's home and Announcements pages and a press's home page | 🐞 | high · crash: server | issues (claude), 2026-10-29 — re-verified |
+| [A23](#a23) | The Announcements list's page controls are gone once its second page is open | 🐞 | user-visible | — |
+| [A24](#a24) | REST API: an announcement takes another journal's type, and a type that does not exist fails with a server error | 🐞 | latent · crash: server | — |
+| [A25](#a25) | REST API: an announcement's posted date can be set on an add and changed on an edit | 🐞 | latent | — |
 | [OMP2](#omp2) | A press's home page shows the site's announcements, with links that lead nowhere {OMP} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | An announcement's type is printed nowhere a reader looks | ❓ | minor | — |
 | [A6](#a6) | A chosen "Announcement Type" cannot be cleared, only changed | ❓ | minor | — |
@@ -1281,6 +1372,40 @@ The cause is the one behind the site's failed "Remove" in [A12](#a12),
 a different loss: there files stay on the server, here the site's
 public pages go down.
 Since: 2024-09-30 · Basis: probe, 2026-10-29; issue report walk, 2026-10-29. <sup>f-a22</sup>
+
+<a id="a23"></a>
+**A23 — The Announcements list's page controls are gone once its second page is open** · 🐞 · user-visible.
+A manager whose journal has more than thirty announcements sees "Previous
+1 2 Next" under the list and presses "2" to see the older ones. The
+second page lists them, but the page controls are gone, so "Previous" and
+"1" are no longer offered; a reload of the page brings the first page
+and the controls back. The list's total, which the controls
+count from, reads 0 for every page after the first: the programming
+interface answers it so for any request that skips rows.
+Basis: probe, 2026-10-29. <sup>f-a23</sup>
+
+<a id="a24"></a>
+**A24 — REST API: an announcement takes another journal's type, and a type that does not exist fails with a server error** · 🐞 · latent · crash: server.
+The apps' own panel offers only the journal's own types (Rule 13), so
+only programs meet this. A program that adds or edits an announcement
+through the REST API with the number of another journal's type gets the
+announcement saved with that type, although a journal's types are its
+own (Rule 1); by the code, removing the type in the other journal then
+deletes this journal's announcement with it ([A1](#a1)). With the number of a type
+that does not exist, the request fails with a server error (500) whose
+message is the database's own, instead of a refusal naming the type.
+Basis: probe, 2026-10-29. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — REST API: an announcement's posted date can be set on an add and changed on an edit** · 🐞 · latent.
+An announcement's posted date is the day it was added and never changes
+(Rules 5, 6); the panel never sends one. A program that sends a posted
+date through the REST API, on an add or on an edit, has it stored: the
+announcement then carries that date, and by the code its pages print it
+and every list sorts by it, a new one dated years back included. The interface's
+own description of the announcement marks the posted date as one it
+does not accept.
+Basis: probe, 2026-10-29. <sup>f-a25</sup>
 
 ### OMP
 
@@ -2506,6 +2631,52 @@ titles, and the Announcements page still answered 500 on OMP and OPS.
 The site's list panel showed only titles with "View", "Edit" and
 "Delete".
 Issue report: [pkp-e2e#1077](https://github.com/jardakotesovec/pkp-e2e/issues/1077) ([docs/issues/U12-A22-site-announcement-picture-breaks-site-pages.md](../issues/U12-A22-site-announcement-picture-breaks-site-pages.md)).
+
+<a id="fn-f-a23"></a>
+**f-a23 — A23 evidence.** `PKPAnnouncementController::getMany()` builds
+one query with `limit()` and `offset()` from `count` and `offset`, then
+answers `itemsMax` with `$announcements->count()` on that same query,
+so the count keeps the offset: `select count(*) … offset 30` has no row
+and reads 0 for any offset above zero. The panel's `lastPage` is
+`Math.ceil(itemsMax / count)` (ui-library `mixins/fetch.js`) and
+`AnnouncementsListPanel.vue` shows `Pagination` only `v-if="lastPage > 1"`.
+Code read 2026-10-29, lib/pkp df42984b46 (`main`); `stable-3_5_0`
+answers `itemsMax` the same way (code). Live-probed 2026-10-29 (Rule 4;
+A23): on OJS `main`, a scratch journal with 31 seeded announcements, as
+its manager, the list showed "Previous 1 2 Next"; "2" sent `GET
+…/api/v1/announcements?count=30&offset=30`, answered `itemsMax` 0 with
+one item, and the page showed that row with no page controls. Through
+the API on OJS, OMP and OPS `main`: `count=1&offset=1` on a journal of
+five announcements answered one item and `itemsMax` 0.
+
+<a id="fn-f-a24"></a>
+**f-a24 — Rule 19 and A24 evidence.** `PKPAnnouncementController::add()`
+and `edit()` pass `typeId` to `Repo::announcement()->validate()`, whose
+schema rule for it is `nullable` alone, and `Announcement::create()` /
+`update()` store it; nothing compares the type's context with the
+request's. The `announcements.type_id` foreign key refuses a number with
+no type, which surfaces as the unhandled `QueryException`.
+`AnnouncementTypeDAO::deleteById()` deletes
+`Announcement::withTypeIds([$typeId])` with no context filter, which is
+how another journal's removal reaches this journal's announcement (code
+read, not driven). Code read 2026-10-29, lib/pkp df42984b46 (`main`).
+Live-probed 2026-10-29 (Rule 19; A24), OJS, OMP and OPS `main`, as the
+manager of a scratch journal with a second scratch journal beside it:
+`POST {journal}/api/v1/announcements` with the other journal's type id
+answered 200 with that `typeId`; with `typeId` 999999 it answered 500
+`SQLSTATE[23503]: Foreign key violation … announcements_type_id_foreign`.
+
+<a id="fn-f-a25"></a>
+**f-a25 — Rule 19 and A25 evidence.** `datePosted` is marked
+`writeDisabledInApi` in `lib/pkp/schemas/announcement.json`, but
+`PKPAnnouncementController::add()` and `edit()` hand the converted
+request on to `Announcement::create()` / `update()` with only `assocType`,
+`assocId` (add) or `id`, `typeId` (edit) set by the controller, so a sent
+`datePosted` is stored over the `CREATED_AT` value. Code read 2026-10-29,
+lib/pkp df42984b46 (`main`). Live-probed 2026-10-29 (Rule 19; A25), OJS,
+OMP and OPS `main`, as a scratch journal's manager: an add with
+`datePosted` `2020-01-01 00:00:00` and an edit with it each answered 200
+with `datePosted` `2020-01-01T00:00:00.000000Z`.
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls

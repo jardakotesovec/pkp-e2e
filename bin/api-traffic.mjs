@@ -5,6 +5,7 @@
 //
 // run: npm run api-traffic -- <ci-run-id>        a CI run's logs (gh downloads them)
 //      npm run api-traffic -- --local            this clone's apps/*/playwright/.api-traffic/
+//      npm run api-traffic -- --clear            empty the local logs first (a fresh local map)
 //      … --feature U43                           only that feature's routes in the table
 //
 // Writes .reports/api-traffic/<run>.md: per feature, each route and who
@@ -23,6 +24,11 @@ const REPO = 'jardakotesovec/pkp-e2e';
 const args = process.argv.slice(2);
 const feature = args.includes('--feature') ? args[args.indexOf('--feature') + 1] : null;
 const runId = args.find((a) => /^\d+$/.test(a));
+if (args.includes('--clear')) {
+    for (const app of ['ojs', 'omp', 'ops']) fs.rmSync(path.join(REPO_ROOT, 'apps', app, 'playwright', '.api-traffic'), { recursive: true, force: true });
+    console.log('api-traffic: local logs cleared');
+    process.exit(0);
+}
 if (!runId && !args.includes('--local')) {
     console.error('usage: npm run api-traffic -- <ci-run-id> | --local [--feature U43]');
     process.exit(2);

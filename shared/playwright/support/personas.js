@@ -23,8 +23,9 @@
  *
  * A context-level grid may use the plainer ALIASES below.
  * A persona the app has no role for (no reviewer on a preprint server) is
- * absent from `set.users`; a grid row for it carries the app badge that
- * leaves that app out.
+ * absent from `set.users`, and the matrix skips a grid row for it on that
+ * app, so the row needs no badge; a badge is for a row whose cells differ
+ * by app.
  */
 
 /** Role keys per app (users.md "Scenario role keys"). */

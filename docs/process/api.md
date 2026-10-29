@@ -49,15 +49,27 @@ cell, so a program can check it:
 ```
 
 - **Rows** are personas, by the labels of
-  `shared/playwright/support/personas.js`. An app badge limits a row to
-  those apps; a persona an app has no role for (no reviewer on a preprint
-  server) is skipped there.
+  `shared/playwright/support/personas.js`. A persona an app has no role for
+  (no reviewer on a preprint server) is skipped there by itself; an app
+  badge is only for a row whose cells differ by app, split into one row
+  per badge, as `submitter` above.
 - **Columns** are states. `Unpublished` and `Published` are the persona
   set's two submissions; a rule about the context rather than a submission
   has one column, `Allowed`, and `Site` calls the route on the site
   (`index`) instead of the scratch context.
 - **Cells** are `✓` (allowed), `—` (refused) or `?` (an open question in
   the register, linked; not checked).
+- **A context's own rule** (announcements, institutions) reads like this,
+  `Site` where the site has the same thing in Administration:
+
+  ```markdown
+  | Persona | Allowed | Site |
+  |---|---|---|
+  | manager | ✓ | — |
+  | site admin | ✓ | ✓ |
+  | reader | — | — |
+  ```
+
 - **One grid per rule, not per feature.** The routes of contributors,
   citations and funding all follow the publication metadata spec's
   edit gate; each route names it in the registry. A feature that has its
@@ -121,8 +133,13 @@ API1. **A funder without a name is refused** {OJS OMP OPS}
 
 - **Only gaps.** A check exists because no screen sends that request. A
   route the screens call with the input that matters needs none.
-- **Never a permission.** Who may call a route is the grid's; an API check
-  never asserts a refusal for a role.
+- **Never a role.** Who may call a route is the grid's; an API check
+  never asserts a refusal for a persona. That a route stays inside its own
+  context and submission (another journal's announcement refused at this
+  journal's address, a funder of another submission not reordered) is an
+  API check, the way the UI suites assert that a screen leaks nothing: it
+  holds a guard that works. A guard that does not hold is a security
+  finding, never a public check.
 - **Tests** live in `shared/playwright/tests/api/U<nn>-<feature>.api.spec.js`,
   app-neutral (the `appContext` names the app's context and capabilities),
   so every app's `shared` project runs them on CI. A test is named
@@ -133,7 +150,8 @@ API1. **A funder without a name is refused** {OJS OMP OPS}
 
 With `PKP_API_TRAFFIC=1` (CI sets it), every API call the suites make is
 logged per test (`shared/playwright/support/api-traffic.js`), and each CI
-shard uploads its log. `npm run api-traffic -- <run-id>` maps a run's logs
+shard uploads its log. `npm run api-traffic -- <run-id>` maps a run's logs (`--local` maps
+this clone's own, `--clear` empties them before a fresh local run)
 onto the registry: per feature, which routes the screens reach and as
 which roles, which only API checks reach, which nothing reaches, and every
 5xx answer with the test that met it. Read it when adding API coverage to
