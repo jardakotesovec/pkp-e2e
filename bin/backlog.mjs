@@ -17,8 +17,8 @@ const specFiles = fs.readdirSync(path.join(root, 'docs/specs'))
     .filter((f) => /^U\d{2}-.*\.md$/.test(f)).sort();
 
 // The entries a report covers, from its "Tracked in" bullet's links: an issue
-// report under docs/issues/, or an open report under docs/reports/ (the entry
-// waits for it).
+// report under docs/issues/, or an open report under docs/reports/ or
+// docs/reports/pr-review/ (the entry waits for it).
 function trackedIn(dir) {
     const map = new Map();
     for (const f of fs.readdirSync(path.join(root, dir)).filter((x) => x.endsWith('.md'))) {
@@ -30,7 +30,7 @@ function trackedIn(dir) {
     return map;
 }
 const reported = trackedIn('docs/issues');
-const openReports = trackedIn('docs/reports');
+const openReports = new Map([...trackedIn('docs/reports'), ...trackedIn('docs/reports/pr-review')]);
 
 // An entry's body: from its anchor to the next anchor or heading.
 function bodies(text) {

@@ -4,7 +4,10 @@
 // many were closed in the week and where each closed one went, since a report is
 // deleted once acted on and otherwise leaves no trace in the files. Read from git:
 // a report is a `.md` file in docs/reports/ (its `.patch`, `.js` and `img/`
-// attachments are not counted); open = present at the week's end; closed = deleted
+// attachments are not counted, nor are the subfolders: docs/reports/pr-review/
+// holds findings in PRs not yet merged, which are not regressions of the product
+// until a merge carries them, and a report moved up from there at the merge
+// counts as new); open = present at the week's end; closed = deleted
 // in the week, with the deleting commit, whose message says what fixed it; new =
 // added in the week. Each count is split into regressions (REPORT.md `- **Kind**
 // regression…`, or an older report whose header paragraph opens "Regression.")

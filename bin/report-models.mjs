@@ -29,7 +29,7 @@ const write = args.includes('--write');
 const projects = args.flatMap((a, i) => args[i - 1] === '--projects' ? [a] : []);
 const only = args.filter((a, i) => a.endsWith('.md') && args[i - 1] !== '--projects').map((a) => path.basename(a));
 
-const dirs = ['docs/issues', 'docs/reports'];
+const dirs = ['docs/issues', 'docs/reports', 'docs/reports/pr-review'];
 const reports = new Map(); // basename -> repo path
 const since = new Map(); // basename -> date of the latest end-to-end re-verification
 const REVERIFIED = /^Update (\d{4}-\d{2}-\d{2}):\s+re-verified\s+end\s+to\s+end/gm;

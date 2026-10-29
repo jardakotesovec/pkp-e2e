@@ -116,7 +116,7 @@ orchestrator.
 | Process friction | `docs/tracking/friction.md`, one line, appended by the screen-driving agent itself |
 | Build blockers and any app-code change | `docs/tracking/app-changes.md`, orchestrator only |
 | Builder parity | `docs/tracking/parity-ledger.md` |
-| A write-up for the team | `docs/reports/`, in the shape of `REPORT.md` (severity, summary, impact, steps, cause, proposed fix, evidence last), deleted once acted on; the register footnote keeps the pointer |
+| A write-up for the team | `docs/reports/`, in the shape of `REPORT.md` (severity, summary, impact, steps, cause, proposed fix, evidence last), deleted once acted on; the register footnote keeps the pointer. A finding in a PR not merged yet goes to `docs/reports/pr-review/` until the merge |
 | A spec's defect written up for the team | `docs/issues/`, in the shape of `REPORT.md`, by the housekeeping session (MAINTENANCE "Issue reports"), filed as a GitHub issue on pkp-e2e (reports filed before 2026-10-17 with `- **Security** unreleased` live on the private `pkp-e2e-sec` tracker) and deleted when the issue closes; the register footnote keeps the pointer. A change to an entry that has a filed report is carried to the report and the issue (MAINTENANCE "Keeping a report in step") |
 | Process learnings | this file, TEMPLATE, PRINCIPLES or a brief template, through maintainer review; never a spec |
 | Anything resolved | deleted; git keeps it. Tracking files hold what is open, and anything outside its canonical home is one sentence plus a link |

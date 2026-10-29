@@ -91,7 +91,10 @@ kept, and commits it with the day's work. The summary gives the line as
 <open> / <closed> / <new>)", then each closed regression's report with what
 the deleting commit says took it (the fix that landed, or the ruling that
 retired it). The count is of the `.md` write-ups in `docs/reports/`; a
-report counts as a regression by its REPORT.md "Kind". `npm run regressions
+report counts as a regression by its REPORT.md "Kind". Its subfolders
+are not counted: `docs/reports/pr-review/` holds findings in PRs not
+merged yet, which reach the count only when a merge carries one and
+its report moves up (it then counts as new). `npm run regressions
 -- --week today` gives the current week so far when the maintainer asks
 mid-week.
 
@@ -935,7 +938,9 @@ sync loop's critical triage, on one PR:
    evidence, never by default: test drift, an intended change the spec must
    follow, or a bug the PR introduces.
 3. **Bug.** Report it to the developer in `REPORT.md`'s shape: what the
-   screen offers, what happens, at which commit, and what would fix it.
+   screen offers, what happens, at which commit, and what would fix it;
+   a written report goes under `docs/reports/pr-review/`, as a PR
+   review's does.
    Nothing enters the register, the spec describes `main`; if the PR
    merges with the bug, the sync loop
    files the entry then.
@@ -1021,7 +1026,10 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    tables; see `checks/sync/pkp-lib-13317/`). Kept checks go under
    `shared/playwright/checks/sync/<repo>-<pr>/` on the companion, with the
    before-evidence recorded at the previous tip. A confirmed regression,
-   security weakness or intention gap follows step 5's report, posted in this thread untagged (whoever asked follows up here); a behavior the issue
+   security weakness or intention gap follows step 5's report, filed
+   under `docs/reports/pr-review/<date>-<repo>-<pr>.md` (not
+   `docs/reports/`: the PR is not merged, so it is no regression of the
+   product yet) and posted in this thread untagged (whoever asked follows up here); a later round updates it in place there; a behavior the issue
    leaves open is a ❓ in the owning spec, posted in the thread, and the
    team's reply is recorded as the entry's verdict the same day.
 5. **Run the suites on CI at the PR refs.** Push the companion, then
@@ -1065,7 +1073,14 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    before the merge is fine when it reads all `=`; anything else is
    re-read), rebase the companion onto `main`, push it and `node
    bin/ci.js watch` its run (the full suites, on CI), fast-forward on
-   green, delete the row and the remote branch. The baselines advance past the merge only when every
+   green, delete the row and the remote branch. Its report in
+   `docs/reports/pr-review/` is deleted when the merged code no longer
+   shows the finding (the commit says which round fixed it), or moved up
+   into `docs/reports/` (`git mv`, images along) when the merge carries
+   it: it is then `main`'s regression and takes sync loop step 5's path
+   from there (the tagged post, the "Open regressions" row, the register
+   entry). A PR closed without merging deletes its report, the commit
+   saying so. The baselines advance past the merge only when every
    tip commit up to it has been reviewed; when the tips carry unreviewed
    commits beside the PR, the log entry lists them and the next daily
    sync advances (the rule of sync loop step 6 holds here too).

@@ -41,7 +41,7 @@ history.
 - `docs/tracking/incidentals.md`: what a session saw in passing on another
   feature's screens, kept until that spec absorbs it.
 - `docs/tracking/regression-metrics.md`: the weekly count of the
-  reports in `docs/reports/`, regressions apart (open, closed, new), with
+  reports in `docs/reports/` (not its subfolders), regressions apart (open, closed, new), with
   where each closed regression went; rows are kept as the history
   (`npm run regressions`).
 - `docs/tracking/friction.md`: what made an agent's task harder than it
@@ -53,7 +53,9 @@ history.
 - `docs/tracking/UNASSIGNED.md` and `docs/tracking/atlas/`: the inventory
   of every screen and action in the apps, and the leftovers no spec claims.
 - `docs/reports/`: regression and defect write-ups handed to the team,
-  deleted once acted on.
+  deleted once acted on. `docs/reports/pr-review/` holds the ones found
+  in PRs not merged yet, until the merge deletes them or moves them up;
+  `docs/reports/ore/` the ones only `ore` shows.
 - `docs/issues/`: the specs' defects written up for the team, one file
   per GitHub issue on pkp-e2e, kept in step with its register entries
   and deleted when the issue closes (a developer who takes one on copies
