@@ -2293,7 +2293,9 @@ a 500 in the browser (`.reports/sync/ce992/`): `r1` no window left,
 kept, `d1` one "Error An unexpected error has occurred. Please reload the
 page and try again." window (the delete path calls
 `openDialogNetworkError()` without the error, so the server's message is
-not shown). Report: `docs/reports/2026-09-29-ui-library-992.md`.
+not shown). Report: `docs/reports/2026-09-29-ui-library-992.md` (deleted
+2026-10-29: its silent close fixed by pkp/ui-library#1024, the lost
+reason carried by pkp-e2e#1073; git keeps it).
 pkp/ui-library#1024 (head `26de0d0c`, on `9cfb8987`, with pkp/pkp-lib#13550
 `9be1c9efb0`) removes the `closeTopDialog()` call from
 `performCommentReport()`, so the error window stays; the "Submit"
