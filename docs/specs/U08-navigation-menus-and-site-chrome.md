@@ -2875,7 +2875,7 @@ pkp-lib#12177 (`e0a5aa2b02`, 2026-01-22); the legacy form opened on the
 site. Past the crash, `getNavigationAreas($context)` returns `[]` when
 `$context` is null (note o), so the site window's area list would offer
 `common.none` alone.
-Issue report: [docs/issues/U08-A4-site-menu-window-opens-nothing.md](../issues/U08-A4-site-menu-window-opens-nothing.md), filed as [pkp-e2e#629](https://github.com/jardakotesovec/pkp-e2e/issues/629).
+Issue report: [docs/issues/U08-A4-site-menu-window-opens-nothing.md](../issues/U08-A4-site-menu-window-opens-nothing.md), filed as [pkp-e2e#629](https://github.com/jardakotesovec/pkp-e2e/issues/629). The team's copy is `pkp/pkp-lib#13648` (2026-10-29).
 
 <a id="fn-f-a5"></a>
 **f-a5** — `getMenuItemTypes()` gives `NMI_TYPE_ABOUT` a

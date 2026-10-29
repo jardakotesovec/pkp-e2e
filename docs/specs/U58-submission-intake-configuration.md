@@ -1945,7 +1945,7 @@ Issue report: [pkp-e2e#822](https://github.com/jardakotesovec/pkp-e2e/issues/822
 submitting new articles to the press. …" and `manager.setup.copyrightNotice`
 "Copyright notice"; OMP's `about.copyrightNotice` on the page reads
 "Copyright Notice".
-Issue reports: "Disable Submissions" [pkp-e2e#831](https://github.com/jardakotesovec/pkp-e2e/issues/831) ([docs/issues/U58-OMP1-press-disable-submissions-help-says-articles.md](../issues/U58-OMP1-press-disable-submissions-help-says-articles.md)); the label [pkp-e2e#832](https://github.com/jardakotesovec/pkp-e2e/issues/832) ([docs/issues/U58-OMP1-press-copyright-notice-label-lowercase.md](../issues/U58-OMP1-press-copyright-notice-label-lowercase.md)).
+Issue reports: "Disable Submissions" [pkp-e2e#831](https://github.com/jardakotesovec/pkp-e2e/issues/831) ([docs/issues/U58-OMP1-press-disable-submissions-help-says-articles.md](../issues/U58-OMP1-press-disable-submissions-help-says-articles.md)); the label [pkp-e2e#832](https://github.com/jardakotesovec/pkp-e2e/issues/832) ([docs/issues/U58-OMP1-press-copyright-notice-label-lowercase.md](../issues/U58-OMP1-press-copyright-notice-label-lowercase.md)). The team's copy of both is `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp2"></a>
 **f-omp2** — OMP `templates/frontend/pages/submissions.tpl`: the

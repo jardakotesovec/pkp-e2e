@@ -10,7 +10,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** `pkp/pkp-lib#12178` and `pkp/ui-library#766` for `pkp/pkp-lib#12177` · [e0a5aa2b02](https://github.com/pkp/pkp-lib/commit/e0a5aa2b022516952b6a39c926cfb2d914a86bf2), [eeebc65b](https://github.com/pkp/ui-library/commit/eeebc65bb643a58b385d4507a73e9874527bd948) · 2026-01-22 · Blesilda Biazon (blesildaramirez)
-- **Upstream** none found (2026-10-03)
+- **Upstream** `pkp/pkp-lib#13648` (open), the team's copy of this issue (2026-10-29). Before it: none found (2026-10-03)
 - **Tracked in** spec U08 [A4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U08-navigation-menus-and-site-chrome.md#a4)
 - **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

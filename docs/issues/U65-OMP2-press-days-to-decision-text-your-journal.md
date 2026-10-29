@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: OMP (code)
 - **Introduced** `pkp/pkp-lib#5342` for `pkp/pkp-lib#4844` · [3c69fb4](https://github.com/pkp/pkp-lib/commit/3c69fb482e271fd248fab9bc206dd6dffd90f2ef) · 2019-12-10 · Nate Wright (NateWr)
-- **Upstream** none found (2026-10-03)
+- **Upstream** `pkp/pkp-lib#13646` (open), the team's copy of this issue with six other OMP strings (2026-10-28). Before it: none found (2026-10-03)
 - **Tracked in** U65 [OMP2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U65-editorial-statistics.md#omp2)
 - **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

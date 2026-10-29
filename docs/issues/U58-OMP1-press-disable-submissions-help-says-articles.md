@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: OMP (code)
 - **Introduced** `pkp/omp#851` for `pkp/pkp-lib#5702` · [dad0d4b316](https://github.com/pkp/omp/commit/dad0d4b3169de63c31337adf0764cddf77b558cf) · 2020-07-22 · Salman Murad (salmanm2003)
-- **Upstream** none found (2026-10-04)
+- **Upstream** `pkp/pkp-lib#13646` (open), the team's copy of this issue with six other OMP strings (2026-10-28). Before it: none found (2026-10-04)
 - **Tracked in** spec U58 [OMP1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U58-submission-intake-configuration.md#omp1)
 - **Checked** 2026-10-04, each branch's latest commit (OMP's in Evidence)
 - **Model** claude-opus-5-5

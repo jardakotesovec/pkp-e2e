@@ -1715,14 +1715,14 @@ Issue report: [pkp-e2e#484](https://github.com/jardakotesovec/pkp-e2e/issues/484
 
 <a id="fn-f-omp5"></a>
 **f-omp5** — `SeriesGridCellProvider::getCellActions()` uses `manager.sections.confirmActivateSection` / `confirmDeactivateSection`, which OMP's locale does not override. Live-probed 2026-09-25: note td9.
-Issue report: [pkp-e2e#485](https://github.com/jardakotesovec/pkp-e2e/issues/485) ([docs/issues/U17-OMP5-series-toggle-asks-about-section.md](../issues/U17-OMP5-series-toggle-asks-about-section.md)).
+Issue report: [pkp-e2e#485](https://github.com/jardakotesovec/pkp-e2e/issues/485) ([docs/issues/U17-OMP5-series-toggle-asks-about-section.md](../issues/U17-OMP5-series-toggle-asks-about-section.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp6"></a>
 **f-omp6** — OMP's `SeriesForm` sets no place in the order for a new series, where the section form puts a new section last (fn i); the list is read by `seq`, so series sharing a value come back in whatever order the database returns (the test installs run PostgreSQL). Live-probed 2026-09-25 (two presses, several drives): note td7.
 
 <a id="fn-f-omp7"></a>
 **f-omp7** — `manager.setup.issnDescription` (fn m). Live-probed 2026-09-25: note td6.
-Issue report: [pkp-e2e#486](https://github.com/jardakotesovec/pkp-e2e/issues/486) ([docs/issues/U17-OMP7-series-issn-help-which-identifying.md](../issues/U17-OMP7-series-issn-help-which-identifying.md)).
+Issue report: [pkp-e2e#486](https://github.com/jardakotesovec/pkp-e2e/issues/486) ([docs/issues/U17-OMP7-series-issn-help-which-identifying.md](../issues/U17-OMP7-series-issn-help-which-identifying.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp8"></a>
 **f-omp8** — OMP `seriesForm.tpl` builds the help from a sample address, `{url … page="catalog" op="series" path="Path"}`, passed to `grid.series.urlWillBe`; the typed or saved path never reaches it. Live-probed 2026-09-25: note td6.

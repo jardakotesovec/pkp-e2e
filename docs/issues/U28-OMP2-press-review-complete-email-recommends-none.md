@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: none (code; editors get the general notification email, which names no recommendation)
 - **Introduced** `pkp/pkp-lib#8646` for `pkp/pkp-lib#8474` · [7d3d9039d9](https://github.com/pkp/pkp-lib/commit/7d3d9039d9ea51267f702a4a5e9b0eff4b8c97e3) · 2023-02-20 · Nate Wright (NateWr)
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#13646` (open), the team's copy of this issue with six other OMP strings (2026-10-28). Before it: none found (2026-10-02)
 - **Tracked in** spec U28 [OMP2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U28-reviewers-review.md#omp2)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

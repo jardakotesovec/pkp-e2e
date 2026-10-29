@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: OMP (code)
 - **Introduced** `pkp/omp#231` for `pkp/pkp-lib#1212` · [37ae194f74](https://github.com/pkp/omp/commit/37ae194f7492f7c768331c4acabcef5605475a6c) · 2016-03-08 · Nate Wright (NateWr)
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#13646` (open), the team's copy of this issue with six other OMP strings (2026-10-28). Before it: none found (2026-10-02)
 - **Tracked in** spec U17 [OMP7](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U17-sections.md#omp7)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

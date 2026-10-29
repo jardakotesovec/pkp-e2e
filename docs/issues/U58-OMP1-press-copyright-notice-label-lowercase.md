@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: OMP (code; the box sits on the "Author Guidelines" side tab there)
 - **Introduced** not traced; present since at least [16111b123a](https://github.com/pkp/omp/commit/16111b123a86d44e1f4faf120c4ca3c85ff1f0fd) (2008-10-20)
-- **Upstream** none found (2026-10-04)
+- **Upstream** `pkp/pkp-lib#13646` (open), the team's copy of this issue with six other OMP strings (2026-10-28). Before it: none found (2026-10-04)
 - **Tracked in** spec U58 [OMP1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U58-submission-intake-configuration.md#omp1)
 - **Checked** 2026-10-04, each branch's latest commit (OMP's in Evidence)
 - **Model** claude-opus-5-5

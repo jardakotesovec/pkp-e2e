@@ -1504,7 +1504,7 @@ Issue report: [pkp-e2e#860](https://github.com/jardakotesovec/pkp-e2e/issues/860
 
 <a id="fn-omp1"></a>
 **f-omp1** — Note n: OMP's `locale/en/emails.po` `emails.reviewCancel.body` still reads "{$journalName}", a variable `ReviewCancel` does not carry (`contextName` is the one it has). Live-probed 2026-09-20: the press's email "…agreeing to review "{title}" for {$journalName}."; the journal's names the journal.
-Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690) ([docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md](../issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md)).
+Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690) ([docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md](../issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28).
 
 ## Reference — entry points & surfaces
 

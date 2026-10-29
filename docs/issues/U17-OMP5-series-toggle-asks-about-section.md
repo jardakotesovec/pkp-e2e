@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: OMP (code)
 - **Introduced** `pkp/omp#851` for `pkp/pkp-lib#5702` · [dad0d4b316](https://github.com/pkp/omp/commit/dad0d4b3169de63c31337adf0764cddf77b558cf) · 2020-07-22 · Salman Murad (salmanm2003)
-- **Upstream** `pkp/pkp-lib#12461` (closed, fixed in `pkp/omp#2308`), covering only the box in a series' edit window, not this question in the series list
+- **Upstream** `pkp/pkp-lib#13646` (open), the team's copy of this issue with six other OMP strings (2026-10-28). Before it: `pkp/pkp-lib#12461` (closed, fixed in `pkp/omp#2308`), covering only the box in a series' edit window, not this question in the series list
 - **Tracked in** spec U17 [OMP5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U17-sections.md#omp5)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

@@ -9,7 +9,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** `pkp/pkp-lib#12176` for `pkp/pkp-lib#12175` · [eb7fa6b8be](https://github.com/pkp/pkp-lib/commit/eb7fa6b8be07f486d8a5219a8df8008f42a75c0f) · 2026-01-01 · Vitaliy Bezsheiko (Vitaliy-1), which added the rule; no screen sent it a file list until `pkp/ui-library#765` for `pkp/pkp-lib#11825` · [185571a9b](https://github.com/pkp/ui-library/commit/185571a9b1f9061909444e47d24ccc695f0070ad) · 2026-01-21 · Blesilda Biazon (blesildaramirez)
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#13604` (open), the team's copy of this issue (2026-10-23). Before it: none found (2026-10-02)
 - **Tracked in** spec U37 [A8](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U37-tasks-and-discussions.md#a8)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

@@ -9,7 +9,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** `pkp/omp#2442` for `pkp/pkp-lib#12903` · [b21b505875](https://github.com/pkp/omp/commit/b21b505875510e6c684b6862803b970021f33521) · merged 2026-08-27 · Vitaliy Bezsheiko (Vitaliy-1)
-- **Upstream** none found (2026-10-03)
+- **Upstream** `pkp/pkp-lib#13646` (open), the team's copy of this issue with six other OMP strings (2026-10-28). Before it: none found (2026-10-03)
 - **Tracked in** spec U27 [OMP3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U27-reviewer-assignment-and-management.md#omp3), spec U34 [OMP1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U34-editorial-decision-recording.md#omp1)
 - **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
