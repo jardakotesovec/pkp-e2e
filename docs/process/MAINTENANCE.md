@@ -432,7 +432,9 @@ same model: a false positive's piece goes to a narrow rerun
      reporter (SendMessage) together, once; the session weighs each and
      passes on only what it agrees with.
    - `not reproduced` or `fixed upstream`: the entry is not retired
-     here. It gets a row in `docs/tracking/incidentals.md` in its shape,
+     here. `fixed upstream` means gone on `main` and on the 3.5 branch;
+     a fault `main` lost but released 3.5 still shows is written up,
+     its Affects reading "main: none" (U46 A9, 2026-10-29). It gets a row in `docs/tracking/incidentals.md` in its shape,
      "Seen" saying "A5 no longer shows on main" (or naming the upstream
      fix) and "Evidence" the kept script, and the housekeeping session
      confirms it and retires the entry through its fold, markers, suites
