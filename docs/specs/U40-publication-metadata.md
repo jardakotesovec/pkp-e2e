@@ -43,7 +43,7 @@ is not restated here. <sup>a</sup> <sup>b</sup>
 | Action | Who may — and when |
 |--------|--------------------|
 | **See the Title & Abstract, Metadata and Data pages** | • Journal Manager, Editor, Site Administrator: on any submission, assigned or not<br>• Section Editor, Guest Editor, assistant roles: while assigned to the submission's current stage. An assistant assigned to another stage sees the "Publication" entry with no pages beneath it (Rule 1)<br>• the submission's Author: on their own submission, in the author view <sup>a</sup> |
-| **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always). The page is absent from the author view in every app (Rule 1) <sup>a</sup> |
+| **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always). The page is absent from the author view in every app (Rule 1). A program loads the page's form as a Copyeditor without that access too ⚠ [A24](#a24) <sup>a</sup> |
 | **Save changes on any of these pages** | • Journal Manager, Editor: always, published versions included (Rule 8)<br>• Site Administrator: only through their journal roles; holding the manager role, they save as a Journal Manager. One whose manager role was ended (Users & Roles › Edit, "Remove Role"), left with an assistant role and not a participant, finds Save disabled on Title & Abstract, Metadata and Data (Rule 10) ⚠ [A18](#a18)<br>• Section Editor, Guest Editor, assistant roles: while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author: while their assignment carries the permission AND the version they are on is neither published nor scheduled (Rule 9). While another version is published, the Author saves on the unpublished one. A journal or press does not grant the permission by default; a preprint server does [OPS1](#ops1) <sup>b</sup> |
 | **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13). A journal article whose only version was published as "Author's Original" or "Published Manuscript Under Review" is the exception ⚠ [OJS1](#ojs1). An assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button; the button appears once their assignment carries the permission (their Confirm is untried [A19](#a19)). The Site Administrator left with an assistant role (the row above) is offered it; Confirm fails (Rule 13c) [A19](#a19). The Author is never offered it, in any app <sup>i</sup> |
 | **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal): Settings › Distribution › License <sup>m</sup> |
@@ -75,6 +75,31 @@ published; ✓ allowed, — refused, ? an open question.
 | nobody signed in | — | — |
 | manager of another context | — | — |
 | site admin | ? [A18](#a18) | ? [A18](#a18) |
+
+<a id="api-grid-permissions-page"></a>
+**Permission grid: opening the Permissions & Disclosure page.** The row
+"See the Permissions & Disclosure page" above, cell by cell, as the API
+checks read it (`docs/process/api.md` names the personas and how they are
+seeded). The route that loads the page's form follows it; the route
+registry (`docs/tracking/api-routes.md`) lists it in its Gate column. The
+assigned assistant is a Copyeditor, whose role has no Production-stage
+access. "Unpublished" is a submission in Copyediting, "Published" the
+same submission published; ✓ allowed, — refused, ? an open question.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ? [A24](#a24) | ? [A24](#a24) |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ? [workflow screen A8](U24-workflow-screen-and-stage-access.md#a8) | ? [workflow screen A8](U24-workflow-screen-and-stage-access.md#a8) |
 
 ## Fields & validation
 
@@ -370,7 +395,9 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
       instead: the toast "An unexpected error
       has occurred. Please reload the page and try again." appears, the
       panel stays open with its values, and the language is unchanged
-      ⚠ [A19](#a19). <sup>i</sup>
+      ⚠ [A19](#a19). A program that sends the change without the panel
+      can name a language the journal does not offer, with no title
+      ⚠ [A23](#a23). <sup>i</sup>
 14. **Reset permissions (Tools › Permissions).** The Tools page's
     "Permissions" tab shows "Reset Article Permissions" ("Reset Monograph
     Permissions" on a press, "Reset Preprint Permissions" on a preprint
@@ -953,6 +980,64 @@ App-specific:
       beside the readout throughout (Rule 2; Actors rows 3, 4).
       <sup>s12</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the routes is
+the grids' (this feature's two under Actors & permissions, the edit
+gate for saving and the Permissions & Disclosure page's,
+*[the workflow screen](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*
+for loading the other pages' forms), checked apart (`docs/process/api.md`).
+
+API1. **The fields the journal stamps are refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission.
+
+   - **Stamped fields**: save the version through the API with a journal
+     name, then with a publisher location, each beside a new Prefix:
+     each refused (400) with an error on that field, and the version
+     keeps its name, location and Prefix. The journal writes these onto
+     a version when it is published; no page has a field for them.
+   - **Control**: the same save with the Prefix alone: saved (200), and
+     the Prefix reads "The".
+
+API2. **An edit changes neither the status nor the submission language** {OJS OMP OPS}
+
+   Given: a Journal Manager, an unpublished submission.
+
+   - **The status**: save the version through the API with the status
+     "published", then "scheduled": each refused (403), and the version
+     is still unpublished with no publication date. Publishing is the
+     publish step's (Rule 12).
+   - **The language**: save the version with a language and a new
+     Subtitle: saved (200) with the Subtitle, and the version and the
+     submission keep their language. Only "Change Submission Language"
+     changes it (Rule 13).
+
+API3. **A language the journal lacks, or a title that is not per language, is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager of a scratch journal in English only, a
+   submission there.
+
+   - **A language the journal lacks**: save a French title and a French
+     keyword: refused (400) with an error on the French title. The forms
+     show only the journal's languages (Rule 3).
+   - **One title for every language**: save the title as plain text
+     instead of per language: refused (400) with an error on the title.
+   - The version keeps its title and keywords throughout.
+
+API4. **Term suggestions come from this journal's published versions alone** {OJS OMP OPS}
+
+   Given: a scratch journal with a published submission carrying one
+   keyword and an unpublished one carrying another, and a second
+   scratch journal whose published submission carries a third.
+
+   - **The suggestions**: ask the first journal for keyword suggestions
+     matching the three terms' shared beginning: the published
+     submission's keyword alone (Rule 7b). The second journal is offered
+     its own keyword alone.
+   - **A language the journal lacks**: ask for French suggestions:
+     refused (400).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1011,6 +1096,10 @@ Left out of the scenarios above, by reason:
     and Default Chapter License URL; Fields)
   - A22 (a title typed into the language panel's Title box before the
     box has finished loading, lost on a slow link; Rule 13b)
+  - A23 (a program's language change to a language the journal does
+    not offer, with no title; Rule 13c)
+  - A24 (a program loading the Permissions & Disclosure form as a
+    Copyeditor without Production access; Actors row 2)
   - OMP5 (the press's "License" link that leads nowhere with terms and no
     license; Rule 15; scenario 5 marks it)
   - OPS3 (a preprint server in French: the Author's "posted" banner and
@@ -1047,7 +1136,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-28; A16, A17 and the
-retirement of A4 2026-09-09; the retirement of A16 2026-09-14; A10 settled 2026-09-18; OJS2 and the retirement of A10 2026-09-21; A18–A20 2026-09-28; OPS3 and the correction of A15's press face 2026-09-30; A21 2026-10-05; A22 and the rewriting of OJS1 and A5 2026-10-07), unreviewed unless an entry notes otherwise;
+retirement of A4 2026-09-09; the retirement of A16 2026-09-14; A10 settled 2026-09-18; OJS2 and the retirement of A10 2026-09-21; A18–A20 2026-09-28; OPS3 and the correction of A15's press face 2026-09-30; A21 2026-10-05; A22 and the rewriting of OJS1 and A5 2026-10-07; A23 and A24 2026-10-29), unreviewed unless an entry notes otherwise;
 the team settles them on spec review. The summary
 is sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact
 and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
@@ -1060,6 +1149,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A19](#a19) | Assistants allowed to edit the publication's metadata, and administrators with only an assistant role, get a language "Change" that fails | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A21](#a21) | Through a new version of a published item, the permitted Author changes the published version's funders and can take its review round | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A22](#a22) | Change Submission Language: on a slow link, a title typed the moment the Title box appears is wiped | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
+| [A23](#a23) | A program changes the submission language to one the journal does not offer, with no title; saves are then refused, and a code that is no language breaks the Publication pages | 🐞 | latent · crash: server | — |
 | [OJS1](#ojs1) | Editors are offered a language "Change" on an article published as Author's Original, and every change is refused | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [OMP5](#omp5) | Book page: with press License Terms and no book license, a "License" link reloads the page | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS3](#ops3) | In French a preprint server shows the Author's "posted" banner and the Copyright Holder and Copyright Year descriptions as raw codes | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1073,6 +1163,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | The language panel's Abstract is required but described as "recommended" | ❓ | minor | — |
 | [A18](#a18) | A Site Administrator whose manager role in the journal was ended finds Title & Abstract, Metadata and Data read-only, while the workflow header still offers publishing and "Change" | ❓ | minor | — |
 | [A20](#a20) | After an override, License URL (and a press's Default Chapter License URL) keeps the sentence naming the default beside the saved address | ❓ | minor | — |
+| [A24](#a24) | A Copyeditor without Production access, who has no Permissions & Disclosure page, loads its form through the REST API | ❓ | latent | — |
 | [OJS2](#ojs2) | Whether a scheduled article's terms are offered as suggestions: Rule 7b names no scheduled source | ❓ | minor | — |
 | [OMP3](#omp3) | The press's reset-permissions wording is the older text | ❓ | minor | — |
 | [OPS2](#ops2) | A wizard-chosen license shows beside a sentence promising the server's default | ❓ | minor | — |
@@ -1330,6 +1421,45 @@ with half a second of delay, and typing that starts within that half
 second. Keys typed later are not shown at all while the box is pale. On
 an ordinary link the box has loaded before the first key.
 Basis: probe, 2026-10-19. <sup>f-a22</sup>
+
+<a id="a23"></a>
+**A23 — A program changes the submission language to one the journal does not offer, with no title; saves are then refused, and a code that is no language breaks the Publication pages** · 🐞 · latent · crash: server.
+The "Change Submission Language For" panel offers only the journal's
+submission languages and requires the title in the one picked (Rule
+13b). A program that sends the change through the install's programming
+interface (the REST API's language change request), as a Journal
+Manager or a Section Editor who may edit the publication, is held to
+neither. The program expects a language the journal does not offer, or
+a change without the title, refused with a message, and the language to
+stay as it was.
+Instead the change is stored. With a language the journal does not
+offer (French (Canada) on an English-only journal), the item then has
+that language with an empty title: every later save of the version is
+refused with "This field is required." for that title, a change back to
+the old language included, until a program stores a title in that
+language. With a code that is no language at all ("xx_XX"), every
+Publication page's form also fails with a server error, so no screen
+can repair it; a program must store a title under that code before the
+change back is accepted.
+Basis: probe, 2026-10-29. <sup>f-a23</sup>
+
+<a id="a24"></a>
+**A24 — A Copyeditor without Production access, who has no Permissions & Disclosure page, loads its form through the REST API** · ❓ · latent.
+The Permissions & Disclosure page appears only for editorial roles with
+access to the Production stage (Actors; Rule 1), so a Copyeditor
+assigned to the submission, whose role reaches Copyediting only, has no
+such page. The install's programming interface still answers that
+Copyeditor's request for the page's form, with the Copyright Holder,
+Copyright Year and License URL values and the journal's default license
+in the descriptions, before and after publication. The values are the
+version's own, which the same Copyeditor reads through the version's
+own request anyway, and the default license is shown on every published
+item.
+Question: should the form's request follow the page's Production-stage
+rule? Lean: harmless as it stands, since it shows nothing the Copyeditor
+cannot read otherwise; worth aligning only if the page ever carries
+more.
+Basis: probe, 2026-10-29. <sup>f-a24</sup>
 
 ### OJS
 
@@ -2938,6 +3068,37 @@ holding the English title (A15). First seen in a test run 2026-09-30
 keys pressed before the editor was initialized were lost. Kept script
 `shared/playwright/checks/U40/I07/i07.js` (`PHASES=type`).
 Issue report: [pkp-e2e#1023](https://github.com/jardakotesovec/pkp-e2e/issues/1023) ([docs/issues/U40-A22-language-panel-title-typed-early-lost.md](../issues/U40-A22-language-panel-title-typed-early-lost.md)).
+
+<a id="fn-f-a23"></a>
+**f-a23 — A23 evidence.** Probed 2026-10-29 (API coverage, OJS, OMP and
+OPS `main`, lib/pkp `df42984b46`, the probe servers, the persona set's
+English-only scratch journal and its submission in Copyediting): as the
+Journal Manager, `PUT …/publications/{id}/changeLocale` with
+`{"locale":"xx_XX"}` answered 200 and the submission's language became
+"xx_XX"; the Title & Abstract, Metadata and language panel forms
+(`GET …/_components/…`) then answered 500, and `{"locale":"en"}` was
+refused (400) until a title under "xx_XX" was saved. With
+`{"locale":"fr_CA"}` (the assigned Section Editor on OJS and OMP, the
+Journal Manager on OPS) the change answered 200; the forms loaded, and
+every `PUT …/publications/{id}` and the change back answered 400 with
+`title.fr_CA` "This field is required." until a French title was saved.
+A title in a language the journal lacks, sent with the change, is
+refused (400, "This language is not accepted."). Mechanism:
+`PKPSubmissionController::changeLocale()` checks only that a locale is
+sent and that the item has one unpublished version, then saves the
+version and the submission with it; neither save checks the locale
+against the journal's submission languages.
+
+<a id="fn-f-a24"></a>
+**f-a24 — A24 evidence.** API coverage's permission matrix, 2026-10-29,
+OJS and OMP `main` (lib/pkp `df42984b46`): `GET …/_components/permissionDisclosure`
+as the assigned Copyeditor answered 200 on the submission in
+Copyediting and on the published one; the Copyeditor's `GET …/publications/{id}`
+answered 200 with the same three fields. The route's guard is the
+publication read (`PublicationAccessPolicy`) and the role list
+(manager, sub-editor, assistant), with no stage check; the page's
+visibility comes from the workflow's `canAccessProduction` (ui-library
+`useWorkflowPermissions.js`). A preprint server has no Copyeditor.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1 — OJS1 evidence.** The submission's status comes from lib/pkp
