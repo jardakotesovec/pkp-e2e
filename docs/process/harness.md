@@ -48,6 +48,7 @@ shared/playwright/
 │   ├── auth.js              # ensureAuthStateFor — a session per call via POST _test/session
 │   ├── api.js               # pkpApi — test-API client (bootstrap, createContext, createSubmission)
 │   ├── api-client.js        # apiAs — the app's REST API as a user (session cookie + CSRF), for API checks
+│   ├── api-scratch.js       # scratch — a scratch context with named users and their API clients
 │   ├── personas.js          # seedPersonas — the persona set a permission grid names (api.md)
 │   ├── api-grids.js         # reads the route registry's gates and the specs' permission grids
 │   ├── api-traffic.js       # the traffic recorder, on with PKP_API_TRAFFIC=1
@@ -835,8 +836,10 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
 - **Project chain**: `setup → {shared, <app>} → <app>-serial → <app>-solo`.
   Beside the chain, where the private security repo sits next to the
   clone, an `api-matrix` project (setup as its dependency) runs the API
-  permission matrix from `../pkp-e2e-sec/api-matrix/`; only a command
-  that names it runs it, so CI never does (api.md "The matrix").
+  permission matrix from `../pkp-e2e-sec/api-matrix/`, whose files require
+  the harness through `PKP_E2E_DIR` (the config sets it to this clone);
+  only a command that names it runs it, so CI never does (api.md "The
+  matrix").
   The setup project probes `GET /api/v1/_test/bootstrap`. Warm, it is a no-op
   in under a second. Cold, it installs the schema through
   `tools/installTest.php` and seeds. The serial project runs after everything
