@@ -1,11 +1,14 @@
 --- a/lib/pkp/api/v1/submissions/PKPSubmissionController.php
 +++ b/lib/pkp/api/v1/submissions/PKPSubmissionController.php
-@@ -1882,6 +1882,8 @@
+@@ -1883,6 +1883,11 @@
          }
  
          $params = $this->convertStringsToSchema(PKPSchemaService::SCHEMA_AUTHOR, $illuminateRequest->input());
-+        // A request that leaves out the type keeps the contributor's own, as it keeps every other field it leaves out
-+        $params['contributorType'] ??= $author->getData('contributorType');
++        // A request that leaves out the type keeps the contributor's own, as it keeps every other field it leaves out;
++        // a type sent empty is still refused by validate()
++        if (!array_key_exists('contributorType', $params)) {
++            $params['contributorType'] = $author->getData('contributorType');
++        }
          $submissionContext = $request->getContext();
          // Remove extra data that is irrelevant to the selected contributor type
          $this->removeIrrelevantContributorTypeData($params, $submissionContext);

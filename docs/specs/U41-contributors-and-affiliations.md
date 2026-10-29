@@ -1030,7 +1030,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A27](#a27) | A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ" | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A29](#a29) | A program saving a contributor with an unknown CRediT degree gets a server error, and part of the change is kept | 🐞 | low · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A30](#a30) | A program that changes one field of a contributor through the REST API silently removes all their affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
-| [A31](#a31) | A program that edits a contributor through the REST API without the contributor type erases the contributor's names, email, country, biography, homepage URL and affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
+| [A31](#a31) | A program that edits a contributor through the REST API without the contributor type erases the contributor's names, email, country, biography, homepage URL and affiliations | 🐞 | medium | issues (claude), 2026-10-29 — re-verified |
 | [A32](#a32) | A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved | 🐞 | low · crash: server | issues (claude), 2026-10-21 — re-verified |
 | [A33](#a33) | A program that names a contributor type the install does not have gets a server error, and the contributor's affiliations are deleted | 🐞 | low · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A2](#a2) | Deleting the primary contact silently leaves the publication with none | ❓ | user-visible | — |
@@ -1531,16 +1531,16 @@ contributor when the request does not name the contributor type
 ("Person", "Organization or group" or "Anonymous"), and answers success.
 The given, family and preferred public names, the email, the country,
 the "Bio Statement", the "Homepage URL" and every affiliation are
-blanked, even when the request resends the affiliations. The value the
-request changes (a new email, a new biography) is not kept either. The
-Contributors list then shows a row
-with no name, and on a published item the public page lists an author
-without a name. Every script written for 3.5, which has no contributor
-types, sends exactly such edits, so after an upgrade it erases each
-contributor it touches. The old values are gone; they can only be typed
-in again.
-Basis: probe, 2026-10-21. <sup>f-a31</sup>
-Report: refresh owed — housekeeping fold 2026-10-29: an API edit without contributorType also blanks the preferred public name, the biography and the homepage URL (claim check cc29a); the report's title, Summary and Impact take the wider field list, and its Evidence's "Not driven: … the unknown type (code only)" is now driven, a fault of its own with A29's fix (A33), as its Cause's `removeIrrelevantContributorTypeData()` bullet says (2026-10-29)
+blanked, even when the request resends the affiliations. The new value
+the request sends is not saved either.
+The Contributors list then shows a row with no name, and on a published
+item the public page lists an author without a name. Every script
+written for 3.5, which has no contributor types, sends exactly such
+edits, so on 3.6 (the release `main` becomes) it erases each
+contributor it touches. The values are gone from the edited version:
+they can be copied back by hand from an earlier version of the
+submission where one exists, and otherwise only typed in again.
+Basis: probe, 2026-10-21; issue report refresh walk, 2026-10-29. <sup>f-a31</sup>
 
 <a id="a32"></a>
 **A32 — A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved** · 🐞 · low · crash: server.

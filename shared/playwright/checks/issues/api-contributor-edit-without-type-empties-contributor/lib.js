@@ -1,5 +1,5 @@
-// Helpers of walk.js here (U41 A30, A31, A32 issue walks; each of their folders holds the same copy so
-// that each stands alone). Requiring this file runs nothing.
+// Helpers of walk.js here (U41 A30, A31, A32 issue walks; each of their folders holds its own copy so
+// that each stands alone; this one widened for the A31 refresh of 2026-10-29). Requiring this file runs nothing.
 const path = require('path');
 const fs = require('fs');
 const {execFileSync} = require('child_process');
@@ -46,15 +46,21 @@ function resolve(app, control = false) {
     return {...c, id, pub, index: order.indexOf(id), rel, url: app.url(`/index.php/${app.contextPath}/api/v1/${rel}`)};
 }
 
-/** The stored rows: names, email, country, contributor type (main), affiliations (id and English name). */
+/**
+ * The stored rows: names, preferred public name, email, country, biography, homepage URL, contributor type (main),
+ * affiliations (id and English name).
+ */
 function stored(app, id) {
     const setting = (n) => sql(app, `select coalesce(setting_value, '') from author_settings where author_id = ${id} and setting_name = '${n}' and locale = 'en'`);
     const hasType = sql(app, `select count(*) from information_schema.columns where table_name = 'authors' and column_name = 'contributor_type'`) !== '0';
     return {
         givenName: setting('givenName'),
         familyName: setting('familyName'),
+        preferredPublicName: setting('preferredPublicName'),
         email: sql(app, `select email from authors where author_id = ${id}`),
         country: sql(app, `select coalesce(setting_value, '') from author_settings where author_id = ${id} and setting_name = 'country'`),
+        biography: setting('biography'),
+        url: sql(app, `select coalesce(setting_value, '') from author_settings where author_id = ${id} and setting_name = 'url'`),
         type: hasType ? sql(app, `select coalesce(contributor_type, '-') from authors where author_id = ${id}`) : '(no column)',
         affiliations: sql(
             app,
@@ -172,12 +178,50 @@ async function readForm(page, wf, c, key, run = '') {
     record(`${key}-edit${run}`, await screen(page));
     await shot(page, `${key}-edit${run}`);
     const box = async (n) => dlg.locator(`input[name="${n}"]`).first().inputValue({timeout: 3000}).catch(() => '(no box)');
-    const out = {listRow: row, givenName: await box('givenName-en'), familyName: await box('familyName-en'), email: await box('email'), affiliationRows: await affRows(dlg)};
+    const out = {
+        listRow: row,
+        givenName: await box('givenName-en'),
+        familyName: await box('familyName-en'),
+        preferredPublicName: await box('preferredPublicName-en'),
+        email: await box('email'),
+        url: await box('url'),
+        country: await dlg.locator('select[name="country"]').first().evaluate((s) => (s.selectedOptions[0] ? s.selectedOptions[0].text : '')).catch(() => '(no box)'),
+        bioStatement: await bioField(dlg)
+            .frameLocator('iframe')
+            .first()
+            .locator('body')
+            .innerText({timeout: 3000})
+            .then((t) => flat(t, 200))
+            .catch(() => '(no box)'),
+        bioProgress: flat(await bioField(dlg).locator('.pkpFormField--richTextarea__controlFooter').innerText({timeout: 3000}).catch(() => null), 100),
+        affiliationRows: await affRows(dlg),
+    };
     if (out.affiliationRows && !out.affiliationRows.length) {
         out.affiliationsField = flat(await dlg.locator('.pkpFormField--affiliations').first().innerText().catch(() => '(no field)'), 300);
     }
     await closeEdit(page, dlg);
     return out;
+}
+
+/** The form's "Bio Statement" field (a formatted-text box per language, English first). */
+const bioField = (dlg) => dlg.locator('.pkpFormField--richTextarea').filter({hasText: 'Bio Statement'}).first();
+
+/**
+ * Step 1: "Edit" on the contributor, type `values.preferredPublicName` in "Preferred Public Name", `values.url` in
+ * "Homepage URL" and `values.biography` in "Bio Statement" (English), and "Save": the save's answer.
+ */
+async function fillAndSave(page, wf, c, values) {
+    await page.reload().catch(() => {});
+    await idle(page);
+    if (!(await openContributors(wf, page, c.sub))) return {error: 'no "Contributors" entry'};
+    const dlg = await openEdit(page, wf, c);
+    await dlg.locator('input[name="preferredPublicName-en"]').fill(values.preferredPublicName);
+    await dlg.locator('input[name="url"]').fill(values.url);
+    const body = bioField(dlg).frameLocator('iframe').first().locator('body');
+    await body.click();
+    await body.pressSequentially(values.biography);
+    await sleep(300);
+    return pressSave(page, dlg);
 }
 
 /** Open the Affiliations row's actions ("Click to edit or delete") and choose `item`. */
@@ -217,5 +261,5 @@ async function pressSave(page, dlg) {
 
 module.exports = {
     T, sleep, flat, CASES, CONTROLS, PUBLISHED, resolve, stored, setApiKeySecret, createApiKey, curl, answer,
-    openContributors, openEdit, closeEdit, affRows, readForm, rowAction, confirmYes, pressSave,
+    openContributors, openEdit, closeEdit, affRows, readForm, rowAction, confirmYes, pressSave, bioField, fillAndSave,
 };
