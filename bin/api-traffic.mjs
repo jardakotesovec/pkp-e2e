@@ -7,6 +7,8 @@
 //      npm run api-traffic -- --local            this clone's apps/*/playwright/.api-traffic/
 //      npm run api-traffic -- --clear            empty the local logs first (a fresh local map)
 //      … --feature U43                           only that feature's routes in the table
+//      … --against <run-id>                      mark the server errors that run met too,
+//                                                so the daily read judges only new ones
 //
 // Writes .reports/api-traffic/<run>.md: per feature, each route and who
 // reached it (the screens, as which roles; the API checks), the routes nothing
@@ -24,7 +26,8 @@ const REPO = 'jardakotesovec/pkp-e2e';
 
 const args = process.argv.slice(2);
 const feature = args.includes('--feature') ? args[args.indexOf('--feature') + 1] : null;
-const runId = args.find((a) => /^\d+$/.test(a));
+const against = args.includes('--against') ? args[args.indexOf('--against') + 1] : null;
+const runId = args.find((a) => /^\d+$/.test(a) && a !== against);
 if (args.includes('--clear')) {
     for (const app of ['ojs', 'omp', 'ops']) fs.rmSync(path.join(REPO_ROOT, 'apps', app, 'playwright', '.api-traffic'), { recursive: true, force: true });
     console.log('api-traffic: local logs cleared');
@@ -37,23 +40,32 @@ if (!runId && !args.includes('--local')) {
 
 // ---- the logs ----
 
-function logDirs() {
-    if (!runId) return ['ojs', 'omp', 'ops'].map((app) => path.join(REPO_ROOT, 'apps', app, 'playwright', '.api-traffic'));
-    const dir = path.join(REPO_ROOT, '.reports', 'api-traffic', runId);
+function logDirs(run) {
+    if (!run) return ['ojs', 'omp', 'ops'].map((app) => path.join(REPO_ROOT, 'apps', app, 'playwright', '.api-traffic'));
+    const dir = path.join(REPO_ROOT, '.reports', 'api-traffic', run);
     if (!fs.existsSync(dir)) {
-        execFileSync('gh', ['run', 'download', runId, '-R', REPO, '-p', 'api-traffic-*', '-D', dir], { stdio: 'inherit' });
+        execFileSync('gh', ['run', 'download', run, '-R', REPO, '-p', 'api-traffic-*', '-D', dir], { stdio: 'inherit' });
     }
     return fs.readdirSync(dir).map((d) => path.join(dir, d));
 }
 
-const calls = [];
-for (const dir of logDirs().filter((d) => fs.existsSync(d))) {
-    for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.jsonl'))) {
-        for (const line of fs.readFileSync(path.join(dir, file), 'utf8').split('\n')) {
-            if (line.trim()) calls.push(JSON.parse(line));
+/** Every logged call of a run (or of the local logs). */
+function loadCalls(run) {
+    const out = [];
+    for (const dir of logDirs(run).filter((d) => fs.existsSync(d))) {
+        for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.jsonl'))) {
+            for (const line of fs.readFileSync(path.join(dir, file), 'utf8').split('\n')) {
+                if (line.trim()) out.push(JSON.parse(line));
+            }
         }
     }
+    return out;
 }
+
+const calls = loadCalls(runId);
+// A server error's shape: app, method and path with its numbers blanked.
+const errorShape = (c) => `${c.app} ${c.m} ${c.p.split('?')[0].replace(/\/\d+(?=\/|$)/g, '/{id}')}`;
+const seenBefore = new Set(against ? loadCalls(against).filter((c) => c.s >= 500).map(errorShape) : []);
 
 // ---- the registry ----
 
@@ -116,7 +128,10 @@ for (const [owner, list] of [...byOwner].sort()) {
     }
 }
 out.push('', '## Server errors', '');
-out.push(...(errors.length ? errors.map((e) => `- ${e.s} ${e.m} \`${e.p}\` (${e.app}, ${e.f}, as ${role(e.u)})`) : ['None.']));
+if (against) out.push(`Marked "seen in ${against}": the shapes that run met too; the others are new.`, '');
+out.push(...(errors.length
+    ? errors.map((e) => `- ${e.s} ${e.m} \`${e.p}\` (${e.app}, ${e.f}, as ${role(e.u)})${seenBefore.has(errorShape(e)) ? ` · seen in ${against}` : ''}`)
+    : ['None.']));
 out.push('', '## Calls no route matches', '');
 out.push(...(unmatched.size ? [...unmatched].map(([k, n]) => `- ${k} (${n})`) : ['None.']));
 
@@ -124,4 +139,5 @@ const file = path.join(REPO_ROOT, '.reports', 'api-traffic', `${runId || 'local'
 fs.mkdirSync(path.dirname(file), { recursive: true });
 fs.writeFileSync(file, out.join('\n') + '\n');
 console.log(out[2]);
-console.log(`${errors.length} server errors, ${unmatched.size} unmatched call shapes; report: ${path.relative(REPO_ROOT, file)}`);
+const fresh = errors.filter((e) => !seenBefore.has(errorShape(e))).length;
+console.log(`${errors.length} server errors${against ? ` (${fresh} new since ${against})` : ''}, ${unmatched.size} unmatched call shapes; report: ${path.relative(REPO_ROOT, file)}`);

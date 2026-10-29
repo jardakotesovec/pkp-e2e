@@ -49,9 +49,9 @@ manager role in every journal of a test install. <sup>b</sup>
 | **The Site Administrator with no manager role in the journal** | • On a journal, the page lists the journal's institutions under an "Error" window, and every search, "Save" and "Yes" on "Delete" fails, changing nothing ⚠ [A6](#a6) <sup>q7</sup><br>• On a press and a preprint server, the access-denied page, as on their other Settings pages <sup>b</sup> |
 
 <a id="api-grid-institutions"></a>
-**Permission grid: managing institutions.** Row 2 above, for every
-institutions route (Rule 8); the site keeps no list of its own (Rule 2)
-(`docs/process/api.md`).
+**Permission grid: managing institutions.** The row "Open the Institutions
+page…" above, for every institutions route (Rule 8); the site keeps no
+list of its own (Rule 2) (`docs/process/api.md`).
 
 | Persona | Context |
 |---|---|

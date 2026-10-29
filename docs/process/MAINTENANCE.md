@@ -61,9 +61,10 @@ The scheduled prompt only points here; this section is the day's order.
 4. Check the latest `e2e-tests.yml` run on each app's `main` (harness.md
    "CI") and triage anything red against `ci-triage.md` before calling it
    new. A daily check also catches a red nobody has reported yet. Then the
-   server errors the suites met: `npm run api-traffic -- <run-id>` on the
-   latest pkp-e2e `main` run, its "Server errors" section; a 5xx no spec
-   records is a finding (`api.md` "Keeping it true").
+   server errors the suites met: `npm run api-traffic -- <run-id> --against
+   <the run before>` on the latest pkp-e2e `main` run, its "Server errors"
+   section; a new 5xx no spec records is a finding (`api.md` "Keeping it
+   true").
 5. Merge any companion whose app PR has merged ("A developer's PR fails
    the suite", step 5).
 6. Read the stable line for regressions ("The stable line:

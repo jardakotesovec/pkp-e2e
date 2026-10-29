@@ -24,9 +24,9 @@ hand-kept columns:
   controller that serves several features is split route by route.
 - **Gate**: the grid the route follows, as `U40#edit-gate` (the spec
   `U40-…md`, the table after its `api-grid-edit-gate` anchor);
-  `none: <reason>` when it has none on purpose (it changes the persona
-  set's shared state, no test install holds the resource, no role rule
-  applies); `—` while its feature has no API coverage yet.
+  `none: <reason>` when it has none on purpose (no test install holds the
+  resource, no role rule applies, an allowed call would change what the
+  next cell reads); `—` while its feature has no API coverage yet.
 
 `npm run api-routes -- --write` regenerates the file and keeps the hand
 columns; `--gate <gate> <route…>` sets a Gate; `--check` is the lint: a
@@ -106,14 +106,20 @@ reads the registry and the grids from this repo and makes two passes:
 
 - **The grids.** Every gated route, as every persona, in every state;
   a route fails with the list of cells that disagree.
-- **The foreign pass.** Every gated route that names a child resource (a
-  funder, a comment, an announcement), the resource made in a second
-  persona set and requested at the first one's address as its manager:
-  anything but a refusal is a leak across contexts or submissions.
+- **The foreign passes.** Every gated route that names a child resource (a
+  funder, a comment, an announcement), the resource made elsewhere and
+  requested at the persona set's own address as its manager: made in a
+  second persona set (another context), and for a route under a
+  submission, on the set's other submission. A 2xx is a leak.
 
 A call answered 401, 403 or 404, or a 2xx whose body is an error alone,
 counts as refused; any other answer, a 400 for an empty body included, as
-allowed; a 5xx is a finding of its own. The Playwright config adds an
+allowed; a 5xx is a finding of its own. A write is sent an empty body,
+unless the route checks its body before its caller: then the matrix's
+`params.js` gives it a valid body that changes nothing the next cell reads
+(the submission's own language for the language change). In the foreign
+passes a 4xx to such a write that is no refusal proves nothing, and fails
+until the route has its body. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
 never runs it. All of it takes about a minute for the three apps:
 
@@ -170,7 +176,8 @@ shard uploads its log. `npm run api-traffic -- <run-id>` maps a run's logs
 onto the registry (`--local` this clone's own, `--clear` empties them
 first): per feature, which routes the screens reach, as which roles and
 with which query keys, which only API checks reach, which nothing reaches,
-and every 5xx answer with the test that met it. Read it when adding API
+and every 5xx answer with the test that met it (`--against <run-id>` marks
+the ones an earlier run met too). Read it when adding API
 coverage to a spec: a route the screens never reach is where API checks
 pay.
 
@@ -213,6 +220,6 @@ feature"), one spec at a time:
 - **Weekly** (the housekeeping session): the whole matrix on the three
   apps, so a maker broken by an upstream change does not rot unseen.
 - **Daily** (the upstream session): the "Server errors" section of the
-  traffic map of the latest `main` CI run; a 5xx no spec records is a
-  finding (a 🐞 entry, or the security repo when its body shows server
-  internals).
+  traffic map of the latest `main` CI run, `--against` the run before it;
+  a new 5xx no spec records is a finding (a 🐞 entry, or the security repo
+  when its body shows server internals).

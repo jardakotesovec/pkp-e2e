@@ -41,7 +41,8 @@ screen. Readers need no account. <sup>b</sup>
 | **Follow a slide's button** | • any visitor; the button opens the address typed into "URL", exactly as typed (Rule 4) ⚠ [A2](#a2) <sup>e</sup> |
 
 <a id="api-grid-highlights"></a>
-**Permission grid: managing highlights.** Rows 1 and 2 above, for every
+**Permission grid: managing highlights.** The rows "See the journal's
+Highlights tab…" and "See the site's Highlights tab…" above, for every
 highlights route (Rule 15): "Context" is a journal's own highlights,
 "Site" the site's (Rules 1 and 12); the carousel itself is read through
 the home pages (`docs/process/api.md`).

@@ -1140,6 +1140,26 @@ App-specific:
     - **Control**: the Author types the My Submissions address for their
       second submission: the panel opens with its header (Rule 2c).
 
+### Through the API
+
+The check below asks what no screen asks; who may call these routes is
+the [submission-read grid](#api-grid-submission-read)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **The assigned reviewer reads a submission without its authors' identity** {OJS OMP}
+
+   Given: a Journal Manager, an Author, a Reviewer; the Author's
+   submission sent to review with the default review type, which keeps the
+   authors' identity from the reviewer, and the Reviewer assigned to it,
+   the request accepted.
+
+   - **The submission and its versions**: the Reviewer's read of the
+     submission and of its list of versions each answer 200 and carry
+     nowhere the Author's name. The read of one version their review page
+     sends is *[Contributors & affiliations](U41-contributors-and-affiliations.md)*'
+     scenario 11's.
+   - **Control**: the manager's same reads carry the Author's name.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:

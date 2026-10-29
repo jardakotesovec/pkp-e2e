@@ -484,7 +484,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `submission.decision.add` | POST | `submissions/{submissionId}/decisions` | ojs omp ops | manager subEditor | U34 | — |
 | `submission.returnToDone` | POST | `submissions/{submissionId}/returnToDone` | ojs omp ops | manager subEditor | U34 | — |
 | `submission.delete` | DELETE | `submissions/{submissionId}` | ojs omp ops | manager subEditor | U22 | — |
-| `submission.publication.changeLocale` | PUT | `submissions/{submissionId}/publications/{publicationId}/changeLocale` | ojs omp ops | manager subEditor | U40 | none: it changes the persona set's submission language; Rule 13's roles probed by hand |
+| `submission.publication.changeLocale` | PUT | `submissions/{submissionId}/publications/{publicationId}/changeLocale` | ojs omp ops | manager subEditor | U40 | U40#change-language |
 | `submission.publication.version` | PUT | `submissions/{submissionId}/publications/{publicationId}/version` | ojs omp ops | manager subEditor | U49 | — |
 | `submission.getNextAvailableVersion` | GET | `submissions/{submissionId}/nextAvailableVersion` | ojs omp ops | manager subEditor | U49 | — |
 | `submission.publication.add` | POST | `submissions/{submissionId}/publications` | ojs omp ops | manager subEditor assistant | U49 | — |

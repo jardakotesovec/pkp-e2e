@@ -48,10 +48,11 @@ account. <sup>b</sup>
 | **Read the announcement feed** {OJS} | • any visitor, through the feed links, while announcements are on and a manager has enabled the "Announcement Feed Plugin", which a fresh journal has off (Rule 18) <sup>g</sup> |
 
 <a id="api-grid-announcements"></a>
-**Permission grid: managing announcements.** Rows 2 and 3 above, for every
-announcements route (Rule 19): "Context" is a journal's own announcements,
-"Site" the site's (Rule 16); public reading goes through the public pages,
-and the types have no route (`docs/process/api.md`).
+**Permission grid: managing announcements.** The rows "Open the journal's
+Announcements page…" and "Open the site's Announcements tab…" above, for
+every announcements route (Rule 19): "Context" is a journal's own
+announcements, "Site" the site's (Rule 16); public reading goes through
+the public pages, and the types have no route (`docs/process/api.md`).
 
 | Persona | Context | Site |
 |---|---|---|

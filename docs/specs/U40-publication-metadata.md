@@ -92,6 +92,27 @@ Production-stage access (`docs/process/api.md`).
 | manager of another context | — | — |
 | site admin | ✓ | ✓ |
 
+<a id="api-grid-change-language"></a>
+**Permission grid: changing the submission language.** The row "Change
+the submission language" above, for the route behind its window; on a
+published version nobody may (Rule 13), so the grid reads the unpublished
+one (`docs/process/api.md`).
+
+| Persona | Unpublished |
+|---|---|
+| manager | ✓ |
+| assigned section editor | ✓ |
+| assigned section editor, metadata edit off | — |
+| unassigned section editor | — |
+| assigned assistant | — |
+| submitter | — |
+| other author | — |
+| assigned reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 All fields are per version. Where a field is marked *multilingual*, it is

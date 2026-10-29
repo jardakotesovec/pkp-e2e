@@ -38,7 +38,7 @@ async function createScratch(pkpApi, apiAs, tag, {users = {mg: 'manager'}, ...co
         as: (key) => apiAs(key ? user(key) : null, {context: tag}),
         /** A submission in this context; `submitter` names a user key. */
         submission: (suffix, {submitter, ...spec} = {}) =>
-            pkpApi.createSubmission({tag: `${tag}${suffix}`, context: tag, submitter: user(submitter), ...spec}),
+            pkpApi.createSubmission({tag: `${tag}${suffix}`, context: tag, ...(submitter ? {submitter: user(submitter)} : {}), ...spec}),
     };
 }
 
