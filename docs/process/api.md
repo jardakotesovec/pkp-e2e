@@ -54,7 +54,8 @@ cell, so a program can check it:
   server) is skipped there.
 - **Columns** are states. `Unpublished` and `Published` are the persona
   set's two submissions; a rule about the context rather than a submission
-  has one column, `Allowed`.
+  has one column, `Allowed`, and `Site` calls the route on the site
+  (`index`) instead of the scratch context.
 - **Cells** are `✓` (allowed), `—` (refused) or `?` (an open question in
   the register, linked; not checked).
 - **One grid per rule, not per feature.** The routes of contributors,
@@ -144,7 +145,8 @@ Done as a revision of the shipped spec (RUNBOOK "Revising a shipped
 feature"), one spec at a time:
 
 1. **Owners.** The registry rows for the spec's routes name it.
-2. **Gates.** Each route gets the grid of the rule it follows; a rule
+2. **Gates.** Each route gets the grid of the rule it follows
+   (`npm run api-routes -- --gate U40#edit-gate funders.add …`); a rule
    with no grid yet gets one in the spec that owns it.
 3. **Matrix.** Run it on all three apps and judge every disagreeing cell
    (above).

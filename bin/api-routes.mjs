@@ -13,6 +13,8 @@
 // run: npm run api-routes              print the counts and anything odd
 //      npm run api-routes -- --write   regenerate the file, keeping the hand
 //                                      columns (Owner, Gate) by route key
+//      npm run api-routes -- --gate U40#edit-gate funders.add funders.edit
+//                                      set the Gate of those routes (`—` clears)
 //      npm run api-routes -- --check   lint: exit 1 when file and code differ,
 //                                      an Owner is not a feature, or a Gate's
 //                                      grid does not parse
@@ -288,7 +290,29 @@ function check(rows, kept) {
     return problems;
 }
 
+// The Gate column of the named routes, set in place.
+function setGate(gate, keys) {
+    const lines = read(FILE).split('\n');
+    const done = new Set();
+    lines.forEach((line, i) => {
+        const m = line.match(/^\| `([^`]+)` \|/);
+        if (m && keys.includes(m[1])) {
+            lines[i] = line.replace(/\| [^|]+ \|$/, `| ${gate} |`);
+            done.add(m[1]);
+        }
+    });
+    fs.writeFileSync(path.join(REPO_ROOT, FILE), lines.join('\n'));
+    const missing = keys.filter((k) => !done.has(k));
+    console.log(`gate ${gate} set on ${done.size} route(s)${missing.length ? `; no such route: ${missing.join(', ')}` : ''}`);
+    if (missing.length) process.exit(1);
+}
+
 // ---- main ----
+
+if (process.argv[2] === '--gate') {
+    setGate(process.argv[3], process.argv.slice(4));
+    process.exit(0);
+}
 
 const rows = scanCode();
 const kept = parseFile();

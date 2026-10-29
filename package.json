@@ -28,7 +28,8 @@
     "lint:probe-imports": "! git grep -l \"playwright/probe\" -- apps shared/playwright/tests shared/playwright/pages shared/playwright/support",
     "check-models": "node bin/check-models.mjs",
     "report-models": "node bin/report-models.mjs",
-    "regressions": "node bin/regression-metrics.mjs"
+    "regressions": "node bin/regression-metrics.mjs",
+    "api-traffic": "node bin/api-traffic.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.0"

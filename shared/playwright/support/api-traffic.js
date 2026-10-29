@@ -58,8 +58,11 @@ function watchContext(context) {
     }
     context.__pkpTraffic = true;
     context.on('response', (response) => {
+        const request = response.request();
         record({
-            method: response.request().method(),
+            // The screens send PUT and DELETE as a POST that names the
+            // method in X-Http-Method-Override; the app routes it as named.
+            method: (request.headers()['x-http-method-override'] || request.method()).toUpperCase(),
             url: response.url(),
             status: response.status(),
             user: context.__pkpUser,
