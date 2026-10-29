@@ -1028,11 +1028,11 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A25](#a25) | A contributor's later CRediT rows have unnamed drop-downs, and a click on their labels edits the first row | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A26](#a26) | On an article, book or preprint page with several contributors, a contributor's affiliations print in reverse order | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A27](#a27) | A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ" | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
-| [A29](#a29) | A program saving a contributor with an unknown CRediT degree gets a server error, and part of the change is kept | 🐞 | low · crash: server | issues (claude), 2026-10-15 — re-verified |
+| [A29](#a29) | A program saving a contributor with an unknown CRediT degree gets a server error, and part of the change is kept | 🐞 | low · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A30](#a30) | A program that changes one field of a contributor through the REST API silently removes all their affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A31](#a31) | A program that edits a contributor through the REST API without the contributor type erases the contributor's names, email, country, biography, homepage URL and affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A32](#a32) | A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved | 🐞 | low · crash: server | issues (claude), 2026-10-21 — re-verified |
-| [A33](#a33) | A program that names a contributor type the install does not have gets a server error, and the contributor's affiliations are deleted | 🐞 | low · crash: server | — |
+| [A33](#a33) | A program that names a contributor type the install does not have gets a server error, and the contributor's affiliations are deleted | 🐞 | low · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A2](#a2) | Deleting the primary contact silently leaves the publication with none | ❓ | user-visible | — |
 | [A16](#a16) | The auto-created contributor can arrive without a Country — every later edit is then refused until one is supplied | ❓ | user-visible | — |
 | [A4](#a4) | The organization contributor's "ROR ID" box accepts any text without a shape check | ❓ | minor | — |
@@ -1508,7 +1508,7 @@ made. The CRediT roles the request lists before the faulty one take
 their new degrees. The roles it lists after the faulty one are not
 saved, and the roles it leaves out are removed from the contributor.
 The rest of the change, a new given name for one, is lost.
-Basis: probe + code reading, 2026-10-15. <sup>f-a29</sup>
+Basis: probe + code reading, 2026-10-15; issue report refresh walk, 2026-10-29. <sup>f-a29</sup>
 
 <a id="a30"></a>
 **A30 — A program that changes one field of a contributor through the REST API silently removes all their affiliations** · 🐞 · medium.
@@ -1574,8 +1574,7 @@ error. The change it sent is not
 saved, and the names, email, country, "Bio Statement" and "Homepage
 URL" stay as they were, but every affiliation is deleted, even when the
 request resends them. Version 3.5 has no contributor types.
-Basis: probe, 2026-10-29. <sup>f-a33</sup>
-Report: refresh owed — housekeeping fold 2026-10-29: this entry is the contributor-type half of A29's fault (one cause, one fix), which the A29 report's Reach names from a code check of `Repo::author()->validate()` and `edit()`; driven now through the API on OJS, OMP and OPS, where the affiliations are deleted even when the request resends them, because `removeIrrelevantContributorTypeData()` nulls them before `author\DAO::update()` fails; the report's "Tracked in" lacks A33 (2026-10-29)
+Basis: probe, 2026-10-29; issue report walk, 2026-10-29. <sup>f-a33</sup>
 
 ### OMP
 
