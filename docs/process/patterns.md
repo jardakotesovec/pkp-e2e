@@ -951,4 +951,8 @@ a queued job six seconds on (a failed attempt is retried after five
 seconds and `--stop-when-empty` exits while it waits). `jobs.php run`
 stops at the first failing job of any feature and returns between two
 jobs of a chain; either one runs other features' queued jobs on that
-fleet (U45 claim check K3, K5; U51, U17, U55, U56, U64).
+fleet (U45 claim check K3, K5; U51, U17, U55, U56, U64). A DOI deposit
+driven end to end without the queue: `checks/sync/pkp-lib-13119/deposit.php`
+runs one work's deposit jobs from the jobs table, the agency answered
+inside the process (Crossref or DataCite, ok or fail), and leaves every
+other queued job alone (OJS; regression read rr13062).
