@@ -49,6 +49,87 @@ always editable there. <sup>a</sup> <sup>b</sup>
 | **See contributors on reader pages** | • any reader, on a published item's landing page and in the listing pages' author lines (Rules 14–15). <sup>h</sup> |
 | **Require competing-interest statements** | • Journal Manager, and a Site Administrator working in the journal, on the workflow settings' Metadata screen (Settings that modify behavior). <sup>j</sup> |
 
+Adding, editing, deleting and reordering contributors follow
+*[Publication metadata's edit gate](U40-publication-metadata.md#api-grid-edit-gate)*,
+and reading one contributor follows
+*[the workflow screen's grid](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*.
+The three grids below are this feature's own.
+
+<a id="api-grid-contributor-list"></a>
+**Permission grid: reading the contributor list.** The row "See the
+Contributors list (workflow)" above, with the reviewer of Rule 17 added,
+cell by cell, as the API checks read it (`docs/process/api.md` names the
+personas and how they are seeded). The route that lists a version's
+contributors follows it; the route registry
+(`docs/tracking/api-routes.md`) lists it in its Gate column. The
+reviewer's own submission page asks for the list, and the answer comes
+with the list emptied while the review keeps the authors' identity from
+them (Rule 17), as the persona set's review does; so their cells read ✓,
+the withholding being the answer's content. The read of one contributor
+refuses that reviewer instead, so it follows the workflow screen's grid.
+"Unpublished" is a submission in Copyediting, "Published" the same
+submission published; ✓ allowed, — refused, ? an open question.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | ✓ | ✓ |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ? [workflow screen A8](U24-workflow-screen-and-stage-access.md#a8) | ? [workflow screen A8](U24-workflow-screen-and-stage-access.md#a8) |
+
+<a id="api-grid-contributor-roles"></a>
+**Permission grid: managing the contributor roles.** The row "Manage the
+journal's contributor roles" above, cell by cell, as the API checks read
+it (`docs/process/api.md` names the personas and how they are seeded).
+The routes behind the "Contributor Roles" screen (list, read, add, edit,
+delete) follow it; the route registry (`docs/tracking/api-routes.md`)
+lists them in its Gate column. The rule is about the journal, not a
+submission: "Allowed" is a call in the journal. ✓ allowed, — refused,
+? an open question.
+
+| Persona | Allowed |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-registry-lookup"></a>
+**Permission grid: the registry lookup.** Who reaches the Affiliations
+field's registry lookup (Fields, Rule 16), cell by cell, as the API checks
+read it (`docs/process/api.md` names the personas and how they are
+seeded): every role that can open a contributor form, the wizard's
+included, so any author. The install's `rors` routes (pressing "Add" on a
+registry suggestion, and the two reads no screen calls) follow it; the
+route registry (`docs/tracking/api-routes.md`) lists them in its Gate
+column. "Allowed" is a call in the journal. ✓ allowed, — refused, ? an
+open question.
+
+| Persona | Allowed |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | ✓ |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ? [publication metadata A18](U40-publication-metadata.md#a18) |
+
 ## Fields & validation
 
 The add/edit panel ("Add Contributor" / "Edit") opens with a
@@ -157,7 +238,8 @@ screen, Rule 12): <sup>e</sup>
      not driven), an edit naming a type other than the form's `PERSON`,
      `ORGANIZATION` or `ANONYMOUS` (`person`, say) fails with a server
      error. The change it sent is not saved, and the affiliations are
-     gone ⚠ [A33](#a33).
+     gone ⚠ [A33](#a33). Adding a contributor with such a type fails
+     the same way, and nothing is added.
    - **The record sent back as read.** A contributor read and sent back
      unchanged is not saved, and nothing changes ⚠ [A32](#a32). Sent
      with the fields that entry names adjusted, the record saves and
@@ -165,6 +247,11 @@ screen, Rule 12): <sup>e</sup>
    - **A CRediT degree** other than "Lead", "Equal" or "Supporting"
      fails with a server error, part of the change saved ([A29](#a29)
      says which).
+   - **An order naming a contributor the version lacks.** "Save Order"
+     sends every contributor of the list; a saved order that names one
+     the version does not have (another version's, or a number no
+     contributor has) fails with a server error, and the contributors
+     named before it are already moved ⚠ [A34](#a34).
 5. **Delete.** "Delete" opens a confirmation titled "Delete Contributor":
    "Are you sure you want to remove {name} as a contributor? This action
    can not be undone." Its "Delete Contributor" button removes the
@@ -820,6 +907,70 @@ App-specific:
       contributor list (Rule 17). A preprint server installs no review
       stage, so the scenario has no end there. <sup>s11</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the routes is
+the grids' (this feature's three under Actors & permissions,
+*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
+for saving contributors, *[the workflow screen](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*
+for reading one), checked apart (`docs/process/api.md`).
+
+API1. **An edit keeps what it leaves out, and the affiliations it resends** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission with a Person contributor
+   holding a family name, an email, a country, a role and two typed
+   institutions.
+
+   - **A partial edit**: edit the contributor through the API with the
+     type, a new given name and the affiliations as read, nothing else:
+     saved (200); the contributor keeps the family name, email, country
+     and role, and both institutions, each under its own id and name
+     (Rule 4a). The form's "Save" always sends every field.
+
+API2. **A contributor type sent empty or left out of an add is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission.
+
+   - **The add**: add a complete Person with the type sent empty, then
+     with it left out: each refused (400) with an error on the type, and
+     the list keeps its count. The form's type is a radio choice with
+     "Person" preselected.
+   - **The edit**: edit a contributor with the type sent empty: refused
+     (400) with an error on the type, and the contributor unchanged
+     (Rule 4a).
+
+API3. **A contributor role of another journal is not taken** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission, a second journal.
+
+   - **A foreign role**: add a Person whose only role is one of the
+     second journal's: refused (400) with an error on the roles, and the
+     list keeps its count. The form offers the journal's own roles alone
+     (Rule 11).
+
+API4. **A role identifier the list lacks is refused, and an edit keeps the identifier** {OJS OMP OPS}
+
+   Given: a Journal Manager of a scratch journal.
+
+   - **An unknown identifier**: add a role whose identifier is none of
+     the built-in codes: refused (400) with an error on the identifier,
+     and the role count unchanged. The "Add Role" panel offers only the
+     built-in codes (Fields "Role Identifier").
+   - **The identifier on edit**: edit a new EDITOR role with another
+     identifier and a new name: saved (200) with the new name, the
+     identifier still EDITOR. "Edit Role" offers the role's own
+     identifier alone (Rule 12).
+
+API5. **A registry id that is not a ROR address is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager.
+
+   - **Not a ROR address**: ask the install to store a registry record
+     whose id is empty, a bare code, an address on another site, or a
+     ror.org address of the wrong shape: each refused (400) with an
+     error on the id. The Affiliations field only sends ids picked from
+     the registry's own suggestions (Rule 16).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -898,13 +1049,6 @@ Left out of the scenarios above, by reason:
   - a contributor whose hand-entered institution is named in a language
     then unticked under "Metadata" saved with nothing changed, the save
     going through ([A28](#a28)): the guard the issue report proposes
-  - a program's contributor edit through the programming interface that
-    names the type and sends only a new given name, keeping the family
-    name, email and country, and one that also resends the affiliations
-    as read, keeping each (Rule 4a)
-  - a program's contributor edit that sends the type empty, refused with
-    "This field is required." and the contributor unchanged after a
-    reload (Rule 4a)
 - **Nothing new to test**:
   - Preferred Public Name (Fields): another text box on the form
     scenario 1 fills
@@ -969,6 +1113,8 @@ Left out of the scenarios above, by reason:
     on `main` with a server error; Rule 4a)
   - A33 (a program's edit on `main` naming a contributor type the
     install does not have failing and deleting the affiliations; Rule 4a)
+  - A34 (a program's saved order naming a contributor the version lacks
+    failing, part of the order saved; Rule 4a)
   - OPS2 (the Competing Interests label rendering raw on a preprint
     server; Fields)
 - **No seed**:
@@ -1033,6 +1179,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A31](#a31) | A program that edits a contributor through the REST API without the contributor type erases the contributor's names, email, country, biography, homepage URL and affiliations | 🐞 | medium | issues (claude), 2026-10-29 — re-verified |
 | [A32](#a32) | A program that sends a contributor back as it read it gets a server error on `main`, a refusal in 3.5, and nothing is saved | 🐞 | low · crash: server | issues (claude), 2026-10-21 — re-verified |
 | [A33](#a33) | A program that names a contributor type the install does not have gets a server error, and the contributor's affiliations are deleted | 🐞 | low · crash: server | issues (claude), 2026-10-29 — re-verified |
+| [A34](#a34) | A program that saves a contributor order naming a contributor the version lacks gets a server error, and part of the order is saved | 🐞 | low · crash: server | — |
 | [A2](#a2) | Deleting the primary contact silently leaves the publication with none | ❓ | user-visible | — |
 | [A16](#a16) | The auto-created contributor can arrive without a Country — every later edit is then refused until one is supplied | ❓ | user-visible | — |
 | [A4](#a4) | The organization contributor's "ROR ID" box accepts any text without a shape check | ❓ | minor | — |
@@ -1573,8 +1720,25 @@ Instead (PostgreSQL; MySQL not driven) the edit fails with a server
 error. The change it sent is not
 saved, and the names, email, country, "Bio Statement" and "Homepage
 URL" stay as they were, but every affiliation is deleted, even when the
-request resends them. Version 3.5 has no contributor types.
+request resends them. A program that adds a contributor with such a
+type gets the same server error, and no contributor is added. Version
+3.5 has no contributor types.
 Basis: probe, 2026-10-29; issue report walk, 2026-10-29. <sup>f-a33</sup>
+
+<a id="a34"></a>
+**A34 — A program that saves a contributor order naming a contributor the version lacks gets a server error, and part of the order is saved** · 🐞 · low · crash: server.
+"Save Order" sends the version's own contributors, each once. A program
+that saves the order through the install's programming interface (the
+REST API's contributor order request) can name a contributor the
+version does not have: one of another submission, or a number no
+contributor has. The program expects the order refused with a message,
+and the list to stay as it was.
+
+Instead the request fails with a server error. The contributors named
+before the unknown one have already taken their new places, so the
+list can be left with two contributors in the same place, its order
+then up to the install.
+Basis: probe, 2026-10-29. <sup>f-a34</sup>
 
 ### OMP
 
@@ -3098,6 +3262,29 @@ written. A31's fix (the stored type when none is sent) does not reach
 it, since the type is sent. Kept script
 `shared/playwright/checks/U41/H29/h29.js` (steps N4, N4b).
 Issue report: [pkp-e2e#978](https://github.com/jardakotesovec/pkp-e2e/issues/978) ([docs/issues/U41-A29-contributor-unknown-credit-degree-server-error.md](../issues/U41-A29-contributor-unknown-credit-degree-server-error.md)), A29's report.
+The add, probed 2026-10-29 (API coverage, OJS `0a00726121`, OMP
+`fd4ea260c`, OPS `d4e4d8737d`, lib/pkp `df42984b46` on OJS; scratch
+contexts, a manager's session): `POST …/contributors` with
+`contributorType: "person"` and an otherwise complete Person answered
+500 on all three apps, the `authors` insert refused by the same check;
+the list after it held no new contributor. The type sent empty or left
+out is refused with 400 "This field is required." on the add and the
+edit alike (API2).
+
+<a id="fn-f-a34"></a>
+**f-a34 — A34 evidence.** Probed 2026-10-29 (the installs and session
+of fn f-a33's add), OJS, OMP and OPS: `PUT …/contributors/saveOrder`
+with `sortedAuthors` naming another submission's contributor first, or
+the number 99999999, answered 500 ("Call to a member function setData()
+on null"); with the version's added contributor first and 99999999
+second, also 500, and the list then read both contributors at `seq` 0.
+Mechanism (lib/pkp `df42984b46`):
+`PKPSubmissionController::saveContributorsOrder()` looks each id up with
+`Repo::author()->get($id, $publicationId)`, which gives null for an id
+the version lacks, and passes the list unchecked to
+`author\Repository::setAuthorsOrder()`, which writes each author's `seq`
+in turn and fails on the null. The fix would refuse the request (400)
+when any id is not the version's, before writing.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** OMP

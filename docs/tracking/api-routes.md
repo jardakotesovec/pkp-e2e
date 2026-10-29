@@ -112,11 +112,11 @@ gates are used: `docs/process/api.md`.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `announcement.getMany` | GET | `announcements` | ojs omp ops | admin manager | U12 | — |
-| `announcement.getAnnouncement` | GET | `announcements/{announcementId}` | ojs omp ops | admin manager | U12 | — |
-| `announcement.add` | POST | `announcements` | ojs omp ops | admin manager | U12 | — |
-| `announcement.edit` | PUT | `announcements/{announcementId}` | ojs omp ops | admin manager | U12 | — |
-| `announcement.delete` | DELETE | `announcements/{announcementId}` | ojs omp ops | admin manager | U12 | — |
+| `announcement.getMany` | GET | `announcements` | ojs omp ops | admin manager | U12 | U12#announcements |
+| `announcement.getAnnouncement` | GET | `announcements/{announcementId}` | ojs omp ops | admin manager | U12 | U12#announcements |
+| `announcement.add` | POST | `announcements` | ojs omp ops | admin manager | U12 | U12#announcements |
+| `announcement.edit` | PUT | `announcements/{announcementId}` | ojs omp ops | admin manager | U12 | U12#announcements |
+| `announcement.delete` | DELETE | `announcements/{announcementId}` | ojs omp ops | admin manager | U12 | U12#announcements |
 
 ### categories — CategoryCategoryController (API-010)
 
@@ -161,12 +161,12 @@ gates are used: `docs/process/api.md`.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `contributorRole.getContributorRole` | GET | `contributorRoles/{roleId}` | ojs omp ops | admin manager | U41 | — |
-| `contributorRole.getContributorRoles` | GET | `contributorRoles` | ojs omp ops | admin manager | U41 | — |
-| `contributorRole.getIdentifiers` | GET | `contributorRoles/identifiers` | ojs omp ops | admin manager | U41 | — |
-| `contributorRole.addContributorRole` | POST | `contributorRoles` | ojs omp ops | admin manager | U41 | — |
-| `contributorRole.editContributorRole` | PUT | `contributorRoles/{roleId}` | ojs omp ops | admin manager | U41 | — |
-| `contributorRole.deleteContributorRole` | DELETE | `contributorRoles/{roleId}` | ojs omp ops | admin manager | U41 | — |
+| `contributorRole.getContributorRole` | GET | `contributorRoles/{roleId}` | ojs omp ops | admin manager | U41 | U41#contributor-roles |
+| `contributorRole.getContributorRoles` | GET | `contributorRoles` | ojs omp ops | admin manager | U41 | U41#contributor-roles |
+| `contributorRole.getIdentifiers` | GET | `contributorRoles/identifiers` | ojs omp ops | admin manager | U41 | U41#contributor-roles |
+| `contributorRole.addContributorRole` | POST | `contributorRoles` | ojs omp ops | admin manager | U41 | U41#contributor-roles |
+| `contributorRole.editContributorRole` | PUT | `contributorRoles/{roleId}` | ojs omp ops | admin manager | U41 | U41#contributor-roles |
+| `contributorRole.deleteContributorRole` | DELETE | `contributorRoles/{roleId}` | ojs omp ops | admin manager | U41 | U41#contributor-roles |
 
 ### dois — DoiController [ojs] (API-052)
 
@@ -247,11 +247,11 @@ gates are used: `docs/process/api.md`.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `institution.getMany` | GET | `institutions` | ojs omp ops | manager | U66 | — |
-| `institution.getInstitution` | GET | `institutions/{institutionId}` | ojs omp ops | manager | U66 | — |
-| `institution.add` | POST | `institutions` | ojs omp ops | manager | U66 | — |
-| `institution.edit` | PUT | `institutions/{institutionId}` | ojs omp ops | manager | U66 | — |
-| `institution.delete` | DELETE | `institutions/{institutionId}` | ojs omp ops | manager | U66 | — |
+| `institution.getMany` | GET | `institutions` | ojs omp ops | manager | U66 | U66#institutions |
+| `institution.getInstitution` | GET | `institutions/{institutionId}` | ojs omp ops | manager | U66 | U66#institutions |
+| `institution.add` | POST | `institutions` | ojs omp ops | manager | U66 | U66#institutions |
+| `institution.edit` | PUT | `institutions/{institutionId}` | ojs omp ops | manager | U66 | U66#institutions |
+| `institution.delete` | DELETE | `institutions/{institutionId}` | ojs omp ops | manager | U66 | U66#institutions |
 
 ### invitations — InvitationController (API-024)
 
@@ -351,9 +351,9 @@ gates are used: `docs/process/api.md`.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `ror.getRor` | GET | `rors/{rorId}` | ojs omp ops | manager subEditor assistant author | U41 | — |
-| `ror.getMany` | GET | `rors` | ojs omp ops | manager subEditor assistant author | U41 | — |
-| `ror.addOrEdit` | POST | `rors` | ojs omp ops | manager subEditor assistant author | U41 | — |
+| `ror.getRor` | GET | `rors/{rorId}` | ojs omp ops | manager subEditor assistant author | U41 | U41#registry-lookup |
+| `ror.getMany` | GET | `rors` | ojs omp ops | manager subEditor assistant author | U41 | U41#registry-lookup |
+| `ror.addOrEdit` | POST | `rors` | ojs omp ops | manager subEditor assistant author | U41 | U41#registry-lookup |
 
 ### sections — SectionController (API-034)
 
@@ -472,8 +472,8 @@ gates are used: `docs/process/api.md`.
 | `submission.getSubmission` | GET | `submissions/{submissionId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | — |
 | `submission.publications.getMany` | GET | `submissions/{submissionId}/publications` | ojs omp ops | manager subEditor assistant author reviewer | U24 | — |
 | `submission.publications.get` | GET | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | — |
-| `submission.publication.contributor.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author reviewer | U41 | — |
-| `submission.publication.contributor.get` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author reviewer | U41 | — |
+| `submission.publication.contributor.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author reviewer | U41 | U41#contributor-list |
+| `submission.publication.contributor.get` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author reviewer | U41 | U24#publication-pages |
 | `submission.participants.getMany` | GET | `submissions/{submissionId}/participants` | ojs omp ops | manager subEditor assistant | U35 | — |
 | `submission.participants.stage.getMany` | GET | `submissions/{submissionId}/participants/{stageId}` | ojs omp ops | manager subEditor assistant | U35 | — |
 | `submission.decisions.getMany` | GET | `submissions/{submissionId}/decisions` | ojs omp ops | manager subEditor | U34 | — |
@@ -488,11 +488,11 @@ gates are used: `docs/process/api.md`.
 | `submission.publication.publish` | PUT | `submissions/{submissionId}/publications/{publicationId}/publish` | ojs omp ops | manager subEditor assistant | U49 | — |
 | `submission.publication.unpublish` | PUT | `submissions/{submissionId}/publications/{publicationId}/unpublish` | ojs omp ops | manager subEditor assistant | U49 | — |
 | `submission.publication.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant | U49 | — |
-| `submission.contributor.add` | POST | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author | U41 | — |
+| `submission.contributor.add` | POST | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
 | `submission.publication.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author | U40 | — |
-| `submission.publication.contributor.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author | U41 | — |
-| `submission.publication.contributor.order.save` | PUT | `submissions/{submissionId}/publications/{publicationId}/contributors/saveOrder` | ojs omp ops | manager subEditor assistant author | U41 | — |
-| `submission.publication.contributor.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author | U41 | — |
+| `submission.publication.contributor.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
+| `submission.publication.contributor.order.save` | PUT | `submissions/{submissionId}/publications/{publicationId}/contributors/saveOrder` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
+| `submission.publication.contributor.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
 | `submission.publication._components.metadata` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/metadata` | ojs omp ops | manager subEditor assistant author | U40 | — |
 | `submission.publication._components.dataAvailability` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/dataAvailability` | ojs omp ops | manager subEditor assistant author | U40 | — |
 | `submission.publication._components.fundingStatement` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/fundingStatement` | ojs omp ops | manager subEditor assistant author | U40 | — |
