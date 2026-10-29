@@ -14,7 +14,8 @@
 //      npm run api-routes -- --write   regenerate the file, keeping the hand
 //                                      columns (Owner, Gate) by route key
 //      npm run api-routes -- --gate U40#edit-gate funders.add funders.edit
-//                                      set the Gate of those routes (`—` clears)
+//                                      set the Gate of those routes (`—` clears;
+//                                      'none: <reason>' says why a route has none)
 //      npm run api-routes -- --check   lint: exit 1 when file and code differ,
 //                                      an Owner is not a feature, or a Gate's
 //                                      grid does not parse
@@ -219,6 +220,11 @@ function sectionTitle(cls, atoms) {
     return `${cls.base} — ${cls.short}${cls.app ? ` [${cls.app}]` : ''}${atom ? ` (${atom})` : ''}`;
 }
 
+function hasGrid(owner) {
+    const spec = /^U\d{2}$/.test(owner) && fs.readdirSync(path.join(REPO_ROOT, 'docs/specs')).find((f) => f.startsWith(`${owner}-`));
+    return !!spec && read(`docs/specs/${spec}`).includes('<a id="api-grid-');
+}
+
 function features() {
     const ids = new Set([...read('docs/tracking/FEATURE-MAP.md').matchAll(/^### (U\d{2}) —/gm)].map((m) => m[1]));
     return ids;
@@ -284,8 +290,11 @@ function check(rows, kept) {
         if (!rows.has(id)) { problems.push(`no longer in code: ${k.method} ${k.path} (${id.split('|')[1]})`); continue; }
         if (!k.owner) problems.push(`Owner is blank: ${id.split('|')[1]}`);
         else if (k.owner !== 'parked' && !known.has(k.owner)) problems.push(`Owner "${k.owner}" is not a feature ID or parked: ${id.split('|')[1]}`);
-        const gateIssue = k.gate === '—' ? null : gateProblem(k.gate);
+        const gateIssue = k.gate === '—' || k.gate.startsWith('none: ') ? null : gateProblem(k.gate);
         if (gateIssue) problems.push(`Gate "${k.gate}" ${gateIssue}: ${id.split('|')[1]}`);
+        // A feature that has API coverage (a grid in its spec) gates every
+        // route it owns, or says why not (`none: <reason>`).
+        if (k.gate === '—' && hasGrid(k.owner)) problems.push(`Gate is blank on a route of ${k.owner}, which has API coverage (a grid, or none: <reason>): ${id.split('|')[1]}`);
     }
     return problems;
 }

@@ -48,24 +48,18 @@ account. <sup>b</sup>
 | **Read the announcement feed** {OJS} | • any visitor, through the feed links, while announcements are on and a manager has enabled the "Announcement Feed Plugin", which a fresh journal has off (Rule 18) <sup>g</sup> |
 
 <a id="api-grid-announcements"></a>
-**Permission grid: managing announcements.** Rows 2 and 3 above, cell by
-cell, as the API checks read it (`docs/process/api.md` names the personas
-and how they are seeded). Every announcements route of the programming
-interface (list, read one, add, edit, delete; Rule 19) follows it; the
-route registry (`docs/tracking/api-routes.md`) lists them in its Gate
-column. "Allowed" calls the routes on a journal, for the journal's own
-announcements; "Site" calls them on the site, for the site's
-announcements (Rule 16). Reading announcements publicly (row 4) goes
-through the public pages, not through these routes. The types (Rule 13)
-have no route. ✓ allowed, — refused, ? an open question.
+**Permission grid: managing announcements.** Rows 2 and 3 above, for every
+announcements route (Rule 19): "Context" is a journal's own announcements,
+"Site" the site's (Rule 16); public reading goes through the public pages,
+and the types have no route (`docs/process/api.md`).
 
-| Persona | Allowed | Site |
+| Persona | Context | Site |
 |---|---|---|
 | manager | ✓ | — |
 | section editor | — | — |
-| assistant {OJS OMP} | — | — |
+| assistant | — | — |
 | author | — | — |
-| reviewer {OJS OMP} | — | — |
+| reviewer | — | — |
 | reader | — | — |
 | nobody signed in | — | — |
 | manager of another context | — | — |

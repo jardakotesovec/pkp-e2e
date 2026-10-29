@@ -52,6 +52,9 @@ const PERSONAS = {
     'reader': {role: 'reader'},
     'nobody signed in': {anonymous: true},
     'manager of another context': {outsider: true},
+    // The installer's admin, who holds the manager role in every context
+    // it creates (scratch ones included), as a site's administrator does
+    // in the journals they set up.
     'site admin': {username: 'admin'},
 };
 

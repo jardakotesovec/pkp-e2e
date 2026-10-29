@@ -86,14 +86,8 @@ role's stage set. The rows spell that out per capability.
 
 <a id="api-grid-publication-pages"></a>
 **Permission grid: reading a submission's publication data.** The row "See
-the "Publication" group's pages" above, cell by cell, as the API checks
-read it (`docs/process/api.md` names the personas and how they are
-seeded). The routes that read a version's data for those pages
-(contributors, citations, funding) follow it; the route registry
-(`docs/tracking/api-routes.md`) lists them in its Gate column.
-"Unpublished" is a submission in Copyediting, a stage every assigned
-persona's role reaches; "Published" is the same submission published,
-resting in Done. ✓ allowed, — refused, ? an open question.
+the "Publication" group's pages" above, for the routes that read a
+version's data for those pages (`docs/process/api.md`).
 
 | Persona | Unpublished | Published |
 |---|---|---|
@@ -108,7 +102,28 @@ resting in Done. ✓ allowed, — refused, ? an open question.
 | reader | — | — |
 | nobody signed in | — | — |
 | manager of another context | — | — |
-| site admin | ? [A8](#a8) | ? [A8](#a8) |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-submission-read"></a>
+**Permission grid: reading a submission.** The row "Open a submission's
+workflow" above, plus the assigned reviewer, whose review page reads the
+submission, its versions and their contributors with the authors'
+identity withheld while the review keeps it from them (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | ✓ | ✓ |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
 
 ## Fields & validation
 

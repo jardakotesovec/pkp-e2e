@@ -57,27 +57,20 @@ Comments page is refused (Rule 2b).
 | **Approve, hide or delete a comment; view or delete a report** | • whoever can open the Comments page (the row above), on every comment of the journal, their own included, while comments are on (Rules 12 to 16); nobody on another journal's comment <sup>j</sup> |
 | **Receive the moderation tasks** | • every Journal Manager and Editor of the journal, in the Tasks panel (Side effects); a Site Administrator holding no manager role in the journal gets none <sup>l</sup> |
 
-The five grids below restate the rows above cell by cell, as the API
-checks read them (`docs/process/api.md` names the personas and how they
-are seeded; the persona set's manager stands for every manager-level
-role). Each comments route of the programming interface follows one of
-them; the route registry (`docs/tracking/api-routes.md`) lists them in its
-Gate column. The rules are about the journal, not a submission:
-"Allowed" is a call in the journal with public comments on, and wherever
-a route names a comment it is **the reader's comment**, written by the
-persona set's reader on its published article and approved by the
-manager, so the reader's row reads as the comment's writer and every
-other row as someone else. The rows read a journal's screens; a press and
-a preprint server, whose screens write and show no comment (Purpose),
-answer the same requests the same way [A24](#a24). ✓ allowed, —
-refused, ? an open question.
+The five grids below restate the rows above for the comments routes
+(`docs/process/api.md`). "Context" is a call in a journal with public
+comments on. Wherever a route names a comment it is **the reader's
+comment**, written by the persona set's reader on its published article
+and approved by the manager, so the reader's row is the comment's writer.
+A press and a preprint server, whose screens write and show no comment,
+answer the same requests the same way [A24](#a24).
 
 <a id="api-grid-comments-read"></a>
 **Permission grid: reading the comments.** The row "Read the comments
 under an article": the approved comments are anyone's (`docs/process/api.md`).
 The route behind the landing page's list follows it.
 
-| Persona | Allowed |
+| Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | ✓ |
@@ -95,7 +88,7 @@ signed-in account, with or without a role in the journal
 (`docs/process/api.md`). The route behind the comment box's "Submit"
 follows it.
 
-| Persona | Allowed |
+| Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | ✓ |
@@ -113,7 +106,7 @@ comment": any signed-in account but the comment's writer
 (`docs/process/api.md`). The route behind the "Report Comment" dialog's
 "Submit" follows it.
 
-| Persona | Allowed |
+| Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | ✓ |
@@ -131,7 +124,7 @@ comment from the landing page" and "Approve, hide or delete a comment":
 its writer, and whoever moderates (`docs/process/api.md`). The route
 behind both "Delete Comment" dialogs follows it.
 
-| Persona | Allowed |
+| Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | — |
@@ -151,7 +144,7 @@ behind both "Delete Comment" dialogs follows it.
 (`docs/process/api.md`). The Comments page's routes follow it: the list,
 one comment, its approval, its reports one by one and all at once.
 
-| Persona | Allowed |
+| Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | — |

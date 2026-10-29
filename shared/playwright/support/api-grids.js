@@ -9,7 +9,7 @@
  * - a permission grid in the spec that owns the rule: the table right after
  *   `<a id="api-grid-<name>"></a>`, one row per persona (the labels of
  *   support/personas.js, optionally with an app badge such as `{OJS OMP}`),
- *   one column per state (`Unpublished`, `Published`, or `Allowed` for a
+ *   one column per state (`Unpublished`, `Published`, or `Context` for a
  *   rule with no submission), each cell `✓` (allowed), `—` (refused) or
  *   `?` (an open question, not checked; the cell links its register entry).
  *
@@ -41,7 +41,7 @@ function gatedRoutes(registryFile = REGISTRY) {
             continue;
         }
         const [key, method, routePath, apps, , owner, gate] = cells.map((cell) => cell.replace(/`/g, ''));
-        if (gate && gate !== '—') {
+        if (gate && gate !== '—' && !gate.startsWith('none: ')) {
             routes.push({key, method, path: routePath, apps: apps.split(/\s+/), owner, gate});
         }
     }

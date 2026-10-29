@@ -50,52 +50,20 @@ always editable there. <sup>a</sup> <sup>b</sup>
 | **Require competing-interest statements** | • Journal Manager, and a Site Administrator working in the journal, on the workflow settings' Metadata screen (Settings that modify behavior). <sup>j</sup> |
 
 Adding, editing, deleting and reordering contributors follow
-*[Publication metadata's edit gate](U40-publication-metadata.md#api-grid-edit-gate)*,
-and reading one contributor follows
-*[the workflow screen's grid](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*.
-The three grids below are this feature's own.
-
-<a id="api-grid-contributor-list"></a>
-**Permission grid: reading the contributor list.** The row "See the
-Contributors list (workflow)" above, with the reviewer of Rule 17 added,
-cell by cell, as the API checks read it (`docs/process/api.md` names the
-personas and how they are seeded). The route that lists a version's
-contributors follows it; the route registry
-(`docs/tracking/api-routes.md`) lists it in its Gate column. The
-reviewer's own submission page asks for the list, and the answer comes
-with the list emptied while the review keeps the authors' identity from
-them (Rule 17), as the persona set's review does; so their cells read ✓,
-the withholding being the answer's content. The read of one contributor
-refuses that reviewer instead, so it follows the workflow screen's grid.
-"Unpublished" is a submission in Copyediting, "Published" the same
-submission published; ✓ allowed, — refused, ? an open question.
-
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | ✓ | ✓ |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ? [workflow screen A8](U24-workflow-screen-and-stage-access.md#a8) | ? [workflow screen A8](U24-workflow-screen-and-stage-access.md#a8) |
+*[Publication metadata's edit gate](U40-publication-metadata.md#api-grid-edit-gate)*;
+reading the list follows
+*[the workflow screen's submission grid](U24-workflow-screen-and-stage-access.md#api-grid-submission-read)*,
+whose assigned reviewer gets it emptied while the review keeps the
+authors' identity from them (Rule 17), and reading one contributor
+*[its publication pages grid](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*.
+The two grids below are this feature's own.
 
 <a id="api-grid-contributor-roles"></a>
 **Permission grid: managing the contributor roles.** The row "Manage the
-journal's contributor roles" above, cell by cell, as the API checks read
-it (`docs/process/api.md` names the personas and how they are seeded).
-The routes behind the "Contributor Roles" screen (list, read, add, edit,
-delete) follow it; the route registry (`docs/tracking/api-routes.md`)
-lists them in its Gate column. The rule is about the journal, not a
-submission: "Allowed" is a call in the journal. ✓ allowed, — refused,
-? an open question.
+journal's contributor roles" above, for the routes behind the "Contributor
+Roles" screen (`docs/process/api.md`).
 
-| Persona | Allowed |
+| Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | — |
@@ -108,17 +76,11 @@ submission: "Allowed" is a call in the journal. ✓ allowed, — refused,
 | site admin | ✓ |
 
 <a id="api-grid-registry-lookup"></a>
-**Permission grid: the registry lookup.** Who reaches the Affiliations
-field's registry lookup (Fields, Rule 16), cell by cell, as the API checks
-read it (`docs/process/api.md` names the personas and how they are
-seeded): every role that can open a contributor form, the wizard's
-included, so any author. The install's `rors` routes (pressing "Add" on a
-registry suggestion, and the two reads no screen calls) follow it; the
-route registry (`docs/tracking/api-routes.md`) lists them in its Gate
-column. "Allowed" is a call in the journal. ✓ allowed, — refused, ? an
-open question.
+**Permission grid: the registry lookup.** Every role that can open a
+contributor form, the wizard's included (Fields, Rule 16), for the
+install's `rors` routes (`docs/process/api.md`).
 
-| Persona | Allowed |
+| Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | ✓ |
@@ -128,7 +90,7 @@ open question.
 | reader | — |
 | nobody signed in | — |
 | manager of another context | — |
-| site admin | ? [publication metadata A18](U40-publication-metadata.md#a18) |
+| site admin | ✓ |
 
 ## Fields & validation
 

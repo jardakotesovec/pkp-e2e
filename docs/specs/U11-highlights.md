@@ -41,19 +41,12 @@ screen. Readers need no account. <sup>b</sup>
 | **Follow a slide's button** | • any visitor; the button opens the address typed into "URL", exactly as typed (Rule 4) ⚠ [A2](#a2) <sup>e</sup> |
 
 <a id="api-grid-highlights"></a>
-**Permission grid: managing highlights.** Rows 1 and 2 above, cell by
-cell, as the API checks read it (`docs/process/api.md` names the personas
-and how they are seeded; the persona set's manager stands for every
-manager-level role). Every highlights route of the programming interface
-(list, read one, add, edit, delete, order; Rule 15) follows it; the route
-registry (`docs/tracking/api-routes.md`) lists them in its Gate column.
-"Allowed" calls the routes on a journal, for the journal's own
-highlights; "Site" calls them on the site, for the site's highlights
-(Rules 1 and 12). Seeing the carousel (row 3) goes through the home
-pages, not through these routes. ✓ allowed, — refused, ? an open
-question.
+**Permission grid: managing highlights.** Rows 1 and 2 above, for every
+highlights route (Rule 15): "Context" is a journal's own highlights,
+"Site" the site's (Rules 1 and 12); the carousel itself is read through
+the home pages (`docs/process/api.md`).
 
-| Persona | Allowed | Site |
+| Persona | Context | Site |
 |---|---|---|
 | manager | ✓ | — |
 | section editor | — | — |

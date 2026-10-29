@@ -49,17 +49,11 @@ manager role in every journal of a test install. <sup>b</sup>
 | **The Site Administrator with no manager role in the journal** | • On a journal, the page lists the journal's institutions under an "Error" window, and every search, "Save" and "Yes" on "Delete" fails, changing nothing ⚠ [A6](#a6) <sup>q7</sup><br>• On a press and a preprint server, the access-denied page, as on their other Settings pages <sup>b</sup> |
 
 <a id="api-grid-institutions"></a>
-**Permission grid: managing institutions.** Row 2 above, cell by cell, as
-the API checks read it (`docs/process/api.md` names the personas and how
-they are seeded; its Site Administrator holds a manager role in the
-journal). Every institutions route of the programming interface (list,
-read one, add, edit, delete; Rule 8) follows it; the route registry
-(`docs/tracking/api-routes.md`) lists them in its Gate column. "Allowed"
-calls the routes on a journal, for the journal's own institutions; the
-site keeps no list (Rule 2), so the grid has no "Site" column. ✓
-allowed, — refused, ? an open question.
+**Permission grid: managing institutions.** Row 2 above, for every
+institutions route (Rule 8); the site keeps no list of its own (Rule 2)
+(`docs/process/api.md`).
 
-| Persona | Allowed |
+| Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | — |

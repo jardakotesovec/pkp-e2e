@@ -351,7 +351,7 @@ gates are used: `docs/process/api.md`.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `ror.getRor` | GET | `rors/{rorId}` | ojs omp ops | manager subEditor assistant author | U41 | U41#registry-lookup |
+| `ror.getRor` | GET | `rors/{rorId}` | ojs omp ops | manager subEditor assistant author | U41 | none: no record to read on a test install (its registry copy is empty, and a record comes only from ror.org) |
 | `ror.getMany` | GET | `rors` | ojs omp ops | manager subEditor assistant author | U41 | U41#registry-lookup |
 | `ror.addOrEdit` | POST | `rors` | ojs omp ops | manager subEditor assistant author | U41 | U41#registry-lookup |
 
@@ -469,10 +469,10 @@ gates are used: `docs/process/api.md`.
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `submission.getMany` | GET | `submissions` | ojs omp ops | manager subEditor assistant author reviewer | U23 | — |
-| `submission.getSubmission` | GET | `submissions/{submissionId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | — |
-| `submission.publications.getMany` | GET | `submissions/{submissionId}/publications` | ojs omp ops | manager subEditor assistant author reviewer | U24 | — |
-| `submission.publications.get` | GET | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | — |
-| `submission.publication.contributor.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author reviewer | U41 | U41#contributor-list |
+| `submission.getSubmission` | GET | `submissions/{submissionId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | U24#submission-read |
+| `submission.publications.getMany` | GET | `submissions/{submissionId}/publications` | ojs omp ops | manager subEditor assistant author reviewer | U24 | U24#submission-read |
+| `submission.publications.get` | GET | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | U24#submission-read |
+| `submission.publication.contributor.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author reviewer | U41 | U24#submission-read |
 | `submission.publication.contributor.get` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author reviewer | U41 | U24#publication-pages |
 | `submission.participants.getMany` | GET | `submissions/{submissionId}/participants` | ojs omp ops | manager subEditor assistant | U35 | — |
 | `submission.participants.stage.getMany` | GET | `submissions/{submissionId}/participants/{stageId}` | ojs omp ops | manager subEditor assistant | U35 | — |
@@ -480,7 +480,7 @@ gates are used: `docs/process/api.md`.
 | `submission.decision.add` | POST | `submissions/{submissionId}/decisions` | ojs omp ops | manager subEditor | U34 | — |
 | `submission.returnToDone` | POST | `submissions/{submissionId}/returnToDone` | ojs omp ops | manager subEditor | U34 | — |
 | `submission.delete` | DELETE | `submissions/{submissionId}` | ojs omp ops | manager subEditor | U22 | — |
-| `submission.publication.changeLocale` | PUT | `submissions/{submissionId}/publications/{publicationId}/changeLocale` | ojs omp ops | manager subEditor | U40 | — |
+| `submission.publication.changeLocale` | PUT | `submissions/{submissionId}/publications/{publicationId}/changeLocale` | ojs omp ops | manager subEditor | U40 | none: it changes the persona set's submission language; Rule 13's roles probed by hand |
 | `submission.publication.version` | PUT | `submissions/{submissionId}/publications/{publicationId}/version` | ojs omp ops | manager subEditor | U49 | — |
 | `submission.getNextAvailableVersion` | GET | `submissions/{submissionId}/nextAvailableVersion` | ojs omp ops | manager subEditor | U49 | — |
 | `submission.publication.add` | POST | `submissions/{submissionId}/publications` | ojs omp ops | manager subEditor assistant | U49 | — |
@@ -650,7 +650,7 @@ gates are used: `docs/process/api.md`.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `vocab.getMany` | GET | `vocabs` | ojs omp ops | admin manager subEditor assistant author | U40 | — |
+| `vocab.getMany` | GET | `vocabs` | ojs omp ops | admin manager subEditor assistant author | U40 | none: it suggests only terms already public on published versions; no role rule (API4 holds its scope) |
 
 ### vocabs/interests — PKPInterestController (API-048)
 

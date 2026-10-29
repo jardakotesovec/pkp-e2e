@@ -13,6 +13,8 @@
  * - pkpMail: Mailpit wrapper (recipient-scoped assertions only).
  * - apiAs(username, {context}): the app's REST API as that user, or
  *   anonymously with null (support/api-client.js; docs/process/api.md).
+ * - scratch(spec): a scratch context with named throwaway users and their
+ *   API clients, for API checks (support/api-scratch.js).
  * - apiTrafficWatch (auto): with PKP_API_TRAFFIC=1, every API response the
  *   test's contexts receive is logged for the traffic map
  *   (support/api-traffic.js).
@@ -53,6 +55,7 @@ const {PkpApi} = require('./api.js');
 const {PkpMail} = require('./mail.js');
 const {ApiClient} = require('./api-client.js');
 const apiTraffic = require('./api-traffic.js');
+const {createScratch} = require('./api-scratch.js');
 const {workerLogFile, logOffset, reportServerDeaths, failedOnDroppedConnection, waitForDeathLine} = require('./server-crash.js');
 
 const appRoot = process.env.PKP_APP_ROOT;
@@ -129,6 +132,14 @@ const test = base.test.extend({
         },
         {auto: true},
     ],
+
+    // A scratch context for an API check (support/api-scratch.js):
+    // `await scratch({users: {mg: 'manager'}, ...contextKeys})`, a fresh
+    // unique tag per call.
+    scratch: async ({pkpApi, apiAs}, use, testInfo) => {
+        let n = 0;
+        await use((spec) => createScratch(pkpApi, apiAs, `ap${testInfo.workerIndex}${Date.now().toString(36)}${n++}`, spec));
+    },
 
     // The traffic recorder (support/api-traffic.js; off unless
     // PKP_API_TRAFFIC=1): attributes this test's API calls to its file.

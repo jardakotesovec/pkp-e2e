@@ -51,14 +51,9 @@ is not restated here. <sup>a</sup> <sup>b</sup>
 | **Read the license, data availability and funding statement blocks** | • any reader: on a published item's landing page (Rule 15) <sup>l</sup> |
 
 <a id="api-grid-edit-gate"></a>
-**Permission grid: saving a version's metadata.** Rule 2's gate, cell by
-cell, as the API checks read it (`docs/process/api.md` names the personas
-and how they are seeded). Every route that saves a version's publication
-data follows it: this feature's pages and the neighbouring ones
-(contributors, citations, funding); the route registry
-(`docs/tracking/api-routes.md`) lists them in its Gate column.
-"Unpublished" is a submission in Copyediting, "Published" its version once
-published; ✓ allowed, — refused, ? an open question.
+**Permission grid: saving a version's metadata.** Rule 2's gate, for every
+route that saves a version's data, this feature's and its neighbours'
+(contributors, citations, funding) (`docs/process/api.md`).
 
 | Persona | Unpublished | Published |
 |---|---|---|
@@ -74,17 +69,13 @@ published; ✓ allowed, — refused, ? an open question.
 | reader | — | — |
 | nobody signed in | — | — |
 | manager of another context | — | — |
-| site admin | ? [A18](#a18) | ? [A18](#a18) |
+| site admin | ✓ | ✓ |
 
 <a id="api-grid-permissions-page"></a>
 **Permission grid: opening the Permissions & Disclosure page.** The row
-"See the Permissions & Disclosure page" above, cell by cell, as the API
-checks read it (`docs/process/api.md` names the personas and how they are
-seeded). The route that loads the page's form follows it; the route
-registry (`docs/tracking/api-routes.md`) lists it in its Gate column. The
-assigned assistant is a Copyeditor, whose role has no Production-stage
-access. "Unpublished" is a submission in Copyediting, "Published" the
-same submission published; ✓ allowed, — refused, ? an open question.
+"See the Permissions & Disclosure page" above, for the route that loads
+its form; the assigned assistant is a Copyeditor, whose role has no
+Production-stage access (`docs/process/api.md`).
 
 | Persona | Unpublished | Published |
 |---|---|---|
@@ -99,7 +90,7 @@ same submission published; ✓ allowed, — refused, ? an open question.
 | reader | — | — |
 | nobody signed in | — | — |
 | manager of another context | — | — |
-| site admin | ? [workflow screen A8](U24-workflow-screen-and-stage-access.md#a8) | ? [workflow screen A8](U24-workflow-screen-and-stage-access.md#a8) |
+| site admin | ✓ | ✓ |
 
 ## Fields & validation
 
