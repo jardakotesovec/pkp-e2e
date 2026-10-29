@@ -95,6 +95,9 @@ jobs:
       TEST_API_KEY: ci-test-key
       MAILPIT_URL: http://127.0.0.1:8025
       PLAYWRIGHT_WORKERS: 4
+      # The traffic recorder (docs/process/api.md "The traffic map"): every
+      # API call the suites make, uploaded below for `npm run api-traffic`.
+      PKP_API_TRAFFIC: 1
     services:
       postgres:
         image: postgres:16
@@ -330,6 +333,18 @@ jobs:
         with:
           name: timings-${{ inputs.app }}-${{ matrix.shard }}
           path: e2e/apps/${{ inputs.app }}/playwright/.timings/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # Every API call this shard's tests made (support/api-traffic.js), the
+      # input of `npm run api-traffic`; uploaded on red runs too.
+      - name: Upload API traffic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-traffic-${{ inputs.app }}-${{ matrix.shard }}
+          path: e2e/apps/${{ inputs.app }}/playwright/.api-traffic/
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 30

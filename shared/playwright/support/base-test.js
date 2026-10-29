@@ -11,6 +11,11 @@
  *   multi-actor tests; auto-closes at teardown.
  * - pkpApi: test-API client (bootstrap, createContext, createSubmission).
  * - pkpMail: Mailpit wrapper (recipient-scoped assertions only).
+ * - apiAs(username, {context}): the app's REST API as that user, or
+ *   anonymously with null (support/api-client.js; docs/process/api.md).
+ * - apiTrafficWatch (auto): with PKP_API_TRAFFIC=1, every API response the
+ *   test's contexts receive is logged for the traffic map
+ *   (support/api-traffic.js).
  * - appContext: the app's capability map + seeded-actor roster
  *   (playwright/support/app.context.js). Shared code gates on capabilities
  *   (appContext.capabilities.hasReviewStage), never app names, and resolves
@@ -46,6 +51,8 @@ const {disableMotion} = require('./motion.js');
 const {throttleCpu} = require('./throttle.js');
 const {PkpApi} = require('./api.js');
 const {PkpMail} = require('./mail.js');
+const {ApiClient} = require('./api-client.js');
+const apiTraffic = require('./api-traffic.js');
 const {workerLogFile, logOffset, reportServerDeaths, failedOnDroppedConnection, waitForDeathLine} = require('./server-crash.js');
 
 const appRoot = process.env.PKP_APP_ROOT;
@@ -70,6 +77,7 @@ async function armContext(context) {
         return;
     }
     armedContexts.add(context);
+    apiTraffic.watchContext(context);
     await disableMotion(context);
     await throttleCpu(context);
 }
@@ -122,6 +130,17 @@ const test = base.test.extend({
         {auto: true},
     ],
 
+    // The traffic recorder (support/api-traffic.js; off unless
+    // PKP_API_TRAFFIC=1): attributes this test's API calls to its file.
+    apiTrafficWatch: [
+        async ({}, use, testInfo) => {
+            apiTraffic.setCurrentTest(path.relative(suiteDir, testInfo.file));
+            await use();
+            apiTraffic.flush(suiteDir);
+        },
+        {auto: true},
+    ],
+
     variants: async ({}, use) => {
         const basePort = parseInt(process.env.PLAYWRIGHT_BASE_PORT || '8000', 10);
         await use({
@@ -131,7 +150,8 @@ const test = base.test.extend({
     },
 
     // Kill animations in the default context (and thus `page`) — see motion.js.
-    context: async ({context}, use) => {
+    context: async ({context, user}, use) => {
+        context.__pkpUser = user;
         await armContext(context);
         await use(context);
     },
@@ -149,6 +169,7 @@ const test = base.test.extend({
         await use(async (username) => {
             const storageState = await ensureAuthStateFor(browser, username, {baseURL});
             const context = await browser.newContext({baseURL, storageState, reducedMotion: 'reduce'});
+            context.__pkpUser = username;
             await armContext(context);
             openedContexts.push(context);
             return context;
@@ -164,6 +185,19 @@ const test = base.test.extend({
 
     pkpMail: async ({}, use) => {
         await use(new PkpMail());
+    },
+
+    // The REST API as a user (support/api-client.js): `await apiAs(username,
+    // {context})`, `apiAs(null)` for nobody signed in. Clients close at
+    // teardown.
+    apiAs: async ({baseURL}, use) => {
+        const clients = [];
+        await use(async (username, {context = appContext.contextPath} = {}) => {
+            const client = await ApiClient.create({baseURL, contextPath: context, username});
+            clients.push(client);
+            return client;
+        });
+        await Promise.all(clients.map((client) => client.dispose().catch(() => {})));
     },
 });
 

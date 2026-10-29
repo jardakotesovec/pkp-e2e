@@ -425,6 +425,33 @@ and the mail catcher's address are in its footnote.
      the submission carries "Test Foundation" (Rules 1, 3). A preprint
      server installs no review stage. <sup>s6</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the funders
+routes is the grids' (*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
+for saving, *[the workflow screen](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*
+for reading), checked apart (`docs/process/api.md`).
+
+API1. **A funder without a name is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission with no funders.
+
+   - **No name**: add a funder with an empty name and one grant through
+     the API: refused (400) with an error on the funder, and the list
+     stays empty. The panel never sends this: its Save stays disabled
+     until "Funder" is filled.
+   - **Control**: the same request with a name is stored and listed.
+
+API2. **A registry id that is not a ROR address is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission with no funders.
+
+   - **Not a ROR address**: add a funder whose registry id is a bare
+     code, an address on another site, or a ror.org address of the wrong
+     shape: each refused (400) with an error on the registry id, and the
+     list stays empty. The panel only sends ids picked from the registry's
+     own suggestions.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:

@@ -142,7 +142,9 @@ abstract class PKPTestController extends PKPBaseController
     /**
      * Sign a user in without the login form: {username} → the session
      * registered server-side, the session cookie on the response, and the
-     * user's id. The login form costs a page load plus a bcrypt verify at
+     * user's id and the session's CSRF token, which a REST write sent with
+     * the cookie must carry as `X-Csrf-Token` (support/api-client.js). The
+     * login form costs a page load plus a bcrypt verify at
      * cost 12 (some 400 ms per test on a runner); this is one 40 ms request
      * (support/auth.js). Disabled accounts answer 403 like the form would.
      */
@@ -159,8 +161,13 @@ abstract class PKPTestController extends PKPBaseController
         }
         // The guard queues the cookie on the Illuminate response singleton;
         // the page router sends it from there, the API router does not.
-        Application::get()->getRequest()->getSessionGuard()->sendCookies();
-        return response()->json(['userId' => $user->getId(), 'username' => $username], 200);
+        $request = Application::get()->getRequest();
+        $request->getSessionGuard()->sendCookies();
+        return response()->json([
+            'userId' => $user->getId(),
+            'username' => $username,
+            'csrfToken' => $request->getSession()->token(),
+        ], 200);
     }
 
     public function contextScenario(Request $illuminateRequest): JsonResponse

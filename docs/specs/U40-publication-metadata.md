@@ -50,6 +50,32 @@ is not restated here. <sup>a</sup> <sup>b</sup>
 | **Reset every submission's permissions to the defaults** | • Journal Manager, Site Administrator: Tools › Permissions (Rule 14) <sup>k</sup> |
 | **Read the license, data availability and funding statement blocks** | • any reader: on a published item's landing page (Rule 15) <sup>l</sup> |
 
+<a id="api-grid-edit-gate"></a>
+**Permission grid: saving a version's metadata.** Rule 2's gate, cell by
+cell, as the API checks read it (`docs/process/api.md` names the personas
+and how they are seeded). Every route that saves a version's publication
+data follows it: this feature's pages and the neighbouring ones
+(contributors, citations, funding); the route registry
+(`docs/tracking/api-routes.md`) lists them in its Gate column.
+"Unpublished" is a submission in Copyediting, "Published" its version once
+published; ✓ allowed, — refused, ? an open question.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| submitter {OJS OMP} | — | — |
+| submitter {OPS} | ✓ | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ? [A18](#a18) | ? [A18](#a18) |
+
 ## Fields & validation
 
 All fields are per version. Where a field is marked *multilingual*, it is

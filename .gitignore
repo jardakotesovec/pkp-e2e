@@ -5,6 +5,7 @@ apps/*/playwright/test-results/
 apps/*/playwright/.server-logs/
 apps/*/playwright/.last-run.json
 apps/*/playwright/.timings/
+apps/*/playwright/.api-traffic/
 docs/tracking/.reports/
 .reports/
 

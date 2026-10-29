@@ -93,6 +93,10 @@ function detectWorkers() {
  *   Administrator re-enters their password ("Confirm Access") before
  *   Administration and the confirmed window lapses after one minute.
  */
+/** This clone's root, and the private matrix folder beside it (see projects). */
+const REPO_DIR = path.resolve(__dirname, '../..');
+const API_MATRIX_DIR = process.env.PKP_API_MATRIX_DIR || path.resolve(REPO_DIR, '../pkp-e2e-sec/api-matrix');
+
 const VALIDATION_PORT_OFFSET = 90;
 const REAUTH_PORT_OFFSET = 91;
 const VARIANTS = {
@@ -206,6 +210,7 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
     suiteDir = suiteDir || path.join(appRoot, 'playwright');
 
     // base-test.js and subprocesses (installTest, reset) read these.
+    process.env.PKP_E2E_DIR = REPO_DIR;
     process.env.PKP_APP_NAME = appName;
     process.env.PKP_APP_ROOT = appRoot;
     process.env.PKP_SUITE_DIR = suiteDir;
@@ -319,6 +324,13 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
                 grep: /@solo/,
                 dependencies: [`${appName}-serial`],
             },
+            // The API permission matrix lives in the private security repo
+            // (docs/process/api.md "Permission grids"): the project exists
+            // only where that repo sits next to this clone, and runs only
+            // when named (`--project=api-matrix`), never on CI.
+            ...(fs.existsSync(API_MATRIX_DIR)
+                ? [{name: 'api-matrix', testDir: API_MATRIX_DIR, dependencies: ['setup']}]
+                : []),
         ],
         // One PHP server per worker; `php -S` is single-threaded. The ready
         // probe is a static file so it answers even before the DB is installed

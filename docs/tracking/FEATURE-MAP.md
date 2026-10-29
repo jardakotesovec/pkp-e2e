@@ -4,8 +4,8 @@ This file is the single home for the campaign's feature taxonomy: **75 features
 (U01–U75)** with every atlas atom assigned.
 
 - **The atlas is the frozen Phase-0 inventory** (2026-07-28). It split the apps into these features and is not extended: a surface added upstream since then is noted in the row of the feature whose screens it joins, and a new feature gets a new row with the next U-number and a `pending` PROGRESS row (MAINTENANCE "Triage: where does a change land?").
-- **Atom count**: this map accounts for all **2,163** atoms:
-  **2,066 feature-assigned · 68 out of scope · 29 parked in UNASSIGNED.md** (13 at Phase-0 close; 5 U26-derived dead author-dashboard atoms parked later; 11 parked by the 2026-09-27 scope extension, section H).
+- **Atom count**: this map accounts for all **2,164** atoms:
+  **2,067 feature-assigned · 68 out of scope · 29 parked in UNASSIGNED.md** (13 at Phase-0 close; 5 U26-derived dead author-dashboard atoms parked later; 11 parked by the 2026-09-27 scope extension, section H).
   The unclaimed count is the campaign's completeness metric.
 - **Atom IDs and modality conventions**: see `atlas/README.md`. IDs are dense per
   modality and never renumbered; ranges here (`AFFW-068..075`) are inclusive.
@@ -171,7 +171,7 @@ Notes: owns the round's recommendation *display* per D18 (recording → U34, tog
 
 ### U27 — Reviewer assignment & management {OJS OMP}
 An editor finds, invites, edits, reminds, thanks, unassigns, reinstates reviewers and reads their reviews.
-Atoms: AFFW-213..215, 217..224, 486, 488..498, 500..501, 503..506, 621..665, 668, 708 · GRID-012, 026, 086, 098 · VUE-016, 046, 067..068 · API-048 · MAIL-026, 034, 038..046 · NOTIF-019, 048 · SET-020 · JOB-012
+Atoms: AFFW-213..215, 217..224, 486, 488..498, 500..501, 503..506, 621..665, 668, 708 · GRID-012, 026, 086, 098 · VUE-016, 046, 067..068 · API-048, 067 · MAIL-026, 034, 038..046 · NOTIF-019, 048 · SET-020 · JOB-012
 Notes: automatic reminders (MAIL-043, 046) are sent here; their clocks are configured in U29 (JOB-054). Riders: AFFW-506's ORCID-deposit confirm cited by U04; API-047's GET-reviewers sub-op (owned by U53) cited here.
 
 ### U28 — Reviewer's review {OJS OMP}

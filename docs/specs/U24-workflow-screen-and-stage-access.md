@@ -84,6 +84,32 @@ role's stage set. The rows spell that out per capability.
 | **Confirm the "Delete" dialog** (Rule 19) | • Journal Manager; Editor; Site Administrator (holding Journal Manager in the journal; without it, untried [A8](#a8)). An assigned Section Editor (a Moderator on a preprint server) is not offered the button. Which stage offers it, and when, is the stage feature's rule (*[Submission stage](U25-submission-stage.md#delete)*, *Review stage & rounds*, *Production stage*). Behind the dialog the system refuses the deletion for any other role <sup>n</sup> |
 | **Change the submission language / choose a version / create a version** (publication controls, Rules 9 and 17) | • Owned elsewhere: [→ change language](U40-publication-metadata.md), *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*. A version is chosen by selecting its node in the side menu; the page itself offers no version switcher (Rule 17) |
 
+<a id="api-grid-publication-pages"></a>
+**Permission grid: reading a submission's publication data.** The row "See
+the "Publication" group's pages" above, cell by cell, as the API checks
+read it (`docs/process/api.md` names the personas and how they are
+seeded). The routes that read a version's data for those pages
+(contributors, citations, funding) follow it; the route registry
+(`docs/tracking/api-routes.md`) lists them in its Gate column.
+"Unpublished" is a submission in Copyediting, a stage every assigned
+persona's role reaches; "Published" is the same submission published,
+resting in Done. ✓ allowed, — refused, ? an open question.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ? [A8](#a8) | ? [A8](#a8) |
+
 ## Fields & validation
 
 N/A. The screen's own surfaces are the header, the side menu and three
