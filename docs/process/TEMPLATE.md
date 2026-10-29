@@ -272,6 +272,13 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
 |--------|--------------------|
 | **<Action>** | • <actor(s)>: <condition><br>• <actor(s)>: <condition; ⚠ [A1](#a1) for oddities> <sup>a</sup> |
 
+<!-- OPTIONAL, when REST API routes follow a rule this spec owns: a
+     permission grid after the table, `<a id="api-grid-<name>"></a>`, an
+     intro sentence and a persona × state table of ✓ / — / ? cells, the
+     same rule cell by cell (api.md "Permission grids"). Routes name it in
+     docs/tracking/api-routes.md; the grid never adds a rule the prose does
+     not state. -->
+
 ## Fields & validation
 
 <!-- Fields by on-screen LABEL, not internal attribute names. Validation in
@@ -379,6 +386,13 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
    - **<Screen or case>**: <steps, each typed value named, each outcome
      quoted>.
    - **Control**: <the negative control>. <sup>s1</sup>
+
+<!-- OPTIONAL: "### Through the API", the API checks (api.md "API checks"):
+     what the feature's routes do with what no screen sends, numbered
+     API1, API2…, each a title with its badge, a "Given:" line and bullets
+     naming the request in words and the answer; never who may call a
+     route (that is a grid's). One test each, named alike, in
+     shared/playwright/tests/api/. -->
 
 ## Coverage
 

@@ -14,7 +14,10 @@ per-test token described in `patterns.md`.
 role, including navigating straight to a URL, and never asserts against a
 request the application's own screens would not send. The `/api/v1/_test/*`
 endpoints are harness plumbing for reaching a starting state (A4), never the
-behavior under test.
+behavior under test. The REST API itself is checked apart, where a spec
+names it (`api.md`): its permission grids by the private matrix, its API
+checks by the tests under `shared/playwright/tests/api/`, which follow these
+rules too, a screen aside.
 
 ## Architecture principles (A1–A9)
 

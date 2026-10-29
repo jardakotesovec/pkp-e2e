@@ -588,6 +588,13 @@ The apps move; the suite follows. The baselines live in
    The behavior the app now shows is coverage owed: the entry's "Register
    carries it" item goes, and the path becomes a bullet or a **Planned**
    item as above, because a test never asserted it while it was a bug.
+   **API routes** (`api.md`): a diff that touches an `api/` folder runs
+   `npm run api-routes -- --write`; each new route gets its Owner the same
+   day, and its Gate when an existing grid states its rule, and `--check`
+   passes. A diff that touches a gated route or its grid's rule runs the
+   matrix for that gate on the apps it reaches; a cell that now disagrees
+   is judged as `api.md` "The matrix" says, a security one through the
+   private repo like any other.
 5. **Hunt regressions.** Reviewing the diff IS a QA review of the team's
    recent work, and step 3's question ("does the suite care?") is not the
    same as "does this break something?". Ask the second question of every

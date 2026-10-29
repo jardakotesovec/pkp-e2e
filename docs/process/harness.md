@@ -42,10 +42,15 @@ per feature, run on demand and never by CI; `briefs/claim-check.md`).
 ```
 shared/playwright/
 ├── tests/                   # bootstrap.setup.js (setup project), login.spec.js (smoke)
+│   └── api/                 # the specs' API checks, app-neutral, run by every app's shared project (api.md)
 ├── support/
 │   ├── base-test.js         # The extended `test` fixture — start here
 │   ├── auth.js              # ensureAuthStateFor — a session per call via POST _test/session
 │   ├── api.js               # pkpApi — test-API client (bootstrap, createContext, createSubmission)
+│   ├── api-client.js        # apiAs — the app's REST API as a user (session cookie + CSRF), for API checks
+│   ├── personas.js          # seedPersonas — the persona set a permission grid names (api.md)
+│   ├── api-grids.js         # reads the route registry's gates and the specs' permission grids
+│   ├── api-traffic.js       # the traffic recorder, on with PKP_API_TRAFFIC=1
 │   ├── mail.js              # pkpMail — Mailpit HTTP API wrapper
 │   ├── jobs.js              # runJobs — drain the fleet's queued jobs (serial project only)
 │   ├── legacy.js            # waitForJQueryIdle — legacy jQuery surfaces (grids, AjaxModals)
@@ -828,6 +833,10 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   adopted through `reuseExistingServer` (a stray one on a worker port)
   keeps logging wherever it was started.
 - **Project chain**: `setup → {shared, <app>} → <app>-serial → <app>-solo`.
+  Beside the chain, where the private security repo sits next to the
+  clone, an `api-matrix` project (setup as its dependency) runs the API
+  permission matrix from `../pkp-e2e-sec/api-matrix/`; only a command
+  that names it runs it, so CI never does (api.md "The matrix").
   The setup project probes `GET /api/v1/_test/bootstrap`. Warm, it is a no-op
   in under a second. Cold, it installs the schema through
   `tools/installTest.php` and seeds. The serial project runs after everything
@@ -1004,6 +1013,9 @@ to spot: seeding succeeds and the browser step dies.
 
 ## Env vars (`.env.playwright`; shell exports win)
 
+- `PKP_API_TRAFFIC=1`: log every REST API call the tests make, per test,
+  into `apps/<app>/playwright/.api-traffic/` (CI sets it and uploads the
+  logs; `npm run api-traffic`, api.md "The traffic map").
 - `PKP_CONFIG_FILE`: absolute path to `config.test.inc.php`
 - `PLAYWRIGHT_BASE_PORT` / `PLAYWRIGHT_WORKERS`: worker 0's port, and the
   worker count (unset = auto-detect, see above). A second runner beside
