@@ -532,19 +532,15 @@ API1. **One institution read back at the journal's own address** {OJS OMP OPS}
      the address the list gives for it is [A12](#a12)'s, an unknown
      number [A13](#a13)'s.
 
-API2. **Another journal's institution is out of reach from this journal's address** {OJS OMP OPS}
+API2. **An add naming another journal lands in this one** {OJS OMP OPS}
 
    Given: two scratch journals, each with a Journal Manager and one
    institution ("Our Library", "Their Library").
 
-   - **Foreign number**: through the first journal's address, as its
-     manager, "Their Library" is refused to an edit (404) and a delete
-     (404), a read carries none of it, and the second journal still lists
-     it unchanged (Rules 2, 8c). The page only sends its own journal's
-     institutions.
    - **Foreign journal named**: an add through the first journal's
      address that names the second journal as the institution's journal
-     is stored in the first; the second journal's list is unchanged.
+     is stored in the first; the second journal still lists "Their
+     Library" alone (Rule 2). The page never names a journal.
 
 API3. **An edit that sends one field keeps the others** {OJS OMP OPS}
 

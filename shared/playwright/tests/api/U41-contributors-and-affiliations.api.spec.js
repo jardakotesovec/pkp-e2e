@@ -7,23 +7,11 @@
  */
 const {test, expect} = require('../../support/base-test.js');
 
-const uniqueTag = (prefix, testInfo) => `${prefix}${testInfo.workerIndex}${Date.now().toString(36)}`;
-
-/** A scratch context with its own manager, and that manager's client. */
-async function scratchContext(pkpApi, apiAs, tag) {
-    const manager = `${tag}mg`;
-    await pkpApi.createContext({tag, users: [{username: manager, roles: ['manager']}]});
-    return apiAs(manager, {context: tag});
-}
-
-/** A manager's client, a fresh submission's contributors route and the context's roles. */
-async function contributorsOf(apiAs, pkpApi, appContext, tag) {
-    const {submissionId, publicationId} = await pkpApi.createSubmission({
-        tag,
-        context: appContext.contextPath,
-        submitter: appContext.seed.actors.author,
-    });
-    const api = await apiAs(appContext.seed.actors.manager);
+/** A scratch journal's manager client, a submission's version route and the journal's roles. */
+async function contributorsOf(scratch) {
+    const j = await scratch({users: {mg: 'manager', au: 'author'}});
+    const {submissionId, publicationId} = await j.submission('s', {submitter: 'au'});
+    const api = await j.as('mg');
     const roles = (await api.get('contributorRoles')).body;
     return {api, roles, route: `submissions/${submissionId}/publications/${publicationId}/contributors`};
 }
@@ -39,8 +27,8 @@ const person = (roleId, extra = {}) => ({
 });
 
 test.describe('contributors & affiliations through the API', () => {
-    test('API1: an edit keeps what it leaves out, and the affiliations it resends', async ({apiAs, pkpApi, appContext}, testInfo) => {
-        const {api, roles, route} = await contributorsOf(apiAs, pkpApi, appContext, uniqueTag('u41a1', testInfo));
+    test('API1: An edit keeps what it leaves out, and the affiliations it resends', async ({scratch}) => {
+        const {api, roles, route} = await contributorsOf(scratch);
         const added = await api.post(route, person(roles[0].id, {affiliations: [{name: {en: 'Probe Institute'}}, {name: {en: 'Second Institute'}}]}));
         expect(added.status).toBe(200);
         const read = (await api.get(`${route}/${added.body.id}`)).body;
@@ -60,8 +48,8 @@ test.describe('contributors & affiliations through the API', () => {
         );
     });
 
-    test('API2: a contributor type sent empty or left out of an add is refused', async ({apiAs, pkpApi, appContext}, testInfo) => {
-        const {api, roles, route} = await contributorsOf(apiAs, pkpApi, appContext, uniqueTag('u41a2', testInfo));
+    test('API2: A contributor type sent empty or left out of an add is refused', async ({scratch}) => {
+        const {api, roles, route} = await contributorsOf(scratch);
         const before = (await api.get(route)).body.itemsMax;
 
         for (const contributorType of ['', undefined]) {
@@ -81,10 +69,9 @@ test.describe('contributors & affiliations through the API', () => {
         expect([after.contributorType, after.givenName.en, after.email]).toEqual(['PERSON', 'Dana', 'dana.phillips@example.test']);
     });
 
-    test('API3: a contributor role of another journal is not taken', async ({apiAs, pkpApi, appContext}, testInfo) => {
-        const tag = uniqueTag('u41a3', testInfo);
-        const {api, route} = await contributorsOf(apiAs, pkpApi, appContext, tag);
-        const elsewhere = await scratchContext(pkpApi, apiAs, `${tag}x`);
+    test('API3: A contributor role of another journal is not taken', async ({scratch}) => {
+        const {api, route} = await contributorsOf(scratch);
+        const elsewhere = await (await scratch()).as('mg');
         const foreignRole = (await elsewhere.get('contributorRoles')).body[0].id;
         const before = (await api.get(route)).body.itemsMax;
 
@@ -94,8 +81,8 @@ test.describe('contributors & affiliations through the API', () => {
         expect((await api.get(route)).body.itemsMax).toBe(before);
     });
 
-    test('API4: a role identifier the list lacks is refused, and an edit keeps the identifier', async ({apiAs, pkpApi}, testInfo) => {
-        const api = await scratchContext(pkpApi, apiAs, uniqueTag('u41a4', testInfo));
+    test('API4: A role identifier the list lacks is refused, and an edit keeps the identifier', async ({scratch}) => {
+        const api = await (await scratch()).as('mg');
         const count = (await api.get('contributorRoles')).body.length;
 
         const refused = await api.post('contributorRoles', {contributorRoleIdentifier: 'HANDLING_EDITOR', name: {en: 'Handling editor'}});
@@ -111,13 +98,35 @@ test.describe('contributors & affiliations through the API', () => {
         expect([after.contributorRoleIdentifier, after.name.en]).toEqual(['EDITOR', 'Section handler']);
     });
 
-    test('API5: a registry id that is not a ROR address is refused', async ({apiAs, appContext}) => {
-        const api = await apiAs(appContext.seed.actors.manager);
+    test('API5: A registry id that is not a ROR address is refused', async ({scratch}) => {
+        const api = await (await scratch()).as('mg');
 
         for (const ror of ['', '01abcde12', 'https://example.org/01abcde12', 'https://ror.org/abc']) {
             const refused = await api.post('rors', {ror});
             expect(refused.status, ror).toBe(400);
             expect(refused.body, ror).toHaveProperty('ror');
         }
+    });
+
+    test("API6: The assigned reviewer's contributor list is empty while the review hides the authors", async ({scratch, appContext}) => {
+        test.skip(!appContext.capabilities.hasReviewStage, 'a preprint server has no review');
+        const j = await scratch({users: {mg: 'manager', au: 'author', rv: 'externalReviewer'}});
+        const {submissionId, publicationId} = await j.submission('s', {
+            submitter: 'au',
+            decisions: ['sendExternalReview'],
+            reviewRounds: [{reviewers: [{username: j.user('rv'), status: 'accepted'}]}],
+        });
+        const version = `submissions/${submissionId}/publications/${publicationId}`;
+        // The seeded contributor is named after the author's username.
+        const name = j.user('au');
+
+        // Control: the manager's same request names the contributor.
+        const managerList = await (await j.as('mg')).get(`${version}/contributors`);
+        expect(managerList.status).toBe(200);
+        expect(managerList.body.items.map((c) => c.fullName)).toEqual([name]);
+
+        const list = await (await j.as('rv')).get(`${version}/contributors`);
+        expect(list.status).toBe(200);
+        expect(list.body).toMatchObject({items: [], itemsMax: 0});
     });
 });

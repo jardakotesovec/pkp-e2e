@@ -933,6 +933,20 @@ API5. **A registry id that is not a ROR address is refused** {OJS OMP OPS}
      error on the id. The Affiliations field only sends ids picked from
      the registry's own suggestions (Rule 16).
 
+API6. **The assigned reviewer's contributor list is empty while the review hides the authors** {OJS OMP}
+
+   Given: a Journal Manager, an Author, a Reviewer; the Author's
+   submission sent to review with the default review type, which keeps
+   the authors' identity from the reviewer, and the Reviewer assigned to
+   it, the request accepted.
+
+   - **The contributor list**: the Reviewer's request for the version's
+     contributor list, which no screen sends, answers 200 with the list
+     empty (Rule 17). The version read their page does send is scenario
+     11's.
+   - **Control**: the manager's same request lists the contributor by
+     name.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:

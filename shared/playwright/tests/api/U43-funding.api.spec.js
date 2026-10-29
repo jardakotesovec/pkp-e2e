@@ -5,20 +5,12 @@
  */
 const {test, expect} = require('../../support/base-test.js');
 
-/** A manager's client and a fresh submission's funders route. */
-async function fundersOf(apiAs, pkpApi, appContext, tag) {
-    const {submissionId, publicationId} = await pkpApi.createSubmission({
-        tag,
-        context: appContext.contextPath,
-        submitter: appContext.seed.actors.author,
-    });
-    const api = await apiAs(appContext.seed.actors.manager);
-    return {api, route: `submissions/${submissionId}/publications/${publicationId}/funders`};
-}
-
 test.describe('funding through the API', () => {
-    test('API1: a funder without a name is refused', async ({apiAs, pkpApi, appContext}, testInfo) => {
-        const {api, route} = await fundersOf(apiAs, pkpApi, appContext, `u43a1${testInfo.workerIndex}${Date.now().toString(36)}`);
+    test('API1: A funder without a name is refused', async ({scratch}) => {
+        const j = await scratch({users: {mg: 'manager', au: 'author'}});
+        const {submissionId, publicationId} = await j.submission('s', {submitter: 'au'});
+        const route = `submissions/${submissionId}/publications/${publicationId}/funders`;
+        const api = await j.as('mg');
 
         const refused = await api.post(route, {funder: {name: {}}, grants: [{grantNumber: 'G-1'}]});
         expect(refused.status).toBe(400);
@@ -31,8 +23,11 @@ test.describe('funding through the API', () => {
         expect((await api.get(route)).body.items.map((f) => f.name.en)).toEqual(['Named Foundation']);
     });
 
-    test('API2: a registry id that is not a ROR address is refused', async ({apiAs, pkpApi, appContext}, testInfo) => {
-        const {api, route} = await fundersOf(apiAs, pkpApi, appContext, `u43a2${testInfo.workerIndex}${Date.now().toString(36)}`);
+    test('API2: A registry id that is not a ROR address is refused', async ({scratch}) => {
+        const j = await scratch({users: {mg: 'manager', au: 'author'}});
+        const {submissionId, publicationId} = await j.submission('s', {submitter: 'au'});
+        const route = `submissions/${submissionId}/publications/${publicationId}/funders`;
+        const api = await j.as('mg');
 
         for (const ror of ['01abcde12', 'https://example.org/01abcde12', 'https://ror.org/abc']) {
             const refused = await api.post(route, {funder: {ror}});

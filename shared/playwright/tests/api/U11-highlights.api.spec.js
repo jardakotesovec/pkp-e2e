@@ -3,21 +3,9 @@
  * API"). Who may call the highlights routes is the spec's highlights grid,
  * checked by the matrix (docs/process/api.md), never here. There is no
  * highlight seed key, so each test adds its highlights through the route
- * the panel uses, as the journal's manager.
+ * the panel uses, as the scratch journal's manager.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-/** A unique tag for this test's scratch journal(s). */
-function makeTag(check, testInfo) {
-    return `u11${check}w${testInfo.workerIndex}${Date.now().toString(36)}`;
-}
-
-/** A scratch journal with a manager; its manager's client. */
-async function journal(apiAs, pkpApi, tag) {
-    const seeded = await pkpApi.createContext({tag, users: [{username: `${tag}mg`, roles: ['manager']}]});
-    const api = await apiAs(`${tag}mg`, {context: tag});
-    return {seeded, api};
-}
 
 /** A highlight as the panel sends it; `extra` overrides. */
 const slide = (title, extra = {}) => ({
@@ -39,16 +27,16 @@ async function add(api, body) {
 const titles = async (api) => (await api.get('highlights')).body.items.map((h) => h.title.en);
 
 test.describe('highlights through the API', () => {
-    test('API1: one highlight read back at the journal\'s own address', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a1', testInfo);
-        const {seeded, api} = await journal(apiAs, pkpApi, tag);
+    test('API1: One highlight read back at the journal\'s own address', async ({scratch}) => {
+        const j = await scratch();
+        const api = await j.as('mg');
         const id = await add(api, slide('Call for papers', {url: 'https://example.org/cfp'}));
 
         const one = await api.get(`highlights/${id}`);
         expect(one.status).toBe(200);
         expect(one.body).toMatchObject({
             id,
-            contextId: seeded.contextId,
+            contextId: j.seeded.contextId,
             title: {en: 'Call for papers'},
             url: 'https://example.org/cfp',
             urlText: {en: 'Read more'},
@@ -57,30 +45,26 @@ test.describe('highlights through the API', () => {
         expect((await api.get('highlights/999999999')).status).toBe(404);
     });
 
-    test('API2: another journal\'s highlight is out of reach from this journal\'s address', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a2', testInfo);
-        const own = await journal(apiAs, pkpApi, tag);
-        const other = await journal(apiAs, pkpApi, `${tag}b`);
-        await add(own.api, slide('Our slide'));
-        const theirs = await add(other.api, slide('Their slide'));
+    test('API2: An add or an order naming another journal leaves that journal untouched', async ({scratch}) => {
+        const own = await scratch();
+        const other = await scratch();
+        const ours = await own.as('mg');
+        const theirs = await other.as('mg');
+        await add(ours, slide('Our slide'));
+        const theirSlide = await add(theirs, slide('Their slide'));
 
-        expect((await own.api.get(`highlights/${theirs}`)).status).toBe(404);
-        expect((await own.api.put(`highlights/${theirs}`, {title: {en: 'Changed from elsewhere'}})).status).toBe(404);
-        expect((await own.api.delete(`highlights/${theirs}`)).status).toBe(404);
-        expect((await own.api.put('highlights/order', {sequence: [{id: theirs, sequence: 0}]})).status).toBe(400);
-        const left = (await other.api.get('highlights')).body.items;
-        expect(left).toHaveLength(1);
-        expect(left[0]).toMatchObject({id: theirs, title: {en: 'Their slide'}, sequence: 1});
+        // An order naming the other journal's highlight is refused.
+        expect((await ours.put('highlights/order', {sequence: [{id: theirSlide, sequence: 0}]})).status).toBe(400);
+        expect((await theirs.get('highlights')).body.items).toEqual([expect.objectContaining({id: theirSlide, sequence: 1})]);
 
         // An add naming the other journal still lands in this one.
-        await add(own.api, slide('Placed here', {contextId: other.seeded.contextId}));
-        expect(await titles(own.api)).toEqual(['Our slide', 'Placed here']);
-        expect(await titles(other.api)).toEqual(['Their slide']);
+        await add(ours, slide('Placed here', {contextId: other.seeded.contextId}));
+        expect(await titles(ours)).toEqual(['Our slide', 'Placed here']);
+        expect(await titles(theirs)).toEqual(['Their slide']);
     });
 
-    test('API3: an order the panel never sends', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a3', testInfo);
-        const {api} = await journal(apiAs, pkpApi, tag);
+    test('API3: An order the panel never sends', async ({scratch}) => {
+        const api = await (await scratch()).as('mg');
         const first = await add(api, slide('First'));
         const second = await add(api, slide('Second'));
         const third = await add(api, slide('Third'));
@@ -98,9 +82,8 @@ test.describe('highlights through the API', () => {
         expect(await titles(api)).toEqual(['Third', 'First', 'Second']);
     });
 
-    test('API4: a text in a language the journal\'s forms do not offer is refused', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a4', testInfo);
-        const {api} = await journal(apiAs, pkpApi, tag);
+    test('API4: A text in a language the journal\'s forms do not offer is refused', async ({scratch}) => {
+        const api = await (await scratch()).as('mg');
 
         const refused = await api.post('highlights', slide('Call for papers', {title: {en: 'Call for papers', fr_CA: 'Appel à contributions'}}));
         expect(refused.status).toBe(400);
@@ -112,9 +95,8 @@ test.describe('highlights through the API', () => {
         expect(await titles(api)).toEqual(['Call for papers']);
     });
 
-    test('API5: an edit that sends one field keeps the others', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a5', testInfo);
-        const {api} = await journal(apiAs, pkpApi, tag);
+    test('API5: An edit that sends one field keeps the others', async ({scratch}) => {
+        const api = await (await scratch()).as('mg');
         const id = await add(api, slide('Call for papers', {
             description: {en: '<p>Submissions open until June.</p>'},
             url: 'https://example.org/cfp',

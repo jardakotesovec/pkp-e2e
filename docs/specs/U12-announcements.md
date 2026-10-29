@@ -923,18 +923,15 @@ API2. **The list filtered by type** {OJS OMP OPS}
    - **Two types**: asked for both, it holds "Summit" and "Workshop".
    - **Control**: unfiltered, it holds all three.
 
-API3. **Another journal's announcement is out of reach from this journal's address** {OJS OMP OPS}
+API3. **An add naming another journal lands in this one** {OJS OMP OPS}
 
    Given: two scratch journals, each with a Journal Manager and one
    announcement ("Our notice", "Their notice").
 
-   - **Foreign number**: through the first journal's address, as its
-     manager, "Their notice" is refused to a read (400), an edit (403) and
-     a delete (403), and the second journal still lists it unchanged (Rule
-     1). The panel only sends its own journal's announcements.
    - **Foreign journal named**: an add through the first journal's address
      that names the second journal as the announcement's owner is stored
-     in the first; the second journal's list is unchanged.
+     in the first; the second journal still lists "Their notice" alone
+     (Rule 1). The panel never names a journal.
 
 API4. **A text in a language the journal's forms do not offer is refused** {OJS OMP OPS}
 

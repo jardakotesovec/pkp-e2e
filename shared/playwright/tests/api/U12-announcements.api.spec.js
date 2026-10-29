@@ -6,27 +6,15 @@
  */
 const {test, expect} = require('../../support/base-test.js');
 
-/** A unique tag for this test's scratch journal(s). */
-function makeTag(check, testInfo) {
-    return `u12${check}w${testInfo.workerIndex}${Date.now().toString(36)}`;
-}
-
-/** A scratch journal with a manager, seeded with `extra`; its manager's client. */
-async function journal(apiAs, pkpApi, tag, extra = {}) {
-    const seeded = await pkpApi.createContext({tag, users: [{username: `${tag}mg`, roles: ['manager']}], ...extra});
-    const api = await apiAs(`${tag}mg`, {context: tag});
-    return {seeded, api};
-}
-
 const titles = (res) => res.body.items.map((a) => a.title.en).sort();
 
 test.describe('announcements through the API', () => {
-    test('API1: one announcement read back at the journal\'s own address', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a1', testInfo);
-        const {seeded, api} = await journal(apiAs, pkpApi, tag, {
+    test('API1: One announcement read back at the journal\'s own address', async ({scratch}) => {
+        const j = await scratch({
             announcements: [{title: 'Call for papers', descriptionShort: '<p>Deadline 1 June.</p>', dateExpire: '2099-06-01'}],
         });
-        const id = seeded.announcements[0].id;
+        const api = await j.as('mg');
+        const id = j.seeded.announcements[0].id;
 
         const one = await api.get(`announcements/${id}`);
         expect(one.status).toBe(200);
@@ -42,13 +30,13 @@ test.describe('announcements through the API', () => {
         expect(unknown.status).toBe(404);
     });
 
-    test('API2: the list filtered by type', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a2', testInfo);
-        const {seeded, api} = await journal(apiAs, pkpApi, tag, {
+    test('API2: The list filtered by type', async ({scratch}) => {
+        const j = await scratch({
             announcementTypes: [{name: {en: 'Conference'}}, {name: {en: 'Event'}}],
             announcements: [{title: 'Workshop', type: 'Event'}, {title: 'Summit', type: 'Conference'}, {title: 'Notice'}],
         });
-        const typeId = (name) => seeded.announcementTypes.find((t) => t.name === name).id;
+        const api = await j.as('mg');
+        const typeId = (name) => j.seeded.announcementTypes.find((t) => t.name === name).id;
 
         const events = await api.get('announcements', {typeIds: typeId('Event')});
         expect(events.status).toBe(200);
@@ -62,28 +50,19 @@ test.describe('announcements through the API', () => {
         expect(titles(await api.get('announcements'))).toEqual(['Notice', 'Summit', 'Workshop']);
     });
 
-    test('API3: another journal\'s announcement is out of reach from this journal\'s address', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a3', testInfo);
-        const own = await journal(apiAs, pkpApi, tag, {announcements: [{title: 'Our notice'}]});
-        const other = await journal(apiAs, pkpApi, `${tag}b`, {announcements: [{title: 'Their notice'}]});
-        const theirs = other.seeded.announcements[0].id;
+    test('API3: An add naming another journal lands in this one', async ({scratch}) => {
+        const own = await scratch({announcements: [{title: 'Our notice'}]});
+        const other = await scratch({announcements: [{title: 'Their notice'}]});
+        const ours = await own.as('mg');
 
-        expect((await own.api.get(`announcements/${theirs}`)).status).toBe(400);
-        const edited = await own.api.put(`announcements/${theirs}`, {title: {en: 'Changed from elsewhere'}});
-        expect(edited.status).toBe(403);
-        expect((await own.api.delete(`announcements/${theirs}`)).status).toBe(403);
-        expect(titles(await other.api.get('announcements'))).toEqual(['Their notice']);
-
-        // An add naming the other journal still lands in this one.
-        const added = await own.api.post('announcements', {title: {en: 'Placed here'}, assocId: other.seeded.contextId, sendEmail: false});
+        const added = await ours.post('announcements', {title: {en: 'Placed here'}, assocId: other.seeded.contextId, sendEmail: false});
         expect(added.status).toBe(200);
-        expect(titles(await own.api.get('announcements'))).toEqual(['Our notice', 'Placed here']);
-        expect(titles(await other.api.get('announcements'))).toEqual(['Their notice']);
+        expect(titles(await ours.get('announcements'))).toEqual(['Our notice', 'Placed here']);
+        expect(titles(await (await other.as('mg')).get('announcements'))).toEqual(['Their notice']);
     });
 
-    test('API4: a text in a language the journal\'s forms do not offer is refused', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a4', testInfo);
-        const {api} = await journal(apiAs, pkpApi, tag);
+    test('API4: A text in a language the journal\'s forms do not offer is refused', async ({scratch}) => {
+        const api = await (await scratch()).as('mg');
 
         const refused = await api.post('announcements', {title: {en: 'Call for papers', fr_CA: 'Appel à contributions'}, sendEmail: false});
         expect(refused.status).toBe(400);

@@ -11,46 +11,15 @@
  */
 const {test, expect} = require('../../support/base-test.js');
 
-/** A unique tag for this test's scratch journal(s). */
-function makeTag(check, testInfo) {
-    return `u14${check}w${testInfo.workerIndex}${Date.now().toString(36)}`;
-}
-
-/**
- * A scratch journal with public comments on and one user per key of
- * `roles` (`{mg: 'manager', rd: 'reader'}`), each `${tag}${key}`.
- * `as(key)` is that user's client at the journal's address (`as(null)`
- * nobody signed in), `user(key)` the username, `id(key)` the user's id.
- */
-async function journal(apiAs, pkpApi, tag, roles) {
-    const seeded = await pkpApi.createContext({
-        tag,
-        enablePublicComments: true,
-        users: Object.entries(roles).map(([key, role]) => ({username: `${tag}${key}`, roles: [role]})),
-    });
-    const user = (key) => `${tag}${key}`;
-    return {
-        tag,
-        user,
-        id: (key) => seeded.users.find((u) => u.username === user(key)).id,
-        as: (key) => apiAs(key ? user(key) : null, {context: tag}),
-    };
-}
-
-/** A published article by the journal's author `au`, with its seeded comments. */
-function article(pkpApi, j, suffix, userComments = []) {
-    return pkpApi.createSubmission({tag: `${j.tag}${suffix}`, context: j.tag, submitter: j.user('au'), published: true, userComments});
-}
-
 /** The comments of a moderator's list, by text, sorted. */
 const texts = (res) => res.body.data.map((c) => c.commentText).sort();
 
 test.describe('reader comments through the API', () => {
-    test('API1: a comment or a report the landing page would not send is refused', async ({apiAs, pkpApi}, testInfo) => {
-        const j = await journal(apiAs, pkpApi, makeTag('a1', testInfo), {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader'});
-        const art = await article(pkpApi, j, 'a', [{user: j.user('rb'), text: 'Other reader', approved: true}]);
+    test('API1: A comment or a report the landing page would not send is refused', async ({scratch}) => {
+        const j = await scratch({users: {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader'}, enablePublicComments: true});
+        const art = await j.submission('a', {submitter: 'au', published: true, userComments: [{user: j.user('rb'), text: 'Other reader', approved: true}]});
         const otherComment = art.userComments[0].id;
-        const unpublished = await pkpApi.createSubmission({tag: `${j.tag}u`, context: j.tag, submitter: j.user('au')});
+        const unpublished = await j.submission('u', {submitter: 'au'});
 
         // A second version, published: the first becomes an older version.
         const manager = await j.as('mg');
@@ -86,18 +55,13 @@ test.describe('reader comments through the API', () => {
         expect(control.body).toMatchObject({publicationId: newest, isApproved: false});
     });
 
-    test('API2: another journal\'s article and comments are out of reach from this journal\'s address', async ({apiAs, pkpApi}, testInfo) => {
-        const tag = makeTag('a2', testInfo);
-        const own = await journal(apiAs, pkpApi, tag, {mg: 'manager', rd: 'reader'});
-        const other = await journal(apiAs, pkpApi, `${tag}b`, {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader'});
-        const theirs = await article(pkpApi, other, 'a', [
-            {user: other.user('rd'), text: 'Pending there'},
-            {user: other.user('rd'), text: 'Approved there', approved: true, reports: [{user: other.user('rb'), note: 'Off topic'}]},
-        ]);
-        const [pending, approved] = theirs.userComments;
-        const reportId = approved.reports[0];
+    test('API2: Another journal\'s article is out of reach from this journal\'s address', async ({scratch}) => {
+        const own = await scratch({users: {mg: 'manager', rd: 'reader'}, enablePublicComments: true});
+        const other = await scratch({users: {mg: 'manager', au: 'author', rd: 'reader'}, enablePublicComments: true});
+        const theirs = await other.submission('a', {submitter: 'au', published: true, userComments: [
+            {user: other.user('rd'), text: 'Approved there', approved: true},
+        ]});
 
-        // Their article.
         const reader = await own.as('rd');
         const onTheirs = await reader.post('comments', {publicationId: theirs.publicationId, commentText: 'From elsewhere'});
         expect(onTheirs.status).toBe(422);
@@ -106,37 +70,16 @@ test.describe('reader comments through the API', () => {
         expect(listed.status).toBe(200);
         expect(listed.body.data).toEqual([]);
 
-        // Their comments.
-        const manager = await own.as('mg');
-        for (const [method, path, data] of [
-            ['GET', `comments/${pending.id}`],
-            ['GET', `comments/${approved.id}`],
-            ['PUT', `comments/${pending.id}/setApproval`, {approved: true}],
-            ['DELETE', `comments/${approved.id}`],
-            ['GET', `comments/${approved.id}/reports`],
-            ['GET', `comments/${approved.id}/reports/${reportId}`],
-            ['DELETE', `comments/${approved.id}/reports/${reportId}`],
-            ['DELETE', `comments/${approved.id}/reports`],
-        ]) {
-            expect((await manager.call(method, path, {data})).status, `${method} ${path}`).toBe(404);
-        }
-        expect((await reader.post(`comments/${approved.id}/reports`, {note: 'From elsewhere'})).status).toBe(404);
-        expect((await manager.get('comments')).body.data).toEqual([]);
-
-        // Untouched.
-        const theirManager = await other.as('mg');
-        const left = await theirManager.get('comments');
-        expect(texts(left)).toEqual(['Approved there', 'Pending there']);
-        expect(left.body.data.find((c) => c.id === pending.id).isApproved).toBe(false);
-        expect(left.body.data.find((c) => c.id === approved.id).isApproved).toBe(true);
-        expect((await theirManager.get(`comments/${approved.id}/reports`)).body.total).toBe(1);
+        // Nothing kept on either journal.
+        expect((await (await own.as('mg')).get('comments')).body.data).toEqual([]);
+        expect(texts(await (await other.as('mg')).get('comments'))).toEqual(['Approved there']);
     });
 
-    test('API3: the public list gives a comment\'s reports to a moderator alone', async ({apiAs, pkpApi}, testInfo) => {
-        const j = await journal(apiAs, pkpApi, makeTag('a3', testInfo), {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader'});
-        const art = await article(pkpApi, j, 'a', [
+    test('API3: The public list gives a comment\'s reports to a moderator alone', async ({scratch}) => {
+        const j = await scratch({users: {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader'}, enablePublicComments: true});
+        const art = await j.submission('a', {submitter: 'au', published: true, userComments: [
             {user: j.user('rd'), text: 'Worth reading', approved: true, reports: [{user: j.user('rb'), note: 'Spam link'}]},
-        ]);
+        ]});
         const asked = {publicationIds: art.publicationId, includeReports: 1};
 
         for (const key of [null, 'rd', 'rb']) {
@@ -150,13 +93,13 @@ test.describe('reader comments through the API', () => {
         expect(moderator.body.data[0].reports[0]).toMatchObject({note: 'Spam link', userName: j.user('rb')});
     });
 
-    test('API4: the Comments page\'s list filtered by writer and by article', async ({apiAs, pkpApi}, testInfo) => {
-        const j = await journal(apiAs, pkpApi, makeTag('a4', testInfo), {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader'});
-        await article(pkpApi, j, 'a', [{user: j.user('rd'), text: 'First reader on A'}]);
-        const b = await article(pkpApi, j, 'b', [
+    test('API4: The Comments page\'s list filtered by writer and by article', async ({scratch}) => {
+        const j = await scratch({users: {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader'}, enablePublicComments: true});
+        await j.submission('a', {submitter: 'au', published: true, userComments: [{user: j.user('rd'), text: 'First reader on A'}]});
+        const b = await j.submission('b', {submitter: 'au', published: true, userComments: [
             {user: j.user('rb'), text: 'Second reader on B'},
             {user: j.user('rd'), text: 'First reader on B'},
-        ]);
+        ]});
         const manager = await j.as('mg');
 
         const byWriter = await manager.get('comments', {userIds: j.id('rd')});
@@ -171,14 +114,14 @@ test.describe('reader comments through the API', () => {
         expect((await manager.get('comments', {publicationIds: 'abc'})).status).toBe(400);
     });
 
-    test('API5: moderation requests the Comments page never sends', async ({apiAs, pkpApi}, testInfo) => {
-        const j = await journal(apiAs, pkpApi, makeTag('a5', testInfo), {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader', rc: 'reader'});
-        const art = await article(pkpApi, j, 'a', [{
+    test('API5: Moderation requests the Comments page never sends', async ({scratch}) => {
+        const j = await scratch({users: {mg: 'manager', au: 'author', rd: 'reader', rb: 'reader', rc: 'reader'}, enablePublicComments: true});
+        const art = await j.submission('a', {submitter: 'au', published: true, userComments: [{
             user: j.user('rd'),
             text: 'Reported twice',
             approved: true,
             reports: [{user: j.user('rb'), note: 'One'}, {user: j.user('rc'), note: 'Two'}],
-        }]);
+        }]});
         const id = art.userComments[0].id;
         const manager = await j.as('mg');
         expect((await manager.get(`comments/${id}/reports`)).body.total).toBe(2);

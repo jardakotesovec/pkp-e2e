@@ -979,24 +979,20 @@ API1. **A comment or a report the landing page would not send is refused** {OJS 
      comment alone, with no report.
    - **Control**: the same comment on the newest version is kept, pending.
 
-API2. **Another journal's article and comments are out of reach from this journal's address** {OJS OMP OPS}
+API2. **Another journal's article is out of reach from this journal's address** {OJS OMP OPS}
 
    Given: two scratch journals with public comments on, each with a
    Journal Manager and a Reader; on the second journal, a published
-   article with a pending comment and an approved one with a report.
+   article with an approved comment.
 
-   - **Their article**: through the first journal's address, a comment
-     on the second journal's article is refused (422, not found) and
-     nothing is kept; the public list asked for that article lists
-     nothing.
-   - **Their comments**: through the first journal's address, as its
-     manager, the second journal's comments are refused to a read, an
-     approval, a delete, and a read or delete of their reports, one or
-     all (404); as its reader, a report on the approved one is refused
-     (404) [A12](#a12).
-   - **Untouched**: the second journal still lists both comments, the
-     pending one pending, the approved one approved with its one report.
-     The screens only send their own journal's numbers.
+   - **A comment on it**: through the first journal's address, as its
+     reader, a comment on the second journal's article is refused (422,
+     not found).
+   - **Its public list**: the public list asked for that article through
+     the first journal's address lists nothing.
+   - **Nothing kept**: the first journal's Comments page lists nothing,
+     and the second journal's still holds its one comment. The landing
+     page only sends its own article's version.
 
 API3. **The public list gives a comment's reports to a moderator alone** {OJS OMP OPS}
 

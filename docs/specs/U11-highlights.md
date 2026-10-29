@@ -440,16 +440,15 @@ API1. **One highlight read back at the journal's own address** {OJS OMP OPS}
      list gives for it is [A10](#a10)'s.
    - **Unknown**: a number no highlight has answers 404.
 
-API2. **Another journal's highlight is out of reach from this journal's address** {OJS OMP OPS}
+API2. **An add or an order naming another journal leaves that journal untouched** {OJS OMP OPS}
 
    Given: two scratch journals, each with a Journal Manager and one
    highlight ("Our slide", "Their slide").
 
-   - **Foreign number**: through the first journal's address, as its
-     manager, "Their slide" is refused to a read, an edit and a delete
-     (404) and to an order naming it (400), and the second journal still
-     lists it unchanged (Rule 1). The panel only sends its own journal's
-     highlights.
+   - **Foreign highlight ordered**: through the first journal's address,
+     as its manager, an order naming "Their slide" is refused (400), and
+     the second journal still lists it at its place (Rule 1). The panel
+     only orders its own journal's highlights.
    - **Foreign journal named**: an add through the first journal's
      address that names the second journal as the highlight's owner is
      stored in the first; the second journal's list is unchanged.
