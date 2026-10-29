@@ -95,6 +95,49 @@ async function pressDashboard(page) {
 }
 
 /**
+ * The way back from the Profile page (step 5b): the side menu as it shows (the visible entries), then
+ * press "Editor Dashboard" (where it leads, and the lists now visible under it), then press "Assigned to
+ * me" (where it lands). Each part is recorded, never thrown, so a menu that already leads to the
+ * Dashboard in one press reads as such.
+ */
+async function wayBack(page) {
+    const nav = page.locator('#app-nav');
+    const visibleLinks = async () => {
+        const out = [];
+        const links = nav.locator('a');
+        for (let i = 0; i < (await links.count()); i++) {
+            const a = links.nth(i);
+            if (!(await a.isVisible().catch(() => false))) continue;
+            out.push({text: flat(await a.innerText().catch(() => '')), href: rel(await a.getAttribute('href'))});
+        }
+        return out;
+    };
+    await nav.waitFor({timeout: T}).catch(() => {});
+    const out = {address: rel(page.url()), menu: await visibleLinks()};
+    const group = nav.locator('a, button').filter({has: page.getByText('Editor Dashboard', {exact: true})}).first();
+    if (!(await group.count())) return {...out, group: null};
+    const assigned = () => nav.locator('a[href*="dashboard/editorial"]').filter({has: page.getByText('Assigned to me', {exact: true})}).first();
+    out.assignedVisibleBefore = await assigned().isVisible().catch(() => false);
+    out.groupHref = rel(await group.getAttribute('href'));
+    out.groupExpandedBefore = await group.getAttribute('aria-expanded');
+    await group.click();
+    await idle(page);
+    await pause(500);
+    out.afterGroup = {address: rel(page.url()), expanded: await group.getAttribute('aria-expanded').catch(() => null),
+        lists: (await visibleLinks()).filter((l) => /dashboard\/editorial/.test(l.href)).map((l) => l.text)};
+    if (await assigned().isVisible().catch(() => false)) {
+        const before = page.url();
+        await assigned().click();
+        await page.waitForURL((u) => String(u) !== before, {timeout: T}).catch(() => {});
+        await idle(page);
+        await pause(300);
+        out.afterAssigned = {address: rel(page.url()), title: await page.title(),
+            heading: await page.locator('h1').first().innerText().then(flat, () => null)};
+    } else out.afterAssigned = null;
+    return out;
+}
+
+/**
  * Settings › Website › "Setup" › "Languages" (U57's page object): press French's box in the "Forms"
  * column once, as the journal's manager; the box before, the list's answer, the box after a fresh load.
  * The page object is required here, inside the walk, because it reads the app's environment.
@@ -310,4 +353,4 @@ async function guestEditorGetsTask(page, app) {
     return {rows, discussion};
 }
 
-module.exports = {GUEST, GUEST_TASK, guestEditorJoins, guestEditorGetsTask, readBell, openPublic, readUserMenu, readUserMenuNarrow, pressDashboard, untickFrenchForms};
+module.exports = {GUEST, GUEST_TASK, guestEditorJoins, guestEditorGetsTask, readBell, openPublic, readUserMenu, readUserMenuNarrow, pressDashboard, wayBack, untickFrenchForms};

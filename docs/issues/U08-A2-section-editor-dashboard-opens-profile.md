@@ -9,9 +9,9 @@
   - 3.4: OJS (Section and Guest Editor), OMP, OPS (code)
   - 3.3: OJS (Section and Guest Editor), OMP, OPS (code)
 - **Introduced** `pkp/pkp-lib#2917` for `pkp/pkp-lib#2910` · [39912fe](https://github.com/pkp/pkp-lib/commit/39912fe17912b83edfedb7897fb28a686a85e1c4) (the Profile address) and [03f1cbe](https://github.com/pkp/pkp-lib/commit/03f1cbea007f65c59ebf8812c66f3287ce46dd38) (the count) · 2017-10-23 · Dimitris Efstathiou (defstat)
-- **Upstream** none found (2026-10-26)
+- **Upstream** none found (2026-10-29)
 - **Tracked in** U08 [A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U08-navigation-menus-and-site-chrome.md#a2), U05 [A3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U05-notifications-center-and-email-preferences.md#a3)
-- **Checked** 2026-10-26, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-29, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
 Update 2026-10-26: pkp-lib
@@ -24,6 +24,10 @@ the Profile page, "as it does for the other users and did in 3.3". It
 changes nothing on a journal's pages, where this fault is, and the walks
 on `main` and 3.5 show the fault unchanged. The fix below now keeps that
 change.
+
+Update 2026-10-29: from the Profile page, the way back to the Dashboard
+takes two presses: the side menu's closed "Editor Dashboard" group, then
+"Assigned to me" in it. The fault itself is unchanged on `main` and 3.5.
 
 ## Summary
 
@@ -45,8 +49,8 @@ has more than one language under "Forms"
 On such a journal the other roles still see it after "Dashboard" in the
 narrow menu, and these editors do not.
 
-The Profile page's side menu leads back to the Dashboard in one press. It
-has been this way since 3.1 (2017); 3.0 took them to their submissions.
+Their "Dashboard" has led to the Profile page since 3.1 (2017); 3.0
+took them to their submissions.
 
 ## Impact
 
@@ -56,11 +60,16 @@ has been this way since 3.1 (2017); 3.0 took them to their submissions.
   menu under their name on its public pages. The address and the count
   come from pkp-lib's menu code, not from the theme; walked with the
   default theme.
-- **Way round**: "Editor Dashboard" in the Profile page's side menu. The bell
-  on every editorial page counts their tasks.
+- **Way round**: on the Profile page, press "Editor Dashboard" in the side
+  menu, which opens that group in place, then one of the entries under it,
+  such as "Assigned to me", which opens the Dashboard (3.4 and 3.3:
+  "Submissions" in the side menu, one press). Neither the journal's name
+  in the header, which opens the journal's home page, nor the menu under
+  the user's initials leads there. The bell on every editorial page
+  counts their tasks.
 
 Low: a misleading link and a missing count, with nothing lost and the
-Dashboard one press away.
+Dashboard two presses away from the Profile page.
 
 ## Steps to reproduce
 
@@ -131,6 +140,9 @@ Profile page:
 /index.php/publicknowledge/en/user/profile
 Profile | Journal of Public Knowledge
 ```
+
+On that page the side menu's "Editor Dashboard" group is closed, so the
+Dashboard is two presses away: the group, then "Assigned to me" in it.
 
 The same happens on OMP ("Profile | Public Knowledge Press") and OPS
 ("Profile | Public Knowledge Preprint Server"), and to the Guest Editor:
@@ -299,21 +311,29 @@ test.
   It takes the Steps as `dbarnes` and `dbuskins`, and on OJS as the
   invited Guest Editor `u08h20d` (the accept link read from the install's
   mail catcher), on an install freshly loaded from the default dataset
-  (pkp/datasets d1d235a7, 2026-10-25, PostgreSQL). From a pkp-e2e
+  (pkp/datasets 2f0edb08, 2026-10-28, PostgreSQL). From a pkp-e2e
   checkout:
   `GUEST_TASK=1 PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/section-editor-dashboard-opens-profile/walk.js`.
-  `GUEST_TASK=1` takes step 9. `WALK_MODE=neighbour` walks the Author (`ccorino`, `aclark` on OMP), the
+  `GUEST_TASK=1` takes step 9. Where "Dashboard" opened the Profile page,
+  the script then presses "Editor Dashboard" and "Assigned to me" in the
+  side menu (the way round). `WALK_MODE=neighbour` walks the Author (`ccorino`, `aclark` on OMP), the
   Reviewer (`jjanssen`; the OPS dataset has none) and the site-level page
   as `dbuskins`, `dbarnes` and `admin`, with French left under "Forms".
-- Walks on 2026-10-26, each on a freshly loaded install:
-  - `main`: the Steps on all three apps, step 9 included on OJS: the
-    Observed above, the Guest Editor's bell "Tasks 1".
-  - 3.5: the same command with `PKP_E2E_LINE=stable-3_5_0` in front, on
-    that line's dataset (`ojs/stable-3_5_0/pgsql` and the others), with
-    the same result as `main`. The Guest Editor there was walked without
-    step 9 (bell "Tasks", the name and "Dashboard" bare, the Profile page),
-    invited at `u08h20d@example.com` as the Steps say.
-  - The fix: `main`, all three apps, with
+- Walks, each on a freshly loaded install:
+  - `main`, 2026-10-29: the Steps on all three apps, step 9 included on
+    OJS: the Observed above, the Guest Editor's bell "Tasks 1". The way
+    round opened the Dashboard at
+    `/index.php/publicknowledge/en/dashboard/editorial?currentViewId=assigned-to-me`
+    ("Assigned to me (15)"; OMP "(3)", OPS "(1)", the Guest Editor "(1)").
+  - 3.5, 2026-10-29: the same command with `PKP_E2E_LINE=stable-3_5_0` in
+    front, on that line's dataset (`ojs/stable-3_5_0/pgsql` and the
+    others), step 9 included: the same result as `main`. There "Start A
+    New Submission" sits inside the closed "Editor Dashboard" group
+    (`PKPTemplateManager.php` line 1048 on 3.5) instead of beside it.
+  - The fix, tried on 2026-10-26 at lib/pkp 800863b5dc. The files it
+    changes and reads (`PKPNavigationMenuService.php`, `PKPPageRouter.php`,
+    `dashboardMenuItem.tpl`) have no commit between that and today's
+    df42984b46. On `main`, all three apps, with
     [fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/section-editor-dashboard-opens-profile/fix.diff)
     applied (`node bin/try-fix.js apply <fix.diff> ojs omp ops`): the
     Steps with step 9, then `WALK_MODE=neighbour`; reverted, then
@@ -321,11 +341,11 @@ test.
     "Dashboard" opened the Profile page for `dbuskins`, `dbarnes` and
     `admin` both times.
   - No request failed and no page script failed, with the fix in or out.
-- Tips (2026-10-26): `main` OJS d054e2660d, OMP 38bf23300c and OPS
-  fbd57562f4 (lib/pkp 800863b5dc); `stable-3_5_0` OJS 18b464cafd and OMP
-  dade65f368 (lib/pkp 0f3c36bc2f), OPS bd726f9b7a (lib/pkp 9a0212faff);
-  `stable-3_4_0` OJS 90c26f8f68 (lib/pkp 83e78a85e5); `stable-3_3_0` OJS
-  3ef62492a4 (lib/pkp 93722c9179).
+- Tips (2026-10-29): `main` OJS 7705b2aeb8, OMP 3583c1bfd7 and OPS
+  815fbaad1b (lib/pkp df42984b46); `stable-3_5_0` OJS 851416bc2d, OMP
+  50b83d1e67 and OPS bd0ef09fd6 (lib/pkp a6ed3df00a); `stable-3_4_0` OJS
+  567c40df4f (lib/pkp cbf5446d1b); `stable-3_3_0` OJS bb9835c6e0 (lib/pkp
+  fc94a53416).
 - Code reads: `PKPNavigationMenuService.php` on 3.5, lines 213 and 303,
   as on `main` (3.5 has the guard from `6accf87c49`); 3.4
   `classes/services/PKPNavigationMenuService.php` lines 210 and 300 and 3.3
@@ -340,6 +360,18 @@ test.
   group has `roleId="0x00000011"` (`ROLE_ID_SUB_EDITOR`) on every line;
   OMP's and OPS's registries hold no group with that role id besides the
   Series editor and the Moderator.
+- The way back, in the code: `PKPTemplateManager` on `main` (line 1250)
+  builds the side menu's "Editor Dashboard" group from the dashboard's
+  lists, each `isCurrent` only on `dashboard/editorial`, so the group is
+  closed on every other page, the Profile page included. 3.4
+  (`PKPTemplateManager.php` line 1044) and 3.3
+  (`PKPTemplateManager.inc.php` line 964) have no such group: every role
+  in the journal but Reader gets one "Submissions" entry to the
+  `submissions` page. On `main`, lib/pkp `templates/layouts/backend.tpl`
+  links the journal's name in the header to its home page
+  (`page="index"`), and ui-library `TopNavActions.vue` puts the languages,
+  "Edit Profile" and "Logout" in the menu under the initials. The task
+  list behind the bell was not checked for a way to the Dashboard.
 - Introduced: `git blame` of line 305 now lands on `00ce12b`, which only
   wrapped the existing check in `$context && (…)`; blame at its parent,
   and of line 215, lands on abc36ccdc16 (2024), which only renamed the
@@ -359,7 +391,7 @@ test.
   fault. `pkp/pkp-lib#13553` (closed, the site administrator on site
   pages) and `pkp/pkp-lib#13443` (open, a fatal error for a disabled
   user's session) touch the same method; neither is this fault. Searched
-  again on 2026-10-26, by the symptom's words, "guest editor",
+  on 2026-10-26 by the symptom's words, "guest editor",
   `NMI_TYPE_USER_DASHBOARD`, `ROLE_ID_SUB_EDITOR` and
   `PKPNavigationMenuService`, in pkp-lib, the three apps and ui-library.
 - Unverified: how many Guest Editors hold no other role in their journal.

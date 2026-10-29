@@ -1297,7 +1297,7 @@ an entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
 | [A1](#a1) | Screen readers announce the editorial header's "i" (help) icon as "##common.help##" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A2](#a2) | A Section or Guest Editor's "Dashboard" on the journal's public pages opens the Profile page, with no task count | 🐞 | low | issues (claude), 2026-10-26 — re-verified |
+| [A2](#a2) | A Section or Guest Editor's "Dashboard" on the journal's public pages opens the Profile page, with no task count | 🐞 | low | issues (claude), 2026-10-29 — re-verified |
 | [A3](#a3) | The access-denied page a signed-in user gets has an empty heading and an unnamed browser tab | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | Site Settings › "Navigation": "Add Menu" and a menu's "Edit" open nothing and leave the page dimmed | 🐞 | medium · crash: script | issues (claude), 2026-10-03 — re-verified |
 | [A6](#a6) | The "Privacy Statement" and "Contact" notices send the manager to the wrong Settings tab | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1366,12 +1366,9 @@ has more than one language under "Forms"
 ([Notifications center & email preferences](U05-notifications-center-and-email-preferences.md#a15) A15).
 On such a journal the other roles still see it after "Dashboard" in the
 narrow menu, and these editors do not.
-On the Profile page the side menu's "Editor Dashboard" group is closed;
-pressing it, then one of its lists ("Assigned to me"), opens the
-Dashboard. The fault has been there since 3.1 (2017); 3.0 took them to
-their submissions.
-Basis: probe, 2026-10-28; issue report refresh walk, 2026-10-26. <sup>f-a2</sup>
-Report: refresh owed — the 2026-10-28 drift sweep found the way back from the Profile page takes two presses, not one: "Editor Dashboard" is a closed group there, and one of its lists ("Assigned to me") opens the Dashboard; the report's Summary, "Way round" and severity line ("the Dashboard one press away") say one press; no class or method the report names is touched (2026-10-28)
+Their "Dashboard" has led to the Profile page since 3.1 (2017); 3.0
+took them to their submissions.
+Basis: probe, 2026-10-28; issue report refresh walk, 2026-10-29. <sup>f-a2</sup>
 
 <a id="a3"></a>
 **A3 — The access-denied page a signed-in user gets has an empty heading and an unnamed browser tab** · 🐞 · low.

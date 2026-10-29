@@ -827,7 +827,7 @@ an entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A2](#a2) | A published book's Production stage says "using the links just above" with no links there, and shows it to the Author | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A3](#a3) | With a filter, an ascending "Order of monographs" lists the other way round; after a filter the press's order is lost | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A3](#a3) | With a filter, an ascending "Order of monographs" lists the other way round; after a filter the press's order is lost | 🐞 | low | issues (claude), 2026-10-29 — re-verified |
 | [A4](#a4) | Catalog page: pressing "Featured in category" for a book's second category unfeatures it in the first | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | Catalog "Add Entry" refuses "Save" with no book chosen, showing only "Please correct these errors" and never saying why | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A6](#a6) | On a press, an unpublished book's Production stage still says the monograph has been approved | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -885,6 +885,8 @@ of monographs" ("Title (A-Z)", the default of every new series,
 "Publication date (oldest first)" or "Series position (lowest first)")
 lists its books that are not featured the other way round: Z to A,
 newest first, highest position first. Descending orders list correctly.
+Series and categories carried over from 3.3 list the same way once the
+press is upgraded to 3.5 or `main`.
 Once the filter is removed, the books that are not featured come back
 newest first by publication date, and paging and search keep that order
 until a reload, although the press's own "Order of monographs" says
@@ -892,8 +894,7 @@ otherwise and the page first opened in that order; a press on the
 default "Publication date (newest first)" sees no difference. Expected:
 each list in the order its setting names. The staff see the books in a
 different order than readers do.
-Basis: probe, 2026-10-03. <sup>f-a3</sup>
-Report: refresh owed — OMP `c3501fbed` (3.5 `6a876d4a37`, pkp/pkp-lib#13617, 2026-10-26/27) adds the upgrade migration `I13617_FixSeriesSort`, which rewrites every series `sortOption` left as `title-1` and the like in `series_settings` to `title-ASC` and the like, so a series carried over from 3.3 with an ascending order, which the Catalog filter listed right while it held the numeric value, now lists in reverse too once upgraded (`CatalogListPanel::getConfig()` still compares with `DAO::SORT_DIRECTION_ASC`; walked on `main` and 3.5 from PKP's 3.3 OMP data by the daily sync's reader rr13617, 2026-10-28). The Affects line "3.3: none … which the check matches" and the reach of "any series saved from 3.4 on" change (2026-10-28)
+Basis: probe, 2026-10-03; issue report refresh walk, 2026-10-29. <sup>f-a3</sup>
 
 <a id="a4"></a>
 **A4 — Catalog page: pressing "Featured in category" for a book's second category unfeatures it in the first** · 🐞 · medium.

@@ -13,6 +13,8 @@
 //       (below 992 px the theme shows the count after "Dashboard" and hides the one after the name)
 //   3. back at full width: the name in the header's user menu (and its count beside it, Rule 4a), pressed open
 //   4. press the name, then "Dashboard": where it lands
+//   4b. when that is the Profile page: the side menu as shown, press "Editor Dashboard" (the lists it shows),
+//       then "Assigned to me": where it lands (the way back, h29a 2026-10-29)
 //   5. control: dbarnes, steps 1-4
 //   6-7. OJS only (the one default role besides Section editor at the Section Editor level; the dataset has no
 //      holder): dbarnes invites a newcomer (u08h20d) as "Guest editor" through Users & Roles, the newcomer
@@ -31,10 +33,10 @@
 //      pkp-lib 00ce12be77 (pkp/pkp-lib#13553; 3.5 6accf87c49), which the fix keeps
 //
 // Guest editor: OJS steps 6-7 above (h20d, 2026-10-20). The fix trial for it: WALK_ONLY=guest PROBE_RUN=fix … ojs.
-// Reset first:  npm run fleet-prep -- --feature issues-q26b --dataset 2 --reset
-// Run (main):   GUEST_TASK=1 PROBE_FEATURE=issues-q26b PROBE_AGENT=q26b node bin/probe.js all shared/playwright/checks/issues/section-editor-dashboard-opens-profile/walk.js
-// Run (3.5):    PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-q26b-3_5 --dataset 2 --reset
-//               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-q26b-3_5 PROBE_AGENT=q26b node bin/probe.js all <this file>
+// Reset first:  npm run fleet-prep -- --feature issues-h29a --dataset 1 --reset
+// Run (main):   GUEST_TASK=1 PROBE_FEATURE=issues-h29a PROBE_AGENT=h29a node bin/probe.js all shared/playwright/checks/issues/section-editor-dashboard-opens-profile/walk.js
+// Run (3.5):    PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-h29a-3_5 --dataset 1 --reset
+//               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-h29a-3_5 PROBE_AGENT=h29a node bin/probe.js all <this file>
 // Neighbour:    WALK_MODE=neighbour PROBE_RUN=nb-out … (and nb-in with the fix applied)
 // Facts: .reports/<feature>/<agent>/facts[-<run>]-<app>.json
 const {forEachApp, launch, signIn, signOut, screen, shot, record} = require('../../../probe');
@@ -76,7 +78,11 @@ forEachApp(async (app) => {
         await snap(page, `${key}-3-user-menu`);
         const dashboard = await step(`${key} 4 Dashboard`, () => L.pressDashboard(page));
         await snap(page, `${key}-4-dashboard`);
-        fact(key, {signedIn: landed, home, narrow, menu, dashboard});
+        // 4b: from the Profile page, the way back: "Editor Dashboard" in the side menu, then "Assigned to me"
+        const back = dashboard && /\/user\/profile/.test(dashboard.address || '')
+            ? await step(`${key} 4b way back`, () => L.wayBack(page)) : null;
+        if (back) await snap(page, `${key}-4b-way-back`);
+        fact(key, {signedIn: landed, home, narrow, menu, dashboard, back});
     };
     // A site-level public page: the user menu, then "Dashboard".
     const walkSite = async (key, username) => {
