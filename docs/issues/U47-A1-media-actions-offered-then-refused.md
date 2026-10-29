@@ -9,7 +9,7 @@
   - 3.4: none (code; no "Media" page)
   - 3.3: none (code; no "Media" page)
 - **Introduced** `pkp/ui-library#794` for `pkp/pkp-lib#12262` · [3f97137c](https://github.com/pkp/ui-library/commit/3f97137cef11b99042ee8bcc96ff0dfe5dcf84e4) · 2026-05-06 · Blesilda Biazon (blesildaramirez)
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#13647` (open), the team's copy of this issue (2026-10-29). Before it, none found (2026-10-02)
 - **Tracked in** spec U47 [A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U47-media-files.md#a1)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
