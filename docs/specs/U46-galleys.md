@@ -45,7 +45,7 @@ where they can open the workflow, whatever their role there.
 | Action | Who may, and when |
 |--------|--------------------|
 | **See the "Galleys" page and its list** | • everyone the side menu offers the page ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)). They all see the same list (Fields) <sup>a</sup> |
-| **Manage the galleys** ("Add galley", "Order", "Edit", "Change File", "Delete") | • Journal: the Journal Manager, Editor, Production Editor and Site Administrator, and every Section Editor, Guest Editor, Layout Editor, Designer, Indexer or Proofreader who reaches the page. The assignment's "Permissions" box plays no part [OPS1](#ops1) <sup>b</sup> <sup>q2</sup><br>• Journal: the Author never; their list has no "Order", no "Add galley" and no row menu <sup>b</sup> <sup>q1</sup><br>• Preprint server: the Preprint Server Manager and the Site Administrator, always <sup>c</sup><br>• Preprint server: a Moderator is offered the whole set. Once the preprint is posted, every assigned Moderator may use it. Before posting, a Moderator whose "Permissions" box is unticked gets "Edit" read-only, a new galley's "Save" refused and "Save Order" ignored, while "Delete" and "Change File" still work ⚠ [OPS2](#ops2) <sup>c</sup> <sup>q3</sup><br>• Preprint server: the Author, while they may edit the preprint (before posting, and only while the Author role's "Permit submission metadata edit." is on, as installed; Settings bullet 4) [OPS1](#ops1). "Change File" works only on a galley whose file they uploaded themselves ⚠ [OPS3](#ops3) <sup>c</sup> |
+| **Manage the galleys** ("Add galley", "Order", "Edit", "Change File", "Delete") | • Journal: the Journal Manager, Editor, Production Editor and Site Administrator, and every Section Editor, Guest Editor, Layout Editor, Designer, Indexer or Proofreader who reaches the page. The assignment's "Permissions" box plays no part [OPS1](#ops1) <sup>b</sup> <sup>q2</sup><br>• Journal: the Author never; their list has no "Order", no "Add galley" and no row menu <sup>b</sup> <sup>q1</sup><br>• Preprint server: the Preprint Server Manager and the Site Administrator, always <sup>c</sup><br>• Preprint server: a Moderator is offered the whole set. Once the preprint is posted, every assigned Moderator may use it. Before posting, a Moderator whose "Permissions" box is unticked gets "Edit" read-only, a new galley's "Save" refused, "Save Order" ignored and "Delete" refused with "An unexpected error has occurred. Please reload the page and try again." (the galley stays); only "Change File" works ⚠ [OPS2](#ops2) <sup>c</sup> <sup>q3</sup><br>• Preprint server: the Author, while they may edit the preprint (before posting, and only while the Author role's "Permit submission metadata edit." is on, as installed; Settings bullet 4) [OPS1](#ops1). "Change File" works only on a galley whose file they uploaded themselves ⚠ [OPS3](#ops3) <sup>c</sup> |
 | **View a galley read-only** (row menu "View") | • Preprint server: the Author, whenever they may not edit the preprint: after posting, or with the edit permission off. "View" is then the row menu's only item, and "Order" and "Add galley" are gone (Rule 7) <sup>c</sup> <sup>q4</sup><br>• Journal: never offered; the Author has no row menu |
 | **"More Information"** (row menu) | • the editorial roles of the row "Manage the galleys", on a galley that has a file. Never the Author, not even a preprint's Author who may edit it. The window it opens is *[Submission files](U36-submission-files.md#more-information)*' <sup>a</sup> |
 | **Set a galley's identifiers** (the window's "Identifiers" tab) | • Owned by *[Identifiers](U44-identifiers.md)*, which names who may save the tab |
@@ -104,7 +104,10 @@ wish to delete this item? This action cannot be undone." and the buttons
    <sup>e</sup> <sup>q6</sup>
    - 2a. **"Cancel"** in "Create New Galley" closes it and adds nothing,
      without asking. The window's header "Close" asks first when a field
-     was changed (Rule 6a). <sup>e</sup> <sup>h</sup>
+     was changed (Rule 6a). On 3.5 every header "Close" of this window
+     also makes the page's script fail (an error in the browser's
+     console), with nothing amiss on screen ⚠ [A9](#a9). <sup>e</sup>
+     <sup>h</sup>
    - 2b. **The wizard left unfinished.** The galley exists from the
      moment "Save" was pressed. Closing or cancelling the wizard before a
      file is uploaded leaves a row whose label is plain text and whose menu
@@ -161,9 +164,10 @@ wish to delete this item? This action cannot be undone." and the buttons
      continue without saving?". "OK" drops the change and switches the
      tab or closes the window; "Cancel" stays where it was. "Create New Galley"'s header "Close"
      asks the same. The form's own "Cancel" closes without asking and
-     stores nothing. After a refused "Save" (Rule 5), the "Edit"
-     window's header "Close" closes it at once, without asking, although
-     the box still holds the refused path. <sup>h</sup>
+     stores nothing. Straight after a refused "Save" (Rule 5), no field
+     changed since, the header "Close" of either window closes it without
+     asking, although the boxes still hold the refused values.
+     <sup>h</sup>
    - 6b. **Leaving the "Identifiers" tab with a typed value.** A move to
      "Edit Metadata" asks the question of Rule 6a. The window's header
      "Close" asks nothing: it closes the window at once, and the typed
@@ -619,9 +623,9 @@ Left out of the scenarios above, by reason:
   - the guard for OPS2 (issue report
     `docs/issues/U46-OPS2-moderator-galleys-offered-then-refused.md`):
     before posting, a Moderator whose assignment has "Permissions" unticked
-    edits a galley, adds one and saves an order, and each change holds after
-    a reload (or, if the team rules the box binds, the page offers that
-    Moderator "View" only)
+    edits a galley, adds one, saves an order and deletes one, and each
+    change holds after a reload (or, if the team rules the box binds,
+    the page offers that Moderator "View" only)
   - the guard for OPS3 (issue report
     `docs/issues/U46-OPS3-author-galley-change-file-refused.md`): before
     posting, the Author offered the galleys sees "Change File" on a galley
@@ -657,8 +661,9 @@ Left out of the scenarios above, by reason:
     `docs/issues/U09-A11-static-page-refusal-repeated-after-save.md`):
     after two refused "URL Path" values in a galley's "Edit" window, the
     save of a good one shows no notice at the top right
-  - after a refused "Save" in a galley's "Edit" window, the header
-    "Close" closes the window without asking (Rule 6a)
+  - the header "Close" pressed straight after a refused "Save" in a
+    galley's "Edit" or "Create New Galley" window closes it without
+    asking (Rule 6a)
 - **Nothing new to test**:
   - a new galley's place in the list, before and after a saved order
     (Rule 8d)
@@ -673,9 +678,9 @@ Left out of the scenarios above, by reason:
     server, offered what the Journal Manager of scenario 1 is (Actors,
     opening paragraph; Actors row 2)
 - **Register carries it**:
-  - OPS2 (a Moderator without "Permissions" offered "Add galley" and
-    "Save Order" that do not hold, while "Delete" and "Change File"
-    work; Actors row 2; scenario 7 passes it)
+  - OPS2 (a Moderator without "Permissions" offered "Edit", "Add
+    galley", "Save Order" and "Delete" that do not hold, while "Change
+    File" works; Actors row 2; scenario 7 passes it)
   - OPS3 (the preprint's Author offered "Change File" on a galley whose
     file someone else uploaded; Actors row 2)
   - A3 (a remote galley sent to the upload wizard and offered "Change
@@ -687,6 +692,8 @@ Left out of the scenarios above, by reason:
   - A8 (a refused "URL Path" coming back as a red notice at the next
     save, or on the next page when the window is closed instead; Rule 5;
     scenario 2 passes it)
+  - A9 (on 3.5, the page's script failing at the header "Close" of
+    "Create New Galley"; Rule 2a)
   - A5 (the ordering arrows unnamed for screen readers; Rule 8a)
   - A4 (a new version's copy sharing the published galley's file;
     Rule 11)
@@ -726,7 +733,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | The ordering arrows have no names for screen readers | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | A galley's separate-website box keeps an address typed without "https://", and readers' link lands on "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | Until an order is saved, editing a galley moves it to the end of the list | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [A8](#a8) | A good "Save" in the galley window shows an earlier refused "URL Path" as a red notice | 🐞 | low || issues (claude), 2026-10-12 — re-verified |
+| [A8](#a8) | A good "Save" in the galley window shows an earlier refused "URL Path" as a red notice | 🐞 | low | issues (claude), 2026-10-12 — re-verified |
+| [A9](#a9) | On 3.5, the "Create New Galley" window's header "Close" makes the page's script fail; "Cancel" does not | 🐞 | low · crash: script | — |
 | [OJS1](#ojs1) | Deleting a published galley that a new version copied fails with an error | 🐞 | high · crash: server · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [OJS2](#ojs2) | One crafted visit decides what an HTML galley shows every later signed-out reader for a day, including markup that runs on the journal's site | 🐞 | user-visible | — |
 | [OPS2](#ops2) | Before posting, a Moderator without "Permissions" cannot edit, add, reorder or delete the galleys the page offers | 🐞 | medium | issues (claude), 2026-10-29 — re-verified |
@@ -835,6 +843,20 @@ when the "Save" is refused, and a save that succeeds shows no error. The
 fault and its fix are the static page window's
 ([→ Custom pages & blocks, A11](U09-custom-pages-and-blocks.md#a11)).
 Basis: probe, 2026-10-09. <sup>f-a8</sup>
+
+<a id="a9"></a>
+**A9 — On 3.5, the "Create New Galley" window's header "Close" makes the page's script fail** · 🐞 · low · crash: script.
+On 3.5, on a journal's or preprint server's "Galleys" page, every press
+of the header "Close" of "Create New Galley" makes the page's script
+fail, with an error in the browser's console: with nothing changed,
+after "OK" to the unsaved-changes question (Rule 6a), and after a
+refused "Save" (Rule 5). It happens for every role offered "Add
+galley". "Cancel" closes the window without an error. Nothing on screen
+shows the failure: the window closes, nothing is added, "Add galley"
+opens the window again at once, and the next reload asks no question.
+Expected: no error; `main`, the unreleased version the suites run, logs
+none.
+Basis: probe, 2026-10-29. <sup>f-a9</sup>
 
 ### OJS
 
@@ -1022,10 +1044,12 @@ for a submission not yet submitted, then when
 `permitMetadataEdit="true"` and its Moderator (sub-editor) group too
 (`registry/userGroups.xml`); OPS has no assistant group with a stage.
 `canEdit()` feeds `editGalleyTab`/`updateGalley` (the form's
-`$isEditable`) and `initFeatures()` (ordering), and not `addGalley`'s
-form or `deleteGalley`. U44's drive of 2026-09-24 saw a Moderator with
-"Permissions" unticked get the "Identifiers" tab read-only before
-posting, and the Author's row menu read "View" after posting.
+`$isEditable`), `initFeatures()` (ordering) and, since
+pkp/pkp-lib#13637 (OPS `ff72e607ef`, 3.5 `ef55e33bcd`, 2026-10-27),
+`deleteGalley` and `clearPubId`; not `addGalley`'s form. The refused
+delete was live-probed 2026-10-29 (note f-ops2). U44's drive of
+2026-09-24 saw a Moderator with "Permissions" unticked get the
+"Identifiers" tab read-only before posting, and the Author's row menu read "View" after posting.
 
 <a id="fn-d"></a>
 **d** — `GalleyManager.vue` (`PkpTable`, label
@@ -1143,6 +1167,18 @@ no question, the box still reading "123" (OJS three runs, OPS two);
 control, two runs each: a path typed and not saved, the header "Close"
 asked the question and "OK" closed the window. A field changed
 again after the refusal, then "Close", was not driven. Live-probed
+2026-10-29 (Rules 2a, 6a), OJS and OPS, `main` and `stable-3_5_0`, two
+runs each, on the dataset's submission 5 (OJS: `dbarnes` Editor,
+`dbuskins` Section Editor, `gcox` Layout Editor) and 1 (OPS: `dbarnes`
+Preprint Server Manager, `dbuskins` Moderator with "Permissions"
+ticked): in "Create New Galley", "Close" with nothing changed closed
+the window without asking; after "Galley Label" was changed it asked
+the question and "OK" closed it; "Cancel" with a typed label closed it
+without asking; nothing was added each time. "Galley Label" "cc29e
+refused" with "URL Path" "123" › "Save" was refused under the box with
+"The URL path can not be a number."; the header "Close" then closed the
+window at once with no question, both boxes still filled, and the
+reload showed that refusal as a red notice ([A8](#a8)). Live-probed
 2026-10-09 (Rule 6b; Identifiers A17), OJS and OPS, `main` and
 `stable-3_5_0`, two runs or more each, as the manager of a scratch
 journal and preprint server on the galley "PDF" of an unpublished
@@ -1181,8 +1217,8 @@ galleys sharing a position come in whatever order the database returns
 <a id="fn-k"></a>
 **k** — `galleyDelete()`: `openDialog` titled `common.delete` "Delete",
 message `common.confirmDelete`, actions `common.ok` "OK" (warnable) and
-`common.cancel` "Cancel"; "OK" posts `deleteGalley`, which checks only
-the CSRF token, calls `Repo::galley()->delete()` (deleting every
+`common.cancel` "Cancel"; "OK" posts `deleteGalley`, which checks the
+CSRF token (on a preprint server also `canEdit()`, note c), calls `Repo::galley()->delete()` (deleting every
 submission file associated with the galley, whose own deletion takes its
 dependent files), deletes the galley's notifications and, on a journal
 in Copyediting or Production, updates the production notices.
@@ -1571,6 +1607,31 @@ Not driven: whether "Save Order" or a confirmed "Delete" after a
 refusal and "Cancel" also shows the waiting notice; `stable-3_5_0`.
 Issue report: [pkp-e2e#367](https://github.com/jardakotesovec/pkp-e2e/issues/367) ([docs/issues/U09-A11-static-page-refusal-repeated-after-save.md](../issues/U09-A11-static-page-refusal-repeated-after-save.md)).
 
+<a id="fn-f-a9"></a>
+**f-a9** — Live-probed 2026-10-29 (Rule 2a), `stable-3_5_0` (OJS
+`851416bc2d`, OPS `bd0ef09fd6`, ui-library `a12b7523`) and `main` (OJS
+`7705b2aeb8`, OPS `815fbaad1b`, ui-library `b44825b0`), PKP's default
+dataset, two runs each, with the accounts of note h, and on OPS also
+`dbuskins` with "Permissions" unticked (OPS2's walk, after a refused
+"Save"). On 3.5 each header "Close" of "Create New Galley" (unchanged;
+changed, then "OK"; after "URL Path" "123" was refused) raised one
+uncaught page error,
+`Cannot read properties of undefined (reading 'dataChanged')`, at
+`…/dashboard/editorial?workflowSubmissionId=…&workflowMenuKey=publication_galleys`:
+9 per OJS run, 6 per OPS run. "Cancel" raised none, no request failed,
+and on `main` no close raised any. OMP control: book 4's "Publication
+Formats" › "Add publication format" › header "Close" raised none on
+either line. Mechanism: 3.5's `modalStore.js` `closeSideModalById`
+hands `onClose` the `returnData` it was given, which a header "Close"
+leaves undefined, and the callback of
+`useGalleyManagerActions.galleyAdd()` reads `closeData.dataChanged[0]`
+(note e). The `3_5_0-5` tag's ui-library (`ac2dabbc`) has the same two
+lines, so released 3.5 carries the fault. On `main` the store always
+hands `onClose` `{dataChanged: …}` (ui-library `1afd40a9`,
+pkp/ui-library#853, 2026-09-24). A fix on 3.5: read
+`closeData?.dataChanged?.[0]` in the callback, or give the store
+`main`'s shape.
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — Live-probed 2026-09-24 (note q15), twice on OJS: the
 delete request answered a server error (500 on
@@ -1689,11 +1750,22 @@ Issue report: [pkp-e2e#613](https://github.com/jardakotesovec/pkp-e2e/issues/613
 whatever `canCurrentUserEditPublication`; the server's `canEdit()` then
 disables the form, refuses `updateGalley` for a new galley with
 `galley.cantEditPublished`, and leaves the ordering feature out, so
-`saveSequence` answers success and stores nothing (note j), while
-`deleteGalley` and the upload wizard do not consult `canEdit()`.
-Live-probed 2026-09-24 (note q3): the refused new galley's window
-showed no message, neither the `galley.cantEditPublished` text nor any
-other.
+`saveSequence` answers success and stores nothing (note j);
+`deleteGalley` refuses with `galley.cantEditPublished`, which the page
+shows as its generic "Error" dialog, while the upload wizard asks
+`canEditRepresentations()`. Live-probed 2026-09-24 (note q3): the
+refused new galley's window showed no message, neither the
+`galley.cantEditPublished` text nor any other. Re-walked 2026-10-29
+(Actors row 2), OPS `main` and `stable-3_5_0`, two runs each, as
+`dbuskins` (Moderator, "Permissions" unticked) on the dataset's
+unposted submission 1: "Delete" › "OK" opened a dialog headed "Error"
+reading "An unexpected error has occurred. Please reload the page and
+try again."; after a reload the row was still listed and the galley
+still stored. The `delete-galley` request answered 200 with
+`status: false` and "This galley can not be edited because it has
+already been published.". "Change File" stored and downloaded the
+replacement file; "Edit", a new galley's "Save" and "Save Order" did
+as note q3 says.
 Issue report: [pkp-e2e#613](https://github.com/jardakotesovec/pkp-e2e/issues/613) ([docs/issues/U46-OPS2-moderator-galleys-offered-then-refused.md](../issues/U46-OPS2-moderator-galleys-offered-then-refused.md)).
 
 <a id="fn-f-ops3"></a>
