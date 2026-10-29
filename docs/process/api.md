@@ -177,7 +177,9 @@ feature"), one spec at a time:
 3. **Matrix.** Run it on all three apps and judge every disagreeing cell
    (above).
 4. **API checks.** From the traffic map and the spec's Rules and Fields:
-   the inputs, filters and refusals the screens never send. Write them
-   into "Through the API", then the tests.
+   the inputs, filters and refusals the screens never send. A value the
+   form refuses is a gap only if the browser refuses it: when the server
+   does, the screens already send it (`npm run api-call` shows which).
+   Write them into "Through the API", then the tests.
 5. **Green and lint**: the API tests on all three apps,
    `npm run api-routes -- --check`, the spec lint.
