@@ -29,7 +29,8 @@
     "check-models": "node bin/check-models.mjs",
     "report-models": "node bin/report-models.mjs",
     "regressions": "node bin/regression-metrics.mjs",
-    "api-traffic": "node bin/api-traffic.mjs"
+    "api-traffic": "node bin/api-traffic.mjs",
+    "api-call": "node bin/api-call.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.0"

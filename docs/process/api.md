@@ -157,6 +157,14 @@ which roles, which only API checks reach, which nothing reaches, and every
 5xx answer with the test that met it. Read it when adding API coverage to
 a spec: a route the screens never reach is where API checks pay.
 
+## Probing
+
+`npm run api-call -- <app> <username|-> <METHOD> <path> [json]` sends one
+call to the app's probe server (`npm run probe-servers -- --start`), signed
+in as that user the way `apiAs` signs in (`-` for nobody; `--context index`
+for the site), and prints the status and the body: the quick way to see
+what a route does before writing its grid or its check.
+
 ## Adding API coverage to a spec
 
 Done as a revision of the shipped spec (RUNBOOK "Revising a shipped
