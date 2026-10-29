@@ -6,7 +6,7 @@
  * receive, and every call an API check makes through `apiAs`, is logged as
  * one JSON line in `<suite>/.api-traffic/<pid>.jsonl`:
  *
- *   {"app":"ojs","m":"GET","p":"submissions/12/publications/12/funders",
+ *   {"app":"ojs","m":"GET","p":"submissions/12/publications/12/funders","q":[],
  *    "c":"publicknowledge","s":200,"u":"manager.maya","f":"tests/U43-funding.spec.js",
  *    "via":"screen"}
  *
@@ -32,7 +32,8 @@ function record({method, url, status, user, via}) {
     if (!ENABLED) {
         return;
     }
-    const match = new URL(url).pathname.match(API);
+    const parsed = new URL(url);
+    const match = parsed.pathname.match(API);
     if (!match || match[2].startsWith('_test')) {
         return;
     }
@@ -40,6 +41,7 @@ function record({method, url, status, user, via}) {
         app: process.env.PKP_APP_NAME,
         m: method,
         p: match[2],
+        q: [...new Set(parsed.searchParams.keys())].sort(),
         c: match[1],
         s: status,
         u: user || null,

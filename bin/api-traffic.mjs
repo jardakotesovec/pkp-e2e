@@ -66,7 +66,7 @@ for (const line of fs.readFileSync(path.join(REPO_ROOT, 'docs/tracking/api-route
         key, method, path: routePath, apps: apps.split(' '), owner, gate,
         re: new RegExp(`^${pattern}$`),
         literal: routePath.replace(/\{\w+\}/g, '').length, // the more literal, the more specific
-        screens: new Map(), api: new Map(), statuses: new Set(),
+        screens: new Map(), api: new Map(), statuses: new Set(), query: new Set(),
     });
 }
 
@@ -89,6 +89,7 @@ for (const call of calls) {
     const seen = call.via === 'api' ? route.api : route.screens;
     seen.set(role(call.u), (seen.get(role(call.u)) || 0) + 1);
     route.statuses.add(call.s);
+    if (call.via === 'screen') for (const key of call.q || []) route.query.add(key.replace(/\[\]$/, ''));
 }
 
 // ---- the report ----
@@ -114,9 +115,9 @@ for (const [owner, list] of [...byOwner].sort()) {
 const fmt = (seen) => [...seen].sort((a, b) => b[1] - a[1]).map(([k, n]) => `${k} ${n}`).join(', ') || '—';
 for (const [owner, list] of [...byOwner].sort()) {
     if (feature && owner !== feature) continue;
-    out.push('', `## ${owner}`, '', '| Route | Method | Screens, by role | API checks | Statuses | Gate |', '|---|---|---|---|---|---|');
+    out.push('', `## ${owner}`, '', '| Route | Method | Screens, by role | Query keys the screens send | API checks | Statuses | Gate |', '|---|---|---|---|---|---|---|');
     for (const r of list) {
-        out.push(`| \`${r.key}\` | ${r.method} | ${fmt(r.screens)} | ${fmt(r.api)} | ${[...r.statuses].sort().join(' ') || '—'} | ${r.gate} |`);
+        out.push(`| \`${r.key}\` | ${r.method} | ${fmt(r.screens)} | ${[...r.query].sort().join(', ') || '—'} | ${fmt(r.api)} | ${[...r.statuses].sort().join(' ') || '—'} | ${r.gate} |`);
     }
 }
 out.push('', '## Server errors', '');

@@ -25,7 +25,8 @@ articles; the press and preprint-server words follow the glossary. <sup>a</sup>
 A press and a preprint server do not install the reader-side half: the
 monograph and preprint landing pages carry no "Comments on this
 publication" section, no "Comments" block in the sidebar and no way to
-write, report or read a comment through the screens. Both do install the
+write, report or read a comment through the screens, although the
+programming interface takes them ⚠ [A24](#a24). Both do install the
 "Comments" tab of the Website settings and the Comments page, exactly as a
 journal does (Rules 2, 3c and 10 to 17 hold there as written); with nothing
 that writes comments, the Comments page on a press or a preprint server
@@ -49,12 +50,120 @@ Comments page is refused (Rule 2b).
 |--------|--------------------|
 | **Read the comments under an article** | • anyone, signed in or not, on a published article's landing page: the approved comments (Rule 6)<br>• the writer of a comment that is not approved, signed in: that comment as well, marked "Your comment will be visible when the editor approves it" (Rule 6); nobody else sees it, a moderator included <sup>e</sup> |
 | **Write a comment** | • any signed-in visitor, with or without a role in the journal (an account registered with another journal of the site included), on the article's latest published version only, while comments are on (Rule 4)<br>• a visitor who is not signed in is offered "Log in to comment" instead, which leads through the Login page back to the comments (Rule 4b) <sup>f</sup> |
-| **Report a comment** | • any signed-in visitor, with or without a role in the journal, on another person's comment that is showing, through the comment's "…" menu (Rule 8); a moderator gets the same offer there and nothing more<br>• nobody on their own comment: its menu offers "Delete Comment" and no "Report" (Rule 7) <sup>g</sup> |
+| **Report a comment** | • any signed-in visitor, with or without a role in the journal, on another person's comment that is showing, through the comment's "…" menu (Rule 8); a moderator gets the same offer there and nothing more<br>• nobody on their own comment: its menu offers "Delete Comment" and no "Report" (Rule 7) ⚠ [A25](#a25) <sup>g</sup> |
 | **Delete a comment from the landing page** | • the comment's own writer, signed in, through the comment's "…" menu (Rule 9); the menu on anyone else's comment offers no "Delete Comment", and a moderator deletes other people's comments on the Comments page only (Rule 14) <sup>h</sup> |
 | **Switch public comments on or off** | • a Journal Manager, an Editor whose role permits settings changes (the Roles screen's "Permit changes to Settings", ticked by default), and a Site Administrator working in the journal, on Settings › Website › Content › "Comments" (Rule 2) <sup>b</sup> |
 | **Open the Comments page** | • a Journal Manager and an Editor, whether or not their role permits settings changes: the Content › Comments menu entry and the page's address while the setting is on (Rule 3); with the setting off the address answers the access-denied page (Rule 2b)<br>• a Site Administrator holding no manager role in the journal: on a journal the page opens; on a press or a preprint server the menu entry is offered but the address answers the access-denied page ⚠ [OMP1](#omp1) ⚠ [OPS1](#ops1) (Rule 17)<br>• a Section Editor, an Assistant, an Author, a Reviewer or a Reader: no menu entry, and the address answers the access-denied page<br>• a visitor who is not signed in: the address answers the Login page<br>• a visitor who is not signed in and the Site Administrator, at the page's address with "index", the site, in place of the journal's path ("…/index.php/index/management/settings/userComments"): the visitor gets the Login page, the Site Administrator the notice "No journal was found that matched your request." <sup>i</sup> <sup>m</sup> |
 | **Approve, hide or delete a comment; view or delete a report** | • whoever can open the Comments page (the row above), on every comment of the journal, their own included, while comments are on (Rules 12 to 16); nobody on another journal's comment <sup>j</sup> |
 | **Receive the moderation tasks** | • every Journal Manager and Editor of the journal, in the Tasks panel (Side effects); a Site Administrator holding no manager role in the journal gets none <sup>l</sup> |
+
+The five grids below restate the rows above cell by cell, as the API
+checks read them (`docs/process/api.md` names the personas and how they
+are seeded; the persona set's manager stands for every manager-level
+role). Each comments route of the programming interface follows one of
+them; the route registry (`docs/tracking/api-routes.md`) lists them in its
+Gate column. The rules are about the journal, not a submission:
+"Allowed" is a call in the journal with public comments on, and wherever
+a route names a comment it is **the reader's comment**, written by the
+persona set's reader on its published article and approved by the
+manager, so the reader's row reads as the comment's writer and every
+other row as someone else. The rows read a journal's screens; a press and
+a preprint server, whose screens write and show no comment (Purpose),
+answer the same requests the same way [A24](#a24). ✓ allowed, —
+refused, ? an open question.
+
+<a id="api-grid-comments-read"></a>
+**Permission grid: reading the comments.** The row "Read the comments
+under an article": the approved comments are anyone's (`docs/process/api.md`).
+The route behind the landing page's list follows it.
+
+| Persona | Allowed |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | ✓ |
+| reviewer | ✓ |
+| reader | ✓ |
+| nobody signed in | ✓ |
+| manager of another context | ✓ |
+| site admin | ✓ |
+
+<a id="api-grid-comments-write"></a>
+**Permission grid: writing a comment.** The row "Write a comment": any
+signed-in account, with or without a role in the journal
+(`docs/process/api.md`). The route behind the comment box's "Submit"
+follows it.
+
+| Persona | Allowed |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | ✓ |
+| reviewer | ✓ |
+| reader | ✓ |
+| nobody signed in | — |
+| manager of another context | ✓ |
+| site admin | ✓ |
+
+<a id="api-grid-comments-report"></a>
+**Permission grid: reporting the reader's comment.** The row "Report a
+comment": any signed-in account but the comment's writer
+(`docs/process/api.md`). The route behind the "Report Comment" dialog's
+"Submit" follows it.
+
+| Persona | Allowed |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | ✓ |
+| reviewer | ✓ |
+| reader | ? [A25](#a25) |
+| nobody signed in | — |
+| manager of another context | ✓ |
+| site admin | ✓ |
+
+<a id="api-grid-comments-delete"></a>
+**Permission grid: deleting the reader's comment.** The rows "Delete a
+comment from the landing page" and "Approve, hide or delete a comment":
+its writer, and whoever moderates (`docs/process/api.md`). The route
+behind both "Delete Comment" dialogs follows it.
+
+| Persona | Allowed |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | ✓ |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin {OJS} | ✓ |
+| site admin {OMP} | ? [OMP1](#omp1) |
+| site admin {OPS} | ? [OPS1](#ops1) |
+
+<a id="api-grid-comments-moderation"></a>
+**Permission grid: moderating.** The rows "Open the Comments page" and
+"Approve, hide or delete a comment; view or delete a report"
+(`docs/process/api.md`). The Comments page's routes follow it: the list,
+one comment, its approval, its reports one by one and all at once.
+
+| Persona | Allowed |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin {OJS} | ✓ |
+| site admin {OMP} | ? [OMP1](#omp1) |
+| site admin {OPS} | ? [OPS1](#ops1) |
 
 ## Fields & validation
 
@@ -847,6 +956,92 @@ and a preprint server. <sup>s0</sup>
       Comments leaves the side menu while the landing page reads exactly as
       before: the setting changes only the side menu here. <sup>s14</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the comments
+routes is the grids' (Actors & permissions, from the
+[reading grid](#api-grid-comments-read) to the
+[moderating grid](#api-grid-comments-moderation)), checked apart
+(`docs/process/api.md`). Each runs on a scratch journal with public
+comments on; on a press and a preprint server the requests are the same
+[A24](#a24).
+
+API1. **A comment or a report the landing page would not send is refused** {OJS OMP OPS}
+
+   Given: a Reader; a scratch journal with an article whose second
+   version is published, so the first is an older version, an unpublished
+   submission, and an approved comment by another reader on the article.
+
+   - **No text**: a comment with an empty text, and one of spaces alone,
+     is refused (422) with an error on the text. The box's "Submit" stays
+     grayed out for both (Fields).
+   - **Not the latest published version**: a comment on the older
+     version, on the unpublished submission and on a number no
+     publication has is refused (422) with an error on the publication.
+     The box is offered under the newest version alone (Rule 4a), and on
+     a published article alone.
+   - **No reason**: a report with an empty reason is refused (422) with an
+     error on the reason. The dialog's "Submit" does nothing then (Rule 8).
+   - **Nothing kept**: the Comments page's list holds the other reader's
+     comment alone, with no report.
+   - **Control**: the same comment on the newest version is kept, pending.
+
+API2. **Another journal's article and comments are out of reach from this journal's address** {OJS OMP OPS}
+
+   Given: two scratch journals with public comments on, each with a
+   Journal Manager and a Reader; on the second journal, a published
+   article with a pending comment and an approved one with a report.
+
+   - **Their article**: through the first journal's address, a comment
+     on the second journal's article is refused (422, not found) and
+     nothing is kept; the public list asked for that article lists
+     nothing.
+   - **Their comments**: through the first journal's address, as its
+     manager, the second journal's comments are refused to a read, an
+     approval, a delete, and a read or delete of their reports, one or
+     all (404); as its reader, a report on the approved one is refused
+     (404) [A12](#a12).
+   - **Untouched**: the second journal still lists both comments, the
+     pending one pending, the approved one approved with its one report.
+     The screens only send their own journal's numbers.
+
+API3. **The public list gives a comment's reports to a moderator alone** {OJS OMP OPS}
+
+   Given: a Journal Manager and two Readers; a published article with an
+   approved comment by the first reader, reported by the second.
+
+   - **Asked for the reports**: the public list of the article's comments,
+     asked to include reports, carries no reports signed out, as the
+     comment's writer or as the reporter, and carries the report, with
+     its reason, for the manager [A17](#a17). The landing page never asks
+     for reports; the Comments page reads them through its own routes
+     (Rule 15).
+
+API4. **The Comments page's list filtered by writer and by article** {OJS OMP OPS}
+
+   Given: a Journal Manager; two published articles; comments by two
+   Readers, one on each article and one by the first reader on the second
+   article.
+
+   - **By writer**: the moderator's list filtered by the first reader
+     holds that reader's two comments alone.
+   - **By article**: filtered by the second article, it holds the two
+     comments on it alone.
+   - **Not a number**: a writer or an article that is not a number is
+     refused (400). The Comments page filters by its tabs alone (Rule 10a).
+
+API5. **Moderation requests the Comments page never sends** {OJS OMP OPS}
+
+   Given: a Journal Manager; a published article with an approved comment
+   reported by two Readers.
+
+   - **Every report at once**: deleting all of the comment's reports in
+     one request leaves it with none, off the reported list, and still
+     approved (Side effects). The panel deletes reports one by one.
+   - **An approval that is not yes or no**: an approval of "perhaps", or
+     with no value, is refused (400) and the comment stays approved. The
+     panel's buttons send yes or no alone (Rule 13).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -860,7 +1055,6 @@ Left out of the scenarios above, by reason:
   - under a comment on the landing page, a writer with no ORCID iD and one with no affiliation: no icon after the name, no line below it (Rule 6b)
   - the comment box left with text typed and not submitted: nothing asked, nothing posted, the box empty after a reload (Fields, the comment box)
   - an account holding no role in the journal, registered with another journal of the site, writing a comment that waits for approval and filing a report the Comments page lists (Actors rows 2 and 3; A20, retired)
-  - a comment request made by hand in one journal naming another journal's published article, refused with nothing kept (Actors row 2; A21, retired)
   - a moderator's comment task and report task pressed while public comments are off, landing on the access-denied page (Rules 2b, 16)
   - with public comments off, the Comments page's address ending in "/" and carrying one more part, both landing on the access-denied page like the bare address (Rule 2b; A22, retired)
   - the Comments page's address at the site, with no journal: the Login page for a visitor who is not signed in, the notice "No journal was found that matched your request." for the Site Administrator (Actors row 6; A23, retired)
@@ -915,6 +1109,8 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A9](#a9) | A Site Administrator whose only journal role is Reader gets an "Error" dialog on every editorial page, the Comments page included | ❓ | minor | claim check (claude), 2026-09-28 — the dialog is the side menu's |
 | [A15](#a15) | Under a comment, nothing but the icon's fill tells an unverified ORCID iD from a verified one, and the iD is no longer written out | ❓ | minor | — |
 | [A16](#a16) | Merging an account deletes the comments and reports it wrote, while the rest of its work passes to the account it is merged into | ❓ | user-visible | — |
+| [A24](#a24) | A press and a preprint server take comments and reports through the API although none of their screens writes or shows one {OMP OPS} | ❓ | minor | — |
+| [A25](#a25) | A comment's writer can report their own comment through the API; the landing page offers no "Report" on it | ❓ | minor | — |
 | [OMP1](#omp1) | On a press, a Site Administrator holding no manager role is offered Content › Comments but the page answers the access-denied page | ❓ | minor | — |
 | [OPS1](#ops1) | On a preprint server, a Site Administrator holding no manager role is offered Content › Comments but the page answers the access-denied page | ❓ | minor | — |
 | [A12](#a12) | Retired: a Journal Manager of one journal could read, approve, hide and delete another journal's comments, and any signed-in account could report them, by requests made by hand; each is now refused as not found | ✅ | retired | PR review (claude), 2026-10-16 — fixed by pkp/pkp-lib#13550 |
@@ -1129,6 +1325,36 @@ over to the chosen account? Lean: oversight; the merge hands over
 everything else the account wrote, and two accounts merged are usually
 one person's, whose public comments should survive it.
 Basis: probe, 2026-10-04; code for what the merge hands over. <sup>f-a16</sup>
+
+<a id="a24"></a>
+**A24 — A press and a preprint server take comments through the API that none of their screens writes or shows** {OMP OPS} · ❓ · minor.
+On a press and a preprint server the landing pages carry no comments
+blocks (Purpose), yet the comments routes answer there as on a journal:
+any signed-in account writes a comment on a published book or preprint
+and reports an approved one, the moderators get their tasks, and anyone
+reads the approved ones through the public list. Expected either the
+reader-side requests refused where no screen offers them, or the screens
+to follow; observed the requests accepted. Nothing reaches the public
+pages: a comment written this way shows only on the Comments page.
+Question: are the comments routes meant to be live on a press and a
+preprint server ahead of a reader side there? Lean: intended; the routes
+are the shared library's, the Comments page and the setting are
+installed on purpose, and moderation already covers what arrives.
+Basis: probe. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — A comment's writer can report their own comment through the API** · ❓ · minor.
+The "…" menu on one's own comment offers "Delete Comment" and no
+"Report" (Rule 7), but a report request on one's own approved comment
+is accepted like anyone else's: the report is kept, the Comments page
+lists the comment as reported, and every moderator gets a report task.
+Expected the request refused, as the menu refuses it; observed it
+kept. Nobody else is affected: the writer can delete the comment
+instead.
+Question: is a report on one's own comment meant to be refused, or is
+the menu only leaving out an action nobody needs? Lean: the menu's
+choice, not a rule; a self-report harms no one and the moderators
+judge it like any other. Basis: probe. <sup>f-a25</sup>
 
 ### OMP
 
@@ -2534,6 +2760,30 @@ authorized to access the requested resource." at the heads `08024165dd`,
 `9be1c9efb0` and `035769b365`, where the bases answered `404` "The
 requested resource was not found."; no screen calls it.
 
+<a id="fn-f-a24"></a>
+**f-a24 — A24.** `lib/pkp/api/v1/comments/UserCommentController.php`
+is registered by the three apps (`api/v1/comments/index.php`); its
+`authorize()` reads only the context's `enablePublicComments`, and
+`AddComment` asks for the request context's current published
+publication, which a book and a preprint have. Probed 2026-10-29 on OMP
+and OPS `main` through the API matrix's persona set (pkp-e2e-sec
+`api-matrix`, the comments grids): with public comments on, every
+signed-in persona's comment on the published submission answered a
+validation refusal for an empty body, and a reader's comment with text
+answered `200`, kept pending; another persona's report on it, once
+approved, `200`; the public list `200` signed out. The question and the
+lean are the author's; no screen settles them.
+
+<a id="fn-f-a25"></a>
+**f-a25 — A25.** `AddReport::passedValidation()` refuses only a comment
+of another journal and an unapproved one (for anyone but a moderator);
+nothing compares the comment's `userId` with the reporter. Probed
+2026-10-29 on OJS, OMP and OPS `main`: the writer of an approved comment,
+`POST …/api/v1/comments/{id}/reports` with a reason, answered `200` and
+the report was kept. The landing page's menu builds "Report" only for
+another person's comment (ui-library `usePkpCommentsStore.js`). The
+question and the lean are the author's; no screen settles them.
+
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1.** Footnote m: `omp/pages/management/SettingsHandler::__construct()`
 assigns `ROLE_ID_SITE_ADMIN` the `access` op only, against OJS's
@@ -2542,7 +2792,11 @@ builds the Content group for `ROLE_ID_SITE_ADMIN`. Live-probed 2026-09-16
 with `admin` holding a Series Editor role and no manager role (footnote
 m): "Content › Comments" offered, the entry and the address answering the
 access-denied page, the journal opening the page for the same account.
-The question and the lean are the author's; no screen settles them.
+The question and the lean are the author's; no screen settles them. The
+comments API's moderator routes admit the Site Administrator on a press
+as on a journal (`roleAuthorizer([SITE_ADMIN, MANAGER])`; probed
+2026-10-29 through the API matrix), so the moderating grid's cell stays
+open with this question.
 
 <a id="fn-f-ops1"></a>
 **f-ops1 — OPS1.** Footnote m: `ops/pages/management/SettingsHandler::__construct()`
@@ -2553,7 +2807,10 @@ assigns `ROLE_ID_SITE_ADMIN` the `access` op only;
 (footnote m): the "Content" group with "Comments" alone offered, the
 entry and the address answering the access-denied page, the journal
 opening the page for the same account. The question and the lean are the
-author's; no screen settles them.
+author's; no screen settles them. The comments API's moderator routes
+admit the Site Administrator on a preprint server as on a journal
+(`roleAuthorizer([SITE_ADMIN, MANAGER])`; probed 2026-10-29 through the
+API matrix), so the moderating grid's cell stays open with this question.
 
 ## Reference — entry points & surfaces
 

@@ -132,17 +132,17 @@ gates are used: `docs/process/api.md`.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `comment.getManyPublic` | GET | `comments/public` | ojs omp ops | none | U14 | — |
-| `comment.submit` | POST | `comments` | ojs omp ops | none | U14 | — |
-| `comment.delete` | DELETE | `comments/{commentId}` | ojs omp ops | none | U14 | — |
-| `comment.submitReport` | POST | `comments/{commentId}/reports` | ojs omp ops | none | U14 | — |
-| `comment.getMany` | GET | `comments` | ojs omp ops | admin manager | U14 | — |
-| `comment.getComment` | GET | `comments/{commentId}` | ojs omp ops | admin manager | U14 | — |
-| `comment.setApproval` | PUT | `comments/{commentId}/setApproval` | ojs omp ops | admin manager | U14 | — |
-| `comment.deleteReport` | DELETE | `comments/{commentId}/reports/{reportId}` | ojs omp ops | admin manager | U14 | — |
-| `comment.getReport` | GET | `comments/{commentId}/reports/{reportId}` | ojs omp ops | admin manager | U14 | — |
-| `comment.getReports` | GET | `comments/{commentId}/reports` | ojs omp ops | admin manager | U14 | — |
-| `comment.deleteReports` | DELETE | `comments/{commentId}/reports` | ojs omp ops | admin manager | U14 | — |
+| `comment.getManyPublic` | GET | `comments/public` | ojs omp ops | none | U14 | U14#comments-read |
+| `comment.submit` | POST | `comments` | ojs omp ops | none | U14 | U14#comments-write |
+| `comment.delete` | DELETE | `comments/{commentId}` | ojs omp ops | none | U14 | U14#comments-delete |
+| `comment.submitReport` | POST | `comments/{commentId}/reports` | ojs omp ops | none | U14 | U14#comments-report |
+| `comment.getMany` | GET | `comments` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
+| `comment.getComment` | GET | `comments/{commentId}` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
+| `comment.setApproval` | PUT | `comments/{commentId}/setApproval` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
+| `comment.deleteReport` | DELETE | `comments/{commentId}/reports/{reportId}` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
+| `comment.getReport` | GET | `comments/{commentId}/reports/{reportId}` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
+| `comment.getReports` | GET | `comments/{commentId}/reports` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
+| `comment.deleteReports` | DELETE | `comments/{commentId}/reports` | ojs omp ops | admin manager | U14 | U14#comments-moderation |
 
 ### contexts — PKPContextController (API-013)
 
