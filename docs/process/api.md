@@ -153,8 +153,10 @@ API1. **A funder without a name is refused** {OJS OMP OPS}
    - **Control**: the same request with a name is stored and listed.
 ```
 
-- **Only gaps.** A check exists because no screen sends that request. A
-  route the screens call with the input that matters needs none.
+- **Only gaps.** A check exists because no screen sends that request, or
+  because no screen shows what the answer withholds (the reviewer's reads
+  under anonymous review). A route the screens call with the input that
+  matters, and whose answer they show, needs none.
 - **Never who may call.** That is the grid's, and requesting another
   context's or submission's resource is the foreign pass's. An API check
   may assert what an allowed persona's answer withholds, and that an add
@@ -210,6 +212,12 @@ feature"), one spec at a time:
 5. **Green and lint**: the API tests on all three apps,
    `npm run api-routes -- --check`, the spec lint with and without
    `--tests`.
+
+Not covered yet: an id a write carries in its body rather than its path
+(the order routes of funders, contributors and highlights). The foreign
+passes swap path ids and judge by status; an order naming another
+submission's funder answers 200 whether or not it moved it, so it needs a
+check of the outcome, which no pass makes yet.
 
 ## Keeping it true
 

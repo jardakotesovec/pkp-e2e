@@ -1142,8 +1142,9 @@ App-specific:
 
 ### Through the API
 
-The check below asks what no screen asks; who may call these routes is
-the [submission-read grid](#api-grid-submission-read)'s, checked apart
+The check below asserts what the answers withhold, which no screen shows;
+who may call these routes is the
+[submission-read grid](#api-grid-submission-read)'s, checked apart
 (`docs/process/api.md`).
 
 API1. **The assigned reviewer reads a submission without its authors' identity** {OJS OMP}

@@ -20,6 +20,10 @@ _Suspicions another session met and handed over, one line each; the
 upstream session works them (MAINTENANCE upstream session step 3) and
 deletes each once it is a report, a register entry or dismissed._
 
+- 2026-10-29 (API coverage branch, read in code only): OPS's `SubmissionController` registers `publication.add`, `version.get`, `publish` and `unpublish` again with an author-inclusive role set, then calls `parent::getGroupRoutes()` last, so Laravel keeps the parent's registration and the author roles may never apply; a probe as a preprint's author settles it (`npm run api-routes` prints the note).
+- 2026-10-29 (API coverage of U11, OMP and OPS `main`, lib/pkp `df42984b46`): U11 A5 looks fixed (the site admin's highlight add and order answer 200 on all three apps, pkp/pkp-lib#13521 is in every pointer); verify and retire it.
+- 2026-10-29 (API coverage of U11): A10 was revised (the journal-address read answers 200 since pkp-lib `07bc43fe67`; the site-address read and `_href` still fail), so its report `docs/issues/U11-A10-highlight-read-on-its-own-fails.md` and pkp-e2e#974 need the refresh MAINTENANCE "Keeping a report in step" describes.
+
 ## Sync log
 
 - **2026-10-29 — PR review round 2, pkp/pkp-lib#13650 (precaution PRs added to the issue; asked in the thread by @jarda.kotesovec, VM s3): pkp/ops#1466 (`main`, kaitlinnewson `13650-main`, `7f20b100b9` on the ops tip `815fbaad1b`), pkp/ojs#6001 (3.5, `3842863962` on `851416bc2d`), pkp/ops#1467 (3.5, `9ea1449056` on `bd0ef09fd6`), pkp/ojs#6002 (3.4, `89ee3d7bb4` on `567c40df4f`), pkp/ops#1468 (3.4, `9f259d264f` on `2e4bf7fd66`); round 1's ojs#5999 and #6000 unchanged. Each new PR is the one `writeDisabledInApi` line in `PubObjectsExportPlugin::addToSchema()` (no DOAJ change). All on their line tips. Not merged; baselines not advanced.**
