@@ -2505,7 +2505,7 @@ the home page answered 200 on all three apps, listing the older ones as
 titles, and the Announcements page still answered 500 on OMP and OPS.
 The site's list panel showed only titles with "View", "Edit" and
 "Delete".
-Issue report: [docs/issues/U12-A22-site-announcement-picture-breaks-site-pages.md](../issues/U12-A22-site-announcement-picture-breaks-site-pages.md).
+Issue report: [pkp-e2e#1077](https://github.com/jardakotesovec/pkp-e2e/issues/1077) ([docs/issues/U12-A22-site-announcement-picture-breaks-site-pages.md](../issues/U12-A22-site-announcement-picture-breaks-site-pages.md)).
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls
