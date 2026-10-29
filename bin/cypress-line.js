@@ -339,7 +339,10 @@ async function main() {
         cwd: app.root,
         detached: true,
         stdio: ['ignore', 'pipe', out],
-        env: {...process.env, ...(xvfb ? {DISPLAY: display} : {}), TERM: 'dumb', CYPRESS_CRASH_REPORTS: '0', CI: '1'},
+        // PKP_CONFIG_FILE: the specs' `cy.exec('php lib/pkp/tools/jobs.php run')`
+        // and the like run the app's CLI tools from the checkout and must read
+        // this run's config, as the server does.
+        env: {...process.env, ...(xvfb ? {DISPLAY: display} : {}), PKP_CONFIG_FILE: configFile, TERM: 'dumb', CYPRESS_CRASH_REPORTS: '0', CI: '1'},
     });
     const timer = setTimeout(() => {
         console.error(`cypress-line: --timeout ${opts.timeoutMin} min reached`);
