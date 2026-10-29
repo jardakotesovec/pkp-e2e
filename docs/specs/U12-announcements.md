@@ -266,7 +266,8 @@ discards the changes. <sup>g</sup>
 15. **The image.** A saved image is kept as a file of the journal's (or
     the site's) public files, one per announcement, and shown on the
     announcement's page and in its summaries with the "Alternate text" as
-    its description. <a id="kept-file"></a>A tester sees whether a
+    its description; a site announcement's picture is not shown
+    ([A22](#a22); Rule 16). <sup>f-a22</sup> <a id="kept-file"></a>A tester sees whether a
     picture's file is kept at the picture's own address, as the page
     printed it before the change (the browser's "Copy image address"):
     while the file is kept, that address still opens the picture, even
@@ -292,6 +293,12 @@ discards the changes. <sup>g</sup>
     open while the site's box is ticked; the site's header has no
     "Announcements" item, so that page is reached by its address, by the
     home page block's links and by the "Skip to announcements" link.
+    A site announcement with a picture breaks those pages ⚠ [A22](#a22):
+    on a press or a preprint server, the site's home page while that
+    announcement is the newest, the site's Announcements page while it is
+    listed there, and the announcement's own page fail with a server
+    error and show a blank page; on a site that hosts journals they
+    open, but the picture never shows. <sup>f-a22</sup>
     The site's "Add Announcement" and "Edit Announcement" offer "Send an
     email about this to all registered users." as the journal's do, but
     a site announcement never sends the email of Side effects, ticked or
@@ -884,6 +891,7 @@ Left out of the scenarios above, by reason:
   - pictures that save since A2 retired (Fields "Image"): a JPEG named ".jpeg", a picture with an upper-case extension and a WebP picture save on "Add Announcement" and "Edit Announcement" and show on the announcement's page and its summaries.
   - a text file named ".png" passing the "Image" box and refused on "Save" (Fields "Image"): on "Add Announcement" nothing is added.
   - the guard for A12 (issue report `docs/issues/U12-A12-announcement-image-files-left-behind.md`): deleting an announcement with a picture, and replacing its picture with one of another type, leave no file behind: the picture's earlier address no longer opens it ([Rule 15](#kept-file)), on a context and on the site.
+  - the guard for A22, once fixed (Rules 15, 16): a site announcement with a picture, the newest of the site's: the site's home page, the site's Announcements page and the announcement's own page open for a signed-out visitor and for the Site Administrator after signing in, each showing the picture, on OJS, OMP and OPS.
 - **Nothing new to test**:
   - an unsaved tick on the settings tab kept across a tab switch and
     lost on leaving the page (Fields)
@@ -944,6 +952,8 @@ Left out of the scenarios above, by reason:
     programming interface, at the address its list gives; Rule 19)
   - A20 (the warning an add by program without the email choice
     leaves; Rule 19)
+  - A22 (a site announcement with a picture on the site's home page,
+    Announcements page and its own page; Rules 15, 16)
   - OMP2 (a press's home page carrying the site's announcements while
     the press has no "Display on Homepage" count; Rule 11; scenario 6
     marks it)
@@ -989,6 +999,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A15](#a15) | A journal's Atom and RSS 1.0 announcement feeds write every date with "%" signs ("%2026-%10-%03UTC%UTC%275") {OJS} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A19](#a19) | Through the programming interface, an announcement's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A20](#a20) | REST API: an announcement added without the email choice writes a warning to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
+| [A22](#a22) | A site announcement with a picture takes the site's home page and Announcements page down on a press or a preprint server, and its picture never shows on a site that hosts journals | 🐞 | high · crash: server | — |
 | [OMP2](#omp2) | A press's home page shows the site's announcements, with links that lead nowhere {OMP} | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A5](#a5) | An announcement's type is printed nowhere a reader looks | ❓ | minor | — |
 | [A6](#a6) | A chosen "Announcement Type" cannot be cleared, only changed | ❓ | minor | — |
@@ -1133,8 +1144,10 @@ Nothing on screen shows these files, so the manager is not told. The
 site's announcements leave their pictures the same way. There "Remove"
 then "Save" leaves the file too, and on a press or preprint server that
 save fails with a server error and the picture stays on the
-announcement.
+announcement. The same cause breaks a site announcement's picture on
+the site's public pages: [A22](#a22).
 Basis: probe, 2026-10-27. <sup>f-a12</sup>
+Report: refresh owed — housekeeping fold 2026-10-29: the site announcement's picture was walked (claim check cc29b): on OMP and OPS the site's home, Announcements and announcement pages answer a server error, on OJS the picture's address answers not found; the Reach bullet on imageUrl() changes (2026-10-29)
 
 <a id="a13"></a>
 **A13 — An edited announcement type keeps its old name in the Announcement Types table until a reload** · 🐞 · low · crash: server.
@@ -1249,6 +1262,28 @@ announcements, and, by the code, for the site's announcements too. The
 apps' own "Add Announcement" form always sends `sendEmail`, so only
 programs meet it. The fix is a one-line default.
 Basis: probe, 2026-10-23. <sup>f-a20</sup>
+
+<a id="a22"></a>
+**A22 — A site announcement with a picture takes the site's home page and Announcements page down on a press or a preprint server, and its picture never shows on a site that hosts journals** · 🐞 · high · crash: server.
+A Site Administrator who adds a site announcement with a picture in
+"Image" (Administration › Site Settings › Announcements) expects it on
+the site's home page, the site's Announcements page and its own page,
+with the picture (Rules 15, 16). On a press or a preprint server those
+pages fail with a server error and the browser shows a blank page, for
+every visitor and for the Site Administrator, who lands on the site's
+home page after signing in. The home page fails while that announcement
+is the newest, the Announcements page while it is listed there, and its
+own page always. A newer announcement without a picture brings the home
+page back, which then lists the older one as a title alone; the
+Announcements page stays blank. Removing the picture ("Remove" then
+"Save") fails there too, so deleting the announcement is the way round.
+On a site that hosts journals the pages open, but the picture is
+printed at an address that answers "not found", so no picture shows and
+nothing stands in its place. The site's list panel shows no pictures,
+so nothing in Site Settings hints at the fault. The cause is the one
+behind the site's failed "Remove" in [A12](#a12), a different loss:
+there files stay on the server, here the site's public pages go down.
+Since: 2024-09-30 · Basis: probe, 2026-10-29. <sup>f-a22</sup>
 
 ### OMP
 
@@ -2435,6 +2470,44 @@ with `photo.png` and a GIF replacing it saved (200, `{id}.gif` beside
 `{id}.png`, A12), a refused add stored nothing, and "Restore Original"
 after a refused edit then "Save" answered 200 with the earlier picture.
 Issue report: [pkp-e2e#1076](https://github.com/jardakotesovec/pkp-e2e/issues/1076), closed 2026-10-27 at the retirement; the report and its walk were deleted then (git history keeps them).
+
+<a id="fn-f-a22"></a>
+**f-a22 — A22 evidence.** `Announcement::imageUrl()`, which
+`announcement_summary.tpl` and `announcement_full.tpl` print, picks the
+folder with `$this->hasAttribute('assocId')`, true for a site
+announcement too (the schema casts declare `assocId`), and passes its
+`null` to `PublicFileManager::getContextFilesPath()`: typed `int` on OMP
+and OPS, so PHP throws a `TypeError`; untyped with an `(int)` cast on
+OJS, so the address points at `public/journals/0/announcements/`. The
+save stores the file where it belongs, `public/site/announcements/{id}.png`
+(`storeTemporaryFile()` tests `$this->assocId`), and no `journals/0`
+folder exists. 3.4's `getImageUrl()` tested `getAssocId()` and used
+`getSiteFilesPath()` for the site (code). Since commit c9cda06979
+(Vitalii Bezsheiko, committed 2024-09-30) in pkp/pkp-lib#10382 for
+#10328, the Eloquent rewrite of announcements; the same folder test as
+`deleteImage()` in A12. A one-line fix:
+`$this->assocId ? getContextFilesPath($this->assocId) : getSiteFilesPath()`.
+Live-probed 2026-10-29 (Rules 15, 16; A22), OJS, OMP and OPS `main`
+(lib/pkp df42984b46) and `stable-3_5_0` (lib/pkp a6ed3df00a), two full
+runs and two runs of the home page's order each, on PKP's default
+dataset with a second journal, press or server made on screen, as
+`admin` and signed out: Site Settings › Announcements with "Enable
+announcements" ticked and "Display on Homepage" 3; two site
+announcements added (POST 200), one without a picture and one with a
+PNG, stored as `{uploadName: "{id}.png"}`. On OMP and OPS GET
+`/index.php/index/en` (the picture announcement newest),
+`/index.php/index/en/announcement`, `…/announcement/view/{id}` of the
+picture announcement, and `/index.php/index/en/index` after signing in
+as `admin`, each answered 500 with an empty page, logging
+`PHP Fatal error: Uncaught TypeError: APP\file\PublicFileManager::getContextFilesPath(): Argument #1 ($contextId) must be of type int, null given, called in …/lib/pkp/classes/announcement/Announcement.php on line 277`
+(278 on 3.5); the plain announcement's page answered 200. On OJS the same pages
+answered 200 and printed the picture as
+`/public/journals/0/announcements/{id}.png?…` with an empty `alt`,
+which answered 404. With a newer announcement without a picture added,
+the home page answered 200 on all three apps, listing the older ones as
+titles, and the Announcements page still answered 500 on OMP and OPS.
+The site's list panel showed only titles with "View", "Edit" and
+"Delete".
 
 <a id="fn-f-omp2"></a>
 **f-omp2 — OMP2 evidence.** OMP's `pages/index/IndexHandler.php` calls
