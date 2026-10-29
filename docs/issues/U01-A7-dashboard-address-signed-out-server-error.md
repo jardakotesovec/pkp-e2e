@@ -10,15 +10,25 @@
   - 3.4: none (code; the old "Submissions" page)
   - 3.3: none (code; the old "Submissions" page)
 - **Introduced** `pkp/pkp-lib#10782` (with `pkp/ojs#4583`, `pkp/omp#1804`, OPS [5f7424f9e7](https://github.com/pkp/ops/commit/5f7424f9e7bece64fe22c3301592064fb62fb022)) for `pkp/pkp-lib#10670` · [9113dec](https://github.com/pkp/pkp-lib/commit/9113dec7eda44fdf62eb130c5153b6ede0b07085), in `PKPDashboardHandlerNext.php` (now `PKPDashboardHandler.php`) · 2025-01-14 · Jarda Kotěšovec (jardakotesovec)
-- **Upstream** none found (2026-10-07)
+- **Upstream** `pkp/pkp-lib#13651` (open; fix in PR `pkp/pkp-lib#13652`,
+  not yet in main), covering the bare Dashboard address only, seen there
+  on the `ore` line; the PR also ends the "Logout as" address's 500
 - **Tracked in** spec U01 [A7](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U01-login-and-sessions.md#a7)
-- **Checked** 2026-10-07, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-29, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
 **Update 2026-10-07.** The address with a final slash
 (`…/en/dashboard/`) gives the same empty error page; the Summary,
 Observed and Cause name it. The Proposed fix was tried on it and opens
 the Login page.
+
+**Update 2026-10-29.** pkp tracks the fault as `pkp/pkp-lib#13651`,
+filed from the `ore` line, and PR `pkp/pkp-lib#13652` (open) fixes it.
+The PR names a second address that fails the same way: "Logout as"
+(`…/en/login/signOutAsUser`) opened signed out, with no `redirectUrl`.
+Walked on `main` and 3.5, all three apps: it answers the same 500. The
+Summary, Observed, Reach and Proposed fix name it. The PR's change was
+tried on `main` and fixes both addresses.
 
 ## Summary
 
@@ -28,7 +38,8 @@ that ends at the word "dashboard", with or without a final slash
 `…/index.php/publicknowledge/en/dashboard/`). The visitor gets an empty
 error page instead of the Login page. Longer Dashboard addresses, such as
 `…/dashboard/editorial`, open the Login page and return there after
-signing in.
+signing in. The "Logout as" address (`…/en/login/signOutAsUser`), opened
+signed out with no `redirectUrl`, fails the same way.
 
 The address without the slash is the "submission dashboard" link in
 the monthly "Outstanding editorial tasks" email to managers and section
@@ -84,9 +95,11 @@ PHP Fatal error:  Uncaught Error: Call to a member function getId() on null in �
 ```
 
 The address with a final slash
-(`/index.php/publicknowledge/en/dashboard/`), `/en/dashboard/index` and
+(`/index.php/publicknowledge/en/dashboard/`), `/en/dashboard/index`,
 the address without a language (`/index.php/publicknowledge/dashboard`,
-which redirects to the one in step 1) answer the same. In steps 3 and 4 the Login page opens at
+which redirects to the one in step 1) and the "Logout as" address
+without a `redirectUrl` (`/index.php/publicknowledge/en/login/signOutAsUser`)
+answer the same. With a `redirectUrl`, "Logout as" goes to that page. In steps 3 and 4 the Login page opens at
 `login?source=%2Findex.php%2Fpublicknowledge%2Fen%2Fdashboard%2Feditorial`,
 and signing in leads to "Assigned to me (17)" (OMP "Assigned to me (4)",
 OPS "Assigned to me (0)").
@@ -139,9 +152,17 @@ Reach:
 - The old `/submissions` address is served by the legacy
   `PKP\pages\dashboard\DashboardHandler`, which authorizes first, so it
   opens Login and then the Dashboard (on screen). Not affected.
+- "Logout as" (`LoginHandler::signOutAsUser()`) has no access policy:
+  `LoginHandler::authorize()` adds one for `signInAsUser` only. Without
+  a `redirectUrl` it sends the visitor home through `sendHome()` and
+  `redirectHome()`, so a signed-out visitor at
+  `login/signOutAsUser` gets the same 500 (walked on `main` and 3.5,
+  all three apps; named by `pkp/pkp-lib#13652`). How a signed-out user
+  comes to press "Logout as" (a page left open after the session ended,
+  say) was not driven.
 - The other callers of `redirectHome()` and `getHomeUrl()` run with a
   user signed in or after their policies (in the code):
-  - `LoginHandler`: when already signed in, or after signing in;
+  - `LoginHandler`, elsewhere: when already signed in, or after signing in;
   - `AdminHandler`, after its policies;
   - `PKPNavigationMenuService`, only for a signed-in user;
   - the legacy `PKP\pages\dashboard\DashboardHandler::index()`.
@@ -189,12 +210,22 @@ the author (`amwandenga`, OMP `aclark`, OPS `ccorino`) to
 in Reach, the same with the fix in and out. No request failed with the
 fix in.
 
+This guard does not cover "Logout as" (Reach). The change in PR
+`pkp/pkp-lib#13652` covers both: `getHomeUrl()` returns the Login
+address, with the address asked for as `source`, when no user is signed
+in. That is the fix the 2026-08-25 review of this entry ruled for. Tried
+on `main` in the three apps (2026-10-29): step 1 opened the Login page at
+`login?source=%2Findex.php%2Fpublicknowledge%2Fen%2Fdashboard` and step 2
+led `dbarnes` to "Assigned to me"; the address with a final slash and
+"Logout as" without a `redirectUrl` opened Login too, and "Logout as"
+with one went to that page. No request failed with the change in.
+
 **Alternatives**
 
 - Return the journal's home page from `getHomeUrl()` when no user is
   signed in. That ends the crash, but the visitor lands on the home page
-  instead of Login and the address is lost. It is worth adding as a
-  hardening, but it does not replace the guard.
+  instead of Login and the address is lost. PR `pkp/pkp-lib#13652`
+  returns the Login address instead, which keeps it.
 - Authorize first, as the old handler did: list `index` in the role
   assignments and choose the dashboard in `index()`. That also works, but a
   signed-in Reader at the bare address would get the access-denied page
@@ -230,6 +261,15 @@ one shared handler, following the router's own pattern, and one check.
   with `node bin/try-fix.js apply shared/playwright/checks/issues/dashboard-address-signed-out-server-error/fix.diff ojs omp ops`.
 - 3.5 answered the same 500 at line 412 on each app, the address with
   a final slash included, and steps 3 and 4 behaved as on `main`.
+- 2026-10-29: the walk, with the "Logout as" reads added, on fresh
+  dataset fleets (pkp/datasets 2f0edb08, 2026-10-28) at `main` (OJS
+  7705b2aeb8, OMP 3583c1bfd and OPS 815fbaad1b, pkp-lib df42984b46) and
+  `stable-3_5_0` (OJS 851416bc2d, OMP 50b83d1e6 and OPS bd0ef09fd6,
+  pkp-lib a6ed3df00a): every Step and read as above on each app, the
+  "Logout as" read included. The PR's change (`pkp/pkp-lib#13652` at
+  its head on 2026-10-29) was tried on `main` with
+  `node bin/try-fix.js apply` on its diff (paths under `lib/pkp/`), the
+  walk rerun, then reverted.
   Nothing here depends on the database.
 - The fix's neighbour paths (signed in, and the old `/submissions`
   address) were walked on 2026-10-04.
@@ -285,6 +325,9 @@ one shared handler, following the router's own pattern, and one check.
   `Validation::registerUserSession()` refuses a disabled account, but
   whether `Auth::user()` is then empty was not settled. The getHomeUrl()
   hardening under Alternatives would cover it.
+- `pkp/pkp-lib#13651` (filed 2026-10-29, on the `ore` line) and its
+  PR `pkp/pkp-lib#13652` were read on 2026-10-29; neither links pkp-e2e.
+  The `ore` line was not driven here.
 - Tracker search (2026-10-04, repeated in pkp/pkp-lib and pkp/ojs on
   2026-10-07): pkp/pkp-lib, pkp/ojs, pkp/omp, pkp/ops and
   pkp/ui-library, for the dashboard address signed out, an empty error

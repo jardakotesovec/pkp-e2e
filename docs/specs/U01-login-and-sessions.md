@@ -993,8 +993,9 @@ signing in.
 The address without the slash is the "submission dashboard" link in
 the monthly "Outstanding editorial tasks" email to managers and section
 editors. A bookmark or a typed address cut short at "dashboard" leads
-there too.
-Since: 2025-01-14 (pkp/pkp-lib#10782) · Basis: probe, 2026-10-07. <sup>[f-a7](#fn-a7)</sup>
+there too. The "Logout as" address (`…/en/login/signOutAsUser`), opened
+signed out with no `redirectUrl`, fails the same way.
+Since: 2025-01-14 (pkp/pkp-lib#10782) · Basis: probe, 2026-10-29. <sup>[f-a7](#fn-a7)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Ruling: signed
 > out, the bare dashboard address must behave like every other private
@@ -1888,6 +1889,15 @@ than one it sends an address without a language to the same path with
 one ([Languages & locales](U57-languages-and-locales.md#fn-m), note m,
 probed there on the public pages). A scratch journal given a second
 language was not driven at these addresses.
+Walked 2026-10-29 (OJS, OMP, OPS on `main` and `stable-3_5_0`; the
+default dataset; signed out; the same kept script): every read above
+again, and "Logout as" with no `redirectUrl`
+(`{journal}/en/login/signOutAsUser`) answered the same 500
+(`getHomeUrl()` through `LoginHandler::sendHome()`; `signOutAsUser` has
+no access policy); with a `redirectUrl` it went to that page. Upstream:
+`pkp/pkp-lib#13651` (open), fix in PR `pkp/pkp-lib#13652` (open), which
+guards `getHomeUrl()` as the 2026-08-25 ruling asked; tried on `main`,
+it opened the Login page at both addresses.
 Issue report: [pkp-e2e#825](https://github.com/jardakotesovec/pkp-e2e/issues/825) ([docs/issues/U01-A7-dashboard-address-signed-out-server-error.md](../issues/U01-A7-dashboard-address-signed-out-server-error.md)).
 
 <a id="fn-a8"></a>
