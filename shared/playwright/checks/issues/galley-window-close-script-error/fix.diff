@@ -1,0 +1,24 @@
+--- a/lib/ui-library/src/components/Form/fields/FieldSelectIssue.vue
++++ b/lib/ui-library/src/components/Form/fields/FieldSelectIssue.vue
+@@ -159,7 +159,7 @@
+ 			const workflowSotre = useWorkflowStore();
+ 
+ 			workflowSotre.workflowAssignToIssue({}, (finishedData) => {
+-				if (finishedData.data.issueId) {
++				if (finishedData.data?.issueId) {
+ 					this.currentValue = finishedData.data.issueId;
+ 				}
+ 			});
+--- a/lib/ui-library/src/stores/modalStore.js
++++ b/lib/ui-library/src/stores/modalStore.js
+@@ -178,7 +178,9 @@
+ 		}
+ 		modalToClose.value.opened = false;
+ 		if (modalToClose.value.onClose) {
+-			modalToClose.value.onClose(returnData);
++			// A header "Close", a click outside or a legacy close passes no data:
++			// hand onClose the {dataChanged: []} shape AjaxModalWrapper gives a close without changes
++			modalToClose.value.onClose(returnData ?? {dataChanged: []});
+ 		}
+ 		// To keep the side modal animation nice, it needs to keep the component&props around for bit longer
+ 		setTimeout(() => {

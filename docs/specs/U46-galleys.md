@@ -734,7 +734,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | A galley's separate-website box keeps an address typed without "https://", and readers' link lands on "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | Until an order is saved, editing a galley moves it to the end of the list | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | A good "Save" in the galley window shows an earlier refused "URL Path" as a red notice | 🐞 | low | issues (claude), 2026-10-12 — re-verified |
-| [A9](#a9) | On 3.5, the "Create New Galley" window's header "Close" makes the page's script fail; "Cancel" does not | 🐞 | low · crash: script | — |
+| [A9](#a9) | On 3.5, closing the "Create New Galley" or "Select an issue" window with its header "Close" logs a script error | 🐞 | low · crash: script | issues (claude), 2026-10-29 — re-verified |
 | [OJS1](#ojs1) | Deleting a published galley that a new version copied fails with an error | 🐞 | high · crash: server · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [OJS2](#ojs2) | One crafted visit decides what an HTML galley shows every later signed-out reader for a day, including markup that runs on the journal's site | 🐞 | user-visible | — |
 | [OPS2](#ops2) | Before posting, a Moderator without "Permissions" cannot edit, add, reorder or delete the galleys the page offers | 🐞 | medium | issues (claude), 2026-10-29 — re-verified |
@@ -845,18 +845,18 @@ fault and its fix are the static page window's
 Basis: probe, 2026-10-09. <sup>f-a8</sup>
 
 <a id="a9"></a>
-**A9 — On 3.5, the "Create New Galley" window's header "Close" makes the page's script fail** · 🐞 · low · crash: script.
-On 3.5, on a journal's or preprint server's "Galleys" page, every press
-of the header "Close" of "Create New Galley" makes the page's script
-fail, with an error in the browser's console: with nothing changed,
-after "OK" to the unsaved-changes question (Rule 6a), and after a
-refused "Save" (Rule 5). It happens for every role offered "Add
-galley". "Cancel" closes the window without an error. Nothing on screen
-shows the failure: the window closes, nothing is added, "Add galley"
-opens the window again at once, and the next reload asks no question.
-Expected: no error; `main`, the unreleased version the suites run, logs
-none.
-Basis: probe, 2026-10-29. <sup>f-a9</sup>
+**A9 — On 3.5, closing the "Create New Galley" or "Select an issue" window with its header "Close" logs a script error** · 🐞 · low · crash: script.
+On 3.5, an editor who opens "Add galley" on a journal's or preprint
+server's "Galleys" page and leaves the "Create New Galley" window by its
+header "Close" gets an uncaught JavaScript error in the browser's
+console, whether or not anything was typed. On a journal, the same
+happens when the "Select an issue to schedule for publication" window is
+left by its header "Close", opened from "Schedule For Publication" or
+from "Assign to Issue".
+The page keeps working and nothing is lost: the window closes, nothing
+is saved, and the window opens again at once. "Create New Galley"'s own
+"Cancel" closes it without the error.
+Basis: probe, 2026-10-29; issue report walk, 2026-10-29. <sup>f-a9</sup>
 
 ### OJS
 
@@ -1631,6 +1631,7 @@ hands `onClose` `{dataChanged: …}` (ui-library `1afd40a9`,
 pkp/ui-library#853, 2026-09-24). A fix on 3.5: read
 `closeData?.dataChanged?.[0]` in the callback, or give the store
 `main`'s shape.
+Issue report: [docs/issues/U46-A9-galley-window-close-script-error.md](../issues/U46-A9-galley-window-close-script-error.md).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — Live-probed 2026-09-24 (note q15), twice on OJS: the
