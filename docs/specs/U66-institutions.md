@@ -48,6 +48,29 @@ manager role in every journal of a test install. <sup>b</sup>
 | **Open the Institutions page; search, add, edit and delete institutions** (Rules 1–7) | • Manager-level roles with "Permit changes to Settings"<br>• The Site Administrator working in the journal<br>• A manager-level role without "Permit changes to Settings", the Section Editor, assistant-level roles, Author, Reviewer, Reader and, on a journal, the Subscription Manager: the access-denied page ("The current role does not have access to this operation.")<br>• Signed out: the Login page <sup>b</sup> |
 | **The Site Administrator with no manager role in the journal** | • On a journal, the page lists the journal's institutions under an "Error" window, and every search, "Save" and "Yes" on "Delete" fails, changing nothing ⚠ [A6](#a6) <sup>q7</sup><br>• On a press and a preprint server, the access-denied page, as on their other Settings pages <sup>b</sup> |
 
+<a id="api-grid-institutions"></a>
+**Permission grid: managing institutions.** Row 2 above, cell by cell, as
+the API checks read it (`docs/process/api.md` names the personas and how
+they are seeded; its Site Administrator holds a manager role in the
+journal). Every institutions route of the programming interface (list,
+read one, add, edit, delete; Rule 8) follows it; the route registry
+(`docs/tracking/api-routes.md`) lists them in its Gate column. "Allowed"
+calls the routes on a journal, for the journal's own institutions; the
+site keeps no list (Rule 2), so the grid has no "Site" column. ✓
+allowed, — refused, ? an open question.
+
+| Persona | Allowed |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **The Institutions page** (Rule 1) carries the heading "Institutions",
@@ -164,6 +187,18 @@ languages these are:
      the install has, the interface answers as if it had succeeded,
      carrying only the text "The institution you requested was not
      found." ⚠ [A13](#a13). <sup>j</sup>
+   - 8c. Beyond what the page sends, the interface reads one institution
+     on its own at the journal's address (its name per language, its IP
+     ranges as a list, its ROR) and turns the list's pages at any size
+     asked, the total counting the whole list. Another journal's
+     institution is out of reach there, to read, edit or delete, and an
+     add that names another journal stores the institution in this one.
+     An edit that sends some of the fields keeps the others, and a name
+     in a language the journal's forms do not offer is refused. IP
+     ranges sent as a list, the form in which the interface itself gives
+     them, fail with a server error, and only the box's form, the ranges
+     joined by line breaks, is taken ⚠ [A14](#a14). <sup>j</sup>
+     <sup>f-a14</sup>
 
 ## Side effects
 
@@ -486,6 +521,66 @@ catcher's address and the tooling recipe are in the footnote. <sup>s</sup>
    - **Control**: reload the Institutions page: it lists "Other Library"
      and "Fresh Institute" (Rule 7). <sup>s</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the
+institutions routes is the [institutions grid](#api-grid-institutions)'s,
+checked apart (`docs/process/api.md`).
+
+API1. **One institution read back at the journal's own address** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with the institution
+   "Campus Library" (IP range 10.0.0.0/8, ROR https://ror.org/0213rcc28).
+
+   - **Read on its own**: the institution read through the API at the
+     journal's address answers it, with its name, its IP ranges as a list
+     and its ROR. No screen reads one institution on its own (Rule 8c);
+     the address the list gives for it is [A12](#a12)'s, an unknown
+     number [A13](#a13)'s.
+
+API2. **Another journal's institution is out of reach from this journal's address** {OJS OMP OPS}
+
+   Given: two scratch journals, each with a Journal Manager and one
+   institution ("Our Library", "Their Library").
+
+   - **Foreign number**: through the first journal's address, as its
+     manager, "Their Library" is refused to an edit (404) and a delete
+     (404), a read carries none of it, and the second journal still lists
+     it unchanged (Rules 2, 8c). The page only sends its own journal's
+     institutions.
+   - **Foreign journal named**: an add through the first journal's
+     address that names the second journal as the institution's journal
+     is stored in the first; the second journal's list is unchanged.
+
+API3. **An edit that sends one field keeps the others** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with "Campus Library" (IP
+   range 10.0.0.0/8, no ROR).
+
+   - **ROR alone**: an edit that sends only the ROR
+     https://ror.org/0213rcc28 stores it, and the institution keeps its
+     name and its IP range (Rule 8c). The panel always sends all three
+     boxes (Rule 6).
+
+API4. **A name in a language the journal's forms do not offer is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal whose forms offer English
+   alone, with no institutions.
+
+   - **French name**: an add whose name is given in English and in French
+     is refused (400) with an error on the French name, and the list stays
+     empty. The panel offers only the forms' languages (Fields "Name").
+   - **Control**: the same add in English alone is stored and listed.
+
+API5. **The list paged one institution at a time** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with the institutions
+   "Alpha", "Beta" and "Gamma".
+
+   - **Second page**: asked for one institution from the second on, the
+     list holds one, and its total still reads 3 (Rule 8c). The page asks
+     for thirty at a time and turns pages only past thirty (Rule 3).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -551,6 +646,8 @@ Left out of the scenarios above, by reason:
     interface at the address the interface gives; Rule 8a)
   - A13 (an institution the journal does not hold asked for through the
     programming interface; Rule 8b)
+  - A14 (IP ranges sent through the programming interface as a list;
+    Rule 8c)
 - **Owned by another feature**:
   - the Subscription Manager shown "Institutions" and refused the page
     {OJS} (Actors rows 1–2; *[Subscriptions](U51-subscriptions.md)*,
@@ -582,6 +679,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | A long "IP ranges" line makes an institution's "Save" fail, adding duplicates or wiping its ranges | 🐞 | medium · crash: server | issues (claude), 2026-09-30 — re-verified |
 | [A12](#a12) | Through the programming interface, an institution's own address points at the site, which refuses it | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A13](#a13) | REST API: asking a journal for an institution it does not hold answers "200 OK" with an error text | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
+| [A14](#a14) | REST API: IP ranges sent as a list fail with a server error | 🐞 | latent · crash: server | — |
 | [A4](#a4) | Deleting an institution deletes the usage figures credited to it | ❓ | latent | — |
 | [A5](#a5) | The "ROR" box asks for an ID and refuses one | ❓ | minor | — |
 | [A6](#a6) | On a journal, a Site Administrator with no manager role is shown the page under an "Error" window and refused every change | ❓ | minor | — |
@@ -759,6 +857,19 @@ well as editors.
 The fix is small: the two read handlers return 404, as edit and delete
 already do.
 Since: 2023-10-13, a date read from the code's history · Basis: probe, 2026-10-23. <sup>f-a13</sup>
+
+<a id="a14"></a>
+**A14 — REST API: IP ranges sent as a list fail with a server error** · 🐞 · latent · crash: server.
+The Institutions page sends "IP ranges" as the box's text, one range per
+line, so only programs meet this. The interface describes an
+institution's IP ranges as a list of texts and gives them back as one
+with every institution it lists or reads (Rule 8c). A program that sends
+them the same way, as a list, on an add or an edit, gets a server error
+(500) instead of the institution saved or a refusal naming the field,
+and nothing is stored. Only the box's form, the ranges joined by line
+breaks, is taken, which the interface's description of the institution
+does not say.
+Basis: probe, 2026-10-29. <sup>f-a14</sup>
 
 ---
 
@@ -1130,7 +1241,24 @@ and OPS, `main` and `stable-3_5_0`, two runs each: Settings ›
 Institutions as a scratch journal's manager showed "Add Institution"
 and the one row with "Edit" and "Delete", and sent no
 `api/v1/institutions` request on landing. The address and the unknown
-id: notes f-a12 and f-a13.
+id: notes f-a12 and f-a13. `getMany()` reads `count` (at most 100),
+`offset` and `searchPhrase` and filters by the request's context;
+`get()`, `edit()` and `delete()` check
+`Repository::exists($id, $contextId)` first; `add()` and `edit()` set
+`contextId` from the
+request's context over any sent (the schema marks it
+`writeDisabledInApi`), and `Repo::institution()->edit()` merges the sent
+fields into the stored ones (code read 2026-10-29, lib/pkp df42984b46).
+Live-probed 2026-10-29 (Rule 8c), OJS, OMP and OPS `main`, as a scratch
+journal's manager, with a second scratch journal beside it: one
+institution read at the journal's address answered 200 with `name`,
+`ipRanges` as a list and `ror`; `count=1&offset=1` on three institutions
+answered one item and `itemsMax` 3; the other journal's institution
+answered an edit and a delete 404 and a read 200 with the A13 text
+alone; an add with the other journal's `contextId` answered 200 with
+this journal's; a `PUT` with `ror` alone kept `name` and `ipRanges`; an
+add with a `fr_CA` name answered 400 with "This language is not
+accepted." under `name.fr_CA`.
 
 <a id="fn-h"></a>
 **h — what the list feeds.** No mailable, notification or log call sits
@@ -1419,6 +1547,21 @@ answered the manager and the administrator 200
 `{"error":"The institution you requested was not found."}`.
 Issue report: [pkp-e2e#1063](https://github.com/jardakotesovec/pkp-e2e/issues/1063) ([docs/issues/U66-A13-institution-unknown-id-answers-success.md](../issues/U66-A13-institution-unknown-id-answers-success.md)).
 
+<a id="fn-f-a14"></a>
+**f-a14 — A14 evidence.** `lib/pkp/schemas/institution.json` types
+`ipRanges` as an `array` of `string`, and the schema map gives it back
+so. `PKPInstitutionController::add()` and `edit()` hand a non-empty
+`ipRanges` to `convertIpToArray(string $ipString)`, which splits the
+box's text on line breaks; `convertStringsToSchema()` leaves a sent list
+a list, so the call throws a PHP `TypeError` before the validation and
+the save (code read 2026-10-29, lib/pkp df42984b46, `main`).
+Live-probed 2026-10-29 (Rule 8c; A14), OJS, OMP and OPS `main`, as a
+scratch journal's manager: `POST {journal}/api/v1/institutions` with
+`ipRanges` `["192.168.0.1","10.1.1.1"]` and a `PUT` of a stored
+institution with `["172.16.0.1"]` each answered 500; the same two ranges
+sent as one text, joined by a line break, answered 200 with `ipRanges`
+as the list.
+
 ## Reference — entry points & surfaces
 
 | Entry | Path | Atom |
@@ -1428,7 +1571,7 @@ Issue report: [pkp-e2e#1063](https://github.com/jardakotesovec/pkp-e2e/issues/10
 | "Edit" and the "Edit Institution" panel | the page above | AFFM-139 · VUE-098 |
 | "Delete" and the "Delete Institution" dialog | the page above | AFFM-140 |
 | Side-menu entry "Institutions" | every editorial page | ROUTE-017 |
-| Institutions API | `api/v1/institutions` (`GET`, `GET {id}`, `POST`, `PUT {id}`, `DELETE {id}`). An institution's `_href` points at the site's address, which refuses it for want of a journal; the journal's own address for it answers ([A12](#a12)). An id the journal does not hold answers success with an error text ([A13](#a13)). The page never sends `GET {id}`. | API-023 |
+| Institutions API | `api/v1/institutions` (`GET`, `GET {id}`, `POST`, `PUT {id}`, `DELETE {id}`). An institution's `_href` points at the site's address, which refuses it for want of a journal; the journal's own address for it answers ([A12](#a12)). An id the journal does not hold answers success with an error text ([A13](#a13)). IP ranges sent as a list fail with a server error ([A14](#a14)). The page never sends `GET {id}`. | API-023 |
 | Institution record | — | SET-016 |
 
 ## Reference — code anchors
