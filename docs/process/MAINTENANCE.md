@@ -211,8 +211,12 @@ is left, the next morning picks up from the files.
    back. Commit what changed with the repo's other updates.
 6. **Incidentals** (odd days). Every row whose feature has a shipped spec (PROGRESS
    `done`), oldest first; rows against pending features stay for their
-   spec author (RUNBOOK step 3). First grep the spec for each row: a
-   sighting the spec already states is deleted without a drive. The rest
+   spec author (RUNBOOK step 3). First grep the spec for each row, its
+   register entries and their reports for the row's mechanism, and
+   ci-triage "Open regressions" for its screen: a
+   sighting the spec already states is deleted without a drive, and a
+   matching entry or regression row is named in the checker's triage
+   plan (two checkers re-derived one each, 2026-10-29). The rest
    are driven, grouped by feature, by fresh checkers rendered from
    `briefs/claim-check.md` (the rows are the chunk, each named by the
    register IDs and rule numbers it bears on, never spec line numbers,
