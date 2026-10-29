@@ -986,7 +986,10 @@ function note(text) {
     const header = fs.existsSync(file)
         ? ''
         : `# ${process.env.PROBE_NOTES_FEATURE || process.env.PROBE_FEATURE} screen notes\n\nRead first, append as you learn (docs/process/briefs/claim-check.md).\n`;
-    fs.appendFileSync(file, `${header}- ${agent}${app}: ${String(text).replace(/\s+/g, ' ').trim()}\n`);
+    const line = `- ${agent}${app}: ${String(text).replace(/\s+/g, ' ').trim()}\n`;
+    // A kept script runs once per run (r1/r2), so the same note would land twice.
+    if (!header && fs.readFileSync(file, 'utf8').split('\n').includes(line.trimEnd())) return;
+    fs.appendFileSync(file, `${header}${line}`);
 }
 
 // The page's requests in flight, for idle(). Playwright's 'networkidle' fires

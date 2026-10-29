@@ -120,6 +120,16 @@ if real, their specs' own probes will resurface them.)
 ### ROUTE-043 — OJS legacy `manager` dispatcher stub
 - What: legacy page-handler switch that returns no handler for any op.
 - Why parked: dead routing stub, no reachable behavior.
+- Evidence (housekeeping, U51 check UA1, live drive 2026-10-29, OJS
+  `main` and `stable-3_5_0`, two runs each; OMP and OPS as controls):
+  `/manager`, `/manager/index`, each of the nine ops the switch lists and
+  an unknown op answer the router's bare "404 Not Found" (HTTP 404) to a
+  signed-out visitor, a Reader, the Journal Manager and `admin`, with no
+  server log line; OMP and OPS answer the same to
+  `/manager/subscriptionTypes`. The `switch` sets no handler, so
+  `PKPPageRouter::route()` throws `NotFoundHttpException`; the file was
+  left over by ojs `ac405a910f` (2023). Rerun:
+  `shared/playwright/checks/U51/UA1/ua1.js`.
 - Resolves: maintainer confirmation as dead code (candidate for removal).
 
 ### VUE-004 — ExamplePage
