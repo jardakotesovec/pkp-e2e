@@ -164,6 +164,8 @@ call to the app's probe server (`npm run probe-servers -- --start`), signed
 in as that user the way `apiAs` signs in (`-` for nobody; `--context index`
 for the site), and prints the status and the body: the quick way to see
 what a route does before writing its grid or its check.
+`npm run api-call -- <app> --scratch` makes a scratch context and its
+manager first, for probing writes away from the base context.
 
 ## Adding API coverage to a spec
 

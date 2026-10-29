@@ -8,6 +8,8 @@
 //      npm run api-call -- ojs manager.maya GET announcements
 //      npm run api-call -- ojs - GET submissions/12           (nobody signed in)
 //      npm run api-call -- omp admin POST announcements '{"title":{"en":"Hi"}}' --context index
+//      npm run api-call -- ojs --scratch                       a scratch context and its manager,
+//                                                              to call as with --context
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -19,6 +21,10 @@ const args = process.argv.slice(2);
 const contextAt = args.indexOf('--context');
 const context = contextAt >= 0 ? args.splice(contextAt, 2)[1] : null;
 const [appName, user, method, apiPath, json] = args;
+if (user === '--scratch') {
+    await scratch(appName);
+    process.exit(0);
+}
 if (!apiPath) {
     console.error('usage: npm run api-call -- <app> <username|-> <METHOD> <path> [json] [--context <path>]');
     process.exit(2);
@@ -38,3 +44,15 @@ const res = await client.call(method.toUpperCase(), apiPath, { data: json ? JSON
 console.log(res.status);
 console.log(typeof res.body === 'string' ? res.body.slice(0, 4000) : JSON.stringify(res.body, null, 2).slice(0, 4000));
 await client.dispose();
+
+/** A scratch context with a manager, through the test API (scenarios.md). */
+async function scratch(name) {
+    const app = resolveApp(name);
+    loadEnv(app.root);
+    const { PkpApi } = require('../shared/playwright/support/api.js');
+    const tag = `probe${Date.now().toString(36)}`;
+    const pkpApi = await PkpApi.create({ baseURL: `http://127.0.0.1:${app.basePort + PROBE_PORT_OFFSET}` });
+    await pkpApi.createContext({ tag, users: [{ username: `${tag}mgr`, roles: ['manager'] }] });
+    await pkpApi.dispose();
+    console.log(`context ${tag}, manager ${tag}mgr: npm run api-call -- ${name} ${tag}mgr GET <path> --context ${tag}`);
+}
