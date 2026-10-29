@@ -236,12 +236,12 @@ gates are used: `docs/process/api.md`.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `highlight.getMany` | GET | `highlights` | ojs omp ops | admin manager | U11 | — |
-| `highlight.get` | GET | `highlights/{highlightId}` | ojs omp ops | admin manager | U11 | — |
-| `highlight.add` | POST | `highlights` | ojs omp ops | admin manager | U11 | — |
-| `highlight.edit` | PUT | `highlights/{highlightId}` | ojs omp ops | admin manager | U11 | — |
-| `highlight.order` | PUT | `highlights/order` | ojs omp ops | admin manager | U11 | — |
-| `highlight.delete` | DELETE | `highlights/{highlightId}` | ojs omp ops | admin manager | U11 | — |
+| `highlight.getMany` | GET | `highlights` | ojs omp ops | admin manager | U11 | U11#highlights |
+| `highlight.get` | GET | `highlights/{highlightId}` | ojs omp ops | admin manager | U11 | U11#highlights |
+| `highlight.add` | POST | `highlights` | ojs omp ops | admin manager | U11 | U11#highlights |
+| `highlight.edit` | PUT | `highlights/{highlightId}` | ojs omp ops | admin manager | U11 | U11#highlights |
+| `highlight.order` | PUT | `highlights/order` | ojs omp ops | admin manager | U11 | U11#highlights |
+| `highlight.delete` | DELETE | `highlights/{highlightId}` | ojs omp ops | admin manager | U11 | U11#highlights |
 
 ### institutions — PKPInstitutionController (API-023)
 
@@ -489,17 +489,17 @@ gates are used: `docs/process/api.md`.
 | `submission.publication.unpublish` | PUT | `submissions/{submissionId}/publications/{publicationId}/unpublish` | ojs omp ops | manager subEditor assistant | U49 | — |
 | `submission.publication.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant | U49 | — |
 | `submission.contributor.add` | POST | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
-| `submission.publication.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author | U40 | — |
+| `submission.publication.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author | U40 | U40#edit-gate |
 | `submission.publication.contributor.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
 | `submission.publication.contributor.order.save` | PUT | `submissions/{submissionId}/publications/{publicationId}/contributors/saveOrder` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
 | `submission.publication.contributor.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
-| `submission.publication._components.metadata` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/metadata` | ojs omp ops | manager subEditor assistant author | U40 | — |
-| `submission.publication._components.dataAvailability` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/dataAvailability` | ojs omp ops | manager subEditor assistant author | U40 | — |
-| `submission.publication._components.fundingStatement` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/fundingStatement` | ojs omp ops | manager subEditor assistant author | U40 | — |
-| `submission.publication._components.titleAbstract` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/titleAbstract` | ojs omp ops | manager subEditor assistant author | U40 | — |
-| `submission.publication._components.changeLanguageMetadata` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/changeLanguageMetadata` | ojs omp ops | manager subEditor assistant author | U40 | — |
+| `submission.publication._components.metadata` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/metadata` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
+| `submission.publication._components.dataAvailability` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/dataAvailability` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
+| `submission.publication._components.fundingStatement` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/fundingStatement` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
+| `submission.publication._components.titleAbstract` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/titleAbstract` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
+| `submission.publication._components.changeLanguageMetadata` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/changeLanguageMetadata` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
 | `submission.publication._components.identifiers` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/identifier` | ojs omp ops | manager subEditor assistant | U44 | — |
-| `submission.publication._components.permissionDisclosure` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/permissionDisclosure` | ojs omp ops | manager subEditor assistant | U40 | — |
+| `submission.publication._components.permissionDisclosure` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/permissionDisclosure` | ojs omp ops | manager subEditor assistant | U40 | U40#permissions-page |
 | `submission.edit` | PUT | `submissions/{submissionId}` | ojs omp ops | manager subEditor author | U21 | — |
 | `submission.saveForLater` | PUT | `submissions/{submissionId}/saveForLater` | ojs omp ops | manager subEditor author | U21 | — |
 | `submission.submit` | PUT | `submissions/{submissionId}/submit` | ojs omp ops | manager subEditor author | U21 | — |

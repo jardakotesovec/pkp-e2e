@@ -40,6 +40,31 @@ screen. Readers need no account. <sup>b</sup>
 | **See the carousel** | • any visitor, signed in or not, on the journal's home page (its own highlights) while at least one highlight exists there, and on the site's home page once a site highlight exists, which none can today [A5](#a5) (Rules 2, 3 and 13) <sup>j</sup> |
 | **Follow a slide's button** | • any visitor; the button opens the address typed into "URL", exactly as typed (Rule 4) ⚠ [A2](#a2) <sup>e</sup> |
 
+<a id="api-grid-highlights"></a>
+**Permission grid: managing highlights.** Rows 1 and 2 above, cell by
+cell, as the API checks read it (`docs/process/api.md` names the personas
+and how they are seeded; the persona set's manager stands for every
+manager-level role). Every highlights route of the programming interface
+(list, read one, add, edit, delete, order; Rule 15) follows it; the route
+registry (`docs/tracking/api-routes.md`) lists them in its Gate column.
+"Allowed" calls the routes on a journal, for the journal's own
+highlights; "Site" calls them on the site, for the site's highlights
+(Rules 1 and 12). Seeing the carousel (row 3) goes through the home
+pages, not through these routes. ✓ allowed, — refused, ? an open
+question.
+
+| Persona | Allowed | Site |
+|---|---|---|
+| manager | ✓ | — |
+| section editor | — | — |
+| assistant | — | — |
+| author | — | — |
+| reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 The "Add Highlight" and "Edit Highlight" side panels carry the same five
@@ -183,8 +208,9 @@ second language's boxes, labelled "{Field} in {language}" (Rule 11).
     (the address is in the footnote). With each highlight it lists, the
     interface gives the address that highlight can be read back from on
     its own. For a journal's highlight that address points at the site
-    instead of the journal, and the highlight cannot be read back on its
-    own at either address ⚠ [A10](#a10). The panel never reads one
+    instead of the journal, where the highlight cannot be read back; at
+    the journal's own address it can. A site highlight cannot be read
+    back on its own at all ⚠ [A10](#a10). The panel never reads one
     highlight on its own, so no screen meets this. <sup>p</sup>
 
 ## Side effects
@@ -404,6 +430,72 @@ address are in its footnote.
    - **Control**: signed out, the home page in English shows "Second call"
      with the button "Read on" (Rule 11). <sup>s4</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the highlights
+routes is the [highlights grid](#api-grid-highlights)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **One highlight read back at the journal's own address** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with one highlight "Call
+   for papers" (URL "https://example.org/cfp", button "Read more").
+
+   - **Read on its own**: the highlight read through the API at the
+     journal's address answers it, with its title, URL and button label.
+     No screen reads one highlight on its own (Rule 15); the address the
+     list gives for it is [A10](#a10)'s.
+   - **Unknown**: a number no highlight has answers 404.
+
+API2. **Another journal's highlight is out of reach from this journal's address** {OJS OMP OPS}
+
+   Given: two scratch journals, each with a Journal Manager and one
+   highlight ("Our slide", "Their slide").
+
+   - **Foreign number**: through the first journal's address, as its
+     manager, "Their slide" is refused to a read, an edit and a delete
+     (404) and to an order naming it (400), and the second journal still
+     lists it unchanged (Rule 1). The panel only sends its own journal's
+     highlights.
+   - **Foreign journal named**: an add through the first journal's
+     address that names the second journal as the highlight's owner is
+     stored in the first; the second journal's list is unchanged.
+
+API3. **An order the panel never sends** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with the highlights
+   "First", "Second" and "Third", added in that order.
+
+   - **A number no highlight has**: an order naming the three in reverse
+     and a number no highlight has is refused (400), and the list still
+     reads "First", "Second", "Third": nothing moved. "Save Order" always
+     names every row of the list, and only those (Rule 9).
+   - **One highlight named**: an order naming "Third" alone, at the first
+     place, is stored: the list reads "Third", "First", "Second", the two
+     not named keeping their order.
+
+API4. **A text in a language the journal's forms do not offer is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal whose forms offer English
+   alone, with no highlights.
+
+   - **French title**: an add whose title is given in English and in
+     French is refused (400) with an error on the French title, and the
+     list stays empty. The panel offers only the forms' languages (Rule
+     11).
+   - **Control**: the same add in English alone is stored and listed.
+
+API5. **An edit that sends one field keeps the others** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with the highlight "Call
+   for papers" (description "Submissions open until June.", URL
+   "https://example.org/cfp", button "Read more").
+
+   - **URL alone**: an edit that sends only the URL
+     "https://example.org/cfp-2027" is stored, and the highlight read
+     back keeps its title, description and button label. The panel
+     always sends every field (Rule 6).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -452,8 +544,9 @@ Left out of the scenarios above, by reason:
   - A6 (a dot pressed under the carousel; Rule 4; scenario 3 marks it)
   - A8 ("Save Order" on an empty list; Rule 9a)
   - A9 (the image replaced on an edit emptying "Alternate text"; Rule 10)
-  - A10 (a journal's highlight read on its own through the programming
-    interface; Rule 15)
+  - A10 (a highlight's own address not giving it back through the
+    programming interface; Rule 15; API1 reads one at the journal's
+    address)
   - A11 (a replacement picture the app refuses at "Save", which deletes
     the old one; Rule 10)
 - **No seed**:
@@ -488,7 +581,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | The Highlights settings list shows a title's bold word as `<b>…</b>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | "Edit Highlight" closed without "Save" leaves the unsaved title on the row, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-09-30 — re-verified |
 | [A5](#a5) | The site administrator cannot add site highlights: "Save" leaves the panel open and "Save Order" shows an error | 🐞 | medium · crash: server | issues (claude), 2026-10-04 — re-verified |
-| [A10](#a10) | Through the programming interface, a journal's highlight cannot be read on its own: its own address points at the site, and the journal's address for it fails | 🐞 | low · crash: server | issues (claude), 2026-10-15 — re-verified |
+| [A10](#a10) | Through the programming interface, a highlight's own address does not give it back: a journal's points at the site, and a site highlight's read fails | 🐞 | low · crash: server | issues (claude), 2026-10-15 — re-verified |
 | [A11](#a11) | Replacing a highlight's picture with one the app refuses deletes the old picture and leaves the home page's slide empty | 🐞 | user-visible | — |
 | [A2](#a2) | "URL" accepts any text although its hint asks for a full web address, so a slide's button can point nowhere | ❓ | user-visible | — |
 | [A6](#a6) | The carousel's dots do nothing when pressed and have no name for a screen reader | ❓ | minor | — |
@@ -598,7 +691,7 @@ miss, and a picture without a description fails visitors on assistive
 devices. Basis: probe. <sup>f-a9</sup>
 
 <a id="a10"></a>
-**A10 — Through the programming interface, a journal's highlight cannot be read on its own** · 🐞 · low · crash: server.
+**A10 — Through the programming interface, a highlight's own address does not give it back** · 🐞 · low · crash: server.
 The apps' own screens never read one highlight on its own, so no user of
 them meets this. A program listing a journal's highlights through the
 install's programming interface (Rule 15) gets, with each highlight, the
@@ -606,11 +699,13 @@ address to read that highlight back from, and expects it to give the
 highlight. The address points at the site instead of the journal. There
 the journal's Journal Manager is refused with "The current role does not
 have access to this operation.", the Site Administrator's request fails
-with a server error (the failure behind [A5](#a5)), and a visitor who is
+with a server error, and a visitor who is
 not signed in is refused. Asked for at the journal's own address, the
-same highlight fails with a server error for the Journal Manager and the
-Site Administrator alike.
-Since: 2023-10-12 · Basis: probe, 2026-10-15. <sup>f-a10</sup>
+highlight is given back (since 2026-10-16; until then that read failed
+too). A site highlight read on its own at the site's address fails with
+a server error, so the site's highlights cannot be read one by one at
+all.
+Since: 2023-10-12 · Basis: probe, 2026-10-15; 2026-10-29. <sup>f-a10</sup>
 
 <a id="a11"></a>
 **A11 — A refused replacement picture deletes the highlight's old picture and leaves the slide empty** · 🐞 · user-visible.
@@ -1198,7 +1293,14 @@ to the manager and the administrator and 401 signed out. The site's own
 list answered the administrator 500 (A5), so no site highlight's `_href`
 could be compared. 3.5 read in the code only (lib/pkp f4f8fcdbc0 under
 ojs, 8094f06bf5 under omp and ops); 3.4 and 3.3 have no highlights
-(note a).
+(note a). pkp-lib 07bc43fe67 (pkp/pkp-lib#13512, 2026-10-16) made
+`get()` pass the context's id, so `{journal}/api/v1/highlights/{id}`
+answers the highlight; at site scope `getContext()` is null and the same
+line fails ("Call to a member function getId() on null"), for a site
+highlight and a journal's alike. Live-probed 2026-10-29 on OJS, OMP and
+OPS (lib/pkp df42984b46): the journal's address answers 200 to its
+manager, the site's 500 to the administrator and 401 to the journal's
+manager; `_href` still names `index`.
 Issue report: [pkp-e2e#974](https://github.com/jardakotesovec/pkp-e2e/issues/974) ([docs/issues/U11-A10-highlight-read-on-its-own-fails.md](../issues/U11-A10-highlight-read-on-its-own-fails.md)).
 
 <a id="fn-f-a11"></a>
