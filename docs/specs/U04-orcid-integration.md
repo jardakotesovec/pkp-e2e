@@ -1919,6 +1919,7 @@ otherwise admits Assistants (the contributors feature's gate). Live-probed
 2026-08-07 (OJS): both actions returned an authorization refusal
 (HTTP 401) — no email delivered, stored iD unchanged — while the field
 showed the requested state / the iD removed.
+At the heads of pkp/pkp-lib#13659 + ui-library#1033 (issue pkp/pkp-lib#13517; `f47bab3952`, before their merge) the routes admit the Assistant: on the dataset, OJS and OMP `mfritz` and an OPS Editorial Board Member, each with the "Permissions" box, got 200 for both, the "Requesting ORCID record access" email arrived and the iD was removed (bases: 401 both, as above). 3.5 carries the same change since pkp/pkp-lib#13538 (merged 2026-10-23; code). The entry retires at the `main` merge.
 Issue reports: the field's state, [pkp-e2e#749](https://github.com/jardakotesovec/pkp-e2e/issues/749) ([docs/issues/U04-A5-orcid-field-refusal-shown-as-done.md](../issues/U04-A5-orcid-field-refusal-shown-as-done.md)); the server's refusal, [pkp-e2e#750](https://github.com/jardakotesovec/pkp-e2e/issues/750) ([docs/issues/U04-A5-assistant-orcid-controls-refused.md](../issues/U04-A5-assistant-orcid-controls-refused.md)).
 
 <a id="fn-a6"></a>
