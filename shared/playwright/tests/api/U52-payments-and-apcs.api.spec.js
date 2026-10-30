@@ -11,7 +11,7 @@ const PAYMENTS = {enabled: true, currency: 'USD', paymentPluginName: 'ManualPaym
 
 test.describe('payments and APCs through the API', () => {
     test('API1: A currency not on the list is refused', async ({scratch, appContext}) => {
-        test.skip(appContext.appName === 'ops', 'a preprint server has no payments (U52 scenario 7)');
+        test.skip(!appContext.capabilities.hasPayments, 'a preprint server has no payments (U52 scenario 7)');
         const j = await scratch({payments: PAYMENTS});
         const api = await j.as('mg');
         const currency = async () => (await api.get(`contexts/${j.seeded.contextId}`)).body.currency;

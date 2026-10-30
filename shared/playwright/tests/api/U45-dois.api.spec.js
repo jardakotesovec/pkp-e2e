@@ -98,7 +98,7 @@ test.describe('DOIs through the API', () => {
     });
 
     test('API5: A chapter without its own page takes no DOI', async ({scratch, appContext}) => {
-        test.skip(appContext.capabilities.hasGalleys, 'only a press has chapters (Rule 47)');
+        test.skip(!appContext.capabilities.hasCatalog, 'only a press has chapters (Rule 47)');
         const j = await scratch({users: {mg: 'manager', au: 'author'}, doiPrefix: '10.1234', enabledDoiTypes: ['publication', 'chapter'], doiCreationTime: 'never'});
         const book = await j.submission('b', {
             submitter: 'au',

@@ -10,7 +10,7 @@ const PUBLISHED = 3; // Submission::STATUS_PUBLISHED
 test.describe('catalog management through the API', () => {
     test.beforeEach(async ({appContext}) => {
         // A press keeps series, not sections, and is the only app with a catalog.
-        test.skip(appContext.capabilities.hasSections, 'only a press has a catalog');
+        test.skip(!appContext.capabilities.hasCatalog, 'only a press has a catalog');
     });
 
     test('API1: An add to the catalog naming an unknown book publishes nothing; a published book is passed over', async ({scratch}) => {

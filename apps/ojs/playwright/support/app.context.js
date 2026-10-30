@@ -21,6 +21,9 @@ module.exports = {
         hasSubscriptions: true,
         hasSections: true,
         hasReviewerRoles: true,
+        hasCatalog: false,
+        hasPayments: true,
+        hasPreprintRelations: false,
     },
     seed: {
         // archetype → seeded username (null where the app has no such role)

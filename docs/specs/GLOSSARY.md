@@ -496,6 +496,9 @@ in each app's tree (`apps/<app>/playwright/support/`) must use them verbatim.
 | `hasSubscriptions` | subscriptions management and subscription access | ✓ | ✗ | ✗ |
 | `hasSections` | sections as the content grouping (OMP uses optional series) | ✓ | ✗ | ✓ |
 | `hasReviewerRoles` | reviewer user groups exist / can be seeded | ✓ | ✓ | ✗ |
+| `hasCatalog` | the press's catalog and book model: catalog entries, featured books, chapters, publication formats | ✗ | ✓ | ✗ |
+| `hasPayments` | payments: the payment settings, fees and their records | ✓ | ✓ | ✗ |
+| `hasPreprintRelations` | a preprint's relation to its published version | ✗ | ✗ | ✓ |
 
 ## 3. Spec badge → which suites implement
 

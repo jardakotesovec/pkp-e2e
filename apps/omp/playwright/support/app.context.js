@@ -22,6 +22,9 @@ module.exports = {
         hasSubscriptions: false,
         hasSections: false,
         hasReviewerRoles: true,
+        hasCatalog: true,
+        hasPayments: true,
+        hasPreprintRelations: false,
     },
     seed: {
         actors: {

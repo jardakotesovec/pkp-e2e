@@ -8,7 +8,7 @@ const {test, expect} = require('../../support/base-test.js');
 
 test.describe('preprint relations through the API', () => {
     test.beforeEach(async ({appContext}) => {
-        test.skip(appContext.appName !== 'ops', 'only a preprint server has relations (Purpose)');
+        test.skip(!appContext.capabilities.hasPreprintRelations, 'only a preprint server has relations (Purpose)');
     });
 
     test('API1: A relation the route cannot store is refused', async ({scratch}) => {
