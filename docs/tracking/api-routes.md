@@ -205,11 +205,11 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| — | POST | `editTaskTemplates` | ojs omp ops | admin manager | U37 | — |
-| — | PUT | `editTaskTemplates/{templateId}` | ojs omp ops | admin manager | U37 | — |
-| — | DELETE | `editTaskTemplates/{templateId}` | ojs omp ops | admin manager | U37 | — |
-| — | GET | `editTaskTemplates/variables` | ojs omp ops | admin manager | U37 | — |
-| — | GET | `editTaskTemplates` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
+| — | POST | `editTaskTemplates` | ojs omp ops | admin manager | U37 | U37#template-management |
+| — | PUT | `editTaskTemplates/{templateId}` | ojs omp ops | admin manager | U37 | U37#template-management |
+| — | DELETE | `editTaskTemplates/{templateId}` | ojs omp ops | admin manager | U37 | U37#template-management |
+| — | GET | `editTaskTemplates/variables` | ojs omp ops | admin manager | U37 | U37#template-management |
+| — | GET | `editTaskTemplates` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#template-list |
 
 ### emailTemplates — PKPEmailTemplateController
 
@@ -345,10 +345,10 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `review.authorResponse.editAuthorResponse` | PUT | `reviews/{submissionId}/{reviewRoundId}/authorResponse/{responseId}` | ojs omp | admin manager subEditor | U30 | — |
 | `review.authorResponse.deleteAuthorResponse` | DELETE | `reviews/{submissionId}/{reviewRoundId}/authorResponse/{responseId}` | ojs omp | admin manager subEditor | U30 | — |
 | `review.get.submission.round.history` | GET | `reviews/history/{submissionId}/{reviewRoundId}` | ojs omp | admin manager reviewer | U28 | — |
-| `review.confirm` | PUT | `reviews/{submissionId}/{reviewAssignmentId}/confirmReview` | ojs omp | admin manager subEditor | U27 | — |
-| `review.export.pdf` | GET | `reviews/{submissionId}/{reviewAssignmentId}/export-pdf` | ojs omp | admin manager subEditor assistant | U27 | — |
-| `review.export.xml` | GET | `reviews/{submissionId}/{reviewAssignmentId}/export-xml` | ojs omp | admin manager subEditor assistant | U27 | — |
-| `review.export.getFile` | GET | `reviews/{submissionId}/exports/{fileId}` | ojs omp | admin manager subEditor assistant | U27 | — |
+| `review.confirm` | PUT | `reviews/{submissionId}/{reviewAssignmentId}/confirmReview` | ojs omp | admin manager subEditor | U27 | U27#manage-assignment |
+| `review.export.pdf` | GET | `reviews/{submissionId}/{reviewAssignmentId}/export-pdf` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
+| `review.export.xml` | GET | `reviews/{submissionId}/{reviewAssignmentId}/export-xml` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
+| `review.export.getFile` | GET | `reviews/{submissionId}/exports/{fileId}` | ojs omp | admin manager subEditor assistant | U27 | none: serves the caller's own temporary file alone (a review export they made), whatever their role |
 | `review.sendToOrcid` | POST | `reviews/{submissionId}/{reviewAssignmentId}/sendToOrcid` | ojs omp | admin manager subEditor | U04 | — |
 
 ### rors — PKPRorController
@@ -455,18 +455,18 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `submission.task.add` | POST | `submissions/{submissionId}/tasks` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.edit` | PUT | `submissions/{submissionId}/tasks/{taskId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.delete` | DELETE | `submissions/{submissionId}/tasks/{taskId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.get` | GET | `submissions/{submissionId}/tasks/{taskId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.getMany` | GET | `submissions/{submissionId}/stages/{stageId}/tasks` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.close` | PUT | `submissions/{submissionId}/tasks/{taskId}/close` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.open` | PUT | `submissions/{submissionId}/tasks/{taskId}/open` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.start` | PUT | `submissions/{submissionId}/tasks/{taskId}/start` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.fromTemplate` | GET | `submissions/{submissionId}/stages/{stageId}/tasks/fromTemplate/{templateId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.note.add` | POST | `submissions/{submissionId}/tasks/{taskId}/notes` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.note.delete` | DELETE | `submissions/{submissionId}/tasks/{taskId}/notes/{noteId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
-| `submission.task.participants.get` | GET | `submissions/{submissionId}/stages/{stageId}/tasks/participants` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | — |
+| `submission.task.add` | POST | `submissions/{submissionId}/tasks` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#stage-panel |
+| `submission.task.edit` | PUT | `submissions/{submissionId}/tasks/{taskId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#item-manage |
+| `submission.task.delete` | DELETE | `submissions/{submissionId}/tasks/{taskId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#item-manage |
+| `submission.task.get` | GET | `submissions/{submissionId}/tasks/{taskId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#item-read |
+| `submission.task.getMany` | GET | `submissions/{submissionId}/stages/{stageId}/tasks` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#stage-panel |
+| `submission.task.close` | PUT | `submissions/{submissionId}/tasks/{taskId}/close` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#item-manage |
+| `submission.task.open` | PUT | `submissions/{submissionId}/tasks/{taskId}/open` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#item-manage |
+| `submission.task.start` | PUT | `submissions/{submissionId}/tasks/{taskId}/start` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#item-manage |
+| `submission.task.fromTemplate` | GET | `submissions/{submissionId}/stages/{stageId}/tasks/fromTemplate/{templateId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#stage-panel |
+| `submission.note.add` | POST | `submissions/{submissionId}/tasks/{taskId}/notes` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#reply |
+| `submission.note.delete` | DELETE | `submissions/{submissionId}/tasks/{taskId}/notes/{noteId}` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | none: no screen deletes a message, and the route refuses every one (a reply by its policy, the first message by its handler) |
+| `submission.task.participants.get` | GET | `submissions/{submissionId}/stages/{stageId}/tasks/participants` | ojs omp ops | admin manager subEditor assistant author reviewer | U37 | U37#stage-panel |
 
 ### submissions — PKPSubmissionController
 
@@ -541,7 +541,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `submission.files.add` | POST | `submissions/{submissionId}/files` | ojs omp ops | admin manager subEditor assistant author | U36 | — |
 | `submission.files.edit` | PUT | `submissions/{submissionId}/files/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant author | U36 | — |
 | `submission.files.delete` | DELETE | `submissions/{submissionId}/files/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant author | U36 | — |
-| `submission.files.review` | GET | `submissions/{submissionId}/files/review/{reviewId}` | ojs omp ops | admin manager subEditor assistant reviewer | U27 | — |
+| `submission.files.review` | GET | `submissions/{submissionId}/files/review/{reviewId}` | ojs omp ops | admin manager subEditor assistant reviewer | U27 | U27#review-files |
 | `submission.files.copy` | PUT | `submissions/{submissionId}/files/{submissionFileId}/copy` | ojs omp ops | admin manager subEditor | U36 | — |
 
 ### submissions/{submissionId}/publications/{publicationId}/bodyText — PKPBodyTextController
@@ -556,25 +556,25 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `citation.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/citations` | ojs omp ops | manager subEditor assistant author | U42 | — |
-| `citation.getCitation` | GET | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | — |
-| `citation.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | — |
-| `citation.reprocessCitation` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}/reprocessCitation` | ojs omp ops | manager subEditor assistant author | U42 | — |
-| `citation.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | — |
-| `citation.importAdditionalCitations` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/importAdditionalCitations` | ojs omp ops | manager subEditor assistant author | U42 | — |
-| `citation.deleteCitationsByPublicationId` | DELETE | `submissions/{submissionId}/publications/{publicationId}/citations/deleteCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | — |
-| `citation.reprocessCitationsByPublicationId` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/reprocessCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | — |
+| `citation.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/citations` | ojs omp ops | manager subEditor assistant author | U42 | U24#publication-pages |
+| `citation.getCitation` | GET | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | U24#publication-pages |
+| `citation.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate |
+| `citation.reprocessCitation` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}/reprocessCitation` | ojs omp ops | manager subEditor assistant author | U42 | none: every allowed call queues the reference's metadata lookup (Crossref, OpenAlex, ORCID jobs) on the fleet's shared queue |
+| `citation.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate |
+| `citation.importAdditionalCitations` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/importAdditionalCitations` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate |
+| `citation.deleteCitationsByPublicationId` | DELETE | `submissions/{submissionId}/publications/{publicationId}/citations/deleteCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate |
+| `citation.reprocessCitationsByPublicationId` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/reprocessCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | none: every allowed call queues the reference's metadata lookup (Crossref, OpenAlex, ORCID jobs) on the fleet's shared queue |
 
 ### submissions/{submissionId}/publications/{publicationId}/dataCitations — PKPDataCitationController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `dataCitation.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/dataCitations` | ojs omp ops | admin manager subEditor assistant author | U42 | — |
-| `dataCitation.getDataCitation` | GET | `submissions/{submissionId}/publications/{publicationId}/dataCitations/{dataCitationId}` | ojs omp ops | admin manager subEditor assistant author | U42 | — |
-| `dataCitation.add` | POST | `submissions/{submissionId}/publications/{publicationId}/dataCitations` | ojs omp ops | admin manager subEditor assistant author | U42 | — |
-| `dataCitation.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/dataCitations/{dataCitationId}` | ojs omp ops | admin manager subEditor assistant author | U42 | — |
-| `dataCitation.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/dataCitations/{dataCitationId}` | ojs omp ops | admin manager subEditor assistant author | U42 | — |
-| `dataCitation.order` | PUT | `submissions/{submissionId}/publications/{publicationId}/dataCitations/order` | ojs omp ops | admin manager subEditor assistant author | U42 | — |
+| `dataCitation.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/dataCitations` | ojs omp ops | admin manager subEditor assistant author | U42 | U24#publication-pages |
+| `dataCitation.getDataCitation` | GET | `submissions/{submissionId}/publications/{publicationId}/dataCitations/{dataCitationId}` | ojs omp ops | admin manager subEditor assistant author | U42 | U24#publication-pages |
+| `dataCitation.add` | POST | `submissions/{submissionId}/publications/{publicationId}/dataCitations` | ojs omp ops | admin manager subEditor assistant author | U42 | U40#edit-gate |
+| `dataCitation.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/dataCitations/{dataCitationId}` | ojs omp ops | admin manager subEditor assistant author | U42 | U40#edit-gate |
+| `dataCitation.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/dataCitations/{dataCitationId}` | ojs omp ops | admin manager subEditor assistant author | U42 | U40#edit-gate |
+| `dataCitation.order` | PUT | `submissions/{submissionId}/publications/{publicationId}/dataCitations/order` | ojs omp ops | admin manager subEditor assistant author | U42 | U40#edit-gate |
 
 ### submissions/{submissionId}/publications/{publicationId}/funders — PKPFunderController
 
@@ -611,11 +611,11 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `submission.reviewAssignment.getReviewAssignment` | GET | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}` | ojs omp | admin manager subEditor assistant | U27 | — |
-| `submission.reviewAssignment.editReviewAssignment` | PUT | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}` | ojs omp | admin manager subEditor assistant | U27 | — |
-| `submission.reviewAssignment.consider` | PUT | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}/consider` | ojs omp | admin manager subEditor assistant | U27 | — |
-| `submission.reviewAssignment.review.getReview` | GET | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}/review` | ojs omp | admin manager subEditor assistant | U27 | — |
-| `submission.reviewAssignment.review.editReview` | PUT | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}/review` | ojs omp | admin manager subEditor | U27 | — |
+| `submission.reviewAssignment.getReviewAssignment` | GET | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
+| `submission.reviewAssignment.editReviewAssignment` | PUT | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
+| `submission.reviewAssignment.consider` | PUT | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}/consider` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
+| `submission.reviewAssignment.review.getReview` | GET | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}/review` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
+| `submission.reviewAssignment.review.editReview` | PUT | `submissions/{submissionId}/reviewAssignments/{reviewAssignmentId}/review` | ojs omp | admin manager subEditor | U27 | U27#modify-review |
 
 ### submissions/{submissionId}/reviewers/suggestions — ReviewerSuggestionController
 
@@ -643,7 +643,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `user.getReviewers` | GET | `users/reviewers` | ojs omp ops | admin manager subEditor | U27 | — |
+| `user.getReviewers` | GET | `users/reviewers` | ojs omp ops | admin manager subEditor | U27 | U27#reviewer-search |
 | `user.getReport` | GET | `users/report` | ojs omp ops | admin manager subEditor | U65 | — |
 | `user.getUser` | GET | `users/{userId}` | ojs omp ops | admin manager subEditor | U53 | — |
 | `user.getManyUsers` | GET | `users` | ojs omp ops | admin manager subEditor | U53 | — |
@@ -660,4 +660,4 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `interest.getMany` | GET | `vocabs/interests` | ojs omp | none | U27 | — |
+| `interest.getMany` | GET | `vocabs/interests` | ojs omp | none | U27 | none: public by design, the site-wide interests vocabulary the registration and profile forms suggest from, signed out included |

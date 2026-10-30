@@ -75,6 +75,134 @@ The rows below use three terms. <sup>b</sup>
 | **Use a template** in the "Add" window (Rule 10) | • Everyone who adds an item. A template limited to some roles is listed only to people holding one of them; manager-level people see every template (Settings bullet 3) <sup>i</sup> |
 | **Manage the templates** (Settings › Workflow › "Tasks and Discussions"; Rules 25–26) | • The Journal Manager, the Editor and the Site Administrator (whoever may open the journal's Settings)<br>• A Section Editor who types the screen's address gets "The current role does not have access to this operation." <sup>h</sup> |
 
+The grids below restate the rows above for the tasks routes
+(`docs/process/api.md`). Wherever a route names a stage it is the
+submission's Copyediting stage (Production on a preprint server, which has
+no other), whose panel every assigned role but the reviewer opens; the
+assigned reviewer meets the review stage's panel alone. Wherever a route
+names an item it is **the section editor's task**: opened there by the
+assigned section editor, not begun, with the submitter as its "Task Owner"
+and the assigned assistant as a further participant.
+
+<a id="api-grid-template-management"></a>
+**Permission grid: managing the templates.** The row "Manage the
+templates": a template's add, its "Edit" and "Delete", and the
+placeholders "Insert Content" lists (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-template-list"></a>
+**Permission grid: listing the templates.** The row "Use a template in the
+"Add" window": everyone who adds an item somewhere, whatever their role in
+the context, reads the context's template list (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | ✓ |
+| reviewer | ✓ |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-stage-panel"></a>
+**Permission grid: a stage's panel.** The rows "See the panel and its
+items" and "Add": the stage's list of items, the people "Participants"
+offers, a template pressed in the "Add" window, and a new item
+(`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-item-read"></a>
+**Permission grid: opening the section editor's task.** The row "Open an
+item": manager-level people and the item's participants
+(`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-item-manage"></a>
+**Permission grid: managing the section editor's task.** The rows "Edit",
+"History", "Delete", "Start a task" and "Close or reopen": whoever may
+manage the item, here the manager-level people, its creator and its owner
+(`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-reply"></a>
+**Permission grid: replying in the section editor's task.** The row
+"Reply": its participants alone, a manager-level person who is not one
+included (`docs/process/api.md`). The application refuses that person's
+reply in an answer the screen cannot show ([A36](#a36)), and which a
+permission check cannot tell from a reply with a missing field, so their
+cells stay unchecked.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ? [A36](#a36) | ? [A36](#a36) |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ? [A36](#a36) | ? [A36](#a36) |
+
 ## Fields & validation
 
 **The "Add" and "Edit" window** (Rules 6–11, 15). Every group carries a
@@ -1364,6 +1492,62 @@ App-specific:
     A preprint server has no review stage, so this scenario has no
     analogue there.
 
+### Through the API
+
+The checks below send what no screen sends; who may call the tasks and
+templates routes is the grids' (Actors & permissions, from the
+[templates grid](#api-grid-template-management) to the
+[reply grid](#api-grid-reply)), checked apart (`docs/process/api.md`).
+Each item goes on a submission at Copyediting (Production on a preprint
+server).
+
+API1. **A participant "Participants" never offers is refused** {OJS OMP OPS}
+
+   Given: a Section Editor and an Author assigned to the submission; a
+   second Section Editor, a second Author and a Reader of the journal, none
+   of them assigned to it.
+
+   - **Not offered**: the Section Editor's discussion naming the second
+     Section Editor, the second Author or the Reader is refused (422) with
+     an error on that participant, and the stage lists no item. The
+     window offers only the people assigned to the stage (Rule 7a).
+   - **Control**: the same discussion naming the Author is kept, with
+     the two of them as its participants.
+
+API2. **An item or a reply the windows could not send is refused** {OJS OMP OPS}
+
+   Given: a Section Editor and an Author assigned to the submission.
+
+   - **Two owners**: a task with both participants as "Task Owner" is
+     refused (422) with an error on the participants. The window's owner
+     is one radio button (Rule 8c).
+   - **A discussion with task information**: a discussion with a due date
+     is refused (422) with an error on the due date, and one with an owner
+     with an error on the owner. The window shows neither until "Enter
+     task information" is ticked, which makes the item a task (Rule 9).
+   - **Nothing kept**: the stage lists no item.
+   - **Control**: the task with one owner is kept. A reply in it with an
+     empty text, or spaces alone, is refused (422) with an error on the
+     text, and the task keeps its one message; the window's "Save" stays
+     refused with the box empty (Rule 13a).
+
+API3. **A template the template window could not send is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager; a second journal.
+
+   - **Limited to no role**: a template limited to specific roles with
+     none named is refused (422) with an error on the roles. The window
+     refuses "Save" with no role ticked (Fields).
+   - **Another journal's role**: a template limited to the second
+     journal's Author role is refused (422) with an error on that role;
+     the window lists this journal's roles alone.
+   - **A due date the drop-down lacks**: a task template due five days
+     after its creation is refused (422) with an error on the due date;
+     the drop-down offers whole weeks and months (Fields).
+   - **Nothing kept**: the stage's template list is as before.
+   - **Control**: limited to this journal's Author role, the template is
+     kept with that role.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1604,6 +1788,9 @@ Once a task is closed its "Closed" box and its window's "Complete this
 task" are greyed for everybody, a Journal Manager included, while a
 closed discussion reopens with one press.
 No screen shows the application's own texts "Reopen this task" and "Are you sure you want to reopen this task?".
+The application's reopen request, the one a discussion's "Reopen" sends,
+reopens a closed task when sent for it: a Journal Manager's call answers
+with the task open again (2026-10-30, OJS).
 Question: may a closed task be reopened? Lean: intended as built (the
 screen blocks it on purpose), with the unused texts a leftover.
 Basis: probe. <sup>[f-a13](#fn-a13)</sup>

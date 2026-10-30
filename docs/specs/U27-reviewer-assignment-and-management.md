@@ -75,6 +75,100 @@ list of completed reviews appears is owned by
 | **"Login As" the reviewer** | • Whoever may impersonate that reviewer. The row entry appears only then. The rule is [→ who may impersonate whom](U01-login-and-sessions.md#who-may-impersonate) <sup>l</sup> |
 | **Author on the workflow screen** | • None of the above. An assigned Author gets none of these entries, even when they also hold an editorial role on the submission, because the panel itself is absent (see the preamble). The server-side refusals behind that, including the read operations for anonymous review types, are recorded in the footnote <sup>a</sup> |
 
+The four grids below restate the rows above for the review routes
+(`docs/process/api.md`). Wherever a route names a review assignment it is
+the one review of the persona set's submission, completed before the
+submission left review. The persona set's assistant is a copyeditor,
+assigned on Copyediting alone, so no participant of the review stage, and
+its rows read "—".
+
+<a id="api-grid-manage-assignment"></a>
+**Permission grid: managing a review assignment.** The row "Manage an
+assignment": the Review Details window's reads, its rating, "Mark as
+Complete" and its downloads, and "Log Response" (`docs/process/api.md`).
+The routes behind them follow it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-modify-review"></a>
+**Permission grid: modifying a review.** The row "Manage an assignment",
+whose "Save Changes" in "Modify Review" is a review manager's alone
+(`docs/process/api.md`). The route behind that save follows it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-review-files"></a>
+**Permission grid: listing a review's files.** The row "Manage an
+assignment", plus the assigned reviewer, who downloads the files of their
+own review ([→ the reviewer's files](U28-reviewers-review.md))
+(`docs/process/api.md`). The route listing the files and attachments of
+one review follows it; a preprint server registers it too, but has no
+review to name, so it refuses everyone there.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ |
+| manager {OPS} | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ |
+| assigned section editor {OPS} | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | ✓ | ✓ |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin {OJS OMP} | ✓ | ✓ |
+| site admin {OPS} | — | — |
+
+<a id="api-grid-reviewer-search"></a>
+**Permission grid: searching the reviewer pool.** The row "Add a
+reviewer": the journal's reviewers, listed and searched in the Add
+Reviewer window (`docs/process/api.md`). The route behind the window's
+search follows it; a preprint server registers it too and answers its
+editors with an empty pool, having no reviewer role.
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **Add Reviewer window** (title "Add Reviewer"; opened by the panel's "Add
@@ -1303,6 +1397,77 @@ App-specific:
       with a reviewer selected, presets both dates four weeks from today,
       selects "Anonymous Reviewer/Anonymous Author" and leaves "Publicly
       Show Reviewer Comments" unticked. <sup>s</sup>
+
+### Through the API
+
+The checks below send what no screen sends; who may call the review
+routes is the grids' (Actors & permissions, from the
+[managing grid](#api-grid-manage-assignment) to the
+[reviewer-pool grid](#api-grid-reviewer-search)), checked apart
+(`docs/process/api.md`). Each runs on a scratch journal or press whose
+submission has one review, completed by its reviewer.
+
+API1. **A rating outside the five stars, or with anything else, is refused** {OJS OMP}
+
+   Given: a Journal Manager, the review unrated.
+
+   - **Out of range**: rate the review 6, -1 or "good" through the API:
+     each refused (422) with an error on the rating. The star row sends
+     1 to 5 alone, and 0 for "No rating" (Rule 14a).
+   - **Anything else**: a rating sent with another field of the
+     assignment (its considered state) is refused (422); the review stays
+     unrated and unmarked.
+   - **Control**: a rating of 4 is stored with its date, and 0 takes it
+     back, date and all.
+
+API2. **A review marked complete is not marked again** {OJS OMP}
+
+   Given: a Journal Manager, the review not yet viewed.
+
+   - **Unknown state**: mark the review with a state the window never
+     sends (2): refused (422), and the review stays unviewed.
+   - **Twice**: mark it complete (200), then complete again: refused
+     (409), and its consideration date is the first one. In the window,
+     "Mark as Complete" goes disabled once pressed (Rule 14a).
+
+API3. **A modified review keeps the shape of its review** {OJS OMP}
+
+   Given: a Journal Manager, a free-form review, a journal or press with
+   no competing-interests policy.
+
+   - **Form answers**: save the review with review form answers: refused
+     (422) with an error on them. The edit window offers the form only to
+     a review that carries one (Rule 14b).
+   - **Competing interests**: save it with a competing-interests statement:
+     refused (422). The window offers the answer only where there is a
+     policy or an answer.
+   - **A recommendation of another journal** {OJS}: save it with another
+     journal's recommendation: refused (422) with an error on the
+     recommendation. The window's select lists this journal's own.
+   - The review reads as before, its competing interests undeclared.
+   - **Control**: the same save with a new "For author and editor"
+     comment changes that comment alone.
+
+API4. **A review's file list serves only the review's files** {OJS OMP}
+
+   Given: the review's Reviewer and a Journal Manager, the submission with
+   a file on "Submission Files" and the same file on the round's "Files
+   for Review", given to the reviewer.
+
+   - **Other files**: ask the review's file list for the submission's
+     files (file stage 2), alone or with the review files: refused (403),
+     for both.
+   - **Control**: unfiltered, the list holds the round's file alone.
+
+API5. **Naming users outside the reviewer pool lists none of them** {OJS OMP}
+
+   Given: a Journal Manager; in the journal a reviewer, the manager and
+   the submitting author; in another journal a reviewer.
+
+   - **Outside the pool**: list the journal's reviewers by id, naming the
+     manager, the author and the other journal's reviewer: none listed.
+     The Add Reviewer window never names reviewers by id (Rules 5–8).
+   - **Control**: the journal's reviewer, named the same way, is listed.
 
 ## Coverage
 

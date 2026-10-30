@@ -177,7 +177,8 @@ typed. Nothing asks first. The one exception is an author row added in
    table shows the new rows. <sup>e</sup> <sup>q4</sup>
    A line whose exact text (capitals count) is already in the list, or
    appeared earlier in the same paste, is dropped without any message
-   ⚠ [A2](#a2). <sup>q5</sup>
+   ⚠ [A2](#a2). <sup>q5</sup> A program that sends the lines as a list
+   instead of one text gets one reference reading "Array" ⚠ [A32](#a32).
 6. **Editing a reference.** "Edit" opens the "Edit citation" side panel
    prefilled with the reference ([Fields & validation](#fields)). Saving closes the
    panel and the row shows the change. With lookup off only the text can
@@ -424,7 +425,9 @@ typed. Nothing asks first. The one exception is an author row added in
     saves the order shown, which then holds across reloads, and leaves
     ordering mode. A data citation added after an order was saved
     appears first, above every ordered row ([A8](#a8)). <sup>m</sup>
-    <sup>q18</sup>
+    <sup>q18</sup> A program that saves the order in another shape than
+    the plain list of data citations gets a server error, and part of
+    the order may already be saved ⚠ [A31](#a31).
 24. **Data citations while submitting.** While the journal asks for or
     requires data citations, the "Details" step shows a **"Data"** section
     headed "Data" with "Information about the research data associated with
@@ -948,6 +951,53 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      submission's "Data" page lists "Ocean temperature records"
      (Rule 19). A preprint server has no review stage. <sup>s</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the references
+and data citations routes is the grids' (*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
+for saving, *[the workflow screen](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*
+for reading), checked apart (`docs/process/api.md`).
+
+API1. **A data citation's relationship or identifier type outside its list is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission with no data citations.
+
+   - **Unknown types**: add a data citation with the relationship type
+     "cited", then one with the identifier type "FOO" and an identifier:
+     each refused (400) with an error on that type, and the list stays
+     empty. The panel offers only its two lists ([Fields & validation](#fields)).
+   - **Control**: the same data citation with the relationship type
+     "supporting" is stored and listed.
+
+API2. **A reference or a data citation naming another publication is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, two submissions in the journal; the first
+   has one reference and one data citation, the second none.
+
+   - **Add**: add a data citation to the first whose body names the
+     second's publication: refused (400) with an error on the
+     publication.
+   - **Edit**: edit the first's reference, then its data citation, with
+     a body naming the second's publication: each refused (400) with an
+     error on the publication.
+   - **Control**: the second's reference and data citation lists stay
+     empty, and the first's reference and data citation stay its own.
+     No screen sends a publication in these bodies.
+
+API3. **The reference list reads in pages, in the order the references were added** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission whose references, added in one
+   paste, are "Alpha study 2020", "Beta trial 2021" and "Gamma report
+   2022" (Rule 5).
+
+   - **First page**: read the reference list two at a time: the first
+     two references, with the list's total of three.
+   - **Second page**: the same from the third: "Gamma report 2022" alone.
+   - **One reference**: read the first one on its own: its text is
+     "Alpha study 2020". No screen reads this list or one reference
+     through these routes; the References page gets them with the
+     version.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1133,6 +1183,8 @@ entry notes otherwise; the team settles them on spec review.
 | [A25](#a25) | A DOI an editor corrects in "Edit citation" before the lookup starts is replaced by the reference text's DOI | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
 | [A29](#a29) | A web address with an apostrophe in a reference links to the address cut at the apostrophe, on the published page and on the References page | 🐞 | medium | issues (claude), 2026-10-23 — re-verified |
 | [A30](#a30) | On the published page, a web address in brackets in a reference links with the closing bracket included | 🐞 | minor | — |
+| [A31](#a31) | A program that saves a data citation order as anything but a list of numbers gets a server error, and part of the order is saved | 🐞 | minor · crash: server | — |
+| [A32](#a32) | A program that adds references as a list instead of text gets one reference reading "Array" | 🐞 | minor | — |
 | [A11](#a11) | Readers never see data citations, though the editors' table says they appear alongside the references | ❓ | user-visible | — |
 | [A17](#a17) | "Edit" accepts a repeated reference that "Add" drops | ❓ | minor | — |
 | [A26](#a26) | Whether a lookup that finishes after an editor filled a reference in by hand replaces what was typed has not been seen | ❓ | user-visible | — |
@@ -1436,6 +1488,32 @@ the link. With metadata lookup on, the same reference's row on the
 same, so this is not a regression.
 Basis: probe, 2026-10-21. <sup>f-a30</sup>
 Report: paused — written and read 2026-10-23, held until a related item is settled before it is published (2026-10-23)
+
+<a id="a31"></a>
+**A31 — A program that saves a data citation order as anything but a list of numbers gets a server error, and part of the order is saved** · 🐞 · minor · crash: server.
+"Save Order" on the Data Citations table sends the version's data
+citations as a plain list. A program that saves the order through the
+install's programming interface (the REST API's data citation order
+request) in another shape, such as an object holding the list (the
+shape the highlights' order takes), expects the request refused with a
+message and the table left as it was. Instead the request fails with a
+server error. When the object also holds a numbered entry before the
+others, that data citation has already moved to the first place, so two
+data citations can share it, their order then up to the install (as
+before any order is saved, [A8](#a8)).
+Basis: probe, 2026-10-30. <sup>f-a31</sup>
+
+<a id="a32"></a>
+**A32 — A program that adds references as a list instead of text gets one reference reading "Array"** · 🐞 · minor.
+The "Add" box sends the references as one text, one reference per line
+(Rule 5). A program that adds them through the install's programming
+interface (the REST API's add request) as a list of lines expects each
+line added, or the request refused. Instead the request is accepted and
+the version gets one reference whose text is the word "Array"; none of
+the lines is added. The stray reference then shows on the References
+page and, once the version is published, in the landing page's
+"References" block.
+Basis: probe, 2026-10-30. <sup>f-a32</sup>
 
 
 ### Retired
@@ -3147,6 +3225,32 @@ links `https://doi.org/10.1234/f8)`. The same pattern and trim are in
 lookup's first step drops the bracket (Rule 11), so the References row
 of the same reference links `https://doi.org/10.1234/f8`. Live-probed
 2026-10-21: note q26.
+
+<a id="fn-f-a31"></a>
+**f-a31 — A31 evidence.** Probed 2026-10-30 on scratch journals, OJS
+and OMP (`main`; OPS read the same list after it), as the journal's
+manager, a version with three data citations A, B, D:
+`PUT …/dataCitations/order` with `[A, B, D]` answered 200 and the list
+read A, B, D; with `{"sequence": [D, B, A]}` and with
+`{"0": D, "x": A}` each answered 500
+(`{"error": "Unsupported operand types: string + int"}`), and after the
+second the list read A, D, B (A and D both at `seq` 1, by the code). Mechanism
+(lib/pkp): `PKPDataCitationController::saveOrder()` takes the body's
+keys as positions (`$index + 1`) and writes each id's `seq` in turn
+with no check of the body's shape, so a string key fails after the
+numbered ones before it were written. The fix would refuse (400) a body
+that is not a list of ids before writing.
+
+<a id="fn-f-a32"></a>
+**f-a32 — A32 evidence.** Probed 2026-10-30 on scratch journals, OJS
+and OPS (`main`), as the journal's manager:
+`POST …/citations/importAdditionalCitations` with
+`{"rawCitations": ["a", "b"]}` answered 200 with an empty body, and the
+version's one reference then read `rawCitation` "Array". Mechanism (lib/pkp):
+`PKPCitationController::importAdditionalCitations()` casts the value
+with `(string)`, which turns a list into "Array", and
+`citation\Repository::importAdditionalCitations()` adds it as one line.
+The fix would refuse (400) a value that is not text.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1 evidence.** Note p. Live-probed 2026-09-24: f-a20, where
