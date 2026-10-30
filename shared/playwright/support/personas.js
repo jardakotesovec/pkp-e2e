@@ -15,12 +15,14 @@
  *   set.submission('unpublished') // {submissionId, publicationId}
  *   set.submission('published')
  *   set.submission('review')      // a journal or press only (set.states)
+ *   set.issueId                   // a journal only: the published issue
  *
  * The unpublished submission sits in Copyediting (a journal or press: sent
  * to review, the reviewer's review completed, accepted; a preprint server
  * has no review), a stage every assigned persona's role reaches, so a grid
  * about the workflow's pages reads the ordinary case. The published one is
- * the same submission published, resting in Done. The review one (a
+ * the same submission published, resting in Done (on a journal, in the
+ * context's one published issue). The review one (a
  * journal or press) is sent to review, the reviewer's review accepted and
  * not yet submitted: a grid about review reads it as its `Review` column,
  * and the matrix skips that column on a preprint server.
@@ -116,7 +118,9 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         accounts.push({username, roles: [key]});
     });
 
-    await pkpApi.createContext({tag, users: accounts});
+    const year = new Date().getFullYear();
+    const issue = {volume: 1, number: '1', year};
+    const context = await pkpApi.createContext({tag, users: accounts, ...(appName === 'ojs' ? {issues: [{...issue, published: true}]} : {})});
     const outsider = `${tag}xm`;
     await pkpApi.createContext({tag: `${tag}x`, users: [{username: outsider, roles: ['manager']}]});
     users['manager of another context'] = outsider;
@@ -159,7 +163,11 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         reviewer ? {decisions, reviewRounds: [{reviewers: [{username: reviewer, status}]}]} : {};
     const submissions = {
         unpublished: await seedSubmission('u', reviewed('completed', ['sendExternalReview', 'accept'])),
-        published: await seedSubmission('p', {...reviewed('completed', ['sendExternalReview', 'accept']), published: true}),
+        published: await seedSubmission('p', {
+            ...reviewed('completed', ['sendExternalReview', 'accept']),
+            published: true,
+            ...(appName === 'ojs' ? {issue} : {}),
+        }),
     };
     if (reviewer) {
         submissions.review = await seedSubmission('r', reviewed('accepted', ['sendExternalReview']));
@@ -169,6 +177,7 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         context: tag,
         users,
         states: Object.keys(submissions),
+        issueId: context.issues?.[0]?.id ?? null,
         submission: (state) => {
             if (!submissions[state]) {
                 throw new Error(`seedPersonas: no "${state}" submission (${Object.keys(submissions).join(', ')})`);

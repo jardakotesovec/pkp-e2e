@@ -98,12 +98,12 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_submission.getMany` | GET | `_submissions` | ojs omp ops | admin manager | U23 | — |
-| `_submission.incomplete.delete` | DELETE | `_submissions` | ojs omp ops | admin manager author | U23 | — |
-| `_submission.delete` | DELETE | `_submissions/{submissionId}` | ojs omp ops | admin manager author | U23 | — |
-| `_submission.assigned` | GET | `_submissions/assigned` | ojs omp ops | manager subEditor assistant author | U23 | — |
-| `_submission.reviews` | GET | `_submissions/reviews` | ojs omp ops | manager subEditor assistant author | U23 | — |
-| `_submission.getViewsCount` | GET | `_submissions/viewsCount` | ojs omp ops | manager subEditor assistant author reviewer | U23 | — |
+| `_submission.getMany` | GET | `_submissions` | ojs omp ops | admin manager | U23 | U23#journal-list |
+| `_submission.incomplete.delete` | DELETE | `_submissions` | ojs omp ops | admin manager author | U23 | U23#delete-incomplete |
+| `_submission.delete` | DELETE | `_submissions/{submissionId}` | ojs omp ops | admin manager author | U24 | — |
+| `_submission.assigned` | GET | `_submissions/assigned` | ojs omp ops | manager subEditor assistant author | U23 | U23#assigned-lists |
+| `_submission.reviews` | GET | `_submissions/reviews` | ojs omp ops | manager subEditor assistant author | U23 | U23#assigned-lists |
+| `_submission.getViewsCount` | GET | `_submissions/viewsCount` | ojs omp ops | manager subEditor assistant author reviewer | U23 | U23#back-office-lists |
 | `_submission.getReviewAssignments` | GET | `_submissions/reviewerAssignments` | ojs omp ops | reviewer | U28 | — |
 
 ### _uploadPublicFile — PKPUploadPublicFileController
@@ -396,8 +396,8 @@ grid does not parse, and a blank Gate on a feature with grids.
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `stats.issue.getManyTimeline` | GET | `stats/issues/timeline` | ojs | admin manager subEditor | U64 | U64#statistics |
-| `stats.issue.getIssue` | GET | `stats/issues/{issueId}` | ojs | admin manager subEditor | U64 | — |
-| `stats.issue.getTimeline` | GET | `stats/issues/{issueId}/timeline` | ojs | admin manager subEditor | U64 | — |
+| `stats.issue.getIssue` | GET | `stats/issues/{issueId}` | ojs | admin manager subEditor | U64 | U64#statistics |
+| `stats.issue.getTimeline` | GET | `stats/issues/{issueId}/timeline` | ojs | admin manager subEditor | U64 | U64#statistics |
 | `stats.issue.getMany` | GET | `stats/issues` | ojs | admin manager subEditor | U64 | U64#statistics |
 
 ### stats/publications — PKPStatsPublicationController
@@ -472,7 +472,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `submission.getMany` | GET | `submissions` | ojs omp ops | manager subEditor assistant author reviewer | U23 | — |
+| `submission.getMany` | GET | `submissions` | ojs omp ops | manager subEditor assistant author reviewer | U23 | U23#back-office-lists |
 | `submission.getSubmission` | GET | `submissions/{submissionId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | U24#submission-read |
 | `submission.publications.getMany` | GET | `submissions/{submissionId}/publications` | ojs omp ops | manager subEditor assistant author reviewer | U24 | U24#submission-read |
 | `submission.publications.get` | GET | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | U24#submission-read |

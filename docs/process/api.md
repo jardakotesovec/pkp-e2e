@@ -89,7 +89,8 @@ emptied while the review is anonymous) is an API check's.
 user per persona, a second context whose manager is the outsider, and two
 submissions in the first: one in Copyediting (sent to review, its review
 completed, accepted; a preprint server has no review), the other the same
-and published; a journal or press has a third, in review, the reviewer's
+and published (on a journal, in the context's one published issue); a
+journal or press has a third, in review, the reviewer's
 review accepted and not yet submitted (a grid's `Review` column, skipped
 on a preprint server). The participants are the assigned section editors
 (one with "Permit submission metadata edit" off), the assigned assistant
