@@ -87,14 +87,20 @@ The grids below restate the rows above for the files routes
 Journal Manager added to "Copyedited Files": the persona set's assistant
 is a Copyeditor, assigned on Copyediting alone, and its review assistant
 a Funding Coordinator, on Submission and Review alone. Reading,
-changing and deleting a file name the stage it is read on, Copyediting,
-which a preprint server lacks, so nobody reaches the file there
-[OPS1](#ops1). The submission in review (`Review`) has no "Copyedited
+changing and deleting a file name the stage it is read on, Copyediting.
+The submission in review (`Review`) has no "Copyedited
 Files" yet: there the file is one a Journal Manager added to the round's
 "Files for Review", given to no reviewer and read on the Review stage,
 whose team ("Upload/Select Files") includes the Funding Coordinator and
 not the Copyeditor; the Author's view of that stage does not show the
-list. The decision windows' copy of a file to the next stage's
+list. A preprint server has neither list [OPS1](#ops1): there the file
+is one the Preprint Server Manager added to the preprint's galley, read
+on Production, and who may read or change it is
+*[Galleys](U46-galleys.md)*' "Manage the galleys": the Preprint Server
+Manager, the Site Administrator and the assigned Moderators, and the
+Author, who downloads it and, until the preprint is posted, changes it
+(refused on a file someone else uploaded ⚠
+[→ Galleys' OPS3](U46-galleys.md#ops3)). The decision windows' copy of a file to the next stage's
 list is
 *[Editorial decision recording](U34-editorial-decision-recording.md)*'s.
 
@@ -127,55 +133,50 @@ Copyediting, which holds none yet.
 **Permission grid: reading a file on "Copyedited Files".** The rows "See
 a workflow file list" and "Download a file" for one file of that list:
 the Copyediting stage's team, and the Author, whose view of the stage
-shows the list (`docs/process/api.md`). The route reading one file
+shows the list; on a preprint server, a file of the galley, which the
+same people download (`docs/process/api.md`). The route reading one file
 follows it.
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|
-| manager {OJS OMP} | ✓ | ✓ | ✓ |
-| manager {OPS} | — | — | — |
-| assigned section editor {OJS OMP} | ✓ | ✓ | ✓ |
-| assigned section editor {OPS} | — | — | — |
-| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ | ✓ |
-| assigned section editor, metadata edit off {OPS} | — | — | — |
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
 | unassigned section editor | — | — | — |
 | assigned assistant | ✓ | ✓ | — |
 | assigned review assistant | — | — | ✓ |
-| submitter {OJS OMP} | ✓ | ✓ | — |
-| submitter {OPS} | — | — | — |
+| submitter | ✓ | ✓ | — |
 | other author | — | — | — |
 | assigned reviewer | — | — | — |
 | reader | — | — | — |
 | nobody signed in | — | — | — |
 | manager of another context | — | — | — |
-| site admin {OJS OMP} | ✓ | ✓ | ✓ |
-| site admin {OPS} | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-copyedited-file-change"></a>
 **Permission grid: changing or deleting a file on "Copyedited Files".**
 The rows "Update File Details" and "Delete": the Copyediting stage's
-team, never the Author (`docs/process/api.md`). The routes that save a
-file's details and delete it follow it.
+team, never the Author; on a preprint server, a file of the galley,
+which the Author may change too until the preprint is posted
+(`docs/process/api.md`). The routes that save a file's details and
+delete it follow it.
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|
-| manager {OJS OMP} | ✓ | ✓ | ✓ |
-| manager {OPS} | — | — | — |
-| assigned section editor {OJS OMP} | ✓ | ✓ | ✓ |
-| assigned section editor {OPS} | — | — | — |
-| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ | ✓ |
-| assigned section editor, metadata edit off {OPS} | — | — | — |
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
 | unassigned section editor | — | — | — |
 | assigned assistant | ✓ | ✓ | — |
 | assigned review assistant | — | — | ✓ |
-| submitter | — | — | — |
+| submitter {OJS OMP} | — | — | — |
+| submitter {OPS} | ✓ | — | — |
 | other author | — | — | — |
 | assigned reviewer | — | — | — |
 | reader | — | — | — |
 | nobody signed in | — | — | — |
 | manager of another context | — | — | — |
-| site admin {OJS OMP} | ✓ | ✓ | ✓ |
-| site admin {OPS} | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-copyedited-file-add"></a>
 **Permission grid: adding a file to "Copyedited Files".** The row "Add a

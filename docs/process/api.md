@@ -99,7 +99,8 @@ emptied while the review is anonymous) is an API check's.
 user per persona, a second context whose manager is the outsider, and two
 submissions in the first: one in Copyediting (sent to review, its review
 completed, accepted; a preprint server has no review), the other the same
-and published (on a journal, in the context's one published issue); a
+and published (on a journal, in the context's one published issue; on a
+preprint server both carry a "PDF" galley, its only files); a
 journal or press has a third, in review, the reviewer's
 review accepted and not yet submitted (a grid's `Review` column, skipped
 on a preprint server). The participants are the assigned section editors
@@ -132,7 +133,10 @@ reads the registry and the grids from this repo and makes these passes:
   the caller may have. The site admin's answers, the site's, and the few
   routes that list across the install by design are left out. A column
   the persona set cannot read fails (a Review column on a preprint server
-  aside), and so does a route of which no cell was read.
+  aside), and so does a route of which no cell was read. A grid that
+  allows no one on an app its route runs on fails there too, unless the
+  route's `routes.js` entry says why (`noneOn`: a preprint server has no
+  review, no reviewer, no identifier plugin).
 - **The foreign passes.** Every gated route that names a child resource (a
   funder, a comment, an announcement), the resource made elsewhere and
   requested at the persona set's own address by the first persona its

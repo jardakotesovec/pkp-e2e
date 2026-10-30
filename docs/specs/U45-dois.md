@@ -103,6 +103,24 @@ DOI settings" above, for the route the "Registration" tab saves to
 | manager of another context | — |
 | site admin | ✓ |
 
+<a id="api-grid-doi-export-download"></a>
+**Permission grid: downloading an export.** The file "Export DOIs" makes
+is its maker's alone (Rule 29, "Downloads"): the route that serves it
+answers only the user whose export made it, a Site Administrator or
+another manager of the same journal included (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | — |
+
 <a id="api-grid-review-dois"></a>
 **Permission grid: putting a DOI on a review.** The rows of
 [managing DOIs](#api-grid-dois), for the two routes that put a typed DOI

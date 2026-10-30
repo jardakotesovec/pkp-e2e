@@ -22,8 +22,10 @@
  *
  * The unpublished submission sits in Copyediting (a journal or press: sent
  * to review, the reviewer's review completed, accepted; a preprint server
- * has no review), a stage every assigned persona's role reaches, so a grid
- * about the workflow's pages reads the ordinary case. The published one is
+ * has no review: its preprint waits in Production and carries a galley,
+ * whose file is the one kind of file a preprint server has), a stage every
+ * assigned persona's role reaches, so a grid about the workflow's pages
+ * reads the ordinary case. The published one is
  * the same submission published, resting in Done (on a journal, in the
  * context's published issue; the journal also has a future issue). The review one (a
  * journal or press) is sent to review, the reviewer's review accepted and
@@ -253,10 +255,13 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
     };
     const reviewed = (status, decisions) =>
         reviewer ? {decisions, reviewRounds: [{reviewers: [{username: reviewer, status}]}]} : {};
+    // A preprint's galley: a preprint server's only files are its galleys'
+    // (U36 OPS1), so a grid about one file reads one of those there.
+    const galley = appName === 'ops' ? {galleys: [{label: 'PDF', file: 'preprint.pdf'}]} : {};
     // Each state's submission, by its tag suffix and seed.
     const seeds = {
-        unpublished: ['u', reviewed('completed', ['sendExternalReview', 'accept'])],
-        published: ['p', {...reviewed('completed', ['sendExternalReview', 'accept']), published: true, ...(appName === 'ojs' ? {issue} : {})}],
+        unpublished: ['u', {...reviewed('completed', ['sendExternalReview', 'accept']), ...galley}],
+        published: ['p', {...reviewed('completed', ['sendExternalReview', 'accept']), ...galley, published: true, ...(appName === 'ojs' ? {issue} : {})}],
         ...(reviewer ? {review: ['r', reviewed('accepted', ['sendExternalReview'])]} : {}),
     };
     const submissions = {};

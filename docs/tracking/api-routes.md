@@ -188,7 +188,7 @@ route registry" lists what it fails on); `npm run backlog` prints it daily.
 |---|---|---|---|---|---|---|
 | `doi.getMany` | GET | `dois` | ojs omp ops | admin manager | U45 | U45#dois |
 | `doi.getDoi` | GET | `dois/{doiId}` | ojs omp ops | admin manager | U45 | U45#dois |
-| `doi.exports.getFile` | GET | `dois/exports/{fileId}` | ojs omp ops | admin manager | U45 | none: downloads the caller's own export file by its temporary-file id; a file belongs to the one user whose export made it, so no persona can be read against another's |
+| `doi.exports.getFile` | GET | `dois/exports/{fileId}` | ojs omp ops | admin manager | U45 | U45#doi-export-download |
 | `doi.add` | POST | `dois` | ojs omp ops | admin manager | U45 | U45#dois |
 | `doi.submissions.assignDois` | POST | `dois/submissions/assignDois` | ojs omp ops | admin manager | U45 | U45#dois |
 | `doi.edit` | PUT | `dois/{doiId}` | ojs omp ops | admin manager | U45 | U45#dois |
@@ -347,7 +347,7 @@ route registry" lists what it fails on); `npm run backlog` prints it daily.
 | `review.confirm` | PUT | `reviews/{submissionId}/{reviewAssignmentId}/confirmReview` | ojs omp | admin manager subEditor | U27 | U27#manage-assignment |
 | `review.export.pdf` | GET | `reviews/{submissionId}/{reviewAssignmentId}/export-pdf` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
 | `review.export.xml` | GET | `reviews/{submissionId}/{reviewAssignmentId}/export-xml` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
-| `review.export.getFile` | GET | `reviews/{submissionId}/exports/{fileId}` | ojs omp | admin manager subEditor assistant | U27 | none: serves the caller's own temporary file alone (a review export they made), whatever their role |
+| `review.export.getFile` | GET | `reviews/{submissionId}/exports/{fileId}` | ojs omp | admin manager subEditor assistant | U27 | U27#review-export-download |
 | `review.sendToOrcid` | POST | `reviews/{submissionId}/{reviewAssignmentId}/sendToOrcid` | ojs omp | admin manager subEditor | U04 | U04#send-review |
 
 ### rors — PKPRorController

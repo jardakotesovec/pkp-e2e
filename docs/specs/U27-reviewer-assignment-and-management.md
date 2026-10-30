@@ -75,7 +75,7 @@ list of completed reviews appears is owned by
 | **"Login As" the reviewer** | • Whoever may impersonate that reviewer. The row entry appears only then. The rule is [→ who may impersonate whom](U01-login-and-sessions.md#who-may-impersonate) <sup>l</sup> |
 | **Author on the workflow screen** | • None of the above. An assigned Author gets none of these entries, even when they also hold an editorial role on the submission, because the panel itself is absent (see the preamble). The server-side refusals behind that, including the read operations for anonymous review types, are recorded in the footnote <sup>a</sup> |
 
-The four grids below restate the rows above for the review routes
+The five grids below restate the rows above for the review routes
 (`docs/process/api.md`). Wherever a route names a review assignment it is
 the one review of the persona set's submission: in "Unpublished" and
 "Published" completed before the submission left review, in "Review"
@@ -127,6 +127,30 @@ whose "Save Changes" in "Modify Review" is a review manager's alone
 | nobody signed in | — | — | — |
 | manager of another context | — | — | — |
 | site admin | ✓ | ✓ | ✓ |
+
+<a id="api-grid-review-export-download"></a>
+**Permission grid: downloading a review export.** Rule 15's "Download
+Review Form": each entry makes a file for whoever chose it, which the
+browser then downloads, and that file is theirs alone, whatever their
+role, the Site Administrator's included (`docs/process/api.md`). The
+route downloading the file follows it; the file is the one a Journal
+Manager's "Editor Form Shows All Review Sections (PDF)" made.
+
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | — | — | — |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | — | — | — |
 
 <a id="api-grid-review-files"></a>
 **Permission grid: listing a review's files.** The row "Manage an
