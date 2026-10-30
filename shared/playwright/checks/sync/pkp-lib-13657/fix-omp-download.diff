@@ -1,0 +1,17 @@
+diff --git a/pages/catalog/CatalogBookHandler.php b/pages/catalog/CatalogBookHandler.php
+index b12e58edf..6ede42963 100755
+--- a/pages/catalog/CatalogBookHandler.php
++++ b/pages/catalog/CatalogBookHandler.php
+@@ -405,7 +405,11 @@ class CatalogBookHandler extends Handler
+         $monographId = array_shift($args); // Validated thru auth
+         $subPath = array_shift($args);
+         if ($subPath === 'version') {
+-            $publicationId = array_shift($args);
++            $publicationId = (string) array_shift($args);
++            if (!ctype_digit($publicationId)) {
++                throw new NotFoundHttpException();
++            }
++            $publicationId = (int) $publicationId;
+             $representationId = array_shift($args);
+         } else {
+             $publicationId = $submission->getCurrentPublication()->getId();

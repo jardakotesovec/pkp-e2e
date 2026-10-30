@@ -10,7 +10,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** OMP: `pkp/omp#1908` (3.5: `pkp/omp#1907`) for `pkp/pkp-lib#10671` · [29fa885084](https://github.com/pkp/omp/commit/29fa885084560ff55e1f7d3aabd84f37e81b1795) · 2025-03-20 · Kaitlin Newson (kaitlinnewson). OJS: `pkp/ojs#5308` for `pkp/pkp-lib#12245` · [17bed669e9](https://github.com/pkp/ojs/commit/17bed669e9e22c5683fc7af316318ce180ea7f84) · 2026-02-05 · Alec Smecher (asmecher)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13657` (open; fix in PRs `pkp/ojs#6003`, merged into main 2026-10-30, `pkp/omp#2530` and `pkp/ojs#6005` into `ore`, both open), the team's copy of this issue (2026-10-30), covering main; no OMP `stable-3_5_0` PR yet
 - **Tracked in** spec U69 [A3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U69-monograph-landing-page.md#a3) · spec U49 [OJS3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U49-publish-schedule-and-versions.md#ojs3)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
