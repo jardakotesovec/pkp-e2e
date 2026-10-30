@@ -20,7 +20,8 @@
 //   PROBE_FEATURE=<f> PROBE_AGENT=<id> [PROBE_RUN=<run>] \
 //     node bin/probe.js <ojs|omp|ops|all> shared/playwright/checks/sync/pkp-lib-13657/version-urls.js
 //   On ore: the same with `ojs` from the ore worktree, with this file copied to the same path there (the ore branch
-//   does not carry it). With PKP_E2E_LINE=stable-3_5_0 in front of both: the 3.5 line.
+//   does not carry it). With PKP_E2E_LINE=stable-3_5_0 (or stable-3_4_0, stable-3_3_0) in front of both: that line
+//   (`fleet-prep … --dataset --reset --apps omp` there loads the line's own dataset).
 // fix-omp-download.diff (OMP main) and fix-omp-3_5.diff (OMP 3.5, a port of omp#2530 plus that hunk) are the
 // report's fixes: `node bin/try-fix.js apply <diff> omp`, the run, then `revert` with the same arguments.
 //
@@ -67,7 +68,9 @@ forEachApp(async (app) => {
         const row = sql(app, `SELECT galley_id, submission_file_id FROM publication_galleys WHERE publication_id = ${P} ORDER BY 1 LIMIT 1`);
         if (row) [rep, file] = row.split('|').map(Number);
     }
-    const head = (...a) => `/index.php/${ctx}/en/${a.join('/')}`;
+    // 3.4 and 3.3 have no language part in their addresses.
+    const lang = ['stable-3_4_0', 'stable-3_3_0'].includes(app.line) ? '' : 'en/';
+    const head = (...a) => `/index.php/${ctx}/${lang}${a.join('/')}`;
     const cases = [
         ['landing', head(page_, op, sid)],
         ...published.map((id) => [`version ${id} (published)`, head(page_, op, sid, 'version', id)]),
