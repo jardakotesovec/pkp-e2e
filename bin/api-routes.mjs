@@ -17,8 +17,9 @@
 //                                      set the Gate of those routes (`—` clears;
 //                                      'none: <reason>' says why a route has none)
 //      npm run api-routes -- --check   lint: exit 1 when file and code differ,
-//                                      an Owner is not a feature, or a Gate's
-//                                      grid does not parse
+//                                      an Owner is not a feature, a route is
+//                                      not gated, or a Gate's grid does not
+//                                      parse, allows no one or is not whole
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -26,7 +27,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { REPO_ROOT, resolveApp } = require('./apps.js');
 const { loadGrid, registryRows } = require('../shared/playwright/support/api-grids.js');
-const { LABELS: PERSONA_LABELS, PERSONAS, ALIASES, hasPersona } = require('../shared/playwright/support/personas.js');
+const { LABELS: PERSONA_LABELS, PERSONAS, ALIASES, CONTEXT_ROLES, hasPersona } = require('../shared/playwright/support/personas.js');
 const APPS = ['ojs', 'omp', 'ops'];
 const FILE = 'docs/tracking/api-routes.md';
 const METHODS = ['get', 'post', 'put', 'delete', 'patch'];
@@ -247,7 +248,6 @@ function render(rows, kept) {
 // reads both an unpublished and a published submission reads the one in
 // review too, on the apps its routes run on (a preprint server has no
 // reviewer and no review). Returns the problem, or null.
-const CONTEXT_ROLES = ['manager', 'unassigned section editor', 'assigned assistant', 'other author', 'assigned reviewer', 'reader', 'nobody signed in', 'manager of another context', 'site admin'];
 function gateProblem(gate, apps = APPS) {
     if (!/^U\d{2}#[a-z0-9-]+$/.test(gate)) return 'is not of the form U40#edit-gate';
     try {

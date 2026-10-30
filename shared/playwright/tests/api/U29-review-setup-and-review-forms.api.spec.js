@@ -12,7 +12,7 @@ const titles = (res) => res.body.items.map((r) => r.title.en).sort();
 
 test.describe('review setup & review forms through the API', () => {
     test.beforeEach(async ({appContext}) => {
-        test.skip(!appContext.capabilities.hasIssues, 'only a journal has reviewer recommendations');
+        test.skip(!appContext.capabilities.hasIssues, 'only a journal has reviewer recommendations (a {OJS} feature, gated as the GLOSSARY maps {OJS})');
     });
 
     test('API1: A recommendation without a title, a known type or a status is refused', async ({scratch}) => {

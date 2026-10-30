@@ -83,14 +83,30 @@ const ALIASES = {
 };
 
 /**
- * Personas no grid names: each holds a manager's role in the set's second
- * context and a lesser one here, and the matrix reads it against the row
- * of the persona it stands for (a role taken from the wrong context).
+ * Personas no grid names, each read by the matrix against the refused
+ * cells of the row it stands for (`sameAs`; an object names the row for a
+ * submission grid and for a context grid): a manager of the set's second
+ * context who is only a reader or an author here (a role taken from the
+ * wrong context), and people assigned on another submission of this
+ * context (an assignment checked against the wrong submission). `role` is
+ * their role here; `elsewhere` how they sit on the other submission.
  */
 const DERIVED = {
-    'manager elsewhere, reader here': 'reader',
-    'manager elsewhere, author here': 'other author',
+    'manager elsewhere, reader here': {sameAs: 'reader', role: 'reader', managerElsewhere: true},
+    'manager elsewhere, author here': {sameAs: 'other author', role: 'author', managerElsewhere: true},
+    'section editor assigned elsewhere': {sameAs: 'unassigned section editor', role: 'sectionEditor', elsewhere: 'participant'},
+    'submitter elsewhere': {sameAs: 'other author', role: 'author', elsewhere: 'submitter'},
+    'reviewer elsewhere': {sameAs: {submission: 'reader', context: 'assigned reviewer'}, role: 'reviewer', elsewhere: 'reviewer'},
 };
+
+/** The row a derived persona stands for in a grid (a submission grid or not). */
+function derivedSameAs(label, submissionGrid) {
+    const {sameAs} = DERIVED[label];
+    return typeof sameAs === 'string' ? sameAs : sameAs[submissionGrid ? 'submission' : 'context'];
+}
+
+/** The personas a grid about the context rather than a submission names (directly or by an alias). */
+const CONTEXT_ROLES = ['manager', 'unassigned section editor', 'assigned assistant', 'other author', 'assigned reviewer', 'reader', 'nobody signed in', 'manager of another context', 'site admin'];
 
 /** Every label a grid row may use. */
 const LABELS = [...Object.keys(PERSONAS), ...Object.keys(ALIASES)];
@@ -148,10 +164,17 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         users[label] = username;
         accounts.push({username, roles: [key]});
     });
-    const elsewhere = Object.entries(DERIVED).map(([label, sameAs], i) => {
+    const elsewhere = [];
+    Object.entries(DERIVED).forEach(([label, derived], i) => {
+        const key = roleKey(appName, derived.role);
+        if (!key) {
+            return; // a role this app has none of (no reviewer on a preprint server)
+        }
         users[label] = `${tag}d${i}`;
-        accounts.push({username: users[label], roles: [roleKey(appName, PERSONAS[sameAs].role)]});
-        return {username: users[label], roles: ['manager']};
+        accounts.push({username: users[label], roles: [key]});
+        if (derived.managerElsewhere) {
+            elsewhere.push({username: users[label], roles: ['manager']});
+        }
     });
 
     const year = new Date().getFullYear();
@@ -217,6 +240,15 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         const {submissionId, publicationId} = await seedSubmission(suffix, seed);
         submissions[state] = {submissionId, publicationId};
     }
+    // Another submission of this context, in review where the app has one,
+    // on which the derived personas DERIVED places there sit (and no other).
+    const placed = (how) => Object.entries(DERIVED).filter(([label, d]) => d.elsewhere === how && users[label]).map(([label]) => users[label]);
+    const [elsewhereReviewer] = placed('reviewer');
+    await seedSubmission('e', {
+        submitter: placed('submitter')[0],
+        participants: placed('participant').map((username) => ({username, role: 'sectionEditor', canChangeMetadata: true})),
+        ...(elsewhereReviewer ? {decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: elsewhereReviewer, status: 'accepted'}]}]} : {}),
+    });
     let fresh = 0;
 
     return {
@@ -241,4 +273,4 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
     };
 }
 
-module.exports = {PERSONAS, ALIASES, DERIVED, LABELS, hasPersona, seedPersonas};
+module.exports = {PERSONAS, ALIASES, CONTEXT_ROLES, DERIVED, derivedSameAs, LABELS, hasPersona, seedPersonas};

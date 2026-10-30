@@ -108,6 +108,13 @@ as a site's administrator does in the journals they set up. The base
 context is never used, because a submit there assigns its section editors
 automatically.
 
+No grid names the **derived personas** (`personas.js` DERIVED): a manager
+of the set's second context who is only a reader or an author here, and a
+section editor, submitter and reviewer of a fourth submission of the set.
+The matrix reads each against the refused cells of the row it stands for,
+so a role taken from the wrong context, or an assignment checked against
+the wrong submission, fails the grid without a row of its own.
+
 ### The matrix
 
 The matrix lives in the private security repo
@@ -116,7 +123,11 @@ grid is often a security weakness, and a public check would publish it. It
 reads the registry and the grids from this repo and makes these passes:
 
 - **The grids.** Every gated route, as every persona, in every state;
-  a route fails with the list of cells that disagree.
+  a route fails with the list of cells that disagree. An allowed answer
+  must also not carry the second persona set's tag (its context path,
+  usernames and titles carry it): another context's data in an answer
+  the caller may have. The site admin's answers, the site's, and the few
+  routes that list across the install by design are left out.
 - **The foreign passes.** Every gated route that names a child resource (a
   funder, a comment, an announcement), the resource made elsewhere and
   requested at the persona set's own address by the first persona its
@@ -147,7 +158,7 @@ read names its submission only in its query: then the matrix's
 foreign call and its control both stopped by a 4xx prove nothing, and fail
 until the route has its body or query. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
-never runs it. A whole run takes 2 to 5 minutes per app:
+never runs it. A whole run takes 3 to 8 minutes per app:
 
 ```bash
 npx playwright test -c configs/ojs.config.js --project=api-matrix --no-deps

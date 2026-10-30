@@ -9,8 +9,9 @@
  * - a permission grid in the spec that owns the rule: the table right after
  *   `<a id="api-grid-<name>"></a>`, one row per persona (the labels of
  *   support/personas.js, optionally with an app badge such as `{OJS OMP}`),
- *   one column per state (`Unpublished`, `Published`, or `Context` for a
- *   rule with no submission), each cell `✓` (allowed), `—` (refused) or
+ *   one column per state (`Unpublished`, `Published`, `Review`, a route's
+ *   own `Draft`, or `Context` and `Site` for a rule with no submission),
+ *   each cell `✓` (allowed), `—` (refused) or
  *   `?` (an open question, not checked; the cell links its register entry).
  *
  * The checks that sweep the grids are private (docs/process/api.md);
