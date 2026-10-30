@@ -60,7 +60,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_email.create` | POST | `_email` | ojs omp ops | admin manager | U55 | — |
+| `_email.create` | POST | `_email` | ojs omp ops | admin manager | U55 | U53#users |
 
 ### _i18n — I18nController
 

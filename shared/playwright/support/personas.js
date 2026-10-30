@@ -138,6 +138,8 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
     const context = await pkpApi.createContext({
         tag,
         users: accounts,
+        // Listed for bulk email by the site, so its "Notify" tab answers (U55).
+        bulkEmails: true,
         ...(appName === 'ojs' ? {issues: [{...issue, published: true}, {...issue, number: '2', published: false}]} : {}),
         // A publication identifier plugin, without which the publication's
         // "Identifiers" page answers no one (U44; a preprint server has none).

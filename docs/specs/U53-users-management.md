@@ -63,7 +63,8 @@ that row has not been seen; that it is refused is read from the code.
 **Permission grid: reading the journal's users.** The row "Open the
 "Users" list, search it and page through it" above, for the routes the
 list and a user's roles page read users through, the list and one user
-of the journal (`docs/process/api.md`).
+of the journal; and the same page's "Notify" tab, whose send follows it
+([Notify users](U55-notify-users.md)) (`docs/process/api.md`).
 
 | Persona | Context |
 |---|---|
