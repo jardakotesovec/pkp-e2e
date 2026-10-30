@@ -156,7 +156,11 @@ reads the registry and the grids from this repo and makes these passes:
   instead of passing for nothing. Each such route gets an entry in the
   matrix's `routes.js` (its child, its body, the read of what it changes),
   or one that says why it needs none; a self-test fails a route whose
-  body names an id without either.
+  input names an id without either.
+- **The context move pass.** An edit of a context's child that has a read
+  at the same address, sent with the second persona set's context id in
+  its body: the child still answers at home, and not at the other
+  context's address.
 
 A call answered 401, 403 or 404, or a 2xx whose body is an error alone,
 counts as refused; any other answer, a 400 for an empty body included, as
