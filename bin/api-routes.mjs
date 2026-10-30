@@ -259,6 +259,9 @@ function gateProblem(gate, apps = APPS) {
         if (!grid.rows.some((r) => grid.states.some((s) => r.cells[s] === true))) return 'allows no one';
         const named = new Set(rows.map((p) => ALIASES[p] || p));
         const submission = grid.states.some((s) => !['context', 'site'].includes(s));
+        // A submission grid names its personas in full; the aliases are a context grid's.
+        const aliased = submission ? rows.filter((p) => p in ALIASES) : [];
+        if (aliased.length) return `is a submission grid with context labels: ${aliased.join(', ')} (use ${aliased.map((p) => ALIASES[p]).join(', ')})`;
         const missing = (submission ? Object.keys(PERSONAS) : CONTEXT_ROLES).filter((p) => !named.has(p) && apps.some((app) => hasPersona(app, p)));
         if (missing.length) return `names no row for: ${missing.join(', ')}`;
         const review = apps.some((app) => hasPersona(app, 'assigned reviewer'));

@@ -43,7 +43,7 @@ backlog` prints the check's problems every day.
 ## Permission grids
 
 A grid is a table in the spec that owns the permission rule, right after
-`<a id="api-grid-<name>"></a>` and a one-sentence intro naming the rule it
+`<a id="api-grid-<name>"></a>` and a short intro naming the rule it
 restates and the routes that follow it, usually at the end of "Actors &
 permissions". It says, cell by cell, what the spec's prose already says,
 so a program can check it:
@@ -58,7 +58,9 @@ so a program can check it:
 ```
 
 - **Rows** are personas, by the labels of
-  `shared/playwright/support/personas.js`. A persona an app has no role for
+  `shared/playwright/support/personas.js`: a submission grid names them in
+  full, a context grid may use the plainer aliases (`author` for `other
+  author`). A persona an app has no role for
   (no reviewer on a preprint server) is skipped there by itself; an app
   badge is only for a row whose cells differ by app, split into one row
   per badge, as `submitter` above.
@@ -209,8 +211,9 @@ API1. **A funder without a name is refused** {OJS OMP OPS}
   silently honoured, is the matrix's. An API check may assert input
   validation (a 400 or 422 with an error on the field that names the
   foreign id), what an allowed persona's answer withholds, and that an add
-  naming another context lands in this one: guards that hold. A guard
-  that does not hold is a security finding, never a public check.
+  or an edit naming another context lands or stays in this one (asserting
+  where it is, not the status): guards that hold. A guard that does not
+  hold is a security finding, never a public check.
 - **Tests** live in `shared/playwright/tests/api/U<nn>-<feature>.api.spec.js`,
   app-neutral, so every app's `shared` project runs them on CI. A test is
   named `API<n>: <the item's title>`, seeds a scratch context through the

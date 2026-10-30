@@ -94,12 +94,12 @@ it); once a submission is in, every write is refused
 | manager | ✓ |
 | assigned section editor | — |
 | assigned section editor, metadata edit off | — |
-| section editor | — |
-| assistant | — |
+| unassigned section editor | — |
+| assigned assistant | — |
 | assigned review assistant | — |
 | submitter | ✓ |
-| author | — |
-| reviewer | — |
+| other author | — |
+| assigned reviewer | — |
 | reader | — |
 | nobody signed in | — |
 | manager of another context | — |

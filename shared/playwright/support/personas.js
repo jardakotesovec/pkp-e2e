@@ -118,6 +118,12 @@ const PRIVILEGE = [
     'manager', 'site admin',
 ];
 
+for (const label of Object.keys(PERSONAS)) {
+    if (!PRIVILEGE.includes(label)) {
+        throw new Error(`personas: "${label}" is missing from PRIVILEGE`);
+    }
+}
+
 /** Of grid row labels (aliases allowed), the least privileged. */
 const leastPrivileged = (labels) =>
     [...labels].sort((a, b) => PRIVILEGE.indexOf(ALIASES[a] || a) - PRIVILEGE.indexOf(ALIASES[b] || b))[0];

@@ -82,6 +82,10 @@ Read in this order:
   team has), per app: the context, every user with their roles and every
   submission with its stage and people; an issue report's steps start
   from it, walked on a dataset fleet (harness.md "Dataset fleets").
+- `docs/process/api.md`: the REST API's coverage: the route registry
+  (`docs/tracking/api-routes.md`), the permission grids in the specs, the
+  private matrix that sweeps them, the "Through the API" checks and the
+  traffic map; how a spec gains API coverage and how it is kept true.
 - `docs/process/seed-facts.md`: what a fresh test install contains and how
   it is configured; check a probe premise against it before writing the
   question. Its generated part is kept true by `npm run seed-facts -- --check`.

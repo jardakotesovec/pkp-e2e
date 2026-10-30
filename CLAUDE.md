@@ -36,7 +36,9 @@ not here. `docs/README.md` is the map of the documentation.
   regression or defect write-up or GitHub issue for the team, with the
   severity and effort scales): `docs/process/REPORT.md`.
   Harness knowledge:
-  `docs/process/{harness,patterns,scenarios,users}.md`. Spec contract:
+  `docs/process/{harness,patterns,scenarios,users}.md`. API coverage
+  (route registry, permission grids, the private matrix, API checks):
+  `docs/process/api.md`. Spec contract:
   `docs/process/TEMPLATE.md` plus `docs/specs/GLOSSARY.md`.
 - **Security**: anything security-shaped follows
   `../pkp-e2e-sec/security_policy.md`, in the private repo
