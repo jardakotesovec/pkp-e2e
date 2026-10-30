@@ -99,7 +99,7 @@ async function personas(name, verb, template, body) {
         rows.push(`| ${label} | ${cells.join(' | ')} |`);
     }
     console.log(`| Persona | ${states.join(' | ')} |\n|---|${states.map(() => '---').join('|')}|\n${rows.join('\n')}`);
-    console.log(`\ncontext ${set.context} (id ${set.contextId}); ${states.filter((s) => s !== 'context').map((s) => `${s} ${JSON.stringify(set.submission(s))}`).join('; ')}`);
+    console.log(`\ncontext ${set.context} (id ${set.contextId}); ${states.filter((s) => !['context', 'site'].includes(s)).map((s) => `${s} ${JSON.stringify(set.submission(s))}`).join('; ')}`);
     console.log(Object.entries(set.users).map(([label, u]) => `${label}: ${u ?? '-'}`).join('\n'));
     await pkpApi.dispose();
 }

@@ -17,6 +17,7 @@
  *   set.submission('published')
  *   set.submission('review')      // a journal or press only (set.states)
  *   set.issueId                   // a journal only: the published issue
+ *   set.futureIssueId             // and a future (unpublished) one
  *   await set.freshSubmission('published', {extra seed keys}) // another like it, to delete
  *
  * The unpublished submission sits in Copyediting (a journal or press: sent
@@ -24,7 +25,7 @@
  * has no review), a stage every assigned persona's role reaches, so a grid
  * about the workflow's pages reads the ordinary case. The published one is
  * the same submission published, resting in Done (on a journal, in the
- * context's one published issue). The review one (a
+ * context's published issue; the journal also has a future issue). The review one (a
  * journal or press) is sent to review, the reviewer's review accepted and
  * not yet submitted: a grid about review reads it as its `Review` column,
  * and the matrix skips that column on a preprint server.
@@ -137,7 +138,7 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
     const context = await pkpApi.createContext({
         tag,
         users: accounts,
-        ...(appName === 'ojs' ? {issues: [{...issue, published: true}]} : {}),
+        ...(appName === 'ojs' ? {issues: [{...issue, published: true}, {...issue, number: '2', published: false}]} : {}),
         // A publication identifier plugin, without which the publication's
         // "Identifiers" page answers no one (U44; a preprint server has none).
         ...(appName === 'ops' ? {} : {plugins: {urnpubidplugin: {enabled: true, settings: URN}}}),
@@ -201,6 +202,7 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         users,
         states: Object.keys(submissions),
         issueId: context.issues?.[0]?.id ?? null,
+        futureIssueId: context.issues?.[1]?.id ?? null,
         /**
          * Another submission like the state's, for a call that would change
          * or remove it; `extra` adds seed keys (scenarios.md), and `seeded`
