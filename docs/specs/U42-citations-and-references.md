@@ -953,10 +953,9 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the references
-and data citations routes is the grids' (*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
-for saving, *[the workflow screen](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*
-for reading), checked apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A data citation's relationship or identifier type outside its list is refused** {OJS OMP OPS}
 

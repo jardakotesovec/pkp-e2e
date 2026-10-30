@@ -704,8 +704,8 @@ App-specific:
 
 ### Through the API
 
-The check below reads what no screen reads; who may ask for the author's
-letters is the [letters grid](#api-grid-author-emails)'s, checked apart
+The check below reads what no screen reads; who may call these routes is their permission grids'
+(`docs/tracking/api-routes.md` names each route's), checked apart
 (`docs/process/api.md`).
 
 API1. **The letters list holds only the letters sent to the caller** {OJS OMP OPS}

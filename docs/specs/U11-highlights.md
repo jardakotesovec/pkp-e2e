@@ -426,9 +426,9 @@ address are in its footnote.
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the highlights
-routes is the [highlights grid](#api-grid-highlights)'s, checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **One highlight read back at the journal's own address** {OJS OMP OPS}
 

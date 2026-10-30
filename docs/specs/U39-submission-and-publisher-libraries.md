@@ -557,11 +557,9 @@ footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the library
-route is the grid of the deciding editors
-(*[Editorial decision recording](U34-editorial-decision-recording.md#api-grid-record-decision)*,
-whose email pages offer "Library Files", Rule 11), checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **The library list names the Publisher Library and the one submission asked for** {OJS OMP OPS}
 

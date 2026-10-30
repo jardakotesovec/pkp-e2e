@@ -903,11 +903,8 @@ App-specific:
 ### Through the API
 
 The checks below send what no screen sends, or read what an allowed
-caller's answer withholds; who may call the list routes is the grids'
-([the whole journal](#api-grid-journal-list),
-[one's own](#api-grid-assigned-lists),
-[any back-office list](#api-grid-back-office-lists),
-[deleting drafts](#api-grid-delete-incomplete)), checked apart
+caller's answer withholds; who may call these routes is their permission grids'
+(`docs/tracking/api-routes.md` names each route's), checked apart
 (`docs/process/api.md`).
 
 API1. **A bulk delete removes drafts only** {OJS OMP OPS}

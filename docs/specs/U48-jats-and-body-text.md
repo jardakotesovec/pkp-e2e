@@ -788,11 +788,8 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the JATS and
-Body Text routes is the grids' (*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
-for the changes, [the "JATS XML" page](#api-grid-jats-page) and
-[the "Body Text" page](#api-grid-body-text-page) for reading,
-[the published JATS XML](#api-grid-public-jats) for its download),
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
 checked apart (`docs/process/api.md`).
 
 API1. **A JATS download switch without its value is refused** {OJS}

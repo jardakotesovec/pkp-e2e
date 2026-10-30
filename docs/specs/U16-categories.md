@@ -864,9 +864,9 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the categories
-routes is the [categories grid](#api-grid-categories)'s, checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A category cannot be placed under itself or its own sub-category** {OJS OMP OPS}
 

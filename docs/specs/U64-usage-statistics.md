@@ -1228,10 +1228,9 @@ seeded reader visits. <sup>sc</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the statistics
-routes is the grids' (the [figures grid](#api-grid-statistics), the
-[one-work grid](#api-grid-statistics-work) and the
-[SUSHI grid](#api-grid-sushi)), checked apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 Their works and issues are seeded with visits as the scenarios above
 seed them.
 

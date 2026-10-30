@@ -854,8 +854,8 @@ recipe are in the footnote. <sup>s</sup>
 
 ### Through the API
 
-The check below reads what no screen reads; who may read the components
-is the [components grid](#api-grid-components-read)'s, checked apart
+The check below reads what no screen reads; who may call these routes is their permission grids'
+(`docs/tracking/api-routes.md` names each route's), checked apart
 (`docs/process/api.md`).
 
 API1. **One component read alone is the one the list shows** {OJS OMP OPS}

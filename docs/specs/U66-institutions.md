@@ -517,8 +517,8 @@ catcher's address and the tooling recipe are in the footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the
-institutions routes is the [institutions grid](#api-grid-institutions)'s,
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
 checked apart (`docs/process/api.md`).
 
 API1. **One institution read back at the journal's own address** {OJS OMP OPS}

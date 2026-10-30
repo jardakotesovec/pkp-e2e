@@ -1094,10 +1094,9 @@ each scenario's seeding are in its footnote.
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the routes is
-the grids' (this feature's three under Actors & permissions, and the
-Permissions & Disclosure page's for the Publication Settings and
-Preprint Entry pages), checked apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A version is published only once, and unpublished only while published** {OJS OMP OPS}
 

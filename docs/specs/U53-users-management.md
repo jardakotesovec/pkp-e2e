@@ -811,9 +811,10 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may read the journal's
-users is the [users grid](#api-grid-users)'s, checked apart
-(`docs/process/api.md`). Removing a role and changing its masthead choice
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
+Removing a role and changing its masthead choice
 belong to the member's roles page, [User invitations](U06-user-invitations.md#api-grid-invitations).
 
 API1. **The list ordered and narrowed as no screen asks** {OJS OMP OPS}

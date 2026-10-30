@@ -573,9 +573,9 @@ footnote. <sup>s0</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the relation
-route is the [relation route grid](#api-grid-relation)'s, checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A relation the route cannot store is refused** {OPS}
 

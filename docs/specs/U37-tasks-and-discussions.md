@@ -1502,10 +1502,9 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the tasks and
-templates routes is the grids' (Actors & permissions, from the
-[templates grid](#api-grid-template-management) to the
-[reply grid](#api-grid-reply)), checked apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 Each item goes on a submission at Copyediting (Production on a preprint
 server).
 

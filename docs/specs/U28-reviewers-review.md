@@ -1048,11 +1048,10 @@ App-specific:
 
 ### Through the API
 
-The check below reads what no screen shows; who may call the reviewer's
-routes is the grids' (Actors & permissions, the
-[reviewer's list](#api-grid-reviewer-assignments) and the
-[round's review](#api-grid-round-history)), checked apart
-(`docs/process/api.md`). It runs on a scratch journal or press.
+The check below reads what no screen shows; who may call these routes is their permission grids'
+(`docs/tracking/api-routes.md` names each route's), checked apart
+(`docs/process/api.md`).
+It runs on a scratch journal or press.
 
 API1. **A round's review read by its reviewer holds their own review alone** {OJS OMP}
 

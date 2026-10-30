@@ -1434,11 +1434,10 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the review
-routes is the grids' (Actors & permissions, from the
-[managing grid](#api-grid-manage-assignment) to the
-[reviewer-pool grid](#api-grid-reviewer-search)), checked apart
-(`docs/process/api.md`). Each runs on a scratch journal or press whose
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
+Each runs on a scratch journal or press whose
 submission has one review, completed by its reviewer.
 
 API1. **A rating outside the five stars, or with anything else, is refused** {OJS OMP}

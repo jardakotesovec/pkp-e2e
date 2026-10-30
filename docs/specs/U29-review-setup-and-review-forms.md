@@ -886,11 +886,9 @@ recipe are in the footnote. <sup>s0</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the
-recommendations routes is the grids' (Actors & permissions, the
-[reading grid](#api-grid-recommendations-read) and the
-[changing grid](#api-grid-recommendations)), checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A recommendation without a title, a known type or a status is refused** {OJS}
 

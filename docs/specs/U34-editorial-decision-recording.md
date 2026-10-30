@@ -1224,11 +1224,9 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the decision
-routes is the grids' (Actors & permissions, from the
-[reading grid](#api-grid-decisions-read) to the
-[file-copy grid](#api-grid-file-copy)), checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A decision of another stage, or of no known type, is refused** {OJS OMP OPS}
 

@@ -872,10 +872,9 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the templates
-and emails routes is the grids' ([managing](#api-grid-email-templates)
-and [reading](#api-grid-email-template-read) the templates), checked
-apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A template added to something that is not an email is refused** {OJS OMP OPS}
 

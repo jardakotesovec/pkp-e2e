@@ -863,9 +863,9 @@ the footnote. <sup>y</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may upload a picture is
-the [picture upload grid](#api-grid-picture-upload)'s, checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A file name with folder parts stays in the account's own folder** {OJS OMP OPS}
 

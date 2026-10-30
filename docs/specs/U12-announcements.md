@@ -898,8 +898,8 @@ footnote.
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the
-announcements routes is the [announcements grid](#api-grid-announcements)'s,
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
 checked apart (`docs/process/api.md`).
 
 API1. **One announcement read back at the journal's own address** {OJS OMP OPS}

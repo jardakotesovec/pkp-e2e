@@ -1216,9 +1216,9 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the theme
-routes is the [theme grid](#api-grid-theme)'s, checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **The theme and its fields read back** {OJS OMP OPS}
 

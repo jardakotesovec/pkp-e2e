@@ -951,11 +951,10 @@ and a preprint server. <sup>s0</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the comments
-routes is the grids' (Actors & permissions, from the
-[reading grid](#api-grid-comments-read) to the
-[moderating grid](#api-grid-comments-moderation)), checked apart
-(`docs/process/api.md`). Each runs on a scratch journal with public
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
+Each runs on a scratch journal with public
 comments on; on a press and a preprint server the requests are the same
 [A24](#a24).
 

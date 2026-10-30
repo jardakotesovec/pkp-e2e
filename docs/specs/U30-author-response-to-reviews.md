@@ -772,11 +772,10 @@ the footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the author
-response routes is the grids' (Actors & permissions, from the
-[request grid](#api-grid-request-response) to the
-[edit and delete grid](#api-grid-manage-response)), checked apart
-(`docs/process/api.md`). Each runs on a scratch journal or press whose
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
+Each runs on a scratch journal or press whose
 author has two submissions, each with a file on "Submission Files" and
 accepted from its review round, the review completed. A press answers
 these routes as a journal does, though its screens show none of it

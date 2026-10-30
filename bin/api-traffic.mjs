@@ -5,7 +5,7 @@
 //
 // run: npm run api-traffic -- <ci-run-id>        a CI run's logs (gh downloads them)
 //      npm run api-traffic -- --local            this clone's apps/*/playwright/.api-traffic/
-//      npm run api-traffic -- --clear            empty the local logs first (a fresh local map)
+//      npm run api-traffic -- --clear            empty the local logs and exit (before a fresh local run)
 //      … --feature U43                           only that feature's routes in the table
 //      … --against <run-id>                      mark the server errors that run met too,
 //                                                so the daily read judges only new ones

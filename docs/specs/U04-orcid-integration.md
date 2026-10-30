@@ -658,9 +658,8 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the ORCID
-routes is the grids' (*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
-for "Request verification", [sending a review](#api-grid-send-review)),
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
 checked apart (`docs/process/api.md`). "Delete" asks ORCID to cancel the
 contributor's token (Rule 8a), so a check sends it only where it is
 refused first.

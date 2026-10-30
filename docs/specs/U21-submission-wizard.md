@@ -1031,8 +1031,9 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may work on a draft is
-the [draft grid](#api-grid-draft)'s, checked apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A start in another journal's section is refused** {OJS OMP OPS}
 

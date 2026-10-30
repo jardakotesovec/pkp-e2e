@@ -1220,8 +1220,8 @@ are in the footnote. <sup>y</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the navigation
-menus routes is the [navigation menus grid](#api-grid-navigation-menus)'s,
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
 checked apart (`docs/process/api.md`).
 
 API1. **A menu's title cannot be emptied** {OJS OMP OPS}

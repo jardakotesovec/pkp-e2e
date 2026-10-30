@@ -928,9 +928,9 @@ are in the footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the sections
-routes is the [sections-read grid](#api-grid-sections-read)'s, checked
-apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **The sections listed a page at a time** {OJS}
 

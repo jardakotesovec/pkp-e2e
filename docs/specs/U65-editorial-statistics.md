@@ -1001,9 +1001,8 @@ other suite's run. <sup>sc</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the editorial
-figures, the users' figures and the users export is the statistics
-roles' grid of *[Statistics — usage](U64-usage-statistics.md#api-grid-statistics)*,
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
 checked apart (`docs/process/api.md`).
 
 API1. **A range the date picker refuses is refused** {OJS OMP OPS}

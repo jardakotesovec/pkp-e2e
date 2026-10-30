@@ -818,11 +818,9 @@ journals runs alone. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the journal
-routes is the grids' (the [journal reads](#api-grid-context-read), the
-[journal saves](#api-grid-context-edit), and
-*[System administration & jobs](U61-system-administration.md#api-grid-administration)*
-for adding and removing), checked apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A journal added with its required fields empty is refused** {OJS OMP OPS}
 

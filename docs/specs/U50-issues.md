@@ -1118,10 +1118,9 @@ catcher's address, background-jobs command and tooling recipe. <sup>s0</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the issues
-routes is the grids' ([reading the issues](#api-grid-issues-read),
-[the issue choices](#api-grid-issue-choices)), checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **Future issues are listed to the journal's managers alone** {OJS}
 

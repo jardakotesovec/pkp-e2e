@@ -669,9 +669,10 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the invitations
-routes is the [invitations grid](#api-grid-invitations)'s, checked apart
-(`docs/process/api.md`). An invitation started or saved through the API
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
+An invitation started or saved through the API
 with no invitation data at all fails on the server ⚠ [A19](#a19), an
 end date that is no date breaks its acceptance ⚠ [A18](#a18), and a
 member's last role ends through the API ⚠ [A20](#a20).

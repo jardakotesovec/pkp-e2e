@@ -796,9 +796,9 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the roles list
-is the [roles list grid](#api-grid-roles-list)'s, checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **An author reads each role by its name and level alone** {OJS OMP OPS}
 

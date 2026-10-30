@@ -392,7 +392,11 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      API1, API2…, each a title with its badge, a "Given:" line and bullets
      naming the request in words and the answer; never who may call a
      route (that is a grid's). One test each, named alike, in
-     shared/playwright/tests/api/. -->
+     shared/playwright/tests/api/. The block opens with: "The checks below
+     send what no screen sends; who may call these routes is their
+     permission grids' (`docs/tracking/api-routes.md` names each route's),
+     checked apart (`docs/process/api.md`)." (or what the checks read
+     instead of send), then what the checks share. -->
 
 ## Coverage
 

@@ -971,9 +971,8 @@ App-specific:
 
 ### Through the API
 
-The check below reads what no screen reads; who may read the
-participants is the grids' (the [list of every stage](#api-grid-participants-read)
-and [one stage's](#api-grid-stage-participants-read)), checked apart
+The check below reads what no screen reads; who may call these routes is their permission grids'
+(`docs/tracking/api-routes.md` names each route's), checked apart
 (`docs/process/api.md`).
 
 API1. **The list of every stage names each participant once** {OJS OMP OPS}

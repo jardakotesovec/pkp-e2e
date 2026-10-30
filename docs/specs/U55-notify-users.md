@@ -416,10 +416,9 @@ the footnote. <sup>s</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may send is the grid of
-the Users & Roles page the "Notify" tab sits on
-(*[Users management](U53-users-management.md#api-grid-users)*), checked
-apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A role of another journal is refused** {OJS OMP OPS}
 

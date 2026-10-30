@@ -1122,10 +1122,9 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the files
-routes is the grids' (the [file list grid](#api-grid-file-list) to the
-[temporary upload grid](#api-grid-temporary-upload)), checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A file list that names no list holds only the reader's own stages** {OJS OMP}
 

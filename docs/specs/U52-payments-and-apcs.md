@@ -798,10 +798,9 @@ ready account. <sup>s0</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the payments
-routes is the grids' ([setting up payments](#api-grid-payments-setup),
-[recording the APC](#api-grid-apc-record)), checked apart
-(`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **A currency not on the list is refused** {OJS OMP}
 

@@ -2143,11 +2143,10 @@ throwaway accounts. <sup>sc</sup>
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the DOI routes
-is the grids' ([managing DOIs](#api-grid-dois),
-[the registration agency](#api-grid-doi-registration),
-[a review's DOI](#api-grid-review-dois)), checked apart
-(`docs/process/api.md`). No journal here has a registration agency, so
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
+No journal here has a registration agency, so
 nothing reaches one.
 
 API1. **A DOI record added naming another journal lands in this one** {OJS OMP OPS}

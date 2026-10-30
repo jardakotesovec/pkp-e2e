@@ -871,11 +871,9 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the routes is
-the grids' (this feature's three under Actors & permissions,
-*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
-for saving contributors, *[the workflow screen](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*
-for reading one), checked apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **An edit keeps what it leaves out, and the affiliations it resends** {OJS OMP OPS}
 

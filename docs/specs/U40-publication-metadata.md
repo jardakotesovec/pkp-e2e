@@ -1000,11 +1000,9 @@ App-specific:
 
 ### Through the API
 
-The checks below send what no screen sends; who may call the routes is
-the grids' (this feature's two under Actors & permissions, the edit
-gate for saving and the Permissions & Disclosure page's,
-*[the workflow screen](U24-workflow-screen-and-stage-access.md#api-grid-publication-pages)*
-for loading the other pages' forms), checked apart (`docs/process/api.md`).
+The checks below send what no screen sends; who may call these routes is
+their permission grids' (`docs/tracking/api-routes.md` names each route's),
+checked apart (`docs/process/api.md`).
 
 API1. **The fields the journal stamps are refused** {OJS OMP OPS}
 

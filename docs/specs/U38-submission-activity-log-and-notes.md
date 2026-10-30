@@ -538,8 +538,8 @@ footnote. <sup>s0</sup>
 
 ### Through the API
 
-The check below reads what no screen reads; who may read one sent email
-is the [email grid](#api-grid-email-read)'s, checked apart
+The check below reads what no screen reads; who may call these routes is their permission grids'
+(`docs/tracking/api-routes.md` names each route's), checked apart
 (`docs/process/api.md`).
 
 API1. **A sent letter reads back as it was sent** {OJS OMP OPS}
