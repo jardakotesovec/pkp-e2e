@@ -178,7 +178,7 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
             participants,
             ...extra,
         });
-        return {submissionId: created.submissionId, publicationId: created.publicationId};
+        return {submissionId: created.submissionId, publicationId: created.publicationId, seeded: created};
     };
     const reviewed = (status, decisions) =>
         reviewer ? {decisions, reviewRounds: [{reviewers: [{username: reviewer, status}]}]} : {};
@@ -190,7 +190,8 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
     };
     const submissions = {};
     for (const [state, [suffix, seed]] of Object.entries(seeds)) {
-        submissions[state] = await seedSubmission(suffix, seed);
+        const {submissionId, publicationId} = await seedSubmission(suffix, seed);
+        submissions[state] = {submissionId, publicationId};
     }
     let fresh = 0;
 
@@ -202,7 +203,8 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         issueId: context.issues?.[0]?.id ?? null,
         /**
          * Another submission like the state's, for a call that would change
-         * or remove it; `extra` adds seed keys (scenarios.md).
+         * or remove it; `extra` adds seed keys (scenarios.md), and `seeded`
+         * is the seed's whole answer (its galleys, chapters, formats).
          */
         freshSubmission: (state, extra = {}) => seedSubmission(`${seeds[state][0]}${(fresh++).toString(36)}`, {...seeds[state][1], ...extra}),
         submission: (state) => {
