@@ -536,21 +536,21 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `submission.files.getMany` | GET | `submissions/{submissionId}/files` | ojs omp ops | admin manager subEditor assistant author | U36 | — |
-| `submission.files.getFile` | GET | `submissions/{submissionId}/files/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant author | U36 | — |
-| `submission.files.add` | POST | `submissions/{submissionId}/files` | ojs omp ops | admin manager subEditor assistant author | U36 | — |
-| `submission.files.edit` | PUT | `submissions/{submissionId}/files/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant author | U36 | — |
-| `submission.files.delete` | DELETE | `submissions/{submissionId}/files/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant author | U36 | — |
+| `submission.files.getMany` | GET | `submissions/{submissionId}/files` | ojs omp ops | admin manager subEditor assistant author | U36 | U36#file-list |
+| `submission.files.getFile` | GET | `submissions/{submissionId}/files/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant author | U36 | U36#copyedited-file-read |
+| `submission.files.add` | POST | `submissions/{submissionId}/files` | ojs omp ops | admin manager subEditor assistant author | U36 | U36#copyedited-file-add |
+| `submission.files.edit` | PUT | `submissions/{submissionId}/files/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant author | U36 | U36#copyedited-file-change |
+| `submission.files.delete` | DELETE | `submissions/{submissionId}/files/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant author | U36 | U36#copyedited-file-change |
 | `submission.files.review` | GET | `submissions/{submissionId}/files/review/{reviewId}` | ojs omp ops | admin manager subEditor assistant reviewer | U27 | U27#review-files |
-| `submission.files.copy` | PUT | `submissions/{submissionId}/files/{submissionFileId}/copy` | ojs omp ops | admin manager subEditor | U36 | — |
+| `submission.files.copy` | PUT | `submissions/{submissionId}/files/{submissionFileId}/copy` | ojs omp ops | admin manager subEditor | U34 | — |
 
 ### submissions/{submissionId}/publications/{publicationId}/bodyText — PKPBodyTextController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `publication.bodyText.get` | GET | `submissions/{submissionId}/publications/{publicationId}/bodyText` | ojs | admin manager subEditor assistant author | U48 | — |
-| `publication.bodyText.save` | PUT | `submissions/{submissionId}/publications/{publicationId}/bodyText` | ojs | admin manager subEditor assistant | U48 | — |
-| `publication.bodyText.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/bodyText` | ojs | admin manager subEditor assistant | U48 | — |
+| `publication.bodyText.get` | GET | `submissions/{submissionId}/publications/{publicationId}/bodyText` | ojs | admin manager subEditor assistant author | U48 | U48#body-text-page |
+| `publication.bodyText.save` | PUT | `submissions/{submissionId}/publications/{publicationId}/bodyText` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
+| `publication.bodyText.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/bodyText` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
 
 ### submissions/{submissionId}/publications/{publicationId}/citations — PKPCitationController
 
@@ -591,21 +591,21 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `publication.jats.get` | GET | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant author | U48 | — |
-| `publication.jats.add` | POST | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | — |
-| `publication.jats.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | — |
-| `publication.jats.setVisibility` | PUT | `submissions/{submissionId}/publications/{publicationId}/jats/visibility` | ojs | admin manager subEditor assistant | U48 | — |
+| `publication.jats.get` | GET | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant author | U48 | U48#jats-page |
+| `publication.jats.add` | POST | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
+| `publication.jats.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
+| `publication.jats.setVisibility` | PUT | `submissions/{submissionId}/publications/{publicationId}/jats/visibility` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
 
 ### submissions/{submissionId}/publications/{publicationId}/mediaFiles — MediaFilesController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `mediaFiles.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/mediaFiles` | ojs omp ops | admin manager subEditor assistant author | U47 | — |
-| `mediaFiles.add` | POST | `submissions/{submissionId}/publications/{publicationId}/mediaFiles` | ojs omp ops | admin manager subEditor assistant | U47 | — |
-| `mediaFiles.linkMany` | POST | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/link` | ojs omp ops | admin manager subEditor assistant | U47 | — |
-| `mediaFiles.link` | PUT | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/{submissionFileId}/link` | ojs omp ops | admin manager subEditor assistant | U47 | — |
-| `mediaFiles.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant | U47 | — |
-| `mediaFiles.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant | U47 | — |
+| `mediaFiles.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/mediaFiles` | ojs omp ops | admin manager subEditor assistant author | U47 | U47#media-list |
+| `mediaFiles.add` | POST | `submissions/{submissionId}/publications/{publicationId}/mediaFiles` | ojs omp ops | admin manager subEditor assistant | U47 | U47#media-manage |
+| `mediaFiles.linkMany` | POST | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/link` | ojs omp ops | admin manager subEditor assistant | U47 | U47#media-manage |
+| `mediaFiles.link` | PUT | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/{submissionFileId}/link` | ojs omp ops | admin manager subEditor assistant | U47 | U47#media-manage |
+| `mediaFiles.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant | U47 | U47#media-manage |
+| `mediaFiles.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/mediaFiles/{submissionFileId}` | ojs omp ops | admin manager subEditor assistant | U47 | U47#media-manage |
 
 ### submissions/{submissionId}/reviewAssignments — ReviewAssignmentController
 
@@ -631,7 +631,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `temporaryFile.uploadFile` | POST | `temporaryFiles` | ojs omp ops | admin manager subEditor assistant author reviewer | U36 | — |
+| `temporaryFile.uploadFile` | POST | `temporaryFiles` | ojs omp ops | admin manager subEditor assistant author reviewer | U36 | U36#temporary-upload |
 
 ### userGroups — UserGroupController
 

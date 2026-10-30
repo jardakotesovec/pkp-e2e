@@ -55,6 +55,55 @@ and every assistant role). <sup>c</sup>
 | **Download the published JATS XML** (the article page's "JATS XML" link; Rules 10–12) | • Anyone who opens the article's page, signed out included, while the version's box is ticked and the version is published. On a journal that requires subscriptions this holds in a restricted issue too: a visitor its galleys refuse ([Subscriptions](U51-subscriptions.md), its Rule 12) still downloads the XML ⚠ [A22](#a22)<br>• With "Users must be registered and log in to view open access content." on, signed-in visitors only (Settings bullet 2)<br>• Before the version is published: those offered the workflow header's "Preview", and the submitting author by the link's address (Rule 11) <sup>e</sup> <sup>d13</sup> |
 | **Turn the "JATS Template Plugin" on or off** | • Journal Manager, Editor and Site Administrator: on Settings › Website › "Plugins", the plugin row's box (*Plugins management*; Settings bullet 1). Ticking it shows "The plugin "JATS Template Plugin" has been enabled."; unticking asks "Are you sure you want to disable this plugin?" with "OK" and "Cancel", then shows "The plugin "JATS Template Plugin" has been disabled."<br>• A Section Editor who opens Settings › Website reads "The current role does not have access to this operation." <sup>d29</sup> |
 
+Uploading and deleting a JATS file, the tick box, and saving and
+deleting the Body Text follow
+*[Publication metadata's edit gate](U40-publication-metadata.md#api-grid-edit-gate)*.
+The two grids below are this feature's own: reading each page, for the
+roles that see it. Through the REST API the submitting author also reads
+both pages' content, and the Copyeditor the Body Text ⚠ [A25](#a25).
+
+<a id="api-grid-jats-page"></a>
+**Permission grid: reading the "JATS XML" page.** The preamble's "JATS
+XML" listing, every editorial role that sees the version's publication
+pages and not the author view, for the route that loads the page's XML
+(`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| submitter | ? [A25](#a25) | ? [A25](#a25) |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-body-text-page"></a>
+**Permission grid: reading the "Body Text" page.** The preamble's "Body
+Text" listing, the editorial roles with Production access, for the route
+that loads the page's text; the assigned assistant is a Copyeditor, whose
+role has no Production access (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ? [A25](#a25) | ? [A25](#a25) |
+| submitter | ? [A25](#a25) | ? [A25](#a25) |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 **The "JATS XML" page** (Publication › a version › "JATS XML", headed
@@ -175,7 +224,9 @@ Nothing on either page is required, and neither page has a form-level
    page. Are you sure you want to disable this?". Each offers "Confirm" and
    "Cancel". "Cancel" puts the tick back as it was; "Confirm" saves at
    once, with no toast. On a published version the change reaches the
-   article's page immediately. <sup>l</sup> <sup>d2</sup>
+   article's page immediately. A program that sends the change through
+   the REST API with the value as the text "false" ticks the box
+   ⚠ [A24](#a24). <sup>l</sup> <sup>d2</sup>
 
 ### The published "JATS XML"
 
@@ -235,7 +286,8 @@ Nothing on either page is required, and neither page has a form-level
     "Unsaved Changes" badge; undoing back to the saved text hides it
     again. "Save" stores the whole text, hides the badge and reads "Saved"
     for about a second and a half. "Save" can be pressed with nothing
-    changed, and saves again. <sup>g</sup> <sup>n</sup> <sup>d16</sup>
+    changed, and saves again. A program that saves through the REST
+    API's own PUT request gets a server error ⚠ [A23](#a23). <sup>g</sup> <sup>n</sup> <sup>d16</sup>
 16. **Leaving with unsaved changes.** Nothing asks. Choosing another
     entry of the workflow's side menu, closing the workflow, reloading the
     browser page or closing the tab leaves at once, and the changes are
@@ -697,6 +749,37 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
      and the public page shows the monograph's (preprint's) title.
      <sup>v</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the JATS and
+Body Text routes is the grids' (*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
+for the changes, [the "JATS XML" page](#api-grid-jats-page) and
+[the "Body Text" page](#api-grid-body-text-page) for reading), checked
+apart (`docs/process/api.md`).
+
+API1. **A JATS download switch without its value is refused** {OJS}
+
+   Given: a Journal Manager, an unpublished submission whose "Make
+   available with publication" was never ticked.
+
+   - **No value**: send the tick box's change through the API with no
+     value: refused (400), and the box stays unticked. The page always
+     sends one.
+   - **Control**: the same request with true ticks the box, and with
+     false unticks it again (Rule 9).
+
+API2. **A version's Body Text is deleted, once** {OJS}
+
+   Given: a Journal Manager, an unpublished submission whose Body Text
+   was never saved.
+
+   - **Nothing to delete**: delete the version's Body Text through the
+     API: refused (404). No screen offers a delete.
+   - **Saved, then deleted**: save a paragraph the way "Save" does, and
+     read it back; delete it: answered 200, and the version's Body Text
+     reads empty again, as on a version never saved (Rule 14). A second
+     delete is refused (404).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -824,11 +907,14 @@ entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | On "Body Text", pressing a closed side section closes the open one and leaves the pressed one closed | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | Each JATS "Upload" leaves a warning in the server's log | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A22](#a22) | On a subscription journal, the article page's "JATS XML" gives the article's text to visitors its galleys refuse | 🐞 | high | issues (claude), 2026-10-05 — re-verified |
+| [A23](#a23) | A program that saves a version's Body Text with the REST API's own PUT request gets a server error, and nothing is saved | 🐞 | low · crash: server | — |
+| [A24](#a24) | A program that sends the JATS download switch as the text "false" makes the JATS XML public | 🐞 | low | — |
 | [A3](#a3) | A published version's Body Text stays editable | ❓ | minor | — |
 | [A4](#a4) | A new version starts with an empty Body Text, though its JATS file and media are copied | ❓ | user-visible | — |
 | [A5](#a5) | The saved Body Text reaches no reader and not the JATS XML | ❓ | user-visible | — |
 | [A10](#a10) | "Upload" on "JATS XML" accepts a text file or a PDF as the article's JATS XML | ❓ | minor | — |
 | [A19](#a19) | Signed in for the "JATS XML" download, the visitor is left on the Login page | ❓ | minor | — |
+| [A25](#a25) | The REST API gives the submitting author the "JATS XML" and "Body Text" pages' content, and a Copyeditor the Body Text, though their screens list neither page | ❓ | latent | — |
 | [A21](#a21) | Retired: in French the tick box, its two windows and labels of the "Body Text" panel show raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [A18](#a18) | Retired: a file sent to the Body Text editor that could not be converted ended the import with no message; fixed in pkp/ui-library#979 before its merge | ✅ | retired | re-probe at the PR head (claude), 2026-10-12 — fixed before merge |
 | [OMP1](#omp1) | Retired: a press's editor was offered "Send to Text Editor" on a file, and confirming it imported nothing; fixed in pkp/ui-library#979 before its merge | ✅ | retired | re-probe at the PR head (claude), 2026-10-12 — fixed before merge |
@@ -1113,6 +1199,46 @@ available "for public download when the publication is published", not
 that this bypasses subscriptions.
 Since: 2026-02-13 · Basis: probe, 2026-10-05. <sup>f-a22</sup>
 
+<a id="a23"></a>
+**A23 — A program that saves a version's Body Text with the REST API's own PUT request gets a server error, and nothing is saved** · 🐞 · low · crash: server.
+The "Body Text" page's "Save" sends the text as a form posted with a
+note that it stands for a PUT, and that works. A program that uses the
+install's programming interface as it is published, a PUT request with
+the text in its body, gets a server error instead, whatever the body
+holds, and the version's Body Text stays as it was. So does a save
+that carries no text at all, the screen's way included. The program
+expects the text saved, or a request without text refused with a
+message.
+Basis: probe, 2026-10-30. <sup>f-a23</sup>
+
+<a id="a24"></a>
+**A24 — A program that sends the JATS download switch as the text "false" makes the JATS XML public** · 🐞 · low.
+"Make available with publication" sends a true or false value. A
+program that sends the same request through the install's programming
+interface with the value written as text, "false" or "no", gets the
+box ticked: the answer reads true, and once the version is published
+its article page offers the JATS XML to readers. The program expects
+"false" to untick the box, or a value that is not a yes or no to be
+refused.
+Basis: probe, 2026-10-30. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — The REST API gives the submitting author the "JATS XML" and "Body Text" pages' content, and a Copyeditor the Body Text, though their screens list neither page** · ❓ · latent.
+The author's view of a submission lists neither page, and "Body Text"
+is listed only for editorial roles with Production access, so a
+Copyeditor assigned to the submission does not see it (Actors). The
+install's programming interface still answers the submitting author's
+request for either page's content (the JATS XML, an uploaded file's
+details, the Body Text), and the Copyeditor's for the Body Text,
+before and after publication. The request for the page's content says
+in the code that authors may read it. What they get is their own
+article's text and metadata, which they read elsewhere anyway (the
+author view's other pages, the galleys).
+Question: should the two pages' requests follow the pages' own rules?
+Lean: harmless as it stands; align them, or list the pages read-only
+for the author, so that the two say the same.
+Basis: probe, 2026-10-30. <sup>f-a25</sup>
+
 ### Retired
 
 <a id="a18"></a>
@@ -1377,6 +1503,15 @@ Security-shaped and unreleased: its issue report carries "- **Security** unrelea
 Issue report: [pkp-e2e-sec#3](https://github.com/jardakotesovec/pkp-e2e-sec/issues/3) ([docs/issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md](../issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md)).
 
 <a id="fn-f-omp1"></a>
+<a id="fn-f-a23"></a>
+**f-a23** — Probed 2026-10-30, OJS `main` (ojs `0a00726121`, lib/pkp `df42984b46`), a scratch journal's manager on an unpublished and a published version: `PUT …/publications/{pid}/bodyText` with a JSON body (`{}`, `{"bodyText": "<a document>"}`, `{"bodyText": ""}`) answered 500 with the PHP TypeError ("`PKP\bodyText\Repository::setBodyText(): Argument #1 ($bodyText) must be of type string, null given`", naming the controller's absolute path and line 141), and the next read held the earlier text; the screen's request, `POST` with `X-Http-Method-Override: PUT` and a multipart `bodyText` field, answered 200 and stored it; the same request without the field answered the same 500. Mechanism: `PKPBodyTextController::save()` reads `$_POST['bodyText']` unchecked, and PHP fills `$_POST` only for a form-encoded POST, so a real PUT (or a JSON body) gives it null; introduced with the route by `21585b09ab` (pkp/pkp-lib#11994, 2025-12-10); `stable-3_5_0` has no Body Text route. The fix would read the field from the request (`$illuminateRequest->input('bodyText')`) and refuse a missing one with 400. The matrix meets it in every allowed cell of the save.
+
+<a id="fn-f-a24"></a>
+**f-a24** — Probed 2026-10-30, OJS `main` (lib/pkp `df42984b46`), a scratch journal's manager: `PUT …/publications/{pid}/jats/visibility` with `{"jatsPublicVisibility": "false"}` or `"no"` answered 200 `{"jatsPublicVisibility": true}`; `null`, `0` and `[]` answered false; `{}` answered 400 "missingRequiredParameter". Mechanism: `PKPJatsController::setVisibility()` stores `(bool) $params['jatsPublicVisibility']`, PHP's cast, under which any non-empty text is true; the publication schema's own conversion (`convertStringsToSchema`, which reads "false" as false) is not applied. Introduced by `5f5066e1f6` (pkp/pkp-lib#10405, 2026-02-13); `stable-3_5_0` has no visibility route. The page sends a JSON boolean, so no screen meets it.
+
+<a id="fn-f-a25"></a>
+**f-a25** — Probed 2026-10-30, OJS `main` (lib/pkp `df42984b46`), a persona set (`docs/process/api.md` "The personas"): `GET …/publications/{pid}/jats` and `GET …/bodyText` answered 200 to the submitting author on the unpublished and the published version, and `GET …/bodyText` 200 to the assigned Copyeditor; an author not on the submission, a reviewer, a reader and a signed-out visitor got 401. Mechanism: both routes admit `ROLE_ID_AUTHOR` ("Read access: authors may view … content (read-only)" in `PKPJatsController::getGroupRoutes()` and `PKPBodyTextController::getGroupRoutes()`) and authorize the read with `PublicationAccessPolicy` (whoever may open the submission), not the workflow's page roster or a Production-stage check.
+
 **f-omp1** — Note b and note p: before the fix, OMP's navigation config had no `bodyText` item, so `navigateToMenu('publication_{id}_bodyText')` found no entry after the version form's POST/PUT had run; the address kept `importFileUrl` and `importFileName` (live-probed 2026-10-02). At the PR head `e28a1de30d` (ui-library#979), before its merge, 2026-10-12, `useFileManagerConfig.js` `getManagerConfig()` drops `Actions.FILE_SEND_TO_EDITOR` from every file list's available actions unless `useApp().isOJS()` (`pkp.context.app === 'ojs2'`), so OMP and OPS offer it on no row, for any role; the author ruled (@jarda.kotesovec, 2026-10-12, in the review thread) that a press should not have the action at all. Probe: d28.
 Merged 2026-10-12 as ui-library `c9889f00` (pkp/ui-library#979, with pkp-lib `f4c2578c94` and ojs `22d0136df7`), each the squash of its reviewed head. The report's walk (`checks/issues/press-send-to-text-editor-leads-nowhere/walk.js`, `DOCX=1`) on the default dataset at the merged tips: a press's Word row offers no "Send to Text Editor", a journal's still sends and imports; the report deleted, [pkp-e2e#553](https://github.com/jardakotesovec/pkp-e2e/issues/553) closed.
 

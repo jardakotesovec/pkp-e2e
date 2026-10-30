@@ -63,6 +63,33 @@ and there the "URN" row of the Plugins page offers no "Settings". <sup>a</sup> <
 | **See URNs on the reader pages** {OJS OMP} | • any reader, on a published article's page and an issue's page (journal), and under an approved, available publication format on the book page (press) (Rule 21) <sup>h</sup> |
 | **Assign a publication format's URN while approving it** {OMP} | • the roles that approve publication formats, from the format row's "Awaiting Approval" on the Publication Formats page (Rule 16a) <sup>g</sup> |
 
+<a id="api-grid-identifiers-page"></a>
+**Permission grid: opening the article's "Identifiers" page.** The row
+"See the article's "Identifiers" page" above, every role that sees the
+editorial view of the Publication area while the URN plugin is on for
+articles, for the route that loads the page's form; a preprint server
+has no URN plugin and no page, so nobody loads it there
+(`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ |
+| manager {OPS} | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ |
+| assigned section editor {OPS} | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin {OJS OMP} | ✓ | ✓ |
+| site admin {OPS} | — | — |
+
 ## Fields & validation
 
 **Settings › Workflow › Submission › "Metadata": "Publisher ID"** <sup>a</sup>
