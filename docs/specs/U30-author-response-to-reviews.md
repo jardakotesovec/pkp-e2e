@@ -79,23 +79,28 @@ response" and "Open the request page by its address": the editorial
 roles, on any round of a submission they may open; the Funding
 Coordinator is refused ([A3](#a3) is the button offered to them). The
 route behind "Submit Request" follows it; a round that is not ready
-refuses the request itself (Rule 4a), whoever sends it.
+refuses the request itself (Rule 4a), whoever sends it. `Review` is the
+round of the persona set's submission still in review, its review not
+yet in: there the request is refused (422) only after the caller is let
+through. The two grids after this one have no such column: nobody may
+submit a response to that round (no card, Rule 6), and it holds none to
+edit or delete.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| assigned review assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-submit-response"></a>
 **Permission grid: submitting a response.** The row "Submit a

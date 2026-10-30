@@ -57,7 +57,9 @@ so a program can check it:
   badge is only for a row whose cells differ by app, split into one row
   per badge, as `submitter` above.
 - **Columns** are states. `Unpublished` and `Published` are the persona
-  set's two main submissions, `Review` the one in review. A rule about the context rather than a submission
+  set's two main submissions, `Review` the one in review, and `Draft`
+  the submitter's draft (made per cell for a route that only a draft
+  takes). A rule about the context rather than a submission
   has `Context`, and `Site` where the site has the same thing in
   Administration (the route called on `index`):
 

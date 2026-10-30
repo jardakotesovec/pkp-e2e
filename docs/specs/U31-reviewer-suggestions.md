@@ -59,9 +59,9 @@ the "Reviewers Suggested by Author" panel" (`docs/process/api.md`): the
 editorial roles and the Funding Coordinator, on any submission they may
 open, whatever its stage (the panel sits on its Submission and Review
 stages); the author's view carries no panel, whether it should is
-[A4](#a4). The route listing a submission's suggestions
-follows it. The persona set's assistant is a copyeditor, who reaches
-neither stage the panel sits on.
+[A4](#a4). The routes listing a submission's suggestions and reading
+one of them follow it. The persona set's assistant is a copyeditor, who
+reaches neither stage the panel sits on.
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|
@@ -78,6 +78,28 @@ neither stage the panel sits on.
 | nobody signed in | — | — | — |
 | manager of another context | — | — | — |
 | site admin | ✓ | ✓ | ✓ |
+
+<a id="api-grid-suggestions-write"></a>
+**Permission grid: suggesting reviewers.** The row "Suggest reviewers"
+(`docs/process/api.md`): the author on their own draft and the Journal
+Manager (so the Site Administrator) on any draft; no one else is
+offered the draft. The routes behind the step's "Save", "Edit" › "Save"
+and "Delete" follow it. `Draft` is the submitter's draft, which no one
+is assigned to yet; once a submission is in, every write is refused
+(Rule 7; "Through the API", API1).
+
+| Persona | Draft |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| submitter | ✓ |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
 
 ## Fields & validation
 
@@ -554,6 +576,27 @@ footnote. <sup>s</sup>
    - **Control**: on a journal with the setting on, the same wizard carries
      the step (scenario 1) and the same screen the panel (scenario 2).
      <sup>s6</sup>
+
+### Through the API
+
+The checks below send what no screen sends; who may call the
+suggestions routes is the grids' (the [read grid](#api-grid-suggestions-read)
+and the [write grid](#api-grid-suggestions-write)), checked apart
+(`docs/process/api.md`).
+
+API1. **Suggestions are fixed once the submission is in** {OJS OMP}
+
+   Given: "Reviewer Suggestion at Submission" on, a Journal Manager, and
+   an Author with a submitted submission and a draft, each carrying one
+   suggestion.
+
+   - **Refused (401)**: on the submitted submission, adding a suggestion,
+     editing it and deleting it through the API, as the Author and as
+     the Journal Manager, each with the error
+     `user.authorization.submission.complete.reviewerSuggestionRestrict`,
+     and the list stays as it was. No screen offers a change once the
+     submission is in (Rule 7).
+   - **Control**: on the draft, the Author's edit is stored.
 
 ## Coverage
 

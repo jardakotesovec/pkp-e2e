@@ -388,8 +388,8 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.editorial.getEditorialStat` | GET | `stats/editorial` | ojs omp ops | admin manager subEditor | U65 | — |
-| `stats.editorial.getAverages` | GET | `stats/editorial/averages` | ojs omp ops | admin manager subEditor | U65 | — |
+| `stats.editorial.getEditorialStat` | GET | `stats/editorial` | ojs omp ops | admin manager subEditor | U65 | U64#statistics |
+| `stats.editorial.getAverages` | GET | `stats/editorial/averages` | ojs omp ops | admin manager subEditor | U65 | U64#statistics |
 
 ### stats/issues — StatsIssueController [ojs]
 
@@ -449,7 +449,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.user.getUserStat` | GET | `stats/users` | ojs omp ops | admin manager subEditor | U65 | — |
+| `stats.user.getUserStat` | GET | `stats/users` | ojs omp ops | admin manager subEditor | U65 | U64#statistics |
 
 ### submissions — EditorialTaskController
 
@@ -504,10 +504,10 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `submission.publication._components.changeLanguageMetadata` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/changeLanguageMetadata` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
 | `submission.publication._components.identifiers` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/identifier` | ojs omp ops | manager subEditor assistant | U44 | U44#identifiers-page |
 | `submission.publication._components.permissionDisclosure` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/permissionDisclosure` | ojs omp ops | manager subEditor assistant | U40 | U40#permissions-page |
-| `submission.edit` | PUT | `submissions/{submissionId}` | ojs omp ops | manager subEditor author | U21 | — |
-| `submission.saveForLater` | PUT | `submissions/{submissionId}/saveForLater` | ojs omp ops | manager subEditor author | U21 | — |
-| `submission.submit` | PUT | `submissions/{submissionId}/submit` | ojs omp ops | manager subEditor author | U21 | — |
-| `submission.add` | POST | `submissions` | ojs omp ops | none | U21 | — |
+| `submission.edit` | PUT | `submissions/{submissionId}` | ojs omp ops | manager subEditor author | U21 | U21#draft |
+| `submission.saveForLater` | PUT | `submissions/{submissionId}/saveForLater` | ojs omp ops | manager subEditor author | U21 | U21#draft |
+| `submission.submit` | PUT | `submissions/{submissionId}/submit` | ojs omp ops | manager subEditor author | U21 | U21#draft |
+| `submission.add` | POST | `submissions` | ojs omp ops | none | U21 | none: an allowed call enrols its caller in the context's Author role even when its body is refused (Rule 3a), which would change what every later cell of the persona set reads |
 
 ### submissions — SubmissionController [ojs]
 
@@ -622,11 +622,11 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `reviewer.suggestions.get` | GET | `submissions/{submissionId}/reviewers/suggestions/{suggestionId}` | ojs omp | admin manager subEditor assistant author | U31 | — |
+| `reviewer.suggestions.get` | GET | `submissions/{submissionId}/reviewers/suggestions/{suggestionId}` | ojs omp | admin manager subEditor assistant author | U31 | U31#suggestions-read |
 | `reviewer.suggestions.getMany` | GET | `submissions/{submissionId}/reviewers/suggestions` | ojs omp | admin manager subEditor assistant author | U31 | U31#suggestions-read |
-| `reviewer.suggestions.add` | POST | `submissions/{submissionId}/reviewers/suggestions` | ojs omp | admin manager subEditor assistant author | U31 | — |
-| `reviewer.suggestions.edit` | PUT | `submissions/{submissionId}/reviewers/suggestions/{suggestionId}` | ojs omp | admin manager subEditor assistant author | U31 | — |
-| `reviewer.suggestions.delete` | DELETE | `submissions/{submissionId}/reviewers/suggestions/{suggestionId}` | ojs omp | admin manager subEditor assistant author | U31 | — |
+| `reviewer.suggestions.add` | POST | `submissions/{submissionId}/reviewers/suggestions` | ojs omp | admin manager subEditor assistant author | U31 | U31#suggestions-write |
+| `reviewer.suggestions.edit` | PUT | `submissions/{submissionId}/reviewers/suggestions/{suggestionId}` | ojs omp | admin manager subEditor assistant author | U31 | U31#suggestions-write |
+| `reviewer.suggestions.delete` | DELETE | `submissions/{submissionId}/reviewers/suggestions/{suggestionId}` | ojs omp | admin manager subEditor assistant author | U31 | U31#suggestions-write |
 
 ### temporaryFiles — PKPTemporaryFilesController
 
@@ -645,7 +645,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `user.getReviewers` | GET | `users/reviewers` | ojs omp ops | admin manager subEditor | U27 | U27#reviewer-search |
-| `user.getReport` | GET | `users/report` | ojs omp ops | admin manager subEditor | U65 | — |
+| `user.getReport` | GET | `users/report` | ojs omp ops | admin manager subEditor | U65 | U64#statistics |
 | `user.getUser` | GET | `users/{userId}` | ojs omp ops | admin manager subEditor | U53 | — |
 | `user.getManyUsers` | GET | `users` | ojs omp ops | admin manager subEditor | U53 | — |
 | `user.endRole` | PUT | `users/{userId}/endRole/{userGroupId}` | ojs omp ops | admin manager | U53 | — |
