@@ -50,6 +50,27 @@ signed-out visitor who types the page's address gets the Login page.
 | **Open and save a version's "Catalog Entry" page** (Rule 13) | • whoever the workflow shows the page to: it is one of the version's pages in the editorial view, for roles with access to the Production stage ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#publication-tabs)). The Author's view never lists it<br>• saving: whoever may edit the publication ([Publication metadata](U40-publication-metadata.md#edit-gate)); anyone else sees the page with its boxes open to typing and "Save" greyed out, so nothing they type can be saved <sup>d</sup> <sup>td3</sup> |
 | **Read the "Catalog Management" notice** (Rule 14) | • every role that opens the book's Production stage, the Author included ⚠ [A2](#a2) <sup>e</sup> <sup>td15</sup> |
 
+<a id="api-grid-catalog"></a>
+**Permission grid: managing the catalog.** The rows "Tick or untick
+"Featured" / "New release"", "Order the featured books" and "Add books to
+the catalog" above, for the routes behind the boxes, "Save Order" and "Add
+Entry" › "Save"; the Series editor's saves are refused ([A1](#a1)), and
+the Catalog Entry page's form follows
+[the Permissions & Disclosure page's grid](U40-publication-metadata.md#api-grid-permissions-page),
+another of the version's editorial pages (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **The Catalog page.** Headed "Catalog", with one tab, "All Monographs",
@@ -244,6 +265,10 @@ bottom, and a sixth, "Identity", once the book has been published;
       The warning about it is the publish window's alone
       ([Publish, schedule & versions](U49-publish-schedule-and-versions.md),
       its Rule 4), and "Add Entry" opens no such window. <sup>g</sup>
+    - 12d. **Every book or none.** "Save" publishes the chosen books
+      only once every one of them can be: a book that cannot stops the
+      whole save, and a chosen book already published is passed over.
+      <sup>g</sup>
 13. **The Catalog Entry page.** Each version has its own; "Save" stores
     the whole page onto the shown version, with "Saving", then "Saved",
     beside the button, and after a reload the page shows the saved
@@ -693,6 +718,25 @@ published. <sup>s</sup>
      the page headed "Catalog"; the book's version lists "Catalog
      Entry", and its Production stage shows the "Catalog Management"
      notice (Actors row 1; Rule 14). <sup>s</sup>
+
+### Through the API
+
+The checks below send what no screen sends; who may call the catalog
+routes is the [catalog grid](#api-grid-catalog)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **An add to the catalog naming an unknown book publishes nothing; a published book is passed over** {OMP}
+
+   Given: a Press manager, a scratch press with "Atlas" in Copyediting,
+   unpublished, and "Chronicle" published.
+
+   - **Unknown book**: an add naming "Atlas" and a number no book has is
+     refused (404), and "Atlas" stays unpublished. "Add Entry" suggests
+     only the press's books (Rule 12d).
+   - **Published book**: an add naming "Chronicle" and "Atlas" goes
+     through: "Atlas" is published, and "Chronicle" keeps its one
+     version, its status and its publication date. "Add Entry" never
+     suggests a published book (Fields, "Add Entry").
 
 ## Coverage
 
@@ -1286,7 +1330,10 @@ answers 400 `api.submissions.400.submissionIdsRequired` with no ids, skips
 a current publication already published, runs `validatePublish()`
 (declined; the two ORCID checks too until pkp/pkp-lib#13493, below) and
 answers 400 with the requirement-keyed errors, else
-calls `Repo::publication()->publish()` for each id posted, which fires
+calls `Repo::publication()->publish()` for each id posted only after
+every id passed (an unknown id answers 404
+`api.submissions.400.submissionsNotFound` before anything is
+published; Rule 12d, API1, probed 2026-10-30), which fires
 `PublicationPublished` and, through OMP `setStatusOnPublish()`, schedules a
 future date. `Form.vue::error()` turns a 400 into the `form.errors`
 notice ("…Please correct these errors and try again." in this checkout)

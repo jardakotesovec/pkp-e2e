@@ -51,6 +51,24 @@ the sections treat them as they treat an Author. Readers need no account.
 | **Browse posted preprints** {OPS} (the "Archives" page and a section's page; Rules 14–16) | • any visitor, signed in or not <sup>f</sup> |
 | **Read the journal's sections through the install's programming interface** {OJS} (Rule 17) | • a signed-in Site Administrator, or a manager-level role of that journal, whether or not the role has "Permit changes to Settings"<br>• refused: every other role, a manager of another journal, and a visitor who is not signed in <sup>g</sup> |
 
+<a id="api-grid-sections-read"></a>
+**Permission grid: reading the sections through the programming
+interface.** The row "Read the journal's sections through the install's
+programming interface" above, for the list and the one-section read
+(Rule 17; `docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **The "Sections" tab** (Settings › Journal › "Sections"; Settings › Server
@@ -908,6 +926,32 @@ are in the footnote. <sup>s</sup>
      taken with no refusal, where a journal keeps its last active section
      (Rule 6; [OMP1](#omp1)). <sup>s</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the sections
+routes is the [sections-read grid](#api-grid-sections-read)'s, checked
+apart (`docs/process/api.md`).
+
+API1. **The sections listed a page at a time** {OJS}
+
+   Given: a Journal Manager, a scratch journal with the sections
+   "Articles", "Reviews" and "Editorials", in that order.
+
+   - **First page**: the list asked for two sections holds "Articles"
+     and "Reviews", and its total reads 3. No screen calls the list
+     (Rule 17a).
+   - **Next page**: asked for two after the first two, it holds
+     "Editorials" alone, its total still 3.
+   - **Control**: unpaged, it holds all three in the section order.
+
+API2. **One section read on its own** {OJS}
+
+   Given: the same journal.
+
+   - **By its number**: "Reviews" read by the number the list gives it
+     answers that section, with its title and abbreviation (Rule 17c).
+   - **Unknown**: a number no section has answers 404.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -981,9 +1025,6 @@ Left out of the scenarios above, by reason:
     its "×" asking first (Fields, the section window)
   - while ordering, "Create Section" and "Order" doing nothing, and the
     dragged order surviving a tab switch but not a reload (Rule 4b)
-  - {OJS} the sections read through the programming interface, by a
-    Journal Manager and by the roles it refuses, a page at a time (Actors
-    row 6; Rule 17a): the apps' own screens never call it
   - the Editor, the Production Editor and the Site Administrator on the
     same tab (Actors row 1): scenario 1's Journal Manager meets the same
     screen

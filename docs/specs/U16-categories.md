@@ -46,6 +46,24 @@ with the access-denied page. Readers need no account. <sup>b</sup>
 | **Browse by category** (the category pages, the "Browse" block; Rules 8–15) | • any visitor, signed in or not; on a journal that requires visitors to sign in, a signed-out visitor gets the Login page ([Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rule 22) <sup>g</sup> |
 | **Choose what the press's "Browse" block lists** {OMP} (Settings › Website › "Plugins", "Browse Block" › "Settings"; Rule 15) | • whoever opens the Settings pages <sup>h</sup> |
 
+<a id="api-grid-categories"></a>
+**Permission grid: building the category tree.** The row "Build the
+category tree" above, for every categories route: the tab's list, the
+window's add and edit, the delete and the form's own address
+(`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **The "Categories" tab** (Settings › Journal › "Categories"; on a press
@@ -354,6 +372,24 @@ cannot be reached by heading ⚠ [OMP3](#omp3). <sup>h</sup>
       Publication Settings page, assigns nobody, and changing the ticks
       changes nothing for submissions already received ⚠ [A14](#a14).
       <sup>k</sup> <sup>td13</sup>
+
+**Through the programming interface**
+
+19. **The tab's own requests.** The tab and the category window read and
+    save through the install's programming interface (the categories
+    routes), which answers whoever opens the Settings pages
+    ([the grid above](#api-grid-categories)). A program can send what the
+    window never does. <sup>b</sup>
+    - 19a. **A parent.** An edit may name a new parent and moves the
+      category under it, which no window offers (Rule 1, [A4](#a4)). A
+      parent that is the category itself or one of its own sub-categories
+      is refused, and so is another journal's category, for an add as for
+      an edit.
+    - 19b. **What the window always sends.** An add or edit without a
+      path fails with a server error ⚠ [A26](#a26); an add without a name
+      is stored, and the tab's list and the category's page then fail
+      ⚠ [A27](#a27). The address meant for the window's form fails with
+      a server error for everyone it lets in ⚠ [A28](#a28).
 
 ## Side effects
 
@@ -826,6 +862,37 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **Control**: "Arts"'s own page still opens, headed "Arts": only the
      block lost its list (Settings bullet 8). <sup>s</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the categories
+routes is the [categories grid](#api-grid-categories)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **A category cannot be placed under itself or its own sub-category** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal with "Science", "Physics"
+   under it and "Optics" under "Physics", and a top-level "Arts".
+
+   - **Under its own sub-category**: an edit of "Science" naming "Optics"
+     as its parent is refused (400) (Rule 19a).
+   - **Under itself**: an edit of "Science" naming "Science" is refused
+     (400), and the journal's list still holds the tree as seeded.
+   - **Control**: an edit of "Arts" naming "Physics" moves it there: the
+     list shows "Arts" under "Physics". No window names a parent (Rule 1,
+     [A4](#a4)).
+
+API2. **A sub-category under another journal's category is refused** {OJS OMP OPS}
+
+   Given: two scratch journals, each with a Journal Manager and one
+   category ("Ours", "Theirs").
+
+   - **Add**: an add through the first journal's address naming "Theirs"
+     as the new category's parent is refused (404) (Rule 19a).
+   - **Edit**: an edit of "Ours" naming "Theirs" as its parent is refused
+     (404); the first journal still lists "Ours" alone, at the top level,
+     and the second "Theirs" alone.
+   - **Control**: the same add naming "Ours" is stored under it.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -921,6 +988,9 @@ Left out of the scenarios above, by reason:
   - A24 (a damaged PNG as a category's "Cover Image"; Fields, "Cover
     Image")
   - A25 (a category's picture kept without its file ending; Rule 12)
+  - A26, A27 and A28 (a program's add or edit without a path, an add
+    without a name, and the form's own address; Rule 19b): no screen
+    sends them
   - OMP1 ("Cover Image Max Width" and "Cover Image Max Height" changed,
     with no picture shown to size; Settings bullet 6)
   - OMP3 (the press's "Browse" for a screen reader; Fields, the "Browse"
@@ -983,6 +1053,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [A23](#a23) | A category page number typed past the last page opens an empty page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A24](#a24) | A damaged PNG as a category's "Cover Image" fails "Save" halfway, with "An unexpected error has occurred"; a new category is saved without the picture | 🐞 | medium · crash: server | — |
 | [A25](#a25) | A category's picture is stored as a file with no ending ("8-category", not "8-category.png"), and the full-size picture is offered under that name | 🐞 | minor | — |
+| [A26](#a26) | A program that adds or edits a category without a path gets a server error | 🐞 | low · crash: server | — |
+| [A27](#a27) | A program can add a category without a name, after which the Categories tab's list and the category's page fail | 🐞 | medium · crash: server | — |
+| [A28](#a28) | The address of the category window's form fails with a server error for every caller | 🐞 | low · crash: server | — |
 | [OMP1](#omp1) | A press's category page shows a broken-picture mark instead of the category's picture | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP2](#omp2) | A press's "Browse" block lists sub-categories in one alphabetical run, not under their parents | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | A press's "Browse" block title is not a heading, so screen-reader users cannot reach it by heading | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1293,6 +1366,39 @@ pictures, not to rename them: regression, not choice. That is `main`
 only; 3.5 saves categories through another window, which keeps the
 ending.
 Since: 2026-10-16 (pkp/pkp-lib#13512) · Basis: probe, 2026-10-19. <sup>f-a25</sup>
+
+<a id="a26"></a>
+**A26 — A program that adds or edits a category without a path gets a server error** · 🐞 · low · crash: server.
+The category window always sends a "Path", empty or not, and an empty
+one is refused with "This field is required." (Fields). A program that
+adds or edits a category through the install's programming interface
+(Rule 19) and leaves the path out expects the same refusal. Instead the
+request fails with a server error, for an add and for an edit; nothing
+is saved. `main` only: 3.5 has no categories route.
+Basis: probe, 2026-10-30. <sup>f-a26</sup>
+
+<a id="a27"></a>
+**A27 — A program can add a category without a name, after which the Categories tab's list and the category's page fail** · 🐞 · medium · crash: server.
+"Name" is required in the window (Fields), and an empty one is refused.
+A program that adds a category through the install's programming
+interface (Rule 19) with a path and no name at all expects the same
+refusal. Instead the add fails with a server error, yet the category is
+stored: from then on the journal's list of categories, which the
+Categories tab shows, fails with a server error for every manager, and
+so does the category's own page for visitors. Nothing on screen can
+remove it, since the tab no longer lists anything. `main` only: 3.5 has
+no categories route.
+Basis: probe, 2026-10-30. <sup>f-a27</sup>
+
+<a id="a28"></a>
+**A28 — The address of the category window's form fails with a server error for every caller** · 🐞 · low · crash: server.
+The categories routes include an address meant to answer the category
+window's form. No screen calls it (the tab builds the window itself),
+and a program that asks for it, as a Journal Manager or the Site
+Administrator, gets a server error naming a part of the app that does
+not exist. Either the address should answer the form or it should go.
+`main` only: 3.5 has no categories route.
+Basis: probe, 2026-10-30. <sup>f-a28</sup>
 
 ### OMP
 
@@ -2361,6 +2467,44 @@ full-size address naming `filename="8-category.png"`. Kept check
 regressions". Written up for the team in
 `docs/reports/2026-10-19-pkp-lib-13512.md` (Finding 2; a temporary
 report, deleted once acted on; git history keeps it).
+
+<a id="fn-f-a26"></a>
+**f-a26** — `CategoryCategoryController::saveCategory()` (lib/pkp
+`df42984b46`) validates the input with `Repo::category()->validate()`,
+which checks the path only when it is given (an empty string is
+refused "This field is required."), then calls
+`$category->setPath($illuminateRequest->input('path'))`, typed `string`,
+with null. Probed 2026-10-30 on scratch journals, presses and servers
+as their Journal Manager (OJS, OMP, OPS `main`):
+`POST {context}/api/v1/categories` with `{}` or `{"title":{"en":"Arts"}}`,
+and `PUT …/categories/{id}` with `{}` or `{"title":{"en":"Science2"}}`,
+answered 500 ("PKP\category\Category::setPath(): Argument #1 ($path)
+must be of type string, null given", with the controller's path and
+line); the list read the category unchanged after the edits.
+
+<a id="fn-f-a27"></a>
+**f-a27** — The same validation passes a missing `title`;
+`saveCategory()` stores the category, then `getSchemaMap()->summarize()`
+calls `Category::getLocalizedTitle()`, typed `string`, which returns
+null. `getMany()` maps every category the same way. Probed 2026-10-30
+(as f-a26): `POST …/categories` with `{"path":"notitle"}` answered 500
+("Category::getLocalizedTitle(): Return value must be of type string,
+null returned"), and afterwards `GET …/categories` answered the same
+500 on OJS, OMP and OPS, and the category's page
+(`catalog/category/notitle`, OPS `preprints/category/notitle`) answered
+500 signed out. A title given as `{"en":""}` is refused 400.
+
+<a id="fn-f-a28"></a>
+**f-a28** — `CategoryCategoryController::getGroupRoutes()` registers
+`GET categoryFormComponent` with `$this->getCategoryFormComponent(...)`,
+a method the class does not define; Laravel's `Controller::__call()`
+throws when the route runs, after the role middleware and
+`CanAccessSettingsPolicy`. Probed 2026-10-30 (as f-a26): the Journal
+Manager and the Site Administrator got 500 ("Method
+PKP\API\v1\categories\CategoryCategoryController::getCategoryFormComponent
+does not exist.") on OJS, OMP and OPS; the other personas are refused
+first (the API matrix). The method is absent since the controller came
+in (pkp/pkp-lib#10404).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP `CatalogHandler::thumbnail()` / `fullSize()` read
