@@ -208,6 +208,10 @@ in as that user the way the tests sign in (`-` for nobody; `--context
 index` for the site), and prints the status and the body.
 `npm run api-call -- <app> --scratch` makes a scratch context and its
 manager first, for probing writes away from the base context.
+`npm run api-call -- <app> --personas <METHOD> <path> [json]` seeds a
+persona set and prints the call's status as every persona in every state
+(`{submissionId}` and `{publicationId}` filled per state), the table a grid
+is compared with; `--full` prints a whole body.
 
 ## Adding API coverage to a spec
 
