@@ -65,6 +65,30 @@ press's manager-level roles. <sup>c</sup>
 | **Add, edit and delete sales rights and market territories** (Rules 9–15) | • the Press manager, Press editor, Production editor and Site Administrator, on any version, published or not<br>• the assigned Series editor, Layout Editor, Designer, Indexer and Proofreader: the format window's "Metadata" tab opens, but its "Sales Rights" and "Market Territories" lists stay on "Loading" ([Publication formats & proof terms, its A2](U73-publication-formats-proof-terms.md#a2))<br>• the assigned Copyeditor, Marketing and sales coordinator and Funding coordinator: the "Publication Formats" page shows only "You don't currently have access to that stage of the workflow.", so they never reach the format window <sup>c</sup> <sup>td5</sup> |
 | **Open "ONIX 3.0 Monograph Export Plugin" and export** (Rules 16–18) | • the roles that open Tools, as [Import & export](U63-import-export.md) names them in its Actors table; every other role gets the access-denied page at the tool's address <sup>c</sup> |
 
+<a id="api-grid-marketing-pages"></a>
+**Permission grid: opening the "Marketing" pages.** The row "Open
+"Audience" and "Representatives"" above, every role that opens the
+book's editorial view, the assigned assistant roles included, whatever
+stage the book is in, for the routes that load the forms of "Audience"
+and of *[Chapters & work type](U72-chapters-work-type.md)*'s
+"Publication Dates" (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| assigned review assistant | ✓ | ✓ |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 Every list on these screens is one of the book trade's code lists,

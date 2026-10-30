@@ -66,13 +66,13 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_i18n.getTranslations` | GET | `_i18n/ui.js` | ojs omp ops | none | U57 | — |
+| `_i18n.getTranslations` | GET | `_i18n/ui.js` | ojs omp ops | none | U57 | none: no role rule: the screens' UI strings, which every page loads for whoever opens it, signed in or not |
 
 ### _library — PKPLibraryController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_library.getLibrary` | GET | `_library` | ojs omp ops | admin manager subEditor | U39 | — |
+| `_library.getLibrary` | GET | `_library` | ojs omp ops | admin manager subEditor | U39 | U34#record-decision |
 
 ### _payments — PKPBackendPaymentsSettingsController
 
@@ -320,10 +320,10 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `peerReviews.open.submissions.getMany` | GET | `peerReviews/open/submissions` | ojs | none | parked | — |
-| `peerReviews.open.submissions.summary.getMany` | GET | `peerReviews/open/submissions/summary` | ojs | none | parked | — |
-| `peerReviews.open.submissions.get` | GET | `peerReviews/open/submissions/{submissionId}` | ojs | none | parked | — |
-| `peerReviews.open.submissions.summary.get` | GET | `peerReviews/open/submissions/{submissionId}/summary` | ojs | none | parked | — |
+| `peerReviews.open.submissions.getMany` | GET | `peerReviews/open/submissions` | ojs | none | parked | none: parked in UNASSIGNED.md (the open peer review record of a journal's published articles, public to every visitor) |
+| `peerReviews.open.submissions.summary.getMany` | GET | `peerReviews/open/submissions/summary` | ojs | none | parked | none: parked in UNASSIGNED.md (the open peer review record of a journal's published articles, public to every visitor) |
+| `peerReviews.open.submissions.get` | GET | `peerReviews/open/submissions/{submissionId}` | ojs | none | parked | none: parked in UNASSIGNED.md (the open peer review record of a journal's published articles, public to every visitor) |
+| `peerReviews.open.submissions.summary.get` | GET | `peerReviews/open/submissions/{submissionId}/summary` | ojs | none | parked | none: parked in UNASSIGNED.md (the open peer review record of a journal's published articles, public to every visitor) |
 
 ### reviewers/recommendations — ReviewerRecommendationController [ojs]
 
@@ -521,15 +521,15 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `submission.publication._components.audience` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/audience` | omp | admin manager subEditor assistant | U74 | — |
+| `submission.publication._components.audience` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/audience` | omp | admin manager subEditor assistant | U74 | U74#marketing-pages |
 | `submission.publication._components.catalogEntry` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/catalogEntry` | omp | admin manager subEditor assistant | U70 | U40#permissions-page |
-| `submission.publication._components.publicationDates` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/publicationDates` | omp | admin manager subEditor assistant | U72 | — |
+| `submission.publication._components.publicationDates` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/publicationDates` | omp | admin manager subEditor assistant | U72 | U74#marketing-pages |
 
 ### submissions — SubmissionController [ops]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `submission.publication.relate` | PUT | `submissions/{submissionId}/publications/{publicationId}/relate` | ops | admin manager subEditor assistant author | U75 | — |
+| `submission.publication.relate` | PUT | `submissions/{submissionId}/publications/{publicationId}/relate` | ops | admin manager subEditor assistant author | U75 | U75#relation |
 | `submission.publication._components.issue` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/issue` | ops | admin manager subEditor assistant | U49 | U40#permissions-page |
 
 ### submissions/{submissionId}/files — PKPSubmissionFileController
@@ -638,7 +638,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `userGroups.getMany` | GET | `userGroups` | ojs omp ops | admin manager subEditor assistant author reviewer | U54 | — |
+| `userGroups.getMany` | GET | `userGroups` | ojs omp ops | admin manager subEditor assistant author reviewer | U54 | U54#roles-list |
 
 ### users — PKPUserController
 

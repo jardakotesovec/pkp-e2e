@@ -555,6 +555,30 @@ footnote. <sup>s</sup>
    A preprint server's assistant roles do not reach the workflow
    ([→ a preprint server's workflow](U24-workflow-screen-and-stage-access.md#ops1)).
 
+### Through the API
+
+The checks below send what no screen sends; who may call the library
+route is the grid of the deciding editors
+(*[Editorial decision recording](U34-editorial-decision-recording.md#api-grid-record-decision)*,
+whose email pages offer "Library Files", Rule 11), checked apart
+(`docs/process/api.md`).
+
+API1. **The library list names the Publisher Library and the one submission asked for** {OJS OMP OPS}
+
+   Given: a Journal Manager, on a scratch journal whose Publisher
+   Library holds "Journal guide", with two submissions whose Submission
+   Libraries hold "Asked contract" and "Other contract", and a
+   submission of another journal whose library holds "Foreign
+   contract".
+
+   - **No submission**: ask the library route for its list without
+     naming a submission: it holds "Journal guide" alone. The
+     composer always names its submission.
+   - **One submission**: name the first submission: "Asked contract"
+     and "Journal guide", never "Other contract" (Rule 11a).
+   - **Another journal's submission**: name the other journal's
+     submission: refused, with no list.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:

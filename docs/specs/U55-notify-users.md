@@ -414,6 +414,25 @@ the footnote. <sup>s</sup>
    - **Control**: once the site's background jobs have run, Quinn has no
      email "Office closed": nothing was sent (Rule 10). <sup>s</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may send is the grid of
+the Users & Roles page the "Notify" tab sits on
+(*[Users management](U53-users-management.md#api-grid-users)*), checked
+apart (`docs/process/api.md`).
+
+API1. **A role of another journal is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, on a scratch journal the site allows bulk
+   email, with one Author; another journal with an Author of its own.
+
+   - **Another journal's role**: send an email with a subject and a text
+     to the other journal's "Author" role through the API: refused (400)
+     with an error on the roles, and nothing is queued. The tab offers
+     only this journal's roles (Rule 3).
+   - **Control**: the same email to this journal's "Author" role is
+     queued, one batch for its one Author (Rule 8).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:

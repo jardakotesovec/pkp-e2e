@@ -53,6 +53,29 @@ and an Author's assignment carry it by default on a preprint server
 | **Save a relation** (Rule 5) | • Preprint Server Manager and Site Administrator: on any version, posted or not<br>• Moderator with the edit permission: on any version, posted or not<br>• Author with the edit permission: unless the version's "Status: …" reads "Posted" or "Scheduled" (a "Post" with a future "Date Posted", *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*), where "Save" is offered and refused ⚠ [A1](#a1) <sup>td1</sup><br>• Moderator or Author without the edit permission: "Save" is offered and refused ⚠ [A2](#a2) <sup>c</sup> <sup>td2</sup> |
 | **Answer "Relation status" while submitting** | • Whoever submits the preprint, on the wizard's "For Readers" step (*[Submission wizard](U21-submission-wizard.md#steps)*); the Review step shows the answer (Rule 7), and the preprint can be submitted with the question unanswered (Rule 2) <sup>g</sup> |
 
+<a id="api-grid-relation"></a>
+**Permission grid: the relation route.** The older relation address,
+which no screen calls since "Relations" saves through the version's
+edit address (Rule 5, [A1](#a1), [A2](#a2)): it was opened to the
+preprint's Authors so that they can record the published version
+"even after the preprint has been posted" (pkp/pkp-lib#5957), and it
+answers the preprint's Author and the staff who reach its publication
+pages, on any version, posted or not, whatever their "Permissions" box
+(`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 **The relation form**, the same in the "Relations" panel (Rule 4) and on
@@ -221,6 +244,23 @@ answer (Rule 7). <sup>g</sup>
     "Registered" keeps reading "Registered", after a reload too. Crossref
     keeps the relation of the last deposit until the manager deposits
     again. <sup>k</sup>
+
+### The programming interface
+
+12. **The older relation address.** Besides the version's edit address
+    that "Relations" saves through (Rule 5), the install's programming
+    interface keeps an address of its own for the relation, which no
+    screen calls; the [relation route grid](#api-grid-relation) says who
+    it answers. <sup>n</sup>
+    - 12a. It takes "Relation status" and "DOI of the published
+      preprint" alone, on any version, posted or not. A status left out,
+      or one outside the three choices, is refused with a message on the
+      status, and a DOI that is not a full web address with "This is not
+      a valid URL." on the DOI; nothing is stored.
+    - 12b. An accepted save stores the status, and the DOI only with
+      "This preprint has been published elsewhere."; any other status
+      stores the DOI empty (unlike "Relations", [A3](#a3)). The answer
+      is a server error, though the save is stored ⚠ [A12](#a12).
 
 ## Side effects
 
@@ -531,6 +571,27 @@ footnote. <sup>s0</sup>
      question on "For Readers" (scenario 5) and the notice on the
      preprint page (scenario 2) (Fields; Rules 4, 8). <sup>s0</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the relation
+route is the [relation route grid](#api-grid-relation)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **A relation the route cannot store is refused** {OPS}
+
+   Given: a Preprint Server Manager, a preprint whose "Relation status"
+   was never answered.
+
+   - **No status**: send the relation route a DOI with no "Relation
+     status": refused (400) with an error on the status (Rule 12a).
+   - **Not a choice**: send a status outside the three choices: refused
+     (400) with an error on the status.
+   - **Not a web address**: send "This preprint has been published
+     elsewhere." with the DOI "10.1234/abcd": refused (400) with "This is
+     not a valid URL." on the DOI.
+   - **Control**: the version's "Relation status" is still unanswered,
+     with no DOI. No screen calls this address (Rule 12).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -566,6 +627,8 @@ Left out of the scenarios above, by reason:
   - A10 ("For Readers" after a reload showing no saved answer ticked;
     Rule 2b)
   - A11 (the Review step's "Edit" on the "Relation status" panel; Rule 7)
+  - A12 (the older relation address's server error after an accepted
+    save; Rule 12b; API1 sends only refused saves)
 - **No seed**:
   - "Registration Agency" at "Crossref": the deposited record carrying
     the relation (Settings bullet 2; Rule 10): no deposit or export
@@ -586,7 +649,7 @@ Left out of the scenarios above, by reason:
 
 ## Findings register
 
-Verdicts are the author's judgment (claude, 2026-09-27), unreviewed unless
+Verdicts are the author's judgment (claude, 2026-09-27; A12 2026-10-30), unreviewed unless
 an entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -599,6 +662,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | A preprint's submission "Review" says "not published elsewhere" when the author never answered "Relation status" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A10](#a10) | After a reload, the wizard's "For Readers" shows the saved relation unticked, and answering again erases the DOI | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | The Review step's "Edit" on the "Relation status" panel does nothing | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A12](#a12) | The older relation address stores a relation, then answers a server error | 🐞 | low · crash: server | — |
 | [A4](#a4) | "DOI of the published preprint" refuses a DOI written on its own | ❓ | minor | — |
 | [A5](#a5) | The wizard asks whether the preprint was "submitted for publication elsewhere" but offers no answer for it | ❓ | minor | — |
 | [A6](#a6) | Crossref receives the full web address marked as a DOI | ❓ | invisible | — |
@@ -763,6 +827,16 @@ the top or the "For Readers" panel's "Edit". Since a 2026 change to the
 template hooks, a template fetched from a hook no longer sees the
 calling template's step, so these panels' "Edit" names none.
 Basis: probe, 2026-10-03. <sup>f-a11</sup>
+
+<a id="a12"></a>
+**A12 — The older relation address stores a relation, then answers a server error** · 🐞 · low · crash: server.
+A program that saves a preprint's relation through the older relation
+address (Rule 12), with a valid status and DOI, gets a server error
+whose text names the program's internals instead of the saved version.
+The relation is stored all the same: a reload of the version shows it.
+No screen calls the address, so only programs outside the apps meet
+it; they cannot tell the save from a failure.
+Since: 2025-11-11 (main only, by the code) · Basis: probe, 2026-10-30. <sup>f-a12</sup>
 
 ---
 
@@ -1136,6 +1210,22 @@ unticked); td9. With install defaults, Settings › Distribution › "DOIs"
 the DOI box and "Preprints" ticked; a server with the Crossref plugin
 on offered "None" and "Crossref" under "Registration Agency".
 
+<a id="fn-n"></a>
+**n** — ops `api/v1/submissions/SubmissionController.php`
+`relatePublication()` (`PUT submissions/{submissionId}/publications/{publicationId}/relate`,
+route `submission.publication.relate`): the roles Manager, Site
+Administrator, Section editor, Assistant and Author, then
+`SubmissionAccessPolicy` and the Production `StageRolePolicy` with the
+Author added (`productionStageAccessRoles`); no metadata-edit or
+publication-status check. The body is cut to `relationStatus` and
+`vorDoi`, `relationStatus` is required, both are validated against
+`schemas/publication.json` (`in:0,1,2,3`, the URL rule), and
+`Repo::publication()->relate()` empties `vorDoi` for any status but
+`PUBLICATION_RELATION_PUBLISHED` (3). Live-probed 2026-10-30 as a
+persona set's manager (`npm run api-call -- ops --personas`): the four
+refusals of API1 answered 400 and left the version as it was; status 1
+with a DOI stored status 1 and an empty DOI.
+
 <a id="fn-td9"></a>
 **td9** — Live-probed 2026-09-27 (Settings bullet 1), on a scratch
 preprint server as the Preprint Server Manager: "Permit submission
@@ -1294,6 +1384,18 @@ in both `review-relation.tpl` and `review-license.tpl`, so neither
 panel's "Edit" jump back to its step. Live-probed 2026-09-27 on five
 runs over two drafts.
 Issue report: [pkp-e2e#675](https://github.com/jardakotesovec/pkp-e2e/issues/675) ([docs/issues/U75-A11-review-panel-edit-stays-on-review.md](../issues/U75-A11-review-panel-edit-stays-on-review.md)).
+
+<a id="fn-f-a12"></a>
+**f-a12** — Note n: after `relate()` the handler maps the version with
+`Repo::publication()->getSchemaMap($submission, $userGroups, $genres)`,
+but lib/pkp `52d3a0f8e7` (2025-11-11, "Contributor Roles and Type")
+changed the signature to `getSchemaMap(Submission $submission, array $genres)`
+and the OPS caller was not updated: the answer is 500
+"Argument #2 ($genres) must be of type array, …Collection given".
+Live-probed 2026-10-30 on main as the Preprint Server Manager, the
+Moderators and the Author (every caller the grid allows), with status 1
+and 2 and a DOI: 500 each time, and the version read back with the new
+status. stable-3_5_0's `getSchemaMap()` still takes the user groups.
 
 ## Reference — entry points & surfaces
 

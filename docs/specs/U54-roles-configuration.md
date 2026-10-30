@@ -51,6 +51,27 @@ which manager-level role is signed in. <sup>a</sup>
 | **Save "Site Access Options"** | • every manager (Rule 23) <sup>t</sup> |
 | **Change "Permit changes to Settings" on a role** | • every manager, in the role's window, except on the one role that alone gives the signed-in manager the Settings pages: there the box is ticked and greyed out, yet "OK" in that window unticks it (Rule 18) ⚠ [A11](#a11) <sup>o</sup> |
 
+<a id="api-grid-roles-list"></a>
+**Permission grid: listing the journal's roles.** The route that lists
+the journal's roles, each by its name and permission level alone, which
+a task template's "Limit access to specific roles" reads for a stage
+(Rule 22, the stage boxes' row): the names are the ones every screen
+gives the roles (Rule 22, the "Role Name" row), and the list answers
+every role that works in the journal, not a Reader, a visitor or
+another journal's manager (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | ✓ |
+| reviewer | ✓ |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **The "Roles" tab.** A list headed "Current Roles" with "Search" and
@@ -772,6 +793,34 @@ App-specific:
    - **Control**: the book page itself opened for the visitor with the
      box ticked; only the format's file asks for a sign-in (Rule 24).
      <sup>s</sup>
+
+### Through the API
+
+The checks below send what no screen sends; who may call the roles list
+is the [roles list grid](#api-grid-roles-list)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **An author reads each role by its name and level alone** {OJS OMP OPS}
+
+   Given: an Author, on a scratch journal with a role made with "Create
+   New Role", "Data curator" at the level "Assistant".
+
+   - **The list**: the Author asks for the journal's roles through the
+     API: every role is listed, "Data curator" included, each with its
+     name, its permission level and whether the journal was created with
+     it, and nothing else: no stages, no "Role Options", no members.
+     The one screen that reads the list, the task template form, is a
+     manager's.
+
+API2. **Roles filtered by permission level** {OJS OMP OPS}
+
+   Given: a Journal Manager, on a scratch journal.
+
+   - **One level**: ask for the roles of the level "Assistant": exactly
+     the roles the whole list gives that level.
+   - **Two levels**: ask for "Assistant" and "Section Editor" together:
+     the roles of both, and no other. The task template form filters by
+     stage only.
 
 ## Coverage
 
