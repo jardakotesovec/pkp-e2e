@@ -370,11 +370,13 @@ row's "Edit" (headed "Edit"), with "Save" and "Cancel" at its foot:
       enough space in your user directory. The file you are uploading is
       {size}kb and you have {remaining}kb remaining."
     - a file larger than the server takes in one upload ⚠ [A18](#a18):
-      the server fails, and the window reads "Path cannot be empty" or
-      "One or more files could not be uploaded."; a file over the server's
-      limit for a whole request gets
-      "The POST data is too large.". The message meant for this case,
-      "Files larger than {size} can not be uploaded.", never shows.
+      a PNG, JPEG or GIF picture makes the server fail, and the small
+      window reads "Path cannot be empty"; a WEBP picture is refused with
+      "One or more files could not be uploaded.". A file over the
+      server's limit for a whole request makes the server fail, and the
+      small window reads "The POST data is too large.". The message meant
+      for these cases, "Files larger than {size} can not be uploaded.",
+      never shows.
     - a file the browser does not take for a picture (".pdf", ".svg"):
       nothing happens, and the window stays on "Upload" with no message
       ⚠ [A16](#a16).
@@ -854,7 +856,7 @@ Left out of the scenarios above, by reason:
   - a placed custom block's "Custom Block Manager" unticked, then a "Page Footer" saved on "Appearance" › "Setup" without a refusal (A15; the guard its issue report names)
   - a preview's address typed by a section editor, an author or a signed-out visitor: the access-denied page, or Login (A7; the guard its issue report names)
   - a picture over the server's file limit, and one over its request limit, chosen in "Insert/edit image": each refused with "Files larger than {size} can not be uploaded." and no server error (A18; the guard its two issue reports name)
-  - a custom block listed in "Custom Blocks" and offered under "Sidebar" by its "Block Name", and by the new one after a rename (A1; the guard its issue report names)
+  - a custom block listed in "Custom Blocks" and offered under "Sidebar" by its "Block Name", and by the new one after a rename (A1; the guard its issue report names; scenario 4's "Renamed, name shown" bullet, whose "Sidebar" label after the rename no suite asserts while A1 stands)
   - a custom block named with "&", and one named only in the primary language by a manager working in another, each opened with "Edit" and placed under "Sidebar" (A4, A13; the guard their issue report names)
   - deleting a custom block: "OK" closing the window, the block gone from the Custom Block Manager's list, the sidebar and "Sidebar" (A14; the guard its issue report names)
   - a press on the shaded page beside the block window after a "Block Name" change: the question "The data on this form has changed. Do you wish to continue without saving?", "Cancel" keeping the window and the name, "OK" closing it with the "Custom Block Manager" window still open (Rule 30a)
@@ -894,7 +896,7 @@ Left out of the scenarios above, by reason:
   - A15 ("Appearance" › "Setup" refusing a save over a placed block while "Custom Block Manager" is unticked; Rule 25a)
   - A16 (a ".pdf" or ".svg" chosen in the picture window ignored with no message; Rule 29)
   - A17 (a refused pasted or dropped picture kept in the text, embedded; Rule 29c)
-  - A18 (a picture over the server's upload limit getting a server error, never the size message; Rule 29)
+  - A18 (a picture over the server's upload limit getting a server error, or for a WEBP a refusal that does not say why, never the size message; Rule 29)
   - A19 (a change only in "Content" lost without a question, in the static page window {OJS OMP} on its back arrow and on leaving the page, and in the block window on its close control, on a press beside it and on leaving the page; Rules 30, 30a, 30b, 30c)
   - A20 (the first language's "Content" box left under a "Loading..." spinner when the second language's box loads last; Fields)
 - **No seed**:
@@ -913,7 +915,7 @@ an entry notes otherwise; the team settles them on spec review.
 |----|------------------------------|------|--------|--------|
 | [A1](#a1) | Custom blocks are listed by a lower-case name built from their first "Block Name", even after a rename | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A3](#a3) | A static page has no breadcrumbs and no main heading, unlike a custom page | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A4](#a4) | A custom block named only outside the manager's interface language is kept as a blank row with neither "Edit" nor "Delete" | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
+| [A4](#a4) | A custom block named only outside the manager's interface language is kept as a blank row with neither "Edit" nor "Delete" | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A7](#a7) | Typing a page preview's address below manager level, or signed out, gives a blank page | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A10](#a10) | A static page or custom page whose "Path" has a "." in its first two parts answers "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A11](#a11) | A manager's good save in the static page window shows the earlier refusal as a red notice | 🐞 | low | issues (claude), 2026-10-12 — re-verified |
@@ -923,7 +925,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A15](#a15) | With "Custom Block Manager" unticked, "Appearance" › "Setup" refuses every save over a placed block it no longer lists | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A16](#a16) | An SVG, a PDF or any file but a JPEG, PNG, GIF, BMP or WEBP is ignored in "Insert/Edit Image", with no message | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A17](#a17) | A dropped or pasted picture the site refuses stays in the text, embedded, and is saved | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A18](#a18) | A picture over the upload limit gets a server error, never "Files larger than {size} can not be uploaded." | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
+| [A18](#a18) | A picture over the upload limit gets a server error or a vague refusal, never "Files larger than {size} can not be uploaded." | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A19](#a19) | A reviewer's typed review, a profile's signature or bio, or a static page's text is lost without asking on leaving the form | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
 | [A20](#a20) | With two form languages, the first language's "Content" box can stay under a "Loading..." spinner for good | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A2](#a2) | A deleted custom block would keep its place in the sidebar, so a later block of the same name appears unplaced | ❓ | minor | — |
@@ -976,7 +978,7 @@ no Static Pages plugin.
 Basis: probe, 2026-10-02. <sup>f-a3</sup>
 
 <a id="a4"></a>
-**A4 — A custom block named only outside the manager's interface language cannot be edited or deleted** · 🐞 · medium · crash: script.
+**A4 — A custom block named only outside the manager's interface language cannot be edited or deleted** · 🐞 · medium.
 The browser requires the "Block Name" box of the journal's primary
 language, but the block's name is made from the box of the manager's
 interface language. A manager working in French who types only the
@@ -1197,19 +1199,22 @@ page, custom block and static page windows, and the settings forms.
 Basis: probe, 2026-10-01. <sup>f-a17</sup>
 
 <a id="a18"></a>
-**A18 — A picture over the upload limit gets a server error, not the size message** · 🐞 · medium · crash: server.
+**A18 — A picture over the upload limit gets a server error or a vague refusal, not the size message** · 🐞 · medium · crash: server.
 A manager uploading a picture through "Insert/edit image" expects
 "Files larger than {size} can not be uploaded.", the message the
 application gives for a file over the limit on its other uploads.
-Instead the application fails on the server. Over the limit for one
-uploaded file (PHP's default 2 MB, less than many phone photos), the
-alert over the "Insert/Edit Image" window reads "Path must not be
-empty" for a PNG, JPEG or GIF picture, or "One or more files could not
-be uploaded." for a WEBP one. Over the limit for a whole request (8 MB
-by default), it reads "The POST data is too large.", in English
-whatever the interface language. None of them tells the manager to send
-a smaller file.
+Over the limit for one uploaded file (PHP's default 2 MB, less than
+many phone photos), a PNG, JPEG or GIF picture instead makes the
+application fail on the server, and the alert over the "Insert/Edit
+Image" window reads "Path cannot be empty" ("Path must not be empty" on
+PHP 8.4). A WEBP picture is refused with "One or more files could not
+be uploaded.", without a server error. Over the limit for a whole
+request (8 MB by default), any picture makes the application fail on
+the server, and the alert reads "The POST data is too large.", in
+English whatever the interface language. None of them tells the
+manager to send a smaller file.
 Basis: probe, 2026-10-01. <sup>f-a18</sup>
+Report: refresh owed — drift sweep 2026-10-30 (OJS, OMP, OPS, two runs): a WEBP picture over the file limit is refused with status 400 (the `FileManager::uploadFile()`, `uploadError()` and `getUploadErrorCode()` branch), not a server failure, and the PNG, JPEG and GIF alert (the `ValueError` in `PKPUploadPublicFileController::uploadFile()`) reads "Path cannot be empty" on the test installs; the file-limit report's Summary has the server fail for the WEBP too, and its title, Summary and Observed quote PHP 8.4's "Path must not be empty" alone (2026-10-30)
 
 <a id="a19"></a>
 **A19 — A reviewer's typed review, a profile's signature or bio, or a static page's text is lost without asking on leaving the form** · 🐞 · medium.
@@ -2013,8 +2018,8 @@ column, and `CustomBlockPlugin::getDisplayName()` gives the "Sidebar"
 label "{name} (Custom Block)". `Str::kebab()` drops the spaces and puts
 "-" before each word whose first letter it can capitalise (a to z), so a
 word opening with a digit, a sign or an accented letter runs into the one
-Issue report: [pkp-e2e#365](https://github.com/jardakotesovec/pkp-e2e/issues/365) ([docs/issues/U09-A1-custom-block-listed-by-made-up-name.md](../issues/U09-A1-custom-block-listed-by-made-up-name.md)).
 before. Live-probed 2026-09-24 (three apps): td19, td22.
+Issue report: [pkp-e2e#365](https://github.com/jardakotesovec/pkp-e2e/issues/365) ([docs/issues/U09-A1-custom-block-listed-by-made-up-name.md](../issues/U09-A1-custom-block-listed-by-made-up-name.md)).
 
 <a id="fn-f-a2"></a>
 **f-a2** — `CustomBlockGridHandler::deleteCustomBlock()` removes the
@@ -2043,8 +2048,12 @@ interface language's box (note g), empty for a manager working in French
 who typed the English name only; `CustomBlockGridRow::initialize()` adds
 "Edit" and "Delete" only for a non-empty row id, and the "Sidebar" save
 refuses the blank name with the two messages Rule 26a quotes. Live-probed
+2026-09-24 (three apps): td26. Walked 2026-10-30 (Rule 26a; OJS, OMP, OPS on
+`main`, two runs each): an English-only "Block Name" saved in the French
+interface left a blank row with no arrow; the "Custom Block Manager"
+window reopened in French and in English logged no page script error,
+unlike a name holding "&" (note f-a13).
 Issue report: [pkp-e2e#378](https://github.com/jardakotesovec/pkp-e2e/issues/378) ([docs/issues/U09-A4-A13-custom-block-stuck-with-unusable-name.md](../issues/U09-A4-A13-custom-block-stuck-with-unusable-name.md)).
-2026-09-24 (three apps): td26.
 
 <a id="fn-f-a5"></a>
 **f-a5** — `PKPUploadPublicFileController::uploadFile()`'s allowed
@@ -2102,9 +2111,12 @@ Walked 2026-10-01 (Rule 1, Fields; main and 3.5, PostgreSQL): a "Custom
 Page" item at "nav.dot" saved and answered status 404 with only the
 heading "404 Not Found", with or without "/en/" (OJS, OMP, OPS); static
 pages at "dot.only" (from the list's "Path" link) and "deep/Mixed_1.x"
-answered the same and "one/two/three.x" opened (OJS, OMP). A "Custom
-Page" item with the "." in the second part only, and the site's own
-items, read in the code, not driven.
+answered the same and "one/two/three.x" opened (OJS, OMP). The site's
+own items read in the code, not driven. Walked 2026-10-30 (Rule 1; OJS,
+OMP, OPS on `main`, two runs each): "Custom Page" items at "nav.dot" and
+"deep/Mixed_1.x" saved with "Navigation menu item was successfully
+added" and answered status 404 with only "404 Not Found"; one at
+"one/two/three.x" opened with the breadcrumbs "Home / Third part dot".
 Issue report: [pkp-e2e#366](https://github.com/jardakotesovec/pkp-e2e/issues/366) ([docs/issues/U09-A10-static-page-dot-path-not-found.md](../issues/U09-A10-static-page-dot-path-not-found.md)).
 
 <a id="fn-f-a11"></a>
@@ -2162,8 +2174,8 @@ the links get no action. The "Sidebar" save refuses an entry outside
 letters, digits, "-" and "_", accented letters counting as letters.
 Live-probed 2026-09-24 (three apps): td19; "Edit" and "Delete" on
 "news2026&-events" opened nothing, and ticking it under "Sidebar" was
-Issue report: [pkp-e2e#378](https://github.com/jardakotesovec/pkp-e2e/issues/378) ([docs/issues/U09-A4-A13-custom-block-stuck-with-unusable-name.md](../issues/U09-A4-A13-custom-block-stuck-with-unusable-name.md)).
 refused (status 400).
+Issue report: [pkp-e2e#378](https://github.com/jardakotesovec/pkp-e2e/issues/378) ([docs/issues/U09-A4-A13-custom-block-stuck-with-unusable-name.md](../issues/U09-A4-A13-custom-block-stuck-with-unusable-name.md)).
 
 <a id="fn-f-a14"></a>
 **f-a14** — `CustomBlockGridHandler::deleteCustomBlock()` first calls
@@ -2212,13 +2224,26 @@ Issue report: [pkp-e2e#372](https://github.com/jardakotesovec/pkp-e2e/issues/372
 <a id="fn-f-a18"></a>
 **f-a18** — A file over PHP's `upload_max_filesize` arrives with an
 empty temporary name, and the application fails on it before any size
-check: "Path cannot be empty" (status 500), or, where the save fails, the
-error lookup `uploadError($filename)` asks about the file's name instead
-of the field `file`, so the switch holding `api.files.400.fileSize` is
-never reached and `api.files.400.uploadFailed` answers. A request over
+check: for a `gif`, `jpg` or `png` name, `getimagesize()` on the empty
+name throws "Path cannot be empty" (status 500); a `webp` name skips
+that check, the save fails, and the error lookup
+`uploadError($filename)` asks about the file's name instead of the
+field `file`, so the switch holding `api.files.400.fileSize` is never
+reached and `api.files.400.uploadFailed` answers (status 400). A request over
 `post_max_size` fails before the application runs ("The POST data is too
 large.", status 500). Live-probed 2026-09-24 (three apps): td30; the
 test installs' limits are 2 MB per file and 8 MB per request.
+The "Path cannot be empty" text is PHP's own `ValueError` message,
+worded "Path must not be empty" by PHP 8.4 (the file-limit report's
+walk, 2026-10-01). Walked 2026-10-30 (Rule 29; OJS, OMP, OPS on `main`,
+two runs each): a 2492 KB PNG and 3000 KB JPEG and GIF pictures
+answered status 500 `{"error":"Path cannot be empty"}`, the alert
+reading "Path cannot be empty" with "OK"; a 3000 KB WEBP answered
+status 400 `{"error":"One or more files could not be uploaded."}`, the
+alert reading "One or more files could not be uploaded.", and no server
+error; a 9232 KB PNG chosen in the French interface ("Insérer/modifier
+image") answered status 500 with the alert "The POST data is too
+large." beside the French "Ok".
 Issue reports, one per cause: [pkp-e2e#374](https://github.com/jardakotesovec/pkp-e2e/issues/374) ([docs/issues/U09-A18-picture-over-upload-limit-server-error.md](../issues/U09-A18-picture-over-upload-limit-server-error.md)) (the file limit) and [pkp-e2e#373](https://github.com/jardakotesovec/pkp-e2e/issues/373) ([docs/issues/U09-A18-picture-over-request-limit-server-error.md](../issues/U09-A18-picture-over-request-limit-server-error.md)) (the request limit).
 
 <a id="fn-f-a19"></a>
@@ -2300,6 +2325,7 @@ language boxes are built the same way, and whether closing and
 reopening the window clears it. The suites take no workaround; a stuck
 box fails its test with a message naming it.
 Fixed in pkp-lib by `pkp/pkp-lib#13490` (`689e7ec1a5`, `main`) and `pkp/pkp-lib#13491` (`4045d9241e`, 3.5), merged 2026-10-14 for `pkp/pkp-lib#13489`: the `deactivate` handler skips an editor whose `initialized` is false. Driven at the PR heads on the default dataset (PR review 2026-10-14, `checks/sync/pkp-lib-13490/`): fixed with the source scripts in OJS, OMP and OPS; still stuck with `enable_minified = On` until each app rebuilds its committed `js/pkp.min.js`. `isIncomplete_()` keeps its throw (`pkp/pkp-lib#13180`).
+Read 2026-10-30 at the tips (ojs 0a00726121, omp fd4ea260c, ops d4e4d8737d, lib/pkp df42984b46): `lib/pkp/js/controllers/SiteHandler.js` carries the guard (`tinyMCEObject.target.initialized &&`); each app's committed `js/pkp.min.js` still has the unguarded handler (`deactivate",function(d){d.target.getContent().length||…`), so the entry stays. The test installs run `enable_minified = Off`, so they load the guarded source script and cannot show the fault; not driven.
 Issue report: [pkp-e2e#376](https://github.com/jardakotesovec/pkp-e2e/issues/376), closed 2026-10-14 at that merge; the report and its walk were deleted then (in git before that commit).
 
 ## Reference — entry points & surfaces
