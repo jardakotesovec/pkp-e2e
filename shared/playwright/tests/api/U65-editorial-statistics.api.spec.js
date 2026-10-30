@@ -62,17 +62,9 @@ test.describe('editorial statistics through the API', () => {
         expect(figure(own.body, 'submissionsReceived')).toBe(1);
     });
 
-    test('API3: The users\' figures read through the API', async ({pkpApi, apiAs}) => {
-        const tag = `ap65u${Date.now().toString(36)}`;
-        await pkpApi.createContext({
-            tag,
-            users: [
-                {username: `${tag}mg`, roles: ['manager']},
-                {username: `${tag}au`, roles: ['author']},
-                {username: `${tag}du`, roles: ['author'], disabled: true},
-            ],
-        });
-        const api = await apiAs(`${tag}mg`, {context: tag});
+    test('API3: The users\' figures read through the API', async ({scratch}) => {
+        const j = await scratch({users: {mg: 'manager', au: 'author', du: {roles: ['author'], disabled: true}}});
+        const api = await j.as('mg');
 
         // Unfiltered: the active accounts, the site administrator's
         // manager role in the new journal among them (Rule 14).
