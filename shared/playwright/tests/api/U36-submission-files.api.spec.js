@@ -11,13 +11,7 @@ const STAGE = {submission: 2, note: 3, reviewAttachment: 5, draft: 6, copyedited
 
 /** A file uploaded through the files API as `api`, as a list's "Upload" sends it. */
 async function upload(api, submissionId, fields) {
-    const res = await api.http.fetch(api.url(`submissions/${submissionId}/files`), {
-        method: 'POST',
-        headers: {'X-Csrf-Token': api.csrfToken, Accept: 'application/json'},
-        multipart: {file: {name: 'chapter.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 U36')}, ...fields},
-        failOnStatusCode: false,
-    });
-    return {status: res.status(), body: await res.json().catch(() => null)};
+    return api.upload(`submissions/${submissionId}/files`, {file: {name: 'chapter.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 U36')}, ...fields});
 }
 
 test.describe('submission files through the API', () => {

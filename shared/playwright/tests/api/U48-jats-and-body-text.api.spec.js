@@ -21,13 +21,8 @@ async function version(scratch) {
  * a PUT override (a real PUT fails on the server, U48 A23).
  */
 async function saveBodyText(api, route, doc) {
-    const res = await api.http.fetch(api.url(`${route}/bodyText`), {
-        method: 'POST',
-        headers: {'X-Csrf-Token': api.csrfToken, 'X-Http-Method-Override': 'PUT', Accept: 'application/json'},
-        multipart: {bodyText: JSON.stringify(doc)},
-        failOnStatusCode: false,
-    });
-    expect(res.status(), await res.text()).toBe(200);
+    const res = await api.upload(`${route}/bodyText`, {bodyText: JSON.stringify(doc)}, {method: 'PUT'});
+    expect(res.status, JSON.stringify(res.body)).toBe(200);
 }
 
 test.describe('JATS and body text through the API', () => {

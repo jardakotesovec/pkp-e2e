@@ -83,6 +83,18 @@ const ALIASES = {
 /** Every label a grid row may use. */
 const LABELS = [...Object.keys(PERSONAS), ...Object.keys(ALIASES)];
 
+/** The URN plugin's settings (docs/specs/U44-identifiers.md, the seed facts). */
+const URN = {
+    enableIssueURN: false,
+    enablePublicationURN: true,
+    enableRepresentationURN: false,
+    urnPrefix: 'urn:nbn:de:0000-',
+    urnSuffix: 'default',
+    urnCheckNo: true,
+    urnNamespace: 'urn:nbn:de',
+    urnResolver: 'https://nbn-resolving.de/',
+};
+
 function roleKey(appName, role) {
     const keys = ROLE_KEYS[appName];
     return role in keys ? keys[role] : role;
@@ -121,7 +133,14 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
 
     const year = new Date().getFullYear();
     const issue = {volume: 1, number: '1', year};
-    const context = await pkpApi.createContext({tag, users: accounts, ...(appName === 'ojs' ? {issues: [{...issue, published: true}]} : {})});
+    const context = await pkpApi.createContext({
+        tag,
+        users: accounts,
+        ...(appName === 'ojs' ? {issues: [{...issue, published: true}]} : {}),
+        // A publication identifier plugin, without which the publication's
+        // "Identifiers" page answers no one (U44; a preprint server has none).
+        ...(appName === 'ops' ? {} : {plugins: {urnpubidplugin: {enabled: true, settings: URN}}}),
+    });
     const outsider = `${tag}xm`;
     await pkpApi.createContext({tag: `${tag}x`, users: [{username: outsider, roles: ['manager']}]});
     users['manager of another context'] = outsider;

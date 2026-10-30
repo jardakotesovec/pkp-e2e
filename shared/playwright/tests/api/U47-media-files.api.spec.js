@@ -7,14 +7,9 @@ const {test, expect} = require('../../support/base-test.js');
 
 /** A temporary file of the signed-in user, as the "Upload Media File" window stores each card. */
 async function temporaryFile(api, name = 'figure.png') {
-    const res = await api.http.fetch(api.url('temporaryFiles'), {
-        method: 'POST',
-        headers: {'X-Csrf-Token': api.csrfToken, Accept: 'application/json'},
-        multipart: {file: {name, mimeType: 'image/png', buffer: Buffer.from('U47 figure')}},
-        failOnStatusCode: false,
-    });
-    expect(res.status()).toBe(200);
-    return (await res.json()).id;
+    const res = await api.upload('temporaryFiles', {file: {name, mimeType: 'image/png', buffer: Buffer.from('U47 figure')}});
+    expect(res.status).toBe(200);
+    return res.body.id;
 }
 
 /** A scratch context's manager, its "Image" media type, and a media-file helper per submission. */

@@ -12,6 +12,7 @@
  *   const res = await api.post('announcements', {title: {en: 'Hi'}});
  *   expect(res.status).toBe(200);
  *   res.body                                           // parsed JSON, or the text
+ *   await api.upload('temporaryFiles', {file: {name, mimeType, buffer}});
  *
  * Every call answers whatever the app answered (no throw on 4xx/5xx), so a
  * test asserts the status itself. The session is minted through the test
@@ -75,17 +76,31 @@ class ApiClient {
     }
 
     /**
+     * A multipart write, as a screen's upload sends it; a file field is
+     * `{name, mimeType, buffer}`. A `method` other than POST is sent as a
+     * POST with `X-Http-Method-Override`, as the screens send it (PHP reads
+     * a multipart body on a POST only).
+     */
+    upload(path, fields, {method = 'POST'} = {}) {
+        return this.call(method, path, {multipart: fields});
+    }
+
+    /**
      * @returns {Promise<{status: number, body: any, response: import('@playwright/test').APIResponse}>}
      */
-    async call(method, path, {params, data} = {}) {
+    async call(method, path, {params, data, multipart} = {}) {
         const headers = {Accept: 'application/json'};
         if (method !== 'GET' && this.csrfToken) {
             headers['X-Csrf-Token'] = this.csrfToken;
         }
+        if (multipart && method !== 'POST') {
+            headers['X-Http-Method-Override'] = method;
+        }
         const response = await this.http.fetch(this.url(path), {
-            method,
+            method: multipart ? 'POST' : method,
             params,
             data,
+            multipart,
             headers,
             failOnStatusCode: false,
             maxRedirects: 0,

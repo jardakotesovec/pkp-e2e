@@ -502,7 +502,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `submission.publication._components.fundingStatement` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/fundingStatement` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
 | `submission.publication._components.titleAbstract` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/titleAbstract` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
 | `submission.publication._components.changeLanguageMetadata` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/changeLanguageMetadata` | ojs omp ops | manager subEditor assistant author | U40 | U24#publication-pages |
-| `submission.publication._components.identifiers` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/identifier` | ojs omp ops | manager subEditor assistant | U44 | — |
+| `submission.publication._components.identifiers` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/identifier` | ojs omp ops | manager subEditor assistant | U44 | U44#identifiers-page |
 | `submission.publication._components.permissionDisclosure` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/permissionDisclosure` | ojs omp ops | manager subEditor assistant | U40 | U40#permissions-page |
 | `submission.edit` | PUT | `submissions/{submissionId}` | ojs omp ops | manager subEditor author | U21 | — |
 | `submission.saveForLater` | PUT | `submissions/{submissionId}/saveForLater` | ojs omp ops | manager subEditor author | U21 | — |
