@@ -121,13 +121,14 @@ reads the registry and the grids from this repo and makes these passes:
   `publications/{publicationId}`, with the version swapped for one of the
   other context's or the other submission's.
 - **The foreign body pass.** A route that takes its children's ids in the
-  body rather than the path (the order routes), called at the persona
-  set's own address with two children made in those same places. An order
-  answers 200 whether or not it touched a row, so the pass reads the
-  outcome: the foreign list keeps its order. A control first reorders two
-  of the set's own children, so a body the route stopped reading fails
+  body rather than the path (an order, a link, a flag), called at the
+  persona set's own address with two children made in those same places.
+  An order answers 200 whether or not it touched a row, so the pass reads
+  the outcome: what the call would change about the foreign pair stays as
+  it was. A control first makes the call on two of the set's own children,
+  whose read must change, so a body the route stopped reading fails
   instead of passing for nothing. Each such route gets an entry in the
-  matrix's `params.js` (its child, the list showing the order, its body).
+  matrix's `params.js` (its child, its body, the read of what it changes).
 
 A call answered 401, 403 or 404, or a 2xx whose body is an error alone,
 counts as refused; any other answer, a 400 for an empty body included, as
@@ -223,7 +224,7 @@ feature"), one spec at a time:
    `none: <reason>`; a rule with no grid yet gets one in the spec that
    owns it.
 3. **Matrix.** Add a maker to the matrix's `params.js` for each new child
-   resource, and an order entry for each route that names children in its
+   resource, and a body entry for each route that names children in its
    body; run the matrix on all three apps, and judge every disagreeing
    cell (above).
 4. **API checks.** From the traffic map and the spec's Rules and Fields:
