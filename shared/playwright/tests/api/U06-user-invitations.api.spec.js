@@ -41,24 +41,17 @@ test.describe('user invitations through the API', () => {
         expect(saved.body.userGroupsToAdd.map((g) => g.userGroupId)).toEqual([own]);
     });
 
-    test('API2: A disabled user cannot be invited', async ({scratch, pkpApi}) => {
+    test('API2: A disabled user cannot be invited', async ({scratch}) => {
         const j = await scratch();
         const api = await j.as('mg');
-        const people = await pkpApi.createContext({
-            tag: `${j.path}u`,
-            users: [
-                {username: `${j.path}du`, roles: ['author'], disabled: true},
-                {username: `${j.path}au`, roles: ['author']},
-            ],
-        });
-        const idOf = (username) => people.users.find((u) => u.username === username).id;
+        const people = await j.another('u', {users: {du: {roles: ['author'], disabled: true}, au: 'author'}});
 
-        const refused = await api.post('invitations/add/userRoleAssignment', {invitationData: {userId: idOf(`${j.path}du`)}});
+        const refused = await api.post('invitations/add/userRoleAssignment', {invitationData: {userId: people.id('du')}});
         expect(refused.status).toBe(422);
         expect(refused.body.errors).toHaveProperty('userId');
 
         // Control: the active user's invitation is started.
-        const started = await api.post('invitations/add/userRoleAssignment', {invitationData: {userId: idOf(`${j.path}au`)}});
+        const started = await api.post('invitations/add/userRoleAssignment', {invitationData: {userId: people.id('au')}});
         expect(started.status).toBe(200);
         expect(started.body.invitationId).toBeTruthy();
     });
@@ -88,18 +81,11 @@ test.describe('user invitations through the API', () => {
         expect((await anon.put(`invitations/${id}/key/${key}/finalize`, {})).status).toBe(401);
     });
 
-    test('API4: A reviewer role\'s masthead choice cannot be changed', async ({pkpApi, apiAs, appContext}) => {
+    test('API4: A reviewer role\'s masthead choice cannot be changed', async ({scratch, appContext}) => {
         test.skip(!appContext.capabilities.hasReviewStage, 'a preprint server has no reviewer role');
-        const tag = `ap06m${Date.now().toString(36)}`;
-        const seeded = await pkpApi.createContext({
-            tag,
-            users: [
-                {username: `${tag}mg`, roles: ['manager']},
-                {username: `${tag}me`, roles: ['author', 'externalReviewer']},
-            ],
-        });
-        const member = seeded.users.find((u) => u.username === `${tag}me`).id;
-        const api = await apiAs(`${tag}mg`, {context: tag});
+        const j = await scratch({users: {mg: 'manager', me: ['author', 'externalReviewer']}});
+        const member = j.id('me');
+        const api = await j.as('mg');
         const groups = (await api.get(`users/${member}`)).body.groups;
         const roleOf = (roleId) => groups.find((g) => g.roleId === roleId);
 

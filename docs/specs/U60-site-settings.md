@@ -806,26 +806,6 @@ journals with throwaway accounts. <sup>s</sup>
     A press stores the sheet and loads it on no page ⚠ [OMP1](#omp1), so
     this scenario does not run on a press.
 
-### Through the API
-
-The check below sends what no screen sends; who may call the site's
-routes is the *[System administration & jobs](U61-system-administration.md#api-grid-administration)*
-grid's, checked apart (`docs/process/api.md`). It only reads: the
-site's settings are shared by every test on the install.
-
-API1. **The site's settings and theme read through the API** {OJS OMP OPS}
-
-   Given: the Site Administrator, at the site's address.
-
-   - **Settings**: the site read through the API answers its record:
-     the primary language among the languages it offers, and a "Minimum
-     password length (characters)" that is a whole number, 4 or more
-     (Rule 10). No screen reads the site this way; the Site Settings
-     tabs come filled with the page.
-   - **Theme**: the site's theme read through the API answers the theme
-     the site's record names, with the fields "Default Theme" offers on
-     the "Theme" tab, "Colour" and "Typography" among them (Rule 17).
-
 ## Coverage
 
 Left out of the scenarios above, by reason:

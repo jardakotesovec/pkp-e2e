@@ -7,21 +7,20 @@
 const {test, expect} = require('../../support/base-test.js');
 
 test.describe('users management through the API', () => {
-    test('API1: The list ordered and narrowed as no screen asks', async ({pkpApi, apiAs}) => {
-        const tag = `ap53l${Date.now().toString(36)}`;
+    test('API1: The list ordered and narrowed as no screen asks', async ({scratch}) => {
         const people = [
             {key: 'zi', familyName: 'Zimmer'},
             {key: 'ab', familyName: 'Abbott'},
             {key: 'mi', familyName: 'Mills', disabled: true},
         ];
-        await pkpApi.createContext({
-            tag,
-            users: [
-                {username: `${tag}mg`, roles: ['manager']},
-                ...people.map(({key, familyName, disabled}) => ({username: `${tag}${key}`, roles: ['author'], givenName: 'Test', familyName, ...(disabled ? {disabled} : {})})),
-            ],
+        const j = await scratch({
+            users: {
+                mg: 'manager',
+                ...Object.fromEntries(people.map(({key, familyName, disabled}) => [key, {roles: ['author'], givenName: 'Test', familyName, ...(disabled ? {disabled} : {})}])),
+            },
         });
-        const api = await apiAs(`${tag}mg`, {context: tag});
+        const tag = j.path;
+        const api = await j.as('mg');
         const names = async (query) => {
             const res = await api.get('users', query);
             expect(res.status).toBe(200);

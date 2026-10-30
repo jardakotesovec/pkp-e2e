@@ -14,17 +14,10 @@ const EDITOR_NOTIFY_AUTHOR = 0x30000001;
 const REVIEW_NOTIFY_REVIEWER = 0x40000001;
 
 test.describe('review stage through the API', () => {
-    test('API1: The letters list holds only the letters sent to the caller', async ({scratch, pkpApi, apiAs}) => {
+    test('API1: The letters list holds only the letters sent to the caller', async ({scratch}) => {
         const j = await scratch({users: {mg: 'manager', au: 'author', ot: 'author'}});
         // A second journal, where the manager also holds the Author role.
-        const second = `${j.path}b`;
-        await pkpApi.createContext({
-            tag: second,
-            users: [
-                {username: j.user('mg'), roles: ['manager', 'author']},
-                {username: j.user('au'), roles: ['author']},
-            ],
-        });
+        const second = await j.another('b', {users: {mg: ['manager', 'author'], au: 'author'}});
         const decline = async (editor, submissionId, subject) => {
             const res = await editor.post(`submissions/${submissionId}/decisions`, {
                 decision: INITIAL_DECLINE,
@@ -34,10 +27,10 @@ test.describe('review stage through the API', () => {
         };
         const own = (await j.submission('s', {submitter: 'au'})).submissionId;
         const other = (await j.submission('o', {submitter: 'ot'})).submissionId;
-        const away = (await pkpApi.createSubmission({tag: `${second}s`, context: second, submitter: j.user('au')})).submissionId;
+        const away = (await second.submission('s', {submitter: 'au'})).submissionId;
         await decline(await j.as('mg'), own, 'Own letter');
         await decline(await j.as('mg'), other, 'Other author letter');
-        const managerThere = await apiAs(j.user('mg'), {context: second});
+        const managerThere = await second.as('mg');
         await decline(managerThere, away, 'Second journal letter');
         const subjects = (res) => {
             expect(res.status, JSON.stringify(res.body)).toBe(200);
