@@ -226,15 +226,15 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `emails.getMany` | GET | `emails/authorEmails` | ojs omp ops | author | U38 | — |
-| `emails.getEmail` | GET | `emails/{emailId}` | ojs omp ops | manager subEditor author | U38 | — |
+| `emails.getMany` | GET | `emails/authorEmails` | ojs omp ops | author | U26 | — |
+| `emails.getEmail` | GET | `emails/{emailId}` | ojs omp ops | manager subEditor author | U38 | U38#email-read |
 
 ### genres — GenreController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `genre.getMany` | GET | `genres` | ojs omp ops | admin manager subEditor assistant author | U58 | — |
-| `genre.get` | GET | `genres/{genreId}` | ojs omp ops | admin manager subEditor assistant author | U58 | — |
+| `genre.getMany` | GET | `genres` | ojs omp ops | admin manager subEditor assistant author | U58 | U58#components-read |
+| `genre.get` | GET | `genres/{genreId}` | ojs omp ops | admin manager subEditor assistant author | U58 | U58#components-read |
 
 ### highlights — HighlightsController
 
@@ -313,8 +313,8 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `orcid.requestAuthorVerification` | POST | `orcid/requestAuthorVerification/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | — |
-| `orcid.delete` | POST | `orcid/deleteForAuthor/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | — |
+| `orcid.requestAuthorVerification` | POST | `orcid/requestAuthorVerification/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | U40#edit-gate |
+| `orcid.delete` | POST | `orcid/deleteForAuthor/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | none: an allowed call has the install ask ORCID to revoke the iD's token (orcid.org); no ORCID client on the test installs |
 
 ### peerReviews — PeerReviewController
 
@@ -349,7 +349,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `review.export.pdf` | GET | `reviews/{submissionId}/{reviewAssignmentId}/export-pdf` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
 | `review.export.xml` | GET | `reviews/{submissionId}/{reviewAssignmentId}/export-xml` | ojs omp | admin manager subEditor assistant | U27 | U27#manage-assignment |
 | `review.export.getFile` | GET | `reviews/{submissionId}/exports/{fileId}` | ojs omp | admin manager subEditor assistant | U27 | none: serves the caller's own temporary file alone (a review export they made), whatever their role |
-| `review.sendToOrcid` | POST | `reviews/{submissionId}/{reviewAssignmentId}/sendToOrcid` | ojs omp | admin manager subEditor | U04 | — |
+| `review.sendToOrcid` | POST | `reviews/{submissionId}/{reviewAssignmentId}/sendToOrcid` | ojs omp | admin manager subEditor | U04 | U04#send-review |
 
 ### rors — PKPRorController
 
@@ -478,8 +478,8 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `submission.publications.get` | GET | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author reviewer | U24 | U24#submission-read |
 | `submission.publication.contributor.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author reviewer | U41 | U24#submission-read |
 | `submission.publication.contributor.get` | GET | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author reviewer | U41 | U24#publication-pages |
-| `submission.participants.getMany` | GET | `submissions/{submissionId}/participants` | ojs omp ops | manager subEditor assistant | U35 | — |
-| `submission.participants.stage.getMany` | GET | `submissions/{submissionId}/participants/{stageId}` | ojs omp ops | manager subEditor assistant | U35 | — |
+| `submission.participants.getMany` | GET | `submissions/{submissionId}/participants` | ojs omp ops | manager subEditor assistant | U35 | U35#participants-read |
+| `submission.participants.stage.getMany` | GET | `submissions/{submissionId}/participants/{stageId}` | ojs omp ops | manager subEditor assistant | U35 | U35#stage-participants-read |
 | `submission.decisions.getMany` | GET | `submissions/{submissionId}/decisions` | ojs omp ops | manager subEditor | U34 | U34#decisions-read |
 | `submission.decision.add` | POST | `submissions/{submissionId}/decisions` | ojs omp ops | manager subEditor | U34 | U34#record-decision |
 | `submission.returnToDone` | POST | `submissions/{submissionId}/returnToDone` | ojs omp ops | manager subEditor | U34 | U34#return-to-done |
@@ -646,10 +646,10 @@ grid does not parse, and a blank Gate on a feature with grids.
 |---|---|---|---|---|---|---|
 | `user.getReviewers` | GET | `users/reviewers` | ojs omp ops | admin manager subEditor | U27 | U27#reviewer-search |
 | `user.getReport` | GET | `users/report` | ojs omp ops | admin manager subEditor | U65 | U64#statistics |
-| `user.getUser` | GET | `users/{userId}` | ojs omp ops | admin manager subEditor | U53 | — |
-| `user.getManyUsers` | GET | `users` | ojs omp ops | admin manager subEditor | U53 | — |
-| `user.endRole` | PUT | `users/{userId}/endRole/{userGroupId}` | ojs omp ops | admin manager | U53 | — |
-| `user.masthead` | PUT | `users/{userId}/masthead/{userUserGroupId}` | ojs omp ops | admin manager | U53 | — |
+| `user.getUser` | GET | `users/{userId}` | ojs omp ops | admin manager subEditor | U53 | U53#users |
+| `user.getManyUsers` | GET | `users` | ojs omp ops | admin manager subEditor | U53 | U53#users |
+| `user.endRole` | PUT | `users/{userId}/endRole/{userGroupId}` | ojs omp ops | admin manager | U06 | U06#invitations |
+| `user.masthead` | PUT | `users/{userId}/masthead/{userUserGroupId}` | ojs omp ops | admin manager | U06 | U06#invitations |
 
 ### vocabs — PKPVocabController
 

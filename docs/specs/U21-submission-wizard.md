@@ -46,6 +46,29 @@ gets the Login page.
 | **See the Saved for Later / Submission complete / Submission cancelled screens** | • whoever may open the underlying submission. The cancelled screen names no submission and shows for anyone signed in <sup>n</sup> |
 | **Reach the wizard from the reader site** ("Make a Submission" block, {OJS OMP}) | • any visitor, once a Journal Manager has enabled the block (Rule 1). It links to the journal's submissions information page, which in turn leads to the wizard <sup>a</sup> |
 
+<a id="api-grid-draft"></a>
+**Permission grid: working on a draft.** The row "Open a draft's wizard"
+above, for the routes the wizard saves, saves for later and submits
+through; `Draft` is a draft of the submitter's, its participants
+assigned. Starting a submission enrols its caller in an author role
+(Rule 3a) and has no grid (`docs/process/api.md`).
+
+| Persona | Draft |
+|---|---|
+| manager | ✓ |
+| assigned section editor | ✓ |
+| assigned section editor, metadata edit off | ✓ |
+| unassigned section editor | — |
+| assigned assistant | — |
+| assigned review assistant | — |
+| submitter | ✓ |
+| other author | — |
+| assigned reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 These are the fields of the start form (Rule 4). Later steps embed forms
@@ -1005,6 +1028,53 @@ App-specific:
       scratch journal with the keywords item switched off, since the seeded
       journal asks for them by install default), "Details" shows no
       "Keywords" field and "Review" passes without one. <sup>s</sup>
+
+### Through the API
+
+The checks below send what no screen sends; who may work on a draft is
+the [draft grid](#api-grid-draft)'s, checked apart (`docs/process/api.md`).
+
+API1. **A start in another journal's section is refused** {OJS OMP OPS}
+
+   Given: two scratch journals (presses: each with one series), each with
+   a Journal Manager and an Author.
+
+   - **Foreign section**: the first journal's Author starts a submission
+     through its address naming the second journal's section (a press:
+     series): refused (400) with an error on the section. The start form
+     offers only the journal's own sections (Rule 4).
+   - **Control**: the same start naming the journal's own section makes
+     a draft.
+
+API2. **Submitting as a role the user does not hold is refused** {OJS OMP OPS}
+
+   Given: a scratch journal with a Journal Manager and an Author.
+
+   - **Another role**: the Author starts a submission "Submit As" the
+     journal's Journal Manager role: refused (400) with an error on the
+     role. "Submit As" offers only the user's own roles (Rule 4a).
+   - **Control**: the same start as the Author role makes a draft.
+
+API3. **Comments for the editors are refused once submitted** {OJS OMP OPS}
+
+   Given: a scratch journal with a Journal Manager and an Author, who has
+   a draft and a submitted submission.
+
+   - **Submitted**: the Author saves a comment for the editors on the
+     submitted submission through the API: refused (400) with an error
+     on the comment, and none is stored. The comments box is on the
+     wizard's "For the Editors" step alone (Rule 7).
+   - **Control**: on the draft the same save is stored.
+
+API4. **A submission submitted twice is refused** {OJS OMP OPS}
+
+   Given: a scratch journal with a Journal Manager and an Author, who has
+   a submitted submission.
+
+   - **Again**: the Author submits it again through the API: refused
+     (400) with an error on the submission's progress, and its date
+     submitted stays as it was. "Submit" is on the wizard's Review step
+     alone (Rule 14).
 
 ## Coverage
 

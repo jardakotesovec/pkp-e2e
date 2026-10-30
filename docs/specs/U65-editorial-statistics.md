@@ -999,6 +999,62 @@ other suite's run. <sup>sc</sup>
    - **Control**: the side menu's "Statistics" group offers "Reports",
      which opened the page above (Actors row 3). <sup>sc</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the editorial
+figures, the users' figures and the users export is the statistics
+roles' grid of *[Statistics — usage](U64-usage-statistics.md#api-grid-statistics)*,
+checked apart (`docs/process/api.md`).
+
+API1. **A range the date picker refuses is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal.
+
+   - **Refused (400)**, each with an error: the "Editorial Activity"
+     figures asked for a range ending today, one starting before
+     2001-01-01, a first date after the second, and a date not written
+     YYYY-MM-DD. The date range refuses these in the browser before any
+     request (Rule 3).
+   - **Control**: "Last 90 days", the range the page opens on, is
+     answered.
+
+API2. **A filter naming another journal's section counts nothing** {OJS OMP OPS}
+
+   Given: two scratch journals (presses: each with one series), each
+   with a Journal Manager and one received submission in its section.
+
+   - **Foreign section**: the first journal's figures asked through its
+     own address for the second journal's section read 0 under
+     "Submissions Received". "Filters" offers only the journal's own
+     sections (Rule 4).
+   - **Control**: asked for its own section, they read 1.
+
+API3. **The users' figures read through the API** {OJS OMP OPS}
+
+   Given: a scratch journal with a Journal Manager, an Author and a
+   disabled Author.
+
+   - **Unfiltered**: the figures read 3 under "All Users" (the Site
+     Administrator's manager role in the new journal counted) and 1
+     under "Author", the disabled account left out. No screen asks for
+     them: "Users" draws its counts on the page (Rules 14, 15).
+   - **Status**: asked for the disabled accounts they read 1 and 1, for
+     every account 4 and 2. The page has no filter (Rule 15).
+   - **Registration date**: asked for the accounts registered before
+     yesterday, "Author" reads 0.
+
+API4. **The users export narrowed to another journal's role lists no account** {OJS OMP OPS}
+
+   Given: two scratch journals, each with a Journal Manager and an
+   Author.
+
+   - **Foreign role**: the export asked through the first journal's
+     address for the second journal's Author role holds the line of
+     column names alone. The window's boxes offer the journal's own
+     roles only (Rule 16).
+   - **Control**: asked for its own Author role, the file lists the
+     Author.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:

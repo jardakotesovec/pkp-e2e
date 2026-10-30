@@ -87,4 +87,31 @@ test.describe('user invitations through the API', () => {
         expect((await anon.get(`invitations/${id}/key/${key}`)).status).toBe(401);
         expect((await anon.put(`invitations/${id}/key/${key}/finalize`, {})).status).toBe(401);
     });
+
+    test('API4: A reviewer role\'s masthead choice cannot be changed', async ({pkpApi, apiAs, appContext}) => {
+        test.skip(!appContext.capabilities.hasReviewStage, 'a preprint server has no reviewer role');
+        const tag = `ap06m${Date.now().toString(36)}`;
+        const seeded = await pkpApi.createContext({
+            tag,
+            users: [
+                {username: `${tag}mg`, roles: ['manager']},
+                {username: `${tag}me`, roles: ['author', 'externalReviewer']},
+            ],
+        });
+        const member = seeded.users.find((u) => u.username === `${tag}me`).id;
+        const api = await apiAs(`${tag}mg`, {context: tag});
+        const groups = (await api.get(`users/${member}`)).body.groups;
+        const roleOf = (roleId) => groups.find((g) => g.roleId === roleId);
+
+        const reviewer = roleOf(4096);
+        const refused = await api.put(`users/${member}/masthead/${reviewer.userUserGroupId}`, {masthead: reviewer.masthead});
+        expect(refused.status).toBe(400);
+        expect(refused.body).toHaveProperty('error');
+
+        // Control: the Author role's choice, sent unchanged.
+        const author = roleOf(65536);
+        const answered = await api.put(`users/${member}/masthead/${author.userUserGroupId}`, {masthead: author.masthead});
+        expect(answered.status).toBe(200);
+        expect(answered.body.groups.find((g) => g.roleId === 65536).masthead).toBe(author.masthead);
+    });
 });

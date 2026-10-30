@@ -59,6 +59,24 @@ that row has not been seen; that it is refused is read from the code.
 | **"Login As"** | • offered on the rows of users the signed-in manager may impersonate; the action itself and who may use it belong to [Login & sessions](U01-login-and-sessions.md#who-may-impersonate) <sup>o</sup> |
 | **Manage a journal's users from Administration** (the Settings wizard's "Users" tab: "Add User", "Edit User" and the other row actions) | • Site Administrator only (Rules 19–24) <sup>k</sup> |
 
+<a id="api-grid-users"></a>
+**Permission grid: reading the journal's users.** The row "Open the
+"Users" list, search it and page through it" above, for the routes the
+list and a user's roles page read users through, the list and one user
+of the journal (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 The "Current Users" list (Settings › Users & Roles › "Users"), one row per
@@ -789,6 +807,27 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **Control**: Lena signs in with her old password, the password
      boxes having been left empty on "Edit User" (Fields "Password").
      <sup>s</sup>
+
+### Through the API
+
+The checks below send what no screen sends; who may read the journal's
+users is the [users grid](#api-grid-users)'s, checked apart
+(`docs/process/api.md`). Removing a role and changing its masthead choice
+belong to the member's roles page, [User invitations](U06-user-invitations.md#api-grid-invitations).
+
+API1. **The list ordered and narrowed as no screen asks** {OJS OMP OPS}
+
+   Given: a scratch journal with a Journal Manager and three Authors,
+   "Zimmer", "Abbott" and "Mills" (disabled), made in that order.
+
+   - **By family name, last first**: the list asked through the API for
+     that order holds Zimmer, Mills, Abbott. The list's columns do not
+     sort (Rule 4).
+   - **Disabled alone**: asked for the disabled accounts, it holds Mills
+     alone. The list shows enabled and disabled accounts together
+     (Rule 2).
+   - **Control**: unfiltered, it holds Zimmer, Abbott and Mills, oldest
+     first.
 
 ## Coverage
 

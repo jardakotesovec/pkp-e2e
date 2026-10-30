@@ -42,10 +42,12 @@ Production Editor; on a preprint server the Preprint Server Manager).
 
 <a id="api-grid-invitations"></a>
 **Permission grid: sending invitations.** The rows "See pending
-invitations", "Invite to a role", "Edit a pending invitation" and "Cancel
-a pending invitation" above, for the invitations routes that list, start,
-fill and send an invitation, read its email and cancel it; the routes the
-emailed links call take the link's key as their only credential (Rule 6)
+invitations", "Invite to a role", "Edit a pending invitation", "Cancel
+a pending invitation" and "Propose roles for an existing member" above,
+for the invitations routes that list, start, fill and send an invitation,
+read its email and cancel it, and for the two the member's roles table
+calls to remove a role and change its masthead choice (Rule 13); the
+routes the emailed links call take the link's key as their only credential (Rule 6)
 and follow no role (`docs/process/api.md`).
 
 | Persona | Context |
@@ -670,8 +672,9 @@ App-specific:
 The checks below send what no screen sends; who may call the invitations
 routes is the [invitations grid](#api-grid-invitations)'s, checked apart
 (`docs/process/api.md`). An invitation started or saved through the API
-with no invitation data at all fails on the server ⚠ [A19](#a19), and an
-end date that is no date breaks its acceptance ⚠ [A18](#a18).
+with no invitation data at all fails on the server ⚠ [A19](#a19), an
+end date that is no date breaks its acceptance ⚠ [A18](#a18), and a
+member's last role ends through the API ⚠ [A20](#a20).
 
 API1. **A role of another journal is refused** {OJS OMP OPS}
 
@@ -709,6 +712,18 @@ API3. **Declining through the API** {OJS OMP OPS}
    - **The key afterwards**: reading the invitation, or accepting it, with
      the same key is refused, as the emailed links then show "Invitation
      Unavailable" (Rule 4).
+
+API4. **A reviewer role's masthead choice cannot be changed** {OJS OMP}
+
+   Given: a Journal Manager; a member holding the Author and the
+   Reviewer roles.
+
+   - **Reviewer**: the masthead choice of the member's Reviewer role
+     sent through the API, even unchanged, is refused (400) with an
+     error. The roles table shows a reviewer role's choice as fixed text,
+     with no select (Fields "Journal Masthead").
+   - **Control**: the Author role's choice sent unchanged is answered
+     (200), and nothing changes.
 
 ## Coverage
 
@@ -897,6 +912,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A17](#a17) | "Edit Invitation" logs a PHP warning when the invitee has no Given Name in the interface language | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A18](#a18) | A role end date that is no date, saved through the API, makes the invitation's acceptance fail after the account is made | 🐞 | minor · crash: server | — |
 | [A19](#a19) | Starting or saving an invitation through the API with no invitation data gets a server error | 🐞 | minor · crash: server | — |
+| [A20](#a20) | A member's last role, which the roles page refuses to remove, is ended through the API | 🐞 | minor | — |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
@@ -1164,6 +1180,18 @@ an empty part is (422, an error per missing field). Instead both
 requests fail with a server error whose text names the server's code.
 Nothing is started or changed.
 Basis: probe, 2026-10-30. <sup>[f-a19](#fn-a19)</sup>
+
+<a id="a20"></a>
+**A20 — A member's last role, which the roles page refuses to remove, is ended through the API** · 🐞 · minor.
+On a member's roles page "Remove Role" on their last active role opens
+no confirmation: a dialog answers "You cannot remove the role. At least
+one role must be assigned to the user." (Rule 13). The request behind
+"Remove Role", sent through the install's programming interface for
+that same last role, ends it (200): the member is left with no role in
+the journal, as the Users list's "Remove User" leaves them
+([Users management](U53-users-management.md) Rule 14), and is emailed
+that the role was removed.
+Basis: probe, 2026-10-30. <sup>[f-a20](#fn-a20)</sup>
 
 ### OMP and OPS
 
@@ -2176,6 +2204,16 @@ field. Mechanism (lib/pkp): `InvitationController::add()` and
 `UserRoleAssignmentCreateController::populate()` read
 `$reqInput['invitationData']` with no default (the key routes' `refine`
 has `?? []`).
+
+<a id="fn-a20"></a>
+**f-a20** — Probed 2026-10-30 on scratch journals, OJS, OMP and OPS
+(`main`), as the journal's manager: a member seeded with the Author role
+alone; `PUT …/users/{id}/endRole/{group}` for that group answered 200
+and the member's Author row came back with today's end date. Mechanism
+(lib/pkp): `PKPUserController::endRole()` checks the caller may
+administer the member and that the member holds the role, then calls
+`Repo::userGroup()->endAssignments()`; the last-role refusal lives only
+in the roles table (`UserInvitationUserGroupsTable.vue`).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two
