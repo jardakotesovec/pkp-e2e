@@ -63,6 +63,84 @@ stage spec's row "Open the review stage". <sup>a</sup>
 | **Delete a submitted response** | • Editorial roles: row action "Delete" (Rule 11)<br>• Funding Coordinator: the action is offered like everyone else's, but "OK" in its dialog is refused with the dialog "Error" / "The current role does not have access to this operation." and the response stays [A3](#a3) <sup>l</sup> |
 | **Open the request page by its address** | • Editorial roles who may open the submission: the page opens for any of its rounds (Rule 14)<br>• Everyone else (an unassigned Section Editor or Guest Editor, Funding Coordinator, Author, Reviewer, Reader): the access-denied page (Rule 14) <sup>o</sup> |
 
+The three grids below restate rows of the table above for the author
+response routes (`docs/process/api.md`), each named by the submission
+and its review round: the round of each of the persona set's two
+submissions that moved past review, accepted from with its review
+completed, so the author's card shows there (Rule 6). A press registers
+the same routes and answers them the same way; its screens show none of
+it ([OMP1](#omp1)). The persona set's assistant is a copyeditor, no
+participant of the review stage; the review assistant is the Funding
+Coordinator.
+
+<a id="api-grid-request-response"></a>
+**Permission grid: requesting a response.** The rows "Request a
+response" and "Open the request page by its address": the editorial
+roles, on any round of a submission they may open; the Funding
+Coordinator is refused ([A3](#a3) is the button offered to them). The
+route behind "Submit Request" follows it; a round that is not ready
+refuses the request itself (Rule 4a), whoever sends it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-submit-response"></a>
+**Permission grid: submitting a response.** The row "Submit a
+response": an assigned author, while the round shows the card
+(Rule 6). The route behind the window's "Submit Response" follows it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | — | — |
+| assigned section editor | — | — |
+| assigned section editor, metadata edit off | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | — | — |
+
+<a id="api-grid-manage-response"></a>
+**Permission grid: editing and deleting a response.** The rows "Edit a
+submitted response" and "Delete a submitted response": the editorial
+roles; the author never, and the Funding Coordinator is refused
+([A3](#a3) is the "Delete" offered to them). The routes behind "Save"
+and "Delete" follow it, on the round's response.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 The request page is an email editor; the response window is a two-field
@@ -75,7 +153,7 @@ form.
 | "Subject" (request page) | yes | Prefilled "Request For Author Response To Reviewer Feedback" from the template; emptied, "Submit Request" is refused with a generic "Error" dialog (Rule 4a) ⚠ [A5](#a5) <sup>f</sup> |
 | "Message" (request page) | yes | Rich text (bold, italic, superscript, subscript, link) prefilled from the "Request Author Review Response" template (Rule 4), with the "Submit Author Response" button and the reviewers' comments (Rule 5) already in it; emptied, "Submit Request" is refused the same way [A5](#a5) <sup>f</sup> |
 | "Attach Files" (request page) | no | A toolbar button opening the "Attach Files" window with four sources: "Upload File", "Submission Files" (the author's files from the submission stage), "Review Files" (files uploaded by this round's reviewers) and "Library Files" <sup>f</sup> |
-| "Author Response" (response window) | yes | Rich text (bold, italic, underline, bullet list), one box per form language, so one on the seeded journal; the submit button stays greyed while the box is empty <sup>b</sup> |
+| "Author Response" (response window) | yes | Rich text (bold, italic, underline, bullet list), one box per form language, so one on the seeded journal; the submit button stays greyed while the box is empty, though the server stores an empty text, or one in a language the journal does not have, when a program sends it ⚠ [A12](#a12) <sup>b</sup> |
 | "Authors" (response window) | yes, at least one | One checkbox per contributor of the submission, described as "Author contributors who this response is being submitted on behalf of."; an assigned co-author who is not on the Contributors list has no box; the submit button stays greyed while none is ticked <sup>b</sup> |
 
 ## Rules & state
@@ -685,6 +763,47 @@ the footnote. <sup>s</sup>
      ends with no "Author Response" card; the request and the response
      belong to round 1 alone.
 
+### Through the API
+
+The checks below send what no screen sends; who may call the author
+response routes is the grids' (Actors & permissions, from the
+[request grid](#api-grid-request-response) to the
+[edit and delete grid](#api-grid-manage-response)), checked apart
+(`docs/process/api.md`). Each runs on a scratch journal or press whose
+author has two submissions, each with a file on "Submission Files" and
+accepted from its review round, the review completed. A press answers
+these routes as a journal does, though its screens show none of it
+([OMP1](#omp1)).
+
+API1. **A response must carry its text and name the submission's own contributors** {OJS OMP}
+
+   Given: the Author, the first submission's round holding no response.
+
+   - **No text**: submit a response with no text, an empty set of texts,
+     or a bare string in place of the per-language texts: each refused
+     (422) with an error on the response. The window's "Submit Response"
+     stays greyed while the box is empty (Fields).
+   - **No contributor, or another's**: submit it naming no contributor,
+     or the second submission's contributor: each refused (422) with an
+     error on the contributors. The window lists the submission's own
+     (Fields).
+   - The round still holds no response.
+   - **Control**: the text with the submission's own contributor is
+     stored, the round's response reading that text and that contributor.
+
+API2. **A request's attachments must be files of the submission** {OJS OMP}
+
+   Given: a Journal Manager, the first submission's round ready and
+   never asked.
+
+   - **Another submission's file**: send the request with the second
+     submission's file attached, or with an attachment naming no file:
+     each refused (422) with an error on the attachments, and the round
+     is not marked as asked. "Attach Files" offers the submission's files,
+     an upload or the journal's library (Fields).
+   - **Control**: the same request with the submission's own file is
+     sent (200), and the round is marked as asked (Side effects).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -737,6 +856,7 @@ Left out of the scenarios above, by reason:
   - A7 (revisions uploaded before responding)
   - A8 (a cancelled request beside a completed review)
   - A10 (a response not marked public, read in the article's open peer review record)
+  - A12 (a program's response with no text, or in a language the journal does not have)
 - **No seed**:
   - "Notify All Authors" at its default, the copy to other contributors (needs a contributor with an email and no account)
   - "Notify All Authors" off (no scenario key)
@@ -758,6 +878,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | "Request Author Response" refuses an empty subject or message with "An unexpected error has occurred" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A7](#a7) | Author who uploads revisions first can no longer respond to the reviewers, as the decision email asks | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | Anyone, without signing in, can read an author's response that also answers reviews the editor kept private | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
+| [A12](#a12) | A program can store an author response with no text, or in a language the journal does not have | 🐞 | low | — |
 | [OMP1](#omp1) | Press author's "Submit Author Response" email button opens a review round with nothing to respond in | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A2](#a2) | Nobody is told when the author's response arrives | ❓ | user-visible | — |
 | [A6](#a6) | Under a minimum, the request email says every review is in while one is still due | ❓ | minor | — |
@@ -906,6 +1027,23 @@ making every review of a round public, or none.
 Security: unreleased.
 Since: 2026-02-03 (pkp/pkp-lib#12294) · Basis: probe, 2026-10-15. <sup>f-a10</sup>
 
+<a id="a12"></a>
+**A12 — A program can store an author response with no text, or in a language the journal does not have** · 🐞 · low.
+"Submit Response" stays greyed while the "Author Response" box is
+empty, and the window offers a box for each of the journal's form
+languages alone. A program that sends the response through the
+install's programming interface (the REST API's response request) can
+send an empty text, or a text under a language the journal does not
+have, even a code no language has. It expects the response refused
+with a message, as a response naming no contributor is.
+
+Instead the response is stored. The round then holds a response with
+no text the journal can show, and the author cannot submit another,
+since a round holds one response, until an editor deletes it. An
+editor's save through the same interface can empty a response the same
+way.
+Since: 2026-01-23 (pkp/pkp-lib#12207) · Basis: probe, 2026-10-30. <sup>f-a12</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1033,6 +1171,24 @@ Issue report: [pkp-e2e-sec#9](https://github.com/jardakotesovec/pkp-e2e-sec/issu
 
 <a id="fn-f-a9"></a>
 **f-a9** — Notes c, d, f, h, j and k name the keys. None of the keys quoted in A9 has an entry in lib/pkp's `locale/fr_CA/` (`submission.po`, `common.po`, `emails.po`), while `submission.dashboard.view.awaitingReviews` has one; `emails.reviewRound.requestAuthorResponse.subject` and `.body` exist in `locale/en/emails.po` only. Live-probed 2026-09-30 at ojs `7ce98ec09e`, omp `3b0ecf794c` (lib/pkp `3dc90c81a6`), two runs, each on a scratch journal and a scratch press with English and French (Canada) as interface languages, as their Journal Manager and the submitting Author, on a round awaiting reviews, a ready round and a round with revisions requested; every French read was paired with the same read in `/en/`, where the only code on screen was the header's help link (the workflow screen's, U24 A11). On the ready round the Journal Manager sent a request from the page reached through "Request Response"; the Author opened the window, typed and pressed "Annuler" (the window closed with no question and reopened with its submit button greyed), then typed, ticked themself and submitted: one saved response per run, the card reading the submitted code at once and after a reload; the Journal Manager then read the table, the row's menu, the "View" window (closed with "Annuler") and the "Delete" dialog ("Annuler", the row unchanged). The ready cell's capitals come from the same CSS as the English cell's (note d), the page's capitals from the heading's `uppercase` class (note f). The request page's language switch read "Passer à français" and was not pressed. Control: the press's External Review stage showed no table and no card in either language. No response of 500 or more and no script error. Re-walked 2026-10-04 on OJS `main` (issues session): the row's "…" button's name, `common.moreActions`, is a released text French (Canada) lacks on 3.5 too; every other key is in lib/pkp `locale/en` on `main` only (22 from 3dff6a7b6e, 2026-01-23, `pkp/pkp-lib#12048`; the email's subject and body from 4f3b6f906e, 2026-02-20, `pkp/pkp-lib#12307`; `discussion.form.templatesLabel` from 2ceea5cd28, 2025-09-15, `pkp/pkp-lib#11825`), no other language has them and `stable-3_5_0` has none.
+
+<a id="fn-f-a12"></a>
+**f-a12 — A12 evidence.** Probed 2026-10-30 on OJS `main` (ojs
+`0a00726121`, lib/pkp `df42984b46`), a scratch journal with English as
+its one form language, each submission accepted from its round with the
+review completed: `POST …/reviews/{submissionId}/{reviewRoundId}/authorResponse`
+as the submitting author with `authorResponse` `{"en": ""}` answered 200
+and stored `response` `{"en": null}`; with `{"fr_CA": "Réponse"}` and
+with `{"xx": "bogus"}`, 200 and stored as sent; `{}` and a bare string
+were refused (422). `PUT …/authorResponse/{responseId}` as the Journal
+Manager with `{"en": ""}` answered 200 and left `response` `[]`.
+Mechanism: `ReviewRoundAuthorResponseCommonValidator::commonRules()`
+checks `authorResponse` only as a required array, with no text required
+in the journal's primary form language and no check of the language
+codes against the journal's form languages (the reviewer suggestions'
+form requests do both through `HasMultilingualRule`). The fix would
+require a text in the primary form language and refuse a language the
+journal does not have.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — Note a for the missing components; note h for the shared `DecisionRequestRevisionsNotifyAuthor` and template. Seen 2026-07-31 on a press during the review-stage probes (recorded in the review stage spec's note a: no Author Response panel in either view, console clean, while the author still received the letter inviting a response). Re-observed 2026-09-06 on the current build: no table on `workflow_3_{round}` or `workflow_2_{round}`; the typed page renders, `POST …/requestResponse` 200, the email's anchor `…mySubmissions?workflowSubmissionId={id}&workflowMenuKey=workflow_3_{round}&reviewResponseAction=respond`; the Request Revisions wizard's "Notify Authors" message and the "Your submission has been reviewed and we encourage you to submit revisions" email carry the same anchor; the author lands on External Review with the headings "Round 1 Status", "Notifications", "Revisions Uploaded", "Review Tasks & Discussions", no "Author Response" and no window, console clean (own console listeners; the kit's `screen()` does not capture it).

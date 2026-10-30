@@ -53,6 +53,32 @@ is named where it differs. <sup>a</sup>
 | **"Add Reviewer" from a suggestion** (the row's "…" menu on the Review stage) | • Journal Manager, Editor, Site Administrator, assigned Section or Guest Editor: while the Review stage is the submission's current stage (Rule 9); the request follows the Add Reviewer window's own rules (*Reviewer assignment & management*)<br>• Funding Coordinator: offered the same menu on every pending row; on a person with no account its "Add Reviewer" opens "Create New Reviewer", which refuses the role as the next row says [A5](#a5) <sup>a</sup> |
 | **"Select Reviewer" on a suggestion inside the Add Reviewer window** | • Whoever opened the Add Reviewer window, while the suggestion is pending and the person is not yet on the round (Rule 10)<br>• Funding Coordinator: offered on every entry, but on a person with no account it opens the "Create New Reviewer" form, whose "Add Reviewer" is refused with a browser alert, "The current role does not have access to this operation.", and the form stays open ⚠ [A5](#a5) <sup>a</sup> |
 
+<a id="api-grid-suggestions-read"></a>
+**Permission grid: listing a submission's suggestions.** The row "See
+the "Reviewers Suggested by Author" panel" (`docs/process/api.md`): the
+editorial roles and the Funding Coordinator, on any submission they may
+open, whatever its stage (the panel sits on its Submission and Review
+stages); the author's view carries no panel, whether it should is
+[A4](#a4). The route listing a submission's suggestions
+follows it. The persona set's assistant is a copyeditor, who reaches
+neither stage the panel sits on.
+
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | ✓ | ✓ | ✓ |
+| submitter | ? [A4](#a4) | ? [A4](#a4) | ? [A4](#a4) |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
+
 ## Fields & validation
 
 The "Add Reviewer Suggestion" window (also the "Edit" window, prefilled).

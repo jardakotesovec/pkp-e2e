@@ -66,6 +66,55 @@ give no access to any screen in this spec. <sup>l</sup>
 | **Read an earlier round's review** ("Previous Reviews") | • The assigned reviewer: for their own assignments on rounds the submission has moved past, their current one included once a later round opened without them (Rule 14, ⚠ [A12](#a12)) <sup>k</sup> |
 | **Open a one-click review link** | • The addressed reviewer, signed out or signed in as themselves. A browser signed in as somebody else gets a blank page (Rule 16, [A10](#a10)) <sup>m</sup> |
 
+The two grids below restate rows of the table above for the reviewer's
+routes (`docs/process/api.md`). The persona set's reviewer holds one
+review on each of its submissions: completed on the two that moved past
+review, and accepted, not yet submitted, on the one still in review.
+
+<a id="api-grid-reviewer-assignments"></a>
+**Permission grid: the reviewer's list.** The row "See "My Assignments
+as Reviewer"": a reviewer lists their own assignments in this journal,
+and no other role has the list. The route behind the list follows it; a
+preprint server registers it too and, having no reviewer role, refuses
+everyone there.
+
+| Persona | Context |
+|---|---|
+| manager | — |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | ✓ |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | — |
+
+<a id="api-grid-round-history"></a>
+**Permission grid: reading a round's review.** The row "Read an earlier
+round's review": the assigned reviewer reads their own review of a
+round, as the "Previous Reviews" window does; editors read reviews in
+the Reviewers panel instead
+([→ Read Review](U27-reviewer-assignment-and-management.md#read-review)).
+The route behind the window follows it, named by the submission and the
+round; it answers the caller's own assignment on that round alone.
+
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | — | — | — |
+| assigned section editor | — | — | — |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | ✓ | ✓ | ✓ |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | — | — | — |
+
 ## Fields & validation
 
 **Step 1 ("1. Request")** <sup>e</sup>
@@ -995,6 +1044,26 @@ App-specific:
     - **Control**: the second submission's row still reads "Please complete
       this review by {date} 00:00:00." with "Finish review", and its wizard
       address opens the wizard.
+
+### Through the API
+
+The check below reads what no screen shows; who may call the reviewer's
+routes is the grids' (Actors & permissions, the
+[reviewer's list](#api-grid-reviewer-assignments) and the
+[round's review](#api-grid-round-history)), checked apart
+(`docs/process/api.md`). It runs on a scratch journal or press.
+
+API1. **A round's review read by its reviewer holds their own review alone** {OJS OMP}
+
+   Given: a submission whose one round has two reviews, both completed,
+   each with its own "For author and editor" comment.
+
+   - **Each reviewer**: read the round's review through the API, as the
+     "Previous Reviews" window does (Rule 14), as each reviewer in turn:
+     each answer is that reviewer's own assignment and holds their own
+     comment, never the other reviewer's. The screens read the round only
+     on a reviewer's past rounds, and the scenarios hold one reviewer per
+     round.
 
 ## Coverage
 
