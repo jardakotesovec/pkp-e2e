@@ -9,7 +9,7 @@
   - 3.4: none (code; no ORCID iD field, the ORCID Profile plugin's boxes)
   - 3.3: none (code; the same plugin boxes)
 - **Introduced** `pkp/pkp-lib#9818` for `pkp/pkp-lib#9771` · [c79f538c51](https://github.com/pkp/pkp-lib/commit/c79f538c51e8300366732f993edcd84fa18a18ff) · 2023-10-06 · Erik Hanson (ewhanson)
-- **Upstream** none found (2026-10-03)
+- **Upstream** `pkp/pkp-lib#13517` (open): fixed on 3.5 by `pkp/pkp-lib#13538` (merged 2026-10-23; code), and on `main` at the heads of `pkp/pkp-lib#13659` + `pkp/ui-library#1033` (walked 2026-10-30 on OJS, OMP and OPS, not merged yet)
 - **Tracked in** spec U04 [A5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U04-orcid-integration.md#a5), the server's refusal
 - **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
