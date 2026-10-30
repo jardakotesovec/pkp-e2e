@@ -881,18 +881,6 @@ API1. **A category cannot be placed under itself or its own sub-category** {OJS 
      list shows "Arts" under "Physics". No window names a parent (Rule 1,
      [A4](#a4)).
 
-API2. **A sub-category under another journal's category is refused** {OJS OMP OPS}
-
-   Given: two scratch journals, each with a Journal Manager and one
-   category ("Ours", "Theirs").
-
-   - **Add**: an add through the first journal's address naming "Theirs"
-     as the new category's parent is refused (404) (Rule 19a).
-   - **Edit**: an edit of "Ours" naming "Theirs" as its parent is refused
-     (404); the first journal still lists "Ours" alone, at the top level,
-     and the second "Theirs" alone.
-   - **Control**: the same add naming "Ours" is stored under it.
-
 ## Coverage
 
 Left out of the scenarios above, by reason:

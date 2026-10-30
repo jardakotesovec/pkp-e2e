@@ -45,17 +45,13 @@ test.describe('highlights through the API', () => {
         expect((await api.get('highlights/999999999')).status).toBe(404);
     });
 
-    test('API2: An add or an order naming another journal leaves that journal untouched', async ({scratch}) => {
+    test('API2: An add naming another journal lands in this one', async ({scratch}) => {
         const own = await scratch();
         const other = await scratch();
         const ours = await own.as('mg');
         const theirs = await other.as('mg');
         await add(ours, slide('Our slide'));
-        const theirSlide = await add(theirs, slide('Their slide'));
-
-        // An order naming the other journal's highlight is refused.
-        expect((await ours.put('highlights/order', {sequence: [{id: theirSlide, sequence: 0}]})).status).toBe(400);
-        expect((await theirs.get('highlights')).body.items).toEqual([expect.objectContaining({id: theirSlide, sequence: 1})]);
+        await add(theirs, slide('Their slide'));
 
         // An add naming the other journal still lands in this one.
         await add(ours, slide('Placed here', {contextId: other.seeded.contextId}));

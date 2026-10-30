@@ -19,7 +19,8 @@
 //      npm run api-routes -- --check   lint: exit 1 when file and code differ,
 //                                      an Owner is not a feature, a route is
 //                                      not gated, or a Gate's grid does not
-//                                      parse, allows no one or is not whole
+//                                      parse, allows no one, is not whole
+//                                      or is no route's Gate
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -294,6 +295,13 @@ function check(rows, kept) {
         if (gateIssue) problems.push(`Gate "${k.gate}" ${gateIssue}: ${id.split('|')[1]}`);
         // Every route follows a grid, or says why not (`none: <reason>`).
         if (k.gate === '—') problems.push(`not gated (a grid, or none: <reason>): ${id.split('|')[1]}`);
+    }
+    // Every grid is some route's Gate: one no route names checks nothing.
+    const named = new Set([...kept.values()].map((k) => k.gate.replace(/!$/, '')));
+    for (const f of fs.readdirSync(path.join(REPO_ROOT, 'docs/specs')).filter((x) => /^U\d{2}-.*\.md$/.test(x))) {
+        for (const [, name] of read(`docs/specs/${f}`).matchAll(/<a id="api-grid-([a-z0-9-]+)"><\/a>/g)) {
+            if (!named.has(`${f.slice(0, 3)}#${name}`)) problems.push(`grid ${f.slice(0, 3)}#${name} is no route's Gate`);
+        }
     }
     return problems;
 }

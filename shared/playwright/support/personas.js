@@ -105,6 +105,23 @@ function derivedSameAs(label, submissionGrid) {
     return typeof sameAs === 'string' ? sameAs : sameAs[submissionGrid ? 'submission' : 'context'];
 }
 
+/**
+ * The personas from least to most privileged: the matrix's foreign passes
+ * call a route as the first persona its grid allows and, when it differs,
+ * as the least privileged one too (a submitter reaching another
+ * submission's child through their own submission's path).
+ */
+const PRIVILEGE = [
+    'nobody signed in', 'reader', 'other author', 'submitter', 'assigned reviewer',
+    'assigned assistant', 'assigned review assistant', 'manager of another context',
+    'assigned section editor, metadata edit off', 'assigned section editor', 'unassigned section editor',
+    'manager', 'site admin',
+];
+
+/** Of grid row labels (aliases allowed), the least privileged. */
+const leastPrivileged = (labels) =>
+    [...labels].sort((a, b) => PRIVILEGE.indexOf(ALIASES[a] || a) - PRIVILEGE.indexOf(ALIASES[b] || b))[0];
+
 /** The personas a grid about the context rather than a submission names (directly or by an alias). */
 const CONTEXT_ROLES = ['manager', 'unassigned section editor', 'assigned assistant', 'other author', 'assigned reviewer', 'reader', 'nobody signed in', 'manager of another context', 'site admin'];
 
@@ -273,4 +290,4 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
     };
 }
 
-module.exports = {PERSONAS, ALIASES, CONTEXT_ROLES, DERIVED, derivedSameAs, LABELS, hasPersona, seedPersonas};
+module.exports = {PERSONAS, ALIASES, CONTEXT_ROLES, DERIVED, derivedSameAs, LABELS, PRIVILEGE, leastPrivileged, hasPersona, seedPersonas};

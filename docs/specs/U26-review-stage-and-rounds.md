@@ -723,8 +723,6 @@ API1. **The letters list holds only the letters sent to the caller** {OJS OMP OP
      and not the other Author's; the other Author's holds only their own.
      No screen asks without a submission. It also holds the second
      journal's letter ([A15](#a15)), which the check does not assert.
-   - **Another Author's submission**: the first Author naming the other
-     Author's submission is refused (401).
    - **The sender**: in the second journal, the manager, an Author there,
      gets an empty list: the letters they sent are not theirs.
    - **Not an author's letter**: asking for a kind of email no author is

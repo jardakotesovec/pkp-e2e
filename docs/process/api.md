@@ -33,8 +33,9 @@ hand-kept columns:
 `npm run api-routes -- --write` regenerates the file and keeps the hand
 columns; `--gate <gate> <route…>` sets a Gate; `--check` is the lint: a
 route in code but not in the file, a row whose route is gone, an Owner
-that is not a feature, a route not gated, and a grid that does not parse,
-allows no one, or is not whole (a submission grid names every persona of
+that is not a feature, a route not gated, a grid no route's Gate names,
+and a grid that does not parse, has a column that is no state, allows no
+one, or is not whole (a submission grid names every persona of
 the set, a context grid every role, and one that reads both submissions
 reads the one in review too, on the apps its routes run on). `npm run
 backlog` prints the check's problems every day.
@@ -127,12 +128,17 @@ reads the registry and the grids from this repo and makes these passes:
   must also not carry the second persona set's tag (its context path,
   usernames and titles carry it): another context's data in an answer
   the caller may have. The site admin's answers, the site's, and the few
-  routes that list across the install by design are left out.
+  routes that list across the install by design are left out. A column
+  the persona set cannot read fails (a Review column on a preprint server
+  aside), and so does a route of which no cell was read.
 - **The foreign passes.** Every gated route that names a child resource (a
   funder, a comment, an announcement), the resource made elsewhere and
   requested at the persona set's own address by the first persona its
-  grid allows: made in a second persona set (another context), and for a
-  route under a submission, on the set's other submission. A control first
+  grid allows and, when it differs, by the least privileged one too (a
+  submitter reaching another submission's child through their own): made
+  in a second persona set (another context), and for a route under a
+  submission, on the set's other submission; a read that names its
+  submission in its query names another context's there. A control first
   makes the same call on the set's own child, which must not be refused.
   A 2xx is a leak; a refusal, or a 4xx where the control had a 2xx, holds
   the guard. The version passes do the same for every route under
@@ -146,7 +152,9 @@ reads the registry and the grids from this repo and makes these passes:
   it was. A control first makes the call on two of the set's own children,
   whose read must change, so a body the route stopped reading fails
   instead of passing for nothing. Each such route gets an entry in the
-  matrix's `routes.js` (its child, its body, the read of what it changes).
+  matrix's `routes.js` (its child, its body, the read of what it changes),
+  or one that says why it needs none; a self-test fails a route whose
+  body names an id without either.
 
 A call answered 401, 403 or 404, or a 2xx whose body is an error alone,
 counts as refused; any other answer, a 400 for an empty body included, as
@@ -158,7 +166,8 @@ read names its submission only in its query: then the matrix's
 foreign call and its control both stopped by a 4xx prove nothing, and fail
 until the route has its body or query. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
-never runs it. A whole run takes 4 to 10 minutes per app:
+never runs it, and neither does a run that does not name it. A whole run
+takes 5 to 12 minutes per app:
 
 ```bash
 npx playwright test -c configs/ojs.config.js --project=api-matrix --no-deps
@@ -194,9 +203,12 @@ API1. **A funder without a name is refused** {OJS OMP OPS}
   because no screen shows what the answer withholds (the reviewer's reads
   under anonymous review). A route the screens call with the input that
   matters, and whose answer they show, needs none.
-- **Never who may call.** That is the grid's, and requesting another
-  context's or submission's resource is the foreign pass's. An API check
-  may assert what an allowed persona's answer withholds, and that an add
+- **Never who may call.** That is the grid's, and naming another
+  context's or submission's resource, in the path, the body or the query,
+  is the foreign passes': a refusal (401, 403, 404) of it, or a foreign id
+  silently honoured, is the matrix's. An API check may assert input
+  validation (a 400 or 422 with an error on the field that names the
+  foreign id), what an allowed persona's answer withholds, and that an add
   naming another context lands in this one: guards that hold. A guard
   that does not hold is a security finding, never a public check.
 - **Tests** live in `shared/playwright/tests/api/U<nn>-<feature>.api.spec.js`,

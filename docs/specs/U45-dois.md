@@ -2156,24 +2156,7 @@ API2. **Without a registration agency, export and deposit are refused** {OJS OMP
    - **Deposit All**: answers success, and the work's DOI still reads
      "Unregistered" (Rules 29, 29a).
 
-API3. **Bulk actions naming another journal's work change nothing there** {OJS OMP OPS}
-
-   Given: two journals with the prefix "10.1234" and "Automatic DOI
-   Assignment" "Never"; in the second, a published work whose DOI reads
-   "Registered" and a work with no DOI; in the first, its Journal
-   Manager and a work with no DOI.
-
-   - **"Assign DOIs"**: through the API, naming the second journal's
-     work with no DOI: refused (400) with one failure, and that work
-     still has no DOI.
-   - **"Mark DOIs Unregistered"**: naming the second journal's registered
-     work: refused (400) with one failure, and its DOI still reads
-     "Registered".
-   - **Control**: the same two on the first journal's own work: it gets
-     a DOI reading "Unregistered", and the mark is accepted. The DOIs page
-     only lists the journal's own works (Rule 15).
-
-API4. **A registration agency no agency plugin offers is refused** {OJS OMP OPS}
+API3. **A registration agency no agency plugin offers is refused** {OJS OMP OPS}
 
    Given: a Journal Manager.
 
@@ -2184,7 +2167,7 @@ API4. **A registration agency no agency plugin offers is refused** {OJS OMP OPS}
      name is kept all the same [A5](#a5).
    - **Control**: "None" is saved.
 
-API5. **A chapter without its own page takes no DOI** {OMP}
+API4. **A chapter without its own page takes no DOI** {OMP}
 
    Given: a Press Manager of a press with the prefix "10.1234",
    "Chapters" ticked and "Automatic DOI Assignment" "Never"; a book with
@@ -2197,7 +2180,7 @@ API5. **A chapter without its own page takes no DOI** {OMP}
      and its box cannot be typed in (Rule 47).
    - **Control**: the same record on the chapter with its page is stored.
 
-API6. **A review not shown publicly takes no DOI** {OJS}
+API5. **A review not shown publicly takes no DOI** {OJS}
 
    Given: a Journal Manager of a journal with the prefix "10.1234",
    "Peer Review" ticked and "Automatic DOI Assignment" "Never"; two
@@ -2587,7 +2570,7 @@ kind the agency does not accept already unticked.
 Question: should a refused block leave the tab's other fields unsaved?
 Lean: yes; one "Save" should store all or nothing. Through the API the
 agency itself is kept the same way: a name that is no enabled agency
-plugin's is refused (400) and stored all the same (API4).
+plugin's is refused (400) and stored all the same (API3).
 Basis: probe, 2026-09-26; API probe, 2026-10-30. <sup>f-a5</sup>
 
 <a id="a6"></a>
@@ -6101,7 +6084,7 @@ adds the Crossmark node whenever "DOI Versioning" is on, and
 **f-ojs13** — Live-probed 2026-10-30, OJS `main` (ojs 0a00726121, lib/pkp df42984b46), a scratch journal on the probe server with "Public Visibility" on by default: a submission sent to review with two reviewers, one review `completed` (never marked complete, `considered` 0), one `accepted` and not submitted; the manager's `PUT api/v1/_dois/peerReviews/{id}` with a fresh DOI record of the journal answered 200 for both and stored the DOI. `PKPBackendDoiController::editPeerReview()` checks `getIsReviewPubliclyVisible()` alone (added by pkp/pkp-lib#12509, 2026-07-01; the route came with pkp/pkp-lib#11332, 2026-01-27); nothing reads the review's status or `considered`. A press answers the same through its own copy of the route (the API matrix, U45's review grid).
 
 <a id="fn-f-ojs14"></a>
-**f-ojs14** — Live-probed 2026-10-30, OJS `main` (ojs 0a00726121, lib/pkp df42984b46), the same journal as f-ojs13: after the review route stored a DOI, both its answer and `GET api/v1/submissions/{id}/reviewAssignments/{id}` returned `"doiObject":{"_data":{"id":…,"contextId":…,"doi":…,"status":1,"resolvingUrl":…},"_hasLoadableAdapters":false,"_metadataExtractionAdapters":[],"_extractionAdaptersLoaded":false,"_metadataInjectionAdapters":[],"_injectionAdaptersLoaded":false}`. The review assignment's schema map passes the DOI object through unsummarised, where the publication map calls `Repo::doi()->getSchemaMap()->summarize()` on it (lib/pkp `classes/publication/maps/Schema.php:178`); `classes/submission/reviewAssignment/maps/Schema.php` has no `doiObject` case. API6's read takes either shape.
+**f-ojs14** — Live-probed 2026-10-30, OJS `main` (ojs 0a00726121, lib/pkp df42984b46), the same journal as f-ojs13: after the review route stored a DOI, both its answer and `GET api/v1/submissions/{id}/reviewAssignments/{id}` returned `"doiObject":{"_data":{"id":…,"contextId":…,"doi":…,"status":1,"resolvingUrl":…},"_hasLoadableAdapters":false,"_metadataExtractionAdapters":[],"_extractionAdaptersLoaded":false,"_metadataInjectionAdapters":[],"_injectionAdaptersLoaded":false}`. The review assignment's schema map passes the DOI object through unsummarised, where the publication map calls `Repo::doi()->getSchemaMap()->summarize()` on it (lib/pkp `classes/publication/maps/Schema.php:178`); `classes/submission/reviewAssignment/maps/Schema.php` has no `doiObject` case. API5's read takes either shape.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — `omp/classes/submission/Collector.php`

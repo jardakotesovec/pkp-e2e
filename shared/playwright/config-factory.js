@@ -96,6 +96,11 @@ function detectWorkers() {
 /** This clone's root, and the private matrix folder beside it (see projects). */
 const REPO_DIR = path.resolve(__dirname, '../..');
 const API_MATRIX_DIR = path.resolve(REPO_DIR, '../pkp-e2e-sec/api-matrix');
+// Named on the command line (`--project=api-matrix`): set for the workers
+// too, which read this config without the runner's arguments.
+if (process.argv.some((arg) => arg.includes('api-matrix'))) {
+    process.env.PKP_API_MATRIX = '1';
+}
 
 const VALIDATION_PORT_OFFSET = 90;
 const REAUTH_PORT_OFFSET = 91;
@@ -327,9 +332,10 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
             },
             // The API permission matrix lives in the private security repo
             // (docs/process/api.md "Permission grids"): the project exists
-            // only where that repo sits next to this clone, and runs only
-            // when named (`--project=api-matrix`), never on CI.
-            ...(fs.existsSync(API_MATRIX_DIR)
+            // only where that repo sits next to this clone, and only when
+            // named (`--project=api-matrix`), so a bare run never includes
+            // it; never on CI.
+            ...(process.env.PKP_API_MATRIX && fs.existsSync(API_MATRIX_DIR)
                 ? [{name: 'api-matrix', testDir: API_MATRIX_DIR, dependencies: ['setup']}]
                 : []),
         ],

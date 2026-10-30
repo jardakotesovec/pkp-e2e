@@ -567,17 +567,13 @@ API1. **The library list names the Publisher Library and the one submission aske
 
    Given: a Journal Manager, on a scratch journal whose Publisher
    Library holds "Journal guide", with two submissions whose Submission
-   Libraries hold "Asked contract" and "Other contract", and a
-   submission of another journal whose library holds "Foreign
-   contract".
+   Libraries hold "Asked contract" and "Other contract".
 
    - **No submission**: ask the library route for its list without
      naming a submission: it holds "Journal guide" alone. The
      composer always names its submission.
    - **One submission**: name the first submission: "Asked contract"
      and "Journal guide", never "Other contract" (Rule 11a).
-   - **Another journal's submission**: name the other journal's
-     submission: refused, with no list.
 
 ## Coverage
 

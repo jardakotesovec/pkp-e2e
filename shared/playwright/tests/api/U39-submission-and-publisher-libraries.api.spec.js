@@ -14,8 +14,6 @@ test.describe('libraries through the API', () => {
         const j = await scratch({users: {mg: 'manager', au: 'author'}, libraryFiles: [{name: 'Journal guide', type: 'Other'}]});
         const asked = await j.submission('a', {submitter: 'au', libraryFiles: [{name: 'Asked contract', type: 'Permissions'}]});
         await j.submission('b', {submitter: 'au', libraryFiles: [{name: 'Other contract', type: 'Permissions'}]});
-        const other = await scratch({users: {au: 'author'}});
-        const foreign = await other.submission('c', {submitter: 'au', libraryFiles: [{name: 'Foreign contract', type: 'Permissions'}]});
         const api = await j.as('mg');
 
         const none = await api.get('_library');
@@ -26,9 +24,5 @@ test.describe('libraries through the API', () => {
         expect(one.status).toBe(200);
         expect(names(one)).toEqual(['Asked contract', 'Journal guide']);
         expect(one.body.itemsMax).toBe(2);
-
-        const elsewhere = await api.get('_library', {includeSubmissionId: foreign.submissionId});
-        expect([403, 404]).toContain(elsewhere.status);
-        expect(elsewhere.body).not.toHaveProperty('items');
     });
 });

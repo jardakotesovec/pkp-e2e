@@ -51,39 +51,7 @@ test.describe('DOIs through the API', () => {
         expect(await doiOf(api, work)).toMatchObject({id: before.id, doi: before.doi, status: DOI_STATUS.UNREGISTERED});
     });
 
-    test('API3: Bulk actions naming another journal\'s work change nothing there', async ({scratch}) => {
-        // "Never": no work gets a DOI by itself, so "Assign DOIs" decides.
-        const own = await scratch({users: {mg: 'manager', au: 'author'}, doiPrefix: '10.1234', doiCreationTime: 'never'});
-        const other = await scratch({users: {mg: 'manager', au: 'author'}, doiPrefix: '10.1234', doiCreationTime: 'never'});
-        const ours = await own.as('mg');
-        const theirs = await other.as('mg');
-        const theirRegistered = await other.submission('r', {submitter: 'au', published: true});
-        const theirBare = await other.submission('b', {submitter: 'au'});
-        const ownBare = await own.submission('b', {submitter: 'au'});
-        expect((await theirs.post('dois/submissions/assignDois', {ids: [theirRegistered.submissionId]})).status).toBe(200);
-        expect((await theirs.put('dois/submissions/markRegistered', {ids: [theirRegistered.submissionId]})).status).toBe(200);
-        expect(await doiOf(theirs, theirRegistered)).toMatchObject({status: DOI_STATUS.REGISTERED});
-        expect(await doiOf(theirs, theirBare)).toBeNull();
-
-        // "Assign DOIs" naming their work without a DOI.
-        const assign = await ours.post('dois/submissions/assignDois', {ids: [theirBare.submissionId]});
-        expect(assign.status).toBe(400);
-        expect(assign.body.failedDoiActions).toHaveLength(1);
-        expect(await doiOf(theirs, theirBare)).toBeNull();
-
-        // "Mark DOIs Unregistered" naming their registered work.
-        const unmark = await ours.put('dois/submissions/markUnregistered', {ids: [theirRegistered.submissionId]});
-        expect(unmark.status).toBe(400);
-        expect(unmark.body.failedDoiActions).toHaveLength(1);
-        expect(await doiOf(theirs, theirRegistered)).toMatchObject({status: DOI_STATUS.REGISTERED});
-
-        // Control: the same two on this journal's own work.
-        expect((await ours.post('dois/submissions/assignDois', {ids: [ownBare.submissionId]})).status).toBe(200);
-        expect(await doiOf(ours, ownBare)).toMatchObject({status: DOI_STATUS.UNREGISTERED});
-        expect((await ours.put('dois/submissions/markUnregistered', {ids: [ownBare.submissionId]})).status).toBe(200);
-    });
-
-    test('API4: A registration agency no agency plugin offers is refused', async ({scratch}) => {
+    test('API3: A registration agency no agency plugin offers is refused', async ({scratch}) => {
         const j = await scratch();
         const api = await j.as('mg');
         const route = `contexts/${j.seeded.contextId}/registrationAgency`;
@@ -98,7 +66,7 @@ test.describe('DOIs through the API', () => {
         expect(none.body).toEqual({registrationAgency: null});
     });
 
-    test('API5: A chapter without its own page takes no DOI', async ({scratch, appContext}) => {
+    test('API4: A chapter without its own page takes no DOI', async ({scratch, appContext}) => {
         test.skip(!appContext.capabilities.hasCatalog, 'only a press has chapters (Rule 47)');
         const j = await scratch({users: {mg: 'manager', au: 'author'}, doiPrefix: '10.1234', enabledDoiTypes: ['publication', 'chapter'], doiCreationTime: 'never'});
         const book = await j.submission('b', {
@@ -126,7 +94,7 @@ test.describe('DOIs through the API', () => {
         expect(await chapterDoi(paged)).toBe(doi.body.id);
     });
 
-    test('API6: A review not shown publicly takes no DOI', async ({scratch, appContext}) => {
+    test('API5: A review not shown publicly takes no DOI', async ({scratch, appContext}) => {
         test.skip(!appContext.capabilities.hasIssues, 'only a journal has peer-review DOIs (Rule 7)');
         const j = await scratch({
             users: {mg: 'manager', au: 'author', rv: 'externalReviewer'},

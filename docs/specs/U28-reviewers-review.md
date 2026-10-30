@@ -76,7 +76,7 @@ review, and accepted, not yet submitted, on the one still in review.
 as Reviewer"": a reviewer lists their own assignments in this journal,
 and no other role has the list. The route behind the list follows it; a
 preprint server registers it too and, having no reviewer role, refuses
-everyone there.
+everyone there (`docs/process/api.md`).
 
 | Persona | Context |
 |---|---|
@@ -97,7 +97,8 @@ round, as the "Previous Reviews" window does; editors read reviews in
 the Reviewers panel instead
 ([→ Read Review](U27-reviewer-assignment-and-management.md#read-review)).
 The route behind the window follows it, named by the submission and the
-round; it answers the caller's own assignment on that round alone.
+round; it answers the caller's own assignment on that round alone
+(`docs/process/api.md`).
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|

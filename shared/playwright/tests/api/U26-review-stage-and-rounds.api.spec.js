@@ -45,11 +45,6 @@ test.describe('review stage through the API', () => {
         expect(mine).not.toContain('Other author letter');
         expect(subjects(await (await j.as('ot')).get('emails/authorEmails'))).toEqual(['Other author letter']);
 
-        // Naming another author's submission: refused.
-        const theirs = await author.get('emails/authorEmails', {submissionId: other, eventType: EMAIL_EVENT.EDITOR_NOTIFY_AUTHOR});
-        expect(theirs.status).toBe(401);
-        expect(JSON.stringify(theirs.body)).not.toContain('Other author letter');
-
         // The sender, an Author in the second journal: the letters they sent are not theirs.
         expect(subjects(await managerThere.get('emails/authorEmails'))).toEqual([]);
 

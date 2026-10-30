@@ -48,22 +48,4 @@ test.describe('categories through the API', () => {
         expect((await edit(api, j, 'arts', 'physics')).status).toBe(200);
         expect(await tree(api)).toEqual({...before, arts: 'physics'});
     });
-
-    test("API2: A sub-category under another journal's category is refused", async ({scratch}) => {
-        const own = await scratch({categories: [{path: 'ours', title: 'Ours'}]});
-        const other = await scratch({categories: [{path: 'theirs', title: 'Theirs'}]});
-        const api = await own.as('mg');
-        const theirs = idOf(other, 'theirs');
-
-        const added = await api.post('categories', {title: {en: 'Stray'}, path: 'stray', parentCategoryId: theirs});
-        expect(added.status).toBe(404);
-        const moved = await api.put(`categories/${idOf(own, 'ours')}`, {title: {en: 'Ours'}, path: 'ours', parentCategoryId: theirs});
-        expect(moved.status).toBe(404);
-        expect(await tree(api)).toEqual({ours: null});
-        expect(await tree(await other.as('mg'))).toEqual({theirs: null});
-
-        // Control: the same add under the journal's own category is stored there.
-        expect((await api.post('categories', {title: {en: 'Stray'}, path: 'stray', parentCategoryId: idOf(own, 'ours')})).status).toBe(200);
-        expect(await tree(api)).toEqual({ours: null, stray: 'ours'});
-    });
 });

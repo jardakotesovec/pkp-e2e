@@ -82,6 +82,9 @@ function gatedRoutes(registryFile = REGISTRY) {
 
 const CELL = {'✓': true, '—': false, '?': null};
 
+/** The columns a grid may have (docs/process/api.md "Permission grids"). */
+const COLUMNS = ['unpublished', 'published', 'review', 'draft', 'context', 'site'];
+
 /**
  * The grid a gate reference names (`U40#edit-gate`).
  *
@@ -102,6 +105,10 @@ function loadGrid(ref, specsDir = path.join(REPO, 'docs/specs')) {
     const end = lines.findIndex((line, i) => i > start && !line.trim().startsWith('|'));
     const [header, , ...body] = tableRows(lines.slice(start, end < 0 ? undefined : end));
     const states = header.slice(1).map((state) => state.toLowerCase());
+    const unknown = states.filter((state) => !COLUMNS.includes(state));
+    if (unknown.length) {
+        throw new Error(`api-grids: ${ref} has a column that is no state: ${unknown.join(', ')} (${COLUMNS.join(', ')})`);
+    }
     const rows = body.map((cells) => {
         const badge = cells[0].match(/\{([A-Z ]+)\}/);
         const persona = cells[0].replace(/\{[A-Z ]+\}/, '').trim();

@@ -85,7 +85,7 @@ yet in: there the request is refused (422) only after the caller is let
 through. In the submit grid after this one nobody may respond on that
 round (no card, Rule 6); the edit and delete grid's `Review` is a
 submission in review whose round asked for revisions, the one round in
-review that can hold a response (Rule 6).
+review that can hold a response (Rule 6) (`docs/process/api.md`).
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|
@@ -106,7 +106,8 @@ review that can hold a response (Rule 6).
 <a id="api-grid-submit-response"></a>
 **Permission grid: submitting a response.** The row "Submit a
 response": an assigned author, while the round shows the card
-(Rule 6). The route behind the window's "Submit Response" follows it.
+(Rule 6). The route behind the window's "Submit Response" follows it
+(`docs/process/api.md`).
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|
@@ -129,7 +130,7 @@ response": an assigned author, while the round shows the card
 submitted response" and "Delete a submitted response": the editorial
 roles; the author never, and the Funding Coordinator is refused
 ([A3](#a3) is the "Delete" offered to them). The routes behind "Save"
-and "Delete" follow it, on the round's response.
+and "Delete" follow it, on the round's response (`docs/process/api.md`).
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|

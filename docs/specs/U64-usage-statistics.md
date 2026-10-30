@@ -66,7 +66,7 @@ timelines, with their files and places (`docs/process/api.md`).
 **Permission grid: one work's figures.** The same row, for the two routes
 that read one published work's figures and timeline, which no page calls:
 an unpublished work has no figures (Rule 1), and a Section Editor not
-assigned to the work is refused ⚠ [A19](#a19).
+assigned to the work is refused ⚠ [A19](#a19) (`docs/process/api.md`).
 
 | Persona | Published |
 |---|---|
@@ -88,7 +88,8 @@ assigned to the work is refused ⚠ [A19](#a19).
 **Permission grid: the SUSHI address while restricted.** The row "Fetch
 COUNTER reports from the journal's SUSHI address" above, for every SUSHI
 route (Rule 23), on a journal whose COUNTER statistics are restricted
-(Rule 30); while they are public, anyone may fetch.
+(Rule 30); while they are public, anyone may fetch
+(`docs/process/api.md`).
 
 | Persona | Context |
 |---|---|
