@@ -43,7 +43,7 @@ is not restated here. <sup>a</sup> <sup>b</sup>
 | Action | Who may — and when |
 |--------|--------------------|
 | **See the Title & Abstract, Metadata and Data pages** | • Journal Manager, Editor, Site Administrator: on any submission, assigned or not<br>• Section Editor, Guest Editor, assistant roles: while assigned to the submission's current stage. An assistant assigned to another stage sees the "Publication" entry with no pages beneath it (Rule 1)<br>• the submission's Author: on their own submission, in the author view <sup>a</sup> |
-| **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always). The page is absent from the author view in every app (Rule 1). A program loads the page's form as a Copyeditor without that access too ⚠ [A24](#a24) <sup>a</sup> |
+| **See the Permissions & Disclosure page** | • the editorial roles above, when they have access to the Production stage (managers always). The page is absent from the author view in every app (Rule 1). A program loads the page's form as an assistant without that access too ⚠ [A24](#a24) <sup>a</sup> |
 | **Save changes on any of these pages** | • Journal Manager, Editor: always, published versions included (Rule 8)<br>• Site Administrator: only through their journal roles; holding the manager role, they save as a Journal Manager. One whose manager role was ended (Users & Roles › Edit, "Remove Role"), left with an assistant role and not a participant, finds Save disabled on Title & Abstract, Metadata and Data (Rule 10) ⚠ [A18](#a18)<br>• Section Editor, Guest Editor, assistant roles: while their participant assignment carries the metadata-edit permission (Rule 2)<br>• Author: while their assignment carries the permission AND the version they are on is neither published nor scheduled (Rule 9). While another version is published, the Author saves on the unpublished one. A journal or press does not grant the permission by default; a preprint server does [OPS1](#ops1) <sup>b</sup> |
 | **Change the submission language** | • any editorial role who may edit the publication or publish it, while the submission has exactly one version and is not published (Rule 13). A journal article whose only version was published as "Author's Original" or "Published Manuscript Under Review" is the exception ⚠ [OJS1](#ojs1). An assistant assigned to the current stage without the metadata-edit permission sees the pages read-only (Rule 10) with no "Change" button; the button appears once their assignment carries the permission (their Confirm is untried [A19](#a19)). The Site Administrator left with an assistant role (the row above) is offered it; Confirm fails (Rule 13c) [A19](#a19). The Author is never offered it, in any app <sup>i</sup> |
 | **Set the journal's default copyright and license** | • Journal Manager (and a Site Administrator working in the journal): Settings › Distribution › License <sup>m</sup> |
@@ -57,42 +57,45 @@ route that saves a version's data, this feature's and its neighbours'
 contributor's ORCID unlink follow it for refusals only, since an allowed
 call reaches an outside service (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| submitter {OJS OMP} | — | — |
-| submitter {OPS} | ✓ | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter {OJS OMP} | — | — | — |
+| submitter {OPS} | ✓ | — | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-permissions-page"></a>
 **Permission grid: opening the Permissions & Disclosure page.** The row
 "See the Permissions & Disclosure page" above, for the route that loads
-its form; the assigned assistant is a Copyeditor, whose role has no
+its form; the assigned assistant is a Copyeditor and the assigned review
+assistant a Funding Coordinator, neither of whose roles has
 Production-stage access (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ? [A24](#a24) | ? [A24](#a24) |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ? [A24](#a24) | ? [A24](#a24) | ? [A24](#a24) |
+| assigned review assistant | ? [A24](#a24) | ? [A24](#a24) | ? [A24](#a24) |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-change-language"></a>
 **Permission grid: changing the submission language.** The row "Change
@@ -107,6 +110,7 @@ one (`docs/process/api.md`).
 | assigned section editor, metadata edit off | — |
 | unassigned section editor | — |
 | assigned assistant | — |
+| assigned review assistant | — |
 | submitter | — |
 | other author | — |
 | assigned reviewer | — |
@@ -1112,8 +1116,8 @@ Left out of the scenarios above, by reason:
     box has finished loading, lost on a slow link; Rule 13b)
   - A23 (a program's language change to a language the journal does
     not offer, with no title; Rule 13c)
-  - A24 (a program loading the Permissions & Disclosure form as a
-    Copyeditor without Production access; Actors row 2)
+  - A24 (a program loading the Permissions & Disclosure form as an
+    assistant without Production access; Actors row 2)
   - OMP5 (the press's "License" link that leads nowhere with terms and no
     license; Rule 15; scenario 5 marks it)
   - OPS3 (a preprint server in French: the Author's "posted" banner and
@@ -1177,7 +1181,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | The language panel's Abstract is required but described as "recommended" | ❓ | minor | — |
 | [A18](#a18) | A Site Administrator whose manager role in the journal was ended finds Title & Abstract, Metadata and Data read-only, while the workflow header still offers publishing and "Change" | ❓ | minor | — |
 | [A20](#a20) | After an override, License URL (and a press's Default Chapter License URL) keeps the sentence naming the default beside the saved address | ❓ | minor | — |
-| [A24](#a24) | A Copyeditor without Production access, who has no Permissions & Disclosure page, loads its form through the REST API | ❓ | latent | — |
+| [A24](#a24) | An assistant without Production access, who has no Permissions & Disclosure page, loads its form through the REST API | ❓ | latent | — |
 | [OJS2](#ojs2) | Whether a scheduled article's terms are offered as suggestions: Rule 7b names no scheduled source | ❓ | minor | — |
 | [OMP3](#omp3) | The press's reset-permissions wording is the older text | ❓ | minor | — |
 | [OPS2](#ops2) | A wizard-chosen license shows beside a sentence promising the server's default | ❓ | minor | — |
@@ -1458,19 +1462,20 @@ change back is accepted.
 Basis: probe, 2026-10-29. <sup>f-a23</sup>
 
 <a id="a24"></a>
-**A24 — A Copyeditor without Production access, who has no Permissions & Disclosure page, loads its form through the REST API** · ❓ · latent.
+**A24 — An assistant without Production access, who has no Permissions & Disclosure page, loads its form through the REST API** · ❓ · latent.
 The Permissions & Disclosure page appears only for editorial roles with
 access to the Production stage (Actors; Rule 1), so a Copyeditor
 assigned to the submission, whose role reaches Copyediting only, has no
-such page. The install's programming interface still answers that
-Copyeditor's request for the page's form, with the Copyright Holder,
+such page, nor has a Funding Coordinator, whose role reaches Submission
+and Review. The install's programming interface still answers either
+one's request for the page's form, with the Copyright Holder,
 Copyright Year and License URL values and the journal's default license
 in the descriptions, before and after publication. The values are the
-version's own, which the same Copyeditor reads through the version's
+version's own, which the same assistant reads through the version's
 own request anyway, and the default license is shown on every published
 item.
 Question: should the form's request follow the page's Production-stage
-rule? Lean: harmless as it stands, since it shows nothing the Copyeditor
+rule? Lean: harmless as it stands, since it shows nothing the assistant
 cannot read otherwise; worth aligning only if the page ever carries
 more.
 Basis: probe, 2026-10-29. <sup>f-a24</sup>
@@ -3113,6 +3118,8 @@ publication read (`PublicationAccessPolicy`) and the role list
 (manager, sub-editor, assistant), with no stage check; the page's
 visibility comes from the workflow's `canAccessProduction` (ui-library
 `useWorkflowPermissions.js`). A preprint server has no Copyeditor.
+The matrix of 2026-10-30 (OJS) found the same for the assigned Funding
+Coordinator on the submission in review, in Copyediting and published.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1 — OJS1 evidence.** The submission's status comes from lib/pkp

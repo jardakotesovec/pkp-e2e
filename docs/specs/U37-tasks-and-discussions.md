@@ -78,11 +78,16 @@ The rows below use three terms. <sup>b</sup>
 The grids below restate the rows above for the tasks routes
 (`docs/process/api.md`). Wherever a route names a stage it is the
 submission's Copyediting stage (Production on a preprint server, which has
-no other), whose panel every assigned role but the reviewer opens; the
-assigned reviewer meets the review stage's panel alone. Wherever a route
-names an item it is **the section editor's task**: opened there by the
-assigned section editor, not begun, with the submitter as its "Task Owner"
-and the assigned assistant as a further participant.
+no other), whose panel every assigned role but the reviewer and the
+Funding Coordinator opens; the assigned reviewer meets the review stage's
+panel alone. Wherever a route names an item it is **the section editor's
+task**: opened there by the assigned section editor, not begun, with the
+submitter as its "Task Owner" and the assigned assistant (a Copyeditor) as
+a further participant. On the submission in review (the `Review` column)
+the stage is the review stage, whose panel the assigned reviewer and the
+assigned review assistant (a Funding Coordinator) open and the Copyeditor
+does not, and the section editor's task there has the review assistant as
+its further participant in the Copyeditor's place.
 
 <a id="api-grid-template-management"></a>
 **Permission grid: managing the templates.** The row "Manage the
@@ -124,40 +129,42 @@ items" and "Add": the stage's list of items, the people "Participants"
 offers, a template pressed in the "Add" window, and a new item
 (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | — |
+| assigned review assistant | — | — | ✓ |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | ✓ |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-item-read"></a>
 **Permission grid: opening the section editor's task.** The row "Open an
 item": manager-level people and the item's participants
 (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | — |
+| assigned review assistant | — | — | ✓ |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-item-manage"></a>
 **Permission grid: managing the section editor's task.** The rows "Edit",
@@ -165,20 +172,21 @@ item": manager-level people and the item's participants
 manage the item, here the manager-level people, its creator and its owner
 (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-reply"></a>
 **Permission grid: replying in the section editor's task.** The row
@@ -188,20 +196,21 @@ reply in an answer the screen cannot show ([A36](#a36)), and which a
 permission check cannot tell from a reply with a missing field, so their
 cells stay unchecked.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ? [A36](#a36) | ? [A36](#a36) |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ? [A36](#a36) | ? [A36](#a36) |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ? [A36](#a36) | ? [A36](#a36) | ? [A36](#a36) |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | — |
+| assigned review assistant | — | — | ✓ |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ? [A36](#a36) | ? [A36](#a36) | ? [A36](#a36) |
 
 ## Fields & validation
 

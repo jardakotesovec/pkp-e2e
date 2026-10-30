@@ -53,7 +53,7 @@ and there the "URN" row of the Plugins page offers no "Settings". <sup>a</sup> <
 |--------|--------------------|
 | **Switch publisher IDs on or off, per kind of item** | • manager-level roles, on Settings › Workflow › Submission › "Metadata" (Settings bullet 1) <sup>a</sup> |
 | **Enable the URN plugin, configure it, "Reassign URNs"** {OJS OMP} | • manager-level roles, on Settings › Website › "Plugins" (Settings bullets 2 to 6; Rule 18) <sup>b</sup> |
-| **See the article's "Identifiers" page** {OJS OMP} | • every role that sees the editorial view of the Publication area, while the URN plugin is on for articles (Rule 7); a press keeps listing it once the plugin is off (Rule 20) ⚠ [OMP7](#omp7). The author view never lists the page ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)) <sup>c</sup> |
+| **See the article's "Identifiers" page** {OJS OMP} | • every role that sees the editorial view of the Publication area, while the URN plugin is on for articles (Rule 7); a press keeps listing it once the plugin is off (Rule 20) ⚠ [OMP7](#omp7). An assigned assistant off the active stage, who has no such page, still loads its form through a program ⚠ [A18](#a18). The author view never lists the page ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)) <sup>c</sup> |
 | **Assign, type or clear the article's URN** {OJS OMP} | • whoever may edit the publication ([→ edit gate](U40-publication-metadata.md#edit-gate))<br>• anyone else who reaches the page sees it with "Save" greyed, yet is offered "Assign", which fills the box with a URN that cannot be saved and is gone when the page is left ⚠ [A9](#a9). A Layout Editor reaches the page once the submission is in Production; while it is still at the Submission stage, their side menu's "Publication" group is empty ([→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs)) <sup>c</sup> <sup>q1</sup> <sup>s</sup> |
 | **Type the article's Publisher ID** | • whoever may save the Metadata page ([→ edit gate](U40-publication-metadata.md#edit-gate)), the Author included, while publisher IDs are on for articles (Rule 2) <sup>d</sup> <sup>q2</sup> |
 | **Set a galley's identifiers** {OJS OPS} | • Journal Manager, Editor, Site Administrator, and a Section Editor or production assistant (Layout Editor, Designer, Proofreader…) assigned with access to Production, from the galley row's "Edit" on the Galleys page (Rule 12). On a journal an assigned Section Editor saves the tab whether or not the assignment's "Permissions" box (changes to the publication) is ticked<br>• on a preprint server, also the Author, while they may edit the preprint and it is not yet posted; before posting, a Moderator whose assignment has "Permissions" unticked sees the tab read-only. Once the preprint is posted, the Preprint Server Manager, every assigned Moderator and a Site Administrator may save, and the Author's row menu offers only "View", which opens the window with the tab read-only <sup>e</sup> <sup>q19</sup><br>• a journal's Author is not offered "Edit" on a galley |
@@ -68,27 +68,32 @@ and there the "URN" row of the Plugins page offers no "Settings". <sup>a</sup> <
 "See the article's "Identifiers" page" above, every role that sees the
 editorial view of the Publication area while the URN plugin is on for
 articles, for the route that loads the page's form; a preprint server
-has no URN plugin and no page, so nobody loads it there
+has no URN plugin and no page, so nobody loads it there. The assigned
+assistant is a Copyeditor and the assigned review assistant a Funding
+Coordinator, each of whom sees the Publication area's pages only while
+their role's stage set holds the active stage: the `Review` column is the
+submission in review, the unpublished one sits in Copyediting
 (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager {OJS OMP} | ✓ | ✓ |
-| manager {OPS} | — | — |
-| assigned section editor {OJS OMP} | ✓ | ✓ |
-| assigned section editor {OPS} | — | — |
-| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
-| assigned section editor, metadata edit off {OPS} | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin {OJS OMP} | ✓ | ✓ |
-| site admin {OPS} | — | — |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ | ✓ |
+| manager {OPS} | — | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor {OPS} | — | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | ? [A18](#a18) |
+| assigned review assistant | ? [A18](#a18) | ✓ | ✓ |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin {OJS OMP} | ✓ | ✓ | ✓ |
+| site admin {OPS} | — | — | — |
 
 ## Fields & validation
 
@@ -981,6 +986,8 @@ Left out of the scenarios above, by reason:
   - OMP6 (a press file's default URN without the format number; Rule 8)
   - OMP7 (a press still listing "Identifiers" and showing format URNs
     on its book page with the plugin off; Rule 20; scenario 3 passes it)
+  - A18 (a program loading the "Identifiers" form as an assigned
+    assistant off the active stage; Actors row 3)
 - **No seed**:
   - an issue galley's "Publisher ID" on an existing issue galley, its
     refusal notices, "/" accepted, and "Enable for Issue Galleys"
@@ -1044,6 +1051,7 @@ entry notes otherwise; the team settles them on spec review.
 | [OMP8](#omp8) | A press's URN settings give a pattern example with "%r", which stays in every URN made from it | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
 | [A3](#a3) | An article's Publisher ID accepts values the tabs refuse, a duplicate included | ❓ | minor | — |
 | [A12](#a12) | A URN that differs from another only in case is accepted as new | ❓ | minor | — |
+| [A18](#a18) | An assigned assistant off the active stage, who has no "Identifiers" page, loads its form through the REST API | ❓ | latent | — |
 | [OJS2](#ojs2) | The JATS XML's publisher ID is the article's number, not the typed Publisher ID | ❓ | minor | — |
 | [OMP3](#omp3) | Readers never see a monograph's URN | ❓ | user-visible | — |
 | [A1](#a1) | Retired: an "Identifiers" tab refuses without saying why | ✅ | retired | — |
@@ -1302,6 +1310,22 @@ publication format window and "Edit a file" close the same way, once
 their first tab has appeared before "Identifiers" is opened; an issue's
 window asks the question.
 Basis: probe, 2026-10-19. <sup>f-a17</sup>
+
+<a id="a18"></a>
+**A18 — An assigned assistant off the active stage, who has no "Identifiers" page, loads its form through the REST API** · ❓ · latent.
+An assistant whose role's stage set does not hold the active stage sees
+the "Publication" group with nothing under it: a Copyeditor on a
+submission in review, a Funding Coordinator on one in Copyediting. The
+install's programming interface still answers that assistant's request
+for the "Identifiers" page's form, with the version's URN. The same
+assistant reads the version itself through the submission read the
+workflow screen sends in any stage. The same question for the other
+publication pages is the workflow screen's
+([→ A14](U24-workflow-screen-and-stage-access.md#a14)).
+Question: should the form's request follow the page's stage rule? Lean:
+harmless as it stands, since it shows nothing beyond the version the
+assistant already reads.
+Basis: probe, 2026-10-30. <sup>f-a18</sup>
 
 ### OJS
 
@@ -2212,6 +2236,14 @@ galley-then-article steps on a 3.4 install settles it. The A4 issue
 report names this fault as out of its scope
 ([docs/issues/U44-A4-article-own-urn-refused-as-in-use.md](../issues/U44-A4-article-own-urn-refused-as-in-use.md)).
 Issue report: [pkp-e2e#1011](https://github.com/jardakotesovec/pkp-e2e/issues/1011) ([docs/issues/U44-A16-urn-shared-across-item-kinds.md](../issues/U44-A16-urn-shared-across-item-kinds.md)).
+
+<a id="fn-f-a18"></a>
+**f-a18** — API coverage's permission matrix, 2026-10-30, OJS and OMP
+`main` (lib/pkp `df42984b46`): `GET …/publications/{id}/_components/identifier`
+answered 200 to the assigned Copyeditor on the submission in review and
+to the assigned Funding Coordinator on the one in Copyediting. Its guard
+is the version read (`PublicationAccessPolicy`) and the role list, with
+no stage check.
 
 <a id="fn-f-a17"></a>
 **f-a17** — Live-probed 2026-10-09 (note q26). On `stable-3_5_0` the

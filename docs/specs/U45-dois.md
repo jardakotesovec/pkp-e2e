@@ -67,22 +67,24 @@ route behind the DOIs page: the DOI list and records, the bulk actions
 on works and issues, "Deposit All", and putting a typed DOI on an
 item: a version, a galley, an issue, a chapter, a publication format or
 a file. DOIs are on, as on a new journal (Rule 2); the page lists a
-work before and after its publication (Rule 15), and the site has no
-DOIs page (`docs/process/api.md`).
+work before and after its publication and while it is in review (Rule
+15), and the site has no DOIs page (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | — | — | — |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-doi-registration"></a>
 **Permission grid: saving the registration agency.** The row "Change the
@@ -107,23 +109,28 @@ DOI settings" above, for the route the "Registration" tab saves to
 on a peer review (Rule 7) or an author response: whoever opens the DOIs
 page, on a journal and a press, whose reviews and responses take one
 whichever kinds are ticked; a preprint server has no review, so nothing
-there takes one (`docs/process/api.md`).
+there takes one. In the `Review` column the review is accepted and not
+yet submitted, which no row of the page lists ([OJS13](#ojs13)), and the
+response is on a round that asked for revisions: when, not who
+(`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager {OJS OMP} | ✓ | ✓ |
-| manager {OPS} | — | — |
-| assigned section editor | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin {OJS OMP} | ✓ | ✓ |
-| site admin {OPS} | — | — |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ | ✓ |
+| manager {OPS} | — | — | — |
+| assigned section editor | — | — | — |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin {OJS OMP} | ✓ | ✓ | ✓ |
+| site admin {OPS} | — | — | — |
 
 ## Fields & validation
 

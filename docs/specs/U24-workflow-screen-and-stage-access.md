@@ -73,7 +73,7 @@ role's stage set. The rows spell that out per capability.
 |--------|--------------------|
 | **Open a submission's workflow** (from the editorial dashboard, from My Submissions, or by a typed address, Rules 1–3) | • Journal Manager; Editor: any submission in the journal, assigned or not. A submission they are assigned to only as its Author opens in the editorial view by the dashboard address and in the author's view from My Submissions, and the older addresses of Rule 2a turn them away (Rule 20)<br>• Section Editor; Guest Editor; assistant roles: submissions they are assigned to, in any stage. For any other submission the dashboard address gives an empty panel and an "Error" dialog (Rule 3); the older addresses turn them away at the page (Rule 2a)<br>• Author: their own submissions, from My Submissions only. A typed editorial address is refused at the page (Rules 2–3); another author's submission, or their own once deleted, typed at My Submissions gives the empty panel and "Error" dialog (Rule 3)<br>• Reviewer; Reader: never, at any door (Rules 2–3). Reviewers work on their own review pages (see *Reviewer's review*) <sup>a</sup> <sup>b</sup> <sup>r</sup> |
 | **Open a stage's panels** (the stage entry shows its panels instead of the no-access box, Rule 13) | • Journal Manager; Editor: every stage, unless they are assigned to the submission in some other role, in which case only that role's stage set. A manager assigned only as the submission's Author therefore reaches every stage, and in the editorial view gets its editorial panels and decision buttons, some of which then refuse them (Rule 20). A manager who is also a reviewer of the submission reaches no stage panels at all ⚠ [A4](#a4)<br>• Section Editor; Guest Editor; assistant roles; Author: the stages in their role's stage set. On the other stages they get the no-access box (Rule 13); the Author, whose stage set covers every stage, never sees it on their own submission <sup>j</sup> |
-| **See the "Publication" group's pages** ("Preprint" on a preprint server; Rule 9) | • Editorial roles: while their role's stage set includes the active stage; a submission resting in Done (Rule 18) counts as reached by every role assigned to it. Journal Manager and Editor always, except in the editorial view of a submission they are assigned to only as its Author (Rule 20). Otherwise the group is listed with nothing under it ⚠ [A2](#a2)<br>• Author: always, on their own submission, with the author's page roster (Rule 10); a Journal Manager or Editor who is its Author gets that roster from My Submissions (Rule 20) <sup>h</sup> |
+| **See the "Publication" group's pages** ("Preprint" on a preprint server; Rule 9) | • Editorial roles: while their role's stage set includes the active stage; a submission resting in Done (Rule 18) counts as reached by every role assigned to it. Journal Manager and Editor always, except in the editorial view of a submission they are assigned to only as its Author (Rule 20). Otherwise the group is listed with nothing under it ⚠ [A2](#a2), while a program still reads those pages' data ⚠ [A14](#a14)<br>• Author: always, on their own submission, with the author's page roster (Rule 10); a Journal Manager or Editor who is its Author gets that roster from My Submissions (Rule 20) <sup>h</sup> |
 | **See the production-only pages** (Body Text, Galleys, Media, Permissions & Disclosure, Publication Settings / Catalog Entry / Preprint entry; Rule 10) | • Editorial roles: while their role's stage set includes Production (managers always). A press lists "Media" without that condition ⚠ [OMP2](#omp2)<br>• Author: Galleys and Media only, always (Rule 10) <sup>h</sup> |
 | **"Payments"** (header dropdown, journals only) | • Every role in the editorial view, the assistant roles included, once the journal has submission payments set up (Settings that modify behavior)<br>• Author: never <sup>f</sup> |
 | **"View" / "Preview"** (header) | • Everyone who opened the screen from the editorial dashboard, the assistant roles included: "View" while the submission rests in Done; "Preview" while it is not published and sits in Copyediting or Production (Rule 6)<br>• Author: neither; the author's header carries "Library" only <sup>f</sup> |
@@ -87,43 +87,52 @@ role's stage set. The rows spell that out per capability.
 <a id="api-grid-publication-pages"></a>
 **Permission grid: reading a submission's publication data.** The row "See
 the "Publication" group's pages" above, for the routes that read a
-version's data for those pages (`docs/process/api.md`).
+version's data for those pages. The assigned assistant is a Copyeditor,
+whose stage set holds Copyediting, and the assigned review assistant a
+Funding Coordinator, whose set holds Submission and Review: the
+`Review` column is the submission in review, the unpublished one sits in
+Copyediting, and the published one rests in Done, which every assigned role
+reaches (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | ? [A14](#a14) |
+| assigned review assistant | ? [A14](#a14) | ✓ | ✓ |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-submission-read"></a>
 **Permission grid: reading a submission.** The row "Open a submission's
 workflow" above, plus the assigned reviewer, whose review page reads the
 submission, its versions and their contributors with the authors'
-identity withheld while the review keeps it from them (`docs/process/api.md`).
+identity withheld while the review keeps it from them. The `Review`
+column is the submission in review, the reviewer's request accepted and
+the review not yet submitted (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | ✓ | ✓ |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | ✓ |
+| assigned review assistant | ✓ | ✓ | ✓ |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | ✓ | ✓ | ✓ |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-delete"></a>
 **Permission grid: deleting a submission.** The row "Confirm the "Delete"
@@ -132,21 +141,21 @@ behind the dialog (`DELETE _submissions/{id}`) and the REST API's own
 delete (`DELETE submissions/{id}`); the stage features offer the button on
 a declined submission only, which is when, not who (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | — | — |
-| assigned section editor, metadata edit off | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| assigned review assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | — | — | — |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 ## Fields & validation
 
@@ -1259,6 +1268,8 @@ Left out of the scenarios above, by reason:
     the submission's Author; Rule 20c)
   - A13 (decision buttons offered to a manager who is the submission's
     Author, and the decision refused; Rule 20c)
+  - A14 (a program reading the publication pages' data as an assigned
+    assistant off the active stage; Actors row 3)
   - OMP3 (a press keeping "Identifiers" after the plugin is turned off;
     Settings)
   - OPS2 (a preprint declined at Production landing on "Title &
@@ -1323,6 +1334,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A4](#a4) | A manager who also reviews a submission gets its workflow with every stage marked inaccessible | ❓ | latent | — |
 | [A7](#a7) | A submission published straight from the Submission stage shows no status box on "Submission" or "Copyediting" while in Done | ❓ | minor | — |
 | [A8](#a8) | A Site Administrator without Journal Manager in the journal opens every submission's workflow with Section Editor left, and none with Reader left | ❓ | latent | claim check (claude), 2026-09-28 — narrowed: a role-less administrator does not occur |
+| [A14](#a14) | An assigned assistant off the active stage, who has no publication pages, reads their data through the REST API | ❓ | latent | — |
 | [OMP2](#omp2) | A press lists the "Media" page without Production access; a journal and a preprint server require it | ❓ | minor | — |
 | [OPS2](#ops2) | A declined preprint's workflow lands on "Title & Abstract", not on the stage holding "Revert Decline" | ❓ | minor | — |
 | [OPS4](#ops4) | A preprint server's author opening their own draft's panel gets an "Error" dialog over an otherwise open panel | ❓ | minor | — |
@@ -1558,6 +1570,24 @@ buttons for a reader the decision is refused to, or the author's view.
 A preprint server's "Post the preprint" fails differently for the same
 reader [OPS6](#ops6).
 Basis: probe, 2026-10-21. <sup>[f-a13](#fn-a13)</sup>
+
+<a id="a14"></a>
+**A14 — An assigned assistant off the active stage, who has no publication pages, reads their data through the REST API** · ❓ · latent.
+An assistant whose role's stage set does not hold the active stage sees
+the "Publication" group with nothing under it (Actors row 3; [A2](#a2)): a
+Copyeditor on a submission in review, a Funding Coordinator on one in
+Copyediting. The install's programming interface still answers that
+assistant's requests for those pages' data: the Title & Abstract,
+Metadata, Data and Funding statement forms, the language form, one
+contributor, the references, the data citations and the funders. The
+same assistant reads the version itself, its contributors included,
+through the submission read the workflow screen sends in any stage.
+Question: should the pages' data requests follow the pages' stage rule?
+Lean: harmless as it stands, since they show nothing beyond the version
+the assistant already reads; worth aligning if the pages ever carry
+more. The Permissions & Disclosure form is the same question for the
+Production stage (*[Publication metadata](U40-publication-metadata.md#a24)*).
+Basis: probe, 2026-10-30. <sup>[f-a14](#fn-a14)</sup>
 
 ### OMP
 
@@ -1817,6 +1847,9 @@ Issue report: [pkp-e2e#1041](https://github.com/jardakotesovec/pkp-e2e/issues/10
 <a id="fn-a13"></a>
 **f-a13** — `Schema::getAvailableEditorialDecisions()` → `checkDecisionPermissions()` (`lib/pkp/classes/submission/maps/Schema.php`) looks for the user's manager or sub-editor stage assignments on the stage and, finding none, falls back to the user's manager-level group, so the decision buttons render; `DecisionAllowedPolicy` (`classes/security/authorization/internal/`) finds the user's Author stage assignment on the stage, skips it as not editorial, and denies with `editor.submission.workflowDecision.disallowedDecision`. Live-probed 2026-10-19 (Rule 20; OJS, OMP, as note r, two runs each): on "Review Round 1" / "External Review" round 1 the buttons "Request Revisions", "Accept Submission", "Create New Review Round", "Cancel Review Round", "Decline Submission", and "Schedule For Publication" on OJS's "Submission" and "Production" entries; "Request Revisions" opened its window ("Require New Review Round", "Next") as it did for `dbarnes`; "Next" went to `user/authorizationDenied?message=editor.submission.workflowDecision.disallowedDecision`, "You do not have permission to record this decision on this submission.". Not pressed: the other decision buttons, "Add Reviewer", "Upload", "Request Response" and OJS's "Editor Recommendation".
 Issue report: [pkp-e2e#1041](https://github.com/jardakotesovec/pkp-e2e/issues/1041) ([docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md](../issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md)).
+
+<a id="fn-a14"></a>
+**f-a14** — API coverage's permission matrix, 2026-10-30, OJS and OMP `main` (lib/pkp `df42984b46`): the publication-pages grid's thirteen reads (`GET …/publications/{id}/_components/{metadata,dataAvailability,fundingStatement,titleAbstract,changeLanguageMetadata}`, `…/contributors/{id}`, `…/citations`, `…/citations/{id}`, `…/dataCitations`, `…/dataCitations/{id}`, `…/funders`, `…/funders/{id}`) answered 200 to the assigned Copyeditor on the submission in review and to the assigned Funding Coordinator on the one in Copyediting. Their guards are the submission and version reads (`SubmissionAccessPolicy`, `PublicationAccessPolicy`) and the role list, with no stage check; the pages' visibility comes from the workflow's stage permissions (ui-library `useWorkflowPermissions.js`). A preprint server has no assistant role with stage access [OPS1](#ops1).
 
 <a id="fn-omp2"></a>
 **f-omp2** — Note h: `useWorkflowNavigationConfigOMP.js::getPublicationItemsEditorial()` pushes `media` before the settings-gated pages and outside the `permissions.canAccessProduction` block; `…OJS.js` and `…OPS.js` push it inside that block. Live-probed 2026-09-02: `assistant.rita` as Funding Coordinator on a monograph in External Review Round 1 saw "Title & Abstract", "Contributors", "Chapters", "Metadata", "Publication Formats", "Media", "References", "Funding" and no "Catalog Entry" or "Permissions & Disclosure"; the same role on a journal article in Review Round 1 saw "Title & Abstract", "Contributors", "Metadata", "References", "Funding", "JATS XML" and no "Media".
