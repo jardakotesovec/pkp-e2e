@@ -158,7 +158,7 @@ read names its submission only in its query: then the matrix's
 foreign call and its control both stopped by a 4xx prove nothing, and fail
 until the route has its body or query. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
-never runs it. A whole run takes 3 to 8 minutes per app:
+never runs it. A whole run takes 4 to 10 minutes per app:
 
 ```bash
 npx playwright test -c configs/ojs.config.js --project=api-matrix --no-deps
