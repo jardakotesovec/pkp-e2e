@@ -47,6 +47,14 @@ class UsersAccessPage {
         }
     }
 
+    /**
+     * The send wizard's own address, the one "Invite to a role" opens
+     * (Actors row 2), as a visitor types it.
+     */
+    inviteWizardPath() {
+        return `/index.php/${this.contextPath}/invitation/create/userRoleAssignment`;
+    }
+
     /** The invitations-table heading carries the live row count. */
     async expectInvitationCount(n) {
         await expect(
@@ -165,6 +173,29 @@ class SendInvitationWizard {
         /** The read-only details block's first heading ("Email address", or "Email" where a fresh install resolves the twice-defined key `user.email` from user.po). */
         this.detailsEmailHeading = page.getByRole('heading', {name: /^Email( address)?$/});
         this.saveAndContinueButton = this.footerButton('Save And Continue');
+    }
+
+    /**
+     * A form-language button above the name fields on "Enter details"
+     * ("French", "English"): it shows or hides that language's name boxes.
+     */
+    localeButton(language) {
+        return this.page.locator('.pkpFormLocales').getByRole('button', {name: language, exact: true});
+    }
+
+    /**
+     * A name box on "Enter details" by its exact label: "Given Name" is the
+     * press's primary language, "Given Name in French" another form language.
+     * By the accessible name: the label element also holds a hidden language
+     * tag ("French Given Name in French"), so an exact getByLabel misses it.
+     */
+    nameField(label) {
+        return this.page.getByRole('textbox', {name: label, exact: true});
+    }
+
+    /** The "Invitation Sent" dialog's sentence for the searched address (Rule 15). */
+    sentMessage(email) {
+        return `${email} has been invited to a new role in OMP. The invitation is listed under Invitations on the Users & Roles page while it awaits their answer.`;
     }
 
     /** Wait out the modal store's close window (patterns.md pitfall 4) before reopening a dialog. */
@@ -420,6 +451,11 @@ class AcceptInvitationWizard {
         this.privacyStatementLink = page.getByRole('link', {name: 'Privacy Statement'});
         /** The Password field's helper text stating the site minimum. */
         this.passwordDescription = page.getByText(/It should be at least \d+ characters long/);
+        /** The inline error under the Username field ("There is already an existing user …"). */
+        this.usernameError = page
+            .locator('.pkpFormField')
+            .filter({has: page.getByLabel('Username')})
+            .locator('.pkpFieldError__message');
         /** The inline error a refused password shows under the field. */
         this.passwordError = page.locator('.pkpFieldError__message').filter({hasText: /password/i});
         /** Rule 17's question behind the footer's "Cancel". */

@@ -110,6 +110,44 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
         );
         // Every new-role row's role select (none on a disabled user's step).
         this.newRoleSelects = page.getByLabel(/^Select a new role/);
+        // The name boxes in the journal's primary language ("Given Name",
+        // "Family Name"); a second form language's boxes are `nameInLanguage`.
+        this.givenNameInput = page.getByLabel(/^Given Name/).first();
+        this.familyNameInput = page.getByLabel(/^Family Name/).first();
+        // Actors row 2: the page a typed wizard address answers a role that
+        // does not open Users & Roles with.
+        this.accessDenied = page.getByText('The current role does not have access to this operation.', {exact: true});
+    }
+
+    /**
+     * The address "Invite to a role" opens (Actors row 2), for typing it.
+     *
+     * @param {string} contextPath
+     */
+    createAddress(contextPath) {
+        return this.contextUrl(contextPath, '/invitation/create/userRoleAssignment');
+    }
+
+    /**
+     * The button above the name fields named for a second form language
+     * ("French", "English"; Fields).
+     *
+     * @param {string} language the language's name as the screen shows it
+     */
+    formLanguageButton(language) {
+        return this.page.locator('main').getByRole('button', {name: language, exact: true});
+    }
+
+    /**
+     * A name box in a second form language ("Given Name in French"). Its
+     * label carries a hidden language prefix while the box is hidden, so
+     * the name is matched unanchored.
+     *
+     * @param {'Given Name'|'Family Name'} field
+     * @param {string} language
+     */
+    nameInLanguage(field, language) {
+        return this.page.getByLabel(new RegExp(`${field} in ${language}`));
     }
 
     stepHeading(name) {
@@ -302,8 +340,7 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
 
     /**
      * The success dialog's only button, "View All Users": the browser
-     * returns to Users & Roles (Rule 15; the dialog's promise of updates is
-     * register A5, not asserted).
+     * returns to Users & Roles (Rule 15).
      */
     async dismissSentDialog() {
         await this.sentDialog.getByRole('button', {name: 'View All Users'}).click();
@@ -359,6 +396,21 @@ exports.AcceptInvitationWizard = class AcceptInvitationWizard extends BasePage {
 
     async expectOnAccountStep() {
         await expect(this.stepHeading(/Create OJS account/)).toBeVisible();
+    }
+
+    /**
+     * `upper` sits above `lower` on the page, read once both are shown
+     * (polled: the step may still be laying out).
+     */
+    async expectAbove(upper, lower) {
+        await expect(upper).toBeVisible();
+        await expect(lower).toBeVisible();
+        await expect
+            .poll(async () => {
+                const [a, b] = [await upper.boundingBox(), await lower.boundingBox()];
+                return Boolean(a && b && a.y + a.height <= b.y);
+            })
+            .toBe(true);
     }
 
     /** "Skip ORCID verification" → the next step (Rule 7). */

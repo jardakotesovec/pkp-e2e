@@ -81,7 +81,10 @@ Keys:
   `path` unless you set one, and a second context with the same path fails
   with a 400.
 - `context`: `path` (defaults to the tag), `name` (defaults to "Scratch
-  context {tag}"), `acronym`, `description`, `primaryLocale`,
+  context {tag}" under `en` alone, whatever `primaryLocale` is, so a
+  context whose primary language is not English has no name in it and
+  its emails' "{journal}" prints empty: pass `name` as a locale map
+  there; U06 test run, 2026-10-30), `acronym`, `description`, `primaryLocale`,
   `supportedLocales`, `supportedSubmissionLocales`, `supportedFormLocales`,
   `contactName`, `contactEmail`, `country`, `enabled`.
   `supportedSubmissionLocales`

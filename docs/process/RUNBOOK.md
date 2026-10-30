@@ -313,4 +313,5 @@ The writer spends the table as "What the scenarios cover" says.
    `node docs/process/lint/lint-spec.mjs --tests <spec>` zero.
 5. **Progress, commit and push, report** as steps 9 to 11: the PROGRESS row in the
    fixed shape with the scenario count; the sheet deleted, with its queue
-   row when it has one, and no Planned item left in the spec.
+   row when it has one, and no Planned item left in the spec but the
+   guards that wait for an open 🐞's fix.

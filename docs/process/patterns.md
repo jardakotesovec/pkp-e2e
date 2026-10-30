@@ -174,7 +174,10 @@ Each of these has bitten at least once.
     on CI, 2026-09-30).
 11. **PkpButton accessible names include row context.** The Edit button in a
     mailables list is named `Edit Discussion (Production)`. Use a row-scoped
-    regex.
+    regex. A multilingual form's second-language box is named the same way:
+    its label opens with a hidden language name ("French Given Name in
+    French"), so `getByLabel(/^Given Name in French/)` and an `exact: true`
+    match find nothing; match it unanchored (U06 revision, 2026-10-30).
 12. **AJAX-loaded email templates** (decision Composer steps). Wait for
     `.composer__loadingTemplateMask` to be gone before submitting, or the POST
     validates against an empty body.

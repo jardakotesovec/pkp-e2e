@@ -4,14 +4,14 @@
  *
  * U06 — User invitations, OMP suite (spec:
  * docs/specs/U06-user-invitations.md). One test per canonical scenario the
- * spec runs on a press (common scenarios 1–8, 10 and 11, in OMP vocabulary:
+ * spec runs on a press (common scenarios 1–8, 10, 11 and 12, in OMP vocabulary:
  * press, Press Manager, Press Masthead, "Create OMP account", "Accept And
  * Continue to OMP"; the offered roles Author, External Reviewer and
  * Copyeditor per fn-s); scenario 9 is OPS-only.
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A2, A3, A4, A5, A7, A8, A9, A11, A12,
- * OMP1.
+ * of everything else left out): A2, A3, A4, A7, A8, A9, A11, A12, A13,
+ * A14, A15, A16, A17, OMP1.
  *
  * All mutating state lives in per-test scratch presses seeded through the
  * scenario endpoints; `publicknowledge` and the seeded roster are untouched.
@@ -114,11 +114,23 @@ async function fetchInvitationEmail(pkpMail, {to, marker}) {
 test.describe('User invitations (U6)', () => {
     test.beforeEach(async ({}, testInfo) => testInfo.setTimeout(180_000));
 
-    test('S1: manager invites a newcomer to a role', async ({ompApi, asUser, pkpMail}, testInfo) => {
+    test('S1: manager invites a newcomer to a role', async ({ompApi, asUser, pkpMail, page}, testInfo) => {
         const tag = makeTag(testInfo, 'u6s1');
         const recipient = `rcpt${tag}@mail.test`;
         const marker = `Invitation${tag}`;
-        const {path, manager} = await seedPress(ompApi, tag);
+        // A throwaway Series Editor (`sectionEditor`) and a throwaway Press
+        // editor whose role has "Permit changes to Settings" unticked (fn-s).
+        const sectionEditor = `se${tag}`;
+        const editor = `ed${tag}`;
+        const {path, manager} = await seedPress(
+            ompApi,
+            tag,
+            [
+                {username: sectionEditor, roles: ['sectionEditor']},
+                {username: editor, roles: ['editor']},
+            ],
+            {roles: {editor: {permitSettings: false}}},
+        );
 
         const mgrPage = await (await asUser(manager)).newPage();
         const access = new UsersAccessPage(mgrPage, path);
@@ -130,6 +142,8 @@ test.describe('User invitations (U6)', () => {
         await access.goto();
         await access.inviteButton.click();
         await expect(wizard.searchField).toBeVisible();
+        // The wizard's own address, typed by the other accounts below.
+        await expect(mgrPage).toHaveURL(new RegExp(`/${path}/(en/)?invitation/create/userRoleAssignment$`));
         await wizard.searchFor(recipient);
         await expect(
             mgrPage.getByText('The user does not have a role in this press'),
@@ -159,6 +173,11 @@ test.describe('User invitations (U6)', () => {
         // shows "Invitation Sent".
         const bodyText = await wizard.composeBodyText();
         await wizard.composeAndSend(marker);
+
+        // The "Invitation Sent" dialog: "{email} has been invited to a new role
+        // in OMP. The invitation is listed under Invitations on the Users &
+        // Roles page while it awaits their answer." (Rule 15).
+        await expect(wizard.sentDialog).toContainText(wizard.sentMessage(recipient));
 
         // "View All Users": the browser returns to Users & Roles, where the
         // pending row reads "Invited {date}".
@@ -223,6 +242,28 @@ test.describe('User invitations (U6)', () => {
         await expect(access.invitationRow(recipient)).toHaveCount(1);
         await expect(access.invitationRow(recipient)).toContainText(access.invitedOn());
 
+        // The wizard's address, typed by the Series Editor and by the Press
+        // editor without "Permit changes to Settings", each signed in in a
+        // browser of their own: the access-denied page, no wizard (Actors
+        // row 2; the Press Manager's own opening above is the positive
+        // control).
+        for (const other of [sectionEditor, editor]) {
+            const otherPage = await (await asUser(other)).newPage();
+            await otherPage.goto(access.inviteWizardPath());
+            await expect(otherPage).toHaveURL(/\/user\/authorizationDenied/);
+            await expect(
+                otherPage.getByText('The current role does not have access to this operation.'),
+            ).toBeVisible();
+            await expect(otherPage.getByLabel(/Search for a user by email address/)).toHaveCount(0);
+        }
+
+        // The same address, signed out (a browser where nobody is signed in):
+        // the sign-in screen opens.
+        await page.goto(access.inviteWizardPath());
+        await expect(page).toHaveURL(/\/login\?source=/);
+        await new LoginPage(page).expectForm();
+        await expect(page.getByLabel(/Search for a user by email address/)).toHaveCount(0);
+
         // Control: under Current Users the address has no row (Rule 9); the
         // absence read is bounded by the list's own filtered response.
         await access.searchUsers(recipient);
@@ -276,7 +317,39 @@ test.describe('User invitations (U6)', () => {
             new RegExp(`/index\\.php/${path}/about/privacy$`),
         );
 
-        // A valid password advances (the refusal's positive control).
+        // A username already in use: the Press Manager's, with a valid
+        // password: "There is already an existing user with the username
+        // {username}. Try another one." under the field, and the step stays
+        // (Fields).
+        await wizard.submitAccount({username: manager, password});
+        await expect(wizard.usernameError).toContainText(
+            `There is already an existing user with the username ${manager}. Try another one.`,
+        );
+        await expect(wizard.stepHeading('Create OMP account')).toBeVisible();
+        await expect(wizard.stepHeading('Enter details')).toHaveCount(0);
+
+        // The chosen username advances (the positive control for both
+        // refusals): "Enter details" opens.
+        await wizard.submitAccount({username, password});
+        await expect(wizard.stepHeading('Enter details')).toBeVisible();
+
+        // "Cancel" on "Enter details", then "Cancel Invitation Process": the
+        // sign-in screen opens, and the manager's row still reads "Invited
+        // {date}" (Rule 17).
+        await wizard.openCancelDialog();
+        await wizard.cancelProcess();
+        await expect(page).toHaveURL(/\/login/);
+        await new LoginPage(page).expectForm();
+        await access.goto();
+        await access.expectInvitationCount(1);
+        await expect(access.invitationRow(recipient)).toContainText(access.invitedOn());
+
+        // The accept link, reopened: "Create OMP account" with the chosen
+        // username still in its box (Rule 17); the password is retyped, the
+        // consent ticked, and the step continues.
+        await page.goto(acceptUrl);
+        await expect(wizard.stepHeading('Create OMP account')).toBeVisible();
+        await expect(wizard.usernameField).toHaveValue(username);
         await wizard.submitAccount({username, password});
         await expect(wizard.stepHeading('Enter details')).toBeVisible();
         // "Enter details" arrives holding the name the manager entered.
@@ -618,6 +691,10 @@ test.describe('User invitations (U6)', () => {
         const tag = makeTag(testInfo, 'u6s6');
         const recipient = `rcpt${tag}@mail.test`;
         const {path, manager} = await seedPress(ompApi, tag);
+        // A second scratch press the same Press Manager also manages: a second
+        // scenario request naming the existing account (fn-s).
+        const otherPath = `${tag}b`;
+        await ompApi.createContext({tag: otherPath, users: [{username: manager, roles: ['manager']}]});
 
         const mgrPage = await (await asUser(manager)).newPage();
         const {access} = await sendNewUserInvitation(mgrPage, {
@@ -640,12 +717,37 @@ test.describe('User invitations (U6)', () => {
             .getByRole('button', {name: 'Edit Invitation', exact: true})
             .click();
 
-        // The wizard reopens prefilled, without the search step.
+        // The wizard reopens prefilled, without the search step, the browser's
+        // address ending in the invitation's number.
         const wizard = new SendInvitationWizard(mgrPage);
         await expect(mgrPage.getByRole('textbox', {name: /^Email/})).toHaveValue(recipient);
         await expect(
             mgrPage.getByRole('button', {name: 'Search User'}),
         ).toHaveCount(0);
+        await expect(mgrPage).toHaveURL(/\/invitation\/edit\/\d+$/);
+        const editUrl = new URL(mgrPage.url());
+        const editPath = editUrl.pathname;
+        expect(editPath).toContain(`/${path}/`);
+
+        // The number under the second press's address: "404 Not Found"; the
+        // first press's address with 99999999, a number no invitation has,
+        // shows the same page (Actors row 3).
+        const notFoundReads = [
+            editPath.replace(`/${path}/`, `/${otherPath}/`),
+            editPath.replace(/\/\d+$/, '/99999999'),
+        ];
+        for (const typed of notFoundReads) {
+            const response = await mgrPage.goto(typed);
+            expect(response?.status()).toBe(404);
+            await expect(mgrPage.getByText('404 Not Found').first()).toBeVisible();
+            await expect(mgrPage.getByRole('textbox', {name: /^Email/})).toHaveCount(0);
+        }
+
+        // The number under its own press's address: the edit wizard opens
+        // prefilled (the positive control for the two reads above).
+        await mgrPage.goto(editPath);
+        await expect(mgrPage.getByRole('textbox', {name: /^Email/})).toHaveValue(recipient);
+        await expect(mgrPage.getByText('404 Not Found')).toHaveCount(0);
 
         // Change the role set, type the second marker and send.
         await wizard.addRole({role: 'Copyeditor'});
@@ -661,14 +763,25 @@ test.describe('User invitations (U6)', () => {
         await expect(acceptWizard.stepHeading('Create OMP account')).toBeVisible();
 
         // ...the first email's links no longer do (the dead link's bare 404 is
-        // register finding A3 — assert only that the accept flow does not
-        // open, in either page shape).
+        // register finding A3 — assert only that neither flow opens, in either
+        // page shape): its accept link opens no accept wizard...
         await page.goto(first.acceptUrl);
         await expect(
             page.getByText(/not found|Invitation Unavailable/i).first(),
         ).toBeVisible();
         await expect(acceptWizard.stepHeading('Create OMP account')).toHaveCount(0);
         await expect(page.getByLabel('Username')).toHaveCount(0);
+
+        // ...and its decline link no "Decline Invitation" page. (The second
+        // email's decline link is not pressed: it would decline the live
+        // invitation whose accept link opened the wizard above.)
+        expect(first.declineUrl).toBeTruthy();
+        await page.goto(first.declineUrl);
+        await expect(
+            page.getByText(/not found|Invitation Unavailable/i).first(),
+        ).toBeVisible();
+        await expect(page.getByRole('heading', {name: 'Decline Invitation'})).toHaveCount(0);
+        await expect(page.getByRole('button', {name: 'Confirm Decline Invitation'})).toHaveCount(0);
     });
 
     test('S7: wrong person signed in is refused and can log out', async ({ompApi, asUser, pkpMail}, testInfo) => {
@@ -910,6 +1023,17 @@ test.describe('User invitations (U6)', () => {
         await expect(wizard.footerButton('Save and continue')).toHaveCount(0);
         await expect(page.getByRole('button', {name: /continue/i})).toHaveCount(0);
 
+        // "Cancel" on "Verify ORCID iD": "Cancel Role Invitation Process?"
+        // opens with "Cancel Invitation Process" and "Go Back"; "Go Back"
+        // returns to the step (Rule 17).
+        await wizard.openCancelDialog();
+        await expect(wizard.cancelProcessButton).toBeVisible();
+        await expect(wizard.goBackButton).toBeVisible();
+        await wizard.goBack();
+        await expect(wizard.cancelDialog).toHaveCount(0);
+        await expect(wizard.stepHeading('Verify ORCID iD')).toBeVisible();
+        await expect(wizard.skipOrcidButton).toBeVisible();
+
         // "Skip ORCID verification": "Create OMP account" opens, with the
         // footer's own Continue button (the positive control for its absence
         // on the ORCID step).
@@ -1042,5 +1166,108 @@ test.describe('User invitations (U6)', () => {
         await access.openUserEdit(`Inv${tag}`);
         await expect(mgrWizard.currentRoleRow('Author')).toHaveCount(1);
         await expect(mgrWizard.currentRoleRow('Copyeditor')).toHaveCount(1);
+    });
+    test('S12: the invitation greets the newcomer by the name in the press\'s language', async ({ompApi, asUser, pkpMail}, testInfo) => {
+        testInfo.setTimeout(240_000);
+        const tag = makeTag(testInfo, 'u6s12');
+        const frPath = `${tag}fr`;
+        const enPath = `${tag}en`;
+        const manager = `mgr${tag}`;
+        const first = `rcpt${tag}a@mail.test`;
+        const second = `rcpt${tag}b@mail.test`;
+        // The first press French with English as its second form language,
+        // its Press Manager named in French only (Mia Mgr); the second press
+        // English with French as its second form language, the same Press
+        // Manager named by a second scenario request (fn-s). The site's
+        // primary language is English on the test installs.
+        await ompApi.createContext({
+            tag: frPath,
+            context: {primaryLocale: 'fr_CA', supportedLocales: ['en', 'fr_CA'], supportedFormLocales: ['en', 'fr_CA']},
+            users: [{username: manager, roles: ['manager'], givenName: {fr_CA: 'Mia'}, familyName: {fr_CA: 'Mgr'}}],
+        });
+        await ompApi.createContext({
+            tag: enPath,
+            context: {supportedLocales: ['en', 'fr_CA'], supportedFormLocales: ['en', 'fr_CA']},
+            users: [{username: manager, roles: ['manager']}],
+        });
+
+        const mgrPage = await (await asUser(manager)).newPage();
+        const wizard = new SendInvitationWizard(mgrPage);
+
+        // A newcomer named in both languages, on the French press, the
+        // manager's screens in English (its addresses under /en/): "Search
+        // User", then "Enter details", where Given Name and Family Name are
+        // the press's primary language, French. The English boxes are filled
+        // as the step shows them; "English" is left unpressed: the spec's
+        // "the button … opens its boxes" is contradicted here (the boxes
+        // arrive open and the button hides them), finding T-omp-1 for the
+        // fold.
+        const frAccess = new UsersAccessPage(mgrPage, frPath);
+        await frAccess.goto({locale: 'en'});
+        await expect(frAccess.inviteButton).toBeVisible();
+        await frAccess.inviteButton.click();
+        await expect(wizard.searchField).toBeVisible();
+        await wizard.searchFor(first);
+        await expect(mgrPage.getByText('The user does not have a role in this press')).toBeVisible();
+        await wizard.nameField('Given Name').fill('Eva');
+        await wizard.nameField('Family Name').fill('Anglais');
+        await expect(wizard.localeButton('English')).toBeVisible();
+        await expect(wizard.nameField('Given Name in English')).toBeVisible();
+        await expect(wizard.nameField('Family Name in English')).toBeVisible();
+        await wizard.nameField('Given Name in English').fill('Eve');
+        await wizard.nameField('Family Name in English').fill('English');
+        await wizard.addRole({role: 'Author'});
+        await wizard.saveAndContinue();
+        await wizard.composeAndSend(`Invitation${tag}a`);
+
+        // The first newcomer's mailbox: "Dear Eva Anglais,", the name in the
+        // press's primary language although the manager's screens are in
+        // English, Eva Anglais on the "To" line, and "You have been invited
+        // by" the Press Manager's French name (Side effects).
+        const firstSummary = await pkpMail.find({to: first, contains: `Invitation${tag}a`});
+        const firstMail = await pkpMail.fullMessage(firstSummary.ID);
+        const firstText = firstMail.Text.replace(/\s+/g, ' ');
+        expect(firstText).toContain('Dear Eva Anglais,');
+        expect(firstMail.To.map((r) => r.Name)).toEqual(['Eva Anglais']);
+        expect(firstText).toContain('invited by Mia Mgr');
+
+        // A newcomer named only in French, on the English press: "French"
+        // opens "Given Name in French" and "Family Name in French" (hidden
+        // before the press); Anne Dupont typed there, Given Name and Family
+        // Name left empty.
+        const enAccess = new UsersAccessPage(mgrPage, enPath);
+        await enAccess.goto({locale: 'en'});
+        await expect(enAccess.inviteButton).toBeVisible();
+        await enAccess.inviteButton.click();
+        await expect(wizard.searchField).toBeVisible();
+        await wizard.searchFor(second);
+        await expect(mgrPage.getByText('The user does not have a role in this press')).toBeVisible();
+        await expect(wizard.nameField('Given Name')).toBeVisible();
+        await expect(wizard.nameField('Given Name in French')).toBeHidden();
+        await wizard.localeButton('French').click();
+        await expect(wizard.nameField('Given Name in French')).toBeVisible();
+        await expect(wizard.nameField('Family Name in French')).toBeVisible();
+        await wizard.nameField('Given Name in French').fill('Anne');
+        await wizard.nameField('Family Name in French').fill('Dupont');
+        await expect(wizard.nameField('Given Name')).toHaveValue('');
+        await expect(wizard.nameField('Family Name')).toHaveValue('');
+        await wizard.addRole({role: 'Author'});
+        await wizard.saveAndContinue();
+        await wizard.composeAndSend(`Invitation${tag}b`);
+
+        // The second newcomer's mailbox: "Dear Anne Dupont,", the one
+        // language a name was entered in, and Anne Dupont on the "To" line.
+        const secondSummary = await pkpMail.find({to: second, contains: `Invitation${tag}b`});
+        const secondMail = await pkpMail.fullMessage(secondSummary.ID);
+        expect(secondMail.Text.replace(/\s+/g, ' ')).toContain('Dear Anne Dupont,');
+        expect(secondMail.To.map((r) => r.Name)).toEqual(['Anne Dupont']);
+
+        // Control: Eve English, the name entered in the language of the
+        // manager's screens, is neither in the first email's greeting nor on
+        // its "To" line (the greeting and the line read above are the
+        // positive control).
+        expect(firstText).not.toMatch(/Dear Eve\b/);
+        expect(firstText).not.toContain('Eve English');
+        expect(firstMail.To.map((r) => r.Name).join(' ')).not.toContain('Eve');
     });
 });

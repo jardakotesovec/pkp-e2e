@@ -56,7 +56,7 @@ user the personal fields show read-only.
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | "Search for a user by email address, username, or ORCID iD" | yes (to pass step 1) | Exact match on email, then username, then ORCID iD. A miss, even text that is no valid email address, advances to "Enter details" with "The user does not have a role in this journal". An email address with no account arrives typed into the Email field; other text is discarded (the Email field arrives empty) and the address is validated there instead <sup>h</sup> |
-| Email address / Given Name / Family Name | email only | "Enter details" has no Affiliation box, so the "Affiliation:" line of the "Cancel Invite" confirmation (Rule 16) stays empty for an invitation sent from this wizard. Names are optional; helper text notes the invitee can change them. On a journal with a second form language (Settings), a button named for it ("French") above the fields adds "Given Name in French" and "Family Name in French" boxes, and each name field counts its filled languages ("0/2 languages completed"). The email greets by the name in the journal's primary language, else in the site's, else in whichever language one was entered, on the "To" line too (Side effects). <sup>i</sup> If the address gains an account before the invitation is accepted, what the recipient then sees was not verified live <sup>o</sup> |
+| Email address / Given Name / Family Name | email only | "Enter details" has no Affiliation box, so the "Affiliation:" line of the "Cancel Invite" confirmation (Rule 16) stays empty for an invitation sent from this wizard. Names are optional; helper text notes the invitee can change them. On a journal with a second form language (Settings), a button named for that language sits above the fields, and each name field counts its filled languages ("0/2 languages completed"). The second language's boxes start hidden and its button opens them ("French" opens "Given Name in French" and "Family Name in French"), unless it is the language the manager's screens are in: then its boxes arrive open beside the primary language's, its button shown selected, and pressing the button hides them (on a French journal with the screens in English, "Given Name in English" and "Family Name in English" are open from the start). The email greets by the name in the journal's primary language, else in the site's, else in whichever language one was entered, on the "To" line too (Side effects). <sup>i</sup> If the address gains an account before the invitation is accepted, what the recipient then sees was not verified live <sup>o</sup> |
 | Role (per row, "Select a new role") | at least one row | Roles the person already holds are not offered. A role already chosen in another row is listed but cannot be picked. From the second row on, a row's fields lose their screen-reader names ⚠ [A8](#a8) <sup>i</sup> |
 | Start Date (per role row) | yes | A date in the past takes effect as "today" at acceptance (Rule 8) ⚠ [A8](#a8) |
 | End Date (per role row) | no | Cannot be entered when inviting. An added role row's END DATE cell shows "---" and holds no input. The column only displays dates on an existing member's current roles (Rule 13) <sup>i</sup> |
@@ -300,7 +300,9 @@ Accept wizard (new invitee):
 - **"Forms"** languages (Settings › Website › "Setup" › "Languages"; default
   the journal's primary language alone): each further language ticked adds
   a button named for it above the name fields on "Enter details" in both
-  wizards, which opens the name boxes in that language (Fields). The email
+  wizards, which opens the name boxes in that language; on the send
+  wizard the boxes of the language the manager's screens are in arrive
+  open instead, and that button hides them (Fields). The email
   greets by the name in the primary language only (Side effects). <sup>i</sup>
 
 ## Cross-feature interactions
@@ -331,17 +333,18 @@ Accept wizard (new invitee):
 
 ## Canonical scenarios
 
-Every scenario but 9 runs on a scratch journal of its own, with a throwaway
-Journal Manager, throwaway invitee addresses and the emails read in the
-mail catcher; scenarios 3, 7, 8, 10 and 11 start with an extra throwaway
-user (scenarios 3 and 7 with two), scenario 10's journal has ORCID enabled and its
-extra user holds a verified ORCID iD, and scenario 9 browses the seeded
+Every scenario but 9 runs on a scratch journal of its own (scenarios 6
+and 12 on two), with a throwaway Journal Manager, throwaway invitee
+addresses and the emails read in the mail catcher, scenarios 1, 3, 7, 8,
+10 and 11 with extra throwaway users; scenario 9 browses the seeded
 preprint server as its ready Preprint Server Manager. The accounts, the
 addresses and the tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Invite a newcomer to a role**
 
-   Given: a Journal Manager, signed in, on a scratch journal. <sup>s</sup>
+   Given: a Journal Manager, signed in, on a scratch journal with a
+   throwaway Section Editor and, on a journal or press, a throwaway Editor
+   whose role has "Permit changes to Settings" unticked. <sup>s</sup>
 
    - **Users & Roles**: press "Invite to a role".
    - **"Search User"**: enter an email address no account uses (the footnote
@@ -358,6 +361,11 @@ addresses and the tooling recipe are in the footnote. <sup>s</sup>
    - **The compose step**: replace the subject with a marker of this run
      (the footnote names it) and press "Invite user to the role": an
      "Invitation Sent" dialog appears.
+   - **The "Invitation Sent" dialog**: it reads "{email} has been invited
+     to a new role in OJS. The invitation is listed under Invitations on
+     the Users & Roles page while it awaits their answer.", {email} being
+     the address searched (a press and a preprint server name OMP and OPS)
+     (Rule 15).
    - **"View All Users"**: press it: the browser returns to Users & Roles,
      where the Invitations table shows the row as "Invited {date}".
    - **The recipient's mailbox**: holds the invitation email, sent from the
@@ -373,6 +381,17 @@ addresses and the tooling recipe are in the footnote. <sup>s</sup>
      user to the role": the wizard gives no hint that a pending invitation
      exists, and afterwards the Invitations table holds only the newer row
      (Rule 3).
+   - **The wizard's address, typed by the Section Editor**: signed in as
+     the Section Editor in a browser of their own, type the address
+     "Invite to a role" opened for the Journal Manager,
+     `{journal}/invitation/create/userRoleAssignment`: the access-denied
+     page reads "The current role does not have access to this
+     operation." (Actors row 2).
+   - **The same address, typed by the Editor**: on a journal or press,
+     signed in as the Editor in a browser of their own, type it: the same
+     access-denied page.
+   - **The same address, signed out**: type it in a browser where nobody
+     is signed in: the sign-in screen opens (Actors row 2).
    - **Control**: under Current Users the address has no row: a new
      invitee's account exists only from the moment they accept (Rule 9).
 
@@ -383,22 +402,38 @@ addresses and the tooling recipe are in the footnote. <sup>s</sup>
    journal with ORCID off. <sup>s</sup>
 
    - **The accept link**: open it: the wizard opens on "Create OJS account"
-     with no "Verify ORCID iD" step, ORCID being off on this journal
-     (Rule 5).
-   - **The password's minimum on "Create OJS account"**: the Password field
-     states its minimum, six characters on a default install; Pass5, five
-     characters, is refused and the step does not advance (Settings).
+     with no "Verify ORCID iD" step (Rule 5).
    - **"Create OJS account"**: choose a username and password (the footnote
      names them) and tick the privacy consent.
+   - **The password's minimum**: the Password field states its minimum,
+     six characters on a default install. Replace the password with Pass5
+     and press "Save and continue": "The password must be at least 6
+     characters." shows under the field, and the step stays (Settings).
+     Retype the chosen password.
    - **The consent checkbox's label**: links to the journal's Privacy
      Statement page (Settings).
+   - **A username already in use**: replace the chosen username with the
+     Journal Manager's (the footnote names it) and press "Save and
+     continue": "There is already an existing user with the username
+     {username}. Try another one." shows under the field, and the step
+     stays (Fields). Retype the chosen username.
+   - **"Cancel" on "Enter details"**: press "Save and continue": "Enter
+     details" opens. Press "Cancel", then "Cancel Invitation Process" in
+     the "Cancel Role Invitation Process?" dialog: the sign-in screen
+     opens, and on the manager's Users & Roles the invitation's row still
+     reads "Invited {date}" (Rule 17).
+   - **The accept link, reopened**: open it again: "Create OJS account"
+     opens with the chosen username still in its box (Rule 17). Retype
+     the password, with the privacy consent ticked, and press "Save and
+     continue".
    - **"Enter details"**: Given Name already reads Nova, the name the
      Journal Manager entered; choose Country Canada.
-   - **"Review & create account"**: check the summary; its Edit button
-     reopens the details. Press "Accept And Continue to OJS": a dialog
-     announces the new role.
-   - **"View All Submissions"**: ⚠ [A4](#a4) the dialog's "View All
-     Submissions" button lands on the sign-in screen.
+   - **"Review & create account"**: the summary shows the chosen username.
+     Its Edit button reopens "Enter details", whose "Save and continue"
+     returns here. Press "Accept And Continue to OJS": a dialog announces
+     the new role.
+   - **"View All Submissions"**: press it: ⚠ [A4](#a4) the sign-in
+     screen opens.
    - **The sign-in screen**: signing in with the new credentials succeeds,
      and the account holds the offered role.
    - **Control**: the invitation's row is gone from the manager's
@@ -506,17 +541,29 @@ addresses and the tooling recipe are in the footnote. <sup>s</sup>
 
    Given: a Journal Manager, signed in, on a scratch journal with a pending
    invitation to a throwaway address, sent as in scenario 1, its email in
-   the recipient's mailbox. <sup>s</sup>
+   the recipient's mailbox, the same Journal Manager also managing a
+   second scratch journal. <sup>s</sup>
 
    - **The invitation's row menu**: choose Edit: a dialog warns the current
      invitation will be canceled and a new one sent. Proceed.
-   - **The wizard**: opens prefilled without the search step. Change the
-     role set (the footnote names the roles), replace the subject with a
-     second marker of this run and send.
+   - **The wizard**: opens prefilled without the search step, the
+     browser's address ending in the invitation's number.
+   - **The number under the second journal's address**: type the same
+     address with the second journal's path (the part of the address
+     that names the journal) in place of the first's: a
+     page reading "404 Not Found" opens. The first journal's address with
+     99999999, a number no invitation has, in place of the invitation's
+     number shows the same page (Actors row 3).
+   - **The number under its own journal's address**: type the first
+     journal's address with the invitation's number again: the edit
+     wizard opens prefilled. Change the role set (the footnote names the
+     roles), replace the subject with a second marker of this run and
+     send.
    - **The recipient's mailbox**: holds a second invitation email.
    - **Control**: the second email's links work, its accept link opening
-     the accept wizard, while the first email's links no longer do
-     ⚠ [A3](#a3).
+     the accept wizard, while the first email's links no longer do: its
+     accept link opens no accept wizard and its decline link no "Decline
+     Invitation" page ⚠ [A3](#a3).
 
 7. **Wrong person signed in**
 
@@ -600,6 +647,10 @@ App-specific:
       on "Verify ORCID iD", which offers the "Verify ORCID iD" button and
       "Skip ORCID verification" and no other Continue button (Rules 5, 7).
       Leave "Verify ORCID iD" unpressed.
+    - **"Cancel" on "Verify ORCID iD"**: press "Cancel": a dialog "Cancel
+      Role Invitation Process?" opens with "Cancel Invitation Process" and
+      "Go Back". Press "Go Back": the "Verify ORCID iD" step is back
+      (Rule 17).
     - **"Skip ORCID verification"**: press it: "Create OJS account" opens
       (Rule 5).
     - **The verified user's invitation**: invite the throwaway user to a
@@ -645,6 +696,43 @@ App-specific:
       gone from the Invitations table while Edit on the user's row shows
       Author and the offered role (Rules 8, 11).
 
+12. **The invitation greets the newcomer by the name in the journal's language** {OJS OMP OPS}
+
+    Given: a Journal Manager whose account carries a name in French only
+    (the footnote names it), signed in with their screens in English, the
+    site's primary language, on two scratch journals: the first French
+    with English as its second form language, the second English with
+    French as its second form language. <sup>s</sup>
+
+    - **A newcomer named in both languages, on the French journal**: on
+      Users & Roles press "Invite to a role", search an address no account
+      uses (the footnote names it) and continue to "Enter details": "Given
+      Name in English" and "Family Name in English" are already open below
+      the "English" button, English being the language of the manager's
+      screens (Fields). Fill in the name in French, Given Name Eva and
+      Family Name Anglais, and, in those open boxes without pressing
+      "English", Given Name Eve and Family Name English. Add a role row as
+      in scenario 1 and send.
+    - **The first newcomer's mailbox**: the invitation email opens "Dear
+      Eva Anglais,", the name in the journal's primary language although
+      the manager's screens are in English, and its "To" line carries Eva
+      Anglais (Side effects).
+    - **"You have been invited by {name}"**: the same email names the
+      Journal Manager by their French name (Side effects).
+    - **A newcomer named only in French, on the English journal**: on that
+      journal's Users & Roles press "Invite to a role", search a second
+      address no account uses (the footnote names it) and continue to
+      "Enter details". Press "French": "Given Name in French" and "Family
+      Name in French" appear (Fields). Type Anne in "Given Name in French"
+      and Dupont in "Family Name in French", leave Given Name and Family
+      Name empty, add a role row as in scenario 1 and send.
+    - **The second newcomer's mailbox**: the invitation email opens "Dear
+      Anne Dupont,", the one language a name was entered in, and its "To"
+      line carries Anne Dupont (Side effects).
+    - **Control**: Eve English, the name entered in the language of the
+      manager's screens, appears neither in the first email's greeting nor
+      on its "To" line (Side effects).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -655,13 +743,6 @@ Left out of the scenarios above, by reason:
     under Username ([A13](#a13)): the guard the issue report
     (`docs/issues/U06-A13-accept-taken-username-nothing-happens.md`)
     proposes, once fixed
-  - the send wizard's address typed by roles that do not open Users &
-    Roles, a Section Editor and an Editor with "Permit changes to Settings"
-    unticked, each getting the access-denied page, and by a signed-out
-    visitor, who gets the sign-in screen (Actors row 2; A1 retired)
-  - another journal's invitation number in the edit address showing "404
-    Not Found", while under that journal's own address it opens the edit
-    wizard (Actors row 3)
   - the guard for OMP1 (issue report
     `docs/issues/U53-A14-masthead-change-error-no-email.md`): a manager
     changes a member's "Appear on the masthead" select on the user's roles
@@ -677,8 +758,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U06-A4-newcomer-not-signed-in-after-accepting.md`): a
     newcomer's "View All Submissions" after "Accept And Continue" opens the
     Dashboard signed in as the new account
-  - the guard for retired A5: the "Invitation Sent" dialog's text promises
-    only what the app does
   - the guard for A12 (issue report
     `docs/issues/U06-A12-invitation-address-made-up-kind-empty-page.md`):
     the send wizard's address typed with a made-up last word and with
@@ -695,42 +774,19 @@ Left out of the scenarios above, by reason:
     this invitation", no list or button there carries "##" in its name, and on
     an existing user's one-step accept page Tab reaches no element inside
     the clipped steps row or an `aria-hidden` block
-  - on a journal whose primary language is not the site's, with the
-    manager's screens in the site's language, a newcomer named in both
-    form languages greeted by the name in the journal's primary language,
-    on the email's "To" line too (Side effects; the part of A10 retired by
-    pkp/pkp-lib#13429)
-  - a newcomer named only in a journal's second form language greeted by
-    that name, on the "To" line too, and, on a journal whose primary language is not the
-    site's, "invited by {name}" naming a manager whose account carries a
-    name only in the journal's language while their screens are in the
-    site's (Side effects; the rest of A10 retired by pkp/pkp-lib#13429)
-  - a newcomer's username already in use refused on "Create OJS account"
-    with "There is already an existing user with the username {username}.
-    Try another one." under the field, the step staying (Fields, accept
-    wizard)
-  - a newcomer who pressed "Save and continue" on "Create OJS account",
-    then cancelled from "Enter details", finding the chosen username
-    still in its box when the emailed link reopens that step (Rule 17)
   - the guard for A15: after "Back" to "Search User" and a search for
     another address, the names "Enter details" shows are the names the
     invitation carries, in the Invitations row, the greeting and the "To"
     line (Rule 15), once fixed
-  - "Cancel" on a newcomer's "Verify ORCID iD" step on a journal with
-    ORCID enabled, its "Cancel Role Invitation Process?" dialog and "Go
-    Back" returning to the step (Rule 17)
-  - the first email's decline link after "Edit" replaced the invitation,
-    which scenario 6's Control names beside its accept link (Rule 12,
-    A3): only the accept link is read today
 - **Rarely met**:
   - a past start date taking effect as the acceptance day, read on the
     member's Current Users row and Edit page (Rule 8): a manager rarely
     backdates a start date
-  - a journal with a second form language: the name boxes in that language
-    on "Enter details" in both wizards, and the greeting by the name in the
-    primary language only (Fields; Settings "Forms"; Side effects): the
-    names are optional and nothing else on these screens changes, and
-    scenario 1 reads the greeting by name on a one-language journal
+  - the accept wizard's "Enter details" for a newcomer the manager named
+    only in a second form language: the name in that language's boxes,
+    behind the button named for it, and Given Name empty (Fields, accept
+    wizard): the names are optional, and scenario 12 reads the greeting
+    such a name gets
 - **Nothing new to test**:
   - the compose step's template list (Fields, send wizard): it offers the
     invitation email's own template alone, and picking it changes nothing
@@ -741,16 +797,21 @@ Left out of the scenarios above, by reason:
   - leaving the send wizard by following a link, with no question and no
     row added (Rule 15): scenario 3 leaves it by a typed address, to the
     same effect
-  - a newcomer's "Cancel" on "Create OJS account" or "Enter details", its
-    "Cancel Invitation Process" landing on the sign-in screen and the link
-    reopening "Create OJS account" (Rule 17): the same question, the same
-    signed-out landing and the same surviving invitation as scenario 11's
+  - a newcomer's "Cancel" on "Create OJS account", its "Cancel Invitation
+    Process" landing on the sign-in screen and the link reopening "Create
+    OJS account" (Rule 17): the same question, the same signed-out landing
+    and the same surviving invitation as scenario 2's "Cancel" on "Enter
+    details"
   - leaving the accept wizard by a typed address, with no question and the
     typed username not kept (Rule 17): a way out of the wizard that answers
     nothing
   - the masthead select of a removed role's row, its confirmation and its
     email (Rule 13, Side effects): scenario 8 changes the same select on a
     current row
+  - pressing the button of the language the manager's screens are in,
+    which hides that language's name boxes on "Enter details" (Fields): a
+    show-or-hide control; scenario 12 reads those boxes open on arrival,
+    and its "French" press opens another language's boxes
   - a Site Administrator sending, editing, cancelling or proposing (Actors
     rows 1–5; scenarios 1, 5, 6 and 8's Journal Manager sees the same
     screens)
@@ -1413,6 +1474,18 @@ Role: {role}, / Status: Invited 2026-10-22 / Affiliation:" with nothing
 after "Affiliation:". With Copyeditor (OJS), Author (OMP) or Moderator
 (OPS) chosen in row 1, row 2's role select listed that role marked
 disabled among the others; a member's held Author role was not listed.
+Test runs 2026-10-30, OJS, OMP and OPS (Fields; Settings bullet 6;
+scenario 12), on a scratch context with `primaryLocale` `fr_CA` and
+English as its second form language, opened under `/en/` with the
+screens in English: "Enter details" arrived with "Given Name in English"
+and "Family Name in English" shown and the "English" button carrying
+`pkpFormLocales__locale--isActive`, before any press; one press hid them
+and dropped that class, a second showed them again. On the English
+context with French, the French boxes started hidden and "French" showed
+them. The boxes open on arrival are the form's `visibleLocales`, which
+`FormComponent::getConfig()` (the parent of `UserDetailsForm`) sets to
+the interface language, with the primary language in front when it
+differs.
 
 <a id="fn-j"></a>
 **j** — Mailable `PKP\mail\mailables\UserRoleAssignmentInvitationNotify`
@@ -1606,8 +1679,8 @@ scenario 8's member `roles: ['author', 'reader']`; scenario 10's context
 passes `orcid: {}` (ORCID enabled on the dummy Public Sandbox pair; every
 other context omits the key, which leaves ORCID off) and its user an
 `author` entry with `orcid` (the sandbox example
-`https://sandbox.orcid.org/0000-0002-1825-0097`) and `orcidIsVerified:
-true`, the seed that stamps the live permission ORCID's own sign-in would
+`https://sandbox.orcid.org/0000-0002-1825-0097`) and
+`orcidIsVerified: true`, the seed that stamps the live permission ORCID's own sign-in would
 store. Invitee addresses are `rcpt<tag>@mail.test`, typed on "Search
 User"; the subject marker typed on the compose step is `Invitation<tag>`
 (scenario 6's first send `<tag>first`, its second `<tag>second`), and every
@@ -1620,7 +1693,9 @@ pending invitation is sent through the wizard by its Journal Manager, as in
 scenario 3 without the masthead change, before the user's browser opens the
 link; its context omits `orcid`, like every context but scenario 10's.
 Scenario 2's account is `acc<tag>` / `Password<tag>`, the refused control
-`Pass5`. The offered role is one the invitee does not hold: Copyeditor on
+`Pass5` (the OJS and OPS suites read "The password must be at least 6
+characters." under Password, the OMP suite the field's error; all three
+read `acc<tag>` on the review step). The offered role is one the invitee does not hold: Copyeditor on
 OJS, Author or External Reviewer on OMP, Moderator on OPS; scenario 6's
 replacement changes the row to a second such role (Author on OJS,
 Copyeditor on OMP). Scenario 11 offers Copyeditor on OJS and OMP and
@@ -1628,6 +1703,36 @@ Moderator on OPS, the roles the 2026-09-28 and 2026-09-29 claim checks
 offered an existing Author before reading the landings (notes m, u).
 Scenario 9 signs in as the seeded preprint server's
 ready Preprint Server Manager (`manager.maya`) and only browses.
+Scenario 1's Section Editor is a `sectionEditor` entry (a Moderator on
+OPS) and, on OJS and OMP, its Editor an `editor` entry on a context
+seeded `roles: {editor: {permitSettings: false}}` (scenarios.md
+`roles`); each signs in in a browser context of their own and types
+`{journal}/invitation/create/userRoleAssignment` under the scratch
+journal's path, and the signed-out read types it in a fresh browser
+context (f-a1, note b). The "Invitation Sent" sentence is read with the
+app's acronym, {email} the searched `rcpt<tag>@mail.test` (note g).
+Scenario 2's taken username is its Journal Manager's `users[]` username;
+the "Cancel" from "Enter details" follows the first "Save and continue"
+with `acc<tag>`, and the reopened link is the same accept link from the
+mail catcher (note u). Scenario 6's second journal is a second
+`POST scenarios/context` whose `users[]` entry names the first context's
+Journal Manager with `roles: ['manager']` (scenarios.md `users[]`, an
+entry naming an account that already exists); the address "Edit" opens
+is `{journal}/invitation/edit/{id}` (note q), retyped with the second
+context's path, then with `99999999` under the first's (note b).
+Scenario 12's first context is seeded under `context` with
+`primaryLocale: 'fr_CA'`, `supportedLocales: ['en', 'fr_CA']` and
+`supportedFormLocales: ['en', 'fr_CA']`, its Journal Manager named in French only by `givenName: {fr_CA: 'Mia'}`
+and `familyName: {fr_CA: 'Mgr'}` (the user seeder reads a locale map),
+and the second `supportedLocales` and `supportedFormLocales`
+`['en', 'fr_CA']` with English primary, its `users[]` entry naming the
+same Journal Manager; the manager's screens stay English by opening the
+first journal's addresses under `/en/` (a visit to a `/fr_CA/` address
+switches the session to French); the site's primary language is English
+on the test installs. Its invitees are `rcpt<tag>a@mail.test` (Eva
+Anglais, Eve English) and `rcpt<tag>b@mail.test` (Anne Dupont), the names
+of f-a10's drives; the "To" line is the name on the message's recipient
+header in the mail catcher.
 
 <a id="fn-t"></a>
 **t** — The daily cleanup has no screen: no page or API shows when it

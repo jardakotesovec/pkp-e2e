@@ -214,6 +214,62 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
         this.emailAddressHeading = page.getByRole('heading', {name: /^Email( address)?$/});
         // The "Invitation Sent" dialog's one button (Rule 15).
         this.viewAllUsersButton = this.sentDialog.getByRole('button', {name: 'View All Users'});
+        // Its sentence, "{email} has been invited to a new role in OPS. …" (Rule 15).
+        this.sentDialogMessage = this.sentDialog.getByRole('paragraph');
+        // The page a role the wizard bars lands on (Actors row 2).
+        this.accessDeniedText = page.getByText('The current role does not have access to this operation.');
+    }
+
+    /**
+     * The send wizard's own address, as "Invite to a role" opens it
+     * (Actors row 2).
+     *
+     * @param {string} contextPath
+     */
+    createAddress(contextPath) {
+        return this.contextUrl(contextPath, '/invitation/create/userRoleAssignment');
+    }
+
+    /**
+     * The address "Edit Invitation" opens, ending in the invitation's
+     * number (Actors row 3).
+     *
+     * @param {string} contextPath
+     * @param {string|number} id
+     */
+    editAddress(contextPath, id) {
+        return this.contextUrl(contextPath, `/invitation/edit/${id}`);
+    }
+
+    /**
+     * The invitation's number at the end of the edit wizard's address
+     * the browser holds (after "Edit Invitation").
+     */
+    async invitationIdFromAddress() {
+        await this.page.waitForURL(/\/invitation\/edit\/\d+/, {waitUntil: 'commit'});
+        return /** @type {RegExpMatchArray} */ (this.page.url().match(/\/invitation\/edit\/(\d+)/))[1];
+    }
+
+    /**
+     * A form-language button above the name fields on "Enter details",
+     * named for the language ("French", "English"; Fields).
+     *
+     * @param {string} language
+     */
+    languageButton(language) {
+        return this.page.locator('main').getByRole('button', {name: language, exact: true});
+    }
+
+    /**
+     * A name box of "Enter details" by its exact accessible name: "Given
+     * Name", "Family Name", or a form language's "Given Name in French".
+     * (The language boxes' <label> text opens with the language's name, so
+     * a label regex anchored on "Given Name" misses them.)
+     *
+     * @param {string} name
+     */
+    nameBox(name) {
+        return this.page.locator('main').getByRole('textbox', {name, exact: true});
     }
 
     /** A step heading ("STEP 1 - Enter details", the compose step's, ...). */

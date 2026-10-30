@@ -3,11 +3,11 @@
  * @file playwright/tests/U06-user-invitations.spec.js
  *
  * User invitations — OJS suite, one test per canonical scenario the spec runs
- * on OJS (scenarios 1–8, 10 and 11; scenario 9 is OPS-only).
+ * on OJS (scenarios 1–8, 10, 11 and 12; scenario 9 is OPS-only).
  * Spec: docs/specs/U06-user-invitations.md
  *
- * Deliberately NOT covered (register IDs): A2, A3, A4, A5, A7, A8, A9, A11,
- * A12, OMP1, OPS1.
+ * Deliberately NOT covered (register IDs): A2, A3, A4, A7, A8, A9, A11, A12,
+ * A13, A14, A15, A16, A17, OMP1, OPS1.
  *
  * Every test seeds its own scratch journal (publicknowledge and the seeded
  * roster stay untouched); Mailpit assertions are scoped by unique throwaway
@@ -62,11 +62,12 @@ async function seedJournal(ojsApi, tag, extraUsers = [], contextKeys = {}) {
  * page. `search` is the step-1 input; pass `expectExisting` for a roster hit.
  * A miss arrives on "Enter details" with the searched address already in
  * Email (Fields). `onDetails(wizard)` runs on "Enter details" before the role
- * row is filled. Returns the "Enter details" step's text and the compose
+ * row is filled; `onSent(wizard)` runs while the "Invitation Sent" dialog is
+ * open. Returns the "Enter details" step's text and the compose
  * step's body as shown at send time; the "Invitation Sent" dialog's "View
  * All Users" has returned the browser to Users & Roles.
  */
-async function sendInvitation(managerPage, contextPath, {search, expectExisting = false, givenName, subject, onDetails}) {
+async function sendInvitation(managerPage, contextPath, {search, expectExisting = false, givenName, subject, onDetails, onSent}) {
     const usersRoles = new UsersRolesPage(managerPage, contextPath);
     await usersRoles.goto();
     await usersRoles.inviteButton.click();
@@ -91,13 +92,16 @@ async function sendInvitation(managerPage, contextPath, {search, expectExisting 
     await wizard.setSubject(subject);
     const body = await wizard.readBody();
     await wizard.send();
+    if (onSent) {
+        await onSent(wizard);
+    }
     await wizard.dismissSentDialog();
     return {wizard, detailsText, body};
 }
 
 /**
  * Fetch the invitation email (scoped by recipient + subject marker) and pull
- * both links, the sender and the plain-text body. The email template uses
+ * both links, the sender, the recipients ("To" line) and the plain-text body. The email template uses
  * single-quoted hrefs, so we regex the URL directly rather than via
  * extractLink (which assumes double quotes).
  */
@@ -114,6 +118,7 @@ async function invitationLinks(pkpMail, {to, contains}) {
         text: full.Text,
         subject: full.Subject,
         from: full.From,
+        to: full.To,
         accept: grab('accept'),
         decline: grab('decline'),
     };
@@ -137,7 +142,19 @@ test.describe('user invitations', () => {
         const tag = makeTag('s1', testInfo);
         const recipient = `rcpt${tag}@mail.test`;
         const subject = `Invitation${tag}`;
-        const {path, manager} = await seedJournal(ojsApi, tag);
+        const sectionEditor = `se${tag}`;
+        const editor = `ed${tag}`;
+        // A throwaway Section Editor, and an Editor whose role has "Permit
+        // changes to Settings" unticked (fn-s; scenarios.md `roles`).
+        const {path, manager} = await seedJournal(
+            ojsApi,
+            tag,
+            [
+                {username: sectionEditor, roles: ['sectionEditor']},
+                {username: editor, roles: ['editor']},
+            ],
+            {roles: {editor: {permitSettings: false}}}
+        );
 
         const managerCtx = await asUser(manager);
         const managerPage = await managerCtx.newPage();
@@ -162,6 +179,13 @@ test.describe('user invitations', () => {
                 await expect(row.getByText('Does not appear on the masthead', {exact: true})).toBeVisible();
                 await expect(masthead).toHaveCount(0);
                 await expect(row.getByRole('combobox')).toHaveCount(1);
+            },
+            // The "Invitation Sent" dialog reads the sentence of Rule 15,
+            // {email} the address searched.
+            onSent: async (wizard) => {
+                await expect(wizard.sentDialog).toContainText(
+                    `${recipient} has been invited to a new role in OJS. The invitation is listed under Invitations on the Users & Roles page while it awaits their answer.`
+                );
             },
         });
 
@@ -212,8 +236,33 @@ test.describe('user invitations', () => {
         await expect(usersRoles.invitationsHeading(1)).toBeVisible();
         await expect(usersRoles.invitationRow(recipient)).toHaveCount(1);
 
+        // The wizard's address, typed: the Journal Manager's own typing
+        // opens "Search User" (the positive control), while the Section
+        // Editor and the Editor without "Permit changes to Settings", each in
+        // a browser of their own, get the access-denied page (Actors row 2).
+        const address = first.wizard.createAddress(path);
+        await managerPage.goto(address);
+        await expect(first.wizard.stepHeading(/Search User/)).toBeVisible();
+        await expect(first.wizard.searchInput).toBeVisible();
+        for (const username of [sectionEditor, editor]) {
+            const deniedPage = await (await asUser(username)).newPage();
+            const denied = new SendInvitationWizard(deniedPage);
+            await deniedPage.goto(address);
+            await expect(denied.accessDenied).toBeVisible();
+            await expect(denied.searchInput).toHaveCount(0);
+            await expect(denied.stepHeading(/Search User/)).toHaveCount(0);
+        }
+
+        // The same address, signed out (the fixture page has no session):
+        // the sign-in screen opens.
+        await page.goto(address);
+        await expect(page).toHaveURL(new RegExp(`/${path}/login`));
+        await new LoginPage(page).expectForm();
+        await expect(new SendInvitationWizard(page).searchInput).toHaveCount(0);
+
         // Control: under Current Users the address has no row, the manager's
         // own row bounding the list read (Rule 9).
+        await usersRoles.goto();
         await expect(usersRoles.userRow(`${manager}@mail.test`)).toBeVisible();
         await expect(usersRoles.usersTable).not.toContainText(recipient);
     });
@@ -255,7 +304,37 @@ test.describe('user invitations', () => {
         // Statement page (Settings).
         await expect(wizard.privacyStatementLink).toHaveAttribute('href', new RegExp(`/${path}/about/privacy$`));
 
+        // A username already in use, the Journal Manager's: the sentence
+        // shows under Username and the step stays (Fields, accept wizard;
+        // the chosen username's "Save and continue" below is the control).
+        await wizard.submitAccount({username: manager, password});
+        const taken = wizard.fieldError(`There is already an existing user with the username ${manager}. Try another one.`);
+        await expect(taken).toBeVisible();
+        await wizard.expectAbove(wizard.usernameInput, taken);
+        await wizard.expectOnAccountStep();
+        await expect(wizard.stepHeading(/Enter details/)).toHaveCount(0);
+
+        // "Cancel" on "Enter details": "Cancel Invitation Process" lands the
+        // signed-out newcomer on the sign-in screen, and the manager's row
+        // still reads "Invited {date}" (Rule 17).
         await wizard.createAccount({username, password});
+        await wizard.expectOnDetailsStep();
+        await wizard.cancelProcess();
+        await page.waitForURL(/\/login/, {waitUntil: 'commit'});
+        await new LoginPage(page).expectForm();
+        const usersRoles = new UsersRolesPage(managerPage, path);
+        await usersRoles.goto();
+        await expect(usersRoles.invitationsHeading(1)).toBeVisible();
+        await expect(usersRoles.invitationRow(recipient)).toContainText(`Invited ${today()}`);
+
+        // The accept link, reopened: "Create OJS account" with the chosen
+        // username still in its box (Rule 17); the password retyped.
+        await page.goto(links.accept);
+        await wizard.expectOnAccountStep();
+        await expect(wizard.usernameInput).toHaveValue(username);
+        await wizard.passwordInput.fill(password);
+        await wizard.privacyCheckbox.check();
+        await wizard.saveAndContinueButton.click();
         // "Enter details" arrives holding the Given Name the Journal Manager
         // entered (Fields, accept wizard).
         await wizard.expectOnDetailsStep();
@@ -281,7 +360,6 @@ test.describe('user invitations', () => {
 
         // Control: the invitation's row is gone from the manager's Invitations
         // table, beside the account now holding the role (Rule 11).
-        const usersRoles = new UsersRolesPage(managerPage, path);
         await usersRoles.goto();
         await expect(usersRoles.invitationsHeading(0)).toBeVisible();
         await expect(usersRoles.invitationRow(recipient)).toHaveCount(0);
@@ -556,6 +634,10 @@ test.describe('user invitations', () => {
         const firstMarker = `${tag}first`;
         const secondMarker = `${tag}second`;
         const {path, manager} = await seedJournal(ojsApi, tag);
+        // The second scratch journal, managed by the same Journal Manager: a
+        // second request naming the existing account (fn-s).
+        const otherPath = `${tag}b`;
+        await ojsApi.createContext({tag: otherPath, users: [{username: manager, roles: ['manager']}]});
 
         const managerCtx = await asUser(manager);
         const managerPage = await managerCtx.newPage();
@@ -571,12 +653,38 @@ test.describe('user invitations', () => {
         await expect(dialog).toContainText('the current invitation will be canceled');
         await dialog.getByRole('button', {name: 'Edit Invitation'}).click();
 
-        // The wizard reopens prefilled, without the search step.
+        // The wizard reopens prefilled, without the search step, the
+        // browser's address ending in the invitation's number.
         const wizard = new SendInvitationWizard(managerPage);
         await expect(wizard.stepHeading(/STEP 1 - Enter details/)).toBeVisible();
         await expect(wizard.stepPill('Enter details')).toBeVisible();
         await expect(wizard.stepPill('Search User')).toHaveCount(0);
         await expect(wizard.emailInput).toHaveValue(recipient);
+        await expect(managerPage).toHaveURL(new RegExp(`/${path}/invitation/edit/\\d+$`));
+        const editAddress = managerPage.url();
+
+        // The number under the second journal's address: "404 Not Found";
+        // the first journal's address with a number no invitation has: the
+        // same page (Actors row 3).
+        const notFound = managerPage.getByRole('heading', {name: '404 Not Found'});
+        for (const address of [
+            editAddress.replace(`/${path}/`, `/${otherPath}/`),
+            editAddress.replace(/\/edit\/\d+$/, '/edit/99999999'),
+        ]) {
+            const response = await managerPage.goto(address);
+            expect(response && response.status()).toBe(404);
+            await expect(notFound).toBeVisible();
+            await expect(wizard.emailInput).toHaveCount(0);
+            await expect(wizard.stepHeading(/Enter details/)).toHaveCount(0);
+        }
+
+        // The number under its own journal's address, typed: the edit wizard
+        // opens prefilled (the positive control for the two pages above).
+        await managerPage.goto(editAddress);
+        await expect(wizard.stepHeading(/STEP 1 - Enter details/)).toBeVisible();
+        await expect(wizard.stepPill('Search User')).toHaveCount(0);
+        await expect(wizard.emailInput).toHaveValue(recipient);
+        await expect(notFound).toHaveCount(0);
 
         // Change the role set and send the replacement (the prefilled row is a
         // "Select a new role" row — the newcomer has no current groups).
@@ -586,17 +694,28 @@ test.describe('user invitations', () => {
         await wizard.send();
         await wizard.dismissSentDialog();
 
-        // The second email's links work (positive control)...
+        // The second email's links work (positive control): its accept link
+        // opens the accept wizard, its decline link the "Decline Invitation"
+        // page (left unconfirmed)...
         const secondLinks = await invitationLinks(pkpMail, {to: recipient, contains: secondMarker});
         await page.goto(secondLinks.accept);
         const acceptWizard = new AcceptInvitationWizard(page);
         await acceptWizard.expectOnAccountStep();
+        const declineHeading = page.getByRole('heading', {name: 'Decline Invitation'});
+        const confirmDecline = page.getByRole('button', {name: 'Confirm Decline Invitation'});
+        await page.goto(secondLinks.decline);
+        await expect(declineHeading).toBeVisible();
+        await expect(confirmDecline).toBeVisible();
 
-        // ...while the first email's links no longer open the flow (Rule 12;
-        // the exact error rendering is register A3, not asserted).
+        // ...while the first email's links no longer do: its accept link
+        // opens no accept wizard, its decline link no "Decline Invitation"
+        // page (Rule 12; the page they show is register A3, not asserted).
         await page.goto(firstLinks.accept);
         await expect(acceptWizard.stepHeading(/Create OJS account/)).toHaveCount(0);
         await expect(acceptWizard.acceptButton).toHaveCount(0);
+        await page.goto(firstLinks.decline);
+        await expect(declineHeading).toHaveCount(0);
+        await expect(confirmDecline).toHaveCount(0);
     });
 
     test('S7: wrong person signed in is refused until they log out', async ({asUser, ojsApi, pkpMail}, testInfo) => {
@@ -791,6 +910,18 @@ test.describe('user invitations', () => {
         await expect(wizard.saveAndContinueButton).toHaveCount(0);
         await expect(page.getByRole('button', {name: /continue/i})).toHaveCount(0);
 
+        // "Cancel" on "Verify ORCID iD": "Cancel Role Invitation Process?"
+        // with "Cancel Invitation Process" and "Go Back"; "Go Back" returns
+        // to the step (Rule 17).
+        await wizard.openCancelDialog();
+        await expect(wizard.cancelProcessButton).toBeVisible();
+        await expect(wizard.goBackButton).toBeVisible();
+        await wizard.goBackButton.click();
+        await expect(wizard.cancelDialog).toBeHidden();
+        await wizard.expectOnOrcidStep();
+        await expect(wizard.verifyOrcidButton).toBeVisible();
+        await expect(wizard.skipOrcidButton).toBeVisible();
+
         // "Skip ORCID verification": "Create OJS account" opens (Rule 5), with
         // its own "Save and continue" (the control for the step above).
         await wizard.skipOrcid();
@@ -905,5 +1036,102 @@ test.describe('user invitations', () => {
         await expect(sendWizard.roleRows()).toHaveCount(2);
         await expect(sendWizard.removeRoleButton(sendWizard.currentRoleRow('Author'))).toBeVisible();
         await expect(sendWizard.removeRoleButton(sendWizard.currentRoleRow(ROLE))).toBeVisible();
+    });
+
+    test("S12: the invitation greets the newcomer by the name in the journal's language", async ({asUser, ojsApi, pkpMail}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s12', testInfo);
+        const manager = `mgr${tag}`;
+        const frPath = `${tag}fr`;
+        const enPath = `${tag}en`;
+        const rcptA = `rcpt${tag}a@mail.test`;
+        const rcptB = `rcpt${tag}b@mail.test`;
+        const subjectA = `Invitation${tag}a`;
+        const subjectB = `Invitation${tag}b`;
+        const languages = ['en', 'fr_CA'];
+        // The first journal French with English as its second form language,
+        // its Journal Manager named in French only; the second English with
+        // French as its second form language, the same Journal Manager named
+        // again (fn-s). The site's primary language is English.
+        await ojsApi.createContext({
+            tag: frPath,
+            context: {primaryLocale: 'fr_CA', supportedLocales: languages, supportedFormLocales: languages},
+            users: [{username: manager, roles: ['manager'], givenName: {fr_CA: 'Mia'}, familyName: {fr_CA: 'Mgr'}}],
+        });
+        await ojsApi.createContext({
+            tag: enPath,
+            context: {supportedLocales: languages, supportedFormLocales: languages},
+            users: [{username: manager, roles: ['manager']}],
+        });
+
+        // The manager's screens stay in English: every address of the French
+        // journal is opened under `/en/` (fn-s).
+        const managerCtx = await asUser(manager);
+        const managerPage = await managerCtx.newPage();
+
+        // A newcomer named in both languages, on the French journal: the
+        // French name in Given Name and Family Name, the English one in the
+        // "English" boxes (Fields). That the "English" button opens them is
+        // not asserted: here the boxes arrive open and the button hides them
+        // (test-author finding T-ojs-1, 2026-10-30, for the fold); the
+        // English journal's "French" below opens its boxes as Fields says.
+        await sendInvitation(managerPage, `${frPath}/en`, {
+            search: rcptA,
+            subject: subjectA,
+            onDetails: async (wizard) => {
+                await wizard.givenNameInput.fill('Eva');
+                await wizard.familyNameInput.fill('Anglais');
+                await expect(wizard.formLanguageButton('English')).toBeVisible();
+                const givenEnglish = wizard.nameInLanguage('Given Name', 'English');
+                const familyEnglish = wizard.nameInLanguage('Family Name', 'English');
+                await expect(givenEnglish).toBeVisible();
+                await givenEnglish.fill('Eve');
+                await familyEnglish.fill('English');
+            },
+        });
+
+        // The first newcomer's mailbox: "Dear Eva Anglais,", the name in the
+        // journal's primary language although the manager's screens are in
+        // English, Eva Anglais on the "To" line too; "You have been invited
+        // by" names the Journal Manager by their French name (Side effects).
+        const first = await invitationLinks(pkpMail, {to: rcptA, contains: subjectA});
+        const firstText = first.text.replace(/\s+/g, ' ');
+        expect(firstText).toContain('Dear Eva Anglais,');
+        expect(first.to.map((r) => r.Name)).toEqual(['Eva Anglais']);
+        expect(firstText).toMatch(/you have been invited by Mia Mgr\b/i);
+
+        // A newcomer named only in French, on the English journal: "French"
+        // opens "Given Name in French" and "Family Name in French" (Fields);
+        // Given Name and Family Name stay empty.
+        await sendInvitation(managerPage, `${enPath}/en`, {
+            search: rcptB,
+            subject: subjectB,
+            onDetails: async (wizard) => {
+                const givenFrench = wizard.nameInLanguage('Given Name', 'French');
+                const familyFrench = wizard.nameInLanguage('Family Name', 'French');
+                await expect(givenFrench).toBeHidden();
+                await wizard.formLanguageButton('French').click();
+                await expect(givenFrench).toBeVisible();
+                await expect(familyFrench).toBeVisible();
+                await givenFrench.fill('Anne');
+                await familyFrench.fill('Dupont');
+                await expect(wizard.givenNameInput).toHaveValue('');
+                await expect(wizard.familyNameInput).toHaveValue('');
+            },
+        });
+
+        // The second newcomer's mailbox: "Dear Anne Dupont,", the one
+        // language a name was entered in, Anne Dupont on the "To" line too
+        // (Side effects).
+        const second = await invitationLinks(pkpMail, {to: rcptB, contains: subjectB});
+        expect(second.text.replace(/\s+/g, ' ')).toContain('Dear Anne Dupont,');
+        expect(second.to.map((r) => r.Name)).toEqual(['Anne Dupont']);
+
+        // Control: Eve English, the name entered in the language of the
+        // manager's screens, is neither in the first email's greeting nor on
+        // its "To" line, where Eva Anglais was read above (Side effects).
+        expect(firstText).not.toContain('Dear Eve');
+        expect(firstText).not.toContain('Eve English');
+        expect(first.to.map((r) => r.Name).join(' ')).not.toContain('Eve');
     });
 });

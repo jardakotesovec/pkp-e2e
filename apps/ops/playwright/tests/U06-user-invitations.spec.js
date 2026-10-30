@@ -3,19 +3,20 @@
  * @file playwright/tests/U06-user-invitations.spec.js
  *
  * User invitations — OPS suite, one test per canonical scenario the spec runs
- * on OPS (scenarios 1–8, 10 and 11 in OPS vocabulary — preprint server,
+ * on OPS (scenarios 1–8 and 10–12 in OPS vocabulary — preprint server,
  * Preprint Server Manager, Moderator as the offered role, "Create OPS
  * account" / "Accept And Continue to OPS" — plus the OPS-only scenario 9).
  * Spec: docs/specs/U06-user-invitations.md
  *
  * Deliberately NOT covered (register IDs; the spec's Coverage section is the
- * record of the rest): A2, A3, A4, A5, A7, A8, A9, A11, A12, OMP1.
+ * record of the rest): A2, A3, A4, A7, A8, A9, A11, A12, A13, A14, A15,
+ * A16, A17, OMP1.
  * OPS1 is S9's subject, asserted as an absence with a positive control.
  *
- * Every test but S9 seeds its own scratch preprint server (publicknowledge
- * and the seeded roster stay untouched; S9 only browses); Mailpit assertions
- * are scoped by unique throwaway recipient addresses carrying app + test in
- * the tag, plus a subject marker. "Today" is computed in the process's zone;
+ * Every test but S9 seeds its own scratch preprint server (S6 and S12 two;
+ * publicknowledge and the seeded roster stay untouched; S9 only browses);
+ * Mailpit assertions are scoped by unique throwaway recipient addresses
+ * carrying app + test in the tag, plus a subject marker. "Today" is computed in the process's zone;
  * the suite runs with TZ=UTC, the PHP servers' clock (the start date the
  * wizard stamps is compared to it).
  */
@@ -142,12 +143,15 @@ async function signInFresh(page, username, password) {
 }
 
 test.describe('user invitations', () => {
-    test('S1: manager invites a newcomer to a role', {tag: '@smoke'}, async ({asUser, pkpApi, pkpMail}, testInfo) => {
+    test('S1: manager invites a newcomer to a role', {tag: '@smoke'}, async ({page, asUser, pkpApi, pkpMail}, testInfo) => {
         test.slow();
         const tag = makeTag('s1', testInfo);
         const recipient = `rcpt${tag}@mail.test`;
         const subject = `Invitation${tag}`;
-        const {path, manager} = await seedServer(pkpApi, tag);
+        // The Section Editor key seeds a Moderator on a preprint server; OPS
+        // has no Editor role, so the Editor bullet has no OPS run (fn-s).
+        const moderator = `mod${tag}`;
+        const {path, manager} = await seedServer(pkpApi, tag, [{username: moderator, roles: ['sectionEditor']}]);
 
         const managerPage = await (await asUser(manager)).newPage();
         // "Search User" → "Enter details" with the address already in Email;
@@ -156,6 +160,12 @@ test.describe('user invitations', () => {
         // has no OPS run: a preprint server's role select offers no
         // reviewer role (users.md; findings T-ops-1).
         const first = await sendInvitation(managerPage, path, {search: recipient, givenName: 'Nova', subject});
+
+        // The "Invitation Sent" dialog: its sentence names the address
+        // searched and the app, and promises nothing more (Rule 15).
+        await expect(first.wizard.sentDialogMessage).toHaveText(
+            `${recipient} has been invited to a new role in OPS. The invitation is listed under Invitations on the Users & Roles page while it awaits their answer.`
+        );
 
         // "View All Users": the browser returns to Users & Roles, where the
         // Invitations table shows the row as "Invited {date}" (Rule 15).
@@ -205,6 +215,29 @@ test.describe('user invitations', () => {
         // own row bounding the list read (Rule 9).
         await expect(users.usersTable.getByRole('row').filter({hasText: `${manager}@mail.test`})).toBeVisible();
         await expect(users.usersTable).not.toContainText(recipient);
+
+        // The wizard's own address, typed (Actors row 2). Positive control:
+        // the Preprint Server Manager typing it reaches "Search User".
+        const typed = new SendInvitationWizard(managerPage);
+        await managerPage.goto(typed.createAddress(path));
+        await typed.expectSearchStep();
+
+        // Typed by the Moderator, signed in in a browser of their own: the
+        // access-denied page, and no wizard.
+        const moderatorPage = await (await asUser(moderator)).newPage();
+        const barred = new SendInvitationWizard(moderatorPage);
+        await moderatorPage.goto(barred.createAddress(path));
+        await expect(moderatorPage).toHaveURL(/\/user\/authorizationDenied/);
+        await expect(barred.accessDeniedText).toBeVisible();
+        await expect(barred.searchInput).toHaveCount(0);
+
+        // Typed in a browser where nobody is signed in: the sign-in screen,
+        // and no wizard.
+        const visitor = new SendInvitationWizard(page);
+        await page.goto(visitor.createAddress(path));
+        await expect(page).toHaveURL(/\/login\?source=/);
+        await new LoginPage(page).expectForm();
+        await expect(visitor.searchInput).toHaveCount(0);
     });
 
     test('S2: newcomer accepts and gets an account', {tag: '@smoke'}, async ({page, asUser, pkpApi, pkpMail}, testInfo) => {
@@ -243,7 +276,41 @@ test.describe('user invitations', () => {
         // Statement page (Settings).
         await expect(wizard.privacyStatementLink).toHaveAttribute('href', new RegExp(`/${path}/about/privacy$`));
 
+        // A username already in use, the Preprint Server Manager's: refused
+        // under the field, the step stays (Fields, accept wizard).
+        await wizard.submitAccount({username: manager, password});
+        await expect(
+            wizard.fieldError(`There is already an existing user with the username ${manager}. Try another one.`)
+        ).toBeVisible();
+        await expect(wizard.createAccountHeading).toBeVisible();
+        await expect(page.getByRole('heading', {name: /Enter details/})).toHaveCount(0);
+
+        // The chosen username retyped: "Enter details" opens (the control
+        // for the two refusals above). "Cancel" there, then "Cancel
+        // Invitation Process": a signed-out newcomer lands on the sign-in
+        // screen, and the manager's row still reads "Invited {date}"
+        // (Rule 17).
         await wizard.createAccount({username, password});
+        await expect(page.getByRole('heading', {name: /Enter details/})).toBeVisible();
+        await wizard.openCancelDialog();
+        await wizard.cancelProcessButton.click();
+        await page.waitForURL(/\/login/, {waitUntil: 'commit'});
+        await new LoginPage(page).expectForm();
+        const users = new UsersRolesPage(managerPage, path);
+        await users.goto();
+        await expect(users.invitationsCountHeading(1)).toBeVisible();
+        await expect(users.invitationRow(recipient)).toContainText(`Invited ${today()}`);
+
+        // The accept link, reopened: "Create OPS account" with the chosen
+        // username still in its box (Rule 17); the password retyped, the
+        // consent ticked, "Save and continue".
+        await wizard.open(links.acceptUrl);
+        await expect(wizard.createAccountHeading).toBeVisible();
+        await expect(wizard.usernameInput).toHaveValue(username);
+        await wizard.passwordInput.fill(password);
+        await wizard.privacyCheckbox.check();
+        await wizard.saveAndContinueButton.click();
+
         // "Enter details": Given Name already reads Nova, the name the
         // manager entered (Fields, accept wizard).
         await expect(page.getByRole('heading', {name: /Enter details/})).toBeVisible();
@@ -269,7 +336,6 @@ test.describe('user invitations', () => {
 
         // Control: the invitation's row is gone from the manager's Invitations
         // table, beside the account now holding the role (Rule 11).
-        const users = new UsersRolesPage(managerPage, path);
         await users.goto();
         await expect(users.invitationsCountHeading(0)).toBeVisible();
         await expect(users.invitationRow(recipient)).toHaveCount(0);
@@ -551,6 +617,10 @@ test.describe('user invitations', () => {
         const firstMarker = `${tag}first`;
         const secondMarker = `${tag}second`;
         const {path, manager} = await seedServer(pkpApi, tag);
+        // A second scratch server the same Preprint Server Manager manages:
+        // a second scenario request naming the existing account (fn-s).
+        const otherPath = `${tag}b`;
+        await pkpApi.createContext({tag: otherPath, users: [{username: manager, roles: ['manager']}]});
 
         const managerPage = await (await asUser(manager)).newPage();
         await sendInvitation(managerPage, path, {search: recipient, givenName: 'Nova', subject: firstMarker});
@@ -566,15 +636,34 @@ test.describe('user invitations', () => {
         await expect(editDialog).toBeVisible();
         await expect(editDialog).toContainText('the current invitation will be canceled');
         await editDialog.getByRole('button', {name: 'Edit Invitation'}).click();
-        await managerPage.waitForURL(/\/invitation\/edit\/\d+/, {waitUntil: 'commit'});
 
-        // The wizard reopens prefilled, without the search step.
+        // The wizard reopens prefilled, without the search step, the
+        // browser's address ending in the invitation's number.
         const wizard = new SendInvitationWizard(managerPage);
+        const id = await wizard.invitationIdFromAddress();
         await expect(wizard.stepHeading(/Enter details/)).toBeVisible();
         await expect(wizard.stepPill('Enter details')).toBeVisible();
         await expect(wizard.stepPill('Search User')).toHaveCount(0);
         await expect(wizard.emailField).toHaveValue(recipient);
         await expect(wizard.searchInput).toHaveCount(0);
+
+        // The number under the second server's address: "404 Not Found",
+        // no wizard; a number no invitation has under the first server's
+        // address shows the same page (Actors row 3).
+        for (const address of [wizard.editAddress(otherPath, id), wizard.editAddress(path, 99999999)]) {
+            const response = await managerPage.goto(address);
+            expect(response && response.status(), address).toBe(404);
+            await expect(managerPage.getByRole('heading', {name: '404 Not Found'})).toBeVisible();
+            await expect(wizard.stepHeading(/Enter details/)).toHaveCount(0);
+            await expect(wizard.emailField).toHaveCount(0);
+        }
+
+        // The number under its own server's address (the control): the
+        // edit wizard opens prefilled.
+        await managerPage.goto(wizard.editAddress(path, id));
+        await expect(wizard.stepHeading(/Enter details/)).toBeVisible();
+        await expect(wizard.stepPill('Search User')).toHaveCount(0);
+        await expect(wizard.emailField).toHaveValue(recipient);
         // Change the role set: keep Moderator, add a second role; replace the
         // subject with the second marker and send.
         await wizard.addAnotherRoleButton.click();
@@ -590,12 +679,23 @@ test.describe('user invitations', () => {
         await acceptWizard.open(second.acceptUrl);
         await expect(acceptWizard.createAccountHeading).toBeVisible();
 
+        // …and its decline link the "Decline Invitation" page (opened, not
+        // confirmed: that would decline the live invitation)…
+        const decline = new DeclineInvitationPage(page);
+        await page.goto(second.declineUrl);
+        await expect(decline.heading).toBeVisible();
+        await expect(decline.confirmButton).toBeVisible();
+
         // …while the first email's links no longer do (Rule 12; the exact
-        // error rendering is register A3, not asserted: the replaced link
-        // must not open the accept flow).
+        // error rendering is register A3, not asserted): its accept link
+        // opens no accept wizard, its decline link no "Decline Invitation"
+        // page.
         await page.goto(first.acceptUrl);
         await expect(acceptWizard.createAccountHeading).toHaveCount(0);
         await expect(acceptWizard.acceptButton).toHaveCount(0);
+        await page.goto(first.declineUrl);
+        await expect(decline.heading).toHaveCount(0);
+        await expect(decline.confirmButton).toHaveCount(0);
     });
 
     test('S7: wrong person signed in is refused until they log out', async ({asUser, pkpApi, pkpMail}, testInfo) => {
@@ -852,6 +952,16 @@ test.describe('user invitations', () => {
         await expect(wizard.saveAndContinueButton).toHaveCount(0);
         await expect(page.getByRole('button', {name: /continue/i})).toHaveCount(0);
 
+        // "Cancel" on "Verify ORCID iD": "Cancel Role Invitation Process?"
+        // with its two buttons; "Go Back" returns to the step (Rule 17).
+        await wizard.openCancelDialog();
+        await expect(wizard.cancelDialog.getByRole('button')).toHaveText(['Cancel Invitation Process', 'Go Back']);
+        await wizard.goBackButton.click();
+        await expect(wizard.cancelDialog).toBeHidden();
+        await expect(wizard.orcidStepHeading).toBeVisible();
+        await expect(wizard.verifyOrcidButton).toBeVisible();
+        await expect(wizard.skipOrcidButton).toBeVisible();
+
         // "Skip ORCID verification": "Create OPS account" opens (Rule 5), with
         // its own "Save and continue" (the control for the step above).
         await wizard.skipOrcidButton.click();
@@ -976,5 +1086,108 @@ test.describe('user invitations', () => {
         await expect(sendWizard.stepHeading(/Enter details/)).toBeVisible();
         await expect(sendWizard.removeRoleButton(sendWizard.currentRoleRow('Author'))).toBeVisible();
         await expect(sendWizard.removeRoleButton(sendWizard.currentRoleRow(ROLE))).toBeVisible();
+    });
+
+    test("S12: the invitation greets the newcomer by the name in the server's language", async ({asUser, pkpApi, pkpMail}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s12', testInfo);
+        const manager = `mgr${tag}`;
+        const frenchPath = tag;
+        const englishPath = `${tag}b`;
+        const firstRecipient = `rcpt${tag}a@mail.test`;
+        const secondRecipient = `rcpt${tag}b@mail.test`;
+        const subject = `Invitation${tag}`;
+        // The first server French, English its second form language, its
+        // Preprint Server Manager named in French only; the second English,
+        // French its second form language, the same manager (fn-s). The
+        // site's primary language is English on the test installs.
+        await pkpApi.createContext({
+            tag: frenchPath,
+            context: {primaryLocale: 'fr_CA', supportedLocales: ['en', 'fr_CA'], supportedFormLocales: ['en', 'fr_CA']},
+            users: [{username: manager, roles: ['manager'], givenName: {fr_CA: 'Mia'}, familyName: {fr_CA: 'Mgr'}}],
+        });
+        await pkpApi.createContext({
+            tag: englishPath,
+            context: {supportedLocales: ['en', 'fr_CA'], supportedFormLocales: ['en', 'fr_CA']},
+            users: [{username: manager, roles: ['manager']}],
+        });
+
+        const managerPage = await (await asUser(manager)).newPage();
+        const wizard = new SendInvitationWizard(managerPage);
+
+        /** Role row as in scenario 1, then the compose step's marker, sent. */
+        const addRoleAndSend = async () => {
+            await wizard.fillNewRoleRow(0, {role: ROLE, dateStart: today(), masthead: MASTHEAD_SHOW});
+            await wizard.saveAndContinueButton.click();
+            await wizard.setSubject(subject);
+            await wizard.sendAndAwaitConfirmation();
+        };
+
+        /** The invitation email's whitespace-collapsed text and "To" names. */
+        const readMail = async (to) => {
+            const full = await pkpMail.fullMessage((await pkpMail.find({to, contains: subject})).ID);
+            return {text: full.Text.replace(/\s+/g, ' '), toNames: full.To.map((t) => t.Name)};
+        };
+
+        // A newcomer named in both languages, on the French server, the
+        // manager's screens in English through its /en/ addresses.
+        const frenchUsers = new UsersRolesPage(managerPage, frenchPath);
+        await frenchUsers.goto({locale: 'en'});
+        await expect(frenchUsers.invitationsCountHeading(0)).toBeVisible();
+        await frenchUsers.inviteToRoleButton.click();
+        await wizard.expectSearchStep();
+        await wizard.searchAndContinue(firstRecipient);
+        await expect(wizard.userNotFoundMessage).toBeVisible();
+        await expect(wizard.emailField).toHaveValue(firstRecipient);
+        await wizard.nameBox('Given Name').fill('Eva');
+        await wizard.nameBox('Family Name').fill('Anglais');
+        // The English boxes. The bullet's "the button "English" opens its
+        // boxes" is not run: on this server the boxes in the language of
+        // the manager's screens arrive open and "English" closes them
+        // (findings T-ops-1); they are filled as they arrive.
+        await wizard.nameBox('Given Name in English').fill('Eve');
+        await wizard.nameBox('Family Name in English').fill('English');
+        await addRoleAndSend();
+
+        // The first newcomer's mailbox: "Dear Eva Anglais,", the name in the
+        // server's primary language, on the "To" line too; "invited by"
+        // names the manager by their French name (Side effects).
+        const firstMail = await readMail(firstRecipient);
+        expect(firstMail.text).toContain('Dear Eva Anglais,');
+        expect(firstMail.toNames).toEqual(['Eva Anglais']);
+        expect(firstMail.text).toContain('invited by Mia Mgr to');
+
+        // A newcomer named only in French, on the English server: "French"
+        // opens "Given Name in French" and "Family Name in French" (Fields);
+        // Given Name and Family Name stay empty.
+        const englishUsers = new UsersRolesPage(managerPage, englishPath);
+        await englishUsers.goto();
+        await englishUsers.inviteToRoleButton.click();
+        await wizard.expectSearchStep();
+        await wizard.searchAndContinue(secondRecipient);
+        await expect(wizard.userNotFoundMessage).toBeVisible();
+        await expect(wizard.nameBox('Given Name')).toBeVisible();
+        await expect(wizard.nameBox('Given Name in French')).toBeHidden();
+        await wizard.languageButton('French').click();
+        await expect(wizard.nameBox('Given Name in French')).toBeVisible();
+        await expect(wizard.nameBox('Family Name in French')).toBeVisible();
+        await wizard.nameBox('Given Name in French').fill('Anne');
+        await wizard.nameBox('Family Name in French').fill('Dupont');
+        await expect(wizard.nameBox('Given Name')).toHaveValue('');
+        await expect(wizard.nameBox('Family Name')).toHaveValue('');
+        await addRoleAndSend();
+
+        // The second newcomer's mailbox: "Dear Anne Dupont,", the one
+        // language a name was entered in, on the "To" line too.
+        const secondMail = await readMail(secondRecipient);
+        expect(secondMail.text).toContain('Dear Anne Dupont,');
+        expect(secondMail.toNames).toEqual(['Anne Dupont']);
+
+        // Control: Eve English, the name in the language of the manager's
+        // screens, is in neither the first email's greeting nor its "To"
+        // line (the greeting read above bounds it).
+        expect(firstMail.text).not.toContain('Dear Eve');
+        expect(firstMail.text).not.toContain('Eve English');
+        expect(firstMail.toNames.join(' ')).not.toContain('Eve');
     });
 });
