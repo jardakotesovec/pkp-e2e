@@ -63,6 +63,28 @@ account. <sup>b</sup>
 | **See a custom block** (Rules 19–21) | • any visitor, on every public page of the journal that has a sidebar, while the block is placed; on a journal closed to visitors, the Login page a signed-out visitor is sent to shows the placed blocks too <sup>h</sup> <sup>td32</sup> |
 | **Upload a picture into a formatted text box** (Rule 29) | • whoever works in a "Content" box of this spec (Actors rows 1, 5 and 6)<br>• the same upload serves every formatted text box of the application that offers a picture button, for whoever that box's screen admits <sup>i</sup> |
 
+<a id="api-grid-picture-upload"></a>
+**Permission grid: uploading a picture.** The row "Upload a picture
+into a formatted text box" above, for the one upload route every
+formatted box with a picture button sends to (Rule 29): every user
+holding a role in the journal has such a box (the Profile page's "Bio
+Statement" at the least), and so does a signed-in user with no role
+there, on the Profile page opened at the journal's address
+⚠ [A21](#a21). "Context" is a journal's address, "Site" the site's,
+whose boxes are the Site Administrator's (`docs/process/api.md`).
+
+| Persona | Context | Site |
+|---|---|---|
+| manager | ✓ | — |
+| section editor | ✓ | — |
+| assistant | ✓ | — |
+| author | ✓ | — |
+| reviewer | ✓ | — |
+| reader | ✓ | — |
+| nobody signed in | — | — |
+| manager of another context | ✓ | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 **The formatted text boxes.** The "Content" box of a "Custom Page" item,
@@ -839,6 +861,22 @@ the footnote. <sup>y</sup>
    - **Control**: the same list holds "Custom Block Manager" under
      "Generic Plugins" (Purpose; Rule 17).
 
+### Through the API
+
+The checks below send what no screen sends; who may upload a picture is
+the [picture upload grid](#api-grid-picture-upload)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **A file name with folder parts stays in the account's own folder** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal.
+
+   - **Folder parts**: a PNG picture sent as "../../../escape.png" is
+     stored, its address is the site's "/public/site/images/{username}/"
+     followed by a name with no folder part, ending "escape.png", and
+     that address serves the picture as sent (Rule 29b). A browser never
+     sends a file name with folders.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -926,6 +964,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A18](#a18) | A picture over the upload limit gets a server error, never "Files larger than {size} can not be uploaded." | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A19](#a19) | A reviewer's typed review, a profile's signature or bio, or a static page's text is lost without asking on leaving the form | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
 | [A20](#a20) | With two form languages, the first language's "Content" box can stay under a "Loading..." spinner for good | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
+| [A21](#a21) | On the Profile page opened in a journal where the user holds no role, a picture for the bio is refused with "user.authorization.roleBasedAccessDenied" | 🐞 | low | — |
 | [A2](#a2) | A deleted custom block would keep its place in the sidebar, so a later block of the same name appears unplaced | ❓ | minor | — |
 | [A5](#a5) | Pictures named ".jpeg" are refused while ".jpg" is accepted | ❓ | user-visible | — |
 | [A6](#a6) | A static page and a "Custom Page" item can take the same path, and the static page is then unreachable | ❓ | minor | — |
@@ -1262,6 +1301,22 @@ a loaded machine. Run 35 times per app without anything holding the
 second box back, the same tests passed every time.
 Basis: probe, 2026-10-01. <sup>f-a20</sup>
 Report: none — pkp-e2e#376 closed 2026-10-14 at the merge of the fix, `pkp/pkp-lib#13490` (`689e7ec1a5`; 3.5 `pkp/pkp-lib#13491`, `4045d9241e`); the entry retires when the apps' `js/pkp.min.js` carries the guard and `checks/sync/pkp-lib-13490/stuck-editors.js` reads fixed at the tips with `enable_minified = On` (ci-triage Flake watch, the row on scenario 6's formatted box getting stuck) (2026-10-14)
+
+<a id="a21"></a>
+**A21 — A picture for the bio is refused in a journal where the user holds no role** · 🐞 · low.
+Every signed-in user can open their Profile page at any journal's
+address, a journal where they hold no role included (the editorial
+header's journal list, or a typed address). Its "Public" tab's "Bio
+Statement" box offers the picture button like every other formatted
+text box (Rule 29), and the user expects the picture to be inserted as
+it is at a journal where they hold a role. Instead "Browse for an
+image" in "Insert/Edit Image" is refused, and the small window over it
+reads "user.authorization.roleBasedAccessDenied" with "OK". The upload
+is sent to the address of the journal the page was opened at, which
+takes pictures only from users holding a role there. The same box at
+a journal where the user holds a role takes the picture. All three
+apps.
+Basis: probe, 2026-10-30. <sup>f-a21</sup>
 
 ---
 
@@ -2301,6 +2356,30 @@ reopening the window clears it. The suites take no workaround; a stuck
 box fails its test with a message naming it.
 Fixed in pkp-lib by `pkp/pkp-lib#13490` (`689e7ec1a5`, `main`) and `pkp/pkp-lib#13491` (`4045d9241e`, 3.5), merged 2026-10-14 for `pkp/pkp-lib#13489`: the `deactivate` handler skips an editor whose `initialized` is false. Driven at the PR heads on the default dataset (PR review 2026-10-14, `checks/sync/pkp-lib-13490/`): fixed with the source scripts in OJS, OMP and OPS; still stuck with `enable_minified = On` until each app rebuilds its committed `js/pkp.min.js`. `isIncomplete_()` keeps its throw (`pkp/pkp-lib#13180`).
 Issue report: [pkp-e2e#376](https://github.com/jardakotesovec/pkp-e2e/issues/376), closed 2026-10-14 at that merge; the report and its walk were deleted then (in git before that commit).
+
+<a id="fn-f-a21"></a>
+**f-a21** — `TinyMCEPlugin::registerJS()` gives every back-office page
+the upload address of the context the page is opened at
+(`$request->getContext()`, the site's when none), and `SiteHandler.js`
+sets it as the `images_upload_handler` of every legacy formatted box,
+the Profile page's "Bio Statement"
+(`lib/pkp/templates/user/publicProfileForm.tpl`, `rich=true`)
+included. `PKPUploadPublicFileController` admits the roles of that
+context only (`roleAuthorizer`: site admin, manager, sub-editor,
+reviewer, author, assistant, reader), and its refusal's `error` is the
+locale key, which the handler shows as it is. The Profile page itself
+asks for no role in the context. Live-probed 2026-10-30, all three
+apps (`main`), two scratch journals, a user holding Journal Manager in
+the first alone: at the second journal's
+`/user/profile`, "Public" tab, the "Bio Statement" box's image button,
+"Upload", a 1×1 PNG: `POST {second}/api/v1/_uploadPublicFile` answered
+401 `{"error":"user.authorization.roleBasedAccessDenied","errorMessage":"The current role does not have access to this operation."}`
+and the window read "user.authorization.roleBasedAccessDenied" with
+"OK"; the same steps at the first journal answered 200 and inserted the
+picture. The site's own `/index/…/user/profile` sent the page to the
+user's journal, where the upload answered 200. The API matrix's
+"manager of another context" cell meets the refusal. `stable-3_5_0`
+carries the same role list (code read).
 
 ## Reference — entry points & surfaces
 

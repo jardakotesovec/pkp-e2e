@@ -44,6 +44,26 @@ account.
 | **Switch journals from the editorial header** (Rule 29) | • the Site Administrator: every other journal on the site<br>• any other user: the other journals where they hold a role<br>• in both cases a journal with the current journal's name is left out ([A21](#a21))<br>• with no other journal to offer, the control is absent <sup>g</sup> |
 | **See the side menu** (Rule 30) | • a signed-in user holding at least one role in the journal; each entry's own condition is in Rule 30's table; a user none of whose entries shows (a Reader while "Disable Submissions" is on; {OJS} the Subscription Manager too, while payments are off) sees no side menu<br>• the Site Administrator holding Reader alone in the journal: the manager's side menu, with an "Error" window on every editorial page ([A22](#a22))<br>• a user with no role in the journal, and every user on the site's own editorial screens (Administration): no side menu <sup>h</sup> |
 
+<a id="api-grid-navigation-menus"></a>
+**Permission grid: managing the menus.** The rows "Open Settings ›
+Website › "Setup" › "Navigation"…" and "Add, edit or delete the site's
+menus and items" above, for every navigation menus route: the menu
+window's item lists, its areas, its add and its save. "Context" is a
+journal's own menus, "Site" the site's (Rule 1b); the items themselves
+have no route (`docs/process/api.md`).
+
+| Persona | Context | Site |
+|---|---|---|
+| manager | ✓ | — |
+| section editor | — | — |
+| assistant | — | — |
+| author | — | — |
+| reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 **The "Navigation" tab** (Settings › Website › "Setup" › "Navigation"; the
@@ -147,7 +167,8 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
      - There, "Add Menu", a menu's title and its "Edit" dim the page and
        open no window; nothing on the page can be pressed until it is
        reloaded. A site menu can be removed, but not added or edited
-       ⚠ [A4](#a4). <sup>td9</sup>
+       ⚠ [A4](#a4). <sup>td9</sup> Past that fault, the window's two
+       lists of items would fail on the server too ⚠ [A28](#a28).
      - The item window works as on a journal. It offers the journal's
        types, including those the site has no page for ⚠ [A14](#a14).
 2. **What a new journal has.** Two menus and the items below (seventeen
@@ -1197,6 +1218,23 @@ are in the footnote. <sup>y</sup>
     - **Control**: before the save, the visitor's home page had no "Open
       Journal Systems" link in its sidebar (Rule 21).
 
+### Through the API
+
+The checks below send what no screen sends; who may call the navigation
+menus routes is the [navigation menus grid](#api-grid-navigation-menus)'s,
+checked apart (`docs/process/api.md`).
+
+API1. **A menu's title cannot be emptied** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal.
+
+   - **Empty on add**: a menu added through the API with an empty title
+     is refused (422) with an error on the title. The window refuses an
+     empty "Title" before anything is sent (Fields).
+   - **Empty on save**: the menu "Partners" saved with an empty title,
+     and again with one of spaces alone, keeps "Partners".
+   - **Control**: saved as "Our partners", it reads "Our partners".
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1314,6 +1352,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A21](#a21) | The journals switcher in the editorial header leaves out every journal with exactly the current journal's name | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A22](#a22) | A Site Administrator holding only Reader in a journal gets an "Error" window on every editorial page | 🐞 | low · crash: script | issues (claude), 2026-10-03 — re-verified |
 | [A26](#a26) | A role kept out of Settings can still add, rename and rearrange the journal's navigation menus | 🐞 | user-visible | — |
+| [A28](#a28) | The site's menu window's two item lists fail with a server error | 🐞 | low · crash: server | — |
 | [OJS1](#ojs1) | Menu window marks "Subscriptions" and "My Subscriptions" items with no eye, so their notices never show {OJS} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS2](#ops2) | A preprint server's "Posting Mode" says "Saved" but keeps nothing, so the server goes on posting {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OPS4](#ops4) | {OPS} A server's settings address typed with the site's path refuses with "No server in context!", which says nothing a user understands | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1647,6 +1686,17 @@ page? Lean: yes, unintended; the change that sent the item to the
 Profile page left the number in place, and every other user's item that
 opens the Profile page has none.
 Since: 2026-10-22 · Basis: probe, 2026-10-29. <sup>f-a27</sup>
+
+<a id="a28"></a>
+**A28 — The site's menu window's two item lists fail with a server error** · 🐞 · low · crash: server.
+The menu window asks the server for the items it can place: every item
+for "Add Menu", and the menu's own and the rest for a menu's "Edit"
+(Fields). On a journal both answer. On the site both fail with a server
+error, whose text names the server's code, so even with the window's
+own fault mended ([A4](#a4)) the site's window would have no items to
+offer, and a site menu still could not be filled or rearranged. The
+window's list of areas and its save answer on the site.
+Since: 2026-01-22 · Basis: probe, 2026-10-30. <sup>f-a28</sup>
 
 ### OJS
 
@@ -3158,6 +3208,26 @@ open; at 375 px with "Open Menu" pressed it rendered "Dashboard 1",
 marked read), visible; pressed at either width it opened
 `index/en/user/profile`; `dbarnes` read "Dashboard" with no number at
 both widths; the username carried none at either width.
+
+<a id="fn-f-a28"></a>
+**f-a28** — `PKPNavigationMenuController::getAllItems()` and
+`getItems()` take `$context?->getId() ?? PKPApplication::SITE_CONTEXT_ID`
+for the site, which is `null` since 3.5, and pass it to
+`PKPNavigationMenuService::getAllMenuItems(int $contextId)` and
+`getUnassignedItems(int $contextId, …)`, whose `int` refuses it.
+`add()` and `edit()` store the `null` as the menu's context and answer.
+Live-probed 2026-10-30, all three apps (`main`), as `admin` on
+`index/api/v1/`: `GET navigationMenus/items` and
+`GET navigationMenus/1/items` (the site's "User Navigation Menu")
+answered 500, the error reading
+"PKP\\services\\PKPNavigationMenuService::getAllMenuItems(): Argument
+#1 ($contextId) must be of type int, null given, called in {the
+install's path}/lib/pkp/api/v1/navigationMenus/PKPNavigationMenuController.php
+on line 125" (`getUnassignedItems()`, line 155, for the second);
+`GET navigationMenus/areas` answered 200 with no areas (note o),
+`PUT navigationMenus/1` with an empty body 200, and
+`POST navigationMenus` with an empty body 422. The API matrix's
+`Site` cells meet both 500s. 3.5 has no such API (note f-a26).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `NavigationMenuService` gives `NMI_TYPE_SUBSCRIPTIONS`

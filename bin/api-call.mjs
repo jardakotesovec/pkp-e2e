@@ -84,14 +84,14 @@ async function personas(name, verb, template, body) {
     const baseURL = `http://127.0.0.1:${app.basePort + PROBE_PORT_OFFSET}`;
     const pkpApi = await PkpApi.create({ baseURL });
     const set = await seedPersonas(pkpApi, { appName: app.name }, { tag: `pp${Date.now().toString(36)}` });
-    const states = /\{(submissionId|publicationId)\}/.test(template) ? set.states : ['context'];
+    const states = /\{(submissionId|publicationId)\}/.test(template) ? set.states : ['context', 'site'];
     const rows = [];
     for (const [label, username] of Object.entries(set.users).filter(([label]) => label in PERSONAS)) {
         const cells = [];
         for (const state of states) {
-            const ids = state === 'context' ? {} : set.submission(state);
+            const ids = ['context', 'site'].includes(state) ? {} : set.submission(state);
             const url = template.replace(/\{(\w+)\}/g, (m, key) => (key in ids ? ids[key] : m));
-            const client = await ApiClient.create({ baseURL, contextPath: set.context, username });
+            const client = await ApiClient.create({ baseURL, contextPath: state === 'site' ? 'index' : set.context, username });
             const res = await client.call(verb, url, verb === 'GET' ? {} : { data: body ? JSON.parse(body) : {} });
             cells.push(String(res.status));
             await client.dispose();
@@ -99,7 +99,7 @@ async function personas(name, verb, template, body) {
         rows.push(`| ${label} | ${cells.join(' | ')} |`);
     }
     console.log(`| Persona | ${states.join(' | ')} |\n|---|${states.map(() => '---').join('|')}|\n${rows.join('\n')}`);
-    console.log(`\ncontext ${set.context}; ${states.filter((s) => s !== 'context').map((s) => `${s} ${JSON.stringify(set.submission(s))}`).join('; ')}`);
+    console.log(`\ncontext ${set.context} (id ${set.contextId}); ${states.filter((s) => s !== 'context').map((s) => `${s} ${JSON.stringify(set.submission(s))}`).join('; ')}`);
     console.log(Object.entries(set.users).map(([label, u]) => `${label}: ${u ?? '-'}`).join('\n'));
     await pkpApi.dispose();
 }

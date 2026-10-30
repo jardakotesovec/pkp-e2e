@@ -45,6 +45,26 @@ from the Settings Wizard (Rule 34). Visitors need no account. <sup>a</sup>
 | **Change a journal's theme from its Settings Wizard** (Administration › Hosted Journals, the journal's "Settings wizard", "Appearance"; Rule 34) | • the Site Administrator alone <sup>b</sup> <sup>td2</sup> |
 | **See the result** (the home page, and the header, footer and sidebar of every public page of the journal) | • any visitor, signed in or not; on a journal that requires visitors to sign in, or that is not enabled, a signed-out visitor gets the Login page instead ([Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rule 22) <sup>a</sup> |
 
+<a id="api-grid-theme"></a>
+**Permission grid: the journal's theme.** The rows "Change and save the
+"Appearance" tabs…" and "Change a journal's theme from its Settings
+Wizard" above, for the two theme routes: the "Theme" tab's save and the
+read of the theme and its fields. The site's own theme has routes of
+its own ([Site settings](U60-site-settings.md)); the other tabs save
+through the journal's settings route (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 The tabs this spec describes sit on Settings › Website. The top tab
@@ -1193,6 +1213,32 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
       bullet 25).
     - **Control**: the home page never showed "Latest Publications": the
       journal has no article outside a published issue (Rule 13).
+
+### Through the API
+
+The checks below send what no screen sends; who may call the theme
+routes is the [theme grid](#api-grid-theme)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **The theme and its fields read back** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal on "Default Theme".
+
+   - **Read**: the journal's theme read through the API names "default"
+     and carries the theme's fields, "typography" among them. No screen
+     sends this read (Rule 4a).
+   - **After a save**: "Lato" and the colour "#123456" saved through the
+     theme route are read back as saved, the theme still "default".
+
+API2. **A theme the install lacks is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal on "Default Theme".
+
+   - **Unknown theme**: a save naming a theme the install does not have
+     is refused (400) with an error on the theme, and the journal's theme
+     still reads "default". The "Theme" list offers only installed,
+     enabled themes (Rule 4).
+   - **Control**: a save naming "default" goes through.
 
 ## Coverage
 

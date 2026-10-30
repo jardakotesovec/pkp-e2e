@@ -11,6 +11,7 @@
  *
  *   const set = await seedPersonas(pkpApi, appContext, {tag});
  *   set.context                   // the scratch context's path
+ *   set.contextId                 // and its id
  *   set.users['submitter']        // a username; null for "nobody signed in"
  *   set.submission('unpublished') // {submissionId, publicationId}
  *   set.submission('published')
@@ -195,6 +196,7 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
 
     return {
         context: tag,
+        contextId: context.contextId,
         users,
         states: Object.keys(submissions),
         issueId: context.issues?.[0]?.id ?? null,
