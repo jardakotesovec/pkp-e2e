@@ -89,7 +89,12 @@ is a Copyeditor, assigned on Copyediting alone, and its review assistant
 a Funding Coordinator, on Submission and Review alone. Reading,
 changing and deleting a file name the stage it is read on, Copyediting,
 which a preprint server lacks, so nobody reaches the file there
-[OPS1](#ops1). The decision windows' copy of a file to the next stage's
+[OPS1](#ops1). The submission in review (`Review`) has no "Copyedited
+Files" yet: there the file is one a Journal Manager added to the round's
+"Files for Review", given to no reviewer and read on the Review stage,
+whose team ("Upload/Select Files") includes the Funding Coordinator and
+not the Copyeditor; the Author's view of that stage does not show the
+list. The decision windows' copy of a file to the next stage's
 list is
 *[Editorial decision recording](U34-editorial-decision-recording.md)*'s.
 
@@ -99,22 +104,24 @@ workflow file list": everyone who works on the submission lists the files
 of the stages their role reaches, the Author their own lists; on a
 preprint server, which shows no list, the same people list its galleys'
 files (`docs/process/api.md`). The route behind every list follows it.
+On the submission in review the Copyeditor is answered the files of
+Copyediting, which holds none yet.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| assigned review assistant | ✓ | ✓ |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | ✓ |
+| assigned review assistant | ✓ | ✓ | ✓ |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-copyedited-file-read"></a>
 **Permission grid: reading a file on "Copyedited Files".** The rows "See
@@ -123,26 +130,26 @@ the Copyediting stage's team, and the Author, whose view of the stage
 shows the list (`docs/process/api.md`). The route reading one file
 follows it.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager {OJS OMP} | ✓ | ✓ |
-| manager {OPS} | — | — |
-| assigned section editor {OJS OMP} | ✓ | ✓ |
-| assigned section editor {OPS} | — | — |
-| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
-| assigned section editor, metadata edit off {OPS} | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| assigned review assistant | — | — |
-| submitter {OJS OMP} | ✓ | ✓ |
-| submitter {OPS} | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin {OJS OMP} | ✓ | ✓ |
-| site admin {OPS} | — | — |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ | ✓ |
+| manager {OPS} | — | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor {OPS} | — | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | — |
+| assigned review assistant | — | — | ✓ |
+| submitter {OJS OMP} | ✓ | ✓ | — |
+| submitter {OPS} | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin {OJS OMP} | ✓ | ✓ | ✓ |
+| site admin {OPS} | — | — | — |
 
 <a id="api-grid-copyedited-file-change"></a>
 **Permission grid: changing or deleting a file on "Copyedited Files".**
@@ -150,25 +157,25 @@ The rows "Update File Details" and "Delete": the Copyediting stage's
 team, never the Author (`docs/process/api.md`). The routes that save a
 file's details and delete it follow it.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager {OJS OMP} | ✓ | ✓ |
-| manager {OPS} | — | — |
-| assigned section editor {OJS OMP} | ✓ | ✓ |
-| assigned section editor {OPS} | — | — |
-| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
-| assigned section editor, metadata edit off {OPS} | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| assigned review assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin {OJS OMP} | ✓ | ✓ |
-| site admin {OPS} | — | — |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ | ✓ |
+| manager {OPS} | — | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor {OPS} | — | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | — |
+| assigned review assistant | — | — | ✓ |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin {OJS OMP} | ✓ | ✓ | ✓ |
+| site admin {OPS} | — | — | — |
 
 <a id="api-grid-copyedited-file-add"></a>
 **Permission grid: adding a file to "Copyedited Files".** The row "Add a
@@ -179,23 +186,23 @@ server takes one from them too, though it shows no such list; nobody
 else may add one there (`docs/process/api.md`). The route that uploads a
 file follows it.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor {OJS OMP} | ✓ | ✓ |
-| assigned section editor {OPS} | — | — |
-| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
-| assigned section editor, metadata edit off {OPS} | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| assigned review assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor {OPS} | — | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | — |
+| assigned review assistant | — | — | ✓ |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-temporary-upload"></a>
 **Permission grid: uploading a temporary file.** The newer upload

@@ -85,21 +85,21 @@ paid, waived or unpaid" above, on a journal with the APC in force, for
 the route the "Payments" menu's "Save" sends and the route that loads
 the menu's choice (Rules 13, 14; `docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ? [A6](#a6) | ? [A6](#a6) |
-| assigned review assistant | ? [A6](#a6) | ? [A6](#a6) |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ? [A6](#a6) | ? [A6](#a6) | ? [A6](#a6) |
+| assigned review assistant | ? [A6](#a6) | ? [A6](#a6) | ? [A6](#a6) |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 ## Fields & validation
 

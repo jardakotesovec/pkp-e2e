@@ -62,23 +62,24 @@ Permissions & Disclosure page, so their routes follow
 **Permission grid: making and numbering versions.** The row "Create New
 Version" above, for the routes that copy a version, create one by
 program (Rule 11b), give a version its stage and number, and read the
-number the next version would get (`docs/process/api.md`).
+number the next version would get (`docs/process/api.md`). The side
+menu offers the item on a submission still in review too (`Review`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ? [A2](#a2) | ? [A2](#a2) |
-| assigned section editor, metadata edit off | ? [A2](#a2) | ? [A2](#a2) |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| assigned review assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ? [A2](#a2) | ? [A2](#a2) | ? [A2](#a2) |
+| assigned section editor, metadata edit off | ? [A2](#a2) | ? [A2](#a2) | ? [A2](#a2) |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-publish"></a>
 **Permission grid: publishing a version.** The row "Publish" above, on

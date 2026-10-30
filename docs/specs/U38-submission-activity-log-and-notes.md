@@ -67,23 +67,24 @@ above, its "View Email", for the route that reads one email of the
 submission's record; the email here is a decision letter to the
 submitter, who holds it already and re-reads it on a journal or a press
 ([→ the author's letters](U26-review-stage-and-rounds.md#author-emails))
-(`docs/process/api.md`).
+(`docs/process/api.md`). On the submission in review (`Review`) the
+letter is a "Request Revisions" one, which leaves it in review.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| assigned review assistant | — | — |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 ## Fields & validation
 
