@@ -56,6 +56,14 @@ const progress = table('docs/tracking/PROGRESS.md').filter((r) => /^U\d{2}$/.tes
 const builds = progress.filter((r) => r.some((c) => /^(pending|in_progress)$/.test(c)));
 
 const refreshes = []; const owed = []; const held = []; const planned = [];
+// The open 🐞 IDs of a spec's register, from its text or its file name.
+const bugCache = new Map();
+function openBugs(textOrFile) {
+    const text = textOrFile.endsWith('.md') && !textOrFile.includes('\n') ? read(`docs/specs/${textOrFile}`) : textOrFile;
+    if (!bugCache.has(text)) bugCache.set(text, new Set([...text.matchAll(/^\| \[([A-Z]{1,4}\d+)\]\(#[a-z0-9-]+\) \| .* \| 🐞 \|/gm)].map((x) => x[1])));
+    return bugCache.get(text);
+}
+
 for (const f of specFiles) {
     const text = read(`docs/specs/${f}`);
     const spec = f.slice(0, 3);
@@ -100,12 +108,15 @@ for (const f of specFiles) {
         // A guard an issue report proposes asserts the fixed behavior, so it
         // waits while an entry it cites is still an open 🐞; the rest is
         // coverage a test can assert today.
-        const open = new Set([...text.matchAll(/^\| \[([A-Z]{1,4}\d+)\]\(#[a-z0-9-]+\) \| .* \| 🐞 \|/gm)].map((x) => x[1]));
+        const open = openBugs(text);
         const items = left[1].split(/^ {2}- /m).slice(1);
         // An item "once <ID> is settled" waits while that entry is still a ❓.
         const question = new Set([...text.matchAll(/^\| \[([A-Z]{1,4}\d+)\]\(#[a-z0-9-]+\) \| .* \| ❓ \|/gm)].map((x) => x[1]));
+        // An ID linked into another spec (`U28-….md#omp2`) is read in that spec's register.
+        const linked = (i) => [...i.matchAll(/\((U\d+-[\w-]+\.md)#([a-z]{1,4}\d+)\)/g)]
+            .some(([, other, id]) => specFiles.includes(other) && openBugs(other).has(id.toUpperCase()));
         const waits = (i) => (/guard|issue report|docs\/issues\/|once fixed/i.test(i)
-            && [...i.matchAll(/\b((?:A|OJS|OMP|OPS)\d+)\b/g)].some(([, id]) => open.has(id)))
+            && ([...i.matchAll(/(?<![#\w])((?:A|OJS|OMP|OPS)\d+)\b/g)].some(([, id]) => open.has(id)) || linked(i)))
             || [...i.matchAll(/\bonce ((?:A|OJS|OMP|OPS)\d+) is settled\b/g)].some(([, id]) => question.has(id));
         const ready = items.filter((i) => !waits(i)).length;
         if (items.length) planned.push({ spec, file: f, n: ready, waiting: items.length - ready });

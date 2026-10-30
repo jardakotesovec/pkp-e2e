@@ -9,7 +9,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** `pkp/ui-library#960`, `pkp/pkp-lib#13198` and `pkp/omp#2444` for `pkp/pkp-lib#13156` · [30beb5e3](https://github.com/pkp/ui-library/commit/30beb5e3ed17f98407654d5850e9b682a4005755) · 2026-08-27 · Blesilda Biazon (blesildaramirez)
-- **Upstream** `pkp/pkp-lib#10544` (open), covering the reviewer left on step 1 after the older window's "Confirm", on journals and presses; `pkp/pkp-lib#6353` (open), asking that the older window's "Confirm" stay disabled until the reviewer has submitted, on a journal
+- **Upstream** `pkp/pkp-lib#13653` (open), the team's copy of this issue (2026-10-30). Earlier: `pkp/pkp-lib#10544` (open), covering the reviewer left on step 1 after the older window's "Confirm", on journals and presses; `pkp/pkp-lib#6353` (open), asking that the older window's "Confirm" stay disabled until the reviewer has submitted, on a journal
 - **Tracked in** U27 [OMP4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U27-reviewer-assignment-and-management.md#omp4)
 - **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

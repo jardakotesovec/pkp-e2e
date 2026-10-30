@@ -4284,7 +4284,7 @@ only the moment, which both labels carry. The same code reading raises an
 unprobed side: History would now show "Request Accepted" and "Review
 Submitted" for the editor's click, where it read "Confirm" and
 "Completed" before.
-Issue report: [pkp-e2e#719](https://github.com/jardakotesovec/pkp-e2e/issues/719) ([docs/issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md](../issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md)).
+Issue report: [pkp-e2e#719](https://github.com/jardakotesovec/pkp-e2e/issues/719) ([docs/issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md](../issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md)). The team's copy is `pkp/pkp-lib#13653` (2026-10-30).
 
 <a id="fn-omp5"></a>
 **f-omp5** — Driven 2026-09-17 (OMP, three runs): "Save Changes" pressed

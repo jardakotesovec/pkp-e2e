@@ -908,7 +908,7 @@ Left out of the scenarios above, by reason:
   - a reply in a discussion with "Discussion activity." switched off reaching neither the Tasks window nor the mailbox, and with it on a row reading "… replied to …" (Rule 6; the guard [A1](#a1)'s issue report proposes)
   - unticking a box on the "Unsubscribe" page leaving the emails switched off before still off (Rule 8c; the guard [A2](#a2)'s issue report proposes)
   - a preprint server's new-preprint row on the Notifications tab reading "A new preprint, "Title", has been submitted." (*Fields & validation*; the guard [OPS2](#ops2)'s issue report proposes)
-  - {OMP} the review-complete email's subject reading "recommends None" (Rule 6; scenario 11 states it, the press's suite does not read it yet)
+  - {OMP} the review-complete email's subject on a press naming no recommendation rather than "recommends None" (Rule 6, scenario 11): the guard for *Reviewer's review*'s [OMP2](U28-reviewers-review.md#omp2), whose issue report `docs/issues/U28-OMP2-press-review-complete-email-recommends-none.md` proposes it, once fixed
 - **Rarely met**:
   - the Tasks window paged beyond 25 rows, "1 - 25 of 26 items" and "Items per page:" (Rule 2b): 26 tasks to raise for one account
   - the blue-edged notice toast (Rule 9a): the one screen that produces it is a plugin switch under Settings › Website › "Plugins", a Journal Manager's occasional act, not an editor's, author's or reviewer's week
