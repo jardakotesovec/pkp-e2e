@@ -11,10 +11,9 @@ const {ROLE} = require('../../support/pkp-ids.js');
 const ids = (res) => (res.body.items || []).map((s) => s.id).sort((a, b) => a - b);
 
 test.describe('the submission lists through the API', () => {
-    test('API1: A bulk delete removes drafts only, and an author only their own', async ({scratch, appContext}) => {
-        const j = await scratch({users: {mg: 'manager', au: 'author', ao: 'author'}});
+    test('API1: A bulk delete removes drafts only', async ({scratch}) => {
+        const j = await scratch({users: {mg: 'manager', au: 'author'}});
         const draft = (await j.submission('d', {submitter: 'au', submitted: false})).submissionId;
-        const other = (await j.submission('o', {submitter: 'ao', submitted: false})).submissionId;
         const sent = (await j.submission('s', {submitter: 'au'})).submissionId;
         const manager = await j.as('mg');
         const exists = async (id) => (await manager.get(`submissions/${id}`)).status === 200;
@@ -28,22 +27,9 @@ test.describe('the submission lists through the API', () => {
         expect(await exists(sent)).toBe(true);
         expect(await exists(draft)).toBe(true);
 
-        // An author naming another author's draft: nothing is deleted.
-        const author = await j.as('au');
-        expect((await bulk(author, [other])).status).toBe(404);
-        expect((await bulk(author, [draft, other])).status).toBe(404);
-        expect(await exists(other)).toBe(true);
-        expect(await exists(draft)).toBe(true);
-
-        // Control: the manager's pick of a draft is deleted, and on a
-        // journal or press the author's of their own. A preprint server,
-        // whose one stage is Production, refuses the author's (U22 OPS2).
-        if (appContext.capabilities.hasReviewStage) {
-            expect((await bulk(author, [draft])).status).toBe(200);
-            expect(await exists(draft)).toBe(false);
-        }
-        expect((await bulk(manager, [other])).status).toBe(200);
-        expect(await exists(other)).toBe(false);
+        // Control: the manager's pick of the draft is deleted.
+        expect((await bulk(manager, [draft])).status).toBe(200);
+        expect(await exists(draft)).toBe(false);
         expect(await exists(sent)).toBe(true);
     });
 

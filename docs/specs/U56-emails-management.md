@@ -903,8 +903,10 @@ API2. **Templates stay in their own journal** {OJS OMP OPS}
      (its journal is the first), and the second still lists "Their
      decline" alone among that email's added templates.
    - **An edit naming the other journal**: the first journal's manager
-     edits that template, naming the second journal: refused (403), and
-     the template keeps its subject.
+     edits their added template with a body naming the second journal and
+     a new subject: the template stays in the first journal with its
+     subject, and the second still lists "Their decline" alone, its
+     subject unchanged.
    - **"Reset All"**: the first journal's manager resets all templates
      through the API: the first journal's added template is gone, and
      the second's "Their decline" is still listed (Rules 11, 19). No

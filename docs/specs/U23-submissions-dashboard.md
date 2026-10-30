@@ -123,16 +123,21 @@ to a reviewer the submissions they review (`docs/process/api.md`).
 incomplete submissions in bulk" above and *[My
 Submissions](U22-my-submissions.md)*' "Delete incomplete submissions", for
 the route behind both lists' "Delete Incomplete Submissions"
-(`DELETE _submissions`): a Journal Manager over any draft, an author over
-their own (`docs/process/api.md`).
+(`DELETE _submissions`), each call naming a fresh draft of the
+submitter's: a Journal Manager over any draft, an author over their own
+only, so another author's draft is refused (`docs/process/api.md`).
 
-| Persona | Context |
+| Persona | Draft |
 |---|---|
 | manager | ✓ |
-| section editor | — |
-| assistant | — |
-| author | ✓ |
-| reviewer | — |
+| assigned section editor | — |
+| assigned section editor, metadata edit off | — |
+| unassigned section editor | — |
+| assigned assistant | — |
+| assigned review assistant | — |
+| submitter | ✓ |
+| other author | — |
+| assigned reviewer | — |
 | reader | — |
 | nobody signed in | — |
 | manager of another context | — |
@@ -905,22 +910,17 @@ caller's answer withholds; who may call the list routes is the grids'
 [deleting drafts](#api-grid-delete-incomplete)), checked apart
 (`docs/process/api.md`).
 
-API1. **A bulk delete removes drafts only, and an author only their own** {OJS OMP OPS}
+API1. **A bulk delete removes drafts only** {OJS OMP OPS}
 
-   Given: a Journal Manager, two Authors, a draft of each, and a submitted
-   submission of the first.
+   Given: a Journal Manager, an Author, a draft of theirs and a submitted
+   submission of theirs.
 
    - **Not a draft**: the manager's "Delete Incomplete Submissions"
-     request naming the submitted submission, alone or beside a draft, is
-     refused (404), and one naming no number is refused (400); both
+     request naming the submitted submission, alone or beside the draft,
+     is refused (404), and one naming no number is refused (400); both
      survive. The list only offers drafts a checkbox.
-   - **Another author's draft**: the first author's request naming the
-     other's draft, alone or beside their own, is refused (404), and both
-     drafts survive.
-   - **Control**: the first author's request naming their own draft
-     deletes it {OJS OMP} (a preprint server refuses it, [→ My Submissions
-     OPS2](U22-my-submissions.md#ops2)), and the manager's naming the
-     other draft deletes it; the submitted submission stays.
+   - **Control**: the manager's request naming the draft deletes it; the
+     submitted submission stays.
 
 API2. **A list of submissions holds only the caller's own unless they work journal-wide** {OJS OMP OPS}
 

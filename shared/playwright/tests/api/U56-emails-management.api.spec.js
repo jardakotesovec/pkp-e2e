@@ -47,7 +47,8 @@ test.describe('emails management through the API', () => {
         const ours = await own.as('mg');
         const theirs = await other.as('mg');
         const theirId = other.seeded.contextId;
-        expect((await theirs.post('emailTemplates', template('Their decline', {alternateTo: EMAIL}))).status).toBe(200);
+        const their = await theirs.post('emailTemplates', template('Their decline', {alternateTo: EMAIL}));
+        expect(their.status).toBe(200);
 
         // An add naming the other journal is stored in this one.
         const added = await ours.post('emailTemplates', template('Our decline', {alternateTo: EMAIL, contextId: theirId}));
@@ -56,10 +57,14 @@ test.describe('emails management through the API', () => {
         expect((await namesOf(ours)).slice(1)).toEqual(['Our decline']);
         expect((await namesOf(theirs)).slice(1)).toEqual(['Their decline']);
 
-        // An edit naming the other journal is refused.
-        const moved = await ours.put(`emailTemplates/${added.body.key}`, {contextId: theirId, subject: {en: 'Moved subject'}});
-        expect(moved.status).toBe(403);
-        expect((await ours.get(`emailTemplates/${added.body.key}`)).body.subject.en).toBe('Our decline subject');
+        // An edit naming the other journal leaves the template where it is,
+        // and the other journal's templates as they were.
+        await ours.put(`emailTemplates/${added.body.key}`, {contextId: theirId, subject: {en: 'Moved subject'}});
+        const kept = (await ours.get(`emailTemplates/${added.body.key}`)).body;
+        expect(kept.contextId).toBe(own.seeded.contextId);
+        expect(kept.subject.en).toBe('Our decline subject');
+        expect((await namesOf(theirs)).slice(1)).toEqual(['Their decline']);
+        expect((await theirs.get(`emailTemplates/${their.body.key}`)).body.subject.en).toBe('Their decline subject');
 
         // "Reset All" here leaves the other journal's templates.
         expect((await ours.delete('emailTemplates/restoreDefaults')).status).toBe(200);
