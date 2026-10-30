@@ -15,7 +15,7 @@ forEachApp(async (app) => {
     const cp = (ctx && (ctx.path || ctx.urlPath || (ctx.context && ctx.context.path))) || t;
     const {table, id} = app.contextTables;
     const cid = sql(app, `select ${id} from ${table} where path = '${cp}'`).trim();
-    const ug = sql(app, `select user_group_id from user_groups where context_id = ${cid} and role_id = 4096 order by user_group_id limit 1`).trim();
+    const ug = sql(app, `select user_group_id from user_groups where context_id = ${cid} and role_id in (4096, 65536) order by role_id, user_group_id limit 1`).trim();
     const invitee = `${t}inv@mail.test`;
     const since = new Date();
 
