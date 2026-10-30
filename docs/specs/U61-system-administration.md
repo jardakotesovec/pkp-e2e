@@ -41,6 +41,27 @@ without the Site Administrator role, a Journal Manager's included.
 | **Receive a routine task's report** (Rule 22) | • the site's principal contact, an email address rather than an account (*Site settings*, Rule 14) <sup>u</sup> |
 | **Download a routine task's log** (Rule 23) | • Site Administrator, from the report's link<br>• every other account: the access-denied page, reading "The current role does not have access to this operation."<br>• signed out: the Login page <sup>v</sup> |
 
+<a id="api-grid-administration"></a>
+**Permission grid: Administration.** The row "Open Administration and
+its tools" above, for the routes behind the pages it leads to, all
+called at the site's address: the job lists and a failed job's requeue
+and delete (Rules 13–19), the site's settings
+([Site settings](U60-site-settings.md), Rule 22) and the adding and
+removing of journals ([Hosted journals](U59-hosted-journals.md),
+Rules 3–15) (`docs/process/api.md`).
+
+| Persona | Site |
+|---|---|
+| manager | — |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 None of these pages has a field to fill in. What each page lists, top to

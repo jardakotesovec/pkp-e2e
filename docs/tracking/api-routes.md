@@ -110,7 +110,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_uploadPublicFile.uploadFile` | POST | `_uploadPublicFile` | ojs omp ops | admin manager subEditor assistant author reviewer reader | U09 | — |
+| `_uploadPublicFile.uploadFile` | POST | `_uploadPublicFile` | ojs omp ops | admin manager subEditor assistant author reviewer reader | U09 | U09#picture-upload |
 
 ### announcements — PKPAnnouncementController
 
@@ -152,14 +152,14 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `context.getMany` | GET | `contexts` | ojs omp ops | admin manager | U59 | — |
-| `context.getContext` | GET | `contexts/{contextId}` | ojs omp ops | admin manager | U59 | — |
-| `context.getTheme` | GET | `contexts/{contextId}/theme` | ojs omp ops | admin manager | U10 | — |
-| `context.edit` | PUT | `contexts/{contextId}` | ojs omp ops | admin manager | U59 | — |
-| `context.editTheme` | PUT | `contexts/{contextId}/theme` | ojs omp ops | admin manager | U10 | — |
+| `context.getMany` | GET | `contexts` | ojs omp ops | admin manager | U59 | U59#context-read |
+| `context.getContext` | GET | `contexts/{contextId}` | ojs omp ops | admin manager | U59 | U59#context-read |
+| `context.getTheme` | GET | `contexts/{contextId}/theme` | ojs omp ops | admin manager | U10 | U10#theme |
+| `context.edit` | PUT | `contexts/{contextId}` | ojs omp ops | admin manager | U59 | U59#context-edit |
+| `context.editTheme` | PUT | `contexts/{contextId}/theme` | ojs omp ops | admin manager | U10 | U10#theme |
 | `context.edit.doiRegistration` | PUT | `contexts/{contextId}/registrationAgency` | ojs omp ops | admin manager | U45 | U45#doi-registration |
-| `context.add` | POST | `contexts` | ojs omp ops | admin | U59 | — |
-| `context.delete` | DELETE | `contexts/{contextId}` | ojs omp ops | admin | U59 | — |
+| `context.add` | POST | `contexts` | ojs omp ops | admin | U59 | U61#administration |
+| `context.delete` | DELETE | `contexts/{contextId}` | ojs omp ops | admin | U59 | U61#administration |
 
 ### contributorRoles — ContributorRoleController
 
@@ -286,11 +286,11 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `job.getMany` | GET | `jobs/all` | ojs omp ops | admin | U61 | — |
-| `job.failed.getMany` | GET | `jobs/failed/all` | ojs omp ops | admin | U61 | — |
-| `job.redispatch.all` | POST | `jobs/redispatch/all` | ojs omp ops | admin | U61 | — |
-| `job.redispatch` | POST | `jobs/redispatch/{jobId}` | ojs omp ops | admin | U61 | — |
-| `job.delete.failed` | DELETE | `jobs/failed/delete/{jobId}` | ojs omp ops | admin | U61 | — |
+| `job.getMany` | GET | `jobs/all` | ojs omp ops | admin | U61 | U61#administration |
+| `job.failed.getMany` | GET | `jobs/failed/all` | ojs omp ops | admin | U61 | U61#administration |
+| `job.redispatch.all` | POST | `jobs/redispatch/all` | ojs omp ops | admin | U61 | none: requeues every failed job of the install, other tests' and real ones alike |
+| `job.redispatch` | POST | `jobs/redispatch/{jobId}` | ojs omp ops | admin | U61 | U61#administration |
+| `job.delete.failed` | DELETE | `jobs/failed/delete/{jobId}` | ojs omp ops | admin | U61 | U61#administration |
 
 ### mailables — PKPMailableController
 
@@ -303,11 +303,11 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `navigationMenu.getAllItems` | GET | `navigationMenus/items` | ojs omp ops | admin manager | U08 | — |
-| `navigationMenu.getAreas` | GET | `navigationMenus/areas` | ojs omp ops | admin manager | U08 | — |
-| `navigationMenu.getItems` | GET | `navigationMenus/{navigationMenuId}/items` | ojs omp ops | admin manager | U08 | — |
-| `navigationMenu.add` | POST | `navigationMenus` | ojs omp ops | admin manager | U08 | — |
-| `navigationMenu.edit` | PUT | `navigationMenus/{navigationMenuId}` | ojs omp ops | admin manager | U08 | — |
+| `navigationMenu.getAllItems` | GET | `navigationMenus/items` | ojs omp ops | admin manager | U08 | U08#navigation-menus |
+| `navigationMenu.getAreas` | GET | `navigationMenus/areas` | ojs omp ops | admin manager | U08 | U08#navigation-menus |
+| `navigationMenu.getItems` | GET | `navigationMenus/{navigationMenuId}/items` | ojs omp ops | admin manager | U08 | U08#navigation-menus |
+| `navigationMenu.add` | POST | `navigationMenus` | ojs omp ops | admin manager | U08 | U08#navigation-menus |
+| `navigationMenu.edit` | PUT | `navigationMenus/{navigationMenuId}` | ojs omp ops | admin manager | U08 | U08#navigation-menus |
 
 ### orcid — OrcidController
 
@@ -370,10 +370,10 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `site.getSite` | GET | `site` | ojs omp ops | admin | U60 | — |
-| `site.getTheme` | GET | `site/theme` | ojs omp ops | admin | U60 | — |
-| `site.edit` | PUT | `site` | ojs omp ops | admin | U60 | — |
-| `site.editTheme` | PUT | `site/theme` | ojs omp ops | admin | U60 | — |
+| `site.getSite` | GET | `site` | ojs omp ops | admin | U60 | U61#administration |
+| `site.getTheme` | GET | `site/theme` | ojs omp ops | admin | U60 | U61#administration |
+| `site.edit` | PUT | `site` | ojs omp ops | admin | U60 | U61#administration |
+| `site.editTheme` | PUT | `site/theme` | ojs omp ops | admin | U60 | none: clears the install's template and style-sheet caches, and an empty body unsets the site's theme |
 
 ### stats/contexts — PKPStatsContextController
 

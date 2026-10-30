@@ -38,6 +38,11 @@ Administrator role, a Journal Manager's included.
 | **Save through the site's own requests** (Rule 22) | • Site Administrator alone; every other account is refused <sup>l</sup> |
 | **Meet the result** | • every visitor, signed in or not, on the site's own pages (Rules 7, 8, 13, 15, 17–21)<br>• every account, wherever it chooses a password or signs in (Rules 10–12)<br>• each journal's managers, through the "Notify" tab (Rule 16) <sup>a</sup> |
 
+The site's requests (Rule 22) follow the
+[Administration grid](U61-system-administration.md#api-grid-administration);
+the theme's save is left out of it, since each save clears the
+install's stored copies of pages and style sheets.
+
 ## Fields & validation
 
 A field marked "per language" takes one value for each language the site
@@ -800,6 +805,26 @@ journals with throwaway accounts. <sup>s</sup>
 
     A press stores the sheet and loads it on no page ⚠ [OMP1](#omp1), so
     this scenario does not run on a press.
+
+### Through the API
+
+The check below sends what no screen sends; who may call the site's
+routes is the *[System administration & jobs](U61-system-administration.md#api-grid-administration)*
+grid's, checked apart (`docs/process/api.md`). It only reads: the
+site's settings are shared by every test on the install.
+
+API1. **The site's settings and theme read through the API** {OJS OMP OPS}
+
+   Given: the Site Administrator, at the site's address.
+
+   - **Settings**: the site read through the API answers its record:
+     the primary language among the languages it offers, and a "Minimum
+     password length (characters)" that is a whole number, 4 or more
+     (Rule 10). No screen reads the site this way; the Site Settings
+     tabs come filled with the page.
+   - **Theme**: the site's theme read through the API answers the theme
+     the site's record names, with the fields "Default Theme" offers on
+     the "Theme" tab, "Colour" and "Typography" among them (Rule 17).
 
 ## Coverage
 

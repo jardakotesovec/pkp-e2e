@@ -41,6 +41,48 @@ on the site" is ticked (Rule 11).
 | **Change the same identity from the journal's own Settings** (Rule 9) | • whoever opens that journal's Settings pages ([Journal identity & about pages](U07-journal-identity-and-about-pages.md#settings-access)); never "Path", "Enable" or the journal's removal <sup>g</sup> |
 | **See the site's list of journals** (Rules 20–21) | • every visitor, signed in or not, on the site's home page <sup>m</sup> |
 
+Adding and removing a journal through the site's requests follow the
+[Administration grid](U61-system-administration.md#api-grid-administration).
+
+<a id="api-grid-context-read"></a>
+**Permission grid: reading a journal's settings.** The rows "Create,
+edit, order and remove journals" and "Change the same identity from the
+journal's own Settings" above, for the routes that read one journal's
+record and the list of journals: at a journal's address its Settings
+users ([Journal identity & about pages](U07-journal-identity-and-about-pages.md#settings-access))
+and the Site Administrator, at the site's address the Site
+Administrator alone (`docs/process/api.md`).
+
+| Persona | Context | Site |
+|---|---|---|
+| manager | ✓ | — |
+| section editor | — | — |
+| assistant | — | — |
+| author | — | — |
+| reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-context-edit"></a>
+**Permission grid: saving a journal's settings.** The same rows, for the
+route every journal form saves to, the "Edit" window and the Settings
+Wizard included: it answers at the journal's own address alone (Rules
+8, 9) (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **The journal form.** "Create Journal" ("Create Press", "Create
@@ -112,7 +154,8 @@ wizard, the journal's primary language. <sup>c</sup> <sup>d</sup>
    correct one error." ("Please correct {n} errors.") and the link
    "Jump to next error" ⚠ [A6](#a6); a screen reader also hears a "Go
    to {field}" per refused field. An empty required field is refused
-   before anything is sent. The "Path", email and "Country" refusals,
+   before anything is sent; the server refuses one sent empty too, but
+   not one a request leaves out ⚠ [A12](#a12). The "Path", email and "Country" refusals,
    and a "Primary locale" not ticked under "Languages", come back from
    the server and also show the notice "The form was not saved because
    {n} error(s) were encountered. Please correct these errors and try
@@ -773,6 +816,55 @@ journals runs alone. <sup>s</sup>
      Initials" reads CL, the save having changed Bay Letters alone (Rule
      16). <sup>s</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the journal
+routes is the grids' (the [journal reads](#api-grid-context-read), the
+[journal saves](#api-grid-context-edit), and
+*[System administration & jobs](U61-system-administration.md#api-grid-administration)*
+for adding and removing), checked apart (`docs/process/api.md`).
+
+API1. **A journal added with its required fields empty is refused** {OJS OMP OPS}
+
+   Given: the Site Administrator, at the site's address.
+
+   - **Empty fields**: add a journal through the API with a fresh path
+     and initials, and "Journal Title", "Principal Contact Name",
+     "Principal Contact Email address" and "Country" sent empty: refused
+     (400) with an error on each of the four. "Create Journal" never
+     sends this: the browser refuses an empty required field before
+     anything is sent (Rule 4). A field the request leaves out is
+     [A12](#a12)'s.
+   - **Control**: the same add with the four filled is stored under that
+     path, and removed again.
+
+API2. **A journal removed through the API is gone, its accounts kept** {OJS OMP OPS}
+
+   Given: the Site Administrator, a journal with a Journal Manager.
+
+   - **Removed**: remove the journal through the API at the site's
+     address: it answers the journal's number and path, and reading the
+     journal afterwards answers 404 (Rule 14). No screen sends this:
+     "Remove" on Hosted Journals goes through the list's own request.
+   - **Accounts stay**: the Journal Manager can still sign in (Rule 15).
+   - **Unknown**: a number no journal has answers 404.
+
+API3. **A journal's manager lists the enabled journals alone** {OJS OMP OPS}
+
+   Given: two journals whose initials share one word, the second not
+   enabled publicly, each with a Journal Manager; the Site
+   Administrator.
+
+   - **Enabled only**: the first journal's manager asks the list of
+     journals for the enabled ones, searched by that word: it holds the
+     first journal alone (Rule 11). No screen asks for this list. The
+     search reads the initials, not the title ⚠ [A13](#a13).
+   - **Every journal**: the same manager asking without the filter is
+     refused (403), so a journal not enabled publicly is never listed
+     to them.
+   - **Control**: the Site Administrator's list, searched by the same
+     word, holds both.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -907,6 +999,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | Signing in at a journal not enabled publicly leads to the Dashboard or home page, not the page asked for | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | A press or preprint server that holds an institution cannot be removed and is left half deleted {OMP OPS} | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | Journal form: a path of zeros such as "00" is refused with "A path is required." | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A12](#a12) | A program that adds a journal through the API without its required fields gets a server error, or a journal with no name or initials | 🐞 | low · crash: server | — |
+| [A13](#a13) | A program that searches the list of journals through the API finds no journal by its name | 🐞 | low | — |
 | [OPS1](#ops1) | Hosted Servers: a path of zeros ("0", "00") on a preprint server is refused with a raw code | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | A changed path leaves the default "For Readers" and "For Authors" texts linking to the old address {OJS OMP} | ❓ | minor | — |
 | [A9](#a9) | On the Login page of a journal not enabled publicly, "Register" and "Home" load the Login page again | ❓ | minor | — |
@@ -1081,6 +1175,37 @@ these paths and for "0", while an empty "Path" is refused in words
 reported apart under [OPS1](#ops1)
 ([pkp-e2e#503](https://github.com/jardakotesovec/pkp-e2e/issues/503)).
 Basis: probe, 2026-10-21. <sup>f-a11</sup>
+
+<a id="a12"></a>
+**A12 — A program that adds a journal through the API without its required fields gets a server error, or a journal with no name or initials** · 🐞 · low · crash: server.
+"Create Journal" always sends every field of the journal form, and
+refuses the required ones left empty (Fields). A program that adds a
+journal through the install's programming interface (the REST API's
+journal add, at the site's address, which answers the Site
+Administrator alone) can leave fields out of its request. The program
+expects the add refused with an error on each required field it left
+out, as the window refuses an empty one.
+
+Instead the add checks none of the required fields its request leaves
+out. A request with no "Path" fails with a server error, and its answer
+is the database's error text; a request with a path alone is stored: a
+journal with no title, initials, principal contact or country.
+"Journal Initials" is not required by the server at all: sent empty, it
+is stored as well, on an add and on a journal's edit. A press and a
+preprint server behave the same way.
+Basis: probe, 2026-10-30. <sup>f-a12</sup>
+
+<a id="a13"></a>
+**A13 — A program that searches the list of journals through the API finds no journal by its name** · 🐞 · low.
+No screen searches the journals; the list behind the install's
+programming interface (the REST API's list of journals) takes a search
+phrase. A program that searches it for a word of a journal's title
+expects that journal found, as 3.3's list found it.
+Instead the search reads only each journal's description, initials and
+abbreviation: a word of the title finds nothing, every journal of the
+test installs being named "Scratch context …" or the like. A press and a
+preprint server behave the same way.
+Basis: probe, 2026-10-30. <sup>f-a13</sup>
 
 ### OPS
 
@@ -1904,6 +2029,38 @@ is required." and OPS "##admin.contexts.form.pathRequired##" under
 field is required." and sent nothing. OMP was read in the code only:
 the check is lib/pkp's, and OMP defines the key with OJS's sentence.
 Issue report: [pkp-e2e#1057](https://github.com/jardakotesovec/pkp-e2e/issues/1057) ([docs/issues/U59-A11-journal-path-zeros-refused-as-empty.md](../issues/U59-A11-journal-path-zeros-refused-as-empty.md)).
+
+<a id="fn-f-a12"></a>
+**f-a12** — `PKPContextService::validate()` passes its action (`add`)
+to `ValidatorFactory::required()`, which since 3.4 takes the object
+being edited instead, `null` on an add; given a value, it checks a
+required field only when the request carries it. So an add checks none
+that are missing (3.3's `required()` still took the action). An empty
+body reaches the insert, which fails on the path's not-null column
+(SQLSTATE 23502, the statement and the database's name in the answer).
+Live-probed 2026-10-30 on `main`: `POST index/api/v1/contexts` as
+`admin` with `{}` answered 500 on OJS, OMP and OPS; on OJS a body with
+`urlPath` alone answered 200 and the journal was stored with no `name`,
+`acronym`, `contactName`, `contactEmail` or `country` row (removed
+afterwards). The API matrix meets the empty body as the site admin's
+cell. "Journal Initials" (`acronym`) is left out of the schema's
+`required` list (`lib/pkp/schemas/context.json`), which names `name`,
+`primaryLocale`, `supportedLocales`, `urlPath`, `contactName` and
+`contactEmail`; the form marks it required in the browser alone
+(`PKPContextForm`, Rule 4). Live-probed 2026-10-30, the three apps: an
+add with `acronym` `{"en": ""}` and the other required fields empty was
+refused with errors on those fields and none on `acronym`.
+
+<a id="fn-f-a13"></a>
+**f-a13** — `PKPContextQueryBuilder::getQuery()` matches each word of
+`searchPhrase` against the settings `description`, `acronym` and
+`abbreviation` alone; 3.3's query also matched `name`, which
+pkp/pkp-lib@f6eba567bc (#7353, 2021-09-29, the 3.4 line) left out when
+it rewrote the query. Live-probed 2026-10-30 on `main`: the list
+asked by `admin` at the site's address with `searchPhrase=Scratch`
+answered `itemsMax` 0 on OJS, OMP and OPS, which list some 2,000 to 2,900
+journals named "Scratch context {tag}"; a word of the initials finds
+its journal (Through the API, API3).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `PKPContextService::validate()` adds
