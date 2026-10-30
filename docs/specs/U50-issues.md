@@ -51,6 +51,43 @@ anywhere in the journal is enough. <sup>c</sup>
 | **Receive the issue email** (Side effects) | • Every account with an active role in the journal, the person publishing included, when that person leaves "Send an email about this to all registered users." ticked<br>• Minus those who unticked "Enable these types of notifications." for "An issue has been published." in their profile, and minus those who ticked "Do not send me an email for these types of notifications." there (see [Notifications center & email preferences](U05-notifications-center-and-email-preferences.md)) <sup>f</sup> |
 | **Set an issue's identifiers, and its URN while publishing** | • Manager-level roles, on the window's "Identifiers" tab and in "Publish Issue"; the rules are [Identifiers](U44-identifiers.md) (its Rules 4, 15, 16) |
 | **Place an article in an issue, or take it out through the article** | • Who may publish, and the issue choices, are [Publish, schedule & versions](U49-publish-schedule-and-versions.md) (its Rules 5 and 9) |
+| **Read the journal's issues in the back office** (the "Issues" filter of the submission lists, the issue choice of "Publication Settings" and of the publish window; Rule 29) | • Published issues: every role with a submission list, the Author and the Reviewer included: each list's "Filters" offers "Issues" ([Submissions dashboard](U23-submissions-dashboard.md), its Fields)<br>• Future issues: manager-level roles. An assigned Section Editor is offered the future-issue choices on "Publication Settings" but gets no issue to pick ⚠ [A23](#a23)<br>• The issue choices themselves ("Issue Assignment"): manager-level and editorial roles, the ones who reach "Publication Settings"<br>• The Reader, a manager of another journal and a signed-out visitor read published issues on the reader pages only (Rules 21–25) <sup>aa</sup> |
+
+<a id="api-grid-issues-read"></a>
+**Permission grid: reading the journal's issues.** The row "Read the
+journal's issues in the back office" above, its published-issue half,
+for the list of issues, the current issue and one issue (the persona
+set's published one); which issues the list leaves out is API1's
+(Rule 29; `docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | ✓ |
+| reviewer | ✓ |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-issue-choices"></a>
+**Permission grid: the issue choices.** The same row's "Issue
+Assignment" half, for the route that lists the choices the journal's
+issues allow (Rule 29; `docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
 
 ## Fields & validation
 
@@ -470,6 +507,29 @@ page reads "View {issue name}" ⚠ [A7](#a7). <sup>v</sup>
     [Appearance & theming](U10-appearance-and-theming.md), its Rule 14)
     carries the current issue's name, the issue's page parts from the
     cover down (Fields), and "View All Issues". <sup>z</sup>
+
+### The programming interface
+
+29. **The issues as data.** A journal answers its list of issues, its
+    current issue, any one issue, and the "Issue Assignment" choices its
+    issues allow, as data at addresses of the install's programming
+    interface (the addresses are in the footnote), to the roles Actors
+    names. The "Issues" filter of the submission lists searches the list,
+    and "Publication Settings" and the publish window read the choices
+    and then the list of published or of future issues; nothing on the
+    screens reads the current issue or one issue this way. <sup>aa</sup>
+    - 29a. The list holds the published issues for everyone but the
+      manager-level roles and the Site Administrator, who get the future
+      ones too; asked for the future issues alone, it refuses everyone
+      else ⚠ [A23](#a23). It gives 20 issues at a time unless the program
+      asks for another number, never more than 100, and narrows to given
+      volumes, numbers and years.
+    - 29b. The current issue is the one of Rule 17; with none, the
+      address answers "not found".
+    - 29c. The choices are those of [Publish, schedule & versions](U49-publish-schedule-and-versions.md)
+      (its Rule 5): the future-issue ones only while the journal has a
+      future issue, the current/back-issue one only while it has a
+      published issue.
 
 ## Side effects
 
@@ -1056,6 +1116,55 @@ catcher's address, background-jobs command and tooling recipe. <sup>s0</sup>
       the journal's address followed by "issue/current", opens "Vol. 1
       No. 2 (2014)" (Actors rows 1, 3; Rule 24). <sup>s0</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the issues
+routes is the grids' ([reading the issues](#api-grid-issues-read),
+[the issue choices](#api-grid-issue-choices)), checked apart
+(`docs/process/api.md`).
+
+API1. **Future issues are listed to the journal's managers alone** {OJS}
+
+   Given: a Journal Manager and an Author, on a scratch journal with the
+   published issue "Vol. 1 No. 1" and the future issue "Vol. 2 No. 1".
+
+   - **The Author**: the list holds "Vol. 1 No. 1" alone, its total
+     reading 1; asked for the future issues, it is refused (403) and
+     lists nothing (Rule 29a). The Author's "Issues" filter shows the
+     same list, but no screen of theirs asks for future issues.
+   - **Control**: the Journal Manager's list holds both issues, its
+     total reading 2, and asked for the future issues it holds "Vol. 2
+     No. 1" alone.
+
+API2. **Issues filtered by volume, number and year** {OJS}
+
+   Given: a Journal Manager, on a scratch journal with the published
+   issues "Vol. 1 No. 1 (2024)", "Vol. 1 No. 2 (2025)" and "Vol. 2 No. 1
+   (2025)".
+
+   - **One filter**: the list asked for volume 1 holds the two issues of
+     volume 1, for number 1 the two issues numbered 1, for 2025 the two
+     issues of that year (Rule 29a). No screen filters the list this way.
+   - **Two filters**: volume 1 and 2025 together hold "Vol. 1 No. 2
+     (2025)" alone; the years 2024 and 2025 given as one list hold all
+     three.
+   - **No match**: volume 3 holds nothing.
+
+API3. **The current issue read on its own** {OJS}
+
+   Given: a Journal Manager, on a scratch journal with the published
+   issues "Vol. 1 No. 1" and "Vol. 1 No. 2", published in that order,
+   and the future issue "Vol. 1 No. 3"; and a second scratch journal
+   whose only issue is a future one.
+
+   - **Current**: the current issue's address answers "Vol. 1 No. 2",
+     the issue published last (Rules 17, 29b). No screen reads it this
+     way.
+   - **One issue**: "Vol. 1 No. 2" read by its number answers the same
+     issue.
+   - **None**: on the second journal the current issue's address
+     answers "not found" (404).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1195,7 +1304,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-25; A17, A18 2026-09-28;
-A19, A20 2026-10-05; A21, A22 2026-10-08), unreviewed unless an entry notes otherwise; the team
+A19, A20 2026-10-05; A21, A22 2026-10-08; A23 2026-10-30), unreviewed unless an entry notes otherwise; the team
 settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -1215,6 +1324,7 @@ settles them on spec review.
 | [A18](#a18) | On such an article, "Remove" leaves it in the issue and unpublishes its earlier version, the one the issue published | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A19](#a19) | Saving an issue's "Issue Data" drops it below the other issues published the same day on "Back Issues" | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A21](#a21) | An issue's saved section order changes when a manager reorders the journal's sections | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
+| [A23](#a23) | An assigned Section Editor who picks a future-issue choice on "Publication Settings" gets no issue to pick | 🐞 | user-visible | — |
 | [A3](#a3) | "Delete" takes an issue's published articles offline behind a generic confirmation | ❓ | user-visible | — |
 | [A7](#a7) | On "Archives", a cover with no alternate text is a link with no name | ❓ | minor | — |
 | [A15](#a15) | On a journal that does not publish online, "Publish Issue" still offers its email, ticked, and sends nothing | ❓ | user-visible | — |
@@ -1484,6 +1594,19 @@ order they were scheduled in, before anyone orders them? Lean: yes;
 a published table of contents should not reshuffle for readers.
 Basis: probe, 2026-10-08. <sup>f-a22</sup>
 
+<a id="a23"></a>
+**A23 — An assigned Section Editor who picks a future-issue choice on "Publication Settings" gets no issue to pick** · 🐞 · user-visible.
+On an article's "Publication Settings" page an assigned Section Editor
+is offered "Assign To Future Issue and Publish Immediately" and "Assign
+To Future Issue and Schedule Only" whenever the journal has a future
+issue, but after either choice the "Issue" list under it is empty: the
+journal's future issues are given to manager-level roles alone (Rule
+29a). A Journal Manager on the same page gets them. The Section Editor
+can save the article into a back issue or into none, never into the
+future issue the page offers, though they may preview that issue
+(Actors row 2). 3.5 is not affected.
+Basis: probe, 2026-10-30. <sup>f-a23</sup>
+
 ### Retired
 
 <a id="a9"></a>
@@ -1584,6 +1707,9 @@ claim still read only in the code says so where it is made.
 
 <a id="fn-z"></a>
 **z** — `templates/frontend/pages/indexJournal.tpl` `.current_issue`: `journal.currentIssue` "Current Issue", `getIssueIdentification()`, `issue_toc.tpl` with `heading="h3"`, `journal.viewAllIssues` "View All Issues" → `issue/archive`; `IndexHandler` sets the issue up only when `publishingMode != NONE`. The part's conditions are U10 Rule 14.
+
+<a id="fn-aa"></a>
+**aa** — OJS `api/v1/issues/IssueController.php` (`issue.getMany` `GET issues`, `issue.current` `GET issues/current`, `issue.getIssue` `GET issues/{issueId}`, `issue.getAssignmentOptions` `GET issues/assignmentOptions`): route middleware `has.user`, `has.context` and a `roleAuthorizer` that leaves out the Reader, so a Reader-only account and a signed-out visitor are refused (401); `ContextAccessPolicy`, `OjsJournalMustPublishPolicy`; the one-issue read adds `OjsIssueRequiredPolicy` (the issue must be the journal's, and an unpublished one needs site admin, manager, sub-editor or assistant). `getMany()`: `DEFAULT_COUNT` 20, `MAX_COUNT` 100, `offset`, `orderBy`, `volumes`/`numbers`/`years` (singular forms too; a comma list or an array, each value cast to a whole number), `isPublished`, `searchPhrase`, `doiStatus`, `hasDois`; then "You must be a manager or site admin to access unpublished Issues": a caller without the manager role in the journal or site admin gets `filterByPublished(true)`, and `isPublished` false is answered 403 `api.submissions.403.unpublishedIssues`. `getCurrent()`: `Repo::issue()->getCurrent()`, 404 when none. `getAssignmentOptions()`: `IssueAssignment::getAvailableAssignmentOption()` keeps an option whose `isPublished` is set only while an issue of that state exists. The screens' calls: `FieldSelectIssues` of the dashboard's `SubmissionFilters` (`apiUrl` `issues`, offered whenever the journal has any issue), and ui-library `useWorkflowPublicationFormIssue.js` (`issues/assignmentOptions`, then `issues` with `isPublished` and `count` 100) on "Publication Settings" and in the publish window. Traffic map of CI run 40956726825: the list and the choices reached by the screens, the current issue and the one-issue read by nothing. Matrix and API1–API3 run 2026-10-30.
 
 <a id="fn-se"></a>
 **se** — Released articles: `Repo::publication()->publish()` logs `publication.event.published` (or `versionPublished`) and fires `PublicationPublished`, whose listener `NotifyAuthorOnPublication` sends `AuthorPublicationPublished` to author assignments when the status is published; `unpublish()` logs `publication.event.unpublished`. Statistics: `IssueHandler::view()` and `download()` fire `UsageEvent` with `ASSOC_TYPE_ISSUE` / `ASSOC_TYPE_ISSUE_GALLEY`. No mail is sent by `updateIssue`, `saveSequence`, `setCurrentIssue`, `unpublishIssue`, `deleteIssue`, `removeArticle` or the galley operations. Live-probed 2026-09-25 (Side effects bullets 3, 5, 6), OJS: the author got "Publication Published" during the press and a Tasks row; the History read "The submission was published."; unpublishing the issue and "Remove" logged "The submission was unpublished."; "Delete": f-a12; no action here sent mail after the queue ran. Statistics: opening an issue's page and its PDF "Full Issue", then "Download", logged two issue views and two galley downloads at once, while Statistics › "Issues" read "Date Range 2026-08-25 — 2026-09-24" and "0 of 0 issues": the daily statistics task that moves the log into that page never runs on the test installs.
@@ -1740,6 +1866,9 @@ Issue report: [pkp-e2e#995](https://github.com/jardakotesovec/pkp-e2e/issues/995
 
 <a id="fn-f-a22"></a>
 **f-a22** — Live-probed 2026-10-08 (Rule 10; A22), the drive of td18, OJS `main` on PostgreSQL; not driven on MySQL. A never-ordered issue's "Articles" section read differently at two reads between which only other issues' orders and the journal's "Sections" list were saved: "Vol. 1 No. 4 (2026)" in one run (second, first, third article as seeded, then first, third, second), "Vol. 1 No. 1 (2026)" in the other (first, second, third, then second, third, first), and "Vol. 1 No. 3 (2026)" in both. The tab and the issue's page agreed at each read. After one "Done" on the issue (with a section dragged, or after a drag that left the list as it stood) every later load of the tab and the page gave the same order. Never-ordered articles share `seq` 0 and `ORDERBY_SEQUENCE` has no tie-breaker (note m); what decides the order among them was not established. The current-issue web feeds show the same looseness ([Web feeds](U18-web-feeds.md), its Rule 5).
+
+<a id="fn-f-a23"></a>
+**f-a23** — Live-probed 2026-10-30 (OJS `main`, probe server): a scratch journal with the published issue "Vol. 1 No. 1" and the future issue "Vol. 2 No. 1", a submission in Production with an assigned Section Editor ("Permit submission metadata edit" on). On "Publication Settings" the Section Editor was offered "Assign To Future Issue and Schedule Only"; after picking it, the "Issue" select held no option, the page's requests reading `issues/assignmentOptions` 200, `issues?isPublished=1&count=100` 200 and `issues?isPublished=0&count=100` 403. The Journal Manager on the same page got "Vol. 2 No. 1" (the same requests, all 200). Mechanism: note aa (`getMany()` answers future issues to a manager or site admin alone) and ui-library `useWorkflowPublicationFormIssue.js` (pkp/pkp-lib#9295, "client side only implementation for issue selection", Touhidur Rahman, 2025-10). `stable-3_5_0` builds the choice on the server (`IssueEntryForm` lists the unpublished and published issues itself) and makes no such request, so 3.5 is not affected (code read).
 
 ## Reference — entry points & surfaces
 

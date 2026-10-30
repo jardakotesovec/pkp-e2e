@@ -62,6 +62,45 @@ submission for the APC, the reader for a reader fee. <sup>c</sup>
 | **Buy a membership** ("Association Membership", Rule 7a) | • Nobody through the screens: no page, button or link offers it ⚠ [A7](#a7)<br>• A signed-in user who types the journal's address followed by "user/payMembership" while payments are set up gets the method's payment page for it; signed out, or while payments are not set up, the address fails [A9](#a9) <sup>m</sup> <sup>td13</sup> |
 | **Receive the payment emails** (Side effects) | • "Payment Request Notification": each assigned Author of the accepted submission<br>• "Manual Payment Notification": the journal's principal contact <sup>k</sup> |
 
+<a id="api-grid-payments-setup"></a>
+**Permission grid: setting up payments.** The row "Set up payments"
+above, for the route the "Payments" tab's "Save" sends, on a journal and
+a press (Rules 1–3; `docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-apc-record"></a>
+**Permission grid: recording the APC.** The row "Record the APC as
+paid, waived or unpaid" above, on a journal with the APC in force, for
+the route the "Payments" menu's "Save" sends and the route that loads
+the menu's choice (Rules 13, 14; `docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ? [A6](#a6) | ? [A6](#a6) |
+| assigned review assistant | ? [A6](#a6) | ? [A6](#a6) |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 <a id="payments-tab"></a>
@@ -346,6 +385,26 @@ page](U69-monograph-landing-page.md) (its Fields, "The payment page").
 
     With the manual method the list holds only what the "Payments" menu
     records (Rule 14): the manual method records nothing (Rule 11).
+
+### The programming interface
+
+18. **The routes behind the tab and the menu.** The "Payments" tab's
+    "Save" {OJS OMP} and the "Payments" menu's "Save" and choice {OJS}
+    go through addresses of the install's programming interface (the
+    addresses are in the footnote), open to the roles Actors names, which
+    programs outside the apps can also call. <sup>o</sup>
+    - 18a. The tab's save stores the fields it is given. A "Currency"
+      not in the tab's list is refused with a message on "Currency", and
+      nothing is stored. "Enable" is taken as ticked only when it reads
+      the word "true", as the tab sends it; a program that sends a plain
+      yes switches payments off ⚠ [A13](#a13). A save that leaves out
+      "Manual Payment Instructions" empties them, so payments stop being
+      set up (Rule 2) ⚠ [A14](#a14), and "Payment Plugins" takes any
+      name, a method the journal does not have included ⚠ [A15](#a15).
+    - 18b. The menu's save takes "paid", "waived" or "unpaid" and does
+      what Rule 14 says; anything else, or nothing, is refused with a
+      message on the choice and records nothing. While the APC is not
+      in force both the save and the choice answer "not found".
 
 ## Side effects
 
@@ -737,6 +796,37 @@ ready account. <sup>s0</sup>
    - **Control**: on a journal Settings › Distribution offers "Payments"
      (scenario 1; Fields, the "Payments" tab). <sup>s0</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the payments
+routes is the grids' ([setting up payments](#api-grid-payments-setup),
+[recording the APC](#api-grid-apc-record)), checked apart
+(`docs/process/api.md`).
+
+API1. **A currency not on the list is refused** {OJS OMP}
+
+   Given: a Journal Manager (Press Manager), on a scratch journal (press)
+   whose payments are set up with the US dollar and "Manual Fee Payment".
+
+   - **Not on the list**: save the payments with the currency "XYZ",
+     with "usd" and with "US Dollar" through the API: each refused (400)
+     with an error on the currency, and the journal keeps the US dollar
+     (Rule 18a). The tab's "Currency" is a list and sends only its own
+     codes.
+   - **Control**: the same save with the euro is stored.
+
+API2. **A fee record the menu does not offer is refused** {OJS}
+
+   Given: a Journal Manager, on a scratch journal with payments set up
+   and an APC of 50, and a submission with no fee record.
+
+   - **Not a choice**: record the fee as "refunded", as an empty
+     choice, and with no choice at all, through the API: each refused
+     (400) with an error on the choice, and the menu's choice still
+     reads "Unpaid" (Rule 18b). The menu sends only its three options.
+   - **Control**: recording "waived" is stored, and the choice then
+     reads "Waived" (Rule 14).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -820,7 +910,7 @@ Left out of the scenarios above, by reason:
 
 ## Findings register
 
-Verdicts are the author's judgment (claude, 2026-09-26), unreviewed unless
+Verdicts are the author's judgment (claude, 2026-09-26; A13–A15 2026-10-30), unreviewed unless
 an entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -833,6 +923,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | The PayPal error page has no heading, and the browser tab shows only the journal's name | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A11](#a11) | Merging a payer's account breaks the journal's list of payments and the paid article's publishing | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A12](#a12) | After a journal switches payments off, the side menu keeps "Institutions" until the page is reloaded | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A13](#a13) | A program that switches payments on with a plain yes switches them off | 🐞 | minor | — |
+| [A14](#a14) | A program's payments save that leaves out the manual instructions empties them, and payments stop being set up | 🐞 | minor | — |
+| [A15](#a15) | A program can choose a payment method the journal does not have | 🐞 | minor | — |
 | [A5](#a5) | Payments save and ask for fees with no currency, and a saved currency cannot be removed | ❓ | minor | — |
 | [A6](#a6) | An assigned assistant role can record the APC as paid or waived | ❓ | user-visible | — |
 | [A7](#a7) | No page offers the "Association Membership" the tab prices | ❓ | user-visible | — |
@@ -1007,6 +1100,34 @@ follows "Enable": a press has the "Payments" tab too, but its side menu
 never gains either entry.
 Basis: test run; probe, 2026-10-01. <sup>f-a12</sup>
 
+<a id="a13"></a>
+**A13 — A program that switches payments on with a plain yes switches them off** · 🐞 · minor.
+A program saving the "Payments" tab's "Enable" through the install's
+programming interface with a yes (the value the journal itself reports
+for it) gets the save confirmed, yet payments are switched off: only the
+word "true", as the tab sends it, switches them on (Rule 18a). A
+program that sets up a journal's payments this way leaves them off
+without a word.
+Basis: probe, 2026-10-30. <sup>f-a13</sup>
+
+<a id="a14"></a>
+**A14 — A program's payments save that leaves out the manual instructions empties them** · 🐞 · minor.
+A program that saves only part of the "Payments" tab, the currency
+alone for instance, gets "Manual Payment Instructions" emptied with it,
+though it never named them; with the manual method chosen, payments are
+then no longer set up (Rule 2) and every fee stops being asked for. The
+tab always sends every field, so on the screens nothing is lost. The
+PayPal fields, left out the same way, are kept.
+Basis: probe, 2026-10-30. <sup>f-a14</sup>
+
+<a id="a15"></a>
+**A15 — A program can choose a payment method the journal does not have** · 🐞 · minor.
+Through the install's programming interface, "Payment Plugins" takes
+any name and stores it with a confirmation; the tab offers only the
+installed methods. With a name no method has, payments are no longer
+set up (Rule 2), and the tab then shows no method chosen.
+Basis: probe, 2026-10-30. <sup>f-a15</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1074,6 +1195,9 @@ manual page's layout to a journal (note td16).
 
 <a id="fn-n"></a>
 **n** — No payment completes on the test installs: they reach no PayPal account (note l), the return address PayPal calls is not a request any screen sends, and the manual method completes nothing (Rule 11). So the hand-over to PayPal (Rule 9), a completed online payment (Rule 12) and its row in the list (Rule 17: the account the request was made for as "User", and the reader-fee and membership payment types) cannot be seen there; they are read from the code. `PaypalPaymentPlugin::handle()` calls `OJSPaymentManager::fulfillQueuedPayment()`, which writes the completed payment with the queued payment's user, type and amount (note l); the request's user is the reader for a reader fee and the requesting editor for the APC (note i); `getPaymentName()` names the types (note f). Live-probed 2026-09-27: every PayPal payment page showed the error of Rule 9, and after the manual method's notifications the list read "No Items". Settled by one payment completed with a PayPal sandbox account ("Test Mode" ticked).
+
+<a id="fn-o"></a>
+**o** — lib/pkp `api/v1/_payments/PKPBackendPaymentsSettingsController.php` (`_payment.backend.edit`, `PUT _payments`, OJS and OMP; `roleAuthorizer` [site admin, manager]): `paymentsEnabled` is cast as `$val === 'true'`, `currency` is cast to a string and validated against the context schema only when sent, the rest is passed to `contextService->edit()` as given, after the hook `API::payments::settings::edit` lets each paymethod plugin save its own fields (`ManualPaymentPlugin::saveSettings()` writes `manualInstructions`, `''` when absent; `PaypalPaymentPlugin::saveSettings()` writes only the keys sent). The tab's form (ui-library `Form.vue`) posts form-encoded through `$.ajax`, so its booleans arrive as the strings "true"/"false". OJS `api/v1/_submissions/BackendSubmissionsController.php` (`_submission.payment`, `PUT _submissions/{submissionId}/payment`; [sub-editor, manager, site admin, assistant] with `SubmissionAccessPolicy`): 404 unless `publicationEnabled()`; `publicationFeeStatus` empty or not one of `waived`/`paid`/`unpaid` → 400 `validator.required`. OJS `api/v1/submissions/SubmissionController.php` `getSubmissionPaymentForm()` (`submission.publication._components.submissionPayment`, the menu's `SubmissionPaymentsForm`; the same roles, `requiresSubmissionAccess`): 403 `api.publications.403.paymentFeesNotEnabled` unless `publicationEnabled()`. Traffic map of CI run 40956726825: the three reached by the screens alone. Matrix and API1–API2 run 2026-10-30.
 
 <a id="fn-s0"></a>
 **s0** — Scenario seeding. Scenarios 1 to 5 each run on a scratch journal from `POST scenarios/context` with throwaway `users[]` (password: the username twice): `manager` (the Journal Manager) in scenarios 1, 2, 4 and 5; `sectionEditor` in scenarios 3 and 4; `author` (the submitting Author) in every one; in scenario 3 also a second `author` account and a `reader`. The payment settings are the `payments` key: scenario 1 `{enabled: false, publicationFee: 50}`; scenario 2 `{currency: 'USD', paymentPluginName: 'ManualPayment', manualInstructions: 'Pay by bank transfer.'}`; scenarios 4 and 5 the same plus `publicationFee: 50`; scenario 3 the same with `manualInstructions: 'Pay by bank transfer.\nAccount 123.'` and `publicationFee: 50`, together with `publishingMode: 'subscription'`, `subscriptionTypes: [{name: 'Online Year', cost: 40, currency: 'USD', duration: 12}]` and `issues: [{volume: 1, number: 1, year: 2026, published: true}]`. "Tidal Patterns" comes from `POST scenarios/submission` with `title: 'Tidal Patterns'` and the throwaway `author` as `submitter`: at the Submission stage in scenarios 1, 2, 3 and 5 (scenario 3 with `participants: [{username: <sectionEditor>, role: 'sectionEditor'}, {username: <second author>, role: 'author'}]`); in scenario 4 with the Section Editor in `participants[]` and `decisions: ['skipExternalReview', 'sendToProduction']` (the menu reads "Unpaid" whether or not that seeded decision requests the fee, Rule 13). Scenario 4's publish windows are the Journal Manager's: in the OJS suite's test run of 2026-09-27 the stage view's "Schedule For Publication" took the assigned Section Editor to "Publication: Title & Abstract", which read "Status: Unscheduled" with no publish button beside it, its header offering "Payments", "Preview", "Activity Log" and "Library". Scenario 5's request is made on screen before its steps: the Journal Manager's "Accept and Skip Review" on "Tidal Patterns" with "Request publication fee (50 USD)" chosen, as in scenario 3's first bullet. Scenario 6 runs on a scratch OMP press from `POST scenarios/context` with the throwaway `manager` (the Press Manager) and `author`, and "Tidal Patterns" from `POST scenarios/submission` with `decisions: ['sendExternalReview']`; the `payments` key is OJS only, so the press's tab is saved on screen, and its control is scenario 1. Scenario 7 runs on OPS `publicknowledge` as `manager.maya` (the Preprint Server Manager), password as `docs/process/users.md` gives it; its control is scenario 1. A scratch journal's principal contact is "Site Admin" <admin@mail.test> (seed-facts). Choosing "the US dollar" in "Currency" is the list's USD entry. The mail catcher is Mailpit at `MAILPIT_URL` (default `http://127.0.0.1:8025`), scoped by recipient address. Live-probed 2026-09-27: `publicknowledge` (OJS) keeps "Enable" unticked, and the `payments` key on a press answers 400 `Unsupported spec key "payments"`.
@@ -1170,6 +1294,15 @@ Issue report: [pkp-e2e#359](https://github.com/jardakotesovec/pkp-e2e/issues/359
 <a id="fn-f-a12"></a>
 **f-a12** — ui-library `src/components/Container/SettingsPage.vue`: on the `form-success` of `FORM_PAYMENT_SETTINGS` with `paymentsEnabled` off it deletes only `menu.payments`; `menu.institutions`, which the same handler adds with `payments` when `paymentsEnabled` is on, is removed only by the `FORM_CONTEXT_STATISTICS` branch (note d). The server builds the menu afresh on every page load, so a reload drops the entry. OJS suite's test run of 2026-09-27 (Rule 1; scenario 1): after "Save" with "Enable" unticked the side menu held "Institutions" and no "Payments" for the whole 10-second wait on the suite's scratch journal, and the same after each of two unticked saves on another scratch journal driven by hand; after a reload it held neither; a ticked save added both on the same page.
 Issue report: [pkp-e2e#354](https://github.com/jardakotesovec/pkp-e2e/issues/354) ([docs/issues/U52-A12-institutions-menu-entry-stays-after-payments-off.md](../issues/U52-A12-institutions-menu-entry-stays-after-payments-off.md)).
+
+<a id="fn-f-a13"></a>
+**f-a13** — Note o. Live-probed 2026-10-30 on OJS and OMP `main` (scratch contexts set up with the US dollar and "Manual Fee Payment"): `PUT _payments` with the JSON body `{"paymentsEnabled": true}` answered 200 `{"paymentsEnabled": false, …}` and the context then read `paymentsEnabled` false; `{"paymentsEnabled": "true"}` answered true and stored it. The context schema types the setting as a boolean and `GET contexts/{id}` reports it as one. The cast dates from pkp/pkp-lib#3594 (Nate Wright, 2018); `stable-3_5_0` carries it (code read).
+
+<a id="fn-f-a14"></a>
+**f-a14** — Note o. Live-probed 2026-10-30 on OJS and OMP `main`: on a context set up with manual instructions, `PUT _payments` `{"currency": "EUR"}` answered 200 `{"currency": "EUR", "manualInstructions": ""}`; the manual method's `isConfigured()` needs the instructions, so `publicationEnabled()` and every fee then read off. `stable-3_5_0`'s `ManualPaymentPlugin::saveSettings()` is the same (code read).
+
+<a id="fn-f-a15"></a>
+**f-a15** — Note o. Live-probed 2026-10-30 on OJS and OMP `main`: `PUT _payments` `{"paymentPluginName": "NoSuchPlugin"}` answered 200 and the context stored "NoSuchPlugin"; `getPaymentPlugin()` then finds no plugin, so `isConfigured()` is false. The context schema gives `paymentPluginName` no list of values.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP `schemas/context.json` `paymentPluginName` default `ManualPayment`, applied when a press is created; OJS gives no default (note b). Live-probed 2026-09-27 (note td1): the press arrived with "Manual Fee Payment" chosen and "Enable" unticked, the journal with none chosen.
