@@ -116,7 +116,9 @@ reads the registry and the grids from this repo and makes these passes:
   route under a submission, on the set's other submission. A control first
   makes the same call on the set's own child, which must not be refused.
   A 2xx is a leak; a refusal, or a 4xx where the control had a 2xx, holds
-  the guard.
+  the guard. The version passes do the same for every route under
+  `publications/{publicationId}`, with the version swapped for one of the
+  other context's or the other submission's.
 - **The foreign body pass.** A route that takes its children's ids in the
   body rather than the path (the order routes), called at the persona
   set's own address with two children made in those same places. An order
