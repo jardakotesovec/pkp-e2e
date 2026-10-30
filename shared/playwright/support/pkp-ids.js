@@ -43,8 +43,8 @@ const REVIEW_ASSIGNMENT = {RECONSIDERED: 2, CONSIDERED: 3};
 /** `ReviewerRecommendationType`, a reviewer recommendation's `type`. */
 const RECOMMENDATION_TYPE = {APPROVED: 1, REVISIONS_REQUESTED: 3};
 
-/** `PKPApplication::ASSOC_TYPE_*` */
-const ASSOC_TYPE = {REPRESENTATION: 0x0000209};
+/** `PKPApplication::ASSOC_TYPE_*` (PRESS is OMP's `Application`'s). */
+const ASSOC_TYPE = {PRESS: 0x0000200, REPRESENTATION: 0x0000209, REVIEW_ROUND: 0x000020b};
 
 /** OPS's `Publication::PUBLICATION_RELATION_*`, a preprint's `relationStatus`. */
 const PUBLICATION_RELATION = {PUBLISHED: 3};

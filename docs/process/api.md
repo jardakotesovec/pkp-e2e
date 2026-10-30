@@ -135,14 +135,15 @@ reads the registry and the grids from this repo and makes these passes:
   it was. A control first makes the call on two of the set's own children,
   whose read must change, so a body the route stopped reading fails
   instead of passing for nothing. Each such route gets an entry in the
-  matrix's `params.js` (its child, its body, the read of what it changes).
+  matrix's `routes.js` (its child, its body, the read of what it changes).
 
 A call answered 401, 403 or 404, or a 2xx whose body is an error alone,
 counts as refused; any other answer, a 400 for an empty body included, as
 allowed; a 5xx is a finding of its own. A write is sent an empty body and
 a read no query, unless the route checks them before its caller, or a
 read names its submission only in its query: then the matrix's
-`params.js` gives it a valid one that changes nothing the next cell reads (the submission's own language for the language change). A
+`routes.js` gives it a valid one that changes nothing the next cell reads
+(the submission's own language for the language change). A
 foreign call and its control both stopped by a 4xx prove nothing, and fail
 until the route has its body or query. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
@@ -231,10 +232,11 @@ feature"), one spec at a time:
 2. **Gates.** Each route gets the grid of the rule it follows, or
    `none: <reason>`; a rule with no grid yet gets one in the spec that
    owns it.
-3. **Matrix.** Add a maker to the matrix's `params.js` for each new child
-   resource, and a body entry for each route that names children in its
-   body; run the matrix on all three apps, and judge every disagreeing
-   cell (above).
+3. **Matrix.** Add a maker to the matrix's `makers.js` for each new child
+   resource, and a `routes.js` entry for a route that needs a body, a
+   submission of its own or names children in its body (the matrix's
+   README, "Adding a route"); run the matrix on all three apps, and judge
+   every disagreeing cell (above).
 4. **API checks.** From the traffic map and the spec's Rules and Fields:
    the inputs, filters and refusals the screens never send. A value the
    form refuses is a gap only if the browser refuses it: when the server
