@@ -60,6 +60,46 @@ Distribution › "DOIs" › "Setup" is ticked with at least one kind ticked
 | **See the Crossmark button** {OJS} | • any visitor on a journal's article page, while Rule 42 holds <sup>t</sup> |
 | **See "Cited by" and the citing articles** {OJS} | • any visitor on a journal's article page, while Rule 42a holds <sup>z</sup> |
 
+<a id="api-grid-dois"></a>
+**Permission grid: managing DOIs.** The rows "Open the DOIs page" and
+"Assign, type, clear, mark, export and deposit DOIs" above, for every
+route behind the DOIs page: the DOI list and records, the bulk actions
+on works and issues, "Deposit All", and putting a typed DOI on a
+version. DOIs are on, as on a new journal (Rule 2); the page lists a
+work before and after its publication (Rule 15), and the site has no
+DOIs page (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-doi-registration"></a>
+**Permission grid: saving the registration agency.** The row "Change the
+DOI settings" above, for the route the "Registration" tab saves to
+(`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **Settings › Distribution › "DOIs" › "Setup"** (the tab "DOIs", side tab
@@ -2050,6 +2090,66 @@ throwaway accounts. <sup>sc</sup>
       successfully marked registered", and its row reads "Registered"
       (Rule 26). <sup>sc</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the DOI routes
+is the grids' ([managing DOIs](#api-grid-dois),
+[the registration agency](#api-grid-doi-registration)), checked apart
+(`docs/process/api.md`). No journal here has a registration agency, so
+nothing reaches one.
+
+API1. **A DOI record added naming another journal lands in this one** {OJS OMP OPS}
+
+   Given: a Journal Manager of a journal with the prefix "10.1234", and a
+   second journal.
+
+   - **Another journal named**: add a DOI record through the API with
+     the second journal's id in the request: it is stored in this
+     journal, read back on its own as "Unregistered", and this journal's
+     DOI list holds it alone; the second journal's list stays empty. The
+     DOIs page sends the typed DOI alone, and no screen reads the DOI
+     list.
+
+API2. **Without a registration agency, export and deposit are refused** {OJS OMP OPS}
+
+   Given: a Journal Manager of a journal with the prefix "10.1234" and no
+   registration agency, a published work given its DOI by "Assign DOIs".
+
+   - **Export, deposit**: "Export DOIs" and "Deposit DOIs" for the work
+     through the API are each refused (400) with an error; the page
+     offers neither without an agency (Rule 36). On a press the error is
+     a raw message key ⚠ [OMP6](#omp6).
+   - **Deposit All**: answers success, and the work's DOI still reads
+     "Unregistered" (Rules 29, 29a).
+
+API3. **Bulk actions naming another journal's work change nothing there** {OJS OMP OPS}
+
+   Given: two journals with the prefix "10.1234" and "Automatic DOI
+   Assignment" "Never"; in the second, a published work whose DOI reads
+   "Registered" and a work with no DOI; in the first, its Journal
+   Manager and a work with no DOI.
+
+   - **"Assign DOIs"**: through the API, naming the second journal's
+     work with no DOI: refused (400) with one failure, and that work
+     still has no DOI.
+   - **"Mark DOIs Unregistered"**: naming the second journal's registered
+     work: refused (400) with one failure, and its DOI still reads
+     "Registered".
+   - **Control**: the same two on the first journal's own work: it gets
+     a DOI reading "Unregistered", and the mark is accepted. The DOIs page
+     only lists the journal's own works (Rule 15).
+
+API4. **A registration agency no agency plugin offers is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager.
+
+   - **Not an agency**: save the "Registration" tab's agency through the
+     API as a name no enabled agency plugin carries: refused (400), "The
+     currently configured plugin must be a registration agency plugin."
+     The list offers only "None" and the enabled agencies (Fields); the
+     name is kept all the same [A5](#a5).
+   - **Control**: "None" is saved.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -2320,6 +2420,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS11](#ojs11) | A journal's Crossref deposit names a DOI twice, older version first, after "DOI Versioning" is switched on | 🐞 | medium | issues (claude), 2026-10-20 — re-verified |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
+| [OMP6](#omp6) | A press's DOI export and deposit refusals read as a raw message key | 🐞 | low | — |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS3](#ops3) | A preprint server's Crossref "Username" help reads "see the advise above" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS6](#ops6) | A preprint server's Crossref deposit names a DOI once per posted version that shares it | 🐞 | medium | issues (claude), 2026-10-20 — re-verified |
@@ -2419,8 +2520,10 @@ refuses, and presses "Save". The message appears under the field, yet
 the agency choice and "Automatic Deposit" are already saved, and any
 kind the agency does not accept already unticked.
 Question: should a refused block leave the tab's other fields unsaved?
-Lean: yes; one "Save" should store all or nothing.
-Basis: probe, 2026-09-26. <sup>f-a5</sup>
+Lean: yes; one "Save" should store all or nothing. Through the API the
+agency itself is kept the same way: a name that is no enabled agency
+plugin's is refused (400) and stored all the same (API4).
+Basis: probe, 2026-09-26; API probe, 2026-10-30. <sup>f-a5</sup>
 
 <a id="a6"></a>
 **A6 — Choosing an agency silently unticks the kinds it does not accept** · ❓ · minor.
@@ -3028,6 +3131,17 @@ asks for one?
 Lean: no, a minor 🐞; the badge asks for a DOI the same view says the
 chapter cannot have.
 Basis: probe, 2026-09-29. <sup>f-omp3</sup>
+
+<a id="omp6"></a>
+**OMP6 — A press's DOI export and deposit refusals read as a raw message key** · 🐞 · low.
+A press has no registration agency, so its DOIs page never offers
+"Export DOIs" or "Deposit DOIs" (Rule 36). Sent through the API anyway,
+both are refused as they should be, but the error reads
+`##api.dois.400.noRegistrationAgencyConfigured##` instead of a
+sentence: the press has no English text for it, which a journal and a
+preprint server word "No DOI registration agency has been configured
+for this journal." (API2).
+Since: 2021-06-08 · Basis: probe, 2026-10-30. <sup>f-omp6</sup>
 
 ### OPS
 
@@ -6046,6 +6160,16 @@ passed the same day at these heads: 2.0's file DOI made at "Create New
 Version" stayed "Unregistered" through the mark and after 2.0's
 publication. No issue report; the regression report and the kept check
 are dealt with when the PRs merge.
+
+<a id="fn-f-omp6"></a>
+**f-omp6** — API check API2, 2026-10-30, OMP: `PUT dois/submissions/export`
+and `…/deposit` for a published book on a press with no agency answer
+400 with `{"error":"##api.dois.400.noRegistrationAgencyConfigured##"}`.
+lib/pkp `api/v1/dois/PKPDoiController.php` (`exportSubmissions()`,
+`depositSubmissions()`) uses the key, which only the apps' own
+`locale/en/api.po` define, OJS and OPS but not OMP (nor its
+`stable-3_5_0` and `stable-3_4_0`); the key came with
+pkp/pkp-lib#7014 (2021-06-08).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `ops/locale/en/manager.po`

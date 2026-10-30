@@ -52,7 +52,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_doi.backend.publication.edit` | PUT | `_dois/publications/{publicationId}` | ojs omp ops | admin manager | U45 | — |
+| `_doi.backend.publication.edit` | PUT | `_dois/publications/{publicationId}` | ojs omp ops | admin manager | U45 | U45#dois |
 | `_doi.backend.peerReview.edit` | PUT | `_dois/peerReviews/{reviewId}` | ojs omp ops | admin manager | U45 | — |
 | `_doi.backend.authorResponse.edit` | PUT | `_dois/authorResponses/{responseId}` | ojs omp ops | admin manager | U45 | — |
 
@@ -157,7 +157,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `context.getTheme` | GET | `contexts/{contextId}/theme` | ojs omp ops | admin manager | U10 | — |
 | `context.edit` | PUT | `contexts/{contextId}` | ojs omp ops | admin manager | U59 | — |
 | `context.editTheme` | PUT | `contexts/{contextId}/theme` | ojs omp ops | admin manager | U10 | — |
-| `context.edit.doiRegistration` | PUT | `contexts/{contextId}/registrationAgency` | ojs omp ops | admin manager | U45 | — |
+| `context.edit.doiRegistration` | PUT | `contexts/{contextId}/registrationAgency` | ojs omp ops | admin manager | U45 | U45#doi-registration |
 | `context.add` | POST | `contexts` | ojs omp ops | admin | U59 | — |
 | `context.delete` | DELETE | `contexts/{contextId}` | ojs omp ops | admin | U59 | — |
 
@@ -176,30 +176,30 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `doi.issues.assignDois` | POST | `dois/issues/assignDois` | ojs | admin manager | U45 | — |
-| `doi.issues.export` | PUT | `dois/issues/export` | ojs | admin manager | U45 | — |
-| `doi.issues.deposit` | PUT | `dois/issues/deposit` | ojs | admin manager | U45 | — |
-| `doi.issues.markRegistered` | PUT | `dois/issues/markRegistered` | ojs | admin manager | U45 | — |
-| `doi.issues.markUnregistered` | PUT | `dois/issues/markUnregistered` | ojs | admin manager | U45 | — |
-| `doi.issues.markStale` | PUT | `dois/issues/markStale` | ojs | admin manager | U45 | — |
+| `doi.issues.assignDois` | POST | `dois/issues/assignDois` | ojs | admin manager | U45 | U45#dois |
+| `doi.issues.export` | PUT | `dois/issues/export` | ojs | admin manager | U45 | U45#dois |
+| `doi.issues.deposit` | PUT | `dois/issues/deposit` | ojs | admin manager | U45 | U45#dois |
+| `doi.issues.markRegistered` | PUT | `dois/issues/markRegistered` | ojs | admin manager | U45 | U45#dois |
+| `doi.issues.markUnregistered` | PUT | `dois/issues/markUnregistered` | ojs | admin manager | U45 | U45#dois |
+| `doi.issues.markStale` | PUT | `dois/issues/markStale` | ojs | admin manager | U45 | U45#dois |
 
 ### dois — PKPDoiController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `doi.getMany` | GET | `dois` | ojs omp ops | admin manager | U45 | — |
-| `doi.getDoi` | GET | `dois/{doiId}` | ojs omp ops | admin manager | U45 | — |
-| `doi.exports.getFile` | GET | `dois/exports/{fileId}` | ojs omp ops | admin manager | U45 | — |
-| `doi.add` | POST | `dois` | ojs omp ops | admin manager | U45 | — |
-| `doi.submissions.assignDois` | POST | `dois/submissions/assignDois` | ojs omp ops | admin manager | U45 | — |
-| `doi.edit` | PUT | `dois/{doiId}` | ojs omp ops | admin manager | U45 | — |
-| `doi.submissions.export` | PUT | `dois/submissions/export` | ojs omp ops | admin manager | U45 | — |
-| `doi.submissions.deposit` | PUT | `dois/submissions/deposit` | ojs omp ops | admin manager | U45 | — |
-| `doi.submissions.markRegistered` | PUT | `dois/submissions/markRegistered` | ojs omp ops | admin manager | U45 | — |
-| `doi.submissions.markUnregistered` | PUT | `dois/submissions/markUnregistered` | ojs omp ops | admin manager | U45 | — |
-| `doi.submissions.markStale` | PUT | `dois/submissions/markStale` | ojs omp ops | admin manager | U45 | — |
-| `doi.deposite.all` | PUT | `dois/depositAll` | ojs omp ops | admin manager | U45 | — |
-| `doi.delete` | DELETE | `dois/{doiId}` | ojs omp ops | admin manager | U45 | — |
+| `doi.getMany` | GET | `dois` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.getDoi` | GET | `dois/{doiId}` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.exports.getFile` | GET | `dois/exports/{fileId}` | ojs omp ops | admin manager | U45 | none: downloads the caller's own export file by its temporary-file id; a file belongs to the one user whose export made it, so no persona can be read against another's |
+| `doi.add` | POST | `dois` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.submissions.assignDois` | POST | `dois/submissions/assignDois` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.edit` | PUT | `dois/{doiId}` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.submissions.export` | PUT | `dois/submissions/export` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.submissions.deposit` | PUT | `dois/submissions/deposit` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.submissions.markRegistered` | PUT | `dois/submissions/markRegistered` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.submissions.markUnregistered` | PUT | `dois/submissions/markUnregistered` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.submissions.markStale` | PUT | `dois/submissions/markStale` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.deposite.all` | PUT | `dois/depositAll` | ojs omp ops | admin manager | U45 | U45#dois |
+| `doi.delete` | DELETE | `dois/{doiId}` | ojs omp ops | admin manager | U45 | U45#dois |
 
 ### editTaskTemplates — PKPEditTaskTemplateController
 
@@ -379,10 +379,10 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.context.multipleContextTimeline` | GET | `stats/contexts/timeline` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.context.contextTimeline` | GET | `stats/contexts/{contextId}/timeline` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.context.contextStat` | GET | `stats/contexts/{contextId}` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.context.multipleContextStat` | GET | `stats/contexts` | ojs omp ops | admin manager subEditor | U64 | — |
+| `stats.context.multipleContextTimeline` | GET | `stats/contexts/timeline` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
+| `stats.context.contextTimeline` | GET | `stats/contexts/{contextId}/timeline` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
+| `stats.context.contextStat` | GET | `stats/contexts/{contextId}` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
+| `stats.context.multipleContextStat` | GET | `stats/contexts` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
 
 ### stats/editorial — PKPStatsEditorialController
 
@@ -395,55 +395,55 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.issue.getManyTimeline` | GET | `stats/issues/timeline` | ojs | admin manager subEditor | U64 | — |
+| `stats.issue.getManyTimeline` | GET | `stats/issues/timeline` | ojs | admin manager subEditor | U64 | U64#statistics |
 | `stats.issue.getIssue` | GET | `stats/issues/{issueId}` | ojs | admin manager subEditor | U64 | — |
 | `stats.issue.getTimeline` | GET | `stats/issues/{issueId}/timeline` | ojs | admin manager subEditor | U64 | — |
-| `stats.issue.getMany` | GET | `stats/issues` | ojs | admin manager subEditor | U64 | — |
+| `stats.issue.getMany` | GET | `stats/issues` | ojs | admin manager subEditor | U64 | U64#statistics |
 
 ### stats/publications — PKPStatsPublicationController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.publication.getMany` | GET | `stats/publications` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.publication.getManyTimeline` | GET | `stats/publications/timeline` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.publication.getSubmission` | GET | `stats/publications/{submissionId}` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.publication.getTimeline` | GET | `stats/publications/{submissionId}/timeline` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.publication.getFiles` | GET | `stats/publications/files` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.publication.getCountries` | GET | `stats/publications/countries` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.publication.getRegions` | GET | `stats/publications/regions` | ojs omp ops | admin manager subEditor | U64 | — |
-| `stats.publication.getCities` | GET | `stats/publications/cities` | ojs omp ops | admin manager subEditor | U64 | — |
+| `stats.publication.getMany` | GET | `stats/publications` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
+| `stats.publication.getManyTimeline` | GET | `stats/publications/timeline` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
+| `stats.publication.getSubmission` | GET | `stats/publications/{submissionId}` | ojs omp ops | admin manager subEditor | U64 | U64#statistics-work |
+| `stats.publication.getTimeline` | GET | `stats/publications/{submissionId}/timeline` | ojs omp ops | admin manager subEditor | U64 | U64#statistics-work |
+| `stats.publication.getFiles` | GET | `stats/publications/files` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
+| `stats.publication.getCountries` | GET | `stats/publications/countries` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
+| `stats.publication.getRegions` | GET | `stats/publications/regions` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
+| `stats.publication.getCities` | GET | `stats/publications/cities` | ojs omp ops | admin manager subEditor | U64 | U64#statistics |
 
 ### stats/sushi — PKPStatsSushiController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.sushi.getStatus` | GET | `stats/sushi/status` | ojs omp ops | ? | U64 | — |
-| `stats.sushi.getMembers` | GET | `stats/sushi/members` | ojs omp ops | ? | U64 | — |
-| `stats.sushi.getReports` | GET | `stats/sushi/reports` | ojs omp ops | ? | U64 | — |
-| `stats.sushi.getReportsPR` | GET | `stats/sushi/reports/pr` | ojs omp ops | ? | U64 | — |
-| `stats.sushi.getReportsPR1` | GET | `stats/sushi/reports/pr_p1` | ojs omp ops | ? | U64 | — |
+| `stats.sushi.getStatus` | GET | `stats/sushi/status` | ojs omp ops | ? | U64 | U64#sushi |
+| `stats.sushi.getMembers` | GET | `stats/sushi/members` | ojs omp ops | ? | U64 | U64#sushi |
+| `stats.sushi.getReports` | GET | `stats/sushi/reports` | ojs omp ops | ? | U64 | U64#sushi |
+| `stats.sushi.getReportsPR` | GET | `stats/sushi/reports/pr` | ojs omp ops | ? | U64 | U64#sushi |
+| `stats.sushi.getReportsPR1` | GET | `stats/sushi/reports/pr_p1` | ojs omp ops | ? | U64 | U64#sushi |
 
 ### stats/sushi — StatsSushiController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.sushi.getReportsTR` | GET | `stats/sushi/reports/tr` | ojs | ? | U64 | — |
-| `stats.sushi.getReportsTRJ3` | GET | `stats/sushi/reports/tr_j3` | ojs | ? | U64 | — |
-| `stats.sushi.getReportsIR` | GET | `stats/sushi/reports/ir` | ojs | ? | U64 | — |
-| `stats.sushi.getReportsIRA1` | GET | `stats/sushi/reports/ir_a1` | ojs | ? | U64 | — |
+| `stats.sushi.getReportsTR` | GET | `stats/sushi/reports/tr` | ojs | ? | U64 | U64#sushi |
+| `stats.sushi.getReportsTRJ3` | GET | `stats/sushi/reports/tr_j3` | ojs | ? | U64 | U64#sushi |
+| `stats.sushi.getReportsIR` | GET | `stats/sushi/reports/ir` | ojs | ? | U64 | U64#sushi |
+| `stats.sushi.getReportsIRA1` | GET | `stats/sushi/reports/ir_a1` | ojs | ? | U64 | U64#sushi |
 
 ### stats/sushi — StatsSushiController [omp]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.sushi.getReportsTR` | GET | `stats/sushi/reports/tr` | omp | ? | U64 | — |
-| `stats.sushi.getReportsTRB3` | GET | `stats/sushi/reports/tr_b3` | omp | ? | U64 | — |
+| `stats.sushi.getReportsTR` | GET | `stats/sushi/reports/tr` | omp | ? | U64 | U64#sushi |
+| `stats.sushi.getReportsTRB3` | GET | `stats/sushi/reports/tr_b3` | omp | ? | U64 | U64#sushi |
 
 ### stats/sushi — StatsSushiController [ops]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `stats.sushi.getReportsIR` | GET | `stats/sushi/reports/ir` | ops | ? | U64 | — |
+| `stats.sushi.getReportsIR` | GET | `stats/sushi/reports/ir` | ops | ? | U64 | U64#sushi |
 
 ### stats/users — PKPStatsUserController
 
