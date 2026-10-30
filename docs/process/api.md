@@ -102,7 +102,7 @@ automatically.
 The matrix lives in the private security repo
 (`../pkp-e2e-sec/api-matrix/`), because a cell that disagrees with its
 grid is often a security weakness, and a public check would publish it. It
-reads the registry and the grids from this repo and makes two passes:
+reads the registry and the grids from this repo and makes these passes:
 
 - **The grids.** Every gated route, as every persona, in every state;
   a route fails with the list of cells that disagree.
@@ -111,6 +111,14 @@ reads the registry and the grids from this repo and makes two passes:
   requested at the persona set's own address as its manager: made in a
   second persona set (another context), and for a route under a
   submission, on the set's other submission. A 2xx is a leak.
+- **The foreign body pass.** A route that takes its children's ids in the
+  body rather than the path (the order routes), called at the persona
+  set's own address with two children made in those same places. An order
+  answers 200 whether or not it touched a row, so the pass reads the
+  outcome: the foreign list keeps its order. A control first reorders two
+  of the set's own children, so a body the route stopped reading fails
+  instead of passing for nothing. Each such route gets an entry in the
+  matrix's `params.js` (its child, the list showing the order, its body).
 
 A call answered 401, 403 or 404, or a 2xx whose body is an error alone,
 counts as refused; any other answer, a 400 for an empty body included, as
@@ -202,8 +210,9 @@ feature"), one spec at a time:
    `none: <reason>`; a rule with no grid yet gets one in the spec that
    owns it.
 3. **Matrix.** Add a maker to the matrix's `params.js` for each new child
-   resource, run both passes on all three apps, and judge every
-   disagreeing cell (above).
+   resource, and an order entry for each route that names children in its
+   body; run the matrix on all three apps, and judge every disagreeing
+   cell (above).
 4. **API checks.** From the traffic map and the spec's Rules and Fields:
    the inputs, filters and refusals the screens never send. A value the
    form refuses is a gap only if the browser refuses it: when the server
@@ -212,12 +221,6 @@ feature"), one spec at a time:
 5. **Green and lint**: the API tests on all three apps,
    `npm run api-routes -- --check`, the spec lint with and without
    `--tests`.
-
-Not covered yet: an id a write carries in its body rather than its path
-(the order routes of funders, contributors and highlights). The foreign
-passes swap path ids and judge by status; an order naming another
-submission's funder answers 200 whether or not it moved it, so it needs a
-check of the outcome, which no pass makes yet.
 
 ## Keeping it true
 
