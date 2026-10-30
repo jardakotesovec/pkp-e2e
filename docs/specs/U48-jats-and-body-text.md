@@ -104,6 +104,33 @@ role has no Production access (`docs/process/api.md`).
 | manager of another context | — | — |
 | site admin | ✓ | ✓ |
 
+<a id="api-grid-public-jats"></a>
+**Permission grid: downloading the published JATS XML.** The row
+"Download the published JATS XML" above (Rules 10 and 11), for the route
+the article page's and the "Preview" page's "JATS XML" link downloads
+from, on a version whose box is ticked and which has a JATS file:
+anyone once the version is published; before that, everyone the
+workflow header offers "Preview" (those who open the workflow from the
+editorial dashboard, the assistant roles included:
+[→ the header](U24-workflow-screen-and-stage-access.md)) and the
+submitting author (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | ✓ |
+| assigned assistant | ✓ | ✓ |
+| assigned review assistant | ✓ | ✓ |
+| submitter | ✓ | ✓ |
+| other author | — | ✓ |
+| assigned reviewer | — | ✓ |
+| reader | — | ✓ |
+| nobody signed in | — | ✓ |
+| manager of another context | — | ✓ |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 **The "JATS XML" page** (Publication › a version › "JATS XML", headed
@@ -754,8 +781,9 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
 The checks below send what no screen sends; who may call the JATS and
 Body Text routes is the grids' (*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
 for the changes, [the "JATS XML" page](#api-grid-jats-page) and
-[the "Body Text" page](#api-grid-body-text-page) for reading), checked
-apart (`docs/process/api.md`).
+[the "Body Text" page](#api-grid-body-text-page) for reading,
+[the published JATS XML](#api-grid-public-jats) for its download),
+checked apart (`docs/process/api.md`).
 
 API1. **A JATS download switch without its value is refused** {OJS}
 

@@ -31,30 +31,30 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_doi.backend.issue.edit` | PUT | `_dois/issues/{issueId}` | ojs | admin manager | U45 | — |
-| `_doi.backend.galley.edit` | PUT | `_dois/galleys/{galleyId}` | ojs | admin manager | U45 | — |
+| `_doi.backend.issue.edit` | PUT | `_dois/issues/{issueId}` | ojs | admin manager | U45 | U45#dois |
+| `_doi.backend.galley.edit` | PUT | `_dois/galleys/{galleyId}` | ojs | admin manager | U45 | U45#dois |
 
 ### _dois — BackendDoiController [omp]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_doi.backend.chapter.edit` | PUT | `_dois/chapters/{chapterId}` | omp | admin manager | U45 | — |
-| `_doi.backend.publication.format.edit` | PUT | `_dois/publicationFormats/{publicationFormatId}` | omp | admin manager | U45 | — |
-| `_doi.backend.submission.file.edit` | PUT | `_dois/submissionFiles/{submissionFileId}` | omp | admin manager | U45 | — |
+| `_doi.backend.chapter.edit` | PUT | `_dois/chapters/{chapterId}` | omp | admin manager | U45 | U45#dois |
+| `_doi.backend.publication.format.edit` | PUT | `_dois/publicationFormats/{publicationFormatId}` | omp | admin manager | U45 | U45#dois |
+| `_doi.backend.submission.file.edit` | PUT | `_dois/submissionFiles/{submissionFileId}` | omp | admin manager | U45 | U45#dois |
 
 ### _dois — BackendDoiController [ops]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_doi.backend.galley.edit` | PUT | `_dois/galleys/{galleyId}` | ops | admin manager | U45 | — |
+| `_doi.backend.galley.edit` | PUT | `_dois/galleys/{galleyId}` | ops | admin manager | U45 | U45#dois |
 
 ### _dois — PKPBackendDoiController
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `_doi.backend.publication.edit` | PUT | `_dois/publications/{publicationId}` | ojs omp ops | admin manager | U45 | U45#dois |
-| `_doi.backend.peerReview.edit` | PUT | `_dois/peerReviews/{reviewId}` | ojs omp ops | admin manager | U45 | — |
-| `_doi.backend.authorResponse.edit` | PUT | `_dois/authorResponses/{responseId}` | ojs omp ops | admin manager | U45 | — |
+| `_doi.backend.peerReview.edit` | PUT | `_dois/peerReviews/{reviewId}` | ojs omp ops | admin manager | U45 | U45#review-dois |
+| `_doi.backend.authorResponse.edit` | PUT | `_dois/authorResponses/{responseId}` | ojs omp ops | admin manager | U45 | U45#review-dois |
 
 ### _email — PKPEmailController
 
@@ -78,13 +78,13 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_payment.backend.edit` | PUT | `_payments` | ojs omp | admin manager | U52 | — |
+| `_payment.backend.edit` | PUT | `_payments` | ojs omp | admin manager | U52 | U52#payments-setup |
 
 ### _submissions — BackendSubmissionsController [ojs]
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_submission.payment` | PUT | `_submissions/{submissionId}/payment` | ojs | admin manager subEditor assistant | U52 | — |
+| `_submission.payment` | PUT | `_submissions/{submissionId}/payment` | ojs | admin manager subEditor assistant | U52 | U52#apc-record |
 
 ### _submissions — BackendSubmissionsController [omp]
 
@@ -277,10 +277,10 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `issue.getMany` | GET | `issues` | ojs | manager subEditor assistant author reviewer | U50 | — |
-| `issue.current` | GET | `issues/current` | ojs | manager subEditor assistant author reviewer | U50 | — |
-| `issue.getIssue` | GET | `issues/{issueId}` | ojs | manager subEditor assistant author reviewer | U50 | — |
-| `issue.getAssignmentOptions` | GET | `issues/assignmentOptions` | ojs | manager subEditor assistant author reviewer | U50 | — |
+| `issue.getMany` | GET | `issues` | ojs | manager subEditor assistant author reviewer | U50 | U50#issues-read |
+| `issue.current` | GET | `issues/current` | ojs | manager subEditor assistant author reviewer | U50 | U50#issues-read |
+| `issue.getIssue` | GET | `issues/{issueId}` | ojs | manager subEditor assistant author reviewer | U50 | U50#issues-read |
+| `issue.getAssignmentOptions` | GET | `issues/assignmentOptions` | ojs | manager subEditor assistant author reviewer | U50 | U50#issue-choices |
 
 ### jobs — PKPJobController
 
@@ -515,7 +515,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 |---|---|---|---|---|---|---|
 | `submission.publication.issue.assignmentStatus` | GET | `submissions/{submissionId}/publications/{publicationId}/issueAssignmentStatus` | ojs | admin manager subEditor assistant | U49 | U40#permissions-page |
 | `submission.publication._components.issue` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/issue` | ojs | admin manager subEditor assistant | U49 | U40#permissions-page |
-| `submission.publication._components.submissionPayment` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/submissionPayment` | ojs | admin manager subEditor assistant | U52 | — |
+| `submission.publication._components.submissionPayment` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/submissionPayment` | ojs | admin manager subEditor assistant | U52 | U52#apc-record |
 
 ### submissions — SubmissionController [omp]
 
@@ -595,7 +595,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `publication.jats.add` | POST | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
 | `publication.jats.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
 | `publication.jats.setVisibility` | PUT | `submissions/{submissionId}/publications/{publicationId}/jats/visibility` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
-| `publication.jats.publicDownload` | GET | `submissions/{submissionId}/publications/{publicationId}/jats/download` | ojs | none | U48 | — |
+| `publication.jats.publicDownload` | GET | `submissions/{submissionId}/publications/{publicationId}/jats/download` | ojs | none | U48 | U48#public-jats |
 
 ### submissions/{submissionId}/publications/{publicationId}/mediaFiles — MediaFilesController
 

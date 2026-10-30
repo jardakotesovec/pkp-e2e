@@ -96,4 +96,80 @@ test.describe('DOIs through the API', () => {
         expect(none.status).toBe(200);
         expect(none.body).toEqual({registrationAgency: null});
     });
+
+    test('API5: A chapter without its own page takes no DOI', async ({scratch, appContext}) => {
+        test.skip(appContext.capabilities.hasGalleys, 'only a press has chapters (Rule 47)');
+        const j = await scratch({users: {mg: 'manager', au: 'author'}, doiPrefix: '10.1234', enabledDoiTypes: ['publication', 'chapter'], doiCreationTime: 'never'});
+        const book = await j.submission('b', {
+            submitter: 'au',
+            chapters: [{title: 'Without a page'}, {title: 'With a page', page: true}],
+        });
+        const api = await j.as('mg');
+        const [bare, paged] = book.chapters;
+        const chapterDoi = async (chapter) => {
+            const version = await api.get(`submissions/${book.submissionId}/publications/${book.publicationId}`);
+            expect(version.status).toBe(200);
+            return version.body.chapters.find((c) => c.id === chapter.id).doiId ?? null;
+        };
+
+        // "Chapter Page" unticked: the DOIs page greys the row out.
+        const doi = await api.post('dois', {doi: uniqueDoi('10.1234')});
+        expect(doi.status).toBe(200);
+        const refused = await api.put(`_dois/chapters/${bare.id}`, {doiId: doi.body.id});
+        expect(refused.status).toBe(403);
+        expect(refused.body.error).toBe('A DOI cannot be assigned to this item.');
+        expect(await chapterDoi(bare)).toBeNull();
+
+        // Control: the chapter with its own page takes it.
+        expect((await api.put(`_dois/chapters/${paged.id}`, {doiId: doi.body.id})).status).toBe(200);
+        expect(await chapterDoi(paged)).toBe(doi.body.id);
+    });
+
+    test('API6: A review not shown publicly takes no DOI', async ({scratch, appContext}) => {
+        test.skip(!appContext.capabilities.hasIssues, 'only a journal has peer-review DOIs (Rule 7)');
+        const j = await scratch({
+            users: {mg: 'manager', au: 'author', rv: 'externalReviewer'},
+            doiPrefix: '10.1234',
+            enabledDoiTypes: ['publication', 'peerReview'],
+            doiCreationTime: 'never',
+        });
+        const api = await j.as('mg');
+        // A review submitted and read ("Mark as Complete"), its "Public
+        // Visibility" as the journal's default gives it at the assignment.
+        const review = async (suffix, visible) => {
+            const saved = await api.put(`contexts/${j.seeded.contextId}`, {defaultReviewPublicVisibility: visible});
+            expect(saved.status).toBe(200);
+            const work = await j.submission(suffix, {
+                submitter: 'au',
+                decisions: ['sendExternalReview'],
+                reviewRounds: [{reviewers: [{username: j.user('rv'), status: 'completed'}]}],
+            });
+            const id = work.reviewAssignments[0].id;
+            const read = await api.put(`submissions/${work.submissionId}/reviewAssignments/${id}/consider`, {considered: 3});
+            expect(read.status).toBe(200);
+            return {work, id};
+        };
+        const reviewDoi = async ({work, id}) => {
+            const res = await api.get(`submissions/${work.submissionId}/reviewAssignments/${id}`);
+            expect(res.status).toBe(200);
+            // Read either way: the review's DOI comes back as the server's
+            // own object, its fields under `_data` (OJS14).
+            const doi = res.body.doiObject;
+            return doi ? (doi.id ?? doi._data?.id) : null;
+        };
+        const hidden = await review('h', false);
+        const shown = await review('s', true);
+        const doi = await api.post('dois', {doi: uniqueDoi('10.1234')});
+        expect(doi.status).toBe(200);
+
+        // Not shown publicly: the DOIs page lists no row for it.
+        const refused = await api.put(`_dois/peerReviews/${hidden.id}`, {doiId: doi.body.id});
+        expect(refused.status).toBe(422);
+        expect(refused.body).toHaveProperty('error');
+        expect(await reviewDoi(hidden)).toBeNull();
+
+        // Control: the review shown publicly takes it.
+        expect((await api.put(`_dois/peerReviews/${shown.id}`, {doiId: doi.body.id})).status).toBe(200);
+        expect(await reviewDoi(shown)).toBe(doi.body.id);
+    });
 });

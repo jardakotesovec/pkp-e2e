@@ -64,8 +64,9 @@ Distribution › "DOIs" › "Setup" is ticked with at least one kind ticked
 **Permission grid: managing DOIs.** The rows "Open the DOIs page" and
 "Assign, type, clear, mark, export and deposit DOIs" above, for every
 route behind the DOIs page: the DOI list and records, the bulk actions
-on works and issues, "Deposit All", and putting a typed DOI on a
-version. DOIs are on, as on a new journal (Rule 2); the page lists a
+on works and issues, "Deposit All", and putting a typed DOI on an
+item: a version, a galley, an issue, a chapter, a publication format or
+a file. DOIs are on, as on a new journal (Rule 2); the page lists a
 work before and after its publication (Rule 15), and the site has no
 DOIs page (`docs/process/api.md`).
 
@@ -99,6 +100,30 @@ DOI settings" above, for the route the "Registration" tab saves to
 | nobody signed in | — |
 | manager of another context | — |
 | site admin | ✓ |
+
+<a id="api-grid-review-dois"></a>
+**Permission grid: putting a DOI on a review.** The rows of
+[managing DOIs](#api-grid-dois), for the two routes that put a typed DOI
+on a peer review (Rule 7) or an author response: whoever opens the DOIs
+page, on a journal and a press, whose reviews and responses take one
+whichever kinds are ticked; a preprint server has no review, so nothing
+there takes one (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ |
+| manager {OPS} | — | — |
+| assigned section editor | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin {OJS OMP} | ✓ | ✓ |
+| site admin {OPS} | — | — |
 
 ## Fields & validation
 
@@ -338,7 +363,8 @@ links under the list. <sup>g</sup>
    current version, empty and reading "Needs DOI" until it gets its
    DOI. The number is one the install gives the review request ("Peer
    Review 186"), not a count of the article's reviews. A review that
-   does not count as read has no row and no DOI. <sup>j</sup> <sup>q15</sup> <sup>q46</sup>
+   does not count as read has no row and no DOI; through the API it
+   takes one all the same ⚠ [OJS13](#ojs13). <sup>j</sup> <sup>q15</sup> <sup>q46</sup>
 
 7a. **When a review gets its DOI** {OJS}. A review that meets Rule 7's
     three conditions ("qualifies" below) gets its DOI:
@@ -2094,7 +2120,8 @@ throwaway accounts. <sup>sc</sup>
 
 The checks below send what no screen sends; who may call the DOI routes
 is the grids' ([managing DOIs](#api-grid-dois),
-[the registration agency](#api-grid-doi-registration)), checked apart
+[the registration agency](#api-grid-doi-registration),
+[a review's DOI](#api-grid-review-dois)), checked apart
 (`docs/process/api.md`). No journal here has a registration agency, so
 nothing reaches one.
 
@@ -2149,6 +2176,35 @@ API4. **A registration agency no agency plugin offers is refused** {OJS OMP OPS}
      The list offers only "None" and the enabled agencies (Fields); the
      name is kept all the same [A5](#a5).
    - **Control**: "None" is saved.
+
+API5. **A chapter without its own page takes no DOI** {OMP}
+
+   Given: a Press Manager of a press with the prefix "10.1234",
+   "Chapters" ticked and "Automatic DOI Assignment" "Never"; a book with
+   two chapters, one with "Chapter Page" ticked, one without; a DOI
+   record of the press.
+
+   - **No page**: put the record on the chapter without a page through
+     the API: refused (403), "A DOI cannot be assigned to this item.",
+     and the chapter still has no DOI. The DOIs page greys that row out
+     and its box cannot be typed in (Rule 47).
+   - **Control**: the same record on the chapter with its page is stored.
+
+API6. **A review not shown publicly takes no DOI** {OJS}
+
+   Given: a Journal Manager of a journal with the prefix "10.1234",
+   "Peer Review" ticked and "Automatic DOI Assignment" "Never"; two
+   reviews, each submitted and marked complete, one assigned while the
+   journal's "Public Visibility" default was off, the other while it was
+   on; a DOI record of the journal.
+
+   - **Not public**: put the record on the review not shown publicly
+     through the API: refused (422) with an error, and the review still
+     has no DOI. The DOIs page lists no row for it (Rule 7).
+   - **Control**: the same record on the review shown publicly is
+     stored, read back from the review, whose answer gives the DOI as the
+     server's internal object ⚠ [OJS14](#ojs14). A review not yet submitted, or not yet marked complete,
+     takes one all the same ⚠ [OJS13](#ojs13).
 
 ## Coverage
 
@@ -2418,6 +2474,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS9](#ojs9) | With "Author Response" DOIs turned on, every DOI assignment gives each author response a new DOI | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [OJS10](#ojs10) | A cancelled reviewer's review stays on the DOIs page and is still deposited with Crossref | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OJS11](#ojs11) | A journal's Crossref deposit names a DOI twice, older version first, after "DOI Versioning" is switched on | 🐞 | medium | issues (claude), 2026-10-20 — re-verified |
+| [OJS13](#ojs13) | A review not yet submitted, or not yet read by an editor, takes a DOI through the API | 🐞 | low | — |
+| [OJS14](#ojs14) | A review's DOI reads through the API as the server's internal object | 🐞 | low | — |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OMP6](#omp6) | A press's DOI export and deposit refusals read as a raw message key | 🐞 | low | — |
@@ -3077,6 +3135,27 @@ is the agency (or the file leave the policy out while it is empty)?
 Lean: a low 🐞; the save that makes the box required gives no sign of
 it, and deposits then fail over a box on another tab.
 Basis: probe, 2026-10-19. <sup>f-ojs12</sup>
+
+<a id="ojs13"></a>
+**OJS13 — A review not yet submitted, or not yet read by an editor, takes a DOI through the API** · 🐞 · low.
+A Journal Manager who sends the DOIs page's request for a review row
+with the id of a review shown publicly gets the DOI stored on it even
+while the reviewer has not submitted it or no editor has marked it
+complete. Rule 7 gives a review a DOI only once all three hold, and the
+DOIs page lists no row for such a review; only the public flag is
+checked. No screen sends it, so only a direct API call meets it.
+Since: 2026-01-27 (pkp/pkp-lib#11332) · Basis: probe, 2026-10-30. <sup>f-ojs13</sup>
+
+<a id="ojs14"></a>
+**OJS14 — A review's DOI reads through the API as the server's internal object** · 🐞 · low.
+A review that has a DOI returns it, in the review's own answer and in
+the answer to the request that stores it, as a `doiObject` holding the
+DOI's fields under `_data` beside the server's internal flags
+(`_hasLoadableAdapters` and four more), where a version's `doiObject`
+gives the DOI's fields themselves (`id`, `doi`, `status`). A program
+reading a review's DOI the way it reads a version's finds none. The
+DOIs page still shows a review's DOI (scenario 17).
+Basis: probe, 2026-10-30. <sup>f-ojs14</sup>
 
 
 ### OMP
@@ -6010,6 +6089,12 @@ adds the Crossmark node whenever "DOI Versioning" is on, and
 `appendCrossmarkNode()` writes the stored `updatePolicyDoi` as it is.
 3.5 is not affected: a journal there has neither "DOI Versioning" nor
 "Update Policy DOI".
+
+<a id="fn-f-ojs13"></a>
+**f-ojs13** — Live-probed 2026-10-30, OJS `main` (ojs 0a00726121, lib/pkp df42984b46), a scratch journal on the probe server with "Public Visibility" on by default: a submission sent to review with two reviewers, one review `completed` (never marked complete, `considered` 0), one `accepted` and not submitted; the manager's `PUT api/v1/_dois/peerReviews/{id}` with a fresh DOI record of the journal answered 200 for both and stored the DOI. `PKPBackendDoiController::editPeerReview()` checks `getIsReviewPubliclyVisible()` alone (added by pkp/pkp-lib#12509, 2026-07-01; the route came with pkp/pkp-lib#11332, 2026-01-27); nothing reads the review's status or `considered`. A press answers the same through its own copy of the route (the API matrix, U45's review grid).
+
+<a id="fn-f-ojs14"></a>
+**f-ojs14** — Live-probed 2026-10-30, OJS `main` (ojs 0a00726121, lib/pkp df42984b46), the same journal as f-ojs13: after the review route stored a DOI, both its answer and `GET api/v1/submissions/{id}/reviewAssignments/{id}` returned `"doiObject":{"_data":{"id":…,"contextId":…,"doi":…,"status":1,"resolvingUrl":…},"_hasLoadableAdapters":false,"_metadataExtractionAdapters":[],"_extractionAdaptersLoaded":false,"_metadataInjectionAdapters":[],"_injectionAdaptersLoaded":false}`. The review assignment's schema map passes the DOI object through unsummarised, where the publication map calls `Repo::doi()->getSchemaMap()->summarize()` on it (lib/pkp `classes/publication/maps/Schema.php:178`); `classes/submission/reviewAssignment/maps/Schema.php` has no `doiObject` case. API6's read takes either shape.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — `omp/classes/submission/Collector.php`
