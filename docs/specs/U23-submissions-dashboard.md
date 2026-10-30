@@ -53,6 +53,91 @@ Rule 9a.
 | **Delete incomplete submissions in bulk** | • Journal Manager, and a Site Administrator who also holds Journal Manager in the journal: over any incomplete submission in the journal (Rule 12)<br>• a Site Administrator without Journal Manager there: still offered "More Actions", over the assigned-only or empty list they get [A9](#a9)<br>• Section Editors and assistants get no "More Actions" control here at all. Authors get it on their own list ([→ deleting drafts](U22-my-submissions.md)) <sup>m</sup> |
 | **Receive the monthly outstanding-tasks email** | • Journal Manager, Section Editor: active accounts with at least one outstanding item, unless they opted out {OJS OMP} (Side effects) <sup>n</sup> |
 
+<a id="api-grid-journal-list"></a>
+**Permission grid: listing the whole journal.** The row "See a submission
+listed" above, its journal-wide half, for the route behind a Journal
+Manager's and a Site Administrator's views (`_submissions`); everyone
+else's views read the assigned-only routes below (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-assigned-lists"></a>
+**Permission grid: listing one's own submissions.** The rows "Open the
+editorial dashboard" and "See a submission listed" above, and *[My
+Submissions](U22-my-submissions.md)*' own, for the routes behind "Assigned
+to me", the review views and every view of an assigned-only account or an
+author (`_submissions/assigned`, `_submissions/reviews`): any editorial
+role or author may ask, unassigned or not, and gets only what Rule 3
+scopes to them; a reviewer's list is their own
+([Reviewer's review](U28-reviewers-review.md)) (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| assigned section editor | ✓ |
+| unassigned section editor | ✓ |
+| assigned assistant | ✓ |
+| assigned review assistant | ✓ |
+| submitter | ✓ |
+| other author | ✓ |
+| assigned reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-back-office-lists"></a>
+**Permission grid: any back-office list.** Rule 1's count badges, which
+every back-office list's sidebar shows (this dashboard's, My Submissions',
+a reviewer's), for `_submissions/viewsCount`, and the plain submissions
+list the DOI and issue pages read (`submissions`), scoped as Rule 3 says,
+to a reviewer the submissions they review (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| assigned section editor | ✓ |
+| unassigned section editor | ✓ |
+| assigned assistant | ✓ |
+| assigned review assistant | ✓ |
+| submitter | ✓ |
+| other author | ✓ |
+| assigned reviewer | ✓ |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-delete-incomplete"></a>
+**Permission grid: deleting incomplete submissions.** The row "Delete
+incomplete submissions in bulk" above and *[My
+Submissions](U22-my-submissions.md)*' "Delete incomplete submissions", for
+the route behind both lists' "Delete Incomplete Submissions"
+(`DELETE _submissions`): a Journal Manager over any draft, an author over
+their own (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | ✓ |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 The page collects no data of its own. Its one form is the **Filters** panel
@@ -122,7 +207,9 @@ the account's roles, never on which dashboard page it opens from:
    open [A9](#a9). An assignment
    as Author or Reviewer does not surface a submission on *this* dashboard;
    it surfaces on My Submissions or the reviewer's list instead. The scope
-   applies uniformly to views, search and counts. <sup>c</sup>
+   applies uniformly to views, search and counts. A program asking for
+   the assigned-only list directly fails when it sends the role filter
+   as a single value ⚠ [A19](#a19). <sup>c</sup>
 4. **Addresses.** The page's address records the current state: the view,
    the search phrase, any filters, the sort, and an open workflow panel. So
    the page can be bookmarked, shared or reloaded as it was, with two
@@ -188,6 +275,8 @@ the account's roles, never on which dashboard page it opens from:
    - **Switching views** clears the search: the chip goes and the box
      empties. A phrase typed without pressing Enter stays in the box on the
      next view, which shows its full list with no chip.
+   - **A phrase as a list**, which no box sends, fails on every
+     submissions list when a program sends it ⚠ [A20](#a20).
 <a id="search-view"></a>
 7. **Global search.** The sidebar's "Search submissions" box searches
    *everything the account can reach*, regardless of state: the whole
@@ -806,6 +895,70 @@ App-specific:
       longer lists the submission once its review is confirmed.
       <sup>s17</sup>
 
+### Through the API
+
+The checks below send what no screen sends, or read what an allowed
+caller's answer withholds; who may call the list routes is the grids'
+([the whole journal](#api-grid-journal-list),
+[one's own](#api-grid-assigned-lists),
+[any back-office list](#api-grid-back-office-lists),
+[deleting drafts](#api-grid-delete-incomplete)), checked apart
+(`docs/process/api.md`).
+
+API1. **A bulk delete removes drafts only, and an author only their own** {OJS OMP OPS}
+
+   Given: a Journal Manager, two Authors, a draft of each, and a submitted
+   submission of the first.
+
+   - **Not a draft**: the manager's "Delete Incomplete Submissions"
+     request naming the submitted submission, alone or beside a draft, is
+     refused (404), and one naming no number is refused (400); both
+     survive. The list only offers drafts a checkbox.
+   - **Another author's draft**: the first author's request naming the
+     other's draft, alone or beside their own, is refused (404), and both
+     drafts survive.
+   - **Control**: the first author's request naming their own draft
+     deletes it {OJS OMP} (a preprint server refuses it, [→ My Submissions
+     OPS2](U22-my-submissions.md#ops2)), and the manager's naming the
+     other draft deletes it; the submitted submission stays.
+
+API2. **A list of submissions holds only the caller's own unless they work journal-wide** {OJS OMP OPS}
+
+   Given: a Journal Manager, two Section Editors, two Authors; the first
+   author's submission with the first section editor assigned, and the
+   second author's.
+
+   - **By role**: the REST API's submissions list, which the screens ask
+     only as a Journal Manager, lists both submissions to the manager,
+     the first to the assigned section editor and to its author, the
+     second to its author, and none to the unassigned section editor
+     (Rule 3).
+   - **Someone else's assignments**: the assigned section editor asking
+     for the second author's assignments is refused (403); asking for
+     their own lists the first, and so does the manager asking for the
+     section editor's.
+
+API3. **A reviewer's list of submissions withholds the authors' identity** {OJS OMP}
+
+   Given: a Journal Manager, an Author, a Reviewer who accepted a
+   double-anonymous review of the author's submission.
+
+   - **The reviewer's list**: the REST API's submissions list, which no
+     screen asks as a reviewer, lists the one submission under review and
+     names its author nowhere
+     ([→ the single read](U24-workflow-screen-and-stage-access.md#api-grid-submission-read)).
+   - **Control**: the manager's list names the author.
+
+API4. **An author's own list withholds the anonymous reviewers' identity** {OJS OMP}
+
+   Given: a Journal Manager, an Author, a Reviewer who accepted a
+   double-anonymous review of the author's submission.
+
+   - **My Submissions' list**: the author's list as My Submissions asks
+     for it carries the submission and its one review, and names the
+     reviewer nowhere. No screen shows the withheld fields.
+   - **Control**: the manager's list of the journal names the reviewer.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -873,6 +1026,8 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A15](#a15) | A screen reader is never told which column the submissions list is sorted by, or in which direction | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
 | [A17](#a17) | With strict mode on, every search from the sidebar's "Search submissions" box fails and shows "Search Results (0)" | 🐞 | low · crash: server | — |
+| [A19](#a19) | A program that asks for a person's own submissions with the role filter as a single value gets a server error | 🐞 | low · crash: server | — |
+| [A20](#a20) | A program that sends a submissions list a search phrase as a list gets a server error | 🐞 | low · crash: server | — |
 | [A1](#a1) | Section Editors and assistants have no "Declined" view, so a declined submission they are assigned to drops out of every view; on 3.5 nothing on the dashboard brings it back | 🐞 | medium | upstream sync (claude), 2026-10-28 — regression report |
 | [A2](#a2) | Editors are offered "Complete submission" on other people's incomplete submissions, landing them in the author's wizard | ❓ | minor | — |
 | [A3](#a3) | The author/reviewer conflict notice always says "as a Journal Manager", whoever is looking, on presses and preprint servers too | ❓ | minor | — |
@@ -1062,6 +1217,27 @@ landing view or under "Search Results"? Lean: 🐞; the address is the
 page's record of a search (Rule 4), and dropping it silently shows
 submissions the person did not ask for.
 Basis: probe, 2026-10-05. <sup>a18</sup>
+
+<a id="a19"></a>
+**A19 — A program that asks for a person's own submissions with the role filter as a single value gets a server error** · 🐞 · low · crash: server.
+"Assigned to me" and every view of an assigned-only account or an author
+ask the install's programming interface (the REST API) for the
+signed-in person's submissions, filtered by the roles they hold them
+in, and always send that filter as a list, even of one role. A program
+that sends it as a single value, as the same interface accepts on its
+counts and review lists, expects the same list. Instead the request
+fails with a server error, and nothing is listed.
+Basis: probe, 2026-10-30. <sup>a19</sup>
+
+<a id="a20"></a>
+**A20 — A program that sends a submissions list a search phrase as a list gets a server error** · 🐞 · low · crash: server.
+The dashboard's search boxes (Rules 6 and 7) send their phrase as one
+piece of text. A program that sends the install's programming interface
+(the REST API) a phrase as a list, as it may send most other filters,
+expects the list refused with a message or searched by its words.
+Instead every submissions list answers a server error: the whole
+journal's, one's own, the review views' and the REST API's own list.
+Basis: probe, 2026-10-30. <sup>a20</sup>
 
 ### OMP
 
@@ -2181,6 +2357,33 @@ kept the phrase ("Assigned to me (0)" with the chip), and
 script error or failed request. An earlier sighting on the default
 dataset (2026-10-01, OJS and OPS, `?searchPhrase=20` listing other
 submissions) fits this fallback; that walk was not repeated.
+
+<a id="fn-a19"></a>
+**a19 — A19 evidence.** `PKPBackendSubmissionsController::assigned()`
+passes `$queryParams['assignedWithRoles']` to
+`Collector::assignedTo(array $assignedTo, ?array $withRoles)` as it
+comes; the counts (`getViewsCount()`) and the review views (`reviews()`)
+run the same key through `paramToArray()` first. The views send
+`assignedWithRoles[]` (`DashboardView` props). From pkp/pkp-lib#10768
+(`2a42a379ec`, 2025-03-06); `stable-3_5_0` has the same line (code).
+Probed 2026-10-30 (OJS, OMP, OPS `main`, lib/pkp `df42984b46` on OJS,
+the base journals' probe servers): `GET _submissions/assigned?assignedWithRoles=16`
+as the Journal Manager and `?assignedWithRoles=65536` as the Author
+each answered 500 with the PHP type error ("Argument #2 ($withRoles)
+must be of type ?array, string given"); `assignedWithRoles[]=16`
+answered 200, and so did `_submissions/viewsCount?assignedWithRoles=16`.
+
+<a id="fn-a20"></a>
+**a20 — A20 evidence.** `getSubmissionCollector()` in
+`PKPBackendSubmissionsController` and in `PKPSubmissionController`
+hands the `searchPhrase` key to `Collector::searchPhrase(?string $phrase)`
+as it comes, with no check of its type (code). Probed 2026-10-30 (OJS
+`main`, lib/pkp `df42984b46`, OPS `main` for the first, the base
+journals' probe servers, the Journal Manager): `GET _submissions`,
+`_submissions/assigned`, `_submissions/reviews` and `submissions`, each
+with `?searchPhrase[]=x`, answered 500 with the PHP type error
+("Argument #1 ($phrase) must be of type ?string, array given");
+`?searchPhrase=x` answers 200 (the screens' own search).
 
 <a id="fn-omp1"></a>
 **omp1 — OMP1 evidence.** OMP's

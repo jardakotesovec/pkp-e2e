@@ -125,6 +125,29 @@ identity withheld while the review keeps it from them (`docs/process/api.md`).
 | manager of another context | — | — |
 | site admin | ✓ | ✓ |
 
+<a id="api-grid-delete"></a>
+**Permission grid: deleting a submission.** The row "Confirm the "Delete"
+dialog" above (Rule 19's refusal for every other role), for the route
+behind the dialog (`DELETE _submissions/{id}`) and the REST API's own
+delete (`DELETE submissions/{id}`); the stage features offer the button on
+a declined submission only, which is when, not who (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | — | — |
+| assigned section editor, metadata edit off | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 N/A. The screen's own surfaces are the header, the side menu and three
