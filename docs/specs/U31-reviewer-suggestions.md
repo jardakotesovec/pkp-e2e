@@ -85,14 +85,18 @@ reaches neither stage the panel sits on.
 Manager (so the Site Administrator) on any draft; no one else is
 offered the draft. The routes behind the step's "Save", "Edit" › "Save"
 and "Delete" follow it. `Draft` is the submitter's draft, which no one
-is assigned to yet; once a submission is in, every write is refused
+is assigned to yet (the "assigned" personas hold only their role on
+it); once a submission is in, every write is refused
 (Rule 7; "Through the API", API1).
 
 | Persona | Draft |
 |---|---|
 | manager | ✓ |
+| assigned section editor | — |
+| assigned section editor, metadata edit off | — |
 | section editor | — |
 | assistant | — |
+| assigned review assistant | — |
 | submitter | ✓ |
 | author | — |
 | reviewer | — |

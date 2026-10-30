@@ -77,46 +77,51 @@ below is one who holds a journal role. <sup>b</sup>
 <a id="api-grid-participants-read"></a>
 **Permission grid: reading a submission's participants.** The row "See
 the Participants panel" above, on any stage, for the route that lists
-the participants of every stage at once (`docs/process/api.md`).
+the participants of every stage at once (`docs/process/api.md`). `Review`
+is the submission in review, whose stages not yet reached keep the panel
+(*[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md)*,
+its Rule 16), so the Copyeditor sees it on Copyediting there too.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| assigned review assistant | ✓ | ✓ |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | ✓ |
+| assigned review assistant | ✓ | ✓ | ✓ |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-stage-participants-read"></a>
 **Permission grid: reading one stage's participants.** The same row, for
 the route the panel loads its list from, asked for Copyediting
 (Production on a preprint server): the assigned Copyeditor works on that
 stage, the assigned Funding Coordinator, whose role works on the
-Submission and Review stages, does not (`docs/process/api.md`).
+Submission and Review stages, does not (`docs/process/api.md`); on the
+submission in review (`Review`) Copyediting is not reached yet and
+keeps the panel all the same.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| assigned review assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | ✓ |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 ## Fields & validation
 

@@ -60,49 +60,56 @@ deleting the Body Text follow
 *[Publication metadata's edit gate](U40-publication-metadata.md#api-grid-edit-gate)*.
 The two grids below are this feature's own: reading each page, for the
 roles that see it. Through the REST API the submitting author also reads
-both pages' content, and the Copyeditor the Body Text ⚠ [A25](#a25).
+both pages' content, and the assistant roles the pages their stage does
+not list ⚠ [A25](#a25).
 
 <a id="api-grid-jats-page"></a>
 **Permission grid: reading the "JATS XML" page.** The preamble's "JATS
 XML" listing, every editorial role that sees the version's publication
 pages and not the author view, for the route that loads the page's XML
-(`docs/process/api.md`).
+(`docs/process/api.md`). That is while their role's stage set holds the
+active stage: the Copyeditor on Copyediting, the Funding Coordinator in
+Review, both once the submission rests in Done (Published)
+([→ the Publication pages](U24-workflow-screen-and-stage-access.md#publication-tabs)).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ✓ | ✓ |
-| submitter | ? [A25](#a25) | ? [A25](#a25) |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ✓ | ✓ | ? [A25](#a25) |
+| assigned review assistant | ? [A25](#a25) | ✓ | ✓ |
+| submitter | ? [A25](#a25) | ? [A25](#a25) | ? [A25](#a25) |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-body-text-page"></a>
 **Permission grid: reading the "Body Text" page.** The preamble's "Body
 Text" listing, the editorial roles with Production access, for the route
-that loads the page's text; the assigned assistant is a Copyeditor, whose
-role has no Production access (`docs/process/api.md`).
+that loads the page's text; the assigned assistant is a Copyeditor and
+the assigned review assistant a Funding Coordinator, neither of whose
+roles has Production access (`docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | ? [A25](#a25) | ? [A25](#a25) |
-| submitter | ? [A25](#a25) | ? [A25](#a25) |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | ? [A25](#a25) | ? [A25](#a25) | ? [A25](#a25) |
+| assigned review assistant | ? [A25](#a25) | ? [A25](#a25) | ? [A25](#a25) |
+| submitter | ? [A25](#a25) | ? [A25](#a25) | ? [A25](#a25) |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-public-jats"></a>
 **Permission grid: downloading the published JATS XML.** The row
@@ -113,23 +120,26 @@ anyone once the version is published; before that, everyone the
 workflow header offers "Preview" (those who open the workflow from the
 editorial dashboard, the assistant roles included:
 [→ the header](U24-workflow-screen-and-stage-access.md)) and the
-submitting author (`docs/process/api.md`).
+submitting author (`docs/process/api.md`). The header offers "Preview"
+only in Copyediting and Production; on the submission in review
+(`Review`) the editors still read the same XML on the "JATS XML" page,
+and whether the assistant roles may is ⚠ [A26](#a26).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | ✓ |
-| assigned assistant | ✓ | ✓ |
-| assigned review assistant | ✓ | ✓ |
-| submitter | ✓ | ✓ |
-| other author | — | ✓ |
-| assigned reviewer | — | ✓ |
-| reader | — | ✓ |
-| nobody signed in | — | ✓ |
-| manager of another context | — | ✓ |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | ✓ | — |
+| assigned assistant | ✓ | ✓ | ? [A26](#a26) |
+| assigned review assistant | ✓ | ✓ | ? [A26](#a26) |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | ✓ | — |
+| assigned reviewer | — | ✓ | — |
+| reader | — | ✓ | — |
+| nobody signed in | — | ✓ | — |
+| manager of another context | — | ✓ | — |
+| site admin | ✓ | ✓ | ✓ |
 
 ## Fields & validation
 
@@ -942,7 +952,8 @@ entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | The saved Body Text reaches no reader and not the JATS XML | ❓ | user-visible | — |
 | [A10](#a10) | "Upload" on "JATS XML" accepts a text file or a PDF as the article's JATS XML | ❓ | minor | — |
 | [A19](#a19) | Signed in for the "JATS XML" download, the visitor is left on the Login page | ❓ | minor | — |
-| [A25](#a25) | The REST API gives the submitting author the "JATS XML" and "Body Text" pages' content, and a Copyeditor the Body Text, though their screens list neither page | ❓ | latent | — |
+| [A25](#a25) | The REST API gives the submitting author the "JATS XML" and "Body Text" pages' content, and an assistant role the pages its screens do not list | ❓ | latent | — |
+| [A26](#a26) | Before publication, the JATS XML download answers a Copyeditor or Funding Coordinator on a submission still in review, where no "Preview" is offered | ❓ | latent | — |
 | [A21](#a21) | Retired: in French the tick box, its two windows and labels of the "Body Text" panel show raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [A18](#a18) | Retired: a file sent to the Body Text editor that could not be converted ended the import with no message; fixed in pkp/ui-library#979 before its merge | ✅ | retired | re-probe at the PR head (claude), 2026-10-12 — fixed before merge |
 | [OMP1](#omp1) | Retired: a press's editor was offered "Send to Text Editor" on a file, and confirming it imported nothing; fixed in pkp/ui-library#979 before its merge | ✅ | retired | re-probe at the PR head (claude), 2026-10-12 — fixed before merge |
@@ -1251,14 +1262,18 @@ refused.
 Basis: probe, 2026-10-30. <sup>f-a24</sup>
 
 <a id="a25"></a>
-**A25 — The REST API gives the submitting author the "JATS XML" and "Body Text" pages' content, and a Copyeditor the Body Text, though their screens list neither page** · ❓ · latent.
+**A25 — The REST API gives the submitting author the "JATS XML" and "Body Text" pages' content, and an assistant role the pages its screens do not list** · ❓ · latent.
 The author's view of a submission lists neither page, and "Body Text"
 is listed only for editorial roles with Production access, so a
-Copyeditor assigned to the submission does not see it (Actors). The
-install's programming interface still answers the submitting author's
-request for either page's content (the JATS XML, an uploaded file's
-details, the Body Text), and the Copyeditor's for the Body Text,
-before and after publication. The request for the page's content says
+Copyeditor or Funding Coordinator assigned to the submission does not
+see it; "JATS XML" is listed for them only while their role's stage set
+holds the active stage (Actors). The install's programming interface
+still answers the submitting author's request for either page's content
+(the JATS XML, an uploaded file's details, the Body Text), the
+Copyeditor's and the Funding Coordinator's for the Body Text, and their
+request for the JATS XML on a stage their role does not work on (the
+Copyeditor in Review, the Funding Coordinator in Copyediting), before
+and after publication. The request for the page's content says
 in the code that authors may read it. What they get is their own
 article's text and metadata, which they read elsewhere anyway (the
 author view's other pages, the galleys).
@@ -1266,6 +1281,20 @@ Question: should the two pages' requests follow the pages' own rules?
 Lean: harmless as it stands; align them, or list the pages read-only
 for the author, so that the two say the same.
 Basis: probe, 2026-10-30. <sup>f-a25</sup>
+
+<a id="a26"></a>
+**A26 — Before publication, the JATS XML download answers a Copyeditor or Funding Coordinator on a submission still in review** · ❓ · latent.
+The "JATS XML" link of an unpublished version downloads for those the
+workflow header offers "Preview", which it offers only in Copyediting
+and Production (Rule 11). On a submission still in review, with the
+version's box ticked, the link's address still downloads the XML for an
+assigned Copyeditor or Funding Coordinator, neither of whom the screens
+offer it there.
+Question: should the download before publication follow the stages the
+"Preview" button is offered on? Lean: harmless, since the XML is the
+version's own metadata and file, which the Funding Coordinator reads on
+the "JATS XML" page in Review anyway; align it with A25's answer.
+Basis: probe, 2026-10-30. <sup>f-a26</sup>
 
 ### Retired
 
@@ -1539,6 +1568,10 @@ Issue report: [pkp-e2e-sec#3](https://github.com/jardakotesovec/pkp-e2e-sec/issu
 
 <a id="fn-f-a25"></a>
 **f-a25** — Probed 2026-10-30, OJS `main` (lib/pkp `df42984b46`), a persona set (`docs/process/api.md` "The personas"): `GET …/publications/{pid}/jats` and `GET …/bodyText` answered 200 to the submitting author on the unpublished and the published version, and `GET …/bodyText` 200 to the assigned Copyeditor; an author not on the submission, a reviewer, a reader and a signed-out visitor got 401. Mechanism: both routes admit `ROLE_ID_AUTHOR` ("Read access: authors may view … content (read-only)" in `PKPJatsController::getGroupRoutes()` and `PKPBodyTextController::getGroupRoutes()`) and authorize the read with `PublicationAccessPolicy` (whoever may open the submission), not the workflow's page roster or a Production-stage check.
+The API matrix, 2026-10-30 (OJS `main`, a persona set with the assigned Funding Coordinator and a submission in review): `GET …/bodyText` 200 to the Funding Coordinator on the submission in Copyediting, in Review and published; `GET …/jats` 200 to the Copyeditor on the submission in Review and to the Funding Coordinator on the one in Copyediting.
+
+<a id="fn-f-a26"></a>
+**f-a26** — The API matrix, 2026-10-30 (OJS `main`, a persona set with a submission in review, the version given a JATS file and its box ticked): `GET …/publications/{pid}/jats/download` answered 200 to the assigned Copyeditor and Funding Coordinator on the submission in review, as to the editors and the submitting author. The header's "Preview" in Copyediting and Production only is *Workflow screen & stage access* Rule 6. Mechanism: `PKPJatsController::publicDownload()` checks the version's `jatsPublicVisibility` and, before publication, `Repo::submission()->canPreview()` (the caller's role, or an Author assignment on the submission), never the submission's stage.
 
 **f-omp1** — Note b and note p: before the fix, OMP's navigation config had no `bodyText` item, so `navigateToMenu('publication_{id}_bodyText')` found no entry after the version form's POST/PUT had run; the address kept `importFileUrl` and `importFileName` (live-probed 2026-10-02). At the PR head `e28a1de30d` (ui-library#979), before its merge, 2026-10-12, `useFileManagerConfig.js` `getManagerConfig()` drops `Actions.FILE_SEND_TO_EDITOR` from every file list's available actions unless `useApp().isOJS()` (`pkp.context.app === 'ojs2'`), so OMP and OPS offer it on no row, for any role; the author ruled (@jarda.kotesovec, 2026-10-12, in the review thread) that a press should not have the action at all. Probe: d28.
 Merged 2026-10-12 as ui-library `c9889f00` (pkp/ui-library#979, with pkp-lib `f4c2578c94` and ojs `22d0136df7`), each the squash of its reviewed head. The report's walk (`checks/issues/press-send-to-text-editor-leads-nowhere/walk.js`, `DOCX=1`) on the default dataset at the merged tips: a press's Word row offers no "Send to Text Editor", a journal's still sends and imports; the report deleted, [pkp-e2e#553](https://github.com/jardakotesovec/pkp-e2e/issues/553) closed.

@@ -157,27 +157,29 @@ file of "Select Files", here a file of "Copyedited Files" carried to
 "Production Ready Files" as "Send To Production" carries it
 (`docs/process/api.md`). The route copying a file follows it; a
 preprint server has no Copyediting stage and no "Select Files" page, so
-nobody reaches the file there.
+nobody reaches the file there. On the submission in review (`Review`)
+"Accept Submission" carries its files to Copyediting the same way, so
+the same editors may.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager {OJS OMP} | ✓ | ✓ |
-| manager {OPS} | — | — |
-| assigned section editor {OJS OMP} | ✓ | ✓ |
-| assigned section editor {OPS} | — | — |
-| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
-| assigned section editor, metadata edit off {OPS} | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| assigned review assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin {OJS OMP} | ✓ | ✓ |
-| site admin {OPS} | — | — |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ | ✓ |
+| manager {OPS} | — | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor {OPS} | — | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin {OJS OMP} | ✓ | ✓ | ✓ |
+| site admin {OPS} | — | — | — |
 
 ## Fields & validation
 

@@ -59,21 +59,21 @@ letters" above, for the route that lists them, asked as the
 "Notifications" list asks it, for one submission (Rule 16;
 `docs/process/api.md`).
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | — | — |
-| assigned section editor | — | — |
-| assigned section editor, metadata edit off | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| assigned review assistant | — | — |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | — | — |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | — | — | — |
+| assigned section editor | — | — | — |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | ✓ | ✓ | ✓ |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | — | — | — |
 
 ## Fields & validation
 

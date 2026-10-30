@@ -82,9 +82,10 @@ route behind "Submit Request" follows it; a round that is not ready
 refuses the request itself (Rule 4a), whoever sends it. `Review` is the
 round of the persona set's submission still in review, its review not
 yet in: there the request is refused (422) only after the caller is let
-through. The two grids after this one have no such column: nobody may
-submit a response to that round (no card, Rule 6), and it holds none to
-edit or delete.
+through. In the submit grid after this one nobody may respond on that
+round (no card, Rule 6); the edit and delete grid's `Review` is a
+submission in review whose round asked for revisions, the one round in
+review that can hold a response (Rule 6).
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|
@@ -107,21 +108,21 @@ edit or delete.
 response": an assigned author, while the round shows the card
 (Rule 6). The route behind the window's "Submit Response" follows it.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | — | — |
-| assigned section editor | — | — |
-| assigned section editor, metadata edit off | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| assigned review assistant | — | — |
-| submitter | ✓ | ✓ |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | — | — |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | — | — | — |
+| assigned section editor | — | — | — |
+| assigned section editor, metadata edit off | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | ✓ | ✓ | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | — | — | — |
 
 <a id="api-grid-manage-response"></a>
 **Permission grid: editing and deleting a response.** The rows "Edit a
@@ -130,21 +131,21 @@ roles; the author never, and the Funding Coordinator is refused
 ([A3](#a3) is the "Delete" offered to them). The routes behind "Save"
 and "Delete" follow it, on the round's response.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| assigned review assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 ## Fields & validation
 
