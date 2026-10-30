@@ -4,6 +4,10 @@
 // credentials); a new-email invitation made by the scratch manager through the invitations API; the
 // invitee drives the accept page signed out. The ORCID popup's server side is not driven (no token
 // stand-in on this fleet); the event is emitted exactly as the callback page runs it in its opener.
+// Once fixed (step 06 lands on "Enter details"), the walk goes on: unsaved "Enter details" fields, a
+// second ORCID return, accept, and a sign-in with the typed password (records 08-13). S1_NO_EVENT=1 is the
+// control that needs no ORCID step change: "Skip ORCID verification" instead of the event, then a Back from
+// "Enter details" and "Save and continue" on step 2 (records 07b, 09); it runs the same at the base.
 const {forEachApp, launch, signIn, screen, shot, record, idle, tag, sql, note} = require('../../../probe');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -107,7 +111,12 @@ forEachApp(async (app) => {
         record(`s1-${app.name}-04-orcid-step-again`, await screen(p));
 
         // What the ORCID callback page runs in its opener on success (AuthorizeUserData, targetOp=invitation).
-        await p.evaluate(() => pkp.eventBus.$emit('orcidAddedToInvitation'));
+        if (process.env.S1_NO_EVENT) {
+            // Control, runs the same before and after the PRs: skip ORCID again instead of the callback's event.
+            await p.getByRole('button', {name: 'Skip ORCID verification'}).click();
+        } else {
+            await p.evaluate(() => pkp.eventBus.$emit('orcidAddedToInvitation'));
+        }
         await idle(p);
         await sleep(2500);
         const accountAfter = await p.evaluate(() => ({
@@ -124,6 +133,73 @@ forEachApp(async (app) => {
         const errs = await p.evaluate(() => [...document.querySelectorAll('.pkpFormFieldLabel, [id$="-error"], .pkpFormField__error, .pkpFieldError, [role="alert"]')].map((e) => e.innerText.trim()).filter(Boolean).slice(0, 20));
         record(`s1-${app.name}-06-next-after-event`, {refines, errs, screen: await screen(p)});
         await shot(p, `s1-${app.name}-06-next-after-event`);
+
+        if (await p.getByRole('heading', {name: /STEP 3/}).count()) {
+            // Fixed (ui-library#1033 round 2, refreshOrcid): continue to the end. Type on "Enter details"
+            // without saving, go back for ORCID a second time, then check what was typed is still there,
+            // accept, and sign in with the password typed on step 2.
+            const cp2 = cp;
+            await p.getByRole('textbox', {name: 'Family Name'}).fill('Quilltyped');
+            await p.getByRole('textbox', {name: 'Affiliation'}).fill('Typed University');
+            await p.getByRole('combobox', {name: /Country of affiliation/}).selectOption({label: 'Canada'});
+            record(`s1-${app.name}-07b-typed`, {family: await p.getByRole('textbox', {name: 'Family Name'}).inputValue()});
+            if (process.env.S1_NO_EVENT) {
+                // Control: the same Back and Save and continue without an ORCID return.
+                await back();
+                await idle(p);
+                await sleep(500);
+                await p.locator('button:has-text("Next"), button:has-text("Save and continue")').last().click();
+                await idle(p);
+                await sleep(2000);
+                record(`s1-${app.name}-09-details-after-second-event`, {noEvent: true, family: await p.getByRole('textbox', {name: 'Family Name'}).inputValue(), screen: await screen(p)});
+                return;
+            }
+            await back();
+            await idle(p);
+            await back();
+            await idle(p);
+            await sleep(500);
+            await p.evaluate(() => pkp.eventBus.$emit('orcidAddedToInvitation'));
+            await idle(p);
+            await sleep(2500);
+            const again = await p.evaluate(() => ({
+                pw: ((document.querySelector('input[type="password"]') || {}).value || '').length,
+                privacy: (document.querySelector('input[type="checkbox"]') || {}).checked,
+            }));
+            record(`s1-${app.name}-08-second-orcid-event`, {fields: again, screen: await screen(p)});
+            await p.locator('button:has-text("Next"), button:has-text("Save and continue")').last().click();
+            await idle(p);
+            await sleep(2000);
+            const details = await p.evaluate(() => ({
+                family: (document.querySelector('input[name="familyName-en"], input[id*="familyName"]') || {}).value || null,
+                affiliation: ([...document.querySelectorAll('input')].find((i) => /affiliation/i.test(i.name || i.id || '')) || {}).value || null,
+                country: (() => { const s = [...document.querySelectorAll('select')].find((x) => /country/i.test(x.name || x.id || '')); return s ? s.options[s.selectedIndex]?.text : null; })(),
+            }));
+            record(`s1-${app.name}-09-details-after-second-event`, {details, refines, screen: await screen(p)});
+            await p.locator('button:has-text("Next"), button:has-text("Save and continue")').last().click();
+            await idle(p);
+            await sleep(2000);
+            record(`s1-${app.name}-10-review`, await screen(p));
+            const fin = p.waitForResponse((r) => /\/finalize/.test(r.url()), {timeout: 30000}).catch(() => null);
+            await p.getByRole('button', {name: /Accept And Continue/}).click();
+            const finR = await fin;
+            await idle(p);
+            await sleep(1500);
+            record(`s1-${app.name}-11-accepted`, {finalize: finR && finR.status(), screen: await screen(p)});
+            const row = sql(app, `select u.username, (select setting_value from user_settings s where s.user_id = u.user_id and s.setting_name = 'familyName' and s.locale = 'en') as family, u.country, (select count(*) from user_user_groups g where g.user_id = u.user_id) as groups from users u where u.username = '${t}inv'`);
+            record(`s1-${app.name}-12-account`, {row});
+            const l = await launch(app);
+            try {
+                let signInError = null;
+                try { await signIn(l.page, `${t}inv`, {password: 'Passw0rd!Passw0rd', contextPath: cp2}); } catch (e) { signInError = String(e.message || e).slice(0, 300); }
+                await idle(l.page);
+                await sleep(1000);
+                record(`s1-${app.name}-13-sign-in`, {signInError, url: l.page.url(), signedIn: await l.page.evaluate(() => !!(window.pkp && pkp.currentUser && pkp.currentUser.id)), screen: await screen(l.page)});
+            } finally {
+                await l.close();
+            }
+            return;
+        }
 
         // Untick and tick the box again (the screen showed it ticked), then Save and continue.
         const box = p.locator('input[type="checkbox"]').first();
