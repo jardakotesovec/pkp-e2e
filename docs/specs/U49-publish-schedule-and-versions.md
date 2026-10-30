@@ -53,6 +53,75 @@ post" preprints. <sup>a</sup>
 | **Fill the publishing details** (Publication Settings page {OJS} / Preprint Entry page {OPS}; the "Review Publishing Details" panel {OJS}) | • may-publish roles. The entry pages additionally save for whoever may edit the publication (see [Publication metadata](U40-publication-metadata.md)) <sup>f</sup> |
 | **Switch versions / read the status** | • every role the Publication area admits, the Author included. The side menu lists each version by name, and every version page heads with "Status: {state}" <sup>g</sup> |
 
+The Publication Settings {OJS} and Preprint Entry {OPS} pages load
+their form and issue choice by the same Production-stage rule as the
+Permissions & Disclosure page, so their routes follow
+[that page's grid](U40-publication-metadata.md#api-grid-permissions-page).
+
+<a id="api-grid-versions"></a>
+**Permission grid: making and numbering versions.** The row "Create New
+Version" above, for the routes that copy a version, create one by
+program (Rule 11b), give a version its stage and number, and read the
+number the next version would get (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ? [A2](#a2) | ? [A2](#a2) |
+| assigned section editor, metadata edit off | ? [A2](#a2) | ? [A2](#a2) |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-publish"></a>
+**Permission grid: publishing a version.** The row "Publish" above, on
+a version not yet published, for the publish route and for the route
+that deletes such a version, which no screen offers (Rule 12)
+(`docs/process/api.md`).
+
+| Persona | Unpublished |
+|---|---|
+| manager | ✓ |
+| assigned section editor | ? [A2](#a2) |
+| assigned section editor, metadata edit off | ? [A2](#a2) |
+| unassigned section editor | — |
+| assigned assistant | — |
+| assigned review assistant | — |
+| submitter | — |
+| other author | — |
+| assigned reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-unpublish"></a>
+**Permission grid: unpublishing a version.** The row "Unpublish" above,
+on a published version, for the unpublish route (`docs/process/api.md`).
+
+| Persona | Published |
+|---|---|
+| manager | ✓ |
+| assigned section editor | ? [A2](#a2) |
+| assigned section editor, metadata edit off | ? [A2](#a2) |
+| unassigned section editor | — |
+| assigned assistant | — |
+| assigned review assistant | — |
+| submitter | — |
+| other author | — |
+| assigned reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 Three surfaces carry fields. Everything else in this feature is buttons and
@@ -370,6 +439,15 @@ In French most of its headings and descriptions are raw codes
     on an English and French journal, unused in the journal's public
     files folder <sup>[f-a15](#fn-a15)</sup>, and a new version is
     created all the same ⚠ [A15](#a15).
+11e. **Version numbers by program.** Through the same interface a
+    program can read the number the next version of a stage would get,
+    and give an existing version its stage and number; the press's and
+    preprint server's publish window sends the second. Both follow
+    Rule 12's numbering, and a stage the app does not have is refused. A
+    "minor revision" flag that is neither yes nor no fails with a server
+    error instead of a refusal ⚠ [A19](#a19), on "Create New Version"'s
+    own request too, and a numbering request refused for another field
+    it carries has renumbered the version all the same ⚠ [A20](#a20).
 12. **Version stages and numbering.** A journal and press know three
     stages: Author's Original, Published Manuscript Under Review, Version of
     Record. A preprint server knows only Author's Original. Numbering is per
@@ -1013,6 +1091,56 @@ each scenario's seeding are in its footnote.
       "Production Ready Files" list, so it has no such action.
       <sup>s18</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the routes is
+the grids' (this feature's three under Actors & permissions, and the
+Permissions & Disclosure page's for the Publication Settings and
+Preprint Entry pages), checked apart (`docs/process/api.md`).
+
+API1. **A version is published only once, and unpublished only while published** {OJS OMP OPS}
+
+   Given: a Journal Manager, a published submission and a new version
+   of it not yet published.
+
+   - **Published again**: publish the published version through the
+     API: refused (403), and its status and publication date stay as
+     they were. The screens offer "Unpublish" in place of the publish
+     button on a published version (Rule 4).
+   - **Unpublished while not published**: unpublish the new version:
+     refused (403), and it stays unpublished.
+   - **Control**: publishing the new version publishes it, and
+     unpublishing it sets it back (Rules 8, 9).
+
+API2. **A published version cannot be deleted** {OJS OMP OPS}
+
+   Given: a Journal Manager, a published submission and a new version
+   of it not yet published.
+
+   - **Published**: delete the published version through the API:
+     refused (403, "You must unpublish this publication before you can
+     delete it."), and the submission keeps both versions. No screen
+     deletes a version (Rule 12).
+   - **Control**: deleting the new version removes it; the published
+     version stays, and the submission stays published.
+
+API3. **Version numbers asked for by program follow the stage's numbering** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission published as "Version of
+   Record 1.0" ("Author's Original 1.0" on a preprint server).
+
+   - **The next number**: ask for the number the next version of that
+     stage would get: "2.0" for a major revision, "1.1" for a minor
+     one (Rules 11e, 12), and "Create New Version" then gives "… 1.1".
+     No screen asks.
+   - **Stage and number together**: give that new version the same
+     stage as a major revision: it reads "… 2.0", its stage and both
+     numbers stored.
+   - **Refused**: the same requests with no stage, or with a stage the
+     app does not have ("Version of Record" on a preprint server): each
+     refused (422) with an error on the stage, and the new version keeps
+     its number. The dialog's stage select offers only the app's own.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1226,6 +1354,8 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A16](#a16) | A version created by program with a cover image the app accepts is created without the cover, and the picture is left unused | 🐞 | minor | — |
 | [A17](#a17) | A program creating a version is refused unless it sends a version number the app throws away | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A18](#a18) | "Create New Version" logs a file upload nobody made, under the editor's name | 🐞 | minor | — |
+| [A19](#a19) | A program asking for a version number with a "minor revision" flag that is neither yes nor no gets a server error instead of a refusal | 🐞 | low · crash: server | — |
+| [A20](#a20) | A program's version-number change refused for another field in the request is saved all the same | 🐞 | minor | — |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Editor publishing an article without an issue gets an error when a contributor has a verified ORCID iD | 🐞 | medium · crash: server | issues (claude), 2026-10-19 — re-verified |
@@ -1271,7 +1401,12 @@ Journal Managers, Editors and Site Administrators who are not limited to
 recommendations. Assigned Section Editors, Guest Editors and Assistants
 see none of them. The application's deeper plumbing names those roles for
 the same acts, so screen and plumbing disagree about who may publish.
-Worse, the Production stage view offers the SAME excluded roles a button
+The programming interface follows the plumbing: an assigned Section
+Editor, with "Permit submission metadata edit" on or off, publishes,
+unpublishes and copies a version through it, and deletes one not yet
+published, while an assigned Copyeditor, who has no Production-stage
+access, is refused. The API grids above leave those cells open on this
+question. Worse, the Production stage view offers the SAME excluded roles a button
 labeled "Schedule For Publication" / "Post the preprint" that is only a
 navigation shortcut. Pressed, it lands on a Publication area where they
 have nothing to press. On a preprint server the excluded set includes the
@@ -1282,7 +1417,8 @@ narrowing, and is the Moderator exclusion intended on a preprint server?
 Lean: the narrowing looks deliberate in the new dashboard, but the
 Moderator case contradicts the server's own texts and needs a ruling.
 Since: 2026-08-29 · Basis: probe (the absent controls and the dead-end
-button, every app; the wider server roster is a code reading).
+button, every app; the wider server roster is a code reading, and the
+programming interface's answers a probe, 2026-10-30).
 <sup>[f-a2](#fn-a2)</sup>
 
 <a id="a3"></a>
@@ -1547,6 +1683,35 @@ is lost, but the history credits the editor with an upload. Until
 2026-10-27 a journal and a preprint server logged only the version; a
 press has always logged its formats' files this way.
 Since: 2026-10-27 (pkp/pkp-lib#13637; on 3.5 the same day) · Basis: probe, 2026-10-28. <sup>[f-a18](#fn-a18)</sup>
+
+
+<a id="a19"></a>
+**A19 — A program asking for a version number with a "minor revision" flag that is neither yes nor no gets a server error instead of a refusal** · 🐞 · low · crash: server.
+Three requests of the REST API take a "minor revision" flag,
+`versionIsMinor`, beside a version stage: reading the number the next
+version would get (`GET …/submissions/{id}/nextAvailableVersion`),
+creating a version (`POST …/publications/{id}/version`, what "Create
+New Version" sends) and giving a version its stage and number
+(`PUT …/publications/{id}/version`). A flag that is not a yes or no
+value (`"maybe"`) should be refused with a message on that field, as an
+unknown stage is (422, "The selected version stage is invalid.").
+Instead each request fails with a server error. Nothing is created or
+changed. The dialog always sends a yes or no, so only a program meets
+this; any role that may make versions can.
+Since: 2025-05-30 (pkp/pkp-lib#10669) · Basis: probe, 2026-10-30. <sup>[f-a19](#fn-a19)</sup>
+
+<a id="a20"></a>
+**A20 — A program's version-number change refused for another field in the request is saved all the same** · 🐞 · minor.
+A program gives a version its stage and number through the REST API
+(`PUT …/publications/{id}/version`, the request the press's and
+preprint server's publish window sends). When the request also carries
+a field the app refuses there, the answer is a refusal (400) naming
+that field, so the program expects nothing to have changed. But the
+version already has its new number: a "Version of Record 1.1" sent a
+major revision this way reads "Version of Record 2.0", and a retry
+numbers it again. The screens send only the stage and the revision
+choice, so only a program meets this.
+Since: 2025-05-30 (pkp/pkp-lib#10669) · Basis: probe, 2026-10-30. <sup>[f-a20](#fn-a20)</sup>
 
 ### OJS
 
@@ -2954,6 +3119,34 @@ OPS: a `bool $log = true` flag on `add()`, as `edit()` has, passed
 (`checks/sync/pkp-lib-13637/fix.diff`): only the version's own lines,
 the copy kept. Kept check `checks/sync/pkp-lib-13637/version-log.js`.
 Report `docs/reports/2026-10-28-pkp-lib-13637.md`.
+
+<a id="fn-a19"></a>
+**f-a19** — lib/pkp `api/v1/submissions/PKPSubmissionController.php`:
+`validateVersionIsMinor()` filters the value with
+`FILTER_VALIDATE_BOOLEAN` and `FILTER_NULL_ON_FAILURE`, so a non-boolean
+value comes back `null`, and
+the three callers pass it on to parameters typed `bool`:
+`Repo::submission()->getNextAvailableVersion()` (line 1093),
+`createNewPublicationVersionAndNotify()` (1325) and
+`Repo::publication()->updateVersion()` (1078); each throws a
+`TypeError` before it writes. `validateVersionStage()` beside it uses a
+`Rule::in` validator and answers 422. Probed 2026-10-30 on OJS and OPS
+`main` (lib/pkp `df42984b46`), scratch journals on the probe servers,
+as the manager: the three requests with `versionIsMinor: "maybe"`
+answered 500; the version count stayed the same, and the version's
+stage and number read as before.
+
+<a id="fn-a20"></a>
+**f-a20** — lib/pkp `api/v1/submissions/PKPSubmissionController.php`
+`changeVersion()` (lines 1046-1081) validates the body against the
+publication, then calls `Repo::publication()->updateVersion()` (line
+1078), then hands the request on to a second save whose own
+validation answers 400 for a field it does not take; the version is
+already saved by then. Probed 2026-10-30 on OJS `main` (lib/pkp `df42984b46`), a scratch
+journal, as the manager: a new version "Version of Record 1.1" sent
+`{"versionStage":"VoR","versionIsMinor":false,"commentsForTheEditors":"x"}`
+answered 400 (`commentsForTheEditors`: "This property is not allowed.")
+and read "Version of Record 2.0" afterwards.
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — OJS1 (retired). Live 2026-08-28 (metadata spec, register A1): with
