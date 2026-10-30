@@ -82,6 +82,16 @@ const ALIASES = {
     'reviewer': 'assigned reviewer',
 };
 
+/**
+ * Personas no grid names: each holds a manager's role in the set's second
+ * context and a lesser one here, and the matrix reads it against the row
+ * of the persona it stands for (a role taken from the wrong context).
+ */
+const DERIVED = {
+    'manager elsewhere, reader here': 'reader',
+    'manager elsewhere, author here': 'other author',
+};
+
 /** Every label a grid row may use. */
 const LABELS = [...Object.keys(PERSONAS), ...Object.keys(ALIASES)];
 
@@ -100,6 +110,12 @@ const URN = {
 function roleKey(appName, role) {
     const keys = ROLE_KEYS[appName];
     return role in keys ? keys[role] : role;
+}
+
+/** Whether an app's persona set has this persona (a preprint server has no reviewer). */
+function hasPersona(appName, label) {
+    const persona = PERSONAS[ALIASES[label] || label];
+    return !persona.role || roleKey(appName, persona.role) !== null;
 }
 
 /**
@@ -132,6 +148,11 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         users[label] = username;
         accounts.push({username, roles: [key]});
     });
+    const elsewhere = Object.entries(DERIVED).map(([label, sameAs], i) => {
+        users[label] = `${tag}d${i}`;
+        accounts.push({username: users[label], roles: [roleKey(appName, PERSONAS[sameAs].role)]});
+        return {username: users[label], roles: ['manager']};
+    });
 
     const year = new Date().getFullYear();
     const issue = {volume: 1, number: '1', year};
@@ -146,7 +167,7 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
         ...(appName === 'ops' ? {} : {plugins: {urnpubidplugin: {enabled: true, settings: URN}}}),
     });
     const outsider = `${tag}xm`;
-    await pkpApi.createContext({tag: `${tag}x`, users: [{username: outsider, roles: ['manager']}]});
+    await pkpApi.createContext({tag: `${tag}x`, users: [{username: outsider, roles: ['manager']}, ...elsewhere]});
     users['manager of another context'] = outsider;
     for (const [alias, label] of Object.entries(ALIASES)) {
         if (label in users) {
@@ -220,4 +241,4 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
     };
 }
 
-module.exports = {PERSONAS, LABELS, seedPersonas};
+module.exports = {PERSONAS, ALIASES, DERIVED, LABELS, hasPersona, seedPersonas};

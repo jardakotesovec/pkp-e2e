@@ -26,7 +26,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { REPO_ROOT, resolveApp } = require('./apps.js');
 const { loadGrid, registryRows } = require('../shared/playwright/support/api-grids.js');
-const { LABELS: PERSONA_LABELS } = require('../shared/playwright/support/personas.js');
+const { LABELS: PERSONA_LABELS, PERSONAS, ALIASES, hasPersona } = require('../shared/playwright/support/personas.js');
 const APPS = ['ojs', 'omp', 'ops'];
 const FILE = 'docs/tracking/api-routes.md';
 const METHODS = ['get', 'post', 'put', 'delete', 'patch'];
@@ -212,11 +212,6 @@ function sectionTitle(cls) {
     return `${cls.base} — ${cls.short}${cls.app ? ` [${cls.app}]` : ''}`;
 }
 
-function hasGrid(owner) {
-    const spec = /^U\d{2}$/.test(owner) && fs.readdirSync(path.join(REPO_ROOT, 'docs/specs')).find((f) => f.startsWith(`${owner}-`));
-    return !!spec && read(`docs/specs/${spec}`).includes('<a id="api-grid-');
-}
-
 function features() {
     const ids = new Set([...read('docs/tracking/FEATURE-MAP.md').matchAll(/^### (U\d{2}) —/gm)].map((m) => m[1]));
     return ids;
@@ -244,18 +239,32 @@ function render(rows, kept) {
     return out.join('\n');
 }
 
-// A gate names a permission grid (docs/process/api.md): it must parse, and
-// its rows must be persona labels. Returns the problem, or null.
-function gateProblem(gate) {
+// A gate names a permission grid (docs/process/api.md): it must parse, its
+// rows must be persona labels, it must allow someone (a grid nobody may
+// call reads every refusal as agreement, even one a broken maker caused),
+// and it must be whole: a submission grid names every persona of the set
+// (directly or by an alias), a context grid every role, and a grid that
+// reads both an unpublished and a published submission reads the one in
+// review too, on the apps its routes run on (a preprint server has no
+// reviewer and no review). Returns the problem, or null.
+const CONTEXT_ROLES = ['manager', 'unassigned section editor', 'assigned assistant', 'other author', 'assigned reviewer', 'reader', 'nobody signed in', 'manager of another context', 'site admin'];
+function gateProblem(gate, apps = APPS) {
     if (!/^U\d{2}#[a-z0-9-]+$/.test(gate)) return 'is not of the form U40#edit-gate';
     try {
         const grid = loadGrid(gate);
-        const unknown = grid.rows.map((r) => r.persona).filter((p) => !PERSONA_LABELS.includes(p));
+        const rows = grid.rows.map((r) => r.persona);
+        const unknown = rows.filter((p) => !PERSONA_LABELS.includes(p));
         if (unknown.length) return `has rows that are no persona: ${unknown.join(', ')}`;
-        // A column nobody may call would read every refusal as agreement,
-        // even one a broken maker caused (a wrong path answers 404).
-        const empty = grid.states.filter((s) => !grid.rows.some((r) => r.cells[s] === true));
-        return empty.length ? `has a column with no ✓: ${empty.join(', ')}` : null;
+        if (!grid.rows.some((r) => grid.states.some((s) => r.cells[s] === true))) return 'allows no one';
+        const named = new Set(rows.map((p) => ALIASES[p] || p));
+        const submission = grid.states.some((s) => !['context', 'site'].includes(s));
+        const missing = (submission ? Object.keys(PERSONAS) : CONTEXT_ROLES).filter((p) => !named.has(p) && apps.some((app) => hasPersona(app, p)));
+        if (missing.length) return `names no row for: ${missing.join(', ')}`;
+        const review = apps.some((app) => hasPersona(app, 'assigned reviewer'));
+        if (review && grid.states.includes('unpublished') && grid.states.includes('published') && !grid.states.includes('review')) {
+            return 'reads both submissions but not the one in review (a `Review` column)';
+        }
+        return null;
     } catch (e) {
         return e.message;
     }
@@ -271,15 +280,20 @@ function check(rows, kept) {
             problems.push(`out of date (run --write): ${r.key}`);
         }
     }
+    // The apps each gate's routes run on.
+    const gateApps = new Map();
+    for (const k of kept.values()) {
+        const g = k.gate.replace(/!$/, '');
+        gateApps.set(g, [...new Set([...(gateApps.get(g) || []), ...k.apps.split(' ')])]);
+    }
     for (const [id, k] of kept) {
         if (!rows.has(id)) { problems.push(`no longer in code: ${k.method} ${k.path} (${id.split('|')[1]})`); continue; }
         if (!k.owner) problems.push(`Owner is blank: ${id.split('|')[1]}`);
         else if (k.owner !== 'parked' && !known.has(k.owner)) problems.push(`Owner "${k.owner}" is not a feature ID or parked: ${id.split('|')[1]}`);
-        const gateIssue = k.gate === '—' || k.gate.startsWith('none: ') ? null : gateProblem(k.gate);
+        const gateIssue = k.gate === '—' || k.gate.startsWith('none: ') ? null : gateProblem(k.gate.replace(/!$/, ''), gateApps.get(k.gate.replace(/!$/, '')));
         if (gateIssue) problems.push(`Gate "${k.gate}" ${gateIssue}: ${id.split('|')[1]}`);
-        // A feature that has API coverage (a grid in its spec) gates every
-        // route it owns, or says why not (`none: <reason>`).
-        if (k.gate === '—' && hasGrid(k.owner)) problems.push(`Gate is blank on a route of ${k.owner}, which has API coverage (a grid, or none: <reason>): ${id.split('|')[1]}`);
+        // Every route follows a grid, or says why not (`none: <reason>`).
+        if (k.gate === '—') problems.push(`not gated (a grid, or none: <reason>): ${id.split('|')[1]}`);
     }
     return problems;
 }

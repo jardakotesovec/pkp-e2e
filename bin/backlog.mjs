@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const all = process.argv.includes('--all');
@@ -151,4 +152,16 @@ section('5. Planned coverage, one spec a revision',
     + `${planned.reduce((n, s) => n + s.waiting, 0)} guards wait for their bug's fix`,
     cap(ready).map((s) => `  ${s.spec}: ${s.n}${s.waiting ? ` (+${s.waiting} waiting)` : ''}\n`).join('') + more(ready));
 section('6. Friction rows to fold', friction.length, '');
+// The API route registry against the checkouts (docs/process/api.md "Keeping
+// it true"): a route upstream added, changed or removed, and a route with no
+// Gate, each a revision of its feature's API coverage.
+const registry = spawnSync(process.execPath, [path.join(root, 'bin/api-routes.mjs'), '--check'], { encoding: 'utf8' });
+// One line per problem, its routes counted (a grid's problem names each route).
+const problems = new Map();
+for (const l of `${registry.stdout}${registry.stderr}`.split('\n').filter((x) => x.startsWith('✗'))) {
+    const [, what, route] = l.slice(2).match(/^(.*?)(?:: ([\w.]+|[A-Z]+ \S+))?$/);
+    problems.set(what, [...(problems.get(what) || []), route].filter(Boolean));
+}
+const drift = [...problems].map(([what, routes]) => (routes.length > 1 ? `${what} (${routes.length} routes)` : routes.length ? `${what}: ${routes[0]}` : what));
+section('7. API registry drift, one feature a revision', drift.length, cap(drift).map((l) => `  ${l}\n`).join('') + more(drift));
 process.stdout.write(out);

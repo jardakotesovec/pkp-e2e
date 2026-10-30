@@ -23,16 +23,21 @@ hand-kept columns:
   id), or `parked` while its controller sits in `UNASSIGNED.md`. A
   controller that serves several features is split route by route.
 - **Gate**: the grid the route follows, as `U40#edit-gate` (the spec
-  `U40-…md`, the table after its `api-grid-edit-gate` anchor);
-  `none: <reason>` when it has none on purpose (no test install holds the
-  resource, no role rule applies, an allowed call would change what the
-  next cell reads); `—` while its feature has no API coverage yet.
+  `U40-…md`, the table after its `api-grid-edit-gate` anchor); with a
+  trailing `!` (`U61#administration!`) for its refused cells only, where an
+  allowed call would harm the shared installs or reach an outside service;
+  `none: <reason>` when it has none on purpose (no role rule applies, no
+  test install holds the resource); `—` for a route no one has looked at
+  yet, which fails the check.
 
 `npm run api-routes -- --write` regenerates the file and keeps the hand
 columns; `--gate <gate> <route…>` sets a Gate; `--check` is the lint: a
 route in code but not in the file, a row whose route is gone, an Owner
-that is not a feature, a grid that does not parse or has a column with no
-✓, and a blank Gate on a feature that has grids.
+that is not a feature, a route not gated, and a grid that does not parse,
+allows no one, or is not whole (a submission grid names every persona of
+the set, a context grid every role, and one that reads both submissions
+reads the one in review too, on the apps its routes run on). `npm run
+backlog` prints the check's problems every day.
 
 ## Permission grids
 
@@ -141,7 +146,7 @@ read names its submission only in its query: then the matrix's
 foreign call and its control both stopped by a 4xx prove nothing, and fail
 until the route has its body or query. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
-never runs it. All of it takes about a minute for the three apps:
+never runs it. A whole run takes 2 to 5 minutes per app:
 
 ```bash
 npx playwright test -c configs/ojs.config.js --project=api-matrix --no-deps

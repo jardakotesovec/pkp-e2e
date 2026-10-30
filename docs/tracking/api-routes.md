@@ -16,16 +16,15 @@ route is public). Two columns are kept by hand:
 - **Owner**: the feature whose rule the route implements, or `parked` while
   its controller is parked in `UNASSIGNED.md`.
 - **Gate**: the permission grid the route follows, as `U40#edit-gate` for
-  the table after `<a id="api-grid-edit-gate"></a>` in the U40 spec;
-  `none: <reason>` when it has none on purpose; `—` not yet reviewed, which
-  a feature with grids may not leave.
+  the table after `<a id="api-grid-edit-gate"></a>` in the U40 spec (a
+  trailing `!`: its refused cells only); `none: <reason>` when it has none
+  on purpose; `—` not yet reviewed, which the lint fails.
 
 `npm run api-routes -- --write` regenerates the file and keeps both hand
 columns; a new route comes in with a blank Owner.
 `npm run api-routes -- --gate <gate> <route…>` sets a Gate.
-`npm run api-routes -- --check` is the lint: it fails on a route missing
-here, a row no longer in code, an Owner that is not a feature, a Gate whose
-grid does not parse, and a blank Gate on a feature with grids.
+`npm run api-routes -- --check` is the lint (`docs/process/api.md` "The
+route registry" lists what it fails on); `npm run backlog` prints it daily.
 
 ### _dois — BackendDoiController [ojs]
 
@@ -288,7 +287,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 |---|---|---|---|---|---|---|
 | `job.getMany` | GET | `jobs/all` | ojs omp ops | admin | U61 | U61#administration |
 | `job.failed.getMany` | GET | `jobs/failed/all` | ojs omp ops | admin | U61 | U61#administration |
-| `job.redispatch.all` | POST | `jobs/redispatch/all` | ojs omp ops | admin | U61 | none: requeues every failed job of the install, other tests' and real ones alike |
+| `job.redispatch.all` | POST | `jobs/redispatch/all` | ojs omp ops | admin | U61 | U61#administration! |
 | `job.redispatch` | POST | `jobs/redispatch/{jobId}` | ojs omp ops | admin | U61 | U61#administration |
 | `job.delete.failed` | DELETE | `jobs/failed/delete/{jobId}` | ojs omp ops | admin | U61 | U61#administration |
 
@@ -314,7 +313,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `orcid.requestAuthorVerification` | POST | `orcid/requestAuthorVerification/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | U40#edit-gate |
-| `orcid.delete` | POST | `orcid/deleteForAuthor/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | none: an allowed call has the install ask ORCID to revoke the iD's token (orcid.org); no ORCID client on the test installs |
+| `orcid.delete` | POST | `orcid/deleteForAuthor/{authorId}` | ojs omp ops | admin manager subEditor author | U04 | U40#edit-gate! |
 
 ### peerReviews — PeerReviewController
 
@@ -373,7 +372,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `site.getSite` | GET | `site` | ojs omp ops | admin | U60 | U61#administration |
 | `site.getTheme` | GET | `site/theme` | ojs omp ops | admin | U60 | U61#administration |
 | `site.edit` | PUT | `site` | ojs omp ops | admin | U60 | U61#administration |
-| `site.editTheme` | PUT | `site/theme` | ojs omp ops | admin | U60 | none: clears the install's template and style-sheet caches, and an empty body unsets the site's theme |
+| `site.editTheme` | PUT | `site/theme` | ojs omp ops | admin | U60 | U61#administration! |
 
 ### stats/contexts — PKPStatsContextController
 
@@ -559,11 +558,11 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `citation.getMany` | GET | `submissions/{submissionId}/publications/{publicationId}/citations` | ojs omp ops | manager subEditor assistant author | U42 | U24#publication-pages |
 | `citation.getCitation` | GET | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | U24#publication-pages |
 | `citation.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate |
-| `citation.reprocessCitation` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}/reprocessCitation` | ojs omp ops | manager subEditor assistant author | U42 | none: every allowed call queues the reference's metadata lookup (Crossref, OpenAlex, ORCID jobs) on the fleet's shared queue |
+| `citation.reprocessCitation` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}/reprocessCitation` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate! |
 | `citation.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/citations/{citationId}` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate |
 | `citation.importAdditionalCitations` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/importAdditionalCitations` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate |
 | `citation.deleteCitationsByPublicationId` | DELETE | `submissions/{submissionId}/publications/{publicationId}/citations/deleteCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate |
-| `citation.reprocessCitationsByPublicationId` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/reprocessCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | none: every allowed call queues the reference's metadata lookup (Crossref, OpenAlex, ORCID jobs) on the fleet's shared queue |
+| `citation.reprocessCitationsByPublicationId` | POST | `submissions/{submissionId}/publications/{publicationId}/citations/reprocessCitationsByPublicationId` | ojs omp ops | manager subEditor assistant author | U42 | U40#edit-gate! |
 
 ### submissions/{submissionId}/publications/{publicationId}/dataCitations — PKPDataCitationController
 

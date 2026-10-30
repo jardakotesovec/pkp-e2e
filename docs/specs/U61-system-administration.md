@@ -48,7 +48,9 @@ called at the site's address: the job lists and a failed job's requeue
 and delete (Rules 13–19), the site's settings
 ([Site settings](U60-site-settings.md), Rule 22) and the adding and
 removing of journals ([Hosted journals](U59-hosted-journals.md),
-Rules 3–15) (`docs/process/api.md`).
+Rules 3–15); the requeue of every failed job and the site's theme save
+follow it for refusals only, since an allowed call acts on the whole
+install (`docs/process/api.md`).
 
 | Persona | Site |
 |---|---|

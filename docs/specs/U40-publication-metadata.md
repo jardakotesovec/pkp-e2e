@@ -53,7 +53,9 @@ is not restated here. <sup>a</sup> <sup>b</sup>
 <a id="api-grid-edit-gate"></a>
 **Permission grid: saving a version's metadata.** Rule 2's gate, for every
 route that saves a version's data, this feature's and its neighbours'
-(contributors, citations, funding) (`docs/process/api.md`).
+(contributors, citations, funding); a reference's metadata lookup and a
+contributor's ORCID unlink follow it for refusals only, since an allowed
+call reaches an outside service (`docs/process/api.md`).
 
 | Persona | Unpublished | Published |
 |---|---|---|

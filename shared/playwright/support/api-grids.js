@@ -67,9 +67,16 @@ function registryRows(registryFile = REGISTRY) {
     return rows;
 }
 
-/** The routes a permission grid covers: a Gate that is neither `—` nor `none: …`. */
+/**
+ * The routes a permission grid covers: a Gate that is neither `—` nor
+ * `none: …`. A Gate ending in `!` (`U61#administration!`) follows its grid
+ * for refusals only (`refusalsOnly`, the `!` dropped from `gate`): an
+ * allowed call would harm the shared installs, so it is never made.
+ */
 function gatedRoutes(registryFile = REGISTRY) {
-    return registryRows(registryFile).filter((r) => r.gate && r.gate !== '—' && !r.gate.startsWith('none: '));
+    return registryRows(registryFile)
+        .filter((r) => r.gate && r.gate !== '—' && !r.gate.startsWith('none: '))
+        .map((r) => (r.gate.endsWith('!') ? {...r, gate: r.gate.slice(0, -1), refusalsOnly: true} : r));
 }
 
 const CELL = {'✓': true, '—': false, '?': null};
