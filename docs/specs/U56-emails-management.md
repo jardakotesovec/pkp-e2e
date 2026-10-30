@@ -50,6 +50,45 @@ depends on the role. <sup>a</sup>
 | **Reset all templates** ("Reset All") | • every manager (Rule 19) <sup>t</sup> |
 | **Send an email with an edited or added template** | • whoever the sending feature allows; this spec only stores the templates (Side effects) |
 
+<a id="api-grid-email-templates"></a>
+**Permission grid: managing the templates.** The rows "Open the "Emails"
+tab and the "Manage Emails" page" to "Reset all templates": every
+template's add, edit, reset, remove and "Reset All", and the emails the
+page lists and opens; the site keeps no templates of its own
+(`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-email-template-read"></a>
+**Permission grid: reading the templates.** The row "Edit a template",
+and the sending windows' "Find Template", which [Editorial decision
+recording](U34-editorial-decision-recording.md) offers a Section
+Editor too: the template list, its search, and one template read on its
+own (`docs/process/api.md`). The API refuses the Section Editor today
+([Editorial decision recording A9](U34-editorial-decision-recording.md#a9)).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **The "Emails" tab** (Settings › Workflow › "Emails"; the page is headed
@@ -294,6 +333,12 @@ The three fields hold one text per form language of the journal (Rule
     template becomes a choice wherever that email's sending window lists
     templates; it is never sent unless someone picks it. Only the emails
     that take several templates offer "Add Template". <sup>m</sup>
+    A program that adds a template through the API with a key of its own
+    gets a server error when one of the journal's templates has that key,
+    and takes over an email's default template when the key is that
+    template's ⚠ [A14](#a14). One added for an email that takes one
+    template, or for no email, is stored, though no screen shows it
+    ⚠ [A15](#a15).
 13. **Refused saves.** "Name", "Subject" and "Body" must each hold text
     (in the journal's primary language when there are several, Rule 20),
     and "Name" at most 255 characters. A save that breaks this stores
@@ -359,7 +404,8 @@ The three fields hold one text per form language of the journal (Rule
     reloaded list every edited default template of every email is back to its
     installed text and every added template is gone. The "Emails" tab's
     choices, the signature included, are untouched. "Cancel" changes
-    nothing. <sup>t</sup>
+    nothing. <sup>t</sup> Through the API, "Reset All" answers an empty
+    list of the templates it removed, whatever it removed ⚠ [A16](#a16).
 20. **Several languages.** When the journal has more than one form
     language (Settings bullet 9), each field of "Edit Template" holds one
     text per language:
@@ -824,6 +870,46 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      email's default template there the same way: "Edit Template" has no
      language button (Rule 20). <sup>s</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the templates
+and emails routes is the grids' ([managing](#api-grid-email-templates)
+and [reading](#api-grid-email-template-read) the templates), checked
+apart (`docs/process/api.md`).
+
+API1. **A template added to something that is not an email is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a scratch journal whose templates are as
+   installed.
+
+   - **Not an email**: add a template, with a name, subject and body,
+     whose email is "NOT_AN_EMAIL", a key no email has: refused (400)
+     with an error on the email, and the journal's template list keeps
+     its length. "Add Template" always sends the key of the email whose
+     window it sits in (Rule 12).
+   - **Control**: the same template for "Submission Declined
+     (Pre-Review)" ("Submission Declined" on a preprint server) is stored
+     and listed among that email's templates, after its default.
+
+API2. **Templates stay in their own journal** {OJS OMP OPS}
+
+   Given: two scratch journals, each with a Journal Manager; the second
+   has a template "Their decline" added to "Submission Declined
+   (Pre-Review)" ("Submission Declined" on a preprint server).
+
+   - **An add naming the other journal**: the first journal's manager
+     adds a template through the first journal's address with a body
+     naming the second journal as its journal: it is stored in the first
+     (its journal is the first), and the second still lists "Their
+     decline" alone among that email's added templates.
+   - **An edit naming the other journal**: the first journal's manager
+     edits that template, naming the second journal: refused (403), and
+     the template keeps its subject.
+   - **"Reset All"**: the first journal's manager resets all templates
+     through the API: the first journal's added template is gone, and
+     the second's "Their decline" is still listed (Rules 11, 19). No
+     screen names a journal in these bodies.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -923,6 +1009,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | On "Manage Emails", "Remove" on a template a manager created names it by its subject, not its row's name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A press's or preprint server's French submission confirmation thanks the author for choosing "notre revue" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A12](#a12) | In any language but English, every email's button on "Manage Emails" reads "Edit" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A14](#a14) | A template added through the API with a key of its own fails on the server, or takes over an email's default | 🐞 | low · crash: server | — |
+| [A16](#a16) | "Reset All" through the API answers an empty list of what it removed | 🐞 | low | — |
 | [OMP1](#omp1) | On a press, "Edit" on the masthead email leaves the page stuck behind a spinner | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP2](#omp2) | On a press, "Notify Primary Contact" opens with neither "Yes" nor "No" selected | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [OMP3](#omp3) | A press's French "Editorial Reminder" prints "{$journalName}" where the press's name belongs | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
@@ -933,6 +1021,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | "Sent From" › "Reader" never lists anything on a press or a preprint server | ❓ | minor | — |
 | [A9](#a9) | An emptied second-language field of a default template comes back on save | ❓ | minor | — |
 | [A13](#a13) | A journal's installed signature keeps linking to the address the journal was created at | ❓ | minor | — |
+| [A15](#a15) | The API stores a template for an email that takes one template, or for no email, which no screen shows | ❓ | latent | — |
 | [OPS2](#ops2) | A preprint server lists "Submission Accepted", which it never sends | ❓ | latent | — |
 | [A11](#a11) | Retired: In French (Canada), "Manage Emails" shows codes instead of some emails' names and descriptions | ✅ | retired | Jarda 2026-10-08 · overturned |
 
@@ -1108,6 +1197,45 @@ address, as the rest of the email does?
 Lean: yes, a defect; the box's own "Insert Content" offers the journal's
 address as a placeholder filled in when the email goes out.
 Basis: probe, 2026-10-13. <sup>f-a13</sup>
+
+<a id="a14"></a>
+**A14 — A template added through the API with a key of its own fails on the server, or takes over an email's default** · 🐞 · low · crash: server.
+"Add Template" sends a template's name, subject, body and email, and the
+journal makes the template's key from its name. A program that adds a
+template through the install's programming interface (the REST API's
+template add) may send a key as well, and the add takes it:
+- a key one of the journal's templates already has fails with a server
+  error, where a refusal with a message is expected;
+- the key of an email's default template, sent with another email,
+  replaces that default: "Submission Declined (Pre-Review)" then opens
+  with the program's template as its default, and the same template is
+  also listed among "Submission Accepted"'s added templates.
+
+"Reset" on the default, or "Reset All", brings the installed text back.
+Only the journal's manager and the Site Administrator can add templates.
+Basis: probe, 2026-10-30. <sup>f-a14</sup>
+
+<a id="a15"></a>
+**A15 — The API stores a template for an email that takes one template, or for no email, which no screen shows** · ❓ · latent.
+"Add Template" exists only in the window of an email that takes several
+templates (Rule 12). A program that adds a template through the API for
+an email that takes one template ("Editor Assigned (Auto)"), or for no
+email at all, has it stored: no email's window lists it, so no screen
+edits or removes it, and only "Reset All" deletes it. One for no email
+still turns up in a sending window's "Find Template".
+Question: should the add refuse an email that takes one template, and a
+template for no email?
+Lean: yes, as it refuses a key that names no email (API1).
+Basis: probe, 2026-10-30. <sup>f-a15</sup>
+
+<a id="a16"></a>
+**A16 — "Reset All" through the API answers an empty list of what it removed** · 🐞 · low.
+"Reset All" is a request that deletes the journal's edited and added
+templates and answers with the list of their keys. It answers an empty
+list every time, also after removing several templates, so a program
+cannot tell what it reset. The page itself reloads and does not read
+the answer.
+Basis: probe, 2026-10-30. <sup>f-a16</sup>
 
 ### OMP
 
@@ -1892,6 +2020,44 @@ text through `Mail::compileParams()` with the context's variables, so a
 signature holding "{$contextUrl}" would be filled with the current
 address. The journal's name is written in the same way (read from the
 code, not driven).
+
+<a id="fn-f-a14"></a>
+**f-a14** — Probed 2026-10-30 on scratch journals of all three apps
+(`main`, lib/pkp df42984b46 on OJS) as the journal's manager:
+`POST emailTemplates` with a `key` an added template of the journal
+already had answered 500 with the database's unique-violation text
+(`email_templates_email_key`); with `key: EDITOR_DECISION_INITIAL_DECLINE`
+and `alternateTo: EDITOR_DECISION_ACCEPT` it answered 200, after which
+`GET emailTemplates/EDITOR_DECISION_INITIAL_DECLINE` read the new
+subject and `alternateTo` `EDITOR_DECISION_ACCEPT`, and
+`GET mailables/EDITOR_DECISION_ACCEPT` listed the template after
+"Submission Accepted"; `DELETE emailTemplates/restoreDefaults` brought
+the installed subject back. Mechanism (lib/pkp):
+`PKPEmailTemplateController::add()` passes the body's `key` (the schema
+leaves it writable) to `EmailTemplate\DAO::insert()`, which makes a key
+from the name only when none is given, and nothing checks it against the
+journal's templates or the emails' default keys. The server error's body
+is a case of a private finding on error texts.
+
+<a id="fn-f-a15"></a>
+**f-a15** — Probed 2026-10-30 on scratch journals of all three apps as
+the journal's manager: `POST emailTemplates` with
+`alternateTo: EDITOR_ASSIGN` and with no `alternateTo` each answered 200;
+`GET mailables/EDITOR_ASSIGN` listed no template, `GET emailTemplates?isModified=1`
+listed both, and `DELETE emailTemplates/restoreDefaults` removed both.
+Mechanism (lib/pkp): `EmailTemplate\Repository::validate()` checks only
+that `alternateTo`, when sent, is some email's default key, not that the
+email takes several templates (`Mailable::supportsTemplates()`).
+
+<a id="fn-f-a16"></a>
+**f-a16** — Probed 2026-10-30 on scratch journals of all three apps as
+the journal's manager: with three added or edited templates
+(`GET emailTemplates?isModified=1` read `itemsMax` 3),
+`DELETE emailTemplates/restoreDefaults` answered 200 with `[]`, and the
+same read then gave 0. Mechanism (lib/pkp):
+`EmailTemplate\Repository::restoreDefaults()` fills `$deletedKeys`
+inside a closure that took the array by value (`use ($deletedKeys)`), so
+the list it returns stays empty.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — Live-probed 2026-09-26 on the seeded press and on a new

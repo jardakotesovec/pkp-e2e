@@ -215,12 +215,12 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `emailTemplate.getMany` | GET | `emailTemplates` | ojs omp ops | admin manager subEditor assistant | U56 | — |
-| `emailTemplate.getTemplate` | GET | `emailTemplates/{key}` | ojs omp ops | admin manager subEditor assistant | U56 | — |
-| `emailTemplate.add` | POST | `emailTemplates` | ojs omp ops | admin manager | U56 | — |
-| `emailTemplate.edit` | PUT | `emailTemplates/{key}` | ojs omp ops | admin manager | U56 | — |
-| `emailTemplate.restoreDefaults` | DELETE | `emailTemplates/restoreDefaults` | ojs omp ops | admin manager | U56 | — |
-| `emailTemplate.delete` | DELETE | `emailTemplates/{key}` | ojs omp ops | admin manager | U56 | — |
+| `emailTemplate.getMany` | GET | `emailTemplates` | ojs omp ops | admin manager subEditor assistant | U56 | U56#email-template-read |
+| `emailTemplate.getTemplate` | GET | `emailTemplates/{key}` | ojs omp ops | admin manager subEditor assistant | U56 | U56#email-template-read |
+| `emailTemplate.add` | POST | `emailTemplates` | ojs omp ops | admin manager | U56 | U56#email-templates |
+| `emailTemplate.edit` | PUT | `emailTemplates/{key}` | ojs omp ops | admin manager | U56 | U56#email-templates |
+| `emailTemplate.restoreDefaults` | DELETE | `emailTemplates/restoreDefaults` | ojs omp ops | admin manager | U56 | U56#email-templates |
+| `emailTemplate.delete` | DELETE | `emailTemplates/{key}` | ojs omp ops | admin manager | U56 | U56#email-templates |
 
 ### emails — PKPEmailController
 
@@ -296,8 +296,8 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `mailable.getMany` | GET | `mailables` | ojs omp ops | admin manager | U56 | — |
-| `mailable.getMailable` | GET | `mailables/{id}` | ojs omp ops | admin manager | U56 | — |
+| `mailable.getMany` | GET | `mailables` | ojs omp ops | admin manager | U56 | U56#email-templates |
+| `mailable.getMailable` | GET | `mailables/{id}` | ojs omp ops | admin manager | U56 | U56#email-templates |
 
 ### navigationMenus — PKPNavigationMenuController
 
@@ -485,13 +485,13 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `submission.returnToDone` | POST | `submissions/{submissionId}/returnToDone` | ojs omp ops | manager subEditor | U34 | — |
 | `submission.delete` | DELETE | `submissions/{submissionId}` | ojs omp ops | manager subEditor | U22 | — |
 | `submission.publication.changeLocale` | PUT | `submissions/{submissionId}/publications/{publicationId}/changeLocale` | ojs omp ops | manager subEditor | U40 | U40#change-language |
-| `submission.publication.version` | PUT | `submissions/{submissionId}/publications/{publicationId}/version` | ojs omp ops | manager subEditor | U49 | — |
-| `submission.getNextAvailableVersion` | GET | `submissions/{submissionId}/nextAvailableVersion` | ojs omp ops | manager subEditor | U49 | — |
-| `submission.publication.add` | POST | `submissions/{submissionId}/publications` | ojs omp ops | manager subEditor assistant | U49 | — |
-| `submission.publication.version.get` | POST | `submissions/{submissionId}/publications/{publicationId}/version` | ojs omp ops | manager subEditor assistant | U49 | — |
-| `submission.publication.publish` | PUT | `submissions/{submissionId}/publications/{publicationId}/publish` | ojs omp ops | manager subEditor assistant | U49 | — |
-| `submission.publication.unpublish` | PUT | `submissions/{submissionId}/publications/{publicationId}/unpublish` | ojs omp ops | manager subEditor assistant | U49 | — |
-| `submission.publication.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant | U49 | — |
+| `submission.publication.version` | PUT | `submissions/{submissionId}/publications/{publicationId}/version` | ojs omp ops | manager subEditor | U49 | U49#versions |
+| `submission.getNextAvailableVersion` | GET | `submissions/{submissionId}/nextAvailableVersion` | ojs omp ops | manager subEditor | U49 | U49#versions |
+| `submission.publication.add` | POST | `submissions/{submissionId}/publications` | ojs omp ops | manager subEditor assistant | U49 | U49#versions |
+| `submission.publication.version.get` | POST | `submissions/{submissionId}/publications/{publicationId}/version` | ojs omp ops | manager subEditor assistant | U49 | U49#versions |
+| `submission.publication.publish` | PUT | `submissions/{submissionId}/publications/{publicationId}/publish` | ojs omp ops | manager subEditor assistant | U49 | U49#publish |
+| `submission.publication.unpublish` | PUT | `submissions/{submissionId}/publications/{publicationId}/unpublish` | ojs omp ops | manager subEditor assistant | U49 | U49#unpublish |
+| `submission.publication.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant | U49 | U49#publish |
 | `submission.contributor.add` | POST | `submissions/{submissionId}/publications/{publicationId}/contributors` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
 | `submission.publication.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}` | ojs omp ops | manager subEditor assistant author | U40 | U40#edit-gate |
 | `submission.publication.contributor.edit` | PUT | `submissions/{submissionId}/publications/{publicationId}/contributors/{contributorId}` | ojs omp ops | manager subEditor assistant author | U41 | U40#edit-gate |
@@ -513,8 +513,8 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `submission.publication.issue.assignmentStatus` | GET | `submissions/{submissionId}/publications/{publicationId}/issueAssignmentStatus` | ojs | admin manager subEditor assistant | U49 | — |
-| `submission.publication._components.issue` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/issue` | ojs | admin manager subEditor assistant | U49 | — |
+| `submission.publication.issue.assignmentStatus` | GET | `submissions/{submissionId}/publications/{publicationId}/issueAssignmentStatus` | ojs | admin manager subEditor assistant | U49 | U40#permissions-page |
+| `submission.publication._components.issue` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/issue` | ojs | admin manager subEditor assistant | U49 | U40#permissions-page |
 | `submission.publication._components.submissionPayment` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/submissionPayment` | ojs | admin manager subEditor assistant | U52 | — |
 
 ### submissions — SubmissionController [omp]
@@ -530,7 +530,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `submission.publication.relate` | PUT | `submissions/{submissionId}/publications/{publicationId}/relate` | ops | admin manager subEditor assistant author | U75 | — |
-| `submission.publication._components.issue` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/issue` | ops | admin manager subEditor assistant | U49 | — |
+| `submission.publication._components.issue` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/issue` | ops | admin manager subEditor assistant | U49 | U40#permissions-page |
 
 ### submissions/{submissionId}/files — PKPSubmissionFileController
 
