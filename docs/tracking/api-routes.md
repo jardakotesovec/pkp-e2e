@@ -226,7 +226,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `emails.getMany` | GET | `emails/authorEmails` | ojs omp ops | author | U26 | — |
+| `emails.getMany` | GET | `emails/authorEmails` | ojs omp ops | author | U26 | U26#author-emails |
 | `emails.getEmail` | GET | `emails/{emailId}` | ojs omp ops | manager subEditor author | U38 | U38#email-read |
 
 ### genres — GenreController

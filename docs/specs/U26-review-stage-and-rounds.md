@@ -53,6 +53,28 @@ nothing of that submission is shown
 | **Open the editor's letters** ("Notifications" list) | • Author: the emails editors sent them about this submission (Rule 16) <sup>k</sup> |
 | **Delete the submission** | • Journal Manager; Site Administrator: only while the submission stands declined (Rule 11) <sup>e</sup> |
 
+<a id="api-grid-author-emails"></a>
+**Permission grid: the author's letters.** The row "Open the editor's
+letters" above, for the route that lists them, asked as the
+"Notifications" list asks it, for one submission (Rule 16;
+`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | — | — |
+| assigned section editor | — | — |
+| assigned section editor, metadata edit off | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | — | — |
+
 ## Fields & validation
 
 N/A. The stage's own surfaces are panels, buttons and a status line. The
@@ -242,7 +264,9 @@ and the reviewer forms to *Reviewer assignment & management*.
     submission. Each row is a subject line and a date. Clicking one opens
     the full letter read-only in a side panel. This is where the author
     re-reads a decision letter. Until the first such letter, the list is
-    absent entirely, not shown empty. <sup>k</sup>
+    absent entirely, not shown empty. A program that asks for the list
+    through the API without naming a submission also gets the author's
+    letters from the site's other journals ⚠ [A15](#a15). <sup>k</sup>
 17. **Old addresses.** A bookmarked author link from earlier versions
     (`{journal}/authorDashboard/submission/{id}`) lands on My Submissions
     with the submission's workflow open. A preprint server does the same
@@ -678,6 +702,32 @@ App-specific:
       confirmed and a decision is needed." with no minimum line.
       <sup>s</sup>
 
+### Through the API
+
+The check below reads what no screen reads; who may ask for the author's
+letters is the [letters grid](#api-grid-author-emails)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **The letters list holds only the letters sent to the caller** {OJS OMP OPS}
+
+   Given: a Journal Manager and two Authors, each the submitter of a
+   submission the manager declined with a letter to its author; a second
+   journal where the manager also holds the Author role and sent the
+   first Author a letter on a submission of theirs.
+
+   - **As the list asks**: the first Author asks for their submission's
+     editor letters the way the "Notifications" list does: the one letter
+     of that submission, its body as sent and their address among its
+     recipients.
+   - **No submission named**: the first Author's list holds their letter
+     and not the other Author's; the other Author's holds only their own.
+     No screen asks without a submission. It also holds the second
+     journal's letter ([A15](#a15)), which the check does not assert.
+   - **The sender**: in the second journal, the manager, an Author there,
+     gets an empty list: the letters they sent are not theirs.
+   - **Not an author's letter**: asking for a kind of email no author is
+     sent (a reviewer's review request) is refused (400).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -712,6 +762,7 @@ Left out of the scenarios above, by reason:
   - A4 (a round whose only reviewers declined reading "All reviews are confirmed and a decision is needed."; Rule 6)
   - A9 (the author's revisions task never returning after the only revised file is deleted; Rule 7, Side effects)
   - A14 (with two authors on the stage, one author's "Revision required." staying after the revised files arrive; Side effects)
+  - A15 (a program's letters list asked without a submission holding the author's letters from other journals; Rule 16)
   - A10 (the "Revisions Uploaded" description on a round with no revision request; Rule 9)
   - A6 (the restored round's box no longer recalling its revision request; Rule 12)
   - A11 (the upload window's "Cancel" link removing the attached file while the "Revised Version Uploaded" email stands; Side effects)
@@ -745,6 +796,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A10](#a10) | The review round's "Revisions Uploaded" list says revisions were requested on rounds where none were | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A13](#a13) | After "Resubmit for Review", the author's "Resubmit for review." task stays once they upload their revisions | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A14](#a14) | With two authors on a submission, a revised file clears only one author's "Revision required." task | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
+| [A15](#a15) | A program asking for an author's letters without naming a submission gets their letters from every journal of the site | 🐞 | low | — |
 | [A2](#a2) | The author sees the editor's status wording; the author-tailored wording exists but is never shown | ❓ | user-visible | — |
 | [A3](#a3) | What the read-review window's attachments section lists: observation recorded privately with the maintainer pending a fix | ❓ | latent | — |
 | [A4](#a4) | A round whose only reviewers declined reports "All reviews are confirmed and a decision is needed." | ❓ | user-visible | — |
@@ -947,6 +999,21 @@ author keeps "Revision required.", while their My Submissions row
 already reads "Review update" and the round reads "Revisions have been
 submitted and a decision is needed.". (Side effects)
 Basis: probe, 2026-10-19. <sup>[f-a14](#fn-a14)</sup>
+
+<a id="a15"></a>
+**A15 — A program asking for an author's letters without naming a submission gets their letters from every journal of the site** · 🐞 · low.
+The author's "Notifications" list (Rule 16) asks the install's
+programming interface (the REST API) for one submission's letters, at
+the journal's own address. A program can ask the same address for the
+author's letters without naming a submission. It expects that journal's
+letters, as every other list at a journal's address gives.
+
+Instead it gets the author's letters from every journal of the site
+where they were sent one, the same at each journal's address. They are
+the author's own letters, so nothing reaches anyone else, but a program
+listing one journal's letters shows another journal's among them.
+(Rule 16)
+Basis: probe, 2026-10-30. <sup>[f-a15](#fn-a15)</sup>
 
 ### OMP
 
@@ -1766,6 +1833,20 @@ pass every stage author. The same code is in `stable-3_5_0`,
 `stable-3_4_0` and `stable-3_3_0` (`.inc.php`), read through git in the
 lib/pkp checkout.
 Issue report: [pkp-e2e#1028](https://github.com/jardakotesovec/pkp-e2e/issues/1028) ([docs/issues/U26-A14-co-author-revisions-task-stays-after-upload.md](../issues/U26-A14-co-author-revisions-task-stays-after-upload.md)).
+
+<a id="fn-a15"></a>
+**f-a15 — A15 evidence.** Probed 2026-10-30 on OJS, OMP and OPS `main`
+(the API1 set-up): an author with a declined submission's letter in each
+of two contexts; `GET emails/authorEmails` with no query, at the first
+context's address, listed both letters (on OJS at the second context's
+address too); with `submissionId` it listed that submission's alone, and
+on OJS the other context's submission at this address was refused (404).
+Mechanism (lib/pkp `df42984b46`):
+`PKPEmailController::getMany()` filters
+`EmailLogEntry::withRecipientId()` by event type and, when given, the
+submission, never by the request's context. The same code is in
+`stable-3_5_0`; `stable-3_4_0` has no such route. The fix would limit the
+list to submissions of the request's context.
 
 <a id="fn-a10"></a>
 **f-a10** — Probed 2026-08-02, editorial view (Journal/Press Manager), on

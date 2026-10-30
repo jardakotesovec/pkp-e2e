@@ -135,9 +135,9 @@ reads the registry and the grids from this repo and makes these passes:
 A call answered 401, 403 or 404, or a 2xx whose body is an error alone,
 counts as refused; any other answer, a 400 for an empty body included, as
 allowed; a 5xx is a finding of its own. A write is sent an empty body and
-a read no query, unless the route checks them before its caller: then the
-matrix's `params.js` gives it a valid one that changes nothing the next
-cell reads (the submission's own language for the language change). A
+a read no query, unless the route checks them before its caller, or a
+read names its submission only in its query: then the matrix's
+`params.js` gives it a valid one that changes nothing the next cell reads (the submission's own language for the language change). A
 foreign call and its control both stopped by a 4xx prove nothing, and fail
 until the route has its body or query. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
