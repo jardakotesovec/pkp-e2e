@@ -53,6 +53,59 @@ during Copyediting, though no page offers them the set ⚠ [A8](#a8).
 | **Manage the media files** ("Add Media File", "Batch Link Media", "Edit Metadata", "Manually Link Media", "Delete File") | • the Journal Manager, Editor, Production Editor and Site Administrator: always, on any version, published ones included (Rules 8, 10) <sup>b</sup> <sup>c</sup> <sup>q4</sup><br>• an assigned Section Editor or Guest Editor (Series Editor on a press, Moderator on a preprint server), and on a journal or press an assigned Layout Editor, Designer, Indexer or Proofreader: offered the whole set. Their changes hold only while their assignment carries the "Permissions" box (Settings bullet 4). Without it, the install default for the Guest Editor and the four assistant roles, every change fails and nothing changes: "Save" in "Edit Metadata" without a word, the others with an "Error" window (Rule 7) ⚠ [A1](#a1) <sup>b</sup> <sup>c</sup> <sup>q2</sup><br>• the Author: never. Their list has no "Batch Link Media", no "Add Media File" and no "…" button <sup>b</sup> <sup>q1</sup><br>• on a press, the Funding Coordinator while the monograph is in review, and the Copyeditor or Marketing and Sales Coordinator while it is in copyediting, see the list alone, as the Author does. In any other stage, Production included, their "Publication" heading has nothing under it <sup>b</sup> <sup>q3</sup> |
 | **"More Information"** (row menu) | • the roles offered "Manage the media files", on every row. The window it opens is *[Submission files](U36-submission-files.md#more-information)*'; for the assistant roles its "History" tab keeps showing "Loading" ⚠ [→ Submission files A3](U36-submission-files.md#a3) <sup>r</sup> <sup>q24</sup> |
 
+The two grids below restate the rows above for the media files routes
+(`docs/process/api.md`). The persona set's assistant is a Copyeditor and
+its review assistant a Funding Coordinator, neither of whose roles
+reaches Production; a press offering them the list is the fault
+[OMP2](#omp2).
+
+<a id="api-grid-media-list"></a>
+**Permission grid: listing a version's media files.** The row "See the
+"Media" page and its list": the editorial roles the side menu offers the
+page, and the Author on their own submission (`docs/process/api.md`).
+The route behind the list follows it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-media-manage"></a>
+**Permission grid: managing a version's media files.** The row "Manage
+the media files", whose changes hold only for those who may edit the
+publication: the Section Editor whose assignment has its "Permissions"
+box unticked is offered them and refused [A1](#a1), and the Author never
+(`docs/process/api.md`). The routes behind "Add Media File", "Batch
+Link Media", "Manually Link Media", "Edit Metadata" and "Delete File"
+follow it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 <a id="media-page"></a>
@@ -195,7 +248,8 @@ and the buttons "Yes" and "No" (Rule 6). <sup>k</sup> <sup>q7</sup>
    A web-resolution file and a high-resolution file of the same media
    type can be linked as counterparts. A file has at most one
    counterpart, and only a media type that supports both versions
-   ("Image" by default, Settings bullet 2) can be linked at all. A
+   ("Image" by default, Settings bullet 2) can be linked at all; a
+   program is not held to either ⚠ [A10](#a10). A
    linked pair shows as two rows sharing one "ID" cell, the
    web-resolution file first (Fields, ID). <sup>i</sup> <sup>q9</sup>
    - 3a. **"Manually Link Media".** From a web-resolution row the list
@@ -798,6 +852,50 @@ mail catcher's address and tooling recipe. <sup>t</sup>
      its side menu's "Publication" heading has nothing under it (Actors
      row 2). <sup>t</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the media
+files routes is the grids' (the [list grid](#api-grid-media-list) and
+the [managing grid](#api-grid-media-manage)), checked apart
+(`docs/process/api.md`).
+
+API1. **A link to anything but a counterpart of the same version is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a version with two web-resolution "Image"
+   files and a high-resolution one, and another submission with a
+   high-resolution "Image" file.
+
+   - **Refused (422)**, each with an error on the counterpart: linking
+     a web-resolution file through the API to itself, to the other
+     web-resolution file, and to the other submission's file; the batch
+     link naming the other submission's file. The windows offer only the
+     version's own files of the other resolution (Rule 3). A number no
+     file has fails instead ⚠ [A9](#a9).
+   - **Unchanged**: every file of both versions still stands alone.
+   - **Control**: the web-resolution file linked to the version's own
+     high-resolution file makes a pair.
+
+API2. **The list narrowed by resolution and by pair** {OJS OMP OPS}
+
+   Given: a Journal Manager, a version with two web-resolution "Image"
+   files and a high-resolution one.
+
+   - **Resolution**: the list asked through the API for high-resolution
+     files holds that one alone, for web-resolution files the other two;
+     an unknown resolution is refused (400). No page narrows the list.
+   - **Pair**: once a web-resolution file is linked to the
+     high-resolution one, the list asked for their pair holds the two.
+
+API3. **A media file is made only from its adder's own upload** {OJS OMP OPS}
+
+   Given: two Journal Managers, a version with no media files.
+
+   - **Another's upload**: the first manager adds a media file naming
+     the second manager's uploaded file: refused (400), and the list
+     stays empty. "Upload Media File" names only the files its own user
+     uploaded (Rule 2).
+   - **Control**: the first manager's own upload is added and listed.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -832,6 +930,10 @@ Left out of the scenarios above, by reason:
     the list until a reload; Rule 6a; scenario 3 reloads before
     reopening the window)
   - A6 (the warning each added file leaves in the server's log; Rule 2)
+  - A9 (a link to a file number that does not exist failing on the
+    server; Rule 3; API1 links to existing files only)
+  - A10 (media files and pairs outside Rules 1, 2a and 3 stored through
+    the API)
   - OJS1 (a reader who is not signed in sees a media change up to a day
     late; Side effects)
   - OPS1 (a preprint server's HTML galley link downloads the file, so
@@ -862,6 +964,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | A name typed in "Edit Metadata" and left with "Yes" shows in the list, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | Each media file added leaves a warning in the server's log | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | Outside Production, a copyeditor allowed to edit a version can change its media files, which no screen offers them | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
+| [A9](#a9) | A program that links a media file to a file number that does not exist gets a server error | 🐞 | minor · crash: server | — |
+| [A10](#a10) | A program can store media files and pairs the "Media" page never makes: no media type or a main component, "High resolution" and pairs on a type without versions, pairs across types | 🐞 | minor | — |
 | [OMP2](#omp2) | On a press, the Copyeditor is offered the "Media" page, and pressing a file name shows a raw refusal | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | The "ID" column shows a pair's number for linked files and another kind of number for the rest | ❓ | minor | — |
 | [OJS1](#ojs1) | A reader who is not signed in sees a media change on an HTML galley up to a day late | ❓ | user-visible | — |
@@ -982,6 +1086,33 @@ beyond the activity log. The proposed fix adds the Production check to
 the server and leaves the page as it is.
 The OJS "Body Text" route takes the same check ([JATS XML & body text](U48-jats-and-body-text.md)).
 Since: 2026-09-17 · Basis: probe, 2026-10-07. <sup>f-a8</sup>
+
+<a id="a9"></a>
+**A9 — A program that links a media file to a file number that does not exist gets a server error** · 🐞 · minor · crash: server.
+The media files API links a file to its counterpart by the counterpart's
+number. A program that names a number no file has, as a Journal Manager
+or anyone else who may manage the media files, gets a server error
+instead of a refusal; nothing is linked. A counterpart of another
+submission, the file itself or one of the same resolution is refused
+with a message (API1). "Manually Link Media" offers existing files
+only, so no screen meets it.
+Basis: probe, 2026-10-30. <sup>f-a9</sup>
+
+<a id="a10"></a>
+**A10 — A program can store media files and pairs the "Media" page never makes** · 🐞 · minor.
+The "Media" page gives every media file one of the journal's components
+marked as dependent files (Rule 1), lets "High resolution" be chosen
+only for a media type that supports both versions (Rule 2a), and links
+only files of one such media type (Rule 3). The media files API checks
+none of it. A program, as a Journal Manager or anyone else who may
+manage the media files, stores a media file with no media type or with
+a main component such as "Article Text", a "Multimedia" file as "High
+resolution", and pairs a "Multimedia" web file with a "Multimedia"
+high-resolution one, or an "Image" web file with a "Multimedia"
+high-resolution one. Readers are not affected unless such a file's name
+matches what an HTML galley asks for; the list and its windows then
+show files and pairs their own rules exclude.
+Basis: probe, 2026-10-30. <sup>f-a10</sup>
 
 ### OJS
 <a id="ojs1"></a>
@@ -1854,6 +1985,35 @@ another role (the `pkp/pkp-lib#12702` fault) and "recommend only"
 Section Editors, whom the page offers the actions; tried with the media
 routes refused for the Copyeditor and the controls unchanged.
 Issue report: [pkp-e2e-sec#5](https://github.com/jardakotesovec/pkp-e2e-sec/issues/5) ([docs/issues/U47-A8-copyeditor-changes-media-outside-production.md](../issues/U47-A8-copyeditor-changes-media-outside-production.md)).
+
+<a id="fn-f-a9"></a>
+**f-a9** — Live-probed 2026-10-30, OJS, OMP and OPS `main` (lib/pkp
+df42984b46), a scratch context's manager:
+`PUT …/publications/{id}/mediaFiles/{fileId}/link` with
+`{"targetSubmissionFileId": 999999999}` answered 500
+`{"error": "Call to a member function getData() on null"}` on the three
+apps; another submission's file, the file itself and a file of the same
+resolution answered 422 with an error on `targetSubmissionFileId`.
+Mechanism: `LinkMediaFile::after()` reads the target with
+`Repo::submissionFile()->get()` and calls `getData()` on the result
+without checking that a file was found; `LinkManyMediaFiles` checks it
+("The requested resource was not found.", 422). The body's PHP error
+text is the security repo's concern (an API error body that shows the
+server's internals).
+
+<a id="fn-f-a10"></a>
+**f-a10** — Live-probed 2026-10-30, OJS `main` (lib/pkp df42984b46), a
+scratch journal's manager, each answered 200 and stored:
+`POST …/mediaFiles` with no `genreId`, with the "Article Text"
+component's id, and with "Multimedia" as `high_resolution`;
+`PUT …/mediaFiles/{web}/link` pairing a "Multimedia" web file with a
+"Multimedia" high-resolution one, and an "Image" web file with the
+"Multimedia" high-resolution one. The same requests on OMP and OPS
+answered alike (OMP has no "Multimedia": "HTML Stylesheet" stood in).
+Mechanism: `AddMediaFiles` validates `temporaryFileId` and
+`variantType` only; `LinkMediaFile` and `LinkManyMediaFiles` compare the
+two files' resolutions, never their components or the component's
+"File Variants" setting. An unknown `variantType` is refused (422).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — Note q29. `HtmlArticleGalleyPlugin`, the galley view: a

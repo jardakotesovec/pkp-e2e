@@ -98,7 +98,7 @@ function walk(body, ctx, routes) {
         re.lastIndex = end;
         let { prefix, roles } = ctx, group = null, route = null;
         for (const c of calls) {
-            if (METHODS.includes(c.fn) && c === calls[0]) {
+            if (METHODS.includes(c.fn) && !route) { // Route::get(…), or Route::middleware(…)->get(…)
                 const p = firstString(c.args);
                 if (p === undefined) odd.push(`unreadable path: Route::${c.fn}(${c.args.slice(0, 40)}…)`);
                 route = { method: c.fn.toUpperCase(), path: p ?? '?' };

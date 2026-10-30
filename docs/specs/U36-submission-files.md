@@ -82,6 +82,142 @@ record what each role is offered once the list is on screen. <sup>b</sup>
 | **The submission wizard's "Files" panel** {OJS OMP} (add, choose the component, change it, remove; Rules 17–18) | • Whoever may open the draft's wizard (*[Submission wizard](U21-submission-wizard.md)*, its Actors), until the submission is submitted <sup>k</sup> |
 | **A galley's file** {OJS OPS} ("Change File" and "More Information" on the publication's "Galleys" page) | • Who is offered them is *Galleys*'. "Change File" opens this spec's upload wizard for that one file (Rule 9a), "More Information" this spec's window (Rule 13)<br>• A press's publication formats belong to *Publication formats & proof terms* {OMP} <sup>l</sup> |
 
+The grids below restate the rows above for the files routes
+(`docs/process/api.md`). Each grid about one file reads a fresh file a
+Journal Manager added to "Copyedited Files": the persona set's assistant
+is a Copyeditor, assigned on Copyediting alone, and its review assistant
+a Funding Coordinator, on Submission and Review alone. Reading,
+changing and deleting a file name the stage it is read on, Copyediting,
+which a preprint server lacks, so nobody reaches the file there
+[OPS1](#ops1). The decision windows' copy of a file to the next stage's
+list is
+*[Editorial decision recording](U34-editorial-decision-recording.md)*'s.
+
+<a id="api-grid-file-list"></a>
+**Permission grid: listing a submission's files.** The row "See a
+workflow file list": everyone who works on the submission lists the files
+of the stages their role reaches, the Author their own lists; on a
+preprint server, which shows no list, the same people list its galleys'
+files (`docs/process/api.md`). The route behind every list follows it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| assigned review assistant | ✓ | ✓ |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-copyedited-file-read"></a>
+**Permission grid: reading a file on "Copyedited Files".** The rows "See
+a workflow file list" and "Download a file" for one file of that list:
+the Copyediting stage's team, and the Author, whose view of the stage
+shows the list (`docs/process/api.md`). The route reading one file
+follows it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ |
+| manager {OPS} | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ |
+| assigned section editor {OPS} | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| assigned review assistant | — | — |
+| submitter {OJS OMP} | ✓ | ✓ |
+| submitter {OPS} | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin {OJS OMP} | ✓ | ✓ |
+| site admin {OPS} | — | — |
+
+<a id="api-grid-copyedited-file-change"></a>
+**Permission grid: changing or deleting a file on "Copyedited Files".**
+The rows "Update File Details" and "Delete": the Copyediting stage's
+team, never the Author (`docs/process/api.md`). The routes that save a
+file's details and delete it follow it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ |
+| manager {OPS} | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ |
+| assigned section editor {OPS} | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin {OJS OMP} | ✓ | ✓ |
+| site admin {OPS} | — | — |
+
+<a id="api-grid-copyedited-file-add"></a>
+**Permission grid: adding a file to "Copyedited Files".** The row "Add a
+file to a list": the Copyediting stage's team ("Upload/Select Files"),
+never the Author. A Journal Manager or Site Administrator may add a file
+to any list of any submission without being assigned, so a preprint
+server takes one from them too, though it shows no such list; nobody
+else may add one there (`docs/process/api.md`). The route that uploads a
+file follows it.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor {OJS OMP} | ✓ | ✓ |
+| assigned section editor {OPS} | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-temporary-upload"></a>
+**Permission grid: uploading a temporary file.** The newer upload
+windows (the publication's "Media" page, a discussion's attachments, the
+settings forms' images) first store the file as the uploader's own
+temporary file, which their save then names. Every role of the context
+but Reader has such a window; on the site, the Site Administrator's
+appearance settings (`docs/process/api.md`). The route that stores the
+temporary file follows it.
+
+| Persona | Context | Site |
+|---|---|---|
+| manager | ✓ | — |
+| section editor | ✓ | — |
+| assistant | ✓ | — |
+| author | ✓ | — |
+| reviewer | ✓ | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 **Upload wizard, "1. Upload File"** (Rules 5–6). <sup>o</sup>
@@ -976,6 +1112,50 @@ App-specific:
       panels are on screen, so the missing file list is not a page that
       failed to load [OPS1](#ops1) (Purpose).
 
+### Through the API
+
+The checks below send what no screen sends; who may call the files
+routes is the grids' (the [file list grid](#api-grid-file-list) to the
+[temporary upload grid](#api-grid-temporary-upload)), checked apart
+(`docs/process/api.md`).
+
+API1. **A file list that names no list holds only the reader's own stages** {OJS OMP}
+
+   Given: a Journal Manager, a Copyeditor assigned to a submission in
+   Copyediting, its Author, and the submission with one file on each of
+   "Submission Files", "Draft Files" and "Copyedited Files".
+
+   - **The Copyeditor**: the file list asked for through the API with no
+     list named holds the two Copyediting files and not the Submission
+     File; asked for "Submission Files" by name, it is refused (403).
+     Every screen names the list it shows (Rule 1).
+   - **The Author**: the same request holds the Submission File and the
+     Copyedited file, not the Draft file (Actors row 1).
+   - **Control**: the Journal Manager gets all three.
+
+API2. **Discussion files and review attachments are not added through the files list** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission with no files.
+
+   - **Refused (400)**, each with an error: a file uploaded through the
+     files route as a note's file, a reviewer's attachment or a
+     discussion's file. Those files come only from their own windows
+     (*Tasks & discussions*, *Reviewer's review*).
+   - **Control**: the same upload as a "Submission Files" file is stored
+     and listed.
+
+API3. **An edit does not move a file to another list or item** {OJS OMP}
+
+   Given: a Journal Manager, a submission with one file on "Submission
+   Files".
+
+   - **Another list**: an edit through the API with a new name and the
+     "Copyedited Files" stage saves the name; the file stays on
+     "Submission Files" (Rule 10b).
+   - **Another item**: an edit that attaches the file to a galley by number
+     succeeds and changes nothing: the file is attached to nothing, and
+     "Submission Files" lists it alone.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -995,7 +1175,7 @@ Left out of the scenarios above, by reason:
   - step 1 of the upload wizard before a component is chosen: the upload box absent from the accessibility snapshot, and each drop-down found by its role and label ([A9](#a9)): the guards the two issue reports propose
   - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes
   - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes
-  - the REST API edit with `fileStage`, or `assocType` and `assocId`, beside a new `name`: the file still on its list after a reload, under the new name, with one more "The metadata for file…" line in its "History" (Rule 10b)
+  - the REST API edit with `fileStage`, or `assocType` and `assocId`, beside a new `name`: one more "The metadata for file…" line in the file's "History" (Rule 10b; API3 checks the rest)
 - **Nothing new to test**:
   - "Cancel" after revising a file renamed since its last upload: the previous file back, its rename kept, and no line of the cancelled upload in its "History" (Rule 9)
   - the header "Close" after a revision: the new file kept, the earlier version a "Download" in "History" (Rule 9)

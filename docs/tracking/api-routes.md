@@ -595,6 +595,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `publication.jats.add` | POST | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
 | `publication.jats.delete` | DELETE | `submissions/{submissionId}/publications/{publicationId}/jats` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
 | `publication.jats.setVisibility` | PUT | `submissions/{submissionId}/publications/{publicationId}/jats/visibility` | ojs | admin manager subEditor assistant | U48 | U40#edit-gate |
+| `publication.jats.publicDownload` | GET | `submissions/{submissionId}/publications/{publicationId}/jats/download` | ojs | none | U48 | — |
 
 ### submissions/{submissionId}/publications/{publicationId}/mediaFiles — MediaFilesController
 
