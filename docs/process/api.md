@@ -131,7 +131,10 @@ reads the registry and the grids from this repo and makes these passes:
   must also not carry the second persona set's tag (its context path,
   usernames and titles carry it): another context's data in an answer
   the caller may have. The site admin's answers, the site's, and the few
-  routes that list across the install by design are left out. A column
+  routes that list across the install by design are left out. Nor may a
+  persona that sits on no submission but its own (a reader, an author, a
+  reviewer, an assistant) get an answer carrying the title of the set's
+  fourth, unpublished submission: a list holding rows it should not. A column
   the persona set cannot read fails (a Review column on a preprint server
   aside), and so does a route of which no cell was read. A grid that
   allows no one on an app its route runs on fails there too, unless the
