@@ -100,7 +100,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 |---|---|---|---|---|---|---|
 | `_submission.getMany` | GET | `_submissions` | ojs omp ops | admin manager | U23 | U23#journal-list |
 | `_submission.incomplete.delete` | DELETE | `_submissions` | ojs omp ops | admin manager author | U23 | U23#delete-incomplete |
-| `_submission.delete` | DELETE | `_submissions/{submissionId}` | ojs omp ops | admin manager author | U24 | — |
+| `_submission.delete` | DELETE | `_submissions/{submissionId}` | ojs omp ops | admin manager author | U24 | U24#delete |
 | `_submission.assigned` | GET | `_submissions/assigned` | ojs omp ops | manager subEditor assistant author | U23 | U23#assigned-lists |
 | `_submission.reviews` | GET | `_submissions/reviews` | ojs omp ops | manager subEditor assistant author | U23 | U23#assigned-lists |
 | `_submission.getViewsCount` | GET | `_submissions/viewsCount` | ojs omp ops | manager subEditor assistant author reviewer | U23 | U23#back-office-lists |
@@ -483,7 +483,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | `submission.decisions.getMany` | GET | `submissions/{submissionId}/decisions` | ojs omp ops | manager subEditor | U34 | — |
 | `submission.decision.add` | POST | `submissions/{submissionId}/decisions` | ojs omp ops | manager subEditor | U34 | — |
 | `submission.returnToDone` | POST | `submissions/{submissionId}/returnToDone` | ojs omp ops | manager subEditor | U34 | — |
-| `submission.delete` | DELETE | `submissions/{submissionId}` | ojs omp ops | manager subEditor | U22 | — |
+| `submission.delete` | DELETE | `submissions/{submissionId}` | ojs omp ops | manager subEditor | U22 | U24#delete |
 | `submission.publication.changeLocale` | PUT | `submissions/{submissionId}/publications/{publicationId}/changeLocale` | ojs omp ops | manager subEditor | U40 | U40#change-language |
 | `submission.publication.version` | PUT | `submissions/{submissionId}/publications/{publicationId}/version` | ojs omp ops | manager subEditor | U49 | U49#versions |
 | `submission.getNextAvailableVersion` | GET | `submissions/{submissionId}/nextAvailableVersion` | ojs omp ops | manager subEditor | U49 | U49#versions |

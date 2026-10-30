@@ -16,6 +16,7 @@
  *   set.submission('published')
  *   set.submission('review')      // a journal or press only (set.states)
  *   set.issueId                   // a journal only: the published issue
+ *   await set.freshSubmission('published') // another like it, to delete
  *
  * The unpublished submission sits in Copyediting (a journal or press: sent
  * to review, the reviewer's review completed, accepted; a preprint server
@@ -161,23 +162,25 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
     };
     const reviewed = (status, decisions) =>
         reviewer ? {decisions, reviewRounds: [{reviewers: [{username: reviewer, status}]}]} : {};
-    const submissions = {
-        unpublished: await seedSubmission('u', reviewed('completed', ['sendExternalReview', 'accept'])),
-        published: await seedSubmission('p', {
-            ...reviewed('completed', ['sendExternalReview', 'accept']),
-            published: true,
-            ...(appName === 'ojs' ? {issue} : {}),
-        }),
+    // Each state's submission, by its tag suffix and seed.
+    const seeds = {
+        unpublished: ['u', reviewed('completed', ['sendExternalReview', 'accept'])],
+        published: ['p', {...reviewed('completed', ['sendExternalReview', 'accept']), published: true, ...(appName === 'ojs' ? {issue} : {})}],
+        ...(reviewer ? {review: ['r', reviewed('accepted', ['sendExternalReview'])]} : {}),
     };
-    if (reviewer) {
-        submissions.review = await seedSubmission('r', reviewed('accepted', ['sendExternalReview']));
+    const submissions = {};
+    for (const [state, [suffix, seed]] of Object.entries(seeds)) {
+        submissions[state] = await seedSubmission(suffix, seed);
     }
+    let fresh = 0;
 
     return {
         context: tag,
         users,
         states: Object.keys(submissions),
         issueId: context.issues?.[0]?.id ?? null,
+        /** Another submission like the state's, for a call that would change or remove it. */
+        freshSubmission: (state) => seedSubmission(`${seeds[state][0]}${(fresh++).toString(36)}`, seeds[state][1]),
         submission: (state) => {
             if (!submissions[state]) {
                 throw new Error(`seedPersonas: no "${state}" submission (${Object.keys(submissions).join(', ')})`);
