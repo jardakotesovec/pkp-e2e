@@ -192,13 +192,12 @@ manage the item, here the manager-level people, its creator and its owner
 **Permission grid: replying in the section editor's task.** The row
 "Reply": its participants alone, a manager-level person who is not one
 included (`docs/process/api.md`). The application refuses that person's
-reply in an answer the screen cannot show ([A36](#a36)), and which a
-permission check cannot tell from a reply with a missing field, so their
-cells stay unchecked.
+reply in an answer the screen cannot show ([A36](#a36)), a 422 a
+permission check reads as allowed until the bug is fixed.
 
 | Persona | Unpublished | Published | Review |
 |---|---|---|---|
-| manager | ? [A36](#a36) | ? [A36](#a36) | ? [A36](#a36) |
+| manager | — | — | — |
 | assigned section editor | ✓ | ✓ | ✓ |
 | assigned section editor, metadata edit off | — | — | — |
 | unassigned section editor | — | — | — |
@@ -210,7 +209,7 @@ cells stay unchecked.
 | reader | — | — | — |
 | nobody signed in | — | — | — |
 | manager of another context | — | — | — |
-| site admin | ? [A36](#a36) | ? [A36](#a36) | ? [A36](#a36) |
+| site admin | — | — | — |
 
 ## Fields & validation
 

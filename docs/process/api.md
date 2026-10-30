@@ -173,7 +173,7 @@ foreign call and its control both stopped by a 4xx prove nothing, and fail
 until the route has its body or query. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
 never runs it, and neither does a run that does not name it. A whole run
-takes 5 to 12 minutes per app:
+takes 5 to 13 minutes per app:
 
 ```bash
 npx playwright test -c configs/ojs.config.js --project=api-matrix --no-deps

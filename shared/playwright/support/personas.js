@@ -114,7 +114,8 @@ function derivedSameAs(label, submissionGrid) {
 const PRIVILEGE = [
     'nobody signed in', 'reader', 'other author', 'submitter', 'assigned reviewer',
     'assigned assistant', 'assigned review assistant', 'manager of another context',
-    'assigned section editor, metadata edit off', 'assigned section editor', 'unassigned section editor',
+    // A section editor with no assignment holds the role but no submission.
+    'unassigned section editor', 'assigned section editor, metadata edit off', 'assigned section editor',
     'manager', 'site admin',
 ];
 
