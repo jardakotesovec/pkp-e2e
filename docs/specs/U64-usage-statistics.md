@@ -44,6 +44,64 @@ Settings pages" is defined in
 | **Change what the installation collects** (Administration › Site Settings › "Statistics", Rule 26) | • Site Administrator alone <sup>q</sup> |
 | **Change what the journal collects** (Settings › Distribution › "Statistics", Rules 27–30) | • whoever opens the Settings pages, while the tab shows (Rule 27) <sup>r</sup> |
 
+<a id="api-grid-statistics"></a>
+**Permission grid: reading the figures.** The row "Open the "Articles",
+"Journal", "Issues" {OJS} and "Counter R5" pages" above, for the routes
+that read the journal's, its works' and its issues' figures in lists and
+timelines, with their files and places (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-statistics-work"></a>
+**Permission grid: one work's figures.** The same row, for the two routes
+that read one published work's figures and timeline, which no page calls:
+an unpublished work has no figures (Rule 1), and a Section Editor not
+assigned to the work is refused ⚠ [A19](#a19).
+
+| Persona | Published |
+|---|---|
+| manager | ✓ |
+| assigned section editor | ✓ |
+| assigned section editor, metadata edit off | ✓ |
+| unassigned section editor | ? [A19](#a19) |
+| assigned assistant | — |
+| assigned review assistant | — |
+| submitter | — |
+| other author | — |
+| assigned reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-sushi"></a>
+**Permission grid: the SUSHI address while restricted.** The row "Fetch
+COUNTER reports from the journal's SUSHI address" above, for every SUSHI
+route (Rule 23), on a journal whose COUNTER statistics are restricted
+(Rule 30); while they are public, anyone may fetch.
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **"Articles" page** (Statistics › "Articles"; heading "Articles"), top to
@@ -1167,6 +1225,76 @@ seeded reader visits. <sup>sc</sup>
     - **Control**: "Axolotl limb memory" reads "Abstract Views" 2
       throughout (Rule 1). <sup>sc</sup>
 
+### Through the API
+
+The checks below send what no screen sends; who may call the statistics
+routes is the grids' (the [figures grid](#api-grid-statistics), the
+[one-work grid](#api-grid-statistics-work) and the
+[SUSHI grid](#api-grid-sushi)), checked apart (`docs/process/api.md`).
+Their works and issues are seeded with visits as the scenarios above
+seed them.
+
+API1. **One work's figures read on their own** {OJS OMP OPS}
+
+   Given: a Journal Manager, a published work read 4 times two days ago
+   and 3 times forty days ago.
+
+   - **The range**: the work's figures asked through the API for the
+     last 30 days read 4 abstract views and no file views, with the
+     work named; asked with no range they read 7. No page reads one
+     work's figures on its own (Rule 12).
+   - **The timeline**: its daily timeline for the day two days ago reads
+     4 (Rule 10).
+   - **Unknown**: a number no work has answers 404.
+
+API2. **The figures narrowed to chosen works** {OJS OMP OPS}
+
+   Given: a Journal Manager, two published works read 4 and 2 times two
+   days ago, and a work of another journal read 9 times that day.
+
+   - **One work**: the list asked for the first work alone holds it
+     alone, with 4, and counts 1; the timeline asked for the second
+     alone reads 2 on that day. No page narrows by work (Rules 11, 13).
+   - **Another journal's work**: named, it is not listed and its visits
+     are not counted: an empty list, 0 on the timeline.
+   - **Control**: unnarrowed, the list counts both works.
+
+API3. **One issue's figures read on their own** {OJS}
+
+   Given: a Journal Manager, the published issue "Vol. 3 No. 1 (2024)"
+   whose table of contents was opened 5 times two days ago.
+
+   - **The issue**: its figures asked through the API for the last 30
+     days read 5 views and no downloads, the issue named by its
+     identification. No page reads one issue's figures on its own
+     (Rule 15); its timeline fails ⚠ [OJS8](#ojs8).
+   - **Unknown**: a number no issue of the journal has is refused.
+
+API4. **Ranges, intervals and orders no page sends are refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a published work with visits.
+
+   - **Refused (400)**, each with an error: a range ending today (the
+     works' and the journal's figures), one starting before 2001-01-01,
+     a first date after the second, the order "sideways", and the
+     timeline interval "week". The date range refuses the dates in the
+     browser before any request (Fields "The date range"; Rule 8), and
+     the pages send only their own order and intervals (Rules 10, 12).
+   - **Control**: the range the page opens on is answered, with the work.
+
+API5. **The SUSHI customer lookup** {OJS OMP OPS}
+
+   Given: a Journal Manager of a journal with the institution "Okapi
+   Institute" (a ROR id), and another journal with "Wombat Institute".
+
+   - **The World**: the SUSHI customer lookup for customer 0 answers
+     "The World". No page calls it (Rule 23).
+   - **An institution**: for "Okapi Institute" it answers its name, its
+     ROR id and the journal's own identifier for it ("{journal path}:{id}")
+     (Rule 22).
+   - **Refused**: for "Wombat Institute", and with no customer, it
+     answers COUNTER's exception 1030 (400).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1234,6 +1362,8 @@ Left out of the scenarios above, by reason:
     an ORCID iD an earlier author's iD; Rule 23)
   - A17 (a Word galley's downloads in no column of "Articles"; Rule 1)
   - A18 (Word downloads in the "Articles" list and its order; Rule 12)
+  - A19 (one work's figures refused through the API to a Section Editor
+    not assigned to it; the one-work grid)
   - OJS1 (the Release 4 page beside "Counter R5"; Rule 25; scenario 12
     marks it)
   - OJS2 (one HTML galley view counted once more per missing file it
@@ -1247,6 +1377,7 @@ Left out of the scenarios above, by reason:
     12 marks it)
   - OJS7 (the "Created" time of a Release 4 file made after noon;
     Rule 25a)
+  - OJS8 (one issue's timeline through the API fails; API3)
   - OMP4 (an HTML "Appendix" file opened in its view page; Rule 1)
 - **No seed**:
   - visits turned into figures the next day, with known robots and
@@ -1289,11 +1420,13 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OJS4](#ojs4) | Statistics › Issues: "Download Issues" leaves out every issue after the first 30, without saying so | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS5](#ojs5) | "Counter R5": "Journal Article Requests (IR_A1)" also lists investigation rows, which its "Metric_Types" line leaves out | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OJS6](#ojs6) | "COUNTER Reports": the downloaded XML file names its report by a cut-off code path instead of "JR1" or "AR1" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [OJS8](#ojs8) | A program that asks for one issue's timeline of figures gets a server error, for every issue | 🐞 | minor · crash: server | — |
 | [A2](#a2) | Custom Range refuses an open-ended range | ❓ | minor | — |
 | [A9](#a9) | The downloaded spreadsheets carry no byte-order mark | ❓ | minor | — |
 | [A12](#a12) | The date range list does not close on Escape | ❓ | minor | — |
 | [A13](#a13) | After a preset, the "Custom Range" boxes still show the page's first range, and "Apply" on them undoes the preset | ❓ | minor | — |
 | [A18](#a18) | Statistics › Articles: Word downloads may place an article in the list, and above others, with no figure showing them | ❓ | minor | — |
+| [A19](#a19) | A program that asks for one work's figures as a Section Editor not assigned to it is refused, though "Articles" shows them | ❓ | minor | — |
 | [OJS1](#ojs1) | A journal still offers the retired COUNTER Release 4 reports beside "Counter R5" | ❓ | minor | — |
 | [OJS3](#ojs3) | The "Issues" search finds no issue by a bare volume or number | ❓ | minor | — |
 | [OJS7](#ojs7) | "COUNTER Reports": the XML file's "Created" time may read twelve hours early for a file made after noon | ❓ | minor | — |
@@ -1593,6 +1726,19 @@ omission as A17, and counting Word downloads in "File Views" would end
 both.
 Basis: code, 2026-10-23. <sup>f-a18</sup>
 
+<a id="a19"></a>
+**A19 — A program that asks for one work's figures as a Section Editor not assigned to it is refused, though "Articles" shows them** · ❓ · minor.
+The statistics API can read one published work's figures and their
+timeline on their own, which no page does. A Section Editor not
+assigned to the work is refused there (401), while the "Articles" page,
+and the list request behind it, show them the same work's figures, as
+every statistics role sees every published work's (Actors preamble).
+The Journal Manager and an assigned Section Editor are answered.
+Question: should the one-work read follow the statistics pages' rule
+rather than the workflow's assignment? Lean: yes; the figures are the
+same, and only a program meets the difference.
+Basis: probe, 2026-10-30. <sup>f-a19</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -1702,6 +1848,16 @@ Question: does a file made after noon read its time twelve hours
 early? Lean: yes (🐞); the time is written with the twelve-hour hour,
 while the "Created" line of a "Counter R5" file uses the 24-hour hour.
 Basis: probe, 2026-10-13. <sup>f-ojs7</sup>
+
+<a id="ojs8"></a>
+**OJS8 — A program that asks for one issue's timeline of figures gets a server error, for every issue** · 🐞 · minor · crash: server.
+The statistics API offers one issue's figures and, beside them, their
+timeline by day or month. A program that asks for the timeline of any
+issue of the journal, as a Journal Manager or a Section Editor, gets a
+server error instead of the timeline; the issue's figures on their own
+are answered. The "Issues" page uses the list's timeline, which works,
+so no screen meets it.
+Basis: probe, 2026-10-30. <sup>f-ojs8</sup>
 
 ### OMP
 
@@ -2774,6 +2930,19 @@ out (f-a17). Settles it: two published articles on one journal, one
 with two Word downloads and the other with one PDF download, then the
 row order and the first article's figures on "Articles".
 
+<a id="fn-f-a19"></a>
+**f-a19** — Live-probed 2026-10-30, OJS `main` (lib/pkp df42984b46), a
+scratch journal with a published work seeded with 4 abstract views:
+`GET stats/publications/{id}` as its manager → 200 (`abstractViews` 4);
+as a Section Editor of the journal with no assignment → 401
+"roleBasedAccessDenied", the same for `…/{id}/timeline`; the list
+`GET stats/publications` answers them the work. The pkp-e2e matrix
+leaves the cell open (`?`, U64#statistics-work); its other cells agree
+on the three apps. Mechanism (lib/pkp):
+`PKPStatsPublicationController::authorize()` adds
+`SubmissionAccessPolicy` for `get` and `getTimeline` alone, which lets
+a Section Editor in only on a submission assigned to them.
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-p. Live-probed 2026-09-27: td11; the side menu offers
 "Counter R5" at the same time.
@@ -2842,6 +3011,17 @@ the second (as `2026-10-13T04:13:15+00:00` beside `Tue, 13 Oct 2026
 04:13:15 GMT`), an hour where both clocks read the same. The installs' time zone is UTC.
 Settles it: one year-link download between 12:00 and 23:59 UTC, its
 `Created` hour beside the `Date` header. fn-p.
+
+<a id="fn-f-ojs8"></a>
+**f-ojs8** — Live-probed 2026-10-30, OJS `main` (lib/pkp df42984b46),
+`publicknowledge` as `manager.maya`: `GET stats/issues/1/timeline`
+answered 500 `{"error": "Call to a member function getId() on null"}`,
+`GET stats/issues/1` answered 200 with the issue's figures. Mechanism:
+OJS `StatsIssueController::authorize()` adds `OjsIssueRequiredPolicy`
+for `get`, `getGalley` and `getToc` only, so `getTimeline()` finds no
+issue; the same on `stable-3_5_0` by code. The body's PHP error text is
+the security repo's concern (an API error body that shows the server's
+internals).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP `CatalogHandler` fires the series event and
