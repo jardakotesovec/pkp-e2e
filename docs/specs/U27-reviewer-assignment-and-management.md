@@ -68,19 +68,22 @@ list of completed reviews appears is owned by
 |--------|--------------------|
 | **See the Reviewers panel and its rows** | • Review managers and assistant-level participants: every round of the stage<br>• Author: no panel while reviews are underway. Any reduced list of completed reviews belongs to the neighboring feature (see the preamble) <sup>a</sup> |
 | **See declined and cancelled rows** | • Review managers only. An assistant-level participant's table silently omits those rows ⚠ [A6](#a6) <sup>a</sup> |
-| **Add a reviewer** (search & select, "Add Reviewer") | • Review managers and assistant-level participants: any round, including past rounds. The past-round oddity is recorded with the [→ round machinery](U26-review-stage-and-rounds.md#rounds) <sup>a</sup> |
+| **Add a reviewer** (search & select, "Add Reviewer") | • Review managers and assistant-level participants: any round, including past rounds. An assistant-level participant's search in the window is refused ⚠ [A52](#a52). The past-round oddity is recorded with the [→ round machinery](U26-review-stage-and-rounds.md#rounds) <sup>a</sup> |
 | **"Create New Reviewer" / "Enroll Existing User"** | • Journal Manager, Editor, assigned Section Editor and Guest Editor: the two links inside the Add Reviewer window. A Site Administrator's access runs through such a journal role (see the preamble)<br>• Assistant-level participants: the two links never appear <sup>a</sup> |
-| **Manage an assignment** (row actions: "Read Review", "Send Reminder", "Thank Reviewer", "Revert Decision", and the menu's "Review Details", "Edit", "Unassign Reviewer"/"Cancel Reviewer", "Email Reviewer", "History", "Resend Review Request", "Log Response", "Reinstate Reviewer") | • Review managers and assistant-level participants, depending on the assignment's state. Rule 3 says when each action appears and in which order the menu lists them; the operations are Rules 12–21; the Email Reviewer window is described under Fields<br>• Inside the Review Details window (Rules 14a–14d): the rating stars and "Mark as Complete" work for both groups. Saving in "Modify Review" is a review manager's. An assistant-level participant is offered the button, its dialog and the edit window all the same, but "Save Changes" answers "Error" / "The current role does not have access to this operation." / "OK" and nothing is saved ⚠ [A31](#a31) <sup>a</sup> |
+| **Manage an assignment** (row actions: "Read Review", "Send Reminder", "Thank Reviewer", "Revert Decision", and the menu's "Review Details", "Edit", "Unassign Reviewer"/"Cancel Reviewer", "Email Reviewer", "History", "Resend Review Request", "Log Response", "Reinstate Reviewer") | • Review managers and assistant-level participants, depending on the assignment's state. Rule 3 says when each action appears and in which order the menu lists them; the operations are Rules 12–21; the Email Reviewer window is described under Fields<br>• Inside the Review Details window (Rules 14a–14d): the rating stars and "Mark as Complete" work for both groups. Saving in "Modify Review" is a review manager's. An assistant-level participant is offered the button, its dialog and the edit window all the same, but "Save Changes" answers "Error" / "The current role does not have access to this operation." / "OK" and nothing is saved ⚠ [A31](#a31). Their "Log Response" fails the same way, with a generic notice ⚠ [A51](#a51) <sup>a</sup> |
 | **"Editorial Notes"** | • Site Administrator, Journal Manager, Editor, Section Editor, Guest Editor: about a user holding a Reviewer role. They never meet their own row, because a reviewer of the submission is kept off its stages (see the preamble)<br>• Assistant-level participants: the entry is absent <sup>l</sup> |
 | **"Login As" the reviewer** | • Whoever may impersonate that reviewer. The row entry appears only then. The rule is [→ who may impersonate whom](U01-login-and-sessions.md#who-may-impersonate) <sup>l</sup> |
 | **Author on the workflow screen** | • None of the above. An assigned Author gets none of these entries, even when they also hold an editorial role on the submission, because the panel itself is absent (see the preamble). The server-side refusals behind that, including the read operations for anonymous review types, are recorded in the footnote <sup>a</sup> |
 
 The four grids below restate the rows above for the review routes
 (`docs/process/api.md`). Wherever a route names a review assignment it is
-the one review of the persona set's submission, completed before the
-submission left review. The persona set's assistant is a copyeditor,
-assigned on Copyediting alone, so no participant of the review stage, and
-its rows read "—".
+the one review of the persona set's submission: in "Unpublished" and
+"Published" completed before the submission left review, in "Review"
+accepted by the reviewer and not yet submitted. The persona set's
+assistant is a copyeditor, assigned on Copyediting alone, so no
+participant of the review stage, and its rows read "—"; its review
+assistant is a Funding Coordinator, an assistant-level participant of the
+review stage.
 
 <a id="api-grid-manage-assignment"></a>
 **Permission grid: managing a review assignment.** The row "Manage an
@@ -88,40 +91,42 @@ assignment": the Review Details window's reads, its rating, "Mark as
 Complete" and its downloads, and "Log Response" (`docs/process/api.md`).
 The routes behind them follow it.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | ✓ | ✓ | ✓ |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-modify-review"></a>
 **Permission grid: modifying a review.** The row "Manage an assignment",
 whose "Save Changes" in "Modify Review" is a review manager's alone
 (`docs/process/api.md`). The route behind that save follows it.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager | ✓ | ✓ |
-| assigned section editor | ✓ | ✓ |
-| assigned section editor, metadata edit off | ✓ | ✓ |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | — | — |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin | ✓ | ✓ |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
 
 <a id="api-grid-review-files"></a>
 **Permission grid: listing a review's files.** The row "Manage an
@@ -131,37 +136,42 @@ own review ([→ the reviewer's files](U28-reviewers-review.md))
 one review follows it; a preprint server registers it too, but has no
 review to name, so it refuses everyone there.
 
-| Persona | Unpublished | Published |
-|---|---|---|
-| manager {OJS OMP} | ✓ | ✓ |
-| manager {OPS} | — | — |
-| assigned section editor {OJS OMP} | ✓ | ✓ |
-| assigned section editor {OPS} | — | — |
-| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
-| assigned section editor, metadata edit off {OPS} | — | — |
-| unassigned section editor | — | — |
-| assigned assistant | — | — |
-| submitter | — | — |
-| other author | — | — |
-| assigned reviewer | ✓ | ✓ |
-| reader | — | — |
-| nobody signed in | — | — |
-| manager of another context | — | — |
-| site admin {OJS OMP} | ✓ | ✓ |
-| site admin {OPS} | — | — |
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ | ✓ |
+| manager {OPS} | — | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor {OPS} | — | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — | — |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | ✓ | ✓ | ✓ |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | ✓ | ✓ | ✓ |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin {OJS OMP} | ✓ | ✓ | ✓ |
+| site admin {OPS} | — | — | — |
 
 <a id="api-grid-reviewer-search"></a>
 **Permission grid: searching the reviewer pool.** The row "Add a
 reviewer": the journal's reviewers, listed and searched in the Add
 Reviewer window (`docs/process/api.md`). The route behind the window's
 search follows it; a preprint server registers it too and answers its
-editors with an empty pool, having no reviewer role.
+editors with an empty pool, having no reviewer role. The assistant is a
+copyeditor, no participant of the review stage; the review assistant, a
+Funding Coordinator, adds reviewers, and its search is refused ⚠
+[A52](#a52).
 
 | Persona | Context |
 |---|---|
 | manager | ✓ |
 | section editor | ✓ |
 | assistant | — |
+| assigned review assistant | ✓ |
 | author | — |
 | reviewer | — |
 | reader | — |
@@ -1669,6 +1679,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A47](#a47) | A late, unanswered re-sent review request is not marked "Overdue" and offers no "Send Reminder" | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A49](#a49) | Both XML entries of "Download Review Form" open a "not authorized" page until a review PDF is downloaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A50](#a50) | An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
+| [A51](#a51) | A Funding Coordinator is offered "Log Response", and pressing it answers "An unexpected error has occurred. Please reload the page and try again." | 🐞 | low | — |
+| [A52](#a52) | A Funding Coordinator's search in "Add Reviewer" answers "The current role does not have access to this operation." | 🐞 | medium | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -2348,6 +2360,29 @@ the form would say a user is needed, as it does when the box is empty.
 The editor has to leave the window, and a request letter they had already
 written is lost with it.
 Basis: probe, 2026-10-23. <sup>[f-a50](#fn-a50)</sup>
+
+<a id="a51"></a>
+**A51 — A Funding Coordinator is offered "Log Response" they cannot record** · 🐞 · low.
+A Funding Coordinator assigned to the review stage gets the same reviewer
+row menu as a review manager, "Log Response" included on a request the
+reviewer has not answered. The window opens and takes a choice; "Log
+Response" then shows the notice "An unexpected error has occurred.
+Please reload the page and try again." and the window stays open. The
+response is not recorded and the row still reads "Request Sent". Either
+the entry should not be offered, or the Funding Coordinator's response
+should be recorded, as the Actors table says for every other action of
+the menu; the notice does not say which.
+Basis: probe, 2026-10-30. <sup>[f-a51](#fn-a51)</sup>
+
+<a id="a52"></a>
+**A52 — A Funding Coordinator's reviewer search is refused** · 🐞 · medium.
+A Funding Coordinator assigned to the review stage may add a reviewer
+(Actors table) and "Add Reviewer" opens for them on the reviewers listed
+first. A name typed into the search and Enter answer "Error" / "The
+current role does not have access to this operation." / "OK", and no
+reviewer outside that first list can be found. Only a reviewer who
+happens to be listed before any search can be added.
+Basis: probe, 2026-10-30. <sup>[f-a52](#fn-a52)</sup>
 
 ### OMP
 
@@ -4371,6 +4406,36 @@ Sent" row, kept after a reload). OPS has no review stage (no "Reviewers"
 panel, no "Add Reviewer" on a preprint). Kept script
 `shared/playwright/checks/U27/I23A/i23a.js`.
 Issue report: [pkp-e2e#1068](https://github.com/jardakotesovec/pkp-e2e/issues/1068) ([docs/issues/U27-A50-enroll-reviewer-no-matches-hangs.md](../issues/U27-A50-enroll-reviewer-no-matches-hangs.md)).
+
+<a id="fn-a51"></a>
+**f-a51** — Live-probed 2026-10-30 (OJS and OMP `main`; a scratch
+journal or press, a Funding Coordinator and a Section Editor assigned, a
+submission in review round 1 with one request sent and unanswered): the
+Funding Coordinator's row menu offered "Log Response"; "Reviewer has
+accepted the invitation to review" and "Log Response" sent
+`PUT reviews/{submissionId}/{reviewAssignmentId}/confirmReview` (as a
+POST with the method override), answered 401
+"user.authorization.roleBasedAccessDenied", and the window showed the
+generic notice; the assignment kept no confirmation date. Cause:
+`PKPReviewController` lists only `ROLE_ID_SITE_ADMIN`, `ROLE_ID_MANAGER`
+and `ROLE_ID_SUB_EDITOR` for `review.confirm` (main and
+`stable-3_5_0` alike, code read), while the panel's `getItemActions`
+offers the entry by the assignment's state alone (note a). The API
+matrix's managing grid reads the same refusal on every submission state.
+
+<a id="fn-a52"></a>
+**f-a52** — Live-probed 2026-10-30 (OJS and OMP `main`, the scratch
+set-up of note f-a51, a second reviewer never assigned): "Add Reviewer"
+opened through `show-reviewer-form` with both reviewers listed; the
+second reviewer's name typed into the search and Enter sent
+`GET users/reviewers?…&searchPhrase=…`, answered 401, and the window
+showed "Error" / "The current role does not have access to this
+operation.". Cause: `PKPUserController`'s route group lists only
+`ROLE_ID_SITE_ADMIN`, `ROLE_ID_MANAGER` and `ROLE_ID_SUB_EDITOR` (main
+and `stable-3_5_0` alike, code read), while `PKPReviewerGridHandler`
+gives the assistant role every reviewer operation but creating and
+enrolling (note a). The API matrix's reviewer-pool grid reads the same
+refusal.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only

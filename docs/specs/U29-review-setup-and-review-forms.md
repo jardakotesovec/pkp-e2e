@@ -54,6 +54,49 @@ some reviewer has chosen on a submitted review (Rule 18). <sup>c</sup>
 | **Add, edit, delete and order a form's items** | • Manager roles and the Site Administrator, only while the form is not in use (Rule 12): the "Form Items" tab is greyed out for a form in use <sup>c</sup> |
 | **Add, edit, delete, activate and deactivate a reviewer recommendation** {OJS} | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a recommendation not in use (Rule 18); the "Activate" tick is offered on every row<br>• Section Editor, and a role at the Journal Manager level whose settings access is switched off: no screen of theirs offers it, but the app accepts the same changes when they are sent to it directly ⚠ [A13](#a13) <sup>c</sup> |
 
+The two grids below restate the last row for the recommendations routes
+(`docs/process/api.md`); a press and a preprint server have none.
+
+<a id="api-grid-recommendations-read"></a>
+**Permission grid: reading the reviewer recommendations.** The last row's
+list, as the "Reviewer Recommendations" tab reads it; a Section Editor's
+editorial dashboard is handed the same list, from which the Reviewers
+panel names a review's recommendation, so they read it too
+(`docs/process/api.md`). The routes listing the recommendations and
+reading one follow it.
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-recommendations"></a>
+**Permission grid: changing the reviewer recommendations.** The last row:
+adding, editing, activating, deactivating and deleting a recommendation
+are the manager roles' and the Site Administrator's, never a Section
+Editor's ([A13](#a13)) (`docs/process/api.md`). The routes behind
+"Add Recommendation", "Edit Recommendation", the "Activate" tick and
+"Delete" follow it.
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 **"Setup" tab.** One form with "Save" at the bottom. The boxes below are
@@ -840,6 +883,48 @@ recipe are in the footnote. <sup>s0</sup>
       not read "Minimum required number of reviews have been confirmed. A
       decision is needed.": a submitted or viewed review does not count as
       confirmed (Rule 8). <sup>s13</sup>
+
+### Through the API
+
+The checks below send what no screen sends; who may call the
+recommendations routes is the grids' (Actors & permissions, the
+[reading grid](#api-grid-recommendations-read) and the
+[changing grid](#api-grid-recommendations)), checked apart
+(`docs/process/api.md`).
+
+API1. **A recommendation without a title, a known type or a status is refused** {OJS}
+
+   Given: a Journal Manager, a journal with its six starting
+   recommendations.
+
+   - **Missing or unknown**: add a recommendation through the API without
+     a title, with an empty English title, without a type, with a type
+     outside the four (0, 5, "approved"), without a status, or with a
+     status that is not true or false: each refused (422) with an error on
+     that field, and the list keeps its six entries. The window never
+     sends these: its "Save" stays greyed out until the boxes are filled,
+     and its lists offer the four types and the two statuses alone.
+   - **Control**: the whole entry is stored, active and removable, and
+     listed.
+
+API2. **A recommendation in use is neither edited nor deleted** {OJS}
+
+   Given: a Journal Manager, a submission whose one review a Reviewer
+   submitted with "Accept Submission".
+
+   - **In use**: edit that recommendation, then delete it, through the
+     API: each refused (406), and it reads as before. The table offers
+     neither "Edit" nor "Delete" on that row (Rule 18).
+   - **Control**: its "Activate" tick, sent off and on, is saved both
+     times.
+
+API3. **An add naming another journal lands in this one** {OJS}
+
+   Given: the Journal Managers of two journals.
+
+   - **Another journal's id**: add a recommendation in the first journal
+     with the second journal's id in the body: it is stored in the first
+     journal and the second's list is unchanged.
 
 ## Coverage
 

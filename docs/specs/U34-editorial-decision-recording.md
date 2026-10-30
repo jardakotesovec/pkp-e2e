@@ -69,6 +69,116 @@ admits, refuses and offers once a button is pressed or its address typed
 | **"Cancel", "Previous", "Continue", "Record Decision"** (Rules 10–11) | • Whoever opened the wizard <sup>j</sup> <sup>k</sup> |
 | **Read the outcome** | • Author: the email arrives in their mailbox and is listed again on the "Notifications" list of their review stage ([→ the author's letters](U26-review-stage-and-rounds.md#author-emails)); a revision decision also puts a task in their header Tasks panel (Side effects)<br>• Deciding editors: a recommendation arrives as an email and as a discussion on the stage, and is listed in the "Recommendation" box ([→ recommendations](U26-review-stage-and-rounds.md#recommendations))<br>• Everyone with the Activity Log: the decision's line (Side effects) <sup>m</sup> <sup>o</sup> |
 
+The four grids below restate these rows for the decision routes
+(`docs/process/api.md`). A preprint server's submission waits in
+Production, where its one decision is "Decline Submission".
+
+<a id="api-grid-decisions-read"></a>
+**Permission grid: reading a submission's decisions.** The row "Read the
+outcome": the decisions are listed, line by line, in the Activity Log,
+which the deciding editors open and the assistant roles and the Author
+never do, by the "Activity Log" row of
+*[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#stage-access)*
+(`docs/process/api.md`). The route listing a submission's decisions
+follows it.
+
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
+
+<a id="api-grid-record-decision"></a>
+**Permission grid: recording a decision.** The row "Open the wizard and
+record a decision", whose "Record Decision" sends the decision of the
+submission's active stage, and the header's "Return to Workflow" on a
+submission resting in Done
+([→ Done](U24-workflow-screen-and-stage-access.md#done)), whose decision
+goes the same way (`docs/process/api.md`). The route recording a
+decision follows it; the persona set's section editors are assigned and
+not limited to recommendations.
+
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
+
+<a id="api-grid-return-to-done"></a>
+**Permission grid: returning a submission to Done.** The header's
+"Return to Done", offered to the deciding editors on a published
+submission they returned to the workflow
+([→ Done](U24-workflow-screen-and-stage-access.md#done))
+(`docs/process/api.md`). The route behind it follows it; "Published" is
+the published submission after "Return to Workflow", the one state that
+offers the button. The assigned Section Editors' cells are refused ⚠
+[A13](#a13).
+
+| Persona | Published |
+|---|---|
+| manager | ✓ |
+| assigned section editor | ✓ |
+| assigned section editor, metadata edit off | ✓ |
+| unassigned section editor | — |
+| assigned assistant | — |
+| assigned review assistant | — |
+| submitter | — |
+| other author | — |
+| assigned reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
+<a id="api-grid-file-copy"></a>
+**Permission grid: carrying a file to the next stage's list.** The row
+"Choose the files to carry over": "Record Decision" copies each ticked
+file of "Select Files", here a file of "Copyedited Files" carried to
+"Production Ready Files" as "Send To Production" carries it
+(`docs/process/api.md`). The route copying a file follows it; a
+preprint server has no Copyediting stage and no "Select Files" page, so
+nobody reaches the file there.
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager {OJS OMP} | ✓ | ✓ |
+| manager {OPS} | — | — |
+| assigned section editor {OJS OMP} | ✓ | ✓ |
+| assigned section editor {OPS} | — | — |
+| assigned section editor, metadata edit off {OJS OMP} | ✓ | ✓ |
+| assigned section editor, metadata edit off {OPS} | — | — |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin {OJS OMP} | ✓ | ✓ |
+| site admin {OPS} | — | — |
+
 ## Fields & validation
 
 The email pages share one composer; the other pages are a list of tick
@@ -1110,6 +1220,76 @@ App-specific:
       window "Request Revisions" with "Require New Review Round" first, and
       its close control abandons the choice with nothing opened (Rule 14).
 
+### Through the API
+
+The checks below send what no screen sends; who may call the decision
+routes is the grids' (Actors & permissions, from the
+[reading grid](#api-grid-decisions-read) to the
+[file-copy grid](#api-grid-file-copy)), checked apart
+(`docs/process/api.md`).
+
+API1. **A decision of another stage, or of no known type, is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission in Copyediting (on a preprint
+   server, waiting in Production).
+
+   - **Another stage**: record "Return to Workflow", a decision of a
+     submission resting in Done, through the API: refused (401) with
+     "The submission is not at the appropriate stage of the workflow to
+     take this decision.".
+   - **No known type**: record decision 999, or a decision with no
+     number: each refused (401) with "This decision could not be found.
+     Please provide a recognized decision type.".
+   - The submission's decisions and its stage are as before. The wizard
+     refuses such an address on its own page (Rule 12), so no screen
+     sends these.
+   - **Control**: the stage's own decision ("Send To Production"; on a
+     preprint server "Decline Submission") is recorded and listed.
+
+API2. **The decisions list filters by type, stage and editor, and names the caller** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission with two decisions recorded
+   (sent to review and accepted; on a preprint server declined and the
+   decline reverted).
+
+   - **Filters**: list the submission's decisions by one decision type,
+     by one stage and by one editor: each lists exactly the decisions
+     that match; a type the submission never had lists none. No screen
+     reads this list.
+   - **Another editor named**: record the stage's decision with the
+     Author named as its editor: it is recorded as the Journal Manager's,
+     and listing the Author's decisions finds none.
+
+API3. **"Return to Done" is refused where the header does not offer it** {OJS OMP OPS}
+
+   Given: a Journal Manager.
+
+   - **In Done already**: "Return to Done" on a published submission
+     resting in Done: refused (403).
+   - **Never in Done**: the same on a submission never published:
+     refused (403).
+   - **No longer published**: on a published submission returned to the
+     workflow whose one version was then unpublished: refused (403).
+   - Each keeps its stage, and no "Return to Done" is recorded. The
+     header offers the button only on a published submission returned
+     to the workflow ([→ Done](U24-workflow-screen-and-stage-access.md#done)).
+   - **Control**: a published submission returned to the workflow goes
+     back to Done, with one "Return to Done" recorded.
+
+API4. **A copy to no list, or into another submission's review round, is refused** {OJS OMP}
+
+   Given: a Journal Manager, a submission in Copyediting with a file on
+   "Copyedited Files", another submission in review.
+
+   - **No list**: carry the file on with no list named, or with a list
+     that does not exist: each refused (400) with an error.
+   - **Another submission's round**: carry it to "Files for Review" with
+     the other submission's review round: refused (400) with an error.
+   - The submission's files are as before. "Select Files" carries a
+     ticked file to the next stage's own list (Rule 9).
+   - **Control**: carried to "Production Ready Files" it is a new file
+     there with the same name, and the original stays.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1149,6 +1329,7 @@ entry notes otherwise; the team settles them on spec review.
 |----|-----------------------------|------|--------|--------|
 | [A6](#a6) | "Revert Decline" recorded on a submission that is not declined emails the author again and can drop a revisions request | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | A Section Editor's "Find Template" in a decision's email answers "You are not authorized to access the requested resource." | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
+| [A13](#a13) | An assigned Section Editor's "Return to Done" answers "The current role does not have access to this operation." | 🐞 | medium | — |
 | [OJS1](#ojs1) | An editor's "Waive" on an accept decision still asks the Author to pay the publication fee | 🐞 | high | issues (claude), 2026-10-04 — re-verified |
 | [OMP1](#omp1) | A press's "Review Cancel" email reads "{$journalName}" where the press's name should be | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS2](#ops2) | Preprint server emails: "Insert Content" describes the server's initials with a raw code | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
@@ -1306,6 +1487,20 @@ line is written for a person to read, and a username is not a name.
 Basis: test run. <sup>[f-a12](#fn-a12)</sup>
 
 ### OJS
+
+<a id="a13"></a>
+**A13 — An assigned Section Editor's "Return to Done" is refused** · 🐞 · medium.
+A published submission returned to the workflow offers its deciding
+editors "Return to Done" in the header
+([→ Done](U24-workflow-screen-and-stage-access.md#done)). For a Journal
+Manager it works. An assigned Section Editor, a Series Editor on a press
+or a Moderator on a preprint server gets the dialog "Return to Done",
+and "Confirm" answers "Error" / "The current role does not have access
+to this operation." / "OK". The submission stays on its stage until a
+manager returns it. The refusal is not about who they are: the same
+editor's decisions, "Return to Workflow" among them, pass the same check,
+which fails here on its own input.
+Basis: probe, 2026-10-30. <sup>[f-a13](#fn-a13)</sup>
 
 <a id="ojs1"></a>
 **OJS1 — An editor's "Waive" on an accept decision still asks the Author to pay the publication fee** · 🐞 · high.
@@ -1497,6 +1692,9 @@ Issue report: [pkp-e2e#859](https://github.com/jardakotesovec/pkp-e2e/issues/859
 
 <a id="fn-a12"></a>
 **f-a12** — Note i: `record.tpl` passes `item.uploaderUserName` as each row's `uploaded-by`, `lib/pkp/classes/submissionFile/maps/Schema.php` fills `uploaderUserName` with the uploader's username, and `SelectSubmissionFileListItem.vue` prints it through `common.uploadedByAndWhen` "Uploaded by {$name} on {$date}". Live-probed 2026-09-20 by the test run (scenario 1, OJS and OMP): the "Revisions" row read "Uploaded by editor.diana on 2026-09-20" where the suite first expected the Editor's name; the suites assert the username form.
+
+<a id="fn-a13"></a>
+**f-a13** — Note u: `PKPSubmissionController::authorize()` gives `returnToDone` a `DecisionAllowedPolicy` without the `DecisionTypeRequiredPolicy` that `addDecision` stacks before it, so no decision type is in the policy's context; for a user with an assignment on the active stage the policy calls `$decisionType->getDecision()` on null, the error is caught by `PolicyAuthorizer` (code 0) and answered 401 with the default "user.authorization.roleBasedAccessDenied". A manager with no stage assignment takes the policy's other branch and passes. Since pkp/pkp-lib#12799 (Erik Hanson, 2026-06-09, `d52aa4c84b`), which added the route on `main`; `stable-3_5_0` has no "Return to Done". Live-probed 2026-10-30 on all three apps (`main`; a scratch context, its manager and an assigned Section Editor, Series Editor or Moderator, a published submission returned to the workflow by the manager): the dialog, "Confirm", `POST submissions/{id}/returnToDone` answered 401 and the "Error" window; the submission stayed on its stage. The API matrix's return-to-done grid reads the same refusal for both assigned section editors of the persona set, while its record-decision grid lets the same editors through the same policy with a decision named ("Return to Workflow" on a submission in Done).
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — Note s: OJS `classes/decision/types/Accept.php::runAdditionalActions()` (and `SkipExternalReview`'s through the shared trait) calls `requestPayment()` for every `ACTION_PAYMENT` action present, never reading the action's `requestPayment` value; `RequestPayment::validatePaymentAction()` only checks the key is set. Live-probed 2026-09-20 on OJS, twice on fresh submissions: "Waive" chosen, the author's "The publication fee is due for payment." row and the "Payment Request Notification" email arriving as with the fee requested.

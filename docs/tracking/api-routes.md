@@ -90,9 +90,9 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `_submission.displayFlag.save` | POST | `_submissions/saveDisplayFlags` | omp | admin manager | U70 | — |
-| `_submission.featuredOrder.save` | POST | `_submissions/saveFeaturedOrder` | omp | admin manager | U70 | — |
-| `_submission.catalog.addTo` | PUT | `_submissions/addToCatalog` | omp | admin manager | U70 | — |
+| `_submission.displayFlag.save` | POST | `_submissions/saveDisplayFlags` | omp | admin manager | U70 | U70#catalog |
+| `_submission.featuredOrder.save` | POST | `_submissions/saveFeaturedOrder` | omp | admin manager | U70 | U70#catalog |
+| `_submission.catalog.addTo` | PUT | `_submissions/addToCatalog` | omp | admin manager | U70 | U70#catalog |
 
 ### _submissions — PKPBackendSubmissionsController
 
@@ -126,11 +126,11 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| — | GET | `categories` | ojs omp ops | admin manager | U16 | — |
-| — | GET | `categories/categoryFormComponent` | ojs omp ops | admin manager | U16 | — |
-| — | POST | `categories` | ojs omp ops | admin manager | U16 | — |
-| — | PUT | `categories/{categoryId}` | ojs omp ops | admin manager | U16 | — |
-| — | DELETE | `categories/{categoryId}` | ojs omp ops | admin manager | U16 | — |
+| — | GET | `categories` | ojs omp ops | admin manager | U16 | U16#categories |
+| — | GET | `categories/categoryFormComponent` | ojs omp ops | admin manager | U16 | U16#categories |
+| — | POST | `categories` | ojs omp ops | admin manager | U16 | U16#categories |
+| — | PUT | `categories/{categoryId}` | ojs omp ops | admin manager | U16 | U16#categories |
+| — | DELETE | `categories/{categoryId}` | ojs omp ops | admin manager | U16 | U16#categories |
 
 ### comments — UserCommentController
 
@@ -363,8 +363,8 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `section.getMany` | GET | `sections` | ojs | admin manager | U17 | — |
-| `section.getSection` | GET | `sections/{sectionId}` | ojs | admin manager | U17 | — |
+| `section.getMany` | GET | `sections` | ojs | admin manager | U17 | U17#sections-read |
+| `section.getSection` | GET | `sections/{sectionId}` | ojs | admin manager | U17 | U17#sections-read |
 
 ### site — PKPSiteController
 
@@ -522,7 +522,7 @@ grid does not parse, and a blank Gate on a feature with grids.
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
 | `submission.publication._components.audience` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/audience` | omp | admin manager subEditor assistant | U74 | — |
-| `submission.publication._components.catalogEntry` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/catalogEntry` | omp | admin manager subEditor assistant | U70 | — |
+| `submission.publication._components.catalogEntry` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/catalogEntry` | omp | admin manager subEditor assistant | U70 | U40#permissions-page |
 | `submission.publication._components.publicationDates` | GET | `submissions/{submissionId}/publications/{publicationId}/_components/publicationDates` | omp | admin manager subEditor assistant | U72 | — |
 
 ### submissions — SubmissionController [ops]
