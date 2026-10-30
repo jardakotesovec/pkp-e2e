@@ -5,9 +5,7 @@
  * (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-/** lib/pkp Decision: "Decline Submission" on the Submission stage, a preprint server's Production. */
-const INITIAL_DECLINE = 8;
+const {DECISION} = require('../../support/pkp-ids.js');
 
 test.describe('submission activity log through the API', () => {
     test('API1: A sent letter reads back as it was sent', async ({scratch}) => {
@@ -16,7 +14,7 @@ test.describe('submission activity log through the API', () => {
         const editor = await j.as('mg');
         const author = await j.as('au');
         const letter = {id: 'notifyAuthors', subject: 'Letter read back', body: '<p>The letter as it was sent.</p>', locale: 'en'};
-        expect((await editor.post(`submissions/${submissionId}/decisions`, {decision: INITIAL_DECLINE, actions: [letter]})).status).toBe(200);
+        expect((await editor.post(`submissions/${submissionId}/decisions`, {decision: DECISION.INITIAL_DECLINE, actions: [letter]})).status).toBe(200);
         const listed = (await author.get('emails/authorEmails', {submissionId})).body;
         expect(listed).toHaveLength(1);
 

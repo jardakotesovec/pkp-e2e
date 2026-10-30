@@ -7,9 +7,7 @@
  * a preprint server has Production alone, where a submission starts.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-const DISCUSSION = 1;
-const TASK = 2;
+const {ROLE, STAGE, TASK_TYPE} = require('../../support/pkp-ids.js');
 
 /** A journal with a submission on its working stage, and that stage. */
 async function stageOf(scratch, appContext, users) {
@@ -20,7 +18,7 @@ async function stageOf(scratch, appContext, users) {
         participants: [{username: j.user('se'), role: 'sectionEditor'}],
         ...(review ? {decisions: ['skipExternalReview']} : {}),
     });
-    return {j, stageId: review ? 4 : 5, base: `submissions/${s.submissionId}`};
+    return {j, stageId: review ? STAGE.EDITING : STAGE.PRODUCTION, base: `submissions/${s.submissionId}`};
 }
 
 /** A due date a week from today. */
@@ -31,7 +29,7 @@ test.describe('tasks and discussions through the API', () => {
         const {j, stageId, base} = await stageOf(scratch, appContext, {xs: 'sectionEditor', xa: 'author', rd: 'reader'});
         const editor = await j.as('se');
         const discussion = (userId) => ({
-            type: DISCUSSION,
+            type: TASK_TYPE.DISCUSSION,
             title: 'Who may take part',
             stageId,
             description: '<p>Hello</p>',
@@ -58,7 +56,7 @@ test.describe('tasks and discussions through the API', () => {
             {userId: j.id('se'), isResponsible: owner === 'se'},
             {userId: j.id('au'), isResponsible: owner === 'au' || owner === 'both'},
         ];
-        const task = {type: TASK, title: 'Copyedit', stageId, dateDue: nextWeek(), description: '<p>Please</p>'};
+        const task = {type: TASK_TYPE.TASK, title: 'Copyedit', stageId, dateDue: nextWeek(), description: '<p>Please</p>'};
 
         const twoOwners = await editor.post(`${base}/tasks`, {
             ...task,
@@ -67,7 +65,7 @@ test.describe('tasks and discussions through the API', () => {
         expect(twoOwners.status).toBe(422);
         expect(twoOwners.body).toHaveProperty('participants');
 
-        const discussion = {type: DISCUSSION, title: 'A word', stageId, description: '<p>Hi</p>'};
+        const discussion = {type: TASK_TYPE.DISCUSSION, title: 'A word', stageId, description: '<p>Hi</p>'};
         const withDue = await editor.post(`${base}/tasks`, {...discussion, dateDue: nextWeek(), participants: people(null).map(({userId}) => ({userId}))});
         expect(withDue.status).toBe(422);
         expect(withDue.body).toHaveProperty('dateDue');
@@ -91,11 +89,11 @@ test.describe('tasks and discussions through the API', () => {
     test('API3: A template the template window could not send is refused', async ({scratch, appContext}) => {
         const own = await scratch({users: {mg: 'manager'}});
         const other = await scratch({users: {mg: 'manager'}});
-        const stageId = appContext.capabilities.hasReviewStage ? 4 : 5;
+        const stageId = appContext.capabilities.hasReviewStage ? STAGE.EDITING : STAGE.PRODUCTION;
         const authorGroup = async (j) =>
-            (await (await j.as('mg')).get('userGroups', {perPage: 100})).body.items.find((g) => g.roleId === 65536).id;
+            (await (await j.as('mg')).get('userGroups', {perPage: 100})).body.items.find((g) => g.roleId === ROLE.AUTHOR).id;
         const manager = await own.as('mg');
-        const template = {type: DISCUSSION, stageId, title: 'Ask the author', description: '<p>Hi</p>'};
+        const template = {type: TASK_TYPE.DISCUSSION, stageId, title: 'Ask the author', description: '<p>Hi</p>'};
         const before = (await manager.get('editTaskTemplates', {stageId})).body.data.length;
 
         const noRole = await manager.post('editTaskTemplates', {...template, restrictToUserGroups: true, userGroupIds: []});
@@ -104,7 +102,7 @@ test.describe('tasks and discussions through the API', () => {
         const theirRole = await manager.post('editTaskTemplates', {...template, restrictToUserGroups: true, userGroupIds: [await authorGroup(other)]});
         expect(theirRole.status).toBe(422);
         expect(theirRole.body).toHaveProperty(['userGroupIds.0']);
-        const interval = await manager.post('editTaskTemplates', {...template, type: TASK, dueInterval: 'P5D'});
+        const interval = await manager.post('editTaskTemplates', {...template, type: TASK_TYPE.TASK, dueInterval: 'P5D'});
         expect(interval.status).toBe(422);
         expect(interval.body).toHaveProperty('dueInterval');
         expect((await manager.get('editTaskTemplates', {stageId})).body.data).toHaveLength(before);

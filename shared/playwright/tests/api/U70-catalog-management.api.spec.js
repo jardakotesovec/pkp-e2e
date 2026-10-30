@@ -4,8 +4,7 @@
  * catalog grid, checked by the matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-const PUBLISHED = 3; // Submission::STATUS_PUBLISHED
+const {STATUS} = require('../../support/pkp-ids.js');
 
 test.describe('catalog management through the API', () => {
     test.beforeEach(async ({appContext}) => {
@@ -20,17 +19,17 @@ test.describe('catalog management through the API', () => {
         const api = await j.as('mg');
         const read = async ({submissionId}) => (await api.get(`submissions/${submissionId}`)).body;
         const before = await read(chronicle);
-        expect(before.status).toBe(PUBLISHED);
+        expect(before.status).toBe(STATUS.PUBLISHED);
 
         const unknown = await api.put('_submissions/addToCatalog', {submissionIds: [atlas.submissionId, 999999999]});
         expect(unknown.status).toBe(404);
-        expect((await read(atlas)).status).not.toBe(PUBLISHED);
+        expect((await read(atlas)).status).not.toBe(STATUS.PUBLISHED);
 
         const withPublished = await api.put('_submissions/addToCatalog', {submissionIds: [chronicle.submissionId, atlas.submissionId]});
         expect(withPublished.status).toBe(200);
-        expect((await read(atlas)).status).toBe(PUBLISHED);
+        expect((await read(atlas)).status).toBe(STATUS.PUBLISHED);
         const after = await read(chronicle);
-        expect(after.status).toBe(PUBLISHED);
+        expect(after.status).toBe(STATUS.PUBLISHED);
         expect(after.publications.map((p) => [p.id, p.status, p.datePublished]))
             .toEqual(before.publications.map((p) => [p.id, p.status, p.datePublished]));
     });

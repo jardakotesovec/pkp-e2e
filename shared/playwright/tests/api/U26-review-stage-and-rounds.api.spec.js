@@ -5,13 +5,7 @@
  * matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-/** lib/pkp Decision: "Decline Submission" on the Submission stage, a preprint server's Production. */
-const INITIAL_DECLINE = 8;
-/** lib/pkp SubmissionEmailLogEventType: an editor's letter to the author, the one the "Notifications" list asks for. */
-const EDITOR_NOTIFY_AUTHOR = 0x30000001;
-/** lib/pkp SubmissionEmailLogEventType: a reviewer's review request, no author's letter. */
-const REVIEW_NOTIFY_REVIEWER = 0x40000001;
+const {DECISION, EMAIL_EVENT} = require('../../support/pkp-ids.js');
 
 test.describe('review stage through the API', () => {
     test('API1: The letters list holds only the letters sent to the caller', async ({scratch}) => {
@@ -20,7 +14,7 @@ test.describe('review stage through the API', () => {
         const second = await j.another('b', {users: {mg: ['manager', 'author'], au: 'author'}});
         const decline = async (editor, submissionId, subject) => {
             const res = await editor.post(`submissions/${submissionId}/decisions`, {
-                decision: INITIAL_DECLINE,
+                decision: DECISION.INITIAL_DECLINE, // "Decline Submission" on the Submission stage, a preprint server's Production
                 actions: [{id: 'notifyAuthors', subject, body: `<p>${subject}</p>`, locale: 'en'}],
             });
             expect(res.status, JSON.stringify(res.body)).toBe(200);
@@ -39,7 +33,7 @@ test.describe('review stage through the API', () => {
         const author = await j.as('au');
 
         // As the "Notifications" list asks: the submission's editor letters.
-        const listed = await author.get('emails/authorEmails', {submissionId: own, eventType: EDITOR_NOTIFY_AUTHOR});
+        const listed = await author.get('emails/authorEmails', {submissionId: own, eventType: EMAIL_EVENT.EDITOR_NOTIFY_AUTHOR});
         expect(subjects(listed)).toEqual(['Own letter']);
         expect(listed.body[0]).toMatchObject({assocId: own, body: '<p>Own letter</p>'});
         expect(listed.body[0].recipients).toContain(j.user('au'));
@@ -54,8 +48,8 @@ test.describe('review stage through the API', () => {
         // The sender, an Author in the second journal: the letters they sent are not theirs.
         expect(subjects(await managerThere.get('emails/authorEmails'))).toEqual([]);
 
-        // A kind of email no author is sent.
-        const refused = await author.get('emails/authorEmails', {eventType: REVIEW_NOTIFY_REVIEWER});
+        // A kind of email no author is sent: a reviewer's review request.
+        const refused = await author.get('emails/authorEmails', {eventType: EMAIL_EVENT.REVIEW_NOTIFY_REVIEWER});
         expect(refused.status).toBe(400);
         expect(refused.body).toHaveProperty('error');
     });

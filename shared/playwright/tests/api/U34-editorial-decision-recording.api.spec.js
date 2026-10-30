@@ -5,11 +5,7 @@
  * matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-/** lib/pkp Decision and the workflow stages the checks name. */
-const DECISION = {accept: 2, sendToProduction: 7, initialDecline: 8, returnToWorkflow: 34, returnToDone: 35};
-const STAGE = {copyediting: 4, production: 5, done: 6};
-const FILE_STAGE = {reviewFile: 4, copyedited: 9, productionReady: 11};
+const {STAGE, FILE_STAGE, DECISION} = require('../../support/pkp-ids.js');
 
 const ISSUE = {volume: 1, number: '1', year: 2026};
 
@@ -30,7 +26,7 @@ function pastReview(appContext) {
 
 /** The decision of a submission's active stage that the checks record. */
 function stageDecision(stageId) {
-    return {[STAGE.copyediting]: DECISION.sendToProduction, [STAGE.production]: DECISION.initialDecline}[stageId];
+    return {[STAGE.EDITING]: DECISION.SEND_TO_PRODUCTION, [STAGE.PRODUCTION]: DECISION.INITIAL_DECLINE}[stageId];
 }
 
 test.describe('editorial decision recording through the API', () => {
@@ -44,7 +40,7 @@ test.describe('editorial decision recording through the API', () => {
 
         // Refused by the wizard's own checks, with the reason the access-denied page prints.
         for (const [body, reason] of [
-            [{decision: DECISION.returnToWorkflow}, 'editor.submission.workflowDecision.invalidStage'],
+            [{decision: DECISION.RETURN_TO_WORKFLOW}, 'editor.submission.workflowDecision.invalidStage'],
             [{decision: 999}, 'editor.submission.workflowDecision.typeInvalid'],
             [{}, 'editor.submission.workflowDecision.typeInvalid'],
         ]) {
@@ -78,7 +74,7 @@ test.describe('editorial decision recording through the API', () => {
         expect(ids(byType.body)).toEqual(matching('decision', first.decision));
         expect(ids((await api.get(route, {stageId: first.stageId})).body)).toEqual(matching('stageId', first.stageId));
         expect(ids((await api.get(route, {editorIds: first.editorId})).body)).toEqual(matching('editorId', first.editorId));
-        expect((await api.get(route, {decisionTypes: DECISION.returnToDone})).body).toEqual([]);
+        expect((await api.get(route, {decisionTypes: DECISION.RETURN_TO_DONE})).body).toEqual([]);
 
         // A decision naming another editor is recorded as the caller's.
         const stageId = (await api.get(`submissions/${s.submissionId}`)).body.stageId;
@@ -94,7 +90,7 @@ test.describe('editorial decision recording through the API', () => {
         const read = async (s) => {
             const submission = (await api.get(`submissions/${s.submissionId}`)).body;
             const decisions = (await api.get(`submissions/${s.submissionId}/decisions`)).body;
-            return {stageId: submission.stageId, returns: decisions.filter((d) => d.decision === DECISION.returnToDone).length};
+            return {stageId: submission.stageId, returns: decisions.filter((d) => d.decision === DECISION.RETURN_TO_DONE).length};
         };
         const refuse = async (s) => {
             const before = await read(s);
@@ -104,7 +100,7 @@ test.describe('editorial decision recording through the API', () => {
         };
         const returned = async (suffix) => {
             const s = await j.submission(suffix, {submitter: 'au', ...pastReview(appContext), ...published});
-            expect((await api.post(`submissions/${s.submissionId}/decisions`, {decision: DECISION.returnToWorkflow})).status).toBe(200);
+            expect((await api.post(`submissions/${s.submissionId}/decisions`, {decision: DECISION.RETURN_TO_WORKFLOW})).status).toBe(200);
             return s;
         };
 
@@ -122,7 +118,7 @@ test.describe('editorial decision recording through the API', () => {
         const control = await returned('c');
         const done = await api.post(`submissions/${control.submissionId}/returnToDone`, {});
         expect(done.status).toBe(200);
-        expect(await read(control)).toEqual({stageId: STAGE.done, returns: 1});
+        expect(await read(control)).toEqual({stageId: STAGE.DONE, returns: 1});
     });
 
     test('API4: A copy to no list, or into another submission\'s review round, is refused', async ({scratch, appContext}) => {
@@ -133,15 +129,15 @@ test.describe('editorial decision recording through the API', () => {
         const api = await j.as('mg');
         const uploaded = await api.upload(`submissions/${s.submissionId}/files`, {
             file: {name: 'copyedited.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 U34')},
-            fileStage: String(FILE_STAGE.copyedited),
+            fileStage: String(FILE_STAGE.COPYEDIT),
         });
         expect(uploaded.status).toBe(200);
-        const copy = `submissions/${s.submissionId}/files/${uploaded.body.id}/copy?stageId=${STAGE.copyediting}`;
+        const copy = `submissions/${s.submissionId}/files/${uploaded.body.id}/copy?stageId=${STAGE.EDITING}`;
         const count = async () => (await api.get(`submissions/${s.submissionId}/files`)).body.itemsMax;
         const before = await count();
         const otherRound = (await api.get(`submissions/${other.submissionId}`)).body.reviewRounds.at(-1).id;
 
-        for (const body of [{}, {toFileStage: 99}, {toFileStage: FILE_STAGE.reviewFile, reviewRoundId: otherRound}]) {
+        for (const body of [{}, {toFileStage: 99}, {toFileStage: FILE_STAGE.REVIEW_FILE, reviewRoundId: otherRound}]) {
             const refused = await api.put(copy, body);
             expect(refused.status, JSON.stringify(body)).toBe(400);
             expect(refused.body, JSON.stringify(body)).toHaveProperty('error');
@@ -149,9 +145,9 @@ test.describe('editorial decision recording through the API', () => {
         expect(await count()).toBe(before);
 
         // Control: carried to "Production Ready Files", the original kept.
-        const copied = await api.put(copy, {toFileStage: FILE_STAGE.productionReady});
+        const copied = await api.put(copy, {toFileStage: FILE_STAGE.PRODUCTION_READY});
         expect(copied.status).toBe(200);
-        expect(copied.body).toMatchObject({fileStage: FILE_STAGE.productionReady, name: {en: 'copyedited.pdf'}});
+        expect(copied.body).toMatchObject({fileStage: FILE_STAGE.PRODUCTION_READY, name: {en: 'copyedited.pdf'}});
         expect(copied.body.id).not.toBe(uploaded.body.id);
         expect(await count()).toBe(before + 1);
     });

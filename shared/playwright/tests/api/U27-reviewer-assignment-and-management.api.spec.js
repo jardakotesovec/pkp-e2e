@@ -5,6 +5,7 @@
  * (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {FILE_STAGE, REVIEW_ASSIGNMENT} = require('../../support/pkp-ids.js');
 
 /**
  * A scratch journal whose submission's one review is completed: the
@@ -41,7 +42,7 @@ test.describe('reviewer assignment & management through the API', () => {
             expect(refused.status, JSON.stringify(quality)).toBe(422);
             expect(refused.body, JSON.stringify(quality)).toHaveProperty('quality');
         }
-        const mixed = await api.put(assignment, {quality: 3, considered: 3});
+        const mixed = await api.put(assignment, {quality: 3, considered: REVIEW_ASSIGNMENT.CONSIDERED});
         expect(mixed.status).toBe(422);
         let read = (await api.get(assignment)).body;
         expect([read.quality, read.dateRated, read.considered]).toEqual([null, null, 0]);
@@ -59,19 +60,20 @@ test.describe('reviewer assignment & management through the API', () => {
     test('API2: A review marked complete is not marked again', async ({scratch}) => {
         const {api, assignment} = await reviewed(scratch);
 
-        const unknown = await api.put(`${assignment}/consider`, {considered: 2});
-        expect(unknown.status).toBe(422);
+        // "Reconsidered": a state the route keeps but the window never sends.
+        const reconsidered = await api.put(`${assignment}/consider`, {considered: REVIEW_ASSIGNMENT.RECONSIDERED});
+        expect(reconsidered.status).toBe(422);
         expect((await api.get(assignment)).body.considered).toBe(0);
 
-        const marked = await api.put(`${assignment}/consider`, {considered: 3});
+        const marked = await api.put(`${assignment}/consider`, {considered: REVIEW_ASSIGNMENT.CONSIDERED});
         expect(marked.status).toBe(200);
         const first = (await api.get(assignment)).body;
-        expect(first.considered).toBe(3);
+        expect(first.considered).toBe(REVIEW_ASSIGNMENT.CONSIDERED);
 
-        const again = await api.put(`${assignment}/consider`, {considered: 3});
+        const again = await api.put(`${assignment}/consider`, {considered: REVIEW_ASSIGNMENT.CONSIDERED});
         expect(again.status).toBe(409);
         const after = (await api.get(assignment)).body;
-        expect([after.considered, after.dateConsidered]).toEqual([3, first.dateConsidered]);
+        expect([after.considered, after.dateConsidered]).toEqual([REVIEW_ASSIGNMENT.CONSIDERED, first.dateConsidered]);
     });
 
     test('API3: A modified review keeps the shape of its review', async ({scratch}) => {
@@ -108,7 +110,7 @@ test.describe('reviewer assignment & management through the API', () => {
     test("API4: A review's file list serves only the review's files", async ({scratch}) => {
         const {reviewer, api, files} = await reviewed(scratch, {files: true});
 
-        for (const fileStages of ['2', '2,4']) {
+        for (const fileStages of [`${FILE_STAGE.SUBMISSION}`, `${FILE_STAGE.SUBMISSION},${FILE_STAGE.REVIEW_FILE}`]) {
             expect((await reviewer.get(files, {fileStages})).status, `reviewer, stages ${fileStages}`).toBe(403);
             expect((await api.get(files, {fileStages})).status, `manager, stages ${fileStages}`).toBe(403);
         }

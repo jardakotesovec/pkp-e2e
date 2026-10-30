@@ -1434,8 +1434,9 @@ API2. **A review marked complete is not marked again** {OJS OMP}
 
    Given: a Journal Manager, the review not yet viewed.
 
-   - **Unknown state**: mark the review with a state the window never
-     sends (2): refused (422), and the review stays unviewed.
+   - **Unsent state**: mark the review with a state the window never
+     sends ("reconsidered", 2): refused (422), and the review stays
+     unviewed.
    - **Twice**: mark it complete (200), then complete again: refused
      (409), and its consideration date is the first one. In the window,
      "Mark as Complete" goes disabled once pressed (Rule 14a).

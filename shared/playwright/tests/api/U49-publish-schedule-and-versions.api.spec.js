@@ -5,8 +5,7 @@
  * never here.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-const PUBLISHED = 3;
+const {STATUS} = require('../../support/pkp-ids.js');
 
 /** A manager's client and a published submission in a scratch journal, with its version routes. */
 async function publishedSubmission(scratch) {
@@ -36,25 +35,25 @@ test.describe('publishing and versions through the API', () => {
     test('API1: A version is published only once, and unpublished only while published', async ({scratch}) => {
         const s = await publishedSubmission(scratch);
         const published = await s.version(s.publicationId);
-        expect(published.status).toBe(PUBLISHED);
+        expect(published.status).toBe(STATUS.PUBLISHED);
         const draft = await s.copy();
 
         const again = await s.api.put(`${s.versions}/${s.publicationId}/publish`, {});
         expect(again.status).toBe(403);
         const after = await s.version(s.publicationId);
-        expect([after.status, after.datePublished]).toEqual([PUBLISHED, published.datePublished]);
+        expect([after.status, after.datePublished]).toEqual([STATUS.PUBLISHED, published.datePublished]);
 
         const notPublished = await s.api.put(`${s.versions}/${draft}/unpublish`, {});
         expect(notPublished.status).toBe(403);
-        expect((await s.version(draft)).status).not.toBe(PUBLISHED);
+        expect((await s.version(draft)).status).not.toBe(STATUS.PUBLISHED);
 
         // Control: the new version publishes, then unpublishes.
         const publish = await s.api.put(`${s.versions}/${draft}/publish`, {});
         expect(publish.status).toBe(200);
-        expect((await s.version(draft)).status).toBe(PUBLISHED);
+        expect((await s.version(draft)).status).toBe(STATUS.PUBLISHED);
         const unpublish = await s.api.put(`${s.versions}/${draft}/unpublish`, {});
         expect(unpublish.status).toBe(200);
-        expect((await s.version(draft)).status).not.toBe(PUBLISHED);
+        expect((await s.version(draft)).status).not.toBe(STATUS.PUBLISHED);
     });
 
     test('API2: A published version cannot be deleted', async ({scratch}) => {
@@ -70,8 +69,8 @@ test.describe('publishing and versions through the API', () => {
         const deleted = await s.api.delete(`${s.versions}/${draft}`);
         expect(deleted.status).toBe(200);
         expect(await s.ids()).toEqual([s.publicationId]);
-        expect((await s.version(s.publicationId)).status).toBe(PUBLISHED);
-        expect((await s.api.get(`submissions/${s.submissionId}`)).body.status).toBe(PUBLISHED);
+        expect((await s.version(s.publicationId)).status).toBe(STATUS.PUBLISHED);
+        expect((await s.api.get(`submissions/${s.submissionId}`)).body.status).toBe(STATUS.PUBLISHED);
     });
 
     test("API3: Version numbers asked for by program follow the stage's numbering", async ({scratch}) => {

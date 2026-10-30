@@ -5,6 +5,7 @@
  * checked by the matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {ROLE} = require('../../support/pkp-ids.js');
 
 /** The server's day `n` days back, `YYYY-MM-DD` (the fleets run in UTC). */
 const day = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
@@ -71,24 +72,24 @@ test.describe('editorial statistics through the API', () => {
         const active = await api.get('stats/users');
         expect(active.status).toBe(200);
         expect(figure(active.body, 'total')).toBe(3);
-        expect(figure(active.body, 65536)).toBe(1);
+        expect(figure(active.body, ROLE.AUTHOR)).toBe(1);
 
         const disabled = await api.get('stats/users', {status: 'disabled'});
-        expect([figure(disabled.body, 'total'), figure(disabled.body, 65536)]).toEqual([1, 1]);
+        expect([figure(disabled.body, 'total'), figure(disabled.body, ROLE.AUTHOR)]).toEqual([1, 1]);
         const all = await api.get('stats/users', {status: 'all'});
-        expect([figure(all.body, 'total'), figure(all.body, 65536)]).toEqual([4, 2]);
+        expect([figure(all.body, 'total'), figure(all.body, ROLE.AUTHOR)]).toEqual([4, 2]);
 
         // Registered before yesterday: no author, both made today.
         const earlier = await api.get('stats/users', {registeredBefore: day(1)});
         expect(earlier.status).toBe(200);
-        expect(figure(earlier.body, 65536)).toBe(0);
+        expect(figure(earlier.body, ROLE.AUTHOR)).toBe(0);
     });
 
     test('API4: The users export narrowed to another journal\'s role lists no account', async ({scratch}) => {
         const j = await scratch({users: {mg: 'manager', au: 'author'}});
         const other = await scratch({users: {mg: 'manager', au: 'author'}});
         const api = await j.as('mg');
-        const authorRole = async (client) => (await client.get('userGroups')).body.items.find((g) => g.roleId === 65536).id;
+        const authorRole = async (client) => (await client.get('userGroups')).body.items.find((g) => g.roleId === ROLE.AUTHOR).id;
         const lines = (res) => res.body.replace(/^﻿/, '').trim().split('\n');
 
         const foreign = await api.get('users/report', {userGroupIds: String(await authorRole(await other.as('mg')))});

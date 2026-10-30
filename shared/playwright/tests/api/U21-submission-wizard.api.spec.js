@@ -4,9 +4,7 @@
  * (U21#draft), checked by the matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-const AUTHOR = 65536;
-const MANAGER = 16;
+const {ROLE} = require('../../support/pkp-ids.js');
 
 /**
  * A scratch context with a Journal Manager and an Author whose one section
@@ -48,12 +46,12 @@ test.describe('the submission wizard through the API', () => {
         const groups = (await mg.get('userGroups')).body.items;
         const groupOf = (roleId) => groups.find((g) => g.roleId === roleId).id;
 
-        const refused = await au.post('submissions', start(field, sectionId, {userGroupId: groupOf(MANAGER)}));
+        const refused = await au.post('submissions', start(field, sectionId, {userGroupId: groupOf(ROLE.MANAGER)}));
         expect(refused.status).toBe(400);
         expect(refused.body).toHaveProperty('userGroupId');
 
         // Control: the Author role the user holds.
-        const started = await au.post('submissions', start(field, sectionId, {userGroupId: groupOf(AUTHOR)}));
+        const started = await au.post('submissions', start(field, sectionId, {userGroupId: groupOf(ROLE.AUTHOR)}));
         expect(started.status).toBe(200);
     });
 

@@ -5,9 +5,7 @@
  * matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-/** The file stages the lists use (lib/pkp SubmissionFile). */
-const STAGE = {submission: 2, note: 3, reviewAttachment: 5, draft: 6, copyedited: 9, query: 18};
+const {STAGE, FILE_STAGE, ASSOC_TYPE} = require('../../support/pkp-ids.js');
 
 /** A file uploaded through the files API as `api`, as a list's "Upload" sends it. */
 async function upload(api, submissionId, fields) {
@@ -26,8 +24,8 @@ test.describe('submission files through the API', () => {
         });
         const manager = await j.as('mg');
         const submissionFile = s.files[0].submissionFileId;
-        const draft = await upload(manager, s.submissionId, {fileStage: String(STAGE.draft)});
-        const copyedited = await upload(manager, s.submissionId, {fileStage: String(STAGE.copyedited)});
+        const draft = await upload(manager, s.submissionId, {fileStage: String(FILE_STAGE.FINAL)});
+        const copyedited = await upload(manager, s.submissionId, {fileStage: String(FILE_STAGE.COPYEDIT)});
         expect([draft.status, copyedited.status]).toEqual([200, 200]);
         const list = `submissions/${s.submissionId}/files`;
         const ids = async (api, params) => {
@@ -39,7 +37,7 @@ test.describe('submission files through the API', () => {
         // The Copyeditor: Copyediting's two lists, not "Submission Files".
         const copyeditor = await j.as('ce');
         expect(await ids(copyeditor)).toEqual([draft.body.id, copyedited.body.id]);
-        expect((await copyeditor.get(list, {fileStages: STAGE.submission})).status).toBe(403);
+        expect((await copyeditor.get(list, {fileStages: FILE_STAGE.SUBMISSION})).status).toBe(403);
 
         // The Author: "Submission Files" and "Copyedited Files", not "Draft Files".
         expect(await ids(await j.as('au'))).toEqual([submissionFile, copyedited.body.id]);
@@ -53,14 +51,14 @@ test.describe('submission files through the API', () => {
         const s = await j.submission('s', {submitter: 'au'});
         const api = await j.as('mg');
 
-        for (const fileStage of [STAGE.note, STAGE.reviewAttachment, STAGE.query]) {
+        for (const fileStage of [FILE_STAGE.NOTE, FILE_STAGE.REVIEW_ATTACHMENT, FILE_STAGE.QUERY]) {
             const refused = await upload(api, s.submissionId, {fileStage: String(fileStage)});
             expect(refused.status, `file stage ${fileStage}`).toBe(400);
             expect(refused.body, `file stage ${fileStage}`).toHaveProperty('error');
         }
 
         // Control: the same upload to "Submission Files" is stored and listed.
-        const added = await upload(api, s.submissionId, {fileStage: String(STAGE.submission)});
+        const added = await upload(api, s.submissionId, {fileStage: String(FILE_STAGE.SUBMISSION)});
         expect(added.status).toBe(200);
         expect((await api.get(`submissions/${s.submissionId}/files`)).body.items.map((f) => f.id)).toEqual([added.body.id]);
     });
@@ -71,18 +69,18 @@ test.describe('submission files through the API', () => {
         const s = await j.submission('s', {submitter: 'au', files: [{file: 'article.pdf'}]});
         const api = await j.as('mg');
         const route = `submissions/${s.submissionId}/files/${s.files[0].submissionFileId}`;
-        const before = (await api.get(route, {stageId: 1})).body;
-        expect([before.fileStage, before.assocType, before.assocId]).toEqual([STAGE.submission, null, null]);
+        const before = (await api.get(route, {stageId: STAGE.SUBMISSION})).body;
+        expect([before.fileStage, before.assocType, before.assocId]).toEqual([FILE_STAGE.SUBMISSION, null, null]);
 
-        const moved = await api.call('PUT', `${route}?stageId=1`, {data: {name: {en: 'Moved manuscript'}, fileStage: STAGE.copyedited}});
+        const moved = await api.call('PUT', `${route}?stageId=${STAGE.SUBMISSION}`, {data: {name: {en: 'Moved manuscript'}, fileStage: FILE_STAGE.COPYEDIT}});
         expect(moved.status).toBe(200);
-        const attached = await api.call('PUT', `${route}?stageId=1`, {data: {assocType: 521, assocId: 1}});
+        const attached = await api.call('PUT', `${route}?stageId=${STAGE.SUBMISSION}`, {data: {assocType: ASSOC_TYPE.REPRESENTATION, assocId: 1}});
         expect(attached.status).toBe(200);
 
-        const after = (await api.get(route, {stageId: 1})).body;
+        const after = (await api.get(route, {stageId: STAGE.SUBMISSION})).body;
         expect(after.name.en).toBe('Moved manuscript');
-        expect([after.fileStage, after.assocType, after.assocId]).toEqual([STAGE.submission, null, null]);
-        const listed = (await api.get(`submissions/${s.submissionId}/files`, {fileStages: STAGE.submission})).body.items;
+        expect([after.fileStage, after.assocType, after.assocId]).toEqual([FILE_STAGE.SUBMISSION, null, null]);
+        const listed = (await api.get(`submissions/${s.submissionId}/files`, {fileStages: FILE_STAGE.SUBMISSION})).body.items;
         expect(listed.map((f) => f.id)).toEqual([before.id]);
     });
 });

@@ -5,6 +5,7 @@
  * has a registration agency, so nothing is ever sent to one.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {DOI_STATUS, REVIEW_ASSIGNMENT} = require('../../support/pkp-ids.js');
 
 const uniqueDoi = (prefix) => `${prefix}/api.${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
@@ -27,7 +28,7 @@ test.describe('DOIs through the API', () => {
         expect(added.body).toMatchObject({doi, contextId: own.seeded.contextId});
         const one = await ours.get(`dois/${added.body.id}`);
         expect(one.status).toBe(200);
-        expect(one.body).toMatchObject({doi, contextId: own.seeded.contextId, status: 1});
+        expect(one.body).toMatchObject({doi, contextId: own.seeded.contextId, status: DOI_STATUS.UNREGISTERED});
         expect((await ours.get('dois')).body.items.map((d) => d.doi)).toEqual([doi]);
         expect((await (await other.as('mg')).get('dois')).body.itemsMax).toBe(0);
     });
@@ -38,7 +39,7 @@ test.describe('DOIs through the API', () => {
         const api = await j.as('mg');
         expect((await api.post('dois/submissions/assignDois', {ids: [work.submissionId]})).status).toBe(200);
         const before = await doiOf(api, work);
-        expect(before).toMatchObject({status: 1});
+        expect(before).toMatchObject({status: DOI_STATUS.UNREGISTERED});
 
         for (const action of ['export', 'deposit']) {
             const refused = await api.put(`dois/submissions/${action}`, {ids: [work.submissionId]});
@@ -47,7 +48,7 @@ test.describe('DOIs through the API', () => {
         }
         const all = await api.put('dois/depositAll', {});
         expect(all.status).toBe(200);
-        expect(await doiOf(api, work)).toMatchObject({id: before.id, doi: before.doi, status: 1});
+        expect(await doiOf(api, work)).toMatchObject({id: before.id, doi: before.doi, status: DOI_STATUS.UNREGISTERED});
     });
 
     test('API3: Bulk actions naming another journal\'s work change nothing there', async ({scratch}) => {
@@ -61,7 +62,7 @@ test.describe('DOIs through the API', () => {
         const ownBare = await own.submission('b', {submitter: 'au'});
         expect((await theirs.post('dois/submissions/assignDois', {ids: [theirRegistered.submissionId]})).status).toBe(200);
         expect((await theirs.put('dois/submissions/markRegistered', {ids: [theirRegistered.submissionId]})).status).toBe(200);
-        expect(await doiOf(theirs, theirRegistered)).toMatchObject({status: 3});
+        expect(await doiOf(theirs, theirRegistered)).toMatchObject({status: DOI_STATUS.REGISTERED});
         expect(await doiOf(theirs, theirBare)).toBeNull();
 
         // "Assign DOIs" naming their work without a DOI.
@@ -74,11 +75,11 @@ test.describe('DOIs through the API', () => {
         const unmark = await ours.put('dois/submissions/markUnregistered', {ids: [theirRegistered.submissionId]});
         expect(unmark.status).toBe(400);
         expect(unmark.body.failedDoiActions).toHaveLength(1);
-        expect(await doiOf(theirs, theirRegistered)).toMatchObject({status: 3});
+        expect(await doiOf(theirs, theirRegistered)).toMatchObject({status: DOI_STATUS.REGISTERED});
 
         // Control: the same two on this journal's own work.
         expect((await ours.post('dois/submissions/assignDois', {ids: [ownBare.submissionId]})).status).toBe(200);
-        expect(await doiOf(ours, ownBare)).toMatchObject({status: 1});
+        expect(await doiOf(ours, ownBare)).toMatchObject({status: DOI_STATUS.UNREGISTERED});
         expect((await ours.put('dois/submissions/markUnregistered', {ids: [ownBare.submissionId]})).status).toBe(200);
     });
 
@@ -145,7 +146,7 @@ test.describe('DOIs through the API', () => {
                 reviewRounds: [{reviewers: [{username: j.user('rv'), status: 'completed'}]}],
             });
             const id = work.reviewAssignments[0].id;
-            const read = await api.put(`submissions/${work.submissionId}/reviewAssignments/${id}/consider`, {considered: 3});
+            const read = await api.put(`submissions/${work.submissionId}/reviewAssignments/${id}/consider`, {considered: REVIEW_ASSIGNMENT.CONSIDERED});
             expect(read.status).toBe(200);
             return {work, id};
         };

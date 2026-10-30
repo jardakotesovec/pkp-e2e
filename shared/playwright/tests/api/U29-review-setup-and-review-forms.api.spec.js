@@ -5,6 +5,7 @@
  * the matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {RECOMMENDATION_TYPE} = require('../../support/pkp-ids.js');
 
 const ROUTE = 'reviewers/recommendations';
 const titles = (res) => res.body.items.map((r) => r.title.en).sort();
@@ -18,7 +19,7 @@ test.describe('review setup & review forms through the API', () => {
         const j = await scratch();
         const api = await j.as('mg');
         const before = titles(await api.get(ROUTE));
-        const entry = {title: {en: 'Needs a native speaker'}, type: 3, status: true};
+        const entry = {title: {en: 'Needs a native speaker'}, type: RECOMMENDATION_TYPE.REVISIONS_REQUESTED, status: true};
 
         for (const [field, value] of [['title', undefined], ['title', {en: ''}], ['type', undefined], ['type', 0], ['type', 5], ['type', 'approved'], ['status', undefined], ['status', 'yes']]) {
             const body = {...entry, [field]: value};
@@ -35,7 +36,7 @@ test.describe('review setup & review forms through the API', () => {
         // Control: the whole entry is stored and listed.
         const added = await api.post(ROUTE, entry);
         expect(added.status).toBe(200);
-        expect(added.body).toMatchObject({title: {en: 'Needs a native speaker'}, type: 3, status: 1, removable: true});
+        expect(added.body).toMatchObject({title: {en: 'Needs a native speaker'}, type: RECOMMENDATION_TYPE.REVISIONS_REQUESTED, status: 1, removable: true});
         expect(titles(await api.get(ROUTE))).toEqual([...before, 'Needs a native speaker'].sort());
     });
 
@@ -51,7 +52,7 @@ test.describe('review setup & review forms through the API', () => {
         expect(used).toHaveLength(1);
         const {id, title} = used[0];
 
-        const edit = await api.put(`${ROUTE}/${id}`, {title: {en: 'Renamed'}, type: 1, status: true});
+        const edit = await api.put(`${ROUTE}/${id}`, {title: {en: 'Renamed'}, type: RECOMMENDATION_TYPE.APPROVED, status: true});
         expect(edit.status).toBe(406);
         const remove = await api.delete(`${ROUTE}/${id}`);
         expect(remove.status).toBe(406);
@@ -71,7 +72,7 @@ test.describe('review setup & review forms through the API', () => {
         const theirs = await other.as('mg');
         const theirsBefore = titles(await theirs.get(ROUTE));
 
-        const added = await ours.post(ROUTE, {title: {en: 'Placed here'}, type: 1, status: true, contextId: other.seeded.contextId});
+        const added = await ours.post(ROUTE, {title: {en: 'Placed here'}, type: RECOMMENDATION_TYPE.APPROVED, status: true, contextId: other.seeded.contextId});
         expect(added.status).toBe(200);
         expect(added.body.contextId).toBe(own.seeded.contextId);
         expect(titles(await ours.get(ROUTE))).toContain('Placed here');

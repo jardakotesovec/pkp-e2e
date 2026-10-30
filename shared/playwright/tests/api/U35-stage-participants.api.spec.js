@@ -4,9 +4,10 @@
  * checked by the matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {STAGE} = require('../../support/pkp-ids.js');
 
-/** The workflow stages a list can name (lib/pkp WORKFLOW_STAGE_ID_*). */
-const STAGES = [1, 2, 3, 4, 5];
+/** The workflow stages a list can name. */
+const STAGES = [STAGE.SUBMISSION, STAGE.INTERNAL_REVIEW, STAGE.EXTERNAL_REVIEW, STAGE.EDITING, STAGE.PRODUCTION];
 
 test.describe('stage participants through the API', () => {
     test('API1: The list of every stage names each participant once', async ({scratch}) => {

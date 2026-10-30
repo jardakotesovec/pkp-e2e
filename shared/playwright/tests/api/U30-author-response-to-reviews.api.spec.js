@@ -6,6 +6,7 @@
  * though its screens show none of it (the spec's OMP1).
  */
 const {test, expect} = require('../../support/base-test.js');
+const {FILE_STAGE} = require('../../support/pkp-ids.js');
 
 /**
  * A scratch journal with two submissions by its author, each with a file
@@ -24,7 +25,7 @@ async function rounds(scratch) {
     const api = await j.as('mg');
     const read = async (s) => {
         const contributors = (await api.get(`submissions/${s.submissionId}/publications/${s.publicationId}/contributors`)).body;
-        const files = (await api.get(`submissions/${s.submissionId}/files`, {fileStages: [2]})).body;
+        const files = (await api.get(`submissions/${s.submissionId}/files`, {fileStages: [FILE_STAGE.SUBMISSION]})).body;
         const roundId = s.reviewRounds[0].id;
         return {
             ...s,

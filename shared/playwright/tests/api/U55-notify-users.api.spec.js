@@ -4,12 +4,11 @@
  * (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
-
-const ROLE_AUTHOR = 65536;
+const {ROLE} = require('../../support/pkp-ids.js');
 
 /** The id of the context's Author role, as its manager lists the roles. */
 async function authorRole(api) {
-    const res = await api.get('userGroups', {roleIds: ROLE_AUTHOR});
+    const res = await api.get('userGroups', {roleIds: ROLE.AUTHOR});
     expect(res.status).toBe(200);
     const role = res.body.items.find((r) => r.isDefault);
     expect(role).toBeTruthy();

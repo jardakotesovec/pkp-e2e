@@ -4,15 +4,15 @@
  * invitations grid, checked by the matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {ROLE} = require('../../support/pkp-ids.js');
 
-const ROLE_ID_READER = 1048576;
 const today = () => new Date().toISOString().slice(0, 10);
 
 /** The context's Reader role, read through its manager's client. */
 async function readerRole(api) {
     const groups = await api.get('userGroups');
     expect(groups.status).toBe(200);
-    return groups.body.items.find((g) => g.roleId === ROLE_ID_READER).id;
+    return groups.body.items.find((g) => g.roleId === ROLE.READER).id;
 }
 
 /** An invitation being composed for `email`, started by the manager. */
@@ -89,15 +89,15 @@ test.describe('user invitations through the API', () => {
         const groups = (await api.get(`users/${member}`)).body.groups;
         const roleOf = (roleId) => groups.find((g) => g.roleId === roleId);
 
-        const reviewer = roleOf(4096);
+        const reviewer = roleOf(ROLE.REVIEWER);
         const refused = await api.put(`users/${member}/masthead/${reviewer.userUserGroupId}`, {masthead: reviewer.masthead});
         expect(refused.status).toBe(400);
         expect(refused.body).toHaveProperty('error');
 
         // Control: the Author role's choice, sent unchanged.
-        const author = roleOf(65536);
+        const author = roleOf(ROLE.AUTHOR);
         const answered = await api.put(`users/${member}/masthead/${author.userUserGroupId}`, {masthead: author.masthead});
         expect(answered.status).toBe(200);
-        expect(answered.body.groups.find((g) => g.roleId === 65536).masthead).toBe(author.masthead);
+        expect(answered.body.groups.find((g) => g.roleId === ROLE.AUTHOR).masthead).toBe(author.masthead);
     });
 });

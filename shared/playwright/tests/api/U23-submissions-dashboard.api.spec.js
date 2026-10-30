@@ -6,6 +6,7 @@
  * matrix (docs/process/api.md), never here.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {ROLE} = require('../../support/pkp-ids.js');
 
 const ids = (res) => (res.body.items || []).map((s) => s.id).sort((a, b) => a - b);
 
@@ -104,7 +105,7 @@ test.describe('the submission lists through the API', () => {
         expect(JSON.stringify((await (await j.as('mg')).get('_submissions')).body)).toContain(reviewer);
 
         // My Submissions' own list, as it asks: the author's assignments.
-        const res = await (await j.as('au')).get('_submissions/assigned', new URLSearchParams([['assignedWithRoles[]', '65536']]));
+        const res = await (await j.as('au')).get('_submissions/assigned', new URLSearchParams([['assignedWithRoles[]', String(ROLE.AUTHOR)]]));
         expect(res.status).toBe(200);
         expect(ids(res)).toEqual([submissionId]);
         expect(res.body.items[0].reviewAssignments).toHaveLength(1);

@@ -8,6 +8,7 @@
  * alone.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {STATUS} = require('../../support/pkp-ids.js');
 
 test.describe('publication metadata through the API', () => {
     test('API1: The fields the journal stamps are refused', async ({scratch}) => {
@@ -37,8 +38,8 @@ test.describe('publication metadata through the API', () => {
         const api = await j.as('mg');
         const before = (await api.get(route)).body;
 
-        // Published (3) and scheduled (5): refused, the version still unpublished.
-        for (const status of [3, 5]) {
+        // Published and scheduled: refused, the version still unpublished.
+        for (const status of [STATUS.PUBLISHED, STATUS.SCHEDULED]) {
             const refused = await api.put(route, {status});
             expect(refused.status, `status ${status}`).toBe(403);
         }

@@ -5,6 +5,7 @@
  * here.
  */
 const {test, expect} = require('../../support/base-test.js');
+const {PUBLICATION_RELATION} = require('../../support/pkp-ids.js');
 
 test.describe('preprint relations through the API', () => {
     test.beforeEach(async ({appContext}) => {
@@ -32,7 +33,7 @@ test.describe('preprint relations through the API', () => {
         expect(notAChoice.status).toBe(400);
         expect(notAChoice.body).toHaveProperty('relationStatus');
 
-        const notAnAddress = await api.put(`${version}/relate`, {relationStatus: 3, vorDoi: '10.1234/abcd'});
+        const notAnAddress = await api.put(`${version}/relate`, {relationStatus: PUBLICATION_RELATION.PUBLISHED, vorDoi: '10.1234/abcd'});
         expect(notAnAddress.status).toBe(400);
         expect(notAnAddress.body.vorDoi).toEqual(['This is not a valid URL.']);
 
