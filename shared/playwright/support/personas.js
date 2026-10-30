@@ -14,12 +14,16 @@
  *   set.users['submitter']        // a username; null for "nobody signed in"
  *   set.submission('unpublished') // {submissionId, publicationId}
  *   set.submission('published')
+ *   set.submission('review')      // a journal or press only (set.states)
  *
  * The unpublished submission sits in Copyediting (a journal or press: sent
  * to review, the reviewer's review completed, accepted; a preprint server
  * has no review), a stage every assigned persona's role reaches, so a grid
  * about the workflow's pages reads the ordinary case. The published one is
- * the same submission published, resting in Done.
+ * the same submission published, resting in Done. The review one (a
+ * journal or press) is sent to review, the reviewer's review accepted and
+ * not yet submitted: a grid about review reads it as its `Review` column,
+ * and the matrix skips that column on a preprint server.
  *
  * A context-level grid may use the plainer ALIASES below.
  * A persona the app has no role for (no reviewer on a preprint server) is
@@ -30,9 +34,9 @@
 
 /** Role keys per app (users.md "Scenario role keys"). */
 const ROLE_KEYS = {
-    ojs: {assistant: 'copyeditor', reviewer: 'externalReviewer'},
-    omp: {assistant: 'copyeditor', reviewer: 'externalReviewer'},
-    ops: {assistant: null, reviewer: null},
+    ojs: {assistant: 'copyeditor', reviewAssistant: 'funding', reviewer: 'externalReviewer'},
+    omp: {assistant: 'copyeditor', reviewAssistant: 'funding', reviewer: 'externalReviewer'},
+    ops: {assistant: null, reviewAssistant: null, reviewer: null},
 };
 
 /**
@@ -46,6 +50,10 @@ const PERSONAS = {
     'assigned section editor, metadata edit off': {role: 'sectionEditor', participant: {canChangeMetadata: false}},
     'unassigned section editor': {role: 'sectionEditor'},
     'assigned assistant': {role: 'assistant', participant: {}},
+    // A funding coordinator: an assistant whose role works on the
+    // submission and review stages (the copyeditor above works on
+    // Copyediting only).
+    'assigned review assistant': {role: 'reviewAssistant', participant: {}},
     'submitter': {role: 'author', submitter: true},
     'other author': {role: 'author'},
     'assigned reviewer': {role: 'reviewer', reviewer: true},
@@ -143,21 +151,24 @@ async function seedPersonas(pkpApi, appContext, {tag}) {
             context: tag,
             submitter,
             participants,
-            ...(reviewer
-                ? {decisions: ['sendExternalReview', 'accept'], reviewRounds: [{reviewers: [{username: reviewer, status: 'completed'}]}]}
-                : {}),
             ...extra,
         });
         return {submissionId: created.submissionId, publicationId: created.publicationId};
     };
+    const reviewed = (status, decisions) =>
+        reviewer ? {decisions, reviewRounds: [{reviewers: [{username: reviewer, status}]}]} : {};
     const submissions = {
-        unpublished: await seedSubmission('u', {}),
-        published: await seedSubmission('p', {published: true}),
+        unpublished: await seedSubmission('u', reviewed('completed', ['sendExternalReview', 'accept'])),
+        published: await seedSubmission('p', {...reviewed('completed', ['sendExternalReview', 'accept']), published: true}),
     };
+    if (reviewer) {
+        submissions.review = await seedSubmission('r', reviewed('accepted', ['sendExternalReview']));
+    }
 
     return {
         context: tag,
         users,
+        states: Object.keys(submissions),
         submission: (state) => {
             if (!submissions[state]) {
                 throw new Error(`seedPersonas: no "${state}" submission (${Object.keys(submissions).join(', ')})`);

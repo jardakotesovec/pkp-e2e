@@ -57,7 +57,7 @@ so a program can check it:
   badge is only for a row whose cells differ by app, split into one row
   per badge, as `submitter` above.
 - **Columns** are states. `Unpublished` and `Published` are the persona
-  set's two submissions. A rule about the context rather than a submission
+  set's two main submissions, `Review` the one in review. A rule about the context rather than a submission
   has `Context`, and `Site` where the site has the same thing in
   Administration (the route called on `index`):
 
@@ -89,9 +89,12 @@ emptied while the review is anonymous) is an API check's.
 user per persona, a second context whose manager is the outsider, and two
 submissions in the first: one in Copyediting (sent to review, its review
 completed, accepted; a preprint server has no review), the other the same
-and published. The participants are the assigned section editors (one with
-"Permit submission metadata edit" off) and the assigned assistant (a
-copyeditor); the reviewer completed the round. The `site admin` is the
+and published; a journal or press has a third, in review, the reviewer's
+review accepted and not yet submitted (a grid's `Review` column, skipped
+on a preprint server). The participants are the assigned section editors
+(one with "Permit submission metadata edit" off), the assigned assistant
+(a copyeditor) and the assigned review assistant (a funding coordinator,
+whose role works on the review stage); the reviewer completed the round. The `site admin` is the
 installer's admin, who holds the manager role in every context it creates,
 as a site's administrator does in the journals they set up. The base
 context is never used, because a submit there assigns its section editors
@@ -108,9 +111,12 @@ reads the registry and the grids from this repo and makes these passes:
   a route fails with the list of cells that disagree.
 - **The foreign passes.** Every gated route that names a child resource (a
   funder, a comment, an announcement), the resource made elsewhere and
-  requested at the persona set's own address as its manager: made in a
-  second persona set (another context), and for a route under a
-  submission, on the set's other submission. A 2xx is a leak.
+  requested at the persona set's own address by the first persona its
+  grid allows: made in a second persona set (another context), and for a
+  route under a submission, on the set's other submission. A control first
+  makes the same call on the set's own child, which must not be refused.
+  A 2xx is a leak; a refusal, or a 4xx where the control had a 2xx, holds
+  the guard.
 - **The foreign body pass.** A route that takes its children's ids in the
   body rather than the path (the order routes), called at the persona
   set's own address with two children made in those same places. An order
@@ -122,12 +128,12 @@ reads the registry and the grids from this repo and makes these passes:
 
 A call answered 401, 403 or 404, or a 2xx whose body is an error alone,
 counts as refused; any other answer, a 400 for an empty body included, as
-allowed; a 5xx is a finding of its own. A write is sent an empty body,
-unless the route checks its body before its caller: then the matrix's
-`params.js` gives it a valid body that changes nothing the next cell reads
-(the submission's own language for the language change). In the foreign
-passes a 4xx to such a write that is no refusal proves nothing, and fails
-until the route has its body. The Playwright config adds an
+allowed; a 5xx is a finding of its own. A write is sent an empty body and
+a read no query, unless the route checks them before its caller: then the
+matrix's `params.js` gives it a valid one that changes nothing the next
+cell reads (the submission's own language for the language change). A
+foreign call and its control both stopped by a 4xx prove nothing, and fail
+until the route has its body or query. The Playwright config adds an
 `api-matrix` project only where that folder sits next to the clone; CI
 never runs it. All of it takes about a minute for the three apps:
 

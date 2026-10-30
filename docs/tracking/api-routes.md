@@ -261,17 +261,17 @@ grid does not parse, and a blank Gate on a feature with grids.
 
 | Route | Method | Path | Apps | Roles | Owner | Gate |
 |---|---|---|---|---|---|---|
-| `invitation.getMany` | GET | `invitations/{type}` | ojs omp ops | admin manager | U06 | — |
-| `invitation.get` | GET | `invitations/{invitationId}` | ojs omp ops | admin manager | U06 | — |
-| `invitation.add` | POST | `invitations/add/{type}` | ojs omp ops | admin manager | U06 | — |
-| `invitation.populate` | PUT | `invitations/{invitationId}/populate` | ojs omp ops | admin manager | U06 | — |
-| `invitation.invite` | PUT | `invitations/{invitationId}/invite` | ojs omp ops | admin manager | U06 | — |
-| `invitation.getMailable` | GET | `invitations/{invitationId}/getMailable` | ojs omp ops | admin manager | U06 | — |
-| `invitation.cancel` | PUT | `invitations/{invitationId}/cancel` | ojs omp ops | admin manager | U06 | — |
-| `invitation.receive` | GET | `invitations/{invitationId}/key/{key}` | ojs omp ops | none | U06 | — |
-| `invitation.finalize` | PUT | `invitations/{invitationId}/key/{key}/finalize` | ojs omp ops | none | U06 | — |
-| `invitation.refine` | PUT | `invitations/{invitationId}/key/{key}/refine` | ojs omp ops | none | U06 | — |
-| `invitation.decline` | PUT | `invitations/{invitationId}/key/{key}/decline` | ojs omp ops | none | U06 | — |
+| `invitation.getMany` | GET | `invitations/{type}` | ojs omp ops | admin manager | U06 | U06#invitations |
+| `invitation.get` | GET | `invitations/{invitationId}` | ojs omp ops | admin manager | U06 | none: unreachable: `GET invitations/{type}` answers the same address first, reading the number as an invitation kind (refused), and no screen calls it |
+| `invitation.add` | POST | `invitations/add/{type}` | ojs omp ops | admin manager | U06 | U06#invitations |
+| `invitation.populate` | PUT | `invitations/{invitationId}/populate` | ojs omp ops | admin manager | U06 | U06#invitations |
+| `invitation.invite` | PUT | `invitations/{invitationId}/invite` | ojs omp ops | admin manager | U06 | U06#invitations |
+| `invitation.getMailable` | GET | `invitations/{invitationId}/getMailable` | ojs omp ops | admin manager | U06 | U06#invitations |
+| `invitation.cancel` | PUT | `invitations/{invitationId}/cancel` | ojs omp ops | admin manager | U06 | U06#invitations |
+| `invitation.receive` | GET | `invitations/{invitationId}/key/{key}` | ojs omp ops | none | U06 | none: the emailed link's key is the only credential, signed out included (Rule 6), so no role rule applies; an allowed finalize makes an account |
+| `invitation.finalize` | PUT | `invitations/{invitationId}/key/{key}/finalize` | ojs omp ops | none | U06 | none: the emailed link's key is the only credential, signed out included (Rule 6), so no role rule applies; an allowed finalize makes an account |
+| `invitation.refine` | PUT | `invitations/{invitationId}/key/{key}/refine` | ojs omp ops | none | U06 | none: the emailed link's key is the only credential, signed out included (Rule 6), so no role rule applies; an allowed finalize makes an account |
+| `invitation.decline` | PUT | `invitations/{invitationId}/key/{key}/decline` | ojs omp ops | none | U06 | none: the emailed link's key is the only credential, signed out included (Rule 6), so no role rule applies; an allowed finalize makes an account |
 
 ### issues — IssueController [ojs]
 

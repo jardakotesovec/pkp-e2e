@@ -40,6 +40,26 @@ Production Editor; on a preprint server the Preprint Server Manager).
 | **Customize the invitation email for one send** | • Whoever is sending: the wizard's compose step, which edits the subject and body (Fields) <sup>g</sup> |
 | **Edit the stored invitation email template** | • Journal Manager: on the Emails settings screen, which belongs to the emails-management feature. ⚠ [OPS1](#ops1) On a preprint server the template has no row there <sup>j</sup> |
 
+<a id="api-grid-invitations"></a>
+**Permission grid: sending invitations.** The rows "See pending
+invitations", "Invite to a role", "Edit a pending invitation" and "Cancel
+a pending invitation" above, for the invitations routes that list, start,
+fill and send an invitation, read its email and cancel it; the routes the
+emailed links call take the link's key as their only credential (Rule 6)
+and follow no role (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | — |
+| assistant | — |
+| author | — |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 On a press the "Journal Masthead" column reads "Press Masthead", and on a
@@ -59,7 +79,7 @@ user the personal fields show read-only.
 | Email address / Given Name / Family Name | email only | "Enter details" has no Affiliation box, so the "Affiliation:" line of the "Cancel Invite" confirmation (Rule 16) stays empty for an invitation sent from this wizard. Names are optional; helper text notes the invitee can change them. On a journal with a second form language (Settings), a button named for it ("French") above the fields adds "Given Name in French" and "Family Name in French" boxes, and each name field counts its filled languages ("0/2 languages completed"). The email greets by the name in the journal's primary language, else in the site's, else in whichever language one was entered, on the "To" line too (Side effects). <sup>i</sup> If the address gains an account before the invitation is accepted, what the recipient then sees was not verified live <sup>o</sup> |
 | Role (per row, "Select a new role") | at least one row | Roles the person already holds are not offered. A role already chosen in another row is listed but cannot be picked. From the second row on, a row's fields lose their screen-reader names ⚠ [A8](#a8) <sup>i</sup> |
 | Start Date (per role row) | yes | A date in the past takes effect as "today" at acceptance (Rule 8) ⚠ [A8](#a8) |
-| End Date (per role row) | no | Cannot be entered when inviting. An added role row's END DATE cell shows "---" and holds no input. The column only displays dates on an existing member's current roles (Rule 13) <sup>i</sup> |
+| End Date (per role row) | no | Cannot be entered when inviting. An added role row's END DATE cell shows "---" and holds no input. The column only displays dates on an existing member's current roles (Rule 13). A program can send one through the API, and one that is no date breaks the acceptance ⚠ [A18](#a18) <sup>i</sup> |
 | Journal Masthead (per role row) | yes | The select starts blank ("Appear on the masthead" / "Does not appear on the masthead"). Leaving it empty blocks the step with "This field is required." On a journal or press (a preprint server's role select offers no reviewer role), choosing Reviewer replaces the select with fixed text, so there is no choice to make: "Appear on the masthead" while "Enable listing of reviewers on the masthead" is ticked, "Does not appear on the masthead" otherwise (the default on a new journal or press). With the masthead not based on enrollments the column is gone ⚠ [A8](#a8) <sup>i</sup> |
 | Email subject & body (compose step) | prefilled | Freely editable for this send. On a default install the "Email Templates" › "Find Template" list offers "User Invited to Role Notification" alone, also after typing another email's template name such as "Password", and picking it leaves the subject as it was <sup>g</sup> |
 
@@ -645,6 +665,51 @@ App-specific:
       gone from the Invitations table while Edit on the user's row shows
       Author and the offered role (Rules 8, 11).
 
+### Through the API
+
+The checks below send what no screen sends; who may call the invitations
+routes is the [invitations grid](#api-grid-invitations)'s, checked apart
+(`docs/process/api.md`). An invitation started or saved through the API
+with no invitation data at all fails on the server ⚠ [A19](#a19), and an
+end date that is no date breaks its acceptance ⚠ [A18](#a18).
+
+API1. **A role of another journal is refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a second journal, an invitation being
+   composed for a throwaway address.
+
+   - **Another journal's role**: save the invitation through the API
+     with one role row naming the second journal's Reader role: refused
+     (422) with an error on that row's role. The wizard's role select
+     offers this journal's roles alone.
+   - **Control**: the same row naming this journal's Reader role is
+     saved, and the answer lists Reader as the one role offered.
+
+API2. **A disabled user cannot be invited** {OJS OMP OPS}
+
+   Given: a Journal Manager; a disabled user and an active user, each an
+   Author of another journal on the site.
+
+   - **Disabled**: start an invitation for the disabled user's account
+     through the API: refused (422) with an error on the user. The wizard
+     never sends this: it shows the disabled-user warning and lets no role
+     row be added (Rule 14).
+   - **Control**: the same request for the active user starts an
+     invitation.
+
+API3. **Declining through the API** {OJS OMP OPS}
+
+   Given: a Journal Manager, a pending invitation to a throwaway address
+   with one role, its key read from the email.
+
+   - **Decline**: decline through the API with the emailed key, signed
+     out: answered (200) with the invitation declined, and the manager's
+     list of pending invitations no longer holds it (Rules 10, 11). The
+     decline page declines without this request.
+   - **The key afterwards**: reading the invitation, or accepting it, with
+     the same key is refused, as the emailed links then show "Invitation
+     Unavailable" (Rule 4).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -830,6 +895,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A15](#a15) | After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A17](#a17) | "Edit Invitation" logs a PHP warning when the invitee has no Given Name in the interface language | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
+| [A18](#a18) | A role end date that is no date, saved through the API, makes the invitation's acceptance fail after the account is made | 🐞 | minor · crash: server | — |
+| [A19](#a19) | Starting or saving an invitation through the API with no invitation data gets a server error | 🐞 | minor · crash: server | — |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
@@ -1072,6 +1139,31 @@ heading. The four warnings every opening of the wizard writes,
 whatever the name, have another cause and their own report
 ([A14](#a14)).
 Since: 2024-10-24 (pkp/pkp-lib#9658, about a year) · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
+
+<a id="a18"></a>
+**A18 — A role end date that is no date, saved through the API, makes the invitation's acceptance fail after the account is made** · 🐞 · minor · crash: server.
+The wizard has no box for a role's end date (Fields), but a program that
+saves an invitation through the install's programming interface (the
+REST API's invitation save) can send one for each role row, and any
+text is taken, a word such as "soon" too. Such an invitation is sent as
+usual. When the newcomer then presses "Accept And Continue", the request
+fails with a server error: the account has already been made, with the
+username and password chosen, but holds no role, and the invitation
+stays pending under Invitations. Each further try fails the same way. A
+program expects an end date that is no date refused when the invitation
+is saved, as a start date that is no date is.
+Basis: probe, 2026-10-30. <sup>[f-a18](#fn-a18)</sup>
+
+<a id="a19"></a>
+**A19 — Starting or saving an invitation through the API with no invitation data gets a server error** · 🐞 · minor · crash: server.
+The wizard always sends its fields wrapped in an "invitation data"
+part. A program that starts or saves an invitation through the
+install's programming interface without that part, an empty request
+included, expects it refused with a message, as the same request with
+an empty part is (422, an error per missing field). Instead both
+requests fail with a server error whose text names the server's code.
+Nothing is started or changed.
+Basis: probe, 2026-10-30. <sup>[f-a19](#fn-a19)</sup>
 
 ### OMP and OPS
 
@@ -2047,6 +2139,43 @@ details"; on the third, A14's four alone, the page reading "Ines Both"
 and "You are viewing Ines's user details". No response of 500 or more
 and no page error.
 Issue report: [pkp-e2e#1072](https://github.com/jardakotesovec/pkp-e2e/issues/1072) ([docs/issues/U06-A17-invitation-edit-nameless-php-warning.md](../issues/U06-A17-invitation-edit-nameless-php-warning.md)).
+
+<a id="fn-a18"></a>
+**f-a18** — Probed 2026-10-30 on scratch journals, OJS, OMP and OPS
+(`main`), as the journal's manager: `PUT …/invitations/{id}/populate`
+with one `userGroupsToAdd` row (the Reader role, masthead off, start
+today) carrying `dateEnd: "soon"` answered 200 and the invitation read
+the row back with that end date; `PUT …/invite` answered 200 and the
+email went out; signed out, `GET …/key/{key}` and `PUT …/refine` (a
+username, a password, a Given Name, a country) answered 200, and
+`PUT …/finalize` answered 500 with the PHP error text
+(`{"error": "Could not parse 'soon': Failed to parse time string (soon) …"}`).
+The `users` row with the
+chosen username existed after it, the invitation's status still
+`PENDING`, and it was listed by `GET invitations/userRoleAssignment`; a
+second finalize answered the same 500. Mechanism (lib/pkp):
+`UserRoleAssignmentInvitePayload::getValidationRules()` lets
+`userGroupsToAdd.*` hold `dateEnd` (`AllowedKeysRule`) but gives
+`userGroupsToAdd.*.dateEnd` no rule, while `dateStart` is
+`required|date`; `UserRoleAssignmentReceiveController::finalize()` adds
+the user (`Repo::user()->add()`) before `assignUserToGroup()` parses the
+end date. A `date` rule on `dateEnd` (nullable) would refuse it at the
+save.
+
+<a id="fn-a19"></a>
+**f-a19** — Probed 2026-10-30 on scratch journals, OJS, OMP and OPS
+(`main`), as the journal's manager: `POST …/invitations/add/userRoleAssignment`
+with `{}` answered 500
+(`ValidatorFactory::make(): Argument #1 ($props) must be of type array, null given`,
+naming the controller's absolute path and line);
+`PUT …/invitations/{id}/populate` with `{}` answered 500
+(`UserRoleAssignmentInvite::validate(): Argument #1 ($data) must be of type array, null given`,
+the same kind of text). The same two requests
+with `{"invitationData": {}}` answered 422 with an error per missing
+field. Mechanism (lib/pkp): `InvitationController::add()` and
+`UserRoleAssignmentCreateController::populate()` read
+`$reqInput['invitationData']` with no default (the key routes' `refine`
+has `?? []`).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two
