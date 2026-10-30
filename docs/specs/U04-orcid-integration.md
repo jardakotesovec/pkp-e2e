@@ -37,6 +37,28 @@ own features. This table covers only the ORCID capability on each of them.
 | **Send a review to ORCID** {OJS} | • Site Administrator; Journal Manager; Section Editor: "Send Review To ORCID" on the reviewer's row (Rule 12)<br>• ⚠ [A1](#a1) on a press the Site Administrator, Press Manager and assigned Series Editor are offered the same action, though a press deposits nothing <sup>g</sup> |
 | **Read the public ORCID pages** | • Anyone, signed in or out: the "What is ORCID?" page and the verification landing page, reached from links or by URL (Rules 9–10) <sup>f</sup> |
 
+<a id="api-grid-send-review"></a>
+**Permission grid: sending a review to ORCID.** The row "Send a review to
+ORCID" above, for the route behind the row action's confirmation; the
+reviewer's verified iD decides when the action shows, not who has it,
+and a press offers it too ([A1](#a1)) (`docs/process/api.md`).
+
+| Persona | Unpublished | Published | Review |
+|---|---|---|---|
+| manager | ✓ | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ | ✓ |
+| unassigned section editor | — | — | — |
+| assigned assistant | — | — | — |
+| assigned review assistant | — | — | — |
+| submitter | — | — | — |
+| other author | — | — | — |
+| assigned reviewer | — | — | — |
+| reader | — | — | — |
+| nobody signed in | — | — | — |
+| manager of another context | — | — | — |
+| site admin | ✓ | ✓ | ✓ |
+
 ## Fields & validation
 
 Journal ORCID settings ("ORCID" tab, Settings → Users & Roles):
@@ -633,6 +655,36 @@ App-specific:
 
     A press deposits nothing [OMP1](#omp1), so this scenario does not run
     on a press.
+
+### Through the API
+
+The checks below send what no screen sends; who may call the ORCID
+routes is the grids' (*[Publication metadata](U40-publication-metadata.md#api-grid-edit-gate)*
+for "Request verification", [sending a review](#api-grid-send-review)),
+checked apart (`docs/process/api.md`). "Delete" asks ORCID to cancel the
+contributor's token (Rule 8a), so a check sends it only where it is
+refused first.
+
+API1. **With ORCID off, the contributor actions are refused** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission with a contributor, ORCID off
+   (a new journal's state, Rule 1).
+
+   - **Off**: "Request verification" and "Delete" for that contributor
+     through the API: each refused (403), and the contributor is not
+     marked as asked. The contributor form shows neither while ORCID is
+     off (Rule 4).
+   - **Control**: with ORCID switched on, the same request is taken and
+     the contributor reads as asked.
+
+API2. **An author number that names no contributor is not found** {OJS OMP OPS}
+
+   Given: a Journal Manager, ORCID on, a submission with a contributor.
+
+   - **No such contributor**: "Request verification" and "Delete" for a
+     number no contributor has: each answered "not found" (404), and the
+     real contributor is not marked as asked. The form only sends its own
+     contributor's number.
 
 ## Coverage
 

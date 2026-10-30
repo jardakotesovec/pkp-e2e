@@ -54,6 +54,23 @@ Production Editor. Readers need no account. <sup>b</sup>
 | **See the page's "Edit" links** (Rule 25) | • users holding a manager-level role in the journal, signed in, whether or not the role may open the Settings pages; nobody else ([Journal identity & about pages](U07-journal-identity-and-about-pages.md), Actors row 5) <sup>k</sup> |
 | **Read the journal's components through the install's programming interface** (Rule 28) | • a signed-in user holding, in that journal, the Site Administrator, a manager-level role (with or without "Permit changes to Settings"), a Section Editor, an assistant role or the Author role<br>• refused: a signed-in user holding only a Reviewer or Reader role there, and a visitor who is not signed in <sup>l</sup> <sup>td11</sup> |
 
+<a id="api-grid-components-read"></a>
+**Permission grid: reading the components.** The row "Read the
+journal's components through the install's programming interface"
+above, for the list and the read of one component (`docs/process/api.md`).
+
+| Persona | Context |
+|---|---|
+| manager | ✓ |
+| section editor | ✓ |
+| assistant | ✓ |
+| author | ✓ |
+| reviewer | — |
+| reader | — |
+| nobody signed in | — |
+| manager of another context | — |
+| site admin | ✓ |
+
 ## Fields & validation
 
 The "Submission" tab of Settings › Workflow (page heading "Workflow
@@ -430,7 +447,8 @@ shows only while its text is not empty. <sup>j</sup>
 28. **Reading the components.** The install's programming interface lists
     a journal's components to the users of Actors row 8, the same list the
     "Media" page reads. The list includes deleted components, each marked
-    as not enabled [A2](#a2). <sup>l</sup> <sup>td12</sup>
+    as not enabled [A2](#a2). A starting position below zero fails on the
+    server ⚠ [A16](#a16). <sup>l</sup> <sup>td12</sup>
 
 ## Side effects
 
@@ -834,6 +852,22 @@ recipe are in the footnote. <sup>s</sup>
    - **Control**: after the reload, "Data Set", whose delete was refused,
      is still listed (Rule 17a). <sup>s</sup>
 
+### Through the API
+
+The check below reads what no screen reads; who may read the components
+is the [components grid](#api-grid-components-read)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **One component read alone is the one the list shows** {OJS OMP OPS}
+
+   Given: an Author of a new journal (Rule 28).
+
+   - **Each one**: every component the list shows, read alone by its
+     number through the API, answers the same record. No screen reads one
+     component alone.
+   - **No such component**: a number no component has is answered "not
+     found" (404).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -886,6 +920,8 @@ Left out of the scenarios above, by reason:
   - A7 (the "For Reviewer Suggestion" help; Fields)
   - A8 (the "Key" help; Fields)
   - A9 (a preprint server's component names in French; Fields)
+  - A16 (a program's components list from a negative position failing on
+    the server; Rule 28)
   - OMP1 (a press's "Disable Submissions" help and "Copyright notice"
     label; Fields; scenario 3 names it)
   - OJS1 (the LOCKSS and CLOCKSS pages' "Copyright" row; Cross-feature
@@ -958,6 +994,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | A component name of only spaces is refused with a raw text key | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A refused component delete leaves its confirmation window spinning | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A15](#a15) | A click beside the "Add a Component" window, or Escape, closes it without asking while the cursor is still in "Name" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A16](#a16) | A program that asks for the components from a negative position gets a server error | 🐞 | low · crash: server | — |
 | [OJS1](#ojs1) | LOCKSS and CLOCKSS pages show the "Copyright" row only when an unrelated Copyright Notice is set | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [OMP1](#omp1) | A press's "Disable Submissions" help speaks of "new articles", and its "Author Guidance" labels the copyright box "Copyright notice" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A1](#a1) | A new component lands at the top of the list, sharing first place with the first component | ❓ | minor | — |
@@ -1138,6 +1175,15 @@ typed in is the only change: among them "Create New Role" and a role's
 a component's "Edit", the file windows of Settings › Workflow ›
 "Library", and the review forms and their items (journals and presses).
 Basis: probe, 2026-10-21. <sup>f-a15</sup>
+
+<a id="a16"></a>
+**A16 — A program that asks for the components from a negative position gets a server error** · 🐞 · low · crash: server.
+The components list of the install's programming interface (Rule 28)
+takes a count and a starting position, as the "Media" page sends them. A
+program that sends a starting position below zero expects the list from
+its start, as a count of zero or below gives the whole list, or a refusal
+with a message. Instead the request fails with a server error.
+Basis: probe, 2026-10-30. <sup>f-a16</sup>
 
 ### OJS
 
@@ -1981,6 +2027,15 @@ the French start form.
 
 <a id="fn-f-ops2"></a>
 **f-ops2** — Note i.
+
+<a id="fn-f-a16"></a>
+**f-a16** — Probed 2026-10-30 on OJS, OMP and OPS `main` (lib/pkp
+`df42984b46`), a scratch journal's manager and the site administrator:
+`GET …/api/v1/genres?offset=-5` answered 500; `count=0`, `count=-1` and
+`count=abc` answered the whole list, `offset=1000` an empty one with the
+full `itemsMax`. `GenreController::getMany()` casts `offset` to an
+integer and passes it to the query's `OFFSET` unchecked, which
+PostgreSQL refuses below zero.
 
 ## Reference — entry points & surfaces
 

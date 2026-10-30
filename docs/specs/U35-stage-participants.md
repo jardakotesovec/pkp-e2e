@@ -74,6 +74,50 @@ below is one who holds a journal role. <sup>b</sup>
 | **"Login As"** (row menu) and **"Logout as {name}"** (top of the panel) | • Owned by *[Login & sessions](U01-login-and-sessions.md#who-may-impersonate)* |
 | **Receive "Editor Assigned (Auto)"** (Rule 12) | • Each editor assigned automatically when a submission arrives, in an editor role that works on the Submission stage, once per person; not a person assigned through "Assign"<br>• On a preprint server: nobody [OPS3](#ops3) <sup>l</sup> <sup>td12</sup> |
 
+<a id="api-grid-participants-read"></a>
+**Permission grid: reading a submission's participants.** The row "See
+the Participants panel" above, on any stage, for the route that lists
+the participants of every stage at once (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| assigned review assistant | ✓ | ✓ |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
+<a id="api-grid-stage-participants-read"></a>
+**Permission grid: reading one stage's participants.** The same row, for
+the route the panel loads its list from, asked for Copyediting
+(Production on a preprint server): the assigned Copyeditor works on that
+stage, the assigned Funding Coordinator, whose role works on the
+Submission and Review stages, does not (`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | ✓ | ✓ |
+| assigned review assistant | — | — |
+| submitter | — | — |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 **The "Assign Participant" window** (Rule 3). Everything above the two boxes
@@ -920,6 +964,26 @@ App-specific:
      Manager from the preselected role's list: "Assignment privileges"
      appears and no "Permissions" box shows (Rules 4a, 4b).
 
+### Through the API
+
+The check below reads what no screen reads; who may read the
+participants is the grids' (the [list of every stage](#api-grid-participants-read)
+and [one stage's](#api-grid-stage-participants-read)), checked apart
+(`docs/process/api.md`).
+
+API1. **The list of every stage names each participant once** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission with its Author and an
+   assigned Section Editor.
+
+   - **Every stage**: the participants list that names no stage, read
+     through the API, holds exactly the people the five stage lists hold
+     together, each once, the Section Editor and the Author among them.
+     No screen reads it; the panel reads one stage at a time (Rule 2).
+   - **No such stage**: the list of a stage the workflow does not have
+     (99) is empty. A stage named as a word in the query fails on the
+     server ⚠ [A19](#a19).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1020,6 +1084,7 @@ Left out of the scenarios above, by reason:
   - A15 (two footers on the Submission stage's "Assign Editor" email; Side effects; scenario 1 marks it)
   - A16 (the "Do not send me an email…" box on "Discussion added." ignored; Side effects)
   - A18 (the leave-page box on leaving the page after the role list was changed without "Search" and "Cancel" closed "Assign Participant", with or without a refused "OK" before it; Rule 6c)
+  - A19 (a program's participants list naming its stage as a word failing on the server; API1 notes it)
   - OJS1 (the automatic email naming "Send to Review"; Rule 12b; scenario 8 marks it)
   - OMP1 (no "Assign Editor" on a press's Internal Review; Rule 5c)
   - OPS2 ("Assign Editor" leaving "Message" as it was on a preprint server; Rule 5d)
@@ -1057,6 +1122,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A15](#a15) | The Submission stage's "Assign Editor" message ends "This is an automated message from…" instead of the editor's signature | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A16](#a16) | A message sent with "Notify" is emailed to a participant who opted out of emails for new discussions | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A18](#a18) | After "Cancel" closes "Assign Participant", reloading or leaving the page raises the browser's leave-page box | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A19](#a19) | A program that names the stage of the participants list as a word gets a server error | 🐞 | low · crash: server | — |
 | [OJS1](#ojs1) | A journal's "Editor Assigned" email tells the editor to select "Send to Review"; the button reads "Send for Review" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP1](#omp1) | A press's Internal Review offers no "Assign Editor" message in "Assign Participant" and "Notify" | 🐞 | low | issues (claude), 2026-10-06 — re-verified |
 | [OPS2](#ops2) | On a preprint server, choosing the predefined message "Assign Editor" leaves "Message" unfilled | 🐞 | low · crash: server | issues (claude), 2026-10-06 — re-verified |
@@ -1301,6 +1367,16 @@ nothing. The same happens when "OK" was pressed first and
 refused: the editor picked a person, then a role that person does not
 hold, and "OK" showed the window's form again before "Cancel" closed it.
 Basis: probe, 2026-10-21. <sup>[f-a18](#fn-a18)</sup>
+
+<a id="a19"></a>
+**A19 — A program that names the stage of the participants list as a word gets a server error** · 🐞 · low · crash: server.
+The "Participants" panel loads each stage's list by the stage's number
+in the address. The install's programming interface also takes the stage
+as a query value (`stageId`), on the list of a single stage and on the
+list of every stage. A program that sends a value that is not a number
+there expects a refusal with a message, or the list as if no stage were
+named. Instead the request fails with a server error.
+Basis: probe, 2026-10-30. <sup>[f-a19](#fn-a19)</sup>
 
 ### OJS
 
@@ -1581,6 +1657,15 @@ Issue report: [pkp-e2e#336](https://github.com/jardakotesovec/pkp-e2e/issues/336
 <a id="fn-a18"></a>
 **f-a18** — Live-probed 2026-10-09 (Rule 6c; all three apps, as the Journal / Press / Preprint Server Manager of a scratch context, on the Submission stage's panel, Production on the preprint server; four runs on OJS, three each on OMP and OPS; kept check `shared/playwright/checks/U46/I09/i09.js`, phase `assign`): "Section editor" ("Series editor", "Moderator") chosen in the role list, "Search", a person chosen, "Author" chosen in the role list with no "Search", "OK" (the form shown again on the first role, nobody assigned, no notice: A4's second case), "Cancel" (the window closed, no dialog), then `page.reload()`: a `beforeunload` dialog in every run, with no text of the application's own; accepted, the page reloaded and the panel's rows were as before. Controls, each ending in a reload that raised no dialog: "OK" with nobody chosen on an untouched window, then "Cancel" (the same runs); "OK" with nobody chosen, then a person chosen under a searched role and "OK", which assigned (the same runs, and once per run as the assigned Section editor / Series editor / Moderator); the same role, "Search" and person, then "Cancel" with no "OK" (two runs per app); the role and "Search" alone, then "Cancel" (two runs per app). No response of 400 or more and no page error in any run. Not driven: another address in place of the reload; the sequence as an assigned Section Editor; "OK" with nobody chosen after the role list or "Search" was used; a second "Assign" opened before the reload. Walked 2026-10-21 (Rule 6c; the whole entry; OJS, OMP and OPS on `main` and `stable-3_5_0`, PKP's default test dataset, as `dbarnes` on the Submission stage's panel of OJS submission 4, OMP submission 3 and OPS submission 1; kept check `shared/playwright/checks/issues/assign-participant-cancel-reload-leave-box/walk.js`): "Assign", "Section editor" ("Series editor", "Moderator") chosen with no "Search", "Cancel" (the window closed, no dialog), then a reload: one `beforeunload` dialog with no text of the application's own; accepted, the page reloaded with the panel's four rows unchanged, and a second reload raised none. The refused-"OK" sequence above, run the same way, gave the same. With `MODE=leave`, on `main` on the three apps, after "Assign", the role and "Cancel": closing the workflow (Escape) and following the side menu's "Start A New Submission", the browser's back button, and closing the tab each ran the page's `beforeunload`; 3.5 was walked by reload only. Control: the role, "Search", then "Cancel" and a reload: no dialog. No response of 400 or more and no page error. Cause, read in the code on both lines: the people list's own filter form (`templates/controllers/grid/users/userSelect/searchUserFilter.tpl`) is bound to `AddParticipantFormHandler` without `trackFormChanges: false`, unlike every other grid filter, so a change of the role list runs `FormHandler.formChange()` and `SiteHandler.registerUnsavedFormElement_()` lists it; only its "Search" submit sends `unregisterChangedForm`, while "Cancel" (`FormHandler::cancelForm()` › `unregisterForm()`) releases `#addParticipantForm` alone; after a refused "OK" the redrawn window brings a new filter and the old one stays listed; `SiteHandler.pageUnloadHandler_()` asks while one is listed, and a page load starts an empty list. The option was dropped by pkp/pkp-lib 2dbe15f07c (pkp/pkp-lib#7894, 2022); restoring it, tried on `main` on the three apps, removed both dialogs. The galley window (*Galleys*) does not share it: a refused "Save", "Cancel" and a reload raised no dialog in the same probe.
 Issue report: [pkp-e2e#1055](https://github.com/jardakotesovec/pkp-e2e/issues/1055) ([docs/issues/U35-A18-assign-participant-cancel-reload-leave-box.md](../issues/U35-A18-assign-participant-cancel-reload-leave-box.md)).
+
+<a id="fn-a19"></a>
+**f-a19** — Probed 2026-10-30 on OJS `main` (lib/pkp `df42984b46`), a
+scratch persona set's manager: `GET …/api/v1/submissions/{id}/participants?stageId=abc`
+answered 500 ("`PKP\user\Collector::assignedTo()`: Argument #2
+(`$stageId`) must be of type ?int, string given"); the stage numbers 0
+and 99 in the address answered an empty list. `getParticipants()` takes
+the query's `stageId` before the address's, uncast, and hands it to
+`assignedTo()`. Same line on `stable-3_5_0` (code).
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — OJS `locale/en/emails.po` `emails.editorAssign.body`: "…please forward the submission to the review stage by selecting \"Send to Review\" and then assign reviewers by clicking \"Add Reviewer\"."; the decision's label is lib/pkp `editor.submission.decision.sendExternalReview` "Send for Review" (no OJS override). OMP's app body names "Send to Internal Review", OMP's `editor.submission.decision.sendInternalReview` label. Live-probed 2026-09-22 (journal and press): the received email and Settings › Workflow › Emails › "Editor Assigned (Auto)" say "Send to Review"; the Submission stage's button reads "Send for Review" for the Editor and the Section Editor; the press's email and button both read "Send to Internal Review".

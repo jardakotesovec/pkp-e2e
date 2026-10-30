@@ -61,6 +61,30 @@ preprint server an Editorial Board Member). <sup>c</sup>
 | **Add a note** ("Notes"; Rule 10a) | • Everyone the window opens for, the Site Administrator with assistant roles included <sup>d</sup> |
 | **Delete a note** ("Notes"; Rule 10c) | • Every editorial reader, on any note, whoever wrote it<br>• A Site Administrator whose journal roles are all assistant roles: no "Delete" on any note, their own included ([A4](#a4)) <sup>d</sup> |
 
+<a id="api-grid-email-read"></a>
+**Permission grid: reading one sent email.** The row "Read "History""
+above, its "View Email", for the route that reads one email of the
+submission's record; the email here is a decision letter to the
+submitter, who holds it already and re-reads it on a journal or a press
+([→ the author's letters](U26-review-stage-and-rounds.md#author-emails))
+(`docs/process/api.md`).
+
+| Persona | Unpublished | Published |
+|---|---|---|
+| manager | ✓ | ✓ |
+| assigned section editor | ✓ | ✓ |
+| assigned section editor, metadata edit off | ✓ | ✓ |
+| unassigned section editor | — | — |
+| assigned assistant | — | — |
+| assigned review assistant | — | — |
+| submitter | ✓ | ✓ |
+| other author | — | — |
+| assigned reviewer | — | — |
+| reader | — | — |
+| nobody signed in | — | — |
+| manager of another context | — | — |
+| site admin | ✓ | ✓ |
+
 ## Fields & validation
 
 **"Notes" tab** (Rule 10). <sup>d</sup>
@@ -510,6 +534,25 @@ footnote. <sup>s0</sup>
      review submission {number} for review round 1." (Rules 4a, 9).
 
    A preprint server has no reviews (Rule 9).
+
+### Through the API
+
+The check below reads what no screen reads; who may read one sent email
+is the [email grid](#api-grid-email-read)'s, checked apart
+(`docs/process/api.md`).
+
+API1. **A sent letter reads back as it was sent** {OJS OMP OPS}
+
+   Given: a Journal Manager, a submission whose submitter has been sent a
+   decision letter ("Decline Submission", with its email).
+
+   - **Read**: the submitter, the letter's recipient, and the manager
+     each read the letter by its number through the API: its subject and
+     body as sent, the submission it belongs to, and the submitter among
+     its recipients. No screen reads one email this way: "View Email"
+     and the author's list take theirs elsewhere.
+   - **No such email**: a number no email has is answered "not found"
+     (404).
 
 ## Coverage
 
