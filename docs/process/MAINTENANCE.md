@@ -1031,7 +1031,9 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    `docs/reports/`: the PR is not merged, so it is no regression of the
    product yet) and posted in this thread untagged (whoever asked follows up here); a later round updates it in place there; a behavior the issue
    leaves open is a ❓ in the owning spec, posted in the thread, and the
-   team's reply is recorded as the entry's verdict the same day.
+   team's reply is recorded as the entry's verdict the same day. A fix
+   tried here, or offered to the author, is tried on every line it
+   reaches ("Session hygiene", "Every line the change reaches").
 5. **Run the suites on CI at the PR refs.** Push the companion, then
    `node bin/ci.js dispatch --ref <companion> --<app>-repo <fork>/<app>
    --<app>-ref <head sha>` for each app with a PR, plus `--pkp-lib-ref
@@ -1210,6 +1212,17 @@ the answer; the spec and the test are the record.
   when the diff touches `package-lock.json` or buildable sources (`js/`,
   `lib/ui-library`); then `npm run mount`. Findings from a PR checkout are
   reported against that PR, never filed as `main` behavior.
+- **Every line the change reaches.** A pkp-lib or ui-library fix the
+  session verifies, and a patch it prepares for the team, is tried on
+  each line the change lands on: `main`, `stable-3_5_0` (its fleets, "The
+  stable line") and `ore`. `ore` is OJS only, in the slot's own ore
+  worktree (harness.md "The ore worktree"), never another slot's. Before
+  calling a line fixed or broken, check that the app's `lib/pkp` or
+  `lib/ui-library` pointer carries the commit, because pointers lag their
+  branch: on 2026-11-01 OJS `ore` pointed at `a05aa54421` while pkp-lib
+  `ore` already had `c4bb5a1272`. When the pointer does not carry it, pin
+  the submodule at the commit, as a PR review does, and say in the
+  report which was tried: the pointer or the pin.
 - **Start clean: reset the databases.** `npm run reset:<app>` for every
   fleet the session will touch, before any probing or test run (with
   `PKP_E2E_LINE=stable-3_5_0` in front for the stable line's fleets). Never
