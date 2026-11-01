@@ -11,8 +11,8 @@
  * notice, so it runs `@solo` in `serial/U01-login-and-sessions.spec.js`.
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A1, A2, A4, A5, A6, A7, A8, A10, A11,
- * A14, A15, A16, A17.
+ * of everything else left out): A1, A2, A4, A5, A6, A10, A11,
+ * A15, A16, A17.
  *
  * Seeding: scenario endpoints only. Scratch submissions ride the read-only
  * `publicknowledge` press; S1 adds a scratch press with no users so the
@@ -590,7 +590,7 @@ test.describe('Login & sessions (U1)', () => {
         await expect(secondBrowser.locator('form#login')).toHaveCount(0);
 
         // Control: a dashboard address now shows the Login page, not the
-        // dashboard (not the bare "dashboard" address: A7, unasserted).
+        // dashboard (not the bare "dashboard" address, unasserted).
         await page.goto(editorialUrl(PK));
         await expectLoginPage(page);
     });

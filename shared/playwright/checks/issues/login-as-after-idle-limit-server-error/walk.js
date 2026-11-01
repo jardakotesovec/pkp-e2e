@@ -1,4 +1,5 @@
-// U01 A8 walk (issue report docs/issues/U01-A8-login-as-after-idle-limit-server-error.md).
+// U01 A8 walk (retired 2026-11-01, issue pkp-e2e#828 closed; kept as the evidence script of the
+// open U01 A2 report, docs/issues/U01-A2-keep-me-logged-in-always-ticked.md).
 // On PKP's default test dataset, as the manager `rvaca`:
 //   steps (default):
 //     1. signed out, the Login page: sign in with "Keep me logged in" as the page shows it (ticked)
@@ -22,11 +23,8 @@
 //   cookie (a read beside the steps, unpatched code): the browser's cookies before and after the
 //     first page opened past the idle limit (Users & Roles)
 // Every step records its result or its error and goes on.
-// Since pkp-lib 3407fc5bc0 (2026-10-06; 3.5 edc3d36c74) the app does not read the "Keep me logged in"
-// cookie, so on unpatched code step 3 opens the Login page and the fault does not show. The two
-// trial diffs beside this file put the cookie read back as it was before that commit
-// (trial-cookie-read.diff) and add the report's fix.diff on top (trial-cookie-read-fix.diff);
-// trial.sh runs the steps and nb under each, and the steps under fix.diff alone.
+// Since pkp-lib 442148e14e (main) / c4c0aa8c52 (3.5), pkp/pkp-lib#12780, 2026-10-31, the steps end
+// as the A8 report expected: step 3 signed in, step 4 impersonating, the header naming the user.
 //   Reset first: npm run fleet-prep -- --feature <feature> --dataset <n> --reset
 //   PROBE_FEATURE=<feature> PROBE_AGENT=<id> [PROBE_RUN=<run>] node bin/probe.js all shared/playwright/checks/issues/login-as-after-idle-limit-server-error/walk.js [steps|nb|dash|cookie] [gone]
 //   `gone` also takes the session cookie out of the browser at the idle limit (what a real wait

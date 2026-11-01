@@ -51,7 +51,7 @@ feature (see *Cross-feature interactions*).
 |------------------|-----------|-------|
 | "Username or Email" | yes | Either the account's username or its email address |
 | "Password" | yes | The typing box stops accepting input at 32 characters, even though passwords may be longer ⚠ [A1](#a1). A "Forgot your password?" link sits under it <sup>a</sup> |
-| "Keep me logged in" | no | Offers to keep the sign-in alive for a fixed window from login, beyond the idle lifetime that otherwise ends it, but keeps it no longer than an unticked box does (Rules 5, 5a) [A14](#a14). The box is ticked every time the form shows ⚠ [A2](#a2) <sup>c</sup> |
+| "Keep me logged in" | no | Keeps the sign-in alive for a fixed window from login (30 days by default), beyond the idle lifetime that otherwise ends it (Rules 5, 5a). The box is ticked every time the form shows ⚠ [A2](#a2) <sup>c</sup> |
 | Spam check | when configured | Appears only when the installation's configuration turns a check on for the login form. reCAPTCHA shows its widget. The ALTCHA check is invisible: nothing extra appears and signing in works as usual, but a browser without JavaScript is refused with "You must complete the validation check used to prevent spam submissions." (see *Settings*) <sup>a</sup> |
 | "Register" link | — | Shown beside the "Login" button while the journal accepts registrations. Disabling registration removes it (see *Settings*) <sup>a</sup> |
 
@@ -127,10 +127,14 @@ Login, the site's name stands in for the journal's), but after a refused
    exception). Signing in continues to the address they originally
    asked for. When that address is a screen their roles do not allow (a
    Reader who had opened a journal's settings, say), the sign-in lands on
-   the access-denied page instead (Rule 17). One address misbehaves: the
-   address that ends at the word "dashboard", or at "dashboard/",
-   answers a blank server-error page instead of the Login page
-   ⚠ [A7](#a7). <sup>b</sup>
+   the access-denied page instead (Rule 17). The Dashboard address that
+   ends at the word "dashboard" (the link in the monthly "Outstanding
+   editorial tasks" email), with or without a final slash or the
+   language in it, behaves the same: signed out, it opens the Login
+   page, and signing in there leads to the Dashboard (retired
+   [A7](#a7)). Signed in, it opens the user's own dashboard: the
+   Dashboard for a Journal Manager or an Editor, My Submissions for an
+   Author. <sup>b</sup>
 4a. **A sentence above the form, for restricted content** {OJS}. A
    signed-out visitor who presses a galley that needs a subscription gets
    the Login page with a sentence above the form, such as "Subscription
@@ -139,25 +143,30 @@ Login, the site's name stands in for the journal's), but after a refused
    [Subscriptions](U51-subscriptions.md), its Rule 12. No other screen
    adds a sentence there, and on a press or a preprint server none does.
    <sup>b</sup>
-5. **Staying signed in.** Closing the browser does not sign a user out.
-   Ticked or not, the sign-in survives browser restarts, unless the
-   installation is configured to end sessions at browser close. Unticked,
-   the session ends when its idle lifetime runs out (a config default of
-   7 days without a visit). Ticked, "Keep me logged in" is meant to keep
-   the sign-in past that idle limit, for a fixed window from login
-   (config default 30 days); in fact a ticked sign-in ends just as an
-   unticked one does (Rule 5a). <sup>c</sup>
-5a. **Back after the session ended, signed out.** A user who signed in
-   with "Keep me logged in" ticked and comes back after the idle limit,
-   or reopens the browser on an installation that ends sessions at
-   browser close, is signed out: every page they open or reload,
-   "Edit Profile" and the Dashboard included, shows the Login page
-   ⚠ [A14](#a14). A search on a back-office page still open from before is refused
-   instead of leading there (Rule 18). Signing in again works. Before
-   that fault, the same return left the user half signed
-   in: the Dashboard still opened signed in, but the public pages
-   offered "Register" and "Login", the Login page showed its form
-   (Rule 1), and "Login As" failed (Rule 14) ⚠ [A8](#a8). <sup>c</sup>
+5. **Staying signed in.** Closing the browser does not sign a user out:
+   ticked or not, the sign-in survives browser restarts. On an
+   installation configured to end sessions at browser close, only a
+   ticked sign-in survives one (Rule 5a). Unticked, the session ends
+   when its idle lifetime runs out (by default 7 days without a visit;
+   see *Settings*). Ticked, "Keep me logged in" keeps the sign-in past that idle
+   limit, for a fixed window from login (by default 30 days; Rule 5a).
+   <sup>c</sup>
+5a. **Back after the session ended, still signed in.** A user who
+   signed in with "Keep me logged in" ticked and comes back after the
+   idle limit, or reopens the browser on an installation that ends
+   sessions at browser close, is signed in on every page (retired
+   [A14](#a14) and [A8](#a8)). The Dashboard, "Edit Profile" and, for a
+   Journal Manager, Settings › Users & Roles open; the journal's public
+   header shows their username, not "Register" and "Login"; the Login
+   page sends them home (Rule 1); and "Login As" works (Rule 14).
+   Unticked, that return shows the Login page. A return does not
+   restart the window: it ends 30 days (by default) after the original
+   sign-in. Each action below is taken while signed in, the user returning
+   after the session ended. "Logout" (Rule 6), a password change in
+   another browser, or disabling the account ends it: the return shows
+   the Login page. Saving an email change or changing one's own password
+   under "Edit Profile" keeps that browser signed in; the other
+   browser of that password change gets the Login page. <sup>c</sup>
 6. **Signing out.** The user menu (top-right initials) offers "Logout".
    Signing out returns the browser to the Login page and ends only this
    browser's session. The same account signed in elsewhere stays signed in.
@@ -236,15 +245,13 @@ Login, the site's name stands in for the journal's), but after a refused
     address with the number changed. Opened for an out-of-reach user, it
     shows an error page, "Sorry, you do not have administrative rights over
     this user…", listing the possible causes, with a link back to the users
-    list. In the half-signed-in state Rule 5a describes, "Login As"
-    fails on the server and the browser shows a
-    blank page, instead of impersonating or turning the user away, both
-    when pressed on a row and at a hand-built address [A8](#a8).
-    <sup>h</sup>
+    list. <sup>h</sup>
 15. **Returning.** "Logout as", the user menu's "Logout as {username}" or
     the Participants panel's "Logout as {full name}", restores the original
     account without asking for credentials. Pressed on a workflow screen,
     either control lands on that submission; elsewhere it lands home.
+    Opened signed out, the address behind "Logout as" shows the Login
+    page (retired [A7](#a7)).
     Typing the plain sign-out address instead ends everything: the browser is
     signed out of both identities and lands on the Login page, not back in
     the original account. That address must be captured before
@@ -312,7 +319,8 @@ Login, the site's name stands in for the journal's), but after a refused
     once with the "Expire User Sessions" tool (see *System administration*).
     The user's next page load, a link followed or a page reloaded, then
     lands on the Login page. A search on a page already open does not:
-    after the idle limit (Rule 5), "Expire User Sessions" or the
+    after the idle limit of a sign-in made with "Keep me logged in"
+    unticked (Rule 5), "Expire User Sessions" or the
     browser's cookies for the site cleared, it is refused with a message
     that does not say the user is signed out ⚠ [A16](#a16). <sup>m</sup>
 
@@ -362,8 +370,8 @@ Login, the site's name stands in for the journal's), but after a refused
   intended [A6](#a6). Disabled by default. <sup>n</sup>
 - **Configuration file, security section.** For the system administrator,
   with no screen: the reset-link lifetime (`reset_seconds`, default 2 hours);
-  the "Keep me logged in" window (`remember_me_lifetime`, default 30
-  days; it changes nothing while [A14](#a14) stands);
+  the "Keep me logged in" window (`remember_me_lifetime` days, default
+  30, counted from the sign-in);
   end-session-on-browser-close (`session_expire_on_close`);
   end-session-on-address-change (`session_check_ip`, default on); forcing
   https for login or the whole site (`force_login_ssl`, `force_ssl`); the
@@ -371,8 +379,8 @@ Login, the site's name stands in for the journal's), but after a refused
   salt behind reset links, a secret value that makes the links unforgeable.
   The same section's plugin-installation and allowed-HTML keys serve other
   features (see *Cross-feature interactions*). <sup>m</sup>
-- **Idle session lifetime.** `session_lifetime` (default 7 days) in the
-  configuration file's general section. <sup>m</sup>
+- **Idle session lifetime.** `session_lifetime` (days, default 7) in the
+  configuration file's `[general]` section. <sup>m</sup>
 - **Security audit log.** `log_audit = On` in the configuration file's
   `[logs]` section, off by default, writes the "Audit lines" of *Side
   effects* to the log its `log_channel` names: the PHP error log on the
@@ -477,10 +485,8 @@ and the tooling recipe are in the footnote. <sup>s</sup>
    - **The second browser**: in the second browser, open the Dashboard:
      it shows, the account still signed in there; signing out ended only
      the first browser's session (Rule 6).
-   - **Control**: in the first browser, opening any dashboard address now
-     shows the Login page, not the dashboard. The exception is the address
-     that ends at the word "dashboard", which answers a blank error page
-     ⚠ [A7](#a7).
+   - **Control**: in the first browser, opening the Dashboard's address
+     now shows the Login page, not the Dashboard.
 
 3. **A bookmarked private page waits for sign-in**
 
@@ -779,19 +785,21 @@ Left out of the scenarios above, by reason:
     proposes, once fixed
   - signed out, the Dashboard address ending at the word "dashboard"
     opening the Login page, and signing in there leading to the
-    Dashboard ([A7](#a7)): the guard the issue report
-    (`docs/issues/U01-A7-dashboard-address-signed-out-server-error.md`)
-    proposes, once fixed
+    Dashboard; and the address behind "Logout as", opened signed out,
+    showing the Login page (Rules 4, 15; retired [A7](#a7))
   - a user signed in with "Keep me logged in" and back after the idle
-    limit opening the Dashboard signed in, seeing their name, not
-    "Register" and "Login", in the public header, and "Login As"
-    impersonating (Rules 5a, 14; [A8](#a8)): the guard the issue report
-    (`docs/issues/U01-A8-login-as-after-idle-limit-server-error.md`)
-    proposes, once fixed
+    limit opening the Dashboard signed in, seeing their username, not
+    "Register" and "Login", in the public header, the Login page sending
+    them on, and "Login As" impersonating (Rules 5a, 14; retired
+    [A8](#a8))
   - "Keep me logged in" keeping a user signed in once the session ends:
     signed in with the box ticked, back after the session ended, "Edit
-    Profile" and the Dashboard opening signed in, not the Login page
-    (Rules 5, 5a; [A14](#a14)): the guard owed once fixed
+    Profile" and the Dashboard opening signed in, not the Login page;
+    unticked, the Login page (Rules 5, 5a; retired [A14](#a14))
+  - a sign-in kept by "Keep me logged in" ending at "Logout", at a
+    password change in another browser and when the account is
+    disabled, and kept in the browser that saves a new email address or
+    changes its own password under "Edit Profile" (Rule 5a)
   - the Site Administrator's "Edit User" on a flagged account opening
     with "Change Password" ticked, and an unchanged "OK" keeping the
     flag ([A10](#a10)): the guard the issue report
@@ -812,7 +820,7 @@ Left out of the scenarios above, by reason:
   - the other changes Administration saves in place, refused the same way once the confirmed window has lapsed: adding a journal, saving the site's Languages, Plugins, Navigation and Highlights, the site's announcements, and retrying or deleting failed jobs (Rule 16): the same answer as scenario 10's Site Settings "Save" and journal removal
 - **Register carries it**:
   - A5 (no journal-level users screen offering the forced-change flag; Rule 11a)
-  - A16 (a search on a page left open after its session ended refused with an alert or an "Error" window instead of the Login page; Rules 5a, 18)
+  - A16 (a search on a page left open after its session ended refused with an alert or an "Error" window instead of the Login page; Rule 18)
   - A17 (a session ended by a password change in another browser logged as an IP address change; *Side effects*, "Audit lines")
 - **No seed**:
   - other Site Administrators never offered Login As (Rule 14): what is missing is a second site administrator
@@ -847,11 +855,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A1](#a1) | The password boxes stop accepting input at 32 characters, so longer passwords cannot be typed | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A2](#a2) | "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A4](#a4) | While signed in as another user, "Login As" is still offered, and using it strands the operator in that account | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A7](#a7) | Signed out, the Dashboard address the monthly reminder email links to gives an empty error page | 🐞 | medium · crash: server | issues (claude), 2026-10-07 — re-verified |
-| [A8](#a8) | Latent today: a user signed back in by "Keep me logged in" looks signed out on the public site, and "Login As" gives a blank page | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A10](#a10) | The Site Administrator's "Edit User" never shows "Change Password" ticked, and saving it removes the flag | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | After a refused "Change Password" or "Reset Password", the browser tab loses the page's name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A14](#a14) | "Keep me logged in" keeps no one signed in once the session ends: back after the idle limit, the user meets the Login page | 🐞 | minor | — |
 | [A15](#a15) | "Login As" ends and a save made as the user is silently lost when that user first signs in after an upgrade | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
 | [A16](#a16) | A back-office page left open after its session ended answers a search with an alert or an "Error" window that does not say the user is signed out, instead of the Login page | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
 | [A17](#a17) | Audit log records a session ended by a password change in another browser as an IP address change | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
@@ -861,6 +866,9 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A6](#a6) | With rate limiting on, even the correct password is refused as "Invalid username/email or password" during the cool-down; the concealment is intended | ✅ | latent | Jarda 2026-08-25 |
 | [A13](#a13) | Retired: with "Confirm Access" on, an Administration page left open still deleted journals and saved site settings without the password; such changes are now refused once the period has run out (Rule 16) | ✅ | retired | PR review (claude), 2026-10-20 — fixed upstream (pkp/pkp-lib#13521) |
 | [A12](#a12) | Retired: after a disabled account was refused, the browser's next correct sign-in landed back on the Login page with no message; it now lands at once (Rule 2) | ✅ | retired | issues (claude), 2026-10-19 — fixed upstream (pkp/pkp-lib#12780) |
+| [A7](#a7) | Retired: signed out, the Dashboard address the monthly reminder email links to gave an empty error page; it now opens the Login page (Rule 4) | ✅ | retired | retirement walk (claude), 2026-11-01 — fixed upstream (pkp/pkp-lib#13651) |
+| [A8](#a8) | Retired: a user signed back in by "Keep me logged in" looked signed out on the public site, and "Login As" gave a blank page; such a user is now fully signed in (Rule 5a) | ✅ | retired | retirement walk (claude), 2026-11-01 — fixed upstream (pkp/pkp-lib#12780) |
+| [A14](#a14) | Retired: "Keep me logged in" kept no one signed in once the session ended; a ticked sign-in now lasts its window (Rules 5, 5a) | ✅ | retired | retirement walk (claude), 2026-11-01 — fixed upstream (pkp/pkp-lib#12780) |
 
 ### All apps
 
@@ -895,19 +903,17 @@ without being told.
 What the tick costs depends on the version. On 3.4 and 3.3 it decides
 whether a sign-in ends when the browser closes or lasts 30 days without
 a visit, so the ticked box keeps every user who leaves it alone signed
-in on that browser, a shared computer included. On 3.5, in every
-release so far and on the branch, and on `main`, the box keeps no one
-signed in: ticked or not, a sign-in ends after a week without a visit.
-All that is left there is the "Keep me logged in" cookie, stored in the
-browser against the user's choice.
-
-That changes when "Keep me logged in" is made to work on 3.5 and
-`main`; the comment that reopened `pkp/pkp-lib#12780` on 7 October 2026
-reports that it no longer does. A ticked sign-in then lets the browser
-back into the account without the password for up to 30 days (the
-default), however long the browser stood unused.
-The cookie that no longer signs users back in is [A14](#a14).
+in on that browser, a shared computer included. On `main` and the 3.5
+branch a ticked sign-in lets the browser back into the account without
+the password for up to 30 days from the sign-in (the default), however
+long the browser stood unused, where an unticked one ends after a week
+without a visit (Rule 5a). In the 3.5 releases so far the box keeps no
+one signed in: all that is left there is the "Keep me logged in"
+cookie, stored in the browser against the user's choice. From 6 to 31
+October 2026 `main` and the branch behaved the same way (retired
+[A14](#a14)).
 Since: 2015-08-07 (pkp/pkp-lib#658) · Basis: probe, 2026-10-07. <sup>[f-a2](#fn-a2)</sup>
+Report: refresh owed — pkp-lib `442148e14e` (`main`) / `c4c0aa8c52` (`stable-3_5_0`), pkp/pkp-lib#12780, 2026-10-31: the "Keep me logged in" cookie signs the browser back in again on both branches (walked 2026-11-01, OJS, OMP, OPS), so the report's 3.5-and-`main` cost (Summary, Impact, the severity paragraph's "medium on 3.5 and `main` as well from the day "Keep me logged in" works there") and its Upstream bullet are out of date; the change rewrites `Validation::login()` (`Auth::attemptWhen()` in place of `Auth::attempt($credentials, $remember)`) and has the cookie read in `PKPAuthenticateSession::handle()` and `PKPSessionGuard::userFromRecaller()`, so `PKPRequest::getUser()` and `Validation::isLoggedIn()` find the user again (2026-11-01)
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞 — unintended
 > behaviour (the malformed attribute), and persistent sessions should be
@@ -980,61 +986,6 @@ Basis: observed on a running site + upstream design record.
 > upstream issue (pkp/pkp-lib#12162, 2026-02); the brief mislead of the
 > genuine owner is the accepted cost.
 
-<a id="a7"></a>
-**A7 — Signed out, the Dashboard address the monthly reminder email links to gives an empty error page** · 🐞 · medium · crash: server.
-The server fails when a signed-out visitor opens the Dashboard address
-that ends at the word "dashboard", with or without a final slash
-(`…/index.php/publicknowledge/en/dashboard`,
-`…/index.php/publicknowledge/en/dashboard/`). The visitor gets an empty
-error page instead of the Login page. Longer Dashboard addresses, such as
-`…/dashboard/editorial`, open the Login page and return there after
-signing in.
-
-The address without the slash is the "submission dashboard" link in
-the monthly "Outstanding editorial tasks" email to managers and section
-editors. A bookmark or a typed address cut short at "dashboard" leads
-there too. The "Logout as" address (`…/en/login/signOutAsUser`), opened
-signed out with no `redirectUrl`, fails the same way.
-Since: 2025-01-14 (pkp/pkp-lib#10782) · Basis: probe, 2026-10-29. <sup>[f-a7](#fn-a7)</sup>
-
-> **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Ruling: signed
-> out, the bare dashboard address must behave like every other private
-> address — redirect to the Login page (destination preserved); choosing
-> which dashboard variant to land on happens after the successful sign-in,
-> as it already does for every other route.
-
-<a id="a8"></a>
-**A8 — Latent today: a user signed back in by "Keep me logged in" looks signed out on the public site, and "Login As" gives a blank page** · 🐞 · low.
-Nothing to schedule now: no user meets this today. The fix travels with
-the change that makes "Keep me logged in" sign users back in again (the
-comment that reopened `pkp/pkp-lib#12780` reports that it no longer
-does), and it must not be merged alone. Alone, it makes a return after
-the idle limit worse: the first page shows the user signed in, the page's own requests
-are refused (status 401) behind two alerts, and the next page is signed
-out.
-
-Today a user who signed in with the box ticked and comes back after the
-idle limit (seven days without a visit, by default) is signed out on
-every page, and signs in again. From 21 July to 6 October 2026 the
-cookie signed that user back in, but only in part. The dashboard and
-the other editorial pages opened signed in, while the journal's public
-pages offered "Register" and "Login" and the Login page showed its
-form. For a manager "Login As" on a user failed on the server, and the
-browser showed a blank page. That half-signed-in state is the fault,
-and it returns when the cookie signs users back in the same way.
-
-"Keep me logged in" is ticked when the Login page opens, so every user
-who signs in the default way and stays away a week would meet it. No
-release has shown it.
-What keeps it out of reach today is [A14](#a14).
-Since: 2024-04-17 (pkp/pkp-lib#9596) · Basis: probe, 2026-10-07. <sup>[f-a8](#fn-a8)</sup>
-
-> **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞 (filed on
-> review). Ruling: a session whose user cannot be resolved is treated like
-> a signed-out visitor — redirect to Login, never a crash. Same family as
-> the bare-dashboard error (A7): both are missing signed-out guards on
-> older page routes.
-
 <a id="a9"></a>
 **A9 — The last-login date has no screen** · ❓ · minor.
 Every sign-in records the account's last-login date, but no users screen
@@ -1081,22 +1032,6 @@ A screen-reader user hears only the journal's name as the page's title,
 and on "Reset Password" finds no heading to move to.
 Since: 2020-05-13 (pkp/pkp-lib#5866) · Basis: probe, 2026-10-04. <sup>[f-a11](#fn-a11)</sup>
 
-<a id="a14"></a>
-**A14 — "Keep me logged in" no longer keeps anyone signed in once the session ends** · 🐞 · minor.
-A user who signs in with "Keep me logged in" ticked, as the Login page
-offers it, expects to stay signed in for 30 days from the sign-in (the
-default). Once the session ends, after a week without a visit (the
-default idle limit), or at browser close on an installation configured
-to end sessions there, they are signed out
-instead, exactly as if the box had been unticked: "Edit Profile" and the
-Dashboard open the Login page. Signing in again works and nothing is
-lost; the box and the configuration's "Keep me logged in" window simply
-do nothing. Installations that end sessions at browser close, or keep
-sessions short and rely on that window, feel it most. From July 2026
-until this change the box did keep them signed in, if only in part
-([A8](#a8)); regression, not choice.
-Since: 2026-10-06 (pkp/pkp-lib#12780) · Basis: probe, 2026-10-07. <sup>[f-a14](#fn-a14)</sup>
-
 <a id="a15"></a>
 **A15 — "Login As" ends and a save made as the user is silently lost when that user first signs in after an upgrade** · 🐞 · medium.
 A Journal Manager has used "Login As" on an Author. The Author then
@@ -1114,10 +1049,11 @@ Basis: probe, 2026-10-19. <sup>[f-a15](#fn-a15)</sup>
 
 <a id="a16"></a>
 **A16 — A back-office page left open after its session ended answers a search with a refusal, not the Login page** · 🐞 · low.
-Once a session has ended (after the idle limit, "Expire User Sessions"
-or the browser's cookies for the site cleared), the user expects the
-next thing they do to bring up the Login page, as opening or reloading
-any page does (Rules 5a, 18). On a page already open in a tab, a search
+Once a session has ended (after the idle limit of a sign-in made with
+"Keep me logged in" unticked, "Expire User Sessions" or the browser's
+cookies for the site cleared), the user expects the next thing they do
+to bring up the Login page, as opening or reloading any page does
+(Rules 5, 18). On a page already open in a tab, a search
 is refused instead, in words that do not say the session has ended. On
 Settings › Website › "Plugins", every "Search", the first included,
 raises the browser alert "The current role does not have access to this
@@ -1132,6 +1068,7 @@ After a password change in another browser, a Profile page open here
 behaves as [User profile A25](U03-user-profile.md#a25) and
 [A26](U03-user-profile.md#a26) record.
 Basis: probe, 2026-10-19. <sup>[f-a16](#fn-a16)</sup>
+Report: refresh owed — pkp-lib `442148e14e` (`main`) / `c4c0aa8c52` (`stable-3_5_0`), pkp/pkp-lib#12780, 2026-10-31: a sign-in made with "Keep me logged in" ticked is signed back in past the idle limit again (Rule 5a), so the idle-limit case is narrowed to an unticked sign-in; the 2026-10-15 idle-limit read held the cookie on code that did not read it, which reads like an unticked sign-in today. Whether the reports' steps still show the refusal with the box ticked, as the Login page leaves it ([A2](#a2)), is not walked since the change, which reads the cookie in `PKPAuthenticateSession::handle()` (one of `PKPRoutingProvider::$globalMiddleware`) through the new `PKPSessionGuard::userFromRecaller()`, skipped on API requests, and ends a session in `PKPAuthenticateSession::logout()` with `Auth::logoutCurrentDevice()` (2026-11-01)
 
 <a id="a17"></a>
 **A17 — Audit log records a session ended by a password change in another browser as an IP address change** · 🐞 · low.
@@ -1157,11 +1094,32 @@ Since: 2026-08-12 (pkp/pkp-lib#12336) · Basis: probe, 2026-10-21. <sup>[f-a17](
 > tab title to the translated "Reset Password" string. Already reported as
 > pkp/pkp-lib#13132.
 
+<a id="a7"></a>
+**A7 — Signed out, the Dashboard address the monthly reminder email links to gave an empty error page** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13651](https://github.com/pkp/pkp-lib/issues/13651), by [pkp/pkp-lib#13652](https://github.com/pkp/pkp-lib/pull/13652), 2026-10-31), verified 2026-11-01 on OJS, OMP and OPS: signed out, the Dashboard address that ends at the word "dashboard" opens the Login page and signing in there leads to the Dashboard (Rule 4), and the address behind "Logout as" opens the Login page (Rule 15); the server used to fail at both and the browser showed an empty page. <sup>[f-a7](#fn-a7)</sup>
+
+> **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Ruling: signed
+> out, the bare dashboard address must behave like every other private
+> address — redirect to the Login page (destination preserved); choosing
+> which dashboard variant to land on happens after the successful sign-in,
+> as it already does for every other route.
+
+<a id="a8"></a>
+**A8 — A user signed back in by "Keep me logged in" looked signed out on the public site, and "Login As" gave a blank page** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#12780](https://github.com/pkp/pkp-lib/issues/12780), 2026-10-31), verified 2026-11-01 on OJS, OMP and OPS: back after the idle limit, a user signed in with the box ticked is signed in everywhere, the public header naming them, the Login page sending them on and "Login As" impersonating (Rule 5a). From 21 July to 6 October 2026, on `main` and the 3.5 branch only, the editorial pages opened signed in while the public pages and the Login page treated the user as signed out, and "Login As" failed on the server. <sup>[f-a8](#fn-a8)</sup>
+
+> **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞 (filed on
+> review). Ruling: a session whose user cannot be resolved is treated like
+> a signed-out visitor — redirect to Login, never a crash. Same family as
+> the bare-dashboard error (A7): both are missing signed-out guards on
+> older page routes.
+
 <a id="a12"></a>
 **A12 — After a disabled account was refused, the next correct sign-in in that browser failed** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#12780](https://github.com/pkp/pkp-lib/issues/12780), 2026-10-06), verified 2026-10-19 on OJS, OMP and OPS: right after a disabled account's refusal, another account's correct sign-in in the same browser lands at once where Rule 3 says; it used to land back on the Login page with no message (Rule 2). <sup>[f-a12](#fn-a12)</sup>
 
 <a id="a13"></a>
 **A13 — With "Confirm Access" on, an Administration page left open still deleted journals and saved site settings without the password** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13521](https://github.com/pkp/pkp-lib/pull/13521), for pkp/pkp-lib#13520, merged 2026-10-20), verified 2026-10-20 on OJS, OMP and OPS with the merged pkp-lib in `lib/pkp`: past the confirmation period, the Security "Save", a journal's removal and its creation from an Administration page left open are refused with "Your access to Administration has expired…" and change nothing, as are the other Administration requests (Rule 16). <sup>[f-a13](#fn-a13)</sup>
+
+<a id="a14"></a>
+**A14 — "Keep me logged in" kept no one signed in once the session ended** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#12780](https://github.com/pkp/pkp-lib/issues/12780), 2026-10-31), verified 2026-11-01 on OJS, OMP and OPS: a user signed in with the box ticked who comes back after the idle limit, or reopens the browser where the installation ends sessions at browser close, is still signed in on every page (Rules 5, 5a); from 6 October 2026 until the fix the Login page showed instead, as if the box had been unticked. <sup>[f-a14](#fn-a14)</sup>
 
 ---
 
@@ -1281,9 +1239,9 @@ to pkp-lib `3407fc5bc0`: the remember cookie restored the user without
 the session's own user id (finding A8, note f-a8).
 Live-probed 2026-10-07 (Rules 5, 5a; OJS, OMP, OPS on `main`, fleets
 freshly reset; a scratch Author signed in through the Login page with
-the box left ticked; kept check
+the box left ticked; the check
 `shared/playwright/checks/sync/pkp-lib-12780/remember-me.js`, its `s2`
-read): the browser held the session cookie and `remember_web_…` (30
+read, deleted at A14's retirement, git history keeps it): the browser held the session cookie and `remember_web_…` (30
 days); with the session cookie removed and the remember cookie kept,
 which is what a browser close does under `session_expire_on_close`, the
 profile (`…/user/profile`) and the submissions dashboard (`…/submissions`)
@@ -1294,7 +1252,34 @@ read, with the 2026-10-04 unticked control above). Before/after on
 `stable-3_5_0` OJS the same day: with lib/pkp at `771474347e` (before
 the 3.5 twin `edc3d36c74`) the profile and `…/dashboard/mySubmissions`
 loaded signed in after the same drop; at the pointer with the twin, the
-Login page. Finding A14, note f-a14.
+Login page. Finding A14 (retired), note f-a14.
+Live-probed 2026-11-01 (Rules 5, 5a; OJS, OMP, OPS on `main`, lib/pkp
+`442148e14e`, and on `stable-3_5_0`, lib/pkp `c4c0aa8c52`, the six
+alike, no server error; scratch accounts signed in through the Login
+page; the `remember-me.js` and `fix-edges.js` checks of the same
+folder, deleted with it): with the box ticked, the session cookie
+removed and `remember_web_…` (30 days) kept, `…/user/profile` and the
+submissions dashboard (`dashboard/mySubmissions`) opened signed in;
+two ended sessions in a row both came back signed in, the remember
+cookie's expiry unchanged from the one set at sign-in; unticked, the
+Login page. The remembered sign-in ended, the next page the Login page:
+after "Logout" (the cookie copied back in after it did not sign the
+browser in), after the password was changed in another browser, and
+after the account was disabled (the cookie gone). The browser that
+saved an email change, or changed its own password on Profile ›
+Password, stayed signed in after the session cookie was dropped; the
+other browser of that password change got the Login page. In a second
+browser signed in with the box ticked, the account's email-change save
+elsewhere left the Identity tab loading signed in; unticked, the Login
+page (User profile's Rule 6a). Default dataset, `rvaca` with the box
+as the page shows it, the session cookie removed past the idle limit
+(the kept walk
+`shared/playwright/checks/issues/login-as-after-idle-limit-server-error/walk.js`):
+Settings › Users & Roles opened signed in and "Login As" on "David
+Buskins" impersonated him, the journal's home-page header then ending
+"Search dbuskins" and the Login page going on to `dashboard/editorial`;
+with the session cookie kept and the session aged instead, the header
+read "Search rvaca" (note f-a8).
 Live-probed 2026-10-15 (Rule 5a's page still open; OJS, OMP, OPS on
 `main`, OJS on `stable-3_5_0`): after the same eight-day lapse with the
 remember cookie held, a page load landed on the Login page while a
@@ -1776,6 +1761,11 @@ renders the box ticked regardless of any prior choice. Live-confirmed
 2026-07-31: pre-ticked on a fresh Login page in OJS, OMP and OPS.
 Live-probed 2026-09-29 (OJS, OMP, OPS; two runs each): a sign-in refused
 with the box unticked shows the form again with it ticked.
+What the tick costs on `main` and `stable-3_5_0` since pkp-lib
+`442148e14e` / `c4c0aa8c52` (2026-10-31): driven 2026-11-01 on OJS,
+OMP and OPS of both lines (note c), a ticked sign-in comes back signed
+in after its session ended, within the remember cookie's 30 days from
+the sign-in; an unticked one meets the Login page.
 Issue report: [pkp-e2e#820](https://github.com/jardakotesovec/pkp-e2e/issues/820) ([docs/issues/U01-A2-keep-me-logged-in-always-ticked.md](../issues/U01-A2-keep-me-logged-in-always-ticked.md)).
 
 <a id="fn-a3"></a>
@@ -1898,7 +1888,29 @@ no access policy); with a `redirectUrl` it went to that page. Upstream:
 `pkp/pkp-lib#13651` (open), fix in PR `pkp/pkp-lib#13652` (open), which
 guards `getHomeUrl()` as the 2026-08-25 ruling asked; tried on `main`,
 it opened the Login page at both addresses.
-Issue report: [pkp-e2e#825](https://github.com/jardakotesovec/pkp-e2e/issues/825) ([docs/issues/U01-A7-dashboard-address-signed-out-server-error.md](../issues/U01-A7-dashboard-address-signed-out-server-error.md)).
+Retired: fixed by pkp/pkp-lib#13651 through PR pkp/pkp-lib#13652
+(Jack Henschel), lib/pkp `574aaee095` on `main` and `778febf80b` on
+`stable-3_5_0`, merged 2026-10-31: with no signed-in user,
+`PKPPageRouter::getHomeUrl()` returns the Login address with the
+requested address as `source`. Walked 2026-11-01 on OJS, OMP and OPS,
+`main` (lib/pkp `442148e14e`) and `stable-3_5_0` (lib/pkp
+`c4c0aa8c52`), each on PKP's default dataset, signed out (the kept
+walk, default and `neighbour` modes; no server-log line): each of
+`{journal}/en/dashboard`, `{journal}/en/dashboard/`,
+`{journal}/en/dashboard/index` and `{journal}/dashboard` answered 302
+to `{journal}/en/login?source=…` ("Login | Journal of Public
+Knowledge", the press's and the server's names on OMP and OPS), and
+`dbarnes` signing in there landed on
+`dashboard/editorial?currentViewId=assigned-to-me` ("Assigned to
+me"); `{journal}/en/dashboard/editorial` as before.
+`{journal}/en/login/signOutAsUser` with no `redirectUrl` gave the Login
+page, the address as `source`; with `redirectUrl=…/about` the About
+page. Signed in, the bare address led `dbarnes` to
+`dashboard/editorial` and an Author (`amwandenga` on OJS, `aclark` on
+OMP, `ccorino` on OPS) to `dashboard/mySubmissions`; signed out,
+`{journal}/en/submissions` gave the Login page. The walk was deleted at
+this retirement, with the issue report (git history keeps them).
+Issue report: [pkp-e2e#825](https://github.com/jardakotesovec/pkp-e2e/issues/825) (closed 2026-11-01, fixed by `pkp/pkp-lib#13651`).
 
 <a id="fn-a8"></a>
 **f-a8** — Live-probed 2026-08-25 (OJS): with an aged storage-state session
@@ -1929,7 +1941,24 @@ Since pkp-lib `3407fc5bc0` (2026-10-06; 3.5 `edc3d36c74`) nothing reads
 the remember cookie, so the lapsed sign-in is signed out on every page
 (live-probed 2026-10-07, notes c and f-a14) and the half-signed-in state
 does not arise on either line; the "Login As" walk above was not re-run.
-Issue report: [pkp-e2e#828](https://github.com/jardakotesovec/pkp-e2e/issues/828) ([docs/issues/U01-A8-login-as-after-idle-limit-server-error.md](../issues/U01-A8-login-as-after-idle-limit-server-error.md)).
+Retired: fixed by pkp/pkp-lib#12780's fix commit, lib/pkp `442148e14e`
+on `main` and `c4c0aa8c52` on `stable-3_5_0` (2026-10-31), whose
+`PKPSessionGuard::userFromRecaller()` sets the session's own user id
+for a user the cookie signs back in (note f-a14). Walked 2026-11-01 on
+OJS, OMP and OPS, `main` and `stable-3_5_0`, each on a dataset fleet
+(the kept walk above, its default steps with `gone`, `nb` and `dash`;
+no server error): `rvaca` signed in with the box as the page shows it,
+the session cookie removed and every session aged past the idle limit;
+Settings › Users & Roles opened signed in; "Login As" on "David
+Buskins" asked the Rule 12 question and, on OK, landed on his
+`dashboard/editorial`, the home page's header ending "dbuskins" and
+the Login page going on to the Dashboard. `nb`: signed out, the "Login
+As" address for him gave the Login page with it as `source`; the
+hand-built address for `admin` gave "People", "Sorry, you do not have
+administrative rights over this user…" (Rule 14); unticked, the same
+lapse gave the Login page. `dash`: the bare Dashboard address led
+`rvaca` to `dashboard/editorial`, the public header ending "rvaca".
+Issue report: [pkp-e2e#828](https://github.com/jardakotesovec/pkp-e2e/issues/828) (closed 2026-11-01, fixed by `pkp/pkp-lib#12780`); the report was deleted then (git history keeps it).
 
 <a id="fn-a9"></a>
 **f-a9** — `dateLastLogin`, set by `Validation::registerUserSession()` and
@@ -2081,8 +2110,8 @@ as `edc3d36c74`) returned `PKPRequest::getUser()` from `Auth::user()` to
 `Auth::user()` was the only call that reached Laravel's
 `SessionGuard::user()` recaller branch (the `remember_web_…` cookie,
 through `PKPUserProvider::retrieveByToken()`); the remaining
-`Auth::user()` calls sit behind `Validation::isLoggedIn()` or in sign-in
-and sign-out, so the cookie is still set at sign-in
+`Auth::user()` calls sat behind `Validation::isLoggedIn()` or in sign-in
+and sign-out, so the cookie was still set at sign-in
 (`Auth::login($user, $remember)`) and never read. The `Auth::user()` line
 came on 2026-07-21 with `a6d68f9547` (pkp/pkp-lib#12790; 3.5
 `6d0d04f41a`); no 3.5.0 release carries it (`3_5_0-3` to `3_5_0-5` read
@@ -2094,11 +2123,28 @@ account disabled, "Login As" a disabled account and back) hold on
 OMP and OPS `main`, with the before/after on `stable-3_5_0` OJS: note c.
 A fix that reads the cookie again must also set the session's own user
 id (`PKPSessionGuard`), or the half-signed-in state of finding A8
-returns, and must refuse a disabled account on the cookie path. Kept
-checks `shared/playwright/checks/sync/pkp-lib-12780/remember-me.js` and
-`disabled.js`. Tracked in ci-triage "Open regressions". Written up for
-the team in `docs/reports/2026-10-07-pkp-lib-12780.md` (a temporary
-report, deleted once acted on; git history keeps it).
+returns, and must refuse a disabled account on the cookie path.
+Retired: fixed by pkp/pkp-lib#12780's fix commit, lib/pkp `442148e14e`
+on `main` and `c4c0aa8c52` on `stable-3_5_0` (asmecher, 2026-10-31),
+carried by the OJS, OMP and OPS pointers on both lines (`main`: ojs
+`bc4a83e9db`, omp `853bf3b05`, ops `fd893a8c92`).
+`PKPAuthenticateSession::handle()` now calls the guard's `user()`
+before the session is first saved, and the new
+`PKPSessionGuard::userFromRecaller()` puts the recalled user's data in
+the session (`setUserDataToSession()`), not on API requests, and
+removes a cookie that signs no one in; `PKPUserProvider::retrieveById()`
+resolves a disabled account only for "Login As", and
+`Validation::login()` refuses one before the session is written
+(`Auth::attemptWhen()`); a session `PKPAuthenticateSession` ends is
+ended with `Auth::logoutCurrentDevice()`, which keeps the account's
+other remembered browsers. Walked 2026-11-01 on OJS, OMP and OPS of both
+lines (note c): the ticked return signed in, the unticked one on the
+Login page, and the disabled-account cases of the issue holding. The
+checks of `shared/playwright/checks/sync/pkp-lib-12780/`
+(`remember-me.js`, `disabled.js`, `fix-edges.js`, the tried patches)
+and the team's write-up `docs/reports/2026-10-07-pkp-lib-12780.md`
+were deleted at this retirement, with the ci-triage rows that tracked
+the regression; git history keeps them.
 
 <a id="fn-a15"></a>
 **f-a15** — Live-probed 2026-10-14 (Rule 15a; OJS, OMP, OPS on `main`;

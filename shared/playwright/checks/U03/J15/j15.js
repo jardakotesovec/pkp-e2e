@@ -15,6 +15,8 @@
 //   email  A saves a new email address on Contact (a pending request); B as in pw. A cancels the
 //          pending request.
 // J15_MODES=pw,email narrows. Every dialog B's pages raise is answered OK and kept, by phase.
+// J15_UNTICK=1 signs B in with "Keep me logged in" unticked (default: as the page shows it, ticked;
+// since pkp/pkp-lib#12780's 2026-10-31 fix a ticked B is signed back in after A's change).
 //
 // Run (dataset fleet 3):
 //   PROBE_FEATURE=issues-kc1 PKP_E2E_DATASET=3 PROBE_AGENT=kc1 PROBE_RUN=r1 \
@@ -27,6 +29,7 @@ const USER = 'rvaca';
 const CURRENT = 'rvacarvaca';
 const NEXT = 'u03j15NewPass1';
 const MODES = (process.env.J15_MODES || 'pw,pwrev,email').split(',');
+const UNTICK = process.env.J15_UNTICK === '1';
 const ALL_TABS = ['roles', 'contact', 'public', 'password', 'notifications', 'apiKey', 'identity'];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -148,7 +151,15 @@ forEachApp(async (app) => {
         try {
             const w = watchContext(B.context);
             // B before the change: Profile (Identity), Contact, Identity; a second page on Plugins
-            await signIn(B.page, USER, {contextPath: T});
+            if (UNTICK) {
+                const {LoginPage} = pages('LoginPage.js');
+                await B.page.goto(`/index.php/${T}/en/login`);
+                await B.page.locator('form#login input[name="remember"]').setChecked(false);
+                await new LoginPage(B.page).signIn(USER, CURRENT);
+            } else {
+                await signIn(B.page, USER, {contextPath: T});
+            }
+            out.bRemember = UNTICK ? 'unticked' : 'as shown (ticked)';
             const pB = new ProfilePage(B.page, T);
             await pB.goto('identity');
             await pB.open('contact');

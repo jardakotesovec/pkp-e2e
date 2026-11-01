@@ -15,8 +15,8 @@
  * any other session of `admin` could take first.
  *
  * Deliberately NOT covered (register IDs from the spec's Findings
- * register): A1 🐞, A2 🐞, A4 🐞, A5 ❓, A6 ✅, A7 🐞, A8 🐞, A10 🐞, A11 🐞,
- * A14 🐞, A15 🐞, A16 🐞, A17 🐞. The spec's Coverage section
+ * register): A1 🐞, A2 🐞, A4 🐞, A5 ❓, A6 ✅, A10 🐞, A11 🐞,
+ * A15 🐞, A16 🐞, A17 🐞. The spec's Coverage section
  * records everything else left out.
  *
  * Session hygiene: every sign-in, sign-out and impersonation flow runs in a

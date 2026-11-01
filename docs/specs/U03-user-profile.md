@@ -242,10 +242,13 @@ types and what the boxes do belong to
      read-only. On the site-level profile (Rule 3) the page's own script
      sometimes fails just after this save; the request is kept and its
      message sent ⚠ [A24](#a24). The
-     account's other signed-in sessions carry on unaffected; until the
-     regression
-     [Login & sessions A14](U01-login-and-sessions.md#a14) is fixed, they
-     are signed out instead.
+     save ends the account's other signed-in sessions. Another browser
+     that signed in with "Keep me logged in" ticked, as the Login page
+     offers it, is signed straight back in: its next tab press or page
+     load opens as the account. One that signed in with the box unticked
+     is signed out: a tab press on a Profile page still open there opens
+     nothing but an alert ⚠ [A26](#a26), and its next page load shows the
+     Login page.
    - 6b. **The email.** One message, subject "Confirm account contact email
      change request", is sent to the account's **current** address, not the
      new one ⚠ [A8](#a8); a later request goes to whichever address is
@@ -750,10 +753,10 @@ tooling recipe are in the footnote. <sup>s</sup>
      how to validate the changed email." with a "Cancel" button, and the
      "Email address" box is read-only, still showing the old address.
    - **The second browser**: in the second browser, signed in as the same
-     account, press "Identity": the tab opens with the account's names (Rule 6a);
-     until the regression
-     [Login & sessions A14](U01-login-and-sessions.md#a14) is fixed, the
-     press raises a browser alert instead.
+     account with "Keep me logged in" left ticked as the Login page shows
+     it, press "Identity": the tab opens with the account's names, the
+     whole check here; the session's end shows only with the box unticked
+     (Rule 6a, *Coverage*).
    - **The mailbox**: the mailbox of the account's old address now holds a
      message "Confirm account contact email change request", from the
      account holder's own name, naming the new address; the new address
@@ -1085,6 +1088,10 @@ tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - after an email-change save, a second browser signed in with "Keep me
+    logged in" unticked: its "Identity" press raising the alert of
+    [A26](#a26) and its next page load showing the Login page (Rule 6a;
+    scenario 4 ticks the box)
   - text typed into "Signature" alone, then another tab pressed, asking
     "The data on this form has changed. Do you wish to continue without
     saving?", "Cancel" keeping the text ([A19](#a19); Rule 2c): the
@@ -1627,10 +1634,13 @@ page, and what was typed is lost with it.
 A Site Administrator's "Expire User Sessions" brings the alert on every
 press. A password change made in another browser brings it on every
 press after the first; the first press fails in another way
-([A25](#a25)).
+([A25](#a25)). An email change saved in another browser brings it on
+every press to a browser signed in with "Keep me logged in" unticked
+(Rule 6a).
 By the code, a session that expired brings it too. No other page shows
 this code.
 Since: 2012-05-07 (14 years) · Basis: probe, 2026-10-15. <sup>[f-a26](#fn-a26)</sup>
+Report: refresh owed — pkp-lib `442148e14e` (`main`) / `c4c0aa8c52` (`stable-3_5_0`), pkp/pkp-lib#12780, 2026-10-31, retired *Login & sessions* A14: after an email change saved in another browser, a browser signed in with "Keep me logged in" ticked is signed back in and only an unticked one is signed out, its tab presses raising only the alert (walked 2026-11-01, OJS, OMP, OPS, both lines; the alert on `main`), so the report's "Not walked" bullet on the email change, which rests on that open regression, is out of date; the change touches none of the classes the report names (it rewrites `Validation::login()` and reads the cookie in `PKPAuthenticateSession::handle()` through `PKPSessionGuard::userFromRecaller()`) (2026-11-01)
 
 <a id="a27"></a>
 **A27 — An API request with a malformed key is refused with "{$error}" where the reason should be** · 🐞 · low.
@@ -1982,8 +1992,9 @@ ticking changes nothing on screen. Email change: one mail, subject "Confirm
 account contact email change request", From `Probe Dee <old address>`, To
 the same, none to the new address; a second request from the new address
 goes to that address; the second browser's tab press and full page load
-both still worked after the request (`invalidateOtherSessions()` did not
-end it, contrast the password change, note g); "confirm" lands on
+both still worked after the request (read then as
+`invalidateOtherSessions()` not ending it; diagnosed below as the
+remembered sign-in); "confirm" lands on
 `user/profile#contact` with the new address editable and a "Your changes
 have been saved." toast, signed out via `login?source=…/user/profile/contact`
 with the address already switched; "reject" shows "Decline Invitation" /
@@ -2034,8 +2045,9 @@ a text body ending "Kind regards," then "Ursula Contactacdi", while the
 site's own contact read "Open Journal Systems" / "Open Monograph Press" /
 "Open Preprint Systems" (the closing name is the context's, which the
 earlier "Site Admin" readings did not tell apart). Seen 2026-10-14, all three
-apps, while pkp/pkp-lib `3407fc5bc0` (2026-10-06, the open regression
-*Login & sessions* A14) stands: after the email-change save the second
+apps, while pkp/pkp-lib `3407fc5bc0` (2026-10-06, the regression
+*Login & sessions* A14, fixed since by pkp/pkp-lib#12780, `442148e14e`,
+2026-10-31) stood: after the email-change save the second
 browser's reload showed the Login page, "Keep me logged in" ticked or not
 alike. Live-probed 2026-10-15 (claim check), OJS, OMP and OPS on `main`
 and OJS and OMP on `stable-3_5_0`, two runs each (the kept script
@@ -2047,7 +2059,27 @@ never opened there); a "Save" got the same alert and stored nothing. The
 save ends the other sessions by design (`invalidateOtherSessions()`
 above); the 2026-09-03 reading that both still worked is diagnosed
 (2026-10-07) as the remembered sign-in bringing that browser back, which
-the regression stopped, so Rule 6a and scenario 4 wait on its ruling. Since pkp/pkp-lib#13181 (lib/pkp `4d9ec3cbd0`
+the regression stopped, so Rule 6a and scenario 4 waited on its
+fix. Live-probed 2026-11-01 (A14 fixed), OJS, OMP and OPS on `main` and
+`stable-3_5_0` (a one-off walk at pkp/pkp-lib#12780, not kept): a
+second browser signed in with "Keep me logged in" ticked, the Login
+page's default, and one with it unticked; the
+email-change save took the account's session rows from 2 to 1 in both.
+The ticked browser's "Identity" press loaded the Identity form and its
+full load opened `user/profile`; the unticked one's press left the
+Identity panel empty and its full load landed on
+`login?source=…/user/profile`. Live-probed again 2026-11-01, OJS, OMP
+and OPS on `main`, `rvaca` on PKP's default dataset (the kept script
+`shared/playwright/checks/U03/J15/j15.js`, mode `email`, with
+`J15_UNTICK=1` signing the second browser in with the box unticked):
+after the first browser saved the email change, every press in the
+second browser (the tabs Roles, Contact, Public, Password,
+Notifications, API Key and Identity, then "Save") raised the alert
+"##user.authorization.userRequired##" (A26), and its reload landed on
+the Login page; the control run, the box left as the page shows it
+(ticked), raised no alert on any press and its reload opened the
+profile. U03 scenario 4 passed on OJS, OMP and OPS
+`main` the same day with its skip lifted. Since pkp/pkp-lib#13181 (lib/pkp `4d9ec3cbd0`
 "Respect Invitation's context rather than request's" and `aeac6f75cf` "Fix
 redirect to profile/contact after needed login", both 2026-09-16; on OJS
 since lib/pkp `efbba94ae7`, 2026-09-17, and on OMP and OPS since lib/pkp
@@ -3183,7 +3215,12 @@ after OK the pressed tab was marked open, a tab opened there before
 "RJ" stayed in the box, "Save" could be pressed again, and the database
 kept the account's initials unchanged. After an email change the first
 tab press already got the 200 JSON and the alert, then the same for
-every press; no 302 and no page error in that mode. A reload reached the
+every press; no 302 and no page error in that mode. That day the
+"Keep me logged in" cookie went unread (*Login & sessions* A14, fixed
+2026-10-31), which reads like an unticked sign-in today; the 2026-11-01
+reads in note d have a ticked browser signed back in after the email
+change and an unticked one's every tab press and "Save" raising the
+alert (`J15_UNTICK=1`; the ticked control raised none). A reload reached the
 Login page with no alert in both modes. The first browser put the
 account back after each mode (password set back, pending request
 cancelled). The expired and signed-out-elsewhere sessions are read from
