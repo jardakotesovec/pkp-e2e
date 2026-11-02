@@ -60,6 +60,8 @@ Not regressions. The response is a targeted rerun and a dated tally on
 the line (a line keeps its last three); a real investigation starts when the class's watch condition
 trips.
 
+- **U11 S4 "highlights in a second language" reads another highlight's title** (OJS). The assertion on the French titles (`apps/ojs/playwright/tests/U11-highlights.spec.js:542`) expected `["Call for papers", "Appel à contributions"]` and received `["Call for papers", "Second call"]`; green on retry. Sighted once: pkp/ojs `main` hook run 41257374494 (2026-11-01, `bc4a83e9db`, shard 2/3). Not diagnosed. **Watch condition**: a second sighting on CI; then a diagnostician (a list read before the second language's save landed, or another test's highlight in the same journal).
+
 - **U06 S1 "Enter details" text between two sends** (OJS). S1 compares the invitation wizard's "Enter details" step text on a second send to the same address with the first (`expect(second.detailsText).toBe(first.detailsText)`); run 41104707295 (2026-10-30, the PR review of pkp/pkp-lib#13659, which touches no role list) listed "Journal editor" at another place in the role list on the second send, green on retry. Watch: a second sighting → compare the role list as a set and the rest as text.
 
 - **Payment plugin groups in disk order** (U52 S1, OJS; OMP's U52 already asserted a set, T-omp-1). With payments switched on, Settings › Distribution › Payments draws "Manual Fee Payment" and "Paypal Fee Payment" in the order `PluginRegistry::loadCategory('paymethod')` reads the plugin folders, which a fresh CI install does not fix: run 40511504733 (2026-10-27, the PR review of pkp/pkp-lib#12874) drew Paypal first, red at both tries, green on the job's re-run. OJS S1 now asserts the groups as a set with "Setup" first (green locally on a fresh reset, 2 passed). Again 2026-10-28 (run 40667951466, the PR review of pkp/pkp-lib#13636, OJS shard 1, both tries): the "Payment Plugins" select's options, still asserted in order, drew "Paypal Fee Payment" first; OJS S1 now reads them as a set too, as OMP's S1 does. Watch condition: any other test that asserts the order of a plugin category's entries reds the same way.
@@ -1123,13 +1125,24 @@ trips.
   A6 ([U57](../specs/U57-languages-and-locales.md#a6)). Maintainer's call 2026-09-26: not a realistic problem for
   a journal; handle it on the test side, and take it upstream only if it
   keeps firing with no reasonable test-side fix. **Watch condition**: a
-  French-context seed or save red with that 500 on CI; then install French
-  once at bootstrap, before the parallel project, so later French
-  contexts never race the first install. Sighted locally 2026-09-27 in
+  French-context seed or save red with that 500 on CI. Sighted locally 2026-09-27 in
   the U57 OPS test author's run (S5 and S7 ticking French in one second,
-  S7 500): every on-screen "Forms"/"Submissions" tick re-installs the
-  email data, so a bootstrap install alone would not cover it; U57's S5
-  and S7 run in one serial group in each app since.
+  S7 500); U57's S5 and S7 run in one serial group in each app since.
+  **Tripped 2026-11-02** (pkp-e2e nightly 41269163150, OPS U16 S1 and S7
+  seeding 0.1 s apart, key 19 of 27, `SUBMISSION_NEEDS_EDITOR`); the
+  bootstrap install the condition named would not help, since every
+  install deletes and re-inserts the rows already there (U57 f-a6).
+  **Fixed in the harness 2026-11-02** (`.reports/flake-2026-11-02/french-context-race/diagnosis.md`):
+  `shared/playwright/support/locale-install.js` `withLocaleInstall()`,
+  one language install at a time per test database, held by
+  `createContext()` when a seed adds a second form language and by
+  `LanguagesPages.js`'s grid ticks and "Install Locale" save. Under a
+  lever (a third session holding the `fr_CA` rows 2.5 s): three seeds
+  10/10 red per app before, 0/10 after; a tick against a seed 8/8 → 0/8
+  (OPS); U16 S1+S7 `--repeat-each 5` 8/10 → 0/10. U16 and U57 50/50 per
+  app without the lever; the French-seeding files and U57/U59 serial and
+  solo green on OJS, OMP, OPS. **Watch condition**: that 500 on CI behind
+  the lock (then a path that installs a language without it).
 
 - **Order asserted on lists the app does not order** (settled
   2026-09-26 as one class: OPS U13 S1/S10 keywords, OMP U10 S5 masthead,

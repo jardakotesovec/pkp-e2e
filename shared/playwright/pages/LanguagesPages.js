@@ -67,6 +67,7 @@ const {SettingsPages} = require('./ContextIdentityPages.js');
 const {EditorialChrome} = require('./NavigationChromePages.js');
 const {HostedContextsPage} = require('./UsersManagementPages.js');
 const {waitForJQueryIdle} = require('../support/legacy.js');
+const {withLocaleInstall} = require('../support/locale-install.js');
 
 const T = 30_000;
 /**
@@ -243,14 +244,20 @@ class LanguageGrid extends BasePage {
     /**
      * Click a cell and wait for the list's answer to it; returns the
      * response. `endpoint` is a part of the answering request's address.
+     * A "Forms" or "Submissions" tick installs the language's default email
+     * texts site-wide, which no other install may run beside, so the press
+     * and its answer hold the language-install lock
+     * (support/locale-install.js; U57 A6).
      */
     async press(code, column, {endpoint = /languages?-grid\//, timeout = T} = {}) {
-        const answered = this.page.waitForResponse(
-            (r) => r.request().method() === 'POST' && endpoint.test(r.url()),
-            {timeout}
-        );
-        await this.cell(code, column).click();
-        const response = await answered;
+        const response = await withLocaleInstall(async () => {
+            const answered = this.page.waitForResponse(
+                (r) => r.request().method() === 'POST' && endpoint.test(r.url()),
+                {timeout}
+            );
+            await this.cell(code, column).click();
+            return answered;
+        });
         await waitForJQueryIdle(this.page);
         return response;
     }
@@ -455,11 +462,17 @@ class InstallLocaleWindow extends BasePage {
         return flat(await this.form.innerText());
     }
 
-    /** Press "Save" and wait for the install's answer and the window to close; returns the answer. */
+    /**
+     * Press "Save" and wait for the install's answer and the window to
+     * close; returns the answer. The install holds the language-install lock
+     * (support/locale-install.js).
+     */
     async save({timeout = SITE_CHANGE} = {}) {
-        const answered = this.page.waitForResponse((r) => /save-install-locale/.test(r.url()), {timeout});
-        await this.saveButton.click();
-        const response = await answered;
+        const response = await withLocaleInstall(async () => {
+            const answered = this.page.waitForResponse((r) => /save-install-locale/.test(r.url()), {timeout});
+            await this.saveButton.click();
+            return answered;
+        });
         await expect(this.form).toBeHidden({timeout: T});
         await waitForJQueryIdle(this.page);
         await pastModalSlot(this.page);

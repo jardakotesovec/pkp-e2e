@@ -10,6 +10,7 @@
  * requests 400 is exactly the trap that cost three probe sessions.
  */
 const {request} = require('@playwright/test');
+const {withLocaleInstall, contextSpecInstallsLocale} = require('./locale-install.js');
 
 const API_BASE = '/index.php/index/api/v1/_test';
 
@@ -63,12 +64,16 @@ class PkpApi {
     }
 
     /**
-     * Seed a scratch context. @returns the created context summary.
+     * Seed a scratch context. @returns the created context summary. A spec
+     * with a second "Forms" language installs that language's default
+     * email texts site-wide, which no other install may run beside
+     * (support/locale-install.js), so it is sent holding that lock.
      *
      * @param {object} spec {tag, context: {...}, users: [...], ...}
      */
     async createContext(spec) {
-        return this._post(`${API_BASE}/scenarios/context`, spec);
+        const send = () => this._post(`${API_BASE}/scenarios/context`, spec);
+        return contextSpecInstallsLocale(spec) ? withLocaleInstall(send) : send();
     }
 
     /**

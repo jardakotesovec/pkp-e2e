@@ -479,6 +479,11 @@ over.
     so the wait goes inside the page object's scroll helper, not its
     callers, and the three apps' twins of a page object carry the same
     waits (OJS U02 S6, 5 of 5 red with the sheet held 3 s, 2026-10-16).
+17. **A request that installs a language holds `withLocaleInstall()`**
+    (`support/locale-install.js`): a seed adding a second form language,
+    a Languages grid tick, an "Install Locale" save. Two installs of one
+    locale at once collide on the site-wide email data (U57 A6); a serial
+    group or a retry is not the fix (2026-11-02).
 
 ## Tag conventions
 
