@@ -253,9 +253,13 @@ exports.SiteUserMenu = class SiteUserMenu extends BasePage {
         this.logoutLink = this.root.getByRole('link', {name: 'Logout', exact: true});
     }
 
-    /** The menu's own link: the signed-in username. */
+    /**
+     * The menu's own link: the signed-in username, followed by the count of
+     * the account's unread tasks for an editorial role (a Journal Manager's
+     * reads "{username} 0").
+     */
     toggle(username) {
-        return this.root.getByRole('link', {name: username, exact: true});
+        return this.root.getByRole('link', {name: new RegExp(`^${escapeRegExp(username)}(\\s+\\d+)?$`)});
     }
 
     /**
@@ -606,12 +610,15 @@ exports.anonContext = async function anonContext(browser, baseURL) {
  * A fresh UI sign-in in its own context, on the site-level Login page or a
  * journal's, for every flow that will end or migrate its session (sign-out,
  * impersonation, a reset), so the shared .auth cache is never poisoned.
+ * `remember` true or false sets "Keep me logged in" by a click on the box
+ * before "Login" (`LoginPage.signInRemembered`); left out, the box stays as
+ * the page offers it.
  */
 exports.freshLogin = async function freshLogin(
     browser,
     baseURL,
     username,
-    {password = getPassword(username), contextPath = null} = {}
+    {password = getPassword(username), contextPath = null, remember = undefined} = {}
 ) {
     const context = await exports.anonContext(browser, baseURL);
     const page = await context.newPage();
@@ -621,7 +628,11 @@ exports.freshLogin = async function freshLogin(
     } else {
         await loginPage.goto();
     }
-    await loginPage.signIn(username, password);
+    if (remember === undefined) {
+        await loginPage.signIn(username, password);
+    } else {
+        await loginPage.signInRemembered(username, password, remember);
+    }
     return {context, page};
 };
 

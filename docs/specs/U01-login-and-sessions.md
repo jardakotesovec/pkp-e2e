@@ -436,8 +436,11 @@ scenarios 4 to 6 act on throwaway accounts of a scratch journal, because
 each changes a password, and scenario 9 does too, because it disables
 one. Scenario 10 has the Site Administrator, a ready account, act on a
 scratch journal on an installation configured to ask for the password
-again before Administration. Scenarios 2 and 4 keep the same account
-signed in in a second browser. The ready accounts and their passwords
+again before Administration. Scenarios 11 and 12 act on throwaway
+accounts of a scratch journal too, each coming back after the session
+ended, and 12 also changes the password and disables the account.
+Scenarios 2, 4, 11 and 12 keep the same account signed in in a second
+browser. The ready accounts and their passwords
 and the tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Sign in and land on the Dashboard**
@@ -490,15 +493,25 @@ and the tooling recipe are in the footnote. <sup>s</sup>
 
 3. **A bookmarked private page waits for sign-in**
 
-   Given: Editor, signed out, with a submission's workflow address at
-   hand. <sup>s</sup>
+   Given: Editor, signed out, with a submission's workflow address and
+   the address behind "Logout as" (the user menu's exit while
+   impersonating, Rule 15) at hand. <sup>s</sup>
 
    - **The bookmarked address**: paste the submission's workflow address
      into the browser: the Login page appears instead of the submission.
    - **Signing in**: sign in: the browser continues straight to the
      submission that was asked for, not to the Dashboard.
-   - **Control**: the Login page that appeared was the plain form:
-     nothing on it named the submission being held (Rule 4).
+   - **The Dashboard address**: press "Logout" in the user menu, then
+     open the journal's Dashboard address that ends at the word
+     "dashboard", the link in the monthly "Outstanding editorial tasks"
+     email: the Login page appears; sign in there: the browser lands on
+     the Dashboard (Rule 4).
+   - **The address behind "Logout as"**: press "Logout" in the user menu
+     and open the address behind "Logout as": the Login page shows
+     (Rule 15).
+   - **Control**: the Login page the submission's address brought up was
+     the plain form: nothing on it named the submission being held
+     (Rule 4).
 
 4. **Recover a forgotten password**
 
@@ -751,6 +764,68 @@ and the tooling recipe are in the footnote. <sup>s</sup>
       Journals tab: the scratch journal's row is still there. The refused
       changes changed nothing (Rule 16).
 
+11. **Back after the session ended, kept signed in by "Keep me logged
+    in"**
+
+    Given: a Journal Manager and an Author of a scratch journal, the
+    Journal Manager signed in on its Login page with "Keep me logged in"
+    ticked in one browser and unticked in a second. <sup>s</sup>
+
+    - **The Dashboard and "Edit Profile", the session ended**: in both
+      browsers, end the session as the idle limit does (Rule 5): delete
+      the session cookie, not the "Keep me logged in" one. <sup>s</sup>
+      In the first browser, open the Dashboard: it opens, not the Login
+      page; open the top-right user menu (the initials button) and press
+      "Edit Profile": the profile opens, and so does Settings › Users &
+      Roles (Rule 5a).
+    - **The journal's public header**: open the journal's home page: the
+      header shows the Journal Manager's username, not "Register" and
+      "Login" (Rule 5a).
+    - **The Login page**: open the journal's Login page address: the
+      Dashboard shows instead of the form (Rule 1).
+    - **"Login As" on the Author's row**: on Settings › Users & Roles,
+      open the Author's row menu, choose "Login As" and press OK in its
+      dialog: the browser is now the Author's session, on their My
+      Submissions, and the user menu reads "You are currently logged in
+      as {author}" (Rules 12, 13, 14).
+    - **Control**: in the second browser, unticked, open the Dashboard:
+      the Login page shows (Rule 5a).
+
+12. **What ends a sign-in kept by "Keep me logged in"**
+
+    Given: an Author of a scratch journal, signed in on its Login page
+    with "Keep me logged in" ticked in two browsers, on "Edit Profile"
+    in both; the Journal Manager signed in in a third. <sup>s</sup>
+
+    - **Saving a new email address**: in the first browser, on the
+      profile's "Contact" tab, type kept.author@mail.test in "Email
+      address" and save (see [User profile](U03-user-profile.md), its
+      Rule 6a); end this browser's session as the idle limit does
+      (Rule 5): delete the session cookie, not the "Keep me logged in"
+      one. <sup>s</sup> Reload the page: the profile opens, not the Login
+      page (Rule 5a).
+    - **Changing the password in this browser**: on the profile's
+      "Password" tab, type the current password in "Current password"
+      and Remembered1 in "New password" and "Repeat new password", and
+      save (see *User profile*, its Rule 10b); end its session again and
+      reload: the profile opens, still signed in (Rule 5a).
+    - **The other browser of that password change**: in the second
+      browser, reload the page: the Login page shows (Rule 5a).
+    - **"Logout"**: in the first browser, press "Logout" in the user
+      menu; end its session and open the profile's address again: the
+      Login page shows (Rules 5a, 6).
+    - **Disabling the account**: in the second browser, on that Login
+      page, sign in as the Author with Remembered1, "Keep me logged in"
+      ticked: the profile opens (Rule 4).
+      Journal Manager: on Settings › Users & Roles, choose "Disable
+      User" in the Author's row menu and press "OK" with no reason typed
+      (see [Users management](U53-users-management.md), its Rule 10). In
+      the second browser, end its session and reload the page: the Login
+      page shows (Rule 5a).
+    - **Control**: on that Login page, sign in as the Author with
+      Remembered1: the page answers "Your account has been disabled.
+      Please contact the administrator for more information." (Rule 2).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -783,23 +858,6 @@ Left out of the scenarios above, by reason:
     back the operator's own account ([A4](#a4)): the guard the issue
     report (`docs/issues/U01-A4-second-login-as-strands-operator.md`)
     proposes, once fixed
-  - signed out, the Dashboard address ending at the word "dashboard"
-    opening the Login page, and signing in there leading to the
-    Dashboard; and the address behind "Logout as", opened signed out,
-    showing the Login page (Rules 4, 15; retired [A7](#a7))
-  - a user signed in with "Keep me logged in" and back after the idle
-    limit opening the Dashboard signed in, seeing their username, not
-    "Register" and "Login", in the public header, the Login page sending
-    them on, and "Login As" impersonating (Rules 5a, 14; retired
-    [A8](#a8))
-  - "Keep me logged in" keeping a user signed in once the session ends:
-    signed in with the box ticked, back after the session ended, "Edit
-    Profile" and the Dashboard opening signed in, not the Login page;
-    unticked, the Login page (Rules 5, 5a; retired [A14](#a14))
-  - a sign-in kept by "Keep me logged in" ending at "Logout", at a
-    password change in another browser and when the account is
-    disabled, and kept in the browser that saves a new email address or
-    changes its own password under "Edit Profile" (Rule 5a)
   - the Site Administrator's "Edit User" on a flagged account opening
     with "Change Password" ticked, and an unchanged "OK" keeping the
     flag ([A10](#a10)): the guard the issue report
@@ -853,7 +911,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | The password boxes stop accepting input at 32 characters, so longer passwords cannot be typed | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
-| [A2](#a2) | "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
+| [A2](#a2) | "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it | 🐞 | medium | issues (claude), 2026-11-02 — re-verified |
 | [A4](#a4) | While signed in as another user, "Login As" is still offered, and using it strands the operator in that account | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | The Site Administrator's "Edit User" never shows "Change Password" ticked, and saving it removes the flag | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | After a refused "Change Password" or "Reset Password", the browser tab loses the page's name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
@@ -893,27 +951,32 @@ Basis: probe, 2026-10-03. <sup>[f-a1](#fn-a1)</sup>
 > safe, meaningful step up from 32).
 
 <a id="a2"></a>
-**A2 — "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it** · 🐞 · low.
-The Login page shows "Keep me logged in" already ticked, though the
-label offers it as a choice. It ticks the box again when the page shows
-the form after a wrong password: a user who unticked it, mistyped the
-password and signed in on the next try signs in with the box ticked,
-without being told.
+**A2 — "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it** · 🐞 · medium.
+The defect is in how the Login page's "Keep me logged in" box arrives.
+It is ticked the first time the page shows, though the label offers it
+as a choice, and it is ticked again when the page shows the form after
+a wrong password. A user who unticked it, mistyped the password and
+signed in on the next try is signed in with the box ticked, without
+being told. The same box, ticked the same way, is in the Login templates
+of five PKP themes, which a fix in pkp-lib does not reach: each theme
+needs the same change.
 
-What the tick costs depends on the version. On 3.4 and 3.3 it decides
-whether a sign-in ends when the browser closes or lasts 30 days without
-a visit, so the ticked box keeps every user who leaves it alone signed
-in on that browser, a shared computer included. On `main` and the 3.5
-branch a ticked sign-in lets the browser back into the account without
-the password for up to 30 days from the sign-in (the default), however
-long the browser stood unused, where an unticked one ends after a week
-without a visit (Rule 5a). In the 3.5 releases so far the box keeps no
-one signed in: all that is left there is the "Keep me logged in"
-cookie, stored in the browser against the user's choice. From 6 to 31
-October 2026 `main` and the branch behaved the same way (retired
-[A14](#a14)).
-Since: 2015-08-07 (pkp/pkp-lib#658) · Basis: probe, 2026-10-07. <sup>[f-a2](#fn-a2)</sup>
-Report: refresh owed — pkp-lib `442148e14e` (`main`) / `c4c0aa8c52` (`stable-3_5_0`), pkp/pkp-lib#12780, 2026-10-31: the "Keep me logged in" cookie signs the browser back in again on both branches (walked 2026-11-01, OJS, OMP, OPS), so the report's 3.5-and-`main` cost (Summary, Impact, the severity paragraph's "medium on 3.5 and `main` as well from the day "Keep me logged in" works there") and its Upstream bullet are out of date; the change rewrites `Validation::login()` (`Auth::attemptWhen()` in place of `Auth::attempt($credentials, $remember)`) and has the cookie read in `PKPAuthenticateSession::handle()` and `PKPSessionGuard::userFromRecaller()`, so `PKPRequest::getUser()` and `Validation::isLoggedIn()` find the user again (2026-11-01)
+What the tick costs depends on the version:
+
+- On `main`, the 3.5 branch and 3.5.0-6, a ticked sign-in lets the
+  browser back into the account without the password for 30 days from
+  the sign-in, however long the browser stood unused. An unticked one
+  ends after a week without a visit.
+- On 3.4 and 3.3, a ticked sign-in lasts until 30 days pass without a
+  visit; an unticked one ends when the browser closes.
+- In the 3.5 releases before 3.5.0-6 the cookie signs no one back in.
+  The box still makes the server store the cookie in the browser of a
+  user who did not choose it, but the cookie does nothing.
+
+Those it hurts are the users who unticked the box before a refused
+sign-in, and those who did not notice it was ticked, most of all on a
+shared or public computer.
+Since: 2015-08-07 (pkp/pkp-lib#658) · Basis: probe, 2026-11-02. <sup>[f-a2](#fn-a2)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞 — unintended
 > behaviour (the malformed attribute), and persistent sessions should be
@@ -1661,7 +1724,12 @@ holding an expiry date, as a real restart does. Scenarios 2–3 any roster
 account / `editor.diana`; scenario 2's second browser is a second browser
 context signed in as the same account before "Logout" is pressed, and
 scenario 3's submission is a `POST scenarios/submission` on the seeded
-journal. Scenarios 4–5 a throwaway `author` on a scratch journal (`POST
+journal (OPS: a scratch server's, a throwaway `manager` of it signing
+in); its Dashboard address is the journal's `…/dashboard` (Rule 4 holds
+it with a final slash or the language in it too), and the address
+behind "Logout as" is `…/login/signOutAsUser` (note d), each typed
+signed out, after a "Logout".
+Scenarios 4–5 a throwaway `author` on a scratch journal (`POST
 scenarios/context` with `users: [{username, roles: ['author']},
 {username, roles: ['reader']}]`; the `reader` exists to be "another
 account": the Login As address scenario 4 types is
@@ -1739,7 +1807,27 @@ app's `@solo` serial file, apart from every other test that signs in as
 completed…" are one-time notices stored for `admin`, which the next
 back-office page any `admin` session loads shows and deletes. The suites
 wait between 65 seconds and two minutes past the last Administration
-request.
+request. Scenarios 11 and 12: a `POST scenarios/context` scratch journal
+with `users: [{username, roles: ['manager']}, {username, roles:
+['author']}]`, each browser a browser context signed in through the
+scratch journal's Login page with the box as the scenario says (never a
+roster account: a remembered sign-in and its ending are the account's
+own, and other tests share the roster). "The session ended" is tooling,
+as the 2026-11-01 walks did it (the check
+`shared/playwright/checks/sync/pkp-lib-12780/remember-me.js`, git
+`b998b772^`; note c): the browser context's session cookie removed and
+its `remember_web_…` cookie kept, which is what a browser close does on
+an installation configured with `session_expire_on_close`, the idle
+limit ending the session the same way; no scenario key is involved.
+Scenario 11's Dashboard is `…/dashboard/editorial`, "Edit Profile"
+`…/user/profile`, the public header's user menu showing the manager's
+username, and the "Login As" target is the scratch Author, wholly
+within the manager's journals (Rule 14). Scenario 12's new address and
+Remembered1 stand for an address and a password the suites tag per run;
+"Edit Profile"'s address is `…/user/profile`; the Journal Manager is
+the scratch journal's own, signed in in a third browser context, and
+"Disable User" leaves "Reason for disabling user" empty, as scenario
+9's `disabled` key does.
 
 <a id="fn-a1"></a>
 **f-a1** — `maxlength="32"` hardcoded on the password inputs of

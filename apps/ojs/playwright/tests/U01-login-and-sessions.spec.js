@@ -3,8 +3,8 @@
  * @file playwright/tests/U01-login-and-sessions.spec.js
  *
  * Login & sessions — OJS suite, one test per canonical scenario the spec runs
- * on OJS (scenarios 1–10, all common): 1–9 here, 10 (the Confirm Access
- * gate on the reauth variant, `@solo`) in
+ * on OJS (scenarios 1–12, all common): 1–9, 11 and 12 here, 10 (the Confirm
+ * Access gate on the reauth variant, `@solo`) in
  * tests/serial/U01-login-and-sessions.spec.js.
  * Spec: docs/specs/U01-login-and-sessions.md
  *
@@ -20,6 +20,10 @@
  * would destroy for parallel tests (the one cached context, S1's Journal
  * Manager, only reads a screen). Password mutations happen only on throwaway
  * users in scratch journals (the roster's passwords are never touched).
+ * S11 and S12's remembered sign-ins are throwaway accounts of their own
+ * scratch journal, each browser its own context, and "the session ended" is
+ * the session cookie removed with the "Keep me logged in" cookie kept
+ * (`LoginPage.endSession`, fn-s).
  * Mailpit assertions are scoped by unique throwaway recipient addresses
  * carrying app + test in the local part; nobody@mail.test holds no account
  * on any install, so its silence is read as a count after the account's own
@@ -37,6 +41,8 @@ const {
 } = require('../pages/ReviewStagePages.js');
 const {UsersRolesPage} = require('../pages/UserInvitationPages.js');
 const {ReviewerAssignmentsPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
+const {ProfilePage, SAVED_MESSAGE} = require('../../../../shared/playwright/pages/ProfilePage.js');
+const {UsersListPage, DisableUserWindow} = require('../../../../shared/playwright/pages/UsersManagementPages.js');
 const {
     UserMenu,
     SiteUserMenu,
@@ -315,6 +321,34 @@ test.describe('login & sessions', () => {
         });
         const workflow = new WorkflowPage(page, JOURNAL);
         await workflow.expectOpen();
+
+        // The Dashboard address: "Logout" in the user menu, then the
+        // journal's Dashboard address that ends at the word "dashboard"
+        // (the monthly "Outstanding editorial tasks" email's link): the
+        // Login page; signing in there lands on the Dashboard (Rule 4).
+        // The user menu, absent while signed out, is read the same way
+        // signed in (its positive control).
+        const userMenu = new UserMenu(page);
+        await expect(userMenu.button).toContainText('editor.diana');
+        await userMenu.logout();
+        await loginPage.expectForm();
+        await page.goto(`/index.php/${JOURNAL}/dashboard`);
+        await loginPage.expectForm();
+        expect(new URL(page.url()).pathname).toMatch(/\/login$/);
+        await expect(userMenu.root).toHaveCount(0);
+        await loginPage.signIn('editor.diana', getPassword('editor.diana'));
+        await page.waitForURL(/\/dashboard\/editorial/, {waitUntil: 'commit', timeout: 15_000});
+        await expect(userMenu.button).toContainText('editor.diana');
+        await expect(loginPage.form).toHaveCount(0);
+
+        // The address behind "Logout as" (`…/login/signOutAsUser`), typed
+        // signed out after a "Logout": the Login page shows (Rule 15).
+        await userMenu.logout();
+        await loginPage.expectForm();
+        await page.goto(`/index.php/${JOURNAL}/login/signOutAsUser`);
+        await loginPage.expectForm();
+        expect(new URL(page.url()).pathname).toMatch(/\/login$/);
+        await expect(userMenu.root).toHaveCount(0);
     });
 
     test('S4: recover a forgotten password', {tag: '@smoke'}, async ({page, browser, baseURL, ojsApi, pkpMail}, testInfo) => {
@@ -984,6 +1018,242 @@ test.describe('login & sessions', () => {
             await expect(page.getByText(GENERIC_ERROR)).toBeVisible();
         } finally {
             await context.close();
+        }
+    });
+
+    test('S11: back after the session ended, kept signed in by "Keep me logged in"', async ({browser, baseURL, ojsApi}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s11', testInfo);
+        const manager = `mg${tag}`;
+        const author = `au${tag}`;
+        // A scratch journal's throwaway Journal Manager and Author (fn-s:
+        // a remembered sign-in and its ending are the account's own, never
+        // a roster account's).
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: manager, roles: ['manager']},
+                {username: author, roles: ['author']},
+            ],
+        });
+        const dashboard = `/index.php/${tag}/dashboard/editorial`;
+
+        // The Journal Manager signed in on the scratch journal's Login page
+        // with "Keep me logged in" ticked in one browser and unticked in a
+        // second (the first sign-in goes first: it re-saves the seeded
+        // password, which would end a session opened before it; seed-facts).
+        const ticked = await freshLogin(browser, baseURL, manager, {contextPath: tag, remember: true});
+        const unticked = await freshLogin(browser, baseURL, manager, {contextPath: tag, remember: false});
+        try {
+            const {page} = ticked;
+            const userMenu = new UserMenu(page);
+            const loginPage = new LoginPage(page);
+            await page.waitForURL(/\/dashboard\/editorial/, {waitUntil: 'commit', timeout: 15_000});
+            await expect(userMenu.button).toContainText(manager);
+            await unticked.page.waitForURL(/\/dashboard\/editorial/, {waitUntil: 'commit', timeout: 15_000});
+            await expect(new UserMenu(unticked.page).button).toContainText(manager);
+
+            // In both browsers the session ends as the idle limit ends it
+            // (Rule 5): the session cookie removed, the "Keep me logged in"
+            // one kept (fn-s). Only the ticked sign-in holds one.
+            const tickedEnd = await loginPage.endSession();
+            expect(tickedEnd.session, 'the ticked browser had a session to end').toBeTruthy();
+            expect(tickedEnd.remember, 'the ticked sign-in keeps its "Keep me logged in" cookie').toBeTruthy();
+            const untickedEnd = await new LoginPage(unticked.page).endSession();
+            expect(untickedEnd.session, 'the unticked browser had a session to end').toBeTruthy();
+
+            // The Dashboard, the session ended: it opens, not the Login page
+            // (Rule 5a).
+            await page.goto(dashboard);
+            await expect(userMenu.button).toContainText(manager);
+            await expect(loginPage.form).toHaveCount(0);
+            expect(new URL(page.url()).pathname).toMatch(/\/dashboard\/editorial$/);
+
+            // "Edit Profile" in the top-right user menu: the profile opens.
+            await userMenu.open();
+            await userMenu.root.getByRole('link', {name: 'Edit Profile'}).click();
+            await page.waitForURL(/\/user\/profile/, {waitUntil: 'commit', timeout: 15_000});
+            const profile = new ProfilePage(page, tag);
+            await profile.expectOpen('identity');
+            await expect(profile.usernameText()).toContainText(manager);
+            await expect(loginPage.form).toHaveCount(0);
+
+            // Settings › Users & Roles opens too (Rule 5a).
+            const usersRoles = new UsersRolesPage(page, tag);
+            await usersRoles.goto();
+            await expect(usersRoles.userRow(`${author}@mail.test`)).toBeVisible();
+            await expect(loginPage.form).toHaveCount(0);
+
+            // The journal's public header shows the Journal Manager's
+            // username, not "Register" and "Login" (Rule 5a); the username
+            // link is the positive control of the two absences, read in the
+            // same header.
+            const siteMenu = new SiteUserMenu(page);
+            await page.goto(`/index.php/${tag}`);
+            await expect(siteMenu.toggle(manager)).toBeVisible();
+            await expect(siteMenu.root.getByRole('link', {name: 'Register', exact: true})).toHaveCount(0);
+            await expect(siteMenu.root.getByRole('link', {name: 'Login', exact: true})).toHaveCount(0);
+
+            // The Login page's address: the Dashboard shows instead of the
+            // form (Rule 1).
+            await loginPage.gotoContext(tag);
+            await page.waitForURL(/\/dashboard\/editorial/, {waitUntil: 'commit', timeout: 15_000});
+            await expect(userMenu.button).toContainText(manager);
+            await expect(loginPage.form).toHaveCount(0);
+
+            // "Login As" on the Author's row, OK in its dialog: the Author's
+            // session, on their My Submissions; the user menu reads "You are
+            // currently logged in as {author}" (Rules 12, 13, 14).
+            const dialog = new LoginAsDialog(page);
+            await usersRoles.goto();
+            const authorRow = usersRoles.userRow(`${author}@mail.test`);
+            await expect(authorRow).toBeVisible();
+            await usersRoles.rowAction(authorRow, 'Login As');
+            await dialog.expectOpen();
+            expect(await dialog.ok()).toMatch(/\/login\/signInAsUser\/\d+$/);
+            await page.waitForURL(/\/dashboard\/mySubmissions/, {waitUntil: 'commit', timeout: 30_000});
+            await userMenu.expectImpersonating(author);
+            await expect(loginPage.form).toHaveCount(0);
+
+            // Control: in the second browser, unticked, the Dashboard: the
+            // Login page shows (Rule 5a), read as the ticked browser's
+            // Dashboard was.
+            const untickedMenu = new UserMenu(unticked.page);
+            const untickedLogin = new LoginPage(unticked.page);
+            await unticked.page.goto(dashboard);
+            await untickedLogin.expectForm();
+            expect(new URL(unticked.page.url()).pathname).toMatch(/\/login$/);
+            await expect(untickedMenu.root).toHaveCount(0);
+        } finally {
+            await ticked.context.close();
+            await unticked.context.close();
+        }
+    });
+
+    test('S12: what ends a sign-in kept by "Keep me logged in"', async ({browser, baseURL, ojsApi}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s12', testInfo);
+        const manager = `mg${tag}`;
+        const author = `au${tag}`;
+        // The tagged stand-ins for the body's kept.author@mail.test and
+        // Remembered1 (fn-s). The Author's own password is short enough
+        // for the Profile's password boxes.
+        const password = `Kept${tag}`;
+        const newPassword = `Remembered${tag}`;
+        const newEmail = `kept${tag}@mail.test`;
+        const email = `${author}@mail.test`;
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: manager, roles: ['manager']},
+                {username: author, givenName: 'Kim', familyName: 'Kept', password, roles: ['author']},
+            ],
+        });
+
+        // The Author signed in with "Keep me logged in" ticked in two
+        // browsers, on "Edit Profile" in both; the Journal Manager in a
+        // third.
+        const first = await freshLogin(browser, baseURL, author, {password, contextPath: tag, remember: true});
+        const second = await freshLogin(browser, baseURL, author, {password, contextPath: tag, remember: true});
+        const jm = await freshLogin(browser, baseURL, manager, {contextPath: tag});
+        try {
+            const firstProfile = new ProfilePage(first.page, tag);
+            const secondProfile = new ProfilePage(second.page, tag);
+            const firstLogin = new LoginPage(first.page);
+            const secondLogin = new LoginPage(second.page);
+            const firstMenu = new UserMenu(first.page);
+            const secondMenu = new UserMenu(second.page);
+            await firstProfile.goto('contact');
+            await secondProfile.goto('identity');
+            await expect(secondProfile.usernameText()).toContainText(author);
+
+            // Saving a new email address on the "Contact" tab (U03 Rule 6a:
+            // the save is the pending request); then this browser's session
+            // ends as the idle limit ends it, and a reload opens the profile,
+            // not the Login page (Rule 5a).
+            await firstProfile.country().selectOption({label: 'Canada'});
+            await firstProfile.email().fill(newEmail);
+            await firstProfile.save();
+            await expect(firstProfile.pendingEmailNotice()).toBeVisible();
+            let ended = await firstLogin.endSession();
+            expect(ended.session, 'the first browser had a session to end').toBeTruthy();
+            expect(ended.remember, 'the "Keep me logged in" cookie stays').toBeTruthy();
+            await first.page.reload();
+            await firstProfile.expectOpen('contact');
+            await expect(firstMenu.button).toContainText(author);
+            await expect(firstLogin.form).toHaveCount(0);
+
+            // Changing the password in this browser on the "Password" tab
+            // (U03 Rule 10b); its session ended again, a reload opens the
+            // profile, still signed in (Rule 5a).
+            await firstProfile.open('password');
+            await firstProfile.fillPasswords({current: password, next: newPassword});
+            await firstProfile.save();
+            await expect(firstProfile.toast).toContainText(SAVED_MESSAGE);
+            ended = await firstLogin.endSession();
+            expect(ended.session, 'the first browser had a session to end').toBeTruthy();
+            await first.page.reload();
+            await firstProfile.expectOpen('contact');
+            await expect(firstMenu.button).toContainText(author);
+            await expect(firstLogin.form).toHaveCount(0);
+
+            // The other browser of that password change: a reload shows the
+            // Login page (Rule 5a), read as the first browser's reload was.
+            await second.page.reload();
+            await secondLogin.expectForm();
+            expect(new URL(second.page.url()).pathname).toMatch(/\/login$/);
+            await expect(secondMenu.root).toHaveCount(0);
+
+            // "Logout" in the first browser; its session ended, the profile's
+            // address shows the Login page (Rules 5a, 6).
+            await firstMenu.logout();
+            await firstLogin.expectForm();
+            await firstLogin.endSession();
+            await first.page.goto(firstProfile.url());
+            await firstLogin.expectForm();
+            expect(new URL(first.page.url()).pathname).toMatch(/\/login$/);
+            await expect(firstMenu.root).toHaveCount(0);
+
+            // Disabling the account: in the second browser, on that Login
+            // page, the Author signs in with the new password, the box
+            // ticked: the profile opens (Rule 4).
+            await secondLogin.signInRemembered(author, newPassword, true);
+            await second.page.waitForURL(/\/user\/profile/, {waitUntil: 'commit', timeout: 15_000});
+            await secondProfile.expectOpen('identity');
+            await expect(secondMenu.button).toContainText(author);
+
+            // The Journal Manager: "Disable User" in the Author's row menu,
+            // "OK" with no reason typed (U53 Rule 10).
+            const list = new UsersListPage(jm.page, tag);
+            await list.goto();
+            const authorRow = list.row(email);
+            await expect(list.disabledIcon(authorRow)).toHaveCount(0);
+            const disable = new DisableUserWindow(jm.page, 'Disable Kim Kept');
+            await list.chooseAction(authorRow, 'Disable User');
+            await disable.expectForm();
+            await expect(disable.reason).toHaveValue('');
+            await disable.ok();
+            await expect(list.disabledIcon(authorRow)).toHaveCount(1);
+
+            // In the second browser, its session ended, a reload shows the
+            // Login page (Rule 5a), the profile having opened there before.
+            ended = await secondLogin.endSession();
+            expect(ended.session, 'the second browser had a session to end').toBeTruthy();
+            expect(ended.remember, 'the "Keep me logged in" cookie stays').toBeTruthy();
+            await second.page.reload();
+            await secondLogin.expectForm();
+            expect(new URL(second.page.url()).pathname).toMatch(/\/login$/);
+            await expect(secondMenu.root).toHaveCount(0);
+
+            // Control: on that Login page the Author with the new password:
+            // "Your account has been disabled. Please contact the
+            // administrator for more information." (Rule 2).
+            await secondLogin.submitCredentials(author, newPassword);
+            await new LoginRefusal(second.page).expectDisabled(author);
+        } finally {
+            await first.context.close();
+            await second.context.close();
+            await jm.context.close();
         }
     });
 });

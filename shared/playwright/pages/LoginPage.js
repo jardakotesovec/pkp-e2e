@@ -101,4 +101,54 @@ exports.LoginPage = class LoginPage extends BasePage {
             waitUntil: 'commit',
         });
     }
+
+    /**
+     * `signIn()` with "Keep me logged in" ticked or unticked as the user
+     * leaves it (Rules 5, 5a of U01): the box is clicked when it does not
+     * already hold the wanted state, and read back before "Login" is
+     * pressed. The box arrives ticked today (register A2 of U01, which
+     * wants it unticked), so a ticked sign-in clicks only once that is
+     * fixed; nothing here depends on the state it arrives in.
+     *
+     * @param {string} username
+     * @param {string} password
+     * @param {boolean} remember
+     */
+    async signInRemembered(username, password, remember) {
+        await this.setRememberMe(remember);
+        if (remember) {
+            await expect(this.rememberMeCheckbox).toBeChecked();
+        } else {
+            await expect(this.rememberMeCheckbox).not.toBeChecked();
+        }
+        await this.signIn(username, password);
+    }
+
+    /**
+     * End this browser's session the way the idle limit does (Rule 5a of
+     * U01; on an installation configured with `session_expire_on_close`, a
+     * browser close does the same): the session cookie (`…SID`) is removed
+     * from the page's browser context and the "Keep me logged in" cookie
+     * (`remember_web_…`) is kept. Nothing is sent to the site; the page is
+     * left as it is, so the next page load is the return. Returns the names
+     * of the cookie removed (null when the browser held none, as after a
+     * sign-out that left no session) and of the "Keep me logged in" cookie
+     * still held (null after an unticked sign-in or a sign-out).
+     *
+     * @returns {Promise<{session: string|null, remember: string|null}>}
+     */
+    async endSession() {
+        const context = this.page.context();
+        const session = (await context.cookies()).find((cookie) => /SID$/.test(cookie.name));
+        if (session) {
+            await context.clearCookies({name: session.name});
+        }
+        const left = await context.cookies();
+        expect(
+            left.filter((cookie) => /SID$/.test(cookie.name)),
+            'no session cookie left in the browser'
+        ).toEqual([]);
+        const remember = left.find((cookie) => /^remember_web_/.test(cookie.name));
+        return {session: session ? session.name : null, remember: remember ? remember.name : null};
+    }
 };
