@@ -1,21 +1,24 @@
 #!/bin/bash
-# side.sh <base|head>: PR review pkp/pkp-lib#13543 on PKP's default dataset (OJS), at one side.
-# Round 3 (2026-10-23):
-#   head: ojs pkp/ojs#5946 4f4cfe83e4 (its submodule bumps: lib/pkp pkp-lib#13545 927200b331,
-#         lib/ui-library ui-library#1021 55e00e3a85), `npm ci` from the PR's lockfile
-#   base: ojs main 3cf9aa91a8 (the PR's base), lib/pkp 00ce12be77 and lib/ui-library e47a48879a (the shared PRs' bases)
+# side.sh <base|head|r3>: PR review pkp/pkp-lib#13543 on PKP's default dataset (OJS), at one side.
+# Round 4 (2026-11-02):
+#   head: ojs pkp/ojs#5946 481c4bd776 (its submodule bumps: lib/pkp pkp-lib#13545 beaa4b9b3a,
+#         lib/ui-library ui-library#1021 6338cf1ded), `npm ci` from the PR's lockfile
+#   base: ojs main bc4a83e9db (the PR's base), lib/pkp 442148e14e and lib/ui-library eb988214e9 (the shared PRs' bases)
+# Round 3 (2026-10-23) ran heads 4f4cfe83e4 / 927200b331 / 55e00e3a85 on bases 3cf9aa91a8 / 00ce12be77 / e47a48879a;
 # Round 2 (2026-10-21) ran heads 37dce66451 / 945c3e6cb0 / 210f63608e on bases d270741b6b / 45f674d77b / 9cfb898731;
 # round 1 (2026-10-16) heads 87b9df9594 / c9cd7d31c4 / 936b915c56 on bases 79c3676d1b / 6ff76591a9 / 9cfb898731.
-# then the build and mount, and for each of the given walks (default: walk.js newversion.js figure.js race.js)
+# then the build and mount, and for each of the given walks (default: walk.js newversion.js figure.js race.js math.js)
 # a freshly reset dataset fleet 1.
 # Logs and facts under .reports/pr-13543/.
 set -u
-side=$1; shift; WALKS=${*:-walk.js newversion.js figure.js race.js}
+side=$1; shift; WALKS=${*:-walk.js newversion.js figure.js race.js math.js}
 cd "$(dirname "$0")/../../../../.." || exit 1
 R=.reports/pr-13543; S=shared/playwright/checks/sync/pkp-lib-13545; mkdir -p $R
-APP=$([ "$side" = base ] && echo 3cf9aa91a8e357f5d95ad9f9bbcad7e7b29424ef || echo 4f4cfe83e47001cd6174e76632e45387f539afd0)
-PKPLIB=$([ "$side" = base ] && echo 00ce12be776175920847e3da4910617c47af290c || echo 927200b33130c201ea5b78b8d6c9e4e15aae0ef5)
-UI=$([ "$side" = base ] && echo e47a48879a2bc93fda82d7544f8c22a6cc3e2908 || echo 55e00e3a851d33879005470b74fad8885b975076)
+APP=$([ "$side" = base ] && echo bc4a83e9dbb9bc6db7303c13a677f7b8d5a829f2 || echo 481c4bd776569fbd19d6a79061540e245d933b65)
+PKPLIB=$([ "$side" = base ] && echo 442148e14ef5cf836724423cf425102c2a0de480 || echo beaa4b9b3ab87afe443b06428dec1d3de64019cb)
+UI=$([ "$side" = base ] && echo eb988214e9b90460461d88c131a5db908c9d5af7 || echo 6338cf1ded19220ee3f4c94b81eb88928b853dea)
+# r3: round 3's heads, the control for the reviewers' round-4 points (math.js)
+if [ "$side" = r3 ]; then APP=4f4cfe83e47001cd6174e76632e45387f539afd0; PKPLIB=927200b33130c201ea5b78b8d6c9e4e15aae0ef5; UI=55e00e3a851d33879005470b74fad8885b975076; fi
 (cd checkouts/ojs && git checkout -q --detach "$APP" && git submodule update -q lib/pkp lib/ui-library \
   && (git -C lib/pkp cat-file -e $PKPLIB 2>/dev/null || git -C lib/pkp fetch -q origin pull/13545/head) && git -C lib/pkp checkout -q --detach $PKPLIB \
   && (git -C lib/ui-library cat-file -e $UI 2>/dev/null || git -C lib/ui-library fetch -q origin pull/1021/head) && git -C lib/ui-library checkout -q --detach $UI) || { echo "checkout failed"; exit 1; }

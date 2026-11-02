@@ -11,6 +11,7 @@
 //      …/bodyText on the published version; its galleys, the article page a signed-out reader sees
 //      and the bytes of the PDF the reader downloads
 //   D. the author of submission 17: the same POST, refused
+// Round 4: E6–E7 follow the preview whose header, Back and "Create PDF" moved out of the iframe.
 // Round 2 adds (the heads now carry the Body Text's "Export" menu):
 //   E. a Production submission with no galleys, its "Body Text" page: text typed, a figure inserted, "Save";
 //      "Export" › "Export to HTML" twice (the HTML file, its figure copied beside it, no second copy), the
@@ -204,16 +205,21 @@ forEachApp(async (app) => {
                 // PDF through Vivliostyle
                 await exportButton.click();
                 await page.getByRole('menuitem', {name: 'Preview: PDF'}).click();
-                const preview = page.frameLocator('iframe.body-text-pdf-preview');
-                await expect(preview.locator('#generate-pdf')).toBeVisible({timeout: T});
-                fact('E6 PDF preview', {header: flat(await preview.locator('.preview-header').innerText(), 120), button: flat(await preview.locator('#generate-pdf').innerText(), 40), imgs: await preview.locator('#html-preview img').count()});
-                await page.locator('iframe.body-text-pdf-preview').screenshot({path: path.join(outDir(), `${side}-E6-pdf-preview.png`)});
+                // round 4: header, Back and "Create PDF" sit outside the iframe; the PDF shows in a blob: iframe
+                const create = page.getByRole('button', {name: 'Create PDF'});
+                await expect(create).toBeVisible({timeout: T});
+                const preview = page.frameLocator('iframe[srcdoc]');
+                const section = page.locator('section').filter({has: page.getByRole('button', {name: 'Create PDF'})}).last();
+                await expect(preview.locator('article')).toBeVisible({timeout: T});
+                fact('E6 PDF preview', {header: flat(await section.locator('header').innerText(), 120), button: flat(await create.innerText(), 40), imgs: await preview.locator('article img').count()});
+                await section.screenshot({path: path.join(outDir(), `${side}-E6-pdf-preview.png`)});
                 const sentPdf = page.waitForResponse((r) => /\/bodyText\/pdf$/.test(r.url()) && r.request().method() === 'POST', {timeout: 180_000});
                 const t0 = Date.now();
-                await preview.locator('#generate-pdf').click();
+                await create.click();
                 const rp = await sentPdf.catch((e) => null);
-                await expect.poll(async () => flat(await preview.locator('#pdf-status').innerText()), {timeout: 60_000}).toMatch(/saved|Unable/);
-                fact('E7 Create PDF', {status: rp && rp.status(), seconds: Math.round((Date.now() - t0) / 1000), statusLine: flat(await preview.locator('#pdf-status').innerText(), 100), viewerShown: await preview.locator('#pdf-viewer').isVisible()});
+                const pdfStatus = section.locator('footer [role="status"]');
+                await expect.poll(async () => flat(await pdfStatus.innerText()), {timeout: 60_000}).toMatch(/saved|Unable|created/i);
+                fact('E7 Create PDF', {status: rp && rp.status(), seconds: Math.round((Date.now() - t0) / 1000), statusLine: flat(await pdfStatus.innerText(), 100), viewerShown: await section.locator('iframe[src^="blob:"]').count()});
                 fact('E7 galleys', galleys(pub(eSub)));
                 const pdfRel = String(sql(app, `select f.path from publication_galleys g join submission_files sf on sf.submission_file_id = g.submission_file_id join files f on f.file_id = sf.file_id where g.publication_id = ${pub(eSub)} and g.label = 'PDF'`)).trim();
                 if (pdfRel) {
@@ -222,8 +228,8 @@ forEachApp(async (app) => {
                     const txt = b.toString('latin1');
                     fact('E7 PDF file', {size: b.length, magic: txt.slice(0, 8), pages: (txt.match(/\/Type\s*\/Page[^s]/g) || []).length, images: (txt.match(/\/Subtype\s*\/Image/g) || []).length});
                 }
-                await page.locator('iframe.body-text-pdf-preview').screenshot({path: path.join(outDir(), `${side}-E7-pdf-created.png`)});
-                await preview.locator('#back-to-editor').click();
+                await section.screenshot({path: path.join(outDir(), `${side}-E7-pdf-created.png`)});
+                await section.locator('header button').first().click();
                 await expect(exportButton).toBeVisible({timeout: T});
                 fact('E8 Galleys page', await galleyShot('E8-galleys', eSub));
             }
