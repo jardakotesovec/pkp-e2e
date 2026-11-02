@@ -9,7 +9,7 @@
   - 3.4: none (code; no review DOIs)
   - 3.3: none (code; no review DOIs)
 - **Introduced** `pkp/ojs#5297` for `pkp/pkp-lib#11332` · [30e82d3876](https://github.com/pkp/ojs/commit/30e82d3876ae9d2fe6625f0334ca961a21e4cca4) · 2026-01-27 · Erik Hanson (ewhanson)
-- **Upstream** none found (2026-10-13)
+- **Upstream** `pkp/pkp-lib#13530` (open; fix in PRs `pkp/pkp-lib#13672` + `pkp/ojs#6013`, not yet in main, which remove the author-response DOI kind altogether; walked fixed at their heads 2026-11-02, the response left without a DOI)
 - **Tracked in** spec U45 [OJS9](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U45-dois.md#ojs9)
 - **Checked** 2026-10-13, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

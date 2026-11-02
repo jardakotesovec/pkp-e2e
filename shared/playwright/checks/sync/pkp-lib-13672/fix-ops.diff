@@ -1,0 +1,13 @@
+diff --git a/dbscripts/xml/upgrade.xml b/dbscripts/xml/upgrade.xml
+index 5858b19c26..6388dee216 100644
+--- a/dbscripts/xml/upgrade.xml
++++ b/dbscripts/xml/upgrade.xml
+@@ -223,7 +223,7 @@
+ 		<migration class="PKP\migration\upgrade\v3_6_0\I12994_CompetingInterestsDeclared" />
+         <migration class="APP\migration\upgrade\v3_4_0\I11759_RemoveDuplicateFilters"/>
+ 		<migration class="APP\migration\upgrade\v3_6_0\I7527_IdentityMetadata" />
+-		<migration class="APP\migration\upgrade\v3_6_0\I13530_RemoveDoiIdFromReviewRoundAuthorResponses" />
++		<migration class="PKP\migration\upgrade\v3_6_0\I13530_RemoveDoiIdFromReviewRoundAuthorResponses" />
+ 		<code function="rebuildSearchIndex" />
+ 		<note file="docs/release-notes/README-3.6.0" />
+ 	</upgrade>

@@ -1,0 +1,13 @@
+diff --git a/dbscripts/xml/upgrade.xml b/dbscripts/xml/upgrade.xml
+index 2f5c7c3a6..109e8fafb 100644
+--- a/dbscripts/xml/upgrade.xml
++++ b/dbscripts/xml/upgrade.xml
+@@ -234,7 +234,7 @@
+ 		<migration class="APP\migration\upgrade\v3_6_0\I7527_IdentityMetadata" />
+ 		<migration class="APP\migration\upgrade\v3_6_0\I12593_DiscussionInternalReviewTemplate"/>
+ 		<migration class="APP\migration\upgrade\v3_5_0\I13617_FixSeriesSort"/>
+-		<migration class="APP\migration\upgrade\v3_6_0\I13530_RemoveDoiIdFromReviewRoundAuthorResponses"/>
++		<migration class="PKP\migration\upgrade\v3_6_0\I13530_RemoveDoiIdFromReviewRoundAuthorResponses"/>
+ 		<code function="rebuildSearchIndex" />
+ 		<note file="docs/release-notes/README-3.6.0" />
+ 	</upgrade>
