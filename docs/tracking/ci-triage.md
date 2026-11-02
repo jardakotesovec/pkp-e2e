@@ -23,6 +23,7 @@ the log only says where to look.
 
 | ID | Signature (what CI shows) | Apps | Canonical entry | Status | First seen / last confirmed |
 |----|---------------------------|------|-----------------|--------|-----------------------------|
+| K-U64-A19 | U64 S8 (COUNTER reports on "Counter R5"): `input[name="begin_date"]` expected the first of next month, received the first of the month after (2026-10-31: expected "2026-11-01", received "2026-12-01"), red at both tries. Journal B's only article is published on the day the test runs, and the app's month arithmetic overflows on 29–31 January and on 31 March, May, August and October | OJS OMP OPS | U64 A19, `docs/issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md` (an app defect; the test is right) | Dormant: green on other days, red again on 2027-01-29 … 31 and every overflow day until `CounterR5Report::getEarliestDate()` is fixed upstream; a red on those days is this row, not a regression | 2026-10-31 (nightly 41164101437) / 2026-11-02 (walked on `main` and `stable-3_5_0`) |
 
 ## Open regressions — confirmed upstream regressions awaiting a fix
 

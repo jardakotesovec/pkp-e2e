@@ -423,8 +423,8 @@ bottom, then "Save": <sup>q</sup>
 21. **No COUNTER figures yet.** COUNTER figures exist only for whole
     months after the installation (or after the journal's first
     publication, if later): the earliest possible date is the first day
-    of the month after that date, the last possible date is the last day
-    of the previous month. While the earliest is not before the last, the
+    of the month after that date ⚠ [A19](#a19), the last possible date is
+    the last day of the previous month. While the earliest is not before the last, the
     page shows the warning "There are no COUNTER R5 usage statistics
     available yet." and "Download" with the dates as filled is refused,
     "The start date must be before the end date." under both dates. An
@@ -1189,6 +1189,7 @@ Left out of the scenarios above, by reason:
   - a "COUNTER Reports" year link's XML file names its report "JR1" (and "AR1") in its "Name" attribute (the guard for OJS6, once fixed) {OJS}
   - "Item Master Report (IR)" downloaded with "Authors" ticked, and "Journal Article Requests (IR_A1)" {OJS}, for a work with several authors: the IR file names "Authors" on its "Report_Attributes" line, and each file's "Authors" column lists every author in order, an ORCID iD after each who has one (Rule 20; the guard for A15, once fixed) {OJS OPS}
   - the SUSHI "Item Master Report (IR)" asked with the authors shown, for a work whose first author alone has an ORCID iD: only that author carries an iD (Rule 23; the guard for A16, once fixed) {OJS OPS}
+  - "Counter R5" of a context whose first publication is dated the 31st of a month followed by a shorter one: "Start Date" offers the first day of the next month (Rule 21; the guard for A19, once fixed)
   - a reader downloading an article's Word galley and its PDF galley, the day processed: "File Views" and "Total" on "Articles" count both, as the chart's "Files" and "Download Files" do (Rule 1; the guard for A17, once fixed)
   - a reader opening a book's PDF and its "Appendix" file from the book page, each visit a line in the day's log <sup>j</sup>, of type PDF and "Supplementary File" (Rule 1; OMP3, retired) {OMP}
 - **Nothing new to test**:
@@ -1285,6 +1286,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A15](#a15) | "Counter R5": the "Authors" column of the item reports names only each work's last author | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A16](#a16) | SUSHI "Item Master Report (IR)" gives authors without an ORCID iD the iD of an author listed before them | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A17](#a17) | Statistics › Articles leaves Word file downloads out of "Other", "File Views" and "Total" | 🐞 | medium | issues (claude), 2026-10-27 — re-verified |
+| [A19](#a19) | "Counter R5" skips a journal's first month of figures when its first article is dated the 31st | 🐞 | medium | issues (claude), 2026-11-02 — re-verified |
 | [OJS2](#ojs2) | One view of an HTML galley counts once more for each picture or style sheet it names that was never uploaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OJS4](#ojs4) | Statistics › Issues: "Download Issues" leaves out every issue after the first 30, without saying so | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS5](#ojs5) | "Counter R5": "Journal Article Requests (IR_A1)" also lists investigation rows, which its "Metric_Types" line leaves out | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1592,6 +1594,27 @@ no figure on the row shows them? Lean: yes (🐞); it is the same
 omission as A17, and counting Word downloads in "File Views" would end
 both.
 Basis: code, 2026-10-23. <sup>f-a18</sup>
+
+<a id="a19"></a>
+**A19 — "Counter R5" skips a journal's first month of figures when its first article is dated the 31st** · 🐞 · medium.
+On Statistics › "Counter R5", a journal's COUNTER figures should start
+on the first day of the month after its first publication (or after
+the site began counting for COUNTER, if that is later). When the
+journal's first article is dated the 31st, the page starts them a
+month late. For a journal whose first article is dated 31 October,
+"Start Date" offers 1 December, not 1 November.
+
+November's figures exist, but no report can include them. A "Start
+Date" in November is refused. A harvesting system that asks the SUSHI
+address for November is answered from December, with only a warning.
+Until December ends, the page also says "There are no COUNTER R5 usage
+statistics available yet." There is no way round on screen, and the
+month stays out of reach for good.
+
+The same happens for a date on 29, 30 or 31 January (only 30 and 31
+in a leap year), and on 31 March, May, August or October. A press or a
+preprint server meets it the same way.
+Since: 2022-07-23 (pkp/pkp-lib#6782, about four years) · Basis: probe, 2026-11-02. <sup>f-a19</sup>
 
 ### OJS
 
@@ -2773,6 +2796,22 @@ included, while the row's figures leave type 4
 out (f-a17). Settles it: two published articles on one journal, one
 with two Word downloads and the other with one PDF download, then the
 row order and the first article's figures on "Articles".
+
+<a id="fn-f-a19"></a>
+**f-a19** — `CounterR5Report::getEarliestDate()` (lib/pkp
+`classes/sushi/CounterR5Report.php`) takes the later of the site's
+`counterR5StartDate` (else the 3.4 install date) and the context's
+`MIN(publications.date_published)`, every version whatever its status,
+then `date('Y-m-01', strtotime($d . ' + 1 months'))`, which overflows
+on 29–31 January and on 31 March, May, August and October. The page's
+notice, the report form's "Start Date", the TSV validation
+(`after_or_equal`) and the SUSHI `checkDate()` (warning 3032) all read
+it. The same line on `stable-3_5_0` and `stable-3_4_0`. First seen as
+U64 S8 red in the nightly of 2026-10-31 (run 41164101437). Live-probed
+2026-11-02, OJS, OMP and OPS on `main` and `stable-3_5_0`, on freshly
+loaded dataset fleets: a new context whose one submission's date is
+2027-01-31 is offered 2027-03-01, and 2027-02-01 at 2027-01-28.
+Issue report: [docs/issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md](../issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-p. Live-probed 2026-09-27: td11; the side menu offers

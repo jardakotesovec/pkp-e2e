@@ -1,0 +1,13 @@
+--- a/lib/pkp/classes/sushi/CounterR5Report.php
++++ b/lib/pkp/classes/sushi/CounterR5Report.php
+@@ -319,7 +319,9 @@
+                 ->filterByContextIds([$context->getId()])
+         )->min_date_published;
+         $earliestDate = strtotime($firstDatePublished) > strtotime($counterR5StartDate) ? $firstDatePublished : $counterR5StartDate;
+-        $earliestDate = date('Y-m-01', strtotime($earliestDate . ' + 1 months'));
++        // "first day of next month", not "+ 1 months": a date on the 29th to the 31st plus a month can
++        // overflow into the month after (2026-10-31 + 1 month is 2026-12-01), skipping a whole month.
++        $earliestDate = date('Y-m-d', strtotime('first day of next month', strtotime($earliestDate)));
+         return $earliestDate;
+     }
+ 
