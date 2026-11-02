@@ -3226,7 +3226,7 @@ does not test `enableDois`; fields `enableDois`, `doiPrefix`,
 `doiRepresentationSuffixPattern`, `doiVersioning`); app subclasses
 `classes/components/forms/context/DoiSetupSettingsForm.php` add
 `enabledDoiTypes` (OJS `publication`, `issue`, `representation`,
-`peerReview`; the `authorResponse` option commented out; OMP
+`peerReview`; no author-response kind since pkp/pkp-lib#13530; OMP
 `publication`, `chapter`, `representation`, `file`; OPS `publication`,
 `representation`), filtered by the configured agency's `allowedBy`, and
 the pattern boxes (OJS `doiIssueSuffixPattern` and the
@@ -3430,8 +3430,8 @@ back after a reload.
 `doi.manager.displayName`, tabs `submission-doi-management` label
 `article.articles` / `submission.list.monographs` / `common.publications`,
 OJS `issue-doi-management` `issue.issues`); `DoisHandler::getTemplateVariables()`
-(OJS: Articles tab when `publication`, `representation`, `peerReview` or
-`authorResponse` is enabled; Issues tab on `issue`; OMP and OPS: any
+(OJS: Articles tab when `publication`, `representation` or `peerReview`
+is enabled; Issues tab on `issue`; OMP and OPS: any
 kind). List panels: `lib/pkp/classes/components/listPanels/PKPDoiListPanel.php`
 (`count` 30, the "Status" and "Registration" filters), app
 `classes/components/listPanels/DoiListPanel.php` (OJS issue autosuggest
@@ -5834,7 +5834,7 @@ issue, "[Implementation] Consider different DOIs for different versions
 in DataCite", was open with milestone 3.6 that day.
 
 <a id="fn-f-ojs9"></a>
-**f-ojs9** — Note c: OJS `classes/publication/Repository.php` `createDois()`, the author-response block (`:392-404` at ojs `7c6fba2064`), tests `empty($authorResponses->doiId)`, the collection from `getReviewAuthorResponses()`, not the loop's `$authorResponse`. A Laravel collection has no `__isset`, so `empty()` is always true and `Repo::doi()->mintDoi()` runs for every response on every call, replacing its `doiId`. The peer-review block above it tests the item (`$reviewAssignment->getData('doiId')`). The kind is reachable only through the API: `schemas/context.json` `enabledDoiTypes` allows `authorResponse`, while `DoiSetupSettingsForm` and `Repository::getAllDepositableTypes()` comment it out. From `30e82d3876` (Erik Hanson, 2026-01-27, `pkp/pkp-lib#11332`); `stable-3_5_0` has no author responses. Reported by the maintainer from a code read, 2026-10-13; walked the same day on the default dataset (three assignments, three DOIs, two left with no item; the fix keeps the first).
+**f-ojs9** — Note c: OJS `classes/publication/Repository.php` `createDois()`, the author-response block (`:392-404` at ojs `7c6fba2064`), tests `empty($authorResponses->doiId)`, the collection from `getReviewAuthorResponses()`, not the loop's `$authorResponse`. A Laravel collection has no `__isset`, so `empty()` is always true and `Repo::doi()->mintDoi()` runs for every response on every call, replacing its `doiId`. The peer-review block above it tests the item (`$reviewAssignment->getData('doiId')`). The kind is reachable only through the API: `schemas/context.json` `enabledDoiTypes` allows `authorResponse`, while `DoiSetupSettingsForm` and `Repository::getAllDepositableTypes()` comment it out. From `30e82d3876` (Erik Hanson, 2026-01-27, `pkp/pkp-lib#11332`); `stable-3_5_0` has no author responses. Reported by the maintainer from a code read, 2026-10-13; walked the same day on the default dataset (three assignments, three DOIs, two left with no item; the fix keeps the first). Upstream `pkp/pkp-lib#13530` removes the kind (PRs `pkp/pkp-lib#13672` + `pkp/ojs#6013`): at their heads (pkp-lib `fcc464cfc8`, ojs `c447b611ce`), before the merge, the same walk leaves the response without a DOI while the article and the review keep theirs, 2026-11-02; OJS9 retires and pkp-e2e#965 closes at the merge.
 Issue report: [pkp-e2e#965](https://github.com/jardakotesovec/pkp-e2e/issues/965) ([docs/issues/U45-OJS9-author-response-doi-reminted.md](../issues/U45-OJS9-author-response-doi-reminted.md)).
 
 <a id="fn-f-ojs10"></a>
@@ -6127,7 +6127,7 @@ Issue report: [pkp-e2e#981](https://github.com/jardakotesovec/pkp-e2e/issues/981
 | Agency panel, "View Record", "Deposit DOI(s)", "View Error" | an item's expanded view | AFFM-160 · AFFU-237 · AFFU-238 · AFFU-239 · AFFU-240 · AFFU-243 |
 | Row kinds per app | the expanded table | AFFU-244 (OJS) · AFFU-245 (OMP: the monograph, chapter, format and file rows) · AFFU-246 (OPS) |
 | DOI management API | `api/v1/dois` (list, one, add, edit, delete, assign, export, deposit, mark, `depositAll`, export download) | API-016 · API-052 (OJS issues) |
-| DOI attach API | `api/v1/_dois/{publications,peerReviews,authorResponses}/{id}`, OJS `galleys`, `issues`, OPS `galleys`, OMP `chapters`, `publicationFormats`, `submissionFiles` | API-001 · API-050 · API-058 · API-063 |
+| DOI attach API | `api/v1/_dois/{publications,peerReviews}/{id}`, OJS `galleys`, `issues`, OPS `galleys`, OMP `chapters`, `publicationFormats`, `submissionFiles` | API-001 · API-050 · API-058 · API-063 |
 | Registration save | `PUT api/v1/contexts/{id}/registrationAgency` | (the contexts API, cited) |
 | Background deposits | queued jobs | JOB-008 · JOB-009 · JOB-010 · JOB-030 (OJS) |
 | Scheduled automatic deposit | daily task, OJS | JOB-045 |
