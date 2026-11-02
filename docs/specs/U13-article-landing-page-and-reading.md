@@ -215,10 +215,7 @@ Top to bottom: <sup>j</sup>
    version's own such address opens the same page as the article's
    address. A version address naming an id the article has no published
    version under (a mistyped one, or another article's version) answers
-   the "404 Not Found" page on a preprint server; on a journal it fails
-   with a server error
-   ([→ Publish, schedule & versions, OJS3](U49-publish-schedule-and-versions.md#ojs3)).
-   <sup>f</sup> <sup>q2</sup>
+   the "404 Not Found" page. <sup>f</sup> <sup>q2</sup>
 3. **Nothing published, no page.** While an article has no published
    version (a scheduled article included), its address answers the "404
    Not Found" page to a visitor and a Reader. So does the own address
@@ -881,10 +878,7 @@ footnote. <sup>s</sup>
      current version's title, "Tidal Patterns Revised". Press the title:
      the article's address opens (Rule 12; Fields, the HTML reader page).
    - **A version that does not exist** {OPS}: type the article's address
-     followed by "/version/999999": the "404 Not Found" page. A journal
-     fails there with a server error instead
-     ([→ Publish, schedule & versions, OJS3](U49-publish-schedule-and-versions.md#ojs3))
-     (Rule 2).
+     followed by "/version/999999": the "404 Not Found" page (Rule 2).
    - **The home page's summary** {OPS}: on the preprint server's home
      page, the preprint's summary under "Latest preprints" ends its
      details line with " - Versions: 2" (Fields, the article summary).
@@ -2348,8 +2342,9 @@ included, answering "404 Not Found".
 looked up by number, anything else by `Repo::submission()->getByUrlPath()`;
 when `getBestId()` differs from the requested path it redirects to
 `[$currentUrlPath, ...$args]`; a `version` sub-path picks the publication
-by its id, and an unknown id leaves the typed `Publication $publication`
-property unassigned, which fails (the versions spec's OJS3); the galley
+by its id, refusing with a 404 a segment that is not all digits, and an
+unknown id leaves the nullable `?Publication $publication` null, which
+answers 404 (the versions spec's retired OJS3, pkp/ojs#6003); the galley
 is matched by `getBestGalleyId()`, a digit-only galley path matching a
 galley's number redirects to its best id, a galley found only in another
 published publication redirects to the article's view, and anything else

@@ -22,8 +22,8 @@
  * journal requiring the summary is a Planned item), OJS2 🐞 (S11 and S12 schedule on a journal with a
  * published back issue, or through the Publication-Settings-first route;
  * no test picks "Schedule Only" as a first pick on a published-issue-less
- * journal), OJS3 🐞 (S4 asserts only what a signed-out reader gets at the
- * draft's own address; the mistyped-number crash is not driven), OMP1,
+ * journal), OJS3 ✅ retired (pkp/pkp-lib#13657; S4 asserts only the
+ * draft's own address, a mistyped number's 404 is a Planned item), OMP1,
  * OPS1–OPS5 (other apps' trees). The spec's Coverage section records
  * everything else left out.
  *
@@ -492,8 +492,8 @@ test.describe('publish, schedule & versions', () => {
         // The draft by address: the address the draft's "Preview" opens is
         // the reader page's with "/version/" and the draft's own number; a
         // signed-out reader is not served the draft there (what the tip
-        // answers is recorded in the run; OJS3 stays unasserted as
-        // contract).
+        // answers is recorded in the run; a mistyped number's 404, the
+        // retired OJS3, is a Planned item).
         const previewUrl = await pub.pressPreview();
         expect(previewUrl).toContain(`/article/view/${submissionId}/version/${draftId}`);
         const draftResponse = await page.goto(previewUrl);

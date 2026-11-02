@@ -332,9 +332,9 @@ In French most of its headings and descriptions are raw codes
     URL Path, the draft's galley typed so answers "404 Not Found" even to
     the roles that may preview the draft (Actors row 4); the draft's
     preview links it by the URL Path, which opens. A version address
-    naming a number the article has no version under (a mistyped one)
-    fails with a blank server error rather than "404 Not Found"
-    ⚠ [OJS3](#ojs3). <sup>r</sup>
+    naming a number the article has no version under (a mistyped one,
+    another article's version) or letters answers "404 Not Found" too.
+    <sup>r</sup>
 11a. **How a version is named.** The side menu names a version by its
     stage and number ("Version of Record 2.0"). A stage-less version
     reads "Unassigned version ({date})": an item's first until given a
@@ -1018,10 +1018,10 @@ each scenario's seeding are in its footnote.
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for OJS3 (issue report
-    `docs/issues/U69-A3-version-address-no-version-server-error.md`): an
-    article's version address with an id that is none of its versions
-    answering "404 Not Found"
+  - an article's version address with an id that is none of its
+    versions (a mistyped number, another article's version, "abc")
+    answering "404 Not Found" (Rule 11; retired OJS3,
+    pkp/pkp-lib#13657)
   - a new version of an article in an issue, made by an untouched
     version dialog, opening "Review Publishing Details" on its first
     publish with the copied stage, "Minor Revision" and that issue
@@ -1144,8 +1144,6 @@ Left out of the scenarios above, by reason:
   - OJS2's second half (where only future issues exist, a Publication
     Settings save for another field recording "Don't Assign To An
     Issue"; Fields)
-  - OJS3 (a journal's version address naming a number the article has
-    no version under answering a blank server error; Rule 11)
   - OJS4 (a publish without an issue failing for a contributor with a
     verified ORCID iD under the member API; Rule 15)
   - OJS5 (a refused Confirm opening a second, blank panel; Rule 3c)
@@ -1227,7 +1225,6 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A17](#a17) | A program creating a version is refused unless it sends a version number the app throws away | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A18](#a18) | "Create New Version" logs a file upload nobody made, under the editor's name | 🐞 | minor | — |
 | [OJS2](#ojs2) | Editor's "Schedule Only" publishes the article at once when the journal has no published issue | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [OJS3](#ojs3) | A version address naming a number the article has no version under crashes the article page with a blank server error instead of "not found" | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Editor publishing an article without an issue gets an error when a contributor has a verified ORCID iD | 🐞 | medium · crash: server | issues (claude), 2026-10-19 — re-verified |
 | [OJS5](#ojs5) | Editor's refused "Confirm" in "Review Publishing Details" opens a blank copy of the panel that keeps coming back | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [OPS1](#ops1) | A preprint posted with a future "Date Posted" stays "Scheduled" for good and never goes public | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -1249,6 +1246,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A8](#a8) | Retired: after a publish, post or schedule the Publication area kept the unpublished state until a page reload; fixed in pkp/ui-library#853 before its merge, never on `main` | ✅ | retired | re-probe at the PR head (claude), 2026-09-23 — fixed before merge |
 | [A11](#a11) | Retired: an author's revision summary could carry a script that ran in the editor's browser when "Insert Content" opened; the panel now reads the summary without running it | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/ui-library#1025 |
 | [OJS1](#ojs1) | Retired: with a plain language summary required, the panel's Confirm was refused without naming the summary and publishing was unreachable; it now reaches publishing | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13585 |
+| [OJS3](#ojs3) | Retired: a version address naming a number the article had no version under crashed the article page with a blank server error; it now answers "not found" | ✅ | retired | PR review (claude), 2026-11-02 — fixed by pkp/pkp-lib#13657 |
 
 ### All apps
 
@@ -1565,18 +1563,6 @@ field, such as "Pages", on a version with no issue choice yet, records
 "Don't Assign To An Issue", which nobody chose. Basis: probe,
 2026-10-02. <sup>[f-ojs2](#fn-ojs2)</sup>
 
-<a id="ojs3"></a>
-**OJS3 — A mistyped version address crashes instead of "not found"** · 🐞 · low · crash: server.
-An article's reader page links each OLDER published version at its own
-address (the "Versions" list). Typing a number the article has no version
-under into that address returns a blank server error instead of the
-plain "404 Not Found" page the reader should get, so an ordinary mistype
-is enough to hit it. Another article's version number and letters such
-as "abc" fail the same way. The article's own version numbers show the
-page, and an unpublished draft's own number answers the "404 Not Found"
-page. No link the journal's pages offer leads to such an address.
-Since: 2026-08-29 · Basis: probe, 2026-10-01. <sup>[f-ojs3](#fn-ojs3)</sup>
-
 <a id="ojs4"></a>
 **OJS4 — Editor publishing an article without an issue gets an error when a contributor has a verified ORCID iD** · 🐞 · medium · crash: server.
 An editor publishes an article with "Don't Assign To An Issue" while one
@@ -1744,6 +1730,9 @@ Basis: probe, 2026-10-15. <sup>[f-ops6](#fn-ops6)</sup>
 
 <a id="ojs1"></a>
 **OJS1 — A required plain language summary blocked Confirm without naming itself** · ✅ · retired. Fixed by pkp/pkp-lib#13585, reviewed before its merge on 2026-10-21: the "Review Publishing Details" panel's Confirm reaches the confirmation window and publishing on a journal that requires the summary. <sup>[f-ojs1](#fn-ojs1)</sup>
+
+<a id="ojs3"></a>
+**OJS3 — A mistyped version address crashed instead of "not found"** · ✅ · retired. Fixed by pkp/ojs#6003 (`main`) and #6005 (`ore`), merged 2026-10-30, for pkp/pkp-lib#13657: an article's version address whose id names none of its versions, letters included, answers "404 Not Found" (Rule 11). <sup>[f-ojs3](#fn-ojs3)</sup>
 
 <a id="a8"></a>
 **A8 — The workflow still shows "unpublished" after publishing** · ✅ · retired. Fixed in pkp/ui-library#853 at `51f0c727` before its merge, 2026-09-23; never on `main`. <sup>[f-a8](#fn-a8)</sup>
@@ -3044,7 +3033,17 @@ Found" to a signed-out visitor; a nonexistent publication id typed into
 the same address still answered HTTP 500 with an empty body (one typed
 observation on the probe server, not driven by the suite). The current
 version's own id and another submission's were not re-read at that tip.
-Issue report: [pkp-e2e#285](https://github.com/jardakotesovec/pkp-e2e/issues/285) ([docs/issues/U69-A3-version-address-no-version-server-error.md](../issues/U69-A3-version-address-no-version-server-error.md)). The team's copy is `pkp/pkp-lib#13657` (2026-10-30; fixed on OJS main by `pkp/ojs#6003`, merged that day; `pkp/omp#2530`, the `ore` port `pkp/ojs#6005` and the OMP 3.5 port `pkp/omp#2531` open, [PR review](../reports/pr-review/2026-10-30-pkp-lib-13657.md)).
+Issue report: [pkp-e2e#285](https://github.com/jardakotesovec/pkp-e2e/issues/285), closed.
+Retired 2026-11-02: `pkp/pkp-lib#13657`. `pkp/ojs#6003` (merge
+`822b79f70c`) and its `ore` port `pkp/ojs#6005` (`b4d0d0b84d`) make
+`ArticleHandler::$publication` nullable and answer 404 for a version
+segment that is not all digits, in `initialize()`. Reviewed before the
+merge, each merged tree the reviewed head's; walked again at the tips
+on fresh datasets (OJS `main` `bc4a83e9db`, `ore` `404f86e4f6`): every
+such address, its galley and download 404 with no server log line, the
+article and its own versions 200, the manager's preview of an
+unpublished version still open. 3.5 and earlier never failed here (the
+property is untyped there).
 
 <a id="fn-ojs4"></a>
 **f-ojs4** — Live-probed 2026-09-28, two runs and two debug runs, the

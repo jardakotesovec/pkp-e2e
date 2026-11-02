@@ -260,8 +260,9 @@ link, not a button. A journal's page puts the instructions under
    (Rule 9): the book's address followed by "/version/" and an id the
    link carries, not the version's number. A version address that names
    an unpublished version of the book answers the "404 Not Found" page to
-   a visitor; one whose id names no version of the book fails with a
-   server error page ⚠ [A3](#a3). <sup>g</sup> <sup>td6</sup>
+   a visitor, and so does one whose id names no version of the book (a
+   mistyped number, another book's version, letters such as "abc"), to
+   every role. <sup>g</sup> <sup>td6</sup>
 5. **The preview.** An unpublished version's page opens for those Actors
    row 2 names under the notice "This is a preview and has not been
    published. View submission". It looks as it will once published,
@@ -1163,10 +1164,9 @@ Left out of the scenarios above, by reason:
     `docs/issues/U69-A19-older-version-chapter-page-server-error.md`):
     an older version's chapter page opening under the outdated notice
     on a press with "DOI Versioning" "No"
-  - the guard for A3 (issue report
-    `docs/issues/U69-A3-version-address-no-version-server-error.md`): a
-    book's version address with an id that is none of its versions
-    answering "404 Not Found"
+  - a book's version address with an id that is none of its versions
+    (a mistyped number, another book's version, "abc") answering "404
+    Not Found" (Rule 4; retired A3, pkp/pkp-lib#13657)
   - the guard for A16 (issue report
     `docs/issues/U69-A16-earlier-url-path-server-error.md`): a book whose
     later version was published under a new URL Path, opened by the
@@ -1225,7 +1225,6 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A1 (an address that names no book; Rule 3a)
   - A2 (a book published only as an "Author's Original"; Rule 3)
-  - A3 (a version address that names no version; Rule 4)
   - A4 (a new version's preview under both notices, dated today or
     with the version's saved date; Rule 5b)
   - A5 (an older version's browser tab; Rule 6; scenario 6 passes it)
@@ -1314,7 +1313,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | A book's earlier URL Path shows a server error page | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A19](#a19) | An older version's chapter page of a book shows a blank server error page to every reader | 🐞 | medium · crash: server | issues (claude), 2026-10-06 — re-verified |
 | [A1](#a1) | On a press, a book address that names no book opens the Login page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A3](#a3) | A version address that names no version fails with a server error | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A4](#a4) | A new version's preview also calls itself outdated, dated today or with the version's saved date | 🐞 | low | issues (claude), 2026-10-06 — re-verified |
 | [A5](#a5) | An older version's browser tab names the current version | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A6](#a6) | A book's table of contents repeats the book's authors under every chapter | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1336,6 +1334,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | "APA" prints a series position as a number of volumes | ❓ | minor | — |
 | [A14](#a14) | A chapter new in a later version is cited as older than it is | ❓ | minor | — |
 | [A28](#a28) | A screen reader meets two "Downloads" headings on a book's page, the chart's with nothing to read under it | ❓ | minor | — |
+| [A3](#a3) | Retired: a version address that named no version failed with a server error; it now answers "404 Not Found" | ✅ | retired | PR review (claude), 2026-11-02 — fixed by pkp/pkp-lib#13657 |
 | [A9](#a9) | Retired: on a press, a reader who opened a book's PDF got an empty viewer, and no download saved the file; every free file now opens or downloads (Rule 13) | ✅ | retired | upstream sync (claude), 2026-10-05 — fixed by omp `8c807c919` (pkp/pkp-lib#13444) |
 
 ### All apps
@@ -1372,15 +1371,6 @@ Question: should a published Author's Original make the book public on a
 press? Lean: intended; only a Version of Record puts a book in the catalog,
 but the workflow could say so.
 Basis: probe, 2026-09-28. <sup>f-a2</sup>
-
-<a id="a3"></a>
-**A3 — A version address that names no version fails with a server error** · 🐞 · low · crash: server.
-A book's address followed by "/version/" and an id that is none of the
-book's versions (a mistyped number, another book's version, or letters
-such as "abc") shows a blank server error page instead of "404 Not
-Found", to visitors, Readers, the Press manager and the Site
-Administrator alike: the app fails.
-Basis: probe, 2026-10-01. <sup>f-a3</sup>
 
 <a id="a4"></a>
 **A4 — A new version's preview also calls itself outdated** · 🐞 · low.
@@ -1735,6 +1725,9 @@ Basis: probe, 2026-10-27. <sup>f-a28</sup>
 
 ### Retired
 
+<a id="a3"></a>
+**A3 — A version address that named no version failed with a server error** · ✅ · retired. Fixed by pkp/omp#2530 (`main`) and #2531 (`stable-3_5_0`), merged 2026-10-30, for pkp/pkp-lib#13657: a version address whose id names none of the book's versions, letters included, answers "404 Not Found" (Rule 4). <sup>f-a3</sup>
+
 <a id="a9"></a>
 **A9 — On a press, a reader who opens a book's PDF gets an empty viewer, and no download saves the file** · ✅ · retired. Fixed by omp `8c807c919` (pkp/pkp-lib#13444), 2026-10-05: every free file of a book now opens in its view page or downloads under its file name, for visitors and signed-in users alike, and counts as a file view (Rule 13; Side effects). <sup>f-a9</sup>
 
@@ -1972,7 +1965,18 @@ Issue report: [pkp-e2e#292](https://github.com/jardakotesovec/pkp-e2e/issues/292
 
 <a id="fn-f-a3"></a>
 **f-a3** — Note g: the uninitialized typed property `CatalogBookHandler::$publication` when `version/{id}` matches no publication of the submission; the log reads "Typed property APP\pages\catalog\CatalogBookHandler::$publication must not be accessed before initialization" (`CatalogBookHandler.php` line 122). The typed property dates from omp `29fa88508` (2025-03-20). Live-probed 2026-09-28 (td6): 500 for every id tried and every role.
-Issue report: [pkp-e2e#285](https://github.com/jardakotesovec/pkp-e2e/issues/285) ([docs/issues/U69-A3-version-address-no-version-server-error.md](../issues/U69-A3-version-address-no-version-server-error.md)). The team's copy is `pkp/pkp-lib#13657` (2026-10-30; fixed on OJS main by `pkp/ojs#6003`, merged that day; `pkp/omp#2530`, the `ore` port `pkp/ojs#6005` and the OMP 3.5 port `pkp/omp#2531` open, [PR review](../reports/pr-review/2026-10-30-pkp-lib-13657.md)).
+Issue report: [pkp-e2e#285](https://github.com/jardakotesovec/pkp-e2e/issues/285), closed.
+Retired 2026-11-02: `pkp/pkp-lib#13657`. `pkp/omp#2530` (merge `e7704463ea`) and its
+3.5 port `pkp/omp#2531` (`e9697aaf7e`) turn `$publication` into
+`?Publication = null` and answer 404 for a version segment that is not
+all digits, in `book()` and in `download()` (behind `catalog/view` and
+`catalog/download`); the 3.4 and 3.3 ports `pkp/omp#2533` and #2532 add
+the `download()` check alone (the book page there never failed).
+Reviewed before the merge (report deleted), each merge carrying the
+reviewed head's patch unchanged; walked again at the merge tips on fresh datasets (OMP `main`
+`853bf3b05`, `stable-3_5_0` `9e2a7fd00`, `stable-3_4_0` `e92ae5b6d`,
+`stable-3_3_0` `220e3e2f7`): every such address 404 with no server log
+line, the book and its own version 200.
 
 <a id="fn-f-a4"></a>
 **f-a4** — `monograph_full.tpl` prints `submission.viewingPreview` for any unpublished publication and `submission.outdatedVersion` for any publication that is not the current one, with that publication's empty `datePublished`, which prints as today (note h). Live-probed 2026-09-28 (td7). Live-probed 2026-10-05 (Rule 5b; four runs): the new version's preview read "This is an outdated version published on 2026-10-05. Read the most recent version." with no date saved, and "…published on 2025-01-15." once "Date Published" 2025-01-15 was saved on the version's "Catalog Entry".

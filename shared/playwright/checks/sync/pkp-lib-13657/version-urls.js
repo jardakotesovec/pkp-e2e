@@ -28,7 +28,8 @@
 // Reads fixed when: every bad segment answers 404 with no server log line, and every control 200 as before.
 // At the bases (ojs 0a00726121, omp fd4ea260c, ops d4e4d8737d, ore b5fd5d1890) OJS and OMP answered 500 for each bad
 // segment but `<id>abc`, which opened the version; at the heads all 404 but OMP's `catalog/view|download` with
-// letters, 500 on PostgreSQL (report docs/reports/pr-review/2026-10-30-pkp-lib-13657.md, Finding 1).
+// letters, 500 on PostgreSQL (the PR review's Finding 1, fixed by omp#2530's round 2 and the 3.5/3.4/3.3 ports).
+// At the merge tips (2026-11-02: OJS, OMP, OPS main; OJS ore; OMP 3.5, 3.4, 3.3) every bad segment 404, no log line.
 //
 // Facts: version-urls[-<PROBE_RUN>]-<app>.json.
 const {forEachApp, launch, signIn, record, sql, serverLog} = require('../../../probe');
