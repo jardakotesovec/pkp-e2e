@@ -31,8 +31,8 @@ own features. This table covers only the ORCID capability on each of them.
 | **Enable & configure ORCID site-wide** | • Site Administrator: the "ORCID" side tab on Site Settings, whatever the number of journals the install hosts (Rule 2). The same tab holds the site's "Custom Redirect Base URL" (Rule 2a) <sup>b</sup> |
 | **Connect / authorize own iD** | • Any signed-in user: profile, Identity tab (Rules 5–6)<br>• Any visitor: a journal's registration page (Rule 7). Not offered on the site-level registration page <sup>c</sup> |
 | **Remove own iD** | • The user themselves, while their iD is verified: "Delete" beside it on the Identity tab (Rule 6c)<br>• ⚠ [A13](#a13) nobody while the iD is unauthenticated: the tab offers no "Delete" for it <sup>d</sup> |
-| **Request a contributor's verification by email** | • Site Administrator; Journal Manager; Section Editor assigned to the submission: "Request verification" on the contributor's ORCID iD field (Rule 8)<br>• Author of the submission: the same button, from the submission wizard's Contributors step. On a journal or press the contributor list on the author's own dashboard is read-only. On a preprint server that list offers "Edit" on the author's not-yet-posted preprint, and the form it opens carries the same button (the preprint baseline is described in [Contributors & affiliations](U41-contributors-and-affiliations.md#ops1))<br>• ⚠ [A5](#a5) an Assistant who can edit the contributor is offered the same button. The request is refused, yet the field reports it as sent <sup>e</sup> |
-| **Remove a contributor's iD** | • The same roles as the row above: "Delete" on the contributor's ORCID iD field (Rule 8a) ⚠ [A5](#a5) <sup>e</sup> |
+| **Request a contributor's verification by email** | • Site Administrator; Journal Manager; Section Editor assigned to the submission: "Request verification" on the contributor's ORCID iD field (Rule 8)<br>• Author of the submission: the same button, from the submission wizard's Contributors step. On a journal or press the contributor list on the author's own dashboard is read-only. On a preprint server that list offers "Edit" on the author's not-yet-posted preprint, and the form it opens carries the same button (the preprint baseline is described in [Contributors & affiliations](U41-contributors-and-affiliations.md#ops1))<br>• An Assistant whose assignment has the "Permissions" box: the same button. An Assistant without the box is offered no "Edit" <sup>e</sup> |
+| **Remove a contributor's iD** | • The same roles as the row above: "Delete" on the contributor's ORCID iD field (Rule 8a) <sup>e</sup> |
 | **Verify via the emailed link** | • Whoever holds the emailed authorization link. It works signed out, and the link is single-use (Rule 9) <sup>f</sup> |
 | **Send a review to ORCID** {OJS} | • Site Administrator; Journal Manager; Section Editor: "Send Review To ORCID" on the reviewer's row (Rule 12)<br>• ⚠ [A1](#a1) a Press Manager is offered the same action, though a press deposits nothing <sup>g</sup> |
 | **Read the public ORCID pages** | • Anyone, signed in or out: the "What is ORCID?" page and the verification landing page, reached from links or by URL (Rules 9–10) <sup>f</sup> |
@@ -139,7 +139,9 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
    chooses the email). The button then reads "ORCID Verification has been
    requested!" with a "Resend Verification Email" link. For a contributor
    being added, the request is remembered and the email goes out when the
-   contributor is saved.
+   contributor is saved. ⚠ [A5](#a5) when the server refuses the request,
+   the field still switches to "ORCID Verification has been requested!";
+   a refused "Delete" still shows the iD gone.
    8a. "Delete" beside a contributor's iD (verified or not) removes it after
    confirmation and cancels its token at ORCID. <sup>e</sup>
 9. **The emailed link and the verification landing.** The emailed
@@ -532,7 +534,7 @@ Left out of the scenarios above, by reason:
   - the guard for A4 (issue report `docs/issues/U04-A4-what-is-orcid-link-opens-sign-in.md`): Scenario 2 presses "What is ORCID?" on the profile Identity tab and the registration page and expects the "What is ORCID?" page.
   - the guard for A2 (issue report `docs/issues/U04-A2-orcid-denied-page-raw-placeholder.md`): a contributor who denies access at ORCID lands on the "ORCID Authorization" page and reads "You denied access to your ORCID record.", no raw key.
   - the guard for A11 (issue report `docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md`): in French (Canada), both ORCID tabs (the site's and the journal's) read "ORCID".
-  - the guard for A5's refusal (issue report `docs/issues/U04-A5-assistant-orcid-controls-refused.md`): an Assistant whose assignment has the "Permissions" box presses "Request verification" (the email arrives) and "Delete" (the iD is gone), and one without the box is offered no "Edit".
+  - an Assistant whose assignment has the "Permissions" box presses "Request verification" (the email arrives) and "Delete" (the iD is gone), and one without the box is offered no "Edit" (Actors rows 5–6; the path pkp/pkp-lib#13517 opened, which no test asserted while A5's refusal stood).
   - the guard for A14 (issue report `docs/issues/U04-A14-orcid-reauthorization-link-blank-page.md`): once fixed, a contributor verified under the public API follows "Requesting updated ORCID record access" after the journal moved to the member API and lands on the "ORCID Authorization" page, not a blank page.
   - the guard for A15 (issue report `docs/issues/U04-A15-orcid-pages-tab-no-page-name.md`): once fixed, the "What is ORCID?" and "ORCID Authorization" pages' browser tab reads "What is ORCID? | {journal name}" and "ORCID Authorization | {journal name}".
   - the profile's "Delete" window titled "Confirm", with "OK" and "Cancel" (Rule 6c; scenario 3's "Delete" bullet).
@@ -546,7 +548,7 @@ Left out of the scenarios above, by reason:
   - Skip Review also triggering the emails (Rule 13; scenario 8's Accept)
   - the ORCID request log level, no user-facing change (Settings)
 - **Register carries it**:
-  - A5 (an Assistant offered "Request verification" and "Delete", refused yet reported sent; Actors rows 5–6)
+  - A5 (a refused request or delete shown as done in the field; Rule 8)
   - A1 (a Press Manager offered "Send Review To ORCID"; Actors row 8)
   - A4 ("What is ORCID?" beside the button opening the popup; Rule 6a; scenario 2 marks it)
   - A3 (the registration sign-in filling the form, the iD landing unauthenticated; Rule 7)
@@ -604,7 +606,7 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A1](#a1) | "Send Review To ORCID" is offered before the review is complete, and confirms in silence | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A2](#a2) | A contributor who presses "Deny" at ORCID lands on a page showing "##orcid.authDenied##" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | "What is ORCID?" beside the ORCID button opens ORCID's sign-in instead of the explanation page | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A5](#a5) | An Assistant's contributor-ORCID controls are refused by the server yet report success | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A5](#a5) | A refused "Request verification" or "Delete" on a contributor's ORCID iD still shows as done | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A8](#a8) | A press's or preprint server's ORCID verification failure page says to contact "the journal manager" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | In 32 interface languages, both ORCID settings tabs carry the name of the retired ORCID Profile plugin | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | A contributor following the "Requesting updated ORCID record access" link gets a blank page and can never allow deposits | 🐞 | medium · crash: server | issues (claude), 2026-10-07 — re-verified |
@@ -679,17 +681,18 @@ and carry on. Nothing typed is lost.
 Basis: probe, 2026-10-03. <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
-**A5 — Assistant's refused ORCID controls report success** · 🐞 · low.
-When an editor lets an Assistant change the publication, the Assistant
-can edit a contributor, and the contributor's "ORCID iD" field offers
-them "Request verification" and "Delete". The server refuses both: a
-window titled "Error" says "You are not authorized to access the
-requested resource.", no email goes out, and the iD stays. The ORCID
-routes leave the Assistant out, though Assistants may edit every other
-contributor field. The field behind the window still reports success:
-it switches to "ORCID Verification has been requested!" or shows the
-iD gone, until the form is closed and opened again.
-Basis: probe, 2026-10-03. <sup>[f-a5](#fn-a5)</sup>
+**A5 — A refused ORCID control on a contributor reports success** · 🐞 · low.
+When the server refuses a contributor's "Request verification" or
+"Delete", a window titled "Error" says so, no email goes out and the iD
+stays. The field behind the window still reports success: it switches
+to "ORCID Verification has been requested!" or shows the iD gone, until
+the form is closed and opened again. Until 2026-10-30 the server refused
+both actions to every Assistant allowed to edit the contributor; the
+routes now admit that Assistant (pkp/pkp-lib#13517), so the stock
+routes that met it are gone and a refusal now takes another cause.
+Basis: probe, 2026-10-03; the Assistant's refusal gone at the `main`
+tips, 2026-11-02. <sup>[f-a5](#fn-a5)</sup>
+Report: refresh owed — pkp/pkp-lib#13659 + pkp/ui-library#1033 (merged 2026-10-30, pkp-lib `9dfab21b47`, ui-library `eb988214e9`) admit the Assistant, so pkp-e2e#749's steps no longer meet a refusal: its Steps need a refusal the screens still reach, or the report says it is latent (2026-11-02)
 
 <a id="a6"></a>
 **A6 — The email toggle's label misdescribes its trigger** · ❓ · minor.
@@ -1428,8 +1431,8 @@ otherwise admits Assistants (the contributors feature's gate). Live-probed
 2026-08-07 (OJS): both actions returned an authorization refusal
 (HTTP 401) — no email delivered, stored iD unchanged — while the field
 showed the requested state / the iD removed.
-At the heads of pkp/pkp-lib#13659 + ui-library#1033 (issue pkp/pkp-lib#13517; `f47bab3952`, before their merge) the routes admit the Assistant: on the dataset, OJS and OMP `mfritz` and an OPS Editorial Board Member, each with the "Permissions" box, got 200 for both, the "Requesting ORCID record access" email arrived and the iD was removed (bases: 401 both, as above). 3.5 carries the same change since pkp/pkp-lib#13538 (merged 2026-10-23; code). The entry retires at the `main` merge.
-Issue reports: the field's state, [pkp-e2e#749](https://github.com/jardakotesovec/pkp-e2e/issues/749) ([docs/issues/U04-A5-orcid-field-refusal-shown-as-done.md](../issues/U04-A5-orcid-field-refusal-shown-as-done.md)); the server's refusal, [pkp-e2e#750](https://github.com/jardakotesovec/pkp-e2e/issues/750) ([docs/issues/U04-A5-assistant-orcid-controls-refused.md](../issues/U04-A5-assistant-orcid-controls-refused.md)).
+At the heads of pkp/pkp-lib#13659 + ui-library#1033 (issue pkp/pkp-lib#13517; `f47bab3952`, before their merge) the routes admit the Assistant: on the dataset, OJS and OMP `mfritz` and an OPS Editorial Board Member, each with the "Permissions" box, got 200 for both, the "Requesting ORCID record access" email arrived and the iD was removed (bases: 401 both, as above). 3.5 carries the same change since pkp/pkp-lib#13538 (merged 2026-10-23; code). Merged on `main` 2026-10-30 (pkp-lib `9dfab21b47`, ui-library `eb988214e9`, each the reviewed head's tree): walked again 2026-11-02 at the tips (OJS `bc4a83e9db`, OMP `853bf3b052`, OPS `fd893a8c92`) with `checks/issues/assistant-orcid-controls-refused/walk.js`, as at the heads. On `ore` the same walk at OJS `404f86e4f6` (pointers pkp-lib `a05aa54421`, ui-library `11dada940f`, the trees of the ore ports `148e5ecb1e` and `a457c277`), 2026-11-02, gives the same. The server's refusal is retired (pkp-e2e#750 closed); the field's state stays as A5.
+Issue reports: the field's state, [pkp-e2e#749](https://github.com/jardakotesovec/pkp-e2e/issues/749) ([docs/issues/U04-A5-orcid-field-refusal-shown-as-done.md](../issues/U04-A5-orcid-field-refusal-shown-as-done.md)); the server's refusal, [pkp-e2e#750](https://github.com/jardakotesovec/pkp-e2e/issues/750) (closed 2026-11-02, fixed by pkp/pkp-lib#13517).
 
 <a id="fn-a6"></a>
 **f-a6** — Label `orcid.manager.settings.sendMailToAuthorsOnPublication`
