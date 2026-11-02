@@ -916,7 +916,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A10](#a10) | The Site Administrator's "Edit User" never shows "Change Password" ticked, and saving it removes the flag | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | After a refused "Change Password" or "Reset Password", the browser tab loses the page's name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A15](#a15) | "Login As" ends and a save made as the user is silently lost when that user first signs in after an upgrade | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
-| [A16](#a16) | A back-office page left open after its session ended answers a search with an alert or an "Error" window that does not say the user is signed out, instead of the Login page | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
+| [A16](#a16) | A back-office page left open after its session ended answers a search with an alert or an "Error" window that does not say the user is signed out, instead of the Login page | 🐞 | low | issues (claude), 2026-11-02 — re-verified |
 | [A17](#a17) | Audit log records a session ended by a password change in another browser as an IP address change | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A5](#a5) | No journal-level users screen offers the "must change password" box, so a Journal Manager cannot require a forced change on an existing account; only the Site Administrator's Hosted Journals list offers it | ❓ | user-visible | Jarda 2026-08-25 · to triage |
 | [A9](#a9) | The last-login date is recorded on every sign-in, but no users screen shows it, so a manager cannot see when an account last signed in | ❓ | minor | — |
@@ -1125,13 +1125,15 @@ spinner beside "Search" keeps turning and the list stays unfiltered. On
 Settings › Users & Roles, a search typed in the box "Enter a user's
 name, role (e.g Journal editor), or affiliation" opens a window headed
 "Error" reading "You are not authorized to access the requested resource." with
-"OK". Nothing leads to the Login page until the user follows a link or
+"OK". Since 31 October 2026 (pkp/pkp-lib#12780), a user signed in with
+"Keep me logged in" ticked who comes back to such a Users & Roles tab
+after the idle limit gets the same window although still signed in: a
+reload opens the page signed in, and the search then works. Nothing leads to the Login page until the user follows a link or
 reloads, so they may well conclude that their role has lost access.
 After a password change in another browser, a Profile page open here
 behaves as [User profile A25](U03-user-profile.md#a25) and
 [A26](U03-user-profile.md#a26) record.
-Basis: probe, 2026-10-19. <sup>[f-a16](#fn-a16)</sup>
-Report: refresh owed — pkp-lib `442148e14e` (`main`) / `c4c0aa8c52` (`stable-3_5_0`), pkp/pkp-lib#12780, 2026-10-31: a sign-in made with "Keep me logged in" ticked is signed back in past the idle limit again (Rule 5a), so the idle-limit case is narrowed to an unticked sign-in; the 2026-10-15 idle-limit read held the cookie on code that did not read it, which reads like an unticked sign-in today. Whether the reports' steps still show the refusal with the box ticked, as the Login page leaves it ([A2](#a2)), is not walked since the change, which reads the cookie in `PKPAuthenticateSession::handle()` (one of `PKPRoutingProvider::$globalMiddleware`) through the new `PKPSessionGuard::userFromRecaller()`, skipped on API requests, and ends a session in `PKPAuthenticateSession::logout()` with `Auth::logoutCurrentDevice()` (2026-11-01)
+Basis: probe, 2026-11-02. <sup>[f-a16](#fn-a16)</sup>
 
 <a id="a17"></a>
 **A17 — Audit log records a session ended by a password change in another browser as an IP address change** · 🐞 · low.

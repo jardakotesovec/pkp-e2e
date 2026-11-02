@@ -1,4 +1,4 @@
-# Uploading a picture larger than the server's file limit shows "Path must not be empty", not the limit
+# Uploading a picture larger than the server's file limit shows "Path cannot be empty", not the limit
 
 - **Severity** medium
 - **Effort** small
@@ -10,41 +10,52 @@
   - 3.4: OJS, OMP, OPS (code)
   - 3.3: OJS, OMP, OPS (code)
 - **Introduced** `pkp/pkp-lib#5237` for `pkp/pkp-lib#4890` · [a09aa46d19](https://github.com/pkp/pkp-lib/commit/a09aa46d196539078b29ae8426a1384d86147d2a) · 2019-10-31 · Nate Wright (NateWr)
-- **Upstream** none found (2026-10-01)
+- **Upstream** none found (2026-11-02)
 - **Tracked in** spec U09 [A18](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U09-custom-pages-and-blocks.md#a18); pictures over the request limit (8 MB by default) are [U09-A18-picture-over-request-limit-server-error](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U09-A18-picture-over-request-limit-server-error.md)
-- **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-11-02: walked again on `main` and `stable-3_5_0`, on PHP
+8.3; the walks of 2026-10-01 ran on PHP 8.4, which the walking machine
+no longer has. The title and Observed now quote the PHP 8.3 wording of
+the PNG's alert, and Observed gives the PHP 8.4 one beside it. The
+Summary no longer has the server fail for the WEBP picture, which is
+refused with status 400.
 
 ## Summary
 
 A manager uploads a picture through "Insert/edit image" in a formatted
-text box. When the picture is larger than the server's limit for one
-uploaded file, the application fails on the server. The editor's alert
-over the "Insert/Edit Image" window reads "Path must not be empty" for
-a PNG, JPEG or GIF picture, or "One or more files could not be
-uploaded." for a WEBP one.
+text box. When a PNG, JPEG or GIF picture is larger than the server's
+limit for one uploaded file, the application fails on the server. The
+alert over the text editor's "Insert/Edit Image" window then shows
+PHP's own error text, "Path cannot be empty". A WEBP picture over the
+limit is refused without a server error, with "One or more files could
+not be uploaded."
 
 The manager expects "Files larger than 2MB can not be uploaded.", the
 message the application already gives for a file over that limit on
-its other uploads. Neither message on screen says the picture is too
-large, so the manager cannot tell that a smaller copy would go in. In
-the custom page window, which has a "Path" box of its own, the first
-message points at the wrong field.
+its other uploads. Neither message says the picture is too large, so
+the manager cannot tell that a smaller copy would go in. In the custom
+page window, which has a "Path" box of its own for the page's address,
+"Path cannot be empty" reads as if that box had been left empty.
 
-The limit is the web server's PHP setting; PHP's default is 2 MB. On a
-server set to a higher per-file limit, the same messages show for
-pictures between that limit and the server's request limit. A picture
-above the request limit gets another error, the subject of the sibling
-report.
+The limit is a setting of the server's PHP, 2 MB by default, which is
+less than many phone photos. A server set to a higher limit shows the
+same messages for every picture between that limit and its limit for
+a whole upload request (8 MB by default).
 
 ## Impact
 
 - **Lost**: no content. The picture is neither stored nor inserted.
-- **Who**: journal managers, and editors whose role may change
-  settings, wherever a formatted text box has a picture button: custom
-  pages, custom blocks, static pages, announcements, and the journal's
-  masthead, information, privacy and appearance texts. It happens each
-  time a picture is larger than the per-file limit.
+- **Who**: users whose role has "Permit changes to Settings" on (by
+  default Journal manager, Journal editor and Production editor; Press
+  manager, Press editor and Production editor; Preprint Server
+  manager), in every formatted text box with a picture button. On all
+  three apps these are custom pages (a navigation menu item of the type
+  "Custom Page"), custom blocks, announcements, and the masthead,
+  privacy and appearance texts; on OJS and OMP also the information
+  texts and static pages. Custom blocks and static pages are plugins,
+  off by default.
 - **Way round**: make the picture smaller than the limit and upload it
   again.
 
@@ -83,22 +94,32 @@ Steps:
 **Expected**: both times the alert reads "Files larger than 2MB can not
 be uploaded.", and nothing is inserted.
 
-**Observed**: for the PNG the alert reads "Path must not be empty". The
+**Observed**: for the PNG the alert reads "Path cannot be empty". The
 upload answers 500:
 
 ```
 POST /index.php/publicknowledge/api/v1/_uploadPublicFile
-→ 500 {"error":"Path must not be empty"}
+→ 500 {"error":"Path cannot be empty"}
 ```
 
 The server log reads:
 
 ```
-production.ERROR: Path must not be empty {"exception":"[object] (ValueError(code: 0): Path must not be empty at …/lib/pkp/api/v1/_uploadPublicFile/PKPUploadPublicFileController.php:185)
+production.ERROR: Path cannot be empty {"exception":"[object] (ValueError(code: 0): Path cannot be empty at …/lib/pkp/api/v1/_uploadPublicFile/PKPUploadPublicFileController.php:185)
 ```
 
+On `stable-3_5_0` the log line is PHP's own form of the same exception:
+
+```
+ValueError: Path cannot be empty in …/lib/pkp/api/v1/_uploadPublicFile/PKPUploadPublicFileController.php:185
+```
+
+That is the wording of PHP 8.0 to 8.3. On PHP 8.4 the alert, the answer
+and the log read "Path must not be empty" instead (walked 2026-10-01).
+
 For the WEBP the alert reads "One or more files could not be uploaded."
-(status 400).
+The upload answers 400 `{"error":"One or more files could not be
+uploaded."}`, and the server logs no error.
 
 A 1 KB PNG goes in as usual, and a text file named ".png" gets "The
 image you uploaded is not valid.".
@@ -202,11 +223,14 @@ still gets "The image you uploaded is not valid.".
   the handler's own error switch to the top of `uploadFile()`, keyed on
   `'file'`, answering with `$response->withStatus(400)->withJsonError(…)`
   as it does now.
-- Guard: a pkp-lib unit test of `uploadFile()` with
-  `$_FILES['file']['error']` set to `UPLOAD_ERR_INI_SIZE`, and the e2e
-  scenario for spec U09's A18 (a **Planned** item).
+- Guard: the e2e scenario for spec U09's A18 (a **Planned** item),
+  which uploads a picture over the limit to a server at PHP's default
+  limits. A pkp-lib unit test is not proposed: pkp-lib has no test of
+  an API controller to follow (`tests/classes/core/APIRouterTest.php`
+  tests the router only), and one would first need a way to fake the
+  request, the user and the user's roles in the context.
 
-Small: one check in one pkp-lib file, and a test.
+Small: one check in one pkp-lib file, guarded by an e2e scenario.
 
 ## Evidence
 
@@ -223,12 +247,26 @@ Small: one check in one pkp-lib file, and a test.
   script serves the same install through a second `php -S` with
   `-d upload_max_filesize=2M -d post_max_size=8M`
   (`startDefaultLimitsServer()` in `lib.js`).
-- Walked on OJS, OMP and OPS, `main` and `stable-3_5_0`, on PostgreSQL
-  and PHP 8.4.11; the fault does not touch the database. PHP 8.4 words
-  the `ValueError` "Path must not be empty"; an earlier probe of the
-  same steps on PHP 8.3 read "Path cannot be empty". Datasets:
-  pkp/datasets c657990 (2026-10-01). PHP 7 not run.
-- Code reads. `main` and 3.5: `PKPUploadPublicFileController.php` lines
+- Walked on OJS, OMP and OPS, `main` and `stable-3_5_0`, on PostgreSQL:
+  2026-10-01 on PHP 8.4.11, with the fix trial (pkp/datasets c657990),
+  and 2026-11-02 on PHP 8.3.36 (pkp/datasets c1a3abcd), with a PNG of
+  3063 KB and a WEBP of 4102 KB. The walking machine now has PHP 8.2
+  and 8.3 only. PHP 7 not run. The fault does not touch the database.
+- The wording per PHP version (Observed) is set in php-src:
+  `getimagesize()` opens its argument through `php_stream_open_wrapper()`
+  (`ext/standard/image.c`), and `_php_stream_open_wrapper_ex()`
+  (`main/streams/streams.c`) raises the `ValueError`, with the PHP-8.0
+  to PHP-8.3 text on those branches and the PHP-8.4 text there.
+- The fix trial (2026-10-01) stands for today's tips: the controller
+  has no commit since on `main` (`git log` of
+  `api/v1/_uploadPublicFile/`; `FileManager.php`'s two later commits,
+  `pkp/pkp-lib#13512` and `pkp/pkp-lib#13561`, touch neither
+  `uploadFile()`, `uploadError()` nor `getUploadErrorCode()`), the file
+  is byte-identical in the six checkouts of `main` and
+  `stable-3_5_0`, and `fix.diff` applies to them as written
+  (`git apply --check`). Not tried again.
+- Code reads (again 2026-11-02, at the tips below). `main` and 3.5:
+  `PKPUploadPublicFileController.php` lines
   108–112, 150, 185 and 203–204, the same in each app's lib/pkp. 3.4
   (`origin/stable-3_4_0`, `PKPUploadPublicFileHandler.php` lines 140,
   171 and 185–186) and 3.3 (`origin/stable-3_3_0`,
@@ -240,14 +278,19 @@ Small: one check in one pkp-lib file, and a test.
 - Introduced: `git blame` on lines 185 and 203 gives e3f570bc37
   (`pkp/pkp-lib#5678`, PSR-12 formatting only); blame at its parent
   gives a09aa46d19 for both lines.
-- Upstream search (pkp/pkp-lib, pkp/ojs, pkp/ui-library): "Path cannot
-  be empty", "upload_max_filesize", `PKPUploadPublicFileController`.
-  Read and not the same fault: `pkp/pkp-lib#12745` and
-  `pkp/pkp-lib#10718`.
-- Tips: OJS `main` 68615b5a32 with lib/pkp 25562b0e1a; OMP `main`
-  3b0ecf794 and OPS `main` c8af945bb7, both with lib/pkp 3dc90c81a6.
-  `stable-3_5_0` OJS 3517e640f2 with lib/pkp b1981810da; OMP c7b45f88e
-  and OPS 8eaf899468 with lib/pkp 1fb843f491. `stable-3_4_0` lib/pkp
-  32b0f4b4af (OJS 75cc2d488b, OMP 0aec65441, OPS acd8ae704b);
-  `stable-3_3_0` lib/pkp f6ab331645 (OJS ac77c9fb35, OMP 8e72fc883, OPS
-  c5532e2161).
+- Upstream search (pkp/pkp-lib, pkp/ojs, pkp/ui-library; 2026-10-01,
+  again 2026-11-02): "Path cannot be empty", "Path must not be empty",
+  "upload_max_filesize", "One or more files could not be uploaded",
+  "uploadPublicFile", `PKPUploadPublicFileController`,
+  `getUploadErrorCode`. Read and not the same fault:
+  `pkp/pkp-lib#12745`, `pkp/pkp-lib#10718`, `pkp/pkp-lib#10578`, and
+  `pkp/pkp-lib#12144`, `pkp/pkp-lib#10244`, `pkp/pkp-lib#13040` (the
+  same PHP error from other code).
+- Tips (2026-11-02): `main` OJS bc4a83e9db, OMP 853bf3b05 and OPS
+  fd893a8c92, each with lib/pkp 442148e14e. `stable-3_5_0` OJS
+  0f2de4ff3f, OMP 9e2a7fd00 and OPS d4a7e97a55, each with lib/pkp
+  c4c0aa8c52. `stable-3_4_0` lib/pkp f4719f2805 (OJS 8bd9e6f9a0, OMP
+  e92ae5b6d0, OPS d6dd7247c9); `stable-3_3_0` lib/pkp 5b26595791 (OJS
+  2f766afdb1, OMP 35fb871732, OPS 1f02fc5641). The fix was tried at
+  the 2026-10-01 tips: OJS `main` 68615b5a32 with lib/pkp 25562b0e1a;
+  OMP 3b0ecf794 and OPS c8af945bb7 with lib/pkp 3dc90c81a6.

@@ -876,7 +876,10 @@ record's `warnings` (U09, U21 issue walks); `tag(prefix)`
 makes a scratch tag that follows the tag conventions above. `signIn` uses
 the roster password rule, so it works for scratch users too; `signIn(page,
 user, {contextPath})` goes through that journal's own login page (which
-decides where the user lands), and any open session is signed out first.
+decides where the user lands), and any open session is signed out first;
+`{remember: false}` unticks "Keep me logged in" first (left out, the box
+stays ticked as the page shows it, and since `pkp/pkp-lib#12780` a ticked
+browser is signed back in where an unticked one is signed out).
 A request replayed in a role's session (an API the Frame has checked
 directly) takes `pkp.context.apiBaseUrl` and `pkp.currentUser.csrfToken`
 (sent as `X-Csrf-Token`, as `lineScratchContext` does) from a page of

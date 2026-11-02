@@ -925,7 +925,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A15](#a15) | With "Custom Block Manager" unticked, "Appearance" › "Setup" refuses every save over a placed block it no longer lists | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A16](#a16) | An SVG, a PDF or any file but a JPEG, PNG, GIF, BMP or WEBP is ignored in "Insert/Edit Image", with no message | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A17](#a17) | A dropped or pasted picture the site refuses stays in the text, embedded, and is saved | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A18](#a18) | A picture over the upload limit gets a server error or a vague refusal, never "Files larger than {size} can not be uploaded." | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
+| [A18](#a18) | A picture over the upload limit gets a server error or a vague refusal, never "Files larger than {size} can not be uploaded." | 🐞 | medium · crash: server | issues (claude), 2026-11-02 — re-verified |
 | [A19](#a19) | A reviewer's typed review, a profile's signature or bio, or a static page's text is lost without asking on leaving the form | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
 | [A20](#a20) | With two form languages, the first language's "Content" box can stay under a "Loading..." spinner for good | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A2](#a2) | A deleted custom block would keep its place in the sidebar, so a later block of the same name appears unplaced | ❓ | minor | — |
@@ -1213,8 +1213,7 @@ request (8 MB by default), any picture makes the application fail on
 the server, and the alert reads "The POST data is too large.", in
 English whatever the interface language. None of them tells the
 manager to send a smaller file.
-Basis: probe, 2026-10-01. <sup>f-a18</sup>
-Report: refresh owed — drift sweep 2026-10-30 (OJS, OMP, OPS, two runs): a WEBP picture over the file limit is refused with status 400 (the `FileManager::uploadFile()`, `uploadError()` and `getUploadErrorCode()` branch), not a server failure, and the PNG, JPEG and GIF alert (the `ValueError` in `PKPUploadPublicFileController::uploadFile()`) reads "Path cannot be empty" on the test installs; the file-limit report's Summary has the server fail for the WEBP too, and its title, Summary and Observed quote PHP 8.4's "Path must not be empty" alone (2026-10-30)
+Basis: probe, 2026-11-02. <sup>f-a18</sup>
 
 <a id="a19"></a>
 **A19 — A reviewer's typed review, a profile's signature or bio, or a static page's text is lost without asking on leaving the form** · 🐞 · medium.

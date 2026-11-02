@@ -9,10 +9,18 @@
   - 3.4: OJS, OMP, OPS (code)
   - 3.3: OJS, OMP, OPS (code)
 - **Introduced** [7e53bc157b](https://github.com/pkp/pkp-lib/commit/7e53bc157bba1dd3b1cf37f9befdbb884bb290ce) · 2012-05-07 · Alec Smecher (asmecher), a commit with no PR
-- **Upstream** none found (2026-10-15)
+- **Upstream** none found (2026-11-02)
 - **Tracked in** U03 [A26](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U03-user-profile.md#a26)
-- **Checked** 2026-10-15, each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-11-02: since `pkp/pkp-lib#12780` (pkp-lib
+[442148e14e](https://github.com/pkp/pkp-lib/commit/442148e14ef5cf836724423cf425102c2a0de480) on `main`,
+[c4c0aa8c52](https://github.com/pkp/pkp-lib/commit/c4c0aa8c5293254ad253544aea230b1b607d5249) on
+`stable-3_5_0`, 2026-10-31) made "Keep me logged in" work again. An
+email change saved in another browser now signs out a browser that
+signed in with that box unticked, and every press there raises this
+alert. A browser that signed in with the box ticked stays signed in.
 
 ## Summary
 
@@ -30,33 +38,37 @@ A Site Administrator's "Expire User Sessions" brings the alert on every
 press. A password change made in another browser brings it on every
 press after the first; the first press fails in another way
 ([U03 A25](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U03-user-profile.md#a25)).
+An email change saved in another browser brings it on every press in a
+browser that signed in with "Keep me logged in" unticked
+([U03 Rule 6a](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U03-user-profile.md#rules--state)).
 By the code, a session that expired brings it too. No other page shows
 this code.
 
 ## Impact
 
-- **Lost**: what was typed on the page since its last save. The press
-  stores nothing, and the reload that reaches the Login page clears the
-  boxes, so the user types it again after signing in. Nothing already
-  saved is lost.
-- **Who**: users whose session ends while their Profile page is open,
-  in any language. Only the Profile page's tabs and "Save" get this
-  code; other back-office pages refuse an ended session in sentences
-  of their own.
+- **Lost**: nothing this fault causes. What was typed since the last
+  save is lost, and nothing already saved is; with the fix the press
+  still stores nothing and the reload still clears the boxes. The fix
+  changes only the alert's words, so the user is told to sign in again.
+- **Who**: any user whose session ends while their Profile page is open.
 - **Way round**: reload the page and sign in on the Login page it shows,
-  which returns to the Profile page; then type the values again.
+  which returns to the Profile page.
 
-Low: a code shows where a sentence should, and the task gets done after
-a new sign-in; the fix is small because a translated sentence for this
-case already exists and only the check's default has to point at it.
+Low: the user is not told in words why the press failed, and the task
+gets done after a new sign-in.
 
 ## Steps to reproduce
 
 Preconditions:
 
-- PKP's default test dataset for `main` (OJS, OMP or OPS).
+- PKP's default test dataset for `main` (OJS, OMP or OPS), loaded again
+  before each group below: the password-change group changes `dbarnes`'s
+  password, so a later group cannot follow it as written.
 - Two browsers that do not share cookies (or a normal and a private
   window), called A and B below.
+- Every sign-in below leaves "Keep me logged in" unticked, a choice the
+  Login page leaves to the user; after an email change, a browser signed
+  in with it ticked is signed straight back in (U03 Rule 6a).
 
 Ending the session from Administration:
 
@@ -84,6 +96,11 @@ the user has to sign in again.
 ##user.authorization.userRequired##
 ```
 
+On an install with `show_stacktrace = On` (the `[debug]` section of
+`config.inc.php`; Off by default), the alert's text ends with the
+request's address in a bracket, for example
+`##user.authorization.userRequired## [/index.php/publicknowledge/$$$call$$$/tab/user/profile-tab/contact?_=…]`.
+
 The requests are answered `200` with the refusal in JSON:
 
 ```
@@ -108,8 +125,32 @@ After a password change in another browser:
 3. In B, without reloading, press the "Roles" tab.
 4. In B, press the "Contact" tab.
 
+**Expected**: steps 3 and 4 say in words, in the page's language, that
+the user has to sign in again.
+
 **Observed**: step 3 shows no alert and the page's script fails (U03
 A25); step 4 raises the same alert "##user.authorization.userRequired##".
+
+After an email change in another browser:
+
+1. In B, sign in as `dbarnes` and choose "Edit Profile". "Identity"
+   shows.
+2. In A, sign in as `dbarnes`, choose "Edit Profile", press "Contact",
+   replace "Email address" with `dbarnes.u03ir1@mailinator.com` and press
+   "Save". The tab shows "You have requested a change of your email to
+   "dbarnes.u03ir1@mailinator.com". We have already sent you an email
+   with directions on how to validate the changed email."
+3. In B, without reloading, press "Save" under the Identity form.
+4. In B, press "OK", then press the "Contact" tab.
+5. In B, press "OK", then reload the page.
+
+**Expected**: steps 3 and 4 say in words, in the page's language, that
+the user has to sign in again.
+
+**Observed**: steps 3 and 4 each raise the alert
+"##user.authorization.userRequired##", from the same `200` answers as in
+the first group (`save-identity`, `contact`); step 5 shows the Login
+page.
 
 ## Cause
 
@@ -133,7 +174,12 @@ with `alert()`.
 
 `ProfileTabHandler::authorize()` adds the policy (since the tabbed
 Profile of `pkp/pkp-lib#478`, 2015), so every Profile tab and "Save"
-pressed by a signed-out page meets it. The pkp-lib key that says the
+pressed on a page whose session has ended meets it. Each way of ending
+the session leads there: "Expire User Sessions", a password change
+(`Auth::logoutOtherDevices()`), and an email change, whose save in
+`BaseProfileForm::execute()` calls
+`PKPSessionGuard::invalidateOtherSessions()` for the account's other
+sessions. The pkp-lib key that says the
 same thing, `user.authorization.loginRequired` ("Login required."), is
 `PKPSiteAccessPolicy`'s default and is translated in 54 of pkp-lib's 71
 locales (`zh_Hant` has the msgid with an empty msgstr, which is not
@@ -186,9 +232,10 @@ all 71 show the raw code. A new key would leave every language but
 English with the raw code until its translators reach it, since a key
 missing in a locale is not looked up in English.
 
-Tried on OJS, OMP and OPS `main`: with the fix, steps 5 and 6 raise the
-alert "Login required." and nothing else changes (the tab and the
-typed value as before, the Login page on reload). Unchanged with the fix
+Tried on OJS, OMP and OPS `main`: with the fix, steps 5 and 6 of the
+first group and steps 3 and 4 of the email-change group raise the alert
+"Login required." and nothing else changes (the tab and the typed value
+as before, the Login page on reload). Unchanged with the fix
 in and out: a signed-in Profile page opens "Contact" and "Roles" and
 saves Identity with no alert, and "Edit Profile" opened by its address
 in a signed-out browser shows the Login page.
@@ -240,19 +287,30 @@ Small: one line in one pkp-lib class, tried on the three apps.
   `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js <app|all>
   shared/playwright/checks/issues/session-ended-alert-raw-key/walk.js`
   walks "Ending the session from Administration"; `K16_MODE=pw` "After a
-  password change in another browser"; `K16_MODE=nb` the neighbour check
+  password change in another browser"; `K16_MODE=email` "After an email
+  change in another browser"; `K16_MODE=nb` the neighbour check
   (a signed-in page's tabs and "Save", a signed-out "Edit Profile"
   address); `PKP_E2E_LINE=stable-3_5_0` in front for 3.5. The fix trial:
   `node bin/try-fix.js apply|revert
   shared/playwright/checks/issues/session-ended-alert-raw-key/fix.diff ojs
-  omp ops`; the walk and `nb` ran with the fix applied, and `nb` again
-  after the revert.
-- Walked 2026-10-15 on PostgreSQL, pkp/datasets 7912e09 (2026-10-14),
-  each mode from a fresh load: `main` OJS 378eced941, OMP f4836d4fb, OPS
-  2ece50497f, lib/pkp b17fadae59 (all three); `stable-3_5_0` OJS
-  ca763c91cd, OMP a70bbb9c4, OPS 44aec6e131, lib/pkp 4045d9241e. Both
-  groups of Steps showed the Observed on all six installs; on 3.5 the
-  screens and requests are the same as on `main`.
+  omp ops`; the walk, `email` and `nb` ran with the fix applied, and
+  `nb` again after the revert. Every sign-in the script makes in B, and
+  `admin`'s in A, leaves "Keep me logged in" unticked.
+- Walked 2026-11-02 on PostgreSQL, pkp/datasets c1a3abcd (2026-11-01),
+  each mode from a fresh load: `main` OJS bc4a83e9db, OMP 853bf3b05, OPS
+  fd893a8c92, lib/pkp 442148e14e (all three); `stable-3_5_0` OJS
+  0f2de4ff3f, OMP 9e2a7fd00, OPS d4a7e97a55, lib/pkp c4c0aa8c52. All
+  three groups of Steps showed the Observed on all six installs; on 3.5
+  the screens and requests are the same as on `main`. The first walk,
+  2026-10-15 (lib/pkp b17fadae59 and 4045d9241e), showed the first two
+  groups the same.
+- Since 2026-10-15 none of `UserRequiredPolicy`, `ProfileTabHandler`,
+  `PKPComponentRouter`, `Handler.js` or `locale/en/user.po`'s
+  `loginRequired` changed in a way that reaches this (lib/pkp
+  `git log b17fadae59..442148e14e` and `4045d9241e..c4c0aa8c52` on those
+  paths: `pkp/pkp-lib#13520` added keys to `user.po` only, and
+  `pkp/pkp-lib#12780` rewrote `Validation::login()` and the
+  remember-cookie restore); `fix.diff` still applies to both lines.
 - Code reads: the key `user.authorization.userRequired` appears in no
   locale file of lib/pkp, OJS, OMP or OPS on `main`, `stable-3_5_0`,
   `stable-3_4_0` (lib/pkp `origin/stable-3_4_0` 55c8e406b3; OJS
@@ -269,12 +327,7 @@ Small: one line in one pkp-lib class, tried on the three apps.
   `en` (`en_US` on 3.3) `user.po`. Missing-key lookup: `Locale::translate()`
   and `LocaleBundle::getTranslator()` load one locale only; the locale
   count is of msgids with a non-empty msgstr in `lib/pkp/locale/*/user.po`.
-- Not walked: the expired session; an email change saved in another
-  browser, which the spec's own check
-  (`shared/playwright/checks/U03/J15/j15.js`, mode `email`) saw raise the
-  same alert on every press on `main` and 3.5 the same day, left out of
-  the Steps and Summary because it rests on an open regression ruling
-  (U01 A14) and was not walked by this script; the REST API's answer;
+- Not walked: the expired session; the REST API's answer;
   the three other undefined policy messages; a locale other than
   English.
 - "No other page shows this code" is a code read: of the seven classes
@@ -284,7 +337,10 @@ Small: one line in one pkp-lib class, tried on the three apps.
   signs its user in first. The return to the Profile page after signing
   in rests on the Login page's `source` (the reload's address, walked)
   and `LoginHandler::signIn()` redirecting to it (code).
-- Upstream, read and not this fault: `pkp/pkp-lib#13527` (open, other
+- Upstream: searched again 2026-11-02 (pkp/pkp-lib, pkp/ojs,
+  pkp/ui-library: `userRequired`, `"user.authorization.userRequired"`,
+  `UserRequiredPolicy`, missing locale keys since 2026-10-14); nothing
+  new. Read and not this fault: `pkp/pkp-lib#13527` (open, other
   keys used but defined in no locale; this one is not among them),
   `pkp/pkp-lib#3776` (`user.authorization.invalidQuery`, closed),
   `pkp/pkp-lib#1576` (a tab press after a timeout showing the role

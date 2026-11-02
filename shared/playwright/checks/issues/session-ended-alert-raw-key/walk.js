@@ -9,13 +9,18 @@
 //                            again and reads the initials back
 //   K16_MODE=pw              "After a password change": A is `dbarnes`, who saves a new password; B
 //                            then presses "Roles" (the first request, U03 A25) and "Contact"
+//   K16_MODE=email           "After an email change": A is `dbarnes`, who saves a new email address
+//                            on Contact (a pending request, U03 Rule 6a); B then presses "Save" on
+//                            Identity, then "Contact", then reloads
 //   K16_MODE=nb              the neighbour (fix in and out): a signed-in Profile page's tabs and
 //                            "Save" still work (Contact, Roles, Identity's "Save"), and a signed-out
 //                            browser opening "Edit Profile" by its address still gets the Login page
 //
-// walk and pw each start from a freshly reset dataset fleet; nb changes nothing that matters.
+// B (and A as `admin`) sign in with "Keep me logged in" unticked in every mode (since pkp/pkp-lib#12780's fix of
+// 2026-10-31 a ticked browser is signed back in after an email change, U03 Rule 6a).
+// walk, pw and email each start from a freshly reset dataset fleet; nb changes nothing that matters.
 // Every dialog B raises is answered "OK" and kept with its text.
-// Run: PROBE_FEATURE=<feature> PROBE_AGENT=k16 [PROBE_RUN=…] [K16_MODE=pw] node bin/probe.js <app|all> \
+// Run: PROBE_FEATURE=<feature> PROBE_AGENT=k16 [PROBE_RUN=…] [K16_MODE=pw|email|nb] node bin/probe.js <app|all> \
 //        shared/playwright/checks/issues/session-ended-alert-raw-key/walk.js
 //      (stable-3_5_0: PKP_E2E_LINE=stable-3_5_0 in front, its own PROBE_FEATURE and PROBE_RUN)
 const {forEachApp, launch, signIn, record} = require('../../../probe');
@@ -25,6 +30,7 @@ const MODE = process.env.K16_MODE || 'walk';
 const USER = 'dbarnes';
 const CURRENT = 'dbarnesdbarnes';
 const NEXT = 'hkk16NewPass1';
+const NEW_EMAIL = 'dbarnes.u03ir1@mailinator.com';
 
 async function step(out, name, fn) {
     try {
@@ -42,8 +48,8 @@ forEachApp(async (app) => {
     const A = await launch(app);
     const B = await launch(app);
     try {
-        // B: sign in as dbarnes, Edit Profile (Identity)
-        await signIn(B.page, USER, {contextPath: T});
+        // B: sign in as dbarnes with "Keep me logged in" unticked, Edit Profile (Identity)
+        out.bSignIn = await L.signInUnticked(B.page, USER, CURRENT, T);
         const pB = L.profileOf(B.page, T);
         await step(out, 'B-open', async () => {
             await pB.goto('identity');
@@ -83,7 +89,7 @@ forEachApp(async (app) => {
                 return {before, typed: await box.inputValue()};
             });
             // Steps 3-4: A signs in as admin, Administration, "Expire User Sessions", OK
-            await signIn(A.page, 'admin');
+            out.aSignIn = await L.signInUnticked(A.page, 'admin', 'admin', 'index');
             await step(out, 'A-expire', async () => {
                 await A.page.goto('/index.php/index/en/admin');
                 await A.page.waitForLoadState('load');
@@ -119,10 +125,39 @@ forEachApp(async (app) => {
             });
             // Step 8: B signs in again, Edit Profile › Identity: the initials
             await step(out, 'B-again', async () => {
-                await signIn(B.page, USER, {contextPath: T});
+                await L.signInUnticked(B.page, USER, CURRENT, T);
                 await pB.goto('identity');
                 return {initials: await pB.form('identity').locator('input[name="preferredAvatarInitials"]').inputValue(),
                     snap: await L.snap(B.page, 'walk-B-again')};
+            });
+        } else if (MODE === 'email') {
+            // A: dbarnes saves a new email address on Contact
+            await signIn(A.page, USER, {contextPath: T});
+            const pA = L.profileOf(A.page, T);
+            await step(out, 'A-change', async () => {
+                await pA.goto('contact');
+                const r = await L.changeEmail(A.page, pA, NEW_EMAIL);
+                r.snap = await L.snap(A.page, 'email-A-changed');
+                return r;
+            });
+            // B: "Save" under Identity, then "Contact", then a reload
+            await step(out, 'B-save', async () => {
+                const r = await L.press(B.page, () => pB.saveButton().click({timeout: 5000}), 5000);
+                r.snap = await L.snap(B.page, 'email-B-save', 6000);
+                return r;
+            });
+            await step(out, 'B-contact', async () => {
+                const r = await L.press(B.page, () => pB.tabLink('contact').click({timeout: 5000}));
+                r.snap = await L.snap(B.page, 'email-B-contact', 6000);
+                return r;
+            });
+            await step(out, 'B-reload', async () => {
+                const w = L.watch(B.page);
+                await B.page.reload();
+                await B.page.waitForLoadState('load');
+                w.stop();
+                return {url: L.strip(B.page.url()), dialogs: w.dialogs, loginForm: await B.page.locator('form#login').count(),
+                    snap: await L.snap(B.page, 'email-B-reload')};
             });
         } else if (MODE === 'pw') {
             // A: dbarnes saves a new password

@@ -6,16 +6,19 @@
 //   1. signed out, open the Login page: read the box
 //   2-4. dbarnes / wrongpassword, untick the box, "Login": read the error and the box
 //   5. dbarnesdbarnes, the box as shown, "Login": where it lands, and the remember_web_* cookie
+//   6. the idle limit passes: the session cookie deleted from the browser, remember_web_* kept
+//      (what a week unused leaves in the browser; the Steps' shortcut for the wait)
+//   7. "Edit Profile" typed: signed in (the profile) or signed out (the Login page)
 //
 // Neighbour mode (`neighbour` as the script's argument, run alone, fix in and out): the box left
-// ticked on a refused attempt comes back ticked, and the next correct sign-in sets the
-// remember_web_* cookie (the opt-in keeps working).
+// ticked on a refused attempt comes back ticked, the next correct sign-in sets the
+// remember_web_* cookie, and step 7 opens signed in (the opt-in keeps working).
 //
-// Reset first:  npm run fleet-prep -- --feature issues-u01a --dataset 1 --reset
-// Run (main):   PROBE_FEATURE=issues-u01a PROBE_AGENT=u01a node bin/probe.js all shared/playwright/checks/issues/keep-me-logged-in-always-ticked/walk.js [neighbour]
-// Run (3.5):    PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-u01a-3_5 --dataset 1 --reset
-//               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-u01a-3_5 PROBE_AGENT=u01a node bin/probe.js all shared/playwright/checks/issues/keep-me-logged-in-always-ticked/walk.js
-// Facts: .reports/<feature>/u01a/facts[-neighbour][-<run>]-<app>.json
+// Reset first:  npm run fleet-prep -- --feature <feature> --dataset <n> --reset
+// Run (main):   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/keep-me-logged-in-always-ticked/walk.js [neighbour]
+// Run (3.5):    PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature <feature-3_5> --dataset <n> --reset
+//               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=<feature-3_5> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/keep-me-logged-in-always-ticked/walk.js
+// Facts: .reports/<feature>/<id>/facts[-neighbour][-<run>]-<app>.json
 const { forEachApp, launch, signOut, screen, shot, record, idle } = require("../../../probe");
 
 const USER = "dbarnes";
@@ -89,6 +92,35 @@ forEachApp(async (app) => {
       record("5-landed", await screen(page));
     } catch (e) {
       fact("5 error", String(e).slice(0, 500));
+    }
+    // 6: the idle limit passes; the browser keeps every cookie but the session cookie
+    try {
+      const context = page.context();
+      const all = await context.cookies();
+      const sid = all.filter((c) => /SID$/.test(c.name));
+      await context.clearCookies();
+      await context.addCookies(all.filter((c) => !/SID$/.test(c.name)));
+      fact("6 session cookie deleted", { deleted: sid.map((c) => c.name), left: (await context.cookies()).map((c) => c.name) });
+    } catch (e) {
+      fact("6 error", String(e).slice(0, 500));
+    }
+    // 7: "Edit Profile", typed
+    try {
+      const res = await page.goto(app.url(`/index.php/${app.contextPath}${app.line && /3_[34]/.test(app.line) ? "" : "/en"}/user/profile`));
+      await idle(page);
+      const s = await screen(page);
+      const landed = page.url().replace(/^https?:\/\/[^/]+/, "");
+      fact("7 Edit Profile", {
+        status: res && res.status(),
+        landed,
+        signedIn: !/\/login(\?|$)/.test(landed),
+        title: await page.title(),
+        username: await page.locator("#username").inputValue().catch(() => null),
+        cookies: (await page.context().cookies()).map((c) => c.name),
+      });
+      record("7-profile", s);
+    } catch (e) {
+      fact("7 error", String(e).slice(0, 500));
     }
   } finally {
     record(neighbour ? "facts-neighbour" : "facts", facts);

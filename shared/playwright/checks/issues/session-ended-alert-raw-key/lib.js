@@ -96,6 +96,35 @@ async function changePassword(page, profile, current, next) {
     return {status: res ? res.status() : null, notice};
 }
 
+/**
+ * Sign `page` in through the Login page of `contextPath` with "Keep me logged in" unticked (the
+ * page shows it ticked), as the report's browser B does; the URL it lands on.
+ */
+async function signInUnticked(page, username, password, contextPath, locale = '/en') {
+    const {LoginPage} = require(path.join(__dirname, '../../../pages', 'LoginPage.js'));
+    const login = new LoginPage(page);
+    await page.goto(`/index.php/${contextPath}${locale}/login`);
+    await login.setRememberMe(false);
+    const ticked = await login.rememberMeCheckbox.isChecked();
+    await login.signIn(username, password);
+    return {ticked, url: strip(page.url())};
+}
+
+/** Replace the Contact tab's "Email" with `address` as a person types and press "Save"; what the tab shows. */
+async function changeEmail(page, profile, address) {
+    const box = profile.form('contact').locator('input[name="email"]');
+    const before = await box.inputValue();
+    await box.click();
+    await box.fill('');
+    await box.pressSequentially(address, {delay: 5});
+    const answered = page.waitForResponse((r) => /profile-tab\/save-contact/.test(r.url()), {timeout: 15000}).catch(() => null);
+    await profile.saveButton().click();
+    const res = await answered;
+    await sleep(1500);
+    return {before, status: res ? res.status() : null,
+        pending: flat(await profile.pendingEmailNotice().first().innerText({timeout: 3000}).catch(() => null), 200)};
+}
+
 /** screen() + PNG under `name`, bounded: a stuck page still gets its PNG. */
 async function snap(page, name, ms = 15000) {
     let s = null;
@@ -109,4 +138,4 @@ async function snap(page, name, ms = 15000) {
     return s ? name : `${name} (screen() timed out; PNG only)`;
 }
 
-module.exports = {sleep, flat, strip, profileOf, watch, traffic, profileState, press, changePassword, snap};
+module.exports = {sleep, flat, strip, profileOf, watch, traffic, profileState, press, changePassword, signInUnticked, changeEmail, snap};

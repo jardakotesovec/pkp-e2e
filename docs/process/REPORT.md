@@ -254,7 +254,9 @@ screen in quotes ("Add discussion", "Save And Continue"), with the page's
 address where it helps. Then two paragraphs, **Expected** and
 **Observed**, right under the steps: on-screen strings verbatim, an error
 message or a request and its response in a code block, the server log
-line when the app failed. A control (the neighbouring case that still
+line when the app failed; a message or log line PHP itself wrote names
+the PHP version it was seen on, since PHP rewords them (8.4's "Path must
+not be empty", U09 A18). A control (the neighbouring case that still
 works) is one sentence after Observed, when it sharpens the finding.
 
 The campaign's shortcuts are never steps: the harness builders, scenario

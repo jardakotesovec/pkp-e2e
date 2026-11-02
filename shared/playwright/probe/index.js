@@ -669,11 +669,14 @@ async function launch(app, {storageState, headless = true, record: keepRecord = 
  * which is what decides where the user lands afterwards. An open session is
  * signed out first (the login page would otherwise send it home silently).
  *
+ * `remember` sets "Keep me logged in" before signing in (`false` unticks it);
+ * left out, the box stays as the Login page shows it (ticked, U01 A2).
+ *
  * @param {import('@playwright/test').Page} page
  * @param {string} username a roster username (users.md), a dataset user on a dataset fleet (dataset.md) or a scratch user
- * @param {{password?: string, origin?: string, contextPath?: string}} [options]
+ * @param {{password?: string, origin?: string, contextPath?: string, remember?: boolean}} [options]
  */
-async function signIn(page, username, {password, origin = '', contextPath} = {}) {
+async function signIn(page, username, {password, origin = '', contextPath, remember} = {}) {
     const loginPage = new LoginPage(page);
     const open = async () => {
         await page.goto(`${origin}/index.php/${contextPath || 'index'}${urlLocale()}/login`);
@@ -682,6 +685,9 @@ async function signIn(page, username, {password, origin = '', contextPath} = {})
     if ((await loginPage.usernameInput.count()) === 0) {
         await signOut(page, {origin});
         await open();
+    }
+    if (remember !== undefined) {
+        await loginPage.setRememberMe(remember);
     }
     await loginPage.signIn(username, password || users.getPassword(username));
 }

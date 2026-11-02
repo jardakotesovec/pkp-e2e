@@ -5,17 +5,25 @@
 // The issue report's Steps, through the screens on PKP's default dataset in two browsers: B holds
 // `dbarnes`'s Users & Roles page, A (`admin`) ends every session with "Expire User Sessions".
 //
-//   H19J_MODE=walk (default)  the Steps: B opens Users & Roles; A expires the sessions; B types
+//   H19J_MODE=walk (default)  the Steps: B opens Users & Roles; B's session is ended; B types
 //                             "h19i" in the search box and presses Enter; B presses "OK"; B reloads
 //   H19J_MODE=nb              the neighbour (fix in and out): with B's session alive, a search
 //                             answers with its list and no window; then, after A expires the
 //                             sessions, the dashboard's search (another list on the REST API) and
 //                             a settings form's "Save" (Settings › Journal/Press/Server, "Masthead")
-//   H19J_MODE=dash            "Searching the dashboard": B's dashboard left 15 s to settle, A expires
-//                             the sessions, B's dashboard untouched for 30 s, then B searches
+//   H19J_MODE=dash            "Searching the dashboard": B's dashboard left 15 s to settle, B's
+//                             session ended, B's dashboard untouched for 30 s, then B searches
 //                             "h19i", presses "OK" and reloads
 //
-// Each mode starts from a freshly reset dataset fleet. Every dialog is answered "OK" and kept.
+// The walk and dash modes take B's sign-in and the end of its session from a list, each
+// combination with fresh browsers (lib.js combos(), endSession()):
+//   H19_COMBOS=<box>:<end>,…   (default unticked:expire, the Steps) <box> "Keep me logged in" at
+//                              B's sign-in, unticked or ticked; <end> expire ("Expire User Sessions"
+//                              in A; with the box unticked only), idle (the idle limit) or cookies
+//                              (B's cookies for the site cleared)
+// After the reload, a page that opened signed in is searched once more. The nb mode signs B in
+// with the box unticked.
+// Each run starts from a freshly reset dataset fleet. Every dialog is answered "OK" and kept.
 // Run: PROBE_FEATURE=<feature> PROBE_AGENT=<id> [PROBE_RUN=…] [H19J_MODE=nb] node bin/probe.js <app|all> \
 //        shared/playwright/checks/issues/users-search-session-ended-error-window/walk.js
 //      (stable-3_5_0: PKP_E2E_LINE=stable-3_5_0 in front, the line fleet's PROBE_FEATURE)
@@ -23,7 +31,7 @@ const {forEachApp, launch, signIn, record} = require('../../../probe');
 const L = require('./lib.js');
 
 const MODE = process.env.H19J_MODE || 'walk';
-const NAME = `users-${MODE}`;
+let NAME = `users-${MODE}`;
 
 async function step(out, name, fn) {
     try {
@@ -72,17 +80,25 @@ async function search(page, text) {
 }
 
 forEachApp(async (app) => {
+    if (MODE === 'nb') return combo(app, {box: 'unticked', end: 'expire'});
+    for (const c of L.combos()) await combo(app, c);
+});
+
+async function combo(app, {box, end}) {
     const T = app.contextPath;
-    const out = {line: app.line || 'main', mode: MODE};
+    NAME = MODE === 'nb' ? `users-nb` : `users-${MODE}-${box}-${end}`;
+    const out = {line: app.line || 'main', mode: MODE, box, end};
     const A = await launch(app);
     const B = await launch(app);
     const w = L.watchContext(B.context);
+    const signB = () => (box ? L.signInBox(B.page, 'dbarnes', {contextPath: T, remember: box === 'ticked'})
+        : signIn(B.page, 'dbarnes', {contextPath: T}));
     try {
         if (MODE === 'dash') {
             // "Searching the dashboard": B's dashboard settles (past its counts' 5-second throttle), A
             // expires the sessions, B's dashboard sits untouched for 30 s (any request, any window), then
             // B searches, presses "OK" and reloads
-            await signIn(B.page, 'dbarnes', {contextPath: T});
+            await step(out, 'B-signin', signB);
             const box = B.page.getByRole('searchbox', {name: /^Search submissions/}).first();
             await step(out, 'dash-B-open', async () => {
                 await B.page.goto(`/index.php/${T}/en/dashboard/editorial`);
@@ -91,7 +107,7 @@ forEachApp(async (app) => {
                 return {url: L.strip(B.page.url()), window: await windowText(B.page),
                     main: L.flat(await B.page.locator('main').first().innerText({timeout: 2000}).catch(() => null), 300)};
             });
-            await step(out, 'A-expire', () => L.expireSessions(A.page));
+            await step(out, 'end', () => L.endSession(app, end, A, B));
             await step(out, 'dash-B-idle', async () => {
                 const r = await L.act(w, B.context, 'dash-idle', () => L.sleep(30000), 500);
                 return {...r, window: await windowText(B.page), state: await L.where(B.page)};
@@ -109,15 +125,24 @@ forEachApp(async (app) => {
                 await L.sleep(3000);
                 return {pressed, windowAgain: await windowText(B.page), state: await L.where(B.page)};
             });
-            await step(out, 'dash-B-reload', async () => {
+            const reload = await step(out, 'dash-B-reload', async () => {
                 const r = await L.act(w, B.context, 'dash-reload', () => B.page.reload({timeout: 20000}), 1500);
-                return {...r, state: await L.where(B.page)};
+                return {...r, state: await L.where(B.page), cookies: await L.cookieNames(B.context)};
+            });
+            if (reload && reload.state && !reload.state.loginForm) await step(out, 'dash-B-search-after-reload', async () => {
+                const r = await L.act(w, B.context, 'dash-search-after-reload', async () => {
+                    const b2 = B.page.getByRole('searchbox', {name: /^Search submissions/}).first();
+                    await b2.click({timeout: 10000});
+                    await b2.pressSequentially('h19i', {delay: 25});
+                    await b2.press('Enter');
+                }, 5000);
+                return {...r, window: await windowText(B.page), state: await L.where(B.page)};
             });
             return;
         }
 
         // Step 1: B signs in as dbarnes, Settings › Users & Roles
-        await signIn(B.page, 'dbarnes', {contextPath: T});
+        await step(out, 'B-signin', signB);
         await step(out, 'B-users', async () => {
             await B.page.goto(`/index.php/${T}/en/management/settings/access`);
             await B.page.getByRole('searchbox', {name: /Enter a user's name/}).or(B.page.locator('[id^="component-grid-settings-user-usergrid"]')).first().waitFor({timeout: 30000});
@@ -170,8 +195,8 @@ forEachApp(async (app) => {
             return;
         }
 
-        // Step 2: A (admin) presses "Expire User Sessions", "OK"
-        await step(out, 'A-expire', async () => ({...(await L.expireSessions(A.page)), snap: await L.snap(A.page, `${NAME}-A-expired`)}));
+        // Step 2: B's session ends (A presses "Expire User Sessions", the idle limit, or B's cookies cleared)
+        await step(out, 'end', () => L.endSession(app, end, A, B));
         // Step 3: B, without reloading, types h19i in the search box and presses Enter
         await step(out, 'B-search', async () => {
             const r = await L.act(w, B.context, 'search', () => search(B.page, 'h19i'), 5000);
@@ -183,9 +208,14 @@ forEachApp(async (app) => {
             await L.sleep(800);
             return {pressed: text, state: await usersState(B.page)};
         });
-        await step(out, 'B-reload', async () => {
+        const reload = await step(out, 'B-reload', async () => {
             const r = await L.act(w, B.context, 'reload', () => B.page.reload({timeout: 20000}), 1500);
-            return {...r, state: await L.where(B.page), snap: await L.snap(B.page, `${NAME}-B-reload`)};
+            return {...r, state: await L.where(B.page), cookies: await L.cookieNames(B.context), snap: await L.snap(B.page, `${NAME}-B-reload`)};
+        });
+        if (reload && reload.state && !reload.state.loginForm) await step(out, 'B-search-after-reload', async () => {
+            await B.page.getByRole('searchbox', {name: /Enter a user's name/}).waitFor({timeout: 20000}).catch(() => {});
+            const r = await L.act(w, B.context, 'search-after-reload', () => search(B.page, 'h19i'), 4000);
+            return {...r, state: await usersState(B.page)};
         });
     } finally {
         out.allDialogs = w.dialogs;
@@ -194,4 +224,4 @@ forEachApp(async (app) => {
         await A.close().catch(() => {});
         await B.close().catch(() => {});
     }
-});
+}

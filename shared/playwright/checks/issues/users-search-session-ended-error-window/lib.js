@@ -110,4 +110,65 @@ async function where(page) {
         main: flat(await page.locator('main, body').first().innerText({timeout: 2000}).catch(() => null), 300)};
 }
 
-module.exports = {sleep, flat, strip, watchContext, contextTraffic, act, snap, expireSessions, where};
+/**
+ * Sign in on the context's Login page with "Keep me logged in" set as `remember` says (ticked or
+ * unticked), as a person does: an open session is signed out first. Where the browser lands.
+ */
+async function signInBox(page, username, {contextPath, remember}) {
+    const {LoginPage} = require('../../../pages/LoginPage.js');
+    const {signOut} = require('../../../probe');
+    const users = require('../../../data/users.js');
+    const lp = new LoginPage(page);
+    const open = () => page.goto(`/index.php/${contextPath}/en/login`);
+    await open();
+    if ((await lp.usernameInput.count()) === 0) {
+        await signOut(page);
+        await open();
+    }
+    const shown = await lp.rememberMeCheckbox.isChecked();
+    await lp.setRememberMe(remember);
+    await lp.signIn(username, users.getPassword(username));
+    return {boxAsShown: shown, boxSet: remember, landed: strip(page.url())};
+}
+
+/** The names of the cookies a browser context holds for the site (no values). */
+async function cookieNames(context) {
+    return (await context.cookies()).map((c) => c.name).sort();
+}
+
+/**
+ * End browser B's session one of the three ways the reports name:
+ *   expire   browser A (`admin`) presses Administration › "Expire User Sessions", "OK"
+ *   idle     the idle limit: every session row's last activity moved back 8 days, past the
+ *            7-day `session_lifetime` (what waiting does to the row; B's cookies untouched)
+ *   cookies  B's cookies for the site cleared, as the browser's "clear site data" does
+ * What it did, and the cookie names B holds before and after.
+ */
+async function endSession(app, how, A, B) {
+    const before = await cookieNames(B.context);
+    let did;
+    if (how === 'expire') did = await expireSessions(A.page);
+    else if (how === 'idle') {
+        const {sql} = require('../../../probe');
+        did = {aged: sql(app, 'UPDATE sessions SET last_activity = last_activity - 8 * 86400 RETURNING id').split('\n').filter(Boolean).length};
+    } else if (how === 'cookies') {
+        await B.context.clearCookies();
+        did = {cleared: true};
+    } else throw new Error(`endSession: unknown way ${how}`);
+    return {how, did, cookiesBefore: before, cookiesAfter: await cookieNames(B.context)};
+}
+
+/**
+ * The combinations to walk, H19_COMBOS as comma-separated `<box>:<end>` pairs, `<box>` unticked or
+ * ticked ("Keep me logged in" at B's sign-in), `<end>` a way endSession() knows; by default
+ * `unticked:expire`, the reports' Steps.
+ */
+function combos(def = 'unticked:expire') {
+    return String(process.env.H19_COMBOS || def).split(',').map((s) => s.trim()).filter(Boolean)
+        .map((pair) => { const [box, end] = pair.split(':'); return {box, end}; })
+        // "Expire User Sessions" is walked with the box unticked only, as the Steps take it
+        .filter(({box, end}) => !(box === 'ticked' && end === 'expire'));
+}
+
+module.exports = {sleep, flat, strip, watchContext, contextTraffic, act, snap, expireSessions, where,
+    signInBox, cookieNames, endSession, combos};

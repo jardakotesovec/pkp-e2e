@@ -1,6 +1,6 @@
 # "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it
 
-- **Severity** low
+- **Severity** medium
 - **Effort** medium
 - **Kind** defect
 - **Affects**
@@ -9,60 +9,68 @@
   - 3.4: OJS, OMP, OPS (code)
   - 3.3: OJS, OMP, OPS (code)
 - **Introduced** `pkp/pkp-lib#658` for `pkp/pkp-lib#639` · [be949906f5](https://github.com/pkp/pkp-lib/commit/be949906f5aee16ff88668615986ec141f43445f) · 2015-08-07 · Nate Wright (NateWr)
-- **Upstream** none found for the ticked box (2026-10-07). The severity depends on `pkp/pkp-lib#12780` (open: closed 2026-07-28, reopened 2026-10-07), an issue about "Login As" on a disabled account; the comment that reopened it reports that "Keep me logged in" no longer keeps users signed in
+- **Upstream** none found for the ticked box (2026-11-02)
 - **Tracked in** spec U01 [A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U01-login-and-sessions.md#a2)
-- **Checked** 2026-10-07, each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
-Update 2026-10-07: since `pkp/pkp-lib`
-[3407fc5bc0](https://github.com/pkp/pkp-lib/commit/3407fc5bc088cc6a29f2d27d1cf54a6b86d54b37)
-(2026-10-06; on `stable-3_5_0` as
-[edc3d36c74](https://github.com/pkp/pkp-lib/commit/edc3d36c745e2d478d174de1371eeb491c5a50ac))
-the "Keep me logged in" cookie signs no one back in on `main` and the
-3.5 branch, as in every 3.5 release, so a ticked sign-in there ends
-exactly as an unticked one does. The box is still ticked every time the
-form shows. Severity medium → low. Effort small → medium: five PKP
-themes carry the same box in templates of their own.
+Update 2026-11-02: since `pkp/pkp-lib`
+[442148e14e](https://github.com/pkp/pkp-lib/commit/442148e14ef5cf836724423cf425102c2a0de480)
+(`pkp/pkp-lib#12780`, 2026-10-31; on `stable-3_5_0` as
+[c4c0aa8c52](https://github.com/pkp/pkp-lib/commit/c4c0aa8c5293254ad253544aea230b1b607d5249),
+released in 3.5.0-6) the "Keep me logged in" cookie signs the browser
+back in again on `main`, the 3.5 branch and 3.5.0-6. From 6 to 31
+October it did not, so a ticked sign-in there ended as an unticked one
+did and this report was rated low. With the cookie working again, the
+wrongly ticked box keeps users signed in, and the severity goes back
+from low to medium. Steps 6 and 7 show it.
 
 ## Summary
 
-The Login page shows "Keep me logged in" already ticked, though the
-label offers it as a choice. It ticks the box again when the page shows
-the form after a wrong password: a user who unticked it, mistyped the
-password and signed in on the next try signs in with the box ticked,
-without being told.
+The defect is in how the Login page's "Keep me logged in" box arrives.
+It is ticked the first time the page shows, though the label offers it
+as a choice, and it is ticked again when the page shows the form after
+a wrong password. A user who unticked it, mistyped the password and
+signed in on the next try is signed in with the box ticked, without
+being told. The same box, ticked the same way, is in the Login templates
+of five PKP themes, which a fix in pkp-lib does not reach: each theme
+needs the same change.
 
-What the tick costs depends on the version. On 3.4 and 3.3 it decides
-whether a sign-in ends when the browser closes or lasts 30 days without
-a visit, so the ticked box keeps every user who leaves it alone signed
-in on that browser, a shared computer included. On 3.5, in every
-release so far and on the branch, and on `main`, the box keeps no one
-signed in: ticked or not, a sign-in ends after a week without a visit.
-All that is left there is the "Keep me logged in" cookie, stored in the
-browser against the user's choice.
+What the tick costs depends on the version:
 
-That changes when "Keep me logged in" is made to work on 3.5 and
-`main`; the comment that reopened `pkp/pkp-lib#12780` on 7 October 2026
-reports that it no longer does. A ticked sign-in then lets the browser
-back into the account without the password for up to 30 days (the
-default), however long the browser stood unused.
+- On `main`, the 3.5 branch and 3.5.0-6, a ticked sign-in lets the
+  browser back into the account without the password for 30 days from
+  the sign-in, however long the browser stood unused. An unticked one
+  ends after a week without a visit.
+- On 3.4 and 3.3, a ticked sign-in lasts until 30 days pass without a
+  visit; an unticked one ends when the browser closes.
+- In the 3.5 releases before 3.5.0-6 the cookie signs no one back in.
+  The box still makes the server store the cookie in the browser of a
+  user who did not choose it, but the cookie does nothing.
+
+Those it hurts are the users who unticked the box before a refused
+sign-in, and those who did not notice it was ticked, most of all on a
+shared or public computer.
 
 ## Impact
 
-- **Lost.** On 3.4 and 3.3, the end of the sign-in at browser close,
-  for every user who leaves the box as shown. On 3.5 and `main`, the
-  choice alone: a cookie the user declined is stored and does nothing.
-- **Who.** Every user who signs in through the Login page. Where the
-  tick is honoured, those on a shared or public computer bear the cost.
-- **Way round.** Untick the box before each press of "Login", or use
-  "Logout" when done. The page does not say so.
+- **Lost.** The user's choice to end the sign-in. On that browser, the
+  next person opens the account without the password.
+- **Who.** Users who sign in on the Login page (or the Login form of
+  one of the five PKP themes) and leave the box as shown, whether they
+  unticked it before a refused sign-in or never saw it was ticked.
+- **Way round.** For the user: untick the box before each press of
+  "Login", or press "Logout" when done; the page does not say so. For
+  the site, by the code: the 30 days is `remember_me_lifetime` in the
+  `[security]` section of `config.inc.php` (in days, on `main` and from
+  3.5.0-5 on). Set below `session_lifetime` (down to its floor of one
+  minute; 0 counts as one minute), it leaves the box almost no effect,
+  for every user, those who want to stay signed in as well. On 3.4 and
+  3.3 the ticked lifetime is `session_lifetime` in `[general]` (30
+  there), and 0 there makes every sign-in end when the browser closes.
 
-Low: on 3.5 and `main`, the versions walked, ticked and unticked
-sign-ins end alike, so the wrong tick costs the user nothing they can
-see. On 3.4 and 3.3 the code gives the fault its full cost, which is
-medium on this scale; the label does not follow because those versions
-were read, not walked. It is medium on 3.5 and `main` as well from the
-day "Keep me logged in" works there.
+Medium: the user's choice is overridden silently, and the way round
+works only for a user who knows to look.
 
 ## Steps to reproduce
 
@@ -88,18 +96,34 @@ The next, correct attempt:
 5. Type `dbarnesdbarnes` in "Password", leave "Keep me logged in" as the
    page shows it, and press "Login".
 
+Coming back after a week:
+
+6. Leave the browser unused for longer than the idle limit,
+   `[general] session_lifetime` in `config.inc.php` (7 days by
+   default). Do not sign out. To skip the wait, delete the session
+   cookie in the browser's developer tools (Application › Cookies;
+   `OJSSID`, `OMPSID` or `OPSSID` by default, `session_cookie_name` in
+   `config.inc.php`) and keep `remember_web_…`: the session cookie
+   expires with the session, so that is what the wait leaves in the
+   browser.
+7. Open "Edit Profile",
+   `/index.php/publicknowledge/en/user/profile`.
+
 **Expected.** At step 1 "Keep me logged in" is unticked. At step 4 the
 page reads "Invalid username/email or password. Please try again.",
 keeps `dbarnes` in "Username or Email", and shows the box unticked, as
 the user left it. At step 5 the Dashboard opens and the browser holds
 no `remember_web_…` cookie, since the user chose not to stay signed in.
+At step 7 the Login page opens.
 
 **Observed.** At step 1 the box is ticked. At step 4 the error and
 `dbarnes` are shown, and the box is ticked again. At step 5 the
-Dashboard opens, and the browser's developer tools (Application ›
-Cookies) show a `remember_web_c1a26bc0…` cookie that expires 30 days
-later; the session cookie beside it expires 7 days later. The box's
-markup, at steps 1 and 4 alike:
+Dashboard opens, and the browser's developer tools show a
+`remember_web_c1a26bc0…` cookie that expires 30 days later; the session
+cookie beside it expires 7 days later. At step 7 the "Profile" page
+opens, its "Identity" tab reading "Username dbarnes": the browser is
+signed in again without the password. The box's markup, at steps 1 and
+4 alike:
 
 ```html
 <input type="checkbox" name="remember" id="remember" value="1" checked="$remember">
@@ -120,26 +144,24 @@ The handler already passes the user's choice: `LoginHandler::index()`,
 rate-limit branch each assign `remember` from the request. The template
 never reads it. When the form is posted with the box ticked,
 `Validation::login(…, $remember)` hands it to Laravel's
-`Auth::attempt($credentials, $remember)`, which sets the
-`remember_web_*` cookie for `[security] remember_me_lifetime` days
-(30 by default, counted from the sign-in). Unticked, the sign-in rests on
-the session cookie alone, which ends after `[general] session_lifetime`
-days without a visit (7 by default).
+`Auth::attemptWhen($credentials, …, $remember)` (`Auth::attempt()` before
+`pkp/pkp-lib#12780`), which sets the `remember_web_*` cookie for
+`[security] remember_me_lifetime` days (30 by default, counted from the
+sign-in). Unticked, the sign-in rests on the session cookie alone, which
+ends after `[general] session_lifetime` days without a visit (7 by
+default).
 
-On 3.5 and `main` nothing then signs a user back in from that cookie.
-`PKPRequest::getUser()` and `Validation::isLoggedIn()` read the
-session's own user id alone: in every 3.5 release tag (`3_5_0rc2` to
-`3_5_0-5`, code) and, since `pkp/pkp-lib` 3407fc5bc0 (2026-10-06;
-`stable-3_5_0` edc3d36c74), on both branch tips (walked: a ticked and
-an unticked sign-in both open the Login page once the idle limit has
-passed).
-
-Only the two branches read the cookie, from 2026-07-21 to 2026-10-06.
-`pkp/pkp-lib#12790` (a6d68f9547; `stable-3_5_0` 6d0d04f41a) made
-`getUser()` fall back on Laravel's guard, which signed the browser back
-in once its session had lapsed, within the cookie's 30 days (walked
-with that code put back: after the idle limit, Settings › "Users &
-Roles" opens signed in). No release tag holds that fallback.
+On `main`, the 3.5 branch and 3.5.0-6 that cookie signs the browser
+back in once its session has ended. Since `pkp/pkp-lib` 442148e14e
+(`stable-3_5_0` c4c0aa8c52, first released in 3.5.0-6),
+`PKPAuthenticateSession::handle()` asks the
+guard for the user before the session is first saved, and
+`PKPSessionGuard::userFromRecaller()` restores the user from a valid
+`remember_web_*` cookie and writes them into the new session, so
+`PKPRequest::getUser()` and `Validation::isLoggedIn()` find them again
+(walked: step 7). The 3.5 releases `3_5_0-0` to `3_5_0-5` never do:
+there `getUser()` and `isLoggedIn()` read the session's own user id
+alone, which nothing restores from the cookie (code).
 
 The line came in with `pkp/pkp-lib#658` ("style register and login
 pages", for `pkp/pkp-lib#639`), which rewrote the form as plain markup.
@@ -150,10 +172,12 @@ read the variable. The change was made during the 3.0 rewrite, so no
 Reach:
 
 - Every sign-in through the Login page of all three apps; the template
-  is pkp-lib's and no app overrides it (checked in the code).
+  is pkp-lib's and no app overrides it. It is the only template in the
+  apps, pkp-lib and the bundled plugins with the box (checked in the
+  code); the five PKP themes below carry their own.
 - Both forms the Login page shows: the fresh one and the one a refused
   sign-in shows again (walked), and on `main` the rate-limited refusal,
-  which renders the same template (code; 3.5 has no rate limiting).
+  which renders the same template (code; the 3.5 branch has no rate limiting).
 - On 3.4 and 3.3, in their releases as on the branches, a ticked box
   gives the session cookie a lifetime of `session_lifetime` days (30 by
   default there), renewed on every visit
@@ -183,6 +207,7 @@ checkboxes of `userRegister.tpl` do
 --- a/lib/pkp/templates/frontend/pages/userLogin.tpl
 +++ b/lib/pkp/templates/frontend/pages/userLogin.tpl
 @@ -73,7 +73,7 @@
+ 			</div>
  			<div class="remember checkbox">
  				<label>
 -					<input type="checkbox" name="remember" id="remember" value="1" checked="$remember">
@@ -203,12 +228,11 @@ change in their own templates: `{if $remember} checked="checked"{/if}`
 in place of `checked="$remember"`, and in `pkp/classic` in place of the
 bare `checked`. Not tried in the themes.
 
-Tried on `main` on the three apps with the default theme (2026-10-04;
-the template has not changed since): the Steps then show the Expected
-(unticked at steps 1 and 4, no `remember_web_…` cookie after step 5).
-The neighbour check, a refused attempt with the box left ticked and then
-the correct password, shows the box ticked again and the cookie set,
-with the fix in and out.
+Tried on `main` on the three apps with the default theme (2026-11-02):
+the Steps then show the Expected. A control, a refused attempt with the
+box ticked on purpose and then the correct password, comes back with
+the box ticked, sets the cookie and is signed in again at step 7, with
+the fix and without it.
 
 **Alternatives.**
 
@@ -219,11 +243,10 @@ with the fix in and out.
 
 **What goes with it.**
 
-- No stored data to repair. Users already holding a `remember_web_*`
-  cookie keep it until it runs out, they sign out, or their session
-  lapses; a change that makes the cookie work again signs those
-  browsers back in, the unchosen ones included, so this fix is best in
-  before or with it.
+- No stored data to repair. A browser already holding a
+  `remember_web_*` cookie from a sign-in its user did not mean to keep
+  stays signed back in until the cookie runs out (30 days from that
+  sign-in), the user presses "Logout" or the password changes.
 - A search of the three apps' templates, pkp-lib's and the bundled
   plugins' for an HTML attribute holding a bare `$variable` found only
   this line; the other matches are inside Smarty tags or Vue bindings,
@@ -257,41 +280,29 @@ small; it leaves the five themes ticked.
   run with
   `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/keep-me-logged-in-always-ticked/walk.js`
   (`PKP_E2E_LINE=stable-3_5_0` in front for 3.5). `neighbour` as the
-  script's argument
-  runs the neighbour check alone: the same steps with the box left
-  ticked at step 3.
+  script's argument runs the neighbour check alone: the same steps with
+  the box left ticked at step 3. Step 6 takes the Steps' shortcut: it
+  deletes the session cookie from the browser and keeps the others.
 - No request in the walks answered an error and no page script failed.
-- Walked 2026-10-07 on PostgreSQL, each install freshly loaded from
+- Walked 2026-11-02 on PostgreSQL, each install freshly loaded from
   pkp/datasets
-  [a130b9a](https://github.com/pkp/datasets/commit/a130b9a30acbc21e28b167970255b65993ac56bf) (2026-10-07),
+  [c1a3abc](https://github.com/pkp/datasets/commit/c1a3abcdd16e5bfbb911fc38689d934e5de11a27) (2026-11-01),
   with the dataset's own `config.inc.php` values for `session_lifetime`
   (7) and `remember_me_lifetime` (30):
-  - main: OJS 3265fdc673, OMP 0c6a3ebed1, OPS 8ae6c68e04 (lib/pkp
-    f8285b0b8f in all three): the same result on the three apps.
-  - stable-3_5_0: OJS 6d2a42555d, OMP 5861ebee10, OPS 6a8f83586c
-    (lib/pkp 6910ca6d8e in all three): the same result on the three
-    apps.
-- What a tick does on 3.5 and `main` was walked the same day with the
-  kept script of another report,
-  [pkp-e2e#828](https://github.com/jardakotesovec/pkp-e2e/issues/828)
-  (the fault in how the cookie signs a user back in):
-  [login-as-after-idle-limit-server-error/walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/login-as-after-idle-limit-server-error/walk.js),
-  in its default mode (a ticked sign-in) and its mode `nb` (which holds
-  the unticked one), on the three apps on `main` and 3.5. `rvaca` signs
-  in, the idle limit is stood in for (every session row aged eight
-  days; walked with the session cookie kept and with it removed, as a
-  real wait leaves it), and Settings › "Users & Roles" opens the Login
-  page, ticked and unticked alike. With the cookie read put back on
-  `main` (that report's trial-cookie-read.diff, the three files of
-  3407fc5bc0 as they were before it), "Users & Roles" opened signed in
-  after the same stand-in.
-- Code read for the same: `PKPRequest::getUser()` and
-  `Validation::isLoggedIn()` on `main` and `stable-3_5_0` (the session's
-  `userId` alone), `git show 3407fc5bc0` and `git show a6d68f9547`.
-- The releases, by code, in pkp-lib's tags (`git show <tag>:<path>`;
-  pkp's own tag list ends at `3_5_0-5`, `3_4_0-11` and `3_3_0-23`):
+  - main: OJS bc4a83e9db, OMP 853bf3b052, OPS fd893a8c92 (lib/pkp
+    442148e14e in all three): the same result on the three apps.
+  - stable-3_5_0: OJS 0f2de4ff3f, OMP 9e2a7fd005, OPS d4a7e97a55
+    (lib/pkp c4c0aa8c52 in all three), the commits pkp tagged
+    `3_5_0-6` in the three apps: the same result on the three apps.
+- The cookie restore, by code, on both tips: `PKPAuthenticateSession::handle()`
+  (the `$this->guard()->user()` call), `PKPSessionGuard::userFromRecaller()`
+  (`setUserDataToSession()`), `PKPRequest::getUser()` and
+  `Validation::login()` (`Auth::attemptWhen()`); `git show 442148e14e`.
+- The releases, by code, in pkp-lib's tags (`git show <tag>:<path>`):
   `classes/core/PKPRequest.php` at `3_5_0rc2` and `3_5_0-0` to `3_5_0-5`
-  has no `Auth::user()` in `getUser()`, and no tag holds 6d0d04f41a;
+  resolves the user from the session's `userId` alone
+  (`Validation::isLoggedIn()` the same), and `PKPSessionGuard` there has
+  no `userFromRecaller()` that would write it;
   `Validation` and `SessionManager` at `3_4_0-0`, `3_4_0-11`, `3_3_0-6`
   and `3_3_0-23` use the tick as the branches do, and the template has
   the same line in each. The `remember_me_lifetime` setting is in
@@ -299,36 +310,36 @@ small; it leaves the five themes ticked.
   lifetime for the cookie, which leaves Laravel's own (400 days,
   `SessionGuard::$rememberDuration`; not walked).
 - The themes: each template read on its repository's default branch
-  (`main` in all five) at
+  (`main` in all five) on 2026-10-07 at
   `https://raw.githubusercontent.com/pkp/<theme>/HEAD/<path>`, the paths
   and lines as under Cause. `pkp/healthSciences` keeps the box in
   `loginForm.tpl`, not in its `userLogin.tpl`. `pkp/oldGregg`,
   `pkp/defaultManuscript` and `pkp/material` answered 404 for
   `templates/frontend/pages/userLogin.tpl`; other theme repositories
-  were not looked at. No theme was installed or walked.
-- The fix was tried on 2026-10-04, on that day's `main` tips (OJS
-  ff004d0973 with lib/pkp 987776cd04, OMP 3b0ecf794c and OPS c8af945bb7
-  with lib/pkp 3dc90c81a6):
+  were not looked at. No theme was installed or walked, nor read again
+  on 2026-11-02.
+- The fix was tried on 2026-11-02 on the `main` tips above:
+  [fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/keep-me-logged-in-always-ticked/fix.diff),
   `node bin/try-fix.js apply shared/playwright/checks/issues/keep-me-logged-in-always-ticked/fix.diff ojs omp ops`,
-  then walk.js and walk.js `neighbour` with the same command, then
-  `revert` and walk.js `neighbour` again. Not tried again on
-  2026-10-07: between those tips and today's, `userLogin.tpl` is
-  unchanged and `LoginHandler.php` differs in one line that does not
-  touch `remember` (the refusal's reason is escaped), and the diff
-  still applies to the three checkouts (`patch --dry-run`).
-- 3.4, by code: OJS `stable-3_4_0` at d68934d0d1, OMP at 0aec65441f, OPS
-  at acd8ae704b, pkp-lib 767353f4fe. `templates/frontend/pages/userLogin.tpl`
-  line 73 is the same; `pages/login/LoginHandler.php` assigns
-  `remember` on display and on a refused sign-in; no app overrides the
-  template. What the tick does there: `Validation::registerUserSession()`
-  (`setRemember()`, then the session cookie's lifetime),
-  `SessionManager` (sessions not remembered are dropped a day after
-  their last use) and `config.TEMPLATE.inc.php` (`session_lifetime = 30`).
-- 3.3, by code: OJS `stable-3_3_0` at ac77c9fb35, OMP at 8e72fc8836, OPS
-  at c5532e2161, pkp-lib ac3fa73402. The same template line 73;
+  then walk.js and walk.js `neighbour` with the command above, each on a
+  freshly loaded dataset, then `revert` and walk.js `neighbour` again.
+- 3.4, by code: OJS `stable-3_4_0` at 8bd9e6f9a0, OMP at e92ae5b6d,
+  OPS at d6dd7247c9, pkp-lib f4719f2805.
+  `templates/frontend/pages/userLogin.tpl` line 73 is the same;
+  `pages/login/LoginHandler.php` assigns `remember` on display and on a
+  refused sign-in; no app overrides the template; `pkp/pkp-lib#12780`
+  is not on the branch. What the tick does there:
+  `Validation::registerUserSession()` (`setRemember()`, then the session
+  cookie's lifetime), `SessionManager` (sessions not remembered are
+  dropped a day after their last use) and `config.TEMPLATE.inc.php`
+  (`session_lifetime = 30`). None of these files changed since the
+  2026-10-07 read (pkp-lib 767353f4fe).
+- 3.3, by code: OJS `stable-3_3_0` at 2f766afdb1, OMP at 35fb87173,
+  OPS at 1f02fc5641, pkp-lib 5b26595791. The same template line 73;
   `pages/login/LoginHandler.inc.php` assigns `remember` the same way;
   no app overrides the template; `Validation.inc.php` and
-  `SessionManager.inc.php` use the tick as on 3.4.
+  `SessionManager.inc.php` use the tick as on 3.4, unchanged since the
+  2026-10-07 read (pkp-lib ac3fa73402).
 - Introduced: `git blame` on the line names 60fa6ff5ed
   (`pkp/pkp-lib#1614`, 2016-07-15), which only re-indented it when the
   implicit-auth branch was removed; `git log -S'checked="$remember"'`
@@ -337,20 +348,18 @@ small; it leaves the five themes ticked.
   API (`commits/be949906f5/pulls`) names `pkp/pkp-lib#658` ("style
   register and login pages", NateWr, merged 2015-08-07); the commit
   message names only `pkp/pkp-lib#639`.
-- Upstream (2026-10-07): pkp/pkp-lib, then the pkp organisation's other
-  repositories, searched for "keep me logged in", "remember me" with
-  login, checkbox, checked or default, `userLogin.tpl remember` and
-  `rememberUsernameAndPassword`. `pkp/pkp-lib#1867` (closed 2016)
-  renamed the label to "Keep me logged in" and does not mention the box's
-  state; `pkp/pkp-lib#12586` (merged, the `remember_me_lifetime` setting)
-  changed the handler and the cookie, not the template.
-  `pkp/pkp-lib#12780`, read through GitHub's API on 2026-10-07: titled
-  for "Login As" on a user with a disabled account, closed 2026-07-28,
-  reopened 2026-10-07 by the comment of that day, which asks for the
-  regression in "Keep me logged in" to be reviewed; it does not mention
-  the box, and no pull request for it is open.
+- Upstream (2026-11-02): pkp/pkp-lib, pkp/ojs, pkp/ui-library and the
+  pkp organisation searched for "keep me logged in", "remember me" with
+  login, `remember checkbox checked`, `userLogin.tpl remember`,
+  `rememberUsernameAndPassword` and `checked="$remember"`.
+  `pkp/pkp-lib#1867` (closed 2016) renamed the label to "Keep me logged
+  in" and does not mention the box's state; `pkp/pkp-lib#12586` (merged,
+  the `remember_me_lifetime` setting) changed the handler and the
+  cookie, not the template; `pkp/pkp-lib#12780` (closed, fixed by
+  442148e14e) is about the cookie not signing users back in, not the
+  box.
 - Not driven: 3.4 and 3.3 (code only); the rate-limited refusal (code);
   MySQL not checked, though nothing here depends on the database.
-- Unverified: that "Logout" removes the `remember_web_*` cookie rests on
-  Laravel's `SessionGuard::logout()`, which `Validation::logout()` calls;
-  not walked.
+- Unverified: that "Logout" or a password change ends a remembered
+  sign-in, as "What goes with it" says, rests on spec U01's own walks
+  (its Rule 5a), not on this script.

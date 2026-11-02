@@ -1227,7 +1227,7 @@ unless its Basis line says otherwise.
 | [A20](#a20) | After a newcomer registers with an existing reviewing interest, accounts that save their Roles tab list it twice | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A24](#a24) | The Profile page's Contact tab sometimes logs a script error on opening or saving; the save still works | 🐞 | low · crash: script | issues (claude), 2026-10-15 — re-verified |
 | [A25](#a25) | After a password change, a page left open in another browser drops its next save or tab press instead of going to the Login page | 🐞 | medium · crash: script | issues (claude), 2026-10-15 — re-verified |
-| [A26](#a26) | A Profile page whose session has ended answers each press with the alert "##user.authorization.userRequired##" | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
+| [A26](#a26) | A Profile page whose session has ended answers each press with the alert "##user.authorization.userRequired##" | 🐞 | low | issues (claude), 2026-11-02 — re-verified |
 | [A27](#a27) | An API request with a malformed key is refused with "{$error}" where the reason should be | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS2](#ops2) | A preprint server sends the email-change message but its emails list has no "Change Email Address Invitation" row to edit | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | On a preprint server, saving the Profile's Roles tab erases the account's reviewing interests | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
@@ -1634,13 +1634,13 @@ page, and what was typed is lost with it.
 A Site Administrator's "Expire User Sessions" brings the alert on every
 press. A password change made in another browser brings it on every
 press after the first; the first press fails in another way
-([A25](#a25)). An email change saved in another browser brings it on
-every press to a browser signed in with "Keep me logged in" unticked
+([A25](#a25)).
+An email change saved in another browser brings it on every press in a
+browser that signed in with "Keep me logged in" unticked
 (Rule 6a).
 By the code, a session that expired brings it too. No other page shows
 this code.
-Since: 2012-05-07 (14 years) · Basis: probe, 2026-10-15. <sup>[f-a26](#fn-a26)</sup>
-Report: refresh owed — pkp-lib `442148e14e` (`main`) / `c4c0aa8c52` (`stable-3_5_0`), pkp/pkp-lib#12780, 2026-10-31, retired *Login & sessions* A14: after an email change saved in another browser, a browser signed in with "Keep me logged in" ticked is signed back in and only an unticked one is signed out, its tab presses raising only the alert (walked 2026-11-01, OJS, OMP, OPS, both lines; the alert on `main`), so the report's "Not walked" bullet on the email change, which rests on that open regression, is out of date; the change touches none of the classes the report names (it rewrites `Validation::login()` and reads the cookie in `PKPAuthenticateSession::handle()` through `PKPSessionGuard::userFromRecaller()`) (2026-11-01)
+Since: 2012-05-07 (14 years) · Basis: probe, 2026-11-02. <sup>[f-a26](#fn-a26)</sup>
 
 <a id="a27"></a>
 **A27 — An API request with a malformed key is refused with "{$error}" where the reason should be** · 🐞 · low.

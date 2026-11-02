@@ -4,7 +4,7 @@
 // The issue report's Steps, through the screens on PKP's default dataset in two browsers: B holds
 // `dbarnes`'s Plugins list, A (`admin`) ends every session with "Expire User Sessions".
 //
-//   H19I_MODE=walk (default)  the Steps: B opens Plugins; A expires the sessions; B presses
+//   H19I_MODE=walk (default)  the Steps: B opens Plugins; B's session is ended; B presses
 //                             "Search" (with "h19i" typed), "OK", "Search" again; B reloads
 //   H19I_MODE=nb              the neighbour (fix in and out): with B's session alive, a search
 //                             answers with its list and no alert; then, after A expires the
@@ -12,11 +12,19 @@
 //                             refusal: a Profile tab press ("Contact") and a submission file's
 //                             link (a browser navigation, not a script's request; submission 1's
 //                             Submission files, OJS and OMP only)
-//   H19I_MODE=form            "Saving a form": B types a phone number on Profile › Contact; after A
-//                             expires the sessions B presses "Save", then reloads (the way round),
-//                             signs in again and reads Contact's "Phone" back
+//   H19I_MODE=form            "Saving a form": B types a phone number on Profile › Contact; after its
+//                             session is ended B presses "Save", then reloads (the way round),
+//                             signs in again when asked and reads Contact's "Phone" back
 //
-// Each mode starts from a freshly reset dataset fleet. Every dialog is answered "OK" and kept.
+// The walk and form modes take B's sign-in and the end of its session from a list, each
+// combination with fresh browsers (lib.js combos(), endSession()):
+//   H19_COMBOS=<box>:<end>,…   (default unticked:expire, the Steps) <box> "Keep me logged in" at
+//                              B's sign-in, unticked or ticked; <end> expire ("Expire User Sessions"
+//                              in A; with the box unticked only), idle (the idle limit) or cookies
+//                              (B's cookies for the site cleared)
+// After the reload, a page that opened signed in is searched (walk) or read (form) once more. The
+// nb mode signs B in with the box unticked.
+// Each run starts from a freshly reset dataset fleet. Every dialog is answered "OK" and kept.
 // Run: PROBE_FEATURE=<feature> PROBE_AGENT=<id> [PROBE_RUN=…] [H19I_MODE=nb] node bin/probe.js <app|all> \
 //        shared/playwright/checks/issues/plugins-search-session-ended-role-alert/walk.js
 //      (stable-3_5_0: PKP_E2E_LINE=stable-3_5_0 in front, the line fleet's PROBE_FEATURE)
@@ -24,7 +32,7 @@ const {forEachApp, launch, signIn, record} = require('../../../probe');
 const L = require('./lib.js');
 
 const MODE = process.env.H19I_MODE || 'walk';
-const NAME = `plugins-${MODE}`;
+let NAME = `plugins-${MODE}`;
 
 async function step(out, name, fn) {
     try {
@@ -55,18 +63,26 @@ async function search(plugins, text) {
 }
 
 forEachApp(async (app) => {
+    if (MODE === 'nb') return combo(app, {box: 'unticked', end: 'expire'});
+    for (const c of L.combos()) await combo(app, c);
+});
+
+async function combo(app, {box, end}) {
     const T = app.contextPath;
     const {WebsitePluginsPage} = require('../../../pages/PluginsPages.js');
-    const out = {line: app.line || 'main', mode: MODE};
+    NAME = MODE === 'nb' ? `plugins-nb` : `plugins-${MODE}-${box}-${end}`;
+    const out = {line: app.line || 'main', mode: MODE, box, end};
     const A = await launch(app);
     const B = await launch(app);
     const w = L.watchContext(B.context);
+    const signB = () => (box ? L.signInBox(B.page, 'dbarnes', {contextPath: T, remember: box === 'ticked'})
+        : signIn(B.page, 'dbarnes', {contextPath: T}));
     try {
         if (MODE === 'form') {
             // "Saving a form": a phone number typed on Profile › Contact, the session ended, "Save", then the
-            // way round (a reload), a new sign-in, and what Contact holds
+            // way round (a reload), a new sign-in when the Login page shows, and what Contact holds
             const {ProfilePage} = require('../../../pages/ProfilePage.js');
-            await signIn(B.page, 'dbarnes', {contextPath: T});
+            await step(out, 'B-signin', signB);
             const prof = new ProfilePage(B.page, T);
             await step(out, 'form-B-typed', async () => {
                 await prof.goto('contact');
@@ -76,7 +92,7 @@ forEachApp(async (app) => {
                 await box.pressSequentially('555 0119', {delay: 20});
                 return {before, typed: await box.inputValue()};
             });
-            await step(out, 'A-expire', () => L.expireSessions(A.page));
+            await step(out, 'end', () => L.endSession(app, end, A, B));
             await step(out, 'form-B-save', async () => {
                 await B.page.bringToFront();
                 const r = await L.act(w, B.context, 'form-save', () => prof.saveButton().click({timeout: 5000}), 5000);
@@ -84,21 +100,22 @@ forEachApp(async (app) => {
                     phone: await B.page.locator('input[name="phone"]').first().inputValue({timeout: 1000}).catch(() => null),
                     snap: await L.snap(B.page, `${NAME}-B-save`)};
             });
-            await step(out, 'form-B-reload', async () => {
+            const reload = await step(out, 'form-B-reload', async () => {
                 const r = await L.act(w, B.context, 'form-reload', () => B.page.reload({timeout: 20000}), 1500);
-                return {...r, state: await L.where(B.page)};
+                return {...r, state: await L.where(B.page), cookies: await L.cookieNames(B.context)};
             });
             await step(out, 'form-B-again', async () => {
-                await signIn(B.page, 'dbarnes', {contextPath: T});
+                const signedOut = !reload.state || reload.state.loginForm;
+                if (signedOut) await signB();
                 await prof.goto('contact');
-                return {phone: await prof.form('contact').locator('input[name="phone"]').inputValue(),
+                return {signedInAgain: !!signedOut, phone: await prof.form('contact').locator('input[name="phone"]').inputValue(),
                     snap: await L.snap(B.page, `${NAME}-B-again`)};
             });
             return;
         }
 
         // Step 1: B signs in as dbarnes, Settings › Website › Plugins
-        await signIn(B.page, 'dbarnes', {contextPath: T});
+        await step(out, 'B-signin', signB);
         const plugins = new WebsitePluginsPage(B.page, T);
         await step(out, 'B-plugins', async () => {
             await plugins.goto();
@@ -159,8 +176,8 @@ forEachApp(async (app) => {
             return;
         }
 
-        // Step 2: A (admin) presses "Expire User Sessions", "OK"
-        await step(out, 'A-expire', async () => ({...(await L.expireSessions(A.page)), snap: await L.snap(A.page, `${NAME}-A-expired`)}));
+        // Step 2: B's session ends (A presses "Expire User Sessions", the idle limit, or B's cookies cleared)
+        await step(out, 'end', () => L.endSession(app, end, A, B));
         // Step 3: B, without reloading: "Search", type h19i, "Search"
         await step(out, 'B-search-1', async () => {
             const r = await L.act(w, B.context, 'search-1', () => search(plugins, 'h19i'), 5000);
@@ -171,10 +188,14 @@ forEachApp(async (app) => {
             const r = await L.act(w, B.context, 'search-2', () => plugins.list.filterButton.click({timeout: 5000}), 5000);
             return {...r, state: await listState(B.page, plugins), snap: await L.snap(B.page, `${NAME}-B-search-2`)};
         });
-        // Step 5: B reloads
-        await step(out, 'B-reload', async () => {
+        // Step 5: B reloads; a Plugins list that opens signed in is searched once more
+        const reload = await step(out, 'B-reload', async () => {
             const r = await L.act(w, B.context, 'reload', () => B.page.reload({timeout: 20000}), 1500);
-            return {...r, state: await L.where(B.page), snap: await L.snap(B.page, `${NAME}-B-reload`)};
+            return {...r, state: await L.where(B.page), cookies: await L.cookieNames(B.context), snap: await L.snap(B.page, `${NAME}-B-reload`)};
+        });
+        if (reload && reload.state && !reload.state.loginForm) await step(out, 'B-search-after-reload', async () => {
+            const r = await L.act(w, B.context, 'search-after-reload', () => search(plugins, 'h19i'), 4000);
+            return {...r, state: await listState(B.page, plugins)};
         });
     } finally {
         out.allDialogs = w.dialogs;
@@ -183,4 +204,4 @@ forEachApp(async (app) => {
         await A.close().catch(() => {});
         await B.close().catch(() => {});
     }
-});
+}

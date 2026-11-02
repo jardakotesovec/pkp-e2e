@@ -12,8 +12,14 @@
 - **Introduced** `pkp/pkp-lib#9176` for `pkp/pkp-lib#7698` · [71e79e31e3](https://github.com/pkp/pkp-lib/commit/71e79e31e3d5c827e4bfa2443bbe81e5ec4c1dba) · 2023-10-13 · Touhidur Rahman (touhidurabir)
 - **Upstream** none found (2026-10-02)
 - **Tracked in** spec U09 [A18](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U09-custom-pages-and-blocks.md#a18); spec U17 [A10](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U17-sections.md#a10); spec U47 [A4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U47-media-files.md#a4); spec U36 [A21](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U36-submission-files.md#a21) (the server error; the exact-limit file passing the size check is [U36-A21-exact-limit-file-passes-size-check-then-refused](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U36-A21-exact-limit-file-passes-size-check-then-refused.md)); pictures over the per-file limit but under this one are [U09-A18-picture-over-upload-limit-server-error](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U09-A18-picture-over-upload-limit-server-error.md)
-- **Checked** 2026-10-01 (the picture), 2026-10-02 (the other steps), each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-02 (the picture), 2026-10-02 (the other steps), each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-11-02: the picture's steps walked again on `main` and
+`stable-3_5_0`, on PHP 8.3, with the same result; the walks of
+2026-10-01 ran on PHP 8.4, which the walking machine no longer has.
+Observed now quotes the server log's start-up warning as PHP 8.3 writes
+it, and gives the PHP 8.4 form beside it.
 
 ## Summary
 
@@ -100,10 +106,11 @@ POST /index.php/publicknowledge/api/v1/_uploadPublicFile
 The server log reads:
 
 ```
-PHP Warning:  PHP Request Startup: POST Content-Length of 9183349 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
+PHP Warning:  POST Content-Length of 9183349 bytes exceeds the limit of 8388608 bytes in Unknown on line 0
 production.ERROR: The POST data is too large. {"exception":"[object] (Illuminate\\Http\\Exceptions\\PostTooLargeException(code: 0): The POST data is too large. at …/lib/pkp/lib/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php:24)
 ```
 
+That is PHP 8.3's form; on PHP 8.4 (walked 2026-10-01) the first line reads `PHP Warning:  PHP Request Startup: POST Content-Length of …`.
 On `stable-3_5_0` the second line is PHP's own form of the same
 exception:
 
@@ -437,12 +444,21 @@ answer built from an HTTP exception, which REST clients see.
   `PKPSubmissionFileHandler::add()` answers an empty `$_FILES` with 400
   `api.files.400.noUpload` (line 271), no server error.
 - The picture walked on OJS, OMP and OPS, `main` and `stable-3_5_0`, on
-  PostgreSQL and PHP 8.4.11, whose php.ini raises both limits to 100M
-  and has `display_errors = On`; its script serves the same install
-  through a second `php -S` with
+  PostgreSQL: 2026-10-01 on PHP 8.4.11 (with the fix trial), and again
+  2026-11-02 on PHP 8.3.36 (the walking machine now has PHP 8.2 and 8.3
+  only), where the host's php.ini also raises the limits; the script serves the same install through a second `php -S`
+  with
   `-d upload_max_filesize=2M -d post_max_size=8M -d display_errors=Off`.
   The fault does not touch the database. Datasets: pkp/datasets c657990
-  (2026-10-01).
+  (2026-10-01), c1a3abcd (2026-11-01).
+- The warning's two forms, read in php-src `main/rfc1867.c`: PHP-8.3
+  emits it through `sapi_module.sapi_error()` (no prefix), PHP-8.4
+  through `php_error_docref()`, which names the start-up phase
+  "PHP Request Startup" (`main/main.c`).
+- The fix trial (2026-10-01) stands for today's tips: neither
+  `PKPExceptionHandler.php` nor `PKPRoutingProvider.php` has a commit
+  since on `main`, nor `PKPContainer.php` on `stable-3_5_0` (read
+  2026-11-02). Not tried again.
 - Unverified: with `display_errors = On`, what the picture window shows
   after the script error (one walk on OJS `main` recorded the 500 and
   the error, not the window). The 405 with the fix is read in the
@@ -470,8 +486,12 @@ answer built from an HTTP exception, which REST clients see.
   `maxFilesize`, `FileMediaUploader`, "media file upload size". Read and not
   the same fault: `pkp/pkp-lib#9478`, and `pkp/pkp-lib#12262` (the media
   window's QA list, which has no size case).
-- Tips of the picture walks (2026-10-01; the unknown-route walk's are in
-  its bullet above): OJS `main` 68615b5a32 with lib/pkp 25562b0e1a; OMP `main`
+- Tips of the picture walks of 2026-11-02: `main` OJS bc4a83e9db, OMP
+  853bf3b05 and OPS fd893a8c92, each with lib/pkp 442148e14e;
+  `stable-3_5_0` OJS 0f2de4ff3f, OMP 9e2a7fd00 and OPS d4a7e97a55, each
+  with lib/pkp c4c0aa8c52.
+- Tips of the picture walks and fix trial of 2026-10-01 (the
+  unknown-route walk's are in its bullet above): OJS `main` 68615b5a32 with lib/pkp 25562b0e1a; OMP `main`
   3b0ecf794 and OPS `main` c8af945bb7, both with lib/pkp 3dc90c81a6.
   `stable-3_5_0` OJS 3517e640f2 with lib/pkp b1981810da; OMP c7b45f88e
   and OPS 8eaf899468 with lib/pkp 1fb843f491. `stable-3_4_0` lib/pkp
