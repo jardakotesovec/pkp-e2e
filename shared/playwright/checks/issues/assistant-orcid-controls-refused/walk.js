@@ -1,5 +1,5 @@
-// Kept walk for docs/issues/U04-A5-assistant-orcid-controls-refused.md and
-// docs/issues/U04-A5-orcid-field-refusal-shown-as-done.md (spec U04, register A5).
+// Kept walk for docs/issues/U04-A5-orcid-field-refusal-shown-as-done.md (spec U04, register A5); the
+// server's refusal it first recorded is fixed on main and 3.5 (pkp/pkp-lib#13517, pkp-e2e#750 closed 2026-11-02).
 // On PKP's default test dataset (a dataset fleet), OJS, OMP and OPS: dbarnes turns ORCID on (Member
 // Sandbox, dummy credentials) and lets the submission's Assistant edit the publication (the
 // participant's "Permissions" box; on OPS first giving "Editorial Board Member" the Production stage
