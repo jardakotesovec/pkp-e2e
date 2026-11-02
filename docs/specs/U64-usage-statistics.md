@@ -2811,7 +2811,7 @@ U64 S8 red in the nightly of 2026-10-31 (run 41164101437). Live-probed
 2026-11-02, OJS, OMP and OPS on `main` and `stable-3_5_0`, on freshly
 loaded dataset fleets: a new context whose one submission's date is
 2027-01-31 is offered 2027-03-01, and 2027-02-01 at 2027-01-28.
-Issue report: [docs/issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md](../issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md).
+Issue report: [docs/issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md](../issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md), filed as [pkp-e2e#1079](https://github.com/jardakotesovec/pkp-e2e/issues/1079).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-p. Live-probed 2026-09-27: td11; the side menu offers
