@@ -9,15 +9,21 @@
   - 3.4: OMP, OPS (code)
   - 3.3: OMP, OPS (code; the checklist, the privacy statement, OPS's role names)
 - **Introduced** not traced; present since at least [95cec4d325](https://github.com/pkp/ops/commit/95cec4d3258d99cd87761f975f3112c104cb04d8) (2020-02-27)
-- **Upstream** none found (2026-10-01; the components 2026-10-04)
+- **Upstream** none found (2026-10-01; the components 2026-10-04; the invitation email 2026-11-03)
 - **Tracked in** spec U57 [A8](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U57-languages-and-locales.md#a8), spec U07 [OPS3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U07-journal-identity-and-about-pages.md#ops3), [OPS4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U07-journal-identity-and-about-pages.md#ops4), spec U53 [OPS1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U53-users-management.md#ops1), spec U58 [A9](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U58-submission-intake-configuration.md#a9) (the component names)
-- **Checked** 2026-10-01, the components list 2026-10-04, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-01, the components list 2026-10-04, steps 1 to 12 and the invitation email 2026-11-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
 2026-10-04: added a preprint server's file component names (spec U58
 A9), seen on screen and saved again by the list's "Restore Defaults"
 (steps 13 to 16), and corrected the 3.5 backport, the count of saved
 texts and the fix's call sites.
+
+2026-11-03: added the role invitation email of a preprint server whose
+primary language is French, which names the Moderator and manager roles
+by their codes (spec U07 OPS4, steps 17 to 22), and walked steps 1 to 12
+again at the branch tips. The email reads the role name the server saved, so the
+Cause and the fix are unchanged; the fix was tried on the email too.
 
 ## Summary
 
@@ -33,10 +39,11 @@ A preprint server's French "Privacy Statement" page is only
 manager roles are named "##default.groups.name.sectionEditor##" and
 "##default.groups.name.manager##" in French: on the public "Editorial
 Masthead", on Users & Roles › "Roles" and in the users list's "Roles"
-column. The server's list of file components, under Settings › Workflow
-› "Soumission", names seven of them by codes
-("##default.genres.researchInstrument##" and six more), and so does
-each one's "Modifier" (Edit) window.
+column. On a server whose primary language is French, the email
+inviting someone to either of these roles names it by the same code. The server's list of file
+components, under Settings › Workflow › "Soumission", names seven of
+them by codes ("##default.genres.researchInstrument##" and six more),
+and so does each one's "Modifier" (Edit) window.
 
 The codes are saved into the press's or server's settings when it is
 created with French or French is added, so they stay, and no one is
@@ -60,13 +67,21 @@ twenty on a journal (the list under Cause).
   server's public masthead heads its moderators and managers with codes.
   A French author must tick "Oui, ma soumission répond à toutes ces
   exigences." without seeing the requirements; ticking it lets them go
-  on. A French text a manager typed is lost to "Reload defaults".
+  on. A French text a manager typed is lost to "Reload defaults". On a
+  server whose primary language is French, a person invited as
+  Moderator or manager is not told which role is offered: the email
+  names it only by the code. Its "Accept Invitation" link still opens
+  the account form, and the other roles' invitations name them in
+  French.
 - **Who.** Readers, authors and managers of every press and preprint
   server that offers French (Canada), and of a press, server or journal
   in one of the other languages, whenever they use it in that language.
+  On a server whose primary language is French, everyone invited to its
+  Moderator or manager role.
 - **Way round.** A manager types a text into each box, or empties it so
   the English text shows, and renames the roles under Users & Roles ›
-  "Roles" and the components in their "Modifier" windows. Codes already
+  "Roles" (the invitation email then uses the new French name) and the
+  components in their "Modifier" windows. Codes already
   saved stay until a manager does so: changing only the code that saves
   the defaults would not remove them, so the proposed fix includes an
   upgrade step that repairs them.
@@ -75,8 +90,11 @@ Medium: public pages and a submission's first screen show a code in
 place of their text in one language, silently, but no task is stopped
 and a manager can replace each text on screen; the privacy statement and
 the masthead's role names are public, but no one's work depends on
-them. It would rise if an author could not begin a submission or there
-were no way round.
+them. An invitee who cannot tell the role from the email still reaches
+the account form that accepts it, and the inviting manager can say
+which role it is. It would
+rise if an author could not begin a submission, an invitation could not
+be accepted, or there were no way round.
 
 ## Steps to reproduce
 
@@ -147,6 +165,30 @@ no reload):
 16. Press "Restaurer les valeurs par défaut", then "OK". Read the rows'
     names again.
 
+A role invitation on a server whose primary language is French. The
+dataset's server is English-primary, and the invitation email names
+roles in the server's primary language, so these steps create a server
+that has French as its primary language. On OJS and OMP, the control,
+the same steps use "Hosted Journals" › "Create Journal" ("Hosted
+Presses" › "Create Press") in step 17 and the role "Section editor"
+("Series editor") in step 20. The email in step 22 is read wherever the
+install delivers mail: the mail catcher its `[email]` SMTP settings
+point to, or the application log with `default = log` there.
+
+17. Sign in as `admin`. Administration › "Hosted Servers" › "Create
+    Server": name "u07hk3 Server", then press "French" above the form
+    and name it "Server u07hk3 FR"; acronym "u07hk3" in both; contact
+    "u07hk3" and u07hk3@example.org; country Canada; path `u07hk3`;
+    English and French ticked, French primary. "Save".
+18. Open Settings › Users & Roles in English,
+    `/index.php/u07hk3/en/management/settings/access`, and press "Invite
+    to a role".
+19. Type u07hk3-inv@example.org and press "Search User".
+20. Given Name "Ivo", Family Name "Invitee"; role "Moderator", today's
+    date, "Appear on the masthead". "Save And Continue".
+21. Press "Invite user to the role".
+22. Read the email sent to u07hk3-inv@example.org.
+
 **Expected.** Every French page shows a text a reader can use: French
 where the application has one, as the journal shows ("Les auteur.e.s
 sont invité.e.s à soumettre un article à cette revue. …",
@@ -157,7 +199,10 @@ manager"). Step 6 shows the typed text; after step 7 the French
 guidelines are the default again, French or English, never a code.
 Steps 14 to 16 name every component in French, or in English where no
 French name exists, as the journal's list does ("Instruments de
-recherche").
+recherche"). Step 22 names the role "Moderator", as a journal's email
+under the same steps names its Section editor "Rédacteur-trice de
+rubrique" and a press's its Series editor "Rédacteur/Rédactrice en
+chef de la série".
 
 **Observed.** Steps 1, 8 and 11 (OMP; OPS likewise under "Directives
 aux auteurs-es" and "Liste de vérification de la soumission"):
@@ -192,6 +237,21 @@ Liste de vérification pour la préparation de la soumission
   and "Multimédias". Step 15: the French "Nom" box holds
   "##default.genres.researchInstrument##", the English one "Research
   Instrument".
+- Step 22: the email "You are invited to new roles", in English (the
+  language of the inviting manager's screens), reads:
+
+  ```
+  Newly assigned roles
+
+  1.
+  ##default.groups.name.sectionEditor##
+  Starting from 2026-11-03
+
+  Your name will appear in the Server u07hk3 FR's masthead as a ##default.groups.name.sectionEditor##.
+  ```
+
+  The compose step of step 20 shows the role lines only as
+  `{$ROLESADDED}`, so the code first shows in the sent email.
 
 No request failed and no script error showed. The journal shows French
 texts at every step, and the press's and server's English pages show
@@ -241,7 +301,16 @@ five `default.submission.step.*` texts. OJS's file has them all.
 Reach:
 
 - On screen (`main` and 3.5): every place the Summary names. The
-  components list's "Restore Defaults"
+  invitation email reads the role's name and the server's name in the
+  server's primary language: `UserRoleAssignmentInvite::getMailable()`
+  passes `$context->getPrimaryLocale()` to `setData()`, and
+  `UserRoleAssignmentInvitationNotify::getUserUserGroupSection()` reads
+  `getLocalizedData('name', $locale)` and `getName($locale)`. Its own
+  lines ("Newly assigned roles", the "will appear" sentence) come from
+  `__()` with no locale, so in the sender's language. The saved French
+  name is the code, which is not empty, so it is used; on an
+  English-primary server the email names the role "Moderator". The components list's "Restore
+  Defaults"
   (`GenreGridHandler::restoreGenres()`) calls
   `GenreDAO::installDefaults()` for the server's form languages.
 - Not walked: the French submission wizard, which offers the same
@@ -346,7 +415,13 @@ fix, which part 2 would repair. With part 1 in, "Restaurer les valeurs
 par défaut" on the server's components list (step 16) saved the seven
 French names empty, and the list showed their English names ("Research
 Instrument" … "Source Texts"); the journal's list kept its French names
-after the same step.
+after the same step. With part 1 in (2026-11-03), the French server of
+steps 17 to 22 saved its two roles' French names empty, and the
+invitation email named the role "Moderator" in both places; the
+journal's and the press's emails, their new contexts' French role
+names, the server's translated roles ("Auteur-e", "Lecteur-trice",
+"Membre du comité éditorial") and `publicknowledge`'s saved names were
+the same with the fix in and out.
 
 **Alternatives**
 
@@ -404,12 +479,31 @@ migration to repair stored data, and translations in two applications.
   are taken by
   [`shared/playwright/checks/issues/french-components-list-heading-raw-key/walk.js`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/french-components-list-heading-raw-key/walk.js),
   run the same way, which also reads the saved French names
-  (`genre_settings`). Part 1 was tried with
+  (`genre_settings`). Steps 17 to 22 are taken by
+  [`walk-invite.js`](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/french-default-texts-stored-as-codes/walk-invite.js)
+  beside `walk.js`, run the same way, on all three apps (the journal's
+  Section editor and the press's Series editor the control); it reads
+  the email from the install's mail catcher and the new context's saved
+  role names (`user_group_settings`). Its address carries the app and
+  run (`u07hk3-ops-main@example.org`), since one mail catcher serves
+  every install. `MODE=nb` in front runs its neighbour check alone: a
+  French-primary context made the same way, its French "Rôles" tab and
+  saved role names, and `publicknowledge`'s saved role names.
+  On OPS `main`, `INVITE_ROLE='Preprint Server manager'` in front
+  invites to the manager role on a server the steps already made (its email names the
+  role "##default.groups.name.manager##"), and `ACCEPT=1` opens the
+  email's "Accept Invitation" link signed out (it opened "STEP 1 -
+  Create OPS account"; the acceptance was not completed). Part 1 was
+  tried with
   `node bin/try-fix.js apply …/fix.diff ojs omp ops` (`ojs ops` for the
-  components), the scripts, then `revert`.
+  components), the scripts, then `revert`; on 2026-11-03 `walk-invite.js`
+  with the fix in, its `MODE=nb` check with the fix in and again after
+  the revert.
 - Walked on `main` and `stable-3_5_0`, on PostgreSQL: steps 1 to 12
   from pkp/datasets c657990 (2026-10-01), steps 13 to 16 from 566bb1f
-  (2026-10-03). The database plays no part (locale files and the
+  (2026-10-03). On 2026-11-03 steps 1 to 12 and 17 to 22 again, from
+  pkp/datasets 2fd5c320 (2026-11-02), with the same results for steps 1
+  to 12. The database plays no part (locale files and the
   writers); MySQL not checked.
 - Tips: `main`: OJS b84f8e2e44 (`lib/pkp` ddd8ab243a), OMP 3b0ecf794c
   and OPS c8af945bb7 (`lib/pkp` 3dc90c81a6); for steps 13 to 16 OJS
@@ -419,7 +513,11 @@ migration to repair stored data, and translations in two applications.
   771474347e), OMP 9c5e24246c and OPS 38b61882d3 (`lib/pkp`
   cf3f984335). `stable-3_4_0`: OMP 0aec65441, OPS acd8ae704b, `lib/pkp`
   32b0f4b4af. `stable-3_3_0`: OMP 8e72fc883, OPS c5532e2161, `lib/pkp`
-  f6ab331645.
+  f6ab331645. On 2026-11-03 (steps 1 to 12 and 17 to 22): `main` OJS
+  e7ce037799, OMP 828150a8f and OPS 53749f7d2f (`lib/pkp` 1ae711024a in
+  all three); `stable-3_5_0` OJS 0f2de4ff3f, OMP 9e2a7fd00 and OPS
+  d4a7e97a55 (`lib/pkp` c4c0aa8c52); `stable-3_4_0` `lib/pkp`
+  f4719f2805, `stable-3_3_0` `lib/pkp` 5b26595791.
 - Code reads: `locale/*/default.po` of the three apps on `main` (the
   language gaps under Cause, each key checked as missing or empty
   against `locale/en`), and pkp-lib's `locale/en` (none of these keys).
@@ -433,6 +531,13 @@ migration to repair stored data, and translations in two applications.
   checklist items, role names and file types. On every version
   `GenreDAO::installDefaults()` (`.inc.php` on 3.3) translates each
   name with `__()` unguarded, and "Restore Defaults" calls it.
+  The invitation email (2026-11-03): 3.5's `UserRoleAssignmentInvite`
+  and `UserRoleAssignmentInvitationNotify` read the names as `main`'s do
+  (`LocalizedData::getBestLocalizedData()` skips only empty values);
+  3.5's `installLocale()` saves the name with `__()` as `main` does, and OPS's `fr_CA/default.po` leaves
+  `default.groups.name.sectionEditor` empty on both. 3.4 and 3.3 have no
+  role invitation (no `classes/invitation` in their `lib/pkp`), so the
+  email adds nothing to their sub-items.
 - Introduced: OPS's `locale/fr_CA/default.po` was added on Weblate in
   95cec4d325 with a header only; these entries arrived in it later,
   empty, and were blamed through the 2023 rearrangement of the locale
@@ -446,6 +551,15 @@ migration to repair stored data, and translations in two applications.
   and not this fault: `pkp/pkp-lib#3223` (role names in the wrong
   language on 3.1), `pkp/pkp-lib#6467` ("Reload defaults" and
   `$contextPath`), `pkp/pkp-lib#1505` (a translator's question, 2016).
+  On 2026-11-03 for the email: `default.groups.name.sectionEditor`,
+  "invitation email role name untranslated", "invitation role name
+  locale key", `UserRoleAssignmentInvitationNotify` locale, and in
+  pkp/ops `default.groups.name` and "moderator french"; the hits
+  (`pkp/pkp-lib#13181`, `#11803`, `#12538` among them) are other
+  invitation faults.
+- Not this fault: after "Save" in step 17 the new context's page asks
+  the plugin gallery for its list, which answers 500 on the test
+  installs because their `[proxy]` setting leads nowhere.
 - Not driven: OPS's file type names in the submission wizard (database
   read only); the role code in other lists, such as a submission's
   participants.

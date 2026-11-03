@@ -1378,7 +1378,6 @@ language is French the same email reads "Rédacteur-trice de rubrique"
 in both places, on such a press "Rédacteur/Rédactrice en chef de la
 série" ([User invitations](U06-user-invitations.md)).
 Basis: probe, 2026-10-01; probe, 2026-11-03 (the email). <sup>f-ops4</sup>
-Report: refresh owed — the 2026-11-03 fold widened the entry to the role invitation email: on a server whose primary language is French, the email sent from Users & Roles › "Invite to a role" names the Moderator role "##default.groups.name.sectionEditor##" under "Newly assigned roles" and in its masthead sentence, while the report places the role's key on the masthead, the Roles tab and the users list only; the role's name in the email is the one `UserGroup\Repository::installLocale()` saved (2026-11-03)
 
 ### Retired
 
