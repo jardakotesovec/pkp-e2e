@@ -727,7 +727,7 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A1](#a1) | "Send Review To ORCID" is offered before the review is complete, and confirms in silence | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A2](#a2) | A contributor who presses "Deny" at ORCID lands on a page showing "##orcid.authDenied##" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | "What is ORCID?" beside the ORCID button opens ORCID's sign-in instead of the explanation page | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A5](#a5) | A refused "Request verification" or "Delete" on a contributor's ORCID iD still shows as done | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A5](#a5) | A contributor's ORCID iD field shows a refused verification request as sent, and a refused delete as done | 🐞 | low | issues (claude), 2026-11-03 — re-verified |
 | [A8](#a8) | A press's or preprint server's ORCID verification failure page says to contact "the journal manager" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A11](#a11) | In 32 interface languages, both ORCID settings tabs carry the name of the retired ORCID Profile plugin | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | A contributor following the "Requesting updated ORCID record access" link gets a blank page and can never allow deposits | 🐞 | medium · crash: server | issues (claude), 2026-10-07 — re-verified |
@@ -813,18 +813,21 @@ and carry on. Nothing typed is lost.
 Basis: probe, 2026-10-03. <sup>[f-a4](#fn-a4)</sup>
 
 <a id="a5"></a>
-**A5 — A refused ORCID control on a contributor reports success** · 🐞 · low.
+**A5 — A contributor's ORCID iD field shows a refused verification request as sent, and a refused delete as done** · 🐞 · low.
 When the server refuses a contributor's "Request verification" or
-"Delete", a window titled "Error" says so, no email goes out and the iD
-stays. The field behind the window still reports success: it switches
-to "ORCID Verification has been requested!" or shows the iD gone, until
-the form is closed and opened again. Until 2026-10-30 the server refused
+"Delete" under "ORCID iD", a window titled "Error" says the form could
+not be submitted, but the field behind it changes as if the action had
+worked: it reads "ORCID Verification has been requested!" with "Resend
+Verification Email", or the iD disappears. Nothing is sent or removed;
+only the field is wrong, until the form is opened again. Anyone who may
+edit the contributor (an editor, an Assistant allowed to edit, an author)
+meets it when something changes between opening the form and pressing
+the button: they signed out in another tab, their session ran out after
+days without use, ORCID was turned off, they lost the right to edit, or
+the contributor was removed. Until 2026-10-30 the server also refused
 both actions to every Assistant allowed to edit the contributor; the
-routes now admit that Assistant (pkp/pkp-lib#13517), so the stock
-routes that met it are gone and a refusal now takes another cause.
-Basis: probe, 2026-10-03; the Assistant's refusal gone at the `main`
-tips, 2026-11-02. <sup>[f-a5](#fn-a5)</sup>
-Report: refresh owed — pkp/pkp-lib#13659 + pkp/ui-library#1033 (merged 2026-10-30, pkp-lib `9dfab21b47`, ui-library `eb988214e9`) admit the Assistant, so pkp-e2e#749's steps no longer meet a refusal: its Steps need a refusal the screens still reach, or the report says it is latent (2026-11-02)
+routes now admit that Assistant (pkp/pkp-lib#13517).
+Basis: probe, 2026-11-03. <sup>[f-a5](#fn-a5)</sup>
 
 <a id="a6"></a>
 **A6 — The email toggle's label misdescribes its trigger** · ❓ · minor.
@@ -1923,6 +1926,7 @@ otherwise admits Assistants (the contributors feature's gate). Live-probed
 (HTTP 401) — no email delivered, stored iD unchanged — while the field
 showed the requested state / the iD removed.
 At the heads of pkp/pkp-lib#13659 + ui-library#1033 (issue pkp/pkp-lib#13517; `f47bab3952`, before their merge) the routes admit the Assistant: on the dataset, OJS and OMP `mfritz` and an OPS Editorial Board Member, each with the "Permissions" box, got 200 for both, the "Requesting ORCID record access" email arrived and the iD was removed (bases: 401 both, as above). 3.5 carries the same change since pkp/pkp-lib#13538 (merged 2026-10-23; code). Merged on `main` 2026-10-30 (pkp-lib `9dfab21b47`, ui-library `eb988214e9`, each the reviewed head's tree): walked again 2026-11-02 at the tips (OJS `bc4a83e9db`, OMP `853bf3b052`, OPS `fd893a8c92`) with `checks/issues/assistant-orcid-controls-refused/walk.js`, as at the heads. The server's refusal is retired (pkp-e2e#750 closed); the field's state stays as A5.
+Walked 2026-11-03 at the tips (OJS `e7ce037799`, OMP `828150a8f`, OPS `53749f7d2f`; 3.5 the same) with `checks/issues/assistant-orcid-controls-refused/walk-signed-out.js`: `dbarnes` opens a contributor's "Edit", signs out in a second tab, and "Request verification" or "Delete" in the first answers `403` ("The form could not be submitted. You may have been logged out. Please reload the page and try again."), while the field reads "ORCID Verification has been requested!" or shows the iD gone; nothing is sent or removed. `FieldOrcid.vue` tests the `isSuccess` ref without `.value` (main and 3.5); the report's fix, tried, leaves the field unchanged after both refusals.
 Issue reports: the field's state, [pkp-e2e#749](https://github.com/jardakotesovec/pkp-e2e/issues/749) ([docs/issues/U04-A5-orcid-field-refusal-shown-as-done.md](../issues/U04-A5-orcid-field-refusal-shown-as-done.md)); the server's refusal, [pkp-e2e#750](https://github.com/jardakotesovec/pkp-e2e/issues/750) (closed 2026-11-02, fixed by pkp/pkp-lib#13517).
 
 <a id="fn-a6"></a>
