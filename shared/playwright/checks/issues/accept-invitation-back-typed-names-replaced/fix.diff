@@ -1,0 +1,30 @@
+--- a/lib/ui-library/src/pages/acceptInvitation/AcceptInvitationPageStore.js
++++ b/lib/ui-library/src/pages/acceptInvitation/AcceptInvitationPageStore.js
+@@ -374,10 +374,11 @@
+ 		 * request with any required confirmation fields
+ 		 */
+ 		async function updateInvitationPayload() {
++			const invitationData = invitationRequestPayload.value;
+ 			const {data, validationError, fetch} = useFetch(updateInvitationUrl, {
+ 				expectValidationError: true,
+ 				method: 'PUT',
+-				body: {invitationData: invitationRequestPayload.value},
++				body: {invitationData},
+ 			});
+ 			if (!acceptInvitationPayload.value.privacyStatement) {
+ 				errors.value = {
+@@ -391,10 +392,12 @@
+ 					errors.value = [];
+ 					// Reflect any server-side locale fallback (e.g. the site primary locale name
+ 					// copied over from the context primary locale when left empty) so the review
+-					// step replays the entered name in both locales.
++					// step replays the entered name in both locales. Only for a name this step
++					// sent: the answer to another step carries the names last saved, and would
++					// replace names typed on "Enter details" and not saved yet.
+ 					if (data.value) {
+ 						['givenName', 'familyName'].forEach((field) => {
+-							if (data.value[field]) {
++							if (field in invitationData && data.value[field]) {
+ 								updateAcceptInvitationPayload(field, data.value[field]);
+ 							}
+ 						});

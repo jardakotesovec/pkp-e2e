@@ -949,7 +949,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A15](#a15) | After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A17](#a17) | "Edit Invitation" logs a PHP warning when the invitee has no Given Name in the interface language | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
-| [A18](#a18) | After "Back" on the accept wizard's "Enter details", typed names go back to the invitation's, and the account is created with them | 🐞 | user-visible | — |
+| [A18](#a18) | A newcomer's names typed on "Enter details" go back to the invitation's after "Back", and the account is created with them | 🐞 | low | issues (claude), 2026-11-03 — re-verified |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
@@ -1196,21 +1196,22 @@ whatever the name, have another cause and their own report
 Since: 2024-10-24 (pkp/pkp-lib#9658, about a year) · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
 
 <a id="a18"></a>
-**A18 — After "Back" on the accept wizard's "Enter details", typed names go back to the invitation's** · 🐞 · user-visible.
-A newcomer accepting a role invitation types a Given Name or a Family
-Name on "Enter details" other than the one the invitation carries,
-presses that step's "Back" button, which opens "Create OJS account",
-then "Save and continue" there.
-"Enter details" opens with the invitation's names again, while an
-Affiliation and a Country typed the same way are kept. Unless the
-newcomer types the names again, "Review & create account" shows the
-invitation's names and the account is created with them: the account's
-Profile and its row in the Users & Roles list carry the invitation's
-name. Without "Back" the typed names reach the account. Nothing on
-screen says the typed names were replaced. The cause is in the wizard's
-browser code, which copies the names from each step's saved answer back
-into the form. The send wizard's own trouble with names after "Back" is
-[A15](#a15).
+**A18 — A newcomer's names typed on "Enter details" go back to the invitation's after "Back", and the account is created with them** · 🐞 · low.
+A newcomer accepting a role invitation changes the Given Name or Family
+Name on "Enter details" and, without saving, presses "Back". On "Create
+OJS account" (OMP: "Create OMP account", OPS: "Create OPS account") they
+press "Save and continue". "Enter details" then opens with the names the
+invitation holds again, while an Affiliation and a Country typed the
+same way are kept. Unless the newcomer types the names again, "Review &
+create account" shows the invitation's names and the account is created
+with them: its Profile and its row in the Users & Roles list carry them.
+Nothing on screen says the typed names were replaced. Only an unsaved
+change is lost. Names already saved on "Enter details" stay, and a
+change made after coming back to it from the review step is replaced by
+those saved names. A name the invitation does not hold is kept as typed,
+so an invitation sent without names loses nothing, and no account is
+ever created without a Given Name. The send wizard's own trouble with
+names after "Back" is [A15](#a15).
 Since: 2026-06-30 (pkp/pkp-lib#12513, about four months) · Basis: probe, 2026-11-03. <sup>[f-a18](#fn-a18)</sup>
 
 <a id="a19"></a>
@@ -2312,6 +2313,7 @@ control, the same names typed with no "Back", reached the review step
 and the account as "Givtyped Quilltyped". No notice, no dialog, every
 `refine` and `finalize` answered 200, no response of 500 or more and no
 page error.
+Issue report: [docs/issues/U06-A18-accept-invitation-back-typed-names-replaced.md](../issues/U06-A18-accept-invitation-back-typed-names-replaced.md).
 
 <a id="fn-a19"></a>
 **f-a19** — ui-library `AcceptInvitationUserDetailsForms.vue` and
