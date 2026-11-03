@@ -22,6 +22,16 @@ case "${PKP_E2E_LINE:-main}" in main|"") ;; *) dir=$dir/$PKP_E2E_LINE;; esac
 mkdir -p "$dir"
 flag=-s; [ "$mode" = exclusive ] && flag=-x
 echo "[applock] $mode $apps: asked $(date +%T)" >&2
+# A waiter is told who holds an app exclusively and since when: a fix trial over three apps
+# held every walk 27-29 minutes on 2026-11-03 with nothing saying so (friction, U06, U17).
+for a in ojs omp ops; do
+  case ",$apps," in *",$a,"*)
+    # The holder's pid leads the line; a killed trial leaves its line, which kill -0 skips.
+    if [ -s "$dir/$a.holder" ] && read -r hpid hrest < "$dir/$a.holder" && kill -0 "$hpid" 2>/dev/null; then
+      echo "[applock] $a held: $hrest" >&2
+    fi;;
+  esac
+done
 # Each wait runs in the background so a signal reaches this script while it waits, and the
 # trap ends the waiting flock with it: a killed caller leaves no flock queued on a gate.
 waiter=
@@ -37,6 +47,13 @@ done
 for g in "${gates[@]}"; do flock -u "$g"; eval "exec $g>&-"; done
 trap - TERM INT HUP
 echo "[applock] $mode $apps: holds $(date +%T)" >&2
+held=()
+if [ "$mode" = exclusive ]; then
+  for a in ojs omp ops; do
+    case ",$apps," in *",$a,"*) echo "$$ exclusive since $(date +%T) by ${PROBE_AGENT:-pid $$}: ${*:1:4}" > "$dir/$a.holder"; held+=("$dir/$a.holder");; esac
+  done
+fi
 # The command runs without the lock descriptors, so a server it starts cannot keep a lock.
 ( for fd in "${fds[@]}"; do eval "exec $fd>&-"; done; exec "$@" ) && rc=0 || rc=$?
+for h in "${held[@]}"; do rm -f "$h"; done
 exit $rc
