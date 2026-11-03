@@ -71,6 +71,7 @@ Accept wizard (new invitee):
 | Password | yes | At least six characters, the minimum the field states on screen <sup>o</sup> |
 | Privacy consent ("Yes, I agree to have my data collected…") | yes | Unchecked blocks the step with "Please confirm that you have read and agree to the privacy statement". The label links to the journal's Privacy Statement <sup>o</sup> |
 | Given Name / Family Name / Country / Affiliation | given name, country | Collected on the "Enter details" step, which arrives holding the given and family name the manager entered. A name the manager entered only in another of the journal's form languages sits in that language's boxes, behind the button named for it ("French"), and Given Name arrives empty. Editable again from the review step via its Edit button <sup>k</sup> |
+| "ORCID iD" (shown, not editable) | — | Shown on a newcomer's "Enter details", below the invitation's "Email address", and under "User Details" on an existing user's "Review & create account". A recipient with a verified iD sees the iD itself; one without reads "Not verified. You can verify your ORCID iD from your profile section in OJS." (a press "in OMP.", a preprint server "in OPS."). ⚠ [A19](#a19) The line shows also while ORCID is off for the journal, when the profile offers no ORCID iD to verify <sup>k</sup> |
 
 ## Rules & state
 
@@ -215,27 +216,46 @@ Accept wizard (new invitee):
 17. Wizard navigation (accept side). The "Verify ORCID iD", "Create OJS
     account", "Enter details" and every recipient's "Review & create
     account" steps also offer "Cancel". It asks "Cancel Role Invitation Process?" ("Are you
-    sure you want to cancel? Canceling now will stop the role acceptance process, and you'll
+    sure you want to cancel? Canceling now will stop the role acceptance process, and you’ll
     need to restart from the invitation email to accept the role again. …")
     with "Cancel Invitation Process" and "Go Back". "Go Back" returns to the
     step. "Cancel Invitation Process" declines nothing:
     - a signed-out newcomer lands on the sign-in screen;
     - an existing user signed in as themselves stays signed in and lands on
       their usual landing page (for an Author, My Submissions), as the
-      dialog promises ("If you're already a user, you'll be taken back to
+      dialog promises ("If you’re already a user, you’ll be taken back to
       the dashboard.");
     - an existing user who opened the link signed out lands on the sign-in
       screen instead, and signing in there opens the same landing page;
     - the manager's Invitations row still reads "Invited {date}", and an
       existing user's roles are unchanged;
-    - with ORCID off, the emailed link reopens "Create OJS account" (an
-      existing user's review step), and accepting there still works. A
-      newcomer who cancelled from "Enter details" finds the username
-      chosen on "Create OJS account" still in its box.
+    - the emailed link reopens the wizard at its first step as Rule 5
+      shapes it. With ORCID off, a newcomer's link reopens "Create OJS
+      account" and an existing user's "Review & create account", and
+      accepting from there works. With ORCID on, an existing user without
+      a verified ORCID iD finds "Verify ORCID iD" again. A newcomer who
+      cancelled from "Enter details" finds the username chosen on "Create
+      OJS account" still in its box, the Password box empty and the
+      privacy consent unticked.
 
     Leaving "Create OJS account" by typing another address asks nothing and
     keeps nothing: the Username typed there is empty when the link reopens.
     <sup>u</sup>
+17a. **"Back" and a reload in the accept wizard.** Every step but the
+    first carries the wizard's own "Back" button beside its forward
+    button: "Enter details", a newcomer's "Review & create account", and,
+    with ORCID on, the step after "Verify ORCID iD". The button (not the
+    browser's Back) returns one step. From "Enter details" it opens
+    "Create OJS account" with the username, the password and the privacy
+    consent as they were left.
+    ⚠ [A18](#a18) A Given Name or Family Name typed on "Enter details" and
+    not yet saved is replaced by the invitation's name once "Save and
+    continue" on "Create OJS account" leads back there; an Affiliation and
+    a Country typed the same way are kept. Reloading "Review & create
+    account" reopens "Create OJS account" as a reopened link does (Rule
+    17): the chosen username in its box, the Password box empty and the
+    privacy consent unticked. Its "Save and continue" then leads to
+    "Enter details" holding what that step last saved. <sup>u</sup>
 
 ## Side effects
 
@@ -258,6 +278,20 @@ Accept wizard (new invitee):
   by the name on their account. "You have been invited by {name}" names
   the manager the same way, and the email's "To" line carries the
   name the greeting uses. <sup>j</sup>
+- **The email's languages** ⚠ [A20](#a20): on a journal whose primary
+  language is not the one the manager's screens are in, the email's text
+  is in the screens' language, but each role's name, and the journal's
+  name in the role's masthead sentence, are in the journal's primary
+  language. Sent from English screens on a French journal, the email
+  names the journal in English in "you have been invited by {name} to
+  take on new roles at {journal}", then lists the Section Editor role
+  under "Newly assigned roles" as "Rédacteur-trice de rubrique", with
+  "Starting from {date}" and "Your name will appear in the {journal}'s
+  masthead as a Rédacteur-trice de rubrique.", the journal named there in
+  French. A press names its Series Editor "Rédacteur/Rédactrice en chef
+  de la série" in both places; a preprint server names its Moderator by
+  a raw text key ([Journal identity & about pages
+  OPS4](U07-journal-identity-and-about-pages.md#ops4)). <sup>j</sup>
 - **On acceptance**: the account is created (new invitee) or the roles are
   added to the existing account. Masthead listings update per the chosen
   visibility.
@@ -329,7 +363,7 @@ Accept wizard (new invitee):
   a manager's screens are in, are set as
   [Languages & locales](U57-languages-and-locales.md#form-languages)
   describes. This spec owns only the name boxes of its two wizards and the
-  email's greeting.
+  languages of the invitation email, its greeting included.
 
 ## Canonical scenarios
 
@@ -423,9 +457,9 @@ addresses and the tooling recipe are in the footnote. <sup>s</sup>
      opens, and on the manager's Users & Roles the invitation's row still
      reads "Invited {date}" (Rule 17).
    - **The accept link, reopened**: open it again: "Create OJS account"
-     opens with the chosen username still in its box (Rule 17). Retype
-     the password, with the privacy consent ticked, and press "Save and
-     continue".
+     opens with the chosen username still in its box, the Password box
+     empty and the privacy consent unticked (Rule 17). Retype the
+     password, tick the privacy consent, and press "Save and continue".
    - **"Enter details"**: Given Name already reads Nova, the name the
      Journal Manager entered; choose Country Canada.
    - **"Review & create account"**: the summary shows the chosen username.
@@ -673,7 +707,7 @@ App-specific:
       (Rule 5).
     - **"Cancel" and "Go Back"**: press "Cancel": a dialog "Cancel Role
       Invitation Process?" asks "Are you sure you want to cancel? Canceling
-      now will stop the role acceptance process, and you'll need to restart
+      now will stop the role acceptance process, and you’ll need to restart
       from the invitation email to accept the role again. …" and offers
       "Cancel Invitation Process" and "Go Back". Press "Go Back": the
       review step is back (Rule 17).
@@ -778,6 +812,24 @@ Left out of the scenarios above, by reason:
     another address, the names "Enter details" shows are the names the
     invitation carries, in the Invitations row, the greeting and the "To"
     line (Rule 15), once fixed
+  - scenario 2's reopened "Create OJS account" reading the Password box
+    empty and the privacy consent unticked before they are filled again
+    (Rule 17)
+  - the "Back" button on the accept wizard's "Enter details", which
+    opens "Create OJS account" with the username, the password and the
+    consent kept,
+    and a reload of "Review & create account", which reopens "Create OJS
+    account" with the username alone kept, "Enter details" then showing
+    what was saved (Rule 17a)
+  - the guard for A18: after the "Back" button on the accept wizard's
+    "Enter details" and "Save and continue", the names typed there are still in
+    their boxes and reach the review step and the account (Rule 17a),
+    once fixed
+  - scenario 10's "Cancel Invitation Process" on the newcomer's "Verify
+    ORCID iD": the sign-in screen and the row still "Invited {date}"
+    (Rule 17)
+  - scenario 10's verified user's "Review & create account" showing the
+    iD under "User Details" (Fields, accept wizard)
 - **Rarely met**:
   - a past start date taking effect as the acceptance day, read on the
     member's Current Users row and Edit page (Rule 8): a manager rarely
@@ -845,6 +897,12 @@ Left out of the scenarios above, by reason:
     accepted on a later day than it was sent; Rule 8)
   - A17 (the extra error-log warning of "Edit Invitation" on an
     invitation sent with no Given Name; Rule 15)
+  - A18 (names typed on the accept wizard's "Enter details" replaced by
+    the invitation's after "Back"; Rule 17a)
+  - A19 (the ORCID iD advice shown while ORCID is off; Fields, accept
+    wizard)
+  - A20 (the invitation email's role lines in the journal's language,
+    its text in the manager's; Side effects)
 - **No seed**:
   - a pending invitation past its deadline, the link stopped and no role
     granted (Rules 1, 2, 4): the test tooling cannot backdate a deadline
@@ -891,11 +949,14 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | Each opening of the "Invite to a role" wizard writes PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A15](#a15) | After "Back" in the invite wizard, "Enter details" shows names that the invitation is then sent without | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A17](#a17) | "Edit Invitation" logs a PHP warning when the invitee has no Given Name in the interface language | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
+| [A18](#a18) | After "Back" on the accept wizard's "Enter details", typed names go back to the invitation's, and the account is created with them | 🐞 | user-visible | — |
 | [OMP1](#omp1) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | The invitation email template has no row on the preprint server's Emails screen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Daily cleanup deletes invitations still being composed | ❓ | latent | — |
 | [A9](#a9) | The role-removal email tells a disabled user their account "is still active"; the active "Remove Role" and masthead select on their screen are intended | ❓ | minor | @beaug 2026-09-18 · controls intended, email wording open |
 | [A16](#a16) | A past start date reads as the acceptance day once accepted, while the email named the date typed; an acceptance on a later day than the send was not seen | ❓ | minor | — |
+| [A19](#a19) | With ORCID off, the accept wizard tells the recipient to verify their ORCID iD from a profile that has no ORCID iD | ❓ | minor | — |
+| [A20](#a20) | On a journal whose primary language is not the manager's, the invitation email names its roles in the journal's language and says the rest in the manager's | ❓ | minor | — |
 | [A5](#a5) | Retired: "Invitation Sent" promised the inviter news of the person's decision, which never came; it now says the invitation waits under Invitations (Rule 15) | ✅ | retired | PR review (claude), 2026-10-27 — fixed upstream (pkp/ojs#5923, pkp/omp#2505, pkp/ops#1446) |
 | [A1](#a1) | Retired: the send wizard's address was gated more widely than the screen that offers it; it now lets in only those who open Users & Roles (Actors row 2) | ✅ | retired | upstream change + claim check (claude), 2026-10-02 — fixed upstream |
 | [A6](#a6) | Retired: Edit on a disabled member's row opened an error over an empty wizard; it now opens their details with the disabled-user warning (Rule 14) | ✅ | retired | upstream change + claim check (claude), 2026-09-18 — fixed upstream |
@@ -1133,6 +1194,54 @@ heading. The four warnings every opening of the wizard writes,
 whatever the name, have another cause and their own report
 ([A14](#a14)).
 Since: 2024-10-24 (pkp/pkp-lib#9658, about a year) · Basis: probe, 2026-10-23. <sup>[f-a17](#fn-a17)</sup>
+
+<a id="a18"></a>
+**A18 — After "Back" on the accept wizard's "Enter details", typed names go back to the invitation's** · 🐞 · user-visible.
+A newcomer accepting a role invitation types a Given Name or a Family
+Name on "Enter details" other than the one the invitation carries,
+presses that step's "Back" button, which opens "Create OJS account",
+then "Save and continue" there.
+"Enter details" opens with the invitation's names again, while an
+Affiliation and a Country typed the same way are kept. Unless the
+newcomer types the names again, "Review & create account" shows the
+invitation's names and the account is created with them: the account's
+Profile and its row in the Users & Roles list carry the invitation's
+name. Without "Back" the typed names reach the account. Nothing on
+screen says the typed names were replaced. The cause is in the wizard's
+browser code, which copies the names from each step's saved answer back
+into the form. The send wizard's own trouble with names after "Back" is
+[A15](#a15).
+Since: 2026-06-30 (pkp/pkp-lib#12513, about four months) · Basis: probe, 2026-11-03. <sup>[f-a18](#fn-a18)</sup>
+
+<a id="a19"></a>
+**A19 — With ORCID off, the accept wizard says to verify an ORCID iD from a profile that has none** · ❓ · minor.
+On a journal with ORCID off, a newcomer's "Enter details" and an
+existing user's "Review & create account" show "ORCID iD" with "Not
+verified. You can verify your ORCID iD from your profile section in
+OJS." The Profile page's "Identity" tab on that journal has no ORCID iD
+field while ORCID is off, so the recipient cannot follow the advice.
+Question: should the wizard leave the ORCID iD line out while ORCID is
+off for the journal? Lean: yes; the advice is right only where the
+Profile offers the iD.
+Basis: probe, 2026-11-03. <sup>[f-a19](#fn-a19)</sup>
+
+<a id="a20"></a>
+**A20 — The invitation email mixes the journal's language with the manager's** · ❓ · minor.
+A manager whose screens are in English invites someone on a journal
+whose primary language is French. The email's own text is in English
+and names the journal in English in "you have been invited by {name} to
+take on new roles at {journal}", but each role's name is in French
+("Rédacteur-trice de rubrique"), and the role's masthead sentence names the journal in French: "Your name will appear
+in the {journal}'s masthead as a Rédacteur-trice de rubrique." The
+recipient reads one email in two languages, with the journal under two
+names. A press's email does the same; a preprint server's shows a raw
+text key for the Moderator role instead ([Journal identity & about
+pages OPS4](U07-journal-identity-and-about-pages.md#ops4)).
+Question: should the role lines be in the language of the rest of the
+email? Lean: yes, a defect: the role lines take the journal's language
+while the text around them follows the sender's screens, and one email
+should read in one language.
+Basis: probe, 2026-11-03. <sup>[f-a20](#fn-a20)</sup>
 
 ### OMP and OPS
 
@@ -1529,7 +1638,9 @@ Author read "Already assigned roles" › "Reader" › "Starting from
 2026-09-28" › "Your name will appear in the {journal}'s masthead as a
 Reader.", then "Newly assigned roles" › "Author" › the same sentence "as a
 Author."; a Reader set to "Does not appear on the masthead" read "Your name
-will not appear in {journal}'s masthead as a Reader." (finding A11).
+will not appear in {journal}'s masthead as a Reader." (finding A11). The
+email's languages on a journal whose primary language is not the
+sender's: f-a20.
 
 <a id="fn-k"></a>
 **k** — Accept wizard: `pages/acceptInvitation/AcceptInvitationPage.vue` +
@@ -1554,7 +1665,8 @@ name was entered in the French boxes only met an empty "Given Name *
 Required" under a "French" button, each name field reading "1/2 languages
 completed"; with Given Name emptied and no country, "Save and continue"
 was refused and the step stayed; the review step's "Edit" reopened the
-details and "Save and continue" returned to the review.
+details and "Save and continue" returned to the review. The "ORCID iD"
+line on "Enter details" and the review step: f-a19.
 
 <a id="fn-l"></a>
 **l** — `UserRoleAssignmentReceiveController::authorize()` calls
@@ -1746,8 +1858,8 @@ drafts other runs had open (finding A2).
 (Rule 17): "Cancel" stood beside the forward button on each of a
 newcomer's three steps and on an existing user's review step. On a
 newcomer's "Create OJS account" it opened "Cancel Role Invitation
-Process?", whose text goes on "If you're already a user, you'll be taken
-back to the dashboard. If not, you'll need to access the invitation email
+Process?", whose text goes on "If you’re already a user, you’ll be taken
+back to the dashboard. If not, you’ll need to access the invitation email
 to start the process again."; "Go Back" returned to the step, and "Cancel
 Invitation Process" led to `login?source=…/submissions` with no
 invitations request made. The Invitations table still held the row, and
@@ -1782,8 +1894,28 @@ journal with ORCID enabled: a newcomer's "STEP 1 - Verify ORCID iD"
 offered "Verify ORCID iD", "Skip ORCID verification" and "Cancel";
 "Cancel" opened "Cancel Role Invitation Process?" with the same text and
 the buttons "Cancel Invitation Process" and "Go Back", and "Go Back"
-returned to "STEP 1 - Verify ORCID iD". "Cancel Invitation Process" was
-not pressed from that step.
+returned to "STEP 1 - Verify ORCID iD". Claim check 2026-11-03, OJS,
+OMP and OPS, two runs each, PKP's default test dataset, ORCID on (Public
+Sandbox, dummy credentials): "Cancel Invitation Process" pressed on
+"STEP 1 - Verify ORCID iD" led a signed-out newcomer and a signed-out
+member to `login?source=…/submissions`; the row still read "Invited",
+the member's roles were unchanged, and the member's link (no verified
+iD) reopened "STEP 1 - Verify ORCID iD"; the newcomer's link was not
+reopened after that cancel. The wizard's "Back" button stood on "STEP 2 -
+Enter details", a newcomer's "STEP 3 - Review & create account", and,
+with ORCID on, "STEP 2 - Create OJS account" and the member's "STEP 2 -
+Review & create account"; no "STEP 1" step carried it. The same check, ORCID off (Rules 17, 17a): the reopened "Create
+OJS account" after a cancel from "Enter details" read the chosen
+username with the Password box empty and the consent unticked (password
+length 0, consent false, every run); "Back" from "Enter details" opened
+"STEP 1 - Create OJS account" with the username, the 27-character
+password and the consent kept (names after "Back": f-a18); a reload of
+"Review & create account" opened "STEP 1 - Create OJS account" with the
+username, Password empty and consent unticked, and after "Save and
+continue" "Enter details" read the values the last save had stored
+("Ina", "Nonce", "Typed University", "Canada"). The dialog's apostrophes
+are typographic on screen ("you’ll", "you’re"). No browser dialog in any
+run; no response of 500 or more.
 
 <a id="fn-a1"></a>
 **f-a1** — Role assignment vs screen gate: note b vs note a. The atlas route
@@ -2152,6 +2284,75 @@ details"; on the third, A14's four alone, the page reading "Ines Both"
 and "You are viewing Ines's user details". No response of 500 or more
 and no page error.
 Issue report: [pkp-e2e#1072](https://github.com/jardakotesovec/pkp-e2e/issues/1072) ([docs/issues/U06-A17-invitation-edit-nameless-php-warning.md](../issues/U06-A17-invitation-edit-nameless-php-warning.md)).
+
+<a id="fn-a18"></a>
+**f-a18** — ui-library `AcceptInvitationPageStore`: after each `refine`
+answered without validation errors, `updateInvitationPayload()` copies
+`givenName` and `familyName` from the answer back into the form
+(`['givenName', 'familyName'].forEach(… updateAcceptInvitationPayload(field,
+data.value[field]))`, commented "Reflect any server-side locale
+fallback"), so the "Create OJS account" save after "Back" writes the
+invitation's stored names over the unsaved typed ones; `affiliation` and
+`userCountry` are not copied. Added by pkp/pkp-lib#12513 (ui-library
+`7a8c7866` on `main`, `ac2dabbc` on `stable-3_5_0`, 2026-06-30); the same
+code is on `stable-3_5_0`, not driven there. Claim check 2026-11-03, OJS,
+OMP and OPS on `main` (ui-library `eb988214`), two runs each, PKP's
+default test dataset, scratch journals made by `admin` with ORCID off,
+newcomers invited with Given Name "Ina" and Family Name "Nonce":
+Family Name "Quilltyped", Affiliation "Typed University" and Country
+"Canada" typed, "Back" ("STEP 1 - Create OJS account" with the username,
+the password and the consent kept), "Save and continue": "Enter details"
+read Given Name "Ina", Family Name "Nonce", "Typed University",
+"Canada"; the review step read "Given Name Ina Family Name Nonce
+Affiliation Typed University Country of affiliation Canada", and after
+the accept Profile › Identity read "Ina" / "Nonce", Contact "Typed
+University" / "Canada", the users list "Ina Nonce … Typed University".
+Given Name "Givtyped" typed the same way came back as "Ina". The
+control, the same names typed with no "Back", reached the review step
+and the account as "Givtyped Quilltyped". No notice, no dialog, every
+`refine` and `finalize` answered 200, no response of 500 or more and no
+page error.
+
+<a id="fn-a19"></a>
+**f-a19** — ui-library `AcceptInvitationUserDetailsForms.vue` and
+`AcceptInvitationReview.vue` show `invitation.orcid.acceptInvitation.message`
+whenever the payload, or the existing user, holds no ORCID iD, whatever
+the journal's ORCID setting; lib/pkp `IdentityForm` sets `orcidEnabled`
+only when `OrcidManager::isEnabled()`, and `templates/user/identityForm.tpl`
+draws the ORCID field only `{if $orcidEnabled}`. Claim check 2026-11-03,
+OJS, OMP and OPS, two runs each, PKP's default test dataset, scratch
+journals with ORCID off: a newcomer's "STEP 2 - Enter details" and an
+existing user's "STEP 1 - Review & create account" read "ORCID iD" and
+"Not verified. You can verify your ORCID iD from your profile section in
+OJS." (OMP "in OMP.", OPS "in OPS."); the accepted newcomers' Profile ›
+Identity had no "ORCID" on any of 18 reads. With ORCID on, an existing
+user who passed "Skip ORCID verification" read the same line on
+"Review & create account", and one with a verified iD read
+`https://sandbox.orcid.org/0000-0002-1825-0097` there instead.
+
+<a id="fn-a20"></a>
+**f-a20** — `UserRoleAssignmentInvitationNotify::setData($locale)` builds
+each role's block in `getUserUserGroupSection()` with the role's name
+(`getLocalizedData('name', $locale)`) and, in the masthead sentence,
+`$context->getName($locale)`, while the section titles
+(`emails.userRoleAssignmentInvitationNotify.newlyAssignedRoles`,
+`….alreadyAssignedRoles`) and the role block's own text are read with
+`__()` and no locale, that is in the sender's interface language, as is
+the template body the compose step showed. Live-probed 2026-11-03, OJS,
+OMP and OPS on `main`, two runs each, PKP's default test dataset: a
+scratch context made by `admin` under Hosted Journals (Presses, Servers)
+with French (Canada) primary, a name in each language and English under
+"Forms", Users & Roles under `/en/` › "Invite to a role", a new address
+named Ivo Invitee, one role row (Section editor; Series editor; Moderator)
+with "Appear on the masthead". The email read "Dear Ivo Invitee," "you
+have been invited by admin admin to take on new roles at {name} EN",
+"Newly assigned roles", "1.", "Rédacteur-trice de rubrique" (OMP
+"Rédacteur/Rédactrice en chef de la série", OPS
+"##default.groups.name.sectionEditor##"), "Starting from 2026-11-03",
+"Your name will appear in the {name} FR's masthead as a Rédacteur-trice
+de rubrique.", "On accepting the invite, you will be redirected to {name}
+EN." and "Kind regards, {name} EN". No response of 500 or more and no
+page error on the send.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Error observed on OMP and OPS (live probes 2026-07-31, two
