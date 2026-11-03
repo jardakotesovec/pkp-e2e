@@ -1,3 +1,4 @@
+// Copied 2026-11-03 from the U37 A8 issue walk (retired, fixed by pkp/pkp-lib#13605) for addQuery35, used by lib.js here.
 // Helpers of walk.js here (issue report docs/issues/U37-A8-author-discussion-with-file-edit-refused.md).
 // Requiring this file runs nothing. The Tasks & Discussions panel of main's workflow (the Vue
 // DiscussionManager): open it as an Author or an editor, add a discussion with an uploaded file,

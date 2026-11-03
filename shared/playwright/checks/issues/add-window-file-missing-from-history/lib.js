@@ -103,13 +103,13 @@ async function editItem(page, panel, name, {remove, rename, label}) {
 
 // ---------------------------------------------------------------------------------------------
 // stable-3_5_0: the stage's "Production Discussions" grid. "Add discussion" with an upload is the
-// U37 A8 walk's addQuery35; the grid, its row actions and the query window are the U37 A9 walk's.
+// U37 A8 walk's addQuery35 (copied into lib-u37a8.js); the grid, its row actions and the query window are the U37 A9 walk's.
 
 /** dbarnes at Production; "Add discussion" with the file; the grid's rows, the row's actions, the query window. */
 async function walk35(page, app, {subject, message, file}) {
     const P = require('../typed-participant-message-not-sent/lib.js');
     const Q = require('../../sync/pkp-lib-13506/lib.js');
-    const {addQuery35} = require('../author-discussion-with-file-edit-refused/lib.js');
+    const {addQuery35} = require('./lib-u37a8.js');
     await P.openWorkflow(page, app, WORDS[app.name].id, MENU_KEY);
     record('r35-panel', await screen(page));
     const added = await addQuery35(page, app, {participantName: WORDS[app.name].participantName, subject, message, file});
