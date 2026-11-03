@@ -154,17 +154,24 @@ Login, the site's name stands in for the journal's), but after a refused
 5a. **Back after the session ended, still signed in.** A user who
    signed in with "Keep me logged in" ticked and comes back after the
    idle limit, or reopens the browser on an installation that ends
-   sessions at browser close, is signed in on every page (retired
-   [A14](#a14) and [A8](#a8)). The Dashboard, "Edit Profile" and, for a
-   Journal Manager, Settings › Users & Roles open; the journal's public
-   header shows their username, not "Register" and "Login"; the Login
-   page sends them home (Rule 1); and "Login As" works (Rule 14).
-   Unticked, that return shows the Login page. A return does not
-   restart the window: it ends 30 days (by default) after the original
-   sign-in. Each action below is taken while signed in, the user returning
-   after the session ended. "Logout" (Rule 6), a password change in
-   another browser, or disabling the account ends it: the return shows
-   the Login page. Saving an email change or changing one's own password
+   sessions at browser close, is signed in on every page they open or
+   reload (retired [A14](#a14) and [A8](#a8)). The Dashboard, "Edit
+   Profile" and, for a Journal Manager, Settings › Users & Roles open;
+   the journal's public header shows their username, not "Register" and
+   "Login"; the Login page sends them home (Rule 1); and "Login As"
+   works (Rule 14). Unticked, that return shows the Login page. The
+   ticked return has one exception: on a Settings › Users & Roles or
+   Dashboard tab left open from before the idle limit, a search typed
+   there opens a window headed "Error" reading "You are not authorized
+   to access the requested resource." with "OK", although the user is
+   still signed in. A reload opens the page signed in, and the search
+   then works ⚠ [A16](#a16). A return does not restart the window: it
+   ends 30 days (by default) after the original sign-in. Each change
+   that follows is made while still signed in, before the session ends;
+   its effect shows when the user comes back after it has ended.
+   "Logout" (Rule 6), a password change in another browser, or
+   disabling the account ends the sign-in: the return shows the Login
+   page. Saving an email change or changing one's own password
    under "Edit Profile" keeps that browser signed in; the other
    browser of that password change gets the Login page. <sup>c</sup>
 6. **Signing out.** The user menu (top-right initials) offers "Logout".
@@ -322,7 +329,10 @@ Login, the site's name stands in for the journal's), but after a refused
     after the idle limit of a sign-in made with "Keep me logged in"
     unticked (Rule 5), "Expire User Sessions" or the
     browser's cookies for the site cleared, it is refused with a message
-    that does not say the user is signed out ⚠ [A16](#a16). <sup>m</sup>
+    that does not say the user is signed out ⚠ [A16](#a16). After the
+    idle limit of a ticked sign-in, a search on a Users & Roles or
+    Dashboard tab left open is refused too, though the user is still
+    signed in (Rule 5a). <sup>m</sup>
 
 ## Side effects
 
@@ -878,7 +888,7 @@ Left out of the scenarios above, by reason:
   - the other changes Administration saves in place, refused the same way once the confirmed window has lapsed: adding a journal, saving the site's Languages, Plugins, Navigation and Highlights, the site's announcements, and retrying or deleting failed jobs (Rule 16): the same answer as scenario 10's Site Settings "Save" and journal removal
 - **Register carries it**:
   - A5 (no journal-level users screen offering the forced-change flag; Rule 11a)
-  - A16 (a search on a page left open after its session ended refused with an alert or an "Error" window instead of the Login page; Rule 18)
+  - A16 (a search on a page left open after its session ended refused with an alert or an "Error" window instead of the Login page, and on Users & Roles and the Dashboard after the idle limit of a ticked sign-in too, the user still signed in; Rules 5a, 18)
   - A17 (a session ended by a password change in another browser logged as an IP address change; *Side effects*, "Audit lines")
 - **No seed**:
   - other Site Administrators never offered Login As (Rule 14): what is missing is a second site administrator
@@ -1123,13 +1133,16 @@ raises the browser alert "The current role does not have access to this
 operation.", the access-denied sentence of Rule 17; after "OK" the
 spinner beside "Search" keeps turning and the list stays unfiltered. On
 Settings › Users & Roles, a search typed in the box "Enter a user's
-name, role (e.g Journal editor), or affiliation" opens a window headed
-"Error" reading "You are not authorized to access the requested resource." with
-"OK". Since 31 October 2026 (pkp/pkp-lib#12780), a user signed in with
-"Keep me logged in" ticked who comes back to such a Users & Roles tab
-after the idle limit gets the same window although still signed in: a
-reload opens the page signed in, and the search then works. Nothing leads to the Login page until the user follows a link or
-reloads, so they may well conclude that their role has lost access.
+name, role (e.g Journal editor), or affiliation", and on the Dashboard
+one typed in "Search submissions", opens a window headed "Error"
+reading "You are not authorized to access the requested resource."
+with "OK". Nothing leads to the Login page until the user follows a
+link or reloads, so they may well conclude that their role has lost
+access. Since 31 October 2026 (pkp/pkp-lib#12780), a user signed in
+with "Keep me logged in" ticked who comes back to such a Users & Roles
+or Dashboard tab after the idle limit gets the same window although
+still signed in: a reload opens the page signed in, and the search
+then works (Rule 5a).
 After a password change in another browser, a Profile page open here
 behaves as [User profile A25](U03-user-profile.md#a25) and
 [A26](U03-user-profile.md#a26) record.
@@ -1349,6 +1362,16 @@ Live-probed 2026-10-15 (Rule 5a's page still open; OJS, OMP, OPS on
 `main`, OJS on `stable-3_5_0`): after the same eight-day lapse with the
 remember cookie held, a page load landed on the Login page while a
 search on a page already open was refused (finding A16, note f-a16).
+Walked 2026-11-02 (Rule 5a's tab left open; OJS, OMP, OPS on `main`,
+lib/pkp `442148e14e`, and on `stable-3_5_0`; `dbarnes` signed in with
+the box ticked, every session's last activity moved back eight days;
+kept script
+`shared/playwright/checks/issues/users-search-session-ended-error-window/walk.js`,
+`H19J_MODE=walk` and `dash`, `H19_COMBOS=ticked:idle`): a search typed
+on Users & Roles or the Dashboard already open opened the "Error"
+window; after "OK" a reload opened the page signed in, and the same
+search then answered with no window, Users & Roles listing "Current
+Users (0)" (finding A16, note f-a16).
 
 <a id="fn-d"></a>
 **d** — `LoginHandler::signOut()` → `Validation::logout()`: invalidates the
@@ -2312,6 +2335,27 @@ writes finding A17's audit line (note f-a17). What the open Dashboard
 showed in response was not read: the walk moved that browser to a new
 page next (the Login page). A look at that Dashboard a few seconds after
 the save, before any navigation, would settle it.
+Walked 2026-11-02 (Rules 5a, 18; OJS, OMP, OPS on `main`, lib/pkp
+`442148e14e`, and on `stable-3_5_0`, lib/pkp `c4c0aa8c52`, each from a
+fresh load of PKP's default test dataset; `dbarnes` on Settings › Users
+& Roles or on the Dashboard in one browser, `admin` in another; kept
+script
+`shared/playwright/checks/issues/users-search-session-ended-error-window/walk.js`,
+`H19J_MODE=walk` and `dash`): with the box unticked, after "Expire User
+Sessions", the idle limit (every session's last activity moved back
+eight days) or the browser's cookies cleared, the Users & Roles search
+(`GET api/v1/users`) and the Dashboard's "Search submissions"
+(`GET api/v1/_submissions`, with the side menu's
+`_submissions/viewsCount`; `…/_submissions/assigned` on 3.5) answered
+`401 {"error":"You are not authorized to access the requested resource.","errorMessage":""}`,
+shown in the "Error" window, and the reload landed on the Login page.
+With the box ticked, the cookies cleared gave the same; after the idle
+limit the search got the same `401` and window, and the reload opened
+the page signed in, the search then listing "Current Users (0)" with
+no window. Cause (code read): since `442148e14e` (pkp/pkp-lib#12780,
+2026-10-31) `PKPSessionGuard::userFromRecaller()` signs a remembered
+user in again on page and component requests but returns `null` on
+REST API requests, so the open page's search arrives with no user.
 Issue reports (two causes): [pkp-e2e#1015](https://github.com/jardakotesovec/pkp-e2e/issues/1015) ([docs/issues/U01-A16-plugins-search-after-session-ended-role-alert.md](../issues/U01-A16-plugins-search-after-session-ended-role-alert.md)) (the older lists, tabs and forms: the role alert); [pkp-e2e#1016](https://github.com/jardakotesovec/pkp-e2e/issues/1016) ([docs/issues/U01-A16-users-search-after-session-ended-error-window.md](../issues/U01-A16-users-search-after-session-ended-error-window.md)) (the newer lists: the "Error" window).
 
 <a id="fn-a17"></a>
