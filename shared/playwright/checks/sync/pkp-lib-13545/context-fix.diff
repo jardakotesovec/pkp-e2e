@@ -1,0 +1,33 @@
+--- a/lib/pkp/classes/bodyText/Repository.php
++++ b/lib/pkp/classes/bodyText/Repository.php
+@@ -236,7 +236,7 @@
+                 // Catch the images referenced in the HTML and rewrite their src attributes to point to the new image supplement file.
+                 $images = [];
+                 if ($mimeType === 'text/html') {
+-                    [$content, $images] = $this->prepareHtmlImages($content, $publicationId, $submission);
++                    [$content, $images] = $this->prepareHtmlImages($content, $publicationId, $submission, $context);
+                 }
+                 $path = $submissionDir . '/' . uniqid() . '.' . $extension;
+                 $createdPaths[] = $path;
+@@ -397,14 +397,19 @@
+      *
+      * @return array{string, array<string, SubmissionFile>}
+      */
+-    protected function prepareHtmlImages(string $html, int $publicationId, Submission $submission): array
++    protected function prepareHtmlImages(string $html, int $publicationId, Submission $submission, Context $context): array
+     {
+         $request = Application::get()->getRequest();
+         $baseUrl = $request->getBaseUrl() . '/';
+         $bodyTextFile = $this->getBodyTextFile($publicationId)->submissionFile;
+ 
+         $sourcesByUrl = []; // ['url' => SubmissionFile]
+-        $schemaMap = Repo::submissionFile()->getSchemaMap($submission, []);
++        // Pass the context: a call from the CLI or a job has none in the request
++        $schemaMap = app('maps')->withExtensions(Repo::submissionFile()->schemaMap, [
++            'submission' => $submission,
++            'genres' => [],
++            'context' => $context,
++        ]);
+         $files = $bodyTextFile
+             ? Repo::submissionFile()->getCollector()
+                 ->filterBySubmissionIds([$submission->getId()])
