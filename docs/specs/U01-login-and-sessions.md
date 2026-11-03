@@ -127,10 +127,12 @@ Login, the site's name stands in for the journal's), but after a refused
    exception). Signing in continues to the address they originally
    asked for. When that address is a screen their roles do not allow (a
    Reader who had opened a journal's settings, say), the sign-in lands on
-   the access-denied page instead (Rule 17). One address misbehaves: the
-   address that ends at the word "dashboard", or at "dashboard/",
-   answers a blank server-error page instead of the Login page
-   ⚠ [A7](#a7). <sup>b</sup>
+   the access-denied page instead (Rule 17). The Dashboard address that
+   ends at the word "dashboard" (the link in the monthly "Outstanding
+   editorial tasks" email), with or without a final slash or the
+   language in it, behaves the same: signed out, it opens the Login
+   page, and signing in there leads to the Dashboard (retired
+   [A7](#a7)). <sup>b</sup>
 4a. **A sentence above the form, for restricted content** {OJS}. A
    signed-out visitor who presses a galley that needs a subscription gets
    the Login page with a sentence above the form, such as "Subscription
@@ -439,10 +441,8 @@ tooling recipe are in the footnote. <sup>s</sup>
    - **The second browser**: in the second browser, open the Dashboard:
      it shows, the account still signed in there; signing out ended only
      the first browser's session (Rule 6).
-   - **Control**: in the first browser, opening any dashboard address now
-     shows the Login page, not the dashboard. The exception is the address
-     that ends at the word "dashboard", which answers a blank error page
-     ⚠ [A7](#a7).
+   - **Control**: in the first browser, opening the Dashboard's address
+     now shows the Login page, not the Dashboard.
 
 3. **A bookmarked private page waits for sign-in**
 
@@ -652,9 +652,7 @@ Left out of the scenarios above, by reason:
     proposes, once fixed
   - signed out, the Dashboard address ending at the word "dashboard"
     opening the Login page, and signing in there leading to the
-    Dashboard ([A7](#a7)): the guard the issue report
-    (`docs/issues/U01-A7-dashboard-address-signed-out-server-error.md`)
-    proposes, once fixed
+    Dashboard (Rule 4; retired [A7](#a7))
   - a user signed in with "Keep me logged in" and back after the idle
     limit opening the Dashboard signed in, seeing their name, not
     "Register" and "Login", in the public header, and "Login As"
@@ -718,7 +716,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A1](#a1) | The password boxes stop accepting input at 32 characters, so longer passwords cannot be typed | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A2](#a2) | "Keep me logged in" is ticked every time the Login page shows, even after the user unticked it | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A4](#a4) | While signed in as another user, "Login As" is still offered, and using it strands the operator in that account | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A7](#a7) | Signed out, the Dashboard address the monthly reminder email links to gives an empty error page | 🐞 | medium · crash: server | issues (claude), 2026-10-07 — re-verified |
 | [A8](#a8) | Latent today: a user signed back in by "Keep me logged in" looks signed out on the public site, and "Login As" gives a blank page | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [A10](#a10) | The Site Administrator's "Edit User" never shows "Change Password" ticked, and saving it removes the flag | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | After a refused "Change Password" or "Reset Password", the browser tab loses the page's name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
@@ -729,6 +726,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A6](#a6) | With rate limiting on, even the correct password is refused as "Invalid username/email or password" during the cool-down; the concealment is intended | ✅ | latent | Jarda 2026-08-25 |
 | [A13](#a13) | Retired: with "Confirm Access" on, an Administration page left open still deleted journals and saved site settings without the password; such changes are now refused once the period has run out (Rule 16) | ✅ | retired | PR review (claude), 2026-10-20 — fixed upstream (pkp/pkp-lib#13521) |
 | [A12](#a12) | Retired: after a disabled account was refused, the browser's next correct sign-in landed back on the Login page with no message; it now lands at once (Rule 2) | ✅ | retired | issues (claude), 2026-10-19 — fixed upstream (pkp/pkp-lib#12780) |
+| [A7](#a7) | Retired: signed out, the Dashboard address the monthly reminder email links to gave an empty error page; it now opens the Login page (Rule 4) | ✅ | retired | ore daily step (claude), 2026-11-03 — fixed upstream (pkp/pkp-lib#13651) |
 
 ### All apps
 
@@ -849,20 +847,7 @@ Basis: observed on a running site + upstream design record.
 > genuine owner is the accepted cost.
 
 <a id="a7"></a>
-**A7 — Signed out, the Dashboard address the monthly reminder email links to gives an empty error page** · 🐞 · medium · crash: server.
-The server fails when a signed-out visitor opens the Dashboard address
-that ends at the word "dashboard", with or without a final slash
-(`…/index.php/publicknowledge/en/dashboard`,
-`…/index.php/publicknowledge/en/dashboard/`). The visitor gets an empty
-error page instead of the Login page. Longer Dashboard addresses, such as
-`…/dashboard/editorial`, open the Login page and return there after
-signing in.
-
-The address without the slash is the "submission dashboard" link in
-the monthly "Outstanding editorial tasks" email to managers and section
-editors. A bookmark or a typed address cut short at "dashboard" leads
-there too.
-Since: 2025-01-14 (pkp/pkp-lib#10782) · Basis: probe, 2026-10-07. <sup>[f-a7](#fn-a7)</sup>
+**A7 — Signed out, the Dashboard address the monthly reminder email links to gave an empty error page** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13651](https://github.com/pkp/pkp-lib/issues/13651), by [pkp/pkp-lib#13652](https://github.com/pkp/pkp-lib/pull/13652), 2026-10-31; on `ore` as pkp-lib `c4bb5a1272`), verified 2026-11-03 on OJS `ore`: signed out, the Dashboard address that ends at the word "dashboard" opens the Login page and signing in there leads to the Dashboard (Rule 4); the server used to fail there and the browser showed an empty page. <sup>[f-a7](#fn-a7)</sup>
 
 > **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Ruling: signed
 > out, the bare dashboard address must behave like every other private
@@ -1616,7 +1601,21 @@ than one it sends an address without a language to the same path with
 one ([Languages & locales](U57-languages-and-locales.md#fn-m), note m,
 probed there on the public pages). A scratch journal given a second
 language was not driven at these addresses.
-Issue report: [pkp-e2e#825](https://github.com/jardakotesovec/pkp-e2e/issues/825) ([docs/issues/U01-A7-dashboard-address-signed-out-server-error.md](../issues/U01-A7-dashboard-address-signed-out-server-error.md)).
+Retired: fixed by pkp/pkp-lib#13651 through PR pkp/pkp-lib#13652
+(Jack Henschel), lib/pkp `574aaee095` on `main` and `c4bb5a1272` on
+`ore` (in pkp/ojs `ore`'s pointer since `dfb319c4c1`, at `f1585093d5`):
+with no signed-in user, `PKPPageRouter::getHomeUrl()` returns the Login
+address with the requested address as `source`. Walked 2026-11-03 on
+OJS `ore` `00f3da7536` on PKP's default dataset, signed out (the kept
+walk, default mode; no server-log line): each of
+`{journal}/en/dashboard`, `{journal}/en/dashboard/`,
+`{journal}/en/dashboard/index` and `{journal}/dashboard` answered 302
+to `{journal}/en/login?source=…` ("Login | Journal of Public
+Knowledge"), and `dbarnes` signing in there landed on
+`dashboard/editorial`. `main`'s retirement (2026-11-01) has the same
+walk on OJS, OMP and OPS. Issue report
+[pkp-e2e#825](https://github.com/jardakotesovec/pkp-e2e/issues/825),
+closed with the `main` retirement; its report and kept walk deleted.
 
 <a id="fn-a8"></a>
 **f-a8** — Live-probed 2026-08-25 (OJS): with an aged storage-state session

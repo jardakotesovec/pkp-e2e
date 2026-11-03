@@ -8,7 +8,7 @@
  * press, Press Manager, Series Editor — glossary substitution).
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A1, A2, A4, A5, A7, A8, A10, A11,
+ * of everything else left out): A1, A2, A4, A5, A8, A10, A11,
  * A14.
  *
  * Seeding: scenario endpoints only. Scratch submissions ride the read-only
@@ -580,7 +580,7 @@ test.describe('Login & sessions (U1)', () => {
         await expect(secondBrowser.locator('form#login')).toHaveCount(0);
 
         // Control: a dashboard address now shows the Login page, not the
-        // dashboard (not the bare "dashboard" address: A7, unasserted).
+        // dashboard (not the bare "dashboard" address, unasserted).
         await page.goto(editorialUrl(PK));
         await expectLoginPage(page);
     });

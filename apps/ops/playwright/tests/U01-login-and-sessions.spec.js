@@ -12,7 +12,7 @@
  * does scenario 8's Reviewers-table bullet.
  *
  * Deliberately NOT covered (register IDs from the spec's Findings
- * register): A1 🐞, A2 🐞, A4 🐞, A5 ❓, A6 ✅, A7 🐞, A8 🐞, A10 🐞, A11 🐞,
+ * register): A1 🐞, A2 🐞, A4 🐞, A5 ❓, A6 ✅, A8 🐞, A10 🐞, A11 🐞,
  * A14 🐞. The spec's Coverage section records everything
  * else left out.
  *
