@@ -13,3 +13,4 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
+2026-11-03 · plugin-review · plugin drive (pg-549 round 3) · about 8 retries on the pod's 3.5 screens: the Installed Plugins row's first "Settings" link is the hidden screen-reader text of `.show_extras` (the action is `a.pkp_linkaction_settings` in the `-control-row`), the wizard's `#contributors`/`#review` hash does not switch the step ("Continue" does), and the contributor form saves as a form-encoded POST with `X-Http-Method-Override: PUT`, so a wait on a PUT or a JSON parse of the body misses it · a short drive kit beside `sandbox/drive-guard.js` (sign-in, plugin row actions, wizard step, workflow menu, contributor edit) or those three facts in harness.md "Driving the pod's app"
