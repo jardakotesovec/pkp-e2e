@@ -1,0 +1,89 @@
+--- a/plugins/generic/datacite/filter/DataciteXmlFilter.php
++++ b/plugins/generic/datacite/filter/DataciteXmlFilter.php
+@@ -210,13 +210,17 @@
+         $subjects = [];
+         if (!empty($galleyFile) && !empty($genre) && $genre->getSupplementary()) {
+             foreach ($this->getTranslationsByPrecedence($galleyFile->getData('subject') ?? [], $objectLocalePrecedence) as $locale => $subject) {
+-                $subjects[$locale][] = $subject;
++                if (!$this->isBlank($subject)) {
++                    $subjects[$locale][] = $subject;
++                }
+             }
+         } elseif (!empty($article) && !empty($publication)) {
+             foreach (['keywords', 'subjects'] as $field) {
+                 foreach ($this->getTranslationsByPrecedence($publication->getData($field) ?? [], $objectLocalePrecedence) as $locale => $items) {
+                     foreach ((array) $items as $item) {
+-                        $subjects[$locale][] = $item['name'];
++                        if (!$this->isBlank($item['name'] ?? '')) {
++                            $subjects[$locale][] = $item['name'];
++                        }
+                     }
+                 }
+             }
+@@ -572,7 +576,9 @@
+                 break;
+             case isset($issue):
+                 $titles = $this->getIssueInformation($issue);
+-                $alternativeTitle = $this->getPrimaryTranslation($issue->getTitle(null), $objectLocalePrecedence);
++                $issueTitles = array_filter($this->getTranslationsByPrecedence($issue->getTitle(null) ?? [], $objectLocalePrecedence), fn ($t) => !$this->isBlank($t));
++                $alternativeTitleLocale = array_key_first($issueTitles);
++                $alternativeTitle = $issueTitles[$alternativeTitleLocale] ?? null;
+                 break;
+         }
+         // Order titles by locale precedence.
+@@ -598,7 +604,7 @@
+         // And finally the alternative title.
+         if (!empty($alternativeTitle)) {
+             $titlesNode->appendChild($node = $doc->createElementNS($deployment->getNamespace(), 'title', htmlspecialchars($alternativeTitle, ENT_COMPAT, 'UTF-8')));
+-            $node->setAttribute('xml:lang', LocaleConversion::toBcp47($objectLocalePrecedence[0]));
++            $node->setAttribute('xml:lang', LocaleConversion::toBcp47($alternativeTitleLocale));
+             $node->setAttribute('titleType', DATACITE_TITLETYPE_ALTERNATIVE);
+         }
+         return $titlesNode;
+@@ -1053,7 +1059,8 @@
+                 foreach ($issueDescs as $locale => $issueDesc) {
+                     $descriptions[DATACITE_DESCTYPE_OTHER][$locale] = $issueDesc;
+                 }
+-                $descriptions[DATACITE_DESCTYPE_TOC][$objectLocalePrecedence[0]] = $this->getIssueToc($issue, $objectLocalePrecedence);
++                // The entries are each work's own primary title, so the TOC as a whole has no single language.
++                $descriptions[DATACITE_DESCTYPE_TOC][''] = $this->getIssueToc($issue, $objectLocalePrecedence);
+                 break;
+             default:
+                 throw new Exception('DataCite export: unable to determine descriptions; none of issue, article or galley is set.');
+@@ -1063,11 +1070,19 @@
+             $descriptionsNode = $doc->createElementNS($deployment->getNamespace(), 'descriptions');
+             foreach ($descriptions as $descType => $localizedDescriptions) {
+                 foreach ($localizedDescriptions as $locale => $description) {
++                    if ($this->isBlank($description)) {
++                        continue;
++                    }
+                     $descriptionsNode->appendChild($node = $doc->createElementNS($deployment->getNamespace(), 'description', htmlspecialchars(PKPString::html2text($description), ENT_COMPAT, 'UTF-8')));
+                     $node->setAttribute('descriptionType', $descType);
+-                    $node->setAttribute('xml:lang', LocaleConversion::toBcp47($locale));
++                    if ($locale !== '') {
++                        $node->setAttribute('xml:lang', LocaleConversion::toBcp47($locale));
++                    }
+                 }
+             }
++            if (!$descriptionsNode->hasChildNodes()) {
++                $descriptionsNode = null;
++            }
+         }
+         return $descriptionsNode;
+     }
+@@ -1257,6 +1272,15 @@
+     }
+ 
+     /**
++     * Whether a translation is empty once its HTML is converted to text
++     * (an abstract saved as "<p></p>" or "<p>&nbsp;</p>" included).
++     */
++    protected function isBlank(mixed $value): bool
++    {
++        return !is_string($value) || preg_replace('/[\s\x{00A0}]+/u', '', PKPString::html2text($value)) === '';
++    }
++
++    /**
+      * Re-order localized data by locale precedence.
+      *
+      * @param array $localizedData An array of localized
