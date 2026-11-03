@@ -306,6 +306,16 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
                 {timeout: 30_000, intervals: [250]}
             )
             .toBe(true);
+        // The role drop-down lists the roles in an order a fresh install does
+        // not fix (CI moved "Journal editor" last once, ci-triage "U06 S1"), so
+        // its options count as a set: written in sorted order, the rest as text.
+        const options = (await this.page.getByLabel(/^Select a new role/).last().locator('option').allInnerTexts())
+            .map((o) => o.replace(/\s+/g, ' ').trim())
+            .filter(Boolean);
+        const listed = options.join(' ');
+        if (options.length && text.includes(listed)) {
+            text = text.replace(listed, [...options].sort().join(' '));
+        }
         return text;
     }
 
