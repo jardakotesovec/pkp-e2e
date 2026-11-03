@@ -692,6 +692,18 @@ links under the list. <sup>g</sup>
       as the codes `&amp;` and `<i>…</i>` ⚠ [A30](#a30). A preprint
       server's file puts the title again where the subtitle belongs
       ⚠ [OPS7](#ops7).
+29c. **What a DataCite file holds** {OJS}. The file a DataCite journal's
+    "Export DOIs" downloads, read as in Rule 29b. <sup>q53</sup> Its title, its
+    subjects and its descriptions come in every language the work was
+    given them in, each marked with that language (`xml:lang`, as in
+    `fr-CA`), the work's own language first:
+    - **An article**: its title, then each translated title; its
+      keywords and subjects; its abstract.
+    - **An issue**: the journal's name with the issue's number in each
+      language, its own title as the alternative title, its
+      description, and its table of contents.
+    - **A supplementary file**: its name, its subject and its
+      description.
 30. **The agency panel.** With an agency configured, an item's expanded
     view ends with a box naming the agency, a sentence and buttons:
     <sup>m</sup> <sup>q20</sup>
@@ -2279,7 +2291,7 @@ Left out of the scenarios above, by reason:
   - A23 (a journal's or a preprint server's galley given its DOI alone at a publish; Side effects)
   - A29 (an install upgraded from 3.3 keeping an old leftover prefix, an upgrade no test runs; Fields, "DOI Prefix")
 - **No seed**:
-  - the "Export DOIs" download, "Items successfully exported" and what the file holds: the test installs cannot reach the agency's site (Rules 29, 29b; Side effects)
+  - the "Export DOIs" download, "Items successfully exported" and what the file holds: the test installs cannot reach the agency's site (Rules 29, 29b, 29c; Side effects)
   - a deposit the agency answers with an error: "Error", "View Error" and the "Registration Error Message" window, and a review's "Error" DOI kept through "Public Visibility" unticked (Rules 7b, 17, 33)
   - a deposit the agency accepted: the panel's "Registered" through the agency and "View Record" (Rules 30, 33)
 - **Owned by another feature**:
@@ -3693,6 +3705,27 @@ the file held the article's record with an empty
 naming the galley's DOI, then the galley's record. Work 9 with its only
 DOI emptied: "One or more invalid publication objects were included
 with the request." in an "Error" window.
+
+<a id="fn-q53"></a>
+**q53** — Built 2026-11-03 at the PR head `pkp/ojs#5867` `57eb645396`
+(issue `pkp/pkp-lib#9170`), before its merge, on PKP's default test
+dataset (form languages en and fr_CA), with the DataCite export plugin's
+own filter, validation off, and checked against DataCite's kernel-4
+schema (`checks/sync/pkp-lib-9170/xml-lang.php`). Article 1 given a
+French title, abstract, keywords and subjects: two titles (`en`, then
+`fr-CA` as `TranslatedTitle`), five subjects, two abstracts, each with
+its `xml:lang`. With the work's language set to French, the French
+title and abstract come first and `<language>` reads `fr-CA`. Issue 1
+given an English and a French description: both, then the table of
+contents marked `en`. Galley 1 made a supplementary file with an
+English and a French subject and description: both of each. Every file
+passed the schema. At the base (OJS `main` `e7ce037799`) none carried
+`xml:lang`, only the first language's abstract, keywords and subjects
+were sent, and the supplementary file with a subject failed with
+`TypeError: Cannot access offset of type string on string`, as on
+`stable-3_5_0` `0f2de4ff3f`. Empty translations, the alternative title's
+language and the table of contents' language are this PR's open
+review points (`docs/reports/pr-review/2026-11-03-ojs-5867.md`).
 
 <a id="fn-q52"></a>
 **q52** — Live-probed 2026-10-19 (Rules 13, 29b, 38; OJS11, OJS12),
