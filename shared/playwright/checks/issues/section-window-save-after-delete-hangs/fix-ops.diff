@@ -1,0 +1,14 @@
+--- a/controllers/grid/settings/sections/SectionGridHandler.php
++++ b/controllers/grid/settings/sections/SectionGridHandler.php
+@@ -226,6 +226,11 @@
+     {
+         $sectionId = $request->getUserVar('sectionId');
+ 
++        // The section may have been deleted since its window was opened (from another tab)
++        if ($sectionId && !Repo::section()->get((int) $sectionId, $request->getContext()->getId())) {
++            return $this->sendErrorToUser($request->getUser()->getId(), 'api.404.resourceNotFound');
++        }
++
+         $sectionForm = new SectionForm($request, $sectionId);
+         $sectionForm->readInputData();
+ 
