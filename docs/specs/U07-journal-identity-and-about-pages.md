@@ -78,13 +78,28 @@ from their next load. <sup>f</sup> <sup>td4</sup>
 
 Fields marked "per language" take a text in each language the journal
 uses for forms. With a second form language, each such field shows the
-primary language's box with "1/2 languages completed" under it; the other
-language's boxes ("Journal Title in French", "Affiliation in French")
-appear only after pressing that language's button ("French") at the top
-of the tab, and stay shown while the user moves between the page's tabs;
-they are hidden again whenever the page is loaded. Only
-the primary language's box of a required field must be filled (Rule 11).
+primary language's box with "{n}/2 languages completed" under it, n
+being the number of languages filled ("2/2", "1/2", "0/2"); the other
+language's box, when shown, carries the same line. Only the primary
+language's box of a required field must be filled (Rule 11).
 <sup>f</sup> <sup>td4</sup>
+
+Above each tab's form, a button names the other language ("French"; on
+a journal whose primary language is French, "English"), with the
+primary language's name beside it as plain text. The other language's
+boxes ("Journal Title in French", "Affiliation in French") start hidden;
+the button opens them and pressing it again hides them. The
+exception is when the other language is the one the user's screens are
+in: then its boxes arrive open beside the primary language's, the button
+shows as selected, and pressing it hides them. So a journal whose
+primary language is French, opened with the screens in English, shows
+"Journal Title in English" from the start; a journal whose primary
+language is English, opened with the screens in French, shows its French
+boxes from the start, the button reading "français" beside "anglais".
+What pressing the button shows stays while the user moves to another
+tab and back, but each tab's form has its own button. Every load of the
+page returns each tab to its starting state.
+<sup>td4</sup>
 
 **The "Masthead" tab** (Settings › Journal › "Masthead"; on a press
 Settings › Press, on a preprint server Settings › Server). Its groups, top
@@ -292,7 +307,7 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
     A preprint server's "Sponsoring organization" feeds
     nothing [OPS2](#ops2). <sup>n</sup> <sup>aa</sup>
 11. **Languages.** When the journal uses more than one language for its
-    forms, every per-language field takes a text in each, behind the
+    forms, every per-language field takes a text in each, with the
     language buttons described under Fields (*Languages & locales*). A
     public page shows the text saved in the language the visitor is
     reading the site in, and the primary language's text when that
@@ -603,7 +618,7 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
     <sup>l</sup>
 12. **"Forms"** (Settings › Website › "Setup" › "Languages"; default the
     primary language alone). Each language ticked adds that language to
-    every per-language field of these tabs, behind its button at the top
+    every per-language field of these tabs, with its button at the top
     of the tab (Fields; Rule 11). *Languages & locales* owns the column. <sup>o</sup>
 
 ## Cross-feature interactions
@@ -1073,9 +1088,10 @@ Left out of the scenarios above, by reason:
   - "Remove User" moving the member to "Editorial History" at the next load, and a member with a later start date listed from that date on (Rule 14e; A5 retired)
   - "Merge user" of a listed member listing the kept account under the member's role (Rule 14e)
   - a journal renamed after an article was published: the article's "How to Cite" keeping the old name (and, on a journal or preprint server, the abbreviation or initials it was published with), while an article published after the save carries the new ones (Rule 7a)
+  - a second form language that is the language of the screens (a journal whose primary language is French opened in English, or an English one opened in French): its boxes open on arrival with its button selected, pressing the button hiding them, a reload opening them again, and the "Contact" tab arriving in its own starting state whatever was pressed on "Masthead" (Fields)
   - after the "Contact" tab is saved, the author's "Thank you for your submission to {journal title}" and the managers' "A new submission needs an editor to be assigned" sent from the new address under the principal contact's "Name", and on a press or preprint server "Publication Published" under its title (Side effects; Rule 9)
 - **Nothing new to test**:
-  - a second form language: its boxes behind the language button, shown across the page's tabs until the page is loaded again, and each public page in the visitor's language with the primary language's text where that box is empty (Fields; Rule 11; Settings bullet 12)
+  - a second form language: its boxes behind the language button while the screens are in the primary language, kept open on a tab after leaving it and coming back, each tab with its own button, until the page is loaded again, and each public page in the visitor's language with the primary language's text where that box is empty (Fields; Rule 11; Settings bullet 12)
   - unsaved changes kept while moving between the tabs of a page, and lost without a warning on reloading or leaving it (Rule 5)
   - another order of the roles on Settings › Website › "Appearance" › "Editorial Masthead" (Rule 14a; Settings bullet 4b)
   - the abbreviation, the "Publishing Details", "Sponsoring organization" and "Publisher Identity" saved and shown again on the tab (Fields; Rule 10)
@@ -1099,7 +1115,7 @@ Left out of the scenarios above, by reason:
   - OMP1 (Settings › Press headed "Setup"; Rule 1; scenario 2 marks it)
   - OPS2 ("Sponsoring organization" used nowhere; Fields; Rule 10)
   - OPS3 (a preprint server's French privacy default arriving as a raw text key; Fields)
-  - OPS4 (a preprint server's French masthead heading its Moderators with a raw text key; Rule 14a)
+  - OPS4 (a preprint server's French masthead heading its Moderators with a raw text key, and a French server's role invitation email naming the role so; Rule 14a)
 - **No seed**:
   - a journal upgraded from a release without the "Enrollment-based Masthead" group, reading its box unticked (Settings bullet 4a): the test installs are never upgraded
   - the newer-release notice on Settings › Journal (Rule 4b; Settings bullet 11): the test installs never reach the internet
@@ -1132,7 +1148,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | In six languages the page about the software shows a raw "{$…Version}" placeholder or a dead contact link | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OMP2](#omp2) | On a site hosting several presses, the site's "About Open Monograph Press" page says "This press uses" {OMP} | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS3](#ops3) | A preprint server's French "Privacy Statement" default is the raw text "##default.contextSettings.privacyStatement##" {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
-| [OPS4](#ops4) | A preprint server's French "Editorial Masthead" heads the Moderators "##default.groups.name.sectionEditor##" {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
+| [OPS4](#ops4) | A preprint server's French "Editorial Masthead" heads the Moderators "##default.groups.name.sectionEditor##", and a French server's role invitation email names the role so {OPS} | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A2](#a2) | The "Edit" link of the About pages is shown to a manager-level role that cannot open the Settings pages | ❓ | minor | — |
 | [A3](#a3) | The "Contact" tab cannot be saved until a technical support contact is entered, and new journals have none | ❓ | minor | — |
 | [A6](#a6) | The "Editorial History" page is headed "Editorial History Page" | ❓ | minor | — |
@@ -1339,7 +1355,7 @@ body of the server's French "Privacy Statement" page, headed
 Basis: probe, 2026-10-01. <sup>f-ops3</sup>
 
 <a id="ops4"></a>
-**OPS4 — The French masthead names the Moderators by a raw text key** · 🐞 · medium.
+**OPS4 — A French preprint server names the Moderators by a raw text key** · 🐞 · medium.
 A visitor reading a preprint server in French expects the role headings
 of "Editorial Masthead" (headed "Entête" in French) in French, as a
 journal gives them ("Rédacteur-trice", "Rédacteur-trice de rubrique")
@@ -1351,8 +1367,18 @@ Settings › Website › "Appearance" › "Editorial Masthead" ("Entête" in
 French) names the role the same way. The server's French translation has
 no text for the role's name; the users list shows the same key
 ([Users management](U53-users-management.md#ops1)).
-Basis: probe, 2026-10-01.
-<sup>f-ops4</sup>
+
+A role invitation sent from Users & Roles on a server whose primary
+language is French names the role the same way in its email, even when
+the manager's screens, and the rest of the email, are in English: the
+email reads "##default.groups.name.sectionEditor##" under "Newly
+assigned roles", and "Your name will appear in the {server}'s masthead
+as a ##default.groups.name.sectionEditor##.". On a journal whose primary
+language is French the same email reads "Rédacteur-trice de rubrique"
+in both places, on such a press "Rédacteur/Rédactrice en chef de la
+série" ([User invitations](U06-user-invitations.md)).
+Basis: probe, 2026-10-01; probe, 2026-11-03 (the email). <sup>f-ops4</sup>
+Report: refresh owed — the 2026-11-03 fold widened the entry to the role invitation email: on a server whose primary language is French, the email sent from Users & Roles › "Invite to a role" names the Moderator role "##default.groups.name.sectionEditor##" under "Newly assigned roles" and in its masthead sentence, while the report places the role's key on the masthead, the Roles tab and the users list only; the role's name in the email is the one `UserGroup\Repository::installLocale()` saved (2026-11-03)
 
 ### Retired
 
@@ -1684,6 +1710,34 @@ French boxes stayed shown after moving to the "Contact" tab and back, and
 were hidden again when the page was loaded again; "1/2 languages
 completed" under the title and initials, "Journal Title in French" and
 the other labels, and the saves as above held.
+Live-probed 2026-11-03 (Fields, third and fourth paragraphs; all three
+apps, two runs, dataset fleet), which corrects the progress line and the
+language buttons: a scratch context with French primary and English
+under "Forms", read under `/en/` as admin, and `publicknowledge` under
+`/en/` (rvaca, dbarnes) and `/fr_CA/` (rvaca), on Masthead, Contact and
+Website › Setup › Privacy Statement. The line under each shown box read
+"2/2 languages completed" (title and initials filled in both), "1/2 …"
+or "0/2 …" ("2/2 langues complétées" in French screens). Under `/en/`
+on `publicknowledge` the French boxes arrived hidden; "French" opened
+them, a second press hid them, a third opened them; a reload hid them.
+On the French-primary context under `/en/` the English boxes ("Journal
+Title in English", "Affiliation in English", the French ones plain
+"Journal Title", "Affiliation") arrived open with "English" selected; a
+press hid them, a second showed them, a reload opened them again. On
+`publicknowledge` under `/fr_CA/` the French boxes ("Titre de la revue en
+français", OMP "Nom de la presse en français", OPS "Titre du serveur en
+français") arrived open, "français" selected beside the plain "anglais";
+a press hid them; a reload opened them again. Masthead's state survived
+a visit to Contact and back, both ways, but Contact arrived in its own
+starting state whatever had been pressed on Masthead. OMP labels read
+"Press Name in French", OPS "Server Title in French". On the
+French-primary context an empty English title saved (and stayed empty after a reload)
+and an empty French title was refused with "This field is required."
+under the French box and "Go to Journal Title: This field is required."
+(OMP "Go to Press Name", OPS "Go to Server Title"). Mechanism:
+`FormComponent::getConfig()` sets `visibleLocales` to the interface
+locale, with the primary in front when it differs; `FormLocales.vue`
+draws a button for each non-primary locale and the primary as a span.
 
 <a id="fn-g"></a>
 **g** — `PKPMastheadForm` groups and fields: `identity`
@@ -2789,6 +2843,17 @@ reads "Rédacteur-trice de rubrique"), the cause of
 [Users management](U53-users-management.md#ops1) too. Each load
 of Settings › Website answered the Plugin Gallery's server error of
 [Plugins management](U62-plugins-management.md#a1).
+Live-probed 2026-11-03 (OPS4's reach; OPS, OJS and OMP the control; two
+runs, dataset fleet): a scratch context made by admin under
+Administration › Hosted Journals ("Hosted Presses", "Hosted Servers"), with French primary and English under "Forms"; Users & Roles under
+`/en/` › "Invite to a role", a new address, Moderator (Section editor,
+Series editor), "Appear on the masthead". The email in Mailpit read as
+the entry quotes; the compose step shows `{$ROLESADDED}` unfilled, so the
+key shows only in the sent email. The email's role lines come from
+`UserRoleAssignmentInvitationNotify::getUserUserGroupSection()`, which
+reads the role's saved name in the locale handed to the email. The same
+runs read `publicknowledge`'s French masthead, its "Entête" order list
+and its users list as above again on all three apps.
 Issue report: [pkp-e2e#360](https://github.com/jardakotesovec/pkp-e2e/issues/360) ([docs/issues/U57-A8-french-default-texts-stored-as-codes.md](../issues/U57-A8-french-default-texts-stored-as-codes.md)).
 
 ## Reference — entry points & surfaces
