@@ -1,0 +1,41 @@
+--- a/controllers/grid/settings/series/SeriesGridHandler.php
++++ b/controllers/grid/settings/series/SeriesGridHandler.php
+@@ -410,12 +410,12 @@
+         $series = Repo::section()->get((int) $args['seriesId']);
+         $context = $request->getContext();
+         if (!$series || ($series->getContextId() != $context->getId())) {
+-            return new JSONMessage(false, __('manager.categories.form.removeCoverImageOnDifferentContextNowAllowed'));
++            return new JSONMessage(false, __('manager.series.form.removeCoverImageOnDifferentContextNotAllowed'));
+         }
+ 
+         $image = $series->getImage();
+         if (!$image) {
+-            return new JSONMessage(false, __('manager.categories.form.removeCoverImageFileNotFound'));
++            return new JSONMessage(false, __('manager.series.form.removeCoverImageFileNotFound'));
+         }
+ 
+         // Remove the image from the series.
+@@ -433,7 +433,7 @@
+             $json->setEvent('fileDeleted');
+             return $json;
+         } else {
+-            return new JSONMessage(false, __('manager.categories.form.removeCoverImageFileNotFound'));
++            return new JSONMessage(false, __('manager.series.form.removeCoverImageFileNotFound'));
+         }
+     }
+ }
+--- a/locale/en/manager.po
++++ b/locale/en/manager.po
+@@ -39,6 +39,12 @@
+ msgid "manager.series.form.assignEditors.description"
+ msgstr "Select the editorial users who should be assigned automatically to all new submissions to this series."
+ 
++msgid "manager.series.form.removeCoverImageOnDifferentContextNotAllowed"
++msgstr "The series does not exist or belongs to a different press. Please ensure you are working with the correct press and try again."
++
++msgid "manager.series.form.removeCoverImageFileNotFound"
++msgstr "The cover image and thumbnail files could not be found. They may have already been deleted. Try reloading the page."
++
+ msgid "manager.series.submissionIndexing"
+ msgstr "Will not be included in the indexing of the press"
+ 

@@ -4,11 +4,14 @@
 // fleet), as `rvaca`:
 //   PART=series   {OMP}  1-10: "Library & Information Studies" › Edit, Subtitle "u17h13f first", damaged.png, Save;
 //                 Cancel, reopen; cover.png, Save (control); Edit, Subtitle "u17h13f second", damaged.png, Save;
-//                 Cancel, reopen: the window's "Current Image" and the series' page (catalog/series/lis).
+//                 Cancel, reopen: the window's "Current Image" and the series' page (catalog/series/lis);
+//                 11-12 (2026-11-03): "Delete" under the broken picture, "OK"; reopen; the series' page.
 //   PART=category {OJS, OMP, OPS}  11-15: "Add Category" "u17h13f Category" with damaged.png, Save; the list after a
 //                 reload; "Applied Science" (OPS 3.5: "History") › Edit, cover.png, Save (control); Edit, damaged.png,
 //                 Save; reopen.
-//   (default: both)
+//   PART=truncated {OMP}  (2026-11-03) "Political Economy", "History", "Education": cover.png saved, then a 400×300 PNG,
+//                 JPEG and GIF each cut to half its length (a download stopped halfway) chosen and saved; reopened.
+//   (default: series and category)
 // WALK=neighbour runs alone (fix in and out): sound covers still save and show: "History" a PNG, "Education" a JPEG,
 // "Psychology" a subtitle with no file; the category "Social Sciences" a PNG.
 // Each run records every save's answer, whether the window stays open, its messages, the server log lines written
@@ -20,7 +23,7 @@
 //               PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-h13f-3_5 PROBE_AGENT=h13f node bin/probe.js all shared/playwright/checks/issues/series-damaged-cover-save-hangs/walk.js
 const fs = require('fs');
 const {forEachApp, launch, signIn, screen, record, idle, outFile, serverLog, sql} = require('../../../probe');
-const {T, sleep, tidy, PNG, JPG, damagedPng, pictures, openCategory, datasetCategories} = require('./lib.js');
+const {T, sleep, tidy, PNG, JPG, damagedPng, photoPng, halfOf, photoJpgGif, pictures, openCategory, datasetCategories} = require('./lib.js');
 
 const MODE = process.env.WALK || 'walk';
 const PART = process.env.PART || 'all';
@@ -147,7 +150,34 @@ forEachApp(async (app) => {
     try {
         await step('1 sign in as rvaca', () => signIn(page, 'rvaca'));
         if (MODE === 'walk') {
-            if (app.name === 'omp' && PART !== 'category') {
+            if (app.name === 'omp' && PART === 'truncated') {
+                // A download stopped halfway: a 400×300 PNG, JPEG and GIF each cut to half, as "Cover Image" of a
+                // series that has a sound cover ("Political Economy", "History", "Education").
+                const path = require('path');
+                const cut = photoJpgGif(path.dirname(files.cover));
+                const halves = {png: file('truncated.png', halfOf(photoPng())), jpg: file('truncated.jpg', cut.jpg), gif: file('truncated.gif', cut.gif)};
+                for (const [title, sp, kind] of [['Political Economy', 'pe', 'png'], ['History', 'his', 'jpg'], ['Education', 'ed', 'gif']]) {
+                    await step(`t "${title}" Edit, cover.png, Save`, async () => {
+                        await openSeries(title);
+                        await uploadSeries(files.cover);
+                        const out = await saveSeries();
+                        await cancelSeries();
+                        return {status: out.status, windowOpen: out.windowOpen};
+                    });
+                    await step(`t "${title}" Edit, truncated.${kind}, Save`, async () => {
+                        await openSeries(title);
+                        const up = await uploadSeries(halves[kind]);
+                        return {upload: up, save: await saveSeries()};
+                    });
+                    record(name(`t-${kind}-saved`), await screen(page));
+                    await step(`t "${title}" Cancel`, cancelSeries);
+                    await step(`t "${title}" reload, Edit`, () => openSeries(title));
+                    await step(`t "${title}" Cancel again`, cancelSeries);
+                    fact(`t "${title}" stored image (database)`, storedSeries(sp));
+                    await step(`t "${title}" series page`, () => seriesPage(sp));
+                }
+            }
+            if (app.name === 'omp' && PART !== 'category' && PART !== 'truncated') {
                 await step('3 Edit "Library & Information Studies"', () => openSeries('Library & Information Studies'));
                 await step('4 Subtitle "u17h13f first"', () => win.type('subtitle[en]', 'u17h13f first').then(() => 'typed'));
                 await step('5 Upload File: damaged.png', () => uploadSeries(files.damaged));
@@ -174,8 +204,39 @@ forEachApp(async (app) => {
                 await step('10a Cancel', cancelSeries);
                 await step('10 the series page catalog/series/lis', () => seriesPage('lis'));
                 record(name('s10-series-page'), await screen(page));
+                // 11-12 (refresh 2026-11-03): the broken picture's "Delete" clears the cover, though its message says
+                // it failed (the message is U17 OMP11's report, series-cover-delete-raw-code).
+                await step('11 Edit', () => openSeries('Library & Information Studies'));
+                await step('11 Delete under the broken picture, OK', async () => {
+                    const link = page.locator('form#seriesForm #coverImagePreview').getByRole('link', {name: 'Delete', exact: true});
+                    if (!(await link.isVisible().catch(() => false))) return {deleteLink: false};
+                    const confirm = page.getByRole('dialog').filter({hasText: 'Are you sure you wish to delete this item?'});
+                    await link.click();
+                    await confirm.waitFor({state: 'visible', timeout: T});
+                    const answered = page.waitForResponse((r) => r.request().method() === 'POST' && /delete-image/.test(r.url()), {timeout: T});
+                    dialogs.splice(0);
+                    await confirm.getByRole('button', {name: 'OK', exact: true}).click();
+                    const r = await answered;
+                    const body = (await r.text().catch(() => '')).slice(0, 300);
+                    await sleep(2500);
+                    const out = {status: r.status(), body, browserMessages: dialogs.splice(0), confirmStillOpen: await confirm.isVisible().catch(() => false),
+                        currentImage: await pictures(page, page.locator('form#seriesForm #coverImagePreview'))};
+                    record(name('s11-deleted'), await screen(page));
+                    if (out.confirmStillOpen) await confirm.getByRole('button', {name: 'Cancel', exact: true}).click().catch(() => null);
+                    await sleep(1000);
+                    return out;
+                });
+                fact('11 stored image (database)', storedSeries('lis'));
+                await step('11a Cancel', cancelSeries);
+                await step('12 reload, Edit', async () => ({
+                    ...(await openSeries('Library & Information Studies')),
+                    uploadFile: await win.form().getByText('Upload File').count(),
+                }));
+                record(name('s12-reopened'), await screen(page));
+                await step('12a Cancel', cancelSeries);
+                await step('12 the series page catalog/series/lis', () => seriesPage('lis'));
             }
-            if (PART !== 'series') {
+            if (PART !== 'series' && PART !== 'truncated') {
                 await step('11 Categories, Add Category', async () => {
                     cat = await openCategory(page, app, {add: true});
                     return cat.kind;

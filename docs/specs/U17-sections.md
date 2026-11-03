@@ -1117,8 +1117,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP7](#omp7) | The ISSN help in a press's series window reads "which identifying" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP8](#omp8) | The help under a series' "Path" shows an address ending in the word "Path", never the series' own | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP9](#omp9) | A series' public page shows no name, description or ISSN, and lists the books newest first whatever the series' order | 🐞 | user-visible | — |
-| [OMP10](#omp10) | A damaged PNG as a series' cover leaves "Save" hanging, with half of it saved | 🐞 | medium · crash: server | issues (claude), 2026-10-13 — re-verified |
-| [OMP11](#omp11) | A series cover's "Delete" answers with a raw code when the cover or the series is already gone | 🐞 | low | — |
+| [OMP10](#omp10) | A damaged PNG as a series' cover leaves "Save" hanging, with half of it saved | 🐞 | medium · crash: server | issues (claude), 2026-11-03 — re-verified |
+| [OMP11](#omp11) | A press manager deleting a series cover that is already gone gets a browser message with a raw code | 🐞 | low | issues (claude), 2026-11-03 — re-verified |
 | [OPS1](#ops1) | A preprint server with nothing posted shows a blank "Archives" page, with no message | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS2](#ops2) | Preprint server sections: the "Identify items posted in this section as a(n)" box has no examples and no effect | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS5](#ops5) | A typed "Archives" page number past the last page opens an empty page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1418,9 +1418,10 @@ Since: 2026-08-26 (one month) · Basis: probe, 2026-09-25; its start, commit. <s
 <a id="omp10"></a>
 **OMP10 — A damaged PNG as a series' cover leaves "Save" hanging, with half of it saved** · 🐞 · medium · crash: server.
 A press manager editing a series picks, as its "Cover Image", a PNG
-damaged inside its picture data: a sound PNG with the last byte of its
-picture data's checksum changed, and its start, which gives the file's
-type and size, left intact. It uploads like any picture, but "Save"
+that is damaged inside: one whose download stopped partway, or a sound
+PNG with the last byte of its picture data's checksum changed, its
+start, which gives the file's type and size, left intact. A JPG cut
+short saves normally. It uploads like any picture, but "Save"
 then fails on the server and never answers: the window stays open with
 "Save" greyed out and a spinner, and no message shows; "Cancel" closes
 it. The save has stopped halfway: the window's other changes are stored,
@@ -1434,11 +1435,10 @@ offers only "Upload File" and the series' page shows no picture. The
 manager should get either the cover or a message that the picture
 cannot be read, with nothing half saved. A category's "Cover Image"
 fails from the same cause (*[Categories](U16-categories.md#a24)* A24).
-Basis: probe, 2026-10-13; probe, 2026-11-03 (the "Delete"). <sup>f-omp10</sup>
-Report: refresh owed — the 2026-11-03 fold: "Delete" on the broken picture clears the cover (the stored record emptied; after a reload no picture in the window or on the series' page) while it answers OMP11's raw refusal, so the report's Summary ("cannot be restored from the app") and Impact's "Way round" gain a way back without a new upload; the path runs through `SeriesGridHandler::deleteImage()` and `ContextFileManager::deleteByPath()`, which returns false on the files `SeriesForm::execute()` already deleted. The same fold's persona read also reworded the entry's Summary: the damaged PNG is described as a sound PNG with the last byte of its picture data's checksum changed, its start intact, and "A damaged JPG or GIF fails at the same point" left the symptom for the footnote as a code read, since the uploader offers JPG, PNG and SVG and no damaged JPG or GIF was driven; the report's Summary carries both sentences (2026-11-03)
+Basis: probe, 2026-10-13; probe, 2026-11-03 (the "Delete", a PNG cut short). <sup>f-omp10</sup>
 
 <a id="omp11"></a>
-**OMP11 — A series cover's "Delete" answers with a raw code when the cover or the series is already gone** · 🐞 · low.
+**OMP11 — A press manager deleting a series cover that is already gone gets a browser message with a raw code** · 🐞 · low.
 A press manager has a series' "Edit" window open with its cover, and the
 cover has meanwhile been deleted in another tab. Pressing the cover's
 "Delete" and then "OK" pops a browser message reading
@@ -1450,17 +1450,18 @@ picture and its "Delete". Opened again after a reload, it shows no cover
 and only "Upload File". The same happens in two more cases:
 
 - the series itself deleted from the table in another tab: the message
-  reads "##manager.categories.form.removeCoverImageOnDifferentContextNowAllowed##",
-  and after a reload the series is gone from the table;
-- the broken picture a damaged cover leaves ([OMP10](#omp10)): the
-  message reads "##manager.categories.form.removeCoverImageFileNotFound##"
-  and the window keeps the broken picture, yet the cover is removed:
-  after a reload the window offers only "Upload File" and the series'
-  page shows no picture. The message says the delete failed when it
-  succeeded.
+  reads "##manager.categories.form.removeCoverImageOnDifferentContextNowAllowed##";
+- a series whose stored cover names files that an earlier failed save
+  deleted, which the window shows as a broken picture ([OMP10](#omp10)):
+  the message reads "##manager.categories.form.removeCoverImageFileNotFound##",
+  as if the delete had failed, yet after a reload the cover is gone.
 
-The raw codes show in English and French (Canada); several other
-interface languages give a sentence.
+The raw codes show in English and French (Canada); 19 other interface
+languages, French and German among them, give a sentence. On 3.5 English
+reads sentences, the series one naming a category, and French (Canada)
+shows the same codes for a series' cover and for a category's on
+journals, presses and preprint servers. On `main` a category's cover is
+removed in its own window, without these messages.
 Basis: probe, 2026-11-03. <sup>f-omp11</sup>
 
 ### OPS
@@ -1795,6 +1796,8 @@ Issue report: [pkp-e2e#952](https://github.com/jardakotesovec/pkp-e2e/issues/952
 
 <a id="fn-f-omp11"></a>
 **f-omp11** — fn m: the cover's "Delete" posts to OMP `SeriesGridHandler::deleteImage()`. It answers `JSONMessage(false, __('manager.categories.form.removeCoverImageOnDifferentContextNowAllowed'))` when the series no longer exists or belongs to another press (the second case needs a request built by hand with another press's series and was read, not driven), and `…removeCoverImageFileNotFound` when the series has no cover, a check omp `fd4ea260c` "pkp/pkp-lib#13631 fix handling of series cover image deletions (#2528)" (2026-10-29) added. It gives the same refusal when `ContextFileManager::deleteByPath()` returns false for either file (since omp `7901cde3d`, pkp/pkp-lib#6002, 2025-10-31); that check runs after `setImage([])` and `Repo::section()->edit()`, so the record is already cleared when it refuses, and on OMP10's broken picture the failed save had already deleted the files (note f-omp10). The legacy `Handler.handleJson()` shows a refused answer's `content` with `alert()`. Neither key is in pkp-lib `main`'s `locale/en/manager.po` or `locale/fr_CA/manager.po`. `stable-3_5_0`'s define them through pkp-lib `189a812293` and `20a70e8ee1` (pkp/pkp-lib#6002, `stable-3_5_0` only; corrected 2026-11-03 from the OMP11 report's trace), which `main` does not contain: "The cover image and thumbnail files could not be found. They may have already been deleted. Try reloading the page." and, a category's text on a series' window, "The category does not exist or belongs to a different context. Please ensure you are working with the correct context and try again." (code read; 3.5 not driven). Translation merges from `stable-3_5_0` brought both keys into 19 of `main`'s languages (ar, bg, cs, da, de, el, eu, fr, hy, ky, mk, nb_NO, pt, pt_BR, ru, sl, sr_Latn, tr, uk; `git grep` of lib/pkp's `locale/`, none commented out), so a user in one of those reads a sentence there (code read). Live-probed 2026-11-03 (Fields "Cover Image"), OMP `main` (omp `828150a8f`, lib/pkp `1ae711024a`), the default dataset as `rvaca` (Press manager), two runs, on series each run added with a 2×3 PNG cover. Control: with the series' "Edit" open in two tabs, "Delete" and "Cancel" in tab A kept the picture; "Delete" and "OK" answered `{"status":true,…"events":[{"name":"fileDeleted"}]}`, the picture and the link went at once, the window stayed open, and the stored `image` read `[]`. The cover gone: tab B, still showing the picture, "Delete", "OK" posted `{press}/$$$call$$$/grid/settings/series/series-grid/delete-image?seriesId={id}`, answered 200 `{"status":false,"content":"##manager.categories.form.removeCoverImageFileNotFound##",…}`, and the browser alert read that code; the "Confirm" window stayed open, "OK" and "Cancel" enabled, a spinner beside "Cancel", until "Cancel"; the window kept "Current Image" and "Delete"; after "Cancel" and a reload "Edit" showed only the uploader, and the series' page no picture. The series gone (deleted from the table in tab A): the same in tab B with `…removeCoverImageOnDifferentContextNowAllowed`, and after a reload no row. The broken picture (note f-omp10, the damaged PNG saved over a sound cover, the picture of no width, the thumbnail address answering an empty `text/html`): "Delete", "OK" gave the alert `##manager.categories.form.removeCoverImageFileNotFound##` and the same open "Confirm" window, the window kept the broken picture, the stored `image` read `[]`, and after a reload "Edit" showed only the uploader and the series' page no picture. Kept script: `shared/playwright/checks/U17/I03C/i03c.js` (`PART=stale`, `PART=gone`, `PART=broken`).
+Upstream: `pkp/pkp-lib#13635` (open, no PR) reports the same raw codes on `main` in English (found by the issue report, 2026-11-03).
+Issue report: [docs/issues/U17-OMP11-series-cover-delete-raw-code.md](../issues/U17-OMP11-series-cover-delete-raw-code.md).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — fn f. Live-probed 2026-09-25 on a scratch server, three runs: note td13. The seeded server is not empty once other suites have posted to it.

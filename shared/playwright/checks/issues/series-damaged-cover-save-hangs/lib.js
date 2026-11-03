@@ -127,4 +127,51 @@ function datasetCategories(app) {
     return app.name === 'ops' && legacy(app) ? {steps: 'History', neighbour: 'Biology'} : {steps: 'Applied Science', neighbour: 'Social Sciences'};
 }
 
-module.exports = {T, sleep, tidy, legacy, PNG, JPG, damagedPng, pictures, openCategory, datasetCategories};
+/**
+ * A 400×300 PNG of random colours (so it compresses little, like a photograph), written by Node itself, and the
+ * same file cut to half its length: the PART=truncated walk's "a PNG whose download stopped halfway".
+ */
+function photoPng() {
+    const zlib = require('zlib');
+    const w = 400, h = 300;
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) >> 16) & 0xff;
+    const raw = Buffer.alloc((w * 3 + 1) * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w * 3; x++) raw[y * (w * 3 + 1) + 1 + x] = rnd();
+    const crcTable = Array.from({length: 256}, (_, n) => {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        return c >>> 0;
+    });
+    const crc = (buf) => {
+        let c = 0xffffffff;
+        for (const b of buf) c = crcTable[(c ^ b) & 0xff] ^ (c >>> 8);
+        return (c ^ 0xffffffff) >>> 0;
+    };
+    const chunk = (type, data) => {
+        const len = Buffer.alloc(4);
+        len.writeUInt32BE(data.length);
+        const body = Buffer.concat([Buffer.from(type), data]);
+        const c = Buffer.alloc(4);
+        c.writeUInt32BE(crc(body));
+        return Buffer.concat([len, body, c]);
+    };
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(w, 0);
+    ihdr.writeUInt32BE(h, 4);
+    ihdr[8] = 8;
+    ihdr[9] = 2;
+    return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
+const halfOf = (buf) => buf.subarray(0, Math.floor(buf.length / 2));
+
+/** A 400×300 JPEG and GIF of random shapes, made by the PHP command line's GD (the app's own decoder), each cut to half. */
+function photoJpgGif(dir) {
+    const {execFileSync} = require('child_process');
+    const code = '$im=imagecreatetruecolor(400,300);mt_srand(7);for($i=0;$i<3000;$i++){imagefilledellipse($im,mt_rand(0,400),mt_rand(0,300),mt_rand(5,60),mt_rand(5,60),imagecolorallocate($im,mt_rand(0,255),mt_rand(0,255),mt_rand(0,255)));}imagejpeg($im,$argv[1]."/photo.jpg",85);imagegif($im,$argv[1]."/photo.gif");';
+    execFileSync('php', ['-r', code, dir]);
+    const fs = require('fs');
+    return {jpg: halfOf(fs.readFileSync(`${dir}/photo.jpg`)), gif: halfOf(fs.readFileSync(`${dir}/photo.gif`))};
+}
+
+module.exports = {T, sleep, tidy, legacy, PNG, JPG, damagedPng, photoPng, halfOf, photoJpgGif, pictures, openCategory, datasetCategories};
