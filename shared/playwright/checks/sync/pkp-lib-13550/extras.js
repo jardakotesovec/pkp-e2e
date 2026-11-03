@@ -13,7 +13,7 @@
 // dbarnes opens a Settings tab, Announcements and the Comments page, each bare and with one more segment.
 // Each step records rather than throws, so both sides are read.
 const {forEachApp, launch, signIn, signOut, record, sql, idle, screen, serverLog} = require('../../../probe');
-const A17 = require('../../issues/public-comment-list-exposes-reports/lib.js');
+const A17 = require('./lib-a17.js');
 
 const SUBMISSION = 17;
 const flat = (s, n = 400) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, n);

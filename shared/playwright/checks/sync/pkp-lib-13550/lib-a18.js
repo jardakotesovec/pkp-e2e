@@ -1,5 +1,5 @@
-// Helpers of walk.js (U14 A18: a comment request made by hand is accepted on a submission that is not
-// published, and while public comments are off; docs/issues/U14-A18-comment-request-unpublished-submission.md).
+// Helpers copied from the U14 A18 issue walk (retired 2026-11-03), for this folder's checks (U14 A18: a comment request made by hand is accepted on a submission that is not
+// published, and while public comments are off).
 // Requiring this file runs nothing. Every helper drives the screens a person uses, except `comment()`, which
 // is the report's console snippet run in the user's own signed-in page. None throws on a control a fix
 // changes; each records what it found.

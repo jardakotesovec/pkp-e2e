@@ -10,8 +10,8 @@
 //
 // Each step records rather than throws, so the base and the head are read alike.
 const {forEachApp, launch, signIn, signOut, screen, shot, record, sql, idle, tag, serverLog} = require('../../../probe');
-const H17 = require('../../issues/public-comment-list-exposes-reports/lib.js');
-const H18 = require('../../issues/comment-request-unpublished-submission/lib.js');
+const H17 = require('./lib-a17.js');
+const H18 = require('./lib-a18.js');
 
 const EDITOR = 'dbarnes';
 const WRITER = 'ccorino';

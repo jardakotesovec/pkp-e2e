@@ -19,7 +19,7 @@
 // zzedd, who has no role in A, writes a comment and reports C3 through A's article page.
 // Each step records rather than throws, so both sides are read.
 const {forEachApp, launch, signIn, signOut, record, sql, idle, serverLog} = require('../../../probe');
-const A17 = require('../../issues/public-comment-list-exposes-reports/lib.js');
+const A17 = require('./lib-a17.js');
 const {createContext} = require('../../issues/all-dates-error-nothing-published/lib.js');
 
 const SUBMISSION = 17;

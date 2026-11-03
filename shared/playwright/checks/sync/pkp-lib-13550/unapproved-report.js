@@ -11,7 +11,7 @@
 // reports C1; u3: ckwantes reports her own pending C2; u4 (control): dbarnes, a moderator, reports C2.
 // Each step records rather than throws, so both sides are read.
 const {forEachApp, launch, signIn, record, sql, idle, serverLog} = require('../../../probe');
-const A17 = require('../../issues/public-comment-list-exposes-reports/lib.js');
+const A17 = require('./lib-a17.js');
 
 const SUBMISSION = 17;
 const RUN = process.env.PROBE_RUN || 'r1';

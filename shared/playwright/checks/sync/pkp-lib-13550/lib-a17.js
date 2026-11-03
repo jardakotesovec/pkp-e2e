@@ -1,4 +1,4 @@
-// Helpers of walk.js (U14 A17). Requiring this file runs nothing. Every helper drives the screens,
+// Helpers copied from the U14 A17 issue walk (retired 2026-11-03), for this folder's checks. Requiring this file runs nothing. Every helper drives the screens,
 // through the OJS U14 suite's page objects (required inside the call, once withApp has set the app).
 const {idle, screen} = require('../../../probe');
 
