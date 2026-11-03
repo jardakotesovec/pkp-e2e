@@ -8,13 +8,13 @@ The housekeeping session works one entry a quiet morning, top first
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **29 parked atoms** + **50 noted dead-code/defect
+dead-code additions. **28 parked atoms** + **50 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
 if real, their specs' own probes will resurface them.)
 
-## Parked atoms (29)
+## Parked atoms (28)
 
 ### AFFW-701, AFFW-703, AFFW-704 — legacy author-dashboard round surfaces
 - What: the old author-dashboard templates' editor-message link, author
@@ -147,14 +147,6 @@ if real, their specs' own probes will resurface them.)
   `managers/NavigationMenuManager/` holds only the form modal (VUE-066, claimed
   by U08, opened from the legacy grid), its field, its composable and stories.
   Confirmed dead atlas row; retire candidate.
-
-### API-030 — open-peer-review data API (+ unmounted display components)
-- What: OJS-mounted API whose display components (`PkpCite`, `PkpOpenReview`,
-  `PkpOrcidDisplay` — recorded in `atlas/affordances-reader.md`'s boundary
-  notes, no atom IDs) grep to no mount.
-- Why parked: emerging surface with no reachable UI.
-- Resolves: Phase-1 liveness probe; if a UI exists, likely U13/U26 territory;
-  else stays parked as pre-release machinery.
 
 ### API-062 — OMP `publicationPeerReviews` entry point
 - What: API mount instantiating a controller class absent from lib/pkp at the
@@ -550,8 +542,8 @@ until their specs exist. Do not force-claim the defects themselves.
     `OpenReviewComponent` configuration, locale keys and icons for every
     article page, but no template mounts an open-review display
     (`PkpOpenReview*` in ui-library `src/frontend/components/` is mounted
-    by no OJS or OPS template, as API-030 above records for `PkpCite`
-    too); the page's "Downloads" chart is drawn by
+    by no OJS or OPS template, nor are `PkpCite` and `PkpOrcidDisplay`;
+    API-030, the data API behind them, is live and claimed by U30); the page's "Downloads" chart is drawn by
     `lib/pkp/js/usage-stats-chart.js`, and ui-library's
     `PkpUsageChart.vue` is mounted nowhere. Code-verified 2026-09-24 (U13
     spec author; checkouts ojs `d9b567efec`, ops `61cd158ce3`, lib/pkp

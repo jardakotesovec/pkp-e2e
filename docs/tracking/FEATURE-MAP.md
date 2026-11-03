@@ -5,7 +5,7 @@ This file is the single home for the campaign's feature taxonomy: **75 features
 
 - **The atlas is the frozen Phase-0 inventory** (2026-07-28). It split the apps into these features and is not extended: a surface added upstream since then is noted in the row of the feature whose screens it joins, and a new feature gets a new row with the next U-number and a `pending` PROGRESS row (MAINTENANCE "Triage: where does a change land?").
 - **Atom count**: this map accounts for all **2,163** atoms:
-  **2,066 feature-assigned · 68 out of scope · 29 parked in UNASSIGNED.md** (13 at Phase-0 close; 5 U26-derived dead author-dashboard atoms parked later; 11 parked by the 2026-09-27 scope extension, section H).
+  **2,067 feature-assigned · 68 out of scope · 28 parked in UNASSIGNED.md** (13 at Phase-0 close; 5 U26-derived dead author-dashboard atoms parked later; 11 parked by the 2026-09-27 scope extension, section H; API-030 claimed by U30 2026-11-03).
   The unclaimed count is the campaign's completeness metric.
 - **Atom IDs and modality conventions**: see `atlas/README.md`. IDs are dense per
   modality and never renumbered; ranges here (`AFFW-068..075`) are inclusive.
@@ -186,8 +186,8 @@ Notes: owns the reminder clocks (JOB-054); the reminder sends live with U27 (MAI
 
 ### U30 — Author response to reviews {OJS}
 An editor requests, and an author submits, a formal response to a review round.
-Atoms: AFFW-326, 354, 577..585 · ROUTE-023 · VUE-008, 049, 070 · API-032 · MAIL-033
-Notes: badge may widen to OMP — the API is mounted ojs+omp and AFFW-326 is swept all three apps; Phase-1 resolves. API-032's confirmReview / history / export+sendToOrcid ops are cited by U28 / U26 / U04 (riders).
+Atoms: AFFW-326, 354, 577..585 · ROUTE-023 · VUE-008, 049, 070 · API-030, 032 · MAIL-033
+Notes: badge may widen to OMP — the API is mounted ojs+omp and AFFW-326 is swept all three apps; Phase-1 resolves. API-032's confirmReview / history / export+sendToOrcid ops are cited by U28 / U26 / U04 (riders). API-030 (the open peer review record, `peerReviews/open/submissions`) claimed from UNASSIGNED 2026-11-03 (housekeeping): live, answering signed out (U30 f-a10, live-probed 2026-10-13; U29 OJS1, probe 2026-10-15); its display components stay unmounted (U13 Rule 23, OJS12); U29 cites it.
 
 ### U31 — Reviewer suggestions {OJS OMP}
 An author suggests reviewers at submission; an editor sees and acts on them during review.
