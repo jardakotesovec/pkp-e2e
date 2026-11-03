@@ -83,7 +83,11 @@ required." under it. Every other refusal shows as a notice at the top
 right, where "Your changes have been saved." would show, and nothing is
 marked under the box: a title or abbreviation of spaces only, the inactive
 box ticked on the last active section (Rule 6) and, on a press, the path
-and ISSN messages. <sup>i</sup> <sup>td2</sup>
+and ISSN messages. A window left open while the section is deleted from
+the table in another tab never answers its "Save": the app fails, the
+window stays open with "Save" greyed out and a spinner, no message
+shows, and after a reload the table still has no row for the section
+⚠ [A12](#a12). <sup>i</sup> <sup>td2</sup>
 
 With something changed in the window, its "×" asks "The data on this form
 has changed. Do you wish to continue without saving?", and "OK" closes it
@@ -113,7 +117,7 @@ a journal. Fields in screen order: <sup>m</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Cover Image" | No | An uploader. Once saved with an image, the window shows the image with a "Delete" link, which asks, under the heading "Confirm", "Are you sure you wish to delete this item? This action cannot be undone." and on "OK" removes it at once. The uploader offers JPG, PNG and SVG files; with an SVG uploaded, "Save" keeps nothing and shows no message ⚠ [OMP3](#omp3). A PNG whose picture data is damaged uploads like any picture, and "Save" then never answers: the window stays open with "Save" greyed out, the series' other changes are saved, and a cover the series already had turns into a broken picture ⚠ [OMP10](#omp10). <sup>m</sup> <sup>td5</sup> |
+| "Cover Image" | No | An uploader. Once saved with an image, the window shows the image with a "Delete" link, which asks, under the heading "Confirm", "Are you sure you wish to delete this item? This action cannot be undone." and on "OK" removes it at once. When the cover the window still shows, or the series itself, was deleted in another tab meanwhile, "OK" pops a browser message showing a raw code and the "Confirm" window stays open ⚠ [OMP11](#omp11). The uploader offers JPG, PNG and SVG files; with an SVG uploaded, "Save" keeps nothing and shows no message ⚠ [OMP3](#omp3). A PNG damaged inside its picture data (a sound PNG with the last byte of its picture data's checksum changed, and its start, which gives the file's type and size, left intact) uploads like any picture, and "Save" then never answers: the window stays open with "Save" greyed out, the series' other changes are saved, and a cover the series already had turns into a broken picture ⚠ [OMP10](#omp10). The broken picture's "Delete" removes the cover, though its message says it failed [OMP11](#omp11). <sup>m</sup> <sup>td5</sup> |
 | "Prefix", with the help "Examples: A, The" | No | Per language. Shown before the title wherever the series is named. <sup>m</sup> |
 | "Title" | Yes | Per language; the press's primary language required. Empty: "This field is required."; spaces only: a notice with a raw code [A6](#a6). <sup>m</sup> <sup>td2</sup> |
 | "Subtitle" | No | Per language, at most 255 characters. <sup>m</sup> |
@@ -1010,6 +1014,8 @@ Left out of the scenarios above, by reason:
     Count"; Settings bullet 4)
   - A11 (a section saved while its default review form is inactive
     losing the default; Fields, "Review Form"; Settings bullet 6)
+  - A12 (a section's or series' "Save" after it was deleted in another
+    tab, never answering; Fields, the section window)
   - A3 ("Will not be included in the indexing of the journal" ticked,
     with no effect; Settings bullet 8)
   - A4, A9, A10 and A5 (the programming interface's two failing filters,
@@ -1023,6 +1029,9 @@ Left out of the scenarios above, by reason:
   - OMP3 (an SVG cover dropped without a message; Fields, "Cover Image")
   - OMP10 (a damaged PNG as a series' cover, "Save" never answering;
     Fields, "Cover Image")
+  - OMP11 (a series cover's "Delete" on a cover or series already gone,
+    or on OMP10's broken picture, answering with a raw code; Fields,
+    "Cover Image")
   - OMP7 (the ISSN paragraph's "which identifying"; Fields, "ISSN")
   - OMP8 (the path help ending in "Path"; Fields, "Path")
   - OMP4 (a series' "Categories" boxes feeding only the table's column;
@@ -1101,6 +1110,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | The REST API's sections endpoint refuses a missing or another journal's section with a raw message code | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | The sections interface fails with a server error on a section asked for by a word, and on the site's address | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | Saving a journal section while its review form is inactive silently clears the section's review form | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
+| [A12](#a12) | Saving a section's window after the section was deleted in another tab fails and never answers | 🐞 | low · crash: server | — |
 | [OMP2](#omp2) | The series path message says "only letters and numbers" while ".", "/", "_" and "-" are accepted | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | A series "Save" with an SVG cover chosen saves nothing, not even the other changes, and shows no message | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP5](#omp5) | A press manager deactivating or reactivating a series is asked about a "section" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1108,6 +1118,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP8](#omp8) | The help under a series' "Path" shows an address ending in the word "Path", never the series' own | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP9](#omp9) | A series' public page shows no name, description or ISSN, and lists the books newest first whatever the series' order | 🐞 | user-visible | — |
 | [OMP10](#omp10) | A damaged PNG as a series' cover leaves "Save" hanging, with half of it saved | 🐞 | medium · crash: server | issues (claude), 2026-10-13 — re-verified |
+| [OMP11](#omp11) | A series cover's "Delete" answers with a raw code when the cover or the series is already gone | 🐞 | low | — |
 | [OPS1](#ops1) | A preprint server with nothing posted shows a blank "Archives" page, with no message | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS2](#ops2) | Preprint server sections: the "Identify items posted in this section as a(n)" box has no examples and no effect | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS5](#ops5) | A typed "Archives" page number past the last page opens an empty page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1283,6 +1294,17 @@ from a review request in the same way (*[Review setup & review
 forms](U29-review-setup-and-review-forms.md#a9)* A9).
 Basis: probe, 2026-10-13. <sup>f-a11</sup>
 
+<a id="a12"></a>
+**A12 — Saving a section's window after the section was deleted in another tab fails and never answers** · 🐞 · low · crash: server.
+A Journal Manager has a section's "Edit" window open in one tab and
+deletes the same section from the table in another ("Delete", "OK": the row goes).
+"Save" in the first window then fails on the server: the window stays
+open with "Save" greyed out and a spinner, no message or notice shows,
+and only "Cancel" closes it. The section is not recreated: after a
+reload the table has no row for it. The manager should read that the
+section no longer exists. A press's series window fails the same way.
+Basis: probe, 2026-11-03. <sup>f-a12</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -1395,7 +1417,9 @@ Since: 2026-08-26 (one month) · Basis: probe, 2026-09-25; its start, commit. <s
 <a id="omp10"></a>
 **OMP10 — A damaged PNG as a series' cover leaves "Save" hanging, with half of it saved** · 🐞 · medium · crash: server.
 A press manager editing a series picks, as its "Cover Image", a PNG
-whose picture data is damaged. It uploads like any picture, but "Save"
+damaged inside its picture data: a sound PNG with the last byte of its
+picture data's checksum changed, and its start, which gives the file's
+type and size, left intact. It uploads like any picture, but "Save"
 then fails on the server and never answers: the window stays open with
 "Save" greyed out and a spinner, and no message shows; "Cancel" closes
 it. The save has stopped halfway: the window's other changes are stored,
@@ -1403,11 +1427,40 @@ and the files of a cover the series already had are deleted, so the
 window and the series' public page show a broken picture. The old cover
 cannot be restored from the app: saving a sound picture gives the series
 a cover again, and a press that no longer has the original file has lost
-that cover. A damaged JPG or GIF fails at the same point. The manager
-should get either the cover or a message that the picture cannot be
-read, with nothing half saved. A category's "Cover Image" fails from the
-same cause (*[Categories](U16-categories.md#a24)* A24).
-Basis: probe, 2026-10-13. <sup>f-omp10</sup>
+that cover. The broken picture's "Delete" does clear it, though its
+message says it failed ([OMP11](#omp11)): after a reload the window
+offers only "Upload File" and the series' page shows no picture. The
+manager should get either the cover or a message that the picture
+cannot be read, with nothing half saved. A category's "Cover Image"
+fails from the same cause (*[Categories](U16-categories.md#a24)* A24).
+Basis: probe, 2026-10-13; probe, 2026-11-03 (the "Delete"). <sup>f-omp10</sup>
+Report: refresh owed — the 2026-11-03 fold: "Delete" on the broken picture clears the cover (the stored record emptied; after a reload no picture in the window or on the series' page) while it answers OMP11's raw refusal, so the report's Summary ("cannot be restored from the app") and Impact's "Way round" gain a way back without a new upload; the path runs through `SeriesGridHandler::deleteImage()` and `ContextFileManager::deleteByPath()`, which returns false on the files `SeriesForm::execute()` already deleted. The same fold's persona read also reworded the entry's Summary: the damaged PNG is described as a sound PNG with the last byte of its picture data's checksum changed, its start intact, and "A damaged JPG or GIF fails at the same point" left the symptom for the footnote as a code read, since the uploader offers JPG, PNG and SVG and no damaged JPG or GIF was driven; the report's Summary carries both sentences (2026-11-03)
+
+<a id="omp11"></a>
+**OMP11 — A series cover's "Delete" answers with a raw code when the cover or the series is already gone** · 🐞 · low.
+A press manager has a series' "Edit" window open with its cover, and the
+cover has meanwhile been deleted in another tab. Pressing the cover's
+"Delete" and then "OK" pops a browser message reading
+"##manager.categories.form.removeCoverImageFileNotFound##", where a
+sentence should say the cover is already gone. The "Confirm" window
+stays open, "OK" and "Cancel" still pressable and a spinner beside
+"Cancel", until "Cancel" closes it, and the series window keeps the
+picture and its "Delete". Opened again after a reload, it shows no cover
+and only "Upload File". The same happens in two more cases:
+
+- the series itself deleted from the table in another tab: the message
+  reads "##manager.categories.form.removeCoverImageOnDifferentContextNowAllowed##",
+  and after a reload the series is gone from the table;
+- the broken picture a damaged cover leaves ([OMP10](#omp10)): the
+  message reads "##manager.categories.form.removeCoverImageFileNotFound##"
+  and the window keeps the broken picture, yet the cover is removed:
+  after a reload the window offers only "Upload File" and the series'
+  page shows no picture. The message says the delete failed when it
+  succeeded.
+
+The raw codes show in English and French (Canada); several other
+interface languages give a sentence.
+Basis: probe, 2026-11-03. <sup>f-omp11</sup>
 
 ### OPS
 
@@ -1699,6 +1752,9 @@ Issue report for the word as id, joined to the API-wide unknown-route fault: [pk
 **f-a11** — fn j: OJS `SectionForm::fetch()` offers the journal's active forms only (`ReviewFormDAO::getActiveByAssocId()`), so the window of a section whose stored form is inactive posts `reviewFormId` empty, or not at all when the select is not rendered, and `SectionForm::execute()` stores what was posted (`setReviewFormId(null)`); `ReviewerForm::initData()` preselects the section's stored form, which Add Reviewer's own list of active forms leaves out while the form is inactive. Live-probed 2026-10-09 (Fields "Review Form"; Settings bullet 6), OJS `main` (ojs `6d5b793c4e`, lib/pkp `d1bc3a9ecc`) and `stable-3_5_0` (ojs `c6e2c3a879`), two runs on each, the same in all four, on scratch journals as the journal's manager: one journal with the active forms "I09 Form A" and "I09 Form B", one with "I09 Form A" alone, each with the sections "Articles" and "Reviews", both set to "I09 Form A", and a submission at Review in each section. Baseline: "Articles" › "Edit" reopened on "I09 Form A", and Add Reviewer, "Select Reviewer" on Rex Reviewer, arrived on it. "I09 Form A" unticked under "Active" ("Are you sure you wish to deactivate this review form? It will no longer be available for new review assignments.", "OK"): "Articles" › "Edit" listed "None / Free Form Review" (chosen) and "I09 Form B" in the first journal and had no "Review Form" field in the second; "Save" with nothing changed answered 200, closed the window and showed "Your changes have been saved."; Add Reviewer arrived on "None / Free Form Review" for both sections' submissions (in the second journal its window had no "Review Form" list). The form ticked "Active" again ("Are you sure you wish to activate this review form? Once it's assigned to a review you will no longer be able to deactivate it.", "OK"): "Articles" › "Edit" read "None / Free Form Review" with "I09 Form A" back in the list, and Add Reviewer arrived on "None / Free Form Review" for its submission, "I09 Form A" offered; "Reviews", never saved in between, read "I09 Form A" in both places. `sections.review_form_id` of "Articles" was empty from the unchanged "Save" on; that of "Reviews" kept the form's id throughout. No request failed and no page script failed. Kept script: `shared/playwright/checks/U17/I09/i09.js` (row L37).
 Issue report: [pkp-e2e#951](https://github.com/jardakotesovec/pkp-e2e/issues/951) ([docs/issues/U17-A11-section-save-drops-inactive-review-form.md](../issues/U17-A11-section-save-drops-inactive-review-form.md)).
 
+<a id="fn-f-a12"></a>
+**f-a12** — fn i and m: OJS and OPS `SectionForm::execute()` call `setTitle()` on the section `Repo::section()->get()` returns, null once the section is deleted; OMP `SeriesForm::readInputData()` calls `getPath()` on it first, through the lookup omp `4be4badc4` "pkp/pkp-lib#7128 Convert the SectionService to the new Repository/DAO/Map pattern" (2023-01-27) left unchecked. Live-probed 2026-11-03 (Fields, the section window), `main` (omp `828150a8f`, ojs `e7ce037799`, ops `53749f7d2f`, lib/pkp `1ae711024a`), the default dataset as `rvaca` (Journal manager, Press manager, Preprint Server manager), two runs per app, on a section (OJS: title and abbreviation; OPS: also a path) or a series with a PNG cover that each run created: its "Edit" window open in one tab, its row deleted from the table in another ("Delete", "OK", answered `{"status":true,…}`, the row gone). "Save" in the first tab posted `{journal}/$$$call$$$/grid/settings/sections/section-grid/update-section?sectionId={id}` (OJS, OPS) or `{press}/$$$call$$$/grid/settings/series/series-grid/update-series?seriesId={id}` (OMP), which answered 500 with an empty body; `button.submitFormButton` stayed disabled with the spinner beside "Cancel", no text under any box, no notice, no browser dialog. The server logged `PHP Fatal error: Uncaught Error: Call to a member function setTitle() on null in …/SectionForm.php` (OJS, OPS) and `Call to a member function getPath() on null in …/SeriesForm.php` (OMP). "Cancel" closed the window; after a reload the table had no row for it, and no section or series of that title or path was stored. Kept script: `shared/playwright/checks/U17/I03C/i03c.js` (`PART=gonesection`, `PART=gone`).
+
 <a id="fn-f-omp1"></a>
 **f-omp1** — fn h, k, m, n, p: OMP's form, grid handler and `ContextService`; OMP's `submissions.tpl` override (fn e). Live-probed 2026-09-25: notes td9, td10, td11, td12.
 
@@ -1732,8 +1788,11 @@ Issue report: [pkp-e2e#487](https://github.com/jardakotesovec/pkp-e2e/issues/487
 **f-omp9** — OMP `classes/section/DAO.php` `getByPath()` builds the series from `$row->section_id`, a column the series table does not have (its key is `series_id`), so the page gets a series with no data; the probe server logged `PHP Warning: Undefined property: stdClass::$section_id in …/classes/section/DAO.php on line 71` on each such page. The line came with omp `4c2b5d77b` "pkp/pkp-lib#13003 Port batch loading to OMP" (2026-08-26), which changed `fromRow($row)` to `fromRow($row, [$row->section_id], (object) [])`. The cover survives because `image` is a column of the `series` table (`primaryTableColumns`); the title, prefix, subtitle, description, ISSNs and `sortOption` are rows of `series_settings` and are lost, and with no sort option `CatalogHandler::series()` falls back to `ORDERBY_DATE_PUBLISHED` descending. Live-probed 2026-09-25 on the seeded press (read only) and on scratch presses, four chunks: an empty `h1` and last trail step, no description or ISSN; "1 Titles" and the book for a series holding a published book, "0 Titles" and "No titles have been published yet." for one without (the seeded "Monographs" and "Textbooks" as much as a new series). With every field of a series set (note td5): the cover showed, 100×100, from `catalog/thumbnail?type=series&id={id}` (200, image/png), its text alternative a single space and its `.cover` wrapper a `div` carrying an `href` rather than a link; the tab title read "| {press name}" ("| Public Knowledge Press" on the seeded press); each of the six orders saved and reopened as saved, and after each the page listed the books by publication date, newest first; the same page for visitor, Reader and Press Manager. The series window's unique-path check (`SeriesForm`, through `Repo::section()->getByPath()`) goes through the same line: test run 2026-09-25 (Fields "Path"; scenario 7, "A path in use"), seen in two runs, a "Save" with "monographs" in "Path" while another series had it showed "The series path already exists. Please enter a unique path." and logged the same warning on its `update-series` request, which answered 200; the saves with a path no series had logged nothing. A "Save" of a series with its own unchanged path logged it too (two processes, 2026-09-25), so any save whose path finds a series logs it. The screen's refusal is right, so the warning makes no entry of its own. Written up for the team in `docs/reports/2026-09-25-omp-series-page-blank.md` (a temporary report, deleted once addressed; git history keeps it).
 
 <a id="fn-f-omp10"></a>
-**f-omp10** — fn m: OMP `SeriesForm::validate()` accepts the file on `getimagesize()`, which reads only the picture's header; `SeriesForm::execute()` then stores the series' other fields (`Repo::section()->edit()`), deletes the old cover's two files (`ContextFileManager::deleteByPath()`), and fails where it builds the thumbnail: `imagecreatefrompng()` returns false on the damaged data and `imagecopyresampled()` throws, before the new files are written and before `setImage()`, so the stored cover record still names the deleted files. Live-probed 2026-10-09 (Fields "Cover Image"), OMP `main` (omp `57a9235110`, lib/pkp `27938abd4c`; the default dataset, as `rvaca`, three runs) and `stable-3_5_0` (omp `ddc6abf5a9`; scratch presses, as the press's manager, two runs), the same in all five, on series each run added itself, with a 2×3 PNG of 73 bytes whose IDAT checksum has its last byte flipped. "Upload File" took it (200, the box reading the file's name with "Change File"). On a series with no cover, with "Subtitle" typed in the same save: `POST {press}/$$$call$$$/grid/settings/series/series-grid/update-series?seriesId={id}` answered 500 with an empty body; the window stayed open with `button.submitFormButton` disabled and `.pkp_spinner.is_visible` beside "Cancel", no text under any box, no notice, no browser dialog; "Cancel" closed it with no question; after a reload "Edit" showed the subtitle and no cover. On a series whose sound PNG cover had been saved first (the control: the window closed, the reopened one showed the picture under "Current Image" with "Delete"): the same 500 and the same stuck window; after a reload "Edit" showed the new subtitle and a picture of no width under "Current Image", `catalog/thumbnail?type=series&id={id}` answering 200 with an empty body of type text/html where it had answered a 97-byte image/png, and the series' public page showed the same broken cover. A "Save" of that series with a subtitle and no file then answered 200 with "Your changes have been saved."; a sound PNG uploaded and saved brought the cover back (image/png, 97 bytes; four runs). The server logged at each damaged save `imagecreatefrompng(): gd-png: fatal libpng error: IDAT: CRC error`, `imagecreatefrompng(): "…" is not a valid PNG file`, then `PHP Fatal error: Uncaught TypeError: imagecopyresampled(): Argument #2 ($src_image) must be of type GdImage, false given` in `SeriesForm.php`. The test installs' PHP runs with `zend.assertions = -1`, so the `assert($image)` between the two calls is not compiled; where assertions run, the save fails one step earlier (a 3.5 install on 2026-10-02 answered the same 500 and logged `Uncaught AssertionError: assert($image)`). Not driven: "Delete" on the broken picture; the "Add Series" window; a damaged JPG. Kept script: `shared/playwright/checks/U17/I09/i09.js` (row L18).
+**f-omp10** — fn m: OMP `SeriesForm::validate()` accepts the file on `getimagesize()`, which reads only the picture's header; `SeriesForm::execute()` then stores the series' other fields (`Repo::section()->edit()`), deletes the old cover's two files (`ContextFileManager::deleteByPath()`), and fails where it builds the thumbnail: `imagecreatefrompng()` returns false on the damaged data and `imagecopyresampled()` throws, before the new files are written and before `setImage()`, so the stored cover record still names the deleted files. Live-probed 2026-10-09 (Fields "Cover Image"), OMP `main` (omp `57a9235110`, lib/pkp `27938abd4c`; the default dataset, as `rvaca`, three runs) and `stable-3_5_0` (omp `ddc6abf5a9`; scratch presses, as the press's manager, two runs), the same in all five, on series each run added itself, with a 2×3 PNG of 73 bytes whose IDAT checksum has its last byte flipped. "Upload File" took it (200, the box reading the file's name with "Change File"). On a series with no cover, with "Subtitle" typed in the same save: `POST {press}/$$$call$$$/grid/settings/series/series-grid/update-series?seriesId={id}` answered 500 with an empty body; the window stayed open with `button.submitFormButton` disabled and `.pkp_spinner.is_visible` beside "Cancel", no text under any box, no notice, no browser dialog; "Cancel" closed it with no question; after a reload "Edit" showed the subtitle and no cover. On a series whose sound PNG cover had been saved first (the control: the window closed, the reopened one showed the picture under "Current Image" with "Delete"): the same 500 and the same stuck window; after a reload "Edit" showed the new subtitle and a picture of no width under "Current Image", `catalog/thumbnail?type=series&id={id}` answering 200 with an empty body of type text/html where it had answered a 97-byte image/png, and the series' public page showed the same broken cover. A "Save" of that series with a subtitle and no file then answered 200 with "Your changes have been saved."; a sound PNG uploaded and saved brought the cover back (image/png, 97 bytes; four runs). The server logged at each damaged save `imagecreatefrompng(): gd-png: fatal libpng error: IDAT: CRC error`, `imagecreatefrompng(): "…" is not a valid PNG file`, then `PHP Fatal error: Uncaught TypeError: imagecopyresampled(): Argument #2 ($src_image) must be of type GdImage, false given` in `SeriesForm.php`. The test installs' PHP runs with `zend.assertions = -1`, so the `assert($image)` between the two calls is not compiled; where assertions run, the save fails one step earlier (a 3.5 install on 2026-10-02 answered the same 500 and logged `Uncaught AssertionError: assert($image)`). Driven again 2026-11-03, OMP `main` (omp `828150a8f`, lib/pkp `1ae711024a`; the default dataset, as `rvaca`, two runs), on a series saved first with a sound PNG: the same 500 and log lines, the same stuck window, the subtitle stored and the same broken picture; "Delete" on that picture is note f-omp11. Not driven: the "Add Series" window; a damaged JPG or GIF (the uploader offers JPG, PNG and SVG): a 3×2 JPEG and GIF cut short, and a JPEG with bytes overwritten near its end, each passed `getimagesize()` and failed `imagecreatefromjpeg()` / `imagecreatefromgif()` and `imagecreatefromstring()` with PHP 8.3's GD, checked outside the app (2026-10-13, the issue report's walk), and `execute()` decodes them the same way, so they would fail at the same point (code read). Kept scripts: `shared/playwright/checks/U17/I09/i09.js` (row L18), `shared/playwright/checks/U17/I03C/i03c.js` (`PART=broken`).
 Issue report: [pkp-e2e#952](https://github.com/jardakotesovec/pkp-e2e/issues/952) ([docs/issues/U17-OMP10-series-damaged-cover-save-hangs.md](../issues/U17-OMP10-series-damaged-cover-save-hangs.md)).
+
+<a id="fn-f-omp11"></a>
+**f-omp11** — fn m: the cover's "Delete" posts to OMP `SeriesGridHandler::deleteImage()`. It answers `JSONMessage(false, __('manager.categories.form.removeCoverImageOnDifferentContextNowAllowed'))` when the series no longer exists or belongs to another press (the second case needs a request built by hand with another press's series and was read, not driven), and `…removeCoverImageFileNotFound` when the series has no cover, a check omp `fd4ea260c` "pkp/pkp-lib#13631 fix handling of series cover image deletions (#2528)" (2026-10-29) added. It gives the same refusal when `ContextFileManager::deleteByPath()` returns false for either file (since omp `7901cde3d`, pkp/pkp-lib#6002, 2025-10-31); that check runs after `setImage([])` and `Repo::section()->edit()`, so the record is already cleared when it refuses, and on OMP10's broken picture the failed save had already deleted the files (note f-omp10). The legacy `Handler.handleJson()` shows a refused answer's `content` with `alert()`. Neither key is in pkp-lib `main`'s `locale/en/manager.po` or `locale/fr_CA/manager.po`. `stable-3_5_0`'s define them through pkp-lib `52d7fa1c76` "pkp/pkp-lib#13631 fix handling of category cover image deletions" (2026-10-27), which `main` does not contain: "The cover image and thumbnail files could not be found. They may have already been deleted. Try reloading the page." and, a category's text on a series' window, "The category does not exist or belongs to a different context. Please ensure you are working with the correct context and try again." (code read; 3.5 not driven). Translation merges from `stable-3_5_0` brought both keys into 19 of `main`'s languages (ar, bg, cs, da, de, el, eu, fr, hy, ky, mk, nb_NO, pt, pt_BR, ru, sl, sr_Latn, tr, uk; `git grep` of lib/pkp's `locale/`, none commented out), so a user in one of those reads a sentence there (code read). Live-probed 2026-11-03 (Fields "Cover Image"), OMP `main` (omp `828150a8f`, lib/pkp `1ae711024a`), the default dataset as `rvaca` (Press manager), two runs, on series each run added with a 2×3 PNG cover. Control: with the series' "Edit" open in two tabs, "Delete" and "Cancel" in tab A kept the picture; "Delete" and "OK" answered `{"status":true,…"events":[{"name":"fileDeleted"}]}`, the picture and the link went at once, the window stayed open, and the stored `image` read `[]`. The cover gone: tab B, still showing the picture, "Delete", "OK" posted `{press}/$$$call$$$/grid/settings/series/series-grid/delete-image?seriesId={id}`, answered 200 `{"status":false,"content":"##manager.categories.form.removeCoverImageFileNotFound##",…}`, and the browser alert read that code; the "Confirm" window stayed open, "OK" and "Cancel" enabled, a spinner beside "Cancel", until "Cancel"; the window kept "Current Image" and "Delete"; after "Cancel" and a reload "Edit" showed only the uploader, and the series' page no picture. The series gone (deleted from the table in tab A): the same in tab B with `…removeCoverImageOnDifferentContextNowAllowed`, and after a reload no row. The broken picture (note f-omp10, the damaged PNG saved over a sound cover, the picture of no width, the thumbnail address answering an empty `text/html`): "Delete", "OK" gave the alert `##manager.categories.form.removeCoverImageFileNotFound##` and the same open "Confirm" window, the window kept the broken picture, the stored `image` read `[]`, and after a reload "Edit" showed only the uploader and the series' page no picture. Kept script: `shared/playwright/checks/U17/I03C/i03c.js` (`PART=stale`, `PART=gone`, `PART=broken`).
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — fn f. Live-probed 2026-09-25 on a scratch server, three runs: note td13. The seeded server is not empty once other suites have posted to it.
