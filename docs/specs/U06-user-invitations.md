@@ -2313,7 +2313,7 @@ control, the same names typed with no "Back", reached the review step
 and the account as "Givtyped Quilltyped". No notice, no dialog, every
 `refine` and `finalize` answered 200, no response of 500 or more and no
 page error.
-Issue report: [docs/issues/U06-A18-accept-invitation-back-typed-names-replaced.md](../issues/U06-A18-accept-invitation-back-typed-names-replaced.md).
+Issue report: [pkp-e2e#1080](https://github.com/jardakotesovec/pkp-e2e/issues/1080) ([docs/issues/U06-A18-accept-invitation-back-typed-names-replaced.md](../issues/U06-A18-accept-invitation-back-typed-names-replaced.md)).
 
 <a id="fn-a19"></a>
 **f-a19** — ui-library `AcceptInvitationUserDetailsForms.vue` and
