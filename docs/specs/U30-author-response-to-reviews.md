@@ -1011,7 +1011,7 @@ Issue report: [pkp-e2e#813](https://github.com/jardakotesovec/pkp-e2e/issues/813
 
 <a id="fn-f-a5"></a>
 **f-a5** — Note f: `RequestAuthorResponse` refuses a missing `subject` or `body` with 422, and `RequestReviewRoundAuthorResponse.vue` routes every non-2xx answer of "Submit Request" to `openDialogNetworkError` (the generic "Error" dialog) instead of `setErrors` on the composer, so the field-level message never shows. Live-probed 2026-09-06: two 422s, the same dialog both times, the page's content intact after "OK".
-Issue report: [pkp-e2e#815](https://github.com/jardakotesovec/pkp-e2e/issues/815) ([docs/issues/U30-A5-request-author-response-empty-field-generic-error.md](../issues/U30-A5-request-author-response-empty-field-generic-error.md)).
+Issue report: [pkp-e2e#815](https://github.com/jardakotesovec/pkp-e2e/issues/815) ([docs/issues/U30-A5-request-author-response-empty-field-generic-error.md](../issues/U30-A5-request-author-response-empty-field-generic-error.md)). The team's copy is `pkp/pkp-lib#13715` (2026-11-04).
 
 <a id="fn-f-a6"></a>
 **f-a6** — Note g: `emails.reviewRound.requestAuthorResponse.body` opens with a fixed sentence ("All peer reviews for your submission titled "{$submissionTitle}" have now been completed.") and `getCompletedReviewAssignments()` quotes only the reviews with a `dateCompleted`, so the minimum branch of note e sends the sentence with one block. Live-probed 2026-09-06 on a scratch journal with `numReviewsPerSubmission: 1`, the second reviewer "Request Accepted".
