@@ -281,8 +281,13 @@ is left, the next morning picks up from the files.
      databases at the tips, each run's summary read for dead phases, since
      a kept check exits 0 when a phase dies (a fix there comes first: the
      U05 sweep's checks still called `support/jobs.js` and slot 0's
-     Mailpit, 2026-10-20); one fresh checker (`briefs/claim-check.md`, `{{rerun}}` naming
-     the outputs and the suites) judges the snapshots against the spec
+     Mailpit, 2026-10-20); so do the kept walks of the spec's filed
+     reports (`shared/playwright/checks/issues/<report>/`), twice each on
+     a dataset fleet reset before every run, a walk that starts a server
+     of its own left out (the U10 sweep's
+     `shared/playwright/checks/U10/SW04/walks.sh`, 2026-11-04); one fresh
+     checker (`briefs/claim-check.md`, `{{rerun}}` naming
+     the outputs, the walks and the suites) judges the snapshots against the spec
      lines each chunk owns, drives what the checks no longer reach, and
      reads each suite against the scenarios for a bullet no test asserts.
      Drift folds as "Fix stale artifacts as you go" says, the tests with it; a bullet without its
