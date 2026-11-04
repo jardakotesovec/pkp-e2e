@@ -2186,7 +2186,7 @@ case, so the call works there (read, not driven). The test installs run
 PostgreSQL. Present since pkp-lib#7111 (the caching rewrite), on
 stable-3_5_0 too. Live-probed 2026-09-24 (three apps): td24, td27; the
 server log recorded the error on every "OK".
-Issue report: [pkp-e2e#369](https://github.com/jardakotesovec/pkp-e2e/issues/369) ([docs/issues/U09-A14-custom-block-delete-fails-postgresql.md](../issues/U09-A14-custom-block-delete-fails-postgresql.md)).
+Issue report: [pkp-e2e#369](https://github.com/jardakotesovec/pkp-e2e/issues/369) ([docs/issues/U09-A14-custom-block-delete-fails-postgresql.md](../issues/U09-A14-custom-block-delete-fails-postgresql.md)). Upstream: `pkp/pkp-lib#13690` (2026-11-04), fix in PRs `pkp/pkp-lib#13692` (main) and `#13691` (3.5), walked fixed at their heads before the merge.
 
 <a id="fn-f-a15"></a>
 **f-a15** — With the plugin unticked its blocks are not loaded, but the

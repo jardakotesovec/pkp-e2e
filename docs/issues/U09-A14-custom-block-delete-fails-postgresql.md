@@ -10,7 +10,7 @@
   - 3.4: none (code; the delete is a raw SQL query with the right column name)
   - 3.3: none (code; the same raw SQL query)
 - **Introduced** `pkp/pkp-lib#10109` for `pkp/pkp-lib#7111` · [9b81a3c3c9](https://github.com/pkp/pkp-lib/commit/9b81a3c3c941b3583ae43ff4c2f826791c778f56) · merged 2024-06-26 · Alec Smecher (asmecher)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13690` (open, fix in PR `pkp/pkp-lib#13692`, not yet in main; 3.5: PR `pkp/pkp-lib#13691`), covering `deleteSettingsByPlugin()` and `ThemePlugin::saveOption()` too (2026-11-04)
 - **Tracked in** spec U09 [A14](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U09-custom-pages-and-blocks.md#a14)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
