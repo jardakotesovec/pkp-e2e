@@ -743,9 +743,9 @@ tooling recipe are in the footnote. <sup>s</sup>
 
 4. **Change the email address by confirming the emailed link**
 
-   Given: an Author, signed in on a scratch journal in two browsers, on
-   the profile's "Contact" tab in both, with a fresh throwaway address
-   at hand. <sup>s</sup>
+   Given: an Author, signed in on a scratch journal in three browsers, on
+   the profile's "Contact" tab in all three, with a fresh throwaway
+   address at hand. <sup>s</sup>
 
    - **The request**: type the throwaway address into "Email address" and
      save: the tab now reads "You have requested a change of your email to
@@ -754,9 +754,13 @@ tooling recipe are in the footnote. <sup>s</sup>
      "Email address" box is read-only, still showing the old address.
    - **The second browser**: in the second browser, signed in as the same
      account with "Keep me logged in" left ticked as the Login page shows
-     it, press "Identity": the tab opens with the account's names, the
-     whole check here; the session's end shows only with the box unticked
-     (Rule 6a, *Coverage*).
+     it, press "Identity": the tab opens with the account's names; the
+     save ended this browser's session and it was signed straight back in
+     (Rule 6a).
+   - **The third browser**: in the third browser, signed in as the same
+     account with "Keep me logged in" unticked on the Login page, load the
+     page afresh (a full reload, not a tab press): it lands on the Login
+     page; the save signed this browser out (Rule 6a).
    - **The mailbox**: the mailbox of the account's old address now holds a
      message "Confirm account contact email change request", from the
      account holder's own name, naming the new address; the new address
@@ -1088,10 +1092,12 @@ tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - after an email-change save, a second browser signed in with "Keep me
-    logged in" unticked: its "Identity" press raising the alert of
-    [A26](#a26) and its next page load showing the Login page (Rule 6a;
-    scenario 4 ticks the box)
+  - after an email-change save, a tab press on the Profile page still
+    open in another browser signed in with "Keep me logged in" unticked,
+    answered by a sentence saying the user has been signed out instead of
+    "##user.authorization.userRequired##" ([A26](#a26); Rule 6a): the
+    guard, once fixed as the issue report
+    (`docs/issues/U03-A26-session-ended-alert-raw-key.md`) proposes
   - text typed into "Signature" alone, then another tab pressed, asking
     "The data on this form has changed. Do you wish to continue without
     saving?", "Cancel" keeping the text ([A19](#a19); Rule 2c): the
@@ -2582,7 +2588,11 @@ Mailpit, one shared instance at `MAILPIT_URL` (default
 recipient address, never by position; "a second browser" = a second
 Playwright context, signed in as the same scratch user in scenario 4 and
 signed out in scenario 5 (its Login page continues to the Contact tab after
-the sign-in; the sign-in uses the username). Scenario 5's control is
+the sign-in; the sign-in uses the username). Scenario 4's second context
+signs in on the Login page with "Keep me logged in" ticked as shown, and
+its third with the box unticked (`LoginPage.signInRemembered`); the third
+is only reloaded, never tab-pressed, since a press there raises A26's
+alert (PRINCIPLES M3). Scenario 5's control is
 `count()` of the old address's inbox = 3 after the third message is found.
 Scenario 6: a scratch user seeded `roles: ['reader']` in the first scratch
 context, then a second `POST scenarios/context` naming the same username with

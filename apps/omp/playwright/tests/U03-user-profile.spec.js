@@ -93,14 +93,20 @@ async function anonContext(browser, baseURL) {
  * Fresh UI login on a press's Login page, in its own context. Used for
  * every actor whose session this suite may end (sign-out, password change,
  * impersonation) or move into another language, so the shared .auth cache
- * is never poisoned.
+ * is never poisoned. `remember` left out keeps "Keep me logged in" as the
+ * Login page shows it; `false` unticks it (`signInRemembered`, S4's third
+ * browser).
  */
-async function freshLogin(browser, baseURL, contextPath, username, password = getPassword(username)) {
+async function freshLogin(browser, baseURL, contextPath, username, password = getPassword(username), {remember} = {}) {
     const context = await anonContext(browser, baseURL);
     const page = await context.newPage();
     await page.goto(`/index.php/${contextPath}/login`);
     const loginPage = new LoginPage(page);
-    await loginPage.signIn(username, password);
+    if (remember === undefined) {
+        await loginPage.signIn(username, password);
+    } else {
+        await loginPage.signInRemembered(username, password, remember);
+    }
     return {context, page};
 }
 
@@ -590,13 +596,17 @@ test.describe('user profile', () => {
             users: [{username, givenName: 'Dee', familyName: 'Probe', roles: ['author']}],
         });
 
-        // Two browsers signed in as the same account; the second parked on
-        // the profile's Contact tab.
+        // Three browsers signed in as the same account; the second (with
+        // "Keep me logged in" as the Login page shows it, ticked) and the
+        // third (with the box unticked) parked on the profile's Contact tab.
         const first = await freshLogin(browser, baseURL, tag, username);
         const second = await freshLogin(browser, baseURL, tag, username);
+        const third = await freshLogin(browser, baseURL, tag, username, getPassword(username), {remember: false});
         try {
             const otherProfile = new ProfilePage(second.page, tag);
             await otherProfile.goto('contact');
+            const thirdProfile = new ProfilePage(third.page, tag);
+            await thirdProfile.goto('contact');
 
             const profile = new ProfilePage(first.page, tag);
             await profile.goto('contact');
@@ -611,11 +621,21 @@ test.describe('user profile', () => {
             await expect(profile.email()).not.toBeEditable();
 
             // The second browser: "Identity" opens with the account's names;
-            // the session carries on through the pending request (Rule 6a).
+            // the save ended this browser's session and "Keep me logged in"
+            // signed it straight back in (Rule 6a).
             await otherProfile.open('identity');
             await expect(otherProfile.givenName()).toHaveValue('Dee');
             await expect(otherProfile.familyName()).toHaveValue('Probe');
             await expect(otherProfile.usernameText()).toContainText(username);
+
+            // The third browser, signed in with the box unticked: a full
+            // reload (never a tab press, which raises A26's alert) lands on
+            // the Login page; the save signed this browser out (Rule 6a).
+            // The second browser's open profile above is the control.
+            await third.page.reload();
+            await expect(third.page).toHaveURL(/\/login/);
+            await expect(third.page.locator('form#login')).toBeVisible();
+            await expect(thirdProfile.form('contact')).toHaveCount(0);
 
             // One message to the OLD address from the account holder's own
             // name, naming the new address; nothing to the new address (Rule
@@ -663,6 +683,7 @@ test.describe('user profile', () => {
         } finally {
             await first.context.close();
             await second.context.close();
+            await third.context.close();
         }
     });
 

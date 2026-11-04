@@ -114,6 +114,19 @@ async function freshLogin(browser, baseURL, contextPath, username, password = ge
     return {context, page};
 }
 
+/**
+ * `freshLogin()` with "Keep me logged in" ticked or unticked on the Login
+ * page (`LoginPage.signInRemembered`), for a browser whose fate after
+ * another browser's save depends on the box (Rule 6a).
+ */
+async function rememberedLogin(browser, baseURL, contextPath, username, remember) {
+    const context = await anonContext(browser, baseURL);
+    const page = await context.newPage();
+    await page.goto(`/index.php/${contextPath}/login`);
+    await new LoginPage(page).signInRemembered(username, getPassword(username), remember);
+    return {context, page};
+}
+
 /** Sign out through the user menu's "Logout" and wait for the Login page. */
 async function signOut(page) {
     await openUserNav(page);
@@ -595,13 +608,20 @@ test.describe('user profile', () => {
             users: [{username, givenName: 'Dee', familyName: 'Probe', roles: ['author']}],
         });
 
-        // Two browsers signed in as the same account; the second parked on
-        // the profile's Contact tab.
+        // Three browsers signed in as the same account; the second (with
+        // "Keep me logged in" left as the Login page shows it) and the
+        // third (with the box unticked) parked on the profile's Contact tab.
         const first = await freshLogin(browser, baseURL, tag, username);
         const second = await freshLogin(browser, baseURL, tag, username);
+        const third = await rememberedLogin(browser, baseURL, tag, username, false);
         try {
             const otherProfile = new ProfilePage(second.page, tag);
             await otherProfile.goto('contact');
+            const thirdProfile = new ProfilePage(third.page, tag);
+            const thirdLogin = new LoginPage(third.page);
+            await thirdProfile.goto('contact');
+            await expect(thirdProfile.heading).toBeVisible();
+            await expect(userNav(third.page)).toBeVisible();
 
             const profile = new ProfilePage(first.page, tag);
             await profile.goto('contact');
@@ -616,11 +636,23 @@ test.describe('user profile', () => {
             await expect(profile.email()).not.toBeEditable();
 
             // The second browser: "Identity" opens with the account's names;
-            // the session carries on through the pending request (Rule 6a).
+            // the save ended its session and "Keep me logged in", ticked as
+            // the Login page shows it, signed it straight back in (Rule 6a).
             await otherProfile.open('identity');
             await expect(otherProfile.givenName()).toHaveValue('Dee');
             await expect(otherProfile.familyName()).toHaveValue('Probe');
             await expect(otherProfile.usernameText()).toContainText(username);
+
+            // The third browser, signed in with the box unticked: a full
+            // reload, never a tab press (that raises A26's alert, PRINCIPLES
+            // M3), lands on the Login page; the save signed it out (Rule
+            // 6a). The profile and the user menu it showed before the save
+            // are the positive control for their absence now.
+            await third.page.reload();
+            await third.page.waitForURL(/\/login/, {waitUntil: 'commit', timeout: 30_000});
+            await thirdLogin.expectForm();
+            await expect(thirdProfile.heading).toHaveCount(0);
+            await expect(userNav(third.page)).toHaveCount(0);
 
             // One message to the OLD address from the account holder's own
             // name, naming the new address; nothing to the new address (Rule
@@ -670,6 +702,7 @@ test.describe('user profile', () => {
         } finally {
             await first.context.close();
             await second.context.close();
+            await third.context.close();
         }
     });
 
