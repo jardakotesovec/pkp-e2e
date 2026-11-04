@@ -161,10 +161,11 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
      review progress counter, "Review update {completed}/{total}": the
      current round's submitted reviews, marked complete by an editor or
      not, over its reviewers minus declined and cancelled requests
-     ⚠ [A1](#a1). Each submitted *open* review adds its reviewer's avatar
-     to a "Reviewers assigned:" row; the avatar's popover names the
-     reviewer and the review type. Other review types never show a
-     reviewer here
+     ⚠ [A1](#a1). Each *open* review an editor has confirmed ("Read
+     Review" › "Mark as Complete") adds its reviewer's avatar to a
+     "Reviewers assigned:" row; the avatar's popover names the reviewer and
+     the review type. A submitted open review not yet confirmed, and other
+     review types, never show a reviewer here
      ([→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review)).
      <sup>h</sup>
    - 7c. **Copyediting** {OJS OMP}: "Copyedited Files Uploaded: {count}",
@@ -401,10 +402,11 @@ App-specific:
      submission's cell reads "Review update 1/2" and shows no "Reviewers
      assigned:" row: a review that is not open never shows its reviewer
      (Rule 7b).
-   - **A completed open review**: on the journal whose default review type
-     is Open, the submission's cell reads "Review update 1/1" with a
-     "Reviewers assigned:" row of one avatar; the avatar's popover names
-     the reviewer and the review type (Rule 7b).
+   - **A confirmed open review**: on the journal whose default review type
+     is Open, its editor confirms the submission's completed review ("Read
+     Review" › "Mark as Complete"); the author's cell then reads "Review
+     update 1/1" with a "Reviewers assigned:" row of one avatar; the
+     avatar's popover names the reviewer and the review type (Rule 7b).
    - **Control**: the delivered submission's row no longer offers "Submit
      revisions", which shows only while the round awaits the author's
      revisions (Rule 7a).
@@ -890,6 +892,18 @@ reviewer's full name and review type ("Open"), nothing else. The author's
 own list data carries blanked reviewer identity fields (empty name and
 initials) for anonymous assignments — identity is withheld at the source,
 not merely hidden by the cell.
+Confirmation first (pkp/pkp-lib#13602): at the PR heads pkp-lib
+`3b63f6cbb5` (#13712) and ui-library `8d712dd02b` (#1041), before their
+merge, the cell lists `getConfirmedReviewAssignments()` (complete or
+thanked: an editor's "Mark as Complete" or "Thank Reviewer", both setting
+`dateConsidered`) instead of the completed ones, and
+`AnonymizeData::reviewsToAnonymize()` blanks an open review's reviewer
+fields for authors and the submission's other reviewers until
+`dateConsidered` is set. Driven 2026-11-04 on PKP's dataset
+(`checks/sync/pkp-lib-13712/walk.js`, `gap.js`, OJS and OMP): at the first
+heads (`7903807281`, `ebbb413b95`) the row and the popover named the
+reviewer of a submitted, unconfirmed open review; at these heads no row
+and blank fields until "Mark as Complete", then the avatar and the name.
 
 <a id="fn-i"></a>
 **i — draft deletion.** `useDashboardBulkDelete.js`: availability =

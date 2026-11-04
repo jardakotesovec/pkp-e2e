@@ -38,6 +38,10 @@ const {
     uploadWizardSteps,
     uploadWizardTitles,
     inMemoryFile,
+    WorkflowPage,
+    openReviewDetails,
+    markReviewComplete,
+    closeReviewDetails,
 } = require('../pages/ReviewStagePages.js');
 
 const JOURNAL = 'publicknowledge';
@@ -482,22 +486,35 @@ test.describe('my submissions', () => {
         const openTag = `${tag}o`;
         const openAuthor = `${openTag}au`;
         const openReviewer = `${openTag}rv`;
+        const openEditor = `${openTag}ed`;
         await ojsApi.createContext({
             tag: openTag,
             review: {defaultReviewMode: 'open'},
             users: [
                 {username: openAuthor, givenName: 'Ola', familyName: 'Author', email: `${openAuthor}@mail.test`, roles: ['author']},
                 {username: openReviewer, givenName: 'Olga', familyName: 'Reviewer', email: `${openReviewer}@mail.test`, roles: ['externalReviewer']},
+                {username: openEditor, givenName: 'Oren', familyName: 'Editor', email: `${openEditor}@mail.test`, roles: ['editor']},
             ],
         });
-        await ojsApi.createSubmission({
+        const {submissionId: openId} = await ojsApi.createSubmission({
             tag: openTag,
             context: openTag,
             submitter: openAuthor,
             title: `Openreview ${openTag}`,
             decisions: ['sendExternalReview'],
             reviewRounds: [{reviewers: [{username: openReviewer, status: 'completed'}]}],
+            participants: [{username: openEditor, role: 'editor'}],
         });
+        // The editor confirms the completed open review ("Read Review" ›
+        // "Mark as Complete"): only a confirmed open review names its
+        // reviewer to the author (pkp/pkp-lib#13602).
+        const openEditorPage = await (await asUser(openEditor)).newPage();
+        const openWorkflow = new WorkflowPage(openEditorPage, openTag);
+        await openWorkflow.gotoEditorial(openId);
+        const openReviewerRow = openWorkflow.panelRow('Reviewers', 'Olga Reviewer');
+        const openReadModal = await openReviewDetails(openEditorPage, openReviewerRow);
+        await markReviewComplete(openEditorPage, openReadModal);
+        await closeReviewDetails(openEditorPage, openReadModal);
 
         const page = await (await asUser(author)).newPage();
         const mySub = new MySubmissionsPage(page, tag);

@@ -17,6 +17,8 @@
 //     address (author-reviewer-grid read-review) asked directly;
 //   3 `dbarnes`: the reviewer's row › "Read Review" › "Mark as Complete";
 //   4 the author again, the same four reads.
+// After 2 and after 4, another reviewer of the submission (`agallego` /
+// `alzacharia`) reads the same API record (s2r, s4r).
 // The base (the apps' tips) shows the review at 2; the PR head must hide
 // it at 2 and show it at 4.
 //
@@ -30,8 +32,8 @@ const L = require('../../issues/author-read-review-no-text/lib.js');
 
 const T = 30_000;
 const CASES = {
-    ojs: {...L.CASES.ojs, reviewId: 15},
-    omp: {...L.CASES.omp, reviewId: 21},
+    ojs: {...L.CASES.ojs, reviewId: 15, otherReviewer: 'agallego'},
+    omp: {...L.CASES.omp, reviewId: 21, otherReviewer: 'alzacharia'},
 };
 
 // WALK_DB names the dataset fleet's database where the kit's sql() reads the
@@ -96,6 +98,14 @@ async function authorReads(page, app, c) {
     return out;
 }
 
+/** Another reviewer of the same submission: the submissions API's record of the review. */
+async function otherReviewerReads(page, app, c) {
+    const api = await page.request.get(app.url(`/index.php/${app.contextPath}/api/v1/submissions/${c.id}`));
+    const j = await api.json().catch(() => null);
+    const ra = j && (j.reviewAssignments || []).find((x) => x.id === c.reviewId);
+    return {status: api.status(), record: ra ? {reviewerFullName: ra.reviewerFullName, reviewerUserName: ra.reviewerUserName, reviewerId: ra.reviewerId, dateConsidered: ra.dateConsidered} : 'no record'};
+}
+
 /** The editor's "Read Review" › "Mark as Complete" (OMP's confirmReviewAsEditor, on the page). */
 async function confirm(page, c) {
     const row = L.reviewerRow(page, c.reviewer);
@@ -132,12 +142,18 @@ forEachApp(async (app) => {
         await signIn(page, c.author);
         await step('s2', () => authorReads(page, app, c));
         await signOut(page);
+        await signIn(page, c.otherReviewer);
+        await step('s2r', () => otherReviewerReads(page, app, c));
+        await signOut(page);
         await signIn(page, 'dbarnes');
         await step('s3', async () => { await L.openEditorial(page, app, c.id); return confirm(page, c); });
         o.state3 = state(app, c);
         await signOut(page);
         await signIn(page, c.author);
         await step('s4', () => authorReads(page, app, c));
+        await signOut(page);
+        await signIn(page, c.otherReviewer);
+        await step('s4r', () => otherReviewerReads(page, app, c));
         o.pageErrors = errors;
     } finally {
         record(`walk-${o.run}`, o);

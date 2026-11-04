@@ -1328,12 +1328,13 @@ list, no "Read Review", and the window's address asked directly answers
 `ReviewAssignmentRequiredPolicy` now refuses an open assignment without
 `dateConsidered`; after "Read Review" › "Mark as Complete" the window
 reads as before. The same at OJS `ore` with both commits cherry-picked
-(they apply unchanged). Still showing the reviewer before the
-confirmation at the heads: My Submissions' "Reviewers assigned:" avatar
-(U22 Rule 7b reads completed open reviews) and the submissions API's
-`reviewerFullName`, `reviewerUserName` and `reviewerId` for the author
-(`AnonymizeData::reviewsToAnonymize()` blanks only non-open methods),
-the PR review's report `docs/reports/pr-review/2026-11-04-pkp-lib-13712.md`.
+(they apply unchanged). Round 2 (pkp-lib `3b63f6cbb5`, ui-library
+`8d712dd02b`, ojs `5d8724007e`, omp `e2166dba3b`, 2026-11-04) also hides
+the reviewer from My Submissions' "Reviewers assigned:" avatar (U22 Rule
+7b) and blanks the submissions API's `reviewerFullName`,
+`reviewerUserName` and `reviewerId` for the author and the other reviewers
+until the confirmation (`AnonymizeData::reviewsToAnonymize()`), which the
+round-1 heads still showed; the review round reads as at round 1.
 An editor's "unconsider" clears `dateConsidered`, so the review is hidden
 from the author again (code).
 

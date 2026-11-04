@@ -40,7 +40,7 @@ const {
     continueTo,
     saveForLater,
 } = require('../pages/SubmissionWizardPages.js');
-const {completeStandaloneUploadWizard, oldAuthorDashboardUrl} = require('../pages/ReviewStagePages.js');
+const {completeStandaloneUploadWizard, oldAuthorDashboardUrl, openEditorial, confirmReviewAsEditor} = require('../pages/ReviewStagePages.js');
 
 const PRESS = 'publicknowledge';
 const ROLE_DENIED = 'The current role does not have access to this operation.';
@@ -522,19 +522,28 @@ test.describe('My submissions (U22)', () => {
         const openTag = `${tag}o`;
         const openAuthor = `${openTag}au`;
         const openReviewer = `${openTag}rv`;
+        const openEditor = `${openTag}ed`;
         await ompApi.createContext({
             tag: openTag,
             review: {defaultReviewMode: 'open'},
             users: [
                 user(openAuthor, 'Olga', 'Open', ['author']),
                 user(openReviewer, 'Omar', 'Openreviewer', ['externalReviewer']),
+                user(openEditor, 'Oren', 'Editor', ['editor']),
             ],
         });
-        await ompApi.createSubmission({
+        const {submissionId: openId} = await ompApi.createSubmission({
             tag: openTag, context: openTag, submitter: openAuthor, title: `open${openTag}`,
             decisions: ['skipInternalReview'],
             reviewRounds: [{stage: 'external', reviewers: [{username: openReviewer, status: 'completed'}]}],
+            participants: [{username: openEditor, role: 'editor'}],
         });
+        // The editor confirms the completed open review ("Read Review" ›
+        // "Mark as Complete"): only a confirmed open review names its
+        // reviewer to the author (pkp/pkp-lib#13602).
+        const openEditorPage = await (await asUser(openEditor)).newPage();
+        const openModal = await openEditorial(openEditorPage, openTag, openId);
+        await confirmReviewAsEditor(openEditorPage, openModal, 'Omar Openreviewer');
 
         const page = await (await asUser(author)).newPage();
         const mySub = new MySubmissionsPage(page, tag);
