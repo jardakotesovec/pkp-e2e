@@ -12,8 +12,6 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A2 🐞: S3's older PDF reader is read for its title, notice and arrow
- *   only; its viewer and its "Download" are not.
  * - A3 ❓: S7 reads the drawn chart; the sentence it removes is not read.
  * - A5 🐞: S4's Author reads the preview's notice; its "View submission"
  *   is not pressed.
