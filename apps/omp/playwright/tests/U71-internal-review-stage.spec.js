@@ -717,23 +717,30 @@ test.describe('Internal Review stage (U71)', () => {
             participants: [{username: ed, role: 'editor'}],
         });
 
-        // ── A completed open review (Rules 15, 16; Settings bullet 2) ─────
+        // ── A completed open review, not yet confirmed (Rule 16) ──────────
         const author = await stageAs(asUser, appContext, au, tag);
         await author.stage.gotoAuthor(first.submissionId);
         await author.stage.expectRoundHeading(1);
         await author.stage.expectHeadings(['Round 1 Status', 'Reviewers', 'Revisions Uploaded', 'Review Tasks & Discussions']);
-        const rows = author.stage.panelRows('Reviewers');
-        await expect(rows).toHaveCount(1, {timeout: 30_000});
-        await expect(rows.first()).toContainText('Olga Done');
-        await expect(rows.first().getByRole('button', {name: 'Read Review', exact: true})).toBeVisible();
-        await expect(author.stage.panel('Reviewers')).not.toContainText('Pia Pending');
+        await expect(author.stage.panel('Reviewers')).toContainText('No Items', {timeout: 30_000});
+        await expect(author.stage.panel('Reviewers')).not.toContainText('Olga Done');
 
-        // ── The editor's side (Rule 4) ────────────────────────────────────
+        // ── The editor's side (Rule 4), and the confirmation ──────────────
         const pe = await stageAs(asUser, appContext, ed, tag);
         await pe.stage.gotoEditorial(first.submissionId);
         await pe.stage.expectOnRound(1);
         await expect(pe.stage.reviewerRow('Olga Done')).toHaveCount(1, {timeout: 30_000});
         await expect(pe.stage.reviewerRow('Pia Pending')).toHaveCount(1);
+        await confirmReviewAsEditor(pe.page, workflowModal(pe.page), 'Olga Done');
+
+        // ── The confirmed open review (Rules 15, 16; Settings bullet 2) ───
+        await author.stage.gotoAuthor(first.submissionId);
+        await author.stage.expectRoundHeading(1);
+        const rows = author.stage.panelRows('Reviewers');
+        await expect(rows).toHaveCount(1, {timeout: 30_000});
+        await expect(rows.first()).toContainText('Olga Done');
+        await expect(rows.first().getByRole('button', {name: 'Read Review', exact: true})).toBeVisible();
+        await expect(author.stage.panel('Reviewers')).not.toContainText('Pia Pending');
 
         // ── A declined open request (Rule 16) ─────────────────────────────
         await author.stage.gotoAuthor(second.submissionId);
