@@ -20,8 +20,8 @@ dates and times are written. Every visitor meets the result on every
 public page of the journal. The Site Administrator can also set a
 journal's theme from the journal's Settings Wizard. The look of the
 site's own pages (the site's home page and the pages outside any journal)
-is set on Administration › Site Settings, which *Site settings*
-describes. <sup>a</sup>
+is set on Administration › Site Settings, which
+[Site settings](U60-site-settings.md) describes. <sup>a</sup>
 
 ## Actors & permissions
 
@@ -195,7 +195,8 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
    manager opens another side tab and comes back, and "Save" then
    stores it. <sup>c</sup> <sup>td8</sup>
 3. **Languages.** With a second form language (Settings › Website ›
-   "Setup" › "Languages", "Forms"; *Languages & locales*), each field
+   "Setup" › "Languages", "Forms";
+   [Languages & locales](U57-languages-and-locales.md)), each field
    marked "per language" takes a value in each language, and each group
    on "Date & Time" is chosen once per language. A visitor sees the
    logo (with its alternate text), homepage image, favicon, "Page
@@ -241,7 +242,7 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
    ([Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md),
    Rule 8). A stock install has "Default Theme" alone, so the list
    offers no other choice; further themes are installed and enabled as
-   plugins (*Plugins management*). On a press and a preprint server, a
+   plugins ([Plugins management](U62-plugins-management.md)). On a press and a preprint server, a
    newly chosen theme that replaces the home page with one of its own
    did not always show it ⚠ [A25](#a25). Rules 5 to 10 describe the default
    theme's fields. <sup>k</sup> <sup>td10</sup>
@@ -310,9 +311,10 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
 9. **"Usage statistics display options".** A chart choice adds a section
    headed "Downloads" to each article's landing page, holding a bar or a
    line chart of its downloads by month; an article with no downloads
-   yet shows an empty chart. The landing-page features (*Article landing
-   page & reading*, on a press *Monograph landing page*) describe the
-   section. <sup>z</sup> <sup>td14</sup>
+   yet shows an empty chart. The section is described in
+   [Article landing page & reading](U13-article-landing-page-and-reading.md),
+   and on a press in [Monograph landing page](U69-monograph-landing-page.md).
+   <sup>z</sup> <sup>td14</sup>
 10. **"Journal Content Organization"** {OJS}. Each ticked box adds a part
     to the home page (Rule 12): the current issue (Rule 14), the recent
     articles (Rule 13), the categories (Rule 15). Until the tab is saved,
@@ -344,7 +346,7 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     | the carousel | the carousel | the carousel |
     | the homepage image (Rule 18) | the homepage image | the homepage image |
     | the categories (Rule 15) | "About the Press" (Rule 7) | the announcements |
-    | "About the Journal" (Rule 7) | "Featured": books featured in the catalog, while "Featured Books" is ticked ([OMP1](#omp1)) | a search box and the category links (*Sections*) |
+    | "About the Journal" (Rule 7) | "Featured": books featured in the catalog, while "Featured Books" is ticked ([OMP1](#omp1)) | a search box and the category links ([Sections](U17-sections.md)) |
     | the announcements | "New Releases": books marked as new releases, while "New Releases" is ticked | "Latest preprints" (Rule 16) |
     | "Latest Publications" (Rule 13) | the announcements | "About the Server" (Rule 7) |
     | "Current Issue" (Rule 14) | "Additional Content" (Rule 19) | "Additional Content" |
@@ -356,7 +358,8 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     published articles that are not in a published issue (published with
     no issue, or assigned to an issue not yet published), the most
     recently submitted first, each shown as its article summary
-    (*Article landing page & reading*) ⚠ [OJS3](#ojs3); to a screen
+    ([Article landing page & reading](U13-article-landing-page-and-reading.md))
+    ⚠ [OJS3](#ojs3); to a screen
     reader each title is a heading of the section's own level
     ⚠ [OJS6](#ojs6). Under the list "{from} - {to} of {total} items"
     ("1 - 2 of 2 items"), and, with more
@@ -365,27 +368,32 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     on the last. With no such article the section is absent. <sup>n</sup>
     <sup>td17</sup>
 14. **"Current Issue"** {OJS}. Under this heading, the current issue's
-    name ("Vol. 1 No. 2 (2014)"), its table of contents (*Issues*), and
+    name ("Vol. 1 No. 2 (2014)"), its table of contents ([Issues](U50-issues.md)), and
     the link "View All Issues" to the archive. It shows while the journal
     has a current issue and Settings › Distribution › "Access" ›
     "Publishing Mode" is not "OJS will not be used to publish the
-    journal's contents online." (*Subscriptions & open access control*).
+    journal's contents online."
+    ([Subscriptions & open access control](U51-subscriptions.md)).
     <sup>o</sup> <sup>td18</sup>
 15. **The categories** {OJS}. A row of links, one per top-level category
-    of the journal, each opening that category's page (*Categories*);
+    of the journal, each opening that category's page
+    ([Categories](U16-categories.md));
     subcategories are not listed. With no category the row is absent.
     <sup>o</sup> <sup>td19</sup>
 16. **"Latest preprints"** {OPS}. The heading shows always, even with
     nothing posted. Under it, up to ten posted preprints, the most
     recently posted day first, each shown as its preprint summary
-    (*Article landing page & reading*), with no page links: "Items per
+    ([Article landing page & reading](U13-article-landing-page-and-reading.md)),
+    with no page links: "Items per
     page" does not apply. Preprints posted on the same day come in no
     fixed order, so on a day with more than ten posts which ten show is
     not fixed. <sup>p</sup> <sup>td20</sup>
 17. **Featured books and new releases** {OMP}. Which books are featured or
-    marked as new releases is set on the catalog (*Catalog management*),
-    and so is the order of the featured ones ("Order Features"); the new
-    releases come newest first by publication date. The "Setup" boxes
+    marked as new releases is set on the catalog
+    ([Catalog management](U70-catalog-management.md)), and so is the
+    order of the featured ones ("Order Features"). The new releases come
+    newest first by publication date; books published on the same day
+    come in no fixed order among themselves. The "Setup" boxes
     only show or hide the two lists. A ticked box with no book to show
     adds nothing. <sup>m</sup> <sup>td4</sup>
 18. **The homepage image.** Unless "Header Background Image" is ticked
@@ -414,7 +422,8 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     <sup>td23</sup>
 21. **The thumbnail.** Set, it shows beside the journal in the list of
     journals on the site's home page, with its "Alternate text" as its
-    description (*Hosted journals* describes the list). <sup>r</sup>
+    description ([Hosted journals](U59-hosted-journals.md) describes the
+    list). <sup>r</sup>
     <sup>td24</sup>
 22. **"Page Footer".** Set, the text shows at the foot of every public
     page of the journal, above the application's logo
@@ -425,7 +434,8 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
 
 23. **What "Sidebar" offers.** One box per block of a plugin that is
     enabled in the journal (Settings › Website › "Plugins" › "Installed
-    Plugins"; *Plugins management*), labelled with the plugin's name; a
+    Plugins"; [Plugins management](U62-plugins-management.md)), labelled
+    with the plugin's name; a
     custom block's box reads the block's name followed by "(Custom
     Block)", while the sidebar shows its title. A new journal offers "Web
     Feed Plugin", "Information Block", "Subscription Block" and "Language
@@ -459,10 +469,10 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     | ""Developed By" Block" | [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md) |
     | a custom block | [Custom pages & blocks](U09-custom-pages-and-blocks.md) |
     | ""Make a Submission" Block" {OJS OMP} | [Submission wizard](U21-submission-wizard.md) |
-    | "Language Toggle Block" | *Languages & locales* |
-    | "Web Feed Plugin"; the announcement feed's block {OJS} | *Web feeds*; [Announcements](U12-announcements.md) |
-    | "Subscription Block" {OJS} | *Subscriptions & open access control* |
-    | "Browse Block" (enabled on a new press) | *Catalog browse* |
+    | "Language Toggle Block" | [Languages & locales](U57-languages-and-locales.md) |
+    | "Web Feed Plugin"; the announcement feed's block {OJS} | [Web feeds](U18-web-feeds.md); [Announcements](U12-announcements.md) |
+    | "Subscription Block" {OJS} | [Subscriptions & open access control](U51-subscriptions.md) |
+    | "Browse Block" (enabled on a new press) | [Catalog browse](U68-catalog-browse.md) |
 
 25. **A placed block whose plugin is disabled.** It leaves the sidebar and
     the "Sidebar" list at once, and keeps its place: enabled again, it is
@@ -479,12 +489,18 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
 
 26. **The style sheet.** After "Save", the uploaded file is loaded on
     every public page of the journal after the theme's own styles, so its
-    rules win over the theme's where they are as specific: a rule for
-    every heading turns the home page's headings red, while an article
-    page's "Published" label keeps the theme's grey. The editorial
-    screens do not load it.
-    "Remove" and "Save" take it off the pages, but the file itself stays
-    where it was, still opening at its address ⚠ [A5](#a5). <sup>t</sup>
+    rules win over the theme's where they are as specific. A rule for
+    every heading turns red the home page's headings and, on an item's
+    page, its title and the heading "Abstract" ("Synopsis" on a book's
+    page); the headings "Published" ("Posted" on a preprint's page) and
+    "Versions" there keep the theme's grey. The
+    editorial screens do not load it. On a press the public pages load
+    the same file a second time, after every other style sheet, at an
+    address that stays the same when another file is saved
+    ⚠ [OMP3](#omp3). "Remove" and "Save" take it off the pages (on a
+    press, both loads), but the file itself stays where it was: the
+    "styleSheet.css" link "Advanced" showed before the removal still
+    opens it ⚠ [A5](#a5). <sup>t</sup>
     <sup>td28</sup>
 27. **"Favicon".** Set, it is the icon in the browser's tab on every public
     page and every editorial screen of the journal. Without one, the tab
@@ -495,7 +511,8 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
 28. **"Editorial Masthead".** While "Present a masthead based on user
     enrollments" is ticked, the list holds every role of the journal
     whose "Consider role in masthead list" is ticked (Settings › Users &
-    Roles › "Roles"; *Roles configuration*), the Reviewer role excepted:
+    Roles › "Roles"; [Roles configuration](U54-roles-configuration.md)),
+    the Reviewer role excepted:
     on a new journal "Journal editor", "Section editor" and "Editorial
     Board Member" ("Press editor", "Series editor" and "Editorial Board
     Member" on a press; "Moderator" and "Editorial Board Member" on a
@@ -528,11 +545,13 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md)
     (Rule 24), the home page's "Latest Publications" {OJS} (Rule 13), the
     results of the Search page ([Search](U15-search.md)) and a category's
-    page (*Categories*); on a press a category's page shows only its first
-    page ⚠ [OMP2](#omp2). It is also the number of rows the older
-    editorial lists start with before they page, such as Settings › Users
-    & Roles › "Roles" (*Roles configuration*); the "Users" list there
-    shows 25 a page whatever the number (*Users management*).
+    page ([Categories](U16-categories.md)); on a press a category's page
+    shows only its first page ⚠ [OMP2](#omp2). It is also the number of
+    rows the older editorial lists start with before they page, such as
+    Settings › Users & Roles › "Roles"
+    ([Roles configuration](U54-roles-configuration.md)); the "Users" list
+    there shows 25 a page whatever the number
+    ([Users management](U53-users-management.md)).
     <sup>v</sup> <sup>td31</sup>
 30. **"Page links".** The most page numbers a list shows at once, on the
     lists that number their pages: the home page's "Latest Publications"
@@ -591,7 +610,8 @@ September 2026 at 3:05 in the afternoon. <sup>j</sup> <sup>td7</sup>
     tab (Fields), and a save there changes the journal as a save on its
     own tab does. A change there is kept while another of the wizard's
     side tabs is open, and dropped without a question when the page is
-    reloaded or left. Every tab but "Appearance" is *Hosted journals*'s.
+    reloaded or left. Every tab but "Appearance" is described in
+    [Hosted journals](U59-hosted-journals.md).
     On a journal with no issue, the wizard shows "Include the current
     issue's table of contents" ticked where the journal's own tab shows
     "Include recent most published articles", and a save there stores
@@ -659,7 +679,8 @@ that change them.
    <sup>z</sup>
 8. **"Show Series"** {OMP} (the same tab; unticked). Ticked: the catalog
    page lists links to the press's series ("Series: …") when more than
-   one series holds a published book (*Catalog browse*). <sup>e</sup>
+   one series holds a published book
+   ([Catalog browse](U68-catalog-browse.md)). <sup>e</sup>
 9. **"Logo"** (Settings › Website › "Appearance" › "Setup"; none). Set:
    Rule 20. <sup>r</sup>
 10. **The thumbnail** (the same tab; none). Set: Rule 21. <sup>r</sup>
@@ -670,8 +691,8 @@ that change them.
     <sup>s</sup>
 14. **"Featured Books", "New Releases", "Order of monographs"** {OMP} (the
     same tab; see Fields). They show or hide the home page's two book
-    lists (Rule 17) and set the order of the catalog's books (*Catalog
-    browse*). <sup>f</sup>
+    lists (Rule 17) and set the order of the catalog's books
+    ([Catalog browse](U68-catalog-browse.md)). <sup>f</sup>
 15. **"Editorial Masthead"** (Settings › Website › "Appearance" ›
     "Editorial Masthead"; the roles' permission-level order). Another
     order: Rule 28. <sup>u</sup>
@@ -694,8 +715,8 @@ that change them.
     <sup>m</sup>
 19. **"Cover Image Max Width", "Cover Image Max Height"** {OMP} (the same
     tab; 106 and 100). Other sizes: every book's cover thumbnail is
-    remade at the new size when the tab is saved (*Catalog management*).
-    <sup>h</sup>
+    remade at the new size when the tab is saved
+    ([Catalog management](U70-catalog-management.md)). <sup>h</sup>
 20. **"Items per page"** (Settings › Website › "Setup" › "Lists"; 25).
     Another number: Rule 29. <sup>v</sup>
 21. **"Page links"** (the same tab; 10). Another number: Rule 30.
@@ -708,22 +729,29 @@ that change them.
     disabled: ""Developed By" Block", ""Make a Submission" Block"
     {OJS OMP} and, on a journal and a preprint server, "Browse Block").
     Enabled or disabled: Rules 23, 25.
-    *Plugins management* owns the list. <sup>s</sup>
+    [Plugins management](U62-plugins-management.md) describes the list.
+    <sup>s</sup>
 24. **"Consider role in masthead list"** (Settings › Users & Roles ›
     "Roles", a role's "Edit"; ticked on the roles Rule 28 names and on
     the Reviewer role, "External Reviewer" on a press, where "Internal
     Reviewer" arrives unticked). Ticked or unticked: which
     roles "Editorial
-    Masthead" lists (Rule 28). *Roles configuration* owns it. <sup>u</sup>
+    Masthead" lists (Rule 28).
+    [Roles configuration](U54-roles-configuration.md) describes it.
+    <sup>u</sup>
 25. **"Publishing Mode"** {OJS} (Settings › Distribution › "Access"; no
     choice marked on a new journal). "OJS will not be used to publish the
     journal's contents online.": no "Current Issue" on the home page
-    (Rule 14). *Subscriptions & open access control* owns it. <sup>o</sup>
+    (Rule 14).
+    [Subscriptions & open access control](U51-subscriptions.md) describes
+    it. <sup>o</sup>
 26. **"Forms"** (Settings › Website › "Setup" › "Languages"; the primary
     language alone on a new journal). Each language added: a value per
     language on the per-language fields (Rule 3) and its own "Date &
     Time" choices (Rule 3a); a language ticked under "UI" alone gets the
-    default formats (Rule 3b). *Languages & locales* owns it. <sup>y</sup>
+    default formats (Rule 3b).
+    [Languages & locales](U57-languages-and-locales.md) describes it.
+    <sup>y</sup>
 27. **The default formats** (the installation's configuration file; the
     choices marked in Fields). They are the formats of a journal that
     never saved "Date & Time", of a language it never saved them in
@@ -752,22 +780,29 @@ that change them.
   "Items per page" and "Page links".
 - [Submission wizard](U21-submission-wizard.md) owns the ""Make a
   Submission" Block".
-- *Article landing page & reading* owns the article summaries of the
-  home page's lists and the "Downloads" section on the landing page;
-  *Monograph landing page* the same section on a book's page.
-- *Issues* owns the current issue's table of contents; *Categories* owns
-  the category pages; *Sections* owns a preprint server's search box and
+- [Article landing page & reading](U13-article-landing-page-and-reading.md)
+  owns the article summaries of the home page's lists and the
+  "Downloads" section on the landing page;
+  [Monograph landing page](U69-monograph-landing-page.md) the same
+  section on a book's page.
+- [Issues](U50-issues.md) owns the current issue's table of contents;
+  [Categories](U16-categories.md) owns the category pages;
+  [Sections](U17-sections.md) owns a preprint server's search box and
   category links on its home page.
-- *Catalog browse* and *Catalog management* own the books a press's home
-  page lists, the catalog's order and series links, and cover thumbnails.
-- *Hosted journals* owns the Settings Wizard and the site's list of
-  journals where the thumbnail shows; *Site settings* owns the site's own
-  appearance.
-- *Plugins management* owns enabling themes and block plugins; *Roles
-  configuration* owns "Consider role in masthead list" and the "Roles"
-  list; *Languages &
-  locales* owns the form languages; *Subscriptions & open access control*
-  owns "Publishing Mode"; *Users management* owns the "Users" list.
+- [Catalog browse](U68-catalog-browse.md) and
+  [Catalog management](U70-catalog-management.md) own the books a
+  press's home page lists, the catalog's order and series links, and
+  cover thumbnails.
+- [Hosted journals](U59-hosted-journals.md) owns the Settings Wizard and
+  the site's list of journals where the thumbnail shows;
+  [Site settings](U60-site-settings.md) owns the site's own appearance.
+- [Plugins management](U62-plugins-management.md) owns enabling themes
+  and block plugins; [Roles configuration](U54-roles-configuration.md)
+  owns "Consider role in masthead list" and the "Roles" list;
+  [Languages & locales](U57-languages-and-locales.md) owns the form
+  languages; [Subscriptions & open access control](U51-subscriptions.md)
+  owns "Publishing Mode"; [Users management](U53-users-management.md)
+  owns the "Users" list.
 
 ## Canonical scenarios
 
@@ -1253,6 +1288,7 @@ Left out of the scenarios above, by reason:
   - OJS6 (the recent articles' titles as headings at the section's own level {OJS}; Rule 13)
   - OJS7 (a journal's homepage image saved without "Alternate text" {OJS}; Rule 18)
   - OMP2 (a press's category page longer than "Items per page" {OMP}; Rule 29)
+  - OMP3 (a press's public pages loading its style sheet a second time, at an address that stays the same when another sheet is saved {OMP}; Rule 26)
 - **No seed**:
   - another theme: a test install has "Default Theme" alone (Rule 4; Settings bullet 1)
   - the installation's default formats changed: only its configuration file sets them (Settings bullet 27)
@@ -1261,10 +1297,10 @@ Left out of the scenarios above, by reason:
   - a Site Administrator with no role in the journal on Settings › Website: the access-denied page on a press and a preprint server, the "Error" window on a journal (Actors preamble; [Journal identity & about pages](U07-journal-identity-and-about-pages.md#a1), [Reader comments & moderation](U14-reader-comments-and-moderation.md#a9))
   - a signed-out visitor on a journal that requires visitors to sign in, or that is not enabled, getting the Login page (Actors row 3; [Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rule 22)
   - a change left unsaved, gone without a question once the page is left (Rule 2; [Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rule 5)
-  - "Usage statistics display options" on a chart: the "Downloads" section of an article's, a book's and a preprint's page (Rule 9; Settings bullet 7; *Article landing page & reading*, *Monograph landing page*)
-  - the catalog fields of a press: "Show Series", "Featured Books", "New Releases", "Order of monographs" and the cover sizes {OMP} (Rule 17; Settings bullets 8, 14, 19; *Catalog browse*, *Catalog management*)
+  - "Usage statistics display options" on a chart: the "Downloads" section of an article's, a book's and a preprint's page (Rule 9; Settings bullet 7; [Article landing page & reading](U13-article-landing-page-and-reading.md) scenario 7, [Monograph landing page](U69-monograph-landing-page.md) scenario 2)
+  - the catalog fields of a press: "Show Series", "Featured Books", "New Releases", "Order of monographs" and the cover sizes {OMP} (Rule 17; Settings bullets 8, 14, 19; [Catalog browse](U68-catalog-browse.md) scenarios 1, 4 and 5, [Catalog management](U70-catalog-management.md))
   - "Items per page" on the listing pages (Rule 29; [Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md) scenario 10)
-  - "Items per page" and "Page links" on the older editorial lists, and the "Users" list's own page length (Rules 29, 30; *Roles configuration*, *Users management*)
+  - "Items per page" and "Page links" on the older editorial lists, and the "Users" list's own page length (Rules 29, 30; [Roles configuration](U54-roles-configuration.md), [Users management](U53-users-management.md))
   - "Date & Time (Short)" on a submission file's notes and a library file's "Date uploaded" (Rule 31; [Submission files](U36-submission-files.md), [Submission & Publisher Libraries](U39-submission-and-publisher-libraries.md))
   - the Moderator role's raw code in a preprint server's French "Entête" list {OPS} (Rule 36; [Journal identity & about pages](U07-journal-identity-and-about-pages.md#ops4))
   - the public "Editorial Masthead" and "Editorial History" with "Present a masthead based on user enrollments" unticked, and "Peer Reviewers in Previous Year" with "Enable listing of reviewers on the masthead" ticked (Rule 28a; Settings bullets 15a, 15b; [Journal identity & about pages](U07-journal-identity-and-about-pages.md), Rules 14f and 15, scenario 9)
@@ -1272,7 +1308,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-24; A10–A12
-2026-09-28; A13, A14 2026-09-29; A15–A20 2026-10-05; A21 2026-10-14; A22 2026-10-21; A23–A26 2026-10-23), unreviewed unless an entry notes
+2026-09-28; A13, A14 2026-09-29; A15–A20 2026-10-05; A21 2026-10-14; A22 2026-10-21; A23–A26 2026-10-23; OMP3 2026-11-04), unreviewed unless an entry notes
 otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
@@ -1308,6 +1344,7 @@ otherwise; the team settles them on spec review.
 | [OJS3](#ojs3) | "Include recent most published articles" lists only articles outside a published issue, by submission date | ❓ | minor | — |
 | [OJS4](#ojs4) | The Settings Wizard shows the current issue's table of contents ticked for a journal with no issue, and a save there stores it | ❓ | minor | — |
 | [OJS7](#ojs7) | A journal's homepage image saved without "Alternate text" has no text alternative at all | ❓ | minor | — |
+| [OMP3](#omp3) | A press's public pages load its style sheet twice, the second time at an address that stays the same when another sheet is saved | ❓ | minor | — |
 | [A6](#a6) | Retired: in French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [A21](#a21) | Retired: a BMP logo or a style sheet the server misread showed "Saved", stored nothing and removed the one the journal had; the BMP is now refused with the earlier logo kept, and the style sheet is saved | ✅ | retired | upstream sync (claude), 2026-10-19 — fixed upstream (pkp/pkp-lib#13512) |
 | [OJS1](#ojs1) | Only a journal has "Journal Content Organization" | ✅ | minor | — |
@@ -1851,6 +1888,23 @@ short. Visitors can still find the other books through the catalog,
 their series' pages or the search. Basis: probe, 2026-10-03.
 <sup>f-omp2</sup>
 
+<a id="omp3"></a>
+**OMP3 — A press's public pages load its style sheet twice, the second time at an address that stays the same when another sheet is saved** · ❓ · minor.
+A press manager who saves a style sheet under "Advanced" expects it
+loaded once on the public pages, as a journal and a preprint server
+load theirs: after the theme's own styles, at an address that changes
+with each new file. A press's pages load it there and then a second
+time, after every other style sheet, at an address that stays the same
+when another file is saved. A browser that opens the pages fresh shows
+the press as it should look, since both copies are the same file.
+Whether a browser that kept the earlier file goes on applying it, the
+second copy winning over the new one, was not tried.
+Question: should a press load its style sheet once, at an address that
+changes with the file? Lean: yes, a minor defect; the second copy adds
+nothing, and an address that never changes is what lets a browser keep
+an old file, as the header's colour shows ([A10](#a10)).
+Basis: probe, 2026-11-04. <sup>f-omp3</sup>
+
 ### OPS
 
 <a id="ops1"></a>
@@ -2227,15 +2281,25 @@ contexts per app.
 **t — style sheet and favicon.** `PKPTemplateManager::initialize()`: the
 context's `styleSheet` is added as `contextStylesheet` with
 `STYLE_SEQUENCE_LATE` and the default `contexts` (`frontend` only), its
-address carrying `?d={dateUploaded}` on OJS and OPS and `?v=3.6.0.0` on
-OMP; the favicon (`Context::getLocalizedFavicon()`, the current locale
+address carrying `?d={dateUploaded}`; OMP adds it once more at
+`STYLE_SEQUENCE_LAST` as `…/styleSheet.css?v=3.6.0.0` (note f-omp3,
+2026-11-04); the favicon (`Context::getLocalizedFavicon()`, the current locale
 then the primary) as a `<link rel="icon">` header in the `frontend` and
 `backend` contexts. Code read 2026-09-24. Live-probed 2026-09-24 (Rule
 26; all three apps): a style sheet whose one rule colours every heading
 red was the last style sheet in the page head; the home page's headings
 turned red while the item page's "Published" ("Posted") and "Versions"
 labels kept the theme's grey; the Dashboard and Settings › Website did
-not load it.
+not load it. Live-probed 2026-11-04 (Rule 26;
+all three apps, two runs, scratch contexts, the same red-headings
+sheet): on the item's page the `H1` title, the screen-reader-only `H2`
+"Authors" and the `H2.label` "Abstract" (OMP "Synopsis") read
+`rgb(255, 0, 0)`, while the `H2.label`
+"Published" (OPS "Posted"), "Versions" and, on OJS, "Section" read
+`rgb(69, 69, 69)`; after "Remove" and "Save" the home page linked no
+`styleSheet.css` (on OMP neither of its two links), and the address the
+box's "styleSheet.css" link had pointed to (`…/styleSheet.css`, no query)
+answered 200 with the old rule.
 
 <a id="fn-u"></a>
 **u — "Editorial Masthead".** `PKPAppearanceMastheadForm` (reworked by
@@ -2962,6 +3026,23 @@ while the catalog showed one book with "Next"; on a journal and a
 server a category of two items read "1 - 1 of 2 items 1 2 > >>".
 Issue report: [pkp-e2e#774](https://github.com/jardakotesovec/pkp-e2e/issues/774) ([docs/issues/U10-OMP2-press-category-page-no-page-links.md](../issues/U10-OMP2-press-category-page-no-page-links.md)).
 
+<a id="fn-f-omp3"></a>
+**f-omp3** — OMP `APP\template\TemplateManager::initialize()` adds the
+press's `styleSheet` a second time under the same name,
+`contextStylesheet`, at `STYLE_SEQUENCE_LAST`, without the
+`?d={dateUploaded}` that `PKPTemplateManager::initialize()` gives it at
+`STYLE_SEQUENCE_LATE`; `PKPTemplateManager::smartyLoadStylesheet()` then
+appends `?v={application version}` to that address. Live-probed
+2026-11-04 (Rule 26; all three apps, two runs, scratch contexts): with an
+empty ".css" saved, then a ".css" opening with a comment block and a
+`:root` rule, a press's home page linked
+`…/styleSheet.css?d=2026-11-04+05%3A14%3A39` and then
+`…/styleSheet.css?v=3.6.0.0`, the second address the same for both
+files; a journal's and a preprint server's home page linked the `?d=`
+address alone; the seeded press's home page, with a sheet saved, carried
+the same two links, for a signed-in visitor too. A browser holding the
+earlier file was not tried.
+
 <a id="fn-f-ops1"></a>
 **f-ops1** — OPS `IndexHandler::index()` and `indexServer.tpl` (notes m,
 p): no option but `showDescriptionInServerIndex` shapes the page. Code
@@ -3023,7 +3104,11 @@ marked, and the cover sizes read 106 and 100; both boxes ticked and
 saved with no book featured or new, the home page gained no heading.
 "0" in a cover box was refused, "abc" too, and 1 × 1 and 5000 × 5000
 saved. On the catalog "Order Features" › "Save Order" turned "Featured"
-from M1, M2 to M2, M1, while "New Releases" kept M1, M2.
+from M1, M2 to M2, M1, while "New Releases" kept M1, M2. Live-probed
+2026-11-04 (Rule 17; two runs): with two books flagged on the catalog
+and published the same day, the home page's "New Releases" read M1, M2
+in one run and M2, M1 in the other, while "Featured", ordered on the
+catalog, read M1, M2 in both.
 
 <a id="fn-td5"></a>
 **td5** — Live-probed 2026-09-29 (Fields, "Editorial Masthead";

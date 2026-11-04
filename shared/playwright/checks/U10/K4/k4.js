@@ -1122,9 +1122,14 @@ forEachApp(async (app) => {
                         await conf.getByRole('button', {name: new RegExp(`^(${UNPUB}|OK|Yes)$`)}).last().click(); await idle(page); await sleep(1500);
                     }
                     // the entry form with the categories
-                    await wf.getByRole('link', {name: MENU, exact: true}).first().click(); await idle(page); await sleep(1500);
-                    // "Select Categories" opens a picker window
+                    // (sweep SW04, 2026-11-04: under load the press right after the unpublish re-render
+                    // left the window on "Title & Abstract"; wait for the entry's form, pressing once more)
                     const selBtn = wf.getByRole('button', {name: 'Select Categories'}).first();
+                    for (let k = 0; k < 2 && !(await selBtn.count()); k++) {
+                        await wf.getByRole('link', {name: MENU, exact: true}).first().click(); await idle(page); await sleep(1500);
+                        await selBtn.or(wf.getByRole('checkbox', {name: 'K4 Category'}).first()).first().waitFor({timeout: T}).catch(() => {});
+                    }
+                    // "Select Categories" opens a picker window
                     o.selectButton = await selBtn.count();
                     let form = null;
                     if (o.selectButton) {
@@ -1203,9 +1208,10 @@ forEachApp(async (app) => {
                     const wf = page.locator('[role="dialog"]').first();
                     await wf.getByRole('link', {name: 'Catalog Entry', exact: true}).click(); await idle(page); await sleep(1500);
                     const wu = page.waitForResponse((r) => /temporaryFiles/.test(r.url()), {timeout: 8000}).catch(() => null);
-                    await wf.locator('[id="catalogEntry-coverImage-hiddenFileId-en"]').setInputFiles(COVER);
+                    // (sweep SW04, 2026-11-04: the first dialog is no longer the one holding the form; read the page)
+                    await page.locator('[id="catalogEntry-coverImage-hiddenFileId-en"]').setInputFiles(COVER);
                     o.upload = (await wu) ? 'sent' : 'none'; await sleep(1500); await idle(page);
-                    const form = wf.locator('[id="catalogEntry-coverImage-control-en"]').locator('xpath=ancestor::form[1]');
+                    const form = page.locator('[id="catalogEntry-coverImage-control-en"]').locator('xpath=ancestor::form[1]');
                     const w1 = page.waitForResponse((r) => /publications\/\d+/.test(r.url()) && r.request().method() !== 'GET', {timeout: T}).catch(() => null);
                     await form.getByRole('button', {name: 'Save', exact: true}).last().click();
                     const r1 = await w1; o.saveStatus = r1 ? r1.status() : null; await idle(page); await sleep(800);
