@@ -153,12 +153,32 @@ if real, their specs' own probes will resurface them.)
   swept SHA.
 - Why parked: dangling mount (confirmed by task ruling in the crosswalk).
 - Resolves: maintainer confirmation as dead code / upstream sync artifact.
+- Evidence (security audit, 2026-11-03, OMP `main` dataset fleet; incidentals
+  row for U29): live, not dead: any request to `api/v1/publicationPeerReviews`,
+  signed out included, answers 500 with an empty body, since
+  `omp/api/v1/publicationPeerReviews/index.php:16` instantiates
+  `PublicationPeerReviewController`, a class lib/pkp does not ship (it ships
+  `api/v1/peerReviews`, which OJS maps). The U29 row folds it on the next odd
+  day; the entry goes with that fold (housekeeping 2026-11-04).
 
 ### API-066 — OPS legacy non-versioned `api/genres/` entry
 - What: legacy alias mount outside `/v1/`.
 - Why parked: dead-code candidate pending liveness.
 - Resolves: Phase-1 probe (does the alias respond?); if live, claim as a U58
   reference row.
+- Evidence (housekeeping 2026-11-04, curl on OPS `main` `53749f7d2f`,
+  dataset fleet, two runs, OJS and OMP as controls): a stray copy, not an
+  alias. `ops/api/genres/index.php` (its header still reads
+  `api/v1/genres/index.php`) came with pkp/pkp-lib#12251's OPS commit
+  `6768e490db` (Erik Hanson, 2026-02-13); the working route is
+  `api/v1/genres`, added by pkp/pkp-lib#12672 (`a394a3c408`, 2026-05-17).
+  `…/api/genres` loads the controller, whose routes are registered under
+  `api/v1/genres`, so every GET or POST there, signed out, answers 500
+  `{"error":"The route publicknowledge\/api\/genres could not be found."}`
+  where OJS and OMP (and OPS for any other unknown `api/` word) answer 404
+  `api.404.endpointNotFound`; `api/v1/genres` answers 401 signed out.
+  `stable-3_5_0` OPS has neither file (main only). Dead code with a crash:
+  a removal candidate, on maintainer confirmation.
 
 ### JOB-001 — abstract queued-job base class
 - What: framework base, no feature-visible behavior.
