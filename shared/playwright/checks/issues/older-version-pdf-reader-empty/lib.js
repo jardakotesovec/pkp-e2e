@@ -1,4 +1,6 @@
-// Helpers for walk.js (U13 A2). Requiring this file runs nothing.
+// Helpers first written for the U13 A2 walk (issue pkp-e2e#219, retired 2026-11-04 with
+// pkp/pdfJsViewer#83; its walk.js and reach.js deleted). Kept for the kept walks that
+// import it. Requiring this file runs nothing.
 const path = require('path');
 const {expect} = require('@playwright/test');
 const {screen, shot, record, idle} = require('../../../probe');

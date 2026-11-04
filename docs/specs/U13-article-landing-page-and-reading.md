@@ -333,10 +333,9 @@ Top to bottom: <sup>j</sup>
     the notice "This is an outdated version published on {date}. Read the
     most recent version.", the date written like "2026-09-25" in the PDF
     reader and like "September 25, 2026" in the HTML reader {OJS}. An
-    older version's PDF reader shows no document ("0 of 0" in an empty
-    viewer, no message), and its "Download" gets no file: the browser
-    stays on the reader page ⚠ [A2](#a2).
-    <sup>d</sup> <sup>e</sup> <sup>q9</sup>
+    older version's PDF reader shows that version's document, and its
+    "Download" saves that version's file.
+    <sup>d</sup> <sup>e</sup> <sup>q9</sup> <sup>[f-a2](#fn-f-a2)</sup>
     - 12a. **A new version's preview.** On the preview of a new,
       unpublished version (Rule 4), the version's "PDF", and on a journal
       its "HTML", open their readers under the same outdated notice,
@@ -830,7 +829,7 @@ footnote. <sup>s</sup>
      page and press "PDF": the PDF reader page shows the title "Tidal
      Patterns" and, between the bar and the viewer, "This is an outdated
      version published on {today}. Read the most recent version.", the
-     date written like "2026-09-25" ([A2](#a2)). Press the arrow: the
+     date written like "2026-09-25". Press the arrow: the
      article's address opens (Rule 12; Fields, the PDF reader page).
    - **The older version's HTML reader** {OJS}: on the older version's
      page press "HTML": the HTML reader page shows the same notice with
@@ -1128,10 +1127,9 @@ Left out of the scenarios above, by reason:
     `docs/issues/U13-OJS12-public-review-never-shown.md`): a
     confirmed review marked "Publicly Show Reviewer Comments" shown on
     the published article's page, a private or unconfirmed one not {OJS}
-  - the guard for A2 (scenario 3; issue report
-    `docs/issues/U13-A2-older-version-pdf-reader-empty.md`): an
-    older version's PDF reader page showing the document, and its
+  - an older version's PDF reader page showing the document, and its
     "Download" saving the file, on a journal and a preprint server
+    (Rule 12, scenario 3; A2 retired)
   - the guard for OJS9 (Rule 11; issue report
     `docs/issues/U13-OJS9-lens-formulas-not-typeset.md`): an
     XML galley with a TeX formula opened in the Lens reader, the formula
@@ -1265,8 +1263,6 @@ Left out of the scenarios above, by reason:
   - OJS11 (the number "[1]" before a journal's IEEE citation shown
     first {OJS}; Rule 16; scenario 6 passes it)
   - A6 (an older version's browser tab; Rule 5)
-  - A2 (an older version's PDF reader showing no document, its
-    "Download" getting no file; Rule 12; scenario 3 passes it)
   - OJS9 (the Lens page's failing script {OJS}; Rule 11)
   - OJS6 and OPS5 (the PDF reader's return arrow read to screen
     readers; Fields, the PDF reader page)
@@ -1351,7 +1347,6 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | In French, readers and editors see a raw translation key in place of every version's name and number | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
-| [A2](#a2) | An older version's PDF opens a reader with no document, and its "Download" gets no file | 🐞 | high · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A4](#a4) | Preprint lists and a journal's "Latest Publications" show additional files and link a galley with no file ("404 Not Found") | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A5](#a5) | An author previewing their unpublished article, book or preprint gets "access denied" from "View submission" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A6](#a6) | An older version's browser tab reads the current version's title | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -1390,6 +1385,7 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [OPS4](#ops4) | A preprint server has no HTML or XML reader: those galleys download | ✅ | — | — |
 | [OJS1](#ojs1) | Retired: readers got no other citation format or citation download on an article published outside a published issue | ✅ | retired | citationStyleLanguage#169 2026-10-21 · fixed |
 | [A15](#a15) | Retired: in Japanese, every "Versions" entry reads a raw translation key, with no date or version name | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [A2](#a2) | Retired: an older version's PDF opened a reader with no document, and its "Download" got no file | ✅ | retired | pdfJsViewer#83 2026-11-04 · fixed |
 
 ### All apps
 
@@ -1421,27 +1417,6 @@ that has the entry's text. After it a French reader sees
 "2026-09-30 (##publication.versionStage.authorOriginal## 2.0)": the
 stage name stays a raw key until it is translated.
 Basis: probe, 2026-10-01. <sup>[f-a1](#fn-f-a1)</sup>
-
-<a id="a2"></a>
-**A2 — An older version's PDF opens a reader with no document, and its "Download" gets no file** · 🐞 · high · crash: script.
-An older version's page lists that version's galleys. Its PDF link
-opens the PDF reader page with the outdated-version notice, but the
-viewer shows no document: an empty page reading "0 of 0", with no
-message. The reader page's "Download" gets no file either, and the
-browser stays on the reader page.
-A reader who wants the version they cite cannot read or download its
-PDF, and the page offers no other link to it. The older version's
-other galleys (HTML, other files) still open. An editor who previews a
-new, unpublished version gets the same empty viewer for its PDF.
-It happens on every article or preprint with more than one version
-while the "PDF.JS PDF Viewer" plugin is on, as it is by default. A
-press's books are not affected: their PDF reader asks for the file of
-the version shown.
-When the galley's URL Path is the same in both versions, the older
-version's PDF reader page shows the current version's file under the
-outdated notice; the two are the same file only until an editor
-replaces the current galley's file ([→ Galleys, A4](U46-galleys.md#a4)).
-Basis: probe, 2026-10-01. <sup>[f-a2](#fn-f-a2)</sup>
 
 <a id="a3"></a>
 **A3 — No sentence for an article without downloads** · ❓ · minor.
@@ -2002,6 +1977,9 @@ Basis: probe, 2026-10-01. <sup>[f-ops9](#fn-f-ops9)</sup>
 
 <a id="a15"></a>
 **A15 — In Japanese, every "Versions" entry reads a raw translation key, with no date or version name** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-a15](#fn-f-a15)</sup>
+
+<a id="a2"></a>
+**A2 — An older version's PDF opens a reader with no document, and its "Download" gets no file** · ✅ · retired. Fixed by `pkp/pdfJsViewer#83` (`main`, also on `ore`) and `#84` (3.5), for `pkp/pkp-lib#13694`, the team's copy of the issue report; reviewed before the merge on 2026-11-04 and walked again at the merged tips on `main`, 3.5 and `ore`: the older version's PDF reader shows its document and its "Download" saves the file, on a journal and a preprint server, and an editor's preview of an unpublished version shows its PDF (Rule 12). Issue report closed ([pkp-e2e#219](https://github.com/jardakotesovec/pkp-e2e/issues/219)). <sup>[f-a2](#fn-f-a2)</sup>
 
 ---
 
@@ -2987,7 +2965,7 @@ the code: no screen on this build shows them.
 Issue report: [pkp-e2e#228](https://github.com/jardakotesovec/pkp-e2e/issues/228) ([docs/issues/U13-A1-french-version-name-raw-key.md](../issues/U13-A1-french-version-name-raw-key.md)).
 
 <a id="fn-f-a2"></a>
-**f-a2** — `PdfJsViewerPlugin::submissionCallback()` builds `pdfUrl` from
+**f-a2** — Until pkp/pdfJsViewer#83: `PdfJsViewerPlugin::submissionCallback()` builds `pdfUrl` from
 `[$submission->getBestId(), $galley->getBestGalleyId(), $galley->getFile()->getId()]`
 with no `version` part; `ArticleHandler::initialize()` (and OPS's) then
 looks the galley up in the current publication, finds it in an older
@@ -3001,7 +2979,8 @@ with the published galley ([Galleys](U46-galleys.md), its A4: "Change
 File" on the new version's galley changes the published version's
 file). The HTML and Lens readers build versioned addresses. Live-probed
 2026-09-25, note q9 (two runs on the journal, one on the server).
-Issue report: [pkp-e2e#219](https://github.com/jardakotesovec/pkp-e2e/issues/219) ([docs/issues/U13-A2-older-version-pdf-reader-empty.md](../issues/U13-A2-older-version-pdf-reader-empty.md)).
+Retired 2026-11-04: fixed by `pkp/pdfJsViewer#83` (`b7e5188047`, merged on `main` 2026-11-04; OJS `ore` points at the same commit) and `#84` (`99a7b13aaa`, 3.5), whose `submissionCallback()` adds `version/{publicationId}` after `getBestId()` when the galley's publication is not the current one; the current version's address is unchanged. Re-walked 2026-11-04 at the merged tips (OJS `9552aa521a`, OPS `0acd73102d` `main`; OJS `e725cc873a`, OPS `82faa21834` 3.5; OJS `137493ebb1` `ore`; a freshly loaded dataset per run, pkp/datasets `2fd5c320`): as a reader, signed out, the older version's "PDF" on the journal (`…/article/download/mwandenga/version/1/1/12`) and the preprint server (`…/preprint/download/3/version/3/3/3`) showed "1 of 1" and its "Download" saved the file; dbarnes's preview of the unpublished 1.1 showed its PDF (`…/version/2/pdf/…`); the current version's reader and "Download" unchanged; no page script error. On `ore` the same walk at its previous pointer `1d992590f0` (OJS `00f3da7536`) still read "0 of 0" and saved nothing.
+Issue report: [pkp-e2e#219](https://github.com/jardakotesovec/pkp-e2e/issues/219), closed 2026-11-04 with the fix; the report and its walk deleted, its `lib.js` kept for the walks that import it. The team's copy `pkp/pkp-lib#13694` (2026-11-04).
 
 <a id="fn-f-a3"></a>
 **f-a3** — Note l: `usage-stats-chart.js` removes the sentence as soon

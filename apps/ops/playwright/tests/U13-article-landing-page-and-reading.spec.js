@@ -18,8 +18,6 @@
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
  * - A1 🐞: S8 never reads the "Versions" list or the label line in French.
- * - A2 🐞: S3's older PDF reader is read for its bar and notice only; its
- *   viewer and its "Download" are never used.
  * - A3 ❓: S7 reads the "Downloads" heading and the chart only, never the
  *   sentence.
  * - A5 🐞: the Author never presses "View submission" (S4).
@@ -442,7 +440,7 @@ test.describe('article landing page and reading', () => {
 
         // The older version's PDF reader: the title "Tidal Patterns" and the
         // notice between the bar and the viewer; the arrow opens the
-        // article's address (A2; Rule 12; Fields, the PDF reader page).
+        // article's address (Rule 12; Fields, the PDF reader page).
         await page.goBack();
         await expect(page).toHaveURL(addressPattern(olderPath));
         await landing.openGalley('PDF');

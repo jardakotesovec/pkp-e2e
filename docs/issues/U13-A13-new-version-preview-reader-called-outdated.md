@@ -177,10 +177,10 @@ Recommended: show the readers' notice only for a published version that
 is not the current one, the rule `article_details.tpl` already applies.
 Make the change in each reader's template and keep `isLatestPublication`
 as it is. The HTML reader also uses it to pick the versioned file
-address (with or without the `version` part), and the fix for
-[U13 A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U13-A2-older-version-pdf-reader-empty.md)
-proposes using it in the PDF reader to pick the versioned file address
-too.
+address (with or without the `version` part), and since
+`pkp/pdfJsViewer#83` (the fix for
+[pkp-e2e#219](https://github.com/jardakotesovec/pkp-e2e/issues/219), merged
+2026-11-04) the PDF reader uses it the same way.
 
 [fix-ojs.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/new-version-preview-reader-outdated/fix-ojs.diff)
 (the PDF and HTML readers) and
@@ -325,8 +325,8 @@ OJS and OPS each need a submodule update.
   issues that added the notices.
 - Seen on the way, not this fault: on the preview and on an older
   version, the PDF reader's own script fails with `MissingPDFException`
-  and shows no document. That is
-  [U13 A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U13-A2-older-version-pdf-reader-empty.md).
+  and shows no document. That was U13 A2
+  ([pkp-e2e#219](https://github.com/jardakotesovec/pkp-e2e/issues/219)), fixed by `pkp/pdfJsViewer#83` on 2026-11-04.
 - Not driven: the author's preview; 3.4 and 3.3 (code only). The HTML
   reader's file still loading under the fix was read from its frame
   address (unchanged, with the `version` part), not from the frame's

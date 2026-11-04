@@ -91,9 +91,10 @@ The link, while the galley has no URL Path:
 4. Press "PDF". The PDF reader page opens at
    `…/article/view/mwandenga/version/1/1` under "This is an outdated
    version published on {date}. Read the most recent version." Keep
-   this address, as a reader who bookmarks or cites it would. (The
-   viewer under the notice is empty; that is another fault,
-   [pkp-e2e's U13 A2 report](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U13-A2-older-version-pdf-reader-empty.md).)
+   this address, as a reader who bookmarks or cites it would. (Before
+   `pkp/pdfJsViewer#83`, merged 2026-11-04, the viewer under the notice
+   was empty; that was another fault,
+   [pkp-e2e#219](https://github.com/jardakotesovec/pkp-e2e/issues/219).)
 
 The editor gives the older galley a URL Path:
 
