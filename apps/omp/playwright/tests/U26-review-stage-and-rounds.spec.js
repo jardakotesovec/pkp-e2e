@@ -921,6 +921,18 @@ test.describe('Review stage & rounds (U26)', () => {
         const juliaPage = await (await asUser('reviewer.julia')).newPage();
         await completeReviewAsReviewer(juliaPage, PK, seeded.submissionId, remark);
 
+        // Submitted, not yet confirmed: still no reviewer listed (Rule 15,
+        // pkp/pkp-lib#13602).
+        const authorModalC = await openAuthorView(authorPage, PK, seeded.submissionId);
+        await expect(authorModalC.getByRole('button', {name: 'Upload revisions'})).toBeVisible();
+        await expect(reviewersList(authorModalC)).toHaveCount(0);
+        await expect(authorModalC.getByRole('button', {name: 'Read Review'})).toHaveCount(0);
+        await expect(authorModalC.getByText('Julia Reviewer')).toHaveCount(0);
+
+        // The editor confirms it: "Read Review" › "Mark as Complete".
+        const modal3 = await openEditorial(page, PK, seeded.submissionId);
+        await confirmReviewAsEditor(page, modal3, 'Julia Reviewer');
+
         // "Read Review": the author's view now lists the reviewer.
         const authorModal = await openAuthorView(authorPage, PK, seeded.submissionId);
         await expect(reviewersList(authorModal)).toBeVisible({timeout: 15_000});

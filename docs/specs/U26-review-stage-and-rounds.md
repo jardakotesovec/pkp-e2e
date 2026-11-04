@@ -49,7 +49,7 @@ nothing of that submission is shown
 | **Upload revised files** | • Author: the "Upload revisions" button, only while the round asks for or already holds revisions (Rule 9) ⚠ [A1](#a1)<br>• Editorial roles: through the Revisions Uploaded panel's own controls, to file revisions on the author's behalf <sup>i</sup> |
 | **Record a decision on the round** (buttons at the top of the screen) | • Deciding editors: on the current round only (Rules 10–11)<br>• Recommending editors: never the decision buttons. They get recommendation controls instead, and only while a deciding editor is also assigned to the stage (Rule 13). The recording flow belongs to *Editorial decision recording* <sup>e</sup> |
 | **See the "Recommendation" box** | • Deciding editors: once a recommending editor has recorded a recommendation for the round (Rule 13) <sup>e</sup> |
-| **Read a completed review** (author view) | • Author: only reviews conducted openly, and only once completed (Rule 15) <sup>j</sup> |
+| **Read a completed review** (author view) | • Author: only reviews conducted openly, and only once an editor has confirmed them (Rule 15) <sup>j</sup> |
 | **Open the editor's letters** ("Notifications" list) | • Author: the emails editors sent them about this submission (Rule 16) <sup>k</sup> |
 | **Delete the submission** | • Journal Manager; Site Administrator: only while the submission stands declined (Rule 11) <sup>e</sup> |
 
@@ -226,10 +226,12 @@ and the reviewer forms to *Reviewer assignment & management*.
     invited; the finding is recorded with that feature. <sup>a</sup>
 15. <a id="author-read-review"></a> **Reading reviews as the author.** Only
     reviews conducted **openly** are ever listed for the author, and only
-    once completed. Until such a review exists, the author's screen shows no
-    reviewers list at all, not even an empty one. Anonymous reviews never
-    appear, whatever their state. Each listed review offers "Read Review",
-    which opens a window with three parts. First, the reviewer's name,
+    once an editor has confirmed them ("Read Review" › "Mark as Complete"):
+    a review the reviewer has submitted stays hidden from the author until
+    then, its name included. Until such a review exists, the author's
+    screen shows no reviewers list at all, not even an empty one.
+    Anonymous reviews never appear, whatever their state. Each listed
+    review offers "Read Review", which opens a window with three parts. First, the reviewer's name,
     completion date and recommendation; on a press no recommendation exists
     to show ⚠ [OMP2](#omp2). Second, the review text the author is meant to
     see: for form-based reviews, only the questions marked for authors,
@@ -611,6 +613,10 @@ are in the footnote. <sup>s</sup>
     - **Reviewer**: the open reviewer types "Shared remarks for the
       author." in "For author and editor" and submits the review (on a
       journal, with the recommendation "Accept Submission").
+    - **Submitted, not confirmed**: Author: the first submission's review
+      stage still lists no reviewer and offers no "Read Review".
+    - **The editor confirms**: Editor: the reviewer's row › "Read Review" ›
+      "Mark as Complete".
     - **"Read Review"**: Author: the first submission's review stage now
       lists the reviewer with "Read Review". Open it: the window shows the
       reviewer's name, completion date and recommendation (none on a press
@@ -1264,7 +1270,8 @@ address still answers when typed — see note o.
 **j** — Author reading: redacted `ReviewerManager`
 (`useReviewerManagerConfig.js`, `redactedForAuthors: true`) — rows =
 open-method assignments with a completion date
-(`getOpenAndCompletedReviewAssignmentsForRound`), columns reviewer / type /
+(`getOpenAndCompletedReviewAssignmentsForRound`; an editor's confirmation,
+`dateConsidered`, at the PR head below), columns reviewer / type /
 actions (no status column, no add button); row action `editor.review.readReview`
 "Read Review" (AFFW-487) for statuses complete/thanked/received/viewed →
 legacy modal `AuthorReviewerGridHandler::readReview` (GRID-053; author role
@@ -1306,6 +1313,29 @@ which leaves the Author `fetchGrid`, `fetchRow` and `readReview`, so the
 `efbba94ae7`); the OMP and OPS lib/pkp pointers sit at `360badeef5`, before
 the commit, and receive it with their next pointer bump. No app subclasses
 `AuthorReviewerGridHandler` (empty chains).
+Confirmation first (pkp/pkp-lib#13602): driven at the PR heads pkp-lib
+`7903807281` (#13712) and ui-library `ebbb413b95` (#1041), with
+ojs#6025 `db99dae2fb` and omp#2549 `ed7dd3bfb5`, before their merge, on
+PKP's dataset (OJS submission 10, Aisla McCrae; OMP 16, Adela Gallego;
+each review completed, not confirmed, set to "Open"),
+`checks/sync/pkp-lib-13712/walk.js`. At the bases (the app tips) the
+author's review stage listed the reviewer with "Read Review" and the
+window showed the name, the recommendation and the shared remark before
+any confirmation. At the heads, before the confirmation: no reviewers
+list, no "Read Review", and the window's address asked directly answers
+"You do not have permission to access this review assignment." (OMP:
+"…a valid reviewer for this monograph."), because
+`ReviewAssignmentRequiredPolicy` now refuses an open assignment without
+`dateConsidered`; after "Read Review" › "Mark as Complete" the window
+reads as before. The same at OJS `ore` with both commits cherry-picked
+(they apply unchanged). Still showing the reviewer before the
+confirmation at the heads: My Submissions' "Reviewers assigned:" avatar
+(U22 Rule 7b reads completed open reviews) and the submissions API's
+`reviewerFullName`, `reviewerUserName` and `reviewerId` for the author
+(`AnonymizeData::reviewsToAnonymize()` blanks only non-open methods),
+the PR review's report `docs/reports/pr-review/2026-11-04-pkp-lib-13712.md`.
+An editor's "unconsider" clears `dateConsidered`, so the review is hidden
+from the author again (code).
 
 <a id="fn-k"></a>
 **k** — `WorkflowListingEmails.vue` (AFFW-350/351): fetches
