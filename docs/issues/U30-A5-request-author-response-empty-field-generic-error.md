@@ -5,6 +5,7 @@
 - **Kind** defect
 - **Affects**
   - main: OJS, OMP (on a press only by the page's address; OPS has no review stage)
+  - ore: OJS (walked 2026-11-04 at `137493ebb1`: the same component and dialog)
   - 3.5: none (code; no "Request Author Response" page)
   - 3.4: none (code; no author response feature)
   - 3.3: none (code; the same)
