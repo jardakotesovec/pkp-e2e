@@ -31,6 +31,11 @@ pkp-e2e `ore` tip: `d4bb1f5a` (2026-11-03, `main`'s U37 A8 retirement and U01 A7
 
 ## Read log
 
+- **2026-11-04 (daily session, VM s2, the ore worktree) — ojs `ore` `00f3da7536`, pkp-lib `ore` `f1585093d5` and ui-library `ore` `a457c277`: no commits since the 2026-11-03 baselines. Baselines unchanged; pkp-e2e `ore` stays at `d4bb1f5a`.**
+  - Runs: pkp/ojs `ore` hook [41507347844](https://github.com/pkp/ojs/actions/runs/41507347844) at `00f3da7536` green; pkp-e2e `ore` push [41627047305](https://github.com/jardakotesovec/pkp-e2e/actions/runs/41627047305) at `d4bb1f5a` (after the OJS tip) green: the current pair ran, no dispatch.
+  - Carried over: no regression confirmed on `main` today. pkp/pkp-lib#13644 (U18 A7, webFeed) is not on `ore`: OJS `ore` points webFeed at `7436935`, so the feeds still read "Array" there until a bump carries webFeed `bd2efa8`.
+  - Security: none routed.
+
 - **2026-11-03 (daily session, VM s1, the ore worktree) — ojs `404f86e4f6..00f3da7536` (2: pointer bump `dfb319c4c1` + merge `00f3da7536`, pkp/ojs#5995; lib/pkp `a05aa54421` → `f1585093d5`, which brings `c4bb5a1272` too), pkp-lib `ore` `c4bb5a1272..f1585093d5` (1: `=main 1ae711024a`, pkp/pkp-lib#13604 by #13645; `git range-diff`: the PR number in the subject alone); ui-library `ore` unchanged (`a457c277`; pointer `11dada940f`, the same tree). Read in full; baselines advanced.**
   - Runs: pkp/ojs `ore` hook [41507347844](https://github.com/pkp/ojs/actions/runs/41507347844) at `00f3da7536` with pkp-e2e `ore` `8996c806`: green, so the pair was tested and nothing was dispatched before the carry-over.
   - pkp-lib `f1585093d5` (`=main 1ae711024a`) → `main`'s verdict (`upstream-sync.md` 2026-11-03): no regression. `main`'s `dc377c66` (U37 A8 retired) cherry-picked as `89061ea0`, the U37 conflict resolved to `main`'s side, f-a8 gaining the ore walk: the restored kept walk on a fresh ore dataset fleet, the Author's rename with `submissionFileIds` `[47]` answered 200 with the file kept; the editor's likewise; the rename after "Remove" saved with no file.
