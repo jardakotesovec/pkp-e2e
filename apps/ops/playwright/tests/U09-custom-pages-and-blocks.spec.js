@@ -20,9 +20,9 @@
  * - A7 🐞: S3 asserts that no preview opens for the Reader and the
  *   signed-out visitor (the preview's empty-title tab title is absent);
  *   it never asserts the blank page or the server's answer.
- * - A4, A13, A14, A15, A16, A17, A18 🐞: no test reaches those states (no
- *   block is deleted, named with "&" or outside the primary language, no
- *   plugin is unticked, no refused paste, no file over the upload limit).
+ * - A4, A13, A15, A16, A17, A18 🐞: no test reaches those states (no
+ *   block named with "&" or outside the primary language, no plugin is
+ *   unticked, no refused paste, no file over the upload limit).
  * - A3, A11, A12 🐞, A6, A8 ❓: static pages, {OJS OMP}.
  * - A10 🐞 (a "Custom Page" item's dotted "Path") and A19 🐞 (the block
  *   window's "Content" lost on close) reach a server too; no test drives
@@ -35,9 +35,9 @@
  * Manager (footnote y): S3 adds a Reader; S6 seeds English and French
  * under "UI" and "Forms" (`context.supportedLocales`,
  * `supportedFormLocales`) and "Custom Block Manager" enabled (`plugins`);
- * S4 ticks the plugin on screen, as the scenario does. A custom block
- * cannot be deleted on these installs (A14), so each block lives on its
- * test's own server. S5's picture files are made in the test (PNG, BMP
+ * S4 ticks the plugin on screen, as the scenario does. Each block lives
+ * on its test's own server, chosen while a block could not be deleted on
+ * PostgreSQL (A14, retired 2026-11-04). S5's picture files are made in the test (PNG, BMP
  * and a text file; the big ones 1000×650 random-pixel PNGs of about
  * 1906 KB, under the servers' 2 MB upload limit, seed-facts "Install
  * defaults"); its manager is a fresh account, so the whole 5000 KB

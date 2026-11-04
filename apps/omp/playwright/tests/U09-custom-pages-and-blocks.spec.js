@@ -20,8 +20,8 @@
  * - A7 🐞: S3 asserts that no preview opens for the Reader and the
  *   signed-out visitor (the preview's empty-title tab title is absent);
  *   it never asserts the blank page or the server's answer.
- * - A4, A10, A12, A13, A14, A15, A16, A17, A18, A19 🐞: no test reaches
- *   those states (no block is deleted, named with "&" or outside the
+ * - A4, A10, A12, A13, A15, A16, A17, A18, A19 🐞: no test reaches
+ *   those states (no block named with "&" or outside the
  *   primary language, no plugin is unticked, no "." path, no refused
  *   paste, no file over the upload limit, no "Content"-only change is
  *   left unsaved).
@@ -36,8 +36,9 @@
  * Plugin" enabled (`plugins`); S6 seeds English and French under "UI" and
  * "Forms" (`context.supportedLocales`, `supportedFormLocales`) and "Custom
  * Block Manager" enabled (`plugins`); S4 and S7 tick their plugin on
- * screen, as the scenario does. A custom block cannot be deleted on these
- * installs (A14), so each block lives on its test's own press. S5's
+ * screen, as the scenario does. Each block lives on its test's own press,
+ * chosen while a block could not be deleted on PostgreSQL (A14, retired
+ * 2026-11-04). S5's
  * picture files are made in the test (PNG, BMP and a text file; the big
  * ones 1000×650 random-pixel PNGs of about 1906 KB, under the servers' 2 MB
  * upload limit, seed-facts "Install defaults"); its manager is a fresh

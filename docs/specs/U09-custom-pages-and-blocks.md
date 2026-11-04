@@ -58,7 +58,7 @@ account. <sup>b</sup>
 | **Read a custom page or a static page** (Rules 1–6, 12) | • any visitor, signed in or not; a journal closed to signed-out visitors sends them to Login first (Settings bullet 6) <sup>d</sup> <sup>td32</sup> |
 | **Enable or disable "Static Pages Plugin" and "Custom Block Manager"** (Rules 9, 15, 17, 25) | • whoever opens the Settings pages, on Settings › Website › "Plugins" › "Installed Plugins"; *Plugins management* owns the list<br>• the Site Administrator, for the site's "Custom Block Manager", on Administration › "Site Settings" › "Plugins" (Rule 27) <sup>b</sup> |
 | **Add, edit and delete static pages** {OJS OMP} (Rules 9–16) | • whoever opens the Settings pages, while "Static Pages Plugin" is enabled in the journal <sup>b</sup> <sup>f</sup> |
-| **Add, edit and delete custom blocks** (Rules 17–26) | • whoever opens the Settings pages, while "Custom Block Manager" is enabled in the journal; "Delete" is offered but fails on a PostgreSQL installation (Rule 24, [A14](#a14))<br>• the Site Administrator, for the site's blocks (Rule 27) <sup>b</sup> <sup>g</sup> |
+| **Add, edit and delete custom blocks** (Rules 17–26) | • whoever opens the Settings pages, while "Custom Block Manager" is enabled in the journal<br>• the Site Administrator, for the site's blocks (Rule 27) <sup>b</sup> <sup>g</sup> |
 | **Place a custom block in the sidebar** (Rule 19) | • whoever opens the Settings pages, on Settings › Website › "Appearance" › "Setup", "Sidebar"; *Appearance & theming* owns the list<br>• the Site Administrator, on the site's "Appearance" › "Setup" (Rule 27) <sup>h</sup> |
 | **See a custom block** (Rules 19–21) | • any visitor, on every public page of the journal that has a sidebar, while the block is placed; on a journal closed to visitors, the Login page a signed-out visitor is sent to shows the placed blocks too <sup>h</sup> <sup>td32</sup> |
 | **Upload a picture into a formatted text box** (Rule 29) | • whoever works in a "Content" box of this spec (Actors rows 1, 5 and 6)<br>• the same upload serves every formatted text box of the application that offers a picture button, for whoever that box's screen admits <sup>i</sup> |
@@ -291,18 +291,14 @@ row's "Edit" (headed "Edit"), with "Save" and "Cancel" at its foot:
 23. **The same name twice.** A block whose name comes out the same as an
     existing block's gets that name followed by a run of letters and
     digits ("our-partners" and "our-partners5f3c…"). <sup>g</sup> <sup>td23</sup>
-24. **Deleting.** A row's "Delete" asks as Rule 14 describes. On an
-    installation whose database is PostgreSQL, as the test installs' is,
-    "OK" fails ⚠ [A14](#a14): the window stays open, showing a spinner
-    and no message, and the block stays in the list, in the sidebar and
-    in the "Sidebar" list. This holds for the site's blocks too.
-    <sup>g</sup> <sup>td24</sup>
-    - 24a. **Where "OK" works.** On a MySQL installation, as read from the
-      code (the test installs cannot show it), "OK" takes the block out of
-      the list, out of every public page's sidebar and out of the "Sidebar"
-      list, while its place in the sidebar stays stored ⚠ [A2](#a2): a
-      block added later whose name comes out the same shows in the sidebar
-      at once, at the deleted block's place, without being ticked.
+24. **Deleting.** A row's "Delete" asks as Rule 14 describes. "OK"
+    closes the window and takes the block out of the list, out of every
+    public page's sidebar and out of the "Sidebar" list. The site's blocks
+    are deleted the same way. <sup>g</sup> <sup>td24</sup>
+    - 24a. **The place a deleted block leaves.** As read from the code,
+      the deleted block's place in the sidebar stays stored ⚠ [A2](#a2):
+      a block added later whose name comes out the same shows in the
+      sidebar at once, at the deleted block's place, without being ticked.
       <sup>f-a2</sup>
 25. **Plugin disabled.** Unticking "Custom Block Manager" asks as Rule 17
     describes. With the plugin unticked, every custom block leaves the
@@ -858,7 +854,7 @@ Left out of the scenarios above, by reason:
   - a picture over the server's file limit, and one over its request limit, chosen in "Insert/edit image": each refused with "Files larger than {size} can not be uploaded." and no server error (A18; the guard its two issue reports name)
   - a custom block listed in "Custom Blocks" and offered under "Sidebar" by its "Block Name", and by the new one after a rename (A1; the guard its issue report names; scenario 4's "Renamed, name shown" bullet, whose "Sidebar" label after the rename no suite asserts while A1 stands)
   - a custom block named with "&", and one named only in the primary language by a manager working in another, each opened with "Edit" and placed under "Sidebar" (A4, A13; the guard their issue report names)
-  - deleting a custom block: "OK" closing the window, the block gone from the Custom Block Manager's list, the sidebar and "Sidebar" (A14; the guard its issue report names)
+  - deleting a custom block: "OK" closing the window, the block gone from the Custom Block Manager's list, the public sidebar and "Sidebar" (Rule 24; A14, retired)
   - a press on the shaded page beside the block window after a "Block Name" change: the question "The data on this form has changed. Do you wish to continue without saving?", "Cancel" keeping the window and the name, "OK" closing it with the "Custom Block Manager" window still open (Rule 30a)
   - a reload, and "Edit Profile" at the block window's top, after a "Block Name" change, its box left: the "Leave site?" question (Rule 30c)
 - **Rarely met**:
@@ -892,7 +888,6 @@ Left out of the scenarios above, by reason:
   - A11 (the static page window repeating an old refusal after a good save {OJS OMP}; Rule 10)
   - A12 ("Add Static Page" failing on the tab left open after the plugin is unticked {OJS OMP}; Rule 15)
   - A13 (a block whose name holds "&" never placed, edited or deleted; Rule 18b)
-  - A14 (a custom block's "Delete" failing, the block staying in the list, the sidebar and "Sidebar"; Rule 24)
   - A15 ("Appearance" › "Setup" refusing a save over a placed block while "Custom Block Manager" is unticked; Rule 25a)
   - A16 (a ".pdf" or ".svg" chosen in the picture window ignored with no message; Rule 29)
   - A17 (a refused pasted or dropped picture kept in the text, embedded; Rule 29c)
@@ -921,7 +916,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | A manager's good save in the static page window shows the earlier refusal as a red notice | 🐞 | low | issues (claude), 2026-10-12 — re-verified |
 | [A12](#a12) | Right after "Static Pages Plugin" is unticked, the tab's "Add Static Page" fails on the server | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A13](#a13) | A custom block whose name holds "&" can never be placed, edited or deleted | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
-| [A14](#a14) | A custom block cannot be deleted on PostgreSQL: "OK" spins and the block stays | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A15](#a15) | With "Custom Block Manager" unticked, "Appearance" › "Setup" refuses every save over a placed block it no longer lists | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [A16](#a16) | An SVG, a PDF or any file but a JPEG, PNG, GIF, BMP or WEBP is ignored in "Insert/Edit Image", with no message | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A17](#a17) | A dropped or pasted picture the site refuses stays in the text, embedded, and is saved | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -933,6 +927,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | A static page and a "Custom Page" item can take the same path, and the static page is then unreachable | ❓ | minor | — |
 | [A8](#a8) | The site's Plugins list offers "Static Pages Plugin", and ticking it changes nothing | ❓ | minor | — |
 | [A9](#a9) | "Paste" on the editor's bar pastes nothing and asks for the keyboard instead | ❓ | minor | — |
+| [A14](#a14) | Retired: a custom block could not be deleted on PostgreSQL, "OK" spinning and the block staying; "OK" now removes it (Rule 24) | ✅ | retired | PR review (claude), 2026-11-04 — fixed upstream (pkp/pkp-lib#13690) |
 
 ### All apps
 
@@ -957,8 +952,7 @@ A manager who deletes a block that is placed in the sidebar expects its
 place to go with it. As read from the code, the "Sidebar" setting keeps
 the block's name instead: a block added later under the same "Block
 Name" appears on every public page at once, at the old place, before the
-manager has ticked it. This cannot be seen on the test installs, where
-"Delete" fails ([A14](#a14)).
+manager has ticked it.
 Question: should deleting a block also take its place out of the
 "Sidebar" setting? Lean: yes; a block that appears without being placed
 is not what any manager expects.
@@ -1131,19 +1125,6 @@ numbers, dashes and underscores.". The block can never be shown,
 corrected or deleted from the screens.
 Basis: probe, 2026-10-01. <sup>f-a13</sup>
 
-<a id="a14"></a>
-**A14 — A custom block cannot be deleted on PostgreSQL: "OK" spins and the block stays** · 🐞 · medium · crash: server.
-On an installation whose database is PostgreSQL, "OK" in a custom
-block's "Delete" window leaves the window open with a spinner and no
-message. The block stays in three places: the Custom Block Manager's
-list, the sidebar on the public pages, and Settings › Website ›
-"Appearance" › "Setup" › "Sidebar".
-"Delete" is the only way to remove a block, both for a journal's blocks
-and for the site's. A manager can still take a block off the public
-pages by unticking it under "Sidebar", but it stays in the Custom Block
-Manager's list for good.
-Basis: probe, 2026-10-01. <sup>f-a14</sup>
-
 <a id="a15"></a>
 **A15 — "Appearance" › "Setup" refuses to save over a block it no longer lists** · 🐞 · medium.
 A manager who unticks "Custom Block Manager" while a custom block is
@@ -1266,6 +1247,11 @@ a loaded machine. Run 35 times per app without anything holding the
 second box back, the same tests passed every time.
 Basis: probe, 2026-10-01. <sup>f-a20</sup>
 Report: none — pkp-e2e#376 closed 2026-10-14 at the merge of the fix, `pkp/pkp-lib#13490` (`689e7ec1a5`; 3.5 `pkp/pkp-lib#13491`, `4045d9241e`); the entry retires when the apps' `js/pkp.min.js` carries the guard and `checks/sync/pkp-lib-13490/stuck-editors.js` reads fixed at the tips with `enable_minified = On` (ci-triage Flake watch, the row on scenario 6's formatted box getting stuck) (2026-10-14)
+
+### Retired
+
+<a id="a14"></a>
+**A14 — A custom block could not be deleted on PostgreSQL** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13692](https://github.com/pkp/pkp-lib/pull/13692) on main, [pkp/pkp-lib#13691](https://github.com/pkp/pkp-lib/pull/13691) on 3.5, issue [pkp/pkp-lib#13690](https://github.com/pkp/pkp-lib/issues/13690)), 2026-11-04: on an installation whose database is PostgreSQL, "OK" in a custom block's "Delete" window left the window open with a spinner while the server failed, and the block stayed in the Custom Block Manager's list, the public sidebar and "Sidebar"; "OK" now removes it from all three (Rule 24). <sup>f-a14</sup>
 
 ---
 
@@ -1836,13 +1822,21 @@ Partners" was listed as "our-partners" followed by 13 letters and digits
 ("our-partners6ab513cac7317" on OJS), in the list and under "Sidebar".
 
 <a id="fn-td24"></a>
-**td24** — Live-probed 2026-09-24 (Rule 24, A14; three apps): "Delete"
-asked as Rule 14 quotes, and "Cancel" kept the row. "OK" on a placed and
-on an unplaced block, a journal's and the site's, left the window open
-with a spinner, the server answering status 500, and the block in the
-list, the sidebar and "Sidebar". A block added again as "Our Partners"
-was named "our-partners" plus 13 letters and digits, the first never
-having gone, so the kept place (A2) could not be tried.
+**td24** — Live-probed 2026-09-24 (Rule 24, A14; three apps), before
+the fix of A14: "Delete" asked as Rule 14 quotes, and "Cancel" kept the
+row. "OK" on a placed and on an unplaced block, a journal's and the
+site's, left the window open with a spinner, the server answering status
+500, and the block in the list, the sidebar and "Sidebar". A block added
+again as "Our Partners" was named "our-partners" plus 13 letters and
+digits, the first never having gone, so the kept place (A2) could not be
+tried. Walked 2026-11-04 (Rule 24; three apps, main and stable-3_5_0,
+PostgreSQL, PKP's default dataset) with lib/pkp at the fix's merge
+commits (note f-a14): a placed "Our Partners" block's "Delete" › "OK"
+closed the window, and after a reload the block was gone from the list,
+the public sidebar and "Sidebar", with no server error. The site's blocks
+were not walked (that dataset's site hosts one journal, so it has no
+"Plugins" tab); their "Delete" makes the same call with the site's
+context.
 
 <a id="fn-td25"></a>
 **td25** — Live-probed 2026-09-24 (Rules 25, 25a, A15; three apps):
@@ -1862,8 +1856,8 @@ the pages.
 the same window; "Site news" was saved as "site-news"; the site's
 "Appearance" › "Setup" "Sidebar" listed "site-news (Custom Block)";
 placed, it showed on the site's home page only, never on a journal's, and
-no journal's list held it. Its "Delete" failed as a journal's does
-(A14).
+no journal's list held it. Its "Delete" failed as a journal's did then
+(A14, since fixed).
 
 <a id="fn-td29"></a>
 **td29** — Live-probed 2026-09-24 (Rule 29; three apps): "Insert/edit
@@ -2002,9 +1996,10 @@ upload limit (A18); the stored files stay on the install, as nothing
 removes them. 6 — `context.supportedLocales` and
 `context.supportedFormLocales` `['en', 'fr_CA']`, `plugins:
 {customblockmanagerplugin: {enabled: true}}`; the French page is the
-page's address with the `fr_CA` segment. On the test installs a custom
-block, once made, cannot be deleted (A14), which is why each block
-scenario has a scratch journal of its own. Live-probed 2026-09-24 (three
+page's address with the `fr_CA` segment. Each block scenario has a
+scratch journal of its own, a choice made while a custom block, once
+made, could not be deleted on the test installs (A14, fixed upstream
+2026-11-04). Live-probed 2026-09-24 (three
 apps): a journal seeded with the "Custom Block Manager" key arrived with
 the row ticked and "Manage Custom Blocks" offered, one seeded without it
 with the row unticked; every drive ran on such scratch journals.
@@ -2025,11 +2020,12 @@ Issue report: [pkp-e2e#365](https://github.com/jardakotesovec/pkp-e2e/issues/365
 block's settings and its entry in `blocks`, not the name in the journal's
 `sidebar` list; `displaySidebar()` prints any stored name that is a
 loaded, enabled block, and a new block with the same name is created
-enabled (note g). Read from the code 2026-09-24 and not driven: on the
-test installs' PostgreSQL "Delete" fails at its first step (note f-a14),
-so no block was ever deleted (td24). The one check is the same drive on
-a MySQL installation: delete a placed block, add one with the same
-"Block Name", and open the home page signed out.
+enabled (note g). Read from the code 2026-09-24 and not driven: until
+the fix of 2026-11-04 the test installs' PostgreSQL "Delete" failed at
+its first step (note f-a14), so no block was deleted then (td24), and
+the 2026-11-04 walk of the fix did not add a block again. The one check:
+delete a placed block, add one with the same "Block Name", and open the
+home page signed out.
 
 <a id="fn-f-a3"></a>
 **f-a3** — The plugin's `templates/content.tpl` prints the title in an
@@ -2178,15 +2174,21 @@ Issue report: [pkp-e2e#378](https://github.com/jardakotesovec/pkp-e2e/issues/378
 
 <a id="fn-f-a14"></a>
 **f-a14** — `CustomBlockGridHandler::deleteCustomBlock()` first calls
-`PluginSettingsDAO::deleteSetting()`, whose query filters on the column
-`plugin_Name`; PostgreSQL keeps the quoted name's capital and refuses it
-("column "plugin_Name" does not exist"), so the request answers status
-500 and nothing is deleted. MySQL matches column names without regard to
-case, so the call works there (read, not driven). The test installs run
-PostgreSQL. Present since pkp-lib#7111 (the caching rewrite), on
+`PluginSettingsDAO::deleteSetting()`, whose query filtered on the column
+`plugin_Name`; PostgreSQL keeps the quoted name's capital and refused it
+("column "plugin_Name" does not exist"), so the request answered status
+500 and nothing was deleted. MySQL matches column names without regard
+to case, so the call worked there (read, not driven). The test installs
+run PostgreSQL. Present since pkp-lib#7111 (the caching rewrite), on
 stable-3_5_0 too. Live-probed 2026-09-24 (three apps): td24, td27; the
-server log recorded the error on every "OK".
-Issue report: [pkp-e2e#369](https://github.com/jardakotesovec/pkp-e2e/issues/369) ([docs/issues/U09-A14-custom-block-delete-fails-postgresql.md](../issues/U09-A14-custom-block-delete-fails-postgresql.md)). Upstream: `pkp/pkp-lib#13690` (2026-11-04), fix in PRs `pkp/pkp-lib#13692` (main) and `#13691` (3.5), walked fixed at their heads before the merge.
+server log recorded the error on every "OK". The fix merged 2026-11-04,
+`pkp/pkp-lib#13692` on main as `25fdc98a3e` and `pkp/pkp-lib#13691` on
+stable-3_5_0 as `e2c62c4b7b`, `deleteSetting()` and
+`deleteSettingsByPlugin()` now filtering on `plugin_name`, and was walked
+fixed that day on OJS, OMP and OPS, main and stable-3_5_0, with lib/pkp
+pinned at those merge commits (td24; the apps' own lib/pkp pointers had
+not taken them yet).
+Issue: [pkp-e2e#369](https://github.com/jardakotesovec/pkp-e2e/issues/369), closed. Upstream: `pkp/pkp-lib#13690` (2026-11-04), fix in PRs `pkp/pkp-lib#13692` (main) and `#13691` (3.5), walked fixed at their heads before the merge.
 
 <a id="fn-f-a15"></a>
 **f-a15** — With the plugin unticked its blocks are not loaded, but the

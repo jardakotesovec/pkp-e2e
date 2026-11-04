@@ -1,4 +1,8 @@
-// Helpers for walk.js and neighbour.js (U09 A14). Requiring this file runs nothing.
+// Custom Block Manager helpers, shared by the kept walks of
+// custom-block-stuck-with-unusable-name, subscription-block-status-wrong and
+// individual-purchase-refusal-says-nothing. Written for the U09 A14 walk, whose
+// walk.js, neighbour.js and fix.diff were deleted when A14 retired
+// (pkp-lib#13690 merged, 2026-11-04). Requiring this file runs nothing.
 const fs = require('fs');
 const path = require('path');
 const {idle} = require('../../../probe');
