@@ -1117,7 +1117,10 @@ user can read.
    words the plugin reaches nothing; what the plugin or its PR says it
    needs is no allowance. The drive targets OJS on 3.5 for now: a PR
    with no release for 3.5 is read, not driven, and the report says
-   so.
+   so. Only the newest release of each branch (one per app line) is
+   reviewed: older releases a PR adds are left out of the read, the
+   drive and the findings, and the note asks the author to keep only
+   those newest releases in the PR (maintainer, 2026-11-04, pg-506).
 2. **Integrity.** `node bin/plugin-fetch.js <PR> pg-<PR>`. A package
    whose MD5 does not match, whose archive would unpack outside its
    folder or links elsewhere, or whose code differs from its tagged
