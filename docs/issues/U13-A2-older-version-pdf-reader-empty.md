@@ -10,7 +10,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** `pkp/pdfJsViewer#73` for `pkp/pkp-lib#10208` · [8e0a90541a](https://github.com/pkp/pdfJsViewer/commit/8e0a90541a1ed2ea56e189dc3626cb84d16815a6) · 2024-08-19 (merged 2024-12-07) · Hafsa-Naeem (Hafsa-Naeem)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13694` (open), the team's copy of this issue (2026-11-04), with the fix in `pkp/pdfJsViewer#83` (`main`) and `pkp/pdfJsViewer#84` (3.5), neither merged yet. Before it: none found (2026-10-01)
 - **Tracked in** spec U13 [A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U13-article-landing-page-and-reading.md#a2)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
