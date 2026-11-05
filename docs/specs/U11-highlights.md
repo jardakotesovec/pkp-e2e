@@ -17,7 +17,7 @@ Website settings, adds and edits slides in a side panel and sets their
 order; the home page shows them at once, as a carousel every visitor can
 page through. When the install hosts several journals, the Site
 Administrator keeps a second, separate set for the site's own home page;
-today nothing can be saved there ⚠ [A5](#a5). There is no scheduling, no
+on 3.5 nothing can be saved there ⚠ [A5](#a5). There is no scheduling, no
 on/off switch and no reader-side setting: a saved highlight is live until
 it is deleted. <sup>a</sup>
 
@@ -36,8 +36,8 @@ screen. Readers need no account. <sup>b</sup>
 | Action | Who may, and when |
 |--------|--------------------|
 | **See the journal's Highlights tab; add, edit, delete and reorder its highlights** | • Journal Manager, Editor and Production Editor of that journal, any time (on a preprint server its manager alone)<br>• Site Administrator working in the journal (the same tab, the same panel)<br>• Section Editor, Assistant, Author, Reviewer, Reader: no Website settings at all; the settings address answers the access-denied page <sup>b</sup> |
-| **See the site's Highlights tab; add, edit, delete and reorder the site's highlights** | • Site Administrator, on the Site Settings, only while the site hosts two or more journals (Rule 12): the tab, "Order" and "Add Highlight" are offered, but no highlight can be saved or ordered there [A5](#a5)<br>• Journal Manager: never; the Site Settings are the administrator's alone <sup>b</sup> <sup>c</sup> |
-| **See the carousel** | • any visitor, signed in or not, on the journal's home page (its own highlights) while at least one highlight exists there, and on the site's home page once a site highlight exists, which none can today [A5](#a5) (Rules 2, 3 and 13) <sup>j</sup> |
+| **See the site's Highlights tab; add, edit, delete and reorder the site's highlights** | • Site Administrator, on the Site Settings, only while the site hosts two or more journals (Rule 12): the tab, "Order" and "Add Highlight" are offered (on 3.5 no highlight can be saved or ordered there [A5](#a5))<br>• Journal Manager: never; the Site Settings are the administrator's alone <sup>b</sup> <sup>c</sup> |
+| **See the carousel** | • any visitor, signed in or not, on the journal's home page (its own highlights) while at least one highlight exists there, and on the site's home page while at least one site highlight exists (none can on 3.5 [A5](#a5)) (Rules 2, 3 and 13) <sup>j</sup> |
 | **Follow a slide's button** | • any visitor; the button opens the address typed into "URL", exactly as typed (Rule 4) ⚠ [A2](#a2) <sup>e</sup> |
 
 ## Fields & validation
@@ -67,9 +67,9 @@ second language's boxes, labelled "{Field} in {language}" (Rule 11).
 1. **Scope.** Every highlight belongs to exactly one journal, or to the site.
    A journal's list holds only its own highlights and its home page shows
    only those; nothing is shared between journals. The site's list and the
-   site's home page carry none of the journals' highlights and are meant to
-   hold the site's own; today they hold nothing, because no site highlight
-   can be saved [A5](#a5). <sup>a</sup> <sup>j</sup>
+   site's home page carry none of the journals' highlights and hold the
+   site's own (on 3.5 they hold nothing, because no site highlight can be
+   saved [A5](#a5)). <sup>a</sup> <sup>j</sup>
 2. **Where the carousel shows.** On the home page the carousel is the first
    block under the header; below it come the homepage image, on a journal
    the category list, the "About the Journal" / "About the Press" text and
@@ -77,8 +77,8 @@ second language's boxes, labelled "{Field} in {language}" (Rule 11).
    preprint list and the "About the Server" text (each of those blocks
    shows only when its own setting is on). The site's home page has the
    same place for the site's carousel, above the site's about text, the
-   announcements and the list of journals; none has been seen there, since
-   no site highlight can be saved [A5](#a5). No other page shows
+   announcements and the list of journals (seen on `main` 2026-11-05; on
+   3.5 no site highlight can be saved [A5](#a5)). No other page shows
    highlights. <sup>j</sup>
 3. **No highlights, no carousel.** While the list is empty the home page
    carries no carousel, no heading and no empty frame: the next block moves
@@ -168,9 +168,10 @@ second language's boxes, labelled "{Field} in {language}" (Rule 11).
     one-journal site shows only "Site Setup" with "Security", "Languages",
     "Bulk Emails", "Statistics" and "ORCID". The rule belongs to *Site settings*.
     <sup>c</sup>
-13. **The site's home page.** The site's highlights are meant to show on
-    the site's own home page, the page that lists the hosted journals; none
-    has been seen there [A5](#a5). That page opens only on a site with two
+13. **The site's home page.** The site's highlights show on the site's
+    own home page, the page that lists the hosted journals, as a carousel
+    above the list (on 3.5 none can be saved [A5](#a5)). That page opens
+    only on a site with two
     or more journals and no "Journal redirect" set (Settings that modify
     behavior); with one journal, the site address goes straight to that
     journal's home and the site's home page is never shown. <sup>k</sup>
@@ -425,6 +426,13 @@ Left out of the scenarios above, by reason:
     fixed, a highlight's picture replaced by a PNG named "photo.jpg" and
     "Save" refused, the old picture still in the reopened panel and on
     the home page's slide
+  - the guard for A5 (Actors rows 2 and 3; Rules 12, 13; issue report
+    `docs/issues/U11-A5-site-highlights-cannot-be-saved.md`; fixed on
+    `main` 2026-11-05): the Site Administrator adds and orders a site
+    highlight on a two-journal site, and a signed-out visitor sees it as
+    the site's carousel with its button
+  - "Title" and "Button Label" entered in a second language at site scope
+    (Rule 11), possible on `main` since A5's fix
 - **Nothing new to test**:
   - a file over the server's upload limit refused in the "Image" box
     (Fields): the same box's refusal scenario 1 meets with a text file,
@@ -457,11 +465,6 @@ Left out of the scenarios above, by reason:
   - A11 (a replacement picture the app refuses at "Save", which deletes
     the old one; Rule 10)
 - **No seed**:
-  - the Site Administrator adding a site highlight and any visitor seeing
-    the site's carousel on the site's home page (Actors rows 2 and 3;
-    Rules 12, 13): no site highlight can be saved (A5)
-  - "Title" and "Button Label" entered in a second language at site scope
-    (Rule 11): no site highlight can be saved (A5)
   - a one-journal site with no site "Highlights" tab (Rule 12): the
     install stops being a one-journal site once its first scratch journal
     exists
