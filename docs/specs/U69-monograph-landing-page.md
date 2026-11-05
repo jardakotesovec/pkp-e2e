@@ -1697,7 +1697,6 @@ the press turns it on. A journal's article page has the same fault, with
 a different fix
 ([pkp-e2e#218](https://github.com/jardakotesovec/pkp-e2e/issues/218)).
 Basis: probe, 2026-10-13. <sup>f-a26</sup>
-Report: refresh owed — the housekeeping drive of 2026-11-05 (*Review setup and review forms*, OMP4) shows OMP `main`'s `api/v1/publicationPeerReviews` answering 500 with an empty body to every request (`PublicationPeerReviewController` not found), where the report's "The public API" bullet says OMP serves the reviews at no address "(checked in the code, not driven)" and its "Not driven" bullet lists the API; 3.5 has no such address (404). The conclusion (no reviews served) and "Way round: none" stand (2026-11-05).
 
 <a id="a27"></a>
 **A27 — A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included** · 🐞 · medium.

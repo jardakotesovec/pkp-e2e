@@ -11,8 +11,10 @@
 - **Introduced** not traced (the book page never had a display, so no commit broke one); the fault exists since OMP got the box, in [17b988fde4](https://github.com/pkp/omp/commit/17b988fde4e79492c82f747712fe82df8f84c543) (2026-01-22)
 - **Upstream** none found (2026-10-13)
 - **Tracked in** spec U69 [A26](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U69-monograph-landing-page.md#a26)
-- **Checked** 2026-10-13, each branch's tip (the commits in Evidence)
+- **Checked** 2026-10-13, each branch's tip (the commits in Evidence); the public API 2026-11-05
 - **Model** claude-opus-5-5
+
+Update 2026-11-05: OMP's public API for the reviews was walked on `main` and 3.5. On `main` every request to `api/v1/publicationPeerReviews` answers a server error with an empty body, and `api/v1/peerReviews` answers 404; 3.5 has neither address. That is now its own report ([U29 OMP4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U29-OMP4-press-peer-review-address-server-error.md), [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/1086)). The conclusion here stands: OMP serves the public reviews nowhere, and there is no way round.
 
 ## Summary
 
@@ -50,7 +52,8 @@ fault, with a different fix
   book page, and no pkp issue plans it.
 - **Way round.** None. No setting shows the reviews. Off screen there is
   none either: the page receives no review data for a theme to show,
-  and OMP's public API for the reviews points at a missing class.
+  and OMP's public API for the reviews fails on the server for every
+  request.
 
 Medium: a press's choice to publish reviews silently does nothing, but
 only presses that make that choice meet it; a page that lost content
@@ -151,9 +154,12 @@ The reach:
   (`pkp/omp#2160`), a class pkp-lib no longer has since the controller
   moved to `PKP\API\v1\peerReviews\PeerReviewController`; OJS renamed
   its entry point to `api/v1/peerReviews`, OMP did not. So OMP serves
-  the public reviews at no address either (checked in the code, not
-  driven). That is its own one-file fix, outside this one: the page
-  does not use the API.
+  the public reviews at no address either: on `main` every request to
+  `api/v1/publicationPeerReviews` answers 500 with an empty body, and
+  `api/v1/peerReviews` answers 404 (walked 2026-11-05). That is its own
+  one-file fix, outside this one, since the page does not use the API:
+  [U29 OMP4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U29-OMP4-press-peer-review-address-server-error.md)
+  ([pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/1086)).
 - **Chapter pages** use `chapter.tpl` and show no review either; the
   reviews belong to the book, so the fix leaves them out (checked in
   the code).
@@ -301,8 +307,13 @@ wait on the layout decision.
   (open; the reader components' groundwork, OJS only), `#13205`,
   `#13242`, `#2976`; `pkp/omp#2160`, `#2180`, `#2213`, `#2222`, `#2232`
   (the feature's OMP sides, none with a display).
-- Not driven: OMP's public API (the dangling entry point is read in the
-  code); a press with "Make reviewer comments publicly visible with
+- OMP's public API was walked on 2026-11-05 for the U29 OMP4 report
+  (OMP `main` 828150a8fe, pkp-lib 1ae711024a; `stable-3_5_0`
+  e81eefc11c, pkp-lib c4c0aa8c52): its kept script
+  [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/press-peer-review-address-server-error/walk.js)
+  types the addresses signed out and as `dbarnes`; 3.5 answers 404 at
+  both.
+- Not driven: a press with "Make reviewer comments publicly visible with
   published content" on (U69's earlier probe of A26 showed the same
   page); an
   internal review made public (`SubmissionPeerReviewResource` keeps
