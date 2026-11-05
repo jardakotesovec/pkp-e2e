@@ -1825,7 +1825,16 @@ shared places too, with no flag (round 1 copied the old chapter row's,
 round 2 none). The Native XML export's `<chapterAuthor seq>` changed
 the same way (the Contributors-list place before, the chapter place at
 the heads), and the file imported back read Dawson, then Dupuis before
-and Dupuis, then Dawson at the heads.
+and Dupuis, then Dawson at the heads. Round 3 on 2026-11-05 (#2523
+`94e167fe55` merged onto `main`, #2522 merged as `4aeacacc2a`, #2521
+`81d150199a`) adds the tie-break by `author_id`: the sorted and shared
+cases read as in round 2, and a chapter whose two authors share chapter
+place 0 lists them by id (Dawson, then Dupuis) on the book page, at the
+bases too. With the Contributors list ordered Dupuis, then Dawson, the
+new version's copy and the re-import read Dupuis, then Dawson, at base
+and head on all three lines: the copy keeps the shared place and the new
+ids follow the Contributors list
+(`docs/reports/pr-review/2026-11-05-pkp-lib-10570.md`).
 `checks/sync/pkp-lib-10570/walk.js`.
 
 <a id="fn-td18"></a>

@@ -24,6 +24,11 @@
 // PR merged: #2523 93c01ade7b, #2522 efd0156176, #2521 62a58b8fc8), both variants on main, 3.5, 3.4:
 // every base verdict false (the Contributors order, the primary contact flagged), every head true;
 // round 2's copies carry no primary_contact flag (round 1 copied the old chapter row's).
+// 2026-11-05 (round 3, the tie-break by author_id: #2523 94e167fe55 merged onto main 828150a8fe,
+// #2522 merged as 4aeacacc2a, #2521 81d150199a): sorted and ties as round 2. VAR=chapterties at base
+// and head on all three lines: the book page reads Dawson, Dupuis; the new version and the
+// re-import read Dupuis, Dawson (report docs/reports/pr-review/2026-11-05-pkp-lib-10570.md); with
+// the report's proposed fix both read Dawson, Dupuis and sorted/ties stay true.
 const fs = require('fs');
 const path = require('path');
 const {execFileSync} = require('child_process');
