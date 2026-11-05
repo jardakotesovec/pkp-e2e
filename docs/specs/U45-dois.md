@@ -5995,7 +5995,7 @@ variable $resourceType" from
 the type only for a document component; whether the record's
 `resourceType` then comes out right was not read, since the file never
 downloads on the test installs.
-Issue report: [docs/issues/U45-OJS13-datacite-file-subject-export-fails.md](../issues/U45-OJS13-datacite-file-subject-export-fails.md).
+Issue report: [pkp-e2e#1083](https://github.com/jardakotesovec/pkp-e2e/issues/1083) ([docs/issues/U45-OJS13-datacite-file-subject-export-fails.md](../issues/U45-OJS13-datacite-file-subject-export-fails.md)).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — `omp/classes/submission/Collector.php`
