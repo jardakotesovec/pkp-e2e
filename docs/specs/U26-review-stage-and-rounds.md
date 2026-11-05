@@ -1336,7 +1336,18 @@ the reviewer from My Submissions' "Reviewers assigned:" avatar (U22 Rule
 until the confirmation (`AnonymizeData::reviewsToAnonymize()`), which the
 round-1 heads still showed; the review round reads as at round 1.
 An editor's "unconsider" clears `dateConsidered`, so the review is hidden
-from the author again (code).
+from the author again (code). Round 3 (pkp-lib `13d982d9f4`, ui-library
+`255c839533`, ojs `e3f76e3205`, omp `26e1b44e38`, 2026-11-05) reads the
+confirmation as `ReviewAssignment::isConfirmedByEditor()` (`dateConsidered`
+or `dateAcknowledged`, and `considered` not unconsidered) in the API, the
+review round and the public review queries; walked on PKP's `main` dataset
+(`walk.js`, `revert.js`): a thanked review an editor unconsiders through
+the API's consider route (`considered: 1`; the row's "More Actions" on
+`main` has no "Revert Decision") is hidden from the author again although
+`dateAcknowledged` stays. `ReviewAssignmentRequiredPolicy` still asks
+for `dateConsidered`, so a review thanked on 3.4 (upgraded: no
+`dateConsidered`) is listed with "Read Review" but refused (`legacy.js`,
+report `docs/reports/pr-review/2026-11-05-pkp-lib-13712-round3.md`).
 
 <a id="fn-k"></a>
 **k** — `WorkflowListingEmails.vue` (AFFW-350/351): fetches

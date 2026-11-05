@@ -904,6 +904,10 @@ fields for authors and the submission's other reviewers until
 heads (`7903807281`, `ebbb413b95`) the row and the popover named the
 reviewer of a submitted, unconfirmed open review; at these heads no row
 and blank fields until "Mark as Complete", then the avatar and the name.
+Round 3 (pkp-lib `13d982d9f4`, ui-library `255c839533`, 2026-11-05) reads
+the confirmation as `isConfirmedByEditor` (`dateConsidered` or
+`dateAcknowledged`, and not unconsidered) in the cell and the API; the same
+walks give the same results.
 
 <a id="fn-i"></a>
 **i — draft deletion.** `useDashboardBulkDelete.js`: availability =
