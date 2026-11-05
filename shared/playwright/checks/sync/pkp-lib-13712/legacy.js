@@ -30,7 +30,12 @@ const CASES = {
         title: 'Dreamwork'},
 };
 
-const state = (app, c) => sql(app, `select 'method='||review_method||':considered='||considered||':date_considered='||coalesce(date_considered::text,'-')||':date_acknowledged='||coalesce(date_acknowledged::text,'-') from review_assignments where review_id=${c.reviewId}`);
+// WALK_DB names the dataset fleet's database where the kit's sql() reads the
+// campaign one (the ore branch's kit predates dataset fleets in sql()).
+const q = (app, query) => (process.env.WALK_DB
+    ? require('child_process').execFileSync('psql', ['-X', '-d', process.env.WALK_DB, '-tA', '-c', query], {encoding: 'utf8'}).trim()
+    : sql(app, query));
+const state = (app, c) => q(app, `select 'method='||review_method||':considered='||considered||':date_considered='||coalesce(date_considered::text,'-')||':date_acknowledged='||coalesce(date_acknowledged::text,'-') from review_assignments where review_id=${c.reviewId}`);
 
 forEachApp(async (app) => {
     const c = CASES[app.name];
@@ -38,7 +43,7 @@ forEachApp(async (app) => {
     const run = process.env.PROBE_RUN || '-';
     const o = {app: app.name, run, submission: c.id, reviewId: c.reviewId, reviewer: c.reviewer};
     o.state0 = state(app, c);
-    sql(app, `update review_assignments set review_method=3 where review_id=${c.reviewId}`);
+    q(app, `update review_assignments set review_method=3 where review_id=${c.reviewId}`);
     o.state1 = state(app, c);
     const {page, close} = await launch(app);
     const errors = [];

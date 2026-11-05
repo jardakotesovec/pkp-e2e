@@ -30,7 +30,12 @@ const CASES = {
     omp: {id: 11, reviewId: 10, roundId: 11, author: 'jlockehart', reviewer: 'Adela Gallego'},
 };
 
-const state = (app, c) => sql(app, `select 'method='||review_method||':considered='||considered||':date_considered='||coalesce(date_considered::text,'-')||':date_acknowledged='||coalesce(date_acknowledged::text,'-') from review_assignments where review_id=${c.reviewId}`);
+// WALK_DB names the dataset fleet's database where the kit's sql() reads the
+// campaign one (the ore branch's kit predates dataset fleets in sql()).
+const q = (app, query) => (process.env.WALK_DB
+    ? require('child_process').execFileSync('psql', ['-X', '-d', process.env.WALK_DB, '-tA', '-c', query], {encoding: 'utf8'}).trim()
+    : sql(app, query));
+const state = (app, c) => q(app, `select 'method='||review_method||':considered='||considered||':date_considered='||coalesce(date_considered::text,'-')||':date_acknowledged='||coalesce(date_acknowledged::text,'-') from review_assignments where review_id=${c.reviewId}`);
 
 async function openRound(page, app, c, author) {
     await page.goto(app.url(`/index.php/${app.contextPath}/en/dashboard/${author ? 'mySubmissions' : 'editorial'}?workflowSubmissionId=${c.id}&workflowMenuKey=workflow_3_${c.roundId}`));
