@@ -1027,7 +1027,7 @@ entry notes otherwise; the team settles them on spec review.
 | [OMP6](#omp6) | A press file's URN leaves out its format number, and file patterns leave "%f" unfilled | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP7](#omp7) | With the URN plugin switched off, a press's book page still shows format URNs | 🐞 | medium | — |
 | [OMP8](#omp8) | A press's URN settings give a pattern example with "%r", which stays in every URN made from it | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
-| [OPS1](#ops1) | On a preprint server that never saved its "Publisher ID" settings, a galley's identifiers form fails on the server | 🐞 | low · crash: server | — |
+| [OPS1](#ops1) | On a preprint server that never saved its "Publisher ID" settings, a galley's Identifiers form fails on the server | 🐞 | low · crash: server | issues (claude), 2026-11-05 — re-verified |
 | [A3](#a3) | An article's Publisher ID accepts values the tabs refuse, a duplicate included | ❓ | minor | — |
 | [A12](#a12) | A URN that differs from another only in case is accepted as new | ❓ | minor | — |
 | [OJS2](#ojs2) | The JATS XML's publisher ID is the article's number, not the typed Publisher ID | ❓ | minor | — |
@@ -1429,22 +1429,16 @@ Basis: probe, 2026-10-19. <sup>f-omp8</sup>
 ### OPS
 
 <a id="ops1"></a>
-**OPS1 — On a preprint server that never saved its "Publisher ID" settings, a galley's identifiers form fails on the server** · 🐞 · low · crash: server.
-On a preprint server whose Settings › Workflow › Submission ›
-"Metadata" form has never been saved, the request for a galley's
-"Identifiers" form fails on the server, for the Author of an unposted
-preprint and for the Preprint Server Manager alike. PKP's default test
-dataset's preprint server is in that state as installed. No screen sends
-the request then, because the galley's "Edit" window has the "Edit
-Metadata" tab alone, so only someone who requests the form's address
-directly meets it; the address, and how to request it by hand, are in
-the footnote. The check is the request's answer, not a rendered page: a
-server error with an empty answer while the fault holds, against a
-normal answer whose text carries the form once it is gone. One "Save" of
-the "Metadata" form, with or without a "Publisher ID" box ticked, ends
-it: the same request then gets the normal answer. A journal's galley and
-a press's publication format in the same never-saved state get the
-normal answer.
+**OPS1 — On a preprint server that never saved its "Publisher ID" settings, a galley's Identifiers form fails on the server** · 🐞 · low · crash: server.
+On a preprint server whose "Publisher ID" settings have never been
+saved, the request for a galley's "Identifiers" form fails on the
+server, for the Author of an unposted preprint and for the Preprint
+Server Manager alike. Those settings are the "Publisher ID" boxes on
+Settings › Workflow › Submission › "Metadata".
+
+Every new preprint server starts in that state. An upgraded server does
+too, unless that form was saved on an earlier version. The galley's
+"Edit" window offers no "Identifiers" tab in that state.
 Basis: probe, 2026-11-05. <sup>f-ops1</sup>
 
 ### Retired
@@ -2409,6 +2403,7 @@ reached for a file). No OPS screen offers it: OPS never assigns
 tab (the Reference table's "File-identifier operations" row). It is
 dead code on OPS rather than a finding, since no screen and no state
 reaches it; OJS and OMP answered 200 in the same runs.
+Issue report: [docs/issues/U44-OPS1-galley-identifiers-form-fails-never-saved.md](../issues/U44-OPS1-galley-identifiers-form-fails-never-saved.md).
 
 ## Reference — entry points & surfaces
 

@@ -1,0 +1,11 @@
+--- a/controllers/tab/pubIds/form/PublicIdentifiersForm.php
++++ b/controllers/tab/pubIds/form/PublicIdentifiersForm.php
+@@ -30,7 +30,7 @@
+     public function fetch($request, $template = null, $display = false)
+     {
+         $templateMgr = TemplateManager::getManager($request);
+-        $enablePublisherId = $request->getContext()->getData('enablePublisherId');
++        $enablePublisherId = (array) $request->getContext()->getData('enablePublisherId');
+         $templateMgr->assign([
+             'enablePublisherId' => ($this->getPubObject() instanceof Galley && in_array('galley', $enablePublisherId))
+         ]);
