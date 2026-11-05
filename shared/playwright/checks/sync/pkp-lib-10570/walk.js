@@ -59,16 +59,44 @@ forEachApp(async (app) => {
     const chapterId = chapterOf(app, publicationId);
     const [dawson, dupuis] = ['Dawson', 'Dupuis'].map((n) => Number(sql(app, `select a.author_id from authors a join author_settings s on s.author_id = a.author_id and s.setting_name = 'familyName' where a.publication_id = ${publicationId} and s.setting_value = '${n}' limit 1`)));
 
+    // VAR=chapterties (round 3, the tie-break `orderBy('a.author_id')`): the chapter's authors never
+    // sorted (both at chapter place 0), the Contributors list ordered against their ids (the newer
+    // author first), so the chapter's order now rests on the ids alone.
+    if (VAR === 'chapterties') {
+        const [lo, hi] = [dawson, dupuis].sort((a, b) => a - b);
+        sql(app, `update authors set seq = case when author_id = ${hi} then 0 when author_id = ${lo} then 1 else 2 end where publication_id = ${publicationId}`);
+        sql(app, `delete from submission_chapter_authors where chapter_id = ${chapterId}`);
+        // Inserted newest id first, so a database that returns rows as stored disagrees with the ids.
+        sql(app, `insert into submission_chapter_authors (author_id, chapter_id, primary_contact, seq) values (${hi}, ${chapterId}, 0, 0)`);
+        sql(app, `insert into submission_chapter_authors (author_id, chapter_id, primary_contact, seq) values (${lo}, ${chapterId}, 0, 0)`);
+    } else
     // Setup: the contributors' places, then Dawson added to the chapter after Dupuis.
     if (VAR === 'sorted') {
         sql(app, `update authors set seq = case when author_id = ${dawson} then 0 when author_id = ${dupuis} then 1 else 2 end where publication_id = ${publicationId}`);
     } else {
         sql(app, `update authors set seq = 0 where publication_id = ${publicationId}`);
     }
-    sql(app, `delete from submission_chapter_authors where chapter_id = ${chapterId} and author_id = ${dawson}`);
-    sql(app, `insert into submission_chapter_authors (author_id, chapter_id, primary_contact, seq) values (${dawson}, ${chapterId}, 0, 1)`);
+    if (VAR !== 'chapterties') {
+        sql(app, `delete from submission_chapter_authors where chapter_id = ${chapterId} and author_id = ${dawson}`);
+        sql(app, `insert into submission_chapter_authors (author_id, chapter_id, primary_contact, seq) values (${dawson}, ${chapterId}, 0, 1)`);
+    }
     fact('setup', {publicationId, chapterId, primaryContactId: Number(sql(app, `select primary_contact_id from publications where publication_id = ${publicationId}`)), chapter: chapterRows(app, chapterId)});
     const expected = chapterRows(app, chapterId).map((r) => r.author);
+    // The book page's chapter list: the order a reader sees (Chapter::getAuthorNamesAsString()).
+    const bookPageOrder = async () => {
+        const {page, close} = await launch(app);
+        try {
+            const out = [];
+            for (let i = 0; i < 3; i++) {
+                await page.goto(app.url(`/index.php/${app.contextPath}/catalog/book/${SUBMISSION}`));
+                out.push(await page.locator('.chapters li', {hasText: CHAPTER_TITLE}).first().locator('.authors').innerText().catch(() => null));
+            }
+            return out;
+        } finally {
+            await close();
+        }
+    };
+    if (VAR === 'chapterties') fact('bookPage', await bookPageOrder());
 
     // 1. Native export.
     const xmlPath = outFile('book14-export.xml');
@@ -123,8 +151,17 @@ forEachApp(async (app) => {
 
     const v = facts.version || {};
     const sameOrder = (o) => !!o && JSON.stringify(o) === JSON.stringify(expected);
+    // chapterties: ties are the input, so the reading is the head's collector order (seq, then id);
+    // the old version's book page is the reader's order at both sides.
+    const tiesOk = VAR === 'chapterties';
     fact('verdict', {
         expected,
+        ...(tiesOk ? {
+            bookPageStable: facts.bookPage ? new Set(facts.bookPage).size === 1 : null,
+            versionReadsAsOld: sameOrder(v.order),
+            importReadsAsOld: facts.import ? sameOrder(facts.import.order) : null,
+            exportDocumentOrder: facts.export && facts.export.nodes ? facts.export.nodes.map((n) => n.author) : null,
+        } : {}),
         versionKeepsOrder: sameOrder(v.order) && !v.tie,
         versionPrimaryContactCopied: v.rows ? v.rows.map((r) => `${r.author}:${r.primaryContact}`) : null,
         exportSeqIsChapterOrder: facts.export && facts.export.orderBySeq ? sameOrder(facts.export.orderBySeq) && !facts.export.tie : null,
