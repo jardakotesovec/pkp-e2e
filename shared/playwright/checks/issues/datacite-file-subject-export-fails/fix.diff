@@ -1,0 +1,20 @@
+--- a/plugins/generic/datacite/filter/DataciteXmlFilter.php
++++ b/plugins/generic/datacite/filter/DataciteXmlFilter.php
+@@ -211,14 +211,13 @@
+         if (!empty($galleyFile) && !empty($genre) && $genre->getSupplementary()) {
+             $subjects = (array) $this->getPrimaryTranslation($galleyFile->getData('subject'), $objectLocalePrecedence);
+         } elseif (!empty($article) && !empty($publication)) {
+-            $subjects = array_merge(
++            // Keywords and subjects are vocabulary entries (['name' => …, …]); a file's subject is plain text.
++            $subjects = array_map(static fn ($s) => $s['name'], array_merge(
+                 (array) $this->getPrimaryTranslation($publication->getData('keywords'), $objectLocalePrecedence),
+                 (array) $this->getPrimaryTranslation($publication->getData('subjects'), $objectLocalePrecedence)
+-            );
++            ));
+         }
+         if (!empty($subjects)) {
+-            $subjects = array_map(static fn ($s) => $s['name'], $subjects);
+-
+             $subjectsNode = $doc->createElementNS($deployment->getNamespace(), 'subjects');
+             foreach ($subjects as $subject) {
+                 $subjectsNode->appendChild($node = $doc->createElementNS($deployment->getNamespace(), 'subject', htmlspecialchars($subject, ENT_COMPAT, 'UTF-8')));
