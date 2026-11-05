@@ -18,6 +18,7 @@
  *   node bin/plugin-sandbox.js show <review> <file>   (dns.log, requests.log, php-error.log, db.log, upgrade.log, snapshots/<label>/<file>)
  *   node bin/plugin-sandbox.js egress <review>
  *   node bin/plugin-sandbox.js php <review> <args>…
+ *   node bin/plugin-sandbox.js sql <review> "<one SQL statement>"   (as the app's own role: rows as TSV, or the error)
  *   node bin/plugin-sandbox.js purge <review>    (after the report: in/, out/ and .reports/plugin-review/<review>)
  *   node bin/plugin-sandbox.js canary
  *
@@ -413,6 +414,34 @@ async function canary() {
     console.log('\ncanary: every wall held');
 }
 
+/**
+ * One SQL statement on the pod's database, as the app's own role (the
+ * config's [database] section), through the `php` door: a SELECT prints a
+ * header line and its rows tab-separated, anything else the count of rows it
+ * changed, and a failure prints the database's own message and exits 1
+ * (a bare `php -r` with PDO exits 255 with nothing on a missing table or a
+ * second statement). One statement per call, on one line.
+ */
+const SQL_PHP = [
+    '$c = parse_ini_file("config.inc.php", true, INI_SCANNER_RAW)["database"];',
+    'try {',
+    '  $db = new PDO("pgsql:host={$c["host"]};dbname={$c["name"]}", $c["username"], $c["password"], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);',
+    '  $st = $db->query($argv[1]);',
+    '  if ($st->columnCount() === 0) { echo $st->rowCount(), " row(s) changed\\n"; exit(0); }',
+    '  $rows = $st->fetchAll(PDO::FETCH_ASSOC);',
+    '  $cell = fn($v) => $v === null ? "NULL" : str_replace(["\\t", "\\n"], ["\\\\t", "\\\\n"], (string) $v);',
+    '  if ($rows) echo implode("\\t", array_keys($rows[0])), "\\n";',
+    '  foreach ($rows as $r) echo implode("\\t", array_map($cell, $r)), "\\n";',
+    '  fwrite(STDERR, count($rows) . " row(s)\\n");',
+    '} catch (Throwable $e) { echo "SQL error: ", $e->getMessage(), "\\n"; exit(1); }',
+].join(' ');
+
+async function sql(review, query) {
+    if (!query) die('sql needs one SQL statement, quoted');
+    const {status} = await pod(['php', review, '-r', SQL_PHP, '--', query], {check: false});
+    process.exitCode = status;
+}
+
 async function main() {
     const [command, ...rest] = process.argv.slice(2);
     switch (command) {
@@ -439,6 +468,8 @@ async function main() {
             return console.log(`purge: ${rest[0]} removed from in/, out/ and .reports/plugin-review/`);
         case 'php':
             return pod(['php', reviewId(rest[0]), ...rest.slice(1)]);
+        case 'sql':
+            return sql(reviewId(rest[0]), rest[1]);
         case 'diff':
             return diff(reviewId(rest[0]), rest[1] || die('diff needs two labels'), rest[2] || die('diff needs two labels'));
         case 'show':
@@ -448,7 +479,7 @@ async function main() {
         case 'canary':
             return canary();
         default:
-            die('usage: plugin-sandbox.js stage|allow|up|snapshot|diff|show|egress|logs|php|down|purge|status|canary … (see the file header)');
+            die('usage: plugin-sandbox.js stage|allow|up|snapshot|diff|show|egress|logs|php|sql|down|purge|status|canary … (see the file header)');
     }
 }
 

@@ -646,7 +646,10 @@ node bin/plugin-sandbox.js canary                     # the acceptance test of t
   command-line tool instance for its router (as `tools/jobs.php` makes),
   since a bare `tools/bootstrap.php` makes every localized getter throw;
   and `jobs.php run` returns while a retried job waits out its backoff,
-  so each retry is one more run.
+  so each retry is one more run. A table is read with
+  `plugin-sandbox.js sql <review> "<one statement>"`, as the app's own
+  role: rows tab-separated, or the database's error (a `php -r` with PDO
+  exits 255 with no message).
 - **The canary** (`sandbox/canary/probe.php`) tries the ways out a
   plugin could: the bot's files, `/etc/shadow`, DNS over the pod's
   resolver, pasta's and an outside one, HTTP by name and by address, the
