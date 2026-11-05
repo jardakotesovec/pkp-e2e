@@ -1,0 +1,13 @@
+--- a/lib/pkp/classes/plugins/Plugin.php
++++ b/lib/pkp/classes/plugins/Plugin.php
+@@ -826,8 +826,8 @@
+             }
+ 
+             // Install the filter configuration.
+-            $result = $installer->installFilterConfig($filterConfigFile);
+-            if (!$result) {
++            if (!$installer->installFilterConfig($filterConfigFile)) {
++                $result = false;
+                 // The filter configuration file seems to be invalid.
+                 $installer->setError(Installer::INSTALLER_ERROR_DB, str_replace('{$file}', $filterConfigFile, __('installer.installParseFilterConfigFileError')));
+             }

@@ -755,8 +755,8 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | A refused tick or untick is explained by a raw code, and "Disable" stays open with its spinner | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | Uploading a file that is not a plugin package shows PHP's archive error with a server path | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success | 🐞 | low | issues (claude), 2026-10-27 — re-verified |
-| [A12](#a12) | Plugins: a plugin whose installation fails in its database step is reported "Successfully installed" and recorded as installed | 🐞 | medium | — |
-| [A13](#a13) | Plugins: a failed installation's notice shows raw markup and the database's connection details, and the same package cannot install again | 🐞 | low | — |
+| [A12](#a12) | Plugins: a plugin whose own database step fails is reported "Successfully installed" and kept as installed | 🐞 | medium | issues (claude), 2026-11-05 — re-verified |
+| [A13](#a13) | Plugins: a failed plugin installation's notice shows raw markup and database details, and the same package then fails with "already exists" | 🐞 | low | issues (claude), 2026-11-05 — re-verified |
 | [A4](#a4) | "Delete" is offered on plugins nobody can switch off, and on the theme in use | ❓ | minor | — |
 | [A6](#a6) | A Site Administrator with no manager role in a journal cannot switch its plugins | ❓ | minor | — |
 | [A8](#a8) | The theme a journal uses can be switched off | ❓ | user-visible | — |
@@ -946,52 +946,60 @@ yet (Proposed fix).
 Basis: probe, 2026-10-27. <sup>f-a11</sup>
 
 <a id="a12"></a>
-**A12 — Plugins: a plugin whose installation fails in its database step is reported "Successfully installed" and recorded as installed** · 🐞 · medium.
-When the Site Administrator installs a plugin through "Upload A New
-Plugin" and the plugin's own installation step fails partway (Rule 16),
-the notice still reads "Successfully installed version {version}", the
-plugin is listed, its version is recorded as installed, and whatever
-the step made in the database stays. Nothing reaches the server's log
-either, so nobody learns the plugin's tables are incomplete until the
-plugin fails in use. Expected: "Installation failed" with the reason,
-and nothing recorded as installed. Every generic plugin is reported
-this way, and so is a theme with a filter configuration; only the
-theme case of Rule 16 shows the failure ([A13](#a13)). Read from the
-code, not seen: on a press a theme is reported installed too, and the
-Plugin Gallery's "Install" (Rule 26) ends the same way. The test
-packages and the reads that show the recorded version and the tables
-are in the footnote.
+**A12 — Plugins: a plugin whose own database step fails is reported "Successfully installed" and kept as installed** · 🐞 · medium.
+A plugin can carry an install migration that creates its database
+tables. When the Site Administrator installs such a plugin with
+"Upload A New Plugin" (or the Plugin Gallery's "Install") and the
+migration fails partway, the notice still reads "Successfully
+installed version 1.0.0.0". The plugin is listed and recorded as
+installed, and the tables the migration created before failing stay.
+Nothing reaches the server's log, so nobody learns the plugin is half
+set up until it fails in use.
 
-Every installation also runs again the installation step of each
-plugin already installed, and hides their failures the same way.
-Nothing on screen or in the server's log shows it; the test packages
-write a line to a file of the tester's choosing each time their step
-runs (the footnote). With them, during each later upload the earlier
-plugins' lines showed their steps ran again and failed on the tables
-they had made the first time, under the green notice; a deleted
-plugin wrote no line. Read from the code, not seen: "Static Pages
-Plugin" {OJS OMP}, installed by default, creates its tables again the
-same way, so its step fails during every plugin installation; it
-writes no such line, so no read a tester can make shows it.
+This holds for generic plugins and themes on a press, and for most
+other plugin types. A failing plugin of a type the application loads
+after its import/export plugins (themes, report and payment plugins on
+a journal or a preprint server) is reported as failed instead; that
+notice has faults of its own
+([U62-A13](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md)).
+
+Each installation also runs the install migration of every plugin
+already installed, and hides their failures the same way. With the
+plugins that ship with the applications this does no harm today:
+"Static Pages Plugin" fails at its first statement and writes nothing.
+A plugin whose migration adds rows would add them again on every
+installation of another plugin.
+
+The fix has two parts: an installation runs only the installed
+plugin's own steps, and a failed step makes it fail.
 Basis: probe, 2026-11-05. <sup>f-a12</sup>
 
 <a id="a13"></a>
-**A13 — Plugins: a failed installation's notice shows raw markup and the database's connection details, and the same package cannot install again** · 🐞 · low.
-When an installation does report its failure (the theme case of
-Rule 16), the amber notice reads "Installation failed. DB: An
-exception was thrown when executing the migration class
-`<tt>`{class}`</tt>`. The exception was {the database's error}
-(Connection: {database type}, Host: {server address}, Port: ,
-Database: {database name}, SQL: {statement})." The tags `<tt>` and
-`</tt>` show as text, beside the plugin's internal class name, the
-database's server and name, and the statement that failed. Expected: a
-sentence saying the plugin's database step failed. The theme's files
-are removed, but what its step made in the database before failing
-stays: uploading the same package again fails with "… already exists"
-in the notice, and goes on failing until someone with access to the
-database removes what the first attempt left. The theme package, and
-the reads that show its folder gone and its table left, are in the
-footnote.
+**A13 — Plugins: a failed plugin installation's notice shows raw markup and database details, and the same package then fails with "already exists"** · 🐞 · low.
+A plugin can carry an install migration that creates its database
+tables. When that migration fails during "Upload A New Plugin" and the
+failure is reported, the error notice reads "Installation failed. DB:
+An exception was thrown when executing the migration class
+`<tt>`…`</tt>`. The exception was …". The tags `<tt>` and `</tt>` show
+as text around the plugin's internal class name. The rest is the
+database driver's own message, with the database host, the database
+name and the statement that failed. Only the Site Administrator can
+upload plugins, so only they see it.
+
+The plugin's files are removed, but the tables its migration created
+before failing stay. Uploading the same package again then fails with
+"… already exists". It keeps failing, even with a corrected release of
+the plugin, until someone with access to the database drops those
+tables.
+
+Today only a failing theme on a journal or a preprint server is
+reported; every other failed installation, OMP's themes included, is
+reported as a success
+([U62-A12](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U62-A12-plugin-install-step-fails-reported-installed.md)).
+OMP has the same code, so once that report is fixed every failed
+installation on all three apps meets this notice and this dead end.
+The fix proposed here clears the notice's markup and connection
+details, and removes the leftover tables on PostgreSQL, not on MySQL.
 Basis: probe, 2026-11-05. <sup>f-a13</sup>
 
 ### OMP
@@ -1765,6 +1773,7 @@ first); keeping the false result alone would turn every plugin
 installation on OJS and OMP into a failure, since Static Pages' step
 fails on each one. No fix was tried. A different path and fault from
 A5 and A11 (an install, a result overwritten), so its own entry.
+Issue report: [docs/issues/U62-A12-plugin-install-step-fails-reported-installed.md](../issues/U62-A12-plugin-install-step-fails-reported-installed.md).
 
 <a id="fn-f-a13"></a>
 **f-a13** — fn-w; the theme package (`kind: 'theme'`, `fail: true`, no `filter`) and the reads: fn-x. `installer.installMigrationError` holds HTML
@@ -1782,6 +1791,7 @@ failed. DB: … SQLSTATE[42P07]: Duplicate table: 7 ERROR: relation
 "u62i05btfailr1_t" already exists …". OMP shares the message keys
 (read from the code; a theme's failure does not reach the notice there,
 f-a12).
+Issue report: [docs/issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md](../issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-i. Live-probed 2026-09-27 (OJS, two runs): with

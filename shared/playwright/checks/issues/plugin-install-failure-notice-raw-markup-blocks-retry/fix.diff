@@ -1,0 +1,54 @@
+--- a/lib/pkp/classes/plugins/Plugin.php
++++ b/lib/pkp/classes/plugins/Plugin.php
+@@ -59,6 +59,8 @@
+ use PKP\db\DAORegistry;
+ use PKP\facades\Locale;
+ use PKP\facades\Repo;
++use Illuminate\Database\QueryException;
++use Illuminate\Support\Facades\Schema;
+ use PKP\install\Installer;
+ use PKP\observers\events\PluginSettingChanged;
+ use PKP\site\Version;
+@@ -853,9 +855,19 @@
+ 
+         if ($migration = $this->getInstallMigration()) {
+             try {
+-                $migration->up();
++                // Where the database can roll schema changes back (PostgreSQL), run the step in one
++                // transaction, as Laravel's Migrator::runMigration() does, so that a step failing
++                // partway leaves nothing behind and the plugin can be installed again.
++                $connection = Schema::getConnection();
++                $connection->getSchemaGrammar()->supportsSchemaTransactions() && ($migration->withinTransaction ?? true)
++                    ? $connection->transaction(fn () => $migration->up())
++                    : $migration->up();
+             } catch (Exception $e) {
+-                $installer->setError(Installer::INSTALLER_ERROR_DB, __('installer.installMigrationError', ['class' => get_class($migration), 'message' => $e->getMessage()]));
++                // The whole exception, connection and statement included, goes to the server's log;
++                // the notice gets the database's own error.
++                error_log($e);
++                $message = $e instanceof QueryException && $e->getPrevious() ? $e->getPrevious()->getMessage() : $e->getMessage();
++                $installer->setError(Installer::INSTALLER_ERROR_DB, __('installer.installMigrationError', ['class' => get_class($migration), 'message' => $message]));
+                 $result = false;
+             }
+         }
+--- a/lib/pkp/locale/en/installer.po
++++ b/lib/pkp/locale/en/installer.po
+@@ -142,14 +142,14 @@
+ 
+ msgid "installer.installMigrationError"
+ msgstr ""
+-"An exception was thrown when executing the migration class <tt>{$class}</"
+-"tt>. The exception was {$message}."
++"An exception was thrown when executing the migration class {$class}. The "
++"exception was {$message}."
+ 
+ msgid "installer.installParseEmailTemplatesFileError"
+-msgstr "Error parsing the email template file <tt>{$file}</tt>."
++msgstr "Error parsing the email template file {$file}."
+ 
+ msgid "installer.installParseFilterConfigFileError"
+-msgstr "Error parsing the filter configuration file <tt>{$file}</tt>."
++msgstr "Error parsing the filter configuration file {$file}."
+ 
+ msgid "installer.unsupportedUpgradeError"
+ msgstr "Upgrade unsupported. See the Upgrade Guide (https://docs.pkp.sfu.ca/dev/upgrade-guide) for details."

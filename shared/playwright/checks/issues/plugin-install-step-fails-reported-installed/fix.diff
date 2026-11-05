@@ -1,0 +1,103 @@
+--- a/lib/pkp/classes/install/Installer.php
++++ b/lib/pkp/classes/install/Installer.php
+@@ -32,6 +32,7 @@
+ use PKP\filter\FilterHelper;
+ use PKP\navigationMenu\NavigationMenuDAO;
+ use PKP\plugins\Hook;
++use PKP\plugins\Plugin;
+ use PKP\plugins\PluginRegistry;
+ use PKP\site\SiteDAO;
+ use PKP\site\Version;
+@@ -102,6 +103,9 @@
+     /** @var array List of migrations executed already */
+     public $migrations = [];
+ 
++    /** @var ?Version The plugin a plugin's installation installs (setPluginToInstall()) */
++    protected ?Version $pluginToInstall = null;
++
+     /** @var array List of email template variables to rename. App-specific */
+     protected $appEmailTemplateVariableNames = [];
+ 
+@@ -708,6 +712,27 @@
+     }
+ 
+     /**
++     * Name the plugin a plugin's installation installs, so that only that plugin's own
++     * install steps (its Installer::postInstall callbacks) run, not those of every plugin
++     * on disk.
++     */
++    public function setPluginToInstall(Version $version): void
++    {
++        $this->pluginToInstall = $version;
++    }
++
++    /**
++     * Whether a plugin's own install steps belong to this run: every plugin's for the
++     * application's installer, only the named plugin's for a plugin's installation.
++     */
++    public function runsInstallStepsOf(Plugin $plugin): bool
++    {
++        return !$this->pluginToInstall
++            || ($this->pluginToInstall->getProductType() === 'plugins.' . $plugin->getCategory()
++                && $this->pluginToInstall->getProduct() === $plugin->getDirName());
++    }
++
++    /**
+      * For upgrade: install email templates and data
+      *
+      * @deprecated 3.4 Do not use <code function="installEmailTemplate" ...>
+--- a/lib/pkp/classes/plugins/Plugin.php
++++ b/lib/pkp/classes/plugins/Plugin.php
+@@ -727,6 +727,9 @@
+      */
+     public function installSiteSettings($hookName, $args)
+     {
++        if (!$args[0]->runsInstallStepsOf($this)) {
++            return false;
++        }
+         $pluginSettingsDao = DAORegistry::getDAO('PluginSettingsDAO'); /** @var PluginSettingsDAO $pluginSettingsDao */
+         $pluginSettingsDao->installSettings(PKPApplication::SITE_CONTEXT_ID, $this->getName(), $this->getInstallSitePluginSettingsFile());
+ 
+@@ -760,6 +763,9 @@
+      */
+     public function installEmailTemplates($hookName, $args)
+     {
++        if (!$args[0]->runsInstallStepsOf($this)) {
++            return false;
++        }
+         $installer = &$args[0]; /** @var Installer $installer */
+         $result = &$args[1];
+ 
+@@ -808,6 +814,9 @@
+      */
+     public function installFilters($hookName, $args)
+     {
++        if (!$args[0]->runsInstallStepsOf($this)) {
++            return false;
++        }
+         $installer = &$args[0]; /** @var Installer $installer */
+         $result = &$args[1]; /** @var bool $result */
+ 
+@@ -848,6 +857,9 @@
+      */
+     public function updateSchema($hookName, $args)
+     {
++        if (!$args[0]->runsInstallStepsOf($this)) {
++            return false;
++        }
+         $installer = &$args[0];
+         $result = &$args[1];
+ 
+--- a/lib/pkp/classes/plugins/PluginHelper.php
++++ b/lib/pkp/classes/plugins/PluginHelper.php
+@@ -252,7 +252,9 @@
+                     'additionalLocales' => $site->getSupportedLocales(),
+                 ], $installFile, true);
+                 $installer->setCurrentVersion($pluginVersion);
+-                $installer->execute() || throw new Exception(__('manager.plugins.installFailed', ['errorString' => $installer->getErrorString()]));
++                $installer->setPluginToInstall($pluginVersion);
++                // A failed step records its error; a later callback of the same plugin (installFilters()) may still leave the result true
++                ($installer->execute() && !$installer->getErrorType()) || throw new Exception(__('manager.plugins.installFailed', ['errorString' => $installer->getErrorString()]));
+                 $versionDao->insertVersion($pluginVersion, true);
+ 
+                 AuditLog::log(AuditEvent::PLUGIN_INSTALL, LogLevel::NOTICE, [
