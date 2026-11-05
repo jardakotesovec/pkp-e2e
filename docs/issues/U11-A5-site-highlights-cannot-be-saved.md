@@ -5,17 +5,25 @@
 - **Kind** regression
 - **Crash** server
 - **Affects**
-  - main: OMP, OPS until their `lib/pkp` takes `pkp/pkp-lib#13521` (merged 2026-10-20; OJS's pointer has its change)
+  - main: none (fixed by `pkp/pkp-lib#13521`; all three apps' `lib/pkp` carry it)
   - 3.5: OJS, OMP, OPS
   - 3.4: none (code; the older API has no such middleware)
   - 3.3: none (code; no highlights)
 - **Introduced** `pkp/pkp-lib#10267` for `pkp/pkp-lib#10266` · [6f727bb567](https://github.com/pkp/pkp-lib/commit/6f727bb567c1b68d6efc5748b3ac6264389edce0) · 2024-08-02 · Taslan Graham (taslangraham)
-- **Upstream** `pkp/pkp-lib#13521` (for `pkp/pkp-lib#13520`, the Confirm Access fix) fixes it on `main`, merged 2026-10-20, by its `HasRoles` change; nothing yet for 3.5
+- **Upstream** `pkp/pkp-lib#13521` (for `pkp/pkp-lib#13520`, the Confirm Access fix) fixes it on `main`, merged 2026-10-20, by its `HasRoles` change (`pkp/pkp-lib#13577` ports it to `ore`); nothing yet for 3.5
 - **Tracked in** spec U11 [A5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U11-highlights.md#a5)
-- **Checked** 2026-10-04, each branch's tip; 2026-10-20, `main` with pkp-lib `58c2998847` in `lib/pkp` (the commits in Evidence)
+- **Checked** 2026-10-04, each branch's tip; 2026-10-20, `main` with pkp-lib `58c2998847` in `lib/pkp`; 2026-11-05, `main` and `stable-3_5_0` tips (the commits in Evidence)
 - **Model** claude-opus-5-5
 
 ## Summary
+
+**Update 2026-11-05.** `main` is fixed in OJS, OMP and OPS: all
+three apps' `lib/pkp` pointers now carry `pkp/pkp-lib#13521`, and the
+Steps end as Expected in each. `stable-3_5_0` still fails exactly as
+below in all three apps. Its pkp-lib tip has the line the Cause names
+unchanged, and no 3.5 port of the fix exists (the only PRs for
+`pkp/pkp-lib#13520` are #13521 for `main` and #13577 for `ore`). This
+issue stays open for 3.5.
 
 **Update 2026-10-20.** `pkp/pkp-lib#13521`, merged on pkp-lib `main` as
 `58c2998847`, changes the line the Cause names
@@ -296,6 +304,17 @@ Small: one line in one shared middleware, and a unit test.
 
 ## Evidence
 
+- 2026-11-05, each line's tip: the kit's walk on freshly loaded default
+  datasets. `main`: OJS `1e12158722`, OMP `828150a8fe`, OPS
+  `0acd73102d`, `lib/pkp` at `25fdc98a3e` (OJS, OPS) and `1ae711024a`
+  (OMP), each containing `58c2998847`. Steps 4 to 7 as Expected in all
+  three, and the typed list address answers 200. `stable-3_5_0`: OJS
+  `55963418be`, OMP `4aeacacc2a`, OPS `82faa21834`, `lib/pkp` at
+  `40990d1523`, `c4c0aa8c52` and `e2c62c4b7b`. Add, order and the list
+  answer 500 "Call to a member function getId() on null" in all three,
+  and the control (a journal's own highlights) works. pkp-lib's
+  `stable-3_5_0` tip, `40990d1523` (2026-11-04), still has
+  `$context->getId()` unguarded at `HasRoles.php:63`.
 - 2026-10-20, `main` with the fix: the kit's walk and its `neighbour`
   mode on freshly loaded default datasets, OJS `3109a59114`, OMP
   `5777025be`, OPS `f048e747b4`, each with `lib/pkp` at `58c2998847`

@@ -564,9 +564,10 @@ The tab is offered only on a site that hosts two or more journals
 (presses on OMP, preprint servers on OPS).
 On pkp-lib `main`, pkp/pkp-lib#13521 (merged 2026-10-20) fixes it: with
 it in `lib/pkp`, the site highlight saves and orders, and the carousel
-shows, in OJS, OMP and OPS (walked 2026-10-20). OJS's pointer has it;
-OMP's and OPS's take it with their next bump; 3.5 still fails.
-Basis: probe, 2026-10-04; 2026-10-20. <sup>f-a5</sup>
+shows, in OJS, OMP and OPS (walked 2026-10-20). Since then all three
+apps' pointers carry it, and `main` is fixed in each; 3.5 still fails
+in all three, with no port of the fix (walked 2026-11-05).
+Basis: probe, 2026-10-04; 2026-10-20; 2026-11-05. <sup>f-a5</sup>
 
 <a id="a6"></a>
 **A6 — The carousel's dots are not buttons** · ❓ · minor.
@@ -1112,6 +1113,10 @@ status and no error text; "Save Order" shows "Error / Call to a member
 function getId() on null / OK"; the site's list reads "No items found."
 and the database holds no highlight without a context. The journals'
 panels, whose requests carry the journal, are unaffected.
+Re-walked 2026-11-05 at each line's tip on fresh datasets: `main`
+(OJS `1e12158722`, OMP `828150a8fe`, OPS `0acd73102d`, every
+`lib/pkp` containing `58c2998847`) shows the Expected in all three;
+`stable-3_5_0` (pkp-lib `40990d1523`) still answers 500 in all three.
 Issue report: [pkp-e2e#899](https://github.com/jardakotesovec/pkp-e2e/issues/899) ([docs/issues/U11-A5-site-highlights-cannot-be-saved.md](../issues/U11-A5-site-highlights-cannot-be-saved.md)).
 
 <a id="fn-f-a6"></a>
