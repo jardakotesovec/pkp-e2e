@@ -1,0 +1,38 @@
+--- a/api/v1/publicationPeerReviews/index.php
++++ /dev/null
+@@ -1,16 +0,0 @@
+-<?php
+-
+-/**
+- * @file api/v1/publicationPeerReviews/index.php
+- *
+- * Copyright (c) 2025 Simon Fraser University
+- * Copyright (c) 2025 John Willinsky
+- * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
+- *
+- * @ingroup api_v1_publicationPeerReviews
+- *
+- * @brief Handle API requests for public peer reviews.
+- *
+- */
+-
+-return new \PKP\handler\APIHandler(new \PKP\API\v1\publicationPeerReviews\PublicationPeerReviewController());
+--- /dev/null
++++ b/api/v1/peerReviews/index.php
+@@ -0,0 +1,16 @@
++<?php
++
++/**
++ * @file api/v1/peerReviews/index.php
++ *
++ * Copyright (c) 2025 Simon Fraser University
++ * Copyright (c) 2025 John Willinsky
++ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
++ *
++ * @ingroup api_v1_peerReviews
++ *
++ * @brief Handle API requests for public peer reviews.
++ *
++ */
++
++return new \PKP\handler\APIHandler(new \PKP\API\v1\peerReviews\PeerReviewController());

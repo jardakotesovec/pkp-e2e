@@ -993,7 +993,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | On "Reviewer Recommendations", a screen reader announces the "Activate" tick boxes and the status dropdown without a name | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A13](#a13) | A Section Editor, or an editor without settings access, can change and switch off a journal's reviewer recommendations | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
 | [OJS1](#ojs1) | A review made public gives anyone, without signing in, the review form answers meant for the editor only | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
-| [OMP4](#omp4) | A press's public peer-review address fails on the server for every request | 🐞 | low · crash: server | — |
+| [OMP4](#omp4) | Every request to a press's public peer-review API address fails with a server error | 🐞 | low · crash: server | issues (claude), 2026-11-05 — re-verified |
 | [A2](#a2) | A form in use can still be deactivated, although the activation confirmation promises it cannot | ❓ | minor | — |
 | [A3](#a3) | A deadline saved as 0 or left empty makes Add Reviewer preset three weeks for the response but four for the review | ❓ | minor | — |
 | [A4](#a4) | A reload on a "Review" side tab lands on "Submission" › "Disable Submissions", although the address names the side tab and a pressed "Submission" side tab survives a reload | ❓ | minor | — |
@@ -1259,15 +1259,20 @@ pasting a list from another document works round it. Basis: probe,
 2026-10-04. <sup>f-omp3</sup>
 
 <a id="omp4"></a>
-**OMP4 — A press's public peer-review address fails on the server for every request** · 🐞 · low · crash: server.
-A journal gives out the public reviews of its published articles at the
-address `api/v1/peerReviews` (Rule 15). A press has a matching address,
-`api/v1/publicationPeerReviews`, but every request to it fails on the
-server, signed in or not and whatever follows it in the address: the
-answer is a server error with an empty page, where the press's public
-reviews or a "not found" answer are expected. No screen of the press
-calls the address, so only a program reading a press's open reviews
-meets it.
+**OMP4 — Every request to a press's public peer-review API address fails with a server error** · 🐞 · low · crash: server.
+On `main`, a journal gives out the public reviews of its published
+articles at the address `api/v1/peerReviews`. A press has its own
+address for them, `api/v1/publicationPeerReviews`, but every request to
+it fails on the server, signed in or not, whatever path or query follows
+it: the answer is a server error with an empty page, where the press's
+public reviews are expected.
+
+No screen calls the address, so only a program reading a press's public
+reviews meets the error, and it cannot get them any other way. No
+released press has the address: it exists on `main` only. Preprint
+servers have no review stage, so they have no such address.
+
+The proposed fix moves presses to `api/v1/peerReviews`, as OJS did.
 Since: 2026-01-12 (ten months) · Basis: probe, 2026-11-05. <sup>f-omp4</sup>
 
 ---
@@ -2334,6 +2339,7 @@ to `peerReviews`, as OJS did) or delete it. Kept script
 `shared/playwright/checks/U62/I05B/i05b.js` (part `api`). The book
 page's missing public reviews are
 [*Monograph landing page*'s A26](U69-monograph-landing-page.md#a26).
+Issue report: [docs/issues/U29-OMP4-press-peer-review-address-server-error.md](../issues/U29-OMP4-press-peer-review-address-server-error.md).
 
 ## Reference — entry points & surfaces
 
