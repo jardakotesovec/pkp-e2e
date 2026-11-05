@@ -760,12 +760,16 @@ links under the list. <sup>g</sup>
     deposited. Validation errors:" over the check's list; a work deposited
     in the same action whose file passes is sent as usual. When the
     install cannot fetch Crossref's format, the file is sent unchecked
-    and Crossref checks it. A deposit that cannot reach the agency never
-    gets there: its background job fails, is tried twice more and is
-    dropped, and the DOI stays "Submitted" with nothing on the DOIs page
-    to show it ⚠ [A18](#a18). The test installs reach no agency, so
-    every deposit there stays "Submitted".
-    <sup>r</sup> <sup>q22</sup> <sup>f-a13</sup>
+    and Crossref checks it. A deposit that gets no answer from the
+    agency (no connection, a name that does not resolve, a timeout)
+    reads "Error" once the background deposit has run, like one the
+    agency refused: "View Error" opens the same window over the
+    connection error, "Has Error" lists the item, and no failed job is
+    left behind. Until pkp/pkp-lib#13591's fix is merged, the DOI stays
+    "Submitted" with nothing on the DOIs page to show it ⚠ [A18](#a18).
+    The test installs run no background deposit, so every deposit there
+    stays "Submitted".
+    <sup>r</sup> <sup>q22</sup> <sup>q53</sup> <sup>f-a13</sup>
 
 <a id="agencies"></a>
 **Registration agencies**
@@ -4459,6 +4463,28 @@ and landed among the failed jobs; every deposited item still read
 "Submitted", with no "View Error" in the row or the panel. The
 "Registration Error Message" window was therefore not seen; its wording
 is code-read.
+
+<a id="fn-q53"></a>
+**q53** — Walked 2026-11-05 (Rule 33; A18) at the PR heads of
+pkp/pkp-lib#13591, before their merge: crossref-ojs#117 `8a2335c21b`,
+crossref-ops#74 `3535d54844`, ojs#5977 `49f80fec9a` (DataCite, and the
+crossref pointer) and ops#1481 `85500f3837`, each app merged locally onto
+its `main` tip (OJS `1e12158722`, OPS `0acd73102d`), with
+`checks/issues/deposit-unreachable-agency-stays-submitted/walk.js` on
+dataset fleets freshly loaded per run, the second, undeposited item as
+control. Crossref (OJS, OPS) and DataCite (OJS) behind the dead-port
+proxy (`cURL error 7`), and Crossref behind a proxy whose name does not
+resolve (`cURL error 5`, a transfer error without a response): every
+deposited item read "Error" with "View Error" in the row and the panel,
+the window "Registration Error Message" read "The deposit to Crossref
+failed. The details below explain the cause of the error:" over the cURL
+message, "Has Error" listed it, no failed job was recorded, and the
+control stayed "Unregistered". At the tips the same runs left every item
+"Submitted" (the `cURL error 5` case with no failed job either). A
+timeout raises the same `ConnectException` as a refused connection
+(Guzzle `CurlFactory`), code-read. The same walk at the `stable-3_5_0`
+PR heads (crossref-ojs#118, crossref-ops#75, ojs#5978, ops#1482) is
+recorded in the sync log.
 
 <a id="fn-s"></a>
 **s** — `isPluginConfigured()`: OJS `CrossrefPlugin` (the schema's
