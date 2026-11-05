@@ -1,11 +1,11 @@
-# The picture address of a category with no picture never finishes loading on a journal or preprint server
+# The picture address of a category with no picture never finishes loading
 
 - **Severity** low
 - **Effort** small
 - **Kind** defect
 - **Crash** server
 - **Affects**
-  - main: OJS, OPS
+  - main: OJS, OMP, OPS
   - 3.5: OJS, OPS
   - 3.4: OJS, OPS (code)
   - 3.3: OJS, OPS (code)
@@ -28,8 +28,9 @@ server is not kept busy; only the visitor's browser waits.
 
 No page links to these addresses: they are reached only by typing or
 bookmarking one, or by keeping the address of a picture the manager
-has since removed. A press is not affected, because its own handler
-checks for a picture first and answers an empty page.
+has since removed. A press answers the same way since `pkp/omp#2553`
+handed its category pictures to the same code; before, its own handler
+checked for a picture first and answered an empty page.
 
 ## Impact
 
@@ -156,7 +157,13 @@ Reach:
   [U16-OMP1-press-category-picture-broken.md](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U16-OMP1-press-category-picture-broken.md).
   Its proposed fix hands OMP's category pictures to these pkp-lib
   methods, so it would bring this fault to OMP unless this fix lands
-  first.
+  first. `pkp/omp#2553` (for `pkp/pkp-lib#13730`) makes that change:
+  walked 2026-11-05 at its head `7d5c5ffa2a` on the OMP dataset fleet,
+  "Computer Science"'s two addresses answer "200 OK",
+  "Content-Type: directory", "Content-Length: 4096" and no body, with
+  the warning at `PKPCatalogHandler.php` lines 121 and 145, as OJS on
+  `main` does; at its base `828150a8fe`, the empty page above
+  (`shared/playwright/checks/sync/omp-2553/upgraded-picture.js`).
 - A category whose picture was removed in the category window
   (`CategoryCategoryController` stores `image` as `null`) is in the same
   state, so its once-working addresses fail the same way (code).

@@ -9,7 +9,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** `pkp/pkp-lib#11243` and `pkp/omp#1949` for `pkp/pkp-lib#10404` · [198595800a](https://github.com/pkp/pkp-lib/commit/198595800a0bd40db5db4d41d1a7b34556894719), [adeb69c6b](https://github.com/pkp/omp/commit/adeb69c6b8c43fcf3a3aedabbc45c3eca0a49c9a) · 2025-05-12 · Taslan A. Graham (taslangraham)
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#13730` (open, the team's copy of this issue; fix in PR `pkp/omp#2553`, not yet in main, the same change as the Proposed fix; walked fixed at its head 2026-11-05, a 3.5 picture carried over by the upgrade included)
 - **Tracked in** spec U16 [OMP1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U16-categories.md#omp1)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
@@ -202,10 +202,19 @@ pkp-lib.
   (2026-10-02). No request failed on the server and no page script
   failed, apart from OMP5 (Steps, step 6). MySQL not checked (the fault
   does not depend on the database).
-- Not driven: 3.4 and 3.3; an upgrade from 3.5 with category pictures in
-  place (the migration's move was read in the code, not run); the
-  category window's preview after the save; a category with no picture
-  on a press with the fix in (Proposed fix).
+- Not driven: 3.4 and 3.3; the category window's preview after the
+  save.
+- Driven at the fix PR `pkp/omp#2553`'s head `7d5c5ffa2a` (2026-11-05,
+  before its merge; `checks/sync/omp-2553/upgraded-picture.js`): a 3.5
+  press whose "Applied Science" got its picture through 3.5's own form,
+  upgraded to `main`. The upgrade moves both files to
+  `public/presses/1/` and swaps `name` and `uploadName`; at the base
+  `828150a8fe` the picture is broken and both addresses answer an empty
+  `text/html`, at the head it draws and both answer the moved files. A
+  category with no picture, at the head, answers its address with the
+  press's public folder ("Content-Type: directory", no body) and a PHP
+  warning, as OJS on `main` does (pkp-lib `PKPCatalogHandler`; not this
+  report's fault, an incidental of U16).
 - `pkp/pkp-lib#7327` (open PR, browsing URLs) would move these methods
   but does not touch the storage.
 - Tips:
