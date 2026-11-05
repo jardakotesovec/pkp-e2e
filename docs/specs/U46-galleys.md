@@ -48,7 +48,7 @@ where they can open the workflow, whatever their role there.
 | **Manage the galleys** ("Add galley", "Order", "Edit", "Change File", "Delete") | • Journal: the Journal Manager, Editor, Production Editor and Site Administrator, and every Section Editor, Guest Editor, Layout Editor, Designer, Indexer or Proofreader who reaches the page. The assignment's "Permissions" box plays no part [OPS1](#ops1) <sup>b</sup> <sup>q2</sup><br>• Journal: the Author never; their list has no "Order", no "Add galley" and no row menu <sup>b</sup> <sup>q1</sup><br>• Preprint server: the Preprint Server Manager and the Site Administrator, always <sup>c</sup><br>• Preprint server: a Moderator is offered the whole set. Once the preprint is posted, every assigned Moderator may use it. Before posting, a Moderator whose "Permissions" box is unticked gets "Edit" read-only, a new galley's "Save" refused, "Save Order" ignored and "Delete" refused with "An unexpected error has occurred. Please reload the page and try again." (the galley stays); only "Change File" works ⚠ [OPS2](#ops2) <sup>c</sup> <sup>q3</sup><br>• Preprint server: the Author, while they may edit the preprint (before posting, and only while the Author role's "Permit submission metadata edit." is on, as installed; Settings bullet 4) [OPS1](#ops1). "Change File" works only on a galley whose file they uploaded themselves ⚠ [OPS3](#ops3) <sup>c</sup> |
 | **View a galley read-only** (row menu "View") | • Preprint server: the Author, whenever they may not edit the preprint: after posting, or with the edit permission off. "View" is then the row menu's only item, and "Order" and "Add galley" are gone (Rule 7) <sup>c</sup> <sup>q4</sup><br>• Journal: never offered; the Author has no row menu |
 | **"More Information"** (row menu) | • the editorial roles of the row "Manage the galleys", on a galley that has a file. Never the Author, not even a preprint's Author who may edit it. The window it opens is *[Submission files](U36-submission-files.md#more-information)*' <sup>a</sup> |
-| **Set a galley's identifiers** (the window's "Identifiers" tab) | • Owned by *[Identifiers](U44-identifiers.md)*, which names who may save the tab |
+| **Set a galley's identifiers** (the window's "Identifiers" tab) | • Owned by *[Identifiers](U44-identifiers.md)*, which names who may save the tab. On a preprint server that never saved its "Publisher ID" settings, the tab's form fails on the server when its address is opened ([→ Identifiers, OPS1](U44-identifiers.md#ops1)) |
 
 ## Fields & validation
 
@@ -1005,6 +1005,13 @@ component but no OMP config mounts it; U36's probe of 2026-09-23 saw
 action lists never include it. The window is
 `FileInformationCenterHandler::viewInformationCenter` at the Production
 stage, titled `informationCenter.informationCenter` + ": " + the label.
+On `stable-3_5_0` the row menu has no "More Information": read
+2026-11-05 on PKP's default test dataset as the manager `dbarnes`, two
+runs, OJS submission 17 and OPS preprint 1, a galley with a file offered
+"Edit", "Change File" and "Delete", while `main` offered "More
+Information" as well in the same runs (3.5's `GalleyManager` has no
+`galleyMoreInfo` action; kept check
+`shared/playwright/checks/U45/I05A/i05a.js`, `PART=u46`).
 
 <a id="fn-b"></a>
 **b** — Journal gate. Client: `getGalleyManagerConfiguration()` gives

@@ -400,7 +400,16 @@ windows are the galley row's "Edit" on the Galleys page (a window headed
 1. **"Publisher ID"** (Settings › Workflow › Submission › "Metadata"):
    one box per kind of item (Fields). Default: none ticked. Ticked: the
    kind's screen gains the "Publisher ID" field (Rules 2 to 6);
-   unticked, the field is gone and saved values are kept.
+   unticked, the field is gone and saved values are kept. Until the
+   form's first "Save", the boxes are unticked because nothing is
+   stored, and they look the same as after a "Save" with none ticked. A
+   journal and a press treat the two alike. A preprint server does not:
+   until that first "Save", with or without a box ticked, the request for
+   a galley's "Identifiers" form fails on the server when it is sent
+   directly. PKP's default test dataset's preprint server is in that
+   state as installed. No screen sends the request then, since the
+   galley's window shows no "Identifiers" tab while no box is ticked
+   ⚠ [OPS1](#ops1).
 2. **The "URN" plugin** {OJS OMP} (Settings › Website › "Plugins",
    "Public Identifier Plugins", the "URN" row): default disabled, no
    URN anywhere. Enabled and saved with a kind ticked: URNs for that kind
@@ -954,6 +963,9 @@ Left out of the scenarios above, by reason:
   - OMP6 (a press file's default URN without the format number; Rule 8)
   - OMP7 (a press still listing "Identifiers" and showing format URNs
     on its book page with the plugin off; Rule 20; scenario 3 passes it)
+  - OPS1 (a preprint server's galley identifiers form failing on the
+    server until the "Metadata" form is first saved, reached only by its
+    address; Settings bullet 1)
 - **No seed**:
   - an issue galley's "Publisher ID" on an existing issue galley, its
     refusal notices, "/" accepted, and "Enable for Issue Galleys"
@@ -1015,6 +1027,7 @@ entry notes otherwise; the team settles them on spec review.
 | [OMP6](#omp6) | A press file's URN leaves out its format number, and file patterns leave "%f" unfilled | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP7](#omp7) | With the URN plugin switched off, a press's book page still shows format URNs | 🐞 | medium | — |
 | [OMP8](#omp8) | A press's URN settings give a pattern example with "%r", which stays in every URN made from it | 🐞 | medium | issues (claude), 2026-10-19 — re-verified |
+| [OPS1](#ops1) | On a preprint server that never saved its "Publisher ID" settings, a galley's identifiers form fails on the server | 🐞 | low · crash: server | — |
 | [A3](#a3) | An article's Publisher ID accepts values the tabs refuse, a duplicate included | ❓ | minor | — |
 | [A12](#a12) | A URN that differs from another only in case is accepted as new | ❓ | minor | — |
 | [OJS2](#ojs2) | The JATS XML's publisher ID is the article's number, not the typed Publisher ID | ❓ | minor | — |
@@ -1412,6 +1425,27 @@ Once the book is published, that URN goes out in the book page's
 metadata and the press's OAI-PMH records. A pattern typed from the
 listed placeholders gives correct URNs.
 Basis: probe, 2026-10-19. <sup>f-omp8</sup>
+
+### OPS
+
+<a id="ops1"></a>
+**OPS1 — On a preprint server that never saved its "Publisher ID" settings, a galley's identifiers form fails on the server** · 🐞 · low · crash: server.
+On a preprint server whose Settings › Workflow › Submission ›
+"Metadata" form has never been saved, the request for a galley's
+"Identifiers" form fails on the server, for the Author of an unposted
+preprint and for the Preprint Server Manager alike. PKP's default test
+dataset's preprint server is in that state as installed. No screen sends
+the request then, because the galley's "Edit" window has the "Edit
+Metadata" tab alone, so only someone who requests the form's address
+directly meets it; the address, and how to request it by hand, are in
+the footnote. The check is the request's answer, not a rendered page: a
+server error with an empty answer while the fault holds, against a
+normal answer whose text carries the form once it is gone. One "Save" of
+the "Metadata" form, with or without a "Publisher ID" box ticked, ends
+it: the same request then gets the normal answer. A journal's galley and
+a press's publication format in the same never-saved state get the
+normal answer.
+Basis: probe, 2026-11-05. <sup>f-ops1</sup>
 
 ### Retired
 
@@ -2303,6 +2337,78 @@ is A11's (note f-a11), not a second fault. A journal's example reads
 "vol3iss2pp230"." (read in the OJS locale file, with placeholders its
 list names; not driven).
 Issue report: [pkp-e2e#1013](https://github.com/jardakotesovec/pkp-e2e/issues/1013) ([docs/issues/U44-OMP8-urn-pattern-example-unknown-placeholder.md](../issues/U44-OMP8-urn-pattern-example-unknown-placeholder.md)).
+
+<a id="fn-f-ops1"></a>
+**f-ops1** — OPS `controllers/tab/pubIds/form/PublicIdentifiersForm.php`
+`fetch()`, line 35, tests `in_array('galley', $enablePublisherId)` on the
+context's `enablePublisherId`, which holds nothing until the "Metadata"
+form is first saved (the context schema declares no default, note a);
+PHP 8 refuses the `null`:
+`Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given`.
+OJS's and OMP's copies
+read the setting as `(array)`, as OPS's own `PreprintGalleyGridHandler`
+does where it decides whether the window lists the tab (line 388). The
+line dates from 2021–2022 (blame `ee952a951d`, `5269c59222`). Read in
+the code only, not driven: the window also lists the tab when an
+installed public-identifier plugin is on for galleys; OPS installs none
+(no `plugins/pubIds`), but with one on a never-saved server the failing
+form would sit behind a visible tab. Live-probed 2026-11-05 on PKP's
+default test dataset (`publicknowledge`), OPS `main` (`0acd73102d`) and
+`stable-3_5_0`, two runs per line, each after a fleet reset, with
+`enablePublisherId` read from the database first: no row, in all three
+apps on both lines. On unposted preprint 1, as its author `ccorino` and
+as the manager `dbarnes`, the galley row's "Edit" opened "Upload a File
+Ready for Publication" with the "Edit Metadata" tab alone and sent no
+identifiers request;
+`…/grid/preprint-galleys/preprint-galley-grid/identifiers?submissionId=1&publicationId=1&representationId=1`,
+requested directly as each, answered 500 with an empty body and the
+TypeError in the server log. After one "Save" of the "Metadata" form
+with no box ticked (stored `[]`), the same request answered 200 with
+the form, and the window still had one tab. Controls in the same runs:
+OJS (submission 17's galley; `article-galley-grid/identifiers`) and OMP
+(book 14's publication format; the format grid's `identifiers`) answered
+200 with the form for `dbarnes` before and after the save, and refused
+the author (`vkarbasizaed`, `mdawson`) with "The current role does not
+have access to this operation." in a normal answer (the grid request as
+the author in three of the four runs). The requests were made directly
+because no screen sends them in this state (the one exception for an
+API no screen calls, RUNBOOK "What goes where"). Kept check:
+`shared/playwright/checks/U45/I05A/i05a.js`, `PART=u46`. By hand: the
+address is
+`{base}/index.php/{server path}/$$$call$$$/grid/preprint-galleys/preprint-galley-grid/identifiers?submissionId={s}&publicationId={p}&representationId={g}`;
+on the dataset, preprint 1's "PDF" galley is
+`/index.php/publicknowledge/$$$call$$$/grid/preprint-galleys/preprint-galley-grid/identifiers?submissionId=1&publicationId=1&representationId=1`.
+{s} is the number atop the preprint's workflow window; {p} shows on
+`main` in the page address once "Galleys" is opened
+(`workflowMenuKey=publication_{p}_galleys`; 3.5's address carries
+none); {g} is on no screen and is read from the request the galley
+row's "Edit" sends (`edit-galley?…&representationId={g}`, the browser's
+network panel), the address the script turns into this one by swapping
+`edit-galley` for `identifiers`. The script sends it from the signed-in
+page as the window would; by hand, in the browser's console on the
+signed-in workflow page:
+`fetch(address, {credentials: 'same-origin', headers: {'X-Requested-With': 'XMLHttpRequest'}}).then((r) => r.status)`.
+The failing answer is 500 with an empty body (length 0); the working
+one is 200, a JSON text (OPS after the save and OJS 1561 characters,
+OMP 1858) opening `{"status":true,"content":"<script>` with the
+`publicIdentifiersForm` form inside; the template ends that form with
+its "Save" button (`fbvFormButtons`, read in the code; the recorded
+text is cut at 300 characters), and with no box ticked it holds no
+"Publisher ID" box. An Author refused on OJS and OMP gets 200 with
+`{"status":false,"content":"The current role does not have access to this operation."}`.
+The file API's identifiers operation, `…/api/file/manage-file-api/identifiers`,
+also fails on OPS, in every state: in the same runs it answered 500
+with an empty body before and after the save, as both accounts, on both
+lines, with
+`Call to undefined method PKP\submissionFile\SubmissionFile::getRevision()`
+from OPS's
+`templates/controllers/tab/pubIds/form/publicIdentifiersForm.tpl` line
+33, the template's branch for a file (the `in_array` above is never
+reached for a file). No OPS screen offers it: OPS never assigns
+`showIdentifierTab`, so a file's "Edit" window has no "Identifiers"
+tab (the Reference table's "File-identifier operations" row). It is
+dead code on OPS rather than a finding, since no screen and no state
+reaches it; OJS and OMP answered 200 in the same runs.
 
 ## Reference — entry points & surfaces
 

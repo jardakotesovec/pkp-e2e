@@ -36,7 +36,12 @@ what the team's installs hold (harness.md "Dataset fleets").
   check I23F, 2026-10-23). A context created on screen is not public
   until its "Enable this … to appear publicly on the site" box is
   ticked, so until then the site's address still redirects to
-  `publicknowledge` (U10 claim check I23H, 2026-10-23).
+  `publicknowledge` (U10 claim check I23H, 2026-10-23). No "Publisher
+  ID" kind was ever saved (`enablePublisherId` has no row in any app;
+  the boxes are on Settings › Workflow › Submission › "Metadata", and one
+  "Save" with none ticked stores `[]`), and OJS and OMP hold Static
+  Pages' tables with its version 1.2.0.0 current, OPS neither (U44 and
+  U62 claim checks I05A, I05B, 2026-11-05).
 - Name a submission by its ID and title ("open submission 7,
   'Developing efficacy beliefs in the classroom'"), and the context by its
   path, `publicknowledge` in all three apps. "(2 versions)" in the tables

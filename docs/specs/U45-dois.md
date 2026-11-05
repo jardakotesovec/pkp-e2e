@@ -603,7 +603,12 @@ links under the list. <sup>g</sup>
       DOI beside the galley's [OJS5](#ojs5). <sup>q51</sup> With DataCite,
       a published issue's record is built as a work's is, with no
       funding references, and goes on to the same format check.
-      <sup>f-ojs2</sup>
+      <sup>f-ojs2</sup> On a DataCite journal a work is not exported
+      when one of its galleys is a file of a supplementary component
+      (such as "Data Set") with a "Subject" typed for it in the upload
+      wizard: the action fails on the server, nothing downloads, and the
+      "Error" window shows only the server's own message, "Cannot access
+      offset of type string on string" ⚠ [OJS13](#ojs13).
     - **"Deposit DOIs"** asks "You are about to send DOI metadata records
       for {count} item(s) to {agency}. Are you sure you want to deposit
       these records?". Confirmed, it sends the ticked published items to
@@ -625,7 +630,10 @@ links under the list. <sup>g</sup>
       the same notice and the galley's row "Submitted", but the
       galley's DOI is never sent: Administration › "Failed Jobs" ›
       "Details" reads "DataCite export: no DOI assigned…"
-      ⚠ [OJS5](#ojs5). A ticked
+      ⚠ [OJS5](#ojs5). A ticked work with such a supplementary galley
+      gets the same notice and its galley rows read "Submitted", yet its
+      deposit fails on the server: Administration › "Failed Jobs" lists
+      one failed job with the same message [OJS13](#ojs13). A ticked
       unpublished item makes the whole action fail: nothing is marked,
       and an "Error" window says "One or more invalid publication objects
       were included with the request.". <sup>f-a13</sup>
@@ -2259,6 +2267,7 @@ Left out of the scenarios above, by reason:
   - A15 ("Deposit DOIs" on a published work with no DOI, its own or a galley's; Rule 29)
   - OJS5 ("Deposit All" or "Deposit DOIs" on a DataCite journal marking "Submitted", and never sending, the galley DOI of a work whose article DOI was cleared, and "Export DOIs" not refusing that work; Rules 29, 29a, 41)
   - OJS8 ("Deposit All" and "Deposit DOIs" on a DataCite journal under "DOI Versioning" "Yes" marking an earlier major version's DOIs "Submitted"; Rules 29, 29a)
+  - OJS13 ("Export DOIs" and "Deposit DOIs" on a DataCite journal failing for a work whose supplementary galley file has a "Subject"; Rule 29)
   - A24 (a formatted title's codes in a row's name; Rule 16)
   - A30 (a typed "&" or italic word reaching Crossref as codes; Rule 29b)
   - OJS10 (a cancelled review's DOI kept on the DOIs page and in the exports and deposits; Rule 7b)
@@ -2318,6 +2327,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OJS9](#ojs9) | With "Author Response" DOIs turned on, every DOI assignment gives each author response a new DOI | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [OJS10](#ojs10) | A cancelled reviewer's review stays on the DOIs page and is still deposited with Crossref | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OJS11](#ojs11) | A journal's Crossref deposit names a DOI twice, older version first, after "DOI Versioning" is switched on | 🐞 | medium | issues (claude), 2026-10-20 — re-verified |
+| [OJS13](#ojs13) | On a DataCite journal, a work whose supplementary galley file has a "Subject" cannot be exported or deposited | 🐞 | user-visible · crash: server | — |
 | [OMP1](#omp1) | A press's DOIs page lists no books when only "Files" is ticked, and "Needs DOI" skips missing file DOIs | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
 | [OMP2](#omp2) | A DOI typed into a book's file row on a press's DOIs page is saved, but "Save" reports a failure | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
@@ -2974,6 +2984,34 @@ is the agency (or the file leave the policy out while it is empty)?
 Lean: a low 🐞; the save that makes the box required gives no sign of
 it, and deposits then fail over a box on another tab.
 Basis: probe, 2026-10-19. <sup>f-ojs12</sup>
+
+<a id="ojs13"></a>
+**OJS13 — On a DataCite journal, a work whose supplementary galley file has a "Subject" cannot be exported or deposited** · 🐞 · user-visible · crash: server.
+A journal registers article and galley DOIs with DataCite. A work has a
+galley whose file has a supplementary component, such as "Data Set",
+with a "Subject" typed on the upload wizard's "Review Details" step
+([→ the upload wizard](U36-submission-files.md#upload-wizard)). A
+Journal Manager expects "Export DOIs" and "Deposit DOIs" to take the
+published work as any other; instead both fail on the server.
+"Export DOIs" downloads nothing and shows an "Error" window reading
+only "Cannot access offset of type string on string", with "OK" (on
+3.5 no window opens, so nothing seems to happen). "Deposit DOIs" shows
+"Items successfully submitted for deposit" and every galley row of the
+work reads "Submitted" (on 3.5, whose rows show no status, the work's
+badge does), but the deposit fails on the server: Administration ›
+"Failed Jobs" lists one failed job with the same message, and nothing
+on the DOIs page says so. "Deposit All" skips the "Submitted" rows from
+then on. This was seen with "Articles" unticked under "Items with DOIs",
+so the work's rows were its two galleys' alone, the supplementary one
+placed first with "Order" on the publication's "Galleys" tab; the
+article's own DOI kept "Unregistered".
+
+With the file's "Subject" emptied (the galley's row › "Change File",
+step 2), the export goes on to the format check as for any work.
+Keywords on the article's Metadata page do not cause it. `main` and 3.5
+(from 3.5.0-4) are affected; the fix under review upstream reaches
+`main` only.
+Since: 2026-01-12 (pkp/pkp-lib#11557) · Basis: probe, 2026-11-05. <sup>f-ojs13</sup>
 
 
 ### OMP
@@ -5896,6 +5934,71 @@ adds the Crossmark node whenever "DOI Versioning" is on, and
 `appendCrossmarkNode()` writes the stored `updatePolicyDoi` as it is.
 3.5 is not affected: a journal there has neither "DOI Versioning" nor
 "Update Policy DOI".
+
+<a id="fn-f-ojs13"></a>
+**f-ojs13** — Live-probed 2026-11-05, OJS `main` (`9552aa521a`) and
+`stable-3_5_0` (`e725cc873a`), PKP's default test dataset, two runs per
+line, each after a reset, as `dbarnes` (Journal editor): DOIs "Setup"
+with prefix "10.1234" and "Article galleys, such as a published PDF"
+ticked; "DataCite Manager Plugin" enabled; "DataCite" with the test
+system, made-up credentials and test prefix "10.5072"; submission 17
+unpublished, a galley "Data" added with component "Data Set" and
+"Subject" "u45i05a dataset subject" (stored `en=…`), published again,
+"Assign DOIs", "Export DOIs". `POST api/v1/dois/submissions/export`
+answered 500
+`{"error":"Cannot access offset of type string on string"}`, server log `TypeError … DataciteXmlFilter.php:220` (`main`)
+and `:208` (3.5); `main` showed the "Error" window with that text, 3.5
+no window and no notice ([A13](#a13)'s fix is `main`-only). "Deposit
+DOIs", run once per line, with "Articles" unticked and "Data" moved
+before "PDF" with the Galleys tab's "Order" ("Save Order"): 200 with
+the notice, both galley DOIs (`Data`, `PDF`) "Submitted" (status 2),
+the article's DOI status 1 ("Unregistered", no row with the kind
+unticked), and `failed_jobs`, read after the queue was drained, held
+one `DepositSubmission` job with the same TypeError at the same line.
+What was sent is not visible on screen, and the test installs reach no
+agency in any case; it is read from the job's failure point: the
+TypeError is thrown while the "Data" galley's record is built, before
+that galley's agency call, and `DatacitePlugin::depositSubmissions()`
+builds and sends each object in turn (the article first while
+"Articles" is ticked, then the current publication's galleys in their
+order), so the job ends there and neither "Data" nor the "PDF" after
+it is sent, while a galley ordered before the supplementary one would
+be. With "Articles" ticked (the other run per line) the job builds and
+sends the article's record first and on the test installs ends there
+at the agency call ([A18](#a18)), before any galley; that the article's
+record goes out on an install that reaches DataCite is read from the
+code, as is that "Deposit All" and "Automatic Deposit" run the same job
+(not driven). Controls, both
+lines, two runs each: the "Subject" emptied through "Change File" step
+2 (stored `en=` empty), exported again: the test installs' standing
+400 at the schema fetch (on `main` the "Error" window adds "Failed to
+locate the main schema resource at
+'http://schema.datacite.org/meta/kernel-4/metadata.xsd'."), no
+TypeError; a keyword "u45i05a keyword" added on the article's Metadata
+page, exported again: the same 400. OMP and OPS install no DataCite
+plugin (their Plugins grids list none). Cause: `DataciteXmlFilter`
+maps every subject with `$s['name']`; a supplementary galley's
+subjects are its file's `subject` string
+(`(array) getPrimaryTranslation($galleyFile->getData('subject'))`), so indexing
+the string throws, while a publication's keywords and subjects are
+`['name' => …]` entries. The line came with `pkp/pkp-lib#11557` (OJS
+`07a47a4117` on `main`, `e4c2e79cca` on `stable-3_5_0`, 2026-01-12; in
+the tags 3.5.0-4 and 3.5.0-5, `git log -S`); none of the later filter
+commits (13 on `main`, 3 on 3.5) changes it. `pkp/ojs#5867` (open,
+base `main`, head `57eb645396`) replaces it with a loop per language;
+`pkp/ojs#5715` moves the block unchanged; no PR targets
+`stable-3_5_0`. Server-side, `shared/playwright/checks/sync/pkp-lib-9170/xml-lang.php`
+scenario H throws the same at both lines; the PR review
+[docs/reports/pr-review/2026-11-03-ojs-5867.md](../reports/pr-review/2026-11-03-ojs-5867.md)
+names the crash in its Evidence. Kept script:
+`shared/playwright/checks/U45/I05A/i05a.js` (`PART=u45`). Beside it,
+with no visible effect seen: every build of a supplementary galley's
+record (the controls' exports) logs two PHP warnings "Undefined
+variable $resourceType" from
+`DataciteXmlFilter::createResourceTypeNode()`, whose galley branch sets
+the type only for a document component; whether the record's
+`resourceType` then comes out right was not read, since the file never
+downloads on the test installs.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — `omp/classes/submission/Collector.php`
