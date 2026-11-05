@@ -2403,7 +2403,7 @@ reached for a file). No OPS screen offers it: OPS never assigns
 tab (the Reference table's "File-identifier operations" row). It is
 dead code on OPS rather than a finding, since no screen and no state
 reaches it; OJS and OMP answered 200 in the same runs.
-Issue report: [docs/issues/U44-OPS1-galley-identifiers-form-fails-never-saved.md](../issues/U44-OPS1-galley-identifiers-form-fails-never-saved.md).
+Issue report: [pkp-e2e#1087](https://github.com/jardakotesovec/pkp-e2e/issues/1087) ([docs/issues/U44-OPS1-galley-identifiers-form-fails-never-saved.md](../issues/U44-OPS1-galley-identifiers-form-fails-never-saved.md)).
 
 ## Reference — entry points & surfaces
 
