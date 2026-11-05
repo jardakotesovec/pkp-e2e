@@ -1773,7 +1773,7 @@ first); keeping the false result alone would turn every plugin
 installation on OJS and OMP into a failure, since Static Pages' step
 fails on each one. No fix was tried. A different path and fault from
 A5 and A11 (an install, a result overwritten), so its own entry.
-Issue report: [docs/issues/U62-A12-plugin-install-step-fails-reported-installed.md](../issues/U62-A12-plugin-install-step-fails-reported-installed.md).
+Issue report: [pkp-e2e#1084](https://github.com/jardakotesovec/pkp-e2e/issues/1084) ([docs/issues/U62-A12-plugin-install-step-fails-reported-installed.md](../issues/U62-A12-plugin-install-step-fails-reported-installed.md)).
 
 <a id="fn-f-a13"></a>
 **f-a13** — fn-w; the theme package (`kind: 'theme'`, `fail: true`, no `filter`) and the reads: fn-x. `installer.installMigrationError` holds HTML
@@ -1791,7 +1791,7 @@ failed. DB: … SQLSTATE[42P07]: Duplicate table: 7 ERROR: relation
 "u62i05btfailr1_t" already exists …". OMP shares the message keys
 (read from the code; a theme's failure does not reach the notice there,
 f-a12).
-Issue report: [docs/issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md](../issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md).
+Issue report: [pkp-e2e#1085](https://github.com/jardakotesovec/pkp-e2e/issues/1085) ([docs/issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md](../issues/U62-A13-plugin-install-failure-notice-raw-markup-blocks-retry.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-i. Live-probed 2026-09-27 (OJS, two runs): with
