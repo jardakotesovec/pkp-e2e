@@ -366,9 +366,10 @@ and "Save" is greyed out until the boxes are filled: <sup>g</sup>
     published, the public review data of a review the editor has made
     public, which anyone may request
     without signing in (no screen shows it), lists the unticked item and
-    its answer all the same ⚠ [OJS1](#ojs1). A press gives out no such
-    data: its matching address (no screen calls it either) fails on the
-    server for every request, signed in or not ⚠ [OMP4](#omp4). <sup>f</sup>
+    its answer all the same ⚠ [OJS1](#ojs1). A press gives out the same
+    data at the same address, which no screen calls either; its former
+    address `api/v1/publicationPeerReviews` answers "The requested URL
+    was not recognized." <sup>f</sup>
 
 16. **Languages.** A journal with more than one form language gives every
     multilingual box in this spec a version per language, shown in two
@@ -941,8 +942,6 @@ Left out of the scenarios above, by reason:
     buttons; Fields)
   - OJS1 (a public review's unticked items and their answers in the
     public review data anyone may request without signing in; Rule 15)
-  - OMP4 (every request to a press's public peer-review address failing
-    on the server; Rule 15)
 - **No seed**:
   - the automatic reminder email, the "Reminder" date and the activity-log
     row (Rule 9; Side effects): the test installs' daily clock is off
@@ -993,7 +992,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | On "Reviewer Recommendations", a screen reader announces the "Activate" tick boxes and the status dropdown without a name | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A13](#a13) | A Section Editor, or an editor without settings access, can change and switch off a journal's reviewer recommendations | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
 | [OJS1](#ojs1) | A review made public gives anyone, without signing in, the review form answers meant for the editor only | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
-| [OMP4](#omp4) | Every request to a press's public peer-review API address fails with a server error | 🐞 | low · crash: server | issues (claude), 2026-11-05 — re-verified |
 | [A2](#a2) | A form in use can still be deactivated, although the activation confirmation promises it cannot | ❓ | minor | — |
 | [A3](#a3) | A deadline saved as 0 or left empty makes Add Reviewer preset three weeks for the response but four for the review | ❓ | minor | — |
 | [A4](#a4) | A reload on a "Review" side tab lands on "Submission" › "Disable Submissions", although the address names the side tab and a pressed "Submission" side tab survives a reload | ❓ | minor | — |
@@ -1004,6 +1002,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A recommendation a reviewer has only saved for later, on a review not yet submitted, was seen once already without its "More Actions" menu; whether that makes it in use is not settled | ❓ | minor | — |
 | [OMP1](#omp1) | A press has no "Reviewer Recommendations" tab | ✅ | — | — |
 | [OMP2](#omp2) | A press words five strings differently and has a guideline box per review stage | ✅ | — | — |
+| [OMP4](#omp4) | Retired: every request to a press's public peer-review API address failed with a server error; a press now serves the record at `api/v1/peerReviews`, as a journal does (Rule 15) | ✅ | retired | PR review (claude), 2026-11-05 — fixed upstream (pkp/pkp-lib#13729) |
 
 ### All apps
 
@@ -1258,22 +1257,10 @@ cannot make a list or a quote in the internal guidelines on screen;
 pasting a list from another document works round it. Basis: probe,
 2026-10-04. <sup>f-omp3</sup>
 
+### Retired
+
 <a id="omp4"></a>
-**OMP4 — Every request to a press's public peer-review API address fails with a server error** · 🐞 · low · crash: server.
-On `main`, a journal gives out the public reviews of its published
-articles at the address `api/v1/peerReviews`. A press has its own
-address for them, `api/v1/publicationPeerReviews`, but every request to
-it fails on the server, signed in or not, whatever path or query follows
-it: the answer is a server error with an empty page, where the press's
-public reviews are expected.
-
-No screen calls the address, so only a program reading a press's public
-reviews meets the error, and it cannot get them any other way. No
-released press has the address: it exists on `main` only. Preprint
-servers have no review stage, so they have no such address.
-
-The proposed fix moves presses to `api/v1/peerReviews`, as OJS did.
-Since: 2026-01-12 (ten months) · Basis: probe, 2026-11-05. <sup>f-omp4</sup>
+**OMP4 — Every request to a press's public peer-review API address fails with a server error** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13729](https://github.com/pkp/pkp-lib/issues/13729), pkp/omp#2552), verified 2026-11-05 at the PR head before its merge: a press serves its public review record at `api/v1/peerReviews`, as a journal does, and the old `api/v1/publicationPeerReviews` answers 404 instead of a server error. <sup>f-omp4</sup>
 
 ---
 
@@ -2242,11 +2229,12 @@ answered element. The editor-side and email paths skip such elements
 `continue`s on `!getIncluded()`). Fix: skip elements whose
 `getIncluded()` is false in `getReviewFormQuestions()`. The review form
 answers came with the API's first version (`pkp/pkp-lib#11922`,
-`222d16a881`, 2025-10-15). OMP's routing names a `publicationPeerReviews`
-entry point whose controller class is absent from lib/pkp: every request
-to it, signed in or not, fails on the server (500, empty body;
-[OMP4](#omp4)), and OPS has no review stage, so neither serves this
-data. OJS `stable-3_5_0` has no `api/v1/peerReviews/` (main only, so the
+`222d16a881`, 2025-10-15). OMP served it from pkp/omp#2552 on, at the
+same `api/v1/peerReviews` (before, its `publicationPeerReviews` entry
+point named a controller class absent from lib/pkp and every request
+failed on the server, [OMP4](#omp4)); the resource is app-neutral, so a
+press's record carries the same unticked items (code-read). OPS has no
+review stage, so it does not serve this data. OJS `stable-3_5_0` has no `api/v1/peerReviews/` (main only, so the
 finding is an ordinary one with "Security: unreleased", no private
 routing; both of its review addresses answered 404 on 2026-11-05).
 On OJS `main`, `api/v1/peerReviews` with no sub-path (with or without
@@ -2340,6 +2328,24 @@ to `peerReviews`, as OJS did) or delete it. Kept script
 page's missing public reviews are
 [*Monograph landing page*'s A26](U69-monograph-landing-page.md#a26).
 Issue report: [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/1086) ([docs/issues/U29-OMP4-press-peer-review-address-server-error.md](../issues/U29-OMP4-press-peer-review-address-server-error.md)); the team's copy is `pkp/pkp-lib#13729` (open, 2026-11-05).
+Fixed by pkp/omp#2552 (`pkp/pkp-lib#13729`), which renames the entry
+point to `api/v1/peerReviews/index.php` and maps it to
+`\PKP\API\v1\peerReviews\PeerReviewController`, the report's
+proposed fix. Walked at the PR head `3ad45f0966`, before its merge,
+against its base `828150a8fe` (lib/pkp `1ae711024a` at both), on the
+dataset fleet reset before each run, with the issue report's kept
+script: at the base steps 1–4 answered 500 with the fatal line above
+and `api/v1/peerReviews/open/submissions/5` 404; at the head steps 1–4
+answered 404 `api.404.endpointNotFound`, no fatal, and
+`api/v1/peerReviews/open/submissions/5` 200
+`{"submissionId":5,"reviewRounds":[],"reviewerRecommendationsSummary":[]}`.
+Its `public` mode at the head published book 16 with Adela Gallego's
+open review made public: `…/open/submissions/16` 200 lists her review
+and its "For author and editor" comment, not the "For editor" one, and
+`…/16/summary` 200; each of those two requests writes
+`PHP Warning:  Attempt to read property "type" on null in …/ReviewerRecommendationSummary.php on line 89`
+(a press has no reviewer recommendation types), as the issue report's
+"What goes with it" foresaw; the PR leaves that line as it is.
 
 ## Reference — entry points & surfaces
 
@@ -2353,8 +2359,7 @@ Issue report: [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/10
 | OMP legacy preview template (not rendered) | — | AFFW-669 |
 | "Review" › "Reviewer Recommendations" {OJS} | same page, side tab; `api/v1/reviewers/recommendations` | VUE-047 · VUE-069 · API-054 · AFFM-078 (Add), AFFM-079 (Activate tick), AFFM-080 (Edit), AFFM-081 (Delete) |
 | Automatic reminder clock | daily scheduled task, no screen | JOB-054 |
-| Public review data {OJS} (where Rule 15's unticked items leak, OJS1) | `api/v1/peerReviews/open/submissions/{submissionId}`, read without a session; no screen calls it | API-030 |
-| Public peer-review address {OMP} (fails for every request, OMP4) | `api/v1/publicationPeerReviews`, any path below it; no screen calls it | API-062 |
+| Public review data {OJS OMP} (where Rule 15's unticked items leak, OJS1) | `api/v1/peerReviews/open/submissions/{submissionId}`, read without a session; no screen calls it | API-030 · API-062 |
 
 ## Reference — code anchors
 
@@ -2366,7 +2371,7 @@ Issue report: [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/10
 - `lib/pkp/controllers/listbuilder/settings/reviewForms/ReviewFormElementResponseItemListbuilderHandler.php`, `lib/pkp/controllers/listbuilder/settings/SetupListbuilderHandler.php`
 - `lib/pkp/templates/manager/reviewForms/` (`reviewFormForm.tpl`, `reviewFormElementForm.tpl`, `previewReviewForm.tpl`), `lib/pkp/templates/controllers/grid/settings/reviewForms/editReviewForm.tpl`, `lib/pkp/templates/reviewer/review/reviewFormResponse.tpl`, `lib/pkp/templates/controllers/grid/common/cell/selectStatusCell.tpl`
 - `lib/pkp/classes/reviewForm/` — `ReviewForm.php`, `ReviewFormDAO.php`, `ReviewFormElement.php`, `ReviewFormElementDAO.php`
-- `lib/pkp/api/v1/peerReviews/PeerReviewController.php`, `resources/SubmissionPeerReviewResource.php` (`getReviewFormQuestions()`) — the public review data's form answers (OJS1); `omp api/v1/publicationPeerReviews/index.php` — the press's entry point naming a missing class (OMP4); `lib/pkp/classes/mail/traits/ReviewerComments.php` — the decision email's form block, which honours "Included in message to author"
+- `lib/pkp/api/v1/peerReviews/PeerReviewController.php`, `resources/SubmissionPeerReviewResource.php` (`getReviewFormQuestions()`) — the public review data's form answers (OJS1); `omp api/v1/peerReviews/index.php` — the press's entry point (named `publicationPeerReviews` with a missing class before pkp/omp#2552, OMP4); `lib/pkp/classes/mail/traits/ReviewerComments.php` — the decision email's form block, which honours "Included in message to author"
 - `lib/pkp/controllers/grid/users/reviewer/form/ReviewerForm.php`, `EditReviewForm.php`, `traits/HasReviewDueDate.php` — where the defaults land
 - `lib/pkp/classes/submission/reviewer/recommendation/` — `ReviewerRecommendation.php`, `Repository.php`, `enums/ReviewerRecommendationType.php`; `ojs api/v1/reviewers/recommendations/ReviewerRecommendationController.php` and its `formRequests/`; `ojs classes/components/forms/context/ReviewerRecommendationForm.php`, `ojs classes/components/listPanels/ReviewerRecommendationsListPanel.php`; `ojs classes/services/ContextService.php` (default entries); lib/ui-library `managers/ReviewerRecommendationManager/`
 - `lib/pkp/classes/task/ReviewReminder.php`, `lib/pkp/jobs/email/ReviewReminder.php`, `lib/pkp/classes/mail/mailables/ReviewRemindAuto.php`, `ReviewResponseRemindAuto.php`, `ojs classes/scheduler/Scheduler.php`, `omp classes/scheduler/Scheduler.php`
