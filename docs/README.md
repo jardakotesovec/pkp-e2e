@@ -47,6 +47,10 @@ history.
 - `docs/tracking/friction.md`: what made an agent's task harder than it
   needed to be, appended by the agents that drive screens; rows are
   deleted once acted on.
+- `docs/tracking/pkp-lib-triage.md`: every issue open on pkp/pkp-lib
+  on 2026-11-05, classified (bug, feature, enhancement, …) with the bug's
+  state on `main` and 3.5, the pkp-e2e issue tracking it, and a one-line
+  conclusion; open bugs not yet tracked read "to file".
 - `docs/tracking/assignments.md`: who on the team takes each open
   GitHub issue, by who introduced it or who knows that code best; a
   first version to iterate on.
