@@ -5,7 +5,7 @@ This file is the single home for the campaign's feature taxonomy: **75 features
 
 - **The atlas is the frozen Phase-0 inventory** (2026-07-28). It split the apps into these features and is not extended: a surface added upstream since then is noted in the row of the feature whose screens it joins, and a new feature gets a new row with the next U-number and a `pending` PROGRESS row (MAINTENANCE "Triage: where does a change land?").
 - **Atom count**: this map accounts for all **2,163** atoms:
-  **2,067 feature-assigned · 68 out of scope · 28 parked in UNASSIGNED.md** (13 at Phase-0 close; 5 U26-derived dead author-dashboard atoms parked later; 11 parked by the 2026-09-27 scope extension, section H; API-030 claimed by U30 2026-11-03).
+  **2,068 feature-assigned · 68 out of scope · 27 parked in UNASSIGNED.md** (13 at Phase-0 close; 5 U26-derived dead author-dashboard atoms parked later; 11 parked by the 2026-09-27 scope extension, section H; API-030 claimed by U30 2026-11-03; API-062 claimed by U29 2026-11-05).
   The unclaimed count is the campaign's completeness metric.
 - **Atom IDs and modality conventions**: see `atlas/README.md`. IDs are dense per
   modality and never renumbered; ranges here (`AFFW-068..075`) are inclusive.
@@ -181,8 +181,8 @@ Notes: the reviewer dashboard list is folded here per D4 — it cites ROUTE-008/
 
 ### U29 — Review setup & review forms {OJS OMP}
 A manager configures how review runs: mode, deadlines, reminders, guidance, review forms, recommendation options.
-Atoms: AFFW-669..670 · AFFM-065..081 · GRID-046..047, 059..060 · VUE-047, 069 · API-054 · JOB-054
-Notes: owns the reminder clocks (JOB-054); the reminder sends live with U27 (MAIL-043, 046). Review-form elements' rendering in the wizard is U28's (AFFU-170..175). AFFW-669 (OMP's own preview template) is a dead file no handler loads; the preview renders lib/pkp's (U29 footnote f, 2026-09-05).
+Atoms: AFFW-669..670 · AFFM-065..081 · GRID-046..047, 059..060 · VUE-047, 069 · API-054, 062 · JOB-054
+Notes: owns the reminder clocks (JOB-054); the reminder sends live with U27 (MAIL-043, 046). Review-form elements' rendering in the wizard is U28's (AFFU-170..175). AFFW-669 (OMP's own preview template) is a dead file no handler loads; the preview renders lib/pkp's (U29 footnote f, 2026-09-05). API-062 (OMP's `publicationPeerReviews` entry point) claimed from UNASSIGNED 2026-11-05 (housekeeping): live, every request a 500 (U29 OMP4).
 
 ### U30 — Author response to reviews {OJS}
 An editor requests, and an author submits, a formal response to a review round.

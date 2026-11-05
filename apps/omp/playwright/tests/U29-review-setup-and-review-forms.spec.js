@@ -23,7 +23,8 @@
  * changed after adding response options), A6 ❓ and A7 ❓ (journal-only),
  * A8 ❓ (no declined request is counted), A9 🐞 (S7 reads the "Edit"
  * windows before the deactivation and never presses "OK" on one), OMP3 🐞
- * (nothing is asserted about the internal box's toolbar). The spec's
+ * (nothing is asserted about the internal box's toolbar), OMP4 🐞 (no test
+ * calls the public peer-review address). The spec's
  * Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only. S1–S8 and S13 run on their own scratch

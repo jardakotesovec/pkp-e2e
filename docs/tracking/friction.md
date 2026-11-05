@@ -13,3 +13,4 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
+2026-11-05 · U62 · claim checker cc05b (housekeeping I05B) · the drive plan said to read "the DB log" for a masked migration failure, but /var/log/postgresql is not readable by the e2e user and a masked failure writes nothing to .server-logs/, so the check needed marker-writing scratch migrations built from scratch · a kit helper (or harness.md line) saying where a fleet's SQL errors can be read, or a per-fleet log_min_error_statement capture readable by e2e

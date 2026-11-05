@@ -8,13 +8,13 @@ The housekeeping session works one entry a quiet morning, top first
 
 Sources (removed from the tip 2026-08-25, reachable in git history): the six crosswalks in `.reports/phase0-feature-map/` (their UNASSIGNED
 lists, consistent with `synthesis.md` §4) + `RULINGS.md`'s probe-derived
-dead-code additions. **28 parked atoms** + **50 noted dead-code/defect
+dead-code additions. **27 parked atoms** + **50 noted dead-code/defect
 candidates attached to claimed atoms**. (PLUG-028 moved to FEATURE-MAP's
 Out-of-scope tail — see RULINGS.md. Two candidates that rested solely on
 scratched pre-reset evidence were dropped 2026-08-21 per the reset doctrine —
 if real, their specs' own probes will resurface them.)
 
-## Parked atoms (28)
+## Parked atoms (27)
 
 ### AFFW-701, AFFW-703, AFFW-704 — legacy author-dashboard round surfaces
 - What: the old author-dashboard templates' editor-message link, author
@@ -148,18 +148,6 @@ if real, their specs' own probes will resurface them.)
   by U08, opened from the legacy grid), its field, its composable and stories.
   Confirmed dead atlas row; retire candidate.
 
-### API-062 — OMP `publicationPeerReviews` entry point
-- What: API mount instantiating a controller class absent from lib/pkp at the
-  swept SHA.
-- Why parked: dangling mount (confirmed by task ruling in the crosswalk).
-- Resolves: maintainer confirmation as dead code / upstream sync artifact.
-- Evidence (security audit, 2026-11-03, OMP `main` dataset fleet; incidentals
-  row for U29): live, not dead: any request to `api/v1/publicationPeerReviews`,
-  signed out included, answers 500 with an empty body, since
-  `omp/api/v1/publicationPeerReviews/index.php:16` instantiates
-  `PublicationPeerReviewController`, a class lib/pkp does not ship (it ships
-  `api/v1/peerReviews`, which OJS maps). The U29 row folds it on the next odd
-  day; the entry goes with that fold (housekeeping 2026-11-04).
 
 ### API-066 — OPS legacy non-versioned `api/genres/` entry
 - What: legacy alias mount outside `/v1/`.

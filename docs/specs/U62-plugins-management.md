@@ -229,6 +229,22 @@ None of these is shown for a plugin with no compatible version.
     unticked unless the plugin arrives switched on. <sup>k</sup>
     <sup>td16</sup> The application's own version stays as it was,
     whatever version the plugin's installation file names. <sup>v</sup>
+
+    A plugin may carry an installation step of its own, such as
+    creating its tables in the database. When that step fails partway,
+    "Save" still ends as above: the notice "Successfully installed
+    version {version}", the plugin listed under its category
+    ⚠ [A12](#a12). Nothing on screen shows that the step failed; a
+    tester checks what it left in the database. On a journal and a
+    preprint server, a theme whose package holds no filter
+    configuration (a "filter/filterConfig.xml" file, which plugins that
+    convert data between formats carry) is the exception: the amber
+    notice begins "Installation failed. DB:" and goes on in the
+    database's own words ⚠ [A13](#a13), no row is added, and the
+    theme's files are removed from the server. <sup>w</sup> Test
+    packages whose step fails, and the reads that show the recorded
+    version, the tables and the plugin's folder on the server, are in
+    the footnote. <sup>x</sup>
 17. **Upload refused.** Each of these closes the window, shows its
     notice at the top right and installs nothing: <sup>l</sup>
     - the same plugin already installed at the same or a newer version:
@@ -286,7 +302,10 @@ None of these is shown for a plugin with no compatible version.
     this plugin from the system?", with "OK" and "Cancel". "OK" removes
     the plugin's files from the server: the notice "Plugin "{plugin
     name}" successfuly deleted" shows ⚠ [A7](#a7), and the plugin leaves
-    every journal's list and the site's. "Cancel" changes nothing.
+    every journal's list and the site's. The tables the plugin made in
+    the database stay; a test package that makes a table, and the read
+    that finds it, are in the footnote. <sup>x</sup> "Cancel" changes
+    nothing.
     "Delete" is offered on every row, those of Rule 10 and the theme in
     use included ⚠ [A4](#a4). <sup>n</sup> <sup>td16</sup> <sup>td17</sup>
 
@@ -646,6 +665,9 @@ Left out of the scenarios above, by reason:
     file holds a step with no range and one limited to the
     application's versions runs both, each checked by what it leaves
     behind on the server (Rule 18)
+  - a plugin's tables, still in the database after its "Delete", "OK",
+    with the test package and the table read Rule 21's footnote names
+    (Rule 21)
 - **Nothing new to test**:
   - a tick made in the Settings Wizard's "Plugins" tab showing on the
     journal's own list, and the reverse (Rule 3)
@@ -677,6 +699,10 @@ Left out of the scenarios above, by reason:
     server's own words; Rule 17)
   - A11 (an upgrade step limited to the plugin's own earlier versions,
     skipped; Rule 18)
+  - A12 (an installation whose own database step fails, reported
+    installed; the other plugins' steps run again; Rule 16)
+  - A13 (a theme's failed installation: the notice's raw markup and
+    database details, and the same package refused again; Rule 16)
 - **No seed**:
   - browsing the Plugin Gallery, searching it and opening a plugin's
     details, since the test installs never reach PKP's site (Actors
@@ -729,6 +755,8 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | A refused tick or untick is explained by a raw code, and "Disable" stays open with its spinner | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | Uploading a file that is not a plugin package shows PHP's archive error with a server path | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | Plugins: "Upgrade" skips an upgrade step the plugin limits to its own earlier versions, and still reports success | 🐞 | low | issues (claude), 2026-10-27 — re-verified |
+| [A12](#a12) | Plugins: a plugin whose installation fails in its database step is reported "Successfully installed" and recorded as installed | 🐞 | medium | — |
+| [A13](#a13) | Plugins: a failed installation's notice shows raw markup and the database's connection details, and the same package cannot install again | 🐞 | low | — |
 | [A4](#a4) | "Delete" is offered on plugins nobody can switch off, and on the theme in use | ❓ | minor | — |
 | [A6](#a6) | A Site Administrator with no manager role in a journal cannot switch its plugins | ❓ | minor | — |
 | [A8](#a8) | The theme a journal uses can be switched off | ❓ | user-visible | — |
@@ -916,6 +944,55 @@ replaced; a read of every Plugin Gallery release; and the fix's
 dependence on the `pkp/pkp-lib#13608` guard, which no release carries
 yet (Proposed fix).
 Basis: probe, 2026-10-27. <sup>f-a11</sup>
+
+<a id="a12"></a>
+**A12 — Plugins: a plugin whose installation fails in its database step is reported "Successfully installed" and recorded as installed** · 🐞 · medium.
+When the Site Administrator installs a plugin through "Upload A New
+Plugin" and the plugin's own installation step fails partway (Rule 16),
+the notice still reads "Successfully installed version {version}", the
+plugin is listed, its version is recorded as installed, and whatever
+the step made in the database stays. Nothing reaches the server's log
+either, so nobody learns the plugin's tables are incomplete until the
+plugin fails in use. Expected: "Installation failed" with the reason,
+and nothing recorded as installed. Every generic plugin is reported
+this way, and so is a theme with a filter configuration; only the
+theme case of Rule 16 shows the failure ([A13](#a13)). Read from the
+code, not seen: on a press a theme is reported installed too, and the
+Plugin Gallery's "Install" (Rule 26) ends the same way. The test
+packages and the reads that show the recorded version and the tables
+are in the footnote.
+
+Every installation also runs again the installation step of each
+plugin already installed, and hides their failures the same way.
+Nothing on screen or in the server's log shows it; the test packages
+write a line to a file of the tester's choosing each time their step
+runs (the footnote). With them, during each later upload the earlier
+plugins' lines showed their steps ran again and failed on the tables
+they had made the first time, under the green notice; a deleted
+plugin wrote no line. Read from the code, not seen: "Static Pages
+Plugin" {OJS OMP}, installed by default, creates its tables again the
+same way, so its step fails during every plugin installation; it
+writes no such line, so no read a tester can make shows it.
+Basis: probe, 2026-11-05. <sup>f-a12</sup>
+
+<a id="a13"></a>
+**A13 — Plugins: a failed installation's notice shows raw markup and the database's connection details, and the same package cannot install again** · 🐞 · low.
+When an installation does report its failure (the theme case of
+Rule 16), the amber notice reads "Installation failed. DB: An
+exception was thrown when executing the migration class
+`<tt>`{class}`</tt>`. The exception was {the database's error}
+(Connection: {database type}, Host: {server address}, Port: ,
+Database: {database name}, SQL: {statement})." The tags `<tt>` and
+`</tt>` show as text, beside the plugin's internal class name, the
+database's server and name, and the statement that failed. Expected: a
+sentence saying the plugin's database step failed. The theme's files
+are removed, but what its step made in the database before failing
+stays: uploading the same package again fails with "… already exists"
+in the notice, and goes on failing until someone with access to the
+database removes what the first attempt left. The theme package, and
+the reads that show its folder gone and its table left, are in the
+footnote.
+Basis: probe, 2026-11-05. <sup>f-a13</sup>
 
 ### OMP
 
@@ -1263,7 +1340,11 @@ error notification `manager.plugins.deleteError`; else
 `manager.plugins.deleteSuccess` "Plugin "{$pluginName}" successfuly
 deleted"; no version row → `manager.plugins.doesNotExist`. Nothing
 checks `getCanDisable()`, the active theme or the install policy.
-Live-probed 2026-09-27 (Rule 21): td16, td17.
+Live-probed 2026-09-27 (Rule 21): td16, td17. Nothing drops the
+plugin's tables: live-probed 2026-11-05 (Rule 21; OJS, OMP, OPS `main`
+and OJS stable-3_5_0, two runs each; fn-w's test plugins), after
+"Delete", "OK" each plugin's table was still in the database and its
+`versions` row stayed with `current=0`.
 
 <a id="fn-o"></a>
 **o** — Gallery. `PluginGalleryDAO::getNewestCompatible()` reads each
@@ -1381,6 +1462,82 @@ scratch plugin whose `upgrade.xml` and `install.xml` name the core's major.minor
 `.6.2` (`checks/sync/pkp-lib-13608/walk.js`, 2026-10-23): the core row stays, the
 plugin's rows and its descriptor steps are recorded. At each base the core version
 became the descriptor's (`ojs2 3.6.6.2`, `current=1`), the defect of pkp/pkp-lib#13608.
+
+<a id="fn-w"></a>
+**w** — A plugin's own installation step. `PluginHelper::installPlugin()`
+runs `Install`, whose `Installer::execute()` ends in `postInstall()`: it
+fires the hook `Installer::postInstall` with one `$result`. Every
+plugin's `register()` adds its `updateSchema()` (when it has an install
+migration) and its `installFilters()` to that hook. `Plugin::updateSchema()` runs `getInstallMigration()->up()`
+and on an exception calls `setError()` (`installer.installMigrationError`)
+and sets `$result` to false. `Plugin::installFilters()` sets `$result`
+to `installFilterConfig()`'s answer for each filter configuration it
+finds (`filter/filterConfig.xml` in the plugin's folder or under
+`lib/pkp/`), so a later callback that finds one sets it back to true.
+The callbacks run in the order of `Application::getPluginCategories()`.
+On OJS and OPS "themes" is the last category, after "importexport",
+whose bundled plugins carry filter configurations; a failing theme with
+none of its own is the case no later callback reaches. The same code on `main` (lib/pkp `25fdc98a3e`
+OJS/OPS, `1ae711024a` OMP) and stable-3_5_0 (`e2c62c4b7b`).
+Live-probed 2026-11-05 (Rule 16; A12, A13; OJS, OMP, OPS `main` and OJS
+stable-3_5_0, two runs each, PKP's default dataset, PostgreSQL), as
+`admin` on a scratch journal, press or server, "Upload A New Plugin"
+and "Save" with test packages whose install migration writes a marker
+line per run of its `up()`: a control that creates its table and
+returns; a generic plugin that creates its table and then inserts into
+a missing table (all apps); the same with its own
+`filter/filterConfig.xml` (OJS); a theme of each kind (OJS, OPS; not
+run on OMP). The control: "Successfully installed version 1.0.0.0"
+(green), the row listed unticked, `versions` `1.0.0.0 current=1`, its
+table made, markers `up, created, done`. Both generic plugins and the
+theme with a filter configuration: the same notice, row and `versions`
+row (the row also after a reload), the folder kept, the half-made table
+left, while the markers showed `up()` threw `SQLSTATE[42P01]: Undefined
+table`; the save answered `{"status":true,…}` and nothing reached the
+server log. The theme without one: the amber "Installation failed. DB:
+…" notice, no row, no `versions` row, the folder removed, the table
+left. The PostgreSQL server's own log was not readable, so the markers
+stand for a database log. Kept script
+`shared/playwright/checks/U62/I05B/i05b.js` (with `pkg.js`, the
+package builder).
+
+<a id="fn-x"></a>
+**x** — Test packages and by-hand reads (Rules 16, 21; A12, A13). The
+packages come from the kept builder
+`shared/playwright/checks/U62/I05B/pkg.js`:
+`build(outDir, {product, kind, fail, filter, displayName, markerFile})`
+writes a ".tar.gz" to upload through "Upload A New Plugin" (`product`
+lower-case letters and digits; `i05b.js` beside it shows a full call).
+Its options:
+- `kind`: `'generic'` (under "Generic Plugins") or `'theme'` (under
+  "Theme Plugins");
+- `fail`: `true` makes the step create the table `<product>_t` and then
+  write to a table that does not exist, so it fails partway; `false`
+  creates the table and returns (the package for Rule 21);
+- `filter`: `true` adds an empty, valid `filter/filterConfig.xml`;
+- `markerFile`: an absolute path on the server; every run of the step
+  appends one JSON line per stage, `up`, `created`, `done`, or `threw`
+  with the database's message. A step that runs again finds its table
+  and throws `… already exists`, as `Schema::create` without
+  `hasTable()` does.
+
+The reads, on the installation's database (PostgreSQL; on MySQL use
+`information_schema.tables` for the table) and its server:
+- the recorded version:
+  `SELECT product_type, product, major, minor, revision, build, current FROM versions WHERE product = '<product>';`
+  installed: a row with `current` 1; after "Delete": the row with
+  `current` 0; nothing recorded: no row;
+- the table: `SELECT to_regclass('<product>_t');` gives its name while
+  the table is there and nothing once it is gone;
+- the plugin's files: the folder `plugins/generic/<product>` or
+  `plugins/themes/<product>` in the application's directory on the
+  server, there after an install, gone after a theme's failed install
+  or a "Delete";
+- the steps that ran: the lines the upload added to `markerFile`.
+
+Static Pages' tables are `static_pages` and `static_page_settings`; its
+step writes no marker, so its runs are read from the code alone
+(f-a12).
 
 <a id="fn-sc"></a>
 **sc** — Scenarios. Each scratch journal comes from `POST
@@ -1574,6 +1731,57 @@ before `execute()` in `upgradePlugin()`. pkp/pln's `upgrade.xml` on
 its default branch has no `<upgrade>` block (read 2026-10-27); the
 other gallery plugins were not read.
 Issue report: [pkp-e2e#1075](https://github.com/jardakotesovec/pkp-e2e/issues/1075) ([docs/issues/U62-A11-plugin-upgrade-skips-own-version-steps.md](../issues/U62-A11-plugin-upgrade-skips-own-version-steps.md)).
+
+<a id="fn-f-a12"></a>
+**f-a12** — fn-w; packages and reads: fn-x. `Plugin::installFilters()` overwrites the `$result`
+`Plugin::updateSchema()` set to false. Live-probed 2026-11-05 (fn-w's
+runs): the generic failure reported as success on OJS, OMP and OPS
+`main` and OJS stable-3_5_0; the theme with its own filter
+configuration on OJS and OPS. The re-runs: `Installer::__construct()`
+calls `PluginRegistry::loadAllPlugins()`, so every plugin on disk has
+its callbacks on `Installer::postInstall`. In every run, during each
+later upload the earlier test plugins' `up()` ran again and threw
+`SQLSTATE[42P07]: Duplicate table … already exists`, under the green
+notice; a deleted plugin (folder gone) no longer ran. A press: OMP's
+`getPluginCategories()` puts "themes" before "importexport", so a
+failing theme is masked there too (read from the code; the theme pair
+was not run on OMP). Static Pages:
+`StaticPagesSchemaMigration::up()` calls `Schema::create('static_pages')`
+and `Schema::create('static_page_settings')` with no `hasTable()`
+check, and PKP's default dataset holds those tables with `staticPages
+1.2.0.0` current (OJS, OMP; OPS ships no Static Pages), so its step
+throws during every plugin installation; read from the code with the
+test plugins as the replica, not observed (no database log). The
+gallery's "Install": `PluginGalleryGridHandler::installPlugin()` calls
+the same `PluginHelper::installPlugin()` (read from the code; the
+gallery never loads on the test installs, A1). Upgrades fire
+`Installer::postInstall` too (`Upgrade` extends `Installer`), so the
+other plugins' re-runs during an upgrade are masked the same way; read
+from the code, not driven. A fix needs both halves: `installFilters()`
+must keep a false `$result` (`$result = $result && …`, or set it only
+on a failure), and the callbacks must run only for the plugin being
+installed (or the bundled migrations must check for their tables
+first); keeping the false result alone would turn every plugin
+installation on OJS and OMP into a failure, since Static Pages' step
+fails on each one. No fix was tried. A different path and fault from
+A5 and A11 (an install, a result overwritten), so its own entry.
+
+<a id="fn-f-a13"></a>
+**f-a13** — fn-w; the theme package (`kind: 'theme'`, `fail: true`, no `filter`) and the reads: fn-x. `installer.installMigrationError` holds HTML
+(`<tt>{$class}</tt>`) and the notice escapes it; the message is the
+database driver's exception text, connection details and statement
+included. Live-probed 2026-11-05 (fn-w's runs; OJS and OPS `main`, OJS
+stable-3_5_0, two runs each): "Installation failed. DB: An exception
+was thrown when executing the migration class
+`<tt>APP\plugins\themes\u62i05btfailr1\U62i05btfailr1PluginMigration</tt>`.
+The exception was SQLSTATE[42P01]: Undefined table: 7 ERROR: relation
+"u62i05btfailr1_t_missing" does not exist LINE 1: INSERT INTO … ^
+(Connection: pgsql, Host: 127.0.0.1, Port: , Database: ojs_test_ds2,
+SQL: INSERT INTO …)." The same package uploaded again: "Installation
+failed. DB: … SQLSTATE[42P07]: Duplicate table: 7 ERROR: relation
+"u62i05btfailr1_t" already exists …". OMP shares the message keys
+(read from the code; a theme's failure does not reach the notice there,
+f-a12).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-i. Live-probed 2026-09-27 (OJS, two runs): with

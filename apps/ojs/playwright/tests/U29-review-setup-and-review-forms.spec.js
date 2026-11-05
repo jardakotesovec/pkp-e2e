@@ -20,7 +20,7 @@
  * title on the line), A7 ❓ (S9 never asserts the toggled row's position),
  * A8 ❓ (no declined request is seeded), A14 ❓ (no test reads the "More
  * Actions" menu of a recommendation a reviewer has only saved for later),
- * OMP1–OMP3 ✅/🐞 (press-only, in the
+ * OMP1–OMP4 ✅/🐞 (press-only, in the
  * OMP tree). The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only. S1–S10 and S13 run on their own scratch
