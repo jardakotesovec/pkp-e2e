@@ -254,15 +254,14 @@ cannot be reached by heading ⚠ [OMP3](#omp3). <sup>h</sup>
     its address gets that name; the name currently has no ending ⚠
     [A25](#a25). The "Alternate text"
     typed in the window is used nowhere: a screen reader hears "null" for the picture on a journal and
-    a preprint server, the category's name on a press ⚠ [A7](#a7). On a
-    press the page shows the browser's broken-picture mark, with the
-    category's name beside it, instead of the picture ⚠ [OMP1](#omp1).
-    <sup>g</sup> <sup>td11</sup>
+    a preprint server, the category's name on a press ⚠ [A7](#a7). A
+    press shows the picture as a journal does, a picture carried over by
+    the upgrade from 3.5 included. <sup>g</sup> <sup>td11</sup> <sup>f-omp1</sup>
     - 12a. **A category with no picture.** The small copy's address (the
       footnote gives it), typed for a category with no "Cover Image",
-      should answer the not-found page of Rule 13. On a journal and a
-      preprint server it never finishes loading: the server fails
-      ⚠ [A22](#a22); a press is not covered. <sup>td15</sup>
+      should answer the not-found page of Rule 13. On a journal, a
+      preprint server and a press it never finishes loading: the server
+      fails ⚠ [A22](#a22). <sup>td15</sup>
 13. **An unknown path.** A category address whose path no category of the
     journal has answers a bare page reading "404 Not Found", with no
     header and no links, as an unknown article's or preprint's address
@@ -397,8 +396,8 @@ cannot be reached by heading ⚠ [OMP3](#omp3). <sup>h</sup>
    the line "Images will be reduced when larger than this size but will
    never be blown up or stretched to fit these dimensions.". They are
    meant to size the small copy of a category's picture made at the
-   category's next save; no screen shows that copy, since a press's
-   category page shows no picture ([OMP1](#omp1); Rule 12). <sup>m</sup>
+   category's next save, which the press's category page shows (Rule
+   12). <sup>m</sup>
 7. **"Browse Block"** (Settings › Website › "Plugins"; disabled on a new
    journal and preprint server, enabled on a new press) and its box in
    "Sidebar" (Settings › Website › "Appearance" › "Setup"; unticked).
@@ -550,8 +549,7 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      "catalog/category/natural-science" ("preprints/category/" on a preprint
      server): the breadcrumb reads "Home" then "Science", "Home" a link and
      "Science" not; the page is headed "Science"; it shows a small copy of
-     the picture, at most 100 × 100 pixels (on a press the browser's
-     broken-picture mark with "Science" beside it [OMP1](#omp1)), and "Work
+     the picture, at most 100 × 100 pixels, and "Work
      in the natural sciences."; "Subcategories" lists "Physics" alone, as a
      link (Fields, the category's page; Rules 11, 12).
    - **Nothing listed yet**: the same page reads "0 Items" ("0 Titles"
@@ -847,8 +845,8 @@ Left out of the scenarios above, by reason:
     proposes
   - a file that is not a picture put in "Cover Image", leaving no preview
     and no request ([A17](#a17)): the guard the issue report proposes
-  - {OMP} a press's category page loading its picture ([OMP1](#omp1)):
-    the guard the issue report proposes
+  - {OMP} a press's category page loading its picture (OMP1, retired):
+    the guard the issue report proposed
   - a category's "Order of articles" set to "Title (A-Z)" and "Title
     (Z-A)" over three items, the page following each ([A2](#a2)): the
     guard the issue report proposes
@@ -876,7 +874,7 @@ Left out of the scenarios above, by reason:
   - a category's "Path" refused with a message that names the characters
     a saved path may hold ([A9](#a9)): the guard the issue report
     proposes
-  - {OJS OPS} the small picture's address of a category with no picture
+  - the small picture's address of a category with no picture
     answering "404 Not Found" ([A22](#a22)): the guard the issue report
     proposes
   - a PNG whose picture data is cut short, which uploads like a sound
@@ -921,8 +919,8 @@ Left out of the scenarios above, by reason:
   - A24 (a damaged PNG as a category's "Cover Image"; Fields, "Cover
     Image")
   - A25 (a category's picture kept without its file ending; Rule 12)
-  - OMP1 ("Cover Image Max Width" and "Cover Image Max Height" changed,
-    with no picture shown to size; Settings bullet 6)
+  - a press's "Cover Image Max Width" and "Cover Image Max Height"
+    changed, and the small copy made to them (Settings bullet 6)
   - OMP3 (the press's "Browse" for a screen reader; Fields, the "Browse"
     block)
   - OMP4 (the press's "Browse" block with all three "Settings" boxes
@@ -979,11 +977,10 @@ an entry notes otherwise; the team settles them on spec review.
 | [A18](#a18) | The box where a manager types a category's name to delete it has no name for a screen reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A19](#a19) | A category with one item reads "1 Items" ("1 Titles" on a press) | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | With the "Browse" block in a journal's sidebar, every page's breadcrumb gets a grey bar | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A22](#a22) | The picture address of a category with no picture never finishes loading on a journal or preprint server | 🐞 | low · crash: server | issues (claude), 2026-10-07 — re-verified |
+| [A22](#a22) | The picture address of a category with no picture never finishes loading | 🐞 | low · crash: server | issues (claude), 2026-10-07 — re-verified |
 | [A23](#a23) | A category page number typed past the last page opens an empty page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A24](#a24) | A damaged PNG as a category's "Cover Image" fails "Save" halfway, with "An unexpected error has occurred"; a new category is saved without the picture | 🐞 | medium · crash: server | — |
 | [A25](#a25) | A category's picture is stored as a file with no ending ("8-category", not "8-category.png"), and the full-size picture is offered under that name | 🐞 | minor | — |
-| [OMP1](#omp1) | A press's category page shows a broken-picture mark instead of the category's picture | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OMP2](#omp2) | A press's "Browse" block lists sub-categories in one alphabetical run, not under their parents | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | A press's "Browse" block title is not a heading, so screen-reader users cannot reach it by heading | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP4](#omp4) | A press's "Browse" block with nothing to list still shows as an empty box | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
@@ -993,6 +990,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | The breadcrumb names only the nearest parent | ❓ | minor | — |
 | [A14](#a14) | A category added after a submission arrives brings no editors | ❓ | minor | — |
 | [A21](#a21) | The "Path" help ends in the word "path", never in a saved category's own path | ❓ | minor | — |
+| [OMP1](#omp1) | Retired: a press's category page showed a broken-picture mark instead of the category's picture; it now shows the picture, upgraded ones included (Rule 12) | ✅ | retired | PR review (claude), 2026-11-05 — fixed upstream (pkp/pkp-lib#13730) |
 | [OMP5](#omp5) | A press's first category page opened after its catalog page, its search results or a settings save failed to load | ✅ | retired | housekeeping (claude), 2026-10-07 — fixed upstream (pkp/pkp-lib#12915), walked on main |
 | [A15](#a15) | Retired: in French, the tab, the delete dialog, the "Select Categories" window and a press's category page show raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
@@ -1233,8 +1231,8 @@ the "Edit Category" case read from the code.
 Basis: probe, 2026-09-25; the edited category, code reading. <sup>f-a21</sup>
 
 <a id="a22"></a>
-**A22 — The picture address of a category with no picture never finishes loading on a journal or preprint server** · 🐞 · low · crash: server.
-On a journal or a preprint server, a category's picture address
+**A22 — The picture address of a category with no picture never finishes loading** · 🐞 · low · crash: server.
+On a journal, a press or a preprint server, a category's picture address
 (`…/catalog/thumbnail?type=category&id=2` for its small copy,
 `…/fullSize?…` for the full size; `…/preprints/…` on a preprint server),
 opened for a category that has no "Cover Image", should answer the bare
@@ -1244,8 +1242,9 @@ the file, and closes the connection without sending any of them. The
 server is not kept busy; only the visitor's browser waits. No page links
 to these addresses: they are reached only by typing or bookmarking one,
 or by keeping the address of a picture the manager has since removed. A
-press is not affected, because its own handler checks for a picture
-first and answers an empty page. (Rule 12a)
+press answers the same way since pkp/omp#2553 handed its category
+pictures to the same code; before, its own handler answered an empty
+page. (Rule 12a)
 Basis: probe, 2026-10-07. <sup>f-a22</sup>
 
 <a id="a23"></a>
@@ -1295,17 +1294,6 @@ ending.
 Since: 2026-10-16 (pkp/pkp-lib#13512) · Basis: probe, 2026-10-19. <sup>f-a25</sup>
 
 ### OMP
-
-<a id="omp1"></a>
-**OMP1 — A press's category page shows a broken-picture mark instead of the category's picture** · 🐞 · medium.
-A press manager gives a category a "Cover Image" and saves: "Category
-saved". The category's page then shows the browser's broken-picture mark,
-with the category's name beside it, where the picture should be, and the
-picture's own small and full-size addresses open an empty page.
-After an upgrade from 3.5, every category picture a press had is hidden
-the same way; the files are moved, not deleted, and show again once
-fixed.
-Basis: probe, 2026-10-02; the cause, code reading. <sup>f-omp1</sup>
 
 <a id="omp2"></a>
 **OMP2 — A press's "Browse" block lists sub-categories in one alphabetical run, not under their parents** · 🐞 · low.
@@ -1363,6 +1351,9 @@ such a save keeps them, and with the fix below they show ticked.
 Basis: probe, 2026-10-02. <sup>f-ops1</sup>
 
 ### Retired
+
+<a id="omp1"></a>
+**OMP1 — A press's category page shows a broken-picture mark instead of the category's picture** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13730](https://github.com/pkp/pkp-lib/issues/13730), pkp/omp#2553), verified 2026-11-05 at the PR head before its merge: a press's category page shows its picture, and both picture addresses answer the picture, for a picture saved on `main` and for one carried over by the upgrade from 3.5 (Rule 12). <sup>f-omp1</sup>
 
 <a id="omp5"></a>
 **OMP5 — A press's category page fails after its catalog or a settings save** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12915, merged 2026-10-05), verified 2026-10-07 on OMP: a press's first category page opened after its catalog page or its search results now opens at once (Rule 9). <sup>f-omp5</sup>
@@ -2051,9 +2042,12 @@ copy's address typed (`…/catalog/thumbnail?type=category&id={id}`, OPS
 `…/preprints/thumbnail?…`, `{id}` the category's id). The server log read "Trying to access array
 offset on null" (`PKPCatalogHandler.php` line 145, `thumbnail()`) and
 the browser never finished loading. `fullSize()` reads the same array
-(line 121) and is expected to fail the same way; not typed. A press was
-not walked for this: its picture addresses answer an empty page today
-(OMP1), and the OMP1 report's fix would hand them to the same code.
+(line 121) and is expected to fail the same way; not typed. A press,
+walked 2026-11-05 at the head of pkp/omp#2553 (the OMP1 fix): both
+addresses answer "200 OK", "Content-Type: directory", "Content-Length:
+4096" and no body, with the same warning at lines 121 and 145; at its
+base they answered an empty page. OJS on `main` answered the same that
+day.
 
 <a id="fn-td16"></a>
 **td16** — Walked 2026-10-02 (Rule 9a; A23), OJS, OMP and OPS on `main`,
@@ -2373,7 +2367,19 @@ context's public files as `{id}-category.{ext}` and the thumbnail as
 `PKPCatalogHandler` reads for OJS and OPS. With no file at the old place,
 `downloadByPath()` sends nothing.
 Live-probed 2026-09-25: note td11.
-Issue report: [pkp-e2e#598](https://github.com/jardakotesovec/pkp-e2e/issues/598) ([docs/issues/U16-OMP1-press-category-picture-broken.md](../issues/U16-OMP1-press-category-picture-broken.md)); the team's copy is `pkp/pkp-lib#13730` (open, 2026-11-05).
+Fixed by pkp/omp#2553 (pkp/pkp-lib#13730), whose `CatalogHandler` hands
+the category case of both methods to `PKPCatalogHandler`; walked
+2026-11-05 at its head `7d5c5ffa2a`, before its merge, on the OMP
+dataset fleet: a picture saved through "Edit Category" (100 × 100, both
+addresses `image/png`), and a 3.5 press whose "Applied Science" got its
+picture through 3.5's form, upgraded to `main` (the migration
+`I10404_UpdateCategoryImageNameFields` moves both files from
+`files/presses/1/categories/` to `public/presses/1/` and swaps `name` and
+`uploadName`): at the base `828150a8fe` the picture is broken and both
+addresses answer an empty `text/html`, at the head it draws and both
+answer the moved files byte for byte. Kept check
+`shared/playwright/checks/sync/omp-2553/upgraded-picture.js`.
+Issue report: [pkp-e2e#598](https://github.com/jardakotesovec/pkp-e2e/issues/598) ([docs/issues/U16-OMP1-press-category-picture-broken.md](../issues/U16-OMP1-press-category-picture-broken.md)).
 
 <a id="fn-f-omp2"></a>
 **f-omp2** — Note h (OMP flat array, `is_sub` one indent step at any depth;
