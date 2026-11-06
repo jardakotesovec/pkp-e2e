@@ -5183,6 +5183,18 @@ DOIs" and shared the DOI (note q50); this order was not driven there.
 three apps, two runs each. Live-probed again 2026-09-29 (q33) on a press
 with chapter and format DOIs, and on a journal and a preprint server:
 the same.
+Walked 2026-11-06 at the PR heads of `pkp/pkp-lib#13744`, before
+their merge (each line's tip with the PR merged in: OJS `ad4ab4412a`,
+OMP `c3f984180e`, OPS `c870670cae` on `main`; `91d40ba078`,
+`38e68f66d7`, `8bf08b2acc` on 3.5; OJS `264d1e1505` on `ore`), with
+the issue's `walk.js` and `NEIGHBOUR=1` on fresh dataset fleets: at
+the tips each app as the report's Observed (the OPS 500 on 3.5 too), at
+the heads the Expected on every app and line (A by its own DOI, B by
+its galley's or format's DOI, "10.1234/" both, the dashboard's search
+A, on 3.5 through its `_submissions` request), the controls unchanged
+(a title word finds B, "10.9999/" nothing, B's second DOI nothing once
+its kind is unticked). U45 S3's own-DOI search: red at the OMP and OPS
+tips, green at the three `main` heads.
 Issue report: [pkp-e2e#217](https://github.com/jardakotesovec/pkp-e2e/issues/217) ([docs/issues/U45-A11-doi-search-finds-different-sets.md](../issues/U45-A11-doi-search-finds-different-sets.md)). The team's copy is `pkp/pkp-lib#13744` (2026-11-06).
 
 <a id="fn-f-a12"></a>
