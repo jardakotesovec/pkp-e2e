@@ -1,4 +1,4 @@
-// The report docs/reports/pr-review/2026-11-04-pkp-lib-13712.md: what still
+// The PR review's round-1 report (fixed in round 2, deleted at the merge): what still
 // names the open reviewer to the author before the editor's confirmation, at
 // the PR heads. Same dataset cases as walk.js; `dbarnes` sets the review
 // "Open", then the author (`jnovak` / `mpower`) opens My Submissions and

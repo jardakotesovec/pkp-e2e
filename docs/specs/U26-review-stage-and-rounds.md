@@ -1346,11 +1346,15 @@ the API's consider route (`considered: 1`; the row's "More Actions" on
 `main` has no "Revert Decision") is hidden from the author again although
 `dateAcknowledged` stays. `ReviewAssignmentRequiredPolicy` still asks
 for `dateConsidered`, so a review thanked on 3.4 (upgraded: no
-`dateConsidered`) is listed with "Read Review" but refused (`legacy.js`,
-report `docs/reports/pr-review/2026-11-05-pkp-lib-13712-round3.md`).
+`dateConsidered`) is listed with "Read Review" but refused (`legacy.js`; the
+PR review's round-3 report, deleted at the merge).
 Round 4 (pkp-lib `6565784d58`, ui-library `7ecec8b4a9`, 2026-11-06)
 makes the policy ask `isConfirmedByEditor()` too: that review opens for
 the author (`legacy.js`), the other walks unchanged.
+Merged 2026-11-06 (pkp-lib `d1f20f891e`, ui-library `357a18eabf`, each
+`=` the round-4 head; OJS `3c14717777`, OMP `10ceb8e44b`, OPS
+`c90786e51d` point at both): `walk.js`, `revert.js` and `legacy.js`
+read as at round 4 on fresh datasets, OJS and OMP.
 
 <a id="fn-k"></a>
 **k** — `WorkflowListingEmails.vue` (AFFW-350/351): fetches
