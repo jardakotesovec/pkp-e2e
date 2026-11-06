@@ -885,9 +885,11 @@ footnote says how) and judge both mailboxes only once they have run.
       *[Reviewer's review](U28-reviewers-review.md)*'s).
     - **The Section Editor's mailbox**: holds an email whose subject is
       "Review complete: {reviewer} recommends {recommendation} for
-      #{submission number} {authors} — "{title}"" ({OMP} "recommends
-      None", a wording *[Reviewer's review](U28-reviewers-review.md#omp2)*
-      records), ending "This is an automated message from {journal name}.
+      #{submission number} {authors} — "{title}"" ({OMP}, whose review
+      form asks for no recommendation: "Review complete: {reviewer}
+      reviewed #{submission number} {authors} — "{title}"", the fix of
+      *[Reviewer's review](U28-reviewers-review.md#omp2)*'s "recommends
+      None"), ending "This is an automated message from {journal name}.
       You can unsubscribe from this email at any time." with "unsubscribe"
       as the link (Rules 6, 7a).
     - **No task**: the Section Editor's Tasks window holds no row for
@@ -913,7 +915,6 @@ Left out of the scenarios above, by reason:
   - a reply in a discussion with "Discussion activity." switched off reaching neither the Tasks window nor the mailbox, and with it on a row reading "… replied to …" (Rule 6; the guard [A1](#a1)'s issue report proposes)
   - unticking a box on the "Unsubscribe" page leaving the emails switched off before still off (Rule 8c; the guard [A2](#a2)'s issue report proposes)
   - a preprint server's new-preprint row on the Notifications tab reading "A new preprint, "Title", has been submitted." (*Fields & validation*; the guard [OPS2](#ops2)'s issue report proposes)
-  - {OMP} the review-complete email's subject on a press naming no recommendation rather than "recommends None" (Rule 6, scenario 11): the guard for *Reviewer's review*'s [OMP2](U28-reviewers-review.md#omp2), whose issue report `docs/issues/U28-OMP2-press-review-complete-email-recommends-none.md` proposes it, once fixed
 - **Rarely met**:
   - the Tasks window paged beyond 25 rows, "1 - 25 of 26 items" and "Items per page:" (Rule 2b): 26 tasks to raise for one account
   - the blue-edged notice toast (Rule 9a): the one screen that produces it is a plugin switch under Settings › Website › "Plugins", a Journal Manager's occasional act, not an editor's, author's or reviewer's week
@@ -2034,7 +2035,10 @@ The email is `ReviewCompleteNotifyEditors`, From "Site Admin
 message from {journal name} ( {home} ). You can unsubscribe ( {link} ) from
 this email at any time.", with the `List-Unsubscribe` headers; the Section
 Editor's Tasks window unchanged and the Manager's mailbox without it (note
-e). {OMP} "recommends None" in the subject. The Section Editor's window
+e). {OMP} "recommends None" in the subject; at the PR head pkp/omp#2563
+`8eff1e8c2c` (pkp/pkp-lib#13646), before its merge, "Review complete: Rita
+Reviewer reviewed #8 Authorson — "Title …"" (pkp-e2e CI run 42285989715,
+2026-11-06). The Section Editor's window
 holds no row with the submission's title at all: the "needs an editor"
 task the seed raised went to the manager-level accounts alone
 (live-probed 2026-09-28, note e).
