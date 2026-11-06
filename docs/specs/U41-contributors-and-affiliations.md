@@ -340,7 +340,13 @@ screen, Rule 12): <sup>e</sup>
     anyway. The affiliation then saves,
     and publishes, with no name until the copy gains the institution; a
     server without outside internet access never gets it ⚠ [A5](#a5).
-    <sup>d</sup> <sup>k</sup>
+    In a submission language the registry has no name for, the entry
+    shows the registry's own display name. That holds for a language
+    with no two-letter code too (Central Kurdish, Kabyle, Dari), so a
+    contributor holding a registry-backed affiliation saves from "Edit"
+    unchanged whatever languages the journal takes; a registry-backed
+    funder's name follows the same rule.
+    <sup>d</sup> <sup>k</sup> <sup>[p](#fn-p)</sup>
 17. **Reviewers and anonymity.** Where the review type keeps the authors'
     identity from the reviewer, the contributor list is withheld from the
     data sent to the reviewer's browser. That safeguard is visible only by
@@ -905,6 +911,10 @@ Left out of the scenarios above, by reason:
   - a program's contributor edit that sends the type empty, refused with
     "This field is required." and the contributor unchanged after a
     reload (Rule 4a)
+  - a contributor with a registry-backed affiliation, on a journal that
+    takes a language with no two-letter code (Central Kurdish), saved
+    from "Edit" unchanged: the save going through and the entry still
+    the registry's after a reload (Rule 16; pkp/pkp-lib#12520)
 - **Nothing new to test**:
   - Preferred Public Name (Fields): another text box on the form
     scenario 1 fills
@@ -2204,6 +2214,34 @@ string conversion" warnings: `ValidatorFactory::required()` checks on an
 edit only the required keys present in the body, so the null is refused
 while a body without the key passes (A31). Kept script
 `shared/playwright/checks/U41/H29/h29.js`.
+
+<a id="fn-p"></a>
+**p — registry names in a language with no two-letter code (Rule 16).**
+The registry copy keys its names by two-letter language code
+(`ror_settings.locale`: `en`, `de`, …). `Ror::getNameForLocale()` maps
+a submission language to that code through
+`LocaleConversion::getIso1FromLocale()` and falls back to the record's
+display locale when the code is missing or the registry has no name in
+it; `Affiliation::getAffiliationName()`, `getLocalizedName()` and, on
+`main`, the `Funder` name attribute all go through it. Before
+pkp/pkp-lib#12520 (pkp-lib#13743 `main`, #13745 3.5) the code was
+passed to `getName()` as is: null for a language with no two-letter code
+(`ckb`, `kab`, …, and `fa_AF`, missing from Weblate's language list),
+and `getName(null)` returned every registry name. The publication API
+then gave that language's affiliation (and funder) name as an object,
+and the contributor's "Edit" › "Save" was refused with `400`
+`{"affiliations":{"1":{"name":{"ckb":["This is not a valid string."]}}}}`,
+the panel staying open. Driven on PKP's default test
+dataset, OJS, OMP and OPS, with `ckb` added to the site's installed
+languages and the journal's submission and metadata languages (SQL),
+University of Padua (`https://ror.org/00240q980`) added to the first
+unpublished submission's first author and, on `main`, as its funder: at
+the PR heads before their merge (lib/pkp `221fec03de` on `main`,
+`7df8c6abac` on 3.5) the API gives `"ckb": "University of Padua"` and
+"Save" answers `200` and closes the panel, the registry entry kept with
+no names of its own; at the bases (`25fdc98a3e`, `40990d1523`) the
+refusal above, 2026-11-06. `fa_AF` on OJS `main` at the head: the same.
+Kept walk `shared/playwright/checks/sync/pkp-lib-12520/walk.js`.
 
 <a id="fn-s1"></a>
 **s1 — scenario 1 seeding.** One scratch submission (any stage before
