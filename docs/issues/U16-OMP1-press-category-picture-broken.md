@@ -9,7 +9,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** `pkp/pkp-lib#11243` and `pkp/omp#1949` for `pkp/pkp-lib#10404` · [198595800a](https://github.com/pkp/pkp-lib/commit/198595800a0bd40db5db4d41d1a7b34556894719), [adeb69c6b](https://github.com/pkp/omp/commit/adeb69c6b8c43fcf3a3aedabbc45c3eca0a49c9a) · 2025-05-12 · Taslan A. Graham (taslangraham)
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#13730` (open; fix in PR `pkp/omp#2553`, not yet in main), the team's copy of this issue (2026-11-05). Before it: none found (2026-10-02)
 - **Tracked in** spec U16 [OMP1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U16-categories.md#omp1)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

@@ -10,7 +10,7 @@
   - 3.4: none (code; no such address)
   - 3.3: none (code; no such address)
 - **Introduced** `pkp/pkp-lib#12057` for `pkp/pkp-lib#12044` · [2d407aa929](https://github.com/pkp/pkp-lib/commit/2d407aa9292d0e0c1f2ac96f6120a901a75bf0be) · 2026-01-12 · Taslan A. Graham (taslangraham); OMP took it in [755ffb303](https://github.com/pkp/omp/commit/755ffb303da85734a8235b2df50f0fa55218623b) (2026-01-15) without the entry point rename OJS got in `pkp/ojs#5228`
-- **Upstream** none found (2026-11-05)
+- **Upstream** `pkp/pkp-lib#13729` (open; fix in PR `pkp/omp#2552`, not yet in main), the team's copy of this issue (2026-11-05). Before it: none found (2026-11-05)
 - **Tracked in** spec U29 [OMP4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U29-review-setup-and-review-forms.md#omp4)
 - **Checked** 2026-11-05, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

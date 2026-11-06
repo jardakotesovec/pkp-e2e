@@ -2339,7 +2339,7 @@ to `peerReviews`, as OJS did) or delete it. Kept script
 `shared/playwright/checks/U62/I05B/i05b.js` (part `api`). The book
 page's missing public reviews are
 [*Monograph landing page*'s A26](U69-monograph-landing-page.md#a26).
-Issue report: [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/1086) ([docs/issues/U29-OMP4-press-peer-review-address-server-error.md](../issues/U29-OMP4-press-peer-review-address-server-error.md)).
+Issue report: [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/1086) ([docs/issues/U29-OMP4-press-peer-review-address-server-error.md](../issues/U29-OMP4-press-peer-review-address-server-error.md)); the team's copy is `pkp/pkp-lib#13729` (open, 2026-11-05).
 
 ## Reference — entry points & surfaces
 

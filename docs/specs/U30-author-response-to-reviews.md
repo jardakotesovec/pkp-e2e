@@ -1007,7 +1007,7 @@ Issue report: [pkp-e2e#812](https://github.com/jardakotesovec/pkp-e2e/issues/812
 
 <a id="fn-f-a4"></a>
 **f-a4** — Note f: `getReturnUrlToSubmissionSummary()` returns `null` without `ret`; `cancelResponseRequest()` sets `window.location.href = null` and the dialog's action gets `href: null` with the label `submission.list.viewSubmission`. Live-probed 2026-09-06 (note o): `reviewResponse/null` renders "404 Not Found"; the dialog's anchor has no `href` and a press on it changes nothing; the same on OMP.
-Issue report: [pkp-e2e#813](https://github.com/jardakotesovec/pkp-e2e/issues/813) ([docs/issues/U30-A4-request-author-response-typed-address-returns-nowhere.md](../issues/U30-A4-request-author-response-typed-address-returns-nowhere.md)).
+Issue report: [pkp-e2e#813](https://github.com/jardakotesovec/pkp-e2e/issues/813) ([docs/issues/U30-A4-request-author-response-typed-address-returns-nowhere.md](../issues/U30-A4-request-author-response-typed-address-returns-nowhere.md)); the team's copy is `pkp/pkp-lib#13727` (open, 2026-11-05).
 
 <a id="fn-f-a5"></a>
 **f-a5** — Note f: `RequestAuthorResponse` refuses a missing `subject` or `body` with 422, and `RequestReviewRoundAuthorResponse.vue` routes every non-2xx answer of "Submit Request" to `openDialogNetworkError` (the generic "Error" dialog) instead of `setErrors` on the composer, so the field-level message never shows. Live-probed 2026-09-06: two 422s, the same dialog both times, the page's content intact after "OK".

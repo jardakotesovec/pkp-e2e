@@ -9,7 +9,7 @@
   - 3.4: none (code; no author response feature)
   - 3.3: none (code; the same)
 - **Introduced** `pkp/ui-library#767` for `pkp/pkp-lib#12048` · [8d29739f](https://github.com/pkp/ui-library/commit/8d29739f60c4f2fd21417a8c68f74e42efed8cbf) · 2026-01-23 · Taslan A. Graham (taslangraham)
-- **Upstream** none found (2026-10-04)
+- **Upstream** `pkp/pkp-lib#13727` (open; fix in PRs `pkp/ojs#6032`, `pkp/omp#2551`, `pkp/ops#1484` and `pkp/ui-library#1045`, not yet in main), the team's copy of this issue (2026-11-05). Before it: none found (2026-10-04)
 - **Tracked in** spec U30 [A4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U30-author-response-to-reviews.md#a4)
 - **Checked** 2026-10-04, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
