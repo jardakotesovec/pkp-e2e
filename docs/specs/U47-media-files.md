@@ -34,13 +34,14 @@ editorial role that reaches the Publication pages), and the Author on
 their own submission. **Manage the media files** means the whole set:
 "Add Media File", "Batch Link Media", and the row menu's "Edit
 Metadata", "Manually Link Media" and "Delete File". The page offers the
-set by the person's role on the submission's Production stage: a role
-counts when the person is assigned to the submission in it and the
-role's stages include Production (Settings bullet 5); the Journal
-Manager, Editor, Production Editor and Site Administrator count without
-an assignment. **May edit the publication** is the publication's edit
-gate ([→ edit gate](U40-publication-metadata.md#edit-gate)): every
-change the page sends is checked against it, whatever the page offered.
+set to a person who both holds a role on the submission's Production
+stage and may edit the publication. A role counts when the person is
+assigned to the submission in it and the role's stages include
+Production (Settings bullet 5); the Journal Manager, Editor, Production
+Editor and Site Administrator count without an assignment. **May edit
+the publication** is the publication's edit gate
+([→ edit gate](U40-publication-metadata.md#edit-gate)): every change
+the page sends is checked against it again.
 The server does not ask for the Production role the page goes by, only
 for a role on the stage the submission is in now, so a Copyeditor whose
 assignment carries the "Permissions" box can change the media files
@@ -50,8 +51,8 @@ during Copyediting, though no page offers them the set ⚠ [A8](#a8).
 | Action | Who may, and when |
 |--------|--------------------|
 | **See the "Media" page and its list** | • everyone the side menu offers the page. They all see the same list (Fields), and pressing a file name downloads the file for each of them, the Author included <sup>a</sup> <sup>d</sup> <sup>q1</sup><br>• on a press, the exception: the roles that see the list outside Production (next row, last bullet). Pressing a file name opens a new tab showing a line of raw text that holds "The current role does not have access to this operation.", and no file arrives ⚠ [OMP2](#omp2) <sup>q3</sup> |
-| **Manage the media files** ("Add Media File", "Batch Link Media", "Edit Metadata", "Manually Link Media", "Delete File") | • the Journal Manager, Editor, Production Editor and Site Administrator: always, on any version, published ones included (Rules 8, 10) <sup>b</sup> <sup>c</sup> <sup>q4</sup><br>• an assigned Section Editor or Guest Editor (Series Editor on a press, Moderator on a preprint server), and on a journal or press an assigned Layout Editor, Designer, Indexer or Proofreader: offered the whole set. Their changes hold only while their assignment carries the "Permissions" box (Settings bullet 4). Without it, the install default for the Guest Editor and the four assistant roles, every change fails and nothing changes: "Save" in "Edit Metadata" without a word, the others with an "Error" window (Rule 7) ⚠ [A1](#a1) <sup>b</sup> <sup>c</sup> <sup>q2</sup><br>• the Author: never. Their list has no "Batch Link Media", no "Add Media File" and no "…" button <sup>b</sup> <sup>q1</sup><br>• on a press, the Funding Coordinator while the monograph is in review, and the Copyeditor or Marketing and Sales Coordinator while it is in copyediting, see the list alone, as the Author does. In any other stage, Production included, their "Publication" heading has nothing under it <sup>b</sup> <sup>q3</sup> |
-| **"More Information"** (row menu) | • the roles offered "Manage the media files", on every row. The window it opens is *[Submission files](U36-submission-files.md#more-information)*'; for the assistant roles its "History" tab keeps showing "Loading" ⚠ [→ Submission files A3](U36-submission-files.md#a3) <sup>r</sup> <sup>q24</sup> |
+| **Manage the media files** ("Add Media File", "Batch Link Media", "Edit Metadata", "Manually Link Media", "Delete File") | • the Journal Manager, Editor, Production Editor and Site Administrator: always, on any version, published ones included (Rules 8, 10) <sup>b</sup> <sup>c</sup> <sup>q4</sup><br>• an assigned Section Editor or Guest Editor (Series Editor on a press, Moderator on a preprint server), and on a journal or press an assigned Layout Editor, Designer, Indexer or Proofreader: offered the whole set while their assignment carries the "Permissions" box (Settings bullet 4), and their changes hold. Without it, the install default for the Guest Editor and the four assistant roles, they see the list with no "Add Media File" and no "Batch Link Media", and each row's "…" menu holds only "More Information" (Rule 7) <sup>b</sup> <sup>c</sup> <sup>q2</sup><br>• the Author: never. Their list has no "Batch Link Media", no "Add Media File" and no "…" button <sup>b</sup> <sup>q1</sup><br>• on a press, the Funding Coordinator while the monograph is in review, and the Copyeditor or Marketing and Sales Coordinator while it is in copyediting, see the list alone, as the Author does. In any other stage, Production included, their "Publication" heading has nothing under it <sup>b</sup> <sup>q3</sup> |
+| **"More Information"** (row menu) | • the roles of the row above other than the Author and the press's roles outside Production, on every row, with the "Permissions" box or without it. The window it opens is *[Submission files](U36-submission-files.md#more-information)*'; for the assistant roles its "History" tab keeps showing "Loading" ⚠ [→ Submission files A3](U36-submission-files.md#a3) <sup>r</sup> <sup>q24</sup> |
 
 ## Fields & validation
 
@@ -258,13 +259,13 @@ and the buttons "Yes" and "No" (Rule 6). <sup>k</sup> <sup>q7</sup>
      the file's row in the list shows the typed name, and "Edit Metadata"
      opened again arrives holding it. A reload of the page brings back
      the saved name ⚠ [A5](#a5). <sup>f-a5</sup>
-7. **A refused change.** When the edit gate refuses a change (Actors),
-   pressing "Upload Files", "Link Media" or the delete dialog's "OK"
-   opens a window titled "Error" reading "You are not allowed to edit
-   this publication." with "OK". Pressing "Save" in "Edit Metadata"
-   opens nothing: the window stays open with the new value and no
-   message. The list stays as it was ⚠ [A1](#a1). <sup>c</sup>
-   <sup>s</sup> <sup>q2</sup>
+7. **Only people allowed to change the publication are offered
+   changes.** The page offers a change only to a person the edit gate
+   accepts it from (Actors). A person it refuses, such as an assigned Layout Editor
+   without the "Permissions" box, sees the list with no "Add Media
+   File" and no "Batch Link Media", and each row's "…" menu holds only
+   "More Information", so there is nothing they can press that fails.
+   <sup>c</sup> <sup>s</sup> <sup>q2</sup>
 8. **Publishing changes nothing on this page.** Once the version is
    published (posted, on a preprint server), the list, its buttons and
    every row action stay as they were for everyone Actors names, and
@@ -355,9 +356,10 @@ and the buttons "Yes" and "No" (Rule 6). <sup>k</sup> <sup>q7</sup>
    Roles, a role's "Edit") and the assignment's "Permissions" box it
    pre-ticks ([→ the two boxes](U35-stage-participants.md#boxes)). At
    install on for Section Editor and Moderator, off for Guest Editor and
-   the assistant roles. Ticked for an assigned Layout Editor, their
-   changes on the "Media" page hold; unticked, each fails as Rule 7
-   describes (Actors). <sup>c</sup> <sup>q2</sup>
+   the assistant roles. Ticked for an assigned Layout Editor, the
+   "Media" page offers them every change and the changes hold;
+   unticked, it shows them the list without the changes (Rule 7).
+   <sup>c</sup> <sup>q2</sup>
 5. **A role's stages** (Settings › Users & Roles › Roles, a role's
    "Edit", "Stage Assignment"). A role whose stages include Production
    is offered "Manage the media files" once assigned; which roles reach
@@ -806,7 +808,7 @@ Left out of the scenarios above, by reason:
   - the guard for A5 (issue report `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`): change a media file's "Name of the file" in "Edit Metadata", leave with "Cancel" › "Yes", and check the row and the reopened box show the saved name, and that a "Save" of another field does not store the abandoned one.
   - the guard for A3 (issue report `docs/issues/U47-A3-media-upload-window-hidden-drop-button.md`): on the empty "Upload Media File" window, check that the buttons in the accessibility tree are the side window's top bar, "Close" and "Click to upload files", and that Tab from "Click to upload files" lands on a control on screen.
   - the guard for OMP2 (issue report `docs/issues/U47-OMP2-press-copyeditor-media-download-refused.md`): on a press, a Copyeditor assigned to a monograph in Copyediting is not offered "Media" in the side menu, while a Layout Editor in Production keeps the page and the download.
-  - the guard for A1 (issue report `docs/issues/U47-A1-media-actions-offered-then-refused.md`): an assigned Layout Editor without "Permissions" sees the "Media" list alone (no "Add Media File", "Batch Link Media" or write actions in the row menu), while an editor whose assignment allows changes keeps every action.
+  - an assigned Layout Editor without "Permissions" sees the "Media" list with no "Add Media File" or "Batch Link Media" and only "More Information" in a row's "…" menu, while an editor whose assignment allows changes keeps every action (Actors row 2; Rule 7; A1 retired).
   - the guard for A6 (issue report `docs/issues/U47-A6-media-jats-upload-server-log-warning.md`): on a version's "Media" page, add a media file through "Add Media File" and "Upload Files" (Rule 2), and check that the web server's error log, which no screen shows, holds no PHP warning for that upload (A6 quotes the warning; where the log is and how to read it is in the footnote). <sup>f-a6</sup>
   - {OMP} "HTML Monograph File" off, the book page's link to an HTML file: the browser downloads the file and stays on the book page, so no media file is shown (Settings bullet 6; OMP1 retired).
 - **Rarely met**:
@@ -822,9 +824,6 @@ Left out of the scenarios above, by reason:
   - a Site Administrator not assigned to the submission, offered what
     the Journal Manager of scenarios 1 to 3 is (Actors row 2)
 - **Register carries it**:
-  - A1 (an assigned Layout Editor or Guest Editor without
-    "Permissions", offered every action, each change failing; Actors
-    row 2; Rule 7)
   - A3 (the "Drop files here to upload" button only a screen reader
     finds; Fields, the upload window; scenario 1 passes it)
   - A4 (a file over the upload limit failing on its card; Rule 2c)
@@ -856,7 +855,6 @@ an entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
-| [A1](#a1) | A Layout Editor is offered every action on the "Media" page, and each change is refused | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A3](#a3) | The empty "Upload Media File" window gives screen readers and the keyboard a button nobody can see | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A4](#a4) | A file over the request limit fails with a server error; its card gives no size limit | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | A name typed in "Edit Metadata" and left with "Yes" shows in the list, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -868,30 +866,9 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS1](#ops1) | A preprint server offers the "Media" page, but no reader page shows its files | ❓ | user-visible | — |
 | [OMP1](#omp1) | Retired: with "HTML Monograph File" off, a book's HTML file opened as a blank page; the book page's link now downloads it, as a journal's does (Settings bullet 6) | ✅ | retired | upstream change + claim check (claude), 2026-10-05 — fixed upstream |
 | [A7](#a7) | Retired: in French the "Media" page, its windows and the delete dialog show raw codes such as "##publication.mediaFiles.add##" | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [A1](#a1) | Retired: a Layout Editor was offered every action on the "Media" page, and each change was refused; the page now shows them the list without the changes | ✅ | retired | ui-library#1030 2026-11-06 · fixed |
 
 ### All apps
-<a id="a1"></a>
-**A1 — A Layout Editor is offered every action on the "Media" page, and each change is refused** · 🐞 · medium.
-A version's "Media" page holds the images and other files its HTML
-galley shows, and the production team manages them there. An assigned
-Guest Editor, Layout Editor, Designer, Indexer or Proofreader (and a
-Section Editor or Moderator whose assignment's "Permissions" box was
-unticked) sees "Add Media File", "Batch Link Media" and the full row
-menu, exactly as a Journal Manager does. Every change they make then
-fails: "Upload Files", "Link Media" and the delete dialog's "OK" open an
-"Error" window reading "You are not allowed to edit this publication.",
-and "Save" in "Edit Metadata" keeps the window open with only a passing
-notice, "An unexpected error has occurred. Please reload the page and
-try again." The page offers the changes by role; the server accepts them
-only from people allowed to change the publication, the right the
-"Permissions" box on an assignment grants. One of the two is wrong and
-the team must choose which; this report recommends that the page follow
-the server. "Permissions" is unticked by default for the Guest Editor
-and the assistant roles, so with default roles each of them assigned to
-a submission meets this. An editor can tick the box on their assignment,
-or make the change for them.
-Basis: probe, 2026-10-02. <sup>f-a1</sup>
-
 <a id="a2"></a>
 **A2 — The "ID" column mixes two kinds of number** · ❓ · minor.
 The "ID" cell of a linked pair shows the pair's number; the cell of a
@@ -1035,6 +1012,9 @@ Basis: probe, 2026-09-24 (the download); code (the download address).
 <a id="a7"></a>
 **A7 — In French the "Media" page and its windows show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a7</sup>
 
+<a id="a1"></a>
+**A1 — A Layout Editor is offered every action on the "Media" page, and each change is refused** · ✅ · retired. Fixed by `pkp/ui-library#1030` (also on `ore`), for `pkp/pkp-lib#13647`, the team's copy of the issue report, merged and walked on 2026-11-06: an assigned Layout Editor without the "Permissions" box, or on a preprint server a Moderator whose box was unticked, sees the "Media" list with no "Add Media File" or "Batch Link Media" and only "More Information" in a row's "…" menu, while an editor allowed to change the publication keeps every action and its changes hold (Actors row 2; Rule 7). Issue report: [pkp-e2e#493](https://github.com/jardakotesovec/pkp-e2e/issues/493). <sup>f-a1</sup>
+
 ---
 
 <a id="footnotes"></a>
@@ -1055,7 +1035,7 @@ unconditionally and in `getPublicationItemsEditorial()` inside
 (U24's OMP2). `workflowConfigEditorialOJS.js` and `workflowConfigAuthorOJS.js`
 key `media` mount `MediaFileManager` with `{submission, publication}`
 (the editorial config adds `canEdit: permissions.canEditPublication`,
-which the component does not declare and so never reads); OMP and OPS
+which the component reads since `pkp/ui-library#1030`, note b); OMP and OPS
 deep-merge these configs (`useWorkflowConfig{OMP,OPS}.js`) and define
 no `media` key of their own. Table title `publication.mediaFiles` "Media
 Files", description `publication.mediaFiles.description`. The reader
@@ -1081,7 +1061,17 @@ Section Editor and Guest Editor `1,3,4,5,6` (OMP `1,2,3,4,5,6`),
 Designer, Indexer, Layout Editor, Proofreader `5,6`, Copyeditor and
 Marketing `4`, Funding Coordinator `1,3` (OMP `1,2,3`), OPS Moderator
 and Author `5,6`, OJS Author `1,3,4,5,6`. No check of the publication's
-status, of `recommendOnly` or of `canChangeMetadata`. `getTopItems()`
+status or of `recommendOnly`. Since `pkp/ui-library#1030`
+(`f0ced1a4eb`, merged 2026-11-06; OJS `b1240b419e`, OMP `6334d53ac8`,
+OPS `0872927cc9` bump `lib/ui-library` to it; on `ore` the same patch
+as `pkp/ui-library#1031`, `4cf74e62`) `MediaFileManager` takes a
+`canEdit` prop (default true) and, when it is false, drops "Add Media
+File", "Batch Link Media", "Edit Metadata", "Manually Link Media" and
+"Delete File". The editorial config passes
+`permissions.canEditPublication`, the publication's
+`canCurrentUserChangeMetadata`, i.e. the same
+`Repo::submission()->canEditPublication()` the server checks (note c);
+the author's config passes none. `getTopItems()`
 pushes "Batch Link Media" then "Add Media File"; `getItemActions()`
 pushes "More Information", "Edit Metadata", "Manually Link Media"
 (only when `mediaFile.genreSupportsFileVariants`) and "Delete File"
@@ -1334,7 +1324,11 @@ link form only handles 400 and 422 itself), a dialog titled
 `common.error` "Error" with the response's `error` text and "OK". The
 "Edit Metadata" form is built with `showErrorFooter: false` (note f);
 live-probed 2026-09-24, its refused `PUT …/mediaFiles/{id}` (401) opened
-no dialog and left no text on the form, on all three apps.
+no dialog and left no text on the form, on all three apps. Those
+refusals came from the actions the page then offered to people without
+"Permissions" (A1); since `pkp/ui-library#1030` (2026-11-06) the page
+withholds them (Rule 7, note b), and the walk of note q2 met neither
+the dialog nor a refused request.
 
 <a id="fn-t"></a>
 **t** — Scenario seeding. Scenarios 1 and 2 run on the seeded journal,
@@ -1419,7 +1413,28 @@ box arrived ticked for the Section and Series Editor and unticked for
 the Guest Editor, Layout Editor, Designer and Proofreader. The Roles
 form's "Permit submission metadata edit." was ticked on Section Editor,
 Series Editor and Moderator and unticked on Guest Editor and every
-assistant role.
+assistant role. That offer to the unticked roles was A1, retired.
+Re-walked 2026-11-06 after `pkp/ui-library#1030` (OJS `b1240b419e`,
+OMP `6334d53ac8`, OPS `0872927cc9`; a freshly loaded PKP default
+dataset per run): `gcox` (Layout Editor, OJS and OMP) and `sberardo`
+(OPS Moderator, after `dbarnes` unticked "Permissions" on the
+assignment: "The stage assignment has been changed.") saw the "Media
+Files" list with no "Add Media File" and no "Batch Link Media", the
+row's "More Actions" menu holding only "More Information"; the
+"figure.png" `dbarnes` had added stayed listed after a reload, and no
+"Error" window opened. Control: `dbarnes` (Journal Manager, Press
+Manager, Server Manager) was offered "Add Media File" and "Batch Link
+Media" and the upload held (200). Neighbour, on a separate fresh
+dataset: `dbuskins` (OJS Section Editor, OPS Moderator, "Permissions"
+ticked) and `dbarnes` on OMP were offered "Add Media File", "Batch
+Link Media" and the row menu "More Information", "Edit Metadata",
+"Manually Link Media", "Delete File"; the add, "Edit Metadata" ›
+"Save" (the new name after a reload), "Batch Link Media" › "Link
+Media" and "Delete File" with the dialog "Delete media file? Are you
+sure you want to delete "figure-u47r1.png"? This action cannot be
+undone. If this file is linked to other media, those links will be
+removed." › "OK" each answered 200. The same walk on `ore` (OJS
+`9d9e581d63`) read as on `main`.
 
 <a id="fn-q3"></a>
 **q3** — Live-probed 2026-09-24 (Actors row 2, press bullet; Settings
@@ -1695,20 +1710,28 @@ reused galley on a freshly reset install served an earlier install's
 page to a signed-out reader.
 
 <a id="fn-f-a1"></a>
-**f-a1** — Notes b and c: the page's offer reads only the role on the
-Production stage; the writes pass `PublicationWritePolicy`, whose
+**f-a1** — Until `pkp/ui-library#1030` (notes b and c), the page's
+offer read only the role on the Production stage; the writes pass `PublicationWritePolicy`, whose
 `PublicationCanBeEditedPolicy` needs `canEditPublication()`, i.e.
 `canChangeMetadata` on the assignment for any non-manager. Install
 defaults: `permitMetadataEdit` true for Section Editor (OJS, OMP) and
 OPS Moderator and Author; absent (false) for Guest Editor and every
 `ROLE_ID_ASSISTANT` group (`registry/userGroups.xml`). The
 `canEdit: permissions.canEditPublication` the editorial config passes
-(note a) would carry exactly the server's answer
-(`publication.canCurrentUserChangeMetadata`) but `MediaFileManager.vue`
-declares only `publication` and `submission`. The silent "Save": note s.
+(note a) carries exactly the server's answer
+(`publication.canCurrentUserChangeMetadata`), but `MediaFileManager.vue`
+declared only `publication` and `submission`. The silent "Save": note s.
 Live-probed 2026-09-24: note q2. Compare the galley page, where on a
 journal the "Permissions" box plays no part (*Galleys*).
-Issue report: [pkp-e2e#493](https://github.com/jardakotesovec/pkp-e2e/issues/493) ([docs/issues/U47-A1-media-actions-offered-then-refused.md](../issues/U47-A1-media-actions-offered-then-refused.md)).
+Retired 2026-11-06: fixed by `pkp/ui-library#1030` (`f0ced1a4eb`,
+merged on `main` 2026-11-06, "Hide media file write actions from users
+who cannot edit the publication"; OJS `b1240b419e`, OMP `6334d53ac8`,
+OPS `0872927cc9` bump `lib/ui-library` to it; `ore`:
+`pkp/ui-library#1031`, `4cf74e62`, OJS `ore` `9d9e581d63`), which
+makes `MediaFileManager` read the `canEdit` it is given (note b). The
+issue report's walk, re-run that day on all three apps and on `ore`:
+note q2.
+Issue report: [pkp-e2e#493](https://github.com/jardakotesovec/pkp-e2e/issues/493), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13647` (2026-10-29).
 
 <a id="fn-f-a2"></a>
 **f-a2** — Note d: `MediaFileManagerCellGroupId.vue` shows
@@ -1833,9 +1856,10 @@ intended: Section Editor `dbuskins`, managers `dbarnes` and `rvaca`,
 Layout Editor `gcox` with the box in Production. Code only: the Funding
 Coordinator (Submission, Review) and the Marketing and Sales
 Coordinator (Copyediting) stand as the Copyeditor; OPS has the route,
-but a preprint is always in Production, so it cannot meet this. A1 is
-the reverse case (offered, refused) and OMP2 the press's download link;
-both are separate faults. Proposed fix, if the page's rule is the
+but a preprint is always in Production, so it cannot meet this. A1 was
+the reverse case (offered, refused; retired 2026-11-06, fixed by
+`pkp/ui-library#1030`) and OMP2 is the press's download link; both are
+separate faults. Proposed fix, if the page's rule is the
 intended one: on both controllers' write actions add
 `StageRolePolicy([Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT],
 WORKFLOW_STAGE_ID_PRODUCTION)` after `PublicationWritePolicy`; tried
@@ -1933,8 +1957,7 @@ tried: no page links a media file through it.
 | Media files API: `GET`, `POST`, `POST /link`, `PUT /{id}/link`, `PUT /{id}`, `DELETE /{id}` on `submissions/{submissionId}/publications/{publicationId}/mediaFiles` | the page's requests | API-041 |
 
 The API's `variantGroupIds` and `variantTypes` filters on `GET` are used
-by no screen. The editorial page config's `canEdit` value is never read
-by the page (A1). On a preprint server the download address's media
+by no screen. On a preprint server the download address's media
 allowance serves no page (OPS1). Recorded in UNASSIGNED.md.
 
 ## Reference — code anchors

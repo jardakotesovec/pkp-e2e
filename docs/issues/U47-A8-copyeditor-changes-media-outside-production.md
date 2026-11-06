@@ -239,9 +239,11 @@ OJS, the Section Editor `dbuskins` made "recommend only" add media with
 the page's request, and the copyeditor saves the version's title at
 Copyediting, all 200.
 
-The opposite mismatch stays: a Layout Editor assigned on Production
-without the box is offered the actions and refused
-([U47 A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U47-media-files.md#a1)).
+The opposite mismatch, a Layout Editor assigned on Production without
+the box offered the actions and refused
+([U47 A1](https://github.com/jardakotesovec/pkp-e2e/issues/493)), was
+fixed by `pkp/ui-library#1030` (2026-11-06): the page now offers them
+only the list.
 
 **Alternatives.**
 

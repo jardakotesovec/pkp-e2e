@@ -148,8 +148,8 @@ Reach:
   ([U48 A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U48-A1-jats-make-available-offered-then-refused.md);
   its component has `canEdit` but does not apply it to that box) and
   the "Media" page's actions
-  ([U47 A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U47-A1-media-actions-offered-then-refused.md),
-  `pkp-e2e#493`).
+  ([U47 A1](https://github.com/jardakotesovec/pkp-e2e/issues/493),
+  `pkp-e2e#493`; fixed by `pkp/ui-library#1030`, 2026-11-06).
 
 ## Proposed fix
 
