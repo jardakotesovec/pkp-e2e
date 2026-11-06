@@ -3,16 +3,17 @@
  * @file playwright/tests/serial/U04-orcid-integration.spec.js
  *
  * ORCID integration — the OPS canonical scenarios that assert on ORCID
- * EMAIL (spec scenarios 4 and 11). Every ORCID mailable is queued-job mail
+ * EMAIL (spec scenarios 4, 11 and 12). Every ORCID mailable is queued-job mail
  * and the fleets run with `[queues] job_runner = Off`, so nothing reaches
  * Mailpit until `php lib/pkp/tools/jobs.php run` drains the queue — and that
  * drain pops the SHARED queue, so it must never run while parallel agents
  * seed. Hence the serial project (patterns.md parallel lesson 7). S4 reads
  * a "nothing yet, until the save" silence and runs `@solo`; S11's silence
- * (an unpublished preprint sends nothing) holds whatever another drain runs.
+ * (an unpublished preprint sends nothing) holds whatever another drain runs,
+ * and S12's absence is the Contributors list's, not the mailbox's.
  * Spec: docs/specs/U04-orcid-integration.md
  *
- * Not covered, by register ID: OPS2 🐞, A14 🐞, A21 🐞, A7 ❓.
+ * Not covered, by register ID: A5 🐞, OPS2 🐞, A14 🐞, A21 🐞, A7 ❓.
  *
  * Mailpit is shared across fleets and workers: every assertion is scoped by
  * a unique throwaway recipient (the seeded contributor's address carries
@@ -27,6 +28,9 @@ const {
     openContributorEditor,
     orcidField,
     orcidEmailLinks,
+    expectOrcidIcons,
+    pressDeleteOrcid,
+    pressRequestVerification,
     requestVerification,
     resendVerification,
     OrcidSettingsTab,
@@ -35,6 +39,7 @@ const {
     REQUEST_WAITS_FOR_SAVE,
     REQUESTED_TEXT,
     RESEND_LINK_TEXT,
+    UNVERIFIED_NOTE,
 } = require('../../pages/OrcidPages.js');
 const {ContributorsScreen} = require('../../pages/ContributorPages.js');
 const {postPreprint} = require('../../pages/PublicationPages.js');
@@ -321,5 +326,122 @@ test.describe('ORCID integration (queued email)', () => {
             to: secondRecipient,
             afterControl: {to: firstRecipient, subject: SUBJECT_REAUTH},
         });
+    });
+
+    test('S12: what an Assistant may do with a contributor\'s iD', async ({asUser, opsApi, pkpMail}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s12', testInfo);
+        const author = `aut${tag}`; // the contributor with the unauthenticated iD
+        const withBox = `asa${tag}`; // the Assistant whose assignment has "Permissions"
+        const withoutBox = `asb${tag}`; // the Assistant whose assignment has not
+        const noIdName = `Ines Noid${tag}`;
+        const noIdRecipient = `noid-${tag}@mail.test`;
+        // A Public Sandbox server whose "Editorial Board Member" (the
+        // Assistant-level role, the 2026-11-02 walk's OPS Assistant) takes
+        // part in the Production stage: a preprint server's only workflow
+        // stage, and the one where that walk's Assistant reached the
+        // Contributors list. Without the stage the role cannot open the
+        // workflow at all (seed-facts "participants[] accepts
+        // editorialBoardMember"). The two Assistants are seeded on the
+        // preprint with the "Permissions" box ticked and unticked.
+        await opsApi.createContext({
+            tag,
+            context: principalContact(tag),
+            roles: {editorialBoardMember: {stages: {production: true}}},
+            users: [
+                {username: author, roles: ['author']},
+                {username: withBox, roles: ['editorialBoardMember']},
+                {username: withoutBox, roles: ['editorialBoardMember']},
+            ],
+            orcid: {},
+        });
+        const {submissionId} = await opsApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: author,
+            title: `Preprint ${tag}`,
+            author: {orcid: TEST_ORCID, orcidIsVerified: false},
+            contributors: [{givenName: 'Ines', familyName: `Noid${tag}`, email: noIdRecipient}],
+            participants: [
+                {username: withBox, role: 'editorialBoardMember', canChangeMetadata: true},
+                {username: withoutBox, role: 'editorialBoardMember', canChangeMetadata: false},
+            ],
+        });
+
+        // The first Assistant, in a browser of their own: the preprint's
+        // Preprint › Contributors list offers "Edit" on both contributors.
+        const firstPage = await (await asUser(withBox)).newPage();
+        await openEditorialWorkflow(firstPage, tag, submissionId);
+        const firstList = new ContributorsScreen(firstPage);
+        await firstList.openFromWorkflow();
+        await expect(firstList.rowEditButton(noIdName)).toBeVisible();
+        await expect(firstList.rowEditButton(author)).toBeVisible();
+
+        // The contributor without an iD: "Request verification" (Actors
+        // row 5), the Rule 8 question, confirmed. The field's own state
+        // after the press is not read (A5); the mailbox below is.
+        let modal = await openContributorEditor(firstPage, noIdName);
+        let field = orcidField(modal);
+        await expect(field.getByRole('button', {name: 'Request verification'})).toBeVisible();
+        const request = await pressRequestVerification(firstPage, field);
+        expect(request.dialogText).toContain(REQUEST_QUESTION);
+        expect(request.status).toBe(200);
+        await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(modal).toHaveCount(0);
+
+        // That contributor's mailbox: one "Submission ORCID" (the public
+        // API's subject, Rule 14) with a personal authorization link to
+        // ORCID's sandbox (Rule 8); read, never followed.
+        runJobs();
+        const summary = await pkpMail.find({to: noIdRecipient, subject: SUBJECT_PUBLIC});
+        expect(summary.From.Address).toBe(`contact-${tag}@mail.test`);
+        const full = await pkpMail.fullMessage(summary.ID);
+        const links = orcidEmailLinks(full.HTML);
+        expect(links.authorization).toContain('sandbox.orcid.org');
+        expect(links.about).toContain(`/${tag}/orcid/about`);
+        expect(await pkpMail.count({to: noIdRecipient, subject: SUBJECT_PUBLIC})).toBe(1);
+
+        // The contributor with the unauthenticated iD: the hollow-icon iD
+        // link, the not-verified note and "Delete" (Actors row 6).
+        modal = await openContributorEditor(firstPage, author);
+        field = orcidField(modal);
+        const idLink = field.getByRole('link', {name: new RegExp(TEST_ORCID.split('/').pop())});
+        await expect(idLink).toBeVisible();
+        await expect(field).toContainText(UNVERIFIED_NOTE);
+        await expectOrcidIcons(field, ['hollow']);
+        await expect(field.getByRole('button', {name: 'Delete', exact: true})).toBeVisible();
+        const deleted = await pressDeleteOrcid(firstPage, field);
+        expect(deleted.status).toBe(200);
+        await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(modal).toHaveCount(0);
+
+        // Read from the saved state, not the form the browser still holds
+        // (A5: a refused delete still shows the iD gone): a fresh load of
+        // the workflow, the same contributor edited again offers "Request
+        // verification", the iD gone (Rule 8a).
+        await openEditorialWorkflow(firstPage, tag, submissionId);
+        await firstList.openFromWorkflow();
+        modal = await openContributorEditor(firstPage, author);
+        field = orcidField(modal);
+        await expect(field.getByRole('button', {name: 'Request verification'})).toBeVisible();
+        await expect(field.getByRole('link', {name: new RegExp(TEST_ORCID.split('/').pop())})).toHaveCount(0);
+        await expect(field).not.toContainText(UNVERIFIED_NOTE);
+        await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(modal).toHaveCount(0);
+
+        // Control: the second Assistant, whose assignment has no
+        // "Permissions" box, in a browser of their own. The same list
+        // names both contributors (the positive control on this list,
+        // beside the first Assistant's "Edit" above) and neither row
+        // offers "Edit", so no ORCID iD field is reached (Actors row 5).
+        const secondPage = await (await asUser(withoutBox)).newPage();
+        await openEditorialWorkflow(secondPage, tag, submissionId);
+        const secondList = new ContributorsScreen(secondPage);
+        await secondList.openFromWorkflow();
+        await expect(secondList.row(noIdName)).toBeVisible();
+        await expect(secondList.row(author)).toBeVisible();
+        await expect(secondList.rowEditButton(noIdName)).toHaveCount(0);
+        await expect(secondList.rowEditButton(author)).toHaveCount(0);
+        await expect(secondList.rows().getByRole('button', {name: 'Edit', exact: true})).toHaveCount(0);
     });
 });

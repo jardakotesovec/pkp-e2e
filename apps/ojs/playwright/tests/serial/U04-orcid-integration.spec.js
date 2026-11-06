@@ -2,8 +2,8 @@
 /**
  * @file playwright/tests/serial/U04-orcid-integration.spec.js
  *
- * ORCID integration — the three OJS canonical scenarios that assert on ORCID
- * EMAIL (spec scenarios 4, 8 and 11). Every ORCID mailable is queued-job
+ * ORCID integration — the four OJS canonical scenarios that assert on ORCID
+ * EMAIL (spec scenarios 4, 8, 11 and 12). Every ORCID mailable is queued-job
  * mail and the fleets run with `[queues] job_runner = Off`, so nothing
  * reaches Mailpit until `php lib/pkp/tools/jobs.php run` drains the queue —
  * and that drain pops the SHARED queue, so it must never run while parallel
@@ -28,6 +28,10 @@ const {
     openContributors,
     openContributorEditor,
     orcidField,
+    contributorsPanel,
+    deleteOrcid,
+    orcidFieldIcon,
+    orcidIconKind,
     requestVerification,
     resendVerification,
     REQUEST_QUESTION,
@@ -53,6 +57,10 @@ const REAUTH_SUBJECT = 'Requesting updated ORCID record access';
  */
 const AUTH_LINK = /Register or connect your ORCID iD/i;
 const ABOUT_LINK = /More (information )?about ORCID/;
+
+/** The contributor field's note beside an unauthenticated iD (Actors row 6). */
+const UNVERIFIED_NOTE =
+    'This ORCID has not been verified. Please remove this unverified ORCID and request verification from the user/author directly.';
 
 /** A seedable test iD (ORCID's own example iD, sandbox-hosted). */
 const TEST_ORCID = 'https://sandbox.orcid.org/0000-0002-1825-0097';
@@ -445,5 +453,126 @@ test.describe('ORCID integration (queued email)', () => {
                 afterControl: {to: firstRecipient, subject: REAUTH_SUBJECT},
             });
         }
+    });
+
+    test('S12: what an Assistant may do with a contributor\'s iD', async ({asUser, ojsApi, pkpMail}, testInfo) => {
+        test.slow();
+        // A Public Sandbox journal; the submission's two contributors are the
+        // submitter, whose contributor record holds an unauthenticated iD
+        // (seeded), and one `contributors[]` entry with no iD and a
+        // throwaway address. Two Assistants (OJS Copyeditors) are seeded on
+        // it through `participants[]`, the first with the "Permissions" box
+        // (`canChangeMetadata: true`), the second without. The submission
+        // sits in Copyediting (`sendExternalReview`, `accept`), the stage
+        // the Copyeditor group is assigned to, where the Assistant reaches
+        // Publication › Contributors (the 2026-11-02 walk of note f-a5 drove
+        // the dataset's Copyeditor `mfritz` on a copyediting submission).
+        const tag = makeTag('s12', testInfo);
+        const author = `aut${tag}`;
+        const first = `cea${tag}`;
+        const second = `ceb${tag}`;
+        const noIdGiven = 'Noor';
+        const noIdName = `${noIdGiven} Noid${tag}`;
+        const noIdRecipient = `noid-${tag}@mail.test`;
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: author, roles: ['author']},
+                {username: first, roles: ['copyeditor']},
+                {username: second, roles: ['copyeditor']},
+            ],
+            orcid: {},
+        });
+        const {submissionId} = await ojsApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: author,
+            decisions: ['sendExternalReview', 'accept'],
+            author: {orcid: TEST_ORCID, orcidIsVerified: false},
+            contributors: [{givenName: noIdGiven, familyName: `Noid${tag}`, email: noIdRecipient}],
+            participants: [
+                {username: first, role: 'copyeditor', canChangeMetadata: true},
+                {username: second, role: 'copyeditor', canChangeMetadata: false},
+            ],
+        });
+
+        // Each Assistant in a browser of their own, signed in.
+        const firstPage = await (await asUser(first)).newPage();
+        const secondPage = await (await asUser(second)).newPage();
+        const firstWorkflow = new WorkflowPage(firstPage, tag);
+
+        // The first Assistant, the contributor without an iD: the list
+        // offers "Edit" on both contributors (the positive control of the
+        // Control below); the field shows "Request verification" (Actors
+        // row 5). Pressing it asks the Rule 8 question; "Yes" posts the
+        // request. The field's own text is not read after the press (A5).
+        await firstWorkflow.gotoEditorial(submissionId);
+        await openContributors(firstPage);
+        const firstItems = contributorsPanel(firstPage).locator('li.listPanel__item');
+        for (const name of [author, noIdName]) {
+            await expect(
+                firstItems.filter({hasText: name}).getByRole('button', {name: 'Edit', exact: true})
+            ).toBeVisible();
+        }
+        let modal = await openContributorEditor(firstPage, noIdName);
+        let field = orcidField(modal);
+        await expect(field.getByRole('button', {name: 'Request verification'})).toBeVisible();
+        await requestVerification(firstPage, field, {readField: false});
+        await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(modal).toHaveCount(0);
+
+        // That contributor's mailbox, after a drain: the request email,
+        // "Submission ORCID" on this public-API journal, with the personal
+        // authorization link to ORCID's (sandbox) site (Rules 8, 14).
+        runJobs();
+        const summary = await pkpMail.find({to: noIdRecipient, subject: PUBLIC_SUBJECT});
+        expect(summary.Subject).toBe(PUBLIC_SUBJECT);
+        const full = await pkpMail.fullMessage(summary.ID);
+        expect(pkpMail.extractLink(full.HTML, AUTH_LINK)).toContain('sandbox.orcid.org');
+        expect(await pkpMail.count({to: noIdRecipient, subject: PUBLIC_SUBJECT})).toBe(1);
+
+        // The first Assistant, the contributor with the unauthenticated iD:
+        // the field shows the hollow-icon iD link, the not-verified note and
+        // "Delete" (Actors row 6). "Delete" › "Yes" posts the removal; the
+        // form is closed without saving.
+        modal = await openContributorEditor(firstPage, author);
+        field = orcidField(modal);
+        const idLink = field.getByRole('link', {name: new RegExp(TEST_ORCID.split('/').pop())});
+        await expect(idLink).toBeVisible();
+        await expect(orcidFieldIcon(field)).toHaveCount(1);
+        expect(await orcidIconKind(orcidFieldIcon(field))).toBe('hollow');
+        await expect(field).toContainText(UNVERIFIED_NOTE);
+        await expect(field.getByRole('button', {name: 'Delete', exact: true})).toBeVisible();
+        const deleted = await deleteOrcid(firstPage, field);
+        expect(deleted.ok(), `deleteForAuthor answered ${deleted.status()}`).toBe(true);
+        await modal.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(modal).toHaveCount(0);
+
+        // A fresh load of the workflow, so the reopened form reads the saved
+        // state, not the one the browser still holds (a refused Delete still
+        // shows the iD gone, A5): the field offers "Request verification",
+        // the iD gone (Rule 8a).
+        await firstWorkflow.gotoEditorial(submissionId);
+        await openContributors(firstPage);
+        modal = await openContributorEditor(firstPage, author);
+        field = orcidField(modal);
+        await expect(field.getByRole('button', {name: 'Request verification'})).toBeVisible();
+        await expect(idLink).toHaveCount(0);
+        await expect(field).not.toContainText('(unauthenticated)');
+        await expect(field).not.toContainText(UNVERIFIED_NOTE);
+
+        // Control: the second Assistant, without the "Permissions" box, on
+        // the same Contributors list: both contributors are listed (the
+        // settled read), and neither offers "Edit", so no ORCID iD field is
+        // reached (Actors row 5); the first Assistant's "Edit" on both rows
+        // above is the positive control.
+        await new WorkflowPage(secondPage, tag).gotoEditorial(submissionId);
+        await openContributors(secondPage, {editable: false});
+        const secondItems = contributorsPanel(secondPage).locator('li.listPanel__item');
+        await expect(secondItems.filter({hasText: author})).toBeVisible();
+        await expect(secondItems.filter({hasText: noIdName})).toBeVisible();
+        await expect(secondItems).toHaveCount(2);
+        await expect(secondItems.getByRole('button', {name: 'Edit', exact: true})).toHaveCount(0);
+        await expect(secondPage.getByRole('button', {name: 'Add Contributor'})).toHaveCount(0);
     });
 });

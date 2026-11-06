@@ -365,12 +365,9 @@ Contributor's ORCID iD field (add/edit contributor, Contributors list):
 ## Canonical scenarios
 
 Every scenario runs on a scratch journal with throwaway accounts, ORCID
-enabled with sandbox credentials (scenario 1's journal starts with it off,
-scenario 7's has it disabled); no step completes ORCID's own sign-in, and
-the iDs a scenario starts from are seeded. Scenarios 4, 7 and 8 run on two
-scratch journals each (4's second on the Member Sandbox API, 7's with ORCID
-enabled, 8's with the email toggle off), scenarios 4, 8 and 11 read the
-mail catcher, and scenario 10 signs in as the Author. The tooling recipe is in
+enabled with sandbox credentials unless its Given says otherwise; no step
+completes ORCID's own sign-in, and the iDs a scenario starts from are
+seeded. The accounts, the mail catcher reads and the tooling recipe are in
 the footnote. <sup>s</sup>
 
 1. **Turn ORCID on for a journal**
@@ -552,13 +549,14 @@ App-specific:
      request email, subject line "Submission ORCID" on this public-API
      journal (observe the mailbox).
    - **A contributor already verified**: record Accept on the second
-     submission: nothing arrives for its verified contributor's address
+     submission: its verified contributor receives no request email
      (Rule 13); the first submission's email is the positive control.
    - **Control**: with the toggle off, accepting the second journal's
-     submission sends nothing: its contributor's mailbox holds no request
-     email. On a preprint server this scenario does not
-     run: its ORCID tab shows the same toggle, but the server has no
-     accepting decision to trigger it [OPS1](#ops1).
+     submission sends its contributor no request email.
+
+   On a preprint server this scenario does not run: its ORCID tab shows the
+   same toggle, but the server has no accepting decision to trigger it
+   [OPS1](#ops1).
 
 9. **Send a review to ORCID** {OJS}
 
@@ -566,11 +564,11 @@ App-specific:
    the Member Sandbox API, with a submission in review whose reviewer holds
    a verified iD (seeded) and whose second reviewer holds no iD. <sup>s</sup>
 
-   - **The Reviewers table, before the review is complete**: the API type
+   - **The Reviewers table, before the review is complete**: open the row
+     menu of the reviewer with the verified iD: "Send Review To ORCID" is
+     offered ⚠ [A1](#a1) even before the review is complete. The API type
      gates only the background deposit, never the row action's presence
-     (Rule 12). Open the row menu of the reviewer with the verified iD:
-     "Send Review To ORCID" is offered ⚠ [A1](#a1) even before the review is
-     complete.
+     (Rule 12).
    - **After the review is complete** (that reviewer has submitted their
      review): press "Send Review To ORCID". The dialog asks "Send this
      review to the reviewer's ORCID?"; confirm. The dialog closes with no
@@ -636,6 +634,36 @@ App-specific:
     A press deposits nothing [OMP1](#omp1), so this scenario does not run
     on a press.
 
+12. **What an Assistant may do with a contributor's iD** {OJS OMP OPS}
+
+    Given: two Assistants, each in a browser of their own, signed in,
+    assigned to a submission on a scratch journal on the "Public Sandbox"
+    API, the first one's assignment with the "Permissions" box and the
+    second one's without; the submission's two contributors are one
+    without an iD and one with an unauthenticated iD (seeded). <sup>s</sup>
+
+    - **The first Assistant, the contributor without an iD**: on the
+      submission's Contributors list, edit the contributor who has no iD.
+      The ORCID iD field shows "Request verification" (Actors row 5). Press
+      it. The dialog asks "Would you like to send an email to this author
+      requesting they verify their ORCID?"; confirm.
+    - **That contributor's mailbox**: holds the request email, subject line
+      "Submission ORCID" on this public-API journal, with a personal
+      authorization link (Rules 8, 14). The field itself reads "ORCID
+      Verification has been requested!" even when the request is refused
+      [A5](#a5), so the mailbox is where the request shows.
+    - **The first Assistant, the contributor with the unauthenticated iD**:
+      edit the other contributor. The field shows the hollow-icon iD link,
+      the note "This ORCID has not been verified. Please remove this
+      unverified ORCID and request verification from the user/author
+      directly." and "Delete" (Actors row 6). Press "Delete" and
+      confirm. Reload the page and edit the same contributor again: the
+      field offers "Request verification", the iD gone (Rule 8a).
+    - **Control**: the second Assistant, whose assignment has no
+      "Permissions" box, opens the same submission's Contributors list:
+      neither contributor offers "Edit", so no ORCID iD field is reached
+      (Actors row 5).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -644,7 +672,6 @@ Left out of the scenarios above, by reason:
   - the guard for A4 (issue report `docs/issues/U04-A4-what-is-orcid-link-opens-sign-in.md`): once fixed, Scenario 2 presses "What is ORCID?" on the profile Identity tab and the registration page and expects the "What is ORCID?" page (scenario 2's "What is ORCID?" bullet, which no suite asserts while A4 stands).
   - the guard for A2 (issue report `docs/issues/U04-A2-orcid-denied-page-raw-placeholder.md`): once fixed, a contributor who denies access at ORCID lands on the "ORCID Authorization" page and reads "You denied access to your ORCID record.", no raw key.
   - the guard for A11 (issue report `docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md`): once fixed, in French (Canada), both ORCID tabs (the site's and the journal's) read "ORCID".
-  - an Assistant whose assignment has the "Permissions" box presses "Request verification" (the email arrives) and "Delete" (the iD is gone), and one without the box is offered no "Edit" (Actors rows 5–6; the path pkp/pkp-lib#13517 opened, which no test asserted while A5's refusal stood).
   - the guard for A14 (issue report `docs/issues/U04-A14-orcid-reauthorization-link-blank-page.md`): once fixed, a contributor verified under the public API follows "Requesting updated ORCID record access" after the journal moved to the member API and lands on the "ORCID Authorization" page, not a blank page.
   - the guard for A15 (issue report `docs/issues/U04-A15-orcid-pages-tab-no-page-name.md`): once fixed, the "What is ORCID?" and "ORCID Authorization" pages' browser tab reads "What is ORCID? | {journal name}" and "ORCID Authorization | {journal name}".
   - the guard for A17 (issue report `docs/issues/U04-A17-orcid-locked-tab-save-switches-journal-on.md`): once fixed, a Journal Manager saves "City" on the journal's locked ORCID tab while the site-wide switch is on, the Site Administrator turns the switch off, and the journal's "Enable ORCID functionality" reads unticked (Rule 3).
@@ -1811,7 +1838,7 @@ submission carries `decisions: ['sendExternalReview']` and one
 `reviewRounds[]` entry naming both reviewers `accepted`; the review is
 completed on screen through the reviewer wizard before the row action is
 pressed. Every ORCID mailable is queued mail and the fleets run with the
-job runner off, so scenarios 4, 8 and 11, the three that read the mail
+job runner off, so scenarios 4, 8, 11 and 12, the four that read the mail
 catcher, live in each app's `tests/serial/` suite, which drains the queue (`php
 lib/pkp/tools/jobs.php run`) after the action and reads Mailpit scoped by
 the throwaway recipient; every silence claim (scenario 8's toggle-off
@@ -1860,7 +1887,20 @@ new context's default, so publishing without an issue would fail, Side
 effects), and on OPS the first is posted. The API switch is the tab's
 own "Save". The drain runs the deposit job, which queues the email, and
 then the email; the email's links are read, never followed (A14).
-Site-level ORCID stays off throughout: Site Settings →
+Scenario 12's journal is `orcid: {}` (Public Sandbox); its
+submission's submitter carries `author: {orcid, orcidIsVerified: false}`
+(the contributor with the unauthenticated iD) and one `contributors[]`
+entry with a throwaway address and no iD is the contributor without; the
+two Assistants are throwaway `users[]` entries in an Assistant-level
+group, OJS and OMP `copyeditor` (the dataset's `mfritz`, a Copyeditor,
+was the Assistant of note f-a5's 2026-11-02 walk), OPS
+`editorialBoardMember` (that walk's OPS Assistant), each seeded on the
+submission through `participants[]` with `canChangeMetadata: true` for
+the first and `false` for the second (the "Permissions" box,
+scenarios.md). The request is read as one "Submission ORCID" to the
+`contributors[]` address after a drain; the field's own state after
+either press is never asserted (A5), the delete being read on the
+form reopened after a reload. Site-level ORCID stays off throughout: Site Settings →
 ORCID is a shared singleton across every parallel worker and fleet.
 
 <a id="fn-a1"></a>

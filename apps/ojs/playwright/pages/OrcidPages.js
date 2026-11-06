@@ -26,7 +26,8 @@
  * dialog helper and the About page were added on the 2026-09-13 revision;
  * the City box, the tab switch, the refused save, the icon kind, the
  * Delete window, the resend helper and the footer on the 2026-10-26
- * revision (tojs probe, `.reports/U04/screen-notes.md`).
+ * revision (tojs probe, `.reports/U04/screen-notes.md`); the field-silent
+ * request and the Delete helper on the 2026-11-06 revision (scenario 12).
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
@@ -244,12 +245,21 @@ exports.REQUESTED_TEXT = 'ORCID Verification has been requested!';
  * added (`saved: false`) nothing is posted until the form's Save, so only
  * the dialog and the field are read.
  *
+ * `readField: false` leaves the field's own text unread after the press:
+ * the field reads the requested state even when the server refuses the
+ * request (register A5), so a test whose claim is the request itself reads
+ * the mailbox instead (scenario 12).
+ *
  * @param {import('@playwright/test').Page} page
  * @param {import('@playwright/test').Locator} field from orcidField()
- * @param {{saved?: boolean}} [options]
+ * @param {{saved?: boolean, readField?: boolean}} [options]
  * @returns {Promise<import('@playwright/test').Locator>} the (closed) dialog
  */
-exports.requestVerification = async function requestVerification(page, field, {saved = true} = {}) {
+exports.requestVerification = async function requestVerification(
+    page,
+    field,
+    {saved = true, readField = true} = {}
+) {
     await field.getByRole('button', {name: 'Request verification'}).click();
     const dialog = page.getByRole('dialog').filter({hasText: exports.REQUEST_QUESTION});
     await expect(dialog).toContainText('Request ORCID verification');
@@ -265,8 +275,38 @@ exports.requestVerification = async function requestVerification(page, field, {s
         await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
     }
     await expect(dialog).toHaveCount(0);
-    await expect(field).toContainText(exports.REQUESTED_TEXT);
+    if (readField) {
+        await expect(field).toContainText(exports.REQUESTED_TEXT);
+    }
     return dialog;
+};
+
+/** The question the field's "Delete" window asks (Rule 8a). */
+exports.DELETE_QUESTION = 'Are you sure you want to remove this ORCID?';
+
+/**
+ * Press the ORCID iD field's "Delete", check the "Delete ORCID" window's
+ * question, answer "Yes" and wait for the `orcid/deleteForAuthor/…` request
+ * the press posts. The field's own state afterwards is left unread (a
+ * refused delete still shows the iD gone, register A5); the response is
+ * returned for the caller to read, and the saved state is read on a
+ * reopened form after a fresh load.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} field from orcidField()
+ * @returns {Promise<import('@playwright/test').Response>}
+ */
+exports.deleteOrcid = async function deleteOrcid(page, field) {
+    await field.getByRole('button', {name: 'Delete', exact: true}).click();
+    const dialog = page.getByRole('dialog').filter({hasText: exports.DELETE_QUESTION});
+    await expect(dialog).toContainText('Delete ORCID');
+    const deleted = page.waitForResponse((response) =>
+        response.url().includes('/orcid/deleteForAuthor/')
+    );
+    await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
+    const response = await deleted;
+    await expect(dialog).toHaveCount(0);
+    return response;
 };
 
 /**

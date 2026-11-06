@@ -30,6 +30,8 @@
  *   itself), "Resend Verification Email" (resendVerification), the
  *   request dialog's wording (REQUEST_QUESTION, REQUEST_ON_CREATE) and an
  *   ORCID email's body as text (orcidEmailText) — the 2026-10-26 revision.
+ * - The unauthenticated iD's "Delete" on the contributor form (deleteOrcid,
+ *   orcidDeleteDialog, UNVERIFIED_NOTE) — the 2026-11-06 revision (S12).
  *
  * The workflow itself is opened with the U26 helpers
  * (playwright/pages/ReviewStagePages.js — openEditorial).
@@ -320,6 +322,45 @@ exports.resendVerification = async function resendVerification(page, field) {
     await expect(dialog).toHaveCount(0);
     return dialogText;
 };
+
+/**
+ * The "Delete ORCID" confirm dialog an unauthenticated iD's "Delete" opens
+ * on the contributor form (Rule 8a).
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.orcidDeleteDialog = function orcidDeleteDialog(page) {
+    return page.getByRole('dialog').filter({hasText: 'Are you sure you want to remove this ORCID?'});
+};
+
+/**
+ * Press "Delete" on a contributor form's ORCID iD field and confirm its
+ * "Delete ORCID" dialog with "Yes", bounded by the delete request
+ * answering OK. The field's own state after the press is not read here
+ * (A5: the field shows the iD gone even when the delete is refused); a
+ * test reads it on the form reopened after a reload.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} field from orcidField()
+ * @returns {Promise<string>} the dialog's text, read before it was confirmed
+ */
+exports.deleteOrcid = async function deleteOrcid(page, field) {
+    await field.getByRole('button', {name: 'Delete', exact: true}).click();
+    const dialog = exports.orcidDeleteDialog(page);
+    await expect(dialog).toContainText('Delete ORCID');
+    const dialogText = await dialog.innerText();
+    const deleted = page.waitForResponse(
+        (response) => response.url().includes('/orcid/deleteForAuthor/') && response.ok()
+    );
+    await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
+    await deleted;
+    await expect(dialog).toHaveCount(0);
+    return dialogText;
+};
+
+/** The unauthenticated iD's note on the contributor form (Fields; Actors row 6). */
+exports.UNVERIFIED_NOTE =
+    'This ORCID has not been verified. Please remove this unverified ORCID and request verification from the user/author directly.';
 
 /** The request dialog's question (Rule 8; Fields, the contributor's ORCID iD field). */
 exports.REQUEST_QUESTION = 'Would you like to send an email to this author requesting they verify their ORCID?';

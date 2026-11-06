@@ -37,6 +37,12 @@
  * (`AboutOrcidPage.footer`, `footerBrandLink`) and the member-API deposit
  * sentence (`DEPOSIT_SENTENCE`); `leaveUsersAndRoles` (the side menu's
  * Settings › Server, every question the page asks recorded).
+ *
+ * Added on the 2026-11-06 revision (scenario 12, the Assistant's
+ * controls): `pressRequestVerification` and `pressDeleteOrcid`, which
+ * confirm the field's two actions and return the dialog's text and the
+ * server's answer without reading the field afterwards (A5: the field
+ * changes even when the server refuses), and `UNVERIFIED_NOTE`.
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
@@ -368,6 +374,66 @@ exports.resendVerification = async function resendVerification(page, field) {
     await expect(dialog).toHaveCount(0);
     await expect(field).toContainText(exports.REQUESTED_TEXT);
     return dialogText;
+};
+
+/** The note under a contributor's unauthenticated iD (Actors row 6; Rule 8c). */
+exports.UNVERIFIED_NOTE =
+    'This ORCID has not been verified. Please remove this unverified ORCID and request verification from the user/author directly.';
+
+/**
+ * Press "Request verification" on a saved contributor's ORCID iD field and
+ * confirm its dialog with "Yes", bounded by the
+ * `orcid/requestAuthorVerification/…` answer whatever its status. The
+ * field is not read afterwards: it switches to the requested state even
+ * when the server refuses (A5), so the caller reads the mailbox instead.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} field from orcidField()
+ * @returns {Promise<{dialogText: string, status: number}>}
+ */
+exports.pressRequestVerification = async function pressRequestVerification(page, field) {
+    await field.getByRole('button', {name: 'Request verification'}).click();
+    const dialog = exports.orcidRequestDialog(page);
+    await expect(dialog).toContainText('Request ORCID verification');
+    const dialogText = await dialog.innerText();
+    const answered = page.waitForResponse((response) =>
+        response.url().includes('/orcid/requestAuthorVerification/')
+    );
+    await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
+    const response = await answered;
+    await expect(dialog).toHaveCount(0);
+    return {dialogText, status: response.status()};
+};
+
+/** The "Delete ORCID" confirm dialog the field's "Delete" opens (Rule 8a). */
+exports.orcidDeleteDialog = function orcidDeleteDialog(page) {
+    return page
+        .getByRole('dialog')
+        .filter({hasText: 'Are you sure you want to remove this ORCID?'});
+};
+
+/**
+ * Press "Delete" beside a contributor's iD and confirm "Delete ORCID" with
+ * "Yes", bounded by the `orcid/deleteForAuthor/…` answer whatever its
+ * status. The field is not read afterwards (A5: a refused delete still
+ * shows the iD gone); the caller reopens the contributor from a fresh load.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} field from orcidField()
+ * @returns {Promise<{dialogText: string, status: number}>}
+ */
+exports.pressDeleteOrcid = async function pressDeleteOrcid(page, field) {
+    await field.getByRole('button', {name: 'Delete', exact: true}).click();
+    const dialog = exports.orcidDeleteDialog(page);
+    await expect(dialog).toContainText('Delete ORCID');
+    const dialogText = await dialog.innerText();
+    const answered = page.waitForResponse((response) =>
+        response.url().includes('/orcid/deleteForAuthor/')
+    );
+    await dialog.getByRole('button', {name: 'Yes', exact: true}).click();
+    const response = await answered;
+    await expect(dialog).toHaveCount(0);
+    return {dialogText, status: response.status()};
 };
 
 /**
