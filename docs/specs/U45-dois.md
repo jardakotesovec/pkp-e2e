@@ -476,15 +476,15 @@ links under the list. <sup>g</sup>
     "Save" stores them. <sup>m</sup> <sup>q16</sup> <sup>q50</sup>
 21. **Search.** The phrase applies once Enter is pressed. Words match
     the works' titles and contributors' names. A phrase beginning with
-    digits and a dot ("10.1234/a7k") is read as the start of a DOI, and
-    what it finds differs by app ⚠ [A11](#a11): on a journal, the
-    articles whose own DOI begins with it (a galley's DOI finds nothing);
-    on a press, the books with a chapter, format or file DOI beginning
-    with it, counting only the kinds ticked under "Items with DOIs"
-    <sup>q33</sup> (the monograph's own DOI finds nothing); on a
-    preprint server nothing,
-    "10.1234/" included. A suffix without its prefix finds nothing.
-    <sup>o</sup> <sup>q18</sup>
+    digits and a dot ("10.1234/a7k") is read as the start of a DOI: it
+    lists the works that carry a DOI beginning with it, counting only
+    the kinds ticked under "Items with DOIs": the work's own, its
+    galleys' on a journal and a preprint server, its chapters', formats'
+    and files' on a press <sup>q33</sup>. "10.1234/" lists every work
+    with such a DOI, and a DOI of a kind left unticked finds nothing. A
+    suffix without its prefix finds nothing. The editorial dashboard's
+    "Search submissions" finds the same. <sup>o</sup> <sup>q18</sup>
+    <sup>f-a11</sup>
 22. **Filters.** Choosing a filter narrows the list and marks it chosen;
     choosing it again, or its "Clear filter: {name}", lifts it. Within
     "Status" and within "Registration" one filter at a time applies.
@@ -1354,7 +1354,9 @@ throwaway accounts. <sup>sc</sup>
      search phrase" button shows. Press it: the box empties and the other
      works are back. Type "Anning" and press Enter: "Tardigrade
      desiccation" and "Coral spawning" are listed, and "Axolotl limb
-     memory" is not (Fields, "Search"; Rule 21).
+     memory" is not. Clear it, type the DOI its "Article" ("Monograph",
+     "Preprint") row shows and press Enter: only "Axolotl limb memory"
+     is listed (Fields, "Search"; Rule 21).
    - **"Status" filters**: press "Needs DOI": "Axolotl limb memory" leaves
      the list and the filter is marked chosen; press "DOI Assigned": it
      takes the place of "Needs DOI", and only "Axolotl limb memory" is
@@ -2063,6 +2065,7 @@ throwaway accounts. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - searching by a galley's DOI (journal, preprint server) or a chapter's, format's or file's DOI {OMP} while its kind is ticked, by "10.1234/" with both kinds assigned, and the same DOI finding nothing once its kind is unticked (Rule 21; A11, retired; `checks/issues/doi-search-finds-different-sets/walk.js` walks it on PKP's dataset)
   - A review taken out of public view whose DOI reads "Registered" or "Submitted": "Deposit DOIs" and the "Mark DOIs …" actions on its work leave that DOI's status, seen on its row once public again, and the reviews file (Rule 29b) leaves the review out (OJS6 retired; Rules 7b, 29)
   - A review that qualifies again after losing its "Unregistered" DOI (OJS7, ruled intended): under "Immediately…" a new, different DOI at once; under "Upon reaching the copyediting stage" its row reads "Needs DOI" until "Assign DOIs" or the next publication (Rules 7a, 7b; scenario 17 stops at the untick)
   - the guard for A19 (Rule 35; issue report
@@ -2255,7 +2258,6 @@ Left out of the scenarios above, by reason:
   - A10 ("Assign DOIs" while a newer version is unpublished, and under "Yes" the minor version's own DOI at its publication; Rules 11, 12, 17)
   - A17 (a new major version leaving the earlier DOI's status; Rule 32)
   - OPS5 (a preprint server listing unfinished drafts; Rule 15)
-  - A11 (searching by a DOI's start, on a press by a chapter's, format's or file's DOI while its kind is ticked; Rule 21)
   - A12 (clearing a "Registration" filter after "Unregistered"; Rule 22)
   - A8 (the unnamed "DOI Statuses" button and row tick boxes; Fields, the DOIs page)
   - A22 (the "Bulk Actions" menu left open over the list after "Assign DOIs"; Rule 24)
@@ -2307,7 +2309,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A4](#a4) | After "Deposit DOIs", the item's agency box says it "has been manually registered", though nobody marked it | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A8](#a8) | On the DOIs page, a screen reader announces the "DOI Statuses" button and every row's tick box without a name | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A9](#a9) | A pattern symbol with nothing to fill it stays in the DOI | 🐞 | high | issues (claude), 2026-10-12 — re-verified |
-| [A11](#a11) | Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A12](#a12) | On the DOIs page, clearing a "Registration" filter chosen after "Unregistered" leaves only published works listed | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A14](#a14) | The "Mark DOIs Needs Sync" window on the DOIs page asks to mark the records "as stale" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A15](#a15) | "Deposit DOIs" on a published work with no DOI reports success, and nothing is deposited | 🐞 | medium · crash: server | issues (claude), 2026-10-12 — re-verified |
@@ -2347,6 +2348,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS2](#ops2) | A preprint server offers "Automatic Deposit" but nothing runs it | ❓ | user-visible | — |
 | [OPS5](#ops5) | A preprint server's DOIs page lists drafts nobody has submitted | ❓ | minor | — |
 | [OJS7](#ojs7) | A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings; intended | ✅ | minor | @bozana 2026-10-07 · ruled intended |
+| [A11](#a11) | Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server | ✅ | retired | — |
 | [A13](#a13) | A bulk action the server refuses on the DOIs page closes its window and shows no message | ✅ | retired | — |
 | [A25](#a25) | Under "Immediately", declining a submission deletes the DOI its published version shows | ✅ | retired | — |
 | [A26](#a26) | Under "Immediately", "Revert Decline" does not give the work its DOIs back | ✅ | retired | — |
@@ -2497,25 +2499,6 @@ Lean: yes; under "No" the manager chose "No, all versions of an
 article should have the same DOI.", and under "Yes" a minor version is
 meant to share its source's DOI.
 Basis: probe, 2026-09-26 and 2026-10-15. <sup>f-a10</sup>
-
-<a id="a11"></a>
-**A11 — Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server** · 🐞 · medium · crash: server.
-A manager types a DOI, or its start, into the search box of the DOIs
-page and presses Enter, expecting the items that carry it. What the
-search finds depends on the app and on the kinds ticked under "Items
-with DOIs" (Settings › Distribution › "DOIs"). Each app starts with only
-the works' own kind ticked. A journal ("Articles") finds an article by
-its DOI. Once "Article galleys" is ticked, a galley's DOI is never
-found. A press ("Monographs") finds nothing for any DOI. The book's own
-DOI is the one kind it never finds. Once chapters, formats or files are
-ticked, their DOIs are found. A preprint server ("Preprints") fails on
-the server at every DOI search. An "Error" window opens and the list
-stays unfiltered. Once "Preprint galleys" is ticked, the error stops,
-but no DOI is ever found. Where the search misses, the list reads "No
-items found.", so the manager is led to believe that no item carries the
-DOI. The editorial dashboard's "Search submissions" gives the same
-results, the error included.
-Basis: probe, 2026-10-01. <sup>f-a11</sup>
 
 <a id="a12"></a>
 **A12 — On the DOIs page, clearing a "Registration" filter chosen after "Unregistered" leaves only published works listed** · 🐞 · low.
@@ -3146,6 +3129,9 @@ without a subtitle gets no `<subtitle>` in the file.
 Basis: probe, 2026-10-15. <sup>f-ops7</sup>
 
 ### Retired
+
+<a id="a11"></a>
+**A11 — Searching the DOIs page by a DOI misses some DOIs on each app, and fails on a preprint server** · ✅ · retired. Fixed by `pkp/ojs#6050`, `pkp/omp#2566` and `pkp/ops#1497` (`main`; `pkp/ojs#6049`, `pkp/omp#2565` and `pkp/ops#1496` on 3.5, `pkp/ojs#6051` on `ore`) for `pkp/pkp-lib#13744`, the team's copy of the issue report; verified 2026-11-06 at the PR heads before their merge on OJS, OMP and OPS, `main` and 3.5, and on OJS `ore`; merged MERGE-DATE; this page describes the fixed behavior: a DOI or its start lists the works carrying a DOI of a ticked kind that begins with it, the work's own included, on every app, and a preprint server's search no longer fails (Rule 21). <sup>f-a11</sup>
 
 <a id="a13"></a>
 **A13 — A bulk action the server refuses on the DOIs page closes its window and shows no message** · ✅ · retired. Fixed by `pkp/ui-library#1016` (for `pkp/pkp-lib#13507`, with `pkp/pkp-lib#13508`), verified 2026-10-13 at the PR heads before their merge on OJS, OMP and OPS; merged 2026-10-14; this page describes the fixed behavior: a refused bulk action leaves an "Error" window with the server's reason, and an "Export DOIs" whose file fails the agency's check lists what the check found (Rules 24, 29). <sup>f-a13</sup>

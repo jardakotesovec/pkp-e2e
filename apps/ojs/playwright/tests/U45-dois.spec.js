@@ -509,6 +509,7 @@ test.describe('DOIs', () => {
         await expect(dois.columnHeaders(axRow)).toHaveText(TEXT.columns);
         expect(await dois.doiTypes(axRow)).toEqual([ARTICLE]);
         await expect(dois.doiBox(axRow, ARTICLE)).toHaveValue(new RegExp(`^${PREFIX.replace('.', '\\.')}/`));
+        const axDoi = await dois.doiBox(axRow, ARTICLE).inputValue();
         await expect(dois.doiBadge(axRow, ARTICLE)).toHaveText('Unregistered');
         await expect(dois.editButton(axRow)).toHaveText('Edit');
 
@@ -539,6 +540,13 @@ test.describe('DOIs', () => {
         await expectListed(all);
         await dois.search('Anning');
         await expectListed([new RegExp(`— ${TARDIGRADE}$`), new RegExp(`— ${CORAL}$`)]);
+        await dois.clearSearch();
+        await expectListed(all);
+        // A phrase beginning with digits and a dot is read as the start of
+        // a DOI: the published work's own DOI finds it alone (Rule 21;
+        // pkp/pkp-lib#13744).
+        await dois.search(axDoi);
+        await expectListed([new RegExp(`— ${AXOLOTL}$`)]);
         await dois.clearSearch();
         await expectListed(all);
 
