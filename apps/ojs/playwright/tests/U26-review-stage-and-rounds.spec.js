@@ -960,6 +960,20 @@ test.describe('review stage & rounds', () => {
             comments: 'Shared remarks for the author.',
         });
 
+        // Submitted, not yet confirmed: still no reviewer listed (Rule 15,
+        // pkp/pkp-lib#13602).
+        await authorWorkflow.gotoAuthor(submissionId);
+        await expect(uploadRevisions).toBeVisible();
+        await expect(reviewersTable).toHaveCount(0);
+        await expect(readReview).toHaveCount(0);
+
+        // The editor confirms it: "Read Review" › "Mark as Complete".
+        await workflow.gotoEditorial(submissionId);
+        const editorRow = workflow.panelRow('Reviewers', 'Julia Reviewer');
+        const editorModal = await openReviewDetails(editorPage, editorRow);
+        await markReviewComplete(editorPage, editorModal);
+        await closeReviewDetails(editorPage, editorModal);
+
         // The author reads the open review: reviewer's name, completion date
         // and recommendation. (Review text: a Planned assertion since OJS1
         // retired; attachments section: register A3, not asserted.)
