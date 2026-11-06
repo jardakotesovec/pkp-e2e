@@ -30,9 +30,9 @@
  * `supportedLocales` and `supportedFormLocales` (footnote s4); no test
  * drives the Languages screen. Signed-out reads run in a second browser
  * context with an empty storage state (patterns.md parallel lesson 8).
- * The slide's picture never loads on the test installs (footnote g), so
- * the suite asserts the slide's `<img>` and its alternate text, never
- * the rendered picture. Every absence is a settled read paired with a
+ * The suite asserts the slide's `<img>` and its alternate text, not
+ * the rendered picture (which loads on the test installs since the
+ * 2026-11-06 drift sweep, footnote g). Every absence is a settled read paired with a
  * positive control taken the same way: the empty home page's missing
  * carousel against the carousel once a highlight exists, the refused
  * text file's silence against the PNG's upload request, the empty Tasks

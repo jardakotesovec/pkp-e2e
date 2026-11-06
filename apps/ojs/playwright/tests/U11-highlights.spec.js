@@ -21,10 +21,10 @@
  * so every highlight is added through the "Add Highlight" panel, the
  * surface under test. Scenario 4's second form language comes from the
  * context passthrough `supportedFormLocales` (scenarios.md "POST
- * scenarios/context"), never from the Languages screen. The slide's picture
- * never loads on the test installs (footnote g), so the suite asserts the
- * slide's `<img>` and its alternate text and the stored file under the
- * journal's public files directory, never the rendered picture. Signed-out
+ * scenarios/context"), never from the Languages screen. The suite asserts
+ * the slide's `<img>`, its alternate text and the stored file under the
+ * journal's public files directory, not the rendered picture (which loads
+ * on the test installs since the 2026-11-06 drift sweep, footnote g). Signed-out
  * reads run in a second browser context with an empty storage state
  * (patterns.md, parallel lesson 8). The mailbox silence (S1) is read in the
  * shared Mailpit scoped to the throwaway accounts' addresses and bounded by

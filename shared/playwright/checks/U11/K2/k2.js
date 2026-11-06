@@ -36,7 +36,8 @@ const {dbName} = require('../../../../../bin/apps.js'); // the slot's and line's
 //               list unchanged (Side effects, note m/g).
 //   siterefused admin presses "Save" in the site's "Add Highlight" window and
 //               the screen is read three seconds later (what a refused site
-//               save shows).
+//               save showed until A5's fix; on `main` it saves, and cleanup
+//               deletes that row too).
 //   cleanup     delete the site highlights this chunk added (leave the site
 //               list as found).
 //
@@ -715,7 +716,10 @@ async function phasesJournal(app) {
             const dlg = page.getByRole('dialog', {name: /Add Highlight/}).first();
             await dlg.waitFor({state: 'visible', timeout: 15000}); await idle(page);
             await dlg.getByRole('textbox', {name: /^URL/}).waitFor({state: 'visible', timeout: 15000});
-            await typeRich(page, dlg, 'title', `Site refused ${Date.now()}`);
+            // since A5's fix on `main` (pkp-lib#13521) this save succeeds: keep the title so cleanup removes it (SW06 sweep, 2026-11-06)
+            const refusedTitle = `Site refused ${Date.now()}`;
+            scratch.siteTitles = [...(scratch.siteTitles || []), refusedTitle]; saveScratch();
+            await typeRich(page, dlg, 'title', refusedTitle);
             await dlg.getByRole('textbox', {name: /^URL/}).fill('https://example.org/site');
             await dlg.getByRole('textbox', {name: /^Button Label/}).fill('Go');
             await dlg.getByRole('button', {name: 'Save', exact: true}).click();

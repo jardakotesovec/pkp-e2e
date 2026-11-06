@@ -48,11 +48,15 @@ save that fails validation is refused in place: the panel stays open,
 "Please correct one error." (or "Please correct {n} errors.") appears under
 the fields, above "Save", with a "Go to {field}: {message}" button per
 fault and a "Jump to next error" button, the message sits under the field,
-and "Save" is grayed out until every flagged box is changed. "Title",
-"Description" and "Button Label" are entered per language when the form
-has more than one: a language button at the top of the panel shows the
-second language's boxes, labelled "{Field} in {language}" (Rule 11).
-<sup>d</sup> <sup>e</sup>
+and "Save" is grayed out until every flagged box is changed. A notice on
+the page also reads "The form was not saved because {n} error(s) were
+encountered. Please correct these errors and try again." for a few
+seconds. "Title", "Description" and "Button Label" are entered per
+language when the form has more than one: a language button at the top
+of the panel shows the second language's boxes, labelled "{Field} in
+{language}" (Rule 11). With two form languages each of these boxes, in
+either language, carries "{n}/2 languages completed" under it, n being
+how many of the two languages are filled. <sup>d</sup> <sup>e</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
@@ -94,20 +98,23 @@ second language's boxes, labelled "{Field} in {language}" (Rule 11).
    is on and do nothing when pressed ⚠ [A6](#a6). A screen reader also
    hears the heading "Highlights" above the carousel. <sup>j</sup>
 5. **Adding.** "Add Highlight" above the list opens the "Add Highlight"
-   panel (Fields & validation). "Save" closes the panel; the new highlight
-   appears as the last row of the list and as the last slide on the home
-   page, with no reload and no further step. <sup>a</sup> <sup>d</sup>
+   panel (Fields & validation). "Save" closes the panel; with no reload
+   and no further step the new highlight appears as the last slide on the
+   home page and as the last row of the list, except from the 101st
+   highlight on, when the list drops to its first 100 rows until a reload
+   ⚠ [A12](#a12). <sup>a</sup> <sup>d</sup>
 6. **Editing.** "Edit" on a row opens the "Edit Highlight" panel with the
    row's values filled in, the current image previewed. "Save" closes the
    panel and the row shows the new title in place; the slide changes on the
-   next load of the home page. Closing the panel with its close control
-   instead of "Save" saves nothing at that point, but the row shows the
-   unsaved title, "Edit" reopens the panel with it, and the next "Save" of
-   the highlight, even one made to change another box, stores it; only a
-   reload of the tab before editing again puts the saved title back ⚠
-   [A4](#a4). Escape on a plain box (inside a formatted-text box Escape
-   does nothing), a click outside the panel or leaving the page close
-   either panel with no warning, saving nothing then. <sup>a</sup>
+   next load of the home page. Closing the panel without "Save", with its
+   close control, with Escape in "URL" or "Button Label" (in "Title" and
+   "Description" Escape does nothing) or with a click outside the panel,
+   shows no warning and saves nothing then, but the row shows the unsaved
+   title, "Edit" reopens the panel with it, and the next "Save", even one
+   changing another box, stores it; only a reload before editing again
+   puts the saved title back ⚠ [A4](#a4). Escape and the click
+   outside close "Add Highlight" with nothing saved, and leaving the page
+   closes either panel with no warning and nothing saved. <sup>a</sup>
    <sup>d</sup>
 7. **Ordering position of a new highlight.** A new highlight always goes
    last, whatever ordering was saved before. <sup>i</sup>
@@ -181,21 +188,24 @@ second language's boxes, labelled "{Field} in {language}" (Rule 11).
 15. **The programming interface.** The Highlights panel lists, adds,
     edits, deletes and orders highlights through the install's
     programming interface, which programs outside the apps can also call
-    (the address is in the footnote). With each highlight it lists, the
-    interface gives the address that highlight can be read back from on
-    its own. For a journal's highlight that address points at the site
-    instead of the journal, and the highlight cannot be read back on its
-    own at either address ⚠ [A10](#a10). The panel never reads one
-    highlight on its own, so no screen meets this. <sup>p</sup>
+    (the address is in the footnote). With each highlight listed, the
+    interface gives the address to read it back from on its own. For a
+    journal's highlight that address points at the site, not the journal,
+    and there no highlight can be read back, the site's own included ⚠
+    [A10](#a10); at the journal's own address it is returned to the
+    Journal Manager and the Site Administrator and refused to a visitor
+    who is not signed in. The panel never reads one highlight on its own,
+    so no screen meets this. <sup>p</sup>
 
 ## Side effects
 
 - No email is sent and no notification or task is raised by adding,
-  editing, reordering or deleting a highlight; nothing is written to any
-  log. <sup>m</sup>
+  editing, reordering or deleting a highlight. <sup>m</sup>
+- Nothing is written to any log by those actions (server files no screen shows; the footnote names them). <sup>m</sup>
 - The image is stored as a file in the journal's (or the site's) public
-  files directory, replaced in place by a new upload, and deleted when it
-  is removed or the highlight is deleted (Rule 10). <sup>g</sup>
+  files directory, overwritten under the same name by a new upload, and
+  deleted when it is removed or the highlight is deleted (Rule 10).
+  <sup>g</sup>
 - Deleting a journal deletes its highlights and their images with it
   (*Hosted journals* owns the deletion). <sup>m</sup>
 
@@ -359,8 +369,7 @@ address are in its footnote.
    - **The second slide**: press "Next slide": the slide shows the
      picture with "Conference hall" as its description, the headline
      "Annual conference", "Programme and registration." and a "Register"
-     button; the second dot now shows which slide is on, and pressing a dot
-     moves nothing ([A6](#a6)) (Rules 4, 10).
+     button; the second dot now shows which slide is on (Rules 4, 10).
    - **The last slide**: press "Next slide" again: "New book series"
      shows its headline and its "Browse" button only, no description;
      "Next slide" is now disabled and "Previous slide" is not (Fields
@@ -412,33 +421,41 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A1 (Rule 9; issue report
     `docs/issues/U11-A1-highlights-cancel-ordering-keeps-moved-rows.md`):
-    scenario 2 "Reorder the highlights" with a "Cancel" after two moves,
-    the list back in the saved order at once and after a reload
+    once fixed, scenario 2 "Reorder the highlights" with a "Cancel"
+    after two moves, the list back in the saved order at once and after
+    a reload
   - the guard for A3 (Rule 8; issue report
-    `docs/issues/U11-A3-highlights-list-title-html-codes.md`): a title
-    with one word made bold through "Formatting" and one holding "&",
-    the list row showing the bold word and a plain "&"
+    `docs/issues/U11-A3-highlights-list-title-html-codes.md`): once
+    fixed, a title with one word made bold through "Formatting" and one
+    holding "&", the list row showing the bold word and a plain "&"
   - the guard for A4 (Rule 6; issue report
-    `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`): a
-    changed title closed without "Save", then "Edit" and a "Save" of
-    another box, the saved title kept on the row
+    `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`):
+    once fixed, a changed title closed without "Save", then "Edit" and a
+    "Save" of another box, the saved title kept on the row
   - the guard for A11 (Rule 10; the regression report proposes it): once
     fixed, a highlight's picture replaced by a PNG named "photo.jpg" and
     "Save" refused, the old picture still in the reopened panel and on
     the home page's slide
   - the guard for A5 (Actors rows 2 and 3; Rules 12, 13; issue report
     `docs/issues/U11-A5-site-highlights-cannot-be-saved.md`; fixed on
-    `main` 2026-11-05): the Site Administrator adds and orders a site
+    `main`): the Site Administrator adds and orders a site
     highlight on a two-journal site, and a signed-out visitor sees it as
     the site's carousel with its button
   - "Title" and "Button Label" entered in a second language at site scope
     (Rule 11), possible on `main` since A5's fix
+  - the page notice a refused save shows (Fields): scenario 1's empty
+    save also reading "The form was not saved because 3 error(s) were
+    encountered. Please correct these errors and try again."
+  - "{n}/2 languages completed" under "Title", "Description" and "Button
+    Label" with two form languages (Fields; Rule 11): scenario 4's
+    two-language panel reading "0/2 languages completed" under each box
 - **Nothing new to test**:
   - a file over the server's upload limit refused in the "Image" box
     (Fields): the same box's refusal scenario 1 meets with a text file,
     with a file larger than the limit
-  - Escape on a plain box, a click outside the panel or leaving the page
-    closing either panel with nothing saved (Rule 6)
+  - Escape on a plain box or a click outside the panel closing "Add
+    Highlight", and leaving the page closing either panel, with nothing
+    saved (Rule 6)
   - ordering mode kept across a side-tab switch and dropped by a reload
     (Rule 9a)
   - a bold word in "Title" shown bold on the slide and in the "Delete
@@ -455,15 +472,19 @@ Left out of the scenarios above, by reason:
     9a)
   - A2 ("URL" accepting text that is not a web address; Fields)
   - A3 (a formatted title's tags printed in its row; Fields "Title")
-  - A4 ("Edit Highlight" closed with its close control leaving the
-    unsaved title on the row for the next "Save" to store; Rule 6)
-  - A6 (a dot pressed under the carousel; Rule 4; scenario 3 marks it)
-  - A8 ("Save Order" on an empty list; Rule 9a)
+  - A4 ("Edit Highlight" closed without "Save", by its close control,
+    Escape or a click outside, leaving the unsaved title on the row for
+    the next "Save" to store; Rule 6)
+  - A6 (a dot pressed under the carousel; Rule 4)
+  - A8 ("Save Order" refused, on an empty list or after a listed
+    highlight was deleted in another tab; Rule 9a)
   - A9 (the image replaced on an edit emptying "Alternate text"; Rule 10)
-  - A10 (a journal's highlight read on its own through the programming
-    interface; Rule 15)
+  - A10 (a highlight read back through the programming interface from
+    the address listed with it; Rule 15)
   - A11 (a replacement picture the app refuses at "Save", which deletes
     the old one; Rule 10)
+  - A12 (a highlight added to a list of more than 100, missing from the
+    list until a reload; Rule 5)
 - **No seed**:
   - a one-journal site with no site "Highlights" tab (Rule 12): the
     install stops being a one-journal site once its first scratch journal
@@ -491,11 +512,12 @@ an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | The Highlights settings list shows a title's bold word as `<b>…</b>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | "Edit Highlight" closed without "Save" leaves the unsaved title on the row, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-09-30 — re-verified |
 | [A5](#a5) | The site administrator cannot add site highlights: "Save" leaves the panel open and "Save Order" shows an error | 🐞 | medium · crash: server | issues (claude), 2026-10-04 — re-verified |
-| [A10](#a10) | Through the programming interface, a journal's highlight cannot be read on its own: its own address points at the site, and the journal's address for it fails | 🐞 | low · crash: server | issues (claude), 2026-10-15 — re-verified |
+| [A10](#a10) | Through the programming interface, a highlight cannot be read back from the address listed with it: a journal's points at the site, where every read fails | 🐞 | low · crash: server | issues (claude), 2026-10-15 — re-verified |
 | [A11](#a11) | Replacing a highlight's picture with one the app refuses deletes the old picture and leaves the home page's slide empty | 🐞 | user-visible | — |
+| [A12](#a12) | On a list of more than 100 highlights, a newly added highlight is missing from the list until a reload | 🐞 | minor | — |
 | [A2](#a2) | "URL" accepts any text although its hint asks for a full web address, so a slide's button can point nowhere | ❓ | user-visible | — |
 | [A6](#a6) | The carousel's dots do nothing when pressed and have no name for a screen reader | ❓ | minor | — |
-| [A8](#a8) | "Save Order" on an empty list shows the generic "An unexpected error has occurred…" dialog | ❓ | minor | — |
+| [A8](#a8) | A refused "Save Order" (an empty list, or a listed highlight deleted in another tab) shows the generic "An unexpected error has occurred…" dialog | ❓ | minor | — |
 | [A9](#a9) | Replacing a highlight's image on an edit empties "Alternate text", and the highlight saves without one unless it is typed again | ❓ | minor | — |
 | [A7](#a7) | Retired: in the French interface a screen reader names a press's and a server's carousel arrows by raw keys | ✅ | retired | Jarda 2026-10-08 · overturned |
 
@@ -545,12 +567,14 @@ Basis: probe, 2026-10-04. <sup>f-a3</sup>
 <a id="a4"></a>
 **A4 — "Edit Highlight" closed without "Save" leaves the unsaved title on the row, and the next "Save" stores it** · 🐞 · medium.
 A manager who changes the title in "Edit Highlight" and closes the panel
-with its close control expects the change dropped. Instead the row shows
-the unsaved title, "Edit" reopens the panel with it, and the next "Save"
-of the highlight, made to change another box, stores it as the
-highlight's title. Only a reload before editing again puts the saved
+without "Save" (its close control, Escape or a click outside the panel)
+expects the change dropped. Instead the row shows the unsaved title,
+"Edit" reopens the panel with it, and the next "Save" of the highlight,
+made to change another box, stores it as the highlight's title. Only a reload before editing again puts the saved
 title back. The same as [Announcements A11](U12-announcements.md#a11)
-and [Institutions A2](U66-institutions.md#a2). Basis: probe, 2026-09-30. <sup>f-a4</sup>
+and [Institutions A2](U66-institutions.md#a2).
+Basis: probe, 2026-09-30; 2026-11-06. <sup>f-a4</sup>
+Report: refresh owed — the 2026-11-06 drift sweep (SW06) showed Escape and a click outside "Edit Highlight" leaving the unsaved title on the row just as the close control does, while the report's Highlights steps (17–20) walk only the close control; the same sweep saved site highlights on `main` (A5's fix), so its line that the site's Highlights tab cannot save any highlight is stale; the cause it names, `highlights/HighlightsListPanel.vue` `openEditModal()`, is unchanged and serves all three ways of closing (2026-11-06)
 
 <a id="a5"></a>
 **A5 — The site administrator cannot add site highlights: "Save" leaves the panel open and "Save Order" shows an error** · 🐞 · medium · crash: server.
@@ -582,14 +606,18 @@ slide picker, and the arrows alone make a long carousel slow to page.
 Basis: probe. <sup>f-a6</sup>
 
 <a id="a8"></a>
-**A8 — "Save Order" on an empty list shows a generic error** · ❓ · minor.
+**A8 — A refused "Save Order" shows a generic error** · ❓ · minor.
 With no highlights "Order" still switches the list into ordering mode, and
 "Save Order" shows "Error / An unexpected error has occurred. Please reload
 the page and try again. / OK"; "OK" returns the normal header. Refusing
 the save is right, but the dialog is the generic one and nothing needs
-reloading. Question: should "Order" be offered on an
+reloading. The same dialog shows when "Save Order" is refused because a
+highlight on the list was deleted meanwhile in another tab; after "OK"
+the list keeps the moved rows and still shows the deleted one until a
+reload ([A1](#a1)). Question: should "Order" be offered on an
 empty list, and should the dialog say why the save was refused? Lean: gray
-"Order" out while the list is empty. Basis: probe. <sup>f-a8</sup>
+"Order" out while the list is empty, and say in the dialog when a listed
+highlight no longer exists. Basis: probe, 2026-09-16; 2026-11-06. <sup>f-a8</sup>
 
 <a id="a9"></a>
 **A9 — Replacing the image empties "Alternate text"** · ❓ · minor.
@@ -602,19 +630,21 @@ miss, and a picture without a description fails visitors on assistive
 devices. Basis: probe. <sup>f-a9</sup>
 
 <a id="a10"></a>
-**A10 — Through the programming interface, a journal's highlight cannot be read on its own** · 🐞 · low · crash: server.
+**A10 — Through the programming interface, a highlight cannot be read back from the address listed with it** · 🐞 · low · crash: server.
 The apps' own screens never read one highlight on its own, so no user of
 them meets this. A program listing a journal's highlights through the
 install's programming interface (Rule 15) gets, with each highlight, the
-address to read that highlight back from, and expects it to give the
-highlight. The address points at the site instead of the journal. There
-the journal's Journal Manager is refused with "The current role does not
-have access to this operation.", the Site Administrator's request fails
-with a server error (the failure behind [A5](#a5)), and a visitor who is
-not signed in is refused. Asked for at the journal's own address, the
-same highlight fails with a server error for the Journal Manager and the
-Site Administrator alike.
-Since: 2023-10-12 · Basis: probe, 2026-10-15. <sup>f-a10</sup>
+address to read it back from, and expects it to give the highlight.
+The address points at the site instead of the journal. There the
+journal's Journal Manager is refused with "The current role does not
+have access to this operation." and the Site Administrator's request
+fails with a server error. At the journal's own address the highlight is
+returned to the Journal Manager and the Site Administrator. A visitor
+who is not signed in is refused at both addresses. A site highlight read
+on its own at the site's address fails with a server error for the Site
+Administrator too.
+Since: 2023-10-12 · Basis: probe, 2026-10-15; 2026-11-06. <sup>f-a10</sup>
+Report: refresh owed — the 2026-11-06 drift sweep (SW06) showed the journal's own address now returning the highlight to the Journal Manager and the Site Administrator (pkp-lib `07bc43fe67`, 2026-10-16, made `HighlightsController::get()` pass the context's id to `Repository::get(int $id, ?int $contextId)`; `stable-3_5_0` the same since `092ec34b0f`, 2026-10-14, in the code), while the listed site address still fails on the server for the Site Administrator, now inside `HighlightsController::get()` itself (no context there) rather than A5's role check, for a site highlight too; the report's Summary, Steps and Cause on `HighlightsController::get()`, `Repository::get(int $id, ?int $contextId)` and `DAO::get()` (the site route's 404 it predicted is a 500) are stale (2026-11-06)
 
 <a id="a11"></a>
 **A11 — A refused replacement picture deletes the highlight's old picture and leaves the slide empty** · 🐞 · user-visible.
@@ -624,16 +654,29 @@ not match the kind of picture it holds, such as a PNG named
 "photo.jpg". They expect the highlight to keep its old picture. The
 panel does stay open, with "There was an error uploading this image."
 under the picture, printed one letter to a line; but the old picture is
-already deleted. Closed and reopened, the panel's "Image" box shows no
-picture, only "Upload File", and on the home page that highlight's
-slide is an empty grey band: no picture, and its headline, text and
-button no longer show. Nothing tells the manager that the old picture
-is gone; uploading a picture the app accepts puts the slide right.
+already deleted. Closed and reopened without a reload, the panel still
+previews the old picture with its alternate text, though its file is
+gone; after a reload the "Image" box shows no picture, an empty
+"Alternate text" box, "Remove", "Restore Original" and "Upload File". On
+the home page that highlight's slide is an empty grey band: no picture,
+and its headline, text and button no longer show. Nothing tells the
+manager that the old picture is gone; uploading a picture the app
+accepts puts the slide right.
 Until 2026-10-16 such a picture was stored and shown. The change meant
 to refuse files that are not pictures before they are stored, not to
 delete a stored one: regression, not choice. That is `main`, and 3.5
 since 2026-10-14.
-Since: 2026-10-16 (pkp/pkp-lib#13512; on 3.5 2026-10-14) · Basis: probe, 2026-10-19. <sup>f-a11</sup>
+Since: 2026-10-16 (pkp/pkp-lib#13512; on 3.5 2026-10-14) · Basis: probe, 2026-10-19; 2026-11-06. <sup>f-a11</sup>
+
+<a id="a12"></a>
+**A12 — On a list of more than 100 highlights, a newly added highlight is missing from the list until a reload** · 🐞 · minor.
+A manager who adds a 101st highlight or a later one expects it as the
+list's last row, as on a shorter list. Instead "Save" in "Add
+Highlight" closes the panel and the list drops to its first 100 rows:
+the new highlight is not among them, nor are the earlier ones past the
+hundredth, and nothing says rows are hidden. A reload shows them all,
+the new one last; the home page shows the new slide at once.
+Basis: probe, 2026-11-06. <sup>f-a12</sup>
 
 ### Retired
 
@@ -658,8 +701,11 @@ mounts it under "Site Setup" behind `$componentAvailability['highlights']`
 (note c). Panel: ui-library `components/ListPanel/highlights/HighlightsListPanel.vue`
 (header title, "Order"/"Save Order"/"Cancel", "Add Highlight", row "Edit"/"Delete",
 `Orderer` arrows) and `HighlightsEditModal.vue` (a side modal wrapping
-`PkpForm`). The panel's list request is capped at 100 highlights
-(`HighlightsController::MAX_COUNT`); the home page has no cap. Shared-code
+`PkpForm`). The list the tab opens with is read in full
+(`getHighlightsListPanel()` sets no limit); the list the panel fetches
+again after an add (`GET highlights`, whose `count` it ignores) is
+capped at 100 by `HighlightsController::MAX_COUNT` (A12); the home page
+has no cap. Shared-code
 evidence: the handler, templates, controller, repository, form and both
 components are byte-identical in the three checkouts at the 2026-09-16 tips
 (ojs ae597ff9d9, omp 0ec98a508, ops 9ce633ee1d, one pkp-lib b262d27b81),
@@ -675,6 +721,10 @@ OPS: the side tab reads "Highlights", fifth under Setup between
 "Information" tab); "Save" closes the panel by itself, the row appears
 without a reload, and the slide is on the home page at once, in a second
 signed-out browser too. The panels offer only the five fields and "Save".
+Live-probed 2026-11-06 (Rule 5), OJS, OMP and OPS `main`, twice each: a
+scratch journal's tab opened with 31 highlights lists 31 rows and with
+101 lists 101, with no pager, and the home page shows every slide (note
+f-a12).
 
 <a id="fn-b"></a>
 **b — who reaches the panels.** The Website settings page is guarded by
@@ -755,7 +805,17 @@ panel is single-language until French is ticked under "Forms", then
 on) box hidden behind a "French" button at the top of the panel, with
 "URL" and "Image" single; the site's panel offers English and the "French"
 button with no tick; a French-only add is refused on the English "Title"
-and "Button Label".
+and "Button Label". Live-probed 2026-11-06 (Fields), OJS `2db1d0b008`,
+OMP `828150a8f`, OPS `0acd73102d`, twice each: every refused save (the
+empty add, one fault, the French-only add, "Button Label" emptied on an
+edit, a refused picture) also showed the page notice `form.errors` "The
+form was not saved because {n} error(s) were encountered. Please correct
+these errors and try again." (n = 3, 1, 2, 1, 1); with French under
+"Forms" every "Title", "Description" and "Button Label" box of "Add
+Highlight", English and French, carried `form.multilingualProgress`
+"0/2 languages completed", and an "Edit Highlight" with the English
+"Title" and "Button Label" filled read "1/2 languages completed" under
+those two and "0/2" under "Description".
 
 <a id="fn-e"></a>
 **e — validation and the unchecked URL.** `Repository::validate()` runs
@@ -783,7 +843,9 @@ with query and fragment are kept as typed; the hints print verbatim.
 <a id="fn-g"></a>
 **g — the image.** `FieldUploadImage` sets `acceptedFiles: 'image/*'`
 and `maxFilesize` = `Application::getIntMaxFileMBs()` (PHP's
-`upload_max_filesize`, 100M on the test installs); Dropzone refuses the
+`upload_max_filesize`; the test servers run on PHP's default, 2M, so the
+box reads "Max filesize: 2MiB.", seed-facts "Picture uploads beyond the
+file name"); Dropzone refuses the
 rest client-side, and because the PKP `form.dropzone.*` strings
 (`dictInvalidFileType` "Files of this type can not be uploaded.",
 `dictFileTooBig`) are passed to the field as options the Vue field never
@@ -803,19 +865,14 @@ file when the image is emptied or a new `temporaryFileId` arrives, and
 `api.400.errorUploadingImage` "There was an error uploading this image."
 The slide's `<img>` uses `Highlight::getImageUrl()` (base URL + the public
 files path + `highlights/{uploadName}?{timestamp}`) and
-`getImageAltText()`. On the test installs the public files directory is
-an absolute filesystem path (`make-test-config.js`, `public_files_dir`),
-so, as with the profile image (seed-facts), the slide's image address is
-that path appended to the origin and the picture never loads; a test
-asserts the `<img>` element, its alternate text and the stored file, never
-the rendered picture. Code read 2026-09-16. Live-probed 2026-09-16 (the
+`getImageAltText()`. A test asserts the `<img>` element, its alternate
+text and the stored file. Code read 2026-09-16. Live-probed 2026-09-16 (the
 "Image" row; Rule 10; Side effects), OJS, OMP and OPS: a `.txt` and a
 101 MiB file are refused in the box with the two Dropzone sentences and no
 request is sent; the file lands as `public/journals/{id}/highlights/{highlightId}.png`
 (OJS), `public/presses/{id}/…` (OMP), `public/contexts/{id}/…` (OPS); the
-slide's `<img>` carries the typed `alt`, no width or height attributes, and
-a `src` that answers 404, so the rendered size was not seen (the template
-sets none); "Remove" › "Save" deletes the file and the slide is text-only;
+slide's `<img>` carries the typed `alt` and no width or height
+attributes (the template sets none); "Remove" › "Save" deletes the file and the slide is text-only;
 a new upload over a PNG keeps the same file name with a new
 `dateUploaded`, so whether the old file is deleted first is code only
 (`edit()` deletes it when a new `temporaryFileId` arrives); the new
@@ -841,6 +898,14 @@ image."; no printed caption), the "Alternate text" box and "Remove" show,
 PNG's own entry, the summary and the field message are gone and "Save"
 is enabled. On OMP the suite's scenario 1 asserts that whole shape, before
 and after the PNG, and was green on its first run the same day.
+Live-probed 2026-11-06 (Rule 10; the "Image" row), OJS, OMP and OPS
+`main`, twice each: the slide's `<img>` loads from
+`/public/{journals|presses|contexts}/{id}/highlights/{highlightId}.png?{timestamp}`
+(200 `image/png`; the 400 × 400 picture shown at 430 × 430), the public
+files directory being relative on the test installs since 2026-09-24
+(seed-facts); a 101 MiB file is refused with "File is too big (101MiB).
+Max filesize: 2MiB."; a new PNG over a stored one keeps the file name
+with a new modification time.
 
 <a id="fn-h"></a>
 **h — deleting.** `HighlightsListPanel.vue` `openDeleteModal()`: dialog
@@ -924,8 +989,12 @@ dots have no accessible name (A6); the `<h2>` "Highlights" is
 `pkp_screen_reader`; `/about`, `/announcement`, `/search`, `/login`,
 `/user/register` and the archive, catalog or preprints page carry no
 block. The site's home page as found lists the journals with no
-`.highlights` block; no site highlight could be saved (A5), so the site
-carousel's position is the template's only.
+`.highlights` block. Live-probed 2026-11-06 (Rules 2, 3; Actors row 3),
+OJS, OMP and OPS `main` (site highlights save since A5's fix), twice
+each: with a site highlight saved, the site's home page shows the
+`.highlights` block first, above the journals list (`highlights`, then
+`journals` / `presses` / `servers`); after the last site highlight is
+deleted the page has no `.highlights` block.
 
 <a id="fn-k"></a>
 **k — the site's home page.** `PKPHandler::getTargetContext()`: with one
@@ -944,7 +1013,9 @@ journal chosen and saved the site address opened that journal's home,
 carousel first; with the blank option saved again it opened the site
 index. The site's Settings form refuses every save until "Site Name" is
 filled (empty on a fresh test install; "Test site" was typed on the three
-fleets). The site-carousel leg stays unseen (A5).
+fleets). Live-probed 2026-11-06 (Rule 13), OJS, OMP and OPS `main`,
+twice each: with the redirect blank and a site highlight saved, the site
+address opens the site index with its carousel above the list (note j).
 
 <a id="fn-l"></a>
 **l — language fallback.** `Highlight::getLocalizedTitle()` and friends
@@ -1024,10 +1095,9 @@ highlight seed key, so every highlight in every scenario is added through
 the panel (the kept claim-check scripts under
 `shared/playwright/checks/U11/` drive the panel and the home page on the
 three apps). The picture is `apps/ojs/playwright/fixtures/files/profile-image-400.png`,
-the refused file any `.txt` (the suites write `notes.txt`). The slide's picture never loads on the test
-installs (note g), so the suite asserts the slide's `<img>` with its
-alternate text and the stored file under the public files directory,
-never the rendered picture. Signed-out reads run in a second browser
+the refused file any `.txt` (the suites write `notes.txt`). The suites
+assert the slide's `<img>` with its alternate text and the stored file
+under the public files directory. Signed-out reads run in a second browser
 context. Mail is read in the mail catcher (Mailpit, `http://127.0.0.1:8025`);
 the absence is read against a positive control the test sends the same
 way (scenarios.md "Mailpit"); the Tasks panel is the header's. The access-denied page is `management/settings/website` on
@@ -1102,7 +1172,12 @@ still returns the saved title. Walked again 2026-09-30 on `main` and
 its close control; the row read "Open call Draft", "Edit" reopened with
 it, and a "Save" that changed only "URL" stored it: after a reload the
 row and "Title" read "Open call Draft". Checked against that evidence
-2026-10-01.
+2026-10-01. Live-probed 2026-11-06, OJS `2db1d0b008`, OMP `828150a8f`,
+OPS `0acd73102d`, twice each, on a scratch journal: the close-control
+steps as above, then "Edit", the title changed to "Escape draft" and
+Escape pressed on "URL": the panel closed with no dialog and the row
+read "Escape draft"; "Outside draft" and a click outside the panel: the
+same; a reload put the saved "Open call Draft" back on the row.
 Issue report: [pkp-e2e#4](https://github.com/jardakotesovec/pkp-e2e/issues/4) ([docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md](../issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md)).
 
 <a id="fn-f-a5"></a>
@@ -1168,7 +1243,12 @@ response said. Live-probed 2026-09-16, OJS, OMP and OPS: on an empty
 scratch list "Order" flips the header to "Save Order" / "Cancel"; "Save
 Order" sends the request, which is refused, and the dialog "Error / An
 unexpected error has occurred. Please reload the page and try again. / OK"
-appears; "OK" returns the normal header.
+appears; "OK" returns the normal header. Live-probed 2026-11-06, OJS, OMP
+and OPS `main`, twice each: in ordering mode with "Ord three" moved up
+and "Ord two" deleted in a second tab, "Save Order" was answered 400
+`{"sequence":"Highlight order could not be saved because one or more of the highlights could not be found."}`
+and showed the same dialog; after "OK" the rows stayed moved and "Ord
+two" stayed listed until a reload.
 
 <a id="fn-f-a9"></a>
 **f-a9 — A9 evidence.** Live-probed 2026-09-16, OJS, OMP and OPS: "Edit"
@@ -1179,20 +1259,24 @@ watches its value and sets the box to the new value's `altText` whenever
 the value changes; a fresh upload's value has none, so the box empties.
 
 <a id="fn-f-a10"></a>
-**f-a10 — A10 evidence.** Two causes, identical on `main` and
-`stable-3_5_0`. `PKP\highlight\maps\Schema::mapByProperties()` builds
+**f-a10 — A10 evidence.** `PKP\highlight\maps\Schema::mapByProperties()` builds
 `_href` with `getApiUrl('highlights/' . $item->getId())` and no second
 argument, so `core/maps/Schema::getApiUrl()` falls back to
 `PKPApplication::SITE_CONTEXT_PATH` (`index`); the publication, ROR and
 submission-file maps pass the context's `urlPath`. Since 9984fe44707
-(2023-10-12). `HighlightsController::get()` passes
+(2023-10-12). Until 2026-10-16 `HighlightsController::get()` passed
 `$this->getRequest()->getContext()`, the context object, where
-`Repository::get(int $id, ?int $contextId)` takes an id, so the request
-fails on the server; the controller's other operations pass the context's
-id. Since pkp-lib 9984fe4470 (2023-10-12, `pkp/pkp-lib#9321`); 71e79e31e3d (2023-10-13) only moved the line into the Laravel controller. The site route, once A5 is fixed,
-would look the id up among site highlights only (`DAO::get()` matches
-`COALESCE(context_id, 0) = 0`) and answer 404 rather than the journal's
-highlight (code only). Live-probed 2026-10-13 (Rule 15), OJS, OMP and
+`Repository::get(int $id, ?int $contextId)` takes an id, so the read at
+the journal's address failed on the server (since pkp-lib 9984fe4470,
+2023-10-12, `pkp/pkp-lib#9321`; 71e79e31e3d, 2023-10-13, only moved the
+line into the Laravel controller). pkp-lib `07bc43fe67`
+(`pkp/pkp-lib#13512`, 2026-10-16; on `stable-3_5_0` `092ec34b0f`,
+2026-10-14) made it `getContext()->getId()`, which mends the journal's
+address; at the site's address the request carries no context, so that
+call fails ("Call to a member function getId() on null" in
+`HighlightsController::get()`) for any highlight, a site highlight
+included, now that A5's fix lets the request past the role check.
+Live-probed 2026-10-13 (Rule 15), OJS, OMP and
 OPS `main` (ojs 7c6fba2064, omp eb9381314, ops 1bc3f78888, lib/pkp
 f4c2578c94), twice each on a scratch journal with one highlight added
 through the panel: the add answer and the journal's list both carry the
@@ -1204,9 +1288,19 @@ administrator 500 (A5's failure in the `has.roles` middleware) and a
 signed-out request 401. `{journal}/api/v1/highlights/{id}` answers 500
 to the manager and the administrator and 401 signed out. The site's own
 list answered the administrator 500 (A5), so no site highlight's `_href`
-could be compared. 3.5 read in the code only (lib/pkp f4f8fcdbc0 under
-ojs, 8094f06bf5 under omp and ops); 3.4 and 3.3 have no highlights
-(note a).
+could be compared. Live-probed 2026-11-06 (Rule 15), OJS `2db1d0b008`,
+OMP `828150a8f`, OPS `0acd73102d` (lib/pkp `25fdc98a3e`, `1ae711024a`
+under OMP), twice each, on a scratch journal with one highlight added
+through the panel and a site highlight: the list and add answers still
+carry `_href` `/index.php/index/api/v1/highlights/{id}`; that address
+answers the journal's manager 401, the administrator 500 (the server log
+naming `HighlightsController::get()`) and a signed-out request 401;
+`{journal}/api/v1/highlights/{id}` answers the manager and the
+administrator 200 with the highlight and a signed-out request 401; the
+site highlight at `index/api/v1/highlights/{id}` answers the
+administrator 500. 3.5 read in the code only (`stable-3_5_0`, lib/pkp
+`40990d1523`: the same `_href` and the same `get()` line); 3.4 and 3.3
+have no highlights (note a).
 Issue report: [pkp-e2e#974](https://github.com/jardakotesovec/pkp-e2e/issues/974) ([docs/issues/U11-A10-highlight-read-on-its-own-fails.md](../issues/U11-A10-highlight-read-on-its-own-fails.md)).
 
 <a id="fn-f-a11"></a>
@@ -1237,7 +1331,7 @@ dataset (pkp/datasets `eaf024c`, PostgreSQL), freshly loaded, as
 400 `{"image":"There was an error uploading this image."}` (a bare
 string; the field printed it a character to a line), the panel open,
 `public/journals/1/highlights/` empty, the stored image
-`{"temporaryFileId":2}`; reopened, no picture; the home page's slide an
+`{"temporaryFileId":2}`; reopened after a reload, no picture; the home page's slide an
 `<img src="…/public/journals/1/highlights/?">` that loads nothing, the
 headline and button not visible in the screenshot, and on each view
 `PHP Deprecated: strtotime(): Passing null to parameter #1 … in
@@ -1252,10 +1346,38 @@ checked in `Repository::validate()` before any write, through a new
 under the picture, `photo.png` kept on disk, in the panel and on the
 slide. Kept check
 `shared/playwright/checks/sync/pkp-lib-13512/followup.js`, fix
-`fix-followup.diff` in the same folder. Tracked in ci-triage "Open
-regressions". Written up for the team in
+`fix-followup.diff` in the same folder. Live-probed 2026-11-06, OJS
+`2db1d0b008`, OMP `828150a8f`, OPS `0acd73102d`, twice each, on a
+scratch journal with English and French under "Forms": the same refusal
+(400 `{"image":"There was an error uploading this image."}`, the
+message one letter to a line, the context's highlights folder empty);
+"Edit Highlight" reopened without a reload previews the deleted
+`…/highlights/{id}.png` with "Conference hall" in "Alternate text";
+after a reload no preview, an empty "Alternate text" box, "Remove",
+"Restore Original" and "Upload File"; the signed-out slide an
+`<img src="…/highlights/?">` with natural width 0 filling the band, the
+headline and button pushed out of the slide's box; each view logs the
+deprecation line above; a real PNG saved afterwards puts the slide
+right. Tracked in ci-triage "Open regressions". Written up for the team in
 `docs/reports/2026-10-19-pkp-lib-13512.md` (Finding 1; a temporary
 report, deleted once acted on; git history keeps it).
+
+<a id="fn-f-a12"></a>
+**f-a12 — A12 evidence.** The tab opens with the list
+`getHighlightsListPanel()` reads in full (no limit; note a). After a
+successful add `HighlightsListPanel.vue` fetches the list again
+(`this.get()`, note d) with `GET highlights?count=30&offset=0`;
+`HighlightsController::getMany()` ignores `count` and limits the answer
+to `MAX_COUNT` (100), and the panel replaces its rows with that answer.
+The home page reads every highlight (`PKPIndexHandler::getHighlights()`,
+no limit). Code read 2026-11-06. Live-probed 2026-11-06, OJS
+`2db1d0b008`, OMP `828150a8f`, OPS `0acd73102d`, twice each, on a
+scratch journal holding 101 highlights ("Many 001" to "Many 101"): the
+tab listed 101 rows with no pager; after "Save" of one more the list
+showed 100 rows ending "Many 099", "Many 100", the new title and "Many
+101" absent, the one list request answered with 100 items; a reload
+listed 102, the new one last; the signed-out home page showed 102
+slides.
 
 ## Reference — entry points & surfaces
 
@@ -1267,7 +1389,7 @@ report, deleted once acted on; git history keeps it).
 | Row "Delete" (confirm dialog) | the same tab | AFFM-040 |
 | Site's Highlights panel (same controls, site scope) | Administration › Site Settings › Site Setup › Highlights (multi-journal site only) | AFFM-219 |
 | Home-page carousel: slide button, "Previous slide" / "Next slide", dots | the journal's home page; the site's home page | AFFR-017 |
-| Highlights API | `highlights` (list, get, add, edit, delete) and `highlights/order` at journal or site scope. The single-item `get` answers 500 at journal scope, and a journal highlight's `_href` points at the site's address ([A10](#a10)). The panel calls neither. | API-022 |
+| Highlights API | `highlights` (list, get, add, edit, delete) and `highlights/order` at journal or site scope; the list answers at most 100 ([A12](#a12)). A journal highlight's `_href` points at the site's address, where the single-item `get` fails for every highlight; at the journal's address it reads the highlight ([A10](#a10)). The panel never calls `get`. | API-022 |
 | Highlight record shape | — | SET-015 |
 
 ## Reference — code anchors
