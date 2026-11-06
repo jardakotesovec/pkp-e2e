@@ -5197,7 +5197,7 @@ DOIs" and shared the DOI (note q50); this order was not driven there.
 three apps, two runs each. Live-probed again 2026-09-29 (q33) on a press
 with chapter and format DOIs, and on a journal and a preprint server:
 the same.
-Issue report: [pkp-e2e#217](https://github.com/jardakotesovec/pkp-e2e/issues/217) ([docs/issues/U45-A11-doi-search-finds-different-sets.md](../issues/U45-A11-doi-search-finds-different-sets.md)).
+Issue report: [pkp-e2e#217](https://github.com/jardakotesovec/pkp-e2e/issues/217) ([docs/issues/U45-A11-doi-search-finds-different-sets.md](../issues/U45-A11-doi-search-finds-different-sets.md)). The team's copy is `pkp/pkp-lib#13744` (2026-11-06).
 
 <a id="fn-f-a12"></a>
 **f-a12** — `addFilter()` sets the published status with `unregistered`

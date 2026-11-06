@@ -21,7 +21,8 @@
 // NEIGHBOUR=1 adds, after step 10, the paths a fix must leave alone or
 // must reach: n1 a title word of B; n2 "10.9999/"; n3 the second kind
 // unticked, G_B again (must find nothing); n4 the editorial dashboard's
-// "Search submissions" with D_A (the same collector).
+// "Search submissions" with D_A (the same collector; on 3.5, which has no
+// sidebar search, its list request through the signed-in session).
 //
 // Reset first:  npm run fleet-prep -- --feature issues-ir1 --dataset 1 --reset
 // Run (main):   PROBE_FEATURE=issues-ir1 PROBE_AGENT=ir6 node bin/probe.js all shared/playwright/checks/issues/doi-search-finds-different-sets/walk.js
@@ -156,7 +157,22 @@ forEachApp(async (app) => {
             await setup('n3', false);
             await dois.goto();
             await search('n3', gB);
-            // n4: the editorial dashboard's "Search submissions"
+            // n4: the editorial dashboard's "Search submissions". 3.5 has no
+            // sidebar search box (main only): there the dashboard's own list
+            // request, `_submissions?searchPhrase=`, is asked in the signed-in
+            // session (the same collector).
+            if (facts.line !== 'main') {
+                const r = await page.request.get(app.url(`/index.php/${app.contextPath}/api/v1/_submissions?searchPhrase=${encodeURIComponent(dA)}`));
+                const b = await r.json().catch(() => null);
+                fact('n4 dashboard search', {
+                    phrase: dA,
+                    status: r.status(),
+                    itemsMax: b && b.itemsMax,
+                    apiIds: b && Array.isArray(b.items) ? b.items.map((i) => i.id) : b && b.error,
+                    via: 'api',
+                });
+                return;
+            }
             const {EditorialDashboardPage} = require('../../../pages/EditorialDashboardPage.js');
             const dash = new EditorialDashboardPage(page, app.contextPath);
             await dash.goto();

@@ -10,7 +10,7 @@
   - 3.4: none (code; no search by DOI)
   - 3.3: none (code; no DOIs page)
 - **Introduced** `pkp/ojs#4563`, `pkp/omp#1790` and `pkp/ops#830` (with `pkp/pkp-lib#10724`) for `pkp/pkp-lib#10178` · [75a588738e](https://github.com/pkp/ojs/commit/75a588738e93f383bc6ba23f657631898d3a9641), [7bba9c555e](https://github.com/pkp/omp/commit/7bba9c555ec228100ced41d931c54f12956efcd0), [0524b00d58](https://github.com/pkp/ops/commit/0524b00d58eab7ea82659acfc5f06b84e1e665a4) · 2024-12-24 · Taslan Graham (taslangraham)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13744` (open), the team's copy of this issue (2026-11-06); its fix PRs (`pkp/ojs#6050`, `pkp/omp#2566`, `pkp/ops#1497` on `main`, `pkp/ojs#6049`, `pkp/omp#2565`, `pkp/ops#1496` on 3.5, `pkp/ojs#6051` on `ore`) are not merged yet. Before it: none found (2026-10-01)
 - **Tracked in** spec U45 [A11](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U45-dois.md#a11)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
