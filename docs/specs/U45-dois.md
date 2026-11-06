@@ -5330,7 +5330,9 @@ Issue report: [pkp-e2e#229](https://github.com/jardakotesovec/pkp-e2e/issues/229
 failed with `GuzzleHttp\Exception\ConnectException` (three attempts),
 every deposit, OJS and OPS; the DOI status stayed 2 (submitted) and no
 error message was stored. Nothing on the DOIs page lists failed jobs.
-Issue report: [pkp-e2e#210](https://github.com/jardakotesovec/pkp-e2e/issues/210) ([docs/issues/U45-A18-deposit-unreachable-agency-stays-submitted.md](../issues/U45-A18-deposit-unreachable-agency-stays-submitted.md)). The team's copy is `pkp/pkp-lib#13591` (2026-10-23).
+Issue report: [pkp-e2e#210](https://github.com/jardakotesovec/pkp-e2e/issues/210) (closed 2026-11-06, fixed by `pkp/pkp-lib#13591`: `pkp/crossref-ojs#117`, `pkp/crossref-ops#74` and `pkp/ojs#5977` on `main`, #118, #75 and #5978 on `stable-3_5_0`, merged 2026-11-05); the report was deleted then (git history keeps it).
+The entry stays until OPS `main` points its crossref submodule at the
+fix (`pkp/ops#1494`; upstream-sync Leads).
 
 <a id="fn-f-a19"></a>
 **f-a19** — `editDoiRegistrationAgencyPlugin()`'s `array_intersect()`

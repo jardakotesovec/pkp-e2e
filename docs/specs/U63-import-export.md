@@ -3689,6 +3689,7 @@ with the box ticked returned "Articles submitted successfully" and
 <a id="fn-f-ojs9"></a>
 **f-ojs9** — Live-probed 2026-09-27: note u.
 Issue report: [pkp-e2e#277](https://github.com/jardakotesovec/pkp-e2e/issues/277) ([docs/issues/U63-OJS9-doaj-deposit-unreachable-stays-submitted.md](../issues/U63-OJS9-doaj-deposit-unreachable-stays-submitted.md)).
+The team's fix is `pkp/ojs#6047` (open), under `pkp/pkp-lib#13591` (2026-11-06).
 
 <a id="fn-f-ojs10"></a>
 **f-ojs10** — Note i (`ExportableIssuesListGridHandler::loadData()`, no

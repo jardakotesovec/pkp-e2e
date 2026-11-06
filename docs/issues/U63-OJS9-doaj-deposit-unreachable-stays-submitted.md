@@ -10,7 +10,7 @@
   - 3.4: none (code)
   - 3.3: none (code)
 - **Introduced** `pkp/ojs#4985` for `pkp/pkp-lib#11593` · [34a2dc86b9](https://github.com/pkp/ojs/commit/34a2dc86b965d3c3037ceb21d1a2e2e974d5713b) · 2025-10-04 · Bozana Bokan (bozana)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13591` (open; the A18 Crossref and DataCite issue, `pkp-e2e#210`), whose DOAJ fix is `pkp/ojs#6047` (open, 2026-11-06)
 - **Tracked in** spec U63 [OJS9](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U63-import-export.md#ojs9)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
