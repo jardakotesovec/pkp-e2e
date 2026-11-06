@@ -592,9 +592,13 @@ Mac a plugin is only read.
   downs it. Only an abandoned review's claim is freed by `down <its id>`,
   after `node bin/slot.js status` shows no session working on it.
 - **The browser** that drives the app runs as the bot, outside the wall
-  (the maintainer accepted that, 2026-10-12): the drive guards every
-  context with `sandbox/drive-guard.js`, which stops and logs a page's
-  request to any host but the pod's two ports.
+  (the maintainer accepted that, 2026-10-12): the drive makes every
+  context with `newGuardedContext` from `sandbox/drive-guard.js`, which
+  refuses and logs a page's request to any host but the pod's two ports.
+  The refusal sits in the context's proxy (a dead port, the pod's ports
+  bypassed), because a route alone sees only the first request of a
+  redirect chain: on 2026-11-06 a pod's 302 took the drive's browser to
+  an outside host past the old route-only guard.
 
 ```bash
 node bin/plugin-fetch.js <gallery PR> pg-<PR>        # download, MD5, unpack safely, compare with the tagged source → .reports/plugin-review/pg-<PR>/integrity.md
