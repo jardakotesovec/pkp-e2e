@@ -4251,7 +4251,7 @@ place. The template text is the same in both apps' own `locale/en/emails.po`
 (`emails.reviewerUnassign.body`, the 2026-08 unassign template of note k):
 it names `{$journalName}`, the journal-only variable, where the app-neutral
 context-name variable belongs, so a press leaves the placeholder as typed.
-Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690) ([docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md](../issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28).
+Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690) ([docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md](../issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR head pkp/omp#2563 `8eff1e8c2c` (`main`), before its merge: the 3.5 dataset upgraded at the head stores `{$contextName}` in both emails, `{$journalName}` at the base (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
 
 <a id="fn-omp4"></a>
 **f-omp4** — Driven 2026-09-17 (OMP, three runs; OJS as the control): on
