@@ -23,7 +23,7 @@
  * "#{number} {authors}" link, never presses it), A12 (S2 seeds a second
  * apart), A13 (S7 reads the wide "Dashboard" number from the source, never
  * as hidden), A4 (the site-level tab is read, never saved); S11 reads the
- * word after "recommends" loosely (U28 OMP2 🐞).
+ * press's subject without a recommendation (U28 OMP2, pkp/pkp-lib#13646).
  *
  * Isolation: every test seeds its own scratch press with throwaway accounts
  * through the scenario endpoint (unique tags naming the app, at most 13
@@ -1376,15 +1376,15 @@ test.describe('notifications center & email preferences', () => {
         await wizard.expectCompleted();
 
         // The Series Editor's mailbox: the review-complete email, subject
-        // "Review complete: {reviewer} recommends {recommendation} for
-        // #{submission number} {authors} — "{title}"" (the word after
-        // "recommends" is read loosely: U28 OMP2), ending "This is an
+        // "Review complete: {reviewer} reviewed #{submission number}
+        // {authors} — "{title}"" (a press names no recommendation: U28
+        // OMP2, pkp/pkp-lib#13646), ending "This is an
         // automated message from {press name}. You can unsubscribe from
         // this email at any time." with "unsubscribe" as the link (Rules 6,
         // 7a).
         const summary = await pkpMail.find({to: emailOf(sectionEditor), subject: REVIEW_COMPLETE_SUBJECT, contains: title});
         expect(summary.Subject).toMatch(
-            new RegExp(`^Review complete: ${reviewerName} recommends \\S+ for #${submissionId} Authorson — "${escapeRegExp(title)}"$`)
+            new RegExp(`^Review complete: ${reviewerName} reviewed #${submissionId} Authorson — "${escapeRegExp(title)}"$`)
         );
         const full = await pkpMail.fullMessage(summary.ID);
         expect(full.Text).toMatch(
