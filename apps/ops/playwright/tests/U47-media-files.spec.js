@@ -14,8 +14,6 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 🐞: every role these scenarios use has its changes accepted; no
- *   refused change is driven.
  * - A2 ❓: the "ID" cell is read for sharing (one cell spanning a pair, a
  *   cell of its own), never for its number.
  * - A3 🐞: the empty upload window is read for what shows; the

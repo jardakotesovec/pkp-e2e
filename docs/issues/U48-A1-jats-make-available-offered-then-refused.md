@@ -144,10 +144,11 @@ Reach:
 - The same pattern, separate fixes: the "Body Text" page offers the
   text editor and "Save" to the same people
   ([U48 A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U48-A2-body-text-save-offered-then-refused.md);
-  that component is passed no `canEdit`), and the "Media" page offers
+  that component is passed no `canEdit`), and the "Media" page offered
   its write actions
-  ([U47 A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U47-A1-media-actions-offered-then-refused.md),
-  `pkp-e2e#493`; its component drops the `canEdit` it is given).
+  ([U47 A1](https://github.com/jardakotesovec/pkp-e2e/issues/493),
+  `pkp-e2e#493`; its component dropped the `canEdit` it was given,
+  fixed by `pkp/ui-library#1030`, 2026-11-06).
 
 ## Proposed fix
 
