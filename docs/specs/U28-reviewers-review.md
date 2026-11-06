@@ -2735,7 +2735,7 @@ Live-probed 2026-09-04 on the press, External Review (seeded journal) and
 Internal Review (scratch press): subject "Review complete: {reviewer}
 recommends None for #{id} …" and the body line "*Recommendation:* None";
 first seen the same day in the notifications feature's claim check.
-Issue report: [docs/issues/U28-OMP2-press-review-complete-email-recommends-none.md](../issues/U28-OMP2-press-review-complete-email-recommends-none.md), filed as [pkp-e2e#602](https://github.com/jardakotesovec/pkp-e2e/issues/602). The team's copy is `pkp/pkp-lib#13646` (2026-10-28).
+Issue report: [docs/issues/U28-OMP2-press-review-complete-email-recommends-none.md](../issues/U28-OMP2-press-review-complete-email-recommends-none.md), filed as [pkp-e2e#602](https://github.com/jardakotesovec/pkp-e2e/issues/602). The team's copy is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR heads pkp/omp#2563 `8eff1e8c2c` (`main`) and #2529 `72b39e2d44` (`stable-3_5_0`), before their merge: PKP's 3.5 (`main`) and 3.4 (3.5) datasets upgraded at the heads store the text without the recommendation (the PRs' `I13646_ReviewCompleteEmailTemplate`), and the editor's email reads "Review complete: Julie Janssen reviewed #17 …"; at the bases "recommends None" (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
 
 <a id="fn-omp3"></a>
 **f-omp3** — The key `reviewer.submission.reviewFormResponse.form.responseRequired`
