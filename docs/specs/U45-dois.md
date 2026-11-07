@@ -2065,7 +2065,7 @@ throwaway accounts. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - searching by a galley's DOI (journal, preprint server) or a chapter's, format's or file's DOI {OMP} while its kind is ticked, by "10.1234/" with both kinds assigned, and the same DOI finding nothing once its kind is unticked (Rule 21; A11, retired; `checks/issues/doi-search-finds-different-sets/walk.js` walks it on PKP's dataset)
+  - searching by a galley's DOI (journal, preprint server) or a chapter's, format's or file's DOI {OMP} while its kind is ticked, by "10.1234/" with both kinds assigned, and the same DOI finding nothing once its kind is unticked (Rule 21; A11, retired)
   - A review taken out of public view whose DOI reads "Registered" or "Submitted": "Deposit DOIs" and the "Mark DOIs …" actions on its work leave that DOI's status, seen on its row once public again, and the reviews file (Rule 29b) leaves the review out (OJS6 retired; Rules 7b, 29)
   - A review that qualifies again after losing its "Unregistered" DOI (OJS7, ruled intended): under "Immediately…" a new, different DOI at once; under "Upon reaching the copyediting stage" its row reads "Needs DOI" until "Assign DOIs" or the next publication (Rules 7a, 7b; scenario 17 stops at the untick)
   - the guard for A19 (Rule 35; issue report
@@ -5187,7 +5187,7 @@ Walked 2026-11-06 at the PR heads of `pkp/pkp-lib#13744`, before
 their merge (each line's tip with the PR merged in: OJS `ad4ab4412a`,
 OMP `c3f984180e`, OPS `c870670cae` on `main`; `91d40ba078`,
 `38e68f66d7`, `8bf08b2acc` on 3.5; OJS `264d1e1505` on `ore`), with
-the issue's `walk.js` and `NEIGHBOUR=1` on fresh dataset fleets: at
+the issue report's kept walk and `NEIGHBOUR=1` on fresh dataset fleets: at
 the tips each app as the report's Observed (the OPS 500 on 3.5 too), at
 the heads the Expected on every app and line (A by its own DOI, B by
 its galley's or format's DOI, "10.1234/" both, the dashboard's search
