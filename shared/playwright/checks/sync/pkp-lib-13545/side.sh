@@ -1,6 +1,11 @@
 #!/bin/bash
-# side.sh <base|head|r4|r3>: PR review pkp/pkp-lib#13543 on PKP's default dataset (OJS), at one side.
-# Round 5 (2026-11-03):
+# side.sh <base|head|r5|r4|r3>: PR review pkp/pkp-lib#13543 on PKP's default dataset (OJS), at one side.
+# Round 6 (2026-11-07):
+#   head: ojs pkp/ojs#5946 969433cad9 (its submodule bumps: lib/pkp pkp-lib#13545 6035a6fed8,
+#         lib/ui-library ui-library#1021 e5952751), `npm ci` from the PR's lockfile
+#   base: ojs main 61efe12241 (the PR's base), lib/pkp d1f20f891e and lib/ui-library 357a18ea (the shared PRs' bases)
+#   r5: round 5's heads 988f0a5163 / 2222768ff7 / 6338cf1ded, the control for round 6's change (preview.js)
+# Round 5 (2026-11-03) ran heads 988f0a5163 / 2222768ff7 / 6338cf1ded on bases e7ce037799 / 1ae711024a / eb988214e9:
 #   head: ojs pkp/ojs#5946 988f0a5163 (its submodule bumps: lib/pkp pkp-lib#13545 2222768ff7,
 #         lib/ui-library ui-library#1021 6338cf1ded), `npm ci` from the PR's lockfile
 #   base: ojs main e7ce037799 (the PR's base), lib/pkp 1ae711024a and lib/ui-library eb988214e9 (the shared PRs' bases)
@@ -13,15 +18,16 @@
 # Round 2 (2026-10-21) ran heads 37dce66451 / 945c3e6cb0 / 210f63608e on bases d270741b6b / 45f674d77b / 9cfb898731;
 # round 1 (2026-10-16) heads 87b9df9594 / c9cd7d31c4 / 936b915c56 on bases 79c3676d1b / 6ff76591a9 / 9cfb898731.
 # then the build and mount, and for each of the given walks (default: walk.js newversion.js figure.js race.js math.js)
-# a freshly reset dataset fleet 1.
+# a freshly reset dataset fleet 1 (round 6 adds preview.js; cli.php runs when named).
 # Logs and facts under .reports/pr-13543/.
 set -u
-side=$1; shift; WALKS=${*:-walk.js newversion.js figure.js race.js math.js}
+side=$1; shift; WALKS=${*:-walk.js newversion.js figure.js race.js math.js preview.js}
 cd "$(dirname "$0")/../../../../.." || exit 1
 R=.reports/pr-13543; S=shared/playwright/checks/sync/pkp-lib-13545; mkdir -p $R
-APP=$([ "$side" = base ] && echo e7ce0377994f84b67990d1eaf20d16c63c1bbf69 || echo 988f0a516329bf2984a046eee650c7a9cca47268)
-PKPLIB=$([ "$side" = base ] && echo 1ae711024a1d9906c6869153b34670df0b0d2ab1 || echo 2222768ff77c8ecc0119ab9825e6632d2701aa92)
-UI=$([ "$side" = base ] && echo eb988214e9b90460461d88c131a5db908c9d5af7 || echo 6338cf1ded19220ee3f4c94b81eb88928b853dea)
+APP=$([ "$side" = base ] && echo 61efe1224186c4605522c58852ff5daf73b88e58 || echo 969433cad94eba2264fc6cd84907aca257961ba8)
+PKPLIB=$([ "$side" = base ] && echo d1f20f891ea647bbcc8b6573d80e9afaffd4da16 || echo 6035a6fed866eabc4fb297ea653a83b31035d896)
+UI=$([ "$side" = base ] && echo 357a18eabf7ef517d4e0f8232804dec381efae13 || echo e5952751241d04b421d5de393a57a9f5e5893c39)
+if [ "$side" = r5 ]; then APP=988f0a516329bf2984a046eee650c7a9cca47268; PKPLIB=2222768ff77c8ecc0119ab9825e6632d2701aa92; UI=6338cf1ded19220ee3f4c94b81eb88928b853dea; fi
 # r3: round 3's heads, the control for the reviewers' round-4 points (math.js)
 if [ "$side" = r4 ]; then APP=481c4bd776569fbd19d6a79061540e245d933b65; PKPLIB=beaa4b9b3ab87afe443b06428dec1d3de64019cb; fi
 if [ "$side" = r3 ]; then APP=4f4cfe83e47001cd6174e76632e45387f539afd0; PKPLIB=927200b33130c201ea5b78b8d6c9e4e15aae0ef5; UI=55e00e3a851d33879005470b74fad8885b975076; fi
