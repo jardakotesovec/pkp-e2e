@@ -483,8 +483,8 @@ Left out of the scenarios above, by reason:
     the address listed with it; Rule 15)
   - A11 (a replacement picture the app refuses at "Save", which deletes
     the old one; Rule 10)
-  - A12 (a highlight added to a list of more than 100, missing from the
-    list until a reload; Rule 5)
+  - A12 (past 100 highlights, an add or a "Save Order" leaving the list
+    at its first 100 rows until a reload; Rule 5)
 - **No seed**:
   - a one-journal site with no site "Highlights" tab (Rule 12): the
     install stops being a one-journal site once its first scratch journal
@@ -514,7 +514,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | The site administrator cannot add site highlights: "Save" leaves the panel open and "Save Order" shows an error | 🐞 | medium · crash: server | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | Through the programming interface, a highlight cannot be read back from the address listed with it: a journal's points at the site, where every read fails | 🐞 | low · crash: server | issues (claude), 2026-11-09 — re-verified |
 | [A11](#a11) | Replacing a highlight's picture with one the app refuses deletes the old picture and leaves the home page's slide empty | 🐞 | user-visible | — |
-| [A12](#a12) | On a list of more than 100 highlights, a newly added highlight is missing from the list until a reload | 🐞 | minor | — |
+| [A12](#a12) | Highlights list shows only its first 100 rows after adding a highlight or saving the order | 🐞 | low | issues (claude), 2026-11-09 — re-verified |
 | [A2](#a2) | "URL" accepts any text although its hint asks for a full web address, so a slide's button can point nowhere | ❓ | user-visible | — |
 | [A6](#a6) | The carousel's dots do nothing when pressed and have no name for a screen reader | ❓ | minor | — |
 | [A8](#a8) | A refused "Save Order" (an empty list, or a listed highlight deleted in another tab) shows the generic "An unexpected error has occurred…" dialog | ❓ | minor | — |
@@ -667,14 +667,20 @@ since 2026-10-14.
 Since: 2026-10-16 (pkp/pkp-lib#13512; on 3.5 2026-10-14) · Basis: probe, 2026-10-19; 2026-11-06. <sup>f-a11</sup>
 
 <a id="a12"></a>
-**A12 — On a list of more than 100 highlights, a newly added highlight is missing from the list until a reload** · 🐞 · minor.
+**A12 — Highlights list shows only its first 100 rows after adding a highlight or saving the order** · 🐞 · low.
 A manager who adds a 101st highlight or a later one expects it as the
-list's last row, as on a shorter list. Instead "Save" in "Add
-Highlight" closes the panel and the list drops to its first 100 rows:
-the new highlight is not among them, nor are the earlier ones past the
+list's last row, as on a shorter list. Instead "Save" closes the "Add
+Highlight" form and the list drops to its first 100 rows: the new
+highlight is not among them, nor are the earlier ones past the
 hundredth, and nothing says rows are hidden. A reload shows them all,
-the new one last; the home page shows the new slide at once.
-Basis: probe, 2026-11-06. <sup>f-a12</sup>
+the new one last, and the home page's carousel shows the new highlight
+at once. "Save Order" on a list of more than 100 drops it to its first
+100 rows the same way, though the order of every highlight is saved.
+Editing or deleting a highlight leaves the list whole. The cut comes
+from the server: after these two saves the list is fetched again from an
+API that answers at most 100 highlights, and the page replaces its rows
+with that answer.
+Basis: probe, 2026-11-06; 2026-11-09. <sup>f-a12</sup>
 
 ### Retired
 
@@ -1387,7 +1393,15 @@ tab listed 101 rows with no pager; after "Save" of one more the list
 showed 100 rows ending "Many 099", "Many 100", the new title and "Many
 101" absent, the one list request answered with 100 items; a reload
 listed 102, the new one last; the signed-out home page showed 102
-slides.
+slides. Walked again 2026-11-09 by the issue reporter on `main` and
+`stable-3_5_0`, OJS, OMP and OPS
+(`checks/issues/highlights-list-drops-past-100/walk.js`): after the
+101st and 102nd adds the list shows rows 001 to 100, the refetch
+answering 100 items with `itemsMax` 100; "Save Order" on 102 drops the
+list to 100 too, the order of all 102 saved; Edit and Delete fetch
+nothing (code). The fix (the cap dropped in `getMany()` and `order()`)
+tried on `main`.
+Issue report: docs/issues/U11-A12-highlights-list-drops-past-100.md.
 
 ## Reference — entry points & surfaces
 

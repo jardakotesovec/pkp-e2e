@@ -1,0 +1,35 @@
+--- a/lib/pkp/api/v1/highlights/HighlightsController.php
++++ b/lib/pkp/api/v1/highlights/HighlightsController.php
+@@ -37,9 +37,6 @@
+ 
+ class HighlightsController extends PKPBaseController
+ {
+-    /** @var int The maximum number of highlights to return in one request */
+-    public const MAX_COUNT = 100;
+-
+     /**
+      * @copydoc \PKP\core\PKPBaseController::getHandlerPath()
+      */
+@@ -140,9 +137,8 @@
+      */
+     public function getMany(Request $illuminateRequest): JsonResponse
+     {
+-        $collector = Repo::highlight()->getCollector()
+-            ->limit(self::MAX_COUNT)
+-            ->offset(0);
++        // The Highlights panel orders the whole list and replaces its rows with this answer, so it is never cut short
++        $collector = Repo::highlight()->getCollector();
+ 
+         if ($this->getRequest()->getContext()) {
+             $collector->filterByContextIds([$this->getRequest()->getContext()->getId()]);
+@@ -273,9 +269,7 @@
+             Repo::highlight()->edit($highlight, ['sequence' => $sequence[$index]['sequence']]);
+         }
+ 
+-        $collector = Repo::highlight()
+-            ->getCollector()
+-            ->limit(self::MAX_COUNT);
++        $collector = Repo::highlight()->getCollector();
+ 
+         if ($context) {
+             $collector->filterByContextIds([$context->getId()]);
