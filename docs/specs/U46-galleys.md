@@ -719,6 +719,11 @@ Left out of the scenarios above, by reason:
     scenario 6)
   - the "Dependent Files" list of an HTML galley (Fields, the galley
     window; *Submission files*, scenario 5)
+  - the galleys the Body Text's "Export" menu makes {OJS}, their
+    "Generated from text editor" and "Revision N" marks in the list, and
+    a new version's copy of them (Fields, "Name"; *[JATS & Body
+    Text](U48-jats-and-body-text.md#export)*, its Rule 24 and Planned
+    items; pkp/pkp-lib#13543)
 
 ## Findings register
 

@@ -306,6 +306,25 @@ Nothing on either page is required, and neither page has a form-level
     a galley, Rule 2a), and the article's page shows nothing of it
     ⚠ [A5](#a5). <sup>r</sup> <sup>d23</sup>
 
+<a id="export"></a>
+24. **"Export": the Body Text as galleys.** The page's "Export" menu
+    offers "Export to HTML", which saves the editor's text as an "HTML"
+    galley of the version with its figures copied beside it, and
+    "Preview: PDF", a page preview whose "Create PDF" saves the text as a
+    "PDF" galley. A later export of the same version adds a revision to
+    that galley instead of a second one, but exports of one version that
+    reach the server at the same moment each add a galley ⚠ [A23](#a23).
+    The galley list marks these galleys "Generated from text editor" and
+    shows "Revision N" from their file's second version
+    ([Galleys](U46-galleys.md#galleys-page)). On a new version the export
+    gives the copied galley a file of its own, so the published version
+    keeps its text. An author's export is refused, and so is an image
+    from another submission or one whose address is not http(s), with
+    the reason. The same export run outside a web request (a
+    command-line tool or a queued job, with no journal in the request)
+    makes the "PDF" galley but stops with an error for the "HTML" one
+    ⚠ [A24](#a24). <sup>d32</sup>
+
 ## Side effects
 
 - Each JATS "Upload", each "Delete JATS File" and each Body Text "Save"
@@ -734,6 +753,19 @@ Left out of the scenarios above, by reason:
   - the guard for A14 (issue report `docs/issues/U48-A14-body-text-opens-with-unsaved-changes.md`): a never-saved Body Text opens without "Unsaved Changes", and "Save" reads "Saved" only when the text is saved, "Send to Text Editor" with an image included.
   - the guard for A15 (issue report `docs/issues/U48-A15-body-text-leaving-loses-text-unasked.md`): with unsaved text on "Body Text", choosing another side-menu entry asks "The data on this form has changed. Do you wish to continue without saving?", and "Cancel" keeps the text.
   - the guard for A18 (retired): sending an unreadable file to "Body Text" ends the import with "Import failed" and its reason.
+  - the Body Text's "Export" menu (Rule 24, footnote d32;
+    pkp/pkp-lib#13543): "Export to HTML" makes one "HTML" galley marked
+    "Generated from text editor", its figure copied, and a second export
+    shows "Revision 2" on it; "Preview: PDF" › "Create PDF" makes one
+    "PDF" galley the same way
+  - a new version's export (Rule 24, footnote d32): after "Create New
+    Version", "Export to HTML" on the new version leaves the published
+    version's "HTML" galley downloading its own text
+  - the export's refusals (Rule 24, footnote d32): an author's export
+    refused, and an image from another submission or with an address
+    that is not http(s) refused with its reason
+  - the guard for A23 (Rule 24): two exports of one version sent at the
+    same moment leave one galley, the later one a revision
 - **Nothing new to test**:
   - a second "Upload" on a version that already has a file, which
     becomes a revision of that one file, listed in its "History"
@@ -776,6 +808,9 @@ Left out of the scenarios above, by reason:
   - A17 (opening a section while another is open closing both; Rule 19)
   - A20 (a warning in the server's log on each JATS "Upload"; Rule 3;
     scenario 1 uploads without reading the log)
+  - A23 (simultaneous exports of one version each adding a galley;
+    Rule 24)
+  - A24 (the HTML export stopping outside a web request; Rule 24)
 - **No seed**:
   - the XML that cannot be produced: the reason in place of the XML,
     with no "Download" and no tick box (Rule 7)
@@ -824,6 +859,8 @@ entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | On "Body Text", pressing a closed side section closes the open one and leaves the pressed one closed | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | Each JATS "Upload" leaves a warning in the server's log | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A22](#a22) | On a subscription journal, the article page's "JATS XML" gives the article's text to visitors its galleys refuse | 🐞 | high | issues (claude), 2026-10-05 — re-verified |
+| [A23](#a23) | Exports of one version's Body Text sent at the same moment each make a galley, so the version gets duplicate "HTML" or "PDF" galleys | 🐞 | low | — |
+| [A24](#a24) | The Body Text's HTML export stops with an error when run outside a web request; the PDF export works | 🐞 | low | — |
 | [A3](#a3) | A published version's Body Text stays editable | ❓ | minor | — |
 | [A4](#a4) | A new version starts with an empty Body Text, though its JATS file and media are copied | ❓ | user-visible | — |
 | [A5](#a5) | The saved Body Text reaches no reader and not the JATS XML | ❓ | user-visible | — |
@@ -1113,6 +1150,28 @@ available "for public download when the publication is published", not
 that this bypasses subscriptions.
 Since: 2026-02-13 · Basis: probe, 2026-10-05. <sup>f-a22</sup>
 
+<a id="a23"></a>
+**A23 — Simultaneous exports of one version's Body Text make duplicate galleys** · 🐞 · low.
+An editor exports a version's Body Text with "Export to HTML" or "Create
+PDF" and expects one galley of that label, each later export a revision
+of it. When two or more exports of the same version reach the server at
+the same moment (two people, or one request sent twice), each adds a
+galley: four at once left three "HTML" galleys, or two "PDF" galleys.
+Readers of the published version see the label more than once, and later
+exports revise only one of the copies. Deleting the extras on "Galleys"
+puts it right.
+Since: 2026-11-07 (pkp/pkp-lib#13543) · Basis: probe, 2026-11-09. <sup>f-a23</sup>
+
+<a id="a24"></a>
+**A24 — The Body Text's HTML export fails outside a web request** · 🐞 · low.
+The export can be called without a web request, as a command-line tool
+or a queued job would call it. There the PDF export makes its galley,
+with or without a signed-in user, but the HTML export stops with an
+error and stores nothing, because no journal is in the request. No
+screen reaches it today: only the page's "Export" menu calls the export,
+and its requests always carry the journal.
+Since: 2026-11-07 (pkp/pkp-lib#13543) · Basis: probe, 2026-11-09. <sup>f-a24</sup>
+
 ### Retired
 
 <a id="a18"></a>
@@ -1265,6 +1324,9 @@ d6, d20, d28).
 <a id="fn-d23"></a>
 **d23** — Live-probed 2026-09-25 (Rule 23; A5), OJS, two runs: a sentence saved on the "Body Text" of a published version with no galley appeared neither in the "JATS XML" page's XML (no `<body>`) nor on the signed-out article page or in its downloaded XML; with an HTML galley the XML's body was the galley's text, and the galley view carried nothing of the sentence.
 
+<a id="fn-d32"></a>
+**d32** — Rule 24 merged 2026-11-07 with pkp/pkp-lib#13543: pkp-lib `pkp/pkp-lib#13545` (`6035a6fed8`, merged as `b793c1688b`), `pkp/ui-library#1021` (merge `856ca3ad02`, tree `e5952751`), `pkp/ojs#5946` (merge `9cab42ec39`, tree `969433cad9`), `pkp/omp#2544`, `pkp/ops#1479` (build and dependencies only); each merged tree is the head reviewed in the PR review's sixth round (2026-11-07). Driven on PKP's default OJS dataset at the reviewed heads, rounds 3 to 6 (2026-10-23 to 2026-11-07), with `shared/playwright/checks/sync/pkp-lib-13545/` (`walk.js`, `newversion.js`, `figure.js`, `race.js`, `preview.js`, `cli.php`): `POST …/publications/{id}/bodyText` (HTML) and `…/bodyText/pdf` (PDF) answer 201 and store a galley with `generatedFrom` "editor" (`Repository::createGalleyFile()`), a second export a revision of its file; the galley list's badges need `generatedFrom === 'editor'` ("Generated from text editor", and "Revision N" from `revisionCount` 2); on a new version the copied galley's shared file is replaced by a new submission file (`isShared`), the published version keeping its files; the author's export answers 401 (`WorkflowStageAccessPolicy` on Production); another submission's image and a non-http(s) address answer 422 ("The HTML references an image that is not attached to this publication's body text.", "… that cannot be exported."). A23 and A24 re-run at the merged tips 2026-11-09 (f-a23, f-a24). Not yet driven by a suite (Coverage, Planned). Written up in `docs/reports/2026-10-16-pkp-lib-13545.md` (a temporary report, deleted once acted on; git history keeps it).
+
 <a id="fn-s"></a>
 **s** — `SubmissionFile\Repository::add()` logs `SUBMISSION_LOG_FILE_UPLOAD` on the file (`submission.event.fileUploaded` "A file "{$filename}" was uploaded for submission {$submissionId} by {$username}.") and `SUBMISSION_LOG_FILE_REVISION_UPLOAD` on the submission (`submission.event.fileRevised` "Revision "{$filename}" was uploaded for file {$submissionFileId}."); `edit()` with a new `fileId` logs `submission.event.revisionUploaded` "A file revision "{$filename}" was uploaded for submission {$submissionId} by {$username}." on both; `delete()` logs `submission.event.fileDeleted` "A file "{$filename}" was deleted for submission {$submissionId} by {$username}." on both. Neither controller sends mail or creates notifications.
 
@@ -1375,6 +1437,14 @@ Issue report: [pkp-e2e#494](https://github.com/jardakotesovec/pkp-e2e/issues/494
 **f-a22** — Note e: `PKPJatsController::publicDownload()` (lib/pkp `api/v1/jats/PKPJatsController.php:280-353` on `main`) checks only `jatsPublicVisibility` and, for an unpublished version, `Repo::submission()->canPreview()`, behind the `restrictArticleAccess` middleware of Settings bullet 2. It never makes the subscription decision of OJS `ArticleHandler::userCanViewGalley()` (`IssueAction::subscriptionRequired()`, the publication's `accessStatus`, `subscribedUser()`, `subscribedDomain()`, a purchased issue or article), and `ArticleHandler::view()` assigns `jatsDownloadUrl` on the visibility alone; OJS only registers the route (`api/v1/submissions/index.php`). The generated body is the `jatsTemplate` plugin's `ArticleBody::create()`, from the first galley it can read: HTML first, a PDF only with a `[search] index[application/pdf]` text helper configured (commented out by default). Introduced by pkp-lib `5f5066e1f6` and ojs `5f24ac954d` (Touhidur Rahman, 2026-02-13, `pkp/pkp-lib#10405`, from `pkp/pkp-lib#10436`); `pkp/pkp-lib#12728` (same author, `3ce03ceafe` 2026-05-13 and `7bec8ae39e` 2026-07-07) later made the download respect Settings bullet 2 and left subscriptions out. Live-probed 2026-09-30 (A22; Actors row 7), OJS `main` at `9d9f116f38`, lib/pkp `fab29cfeca`, as `dbarnes`: "Publishing Mode" set to subscriptions, Vol. 1 No. 2 "Access status" "Subscription", an active individual subscription for `zwoods`; two articles in that issue each given a new version, one with an HTML galley, one with an uploaded JATS file with a `<body>`, box ticked, published. Signed out and as `ddiouf` (Reader, no subscription): the galley answered 302 (to the Login page with "subscription required", to `about/subscriptions`), `…/jats/download` answered 200 with the article's text in `<body>`, and the article page listed "JATS XML" beside the galley marked restricted; `zwoods` and `dbarnes` got 200 on both. A PDF-only version gave a JATS with no `<body>`. Not tried live: institutional subscriptions, purchases, delayed open access. Proposed fix: before serving a published version, apply the galley's access decision (an OJS subclass of the controller or a hook, since `IssueAction` is OJS code), refusing with 403 or redirecting like the galley; send `Cache-Control: private` whenever the answer depends on the requester, not `public, no-cache`; show the link in `ArticleHandler::view()` / `article_details.tpl` only when `$hasAccess`. Patched temporarily and reverted: hiding the link alone left the address serving the text; the controller check with the link hidden answered 403 signed out and for `ddiouf`, 200 with `Cache-Control: no-store, private` for `zwoods` and `dbarnes`, and an article set to open access opened to all. Release check: 3.5, 3.4 and 3.3 do not have it; `stable-3_5_0`'s `PKPJatsController` has only the role-gated get, add and delete routes and no `jatsPublicVisibility`, and 3.4 and 3.3 have no JATS files. OMP and OPS do not register the route and have no subscriptions.
 Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
 Issue report: [pkp-e2e-sec#3](https://github.com/jardakotesovec/pkp-e2e-sec/issues/3) ([docs/issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md](../issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md)).
+
+<a id="fn-f-a23"></a>
+**f-a23** — Rule 24, note d32. `PKP\bodyText\Repository::createGalleyFile()` looks for the version's generated galley inside `DB::transaction()` and adds one when none is found, with no lock: the publication-row `lockForUpdate()` ("Serialize concurrent exports so they cannot create duplicate galleys") of `0d1717f2d4` and `d830a2a01b` was removed by `85e618b07f` (Vitaliy, 2026-10-20, `pkp/pkp-lib#13545` for `pkp/pkp-lib#13543`, merged 2026-11-07). Probe 2026-11-09, OJS `407246bb8e`, lib/pkp `6035a6fed8`, dataset fleet freshly reset, `race.js` (a second PHP server with `PHP_CLI_SERVER_WORKERS=4`, `dbarnes`): four simultaneous HTML exports of submission 15 / publication 16 answered 201 with galley ids 6, 4, 5, 4 and left HTML galleys 4, 5, 6 (files 48, 49, 47); four PDF exports of submission 5 / publication 6 answered 8, 7, 7, 7 and left PDF galleys 7, 8. Two or three galleys of four in each of eight runs since 2026-10-23. The lock restored (`lock-fix.diff` in the kit) left one galley each, tried at the PR's rounds 3 and 4.
+Report: `docs/reports/2026-10-16-pkp-lib-13545.md` (finding 1; temporary, deleted once acted on); ci-triage "Open regressions".
+
+<a id="fn-f-a24"></a>
+**f-a24** — Rule 24, note d32. `Repository::prepareHtmlImages()` builds the submission-file map with `Repo::submissionFile()->getSchemaMap($submission, [])` (`classes/bodyText/Repository.php:407`, from `d830a2a01b`, Vitaliy, 2026-10-20), and the map container takes the `Context` from the request, null outside a web request, while `createGalleyFile()` has already resolved the journal from the submission. `6035a6fed8` ("Make user nullable in case of command line usage") made the user optional only. Probe 2026-11-09, same tips, `cli.php` (a `CommandLineTool`: the site's first admin signed in, no journal in the request; then the user cleared): `createHtmlFile()` on publication 16 twice and on publication 7 with no user each threw `TypeError: PKP\submissionFile\maps\Schema::__construct(): Argument #4 ($context) must be of type PKP\context\Context, null given` (`MapContainer.php:37` ← `submissionFile/Repository.php:105` ← `bodyText/Repository.php:407`), `files` rows unchanged; `createPdfGalley()` stored PDF galleys 4 and 5, the second no-user call a revision. Passing the resolved context (`context-fix.diff` in the kit) stored every call, tried at the PR's round 5. Nothing calls the export outside `PKPBodyTextController` today.
+Report: `docs/reports/2026-10-16-pkp-lib-13545.md` (finding 2; temporary, deleted once acted on); ci-triage "Open regressions".
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — Note b and note p: before the fix, OMP's navigation config had no `bodyText` item, so `navigateToMenu('publication_{id}_bodyText')` found no entry after the version form's POST/PUT had run; the address kept `importFileUrl` and `importFileName` (live-probed 2026-10-02). At the PR head `e28a1de30d` (ui-library#979), before its merge, 2026-10-12, `useFileManagerConfig.js` `getManagerConfig()` drops `Actions.FILE_SEND_TO_EDITOR` from every file list's available actions unless `useApp().isOJS()` (`pkp.context.app === 'ojs2'`), so OMP and OPS offer it on no row, for any role; the author ruled (@jarda.kotesovec, 2026-10-12, in the review thread) that a press should not have the action at all. Probe: d28.
