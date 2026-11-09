@@ -119,7 +119,14 @@ the top holds a return arrow, the version's title and a "Download" button;
 under it the PDF fills the page in a viewer with its own page, zoom, search
 and print controls, a sidebar of page thumbnails, drawing and highlighting
 tools ("Highlight", "Text", "Draw", "Add or edit images") and a "Save"
-that downloads the file. On an older version's galley an outdated-version
+that downloads the file. The viewer's "Tools" menu (the "»" at the right
+end of its toolbar) also offers "Open", which shows a PDF chosen from the
+reader's own computer in the viewer, under the same bar, its title and
+"Download" unchanged. A highlight is not kept: with one drawn
+("Highlight", then a drag over a line of text), the return arrow makes
+the browser ask whether to leave the page ("Leave site?" in Chrome), and
+the reader opened again from the article's page shows the PDF without
+it. On an older version's galley an outdated-version
 notice sits between the bar and the viewer (Rule 12). The browser tab
 reads "View of {title}"; on a French page a journal's reads "Vue de
 {title}" and a preprint server's "##article.pageTitle##" ⚠ [OPS8](#ops8).
@@ -1252,6 +1259,12 @@ Left out of the scenarios above, by reason:
     "Articles" reads (Rule 17b)
   - the chart keeping its figures after downloads are processed (seeded
     figures on a test install), until "Delete Data Caches" (Rule 17c)
+  - a highlight drawn in the PDF reader, the return arrow pressed: the
+    browser asking whether to leave, and the reader opened again
+    showing the PDF without the highlight (Fields, the PDF reader page)
+  - the PDF reader's "Tools" › "Open" showing a PDF from the reader's
+    computer under the same bar, its title and "Download" unchanged
+    (Fields, the PDF reader page)
 - **Rarely met**:
   - a galley whose component was made a dependent one after the galley
     was built, which the page no longer lists (Rule 10; Settings
@@ -2251,6 +2264,26 @@ opened the article's unversioned page (two runs on the journal). The
 browser tab read "View of {title}" in English on both, "Vue de {title}"
 on the journal's French page and "##article.pageTitle##" on the
 server's. The page has no heading; the title is a link in the bar.
+Live-probed 2026-11-09 (Fields, the PDF reader page), OJS and OPS on
+`main` (pdfJsViewer `b7e5188047`) and `stable-3_5_0` (`99a7b13`), both
+carrying PDF.js 6.4.299, on PKP's test dataset (OJS articles 1 and 17,
+OPS preprint 2, whose PDFs hold the line "Dummy document"), signed out
+and as dbarnes, two runs per line (kept script
+`shared/playwright/checks/U13/H09/h09.js`); a press's book PDF view page
+(*Monograph landing page*), driven beside them as a control, behaved the
+same. The toolbar showed "Manage pages" (it opens the thumbnail
+sidebar) where the 2026-09-25 probe saw "Toggle Sidebar", and the other
+controls as listed above. "Find in Document" with "Dummy" typed and
+Enter read "1 of 1 match", the word highlighted; a mouse drag over the
+line selected "Dummy document". "Highlight" pressed and dragged over the
+line drew one highlight; the return arrow then raised one `beforeunload`
+prompt (empty message) and opened the article's page, and "PDF" pressed
+again showed the PDF with no highlight and the viewer's annotation
+storage empty. Only "Highlight" was driven, and only the return arrow as
+the way out. Signed out, "Tools" › "Open" (`#secondaryOpenFile`) given a
+one-page PDF from disk drew it (one page) in the viewer, the bar above
+keeping the galley's title and "Download"; pdf.js reads a file opened
+this way in the browser.
 
 <a id="fn-e"></a>
 **e** — Galley lists: `ArticleHandler::view()` / `PreprintHandler::view()`
