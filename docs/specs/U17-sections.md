@@ -123,7 +123,7 @@ a journal. Fields in screen order: <sup>m</sup>
 | "Subtitle" | No | Per language, at most 255 characters. <sup>m</sup> |
 | "Description" | No | Formatted text, per language. <sup>m</sup> <sup>td1</sup> |
 | Tick boxes "Mark this series as inactive and do not allow new submissions to be made to it." and "Don't allow authors to submit directly to this series." | No | Unticked on a new series. Effects: Settings bullets 1, 2. <sup>m</sup> |
-| "ISSN": "Online ISSN" and "Print ISSN", under a paragraph on what an ISSN is with a link "ISSN International Centre" | No | The paragraph reads "…is an eight-digit number which identifying periodical publications…" ⚠ [OMP7](#omp7). Each box at most 16 characters. A value that is not a valid ISSN: "Please enter a valid ISSN."; the same value in both: "Online and print ISSN must not be the same." <sup>m</sup> <sup>td6</sup> |
+| "ISSN": "Online ISSN" and "Print ISSN", under a paragraph on what an ISSN is with a link "ISSN International Centre" | No | The paragraph reads "…is an eight-digit number which identifies periodical publications including electronic serials…". Each box at most 16 characters. A value that is not a valid ISSN: "Please enter a valid ISSN."; the same value in both: "Online and print ISSN must not be the same." <sup>m</sup> <sup>td6</sup> |
 | "Order of monographs", with "Choose how to order books in this series." | No | The list "Title (A-Z)", "Title (Z-A)", "Publication date (oldest first)", "Publication date (newest first)", "Series position (lowest first)", "Series position (highest first)". A new series arrives on "Title (A-Z)" and keeps it unless it is changed. Effect: Settings bullet 15. <sup>m</sup> <sup>td5</sup> |
 | "Editorial Assignments", with "Select the editorial users who should be assigned automatically to all new submissions to this series." | No | As on a journal. By default a press offers the Press editor, Series editor and Funding coordinator roles; the Press manager's role has no stage ticked and is not offered. Effect: Rule 8. <sup>l</sup> <sup>td4</sup> |
 | "Categories" | No | One tick box per category of the press, a sub-category named by its line of parents ("Social Sciences > Anthropology"). The boxes stand in the alphabetical order of each category's own name, so a sub-category can come before its parent ("Social Sciences > Anthropology" before "Applied Science" and "Social Sciences"). Absent while the press has no category. Effect: the table's "Categories" column only ⚠ [OMP4](#omp4). <sup>m</sup> <sup>td1</sup> |
@@ -187,7 +187,8 @@ a journal. Fields in screen order: <sup>m</sup>
    "Cancel"; "OK" ticks the box and shows "Your changes have been saved.".
    Pressing the ticked box of an inactive row asks "Are you sure you wish
    to activate this section?" and "OK" unticks it. A press asks the same
-   two questions about a "section" ⚠ [OMP5](#omp5). The window's box "Mark
+   two questions about a "series" ("…deactivate this series?",
+   "…activate this series?"). The window's box "Mark
    this section as inactive…" does the same on "Save". An inactive section:
    <sup>k</sup> <sup>td9</sup>
    - 5a. is no longer offered to anyone starting a submission, and a draft
@@ -900,7 +901,7 @@ are in the footnote. <sup>s</sup>
      order holds (Rule 4a).
    - **Every series inactive**: press the "Inactive" box of "The
      Monographs": a window headed "Confirm" asks "Are you sure you wish to
-     deactivate this section?" [OMP5](#omp5); press "OK": the box is
+     deactivate this series?"; press "OK": the box is
      ticked and "Your changes have been saved." shows. Do the same on
      "Textbooks": its box is ticked too (Rules 5, 6).
    - **Every series deleted**: press the arrow at the start of "The
@@ -947,10 +948,9 @@ Left out of the scenarios above, by reason:
     .jpg.", nothing stored and an existing cover kept ([OMP10](#omp10)):
     the guard the issue report proposes
   - {OMP} the ISSN paragraph in the series window reading "which
-    identifies" ([OMP7](#omp7)): the guard the issue report proposes
+    identifies" (Fields, "ISSN"; OMP7 retired)
   - {OMP} the series list's "Inactive" box asking "…deactivate this
-    series?" ("…activate this series?") ([OMP5](#omp5)): the guard the
-    issue report proposes
+    series?" ("…activate this series?") (Rule 5; OMP5 retired)
   - {OMP} the help under a saved series' "Path" showing the series' own
     address ([OMP8](#omp8)): the guard the issue report proposes
   - {OPS} "Archives" on a server with nothing posted showing a sentence
@@ -1024,15 +1024,12 @@ Left out of the scenarios above, by reason:
     press and a preprint server; Rules 17b–17d)
   - OMP6 (a new series' place in the table; Rule 2a)
   - OMP2 (the series path message; Fields, "Path"; scenario 7 passes it)
-  - OMP5 (the series' activate and deactivate windows asking about a
-    "section"; Rule 5; scenario 7 passes it)
   - OMP3 (an SVG cover dropped without a message; Fields, "Cover Image")
   - OMP10 (a damaged PNG as a series' cover, "Save" never answering;
     Fields, "Cover Image")
   - OMP11 (a series cover's "Delete" on a cover or series already gone,
     or on OMP10's broken picture, answering with a raw code; Fields,
     "Cover Image")
-  - OMP7 (the ISSN paragraph's "which identifying"; Fields, "ISSN")
   - OMP8 (the path help ending in "Path"; Fields, "Path")
   - OMP4 (a series' "Categories" boxes feeding only the table's column;
     Fields, "Categories")
@@ -1113,8 +1110,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A12](#a12) | Saving a section's or series' window after it was deleted in another tab hangs without a message | 🐞 | low · crash: server | issues (claude), 2026-11-03 — re-verified |
 | [OMP2](#omp2) | The series path message says "only letters and numbers" while ".", "/", "_" and "-" are accepted | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | A series "Save" with an SVG cover chosen saves nothing, not even the other changes, and shows no message | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [OMP5](#omp5) | A press manager deactivating or reactivating a series is asked about a "section" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [OMP7](#omp7) | The ISSN help in a press's series window reads "which identifying" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP8](#omp8) | The help under a series' "Path" shows an address ending in the word "Path", never the series' own | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP9](#omp9) | A series' public page shows no name, description or ISSN, and lists the books newest first whatever the series' order | 🐞 | user-visible | — |
 | [OMP10](#omp10) | A damaged PNG as a series' cover leaves "Save" hanging, with half of it saved | 🐞 | medium · crash: server | issues (claude), 2026-11-03 — re-verified |
@@ -1133,6 +1128,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS4](#ops4) | No page of a preprint server links to a section's page | ❓ | minor | — |
 | [OMP1](#omp1) | Series are optional and described for readers; no intake settings, no active-series minimum | ✅ | — | — |
 | [OPS6](#ops6) | One preprint posted without an abstract made the server's harvesting record lists fail | ✅ | retired | PR review (claude), 2026-10-05 — fixed at pkp/ops#1430's head |
+| [OMP5](#omp5) | Retired: a press manager deactivating or reactivating a series was asked about a "section"; the window now asks "…deactivate this series?" ("…activate this series?") | ✅ | retired | omp#2563 2026-11-09 · fixed |
+| [OMP7](#omp7) | Retired: the ISSN help in a press's series window read "which identifying"; it now reads "which identifies" | ✅ | retired | omp#2563 2026-11-09 · fixed |
 
 ### All apps
 
@@ -1353,18 +1350,6 @@ Question: what should a series' categories do? Lean: ❓ for the team; if
 nothing, drop the boxes and the column.
 Basis: probe, 2026-09-25. <sup>f-omp4</sup>
 
-<a id="omp5"></a>
-**OMP5 — A press manager deactivating or reactivating a series is asked about a "section"** · 🐞 · low.
-A press manager presses a series' "Inactive" box on Settings › Press ›
-"Series". The window asks "Are you sure you wish to deactivate this
-section?". When the series is already inactive, it asks "Are you sure
-you wish to activate this section?". Every other screen of a press says
-"series". "OK" deactivates or reactivates the series as asked. The
-question asks about a "section" in every interface language, in French a
-"rubrique", since none of OMP's 34 languages gives these questions a
-press's wording.
-Basis: probe, 2026-10-02. <sup>f-omp5</sup>
-
 <a id="omp6"></a>
 **OMP6 — A new series has no fixed place in the list** · ❓ · minor.
 A manager adds a series to a press, expecting it at the end of the
@@ -1376,15 +1361,6 @@ same shifting order.
 Question: should a new series take the last place, as a new section does?
 Lean: 🐞; give a new series the last place, as a journal does.
 Basis: probe, 2026-09-25. <sup>f-omp6</sup>
-
-<a id="omp7"></a>
-**OMP7 — The ISSN help in a press's series window reads "which identifying"** · 🐞 · low.
-A press manager adding or editing a series reads, above the "Online
-ISSN" and "Print ISSN" boxes: "The ISSN (International Standard Serial
-Number) is an eight-digit number which identifying periodical
-publications including electronic serials." It should read "which
-identifies". The other interface languages' texts do not have the slip.
-Basis: probe, 2026-10-02. <sup>f-omp7</sup>
 
 <a id="omp8"></a>
 **OMP8 — The help under a series' "Path" shows an address ending in the word "Path", never the series' own** · 🐞 · low.
@@ -1547,6 +1523,12 @@ Basis: probe, 2026-10-04. <sup>f-ops7</sup>
 <a id="ops6"></a>
 **OPS6 — A preprint without an abstract broke the server's harvesting** · ✅ · retired. Fixed by pkp/ops#1430 (for pkp/pkp-lib#13445), verified 2026-10-05 at the PR's head before its merge (*[OAI-PMH](U19-oai-pmh.md#ops2)*, note f-ops2). <sup>f-ops6</sup>
 
+<a id="omp5"></a>
+**OMP5 — A press manager deactivating or reactivating a series is asked about a "section"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked on 2026-11-09: the series' "Inactive" box asks "Are you sure you wish to deactivate this series?" and, pressed again, "Are you sure you wish to activate this series?" (Rule 5). <sup>f-omp5</sup>
+
+<a id="omp7"></a>
+**OMP7 — The ISSN help in a press's series window reads "which identifying"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked on 2026-11-09: the paragraph reads "…an eight-digit number which identifies periodical publications including electronic serials…" (Fields, "ISSN"). <sup>f-omp7</sup>
+
 ---
 
 <a id="footnotes"></a>
@@ -1612,7 +1594,7 @@ A section's record, in the list and on its own, carries no `_href`: OJS `schemas
 **k** — Box keys: `manager.sections.form.deactivateSection` (`isInactive`), `manager.sections.submissionReview` "Will not be peer-reviewed" (`metaReviewed`, stored inverted: ticked saves `meta_reviewed = 0`), `manager.sections.abstractsNotRequired`, `manager.sections.submissionIndexing` (`metaIndexed`, inverted), `manager.sections.editorRestriction` (`editorRestricted`; OPS field id `editorRestriction`), `manager.sections.hideTocTitle`, `manager.sections.hideTocAuthor`. New-context section: `ContextService::afterAddContext()` sets `metaIndexed` and `metaReviewed` true and `editorRestricted`, `hideTitle` false (all boxes unticked). Inactive: grid cell actions `activateSection`/`deactivateSection` (OMP `…Series`) in `RemoteActionConfirmationModal`s with `manager.sections.confirmActivateSection` / `confirmDeactivateSection` and the default title `common.confirm` "Confirm", buttons `common.ok` / `common.cancel`; OJS/OPS `deactivateSection()` refuses when the context's active count is not above 1 with an error trivial notification `manager.sections.confirmDeactivateSection.error`; `SectionForm::validate()` adds the same error to `isInactive` when no other section is active. OMP `deactivateSeries()` and `SeriesForm` have no such check. "(Inactive)": `Repo::section()->getSectionList()` feeds OJS and OPS `IssueEntryForm` `sectionId` labels `publication.inactiveSection` "{$section} (Inactive)"; OMP `CatalogEntryForm` labels inactive series `publication.inactiveSeries` "{$series} (Inactive)". Dashboard: `DashboardHandler::getSubmissionFiltersForm()` passes every section of the context. The OPS section page (`SectionsHandler`) does not filter on `is_inactive`. Effects of the other boxes: `metaReviewed` is read only by the Publication Facts Label plugin (`PflPlugin::displayArticlePfl()`) and the native export; `metaIndexed` only by the native export filters (`IssueNativeXmlFilter`, `NativeXmlIssueFilter`), not by the OAI data access objects, the search index or any template (A3); `identifyType` by OJS's `plugins/metadata/dc11/filter/Dc11SchemaArticleAdapter.php` and the MARC templates, and by nothing in OPS, whose `Dc11SchemaPreprintAdapter` writes two fixed types (OPS2, note f-ops2); the abbreviation by `OAIDAO` as the set spec; `hideTitle` by `IssueHandler` and the CSL citation; `hideAuthor` by `article_summary.tpl`; `abstractsNotRequired` and the word count by `Submission\Repository::validateSubmit()` (abstract and plain language summary, `HasWordCountValidation`) and `WorkflowHandler` (`sectionWordLimits`). Live-probed 2026-09-25 (Settings bullets 5, 7, 9, 10), OJS and OPS where the box exists: "Do not require abstracts" ticked let a submission reach "Review" with "Abstract None provided" and be published ("Post the preprint" on a server) with no abstract, and "Title & Abstract" save an empty one; unticked, both refused an empty abstract with "This field is required.". "Will not be peer-reviewed" ticked or not, no article showed a Publication Facts Label, with the label's plugin on or off. "Omit the title…" ticked left the section's block of the issue page and of the home page's current issue without a heading; "Omit author names…" left its articles there without an author line, the article pages unchanged.
 
 <a id="fn-td9"></a>
-**td9** — Live-probed 2026-09-25 (Rules 5, 6; Side effects; OMP5), all three apps, two runs: the "Inactive" box asked under "Confirm" "Are you sure you wish to deactivate this section?" (a press the same), "Cancel" left it, "OK" ticked it with "Your changes have been saved."; the ticked box asked "…activate this section?" and "OK" unticked it; the window's box did the same on "Save". An inactive section left the start form for the Author, the Section Editor (Moderator) and the manager, and an Author's draft in it opened "Section Closed"; it stayed in the dashboard filter, opened its page (OPS), read "{section} (Inactive)" on "Publication Settings" ("Preprint entry"), kept its published item in the issue, on the article page, in "Archives" and on the section page, and left the "Submissions" page for a visitor, Reader and Author. A press's inactive series left the wizard's "Series" choice and read "{series} (Inactive)" on "Catalog Entry". On the last active section the box and "OK" left it unticked with "At least one section must be active. Visit the workflow settings to disable all submissions to this journal." ("…to this server."); the window's box and "Save" left the window open with the box ticked and the same sentence as a notice; "Delete" and "OK" kept the row with it. A press deactivated and deleted both its series. No email reached the five scratch users, and a published item's "Activity Log & Notes" gained no entry for a rename, a deactivation or a reactivation.
+**td9** — Live-probed 2026-09-25 (Rules 5, 6; Side effects; OMP5), all three apps, two runs: the "Inactive" box asked under "Confirm" "Are you sure you wish to deactivate this section?" (a press the same, OMP5, retired 2026-11-09: a press now asks about a "series"), "Cancel" left it, "OK" ticked it with "Your changes have been saved."; the ticked box asked "…activate this section?" and "OK" unticked it; the window's box did the same on "Save". An inactive section left the start form for the Author, the Section Editor (Moderator) and the manager, and an Author's draft in it opened "Section Closed"; it stayed in the dashboard filter, opened its page (OPS), read "{section} (Inactive)" on "Publication Settings" ("Preprint entry"), kept its published item in the issue, on the article page, in "Archives" and on the section page, and left the "Submissions" page for a visitor, Reader and Author. A press's inactive series left the wizard's "Series" choice and read "{series} (Inactive)" on "Catalog Entry". On the last active section the box and "OK" left it unticked with "At least one section must be active. Visit the workflow settings to disable all submissions to this journal." ("…to this server."); the window's box and "Save" left the window open with the box ticked and the same sentence as a notice; "Delete" and "OK" kept the row with it. A press deactivated and deleted both its series. No email reached the five scratch users, and a published item's "Activity Log & Notes" gained no entry for a rename, a deactivation or a reactivation.
 
 <a id="fn-l"></a>
 **l** — `PKPSectionForm::fetch()` builds `assignableUserGroups` from `UserGroup::query()->withRoleIds([ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT])->withStageIds([first stage of Application::getApplicationStages()])` (the Submission stage on OJS and OMP, Production on OPS; comment "see pkp/pkp-lib#10874"), one checkbox per user per group labelled `manager.sections.form.assignEditorAs` "Assign {$name} as {$role}"; heading `manager.sections.form.assignEditors` "Editorial Assignments", description `manager.sections.form.assignEditors.description` (OMP `manager.series.form.assignEditors.description`). `execute()` saves only users who hold a manager, sub-editor or assistant role in the context. Stage sets from `registry/userGroups.xml`: OJS manager (no `stages`, every stage), editor, sectionEditor, guestEditor `1,3,4,5,6`, funding `1,3`, productionEditor `4,5,6`; OMP adds stage 2 and has no Guest editor; OPS manager and sectionEditor `5,6`, editorialBoardMember none. Group names: OJS "Journal manager", "Journal editor", "Section editor", "Guest editor", "Funding coordinator"; OMP "Press manager", "Press editor", "Series editor"; OPS "Preprint Server manager", "Moderator". A category's window on a preprint server offers nobody (Categories OPS1): categories use the Submission stage, sections the first stage.
@@ -1627,7 +1609,7 @@ A section's record, in the list and on its own, carries no `_href`: OJS `schemas
 **td5** — Live-probed 2026-09-25 (Fields "Cover Image", "Order of monographs"; Rule 10; OMP3), OMP, as Press Manager on scratch presses: the file picker accepted ".jpg,.jpeg,.png,.svg"; a PNG uploaded, saved and reopened as the image (text alternative "Current Image", no visible label) with "Delete", which asked under "Confirm" and on "OK" removed it at once, the window staying open. An SVG uploaded; "Save" showed nothing, the window stayed open, and the reopened series had no cover. "Order of monographs" offered the six orders listed and arrived, and reopened, on "Title (A-Z)". The table showed "The K1 Series"; the wizard's choice "The K1 Series: Sub K1"; a series' page, at `catalog/series/{path}` for plain and dotted paths, listed its published book (note f-omp9). Live-probed again 2026-09-25 (Rules 10, 10a, 10b; Settings bullet 15; OMP9), three processes, as visitor, Reader and Press Manager, on a scratch press whose series "K6 Series" had every field set on screen (prefix "The", subtitle "K6 Subtitle", a description, a PNG cover, Online ISSN 0378-5955, Print ISSN 2049-3630, "K6 Cat" ticked, path `k6series`) and held three published books whose dates and series positions make each of the six orders distinct: every field reopened as saved; the table read "The K6 Series", the wizard's choice and each book's page "The K6 Series: K6 Subtitle"; the book pages carried, under the heading "Series", the series' name as a link to `catalog/series/k6series` and the headings "Online ISSN" and "Print ISSN" with the two numbers; the description showed on no series, book, catalog or home page. The scratch press's catalog and home page carried no series link. Path changed to `k6moved`: the new address served the same page, the book pages' link followed it, and the old address opened the page headed "Catalog" with no notice (two processes). The re-drive of the cover (SVG dropped silently; PNG saved; "Delete" asking under "Confirm" and hiding the image at once, no notice, no cover after a reload) and of the six orders matched the above.
 
 <a id="fn-td6"></a>
-**td6** — Live-probed 2026-09-25 (Fields "ISSN", "Path"; OMP2, OMP7, OMP8), OMP: "1234" gave "Please enter a valid ISSN.", "0378-5955" in both boxes "Online and print ISSN must not be the same.", both as notices; each ISSN box kept 16 of 17 characters; the link "ISSN International Centre" went to https://www.issn.org, and the paragraph read "…an eight-digit number which identifying periodical publications…". "Path" kept 32 of 33 characters; "new-series.v2" and "a_b/c.D-1" saved as typed; "new series" gave the notice "The series path must consist of only letters and numbers."; a path in use "The series path already exists. Please enter a unique path."; an empty box "This field is required." under it, with nothing sent. The help read "The series's URL will be: http://…/index.php/{press}/en/catalog/series/Path" while "typed-path" was typed and on the saved "new-series.v2".
+**td6** — Live-probed 2026-09-25 (Fields "ISSN", "Path"; OMP2, OMP7, OMP8), OMP: "1234" gave "Please enter a valid ISSN.", "0378-5955" in both boxes "Online and print ISSN must not be the same.", both as notices; each ISSN box kept 16 of 17 characters; the link "ISSN International Centre" went to https://www.issn.org, and the paragraph read "…an eight-digit number which identifying periodical publications…" (OMP7, retired 2026-11-09: "which identifies"). "Path" kept 32 of 33 characters; "new-series.v2" and "a_b/c.D-1" saved as typed; "new series" gave the notice "The series path must consist of only letters and numbers."; a path in use "The series path already exists. Please enter a unique path."; an empty box "This field is required." under it, with nothing sent. The help read "The series's URL will be: http://…/index.php/{press}/en/catalog/series/Path" while "typed-path" was typed and on the saved "new-series.v2".
 
 <a id="fn-td17"></a>
 **td17** — OMP `CatalogHandler::series()` reads the first part of the address after `catalog/series/` as the path (`$args[0]`) and the second as a page number (`(int) $args[1]`), and redirects to `catalog` when `Repo::section()->getByPath()` finds no series; the book page prints the link through the router, which encodes the "/" (`catalog/series/u17b%2Fdeep`), and the address is read the same way. Live-probed 2026-10-09 (Fields "Path"; Rules 10a, 10c), OMP `main` (omp `57a9235110`, lib/pkp `27938abd4c`), two runs, signed out and as Press Manager, the same for both. On scratch presses with the series "I09 Base" (path `u17b`), "I09 Slashed" and "I09 Lone", one published book in each: "Edit" saved "u17b/deep" as the path of "I09 Slashed" and "u17x/lone" as that of "I09 Lone", and "Add Series" a fourth series, "I09 Paged", with "u17b/2" (each with "Your changes have been saved.", the path reopening as typed after a reload). `catalog/series/u17b/deep` showed "1 Titles" and "I09 Base Book", as `catalog/series/u17b` did; `catalog/series/u17x/lone` opened the page headed "Catalog" with no message, as an address no series has did; `catalog/series/u17b/2` showed "1 Titles" above "No titles have been published yet.". On the page of "I09 Slashed Book" the line "Series I09 Slashed" linked `catalog/series/u17b%2Fdeep`, which showed "I09 Base Book"; "I09 Lone Book" linked `catalog/series/u17x%2Flone`, which landed on "Catalog"; the control, "I09 Base Book" › "I09 Base", opened `catalog/series/u17b` with its own book. On the default dataset, as `rvaca` and then signed out: a series added with the path "psy/u17i09r1" opened the page of "Psychology" (path `psy`; "1 Titles", "From Bricks to Brains: The Embodied Cognitive Science of LEGO Robots"), one added with "u17i09r1/nowhere" the Catalog. The series page's heading is empty on `main` (OMP9), so the pages were told apart by their books. No series with "/" in its path opened at any address; no request failed and no page script failed. `stable-3_5_0` (omp `ddc6abf5a9`), four runs on scratch presses, the addresses only (no book could be published there, so the book pages' link was not driven): the same, `catalog/series/u17b/deep` headed "I09 Base". Kept script: `shared/playwright/checks/U17/I09/i09.js` (row L17).
@@ -1773,15 +1755,17 @@ Issue report: [pkp-e2e#484](https://github.com/jardakotesovec/pkp-e2e/issues/484
 **f-omp4** — fn m: `series_categories` is written by `SeriesForm::execute()` and read by `SeriesGridHandler::initialize()` and `SeriesForm::initData()` only. Live-probed 2026-09-25, after the background jobs had run: with "K3 Cat" ticked on a series, its category page read "0 Titles" while the series' page listed the series' book; a category given to a book on its own "Catalog Entry" listed that book ("1 Titles"); the same with the box unticked. The catalog, the book page and the book's "Catalog Entry" categories were unchanged.
 
 <a id="fn-f-omp5"></a>
-**f-omp5** — `SeriesGridCellProvider::getCellActions()` uses `manager.sections.confirmActivateSection` / `confirmDeactivateSection`, which OMP's locale does not override. Live-probed 2026-09-25: note td9.
-Issue report: [pkp-e2e#485](https://github.com/jardakotesovec/pkp-e2e/issues/485) ([docs/issues/U17-OMP5-series-toggle-asks-about-section.md](../issues/U17-OMP5-series-toggle-asks-about-section.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR heads pkp/omp#2563 `8eff1e8c2c` (`main`) and #2529 `72b39e2d44` (`stable-3_5_0`), before their merge: walked base vs head on fresh datasets, both lines (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
+**f-omp5** — `SeriesGridCellProvider::getCellActions()` uses `manager.sections.confirmActivateSection` / `confirmDeactivateSection`, which OMP's locale did not override, so a press asked about a "section" in every language (in French a "rubrique"). Live-probed 2026-09-25: note td9.
+Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge `f81f129c82`, patch `14f4d2670a`, the same as the reviewed head `8eff1e8c2c`) and `pkp/omp#2529` on `stable-3_5_0` (merge `ae1d900d35`, patch `940105441`, the same as the reviewed head `72b39e2d44`), English only: OMP's `locale/en/manager.po` now carries `manager.sections.confirmDeactivateSection` and `confirmActivateSection` in a press's words; other languages keep pkp-lib's text until translators change it. The PR heads were walked base vs head on fresh datasets, both lines (PR review, 2026-11-06), and both merge commits on 2026-11-09 on freshly loaded PKP dataset fleets (`checks/sync/pkp-lib-13646/side.sh`): "Inactive" on the "History" series row asked "Are you sure you wish to deactivate this series?", pressing it again "Are you sure you wish to activate this series?"; "OK" saved both ways (200, the box ticked, then unticked).
+Issue report: [pkp-e2e#485](https://github.com/jardakotesovec/pkp-e2e/issues/485), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp6"></a>
 **f-omp6** — OMP's `SeriesForm` sets no place in the order for a new series, where the section form puts a new section last (fn i); the list is read by `seq`, so series sharing a value come back in whatever order the database returns (the test installs run PostgreSQL). Live-probed 2026-09-25 (two presses, several drives): note td7.
 
 <a id="fn-f-omp7"></a>
-**f-omp7** — `manager.setup.issnDescription` (fn m). Live-probed 2026-09-25: note td6.
-Issue report: [pkp-e2e#486](https://github.com/jardakotesovec/pkp-e2e/issues/486) ([docs/issues/U17-OMP7-series-issn-help-which-identifying.md](../issues/U17-OMP7-series-issn-help-which-identifying.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR heads pkp/omp#2563 `8eff1e8c2c` (`main`) and #2529 `72b39e2d44` (`stable-3_5_0`), before their merge: walked base vs head on fresh datasets, both lines (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
+**f-omp7** — `manager.setup.issnDescription` (fn m), whose English text in OMP read "which identifying". Live-probed 2026-09-25: note td6.
+Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge `f81f129c82`, patch `14f4d2670a`, the same as the reviewed head `8eff1e8c2c`) and `pkp/omp#2529` on `stable-3_5_0` (merge `ae1d900d35`, patch `940105441`, the same as the reviewed head `72b39e2d44`), English only. The PR heads were walked base vs head on fresh datasets, both lines (PR review, 2026-11-06), and both merge commits on 2026-11-09 on freshly loaded PKP dataset fleets (`checks/sync/pkp-lib-13646/side.sh`): the ISSN paragraph of "Add Series" and of a series' "Edit" read "…an eight-digit number which identifies periodical publications including electronic serials…".
+Issue report: [pkp-e2e#486](https://github.com/jardakotesovec/pkp-e2e/issues/486), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp8"></a>
 **f-omp8** — OMP `seriesForm.tpl` builds the help from a sample address, `{url … page="catalog" op="series" path="Path"}`, passed to `grid.series.urlWillBe`; the typed or saved path never reaches it. Live-probed 2026-09-25: note td6.

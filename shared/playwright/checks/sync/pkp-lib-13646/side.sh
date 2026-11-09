@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # PR review of pkp/pkp-lib#13646: one line at one ref, on dataset fleet DS of this slot.
-#   shared/playwright/checks/sync/pkp-lib-13646/side.sh <main|3.5> <base|head> [DS]
+#   shared/playwright/checks/sync/pkp-lib-13646/side.sh <main|3.5> <base|head|merged> [DS]
+# The issue walks it runs were deleted with their reports when the fix merged (2026-11-09); to rerun,
+# restore them first: git checkout d9485815d4 -- shared/playwright/checks/issues/<walk>
+# merged = the merge commit (2026-11-09; its lib/pkp carries pkp-lib#13768 / #13769): run after
+# `npm run fetch-apps -- --update` (and the 3.5 line's), which puts the submodules at its pointers.
 # Puts the OMP checkout of the line at the ref (base = the PR's parent, head = the PR head; the
 # submodule pointers are the same at both), then per walk: dataset fleet reloaded, the issue walk
 # run. Last, the previous line's dataset upgraded at the ref (stored.js, then the U28 OMP2 walk); on 3.5
@@ -11,12 +15,12 @@ cd "$(dirname "$0")/../../../../.."
 LINE=$1 SIDE=$2 DS=${3:-5}
 if [ "$LINE" = 3.5 ]; then
   export PKP_E2E_LINE=stable-3_5_0; DIR=checkouts/stable-3_5_0/omp; PREV=stable-3_4_0
-  BASE=eb4c0964998bf3f802430396e82444aeccee9c8d; HEAD=72b39e2d44b5891643cab3968ac4ac69b6002a23
+  BASE=eb4c0964998bf3f802430396e82444aeccee9c8d; HEAD=72b39e2d44b5891643cab3968ac4ac69b6002a23; MERGED=ae1d900d35967d3015fbb2c462aaf43ac4cbc390
 else
   DIR=checkouts/omp; PREV=stable-3_5_0
-  BASE=22bc3d8d0894f048bd63fbdaa77f209a87c1e25d; HEAD=8eff1e8c2ccac0e67fab346dac93e606fb040e14
+  BASE=22bc3d8d0894f048bd63fbdaa77f209a87c1e25d; HEAD=8eff1e8c2ccac0e67fab346dac93e606fb040e14; MERGED=f81f129c8263d9407eece0b0d6c5a5cda79ff0ac
 fi
-REF=$BASE; [ "$SIDE" = head ] && REF=$HEAD
+REF=$BASE; [ "$SIDE" = head ] && REF=$HEAD; [ "$SIDE" = merged ] && REF=$MERGED
 git -C "$DIR" checkout -q --detach "$REF" || exit 1
 echo "== $LINE $SIDE omp $(git -C "$DIR" rev-parse --short=10 HEAD) lib/pkp $(git -C "$DIR/lib/pkp" rev-parse --short=10 HEAD)"
 F=pr13646-${LINE/./}-$SIDE

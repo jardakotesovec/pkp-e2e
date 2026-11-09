@@ -20,9 +20,6 @@
  *   the button on a declined monograph only.
  * - A9 🐞 (a Series editor's "Find Template" refused): S2 searches as the
  *   Press Editor, whose search works.
- * - OMP1 🐞 (the press's "Review Cancel" email leaves "{$journalName}"
- *   unfilled): S6 reads the cancelled reviewer's email by its subject and
- *   sender; nothing reads its text.
  * - OJS1 🐞, OPS2 🐞, OPS1 ✅: other apps' territory.
  * - A1 ❓ ("New Review Round" heading), A2 ❓ (the wizard with no page), A11 ❓
  *   (a past round's number): nothing opens those wizards.

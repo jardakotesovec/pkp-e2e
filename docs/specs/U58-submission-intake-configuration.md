@@ -66,7 +66,7 @@ The first three are each one form with "Save" at its foot (Rule 2). <sup>a</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| "Disable Submissions": a heading and one box with the same label. Help: "Prevent users from submitting new articles to the journal. Submissions can be disabled for individual journal sections on the journal sections settings page." ("…new articles to the press. … for individual press series on the press series settings page." ⚠ [OMP1](#omp1); "…new preprints to the server. … for individual server sections on the server sections settings page."), the words "journal sections" ("press series", "server sections") a link | no | Unticked on a new journal. Effect: Rules 4–6 |
+| "Disable Submissions": a heading and one box with the same label. Help: "Prevent users from submitting new articles to the journal. Submissions can be disabled for individual journal sections on the journal sections settings page." ("…new monographs to the press. … for individual press series on the press series settings page."; "…new preprints to the server. … for individual server sections on the server sections settings page."), the words "journal sections" ("press series", "server sections") a link | no | Unticked on a new journal. Effect: Rules 4–6 |
 
 **"Author Guidance" tab.** Every box is a formatted-text box with no
 length limit, empty allowed. "Where it shows" names the screen that
@@ -84,7 +84,7 @@ language (Rule 3). <sup>d</sup>
 | "Details" (help "The following is shown to authors during the details step, …") | no | Default "Please provide the following details to help us manage your submission in our system.". Where it shows: the wizard's "Details" step |
 | "For the Editors" ("For Readers" on a preprint server [OPS1](#ops1); help "The following is shown to authors during the For the Editors step, …") | no | Default opening "Please provide the following details in order to help our editorial team manage your submission." (a preprint server: "…in order to help readers discover your preprint."). Where it shows: the wizard's "For the Editors" ("For Readers") step |
 | "Review and Submit" (help "The following is shown to authors during the final step of the submission wizard, …") | no | Default opening "Review the information you have entered before you complete your submission.". Where it shows: the wizard's "Review" step |
-| "Copyright Notice" ("Copyright notice" on a press, [OMP1](#omp1); help "The following appears on the submissions page where authors will learn about the requirements for submission. Authors will be required to confirm that they agree with the copyright notice before their submission is complete.", "submissions" a link to the "Submissions" page) | no | Empty on a new journal. Where it shows: the wizard's "Review" step, with the box "Yes, I agree to the copyright statement." ([Submission wizard](U21-submission-wizard.md), Rules 12, 14), and the "Submissions" page, under "Copyright Notice" (Rule 24) |
+| "Copyright Notice" (help "The following appears on the submissions page where authors will learn about the requirements for submission. Authors will be required to confirm that they agree with the copyright notice before their submission is complete.", "submissions" a link to the "Submissions" page) | no | Empty on a new journal. Where it shows: the wizard's "Review" step, with the box "Yes, I agree to the copyright statement." ([Submission wizard](U21-submission-wizard.md), Rules 12, 14), and the "Submissions" page, under "Copyright Notice" (Rule 24) |
 | "For Reviewer Suggestion" {OJS OMP} (help "The following is shown to authors during the reviewer suggestions step. Provide a brief explanation of what information the author should provide about themselves, co-authors, and any other contributors." ⚠ [A7](#a7)) | no | Default opening "When submitting, you have the option to suggest several potential reviewers.". Where it shows: the wizard's "Reviewer Suggestions" step, when the journal asks for suggestions ([Reviewer suggestions](U31-reviewer-suggestions.md#step)) |
 
 **"Metadata" tab.** One section per item, in this order. An item is
@@ -622,7 +622,7 @@ recipe are in the footnote. <sup>s</sup>
      are invited to make a submission to this journal." ("…to this
      press."; on a preprint server "Researchers are invited to submit a
      preprint to be posted on this server."), and "Copyright Notice"
-     [OMP1](#omp1) is empty. A journal and a press show a "For Reviewer
+     is empty. A journal and a press show a "For Reviewer
      Suggestion" box; a preprint server shows "For Readers" where a
      journal shows "For the Editors", and no "For Reviewer Suggestion"
      [OPS1](#ops1) (Fields).
@@ -853,9 +853,10 @@ Left out of the scenarios above, by reason:
     other help ([A7](#a7)): the guard the issue report proposes
   - the "Add a Component" window's labels and helps reading as Fields
     gives them ([A8](#a8)): the guard the issue report proposes
-  - each app's "Disable Submissions" help naming its own kind of work,
-    and the "Author Guidance" box labels on the three apps
-    ([OMP1](#omp1)): the guards the two issue reports propose
+  - each app's "Disable Submissions" help naming its own kind of work
+    ("new monographs to the press" on a press), and the "Author
+    Guidance" copyright box labelled "Copyright Notice" on the three
+    apps (Fields; OMP1 retired)
 - **Nothing new to test**:
   - the Editor and the Production Editor while their role keeps "Permit
     changes to Settings" (Actors row 1): the same tabs as the Journal
@@ -886,8 +887,6 @@ Left out of the scenarios above, by reason:
   - A7 (the "For Reviewer Suggestion" help; Fields)
   - A8 (the "Key" help; Fields)
   - A9 (a preprint server's component names in French; Fields)
-  - OMP1 (a press's "Disable Submissions" help and "Copyright notice"
-    label; Fields; scenario 3 names it)
   - OJS1 (the LOCKSS and CLOCKSS pages' "Copyright" row; Cross-feature
     interactions)
 - **No seed**:
@@ -959,7 +958,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A12](#a12) | A refused component delete leaves its confirmation window spinning | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A15](#a15) | A click beside the "Add a Component" window, or Escape, closes it without asking while the cursor is still in "Name" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OJS1](#ojs1) | LOCKSS and CLOCKSS pages show the "Copyright" row only when an unrelated Copyright Notice is set | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [OMP1](#omp1) | A press's "Disable Submissions" help speaks of "new articles", and its "Author Guidance" labels the copyright box "Copyright notice" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A1](#a1) | A new component lands at the top of the list, sharing first place with the first component | ❓ | minor | — |
 | [A3](#a3) | A deleted component keeps its key and can come back, though the confirmation says the delete cannot be undone | ❓ | minor | — |
 | [A4](#a4) | "Multimedia" arrives with both "File Type" boxes ticked, whose sentences contradict each other | ❓ | minor | — |
@@ -972,6 +970,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A13](#a13) | Retired: over an open window a notice's "×" did nothing, or closed the submission's workflow along with the notice; it now removes the notice alone (Rule 16) | ✅ | retired | PR review merge (claude), 2026-10-06 — fixed upstream (pkp/pkp-lib#13188) |
 | [A14](#a14) | Retired: in French (Canada), a press's "Disable Submissions" help reads a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [OMP2](#omp2) | Retired: on a press's public "Submissions" page, "Edit" beside "Copyright Notice" opened "Disable Submissions", not "Author Guidance"; it now opens "Author Guidance" (Rule 25) | ✅ | retired | fix walked (claude), 2026-10-15 — fixed upstream (pkp/omp#2511, pkp/omp#2510) |
+| [OMP1](#omp1) | Retired: a press's "Disable Submissions" help spoke of "new articles", and its "Author Guidance" labelled the copyright box "Copyright notice"; they now read "new monographs" and "Copyright Notice" (Fields) | ✅ | retired | fix walked (claude), 2026-11-09 — fixed upstream (pkp/omp#2563, pkp/omp#2529) |
 
 ### All apps
 
@@ -1162,28 +1161,6 @@ Basis: probe, 2026-10-04. <sup>f-ojs1</sup>
 
 ### OMP
 
-<a id="omp1"></a>
-**OMP1 — A press's "Disable Submissions" help speaks of "new articles", and its "Author Guidance" labels the copyright box "Copyright notice"** · 🐞 · low.
-On a press's Settings › Workflow › "Submission" › "Disable Submissions",
-the help under the box reads "Prevent users from submitting new articles
-to the press.", where a press takes monographs. A journal's help says
-"new articles to the journal" and a preprint server's "new preprints to
-the server".
-Every press manager who opens Settings › Workflow with the interface in
-English sees it, since the panel is the one the page opens on. Fourteen
-of OMP's translations repeat "articles" (the Cause names them); the fix
-is to the English text; the translations are for their translators to
-follow.
-On a press's Settings › Workflow › "Submission" › "Author Guidance", the
-copyright box is labelled "Copyright notice". A journal and a preprint
-server label the same box "Copyright Notice". The press's public About ›
-"Submissions" page heads the notice "Copyright Notice" too.
-Every press manager who opens "Author Guidance" with the interface in
-English sees it. Other languages show OMP's own translation of the
-label, which this does not touch; the fix is to the English text.
-The two have separate causes and fixes, each in its own issue report.
-Basis: probe, 2026-10-04. <sup>f-omp1</sup>
-
 <a id="omp3"></a>
 **OMP3 — A press's components and "Type" default** · ✅ · intended divergence.
 A press lists "Monograph Components": "Appendix", "Bibliography", "Book
@@ -1231,6 +1208,9 @@ Basis: code. <sup>f-ops2</sup>
 
 <a id="omp2"></a>
 **OMP2 — On a press's public "Submissions" page, "Edit" beside "Copyright Notice" opens "Disable Submissions", not "Author Guidance"** · ✅ · retired. Fixed upstream (`pkp/omp#2511` on `main`, `pkp/omp#2510` on 3.5, for `pkp/pkp-lib#13516`), 2026-10-15: the link now opens "Author Guidance" (Rule 25). <sup>f-omp2</sup>
+
+<a id="omp1"></a>
+**OMP1 — A press's "Disable Submissions" help speaks of "new articles", and its "Author Guidance" labels the copyright box "Copyright notice"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: the help reads "Prevent users from submitting new monographs to the press. …" and the box is labelled "Copyright Notice", as on a journal and a preprint server (Fields). <sup>f-omp1</sup>
 
 ---
 
@@ -1302,7 +1282,7 @@ Preprint Server Manager alone at the manager level.
 `manager.setup.disableSubmissions`, description
 `manager.setup.disableSubmissions.description` with `url` =
 `management/settings/context#sections`; each app's `manager.po` words the
-description, OMP's "new articles to the press", OMP1). Context schema
+description, OMP's "new monographs to the press" since OMP1's fix). Context schema
 `disableSubmissions`, boolean, default false. Consumers:
 `PKPTemplateManager` adds the side menu's `submit` item
 (`dashboard.startNewSubmission` "Start A New Submission") only when
@@ -1358,7 +1338,7 @@ url), `beginSubmissionHelp` (`submission.wizard.beforeStart`),
 (`publication.contributors`), `detailsHelp` (`common.details`),
 `forTheEditorsHelp` (`submission.forTheEditors`, OPS "For Readers"),
 `reviewHelp` (`submission.reviewAndSubmit`), `copyrightNotice`
-(`manager.setup.copyrightNotice`, OMP's `manager.po` "Copyright notice"),
+(`manager.setup.copyrightNotice` "Copyright Notice", on a press since OMP1's fix),
 and `reviewerSuggestionsHelp` (`submission.forReviewerSuggestion`) added by
 `addReviewSuggestionGuidanceDetail()` only when the context schema has
 `reviewerSuggestionEnabled` (OJS and OMP `schemas/context.json`; OPS
@@ -1940,12 +1920,29 @@ it once those were saved on Settings › Distribution › "License".
 Issue report: [pkp-e2e#822](https://github.com/jardakotesovec/pkp-e2e/issues/822) ([docs/issues/U58-OJS1-archiving-pages-copyright-row-license-terms.md](../issues/U58-OJS1-archiving-pages-copyright-row-license-terms.md)).
 
 <a id="fn-f-omp1"></a>
-**f-omp1** — OMP `locale/en/manager.po`:
+**f-omp1** — OMP `locale/en/manager.po` had
 `manager.setup.disableSubmissions.description` "Prevent users from
-submitting new articles to the press. …" and `manager.setup.copyrightNotice`
-"Copyright notice"; OMP's `about.copyrightNotice` on the page reads
-"Copyright Notice".
-Issue reports: "Disable Submissions" [pkp-e2e#831](https://github.com/jardakotesovec/pkp-e2e/issues/831) ([docs/issues/U58-OMP1-press-disable-submissions-help-says-articles.md](../issues/U58-OMP1-press-disable-submissions-help-says-articles.md)); the label [pkp-e2e#832](https://github.com/jardakotesovec/pkp-e2e/issues/832) ([docs/issues/U58-OMP1-press-copyright-notice-label-lowercase.md](../issues/U58-OMP1-press-copyright-notice-label-lowercase.md)). The team's copy of both is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR heads pkp/omp#2563 `8eff1e8c2c` (`main`) and #2529 `72b39e2d44` (`stable-3_5_0`), before their merge: walked base vs head on fresh datasets, both lines (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
+submitting new articles to the press. …" and an override of
+`manager.setup.copyrightNotice`, "Copyright notice"; OMP's
+`about.copyrightNotice` on the page read "Copyright Notice". Fourteen
+of OMP's translations repeated "articles".
+Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge
+`f81f129c82`, patch `14f4d2670a`, with a pointer bump to pkp-lib
+`8c3971dd1e`) and `pkp/omp#2529` on `stable-3_5_0` (merge `ae1d900d35`,
+patch `940105441`, pointer to pkp-lib `1e5673c7c7`). The English help
+now reads "…new monographs to the press. …", and OMP's override of
+`manager.setup.copyrightNotice` is gone, so pkp-lib's "Copyright Notice"
+shows; `pkp/pkp-lib#13768` (`main`) and `pkp/pkp-lib#13769` (3.5) first
+moved OMP's translations of that key into pkp-lib. English only: other
+languages keep their translation, and 3.4 and 3.3 are unchanged. Both
+patches equal the PR heads walked base vs head on fresh datasets on
+2026-11-06 (`8eff1e8c2c`, `72b39e2d44`; PR review,
+`checks/sync/pkp-lib-13646/`). Walked at both merge commits on freshly
+loaded PKP dataset fleets, 2026-11-09: "Disable Submissions" help reads
+"Prevent users from submitting new monographs to the press. …", the
+Author Guidance box is labelled "Copyright Notice", and the About ›
+"Submissions" heading stays "Copyright Notice".
+Issue reports: "Disable Submissions" [pkp-e2e#831](https://github.com/jardakotesovec/pkp-e2e/issues/831), the label [pkp-e2e#832](https://github.com/jardakotesovec/pkp-e2e/issues/832); both retired with the fix; the reports and their walks deleted. The team's copy of both `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp2"></a>
 **f-omp2** — OMP `templates/frontend/pages/submissions.tpl`: the

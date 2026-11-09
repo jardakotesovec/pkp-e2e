@@ -21,8 +21,6 @@
  * - A7 🐞, A8 🐞: no help text is read.
  * - A12 🐞: S7 closes the pop-up and presses "Cancel", never reading the
  *   spinner or pressing "OK" again.
- * - OMP1 🐞: the "Copyright notice" box is found by its editor id, never by
- *   its label; the "Disable Submissions" help is never read.
  * - OJS1, OPS1, OPS2: another app's territory.
  *
  * Seeding: scenario endpoints only. S1 reads the seeded press
@@ -436,7 +434,7 @@ test.describe('submission intake configuration', () => {
         await expect(workflow.sideTabs()).toHaveText(SIDE_TABS);
 
         // "Author Guidance": the default guidelines, an empty copyright
-        // notice (found by its editor, OMP1), a "For Reviewer Suggestion" box.
+        // notice (found by its editor), a "For Reviewer Suggestion" box.
         await workflow.openSideTab('Author Guidance');
         const guidance = workflow.guidance;
         expect(await guidance.text('Author Guidelines')).toMatch(new RegExp(`^${GUIDELINES_OPENING.replace(/\./g, '\\.')}`));

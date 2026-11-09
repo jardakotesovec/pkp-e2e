@@ -84,8 +84,9 @@ Journal of Public Knowledge. …"), under the subject of "Review Cancel":
 Your review for "Transformative Impact of AI Tools on Modern Education: Opportunities, Challenges, and Future Directions" has been cancelled
 ```
 
-The same on the press, whose text also prints "{$journalName}"
-([U27-OMP3-press-reviewer-notices-journal-placeholder.md](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md)).
+The same on the press, whose text also printed "{$journalName}" until
+`pkp/omp#2563` (U27 OMP3, [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690),
+fixed for `pkp/pkp-lib#13646`, merged 2026-11-09).
 On 3.5 one notice serves both actions, and the email reads "Request for
 Review Cancelled" over the cancel text, as designed there.
 

@@ -751,10 +751,10 @@ under the prompt "Record the response on behalf of the reviewer". Submit
   cancelled"; the unassign notice's own subject, "Your reviewer assignment
   for "{title}" has been removed", is never the one sent, though its body
   is the removal text ("…you have been removed from the reviewer assignment
-  for "{title}"…") ⚠ [A26](#a26). On a press that body ends "in
-  {$journalName}." with the placeholder printed literally where the press's
-  name belongs ⚠ [OMP3](#omp3). The reviewer's "Review pending." task is
-  removed. The action is logged. The reviewer also leaves the submission's
+  for "{title}"…") ⚠ [A26](#a26). On a press that body ends with the
+  press's name, as a journal's ends with the journal's ([OMP3](#omp3),
+  retired). The reviewer's "Review pending." task is removed. The action
+  is logged. The reviewer also leaves the submission's
   discussions: their "Details" no longer list them, even when one
   participant remains. A reviewer still holding an accepted request on
   another round stays; which others count is open ⚠ [A38](#a38)
@@ -1124,9 +1124,9 @@ are in the footnote. <sup>s</sup>
     - **The unassigned reviewer's side**: their mailbox holds the removal
       notice ("…you have been removed from the reviewer assignment for
       "{title}"…"), under the subject "Your review for "{title}" has been
-      cancelled" ⚠ [A26](#a26) ({OMP}: its last words print "in
-      {$journalName}." ⚠ [OMP3](#omp3)). Reviewer: sign in: the Tasks
-      panel holds no "Review pending." for the submission.
+      cancelled" ⚠ [A26](#a26) ({OMP}: its last words name the press).
+      Reviewer: sign in: the Tasks panel holds no "Review pending." for
+      the submission.
     - **"Cancel Reviewer"**: Editor: on the accepted row the same menu entry
       reads "Cancel Reviewer". The window opens with its template chooser
       above the notice. Press "Cancel Reviewer": the notice reads "Reviewer
@@ -1427,7 +1427,6 @@ Left out of the scenarios above, by reason:
   - A12 (the change notice's unsubscribe page omitting the type; Side effects)
   - A15 (the reviewer's response erasing the "Reviewer Reminded" milestone; Rules 13, 21)
   - A26 (the unassign notice arriving under the cancel notice's subject; Side effects)
-  - OMP3 (the press's unassign notice printing "{$journalName}" literally; Side effects)
   - A28 (a never-assigned reviewer dropping out of the search while "Reviews completed" is enabled; Rule 6)
   - A29 ("Modify Review" worded as an edit on a request with no review; Rule 14d)
   - A30 ("Modify Review" offered on a declined request and its save refused; Rule 14d)
@@ -1488,7 +1487,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A22](#a22) | The Review Details window tells the editor to "upload the file below", but it has no upload control | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP2](#omp2) | {OMP} A press's "Add Reviewer" list opens with both review stages' reviewers, and the other stage's reviewer can be added | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A26](#a26) | A reviewer removed with "Unassign Reviewer" gets the email under the subject "Your review … has been cancelled" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [OMP3](#omp3) | {OMP} A press's reviewer removal and cancel emails print "{$journalName}" where the press's name belongs | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A30](#a30) | "Modify Review" is offered on a "Request Declined" row, and its "Save Changes" is refused with "This review not editable because it was declined." | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A31](#a31) | An assistant-level participant is offered "Modify Review", and "Save Changes" answers "The current role does not have access to this operation." | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP4](#omp4) | {OMP} On a press, "Mark as Complete" closes a review request that has no review, leaving the reviewer nothing to press | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
@@ -1532,6 +1530,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | Retired: the enroll "required" message appears only on an empty submit and clears on pick, which is ordinary validation | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
 | [A40](#a40) | Retired: on a press, recording a reviewer's competing interests in "Modify Review" submitted an empty review for them; fixed by pkp/pkp-lib#13467 | ✅ | retired | PR review (claude), 2026-10-07 — fixed at pkp/pkp-lib#13467's head |
 | [OMP5](#omp5) | Retired: {OMP} "Save Changes" with nothing entered on an unanswered request submitted an empty review; since pkp/pkp-lib#13467 it submits nothing | ✅ | retired | PR review (claude), 2026-10-07 — fixed at pkp/pkp-lib#13467's head |
+| [OMP3](#omp3) | Retired: {OMP} a press's reviewer removal and cancel emails printed "{$journalName}" where the press's name belonged; they now name the press | ✅ | retired | omp#2563 2026-11-09 · fixed |
 
 ### All apps
 
@@ -2227,20 +2226,6 @@ warns the editor. The press's split between its internal and external
 reviewers does not hold. Searching instead of picking avoids it. Basis:
 probe, 2026-10-03. <sup>[f-omp2](#fn-omp2)</sup>
 
-<a id="omp3"></a>
-**OMP3 — A press's reviewer removal and cancel emails print "{$journalName}" where the press's name belongs** · 🐞 · low.
-On a press, the emails a reviewer receives when an editor removes them
-("Unassign Reviewer"), cancels their review ("Cancel Reviewer") or
-cancels the review round ("Cancel Review Round") print "{$journalName}"
-literally where the press's name belongs: "…you have been removed from
-the reviewer assignment for "{title}" in {$journalName}." and "Thank you
-for agreeing to review "{title}" for {$journalName}." A journal's
-reviewers read the journal's name in the same sentences. "Cancel
-Reviewer" and "Cancel Review Round" both send the "Review Cancel"
-template, and "Unassign Reviewer" sends "Reviewer Unassign", so the two
-templates carry the fault for all three actions. Basis: probe,
-2026-10-03. <sup>[f-omp3](#fn-omp3)</sup>
-
 <a id="omp4"></a>
 **OMP4 — On a press, "Mark as Complete" closes a review request that has no review, leaving the reviewer nothing to press** · 🐞 · medium.
 On a press, an editor opens "Review Details" on a review request the
@@ -2321,6 +2306,9 @@ Basis: code reading + registry check. <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="omp5"></a>
 **OMP5 — A press accepted an empty save as the reviewer's review** · ✅ · retired. Settled by the same fix (pkp/pkp-lib#13467), verified 2026-10-07 at the PR's head: a press's save with nothing entered closes the window and submits nothing, so no empty review closes the request (Rule 14d). <sup>[f-omp5](#fn-omp5)</sup>
+
+<a id="omp3"></a>
+**OMP3 — A press's reviewer removal and cancel emails print "{$journalName}" where the press's name belongs** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` (3.5 never had the fault; `pkp/omp#2529` carries the issue's other strings there), for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: the press's "Reviewer Unassign" and "Review Cancel" emails name the press where they printed "{$journalName}" (Side effects). <sup>[f-omp3](#fn-omp3)</sup>
 
 ---
 
@@ -3065,7 +3053,7 @@ same response mails a real reviewer click sends, From set to the reviewer's
 address. Test run 2026-09-12 (OJS and OMP, scenario 11): the unassigned
 reviewer's message arrived under the cancel subject with the unassign body
 (finding A26, note f-a26), and on the press with its `{$journalName}`
-uncompiled (finding OMP3, note f-omp3).
+uncompiled (finding OMP3, note f-omp3; retired 2026-11-09).
 
 <a id="fn-l"></a>
 **l** — Email: `EmailReviewerForm` (template `emailReviewerForm.tpl`,
@@ -4247,11 +4235,26 @@ Issue report: [pkp-e2e#723](https://github.com/jardakotesovec/pkp-e2e/issues/723
 **f-omp3** — Test run 2026-09-12 (scenario 11; the two messages read from
 Mailpit the same day): the OMP message's body read `… in {$journalName}.`
 verbatim, while the OJS message read the scratch journal's name in that
-place. The template text is the same in both apps' own `locale/en/emails.po`
+place. The template text was the same in both apps' own `locale/en/emails.po`
 (`emails.reviewerUnassign.body`, the 2026-08 unassign template of note k):
-it names `{$journalName}`, the journal-only variable, where the app-neutral
-context-name variable belongs, so a press leaves the placeholder as typed.
-Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690) ([docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md](../issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR head pkp/omp#2563 `8eff1e8c2c` (`main`), before its merge: the 3.5 dataset upgraded at the head stores `{$contextName}` in both emails, `{$journalName}` at the base (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
+it named `{$journalName}`, the journal-only variable, where the app-neutral
+context-name variable belongs, so a press left the placeholder as typed.
+Retired 2026-11-09: fixed by `pkp/omp#2563` (`main`, merge `f81f129c82`,
+patch `14f4d2670a`, the reviewed head `8eff1e8c2c` unchanged; with the
+pointer bump to pkp-lib `8c3971dd1e`, `pkp/pkp-lib#13768`), whose OMP
+`emails.reviewCancel.body` and `emails.reviewerUnassign.body` use
+`{$contextName}`; `stable-3_5_0` (`pkp/omp#2529`, merge `ae1d900d35`)
+never had the fault. Walked that day at the merge commit on a freshly
+loaded PKP dataset fleet, OMP
+(`checks/sync/pkp-lib-13646/side.sh main merged`; the same kit read the base and the PR head on 2026-11-06, the
+head already storing `{$contextName}` in both emails and the base
+`{$journalName}`): after the upgrade 3.5.0.6 → 3.6.0.0, whose
+`I12903_ReviewerUnassignEmailTemplate` installs both, the stored English
+"Review Cancel" and "Reviewer Unassign" texts carry `{$contextName}` and
+no `{$journalName}`; a fresh install takes the new text. PKP's `main`
+dataset dump was built before the fix, so a fleet loaded from it still
+stores the old text until PKP rebuilds the dump.
+Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-omp4"></a>
 **f-omp4** — Driven 2026-09-17 (OMP, three runs; OJS as the control): on

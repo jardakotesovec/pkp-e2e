@@ -16,7 +16,7 @@
  * a deleted component is re-used), A4 ❓ ("Multimedia"'s window is never
  * opened), A5 ❓ (S2 never presses the Reader's "view your pending
  * submissions"), A6 ❓ (no site-wide privacy statement is configured), A11 ❓
- * (no default link's address is asserted), OMP1–OMP3, OPS1, OPS2 (press- and
+ * (no default link's address is asserted), OMP3, OPS1, OPS2 (press- and
  * server-only, in those trees; S3 asserts OJS's "For Reviewer Suggestion"
  * box). The spec's Coverage section records everything else left out.
  *

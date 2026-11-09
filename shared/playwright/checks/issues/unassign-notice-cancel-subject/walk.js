@@ -1,8 +1,8 @@
 // Kept walk of two issue reports on PKP's default test dataset (OJS submission 20, OMP 18):
 //   docs/issues/U27-A26-unassign-notice-cancel-subject.md (steps 1-5: "Unassign Reviewer" and
 //     the subject of the notice the reviewer receives), and
-//   docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md (steps 1-8: the same
-//     notice's last words, then "Cancel Review Round" and its "Review Cancel" notice).
+//   U27 OMP3's steps 1-8 (the same notice's last words, then "Cancel Review Round" and its
+//     "Review Cancel" notice; pkp-e2e#690, retired with its fix pkp/omp#2563, 2026-11-09).
 // PHASE=nb runs the "Cancel Reviewer" group alone, on a freshly loaded dataset: "Log Response"
 // (accepted) on Rajek Sharif's row, "Cancel Reviewer", his mailbox (the press report's steps 9-12;
 // for the A26 fix, Cancel Reviewer run as a control), then "Reinstate Reviewer" as a control.

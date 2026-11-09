@@ -19,7 +19,7 @@
  *   Reviewer-level role is created and saved below, but no user is given
  *   it and its list page is never opened).
  * - A1 🐞, A2 🐞, A4 🐞, A5 🐞, A6 🐞, A7 🐞, A9 🐞, A10 🐞, A12 🐞,
- *   OMP2 🐞, OMP3 🐞, A3 ❓, A11 ❓, A13 ❓, OMP1 ✅, A8 ✅, OMP4 ✅
+ *   OMP3 🐞, A3 ❓, A11 ❓, A13 ❓, OMP1 ✅, A8 ✅, OMP4 ✅, OMP2 ✅
  *   (journal and press reviewer surfaces that do not exist on a preprint
  *   server; nothing to assert or park here).
  *

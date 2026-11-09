@@ -1,6 +1,6 @@
 // Helpers of walk.js (U27 A26, OMP3 and U34 OMP1: the reviewer removal and cancel notices;
-// docs/issues/U27-A26-unassign-notice-cancel-subject.md and
-// docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md). Requiring this file runs
+// docs/issues/U27-A26-unassign-notice-cancel-subject.md; OMP3's report, pkp-e2e#690, was retired with
+// its fix, pkp/omp#2563, 2026-11-09). Requiring this file runs
 // nothing. Every helper drives the screens a person uses: the workflow's "Reviewers" panel, its
 // row menu ("More Actions") and the legacy windows it opens, and the decision pages.
 const {idle, screen} = require('../../../probe');

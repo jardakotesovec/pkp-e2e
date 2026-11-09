@@ -19,7 +19,7 @@
  *   Editor, whose search works.
  * - OJS1 🐞 ("Waive" requests the fee): S10 reads that "Waive" is offered and
  *   records with "Request publication fee" chosen; nothing presses "Waive".
- * - OMP1 🐞, OPS2 🐞, OPS1 ✅: other apps' territory.
+ * - OPS2 🐞, OPS1 ✅: other apps' territory.
  * - A1 ❓ ("New Review Round" heading), A2 ❓ (the wizard with no page), A11 ❓
  *   (a past round's number): nothing opens those wizards.
  * - A4 ❓ (the recommendation's discussion lists the deciding editor, not its

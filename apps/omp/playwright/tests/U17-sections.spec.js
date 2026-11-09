@@ -14,12 +14,10 @@
  * spec's Coverage section is the record of everything else left out):
  * - OMP2 🐞: S7 reads that "new series" is refused with a notice about the
  *   series path, never the "only letters and numbers" words.
- * - OMP5 🐞: S7 reads the "Confirm" question up to "deactivate this",
- *   never the noun that follows.
  * - OMP6 ❓: S7 reads "Textbooks" as one row of two, never its place; the
  *   order is read only after "Order" and "Done".
  * - OMP3 🐞, OMP9 🐞: no test uploads a cover or opens a series' page.
- * - OMP7 🐞, OMP8 🐞: S7 never reads the ISSN paragraph or the path help.
+ * - OMP8 🐞: S7 never reads the path help.
  * - OMP4 ❓: the press has no category, so the window has no "Categories".
  * - A6 🐞: S7 never types a title of spaces only.
  * - A1, A2, A3, A4, A5, A7, A8, A9, A10, OPS1–OPS6: the journal's and the preprint
@@ -61,7 +59,7 @@ const PATH_REFUSED = /The series path\b/; // OMP2: the words after it are the de
 const PATH_IN_USE = 'The series path already exists. Please enter a unique path.';
 const BAD_ISSN = 'Please enter a valid ISSN.';
 const SAME_ISSN = 'Online and print ISSN must not be the same.';
-const DEACTIVATE_QUESTION = /^\s*Are you sure you wish to deactivate this\b/; // OMP5: the noun is the defect
+const DEACTIVATE_QUESTION = /^\s*Are you sure you wish to deactivate this\b/;
 const DELETE_QUESTION = 'Are you sure you wish to delete this item? This action cannot be undone.';
 const LAST_ACTIVE = /At least one section must be active/;
 const INACTIVE_BOX = 'Mark this series as inactive and do not allow new submissions to be made to it.';
@@ -247,7 +245,7 @@ test.describe('Sections', () => {
         await tab.reload();
         await expect(tab.titleCells()).toHaveText([lower, upper]);
 
-        // Every series inactive: "Confirm" asks [OMP5], "OK" ticks the box
+        // Every series inactive: "Confirm" asks, "OK" ticks the box
         // with the notice; "Textbooks", the last active one, too (Rules 5,
         // 6).
         let confirm = await tab.pressInactive('The Monographs');

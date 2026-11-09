@@ -299,7 +299,7 @@ items" on an empty list). No text can be typed anywhere in the panel.
    | "A new article has been submitted to which an editor needs to be assigned." | a new submission with nobody assigned automatically (*[Submission wizard](U21-submission-wizard.md)*) | every user holding a manager-level role in the journal (*Actors & permissions*), the Site Administrator included wherever enrolled in one; a Section Editor, a Copyeditor (on a preprint server an Editorial Board Member), an Author and a Reader get neither task nor email <sup>e</sup> | a task, until a Section Editor is assigned to the submission (Rule 1); the assigned Section Editor gets none | the "needs an editor" email, subject "A new submission needs an editor to be assigned: "{title}""; link: no ⚠ [A8](#a8); sent even with "Enable…" unticked ⚠ [A10](#a10) |
    | "Discussion added." | a discussion is opened with the person as a participant, and every reply to it (*[Tasks & discussions](U37-tasks-and-discussions.md)*) | the discussion's participants, the person who wrote the message included | a task reading "{who opened it} started a discussion: {name}: {opening message}", where an opening message of 198 characters or fewer shows whole and a longer one shows its first 199 characters followed by "..." (so one of exactly 199 shows whole, with "..." after it); for a reply the same sentence again ⚠ [A1](#a1) <sup>e</sup> | the whole message, however long, subject the discussion's name, its From line naming the person who wrote it; link: yes, in Rule 7a's "Reply to this comment…" sentence |
    | "Discussion activity." | nothing: no event raises it ⚠ [A1](#a1) | — | — | — |
-   | "A reviewer has commented on "Title"." | a reviewer submits a review (*[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*) | only the editors assigned to the submission on its Participants panel, an Editor or a Section Editor; that panel's "Assign" offers no Journal Manager role, so a Journal Manager not assigned in an editor role gets nothing <sup>e</sup> | no task | the review-complete email, subject "Review complete: {reviewer} recommends {recommendation} for #{submission number} {authors} — "{title}"" ({submission number} and {authors} as in Rule 7a; {OMP} "recommends None", the press's review form offering no recommendation, a wording *[Reviewer's review](U28-reviewers-review.md#omp2)* records); link: yes, in Rule 7a's "This is an automated message…" sentence |
+   | "A reviewer has commented on "Title"." | a reviewer submits a review (*[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*) | only the editors assigned to the submission on its Participants panel, an Editor or a Section Editor; that panel's "Assign" offers no Journal Manager role, so a Journal Manager not assigned in an editor role gets nothing <sup>e</sup> | no task | the review-complete email, subject "Review complete: {reviewer} recommends {recommendation} for #{submission number} {authors} — "{title}"" ({submission number} and {authors} as in Rule 7a; {OMP} "Review complete: {reviewer} reviewed #{n} {authors} — "{title}"", the press's review form offering no recommendation; "recommends None" until *[Reviewer's review](U28-reviewers-review.md#omp2)*'s OMP2 was fixed, 2026-11-09); link: yes, in Rule 7a's "This is an automated message…" sentence |
    | "Weekly email of outstanding tasks" | the monthly reminder of outstanding tasks that *[Submissions dashboard (editorial)](U23-submissions-dashboard.md)* describes (the "Weekly" mislabel is noted in Fields); listed on a preprint server too, where the email is never sent ⚠ [OPS1](#ops1). A scheduled task raises it (above); no screen starts it | Journal Managers and Section Editors with submissions waiting on them (which submissions count is *[Submissions dashboard (editorial)](U23-submissions-dashboard.md)*'s to say) | no task | yes; link: yes, in Rule 7a's "This is an automated message…" sentence |
    | "Statistics report summary." | the monthly statistics email that *[Editorial statistics](U65-editorial-statistics.md#monthly-email)* describes, sent while the journal's "Editorial statistics" choice is "Send a monthly email to editors." (Settings that modify behavior). A scheduled task raises it (above); no screen starts it | every user holding a manager-level role in the journal (*Actors & permissions*), the Site Administrator included wherever enrolled in one, every Section Editor and {OJS} every Guest Editor; an Author and a Reader get neither task nor email, and neither do {OJS OMP} a Reviewer, a Copyeditor or a Funding Coordinator, {OMP} a Volume Editor and {OPS} an Editorial Board Member <sup>e</sup> | a task reading "This is a kind reminder for you to check your publication's health through the editorial report.", with no title line under it (Rule 2b); pressing it opens Statistics › "Editorial Activity" (Rule 2c) | the statistics email, subject "Editorial activity for {month}, {year}" ("Preprint Server activity for {month}, {year}" on a preprint server), with the spreadsheet "editorial-report.csv" attached; link: yes |
 
@@ -1601,8 +1601,8 @@ and OMP: a reviewer who had accepted walked the review steps to "Submit
 Review" and the "Confirm" window's "OK"; the assigned Section Editor's
 mailbox 0.3 s later held `ReviewCompleteNotifyEditors`, subject "Review
 complete: {reviewer} recommends {recommendation} for #{number} {authors}
-— "{title}"" ("recommends None" on OMP, whose review form offers no
-recommendation list), From "Site Admin <admin@mail.test>", Mailpit's
+— "{title}"" ("recommends None" on OMP then, whose review form offers no
+recommendation list; fixed 2026-11-09, note e), From "Site Admin <admin@mail.test>", Mailpit's
 text rendering ending "—" then "This is an automated message from {journal name} (
 {home} ). You can unsubscribe ( {link} ) from this email at any time.",
 with the `List-Unsubscribe` headers; the journal's Manager, not assigned,
@@ -2035,10 +2035,12 @@ The email is `ReviewCompleteNotifyEditors`, From "Site Admin
 message from {journal name} ( {home} ). You can unsubscribe ( {link} ) from
 this email at any time.", with the `List-Unsubscribe` headers; the Section
 Editor's Tasks window unchanged and the Manager's mailbox without it (note
-e). {OMP} "recommends None" in the subject; at the PR head pkp/omp#2563
-`8eff1e8c2c` (pkp/pkp-lib#13646), before its merge, "Review complete: Rita
+e). {OMP} "recommends None" in the subject until pkp/omp#2563 (`main`,
+merge `f81f129c82`) and #2529 (3.5, `ae1d900d35`) for pkp/pkp-lib#13646,
+merged 2026-11-09: at the PR head `8eff1e8c2c` "Review complete: Rita
 Reviewer reviewed #8 Authorson — "Title …"" (pkp-e2e CI run 42285989715,
-2026-11-06). The Section Editor's window
+2026-11-06), and the same at `25e8f00cf3` (run 42396868742, 2026-11-07).
+The Section Editor's window
 holds no row with the submission's title at all: the "needs an editor"
 task the seed raised went to the manager-level accounts alone
 (live-probed 2026-09-28, note e).

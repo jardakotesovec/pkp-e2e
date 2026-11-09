@@ -25,7 +25,7 @@
  * (the markup and empty rows of the same window), and *Production stage*'s
  * OPS2 🐞 (S9 reads the "Submission Reactivated" window's title, that its
  * text names the preprint and its "unless you chose to skip" sentence,
- * never the "submission stage" it names); A6 🐞, A9 🐞, OJS1 🐞, OMP1 🐞,
+ * never the "submission stage" it names); A6 🐞, A9 🐞, OJS1 🐞,
  * A1 ❓, A2 ❓, A4 ❓, A5 ❓, A7 ❓, A10 ❓, A11 ❓ (journal and press surfaces a
  * preprint server never shows). OPS1 ✅ is what S9 asserts. The spec's
  * Coverage section records everything else left out.

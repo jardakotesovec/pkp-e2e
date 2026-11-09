@@ -24,8 +24,6 @@
  * - A14 🐞: S4 leaves the Section Editor's Profile tab without saving.
  * - A5 🐞: S6 rests the pointer on the icons; no keyboard read.
  * - A3 ❓: S6 reads the draft started today only.
- * - OMP2 🐞: S6 reads the "Days to First Editorial Decision" text's
- *   opening sentence, never its "your journal" ending.
  * - OMP3 🐞: S7 reads "Monograph Report"'s author columns to "(Author 2)"
  *   and no further.
  * - A1, A2, A4, A7, A8, A10, A12, OMP1, OMP4: not on these
@@ -898,7 +896,7 @@ test.describe('Statistics — editorial activity & reports', () => {
         const groupStarts = TRENDS_ROWS.filter((n) => !SUB_ROWS.includes(n)).map((n) => starts[n]);
         expect(Math.min(...subStarts), 'every sub-row starts right of every other row').toBeGreaterThan(Math.max(...groupStarts));
 
-        // Information icons (Rule 11; A5, OMP2).
+        // Information icons (Rule 11; A5).
         expect(await activity.iconText('Other Submissions')).toBe(OTHER_TEXT);
         expect(await activity.iconText('Acceptance Rate')).toBe(RATE_TEXT);
         expect(await activity.iconText('Days to First Editorial Decision')).toMatch(new RegExp(`^${DAYS_TEXT_OPENING.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} `));

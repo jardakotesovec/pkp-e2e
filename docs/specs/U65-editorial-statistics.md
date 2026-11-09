@@ -97,7 +97,7 @@ The information icons (Rule 11) carry these texts; each icon is named
 
 | Row | Text |
 |-----|------|
-| "Days to First Editorial Decision" | "The number of days it takes for most submissions to receive the first editorial decision, such as desk rejection or send for review. These figures indicate that 80% of submissions reach the decision within the given number of days. This statistic attempts to describe when the majority of authors submitting to your journal can expect a decision." (the same "your journal" on a press ⚠ [OMP2](#omp2)) |
+| "Days to First Editorial Decision" | "The number of days it takes for most submissions to receive the first editorial decision, such as desk rejection or send for review. These figures indicate that 80% of submissions reach the decision within the given number of days. This statistic attempts to describe when the majority of authors submitting to your journal can expect a decision." (on a press "…submitting to your press can expect a decision.") |
 | "Acceptance Rate" and "Rejection Rate" | "The percentage for the selected date range is calculated for submissions that were submitted during this date range and have received a final decision. For example, consider the case where ten submissions were made during this date range. Four were accepted, four were rejected and two are still awaiting a final decision. The acceptance rate will be 50% (4 of 8 submissions) because the two submissions that have not reached a final decision are not counted." |
 | "Other Submissions" | "This includes submissions that are not counted in other totals, such as those that are still in progress and those that appear to have been imported." |
 
@@ -873,8 +873,7 @@ other suite's run. <sup>sc</sup>
      range and have received a final decision. …", and the one after
      "Days to First Editorial Decision" "The number of days it takes for
      most submissions to receive the first editorial decision, such as
-     desk rejection or send for review. …" ([OMP2](#omp2) on a press)
-     (Rule 11) [A5](#a5).
+     desk rejection or send for review. …" (Rule 11) [A5](#a5).
    - **Section Editor**: the Section Editor, signed in, opens Statistics
      › "Editorial Activity": the same chart and the same "Total" figures
      as on arrival (Actors paragraph).
@@ -1064,8 +1063,6 @@ Left out of the scenarios above, by reason:
   - OJS4 (an institutional subscription whose contact has no country;
     Rule 22; scenario 8 marks it)
   - OMP1 (an Internal Review decline; Rule 13)
-  - OMP2 ("your journal" in the press's icon text; Fields; scenario 6
-    marks it)
   - OMP3, OMP4 and OMP6 ("Monograph Report" columns sized by other
     presses, the reverted Internal Review decline, and publishing's
     unnamed "Move to Done"; Rule 23; scenario 7 marks OMP3)
@@ -1102,7 +1099,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OJS3](#ojs3) | "Articles Report" leaves "Editor Decision" empty for skipped reviews, new rounds, reverted declines and stage moves | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OJS4](#ojs4) | "Subscriptions Report" downloads nothing and leaves a blank tab when an institutional contact has no country | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [OMP1](#omp1) | A press's Editorial Activity leaves books declined at Internal Review out of "Submissions Declined" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [OMP2](#omp2) | A press's "Days to First Editorial Decision" help text says "authors submitting to your journal" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | "Monograph Report" of one press carries empty author and decision columns sized by another press's books | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP4](#omp4) | "Monograph Report" names a reverted Internal Review decline "Decline Submission" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP6](#omp6) | "Monograph Report" leaves "Editor Decision" empty for the "Move to Done" that publishing records | 🐞 | medium | — |
@@ -1118,6 +1114,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | Retired: the monthly editorial email's attachment counted every journal's active submissions, not the journal's own; fixed by pkp/pkp-lib#13515 | ✅ | retired | upstream sync (claude), 2026-10-16 — fixed by pkp/pkp-lib#13515, merged 2026-10-15 |
 | [OMP5](#omp5) | Retired: A French press's monthly attachment names External Review by a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [A13](#a13) | Retired: a French press's or preprint server's monthly email is in English but for the month and the footer | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [OMP2](#omp2) | Retired: a press's "Days to First Editorial Decision" help text said "authors submitting to your journal"; it now says "your press" (Fields) | ✅ | retired | fix walked (claude), 2026-11-09 — fixed by pkp/omp#2563, merged 2026-11-09 |
 
 ### All apps
 
@@ -1435,19 +1432,6 @@ Expected: counted as declined, beside the desk and after-review
 declines.
 Basis: probe, 2026-10-02. <sup>f-omp1</sup>
 
-<a id="omp2"></a>
-**OMP2 — A press's "Days to First Editorial Decision" help text says "authors submitting to your journal"** · 🐞 · low.
-On a press, Statistics › "Editorial Activity" has an information icon
-after "Days to First Editorial Decision". Its text ends "…when the
-majority of authors submitting to your journal can expect a decision."
-It should read "your press".
-
-Nothing else on the page is wrong, and the figures are right.
-
-Most translations name a journal too: in French the text reads
-"…soumettant à votre revue…" on a press.
-Basis: probe, 2026-10-02. <sup>f-omp2</sup>
-
 <a id="omp3"></a>
 **OMP3 — "Monograph Report" of one press carries empty author and decision columns sized by another press's books** · 🐞 · low.
 On an installation with more than one press, the "Monograph Report" that
@@ -1553,6 +1537,9 @@ Basis: probe, 2026-10-02. <sup>f-ops4</sup>
 
 <a id="a13"></a>
 **A13 — A French press's or preprint server's monthly email is in English** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a13</sup>
+
+<a id="omp2"></a>
+**OMP2 — A press's "Days to First Editorial Decision" help text says "authors submitting to your journal"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: the press's icon text now ends "…the majority of authors submitting to your press can expect a decision." (Fields). <sup>f-omp2</sup>
 
 ---
 
@@ -2086,8 +2073,8 @@ chart of 1.
 **td4** — Live-probed 2026-09-28 (Rule 11; A5; OMP2): the "Acceptance
 Rate" text as Fields on hover; Tab from the date range reached
 "Filters" and then left the page's main region, no icon taking focus;
-the press's "Days to First Editorial Decision" text ends "…your journal
-can expect a decision."
+the press's "Days to First Editorial Decision" text ended "…your journal
+can expect a decision." (OMP2, retired: f-omp2).
 
 <a id="fn-td5"></a>
 **td5** — Live-probed 2026-09-28 (Rule 12): at 1280 pixels every
@@ -2331,8 +2318,22 @@ Issue report: [docs/issues/U65-OMP1-internal-review-decline-not-counted-declined
 
 <a id="fn-f-omp2"></a>
 **f-omp2** — `stats.description.daysToDecision` in lib/pkp
-`locale/en/manager.po`; OMP's locale files do not override it. Live-probed 2026-09-28: td4.
-Issue report: [docs/issues/U65-OMP2-press-days-to-decision-text-your-journal.md](../issues/U65-OMP2-press-days-to-decision-text-your-journal.md), filed as [pkp-e2e#653](https://github.com/jardakotesovec/pkp-e2e/issues/653). The team's copy is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR heads pkp/omp#2563 `8eff1e8c2c` (`main`) and #2529 `72b39e2d44` (`stable-3_5_0`), before their merge: walked base vs head on fresh datasets, both lines (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
+`locale/en/manager.po`, "…submitting to your journal can expect a
+decision."; OMP's locale files did not override it. Live-probed
+2026-09-28: td4. Most translations named a journal too (French
+"…soumettant à votre revue…" on a press).
+Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge
+`f81f129c82`, patch `14f4d2670a`) and `pkp/omp#2529` on `stable-3_5_0`
+(merge `ae1d900d35`, patch `940105441`), which give OMP its own English
+`stats.description.daysToDecision` ending "…submitting to your press
+can expect a decision."; English only, so other languages keep their
+translation and 3.4 and 3.3 are unchanged. Both patches equal the PR
+heads walked base vs head on fresh datasets on 2026-11-06 (`8eff1e8c2c`,
+`72b39e2d44`; PR review, `checks/sync/pkp-lib-13646/`). Walked at both
+merge commits on freshly loaded PKP dataset fleets, 2026-11-09: the
+press's "Days to First Editorial Decision" icon text ends "…the
+majority of authors submitting to your press can expect a decision."
+Issue report: [pkp-e2e#653](https://github.com/jardakotesovec/pkp-e2e/issues/653), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp3"></a>
 **f-omp3** — fn o (`retrieveLimits()`). Live-probed 2026-09-28: td13.

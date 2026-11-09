@@ -1,12 +1,12 @@
 // PR review of pkp/pkp-lib#13646: one line per walk and run, from the facts side.sh left in
-// .reports/pr13646-<main|35>-<base|head>[-up]/.   node shared/playwright/checks/sync/pkp-lib-13646/summary.js
+// .reports/pr13646-<main|35>-<base|head|merged>[-up|-patch]/.   node shared/playwright/checks/sync/pkp-lib-13646/summary.js
 const fs = require('fs');
 const path = require('path');
 const R = path.join(__dirname, '../../../../../.reports');
 const j = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } };
 const find = (dir, re) => (fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => re.test(f)).map((f) => j(path.join(dir, f))) : []);
 for (const line of ['main', '35']) {
-    for (const side of ['base', 'head']) {
+    for (const side of ['base', 'head', 'merged']) {
         const d = path.join(R, `pr13646-${line}-${side}`);
         const out = [];
         const tg = find(path.join(d, 'series-toggle-asks-about-section'), /^facts-walk/)[0];

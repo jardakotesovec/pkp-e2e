@@ -18,7 +18,8 @@
  * A1, A2, A3, A4, A5, A6 (the refusal's shape only; that the file is refused
  * is asserted), A7 (the empty submit is driven as scenario 7 prescribes,
  * nothing about it beyond the mail's arrival), A9, A10, A11 (scenario 14's
- * archived wizard is driven as written), A12, A13, OMP2, OMP3.
+ * archived wizard is driven as written), A12, A13, OMP3. Retired: A8, OMP2,
+ * OMP4.
  *
  * Seeding: scenario endpoints only. Scenarios 1–4, 6, 7, 11, 12, 14 and 18
  * run on the seeded press with the roster reviewers and scratch monographs;
@@ -736,7 +737,7 @@ test.describe("Reviewer's review (U28)", () => {
         await expect(taskRow(tasks, titleFor(tag))).toHaveCount(0);
 
         // The assigned editor's mailbox holds "Review complete: …" (its
-        // "recommends None" subject is register finding OMP2, unasserted).
+        // "reviewed #{id}" subject, OMP2 retired, is U05 scenario 11's).
         await pkpMail.find({to: getEmail(ANA), subject: 'Review complete', contains: tag});
 
         // The Section Editor's header "Tasks" panel gains no entry for it
@@ -1539,7 +1540,7 @@ test.describe("Reviewer's review (U28)", () => {
         await wizard.expectCompleted();
 
         // The "Review complete" email reaches the stage's editor (its
-        // "recommends None" subject is register finding OMP2, unasserted).
+        // "reviewed #{id}" subject, OMP2 retired, is U05 scenario 11's).
         await pkpMail.find({to: press.editorEmail, subject: 'Review complete', contains: titleFor(tag)});
 
         // External Review: step 2 shows the "External Review Guidelines".

@@ -408,8 +408,9 @@ give no access to any screen in this spec. <sup>l</sup>
   preferences*). "Assign" never offers the Journal Manager role
   ([→ stage participants](U35-stage-participants.md#assign-window)), so a
   Journal Manager receives the email only when also assigned there in one
-  of those roles. On a press the subject reads "recommends None" and the
-  body "Recommendation: None" ⚠ [OMP2](#omp2). The email is written in
+  of those roles. On a press, which asks for no recommendation, the
+  subject reads "Review complete: {reviewer} reviewed #{id} {authors} —
+  "{title}"" and the body has no "Recommendation:" line. The email is written in
   the language of the reviewer's interface when they press "Submit
   Review": a reviewer working in French sends "Évaluation terminée:
   {reviewer} recommande {recommendation} pour #{id} {authors} — {title}",
@@ -674,7 +675,8 @@ Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
      longer.
    - **The editor's side**: the mailbox of each editor assigned to the
      stage holds "Review complete: …" with the recommendation in its
-     subject ({OMP}: "recommends None" ⚠ [OMP2](#omp2)); the Section
+     subject ({OMP}: "Review complete: {reviewer} reviewed #{id} …", no
+     recommendation); the Section
      Editor's header "Tasks" panel gains no entry; the Reviewers panel row
      reads "Review Submitted", and the submission's activity log records
      "The round 1 review assigned to {reviewer} for submission {id} has
@@ -919,8 +921,8 @@ App-specific:
       dialog.
     - **The submit**: type "Internal remarks." into "For author and
       editor", press "Submit Review" and "OK": the assigned editor's
-      mailbox holds "Review complete: …" with the subject reading
-      "recommends None" ⚠ [OMP2](#omp2).
+      mailbox holds "Review complete: {reviewer} reviewed #{id} …",
+      naming no recommendation.
     - **External Review**: External Reviewer: step 2 shows the "External
       Review Guidelines" text.
     - **Control**: on a journal, step 3 carries the "Recommendation" list
@@ -1015,7 +1017,7 @@ Left out of the scenarios above, by reason:
   - a reviewer's one-click link opened in a browser signed in as another user showing "You are signed in as a different user", and "Sign out and continue" opening the review as the reviewer ([A10](#a10); Actors row 9, Rule 16): the guard the issue report proposes, once fixed
   - a reviewer typing a first answer on a review form with a required question seeing no "Please fill in required fields." box and no "This field is required." mark, "Save for Later" then showing "Your changes have been saved." alone, and a refused "Submit Review" still showing both ([A14](#a14); Fields step 3): the guard the issue report proposes, once fixed
   - {OMP} a press's review form refused for an unanswered required question opening its box with "Please fill in required fields." as a journal's does ([OMP3](#omp3); Fields step 3): the guard the issue report proposes, once fixed
-  - {OMP} the email telling a press's assigned editors a review is in naming no recommendation in its subject or body ([OMP2](#omp2); Side effects): the guard the issue report proposes, once fixed
+  - {OMP} the email telling a press's assigned editors a review is in reading "Review complete: {reviewer} reviewed #{id} …" and naming no recommendation in its subject or body (Side effects "Submitting"; OMP2 retired)
   - text typed into "For author and editor" alone, then the "2.
     Guidelines" tab, asking "The data on this form has changed. Do you
     wish to continue without saving?", "Cancel" keeping the text
@@ -1051,7 +1053,6 @@ Left out of the scenarios above, by reason:
   - A16 (a refused review-form submit marking the unanswered questions on one form and none on another; Fields step 3)
   - A17 (step 3's "Reviewer Files" list on "Loading" with no "Upload File" on an install running in strict mode; Rule 12, Settings)
   - A18 (a review reading "Deadline for completing this review has passed" on its due date, and a request whose response and review are both due today offering "Finish review"; Rule 3)
-  - OMP2 (the press's review-complete email saying "recommends None"; Side effects)
   - OMP3 (the press's review-form refusal opening with a raw key; Fields)
   - OPS1 (a home-made reviewer role landing on a page headed "undefined (0)" that lists nothing under an "Error" window; Purpose, scenario 17)
 - **No seed**:
@@ -1088,7 +1089,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A15](#a15) | Unsaved free-form review text is lost without a warning when the reviewer leaves step 3, while a changed "Recommendation" or review-form answer is guarded | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A17](#a17) | With strict mode on, step 3's "Reviewer Files" list stays on "Loading" with no "Upload File" | 🐞 | low | — |
 | [A18](#a18) | On its due date a review already reads as overdue, to the reviewer and to the editor | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [OMP2](#omp2) | {OMP} On a press, the email telling editors a review is in says the reviewer "recommends None" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | {OMP} On a press, a review form refused for an unanswered required question shows the reviewer a raw text code | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS1](#ops1) | {OPS} On a preprint server, a user given a "Reviewer"-level role lands after every sign-in on a page headed "undefined (0)" under an "Error" window | 🐞 | low · crash: script | issues (claude), 2026-10-02 — re-verified |
 | [A3](#a3) | Declining a request sends the reviewer to the journal's public home page instead of their assignments | ❓ | minor | — |
@@ -1098,6 +1098,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OMP1](#omp1) | A press's wizard collects no recommendation, and each review stage shows its own guidelines | ✅ | — | — |
 | [A8](#a8) | Retired: "Save for Later" with a required question open did save and confirm after all | ✅ | retired | — |
 | [OMP4](#omp4) | Retired: the press's "Previous Reviews" oddity is every app's (A12) | ✅ | retired | — |
+| [OMP2](#omp2) | Retired: on a press, the email telling editors a review was in said the reviewer "recommends None"; it now reads "Review complete: {reviewer} reviewed #{id} …" with no recommendation (Side effects) | ✅ | retired | omp#2563 2026-11-09 · fixed |
 
 ### All apps
 
@@ -1441,23 +1442,6 @@ Basis: probe (2026-09-04, both press stages), and code for the design
 intent (the press disables reviewer recommendations, and the OJS-only step-3
 template carries the list). <sup>[f-omp1](#fn-omp1)</sup>
 
-<a id="omp2"></a>
-**OMP2 — On a press, the email telling editors a review is in says the reviewer "recommends None"** · 🐞 · low.
-When a reviewer submits a review on a press, the email that tells the
-assigned editors has the subject "Review complete: {reviewer} recommends
-None for #{id} …" and a "Recommendation: None" line in its body. A press
-never asks its reviewers for a recommendation, so the editor expects an
-email that only says the review is in.
-
-The email arrives and its link opens the submission. An editor can take
-"None" as the reviewer's answer until they open the review, which has no
-recommendation field.
-
-This is the default text of the email on every press. Each installed
-press holds its own stored copy of it, in each of its languages, so the
-fix is a new text, an upgrade migration and translations.
-Basis: probe, 2026-10-02. <sup>[f-omp2](#fn-omp2)</sup>
-
 <a id="omp3"></a>
 **OMP3 — On a press, a review form refused for an unanswered required question shows the reviewer a raw text code** · 🐞 · low.
 On a press, a reviewer whose review uses a review form presses "Submit
@@ -1506,6 +1490,9 @@ Basis: probe, 2026-10-02. <sup>[f-ops1](#fn-ops1)</sup>
 
 <a id="omp4"></a>
 **OMP4 — A press lists the reviewer's own review as a previous one** · ✅ · retired. Folded into A12 on 2026-09-05: a journal shows the same box once a later round opens without the reviewer. <sup>[f-omp4](#fn-omp4)</sup>
+
+<a id="omp2"></a>
+**OMP2 — On a press, the email telling editors a review is in says the reviewer "recommends None"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: after a review on a press the editor's email reads "Review complete: Julie Janssen reviewed #17 Smith et al. — …" with no "Recommendation:" line (Side effects "Submitting"). <sup>[f-omp2](#fn-omp2)</sup>
 
 ---
 
@@ -2122,8 +2109,8 @@ Submit:
 assignment, `NOTIFICATION_TYPE_REVIEWER_COMMENT` (NOTIF-013,
 `notification.type.reviewerComment` = "A reviewer has commented on
 "{$title}"."), then `ReviewCompleteNotifyEditors` (MAIL-035, key
-`REVIEW_COMPLETE`, subject `emails.reviewComplete.subject` — on a press
-`{$reviewRecommendation}` resolves to "None", finding OMP2 — from the
+`REVIEW_COMPLETE`, subject `emails.reviewComplete.subject` — on a press,
+until OMP2 was fixed, `{$reviewRecommendation}` resolved to "None" — from the
 context contact, with the `emails.footer.unsubscribe.automated` footer)
 unless the type is in the user's blocked email list; deletes the reviewer's
 `NOTIFICATION_TYPE_REVIEW_ASSIGNMENT` task ("Review pending."); logs
@@ -2138,7 +2125,7 @@ the participant alone on the press — From "Site Admin" <admin@mail.test>
 {recommendation} for #{id} Author — "{title}"", body "Dear {name}," /
 "{reviewer} completed the following review:" / the submission line with
 its workflow link / "*Recommendation:* {recommendation}" ("None" on the
-press) / "*Type:* {review type}" / "Login to view all files and comments
+press before OMP2's fix) / "*Type:* {review type}" / "Login to view all files and comments
 ({link}) provided by this reviewer." / the "This is an automated message
 from {journal} … You can unsubscribe …" footer. The editor's header
 "Tasks" panel (the header has no other notifications button) read "No
@@ -2170,7 +2157,7 @@ submitted step 3 in the French interface. On OJS "Review accepted" and
 only, not the unassigned `dbuskins`, `sberardo`, `rvaca`; From "Ramiro
 Vaca" <rvaca@mailinator.com>. The French submit's email: subject
 "Évaluation terminée: Paul Hudson recommande Accepter la soumission pour
-#12 Christopher — {title}" (OMP "recommande Aucun-e", the French OMP2),
+#12 Christopher — {title}" (OMP "recommande Aucun-e", which the English-only fix of OMP2 left as it was),
 body "Daniel Barnes, Paul Hudson a terminé son évaluation : …",
 "*Recommandation :*", "*Type :*", every link under
 `/publicknowledge/fr_CA/…`, sent to the same editors, who work in
@@ -2727,15 +2714,36 @@ matched nothing and the word "Recommendation" was absent on both stages'
 step 3.
 
 <a id="fn-omp2"></a>
-**f-omp2** — `emails.reviewComplete.subject` = "Review complete:
+**f-omp2** — `emails.reviewComplete.subject` read "Review complete:
 {$reviewerName} recommends {$reviewRecommendation} for #{$submissionId}
-…"; `ReviewAssignmentEmailVariable::getRecommendation()` has no
-recommendation to resolve on a press and the placeholder prints "None".
+…"; `ReviewAssignmentEmailVariable::getRecommendation()` had no
+recommendation to resolve on a press and the placeholder printed "None".
 Live-probed 2026-09-04 on the press, External Review (seeded journal) and
 Internal Review (scratch press): subject "Review complete: {reviewer}
 recommends None for #{id} …" and the body line "*Recommendation:* None";
 first seen the same day in the notifications feature's claim check.
-Issue report: [docs/issues/U28-OMP2-press-review-complete-email-recommends-none.md](../issues/U28-OMP2-press-review-complete-email-recommends-none.md), filed as [pkp-e2e#602](https://github.com/jardakotesovec/pkp-e2e/issues/602). The team's copy is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR heads pkp/omp#2563 `8eff1e8c2c` (`main`) and #2529 `72b39e2d44` (`stable-3_5_0`), before their merge: PKP's 3.5 (`main`) and 3.4 (3.5) datasets upgraded at the heads store the text without the recommendation (the PRs' `I13646_ReviewCompleteEmailTemplate`), and the editor's email reads "Review complete: Julie Janssen reviewed #17 …"; at the bases "recommends None" (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
+Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge
+`f81f129c82`, patch `14f4d2670a`, the same as the reviewed head
+`8eff1e8c2c`; OMP's pointer to pkp-lib `8c3971dd1e`) and `pkp/omp#2529`
+on `stable-3_5_0` (merge `ae1d900d35`, patch `940105441`, the same as
+the reviewed head `72b39e2d44`; pointer to pkp-lib `1e5673c7c7`), for
+`pkp/pkp-lib#13646`. OMP now carries its own
+`emails.reviewComplete.subject` = "Review complete: {$reviewerName}
+reviewed #{$submissionId} {$authorsShort} — "{$submissionTitle}"" and
+an `emails.reviewComplete.body` without the recommendation line, and the
+upgrade migration `I13646_ReviewCompleteEmailTemplate` reinstalls the
+`REVIEW_COMPLETE` default for the installed locales. Walked 2026-11-09 at
+both merge commits on freshly loaded PKP dataset fleets
+(`checks/sync/pkp-lib-13646/`): after the upgrades 3.5.0.6 → 3.6.0.0
+(`main`), 3.4.0.12 → 3.5.0.6 and 3.5.0.5 → 3.5.0.6 (3.5) the stored
+English subject was the new one, with no "Recommendation:" line, and the
+editor's email after `jjanssen`'s review of 17 read "Review complete:
+Julie Janssen reviewed #17 Smith et al. — "Open Development: Networked
+Innovations in International Development"". At the PR heads on
+2026-11-06 the same, at the bases "recommends None". The fix is English
+only: French still reads "recommande …" until translators change it, and
+3.4 and 3.3 are not changed.
+Issue report: [pkp-e2e#602](https://github.com/jardakotesovec/pkp-e2e/issues/602), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-omp3"></a>
 **f-omp3** — The key `reviewer.submission.reviewFormResponse.form.responseRequired`

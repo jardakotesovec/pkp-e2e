@@ -454,8 +454,8 @@ before the wizard) or one choice ("Payment", a journal's first page).
   its text names the decision in one sentence, "We have chosen to accept
   this submission without revisions." or its like); on "Cancel Review
   Round" the template is "Review Cancel" ("Your review for "{title}" has
-  been cancelled"), whose text on a press leaves "{$journalName}" unfilled
-  ⚠ [OMP1](#omp1). One Activity Log line records it: "An email about the
+  been cancelled"), whose text names the journal or press ([OMP1](#omp1),
+  retired). One Activity Log line records it: "An email about the
   decision was sent to {n} reviewer(s) with the subject {subject}.", and
   each emailed reviewer's row in the Reviewers panel reads "Reviewer
   Thanked" (with "Revert Decision") where it read "Review Submitted".
@@ -910,9 +910,8 @@ wizard addresses typed and the tooling recipe are in the footnote. <sup>s1</sup>
      submission, {title}, has been cancelled. All notifications have been
      sent, except any you chose to skip."; the invited reviewer's mailbox
      holds "Your review for "{title}" has been cancelled", whose text on a
-     press reads "{$journalName}" where the press's name should be ⚠
-     [OMP1](#omp1); the Activity Log reads "{editor} cancelled the review
-     round." (Rules 2, 11, 15; Side effects).
+     press names the press; the Activity Log reads "{editor} cancelled
+     the review round." (Rules 2, 11, 15; Side effects).
    - **Control**: "Decline Submission" pressed on the first submission
      before its accept opened "Decline Submission: Notify Authors" at once,
      though the round was below the minimum, and "Cancel" › "Cancel
@@ -1150,7 +1149,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | "Revert Decline" recorded on a submission that is not declined emails the author again and can drop a revisions request | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | A Section Editor's "Find Template" in a decision's email answers "You are not authorized to access the requested resource." | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [OJS1](#ojs1) | An editor's "Waive" on an accept decision still asks the Author to pay the publication fee | 🐞 | high | issues (claude), 2026-10-04 — re-verified |
-| [OMP1](#omp1) | A press's "Review Cancel" email reads "{$journalName}" where the press's name should be | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS2](#ops2) | Preprint server emails: "Insert Content" describes the server's initials with a raw code | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A1](#a1) | "Create New Review Round" opens a wizard headed "New Review Round" | ❓ | minor | — |
 | [A2](#a2) | A decision with no author assigned opens a wizard with no page, and its closing window still reports an email | ❓ | minor | — |
@@ -1162,6 +1160,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | A review-stage decision typed with a past round's number opens the wizard for that round | ❓ | minor | — |
 | [A12](#a12) | A "Select Files" row names its uploader by username: "Uploaded by {username} on {date}" | ❓ | minor | — |
 | [A3](#a3) | Retired: the "Notify Reviewers" letter keeps "{$recipientName}" and each email carries one name | ✅ | retired | — |
+| [OMP1](#omp1) | Retired: a press's "Review Cancel" email read "{$journalName}" where the press's name should be; it now names the press | ✅ | retired | omp#2563 2026-11-09 · fixed |
 | [OPS1](#ops1) | A preprint server's wizard has "Decline Submission" and "Revert Decline" alone, with no review page and a two-source "Attach Files" | ✅ | user-visible | — |
 
 ### All apps
@@ -1322,15 +1321,6 @@ tells the Editor, and the email cannot be taken back.
 It happens on every journal that charges a publication fee.
 Basis: probe, 2026-10-04. <sup>[f-ojs1](#fn-ojs1)</sup>
 
-### OMP
-
-<a id="omp1"></a>
-**OMP1 — The press's "Review Cancel" email leaves "{$journalName}" unfilled** · 🐞 · low.
-A reviewer emailed by "Cancel Review Round" on a press reads "…agreeing to
-review "{title}" for {$journalName}." where the press's name should be; a
-journal's reviewer reads the journal's name.
-Basis: probe, 2026-10-03. <sup>[f-omp1](#fn-omp1)</sup>
-
 ### OPS
 
 <a id="ops1"></a>
@@ -1365,6 +1355,9 @@ Basis: probe, 2026-10-04. <sup>[f-ops2](#fn-ops2)</sup>
 
 <a id="a3"></a>
 **A3 — Reviewer names shown where one will be sent** · ✅ · retired. Overturned on screen 2026-09-20 (OJS and OMP): the "Notify Reviewers" letter keeps "{$recipientName}" as a marked token and each reviewer's email carries that reviewer's own name whether or not the text was edited (Rule 4); the code reading behind the entry did not hold. <sup>[f-a3](#fn-a3)</sup>
+
+<a id="omp1"></a>
+**OMP1 — The press's "Review Cancel" email leaves "{$journalName}" unfilled** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` (3.5 never had the fault; `pkp/omp#2529` carries the issue's other strings there), for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: a reviewer emailed by "Cancel Review Round" on a press reads the press's name where "{$journalName}" stood (Side effects). <sup>[f-omp1](#fn-omp1)</sup>
 
 ---
 
@@ -1418,7 +1411,7 @@ their own dates.
 **m** — Recording: `lib/pkp/classes/decision/Repository.php::add()` inserts the row, writes the event log entry (`SUBMISSION_LOG_EDITOR_DECISION`, or `SUBMISSION_LOG_EDITOR_RECOMMENDATION` for `isRecommendation()`, `userId` `Validation::loggedInAs() ?? request user`, `impersonatedUserId` when impersonating, `message` `$decisionType->getLog()` with `editorName`), runs `runAdditionalActions()` (status, stage, review round status, `Repo::editorialTask()->autoCreateFromTemplates()`, then the emails), fires `DecisionAdded`, then `updateNotifications()` (note o). Log keys: `editor.submission.decision.*.log` and `editor.submission.recommend.*.log` (Side effects' table; OMP overrides `sendExternalReview.log` "…to the external review stage."). Author email: `NotifyAuthors::sendAuthorEmail()` → `addEmailDataToMailable()` (`sender($editor)`: `Sender::sender()` sets the From address to the editor's email and full name; subject, body, cc, bcc, attachments) → `Mail::send($mailable->recipients($assignedAuthors, $locale))` → `Repo::emailLogEntry()->logMailable(EDITOR_NOTIFY_AUTHOR, …)` (the row *Review stage & rounds* Rule 16's list reads); then, when `$context->getData('notifyAllAuthors')`, one `DecisionNotifyOtherAuthors` per `getCurrentPublication()->getData('authors')` whose email is set and not among the assigned authors' emails, `subject` the letter's subject (the template's own `emails.decision.notifyOtherAuthors.subject` "An update regarding your submission" is not used), `body` the `EDITOR_DECISION_NOTIFY_OTHER_AUTHORS` template (body "<p>The following email was sent to {$submittingAuthorName} from {$contextName} regarding "{$submissionTitle}".</p>…" with `{$messageToSubmittingAuthor}` = the letter). Template names: `mailable.decision.*.name` (`lib/pkp/locale/en/mailable.po`; OPS overrides `initialDecline.notifyAuthor.name` to "Submission Declined"); subjects `emails.editorDecision*.subject` in `lib/pkp/locale/en/emails.po`, with OJS and OMP overriding `editorDecisionAccept.subject` "Your submission has been accepted to {$contextName}" and `editorDecisionSkipReview.subject` "Your submission has been sent for copyediting" (identical texts) and OMP adding `editorDecisionSendToInternal.subject`. Live-probed 2026-09-20 (Side effects; all three apps): the author's email from the editor's name and address with the subject, text and attachment as left on the page, listed on the author's "Notifications" list; the Activity Log's decision line per the table; under "Login As" the line naming the editor acted as; the contributor's copy arriving under the letter's subject and opening "The following email was sent to {author} from {journal} regarding "{title}".".
 
 <a id="fn-n"></a>
-**n** — Reviewer emails: `NotifyReviewers::sendReviewersEmail()` loops the posted `recipients`, `Mail::send($mailable->recipients([$recipient], $locale))` per reviewer, for `DecisionNotifyReviewer` (template `EDITOR_DECISION_NOTIFY_REVIEWERS`, name `mailable.decision.notifyReviewer.name` "Notify Reviewers of Decision", subject `emails.decision.notifyReviewers.subject` "Thank you for your review", variable `decisionDescription` from `mailable.decision.notifyReviewer.variable.decisionDescription.{accept,decline,pendingRevisions,resubmit}`) sets `dateAcknowledged` when empty, `considered` to `REVIEW_ASSIGNMENT_CONSIDERED` (from NEW/VIEWED) or `RECONSIDERED`, and `dateConsidered`; each send logs `REVIEW_NOTIFY_REVIEWER` (or `REVIEW_EDIT_NOTIFY_REVIEWER` for `ReviewCancel`) and one event `SUBMISSION_LOG_DECISION_EMAIL_SENT` `submission.event.decisionReviewerEmailSent` "An email about the decision was sent to {$recipientCount} reviewer(s) with the subject {$subject}." closes the loop. `CancelReviewRound` uses `ReviewCancel extends ReviewerUnassign` (key `REVIEW_CANCEL`, name `mailable.reviewCancel.name` "Review Cancel", subject `emails.reviewCancel.subject` "Your review for "{$submissionTitle}" has been cancelled", in OJS and OMP `locale/en/emails.po`). Live-probed 2026-09-20 (Side effects; OJS and OMP): one "Thank you for your review" email per reviewer naming the decision in one sentence; the Activity Log line "An email about the decision was sent to 2 reviewer(s) with the subject …"; each emailed reviewer's row reading "Reviewer Thanked" with "Revert Decision" where it read "Review Submitted"; the press's "Review Cancel" text leaving "{$journalName}" unresolved where the journal's names the journal (OMP1).
+**n** — Reviewer emails: `NotifyReviewers::sendReviewersEmail()` loops the posted `recipients`, `Mail::send($mailable->recipients([$recipient], $locale))` per reviewer, for `DecisionNotifyReviewer` (template `EDITOR_DECISION_NOTIFY_REVIEWERS`, name `mailable.decision.notifyReviewer.name` "Notify Reviewers of Decision", subject `emails.decision.notifyReviewers.subject` "Thank you for your review", variable `decisionDescription` from `mailable.decision.notifyReviewer.variable.decisionDescription.{accept,decline,pendingRevisions,resubmit}`) sets `dateAcknowledged` when empty, `considered` to `REVIEW_ASSIGNMENT_CONSIDERED` (from NEW/VIEWED) or `RECONSIDERED`, and `dateConsidered`; each send logs `REVIEW_NOTIFY_REVIEWER` (or `REVIEW_EDIT_NOTIFY_REVIEWER` for `ReviewCancel`) and one event `SUBMISSION_LOG_DECISION_EMAIL_SENT` `submission.event.decisionReviewerEmailSent` "An email about the decision was sent to {$recipientCount} reviewer(s) with the subject {$subject}." closes the loop. `CancelReviewRound` uses `ReviewCancel extends ReviewerUnassign` (key `REVIEW_CANCEL`, name `mailable.reviewCancel.name` "Review Cancel", subject `emails.reviewCancel.subject` "Your review for "{$submissionTitle}" has been cancelled", in OJS and OMP `locale/en/emails.po`). Live-probed 2026-09-20 (Side effects; OJS and OMP): one "Thank you for your review" email per reviewer naming the decision in one sentence; the Activity Log line "An email about the decision was sent to 2 reviewer(s) with the subject …"; each emailed reviewer's row reading "Reviewer Thanked" with "Revert Decision" where it read "Review Submitted"; the press's "Review Cancel" text leaving "{$journalName}" unresolved where the journal's names the journal (OMP1, retired 2026-11-09).
 
 <a id="fn-o"></a>
 **o** — Notifications: `Repository::updateNotifications()` calls `NotificationManager::updateNotification()` for the assigned authors with the decision's type from `PKPNotificationManager::getNotificationTypeByEditorDecision()` (`ACCEPT` → `NOTIFICATION_TYPE_EDITOR_DECISION_ACCEPT`, `EXTERNAL_REVIEW`, `PENDING_REVISIONS`, `RESUBMIT`, `NEW_EXTERNAL_ROUND` → `NEW_ROUND`, `DECLINE` and `INITIAL_DECLINE` → `DECLINE`, `REVERT_DECLINE`, `SEND_TO_PRODUCTION`; no type for the revert of an initial decline, the back-from decisions, the cancel or the recommendations) plus the app's `getReviewNotificationTypes()` (`PENDING_EXTERNAL_REVISIONS`, OMP also `PENDING_INTERNAL_REVISIONS`); `managerDelegate/EditorDecisionNotificationManager.php::updateNotification()` deletes the submission's earlier editor-decision rows for those users and creates one at `NOTIFICATION_LEVEL_TASK` for `PENDING_REVISIONS` and `RESUBMIT` (`notification.type.editorDecisionPendingRevisions` "Revision required.", `…Resubmit` "Resubmit for review.") and `NOTIFICATION_LEVEL_NORMAL` for the rest (`…Accept` "Submission accepted.", `…ExternalReview` "External review process started.", `…NewRound` "A new round of reviews was initiated.", `…Decline` "Submission declined.", `…RevertDecline` "Declined submission reactivated.", `…SendToProduction` "Production process started."; title `notification.type.editorDecisionTitle` "Latest editor decision."), with `getNotificationUrl()` the author's workflow address. The task level is what the header Tasks panel lists (*Notifications center*, Rule 2); the normal level is fetched by no current screen: `WorkflowNotificationDisplay.vue` asks `notification/fetchNotification` for the copyediting and production notice types alone, and the retired author dashboard was the list that showed them (A5). `PendingRevisionsNotificationManager` (the "Revisions to consider in {$stage}." row) is *Review stage & rounds*' note m. `getSubmissionNotificationTypes()` recomputes `ASSIGN_COPYEDITOR` / `AWAITING_COPYEDITS` on `ACCEPT` and those plus `ASSIGN_PRODUCTIONUSER` / `AWAITING_REPRESENTATIONS` on `SEND_TO_PRODUCTION` (the stage specs' notices). Live-probed 2026-09-20 (Side effects; OJS and OMP): after "Request Revisions" the author's header Tasks panel reads "Revision required." on the journal and "Revisions to consider in External Review." on the press (the `PendingRevisionsNotificationManager` row), "Resubmit for review." on both, each linking to the submission; after "Accept Submission" the row is gone and no screen shows "Submission accepted." (A5).
@@ -1503,8 +1496,9 @@ Issue report: [pkp-e2e#859](https://github.com/jardakotesovec/pkp-e2e/issues/859
 Issue report: [pkp-e2e#860](https://github.com/jardakotesovec/pkp-e2e/issues/860) ([docs/issues/U34-OJS1-waive-still-requests-publication-fee.md](../issues/U34-OJS1-waive-still-requests-publication-fee.md)).
 
 <a id="fn-omp1"></a>
-**f-omp1** — Note n: OMP's `locale/en/emails.po` `emails.reviewCancel.body` still reads "{$journalName}", a variable `ReviewCancel` does not carry (`contextName` is the one it has). Live-probed 2026-09-20: the press's email "…agreeing to review "{title}" for {$journalName}."; the journal's names the journal.
-Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690) ([docs/issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md](../issues/U27-OMP3-press-reviewer-notices-journal-placeholder.md)). The team's copy is `pkp/pkp-lib#13646` (2026-10-28). Fixed at the PR head pkp/omp#2563 `8eff1e8c2c` (`main`), before its merge: the 3.5 dataset upgraded at the head stores `{$contextName}` in both emails, `{$journalName}` at the base (PR review, 2026-11-06, `checks/sync/pkp-lib-13646/`).
+**f-omp1** — Note n: OMP's `locale/en/emails.po` `emails.reviewCancel.body` read "{$journalName}", a variable `ReviewCancel` does not carry (`contextName` is the one it has). Live-probed 2026-09-20: the press's email "…agreeing to review "{title}" for {$journalName}."; the journal's named the journal.
+Retired 2026-11-09: fixed by `pkp/omp#2563` (`main`, merge `f81f129c82`, patch `14f4d2670a`, the reviewed head `8eff1e8c2c` unchanged; with the pointer bump to pkp-lib `8c3971dd1e`, `pkp/pkp-lib#13768`), whose OMP `emails.reviewCancel.body` and `emails.reviewerUnassign.body` use `{$contextName}`; `stable-3_5_0` (`pkp/omp#2529`, merge `ae1d900d35`) never had the fault. Walked that day at the merge commit on a freshly loaded PKP dataset fleet, OMP (`checks/sync/pkp-lib-13646/side.sh main merged`; the same kit read the base and the PR head on 2026-11-06, the head already storing `{$contextName}` in both emails and the base `{$journalName}`): after the upgrade 3.5.0.6 → 3.6.0.0, whose `I12903_ReviewerUnassignEmailTemplate` installs both, the stored English "Review Cancel" and "Reviewer Unassign" texts carry `{$contextName}` and no `{$journalName}`; a fresh install takes the new text. PKP's `main` dataset dump was built before the fix, so a fleet loaded from it still stores the old text until PKP rebuilds the dump. See also *Reviewer assignment & management*, its retired OMP3.
+Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 ## Reference — entry points & surfaces
 

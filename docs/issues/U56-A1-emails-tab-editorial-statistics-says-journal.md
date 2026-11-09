@@ -155,7 +155,9 @@ tab, read the same with and without the fix.
   the same kind of mistake in another shared string
   (`stats.description.daysToDecision`, "…your journal…"), reported
   apart because its fix is another string, on OMP only:
-  [U65 OMP2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U65-OMP2-press-days-to-decision-text-your-journal.md).
+  U65 OMP2 ([pkp-e2e#653](https://github.com/jardakotesovec/pkp-e2e/issues/653)),
+  fixed by `pkp/omp#2563` (`main`) and `pkp/omp#2529` (3.5) for
+  `pkp/pkp-lib#13646`, merged 2026-11-09.
   That report names a third, `admin.settings.statistics.sushiPlatform.description`
   ("By default, the journal will be designated as the platform…", on an
   OMP site's statistics settings). A team that wants one change can add
