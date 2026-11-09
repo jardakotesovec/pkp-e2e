@@ -131,7 +131,9 @@ how many of the two languages are filled. <sup>d</sup> <sup>e</sup>
    of {title}" and "Decrease position of {title}"). The arrows move the row
    one place; the first row's up arrow and the last row's down arrow do
    nothing. "Save Order" saves the order shown and leaves ordering mode;
-   the home page follows the saved order. <sup>i</sup>
+   the home page follows the saved order. On a list of more than 100
+   highlights the list then shows only its first 100 rows until a reload
+   ⚠ [A12](#a12). <sup>i</sup>
 
 9a. **Leaving ordering mode without saving.** "Cancel" leaves ordering
    mode without saving ⚠ [A1](#a1): the rows stay where the arrows put
