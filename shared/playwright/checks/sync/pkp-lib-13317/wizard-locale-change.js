@@ -42,7 +42,7 @@ forEachApp(async (app) => {
     const userA = `${s1}a`;   // given name en only -> changeLocale also edits the author
     const userB = `${s1}b`;   // given name en + fr_CA -> changeLocale touches only the affiliation
     const text = `Registry University ${s1}`;
-    const ror = `https://ror.org/0${s1.replace(/[^a-z0-9]/g, '').slice(-6)}12`;
+    const ror = `https://ror.org/0${s1.replace(/[^a-hj-km-np-tv-z0-9]/g, '').slice(-6)}12`; // lowercase Crockford base32 (pkp-lib#12899)
     await app.api.createContext({
         tag: s1,
         context: {supportedLocales: ['en', 'fr_CA'], supportedSubmissionLocales: ['en', 'fr_CA']},

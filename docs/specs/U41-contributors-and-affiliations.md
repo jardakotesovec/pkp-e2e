@@ -1825,7 +1825,11 @@ it showed the old name after a reload (f-a24).
 <a id="fn-d"></a>
 **d — affiliations.** Model `PKP\affiliation\*` + `author_affiliations`
 tables; `affiliation.json`: `ror` (regex
-`#^https://ror\.org/0[^ILOU]{6}\d{2}$#`) XOR multilingual `name` —
+`#^https://ror\.org/0[^ILOU]{6}\d{2}$#`; `0[a-hj-km-np-tv-z0-9]{6}` at the
+PR head `b11ae35cb6`, pkp-lib#13751 for issue pkp-lib#12899, before its
+merge: an API save with `0213RCC28`, `0abcil012` or `0a/b-c.12` answers
+400 there and 200 at the base, `checks/sync/pkp-lib-13751/walk.js`) XOR
+multilingual `name` —
 `Repository::saveAffiliations()` nulls the manual name whenever a ROR is
 set; validation strings `author.affiliationRorAndNameEmpty` ("Please
 provide a ROR affiliation or at least one affiliation name.") and

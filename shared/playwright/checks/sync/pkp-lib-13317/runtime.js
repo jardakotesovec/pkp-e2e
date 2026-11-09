@@ -24,7 +24,8 @@ forEachApp(async (app) => {
     const author = `${scratch}au`;
     const affiliation = `Probe Registry University ${scratch}`;
     // A syntactically valid id (0 + six chars + two digits) unique to this run, never a real record.
-    const PLANTED_ROR = `https://ror.org/0${scratch.replace(/[^a-z0-9]/g, '').slice(-6)}12`;
+    // Lowercase Crockford base32 only (no i, l, o, u: pkp-lib#12899), so the id stays well-formed.
+    const PLANTED_ROR = `https://ror.org/0${scratch.replace(/[^a-hj-km-np-tv-z0-9]/g, '').slice(-6)}12`;
     await app.api.createContext({
         tag: scratch,
         context: {supportedLocales: ['en', 'fr_CA'], supportedSubmissionLocales: ['en', 'fr_CA']},

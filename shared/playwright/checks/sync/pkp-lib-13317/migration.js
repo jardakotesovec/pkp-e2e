@@ -12,7 +12,9 @@ const fs = require('fs');
 const {forEachApp, record, tag} = require('../../../probe');
 
 const IN_CACHE = 'https://ror.org/0cached12';
-const NOT_IN_CACHE = 'https://ror.org/0typo0099';
+// A well-formed id the cache lacks. It was 0typo0099 until pkp-lib#12899 (pkp-lib#13751) made the
+// id's six middle characters lowercase Crockford base32, which drops the 'o' as malformed.
+const NOT_IN_CACHE = 'https://ror.org/0typq0099';
 
 function psql(app, sql) {
     return execFileSync('psql', ['-h', '127.0.0.1', '-U', 'e2e', `${dbName(app.name)}`, '-Atqc', sql], {
