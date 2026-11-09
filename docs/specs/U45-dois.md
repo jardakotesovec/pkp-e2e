@@ -765,8 +765,10 @@ links under the list. <sup>g</sup>
     reads "Error" once the background deposit has run, like one the
     agency refused: "View Error" opens the same window over the
     connection error, "Has Error" lists the item, and no failed job is
-    left behind. Until pkp/pkp-lib#13591's fix is merged, the DOI stays
-    "Submitted" with nothing on the DOIs page to show it ⚠ [A18](#a18).
+    left behind. A journal has this since pkp/pkp-lib#13591's fix; on a
+    preprint server, until that fix reaches it (pkp/ops#1494), the DOI
+    stays "Submitted" with nothing on the DOIs page to show it
+    ⚠ [A18](#a18).
     The test installs run no background deposit, so every deposit there
     stays "Submitted".
     <sup>r</sup> <sup>q22</sup> <sup>q53</sup> <sup>f-a13</sup>
@@ -4485,6 +4487,18 @@ timeout raises the same `ConnectException` as a refused connection
 (Guzzle `CurlFactory`), code-read. The same walk at the `stable-3_5_0`
 PR heads (crossref-ojs#118, crossref-ops#75, ojs#5978, ops#1482) is
 recorded in the sync log.
+Round 2, walked 2026-11-09 the same way at the PR heads before their
+merge, each app merged locally onto its tip: on `main`, ops#1494
+`cbfe5ed95e` (crossref-ops#77 `937286a8ac`, which carries the merged
+#74) on OPS `40f33453f0` turned the preprint's "Submitted" (with a failed
+job) into "Error" with "View Error"; OJS `407246bb8e` already read
+"Error" at its tip and still did with ojs#6047 `acc4948fa2`
+(crossref-ojs#120 `14e6c5f16f`). On `stable-3_4_0`, crossref-ojs#119
+`26049c17e4`, crossref-ops#76 `a7c14f5670`, ojs#6046 `406fb9cf43`
+(DataCite) and ops#1493 `b53787e36f` on OJS `61835656a2` and OPS
+`d406378b01`: "Submitted" with a failed job at the tips (Crossref on both,
+DataCite on OJS), "Error" with "View Error" in the agency panel at the
+heads, the control "Unregistered" throughout.
 
 <a id="fn-s"></a>
 **s** — `isPluginConfigured()`: OJS `CrossrefPlugin` (the schema's

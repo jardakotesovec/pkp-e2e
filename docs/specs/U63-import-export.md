@@ -627,10 +627,14 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     ticked or not ⚠ [OJS8](#ojs8). The articles are then sent to DOAJ
     in the background, and DOAJ's answer sets the row as Rule 37 says.
     <sup>r</sup>
-    When the installation cannot reach DOAJ at all, the queued deposit
-    fails (Administration › "View Failed Jobs" lists it) and the row
-    keeps reading "Submitted": it never reads "Failed", and the "Error"
-    status of the filter lists nothing ⚠ [OJS9](#ojs9). <sup>u</sup>
+    When the installation cannot reach DOAJ at all, the row reads
+    "Failed" once the queued deposit has run, a link to a window headed
+    "Error" over the connection error, and the filter's "Error" status
+    lists it; the deposit is still tried again and then listed under
+    Administration › "View Failed Jobs", as for any refused deposit.
+    Until pkp/pkp-lib#13591's DOAJ fix (pkp/ojs#6047) is merged, the row
+    keeps reading "Submitted" instead, never "Failed", and the "Error"
+    status lists nothing ⚠ [OJS9](#ojs9). <sup>u</sup> <sup>z</sup>
 43. **Automatic deposit.** Once a day (no screen starts it; run by
     hand <sup>s</sup>), for a journal with "DOAJ Plugin" ticked, an API
     key saved and the automatic-deposit box ticked, the installation
@@ -2880,6 +2884,23 @@ article that reads "Registered", and what DOAJ is or is not sent when
 such an article is unpublished (OJS12): `handlePublicationPublishing()`
 and `handlePublicationUnpublishing()` take `registered` exactly as
 they take `markedRegistered`, which was driven (note t).
+
+<a id="fn-z"></a>
+**z** — Walked 2026-11-09 (Rule 42; OJS9) at the PR heads of
+pkp/pkp-lib#13591's DOAJ fix, before their merge: pkp/ojs#6047
+`acc4948fa2` (`main`, merged locally onto OJS `407246bb8e`) and #6045
+`79a80bbaa7` (`ore`, onto `8e022b2591`), with
+`checks/issues/doaj-deposit-unreachable-stays-submitted/walk.js` on a
+dataset fleet freshly loaded per run. At the tips the registered article
+read "Submitted", the "Error" status listed nothing and a
+`DOAJRegister` job failed with the raw `ConnectException`. At the heads it
+read "Failed", a link whose window read "Error" over "cURL error 7:
+Failed to connect to doaj.org port 443 …", the "Error" status listed it,
+and the job still failed, now with "Deposit was not successful! The DOAJ
+API returned an error: …" (`jobs/DOAJRegister.php` throws on any error
+the plugin returns, so the queue tries it again). The unticked control
+read "Not Deposited" throughout. `deleteObject()`'s same change is
+code-read.
 
 <a id="fn-y"></a>
 **y** — Rule 20b is run on the server's command line, from the app's
