@@ -54,18 +54,22 @@ fields and one "Save" button. A save that fails validation is refused in
 place: the panel stays open, "Please correct one error." (or "Please
 correct {n} errors.") appears under the fields above "Save", with a "Go to
 {field}: {message}" button per fault and a "Jump to next error" button,
-the message sits under the field, and "Save" is grayed out until every
-flagged box is changed. "Title", "Short Description" and "Announcement" are
-entered per language when the form has more than one: a language button
-at the top of the panel shows the second language's boxes, labelled
-"{Field} in {language}" (Rule 14). <sup>h</sup>
+the message sits under the field, the notice "The form was not saved
+because {n} error(s) were encountered. Please correct these errors and
+try again." shows at the top right of the screen, and "Save" is grayed
+out until every flagged box is changed. "Title", "Short Description" and
+"Announcement" are entered per language when the form has more than one:
+a language button at the top of the panel shows the second language's
+boxes, labelled "{Field} in {language}", and with two form languages
+each of these fields shows "{n}/2 languages completed" under its label,
+as does the settings tab's "Introduction" (Rule 14). <sup>h</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | "Title" | yes, in the primary language | One line of plain text, the widest box on the panel. Empty on save: "This field is required." (with two or more form languages, on an edit: "You must complete this field in {language}.", naming the primary language). Shown as the row's name in the list, as the heading of the announcement's page and of its summary, as the browser title of its page and as the subject of the email <sup>h</sup> <sup>i</sup> |
 | "Short Description" | no | Formatted text under the hint "A brief description to appear along with the announcement title.", with bold, italic, superscript, subscript, a link, a block quote, bulleted and numbered lists, a picture and a source-code view. The picture button, "Insert/edit image", uploads and inserts a picture as every formatted text box with one does, the files it takes and refuses included ([→ pictures](U09-custom-pages-and-blocks.md#image-upload)). Shown under the title in every summary (the Announcements page, the home page's first item) and in the email; on the announcement's own page only when "Announcement" is empty (Rule 10) <sup>h</sup> <sup>i</sup> |
 | "Announcement" | no | Formatted text under the hint "The full text of the announcement.", the same controls as "Short Description" in a taller box. Shown on the announcement's own page alone (Rule 10) <sup>h</sup> |
-| "Image" | no | An upload box ("Upload File"; "Drop files here to upload") that judges a file by its name and lets in any file named as a picture of any format (".bmp", ".svg" and ".tif" as much as ".png"), with no message. Any other file is refused in the box, with "You can't upload files of this type." under its name and a "REMOVE FILE" link that clears it; until it is cleared the panel counts it as a form error ("Please correct one error.", "Save" and "Upload File" grayed out); a file over the server's upload limit is refused the same way with "File is too big ({size}MiB). Max filesize: {limit}MiB.". A chosen image shows a preview with an "Alternate text" box and "Remove"; on an edit, "Remove" clears the preview and offers "Restore Original", which brings the saved picture and its alternate text back. "Save" keeps a GIF (".gif"), a JPEG (".jpg" or ".jpeg"), a PNG (".png") or a WebP (".webp") picture, and by the code an icon (".ico"), whose content is the type its name says, the extension in any letter case. Every other file the box let in is refused on "Save": a picture of another format, such as a BMP, an SVG or a TIFF, and a file whose content does not match its name, such as a PNG named ".jpg" or a text file named ".png" (listed under its name with "Alternate text", "Remove" and an empty preview). The refusal shows "There was an error uploading this image." under "Image", "Please correct one error." and the notice "The form was not saved because 1 error(s) were encountered. Please correct these errors and try again."; an "Add Announcement" so refused stores nothing, and an edit so refused stores nothing either: the announcement keeps its text and its earlier picture, and a later "Save" (the panel closed, "Edit" pressed again and only "Title" changed), by the same manager or another, goes through. A saved image shows above the text on the announcement's page and beside the title in its summaries, with the alternate text as its description (Rule 15) <sup>j</sup> |
+| "Image" | no | An upload box ("Upload File"; "Drop files here to upload") that judges a file by its name and lets in any file named as a picture of any format (".bmp", ".svg" and ".tif" as much as ".png"), with no message. Any other file is refused in the box, with "You can't upload files of this type." under its name and a "REMOVE FILE" link that clears it; until it is cleared the panel counts it as a form error ("Please correct one error.", "Save" and "Upload File" grayed out); a file over the server's upload limit is refused the same way with "File is too big ({size}MiB). Max filesize: {limit}MiB.". A chosen image shows a preview with an "Alternate text" box and "Remove"; on an edit, "Remove" clears the preview and offers "Restore Original", which brings the saved picture and its alternate text back. "Save" keeps a GIF (".gif"), a JPEG (".jpg" or ".jpeg"), a PNG (".png") or a WebP (".webp") picture, or an icon (".ico"), whose content is the type its name says, the extension in any letter case. Every other file the box let in is refused on "Save": a picture of another format, such as a BMP, an SVG or a TIFF, and a file whose content does not match its name, such as a PNG named ".jpg" or a text file named ".png" (listed under its name with "Alternate text", "Remove" and an empty preview: the broken preview *[Categories](U16-categories.md#a17)* A17 records for every image upload box). The refusal shows "There was an error uploading this image." under "Image", "Please correct one error." and the notice "The form was not saved because 1 error(s) were encountered. Please correct these errors and try again."; an "Add Announcement" so refused stores nothing, and an edit so refused stores nothing either: the announcement keeps its text and its earlier picture, and a later "Save" (the panel closed, "Edit" pressed again and only "Title" changed), by the same manager or another, goes through. A saved image shows above the text on the announcement's page and beside the title in its summaries, with the alternate text as its description (Rule 15) <sup>j</sup> |
 | "Expiry Date" | no | A small plain-text box under the hint "The announcement will be displayed to readers until this date. Leave blank if the announcement should be displayed indefinitely.", typed as YYYY-MM-DD; any other shape is refused with "The date format is not valid. Enter each date in the format YYYY-MM-DD.". A past date is accepted. On "Edit Announcement" the box shows the saved date in the journal's short date format, which the save refuses unless that format is YYYY-MM-DD ⚠ [A3](#a3). What the date does: Rule 8 <sup>k</sup> |
 | "Announcement Type" | no | A list of round buttons, one per type of the journal (Rule 13), shown only while at least one type exists; nothing is chosen for a new announcement, and a chosen type cannot be cleared, only changed ⚠ [A6](#a6). The type shows nowhere to readers ⚠ [A5](#a5) <sup>l</sup> |
 | "Send Email" · "Send an email about this to all registered users." | no | A box, unticked by default. On "Add Announcement", ticked, it sends the email of Side effects to every user the journal notifies; on "Edit Announcement" the box is offered again, unticked, and does nothing ⚠ [A9](#a9) <sup>f</sup> |
@@ -78,19 +82,22 @@ and "Save": <sup>m</sup>
 |------------------|-----------|-------|
 | "Announcements" · "Enable announcements" | no | A box under the sentence "Announcements may be published to inform readers of journal news and events. Published announcements will appear on the Announcements page." ("…of news and events." on a press, "…of server news and events." on a preprint server), unticked on a fresh journal. What it switches: Rule 2. The two fields below appear only while it is ticked <sup>m</sup> |
 | "Introduction" ("Additional Information" on a press [OMP1](#omp1)) | no | Formatted text per language, empty by default; its help icon reads "Enter any information you would like to appear on your announcements page." ("Enter any additional information that should be displayed to readers on the Announcements page." on a press). Shown on the public Announcements page between the heading and the list (Rule 9) <sup>m</sup> |
-| "Display on Homepage" | no | A small box under "How many announcements to display on the homepage. Leave this empty to display none.", empty by default. A whole number of zero or more; text or a decimal is refused with "This is not a valid integer." and a negative number with "This must be at least 0."; the tab then reads "Please correct one error." with a "Jump to next error" link, and "Save" is grayed out until the value changes. What the number does: Rule 11 <sup>m</sup> |
+| "Display on Homepage" | no | A small box under "How many announcements to display on the homepage. Leave this empty to display none.", empty by default. A whole number of zero or more; text or a decimal is refused with "This is not a valid integer." and a negative number with "This must be at least 0."; the tab then reads "Please correct one error." with "Go to Display on Homepage: {message}" and a "Jump to next error" link, the notice "The form was not saved because 1 error(s) were encountered. Please correct these errors and try again." shows, and "Save" is grayed out until the value changes. What the number does: Rule 11 <sup>m</sup> |
 
 Nothing on the tab is saved before "Save": an unsaved tick stays on
 screen while another tab of the Website settings is opened, and leaving
 the page loses it without a warning. <sup>m</sup>
 
 **The "Add Announcement Type" and "Edit" windows** (the "Announcement
-Types" tab, Rule 13) carry one field, "Name" (per language, required in
-the primary language: left empty, or filled in the second language only,
-it is refused with "This field is required." under "Name"), "Save" and
-"Cancel". The window blocks the page behind it until "Save", "Cancel" or
-its close control; leaving by address drops an unsaved name without a
-warning. <sup>l</sup>
+Types" tab, Rule 13) carry one field, "Name*", with the line "Required
+fields are marked with an asterisk: *", "Save" and "Cancel". "Name" is
+entered per language: with a second form language, that language's box,
+captioned with its name ("(French)"), shows under the first box once
+the first box has focus. It is required in the primary language: left
+empty, or filled in the second language only, it is refused with "This
+field is required." under "Name". The window blocks the page behind it
+until "Save", "Cancel" or its close control; leaving by address drops an
+unsaved name without a warning. <sup>l</sup>
 
 **The "Announcement Feed Plugin" settings window** {OJS} (Rule 18)
 carries three round buttons, "Display feed links on all journal pages.",
@@ -143,11 +150,12 @@ discards the changes. <sup>g</sup>
    or full text contains every word typed, in any case, all the words in
    the same one of those three texts ("june call" finds nothing when
    "june" is in the short description and "call" in the title); typing
-   alone changes nothing, clearing the box and pressing Enter brings the
-   whole list back, and a phrase no announcement holds leaves "No items
-   found.". "View" opens the announcement's public page in the same
-   window (an expired one: the Announcements page instead, Rule 8; with
-   announcements off: "404 Not Found", Rule 2). <sup>c</sup> <sup>n</sup>
+   alone changes nothing. While the box holds a phrase a "Clear search
+   phrase" button stands beside it; pressing it, or clearing the box and
+   pressing Enter, brings the whole list back. A phrase no announcement
+   holds leaves "No items found.". "View" opens the announcement's public
+   page in the same window (an expired one: the Announcements page
+   instead, Rule 8; with announcements off: "404 Not Found", Rule 2). <sup>c</sup> <sup>n</sup>
 5. **Adding.** "Add Announcement" opens the "Add Announcement" panel
    (Fields & validation). "Save" closes the panel and the new announcement
    appears as the first row of the list with no reload; the row shows its
@@ -214,10 +222,12 @@ discards the changes. <sup>g</sup>
     above zero and at least one unexpired announcement, the home page
     carries a block headed "Announcements": the newest announcement as a
     full summary (as on the Announcements page, Rule 9) and up to the rest
-    of the number as title links with their posted date, newest first. The
-    block sits below the carousel of highlights, the homepage image and
-    the "About the Journal" text on a journal, and above the preprint list
-    on a preprint server; the page's skip links gain "Skip to
+    of the number as title links with their posted date, newest first. On
+    a journal and a press the block sits below the carousel of
+    highlights, the homepage image and the "About the Journal" ("About the
+    Press") text; on a preprint server it sits below the highlights and
+    the homepage image and above the preprint list ("Latest preprints")
+    and the "About the Server" text. The page's skip links gain "Skip to
     announcements". A number larger than the count lists them all; an
     empty box, zero or no unexpired announcement leaves no block and no
     heading. The site's home page has the same block for the site's
@@ -239,8 +249,9 @@ discards the changes. <sup>g</sup>
     "Add Announcement Type" opens a window of that name with "Name",
     "Save" and "Cancel" (Fields); a save adds the row and shows
     "Announcement type added." at the top right of the screen. A row's
-    arrow opens "Edit" (the same window; "Announcement type edited." on
-    save, but the table shows the old name until the page is reloaded ⚠
+    arrow opens "Edit" (a window headed "Edit" with the same field, the
+    name filled in; "Announcement type edited." on save, but the table
+    shows the old name until the page is reloaded ⚠
     [A13](#a13)) and "Remove", which asks "Are you sure you wish to delete
     this item? This action cannot be undone." with "OK" and "Cancel";
     "OK" removes the type, shows "Announcement type removed." and deletes
@@ -256,10 +267,12 @@ discards the changes. <sup>g</sup>
     settings; the site's panel offers every language the site has. Only
     the primary language's "Title" is required. The list and every public
     page show each text in the language the page is viewed in when the
-    announcement has one, otherwise in the primary language; a short
-    description entered in French alone once printed in French on the
-    English page of a journal whose primary language is English, a
-    fallback not yet confirmed ⚠ [A17](#a17). The email is
+    announcement has one, otherwise in the primary language; a text the
+    primary language lacks too prints in the language it was entered in:
+    on a journal whose primary language is English, a short description
+    entered in French alone prints in French on the English
+    Announcements page, and a full text entered in French alone on the
+    announcement's English page ⚠ [A17](#a17). The email is
     written in the journal's primary language (on a press or a preprint
     server one sentence of it stays English ⚠ [A14](#a14)). <sup>h</sup>
     <sup>r</sup>
@@ -302,11 +315,12 @@ discards the changes. <sup>g</sup>
     The site's "Add Announcement" and "Edit Announcement" offer "Send an
     email about this to all registered users." as the journal's do, but
     a site announcement never sends the email of Side effects, ticked or
-    not ⚠ [A18](#a18); its notification is not recorded either, which no
-    screen shows (Actors row 6). A site with one journal
-    has no site-level announcements screen, a state that cannot be seen
-    on the test installs; the rule that hides the tab is *Site settings*'
-    (*[Highlights](U11-highlights.md)* Rule 12 states it). <sup>d</sup>
+    not ⚠ [A18](#a18).
+    Its notification is not recorded either, which no screen shows (Actors row 6).
+    A site with one journal has no site-level announcements screen:
+    Administration › Site Settings shows no "Announcements" tab there; the
+    rule that hides the tab is Rule 2 of
+    *[Site settings](U60-site-settings.md)*. <sup>d</sup>
 17. **Live at once, for everyone.** An unexpired announcement is public
     from the moment it is saved, to every visitor alike: no draft, no
     approval, no per-role visibility. <sup>o</sup>
@@ -319,7 +333,9 @@ discards the changes. <sup>g</sup>
     Found". Each feed is titled "{journal name}: Announcements" and lists
     the unexpired announcements in no fixed order (usually the order they
     were added), each with the announcement's title, its posted date, its
-    page's address and its "Announcement" text; only the RSS 2.0 feed's
+    page's address and its "Announcement" text, and no text when that is
+    empty: unlike the announcement's page (Rule 10), the feeds never
+    print the "Short Description" in its place. Only the RSS 2.0 feed's
     dates are readable ⚠ [A15](#a15). With "Limit feed to" set the feeds
     carry only the first that many they list without it, not the most
     recent ones the label promises ⚠ [A7](#a7). The plugin's block, "Announcement Feed Plugin", placed in
@@ -372,8 +388,10 @@ discards the changes. <sup>g</sup>
   server ([A14](#a14); Rule 14). Both the notification and the email are
   queued, as one job for the users notified alone and one for those
   emailed too: they arrive when the site's background jobs run; a test
-  install never runs them by itself. The template is edited under
-  Settings › Workflow › Emails as "New Announcement" (*Emails
+  install never runs them by itself. An announcement deleted before the
+  jobs run mails nobody: its job fails, and the Site Administrator's
+  Administration › "View Failed Jobs" lists it. The template is edited
+  under Settings › Workflow › Emails as "New Announcement" (*Emails
   management*). <sup>f</sup>
 - **The image** is stored as a file in the journal's (or the site's)
   public files directory. "Remove" then "Save" deletes it; deleting the
@@ -464,9 +482,9 @@ discards the changes. <sup>g</sup>
   announcements block (Rule 11), the "Date & Time" formats and the
   sidebar (Rule 18).
 - *Languages & locales* owns the "Forms" languages (Rule 14).
-- *Site settings* owns the Site Settings page and the rule that shows its
-  tabs only on a multi-journal site (Rule 16); this spec owns what the
-  site's "Announcements" tab does.
+- *[Site settings](U60-site-settings.md)* owns the Site Settings page
+  and the rule that shows its tabs only on a multi-journal site (Rule
+  16); this spec owns what the site's "Announcements" tab does.
 - *Hosted journals* owns creating and deleting journals (Side effects).
 - *Users management* owns the Roles form with "Permit changes to
   Settings" (Rule 3).
@@ -667,8 +685,9 @@ footnote.
      "Conference" is a row of the table; add "Event" the same way (Rule
      13).
    - **A type edited**: press the arrow on the "Conference" row, then
-     "Edit": the same window opens; change "Name" to "Conference 2027" and
-     press "Save": "Announcement type edited." shows, but the row still
+     "Edit": a window headed "Edit" opens with "Conference" in "Name";
+     change "Name" to "Conference 2027" and press "Save": "Announcement
+     type edited." shows, but the row still
      reads "Conference" ([A13](#a13)); reload the page: the row reads
      "Conference 2027" (Rule 13).
    - **A typed announcement**: on the "Announcements" tab press "Edit" on
@@ -679,16 +698,12 @@ footnote.
      Announcements page, the page of "Workshop" and the home page block
      print "Event" nowhere ([A5](#a5)) (Fields "Announcement Type"; Rule
      13).
-   - **A type removed with its announcement**: on the "Announcement Types"
-     tab press the arrow on "Event", then "Remove": the dialog asks "Are
-     you sure you wish to delete this item? This action cannot be undone."
-     with "OK" and "Cancel"; press "OK": "Announcement type removed."
-     shows and the row is gone; signed out, "Workshop" is gone from the
-     Announcements page and the home page block and the address of its
-     page opens the Announcements page instead, though the dialog said
-     nothing of it ([A1](#a1)); the "Announcements" tab still lists
-     "Workshop" until the page is reloaded, then two rows remain (Rule 13;
-     Side effects).
+   - **A type removed**: on the "Announcement Types" tab press the arrow
+     on "Event", then "Remove": the dialog asks "Are you sure you wish to
+     delete this item? This action cannot be undone." with "OK" and
+     "Cancel"; press "OK": "Announcement type removed." shows and the row
+     is gone. What becomes of "Workshop", which had that type, is
+     [A1](#a1)'s (Rule 13; Side effects).
    - **Control**: "Call for papers" and "Reading group", which have no
      type, are still listed and, signed out, still on the Announcements
      page after the removal (Rule 13). <sup>s3</sup>
@@ -760,24 +775,29 @@ footnote.
      with "/fr_CA" in place of "/en" in its address: the rows read "Appel
      à contributions" and "Call for papers", the second in its
      primary-language title because it has no French one; signed out, the
-     public Announcements page and the home page block with "/fr_CA" in
-     the address print "Appel à contributions" with "Date limite le 1er
-     juin." and "Call for papers" with "Deadline 1 June." (Rule 14).
+     public Announcements page with "/fr_CA" in the address prints "Appel
+     à contributions" with "Date limite le 1er juin." and "Call for
+     papers" with "Deadline 1 June."; the home page with "/fr_CA" in its
+     address prints in its block
+     "Appel à contributions" with "Date limite le 1er juin." and, under
+     it, "Call for papers" as a title link with its posted date (Rules
+     11, 14).
    - **An edit emptying the primary language**: with "/en" back in the
      address, press "Edit" on "Second call", clear "Title" and press
      "Save": the panel stays open with "You must complete this field in
      English." under "Title" (Fields "Title").
    - **A type in two languages**: on the "Announcement Types" tab press
-     "Add Announcement Type": "Name" is offered in English and in French;
-     type "Conférence" in the French one alone and press "Save": "This
-     field is required." sits under "Name"; type "Conference" in the
+     "Add Announcement Type": "Name" is offered in English; click into it:
+     a second box captioned "(French)" shows under it; type "Conférence"
+     in the French one alone and press "Save": "This field is required."
+     sits under "Name"; type "Conference" in the
      English one and press "Save": "Announcement type added." (Fields;
      Rule 13).
    - **Control**: signed out, the public Announcements page in English
      lists "Second call" and "Call for papers" with "Deadline 1 June."
-     under the latter, its English text; what prints under "Second call",
-     whose short description is French only, is open ([A17](#a17)) (Rule
-     14). <sup>s5</sup>
+     under the latter, its English text; under "Second call", whose short
+     description is French only, "Date limite le 1er juin." prints
+     ([A17](#a17)) (Rule 14). <sup>s5</sup>
 
 6. **The site's announcements**
 
@@ -888,16 +908,25 @@ Left out of the scenarios above, by reason:
   - the guard for A15 (issue report `docs/issues/U12-A15-announcement-feed-dates-percent-signs.md`): the Atom and RSS 1.0 feeds' dates are well-formed RFC 3339 and W3CDTF values.
   - the guard for A3 (issue report `docs/issues/U12-A3-announcement-expiry-date-refused-on-edit.md`): an unchanged "Save" on "Edit Announcement" keeps the expiry date, with another "Date (Short)" and with a browser west of the install's time zone.
   - an edit whose new picture is refused on "Save", since A21 retired (Fields "Image"; Rule 15): with a PNG named ".jpg" the announcement keeps its text and its earlier picture on its page and the public Announcements page; a later "Save" of the title alone (the panel closed, "Edit" pressed again and only "Title" changed) goes through, by the same Journal Manager and by the Site Administrator; "Remove" then "Save" leaves the pages text-only and the picture's earlier address no longer opens it ([Rule 15](#kept-file)).
-  - pictures that save since A2 retired (Fields "Image"): a JPEG named ".jpeg", a picture with an upper-case extension and a WebP picture save on "Add Announcement" and "Edit Announcement" and show on the announcement's page and its summaries.
+  - pictures that save since A2 retired (Fields "Image"): a JPEG named ".jpeg", a picture with an upper-case extension, a WebP picture and an icon (".ico") save on "Add Announcement" and "Edit Announcement" and show on the announcement's page and its summaries.
   - a text file named ".png" passing the "Image" box and refused on "Save" (Fields "Image"): on "Add Announcement" nothing is added.
   - the guard for A12 (issue report `docs/issues/U12-A12-announcement-image-files-left-behind.md`): deleting an announcement with a picture, and replacing its picture with one of another type, leave no file behind: the picture's earlier address no longer opens it ([Rule 15](#kept-file)), on a context and on the site.
   - the guard for A22, once fixed (Rules 15, 16): a site announcement with a picture, the newest of the site's: the site's home page, the site's Announcements page and the announcement's own page open for a signed-out visitor and for the Site Administrator after signing in, each showing the picture, on OJS, OMP and OPS.
+  - the notice on a refused "Save" (Fields): scenario 1's refused count and scenario 2's empty save and refused date also show "The form was not saved because 1 error(s) were encountered. Please correct these errors and try again."
+  - scenario 1's "Saved": the side menu entry's own icon, which only the press's suite checks (Rule 3).
+  - scenario 2's "Expired": no message on the expired announcement's address and on the unknown one, which no suite checks (Rule 10).
+  - an announcement added with the email box ticked and deleted before the background jobs run (Side effects): nobody is emailed, and Administration › "View Failed Jobs" lists its job.
+  - an announcement with an empty "Announcement" text in the feeds {OJS} (Rule 18): listed with its title, date and address and no text, its short description left out.
 - **Nothing new to test**:
   - an unsaved tick on the settings tab kept across a tab switch and
     lost on leaving the page (Fields)
   - a type window left with an unsaved name blocking the page's tabs
     and dropped by address (Fields)
   - a list longer than thirty rows with page controls (Rule 4)
+  - the "Clear search phrase" button (Rule 4): scenario 3 clears the box
+    and presses Enter, which brings back the same list
+  - "{n}/2 languages completed" under each per-language field (Fields):
+    a line of wording on the panel scenario 5 opens
   - the "Display feed links…" choices and the "OK" / "Cancel" window
     {OJS} (Fields; Rule 18)
   - a saved image replaced by a new upload (Rule 15): scenario 2 removes
@@ -922,6 +951,9 @@ Left out of the scenarios above, by reason:
   - no history entry for an add, edit or delete (Side effects): no
     screen shows one; scenario 4 reads the Tasks panel
 - **Register carries it**:
+  - A1 (the announcements of a removed type deleted with it, and the
+    tab's list showing them until a reload; Rule 13; scenario 3 marks
+    it)
   - A8 (the Announcements page reached by address, accepting
     announcements and sending the email while "Enable announcements" is
     unticked; Rule 2)
@@ -944,8 +976,8 @@ Left out of the scenarios above, by reason:
     cleared; Fields "Announcement Type"; scenario 3 marks them)
   - A10 (the empty Announcements page with no sentence; Rule 9;
     scenario 1 marks it)
-  - A17 (a short description entered in French alone printed on the
-    English page; Rule 14; scenario 5 marks it)
+  - A17 (a short description or full text entered in French alone
+    printed on the English pages; Rule 14; scenario 5 marks it)
   - A18 ("Send an email about this to all registered users." offered on
     the site's panel and sending nothing; Rule 16; scenario 6 marks it)
   - A19 (a journal's announcement read on its own through the
@@ -1006,7 +1038,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A8](#a8) | The Announcements page opens, accepts announcements and sends the email while "Enable announcements" is unticked | ❓ | minor | — |
 | [A10](#a10) | The public Announcements page with nothing to list shows the heading alone, no "No announcements have been published." | ❓ | minor | — |
 | [A16](#a16) | With no "Display feed links…" choice saved, the browser is told about the feeds on every page while the box shows on the home page alone {OJS} | ❓ | minor | — |
-| [A17](#a17) | A short description entered in French alone printed under its English title on the English Announcements page, seen once | ❓ | minor | — |
+| [A17](#a17) | A short description entered in French alone prints under its English title on the English Announcements page | ❓ | minor | drift sweep (claude), 2026-11-09 — seen on every app |
 | [A18](#a18) | The site's "Add Announcement" and "Edit Announcement" offer "Send an email about this to all registered users.", which never sends anything there | ❓ | minor | — |
 | [OMP1](#omp1) | The settings tab labels the introduction "Additional Information" on a press, "Introduction" elsewhere | ✅ | minor | — |
 | [A2](#a2) | Editing an announcement with a picture the upload check refuses deletes the announcement | ✅ | retired | claim check (claude), 2026-10-27 — fixed upstream, did not reproduce on any app or line |
@@ -1022,14 +1054,12 @@ sure you wish to delete this item? This action cannot be undone." and
 expects the type alone to go. "OK" also deletes every announcement of
 that type, from the list and the public site, and the only message is
 "Announcement type removed."; the "Announcements" tab's list still shows
-the deleted announcements until the page is reloaded. The application
-carries the warning "Warning! All announcements with this announcement
-type will also be deleted…" but never shows it. The deletion is not what
-the code base intends today: since 3.4 the database is set up to keep
-the announcements and clear their type, and 3.4 did keep them; deleting
-them was once meant only with that warning. The deleted announcements
-cannot be brought back. It reaches only journals, presses and preprint
-servers that give their announcements a type.
+the deleted announcements until the page is reloaded.
+The application carries the warning "Warning! All announcements with this announcement type will also be deleted…", but no screen shows it.
+A code reading shows the deletion is not what the code base intends today: since 3.4 the database is set up to keep the announcements and clear their type, and 3.4 did keep them; deleting them was once meant only with that warning.
+The deleted announcements cannot be brought back. It reaches only
+journals, presses and preprint servers that give their announcements a
+type.
 Basis: probe, 2026-10-03.
 <sup>f-a1</sup>
 
@@ -1171,9 +1201,8 @@ English. A journal sends the whole mail in French. The press's primary
 language decides, not the reader's: every recipient gets this mix.
 Nothing is lost: only that one sentence is English. A manager can fix it
 for good by typing the French text into the "New Announcement" email
-template, whose French fields are empty. The same happens with any
-primary language whose translation lacks this email's text; the Cause
-lists them.
+template, whose French fields are empty.
+A code reading shows the same happens with any primary language whose translation lacks this email's text: on OMP Greek, Galician, Slovenian, Swedish and Vietnamese; on OPS Catalan, Spanish, French (France), Norwegian Bokmål, Portuguese and every language with no OPS email translation; on OJS 13 of its 64 languages.
 Basis: probe, 2026-10-03. <sup>f-a14</sup>
 
 <a id="a15"></a>
@@ -1186,10 +1215,10 @@ each entry's "updated" and "published" dates read
 expected; each RSS 1.0 item's date reads "%2026-%10-%03" for
 "2026-10-03". In the Atom value "UTC" is the time zone's name standing
 where the time should be, and "275" the day of the year: the time of day
-is gone. A common feed reader library keeps the feed but drops every one
-of these dates, and the W3C feed validator rejects the Atom feed. The
-RSS 2.0 feed of the same journal carries the dates correctly. It needs
-the "Announcement Feed Plugin", which is off on a new journal.
+is gone.
+Outside the apps, where no screen of theirs shows it, Python's feedparser (6.0.14), a common feed reader library, keeps the feed but drops every one of these dates, and the W3C feed validator rejects the Atom feed.
+The RSS 2.0 feed of the same journal carries the dates correctly. It
+needs the "Announcement Feed Plugin", which is off on a new journal.
 Basis: probe, 2026-10-03. <sup>f-a15</sup>
 
 <a id="a16"></a>
@@ -1206,15 +1235,16 @@ that show no box. Basis: probe. <sup>f-a16</sup>
 **A17 — A French-only short description printed on the English page** · ❓ · minor.
 A visitor reading the English Announcements page expects each text in
 English, or in the journal's primary language when the announcement has
-no English one (Rule 14). Once, on a journal whose primary language is
-English, an announcement with an English title and a short description
-entered in French alone printed that French short description under its
-English title. Seen once, on a journal; not seen again, and not looked
-for on a press or a preprint server. Question: when a text is empty in
-the page's language and in the primary language, should the page print
-it in whichever language holds one, or leave it out? Lean: intended; the
-page falls back to whichever language holds a text rather than leaving a
-gap, and a second look on any app would confirm it. Basis: test run.
+no English one (Rule 14). On a journal, press or preprint server whose
+primary language is English, an announcement with an English title and
+a short description entered in French alone ("Date limite le 1er juin.")
+prints that French short description under its English title on the
+English Announcements page; a full text entered in French alone prints
+in French on the announcement's English page the same way. Question:
+when a text is empty in the page's language and in the primary language,
+should the page print it in whichever language holds one, or leave it
+out? Lean: intended; the page falls back to whichever language holds a
+text rather than leaving a gap. Basis: probe, 2026-11-09.
 <sup>f-a17</sup>
 
 <a id="a18"></a>
@@ -1226,7 +1256,7 @@ unticked. Ticked and saved, it sends no email to anyone, on an add as
 on an edit (Rule 16). The administrator sees "Save" succeed and
 believes the users were emailed. Question: should the site's panel
 offer the box at all? Lean: no, hide it there; a box that can never do
-anything misleads. Basis: probe, 2026-09-17. <sup>f-a18</sup>
+anything misleads. Basis: probe, 2026-09-17 and 2026-11-09. <sup>f-a18</sup>
 
 <a id="a19"></a>
 **A19 — Through the programming interface, an announcement's own address points at the site, which refuses it** · 🐞 · low.
@@ -1247,7 +1277,7 @@ address for the same announcement gives it to the Journal Manager and
 the Site Administrator. The same wrong address as
 *[Highlights](U11-highlights.md#a10)* A10, where the journal's own
 address fails as well.
-Since: 2021-06-03 · Basis: probe, 2026-10-15. <sup>f-a19</sup>
+Since: 2021-06-03 (the commit, read from the code) · Basis: probe, 2026-10-15. <sup>f-a19</sup>
 
 <a id="a20"></a>
 **A20 — REST API: an announcement added without the email choice writes a warning to the server's error log** · 🐞 · low.
@@ -1257,9 +1287,9 @@ nobody is emailed. But each such add writes
 `PHP Warning:  Undefined array key "sendEmail"` to the server's PHP
 error log.
 This holds for a journal's, a press's and a preprint server's
-announcements, and, by the code, for the site's announcements too. The
-apps' own "Add Announcement" form always sends `sendEmail`, so only
-programs meet it. The fix is a one-line default.
+announcements, and, read from the code, for the site's announcements too.
+The apps' own "Add Announcement" form always sends `sendEmail`, so only
+programs meet it. Read from the code, the fix is a one-line default.
 Basis: probe, 2026-10-23. <sup>f-a20</sup>
 
 <a id="a22"></a>
@@ -1277,10 +1307,8 @@ answers "not found", so no picture shows.
 Deleting the announcement, or adding it again without a picture, brings
 the pages back. The announcement list in Site Settings shows no
 pictures, so nothing there points to the cause.
-The cause is the one behind the site's failed "Remove" in [A12](#a12),
-a different loss: there files stay on the server, here the site's
-public pages go down.
-Since: 2024-09-30 · Basis: probe, 2026-10-29; issue report walk, 2026-10-29. <sup>f-a22</sup>
+Read from the code, the cause is the one behind the site's failed "Remove" in [A12](#a12), a different loss: there files stay on the server, here the site's public pages go down.
+Since: 2024-09-30 (the commit, read from the code) · Basis: probe, 2026-10-29; issue report walk, 2026-10-29. <sup>f-a22</sup>
 
 ### OMP
 
@@ -1465,9 +1493,14 @@ above the journals list with "Skip to announcements", and
 `index/announcement/view/{id}` opened; the site's header carried "Register"
 and "Login" alone; the scratch journal's pages showed none of it; a site
 announcement added with the email box ticked mailed nobody; the site was
-restored to off after (`index/announcement` 404 again). A one-journal site
-has no reachable state on the test installs, which carry scratch journals;
-its tab set is seed-facts'.
+restored to off after (`index/announcement` 404 again).
+Live-probed 2026-11-09 (Rule 16, a site with one journal), OJS, OMP and
+OPS `main` and `stable-3_5_0`, two runs each on PKP's default dataset,
+whose only context is `publicknowledge`, as `admin`: Administration ›
+Site Settings showed the tabs "Site Setup", "Security", "Languages",
+"Bulk Emails", "Statistics" and "ORCID" ("Security" absent on 3.5) and
+no "Announcements"; the suites' install holds scratch journals beside
+`publicknowledge`, so it shows the tab (seed-facts).
 
 <a id="fn-e"></a>
 **e — the public pages and the switch.** `AnnouncementHandler::index()` and
@@ -1566,6 +1599,15 @@ read from a mark before each request: the screen's "Add Announcement"
 and the public announcement page, signed out and as the manager, logged
 nothing; every delete and an add by program without `sendEmail` logged
 one PHP warning each (notes f-a12, f-a20).
+Live-probed 2026-11-09 (Side effects, a deletion before the jobs run),
+OJS, OMP and OPS `main`, two runs each, on a scratch journal: "Add
+Announcement" with the email box ticked queued one job for it (every
+recipient emailed), "Delete" › "Yes" removed it, and the drain then
+logged its `PKP\jobs\notifications\NewAnnouncementNotifyUsers` as
+"Failed" (exception `invalid.job.payload`), leaving no job queued and no
+mail for the Reader; `admin`'s Administration › "View Failed Jobs" (the
+page headed "Failed Jobs") listed the job. Drains after the other kept
+checks' deletions failed such jobs the same way.
 
 <a id="fn-g"></a>
 **g — the feed (OJS).** `plugins/generic/announcementFeed/` (OJS only;
@@ -1629,6 +1671,10 @@ on, a feed address answered 200 with the journal's home page after a
 redirect; an unknown feed type the same. OMP and OPS: no "Announcement Feed
 Plugin" row, no block in the Sidebar list, the feed addresses 404, only the
 Web Feed plugin's discovery headers.
+Live-probed 2026-11-09 (Rule 18, an empty "Announcement"), OJS `main`,
+two runs: "Typed notice" and "Quiet notice", seeded with a short
+description and no full text, were Atom entries with their title, date
+and link and no `summary`; the entries with a full text carried it.
 
 <a id="fn-h"></a>
 **h — the panel's form.** `PKPAnnouncementForm`: `FieldText` `title`
@@ -1685,6 +1731,17 @@ picture as `mceclip0.png`; "Edit" read both boxes back with their pictures
 after a reload. *Custom pages & blocks* Rule 29, 29b and 29c hold here as
 stated there. The site's panel was not driven (switching the site's
 announcements on is shared state); it builds the same form.
+Live-probed 2026-11-09 (Fields, the panel; Rule 14), OJS, OMP and OPS
+`main`, two runs each: every "Save" the server refused (the empty panel,
+a malformed "Expiry Date", a French-only title, an emptied primary
+title) raised, beside the panel's own messages, the notice "The form was
+not saved because 1 error(s) were encountered. Please correct these
+errors and try again." at the top right of the screen; a fault the panel
+had flagged before ("Save" grayed until the box changes) sends nothing
+and raises none. With French under "Forms" each per-language field of
+the journal's panel, the site's window and both settings tabs showed
+"0/2 languages completed" under its label, "1/2" and "2/2" as its boxes
+filled.
 
 <a id="fn-i"></a>
 **i — where the texts print.** `frontend/objects/announcement_summary.tpl`:
@@ -1762,7 +1819,18 @@ FILE", "Save" enabled), the temporary upload answered 200 with
 Announcement" answered POST 400 with the refusal, messages and notice
 above, nothing stored (no row after a reload, no database row, no file);
 "Save" on an edit answered PUT 400 the same and left A21's state (before
-its fix). The `.ico` case is the code's alone, not driven. The refused
+its fix). Live-probed 2026-11-09 (Fields "Image"), OJS, OMP and OPS
+`main`, two runs each on a scratch journal: `photo.ico` was let into the
+box, "Save" answered POST 200 and stored `{id}.ico`, and the
+announcement's page loaded the picture (200
+`image/vnd.microsoft.icon`); a 3 MiB `big.png` was refused in the box
+("big.png REMOVE FILE File is too big (3MiB). Max filesize: 2MiB.",
+"Please correct one error. Go to Image: File is too big (3MiB). Max
+filesize: 2MiB.", "Save" and "Upload File" grayed, no upload sent) and
+"REMOVE FILE" brought "Save" back; about three seconds after that file
+was dropped, once per full run on each app, the browser asked for
+`…/management/settings/[object%20Event]` (404), the request of
+*Categories* A17. The refused
 edit after A21's fix (Fields "Image"; Rule 15): live-probed 2026-10-27,
 as footnote f-a21 records.
 Live-probed 2026-09-17 (Fields "Image"; Rules 7, 15; A2, A12), before
@@ -1867,6 +1935,14 @@ present the panel offers them as round buttons, with none it has no
 "Announcement Type" field; a saved type offers no way back to none (the PUT
 carries the new `typeId`); a window left with an unsaved name blocks the
 page's tabs and leaving by address drops it with no dialog.
+Live-probed 2026-11-09 (Fields, the type windows; Rule 13), OJS, OMP and
+OPS `main`, two runs each, the journal's windows and the site's: on a
+two-language journal the "Add Announcement Type" window hid the French
+box (`name[fr_CA]`) until the English one had focus, then read "Name*
+(French) Required fields are marked with an asterisk: *"; the row's
+"Edit" opened a window headed "Edit" (`grid.action.edit`) with the name
+filled in, and after its "Save" `announcement-type-grid/fetch-row`
+answered 500 (A13).
 
 <a id="fn-m"></a>
 **m — the settings tab.** `PKPAnnouncementSettingsForm` (`PUT contexts/{id}`
@@ -1899,6 +1975,11 @@ until the value changes; "Save" with nothing changed reads "Saved"; an
 unsaved tick survives a side-tab and a top-tab switch with no dialog and is
 gone after the page is left; the side menu gains "Announcements" without a
 reload (note c). `publicknowledge` has the box unticked on all three apps.
+Live-probed 2026-11-09 (Fields "Display on Homepage"), OJS, OMP and OPS
+`main`, two runs each: "abc", "2.5" and "-1" saved read "Please correct
+one error." with "Go to Display on Homepage: {message}" and "Jump to
+next error", and raised the notice "The form was not saved because 1
+error(s) were encountered. Please correct these errors and try again.".
 
 <a id="fn-n"></a>
 **n — search and paging.** `Announcement::scopeWithSearchPhrase()` splits
@@ -1913,9 +1994,12 @@ Live-probed 2026-09-17 (Rule 4), OJS, OMP and OPS: "call", "CALL", "june"
 alone; "june deadline" (both words in the short description) found it; "june
 call" and "call june" (one word in the title, one in the short description)
 found nothing, "No items found."; no request was sent while typing, one on
-Enter, and the cleared box restored the list on Enter alone (the box has no
-clear control); 30 rows without page controls, 31 with "Previous 1 2 Next"
-and the oldest on page 2.
+Enter, and the cleared box restored the list on Enter alone; 30 rows
+without page controls, 31 with "Previous 1 2 Next" and the oldest on
+page 2. Live-probed 2026-11-09 (Rule 4), OJS, OMP and OPS `main`, two
+runs each, and the site's panel: while the box held a phrase a button
+"Clear search phrase" stood beside it, gone once the box was empty;
+pressed, it emptied the box and every row came back.
 
 <a id="fn-o"></a>
 **o — posted date, immediacy, closing.** `date_posted` is the Eloquent
@@ -1996,10 +2080,17 @@ no block, no heading and no "Skip to announcements"; with a count but no
 live announcement no block; on OPS the block sat above the archive header
 and "Latest preprints"; on a fresh scratch journal and press only the
 announcements block renders (no highlight, no homepage image, no summary
-text), so the order against those three is the Highlights claim check's
-home-page read of 2026-09-16 with all of them on; the site's home page
+text); the site's home page
 carried the block above the journals list with the skip link once the site's
 box, a count of 1 and one site announcement were set (note d).
+Live-probed 2026-11-09 (Rule 11, the block's place), OJS, OMP and OPS
+`main`, two runs each, on a scratch journal with a highlight (Setup ›
+Highlights), a homepage image (Appearance › Setup) and the theme's about
+box ticked: OJS read the highlights, the homepage image, "About the
+Journal", then "Announcements"; OMP the highlights, the image, "About
+the Press", then "Announcements"; OPS the highlights, the image,
+"Announcements", the archive header, "Latest preprints", then "About the
+Server". The Announcements page and the OJS feeds carried no highlight.
 
 <a id="fn-r"></a>
 **r — languages.** `getLocalizedData()` (`ModelWithSettings`) falls back
@@ -2055,8 +2146,10 @@ the given (`title`, `descriptionShort` or `description` as `<p>…</p>`);
 seeded in one request they share a posted second, so the suite finds rows
 by title and asserts no position (scenarios.md). The types are added
 through the window. The stale row of [A13](#a13) is read from the table
-after the notice (note l); the deleted announcement's page is
-`announcement/view/{id}` from the seed's response.
+after the notice (note l). What the type's removal does to "Workshop"
+is [A1](#a1)'s and no suite asserts it (PRINCIPLES M3); the
+announcements' pages are `announcement/view/{id}` from the seed's
+response.
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** `POST scenarios/context` with
@@ -2161,6 +2254,11 @@ Issue report: [pkp-e2e#770](https://github.com/jardakotesovec/pkp-e2e/issues/770
 `formatShortDate()` and the API validates `date_format:Y-m-d`. Code read 2026-09-17. Live-probed 2026-09-17 (A3), OJS, OMP and OPS: with
 "Date (Short)" `d-m-Y` the panel printed "17-10-2026" and the unchanged save
 was refused; retyped as YYYY-MM-DD it saved.
+Live-probed 2026-11-09 (A3, the site's panel), OJS, OMP and OPS `main`,
+two runs each, from a browser in America/New_York: a site announcement
+expiring 2027-03-31 opened on "Edit Announcement" with "2027-03-30",
+"Save" stored 2027-03-30 and the next "Edit" showed "2027-03-29"; the
+site has no "Date (Short)" of its own.
 Issue report: [pkp-e2e#769](https://github.com/jardakotesovec/pkp-e2e/issues/769) ([docs/issues/U12-A3-announcement-expiry-date-refused-on-edit.md](../issues/U12-A3-announcement-expiry-date-refused-on-edit.md)).
 
 <a id="fn-f-a4"></a>
@@ -2311,17 +2409,22 @@ on announcement page." was saved the home page carried neither and the
 Announcements page both.
 
 <a id="fn-f-a17"></a>
-**f-a17 — A17 evidence.** Seen in the OJS suite's first run of 2026-09-17
+**f-a17 — A17 evidence.** First seen in the OJS suite's run of 2026-09-17
 (scenario 5), on a scratch journal with `en` primary and `fr_CA` under
 "Forms": the English public Announcements page (`/en/announcement`) printed
 "Date limite le 1er juin. Read More Read more about Second call" under
 "Second call", whose `descriptionShort` was entered in `fr_CA` alone. The
 likely mechanism is `getLocalizedData()`'s fallback past the primary locale
 to any locale holding a value (note r), not read in the code. The suites
-assert neither way: their English control reads "Call for papers" alone,
-and OMP and OPS were not driven on this. The one observation that settles
-it: the same announcement read on the English page on any app a second
-time.
+assert neither way: their English control reads "Call for papers" alone.
+Live-probed 2026-11-09 (Rule 14; A17), OJS, OMP and OPS `main`, two runs
+each, on scratch contexts with `en` primary and `fr_CA` under "Forms":
+scenario 5's English page printed "Date limite le 1er juin. Read More
+Read more about Second call" under "Second call" on every app; an
+announcement with the English title "Fallback probe" and a short
+description and full text entered in `fr_CA` alone printed "Seulement en
+français." under its title on `/en/announcement` and "Texte complet en
+français." on `/en/announcement/view/{id}`.
 
 <a id="fn-f-a18"></a>
 **f-a18 — A18 evidence.** Note d: the site's tab builds the same
@@ -2334,8 +2437,14 @@ copy of that form. `PKPAnnouncementController::add()` calls
 who have subscribed to site-level announcements."), and `edit()` never
 calls it (A9). Code read 2026-10-03, all apps `main`. Live-probed
 2026-09-17 (A18), OJS, OMP and OPS: a site announcement added with the
-box ticked mailed nobody (note d); the site's "Edit Announcement" with the
-box ticked was not walked (code alone).
+box ticked mailed nobody (note d).
+Live-probed 2026-11-09 (A18; Rule 16), OJS, OMP and OPS `main`, two
+runs each for the add and two more for the add and the edit: the site's
+"Add Announcement" and "Edit Announcement" offered the box unticked;
+ticked, the save sent `sendEmail=true`, the count of queued jobs did not
+change, and after the jobs were run the mail catcher held nothing with
+the announcement's title at `admin@mail.test`, while journal
+announcements reached that address the same day.
 
 <a id="fn-f-a19"></a>
 **f-a19 — Rule 19 and A19 evidence.** `PKP\announcement\maps\Schema::mapByProperties()`

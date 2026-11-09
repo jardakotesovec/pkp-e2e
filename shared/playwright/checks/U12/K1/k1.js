@@ -635,13 +635,15 @@ forEachApp(async (app) => {
             await search(page, 'call');
             const clear = page.locator('main .listPanel').first().locator('.pkpSearch button, .pkpSearch__clear').first();
             let cleared = null;
-            if (await clear.count()) {
+            // read before the press: the button ("Clear search phrase") shows only while the box holds a phrase
+            const clearPresent = (await clear.count()) > 0;
+            if (clearPresent) {
                 await loc(page, 'Search: clear button', clear);
                 await clear.click();
                 await sleep(900); await idle(page);
                 cleared = {rows: (await listState(page)).rows.map((x) => x.title), value: await searchBox(page).inputValue().catch(() => null)};
             }
-            record('38-pageon-search-clear', {clearPresent: (await clear.count()) > 0, cleared});
+            record('38-pageon-search-clear', {clearPresent, cleared});
             // paging: fill to 30 then 31
             const target30 = 30;
             let current = (await listState(page)).rows.length;

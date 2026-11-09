@@ -11,8 +11,8 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
- * (S3 asserts the remove dialog's sentence and the announcement gone with
- * its type, never that the dialog says nothing of it), A3 🐞 (the short
+ * (S3 asserts the remove dialog's sentence and the type's row gone, never
+ * what becomes of the type's announcement), A3 🐞 (the short
  * date format stays YYYY-MM-DD),
  * A5 🐞 (S3 chooses a type and reads it chosen again, never that the
  * public pages print it nowhere), A6 ❓ (S3 presses no "none"), A7 🐞, A8 ❓
@@ -674,11 +674,10 @@ test.describe('announcements', () => {
         await view.goto(workshopId);
         await expect(view.heading()).toHaveText('Workshop');
 
-        // A type removed with its announcement: the confirm's sentence
-        // with "OK" and "Cancel"; "OK" removes the type with its toast, and
-        // "Workshop" is gone from the public pages; the "Announcements"
-        // tab's list still shows it until the page is reloaded, then two
-        // rows remain (Rule 13; Side effects).
+        // A type removed: the confirm's sentence with "OK" and "Cancel";
+        // "OK" removes the type with its toast and its row, "Conference
+        // 2027" staying (Rule 13). What becomes of "Workshop" is A1 🐞,
+        // not asserted (PRINCIPLES M3; U12 sweep 2026-11-09, SWB-5).
         await admin.openTypesTab();
         const typesAgain = admin.types();
         await typesAgain.openRemove('Event');
@@ -688,20 +687,7 @@ test.describe('announcements', () => {
         await expect(typesAgain.toast('Announcement type removed.')).toBeVisible();
         await expect(typesAgain.row('Event')).toHaveCount(0);
         await expect.poll(() => typesAgain.rowNames()).toEqual(['Conference 2027']);
-        await publicList.goto();
-        expect((await publicList.titles()).sort()).toEqual(['Call for papers', 'Reading group']);
-        await gotoHome(visitor, tag);
-        await expect(home.articles).toHaveCount(2);
-        await expect(home.section).not.toContainText('Workshop');
-        await view.goto(workshopId);
-        await expect(visitor).toHaveURL(/\/announcement$/);
-        await expect(publicList.heading()).toHaveText('Announcements');
-        await admin.openAnnouncementsTab();
-        await expect(list.rows()).toHaveCount(3);
-        await expect(list.row('Workshop')).toBeVisible();
         await admin.goto();
-        await expect(list.rows()).toHaveCount(2);
-        await expect(list.row('Workshop')).toHaveCount(0);
 
         // Control: the two untyped announcements are still listed and,
         // signed out, still on the Announcements page (Rule 13).
@@ -710,7 +696,6 @@ test.describe('announcements', () => {
         await publicList.goto();
         await expect(publicList.summary('Call for papers').titleLink).toBeVisible();
         await expect(publicList.summary('Reading group').titleLink).toBeVisible();
-        await expect(publicList.articles()).toHaveCount(2);
     });
 
     test('S5: announcements in a second language', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {
