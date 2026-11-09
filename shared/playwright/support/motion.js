@@ -57,6 +57,13 @@ async function disableMotion(context) {
             if (!document.head) {
                 return;
             }
+            // A page with its own Content-Security-Policy meta (PDF.js's
+            // viewer.html: style-src 'self') refuses an inline <style> and
+            // logs a console error that reads like the app's (U13 H09,
+            // 2026-11-09): leave such a page unstyled.
+            if (document.querySelector('meta[http-equiv="Content-Security-Policy" i]')) {
+                return;
+            }
             const style = document.createElement('style');
             style.setAttribute('data-pkp-test', 'disable-motion');
             style.textContent = css;

@@ -21,11 +21,11 @@
      }
 --- a/lib/pkp/api/v1/highlights/HighlightsController.php
 +++ b/lib/pkp/api/v1/highlights/HighlightsController.php
-@@ -114,7 +114,7 @@
+@@ -119,7 +119,7 @@
       */
      public function get(Request $illuminateRequest): JsonResponse
      {
--        $highlight = Repo::highlight()->get((int) $illuminateRequest->route('highlightId'), $this->getRequest()->getContext());
+-        $highlight = Repo::highlight()->get((int) $illuminateRequest->route('highlightId'), $this->getRequest()->getContext()->getId());
 +        $highlight = Repo::highlight()->get((int) $illuminateRequest->route('highlightId'), $this->getRequest()->getContext()?->getId());
  
          if (!$highlight) {

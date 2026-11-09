@@ -9,10 +9,21 @@
   - 3.4: OJS, OMP, OPS (code; Institutions and Announcements, and Highlights where `[features] highlights` is on)
   - 3.3: OJS, OMP, OPS (code; Announcements only)
 - **Introduced** `pkp/ui-library#88` for `pkp/pkp-lib#5865` · [d0ffc05ab4](https://github.com/pkp/ui-library/commit/d0ffc05ab4ae7f06e8d2ab82f30ffb8a5ea9a7a3) · 2020-05-13 · Nate Wright (NateWr)
-- **Upstream** none found (2026-10-02)
+- **Upstream** none found (2026-10-02; the Highlights part again 2026-11-09)
 - **Tracked in** specs U66 [A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U66-institutions.md#a2), U12 [A11](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U12-announcements.md#a11), U11 [A4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U11-highlights.md#a4), U47 [A5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U47-media-files.md#a5), U16 [A16](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U16-categories.md#a16), U41 [A22](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U41-contributors-and-affiliations.md#a22), U29 [A11](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U29-review-setup-and-review-forms.md#a11)
-- **Checked** 2026-09-30, each branch's tip (the commits in Evidence); the "Media files" Steps, and the Categories check on `main` and 3.5, again 2026-10-02; the Contributor Roles check on `main`, again 2026-10-03
+- **Checked** 2026-09-30, each branch's tip (the commits in Evidence); the "Media files" Steps, and the Categories check on `main` and 3.5, again 2026-10-02; the Contributor Roles check on `main`, again 2026-10-03; the Highlights Steps on `main` and 3.5, again 2026-11-09
 - **Model** claude-opus-5-5
+
+**Update 2026-11-09.** The Highlights Steps now close "Edit
+Highlight" without "Save" in three ways: its close control, Escape, and
+a click outside the panel. Each one keeps the unsaved title on the row.
+They also walk the site's own Highlights tab, under Administration ›
+Site Settings, which shows the same fault on `main` only (unreleased).
+That tab can save highlights there since pkp-lib
+[58c2998847](https://github.com/pkp/pkp-lib/commit/58c2998847496a6c3ecdf9c94f74fa4841b005e7)
+(`pkp/pkp-lib#13521`, for `pkp/pkp-lib#13520`) made `HasRoles` read
+`$context?->getId()`. 3.5 still has `$context->getId()`, so there the
+site's "Save" answers 500 and the panel stays open.
 
 ## Summary
 
@@ -26,12 +37,13 @@ Instead, the row shows the abandoned text as if it were saved, and
 another box, stores the abandoned text without any warning. The text
 then shows wherever the item shows, public pages included.
 
-On 3.5 only institutions, announcements and highlights break;
-highlights need no setting there or on `main`. On `main` the same also
-happens to a category's name, a contributor role's name, on journals a
-reviewer recommendation's title, and a media file's "Name of the file"
-in "Edit Metadata" on a publication's "Media" page. There it happens even after
-the editor answers "Yes" to "Do you wish to continue without saving?".
+On 3.5 only institutions, announcements and highlights break. On
+`main` the same also happens to a site highlight's "Title" under
+Administration › Site Settings, a category's name, a contributor role's
+name, on journals a reviewer recommendation's title, and a media file's
+"Name of the file" in "Edit Metadata" on a publication's "Media" page.
+In that media window it happens even after the editor answers "Yes" to
+"Do you wish to continue without saving?".
 A category's row keeps showing the saved name, but its reopened
 "Name" box shows the abandoned one, and the next "Save" stores it.
 
@@ -44,7 +56,8 @@ included (tried).
 - **Lost.** The item's saved name or title, replaced by text the manager
   threw away. That text goes public on the Announcements page (also the
   site's, on a site with several journals), the home page's highlights,
-  category pages and the contributor roles shown beside authors. An
+  category pages and the contributor roles shown beside authors. On
+  `main` it also reaches the site's home page highlights. An
   institution's name goes into the COUNTER usage reports its librarians
   download and, on journals, into its institutional subscription. On a
   journal or a press, an HTML galley finds its images by the media
@@ -52,10 +65,14 @@ included (tried).
   abandoned name drops out of the readers' HTML page; a preprint server
   has no HTML galley plugin, and a high-resolution original is never
   shown there (read in the code, not walked).
-- **Who.** A manager, or an editor on the "Media" page, who abandons a
+- **Who.** A manager, an editor on the "Media" page, or on `main` the
+  Site Administrator on the site's Highlights tab, who abandons a
   change to a name or title, then edits the same item again without
   reloading the page. This is a common sequence: an edit is started,
-  dropped, and something else is fixed instead.
+  dropped, and something else is fixed instead. Escape and a click
+  outside were tried on the Institutions and Highlights panels only;
+  they break those as the close control does, and the cause covers
+  every way of closing.
 - **Way round.** Reload the page after closing an edit panel, or retype
   the saved text before saving. Nothing gets worse with time.
 
@@ -72,7 +89,10 @@ Preconditions:
   loaded. Its `publicknowledge` journal (press, preprint server) has no
   institutions and no highlights, and announcements are turned off.
 - No other setup: `rvaca` is its Journal Manager (Press Manager,
-  Preprint Server Manager).
+  Preprint Server Manager), and `admin` the Site Administrator.
+- For the site's Highlights tab only: a second journal (press, preprint
+  server), made in step 24. Site Settings show "Highlights" only on a
+  site with two or more.
 - For "Media files" only: a PNG image named `figure.png`, and a
   submission in Production: OJS submission 5, "Genetic transformation
   of forest trees"; OMP submission 4, "How Canadians Communicate:
@@ -125,32 +145,57 @@ Highlights:
     panel with its close control. Read the row.
 19. Press "Edit" on the row, read "Title", change "URL" to
     `https://example.org/call2` and press "Save".
-20. Reload the page, read the row, press "Edit" and read "Title".
+20. Reload the page, read the row, press "Edit" and read "Title"; close
+    the panel.
+21. Press "Edit", add " Esc" to "Title", click in "URL" and press
+    Escape there (Escape inside the rich-text "Title" box does not close
+    the panel). Read the row.
+22. Press "Edit", read "Title", add " Out" to it and click on the page
+    outside the panel. Read the row.
+23. Reload the page. Read the row.
+
+Site highlights:
+
+24. Sign in as `admin`. Administration › "Hosted Journals" › "Create
+    Journal" ("Hosted Presses" › "Create Press", "Hosted Servers" ›
+    "Create Server"): fill in the required boxes for a second journal,
+    English as its language, tick the box that lets it appear publicly
+    on the site, and press "Save".
+25. Administration › "Site Settings" › "Site Setup" › "Highlights":
+    press "Add Highlight", type "Site news" in "Title",
+    `https://example.org/site` in "URL" and "Read more" in "Button
+    Label", and press "Save".
+26. Press "Edit" on "Site news", add " Draft" to "Title" and close the
+    panel with its close control. Read the row.
+27. Press "Edit" on the row, read "Title", change "URL" to
+    `https://example.org/site2` and press "Save".
+28. Reload the page, open "Site Setup" › "Highlights", read the row,
+    press "Edit" and read "Title".
 
 Media files (`main` only):
 
-21. Sign in as `dbarnes`, open the submission and go to "Publication" ›
+29. Sign in as `dbarnes`, open the submission and go to "Publication" ›
     "Media" ("Preprint" › "Media" on a preprint server).
-22. Press "Add Media File", choose `figure.png` with the file picker,
+30. Press "Add Media File", choose `figure.png` with the file picker,
     choose "Image" and "Web resolution" on its card, and press "Upload
     Files".
-23. On the "figure.png" row, open "More Actions" › "Edit Metadata" and
+31. On the "figure.png" row, open "More Actions" › "Edit Metadata" and
     replace "Name of the file" with "figure-1.png".
-24. Press "Cancel", then "Yes" in the "Warning" dialog. Read the row.
-25. Open "Edit Metadata" on the row again and read "Name of the file".
-26. Type "Figure 1" in "Caption" and press "Save".
-27. Reload the page and read the row.
-28. Open "Edit Metadata", replace "Name of the file" with "figure-2.png",
+32. Press "Cancel", then "Yes" in the "Warning" dialog. Read the row.
+33. Open "Edit Metadata" on the row again and read "Name of the file".
+34. Type "Figure 1" in "Caption" and press "Save".
+35. Reload the page and read the row.
+36. Open "Edit Metadata", replace "Name of the file" with "figure-2.png",
     close the window with its close control, then press "Yes". Read the
     row.
-29. Reload the page and read the row.
+37. Reload the page and read the row.
 
 **Expected:** closing a panel without "Save" drops what was typed: the
-rows of steps 5, 9, 10, 14, 18, 24 and 28 keep the saved name or title,
-"Edit" ("Edit Metadata") reopens with it, and the saves of steps 7, 15,
-19 and 26 store only the box changed there ("Campus Library" with
-`10.2.0.0/16`; "Call for papers"; "Open call"; "figure.png" with the
-caption "Figure 1").
+rows of steps 5, 9, 10, 14, 18, 21, 22, 26, 32 and 36 keep the saved
+name or title, "Edit" ("Edit Metadata") reopens with it, and the saves
+of steps 7, 15, 19, 27 and 34 store only the box changed there
+("Campus Library" with `10.2.0.0/16`; "Call for papers"; "Open call";
+"Site news"; "figure.png" with the caption "Figure 1").
 
 **Observed:** at step 5 the row reads "Campus Library Draft", and at
 step 6 "Name" shows "Campus Library Draft".
@@ -163,17 +208,32 @@ reload of step 11 it reads "Campus Library Draft" again.
 
 At step 14 the row reads "Call for papers Draft", and at step 15 "Edit"
 reopens with it. After step 16 the row and the public Announcements
-page read "Call for papers Draft". At step 18 the row reads "Open call
-Draft", and at step 19 "Edit" reopens with it. After step 20 the row
-and "Title" read "Open call Draft".
+page read "Call for papers Draft".
 
-No close of steps 5 to 18 asked for confirmation, and every save
-returned 200.
+At step 18 the row reads "Open call Draft", and at step 19 "Edit"
+reopens with it; its save stores "Open call Draft" with the new URL.
+After step 20 the row and "Title" read "Open call Draft". After step
+21 the row reads "Open call Draft Esc", and at step 22 "Title" reopens
+with it; after the click outside the row reads "Open call Draft Esc
+Out". After the reload of step 23 it reads "Open call Draft" again.
 
-On the "Media" page, step 24 first shows the "Warning" dialog: "The data
+On the site's tab, at step 26 the row reads "Site news Draft", and at
+step 27 "Edit" reopens with it and the save stores it. After step 28
+the row and "Title" read "Site news Draft". On 3.5 the "Save" of step
+25 answers 500 and the panel stays open, so steps 26 to 28 cannot be
+taken there. The server log reads:
+
+```
+Error: Call to a member function getId() on null in lib/pkp/classes/middleware/HasRoles.php:63
+```
+
+No close in steps 5 to 26 asked for confirmation, and every save in
+steps 7 to 27 returned 200, except step 25's on 3.5.
+
+On the "Media" page, step 32 first shows the "Warning" dialog: "The data
 on this form has changed. Do you wish to continue without saving?".
 After "Yes" the row reads "figure-1.png", and no request is sent. At
-step 25 "Name of the file" reads "figure-1.png". The "Save" of step 26
+step 33 "Name of the file" reads "figure-1.png". The "Save" of step 34
 sends the abandoned name with the caption and answers 200 (OJS):
 
 ```
@@ -181,9 +241,9 @@ PUT /index.php/publicknowledge/api/v1/submissions/5/publications/6/mediaFiles/46
 name[en]=figure-1.png&name[fr_CA]=&caption=Figure 1&credit=&copyrightOwner=&terms=
 ```
 
-After the reload of step 27 the row reads "figure-1.png": the abandoned
-name was stored. At step 28 the row reads "figure-2.png", and after the
-reload of step 29 "figure-1.png" again.
+After the reload of step 35 the row reads "figure-1.png": the abandoned
+name was stored. At step 36 the row reads "figure-2.png", and after the
+reload of step 37 "figure-1.png" again.
 
 Control: after step 11, changing "IP ranges" to `10.3.0.0/16` and
 closing the panel with its close control leaves the row as it was, and
@@ -226,8 +286,8 @@ edits the row's own object.
 A row that prints the object (`localize(item.name)`,
 `localize(item.title)`, `localize(role.name)`) shows the unsaved text at
 once; the Categories row prints the API's `localizedTitle` string, so it
-does not. Closing the panel discards only the cloned form, never the
-row. The next "Edit" fills the form from the same row object, which
+does not. Closing the panel, by its close control, Escape or a click
+outside, discards only the cloned form, never the row. The next "Edit" fills the form from the same row object, which
 already holds the change, so its "Save" posts the abandoned text with
 the rest. On the "Media" page, "Yes" in the "Warning" dialog also
 discards only the form: the row's name object keeps what was typed.
@@ -247,12 +307,13 @@ Reach:
   titles; the descriptions and "Button Label" read in the code.
 - Administration › Site Settings mounts the same `announcements-list-panel`
   and `highlights-list-panel` (`AdminHandler`, `templates/admin/settings.tpl`),
-  for the site's announcements and its home page's highlights. This was
-  read in the code, not reproduced: those tabs show only on a site with
-  two or more journals, and the dataset has one. The site's Highlights
-  tab cannot save any highlight on such a site today (U11
-  [A5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U11-highlights.md#a5)),
-  so only its Announcements tab can show the fault until that is fixed.
+  for the site's announcements and its home page's highlights; both
+  tabs show only on a site with two or more journals. The Highlights
+  tab shows the fault on screen on `main` (Steps 24 to 28). On 3.5 it
+  cannot save any highlight (its `HasRoles` still calls
+  `$context->getId()` with no context on a site request), so there
+  only the Announcements tab can show the fault. The site's
+  Announcements tab was read in the code, not walked.
 - Seen on screen on `main` (none of these managers exists on 3.5): each
   item opened with "Edit", its title or name changed, the panel closed
   with its close control, then reopened and saved unchanged:
@@ -278,7 +339,7 @@ Reach:
     every close, which hid the fault there (read in the code, not
     reproduced).
 - Seen on screen, all three apps: a media file's "Name of the file" in
-  "Edit Metadata" (Steps 21 to 29). The row prints
+  "Edit Metadata" (Steps 29 to 37). The row prints
   `localize(mediaFile.name)` (`MediaFileManagerCellName.vue`). Read in
   the code, the same holds for the multilingual boxes of a
   supplementary file's "Edit Metadata" ("Description", "Creator (or
@@ -309,7 +370,10 @@ Contributor Roles and Reviewer Recommendations checks show the Expected:
 the abandoned text is dropped on close and the next "Save" stores the
 saved one. Ordinary edits in those seven windows and in a settings form
 still save, in English and French; the "Warning" still asks before an
-unsaved "Edit Metadata" closes.
+unsaved "Edit Metadata" closes. Tried again on Steps 17 to 28: with
+the fix, Escape, a click outside and the site's Highlights tab keep the
+saved title too, and an ordinary edit of a journal's and a site's
+highlight still saves, in English and French.
 
 Recommended: make `Form.vue`'s `fieldChanged()` replace a multilingual
 value instead of writing into it, and change the same line in the two
@@ -379,9 +443,18 @@ two overrides, in one repo; it covers all seven windows.
 
 - Kept scripts, on an install loaded from PKP's default test dataset:
   - [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/unsaved-name-kept-after-closing-edit-panel/walk.js),
-    the Steps and the Control on each app:
+    the Institutions and Announcements Steps, the Highlights steps 17
+    to 20 as first written, and the Control, on each app:
     `PROBE_FEATURE=issues PROBE_AGENT=walk node bin/probe.js all shared/playwright/checks/issues/unsaved-name-kept-after-closing-edit-panel/walk.js`
     (stable-3_5_0: `PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35` in front).
+  - [highlights.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/unsaved-name-kept-after-closing-edit-panel/highlights.js)
+    (helpers in `lib.js` beside it), the Highlights Steps 17 to 28 as
+    they stand since 2026-11-09:
+    `PROBE_FEATURE=issues PROBE_AGENT=walk node bin/probe.js all shared/playwright/checks/issues/unsaved-name-kept-after-closing-edit-panel/highlights.js`
+    (stable-3_5_0 as above); with `neighbour` as its argument, an
+    ordinary edit of a journal highlight's and a site highlight's
+    English and French "Title", saved with "Save" and read at once and
+    after a reload.
   - [reach.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/unsaved-name-kept-after-closing-edit-panel/reach.js),
     the Categories, Contributor Roles and Reviewer Recommendations checks
     of the Reach: the same command with `reach.js`; on stable-3_5_0
@@ -392,7 +465,7 @@ two overrides, in one repo; it covers all seven windows.
     of those six panels and in Masthead's acronym, then "Save" and a
     reload: the same command with `neighbour.js`.
   - [media.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/unsaved-name-kept-after-closing-edit-panel/media.js),
-    the "Media files" Steps (21 to 29) and their Control, then an
+    the "Media files" Steps (29 to 37) and their Control, then an
     ordinary rename saved with "Save" and read before and after a
     reload: the same command with `media.js`.
 - The fix, tried on `main` with
@@ -413,6 +486,16 @@ two overrides, in one repo; it covers all seven windows.
     the fix, reach.js showed the Expected for Categories, Contributor
     Roles and Reviewer Recommendations, and neighbour.js stored every new
     value, English and French, with the fix and without it.
+  - tried again on 2026-11-09 with highlights.js, on all three apps at
+    the `main` tips the Highlights walk names below: with the fix, steps
+    17 to 28 showed the Expected (every row, reopened "Title" and stored
+    title "Open call" or "Site news", the new URL stored), and every
+    save answered 200; its `neighbour` mode stored the new English and
+    French titles of a journal and a site highlight, shown in the row at
+    once and after a reload, with the fix and without it, on all three
+    apps (OJS with the fix in a second trial the same day, after a fault
+    of the script that stopped the first run before its saves was
+    corrected).
   - Not driven with the fix: the date and time formats form
     (`DateTimeForm.vue`) and the theme options form (`ThemeForm.vue`).
 - Walked 2026-09-30 on PostgreSQL, each install freshly loaded from
@@ -435,7 +518,7 @@ two overrides, in one repo; it covers all seven windows.
     [c657990](https://github.com/pkp/datasets/commit/c657990320435ecbd047603eadb4b4ac863f6dba)
     (2026-10-01): OJS b84f8e2e44 (lib/pkp ddd8ab243a, lib/ui-library
     64d67363), OMP and OPS as above. Every app showed the Observed, the
-    "Save" request of step 26 included, and no request failed. Neither
+    "Save" request of step 34 included, and no request failed. Neither
     ui-library commit since 280f98c5 touches `Form.vue` or
     `src/managers/MediaFileManager/`, and the fix applies as written.
   - The Categories check was walked again on 2026-10-02 with reach.js,
@@ -451,6 +534,36 @@ two overrides, in one repo; it covers all seven windows.
     check used its "Social sciences" there. No request failed and no
     script error was recorded.
   - The fault is in the browser, so the database does not bear on it.
+- The Highlights Steps (17 to 28) walked again 2026-11-09 with
+  highlights.js on PostgreSQL, each install freshly loaded from
+  pkp/datasets
+  [4875b1c](https://github.com/pkp/datasets/commit/4875b1c598306b9211bd2f9d350a6215f8d5d9f4)
+  (2026-11-08), no upgrade needed:
+  - main: OJS 407246bb8e, OMP d93fcd11a4, OPS 40f33453f0 (lib/pkp
+    6035a6fed8, lib/ui-library 8700ac5d in all three): the Observed on
+    every app, the site's tab included. Each save answered 200, and the
+    run recorded no failed request or script error beyond the Plugin
+    Gallery list, which fails on the test installs because they reach
+    no outside server.
+  - stable-3_5_0: OJS d3e13caf53 (lib/pkp 40990d1523, lib/ui-library
+    228f2aa8), OMP eb4c09649 (lib/pkp c4c0aa8c52, lib/ui-library
+    7cff1702), OPS ffdd27e05c (lib/pkp e2c62c4b7b, lib/ui-library
+    7cff1702): steps 17 to 23 showed the Observed on every app. Step
+    25's site "Save" answered the 500 the Observed quotes, so steps 26
+    to 28 were not taken there.
+  - Read in the code at those tips: `HighlightsListPanel.vue`
+    `openEditModal()` line 278 (`field.value = highlight[field.name]`)
+    and `Form.vue` `fieldChanged()` (line 522 on `main`, 499 on 3.5)
+    unchanged; the side modal's close control, Escape and a click
+    outside all close the panel without touching the list's items. No
+    ui-library commit since 64d67363 touches `Form.vue`, `DateTimeForm.vue`,
+    `ThemeForm.vue`, `FieldRichTextarea.vue` or `ListPanel/highlights/`,
+    and fix.diff applies as written.
+  - The site's Highlights tab on 3.4, by code: pkp-lib `stable-3_4_0`
+    at 2dd24cc5ae offers it (`AdminHandler`) only on a site with two or
+    more journals and `[features] highlights` on, and ui-library
+    `stable-3_4_0` ee684b34 fills the form the same way
+    (`HighlightsListPanel.vue` line 265).
 - The "Media" page on 3.5, 3.4 and 3.3, by code: `stable-3_5_0`'s
   ui-library (1a7a4750) has no `src/managers/MediaFileManager/` and its
   pkp-lib (a9c76aed62) no media files API; the page came with
@@ -509,3 +622,8 @@ two overrides, in one repo; it covers all seven windows.
   `setValues`; `pkp/pkp-lib#10404` and `pkp/pkp-lib#11411`, the
   category manager's issue and its test checklist, read): nothing about
   this fault.
+- Upstream search 2026-11-09 for the Highlights part, in pkp/pkp-lib,
+  pkp/ui-library and pkp/ojs (highlight title without saving, highlight
+  edit unsaved, close modal unsaved changes title kept, site highlights
+  edit, "without saving" list panel, `fieldChanged`,
+  `fieldChanged localeKey`, `openEditModal`): nothing about this fault.

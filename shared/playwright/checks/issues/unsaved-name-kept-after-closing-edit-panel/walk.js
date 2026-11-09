@@ -6,7 +6,9 @@
 // announcement and the highlight are created on screen. Fact labels carry
 // the report's step numbers; the Control runs after step 11. Records every
 // screen with screen(). Reset the fleet before each walk: the walk adds
-// items and turns announcements on.
+// items and turns announcements on. Its Highlights part is steps 17-20 as
+// first written; the report's Highlights Steps since 2026-11-09 (17-28:
+// Escape, a click outside, the site's tab) are highlights.js beside it.
 //
 // Run (main, then stable-3_5_0):
 //   npm run fleet-prep -- --feature issues --dataset --reset

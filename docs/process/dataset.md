@@ -49,6 +49,10 @@ what the team's installs hold (harness.md "Dataset fleets").
   submission 1's 1.1), and the workflow opens on the latest: a step on the
   published version picks it in the Publication menu ("All Versions" on
   3.5) (U13, U19, U44 issue walks).
+- The dataset's PDF galleys and formats hold one line of text, "Dummy
+  document", so the PDF reader's search, text layer and selection can
+  be probed on them; the campaign fixture `article.pdf` holds no text
+  (U13 H09, 2026-11-09).
 - Two facts no table shows. OMP book 4's only publication format, "PDF",
   is remotely hosted, so its window has no "Identifiers" tab: a walk that
   needs one adds a format on screen. And every account's password is

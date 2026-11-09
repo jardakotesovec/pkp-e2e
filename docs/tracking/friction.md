@@ -13,4 +13,3 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
-2026-11-06 · plugin-review · drive agent (pg-472 round 2) · `plugin-sandbox.js php` broke a `-r` snippet holding single quotes ("Unclosed '['", exit 255) until they were rebuilt with `chr(39)`; the pod has no `api_key_secret`, so the profile's API Key tab cannot make a key and API steps fell back to the session's CSRF token; no dataset account has `date_validated` and `require_validation` is off, so a validated account had to be set by SQL · note the quoting limit in harness.md "The plugin sandbox", or pass the snippet from a file; give the pod an `api_key_secret` and one validated dataset user

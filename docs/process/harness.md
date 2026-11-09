@@ -486,7 +486,9 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   multilingual field draws a box per language, so a page-object locator
   written on the English-only campaign seed (`input[name^="name"]`,
   `iframe[id^="biography"]`) matches two there and fails strict mode;
-  scope it to the locale (U03, U27, U29, U73 issue walks). `app.variant()` throws (no validation server); the
+  scope it to the locale (U03, U27, U29, U73 issue walks); a Vue form
+  (a side panel such as "Edit Highlight") hides the French boxes until
+  its "French" language button is pressed (U11 A4 refresh, 2026-11-09). `app.variant()` throws (no validation server); the
   runner's worker ports and the setup project are never involved, and
   `app.users` is still the campaign roster, which the dataset does not
   hold.

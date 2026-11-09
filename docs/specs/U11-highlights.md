@@ -510,9 +510,9 @@ an entry notes otherwise; the team settles them on spec review.
 |----|------------------------------|------|--------|--------|
 | [A1](#a1) | Highlights list: "Cancel" in ordering mode keeps the moved rows, and the next "Save Order" saves them | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A3](#a3) | The Highlights settings list shows a title's bold word as `<b>…</b>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A4](#a4) | "Edit Highlight" closed without "Save" leaves the unsaved title on the row, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-09-30 — re-verified |
+| [A4](#a4) | "Edit Highlight" closed without "Save" leaves the unsaved title on the row, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-11-09 — re-verified |
 | [A5](#a5) | The site administrator cannot add site highlights: "Save" leaves the panel open and "Save Order" shows an error | 🐞 | medium · crash: server | issues (claude), 2026-10-04 — re-verified |
-| [A10](#a10) | Through the programming interface, a highlight cannot be read back from the address listed with it: a journal's points at the site, where every read fails | 🐞 | low · crash: server | issues (claude), 2026-10-15 — re-verified |
+| [A10](#a10) | Through the programming interface, a highlight cannot be read back from the address listed with it: a journal's points at the site, where every read fails | 🐞 | low · crash: server | issues (claude), 2026-11-09 — re-verified |
 | [A11](#a11) | Replacing a highlight's picture with one the app refuses deletes the old picture and leaves the home page's slide empty | 🐞 | user-visible | — |
 | [A12](#a12) | On a list of more than 100 highlights, a newly added highlight is missing from the list until a reload | 🐞 | minor | — |
 | [A2](#a2) | "URL" accepts any text although its hint asks for a full web address, so a slide's button can point nowhere | ❓ | user-visible | — |
@@ -573,8 +573,7 @@ expects the change dropped. Instead the row shows the unsaved title,
 made to change another box, stores it as the highlight's title. Only a reload before editing again puts the saved
 title back. The same as [Announcements A11](U12-announcements.md#a11)
 and [Institutions A2](U66-institutions.md#a2).
-Basis: probe, 2026-09-30; 2026-11-06. <sup>f-a4</sup>
-Report: refresh owed — the 2026-11-06 drift sweep (SW06) showed Escape and a click outside "Edit Highlight" leaving the unsaved title on the row just as the close control does, while the report's Highlights steps (17–20) walk only the close control; the same sweep saved site highlights on `main` (A5's fix), so its line that the site's Highlights tab cannot save any highlight is stale; the cause it names, `highlights/HighlightsListPanel.vue` `openEditModal()`, is unchanged and serves all three ways of closing (2026-11-06)
+Basis: probe, 2026-09-30; 2026-11-06; 2026-11-09. <sup>f-a4</sup>
 
 <a id="a5"></a>
 **A5 — The site administrator cannot add site highlights: "Save" leaves the panel open and "Save Order" shows an error** · 🐞 · medium · crash: server.
@@ -643,8 +642,7 @@ returned to the Journal Manager and the Site Administrator. A visitor
 who is not signed in is refused at both addresses. A site highlight read
 on its own at the site's address fails with a server error for the Site
 Administrator too.
-Since: 2023-10-12 · Basis: probe, 2026-10-15; 2026-11-06. <sup>f-a10</sup>
-Report: refresh owed — the 2026-11-06 drift sweep (SW06) showed the journal's own address now returning the highlight to the Journal Manager and the Site Administrator (pkp-lib `07bc43fe67`, 2026-10-16, made `HighlightsController::get()` pass the context's id to `Repository::get(int $id, ?int $contextId)`; `stable-3_5_0` the same since `092ec34b0f`, 2026-10-14, in the code), while the listed site address still fails on the server for the Site Administrator, now inside `HighlightsController::get()` itself (no context there) rather than A5's role check, for a site highlight too; the report's Summary, Steps and Cause on `HighlightsController::get()`, `Repository::get(int $id, ?int $contextId)` and `DAO::get()` (the site route's 404 it predicted is a 500) are stale (2026-11-06)
+Since: 2023-10-12 · Basis: probe, 2026-10-15; 2026-11-06; 2026-11-09. <sup>f-a10</sup>
 
 <a id="a11"></a>
 **A11 — A refused replacement picture deletes the highlight's old picture and leaves the slide empty** · 🐞 · user-visible.
@@ -1177,7 +1175,14 @@ OPS `0acd73102d`, twice each, on a scratch journal: the close-control
 steps as above, then "Edit", the title changed to "Escape draft" and
 Escape pressed on "URL": the panel closed with no dialog and the row
 read "Escape draft"; "Outside draft" and a click outside the panel: the
-same; a reload put the saved "Open call Draft" back on the row.
+same; a reload put the saved "Open call Draft" back on the row. Walked again
+2026-11-09 by the issue reporter on `main` and `stable-3_5_0`, OJS, OMP
+and OPS (`checks/issues/unsaved-name-kept-after-closing-edit-panel/highlights.js`,
+the report's steps 17 to 28): the close control, Escape in "URL" and a
+click outside each leave the unsaved title on the row, and the next
+"Save" stores it; on `main` the site's Highlights tab (A5 fixed there)
+shows the same; on 3.5 its "Save" still fails (A5). The fix (the
+report's Proposed fix) tried again on `main`, all three apps.
 Issue report: [pkp-e2e#4](https://github.com/jardakotesovec/pkp-e2e/issues/4) ([docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md](../issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md)).
 
 <a id="fn-f-a5"></a>
@@ -1300,7 +1305,12 @@ administrator 200 with the highlight and a signed-out request 401; the
 site highlight at `index/api/v1/highlights/{id}` answers the
 administrator 500. 3.5 read in the code only (`stable-3_5_0`, lib/pkp
 `40990d1523`: the same `_href` and the same `get()` line); 3.4 and 3.3
-have no highlights (note a).
+have no highlights (note a). Walked again 2026-11-09 by the issue
+reporter (`checks/issues/highlight-read-on-its-own-fails/walk.js`) on
+`main` and `stable-3_5_0`, OJS, OMP and OPS, as the report says: on 3.5
+the journal's address reads the highlight too (since 3.5.0-6), while the
+site's address fails earlier, in A5's role check; the fix (the map's
+default and the `get()` line) tried on `main` with the Expected.
 Issue report: [pkp-e2e#974](https://github.com/jardakotesovec/pkp-e2e/issues/974) ([docs/issues/U11-A10-highlight-read-on-its-own-fails.md](../issues/U11-A10-highlight-read-on-its-own-fails.md)).
 
 <a id="fn-f-a11"></a>
