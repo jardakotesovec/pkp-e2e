@@ -153,8 +153,9 @@ Reach:
   does an unknown id: no failure, but no 404 either (walked).
   `pkp/pkp-lib#10404` "Allow nested categories" moved category pictures
   to the public files folder and left OMP reading the old one, a
-  separate fault reported in
-  [U16-OMP1-press-category-picture-broken.md](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U16-OMP1-press-category-picture-broken.md).
+  separate fault reported as
+  [U16 OMP1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U16-categories.md#omp1)
+  and fixed by `pkp/omp#2553` (merged 2026-11-06).
   Its proposed fix hands OMP's category pictures to these pkp-lib
   methods, so it would bring this fault to OMP unless this fix lands
   first. `pkp/omp#2553` (for `pkp/pkp-lib#13730`) makes that change:

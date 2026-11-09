@@ -9,7 +9,7 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 ❓, A3 🐞, A4 🐞, A5 🐞, A6 ❓, A7 🐞, A8 ❓, OMP1 🐞. Where a test
+ * A2 ❓, A3 🐞, A4 🐞, A5 ✅ (retired), A6 ❓, A7 🐞, A8 ❓, OMP1 🐞. Where a test
  * passes through one (S1 and S8 send a request, S2 reads the editor's side
  * after a response, S6 walks the Funding Coordinator and the typed address,
  * S5 reads the minimum's email) it asserts the effect the spec states and

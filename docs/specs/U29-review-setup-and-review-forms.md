@@ -1260,7 +1260,7 @@ pasting a list from another document works round it. Basis: probe,
 ### Retired
 
 <a id="omp4"></a>
-**OMP4 — Every request to a press's public peer-review API address fails with a server error** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13729](https://github.com/pkp/pkp-lib/issues/13729), pkp/omp#2552), verified 2026-11-05 at the PR head before its merge: a press serves its public review record at `api/v1/peerReviews`, as a journal does, and the old `api/v1/publicationPeerReviews` answers 404 instead of a server error. <sup>f-omp4</sup>
+**OMP4 — Every request to a press's public peer-review API address fails with a server error** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13729](https://github.com/pkp/pkp-lib/issues/13729), pkp/omp#2552), verified 2026-11-05 at the PR head before its merge and again 2026-11-09 at the merged tip: a press serves its public review record at `api/v1/peerReviews`, as a journal does, and the old `api/v1/publicationPeerReviews` answers 404 instead of a server error. <sup>f-omp4</sup>
 
 ---
 
@@ -2327,7 +2327,7 @@ to `peerReviews`, as OJS did) or delete it. Kept script
 `shared/playwright/checks/U62/I05B/i05b.js` (part `api`). The book
 page's missing public reviews are
 [*Monograph landing page*'s A26](U69-monograph-landing-page.md#a26).
-Issue report: [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/1086) ([docs/issues/U29-OMP4-press-peer-review-address-server-error.md](../issues/U29-OMP4-press-peer-review-address-server-error.md)); the team's copy is `pkp/pkp-lib#13729` (open, 2026-11-05).
+Issue report: [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/1086), retired with the fix; the report deleted, its walk kept (`shared/playwright/checks/issues/press-peer-review-address-server-error/`, which U69 A26's report cites). The team's copy `pkp/pkp-lib#13729` (2026-11-05).
 Fixed by pkp/omp#2552 (`pkp/pkp-lib#13729`), which renames the entry
 point to `api/v1/peerReviews/index.php` and maps it to
 `\PKP\API\v1\peerReviews\PeerReviewController`, the report's
@@ -2346,6 +2346,10 @@ and its "For author and editor" comment, not the "For editor" one, and
 `PHP Warning:  Attempt to read property "type" on null in …/ReviewerRecommendationSummary.php on line 89`
 (a press has no reviewer recommendation types), as the issue report's
 "What goes with it" foresaw; the PR leaves that line as it is.
+Merged 2026-11-06 as `efbb79bdf7` (its patch the reviewed head's,
+patch-id `2709d5ff99`); the same kept script on a fresh dataset at OMP
+`d93fcd11a4` on 2026-11-09 gave the head's results in both modes,
+the warning included.
 
 ## Reference — entry points & surfaces
 

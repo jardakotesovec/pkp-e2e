@@ -15,7 +15,7 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - OMP1 🐞: S1 uploads a "Cover Image" and never reads the picture on the
+ * - OMP1 ✅ retired: S1 uploads a "Cover Image" and never reads the picture on the
  *   press's category page (only its description).
  * - OMP2 🐞: S8 reads the block's category links as a set and the
  *   sub-category's indent, never their order or where "Physics" stands.
@@ -319,7 +319,7 @@ test.describe('Categories', () => {
 
         // The visitor's page: breadcrumb, heading, the description,
         // "Subcategories" with "Physics" alone (Rules 11, 12; the picture is
-        // OMP1's and not read).
+        // not read; OMP1 retired).
         const cat = new CategoryPage(visitor, tag);
         await cat.goto('natural-science');
         expect(await cat.crumbs()).toEqual(['Home', 'Science']);

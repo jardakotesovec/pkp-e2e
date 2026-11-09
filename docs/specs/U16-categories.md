@@ -1059,6 +1059,7 @@ The picture on a category's page is meant to open its full-size version;
 it is not a link, and nothing on the page leads to the full-size picture,
 which answers only at its typed address.
 Since: 2018 · Basis: probe, 2026-10-02; its age, code reading. <sup>f-a6</sup>
+Report: refresh owed — pkp/omp#2553 (`pkp/pkp-lib#13730`, the category picture fault OMP1 retired) merged 2026-11-06 as `1ac42011ad`: OMP's `CatalogHandler::fullSize()` and `thumbnail()` now hand the category case to `PKPCatalogHandler`, so the A6-A7 report's "the OMP category half depends on the fix in U16-OMP1" no longer holds and its link to its deleted report is dead (2026-11-09).
 
 <a id="a7"></a>
 **A7 — The picture's alternate text is ignored** · 🐞 · low.
@@ -1353,7 +1354,7 @@ Basis: probe, 2026-10-02. <sup>f-ops1</sup>
 ### Retired
 
 <a id="omp1"></a>
-**OMP1 — A press's category page shows a broken-picture mark instead of the category's picture** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13730](https://github.com/pkp/pkp-lib/issues/13730), pkp/omp#2553), verified 2026-11-05 at the PR head before its merge: a press's category page shows its picture, and both picture addresses answer the picture, for a picture saved on `main` and for one carried over by the upgrade from 3.5 (Rule 12). <sup>f-omp1</sup>
+**OMP1 — A press's category page shows a broken-picture mark instead of the category's picture** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13730](https://github.com/pkp/pkp-lib/issues/13730), pkp/omp#2553), verified 2026-11-05 at the PR head before its merge and again 2026-11-09 at the merged tip: a press's category page shows its picture, and both picture addresses answer the picture, for a picture saved on `main` and for one carried over by the upgrade from 3.5 (Rule 12). <sup>f-omp1</sup>
 
 <a id="omp5"></a>
 **OMP5 — A press's category page fails after its catalog or a settings save** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12915, merged 2026-10-05), verified 2026-10-07 on OMP: a press's first category page opened after its catalog page or its search results now opens at once (Rule 9). <sup>f-omp5</sup>
@@ -2379,7 +2380,17 @@ picture through 3.5's form, upgraded to `main` (the migration
 addresses answer an empty `text/html`, at the head it draws and both
 answer the moved files byte for byte. Kept check
 `shared/playwright/checks/sync/omp-2553/upgraded-picture.js`.
-Issue report: [pkp-e2e#598](https://github.com/jardakotesovec/pkp-e2e/issues/598) ([docs/issues/U16-OMP1-press-category-picture-broken.md](../issues/U16-OMP1-press-category-picture-broken.md)).
+The head was force-pushed before the merge (`b5d8dd4d8a`, the same
+base, `pages/catalog/CatalogHandler.php` +2/−10; the reviewed
+`7d5c5ffa2a` no longer fetchable) and merged 2026-11-06 as `1ac42011ad`
+(patch-id the new head's). Walked 2026-11-09 at OMP `d93fcd11a4` on
+fresh datasets: a picture saved through "Edit Category" draws and both
+addresses answer `image/png`; a 3.5.0-6 press given its picture through
+3.5's form, dumped and upgraded (3.5.0.6 → 3.6.0.0) draws it 100 × 100,
+both addresses byte-identical to the moved `1-category.png` and
+`1-category-thumbnail.png`; an unknown id 404; a category with no
+picture still never loads ([A22](#a22)).
+Issue report: [pkp-e2e#598](https://github.com/jardakotesovec/pkp-e2e/issues/598), retired with the fix; the report deleted, its walk (`shared/playwright/checks/issues/category-picture/walk.js`, shared with A6, A7 and A17) kept.
 
 <a id="fn-f-omp2"></a>
 **f-omp2** — Note h (OMP flat array, `is_sub` one indent step at any depth;

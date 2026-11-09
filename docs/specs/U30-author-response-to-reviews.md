@@ -72,8 +72,8 @@ form.
 |------------------|-----------|-------|
 | "To" (request page) | fixed | The assigned authors, one chip per person; there is no box to add anyone (Rule 13) <sup>f</sup> |
 | "Add CC/BCC" → "CC", "BCC" (request page) | no | Pressing "Add CC/BCC" replaces the button with two empty boxes, "CC" and "BCC"; email addresses typed there, comma-separated, go on the email <sup>f</sup> |
-| "Subject" (request page) | yes | Prefilled "Request For Author Response To Reviewer Feedback" from the template; emptied, "Submit Request" is refused with a generic "Error" dialog (Rule 4a) ⚠ [A5](#a5) <sup>f</sup> |
-| "Message" (request page) | yes | Rich text (bold, italic, superscript, subscript, link) prefilled from the "Request Author Review Response" template (Rule 4), with the "Submit Author Response" button and the reviewers' comments (Rule 5) already in it; emptied, "Submit Request" is refused the same way [A5](#a5) <sup>f</sup> |
+| "Subject" (request page) | yes | Prefilled "Request For Author Response To Reviewer Feedback" from the template; emptied, "Submit Request" is refused with "This field is required." under it (Rule 4a) <sup>f</sup> <sup>f-a5</sup> |
+| "Message" (request page) | yes | Rich text (bold, italic, superscript, subscript, link) prefilled from the "Request Author Review Response" template (Rule 4), with the "Submit Author Response" button and the reviewers' comments (Rule 5) already in it; emptied, "Submit Request" is refused the same way <sup>f</sup> <sup>f-a5</sup> |
 | "Attach Files" (request page) | no | A toolbar button opening the "Attach Files" window with four sources: "Upload File", "Submission Files" (the author's files from the submission stage), "Review Files" (files uploaded by this round's reviewers) and "Library Files" <sup>f</sup> |
 | "Author Response" (response window) | yes | Rich text (bold, italic, underline, bullet list), one box per form language, so one on the seeded journal; the submit button stays greyed while the box is empty <sup>b</sup> |
 | "Authors" (response window) | yes, at least one | One checkbox per contributor of the submission, described as "Author contributors who this response is being submitted on behalf of."; an assigned co-author who is not on the Contributors list has no box; the submit button stays greyed while none is ticked <sup>b</sup> |
@@ -141,19 +141,18 @@ form.
    screen on the round. The dialog has no close button; Escape closes it
    and lands on the same screen. <sup>f</sup>
 
-4a. **Refusals at "Submit Request".** Every refusal is a dialog headed
-   "Error" with one button, "OK", and the page keeps what was typed:
+4a. **Refusals at "Submit Request".** The page keeps what was typed.
+   An emptied "Subject" or "Message" is refused with "This field is
+   required." under that field, and no dialog (retired [A5](#a5)). Every
+   other refusal is a dialog headed "Error" with one button, "OK":
 
-   - an emptied "Subject" or "Message": "An unexpected error has occurred.
-     Please reload the page and try again.", with nothing under the field
-     to say what is wrong ⚠ [A5](#a5);
    - a round that is not ready (Rule 3): "This review round has review
      assignments that needs to be completed before a response can be
      requested from the Author.";
    - a round that already holds a response, whether or not every review is
      in: "Unable to complete the intended action on resource.".
 
-   The last two are met only through a typed address (Rule 14), because
+   Both are met only through a typed address (Rule 14), because
    the button is greyed in both states. <sup>f</sup>
 
 <a id="email"></a>
@@ -702,10 +701,10 @@ Left out of the scenarios above, by reason:
     sponse-typed-address-returns-nowhere.md`): the "Request Author
     Response" page opened by its address, without a return address, then
     "Cancel", the sent dialog's link and Escape each open the submission
-  - the guard for A5 (issue report `docs/issues/U30-A5-request-author-re
-    sponse-empty-field-generic-error.md`): an emptied "Subject", then an
-    emptied "Message", at "Submit Request" shows "This field is
-    required." under the field and no "Error" dialog
+  - Rule 4a's field messages (A5 retired, pkp/pkp-lib#13715): an
+    emptied "Subject", then an emptied "Message", at "Submit Request"
+    shows "This field is required." under the field and no "Error"
+    dialog; filled again, the request goes out
   - the guard for A7 (issue report `docs/issues/U30-A7-author-response-g
     one-after-revisions-upload.md`): after "Request Revisions" the
     author uploads a revised file first, and the "Author Response" card
@@ -733,7 +732,6 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A3 (the Funding Coordinator's "View" window and refused "Delete")
   - A4 (the request page by typed address on a round that is not ready or holds a response)
-  - A5 (an emptied "Subject" or "Message" at "Submit Request")
   - A7 (revisions uploaded before responding)
   - A8 (a cancelled request beside a completed review)
   - A10 (a response not marked public, read in the article's open peer review record)
@@ -755,7 +753,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | Editors' "Author Response" table still reads "Ready to invite author" after the request was sent | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A3](#a3) | A Funding coordinator is offered "Request Response" and "Delete" on "Author Response", then refused | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | "Request Author Response" page opened by its address: "Cancel" and the sent dialog lead to "404 Not Found" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A5](#a5) | "Request Author Response" refuses an empty subject or message with "An unexpected error has occurred" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A7](#a7) | Author who uploads revisions first can no longer respond to the reviewers, as the decision email asks | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | Anyone, without signing in, can read an author's response that also answers reviews the editor kept private | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OMP1](#omp1) | Press author's "Submit Author Response" email button opens a review round with nothing to respond in | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -763,6 +760,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | Under a minimum, the request email says every review is in while one is still due | ❓ | minor | — |
 | [A8](#a8) | A cancelled reviewer's effect on readiness and on the email was not seen | ❓ | minor | — |
 | [A9](#a9) | Retired: in French the "Author Response" table, the author's card, both windows and the request page show raw codes such as "##submission.reviewRound.authorResponse##" | ✅ | retired | Jarda 2026-10-08 · overturned |
+| [A5](#a5) | Retired: "Request Author Response" refused an empty subject or message with "An unexpected error has occurred"; the field now says "This field is required." (Rule 4a) | ✅ | retired | daily session (claude), 2026-11-09 — fixed by pkp/pkp-lib#13715 |
 | [A11](#a11) | Retired: a Section Editor could delete, and another journal's manager delete or rewrite, an author's response to reviews; such requests are now refused (Rule 11) | ✅ | retired | housekeeping (claude), 2026-10-20 — fixed by pkp/pkp-lib#13510 |
 
 ### All apps
@@ -834,19 +832,6 @@ press has no way to the page from its screens at all, so there too only
 someone who has the address reaches it, which is rare. The fix lets the
 page fall back to the submission's address it already receives.
 Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-a4</sup>
-
-<a id="a5"></a>
-**A5 — "Request Author Response" refuses an empty subject or message with "An unexpected error has occurred"** · 🐞 · low.
-An editor who clears "Subject" or "Message" on the "Request Author
-Response" page and presses "Submit Request" gets a dialog headed
-"Error": "An unexpected error has occurred. Please reload the page and
-try again." Nothing under either field says that it is required.
-
-The editor who sees which field is empty can fill it in and send. On a
-journal the page opens from "Request Response" on a review round; a
-press shows no "Author Response" table, so there the page is reached
-only by its address.
-Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-a5</sup>
 
 <a id="a6"></a>
 **A6 — Under a minimum, the email says every review is in** · ❓ · minor.
@@ -928,6 +913,9 @@ of the press's emails.
 Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-omp1</sup>
 
 ### Retired
+
+<a id="a5"></a>
+**A5 — "Request Author Response" refused an empty subject or message with "An unexpected error has occurred"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13715: pkp/ui-library#1042, merged 2026-11-08 as `8700ac5d1c`, OJS `407246bb8e` and OMP `d93fcd11a4` point at it), walked 2026-11-09 at those tips on the default dataset: an emptied "Subject", then an emptied "Message", shows "This field is required." under the field and no dialog, and the request goes out once both are filled (Rule 4a). <sup>f-a5</sup>
 
 <a id="a9"></a>
 **A9 — In French the Author Response screens show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a9</sup>
@@ -1011,7 +999,7 @@ Issue report: [pkp-e2e#813](https://github.com/jardakotesovec/pkp-e2e/issues/813
 
 <a id="fn-f-a5"></a>
 **f-a5** — Note f: `RequestAuthorResponse` refuses a missing `subject` or `body` with 422, and `RequestReviewRoundAuthorResponse.vue` routes every non-2xx answer of "Submit Request" to `openDialogNetworkError` (the generic "Error" dialog) instead of `setErrors` on the composer, so the field-level message never shows. Live-probed 2026-09-06: two 422s, the same dialog both times, the page's content intact after "OK".
-Issue report: [pkp-e2e#815](https://github.com/jardakotesovec/pkp-e2e/issues/815) ([docs/issues/U30-A5-request-author-response-empty-field-generic-error.md](../issues/U30-A5-request-author-response-empty-field-generic-error.md)). The team's copy is `pkp/pkp-lib#13715` (2026-11-04).
+Issue report: [pkp-e2e#815](https://github.com/jardakotesovec/pkp-e2e/issues/815), retired with the fix; the report deleted, its walk kept beside `shared/playwright/checks/sync/ui-library-1042/extra.js`, which uses its `lib.js`. The team's copy `pkp/pkp-lib#13715` (2026-11-04). Fixed by `pkp/ui-library#1042` (merged 2026-11-08 as `8700ac5d1c`, the reviewed `ae8e084134`): `RequestReviewRoundAuthorResponse.vue` hands a 422's field errors to the composer, which shows them under its fields. Walked 2026-11-09 at OJS `407246bb8e` and OMP `d93fcd11a4` on fresh datasets (`walk.js` steps and neighbour, `extra.js`).
 
 <a id="fn-f-a6"></a>
 **f-a6** — Note g: `emails.reviewRound.requestAuthorResponse.body` opens with a fixed sentence ("All peer reviews for your submission titled "{$submissionTitle}" have now been completed.") and `getCompletedReviewAssignments()` quotes only the reviews with a `dateCompleted`, so the minimum branch of note e sends the sentence with one block. Live-probed 2026-09-06 on a scratch journal with `numReviewsPerSubmission: 1`, the second reviewer "Request Accepted".
