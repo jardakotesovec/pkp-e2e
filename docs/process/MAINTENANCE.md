@@ -278,7 +278,9 @@ is left, the next morning picks up from the files.
      oldest "Swept" date (none counts as oldest). Its kept checks
      (`shared/playwright/checks/<feature>/`) run twice, under `PROBE_RUN`
      r1 and r2 (a fact one run shows is undetermined), on reset
-     databases at the tips, each run's summary read for dead phases, since
+     databases at the tips (a check whose header has a `RESEED` switch
+     keeps one state file per app, so both runs take `RESEED=1`; U12
+     sweep, 2026-11-09), each run's summary read for dead phases, since
      a kept check exits 0 when a phase dies (a fix there comes first: the
      U05 sweep's checks still called `support/jobs.js` and slot 0's
      Mailpit, 2026-10-20); so do the kept walks of the spec's filed
