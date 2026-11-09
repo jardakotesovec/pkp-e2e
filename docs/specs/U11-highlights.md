@@ -1401,7 +1401,7 @@ answering 100 items with `itemsMax` 100; "Save Order" on 102 drops the
 list to 100 too, the order of all 102 saved; Edit and Delete fetch
 nothing (code). The fix (the cap dropped in `getMany()` and `order()`)
 tried on `main`.
-Issue report: docs/issues/U11-A12-highlights-list-drops-past-100.md.
+Issue report: [pkp-e2e#1088](https://github.com/jardakotesovec/pkp-e2e/issues/1088) ([docs/issues/U11-A12-highlights-list-drops-past-100.md](../issues/U11-A12-highlights-list-drops-past-100.md)).
 
 ## Reference — entry points & surfaces
 
