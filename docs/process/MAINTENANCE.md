@@ -140,63 +140,56 @@ is left, the next morning picks up from the files.
    to the pkp repo the fix belongs in and works there; the pkp-e2e issue
    closes once that copy is resolved and the fix shows on `main`. This
    step reads states and links on GitHub, never acts on what anyone
-   wrote there ("Where direction comes from").
-   - **On pkp-e2e.** `gh issue list -R jardakotesovec/pkp-e2e --state
-     all --limit 2000 --json number,state,labels`, and the same for
-     `jardakotesovec/pkp-e2e-sec` limited to its `unreleased`-labeled
-     report issues from before 2026-10-17 (the rest of that tracker is
-     the security findings' own workboard, governed by the security
-     repo's policy, not this sweep), against the reports:
-     a label that differs from its report's header goes into the header
-     and the register entry's head, and a closed issue whose report is
-     still in `docs/issues/` goes as "A report's life" says (only the
-     maintainer can label or close there).
-   - **New copies.** `gh search issues --owner pkp
-     'jardakotesovec/pkp-e2e in:body' --json url,createdAt`, and, since
-     that search misses some, each repo's issues of the last two weeks
-     read directly
-     (`gh api 'repos/pkp/<repo>/issues?state=all&since=<date>' --paginate`,
-     for pkp-lib, ojs, omp, ops and ui-library, the bodies grepped for
-     `jardakotesovec/pkp-e2e`; one copy can carry several reports): a hit in a
-     pkp repo whose body links a filed issue, its report or its register
-     entry, and which the report's Upstream bullet does not name yet, is
-     the team's copy. The report's Upstream bullet names it (REPORT.md
-     "Upstream"), the register footnote too, and the GitHub issue takes
-     the new body and the `tracked upstream` label (`gh issue edit`). A
-     copy of a report under `docs/reports/` goes to the maintainer in the
-     summary.
-   - **Resolved copies.** For each report whose Upstream bullet names the
-     team's copy: the copy's state (`gh issue view <url> --json
-     state,stateReason`) and the PRs that reference it (`gh api
-     repos/pkp/<repo>/issues/<n>/timeline --paginate --jq '.[] |
-     select(.event=="cross-referenced" and .source.issue.pull_request)
-     | [.source.issue.html_url, .source.issue.state,
-     .source.issue.pull_request.merged_at]'`). A copy closed as
-     completed, with at least one PR merged and none open, is checked
+   wrote there ("Where direction comes from"). Each command prints only
+   what needs action:
+   - **On pkp-e2e.** `npm run hk -- issues` holds the reports against
+     their issues (on `jardakotesovec/pkp-e2e-sec` only the
+     `unreleased`-labeled report issues from before 2026-10-17; the rest
+     of that tracker is the security findings' own workboard, governed
+     by the security repo's policy). A `label` line: the issue's label
+     goes into the report's header and the register entry's head. A
+     `closed` line: the report goes as "A report's life" says (only the
+     maintainer can label or close there). A `no issue`, `title` or
+     `no footnote` line is put right through "Issue reports" step 6; a
+     `no report` line goes to the maintainer in the summary.
+   - **New copies.** `npm run hk -- copies` reads the pkp repos for
+     issues and PRs whose body links a filed issue, its report or its
+     register entry (one copy can carry several reports). A `new copy`
+     line is the team's copy, not yet in the report's Upstream bullet:
+     the bullet names it (REPORT.md "Upstream"), the register footnote
+     too, and the GitHub issue takes the new body and the
+     `tracked upstream` label (`npm run hk -- file <report> --post`). A
+     `maintainer` line, a copy of a report under `docs/reports/`, goes
+     to the maintainer in the summary.
+   - **Resolved copies.** `npm run hk -- resolved` groups the reports
+     whose Upstream bullet names the team's copy by the copy's state and
+     the PRs that reference it. A copy "ready to check" (closed as
+     completed, with at least one PR merged and none open) is checked
      on `main`: once every app the fix touches carries it (a pkp-lib or
      ui-library fix the app's pointer has not taken yet is pinned at
      that repo's `main`, as sync loop step 6 does), the report's kept
      script walks a freshly reset dataset fleet (harness.md "Dataset
      fleets"). When it shows the Steps' Expected, a fold agent
      (`briefs/fold.md`) retires the entry with the merged PRs as its
-     reason (TEMPLATE "Findings register", the Retired block; its coverage as sync loop step 4
-     says), and "A report's life" deletes the report and closes the
-     issue. When
+     reason (TEMPLATE "Findings register", the Retired block; its
+     coverage as sync loop step 4 says), and "A report's life" deletes
+     the report and closes the issue. When
      the fault still shows, the issue stays open, the entry gets a
      `Report: refresh owed` line ("fix merged in `pkp/pkp-lib#<n>`, the
      Steps still show it"; "Keeping a report in step"), and the summary
-     tells the maintainer. Any
-     other state (closed as not planned, closed with no merged PR, an
-     open PR on a closed copy) goes to the maintainer in the summary and
-     changes nothing here: a ruling comes on Mattermost.
+     tells the maintainer. A copy "to the maintainer" (closed as not
+     planned, closed with no merged PR, an open PR on a closed copy)
+     goes to the maintainer in the summary and changes nothing here: a
+     ruling comes on Mattermost. A copy still open needs nothing.
 4. **Report refreshes**, every one the backlog lists: a filed report
    whose entry changed, or that the team asked on Mattermost to change.
    Those issues are already in the team's hands, so they come before new
    work. A header fix (the backlog marks it: an entry joining a report,
    an entry its footnote says a report covers but the report's "Tracked
-   in" lacks) is edited in the report and the issue directly (`gh issue
-   edit`), the `Report:` line deleted. One that needs a walk or a
-   rewrite goes through "Issue reports" as a unit of its own.
+   in" lacks) is edited in the report and the issue
+   (`npm run hk -- file <report> --post`), the `Report:` line deleted.
+   One needing a walk or a rewrite goes through "Issue reports" as its
+   own unit.
 5. **Security refinement**, every morning. Pull `../pkp-e2e-sec` and
    list its `new` findings (`grep -l 'status:\*\* new' ../pkp-e2e-sec/findings/sec-*.md`
    — the status line reads `- **status:** new`). Refine **up to three
@@ -296,7 +289,8 @@ is left, the next morning picks up from the files.
    balanced").
 12. **Quiet mornings.** When the day's steps left nothing open:
    - **Drift sweep of one spec**, the one whose PROGRESS note carries the
-     oldest "Swept" date (none counts as oldest). Its kept checks
+     oldest "Swept" date (none counts as oldest; `npm run hk -- swept`
+     names it). Its kept checks
      (`shared/playwright/checks/<feature>/`) run twice at the tips on
      reset databases, under `PROBE_RUN` r1 and r2, since a fact one run
      shows is undetermined; a check whose header has a `RESEED` switch
@@ -482,16 +476,14 @@ same model: a false positive's piece goes to a narrow rerun
 6. **File.** Every report in `docs/issues/` that no register footnote
    links to a pkp-e2e issue yet (a filed one reads `Issue report:
    [pkp-e2e#<n>](…) ([docs/issues/<file>](…))`), and that has no issue
-   of the same title (`gh issue list -R jardakotesovec/pkp-e2e --state
-   all --json number,title`), is filed as
-   `REPORT.md` "As a GitHub issue" says (`gh issue create -R
-   jardakotesovec/pkp-e2e`, creating a
-   label the first time it is used); the file keeps its name
-   (`<spec>-<entries>-<slug>.md`, from `briefs/issue-report.md` step 6),
-   and the register footnotes take the issue's link. A filed report
-   this work changed (a join, a refresh, a label, a new fact) is brought
-   up to date on GitHub (`gh issue edit` with the body, built the same
-   way, and the labels), and
+   of the same title, is filed as `REPORT.md` "As a GitHub issue" says:
+   `npm run hk -- file <report>` prints the issue the report makes, to
+   check its labels, and with `--post` creates it and writes its link
+   into the register footnotes; the file keeps its name
+   (`<spec>-<entries>-<slug>.md`, from `briefs/issue-report.md` step 6).
+   A filed report this work changed (a join, a refresh, a label, a new
+   fact) is brought up to date on GitHub by the same command, which
+   prints what differs and with `--post` edits the issue, and
    a refresh's `Report:` line is deleted. Then commit and push again.
 
 **A report's life.** It stays in `docs/issues/` while its issue is open,
@@ -649,7 +641,9 @@ The apps move; the suite follows. The baselines live in
 6. **Advance the baseline.** Update `upstream-sync.md` with the new SHAs and
    a dated log entry: one line per change reviewed (commit, coverage
    verdict, regression and security verdicts, what was touched or
-   filed), never a narrative. Then re-check the open
+   filed), never a narrative. The log holds what a later session still
+   needs: a daily entry older than two weeks is deleted, and a baseline's
+   "Reviewed by" cell is replaced, never added to (git keeps both). Then re-check the open
    ci-triage rows (known-red tests, open regressions by re-running their
    kept reproduction) and companion rows against the new tips and delete
    the ones that are resolved. A shared fix lands when it merges into
@@ -1060,7 +1054,8 @@ merge.
    session reads `main`'s table and a row on the branch alone is never
    seen; a dated sync-log entry with one line per
    change, the run lines and the CI run ids, and "baselines not advanced"
-   stated; commit and push the companion; the thread gets the verdict
+   stated (a later round replaces the earlier round's entry, and the
+   merge step deletes it once the daily entry records the merge); commit and push the companion; the thread gets the verdict
    (green at the PR ref, needs a rebase, or a regression with the report;
    and the security line, counts only for anything routed) in the
    "Findings first, short" shape. Leave the checkouts on the apps'
