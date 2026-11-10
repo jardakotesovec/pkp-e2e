@@ -256,22 +256,30 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
      * (patterns.md recorded design).
      */
     async gotoStep(name) {
-        for (let attempt = 0; attempt < 3; attempt++) {
-            if (await this.page.locator('.pkpSteps--collapsed').count()) {
-                const controls = this.page.locator('.pkpSteps__controls button');
-                if (await controls.count()) {
-                    await controls.click();
+        try {
+            for (let attempt = 0; attempt < 3; attempt++) {
+                if (await this.page.locator('.pkpSteps--collapsed').count()) {
+                    const controls = this.page.locator('.pkpSteps__controls button');
+                    if (await controls.count()) {
+                        await controls.click();
+                    }
+                }
+                await this.railButton(name).click();
+                try {
+                    await expect(this.currentStepLabel()).toContainText(name, {timeout: 5_000});
+                    return;
+                } catch (error) {
+                    if (attempt === 2) {
+                        throw error;
+                    }
                 }
             }
-            await this.railButton(name).click();
-            try {
-                await expect(this.currentStepLabel()).toContainText(name, {timeout: 5_000});
-                return;
-            } catch (error) {
-                if (attempt === 2) {
-                    throw error;
-                }
+        } catch (error) {
+            // A step not reached yet has a plain span for a pill: name what reaches it.
+            if (await this.railUnreached(name).count().catch(() => 0)) {
+                throw new Error(`gotoStep("${name}"): the step is not reached yet, so its rail pill is no button; reach it with continueTo()`, {cause: error});
             }
+            throw error;
         }
     }
 

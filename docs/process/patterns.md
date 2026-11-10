@@ -552,10 +552,9 @@ no cleanup fixture.
   `SubmissionWizardPage.gotoStep()`/`expectStep()`
   (`apps/ojs/playwright/pages/SubmissionWizardPage.js`). The pattern handles
   expansion, end-anchored name matching and clicks swallowed by a re-render.
-  It reaches only a step already reached: an unreached pill does nothing
-  (a draft never saved for later reopens on "Upload Files" with the later
-  pills unreached, on all three apps), so a later step is reached by
-  "Continue" (`continueTo()`).
+  It reaches only a step already reached and fails naming `continueTo()`
+  otherwise (a draft never saved for later reopens on "Upload Files" with
+  the later pills unreached, on all three apps).
 - **A workflow opened by its address.** Without a menu key it lands on
   the current stage's view; a declined or posted preprint lands on
   "Title & Abstract", which has no decision buttons and no
@@ -605,7 +604,7 @@ Scripts run through `bin/probe.js`:
 
 ```bash
 npm run probe-servers -- --start                    # once per session: php -S per app at base+50, and the variants at +90, +91
-npm run fleet-prep -- --feature sync --apps ojs [--reset]   # instead, on a cold (just reset) database: the probe server answers 500 to `bootstrapProbe()` until the runner's setup project has installed it
+npm run fleet-prep -- --feature sync --apps ojs [--reset]   # instead, on a cold (just reset) database, which the runner's setup project installs
 PROBE_FEATURE=U03 PROBE_AGENT=g1 node bin/probe.js all my-probe.js   # or ojs|omp|ops; ONLY=ojs,omp narrows
 ```
 
@@ -780,10 +779,9 @@ defaults"), counted apart.
   `goto()`); a script's own dialog listener decides alone, so it accepts
   `beforeunload` itself. A page-leave probe on a legacy window blurs the
   box first: the form notices a change on blur.
-- **A second page.** Console and dialog capture cover the first page
-  only: a `context.newPage()` needs its own `dialog`, `pageerror` and
-  `console` listeners. A script that needs every console level attaches
-  its own `page.on('console')` too.
+- **A second page.** Console, page-error and dialog capture cover every
+  page of the context. A script that needs every console level attaches
+  its own `page.on('console')`.
 - **Downloads.** Await `page.waitForEvent('download')` alone, never
   raced against a `waitForURL`. Judge one by the response's
   `Content-Disposition: attachment`, never by a 200 or a popup (a refused
@@ -793,11 +791,10 @@ defaults"), counted apart.
 - **XML with an XSL stylesheet** (OAI-PMH) reaches `response.text()` and
   `page.content()` as the HTML Chromium rendered from it: read the raw
   XML with `page.request.get(page.url())` in the same context.
-- **A request replayed in a role's session** takes
-  `pkp.context.apiBaseUrl` and `pkp.currentUser.csrfToken` (sent as
-  `X-Csrf-Token`) from a page of that context the role may open, read
-  once it is idle. The authorization denied page carries no context, so a
-  request built there answers 404.
+- **A request replayed in a role's session** goes through
+  `apiAs(page, method, path, body)`, called on an idle page of that
+  context the role may open: it reads the API address and the CSRF token
+  off the page. The authorization denied page carries no context.
 - **The validation variant on a scratch context.** A scratch context has
   no technical support contact, and the validation email's sender is that
   contact, so a registration on the +90 server 500s until a manager sets

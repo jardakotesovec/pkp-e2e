@@ -91,7 +91,9 @@ if (fs.existsSync(cacheDir)) {
     }
 }
 
-console.log('reset: done — next run will cold-bootstrap.');
+// The database is empty now: nothing is installed until the runner's setup
+// project runs, and the probe server's `_test` API cannot seed before that.
+console.log('reset: done — next run will cold-bootstrap. Until the setup project has run (`npm run fleet-prep -- --feature <id>`, or any Playwright run), the probe server cannot seed.');
 
 function recreateDatabase({driver, host, username, password, name}) {
     const env = {...process.env};

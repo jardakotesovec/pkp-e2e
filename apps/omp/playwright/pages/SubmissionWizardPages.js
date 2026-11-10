@@ -88,22 +88,30 @@ async function expectStep(page, label) {
  */
 async function gotoStep(page, label) {
     const exact = new RegExp(`${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`);
-    for (let attempt = 0; attempt < 3; attempt++) {
-        if (await page.locator('.pkpSteps--collapsed').count()) {
-            const controls = page.locator('.pkpSteps__controls button');
-            if (await controls.count()) {
-                await controls.click();
+    try {
+        for (let attempt = 0; attempt < 3; attempt++) {
+            if (await page.locator('.pkpSteps--collapsed').count()) {
+                const controls = page.locator('.pkpSteps__controls button');
+                if (await controls.count()) {
+                    await controls.click();
+                }
+            }
+            await railEntry(page, exact).click();
+            try {
+                await expect(currentRailStep(page)).toHaveText(exact, {timeout: 5_000});
+                return;
+            } catch (error) {
+                if (attempt === 2) {
+                    throw error;
+                }
             }
         }
-        await railEntry(page, exact).click();
-        try {
-            await expect(currentRailStep(page)).toHaveText(exact, {timeout: 5_000});
-            return;
-        } catch (error) {
-            if (attempt === 2) {
-                throw error;
-            }
+    } catch (error) {
+        // A step not reached yet has a plain span for a pill: name what reaches it.
+        if (await page.locator('.pkpSteps__buttons span.pkpSteps__step__label').filter({hasText: exact}).count().catch(() => 0)) {
+            throw new Error(`gotoStep("${label}"): the step is not reached yet, so its rail pill is no button; reach it with continueTo()`, {cause: error});
         }
+        throw error;
     }
 }
 

@@ -510,7 +510,8 @@ function watchNotices() {
  * opening with a JavaScript error's name (a failure Vue caught and logged)
  * also go into the record's `crashes` list (kind `server` | `script`), counted on the
  * console when the process ends; every page notice goes into its
- * `notices` as it appears (screen() returns the page's new ones).
+ * `notices` as it appears (screen() returns the page's new ones). Every
+ * page of the context is recorded, a `context.newPage()` and a popup too.
  * Returns {browser, context, page, close}; a browser still open when
  * withApp's `fn` ends is closed there.
  *
@@ -580,8 +581,6 @@ async function launch(app, {storageState, headless = true, record: keepRecord = 
                 .catch(() => {});
         }
     });
-    context.on('page', trackTraffic); // idle() waits out a press's requests
-    const page = await context.newPage();
     // Console errors and warnings and uncaught page errors go into the run
     // record, each type under its own cap, and a warning whose first line
     // is already kept three times is only counted (`consoleRepeats`):
@@ -606,40 +605,47 @@ async function launch(app, {storageState, headless = true, record: keepRecord = 
         tally.types[type] = (tally.types[type] || 0) + 1;
         record.console.push({at: new Date().toISOString(), type, text: String(text).slice(0, 300), url});
     };
-    if (keepRecord) page.on('console', (message) => {
-        const type = message.type();
-        if (type === 'error' || type === 'warning') {
-            const text = message.text();
-            logConsole(type, text, (message.location() || {}).url || page.url());
-            // Vue's error handler catches a component's script failure and
-            // logs it as a console error ("TypeError: …") instead of
-            // throwing, so no pageerror fires: it is a crash all the same
-            // (U28 I30, the OPS home-made reviewer list).
-            if (type === 'error' && JS_ERROR.test(text) && record.crashes.length < CONSOLE_CAP) {
-                record.crashes.push({at: new Date().toISOString(), kind: 'script', caught: true, text: String(text).split('\n')[0].slice(0, 300), url: page.url()});
+    // Every page of the context gets the listeners below, the first one and
+    // each `context.newPage()` or popup after it.
+    const watchPage = (page) => {
+        if (keepRecord) page.on('console', (message) => {
+            const type = message.type();
+            if (type === 'error' || type === 'warning') {
+                const text = message.text();
+                logConsole(type, text, (message.location() || {}).url || page.url());
+                // Vue's error handler catches a component's script failure and
+                // logs it as a console error ("TypeError: …") instead of
+                // throwing, so no pageerror fires: it is a crash all the same
+                // (U28 I30, the OPS home-made reviewer list).
+                if (type === 'error' && JS_ERROR.test(text) && record.crashes.length < CONSOLE_CAP) {
+                    record.crashes.push({at: new Date().toISOString(), kind: 'script', caught: true, text: String(text).split('\n')[0].slice(0, 300), url: page.url()});
+                }
             }
-        }
-    });
-    if (keepRecord) page.on('pageerror', (error) => {
-        logConsole('pageerror', error.message || String(error), page.url());
-        if (record.crashes.length < CONSOLE_CAP) {
-            record.crashes.push({at: new Date().toISOString(), kind: 'script', text: String(error.message || error).slice(0, 300), url: page.url()});
-        }
-    });
-    // Browser dialogs: while the kit's is the page's only dialog listener it
-    // accepts a page-leave question (dismissing it cancels the navigation,
-    // and the next goto() or signOut() fails with ERR_ABORTED) and dismisses
-    // the rest, Playwright's own default; a script that adds its own listener
-    // decides alone. Every dialog goes into the run record.
-    page.on('dialog', (dialog) => {
-        if (keepRecord && record.dialogs.length < CONSOLE_CAP) {
-            record.dialogs.push({at: new Date().toISOString(), type: dialog.type(), message: dialog.message().slice(0, 300), url: page.url()});
-        }
-        if (page.listenerCount('dialog') > 1) {
-            return;
-        }
-        (dialog.type() === 'beforeunload' ? dialog.accept() : dialog.dismiss()).catch(() => {});
-    });
+        });
+        if (keepRecord) page.on('pageerror', (error) => {
+            logConsole('pageerror', error.message || String(error), page.url());
+            if (record.crashes.length < CONSOLE_CAP) {
+                record.crashes.push({at: new Date().toISOString(), kind: 'script', text: String(error.message || error).slice(0, 300), url: page.url()});
+            }
+        });
+        // Browser dialogs: while the kit's is the page's only dialog listener it
+        // accepts a page-leave question (dismissing it cancels the navigation,
+        // and the next goto() or signOut() fails with ERR_ABORTED) and dismisses
+        // the rest, Playwright's own default; a script that adds its own listener
+        // decides alone. Every dialog goes into the run record.
+        page.on('dialog', (dialog) => {
+            if (keepRecord && record.dialogs.length < CONSOLE_CAP) {
+                record.dialogs.push({at: new Date().toISOString(), type: dialog.type(), message: dialog.message().slice(0, 300), url: page.url()});
+            }
+            if (page.listenerCount('dialog') > 1) {
+                return;
+            }
+            (dialog.type() === 'beforeunload' ? dialog.accept() : dialog.dismiss()).catch(() => {});
+        });
+    };
+    context.on('page', watchPage);
+    context.on('page', trackTraffic); // idle() waits out a press's requests
+    const page = await context.newPage();
     console.log(`[probe] ${app.name}: ${app.baseURL} (key from ${app.keySource})`);
     let closing = false;
     const close = async () => {
@@ -957,7 +963,8 @@ function locatorTable(rows = locatorRows) {
  */
 function screenNotesPath() {
     // A dataset-fleet run names its fleet in PROBE_FEATURE (issues-cc21a); PROBE_NOTES_FEATURE
-    // then names the spec whose notes it reads and appends to.
+    // then names the spec whose notes it reads and appends to (bin/probe.js
+    // sets it from the `notes` that `fleet-prep --notes` recorded in fleet.json).
     const feature = process.env.PROBE_NOTES_FEATURE
         || requireEnv('PROBE_FEATURE', 'the spec id, e.g. PROBE_FEATURE=U03');
     const dir = path.join(REPO_ROOT, '.reports', feature);
@@ -1266,6 +1273,39 @@ async function drainJobs(app, {passes = 6, timeoutMs = 300_000} = {}) {
     return {passes, counts: last, output: output.join('')};
 }
 
+/**
+ * One request to the context's own API in the session of the page's user,
+ * as a client of that user would send it: the address is the page's
+ * `pkp.context.apiBaseUrl` plus `path`, the CSRF token the page's
+ * `pkp.currentUser.csrfToken` (sent as `X-Csrf-Token`). The page must be a
+ * back-office page of the context that the user may open, idle; on a page
+ * that carries neither (the reader side) the call throws. Returns
+ * Playwright's APIResponse; it never throws for a status.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} method GET | POST | PUT | DELETE
+ * @param {string} path below the API base, e.g. 'submissions/12'
+ * @param {object} [body] sent as JSON
+ */
+async function apiAs(page, method, path, body) {
+    const {base, csrfToken} = await page.evaluate(() => {
+        const pkp = window.pkp || {};
+        return {
+            base: (pkp.context && pkp.context.apiBaseUrl) || null,
+            csrfToken: (pkp.currentUser && pkp.currentUser.csrfToken) || null,
+        };
+    });
+    if (!base || !csrfToken) {
+        throw new Error(`probe: apiAs found no ${base ? 'CSRF token' : 'context API address'} on ${page.url()} — open a back-office page of the context as the user first`);
+    }
+    return page.request.fetch(`${base.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`, {
+        method,
+        headers: {'X-Csrf-Token': csrfToken},
+        ...(body === undefined ? {} : {data: body}),
+        failOnStatusCode: false,
+    });
+}
+
 // ---------------------------------------------------------------------------
 // The lines without the `_test` API (3.4, 3.3; harness.md "The stable lines")
 
@@ -1394,6 +1434,7 @@ module.exports = {
     idle,
     settled,
     drainJobs,
+    apiAs,
     sql,
     serverLog,
     usageLog,

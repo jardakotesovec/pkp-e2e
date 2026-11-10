@@ -28,6 +28,10 @@
  * fleet is not touched; no test lock (a load takes seconds, like a probe).
  * fleet.json records `dataset` and `line`, and bin/probe.js reads them, so
  * a script run with PROBE_FEATURE=<that feature> drives the dataset fleet.
+ * A feature whose fleet.json holds a campaign fleet is refused: a dataset
+ * fleet takes a feature name of its own. `--notes <spec id>` records the
+ * spec whose screen notes the fleet's runs write to (the kit's `note()`);
+ * a later prep without the option keeps it.
  */
 const fs = require('fs');
 const path = require('path');
@@ -36,17 +40,19 @@ const {APPS, REPO_ROOT} = require('./apps.js');
 const {resolveProbeApp} = require('../shared/playwright/probe/index.js');
 const {parseDatasetFlag, resetDataset, datasetFleet, query} = require('../shared/playwright/dataset.js');
 
-const USAGE = 'usage: node bin/fleet-prep.js --feature <id> [--dataset [n]] [--reset] [--apps ojs,omp,ops]';
+const USAGE = 'usage: node bin/fleet-prep.js --feature <id> [--dataset [n]] [--notes <spec id>] [--reset] [--apps ojs,omp,ops]';
 
 function parseArgs(allArgs) {
     const {n: dataset, rest: argv} = parseDatasetFlag(allArgs);
-    const options = {feature: null, reset: false, apps: Object.keys(APPS), dataset};
+    const options = {feature: null, reset: false, apps: Object.keys(APPS), dataset, notes: null};
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i];
         if (arg === '--feature') {
             options.feature = argv[++i];
         } else if (arg === '--reset') {
             options.reset = true;
+        } else if (arg === '--notes') {
+            options.notes = argv[++i];
         } else if (arg === '--apps') {
             options.apps = String(argv[++i] || '')
                 .split(',')
@@ -59,6 +65,10 @@ function parseArgs(allArgs) {
     }
     if (!options.feature || !/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(options.feature)) {
         console.error(`fleet-prep: --feature <id> is required (a plain token, e.g. U03)\n${USAGE}`);
+        process.exit(1);
+    }
+    if (options.notes !== null && !/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(options.notes || '')) {
+        console.error(`fleet-prep: --notes <spec id> takes a plain token (e.g. U03)\n${USAGE}`);
         process.exit(1);
     }
     for (const name of options.apps) {
@@ -95,7 +105,24 @@ function runLogged(label, command, args, logFile) {
     return code;
 }
 
-const {feature, reset, apps, dataset} = parseArgs(process.argv.slice(2));
+const {feature, reset, apps, dataset, notes} = parseArgs(process.argv.slice(2));
+// The previous fleet.json of the feature, or null (none, unreadable or malformed).
+const previousFleet = (() => {
+    try {
+        return JSON.parse(fs.readFileSync(path.join(REPO_ROOT, '.reports', feature, 'fleet.json'), 'utf8'));
+    } catch {
+        return null;
+    }
+})();
+// fleet.json is written whole: a dataset prep under a feature whose file
+// holds a campaign fleet would take the ports away from the agents reading it.
+if (dataset && previousFleet && !previousFleet.dataset && Object.keys(previousFleet.apps || {}).length > 0) {
+    console.error(
+        `fleet-prep: .reports/${feature}/fleet.json holds a campaign fleet; a dataset fleet takes a feature of its own ` +
+            `(e.g. --feature ${feature}-<agent> --dataset ${dataset})`,
+    );
+    process.exit(1);
+}
 const lineName = process.env.PKP_E2E_LINE && process.env.PKP_E2E_LINE !== 'main' ? process.env.PKP_E2E_LINE : 'main';
 if (dataset) {
     // The kit's bag and the probe-servers child follow it.
@@ -115,6 +142,7 @@ const fleet = {
     reset,
     line: lineName,
     ...(dataset ? {dataset} : {}),
+    ...(notes || (previousFleet && previousFleet.notes) ? {notes: notes || previousFleet.notes} : {}),
     workers: process.env.PLAYWRIGHT_WORKERS || 'auto',
     apps: {},
 };

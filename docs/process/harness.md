@@ -514,9 +514,9 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   (`--feature issues --dataset 1`), a second `--feature issues-b --dataset 2`, and so on
   up to 9 per slot and line, each with its own database and server; a
   reset of fleet 1 never touches fleet 2. The feature names the fleet
-  file (`.reports/<feature>/fleet.json`), which `fleet-prep` rewrites
-  whole, so a dataset fleet takes a feature of its own (`sync-<agent>`,
-  `issues-<agent>`), never one whose campaign fleet other agents read.
+  file (`.reports/<feature>/fleet.json`), so a dataset fleet takes a
+  feature of its own (`sync-<agent>`, `issues-<agent>`); `fleet-prep`
+  refuses one whose file holds a campaign fleet.
   The dataset users' addresses (`<username>@mailinator.com`) are the
   same in the three apps and every fleet of the slot mails the one
   Mailpit, so a mailbox read goes through `app.mail` with a `since` or

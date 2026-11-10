@@ -67,6 +67,11 @@ if (fs.existsSync(fleetFile)) {
         }
         console.log(`[probe] dataset fleet ${fleet.dataset} on ${fleet.line} (${path.relative(REPO_ROOT, fleetFile)})`);
     }
+    // `fleet-prep --notes <spec id>` names the spec whose screen notes the
+    // fleet's runs read and append to; a PROBE_NOTES_FEATURE in the shell wins.
+    if (fleet && fleet.notes && !process.env.PROBE_NOTES_FEATURE) {
+        process.env.PROBE_NOTES_FEATURE = String(fleet.notes);
+    }
 }
 
 const apps = target === 'all' ? Object.keys(APPS) : target.split(',').filter(Boolean);
