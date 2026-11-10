@@ -1827,8 +1827,9 @@ it showed the old name after a reload (f-a24).
 tables; `affiliation.json`: `ror` (regex
 `#^https://ror\.org/0[^ILOU]{6}\d{2}$#`; `0[a-hj-km-np-tv-z0-9]{6}`
 since pkp-lib#13751 for issue pkp-lib#12899, merged 2026-11-09 as
-`8888001f0a` (3.5 #13752, `03d5890f72`; OMP `main` points at it, OJS
-and OPS once their pointers move): an API save with `0213RCC28`,
+`8888001f0a` (3.5 #13752, `03d5890f72`; `ore` #13771, `6722bea1ed`;
+OMP `main` and OJS `ore` point at it, OJS and OPS `main` once their
+pointers move): an API save with `0213RCC28`,
 `0abcil012` or `0a/b-c.12` answers 400 there and 200 at the base,
 `checks/sync/pkp-lib-13751/walk.js`, at the PR head 2026-11-09 and at
 the merge 2026-11-10) XOR
