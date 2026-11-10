@@ -602,7 +602,9 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      **A5 — <short title>** · ✅ · retired. Fixed upstream (pkp/pkp-lib#NNNN),
      2026-08-25. <sup>f-a5</sup>
      Its summary row stays (sorted with the ✅ rows); its body markers are
-     removed, and lint does not require one for a Retired entry. -->
+     removed, and lint does not require one for a Retired entry. A spec
+     that has not shipped yet keeps no Retired block: a suspicion the
+     claim check did not reproduce is deleted and the IDs renumbered. -->
 
 ---
 

@@ -971,7 +971,9 @@ merge.
    timeline lists (`gh api repos/pkp/pkp-lib/issues/<n>` and
    `.../timeline`), on every branch that has one: `main`, the stable
    branches and `ore` are each reviewed on their own line, unless the
-   request names only some. A pkp-lib PR normally comes with one app PR per app, two of them
+   request names only some. The issue is where a change's PRs are
+   listed: when it lists none, say so in the thread and ask for the
+   links instead of hunting for them. A pkp-lib PR normally comes with one app PR per app, two of them
    submodule-only, but not always: a pkp-lib or ui-library PR often has
    an app PR for one app only. The shared code still reaches all three,
    so every app gets the shared PRs' branches checked out individually in
