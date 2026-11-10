@@ -21,7 +21,8 @@ not here. `docs/README.md` is the map of the documentation.
   ojs, omp and ops as three messages.
   A PR or issue link shared with a request to check it before merging is
   a **PR review**: `docs/process/MAINTENANCE.md` "PR review", which
-  produces a companion branch named like the app PR. A pkp/plugin-gallery
+  produces a verdict and, once its findings are settled, a companion
+  branch named like the app PR. A pkp/plugin-gallery
   PR shared with a request to review it is a **plugin review**:
   MAINTENANCE "Plugin review"; the plugin's code runs only in the plugin
   sandbox on the VM (harness.md "The plugin sandbox") and its report is
