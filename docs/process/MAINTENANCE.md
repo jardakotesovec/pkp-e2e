@@ -617,8 +617,9 @@ The apps move; the suite follows. The baselines live in
    the root cause, a proposed fix that addresses it with its effort,
    and the evidence last. The report is
    posted into the session's thread as a file the same day, in a post that
-   tags @beaug alone, who watches over the regression reports (no
-   direct messages; the tag is the upstream session's alone: a PR check
+   tags @beaug, who watches over the regression reports, and the
+   developer who made the change ("Mattermost norms", "Who is tagged"; no
+   direct messages; the tags are the upstream session's alone: a PR check
    or review posts its report in its own thread untagged, since whoever
    asked follows up there);
    the regression gets a row
@@ -636,7 +637,8 @@ The apps move; the suite follows. The baselines live in
    unverified, one probe rendered from `briefs/security-verify.md` with
    the feature `sync` (described "sync security verification") verifies
    it, and the finding is posted in full in the thread, tagging
-   @jarda.kotesovec alone, who watches over the security reports; none
+   @jarda.kotesovec, who watches over the security reports, and the
+   developer who made the change ("Who is tagged"); none
    of it reaches the repo.
 6. **Advance the baseline.** Update `upstream-sync.md` with the new SHAs and
    a dated log entry: one line per change reviewed (commit, coverage
@@ -687,7 +689,8 @@ command points it at the line; without it every command means `main`.
      has not read yet is read on `main` first, in the same session. A
      twin of a `main` commit whose security weakness is filed as
      `unreleased` puts the fault on a release branch: say so in the
-     thread, tagging @jarda.kotesovec — it ships with the line's next
+     thread, tagging @jarda.kotesovec and the developer who made the
+     change — it ships with the line's next
      patch release unless fixed there first. The label flips to released
      only once a tag or `ore` carries it (the security repo's policy,
      "Is it released?").
@@ -823,8 +826,8 @@ in its Apps cell, the kept reproduction under
 `shared/playwright/checks/sync/ore/<repo>-<pr>/`, and, when a shipped
 test on the ore branch reds on it, a `test.fixme` there naming the row,
 as `main` treats a known red. **Every regression found on `ore` is
-posted in the session's thread tagging @beaug**, as `main`'s
-regression reports are. Anything
+posted in the session's thread tagging @beaug and the developer who
+made the change**, as `main`'s regression reports are. Anything
 security-shaped on `ore` is released code (ORE runs it in production):
 it follows `../pkp-e2e-sec/security_policy.md` as a 3.5 finding would,
 never this repo.
@@ -891,9 +894,29 @@ affected rows and in the next Mattermost summary.
   team is welcome and never required for anything to proceed.
 - **Security findings go to the thread in full**: each finding added to
   the private security repo (`../pkp-e2e-sec`) is posted with its
-  details and its path there, tagging @jarda.kotesovec (Mattermost is
+  details and its path there, tagging @jarda.kotesovec and the
+  developer who made the change (Mattermost is
   private; the repo is public, so no trace of it there). **Never post**
   credentials or speculation presented as a finding.
+- **Who is tagged.** A regression report tags @beaug, a security
+  finding @jarda.kotesovec, and both also tag the developer who made
+  the change that brought the problem in: the author of the commit or
+  PR the report's **Introduced** line names, every author when it
+  names several. The handle comes from this table; a developer who is
+  not in it (someone outside the team, a change never traced) is named
+  in the post without a tag.
+
+  | GitHub | Mattermost |
+  |---|---|
+  | asmecher | @asmecher |
+  | blesildaramirez | @blessie |
+  | bozana | @bozana |
+  | ewhanson | @ewhanson |
+  | jardakotesovec | @jarda.kotesovec |
+  | kaitlinnewson | @kaitlin |
+  | taslangraham | @taslan |
+  | touhidurabir | @touhidur |
+  | Vitaliy-1 | @vitaliy |
 - A team reply that changes campaign rules is a maintainer ruling: encode
   it where RUNBOOK "What goes where" sends process learnings. A team
   reply that settles a register entry (confirmed, overturned, risk accepted,
