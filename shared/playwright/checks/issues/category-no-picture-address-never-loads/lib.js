@@ -53,13 +53,20 @@ async function setCategoryPicture(page, app, catName, file) {
  * whether loading finished, and the page's text when it did.
  */
 async function typeAddress(page, address, {wait = 20_000} = {}) {
+    // Every response on the way, the redirect to the address's `/en/` form on main included; `head` is the last.
+    const base = address.replace(/^https?:\/\/[^/]+/, '');
+    const tail = base.replace(/^\/index\.php\/[^/]+/, '');
+    const chain = [];
     let head = null;
     const onResponse = (r) => {
-        if (r.url() === address && !head) head = {status: r.status(), headers: r.headers()};
+        if (r.url() !== address && !r.url().endsWith(tail)) return;
+        const h = r.headers();
+        chain.push({url: r.url().replace(/^https?:\/\/[^/]+/, ''), status: r.status(), contentType: h['content-type'] || null, contentLength: h['content-length'] || null});
+        head = {status: r.status(), headers: h};
     };
     let failed = null;
     const onFailed = (req) => {
-        if (req.url() === address) failed = req.failure() && req.failure().errorText;
+        if (req.url() === address || req.url().endsWith(tail)) failed = req.failure() && req.failure().errorText;
     };
     page.on('response', onResponse);
     page.on('requestfailed', onFailed);
@@ -82,6 +89,7 @@ async function typeAddress(page, address, {wait = 20_000} = {}) {
     const h = (res && res.headers()) || (head && head.headers) || {};
     return {
         address,
+        chain,
         finishedLoading: !!res,
         ms,
         loadError,
@@ -95,4 +103,26 @@ async function typeAddress(page, address, {wait = 20_000} = {}) {
     };
 }
 
-module.exports = {setCategoryPicture, typeAddress};
+/**
+ * main: Settings › "Categories", the category's "More Actions" › "Edit", "Remove" under "Cover Image", "Save".
+ * Returns whether "Remove" was there, the save's status and the window's state.
+ */
+async function removeCategoryPicture(page, app, catName) {
+    const {CategoriesTab} = require('../../../pages/CategoriesPages.js');
+    const categories = new CategoriesTab(page, app.contextPath);
+    await categories.goto();
+    const win = await categories.openEdit(catName);
+    const remove = win.root().getByRole('button', {name: 'Remove', exact: true}).first();
+    const shown = (await remove.count()) > 0;
+    if (shown) {
+        await remove.click();
+        await page.waitForTimeout(500);
+    }
+    const altTextLeft = await win.altTextBox().isVisible().catch(() => false);
+    const saved = await win.save();
+    await idle(page);
+    await page.waitForTimeout(500);
+    return {removeShown: shown, altTextLeft, save: saved.status(), windowOpen: await win.root().isVisible().catch(() => false)};
+}
+
+module.exports = {setCategoryPicture, typeAddress, removeCategoryPicture};

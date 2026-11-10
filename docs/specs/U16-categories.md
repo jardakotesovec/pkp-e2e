@@ -977,7 +977,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A18](#a18) | The box where a manager types a category's name to delete it has no name for a screen reader | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A19](#a19) | A category with one item reads "1 Items" ("1 Titles" on a press) | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | With the "Browse" block in a journal's sidebar, every page's breadcrumb gets a grey bar | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A22](#a22) | The picture address of a category with no picture never finishes loading | 🐞 | low · crash: server | issues (claude), 2026-10-07 — re-verified |
+| [A22](#a22) | The picture address of a category with no picture never finishes loading | 🐞 | low · crash: server | issues (claude), 2026-11-10 — re-verified |
 | [A23](#a23) | A category page number typed past the last page opens an empty page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A24](#a24) | A damaged PNG as a category's "Cover Image" fails "Save" halfway, with "An unexpected error has occurred"; a new category is saved without the picture | 🐞 | medium · crash: server | — |
 | [A25](#a25) | A category's picture is stored as a file with no ending ("8-category", not "8-category.png"), and the full-size picture is offered under that name | 🐞 | minor | — |
@@ -1232,21 +1232,19 @@ Basis: probe, 2026-09-25; the edited category, code reading. <sup>f-a21</sup>
 
 <a id="a22"></a>
 **A22 — The picture address of a category with no picture never finishes loading** · 🐞 · low · crash: server.
-On a journal, a press or a preprint server, a category's picture address
-(`…/catalog/thumbnail?type=category&id=2` for its small copy,
+On a journal, a press or a preprint server, a category's picture
+address (`…/catalog/thumbnail?type=category&id=2` for its small copy,
 `…/fullSize?…` for the full size; `…/preprints/…` on a preprint server),
 opened for a category that has no "Cover Image", should answer the bare
-"404 Not Found" page. Instead the browser never finishes loading it: the
-server answers "200 OK" with headers promising 4096 bytes, fails to read
-the file, and closes the connection without sending any of them. The
-server is not kept busy; only the visitor's browser waits. No page links
-to these addresses: they are reached only by typing or bookmarking one,
-or by keeping the address of a picture the manager has since removed. A
-press answers the same way since pkp/omp#2553 handed its category
-pictures to the same code; before, its own handler answered an empty
-page. (Rule 12a)
-Basis: probe, 2026-10-07. <sup>f-a22</sup>
-Report: refresh owed — pkp/omp#2553 (`pkp/pkp-lib#13730`) merged 2026-11-06 as `1ac42011ad`: OMP's `CatalogHandler::fullSize()` and `thumbnail()` now hand the category case to `PKPCatalogHandler`, so the report's "OMP: its own `CatalogHandler` keeps the `if ($imageInfo)` check" (OMP the control) no longer holds; a category with no picture's small-copy address timed out on OMP `main` in the [A6](#a6) refresh walk (2026-11-10).
+"404 Not Found" page. Instead the server fails while answering: it logs
+a PHP warning, sends "200 OK" with headers promising 4096 bytes, and
+closes the connection without sending any of them. The browser then
+keeps the page loading and never shows anything.
+
+No page links to these addresses. A visitor meets one by keeping the
+address of a picture the manager has since removed in the category
+window, or by typing or bookmarking one. (Rule 12a)
+Basis: probe, 2026-11-10. <sup>f-a22</sup>
 
 <a id="a23"></a>
 **A23 — A category page number typed past the last page opens an empty page instead of "404 Not Found"** · 🐞 · low.
