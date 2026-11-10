@@ -77,7 +77,7 @@ languages these are:
 |------------------|-----------|-------|
 | "Name" | yes, in the journal's primary language | One line of text per language. The label carries no required mark, yet a save with the primary language's box empty is refused with "This field is required." under it; on "Edit Institution" of a journal with two or more form languages the message reads "You must complete this field in {language}.", naming the primary language. The other languages may stay empty. A name another institution of the journal already has is accepted. Shown as the row's name (Rule 3) and wherever the journal offers its institutions (Side effects) <sup>d</sup> |
 | "IP ranges" | no | A box of several lines under "Valid values include an IP address (e.g. 142.58.103.1), IP range (e.g. 142.58.103.1 - 142.58.103.4), IP range with wildcard '*' (e.g. 142.58.*.*), and an IP range with CIDR (e.g. 142.58.100.0/24).". One entry per line, each one of: an IPv4 address; two addresses joined by "-", with or without spaces around it; an address with "*" standing for any of its four parts, alone or in a range; or an address followed by "/" and a number from 0 to 32. Spaces at either end of a line and empty lines before the first entry and after the last are dropped; otherwise each line is kept as typed, a repeated line and a range written high to low included. Any other line refuses the save with "Invalid IP range" under the box, shown once however many lines are wrong: an empty line between two entries, a part written with a leading zero ("010.0.0.1"), a part above 255, or an IPv6 address ⚠ [A7](#a7) <sup>q8</sup>. A line may run to 40 characters. A longer one, such as a range with many spaces around "-", is neither saved nor refused: the panel stays open with "An unexpected error has occurred. Please reload the page and try again.", yet each "Save" on "Add Institution" adds the institution without IP ranges, and a "Save" on "Edit Institution" stores only the lines above the long one: placed first, it wipes every stored range ⚠ [A9](#a9). Left empty, the institution matches no visitor <sup>d</sup> |
-| "ROR" | no | One line under "Research Organization Registry ID for this institution.". Only a full registry address saves, spaces around it dropped: "https://ror.org/" followed by a nine-character identifier that starts with 0 and ends in two digits, such as "https://ror.org/0213rcc28". ⓘ The six characters between are digits and lowercase letters other than i, l, o and u: at the PR head (pkp-lib#13751, issue pkp-lib#12899, not yet merged) "https://ror.org/0213RCC28", "https://ror.org/0abcil012" and "https://ror.org/0a/b-c.12" are refused like the rest; before it, the box accepts any character there but uppercase I, L, O and U <sup>f-a5</sup>. Anything else, the identifier "0213rcc28" alone included, is refused with "This is not formatted correctly." under the box ⚠ [A5](#a5) <sup>q9</sup>. Nothing is looked up: the box offers no suggestions and the address is not checked against the registry, unlike the registry search on a contributor's affiliations ([→ ROR lookup](U41-contributors-and-affiliations.md#ror-lookup)). No page shows the ROR but this panel; the COUNTER reports print it (Side effects) <sup>d</sup> |
+| "ROR" | no | One line under "Research Organization Registry ID for this institution.". Only a full registry address saves, spaces around it dropped: "https://ror.org/" followed by a nine-character identifier that starts with 0 and ends in two digits, such as "https://ror.org/0213rcc28". ⓘ The six characters between are digits and lowercase letters other than i, l, o and u: since pkp-lib#13751 (issue pkp-lib#12899, merged 2026-11-09; OMP `main` has it, OJS and OPS once their pointers move) "https://ror.org/0213RCC28", "https://ror.org/0abcil012" and "https://ror.org/0a/b-c.12" are refused like the rest; before it, the box accepts any character there but uppercase I, L, O and U <sup>f-a5</sup>. Anything else, the identifier "0213rcc28" alone included, is refused with "This is not formatted correctly." under the box ⚠ [A5](#a5) <sup>q9</sup>. Nothing is looked up: the box offers no suggestions and the address is not checked against the registry, unlike the registry search on a contributor's affiliations ([→ ROR lookup](U41-contributors-and-affiliations.md#ror-lookup)). No page shows the ROR but this panel; the COUNTER reports print it (Side effects) <sup>d</sup> |
 
 ## Rules & state
 
@@ -1297,11 +1297,17 @@ the code.
 `nullable`, `regex:#^https://ror\.org/0[^ILOU]{6}\d{2}$#`, answered with
 `validator.regex` "This is not formatted correctly."; the help is
 `manager.institutions.form.ror.description`. Live-probed 2026-09-28: q9.
-At the PR head `b11ae35cb6` (pkp-lib#13751, issue pkp-lib#12899), before
-its merge, the class is `[a-hj-km-np-tv-z0-9]` (lowercase Crockford
-base32) in every ROR check; probed 2026-11-09 on PKP's dataset (OJS, OMP,
-OPS, `checks/sync/pkp-lib-13751/walk.js`): `0a/b-c.12`, `0ab cde12`,
-`0abcil012` and `0213RCC28` save at the base and are refused at the head.
+Since pkp-lib#13751 (issue pkp-lib#12899; head `b11ae35cb6`, merged
+2026-11-09 as `8888001f0a`, 3.5 #13752 as `03d5890f72`) the class is
+`[a-hj-km-np-tv-z0-9]` (lowercase Crockford base32) in every ROR check;
+probed 2026-11-09 on PKP's dataset (OJS, OMP, OPS,
+`checks/sync/pkp-lib-13751/walk.js`): `0a/b-c.12`, `0ab cde12`,
+`0abcil012` and `0213RCC28` save at the base and are refused at the head;
+walked again at the merge 2026-11-10 on fresh datasets (`main` OJS, OMP,
+OPS, OJS and OPS with `lib/pkp` pinned at `89a6d373b3`; 3.5 OJS pinned
+at `4fdb2979a1`, OMP at its pointer `1e5673c7c7`): the same. OMP `main`
+points at it; OJS and OPS take it with their next pointer move, and 3.5
+OJS and OPS with pkp/ojs#6054 and a bump.
 
 <a id="fn-f-a6"></a>
 **f-a6 — A6 evidence.** Note b: OJS gives the Site Administrator the

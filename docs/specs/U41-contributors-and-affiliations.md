@@ -1825,10 +1825,13 @@ it showed the old name after a reload (f-a24).
 <a id="fn-d"></a>
 **d — affiliations.** Model `PKP\affiliation\*` + `author_affiliations`
 tables; `affiliation.json`: `ror` (regex
-`#^https://ror\.org/0[^ILOU]{6}\d{2}$#`; `0[a-hj-km-np-tv-z0-9]{6}` at the
-PR head `b11ae35cb6`, pkp-lib#13751 for issue pkp-lib#12899, before its
-merge: an API save with `0213RCC28`, `0abcil012` or `0a/b-c.12` answers
-400 there and 200 at the base, `checks/sync/pkp-lib-13751/walk.js`) XOR
+`#^https://ror\.org/0[^ILOU]{6}\d{2}$#`; `0[a-hj-km-np-tv-z0-9]{6}`
+since pkp-lib#13751 for issue pkp-lib#12899, merged 2026-11-09 as
+`8888001f0a` (3.5 #13752, `03d5890f72`; OMP `main` points at it, OJS
+and OPS once their pointers move): an API save with `0213RCC28`,
+`0abcil012` or `0a/b-c.12` answers 400 there and 200 at the base,
+`checks/sync/pkp-lib-13751/walk.js`, at the PR head 2026-11-09 and at
+the merge 2026-11-10) XOR
 multilingual `name` —
 `Repository::saveAffiliations()` nulls the manual name whenever a ROR is
 set; validation strings `author.affiliationRorAndNameEmpty` ("Please
@@ -2245,6 +2248,11 @@ the PR heads before their merge (lib/pkp `221fec03de` on `main`,
 "Save" answers `200` and closes the panel, the registry entry kept with
 no names of its own; at the bases (`25fdc98a3e`, `40990d1523`) the
 refusal above, 2026-11-06. `fa_AF` on OJS `main` at the head: the same.
+Merged 2026-11-09 (`main` `8381b1efde`, 3.5 `5bd26ee348`, each the
+reviewed head's patch); walked again 2026-11-10 on fresh datasets with
+the same results, OJS, OMP and OPS on `main` (OMP at its pointer
+`8c3971dd1e`, OJS and OPS with `lib/pkp` pinned at `89a6d373b3`, their
+pointers still at `6035a6fed8`) and on 3.5 at the apps' pointers.
 Kept walk `shared/playwright/checks/sync/pkp-lib-12520/walk.js`.
 
 <a id="fn-s1"></a>
