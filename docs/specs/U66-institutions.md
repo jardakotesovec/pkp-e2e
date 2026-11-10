@@ -1307,7 +1307,8 @@ walked again at the merge 2026-11-10 on fresh datasets (`main` OJS, OMP,
 OPS, OJS and OPS with `lib/pkp` pinned at `89a6d373b3`; 3.5 OJS pinned
 at `4fdb2979a1`, OMP at its pointer `1e5673c7c7`): the same. OMP `main`
 points at it; OJS and OPS take it with their next pointer move, and 3.5
-OJS and OPS with pkp/ojs#6054 and a bump. `ore` has it since
+OJS and OPS likewise (the bump PRs pkp/ojs#6053 and #6054 are not
+to be merged; the pointers move with other issues' PRs, 2026-11-10). `ore` has it since
 pkp-lib#13771 (merged 2026-11-10 as `6722bea1ed`, OJS `ore`
 `aa4b02810f`), walked there the same day: the same.
 
