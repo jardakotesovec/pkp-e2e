@@ -59,7 +59,7 @@ line's fleet.
 ## Flake watch — known non-deterministic failure classes
 
 Not regressions. The response is a targeted rerun and a dated tally on
-the line (a line keeps its last three); a real investigation starts when the class's watch condition
+the line (a line keeps its last three, and a class that is fixed and unseen for three weeks is deleted); a real investigation starts when the class's watch condition
 trips.
 
 - **U03 S13 "a leaked password refused" keeps the box ticked** (OPS, serial). After the Site Administrator unticks "Check passwords against compromised password databases" and saves (the site API answers 200, 15:45:45 in the server log), the leaked password is still refused one second later (`apps/ops/playwright/tests/serial/U03-user-profile.spec.js:122`, no "Your changes have been saved."), and the retry finds the box ticked at its start (`:80`) with no site save in between, so the untick was never stored. Sighted once: pkp-e2e dispatch 42387087096 (2026-11-07, the PR review of pkp/pkp-lib#13543 round 6, which touches neither the Security form nor the site API), shard 1/3, both attempts; 4/4 green alone on the VM at the same OPS head (`8d1c3ea59a`, `--project=ops-serial --no-deps`). Not diagnosed: whether the Security form's save sends the stale value or a parallel worker overwrites the site row. Watch: a second sighting, then capture the site POST body.
@@ -80,23 +80,7 @@ trips.
   U26 S6 on OJS joined the list 2026-09-15 (the maintainer's second local
   8-worker run at the merged tips, `.reports/flake-local/run2.log`: the
   new-round wizard's composer mask still up after 30 s), green alone 2 of 2.
-  Last incidents: U21 S11 red on OMP with its retry exhausted 2026-09-03 (run
-  33745718330), green on the targeted rerun; U40 S6 then U40 S4 red on OMP in
-  two consecutive local final runs 2026-09-05 (U29 session, load average ~15
-  on 10 cores), green on the third; U40 S4 red on OMP in two of four local final
-  runs 2026-09-07 (U21 revision; the first at load ~15 on 10 cores), green
-  on the others, and in the second of the U23 revision's local final runs
-  2026-09-08. U40 S4 red on OMP in the first of the U26 revision-2 local
-  finals 2026-09-12 (load ~16 on 10 cores), green alone; U43 S4 (a click
-  hitting the 180 s test timeout) red on OMP in the accepted run 2026-09-13,
-  green alone in 12 s; U26 S10 (the decision wizard's "Notify Authors"
-  composer read empty for its 20 s wait) and U40 S3 (the "Publication: Title
-  & Abstract" heading not found in 30 s) red on OMP in the first U31
-  revision local final 2026-09-13 (load over 100 on 10 cores from the
-  desktop), both green in the second full run; U40 S4 (the edited abstract not
-  found in 30 s) red on OMP in the first U03 revision final 2026-09-13, green
-  alone in 5 s and in the second full run; U40 S4 red on OMP in the first
-  U06 revision final 2026-09-13, green alone in 5.1 s; U40 S6 (the "This field is required." message not shown in 10 s after the cleared title's "Confirm") red on OMP in the first U35 local final 2026-09-20 (4 workers), green alone in 13.5 s. Sighted 2026-09-23 on the Mac: red in 5 of 5 runs during the U37 harness step on a used OMP database, the file alone and `--repeat-each 3` included, and also with the builders at HEAD (`.reports/U37/harness/rerun-omp-U40-S6-baseline.log`); then red in the U37 OMP final on a reset database at auto workers, the only red of 291 (`.reports/U37/final-run-omp.log`), and green alone right after (`alone-omp-U40S6.log`). Unread whether used-database state or load drives it. Again 2026-09-25 in the U47 session's third OMP final on a reset database at auto workers, green alone (`.reports/U47/final-run-omp.log`, `alone-omp-reds.log`). **Watch condition**: a
+  **Watch condition**: a
   hardened test reds again with retries exhausted.
   **U40 S4 on OMP, mechanism found 2026-09-15** (a retained trace,
   `docs/reports/2026-09-15-flake-investigation.md`): `WorkflowPublicationForm`
@@ -115,7 +99,7 @@ trips.
   The U40 OMP file keeps traces on failure since 2026-09-15.
   **Baselines carry `70b0892042` since 2026-09-16** (sync); the U40 OMP
   `blur()` stays (a harmless commit), app-changes row 9 (c) is closed on
-  the tips, (a) and (b) stay open. Again 2026-09-25 (U50 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U50/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-25 (U51 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U51/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-28 (U72 harness step, Mac, used OMP database): OMP U40 S6 red in the U40 regression run, green alone (`.reports/U72/harness/harness-log.md`). Again 2026-09-28 (U69 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U69/final-run-omp.log`, `alone-reds.log`). Again 2026-09-29 (U74 session, Mac, reset databases, auto workers): OMP U40 S6 red in the OMP final ("This field is required." not shown in 10 s), green alone (`.reports/U74/final-run-omp.log`, `alone-omp-reds.log`).
+  the tips, (a) and (b) stay open. Again 2026-09-28 (U72 harness step, Mac, used OMP database): OMP U40 S6 red in the U40 regression run, green alone (`.reports/U72/harness/harness-log.md`). Again 2026-09-28 (U69 session, Mac, reset database, auto workers): OMP U40 S6 red in the OMP final, green alone (`.reports/U69/final-run-omp.log`, `alone-reds.log`). Again 2026-09-29 (U74 session, Mac, reset databases, auto workers): OMP U40 S6 red in the OMP final ("This field is required." not shown in 10 s), green alone (`.reports/U74/final-run-omp.log`, `alone-omp-reds.log`).
   **OMP U40 S6 diagnosed 2026-09-30** (housekeeping,
   `.reports/flake-0930/u40s6/`; CI 36529998661 and about ten local reds
   since 2026-09-20): not this class's remount. The second panel open waited
@@ -128,35 +112,6 @@ trips.
   before, 5 of 5 green after; the OMP U40 file 50 of 50 at eight workers.
   **Watch condition**: a U40 S6 red behind the new gates.
 
-- **Reviewer dashboard list under load** (U28 S1/S2, OMP; the roster
-  reviewers' whole assignment list). **Fixed 2026-09-26** (`.reports/flake-s26/fixAD/diagnosis.md`):
-  `ReviewerPages` `goto`/`selectView`/`expectSettled` wait for the view's
-  own `_submissions/reviewerAssignments` answer and `viewCount` for the
-  number the separate count fetch fills in (held 3 s: red 3 of 3 before,
-  0 of 3 after). **Watch condition**: a U28 list red behind those waits;
-  then move the leg to a throwaway reviewer.
-
-- **Error dialog stacking over the Add Reviewer windows** (U31 S4, OMP and
-  once OJS). The "Error" dialog's overlay intercepts the window's "Close"
-  and the test runs to its five-minute timeout (seen first by the U31 test
-  author on 2026-09-06, one re-run). Last incidents: OMP red in a local
-  final run and again alone 2026-09-07, green in two full runs earlier that
-  day; OJS red in a local final run 2026-09-08 (U23 revision), the first
-  time on a journal. **Watch condition**: reds on CI. Again 2026-09-29 (U74 session, Mac, reset databases, auto workers): OJS U31 S4 red in the OJS final beside S2, both at "Reviewers Suggested by Author" not visible in 10 s, not at the dialog; both green alone (`.reports/U74/final-run-ojs.log`, `alone-ojs-reds.log`).
-  **Diagnosed 2026-09-30** (housekeeping, `.reports/flake-0930/u31s2s4/`):
-  the four CI reds of 09-25..29 (OJS/OMP S2 and S4 at
-  `ReviewerSuggestionPages.js:484`) were lost presses, not a slow server:
-  the "Files To Be Reviewed" grid and the jQuery-animated "No Files
-  Selected" notice push "Add Reviewer" down ~114 px between the
-  button-down and the up, so no request goes (the CI server logs hold no
-  POST); the U74 Mac read was the suggestions panel drawn only after its
-  own fetch. Fixed in the page objects (`waitForLegacyFormSettled` in
-  `support/legacy.js`, used by `ReviewerRequestWindow` and 10 other call
-  sites on OJS and OMP; `SuggestedReviewersPanel.loaded()`): red 14 of 14
-  under a grid-hold lever before, 0 of 18 after; U31 45 of 45 and OJS U27
-  90 of 90 at eight workers. Rule in patterns.md "Legacy jQuery flows".
-  Left: U31's reads right after a submit still give the panel's refetch
-  10 s. **Watch condition**: a U31 red behind the settled window.
 - **U01 S8 hangs on a used database** (OJS and once OPS, local only so far). After a
   day's probes, checks and suite runs on one database, "S8: editor
   impersonates a participant from the Participants panel" hit its 4-minute
@@ -193,63 +148,6 @@ trips.
   the search for the tagged row after the reviewer's accept found nothing
   in 30 s (the hardened opener was not reached); green alone 2 of 2.
   **Watch condition**: a red with the hardened opener.
-- **A wizard press swallowed the instant a step becomes current** (U21
-  S10 and S12, OJS, CI only). CI run 34215183797 (2026-09-08, pkp-e2e
-  `main` at `aa12a61`, a docs-only push) red on both attempts of S12: the
-  Continue press issued right after the rail showed "2 Details" fired no
-  save and the rail stayed put for the 30 s wait; green on the same tree
-  and tips elsewhere. Second incident 2026-09-12, pkp-e2e run 34687878464
-  (companion `13274` at the ojs PR ref `75df364d49`): S10 red on both
-  attempts (the Review step's "Submit" press opened no confirmation
-  dialog, no `/submit` request in the server log; the retry stuck on "2
-  Details") and S12 red once on the same "2 Details" wait, green on
-  retry; both green locally at the same ref. The ojs PR's own run
-  34683529824 (read once the token worked) is the same class: U31 S1 red
-  on both attempts and U21 S12 once, all on the "2 Details" wait after
-  Continue. Watch condition tripped;
-  hardened 2026-09-12: `SubmissionWizardPage.pressUntil()` gives a
-  footer press an 8 s window for its outcome and presses again while the
-  button is still offered, at most three times, behind `continueTo()`,
-  `continueToReview()` and `submitAndConfirm()`. **Watch condition**: a
-  hardened press reds again with its retry exhausted. **Seen locally on
-  OMP 2026-09-13** (U24 revision session, the first OMP final at four
-  workers, `.reports/U24/final-run-omp-attempt1.log`: U21 S6's rail
-  still reading "2 Details" for the 44-poll wait on "Contributors" after
-  Continue, the one red of 214; the class's first local and first OMP
-  sighting, beside U04 S10's OMP entry below).
-  **Mechanism found 2026-09-15** (`docs/reports/2026-09-15-flake-investigation.md`):
-  the step rail (`Steps.vue`) animates a 500 ms scroll to the page title
-  after every step change; under a janky main thread Playwright's
-  two-frame stability check passes mid-animation, the mouse-down lands on
-  Continue, the animation's final jump moves the page and the mouse-up
-  lands in the abstract's editor iframe (Playwright validates only the
-  first pointer event of a click). Probe at 6× CPU throttle: 11 of 24
-  presses lost on the stock bundle, 0 of 24 with the reduced-motion patch
-  (`docs/reports/2026-09-15-ui-library-steps-reduced-motion.patch`, for
-  ui-library upstream; the preferred variant replaces the plugin with
-  native scrolling and a stylesheet rule, `2026-09-15-native-scroll-*.patch`,
-  same result); the harness now passes `reducedMotion` to the
-  `asUser` contexts, which it never had. The `pressUntil` retry stays
-  until the patch lands. **Merged upstream 2026-09-15** (ui-library
-  `393dd28952`/`d5d7017074`, pkp-lib `b262d27b81`, ojs `e0e0275a55`, omp
-  `6eb3b935ad`, ops `fb72f079ba`): the plugin is gone and reduced motion
-  means an instant jump (decided per call in `useScrollTo` since the
-  same-day follow-up: a global `scroll-behavior: smooth` rule broke the
-  Cypress suite's own scrolls; verified here at the merged tips: the
-  scroll animates without the preference, jumps with it, the throttled
-  probe loses 0 of 24 presses, U21 16 of 16). Once the sync
-  baselines carry these, `pressUntil()` can go back to a single press.
-  **Watch condition**: a lost press at tips carrying the merge.
-  **Seen on a footer button
-  without the bounded retry 2026-09-15** (sync session, the second OJS
-  final at four workers on a reset database,
-  `.reports/sync/final-run-ojs-attempt2.log`): U22 S2's "Save for Later"
-  press on the Details step, issued right after `continueTo('Details')`
-  returned, left the wizard on "Make a Submission: Details" for the 45 s
-  wait for the "Saved for Later" heading (the error context shows the
-  step still current and the button still offered), one of two reds in
-  216. `SubmissionWizardPage.saveForLater()` presses once; the next
-  step is the same `pressUntil()` shape behind it. Green alone in 14.1 s right after (`.reports/sync/s15-ojs-reds-alone2.log`) and in the traced third final (229 passed). **Baselines carry the merge since 2026-09-16** (sync: ojs `ae597ff9d9`, omp `0ec98a508`, ops `9ce633ee1d` with pkp-lib `b262d27b81` and ui-library `977e460c`, the per-call reduced-motion follow-up); `pressUntil()` stays as a content-verified bounded retry, which presses again only when a press was lost, so the watch condition above is live and a lost press shows as the retry firing.
 - **The Notify window's template body never landing in the editor under
   load** (U41 S3, OJS, once). `PublicationScreen.notifyParticipant()`
   (`apps/ojs/playwright/pages/PublicationMetadataPages.js`, U40's helper,
@@ -305,23 +203,6 @@ trips.
   (press, wait up to 10 s for step 2 to become current, press again while
   the accept button is still offered, at most three presses). **Watch
   condition**: the hardened leg reds again with its retry exhausted.
-  **Tripped 2026-09-13** (U05 revision session, the OJS final at four
-  workers, `.reports/U05/final-run-ojs.log`: the same `aria-disabled="true"`
-  tab for 63 polls after the hardened accept, the one red of 209; green
-  alone in 49 s, `.reports/U05/u28s10-rerun-0913.log`); the bounded retry
-  did not cover it, so the leg needs a second look. Tripped again the same
-  day (U22 revision session, the second OJS final at four workers,
-  `.reports/U22/final-run-ojs-attempt2.log`: the same tab, 63 polls, the
-  one red of 212), and a third time (U24 revision session, the first OJS
-  final at four workers on a reset database,
-  `.reports/U24/final-run-ojs-attempt{1,2}.log`: one of two reds in 216,
-  in both OJS finals of that session). Green in the sync session's OJS final at four workers 2026-09-14 (229 passed, traces retained).
-  The hottest single flake on CI (23 first-attempt reds in nine days,
-  `docs/reports/2026-09-15-ci-flake-tally.md`), never with a trace of the
-  failing attempt; since 2026-09-15 the U28 file keeps traces on failure
-  (`test.use({trace: 'retain-on-failure'})`), so the next CI red carries
-  one. The mechanism is not the wizard's scroll animation (a legacy jQuery
-  page); read the trace before hardening again.
   **Tripped again 2026-09-15** (sync session, the first OJS final at four workers on a reset database with the perf round-2 harness and `persistent = On`, `.reports/sync/final-run-ojs.log`: the same `aria-disabled="true"` tab for 63 polls after the hardened accept, one of three reds in 216; green alone in 45.9 s, `.reports/sync/s15-ojs-reds-alone.log`). Red again in the second OJS final the same day (`.reports/sync/final-run-ojs-attempt2.log`, one of two reds) and then **red alone** on that used database (`.reports/sync/s15-ojs-reds-alone2.log`, 1.2 min: the reminder-link leg's accept, the `2. Guidelines` tab disabled for 63 polls), the class's first alone red; green in the traced third final on a reset database (229 passed, 17.1 min) so still no trace, and green first try on CI the same day (pkp-e2e run 34952057769, ojs run 34956195225). Next step unchanged: a retained trace of the accept POST from a red run.
   **Sighted again on CI 2026-09-19** (pkp-e2e push run 35436736454 at
   `55bc9d0`, the U32 push: OJS red on U28 S10 on both attempts, 1.7 min
@@ -344,58 +225,6 @@ trips.
   after, each; OJS U28 `--repeat-each 5` at eight workers 80 of 80, every
   other wizard caller on OJS and OMP green once. Rule in patterns.md "UI
   realities". **Watch condition**: a U28 S10 red after the fix.
-- **A page-level Escape closing the workflow panel behind a "More
-  Actions" menu** (U30 S4, OJS; CI's second family, 15 first-attempt reds
-  in five weeks; most local OJS finals at four workers since 2026-09-12;
-  read before as "the Author Response table re-rendering"). **Mechanism
-  found and fixed 2026-09-26** (`.reports/flake-s26/u30/diagnosis.md`):
-  the test opened a row's "More Actions" and pressed Escape on the page;
-  headlessui moves focus into the menu two animation frames after the
-  click, so an Escape inside that window reaches the workflow panel's
-  reka dialog, which closes, and the row button never comes back (the
-  U01 S7 race of 2026-09-13, fixed then in one page object only). Held
-  with `requestAnimationFrame` delayed 150 ms: red 10 of 10 before, green
-  10 of 10 after; U30 35 of 35 at `--repeat-each 5`. `closeMenu(page)` in
-  the new `shared/playwright/support/menus.js` presses Escape on the menu
-  itself and waits for it to close; U30, OJS FundingPages and
-  PublishSchedulePages, OJS U04 S9, OPS U41 S4 and OMP U49 S18 use it;
-  `npm run lint:suite` flags every other page-level Escape. U30 S1/S3's
-  `gotoAuthor()` reds all predate the roster-rehash fix `cdf9458`. **Watch
-  condition**: a U30 red behind `closeMenu`.
-
-- **"Create New Version" dialog's stage select empty under load** (U49
-  S4/S6, OJS, OMP and OPS; sightings from 2026-09-15 to 2026-09-24 on
-  the VM, the Mac and twice on CI: push run 35126077430 and, on
-  2026-09-24, push run 35987189615 at `1cd4325`, OPS shard 1/3 red on
-  both attempts, the second dialog's "Publication Stage" with nothing
-  checked for the wait for "Author Original (AO)"). **Cause read
-  2026-09-24** (the daily session): nothing arrives late inside the
-  dialog. `useWorkflowVersionForm()` copies the stage from the store's
-  `selectedPublication` once, at mount, and the workflow store empties
-  `selectedPublication` each time the menu moves to another version
-  (`selectPublicationId()`, run by a pre-flush watch, so before the
-  version dialog leaves the page) until that version's GET answers. The
-  openers pressed "Create New Version" as soon as the side menu listed
-  the new version (the submission refetch), so under load the dialog
-  mounted inside that gap and kept an empty stage and no preselected
-  "Minor Revision" for good; the hardened 15 s wait for a value could
-  never help. Reproduced deterministically with every
-  `…/publications/{id}` GET held 6 s on a reset OPS database
-  (`.reports/sync/s24b-u49s6/old-delay.log`: red on the first dialog).
-  **Fixed the same day**: `WorkflowPage.expectVersionLoaded()` waits
-  for the header's contributors line (rendered only once the selected
-  publication is back) and the three openers (OPS
-  `createNewVersionViaDialog()`, OJS
-  `PublishScreen.openCreateVersionDialog()`, OMP
-  `openCreateVersionDialog()`) call it before the press; the 15 s value
-  wait is gone. Green with the 6 s hold (`fixed-delay.log`) and U49 on
-  the three apps on reset databases, first run (OJS 16, OMP 14, OPS 13;
-  `u49-<app>.log`). **Watch condition**: any red of this read behind the
-  new opener; then read the error context's header for the contributors
-  line. Held on the Mac the same day (U42 session): OPS S6 red alone five
-  times before the fix reached that tree, a reset database included, and
-  green alone after it on the same database
-  (`.reports/U42/alone-ops-U49S6-*.log`).
 - **CI worker server refusing connections during the login smoke** (OJS
   job, once). The U06 push's run 34773613958 (2026-09-13, `main`) failed
   its OJS job on the shared login smoke alone: `socket hang up` on the
@@ -404,17 +233,8 @@ trips.
   the OMP and OPS jobs of the same run passed, and the U04 push's run
   34768503126 an hour earlier was green on all three. No local
   counterpart. **Watch condition**: a second CI job lost to a refused
-  worker port; then read the job's server log step. **Second sighting
-  2026-09-27** (branch `reset-before-serial`, run 36319190019, OJS 3/3,
-  the only red of 9 jobs): U03 S2 in the app pass, 30 s into it; the
-  scenario API answered, then `page.goto` 5 s later got
-  `ERR_CONNECTION_REFUSED` at `127.0.0.1:8002`, and the retry 136 ms
-  later `ECONNREFUSED` on the scenario API. The other 168 tests of the
-  pass were green, later ones on 8002 included, so the server came back
-  (the restart wrapper in `php-server.js`). The server log could not be
-  read: every pass starts its servers with `: > <log>`, so the solo
-  pass's start emptied the app pass's `server-8002.log` (the artifact
-  holds 257 bytes from 12:43). **Diagnosed as a class 2026-09-29**
+  worker port; then read the job's server log step.
+  **Diagnosed as a class 2026-09-29**
   (housekeeping, `.reports/flake-2026-09-29/u01s4/diagnosis.md`): U01 S4
   "recover a forgotten password" on all three apps (ojs 36322492229,
   36459832328; pkp-e2e 36414422622 OPS, 36428321161 OMP), each a page
@@ -454,31 +274,6 @@ trips.
   unannotated, the test failing on `socket hang up` in the death's own
   second (OJS U03 S6 ojs 36672771134, OJS U12 S4 serial 36872303797): the
   watch read the log before the death line was written.
-- **Participants menu still open after the impersonation return** (U01
-  S7, OJS, once). In the fourth OJS final of the U05 revision session
-  (2026-09-13, four workers, `.reports/U05/final-run-ojs-attempt4.log`)
-  the assertion that the Participants panel's menu holds no item after
-  "Login As" and the return found two items for 10 s; the only red of
-  209, the same test green in the three finals before it. **Tripped the
-  same day**: the fifth final, on the same database (used by the two
-  finals before it), red on the same assertion alone
-  (`.reports/U05/final-run-ojs-attempt5.log`); the assertion is the
-  second press of the Editor's own "More Actions" button meant to close
-  the menu, so under load the press lands while the panel re-renders and
-  the menu stays open. Red again in the sixth final, on a reset database,
-  and alone right after it (`.reports/U05/u01s7-rerun-0913.log`), so not
-  a used-database class. **Diagnosed and fixed 2026-09-13** (probe record
-  `.reports/U05/diag-u01s7.md`): the step is `UsersRolesMenu.close()`
-  on the Users & Roles row menu, and the race is the page object's: the
-  bundled headlessui MenuButton moves focus into the menu two animation
-  frames (23–41 ms) after the click and handles Escape only there, so
-  an Escape sent to the page inside that window hits the button and is
-  ignored; the suite's open, two expects and close run in about the
-  same 20–40 ms, so load tips it. The OJS `close()` and OPS
-  `closeMenu()` now press Escape on the menu element itself (focus
-  first); green alone on both (`.reports/U05/u01s7-rerun2-0913.log`,
-  `.reports/U05/ops-u01-closemenu-0913.log`). **Watch condition**: the
-  hardened close reds again.
 - **Enroll-reviewer form's "This field is required." not shown under
   load** (U27 S4, OJS, once). In the same 2026-09-13 second OJS final
   (`.reports/U05/final-run-ojs-attempt2.log`, U05 revision session, four
@@ -488,30 +283,6 @@ trips.
   (`.reports/U05/u27s4-rerun-0913.log`). **Watch condition**: a second
   sighting; then retain a trace to see whether the press reached the
   server or the form re-rendered.
-- **ORCID connect popup not arriving under load** (U04 S2, OJS, once).
-  The `waitForEvent('popup')` after the profile's connect button ran to
-  the 60 s test timeout while three suites shared the VM (2026-09-12,
-  merge of companion `13274`, `.reports/sync/merge13274-ojs.log`); green
-  alone in 5.5 s. **Watch condition**: a second incident, or one at four
-  workers alone on the VM. **Tripped 2026-09-23** (U07 feature session):
-  OMP this time, in the first OMP final at eight workers with nothing else
-  on the VM, the one red of 281 (`waitForEvent('popup')` to the 60 s
-  timeout; the failure snapshot is the fixture page, not the user's, so
-  it shows nothing; `.reports/U07/final-run-omp-attempt1-red.log`). Owed
-  by the next maintenance session: a trace of the popup wait on a
-  repeated run.
-  CI reds followed (ojs 36144112471 2026-09-25; pkp-e2e 36545452266 OPS
-  2026-09-29). **Diagnosed 2026-09-30** (housekeeping,
-  `.reports/flake-0930/u04s2/`): not load but the harness: the button's
-  `openORCID()` sends the browser straight to `sandbox.orcid.org` (a
-  status check, then the window), and the `popup` event waits for that
-  window's first response, so a slow ORCID ran the test out (the CI worker
-  server got no request after the press). S2 on all three apps now presses
-  through `pressOrcidConnect` (`support/orcid.js`), which stubs the ORCID
-  hosts in that context only: red 15 of 15 under a 70 s hold on the
-  sandbox before, 0 of 30 after; U04 120 of 120 at eight workers. Rule in
-  patterns.md parallel lesson 6. **Watch condition**: a U04 red at a press
-  that leaves the app.
 - **A page load hanging under desktop load** (U04 S6, OMP, once). `page.goto`
   to the scratch press's `/orcid/about` ran to the 60 s test timeout in the
   second U06 revision local final 2026-09-13 (load 15–19 on the Mac from
@@ -587,32 +358,6 @@ trips.
   database state, not the build. Not seen on CI (fresh database). **Watch
   condition**: a red on CI or on a reset database; then read which stage
   assignment the author's permission tick lands on.
-- **Edit Review window's file checkbox re-ticked under load** (U27 S6,
-  OMP, once). In the "Files To Be Reviewed" grid of the Edit Review
-  window, the test unticks both files, reads "No Files Selected", then
-  `check()`s the first box back: the click landed while the legacy grid
-  was re-rendering ("element is not stable" twice before the click) and
-  the readback found the box's state unchanged, "Clicking the checkbox
-  did not change its state" (2026-09-15, U25 revision's OMP final at four
-  workers, `.reports/U25/final-run-omp.log`, error context
-  `pw-out-final-omp/U27-reviewer-assignment-Re-4ce6a-…/error-context.md`);
-  green alone in 21 s on the same used database. **Watch condition**: a
-  second incident; then wait for the grid's reload to settle (the
-  `waitForJQueryIdle` helper) between the unticks and the re-tick. Again 2026-09-25 (U50 session, Mac): OJS U27 S6 in the OJS final on a reset database at auto workers ("Clicking the checkbox did not change its state"), green alone (`.reports/U50/final-run-ojs.log`, `alone-ojs-reds.log`).
-  **Diagnosed 2026-09-30** (housekeeping, `.reports/flake-0930/u27s6/`;
-  tripped by OJS 2026-09-25 and CI omp 36581354102 OMP U28 S4 at
-  `ReviewerAssignmentPages.js:183`): the U31 mechanism in the same window:
-  the "No Files Selected" notice slides in or out over 250 ms after the
-  grid loads and on every box change, moving the boxes ~114 px between the
-  button-down and the up (the CI error context: box focused, unticked, no
-  save). Today's `waitForLegacyFormSettled` in `openEditReview` closes the
-  CI shape; every file-box press now goes through `setEditReviewFile`
-  (OJS `ReviewStagePages`, OMP `ReviewerAssignmentPages`), which settles
-  before and after: red 6 of 6 under a grid-event lever before, 0 of 14
-  after; OJS U27+U28 170 of 170 and OMP U27 95 of 95 at eight workers. The
-  09-15 re-tick shape (a press after a box change) went red once in ~70
-  lever runs, covered by the same helper, unproven. **Watch condition**: a
-  box "did not change its state" behind the helper.
 - **Review Details window's star-rating radio not registering the click
   under load** (U27 S9, OMP, once). `ReviewerAssignmentPages.rateReview()`
   (`apps/omp/playwright/pages/ReviewerAssignmentPages.js:352`) `check()`s
@@ -682,26 +427,9 @@ trips.
   (2026-09-16). A Mac-only class, so an OPS full run on the Mac reads
   146 of 147 by design until it is read; unverified hunch: Meta+z under
   headless Chromium on darwin against the keyed `WorkflowPublicationForm`
-  (sync 2026-09-16); red again in the U32 session's OPS final on a reset
-  database at four workers, 2026-09-19, the only red of 161
-  (`.reports/U32/final-run-ops-attempt1.log`), and in the U33 session's,
-  2026-09-20, the only red of 175 (`.reports/U33/final-run-ops.log`), and in the U34 session's the same day, the only red of 164 on a reset database at four workers (`.reports/U34/final-run-ops.log`; the 12 serial and solo tests green alone behind it), and in the U36 session's, 2026-09-23, beside U03 S5, red alone too (`.reports/U36/final-run-ops.log`, `alone-ops-U40S1.log`; serial and solo green alone), and in the U38 session's, 2026-09-24, beside U49 S6, red alone too (`.reports/U38/final-run-ops.log`; serial and solo green alone). **Watch condition**: a red
+  (sync 2026-09-16). **Watch condition**: a red
   of this read on CI or the VM; until then the OPS full green on a Mac
-  push is CI's. Again 2026-09-24 in the U39 session's OPS final and red alone once more; serial 10 and solo 2 green alone (`.reports/U39/final-run-ops.log`, `alone-ops-U40S1-U49S6.log`). Again 2026-09-24 in the U44 session's OPS final on a reset database at auto workers, the only red of 215; serial and solo 13 green alone (`.reports/U44/final-run-ops.log`, `alone-ops-serial-solo.log`). Again 2026-09-25 in the U48 session's OPS final on a reset database at four workers, the only red of 243; serial and solo 13 green alone (`.reports/U48/final-run-ops.log`, `serial-solo-ops.log`). Again 2026-09-25 (U50 session): red in the OPS final and red alone, as before (`.reports/U50/final-run-ops.log`, `alone-ops-reds.log`). Again 2026-09-25 (U51 session): red in the OPS final and red alone, as before (`.reports/U51/final-run-ops.log`, `alone-ops-reds.log`). Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): red in the OPS final beside U14 S5 and red alone, as before (`.reports/U53/final-run-ops.log`, `alone-ops-reds.log`). Again 2026-09-26 (U54 session, Mac, reset database, auto workers): red in the OPS final beside U14 S5 and red alone; serial and solo 17 green alone (`.reports/U54/final-run-ops.log`, `alone-ops-reds.log`, `alone-ops-serial-solo.log`). Again 2026-09-26 in the U55 session's OPS final on a reset database at auto workers, beside U14 S5 and the U18 `rss.xmp` class; serial 16 and solo 5 green alone (`.reports/U55/final-run-ops.log`, `alone-ops-{serial,solo}.log`). Again 2026-09-26 (U56 session, Mac, sync baselines, reset database): red in the OPS final and red alone; serial 15 and solo 8 green alone (`.reports/U56/final-run-ops.log`, `alone-ops-reds.log`). Again 2026-09-26 in the U60 session's OPS final (reset database, auto workers), beside the four U18 reds; serial 15 green alone (`.reports/U60/final-run-ops.log`, `alone-ops-serial.log`). Again 2026-09-27 (U61 session, Mac, reset database, auto workers): red in the OPS final beside the U18 four, U14 S5 and U54 S3; serial 21 and solo 21 green alone (`.reports/U61/final-run-ops.log`, `alone-ops-{serial,solo}.log`). Again 2026-09-27 (U62 session, Mac, reset database, auto workers): in the OPS final and red alone; serial 23 and solo 24 green alone (`.reports/U62/final-run-ops.log`, `alone-ops-reds.log`, `alone-ops-{serial,solo}.log`). Again 2026-09-28 (U68 session, Mac, reset database, auto workers): red in the OPS final, not re-run (`.reports/U68/final-run-ops.log`). Again 2026-09-28 (U72 session, Mac, reset database, auto workers), red in the OPS final (`.reports/U72/final-run-ops.log`). Again 2026-09-28 (U73 session, Mac, reset database, auto workers): red in the OPS final and red alone; serial and solo green in the final (`.reports/U73/final-run-ops.log`, `alone-reds.log`). Again 2026-09-28 (U69 session, Mac, reset database, auto workers): red in the OPS final; serial and solo green in the final (`.reports/U69/final-run-ops.log`). Again 2026-09-29 (U74 session, Mac, reset databases, auto workers): red in the OPS final and red alone (`.reports/U74/final-run-ops.log`, `alone-ops-reds.log`); serial and solo green in the final.
-- **U45 S6/S8's DOI row expander blocked by the "Bulk Actions" menu**
-  (OJS 2026-09-27, OMP 2026-09-28, Mac finals; the `<li>` "from
-  `listPanel__header`" that intercepted the click is the menu's item).
-  **Fixed 2026-09-28** (`.reports/flake-s28/u45-expand/diagnosis.md`):
-  the ui-library `Dropdown` closes only by a blur timer, and a window
-  answered within a second of a press longer than 100 ms hands the focus
-  back to the still-open item, so the menu stays over the first rows (an
-  app defect, U45's register; app-changes row 21).
-  `DoisPage.chooseBulkAction` waits for the menu's items to be gone once
-  the window is visible (and the U45 K3 check script). A 200 ms press: red
-  10/10 on OJS and 10/10 on OMP before, 0/10 each after; U45
-  `--repeat-each 5` at eight workers green 80/80 OJS, 60/60 OMP, 65/65
-  OPS. Rule in patterns.md pitfall 3. **Watch condition**: a row click
-  intercepted by a menu item behind the wait.
+  push is CI's. Again 2026-09-28 (U73 session, Mac, reset database, auto workers): red in the OPS final and red alone; serial and solo green in the final (`.reports/U73/final-run-ops.log`, `alone-reds.log`). Again 2026-09-28 (U69 session, Mac, reset database, auto workers): red in the OPS final; serial and solo green in the final (`.reports/U69/final-run-ops.log`). Again 2026-09-29 (U74 session, Mac, reset databases, auto workers): red in the OPS final and red alone (`.reports/U74/final-run-ops.log`, `alone-ops-reds.log`); serial and solo green in the final.
 - **OPS U09 S4's Custom Block Manager row missing from the plugins grid**
   (OPS, once, 2026-09-27). In the U64 session's OPS final (reset
   database, auto workers) `tr.gridRow[id$="-row-customblockmanagerplugin"]`
@@ -716,25 +444,6 @@ trips.
   (`.reports/U72/final-run-ojs.log`, `alone-reds.log`). Kin of the OPS
   U09 S4 plugins-grid row wait above. **Watch condition**: a second red
   at either wait.
-- **OPS U75 S2's relation DOI box missing** (OPS, once, 2026-09-28). In
-  the U72 session's OPS final (Mac, reset database, auto workers)
-  `relations.doiBox()` was not found where it should read the
-  "elsewhere" DOI (`U75-preprint-relations.spec.js:287`); green alone in
-  10.5 s (`.reports/U72/final-run-ops.log`, `alone-reds.log`).
-  Second sighting 2026-10-06 (pkp-e2e CI 37407424820 on `main`, OPS
-  shard 3, green on its retry): `RelationsControl.open()` read the legend,
-  then found no radios for 30 s, the button shown closed. **Diagnosed and
-  fixed 2026-10-07** (housekeeping, `.reports/flake-2026-10-07/u75s2-relations-panel/`):
-  "Relations" is a ui-library Dropdown that closes itself up to a second
-  after the focus leaves it (the side-menu press to "Contributors"), and
-  `open()` took the still-visible panel for open; a lever holding the close
-  until after that read reds S2 10 of 10, 0 of 10 with the fix. The page
-  objects now decide on `settleDropdown()` (`support/dropdown.js`):
-  Relations, the workflow "Payments" menu and the DOIs page's "Bulk
-  Actions" (patterns.md pitfall 3); U75 `--repeat-each 5` at 8 workers
-  30/30, U45 and U52 green on the three apps. **Watch condition**: a red
-  in a Dropdown's `open()` or `close()`; delete the entry after two weeks
-  without one.
 - **OJS U20 S8's Google Analytics "Settings" window answering "Error"**
   (OJS, once on CI, 2026-09-28). On push run 36371844559 at `f8e211f`
   (OJS shard 3/3) the plugin's "Settings" opened the "An unexpected error
@@ -746,30 +455,6 @@ trips.
   36374699873 on the same commit green on every job
   (`.reports/U72/ci-36371844559/`). **Watch condition**: a second red at
   the same window; then capture the server log of that request.
-- **OMP U16 S8's "Browse" block marks no category** (OMP, once,
-  2026-09-27). In the U70 session's OMP final (reset database, auto
-  workers) the block on the "Science" category page listed no marked
-  entry where "Science" is expected (`U16-categories.spec.js:636`,
-  `markedNames()` `[]`); green alone in 11 s (`.reports/U70/final-run-omp.log`,
-  `alone-omp-U16S8.log`). **Watch condition**: a second red at the same
-  read. **Tripped 2026-09-28** (U73 session, Mac, checkouts at the 09-27
-  baselines, reset database, auto workers): red in the OMP final at the
-  same read (`markedNames()` `[]` after the "Science" link), red once more
-  alone with `--no-deps`, then green alone three times with
-  `--repeat-each 3` (`.reports/U73/final-run-omp.log`, `alone-reds.log`,
-  `alone-omp-U16S8-r3.log`); the read is taken right after the URL
-  assertion, so an unwaited read of the new page is the lead. **Fixed
-  2026-09-29** (housekeeping, `.reports/flake-2026-09-29/u16s8/diagnosis.md`):
-  the test's own race. The mark is the theme's CSS on the server's
-  `li.current`, and the theme's stylesheet is a PHP request fetched on every
-  page while the body is already visible; the link's `click()` and the
-  `toHaveURL` do not wait for `load`, so `getComputedStyle` read no bar.
-  `BrowseBlock.markedNames()`, `look()` and `flatEntries()` now wait for
-  `BasePage.stylesApplied()` (the `load` state), which also covers the same
-  read in OJS and OPS U16. With the stylesheet held 3 s: red 10 of 10
-  before, 0 of 10 after; OMP U16 `--repeat-each 5` at eight workers green,
-  OJS and OPS U16 green once. Rule in patterns.md "Parallel-load lessons"
-  16. **Watch condition**: a `markedNames()` red after `stylesApplied()`.
 - **U18 feed download named `rss.xmp` on the Mac** (U18 S1, S3, S7, S8,
   all three apps; deterministic on the Mac, 2026-09-26). The RDF feed's
   download comes out as `rss.xmp` where `WebFeedPages.js` expects
@@ -785,7 +470,7 @@ trips.
   then a Mac full run reads four reds per app and skips the serial and
   solo projects, which need their own `--no-deps` run. Not driven by the
   U55 feature session that logged it; the fix (the expectation or the
-  download read) is the next daily session's. Again 2026-09-26 (U56 session, Mac, checkouts at the day's sync baselines, reset databases, auto workers): red in all three finals and red alone, 4 per app (`.reports/U56/final-run-{ojs,omp,ops}.log`, `alone-<app>-reds.log`). Again 2026-09-26 (U60 session, Mac, the same baselines, reset databases, auto workers): 4 per app in all three finals, not re-run alone (`.reports/U60/final-run-{ojs,omp,ops}.log`). Again 2026-09-27 (U61 session, Mac, reset databases, auto workers): 4 per app in all three finals; serial and solo green alone on each app (`.reports/U61/final-run-{ojs,omp,ops}.log`, `alone-<app>-{serial,solo}.log`). Again 2026-09-27 (U62 session, Mac, reset databases, auto workers): 4 per app in all three finals, not re-run alone (`.reports/U62/final-run-{ojs,omp,ops}.log`). Again 2026-09-28 (U68 session, Mac, reset databases, auto workers): 4 per app in all three finals, not re-run; serial and solo green in all three (`.reports/U68/final-run-{ojs,omp,ops}.log`). Again 2026-09-28 (U72 session, Mac, reset databases, auto workers): S1, S3, S7, S8 red in all three finals (`.reports/U72/final-run-{ojs,omp,ops}.log`). Again 2026-09-28 (U73 session, Mac, reset databases, auto workers): 4 per app in all three finals; serial and solo green in all three (`.reports/U73/final-run-{ojs,omp,ops}.log`). Again 2026-09-28 (U69 harness regression, Mac, used databases): S1, S3, S7, S8 red alone on each app, `rss.xmp` (`.reports/U69/harness/pw-{ojs,omp,ops}-U18.log`). Again 2026-09-28 (U69 session, Mac, reset databases, auto workers): S1, S3, S7, S8 red in all three finals; serial and solo green in all three (`.reports/U69/final-run-{ojs,omp,ops}.log`). Again 2026-09-29 (U74 session, Mac, reset databases, auto workers): S1, S3, S7, S8 red in all three finals; serial and solo green in all three (`.reports/U74/final-run-{ojs,omp,ops}.log`).
+  download read) is the next daily session's. Again 2026-09-28 (U69 harness regression, Mac, used databases): S1, S3, S7, S8 red alone on each app, `rss.xmp` (`.reports/U69/harness/pw-{ojs,omp,ops}-U18.log`). Again 2026-09-28 (U69 session, Mac, reset databases, auto workers): S1, S3, S7, S8 red in all three finals; serial and solo green in all three (`.reports/U69/final-run-{ojs,omp,ops}.log`). Again 2026-09-29 (U74 session, Mac, reset databases, auto workers): S1, S3, S7, S8 red in all three finals; serial and solo green in all three (`.reports/U74/final-run-{ojs,omp,ops}.log`).
 - **Profile save response not seen in 30 s** (U03 S5, "cancel, and
   reject, an email change", OPS, once: 2026-09-23, the U36 session's OPS
   final on a reset database on the Mac at auto workers,
@@ -807,88 +492,6 @@ trips.
   (`ProfilePage.js:265`, pkp-e2e 36842671866) and OMP U03 S10 (`:243`,
   36872303797) are form waits whose tab fetch went unanswered (exit 139);
   `open()`/`expectOpen()` still give a bare 30 s timeout there.
-- **"Cancel upload" on a throttled upload** (U36 S9, OJS and OMP; local
-  finals from 2026-09-24, CI once on both attempts: push run 36322740739,
-  OMP shard 3/3; CI tally 6 flaky + 1 failed on OJS). **Fixed
-  2026-09-28** (`.reports/flake-s28/u36s9/diagnosis.md`): the test's own
-  race over an app defect. The app stores a file whose whole body reached
-  the server before the abort; the test lifted the throttle about 10 ms
-  after the press (releasing the held body ahead of the abort), and at
-  4 KB/s the 636-byte body was out in 0.3 s, which a press under load
-  missed. Now the body is held at 64 bytes/s (about 10 s) and the
-  throttle stays on through the reload and the empty-panel reads. Under
-  a 6× CPU throttle: red 9/10 OJS and 10/10 OMP before, 0/10 after; the
-  U36 file `--repeat-each 5` at eight workers 50/50 on each app. Rule in
-  patterns.md "Waiting strategy"; the defect underneath is U36's register
-  (a cancel pressed after the last byte keeps the file). **Watch
-  condition**: an S9 red at the reload read behind the held throttle.
-- **Users & Roles "Email" dialog still open after "Send Email"** (U14 S5
-  on OJS, OMP and OPS, local finals only; sightings 2026-09-17 to
-  2026-09-27, `.reports/flake-s26/u14/`, `.reports/workers-8core/invalid-concurrent/run-ojs-w8.log`;
-  no CI sighting: every CI red of S5 is the Tasks-row class below).
-  **Fixed 2026-09-28** (`.reports/flake-s28/u14s5-email/diagnosis.md`):
-  the control mail's Body was typed while TinyMCE was still fetching its
-  content style sheets, whose arrival loads the empty start content over
-  the text; the server refused the empty Body (200, `"status": false`,
-  an `alert()`), so the window never closed. The shared
-  `EmailUserWindow.expectOpen()` now waits for the open form's own editor
-  to be `initialized` and `sendAndExpectSent()` fails on a refused send;
-  OJS `UsersPage.sendEmail` and the OMP and OPS `sendControlEmail` use it.
-  Lever `PLAYWRIGHT_HOLD_URL`/`PLAYWRIGHT_HOLD_MS` on the two style sheets:
-  red 12 of 12 before, 0 of 12 after; the U14 file green `--repeat-each 5`
-  at eight workers (65 + 40 + 40), U53 app and `@solo` green once. Rule in
-  patterns.md "UI realities" (the TinyMCE entry). Thirteen Vue-form
-  TinyMCE fills of the same shape with no sighting are listed in the
-  diagnosis's section 3. **Watch condition**: a send refused with "the
-  send was refused" from `sendAndExpectSent()`, or one of the thirteen
-  red at its fill.
-- **Tasks dialog missing the report's task row: an app defect, not a
-  race** (U14 S5, S12, S13 on OJS, OMP and OPS; 29 first-attempt reds on
-  CI in five weeks, red in nearly every local final since 2026-09-17,
-  always green alone). **Mechanism found 2026-09-26**
-  (`.reports/flake-s26/u14/diagnosis.md`): lib/pkp
-  `UserCommentController::delete()` deletes notifications with one
-  `whereIn(assoc_type)->whereIn(assoc_id)` over the comment's id and its
-  report ids, no journal condition, so deleting comment N removes the
-  report task of report N anywhere (pkp/pkp-lib#12407, `677b737d20`,
-  2026-03-04). A reset database lines comment and report numbers up, and
-  U14's parallel tests delete comments while others read report tasks.
-  Two-journal probe on all three apps: the task deleted 4 of 4, kept 3 of
-  3 without the collision; with the numbers far apart, 0 reds in 210 U14
-  tests. U14 register entry (A11); reported 2026-09-26 (thread + DMs;
-  the write-up deleted 2026-09-27 once the fix merged); kept check `checks/U14/delete-tasks/collide.js`
-  (fixed when `MODE=collide` leaves A's task). The tests are right and
-  stay as they are. Again 2026-09-27 (U52 session's finals, VM, reset
-  databases, auto workers): S5 red on all three apps, green alone on each
-  (`.reports/U52/alone-status.log`). `TasksPanel.openTask()` now fails in 10 s on a
-  missing row instead of the 8-minute test timeout. Harness alternative,
-  not applied (maintainer's call, like the OPcache file cache once offered
-  for GH-20469): at cold
-  bootstrap, insert and delete a block of placeholder reports through the
-  query builder so report numbers start above any comment number a run
-  reaches. Also from the code only: `deleteReports()` passes a list
-  inside a list to `withReportIds()` (no screen sends it). **Watch
-  condition**: the upstream fix lands; then the class should vanish.
-  **Fix landed 2026-09-27** on pkp-lib `main` (`26ae6431b5`, separate
-  deletes for the comment's task and its reports' tasks). OJS carries
-  it since ojs `72b85f4ba0` (lib/pkp `26ae6431b5`): `collide.js` leaves
-  A's task on OJS, still takes it on OMP and OPS (lib/pkp `17a1f01fed`),
-  2026-09-27 (`.reports/sync/s27/u14collide-<app>-*.log`); the day's finals on reset databases: OJS S5 green, OMP and OPS S5 red, green alone (`.reports/s27/final-run-<app>.log`). Since the same day a whole-suite `test:<app>`
-  resets the fleet before the app pass, so local finals run on the
-  colliding numbering every time (H3RESET2: OPS S5 the only red of 379)
-  until the pointers move; then re-run `collide.js` and retire the entry.
-  A second read in S5 red twice in the diagnosis runs: OJS line 738, the
-  "Email" window still open 30 s after "Send Email" (its own entry, "Users & Roles \"Email\" dialog still open"). Again 2026-09-28 (U68 session, Mac, reset databases, auto workers): S5 red in the OMP and OPS finals, green alone on each (`.reports/U68/final-run-{omp,ops}.log`, `alone-reds.log`). Again 2026-09-28 (U72 session, Mac): OJS U14 S5 red in the OJS final at the report row count, green alone (`.reports/U72/final-run-ojs.log`, `alone-reds.log`). Again 2026-09-28 (U65 session, VM, reset databases, auto workers): OMP U14 S5 red in the OMP final at the report row count, green alone (`.reports/U65/final-run-omp.log`, `alone-reds.log`). Again 2026-09-28 (U69 session, Mac, reset databases, auto workers): S5 red in the OMP and OPS finals, green alone on both (`.reports/U69/final-run-{omp,ops}.log`, `alone-reds.log`). Again 2026-09-29 (U74 session, Mac, reset databases, auto workers): OMP U14 S5 red in the OMP final (the Tasks dialog's row count 0 of 1 in 10 s), green alone (`.reports/U74/final-run-omp.log`, `alone-omp-reds.log`). **2026-09-29 (daily session, VM)**: OMP and OPS now carry the fix (lib/pkp `fab29cfeca` at omp `480045c32`, ops `5da5bc48ad`); `collide.js` leaves A's task on both, `MODE=collide` and `control` (`.reports/sync/s29-u14-*.log`); the day's finals on reset databases, auto workers: U14 S5 green on all three apps (`.reports/s29/final-run-<app>.log`); U14 A11 retired. Not deleted yet: the 2026-09-28 OJS sighting (U72, Mac) came after OJS carried the fix, so the entry is deleted after a week with no sighting on a checkout that carries it; a sighting there reopens the diagnosis.
-
-- **Review-forms reads under load** (U29 S4, S7, S9, OJS). S9's
-  recommendation options were read before the step-3 tab's content
-  arrived: **fixed 2026-09-26** (`.reports/flake-s26/fixAD/diagnosis.md`), `continueToStep3` waits for
-  `#reviewStep3Form` (tab held 3 s: red 3 of 3 before, 0 of 5 after);
-  S7's `rowCounts` already waits for its cells (no red under a 2 s grid
-  hold). S9's order read (:738/:759, the recommendations list has no
-  ORDER BY) is fix list B's (`.reports/flake-s26/fixlist-B.md`).
-  **Watch condition**: a U29 red outside the order read.
-
 - **A `php -S` worker segfault** (once, OJS run 33106002377, 2026-08-27,
   in-flight request most likely `GET /api/v1/_submissions/viewsCount`).
   The cascade it used to cause is fixed by the server restart loop
@@ -980,24 +583,6 @@ trips.
   mailable's list; S7 green alone on OJS (20.1 s) and OMP (22.3 s),
   `.reports/sync/s21-u34s7-{ojs-alone2,omp-alone1}.log`. **Watch
   condition**: the hardened save reds again.
-- **A wizard rich-text fill lost before its editor has loaded** (U21 S3,
-  OMP on CI in nightly 35558115088 and push 36320351712, OPS on the Mac
-  2026-09-24; the former "wizard rich-text fill lost to a re-render" and
-  "autosave not firing within its 100 s wait" entries, one class).
-  **Fixed 2026-09-28** (`.reports/flake-s28/u21s3-autosave/diagnosis.md`):
-  the title was typed while TinyMCE was still fetching
-  `content_oneline.css`; on its arrival the box put the seeded title back
-  and only then bound its v-model, so the typed text passed the read-back,
-  vanished, and the autosave timer found nothing to save (nothing pauses
-  it on focus). `waitForEditorReady()` (new
-  `shared/playwright/support/richtext.js`) now guards the rich-text fills
-  of the three wizards' page objects and OPS `PublicationPages` and
-  `ContributorPages`. Lever `PLAYWRIGHT_HOLD_URL='content_oneline\.css'`,
-  4 s: red 12/12 before, 0/12 after; U21 `--repeat-each 5` at eight
-  workers 75/75 OJS, 80/80 OMP, 80/80 OPS; the 13 other caller files green
-  once. Unguarded fills of the same shape with no sighting (the reviewer
-  comment boxes, in-spec task-form fills) are listed in the diagnosis.
-  **Watch condition**: a rich-text value lost behind the ready wait.
 - **"Add Reviewer" search never rendered** (U28 S11, OJS, once). In
   the U42 session's OJS final on a reset database at auto workers on the
   Mac (2026-09-24, `.reports/U42/final-run-ojs.log`), "read an earlier
@@ -1042,62 +627,6 @@ trips.
   the "Announcement type added." notice not found
   (`alone-ojs-serial-solo.log`, `alone-ojs-U12S6.log`). **Watch
   condition**: a second sighting of any; then read its trace. The U12 S6 sightings in the `<app>-serial` projects run alone after the finals (U10, U47, U50, U51, U53 sessions) were the solo project running beside the serial one under a combined `--no-deps` command, now refused by the config (2026-09-26). First sighting the same day of OMP U39 S2 "the Publisher Library on the Settings tab": the 180 s test timeout waiting on a "Press Library" row in the OMP final, green alone (`.reports/U47/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-25 (U50 session, Mac): U12 S6 red in the `<app>-serial` project run alone after the finals on all three apps ("Announcement type added." not found), green alone right after on all three (`.reports/U50/alone-{ojs,omp,ops}-serial-solo.log`, `alone2-{ojs,omp,ops}-U12S6.log`). Again 2026-09-25 (U51 session, Mac): OPS U12 S6 red in `ops-serial` run alone after the OPS final ("Announcement type removed." not found), green alone right after (`.reports/U51/alone-ops-serial-solo.log`, `alone2-ops-U12S6.log`). Again 2026-09-26 (U53 session, Mac, reset databases, auto workers): OJS U12 S6 red in `ojs-serial` run alone after the OJS final ("Announcement type added." not found), green alone right after (`.reports/U53/alone-ojs-serial-solo.log`, `alone2-ojs-U12S6.log`).
-- **U02 S6's consent line read on screen before anything is ticked**
-  (OPS, CI once 2026-09-24). **Fixed 2026-09-26** (`.reports/flake-s26/fixC/diagnosis.md`): the one-shot
-  `boundingBox()` read raced the theme's style sheet; the page object's
-  `expectConsentLineOnScreen()` polls (style sheet held 3 s: red 4 of 4
-  before, green 4 of 4 after). **Watch condition**: a red of the polled
-  read.
-
-- **OPS U08 S2 reading manager.maya's Tasks count** (order-dependent:
-  OPS U40 S1, U41 S1/S3, U42 S1, U43 S1 and OMP U42 S1 opened their
-  mailbox-control discussions as maya on `publicknowledge`). **Fixed
-  2026-09-26** (`.reports/flake-s26/fixAD/diagnosis.md`): U08 S2 reads the count as any number, the controls
-  run on a scratch server or press of the test's own
-  (`PublicationPages.sendMailControl`, OPS). **Watch condition**: a
-  roster persona's task count asserted again.
-
-- **OMP U10 S1's style-sheet buttons read before "Remove" renders**
-  (OMP, 2026-09-25). **Fixed 2026-09-26** (`.reports/flake-s26/fixC/diagnosis.md`): `UploadBox` returns
-  auto-waiting button locators and `expectUploadOffered()` (the upload's
-  answer handled 1.5 s late: red 4 of 4 before, green 4 of 4 after), on
-  every U10 caller of the three apps. **Watch condition**: a red behind
-  the new readers.
-  Again 2026-09-30 (CI ojs 36668070912, OJS U10 S2, green on retry) at a
-  site the fix does not cover: the favicon's `choose()`
-  (`AppearancePages.js:241`) returns on the `temporaryFiles` answer, the
-  save then went out without the file and the home page had no favicon
-  link (spec :430). Again twice 2026-10-13 (pkp-e2e 38459885243 on
-  `main`, 38387808192), the same line. **Fixed 2026-10-14**
-  (housekeeping; `.reports/flake-1014/u10s2-favicon/diagnosis.md`):
-  `UploadBox.choose()` and `chooseByKeyboard()` return only once dropzone
-  marks the upload done (`.dz-preview.dz-complete`, set with `success`,
-  when the form takes the file); a lever holding the page's handling of
-  the answer 1.5 s reds S2 5 of 5 before and 0 of 8 after; U10 whole file
-  `--repeat-each 5` at eight workers green on OJS 50/50, OMP and OPS 40/40,
-  U60 S9 and S11 green (patterns.md "Waiting strategy"). **Watch
-  condition**: a favicon, logo or style-sheet save read empty after the
-  fix.
-
-- **The OJS publish panel confirmed before its "Issue Assignment" is
-  filled** (U13 S3 "an older version beside the current one"; CI's top
-  first-attempt flake, 25 in about 40 OJS shard runs, always green on the
-  traced retry; red in and alone on the Mac at the older baselines).
-  **Mechanism found and fixed 2026-09-26** (`.reports/flake-s26/u13s3/diagnosis.md`):
-  a later version opens "Review Publishing Details" too (it starts
-  QUEUED), whose required "Issue Assignment" mounts empty and is filled
-  only when the panel's own `issueAssignmentStatus` GET answers; a
-  "Confirm" pressed before that is refused inside the page ("This field
-  is required.", no request) and the confirmation never opens. Held
-  deterministically by delaying that GET (red 7 of 7 before, green 8 of 8
-  after). `PublicationScreen.pressPublish()` / `awaitPublishPanelSettled()`
-  (OJS `PublicationMetadataPages.js`) now return the panel only with the
-  answer and its preselected radio in; `openPublishPanel()`, `publish()`,
-  `PublishSchedulePages.openPublishPanelExpectingIssueFields()` and the
-  U13, U18, U20 helpers go through it (OMP and OPS panels have no issue
-  field). **Watch condition**: a red at the confirmation wait behind the
-  settled panel.
-
 - **U09 S6's formatted box stuck under TinyMCE's "Loading..." throbber:
   an app defect, not a race** (OPS 2026-09-25, the box holding "Welc";
   OPS 2026-09-27 on the VM, the custom block's English box, the click
@@ -1161,17 +690,8 @@ trips.
   U12, U13, U18, U28, U29, U35, U42, U54, U55; new U13 A11 🐞: keywords
   lose the typed order on every save); galley seeds carry `seq`.
   **Watch condition**: a position read on a list whose query has no
-  unique ORDER BY. **Sighted 2026-09-27** (first in the U61 session's OPS final): OPS U54 S3 "create a role" red at `RolesTab.openRowActions` because the new "Data editor" landed as the Roles list's first row, which carries no "Settings" arrow (U54 A1, A13). The diagnosis is the next daily session's. Again 2026-09-27 (U63 session's OMP final, Mac, reset database, auto workers): OMP U54 S6 "remove a role", "Spare desk" the first row, green alone (`.reports/U63/final-run-omp.log`, `alone-omp-reds.log`). Again 2026-09-27 (U58 session's OMP final, VM, reset database, auto workers): OMP U54 S3 "create a role", "Data editor" the first row, green alone (`.reports/U58/final-run-omp.log`, `alone-reds.log`). Again 2026-09-27 (U71 session's OMP and OPS finals, VM slot s1, reset databases, auto workers): U54 S3 on both, "Data editor" the first row, green alone on both (`.reports/U71/final-run-omp.log`, `final-run-ops.log`, `alone-omp-U54S3-U14S5.log`, `alone-ops-U54S3-U14S5.log`). Again 2026-09-28 (U59 session's OPS final, VM, reset databases, auto workers): red, green alone (`.reports/U59/alone-reds.log`). **Diagnosed 2026-09-29** (housekeeping, `.reports/flake-2026-09-29/u54s3/diagnosis.md`): an app defect, U54 A1 set off by A13. The grid keys each page's rows 0…n−1 and adds no "Edit"/"Remove" to row id 0, and PostgreSQL stores a new role wherever its free space map offers room, often before the context's own roles on a used database; CI's six OJS S3 first-attempt reds of 2026-09-28 were all shard 1/3. U54 S3–S6 now run through `replayWhenFirstRow()` (a fresh scratch context only when the role opened is the list's first row, at most three attempts, an `app-defect` annotation), app-changes row 22. With a storage lever: red 10 of 10 before, 0 of 10 after; the three U54 files `--repeat-each 5` at eight workers green (35 + 40 + 35). **Watch condition**: a U54 red naming `FirstRowError` with its three attempts spent. Sighted and fixed 2026-09-29 (housekeeping, `.reports/flake-2026-09-29/u65s7/diagnosis.md`): OJS U65 S7 "downloading the reports", red on the first attempt of five CI runs on 2026-09-28 (pkp-e2e 36461456234, 36483369298, 36489553910, 36462286731; ojs 36475766741), compared the second "Review Report" download with the first line for line; the report orders by submission title only, so "Marsh survey"'s two reviewer lines swapped between requests (spec Rule 21: "in no set order"). The test now compares the headers, the title sequence and the lines as a sorted set: under a row-rewrite lever red 10 of 10 before, 0 of 10 after; the OJS U65 file `--repeat-each 5` at eight workers 40 of 40.
+  unique ORDER BY. Again 2026-09-27 (U71 session's OMP and OPS finals, VM slot s1, reset databases, auto workers): U54 S3 on both, "Data editor" the first row, green alone on both (`.reports/U71/final-run-omp.log`, `final-run-ops.log`, `alone-omp-U54S3-U14S5.log`, `alone-ops-U54S3-U14S5.log`). Again 2026-09-28 (U59 session's OPS final, VM, reset databases, auto workers): red, green alone (`.reports/U59/alone-reds.log`). **Diagnosed 2026-09-29** (housekeeping, `.reports/flake-2026-09-29/u54s3/diagnosis.md`): an app defect, U54 A1 set off by A13. The grid keys each page's rows 0…n−1 and adds no "Edit"/"Remove" to row id 0, and PostgreSQL stores a new role wherever its free space map offers room, often before the context's own roles on a used database; CI's six OJS S3 first-attempt reds of 2026-09-28 were all shard 1/3. U54 S3–S6 now run through `replayWhenFirstRow()` (a fresh scratch context only when the role opened is the list's first row, at most three attempts, an `app-defect` annotation), app-changes row 22. With a storage lever: red 10 of 10 before, 0 of 10 after; the three U54 files `--repeat-each 5` at eight workers green (35 + 40 + 35). **Watch condition**: a U54 red naming `FirstRowError` with its three attempts spent. Sighted and fixed 2026-09-29 (housekeeping, `.reports/flake-2026-09-29/u65s7/diagnosis.md`): OJS U65 S7 "downloading the reports", red on the first attempt of five CI runs on 2026-09-28 (pkp-e2e 36461456234, 36483369298, 36489553910, 36462286731; ojs 36475766741), compared the second "Review Report" download with the first line for line; the report orders by submission title only, so "Marsh survey"'s two reviewer lines swapped between requests (spec Rule 21: "in no set order"). The test now compares the headers, the title sequence and the lines as a sorted set: under a row-rewrite lever red 10 of 10 before, 0 of 10 after; the OJS U65 file `--repeat-each 5` at eight workers 40 of 40.
 
-- **OPS U61 S4 "deleting the stored copies": the header read took the
-  admin's unread-task count** (CI push run 36289097857 at `b57a99c`,
-  2026-09-27, shard ops 3/3, red on the first attempt and the retry): the
-  before/after `look()` of the server's home page compared the header's
-  text, which ends with the user menu's task count ("admin 134" then
-  "admin 139"), raised by queued work finishing between the reads. Fixed
-  the same day in all three apps' U61 suites (the trailing count is left
-  out of the read; S4 green alone on each). **Watch condition**: a U61 S4
-  red on the header again.
 - **OMP U27 S9 and S16** (first sightings, the Escape sweep's runs
   2026-09-26, `.reports/flake-s26/esc/diagnosis.md`): S9 red 2 of 8 at
   HEAD under an animation-frame hold, lead: `openRowMenu()` returns
@@ -1193,21 +713,6 @@ trips.
   the Review Details window's two loads, so the next red names the pending
   or failed one. **Watch condition**: an S9 red at "Modify Review"; read
   the recorded loads, `error-context.md` and the worker's server log.
-
-- **OPS U39 S2 "the Publisher Library on the Settings tab": the row's "Edit" link
-  never shows** (`LibraryList.openStrip`, `LibraryPages.js:352`, 30 s on
-  the "Journal guide" row's controls). Sighted 2026-09-27 (U63 session's
-  OPS final, Mac, reset database, auto workers), green alone
-  (`.reports/U63/final-run-ops.log`, `alone-ops-reds.log`). Tripped on CI
-  2026-09-29 on all three apps (pkp-e2e 36579748471 OMP `:352`,
-  36593351856 OPS `:393`, 36596209937 OJS `:360`). **Diagnosed 2026-09-30**
-  (housekeeping, `.reports/flake-0930/u39s2/`): the download link's
-  two-second timer also fires a `fetch-grid`, whose redraw closed the
-  strip the test had just opened (or left the link at `href="#"`);
-  `LibraryList.download()` now returns after the redraw (15 other call
-  sites get it): red 15 of 15 under a redraw-hold lever before, 15 of 15
-  green after; the U39 file 70 of 70 at eight workers. Rule in patterns.md
-  pitfall 10. **Watch condition**: a U39 red after a download.
 
 - **OJS U34 S2 "the composer": the template search's "searching" state
   never seen** (`page.waitForSelector('.composer__templates__searching')`,
@@ -1241,22 +746,6 @@ trips.
   **Watch condition**: a second sighting of any, or one on CI or the VM;
   then read its trace.
 
-- **OMP U71 S3's absence read matching a file number inside another row**
-  ("On to External Review, and back by 'Cancel Review Round'", spec
-  :414, the "Files for Review" row for the internal-review file counted 1,
-  expected 0). CI's top first-attempt flake from 2026-09-28 to 09-29: 18
-  reds, green on retry, on almost every pkp-e2e push and omp 36618354774.
-  Diagnosed 2026-09-30 (housekeeping, `.reports/flake-0930/u71s3/`):
-  order dependence, not timing: `panelRow(title, number)` was a `hasText`
-  substring filter, and the one row left (the revised file's copy, named
-  `revu71s3…`) carried the number's digits in its name; fresh CI installs
-  handed out id 71 in 16 of the 18 sightings. Fixed in
-  `InternalReviewPages.js` (`panelRowNumbered`, the number's own cell,
-  exact; `panelRow` refuses a bare number) with a positive control in S3;
-  red 9 of 10 under an id-steering lever before, 0 of 15 after, the U71
-  file 45 of 45 at eight workers. Rule in patterns.md pitfall 15.
-  **Watch condition**: a U71 red at a numbered row read.
-
 - **First sightings in CI runs of 2026-09-30** (U06 revision branch run
   36664968208 and the housekeeping branch, each green on its retry). OMP U03 S4 "change
   the email address by confirming the emailed link"
@@ -1273,29 +762,6 @@ trips.
   U12 S6 @solo (36853975923), both exit-139 deaths, as were the 09-30 OMP
   U03 S4 and OJS U12 S6 (36698118029 `server-crash.txt`): both move under
   the segfault class. OPS U60 S11 stays open on its own condition.
-
-- **A forced press in a side window still off screen: "Element is
-  outside of the viewport"** (U34 S3; **diagnosed and fixed 2026-10-12**,
-  housekeeping, `.reports/flake-1012/u34s3-review-files-box/diagnosis.md`).
-  Four CI sightings, each green on retry, each at
-  `DecisionWizardPages.js` `check({force: true})` right after
-  `openAttachSource('Attach Review Files', 'Review Files')`: OJS, pkp/ojs
-  36668070912 (2026-09-30); OJS, pkp-e2e 37804093852 (2026-10-08); OJS,
-  pkp/ojs 37960692151 (2026-10-09); OMP, pkp-e2e 37984077140 (2026-10-09).
-  Mechanism: the harness shortens the side window's slide-in to 0.01 ms
-  and does not remove it, so the window is first drawn at
-  `translateX(100%)`, right of the viewport, for two to four frames (12
-  to 31 ms idle, up to 229 ms at eight workers); `toBeVisible()` passes
-  there and a forced action neither waits nor retries. Red 15 of 15 with
-  the slide held or the animation clock slowed, 0 of 15 with the fix:
-  `motionEnded(locator)` (`support/motion.js`) before the forced action,
-  in `openAttachSource()` (the three apps) and four more page-object
-  sites of the same shape (U34 S7, U37 S1, U32 S5, U29 S7 red under the
-  lever; U36's tick the same shape); patterns.md "Waiting strategy" has
-  the rule. **Watch condition**: a further "outside of the viewport" on
-  CI is a forced action not routed through `motionEnded()`; its
-  `error-context.md` names the line. Delete the entry after four weeks
-  without one (2026-11-09).
 
 - **The OPS wizard's galley "Add File" never offered** (U40 S11, OPS,
   CI once): the push run 36984010083 (2026-10-02,
@@ -1356,48 +822,6 @@ trips.
   (whether the tab is missing or late) and wait on the tab's own name
   before reading the list.
 
-- **OMP U73 S2's count read, once** (OMP, pkp/omp run 37590116923 on the
-  PR branch `13308` at `d0b7921`, 2026-10-07, shard 2/3, green on its
-  retry). `U73-publication-formats-proof-terms.spec.js:147` "S2: A
-  format's catalog data" failed its first attempt on a `toHaveCount`
-  after 47 s; the run's failed-step log carries the error's first line
-  only and the job log is no longer served, so the failing line is not
-  known; found by the CI tally of 2026-10-08, no earlier sighting on any
-  app or ref. Watch condition met 2026-10-16 (pkp-e2e branch run
-  38845616290, U03, shard 3/3, green on retry): `form#addPubDateForm`
-  still open 30 s after the date's OK at `:274`, its Date box reading
-  "2026091". **Diagnosed and fixed 2026-10-16** (housekeeping,
-  `.reports/flake-2026-10-16/u73s2-pubdate/diagnosis.md`): a race in the
-  page object. `DateWindow.pressOk()` returned on the `update-date`
-  response, before jQuery applied it; the refused seven-character date's
-  200 swaps in a new form holding the posted value, so "20260915" typed
-  into the old one was thrown away and the next OK posted "2026091" again.
-  `shared/playwright/support/legacy.js` gains `legacyAnswerApplied()`
-  (jQuery idle, the shown form's handler bound), used by `pressOk()` and
-  by `TermsWindow.pressSave()` and `FormatWindow.okRefused()` (the same
-  shape); `openRowEntries()` finds a row's control line as its next
-  `tr.row_controls`, since a format and its file can share an id
-  (app-changes row 23). With the callback held 1500 ms: red 10 of 10
-  before, 0 of 10 after; the U73 file `--repeat-each 5` at eight workers
-  50 of 50, U74 and U45 20 of 20, the serial U73 and U74 2 of 2.
-  patterns.md "Legacy jQuery flows" gained the rule. **Watch condition**:
-  a legacy window left open after an OK that answered ok.
-
-- **The reader-side user menu pressed before the theme's script bound
-  it, fixed 2026-10-08** (OMP U01 S6, once, pkp-e2e push run 37724191553
-  on `main` 82277a16, shard 3/3, green on its retry; the test's first CI
-  run after the U01 revision). `logoutFromPublicMenu`
-  (`apps/omp/playwright/pages/LoginSessionsPages.js:76`, from
-  `U01-login-and-sessions.spec.js:868`) pressed the signed-in name on the
-  site home page and waited 180 s for the menu's "Logout": the name is a
-  plain link until the default theme's `js/main.js` sets
-  `data-toggle="dropdown"` on document ready, so the early press followed
-  the link and no menu opened. Fix: the press waits for that attribute,
-  in OMP's helper and OJS's `SiteUserMenu.logout` (the same shape);
-  patterns.md "UI realities" carries the rule. Green 3 of 3 on OMP and on
-  OJS (`--repeat-each 3`). **Watch condition**: any sighting at those
-  lines again.
-
 - **OPS U42 S5's metadata settings save not answered in 30 s** (OPS,
   once, pkp-e2e push run 37763083478 on the branch `11718-main` at
   `7c3d8a63`, 2026-10-08, shard 1/3, green on its retry).
@@ -1408,38 +832,6 @@ trips.
   carries no more, the trace was not read. No earlier sighting at that
   line on any app. **Watch condition**: a second sighting; then read the
   trace for whether the press reached the form or the save was refused.
-
-- **OMP U02 S6's role box on the site Register page not scrolled into
-  view** (OMP, once, pkp-e2e dispatch run 38450074758 from companion
-  `i13283-main` with pkp-lib pinned at pkp/pkp-lib#13493's head
-  `1836046394`, 2026-10-13, shard 1/3, green on its retry). "S6: register
-  from the site homepage with roles in two presses"
-  (`U02-registration-and-account-validation.spec.js:534`):
-  `toBeInViewport()` on the second press's reader box
-  (`readerGroup[76]`) read "viewport ratio 0" for 10 s; the trace was not
-  read. The PR changes ORCID classes and the publish warnings, nothing the
-  Register page runs. Not once: the CI tally of 2026-10-14 counts it
-  flaky in 42 OMP runs since 2026-10-12, the day the drift sweep added
-  `expectContextListed()`. **Fixed 2026-10-14** (the U02 revision): the
-  method scrolled only the press's name line into view, so a press low on
-  the page kept its role boxes below the fold; it now centres the whole
-  `li.context` block before the viewport reads, and the OJS and OPS twins
-  do the same. Branch run 38505248989: OMP U02 S6 green on its first
-  attempt, no flaky line. Watch condition tripped 2026-10-15 on OJS
-  (pkp-e2e push run 38781476505 at b5825368, shard 1/3, green on its
-  retry): the first block's name line read "viewport ratio 0" for 10 s.
-  **Diagnosed and fixed 2026-10-16** (housekeeping,
-  `.reports/flake-2026-10-16/u02s6-viewport/diagnosis.md`): another
-  mechanism, a race in the test's flow. The "Register" press does not wait
-  for the theme's `css?name=stylesheet`, the block was centred in the
-  layout without it and moved when the sheet landed; the OMP and OPS twins
-  already waited for `stylesApplied()`, the OJS one did not. OJS
-  `RegistrationPages.js` now waits for it in `scrollBlockIntoView()`,
-  `expectConsentHidden()` and `expectConsentShown()`; patterns.md parallel
-  lesson 16 gained the scroll clause. With the sheet held 3 s: OJS S6 red
-  5 of 5 before, 0 of 8 after (OMP and OPS 0 of 5 before); the OJS U02
-  file `--repeat-each 5` at eight workers 40 of 40. **Watch condition**: a
-  role box or name read out of the viewport again.
 
 - **OMP U28 S15's "submit this review?" dialog not shown in 30 s** (OMP,
   once, pkp-e2e dispatch run 37915669207 from `main` at `12e6e1d0` with

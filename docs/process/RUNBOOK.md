@@ -78,7 +78,10 @@ orchestrator.
    (its one inline spec edit) and replaces the PROGRESS row: status, scenario
    count, tests per app, and a note in the fixed shape (tests per app ·
    register counts · one headliner ID · rarely-met states left out · open
-   blocker · low-confidence IDs). Gate: the row, lint zero after the flip.
+   blocker · low-confidence IDs). The note says how the feature stands
+   now, never what each session did: a revision or a sweep replaces it
+   and leaves only its mark ("Revised <date>.", "Swept <date>.").
+   Gate: the row, lint zero after the flip.
 10. **Commit and push.** The feature branch, with the PROGRESS row
     committed on it, rebased onto `origin/main` and pushed there (`git push
     origin U<nn>:main`), then the remote branch deleted: the branch's green
