@@ -1,10 +1,11 @@
 # Seed facts
 
 What a fresh test install contains and how it is configured, on one sheet.
-The first part is generated from the seed fixtures, and `npm run seed-facts
--- --check` in the lint step fails when it drifts (`npm run seed-facts --
---write` regenerates it). The hand-written lines each carry the screen that
-shows the fact and the date it was seen.
+The first part is generated from the seed fixtures: the lint step's
+`npm run seed-facts -- --check` fails when it drifts, and
+`npm run seed-facts -- --write` regenerates it. The second part, "Install
+defaults", is written by hand and grouped by subject: look a fact up under
+its heading or grep a screen word.
 
 ## Generated from the seed
 
@@ -110,1742 +111,725 @@ The archetype a shared test asks for and the seeded username it resolves to; `nu
 
 ## Install defaults
 
-One line per fact: the fact, the screen that shows it, and the date it was
-seen (with the pointer). A line without a dated observation in the repo says
-so; it is not a guess. A `.reports/…` pointer names the session evidence
-behind a line; that scratch is deleted after review.
+What a fresh test install and a new context hold, and what a seed leaves
+differently from the screen. An entry states the fact as it holds now: no
+date, no feature list, no pointer into `.reports/` (git keeps the history). A
+fact about how a screen behaves belongs in the spec that owns the screen, not
+here.
 
-- A `users[]` account keeps its cost-4 seed hash (`$2y$04$`) until its
-  first sign-in, which rehashes it to cost 12 and ends every other session
-  of that account, an impersonation of it included (the impersonating
-  manager lands on the Login page). Sign such an account in once before
-  impersonating it or opening a second browser for it. Three apps,
-  2026-10-14 (U03 drift sweep, `.reports/U03/cc-SW1.md` SW1-9).
-- The Login page's "Keep me logged in" arrives ticked, so a sign-in through
-  the form is a remembered one unless the box is unticked. Three apps,
-  2026-10-14 (U03 drift sweep, `.reports/U03/cc-SW1.md`).
+A scratch context at the other end of a setting is seeded through the scenario
+API's passthrough keys (scenarios.md "Configuring a scratch context"); the
+validation-variant server (harness.md) covers the config-file settings.
 
-- OJS overrides several lib/pkp event-log strings in its own
-  `locale/en/locale.po` (the wizard's submit entry reads "Article
-  submitted" where lib/pkp says "Initial submission completed."); grep the
-  app's `locale/en/locale.po` before quoting a lib/pkp string. Activity Log,
-  OJS, 2026-09-07 (U21 tojs).
+### The test installs, the fleets and the site
+
+- The task and job runners are off (`[schedule] task_runner = Off`,
+  `[queues] job_runner = Off` in `config.test.inc.php`, written by
+  `shared/playwright/make-test-config.js`), so nothing queued or scheduled
+  runs until a test drains the queue (`runJobs` in `support/jobs.js`; from a
+  probe script the kit's `drainJobs(app)`). Until then the Search page answers
+  "No Results" for a seeded or republished title, a category's page reads "0
+  Items" ("0 Titles" on OMP) while a press's catalog, series and "New
+  Releases" pages list the item at once, and review reminders cannot fire.
+  Administration › System Information, section "queues", shows an Off line as
+  an empty value and an On line as "1".
+- Outbound HTTP is dead: `[proxy]` points at `127.0.0.1:9`, so every
+  server-side external call fails fast (ORCID, reCAPTCHA, DOI registration,
+  update checks); Mailpit and other `127.0.0.1` traffic are unaffected
+  (harness.md "config.test.inc.php"). What the screens show of it: a DOI
+  deposit queues its job, the job fails at connection and the DOI stays
+  "Submitted", never "Error" (a DOAJ "Register" the same); every "Export DOIs"
+  answers 400 "An XML validation error occurred and the XML could not be
+  exported." because the agency's schema is fetched from the web, and an OJS
+  PubMed export or a DOAJ "Export" with validation ticked answers 500 with a
+  "Validation errors:" page for the same reason; "Check for updates" answers
+  500; and the "Plugin Gallery" tab reads "Loading" forever behind a 500 on
+  every load, which adds a crash to a probe's run record.
+- The reference lookup never runs on a test install (no job runner, no
+  outbound connections): with "References Metadata Lookup" on, every reference
+  stays unprocessed, a reference structured by hand in "Edit" too, so the
+  References page's progress box reads "Processing references - 0/{n}" and the
+  page refreshes itself every 7 s while it shows. A job-runner pass does run
+  the lookup's first step, which reads the identifiers from the text (a DOI
+  link on the row; a hand-filled reference with a DOI in its text becomes
+  structured), and parks the service steps for retry.
+- The public files directory is `public_files_dir = public`, relative to the
+  app root. Pictures uploaded through a formatted-text box ("Insert/edit
+  image" › "Upload") are stored under
+  `public/site/images/<username>/<file name>` and served at
+  `/public/site/images/…`; a second upload of a name the folder holds is
+  stored as `<name>-<32 hex>.<ext>`. A context's logo lands in
+  `public/journals|presses|contexts/<id>/`, an announcement's image in that
+  folder's `announcements/<announcementId>.<ext>`, a highlight's in its
+  `highlights/<highlightId>.<ext>`, and a profile picture at
+  `/public/site/profileImage-<id>.<ext>`. The site's own "Page Footer" bar has
+  no picture button; the site's upload goes through a Navigation item's
+  "Content".
+- Picture uploads beyond the file name: a pasted or dropped picture is stored
+  as `mceclip<N>.png`, and a picture uploaded in the image window and then
+  cancelled is stored anyway. The servers' upload limits are the host
+  php.ini's (`php -S` sets none), whatever a box's own "Max filesize" line
+  says. A host on PHP's defaults takes uploads up to 2 MB in requests up to 8
+  MB: over 2 MB an upload answers 500 "Path cannot be empty" or 400 "One or
+  more files could not be uploaded.", over 8 MB 500 "The POST data is too
+  large.". The maintainer's Mac takes 100 MB (a 101 MiB file is refused in the
+  wizard with "File is too big (101MiB). Max filesize: 100MiB."). A drive that
+  must fail an upload checks `php -r 'echo ini_get("post_max_size");'` first;
+  one that must reach the 5000 KB picture allowance uploads pictures under 2
+  MB.
+- The PHP servers run in UTC, so near local midnight a date picked as
+  "yesterday" can still be today on the server.
+- The slot fleets on the VM serve the apps with PHP 8.3, the maintainer's Mac
+  with PHP 8.4. On 8.3 `password_hash` without a cost writes cost 10, so on
+  the VM a Users XML import takes the U63 A16 branch: a file password stored
+  as a bcrypt at the installation's cost 12 is treated as stored another way,
+  and a cost-10 bcrypt is kept.
+- Email validation and the ALTCHA check are off on the worker servers and on
+  only on the validation variant at `basePort + 90` (8090/8190/8290), which
+  serves the same install through `config.test.validation.inc.php` (harness.md
+  "The validation-variant server"): no captcha and no "Registration awaiting
+  verification" on a worker server; both on the variant.
+- Security audit logging is off: `[logs] log_audit` is commented out in the
+  test configuration, as in `config.TEMPLATE.inc.php`, so a site "Security"
+  save writes no audit line; `password_timeout` is commented out the same way.
+- The test installs run PostgreSQL. A missing localized value sorts last (a
+  category with no name in the page's language comes after every named one, in
+  no stable order), and a list the app does not sort comes back in storage
+  order, which moves whenever a row is written: the Roles list after a role is
+  saved, a press's series before their first "Order", publication formats, the
+  Tools › "Import/Export" list, the site's "Journal redirect" list, same-level
+  roles on the "Editorial Masthead" tab. Assert the set or find a row by name,
+  never by position.
+- A plugin that fails inside a page hook leaves its part out of a page that
+  still answers 200: the only trace is "Plugin … failed to handle the hook …"
+  in `apps/<app>/playwright/.server-logs/server-<port>[-probe].log`, and the
+  kit's run record lists no crash, so a plugin-rendered part that never shows
+  is read in the server log first.
+- A public address the app refuses (an announcement with announcements off, a
+  route with no handler) answers a bare "404 Not Found" page with an empty
+  browser title and no header, sidebar or footer.
+- On the fleets the sidebar Language block's links land on the site home: its
+  link carries the server name without the probe or worker server's port. A
+  script that needs a page in another language opens
+  `{journal}/<locale>/{path}`. Three apps.
+- Emails sent by a queued job carry links on the config `base_url` (the worker
+  port); emails sent inside a request carry the request's host. A probe on a
+  probe server rewrites the host before opening a footer link from a job-sent
+  email. Mailpit. All three apps.
+- A fleet reset with `fleet-prep --reset` holds `publicknowledge` alone on
+  each app. Until the first scratch journal is enabled publicly, the site's
+  address opens `publicknowledge/en` for every visitor and Hosted Journals has
+  one row with "Order" hidden. Until a second context exists, Administration ›
+  Site Settings shows one tab, "Site Setup", with the side tabs "Security",
+  "Languages", "Bulk Emails", "Statistics" and "ORCID"; the "Appearance",
+  "Announcements" and "Plugins" tabs and the "Settings", "Information",
+  "Navigation" and "Highlights" side tabs appear with the first scratch
+  context. A fleet used by earlier runs without a reset holds hundreds of
+  contexts.
+- `publicknowledge` has no published item on a fresh fleet (OJS Vol 1 No 2 is
+  empty; OMP "No titles have been published yet."; OPS lists categories only),
+  so a reader-facing item page needs a scenario-published scratch submission.
+  The suites publish into it, so on a used fleet its feeds, its "Engineering"
+  category page and the OPS "Archives" list items: a "nothing published" read
+  uses a new scratch context, and a read of the seeded pages asserts no count.
+  "The site has one registration-open journal" stops holding as soon as any
+  scratch context exists.
+- A context with more than one UI language, and the site, answers
+  `{context}/oai` with a 302 to `{context}/en/oai`; a one-language scratch
+  context answers at `{context}/oai` itself. Administration › "System
+  Information" shows the install's OAI settings (`oai` 1, the repository
+  identifier, `oai_max_records` 100), read-only. A fresh fleet has no deleted
+  OAI record; on OMP a `publicknowledge` format set "Not Available" leaves one
+  in press 1, which every OMP press's own list then shows (U19 A1), until that
+  book is unpublished.
+- The site's "Site Name" is empty in both languages on a fresh install:
+  site-level mail reads "an account with, but…", the site home's `<title>` is
+  empty, Administration's header shows the application's name as plain text,
+  and the site Settings form refuses every save until the name is filled.
+  Administration › Site Settings › Site Setup › Settings.
+- The site has no privacy statement, so the site-level Register page asks no
+  site consent. Administration › Site Settings › Site Setup › Information
+  "Privacy Statement".
+- Site Settings › "Site Setup" › "Bulk Emails" has no journal ticked, and
+  "Security" › "Minimum password length (characters)" reads 6, on all three
+  test installs.
+- Site Settings › "Security" › "Enable rate limiting" is unticked, with
+  "Maximum attempts" 5 and "Lockout duration (seconds)" 300 stored, and "Site
+  Setup" › "Settings" › "Disable aggregated reviewer statistics" is unticked.
+  All three apps.
+- The site's principal contact ("Site Setup" › "Information") is the
+  application's name in both English and French, and `admin@mail.test` in
+  English only. All three apps.
+- The compromised-password check is a site setting, off on every fleet
+  (Administration › Site Settings › Security, "Check passwords against
+  compromised password databases" unticked), so Profile › Password accepts
+  `password1234`; ticked, Profile › Password and the Register page refuse
+  `qwerty123456` with "This password has appeared in data leaks. Please choose
+  a different, strong password." The installs carry no local list
+  (`lib/pkp/registry/blacklistedPasswords.txt` is absent), so the ticked check
+  asks Have I Been Pwned online and needs the network. All three apps.
+- Administration › Site Settings › "Statistics" at install: "Do not collect
+  any geographical data", "Enable institutional statistics" unticked, "Only
+  track monthly statistics", "Leave the log files in place", "Make the COUNTER
+  SUSHI statistics publicly available", "Platform" unticked, no Platform ID;
+  Settings › Distribution › "Statistics" of `publicknowledge` and of a scratch
+  context holds "Public API" alone, ticked. All three apps.
+- The site's "Enable institutional statistics" (Administration › Site Settings
+  › Statistics) is unticked on a fresh install, so no side menu shows
+  "Institutions"; the page still opens by address. The journal's own Settings
+  › Distribution › "Statistics" "Enable institutional statistics" box appears
+  once the site's box is ticked and is unticked too; "Institutions" needs
+  both. The exception is an OJS journal whose payments are enabled (U08 Rule
+  30).
+- `plugins/themes/` holds only `default`, so the site's "Theme" list offers
+  "Default Theme" alone; at the install state the tab shows Noto Sans and
+  `#1E6292`. The site's "Sidebar" offers "Language Toggle Block" alone,
+  unticked; the site's "Web Feed Plugin" arrives unticked and the site's feed
+  address answers "404 Not Found". The site's plugin settings are stored with
+  context NULL, not 0, and no row exists until a save.
+- No galley text reaches the search index on any install (U15 A11), so a
+  search on galley content finds nothing; the campaign's PDF fixtures hold no
+  text.
+
+### A new context's settings
+
 - Every context, the seeded one and each scratch one, carries the registry's
-  default editorial task templates (`registry/taskTemplates.xml`: 10 on OJS
-  and OMP across stages 1, 3, 4 and 5; 2 on OPS, both Production), all with
-  "include" off, so no submission gets an auto-created task until a
-  template is switched on. Installed by the context factory since
-  2026-09-11 (parity ledger); `edit_task_templates` per app, sync 2026-09-11
-  (`.reports/sync/s11/tasktemplates-13213.log`).
-- The seed creates no submissions on any app. Every Editor Dashboard view
-  counts 0 until a test seeds one through `POST scenarios/submission`, so a
-  probe premise like "any existing submission" needs a seed first. Editor
-  Dashboard on OPS, 2026-09-04 (U28 pE); OJS and OMP by the seed fixtures,
-  which hold no submission.
+  default task and discussion templates (`registry/taskTemplates.xml`: 10 on
+  OJS, 13 on OMP, 2 on OPS, both Production), all with "include" off, so no
+  submission gets an auto-created task until a template is switched on. The
+  stage's templates show in the Participants "Assign" form's "Choose a
+  predefined message" list.
 - The installer's default Privacy Statement is present on the seeded context
-  and on every scratch context, so their Register pages show the consent
-  box. Settings › Website › Setup › Privacy Statement; the Register page.
-  Live-probed 2026-09-02, all three apps (U02 note d).
+  and on every scratch context, so their Register pages show the consent box.
+  Settings › Website › Setup › Privacy Statement.
 - Neither the seeded context nor a scratch context has a technical support
   contact; the seeders set only the principal contact. Settings › Journal ›
-  Contact "Technical Support Contact"; public About › Contact. Seeded
-  context probed 2026-09-02, all three apps (`.reports/U02/probe-G7.md`;
-  U02 note s); scratch context seen 2026-09-03 on the probe-kit smoke run,
-  where a registration on the +90 variant ended in U02's finding A6 until a
-  manager set the contact.
-  Settings › Journal › "Contact" refuses to save anything until the
-  support "Name" and "Email address" are typed. All three apps, 2026-09-23
-  (U07 claim check K3-4, `.reports/U07/ccK3`).
+  "Contact" refuses to save anything until the support "Name" and "Email
+  address" are typed.
 - A scratch context from `POST scenarios/context` has no Country unless
-  `context.country` is given, and no journal initials unless
-  `context.acronym` is given; its principal contact
-  is "Site Admin" <admin@mail.test>. Settings › Journal › "Masthead" refuses
-  "Save" ("This field is required.") until both are filled. All three
-  apps, 2026-09-23 (U07 claim check K1, K3;
-  `.reports/U07/ccK1/saves-<app>.json`). Administration › Hosted Journals
-  › "Edit" refuses "Save" in the window ("Please correct one error.", "Go
-  to Journal initials: This field is required.") until the initials are
-  typed, then answers 400 "This is not a valid string. This is not a valid
-  country." until a Country is picked. All three apps, 2026-09-26 (U20
-  claim check K1, `.reports/U20/ccK1/n-02-hosted-saved-<app>`).
-- {OMP} "Notify Primary Contact" (Settings › Workflow › "Emails") arrives
-  with neither choice selected on `publicknowledge` and on every scratch
-  press; a journal and a preprint server arrive at "No". Live-probed
-  2026-09-26 (U56 claim check K1, `.reports/U56/ccK1/t-01-arrival-omp`).
-- The default email "Signature" (Settings › Workflow › "Emails") links the
-  context's name to the address of the server it was created on:
-  `publicknowledge` to the installer ports (8000/8100/8200), a scratch
-  context to the server its `POST scenarios/context` went through. All
-  three apps, 2026-09-26 (U56 claim check K1, `.reports/U56/ccK1`).
-- {OMP} A fresh press (`publicknowledge` and scratch) lists "User Role
-  Masthead Visibility Update Notification" on "Manage Emails" but has no
-  template for it (`registry/emailTemplates.xml` lacks it): its "Edit"
-  answers 404 and leaves the page behind a spinner until a reload. OJS has
-  the template; OPS does not list the email. 2026-09-26 (U56 claim check
-  K1-8, K2-6, `.reports/U56/ccK2`).
+  `context.country` is given and no initials unless `context.acronym` is
+  given; its principal contact is "Site Admin" <admin@mail.test>. Settings ›
+  Journal › "Masthead" refuses "Save" until both are filled, and
+  Administration › Hosted Journals › "Edit" refuses its "Save" the same way,
+  so a test that saves there seeds both or fills them first.
 - A journal created on Administration › Hosted Journals has the principal
-  contact typed on the create form and no technical support contact; the
-  form requires "Languages" and "Primary locale"; "Country" carries no
-  Required mark, but "Save" without one is refused ("This is not a valid
-  string." / "This is not a valid country."). A journal created there is
-  not enabled, so its public pages send a signed-out visitor to the login
-  page. All three apps, 2026-09-23 (U07 claim check K2, `.reports/U07/ccK2`);
-  Country and enabling 2026-09-27 (U57 claim check K2,
-  `.reports/U57/ccK2/c-02a-create-no-country-H-*`).
-- {OJS OPS} A context not enabled publicly sends a signed-out visitor to
-  its Login page for any address, even one the app has no page for (such
-  as `catalog`); a context closed by "Users must be registered…" answers
-  such an address with the bare "404 Not Found". 2026-09-27 (U68 claim
-  check K1, `.reports/U68/ccK1/c-03-*`).
-- A context not enabled publicly sends a signed-out visitor to
-  `{path}/login` with no `source`, so a sign-in there lands by role (a
-  manager on `dashboard/editorial`, a reader on `{path}/index`), and its
-  "Register" and "Home" load the Login page again; a context closed by
-  "Users must be registered…" sends the same addresses to
-  `login?source=…` and back after sign-in. All three apps, 2026-09-29
-  (U59 claim check I29, `shared/playwright/checks/U59/I29/`).
-- {OPS} An account holding a created "Reviewer"-level role (and no
-  manager, moderator or assistant role) lands after sign-in on a broken
-  reviewer dashboard ("undefined (0)" under an "Error" window, U54 OPS2);
-  a script dismisses that window with its "OK" before pressing anything,
-  and it comes back on every load. 2026-09-29 (U54 claim check I29,
-  `shared/playwright/checks/U54/I29/`).
+  contact typed on the create form, needs a Country although the box carries
+  no Required mark, and starts not enabled, so its public pages send a
+  signed-out visitor to the login page. One seeded through
+  `POST scenarios/context` is enabled unless `enabled: false`.
+- {OMP} "Notify Primary Contact" (Settings › Workflow › "Emails") arrives with
+  neither choice selected on `publicknowledge` and on every scratch press; a
+  journal and a preprint server arrive at "No".
+- A context's default texts carry full addresses of the server it was created
+  on: the email "Signature" (Settings › Workflow › "Emails"), the Information
+  texts (Settings › Website › "Setup" › "Information") and the "Before you
+  begin" and "Submission Checklist" texts (Settings › Workflow › "Author
+  Guidance"). `publicknowledge` points at the installer ports
+  (8000/8100/8200), a scratch context at the server its
+  `POST scenarios/context` went through, so their links never match a probe or
+  worker server's address.
 - A context created with French under "UI" (seeded or on Hosted Journals)
   already holds the French default texts (privacy statement, For
   Readers/Authors/Librarians, author guidelines, wizard help) and, on a
   journal, French reviewer-recommendation names, although French is not a
-  "Forms" language; a context created with English alone has none until
-  French is ticked under "Forms". On a press and a server the French author
+  "Forms" language; a context created with English alone has none until French
+  is ticked under "Forms". On a press and a server the French author
   guidelines and checklist read "##default.contextSettings.authorGuidelines##"
-  and "##default.contextSettings.checklist##" (the server's privacy
-  statement too), on `publicknowledge` as well. Settings › Website › Setup;
-  `/fr_CA/about/submissions`. All three apps, 2026-09-27 (U57 claim check
-  K2).
-- On Settings › Website › Setup › "Languages" only the Site
-  Administrator's rows carry an arrow ("Reload defaults"); a manager,
-  editor or production editor sees no arrow. All three apps, 2026-09-27
-  (U57 claim check K2).
-- The site's "Install Locale" window offers 78 languages on OJS (including
-  "Unknown language (und)") and 68 on OMP and OPS on `main`, where Norwegian
-  Bokmål is gone (U57 A14), and 79 and 69 on `stable-3_5_0` (U07 claim
-  check H15, 2026-10-15); installed, every one but
-  English carries the "*". On the fleets one site-level language change
-  takes 5–15 s (every context is re-saved), and saving two at once took
-  34 s on OJS, 36 s on OMP and 11 s on OPS (2026-10-05, U13 claim check
-  I05), so a script waits on the save's answer, not a fixed time.
-  Administration › Site Settings › Site Setup › Languages, three apps,
-  2026-09-27 (U57 claim check K1, `.reports/U57/ccK1`).
+  and "##default.contextSettings.checklist##" (the server's privacy statement
+  too), on `publicknowledge` as well. Settings › Website › Setup;
+  `/fr_CA/about/submissions`. All three apps.
+- `fr_CA` is a UI language but not a form language on `publicknowledge` and on
+  scratch contexts (the seeders never set the form locales;
+  `context.supportedLocales` sits under `context` and adds the "UI" column
+  only). So multilingual boxes show one language, the settings forms have no
+  language switch and installed navigation item titles stay English on `fr_CA`
+  pages until "Forms" is ticked for French on Settings › Website › Setup ›
+  Languages or `supportedFormLocales` is seeded.
+- Submission languages are the second list on Settings › Website › Setup ›
+  Languages, "Submission Languages". A new context lists its primary language
+  alone; another language comes in through "Add/Remove Languages" with every
+  box unticked and counts once "Submissions" is ticked. The first list
+  ("Website Languages") has no Submissions column. OJS and OPS.
 - `publicknowledge` has no block placed in its "Sidebar" on any app, so its
   public pages show no Language block although French is a UI language.
-  Public home, three apps, 2026-09-27 (U57 claim check K3).
-- The reading-language choice is kept per browser: the session cookie
-  (`<APP>TESTSID`) lasts 30 days and carries the choice across signing out
-  and in; a fresh browser signing in as the same account reads the primary
-  language. Three apps, 2026-09-27 (U57 claim check K3).
+  Placed, the "Language Toggle Block" prints nothing on a context with one
+  interface language; a scratch context needs
+  `context.supportedLocales: ['en', 'fr_CA']` for it to show.
+- Announcements are off on a scratch context and on the site ("Enable
+  announcements" unticked), and on `publicknowledge`. The announcement form's
+  "Send an email about this to all registered users." box arrives unticked,
+  the OJS "Publish Issue" dialog's box ticked.
+- A scratch context created without an `orcid` key has "Enable ORCID
+  functionality" unticked and no ORCID block on Profile › Identity; one
+  created with `orcid: {enabled: true}` has both. The switch is on Settings ›
+  Users & Roles › "ORCID"; the block on Profile › Identity. All three apps.
+- Settings › Workflow › Review on the seeded journal, and on every scratch
+  context, is at the install defaults: "Restrict File Access" off, "One-click
+  Reviewer Access" off, "Review Guidelines" (OMP: "Internal Review Guidelines"
+  and "External Review Guidelines") empty, "Competing Interests" empty,
+  "Default Review Mode" "Anonymous Reviewer/Anonymous Author", both deadlines
+  4 weeks, "Minimum Confirmed Reviews Required" 0, all four reminder sliders
+  "No reminder set", "Publicly Show Reviewer Comments" off, "Reviewer
+  Suggestion at Submission" off. OJS and OMP.
+- {OMP} A new press (and a scratch press) has no license: Settings ›
+  Distribution › License opens on "Other license URL" with an empty box, and
+  `POST scenarios/context` refuses `licenseUrl`, so a publish fills no chapter
+  license until the version's "License URL" or the press's license is saved on
+  screen.
+- A scratch press has no series and no category unless the context scenario's
+  `series[]` and `categories[]` add them, so Settings › Press › Series reads
+  "No Items" and the Navigation tab's "Add item" offers no "Series" or
+  "Category" type; `publicknowledge` has both. A book goes into a series
+  through `POST scenarios/submission` `series: <path>`.
+- "Notify All Authors" (Settings › Workflow › Emails) arrives at "Send an
+  email notification to all authors of the submission." on a scratch journal;
+  there is no passthrough key, so a probe flips it on the screen and a test
+  cannot. OJS.
+- A fresh context asks for keywords, references and funders at "request" by
+  install default, so the seeded context's Details step shows an optional
+  "Keywords" field, a references box and a Funders section on all three apps;
+  a scratch context seeded `metadata: {keywords: 'off'}` shows no "Keywords"
+  field.
+- A fresh scratch journal has no issues; "Schedule For Publication" › Review
+  Publishing Details then carries no "Issue Assignment" group and the confirm
+  window reads "…This will be published immediately without any issue
+  association…", so a publish-now leg needs no scratch issue, only a scheduled
+  leg does. OJS scratch journal.
+- {OMP} A new press's Settings › Distribution › "Payments" shows "Enable"
+  alone ("Payments will be enabled for this press. Note that users will be
+  required to log in to make payments."); "Currency", "Payment Plugins" and
+  the method's boxes appear while it is ticked and hide again when the press
+  saves it unticked.
+- {OJS} On a fresh journal the "Payments" page's "Subscription Policies" tab
+  has an empty contact, "Full expiry", its four lists at "Disabled" and every
+  box unticked; the payment boxes are greyed with the "Note: To enable these
+  options…" line. Settings › Users & Roles › Roles lists "Subscription
+  Manager" at permission level "Subscription Manager".
+- {OJS} Payments are off on a fresh journal: the "Payments" page's "Payment
+  Types" has every box empty and "Payments" reads "No Items". "Currency" has
+  no empty choice, so a journal with no currency comes only from the
+  `payments` key without `currency`. `{journal}/user/payMembership` creates a
+  queued payment request even when it fails: never open it on
+  `publicknowledge`.
+- Settings › Distribution › "Access" shows no "Publishing Mode" choice ticked
+  on `publicknowledge` or on a scratch journal, so both publish openly; a
+  preprint server never stores its "Posting Mode" choice. OJS and OPS.
+- A scratch context's "About the Journal" text is empty, so its About page is
+  the heading alone. All three apps.
+- DOIs are on by default on `publicknowledge` and every scratch context:
+  "Allow Digital Object Identifiers…" ticked, the first kind ticked
+  ("Articles", "Monographs", "Preprints"), no prefix; managers' side menus
+  show "DOIs". All three apps.
+- Every DOI registration-agency plugin is off on `publicknowledge` and on
+  every new journal and preprint server: Settings › Website › "Plugins" lists
+  "Crossref Manager Plugin" (on a journal also "DataCite Manager Plugin")
+  unticked, and Settings › Distribution › "DOIs" › "Registration" reads "No
+  Registration Agency Enabled"; once a plugin is ticked, the tab's
+  "Registration Agency" list shows an empty box until one is saved. A press
+  has no agency plugin. A new journal and press arrive on "DOI Versioning"
+  "No", a new preprint server on "Yes" (its "Automatic DOI Assignment" shown
+  as "Upon reaching the production stage"), so every saved DOI change on a
+  server's DOIs page writes an Activity Log line. All three apps.
+- Settings › Website › "Setup" › "Lists" reads "Items per page" 25 and "Page
+  links" 10 on every context; the OJS archive, the OMP catalog and the OPS
+  preprint lists follow "Items per page" at once. All three apps.
+- {OJS} "Journal Content Organization" (Settings › Website › Appearance ›
+  "Theme") shows "Include the current issue's table of contents" alone ticked
+  on `publicknowledge` and on a scratch journal seeded with an unpublished
+  issue, and "Include recent most published articles" alone on a scratch
+  journal with no issue. So `publicknowledge`'s home page shows "Current
+  Issue" alone; `themeOptions: {journalContentOrganization: [1, 2, 3]}` on a
+  scratch journal with a published issue shows the categories, "Latest
+  Publications" and "Current Issue".
+- On a fresh context the "Date & Time" formats (Settings › Website › "Setup")
+  are stored empty, so the pages use the configuration file's defaults. {OMP}
+  "Cover Image Max Width" and "Height" are stored as 106 and 100.
+- The components of a new journal and preprint server arrive with "These are
+  supplementary files…" ticked for Research Instrument, Research Materials,
+  Research Results, Transcripts, Data Analysis, Data Set, Source Texts,
+  Multimedia and Other; "These are dependent files…" for Multimedia, Image and
+  HTML Stylesheet; "These files support file variants…" for Image. Settings ›
+  Workflow › Submission › "Components", OJS and OPS.
+- {OJS} A new journal's "Articles" section and the seeded sections arrive with
+  every "Section Options" box unticked and an empty "Word Count" (0 after the
+  first "Save"); a preprint server's section form has no "Omit author names…"
+  box. A new series' "Order of monographs" arrives on "Title (A-Z)".
+- Settings › Users & Roles › "Site Access Options" arrives with both boxes
+  unticked on a fresh context: "Users must be registered and log in to view
+  the journal site." and "…to view open access content.".
+- `publicknowledge`'s sections: {OJS} ids 1 "Articles" and 2 "Reviews"; `REV`
+  has no policy, so About › "Submissions" shows only the "Articles" block.
+  {OPS} `PRE` "Preprints" has the path "pre" (`preprints/section/pre`) and
+  keeps the install's "Section default policy"; a scratch server made without
+  `sections[]` keeps the default section with path "preprints".
+- {OJS} A journal seeded with `sections[]` stores its sections at places 0, 2,
+  3 (`publicknowledge` 0, 2); a reorder on Settings › Journal › "Sections"
+  leaves 0, 1, 2. With the gap, every "Done" in an issue's "Order" stores a
+  section order for the issue even when no section moved, so a drive that
+  reads what an issue keeps reorders the journal's sections on screen and back
+  first.
+- {OMP} A new press, `publicknowledge` included, arrives with "Enable type
+  metadata" ticked at "Do not request the type from the author during
+  submission."; a journal and a server arrive with it unticked. Settings ›
+  Workflow › "Metadata".
+- {OJS} A new journal has "LOCKSS" and "CLOCKSS" unticked on Settings ›
+  Distribution › "Archiving".
+- Every new context, `publicknowledge` included, stores "Present a masthead
+  based on user enrollments" on and has no "Enable listing of reviewers on the
+  masthead" row, so the seeded journal and press show no "Peer Reviewers in
+  Previous Year"; the "Editorial Masthead" tab's first save stores the
+  reviewers box as off.
+
+### Plugins
+
 - The Citation Style Language plugin is off on a scratch context, so its
   article, book and preprint pages show no "How to Cite" until a manager
-  enables it on Settings › Website › "Plugins". All three apps, 2026-09-23
-  (U07 claim check K2, `.reports/U07/ccK2/x03b-plugins-csl-<app>`). On OMP
-  it is off on `publicknowledge` too, so the seeded press's books show no
-  "How to Cite" either. OMP, 2026-09-28 (U69 claim check K5,
-  `k-09-seeded-book-*`).
-- The password reset email is sent by the site (the application's name,
-  `admin@mail.test` on the test installs), never by the journal's principal
-  contact. All three apps, 2026-09-23 (U07 claim check K2).
-- The default Information texts (Settings › Website › "Setup" ›
-  "Information") hold full addresses of the server the context was created
-  on (on `publicknowledge` the installer's port 8000), so their links never
-  match a probe or worker server's address. OJS and OMP, 2026-09-23 (U07
-  claim check K3).
-- The site's "Enable institutional statistics" (Administration › Site
-  Settings › Statistics) is unticked on a fresh install, so no side menu
-  shows "Institutions"; the page still opens by address. All three apps,
-  2026-09-23 (U07 claim check K1, `inst-site-statistics-*`). The exception
-  is an OJS journal whose payments are enabled: its managers' side menu
-  shows "Institutions" before "Payments" whatever the statistics boxes
-  (U08 Rule 30). OJS, 2026-09-25 (U51 claim check K3,
-  `by-35-mg-institutions`). The side menu's "Institutions" is also shown to an
-  Editor or Production Editor whose role lacks "Permit changes to
-  Settings", who is then refused the page. OJS and OMP, 2026-09-28 (U66
-  claim check K1).
+  enables it on Settings › Website › "Plugins". All three apps. On OMP it is
+  off on `publicknowledge` too, so the seeded press's books show no "How to
+  Cite" either.
+- "Static Pages Plugin" {OJS OMP} arrives unticked on a scratch journal, so
+  there is no "Static Pages" tab until a manager ticks it or
+  `plugins: {staticpagesplugin: {enabled: true}}` seeds it; OPS lists no such
+  plugin. "Custom Block Manager" is unticked on a new journal and on the site.
+- The "Make a Submission" block {OJS OMP} and the "Announcement Feed Plugin"
+  {OJS} are disabled on every new context, `publicknowledge` included (their
+  `settings.xml` is never installed), so the "Sidebar" list offers no box for
+  the first until a manager enables it on Settings › Website › "Plugins"; the
+  feed rows' given is `plugins: {announcementfeedplugin: {enabled: true}}`
+  plus `sidebar: ['AnnouncementFeedBlockPlugin']`. A new context's "Sidebar"
+  list reads "Web Feed Plugin", "Information Block", "Subscription Block",
+  "Language Toggle Block" (OJS); "Web Feed Plugin", "Information Block",
+  "Language Toggle Block", "Browse Block" (OMP); "Web Feed Plugin" and
+  "Language Toggle Block" alone (OPS). "Browse Block" is listed and disabled
+  on a journal and a server, enabled on a press.
+- {OMP} A new press's "Browse Block" "Settings" arrive with "New releases",
+  "Categories" and "Series" ticked; placed, the block of a press with no
+  category and no series shows "Browse" and "New Releases" only.
+- "PDF.JS PDF Viewer", "HTML Article Galley" and "eLife Lens Article Viewer"
+  arrive ticked on a new journal, "PDF.js PDF Viewer" and "HTML Monograph
+  File" on a press, "PDF.JS PDF Viewer" alone on a new preprint server, whose
+  HTML galley link downloads the file.
+- {OJS} "DOAJ Plugin" arrives ticked under "Generic Plugins" on
+  `publicknowledge` and every scratch journal, with its API Key empty and
+  automatic deposit off. Tools › "Import/Export" lists a journal's DOAJ
+  Export, DataCite, Crossref, Native XML, Users XML and PubMed tools; a
+  press's Native XML, Tab Delimited, Users XML and ONIX 3.0; a preprint
+  server's Crossref and Native XML, in no fixed order. {OMP} The ONIX plugin
+  shows its "Export" tab, and a press's Native XML export carries ONIX
+  products, only once the press's four ONIX details on Settings › Press ›
+  "Masthead" are filled.
+- The "URN" plugin is disabled on every fresh journal and press;
+  `plugins: {urnpubidplugin: {enabled, settings}}` seeds it and its settings
+  window's keys. A preprint server has no URN plugin, and the key answers 400
+  there. {OMP} The settings window refuses "Files" alone, so a press with URNs
+  for files only comes from the seed key alone.
+- A preprint server ships no "Dublin Core Indexing Plugin"; "Google Scholar
+  Indexing Plugin" and, on a journal and a press, "Dublin Core Indexing
+  Plugin" arrive ticked on `publicknowledge` and on every scratch context.
+  Settings › Website › Plugins, all three apps.
+- "Google Analytics Plugin" arrives unticked on `publicknowledge`, on every
+  scratch context and on the site's own Plugins list, all three apps;
+  `plugins: {googleanalyticsplugin: {enabled: true, settings: {googleAnalyticsSiteId}}}`
+  seeds it ticked with its number. Settings › Website › Plugins and
+  Administration › Site Settings › Plugins.
+- {OJS} "JATS Template Plugin" arrives ticked and "JATS Metadata Format"
+  unticked on a new journal and on `publicknowledge`; a new submission's "JATS
+  XML" page opens with "Make available with publication" unticked.
+- "Web Feed Plugin" arrives enabled on every new context, its window on
+  "Display web feed links on homepage and issue pages only." {OJS} / "…on
+  homepage only." {OMP OPS}, 30 items, "Include identifiers…" unticked and
+  {OJS} "Display a fixed number of the most recent publications."; a drive
+  that reads the current-issue feed seeds
+  `plugins.webfeedplugin.settings.displayItems: 'issue'`. A
+  `sidebar: ['WebFeedBlockPlugin']` seed is refused unless the same request
+  carries `plugins: {webfeedplugin: {enabled: true}}`.
+- A scratch context's "Report Plugins" rows {OJS OMP} and "Import/Export
+  Plugins" rows arrive ticked and cannot be unticked; "Gateway Plugins" reads
+  "No Items". The test installs run `allow_plugin_install = on`.
+
+### Accounts, sign-in and registration
+
+- Accounts a scenario seeds (`users[]`) store their password as a bcrypt hash
+  at cost 4 (the shared roster uses the app's own hash, patterns.md
+  "Sessions"). The first sign-in through the login form rehashes it to cost 12
+  and ends every other session of that account, an impersonation of it
+  included, so sign such an account in once before impersonating it or opening
+  a second browser for it. A seeded account that never signed in on screen
+  counts as "stored another way" when a Users XML move takes it to another
+  context (U63 Rule 28).
+- Where a login lands: the site-level Login page lands every account on the
+  site index; a journal's own Login page lands managers, editors and
+  assistants on the editorial dashboard ("Assigned to me"), reviewers on the
+  review-assignments dashboard ("Action required"), authors on "My
+  Submissions" ("Active") and readers on the journal's reader-facing home.
+  Login. All three apps.
+- A second `POST scenarios/context` naming an existing username enrols that
+  user in the new context; `roles: []` is refused (400), and a context-level
+  registration always adds Reader, so the only way to an account with no role
+  anywhere is the site-level Register page with no journal ticked. A
+  registration on the worker or probe ports signs the visitor in at once
+  ("Registration complete") and sends no email; its "Yes, I would like to be
+  notified of new publications and announcements." box
+  (`input[name=emailConsent]`) arrives unticked.
+- Scratch contexts arrive open for registration with every default role.
+  Settings › Users & Roles › Site Access Options; the context's Register page.
+- A scenario-seeded user has no Country, so its Profile › Contact tab cannot
+  be saved until one is chosen ("This field is required."), at journal and
+  site level; a test that saves Contact picks a Country first. All three apps.
+- {OPS} Opening the "Make a new submission" start page as a user holding no
+  Author or manager-level role enrols that user as Author on the spot; a
+  journal and a press do not. Never open it with roster accounts on OPS
+  `publicknowledge`: it changes their roles for every later reader of the
+  fleet until a reset.
+
+### Roles and permissions
+
+- Scratch contexts enrol `admin` as a manager (the context scenario creates
+  the context as `admin`, as the Hosted Journals flow does). That enrolment
+  has no start date: the Users list shows the "admin admin" row's role with an
+  empty "Start Date".
+- The `editor` and `productionEditor` keys resolve to manager-level groups
+  (users.md): the Roles list shows "Journal Manager" / "Press Manager" as
+  their permission level, and the accounts pass manager gates; OPS enrols no
+  editor. A Production editor's stages are Copyediting and Production only:
+  unassigned it opens every stage of every submission, assigned it opens only
+  those two. `translator`, `volumeEditor` and `chapterAuthor` are
+  author-level.
+- OPS has no reviewer role: its default user groups carry no reviewer group,
+  so the Register page offers no reviewer box and the scenario API rejects
+  `externalReviewer`.
 - "Consider role in masthead list" (Settings › Users & Roles › Roles › a
   role's "Edit") arrives ticked on Journal editor, Section editor, Reviewer
   and Editorial Board Member (OJS); Press editor, Series editor, External
   Reviewer and Editorial Board Member (OMP; Internal Reviewer unticked);
   Moderator and Editorial Board Member (OPS). "Production editor" arrives
-  unticked. On a preprint server the manager role's row reads "Preprint
-  Server manager" at permission level "Manager". Fresh scratch contexts,
-  2026-09-23 (U07 claim check K1, K4; `.reports/U07/ccK4` record `roleBoxes`).
-- The site title is empty in both locales, which is why site-level mail
-  reads "an account with , but…". Administration › Site Settings › Site
-  Setup › Settings "Site Name". Claim check 2026-09-02, all three apps
-  (`.reports/U02/claimcheck-B.md`).
-- The site has no privacy statement, so the site-level Register page asks
-  no site consent. Administration › Site Settings › Site Setup ›
-  Information "Privacy Statement"; the site-level Register page. Claim
-  check 2026-09-02, all three apps (`.reports/U02/claimcheck-A.md` U2;
-  probe G5).
-- Email validation and the ALTCHA check are off on the worker servers and
-  on only on the validation variant at `basePort + 90` (8090/8190/8290),
-  which serves the same install through `config.test.validation.inc.php`
-  (harness.md "The validation-variant server"). The Register page: no
-  captcha and no "Registration awaiting verification" on a worker server;
-  both on the variant. Live-probed 2026-09-02, all three apps (U02 notes
-  f and i; `.reports/U02/probe-G7.md`).
-- The registration notification box ("Yes, I would like to be notified of
-  new publications and announcements.") arrives unticked. The Register page,
-  `input[name=emailConsent]`. Probed 2026-09-02, all three apps
-  (`.reports/U02/probe-G1.md`; claim check A).
-- Scratch contexts arrive open for registration with every default role.
-  Settings › Users & Roles › Site Access Options; the context's Register
-  page. Live-probed 2026-09-02 on scratch contexts of all three apps (U02
-  note g and note s).
-- Scratch contexts enrol `admin` as a manager: the context scenario creates
-  the context through the same service as the admin "hosted contexts" flow,
-  acting as `admin` (`shared/php/classes/testing/ContextFactory.php`).
-  Settings › Users & Roles › Users of the scratch context. Seen
-  2026-08-25 on all three apps (U21 note on the needs-editor mail: "every
-  Manager (including the auto-enrolled admin)"). That enrolment has no
-  start date: the Users list shows the "admin admin" row's role with an
-  empty "Start Date" and its "Edit" page reads "---", and the older user
-  lists (the "Merge user" window, Administration › Hosted Journals ›
-  "Settings wizard" › "Users") show an empty "Roles" cell on that row.
-  Publicknowledge, scratch contexts and journals made on Hosted Journals,
-  all three apps, 2026-09-25 (`.reports/U53/cc-K1.md` K1-5, `cc-K2.md`,
-  `cc-K3.md` K3-8).
-- Accounts a scenario seeds (`users[]`) store their password as a bcrypt
-  hash at cost 4 (the shared roster uses the app's own hash, patterns.md
-  "Sessions"); the first sign-in through the login form rehashes it at the
-  installation's cost. So a seeded account that never signed in on screen
-  counts as "stored another way" when a Users XML move takes it to
-  another context (the U63 Import & export spec, Rule 28). OJS and OMP,
-  2026-09-27 (U63 claim check K3, `.reports/U63/cc-K3.md` K3-8).
-- Site Settings › "Site Setup" › "Bulk Emails" has no journal ticked, and
-  "Security" › "Minimum password length (characters)" reads 6, on all
-  three test installs. Live-read 2026-09-25 (`.reports/U53/cc-K3.md`).
-- Site Settings › "Security" › "Enable rate limiting" is unticked, with
-  "Maximum attempts" 5 and "Lockout duration (seconds)" 300 stored, and
-  "Site Setup" › "Settings" › "Disable aggregated reviewer statistics" is
-  unticked. All three apps, 2026-09-26 (`.reports/U60/cc-K1.md`).
-- The site's principal contact ("Site Setup" › "Information") is the
-  application's name in both English and French, and `admin@mail.test` in
-  English only. All three apps, 2026-09-26 (`.reports/U60/cc-K2.md`).
-- Security audit logging is off: `[logs] log_audit` is commented out in
-  the test configuration, as in `config.TEMPLATE.inc.php`, so a site
-  "Security" save writes no audit line. All three apps, 2026-09-26
-  (`.reports/U60/cc-K4.md`). Administration › System Information shows
-  no row for `log_audit`, nor for `password_timeout`, which the test
-  configuration also leaves commented out as the template does. All three
-  apps, 2026-09-27 (U61 claim check K4, `.reports/U61/cc-K4.md` K4-3).
-- `plugins/themes/` holds only `default`, so the site's "Theme" list offers
-  "Default Theme" alone; at the install state the tab shows Noto Sans and
-  `#1E6292` (OJS also "Include the current issue's table of contents"
-  ticked). The site's "Sidebar" offers "Language Toggle Block" alone,
-  unticked; the "Developed By" block is disabled on the site. All three
-  apps, 2026-09-26 (`.reports/U60/cc-K3.md`, `cc-K4.md`).
-- A removed site "Logo" has its file deleted (its address answers 404); a
-  removed "Site style sheet" stays at `public/site/styleSheet.css` (U60
-  A6), so after the U60 claim check each checkout holds a harmless sheet
-  there that no page links. All three apps, 2026-09-26
-  (`.reports/U60/cc-K3.md`, `cc-K4.md`).
+  unticked.
+- The Author role's "Permit submission metadata edit." is unticked on a fresh
+  journal and press and ticked on a fresh preprint server; the Participants
+  panel's "Edit Assignment" box for the submitter starts from it. On the other
+  roles it arrives ticked on Section editor, Series editor and Moderator,
+  ticked and greyed on Journal/Press editor and Production editor, and
+  unticked on Guest editor and every Assistant-level role. Settings › Users &
+  Roles › Roles › Edit.
+- The Roles list's stage columns are Submission, Review, Copyediting,
+  Production on a journal; Submission, Internal Review, External Review,
+  Copyediting, Production on a press; Production alone on a preprint server.
+  Submission is ticked by default for the Section (Series) editor, Guest
+  editor (OJS), Funding coordinator, Author and Translator (a press also the
+  Volume editor) and unticked for the assistants and a press's Chapter Author.
+  Settings › Users & Roles › Roles, all three apps.
+- The Roles list shows 25 rows per page on a new context (18 installed roles
+  on a journal, 19 on a press, 5 on a preprint server), so a `customRoles[]`
+  seed of more than 7 (journal) or 6 (press) roles puts the last ones on page 2.
+  A role created at the manager level (`customRoles[]` level `manager` too)
+  arrives with "Permit changes to Settings" unticked: its members get the
+  access-denied page on Settings until a manager ticks the box.
+- {OJS OMP} The Journal manager / Press manager role has no workflow stage, so
+  it is never offered in the Participants "Assign" form or under a section's
+  or series' "Editorial Assignments", and its Roles row has no "Edit"; on OPS
+  "Preprint Server manager" is offered at Production.
+- A new context's contributor roles (and `publicknowledge`'s) are named in the
+  primary language only: with French under "Forms" the "Edit Role" window's
+  French box is empty ("1/2 languages completed"), without it there is none,
+  so a French page reads "Author". Three apps.
+- A Site Administrator can be left without a manager role in a scratch
+  context: seed `admin` in `users[]` with one more role, end the manager role
+  on the admin's own Users & Roles › Edit page ("Remove Role"), and sign in
+  again. The context then treats the account as its remaining role; with
+  Reader left, every editorial page it opens shows an "Error" window
+  (`_submissions/viewsCount` answers 401).
+
+### Email and notifications
+
+- Seeding sends no email (the scenario request runs under a mail fake): a
+  seeded submission's Activity Log lists the submission emails as sent, a
+  seeded reviewer gets no request email or one-click link, and a
+  `published: true` seed sends no "Publication Published" email.
+  `submitted: true` still raises the "needs an editor" task for every
+  manager-level member of the context (the auto-enrolled `admin` included; a
+  Section Editor gets none). A probe or test that needs the email drives the
+  screen: the submission wizard, the editor's "Add Reviewer" window.
+- The password reset email is sent by the site (the application's name,
+  `admin@mail.test` on the test installs), never by the journal's principal
+  contact. All three apps.
+- The editorial statistics email is on by default on `publicknowledge` and on
+  every scratch context, so the Profile › Notifications tab shows the
+  "Statistics report summary." row. Settings › Workflow › Emails › "For
+  Editors" ("Send a monthly email to editors."). All three apps.
+- Every row of a user's Notifications settings starts with "Enable these types
+  of notifications." ticked and "Do not send me an email for these types of
+  notifications." unticked, for an account seeded or created by a manager; one
+  registered on a journal's Register page with the notification box left
+  unticked starts with "Do not send me an email…" ticked on every "Public
+  Announcements" row of that journal.
+- PKP's notification emails are single-part `text/html` (the statistics email
+  `multipart/mixed` with its CSV); Mailpit's API `Text` field and its "Text"
+  tab are Mailpit's own rendering of the HTML, each link's address in
+  parentheses after its words. The MIME reads from `/api/v1/message/{id}/raw`;
+  the slot's own Mailpit is `app.mailpitUrl`.
+- The "Publication Published" email's From is the context's name with its
+  principal contact's address (a scratch context: "Scratch context {tag}" and
+  the `contactEmail` given, else admin@mail.test); the other workflow emails
+  (new version created, the posted acknowledgement) use the principal
+  contact's name. Mailpit, all three apps.
+
+### Seeded submissions, reviews, files and usage
+
+- The seed creates no submissions on any app. Every Editor Dashboard view
+  counts 0 until a test seeds one through `POST scenarios/submission`.
 - A seeded submission carries files only where `files[]` (OJS, OMP:
   "Submission Files") or `reviewRounds[].files[]` (a round's "Files for
-  Review") names them, a galley's file aside; OPS refuses both (400). A
-  seeded author file shows on "Submission Files" under its fixture name
-  with its component. On a journal whose submission languages are English
-  and French every file form ("2. Review Details", "Edit a file") shows
-  the language tabs "French (Canada)" / "English" whatever the
-  submission's own languages. Workflow lists and the upload wizard,
-  scratch contexts, OJS and OMP, 2026-09-23 (`.reports/U36/cc-K1.md`,
-  `cc-K2.md`).
-- Deleting a submission file also deletes every copy made from it through
-  "Upload/Select Files" (a "Submission Files" original's copy in "Draft
-  Files"), with no Activity Log line for the copy; a probe that deletes an
-  original seeds a fresh submission for any later leg on the copy. OJS and
-  OMP, 2026-09-23 (`.reports/U36/cc-K1.md` K1-7).
-- The task and job runners are off (`[schedule] task_runner = Off`,
-  `[queues] job_runner = Off` in `config.test.inc.php`, written by
-  `shared/playwright/make-test-config.js`); nothing queued or scheduled
-  runs until a test drains the queue. No screen switches it. Effects seen:
-  a republished article stays "No Results" until the queue ran, 2026-09-02
-  (U15 Side effects); review reminders cannot fire, 2026-08-02 (U27).
-  Administration › System Information, section "queues", shows an Off
-  line as an empty value and an On line as "1" (`job_runner` empty,
-  `job_runner_cross_request_lock` 1). All three apps, 2026-09-27 (U61
-  claim check K3, `.reports/U61/cc-K3.md` K3-5).
-  Seeded published articles likewise reach the search index only when the
-  queued jobs run: the Search page answers "No Results" for a seeded title
-  until then. OJS, 2026-09-25 (U51 claim check K2, `sr-visitor-01-search`
-  vs `ro-visitor-19-search`). A category's page likewise lists a seeded
-  published item only after the queued jobs run: it reads "0 Items" ("0
-  Titles" on OMP) until `php lib/pkp/tools/jobs.php run` (app root, the
-  test config), while a press's catalog, series and "New Releases" pages
-  list the item at once. All three apps, 2026-09-27 (U68 claim check K4,
-  `.reports/U68/ccK4/seed-arts-before-jobs-omp`,
-  `ctl-02-category-arts-before-jobs-{ojs,ops}`).
-- Outbound HTTP is dead: `[proxy]` points at `127.0.0.1:9`, so every
-  server-side external call fails fast (ORCID, reCAPTCHA, DOI registration,
-  update checks); Mailpit and other `127.0.0.1` traffic are unaffected. No
-  screen shows it, except DOIs: a deposit ("Deposit DOIs", "Deposit All")
-  queues its job, the job fails at connection and the DOI stays
-  "Submitted", never "Error"; every "Export DOIs" answers 400 "An XML
-  validation error occurred and the XML could not be exported." because
-  the agency's XML schema is fetched through the same proxy (OJS Crossref
-  and DataCite, OPS Crossref, 2026-09-26, U45 claim check K5); and
-  Administration › System Information › "Check for updates", which
-  answers a server error (500) with an empty page (all three apps,
-  2026-09-27, U61 claim check K1); and the "Plugin Gallery" tab (Settings ›
-  Website › "Plugins", Site Settings › "Plugins", the Settings Wizard),
-  which reads "Loading" forever because its list request answers a server
-  error (500) on every load of those pages, so each visit adds a crash to
-  a probe's run record (all three apps, 2026-09-27, U62 claim check K1,
-  K3); and on OJS every PubMed XML export ("Export Articles", "Export
-  Issues") and every DOAJ "Export" with "Validate XML before the export
-  and registration." ticked, which answer 500 with a "Validation errors:"
-  page and no download because their schemas load files from the web
-  (unticked, the DOAJ file downloads; a missing ISSN is not the cause,
-  `issn` and `eissn` are optional), while a DOAJ "Register" and the daily
-  DOAJ task queue deposit jobs that fail at connection and leave the rows
-  "Submitted" (2026-09-27, U63 claim check K4, `.reports/U63/cc-K4.md`
-  K4-1, K4-5, K4-9). Maintainer ruling 2026-08-20; harness.md
-  "config.test.inc.php".
-- The public files directory is `public_files_dir = public`, relative to
-  the app root as the config template requires (generated since
-  2026-09-24; before, an absolute path). Pictures uploaded through a
-  formatted-text box ("Insert/edit image" › "Upload", journal and site,
-  `api/v1/_uploadPublicFile`) are stored under
-  `public/site/images/<username>/<file name>` and served at
-  `/public/site/images/…` on the origin; a second upload of a name the
-  folder already holds is stored as `<name>-<32 hex>.<ext>`. A context's
-  logo lands in `public/journals|presses|contexts/<id>/` and the header
-  shows it. With the absolute path every such upload answered 500 "The
-  public files directory was not found…" and every public image address
-  was a disk path. The site's own "Page Footer" bar has no picture button
-  (Bold, Italic, Superscript, Subscript, "Insert/edit link"); the site's
-  upload goes through a Navigation item's "Content". Settings › Website ›
-  Appearance › Setup ("Page Footer", "Logo"), Administration › Site
-  Settings › Navigation. Live-driven 2026-09-24, all three apps
-  (`.reports/U09/hU09b/confirm-public-*.json`; U09 claim check K5-6).
-- Picture uploads beyond the file name: a pasted or dropped picture is
-  stored as `mceclip<N>.png`, a name the sanitizing reduces to nothing as
-  `.png`, and a picture uploaded in the image window and then cancelled is
-  stored anyway. The servers' upload limits are the host php.ini's
-  (`php -S` sets none), whatever a box's own "Max filesize" line says. A
-  host on PHP's defaults takes uploads up to 2 MB (`upload_max_filesize`)
-  in requests up to 8 MB (`post_max_size`): over 2 MB an upload answers
-  500 "Path cannot be empty" or 400 "One or more files could not be
-  uploaded.", over 8 MB 500 "The POST data is too large." (U09 claim
-  check K5, K5b). The maintainer's Mac (Homebrew PHP 8.4) takes 100M and
-  100M: a 101 MB upload answers 500 on `POST temporaryFiles` and its card
-  reads "Invalid JSON response from server." (U47 claim check K1-2). A
-  drive that must reach the 5000 KB picture allowance uploads pictures
-  under 2 MB (three 1000×650 random-pixel PNGs of about 1906 KB); a drive
-  that must fail an upload checks `php -r 'echo ini_get("post_max_size");'`
-  first. All three apps, 2026-09-24.
-- "Static Pages Plugin" {OJS OMP} arrives unticked on a scratch journal
-  (Settings › Website › "Plugins" › "Installed Plugins", "Generic
-  Plugins"), so there is no "Static Pages" tab until a manager ticks it or
-  `plugins: {staticpagesplugin: {enabled: true}}` seeds it; OPS lists no
-  such plugin. "Custom Block Manager" is unticked on a new journal and on
-  the site; the site's Plugins list (Administration › Site Settings ›
-  Plugins) lists both, unticked (OPS the second alone). A new journal's
-  "Users must be registered and log in to view the journal site." (OMP
-  "press site.", OPS "server site.") under Settings › Users & Roles ›
-  "Site Access Options" is unticked. Live 2026-09-24, three apps (U09
-  claim check K2, K3, K4).
-- The test installs run PostgreSQL, where "Delete" on a custom block
-  answers 500 and deletes nothing (U09 A14), so a scratch block stays for
-  good; a block made on the site stays on the site until the next reset.
-  Live 2026-09-24, three apps (U09 claim check K3).
-- The test installs sort a missing localized value last (PostgreSQL puts
-  NULL last in ascending order): a category with no name in the page's
-  language comes after every named one in the "Categories" tab, the
-  "Browse" block, the home row and the "Select Categories" window, in no
-  stable order. All three apps, 2026-09-25 (U16 claim check K2-1,
-  `.reports/U16/ccK2/fr-01-tab-french-*`, `v-o-01-home-fr_CA-*`).
-- On the fleets the sidebar Language block's links land on the site home
-  (`index.php/index/<locale>`): its link carries the server name without
-  the probe or worker server's port. A script that needs a page in another
-  language opens `{journal}/<locale>/{path}`. Three apps, 2026-09-24 (U09
-  claim check K1).
-- A fleet reset with `fleet-prep --reset` holds `publicknowledge` alone
-  on each app, so until the first scratch journal is enabled publicly the
-  site's address, `index.php/index/index` and `index.php/index/en` open
-  `publicknowledge/en` for every visitor, the Site Administrator included,
-  and Hosted Journals has one row with "Order" hidden; each scratch
-  journal takes the next place in the site's order. A fleet used by
-  earlier runs without a reset holds hundreds of contexts. All three apps,
-  2026-09-28 (U59 claim check K3).
-- The compromised-password check is a site setting, off on every fleet
-  (Administration › Site Settings › Security, "Check passwords against
-  compromised password databases" unticked), so Profile › Password accepts
-  `password1234`; ticked, Profile › Password and the Register page refuse
-  `qwerty123456` with "This password has appeared in data leaks. Please
-  choose a different, strong password." The installs carry no local list
-  (`lib/pkp/registry/blacklistedPasswords.txt` is absent), so the ticked
-  check asks Have I Been Pwned online and needs the network. All three
-  apps, 2026-09-26 (`.reports/U60/cc-K1.md`).
-- PDF full text is not indexed, so a search on galley content finds nothing.
-  The Search page. harness.md states it; U15 finding A11 says no galley
-  text of any type reaches the index on any install (a product defect, not
-  a test-side setting). Probed for HTML on 2026-09-24, OJS and OPS: after
-  the queued jobs ran, a word only in a published HTML galley found "No
-  Results" while the title word found the item (U46 claim check K1). The
-  PDF fixtures (`article.pdf`, `preprint.pdf`) hold no text, so a PDF
-  galley cannot be probed with them.
-- The submission emails a seeded submission's Activity Log lists as sent
-  ("A new submission needs an editor…", "Thank you for your
-  submission…") never reach Mailpit; an on-screen action's emails do.
-  OJS and OPS, 2026-09-24 (U46 claim check K1).
-- Submission languages are the second list on Settings › Website › Setup
-  › Languages, "Submission Languages". A new context lists its primary
-  language alone; another language comes in through "Add/Remove
-  Languages" with every box unticked and counts once "Submissions" is
-  ticked. The first list ("Website Languages") has no Submissions column.
-  Live-driven 2026-09-24, OJS and OPS (U46 claim check K2).
-- `editor.diana` is at the manager permission level: the `editor` key
-  resolves to "Journal editor" / "Press editor", whose Roles row reads
-  "Journal Manager" / "Press Manager", so the account passes manager gates
-  (settings, canPublish). Settings › Users & Roles › Roles, "Permission
-  level" column. Live-probed 2026-09-02, OJS and OMP (U02 note g; claim
-  check A W3). OPS enrols no editor.
-- OPS has no reviewer role: its default user groups carry no reviewer
-  group, so the Register page offers no reviewer box and the scenario API
-  rejects `externalReviewer`. Settings › Users & Roles › Roles; the Register
-  page. Live-probed 2026-09-02 (U02 note c; `.reports/U02/probe-G1.md`).
-- `fr_CA` is a UI language but not a form language on `publicknowledge`
-  and on scratch contexts (the seeders never set the form locales), so
-  multilingual boxes on the Profile tabs show one language until a manager
-  ticks "Forms" for French. Settings › Website › Setup › Languages; Profile ›
-  Identity. Live-probed 2026-09-03, all three apps (`.reports/U03/pB`, `pC`,
-  `pJ`; U03 note j).
-- A scenario-seeded user has no Country, so its Profile › Contact tab
-  cannot be saved until one is chosen ("This field is required."), at
-  journal and site level; a test that saves Contact picks a Country first.
-  Live-probed 2026-09-03, all three apps (`.reports/U03/pA` P7, `pC` P13,
-  `pJ` P42).
-- Every scratch context offers the stage's task and discussion templates
-  in the Participants "Assign" form's "Choose a predefined message" list
-  (registry templates installed by the context factory since 2026-09-11):
-  "Discussion (Copyediting)" and "Request Copyedit" at Copyediting on OJS
-  and OMP, "Discussion (Production)" and "Assign Editor" on a preprint
-  server; choosing one fills the message box with the template body,
-  except a preprint server's "Assign Editor", which leaves the box as it
-  was (its request answers 500). A template added in Settings › Workflow ›
-  "Tasks and Discussions" is listed but fills nothing and cannot be sent
-  (500). Workflow › Participants › Assign and Notify. Live-driven
-  2026-09-18 and 2026-09-22, all three apps
-  (`.reports/U32/ccK2/n1-se-assign-cancel-form-{ojs,omp}.json`,
-  `ops-assign-form-ops.json`; U35 ccK3 K3-2, K3-7); the 2026-09-03 "empty
-  template list" read predates the factory change.
-- A recipient's "Do not send me an email…" box on the "Discussion added."
-  row does not stop a Participants message's email. Profile ›
-  Notifications; Mailpit. Live-driven 2026-09-22, all three apps (U35 ccK3
-  K3-8).
-- A scratch user's "Discussion added." row on Profile › Notifications
-  arrives with "Enable these types of notifications." ticked and "Do not
-  send me an email…" unticked. Live-driven 2026-09-23, all three apps
-  (`.reports/U37/cc-K5.md`, `cc-K4.md`).
-- In the "Add" window of a stage's "Tasks & Discussions" panel (unlike the
-  Participants form above), a template added in Settings › Workflow ›
-  "Tasks and Discussions" fills "Name" and the message and saves like an
-  installed one, placeholders resolved. A preprint server's "Assign Editor"
-  fills "Name" only; the box keeps its old text, but "Save" treats it as
-  empty. A "Find Template" search holding "task(s)" or "discussion(s)"
-  answers 500 with an "Error" window. Live-driven 2026-09-23, all three
-  apps (`.reports/U37/cc-K3.md`).
-- A template switched on for "Auto-add at stage" makes its item for a
-  seeded submission at the submit into the first stage (OPS: Production)
-  and at a stage change driven on screen ("Send To Production", "Move To
-  Copyediting" on a journal or press, "Unpost" on a preprint server); it
-  is made again only after it is deleted, and its first message keeps the
-  recipient and sender placeholders unfilled. Settings › Workflow and the
-  stage panel, live-driven 2026-09-23, all three apps
-  (`.reports/U37/cc-K4.md`).
-- A seeded `accepted` reviewer's wizard shows no "Review Tasks &
-  Discussions" panel until they walk to step 3. After "Cancel Reviewer",
-  and for a declined request, the wizard address answers "The current user
-  is not assigned as a reviewer for the requested document.", so the
-  reviewer's panel is gone too. Reviewer wizard, live-driven 2026-09-23,
-  OJS and OMP (`.reports/U37/cc-K1.md`).
-- A reviewer seeded in two `reviewRounds` entries holds two open requests,
-  rounds 1 and 2, and a discussion lists them under the reviewer as
-  "Round 1 - {mode}, Round 2 - {mode}". Live-driven 2026-09-23, OJS and OMP
-  (`.reports/U37/cc-K7.md`).
+  Review") names them, a galley's file aside; OPS refuses both (400). A seeded
+  author file shows on "Submission Files" under its fixture name with its
+  component.
 - A scratch context never receives an automatic editor assignment, from a
-  section or a category: a submission sent through the wizard into a
-  section with a sub-editor gets none, and the managers get "A new
-  submission needs an editor to be assigned"; one sent with a category
-  whose "Editorial Assignments" tick a Journal editor and a Section editor
-  (Press editor, Series editor) gets neither, so its participants list the
-  author alone and the editor's "Assigned to me" reads 0 (OJS and OMP,
-  2026-09-25, U16 claim check K1-3, `.reports/U16/ccK1/aa-05-*`,
-  `aa-06-*`). Only `publicknowledge`, the install's first context, gets
-  them. The "You have been assigned as an editor on a submission to
-  {context}" email still goes out at the wizard's final "Submit" to every
-  assignment already on the submission in a manager-level or Section/Series
-  editor role that works on the Submission stage, once per person, from the
-  context's contact, so a scratch context reaches it by seeding
-  `participants[]` on a `submitted: false` draft and submitting that draft
-  through the wizard as its author. A preprint server never sends it (no
-  OPS role works on the Submission stage). Participants panel, Activity Log,
-  Mailpit; OJS, OMP and OPS, 2026-09-22 (U35 ccK4 `b-X3-auto-*`, ccK5
-  `x2-mail-*`).
-- The editorial statistics email is on by default on `publicknowledge` and
-  on every scratch context, so the Profile › Notifications tab shows the
-  "Statistics report summary." row. Settings › Workflow › Emails › "For
-  Editors" ("Send a monthly email to editors."). Live-probed 2026-09-03,
-  all three apps (`.reports/U03/pH` P36, `pJ` P46).
-- `publicknowledge` has no published item on any app (OJS Vol 1 No 2 is
-  empty; OMP "No titles have been published yet."; OPS lists categories
-  only), so a reader-facing item page needs a scenario-published scratch
-  submission. The public home page. Live-probed 2026-09-03 (`.reports/U03/pF`
-  P30). That holds on a fresh fleet only: the suites publish into it, and
-  on a used fleet its web feeds listed 18 (OJS), 28 (OMP) and 17 (OPS)
-  items, so a "nothing published" read uses a new scratch context.
-  2026-09-25 and 2026-09-26 (U18 claim check K1, K3).
-- A context with more than one UI language, and the site, answers
-  `{context}/oai` with a 302 to `{context}/en/oai`; a one-language scratch
-  context answers at `{context}/oai` itself. OJS: on a head older than
-  `2815f33e65` (pkp/ojs#5947, 2026-10-16), while any journal on the
-  install has DOIs on and "DOI Versioning" set to "Yes", every OJS OAI
-  Identify, list and record request answers 500 on the Postgres test
-  install, on every journal and the site-wide address (U19 A22, retired),
-  so a `doiVersioning: true` seed breaks every OJS OAI read there until it
-  is off again; `main` since then answers. A context created under Hosted Journals › "Create Journal" starts
-  not enabled publicly; one seeded through `POST scenarios/context` is
-  enabled unless `enabled: false`. Administration › "System Information"
-  shows the install's OAI settings (`oai` 1, the repository identifier,
-  `oai_max_records` 100), read-only. Live-probed 2026-09-26 (U19 claim
-  check K1, K2, K4). A fresh fleet has no deleted OAI record in
-  `publicknowledge`; on OMP a `publicknowledge` format set "Not
-  Available" (U73 S7, S9, S11 do) leaves one in press 1, which every OMP
-  press's own list, GetRecord and "Earliest Datestamp" then show (U19 A1),
-  and unpublishing that book once none of its formats is available removes
-  it again (U19 claim check I29, 2026-09-29).
-- On a fleet used by earlier runs, `publicknowledge`'s "Engineering"
-  category page lists items other runs published (OJS and OPS: 2 Items on
-  2026-09-25), while the other seeded categories read "0 Items" ("0
-  Titles" on OMP); a read of the seeded category pages asserts no count.
-  All three apps, 2026-09-25 (U16 claim check K4).
-- "The site has one registration-open journal" stops holding as soon as any
-  scratch context exists; a probe that needs the one-journal state runs
-  first on a fresh fleet. Profile › Roles "Register with other journals"
-  fold. Seen 2026-09-03 (`.reports/U03/pE` P22, `pJ` setup).
-- A scratch context created without an `orcid` key has "Enable ORCID
-  functionality" unticked and no ORCID block on Profile › Identity; one
-  created with `orcid: {enabled: true}` has both (`scenarios.md`
-  `POST scenarios/context`). The switch is on Settings › Users & Roles ›
-  "ORCID"; the block on Profile › Identity. Live-probed 2026-09-04, all
-  three apps (`.reports/U03/cc-K6.md` K6-2); the tab driven on OMP
-  2026-09-27 (U70 claim check K4, K4-8).
-- With `orcid: {enabled: true}` the "Add Reviewer Suggestion" window of the
-  wizard's "Reviewer Suggestions" step gains an "ORCID iD" box that accepts
-  only the full `https://orcid.org/…` form; a bare iD or a number is refused
-  with "The ORCID iD you specified is invalid. Please include the full URI".
-  Live-driven 2026-09-06, OJS and OMP (`.reports/U31/cc-K2.md` K2-3).
-- Until 2026-09-24 (the absolute `public_files_dir`, see "Install
-  defaults") the profile image's address was the public files
-  directory's filesystem path appended to the origin, so the picture never
-  loaded (404); a suite asserts the "Delete" control and the stored file,
-  never the rendered picture. Since the relative value the address is
-  `/public/site/…`: the profile picture loads on Profile › Public at
-  `/public/site/profileImage-<id>.<ext>` at its stored size. Live-probed
-  2026-09-03/04, re-driven 2026-10-14, all three apps (U03 drift sweep,
-  `.reports/U03/cc-SW2.md`).
-- `POST scenarios/submission` with `submitted: true` raises the "needs an
-  editor" task for every manager-level member of the context (Journal
-  manager, Journal editor and Production editor; {OMP} Press manager, Press
-  editor, Production editor; {OPS} the Manager; the auto-enrolled `admin`
-  included; a Section Editor gets none; 2026-09-28, U05 claim check I28)
-  but sends no email (the scenario request runs under
-  `Mail::fake()`); the submission wizard raises both, with the email sent
-  inside the submit request itself. A probe or test that needs the email
-  drives the wizard. Tasks window; Mailpit. Live-probed 2026-09-04, all
-  three apps (`.reports/U05/pT` P2, `pN` P32).
+  section or a category: a submission sent through the wizard gets none, and
+  the managers get "A new submission needs an editor to be assigned". Only
+  `publicknowledge`, the install's first context, gets them. The "You have
+  been assigned as an editor on a submission to {context}" email still goes
+  out at the wizard's final "Submit" to every editor already assigned, so a
+  scratch context reaches it by seeding `participants[]` on a
+  `submitted: false` draft and submitting that draft through the wizard as its
+  author. A preprint server never sends it (no OPS role works on the
+  Submission stage).
+- A draft seeded `submitted: false` opens the author's wizard at
+  `submission?id=<id>` on its first step, "Upload Files", with "Details" not
+  yet reached (its inputs sit hidden in the DOM); "Continue" reaches it
+  without a file. The submission scenario has no term keys (keywords,
+  subjects, disciplines, agencies): save them on Publication › Metadata as a
+  manager, which a published version accepts too.
+- OJS overrides several lib/pkp event-log strings in its own
+  `locale/en/locale.po` (the wizard's submit entry reads "Article submitted"
+  where lib/pkp says "Initial submission completed."); grep the app's
+  `locale/en/locale.po` before quoting a lib/pkp string.
+- Every submission has Activity Log lines from its first save, so "History"
+  never reads "No Items": a draft begun on the start page shows two
+  "Submission metadata updated" lines, and a seeded submission with no
+  decision shows 8 lines (OJS, OMP) or 6 (OPS). Activity Log, all three apps.
+- A submission's number and its first publication's number differ on these
+  installs, so a check that needs them equal never meets it on a first
+  version.
+- A scratch user's `givenName`/`familyName` are what the Participants panel
+  and the Composer's "To" chips show; a discussion's "Created by" and the
+  discussion window's "Message from" show the *username*. Workflow ›
+  Discussions. OJS and OMP.
+- A seeded submission's contributor has no Country, so the workflow's
+  Contributors › "Edit" refuses "Save" until one is picked (a Bio Statement
+  too needs it first). OJS and OPS.
+- {OMP} A book seeded with the Press manager as `submitter` has no contributor
+  (its Contributors page reads "No items found."), so its "How to Cite" opens
+  with the title.
 - On `stable-3_5_0` a submission seeded through `POST scenarios/submission`
-  stores its contributor with no user group (`authors.user_group_id`
-  empty; the wizard always stores one); publishing it with a verified ORCID
-  iD under the member API then answers 500 in the ORCID work builder
-  (`getUserGroup()` on null) and queues no deposit. A script that publishes
-  such a seed on 3.5 sets the contributor's group first (the U04 I05 kept
-  script does it by SQL). Live-probed 2026-10-05, OJS and OPS
-  (`.reports/U04/cc-I05.md`).
-- A second `POST scenarios/context` naming an existing username enrols that
-  user in the new context; `roles: []` is refused (400), and a
-  context-level registration always adds Reader, so the only way to an
-  account with no role anywhere is the site-level Register page with no
-  journal ticked. A registration on the worker or probe ports signs the
-  visitor in at once ("Registration complete") and sends no email; its
-  "Yes, I would like to be notified…" box is unticked on arrival. Register
-  page. Live-probed 2026-09-04, all three apps (`.reports/U05/pR` P11,
-  P28, P34).
-- Emails sent by a queued job (`jobs.php run`) carry links on the config
-  `base_url` (the worker port); emails sent inside a request carry the
-  request's host. A probe on a probe server rewrites the host before
-  opening a footer link from a job-sent email. Mailpit. Live-probed
-  2026-09-04, all three apps (`.reports/U05/pA` P24, P26).
-- Announcements are off on a scratch context and on the site ("Enable
-  announcements" unticked); the announcement form's "Send an email about
-  this to all registered users." box is unticked by default, and the OJS
-  "Publish Issue" dialog's box is ticked by default. Settings › Website ›
-  Setup › Announcements; Announcements › Add; Issues › Future Issues ›
-  Publish Issue. Live-probed 2026-09-04, all three apps (`.reports/U05/pA`
-  P24–P26).
-- `publicknowledge` has "Enable announcements" unticked and an empty
-  Announcements page on all three apps; every scratch context starts the
-  same way. The site's announcements are off at a reset too, and the site's
-  Announcements tab (shown once a second context exists) saves, edits,
-  deletes and searches on all three apps, its API answering 200 (unlike the
-  site's highlights API). Settings › Website › Setup › Announcements;
-  Administration › Site Settings › Announcements. Live-probed 2026-09-17,
-  all three apps (`.reports/U12/ccK1`, `ccK3`).
-- An announcement's image is stored as
-  `public/journals|presses|contexts/<id>/announcements/<announcementId>.<ext>`
-  and the page and the public list print the relative public files
-  address with a `?<timestamp>` (`/public-ds2/journals/1/announcements/1.png?…`
-  on a dataset fleet), and the picture loads. Until 2026-09-24 the pages
-  printed the absolute disk path, which never loaded. Live-probed
-  2026-09-17, all three apps (`.reports/U12/ccK2`); the relative address
-  re-driven 2026-10-27 on dataset fleets, `main` and 3.5, all three apps
-  (U12 claim check I27A; campaign fleets not re-driven).
-- The "Announcement Feed Plugin" is disabled on every fresh journal,
-  `publicknowledge` included (its `settings.xml` is never installed);
-  the feed rows' given is `plugins: {announcementfeedplugin: {enabled:
-  true}}` plus `sidebar: ['AnnouncementFeedBlockPlugin']`. Settings ›
-  Website › Plugins. Live-probed 2026-09-17, OJS (`.reports/U12/harness`,
-  `ccK5`).
-- A public address the app refuses (an announcement with announcements
-  off, a route with no handler) answers a bare "404 Not Found" page with
-  an empty browser title on all three apps, with no header, sidebar or
-  footer. Live-probed 2026-09-17 (`.reports/U12/ccK4`). A missing issue
-  {OJS} or book {OMP} is not a 404: a visitor gets Login, a signed-in user
-  the access-denied page ("Invalid issue requested!", "An invalid
-  published submission was specified."); a missing series {OMP}
-  redirects to the Catalog page. All three apps, 2026-09-28 (U08 claim
-  check I28).
-- Every row of a user's Notifications settings starts with "Enable these
-  types of notifications." ticked and "Do not send me an email for these
-  types of notifications." unticked, for an account seeded or created by a
-  manager; one registered on a journal's Register page with "Yes, I would
-  like to be notified of new publications and announcements." left
-  unticked (its arrival state) starts with "Do not send me an email…"
-  ticked on every "Public Announcements" row of that journal. Profile ›
-  Notifications; Register page. Live-probed 2026-09-17 and 2026-10-20, all
-  three apps (`.reports/U12/ccK5`; U05 sweep ccSW2 `register`).
-- PKP's notification emails (discussion, announcement, issue, review
-  complete, statistics report, needs an editor, Publication Published) are
-  single-part `text/html` (the statistics email `multipart/mixed` with its
-  CSV); Mailpit's API `Text` field and its "Text" tab are Mailpit's own
-  rendering of the HTML, each link's address in parentheses after its
-  words. The MIME reads from `/api/v1/message/{id}/raw`; the slot's own
-  Mailpit is `app.mailpitUrl`. Live-probed 2026-10-20, all three apps (U05
-  sweep ccSW3).
-- A scratch preprint server's Settings › Website › Appearance › Setup
-  "Sidebar" list offers "Web Feed Plugin" and "Language Toggle Block"
-  alone (no Information block), and its Plugins grid lists "Web Feed
-  Plugin" and no "Announcement Feed Plugin"; OMP likewise has no
-  "Announcement Feed Plugin" row. Live 2026-09-17, OPS and OMP (the U12
-  suites' S7 absence tests).
-- `participants: [{role: 'manager'}]` on a submitted `POST
-  scenarios/submission` surfaced in the Participants panel and the
-  discussion form on OPS only, not on OJS or OMP (seen once, cause not
-  investigated); the Participants "Assign" form offers no Manager group on
-  OJS or OMP. Workflow › Participants. Seen 2026-09-04 (`.reports/U05/pU`
-  P36).
-- {OPS} Opening the "Make a new submission" start page (`/submission`) as
-  a user holding no Author or manager-level role enrols that user as
-  Author on the spot (Users & Roles lists "Author" dated that day); a
-  journal and a press do not. Never open it with roster accounts on OPS
-  `publicknowledge`: it changes their roles for every later reader of the
-  fleet until a reset. OPS, with OJS and OMP as controls, 2026-09-27 (U58
-  claim check K1, `.reports/U58/ccK1/ms-*`).
-- A seeded draft (`POST scenarios/submission` left unsubmitted) opens the
-  wizard on its first step, "1 Upload Files". All three apps, 2026-09-27
-  (U58 claim check K2, `.reports/U58/ccK2/ad-06-wizard-step0-*`).
-- A wizard submission started from a scratch context's start page needs a
-  title, the checklist and privacy boxes, one file with a genre, and (on OJS
-  and OPS, not OMP) an abstract before its final "Submit"; the wizard asks
-  for "Submit" twice, the second time in a confirm dialog. Submission
-  wizard. Live-driven 2026-09-04, all three apps (`.reports/U05/cc-K1.md`).
-- `POST scenarios/submission` with `participants: [{role: 'sectionEditor'}]`
-  is what makes the workflow's discussion form offer the Section Editor as
-  a participant. Workflow › Discussions › Add. Live-driven 2026-09-04
-  (`.reports/U05/cc-K1.md`).
-- The Login and Register pages' password boxes carry `maxlength=32`, so a
-  scratch tag longer than 14 characters yields a password the Register
-  page cuts (the probe kit strips it on Login only); keep scratch tags
-  short. Login; Register. Live-driven 2026-09-04, all three apps
-  (`.reports/U05/cc-K3.md` K3-3, `cc-K4.md`).
-- Settings › Workflow › Review on the seeded journal, and on every scratch
-  context, is at the install defaults: "Restrict File Access" off,
-  "One-click Reviewer Access" off, "Review Guidelines" (OMP: "Internal
-  Review Guidelines" and "External Review Guidelines") empty, "Competing
-  Interests" empty, "Default Review Mode" "Anonymous Reviewer/Anonymous
-  Author", both deadlines 4 weeks, "Minimum Confirmed Reviews Required" 0,
-  all four reminder sliders "No reminder set", "Publicly Show Reviewer
-  Comments" off, "Reviewer Suggestion at Submission" off. Live-probed
-  2026-09-04 (`.reports/U28/pA` P1) and 2026-09-05, OJS and OMP
-  (`.reports/U29/pA1` P1, `pA2` P5).
-- {OMP} A new press (and a scratch press) has no license: Settings ›
-  Distribution › License opens on "Other license URL" with an empty box,
-  and `POST scenarios/context` refuses `licenseUrl`, so an Edited
-  Volume's chapter window shows no license sentence and a publish fills
-  no chapter license until the version's "License URL" (Permissions &
-  Disclosure) or the press's license is saved on screen. Once the press
-  has one, a version's "License URL" and "Default Chapter License URL"
-  open greyed out behind "Override"; on a press without one, the Edited
-  Volume's "Default Chapter License URL" does too once the version's own
-  "License URL" is saved (after a reload). OMP, 2026-09-28 (U72 claim
-  checks K2 `k2-040`, K3 `k3-002`, `k3-028`); 2026-09-29 (U40 claim check
-  I29).
-- A scratch press has no series unless the context scenario's `series[]`
-  adds them (U70 harness, 2026-09-27); without it, Settings › Press ›
-  Series reads "No Items". Live-probed 2026-09-05, OMP (`.reports/U29/pC2`
-  P21).
-- Where a login lands: the site-level Login page lands every account on
-  the site index; a journal's own Login page lands managers, editors and
-  assistants on the editorial dashboard ("Assigned to me"), reviewers on
-  the review-assignments dashboard ("Action required"), authors on "My
-  Submissions" ("Active") and readers on the journal's reader-facing home.
-  Login. Live-probed 2026-09-06, all three apps (`.reports/U29/pF` P33).
-- The seeded journals carry a privacy statement, so an invited reviewer's
-  step 1 shows the consent box "Yes, I agree to have my data collected and
-  stored according to the privacy statement." and "Accept Review, Continue
-  to Step #2" stays on step 1 until it is ticked (the page shows "This field
-  is required." only after the press); a typed `?step=2` before acceptance
-  shows step 1. Reviewer wizard. Live-probed 2026-09-05, OJS and OMP
-  (`.reports/U29/pB` P10).
-- A "Request Sent" row in the Reviewers panel shows no "Review due:" line;
-  the dates are in the row's "Edit" window and on the reviewer's step 1.
-  Reviewers panel. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K2.md`).
-- A reviewer seeded `invited`, `accepted` or `declined` has a "Review
-  Details" entry and an enabled "Modify Review" like a `completed` one; on a
-  press the window's "Mark as Complete" is enabled too unless the request
-  carries a review form with a required question. Reviewers panel.
-  Live-driven 2026-09-17, OJS and OMP (`.reports/sync/s17/cc-S17.md`).
-- The one-click link in a request or reminder email is
-  `invitation/accept?id=N&key=…`, which answers a redirect to
-  `reviewer/submission?submissionId=…&reviewId=…`. Mailpit; the reviewer
-  wizard. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K2.md`).
-- A scratch context seeded `context.supportedLocales: ['en','fr_CA']` (the key
-  sits under `context`; top-level it is a 400 "Unsupported spec key") has French
-  under the "UI" column only; the settings forms get their language switch
-  once the "Forms" box is ticked in Settings › Website › Setup ›
-  Languages. Live-driven 2026-09-06, OJS and OMP (`.reports/U29/cc-K3.md`).
-- A reviewer seeded through `POST scenarios/submission` gets no request
-  email on either app; the request email (and the one-click link) comes
-  only from the editor's "Add Reviewer" window. Mailpit. Live-probed
-  2026-09-04, OJS and OMP (`.reports/U28/pD1` premise 2; `pD1b`).
+  stores its contributor with no user group (`authors.user_group_id` empty;
+  the wizard always stores one); publishing it with a verified ORCID iD under
+  the member API then answers 500 in the ORCID work builder (`getUserGroup` on
+  null) and queues no deposit. A script that publishes such a seed on 3.5 sets
+  the contributor's group first. OJS and OPS.
+- {OPS} A preprint seeded through `POST scenarios/submission`, a draft started
+  on screen, and one submitted through the wizard with "Relation status" left
+  unanswered hold no relation status at all: the workflow's "Relations" shows
+  none of its three choices ticked. A test that needs a status sets it through
+  "Relations".
+- A decision recorded on screen that opens a round (a new internal or external
+  round) leaves the seed response behind: that response lists only the seeded
+  rounds, so the new round's id is read from the workflow's own
+  `GET submissions/{id}` `reviewRounds[]`. OMP.
+- Some roles `participants[]` accepts cannot open the workflow: an Editorial
+  Board Member on OPS and OMP (the "Error" window "The current role does not
+  have access to this operation.") and, on a press, an assistant whose role
+  takes no part in the book's stage (a Marketing and sales coordinator at
+  Production). A drive that needs an assistant with Production access seeds a
+  Layout Editor.
+- A reviewer seeded in two `reviewRounds` entries holds two open requests,
+  rounds 1 and 2, and a discussion lists them under the reviewer as "Round 1 -
+  {mode}, Round 2 - {mode}". OJS and OMP.
+- A reviewer seeded `invited`, `accepted` or `declined` has a "Review Details"
+  entry and an enabled "Modify Review" like a `completed` one; on a press the
+  window's "Mark as Complete" is enabled too unless the request carries a
+  review form with a required question. Reviewers panel. OJS and OMP.
 - An assignment seeded `status: accepted` opens its wizard on "1. Request"
   with "Save and continue"; step 2 is reached only after that press (an
-  acceptance made on the screen lands on step 2). Reviewer wizard.
-  Live-probed 2026-09-04, OJS and OMP (`.reports/U28/pA`; `pC` header).
+  acceptance made on the screen lands on step 2). OJS and OMP.
 - An assignment seeded `status: declined` stores the decline email's raw
   template, placeholders unresolved ("{$submissionTitle}", "{$contextName}",
   "{$senderName}"), as its message; the reviewer's "Read Round N Review"
-  window prints it as is. A decline made on the screen stores the typed
-  text. Live-probed 2026-09-04, OJS and OMP (`.reports/U28/pD2` P28).
-- OPS `publicknowledge` is seeded with no submissions; every Editor
-  Dashboard view counts 0. Live-probed 2026-09-04 (`.reports/U28/pE` P32).
-- A later one-click email to the same reviewer on the same context (a
-  reminder, or another submission's request) deletes the earlier request
-  link, which then answers a bare "404 Not Found"; a test opens a one-click
-  link before any further email goes to that reviewer. Mailpit; the
-  invitation page. Live-probed 2026-09-04, OJS and OMP (`.reports/U28/pD1b`
-  P26).
-- A decline made on the screen with an empty message stores and sends the
-  decline email's default body with its placeholders resolved ("Unable to
-  Review"; "Editors:" on a journal, "Editor(s):" on a press), followed by
-  the reviewer's name. Reviewer wizard, "Decline Review Request"; the
-  reviewer's "Read Round N Review" window. Live-driven 2026-09-05, OJS and
-  OMP (`.reports/U28/cc-K5.md` K5-3).
+  window prints it as is. A decline made on the screen stores the typed text.
+  OJS and OMP.
 - A submission seeded after a scratch context's "Default Review Mode" was
   changed carries the new mode as its assignments' review type. Reviewer
-  wizard step 1 "Review Type". Live-driven 2026-09-05, OJS and OMP
-  (`.reports/U28/cc-K4.md`).
-- OPS's Roles › "Create New Role" offers the permission levels Manager,
-  Moderator, Assistant, Author, Reviewer and Reader, with "Production" as
-  the only stage; a Reviewer-level role saves with no stage, and a user who
-  accepts an invitation to it (Users › Edit is the invitation wizard on
-  this build; the email "You are invited to new roles"; "Accept And
-  Continue to OPS", which opens the "You've been assigned a new role in
-  OPS" dialog, U06 Rule 8) holds it. Settings › Users & Roles.
-  Live-driven 2026-09-05 (`.reports/U28/cc-K6.md` K6-1, `cc-K6b.md`); the
-  dialog seen in six runs signed out and signed in, 2026-09-28 (U06 claim
-  check I28).
-- A roster reviewer named in `reviewRounds[].reviewers[]` on a scratch
-  context is assigned but not enrolled there: absent from that context's
-  Add Reviewer search and refused the wizard ("The current role does not
-  have access to this operation."); use a throwaway `externalReviewer` in
-  `users[]`. A reviewer's `reviewForm:` attaches only an active form.
-  Live-probed 2026-09-05, OJS and OMP (`.reports/U29-medium/pA` header, `pC2`
-  header, `pD` P22).
-- A reviewer named in `reviewRounds[].reviewers[]` is no longer offered by
-  that submission's Add Reviewer search, so a script that adds a second
-  reviewer through the screen needs a second `externalReviewer` in
-  `users[]`. `review: {numReviewsPerSubmission: N}` on the context reaches
-  the round status box. Live-driven 2026-09-05, OJS and OMP
-  (`.reports/U29-medium/cc-K1.md`).
-- A submission seeded `submitted: false` opens the author's wizard at
-  `submission?id=<id>`; a file left without a component does not stop
-  "Submit" (only a required component with no file does: "You must upload
-  at least one Article Text file."; the file then shows in "Submission
-  Files" with an empty "Type", U36 K4-8, 2026-09-23); a Section Editor not assigned to a submission gets "Error" on
-  its workflow page. Live-driven 2026-09-05, OJS and OMP
-  (`.reports/U29-medium/cc-K2.md`).
-- On the probe servers a 101 MiB file is refused in the submission
-  wizard's "Files" panel with "File is too big (101MiB). Max filesize:
-  100MiB."; a file of exactly 100 MiB fails on the server ("Invalid JSON
-  response from server."); 99 MiB uploads. OJS and OMP, 2026-09-23
-  (`.reports/U36/cc-K4.md` K4-5, K4-6).
-- The draft seeded `submitted: false` reopens on "Upload Files" with
-  "Details" not yet reached (its inputs sit hidden in the DOM); "Continue"
-  reaches it without a file. The submission scenario has no term keys
-  (keywords, subjects, disciplines, agencies): save them on Publication ›
-  Metadata as a manager, which a published version accepts too. All three
-  apps, 2026-09-18 (sync claim check S18b).
-- {OJS} The "Reviewer Recommendations" table keeps no fixed order once a
-  row is toggled or edited; a reviewer's "Save for Later" gives the review
-  a recommendation without submitting it. Live-driven 2026-09-05
-  (`.reports/U29-medium/cc-K6.md`).
-- `reviewRounds[].reviewers[].status: 'completed'` seeds a submitted review
-  on OJS and OMP (optional `recommendation`, OJS only, and `comments`): the
-  editor's Reviewers row reads "Review Submitted" with "Read Review", and
-  the reviewer's "Completed" view lists it. Live-driven 2026-09-06, OJS and
-  OMP (`.reports/U30/harness/report.md`).
+  wizard step 1 "Review Type". OJS and OMP.
+- A roster reviewer named in `reviewRounds[].reviewers[]` on a scratch context
+  is assigned but not enrolled there: absent from that context's Add Reviewer
+  search and refused the wizard ("The current role does not have access to
+  this operation."); use a throwaway `externalReviewer` in `users[]`. A
+  reviewer's `reviewForm:` attaches only an active form.
+- A reviewer named in `reviewRounds[].reviewers[]` shows in that submission's
+  Add Reviewer list as already assigned and cannot be selected, so a script
+  that adds a second reviewer through the screen needs a second
+  `externalReviewer` in `users[]`. `review: {numReviewsPerSubmission: N}` on
+  the context reaches the round status box.
+- `reviewRounds[].reviewers[].status: 'completed'` seeds a submitted review on
+  OJS and OMP (optional `recommendation`, OJS only, and `comments`): the
+  Reviewers row reads "Review Submitted" with "Read Review". It is not an
+  editor-confirmed one: "Minimum Confirmed Reviews Required" ignores it until
+  the editor's "Mark as Complete" or "Thank Reviewer", so a scenario that
+  needs the minimum met confirms the seeded reviews on screen.
 - `decisions: [..., 'newExternalReviewRound']` together with N
   `reviewRounds[]` entries yields N+1 rounds (the decision's round gets no
-  reviewers); two reviewed rounds are seeded with `decisions:
-  ['sendExternalReview']` and two entries. Live-driven 2026-09-06, OJS
-  (`.reports/U30/pD` seeds).
+  reviewers); two reviewed rounds are seeded with
+  `decisions: ['sendExternalReview']` and two entries.
 - {OMP} A monograph seeded with `reviewRounds[].stage: 'internal'` and
   `decisions: ['sendInternalReview']` lands its editor on Internal Review;
   `status: 'completed'` works on a press round (no recommendation cell).
-  Live-probed 2026-09-06 (`.reports/U30/pE` P26).
-- `decisions: [..., 'resubmit']` seeds a "Resubmit for review." task for
-  every author on the stage, as the on-screen decision does;
-  `review.defaultReviewMode: 'open'` makes every seeded and on-screen
-  request "Open". Live-driven 2026-10-07, OJS and OMP (U26 claim check
-  I07).
-- "Notify All Authors" (Settings › Workflow › Emails) arrives at "Send an
-  email notification to all authors of the submission." on a scratch
-  journal; there is no passthrough key, so a probe flips it on the screen
-  and a test cannot. Live-probed 2026-09-06, OJS (`.reports/U30/pC` P20).
-- A fresh context asks for keywords, references and funders at "request" by
-  install default (the context schema's defaults; funders seen live by the
-  U42 claim check, 2026-09-24), so the seeded context's Details step shows an
-  optional "Keywords" field, a references box and a Funders section on OJS,
-  OMP and OPS; a scratch context seeded
-  `metadata: {keywords: 'off'}` shows no "Keywords" field (U21 runs,
-  2026-09-07).
-- A fresh scratch journal has no issues; "Schedule For Publication" › Review
-  Publishing Details then carries no "Issue Assignment" group and the confirm
-  window reads "…This will be published immediately without any issue
-  association…", so a publish-now leg needs no scratch issue, only a
-  scheduled leg does. OJS scratch journal, 2026-09-09 (U40 K1,
-  `.reports/U40/ccK1/mgr-publish-ojs.json`).
-- The Author role's "Permit submission metadata edit." is unticked on a fresh
-  journal and press and ticked on a fresh preprint server; the Participants
-  panel's "Edit Assignment" box for the submitter starts from it. Settings ›
-  Users & Roles › Roles › Author › Edit, all three apps, 2026-09-09 (U40 K1,
-  `.reports/U40/ccK1/roles-permit-metadata-edit-*.json`).
-  On the other roles it arrives ticked on Section editor, Series editor and
-  Moderator, ticked and greyed on Journal/Press editor and Production
-  editor, and unticked on Guest editor and every Assistant-level role.
-  Settings › Users & Roles › Roles › Edit, all three apps, 2026-09-24 (U47
-  claim check K3, `roles-0*-<app>`).
-- "HTML Article Galley" (a journal) and "HTML Monograph File" (a press)
-  arrive ticked on every scratch context; a preprint server's Plugins list
-  has no HTML galley plugin, and its HTML galley link downloads the file.
-  Settings › Website › "Plugins", all three apps, 2026-09-24 (U47 claim
-  check K2).
-
-A scratch context at the other end of a setting is seeded through the
-scenario API's passthrough keys (scenarios.md "Configuring a scratch
-context"); the validation-variant server (harness.md) covers the
-config-file settings.
-- On a fleet whose only context is `publicknowledge`, Administration › Site
-  Settings shows one tab, "Site Setup", with the side tabs "Security",
-  "Languages", "Bulk Emails", "Statistics" and "ORCID"; the "Appearance",
-  "Announcements" and "Plugins" tabs and the "Settings", "Information",
-  "Navigation" and "Highlights" side tabs appear once a second
-  context exists (the first scratch context). Site Settings, all three apps,
-  2026-09-16 (U11 claim check K2, `.reports/U11/cc-K2.md` Rule 12); "ORCID"
-  on a one-context site since pkp/pkp-lib#13493 (driven at the PR head
-  `e29a720de0`, before its merge, on PKP's default dataset, 2026-10-09;
-  before it the tab needed the second context).
-- The site's "Site Name" is empty on a fresh install, and the site Settings
-  form refuses every save until it is filled; the site home's `<title>` is
-  empty meanwhile. Site Settings › Setup › Settings, all three apps,
-  2026-09-16 (U11 claim check K3; K3 filled it with "Test site" on the
-  fleets, a reset clears it).
-- At the 2026-09-16 tips the site-level highlights list (Site Setup ›
-  Highlights, on a multi-context site) cannot save, order or refresh: every
-  request the panel sends answers 500, so no probe or test can seed a site
-  highlight through the screens (U11 register, `.reports/U11/cc-K2.md`
-  K2-1).
-- A highlight's image is stored under the context's public files
-  directory, `public/journals/<id>/highlights/<highlightId>.<ext>` on OJS,
-  `public/presses/<id>/…` on OMP, `public/contexts/<id>/…` on OPS; the
-  slide's image address was that path on the origin and never loaded on
-  the test installs until 2026-09-24 (the same public-files reason as the
-  profile image; not re-driven since), and
-  each page view with a slide image writes a `NotFoundHttpException` to the
-  app's log. Every upload box reads "Max filesize: 100MiB" on the probe
-  servers. Home page and Highlights panel, all three apps, 2026-09-16 (U11
-  claim checks K1 and K2).
-- A submission seeded with `skipExternalReview` (or moved by an on-screen
-  "Accept and Skip Review") carries no "Assign a copyeditor…" notice for
-  its assigned editors, and a later on-screen "Assign" does not create one;
-  the notice appears only on a submission accepted from review (`accept`).
-  Copyediting entry, OJS and OMP, 2026-09-19 (U32 ccK1,
-  `.reports/U32/ccK1/s2-se-before-*`, `s3-se-after-workflow_4-*`).
-- The `productionEditor` key resolves to a manager-level group (Roles grid
-  Permission level "Journal Manager" / "Press Manager"; stages Copyediting
-  and Production only), so an assigned Production editor decides, assigns
-  and reads the editors' notices. An unassigned Production editor opens
-  every stage of every submission with the full Participants panel; an
-  assigned one opens only Copyediting and Production and gets "You don't
-  currently have access to that stage of the workflow." on the others
-  (Workflow › Participants, OJS and OMP, 2026-09-22, U35 ccK1 `str-pe2-*`,
-  `view-pe-s1-*`); `translator`, `volumeEditor` and
-  `chapterAuthor` are author-level (the editorial dashboard refuses them;
-  they open the author view from My Submissions). Settings › Users & Roles
-  › Roles; the Copyediting entry. OJS and OMP, 2026-09-19 (U32 ccK1,
-  `mgr-roles-grid-*`, `s1-pe-workflow_4-*`, `s1-tr-workflow_4-author-address-*`).
-- {OMP} An assistant role opens the version's pages ("Publication" › the
-  version) only while the book is in a stage its role takes part in: on a
-  book in Copyediting the Layout Editor, Designer and Funding coordinator
-  see "Publication" with no version under it, and on a book in Production
-  the Copyeditor, Marketing and sales coordinator and Funding coordinator
-  do; a published book shows the pages to every assistant role. Workflow
-  side menu, OMP, 2026-09-28 (U72 claim check K1, `p-list-*`, `q-list-*`,
-  `b-list-*`). Its "Publication Formats" page, though, holds only "You
-  don't currently have access to that stage of the workflow." for the
-  Copyeditor, Marketing and sales coordinator and Funding coordinator (on
-  a published book, and for the first two on a book in Copyediting too);
-  an assistant with Production access (Layout Editor, Designer, Indexer,
-  Proofreader) gets the list. OMP, 2026-09-28 (U73 claim check K1,
-  `o-b2-ce`, `o-b3-ce`).
-- {OMP} A new publication format's "Metadata" tab refuses "Save" with
-  "This field is required." under "Product Composition" until that list is
-  chosen; the "Add Code" window's "ONIX Code Type" list leaves out a code
-  type the format already holds. Publication › Publication Formats › a
-  format's "Edit", 2026-09-28 (U73 claim check K2).
-- A press's Internal Review entry shows no Participants panel until the
-  stage is initiated; the other not-reached stages show it. OMP,
-  2026-09-22 (U35 ccK1, `nr-s2-InternalReview-omp`).
+- `decisions: [..., 'resubmit']` seeds a "Resubmit for review." task for every
+  author on the stage, as the on-screen decision does;
+  `review.defaultReviewMode: 'open'` makes every seeded and on-screen request
+  "Open".
 - On a press, a `published: true` seed writes the same "Catalog Management"
   notice the screen's "Publish" writes, so the Production entry of a
   seed-published monograph heads "Catalog Management" for every role. On a
   journal a `published: true` article carries no galley, so its assigned
   editor still reads the "Assign a user to create galleys…" notice after
-  publication. Production entry, OJS and OMP, 2026-09-19 (U33 ccK2).
-- A `published: true` seed sits at stage 6: its workflow shows it
-  published, and no "Stages" filter of a submission list matches it.
-  Native XML "Export" list, all three apps, 2026-09-27 (U63 claim check
-  K2, `.reports/U63/cc-K2.md` K2-8).
-- A `published: true` seed on OMP or OPS sends no "Publication Published"
-  email (on OJS that email follows "Publish Issue" on screen), so a check
-  of a journal email's sender drives the submission wizard instead and
-  reads its acknowledgement (U07 drift sweep, ccSW1 and ccSW2, 2026-10-26).
-- The Roles grid (Settings › Users & Roles › Roles) has one live box per
-  stage column and row: one click saves the change and shows its notice,
-  but the box keeps its old look until the page is reloaded (a second
-  click without a reload repeats the change: after a tick it fails with a
-  500 and greys the box). The boxes are greyed on the manager-level rows,
-  on the Reviewer row outside the Review column and on the Reader row; on
-  OJS all four boxes of "Subscription Manager" are live, on OMP "Internal
-  Reviewer" and "External Reviewer" each have both review boxes live. The
-  Journal/Press Manager row shows every stage box empty on OJS and OMP and
-  ticked on OPS. The list's filters sit behind the header's "Search" link
-  and fold away after each choice. All three apps, 2026-09-19 (U33 ccK3),
-  corrected 2026-09-26 (U54 ccK1, ccK2).
-- The Roles list shows 25 rows per page on a new context (18 installed
-  roles on a journal, 19 on a press, 5 on a preprint server), so a
-  `customRoles[]` seed of more than 7 (journal) or 6 (press) roles puts the
-  last ones on page 2. Saving a role's window (its "Edit" › "OK", or the
-  `roles` scenario key) moves that role's row down the list (journal and
-  press: to the end); the list has no fixed order otherwise. A role created
-  at the manager level ("Create New Role" on "Journal Manager", or
-  `customRoles[]` level `manager`) arrives with "Permit changes to
-  Settings" unticked: its members get the access-denied page on Settings
-  until a manager ticks the box. Read settled, the role window's "Stage
-  Assignment" is hidden on the manager level, on Reader and on OPS's
-  Reviewer (a read inside its 600 ms hide animation shows it greyed). All
-  three apps, 2026-09-26 (U54 ccK1 `k1-12-after-copyeditor-edit`,
-  `facts.cmps`; ccK2; ccK3). Eight of a new press's 19 roles are at
-  "Assistant": Copyeditor, Designer, Funding coordinator, Indexer, Layout
-  Editor, Marketing and sales coordinator, Proofreader and Editorial Board
-  Member. OMP, 2026-09-28 (U69 claim check K1).
-- The manager role's Roles row ("Journal manager", "Press manager",
-  "Preprint Server manager") has no "Edit"; every other role's stages are
-  the "Stage Assignment" boxes of its "Edit" form, and a role's last
-  remaining stage cannot be unticked although the form answers "Your
-  changes have been saved.". Settings › Users & Roles › Roles, all three
-  apps, 2026-09-19 (U32 ccK1, `mgr-roles-grid-*`,
-  `mgr-role-copyeditor-last-stage-off-*`).
-- The Participants "Assign" form never offers the manager group; its user
-  grid refreshes only when the search form is submitted after the group is
-  chosen. Workflow › Participants › Assign, OJS and OMP, 2026-09-19 (U32
-  ccK1, `s1-mgr-assign-form-*`, `s2-mgr-assign-deciding-assign-form-*`).
-  On OPS "Preprint Server manager" is offered at Production (2026-09-26,
-  U54 ccK2 `k2-21-manager-workflow_*`).
-- On a press, a publication format file opens and downloads (since omp
-  `8c807c919`, pkp/pkp-lib#13444; before it every `catalog/download/…`
-  answered 500, `CatalogBookHandler::$publication must not be accessed
-  before initialization`): `catalog/download/{book}/{format}/{file}` and an
-  earlier version's `catalog/download/{book}/version/{publication}/{format}/{file}`
-  answer the file, as an attachment and with `?inline=1` inline, signed out
-  or signed in. A PDF's link opens its view page, whose viewer renders the
-  file and whose bar "Download" and viewer download save it (the page still
-  logs "PDFJS is not defined", U69 A23); with "PDF.js PDF Viewer" unticked
-  the link saves the file. A file no viewer takes (an "Appendix", a
-  notes.md), and an HTML file with "HTML Monograph File" unticked, download
-  as an attachment from the book page; with the plugin ticked an HTML
-  file's view page shows, its images included. Each writes its usage line.
-  OMP, 2026-10-05 (the upstream sync's S05 claim checks: U20
-  `checks/U20/S05`, U47 `checks/U47/S05`, U64 `checks/U64/S05`).
-- A reviewer seeded `reviewRounds[].reviewers[].status: 'completed'` is a
-  submitted review ("Review Submitted"), not an editor-confirmed one: the
-  "Minimum Confirmed Reviews Required" count of Settings › Workflow › Review
-  ignores it until the editor's "Read Review" › "Mark as Complete"
-  ("Complete") or "Thank Reviewer" ("Reviewer Thanked"), so a scenario that
-  needs the minimum met confirms the seeded reviews on screen. Reviewers
-  panel; the decision buttons. Live-driven 2026-09-20, OJS and OMP
-  (`.reports/U34/cc-K4.md` seed-facts corrections; `s3-se1-accept*`).
-- Payments (OJS): Settings › Distribution › Payments saves "Enable",
-  "Currency" and "Payment Plugins", and the chosen plugin's own boxes
-  ("Manual Payment Instructions" for the manual plugin) sit on the same tab
-  and must be filled, or the plugin counts as unconfigured and "Accept
-  Submission" shows no "Request Payment" page; the "Article Processing
-  Charge" is set on the "Payments" page ("Payment Types" tab) the side
-  menu gains after the save. A press has the Distribution tab but no
-  "Payments" page. Live-driven 2026-09-20, OJS and OMP
-  (`.reports/U34/cc-K4.md`; `pay-mgr-settings-payments-reloaded`,
-  `pay-mgr-payment-types-labels`, `omppay-mgr-payments-url`).
-- Payments (OJS, U52): "Save" on Settings › Distribution › "Payments"
-  posts `api/v1/_payments` (override PUT) and shows "Saved"; "Payment
-  Plugins" offers only "Paypal Fee Payment" and "Manual Fee Payment" and
-  "Currency" has no empty choice, so a journal with no currency exists
-  only until one is saved (the `payments` key without `currency` makes
-  one). Saving "Enable" unticked removes "Payments" from the managers'
-  side menu at once and "Institutions" on the next load (U52 A12; on a
-  press the tab adds neither, U66 claim check K1, 2026-09-28); the
-  Subscription Manager's
-  side menu shows both while payments are enabled. The "Payments" page
-  opens by its address (`{journal}/payments`) for the manager-level roles
-  and the Subscription Manager whatever the payment settings, headed
-  "Subscriptions"; on a fresh journal "Payment Types" has every box empty
-  and "Only Restrict Access…" unticked, and "Payments" reads "No Items".
-  `{journal}/user/payMembership` creates a queued payment request before
-  it answers, even when it then fails: never open it on
-  `publicknowledge`. OJS and OMP, live-driven 2026-09-26/27
-  (`.reports/U52/cc-K1.md`, `cc-K2.md`, `cc-K3.md` seed-facts sections). An OJS
-  Subscription Manager has no dashboard: `{journal}/submissions`
-  answers the access-denied page, and its side menu shows on
-  `{journal}/payments`. OJS, 2026-09-28 (U66 claim check K1,
-  `r2-m-off-P-sm-menu-ojs`).
-- {OMP OPS} Removing a press or preprint server that holds an
-  institution (Administration › "Hosted Presses" / "Hosted Servers")
-  fails and leaves it listed with no roles; such a scratch context is
-  unusable afterwards, so a test never removes one. OMP and OPS,
-  2026-09-28 (U66 claim check K1).
-- {OMP} A new press's Settings › Distribution › "Payments" shows "Enable"
-  alone ("Payments will be enabled for this press. Note that users will be
-  required to log in to make payments."); "Currency", "Payment Plugins"
-  and the method's boxes appear while it is ticked and hide again when the
-  press saves it unticked. OMP, 2026-09-28 (U69 claim check K1, K4 K4-10).
-- {OJS} A journal seeded `publishingMode: 'subscription'` with
-  `payments.purchaseArticleFee` shows its galley links as "Requires
-  Subscription or Fee {label} ({currency} {fee})". Article page,
-  2026-09-28 (U69 claim check K1).
-- {OJS} On a fresh journal the "Payments" page's "Subscription Policies"
-  tab has an empty contact, "Full expiry", its four lists at "Disabled"
-  and every box unticked; the payment boxes are greyed with the "Note: To
-  enable these options…" line. Settings › Users & Roles › Roles lists
-  "Subscription Manager" at permission level "Subscription Manager".
-  Live-driven 2026-09-25 (U51 claim check K1).
-- A scratch user's `givenName`/`familyName` are what the Participants panel
-  and the Composer's "To" chips show; a discussion's "Created by" and the
-  discussion window's "Message from" show the *username*. Workflow ›
-  Discussions. Live-driven 2026-09-20, OJS and OMP
-  (`.reports/U34/cc-K4.md`; `s1-se1-after-accept-discussions`).
-- The Contributors page's `workflowMenuKey` is
-  `publication_<publicationId>_contributors` (the publication's id, not the
-  submission's; a key with the submission id lands on the workflow), so a
-  script opens it through the side menu's "Contributors" entry. Live-driven
-  2026-09-20, all three apps (`.reports/U34/cc-K2.md`). Every publication
-  page's key carries that id on `main` (`publication_<id>_titleAbstract`,
-  `_galleys`, `_jats`) and none on `stable-3_5_0`
-  (`publication_titleAbstract`); a key the line does not know opens the
-  stage view, so the side menu's link serves both lines (U19, U21, U36,
-  U47 issue walks, 2026-09-30).
-- A Section Editor (OJS, OMP) or Moderator (OPS) gets 401 on
-  `GET emailTemplates?searchPhrase=` from the decision wizard's "Find
-  Template" (the search box answers an "Error" window). Live-driven
-  2026-09-20, all three apps (`.reports/U34/cc-K2.md` K2-9).
-- A Site Administrator can be left without a manager role in a scratch
-  context, in two forms only (a context keeps a user's last role): seed
-  `admin` in `users[]` with one more role, end the manager role on the
-  admin's own Users & Roles › Edit page ("Remove Role"), and sign in
-  again. With an assistant role left (Copyeditor; OPS Editorial Board
-  Member) the workflow opens and "Activity Log" offers "Notes" alone (its
-  Publication pages read-only, Save and References "Add" disabled, and
-  "Change" of the submission language offered but its Confirm answering
-  401 with "An unexpected error has occurred…"; all three apps,
-  2026-09-28, U40 claim check I28); with
-  Reader left the workflow answers "Error / The current role does not have
-  access to this operation." over an empty page. Workflow and Activity
-  Log, all three apps, 2026-09-23 (`.reports/U38/cc-K1.md` K1-8). With
-  Reader left, the editorial dashboard (any view or
-  `workflowSubmissionId`) opens as "Search Results (0)" under the same
-  "Error" (`_submissions/viewsCount` and `_submissions/assigned` answer
-  401), and signing in at the journal lands on its home page (with Author
-  left, on My Submissions, which the retired `{ctx}/submissions` address
-  forwards to too; U22 claim check I28); with Section
-  Editor (Series editor, Moderator) left, the dashboard is assigned-only
-  (no "Needs editor", no "Declined") but keeps "More Actions" and the
-  "Assigned To Editor" filter. All three apps, 2026-09-28 (U23 claim
-  check I28). Such an
-  administrator keeps the Settings Wizard, whose "Appearance" saves, while
-  Settings › Website answers the access-denied page on a press and a
-  server and opens under an "Error" window on a journal (with an assistant
-  role left rather than Reader, on OJS it opened with no "Error" window,
-  twice, on 2026-09-27: U62 claim check K1,
-  `n-02-website-typed-ojs`). All three apps, 2026-09-24 (U10 claim check
-  K5, `.reports/U10/ccK5/x-*`). With Reader
-  left, Users & Roles opens by its address under the same "Error" window
-  (the side menu's submissions count answers 401); on a press and a
-  server only `…/management/access` opens it, `…/management/settings/access`
-  is refused. All three apps, 2026-09-25 (`.reports/U53/cc-K1.md` K1-3).
-  With Reader left, every editorial page the account opens shows the side
-  menu and that "Error" on each load, from `_submissions/viewsCount` 401
-  alone: on a journal the Comments page, Settings › Journal, Website and
-  Users & Roles, Announcements, Statistics and Tools; on a press and a
-  server the dashboard, Statistics and Tools, while the settings pages and
-  the Comments page answer the access-denied page. The journal's Comments
-  page lists its rows and works after "OK". All three apps, 2026-09-28
-  (U14 claim check I28).
-- Every submission has Activity Log lines from its first save, so
-  "History" never reads "No Items": a draft begun on the start page shows
-  two "Submission metadata updated" lines, and a seeded submission with no
-  decision shows 8 lines (OJS, OMP) or 6 (OPS). Activity Log, all three
-  apps, 2026-09-23 (`.reports/U38/cc-K1.md` K1-4).
-- The PHP servers run in UTC (`time_zone = "UTC"` in
-  `config.test.inc.php`), so near local midnight a date picked as
-  "yesterday" can still be today on the server; a reviewer row offers
-  "Send Reminder" only once its response due date is before the server's
-  date. Reviewers panel, the reviewer row's "Edit" window, OJS, 2026-09-24
-  (`.reports/U38/cc-K2.md`).
-- Settings › Distribution › "Access" shows no "Publishing Mode" choice
-  ticked on `publicknowledge` or on a scratch journal, so both publish
-  openly; a preprint server never stores its "Posting Mode" choice. OJS and
-  OPS, 2026-09-23 (U08 claim check K1-7, K2).
-- A scratch context's "About the Journal" text is empty, so its About page
-  is the heading alone. All three apps, 2026-09-23 (U08 claim check K1).
-- A scratch press has no series and no category, so the Navigation tab's
-  "Add item" offers no "Series" or "Category" type there;
-  `publicknowledge` offers both. The context scenario seeds categories
-  through its `categories[]` key (U10 harness, 2026-09-24) and series
-  through its `series[]` key (U70 harness, 2026-09-27). OMP, 2026-09-23
-  (U08 claim check K1, K4-16; the key corrected by the U16 harness,
-  2026-09-25).
-- Installed navigation item titles read French on `fr_CA` pages only on a
-  context whose "Forms" languages include French; `publicknowledge`
-  (French under "UI" only) and a scratch context without
-  `supportedFormLocales` keep every public menu entry English. All three
-  apps, 2026-09-23 (U08 claim check K1, K2, K3).
-- With `publicknowledge` the only context, Administration › Site Settings
-  has no "Navigation" side tab. All three apps, 2026-09-23 (U08 claim check
-  K1, `.reports/U08/ccK1/00-onejournal-*`).
-- DOIs are on by default on `publicknowledge` and every scratch context:
-  "Allow Digital Object Identifiers…" ticked, the first kind ticked
-  ("Articles", "Monographs", "Preprints"), no prefix; managers' side menus
-  show "DOIs". All three apps, 2026-09-24 (U08 claim check K2).
-- Every DOI registration-agency plugin is off on `publicknowledge` and on
-  every new journal and preprint server: Settings › Website › "Plugins"
-  lists "Crossref Manager Plugin" (on a journal also "DataCite Manager
-  Plugin") unticked, and Settings › Distribution › "DOIs" ›
-  "Registration" reads "No Registration Agency Enabled"; once a plugin is
-  ticked, the tab's "Registration Agency" list shows an empty box until one
-  is saved. A press has no agency plugin. A new journal and press arrive
-  on "DOI Versioning" "No", a new preprint server on "Yes" (its "Automatic
-  DOI Assignment" shown as "Upon reaching the production stage"), so every
-  saved DOI change on a server's DOIs page writes an Activity Log line. All
-  three apps, 2026-09-26 (U45 claim check K1, K2, K3, K4).
-- {OJS} "DOAJ Plugin" arrives ticked under "Generic Plugins" on
-  `publicknowledge` and every scratch journal (it can be unticked), with
-  its API Key empty and automatic deposit off; "NLM Title Abbreviation" is
-  empty. Tools › "Import/Export" lists a journal's DOAJ Export, DataCite,
-  Crossref, Native XML, Users XML and PubMed tools; a press's Native XML,
-  Tab Delimited, Users XML and ONIX 3.0; a preprint server's Crossref and
-  Native XML. {OMP} "ONIX 3.0 Monograph Export Plugin" shows its "Export" tab
-  only once the press's four ONIX details on Settings › Press › "Masthead"
-  are filled (blank on the default dataset); then "Export Submissions"
-  completes ("The export completed successfully.") on `main` and
-  `stable-3_5_0` (pkp/omp#2372; 2026-10-13, U74 claim check H13D); with nothing
-  ticked its results tab opens empty and the server answers 500, validation
-  ticked or not (2026-09-28, U74 claim check K5, K5-1). The order of the lines is not fixed: every tool sorts
-  equal, so the list follows the order the plugins register in, which
-  moves as plugin settings are written anywhere on the install (a full
-  suite run showed a new journal's order differ from a fresh install's).
-  Assert the set, never the order. All three apps, 2026-09-27 (U63 claim
-  check K1, K4; U63 OJS final, `.reports/U63/test-ojs-findings.md` T-ojs-2).
-- An "Accept Submission" whose "Notify Reviewers" email is sent marks every
-  completed review considered (the reviewer row reads "Reviewer Thanked",
-  "Read Review" gone); with the email skipped the review stays "Review
-  Submitted". OJS, 2026-09-26 (U45 claim check K2).
-- The journal's own Settings › Distribution › "Statistics" "Enable
-  institutional statistics" box appears once the site's box is ticked and
-  is unticked on `publicknowledge` and a scratch context; "Institutions"
-  needs both. All three apps, 2026-09-24 (U08 claim check K2-10).
-- The manager role's row on Settings › Users & Roles › Roles has no
-  "Settings" arrow and no "Edit". All three apps, 2026-09-24 (U08 claim
-  check K2).
-- Settings › Website › "Setup" › "Lists" reads "Items per page" 25 and
-  "Page links" 10 on every context; the OJS archive, the OMP catalog and
-  the OPS preprint lists follow "Items per page" at once. All three apps,
-  2026-09-23 (U08 claim check K3).
-- On Settings › Users & Roles › Users the installer's `admin` account reads
-  "admin admin". All three apps, 2026-09-23 (U08 claim check K3).
-- A role with a future end date or a future start date is shown
-  differently by Settings › Users & Roles › "Users" and by "Editorial
-  Masthead": the list prints every role with no end date (future starts
-  included, with their date) and no role with an end date (future ends
-  included); the masthead lists the roles active today. A future start
-  comes from the invitation's START DATE (all three apps), a future end
-  only from a Users XML import (OJS, OMP). 2026-09-30 (U53 claim check
-  I30).
-- While the site has no "Site Name", Administration's editorial header shows
-  the application's name ("Open Journal Systems", "Open Monograph Press",
-  "Open Preprint Systems") where the site's name would stand, as plain
-  text, not a link. All three apps, 2026-09-23 (U08 claim check K1, K4);
-  plain text 2026-10-28 (U08 drift sweep).
-- A stage whose panels an assigned participant's role may not open shows
-  "You don't currently have access to that stage of the workflow." in
-  place of the panels, the header's "Library" still offered; "The current
-  role does not have access to this operation." is the "Error" dialog an
-  unassigned Section editor gets on opening a workflow. Workflow, OJS and
-  OMP, 2026-09-24 (`.reports/U39/cc-K1.md`, `stage-le-copyediting`).
-- On OPS, `participants[]` accepts `editorialBoardMember`, but the assigned
-  Editorial Board Member (not a Site Administrator) cannot open the
-  preprint's workflow ("Error" / "The current role does not have access
-  to this operation."). Workflow, OPS, 2026-09-24 (`.reports/U39/cc-K1.md`,
-  `roles-eb-wf`).
-- {OMP} A Marketing and sales coordinator seeded through `participants[]`
-  on a book in Production cannot open the Production stage ("You don't
-  currently have access to that stage of the workflow.") and has no
-  "Catalog Entry" page; a drive that needs an assistant with Production
-  access uses a Layout Editor. OMP, 2026-09-27 (`.reports/U70/cc-K1.md`,
-  `r-notice-marketing-omp`).
-- The Roles list's stage columns are Submission, Review, Copyediting,
-  Production on a journal; Submission, Internal Review, External Review,
-  Copyediting, Production on a press; Production alone on a preprint
-  server. Submission is ticked by default for the Section (Series) editor,
-  Guest editor (OJS), Funding coordinator, Author and Translator (a press
-  also the Volume editor) and unticked for the assistants and a press's
-  Chapter Author. Settings › Users & Roles › Roles, all three apps,
-  2026-09-24 (`.reports/U39/cc-K2.md`, `stages-grid-before-*`).
-- The reference lookup never runs on a test install (no job runner, no
-  outbound connections): with "References Metadata Lookup" on, every
-  reference stays unprocessed, a reference structured by hand in "Edit"
-  too, so the References page's progress box reads "Processing references
-  - 0/{n}" and the page refreshes itself every 7 s while it shows (U42
-  claim check K2, 2026-09-24). A job-runner pass (`drainJobs`) does run
-  the lookup's first step, which reads the identifiers from the text (a
-  DOI link on the row; a hand-filled reference with a DOI in its text
-  becomes structured), and parks the service steps for retry (U42 claim
-  check I07b, 2026-10-07).
-- In the submission wizard every step change ("Continue", the step rail,
-  "Back") saves the step's changed forms within a second, before "Review"
-  lists them, and "Save for Later" saves first too; while the author stays
-  on a step, the autosave comes about a minute after the footer's "Last
-  saved" time, not after the typing; leaving by another address sends
-  nothing. All three apps, two runs (U42 claim check I29, 2026-09-29,
-  `shared/playwright/checks/U42/I29/`; U42 A18 retired).
-- The "URN" plugin is disabled on every fresh journal and press; `plugins:
-  {urnpubidplugin: {enabled, settings}}` seeds it and its settings window's
-  keys. A preprint server has no URN plugin: its Plugins grid shows the
-  "Public Identifier Plugins" heading with no rows, and the key answers
-  400. Settings › Website › "Plugins", all three apps, 2026-09-24 (U44
-  claim check K2, `w-02-plugins-untouched-*`, `x-01-plugins-control-ops`).
-  {OMP} Its settings window refuses "Save" with "Files" alone or with
-  "Chapters" and "Files" ("Please choose the objects URNs should be
-  assigned to."), so a press with URNs for files only comes from the seed
-  key alone. Settings › Website › Plugins, 2026-09-28 (U73 claim check K4,
-  `s-05-F-urn-after-save*`).
-- A preprint server ships no "Dublin Core Indexing Plugin"; "Google Scholar
-  Indexing Plugin" and, on a journal and a press, "Dublin Core Indexing
-  Plugin" arrive ticked on `publicknowledge` and on every scratch context.
-  Settings › Website › Plugins, all three apps, 2026-09-24 (U44 claim
-  check K4, `.reports/U44/ccK4/pk-maya-plugins-*`).
-- "Google Analytics Plugin" arrives unticked on `publicknowledge`, on every
-  scratch context and on the site's own Plugins list, all three apps;
-  `plugins: {googleanalyticsplugin: {enabled: true, settings:
-  {googleAnalyticsSiteId}}}` seeds it ticked with its number. Settings ›
-  Website › Plugins and Administration › Site Settings › Plugins,
-  2026-09-26 (U20 claim check K4, `.reports/U20/ccK4/`).
-- A published version's workflow publication pages ("Title & Abstract",
-  "Metadata", "Publication Formats") stay editable under "Warning: This
-  version has been published. Editing it may impact the published
-  content."; on an unpublished version "Permissions & Disclosure"'s
-  "Copyright Holder" and "Copyright Year" are disabled while "License URL"
-  stays editable. All three apps, 2026-09-26 (U20 claim check K3).
-- A submission's number and its first publication's number differ on these
-  installs (OJS 537/551, OMP 512/524 for new seeds), so a check that needs
-  them equal never meets it on a first version. 2026-09-24 (U44 claim check
-  K2, `k2-state-<app>.json`).
+  publication. Production entry, OJS and OMP.
+- A `published: true` seed sits at stage 6: its workflow shows it published,
+  and no "Stages" filter of a submission list matches it. Native XML "Export"
+  list, all three apps.
+- {OJS} A `published: true` seed whose `issue` names an unpublished issue sits
+  at the Submission stage (it has no Production history), so its workflow
+  header reads "Submission" where an article scheduled through the workflow
+  reads "Scheduled", and it offers no "Preview".
 - {OMP} A publication format's "Select Files" offers only production-ready
   files, so a seed whose `files[]` sit at the submission stage gives it an
   empty list; a format file comes from "Change File" (the upload wizard).
-  Publication › Publication Formats, 2026-09-24 (U44 claim check K1).
-- {OMP} A publication format's files and remote link show on the book page
-  while its row reads "Available", approved or not; its details block
-  (codes, dates, identifiers, "Physical Dimensions") only while it reads
-  "Approved" too. A format created on screen arrives "Awaiting Approval"
-  and "Not Available". Book page and Publication › Publication Formats,
-  2026-09-28 (U69 claim check K3, `s-a3-visitor-both-awaiting`,
-  `a-q1-visitor-revoked`; earlier U44 claim check K4).
-- {OMP} Every publication format, seeded or made on screen, stores the
-  same order number, and the Publication Formats page offers no "Order",
-  so the page, the Author's list and the book page list formats in the
-  order the database returns them. Saving a format's "Edit" (even
-  unchanged), revoking or giving its approval, changing its availability,
-  or emptying its DOI on the DOIs page can move it to the end, the front
-  or between two others; changing a DOI to another value, the book's own
-  DOI, a file's terms or its "Approve Proof" moved nothing, and a DOI
-  typed back into the emptied box left the format where it was.
-  The DOIs page lists a book's format rows in that same order. A book
-  seeded with `publicationFormats[]` in order can already list them in
-  another order. Read the order on screen after the last change, never
-  from creation. 2026-09-28 (U69 claim check K3 K3-4); 2026-09-29 (U45
-  claim check R1, R1-4; U73 claim check I29); 2026-09-30 (U73 claim
-  check I30).
-- {OMP} A book version with no date (every version right after "Create
-  New Version") prints as today's date on the book page: the date line
-  reads "{today} — Updated on …" and a draft's outdated notice "published
-  on {today}". Book page, 2026-09-28 (U69 claim check K2 K2-6, K2-7).
-- {OMP} A book address with a URL Path that is not the shown version's
-  own answers 500: an old path, and a path saved on an unpublished new
-  version. Book page, 2026-09-28 (U69 claim check K2 K2-2).
-- {OMP} An older version's chapter page opens only on a press with "DOI
-  Versioning" "Yes" (`doiVersioning: true`); on a new press (the default
-  "No") it answers 500. Chapter page, 2026-09-28 (U69 claim check K3
-  K3-7, K5).
-- {OMP} A chapter page's address uses the chapter number of the book's
-  first version in every version: `{press}/catalog/book/{id}/chapter/{n}`
-  and `…/version/{publicationId}/chapter/{n}`, `n` being the source
-  chapter's; the new version's own chapter number answers 404. Chapter
-  page, 2026-09-29 (U45 claim check R2).
-- {OMP} A chapter cannot be moved on the Chapters page (a drag under
-  "Order" changes nothing, U72 Rule 8a), so a version's chapters keep
-  the order they were added in. 2026-09-29 (U45 claim check R1).
-- {OJS} A seeded Production article published from the workflow opens
-  the "Review Publishing Details" panel first; its "Confirm" saves the
-  publication and adds a "Submission metadata updated" line to the
-  Activity Log of its own, so the publish adds two lines there, not one.
-  2026-09-29 (U45 test run, OJS S5).
-- {OMP} A book seeded with the Press manager as `submitter` has no
-  contributor (its Contributors page reads "No items found."), so its
-  "How to Cite" opens with the title. 2026-09-28 (U69 claim check K5).
-- {OMP} A book's first "Publish" (Production, on a publication page such
-  as Catalog Entry; the stage view has no "Publish") confirms "…will be
-  assigned … "Version of Record 1.0"" and offers no stage to choose. A
-  book whose only published version is "Author's Original" comes from
-  "Create New Version" › "Publication Stage" "Author's Original (AO)", that
-  version's "Publish", and "Unpublish" on the Version of Record.
-  2026-09-27 (U68 claim check K2-3, `.reports/U68/ccK2/facts-omp.json`
-  "ao-screen").
-- {OMP} The catalog's series links ("Show Series") list only series that
-  hold a published book, a series whose only published version is
-  "Author's Original" included, and show only while at least two series
-  hold one. A scratch press has no series (see above): one is
-  seeded through the context scenario's `series[]` or added on Settings ›
-  Press › Series › "Add Series", and a book goes into it through
-  `POST scenarios/submission` `series: <path>`. Catalog page,
-  2026-09-24 (U10 claim check K1-8, `.reports/U10/ccK1/68-series2-omp.json`);
-  the "Author's Original" case and the two-series condition 2026-09-27 (U68
-  claim check K2-2, K4-7).
+  Publication › Publication Formats.
+- {OMP} Every publication format stores the same order number, so the pages
+  list formats in the order the database returns them, which a save can
+  change: a book seeded with `publicationFormats[]` in order can already list
+  them in another. Read the order on screen after the last change.
+- A count of Activity Log lines after a publish or a stage move depends on the
+  context's DOI setting: each step that makes a DOI adds a "Submission
+  metadata updated" line (in the name of whoever published or recorded the
+  decision; `admin` for a seed), and a journal's "Review Publishing Details" ›
+  "Confirm" adds one more.
+- A draft seeded with a second `author` in `participants[]` may have its
+  comments-box discussion credited to that Author at submit: seed only the
+  submitter as Author when a drive needs the submitter under "Created by:".
 - No routine task processes the usage log on a fleet, so every Statistics
   page, CSV download and item page's "Downloads" chart is empty unless a
-  scenario seeds figures with `usage[]` (scenarios.md). The item page's
-  chart then counts only file views dated on or after the work's first
-  publication date, so a work seeded as published today charts 0; seed
-  `datePublished` before the visit days. All three apps, 2026-09-27 (U10
-  claim check K1-6; U64 claim check K1, `c-work-chart-*`). The chart keeps
-  the figures of the page's first opening for a day (a per-item data
-  cache): open the page first after the figures exist, or press
-  Administration › "Delete Data Caches" before reading it. OJS and OPS
-  `main`, OJS 3.5, 2026-10-27 (U13 claim check I27B-2); OMP `main` and
-  3.5 the same (U69 claim check I27D-2).
-- "All dates" on Statistics › "Articles" ("Monographs", "Preprints")
-  starts at the context's first publication, so on a scratch context
-  whose works were published today it shows none of the seeded past
-  visits and its "Download Articles" file has no rows; "All dates" on
-  "Journal" and "Issues" starts at 2001-01-01 and shows them. All three
-  apps, 2026-09-27 (U64 claim check K3, `k3-<app>.json`).
-- Statistics › "Counter R5" shows "There are no COUNTER R5 usage
-  statistics available yet." on every context of a fleet in its install
-  month and the next (earliest possible date the first of the next month,
-  last possible date the last day of the previous month), and every
-  "Download" is refused "The start date must be before the end date."
-  All three apps, 2026-09-27 (U64 claim check K4, `td4-page-*`,
-  `td4-pr-download-*`).
-- Administration › Site Settings › "Statistics" at install: "Do not
-  collect any geographical data", "Enable institutional statistics"
-  unticked, "Only track monthly statistics", "Leave the log files in
-  place", "Make the COUNTER SUSHI statistics publicly available",
-  "Platform" unticked, no Platform ID; Settings › Distribution ›
-  "Statistics" of `publicknowledge` and of a scratch context holds
-  "Public API" alone, ticked. All three apps, 2026-09-27 (U64 claim
-  check K5, `01-site-tab-defaults-*`).
-- {OJS} Settings › Website › Appearance › "Theme" "Journal Content
-  Organization" shows "Include the current issue's table of contents"
-  alone ticked on `publicknowledge` (issues seeded, "Theme" never saved)
-  and on a scratch journal seeded with an unpublished issue, and "Include
-  recent most published articles" alone on a scratch journal with no
-  issue. 2026-09-24 (U10 claim check K2, `.reports/U10/ccK2/pk-theme-ojs`,
-  `u-theme-ojs`, `e-theme-ojs`).
-- ""Make a Submission" Block" {OJS OMP} is disabled on every new journal
-  and press, `publicknowledge` included (its `settings.xml` is never
-  installed; no `enabled` row), so Settings › Website › Appearance ›
-  Setup "Sidebar" offers no box for it until a manager enables it on
-  Settings › Website › "Plugins". "Browse Block" is listed and disabled on
-  a journal and a server, enabled on a press. A new context's "Sidebar"
-  list reads "Web Feed Plugin", "Information Block", "Subscription Block",
-  "Language Toggle Block" (OJS) and "Web Feed Plugin", "Information
-  Block", "Language Toggle Block", "Browse Block" (OMP); "Web Feed
-  Plugin" and "Language Toggle Block" alone (OPS). All three apps,
-  2026-09-24 (U10 claim check K3, `.reports/U10/ccK3/fresh-plugins-*`,
-  `fresh-setup-*`; the OPS list corrected by U16 claim check K5,
-  2026-09-25, `.reports/U16/ccK5/f-02-setup-sidebar-fresh-ops`).
-- {OMP} A new press's "Browse Block" "Settings" arrive with "New
-  releases", "Categories" and "Series" ticked; placed, the block of a
-  press with no category and no series shows "Browse" and "New Releases"
-  only. 2026-09-25 (U16 claim check K5, `o-02-settings-window-omp`,
-  `f-10-home-placed-empty-omp`).
-- {OJS OPS} While the "Browse" block is placed on a journal or preprint
-  server, its inline style also draws the breadcrumb's last step with a
-  grey bar, so a screenshot of any page with a breadcrumb differs with and
-  without the block. 2026-09-25 (U16 claim check K5, `f-04-about-before-*`,
-  `f-11-about-placed-*`).
-- The sidebar's "Language Toggle Block" prints nothing on a context with
-  one interface language; a scratch context needs
-  `context.supportedLocales: ['en', 'fr_CA']` for it to show. Public home,
-  all three apps, 2026-09-24 (U10 claim check K3, `sb-public-home-*`).
-- On a fresh context the "Date & Time" formats (Settings › Website ›
-  "Setup") are stored empty, so the tab and the pages use the
-  configuration file's defaults ("2026-09-24", "2026-09-24 07:17 PM").
-  {OMP} "Cover Image Max Width" and "Height" are stored as 106 and 100;
-  they are on Settings › Website › Appearance › "Advanced", and saving new
-  values remakes every existing cover's small copy (OMP, 2026-09-27, U70
-  claim check K5, K5-8).
-  All three apps, 2026-09-24 (U10 claim check K4, `.reports/U10/ccK4/fresh-*`).
-- A new context's contributor roles (and `publicknowledge`'s) are named
-  in the primary language only: with French under "Forms" the "Edit Role"
-  window's French box is empty ("1/2 languages completed"), without it
-  there is none, so a French page reads "Author". Three apps, 2026-09-29
-  (U10 claim check I29, `shared/playwright/checks/U10/I29/`).
-- A visit to a context's `/fr_CA/…` address switches the visitor's session
-  to French, so later addresses without a language segment render French;
-  the app forwards a bare address to `/en/…`. OJS and OPS, 2026-09-25 (U13
-  claim check K1).
-- {OJS} On a journal with a published issue, Publication › "Publication
-  Settings" arrives with "Assign To Current/Back Issue" preselected, and
-  "Save" answers "This field is required." at "Issue" until an issue is
-  picked or "Don't Assign To An Issue" is ticked. Its "Publication Date"
-  backdates an unpublished first version ("Published 2026-09-01" after the
-  publish). 2026-09-25 (U13 claim check K1, `v-01`, `v-02`, `v-04`).
-- {OJS} A `published: true` seed whose `issue` names an unpublished issue
-  (a scheduled article) sits at the Submission stage, so its workflow
-  offers no "Preview"; a manager still opens the preview by its address.
-  2026-09-25 (U13 claim check K1, `l-manager-06-workflow-scheduled`,
-  `p-03-scheduled-manager`).
-- "PDF.JS PDF Viewer", "HTML Article Galley" and "eLife Lens Article
-  Viewer" arrive ticked on a new journal, "PDF.JS PDF Viewer" alone on a
-  new preprint server, "PDF.js PDF Viewer" and "HTML Monograph File" on a
-  press. Settings › Website › "Plugins", all three apps, 2026-09-25 (U13
-  claim check K2, `pl-01-plugins-fresh-manager-*`,
-  `omp-01-plugins-publicknowledge-omp`).
-- The components of a new journal and preprint server arrive with "These
-  are supplementary files…" ticked for Research Instrument, Research
-  Materials, Research Results, Transcripts, Data Analysis, Data Set, Source
-  Texts, Multimedia and Other; "These are dependent files…" for Multimedia,
-  Image and HTML Stylesheet; "These files support file variants…" for
-  Image. Settings › Workflow › Submission › "Components", OJS and OPS,
-  2026-09-25 (U13 claim check K2, `co-components-forms-*`).
-- A plugin that fails inside a page hook leaves its part out of a page that
-  still answers 200: the only trace is "Plugin … failed to handle the hook
-  …" in `apps/<app>/playwright/.server-logs/server-<port>[-probe].log`, and
-  the kit's run record lists no crash, so a plugin-rendered part that never
-  shows is read in the server log first. Seen for the Publication Facts
-  Label and "Recommend Articles by Author" on every article page (U13
-  findings). OJS, 2026-09-25 (U13 claim check K4-1, K4-6).
-- {OJS} A new journal's "Articles" section and the seeded sections arrive
-  with "Will not be peer-reviewed" and "Omit author names for section items
-  from issues' table of contents." unticked; a preprint server's section
-  form has no "Omit author names…" box. Settings › Journal › "Sections",
-  2026-09-25 (U13 claim check K4, K5, `k-01-pk-section-*`,
-  `s-02-section-form-*`).
-- {OJS} `publicknowledge`'s home page shows "Current Issue" alone, with no
-  "Latest Publications"; a scratch journal with a published issue seeded
-  `themeOptions: {journalContentOrganization: [1, 2, 3]}` shows the
-  categories, "Latest Publications" and "Current Issue". Home page,
-  2026-09-25 (U13 claim check K5, `k-02-pk-home-visitor-ojs`,
-  `r-v-01-home-ojs`).
-- A seeded submission's contributor has no Country, so the workflow's
-  Contributors › "Edit" refuses "Save" until one is picked (a Bio
-  Statement too needs it first). OJS and OPS, 2026-09-25 (U13 claim check
-  K5, `b-01-e-b-contributor-bio-typed`).
-- Settings › Website › "Plugins" lists "JATS Template Plugin" ticked and
-  "JATS Metadata Format" unticked, on a new journal and on
-  `publicknowledge`; Statistics › "Articles" carries a "JATS" column; a
-  new submission's "JATS XML" page opens with "Make available with
-  publication" unticked. OJS, 2026-09-25 (U48 claim check K2,
-  `.reports/U48/ccK2/plug-*`, `link-12-p5-jatspage`).
-- Settings › Users & Roles › "Site Access Options" carries the box "Users
-  must be registered and log in to view open access content." on all
-  three apps: "View Article Content" (OJS), "View Monograph Content"
-  (OMP), "View Preprint Content" (OPS); unticked on a fresh context. All
-  three apps, 2026-09-25 (U48 claim check K2, `ctl-03-access-{omp,ops}`).
-- {OJS} A `published: true` seeded article has no Production history:
-  when its issue is unpublished, the article goes back to the Submission
-  stage and its workflow header reads "Submission", where an article
-  published through the workflow reads "Scheduled"; both carry "Status:
-  Scheduled" under Publication Settings. 2026-09-25 (U50 claim check K2,
-  `u-wf-b`, `u2-wf-a`, `u2-wf-e`).
-- The signed-out site home (`index.php/index`) lists every enabled
-  context on one page with no page links, each with "View Journal" and
-  "Current Issue" (OJS), "View Press Website" alone (OMP) or "View
-  Server" alone (OPS). All three apps, 2026-09-25 (U50 claim check K3,
-  `m-04-site-home`, `ctl-site-home-*`).
-- {OJS} An issue's seeded `coverImage` is stored for the primary language
-  and shows on the other interface languages' issue pages too
-  (`/fr_CA/issue/view/{id}`). 2026-09-25 (U50 claim check K3,
-  `c-02-l-issue-fr`).
-- {OPS} `publicknowledge`'s section `PRE` "Preprints" has the path "pre"
-  (its page is `preprints/section/pre`; `preprints/section/preprints`
-  answers "404 Not Found"), and keeps the install's default policy "Section
-  default policy" through the bootstrap's rename, so About › "Submissions"
-  shows a "Preprints" block. A scratch server made without `sections[]`
-  keeps the default section with path "preprints". {OJS} `REV` "Reviews"
-  has no policy, so the seeded journal's "Submissions" page shows only the
-  "Articles" block. 2026-09-25 (U17 claim check K1, K4, K5).
-- {OPS} `publicknowledge` is not empty on a fleet where the U13 suite has
-  run: "Archives" and the home page list the preprints it posted. An empty
-  "Archives" read needs a scratch server. 2026-09-25 (U17 claim check K5).
-- {OJS OMP} The Journal manager / Press manager role has no workflow stage
-  on Users & Roles › "Roles", so it is never offered under a section's or
-  series' "Editorial Assignments"; the Production editor starts at
-  Copyediting and Production. 2026-09-25 (U17 claim check K1).
-- A new section's "Word Count" box is empty, and every "Section Options"
-  box unticked, until its first "Save" stores 0; a section made by the
-  context scenario's `sections[]` opens the same way. A new series'
-  "Order of monographs" arrives on "Title (A-Z)". Settings › "Sections" /
-  "Series", 2026-09-25 (U17 claim check K1, K3).
-- {OJS} A journal seeded with `sections[]` stores its sections at places
-  0, 2, 3 (`publicknowledge` 0, 2); a reorder on Settings › Journal ›
-  "Sections" leaves 0, 1, 2. With the gap, every "Done" in an issue's
-  "Order" stores a section order for the issue even when no section moved,
-  so a drive that reads what an issue keeps reorders the journal's sections
-  on screen and back first. An issue's "Table of Contents", 2026-10-08
-  (U50 claim check I08).
-- {OMP} A press's series list has no fixed order until "Order" and "Done"
-  are used on Settings › Press › "Series": on the PostgreSQL test database
-  a new series may land first, in the middle or last, and a saved series
-  can move. 2026-09-25 (U17 claim check K2).
-- The reader's search, and a category's page on a press, list nothing a
-  scenario published until the background jobs have run (`runJobs()` in
-  `support/jobs.js`; from a probe script the kit's `drainJobs(app)`).
-  2026-09-25 (U17 claim check K3).
-- {OMP} A series' public page (`catalog/series/{path}`) shows the series'
-  cover image, but its heading and trail's last step are empty and its
-  description and ISSNs are absent (U17 OMP9); its books come newest
-  first whatever "Order of monographs" says, after any books "Featured in
-  series", which keep their saved order. Its "New Releases" list shows
-  every new release in the series, whatever "Items per page" says. A
-  book's page shows the series' full name and ISSNs under "Series" and
-  links the series page. 2026-09-25 (U17 claim check K6); the featured
-  order and "New Releases" 2026-09-27 (U68 claim check K3).
-- {OJS} `publicknowledge`'s sections have ids 1 "Articles" and 2
-  "Reviews" (the sections programming interface's list). 2026-09-25
-  (U17 claim check K7).
-- "Web Feed Plugin" arrives enabled on every new context, "Settings" in its
-  row, the window on "Display web feed links on homepage and issue pages
-  only." {OJS} / "…on homepage only." {OMP OPS}, 30 items, "Include
-  identifiers…" unticked and {OJS} "Display a fixed number of the most
-  recent publications."; its stored `displayItems` reads `1` (bool) until
-  the window's first "OK" rewrites it. The three feed addresses answer at
-  once (RSS 2.0 fails while nothing is listed, U18 A1). A `sidebar:
-  ['WebFeedBlockPlugin']` seed is refused unless the same request carries
-  `plugins: {webfeedplugin: {enabled: true}}`. Settings › Website ›
-  "Plugins", all three apps, 2026-09-25 (U18 claim check K1, K2). So a
-  drive that reads the current-issue feed seeds
-  `plugins.webfeedplugin.settings.displayItems: 'issue'` (U50 claim check
-  I28, 2026-09-28).
-- A scratch context created without `context.acronym` has no initials, so
-  its first Settings › Journal › "Masthead" save is refused for "Journal
-  initials" ("Press Initials", "Server initials" are required too), and
-  one with an acronym but no Country keeps "Save" grayed out ("Go to
-  Country: This field is required."); `context.country` seeds one (U19
-  harness, 2026-09-26), else a test picks one on the tab first. 2026-09-25 (U18 claim check K1);
-  2026-09-26, all three apps (U18 test run, T-ojs-1).
-- The default "Before you begin" and "Submission Checklist" texts of
-  Settings › Workflow › "Author Guidance" link to the context's
-  "Submissions" page by an absolute address through the port the context
-  was created on: `publicknowledge` through the fleet's base port, a
-  scratch context through the probe server's port. All three apps,
-  2026-09-27 (U58 claim check K2, `.reports/U58/ccK2/ag-*`).
-- {OMP} A new press, `publicknowledge` included, arrives with "Enable
-  type metadata" ticked at "Do not request the type from the author
-  during submission."; a journal and a server arrive with it unticked.
-  Settings › Workflow › "Metadata", 2026-09-27 (U58 claim check K2,
-  `.reports/U58/ccK2/me-*-01-metadata-*`).
-- {OJS} A new journal has "LOCKSS" and "CLOCKSS" unticked on Settings ›
-  Distribution › "Archiving", and `{journal}/gateway/lockss|clockss` land
-  on the home page; OMP and OPS answer "404 Not Found" there. 2026-09-26
-  (U18 claim check K3). The site's own `index.php/index/gateway/lockss|clockss`
-  answers "404 Not Found" on OMP and OPS too, and on OJS lists every enabled
-  journal with the box saved ticked. 2026-09-28 (U67 claim check K1,
-  `.reports/U67/ccK1/r{1,2}-s-0*`).
-- {OJS} A new journal's LOCKSS and CLOCKSS pages, once the box is saved
-  ticked, show five metadata rows: "Journal URL", "Title", "Language(s)",
-  "Publisher Email" (a scratch journal: `admin@mail.test`, the principal
-  contact) and "Rights" (the install's open-access sentence). 2026-09-28
-  (U67 claim check K2, `.reports/U67/ccK2/r{1,2}-m-00-new-lockss`).
-- The site's own "Web Feed Plugin" (Administration › "Site Settings" ›
-  "Plugins") arrives unticked, the site's "Sidebar" offers only "Language
-  Toggle Block", and the site's feed address answers "404 Not Found". The
-  site's plugin settings are stored with context NULL, not 0; the install
-  stores no row for either until a save. Three apps, 2026-09-26 (U18 claim
-  check K3).
-- Settings › Website › "Plugins" › "Installed Plugins" shows its category
-  headings with no count, and "Gateway Plugins" reads "No Items" on every
-  scratch context and on the site's list; a scratch context's "Report
-  Plugins" rows {OJS OMP} and "Import/Export Plugins" rows arrive ticked
-  and cannot be unticked, and a CSV report's "Reports" link downloads the
-  file instead of opening a page. The test installs run
-  `allow_plugin_install = on`, which Administration › "View System
-  Information" shows as "1". On a freshly reset fleet (one context),
-  Administration › "Site Settings" shows "Site Setup" alone, with no
-  "Appearance", "Announcements" or "Plugins" tab, and OMP's
-  `publicknowledge` lists "Usage event" to the Site Administrator. All
-  three apps, 2026-09-27 (U62 claim check K1, K2, K3).
-- A decision recorded on screen that opens a round (a new internal or
-  external round) leaves the seed response behind: that response lists
-  only the seeded rounds, so the new round's id is read from the
-  workflow's own `GET submissions/{id}` `reviewRounds[]`. OMP, 2026-09-27
-  (U71 claim check K3, `.reports/U71/ccK3/`).
-- A monograph seeded with an internal round (`reviewRounds[].stage:
-  'internal'`) whose only reviewer has declined, and a recommend-only
-  Series Editor in `participants[]`, reads "Awaiting recommendations from
-  editors." in the round's status box. OMP, 2026-09-27 (U71 claim check
-  K4, `walk-se-0`).
-- A task added from a template that is set to add itself (seeded
-  `taskTemplates[]` with `include: true`, or the template window's
-  auto-add box) is listed only to manager-level people; an assigned
-  Series Editor's panel reads "No Items", Internal Review included. OMP,
-  2026-09-27 (U71 claim check K4, `tmpl-se-t1-round1`).
-- {OPS} A preprint seeded through `POST scenarios/submission` (unposted,
-  posted or a `submitted: false` draft), a draft started on screen, and one
-  submitted through the wizard with "Relation status" left unanswered hold
-  no relation status at all, not "This preprint's relations have not been
-  entered.": the workflow's "Relations" shows none of its three choices
-  ticked, the wizard's Review panel reads "This preprint has not been
-  published elsewhere.", the "Post the preprint" window reads "This
-  preprint's relations have not been entered.", and the preprint page shows
-  no notice. A test that needs a status sets it through "Relations".
-  Workflow › "Relations", submission wizard › Review, OPS, 2026-09-27 (U75
-  claim check K1, K2).
-- The "Publication Published" email's From is the context's name with its
-  principal contact's address (a scratch context: "Scratch context {tag}"
-  and the `contactEmail` given, else admin@mail.test); the other workflow
-  emails (new version created, the posted acknowledgement) use the
-  principal contact's name. Mailpit, all three apps, 2026-09-28 (U49
-  claim check I28).
-- A publish writes "Submission metadata updated" in the publisher's name
-  only when it assigns a DOI (DOIs on, "Upon publication", none yet), from
-  the workflow and from a press's "Add Entry" alike; a journal's "Review
-  Publishing Details" › "Confirm" writes one more before the publish line,
-  DOIs on or off. So a count of Activity Log lines after a publish depends
-  on the context's DOI setting. Activity Log, all three apps, 2026-09-28
-  (U70 claim check I28).
-- A DOI made at a stage move writes "Submission metadata updated" too, in
-  the name of whoever recorded the decision ("Accept and Skip Review"
-  under "Upon reaching the copyediting stage"), so an item seeded with
-  `decisions[]` on a context with a prefix and that setting carries an
-  extra `admin` line; a press's publish that makes the book's, chapters'
-  and formats' DOIs together writes one line. Activity Log, OJS and OMP on
-  screen, OPS seeded, 2026-09-29 (U49 claim check I29).
-- The "Journal redirect" list of Site Settings › "Settings" follows the
-  database's storage order, neither name, id nor the Hosted Journals
-  order: on the PostgreSQL test install it shifts whenever a journal's row
-  is written (a Hosted Journals "Order" or "Edit" save), so a test finds a
-  journal there by name or id, never by position. All three apps,
-  2026-09-28 (U60 claim check I28).
+  scenario seeds figures with `usage[]` (scenarios.md). The item page's chart
+  counts only file views dated on or after the work's first publication date,
+  so seed `datePublished` before the visit days; and it keeps the figures of
+  the page's first opening for a day, so open the page first after the figures
+  exist, or press Administration › "Delete Data Caches".
 
-- {OMP} The Participants "Assign" window offers only the roles that take
-  part in the stage the book is in: at Production the Designer, Indexer,
-  Layout Editor and Proofreader beside the manager-level and author roles;
-  at the Submission stage the Funding coordinator. "Editorial Board
-  Member", an assistant-level role with no stage, is never offered; seeded
-  through `participants[]` it lists the book under "Assigned to me", and
-  opening the book gives the "Error" window "The current role does not
-  have access to this operation.". Workflow › Participants, OMP,
-  2026-09-28 (U74 claim check K1, `g-assign-window-bp|bs`, `e-03-ebm-open`).
-- {OMP} Marketing › "Representatives": a delete refused because a market
-  names the representative answers with a browser `alert()` and leaves the
-  "Delete" dialog open; a test accepts the alert and presses the dialog's
-  "Cancel", or the dialog's overlay blocks the next click on the list.
-  "Create New Version" copies each format's markets to the new version, so
-  a representative stays undeletable while any version's market names it.
-  OMP, 2026-09-28 (U74 claim check K2, K2-4, `D.markets.afterVersion`).
-- {OMP} A book's Native XML export (Tools › "Native XML Plugin" ›
-  "Export") fails with "The process failed. Check below for
-  errors/warnings." while any format of the book holds a sales-rights
-  entry or a market with no country or region (and, for sales rights,
-  "Rest of World?" unticked), or a market with a "Taxation Rate" other
-  than "Zero-rated (Z)" or a "Taxation Type" without one; a market's
-  "Edit" › "OK" stores "GST (Sales tax) (02)" unless the empty choice is
-  picked again. A check that needs the file seeds entries with a territory
-  and leaves the tax lists out. A press's export carries ONIX products
-  only while its four ONIX details are filled, so an import target press
-  is seeded with them too. OMP, 2026-09-28 (U74 claim check K3, K3-6; K4,
-  K4-3 to K4-5).
-- {OMP} The sales-rights and market windows' "Regions" lists offer "World
-  (WORLD)" and country subdivisions ("Alberta (CA-AB)", "England
-  (GB-ENG)"), but no ONIX supra-region such as "Eurozone (ECZ)"; the seed
-  key answers 400 naming what the list offers. A format's "Metadata" tab,
-  OMP, 2026-09-28 (U74 claim check K6).
-- Every new context, `publicknowledge` included, stores "Present a
-  masthead based on user enrollments" on and has no "Enable listing of
-  reviewers on the masthead" row, so the seeded journal and press show no
-  "Peer Reviewers in Previous Year"; a disabled account stays listed on
-  "Editorial Masthead" and "Editorial History". OJS OMP OPS, 2026-09-29
-  (U07 claim check K4; pkp-lib#13370, #13387).
-- The slot fleets on the VM serve the apps with PHP 8.3.33
-  (Administration › System Information "PHP version 8.3.33"; `php -S`),
-  the maintainer's Mac PHP 8.4. A Users XML import therefore takes the
-  U63 A16 branch on the VM: a file password stored as a bcrypt at the
-  installation's cost 12 is treated as stored another way (new password,
-  registration email), and a cost-10 bcrypt is kept. The VM's CLI `php`
-  is 8.3 too, so `password_hash()` without a cost writes cost 10. OJS and
-  OMP, 2026-09-29 (U63 claim check K3).
-- The "Editorial Masthead" tab's first save stores the reviewers box as
-  off (OJS, OMP; OPS has none). Until that first save, roles of one
-  permission level (OJS "Copyeditor" and "Editorial Board Member") come
-  in no fixed order on the tab: assert the order across levels only.
-  2026-09-29, three apps (U10 claim check K4).
-- A scratch context whose first-stage "Discussion (…)" template has
-  "Auto-add at stage" on gives every seeded submission an item of that
-  name, "Created by: system"; a Participants "Notify" or "Assign" with
-  the same template adds a second row of the same name, so locate a
-  row by its creator as well as its name. 2026-09-30, three apps (U37
-  claim check Ks30).
-- A draft seeded with a second `author` in `participants[]` may have
-  its comments-box discussion credited to that Author at submit (OMP
-  once in two runs, OJS never): seed only the submitter as Author when
-  a drive needs the submitter under "Created by:". 2026-09-30 (U37
-  claim check Ks30).
+### Screen facts no spec states yet
+
+App behaviour that is no install default and that no spec states yet. When a
+spec takes one, delete it here.
+
+- The reading-language choice is kept per browser: the session cookie lasts 30
+  days and carries the choice across signing out and in.
+- A wizard submission on a scratch context needs a title, the checklist and
+  privacy boxes, one file with a genre and (OJS and OPS) an abstract before
+  its final "Submit", which is asked twice, the second time in a confirm
+  dialog.

@@ -50,7 +50,7 @@ const {patchIni} = require('../shared/playwright/ini.js');
 const {phpServerCommand, phpServerStatus} = require('../shared/playwright/php-server.js');
 const {campaignCredentials, dropDatabase} = require('../shared/playwright/dataset.js');
 
-const PORT_OFFSET = 80; // harness.md "Runtime model", the fleet's port bands
+const PORT_OFFSET = 80; // harness.md "The fleets", the fleet's port bands
 const CFT_DIR = path.join(os.homedir(), '.cache', 'cft');
 const CFT_VERSIONS = 'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json';
 

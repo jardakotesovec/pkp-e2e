@@ -12,7 +12,8 @@ backlog (filed issues, issue reports, incidentals, coverage, friction,
 flakes, stale artifacts); the specs' defects become issue reports the team can triage ("Issue
 reports"), written by the housekeeping session. A session does its own
 list only; work it finds for another goes as a line into the tracking
-file that session reads. A red `main` interrupts any of them.
+file that session reads. A red `main` interrupts any of them. A brief
+named here as `briefs/<role>.md` is the file `docs/process/briefs/<role>.md`.
 
 ## Where direction comes from
 
@@ -47,7 +48,8 @@ label or a closure there is the maintainer's.
 
 ## The upstream session (the daily session)
 
-The VM runs it every weekday at midday, scheduled through claude-threads.
+The VM runs it every weekday at 12:15 Prague time, scheduled through
+claude-threads.
 The scheduled prompt only points here; this section is the day's order.
 
 1. Read the PROGRESS banner, this file, `ci-triage.md`,
@@ -110,15 +112,17 @@ too.
 
 ## The housekeeping session
 
-The VM runs it every day at 07:00 Prague time, before the upstream
-session on weekdays, scheduled through claude-threads. Its queue is
+The VM runs it every weekday at 05:00 Prague time, before the upstream
+session, scheduled through claude-threads. Its queue is
 `npm run backlog`, which reads every kind of work from where it lives
 (the registers, the reports, the tracking files) and prints it in the
 order of the steps below, so the order is the priority. Every morning
 works steps 1 to 5; then the day of the month decides the main work,
 so neither side starves the other: an **odd day** works incidentals
-and reports owed (steps 6 and 7), an **even day** builds and Planned
-coverage (step 8). Steps 9 to 12 follow on either day. After about
+and reports owed (steps 6 and 7), an **even day** builds a pending
+feature (step 8). Planned coverage (step 8) follows on every weekday,
+so the suites keep up with what the team ships, and steps 9 to 12
+after it. After about
 three hours the session starts nothing new, but whatever it started
 (a report, a fold, a build or revision) it finishes in the same
 session, however long that takes, and then ends pushed (step 13). What
@@ -148,11 +152,11 @@ is left, the next morning picks up from the files.
      still in `docs/issues/` goes as "A report's life" says (only the
      maintainer can label or close there).
    - **New copies.** `gh search issues --owner pkp
-     'jardakotesovec/pkp-e2e in:body' --json url,createdAt`, and since
-     that search missed four copies on 2026-10-29 (one six days old),
-     each repo's issues of the last two weeks read directly (`gh api
-     'repos/pkp/<repo>/issues?state=all&since=<date>' --paginate`, for
-     pkp-lib, ojs, omp, ops and ui-library, the bodies grepped for
+     'jardakotesovec/pkp-e2e in:body' --json url,createdAt`, and, since
+     that search misses some, each repo's issues of the last two weeks
+     read directly
+     (`gh api 'repos/pkp/<repo>/issues?state=all&since=<date>' --paginate`,
+     for pkp-lib, ojs, omp, ops and ui-library, the bodies grepped for
      `jardakotesovec/pkp-e2e`; one copy can carry several reports): a hit in a
      pkp repo whose body links a filed issue, its report or its register
      entry, and which the report's Upstream bullet does not name yet, is
@@ -175,7 +179,7 @@ is left, the next morning picks up from the files.
      script walks a freshly reset dataset fleet (harness.md "Dataset
      fleets"). When it shows the Steps' Expected, a fold agent
      (`briefs/fold.md`) retires the entry with the merged PRs as its
-     reason (TEMPLATE "Retired entries"; its coverage as sync loop step 4
+     reason (TEMPLATE "Findings register", the Retired block; its coverage as sync loop step 4
      says), and "A report's life" deletes the report and closes the
      issue. When
      the fault still shows, the issue stays open, the entry gets a
@@ -219,7 +223,7 @@ is left, the next morning picks up from the files.
    ci-triage "Open regressions" for its screen: a
    sighting the spec already states is deleted without a drive, and a
    matching entry or regression row is named in the checker's triage
-   plan (two checkers re-derived one each, 2026-10-29). The rest
+   plan. The rest
    are driven, grouped by feature, by fresh checkers rendered from
    `briefs/claim-check.md` (the rows are the chunk, each named by the
    register IDs and rule numbers it bears on, never spec line numbers,
@@ -233,7 +237,7 @@ is left, the next morning picks up from the files.
    that stays unclear becomes that spec's ❓ entry with a lean. A row
    that says an entry no longer shows (from a reporter) is
    driven the same way: when it holds, the fold retires the entry
-   (TEMPLATE "Retired entries"); when the entry still shows, the row is
+   (TEMPLATE "Findings register"); when the entry still shows, the row is
    deleted and the entry stays where the backlog lists it. Every worked
    row is deleted from `incidentals.md`.
 7. **Reports owed** (odd days), spec by spec, the backlog's top spec
@@ -241,32 +245,49 @@ is left, the next morning picks up from the files.
    🐞 entry no report covers is written up and filed through "Issue
    reports". A spec is worked whole; the next starts only inside the
    three hours.
-8. **Builds and Planned coverage** (even days). One piece of work a
-   morning, the first of these that exists, run to its end:
-   - a build or revision left mid-way, resumed from its
+8. **Builds and Planned coverage.** In this order, each run to its
+   end:
+   - a build or revision left mid-way, on any day, resumed from its
      `phase-status.md` (RUNBOOK "Resuming a feature mid-flight");
-   - a `pending` PROGRESS row, oldest first, built through the RUNBOOK
-     loop like any feature (the upstream sync adds these; a build is the
-     fullest coverage work there is, so it goes before a revision);
-   - a spec whose "Left out" list holds **Planned** items ready to
-     write (the backlog's section 5; a guard marked "once fixed" waits
-     for its fix), through RUNBOOK "Revising a shipped feature": the
-     session writes the sheet from all its ready Planned items, then the same writer, reader, test authors, test
-     fold and finals as a build, so the scenarios stay one coherent set
-     and not a scenario per sync.
-9. **Friction.** Fold `docs/tracking/friction.md` and delete every row. A
-   row earns a change only when a third feature would meet the same
-   thing, the docs do not already say it (grep first) and it is not one
-   screen's fact or general Playwright knowledge; what passes is a kit
-   change or a clause on an existing entry, never a new section, and a
+   - on an even day, a `pending` PROGRESS row, oldest first, built
+     through the RUNBOOK loop like any feature (the upstream sync adds
+     these; a build is the fullest coverage work there is, so it goes
+     before a revision);
+   - every weekday, the specs whose "Left out" lists hold **Planned**
+     items ready to write, up to three a morning, in the order of the backlog's
+     section 5. That order puts first what keeps the suites in step
+     with the apps (behavior the team shipped, a guard whose bug is now
+     fixed, a coverage request), the oldest such item first; a guard
+     whose bug is still open waits. Each spec goes through RUNBOOK
+     "Revising a shipped feature" with all its ready items: its own
+     sheet, writer, reader and test authors, so its scenarios stay one
+     coherent set. The specs of one morning share one branch and one CI
+     run (RUNBOOK "Several specs in one morning"). A second and a third
+     spec start only inside the three hours.
+9. **Friction.** Fold `docs/tracking/friction.md` and delete every row.
+   Most rows earn nothing, and that is the expected outcome: a retry or
+   a wrong first guess is the ordinary cost of driving a screen, and
+   every sentence added is one every later agent reads. A row earns a
+   change only when all of these hold: the next agent would not notice
+   the problem by itself (a silent failure, not an error that names its
+   cause); agents on other features will meet it, and they are the ones
+   who read the file the change goes into; the docs do not already say
+   it (grep first); and it is not one screen's fact or general
+   Playwright knowledge. Then take the first of these that fits:
+   - **A tool fix.** When a script, a kit helper, a default, an error
+     message or a lint rule can carry the lesson, change that and write
+     at most one sentence. Prose that teaches agents to work around a
+     tool is the last resort.
+   - **A rewrite of the entry it belongs to**, so the entry still reads
+     as one rule and is no longer than before. Never append a clause to
+     a passage about something else; an unrelated fact gets a short
+     entry of its own under a title that names it.
+   The text says what holds now. The feature, the date and the story of
+   how it was found go in the commit message, never in the doc. A
    harness key a row asks for is listed under scenarios.md "Field shapes
-   not built yet", not built. Most rows earn nothing, and that is the
-   expected outcome: a retry or a wrong first guess is the ordinary cost
-   of driving a screen, and every clause added is a line every later agent
-   reads. A row whose fact one closer read of the spec or the brief would
-   have given, or whose fix the session that wrote it already made (a
-   corrected brief, a new footnote), earns nothing either. When in doubt,
-   delete.
+   not built yet", not built. A row whose fact one closer read of the
+   spec or the brief would have given, or whose fix the session that
+   wrote it already made, earns nothing. When in doubt, delete.
 10. **Flakes.** Diagnose the flake classes whose watch condition has
    tripped ("Keep the flake rate down"); a flake that reds CI on the day
    is the upstream session's interrupt, its diagnosis this session's.
@@ -276,22 +297,19 @@ is left, the next morning picks up from the files.
 12. **Quiet mornings.** When the day's steps left nothing open:
    - **Drift sweep of one spec**, the one whose PROGRESS note carries the
      oldest "Swept" date (none counts as oldest). Its kept checks
-     (`shared/playwright/checks/<feature>/`) run twice, under `PROBE_RUN`
-     r1 and r2 (a fact one run shows is undetermined), on reset
-     databases at the tips (a check whose header has a `RESEED` switch
-     keeps one state file per app, so both runs take `RESEED=1`; U12
-     sweep, 2026-11-09), each run's summary read for dead phases, since
-     a kept check exits 0 when a phase dies (a fix there comes first: the
-     U05 sweep's checks still called `support/jobs.js` and slot 0's
-     Mailpit, 2026-10-20); so do the kept walks of the spec's filed
-     reports (`shared/playwright/checks/issues/<report>/`), twice each on
-     a dataset fleet reset before every run, a walk that starts a server
-     of its own left out (the U10 sweep's
-     `shared/playwright/checks/U10/SW04/walks.sh`, 2026-11-04); one fresh
-     checker (`briefs/claim-check.md`, `{{rerun}}` naming
-     the outputs, the walks and the suites) judges the snapshots against the spec
-     lines each chunk owns, drives what the checks no longer reach, and
-     reads each suite against the scenarios for a bullet no test asserts.
+     (`shared/playwright/checks/<feature>/`) run twice at the tips on
+     reset databases, under `PROBE_RUN` r1 and r2, since a fact one run
+     shows is undetermined; a check whose header has a `RESEED` switch
+     takes `RESEED=1` on both runs. Each run's summary is read for dead
+     phases, because a kept check exits 0 when a phase dies, and a dead
+     check is fixed first. The kept walks of the spec's filed reports
+     (`shared/playwright/checks/issues/<report>/`) run the same way,
+     twice each on a dataset fleet reset before every run (a walk that
+     starts a server of its own is left out). One fresh checker
+     (`briefs/claim-check.md`, `{{rerun}}` naming the outputs, the walks
+     and the suites) judges the snapshots against the spec lines each
+     chunk owns, drives what the checks no longer reach, and reads each
+     suite against the scenarios for a bullet no test asserts.
      Drift folds as "Fix stale artifacts as you go" says, the tests with it; a bullet without its
      assertion becomes a **Planned** item. The PROGRESS note ends with
      "Swept <date>.", replacing the previous one.
@@ -334,8 +352,8 @@ session (<date>)` line and pushes, so the morning's session leaves them
 alone, and replaces the line when it is done. The model
 check for this work (`bin/check-models.mjs --stops-warn`) blocks
 nothing: a report partly served by another model lands like any
-other, and its Model bullet says so (REPORT.md "The header";
-maintainer, 2026-10-06), so the team knows to check it more closely;
+other, and its Model bullet says so (REPORT.md "The header"), so the
+team knows to check it more closely;
 a classifier stop is reported, and the attempt is never re-sent on the
 same model: a false positive's piece goes to a narrow rerun
 (RUNBOOK "Model discipline").
@@ -362,60 +380,41 @@ same model: a false positive's piece goes to a narrow rerun
    locale keys, class or symptom a report in `docs/issues/` or an
    `incidentals.md` line already covers or rules on goes to its reporter
    with that pointer ("check against <report>"), so the unit starts
-   there (U13 A1). An entry of raw locale codes is sorted before
-   dispatch: a missing translation is no finding (TEMPLATE "Findings
-   register"), so an entry that is only one is retired, not reported;
-   only a raw key in English, or one the code reads wrongly, goes to a
-   reporter. The same holds for an entry that is only a singular or
-   plural beside the wrong number ("1 days"). Group those
+   there. An entry TEMPLATE "Findings register" rules out (only a
+   missing translation, or only a singular or plural beside the wrong
+   number) is retired before dispatch, not reported; a raw key in
+   English, or one the code reads wrongly, goes to a reporter. Group those
    that point at one fault (the same action failing on two screens, one
    wrong value showing in several places), and follow an entry's link to
    the same fault in another spec: that entry joins the unit. A twin is not always linked, so the other specs'
-   registers are grepped for the entry's log line, class or method first
-   (U13 OPS1 and U69 A4, U69 A3 and U49 OJS3, U69 A16 and U50 A14). Every other entry is a unit of its own. A group
+   registers are grepped for the entry's log line, class or method first. Every other entry is a unit of its own. A group
    is a guess the reporter confirms or splits.
 3. **Report each unit** through one agent rendered from
    `briefs/issue-report.md`, one or two at a time, each on dataset fleets
    of its own, since a walk changes the dataset (harness.md "Dataset
    fleets"), and under an agent id no earlier session of the slot used,
    since `.reports/issues/<agent>/` keeps an earlier unit's steps, logs
-   and trial scripts: before dispatch, `npm run fleet-prep -- --feature
-   issues-<agent> --dataset <n> --reset` for `main` and
-   `PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature
-   issues-<agent>-3_5 --dataset <n> --reset` for 3.5, a different `<n>`
-   (1–9) per agent running at the same time; the agent resets its own
-   fleets before each walk. The fix trial (the brief's step 4a) patches
-   the slot's shared checkouts, so two reporters take turns there: the
-   second waits until `node bin/try-fix.js status <apps>`, naming the
-   apps of its own walk, says clean (with no app named it exits 1 while
-   any other app holds a fix). The turn
-   covers every walk on `main`, an unpatched one too, since a status read
-   is a point check and an apply lands mid-walk: the session keeps one
-   lock per app checkout, queued first come first served, which a
-   reporter takes before its status read and holds to the walk's end or
-   the revert, and the brief names that lock and every reporter of the
-   slot (U35, U45, U50, U51, U54 issues sessions, 2026-10-01). A claim
-   checker driving the slot's own fleets beside reporters, or beside another
-   checker, takes the same lock for each run on `main`, since a fix applied
-   mid-run serves its pages too and a checker's site-wide change reaches
-   the other's (U03, U39 claim checks, 2026-10-07; U04 sweep, 2026-10-16); a run of its that
-   changes a site-wide setting (Site Settings, the site record) takes it
-   `exclusive`, as one command that puts the setting back, since every
-   visitor of the fleet reads it (U02 sweep, 2026-10-12). On the VM that lock
-   is `bin/app-lock.sh <shared|exclusive> <apps, comma separated> -- <command>`
-   (the stable lines' checkouts have locks of their own): a walk
-   or a drive takes it `shared`, any number at once since only a fix
-   changes the code, and a fix trial takes it `exclusive` as one command
-   (apply, walks, revert, then the neighbour walk with the fix out), naming only the apps it patches; requests are
-   served in the order asked, app by app (a request waits only behind
-   earlier ones for an app it names), and the lock goes when the command
-   ends. A trial on three apps holds every other run for its ten minutes
-   or more, so a checker's script takes its rows in few runs
-   (2026-10-07); and a shared run is kept to minutes and to the apps it
-   drives, one app per lock call, since a trial waiting behind it holds
-   every later request for its apps (a half-hour walk over three apps
-   kept reporters' two-minute walks waiting 20 to 28 minutes,
-   2026-10-09).
+   and trial scripts. Before dispatch:
+   `npm run fleet-prep -- --feature issues-<agent> --dataset <n> --reset`
+   for `main` and
+   `PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-<agent>-3_5 --dataset <n> --reset`
+   for 3.5, a different `<n>` (1–9) per agent running at the same time;
+   the agent resets its own fleets before each walk. A fix trial (the
+   brief's step 4a) patches the slot's shared checkouts, and every fleet
+   of the slot serves the patched code meanwhile, so every run on `main`
+   takes the slot's lock on the app checkouts it uses:
+   `bin/app-lock.sh <shared|exclusive> <apps, comma separated> -- <command>`
+   (the stable lines' checkouts have locks of their own). A reporter's
+   walk and a claim checker's drive take it `shared`, the unpatched
+   walks too; a fix trial takes it `exclusive` as one command (apply,
+   walks, revert, then the neighbour walk with the fix out), naming only
+   the apps it patches. A run that changes a site-wide setting (Site
+   Settings, the site record) also takes it `exclusive`, as one command
+   that puts the setting back. Requests are served in the order asked,
+   app by app, and the lock goes when the command ends, so a locked run
+   is kept to minutes and to one app per call: a trial waiting behind it
+   holds every later request for its apps. The brief names the lock and
+   every reporter of the slot.
    A refresh
    goes to its reporter with the brief's `{{refresh}}` slot naming the
    report and what changed; it is accepted like a written report, and
@@ -444,7 +443,7 @@ same model: a false positive's piece goes to a narrow rerun
    - `not reproduced` or `fixed upstream`: the entry is not retired
      here. `fixed upstream` means gone on `main` and on the 3.5 branch;
      a fault `main` lost but released 3.5 still shows is written up,
-     its Affects reading "main: none" (U46 A9, 2026-10-29). It gets a row in `docs/tracking/incidentals.md` in its shape,
+     its Affects reading "main: none". It gets a row in `docs/tracking/incidentals.md` in its shape,
      "Seen" saying "A5 no longer shows on main" (or naming the upstream
      fix) and "Evidence" the kept script, and the housekeeping session
      confirms it and retires the entry through its fold, markers, suites
@@ -503,7 +502,7 @@ retires with the fixing PR as its reason once a walk on the apps' `main`
 shows the fix (housekeeping step 3, or the sync); won't fix or risk
 accepted, the entry keeps its place and gains the Reviewed blockquote
 with the team's ruling; not a bug, the entry is overturned and retires
-(TEMPLATE "Retired entries"); a duplicate, the footnote points at the
+(TEMPLATE "Findings register"); a duplicate, the footnote points at the
 other issue. It runs the other way too: any session that retires an
 entry with a report (a sync, a housekeeping fold, a drift sweep) deletes
 the report and its script and closes the issue with a comment naming the
@@ -527,8 +526,7 @@ session that makes it:
   their words> (<date>)`. For a merged change the line names every
   class or method the report rests on that the change touched (the
   report's backticked names against the change's file list), not only
-  the sentence first noticed (two refreshes of 2026-10-12 found further
-  moved facts only by rereading the merge). The backlog lists it and
+  the sentence first noticed. The backlog lists it and
   housekeeping step 4 works it. On a companion branch the line rides with the branch and
   lands when it merges, since the issue describes `main`.
 
@@ -628,9 +626,8 @@ The apps move; the suite follows. The baselines live in
    and the evidence last. The report is
    posted into the session's thread as a file the same day, in a post that
    tags @beaug alone, who watches over the regression reports (no
-   direct messages, maintainer 2026-09-29; one watcher per kind,
-   maintainer 2026-09-30; the tag is the upstream session's alone: a PR check or
-   review posts its report in its own thread untagged, since whoever
+   direct messages; the tag is the upstream session's alone: a PR check
+   or review posts its report in its own thread untagged, since whoever
    asked follows up there);
    the regression gets a row
    in `ci-triage.md` "Open regressions" linking the report, with its
@@ -660,7 +657,7 @@ The apps move; the suite follows. The baselines live in
    in a later bump, so their re-run pins the submodule at that `main`
    (checked out in the slot's checkout, then set back, or `-f
    pkp_lib_ref=`/`-f ui_library_ref=` on CI) rather than waiting for the
-   bump (@jarda.kotesovec, 2026-09-28). Commit. The baseline only advances when the
+   bump. Commit. The baseline only advances when the
    range is actually triaged; a partial review leaves it where it was and
    says so in the log.
 
@@ -668,11 +665,10 @@ The apps move; the suite follows. The baselines live in
 
 The team ships 3.5 fixes from `stable-3_5_0`, most of them backports of
 what `main` already received. The daily session hunts regressions there
-too (maintainer ruling 2026-09-17), and does nothing else there: of the
+too, and does nothing else there: of the
 sync loop it runs steps 1, 2, 5 and 6, never 3 or 4. The specs and the
 suites describe `main`, and 3.5 has diverged too far for them to mean
-anything on it (the OJS `@smoke` set at the 2026-09-17 tips: 9 of 39
-green). So no suite runs on the line, no spec follows it, no CI backs it,
+anything on it. So no suite runs on the line, no spec follows it, no CI backs it,
 and a red suite there is not evidence of anything.
 
 The line has its own checkouts beside the `main` ones, so both can be
@@ -728,9 +724,7 @@ command points it at the line; without it every command means `main`.
    installs 3.5, seeds it and starts the probe server (9050 / 9150 /
    9250). The "before" side is the previous stable tip or, for a backport,
    the `main` fleet, which stays up on its own ports. The `_test` seeding
-   works on the line for contexts, users and submissions (driven on OJS
-   2026-09-17 with `checks/sync/pkp-lib-13325/abstract-lists.js`
-   unchanged); a scenario key that reaches a `main`-only class answers 500
+   works on the line for contexts, users and submissions; a scenario key that reaches a `main`-only class answers 500
    naming the class. Guard that spot in the builder (`class_exists`,
    `method_exists`: a no-op on `main`) when it is a line or two, otherwise
    set the state through the screens. Never bend a builder further than
@@ -776,7 +770,7 @@ branch winning as on `main`; and the pkp-e2e `ore` branch's own push
 runs (`e2e.yml` there runs OJS alone against the pkp/ojs `ore` tip)
 cover the suite's side when a cherry-pick moves it. No nightly: the two
 tips are tested together whenever either moves, and the daily step
-dispatches when they were not (step 0 below; maintainer, 2026-10-16).
+dispatches when they were not (step 0 below).
 Nobody watches an Actions tab: the runs count only once that step reads
 them and the day's channel summary says what they showed.
 
@@ -828,18 +822,18 @@ worktree"; `cd ../<clone>-ore`, `git pull --rebase`, `npm run fetch-apps
 **Findings on `ore`.** A regression `main` shows too is `main`'s
 finding and takes the usual path, its report saying `ore` has it. One
 only `ore` shows gets no register entry anywhere (the specs on `main`
-describe `main`, and the ore copies are not kept as a second register,
-maintainer 2026-10-16): a report under `docs/reports/ore/<date>-<repo>-<pr>.md`
+describe `main`, and the ore copies are not kept as a second register):
+a report under `docs/reports/ore/<date>-<repo>-<pr>.md`
 in `REPORT.md`'s shape, a ci-triage "Open regressions" row with `ore`
 in its Apps cell, the kept reproduction under
 `shared/playwright/checks/sync/ore/<repo>-<pr>/`, and, when a shipped
 test on the ore branch reds on it, a `test.fixme` there naming the row,
 as `main` treats a known red. **Every regression found on `ore` is
 posted in the session's thread tagging @beaug**, as `main`'s
-regression reports are (maintainer, 2026-10-16). Anything
+regression reports are. Anything
 security-shaped on `ore` is released code (ORE runs it in production):
 it follows `../pkp-e2e-sec/security_policy.md` as a 3.5 finding would,
-never this repo (maintainer, 2026-10-16).
+never this repo.
 
 **A PR into `ore`** (pkp/ojs, pkp/pkp-lib or pkp/ui-library with base
 `ore`, usually a backport PR) is a "PR review" as below, with three
@@ -874,7 +868,7 @@ decide deliberately. This decision is how the suite stays organised.
   that no row claims (a new workflow, a new settings area, a new plugin).
   Add a FEATURE-MAP row for it with the next U-number, the surface
   described there, and a `pending` PROGRESS row, and name it in the day's
-  summary; the housekeeping session builds it (its step 7) and the sync
+  summary; the housekeeping session builds it (its step 8) and the sync
   leaves it alone until then. A change to a pending feature's surface that a
   shipped spec points at is the previous case, limited to the pointer.
   The atlas is never extended (FEATURE-MAP's header says why).
@@ -904,8 +898,7 @@ affected rows and in the next Mattermost summary.
 - **Security findings go to the thread in full**: each finding added to
   the private security repo (`../pkp-e2e-sec`) is posted with its
   details and its path there, tagging @jarda.kotesovec (Mattermost is
-  private; the repo is public, so no trace of it there; maintainer,
-  2026-10-02). **Never post**
+  private; the repo is public, so no trace of it there). **Never post**
   credentials or speculation presented as a finding.
 - A team reply that changes campaign rules is a maintainer ruling: encode
   it where RUNBOOK "What goes where" sends process learnings. A team
@@ -978,19 +971,17 @@ in any words. The answer is the sync loop run on that change at its own
 ref, so the merge session has nothing left to discover: the review, the
 regression hunt, the spec fold and the suites, all before `main` moves. The
 product is a companion branch, ready to fast-forward when the app PRs
-merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
+merge.
 
-1. **Resolve the PR set.** From an issue link, take the PRs its body or
-   timeline lists for `main` (`gh api repos/pkp/pkp-lib/issues/<n>` and
-   `.../timeline`); stable-branch PRs are ignored unless the request names
-   them. A pkp-lib PR normally comes with one app PR per app, two of them
+1. **Resolve the PR set.** From an issue link, take every PR its body or
+   timeline lists (`gh api repos/pkp/pkp-lib/issues/<n>` and
+   `.../timeline`), on every branch that has one: `main`, the stable
+   branches and `ore` are each reviewed on their own line, unless the
+   request names only some. A pkp-lib PR normally comes with one app PR per app, two of them
    submodule-only, but not always: a pkp-lib or ui-library PR often has
    an app PR for one app only. The shared code still reaches all three,
    so every app gets the shared PRs' branches checked out individually in
-   its submodules (step 2), whether it has its own PR or not (maintainer
-   ruling, 2026-09-23: pkp-lib#13359 had ojs#5444 only, and OMP's and
-   OPS's suites at ui-library#853's head found the major finding OJS
-   could not show). Record each PR's head SHA, base SHA, fork and branch
+   its submodules (step 2), whether it has its own PR or not. Record each PR's head SHA, base SHA, fork and branch
    name; the companion is named exactly like the app PRs' branch (they
    share one in practice).
 2. **Set the checkouts to the PR refs** ("Session hygiene", "Start on the
@@ -1003,7 +994,7 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    checkout --detach <sha>`): a `pr-<n>` branch fetched in one app stays
    at the last round's head in the other two, and its checkout succeeds
    silently, so the three `git rev-parse HEAD` answers are compared
-   before any drive (pkp-lib#13479 round 2, 2026-10-09). A PR based on an
+   before any drive. A PR based on an
    old tip is "needs a rebase before e2e can verify". `composer install`
    in `lib/pkp`, `npm run build` when `lib/ui-library` or `js/` moved
    since the checkout was last built, `npm run mount`, `npm run
@@ -1020,20 +1011,20 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    lib/ui-library` and a rebuild put it back at step 7.
 3. **Read and triage** the diff against the issue's stated intention
    (sync loop steps 2 and 3) on the companion branch, created from
-   `main` before any edit. Accommodate in place as step 4 says: the spec
+   `main` before any edit. Accommodate in place as sync loop step 4 says: the spec
    spans the change contradicts, lint zero, the persona on a rewritten
    scenario; a footnote cites the drive "at the PR head `<sha>`, before
-   its merge". New behavior is spent as step 4 says, on the companion:
+   its merge". New behavior is spent as sync loop step 4 says, on the companion:
    a bullet one scenario plainly takes, with its assertions, now;
    anything more a **Planned** item.
-4. **Hunt regressions** as step 5: the regression reader
+4. **Hunt regressions** as sync loop step 5: the regression reader
    (`briefs/regression-read.md`) on the app whose checkout holds the
    change, plus direct drives for what the fleets cannot reach (an upgrade
    migration is driven through a PHP driver against the fresh install's
    tables; see `checks/sync/pkp-lib-13317/`). Kept checks go under
    `shared/playwright/checks/sync/<repo>-<pr>/` on the companion, with the
    before-evidence recorded at the previous tip. A confirmed regression,
-   security weakness or intention gap follows step 5's report, filed
+   security weakness or intention gap follows sync loop step 5's report, filed
    under `docs/reports/pr-review/<date>-<repo>-<pr>.md` (not
    `docs/reports/`: the PR is not merged, so it is no regression of the
    product yet) and posted in this thread untagged (whoever asked follows up here); a later round updates it in place there; a behavior the issue
@@ -1052,11 +1043,9 @@ merge (first run: issue pkp/pkp-lib#13274, companion `13274`, 2026-09-12).
    under the keepalive; it prints each failed and flaky test per app. The
    VM runs no whole suite for a review. The app PR's own check picks the
    companion up by name on its next run. A PR that moves only a plugin
-   submodule, with no app PR for the pointer, has no dispatch to cite
-   (the workflow pins the app, pkp-lib and ui-library, no plugin): the
-   spec files that read the plugin's output, run on the VM at the PR
-   head, stand in, and the verdict says so (jatsTemplate#124,
-   2026-10-10).
+   submodule, with no app PR for the pointer, has no dispatch to cite:
+   the spec files that read the plugin's output, run on the VM at the PR
+   head, stand in, and the verdict says so.
 6. **Reds.** A red that an app without its own PR shows is the PR's once
    the same spec files are green with the submodule rebuilt at the PR's
    base on the same database; that app meets it with its next pointer
@@ -1122,7 +1111,7 @@ user can read.
    so. Only the newest release of each branch (one per app line) is
    reviewed: older releases a PR adds are left out of the read, the
    drive and the findings, and the note asks the author to keep only
-   those newest releases in the PR (maintainer, 2026-11-04, pg-506).
+   those newest releases in the PR.
 2. **Integrity.** `node bin/plugin-fetch.js <PR> pg-<PR>`. A package
    whose MD5 does not match, whose archive would unpack outside its
    folder or links elsewhere, or whose code differs from its tagged
@@ -1159,19 +1148,19 @@ user can read.
    PKP's code" with its SEC or issue id, routed as any PKP fault
    (`security_policy.md` section 10), and stays out of Findings, the
    verdict and the note, since the author cannot fix core and should
-   not be asked to work around it (maintainer, 2026-10-15). A plugin
+   not be asked to work around it. A plugin
    that trusts what core itself does not, or bypasses a check core
    makes, keeps the finding. The drive confirms which: the same request
    without the plugin, and what core's own screens then show. A security
    finding in a release the author has already made public goes in the
    report's "Security report for the author", a private report the
    maintainer files in the plugin's repository, and stays out of the
-   note; what the note asks for and leaves out is that folder's README
-   (maintainer, 2026-10-21). It commits and pushes
+   note; what the note asks for and leaves out is that folder's README.
+   It commits and pushes
    the private repo and posts the report in full in the thread, its
    screenshots attached, untagged, and ends the post with the report's
-   link in that repo (`https://github.com/jardakotesovec/pkp-e2e-sec/blob/main/plugin-reviews/<product>-<version>.md`,
-   maintainer, 2026-10-12): whoever asked for the review reads it
+   link in that repo (`https://github.com/jardakotesovec/pkp-e2e-sec/blob/main/plugin-reviews/<product>-<version>.md`):
+   whoever asked for the review reads it
    there and follows up. The bot never writes to the gallery PR; the
    person who asked passes the note on.
 6. **Tear down.** `down`, then `purge` once the report is pushed. A
@@ -1229,8 +1218,7 @@ the answer; the spec and the test are the record.
   worktree (harness.md "The ore worktree"), never another slot's. Before
   calling a line fixed or broken, check that the app's `lib/pkp` or
   `lib/ui-library` pointer carries the commit, because pointers lag their
-  branch: on 2026-11-01 OJS `ore` pointed at `a05aa54421` while pkp-lib
-  `ore` already had `c4bb5a1272`. When the pointer does not carry it, pin
+  branch. When the pointer does not carry it, pin
   the submodule at the commit, as a PR review does, and say in the
   report which was tried: the pointer or the pin.
 - **Start clean: reset the databases.** `npm run reset:<app>` for every
@@ -1248,9 +1236,7 @@ the answer; the spec and the test are the record.
   files, `--grep` selections, a red test alone, `fleet-prep` and probes.
   A local whole-suite run is for work about the local runtime itself
   (flake diagnosis under load, performance), announced in the thread; run
-  it at the auto-detected count, 8 on the
-  8-core VM (the measured knee, harness.md "Runtime model"; OPS 4.2 min
-  there against 8.0 at four workers on the old 4-core VM), and pin
+  it at the auto-detected worker count (harness.md "Runtime model"), and pin
   `PLAYWRIGHT_WORKERS=4` only to reproduce a red at CI's setting.
   Targeted `--grep` probes of different apps are fine at any time.
 - **End pushed, not just committed.** The VM's working tree is not a durable
@@ -1258,7 +1244,8 @@ the answer; the spec and the test are the record.
   pkp-e2e `main` before the session ends, tracking updates included, under
   the push rules of RUNBOOK step 10. `git fetch` before the push; when
   `main` moved during the session, rebase onto it keeping both sides of the
-  append-only tracking files (the sync logs, friction, incidentals), then
+  sync logs; in `friction.md` and `incidentals.md` a row a session
+  deleted stays deleted, and only rows new on either side are kept. Then
   push. A push that breaks CI breaks every app PR check.
 
 ## Standing duties
@@ -1294,8 +1281,7 @@ the answer; the spec and the test are the record.
   class whose watch condition trips gets a diagnostician rendered from `briefs/flake-diagnosis.md`, one or two
   at a time, ranked by `bin/ci-flake-tally/run.sh` (CI's first-attempt
   reds) and the ci-triage sightings, each of which names the failing
-  spec line from the log, since one test can red in two classes (U09,
-  U14, U45 diagnoses); the fix lands where the mechanism
+  spec line from the log, since one test can red in two classes; the fix lands where the mechanism
   lives (the app's register, the harness, a shared page object, then the
   test), and a rule every later test must follow goes to `patterns.md`.
 - **Leave a revision queue to the maintainer.**

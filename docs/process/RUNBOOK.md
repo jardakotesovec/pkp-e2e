@@ -5,7 +5,7 @@ developer, and per-app Playwright tests derived from them with strong
 coverage, for OJS, OMP and OPS (one FEATURE-MAP row per feature, anchored on
 OJS). Every claim is driven on the screens before it ships, every spec gets
 one readability pass, every suite runs green twice, and anything
-security-shaped in released code is kept in the private security repo.
+security-shaped is kept in the private security repo.
 When a rule gets in the way of that, the rule changes.
 
 This file and `docs/tracking/PROGRESS.md` are the source of truth; a session
@@ -109,10 +109,10 @@ orchestrator.
 | What | Where |
 |---|---|
 | Product findings: bugs, divergences, open questions, API misbehavior the browser's own traffic showed, or a direct check of an API no screen calls (the Frame's one exception), with no security dimension | the spec's Findings register; nowhere else (not `app-changes.md`, not a PROGRESS note). A new 🐞 entry needs no other step: `npm run backlog` lists it until the housekeeping session writes it up (MAINTENANCE "Issue reports") |
-| A potential security concern, whatever branch carries it (one that no tagged release nor `ore` carries is labeled `unreleased`, a bare stable-branch commit included; its issue on the private tracker posts right after refinement, a released one's at the maintainer's word — maintainer, 2026-10-17) | the private security repo `../pkp-e2e-sec`, as its `security_policy.md` says: checked first against its findings and its copies of PKP's advisories (a known problem gets a sighting line, not a new file), one file per problem, verified by one targeted probe (`briefs/security-verify.md`) before the session report, then committed and pushed there by the orchestrator. Every finding added is posted in full in the session's thread with its path in the private repo (on the VM, in a post tagging @jarda.kotesovec alone, who watches over the security reports (regression reports tag @beaug alone; one watcher per kind, 2026-09-30), in every session, a developer's PR check included; no direct messages): Mattermost is private, the repos are public (maintainer, 2026-10-02). The content never appears in anything this repo carries: a spec, test, tracking file, PROGRESS note, commit message, branch name or pushed file |
+| A potential security concern, whatever branch carries it | the private security repo `../pkp-e2e-sec`, as its `security_policy.md` says: checked first against its findings and its copies of PKP's advisories (a known problem gets a sighting line, not a new file), one file per problem, verified by one targeted probe (`briefs/security-verify.md`) before the session report, then committed and pushed there by the orchestrator. One that no tagged release nor `ore` carries is labeled `unreleased`, a bare stable-branch commit included; its issue on the private tracker posts right after refinement, a released one's at the maintainer's word. Every finding added is posted in full in the session's thread with its path in the private repo, in every session, a developer's PR check included (on the VM in a post tagging @jarda.kotesovec alone, who watches over the security reports; no direct messages): Mattermost is private, the repos are public. The content never appears in anything this repo carries: a spec, test, tracking file, PROGRESS note, commit message, branch name or pushed file |
 | A plugin review's report (a third-party plugin for PKP's Plugin Gallery) | the private security repo's `plugin-reviews/` and the session's thread only (MAINTENANCE "Plugin review"); nothing about the plugin in anything this repo carries |
 | A finding against an unmerged PR | the developer; the spec describes `main` (MAINTENANCE "A developer's PR fails the suite") |
-| What a probe saw on another feature's screen | `docs/tracking/incidentals.md`, one line, written by the orchestrator from the fold log and the merge, only after grepping that feature's spec for it: a sighting the spec already states is dropped, one it contradicts names the rule or register ID it contradicts; the line names the account and the state the read was taken in (signed in or out, a window open over it, what the seed held), and a request it names as the one the screen sends, the role that sent it and the keys of its body, a quoted message as the page's or as one address's answer (four 2026-10-19 checks lost a drive to a row's wrong caller or surface), and its evidence names the kept script under `shared/playwright/checks/` beside any `.reports/` path, which stays in the slot that wrote it (U08, U22, U28, U29, U60 claim checks) |
+| What a probe saw on another feature's screen | `docs/tracking/incidentals.md`, one line, written by the orchestrator from the fold log and the merge, only after grepping that feature's spec for it: a sighting the spec already states is dropped, one it contradicts names the rule or register ID it contradicts. The line names the account and the state the read was taken in (signed in or out, a window open over it, what the seed held); a request it names is the one the screen sends, with the role that sent it and the keys of its body; a quoted message is marked as the page's or as one address's answer. Its evidence names the kept script under `shared/playwright/checks/` beside any `.reports/` path, which stays in the slot that wrote it |
 | Process friction | `docs/tracking/friction.md`, one line, appended by the screen-driving agent itself |
 | Build blockers and any app-code change | `docs/tracking/app-changes.md`, orchestrator only |
 | Builder parity | `docs/tracking/parity-ledger.md` |
@@ -185,35 +185,33 @@ Test files cite these by number, so the numbers are stable.
 
 ## Model discipline
 
-- Opus 5.5 runs every role (maintainer, 2026-10-12); subagents inherit
-  the session model, no per-role pins: no agent is launched on another
-  model because its task looks light.
+- Opus 5.5 runs every role; subagents inherit the session model, no
+  per-role pins: no agent is launched on another model because its task
+  looks light.
 - A refusal or safeguard flag is not the end of the run: the agent
   carries on with its task after the notice instead of winding down, and
   the safeguard then serves the rest on a fallback model (Opus 5.5 →
-  Opus 4.8, Sonnet 5.5 → Sonnet 5; seen in the transcripts 2026-10-17,
-  where an agent that pressed on finished on Opus 4.8 and three that
-  wrote up straight away left their work open). The agent cannot tell it
-  was switched, so `npm run check-models` (the transcript) names the
-  model, never the agent's own word. When the flag is a false positive on
+  Opus 4.8, Sonnet 5.5 → Sonnet 5). The agent cannot tell it was
+  switched, so `npm run check-models` (the transcript) names the model,
+  never the agent's own word. When the flag is a false positive on
   legitimate work (security work most often: the maintainers have access
   to PKP's advisories) and the piece is still undone, it is rerun cut as
   narrow as it goes (one task, such as one reproduction or the
   reproduction script for a security issue), briefed with what is
   already settled and made self-contained (the rows it acts on created by
   the agent itself on the disposable install, the clean-up said), in this
-  order until one gets through (maintainer, 2026-10-17: never give up on
-  a false positive, use the model that gets through): a fresh agent on
-  the session's model, description ending "(narrow rerun)"; then Agent
-  `model: sonnet`, "(Sonnet fallback)"; then `model: fable`, "(Fable
-  fallback)" (not tried yet). `npm run check-models` allows these only in
-  a session that recorded a stop. The session carries on with the result
-  on its own model; specs and reports are written on Opus 5.5 only, and
-  the result names the model that served it. When the flag is not a
-  false positive, or every step above is stopped too: record the gate
-  reached in the PROGRESS note and stop for maintainer review. A
-  technical stall is not
-  a flag: respawn on a narrower slice, at most twice.
+  order until one gets through: a fresh agent on the session's model,
+  description ending "(narrow rerun)"; then Agent `model: sonnet`,
+  "(Sonnet fallback)"; then `model: fable`, "(Fable fallback)".
+  `npm run check-models` allows these only in a session that recorded a
+  stop. The session carries on with the result on its own model, and the
+  result names the model that served it. A spec is written on the
+  session's model only; an issue report partly served by another model
+  lands like any other, its Model bullet saying so (MAINTENANCE "Issue
+  reports"). When the flag is not a false positive, or every step above
+  is stopped too: record the gate reached in the PROGRESS note and stop
+  for maintainer review. A technical stall is not a flag: respawn on a
+  narrower slice, at most twice.
 - The one exception is the security verification probe: a stop there, or
   the rest of its run served on another model, does not hold up the
   feature. Its verdict stands with the model named on the finding's
@@ -234,9 +232,9 @@ Test files cite these by number, so the numbers are stable.
   claude-threads (the Mattermost bot) is paused as idle after 10 silent
   minutes, and a background agent, a full suite or a CI run is silence to
   it. Whenever the next event is more than a few minutes away, arm a
-  keepalive (a Monitor that ticks every 6 minutes, whatever is in flight:
-  the bot warns after 7 idle minutes and pauses after 10; re-armed at its
-  30-minute expiry) and post one line per tick: the
+  keepalive (a Monitor that ticks every 6 minutes, whatever is in flight,
+  since the bot warns after 7 idle minutes; re-armed at its 30-minute
+  expiry) and post one line per tick: the
   gate that is running and what the files show, nothing else. The ticks
   double as the polling points for the finals and the CI run; the
   keepalive stops at the report, never earlier: a quiet tick is fine, a
@@ -270,8 +268,11 @@ two ways:
 - **Planned items.** The spec's "Left out" list holds a **Planned**
   bullet (TEMPLATE "Coverage"): coverage owed on the spec that was not
   written on the spot, from an upstream sync, a coverage request or any
-  other session. That bullet is the spec's one backlog. The housekeeping
-  session revises one such spec at a time, every Planned item in one pass.
+  other session. That bullet is the spec's one backlog. Each item ends
+  with where it came from and the day it was added, which is what
+  `npm run backlog` orders the specs by. The housekeeping session
+  revises up to three such specs a morning, every ready Planned item of
+  a spec in one pass.
 - **A rule change.** A new coverage or scenario rule leaves shipped specs
   behind. The maintainer opens the queue `docs/tracking/coverage-revision.md`,
   one row per spec, deleted when it empties, and launches each revision
@@ -315,3 +316,13 @@ The writer spends the table as "What the scenarios cover" says.
    fixed shape with the scenario count; the sheet deleted, with its queue
    row when it has one, and no Planned item left in the spec but the
    guards that wait for an open 🐞's fix.
+
+**Several specs in one morning.** Up to three revisions may share one
+branch (named `rev-<date>`, no `/`) and one CI run. Each spec is claimed
+(`node bin/slot.js claim U<nn>`) and keeps its own sheet, writer, reader
+and test authors, and its own commit, so one spec can be taken off the
+branch without the others. The specs are written one after another and
+the CI run starts when the last one's suites are green locally. When CI
+reds on one spec's tests and the fix is not quick, that spec's commit is
+dropped from the branch (`git revert`, its sheet and Planned items stay
+for the next morning) and the rest land.

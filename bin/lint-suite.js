@@ -17,6 +17,10 @@
  *    menus with `closeMenu()` (shared/playwright/support/menus.js). An
  *    Escape that is meant for the page carries `// lint-ok: escape <reason>`
  *    on its line or the line above.
+ * 3. `chromium.launch(` (or any `.launch({`): a test or page object that
+ *    starts a browser of its own runs outside the fixtures that arm every
+ *    context (traces, the console and traffic checks). Use the test's
+ *    `browser.newContext()`. The probe kit, which is no test, is exempt.
  *
  * Usage: npm run lint:suite
  */
@@ -39,6 +43,12 @@ const rules = [
         allow: /lint-ok:\s*escape\b/,
         message: 'a page-level Escape: close a menu with closeMenu(), or mark an intended one "// lint-ok: escape <reason>"',
     },
+    {
+        id: 'own-browser',
+        re: /\b(chromium|firefox|webkit)\.launch\(|\.launch\(\s*\{/,
+        skipFile: /[\\/]playwright[\\/]probe[\\/]/,
+        message: 'a browser launched by hand runs outside the fixtures: use the test\'s browser.newContext()',
+    },
 ];
 
 function* files(dir) {
@@ -59,6 +69,7 @@ for (const dir of dirs) {
         lines.forEach((line, i) => {
             for (const rule of rules) {
                 if (!rule.re.test(line)) continue;
+                if (rule.skipFile && rule.skipFile.test(file)) continue;
                 if (rule.allow && (rule.allow.test(line) || rule.allow.test(lines[i - 1] || ''))) continue;
                 if (file.endsWith(path.join('support', 'menus.js')) && rule.id === 'page-escape') continue;
                 console.log(`${path.relative(root, file)}:${i + 1}: [${rule.id}] ${rule.message}`);

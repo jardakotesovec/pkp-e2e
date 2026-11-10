@@ -12,6 +12,17 @@ in `scenarios.md`, and the seeded identities in `users.md`; PKP's default
 test dataset, which the dataset fleets load for issue reports, in
 `dataset.md`.
 
+## Start here
+
+A test author needs four parts of this file: "The two playwright layers",
+"The fleets" (down to "The stable lines"), "Runtime model" with its two
+variant servers, and "Running". "config.test.inc.php" and "Env vars" are
+look-up. Everything else serves other work and is read by heading when a
+brief or MAINTENANCE names it: "The stable lines", "Trying a fix" and
+"Dataset fleets" (issue reports, regression reads), "The ore worktree",
+"The plugin sandbox" (plugin reviews), "Slots" and "CI" (the session
+itself).
+
 ## The two playwright layers
 
 Every app has two Playwright layers.
@@ -87,7 +98,30 @@ disabled, submodule push URLs included; the `jardakotesovec` fork is
 the fork (RUNBOOK step 10). `fetch-apps --update` moves
 an existing checkout to the current upstream `main` and rebuilds the UI
 bundle (`js/build.js`) when `lib/ui-library` moved; a bundle older than the
-submodule makes retired UI defects reappear (U43 A13, 2026-09-04).
+submodule makes retired UI defects reappear.
+
+Every fleet uses fixed port bands above its base port; nothing else may
+listen there:
+
+| offset | who | started by |
+|---|---|---|
+| +0 … +19 | the runner's workers, one `php -S` each | Playwright `webServer` |
+| +50 | the probe server (`patterns.md` "Probe kit") | `npm run probe-servers -- --start` |
+| +61 … +69 | dataset fleet 1 … 9 ("Dataset fleets") | `npm run fleet-prep -- --dataset n` |
+| +80 … +89 | an app's own Cypress run 0 … 9 ("The stable lines") | `npm run cypress -- <app> --n n` |
+| +90 | the validation variant (below) | Playwright, or `probe-servers --start` when nothing answers |
+| +91 | the reauth variant (below) | Playwright, or `probe-servers --start` when nothing answers |
+
+Test DBs are **PostgreSQL** locally. The harness code itself is
+DB-driver-agnostic (PRINCIPLES D8), so Postgres is a local choice, not a
+dependency. Postgres-specific defects reproduce in this environment.
+
+Two facts worth knowing before you write a test:
+
+- PDF full-text is **not** indexed on the test installs. A search assertion
+  on galley content needs its own indexing arrangements.
+- All three apps use the same scenario endpoints and the same
+  `publicknowledge` context path.
 
 ### The stable lines
 
@@ -123,7 +157,7 @@ No suite is meant to run on any of the three lines.
   (the branches' `.github/workflows/stable-3_*.yml`; 3.3's `docs/README.md`
   says "PHP 7.3.x … 8.2.x"), neither on 8.3, so both run on PHP 8.2: the
   sury packages `php8.2-{cli,common,bcmath,bz2,curl,gd,intl,mbstring,opcache,pgsql,readline,soap,xml,zip}`,
-  installed system-wide on the VM (2026-09-30); `/usr/bin/php` stays 8.3.
+  installed system-wide on the VM; `/usr/bin/php` stays 8.3.
   A line's `php` in LINES makes `resolveLine()` put
   `checkouts/runtimes/shims/php8.2/` (a `php` symlink to the binary) first
   on `PATH`, so every child the harness spawns runs on it: the `php -S`
@@ -146,42 +180,41 @@ No suite is meant to run on any of the three lines.
   `fetch-apps` makes the one-line change `main` carries in the line's
   working tree, re-applied after every `--update`: 3.5 and 3.4 in
   `lib/pkp/classes/config/Config.php`, 3.3 in
-  `lib/pkp/classes/config/Config.inc.php` (unnamespaced `Core::`). `git
-  status` in the line's `lib/pkp` shows that one file modified; nothing
+  `lib/pkp/classes/config/Config.inc.php` (unnamespaced `Core::`).
+  `git status` in the line's `lib/pkp` shows that one file modified; nothing
   else under the line's checkouts is edited (docs/tracking/app-changes.md
   row 14).
 - **3.5: the `main` overlays.** On the line the install, the bootstrap
-  seed and the context, user and submission scenarios work (2026-09-17,
-  all three apps); two seed steps for `main`-only features are skipped
-  there behind `method_exists` / `class_exists` (the task templates in
-  `ContextFactory`, the contributor type and roles in
-  `PKPSubmissionScenarioBuilder`), and the seeded contributor gets no user
-  group either (`authors.user_group_id` empty, where the 3.5 wizard sets
-  the Author group), so a Native XML export and an ORCID work deposit of a
-  seeded submission fail on it until its role is set in the Contributors
-  window (U63, U04 claim checks). A scenario key that reaches another
-  `main`-only class answers 500 naming it; the submission scenario's
-  `published` key is one (400 unless the submission stands in Copyediting
-  or Production, then 500 on `updateCurrentPublication()`): a 3.5 drive
-  seeds `decisions: ['skipExternalReview', 'sendToProduction']` and
-  publishes on screen, as `checks/U63/I09/doaj35.js` `publish35` does
-  (U63, U17 claim checks, 2026-10-09). On OMP 3.5 an approved
-  `publicationFormats` entry answers 500 too ("SmartyException: Unknown
-  resource type 'plugins-N-plugins-pubIds-urn-pubIds-urn'"): seed it
-  `approved: false` and approve the format on screen (sync reporter,
-  2026-10-26). The suites' page objects follow
-  `main`'s screens, and those the issue walks keep meeting differ on 3.5:
-  the submission wizard opens on "Details", then "Upload Files"; "Create
-  New Version" is a button in the publication page's header, confirmed
-  with "Yes", and the side menu has no version nodes; publishing an OJS
-  article asks for its issue first ("Select an issue to schedule for
-  publication"); a version is numbered in `publications.version`
-  (`version_stage`, `version_major`, `version_minor` on `main`); the
-  publication pages' menu keys are seed-facts.md's (U13, U19, U21, U45,
-  U50, U52, U69 issue walks, 2026-10-01); the 3.5 "Discussions" grid has
-  no page object, and its helpers (add, open, reply, edit participants)
-  sit in the `lib.js` of the U37 A3, A8, A9 and A36 walks under
-  `checks/issues/`, to be taken from there, not written a fifth time.
+  seed and the context, user and submission scenarios work. What the
+  seed cannot build there:
+  - two seed steps for `main`-only features are skipped behind
+    `method_exists` / `class_exists` (the task templates in
+    `ContextFactory`, the contributor type and roles in
+    `PKPSubmissionScenarioBuilder`);
+  - the seeded contributor has no user group (`authors.user_group_id`
+    empty), so a Native XML export and an ORCID work deposit of a seeded
+    submission fail until its role is set in the Contributors window;
+  - a scenario key that reaches another `main`-only class answers 500
+    naming it. The submission scenario's `published` key is one: seed
+    `decisions: ['skipExternalReview', 'sendToProduction']` and publish
+    on screen, as `checks/U63/I09/doaj35.js` `publish35` does;
+  - on OMP an approved `publicationFormats` entry answers 500 too: seed
+    it `approved: false` and approve the format on screen.
+
+  The suites' page objects follow `main`'s screens. On 3.5 these differ:
+  - the submission wizard opens on "Details", then "Upload Files";
+  - "Create New Version" is a button in the publication page's header,
+    confirmed with "Yes", and the side menu has no version nodes;
+  - publishing an OJS article asks for its issue first ("Select an issue
+    to schedule for publication");
+  - a version is numbered in `publications.version` (`version_stage`,
+    `version_major`, `version_minor` on `main`);
+  - the publication pages' menu keys are seed-facts.md's;
+  - a confirmation whose action the server refuses stays open with "OK"
+    and "Cancel" greyed, and only Escape closes it;
+  - the "Discussions" grid has no page object: take its helpers (add,
+    open, reply, edit participants) from the `lib.js` of a U37 walk (A3,
+    A8, A9, A36) under `checks/issues/`.
 - **3.4 and 3.3: no `_test` API, no seed.** The overlays are written for
   `main`'s Laravel-routed API, which 3.4 (Slim handlers) and 3.3
   (`import()`, `.inc.php`, no `Repo`) do not have, so `mount` copies only
@@ -202,13 +235,14 @@ No suite is meant to run on any of the three lines.
   Administration › Hosted Journals › Create posts, so the admin becomes
   one of its managers as through the screens, then a manager of its own
   through `lineUser()`; it returns the path and the manager's username
-  and password (the roster rule, the username twice). `lineUser(app,
-  {username, contextPath, role})` adds another user (`manager`,
+  and password (the roster rule, the username twice).
+  `lineUser(app, {username, contextPath, role})` adds another user (`manager`,
   `subeditor`, `assistant`, `author`, `reviewer`, `reader`). Anything more
   (sections, submissions, a second language on the context) is driven
-  through the screens. Proven 2026-09-30 on the three apps of both lines
-  (install, reset, servers, admin sign-in, a scratch context, the
-  manager's sign-in): `shared/playwright/checks/harness/lines/lines.js`.
+  through the screens. The check
+  `shared/playwright/checks/harness/lines/lines.js` proves it (install,
+  reset, servers, admin sign-in, a scratch context, the manager's
+  sign-in).
 - Known gaps on 3.4 and 3.3: no scenario keys, so every state a walk
   needs beyond a context and its users is built through the screens; the
   validation variant (+90) and the reauth variant (+91) are served, but
@@ -227,7 +261,7 @@ No suite is meant to run on any of the three lines.
   PKP_E2E_LINE=stable-3_4_0 PROBE_FEATURE=issues-3_4 PROBE_AGENT=x node bin/probe.js all shared/playwright/checks/harness/lines/lines.js
   ```
 
-- **The apps' own Cypress suites.** pkp's CI runs each branch's Cypress
+- **The lines' own Cypress suites.** pkp's CI runs each branch's Cypress
   data suite (pkp-github-actions `run-data-integration-tests.sh`: a fresh
   install through the installer, then a context, users, issues and
   submissions through the screens). `npm run cypress -- <app>` runs it
@@ -258,15 +292,12 @@ No suite is meant to run on any of the three lines.
   into the checkout removed; `--keep` keeps the database and the server
   for a look. No test lock: like a probe it has its own port and
   database, but it shares the cores. A new machine needs the Cypress
-  binaries' libraries, `apt install libgtk2.0-0t64 libgtk-3-0t64 libgbm1
-  libnotify4 libnss3 libxss1 libasound2t64 libxtst6 libxcursor1
-  libgdk-pixbuf-2.0-0 libpangocairo-1.0-0 xauth xvfb` (the VM since
-  2026-10-29; `npx cypress verify` in a checkout proves it), and
+  binaries' libraries,
+  `apt install libgtk2.0-0t64 libgtk-3-0t64 libgbm1 libnotify4 libnss3 libxss1 libasound2t64 libxtst6 libxcursor1 libgdk-pixbuf-2.0-0 libpangocairo-1.0-0 xauth xvfb`
+  (`npx cypress verify` in a checkout proves it), and
   `/tmp/.X11-unix` for Xvfb (`systemd-tmpfiles --create` makes it).
   The branches pin Cypress 5.6 (3.3), 12 (3.4), 15 (3.5) and 14 (`main`);
-  3.3's fails from Chrome 144 on (141–143 and Electron 85 pass, the
-  data suite 24 specs, 43 tests, 2026-10-21), which is why
-  pkp-github-actions runs its Node 12 branch on Electron since `0bdd4bfe`.
+  3.3's fails from Chrome 144 on (141–143 and Electron 85 pass).
 
 ### The ore worktree
 
@@ -282,7 +313,6 @@ branch"), with its own `checkouts/ojs` on pkp/ojs `ore` and that branch's
 | 0 | `/home/e2e/pkp-e2e-ore` | 4 | 12300 | `ojs_test_s4` | 8029 (1029) |
 | 1 | `/home/e2e/pkp-e2e-s1-ore` | 5 | 12600 | `ojs_test_s5` | 8030 (1030) |
 | 2 | `/home/e2e/pkp-e2e-s2-ore` | 6 | 16000 | `ojs_test_s6` | 8031 (1031) |
-| 3 | `/home/e2e/pkp-e2e-s3-ore` | 7 | 16300 | `ojs_test_s7` | 8032 (1032) |
 
 - **Identity.** Its `.env` says `PKP_E2E_SLOT=<n+4>`,
   `PKP_E2E_APP_BRANCH=ore` and `OJS_ROOT=./checkouts/ojs`, so ports, DB,
@@ -290,15 +320,15 @@ branch"), with its own `checkouts/ojs` on pkp/ojs `ore` and that branch's
   follows pkp `ore` instead of `main` and defaults to OJS alone. No line
   is provisioned there.
 - **Running.** Every harness command run from the worktree uses the
-  `ore` branch's suite, overlays and kit against its checkout: `npm run
-  reset:ojs`, `npx playwright test -c configs/ojs.config.js <file>`,
+  `ore` branch's suite, overlays and kit against its checkout:
+  `npm run reset:ojs`, `npx playwright test -c configs/ojs.config.js <file>`,
   `fleet-prep`, `bin/probe.js`. Whole suites still run on CI (the
-  branch's push runs, `node bin/ci.js dispatch --ref <branch> --apps
-  ojs`). To the test lock it is its own slot, so its runs and the
+  branch's push runs,
+  `node bin/ci.js dispatch --ref <branch> --apps ojs`). To the test lock it is its own slot, so its runs and the
   clone's take turns as two slots' runs do.
 - **Moving it.** `npm run fetch-apps -- --update` then `npm run mount`
-  in the worktree brings the checkout to pkp `ore`'s tip; `git pull
-  --rebase` moves the worktree's branch. A PR into `ore` checks out its
+  in the worktree brings the checkout to pkp `ore`'s tip;
+  `git pull --rebase` moves the worktree's branch. A PR into `ore` checks out its
   companion there (`git switch -c <companion> origin/ore`).
 - **The branch is the clone's.** Worktrees share the clone's `.git`, so
   the local branch `ore` lives in the slot clone and `git checkout ore`
@@ -310,7 +340,7 @@ branch"), with its own `checkouts/ojs` on pkp/ojs `ore` and that branch's
   too (nothing uncommitted, untracked, stashed or unpushed).
 - **The ore branch's harness** is `main`'s as at the branch point, plus
   harness commits cherry-picked onto `ore` because the worktree needs
-  them (fetch-apps' `PKP_E2E_APP_BRANCH`, 2026-10-16). A harness fix
+  them (fetch-apps' `PKP_E2E_APP_BRANCH`). A harness fix
   that `main` gets is cherry-picked once an `ore` run or the worktree
   shows the need, like a test-only change.
 - **Provisioning**, slot n with clone `<clone>`:
@@ -325,8 +355,8 @@ branch"), with its own `checkouts/ojs` on pkp/ojs `ore` and that branch's
   npm run mount
   ```
 
-- **Teardown** (MAINTENANCE "The ore branch"): `git -C <clone> worktree
-  remove --force <clone>-ore`, `git -C <clone> branch -D ore`, and
+- **Teardown** (MAINTENANCE "The ore branch"):
+  `git -C <clone> worktree remove --force <clone>-ore`, `git -C <clone> branch -D ore`, and
   `dropdb ojs_test_s<n+4>`.
 
 ### Trying a fix
@@ -357,34 +387,22 @@ node bin/try-fix.js status [ojs] [omp] [ops]    # exits 1 while a named app (def
   file the diff created, and `mount` and `fetch-apps` refuse to run while
   a marker is there. `apply` refuses before patching any app when one of
   them holds a fix; `revert` given the diff reverts only that diff's
-  marker (without it, whatever is applied), so a chained revert never
-  takes out another reporter's fix; `status` exits 1 while a fix is
-  applied, so `status && …` gates a chain, and `bin/probe.js` names an
-  applied fix when it starts and, when it ends, one applied, reverted or
-  swapped while it ran (that run drove mixed code). A status read is a
-  point check: another reporter's apply can land seconds later, mid-walk
-  (MAINTENANCE "Issue reports" step 3).
+  marker (without it, whatever is applied); `status` exits 1 while a fix
+  is applied, so `status && …` gates a chain; and `bin/probe.js` names a
+  fix applied, reverted or swapped while it ran.
   `PKP_E2E_LINE=<line>` in front tries it on a stable line's checkouts.
 - Every fleet of the slot, campaign and dataset alike, serves the patched
-  code while it is applied: one fix at a time, and only while nothing
-  else in the slot needs the unpatched code (`bin/app-lock.sh`, the
-  slot's lock on the app checkouts: MAINTENANCE "Issue reports" step 3). No server restart is
-  needed, but `php -S` does run opcache (`opcache.enable` On, `revalidate_freq` 2): a changed file
-  shows only after up to 2 s, so wait about 3 s after an apply or a revert before the first request
-  (a trial run straight after one drove the old code, 2026-10-17).
-  A fix to install-time data (a `registry/` file: email or task
+  code while it is applied: one fix at a time, under the slot's lock on
+  the app checkouts (`bin/app-lock.sh`, MAINTENANCE "Issue reports" step
+  3). No server restart is needed: `try-fix` waits out opcache's 2 s
+  revalidation before it returns.
+- A fix to install-time data (a `registry/` file: email or task
   templates) does not show on a loaded dataset: replay its install step
-  under the fleet's `PKP_CONFIG_FILE` (`lib/pkp/tools/installEmailTemplate.php`)
-  or read it on a context created after the apply; a migration's fix
-  shows on an older dataset loaded with `PKP_E2E_DATASET_BRANCH`, which
-  runs the upgrade ("Dataset fleets", the reset).
-- An agency export ("Export DOIs" for Crossref or DataCite) stops at the
-  schema fetch on the fleets, which reach no agency, and shows an "Error"
-  window: read the file the plugin builds with its own `exportXML()`,
-  validation off, and check it against the agency's schema with
-  `schemaValidate()` where the schema can be fetched; the Steps then say
-  the file came from that read, not a download (U45 OJS5, A30, OPS6,
-  OPS7 reports).
+  under the fleet's `PKP_CONFIG_FILE`
+  (`lib/pkp/tools/installEmailTemplate.php`) or read it on a context
+  created after the apply. A migration's fix shows on an older dataset
+  loaded with `PKP_E2E_DATASET_BRANCH`, which runs the upgrade ("Dataset
+  fleets", the reset).
 
 ### Dataset fleets
 
@@ -432,20 +450,18 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   dead-port `[proxy]`); everything else stays the team's (`job_runner`
   and `task_runner` On, the dataset's `app_key`; `enable_minified` Off on
   `main` but On in the stable-3_5_0 dataset, so a `lib/pkp/js/` fix tried
-  there sets it Off after each reset, reporter q23f, 2026-10-23).
+  there sets it Off after each reset).
   Every reset writes the config afresh, so a walk that needs another
   value (`strict = On`, a short `session_lifetime`, an `api_key_secret`,
   which the dataset leaves empty so its emailed unsubscribe links open
   "404 Not Found") sets it in `config.test.ds<n>.inc.php` after each
-  reset, a trial's resets included, and the Steps name the setting as the
-  team sets it in `config.inc.php` (U01, U05, U27, U39 issue walks).
+  reset, and the Steps name the setting as the team sets it in
+  `config.inc.php`.
   `database.sql` is a `pg_dump --clean` dump owned by `<app>-ci`: the
   load leaves out the leading drops and the `OWNER TO` lines and runs the
   rest in one transaction with `ON_ERROR_STOP`, so it lands whole or
   stops naming the failing statement; the fleet's role owns everything.
-  `files/` and `public/` are copied over emptied dirs, with the public
-  subdirectories the installer makes (`site`, the context dir) added,
-  since the dump's `public/` holds only `index.html`; the fleet's cache,
+  `files/` and `public/` are copied over emptied dirs; the fleet's cache,
   its compiled stylesheets (named after its base URL) and the legacy
   `cache/fc-*.php` files are cleared. Then the schema: the loaded
   `versions` row against the checkout's `dbscripts/xml/version.xml`; a
@@ -453,23 +469,12 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   (logged to `.reports/datasets/upgrade-<line>-<app>-ds<n>.log`, said in
   the output), and the columns are compared with the campaign's fresh
   install of the tip, a note naming any difference (a schema change
-  merged without a version bump). On 2026-09-30 every dataset (`main`,
-  3.5, 3.4, 3.3; OJS, OMP, OPS) matched its checkout: no upgrade.
+  merged without a version bump).
   `PKP_E2E_DATASET_BRANCH=stable-3_5_0` loads another branch's dataset
-  (pkp's own `loaddb.sh <branch>`), which exercised the upgrade: 3.5.0.5
-  to 3.6.0.0 on OJS `main` in 2 s. Before an upgrade from a dataset older
-  than 3.4 the reset removes the dataset's own usage event log from the
-  fleet's files (`dropStaleUsageLogs()`, said in the output): the 3.4
-  pre-flight check stops the upgrade on any
-  `usageStats/usageEventLogs/usage_events_<date>.log` dated before
-  yesterday, and on a newer one whose addresses are not the install's
-  `base_url`; the dump carries the log of the day pkp's CI built it,
-  under CI's address, so every such log goes (2026-10-09: a dump
-  regenerated the same day kept its log and stopped the upgrade).
-  With `PKP_E2E_DATASET_BRANCH=stable-3_3_0`, 3.3.0.23 upgrades to
-  3.6.0.0 on `main` and to 3.5.0.5 on 3.5 in about 3 s per app
-  (2026-10-09, the PR review of pkp/pkp-lib#13481, whose kept check
-  reloads the dump and upgrades it once per case).
+  (pkp's own `loaddb.sh <branch>`) and so exercises the upgrade;
+  `stable-3_3_0` works too, on `main` and on 3.5. Before an upgrade from
+  a dataset older than 3.4 the reset removes the dataset's own usage
+  event log, which would stop the 3.4 pre-flight check, and says so.
 - **The kit on a dataset fleet.** `bin/probe.js` reads
   `.reports/<PROBE_FEATURE>/fleet.json`: a dataset fleet's sets
   `PKP_E2E_DATASET` (and `PKP_E2E_LINE`, which may be left out), so the
@@ -477,18 +482,15 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   dataset fleet's and `app.dataset` is its number (null on a campaign
   fleet). `signIn(page, '<username>')` signs in a dataset user as it does
   a roster one: the password rule is the same (the username twice,
-  `admin`/`admin`); proven as `dbarnes` and `admin` on the three apps of
-  all four lines. Without `{contextPath: 'publicknowledge'}` it goes
-  through the site login, which lands an editor or manager on the
-  journal's reader home (no side menu, no "Tasks"), so a walk that starts
-  in the back office passes it (U05, U23, U58, U62 issue walks; live
-  2026-10-05). The dataset's contexts are bilingual (en, fr_CA): a
-  multilingual field draws a box per language, so a page-object locator
-  written on the English-only campaign seed (`input[name^="name"]`,
+  `admin`/`admin`). A walk that starts in the back office passes
+  `{contextPath: 'publicknowledge'}`: the site login lands an editor or
+  manager on the journal's reader home (no side menu, no "Tasks"). The
+  dataset's contexts are bilingual (en, fr_CA): a multilingual field
+  draws a box per language, so a page-object locator written on the
+  English-only campaign seed (`input[name^="name"]`,
   `iframe[id^="biography"]`) matches two there and fails strict mode;
-  scope it to the locale (U03, U27, U29, U73 issue walks); a Vue form
-  (a side panel such as "Edit Highlight") hides the French boxes until
-  its "French" language button is pressed (U11 A4 refresh, 2026-11-09). `app.variant()` throws (no validation server); the
+  scope it to the locale (patterns.md pitfall 11a for a Vue form's
+  French boxes). `app.variant()` throws (no validation server); the
   runner's worker ports and the setup project are never involved, and
   `app.users` is still the campaign roster, which the dataset does not
   hold.
@@ -514,44 +516,15 @@ npm run dataset-facts -- --write                         # regenerate dataset.md
   reset of fleet 1 never touches fleet 2. The feature names the fleet
   file (`.reports/<feature>/fleet.json`), which `fleet-prep` rewrites
   whole, so a dataset fleet takes a feature of its own (`sync-<agent>`,
-  `issues-<agent>`), never one whose campaign fleet other agents read
-  (the sync's readers, 2026-10-28). The dataset users' addresses
-  (`<username>@mailinator.com`) are the same in the three apps and every
-  fleet of the slot mails the one Mailpit, so a mailbox read filters by
-  recipient and time (`app.mail.find({to, since})`, `since` taken before
-  the action that sends; `count()` takes it too); a walk beside another
-  reporter's, or a 3.5 walk beside a `main` one, mails the same addresses
-  within the minute, so a read that must be its own fleet's goes through
-  `app.fleetMail`, which keeps only the messages naming the fleet's host
-  (U27, U49, U55, U65, U70 issue walks).
-- **Proof** (2026-09-30): `shared/playwright/checks/harness/dataset/dataset.js`
+  `issues-<agent>`), never one whose campaign fleet other agents read.
+  The dataset users' addresses (`<username>@mailinator.com`) are the
+  same in the three apps and every fleet of the slot mails the one
+  Mailpit, so a mailbox read goes through `app.mail` with a `since` or
+  through `app.fleetMail` (patterns.md "Probe kit").
+- **Proof**: `shared/playwright/checks/harness/dataset/dataset.js`
   signs in as `dbarnes`, records the dashboard and one submission's
   workflow, then `admin` on Administration (`scratch` as its argument
-  adds the `_test` scratch context); green on OJS, OMP and OPS on `main`,
-  3.5, 3.4 and 3.3, no crash recorded.
-
-Every fleet uses fixed port bands above its base port; nothing else may
-listen there:
-
-| offset | who | started by |
-|---|---|---|
-| +0 … +19 | the runner's workers, one `php -S` each | Playwright `webServer` |
-| +50 | the probe server (`patterns.md` "Probe kit") | `npm run probe-servers -- --start` |
-| +61 … +69 | dataset fleet 1 … 9 ("Dataset fleets") | `npm run fleet-prep -- --dataset n` |
-| +80 … +89 | an app's own Cypress run 0 … 9 ("The stable lines") | `npm run cypress -- <app> --n n` |
-| +90 | the validation variant (below) | Playwright, or `probe-servers --start` when nothing answers |
-| +91 | the reauth variant (below) | Playwright, or `probe-servers --start` when nothing answers |
-
-Test DBs are **PostgreSQL** locally. The harness code itself is
-DB-driver-agnostic (PRINCIPLES D8), so Postgres is a local choice, not a
-dependency. Postgres-specific defects reproduce in this environment.
-
-Two facts worth knowing before you write a test:
-
-- PDF full-text is **not** indexed on the test installs. A search assertion
-  on galley content needs its own indexing arrangements.
-- All three apps use the same scenario endpoints and the same
-  `publicknowledge` context path.
+  adds the `_test` scratch context), on every app and line.
 
 ### The plugin sandbox
 
@@ -594,13 +567,11 @@ Mac a plugin is only read.
   downs it. Only an abandoned review's claim is freed by `down <its id>`,
   after `node bin/slot.js status` shows no session working on it.
 - **The browser** that drives the app runs as the bot, outside the wall
-  (the maintainer accepted that, 2026-10-12): the drive makes every
-  context with `newGuardedContext` from `sandbox/drive-guard.js`, which
-  refuses and logs a page's request to any host but the pod's two ports.
-  The refusal sits in the context's proxy (a dead port, the pod's ports
-  bypassed), because a route alone sees only the first request of a
-  redirect chain: on 2026-11-06 a pod's 302 took the drive's browser to
-  an outside host past the old route-only guard.
+  (the maintainer accepted that): the drive makes every context with
+  `newGuardedContext` from `sandbox/drive-guard.js`, which refuses and
+  logs a page's request to any host but the pod's two ports. The refusal
+  sits in the context's proxy (a dead port, the pod's ports bypassed),
+  because a route alone sees only the first request of a redirect chain.
 
 ```bash
 node bin/plugin-fetch.js <gallery PR> pg-<PR>        # download, MD5, unpack safely, compare with the tagged source → .reports/plugin-review/pg-<PR>/integrity.md
@@ -628,7 +599,7 @@ node bin/plugin-sandbox.js canary                     # the acceptance test of t
   dataset's one-journal site Administration shows no site Plugins page
   (`AdminHandler::siteSettingsAvailability`): the site grid is fetched at
   `index/$$$call$$$/grid/admin/plugins/admin-plugin-grid/fetch-grid`, and
-  a plugin's "Delete" is offered to `admin` only (2026-10-22).
+  a plugin's "Delete" is offered to `admin` only.
 - **Allowing a host** opens it for a few hours (`--hours`, default 4):
   its public addresses go into the rule, its name into the pod's
   `/etc/hosts`, and the call into the log. `down` withdraws every
@@ -638,8 +609,8 @@ node bin/plugin-sandbox.js canary                     # the acceptance test of t
   usage statistics' geo database) and `pkp.sfu.ca`: every Administration
   page runs the version check (`AdminHandler::initialize` →
   `VersionCheck`, `ojs-version.xml`), with "Failed to retrieve the latest
-  version info" in the PHP log at the same second (a no-plugin baseline
-  showed it, pg-505, 2026-10-12). Both stay dropped and are reported as
+  version info" in the PHP log at the same second. Both stay dropped and
+  are reported as
   core's, not the plugin's. So are `setup.sh`'s self-test drops (1.1.1.1:443,
   three connections of five SYNs, one per uid), logged whenever setup runs.
   A name or address the canary run also shows is core's, not the plugin's.
@@ -647,21 +618,20 @@ node bin/plugin-sandbox.js canary                     # the acceptance test of t
   its row, so Playwright's `check()` reports no change: click it and read
   the row; switching it off first asks "Are you sure you want to disable
   this plugin?". Plugin settings written by SQL stay unseen until the
-  `pluginSettings-<context>-<plugin>` cache entry (the Laravel file
-  cache, a day long) is forgotten. A PHP snippet through `php` needs a
+  `pluginSettings-<context>-<plugin>` cache entry is forgotten
+  (patterns.md "Probe kit", `sql`). A PHP snippet through `php` needs a
   command-line tool instance for its router (as `tools/jobs.php` makes),
   since a bare `tools/bootstrap.php` makes every localized getter throw;
   and `jobs.php run` returns while a retried job waits out its backoff,
   so each retry is one more run. A table is read with
   `plugin-sandbox.js sql <review> "<one statement>"`, as the app's own
-  role: rows tab-separated, or the database's error (a `php -r` with PDO
-  exits 255 with no message).
+  role: rows tab-separated, or the database's error.
 - **The canary** (`sandbox/canary/probe.php`) tries the ways out a
   plugin could: the bot's files, `/etc/shadow`, DNS over the pod's
   resolver, pasta's and an outside one, HTTP by name and by address, the
   host's Postgres, SSH and Mailpit, this machine's own addresses, the
   database role running a program, a write outside its folder, and a
-  PHP log replaced by a symlink. Every wall held on 2026-10-12. Re-run
+  PHP log replaced by a symlink. Re-run
   it after any change to `sandbox/` or the VM.
 - **The bot's door** is the socket `/run/plugin-sandbox.sock` (root's,
   the bot's group, mode 0660): for each connection systemd starts a root
@@ -686,7 +656,7 @@ node bin/plugin-sandbox.js canary                     # the acceptance test of t
 
 ## Slots (parallel sessions)
 
-Up to four sessions work on the VM at once, each in its own **slot**: a
+Up to three sessions work on the VM at once, each in its own **slot**: a
 full clone of this repo with its own `checkouts/` (every line), databases,
 Mailpit and API key. Only Postgres, the cores and `origin` are shared.
 
@@ -695,12 +665,11 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
 | 0 | `/home/e2e/pkp-e2e` | 8000/8100/8200 (9000…, 10000…, 11000…) | `<app>_test` | 8025 (1025), systemd | `playwright-test-key` |
 | 1 | `/home/e2e/pkp-e2e-s1` | 8300/8400/8500 (9300…, 10300…, 11300…) | `<app>_test_s1` | 8026 (1026) | `playwright-test-key-s1` |
 | 2 | `/home/e2e/pkp-e2e-s2` | 8600/8700/8800 (9600…, 10600…, 11600…) | `<app>_test_s2` | 8027 (1027) | `playwright-test-key-s2` |
-| 3 | `/home/e2e/pkp-e2e-s3` | 12000/12100/12200 (13000…, 14000…, 15000…) | `<app>_test_s3` | 8028 (1028) | `playwright-test-key-s3` |
 
 - **Identity.** `PKP_E2E_SLOT=<n>` in the clone's `.env` makes it slot n
   (`resolveSlot()` in `bin/apps.js`): every port shifted by
   `slotPortShift(n)`, +n×300 for slots 0–2 and the same again 4000 higher
-  for slots 3–5 (clear of the lines' +1000, +2000, +3000 and of the
+  for each three numbers above them, which the ore worktrees use (clear of the lines' +1000, +2000, +3000 and of the
   +0…+91 bands; `slot.js` keeps a literal copy), DB suffix `_s<n>`, Mailpit
   8025+n / SMTP 1025+n, the key suffix `-s<n>`. `fetch-apps` bakes them
   into each checkout's `.env.playwright` and `config.test.inc.php`. Unset
@@ -713,7 +682,7 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   SessionStart hook pulls it when it is clean and says so; a session
   pulls with `--rebase` before writing there and pushes before it ends,
   staging its own paths by name (never `git add -A`: another slot's file
-  may sit in the tree, not yet verified; 2026-10-07);
+  may sit in the tree, not yet verified);
   a slot is freed only when this clone is clean too. If the hook reports it
   missing, clone it there (the VM's GitHub token reaches it).
 - **Kept checks** name their database `dbName(app.name)` (`bin/apps.js`) or
@@ -731,8 +700,8 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   cores turn the suites flaky. Slots take turns in request order: a run
   joins its slot's hold only while no other slot has a run that asked
   earlier. Whole suites run on CI ("CI", `bin/ci.js`), so a hold lasts
-  minutes, not the hour one app's full local run takes. A waiting run prints who holds it (`node
-  shared/playwright/test-lock.js status`). It is a kernel `flock` owned by
+  minutes, not the hour one app's full local run takes. A waiting run prints who holds it (
+  `node shared/playwright/test-lock.js status`). It is a kernel `flock` owned by
   one small holder process per slot, released once the slot's last run
   exits, a crash or a kill included. Probes (`bin/probe.js`, the probe
   servers) take no lock. Off on CI, without `flock(1)` (macOS) and with
@@ -752,47 +721,41 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   session that cannot leave this clone or `../pkp-e2e-sec` clean at its
   end says in its thread what is left and why, tagging the thread's
   owner, as the bot does, and also @blessie while @jarda.kotesovec is
-  away (2026-10-14). A
+  away. A
   resumed thread returns to its own slot, or, when another session holds
-  it, starts fresh in a free one with the thread's messages. `node
-  bin/slot.js status` shows all of it.
+  it, starts fresh in a free one with the thread's messages.
+  `node bin/slot.js status` shows all of it.
 - **The SessionStart hook** (`.claude/settings.json` → `bin/slot.js hook`)
   tells every session its slot, ports and checkout state, and a resumed one
   what moved since its pause. A manual `claude` started in a free slot
   registers itself, so the bot does not place a thread on top of it.
   It also puts `bin/commit-msg.js` in place as the clone's commit-msg
   hook, which writes a pkp issue or PR in a commit message without the
-  owner (`pkp-lib#13447`): GitHub turns `pkp/pkp-lib#13447` and the
-  issue's address into links, and each link from a pkp-e2e commit puts a
-  "referenced" line on pkp's issue, again from every fork that syncs it.
+  owner (`pkp-lib#13447`), so a pkp-e2e commit puts no "referenced" line
+  on pkp's issue.
 - **Feature claims.** `node bin/slot.js claim U<nn>` (RUNBOOK step 1)
   refuses a feature another slot's session holds; a claim lapses when its
-  session's slot is freed, and a session drops one early with `node
-  bin/slot.js unclaim U<nn>`.
+  session's slot is freed, and a session drops one early with
+  `node bin/slot.js unclaim U<nn>`.
 - **A session never runs `acquire`, `release`, `reconcile` or `free`.**
-  They are the bot's and the operator's: `slot.js` refuses them inside a
-  Claude session (`CLAUDECODE` set) and `release` needs the lease `acquire`
-  printed, which only the bot holds. A release from the session frees the
-  slot under its own feet; an acquire to put it back replaces the bot's
-  lease, so the bot's own release is ignored and the slot stays live with
-  nobody in it (2026-10-01, cleared with `free <n>` from a shell).
-  `PKP_E2E_SLOT_FORCE=1` in front overrides, when the operator asks a
-  session to do it.
+  They are the bot's and the operator's, and `slot.js` refuses them
+  inside a Claude session: a release from the session frees the slot
+  under its own feet. `PKP_E2E_SLOT_FORCE=1` in front overrides, when
+  the operator asks a session to do it.
 - **Cleanup is per slot.** Kill by this clone's paths or ports, never a
   broad `pkill php` or `pkill chrome`. The bot's `release` (a pause or an
   end, free or blocked), `reconcile` and `free` stop every `php -S`
   serving from the slot's clone, its restart loop included
   (`stopSlotServers()` in `bin/slot.js`): the probe, validation and
   dataset servers are kept between scripts on purpose and stop only
-  there, so a resumed session starts them again (`probe-servers
-  --start`, `fleet-prep --dataset n`). The slot's browsers go with them:
+  there, so a resumed session starts them again (
+  `probe-servers --start`, `fleet-prep --dataset n`). The slot's browsers go with them:
   a `chrome`, `Cypress`, its crashpad handler or an `Xvfb` whose working
-  directory lies in the clone, which a run killed mid-way leaves behind
-  (three Chromes of a crashed Cypress run lived eight days unnoticed,
-  2026-10-21). The VM's hourly `e2e-orphan-sweep.timer` (`sudo
-  bin/orphan-sweep.sh --install`) is the net under it, slot or no slot:
-  such a browser older than two hours that no process owns any more
-  (parent pid 1) is killed and logged as `orphan-sweep`.
+  directory lies in the clone, which a run killed mid-way leaves behind.
+  The VM's hourly `e2e-orphan-sweep.timer`
+  (`sudo bin/orphan-sweep.sh --install`) is the net under it: such a
+  browser older than two hours that no process owns any more (parent pid
+  1) is killed and logged as `orphan-sweep`.
 - **Provisioning a slot**: clone `origin` to `/home/e2e/pkp-e2e-s<n>`, write
   `.env` with `PKP_E2E_SLOT=<n>` and the relative `<APP>_ROOT`s (`.env.example`),
   `npm ci`, `npm run fetch-apps -- --reference /home/e2e/pkp-e2e` (borrows
@@ -803,8 +766,8 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
 
 ## Runtime model
 
-- **One `php -S` server per Playwright worker**, at `basePort +
-  parallelIndex`. `php -S` serves one request at a time, so a single server
+- **One `php -S` server per Playwright worker**, at
+  `basePort + parallelIndex`. `php -S` serves one request at a time, so a single server
   would serialize the suite. Playwright's `webServer` array owns the servers'
   lifetime. The ready probe is a static file, so a server counts as up before
   the DB is installed. Each server runs with `max_execution_time=120` and
@@ -818,8 +781,7 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   auto-detect uses the performance-core count where the OS exposes it (Apple
   Silicon sysctl, Intel hybrid sysfs), otherwise every CPU core, with a
   minimum of 2. The measured knee is one worker per fast core: the P-cores
-  on the Mac, 8 on the 8-core VM (2026-09-23: OPS and OJS slower at 6, OPS
-  no faster and redder at 10 and 12), 4 on CI's 4-vcpu runners, which pin
+  on the Mac, 8 on the 8-core VM, 4 on CI's 4-vcpu runners, which pin
   the env var explicitly.
 - **Server output** goes to
   `apps/<app>/playwright/.server-logs/server-<port>.log` (request log plus
@@ -849,17 +811,8 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   queue with other tests' drains: it carries `@solo` in its title and runs
   alone in the solo project, last.
   In one invocation a single red in `shared` or `<app>` would skip every
-  serial and solo test ("59 did not run"), so `npm run test:<app>`
-  (`bin/test-app.js`) runs the chain as the three passes CI runs, always
-  all three whatever the earlier ones returned: `--project=shared
-  --project=<app>` (setup as their dependency), then
-  `--project=<app>-serial --no-deps`, then `--project=<app>-solo
-  --no-deps`, the last two `--pass-with-no-tests`. The order keeps the
-  chain's guarantee; a red in any pass fails the run. Between the app
-  pass and the serial pass the fleet is reset and bootstrapped again
-  (about 10 s): site-level `@solo` tests re-save every context of the
-  install, and on the hundreds an app pass leaves U57 took 20.7 of the
-  OPS solo pass's 29.8 min (`.reports/site-variant/feasibility.md`). So
+  serial and solo test, so `npm run test:<app>` runs the chain as three
+  passes, with a fleet reset before the serial one ("Running"). So
   serial and solo specs seed what they need and never read what the app
   pass left.
 - **Animations are globally disabled** (`reducedMotion: 'reduce'` plus the
@@ -931,10 +884,9 @@ config file.
   Administration by its ordinary role gate on both servers. On the
   default server Administration never asks (its `admin/confirmAccess`
   address sends straight on to Administration).
-- What the gate does there (parity drive 2026-10-22, U01 harness, all
-  three apps, `.reports/U01/harness/reauth-parity.js`): Administration ›
-  Hosted Journals opens `admin/confirmAccess?source=<the interrupted
-  page>`, headed "Confirm Access", "Signed in as {name}. Please enter your
+- What the gate does there, on all three apps: Administration ›
+  Hosted Journals opens
+  `admin/confirmAccess?source=<the interrupted page>`, headed "Confirm Access", "Signed in as {name}. Please enter your
   password to continue.", "Password", "Cancel", "Submit"; the password
   lands back on the interrupted page; inside the window `admin/confirmAccess`
   alone sends to Administration. Before confirming, `admin/confirmAccess`
@@ -942,7 +894,7 @@ config file.
   (`index/index`) with a second context hosted, the seeded context's own
   homepage when it is the only enabled one.
 - The window is wall time: a test that crosses it waits it out (a minute
-  and a few seconds; U01 scenario 10 waits two). Each test signs in afresh
+  and a few seconds). Each test signs in afresh
   on the variant, so one test's confirmed window never opens another's.
 - Its log is `.server-logs/server-<port>-reauth.log`.
 
@@ -951,8 +903,7 @@ config file.
 Each app has a local, gitignored `config.test.inc.php`. The app reads it
 through the `PKP_CONFIG_FILE` env var, which is the whole switch between the
 dev install and the test install. Generate it from the app's own template with
-`node bin/with-app.js <app> shared/playwright/make-test-config.js >
-"$APP_ROOT/config.test.inc.php"` (the env inputs are
+`node bin/with-app.js <app> shared/playwright/make-test-config.js > "$APP_ROOT/config.test.inc.php"` (the env inputs are
 documented in `shared/playwright/make-test-config.js`; CI uses the same
 generator), or write it by hand. Besides its own Postgres `<app>_test` DB and
 files dir it must carry:
@@ -970,31 +921,23 @@ files dir it must carry:
   stand-in on 127.0.0.1 goes to the dead proxy like any other (`no_proxy`
   in the environment is not read), so a PHP driver that needs one points
   `Config::getData()['proxy']` at its own stub in its process, as
-  `checks/sync/pkp-lib-13475/lookups.php` does. A Crossref "Export
-  DOIs" answers 400 "An XML validation error occurred" on every fleet
-  for the same reason (the filter fetches crossref.org's XSD): what an
-  export or a deposit would carry is read with a read-only CLI call
-  that builds the XML with validation off, as
-  `checks/sync/pkp-lib-13460/deposit-lists.php --xml` does on OJS. Do not remove
+  `checks/sync/pkp-lib-13475/lookups.php` does. An agency export
+  ("Export DOIs" for Crossref or DataCite) stops for the same reason, at
+  the schema fetch, with an "Error" window or a 400 "An XML validation
+  error occurred": read what an export or a deposit would carry with a
+  read-only CLI call that builds the XML with validation off, as
+  `checks/sync/pkp-lib-13460/deposit-lists.php --xml` does on OJS, and
+  say in a report's Steps that the file came from that read. Do not remove
   it, and re-add it by hand on new machines. There is no OS-level firewall
   and no DTD mirror.
-- `[database] persistent = On` (the generator writes it since 2026-09-14;
-  pkp-lib honours it since `77b76d7664`). The fleet's `php -S` servers then
-  keep their PDO connection between requests, so `npm run reset:<app>`
-  drops the database with `dropdb --force` (the idle backends are
-  terminated; the servers reconnect). A `config.test.inc.php` generated
-  before that date lacks the key: regenerate it with the command above
-  (keep the old `app_key` through `TEST_APP_KEY`), then reset.
+- `[database] persistent = On`. The fleet's `php -S` servers keep their
+  PDO connection between requests, so `npm run reset:<app>` drops the
+  database with `dropdb --force` (the idle backends are terminated; the
+  servers reconnect).
 - `public_files_dir = public`, relative to the app root as the template
-  says (the generator writes it since 2026-09-24 and refuses an absolute
-  `TEST_PUBLIC_FILES_DIR`). `PKPUploadPublicFileController` prefixes the
-  base directory, so an absolute value made every picture upload through
-  a formatted-text box answer 500 and printed disk paths as public image
-  addresses (U09 K5-6); the other readers resolve it from the base
-  directory the app `chdir()`s to. A suite that reads the value from the
-  config resolves it against `PKP_APP_ROOT`. A config generated before
-  that date carries the absolute path: regenerate it (keep `app_key`
-  through `TEST_APP_KEY`). CI generates it fresh on every run.
+  says; the generator refuses an absolute `TEST_PUBLIC_FILES_DIR`, which
+  breaks picture uploads through a formatted-text box. A suite that
+  reads the value from the config resolves it against `PKP_APP_ROOT`.
 - `enable_minified = On`. Backend pages then load `js/pkp.min.js` instead of
   about 107 separate scripts. The bundle is committed in the app. When its
   sources change, recompile it with the Closure minify pass in
@@ -1016,33 +959,21 @@ to spot: seeding succeeds and the browser step dies.
 - `PKP_CONFIG_FILE`: absolute path to `config.test.inc.php`
 - `PLAYWRIGHT_BASE_PORT` / `PLAYWRIGHT_WORKERS`: worker 0's port, and the
   worker count (unset = auto-detect, see above). A second runner beside
-  the session's own takes a base that keeps its whole band clear, the
-  validation server at base + 90 included: 8300, 8400, 8500 do; a base
-  inside another fleet's band (8020, 8140) adopts or collides with that
-  fleet's probe, validation or worker servers (2026-09-26)
-- `PLAYWRIGHT_CPU_THROTTLE`: opt-in race amplifier for flake hunting
-  (`shared/playwright/support/throttle.js`): every page of every context
-  the fixtures open (`page`'s, `asUser()`'s and, since 2026-10-22, a
-  test's own `browser.newContext()`, like every lever below) runs its main thread that many
-  times slower (DevTools protocol, Chromium
-  only). A short probe at 6 reproduces the main-thread jank a loaded CI
-  runner shows; a long scenario at 2–4 only runs into its own timeouts
-  (2026-09-15). Never in CI or a final. The same file's second lever,
-  `PLAYWRIGHT_RAF_HOLD_MS=<ms>`, defers every `requestAnimationFrame`
-  callback, for a race that lives in the frame or two after a click,
-  which the throttle and `--trace on` both hide (U30 S4, 2026-09-26). The
-  third, `PLAYWRIGHT_HOLD_URL=<regex>` with `PLAYWRIGHT_HOLD_MS=<ms>`, holds
-  every request whose address matches before it goes out: the "hold one
-  request" lever without editing a test (U14 S5, 2026-09-28). The fourth,
-  `PLAYWRIGHT_IFRAME_HOLD=<regex>` with `PLAYWRIGHT_IFRAME_HOLD_MS=<ms>`,
-  hands every "load" listener of an iframe whose id matches its event that
-  much later, so one TinyMCE editor finishes its set-up after the others
-  (`-fr_CA-` for a legacy form's second language; U09 S6, 2026-09-28).
-  The fifth, `PLAYWRIGHT_LEVER=<module>`, calls that module's export
-  (`async (context) => {}`) with every context the fixtures open, in every
-  worker: a lever placed relative to the test's own actions (a request
-  held until the next press) without editing a test or patching modules
-  (U31, U39, U40 diagnoses, 2026-09-30).
+  the session's own takes a base whose whole band (+0 … +91) is clear of
+  every slot, line and ore worktree ("Slots"): 13000, 13100 and 13200
+  for OJS, OMP and OPS, plus 300 times the slot's number.
+- Flake-hunting levers (`shared/playwright/support/throttle.js`): opt-in,
+  never in CI or a final. Each acts on every context the fixtures open
+  (`page`'s, `asUser()`'s and a test's own `browser.newContext()`).
+
+  | Variable | What it does |
+  |---|---|
+  | `PLAYWRIGHT_CPU_THROTTLE=<n>` | Runs every page's main thread n times slower (Chromium only). A short probe at 6 reproduces a loaded CI runner's jank; a long scenario at 2–4 only runs into its own timeouts. |
+  | `PLAYWRIGHT_RAF_HOLD_MS=<ms>` | Defers every `requestAnimationFrame` callback, for a race in the frame or two after a click, which the throttle and `--trace on` both hide. |
+  | `PLAYWRIGHT_HOLD_URL=<regex>` with `PLAYWRIGHT_HOLD_MS=<ms>` | Holds every request whose address matches before it goes out. |
+  | `PLAYWRIGHT_IFRAME_HOLD=<regex>` with `PLAYWRIGHT_IFRAME_HOLD_MS=<ms>` | Hands every "load" listener of an iframe whose id matches its event that much later, so one TinyMCE editor finishes its set-up after the others (`-fr_CA-` for a legacy form's second language). |
+  | `PLAYWRIGHT_LEVER=<module>` | Calls that module's export (`async (context) => {}`) with every context, in every worker: a lever placed relative to the test's own actions, without editing a test. |
+
 - `TEST_API_KEY`: enables and gates `/api/v1/_test/*`. The namespace answers
   404 unless the var is in the server's environment, and 403 unless the
   request's `X-Test-Key` header matches.
@@ -1052,8 +983,7 @@ to spot: seeding succeeds and the browser step dies.
   app, so two runs of the same app must never overlap (MAINTENANCE
   "Session hygiene"). The instance keeps at most 500 messages, and on a
   busy day it sits at that cap, so a "no email was sent" reading counts the
-  messages to a fresh recipient, never the total (seen 2026-09-06,
-  `.reports/U31/cc-K3.md`).
+  messages to a fresh recipient, never the total.
 
 ## Running
 
@@ -1104,20 +1034,20 @@ A run longer than about four minutes outlives the prompt cache of the agent
 waiting on it, and whole-suite runs are CI's (`node bin/ci.js`, "CI"): the
 VM's `npm run test:<app>` and `test:final` remain for work about the local
 runtime itself (MAINTENANCE "Session hygiene").
-In a plain `npx playwright test` command, selecting a serial spec by path
-alone runs its dependency projects (`setup`, `shared`, the app project) in
-full first; `--project=<app>-serial --no-deps` on a warm install runs the
-spec alone, and its `@solo` tests need `--project=<app>-solo --no-deps`
-beside it, as a second command; a serial file whose every test is `@solo`
-(U60, U64 and others) answers "No tests found", exit 1, in the serial
-command, so it runs in the solo command alone (U45 harness). A suite id as the
-filter (`U12`) also matches `tests/serial/U12-…` and so pulls in the
-whole chain: an app suite's regression run names `--project=<app>`; and
-`--no-deps` also drops the solo project's wait on the serial one, so a
-`@solo` test runs in its own `--project=<app>-solo --no-deps` command
-after the serial one's (U09 harness, U16 tops); the config refuses a
-`--no-deps` command that selects the solo project beside any other,
-because every "red in `<app>-solo` after the final" sighting was one.
+
+In a plain `npx playwright test` command:
+
+- a serial spec selected by path alone runs its dependency projects
+  (`setup`, `shared`, the app project) in full first; add
+  `--project=<app>-serial --no-deps` on a warm install to run it alone;
+- its `@solo` tests need a second command,
+  `--project=<app>-solo --no-deps`; the config refuses a `--no-deps`
+  command that selects the solo project beside any other;
+- a serial file whose every test is `@solo` answers "No tests found" in
+  the serial command, so it runs in the solo command alone;
+- a suite id as the filter (`U12`) also matches `tests/serial/U12-…` and
+  pulls in the whole chain: an app suite's regression run names
+  `--project=<app>`.
 
 `fleet-prep` and `test:final` run the apps one after another and leave
 `PLAYWRIGHT_WORKERS` to the environment. A slot has one database and one
@@ -1125,7 +1055,7 @@ probe server per app, whatever `--feature` names (dataset fleets apart),
 so a `--reset` there or `reset:<app>` drops the data under every agent
 driving that app: prepare every fleet a session needs before its first
 agent starts, and never reset an app another agent is on (a probe in
-flight answers 500 "database … does not exist"; 2026-10-07, 2026-10-08).
+flight answers 500 "database … does not exist").
 Probe servers may stay up during a
 run; nothing else may listen on a worker port, because the run adopts a
 server it finds there (`reuseExistingServer`).
@@ -1144,8 +1074,8 @@ other slots run beside it).
   `workflow_dispatch` form takes `ojs_ref`, `omp_ref` and `ops_ref`, so a
   branch of this repo can be run against a pinned app commit:
   `gh workflow run e2e.yml --ref <branch> -f ojs_ref=<sha>`; a PR head on
-  a contributor's fork needs `-f ojs_repo=<fork>/ojs` beside it, and `-f
-  apps=ojs` runs only that app. Every dispatch is its own concurrency
+  a contributor's fork needs `-f ojs_repo=<fork>/ojs` beside it, and
+  `-f apps=ojs` runs only that app. Every dispatch is its own concurrency
   group (two slots dispatch from the same commit); a push cancels only
   the same branch's older push run, except on `main`, where every commit
   runs.
@@ -1155,8 +1085,8 @@ other slots run beside it).
   app commit's pointers say: a PR review's merge result when an app PR
   carries no submodule bump or an app has no PR of its own (the job
   summary names the pinned commits). App repo checks never pin: their PRs
-  carry the submodule bumps (@jarda.kotesovec, 2026-09-28).
-  `gh` works on this repo and, since 2026-09-12, on the pkp org.
+  carry the submodule bumps.
+  `gh` works on this repo and on the pkp org.
 - **`node bin/ci.js` is how a session uses CI**, the home of every
   whole-suite run: `watch` waits for the push run of `HEAD` (or `--sha`,
   or a run id), `dispatch` starts `e2e.yml` from `--ref <branch>` with
@@ -1179,9 +1109,9 @@ other slots run beside it).
   and install, check names `e2e (<app>) n/3`) at `PLAYWRIGHT_WORKERS=4`
   and `--retries=1`. A shard runs three passes, because Playwright shards
   only the projects named on the command line and runs their dependency
-  projects in full on every shard: `--shard=n/3 --project=shared
-  --project=<app>` (setup runs as their dependency), then `--project=<app>-serial
-  --no-deps`, then `--project=<app>-solo --no-deps`, both sharded and
+  projects in full on every shard:
+  `--shard=n/3 --project=shared --project=<app>` (setup runs as their dependency), then
+  `--project=<app>-serial --no-deps`, then `--project=<app>-solo --no-deps`, both sharded and
   `--pass-with-no-tests` (the passes `npm run test:<app>` runs locally,
   "Running"). Between the first and the second, `reset.js` and the setup
   project (unsharded) give the serial and solo passes a fresh install, as
@@ -1192,9 +1122,8 @@ other slots run beside it).
   onto the least-loaded shard by their CI duration in
   `shared/playwright/timings/<app>.json` (a test without one weighs the
   pass's median), and every shard excludes the tests that are not its own
-  (a `timed shards:` line opens each pass in the log). Playwright's own
-  split cut equal counts in file order, so OJS ran 7.8 · 10.3 · 14.0 min
-  (2026-09-24). Every shard uploads its fresh durations as
+  (a `timed shards:` line opens each pass in the log). Every shard
+  uploads its fresh durations as
   `timings-<app>-<n>`; `npm run shard-timings [-- <run-id> ...]` (default:
   the three latest green `main` runs) writes their median back into
   `timings/`. `PKP_E2E_TIMED_SHARDS=0` restores Playwright's split. A
@@ -1202,7 +1131,7 @@ other slots run beside it).
   Failure artifacts are per shard (`playwright-artifacts-<app>-<n>`) and
   include `.server-logs/`; each pass writes `test-results/{app,serial,solo}/`,
   and a green shard with a flaky test uploads them too, so a flake's failed
-  attempt leaves its `error-context.md` (since 2026-09-26).
+  attempt leaves its `error-context.md`.
 - The latest run of `e2e-tests.yml` on an app repo's `main` is the
   authoritative "is the app's tip red?" answer:
   `gh run list -R pkp/<app> --workflow e2e-tests.yml --branch main`, then
@@ -1214,5 +1143,4 @@ other slots run beside it).
 ## Verify before trusting
 
 File paths, selectors and schema fields cited across these docs are
-snapshots, verified on the date a line names, and UIs drift faster than
-docs.
+snapshots, and UIs drift faster than docs.

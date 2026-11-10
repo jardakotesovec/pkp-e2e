@@ -71,6 +71,15 @@ function build(app) {
     execFileSync('npm', ['run', 'build'], {cwd: app.root, stdio: ['ignore', 'ignore', 'inherit'], env});
 }
 
+/**
+ * PHP's opcache rechecks a file two seconds after it last looked, so a
+ * request sent right after a patch can still run the old code. Wait that
+ * out here, so the caller's next request sees what was applied or reverted.
+ */
+function settle() {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 3000);
+}
+
 function apply(diffPath, apps) {
     const diffAbs = path.resolve(diffPath);
     const diffText = fs.readFileSync(diffAbs, 'utf8');
@@ -100,6 +109,7 @@ function apply(diffPath, apps) {
         }
         console.log(`try-fix: ${name}${app.line ? ` (${app.line})` : ''}: applied ${path.basename(diffAbs)} to ${files.join(', ')}`);
     }
+    settle();
 }
 
 /** Remove the empty file a reversed creation leaves (BSD patch does without -E) and its emptied dirs. */
@@ -118,6 +128,7 @@ function removeCreated(root, file) {
 
 function revert(apps, diffPath = null) {
     const diffAbs = diffPath ? path.resolve(diffPath) : null;
+    let reverted = false;
     for (const name of apps) {
         const app = resolveApp(name);
         const marker = path.join(app.root, MARKER);
@@ -149,8 +160,10 @@ function revert(apps, diffPath = null) {
         if (needsBuild(rec.files)) {
             build(app);
         }
+        reverted = true;
         console.log(`try-fix: ${name}${app.line ? ` (${app.line})` : ''}: reverted ${path.basename(rec.diff)}`);
     }
+    if (reverted) settle();
 }
 
 function status(apps) {

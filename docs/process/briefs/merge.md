@@ -18,7 +18,7 @@ Inputs:
 
 Output: `{{merge_path}}`, one change list of digest blocks in the shape of `docs/process/briefs/digest-block.md` (ID `M<n>`; Evidence: chunk report and block id), in spec-section order, one block per change, then a closing table of confirmations by section (rule or row · apps · chunk). Merge duplicates across chunks into one block.
 
-Add three sections: "Suite-asserted claims touched", listing every changed claim a test could assert (the fold log needs it); "Declared lines", carrying the orchestrator's diff for the fold: {{declared_lines}}; and "For the orchestrator", collecting the chunks' proposed seed-facts and scenarios.md notes and their incidentals on other features' screens, as pointers.
+Add three sections: "Suite-asserted claims touched", listing every changed claim a test could assert (the fold log needs it); "Declared lines", carrying the orchestrator's diff for the fold: {{declared_lines}}; and "For the orchestrator", collecting the chunks' proposed seed-facts and scenarios.md notes (only install and seed facts that agents on other features will need and could not see for themselves, one sentence each, no date or feature; a screen's behaviour is the spec's) and their incidentals on other features' screens, as pointers.
 
 Size: at most 150 lines. Nothing is quoted from the reports beyond on-screen strings that belong in the spec.
 

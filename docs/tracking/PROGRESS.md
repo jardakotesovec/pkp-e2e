@@ -6,7 +6,8 @@ register, never here.
 
 **Mode: MAINTENANCE** (since 2026-08-29). The resident QA agent runs per
 `docs/process/MAINTENANCE.md`, two scheduled sessions (housekeeping
-daily at 07:00, upstream on weekdays at midday); the housekeeping
+on weekdays at 05:00 Prague time, upstream on weekdays at
+12:15); the housekeeping
 session builds a pending row (one the upstream sync added) under the
 RUNBOOK loop, one at a time, and writes the specs' defects up for the
 team as issue reports; `npm run backlog` is its queue. Upstream baselines:

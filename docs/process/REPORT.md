@@ -101,8 +101,8 @@ read; a label changed on GitHub is copied back into the header.
 - A fault that could plausibly be a security weakness never gets a
   report, whatever branch carries it: it is a finding in the private
   security repo, and its GitHub issue lives on that repo's tracker
-  (RUNBOOK "What goes where"; maintainer, 2026-10-17). Reports filed
-  before then with a `- **Security** unreleased` bullet stay on the
+  (RUNBOOK "What goes where"). Reports filed
+  before 2026-10-17 with a `- **Security** unreleased` bullet stay on the
   private tracker as they are, labeled `unreleased`, until their issues
   close.
 - **Affects**, **Introduced**, **Upstream**: below.
@@ -113,7 +113,7 @@ read; a label changed on GitHub is copied back into the header.
 - **Model** names the Claude model that wrote the report (its walk,
   trace and text, revisions included), so the team knows an AI agent
   wrote it and can give one written partly by a fallback model a closer
-  check (maintainer, 2026-10-06). The model that served most of the work
+  check. The model that served most of the work
   comes first, any other after "parts on". It is never written by hand:
   `npm run report-models -- --write` reads it from the Claude Code
   transcripts of the machine the work ran on and merges it into the
@@ -122,7 +122,7 @@ read; a label changed on GitHub is copied back into the header.
   end to end (every claim walked and traced again, then the role reads
   and a revision) opens its dated update paragraph with "Update <date>:
   re-verified end to end", and from then on names only the models of
-  the work from that date (maintainer, 2026-10-07); its issue drops the
+  the work from that date; its issue drops the
   other `model:` labels. "not recorded" only
   for a report no transcript remains for. A report outside this header
   shape (an older regression report, a research write-up) carries the
@@ -154,8 +154,9 @@ has not reached `main`, goes in the bullet, with a clause when it covers
 less or more than this report (another app, one symptom of several).
 The report is written as usual either way: it re-verifies the fault on
 today's code and adds the steps, cause and fix analysis the pkp issue
-may lack. A fix already on `main` means the finding is stale and gets
-no report. Nothing found says so, with the date of the search. When a
+may lack. A fix already on `main` and on the 3.5 branch means the
+finding is stale and gets no report; a fault `main` lost but 3.5 still
+shows is written up, its Affects reading "main: none". Nothing found says so, with the date of the search. When a
 developer copies a filed issue to pkp to work on it, the bullet names
 the copy with "the team's copy of this issue", and the pkp-e2e issue
 closes once the copy is resolved and a walk on `main` shows the fix
@@ -248,15 +249,15 @@ resending their own save) is shown with the request itself, as a
 (`api_key_secret` set in `config.inc.php`, the key from Profile › "API
 Key"), and a body built from what a `GET` of the object returns, so the
 handler gets every field it needs; a PHP call of the handler's code is
-evidence, not the Steps (U41 A29, U49 A11).
+evidence, not the Steps.
 Then numbered steps, one action each, using the names as they appear on
 screen in quotes ("Add discussion", "Save And Continue"), with the page's
 address where it helps. Then two paragraphs, **Expected** and
 **Observed**, right under the steps: on-screen strings verbatim, an error
 message or a request and its response in a code block, the server log
 line when the app failed; a message or log line PHP itself wrote names
-the PHP version it was seen on, since PHP rewords them (8.4's "Path must
-not be empty", U09 A18). A control (the neighbouring case that still
+the PHP version it was seen on, since PHP rewords them between
+versions. A control (the neighbouring case that still
 works) is one sentence after Observed, when it sharpens the finding.
 
 The campaign's shortcuts are never steps: the harness builders, scenario

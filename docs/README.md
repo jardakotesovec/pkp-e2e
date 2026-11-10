@@ -83,6 +83,9 @@ Read in this order:
 4. `docs/process/harness.md`: how the Playwright harness is laid out and run.
    Then `patterns.md` (conventions and pitfalls), `scenarios.md` (seeding
    test data and asserting on email) and `users.md` (the seeded accounts).
+   harness.md and patterns.md open with "Start here", which names the
+   sections to read; the rest of them, and scenarios.md after "The
+   core", is reference to look up.
 
 - `docs/process/dataset.md`: PKP's default test dataset (the install the
   team has), per app: the context, every user with their roles and every

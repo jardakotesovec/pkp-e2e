@@ -1,7 +1,9 @@
 # Brief templates
 
-One file per role of the RUNBOOK loop, one for the maintenance loop's
-regression reader (`regression-read.md`, MAINTENANCE step 5), one for
+The templates live in `docs/process/briefs/`; the other docs cite them
+as `briefs/<role>.md`. One file per role of the RUNBOOK loop, one for the
+maintenance loop's regression reader (`regression-read.md`, MAINTENANCE
+"The upstream-sync loop" step 5), one for
 the issue reporter (`issue-report.md`, MAINTENANCE "Issue reports") and its two role
 reads of a written report (`issue-read.md`, developer and triage), one for a
 flake class's diagnostician (`flake-diagnosis.md`, MAINTENANCE "Standing
@@ -17,7 +19,9 @@ never writes a brief from scratch, and it never writes rules into one.
 1. Copy the template for the role. The HTML comment at its top lists every
    `{{slot}}` the file uses and what goes there. Fill every one; a brief
    with an unfilled slot is not sent. Delete the comment from the rendered
-   brief.
+   brief. A file a slot tells an agent to write is never named `report…`,
+   `summary…`, `findings…` or `analysis…`: Claude Code refuses a
+   subagent's Write of one.
 2. Add only the feature-specific facts the RUNBOOK step names for that
    role: which chunk, which lines, which blocks, which other agent runs on
    the fleets at the same time. A fact about a screen (a locator, a dialog

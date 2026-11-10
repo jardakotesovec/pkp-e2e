@@ -14,7 +14,7 @@ Situation: {{situation}}
 Inputs:
 - The FEATURE-MAP row: {{feature_map_row}}. Atom rows: {{atlas_files}}, including the feature's `atlas/affordances-*.md` rows.
 - App code, read-only: `checkouts/ojs`, `checkouts/omp`, `checkouts/ops`, each with `lib/pkp` inside.
-- `docs/process/seed-facts.md` and `docs/process/users.md`, for the premise of every claim, and `docs/process/scenarios.md` for the keys the scenario API has.
+- `docs/process/seed-facts.md` and `docs/process/users.md`, for the premise of every claim, and `docs/process/scenarios.md` "Key reference" for the keys the scenario API has.
 - The feature's rows in `docs/tracking/incidentals.md`, what earlier sessions saw on its screens in passing: each row goes into the draft, as a claim or as a `to drive` question.
 
 Code existing is not evidence that a feature exists: the apps carry screens nobody can reach. Establish that a surface is reachable in the current UI first, and record dead candidates in `docs/tracking/UNASSIGNED.md`. Where a legacy path and a Vue path both do the same job, document both and say which one is primary. A rule that is merely strict is usually intended: write it plainly and add a ❓ entry with your lean.

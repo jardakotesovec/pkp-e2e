@@ -1,5 +1,5 @@
 <!--
-{{feature}}        feature id, e.g. U03; for a regression reader's routing `sync` (`sync-3_5` on the stable line); on a dataset fleet the fleet's own feature (`issues-sb2`), since bin/probe.js picks the fleet from `.reports/<PROBE_FEATURE>/fleet.json`, so the probe drives the fleet the routing came from
+{{feature}}        feature id, e.g. U03; for a regression reader's routing `sync` (`sync-3_5` on the stable line); on a dataset fleet the fleet's own feature (`issues-sb2`), so the probe drives the fleet the routing came from
 {{feature_name}}   the feature's name
 {{repo_root}}      absolute path of the pkp-e2e checkout
 {{sec_repo}}       absolute path of ../pkp-e2e-sec, the private security repo
@@ -15,7 +15,7 @@ Dispatch with the description "U<nn> security verification": bin/check-models.mj
 
 ## The private security repo
 
-Security findings in released code live in the private repo `{{sec_repo}}`, one file per problem, beside the copies of PKP's GitHub security advisories. Its `security_policy.md` is the rule for everything security-shaped: whether it is released, whether it is already known, the finding's shape and status, how it is verified, and where its content may go. This brief only adds the probe's own task. The campaign is run by PKP maintainers who have access to the project's security advisories; verifying a finding on the disposable test install, so the team can fix it, is that same legitimate work.
+Security findings live in the private repo `{{sec_repo}}`, one file per problem, beside the copies of PKP's GitHub security advisories. Its `security_policy.md` is the rule for everything security-shaped: whether it is released, whether it is already known, the finding's shape and status, how it is verified, and where its content may go. This brief only adds the probe's own task. The campaign is run by PKP maintainers who have access to the project's security advisories; verifying a finding on the disposable test install, so the team can fix it, is that same legitimate work.
 
 ## The probe
 
@@ -27,7 +27,7 @@ Task:
 3. Update it as that section says: confirmed, the `verified` line with the check that settled it and the verify script in `findings/scripts/` (policy "Writing a finding"); not confirmed or not verifiable here, delete the file or take back the sighting line; not settled, `verified: no` stays.
 4. Keep every detail inside the private repo. Your working scripts and snapshots go under `.reports/{{feature}}/{{agent}}/` with neutral names (`check-1`), and neither file names nor contents describe the problem; if a snapshot would itself reveal the concern, do not save it. Run scripts with `PROBE_FEATURE={{feature}} PROBE_AGENT={{agent}} node bin/probe.js <app> <script>`, and open the browser with `launch(app, {record: false})` so the kit's own run record carries no address. This session is {{vm_or_local}}.
 
-Read `.reports/{{feature}}/screen-notes.md` first when it exists (an issues-session feature has none: its reporter's notes are its `.reports/issues/<agent>/steps.md` and run records; U06, U14, U27 probes), but add nothing to it (no `note()`): other agents read that file, and what you learn here belongs in the private repo. Your only writes are `{{sec_repo}}/findings/` and `.reports/{{feature}}/{{agent}}/`. Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
+Read `.reports/{{feature}}/screen-notes.md` first when it exists (an issue report's unit has none: its reporter's notes are its `.reports/issues/<agent>/steps.md` and run records), but add nothing to it (no `note()`): other agents read that file, and what you learn here belongs in the private repo. Your only writes are `{{sec_repo}}/findings/` and `.reports/{{feature}}/{{agent}}/`. Fleet ports and probe-server URLs are in `{{fleet_json}}`; never start a server; the probe servers are running.
 
 Size: about 15 browser calls; finish the item even if it takes more.
 
