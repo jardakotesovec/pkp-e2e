@@ -460,7 +460,15 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
            back, a register entry retired or ruled intended, a bullet a
            suite does not assert yet. The spec's one backlog: the housekeeping
            session spends every item together through RUNBOOK "Revising
-           a shipped feature". A spec being written has none.>
+           a shipped feature". A spec being written has none. Each item
+           ends with its source and the day it was added, in square
+           brackets, such as [upstream 2026-11-03]: `upstream` (an
+           upstream sync or a PR review), `report` (the guard an issue
+           report proposes, or an entry retired or ruled intended),
+           `sweep` (a drift sweep), `incidental` (a sighting folded in),
+           `request` (someone asked) or `other`. `npm run backlog` reads
+           it to put the oldest upstream, fixed-bug and requested items
+           first; the lint checks it is there.>
        - **Rarely met**:
          - <a state an editor, author or reviewer would not meet in an
            ordinary week, the most likely first; never a main or guard

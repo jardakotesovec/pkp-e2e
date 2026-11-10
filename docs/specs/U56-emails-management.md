@@ -829,12 +829,12 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for OMP2 (issue report `docs/issues/U56-OMP2-press-notify-primary-contact-unselected.md`): a new press's "Emails" tab opens with "Notify Primary Contact" at "No", as a journal's and a preprint server's do (Fields, the "Emails" tab; scenario 2)
+  - the guard for OMP2 (issue report `docs/issues/U56-OMP2-press-notify-primary-contact-unselected.md`): a new press's "Emails" tab opens with "Notify Primary Contact" at "No", as a journal's and a preprint server's do (Fields, the "Emails" tab; scenario 2) [report 2026-10-04]
   - the French (Canada) "Gérer les courriels" rows' button: it reads
     "Edit" while a screen reader names it "Modifier {email name}"
-    (Rule 6a; A12)
-  - the guard for A4 (issue report `docs/issues/U56-A4-add-template-window-titled-edit-template.md`): "Add Template" opens a window titled "Add Template", and an existing template's window stays "Edit Template" (Rule 12; scenario 3)
-  - the guard for A5 (issue report `docs/issues/U56-A5-remove-template-confirmation-names-subject.md`): "Remove" on an added template whose name and subject differ asks about the template by the name its row shows (Rule 17; scenario 3)
+    (Rule 6a; A12) [incidental 2026-10-05]
+  - the guard for A4 (issue report `docs/issues/U56-A4-add-template-window-titled-edit-template.md`): "Add Template" opens a window titled "Add Template", and an existing template's window stays "Edit Template" (Rule 12; scenario 3) [report 2026-10-04]
+  - the guard for A5 (issue report `docs/issues/U56-A5-remove-template-confirmation-names-subject.md`): "Remove" on an added template whose name and subject differ asks about the template by the name its row shows (Rule 17; scenario 3) [report 2026-10-04]
 - **Nothing new to test**:
   - "Signature" emptied, so that the emails carrying it end with nothing
     (Settings bullet 1)

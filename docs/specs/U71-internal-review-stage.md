@@ -827,9 +827,9 @@ footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - {OMP} the author's "Upload" on an internal round that was sent on to External Review refusing with "You are not allowed to add and edit these files.", while External Review's "Upload revisions" takes the file ([OMP8](#omp8); Rule 18): the guard the issue report proposes, once fixed
-  - {OMP} "Accept Submission" and "Create New Review Round" on an internal round listing the author's revised file under "Revisions", ticked, and copying it into "Draft Files" and the new round's "Files for Review" ([OMP2](#omp2); Rule 13b): the guard the issue report proposes, once fixed
-  - {OMP} the author's header Tasks panel gaining "Revisions to consider in Internal Review." after "Request Revisions" on an internal round, and losing it on the revised-file upload ([OMP1](#omp1); Side effects bullet 2): the guard the issue report proposes, once fixed
+  - {OMP} the author's "Upload" on an internal round that was sent on to External Review refusing with "You are not allowed to add and edit these files.", while External Review's "Upload revisions" takes the file ([OMP8](#omp8); Rule 18): the guard the issue report proposes, once fixed [other 2026-10-02]
+  - {OMP} "Accept Submission" and "Create New Review Round" on an internal round listing the author's revised file under "Revisions", ticked, and copying it into "Draft Files" and the new round's "Files for Review" ([OMP2](#omp2); Rule 13b): the guard the issue report proposes, once fixed [report 2026-10-02]
+  - {OMP} the author's header Tasks panel gaining "Revisions to consider in Internal Review." after "Request Revisions" on an internal round, and losing it on the revised-file upload ([OMP1](#omp1); Side effects bullet 2): the guard the issue report proposes, once fixed [other 2026-10-02]
 - **Rarely met**:
   - a round with a recommending editor assigned and no review under way,
     its box reading "Awaiting recommendations from editors." (Rule 14c)

@@ -725,47 +725,47 @@ Left out of the scenarios above, by reason:
     footnote h; pkp/pkp-lib#13464): the "JATS XML" of a version published
     as "Version of Record" 1.0 names that stage and that number, and a
     contributor's CRediT role given the degree "Lead" is carried with its
-    name and its degree
+    name and its degree [upstream 2026-10-10]
   - a tag typed as text in the generated XML (Rule 2, footnote h;
     pkp/pkp-lib#13378): an abstract typed as "Write <i>species names</i>
     in italics", with one more word set in italics by the editor's
     button, shows in the "JATS XML" the typed tag as text and the word in
-    italics
+    italics [upstream 2026-10-10]
   - the identifiers of a reference in the generated XML (Rule 2,
     footnote h; pkp/pkp-lib#13563): a reference "… https://doi.org/10.1234/x."
     added on "References" shows in the "JATS XML" the DOI marked as a DOI,
-    with the text as typed
+    with the text as typed [upstream 2026-10-20]
   - the guard for A22 {OJS} (issue report
     `docs/issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md`):
     an article in a restricted issue with "Make available with publication"
     ticked: its "JATS XML" refused signed out and for a reader without a
-    subscription, served to a subscriber
-  - the guard for A20 (issue report `docs/issues/U47-A6-media-jats-upload-server-log-warning.md`): upload a JATS file on "JATS XML" and check the server log holds no PHP warning for the request.
-  - the guard for A12 (issue report `docs/issues/U48-A12-published-jats-upload-delete-offered.md`): a published version's "JATS XML" page offers neither "Upload" nor "Delete" to an editor who may edit the publication.
-  - the guard for A11 (issue report `docs/issues/U48-A11-jats-download-saves-refusal-json.md`): a Copyeditor's "Download" of the uploaded JATS file on "JATS XML" saves the XML.
-  - the guard for A13 (issue report `docs/issues/U48-A13-jats-image-upload-breaks-page.md`): an image and an ISO-8859-1 JATS XML file uploaded on "JATS XML" are refused with a message, and the page still opens.
-  - the guard for A16 (issue report `docs/issues/U48-A16-body-text-cite-never-enabled.md`): "Cite" on "Body Text" is greyed on arrival and, with the cursor in the text, places a citation when pressed with the mouse and from the keyboard.
-  - the guard for A17 (issue report `docs/issues/U48-A17-body-text-side-section-needs-two-presses.md`): pressing "Document Outline" with "References" open opens "Document Outline" alone, and selecting a word opens "Selected Element" alone.
-  - the guard for A1 (issue report `docs/issues/U48-A1-jats-make-available-offered-then-refused.md`): an assigned Layout Editor without "Permissions" sees "Make available with publication" greyed on "JATS XML".
-  - the guard for A2 (issue report `docs/issues/U48-A2-body-text-save-offered-then-refused.md`): an assigned Layout Editor without "Permissions" sees the "Body Text" read-only, with no "Save".
-  - the guard for A8 (issue report `docs/issues/U48-A8-published-jats-xml-stays-old-after-edit.md`): with "Make available with publication" ticked, a reader who downloaded "JATS XML" gets the corrected title right after the editor edits it, and the published XML right after publishing.
-  - the guard for A9 (issue report `docs/issues/U48-A9-published-jats-xml-name-url-path.md`): with a URL path set, the downloaded "JATS XML" is named "<path>-publication-<id>-jats.xml", and a reader who downloaded it before the path changed gets the new name.
-  - the guard for A14 (issue report `docs/issues/U48-A14-body-text-opens-with-unsaved-changes.md`): a never-saved Body Text opens without "Unsaved Changes", and "Save" reads "Saved" only when the text is saved, "Send to Text Editor" with an image included.
-  - the guard for A15 (issue report `docs/issues/U48-A15-body-text-leaving-loses-text-unasked.md`): with unsaved text on "Body Text", choosing another side-menu entry asks "The data on this form has changed. Do you wish to continue without saving?", and "Cancel" keeps the text.
-  - the guard for A18 (retired): sending an unreadable file to "Body Text" ends the import with "Import failed" and its reason.
+    subscription, served to a subscriber [report 2026-10-05]
+  - the guard for A20 (issue report `docs/issues/U47-A6-media-jats-upload-server-log-warning.md`): upload a JATS file on "JATS XML" and check the server log holds no PHP warning for the request. [report 2026-10-02]
+  - the guard for A12 (issue report `docs/issues/U48-A12-published-jats-upload-delete-offered.md`): a published version's "JATS XML" page offers neither "Upload" nor "Delete" to an editor who may edit the publication. [report 2026-10-02]
+  - the guard for A11 (issue report `docs/issues/U48-A11-jats-download-saves-refusal-json.md`): a Copyeditor's "Download" of the uploaded JATS file on "JATS XML" saves the XML. [report 2026-10-02]
+  - the guard for A13 (issue report `docs/issues/U48-A13-jats-image-upload-breaks-page.md`): an image and an ISO-8859-1 JATS XML file uploaded on "JATS XML" are refused with a message, and the page still opens. [report 2026-10-02]
+  - the guard for A16 (issue report `docs/issues/U48-A16-body-text-cite-never-enabled.md`): "Cite" on "Body Text" is greyed on arrival and, with the cursor in the text, places a citation when pressed with the mouse and from the keyboard. [report 2026-10-02]
+  - the guard for A17 (issue report `docs/issues/U48-A17-body-text-side-section-needs-two-presses.md`): pressing "Document Outline" with "References" open opens "Document Outline" alone, and selecting a word opens "Selected Element" alone. [report 2026-10-02]
+  - the guard for A1 (issue report `docs/issues/U48-A1-jats-make-available-offered-then-refused.md`): an assigned Layout Editor without "Permissions" sees "Make available with publication" greyed on "JATS XML". [report 2026-10-02]
+  - the guard for A2 (issue report `docs/issues/U48-A2-body-text-save-offered-then-refused.md`): an assigned Layout Editor without "Permissions" sees the "Body Text" read-only, with no "Save". [report 2026-10-02]
+  - the guard for A8 (issue report `docs/issues/U48-A8-published-jats-xml-stays-old-after-edit.md`): with "Make available with publication" ticked, a reader who downloaded "JATS XML" gets the corrected title right after the editor edits it, and the published XML right after publishing. [report 2026-10-02]
+  - the guard for A9 (issue report `docs/issues/U48-A9-published-jats-xml-name-url-path.md`): with a URL path set, the downloaded "JATS XML" is named "<path>-publication-<id>-jats.xml", and a reader who downloaded it before the path changed gets the new name. [report 2026-10-02]
+  - the guard for A14 (issue report `docs/issues/U48-A14-body-text-opens-with-unsaved-changes.md`): a never-saved Body Text opens without "Unsaved Changes", and "Save" reads "Saved" only when the text is saved, "Send to Text Editor" with an image included. [report 2026-10-02]
+  - the guard for A15 (issue report `docs/issues/U48-A15-body-text-leaving-loses-text-unasked.md`): with unsaved text on "Body Text", choosing another side-menu entry asks "The data on this form has changed. Do you wish to continue without saving?", and "Cancel" keeps the text. [report 2026-10-02]
+  - the guard for A18 (retired): sending an unreadable file to "Body Text" ends the import with "Import failed" and its reason. [report 2026-10-02]
   - the Body Text's "Export" menu (Rule 24, footnote d32;
     pkp/pkp-lib#13543): "Export to HTML" makes one "HTML" galley marked
     "Generated from text editor", its figure copied, and a second export
     shows "Revision 2" on it; "Preview: PDF" › "Create PDF" makes one
-    "PDF" galley the same way
+    "PDF" galley the same way [upstream 2026-11-09]
   - a new version's export (Rule 24, footnote d32): after "Create New
     Version", "Export to HTML" on the new version leaves the published
-    version's "HTML" galley downloading its own text
+    version's "HTML" galley downloading its own text [upstream 2026-11-09]
   - the export's refusals (Rule 24, footnote d32): an author's export
     refused, and an image from another submission or with an address
-    that is not http(s) refused with its reason
+    that is not http(s) refused with its reason [upstream 2026-11-09]
   - the guard for A23 (Rule 24): two exports of one version sent at the
-    same moment leave one galley, the later one a revision
+    same moment leave one galley, the later one a revision [upstream 2026-11-09]
 - **Nothing new to test**:
   - a second "Upload" on a version that already has a file, which
     becomes a revision of that one file, listed in its "History"

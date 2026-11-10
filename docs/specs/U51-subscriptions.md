@@ -1369,90 +1369,90 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A12 (issue report
     `docs/issues/U52-A9-membership-address-signed-out-blank-page.md`):
-    a signed-out visitor at the "Purchase Individual Subscription", "Purchase Institutional Subscription" and membership addresses sent to the Login page
+    a signed-out visitor at the "Purchase Individual Subscription", "Purchase Institutional Subscription" and membership addresses sent to the Login page [report 2026-10-01]
   - the guard for OPS1 (issue report
     `docs/issues/U51-OPS1-posting-mode-says-saved-keeps-nothing.md`): on a
     preprint server, Settings › Distribution › "Access" offers "Enable OAI"
     and no "Posting Mode", and an "Enable OAI" choice saved is still
-    selected after a reload {OPS}.
+    selected after a reload {OPS}. [report 2026-10-01]
   - the guard for A14 (issue report
     `docs/issues/U51-A14-non-pdf-galley-shown-open-refused.md`): with "Only
     Restrict Access to PDF version of issues and articles" ticked and no fee
     set, a visitor opens the HTML galley of a restricted article and of a
-    "Full Issue".
+    "Full Issue". [report 2026-10-01]
   - the guard for A20 (issue report
     `docs/issues/U51-A20-full-issue-asks-fee-of-no-amount.md`): with only an
     "Association Membership" fee, a signed-in reader without a subscription
-    who presses a "Full Issue" galley lands on the "Subscriptions" page.
+    who presses a "Full Issue" galley lands on the "Subscriptions" page. [report 2026-10-01]
   - the guard for A13 (issue report
     `docs/issues/U51-A13-A26-subscription-block-status-wrong.md`): a
     subscription bought with the manual method reads "Awaiting Manual
     Payment" in the "Subscription" block on the home page, and once set to
-    "Needs Approval" reads "Inactive" there (A13, A26).
+    "Needs Approval" reads "Inactive" there (A13, A26). [report 2026-10-01]
   - the guard for A9 (issue report
     `docs/issues/U51-A9-individual-purchase-refusal-says-nothing.md`): on
     "Purchase Individual Subscription", "Save" with a type that requires
     membership and "Membership" empty shows a message
-    that "Membership" is required.
+    that "Membership" is required. [report 2026-10-02]
   - the guard for A23 (issue report
     `docs/issues/U51-A23-purchase-link-on-open-journal-leads-home.md`): a
     signed-in reader on an open-access journal with payments set up finds no
-    "Purchase New Subscription" on "Subscriptions".
+    "Purchase New Subscription" on "Subscriptions". [report 2026-10-02]
   - the guard for A24 (issue report
     `docs/issues/U51-A24-subscription-offer-links-lead-home-payments-off.md`):
     on a journal that requires subscriptions with payments off, "My
     Subscriptions" and the "Subscription" block offer neither "View
-    Available Subscription Types" nor "Learn More".
+    Available Subscription Types" nor "Learn More". [report 2026-10-02]
   - the guard for A16 (issue report
     `docs/issues/U51-A16-subscription-manager-offered-institutions-refused.md`):
     a Subscription Manager without the Journal Manager role creates an
     institution from "Institutions" and then an institutional subscription
-    (with the other fix: the side menu offers no "Institutions").
+    (with the other fix: the side menu offers no "Institutions"). [report 2026-10-02]
   - the guard for A7 (issue report
     `docs/issues/U51-A7-issue-contents-lock-galleys-reader-can-open.md`): on
     a restricted issue's table of contents a Section Editor without a
-    subscription sees no padlock.
+    subscription sees no padlock. [report 2026-10-02]
   - the guard for A18 (issue report
     `docs/issues/U51-A18-additional-file-no-padlock-refused.md`): a
-    restricted article's additional file shows the padlock to a visitor.
+    restricted article's additional file shows the padlock to a visitor. [report 2026-10-02]
   - the guard for A19 (issue report
     `docs/issues/U51-A19-locked-link-fee-while-payments-off.md`): with
     "Purchase Article" and "Purchase Issue" fees saved and payments turned
-    off, the locked galley links show no price.
+    off, the locked galley links show no price. [report 2026-10-02]
   - the guard for A22 (issue report
     `docs/issues/U51-A22-subscription-search-fields-narrow-nothing.md`): on
     both subscription lists, a search by each of the ten fields ("is" and
-    "contains") lists only the subscriptions that match.
+    "contains") lists only the subscriptions that match. [report 2026-10-02]
   - the guard for A10 (issue report
     `docs/issues/U51-A10-purchase-on-active-subscription-removes-access.md`):
     on "My Subscriptions" a running subscription offers only "Renew", and
-    its purchase address changes nothing.
+    its purchase address changes nothing. [report 2026-10-02]
   - the guard for A25 (issue report
     `docs/issues/U51-A25-institutional-purchase-ip-ranges-read-array.md`):
     the institutional purchase page opened for an existing institutional
-    subscription shows its stored IP ranges.
+    subscription shows its stored IP ranges. [report 2026-10-02]
   - the guard for A11 (issue report
     `docs/issues/U51-A11-institutional-purchase-adds-institution-each-time.md`):
     two institutional purchases for the same institution leave one entry on
-    the Institutions page.
+    the Institutions page. [report 2026-10-02]
   - the guard for A21 (issue report
     `docs/issues/U51-A21-subscription-end-before-start-saved.md`): the
     subscription window refuses a subscription whose end date is before its
-    start date.
+    start date. [report 2026-10-02]
   - the guard for A28 (issue report
     `docs/issues/U51-A28-refused-form-date-box-shows-today.md`): after a
     refused "Save" with the date boxes empty, the subscription window's date
-    boxes stay empty.
+    boxes stay empty. [report 2026-10-02]
   - the guard for A27 (issue report
     `docs/issues/U51-A27-expiry-reminder-task-stops-with-error.md`): the
     "Subscription Expiry Reminders" task, run from the command line with a
     reminder set, sends the reminder to an individual and an institutional
-    subscription ending on the reminder's day.
+    subscription ending on the reminder's day. [report 2026-10-02]
   - the guard for A30, retired: on a journal that requires
     subscriptions, an article published with "Don't Assign To An Issue"
     sends a signed-out visitor pressing its galley to the Login page,
     turns away a Reader without a subscription, and opens to a Reader
-    with an "Active" subscription (Rule 7).
+    with an "Active" subscription (Rule 7). [report 2026-10-22]
 - **Nothing new to test**:
   - subscriptions set to "Needs Information", "Needs Approval" or
     "Other, See Notes", which open nothing and read "Inactive" on "My

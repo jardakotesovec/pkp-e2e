@@ -921,54 +921,54 @@ Left out of the scenarios above, by reason:
   - a section's "Section title" (a series' "Title") of one space refused
     with the sentence "A title is required for the section." (OMP "…for
     the series.") in the notice, not a raw code ([A6](#a6)): the guard
-    the issue report proposes
+    the issue report proposes [report 2026-10-02]
   - the section link under a policy on the "Submissions" page opening
     "Make a Submission" with that section chosen ([A1](#a1)): the guard
-    the issue report proposes
+    the issue report proposes [report 2026-10-02]
   - the "Submissions" page with "Disable Submissions" ticked showing no
     "Make a new submission to the {section} section." line, and an
     inactive section's policy absent for the editorial roles ([A7](#a7),
-    [A8](#a8)): the guard the issue report proposes
+    [A8](#a8)): the guard the issue report proposes [report 2026-10-02]
   - {OJS} a section whose review form was deactivated, saved and the
     form made active again, still on that form in its "Edit" window and
     preselected by Add Reviewer ([A11](#a11)): the guard the issue report
-    proposes
+    proposes [report 2026-10-13]
   - the sections endpoint asked for its list at the site's address by
     the Site Administrator answering a refusal (404), not a server error
-    ([A10](#a10)): the guard the issue report proposes
+    ([A10](#a10)): the guard the issue report proposes [report 2026-10-02]
   - {OMP} a series' "Path" refused with a message that names the
     characters a saved path may hold ([OMP2](#omp2)): the guard the
-    issue report proposes
+    issue report proposes [report 2026-10-02]
   - {OMP} an SVG not offered as a series cover, and a cover file the
     server refuses answered with the "An invalid image was uploaded."
     notice, the series' other edits kept in the open window
-    ([OMP3](#omp3)): the guard the issue report proposes
+    ([OMP3](#omp3)): the guard the issue report proposes [report 2026-10-02]
   - {OMP} a damaged PNG as a series' "Cover Image" refused with "An
     invalid image was uploaded. Accepted formats are .png, .gif, or
     .jpg.", nothing stored and an existing cover kept ([OMP10](#omp10)):
-    the guard the issue report proposes
+    the guard the issue report proposes [report 2026-10-13]
   - {OMP} the ISSN paragraph in the series window reading "which
-    identifies" (Fields, "ISSN"; OMP7 retired)
+    identifies" (Fields, "ISSN"; OMP7 retired) [report 2026-10-02]
   - {OMP} the series list's "Inactive" box asking "…deactivate this
-    series?" ("…activate this series?") (Rule 5; OMP5 retired)
+    series?" ("…activate this series?") (Rule 5; OMP5 retired) [report 2026-10-02]
   - {OMP} the help under a saved series' "Path" showing the series' own
-    address ([OMP8](#omp8)): the guard the issue report proposes
+    address ([OMP8](#omp8)): the guard the issue report proposes [report 2026-10-02]
   - {OPS} "Archives" on a server with nothing posted showing a sentence
-    that says so ([OPS1](#ops1)): the guard the issue report proposes
+    that says so ([OPS1](#ops1)): the guard the issue report proposes [report 2026-10-02]
   - {OPS} an "Archives" page typed past the last one answering "404 Not
     Found", as a section's page does ([OPS5](#ops5)): the guard the
-    issue report proposes
+    issue report proposes [report 2026-10-02]
   - {OPS} the section window without the "Identify items posted in this
     section as a(n)" box, or the box's help giving examples, as the team
-    decides ([OPS2](#ops2)): the guard the issue report proposes
+    decides ([OPS2](#ops2)): the guard the issue report proposes [report 2026-10-02]
   - {OPS} "Archives" holding 272 preprints posted on one day (11 pages
     of 25, as walked), paged with "Next" to the end: each preprint on
     exactly one page (Rule 14d, [OPS7](#ops7)): the guard the issue
-    report proposes
+    report proposes [incidental 2026-10-05]
   - {OJS} a section's default review form made inactive, Add Reviewer
     then not preselecting it for the section's submissions, and
     preselecting it again once it is active, the section not saved in
-    between (Settings bullet 6)
+    between (Settings bullet 6) [report 2026-10-13]
 - **Rarely met**:
   - {OJS} "Omit author names for section items from issues' table of
     contents." ticked, the issue's table of contents without the section's

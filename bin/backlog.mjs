@@ -118,8 +118,19 @@ for (const f of specFiles) {
         const waits = (i) => (/guard|issue report|docs\/issues\/|once fixed/i.test(i)
             && ([...i.matchAll(/(?<![#\w])((?:A|OJS|OMP|OPS)\d+)\b/g)].some(([, id]) => open.has(id)) || linked(i)))
             || [...i.matchAll(/\bonce ((?:A|OJS|OMP|OPS)\d+) is settled\b/g)].some(([, id]) => question.has(id));
-        const ready = items.filter((i) => !waits(i)).length;
-        if (items.length) planned.push({ spec, file: f, n: ready, waiting: items.length - ready });
+        // Each item ends "[<source> <date>]" (lint-spec checks it). A report's guard
+        // that cites a still-open 🐞 waits whatever its wording.
+        const tag = (i) => (i.trim().match(/\[(upstream|report|sweep|incidental|request|other) (20\d\d-\d\d-\d\d)\]$/) || []);
+        const citesOpen = (i) => [...i.matchAll(/(?<![#\w])((?:A|OJS|OMP|OPS)\d+)\b/g)].some(([, id]) => open.has(id));
+        const readyItems = items.filter((i) => !waits(i) && !(tag(i)[1] === 'report' && citesOpen(i)));
+        // First come the items that keep the suites in step with the apps: behavior
+        // the team shipped, a guard whose bug is now fixed, a coverage request.
+        const first = readyItems.filter((i) => ['upstream', 'report', 'request'].includes(tag(i)[1]));
+        const oldest = (list) => list.map((i) => tag(i)[2] || '0000').sort()[0];
+        if (items.length) {
+            planned.push({ spec, file: f, n: readyItems.length, waiting: items.length - readyItems.length,
+                first: first.length, firstOldest: oldest(first), oldest: oldest(readyItems) });
+        }
     }
 }
 
@@ -137,7 +148,7 @@ const cap = (list) => (all ? list : list.slice(0, 5));
 const more = (list) => (!all && list.length > 5 ? `  … ${list.length - 5} more (--all)\n` : '');
 const day = new Date().getDate();
 let out = `Today (day ${day}, ${day % 2 ? 'odd' : 'even'}): refreshes, then `
-    + `${day % 2 ? 'incidentals and reports owed (2, 3)' : 'builds and Planned coverage (4, 5)'}, then friction.\n`;
+    + `${day % 2 ? 'incidentals and reports owed (2, 3)' : 'builds (4)'}, then Planned coverage (5), then friction.\n`;
 const section = (title, count, body) => { out += `\n${title} (${count})\n${body}`; };
 
 // A header fix needs no walk: a join, or a "Tracked in" that lacks the entry.
@@ -156,10 +167,16 @@ section('3. Reports owed, one spec at a time', `${owed.length} entries in ${owed
         : `  held, skipped: ${held.length} (--all)\n`));
 section('4. Builds and revisions', builds.length,
     builds.map((r) => `  ${r[0]} ${r[1]}\n`).join(''));
-const ready = planned.filter((s) => s.n);
-section('5. Planned coverage, one spec a revision',
-    `${ready.reduce((n, s) => n + s.n, 0)} items ready in ${ready.length} specs; `
+// Specs with first-class items lead, the oldest such item first; then the rest, oldest first.
+const ready = planned.filter((s) => s.n).sort((a, b) => (b.first > 0) - (a.first > 0)
+    || (a.first ? a.firstOldest : a.oldest).localeCompare(b.first ? b.firstOldest : b.oldest)
+    || b.first - a.first || a.spec.localeCompare(b.spec));
+section('5. Planned coverage, up to three specs a morning in this order',
+    `${ready.reduce((n, s) => n + s.n, 0)} items ready in ${ready.length} specs, `
+    + `${ready.reduce((n, s) => n + s.first, 0)} of them first: from upstream, a fixed bug or a request; `
     + `${planned.reduce((n, s) => n + s.waiting, 0)} guards wait for their bug's fix`,
-    cap(ready).map((s) => `  ${s.spec}: ${s.n}${s.waiting ? ` (+${s.waiting} waiting)` : ''}\n`).join('') + more(ready));
+    cap(ready).map((s) => `  ${s.spec}: ${s.n}`
+        + (s.first ? `, ${s.first} first (oldest ${s.firstOldest})` : ` (oldest ${s.oldest})`)
+        + `${s.waiting ? ` (+${s.waiting} waiting)` : ''}\n`).join('') + more(ready));
 section('6. Friction rows to fold', friction.length, '');
 process.stdout.write(out);

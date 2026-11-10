@@ -852,32 +852,32 @@ Left out of the scenarios above, by reason:
   - the guard for A13 {OJS} (issue report
     `docs/issues/U29-A13-section-editor-changes-reviewer-recommendations.md`): the
     reviewer recommendation writes sent as a Section Editor and as a
-    manager-level role without settings access, each refused
+    manager-level role without settings access, each refused [report 2026-10-05]
   - an unsaved "Setup" edit staying through "Submission" and back to
-    "Review", and a reload then dropping it (Rule 2)
+    "Review", and a reload then dropping it (Rule 2) [incidental 2026-09-30]
   - the guard for A11 {OJS} (Rule 18; issue report
     `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`): a
     changed "Review Recommendations" closed with "Close", then "Edit"
-    and "Save", the row keeping its title from before the change
+    and "Save", the row keeping its title from before the change [incidental 2026-10-01]
   - the guard for OMP3 (issue report
     `docs/issues/U29-OMP3-press-internal-guidelines-no-list-buttons.md`): on
     a press, Settings › Workflow › "Review" › "Reviewer Guidance" shows the
     same toolbar (with Blockquote, Bullet list and Numbered list) on
     "Internal Review Guidelines" as on "External Review Guidelines" and
-    "Competing Interests".
+    "Competing Interests". [report 2026-10-04]
   - the guard for A5 (issue report
     `docs/issues/U29-A5-review-form-item-text-type-drops-options.md`): a
     review form item with "Response Options" switched from a choice type to
     a text type raises the confirmation, and "Cancel" keeps the type and its
-    options.
+    options. [report 2026-10-04]
   - the guard for A9 (issue report
     `docs/issues/U29-A9-edit-review-drops-deactivated-form.md`): a form a
     request carries deactivated, then "OK" in the reviewer row's "Edit"
     window with nothing changed: the window lists the carried form selected,
-    and the request and the reviewer's step 3 keep it.
+    and the request and the reviewer's step 3 keep it. [report 2026-10-04]
   - "Add Recommendation" closed with "Close" after typing in "Review
     Recommendations" {OJS}: no question, no notice, and the table keeping
-    its rows, also after a reload (Rule 17)
+    its rows, also after a reload (Rule 17) [incidental 2026-10-05]
 - **Rarely met**:
   - ordering the forms and a form's items with "Order", "Done" and "Cancel
     ordering", and the editors' "Review Form" lists following the order

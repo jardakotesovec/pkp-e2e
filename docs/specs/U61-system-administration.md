@@ -636,8 +636,8 @@ All Failed Jobs" or "Delete Task Logs", run alone. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - "Check for updates" pressed on the test installs, which cannot reach PKP's site: System Information with a warning that the latest version could not be retrieved, the link still there, no server error (A1; the guard its issue report names)
-  - "Requeue All Failed Jobs" refused because the list was emptied in another tab: after "OK" no loading circle beside the button or in the page links (A6; the guard its issue report names)
+  - "Check for updates" pressed on the test installs, which cannot reach PKP's site: System Information with a warning that the latest version could not be retrieved, the link still there, no server error (A1; the guard its issue report names) [report 2026-10-02]
+  - "Requeue All Failed Jobs" refused because the list was emptied in another tab: after "OK" no loading circle beside the button or in the page links (A6; the guard its issue report names) [report 2026-10-02]
 - **Nothing new to test**:
   - a refused "Try Again" or "Delete" on a failed job already taken off
     the list in another tab (Rule 17b)

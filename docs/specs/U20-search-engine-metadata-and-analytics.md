@@ -923,22 +923,22 @@ the tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - A1 (a "Description" with a double quote mark: the journal's home page carries the whole text in its description tag; Rule 9)
-  - OMP1 {OMP} (a book with an EPUB format and an HTML format: the book page's "citation_fulltext_html_url" names the HTML file alone; Fields, "citation_fulltext_html_url")
-  - OMP2 {OMP} (a book with two PDF files for the whole book and no ISBN: one "citation_pdf_url" per file; Fields, "citation_pdf_url")
-  - A5 (an expired announcement: the sitemap lists the unexpired one alone; Rule 3)
-  - A2 (the Plugins list's "Google Analytics Plugin" description on a press and a preprint server, and its "Settings" window's paragraphs, naming no other application and no missing function; scenario 8)
-  - A7 (an abstract holding "&" and "<": "citation_abstract" and "DC.Description" carry the symbols, not their HTML entities; Fields, "citation_abstract")
-  - OMP3 {OMP} (book 14's pages: "DC.Type" "Text.Book" on the book's page and a whole-book file's view page, "Text.Chapter" on a chapter's page and a chapter file's view page; Rule 17)
-  - OMP4 {OMP} (a published book with a chapter page and "Create New Version", then the new version published: the sitemap lists the chapter page at the address the book's page links to, and it opens; Rule 2c)
-  - A6 (an author whose account holds an English name only submits in French: "citation_author" and "DC.Creator.PersonalName" carry the full name; Fields, "citation_author")
-  - OMP5 {OMP} (a book file's view page: "DC.Identifier.URI" names that view page; Rule 17)
-  - {OMP} a chapter with "Show this chapter on its own page…" ticked: its entry in the sitemap, and its page's own tags, the chapter's title, contributors and abstract beside the book's identifiers (Fields, "What the sitemap lists"; Rule 16; Settings bullet 15)
-  - {OMP} a series' page in the sitemap (Fields, "What the sitemap lists")
-  - {OMP} a book whose only PDF file is for sale ("Direct Sales"): the address its "citation_pdf_url" gives sends a signed-out visitor to the Login page (Rule 12)
-  - {OMP} a book and its "PDF" format with a "URL Path" each: the "PDF" link opens a view page whose address carries both, while its "DC.Identifier" keeps the format's number (Rule 17)
-  - {OMP} a chapter's file view page beside a whole-book file's: the chapter's title and contributors on the first, the book's title, contributors and abstract on the second (Rule 17)
-  - {OMP} a series with only a "Print ISSN": a file's view page carries no "DC.Source.ISSN"; with an "Online ISSN", that one (Rule 17)
+  - A1 (a "Description" with a double quote mark: the journal's home page carries the whole text in its description tag; Rule 9) [report 2026-10-03]
+  - OMP1 {OMP} (a book with an EPUB format and an HTML format: the book page's "citation_fulltext_html_url" names the HTML file alone; Fields, "citation_fulltext_html_url") [report 2026-10-03]
+  - OMP2 {OMP} (a book with two PDF files for the whole book and no ISBN: one "citation_pdf_url" per file; Fields, "citation_pdf_url") [report 2026-10-03]
+  - A5 (an expired announcement: the sitemap lists the unexpired one alone; Rule 3) [report 2026-10-03]
+  - A2 (the Plugins list's "Google Analytics Plugin" description on a press and a preprint server, and its "Settings" window's paragraphs, naming no other application and no missing function; scenario 8) [report 2026-10-03]
+  - A7 (an abstract holding "&" and "<": "citation_abstract" and "DC.Description" carry the symbols, not their HTML entities; Fields, "citation_abstract") [report 2026-10-03]
+  - OMP3 {OMP} (book 14's pages: "DC.Type" "Text.Book" on the book's page and a whole-book file's view page, "Text.Chapter" on a chapter's page and a chapter file's view page; Rule 17) [report 2026-10-03]
+  - OMP4 {OMP} (a published book with a chapter page and "Create New Version", then the new version published: the sitemap lists the chapter page at the address the book's page links to, and it opens; Rule 2c) [report 2026-10-03]
+  - A6 (an author whose account holds an English name only submits in French: "citation_author" and "DC.Creator.PersonalName" carry the full name; Fields, "citation_author") [report 2026-10-03]
+  - OMP5 {OMP} (a book file's view page: "DC.Identifier.URI" names that view page; Rule 17) [report 2026-10-03]
+  - {OMP} a chapter with "Show this chapter on its own page…" ticked: its entry in the sitemap, and its page's own tags, the chapter's title, contributors and abstract beside the book's identifiers (Fields, "What the sitemap lists"; Rule 16; Settings bullet 15) [incidental 2026-10-05]
+  - {OMP} a series' page in the sitemap (Fields, "What the sitemap lists") [incidental 2026-10-05]
+  - {OMP} a book whose only PDF file is for sale ("Direct Sales"): the address its "citation_pdf_url" gives sends a signed-out visitor to the Login page (Rule 12) [report 2026-10-07]
+  - {OMP} a book and its "PDF" format with a "URL Path" each: the "PDF" link opens a view page whose address carries both, while its "DC.Identifier" keeps the format's number (Rule 17) [incidental 2026-10-13]
+  - {OMP} a chapter's file view page beside a whole-book file's: the chapter's title and contributors on the first, the book's title, contributors and abstract on the second (Rule 17) [incidental 2026-10-13]
+  - {OMP} a series with only a "Print ISSN": a file's view page carries no "DC.Source.ISSN"; with an "Online ISSN", that one (Rule 17) [incidental 2026-10-13]
 - **Rarely met**:
   - "User Registration" set to "The Journal Manager will register all
     user accounts. …", which takes "Register" out of the sitemap

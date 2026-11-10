@@ -654,20 +654,20 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A9 (issue reports
     `docs/issues/U62-A9-plugin-switch-refusal-raw-key.md` and
-    `docs/issues/U62-A9-refused-confirmation-window-keeps-spinning.md`): a Site Administrator without a manager role ticks and unticks a journal's plugin; the alert gives the reason in words and the "Disable" window closes
+    `docs/issues/U62-A9-refused-confirmation-window-keeps-spinning.md`): a Site Administrator without a manager role ticks and unticks a journal's plugin; the alert gives the reason in words and the "Disable" window closes [report 2026-10-02]
   - the guard for A1 (issue report
-    `docs/issues/U62-A1-plugin-gallery-offline-stays-loading.md`): "Plugin Gallery" on an installation that cannot reach PKP's site shows an empty list, with no server error
+    `docs/issues/U62-A1-plugin-gallery-offline-stays-loading.md`): "Plugin Gallery" on an installation that cannot reach PKP's site shows an empty list, with no server error [report 2026-10-02]
   - the guard for A5 (issue report
-    `docs/issues/U62-A5-failed-upgrade-removes-plugin.md`): an upgrade through a row's "Upgrade" whose own upgrade step fails leaves the old version listed, ticked and working
+    `docs/issues/U62-A5-failed-upgrade-removes-plugin.md`): an upgrade through a row's "Upgrade" whose own upgrade step fails leaves the old version listed, ticked and working [report 2026-10-02]
   - Rule 12's journal home page with its theme unticked (OJS1,
-    retired): it answers 200 and shows its current issue
+    retired): it answers 200 and shows its current issue [report 2026-10-02]
   - an upgrade's own steps (Rule 18): a newer version whose upgrade
     file holds a step with no range and one limited to the
     application's versions runs both, each checked by what it leaves
-    behind on the server (Rule 18)
+    behind on the server (Rule 18) [upstream 2026-10-27]
   - a plugin's tables, still in the database after its "Delete", "OK",
     with the test package and the table read Rule 21's footnote names
-    (Rule 21)
+    (Rule 21) [incidental 2026-11-05]
 - **Nothing new to test**:
   - a tick made in the Settings Wizard's "Plugins" tab showing on the
     journal's own list, and the reverse (Rule 3)

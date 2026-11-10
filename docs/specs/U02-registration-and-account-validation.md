@@ -737,51 +737,51 @@ Left out of the scenarios above, by reason:
     Account" email from the principal contact ([A6](#a6); Rule 12): the
     guard the issue report
     (`docs/issues/U02-A6-register-no-support-contact-empty-page.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - with validation required and the mail server refusing connections,
     registering leaves no locked account behind ([A6](#a6); Rule 12):
     the guard the issue report
     (`docs/issues/U02-A6-register-mail-down-says-email-sent.md`)
-    proposes, once the team settles the fix
+    proposes, once the team settles the fix [report 2026-10-04]
   - on a press site's site-wide Register page, both privacy consent
     refusals read as sentences ([OMP1](#omp1)): the guard the issue
     report (`docs/issues/U02-OMP1-press-site-register-consent-raw-codes.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - with validation required, the page the emailed activation link opens
     and the thank-you page after "Activate Account" each named in heading,
     breadcrumb and browser tab, the thank-you page ending with a "Login"
     link ([A2](#a2); Rule 13): the guard the issue report
     (`docs/issues/U02-A2-activation-pages-no-heading.md`) proposes, once
-    fixed
+    fixed [report 2026-10-04]
   - registering on the site-wide Register page with a journal's role and
     "Yes, I would like to be notified of new publications and
     announcements." unticked, then every "Do not send me an email…" box
     under "Public Announcements" ticked on that journal's Notifications
     tab ([A3](#a3); Rule 6): the guard the issue report
     (`docs/issues/U02-A3-site-register-email-optout-not-kept.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - on a press site's site-wide Register page, the press's privacy
     consent line off-screen until "Reader" is ticked under it and gone
     again when it is unticked ([OMP2](#omp2); scenario 6): the guard the
     issue report
     (`docs/issues/U02-OMP2-press-site-register-consent-shown-early.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - a journal closed to registrations, or open with no self-registering
     Reader or Reviewer role, left out of the site-wide Register page's
     list ([A4](#a4); Rule 8): the guard the issue report
     (`docs/issues/U03-A4-closed-journal-listed-on-roles-tab.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - a preprint server's site-wide Register page showing no
     reviewing-interests question or box ([OPS1](#ops1)): the guard the
     issue report
     (`docs/issues/U02-OPS1-server-site-register-asks-reviewing-interests.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - with validation required and `[invitations] expiration_days = 0`, the
     emailed activation link still opening "Confirm and activate your
     account" within `validation_timeout`, and activating the account
     ([A1](#a1); Rule 14): the guard the issue report
     (`docs/issues/U02-A1-activation-link-expires-before-validation-timeout.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
 - **Nothing new to test**:
   - the "Register" link on the Login and lost-password pages (Rule 1; scenario 1's header entry opens the same page)
   - the header's "Register" on the Login page carrying no destination (Rule 9; scenario 1's link below the form)

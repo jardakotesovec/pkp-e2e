@@ -841,88 +841,88 @@ are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for OMP8 (issue report `docs/issues/U44-OMP8-urn-pattern-example-unknown-placeholder.md`): once fixed, the press's URN settings window's pattern example uses only the placeholders it lists, and the URN it shows is what "Assign" makes from that pattern.
-  - the guard for A15 (issue report `docs/issues/U44-A15-urn-check-number-nan-unlisted-character.md`): once fixed, with "Enter an individual URN suffix…" and "Check Number" chosen, "Add Check Number" on the suffix "a~b" adds one digit, not "NaN".
-  - the guard for A16 (issue report `docs/issues/U44-A16-urn-shared-across-item-kinds.md`): once fixed, with "Enter an individual URN suffix…" chosen, a galley's "Identifiers" tab refuses the URN an article already carries, and an article's page refuses a galley's, with "The given URN suffix is already in use for another published item. Please enter a unique URN suffix for each item." (Rules 11, 12a).
+  - the guard for OMP8 (issue report `docs/issues/U44-OMP8-urn-pattern-example-unknown-placeholder.md`): once fixed, the press's URN settings window's pattern example uses only the placeholders it lists, and the URN it shows is what "Assign" makes from that pattern. [report 2026-10-19]
+  - the guard for A15 (issue report `docs/issues/U44-A15-urn-check-number-nan-unlisted-character.md`): once fixed, with "Enter an individual URN suffix…" and "Check Number" chosen, "Add Check Number" on the suffix "a~b" adds one digit, not "NaN". [report 2026-10-19]
+  - the guard for A16 (issue report `docs/issues/U44-A16-urn-shared-across-item-kinds.md`): once fixed, with "Enter an individual URN suffix…" chosen, a galley's "Identifiers" tab refuses the URN an article already carries, and an article's page refuses a galley's, with "The given URN suffix is already in use for another published item. Please enter a unique URN suffix for each item." (Rules 11, 12a). [report 2026-10-19]
   - the guard for OJS1 (issue report
     `docs/issues/U44-OJS1-new-issue-galley-publisher-id-server-error.md`):
     "Create Issue Galley" with a Publisher ID saving the galley, and a
-    Publisher ID another issue galley already has refused with its notice
+    Publisher ID another issue galley already has refused with its notice [report 2026-10-02]
   - the guard for A4 (issue report
     `docs/issues/U44-A4-article-own-urn-refused-as-in-use.md`): an
     article's "Identifiers" page saving its own URN a second time and on
-    a new version, and a URN another article carries refused
+    a new version, and a URN another article carries refused [report 2026-10-02]
   - the guard for OJS3 and OMP5 (issue report `docs/issues/U44-OJS3-OMP5
     -issue-and-press-file-publisher-id-never-kept.md`): an issue's and a
     press file's Publisher ID saved and read back on the reopened
-    "Identifiers" tab
+    "Identifiers" tab [report 2026-10-02]
   - the guard for OMP5 (issue report `docs/issues/U44-OMP5-press-file-re
     fused-publisher-id-box-vanishes.md`): a press file's "Identifiers"
-    tab keeping the "Publisher ID" box after a refused value
+    tab keeping the "Publisher ID" box after a refused value [report 2026-10-02]
   - the guard for A6 (issue report
     `docs/issues/U44-A6-urn-check-digit-from-suffix-only.md`): "Add
     Check Number" on `urn:nbn:de:0000-abc` giving
     `urn:nbn:de:0000-abc2`, the whole-URN digit, and "Assign" matching
-    the tab's own preview rule
+    the tab's own preview rule [report 2026-10-02]
   - the guard for A2 (issue report
     `docs/issues/U44-A2-publisher-id-on-tab-never-removed.md`): a
     galley's and a chapter's "Publisher ID" saved, emptied and saved,
-    and the reopened tab empty
+    and the reopened tab empty [report 2026-10-02]
   - the guard for A9 (issue report
     `docs/issues/U44-A9-urn-assign-offered-without-edit-rights.md`): a
     participant whose "Save" is greyed on the "Identifiers" page (a
-    Layout Editor) finding "Assign" greyed too
+    Layout Editor) finding "Assign" greyed too [report 2026-10-02]
   - the guard for A5 (issue report
     `docs/issues/U44-A5-new-version-galley-publisher-id-refused.md`): a
     galley's and a chapter's Publisher ID set, "Create New Version", and
-    the copy's "Identifiers" tab saving with the copied ID
+    the copy's "Identifiers" tab saving with the copied ID [report 2026-10-02]
   - the guard for A11 (issue report
     `docs/issues/U44-A11-urn-settings-pattern-choice-script-error.md`):
     the URN settings window under "Use the pattern entered below…", a
-    kind and "Check Number" ticked, with no page error
+    kind and "Check Number" ticked, with no page error [report 2026-10-02]
   - the guard for A13 (issue report
     `docs/issues/U44-A13-check-number-empty-urn-suffix-nan.md`): a
     galley's "Identifiers" tab greying "Add Check Number" while "URN
-    Suffix" is empty
+    Suffix" is empty [report 2026-10-02]
   - the guard for A14 (issue report
     `docs/issues/U44-A14-cleared-urn-stays-on-tab.md`): "Clear" › "OK"
     on a galley's and a chapter's "Identifiers" tab redrawing the tab at
-    once without the URN
+    once without the URN [report 2026-10-02]
   - the guard for A7 (issue report
     `docs/issues/U44-A7-urn-assign-box-leaves-urn-out.md`): a galley's
-    "Identifiers" tab whose assign box names the URN it will assign
+    "Identifiers" tab whose assign box names the URN it will assign [report 2026-10-02]
   - the guard for A8 (issue report
     `docs/issues/U44-A8-urn-suffix-pattern-spaces-raw-text-code.md`):
     the URN settings window refusing a pattern box of spaces with
-    "Please enter the URN suffix pattern for …", not a text code
+    "Please enter the URN suffix pattern for …", not a text code [report 2026-10-02]
   - the guard for OMP1 (issue report `docs/issues/U44-OMP1-urn-settings-
     chapters-files-alone-refused.md`): a press's URN settings saving
-    with only "Chapters", only "Files", or those two ticked
+    with only "Chapters", only "Files", or those two ticked [report 2026-10-02]
   - the guard for A10 (issue report
     `docs/issues/U44-A10-urn-prefix-refusal-written-out-brackets.md`):
     the URN settings window refusing `nbn:de:0000-` with
     `"urn:"<NID>":"<NSS>` under the box and at the top, no written-out
-    codes
+    codes [report 2026-10-02]
   - the guard for OMP2 (issue report
     `docs/issues/U44-OMP2-book-page-format-urn-code-label.md`): the book
     page showing an approved, available format's URN under "URN", linked
-    to the resolver
+    to the resolver [report 2026-10-02]
   - the guard for OMP6 (issue report
     `docs/issues/U44-OMP6-press-file-default-urn-no-format-number.md`):
     a format file's "Identifiers" tab previewing its default URN with
-    the format number, `…{press}.{monograph}.{format}.{file}`
+    the format number, `…{press}.{monograph}.{format}.{file}` [report 2026-10-02]
   - the guard for OMP4 (issue report
     `docs/issues/U44-OMP4-press-publish-window-urn-table.md`): a press
     with only "Monographs" ticked seeing the URN sentence, not the
-    one-row table, in the "Publish" window
+    one-row table, in the "Publish" window [report 2026-10-02]
   - a URN suffix another galley has saved without its URN being
     assigned, accepted on a second galley's "Identifiers" tab; the first
     of the two saved with the box ticked getting the URN and the other's
-    next "Save" refused (Rule 12a)
+    next "Save" refused (Rule 12a) [incidental 2026-10-13]
   - a switch from a galley's "Identifiers" tab to "Edit Metadata" with
     a Publisher ID typed and not saved, asking "The data on this form
     has changed. Do you wish to continue without saving?" (Fields, the
-    "Identifiers" tab)
+    "Identifiers" tab) [incidental 2026-10-13]
 - **Rarely met**:
   - a Site Administrator without a manager role in the journal: Settings
     reached on a journal only, and there the "URN" row without "Settings"

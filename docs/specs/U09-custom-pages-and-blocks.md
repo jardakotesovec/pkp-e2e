@@ -842,21 +842,21 @@ the footnote. <sup>y</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - a static page "Save" refused for its "Path", then corrected and saved: no red notice after the good save {OJS OMP} (A11; the guard its issue report names)
-  - an SVG chosen through "Browse for an image" refused with the site's types message, a PNG still stored (A16; the guard its issue report names)
-  - a BMP dropped and one pasted into a custom page's "Content": each refused with its notice and gone from the box, the saved page holding no embedded picture (A17; the guard its issue report names)
-  - a change made only in "Content" of the static page window and of the block window, then the back arrow: the question "The data on this form has changed. Do you wish to continue without saving?" (A19; the guard its issue report names)
-  - a static page and a "Custom Page" item saved at "dot.only" and "deep/Mixed_1.x", each opening at its address (A10; the guard its issue report names)
-  - with two form languages and the second language's editor held back, the first language's "Content" box in the block and item windows taking the click and the text, no spinner left (A20; the guard its issue report names)
-  - "Add Static Page" on the tab left open after "Static Pages Plugin" is unticked: no server error {OJS OMP} (A12; the guard its issue report names)
-  - a placed custom block's "Custom Block Manager" unticked, then a "Page Footer" saved on "Appearance" › "Setup" without a refusal (A15; the guard its issue report names)
-  - a preview's address typed by a section editor, an author or a signed-out visitor: the access-denied page, or Login (A7; the guard its issue report names)
-  - a picture over the server's file limit, and one over its request limit, chosen in "Insert/edit image": each refused with "Files larger than {size} can not be uploaded." and no server error (A18; the guard its two issue reports name)
-  - a custom block listed in "Custom Blocks" and offered under "Sidebar" by its "Block Name", and by the new one after a rename (A1; the guard its issue report names; scenario 4's "Renamed, name shown" bullet, whose "Sidebar" label after the rename no suite asserts while A1 stands)
-  - a custom block named with "&", and one named only in the primary language by a manager working in another, each opened with "Edit" and placed under "Sidebar" (A4, A13; the guard their issue report names)
-  - deleting a custom block: "OK" closing the window, the block gone from the Custom Block Manager's list, the public sidebar and "Sidebar" (Rule 24; A14, retired)
-  - a press on the shaded page beside the block window after a "Block Name" change: the question "The data on this form has changed. Do you wish to continue without saving?", "Cancel" keeping the window and the name, "OK" closing it with the "Custom Block Manager" window still open (Rule 30a)
-  - a reload, and "Edit Profile" at the block window's top, after a "Block Name" change, its box left: the "Leave site?" question (Rule 30c)
+  - a static page "Save" refused for its "Path", then corrected and saved: no red notice after the good save {OJS OMP} (A11; the guard its issue report names) [report 2026-10-02]
+  - an SVG chosen through "Browse for an image" refused with the site's types message, a PNG still stored (A16; the guard its issue report names) [report 2026-10-02]
+  - a BMP dropped and one pasted into a custom page's "Content": each refused with its notice and gone from the box, the saved page holding no embedded picture (A17; the guard its issue report names) [report 2026-10-01]
+  - a change made only in "Content" of the static page window and of the block window, then the back arrow: the question "The data on this form has changed. Do you wish to continue without saving?" (A19; the guard its issue report names) [report 2026-10-01]
+  - a static page and a "Custom Page" item saved at "dot.only" and "deep/Mixed_1.x", each opening at its address (A10; the guard its issue report names) [report 2026-10-01]
+  - with two form languages and the second language's editor held back, the first language's "Content" box in the block and item windows taking the click and the text, no spinner left (A20; the guard its issue report names) [report 2026-10-01]
+  - "Add Static Page" on the tab left open after "Static Pages Plugin" is unticked: no server error {OJS OMP} (A12; the guard its issue report names) [report 2026-10-01]
+  - a placed custom block's "Custom Block Manager" unticked, then a "Page Footer" saved on "Appearance" › "Setup" without a refusal (A15; the guard its issue report names) [report 2026-10-01]
+  - a preview's address typed by a section editor, an author or a signed-out visitor: the access-denied page, or Login (A7; the guard its issue report names) [report 2026-10-01]
+  - a picture over the server's file limit, and one over its request limit, chosen in "Insert/edit image": each refused with "Files larger than {size} can not be uploaded." and no server error (A18; the guard its two issue reports name) [report 2026-10-01]
+  - a custom block listed in "Custom Blocks" and offered under "Sidebar" by its "Block Name", and by the new one after a rename (A1; the guard its issue report names; scenario 4's "Renamed, name shown" bullet, whose "Sidebar" label after the rename no suite asserts while A1 stands) [report 2026-10-01]
+  - a custom block named with "&", and one named only in the primary language by a manager working in another, each opened with "Edit" and placed under "Sidebar" (A4, A13; the guard their issue report names) [report 2026-10-01]
+  - deleting a custom block: "OK" closing the window, the block gone from the Custom Block Manager's list, the public sidebar and "Sidebar" (Rule 24; A14, retired) [report 2026-10-01]
+  - a press on the shaded page beside the block window after a "Block Name" change: the question "The data on this form has changed. Do you wish to continue without saving?", "Cancel" keeping the window and the name, "OK" closing it with the "Custom Block Manager" window still open (Rule 30a) [report 2026-10-12]
+  - a reload, and "Edit Profile" at the block window's top, after a "Block Name" change, its box left: the "Leave site?" question (Rule 30c) [report 2026-10-12]
 - **Rarely met**:
   - "Static Pages Plugin" unticked with pages stored: every page answering "404 Not Found" and the tab gone, then the pages back when it is ticked again {OJS OMP} (Settings bullet 1; Rule 15)
   - "Custom Block Manager" unticked with a block placed: the block leaving the public pages and "Sidebar", then back at its place when it is ticked again (Settings bullet 2; Rule 25)

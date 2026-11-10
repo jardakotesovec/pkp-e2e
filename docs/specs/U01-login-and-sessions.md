@@ -846,38 +846,38 @@ Left out of the scenarios above, by reason:
     password change, with no IP addresses ([A17](#a17)): the guard the
     issue report
     (`docs/issues/U01-A17-password-change-logout-audited-as-ip-change.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-21]
   - a 40-character password chosen while accepting a role invitation,
     then the Login page's "Password" box taking all 40 and signing in
     ([A1](#a1)): the guard the issue report
     (`docs/issues/U03-A7-password-boxes-keep-32-characters.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-03]
   - the Login page's "Keep me logged in" arriving unticked, and after
     a refused sign-in showing as the user left it, unticked or ticked
     ([A2](#a2)): the guard the issue report
     (`docs/issues/U01-A2-keep-me-logged-in-always-ticked.md`) proposes,
-    once fixed
+    once fixed [report 2026-10-04]
   - the browser tab after a refused "OK" on "Change Password" and a
     refused "Save" on "Reset Password" still naming the page, and the
     reset form keeping its "Reset Password" heading ([A11](#a11)): the
     guard the issue report
     (`docs/issues/U01-A11-refused-password-form-tab-loses-name.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - after a "Login As", no row of Users & Roles, the Participants panel
     or the Reviewers table offering "Login As", and "Logout as" bringing
     back the operator's own account ([A4](#a4)): the guard the issue
     report (`docs/issues/U01-A4-second-login-as-strands-operator.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - the Site Administrator's "Edit User" on a flagged account opening
     with "Change Password" ticked, and an unchanged "OK" keeping the
     flag ([A10](#a10)): the guard the issue report
     (`docs/issues/U01-A10-edit-user-hides-clears-change-password.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-04]
   - a Journal Manager logged in as an Author while the Author signs in
     in another browser: for an Author who had signed in before, the
     manager's next page still shows the Author's account and "Logout as"
     leads back to the manager's own (Rule 15a); for a sign-in that
-    re-saves the Author's password, the guard owed once [A15](#a15) is fixed
+    re-saves the Author's password, the guard owed once [A15](#a15) is fixed [incidental 2026-10-15]
 - **Rarely met**:
   - a forced change ending the account's other sessions, and flagging alone leaving them signed in (Rule 11): it needs the Site Administrator's "Edit User" (Rule 11a) on an account already signed in elsewhere
 - **Nothing new to test**:

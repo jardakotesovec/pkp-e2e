@@ -516,13 +516,13 @@ footnote. <sup>s0</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for the retired A11 {OJS OMP} (Rule 5a; Actors row 3): a Section Editor opens the "View changes" address of one of their own submissions with the number of a change made on a submission they are not assigned to, and the tab shows a line of raw text holding "The requested resource was not found." and nothing of that review; an editor of the submission the change was made on still presses "View changes" on its line, and the window titled "View Review" opens with the review's old and new comments
-  - "Add Note" with the box empty in "Activity Log & Notes": refused, no note listed and no "Posted new note." line in "History" ([A2](#a2)): the guard the issue report proposes
-  - a "Notify" message, an "Assign" message and a discussion's email: their "History" lines name the editor who sent them under "User" (Rule 4c; [A1](#a1)): the guard the issue report proposes
-  - a Reviewer's "Submit Review": the "Review complete" lines with nothing under "User" (Rule 4c; [A5](#a5)): the guard the issue report proposes
-  - text typed in "Add Note" and not added on a submission with a note: "Close" asks; after a switch to "History" answered "OK", "Close" asks nothing; no "Leave site?" after either (Rule 10d; [A3](#a3), [A9](#a9), [A10](#a10)): the guard the issue report proposes
-  - a submission's "History" read in French (Canada): its file lines name the file, and its "was assigned" lines the participant (Rule 8a; [A7](#a7)): the guard the issue report proposes
-  - a publication format created and then deleted: its two "History" lines name the format {OMP} (Rule 11; [OMP1](#omp1)): the guard the issue report proposes
+  - the guard for the retired A11 {OJS OMP} (Rule 5a; Actors row 3): a Section Editor opens the "View changes" address of one of their own submissions with the number of a change made on a submission they are not assigned to, and the tab shows a line of raw text holding "The requested resource was not found." and nothing of that review; an editor of the submission the change was made on still presses "View changes" on its line, and the window titled "View Review" opens with the review's old and new comments [report 2026-10-13]
+  - "Add Note" with the box empty in "Activity Log & Notes": refused, no note listed and no "Posted new note." line in "History" ([A2](#a2)): the guard the issue report proposes [report 2026-10-02]
+  - a "Notify" message, an "Assign" message and a discussion's email: their "History" lines name the editor who sent them under "User" (Rule 4c; [A1](#a1)): the guard the issue report proposes [report 2026-10-04]
+  - a Reviewer's "Submit Review": the "Review complete" lines with nothing under "User" (Rule 4c; [A5](#a5)): the guard the issue report proposes [report 2026-10-04]
+  - text typed in "Add Note" and not added on a submission with a note: "Close" asks; after a switch to "History" answered "OK", "Close" asks nothing; no "Leave site?" after either (Rule 10d; [A3](#a3), [A9](#a9), [A10](#a10)): the guard the issue report proposes [report 2026-10-04]
+  - a submission's "History" read in French (Canada): its file lines name the file, and its "was assigned" lines the participant (Rule 8a; [A7](#a7)): the guard the issue report proposes [report 2026-10-04]
+  - a publication format created and then deleted: its two "History" lines name the format {OMP} (Rule 11; [OMP1](#omp1)): the guard the issue report proposes [report 2026-10-04]
 - **Nothing new to test**:
   - a revision cancelled with "Cancel", leaving no line of it, metadata line included, on either "History" (Rule 6c)
   - a preprint server's file lines, from a galley's file, and its "Change File" cancelled (Rules 6, 6c)

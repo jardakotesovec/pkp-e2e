@@ -1123,15 +1123,15 @@ Left out of the scenarios above, by reason:
   - the guard for A13 (issue report
     `docs/issues/U13-A1-french-version-name-raw-key.md`): records read
     at `…/fr_CA/oai` carrying the version's name in an article's MARC
-    field 251, no "##…##" key {OJS} (Rule 19; once fixed)
+    field 251, no "##…##" key {OJS} (Rule 19; once fixed) [report 2026-10-01]
   - the guard for OPS1 (issue report
     `docs/issues/U19-OPS1-preprint-server-oai-until-fails.md`):
     ListIdentifiers and ListRecords asked with `until` on a preprint server
     list its preprints, as scenario 5 shows on a journal and a press {OPS}
-    (Rule 9)
+    (Rule 9) [report 2026-10-01]
   - a book or a preprint published without an abstract (retired OMP4,
     OPS2): the press's or the server's ListRecords and GetRecord answer
-    its record without a "Description" {OMP OPS} (the Dublin Core table)
+    its record without a "Description" {OMP OPS} (the Dublin Core table) [upstream 2026-10-05]
   - the guard for retired [A1](#a1) and [A25](#a25) (fixed by
     pkp/pkp-lib#13566): a second journal's (press's) own address after
     it unpublishes an article: its lists and GetRecord show its own
@@ -1141,16 +1141,16 @@ Left out of the scenarios above, by reason:
     repository" while the first journal has deleted records, and {OJS}
     its `driver` set holds none of the first journal's {OJS OMP} (Rules
     4b, 6, 15, 23a; scenario 3's journal and press reads, scenario 4's
-    empty journal)
+    empty journal) [report 2026-10-22]
   - Rules 17a and 18 read again on a journal other than the first, now
     that A1 is fixed: with "Enable OAI" off {OJS} and with the journal
     not enabled publicly, whether its own address lists its deleted
-    records {OJS OMP}
+    records {OJS OMP} [report 2026-10-22]
   - the guard for A18 (issue report
     `docs/issues/U19-A18-oai-datestamp-stays-after-edit-republish.md`): a
     published book (preprint) edited, then unpublished and published again:
     the record's datestamp moves each time and `from` today lists it {OMP
-    OPS} (once fixed)
+    OPS} (once fixed) [report 2026-10-01]
   - the per-version records and the guard for retired [A22](#a22)
     (pkp-e2e#281, closed at the fix): with "DOI
     Versioning" at "Yes" on one journal (a "DOI Prefix" typed first),
@@ -1159,108 +1159,108 @@ Left out of the scenarios above, by reason:
     published on screen listed as its own record before the article's,
     each answering GetRecord {OJS} (Rules 20, 20b; writable since
     pkp/ojs#5947: before it, one such journal failed every OJS OAI read
-    on the shared install)
+    on the shared install) [upstream 2026-10-16]
   - the guard for A16 (issue report
     `docs/issues/U19-A16-oai-argument-twice-server-error.md`): a request
     that gives `metadataPrefix`, `set` or `verb` twice answering the
     protocol's refusal ("Multiple values are not allowed for the …
-    parameter", "Illegal OAI verb") (once fixed)
+    parameter", "Illegal OAI verb") (once fixed) [report 2026-10-01]
   - the guard for A17 (issue report
     `docs/issues/U19-A17-oai-malformed-identifier-answers-record.md`):
     GetRecord of an identifier with letters after the number, or with the
     app's start in its middle, answering "Identifier is not in a valid
     format" on a press and a preprint server, as a journal does
-    {OMP OPS} (once fixed)
+    {OMP OPS} (once fixed) [report 2026-10-01]
   - the guard for OMP3 (issue report
     `docs/issues/U19-OMP3-oai-unknown-set-lists-other-records.md`): a press
     asked for an unknown series, another press's path and an unknown path as
     `set`, each answering "No matching records in this repository" {OMP}
-    (once fixed)
+    (once fixed) [report 2026-10-01]
   - the guard for A2 (issue report
     `docs/issues/U19-A2-oai-from-until-ignore-time-of-day.md`): `from` and
     `until` given with a time of day listing only the records changed from,
-    or until, that second (Rule 9a; once fixed)
+    or until, that second (Rule 9a; once fixed) [report 2026-10-01]
   - the guard for A3 (issue report
     `docs/issues/U19-A3-oai-impossible-date-accepted.md`): ListRecords and
     ListIdentifiers given a `from` or `until` that is not in the calendar
     (month 13, 30 February, hour 25) answering "Illegal from parameter" or
-    "Illegal until parameter" (Rule 9b; once fixed)
+    "Illegal until parameter" (Rule 9b; once fixed) [report 2026-10-01]
   - the guard for OPS4 (issue report
     `docs/issues/U19-OPS4-removed-preprint-server-no-deleted-records.md`): a
     second preprint server with a posted preprint removed under
     Administration › Hosted Servers: the site-wide GetRecord and list show
-    the preprint as a deleted record {OPS} (once fixed)
+    the preprint as a deleted record {OPS} (once fixed) [report 2026-10-01]
   - the guard for A4 (issue report
     `docs/issues/U19-A4-oai-browser-last-part-says-more-results.md`): the
     browser view of a paged list's last part ending the list, with no
-    "Resume" (Rule 13; once fixed)
+    "Resume" (Rule 13; once fixed) [report 2026-10-01]
   - the guard for A5 (issue report
     `docs/issues/U19-A5-oai-browser-record-formats-shown-as-archive.md`):
     the browser view of "formats" on a record's header naming the record and
-    linking each format to that record (once fixed)
+    linking each format to that record (once fixed) [report 2026-10-01]
   - the guard for A12 (issue report
     `docs/issues/U19-A12-oai-marc-records-not-valid-for-their-schemas.md`):
     a journal's `marcxml` and `oai_marc` records valid for the schemas they
     name, with field 773, the issue date, the affiliation and the ISSN where
-    a reader looks for them {OJS} (once fixed)
+    a reader looks for them {OJS} (once fixed) [report 2026-10-01]
   - the guard for A15 (issue report
     `docs/issues/U19-A15-oai-marc-008-date-percent-signs.md`): a journal's
     MARC field 008 carrying the publication date as six digits and the year
-    in both MARC formats {OJS} (once fixed)
+    in both MARC formats {OJS} (once fixed) [report 2026-10-01]
   - the guard for A19 (issue report
     `docs/issues/U19-A19-oai-deleted-section-set-lists-nothing.md`): the set
     of a section whose "Abbreviation" was changed, or that was deleted,
     after an article in it was unpublished: asked for, it lists its deleted
-    records {OJS OPS} (once fixed)
+    records {OJS OPS} (once fixed) [report 2026-10-01]
   - the guard for A20 (issue report
     `docs/issues/U19-A20-oai-section-set-deleted-records-ignore-dates.md`):
     a section's set asked with `from` or `until` leaving out the deleted
-    records outside the dates {OJS OPS} (Rule 9d; once fixed)
+    records outside the dates {OJS OPS} (Rule 9d; once fixed) [report 2026-10-01]
   - the guard for A7 (issue report
     `docs/issues/U19-A7-oai-dc-peer-reviewed-type-gone-after-section-save.md`):
     a section with an empty "Identify items published in this section as
     a(n)" typing its articles the same before and after its window is saved
-    {OJS} (once the team rules on the default, pkp/pkp-lib#10839)
+    {OJS} (once the team rules on the default, pkp/pkp-lib#10839) [report 2026-10-01]
   - the guard for A8 (issue report
     `docs/issues/U19-A8-oai-dc-source-keeps-empty-part.md`): the Dublin Core
     "Source" of an article in no issue and of a press record carrying only
     the parts it has, with no trailing or doubled "; " {OJS OMP} (once
-    fixed)
+    fixed) [report 2026-10-01]
   - the guard for OMP6 (issue report
     `docs/issues/U19-OMP6-oai-series-set-name-leading-space.md`): a press's
     ListSets naming a series that has no "Prefix" by its title, with no
-    leading space {OMP} (once fixed)
+    leading space {OMP} (once fixed) [report 2026-10-01]
   - the guard for A10 (issue report
     `docs/issues/U19-A10-oai-jats-list-refused-for-one-subscription-article.md`):
     a subscription journal's `jats` list holding an article of a
     subscription issue answering with the open articles' records {OJS} (once
-    the team chooses the list's answer and it is fixed)
+    the team chooses the list's answer and it is fixed) [report 2026-10-01]
   - the guard for A23 (issue report
     `docs/issues/U19-A23-oai-driver-set-lists-article-without-galley.md`):
     with "DRIVER" enabled, an article published with no galley left out of
-    the `driver` set {OJS} (Rule 23; once fixed)
+    the `driver` set {OJS} (Rule 23; once fixed) [report 2026-10-01]
   - the guard for A24 (issue report
     `docs/issues/U19-A24-oai-driver-list-says-more-results.md`): a journal's
     `driver` list ending without "Resume" when it holds every member, its
     "completeListSize" counting the members, and a set of more than a
-    hundred members listed in parts to its end {OJS} (Rule 23; once fixed)
+    hundred members listed in parts to its end {OJS} (Rule 23; once fixed) [report 2026-10-01]
   - the guard for A11 (issue report
     `docs/issues/U19-A11-oai-driver-set-misses-deleted-record-of-article-in-no-issue.md`):
     with "DRIVER" enabled, an article published in no issue and then
     unpublished leaving a deleted record in the `driver` set {OJS} (Rule
-    23a; once fixed)
+    23a; once fixed) [report 2026-10-01]
   - with "DRIVER" enabled, an article unpublished from its issue staying
     in the `driver` set as a deleted record, its header naming "driver"
-    {OJS} (Rule 23a; on a scratch journal, writable since A1's fix)
+    {OJS} (Rule 23a; on a scratch journal, writable since A1's fix) [incidental 2026-10-02]
   - the guard for OMP8 and OPS5 (issue report
     `docs/issues/U15-OMP3-OPS4-returned-item-gone-search-still-lists.md`):
     a published book and a posted preprint returned with "Return to
     Workflow" still listed with their metadata, and no deleted record
-    for either {OMP OPS} (Rule 4c; once fixed)
+    for either {OMP OPS} (Rule 4c; once fixed) [incidental 2026-10-05]
   - {OMP} a press with a series, one book published in it and one in no
     series: ListSets naming the series' set "{press path}:{series path}",
     each record's header naming its one set, the series' set listing the
-    book in it alone and the press's set both (Rules 7b, 7d, 8)
+    book in it alone and the press's set both (Rules 7b, 7d, 8) [incidental 2026-10-05]
 - **Rarely met**:
   - a list longer than one answer holds (more than 100 records), paged
     with "Resume" to its last part (Rule 13): only a harvester pages

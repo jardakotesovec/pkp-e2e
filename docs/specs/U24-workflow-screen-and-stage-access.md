@@ -1109,13 +1109,13 @@ Left out of the scenarios above, by reason:
     submission under My Submissions ([A12](#a12), [A13](#a13),
     [OPS6](#ops6)): the guard the issue report
     (`docs/issues/U24-A12-A13-OPS6-author-editor-editorial-view-refused.md`)
-    proposes, once fixed
-  - a preprint server draft's header bubble and list rows reading "Incomplete" ([OPS3](#ops3); Rule 5) {OPS}: the guard the issue report proposes, once fixed
-  - a press that enables the URN plugin, disables it and reads the version's pages (no "Identifiers") and the public book page (no URN) ([OMP3](#omp3)) {OMP}: the guard the issue report proposes, once fixed
-  - an older workflow address (`…/workflow/access/<id>`) to a deleted submission, and a reader address that names nothing, answering "404 Not Found" inside the site's own header and menus with status 404 ([A9](#a9); Rules 2a, 3): the guard the issue report proposes, once fixed
-  - a stage-naming address typed without a submission number, or with a number no submission has, answering "404 Not Found" for an editor and an author ([A5](#a5); Rule 2d): the guard the issue report proposes, once fixed
-  - the review stage's own entry ("Review"; "Internal Review" or "External Review" on a press) only folding and unfolding its rounds, the selected round's page staying, for the editor and the author ([A6](#a6); Rules 8a, 8b): the guard the issue report proposes, once fixed
-  - a Journal Manager or Editor assigned to their own submission only as its Author: the dashboard address opening it in the editorial view Rule 20b describes, My Submissions and the old author-dashboard address opening the author's view, and the older addresses of Rule 2a, every stage's, turning them away while their other submissions forward (Actors rows 1–3; Rules 2a, 20a, 20b, 20d)
+    proposes, once fixed [other 2026-10-21]
+  - a preprint server draft's header bubble and list rows reading "Incomplete" ([OPS3](#ops3); Rule 5) {OPS}: the guard the issue report proposes, once fixed [report 2026-10-02]
+  - a press that enables the URN plugin, disables it and reads the version's pages (no "Identifiers") and the public book page (no URN) ([OMP3](#omp3)) {OMP}: the guard the issue report proposes, once fixed [report 2026-10-02]
+  - an older workflow address (`…/workflow/access/<id>`) to a deleted submission, and a reader address that names nothing, answering "404 Not Found" inside the site's own header and menus with status 404 ([A9](#a9); Rules 2a, 3): the guard the issue report proposes, once fixed [report 2026-10-02]
+  - a stage-naming address typed without a submission number, or with a number no submission has, answering "404 Not Found" for an editor and an author ([A5](#a5); Rule 2d): the guard the issue report proposes, once fixed [report 2026-10-02]
+  - the review stage's own entry ("Review"; "Internal Review" or "External Review" on a press) only folding and unfolding its rounds, the selected round's page staying, for the editor and the author ([A6](#a6); Rules 8a, 8b): the guard the issue report proposes, once fixed [report 2026-10-02]
+  - a Journal Manager or Editor assigned to their own submission only as its Author: the dashboard address opening it in the editorial view Rule 20b describes, My Submissions and the old author-dashboard address opening the author's view, and the older addresses of Rule 2a, every stage's, turning them away while their other submissions forward (Actors rows 1–3; Rules 2a, 20a, 20b, 20d) [incidental 2026-10-19]
 - **Rarely met**:
   - the language line gone once a second version exists (Rule 17): a
     second version comes from "Create New Version"

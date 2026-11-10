@@ -744,22 +744,22 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A10 (issue report
     `docs/issues/U52-A10-paypal-error-page-no-heading.md`):
-    the PayPal error page of scenario 5 carrying the heading "Paypal Fee Payment" and that name in its breadcrumb and browser tab
+    the PayPal error page of scenario 5 carrying the heading "Paypal Fee Payment" and that name in its breadcrumb and browser tab [report 2026-10-01]
   - the guard for A2 (issue report
     `docs/issues/U52-A2-fee-task-stays-after-fee-recorded.md`):
-    after "Paid" and after "Waived" are saved in the "Payments" menu, the Author's Tasks panel holding no "The publication fee is due for payment." task
+    after "Paid" and after "Waived" are saved in the "Payments" menu, the Author's Tasks panel holding no "The publication fee is due for payment." task [report 2026-10-01]
   - the guard for A12 (issue report
     `docs/issues/U52-A12-institutions-menu-entry-stays-after-payments-off.md`):
-    after "Enable" is saved unticked, the side menu dropping "Institutions" together with "Payments" on the same page (the journal's institutional statistics off)
+    after "Enable" is saved unticked, the side menu dropping "Institutions" together with "Payments" on the same page (the journal's institutional statistics off) [report 2026-10-01]
   - the guard for A4 (issue report
     `docs/issues/U52-A4-payment-types-required-note-no-required-field.md`):
-    the "Payment Types" tab carrying no "Required fields are marked with an asterisk" line
+    the "Payment Types" tab carrying no "Required fields are marked with an asterisk" line [report 2026-10-01]
   - the guard for A3 (issue report
     `docs/issues/U52-A3-A9-payment-link-blank-page-when-payments-off.md`):
-    with a fee requested, the Author's fee link opening no payment page once "Enable" is saved unticked or the method's instructions are emptied
+    with a fee requested, the Author's fee link opening no payment page once "Enable" is saved unticked or the method's instructions are emptied [report 2026-10-01]
   - the guard for A11 (issue report
     `docs/issues/U52-A11-merged-payer-breaks-payments-list-and-publishing.md`):
-    merging a paid Author and a subscriber into other accounts, then the "Payments" list loading, the menu reading "Paid", the publish window passing and the subscription moved
+    merging a paid Author and a subscriber into other accounts, then the "Payments" list loading, the menu reading "Paid", the publish window passing and the subscription moved [upstream 2026-10-01]
 - **Rarely met**:
   - "Purchase Issue" set: the reader's "Purchase Issue Fee" payment page
     (Settings bullet 7; Fields, the manual method's payment page)

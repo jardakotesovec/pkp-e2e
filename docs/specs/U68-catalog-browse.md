@@ -612,20 +612,20 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A2 (issue report
     `docs/issues/U68-A2-cover-link-no-name.md`): a book summary's cover
-    link out of the accessibility tree, its title link named
+    link out of the accessibility tree, its title link named [report 2026-10-04]
   - the guard for A7 (issue report
     `docs/issues/U70-A10-U68-A7-category-page-no-new-releases-or-featured.md`):
     a category's new release listed on its page, and its featured book
-    set apart
+    set apart [report 2026-10-03]
   - the guard for A4 (issue report
     `docs/issues/U16-A6-A7-category-picture-not-link-alt-null.md`): a
-    series' picture a link to its full-size version
+    series' picture a link to its full-size version [report 2026-10-04]
   - the guard for A9 (issue report
     `docs/issues/U68-A9-catalog-old-search-address-not-found.md`): the
-    catalog's old search address opening the Search page with its words
+    catalog's old search address opening the Search page with its words [report 2026-10-04]
   - the guard for A11 (issue report
     `docs/issues/U16-OMP4-press-browse-block-empty-box.md`): the "Browse"
-    block's "Series" line gone while every series is inactive
+    block's "Series" line gone while every series is inactive [report 2026-10-04]
 - **Nothing new to test**:
   - a signed-in user of any role, shown the same pages with the same
     books as the signed-out visitor (Actors row 1)

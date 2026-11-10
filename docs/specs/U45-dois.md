@@ -2063,85 +2063,85 @@ throwaway accounts. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - A review taken out of public view whose DOI reads "Registered" or "Submitted": "Deposit DOIs" and the "Mark DOIs …" actions on its work leave that DOI's status, seen on its row once public again, and the reviews file (Rule 29b) leaves the review out (OJS6 retired; Rules 7b, 29)
-  - A review that qualifies again after losing its "Unregistered" DOI (OJS7, ruled intended): under "Immediately…" a new, different DOI at once; under "Upon reaching the copyediting stage" its row reads "Needs DOI" until "Assign DOIs" or the next publication (Rules 7a, 7b; scenario 17 stops at the untick)
+  - A review taken out of public view whose DOI reads "Registered" or "Submitted": "Deposit DOIs" and the "Mark DOIs …" actions on its work leave that DOI's status, seen on its row once public again, and the reviews file (Rule 29b) leaves the review out (OJS6 retired; Rules 7b, 29) [upstream 2026-10-07]
+  - A review that qualifies again after losing its "Unregistered" DOI (OJS7, ruled intended): under "Immediately…" a new, different DOI at once; under "Upon reaching the copyediting stage" its row reads "Needs DOI" until "Assign DOIs" or the next publication (Rules 7a, 7b; scenario 17 stops at the untick) [upstream 2026-10-07]
   - the guard for A19 (Rule 35; issue report
     `docs/issues/U45-A19-agency-choice-unticks-every-doi-kind.md`): a
     journal and a preprint server with the galley kind ticked before a
     kept kind choose Crossref and save; the Setup tab then shows the kept
-    kinds ticked and the DOIs page lists its items {OJS OPS}
+    kinds ticked and the DOIs page lists its items {OJS OPS} [report 2026-10-01]
   - the guard for A18 (Rule 33; issue report
     `docs/issues/U45-A18-deposit-unreachable-agency-stays-submitted.md`):
     a deposit the test install cannot send to the agency turns the item
-    "Error" with "View Error", and "Has Error" lists it {OJS OPS}
+    "Error" with "View Error", and "Has Error" lists it {OJS OPS} [report 2026-10-01]
   - the guard for OMP1 (Rules 4, 22; issue report
     `docs/issues/U45-OMP1-file-dois-ignored-on-dois-page.md`): a press
     with "Files" alone ticked listing its books on the DOIs page, and a
-    book missing only its file DOI listed under "Needs DOI" {OMP}
+    book missing only its file DOI listed under "Needs DOI" {OMP} [report 2026-10-01]
   - the guard for A17 (Rule 32; issue report
     `docs/issues/U45-A17-major-version-earlier-doi-stays-registered.md`):
     under "DOI Versioning" "Yes", a new major version published over a
     version whose DOI reads "Registered" turns that DOI "Needs Sync" in
-    the "View all" window
+    the "View all" window [report 2026-10-12]
   - under "DOI Versioning" "Yes", a preprint's "Minor Revision" keeping
     its galley's DOI: once 2.1 made from 2.0 is posted, its block in the
     "View all" window holds 2.0's galley DOI {OPS} (Rules 12, 20; OPS4
-    retired)
+    retired) [upstream 2026-10-07]
   - under "DOI Versioning" "Yes", a work whose 1.0 and a minor 1.1 are
     published showing no "There are … versions." line and no "View
-    all" (Rule 20)
+    all" (Rule 20) [incidental 2026-10-15]
   - the guard for OMP2 (Rule 45; issue report
     `docs/issues/U45-OMP2-file-row-doi-save-error.md`): a DOI typed into a
     book's empty file row and saved answers "DOI(s) successfully updated"
-    and shows at once {OMP}
+    and shows at once {OMP} [report 2026-10-01]
   - the guard for A12 (Rule 22; issue report
     `docs/issues/U45-A12-doi-filter-clear-hides-unpublished.md`):
     "Unregistered", then "Registered", then "Clear filter: Registered"
-    lists the unpublished works again
+    lists the unpublished works again [report 2026-10-01]
   - the guard for A4 (Rule 30; issue report
     `docs/issues/U45-A4-deposited-item-reads-manually-registered.md`):
     after "Deposit DOIs" the "Submitted" item's agency box reads "The
-    metadata for this item has been submitted to {agency}." {OJS OPS}
+    metadata for this item has been submitted to {agency}." {OJS OPS} [report 2026-10-01]
   - the guard for A8 (Fields, the DOIs page; issue report
     `docs/issues/U45-A8-doi-page-controls-unnamed.md`): the button beside
     "Filters" found by its role and the name "DOI Statuses", and a row's
-    tick box by its role and the item's name
+    tick box by its role and the item's name [report 2026-10-01]
   - the guard for A20 (Rule 44; issue report
     `docs/issues/U45-A20-doi-agency-tool-page-empty-heading.md`): the
     agency plugins' Tools pages carrying the plugin's name in their
-    heading and browser tab, under the "Tools" breadcrumb {OJS OPS}
+    heading and browser tab, under the "Tools" breadcrumb {OJS OPS} [report 2026-10-01]
   - the guard for OJS3 (Rule 39; issue report
     `docs/issues/U45-OJS3-publish-window-issn-warning-twice.md`):
-    scenario 14's publish window listing the ISSN sentence once {OJS}
+    scenario 14's publish window listing the ISSN sentence once {OJS} [report 2026-10-01]
   - the guard for A21 (Fields, the Registration tab; issue report
     `docs/issues/U45-A21-registration-save-without-agency-logs-warning.md`):
     scenarios 12 and 19's "Save" without an agency plugin leaving no
     PHP warning in the test install's server log
-    ([note f-a21](#fn-f-a21) says where)
+    ([note f-a21](#fn-f-a21) says where) [report 2026-10-01]
   - the guard for A22 (Rule 24; issue report
     `docs/issues/U45-A22-bulk-actions-menu-stays-open.md`): after "Assign
     DOIs" confirmed at once, the "Bulk Actions" menu closed and the first
-    row's expand button pressable
+    row's expand button pressable [report 2026-10-01]
   - the guard for A24 (Rule 16; issue report
     `docs/issues/U45-A24-doi-row-title-formatting-codes.md`): a work
     whose "Title" was saved with an italic word and an "&" listed on the
     DOIs page with the title as its workflow page shows it, the word in
-    italics and no tag or entity printed
+    italics and no tag or entity printed [upstream 2026-10-09]
   - the guard for OJS4 (issue report
     `docs/issues/U45-OJS4-issue-deposit-dois-stays-unregistered.md`):
     with the queue held, a published issue ticked on the "Issues" tab
     reading "Submitted" right after "Deposit DOIs" is confirmed, an
-    unticked article beside it still "Unregistered" {OJS}
+    unticked article beside it still "Unregistered" {OJS} [upstream 2026-10-09]
   - "Mark DOIs Registered", "Mark DOIs Needs Sync" and "Mark DOIs
     Unregistered" on a work with two published major versions under "DOI
     Versioning" "Yes", every block of the "View all" window changing
     {OJS OPS}, and on a press "Mark DOIs Registered" and "Mark DOIs Needs
     Sync" changing every published version's block, chapter and format
-    rows included {OMP} (Rules 20, 26–28, 52; OMP4 retired)
+    rows included {OMP} (Rules 20, 26–28, 52; OMP4 retired) [incidental 2026-10-05]
   - a press with "Files" ticked and "DOI Versioning" "Yes": "Mark DOIs
     Registered" on a book whose new major version is not yet published
     leaving that version's file row ("PDF / article.pdf") "Unregistered",
-    and still so once it is published {OMP} (Rules 26, 52; OMP5 retired)
+    and still so once it is published {OMP} (Rules 26, 52; OMP5 retired) [upstream 2026-10-07]
   - a journal with Crossref configured and "Peer Review" ticked, a work
     published as a version of record with a public review that does not
     count as read: no "Peer Review {number}" row, "Deposit All" turning
@@ -2150,79 +2150,79 @@ Left out of the scenarios above, by reason:
     "Article" row was marked "Registered" by "Mark DOIs Registered",
     "Mark as Complete" and "Assign DOIs", then "Deposit All" turning the
     review's row "Submitted" and the "Article" row staying "Registered"
-    {OJS} (Rules 7, 7a, 26, 29)
+    {OJS} (Rules 7, 7a, 26, 29) [upstream 2026-10-07]
   - a work at Review whose version is published as a "Published
     Manuscript Under Review", with a public review that does not count as
     read: no "Peer Review {number}" row, "Deposit DOIs" turning the
     "Article" row "Submitted" and "Mark DOIs Registered" on a twin turning
     it "Registered", and after "Mark as Complete" the review's row
-    reading "Needs DOI" {OJS} (Rules 7, 26, 29)
+    reading "Needs DOI" {OJS} (Rules 7, 26, 29) [upstream 2026-10-07]
   - "Upon reaching the copyediting stage": a review that comes to count
     as read after the move getting its DOI when the version is
-    published {OJS} (Rule 7a)
+    published {OJS} (Rule 7a) [upstream 2026-10-07]
   - a published work's review that comes to count as read: "Assign
     DOIs" giving it its DOI, then "Mark DOIs Registered" (or "Deposit
     DOIs") turning its row "Registered" ("Submitted") with the "Article"
-    row {OJS} (Rules 7a, 26, 29)
+    row {OJS} (Rules 7a, 26, 29) [upstream 2026-10-07]
   - "Revert Decision" on a "Complete" review deleting its "Unregistered"
     DOI, the row leaving the DOIs page, and on a "Reviewer Thanked" one
     changing nothing; a "Registered" or "Submitted" review DOI kept
     through "Public Visibility" unticked, its row hidden and shown again
-    with that status once the box is ticked {OJS} (Rule 7b)
+    with that status once the box is ticked {OJS} (Rule 7b) [upstream 2026-10-07]
   - a review DOI reading "Needs Sync" (after "Mark DOIs Registered" and
     "Mark DOIs Needs Sync") kept through "Public Visibility" unticked:
     its row hidden, and "Deposit All" turning the work's other rows
     "Submitted" while the review's stays "Needs Sync" {OJS} (Rules 7b,
-    29a)
+    29a) [incidental 2026-10-15]
   - "Deposit DOIs" on a work whose new major version is not yet
     published: the published versions' DOIs reading "Submitted", the new
     version's "Unregistered", and "Deposit All" sending them once it is
-    published {OJS OPS} (Rules 26, 29; A28 retired)
+    published {OJS OPS} (Rules 26, 29; A28 retired) [upstream 2026-10-07]
   - an article whose own DOI was cleared while its galley keeps one,
-    its badge reading "Unregistered" {OJS} (Rule 31)
+    its badge reading "Unregistered" {OJS} (Rule 31) [incidental 2026-10-05]
   - a DataCite journal with the galley kind ticked: "Deposit All"
     turning "Submitted" the "PDF" row of a work whose "Article" row was
     marked "Registered" before galley DOIs were turned on, the "Article"
     row keeping "Registered"; and on a journal with the galley kind
     ticked and "Articles" not, the "PDF" row turning "Submitted" {OJS}
-    (Rule 29a; OJS5 narrowed to the work without an article DOI)
+    (Rule 29a; OJS5 narrowed to the work without an article DOI) [upstream 2026-10-08]
   - "DOI Versioning" "Yes" with Crossref configured: "Deposit All" on a
     work with 1.0 and 2.0 published turning both blocks of "View all"
     "Submitted", on a work with 1.0 and a minor 1.1 published turning
     their shared DOI "Submitted", and leaving "Registered" a 1.0 marked
-    so before its 2.0 was published {OJS OPS} (Rule 29a)
+    so before its 2.0 was published {OJS OPS} (Rule 29a) [upstream 2026-10-08]
   - "Immediately, when an item is created": the final "Submit" giving
     the version its DOI (a journal's and a preprint server's galleys,
     a press's chapters with their page, formats and files theirs), a
     preprint server's listed draft none; a galley, a format or a format's file added later and a
-    chapter's page ticked later getting theirs at once (Rules 5a, 48)
+    chapter's page ticked later getting theirs at once (Rules 5a, 48) [upstream 2026-10-07]
   - "Immediately…" and new versions: under "No" the new version
     sharing its source's DOIs, under "Yes" a "Major Revision" getting
     its own at once and a "Minor Revision" sharing them (Rules 5a, 11,
-    12, 50)
+    12, 50) [upstream 2026-10-07]
   - "Immediately…": an issue saved with "Create Issue" listed on the
-    "Issues" tab with its DOI before "Publish Issue" {OJS} (Rules 5a, 8)
+    "Issues" tab with its DOI before "Publish Issue" {OJS} (Rules 5a, 8) [upstream 2026-10-07]
   - "Immediately…": a completed review, publicly shown, getting its
     "Peer Review {number}" row and DOI at "Mark as Complete" {OJS}
-    (Rules 5a, 7)
+    (Rules 5a, 7) [upstream 2026-10-07]
   - "Immediately…" and "Decline Submission": a work with no published
     version losing its "Unregistered" DOIs while one marked "Registered"
     stays, and a work whose "Published Manuscript Under Review" version
     is published keeping every DOI and its page's "DOI:" line (Rule 5b;
-    A25 retired)
+    A25 retired) [upstream 2026-10-07]
   - "Immediately…": "Revert Decline" giving the declined work's current
     version new DOIs, the work no longer listed by "Needs DOI" (Rule 5b;
-    A26 retired)
+    A26 retired) [upstream 2026-10-07]
   - a declined submission carrying a DOI listed on the DOIs page and by
     "In Copyediting, Production, Published or with DOIs", one moved back
     from Copyediting to Review with its DOI listed by that filter, and a
     declined one with no DOI listed by neither {OJS OMP} (Rules 15, 22;
-    A27 retired)
+    A27 retired) [upstream 2026-10-07]
   - "Upon reaching the copyediting stage": a new version made while the
     submission is at Copyediting or Production getting the DOIs it lacks
     at once, and one made at Review after a "Published Manuscript Under
     Review" version was published getting none until its publication
-    (Rules 5, 12)
+    (Rules 5, 12) [upstream 2026-10-07]
 - **Rarely met**:
   - a press with "Chapters" or "Publication Formats" ticked and "Monographs" not: the same books listed, each with only those kinds' rows, the badge read from the first row {OMP} (Rule 46)
   - a journal switched from "DOI Versioning" "Yes" to "No" with 1.0 and 2.0 published on DOIs of their own: "Deposit All" turning 2.0's DOI "Submitted" and leaving 1.0's "Unregistered", as "View all" shows once "Yes" is saved again (Rule 29a)

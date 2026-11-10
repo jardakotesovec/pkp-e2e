@@ -751,12 +751,12 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for OMP2 (issue report
     `docs/issues/U70-A6-unpublished-book-notice-still-approved.md`): the
-    Production stage reads "Awaiting approval." after "Unpublish"
+    Production stage reads "Awaiting approval." after "Unpublish" [report 2026-10-03]
   - the guard for OPS2 (issue report
     `docs/issues/U33-OPS2-preprint-revert-decline-names-submission-stage.md`):
     scenario 9's "Revert Decline" reads a closing text naming Production,
     and a "Notify Authors" instruction and template name that speak of
-    no review (Rule 10)
+    no review (Rule 10) [report 2026-10-04]
 - **Rarely met**:
   - a second "Send To Production" bringing the earlier production ready files back beside the newly ticked ones (Rule 7b): sending a submission to production twice is not an ordinary week's action; scenario 4 stops at the hidden "Production" entry
   - "Stage Assignment" changed on the Roles screen, Production ticked for Copyeditor and unticked again (Settings bullet 1): a manager changes a role's stages rarely, not in an ordinary week

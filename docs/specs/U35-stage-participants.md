@@ -928,80 +928,80 @@ Left out of the scenarios above, by reason:
   - the guard for A6 (issue report
     `docs/issues/U35-A6-assign-editor-message-gives-no-task.md`):
     "Assign" with "Assign Editor", the new editor's Tasks panel holding
-    "You have been assigned as an editor to the submission…"
+    "You have been assigned as an editor to the submission…" [report 2026-10-01]
   - the guard for A7 (issue report
     `docs/issues/U35-A7-edit-assignment-logged-as-assignment.md`):
     an "Edit Assignment" save logged as a change, and an untouched "OK"
-    adding no line
+    adding no line [report 2026-10-01]
   - the guard for A14 (issue report
     `docs/issues/U35-A14-activity-log-names-participant-not-editor.md`):
     the Activity Log's "User" column naming the acting editor on the
-    "was assigned" and "was removed" lines
+    "was assigned" and "was removed" lines [report 2026-10-01]
   - the guard for A4 (issue report
     `docs/issues/U35-A4-assign-participant-ok-assigns-nobody-no-reason.md`):
     "OK" on "Assign Participant" with nobody chosen, the notice read and
-    the window's role, person and message kept
+    the window's role, person and message kept [report 2026-10-01]
   - the guard for OPS4 (issue report
     `docs/issues/U35-OPS4-participant-notice-lands-in-stage-box.md`):
     on a preprint server "Notification sent to users." at the top right
-    after "Notify", and no "Notification" box in the Production entry
+    after "Notify", and no "Notification" box in the Production entry [report 2026-10-01]
   - the guard for OJS1 (issue report
     `docs/issues/U35-OJS1-assigned-email-names-send-to-review.md`):
     the "Editor Assigned (Auto)" email naming the Submission stage's
-    button as the screen shows it
+    button as the screen shows it [report 2026-10-01]
   - the guard for A12 (issue report
     `docs/issues/U35-A12-no-changes-window-ok-reports-change.md`):
     the "No changes can be made to this participant" window, "OK"
-    disabled or closing with no "The stage assignment has been changed."
+    disabled or closing with no "The stage assignment has been changed." [report 2026-10-01]
   - the guard for A15 (issue report
     `docs/issues/U35-A15-assign-editor-email-two-footers.md`):
     the Submission stage's "Assign Editor" letter ending with the
-    sender's signature and the discussion footer alone
+    sender's signature and the discussion footer alone [report 2026-10-01]
   - a guard for retired A5: after "Notify" the discussions panel's row
-    reading "Created by:" the sender
+    reading "Created by:" the sender [report 2026-10-01]
   - the guard for A9 (issue report
     `docs/issues/U35-A9-permissions-tick-carries-to-other-role.md`):
     in "Assign Participant" a Section Editor chosen, then the role
-    changed to Author and a person chosen, "Permissions" read unticked
+    changed to Author and a person chosen, "Permissions" read unticked [report 2026-10-01]
   - the guard for A11 (issue report
     `docs/issues/U35-A11-anonymous-reviewer-assign-no-warning.md`):
     a person with an anonymous review of the submission chosen in
-    "Assign", the warning read before "OK"
+    "Assign", the warning read before "OK" [report 2026-10-01]
   - the guard for OPS2 (issue report
     `docs/issues/U35-OPS2-preprint-assign-editor-message-not-filled.md`):
     on a preprint server each predefined message of the Production stage
-    filling "Message"
+    filling "Message" [report 2026-10-01]
   - the guard for A16 (issue report
     `docs/issues/U35-A16-notify-message-ignores-email-opt-out.md`):
     "Notify" to a participant who ticked "Do not send me an email…"
-    under "Discussion added.", the mailbox empty and the Tasks entry there
+    under "Discussion added.", the mailbox empty and the Tasks entry there [report 2026-10-01]
   - guards for retired A10: a template added in Settings sent from "Notify", and a template
-    limited to a role sent from "Notify" by a manager outside that role
+    limited to a role sent from "Notify" by a manager outside that role [report 2026-10-01]
   - the guard for OPS3 (issue report
     `docs/issues/U35-OPS3-moderator-assigned-email-never-sent.md`):
     a preprint submitted to a section with Moderators under "Editorial
     Assignments", each assigned moderator's mailbox read for "Moderator
-    Assigned (Auto)"
+    Assigned (Auto)" [report 2026-10-01]
   - the guard for A1 (issue report
     `docs/issues/U35-A1-section-editor-edit-assignment-saves-nothing.md`):
     a Section Editor changing the Author's "Permissions" in "Edit
-    Assignment", the notice and the changed box read
+    Assignment", the notice and the changed box read [report 2026-10-01]
   - the guard for OMP1 (issue report
     `docs/issues/U35-OMP1-internal-review-no-predefined-message.md`):
     the predefined messages of a press's Internal Review, read as a set
-    ("Discussion (Review)" there since pkp/omp#2487)
+    ("Discussion (Review)" there since pkp/omp#2487) [report 2026-10-01]
   - a guard for retired A3: a message typed in "Notify" and in "Assign Participant" with the
     list on its blank entry, the recipient's mailbox and the stage's
     discussions panel read ("Discussion (…)" since pkp/pkp-lib#13385;
-    Rule 5b)
+    Rule 5b) [report 2026-10-01]
   - "Notify" after the list was set back to its blank entry: "Message"
     emptied, a typed message sent under the stage's "Discussion (…)"
-    (Rule 11b; A17 retired)
-  - the "Notify" window's close control, asking first or not (Rule 11c)
-  - Escape and a reload on the "Notify" window (Rule 11d)
+    (Rule 11b; A17 retired) [upstream 2026-10-05]
+  - the "Notify" window's close control, asking first or not (Rule 11c) [incidental 2026-09-29]
+  - Escape and a reload on the "Notify" window (Rule 11d) [incidental 2026-09-29]
   - a reload after "Cancel" closed "Assign Participant", with a role
     chosen, "Search" pressed and a person chosen, "OK" never pressed,
-    raising no leave-page box (Rule 6c)
+    raising no leave-page box (Rule 6c) [report 2026-10-21]
 - **Nothing new to test**:
   - "Cancel" on "Edit Assignment" after a box was changed, and its close control asking first (Rule 8f): scenario 3 cancels only an unchanged window
   - "Assignments" counting open review requests and leaving out published submissions (Fields "Assign Participant")

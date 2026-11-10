@@ -807,10 +807,10 @@ Left out of the scenarios above, by reason:
 
 - **Planned**:
   - scenario 11 on a press: the site's style sheet loaded on the site's
-    and a press's pages, the guard OMP1's report names (Rule 21; OMP1)
+    and a press's pages, the guard OMP1's report names (Rule 21; OMP1) [report 2026-10-04]
   - the site's save (`PUT index/api/v1/site`) sent with an empty "Email
     of principal contact" refused with 400, the guard A4's report names
-    (Rule 22; A4)
+    (Rule 22; A4) [report 2026-10-04]
 - **Rarely met**:
   - the "Security" tab's raw codes in French, texts its translators
     have yet to enter (Rule 23)

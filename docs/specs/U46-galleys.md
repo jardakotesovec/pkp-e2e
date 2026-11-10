@@ -625,45 +625,45 @@ Left out of the scenarios above, by reason:
     before posting, a Moderator whose assignment has "Permissions" unticked
     edits a galley, adds one, saves an order and deletes one, and each
     change holds after a reload (or, if the team rules the box binds,
-    the page offers that Moderator "View" only)
+    the page offers that Moderator "View" only) [report 2026-10-02]
   - the guard for OPS3 (issue report
     `docs/issues/U46-OPS3-author-galley-change-file-refused.md`): before
     posting, the Author offered the galleys sees "Change File" on a galley
     whose file they uploaded and not on one whose file the Preprint Server
-    Manager uploaded
+    Manager uploaded [report 2026-10-02]
   - the guard for A7 (issue report
     `docs/issues/U46-A7-galley-format-moves-in-list-when-saved.md`): with no
     order ever saved, "Edit" › "Save" on the first of three galleys leaves
-    the list and the public page in the order the galleys were added
+    the list and the public page in the order the galleys were added [report 2026-10-02]
   - the guard for A4 (issue report
     `docs/issues/U46-A4-OJS1-new-version-galley-shares-published-file.md`):
     after "Create New Version", "Change File" on the new version's galley
     leaves the published version's download unchanged, and deleting the
-    published version's galley leaves the copy's file downloading
+    published version's galley leaves the copy's file downloading [report 2026-10-02]
   - the guard for A5 (issue report
     `docs/issues/U46-A5-ordering-arrows-unnamed.md`): in ordering mode each
     galley row's up and down arrows carry names that say the direction and
-    the galley
+    the galley [report 2026-10-02]
   - the guard for A1 (issue report
     `docs/issues/U46-A1-galley-edit-window-upload-heading.md`): a galley's
     "Edit" window is headed "Edit a Layout Galley", and "Change File" keeps
-    "Upload a File Ready for Publication"
+    "Upload a File Ready for Publication" [report 2026-10-02]
   - the guard for A3 (issue report
     `docs/issues/U46-A3-remote-galley-asked-for-file.md`): saving a galley
     with "This galley will be available at a separate website." ticked
-    closes with no upload window, and its row offers no "Change File"
+    closes with no upload window, and its row offers no "Change File" [report 2026-10-02]
   - the guard for A6 (issue report
     `docs/issues/U46-A6-remote-galley-address-not-checked.md`): "Save" in a
     galley's window with "This galley will be available at a separate
     website." ticked and "www.example.org" in the address refuses the
-    address, and a full "https://" address saves
+    address, and a full "https://" address saves [report 2026-10-02]
   - the guard for A8 (issue report
     `docs/issues/U09-A11-static-page-refusal-repeated-after-save.md`):
     after two refused "URL Path" values in a galley's "Edit" window, the
-    save of a good one shows no notice at the top right
+    save of a good one shows no notice at the top right [report 2026-10-12]
   - the header "Close" pressed straight after a refused "Save" in a
     galley's "Edit" or "Create New Galley" window closes it without
-    asking (Rule 6a)
+    asking (Rule 6a) [report 2026-10-12]
 - **Nothing new to test**:
   - a new galley's place in the list, before and after a saved order
     (Rule 8d)

@@ -840,23 +840,23 @@ Left out of the scenarios above, by reason:
 
 - **Planned**:
   - the guard for A12 (issue report
-    `docs/issues/U62-A9-refused-confirmation-window-keeps-spinning.md`): a refused delete of a component in use closes its "Delete" window once the alert is closed
+    `docs/issues/U62-A9-refused-confirmation-window-keeps-spinning.md`): a refused delete of a component in use closes its "Delete" window once the alert is closed [report 2026-10-02]
   - a reload opening "Disable Submissions" after another tab of the
-    page and back (Rule 1b): scenario 3 reloads on a side tab it pressed
+    page and back (Rule 1b): scenario 3 reloads on a side tab it pressed [incidental 2026-09-29]
   - unsaved boxes and choices kept through another tab of the page and
     back, and dropped on leaving (Rules 2a, 2b): scenario 3 checks typed
-    text through a side tab and a reload
+    text through a side tab and a reload [incidental 2026-09-29]
   - a component's "Name" of one space refused with a sentence in the
     notice, not a raw code ([A10](#a10)): the guard the issue report
-    proposes
+    proposes [report 2026-10-02]
   - each help on "Author Guidance" naming its own step and repeating no
-    other help ([A7](#a7)): the guard the issue report proposes
+    other help ([A7](#a7)): the guard the issue report proposes [report 2026-10-04]
   - the "Add a Component" window's labels and helps reading as Fields
-    gives them ([A8](#a8)): the guard the issue report proposes
+    gives them ([A8](#a8)): the guard the issue report proposes [report 2026-10-04]
   - each app's "Disable Submissions" help naming its own kind of work
     ("new monographs to the press" on a press), and the "Author
     Guidance" copyright box labelled "Copyright Notice" on the three
-    apps (Fields; OMP1 retired)
+    apps (Fields; OMP1 retired) [upstream 2026-11-09]
 - **Nothing new to test**:
   - the Editor and the Production Editor while their role keeps "Permit
     changes to Settings" (Actors row 1): the same tabs as the Journal

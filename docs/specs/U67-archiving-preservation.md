@@ -541,14 +541,14 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - a journal with License Terms and no Copyright Notice showing the
     "Copyright" row with the License Terms on the LOCKSS and CLOCKSS
-    pages ([A1](#a1)): the guard the issue report proposes
+    pages ([A1](#a1)): the guard the issue report proposes [report 2026-10-04]
   - a journal's LOCKSS and CLOCKSS pages with no "Rights" row, on an
     open access journal and on one that requires subscriptions
-    ([A2](#a2)): the guard the issue report proposes
+    ([A2](#a2)): the guard the issue report proposes [report 2026-10-04]
   - the PN plugin installed, disabled and then enabled, the side tab
     offering the "Enable the PKP PN plugin" box unticked and then
     ticked ([A3](#a3)): the guard the issue report proposes, once a
-    test install can carry the plugin
+    test install can carry the plugin [report 2026-10-04]
 - **Nothing new to test**:
   - "Description" set on Settings › Distribution › "Search Indexing",
     its text in the "Description" row (Settings bullet 6; Rule 10)

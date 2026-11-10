@@ -1221,144 +1221,144 @@ Left out of the scenarios above, by reason:
     "Import", the box naming the file's size and the limit
     ([A25](#a25)): the guard the issue report
     (`docs/issues/U63-A25-import-over-upload-limit-file-size-error.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-21]
   - a press's export of a book in a series on the "Export" tab,
     imported again on "Import", reading as a plain success with no
     "Unknown element sequence" line {OMP} ([OMP5](#omp5)): the guard the
     issue report
     (`docs/issues/U63-OMP5-native-import-series-unknown-element-sequence.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-21]
   - with the press's four ONIX details filled, the command-line export
     of a book with a publication format writing its file, and that file
     importing from the command line with the format kept {OMP}
     ([OMP6](#omp6)): the guard the issue report
     (`docs/issues/U63-OMP6-command-line-native-import-export-formats-fail.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-21]
   - the roles' masthead choices and start dates carried from one
     journal to another (Rules 24a, 24b, 28; A2 and A3 retired): in
     scenario 6, moss's
     Copyeditor role in A given a start date in the past and fern's
     Author role set to "Does not appear on the masthead", both read on
-    B's roles pages and "Editorial Masthead" after the move
+    B's roles pages and "Editorial Masthead" after the move [upstream 2026-09-29]
   - a reviewer role imported as "Appear on the masthead" whatever the
     file says (Rule 24a), a role the file gives no start date starting
     on the day of the import, and a role the file gives as ended listed
-    on "Editorial History" with the file's years (Rule 24b)
+    on "Editorial History" with the file's years (Rule 24b) [upstream 2026-09-29]
   - a submission's plain language summary, data availability statement
     and funding statement carried from one journal to another (Rule 20a):
     in scenario 4, "Okapi field notes" given all three in A, each read
-    on B's copy after the import
+    on B's copy after the import [upstream 2026-09-30]
   - an account whose only role has ended, left off "Export Users" and
     out of the "Export All Users" file, while one with a role that ends
-    on a later date is listed (Rules 26, 27)
+    on a later date is listed (Rules 26, 27) [incidental 2026-10-01]
   - a users file imported a second time with a role that starts on a
     later date and one that ends on a later date: the success sentence
-    again, and each role held once (Rule 24; A17 retired)
+    again, and each role held once (Rule 24; A17 retired) [upstream 2026-10-01]
   - a users file with a role date that is not a date and a role whose
     start date is not before its end date: the line of each, the role
     not given, the user's other role kept and the user after it
     imported; a role with an empty date imported as one with none
-    (Rule 22c; A18 retired)
+    (Rule 22c; A18 retired) [upstream 2026-10-01]
   - a role the user already holds from another start date: the overlap
     line and the role not given again, while a period that overlaps
-    none held is given beside it (Rule 24)
+    none held is given beside it (Rule 24) [upstream 2026-10-01]
   - a role the file gives an end date already past and no start date:
     "---" under "Start Date" on the roles page and the end year alone
-    on "Editorial History" (Rule 24b)
+    on "Editorial History" (Rule 24b) [upstream 2026-10-01]
   - a users file whose role dates are written the other usual ways
     (with a time, in words, day first, as a week date): each role given
     from its day; an all-zero date, a bare number and a weekday the
     date does not fall on each refused with the invalid-date line; a
     start and an end that are the same moment written two ways refused
-    with the period line (Rule 22c)
+    with the period line (Rule 22c) [upstream 2026-10-13]
   - a role imported from a start date, then from the same start written
     with a time: the success sentence again and the role held once
-    (Rule 22c)
+    (Rule 22c) [upstream 2026-10-13]
   - a role the user holds from an earlier start date, imported from a
     file that gives it no dates: the success sentence and the role held
-    once (Rule 24)
+    once (Rule 24) [upstream 2026-10-13]
   - an ended role with no start date, exported with "Export Users" and
     imported back into the same journal: no line for the role and no
-    role added (Rule 24b)
+    role added (Rule 24b) [upstream 2026-10-13]
   - the guard A9's issue report names, once fixed: an article (a
     preprint) naming a section the journal (server) lacks, imported:
     the import refused whole with "Unknown section …", no submission
-    added, the export list unchanged {OJS OPS}
+    added, the export list unchanged {OJS OPS} [report 2026-10-01]
   - the daily DOAJ deposit keeping to its journal (retired A5; Rule
     43): two journals, one with automatic deposit on, the other holding
     a "Needs Sync" article: the article stays "Needs Sync" and
     Administration › "View Jobs" lists no deposit for it, while the
     depositing journal's own "Needs Sync" and "Not Deposited" articles
-    read "Submitted" {OJS}
+    read "Submitted" {OJS} [upstream 2026-10-08]
   - the guard A13's issue report names, once fixed: a users file with
     an element the format does not know, imported: the "Results" tab
-    reads "Validation errors:" with the reason {OJS OMP}
+    reads "Validation errors:" with the reason {OJS OMP} [report 2026-10-01]
   - the guard A21's issue report names, once fixed: a users file whose
     second user has no registration date, imported: every user in the
-    file imported {OJS OMP}
+    file imported {OJS OMP} [report 2026-10-01]
   - the guard A7's issue report names, once fixed: a file imported,
     the "Import" tab opened, then the "Import Results" tab chosen
     again: the same submission number shown and no new submission
-    added
+    added [report 2026-10-01]
   - the guard A1 and A19's issue report names, once fixed: a tool's
     address naming a tool the installation lacks, and Rule 5's two
-    addresses that open a blank page, each answering "404 Not Found"
+    addresses that open a blank page, each answering "404 Not Found" [report 2026-10-01]
   - the guard A12's issue report names, once fixed: "Export Articles"
     ("Export Submissions", "Export Preprints") and "Export Issues"
     {OJS} pressed with nothing ticked: the alert "No objects
-    selected.", no results tab opened
+    selected.", no results tab opened [report 2026-10-01]
   - the guard OMP1's issue report names, once fixed: every link in a
     press's Tools list opening a page headed with the tool's name,
-    "Tab Delimited Content Import Plugin" included {OMP}
+    "Tab Delimited Content Import Plugin" included {OMP} [report 2026-10-01]
   - the guards A8's two issue reports name, once fixed: an article in
     no issue exported and imported, its results tab without "Errors
     occured:" {OJS}; and a submission with a contributor in a role
     other than "Author" imported into a second journal, press or
-    server, that role read on the copy's "Contributors"
+    server, that role read on the copy's "Contributors" [report 2026-10-01]
   - the guard A10's issue report names, once fixed: a published
     submission found under the export list's "Done" filter, then sent
-    back to the workflow and found under that stage instead
+    back to the workflow and found under that stage instead [report 2026-10-01]
   - the guard A11's issue report names, once fixed: an export list of
     more than one page, submissions ticked on two pages and "Select
     All" pressed on a page: the file holds every ticked submission,
-    and the button turns into "Select None"
+    and the button turns into "Select None" [report 2026-10-01]
   - the guard A24's issue report names, once fixed: an export list of
     more than one page whose submissions share one submission date,
     exported a page at a time: the files together hold every
-    submission once
+    submission once [report 2026-10-04]
   - the guard A6's issue report names, once fixed, on this feature's
     screen: on the Native XML "Import" tab, Tab stops on "Upload
-    File" and Enter opens the file picker
+    File" and Enter opens the file picker [report 2026-10-01]
   - the guard OJS10's issue report names, once fixed: issues created
     out of year and volume order and one of them saved again: the
     "Export Issues" list keeps the "Back Issues" order, then the
-    "Future Issues" {OJS}
+    "Future Issues" {OJS} [report 2026-10-01]
   - the guard OJS2's issue report names, once fixed: in the "DOAJ
     Plugin" unticked scenario, the Plugins list's "Import/Export
-    Plugins" leaves out "DOAJ Export Plugin" {OJS}
+    Plugins" leaves out "DOAJ Export Plugin" {OJS} [report 2026-10-01]
   - the guard OJS5's issue report names, once fixed: the PubMed and
     DOAJ Settings tabs offer no "Cancel", and a typed change still
-    asks before another tab opens {OJS}
+    asks before another tab opens {OJS} [report 2026-10-01]
   - the guards OJS6's and OJS1's issue reports name, once fixed: the
     DOAJ "Articles" list's "Article Title" and "Authors" search
     finding an article typed in lower case; and its issue link opening
-    the window headed with the issue's name {OJS}
+    the window headed with the issue's name {OJS} [report 2026-10-01]
   - a Native XML file with a contributor that has no Country: the
     success text, then "The author {name} does not have a country."
-    (Rule 12)
+    (Rule 12) [incidental 2026-10-05]
   - a submission with one file under "Files for Review", exported:
     under the success text, "Warnings encountered:", "Submission" and
     the "…was skipped…" line for that file, and the exported file
-    still downloading (Rule 16a) {OJS OMP}
+    still downloading (Rule 16a) {OJS OMP} [upstream 2026-10-13]
   - an article that reads "Marked registered", unpublished and
     published again: in scenario 8, no row for it on "Articles" while
     it is unpublished, with the status filter on "Any Status" and on
     "Needs Sync"; published again, its row reading "Needs Sync"
-    (Rule 44) {OJS}
+    (Rule 44) {OJS} [upstream 2026-10-13]
   - the Native XML Plugin run from the server's command line: a
     published article (preprint) exported and the file imported back,
     "The export completed successfully." and the success text of Rule
-    10 printed, the copy added {OJS OPS} (Rule 20b)
+    10 printed, the copy added {OJS OPS} (Rule 20b) [upstream 2026-10-19]
 - **Nothing new to test**:
   - "Import" pressed with no file up, and with a file that is not XML
     (Rule 13)

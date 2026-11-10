@@ -1011,18 +1011,18 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - with "Do not send an email." saved, the completion screen making no email claim (A7; the guard its issue report names)
-  - a Title typed after a quiet minute on "Details" saved whole, not cut after its first letters (A18; the guard its issue report names)
-  - the footer blank on opening a draft until the first real save, with no "Last saved" time from the page load (A4; the guard its issue report names)
-  - a preprint author cancelling their own draft from the wizard, "Submission cancelled" shown and the draft gone from My Submissions {OPS} (OPS3; the guard its issue report names)
-  - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names)
-  - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names)
-  - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names)
-  - a journal that requires the plain language summary: the start page's title, a "Details" save before the summary is typed and the "References" box all saved, and "Submit" disabled until the summary is typed (Settings, "Metadata asked of authors"; A20, retired)
-  - the Review step after a language change asking for the new language's title, contributor names and typed institution names, the affiliation copied from the author's profile included, with "Submit" disabled until they are typed (Rule 11): likely bullets in scenario 5, which changes the language and reaches Review
-  - the timer's minute counted from the last save, not from the end of typing: scenario 3's "Saving" coming as the footer reaches "Last saved 1 minute ago", and a step with no change sending nothing (Rule 9): the suites move the page's clock on a minute after the typing, which cannot tell the two readings apart
-  - leaving the start screen with a title typed, for My Submissions, asking nothing (Rule 4): likely a bullet after scenario 1's "The start screen"
-  - "Order" on a preprint's "Upload Files": a galley dragged above another and "Done" keeping the new order in "Files", also after a reload, and "Cancel ordering" leaving the order as it was {OPS} (Rule 7): likely a bullet in scenario 15
+  - with "Do not send an email." saved, the completion screen making no email claim (A7; the guard its issue report names) [report 2026-10-01]
+  - a Title typed after a quiet minute on "Details" saved whole, not cut after its first letters (A18; the guard its issue report names) [report 2026-10-01]
+  - the footer blank on opening a draft until the first real save, with no "Last saved" time from the page load (A4; the guard its issue report names) [report 2026-10-01]
+  - a preprint author cancelling their own draft from the wizard, "Submission cancelled" shown and the draft gone from My Submissions {OPS} (OPS3; the guard its issue report names) [report 2026-10-01]
+  - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names) [report 2026-10-01]
+  - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names) [report 2026-10-01]
+  - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names) [report 2026-10-01]
+  - a journal that requires the plain language summary: the start page's title, a "Details" save before the summary is typed and the "References" box all saved, and "Submit" disabled until the summary is typed (Settings, "Metadata asked of authors"; A20, retired) [report 2026-10-01]
+  - the Review step after a language change asking for the new language's title, contributor names and typed institution names, the affiliation copied from the author's profile included, with "Submit" disabled until they are typed (Rule 11): likely bullets in scenario 5, which changes the language and reaches Review [upstream 2026-09-29]
+  - the timer's minute counted from the last save, not from the end of typing: scenario 3's "Saving" coming as the footer reaches "Last saved 1 minute ago", and a step with no change sending nothing (Rule 9): the suites move the page's clock on a minute after the typing, which cannot tell the two readings apart [incidental 2026-09-30]
+  - leaving the start screen with a title typed, for My Submissions, asking nothing (Rule 4): likely a bullet after scenario 1's "The start screen" [incidental 2026-10-05]
+  - "Order" on a preprint's "Upload Files": a galley dragged above another and "Done" keeping the new order in "Files", also after a reload, and "Cancel ordering" leaving the order as it was {OPS} (Rule 7): likely a bullet in scenario 15 [incidental 2026-10-21]
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold

@@ -780,28 +780,28 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - "Create Journal" saved with "Country" left empty, and "Edit" saved on
     a journal with no country ([A1](#a1)): the guard the issue report
-    proposes
+    proposes [report 2026-10-02]
   - the row read right after a saved "Edit", before any reload, showing
     the new name and path ([A2](#a2)): the guard the issue report
-    proposes
+    proposes [report 2026-10-02]
   - the address in front of "Path" on the journal form reading the
     journal's address up to its path, with "index.php/" on the test
-    installs ([A3](#a3)): the guard the issue report proposes
+    installs ([A3](#a3)): the guard the issue report proposes [report 2026-10-02]
   - "Jump to next error" pressed twice after a refused empty "Create
     Journal", the second press reaching the second refused field
-    ([A6](#a6)): the guard the issue report proposes
+    ([A6](#a6)): the guard the issue report proposes [report 2026-10-02]
   - on the Settings Wizard, a new "Path" saved and then "Journal title"
     saved on the same page, showing "Saved" ([A4](#a4)): the guard the
-    issue report proposes
+    issue report proposes [report 2026-10-02]
   - signing in from the Login page of a journal not enabled publicly
     returning to the page asked for ([A8](#a8)): the guard the issue
-    report proposes
+    report proposes [report 2026-10-02]
   - the "Edit" and "Create Journal" windows closed as soon as the form
     shows, with no page error ([A7](#a7)): the guard the issue report
-    proposes
+    proposes [report 2026-10-02]
   - {OPS} the path "0" on "Create Server" refused with "A path is
     required." under "Path", not a raw code ([OPS1](#ops1)): the guard
-    the issue report proposes
+    the issue report proposes [report 2026-10-02]
 - **Rarely met**:
   - exactly one journal enabled publicly, where the site's address opens
     that journal instead of the list (Rule 19; Settings bullet 4): a

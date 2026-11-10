@@ -833,88 +833,88 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - a new contributor joining last before any "Save Order" is pressed,
     on a press and a preprint server, where the suites save an order
-    before they read it (Rule 6): scenario 2's "Preview" and "Control"
+    before they read it (Rule 6): scenario 2's "Preview" and "Control" [upstream 2026-09-29]
   - role names in the reader's language: a French reader's "Author" on
     the landing page and in the listings' author lines, "Auteur-e" once
     the role's French name is saved, the English pages unchanged
-    (Rule 15a)
+    (Rule 15a) [incidental 2026-09-29]
   - the "Edit Role" window's language button, the other language's box
     shown once it is pressed, and "{count}/{total} languages completed"
-    under each box (Fields "Role Name")
+    under each box (Fields "Role Name") [incidental 2026-09-29]
   - "Close" on "Edit Role" leaving at once, with no question, and a
-    reload showing nothing saved (Rule 12)
+    reload showing nothing saved (Rule 12) [incidental 2026-09-29]
   - the guard for A14 (issue report
     `docs/issues/U41-A14-one-role-journal-contributor-save-fails.md`): on
     a journal with one contributor role, a contributor added from the
-    form saves, listed with that role's badge after a reload
+    form saves, listed with that role's badge after a reload [report 2026-10-03]
   - the guard for A3 (issue report
     `docs/issues/U41-A3-publication-lists-tick-ignored.md`): scenario 7's
     reader pages, with a journal's and a preprint server's listings
-    leaving the unticked contributor out, as a press's catalog does
+    leaving the unticked contributor out, as a press's catalog does [report 2026-10-03]
   - the guard for A7 (issue report
     `docs/issues/U41-A7-affiliation-error-list-object-object.md`): a
     hand-entered institution's name cleared and saved, the error list's
-    "Go to Affiliations" entry reading the refusal's message
+    "Go to Affiliations" entry reading the refusal's message [report 2026-10-03]
   - the guard for A10 (issue report
     `docs/issues/U41-A10-name-boxes-labels-run-together.md`): a
     hand-entered institution's name boxes, each named for its own
-    language alone
+    language alone [report 2026-10-03]
   - the guard for A1 (issue report
     `docs/issues/U41-A1-contributor-rows-no-affiliation.md`): a
-    contributor row showing the affiliation its "Edit" window lists
+    contributor row showing the affiliation its "Edit" window lists [report 2026-10-03]
   - the guard for A1 (issue report
     `docs/issues/U41-A1-book-page-long-credits-dangling-comma.md`): on a
-    book page with five or more contributors, each affiliation shown
+    book page with five or more contributors, each affiliation shown [report 2026-10-03]
   - the guard for A9 (issue report
     `docs/issues/U41-A9-ror-logo-link-unnamed.md`): scenario 6's landing
-    page, every ROR logo link with a name
+    page, every ROR logo link with a name [report 2026-10-03]
   - the guard for A12 (issue report
     `docs/issues/U41-A12-delete-role-button-label-sentence.md`): scenario
     5's "Delete Role", its button named "I understand the consequences,
-    delete this role"
+    delete this role" [report 2026-10-03]
   - the guard for OPS2 (issue report
     `docs/issues/U41-OPS2-competing-interests-label-raw-markup.md`):
     scenario 8 on a preprint server, the contributor form's field
-    labelled "Competing Interests"
+    labelled "Competing Interests" [report 2026-10-03]
   - a CRediT role's degree on a French landing page reading in French,
     once the degree words gain their French translation (Rule 14; A23,
-    retired)
+    retired) [incidental 2026-10-05]
   - "Close" and the Escape key shutting the contributor panel at once,
-    with no question, and a reload showing nothing saved (Rule 4)
+    with no question, and a reload showing nothing saved (Rule 4) [incidental 2026-10-07]
   - an "Edit" refused for a hand-entered institution's missing name
     saving nothing: after "Close" and a reload, the contributor as
-    before (Fields "Affiliations")
+    before (Fields "Affiliations") [incidental 2026-10-07]
   - the CRediT table's "Add Another Role": a new row on
     "Conceptualization" with no degree picked, a role a row shows
     grayed out in every row's list, and "Save" with "Degree" still empty
     keeping the role with no degree (Fields "CRediT roles and the
-    degrees of contribution")
+    degrees of contribution") [incidental 2026-10-07]
   - "Edit" and "Save" with nothing changed leaving the contributor in
     its place, in the list after a reload and on the published item's
-    page (Rule 6)
+    page (Rule 6) [incidental 2026-10-15]
   - an article, book or preprint page with four contributors listing a
     contributor's two affiliations in the order "Edit" lists them
-    ([A26](#a26)): the guard the issue report proposes
+    ([A26](#a26)): the guard the issue report proposes [report 2026-10-13]
   - a contributor's two affiliations reading "First, Second", with no
     space before the comma, on the article, book, chapter and preprint
-    pages ([A27](#a27)): the guard the issue report proposes
+    pages ([A27](#a27)): the guard the issue report proposes [report 2026-10-13]
   - a contributor's CRediT table with two rows, each row's two
     drop-downs named once by their own labels ([A25](#a25)): the guard
-    the issue report proposes
+    the issue report proposes [report 2026-10-13]
   - a contributor whose hand-entered institution is named in a language
     then unticked under "Metadata" saved with nothing changed, the save
-    going through ([A28](#a28)): the guard the issue report proposes
+    going through ([A28](#a28)): the guard the issue report proposes [report 2026-10-13]
   - a program's contributor edit through the programming interface that
     names the type and sends only a new given name, keeping the family
     name, email and country, and one that also resends the affiliations
-    as read, keeping each (Rule 4a)
+    as read, keeping each (Rule 4a) [incidental 2026-10-19]
   - a program's contributor edit that sends the type empty, refused with
     "This field is required." and the contributor unchanged after a
-    reload (Rule 4a)
+    reload (Rule 4a) [incidental 2026-10-29]
   - a contributor with a registry-backed affiliation, on a journal that
     takes a language with no two-letter code (Central Kurdish), saved
     from "Edit" unchanged: the save going through and the entry still
-    the registry's after a reload (Rule 16; pkp/pkp-lib#12520)
+    the registry's after a reload (Rule 16; pkp/pkp-lib#12520) [upstream 2026-11-06]
 - **Nothing new to test**:
   - Preferred Public Name (Fields): another text box on the form
     scenario 1 fills

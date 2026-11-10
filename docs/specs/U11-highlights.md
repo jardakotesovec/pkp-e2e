@@ -425,32 +425,32 @@ Left out of the scenarios above, by reason:
     `docs/issues/U11-A1-highlights-cancel-ordering-keeps-moved-rows.md`):
     once fixed, scenario 2 "Reorder the highlights" with a "Cancel"
     after two moves, the list back in the saved order at once and after
-    a reload
+    a reload [report 2026-10-04]
   - the guard for A3 (Rule 8; issue report
     `docs/issues/U11-A3-highlights-list-title-html-codes.md`): once
     fixed, a title with one word made bold through "Formatting" and one
-    holding "&", the list row showing the bold word and a plain "&"
+    holding "&", the list row showing the bold word and a plain "&" [report 2026-10-04]
   - the guard for A4 (Rule 6; issue report
     `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`):
     once fixed, a changed title closed without "Save", then "Edit" and a
-    "Save" of another box, the saved title kept on the row
+    "Save" of another box, the saved title kept on the row [report 2026-09-30]
   - the guard for A11 (Rule 10; the regression report proposes it): once
     fixed, a highlight's picture replaced by a PNG named "photo.jpg" and
     "Save" refused, the old picture still in the reopened panel and on
-    the home page's slide
+    the home page's slide [upstream 2026-10-19]
   - the guard for A5 (Actors rows 2 and 3; Rules 12, 13; issue report
     `docs/issues/U11-A5-site-highlights-cannot-be-saved.md`; fixed on
     `main`): the Site Administrator adds and orders a site
     highlight on a two-journal site, and a signed-out visitor sees it as
-    the site's carousel with its button
+    the site's carousel with its button [other 2026-11-05]
   - "Title" and "Button Label" entered in a second language at site scope
-    (Rule 11), possible on `main` since A5's fix
+    (Rule 11), possible on `main` since A5's fix [other 2026-11-05]
   - the page notice a refused save shows (Fields): scenario 1's empty
     save also reading "The form was not saved because 3 error(s) were
-    encountered. Please correct these errors and try again."
+    encountered. Please correct these errors and try again." [sweep 2026-11-06]
   - "{n}/2 languages completed" under "Title", "Description" and "Button
     Label" with two form languages (Fields; Rule 11): scenario 4's
-    two-language panel reading "0/2 languages completed" under each box
+    two-language panel reading "0/2 languages completed" under each box [sweep 2026-11-06]
 - **Nothing new to test**:
   - a file over the server's upload limit refused in the "Image" box
     (Fields): the same box's refusal scenario 1 meets with a text file,

@@ -815,16 +815,16 @@ Left out of the scenarios above, by reason:
     column's header `aria-sort` "ascending", then "descending", and
     the other header none ([A15](#a15)): the guard the issue report
     (`docs/issues/U23-A15-dashboard-sorted-header-not-announced.md`)
-    proposes, once fixed
-  - the "Section" field with inactive or editor-only sections (Fields)
-  - the panel's own "Clear Filters", "Close" and unapplied changes (Rules 8b, 8c)
-  - the "Loaded" a screen reader hears once the list has loaded (Rule 5)
-  - the guard for A10 (issue report `docs/issues/U23-A10-pager-next-lacks-spoken-label.md`): on a list with two pages, every pager button carries a "Go to …" name, "Go to Next" included
-  - the guard for the retired A4 and A6 and for the day count (pkp/pkp-lib#13472, Rule 10): the popover of a request the editor cancelled reads "Review request cancelled by editor" and offers "Reinstate Reviewer" alone, which puts the reviewer back; that of an accepted review past its deadline says "The review was due on {date}"; a response due tomorrow reads 1 day; it needs a cancelled reviewer and an overdue review, which no scenario sets
-  - the guard for the retired A5 (Rule 5): in scenario 7 ("Sort and page"), a third click on "ID" leaves the address without `sortColumn` and `sortDirection`, and a reload shows the default order
-  - a number in the search box listing the submission with that ID and those whose titles hold its digits, in either box (Rules 6, 7)
-  - the "Clear Filters" beside the chips dropping the filters and keeping the search chip (Rule 8b)
-  - a phrase typed without Enter staying in the box on the next view, over its full list with no chip (Rule 6)
+    proposes, once fixed [report 2026-10-21]
+  - the "Section" field with inactive or editor-only sections (Fields) [incidental 2026-09-29]
+  - the panel's own "Clear Filters", "Close" and unapplied changes (Rules 8b, 8c) [incidental 2026-09-29]
+  - the "Loaded" a screen reader hears once the list has loaded (Rule 5) [incidental 2026-09-30]
+  - the guard for A10 (issue report `docs/issues/U23-A10-pager-next-lacks-spoken-label.md`): on a list with two pages, every pager button carries a "Go to …" name, "Go to Next" included [report 2026-10-04]
+  - the guard for the retired A4 and A6 and for the day count (pkp/pkp-lib#13472, Rule 10): the popover of a request the editor cancelled reads "Review request cancelled by editor" and offers "Reinstate Reviewer" alone, which puts the reviewer back; that of an accepted review past its deadline says "The review was due on {date}"; a response due tomorrow reads 1 day; it needs a cancelled reviewer and an overdue review, which no scenario sets [report 2026-10-13]
+  - the guard for the retired A5 (Rule 5): in scenario 7 ("Sort and page"), a third click on "ID" leaves the address without `sortColumn` and `sortDirection`, and a reload shows the default order [upstream 2026-10-08]
+  - a number in the search box listing the submission with that ID and those whose titles hold its digits, in either box (Rules 6, 7) [incidental 2026-10-05]
+  - the "Clear Filters" beside the chips dropping the filters and keeping the search chip (Rule 8b) [incidental 2026-10-05]
+  - a phrase typed without Enter staying in the box on the next view, over its full list with no chip (Rule 6) [incidental 2026-10-05]
 - **Nothing new to test**:
   - the "Showing {first} to {last} of {total}" line under the list, and "Previous" and "Next" that cannot be pressed at the ends of the pager (Rule 5)
   - Site Administrator holding Journal Manager in the journal, journal-wide like the Journal Manager (Actors row 2; the Journal Manager's views, scenario 2)

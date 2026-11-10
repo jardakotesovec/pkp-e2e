@@ -899,21 +899,21 @@ Left out of the scenarios above, by reason:
 
 - **Planned**:
   - the guard for A7 (issue report
-    `docs/issues/U57-A7-create-journal-one-language-script-error.md`): "Create Journal" on a one-language site, typed into, with no page script failure
+    `docs/issues/U57-A7-create-journal-one-language-script-error.md`): "Create Journal" on a one-language site, typed into, with no page script failure [report 2026-10-01]
   - the guard for A5 (issue report
-    `docs/issues/U57-A5-forms-language-tick-date-time-script-error.md`): a "Forms" tick for a language the page was loaded without, then "Date & Time" offering that language's formats, with no page script failure
+    `docs/issues/U57-A5-forms-language-tick-date-time-script-error.md`): a "Forms" tick for a language the page was loaded without, then "Date & Time" offering that language's formats, with no page script failure [report 2026-10-01]
   - the guard for A3 (issue report
-    `docs/issues/U57-A3-language-block-loses-page-on-port.md`): a visitor choosing "français" in the sidebar "Language" block on "About the Journal" and on the site's Login page, and staying on that page
+    `docs/issues/U57-A3-language-block-loses-page-on-port.md`): a visitor choosing "français" in the sidebar "Language" block on "About the Journal" and on the site's Login page, and staying on that page [report 2026-10-01]
   - the guard for A1 (issue report
-    `docs/issues/U57-A1-site-language-change-unticks-submission-languages.md`): a language the site does not enable, ticked under "Submissions" and made the "Default", keeping both ticks and its place on "Make a Submission" after the Site Administrator installs another language
+    `docs/issues/U57-A1-site-language-change-unticks-submission-languages.md`): a language the site does not enable, ticked under "Submissions" and made the "Default", keeping both ticks and its place on "Make a Submission" after the Site Administrator installs another language [report 2026-10-01]
   - the guard for A8 (issue report
-    `docs/issues/U57-A8-french-default-texts-stored-as-codes.md`): a press and a server created with French under "UI", and French "Reload defaults", leaving no "##" code on the French "Submissions", "Privacy Statement" and "Editorial Masthead" pages {OMP OPS}
+    `docs/issues/U57-A8-french-default-texts-stored-as-codes.md`): a press and a server created with French under "UI", and French "Reload defaults", leaving no "##" code on the French "Submissions", "Privacy Statement" and "Editorial Masthead" pages {OMP OPS} [report 2026-10-01]
   - two scripts of one language named apart (A9 retired): "Uzbek/o‘zbek"
     beside "Uzbek (Latin)/o‘zbek (lotin)" and "Chinese (Simplified)/中文（简体）"
     beside "Chinese (Traditional)/中文（繁體）" on the site's list and
     "Website Languages", the four in "Change Language", and Uzbek (Latin)
     installed alone named "Uzbek/o‘zbek" (Fields, the paragraph after
-    "Change Language")
+    "Change Language") [upstream 2026-10-15]
 - **Rarely met**:
   - the Site Administrator's "Reload defaults" on a journal's "Website
     Languages" row, which puts the default texts back over the

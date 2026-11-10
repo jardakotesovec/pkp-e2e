@@ -445,7 +445,7 @@ Left out of the scenarios above, by reason:
   - an account holding a single Reader-level role, or no role in the
     journal, landing on the journal's home page after signing in on the
     journal's login page, and getting the access-denied page at the
-    retired submission-list address `{journal path}/submissions` (Rule 3)
+    retired submission-list address `{journal path}/submissions` (Rule 3) [incidental 2026-10-13]
 - **Rarely met**:
   - a change someone else makes showing on the list only after a workflow
     panel closes or the page reloads, and not after pressing the open

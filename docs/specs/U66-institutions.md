@@ -495,25 +495,25 @@ Left out of the scenarios above, by reason:
     `docs/issues/U66-A1-institutions-menu-without-settings-permission.md`): a
     member of a manager-level role without "Permit changes to Settings",
     on all three apps, offered "Institutions" in the side menu and
-    reaching the page from it
+    reaching the page from it [report 2026-09-30]
   - the guard for A2 (Rule 6; issue report
     `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`): a
     changed "Name" closed without "Save", then "Edit" and a "Save" of
-    another box, the saved name kept on the row and in the list
+    another box, the saved name kept on the row and in the list [report 2026-09-30]
   - the guard for A3 and A8 (Rule 7b, Side effects; issue report
     `docs/issues/U66-A3-A8-omp-ops-institution-delete-fails.md`): "Delete" ›
     "Yes" removing an institution on a press and a preprint server, and
     "Remove" on "Hosted Presses" ("Hosted Servers") removing one that
-    holds an institution
+    holds an institution [report 2026-09-30]
   - the guard for A9 (Fields "IP ranges"; issue report
     `docs/issues/U66-A9-institution-long-ip-range-save-error.md`): a valid
     range longer than 40 characters on "Add Institution" and on "Edit
-    Institution", saved once or refused, the ranges already stored kept
+    Institution", saved once or refused, the ranges already stored kept [report 2026-09-30]
   - a role created by "Create New Role" at the manager level (Settings
     bullet 3; Actors row 2): its "Permit changes to Settings" unticked
     from the start, and its member refused the Institutions page by its
     address, on all three apps; scenario 3 checks the refusal with the
-    Editor role, on a journal and a press only
+    Editor role, on a journal and a press only [incidental 2026-10-01]
 - **Rarely met**:
   - more than thirty institutions: thirty rows a page and the page
     controls "Previous", the page numbers and "Next" under the list

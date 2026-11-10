@@ -1097,58 +1097,58 @@ Left out of the scenarios above, by reason:
     answered by a sentence saying the user has been signed out instead of
     "##user.authorization.userRequired##" ([A26](#a26); Rule 6a): the
     guard, once fixed as the issue report
-    (`docs/issues/U03-A26-session-ended-alert-raw-key.md`) proposes
+    (`docs/issues/U03-A26-session-ended-alert-raw-key.md`) proposes [other 2026-11-04]
   - text typed into "Signature" alone, then another tab pressed, asking
     "The data on this form has changed. Do you wish to continue without
     saving?", "Cancel" keeping the text ([A19](#a19); Rule 2c): the
-    guard the issue report proposes, once fixed
+    guard the issue report proposes, once fixed [report 2026-10-02]
   - after a refused Contact "Save" (an address already in use), another
     tab pressed, asking "The data on this form has changed. Do you wish
     to continue without saving?", "Cancel" keeping the typed values
     ([A17](#a17); Rule 2d): the guard the issue report
     (`docs/issues/U03-A17-contact-refused-save-lost-on-next-tab.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-03]
   - a valid password change right after a refused one, and the Password
     tab's three boxes empty with the hint under "New password" back
     ([A11](#a11); Rule 10b): the guard the issue report
     (`docs/issues/U03-A11-password-tab-not-cleared-after-save.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-15]
   - an interest already on the site typed again after a comma and a space on
     the Register page, then the Roles tab saved, and "View more details"
     listing each interest once ([A20](#a20)): the guard the issue report
     (`docs/issues/U03-A20-interest-listed-twice-after-roles-save.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-15]
   - {OPS} a Roles tab "Save" on a preprint server with nothing changed, and
     the account's reviewing interests still listed under "View more
     details" ([OPS3](#ops3)): the guard the issue report
     (`docs/issues/U03-OPS3-server-roles-save-erases-interests.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-15]
   - the Contact tab opened, saved and an email change cancelled while the
     French "Signature" box is slow to start, with no script error and the
     globe beside "Signature" right ([A24](#a24)): the regression test the
     issue report (`docs/issues/U03-A24-profile-contact-save-script-error.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-15]
   - after a password change in one browser, a tab press and a "Save" in
     the other browser's Profile page landing on the Login page with no
     script error ([A25](#a25); Rule 10b): the check the issue report
     (`docs/issues/U03-A25-stale-session-tab-press-script-error.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-15]
   - a 40-character password chosen while accepting a role invitation
     then signing in on the Login page, and the Password tab's boxes
     taking all 40 characters ([A7](#a7)): the guard the issue report
     (`docs/issues/U03-A7-password-boxes-keep-32-characters.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-03]
   - the Password tab offering only "Save", and another tab pressed over
     typed passwords asking "The data on this form has changed. Do you
     wish to continue without saving?" ([A12](#a12); Rule 10c): the
     guard the issue report
     (`docs/issues/U03-A12-password-tab-cancel-does-nothing.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-03]
   - the site-wide Profile page showing no privacy sentence while the
     site has no Privacy Statement, and linking to it once one is saved
     ([A14](#a14); Rule 14): the guard the issue report
     (`docs/issues/U03-A14-site-profile-privacy-link-not-found.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-03]
   - a journal closed to registrations, or open with no self-registering
     role, not listed in another journal's
     "Register with other journals", on the site-level profile or on the
@@ -1157,12 +1157,12 @@ Left out of the scenarios above, by reason:
     ([A4](#a4); Rules 8a and 8c): the guard the
     issue report
     (`docs/issues/U03-A4-closed-journal-listed-on-roles-tab.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-03]
   - an oversize .gif refused on the Public tab, the picture and its
     "Delete" still there after a reload, and no .gif stored
     ([A2](#a2); Rule 9a): the guard the issue report
     (`docs/issues/U03-A2-refused-gif-wipes-profile-image.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-03]
 - **Nothing new to test**:
   - a tab named in the site-level address kept on the forward to a one-journal user's profile (Rule 3; scenario 2 opens the site-level address with no tab named, and scenario 1 reads a tab named in a journal's address)
   - no submission or activity-log entry written by this page (*Side effects*): the log is a submission's, and reading its silence needs a submission and a positive control for nothing this page does

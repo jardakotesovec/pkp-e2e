@@ -935,29 +935,29 @@ Left out of the scenarios above, by reason:
   - the guard for A21 (issue report
     `docs/issues/U40-A21-author-new-version-changes-published-funders.md`):
     an Author allowed to edit only a new version of a published item is
-    offered no "Add Funder", and the published page's funders stay as they were
-  - Tools › Permissions: Cancel in the reset confirm box leaves the button usable, and pressing it again asks again (A13; the guard its issue report names)
-  - a press with License Terms and no license: a book page without its own License URL shows the "License" heading and the terms, with no link in the block (OMP5; the guard its issue report names)
+    offered no "Add Funder", and the published page's funders stay as they were [report 2026-10-05]
+  - Tools › Permissions: Cancel in the reset confirm box leaves the button usable, and pressing it again asks again (A13; the guard its issue report names) [report 2026-10-03]
+  - a press with License Terms and no license: a book page without its own License URL shows the "License" heading and the terms, with no link in the block (OMP5; the guard its issue report names) [report 2026-10-03]
   - a journal that requires the plain language summary: the
     Metadata and Permissions & Disclosure pages saved before and after
     the summary is stored, and an emptied summary on Title & Abstract
-    still refused (Rule 5; A1, retired)
+    still refused (Rule 5; A1, retired) [upstream 2026-10-21]
   - term suggestions: a term on another submission's published version
     offered below the typed text, and a term on a submission not
     published, or in another journal, not offered (Rule 7b): likely a
     bullet in scenario 2's "Keywords", with a published submission
-    added to its given
+    added to its given [upstream 2026-09-29]
   - on a press with no license, "Default Chapter License URL" plain-editable
     until the volume's own License URL is saved, then, after a reload,
     locked with "Override" and the sentence naming the volume's license,
     the address itself for a non-Creative Commons one (Fields "Default
     Chapter License URL"): likely a bullet in scenario 10, on a second
-    scratch press left unlicensed
+    scratch press left unlicensed [incidental 2026-09-29]
   - on a journal, an article published as "Version of Record" with
     "Assign To Future Issue and Publish Immediately" showing neither the
     readout nor "Change" on its Publication pages (Rule 13a): likely a
     case in scenario 6's "Without the button", with such an article
-    added to its given
+    added to its given [incidental 2026-10-07]
 - **Nothing new to test**:
   - a term added twice showing two chips until Save and one on the
     reopened page (Rule 7a)

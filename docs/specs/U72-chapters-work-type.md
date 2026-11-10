@@ -735,35 +735,35 @@ Left out of the scenarios above, by reason:
   - the guard for A3 (issue report
     `docs/issues/U72-A3-new-version-chapter-files-left-behind.md`):
     scenario 10's copied chapter reads its earlier files ticked in its
-    "Files" list
+    "Files" list [report 2026-10-04]
   - the guard for A4 (issue report
     `docs/issues/U50-A4-refused-save-date-published-today.md`): a chapter
-    saved without a date reopens with an empty "Date Published"
+    saved without a date reopens with an empty "Date Published" [report 2026-10-04]
   - the guard for A6 (retired): after "Order", a chapter dragged above
     another moves with its author rows and keeps its new place after
     "Done" and a reload (Rule 8a); the order of the authors inside a
-    chapter is no part of it (Rule 8b)
+    chapter is no part of it (Rule 8b) [report 2026-10-04]
   - the list while it is being ordered: the greyed titles that open no
     window, the hidden arrows, "Add Chapter" and, on the Chapters page,
-    "Order" doing nothing when pressed (Rule 8)
+    "Order" doing nothing when pressed (Rule 8) [incidental 2026-10-08]
   - "Done" showing no notice, "Cancel ordering" after a chapter is
     dragged, and a drag left without "Done" gone once the Chapters page
-    or the wizard is opened again (Rule 8c)
+    or the wizard is opened again (Rule 8c) [incidental 2026-10-08]
   - "Cancel ordering" after a chapter that has no authors was dragged,
-    which draws its "No Items" line back under it (Rule 8a)
+    which draws its "No Items" line back under it (Rule 8a) [incidental 2026-10-21]
   - the guard for A7 (issue report
     `docs/issues/U72-A7-chapter-author-order-change-lost.md`): a
     chapter's authors dragged into a place the save used to skip keep
-    the new order after "Done" and a reload
+    the new order after "Done" and a reload [report 2026-10-04]
   - the guard for A8 (issue report
     `docs/issues/U72-A8-chapter-license-sentence-own-address-published.md`):
     a chapter with its own License URL, and any chapter of a published
-    Edited Volume, opens without the automatic-license sentence
-  - the guard for A5 (issue report `docs/issues/U75-A11-review-panel-edit-stays-on-review.md`): the Review step's "Chapters" panel's "Edit" opens "Details".
+    Edited Volume, opens without the automatic-license sentence [report 2026-10-04]
+  - the guard for A5 (issue report `docs/issues/U75-A11-review-panel-edit-stays-on-review.md`): the Review step's "Chapters" panel's "Edit" opens "Details". [report 2026-10-03]
   - the guard for A2 (issue report
     `docs/issues/U74-A2-assistant-marketing-and-work-type-refused.md`):
     an assigned Layout Editor gets no work-type menu and a greyed
-    "Save" on "Publication Dates", while the Press editor changes both
+    "Save" on "Publication Dates", while the Press editor changes both [report 2026-10-03]
 - **Nothing new to test**:
   - two form languages on the press: one "Title", "Subtitle" and
     "Abstract" box per language, the book's language first, and an

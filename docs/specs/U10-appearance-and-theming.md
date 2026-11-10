@@ -1234,25 +1234,25 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for A20 (issue report `docs/issues/U10-A20-removed-thumbnail-stays-public.md`): once fixed, "Remove" under the thumbnail and "Save" leave its address answering 404, also when another language keeps its own thumbnail, which stays.
-  - the guard for A16 (issue report `docs/issues/U10-A16-upload-box-server-refusal-no-message.md`): once fixed, a "Logo" refused for its size shows the server's message under the box
-  - the guard for A16 (issue report `docs/issues/U10-A16-logo-save-refusal-no-message-under-box.md`): once fixed, a BMP or SVG "Logo" refused at "Save" shows "There was an error uploading this image." under the box, and a PNG "Homepage Image" saved beside it is not lost
-  - a BMP chosen for "Logo" over a saved logo and saved: refused with "Please correct one error.", the earlier logo back in the box after a reload and still in the visitor's header; and a ".css" file that opens with a comment block and a `:root` rule, saved as the style sheet and applied on the public pages (Fields, the upload boxes)
-  - the "Homepage Image" description typed in scenario 3 read on a press's and a preprint server's home page, as on a journal's (A1; the guard its issue report names)
-  - the names a screen reader hears for the "Editorial Masthead" arrows ("Increase position of {role}" for an up arrow) and for each "Sidebar" box (the block's name alone) (A3; the guard its issue report names)
-  - a placed block's plugin turned off, then a "Page Footer" saved on "Setup" without a refusal (A4; the guard its issue report names)
-  - a style sheet removed and saved, its old address answering "404 Not Found" (A5; the guard its issue report names)
-  - a ".pdf" picked for "Logo" with "Upload File" and refused, then "Upload File" and the tab's "Save" enabled again (A7; the guard its issue report names)
-  - a press's French (Canada) "Entête" description naming no journal ("la revue") {OMP} (A11; the guard its issue report names)
-  - a French upload box's drop area reading the French text (A12; the guard its issue report names)
-  - a journal's home page with "Latest Publications" showing each article title as a heading one level below the list's heading {OJS} (OJS6; the guard its issue report names)
-  - a press category holding more books than "Items per page" showing page links, its page 2 listing the next book {OMP} (OMP2; the guard its issue report names)
-  - a press's French pages giving a book's date in the default format before a French "Date" is saved, and in the saved one after, the English pages unchanged {OMP} (Rule 3a)
-  - French ticked under "UI" alone: "Date & Time" without a "French" button, and a press's French pages keeping the default format after an English "Date" is saved {OMP} (Rule 3b)
-  - a chapter's page printing the book's "Date" {OMP} (Rule 31)
-  - "Present a masthead based on user enrollments" unticked: the list and "Reviewers" leaving the tab before any save; saved, the box still unticked after a reload; ticked again and saved, the list back in its saved order, a role moved just before the box was unticked included (Fields, "Editorial Masthead"; Rule 28a; Settings bullet 15a)
-  - "Enable listing of reviewers on the masthead" ticked and saved, still ticked after a reload {OJS OMP} (Fields, "Editorial Masthead"; Settings bullet 15b)
-  - a saved "Logo" PNG removed and replaced by another PNG in one save: the logo's old address then opens the new picture (Side effects bullet 2)
+  - the guard for A20 (issue report `docs/issues/U10-A20-removed-thumbnail-stays-public.md`): once fixed, "Remove" under the thumbnail and "Save" leave its address answering 404, also when another language keeps its own thumbnail, which stays. [report 2026-10-19]
+  - the guard for A16 (issue report `docs/issues/U10-A16-upload-box-server-refusal-no-message.md`): once fixed, a "Logo" refused for its size shows the server's message under the box [report 2026-10-07]
+  - the guard for A16 (issue report `docs/issues/U10-A16-logo-save-refusal-no-message-under-box.md`): once fixed, a BMP or SVG "Logo" refused at "Save" shows "There was an error uploading this image." under the box, and a PNG "Homepage Image" saved beside it is not lost [report 2026-10-20]
+  - a BMP chosen for "Logo" over a saved logo and saved: refused with "Please correct one error.", the earlier logo back in the box after a reload and still in the visitor's header; and a ".css" file that opens with a comment block and a `:root` rule, saved as the style sheet and applied on the public pages (Fields, the upload boxes) [upstream 2026-10-19]
+  - the "Homepage Image" description typed in scenario 3 read on a press's and a preprint server's home page, as on a journal's (A1; the guard its issue report names) [report 2026-10-03]
+  - the names a screen reader hears for the "Editorial Masthead" arrows ("Increase position of {role}" for an up arrow) and for each "Sidebar" box (the block's name alone) (A3; the guard its issue report names) [report 2026-10-03]
+  - a placed block's plugin turned off, then a "Page Footer" saved on "Setup" without a refusal (A4; the guard its issue report names) [report 2026-10-01]
+  - a style sheet removed and saved, its old address answering "404 Not Found" (A5; the guard its issue report names) [report 2026-10-03]
+  - a ".pdf" picked for "Logo" with "Upload File" and refused, then "Upload File" and the tab's "Save" enabled again (A7; the guard its issue report names) [report 2026-10-03]
+  - a press's French (Canada) "Entête" description naming no journal ("la revue") {OMP} (A11; the guard its issue report names) [report 2026-10-03]
+  - a French upload box's drop area reading the French text (A12; the guard its issue report names) [report 2026-10-03]
+  - a journal's home page with "Latest Publications" showing each article title as a heading one level below the list's heading {OJS} (OJS6; the guard its issue report names) [report 2026-10-03]
+  - a press category holding more books than "Items per page" showing page links, its page 2 listing the next book {OMP} (OMP2; the guard its issue report names) [report 2026-10-03]
+  - a press's French pages giving a book's date in the default format before a French "Date" is saved, and in the saved one after, the English pages unchanged {OMP} (Rule 3a) [incidental 2026-09-29]
+  - French ticked under "UI" alone: "Date & Time" without a "French" button, and a press's French pages keeping the default format after an English "Date" is saved {OMP} (Rule 3b) [incidental 2026-09-29]
+  - a chapter's page printing the book's "Date" {OMP} (Rule 31) [incidental 2026-09-29]
+  - "Present a masthead based on user enrollments" unticked: the list and "Reviewers" leaving the tab before any save; saved, the box still unticked after a reload; ticked again and saved, the list back in its saved order, a role moved just before the box was unticked included (Fields, "Editorial Masthead"; Rule 28a; Settings bullet 15a) [upstream 2026-09-29]
+  - "Enable listing of reviewers on the masthead" ticked and saved, still ticked after a reload {OJS OMP} (Fields, "Editorial Masthead"; Settings bullet 15b) [upstream 2026-09-29]
+  - a saved "Logo" PNG removed and replaced by another PNG in one save: the logo's old address then opens the new picture (Side effects bullet 2) [incidental 2026-10-21]
 - **Nothing new to test**:
   - a role newly considered for the masthead on a preprint server, before and after the tab's first save {OPS} (Rule 28; Settings bullet 24)
   - the Editor and the Production Editor on the same tabs: the same fields and saves as the Journal Manager in scenarios 1 to 10 (Actors row 1)

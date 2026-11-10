@@ -797,54 +797,54 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the last rows' menus staying in the window (Rule 7): with a short
     window, the "…" of the list's last row opens its menu above the
-    button, every action visible and pressable
+    button, every action visible and pressable [upstream 2026-10-27]
   - the guard for A15 (issue report
     `docs/issues/U53-A15-merge-fails-for-discussion-opener.md`): a manager
     merges an account that opened a discussion on a submission into another
     account: the merge completes with a message, the merged account is gone
     and cannot sign in, and the discussion names the chosen account as its
-    creator
+    creator [report 2026-10-02]
   - the guard for A13 (issue report
     `docs/issues/U53-A13-A17-users-grid-roles-admin-empty-ended-listed.md`):
     the Site Administrator opens the Settings wizard's "Users" grid and the
     "Merge user" window: the administrator's row names the manager role
     under "Roles"; after "Edit User" ends a role, the refreshed row no
-    longer lists it
+    longer lists it [report 2026-10-02]
   - the guard for A6 (issue report
     `docs/issues/U53-A6-disable-window-lists-ended-roles.md`): a manager
     opens "Disable User" on a user one of whose roles has ended: the
     window's "Current Roles:" line names only the roles the list's "Roles"
-    column shows
+    column shows [report 2026-10-02]
   - the guard for A7 (issue report
     `docs/issues/U53-A7-enabling-reason-kept-as-disabling-reason.md`): a
     manager disables an account, enables it and disables it again: the
     second "Disable User" opens with an empty reason box, and the Login page
-    never shows text typed when enabling
+    never shows text typed when enabling [report 2026-10-02]
   - the guard for A1 (issue report
     `docs/issues/U53-A1-A2-user-menu-offers-refused-actions.md`): a manager
     opens the row menu on the Site Administrator's row and on a user who
     holds a role in another journal: neither offers an action the server
     then refuses ("Disable User" on both; "Remove User" on the Site
-    Administrator's)
+    Administrator's) [report 2026-10-02]
   - the guard for A19 (issue report
     `docs/issues/U53-A19-remove-user-upcoming-role-error.md`): a manager
     uses "Remove User" on a user who holds a current role and a role
-    starting on a later date: both roles end in one go, with no error
+    starting on a later date: both roles end in one go, with no error [report 2026-10-02]
   - the guard for A4 (issue report
     `docs/issues/U53-A4-user-search-example-journal-role.md`): on a press
     and a preprint server, searching the users box's own example lists at
-    least one user
+    least one user [report 2026-10-02]
   - the guard for A5 (issue report
     `docs/issues/U53-A5-users-list-row-button-raw-key.md`): every row's "…"
-    button on the users list has an accessible name with no "##"
+    button on the users list has an accessible name with no "##" [report 2026-10-02]
   - the "Merge user" window opened by a manager on a journal where a user
     also holds a role in another journal the manager does not manage:
     that user's row has no arrow, while a manager of both journals is
-    offered "Merge into this User" on it (Rule 16a)
+    offered "Merge into this User" on it (Rule 16a) [upstream 2026-10-13]
   - the "Merge user" window opened by the Site Administrator: every row
     but the account being merged and a second Site Administrator's offers
     "Merge into this User", the administrator's own and other journals'
-    users included (Rule 16a)
+    users included (Rule 16a) [upstream 2026-10-13]
 - **Nothing new to test**:
   - a "Username" outside the characters the Fields section allows, on
     "Add User", whose refusal the Fields section does not quote (Fields

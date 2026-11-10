@@ -702,53 +702,53 @@ Left out of the scenarios above, by reason:
   - the guard for A4 (issue report
     `docs/issues/U70-A4-catalog-second-category-flag-removes-first.md`):
     a book in two categories, featured in each, keeps both "Featured in
-    category" boxes ticked after a reload
+    category" boxes ticked after a reload [report 2026-10-03]
   - the guard for A5 (issue report
     `docs/issues/U70-A5-add-entry-refusal-no-reason.md`): "Add Entry" ›
-    "Save" with nothing chosen marks the box
+    "Save" with nothing chosen marks the box [report 2026-10-03]
   - the guard for A2 (issue report
     `docs/issues/U70-A2-catalog-management-notice-links-not-there.md`):
     the Author's Production stage shows neither the "Catalog Management"
-    nor the "Awaiting approval." box
+    nor the "Awaiting approval." box [report 2026-10-03]
   - the guard for A3 (issue report
     `docs/issues/U70-A3-catalog-filter-order-reversed.md`): a series on
-    "Title (A-Z)" lists A to Z under "Filters"
+    "Title (A-Z)" lists A to Z under "Filters" [report 2026-10-03]
   - the guard for A3 (issue report
     `docs/issues/U70-A3-catalog-press-order-lost-after-filter.md`): a
     press on "Title (Z-A)" keeps that order after a filter is chosen and
-    removed
+    removed [report 2026-10-03]
   - the guard for A10 (issue report
     `docs/issues/U70-A10-category-page-books-featured-elsewhere-first.md`):
     on a category's public page, the book featured in that category comes
-    before one featured only in the whole catalog
+    before one featured only in the whole catalog [report 2026-10-03]
   - the guard for A6 (issue report
     `docs/issues/U70-A6-unpublished-book-notice-still-approved.md`): the
-    Production stage reads "Awaiting approval." after "Unpublish"
+    Production stage reads "Awaiting approval." after "Unpublish" [report 2026-10-03]
   - the guard for A11 (issue report
     `docs/issues/U70-A11-catalog-ordering-notice-offers-drag.md`): after
-    "Order Features", the notice names only the up and down buttons
+    "Order Features", the notice names only the up and down buttons [report 2026-10-03]
   - the guard for A12 (issue report
     `docs/issues/U70-A12-catalog-filters-column-stays-while-ordering.md`):
-    an open "Filters" column is hidden while ordering
+    an open "Filters" column is hidden while ordering [report 2026-10-03]
   - the guard for A13 (issue report
     `docs/issues/U70-A13-catalog-last-featured-down-arrow-extra-press.md`):
     with a book not featured in the list, one press of a featured book's
-    arrow moves it
+    arrow moves it [report 2026-10-03]
   - the guard for A14 (issue report
     `docs/issues/U70-A14-catalog-ordering-arrows-name-undefined.md`):
     after "Order Features", each arrow's name for a screen reader carries
-    the book's title
+    the book's title [report 2026-10-03]
   - a scheduled book's Production stage shows the "Catalog
-    Management" notice, not "Awaiting approval." (Rule 14)
+    Management" notice, not "Awaiting approval." (Rule 14) [incidental 2026-10-05]
   - the "Identity" group's content on a published book, "Press
     Identity" with its sentence and the list of what was recorded; no
     "Identity" group on a book never published; and the list unchanged
     after the press is renamed (Fields, the "Catalog Entry" page;
-    scenario 5 reads the group's heading only)
+    scenario 5 reads the group's heading only) [upstream 2026-10-01]
   - on a scratch press with ORCID on, "Add Entry" › "Save" with a book
     whose contributor has an unauthenticated ORCID iD: the panel
     closes with no notice, the book is in the list and its public page
-    answers (Rule 12c; Settings bullet 6)
+    answers (Rule 12c; Settings bullet 6) [upstream 2026-10-09]
 - **Rarely met**:
   - "Add Entry" › "Save" of a book whose "Date Published" lies in the
     future: the book is scheduled, stays off the list and is still

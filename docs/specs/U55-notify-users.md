@@ -434,11 +434,11 @@ Left out of the scenarios above, by reason:
   - the Site Administrator sending from the tab, as the Journal Manager
     of scenario 1 does (Actors row 2)
 - **Planned**:
-  - scenario 1's send button reading "Send Email" ([A1](#a1); Fields): the guard the issue report proposes, once fixed
-  - scenario 2's "Nothing filled in": "Roles", "Subject" and "Email" marked required, and "Save" refused with each field named and no window ([A2](#a2); Rule 4): the guard the issue report proposes, once fixed
-  - a send to "Nobody role" alone, with "Copy" ticked and unticked, refused with a message under "Roles" and nothing queued ([A4](#a4); Rule 9): the guard the issue report proposes, once fixed
-  - scenario 1's "Author" + "Reader" + "Copy" window reading the number of people the emails reach ([A3](#a3); Rule 5): the guard the issue report proposes, once fixed
-  - a send to "Author" with "Copy" ticked and then unticked before "Save" reaching only the Authors, the manager getting no copy ([A5](#a5); Side effects bullet 1): the guard, once fixed
+  - scenario 1's send button reading "Send Email" ([A1](#a1); Fields): the guard the issue report proposes, once fixed [report 2026-10-04]
+  - scenario 2's "Nothing filled in": "Roles", "Subject" and "Email" marked required, and "Save" refused with each field named and no window ([A2](#a2); Rule 4): the guard the issue report proposes, once fixed [report 2026-10-04]
+  - a send to "Nobody role" alone, with "Copy" ticked and unticked, refused with a message under "Roles" and nothing queued ([A4](#a4); Rule 9): the guard the issue report proposes, once fixed [report 2026-10-04]
+  - scenario 1's "Author" + "Reader" + "Copy" window reading the number of people the emails reach ([A3](#a3); Rule 5): the guard the issue report proposes, once fixed [report 2026-10-04]
+  - a send to "Author" with "Copy" ticked and then unticked before "Save" reaching only the Authors, the manager getting no copy ([A5](#a5); Side effects bullet 1): the guard, once fixed [incidental 2026-10-13]
 - **Register carries it**:
   - A1 (the button that sends reads "Save"; Fields; scenario 1 passes it)
   - A2 (no required mark, and the window opening on "0 users" before any

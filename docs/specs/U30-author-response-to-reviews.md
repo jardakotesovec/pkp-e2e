@@ -692,34 +692,34 @@ Left out of the scenarios above, by reason:
   - the guard for A1 (issue report
     `docs/issues/U30-A1-author-response-request-leaves-no-trace.md`):
     after "Submit Request" the editor's "Author Response" row reads
-    "Response requested", for a second editor of the submission too
+    "Response requested", for a second editor of the submission too [report 2026-10-04]
   - the guard for A3 (issue report `docs/issues/U30-A3-funding-coordinat
     or-author-response-refused.md`): an assigned Funding coordinator
     sees no "Request Response" and no "Delete" on the "Author Response"
-    table, and "View" opens the response read-only
+    table, and "View" opens the response read-only [report 2026-10-04]
   - the guard for A4 (issue report `docs/issues/U30-A4-request-author-re
     sponse-typed-address-returns-nowhere.md`): the "Request Author
     Response" page opened by its address, without a return address, then
-    "Cancel", the sent dialog's link and Escape each open the submission
+    "Cancel", the sent dialog's link and Escape each open the submission [report 2026-10-04]
   - Rule 4a's field messages (A5 retired, pkp/pkp-lib#13715): an
     emptied "Subject", then an emptied "Message", at "Submit Request"
     shows "This field is required." under the field and no "Error"
-    dialog; filled again, the request goes out
+    dialog; filled again, the request goes out [report 2026-10-04]
   - the guard for A7 (issue report `docs/issues/U30-A7-author-response-g
     one-after-revisions-upload.md`): after "Request Revisions" the
     author uploads a revised file first, and the "Author Response" card
     stays and the decision email's "Submit Author Response" opens the
-    response form
+    response form [report 2026-10-04]
   - the guard for OMP1 (issue report `docs/issues/U30-OMP1-press-author-
     response-button-leads-nowhere.md`), once the team rules that presses
     get author responses: the "Author Response" table and card on both
     of a press's review stages, and the decision email's button opening
-    the response form
+    the response form [report 2026-10-04]
   - the guard for A11, retired (Rule 11): a Section Editor's and a
     Journal Manager's delete, edit and "Request Response" request that
     name a round of another submission, in the same journal and in
     another, are refused and leave the response and the round as they
-    were; the same requests with the submission's own round go through
+    were; the same requests with the submission's own round go through [upstream 2026-10-20]
 - **Nothing new to test**:
   - Site Administrator (the Journal Manager's offer, scenarios 1 and 3)
   - Guest Editor (the Section Editor's gate, scenario 6)

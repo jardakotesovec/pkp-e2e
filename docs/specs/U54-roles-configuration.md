@@ -782,49 +782,49 @@ Left out of the scenarios above, by reason:
     `docs/issues/U54-A1-A5-roles-list-first-row-no-edit-stale-rows.md`):
     every row of the "Roles" list, the first included, offering "Edit"
     and "Remove", and a pressed stage box showing its new state without
-    a reload
+    a reload [report 2026-10-02]
   - the guard for A3 (issue report
     `docs/issues/U54-A3-manager-level-role-save-ticks-every-stage.md`):
     "OK" in the "Production editor" window with nothing changed, then
-    its row still reading Copyediting and Production only
+    its row still reading Copyediting and Production only [report 2026-10-02]
   - the guard for A11 (issue report
     `docs/issues/U54-A11-own-role-ok-removes-settings-access.md`): an
     Editor whose only Settings role is "Journal editor" pressing "OK" in
-    its window, then still opening Settings
+    its window, then still opening Settings [report 2026-10-02]
   - the guard for A13 (issue report
     `docs/issues/U54-A13-roles-list-order-moves-and-pages-repeat.md`):
-    a role whose options are saved keeping its place in the "Roles" list
+    a role whose options are saved keeping its place in the "Roles" list [report 2026-10-02]
   - the guard for OPS1 (issue report
     `docs/issues/U54-OPS1-ops-open-access-sign-in-box-not-kept.md`): a
     preprint server's "Site Access Options" offering "Site Access" and
-    "User Registration" only
+    "User Registration" only [report 2026-10-02]
   - the guard for A14 (issue report
     `docs/issues/U54-A14-users-tab-keeps-renamed-role-old-name.md`): a
     role renamed on the "Roles" tab, then the "Users" tab read without a
-    reload showing the new name
+    reload showing the new name [report 2026-10-02]
   - the guard for A2 (issue report
     `docs/issues/U54-A2-manager-role-row-shows-no-stage.md`): a new
     journal's or press's manager role row with every stage ticked, and
-    listed under each stage of "List roles assigned to"
+    listed under each stage of "List roles assigned to" [report 2026-10-02]
   - the guard for A10 (issue report
     `docs/issues/U54-A10-role-name-of-spaces-breaks-window.md`): a role
     created at "Assistant" with one stage ticked and a "Role Name" of
-    spaces, then a real name, listed with its stage
+    spaces, then a real name, listed with its stage [report 2026-10-02]
   - the guard for A4 (issue report
     `docs/issues/U54-A4-role-remove-warning-promises-deletion.md`): a
     default role's row offering "Edit" and no "Remove", and a created
-    role's "Remove" window text before the role is removed
+    role's "Remove" window text before the role is removed [report 2026-10-02]
   - the guard for A9 (issue report
     `docs/issues/U54-A9-roles-filter-lists-hide-after-choice.md`): a
     level chosen in the "Roles" tab's filter, then the two filter lists
-    still shown with the choice
+    still shown with the choice [report 2026-10-02]
   - the guard for A8 (issue report
     `docs/issues/U54-A8-role-stage-boxes-unnamed.md`): each stage box of
-    the "Roles" list found by its role and stage name
+    the "Roles" list found by its role and stage name [report 2026-10-02]
   - the guard for OPS3 (issue report
     `docs/issues/U54-OPS3-ops-french-moderator-reads-series-editor.md`):
     a preprint server's French "Rôles" tab reading the Moderator level by
-    its French name
+    its French name [report 2026-10-02]
 - **Nothing new to test**:
   - "Cancel" in the role window after a change, and the questions its
     "Close" (×) and leaving the page ask (Rule 17)

@@ -981,21 +981,21 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the file's "History" keeping no line of the revision cancelled with "Cancel": one "A file revision "notes.md" …" line, not two (Rule 9): likely a bullet in scenario 3, which cancels a revision before the "History" it reads
-  - "Edit a file" left with "Cancel" after the name is changed: no question, the list keeping the old name after a reload, and the window reopening on it (Rule 10a): likely a bullet in scenario 4 before "The rename"
-  - the "Files" panel's "Other" on a file with no component, then "Save" with no radio button chosen: a message under "What kind of file is this?" and no server error ([A11](#a11)): the guard the issue report proposes
-  - "Add Note" with the box empty on a file's "Notes": refused, no note listed and no "Posted new note." line in "History" ([A10](#a10)): the guard the issue report proposes
-  - "Cancel upload" pressed on the full bar with the server's answer held back: no file stored, the panel empty after a reload ([A25](#a25)): the guard the issue report proposes
-  - the "Files" panel's screen-reader status: none before the first upload, and "Uploading 100% complete" once a file has uploaded (Rule 17c): likely an assertion in scenario 9's "A finished file" bullet
-  - "Change File" on step 1 of a new file's upload, then "Complete": the list gains the second file alone ([A14](#a14)): the guard the issue report proposes
-  - in "Upload/Select Files" with "Show files from all accessible workflow stages." ticked, another stage's row: "More Information" loads and the file name downloads ([A19](#a19)): the guard the issue report proposes
-  - "Show events from prior versions" ticked on a file in "Files for Review": the original file's rows are added ([A4](#a4)): the guard the issue report proposes
-  - "Download All Files" on "Submission Files": the zip named with one hyphen, "{number}-submission-files.zip" ([A12](#a12)): the guard the issue report proposes; likely an assertion in scenario 4
-  - the reviewer's "Review Files" search for a text no file name contains: "No Files" ([A20](#a20)): the guard the issue report proposes
-  - step 1 of the upload wizard before a component is chosen: the upload box absent from the accessibility snapshot, and each drop-down found by its role and label ([A9](#a9)): the guards the two issue reports propose
-  - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes
-  - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes
-  - the REST API edit with `fileStage`, or `assocType` and `assocId`, beside a new `name`: the file still on its list after a reload, under the new name, with one more "The metadata for file…" line in its "History" (Rule 10b)
+  - the file's "History" keeping no line of the revision cancelled with "Cancel": one "A file revision "notes.md" …" line, not two (Rule 9): likely a bullet in scenario 3, which cancels a revision before the "History" it reads [report 2026-10-01]
+  - "Edit a file" left with "Cancel" after the name is changed: no question, the list keeping the old name after a reload, and the window reopening on it (Rule 10a): likely a bullet in scenario 4 before "The rename" [report 2026-10-01]
+  - the "Files" panel's "Other" on a file with no component, then "Save" with no radio button chosen: a message under "What kind of file is this?" and no server error ([A11](#a11)): the guard the issue report proposes [report 2026-10-02]
+  - "Add Note" with the box empty on a file's "Notes": refused, no note listed and no "Posted new note." line in "History" ([A10](#a10)): the guard the issue report proposes [report 2026-10-02]
+  - "Cancel upload" pressed on the full bar with the server's answer held back: no file stored, the panel empty after a reload ([A25](#a25)): the guard the issue report proposes [report 2026-10-02]
+  - the "Files" panel's screen-reader status: none before the first upload, and "Uploading 100% complete" once a file has uploaded (Rule 17c): likely an assertion in scenario 9's "A finished file" bullet [upstream 2026-09-28]
+  - "Change File" on step 1 of a new file's upload, then "Complete": the list gains the second file alone ([A14](#a14)): the guard the issue report proposes [report 2026-10-02]
+  - in "Upload/Select Files" with "Show files from all accessible workflow stages." ticked, another stage's row: "More Information" loads and the file name downloads ([A19](#a19)): the guard the issue report proposes [report 2026-10-02]
+  - "Show events from prior versions" ticked on a file in "Files for Review": the original file's rows are added ([A4](#a4)): the guard the issue report proposes [report 2026-10-02]
+  - "Download All Files" on "Submission Files": the zip named with one hyphen, "{number}-submission-files.zip" ([A12](#a12)): the guard the issue report proposes; likely an assertion in scenario 4 [report 2026-10-02]
+  - the reviewer's "Review Files" search for a text no file name contains: "No Files" ([A20](#a20)): the guard the issue report proposes [report 2026-10-02]
+  - step 1 of the upload wizard before a component is chosen: the upload box absent from the accessibility snapshot, and each drop-down found by its role and label ([A9](#a9)): the guards the two issue reports propose [report 2026-10-02]
+  - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes [report 2026-10-02]
+  - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes [incidental 2026-10-05]
+  - the REST API edit with `fileStage`, or `assocType` and `assocId`, beside a new `name`: the file still on its list after a reload, under the new name, with one more "The metadata for file…" line in its "History" (Rule 10b) [incidental 2026-10-23]
 - **Nothing new to test**:
   - "Cancel" after revising a file renamed since its last upload: the previous file back, its rename kept, and no line of the cancelled upload in its "History" (Rule 9)
   - the header "Close" after a revision: the new file kept, the earlier version a "Download" in "History" (Rule 9)

@@ -432,19 +432,19 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the list in French: "Trier" / "Enregistrer l'ordre", the row menu
     and the delete confirmation in French, and a funder saved through
-    the French panel listed at once and after a reload (Rule 14)
+    the French panel listed at once and after a reload (Rule 14) [incidental 2026-09-30]
   - the guard for A5 (issue report
     `docs/issues/U46-A5-ordering-arrows-unnamed.md`): in ordering mode each
     funder row's up and down arrows carry names that say the direction and
-    the funder
+    the funder [report 2026-10-02]
   - the guard for A5 (issue report
     `docs/issues/U41-A10-name-boxes-labels-run-together.md`): a
     hand-entered funder's name boxes, each named for its own language
-    alone
-  - the guard for A4 (issue report `docs/issues/U42-A10-wizard-data-citations-funders-stale-press-server.md`): on a press and a preprint server, a funder added in the submission wizard shows in its table and on "Review" at once, without a reload
+    alone [report 2026-10-03]
+  - the guard for A4 (issue report `docs/issues/U42-A10-wizard-data-citations-funders-stale-press-server.md`): on a press and a preprint server, a funder added in the submission wizard shows in its table and on "Review" at once, without a reload [report 2026-10-04]
   - a registry pick of a funder the install's copy of the registry
     already holds, saved and listed with its registry name (Fields;
-    A10)
+    A10) [incidental 2026-10-05]
 - **Nothing new to test**:
   - grant validation on while the registry service is unreachable, the
     check skipped and the save going through (Settings): the save

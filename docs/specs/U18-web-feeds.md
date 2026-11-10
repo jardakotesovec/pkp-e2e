@@ -656,9 +656,9 @@ footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - {OMP OPS} an item published, for the first time or again, after later-submitted items were published: first in the three feeds, and alone in them with "Number of publications to display" at 1 ([A8](#a8); Rule 4a): the guard the issue report proposes, once fixed
-  - a feed address with a feed name that does not exist ("ATOM", "atom.xml", "json") or with none answering "404 Not Found" ([A2](#a2); Rule 15): the guard the issue report proposes, once fixed
-  - "Include identifiers…" ticked: the label names what the summary then carries (the section or series, categories, keywords, subjects, disciplines) and no ISBN ([A3](#a3); Rule 9b): the guard the issue report proposes, once fixed
+  - {OMP OPS} an item published, for the first time or again, after later-submitted items were published: first in the three feeds, and alone in them with "Number of publications to display" at 1 ([A8](#a8); Rule 4a): the guard the issue report proposes, once fixed [report 2026-10-02]
+  - a feed address with a feed name that does not exist ("ATOM", "atom.xml", "json") or with none answering "404 Not Found" ([A2](#a2); Rule 15): the guard the issue report proposes, once fixed [report 2026-10-02]
+  - "Include identifiers…" ticked: the label names what the summary then carries (the section or series, categories, keywords, subjects, disciplines) and no ISBN ([A3](#a3); Rule 9b): the guard the issue report proposes, once fixed [report 2026-10-02]
 - **Rarely met**:
   - {OJS} "Display items in current published issue." on a journal with
     no published issue, its Atom and RSS 1.0 feeds holding no item (Rules

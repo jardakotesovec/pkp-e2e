@@ -909,12 +909,12 @@ footnote says how) and judge both mailboxes only once they have run.
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - a Section Editor's task count in the menu under their name on the public pages (Rule 4; the guard [A3](#a3)'s issue report proposes, shared with Navigation menus & site chrome A2)
-  - the "needs an editor" email staying away for a manager who unticked "Enable…" on its row (Rule 5a; scenario 3 reads the mailbox; the guard [A10](#a10)'s issue report proposes)
-  - a preprint server's "needs a moderator" task opening the preprint's workflow (Rule 2c; scenario 1 presses a task; the guard [OPS3](#ops3)'s issue report proposes)
-  - a reply in a discussion with "Discussion activity." switched off reaching neither the Tasks window nor the mailbox, and with it on a row reading "… replied to …" (Rule 6; the guard [A1](#a1)'s issue report proposes)
-  - unticking a box on the "Unsubscribe" page leaving the emails switched off before still off (Rule 8c; the guard [A2](#a2)'s issue report proposes)
-  - a preprint server's new-preprint row on the Notifications tab reading "A new preprint, "Title", has been submitted." (*Fields & validation*; the guard [OPS2](#ops2)'s issue report proposes)
+  - a Section Editor's task count in the menu under their name on the public pages (Rule 4; the guard [A3](#a3)'s issue report proposes, shared with Navigation menus & site chrome A2) [report 2026-10-03]
+  - the "needs an editor" email staying away for a manager who unticked "Enable…" on its row (Rule 5a; scenario 3 reads the mailbox; the guard [A10](#a10)'s issue report proposes) [report 2026-10-04]
+  - a preprint server's "needs a moderator" task opening the preprint's workflow (Rule 2c; scenario 1 presses a task; the guard [OPS3](#ops3)'s issue report proposes) [report 2026-10-04]
+  - a reply in a discussion with "Discussion activity." switched off reaching neither the Tasks window nor the mailbox, and with it on a row reading "… replied to …" (Rule 6; the guard [A1](#a1)'s issue report proposes) [report 2026-10-04]
+  - unticking a box on the "Unsubscribe" page leaving the emails switched off before still off (Rule 8c; the guard [A2](#a2)'s issue report proposes) [report 2026-10-04]
+  - a preprint server's new-preprint row on the Notifications tab reading "A new preprint, "Title", has been submitted." (*Fields & validation*; the guard [OPS2](#ops2)'s issue report proposes) [report 2026-10-04]
 - **Rarely met**:
   - the Tasks window paged beyond 25 rows, "1 - 25 of 26 items" and "Items per page:" (Rule 2b): 26 tasks to raise for one account
   - the blue-edged notice toast (Rule 9a): the one screen that produces it is a plugin switch under Settings › Website › "Plugins", a Journal Manager's occasional act, not an editor's, author's or reviewer's week

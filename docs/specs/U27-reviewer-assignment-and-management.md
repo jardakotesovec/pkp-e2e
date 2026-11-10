@@ -1309,83 +1309,83 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the Review Details dated line past "Review Submitted:": "Review Completed:" on a review marked complete, "Reviewer Thanked:" on a thanked one, "Review Submitted:" again after "Revert Decision" (Rule 14a): likely bullets in scenario 9, which walks these states on the row and reads "History" on the thanked one
-  - the reviewer's own file listed under "Reviewer Files", read-only, in the Review Details window (Rule 14a): reached through the reviewer's upload on their own screens, which scenario 9's reviewer skips
-  - the thanked review marked complete again after "Revert Decision" turning "Reviewer Thanked" at once, with "Revert Decision" alone and no second "Thank Reviewer" (Rule 16): likely a bullet in scenario 9, after its "Revert Decision"
-  - Review Details on that review naming the first thank and its date (Rule 14a): the same bullet
-  - History ending at "Review Submitted" after "Revert Decision" on the thanked review, then, once it is marked complete again, listing the first "Reviewer Thanked" date followed by the new "Review Completed" (Rule 21): the same place in scenario 9
-  - {OJS} the Review Details window opened from the dashboard's "View unread recommendation" showing the recommendation, as the row's window does (Rule 14a): likely a bullet in scenario 14
-  - the competing-interests answer in "Modify Review": preset to the reviewer's answer, changed to a statement and back to "I do not have any competing interests", the row's badge added and removed with it, and the "…Reviewer Competing Interests." row in the activity log (Rules 2, 14b, Side effects): needs a journal with a "Competing Interests" policy, which no scenario sets
-  - answers given under a "Competing Interests" policy kept after the policy is emptied: the badge and the group still shown, the answer still editable, and new reviewers no longer asked (Settings, Rule 2): the same journal, with its policy then emptied
-  - the "Edit Review" window's top "Close" asking first after a change to the review due date, the "Review Type" or the "Public Visibility" box (no other control tried), the window kept open on "Cancel" and the change dropped on "OK", and closing at once with nothing changed (Fields): likely a bullet in scenario 6, which opens the row's "Edit"
+  - the Review Details dated line past "Review Submitted:": "Review Completed:" on a review marked complete, "Reviewer Thanked:" on a thanked one, "Review Submitted:" again after "Revert Decision" (Rule 14a): likely bullets in scenario 9, which walks these states on the row and reads "History" on the thanked one [upstream 2026-09-29]
+  - the reviewer's own file listed under "Reviewer Files", read-only, in the Review Details window (Rule 14a): reached through the reviewer's upload on their own screens, which scenario 9's reviewer skips [upstream 2026-09-29]
+  - the thanked review marked complete again after "Revert Decision" turning "Reviewer Thanked" at once, with "Revert Decision" alone and no second "Thank Reviewer" (Rule 16): likely a bullet in scenario 9, after its "Revert Decision" [upstream 2026-09-29]
+  - Review Details on that review naming the first thank and its date (Rule 14a): the same bullet [upstream 2026-09-29]
+  - History ending at "Review Submitted" after "Revert Decision" on the thanked review, then, once it is marked complete again, listing the first "Reviewer Thanked" date followed by the new "Review Completed" (Rule 21): the same place in scenario 9 [upstream 2026-09-29]
+  - {OJS} the Review Details window opened from the dashboard's "View unread recommendation" showing the recommendation, as the row's window does (Rule 14a): likely a bullet in scenario 14 [upstream 2026-09-29]
+  - the competing-interests answer in "Modify Review": preset to the reviewer's answer, changed to a statement and back to "I do not have any competing interests", the row's badge added and removed with it, and the "…Reviewer Competing Interests." row in the activity log (Rules 2, 14b, Side effects): needs a journal with a "Competing Interests" policy, which no scenario sets [upstream 2026-09-29]
+  - answers given under a "Competing Interests" policy kept after the policy is emptied: the badge and the group still shown, the answer still editable, and new reviewers no longer asked (Settings, Rule 2): the same journal, with its policy then emptied [upstream 2026-09-29]
+  - the "Edit Review" window's top "Close" asking first after a change to the review due date, the "Review Type" or the "Public Visibility" box (no other control tried), the window kept open on "Cancel" and the change dropped on "OK", and closing at once with nothing changed (Fields): likely a bullet in scenario 6, which opens the row's "Edit" [incidental 2026-09-29]
   - the guard for A16 (issue report
     `docs/issues/U13-OJS8-impossible-typed-date-saved-wrong.md`): a review
     due date typed in another format ("11/12/2030") in the "Edit" and "Add
     Reviewer" windows, or a day the month does not have (February 30) in
     the "Edit" window, is refused with a message beside the box, and the
-    stored date is unchanged
+    stored date is unchanged [report 2026-10-03]
   - the guard for A7 (issue report
     `docs/issues/U27-A7-request-sent-row-no-response-due.md`): an unanswered
     row reads "Request Sent" with "Response due:" and the response date,
-    with the response and review dates set apart
+    with the response and review dates set apart [report 2026-10-03]
   - the guard for A2 (issue report
     `docs/issues/U27-A2-request-resent-row-shows-review-deadline.md`): a
     resent request with two different dates reads "Response due:" with the
-    response date
+    response date [report 2026-10-03]
   - the guard for A15 (issue report
     `docs/issues/U27-A15-reviewer-response-erases-reminder-history.md`):
     after a reminder and then the reviewer's response, the assignment's
-    History still reads "Reviewer Reminded" with its date
+    History still reads "Reviewer Reminded" with its date [report 2026-10-03]
   - the guard for A18 (issue report
     `docs/issues/U27-A18-emptied-request-letter-half-adds-reviewer.md`): an
     "Add Reviewer" with the request letter emptied is refused with a
-    message, and no row is added and no email is sent
+    message, and no row is added and no email is sent [report 2026-10-03]
   - the guard for A22 (issue report
     `docs/issues/U27-A22-review-details-guidance-promises-upload.md`): the
     Review Details window on a submitted review: each control its guidance
-    names ("Modify Review", "Mark as Complete") is a button of that window
+    names ("Modify Review", "Mark as Complete") is a button of that window [report 2026-10-03]
   - the guard for OMP6 (issue report
     `docs/issues/U27-OMP6-press-review-form-line-says-this-journal.md`): on
     a press, the Review Details window with a review form reads the form
-    line without "journal"
+    line without "journal" [report 2026-10-03]
   - the guard for A39 (issue report
     `docs/issues/U27-A39-competing-interests-no-reads-declared-yes.md`): a
     competing-interests answer changed to a statement and back reads
     "declared: NO" for "I do not have any competing interests" in each "View
-    changes"
+    changes" [report 2026-10-03]
   - the guard for A26 (issue report
     `docs/issues/U27-A26-unassign-notice-cancel-subject.md`): an unanswered
     reviewer removed with "Unassign Reviewer" gets the notice under its own
-    subject, "Your reviewer assignment for "{title}" has been removed"
+    subject, "Your reviewer assignment for "{title}" has been removed" [report 2026-10-03]
   - the guard for A12 (issue report
     `docs/issues/U27-A12-review-change-email-unsubscribe-ignored.md`): a
     reviewer who unsubscribes through the "Your review assignment has been
     changed" email is not sent it after the next "Edit" save, and the
-    profile's "Notifications" tab lists it
+    profile's "Notifications" tab lists it [report 2026-10-03]
   - the guard for A30 (issue report
     `docs/issues/U27-A30-A31-modify-review-offered-then-refused.md`): the
     Review Details window of a "Request Declined" row shows "Modify Review"
     disabled with the reason beside it, and a Funding coordinator assigned
-    to the stage is not shown "Modify Review"
+    to the stage is not shown "Modify Review" [report 2026-10-03]
   - the guard for OMP4 (issue report
     `docs/issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md`):
     on a press, "Mark as Complete" on an unanswered request with no review
-    stays blocked with its message, and the request stays open
+    stays blocked with its message, and the request stays open [report 2026-10-03]
   - the guard for retired A40 and OMP5 (pkp/pkp-lib#13467): on a press,
     "Save Changes" with only a competing-interests declaration, or with
     nothing entered, on an unanswered request keeps the row "Request
     Sent" (Rule 14d): needs a press with a "Competing Interests" policy,
-    which no scenario sets
+    which no scenario sets [upstream 2026-10-07]
   - the guard for A13 (issue report
     `docs/issues/U27-A13-email-reviewer-sends-empty-body.md`):
     "Email Reviewer" sent with a Subject and an empty Body is refused with
     "Please provide the email body text.", and no email reaches the
-    reviewer
-  - the inverted-date refusal's notice: in "Add Reviewer" and in "Edit", the window open and the notice "There was an error adding the reviewer as review due date must be equal or greater than responde due date." at the top right (Fields, Rule 9): likely the inverted-date bullets of scenarios 5 and 6, which already press the refusal
-  - "Resend Review Request" refusing inverted dates with the window kept open, and accepting equal ones (Fields, Rule 9): likely a bullet in scenario 12, before its send
-  - the Add Reviewer window's top-bar "Close" with a reviewer picked closing at once, nothing asked and no reviewer added (Fields): likely a bullet in scenario 1, after its "Change"
-  - the "Thank Reviewer" window's "Close" asking "The data on this form has changed. Do you wish to continue without saving?" after a changed message with "Do not send email to Reviewer." ticked as well, and "Cancel" keeping the window with the change (Fields): likely a bullet in scenario 9, which thanks the reviewer
-  - the "Enroll Existing User" form's top "Close" asking "The data on this form has changed. Do you wish to continue without saving?" with a name typed in "Search By Name" but not picked, "OK" closing it with nobody added; such a name cleared when the box loses focus and refused with "This field is required." (Fields, Enroll Existing User mode): likely bullets in scenario 4, which opens the form
+    reviewer [report 2026-10-03]
+  - the inverted-date refusal's notice: in "Add Reviewer" and in "Edit", the window open and the notice "There was an error adding the reviewer as review due date must be equal or greater than responde due date." at the top right (Fields, Rule 9): likely the inverted-date bullets of scenarios 5 and 6, which already press the refusal [incidental 2026-10-05]
+  - "Resend Review Request" refusing inverted dates with the window kept open, and accepting equal ones (Fields, Rule 9): likely a bullet in scenario 12, before its send [incidental 2026-10-05]
+  - the Add Reviewer window's top-bar "Close" with a reviewer picked closing at once, nothing asked and no reviewer added (Fields): likely a bullet in scenario 1, after its "Change" [incidental 2026-10-15]
+  - the "Thank Reviewer" window's "Close" asking "The data on this form has changed. Do you wish to continue without saving?" after a changed message with "Do not send email to Reviewer." ticked as well, and "Cancel" keeping the window with the change (Fields): likely a bullet in scenario 9, which thanks the reviewer [incidental 2026-10-05]
+  - the "Enroll Existing User" form's top "Close" asking "The data on this form has changed. Do you wish to continue without saving?" with a name typed in "Search By Name" but not picked, "OK" closing it with nobody added; such a name cleared when the box loses focus and refused with "This field is required." (Fields, Enroll Existing User mode): likely bullets in scenario 4, which opens the form [incidental 2026-10-23]
 - **Rarely met**:
   - submitting a review for the reviewer: "Save Changes" in "Modify Review" on an unanswered, an accepted or a "Request Resent" row, with the row, its menu, the reviewer's side and the missing acceptance email after it, and {OJS} the save refused without a "Recommendation" (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a request with no review: "Request Sent:", "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", the empty blocks, and "Mark as Complete" disabled beside its recommendation message {OJS} or, with a review form, its incomplete-review message (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week

@@ -975,63 +975,63 @@ Left out of the scenarios above, by reason:
   - a book's last agent deleted on "Representatives", "No Items" read
     under "Agents" before any reload ([A21](#a21)): the guard the issue
     report (`docs/issues/U74-A21-emptied-representative-group-shows-nothing.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-21]
   - a digital format with an approved file of known size, its `Extent`
     in the ONIX 3.0 export reading the size in megabytes to three
     decimals ([A22](#a22)): the guard the issue report
     (`docs/issues/U74-A22-onix-digital-format-file-size-wrong.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-21]
   - the guard A16's issue report names, once fixed: "Export
     Submissions" pressed with no book ticked: the alert "No objects
-    selected.", no results tab opened and no request failing
+    selected.", no results tab opened and no request failing [report 2026-10-01]
   - an export whose ticked books have no publication format, with the
-    validation box ticked and unticked (Rule 18b)
+    validation box ticked and unticked (Rule 18b) [upstream 2026-10-02]
   - the "Warnings encountered:" line for a book published while the
-    press's "Press Publisher Name" was blank (Rule 18)
+    press's "Press Publisher Name" was blank (Rule 18) [upstream 2026-10-05]
   - the guard for A6 (issue report
     `docs/issues/U74-A6-market-edit-fills-in-gst-tax-type.md`): a
     market saved with "Taxation Type" empty reopens in its "Edit"
     window with "Taxation Type" still empty, and "OK" stores no tax
-    type
+    type [report 2026-10-03]
   - the guard for A5 (issue report
     `docs/issues/U74-A5-new-market-and-date-preselect-hijri-calendar.md`):
-    "Add Market" opens with "Date Format" on "YYYYMMDD"
+    "Add Market" opens with "Date Format" on "YYYYMMDD" [report 2026-10-03]
   - the guard for A7 and A8 (issue report
     `docs/issues/U74-A7-A8-sales-rights-market-values-fail-native-export.md`):
     a market and a sales-rights entry saved without a territory, a
     market price of "ten" and a date of "abc" under "YYYYMMDD" are
-    each refused in the window
+    each refused in the window [report 2026-10-03]
   - the guard for A2 (issue report
     `docs/issues/U74-A2-assistant-marketing-and-work-type-refused.md`):
     an assigned Layout Editor opens "Marketing" › "Audience" with
-    "Save" greyed, while the Press editor saves
+    "Save" greyed, while the Press editor saves [report 2026-10-03]
   - the guard for A4 (issue report
     `docs/issues/U74-A4-market-list-shows-codes-price-run-together.md`):
     a market's row in "Market Territories" names its countries and
     regions as the window does and shows its price apart from the
-    currency
+    currency [report 2026-10-03]
   - the guard for A11 (issue report
     `docs/issues/U74-A11-native-import-unticks-rest-of-world.md`): a
     book exported to a Native XML file and imported again keeps its
     "Rest of World?" entry ticked beside its other sales-rights
-    entries
+    entries [report 2026-10-03]
   - the guard for A19 (issue reports
     `docs/issues/U74-A19-native-import-adds-press-as-supplier.md` and
     `docs/issues/U74-A19-native-import-changes-supplier-websites.md`):
     a book exported to a Native XML file and imported again keeps a
     market without a supplier without one, and its suppliers with and
-    without a website as they were
+    without a website as they were [report 2026-10-03]
   - the guard for A12 (issue report
     `docs/issues/U74-A12-representative-window-refuses-supplier.md`):
     "Add Representative" shows only the supplier role list and saves a
-    supplier at the first "OK"
+    supplier at the first "OK" [report 2026-10-03]
   - the guard for A13 (issue report
     `docs/issues/U74-A13-representative-type-change-listed-twice.md`):
     a supplier switched to "Agent" is listed under "Agents" only,
-    before any reload
+    before any reload [report 2026-10-03]
   - a digital format's product in the ONIX tool's file stating a file
     size worked out from the format's approved files (Rule 24c; its
-    value is A22)
+    value is A22) [incidental 2026-10-13]
 - **Rarely met**:
   - a format that has used all nine sales-rights types, whose "Add
     Sales Rights" list is empty (Rule 10)

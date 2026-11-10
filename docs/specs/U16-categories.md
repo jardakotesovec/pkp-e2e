@@ -830,62 +830,62 @@ Left out of the scenarios above, by reason:
 
 - **Planned**:
   - {OMP} the press's "Browse" read as a level-2 heading
-    ([OMP3](#omp3)): the guard the issue report proposes
+    ([OMP3](#omp3)): the guard the issue report proposes [report 2026-10-02]
   - {OMP} the press's "Browse" block nesting "Computer Vision" under
     "Computer Science" under "Applied Science" ([OMP2](#omp2)): the guard
-    the issue report proposes
+    the issue report proposes [report 2026-10-02]
   - {OJS OPS} the breadcrumb's last step without a left border while the
     "Browse" block is placed ([A20](#a20)): the guard the issue report
-    proposes
+    proposes [report 2026-10-02]
   - {OJS OPS} a journal or server with no category showing no "Browse"
     block once it is placed ([A10](#a10)): the guard the issue report
-    proposes
+    proposes [report 2026-10-02]
   - a category's picture linking to its full-size version and carrying
     its alternate text ([A6](#a6), [A7](#a7)): the guard the issue report
-    proposes
+    proposes [report 2026-10-02]
   - a file that is not a picture put in "Cover Image", leaving no preview
-    and no request ([A17](#a17)): the guard the issue report proposes
+    and no request ([A17](#a17)): the guard the issue report proposes [report 2026-10-02]
   - {OMP} a press's category page loading its picture (OMP1, retired):
-    the guard the issue report proposed
+    the guard the issue report proposed [report 2026-10-02]
   - a category's "Order of articles" set to "Title (A-Z)" and "Title
     (Z-A)" over three items, the page following each ([A2](#a2)): the
-    guard the issue report proposes
+    guard the issue report proposes [report 2026-10-02]
   - a category's ticked editor assigned to a new submission on a journal
     or press other than the install's first ([A13](#a13)): the guard the
-    issue report proposes
+    issue report proposes [report 2026-10-02]
   - {OPS} a server's category naming a moderator, and a preprint in it
-    assigned to them ([OPS1](#ops1)): the guard the issue report proposes
+    assigned to them ([OPS1](#ops1)): the guard the issue report proposes [report 2026-10-02]
   - the delete dialog's confirmation box found by its name
-    ([A18](#a18)): the guard the issue report proposes
+    ([A18](#a18)): the guard the issue report proposes [report 2026-10-02]
   - the "Select Categories" window's column headings read as a screen
-    reader hears them ([A12](#a12)): the guard the issue report proposes
+    reader hears them ([A12](#a12)): the guard the issue report proposes [report 2026-10-02]
   - a "Categories" tab row opened from the keyboard, its arrow's name
     read before and after ([A11](#a11)): the guard the issue report
-    proposes
+    proposes [report 2026-10-02]
   - a category with one item reading "1 Item" ([A19](#a19)): the guard
-    the issue report proposes
+    the issue report proposes [report 2026-10-02]
   - an empty category's page showing its "Nothing has been published"
-    message ([A1](#a1)): the guard the issue report proposes
+    message ([A1](#a1)): the guard the issue report proposes [report 2026-10-02]
   - a category's "Path" with "/" refused on save ([A8](#a8)): the guard
-    the issue report proposes
+    the issue report proposes [report 2026-10-02]
   - a category's "Name" changed, the window closed without saving, and
     the row and the reopened "Name" checked ([A16](#a16)): the guard the
-    issue report proposes
+    issue report proposes [report 2026-10-02]
   - a category's "Path" refused with a message that names the characters
     a saved path may hold ([A9](#a9)): the guard the issue report
-    proposes
+    proposes [report 2026-10-13]
   - the small picture's address of a category with no picture
     answering "404 Not Found" ([A22](#a22)): the guard the issue report
-    proposes
+    proposes [report 2026-10-13]
   - a PNG whose picture data is cut short, which uploads like a sound
     one (not a file holding no picture, [A17](#a17)), as a category's "Cover
     Image" refused at "Save" with "An invalid image was uploaded.
     Accepted formats are .png, .gif, or .jpg." under "Cover Image", and
     no category created ([A24](#a24)): the guard the issue report
-    proposes
+    proposes [report 2026-10-13]
   - {OJS OPS} a PNG saved as a category's "Cover Image", its full-size
     picture's address offering it under a name ending in ".png"
-    ([A25](#a25)): the guard the regression report proposes
+    ([A25](#a25)): the guard the regression report proposes [upstream 2026-10-19]
 - **Register carries it**:
   - A2 ("Order of articles" set to another choice, with no effect on the
     page; Rule 10; Settings bullet 3)

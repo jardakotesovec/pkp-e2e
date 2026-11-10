@@ -954,71 +954,71 @@ Left out of the scenarios above, by reason:
 
 - **Planned**:
   - a References change carried to "Review" by the step rail, listed
-    there and submitted (Rule 16; A18 retired)
+    there and submitted (Rule 16; A18 retired) [incidental 2026-09-29]
   - a References change saved by the footer's "Back" to "Upload Files"
-    or by "Save for Later" (Rule 16)
+    or by "Save for Later" (Rule 16) [incidental 2026-09-29]
   - the guard for A19 (issue report
     `docs/issues/U46-A5-ordering-arrows-unnamed.md`): in ordering mode each
     data citation row's up and down arrows carry names that say the
-    direction and the citation
-  - the guard for A4 (issue report `docs/issues/U42-A4-press-server-lookup-text-says-journal.md`): with "References Metadata Lookup" on, the References page of a press and of a preprint server describes the lookup without calling the context a journal
-  - the guard for A9 (issue report `docs/issues/U42-A9-submits-without-required-data-citations.md`): with data citations at "Require the author to add data citation metadata…", an author's submission with no data citation is held back on "Review" (the problems banner, "Submit" disabled), and one with a data citation goes in
-  - the guard for A10 (issue report `docs/issues/U42-A10-wizard-data-citations-funders-stale-press-server.md`): on a press and a preprint server, a data citation added in the submission wizard's "Data" section shows in its table and on "Review" at once, without a reload
-  - the guard for A2 (issue report `docs/issues/U42-A2-pasted-repeat-reference-dropped-saved.md`): "Add" with a paste that repeats a listed reference keeps the repeated line in the box and says it was skipped, while the new lines are added
-  - the guard for A3 (issue report `docs/issues/U42-A3-reference-search-keeps-rows-without-word.md`): "Search references here" with a word or a digit no row shows (such as "false", or "5" on a list of five references without a 5) keeps no row, and a word a row shows keeps that row
-  - the guard for A15 (issue report `docs/issues/U42-A15-data-citation-identifier-cannot-be-removed.md`): on "Edit Data Citation", choosing the empty "Identifier type" and clearing "Identifier" removes the identifier, and a cleared "Repository", "Year" or "URL" is gone on the next "Edit"
+    direction and the citation [report 2026-10-02]
+  - the guard for A4 (issue report `docs/issues/U42-A4-press-server-lookup-text-says-journal.md`): with "References Metadata Lookup" on, the References page of a press and of a preprint server describes the lookup without calling the context a journal [report 2026-10-04]
+  - the guard for A9 (issue report `docs/issues/U42-A9-submits-without-required-data-citations.md`): with data citations at "Require the author to add data citation metadata…", an author's submission with no data citation is held back on "Review" (the problems banner, "Submit" disabled), and one with a data citation goes in [report 2026-10-04]
+  - the guard for A10 (issue report `docs/issues/U42-A10-wizard-data-citations-funders-stale-press-server.md`): on a press and a preprint server, a data citation added in the submission wizard's "Data" section shows in its table and on "Review" at once, without a reload [report 2026-10-04]
+  - the guard for A2 (issue report `docs/issues/U42-A2-pasted-repeat-reference-dropped-saved.md`): "Add" with a paste that repeats a listed reference keeps the repeated line in the box and says it was skipped, while the new lines are added [report 2026-10-04]
+  - the guard for A3 (issue report `docs/issues/U42-A3-reference-search-keeps-rows-without-word.md`): "Search references here" with a word or a digit no row shows (such as "false", or "5" on a list of five references without a 5) keeps no row, and a word a row shows keeps that row [report 2026-10-04]
+  - the guard for A15 (issue report `docs/issues/U42-A15-data-citation-identifier-cannot-be-removed.md`): on "Edit Data Citation", choosing the empty "Identifier type" and clearing "Identifier" removes the identifier, and a cleared "Repository", "Year" or "URL" is gone on the next "Edit" [report 2026-10-04]
   - a reference whose lookup failed for good (Rules 12, 13; A5
     retired): its row's "Metadata lookup failed" badge, the box counting
     it finished, and "{processed} of {total} references processed,
     {failed} incomplete" once the others finish (no retry runs out on a
-    test install, so the stored status stands in for it)
+    test install, so the stored status stands in for it) [upstream 2026-10-06]
   - a reference typed with its DOI into the wizard's box with lookup off
     (Rule 17; A7 retired): the DOI kept as the reference's DOI, a link and
-    the "DOI" box of "Edit" once lookup is switched on
+    the "DOI" box of "Edit" once lookup is switched on [upstream 2026-10-06]
   - a new version taken while its references are being looked up (Rule
     26; A23 retired): the copies get lookups of their own, and the new
-    version's box counts them
+    version's box counts them [upstream 2026-10-06]
   - a wizard box saved again unchanged, one of its lines spaces only
     (Rule 16): the references kept as they are, not deleted and added
-    again
+    again [upstream 2026-10-06]
   - an arXiv ID entered with its version ([Fields & validation](#fields);
     A12 retired): "Edit citation" keeps it in each of the three forms, the
     lookup picks it out of a reference's text with it, and a data citation
-    of type "ARXIV" saves it, typed bare or as its address
+    of type "ARXIV" saves it, typed bare or as its address [upstream 2026-10-13]
   - a reference author's ORCID iD in "Edit citation" ([Fields &
     validation](#fields); A22 retired): another website's address and a
     `javascript:` link refused under the row's box with nothing saved; a
     full, a sandbox and an empty box saved, and only the first two linked
     from the expanded row (owed once OJS's, OMP's and OPS's `lib/pkp`
-    carry pkp/pkp-lib#13502)
+    carry pkp/pkp-lib#13502) [upstream 2026-10-13]
   - identifiers read out of a reference's text (Rule 11, step 1): a DOI
     followed by a comma or a closing bracket, a dx.doi.org address, a
     handle followed by a sentence and a URN followed by a comma, each
     shown whole and alone in its "Edit citation" box; a web address
     written with "http://" or a closing "/" shown as written, there and
-    as a "URI" or "PURL" data citation
-  - the guard for A6 (retired; pkp-e2e#883): with "References Metadata Lookup" on, "Add" of new references shows "Processing references - 0/n" counting every reference added, and switching the lookup on over existing references shows no box
+    as a "URI" or "PURL" data citation [upstream 2026-10-13]
+  - the guard for A6 (retired; pkp-e2e#883): with "References Metadata Lookup" on, "Add" of new references shows "Processing references - 0/n" counting every reference added, and switching the lookup on over existing references shows no box [upstream 2026-10-07]
   - a refused data citation save's page notice "The form was not saved
     because {n} error(s) were encountered…" and its count, none for an
     empty required box; two creator rows refused counted as one error,
     and their messages cleared together by typing in one
     ([Fields & validation](#fields), the data citation panel and
-    "Creators")
+    "Creators") [incidental 2026-10-07]
   - the DOI written in a reference's text put back over one typed by
     hand after "Reprocess all references" › "OK", once the lookup's
     first step has run (Rule 14a), and a DOI typed on a reference whose
-    text holds none kept (Rule 15)
+    text holds none kept (Rule 15) [incidental 2026-10-07]
   - a refused data citation save's foot: "Jump to next error" beside
     "Please correct {n} errors." and, for a screen reader, one "Go to
     {field}: {message}" button per refused field
-    ([Fields & validation](#fields), the data citation panel)
+    ([Fields & validation](#fields), the data citation panel) [upstream 2026-10-13]
   - a reference whose web address is followed by a full stop, read on
     the published page: the full stop outside the address's link, which
-    opens the address shown (Rule 27a)
+    opens the address shown (Rule 27a) [incidental 2026-10-21]
   - a reference whose web address holds a double quote mark: shown
     whole on the published page, its link opening the address up to the
     quote in a new tab, and the same cut address linked from its row on
-    the References page with lookup on (Rules 11 step 1, 27a)
+    the References page with lookup on (Rules 11 step 1, 27a) [incidental 2026-10-23]
 - **Rarely met**:
   - "Data Citations" at "Do not request data citation metadata from the
     author during submission.": the "Data" page without the wizard's

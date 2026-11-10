@@ -536,10 +536,10 @@ footnote. <sup>s0</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for A11 (issue report `docs/issues/U75-A11-review-panel-edit-stays-on-review.md`): on a preprint server, the Review step's "Relation status" and "License" panels' "Edit" opens "For Readers".
-  - the guard for A8 (issue report `docs/issues/U75-A8-preprint-submits-without-required-relation-status.md`): the wizard refuses to submit with "Relation status" unanswered (the Review step flags it and "Submit" stays disabled).
-  - the guard for A9 (issue report `docs/issues/U75-A9-review-reads-unanswered-relation-as-not-published.md`): the Review step reads "This preprint's relations have not been entered." for a draft whose "Relation status" is unanswered.
-  - the guard for A1 (issue report `docs/issues/U75-A1-A2-relations-save-refused.md`): the Author of a posted preprint records "published elsewhere" with a DOI in "Relations", and the preprint page shows it.
+  - the guard for A11 (issue report `docs/issues/U75-A11-review-panel-edit-stays-on-review.md`): on a preprint server, the Review step's "Relation status" and "License" panels' "Edit" opens "For Readers". [report 2026-10-03]
+  - the guard for A8 (issue report `docs/issues/U75-A8-preprint-submits-without-required-relation-status.md`): the wizard refuses to submit with "Relation status" unanswered (the Review step flags it and "Submit" stays disabled). [report 2026-10-03]
+  - the guard for A9 (issue report `docs/issues/U75-A9-review-reads-unanswered-relation-as-not-published.md`): the Review step reads "This preprint's relations have not been entered." for a draft whose "Relation status" is unanswered. [report 2026-10-03]
+  - the guard for A1 (issue report `docs/issues/U75-A1-A2-relations-save-refused.md`): the Author of a posted preprint records "published elsewhere" with a DOI in "Relations", and the preprint page shows it. [report 2026-10-03]
 - **Nothing new to test**:
   - the Site Administrator opening "Relations" and saving a relation on
     any version (Actors, "Open" and "Save a relation"): the Preprint

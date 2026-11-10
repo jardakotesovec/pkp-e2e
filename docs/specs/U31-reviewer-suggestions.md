@@ -538,38 +538,38 @@ Left out of the scenarios above, by reason:
     `docs/issues/U31-A10-back-to-search-nests-add-reviewer-window.md`): open
     Add Reviewer on a submission with a no-account suggestion, press "Select
     Reviewer" and then "Back to Search", and assert a single "Add Reviewer"
-    window holding the suggestions list
+    window holding the suggestions list [report 2026-10-04]
   - the guard for A8 (issue report
     `docs/issues/U31-A8-suggestion-select-reviewer-named-undefined.md`):
     open Add Reviewer on a submission with suggestions and assert each
-    suggestion entry's "Select Reviewer" button is named "Select {name}"
+    suggestion entry's "Select Reviewer" button is named "Select {name}" [report 2026-10-04]
   - the guard for A9 (issue report
     `docs/issues/U31-A9-suggestion-added-reviewer-leaves-blank-row.md`): add
     a no-account suggested person through the inner "Add Reviewer" window
-    and assert the suggestions list keeps no empty row
+    and assert the suggestions list keeps no empty row [report 2026-10-04]
   - the guard for A5 (issue report
     `docs/issues/U31-A5-funding-coordinator-create-reviewer-from-suggestion-does-nothing.md`):
     as the Funding coordinator, open Add Reviewer on a submission with a
     no-account suggestion and assert that entry offers no "Select Reviewer"
     and the panel row no "…" menu, while a suggestion holding the Reviewer
-    role keeps both
+    role keeps both [report 2026-10-04]
   - the guard for A7 (issue report
     `docs/issues/U31-A7-reviewer-suggestion-guidance-misspells-valuable.md`):
     on a context created from the defaults, assert the "Reviewer
-    Suggestions" step's guidance reads "provide valuable input"
+    Suggestions" step's guidance reads "provide valuable input" [report 2026-10-04]
   - the guard for A11 (issue report
     `docs/issues/U31-A11-reviewer-suggestion-reason-help-is-there.md`):
     assert the help under "Reasons for suggesting reviewer" in "Add Reviewer
     Suggestion" reads "mention if there are any potential conflicts of
-    interest"
+    interest" [report 2026-10-04]
   - the guard for A6 (issue report
     `docs/issues/U31-A6-reviewer-suggestion-same-address-other-case.md`): in
     the wizard, add a suggestion and then the same address in other
     capitals, and assert the second is refused with "The email has already
-    been taken."
+    been taken." [report 2026-10-04]
   - scenario 4's first two bullets, the Funding Coordinator's panel on
     both stages (Actors rows 2–3; A1 retired): the scenario states them,
-    the suite does not assert them yet
+    the suite does not assert them yet [report 2026-10-07]
 - **Nothing new to test**:
   - assigned Section Editor, Guest Editor and Site Administrator (the Journal Manager's offer, scenarios 2 and 3)
   - Reviewer and Reader (no screen offers them anything)

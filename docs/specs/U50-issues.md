@@ -1063,64 +1063,64 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A4 (issue report
     `docs/issues/U50-A4-refused-save-date-published-today.md`): a refused
-    "Create Issue" keeps an empty "Date Published" empty
+    "Create Issue" keeps an empty "Date Published" empty [report 2026-10-04]
   - the guard for A14 (issue report
     `docs/issues/U69-A16-earlier-url-path-server-error.md`): an issue's
     address naming a galley the issue does not have, forwarding to the
-    issue's page
+    issue's page [report 2026-10-01]
   - the guard for A2 (issue report
     `docs/issues/U50-A2-unpublish-back-issue-clears-current-issue.md`):
     unpublishing a back issue that is not current, then "Current" still
-    opening the current issue
+    opening the current issue [report 2026-10-02]
   - the guard for A12 (issue report
     `docs/issues/U50-A12-delete-issue-articles-still-published.md`):
     deleting a published issue, then the article's workflow out of
-    "Published" and its History recording the unpublishing
+    "Published" and its History recording the unpublishing [report 2026-10-02]
   - the guard for A5 and A6 (issue report
     `docs/issues/U50-A5-A6-issue-big-volume-or-lettered-year.md`): a
     "Volume" of 99999 and a "Year" with a letter on "Create Issue", each
-    refused with its message
+    refused with its message [report 2026-10-02]
   - the guard for A17 and A18 (issue report
     `docs/issues/U50-A17-A18-issue-lists-version-published-outside-it.md`):
     a newer version published with "Don't Assign To An Issue" leaving
-    the issue's page, "Items" and "Table of Contents"
+    the issue's page, "Items" and "Table of Contents" [report 2026-10-02]
   - the guard for A11 (issue report
     `docs/issues/U50-A11-issue-galley-interface-language-refused.md`):
     on a journal with an interface-only language, "Create Issue Galley"
-    offering only the languages "Save" accepts
+    offering only the languages "Save" accepts [report 2026-10-02]
   - the guard for A13 (issue report
     `docs/issues/U50-A13-archive-issues-no-set-order.md`): issues
     published out of order and one saved, then "Archives" reading as
-    "Back Issues" before any order is saved
+    "Back Issues" before any order is saved [report 2026-10-02]
   - the guard for A1 (issue report
     `docs/issues/U50-A1-create-issue-ticked-title-passing-notice.md`):
     a ticked, empty "Title" on "Create Issue" refused with its message
-    under the Title box
+    under the Title box [report 2026-10-02]
   - the guard for A8 (issue report
     `docs/issues/U50-A8-future-issues-number-as-text.md`): "Future
-    Issues" listing No. 2 before No. 10 of one volume and year
+    Issues" listing No. 2 before No. 10 of one volume and year [report 2026-10-02]
   - in the table of contents' "Order", an article dragged toward
     another section still under its own heading after "Done", and one
     dragged to the top of its own section, or dropped above that
     section's heading, saved first with the others in their order
-    (Rule 10b; [A10](#a10) retired)
+    (Rule 10b; [A10](#a10) retired) [upstream 2026-10-08]
   - in the table of contents' "Order", a section dragged by its heading
     above another section and kept after "Done" on the tab and on the
     issue's page, with the journal's "Sections" list and another issue's
     table of contents unchanged; a heading released inside its own
     section leaving the list as it was (Rule 10a; [A9](#a9) and
-    [A20](#a20) retired)
+    [A20](#a20) retired) [incidental 2026-10-08]
   - "Done" in "Order" showing no message; then a drag left unsaved by
     pressing "Issue Data", and "Table of Contents" showing the order
-    "Done" saved, no question asked (Rule 10; [A22](#a22))
+    "Done" saved, no question asked (Rule 10; [A22](#a22)) [incidental 2026-10-08]
   - an article's "Section" changed on its Publication Settings, then
     the issue's "Table of Contents" and page listing it under the new
     section, and a section left with no article gone from both (Rule
-    10b)
+    10b) [incidental 2026-10-08]
   - the guard for A16 (issue report
     `docs/issues/U09-A19-static-page-content-change-lost-on-close.md`,
     pkp-e2e#375): text typed only in "Description" on "Issue Data",
-    then another tab asking the unsaved-change question
+    then another tab asking the unsaved-change question [report 2026-10-02]
 - **Nothing new to test**:
   - a cover saved for the journal's primary language, shown on the
     issue's page in another interface language while "Issue Data"

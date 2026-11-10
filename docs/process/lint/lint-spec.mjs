@@ -119,6 +119,8 @@ function checkShape(doc, out) {
 // leaves a typed value to the tester.
 const PLACEHOLDER_RE = /\btype (?:a|an|some|any) (?:sentence|title|line|word|text|name|description|number|value)\b/i;
 const CLASSES = ['main', 'guard', 'state', 'variant'];
+const PLANNED_SOURCES = ['upstream', 'report', 'sweep', 'incidental', 'request', 'other'];
+const PLANNED_TAG = /\[(upstream|report|sweep|incidental|request|other) 20\d\d-\d\d-\d\d\]\s*$/;
 const REASONS = ['Planned', 'Rarely met', 'Nothing new to test', 'Register carries it', 'No seed', 'Owned by another feature'];
 
 function checkCoverage(doc, out) {
@@ -154,13 +156,29 @@ function checkCoverage(doc, out) {
                     if (/:\s*\S/.test(line.replace(/^-\s+\*\*[^*]+\*\*/, ''))) cov(i + 1, 'a "Left out" bullet ends at the colon; its items are indented bullets under it, one per line (TEMPLATE "Coverage")');
                 }
             } else if (shape === 'final' && doc.front.status === 'verified' && /\bplanned\b/.test(line)) cov(i + 1, 'still reads planned in a verified spec');
-            if (/\b20\d\d-\d\d-\d\d\b/.test(line)) cov(i + 1, 'a date in the Coverage section is evidence; it belongs in a footnote');
+            if (/\b20\d\d-\d\d-\d\d\b/.test(line.replace(PLANNED_TAG, ''))) cov(i + 1, 'a date in the Coverage section is evidence; it belongs in a footnote');
             if (/\bout of tier\b/i.test(line)) cov(i + 1, '"out of tier" is campaign vocabulary; the reason word is Rarely met');
         }
         if (/^Canonical scenarios/.test(doc.h2[i]) && PLACEHOLDER_RE.test(line)) {
             cov(i + 1, `the tester is left to choose a value: ${excerpt(line.match(PLACEHOLDER_RE)[0], 40)} — name it`);
         }
     }
+    // A Planned item ends with where it came from and when, which `npm run backlog` orders by.
+    let item = -1;
+    const closeItem = (last) => {
+        if (item !== -1 && !PLANNED_TAG.test(doc.lines[last])) cov(item + 1, `a Planned item ends with its source and the day it was added, such as "[upstream 2026-11-03]"; the sources are ${PLANNED_SOURCES.join(' · ')} (TEMPLATE "Coverage")`);
+        item = -1;
+    };
+    let inPlanned = false; let lastText = -1;
+    for (let i = covLine + 1; i < doc.tailStart; i++) {
+        const line = doc.lines[i];
+        if (/^##\s/.test(line)) break;
+        if (/^-\s+\*\*/.test(line)) { closeItem(lastText); inPlanned = /^-\s+\*\*Planned\*\*/.test(line); continue; }
+        if (!inPlanned) continue;
+        if (/^ {2}- /.test(line)) { closeItem(lastText); item = i; }
+        if (/^ {2,}\S/.test(line)) lastText = i; else if (line.trim()) { closeItem(lastText); inPlanned = false; }
+    }
+    closeItem(lastText);
     if (shape === 'draft' && doc.front.status === 'verified') cov(covLine + 1, 'a verified spec carries the draft Coverage table; the scenario writer turns it into the "Left out" list (TEMPLATE "Coverage")');
 }
 
@@ -823,7 +841,8 @@ function selfTest() {
         ['a draft row without a class', draftCov.replace('| main |', '| |'), true],
         ['the final shape passes as verified', finalCov.replace('status: draft', 'status: verified'), false],
         ['a table in the final shape', finalCov.replace('Left out of the scenarios above, by reason:', '| # | Scenario | Apps |\n|---|---|---|\n| 1 | Record a decision | OJS |'), true],
-        ['a Planned bullet passes as verified', finalCov.replace('status: draft', 'status: verified').replace('- **Rarely met**:', '- **Planned**:\n  - the reopened round (Rule 4)\n- **Rarely met**:'), false],
+        ['a Planned bullet passes as verified', finalCov.replace('status: draft', 'status: verified').replace('- **Rarely met**:', '- **Planned**:\n  - the reopened round (Rule 4) [upstream 2026-11-03]\n- **Rarely met**:'), false],
+        ['a Planned item without its source and date', finalCov.replace('status: draft', 'status: verified').replace('- **Rarely met**:', '- **Planned**:\n  - the reopened round (Rule 4)\n- **Rarely met**:'), true],
         ['a bullet without a reason word', finalCov.replace('**Owned by another feature**', '**Skipped**'), true],
         ['the Rarely met bullet naming a guard', finalCov.replace('- **Rarely met**:', '- **Rarely met** — guards:'), true],
         ['the retired Budget word', finalCov.replace('- **Rarely met**:', '- **Budget** — states:'), true],

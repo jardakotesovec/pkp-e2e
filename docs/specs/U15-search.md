@@ -688,16 +688,16 @@ Common to every application:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - a word that is only in a published HTML galley finds the article, book or preprint once the queue has run (Rule 3; A11)
-  - a title corrected and a contributor added on a published article, book or preprint are found by their new words once the queue has run, and the old title word no longer finds it (Rule 12; A3)
-  - with A1 fixed, a Year alone under "Published Before", and a Year and Month without a Day, limit the results and show the date applied (Rule 9)
-  - a published article's or preprint's date saved a week later (Rule 12): the result shows the new date and "Published After" the day after the old date finds it, at once with no queue run (Rules 9, 12)
-  - on the site-wide Search page, a journal chosen under "By Journal" stays selected after the search and its page 2 lists that journal's articles only (Rule 10; OJS2)
-  - on a press and a server, a published book or preprint returned to the workflow keeps its page, its place in the catalog or preprint list and its search result for a visitor (Rule 2; OMP3, OPS4)
-  - a Search address asking for the sort by published date, newest or oldest first, lists the results in date order (Rule 14; A12)
-  - a Search address whose page number is not a number, on a search that finds something, shows the first page of results (Rule 8; A13)
-  - a search that finds several items gives the screen-reader status line "Found {N} items." with the count, on a journal and on a preprint server (Rule 7; OJS1, OPS1)
-  - the Search page's box shows its label above it ("Search articles for", "Search preprints for" on a server, "Search Query" on a press) and no hint text, and a preprint server's archive header shows "Search Query" above its box, centred over the category links (Fields rows "Search box", "Press: search box" and "Preprint server: search box"; Rule 17)
+  - a word that is only in a published HTML galley finds the article, book or preprint once the queue has run (Rule 3; A11) [report 2026-10-03]
+  - a title corrected and a contributor added on a published article, book or preprint are found by their new words once the queue has run, and the old title word no longer finds it (Rule 12; A3) [report 2026-10-03]
+  - with A1 fixed, a Year alone under "Published Before", and a Year and Month without a Day, limit the results and show the date applied (Rule 9) [report 2026-10-03]
+  - a published article's or preprint's date saved a week later (Rule 12): the result shows the new date and "Published After" the day after the old date finds it, at once with no queue run (Rules 9, 12) [incidental 2026-10-13]
+  - on the site-wide Search page, a journal chosen under "By Journal" stays selected after the search and its page 2 lists that journal's articles only (Rule 10; OJS2) [report 2026-10-03]
+  - on a press and a server, a published book or preprint returned to the workflow keeps its page, its place in the catalog or preprint list and its search result for a visitor (Rule 2; OMP3, OPS4) [report 2026-10-03]
+  - a Search address asking for the sort by published date, newest or oldest first, lists the results in date order (Rule 14; A12) [report 2026-10-03]
+  - a Search address whose page number is not a number, on a search that finds something, shows the first page of results (Rule 8; A13) [report 2026-10-03]
+  - a search that finds several items gives the screen-reader status line "Found {N} items." with the count, on a journal and on a preprint server (Rule 7; OJS1, OPS1) [report 2026-10-03]
+  - the Search page's box shows its label above it ("Search articles for", "Search preprints for" on a server, "Search Query" on a press) and no hint text, and a preprint server's archive header shows "Search Query" above its box, centred over the category links (Fields rows "Search box", "Press: search box" and "Preprint server: search box"; Rule 17) [upstream 2026-10-15]
 - **Rarely met**:
   - "Items per page" changed on Settings › Website › Setup › Lists, the
     results per page following it (Rule 8, Settings): the Journal Manager

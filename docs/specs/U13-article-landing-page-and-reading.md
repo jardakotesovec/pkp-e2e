@@ -1125,146 +1125,146 @@ footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - a Section Editor not assigned to a submission opens its article landing page before copyediting: "404 Not Found" ([A16](#a16)): the guard the issue report proposes
+  - a Section Editor not assigned to a submission opens its article landing page before copyediting: "404 Not Found" ([A16](#a16)): the guard the issue report proposes [report 2026-10-05]
   - the guard for OPS2 and OPS3 (Rule 1, Rule 13; issue report
     `docs/issues/U13-OPS2-OPS3-ops-number-address-url-path.md`): on a preprint server, a
     preprint with a URL Path, its non-PDF galley link downloading the
     file, and its ID addresses with a galley and a version part
-    forwarding to the URL Path address with that part kept
+    forwarding to the URL Path address with that part kept [report 2026-10-01]
   - an article published with no issue, and one published at once into
     an unpublished issue: another citation format and a download,
-    signed out and as a Reader {OJS} (Rule 15c; OJS1, retired)
+    signed out and as a Reader {OJS} (Rule 15c; OJS1, retired) [upstream 2026-10-21]
   - the guard for OPS7 and OPS8 (Rule 21; issue report
     `docs/issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md`): a preprint's
     page and its PDF reader shown in French, with no `##` code in the
-    keywords label or the browser tab {OPS}
+    keywords label or the browser tab {OPS} [report 2026-10-01]
   - the guard for OJS4 (Rule 20a; issue report
     `docs/issues/U13-OJS4-recommend-by-author-list-never-shown.md`):
     with "Recommend Articles by Author" on, two published articles by one
     contributor, one of them outside an issue, each listing the other
-    under "Most read articles by the same author(s)" {OJS}
+    under "Most read articles by the same author(s)" {OJS} [report 2026-10-01]
   - the place in "Publisher Location" reaching an article published
     after it was typed, in a preprint's IEEE citation and in both apps'
-    "BibTeX" file, while an article published before keeps none (Rule 16)
+    "BibTeX" file, while an article published before keeps none (Rule 16) [upstream 2026-10-02]
   - the guard for OPS1 (Rule 4, Rule 5; issue report
     `docs/issues/U13-OPS1-new-version-preview-called-outdated.md`): a new
     version's preview showing the preview notice alone, and an older
-    posted version's page keeping the outdated notice {OPS}
+    posted version's page keeping the outdated notice {OPS} [report 2026-10-01]
   - the guard for OJS5 (Rule 19; issue report
     `docs/issues/U13-OJS5-publication-facts-panel-never-shown.md`):
     an article page with "Publication Facts Label plugin" on, loading the
-    plugin's script and showing the "Publication Facts" panel {OJS}
+    plugin's script and showing the "Publication Facts" panel {OJS} [report 2026-10-01]
   - the guard for OPS6 (Rule 22; issue report
     `docs/issues/U13-OPS6-preprint-summary-doi-never-shown.md`): a
     preprint with a DOI, its entry in "Archives" showing the "DOI:" line
-    {OPS}
+    {OPS} [report 2026-10-01]
   - the guard for OJS10 (Rule 20b; issue report
     `docs/issues/U13-OJS10-similar-articles-list-never-shown.md`):
     with "Recommend Similar Articles" on, an article page listing the
     published articles that share its keywords, one in an issue and one
-    outside any issue, and leaving out a scheduled one {OJS}
+    outside any issue, and leaving out a scheduled one {OJS} [report 2026-10-01]
   - the guard for OPS9 (Rule 22; issue report
     `docs/issues/U13-OPS9-preprint-summary-cover-middle-dead.md`): on a
     preprint server's "Archives" and a journal's issue page, a click at
-    the cover's centre and at the author line's row opening the item
+    the cover's centre and at the author line's row opening the item [report 2026-10-01]
   - the guard for OJS12 (Rule 23; issue report
     `docs/issues/U13-OJS12-public-review-never-shown.md`): a
     confirmed review marked "Publicly Show Reviewer Comments" shown on
-    the published article's page, a private or unconfirmed one not {OJS}
+    the published article's page, a private or unconfirmed one not {OJS} [report 2026-10-01]
   - an older version's PDF reader page showing the document, and its
     "Download" saving the file, on a journal and a preprint server
-    (Rule 12, scenario 3; A2 retired)
+    (Rule 12, scenario 3; A2 retired) [report 2026-10-01]
   - the guard for OJS9 (Rule 11; issue report
     `docs/issues/U13-OJS9-lens-formulas-not-typeset.md`): an
     XML galley with a TeX formula opened in the Lens reader, the formula
-    typeset and no page script error {OJS}
+    typeset and no page script error {OJS} [report 2026-10-01]
   - the guard for A5 (Rule 4, scenario 4; issue report
     `docs/issues/U13-A5-author-view-submission-access-denied.md`):
     the Author's "View submission" on a preview opening their
-    submission, and an editor's still opening the editorial workflow
+    submission, and an editor's still opening the editorial workflow [report 2026-10-01]
   - the guard for OJS2 (Fields, the settings window; issue report
     `docs/issues/U13-OJS2-publication-facts-settings-funding-warning.md`):
     the "Publication Facts Label plugin" settings window opening with no
     funding warning while funder metadata is on, and naming the setting
-    when it is off {OJS}
+    when it is off {OJS} [report 2026-10-01]
   - the guard for A6 (Rule 5; issue report
     `docs/issues/U13-A6-older-version-tab-current-title.md`): an
     older version's page, published under another title than the current
-    one, with the browser tab reading the older version's title
+    one, with the browser tab reading the older version's title [report 2026-10-01]
   - the guard for OJS7 (Fields, the settings window; issue report
     `docs/issues/U13-OJS7-publication-facts-settings-refused-save-resets.md`):
     a refused "OK" in the "Publication Facts Label plugin" settings
-    keeping every value typed in the window {OJS}
+    keeping every value typed in the window {OJS} [report 2026-10-01]
   - the guard for A1 (Rule 21, scenario 8; issue report
     `docs/issues/U13-A1-french-version-name-raw-key.md`): a page shown
     in French naming each version with its numbers and no
-    "##publication.versionStage.display##"
+    "##publication.versionStage.display##" [report 2026-10-01]
   - the guard for OJS8 (Fields, the settings window; issue report
     `docs/issues/U13-OJS8-impossible-typed-date-saved-wrong.md`):
     a date that does not exist typed into the "Publication Facts Label
-    plugin" "Start Date" refused with a message, nothing saved {OJS}
+    plugin" "Start Date" refused with a message, nothing saved {OJS} [report 2026-10-01]
   - the guard for A4 (Rule 22; issue report
     `docs/issues/U13-A4-listing-offers-galley-without-file.md`): a
     preprint server's lists, and a journal's "Latest Publications" shown
     without the current issue, leaving out a galley with no file and the
-    additional files
+    additional files [report 2026-10-01]
   - the guard for OJS3 (Rule 19, Rule 21; issue report
     `docs/issues/U13-OJS3-publication-facts-panel-missing-without-label-file.md`):
     an article page shown in French (Canada) with the "Publication Facts"
-    panel and its labels {OJS}
+    panel and its labels {OJS} [report 2026-10-01]
   - the guard for OJS6 (Fields, the PDF reader page; issue report
     `docs/issues/U13-OJS6-pdf-reader-return-arrow-names-issue.md`): the PDF
     reader's return arrow announced "Return to Article Details" on an
     article in an issue, and "Return to Issue Details" on an issue galley
-    {OJS}
+    {OJS} [report 2026-10-01]
   - the guard for OPS5 (Fields, the PDF reader page; issue report
     `docs/issues/U13-OPS5-preprint-pdf-reader-return-arrow-raw-key.md`): the PDF
     reader's return arrow on a preprint server announced with a text,
-    not "##article.return##" {OPS}
+    not "##article.return##" {OPS} [report 2026-10-01]
   - the guard for A7 (Rules 15, 15b; issue report
     `docs/issues/U13-A7-abnt-citation-runs-text-together.md`): the "ABNT"
     citation of a preprint and of an article, with a full stop between
-    title and server and a space between month and year
+    title and server and a space between month and year [report 2026-10-01]
   - the guard for A10 (Fields, "References"; issue report
     `docs/issues/U13-A10-reference-link-takes-closing-parenthesis.md`):
     a reference whose address is closed by a parenthesis, "(https://doi.org/…).",
-    linked without the ")"
+    linked without the ")" [report 2026-10-01]
   - the guard for A8 (Rule 15b; issue report
     `docs/issues/U13-A8-ris-download-dates-percent-signs.md`): the
     "Endnote/Zotero/Mendeley (RIS)" download's "PY" and "Y2" lines with
-    no "%"
+    no "%" [report 2026-10-01]
   - the guard for A9 (Rule 16; issue report
     `docs/issues/U13-A9-more-citation-formats-opens-nothing.md`): with no
     "Additional Citation Formats" ticked, "More Citation Formats" opening
     the ticked "Downloadable Formats", and no button when nothing is
-    ticked
+    ticked [report 2026-10-01]
   - the guard for A11 (Fields "Keywords:"; issue report
     `docs/issues/U13-A11-keywords-order-not-kept.md`): keywords shown in
     the order typed on the page and in the "Metadata" form (a unit test
-    in pkp-lib reads entries stored with `seq` against primary-key order)
+    in pkp-lib reads entries stored with `seq` against primary-key order) [report 2026-10-01]
   - the guard for A13 (Rule 12a; issue report
     `docs/issues/U13-A13-new-version-preview-reader-called-outdated.md`),
     written once A13 is fixed: a new version's "PDF" (and, on a journal,
     "HTML") pressed on its preview opening the reader with no outdated
-    notice, while an older published version's reader keeps it
+    notice, while an older published version's reader keeps it [incidental 2026-10-02]
   - an older version's galley typed by its number with no version part:
     the article's page for a galley with no URL Path, the "404 Not
-    Found" page for one with a URL Path (Rule 13a)
+    Found" page for one with a URL Path (Rule 13a) [incidental 2026-10-05]
   - the months of the "Downloads" chart: January of the first
     version's year to the current month; an article first published
     more than twelve months back showing the last twelve, "All time"
-    and "Last 12 months" (Rule 17a)
+    and "Last 12 months" (Rule 17a) [incidental 2026-10-27]
   - the "Downloads" chart of an article with counted downloads, a Word
     file's among them, reading what the "Files" line of Statistics ›
-    "Articles" reads (Rule 17b)
+    "Articles" reads (Rule 17b) [incidental 2026-10-27]
   - the chart keeping its figures after downloads are processed (seeded
-    figures on a test install), until "Delete Data Caches" (Rule 17c)
+    figures on a test install), until "Delete Data Caches" (Rule 17c) [incidental 2026-10-27]
   - a highlight drawn in the PDF reader, the return arrow pressed: the
     browser asking whether to leave, and the reader opened again
-    showing the PDF without the highlight (Fields, the PDF reader page)
+    showing the PDF without the highlight (Fields, the PDF reader page) [other 2026-11-09]
   - the PDF reader's "Tools" › "Open" showing a PDF from the reader's
     computer under the same bar, its title and "Download" unchanged
-    (Fields, the PDF reader page)
+    (Fields, the PDF reader page) [other 2026-11-09]
 - **Rarely met**:
   - a galley whose component was made a dependent one after the galley
     was built, which the page no longer lists (Rule 10; Settings

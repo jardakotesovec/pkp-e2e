@@ -1021,64 +1021,64 @@ Left out of the scenarios above, by reason:
   - an article's version address with an id that is none of its
     versions (a mistyped number, another article's version, "abc")
     answering "404 Not Found" (Rule 11; retired OJS3,
-    pkp/pkp-lib#13657)
+    pkp/pkp-lib#13657) [upstream 2026-11-02]
   - a new version of an article in an issue, made by an untouched
     version dialog, opening "Review Publishing Details" on its first
     publish with the copied stage, "Minor Revision" and that issue
-    chosen (Rule 3b)
+    chosen (Rule 3b) [incidental 2026-09-29]
   - "Unpublish" ("Unpost") on the earlier of two published versions:
     only it reads "Status: Unpublished" with "Preview" and "Publish"
     ("Post"), the later one stays "Published" ("Posted") and the reader
-    page stays live (Rule 9a)
+    page stays live (Rule 9a) [incidental 2026-09-29]
   - a journal's "Submission metadata updated" line from the panel's
-    Confirm, read in scenario 1's Activity Log (Side effects)
+    Confirm, read in scenario 1's Activity Log (Side effects) [incidental 2026-09-29]
   - the guard for OPS1 (issue report
     `docs/issues/U49-OPS1-scheduled-preprint-never-posted.md`): a preprint
     posted with a future "Date Posted" reading "Status: Posted" once the
-    scheduled tasks run on or after that date
+    scheduled tasks run on or after that date [report 2026-10-02]
   - the guard for OJS2 (issue report
     `docs/issues/U49-OJS2-future-issue-schedule-only-publishes-now.md`): on
     a journal whose only issues are future ones, the panel's first pick of
     "Assign To Future Issue and Schedule Only" ending in "Status:
-    Scheduled", and a Publication Settings save of it coming back checked
+    Scheduled", and a Publication Settings save of it coming back checked [report 2026-10-02]
   - the guard for A5 (issue report
     `docs/issues/U49-A5-amendment-notice-shown-to-no-reader.md`): a version
     published with Update Type "Correction" and a Summary of Changes showing
-    that summary on its own reader page, in every app
+    that summary on its own reader page, in every app [report 2026-10-02]
   - the guard for OJS4 (issue report
     `docs/issues/U49-OJS4-publish-without-issue-orcid-contributor-error.md`):
     with ORCID on under the member API, an article published with "Don't
     Assign To An Issue" whose contributor holds a verified iD reaching
     "Status: Published" without an error, and its author receiving
-    "Publication Published"
+    "Publication Published" [report 2026-10-02]
   - the guard for A6 (issue report
     `docs/issues/U49-A6-new-version-draft-rewrites-published-date.md`): a
     published article, book or preprint keeping its "Published {date}" line
     unchanged after "Create New Version" makes a still unpublished version,
-    in every app
+    in every app [report 2026-10-02]
   - the guard for OPS4 (issue reports
     `docs/issues/U49-OPS4-first-post-thanked-for-new-version.md` and `docs/issues/U49-OPS4-posted-acknowledgement-raw-signature.md`): a
     preprint's first post emailing its contributors "Preprint Posted
     Acknowledgement", a later version "New Version Posted Acknowledgement",
-    each ending in the server's signature rather than a raw "{$signature}"
+    each ending in the server's signature rather than a raw "{$signature}" [report 2026-10-02]
   - the "Identity" group on the Publication Settings page of a
     published article ("Journal Identity") and the Preprint Entry page
     of a posted preprint ("Server Identity") with its sentence and
     list; no such group before the first publish; the list unchanged
     after the journal is renamed; and a minor version showing the
     earlier version's list before it is published (Fields, the
-    Publication Settings page)
+    Publication Settings page) [upstream 2026-10-01]
   - on a scratch journal with ORCID enabled, a submission in Production
     whose contributor holds an unauthenticated iD: the confirmation
     window lists "Unauthenticated ORCiDs for contributors detected."
     under "The following issues were found, but will not prevent
     publishing", still offers "Publish" ("Post"), and confirming
     publishes it, in every app; a submission without an iD on the same
-    journal shows no list (Rule 4; Settings)
+    journal shows no list (Rule 4; Settings) [upstream 2026-10-09]
   - a journal that requires the plain language summary: "Review
     Publishing Details" Confirm reaching the confirmation window and
     "Publish" publishing a version without a summary {OJS} (Rule 4;
-    OJS1, retired)
+    OJS1, retired) [upstream 2026-10-21]
 - **Rarely met**:
   - two contributors holding the same verified iD, warned about with
     "Duplicate ORCiDs for contributors detected.", and two sharing one

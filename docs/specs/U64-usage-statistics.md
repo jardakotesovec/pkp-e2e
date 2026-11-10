@@ -1175,23 +1175,23 @@ Left out of the scenarios above, by reason:
   - the date range list closed without choosing a range (the calendar
     button pressed again, a click outside it, the focus leaving it), and
     typed dates kept in the boxes while not applied (Fields "The date
-    range")
-  - a Journal Manager's "Do not collect any geographical data" on a site that collects geographical data: the choice still selected after a reload, and no "Download Geographic" in the "Download Report" window (the guard for A4, once fixed)
-  - "All dates" on Statistics › "Articles" of a context with nothing published and of one whose earliest publication is dated before 2001: no "Error" window, the monthly chart from January 2001 (the guard for A1, once fixed)
-  - a Section Editor's "Statistics" menu and the "Counter R5" address while the journal's COUNTER statistics are restricted: no "Counter R5" entry, the access-denied page (the guard for A5, once fixed)
-  - "Download Issues" on Statistics › "Issues" with more than 30 issues visited in the range: the file holds every issue the page counts (the guard for OJS4, once fixed) {OJS}
-  - a search phrase typed with double quotes on Statistics › "Articles", then each downloaded file's "Search Phrase" line parsed back to the phrase as typed (the guard for A8, once fixed)
-  - Tab on Statistics › "Journal" stops on the "About journal statistics" icon and its text shows while it holds the focus (the guard for A7, once fixed)
-  - on Site Settings › "Statistics", a refused Platform ID left in the box, "Platform" unticked, "Save" answers "Saved" (the guard for A10, once fixed)
-  - "Download" in "Report Settings" of a "Counter R5" report: the saved "counterReport.tsv" is tab-separated, its first line split on a tab giving "Report_Name" (the guard for A11, once fixed)
-  - a "Start Date" before the earliest possible date in a "Counter R5" report's "Report Settings": the refusal under the box names the plain date, no "##" (the guard for A3, once fixed)
-  - with an article page visited and no file opened, the "Journal Article Requests (IR_A1)" file's "Metric_Type" column holds only the types its "Metric_Types" line names (the guard for OJS5, once fixed) {OJS}
-  - a "COUNTER Reports" year link's XML file names its report "JR1" (and "AR1") in its "Name" attribute (the guard for OJS6, once fixed) {OJS}
-  - "Item Master Report (IR)" downloaded with "Authors" ticked, and "Journal Article Requests (IR_A1)" {OJS}, for a work with several authors: the IR file names "Authors" on its "Report_Attributes" line, and each file's "Authors" column lists every author in order, an ORCID iD after each who has one (Rule 20; the guard for A15, once fixed) {OJS OPS}
-  - the SUSHI "Item Master Report (IR)" asked with the authors shown, for a work whose first author alone has an ORCID iD: only that author carries an iD (Rule 23; the guard for A16, once fixed) {OJS OPS}
-  - "Counter R5" of a context whose first publication is dated the 31st of a month followed by a shorter one: "Start Date" offers the first day of the next month (Rule 21; the guard for A19, once fixed)
-  - a reader downloading an article's Word galley and its PDF galley, the day processed: "File Views" and "Total" on "Articles" count both, as the chart's "Files" and "Download Files" do (Rule 1; the guard for A17, once fixed)
-  - a reader opening a book's PDF and its "Appendix" file from the book page, each visit a line in the day's log <sup>j</sup>, of type PDF and "Supplementary File" (Rule 1; OMP3, retired) {OMP}
+    range") [incidental 2026-09-29]
+  - a Journal Manager's "Do not collect any geographical data" on a site that collects geographical data: the choice still selected after a reload, and no "Download Geographic" in the "Download Report" window (the guard for A4, once fixed) [report 2026-10-02]
+  - "All dates" on Statistics › "Articles" of a context with nothing published and of one whose earliest publication is dated before 2001: no "Error" window, the monthly chart from January 2001 (the guard for A1, once fixed) [report 2026-10-02]
+  - a Section Editor's "Statistics" menu and the "Counter R5" address while the journal's COUNTER statistics are restricted: no "Counter R5" entry, the access-denied page (the guard for A5, once fixed) [report 2026-10-02]
+  - "Download Issues" on Statistics › "Issues" with more than 30 issues visited in the range: the file holds every issue the page counts (the guard for OJS4, once fixed) {OJS} [report 2026-10-02]
+  - a search phrase typed with double quotes on Statistics › "Articles", then each downloaded file's "Search Phrase" line parsed back to the phrase as typed (the guard for A8, once fixed) [report 2026-10-02]
+  - Tab on Statistics › "Journal" stops on the "About journal statistics" icon and its text shows while it holds the focus (the guard for A7, once fixed) [report 2026-10-02]
+  - on Site Settings › "Statistics", a refused Platform ID left in the box, "Platform" unticked, "Save" answers "Saved" (the guard for A10, once fixed) [report 2026-10-03]
+  - "Download" in "Report Settings" of a "Counter R5" report: the saved "counterReport.tsv" is tab-separated, its first line split on a tab giving "Report_Name" (the guard for A11, once fixed) [report 2026-10-03]
+  - a "Start Date" before the earliest possible date in a "Counter R5" report's "Report Settings": the refusal under the box names the plain date, no "##" (the guard for A3, once fixed) [report 2026-10-03]
+  - with an article page visited and no file opened, the "Journal Article Requests (IR_A1)" file's "Metric_Type" column holds only the types its "Metric_Types" line names (the guard for OJS5, once fixed) {OJS} [report 2026-10-03]
+  - a "COUNTER Reports" year link's XML file names its report "JR1" (and "AR1") in its "Name" attribute (the guard for OJS6, once fixed) {OJS} [report 2026-10-03]
+  - "Item Master Report (IR)" downloaded with "Authors" ticked, and "Journal Article Requests (IR_A1)" {OJS}, for a work with several authors: the IR file names "Authors" on its "Report_Attributes" line, and each file's "Authors" column lists every author in order, an ORCID iD after each who has one (Rule 20; the guard for A15, once fixed) {OJS OPS} [incidental 2026-10-13]
+  - the SUSHI "Item Master Report (IR)" asked with the authors shown, for a work whose first author alone has an ORCID iD: only that author carries an iD (Rule 23; the guard for A16, once fixed) {OJS OPS} [incidental 2026-10-13]
+  - "Counter R5" of a context whose first publication is dated the 31st of a month followed by a shorter one: "Start Date" offers the first day of the next month (Rule 21; the guard for A19, once fixed) [report 2026-11-02]
+  - a reader downloading an article's Word galley and its PDF galley, the day processed: "File Views" and "Total" on "Articles" count both, as the chart's "Files" and "Download Files" do (Rule 1; the guard for A17, once fixed) [incidental 2026-10-23]
+  - a reader opening a book's PDF and its "Appendix" file from the book page, each visit a line in the day's log <sup>j</sup>, of type PDF and "Supplementary File" (Rule 1; OMP3, retired) {OMP} [upstream 2026-10-05]
 - **Nothing new to test**:
   - the site as the COUNTER platform on an installation without a "Site
     Name", whose reports keep the journal's name (Rule 24)

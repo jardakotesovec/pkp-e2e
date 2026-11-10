@@ -1003,19 +1003,19 @@ other suite's run. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the "Subscriptions Report" download with an institutional subscription whose contact has no country: the file arrives, that row's "Country" empty (the guard for OJS4, once fixed; Rule 22)
-  - a book declined at Internal Review on a press: "Submissions Declined", "Submissions Declined (After Review)" and both rejection rates count it (the guard for OMP1, once fixed; Rule 13)
-  - a context whose every count is dated this year: the "Total" column of "Editorial Activity" holds no "/year" (the guard for A2, once fixed; Rule 8b)
-  - Statistics › "Users" of a journal: no "Site Administrator" row (the guard for A6, once fixed; Rule 14)
-  - a report address with an unknown, empty or missing report name: lands on the "Reports" page (the guard for A8, once fixed; Rule 19)
-  - a Custom Range ending on the day submissions arrived: "Submissions Received" counts them and the rates are not "0%" (the guard for A1, once fixed; Rules 7a, 9)
-  - an editor who saved Profile › "Notifications" while the monthly email was off, and one who saved the site-level profile: each keeps the statistics row as before and gets the email (the guard for A14, once fixed; Settings bullet 1)
-  - "Articles Report" of a submission with supporting agencies: its "Supporting Agencies" cell lists them (the guard for OJS1, once fixed; Rule 20d)
-  - "Articles Report" of a submission whose title holds "&", an apostrophe and an italic word: the "Title" cell reads as typed (the guard for OJS2, once fixed; Rule 20d)
-  - "Articles Report" after "Accept and Skip Review", "Revert Decline", "New Review Round", a move back a stage and a publication: every "Editor Decision" cell named (the guard for OJS3, once fixed; Rule 20b)
-  - "Monograph Report" of a press whose books have fewer authors and decisions than another press's: no author or decision column beyond its own books' (the guard for OMP3, once fixed; Rule 23)
-  - "Monograph Report" after an Internal Review "Decline Submission" and its "Revert Decline": the revert named "Revert Decline" (the guard for OMP4, once fixed; Rule 23)
-  - "Monograph Report" after a book is published: its "Move to Done" named (the guard for OMP6, once fixed; Rule 23b)
+  - the "Subscriptions Report" download with an institutional subscription whose contact has no country: the file arrives, that row's "Country" empty (the guard for OJS4, once fixed; Rule 22) [report 2026-10-02]
+  - a book declined at Internal Review on a press: "Submissions Declined", "Submissions Declined (After Review)" and both rejection rates count it (the guard for OMP1, once fixed; Rule 13) [report 2026-10-02]
+  - a context whose every count is dated this year: the "Total" column of "Editorial Activity" holds no "/year" (the guard for A2, once fixed; Rule 8b) [report 2026-10-02]
+  - Statistics › "Users" of a journal: no "Site Administrator" row (the guard for A6, once fixed; Rule 14) [report 2026-10-02]
+  - a report address with an unknown, empty or missing report name: lands on the "Reports" page (the guard for A8, once fixed; Rule 19) [report 2026-10-03]
+  - a Custom Range ending on the day submissions arrived: "Submissions Received" counts them and the rates are not "0%" (the guard for A1, once fixed; Rules 7a, 9) [report 2026-10-03]
+  - an editor who saved Profile › "Notifications" while the monthly email was off, and one who saved the site-level profile: each keeps the statistics row as before and gets the email (the guard for A14, once fixed; Settings bullet 1) [report 2026-10-03]
+  - "Articles Report" of a submission with supporting agencies: its "Supporting Agencies" cell lists them (the guard for OJS1, once fixed; Rule 20d) [report 2026-10-03]
+  - "Articles Report" of a submission whose title holds "&", an apostrophe and an italic word: the "Title" cell reads as typed (the guard for OJS2, once fixed; Rule 20d) [report 2026-10-03]
+  - "Articles Report" after "Accept and Skip Review", "Revert Decline", "New Review Round", a move back a stage and a publication: every "Editor Decision" cell named (the guard for OJS3, once fixed; Rule 20b) [report 2026-10-03]
+  - "Monograph Report" of a press whose books have fewer authors and decisions than another press's: no author or decision column beyond its own books' (the guard for OMP3, once fixed; Rule 23) [report 2026-10-03]
+  - "Monograph Report" after an Internal Review "Decline Submission" and its "Revert Decline": the revert named "Revert Decline" (the guard for OMP4, once fixed; Rule 23) [report 2026-10-03]
+  - "Monograph Report" after a book is published: its "Move to Done" named (the guard for OMP6, once fixed; Rule 23b) [incidental 2026-10-05]
 - **Nothing new to test**:
   - a published item whose newer version moves it to another section,
     counted under its old section in "Filters" and "Articles Report"

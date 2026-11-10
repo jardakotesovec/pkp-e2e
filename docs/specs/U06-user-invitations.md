@@ -801,46 +801,46 @@ Left out of the scenarios above, by reason:
     the second's "Accept And Continue" showing the taken-username message
     under Username ([A13](#a13)): the guard the issue report
     (`docs/issues/U06-A13-accept-taken-username-nothing-happens.md`)
-    proposes, once fixed
+    proposes, once fixed [report 2026-10-15]
   - the guard for OMP1 (issue report
     `docs/issues/U53-A14-masthead-change-error-no-email.md`): a manager
     changes a member's "Appear on the masthead" select on the user's roles
     page and in "Invite to a role" on a press and a preprint server: the
     save succeeds with no error dialog and the member receives "Your journal
-    masthead visibility has been updated" (the journal is the control)
+    masthead visibility has been updated" (the journal is the control) [report 2026-10-02]
   - the guard for A3 (issue report
     `docs/issues/U06-A3-replaced-invitation-links-not-found.md`): after
     "Edit" replaces a pending invitation, the earlier email's accept and
     decline links open "Invitation Unavailable", not only a page without
-    the wizard
+    the wizard [report 2026-10-02]
   - the guard for A4 (issue report
     `docs/issues/U06-A4-newcomer-not-signed-in-after-accepting.md`): a
     newcomer's "View All Submissions" after "Accept And Continue" opens the
-    Dashboard signed in as the new account
+    Dashboard signed in as the new account [report 2026-10-02]
   - the guard for A12 (issue report
     `docs/issues/U06-A12-invitation-address-made-up-kind-empty-page.md`):
     the send wizard's address typed with a made-up last word and with
-    "reviewerAccess" shows "404 Not Found" (Actors row 2)
+    "reviewerAccess" shows "404 Not Found" (Actors row 2) [report 2026-10-02]
   - the guard for A11 (issue report
     `docs/issues/U06-A11-invitation-promises-masthead-for-unlisted-roles.md`):
     an invitation offering Author with "Appear on the masthead" reads "Your
     name will not appear in the {journal}'s masthead as a Author." while an
-    editor role's line keeps "will appear"
+    editor role's line keeps "will appear" [report 2026-10-02]
   - the guards for A7 (issue reports
     `docs/issues/U06-A7-invitation-steps-raw-labels.md` and
     `docs/issues/U06-A7-accept-page-hidden-steps-button.md`): the list of
     steps on the send and accept wizards is named "Complete the steps for
     this invitation", no list or button there carries "##" in its name, and on
     an existing user's one-step accept page Tab reaches no element inside
-    the clipped steps row or an `aria-hidden` block
+    the clipped steps row or an `aria-hidden` block [report 2026-10-02]
   - the guard for A15: after "Back" to "Search User" and a search for
     another address, the names "Enter details" shows are the names the
     invitation carries, in the Invitations row, the greeting and the "To"
-    line (Rule 15), once fixed
+    line (Rule 15), once fixed [sweep 2026-10-22]
   - the guard for A18: after the "Back" button on the accept wizard's
     "Enter details" and "Save and continue", the names typed there are still in
     their boxes and reach the review step and the account (Rule 17a),
-    once fixed
+    once fixed [incidental 2026-11-03]
 - **Rarely met**:
   - a past start date taking effect as the acceptance day, read on the
     member's Current Users row and Edit page (Rule 8): a manager rarely

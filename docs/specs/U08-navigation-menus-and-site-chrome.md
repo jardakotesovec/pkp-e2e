@@ -1202,28 +1202,28 @@ are in the footnote. <sup>y</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the site's Navigation tab: "Add Menu" and a site menu's "Edit" open the menu window with the site theme's areas ("None", "primary", "user"), and a new site menu saves (Rule 1b; the guard [A4](#a4)'s issue report proposes)
-  - the access-denied page a signed-in user gets: its heading, the breadcrumb's last step and the browser tab name the page (Rule 26a; the guard [A3](#a3)'s issue report proposes)
-  - a Section Editor's "Dashboard" under the username on the public pages opens the Dashboard, with their task count (Rule 19a; the guard [A2](#a2)'s issue report proposes, shared with Notifications center & email preferences A3)
-  - the eye notices of "Privacy Statement", "Contact" and "About" and the "About" type's description, on a journal, a press and a preprint server: each names the Settings place where the screens put it (Rules 7a–7b; the guard [A6](#a6) and [A13](#a13)'s issue report proposes)
-  - a Site Administrator holding Reader alone in a journal opens "Editor Dashboard": the views and counts show, and no "Error" window opens on the editorial pages (Actors; the guard [A22](#a22)'s issue report proposes)
-  - the editorial header's "i" icon and the Tasks window's strip: the link's accessible name reads "Help" ("Aide" in French) (Rule 27b; the guard [A1](#a1)'s issue report proposes)
-  - the public header in a narrow window on French pages: the menu button's name is French, not "Open Menu" (the guard [A7](#a7)'s issue report proposes)
-  - the item window's "Navigation Menu Type": choosing a type and then "Choose a type..." keeps the heading and returns the line under the list to its first text (the guard [A12](#a12)'s issue report proposes)
-  - the "Navigation" table after an item is renamed or removed: each menu's "Navigation Menu Items" cell follows without a reload (the guard [A15](#a15)'s issue report proposes)
-  - the menu window with no items at all: neither panel claims items are assigned or sends the manager to drag (the guard [A16](#a16)'s issue report proposes)
-  - the item window opened and closed with nothing typed: no "The data on this form has changed" box and no leave question (the guard of [A18](#a18)'s first issue report)
-  - the item window after a refused "Save": the back arrow asks before closing and the entries stay until the manager answers (the guard of [A18](#a18)'s second issue report)
-  - the top-right notices scenario 5 states for "No type", "Not a web address", "A path with other characters" and "A path already used": no suite asserts them yet (Fields; scenario 5)
-  - the menu window after a change discarded with "Yes": Settings › "Workflow" in the side menu, pressed a second later, asks nothing (Rule 6a; the guard of the retired [A17](#a17))
-  - the journals switcher on a site with two journals of one name: each offers the other (Rule 29; the guard [A21](#a21)'s issue report proposes)
-  - on a journal, the menu's "Edit" window: "Subscriptions" and "My Subscriptions" carry the crossed-out eye and open their notices (Rule 7a; the guard [OJS1](#ojs1)'s issue report proposes)
-  - a preprint server's settings address typed with the site's path: the refusal names the missing server in words a user understands, as a journal's and a press's do (Rule 26c; the guard [OPS4](#ops4)'s issue report proposes)
-  - scenario 11's "Placed": "\"Developed By\" Block" ticked in the "Sidebar" list on screen and saved with "Save"; the suites place the block before the scenario starts (Rule 21; Settings bullet 15)
-  - scenario 2's Journal Manager: the number after the username is the Tasks bell's number; the suites check that a number is there, not which (Rule 19b)
-  - the Site Administrator's journals switcher on "Comments": the chosen journal's Comments page, and the access-denied page reading "Access denied." when that journal's public comments are off (Rule 29a)
-  - Administration's dark bar while the site has no name: "Open Journal Systems" ("Open Monograph Press", "Open Preprint Systems") as plain text, not a link (Rule 27a)
-  - the Site Administrator on the site's home page in a wide window: "Dashboard" in the username's list and the username itself show no number (Rule 19c)
+  - the site's Navigation tab: "Add Menu" and a site menu's "Edit" open the menu window with the site theme's areas ("None", "primary", "user"), and a new site menu saves (Rule 1b; the guard [A4](#a4)'s issue report proposes) [report 2026-10-03]
+  - the access-denied page a signed-in user gets: its heading, the breadcrumb's last step and the browser tab name the page (Rule 26a; the guard [A3](#a3)'s issue report proposes) [report 2026-10-03]
+  - a Section Editor's "Dashboard" under the username on the public pages opens the Dashboard, with their task count (Rule 19a; the guard [A2](#a2)'s issue report proposes, shared with Notifications center & email preferences A3) [report 2026-10-03]
+  - the eye notices of "Privacy Statement", "Contact" and "About" and the "About" type's description, on a journal, a press and a preprint server: each names the Settings place where the screens put it (Rules 7a–7b; the guard [A6](#a6) and [A13](#a13)'s issue report proposes) [report 2026-10-03]
+  - a Site Administrator holding Reader alone in a journal opens "Editor Dashboard": the views and counts show, and no "Error" window opens on the editorial pages (Actors; the guard [A22](#a22)'s issue report proposes) [report 2026-10-03]
+  - the editorial header's "i" icon and the Tasks window's strip: the link's accessible name reads "Help" ("Aide" in French) (Rule 27b; the guard [A1](#a1)'s issue report proposes) [report 2026-10-03]
+  - the public header in a narrow window on French pages: the menu button's name is French, not "Open Menu" (the guard [A7](#a7)'s issue report proposes) [report 2026-10-03]
+  - the item window's "Navigation Menu Type": choosing a type and then "Choose a type..." keeps the heading and returns the line under the list to its first text (the guard [A12](#a12)'s issue report proposes) [report 2026-10-03]
+  - the "Navigation" table after an item is renamed or removed: each menu's "Navigation Menu Items" cell follows without a reload (the guard [A15](#a15)'s issue report proposes) [report 2026-10-03]
+  - the menu window with no items at all: neither panel claims items are assigned or sends the manager to drag (the guard [A16](#a16)'s issue report proposes) [report 2026-10-03]
+  - the item window opened and closed with nothing typed: no "The data on this form has changed" box and no leave question (the guard of [A18](#a18)'s first issue report) [report 2026-10-03]
+  - the item window after a refused "Save": the back arrow asks before closing and the entries stay until the manager answers (the guard of [A18](#a18)'s second issue report) [report 2026-10-03]
+  - the top-right notices scenario 5 states for "No type", "Not a web address", "A path with other characters" and "A path already used": no suite asserts them yet (Fields; scenario 5) [incidental 2026-10-07]
+  - the menu window after a change discarded with "Yes": Settings › "Workflow" in the side menu, pressed a second later, asks nothing (Rule 6a; the guard of the retired [A17](#a17)) [incidental 2026-10-07]
+  - the journals switcher on a site with two journals of one name: each offers the other (Rule 29; the guard [A21](#a21)'s issue report proposes) [report 2026-10-03]
+  - on a journal, the menu's "Edit" window: "Subscriptions" and "My Subscriptions" carry the crossed-out eye and open their notices (Rule 7a; the guard [OJS1](#ojs1)'s issue report proposes) [report 2026-10-03]
+  - a preprint server's settings address typed with the site's path: the refusal names the missing server in words a user understands, as a journal's and a press's do (Rule 26c; the guard [OPS4](#ops4)'s issue report proposes) [report 2026-10-03]
+  - scenario 11's "Placed": "\"Developed By\" Block" ticked in the "Sidebar" list on screen and saved with "Save"; the suites place the block before the scenario starts (Rule 21; Settings bullet 15) [sweep 2026-10-28]
+  - scenario 2's Journal Manager: the number after the username is the Tasks bell's number; the suites check that a number is there, not which (Rule 19b) [sweep 2026-10-28]
+  - the Site Administrator's journals switcher on "Comments": the chosen journal's Comments page, and the access-denied page reading "Access denied." when that journal's public comments are off (Rule 29a) [sweep 2026-10-28]
+  - Administration's dark bar while the site has no name: "Open Journal Systems" ("Open Monograph Press", "Open Preprint Systems") as plain text, not a link (Rule 27a) [sweep 2026-10-28]
+  - the Site Administrator on the site's home page in a wide window: "Dashboard" in the username's list and the username itself show no number (Rule 19c) [incidental 2026-10-29]
 - **Rarely met**:
   - "Publishing Mode" set to "OJS will not be used to publish the journal's contents online." {OJS}: "Current Issue" and "Archives" leaving the header (Settings bullet 2; item types table)
   - a Reader with no side menu while "Disable Submissions" is on (Actors row 8)

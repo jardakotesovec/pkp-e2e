@@ -689,12 +689,12 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - after "Request Revisions", the author's only revised file deleted: the revisions task back in the author's Tasks panel ([A9](#a9)): the guard the issue report proposes
-  - on a round with no revision request, the "Revisions Uploaded" description makes no claim about a request ([A10](#a10)): the guard the issue report proposes
-  - scenario 4's first bullet read with no reload: the "Revisions Uploaded" panel listing the file as the closed upload window goes (Side effects, "Author uploads a revised file"): the OJS suite reloads the page before it reads the panel
-  - after "Resubmit for Review" and the Author's first uploaded file: "Upload revisions" still offered ([A1](#a1)): the guard the issue report proposes
-  - on a journal, scenario 12's "Read Review" remark (Rule 15; [OJS1](#ojs1) retired): the scenario states it, so a missing remark fails it there too; the OJS suite does not assert it yet
-  - the two old addresses on a preprint server, typed by the preprint's Author (Rule 17) {OPS}: scenario 14 opens a preprint's workflow as the Preprint Server Manager and types no address
+  - after "Request Revisions", the author's only revised file deleted: the revisions task back in the author's Tasks panel ([A9](#a9)): the guard the issue report proposes [report 2026-10-04]
+  - on a round with no revision request, the "Revisions Uploaded" description makes no claim about a request ([A10](#a10)): the guard the issue report proposes [report 2026-10-04]
+  - scenario 4's first bullet read with no reload: the "Revisions Uploaded" panel listing the file as the closed upload window goes (Side effects, "Author uploads a revised file"): the OJS suite reloads the page before it reads the panel [upstream 2026-09-29]
+  - after "Resubmit for Review" and the Author's first uploaded file: "Upload revisions" still offered ([A1](#a1)): the guard the issue report proposes [other 2026-10-02]
+  - on a journal, scenario 12's "Read Review" remark (Rule 15; [OJS1](#ojs1) retired): the scenario states it, so a missing remark fails it there too; the OJS suite does not assert it yet [incidental 2026-10-07]
+  - the two old addresses on a preprint server, typed by the preprint's Author (Rule 17) {OPS}: scenario 14 opens a preprint's workflow as the Preprint Server Manager and types no address [other 2026-10-12]
 - **Rarely met**:
   - "Returned back to review." once every review is confirmed, and the reviewer sentences until then (Rules 5–6, Cross-feature): sending a submission back from Copyediting is not an ordinary week's action, and the sentence needs every review confirmed after the return
   - deleting the only revised file flipping the status back to "requested" (Rule 7): an author seldom deletes their only revised file; the task half of the path is A9

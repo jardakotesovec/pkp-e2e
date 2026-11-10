@@ -852,18 +852,18 @@ and a preprint server. <sup>s0</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for A14 (issue report `docs/issues/U14-A14-refused-comment-report-loses-reason.md`): once fixed, a reader whose report is refused because the session ended keeps "Report Comment" open with the typed reason under the "Error" window, and a report on a comment hidden meanwhile drops the comment from the list.
-  - the Comments page's browser tab reading "Comments | {journal}" on each of its lists and after a reload (Rule 10; A13)
-  - the comment panel and the report panel for a writer and a reporter whose ORCID iD is not verified: the iD link's address is the bare iD (Fields, the comment panel; A6)
-  - a comment's deletion leaving the tasks of a report numbered like it, and of a comment numbered like one of its reports, anywhere on the site (Side effects; A11, retired)
-  - under a comment on the landing page, a writer with an unverified ORCID iD: the hollow icon after the name, a link named "ORCID iD" that opens the iD's ORCID page (Rule 6b; the landing-page half A6 used to carry)
-  - under a comment on the landing page, a writer with no ORCID iD and one with no affiliation: no icon after the name, no line below it (Rule 6b)
-  - the comment box left with text typed and not submitted: nothing asked, nothing posted, the box empty after a reload (Fields, the comment box)
-  - an account holding no role in the journal, registered with another journal of the site, writing a comment that waits for approval and filing a report the Comments page lists (Actors rows 2 and 3; A20, retired)
-  - a comment request made by hand in one journal naming another journal's published article, refused with nothing kept (Actors row 2; A21, retired)
-  - a moderator's comment task and report task pressed while public comments are off, landing on the access-denied page (Rules 2b, 16)
-  - with public comments off, the Comments page's address ending in "/" and carrying one more part, both landing on the access-denied page like the bare address (Rule 2b; A22, retired)
-  - the Comments page's address at the site, with no journal: the Login page for a visitor who is not signed in, the notice "No journal was found that matched your request." for the Site Administrator (Actors row 6; A23, retired)
+  - the guard for A14 (issue report `docs/issues/U14-A14-refused-comment-report-loses-reason.md`): once fixed, a reader whose report is refused because the session ended keeps "Report Comment" open with the typed reason under the "Error" window, and a report on a comment hidden meanwhile drops the comment from the list. [report 2026-10-26]
+  - the Comments page's browser tab reading "Comments | {journal}" on each of its lists and after a reload (Rule 10; A13) [report 2026-10-04]
+  - the comment panel and the report panel for a writer and a reporter whose ORCID iD is not verified: the iD link's address is the bare iD (Fields, the comment panel; A6) [report 2026-10-04]
+  - a comment's deletion leaving the tasks of a report numbered like it, and of a comment numbered like one of its reports, anywhere on the site (Side effects; A11, retired) [upstream 2026-09-29]
+  - under a comment on the landing page, a writer with an unverified ORCID iD: the hollow icon after the name, a link named "ORCID iD" that opens the iD's ORCID page (Rule 6b; the landing-page half A6 used to carry) [upstream 2026-10-01]
+  - under a comment on the landing page, a writer with no ORCID iD and one with no affiliation: no icon after the name, no line below it (Rule 6b) [upstream 2026-10-01]
+  - the comment box left with text typed and not submitted: nothing asked, nothing posted, the box empty after a reload (Fields, the comment box) [upstream 2026-10-01]
+  - an account holding no role in the journal, registered with another journal of the site, writing a comment that waits for approval and filing a report the Comments page lists (Actors rows 2 and 3; A20, retired) [upstream 2026-10-21]
+  - a comment request made by hand in one journal naming another journal's published article, refused with nothing kept (Actors row 2; A21, retired) [upstream 2026-10-21]
+  - a moderator's comment task and report task pressed while public comments are off, landing on the access-denied page (Rules 2b, 16) [upstream 2026-10-21]
+  - with public comments off, the Comments page's address ending in "/" and carrying one more part, both landing on the access-denied page like the bare address (Rule 2b; A22, retired) [upstream 2026-10-22]
+  - the Comments page's address at the site, with no journal: the Login page for a visitor who is not signed in, the notice "No journal was found that matched your request." for the Site Administrator (Actors row 6; A23, retired) [upstream 2026-10-22]
 - **Rarely met**:
   - an Editor whose role does not permit settings changes, refused the "Comments" tab and still opening the Comments page {OJS OMP} (Actors rows 5 and 6; a preprint server has no second manager-level role to untick): unticking "Permit changes to Settings" on a role is a setup few journals make, not a state an editor meets in an ordinary week
   - a Site Administrator holding no manager role in the journal, with no task row in their Tasks panel (Actors row 7): the state needs the Site Administrator's manager role ended on their own edit page, a setup no journal makes in an ordinary week

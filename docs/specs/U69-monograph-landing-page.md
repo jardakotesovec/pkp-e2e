@@ -1117,87 +1117,87 @@ Left out of the scenarios above, by reason:
 
 - **Planned**:
   - the "Downloads" chart of a book first published in the current
-    year: January to the current month, and no "All time" (Rule 20a)
+    year: January to the current month, and no "All time" (Rule 20a) [incidental 2026-10-27]
   - the "Downloads" chart keeping its figures after downloads are
     processed (seeded figures on a test install), until "Delete Data
-    Caches" (Rule 20b)
+    Caches" (Rule 20b) [incidental 2026-10-27]
   - the guard for A20 (issue report
     `docs/issues/U69-A20-later-version-chapter-repeats-date.md`): a later
     version's chapter page printing one date when its two dates are
-    the same
+    the same [report 2026-10-01]
   - the guard for A17 (issue report
     `docs/issues/U69-A17-unpublished-book-chapter-page-no-preview-notice.md`):
-    an unpublished book's chapter page carrying the preview notice
+    an unpublished book's chapter page carrying the preview notice [report 2026-10-01]
   - the guard for A13 (issue report
     `docs/issues/U69-A13-chapter-page-forthcoming-under-other-date-format.md`):
     a published chapter's page headed "Published" under each
-    "Date (Short)" format
+    "Date (Short)" format [report 2026-10-01]
   - the guard for A18 (issue report
     `docs/issues/U69-A18-sign-in-to-buy-file-skips-payment-page.md`): a
     visitor who signs in, or registers, from a priced file's link
-    landing on the payment page
+    landing on the payment page [report 2026-10-01]
   - the guard for A12 (issue report
     `docs/issues/U69-A12-payments-enable-unticked-press-still-sells.md`):
     a press with payments "Enable" unticked opening no payment page
-    for a priced file
+    for a priced file [report 2026-10-01]
   - the guard for A6 (issue report
     `docs/issues/U69-A6-contents-repeat-book-authors.md`): a one-author book's
     table of contents showing no author line under its chapters, and a
-    chapter by other authors keeping its line
+    chapter by other authors keeping its line [report 2026-10-01]
   - the guard for A1 (issue report
     `docs/issues/U69-A1-unknown-book-address-asks-sign-in.md`): a book address
     that names no book answering "404 Not Found", signed out and
-    signed in
+    signed in [report 2026-10-01]
   - the guard for A15 (issue report
     `docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md`):
     a priced file's link naming its format on a book's page in French
-    (Canada)
+    (Canada) [other 2026-10-08]
   - the guard for A7 and A8 (issue report
     `docs/issues/U69-A7-A8-priced-file-link-price-twice-or-missing.md`):
     a priced file's link naming its price once, in a format with one
-    listed file and in one with several
+    listed file and in one with several [report 2026-10-01]
   - the guard for A10 (issue report
     `docs/issues/U69-A10-html-view-page-return-arrow-raw-key.md`):
     the HTML view page's return arrow read out as "Return to view
-    details about {title}"
+    details about {title}" [report 2026-10-01]
   - the guard for A19 (issue report
     `docs/issues/U69-A19-older-version-chapter-page-server-error.md`):
     an older version's chapter page opening under the outdated notice
-    on a press with "DOI Versioning" "No"
+    on a press with "DOI Versioning" "No" [report 2026-10-01]
   - a book's version address with an id that is none of its versions
     (a mistyped number, another book's version, "abc") answering "404
-    Not Found" (Rule 4; retired A3, pkp/pkp-lib#13657)
+    Not Found" (Rule 4; retired A3, pkp/pkp-lib#13657) [upstream 2026-11-02]
   - the guard for A16 (issue report
     `docs/issues/U69-A16-earlier-url-path-server-error.md`): a book whose
     later version was published under a new URL Path, opened by the
-    earlier one, forwarding to the book's current address
+    earlier one, forwarding to the book's current address [report 2026-10-01]
   - a free PDF's link downloading the file under its name with "PDF.js
     PDF Viewer" off, and a free file that is neither PDF nor HTML (an
     EPUB, a Markdown file) downloading under its name (Rule 13; Settings
-    bullet 1)
+    bullet 1) [upstream 2026-10-05]
   - the guard for A23 (issue report
     `docs/issues/U69-A9-pdf-view-page-script-error.md`): the PDF view
-    page opening with no script error
-  - a format with two files listing them in either order (Rule 11b)
+    page opening with no script error [report 2026-10-01]
+  - a format with two files listing them in either order (Rule 11b) [incidental 2026-10-02]
   - the guard for A5 (Rule 6; issue report
     `docs/issues/U13-A6-older-version-tab-current-title.md`): an
     older version's page, published under another title than the current
-    one, with the browser tab reading the older version's title
+    one, with the browser tab reading the older version's title [report 2026-10-01]
   - the guard for A4 (Rule 5, Rule 6; issue report
     `docs/issues/U13-OPS1-new-version-preview-called-outdated.md`): a new
     version's preview showing the preview notice alone, and an older
-    published version's page keeping the outdated notice
+    published version's page keeping the outdated notice [report 2026-10-01]
   - the Login page a file for sale leads a visitor to, saying nothing of
-    the purchase (Rule 14)
+    the purchase (Rule 14) [incidental 2026-09-29]
   - the payment page's order, the press's instructions first, and
     "Send notification of payment" as an underlined link (Fields, the
-    payment page)
+    payment page) [incidental 2026-09-29]
   - an HTML file linking the press with "omp://press", the link opening
-    the press's home page (Fields, the HTML view page)
+    the press's home page (Fields, the HTML view page) [incidental 2026-10-05]
   - a published book's table of contents listing its chapters in a new
     order, after the last chapter is moved above the first with
     "Order" and "Done" on the published version's Chapters page
-    (Rule 10)
+    (Rule 10) [other 2026-10-13]
 - **Nothing new to test**:
   - an unassigned Series editor or assistant role opening the preview
     (Actors row 2)

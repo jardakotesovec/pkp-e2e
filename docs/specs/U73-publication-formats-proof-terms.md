@@ -982,61 +982,61 @@ Left out of the scenarios above, by reason:
   - the guard for A6 (issue report
     `docs/issues/U73-A6-digital-format-metadata-tab-asks-physical-details.md`):
     a digital format's "Metadata" tab shows "Digital Information" and no
-    physical group, and a remotely hosted format's shows neither
+    physical group, and a remotely hosted format's shows neither [incidental 2026-10-03]
   - the guard for A1 and A2 (issue report
     `docs/issues/U73-A1-A2-format-controls-offered-then-refused.md`):
     the assigned Layout Editor makes a format "Available", opens "Set
     Terms" on its form and "Select Files" on its list, and the "Metadata"
     tab's four lists load for the Layout Editor and the assigned Series
-    editor
+    editor [report 2026-10-03]
   - the guard for A9 (issue report
     `docs/issues/U73-A9-priced-file-no-payment-method-turns-readers-away.md`):
     on a press with no currency, a "Direct Sales" save in "Set Terms for
     Downloading" is refused with its message, and a reader who opens a
-    file priced earlier is told it is not available
+    file priced earlier is told it is not available [report 2026-10-03]
   - the guard for A17 (issue report
     `docs/issues/U74-A7-A8-sales-rights-market-values-fail-native-export.md`):
     a physical format's "Metadata" tab refuses "xii" as "Front Matter"
-    and "tall" as "Height", and the book's Native XML export completes
+    and "tall" as "Height", and the book's Native XML export completes [report 2026-10-03]
   - the guard for A3 (issue report
     `docs/issues/U73-A3-format-change-file-only-adds.md`): a format's
     second "Change File" offers its first file to replace, and with it
-    chosen the format still lists one file
+    chosen the format still lists one file [report 2026-10-03]
   - the guard for A4 (issue report
     `docs/issues/U73-A4-remote-format-cannot-be-made-local.md`): the
     dataset's remote "PDF", its box unticked and "OK" pressed, reopens
-    unticked with an empty address and offers "Change File"
+    unticked with an empty address and offers "Change File" [report 2026-10-03]
   - the guard for A12 (issue report
     `docs/issues/U73-A12-proof-approval-revoke-logged-as-sign-off.md`):
     a format file approved and then revoked shows two different lines in
-    its "History"
+    its "History" [report 2026-10-03]
   - the guard for A13 (issue report
     `docs/issues/U73-A13-copyeditor-formats-page-no-list.md`): a press
     Copyeditor on a book in Copyediting is not offered "Publication
-    Formats", and the assigned Layout Editor in Production is
+    Formats", and the assigned Layout Editor in Production is [report 2026-10-03]
   - the guard for A15 (issue report
     `docs/issues/U73-A15-format-name-required-primary-language.md`): on a
     press with English and French form languages, a French book's format
-    and chapter save with French names alone
+    and chapter save with French names alone [report 2026-10-04]
   - the guard for A24 (issue report
     `docs/issues/U09-A11-static-page-refusal-repeated-after-save.md`):
     after two refused "URL Path" values in a format's "Edit" window, the
-    save of a good one shows no notice
+    save of a good one shows no notice [report 2026-10-04]
   - the guard for A20 (issue report
     `docs/issues/U73-A20-direct-sales-price-zero-gives-file-free.md`):
     "Direct Sales" at "0" and at "0.00" is refused in "Set Terms for
-    Downloading", the window staying on "Direct Sales"
+    Downloading", the window staying on "Direct Sales" [report 2026-10-04]
   - the guard for A25 (issue report
     `docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md`):
     in French (Canada), the window a format's availability link opens
-    is titled for availability ("Disponibilité du format")
+    is titled for availability ("Disponibilité du format") [other 2026-10-08]
   - the guard for A14 (issue report
     `docs/issues/U46-A7-galley-format-moves-in-list-when-saved.md`): an
     unchanged "OK" on the first of three formats, an approval and an
-    availability change leave the list in the order the formats were added
+    availability change leave the list in the order the formats were added [report 2026-10-02]
   - the guard for A7 (issue report
     `docs/issues/U74-A5-new-market-and-date-preselect-hijri-calendar.md`):
-    "Add publication date" opens with "Date Format" on "YYYYMMDD"
+    "Add publication date" opens with "Date Format" on "YYYYMMDD" [report 2026-10-03]
 - **Nothing new to test**:
   - "Format Approval" with its URN box changed, whose close arrow asks
     before closing, on a press that assigns URNs to publication formats
