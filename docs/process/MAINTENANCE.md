@@ -915,7 +915,6 @@ affected rows and in the next Mattermost summary.
   | jardakotesovec | @jarda.kotesovec |
   | kaitlinnewson | @kaitlin |
   | taslangraham | @taslan |
-  | touhidurabir | @touhidur |
   | Vitaliy-1 | @vitaliy |
 - A team reply that changes campaign rules is a maintainer ruling: encode
   it where RUNBOOK "What goes where" sends process learnings. A team
