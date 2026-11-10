@@ -209,4 +209,42 @@ async function readBook(page, app, id, {names = [], comments = []} = {}) {
     return out;
 }
 
-module.exports = {T, sleep, flat, openWorkflow, openExternalRound, editReview, markComplete, decide, publish, readBook};
+/**
+ * A typed address under the press (a GET from the address bar): status, type, body and the
+ * server log lines it wrote. Used for the press's public review record, which the page never asks.
+ */
+async function readAddress(page, app, slog, address) {
+    const from = slog.mark();
+    let r = null;
+    let err = null;
+    try {
+        r = await page.goto(app.url(`/index.php/${app.contextPath}/${address}`), {timeout: T});
+    } catch (e) {
+        err = flat(e.message, 200);
+    }
+    await sleep(400);
+    const body = r ? await r.text().catch(() => null) : null;
+    let json = null;
+    try { json = body ? JSON.parse(body) : null; } catch (e) { json = null; }
+    return {
+        address,
+        status: r ? r.status() : null,
+        type: r ? r.headers()['content-type'] || null : null,
+        length: body == null ? null : body.length,
+        body: flat(body, 600),
+        json,
+        err,
+        log: slog.since(from).map((l) => flat(l, 400)).filter((l) => !/ (Accepted|Closing)$| \[(200|30\d)\]: /.test(l) || /peerReviews|PeerReview/i.test(l)).slice(0, 8),
+    };
+}
+
+/** What a public review record names: each round's version and reviewers, so the reader sees who is listed. */
+function recordNames(json) {
+    if (!json || typeof json !== 'object') return null;
+    const rounds = json.reviewRounds;
+    if (!Array.isArray(rounds)) return {keys: Object.keys(json).slice(0, 12)};
+    return rounds.map((r) => ({round: r.roundNumber, version: r.publication && r.publication.versionString,
+        reviewers: (r.reviews || []).map((v) => (v.reviewer && (v.reviewer.fullName || v.reviewer.name)) || v.reviewerFullName || '(anonymous)')}));
+}
+
+module.exports = {T, sleep, flat, openWorkflow, openExternalRound, editReview, markComplete, decide, publish, readBook, readAddress, recordNames};

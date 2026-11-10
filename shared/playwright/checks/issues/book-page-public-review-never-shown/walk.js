@@ -12,6 +12,8 @@
 //   4-5  "Accept Submission", then "Send To Production", each to "Record Decision"
 //   6    "Publication" › "Title & Abstract" › "Publish", "Version of Record"
 //   7    signed out: book 16's page; controls: books 5 and 14 (published, no review made public)
+//   7a   control, signed out: the press's public review record of book 16, typed in the address
+//        bar (api/v1/peerReviews/open/submissions/16; the book page never asks it), and of book 5
 //   8    as dbarnes: book 16's page
 // On 3.5 the walk stops at step 2 when the Edit window has no such box.
 //
@@ -25,7 +27,7 @@
 // Reset first:  npm run fleet-prep -- --feature <dataset fleet's feature> --dataset <n> --reset
 // Run (main):   PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js omp shared/playwright/checks/issues/book-page-public-review-never-shown/walk.js [neighbour]
 // Run (3.5):    PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=<3.5 fleet's feature> … the same command
-const {forEachApp, launch, signIn, signOut, shot, record, sql} = require('../../../probe');
+const {forEachApp, launch, signIn, signOut, shot, record, sql, serverLog} = require('../../../probe');
 const L = require('./lib.js');
 
 const NEIGHBOUR = process.argv.includes('neighbour');
@@ -79,6 +81,17 @@ forEachApp(async (app) => {
                 facts.books.push({as: 'visitor', control: true, ...(await L.readBook(page, app, id, opts))});
                 await shot(page, `book-${id}-visitor`).catch(() => {});
             }
+            const slog = serverLog(app, {match: /./});
+            facts.records = [];
+            for (const id of [BOOK, CONTROLS[0]]) {
+                await step(facts, `7a-${id}`, async () => {
+                    const r = await L.readAddress(page, app, slog, `api/v1/peerReviews/open/submissions/${id}`);
+                    const rec = {as: 'visitor', status: r.status, type: r.type, length: r.length, err: r.err, log: r.log,
+                        names: L.recordNames(r.json), comment: (r.body || '').includes(COMMENT) || JSON.stringify(r.json || '').includes(COMMENT), body: r.json ? null : r.body};
+                    facts.records.push({id, ...rec});
+                    return rec;
+                });
+            }
             await signIn(page, 'dbarnes');
             facts.books.push({as: 'dbarnes', ...(await L.readBook(page, app, BOOK, opts))});
             await shot(page, `book-${BOOK}-dbarnes`).catch(() => {});
@@ -102,6 +115,7 @@ forEachApp(async (app) => {
         record(NEIGHBOUR ? 'neighbour' : 'facts', facts);
         for (const s of facts.steps) console.log(`step ${s.step}`, L.flat(JSON.stringify(s), 900));
         for (const b of facts.books) console.log(`book ${b.bookId} (${b.as}) ${b.status}`, L.flat(JSON.stringify(b), 1200));
+        for (const r of facts.records || []) console.log(`record ${r.id} ${r.status}`, L.flat(JSON.stringify(r), 900));
         if (facts.reviewRows) console.log('review rows', L.flat(JSON.stringify(facts.reviewRows), 600));
         if (facts.stoppedAt) console.log(`stopped at step ${facts.stoppedAt}: no "Publicly Show Reviewer Comments" box`);
         await close();

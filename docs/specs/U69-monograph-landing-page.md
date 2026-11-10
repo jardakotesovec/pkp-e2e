@@ -1325,7 +1325,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A20](#a20) | A chapter with its own date reads "June 1, 2024 — Updated on June 1, 2024" in a book's later version | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A23](#a23) | A press's PDF view page fails in its own script, "PDFJS is not defined", every time it opens | 🐞 | low · crash: script | upstream sync (claude), 2026-10-05 — re-verified |
 | [A25](#a25) | A book's HTML file that links another book shows with every "omp://" link dead | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
-| [A26](#a26) | A review made public never shows on the published book's page | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
+| [A26](#a26) | A review made public never shows on the published book's page | 🐞 | medium | issues (claude), 2026-11-10 — re-verified |
 | [A27](#a27) | A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A24](#a24) | On a press, every file link on a book's preview opens "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A11](#a11) | A buyer who pays by hand never gets the file | ❓ | user-visible | — |
@@ -1696,8 +1696,7 @@ setting "Make reviewer comments publicly visible with published content"
 the press turns it on. A journal's article page has the same fault, with
 a different fix
 ([pkp-e2e#218](https://github.com/jardakotesovec/pkp-e2e/issues/218)).
-Basis: probe, 2026-10-13. <sup>f-a26</sup>
-Report: refresh owed — pkp/omp#2552 (`pkp/pkp-lib#13729`, *Review setup*'s OMP4 retired) merged 2026-11-06 as `efbb79bdf7`: OMP's `api/v1/peerReviews/index.php` now maps `PeerReviewController`, so a press serves its public review record at `api/v1/peerReviews/open/submissions/{id}` (200, walked 2026-11-09). The report's "OMP serves the public reviews nowhere" and its links to the deleted OMP4 report need the walk again; the book page itself is untouched by the change (2026-11-09).
+Basis: probe, 2026-11-10. <sup>f-a26</sup>
 
 <a id="a27"></a>
 **A27 — A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included** · 🐞 · medium.
