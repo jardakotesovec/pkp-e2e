@@ -964,8 +964,8 @@ an entry notes otherwise; the team settles them on spec review.
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | A visitor opening an empty category sees "0 Items" and no "Nothing has been published" message | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | A category's "Order of articles" has no effect: its public page keeps one order whatever is chosen | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [A6](#a6) | A category's picture is not a link; its full-size version is unreachable from the page | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A7](#a7) | The picture's "Alternate text" is used nowhere; a journal's page describes the picture as "null" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [A6](#a6) | A category's picture is not a link; its full-size version is unreachable from the page | 🐞 | low | issues (claude), 2026-11-10 — re-verified |
+| [A7](#a7) | The picture's "Alternate text" is used nowhere; a journal's page describes the picture as "null" | 🐞 | low | issues (claude), 2026-11-10 — re-verified |
 | [A8](#a8) | A category path with "/" saves, but the category's links open another category's page or "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | The path message says "only letters and numbers" while "-", "_", "." and "/" are accepted | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | A journal's "Browse" block with no category shows "Categories" over an empty list | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1058,15 +1058,14 @@ Basis: probe, 2026-09-25; the trail's history, code reading. <sup>f-a5</sup>
 The picture on a category's page is meant to open its full-size version;
 it is not a link, and nothing on the page leads to the full-size picture,
 which answers only at its typed address.
-Since: 2018 · Basis: probe, 2026-10-02; its age, code reading. <sup>f-a6</sup>
-Report: refresh owed — pkp/omp#2553 (`pkp/pkp-lib#13730`, the category picture fault OMP1 retired) merged 2026-11-06 as `1ac42011ad`: OMP's `CatalogHandler::fullSize()` and `thumbnail()` now hand the category case to `PKPCatalogHandler`, so the A6-A7 report's "the OMP category half depends on the fix in U16-OMP1" no longer holds and its link to its deleted report is dead (2026-11-09).
+Since: 2018 · Basis: probe, 2026-11-10; its age, code reading. <sup>f-a6</sup>
 
 <a id="a7"></a>
 **A7 — The picture's alternate text is ignored** · 🐞 · low.
 The window asks for "Alternate text" beside the picture, but no page uses
 it: a screen reader hears "null" for the picture on a journal's and a
 preprint server's category page, and the category's name on a press's.
-Basis: probe, 2026-10-02; that no page at all uses it, code reading. <sup>f-a7</sup>
+Basis: probe, 2026-11-10; that no page at all uses it, code reading. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — A category path with "/" saves, but the category's links open another category's page or "404 Not Found"** · 🐞 · medium.
@@ -1247,6 +1246,7 @@ press answers the same way since pkp/omp#2553 handed its category
 pictures to the same code; before, its own handler answered an empty
 page. (Rule 12a)
 Basis: probe, 2026-10-07. <sup>f-a22</sup>
+Report: refresh owed — pkp/omp#2553 (`pkp/pkp-lib#13730`) merged 2026-11-06 as `1ac42011ad`: OMP's `CatalogHandler::fullSize()` and `thumbnail()` now hand the category case to `PKPCatalogHandler`, so the report's "OMP: its own `CatalogHandler` keeps the `if ($imageInfo)` check" (OMP the control) no longer holds; a category with no picture's small-copy address timed out on OMP `main` in the [A6](#a6) refresh walk (2026-11-10).
 
 <a id="a23"></a>
 **A23 — A category page number typed past the last page opens an empty page instead of "404 Not Found"** · 🐞 · low.

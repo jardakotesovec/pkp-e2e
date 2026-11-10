@@ -679,7 +679,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | One book reads "1 Titles" on the catalog, series and "New Releases" pages | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | Covers in book, article, preprint and issue lists are links a screen reader announces without a name | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A3](#a3) | A series' page shows no name, description or ISSN, and ignores the series' order | 🐞 | user-visible | — |
-| [A4](#a4) | A series' picture does not lead to its full size | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
+| [A4](#a4) | A series' picture does not lead to its full size | 🐞 | low | issues (claude), 2026-11-10 — re-verified |
 | [A7](#a7) | A press's category page never lists its new releases and never sets its featured books apart | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A9](#a9) | A reader on an old link to a press's catalog search gets "404 Not Found", not the Search page | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | With every series inactive, the "Browse" block shows the line "Series" with nothing under it | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
@@ -733,10 +733,9 @@ Since: 2026-08-26 (one month) · Basis: probe, 2026-09-27. <sup>f-a3</sup>
 The picture on a series' page is meant to open the full-size image; it is
 not a link, and nothing on the page leads to the full size, which answers
 only at its typed address. A category's picture is not a link either
-([Categories](U16-categories.md#a6), its A6); on a press it does not
-even show ([Categories](U16-categories.md#omp1), its OMP1). One fix
-makes both pictures links.
-Basis: probe, 2026-10-04. <sup>f-a4</sup>
+([Categories](U16-categories.md#a6), its A6). One fix makes both
+pictures links.
+Basis: probe, 2026-11-10. <sup>f-a4</sup>
 
 <a id="a5"></a>
 **A5 — The two series lists disagree** · ❓ · minor.
