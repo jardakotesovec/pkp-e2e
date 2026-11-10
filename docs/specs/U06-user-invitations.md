@@ -968,10 +968,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A16](#a16) | A past start date reads as the acceptance day once accepted, while the email named the date typed; an acceptance on a later day than the send was not seen | ❓ | minor | — |
 | [A19](#a19) | With ORCID off, the accept wizard tells the recipient to verify their ORCID iD from a profile that has no ORCID iD | ❓ | minor | — |
 | [A20](#a20) | On a journal whose primary language is not the manager's, the invitation email names its roles in the journal's language and says the rest in the manager's | ❓ | minor | — |
-| [A5](#a5) | Retired: "Invitation Sent" promised the inviter news of the person's decision, which never came; it now says the invitation waits under Invitations (Rule 15) | ✅ | retired | PR review (claude), 2026-10-27 — fixed upstream (pkp/ojs#5923, pkp/omp#2505, pkp/ops#1446) |
-| [A1](#a1) | Retired: the send wizard's address was gated more widely than the screen that offers it; it now lets in only those who open Users & Roles (Actors row 2) | ✅ | retired | upstream change + claim check (claude), 2026-10-02 — fixed upstream |
-| [A6](#a6) | Retired: Edit on a disabled member's row opened an error over an empty wizard; it now opens their details with the disabled-user warning (Rule 14) | ✅ | retired | upstream change + claim check (claude), 2026-09-18 — fixed upstream |
-| [A10](#a10) | Retired: some named newcomers were greeted "Dear {email},"; every name entered now reaches the greeting and the "To" line (Side effects) | ✅ | retired | PR review (claude), 2026-10-02 — fixed upstream (pkp/pkp-lib#13429) |
 
 ### All apps
 
@@ -1295,16 +1291,16 @@ Basis: probe, issue report walk, 2026-10-02. <sup>[f-ops1](#fn-ops1)</sup>
 ### Retired
 
 <a id="a5"></a>
-**A5 — "Invitation Sent" promised news of the person's decision** · ✅ · retired. Fixed upstream for pkp/pkp-lib#12874 (pkp/ojs#5923, pkp/omp#2505 and pkp/ops#1446 on `main`, pkp/ojs#5922, pkp/omp#2504 and pkp/ops#1445 on `stable-3_5_0`, merged 2026-10-27), verified the same day at the merged tips on OJS, OMP and OPS, `main` and 3.5: the dialog reads "…has been invited to a new role in OJS. The invitation is listed under Invitations on the Users & Roles page while it awaits their answer." and promises nothing the app does not do. The inviter is still told nothing when the person answers (Side effects); that is the product's choice the report left open, not this entry. <sup>[f-a5](#fn-a5)</sup>
+**A5 — "Invitation Sent" promised news of the person's decision** · ✅ · retired. Fixed upstream (pkp/ojs#5923, for pkp/pkp-lib#12874).
 
 <a id="a1"></a>
-**A1 — Wizard address wider than its screen** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13299, 2026-09-19), verified 2026-10-02 on OJS and 2026-10-06 on OMP and OPS: typing the send wizard's address opens it for exactly those who open Users & Roles, and anyone else signed in gets the access-denied page (Actors row 2). <sup>[f-a1](#fn-a1)</sup>
+**A1 — Wizard address wider than its screen** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13299).
 
 <a id="a6"></a>
-**A6 — Edit on a disabled member opens a broken wizard** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13313, 2026-09-15), verified 2026-09-18 on OJS, OMP and OPS: Edit on a disabled user's row opens their details and current roles under "The user is currently disabled.", with no error (Rule 14); the email its role controls send is [A9](#a9)'s. <sup>[f-a6](#fn-a6)</sup>
+**A6 — Edit on a disabled member opens a broken wizard** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13313).
 
 <a id="a10"></a>
-**A10 — Some named newcomers greeted by their email address** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13429, issue #13376, merged 2026-10-02 as `66bafd91d2`; driven before the merge at its head `0717df15fe`, the same tree, on OJS, OMP and OPS, with its 3.5 twin #13428 `a49059461f`): a newcomer named only in a second form language, and one on a journal whose primary language is not the site's invited by a manager working in the site's, are greeted by the name entered, on the "To" line too, and "invited by {name}" names the manager (Side effects). <sup>[f-a10](#fn-a10)</sup>
+**A10 — Some named newcomers greeted by their email address** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13429).
 
 ---
 
@@ -2000,21 +1996,6 @@ OPS, on both the accept and decline flows. Claim check 2026-09-28, all
 three apps: an existing user who opened the link while signed in as
 themselves stays signed in and reaches the Dashboard (note m).
 Issue report: [pkp-e2e#514](https://github.com/jardakotesovec/pkp-e2e/issues/514) ([docs/issues/U06-A4-newcomer-not-signed-in-after-accepting.md](../issues/U06-A4-newcomer-not-signed-in-after-accepting.md)).
-
-<a id="fn-a5"></a>
-**f-a5** — Success-dialog copy: app locale key `userInvitation.modal.message`.
-No accept/decline code path produces a notification or email to the inviter
-(notes m, n). Live-confirmed 2026-07-31 (live probe, accept and decline
-cases): bell/Tasks panel "No Items", inviter mailbox empty after both accept
-and decline; positive control — an invitation sent afterwards delivered
-normally. Retired 2026-10-27: the app PRs of pkp/pkp-lib#12874 (pkp/ojs#5923 as
-`e421a8840c`, pkp/omp#2505 as `3f5ca963b5`, pkp/ops#1446 as `51a81686ab`; on
-`stable-3_5_0` pkp/ojs#5922 `a82e8a17ef`, pkp/omp#2504 `1dddb3ee11`,
-pkp/ops#1445 `30f5d57968`) give `userInvitation.modal.message` the sentence
-the issue report proposed. The report's walk at the merged tips, default
-dataset, all three apps and both lines: the dialog shows the new sentence;
-"Tasks" unchanged and the inviter's mailbox empty after an acceptance and a
-decline, as before. Issue [pkp-e2e#515](https://github.com/jardakotesovec/pkp-e2e/issues/515) closed.
 
 <a id="fn-a6"></a>
 **f-a6** — Users-grid Edit on a disabled member (live probe 2026-07-31): error

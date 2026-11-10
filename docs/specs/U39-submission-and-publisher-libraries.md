@@ -608,8 +608,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | Every workflow participant, the Author included, edits and deletes every file of the Submission Library, whoever added it | ❓ | minor | — |
 | [A7](#a7) | A manager-level role without "Permit changes to Settings" still changes the Publisher Library through "View Document Library" | ❓ | minor | — |
 | [A10](#a10) | The libraries' "403 Forbidden" pages reach the browser as ordinary pages, not as refusals | ❓ | invisible | — |
-| [A2](#a2) | Retired: "OK" in "Add a file" before a file has uploaded was thought to say nothing; it shows the notice "A library file is required. Please ensure that you have chosen and uploaded a file." at the top right (Rule 3a) | ✅ | retired | claim check (claude), 2026-10-07 — overturned |
-| [A8](#a8) | Retired: a deleted Submission Library file's old download address was thought to show an empty page; since pkp/pkp-lib#13432 it shows "403 Forbidden", as the other refusals do (Rule 5) | ✅ | retired | upstream sync (claude), 2026-10-07 — fixed upstream |
 | [OMP1](#omp1) | A press's libraries have a fifth type, "Contracts", listed first | ✅ | — | — |
 
 ### All apps
@@ -782,10 +780,10 @@ Basis: probe. <sup>[f-omp1](#fn-omp1)</sup>
 ### Retired
 
 <a id="a2"></a>
-**A2 — "OK" without a file does nothing** · ✅ · retired. Overturned 2026-10-07: re-checked on OJS, OMP and OPS in both libraries, "OK" in "Add a file" before a file has uploaded shows the notice "A library file is required. Please ensure that you have chosen and uploaded a file." at the top right of the page (Fields "File"; Rule 3a); the earlier check looked only after the notice had gone. <sup>[f-a2](#fn-a2)</sup>
+**A2 — "OK" without a file does nothing** · ✅ · retired. Overturned: not a bug.
 
 <a id="a8"></a>
-**A8 — A deleted file's download address shows an empty page** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13432), 2026-10-07: a deleted Submission Library file's old download address, once an empty page, now shows a page reading "403 Forbidden", as the other refusals do (Rule 5). <sup>[f-a8](#fn-a8)</sup>
+**A8 — A deleted file's download address shows an empty page** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13432).
 
 ---
 
@@ -889,9 +887,6 @@ Basis: probe. <sup>[f-omp1](#fn-omp1)</sup>
 **f-a1** — The window's audience is note b's and its edit rights note c's, while the download is note d's check on the Submission stage. The check is older than the 2022 rename of the page handler (`df90557bf`, pkp/pkp-lib#6091); the grids came to lib/pkp in 2013 (`c81abf340`). Age would read the Submission-stage audience as intent, but the window offers the same files, and the rights to add and delete them, to people the download refuses, and on a preprint server it refuses the submission's own Author, hence a defect. Live-probed 2026-09-24: notes d and td3.
 Issue report: [docs/issues/U39-A1-submission-library-file-403-for-participants.md](../issues/U39-A1-submission-library-file-403-for-participants.md), filed as [pkp-e2e#691](https://github.com/jardakotesovec/pkp-e2e/issues/691).
 
-<a id="fn-a2"></a>
-**f-a2** — `LibraryFileGridHandler::saveFile()` answers `new JSONMessage(false)` with no content when `validate()` fails, and `Form::validate()` has already created a form-error notification (`NOTIFICATION_TYPE_FORM_ERROR`) for the user carrying `settings.libraryFiles.fileRequired` ("A library file is required. Please ensure that you have chosen and uploaded a file."); the page fetches it (`fetchNotification`) after the save's answer and shows it as a page notice. The hidden `temporaryFileId` has no browser-side check, so the file is the one field only the server checks; a file still uploading posts an empty `temporaryFileId` and is refused the same way. Live-probed 2026-10-07: note td4. A walk of 2026-10-03 saw the same notice on main and stable-3_5_0.
-
 <a id="fn-a3"></a>
 **f-a3** — Both libraries' `newFileForm.tpl` and `editFileForm.tpl` wrap the textarea in `{fbvFormSection title="common.description" required=true}` (the star), while `LibraryFileForm` registers no validator for `description` and the textarea has no `required` attribute. Live-probed 2026-09-24: note td5.
 Issue report: [docs/issues/U39-A3-library-description-starred-not-required.md](../issues/U39-A3-library-description-starred-not-required.md), filed as [pkp-e2e#693](https://github.com/jardakotesovec/pkp-e2e/issues/693).
@@ -909,9 +904,6 @@ Issue report: [docs/issues/U39-A5-library-delete-strict-mode-error.md](../issues
 
 <a id="fn-a7"></a>
 **f-a7** — Note e. Live-probed 2026-09-24: note td11.
-
-<a id="fn-a8"></a>
-**f-a8** — Live-probed 2026-09-24 (Rule 5; all three apps, in two separate drives): a Submission Library file's download address (note d's `downloadLibraryFile`), opened again after "Delete" › "OK", answered status 200, `text/html`, with an empty body, and the server log held no PHP error for it. pkp/pkp-lib `e60013c77f` (#13432, on `main` 2026-10-07) moved the download into `FileApiHandler::downloadLibraryFile()`, which prints `403 Forbidden<br>` for a number the journal has no file under (note d). Live-probed 2026-10-07 (Rule 5; all three apps, two runs): status 200, `text/html; charset=utf-8`, body "403 Forbidden"; the same for an unknown number and for a deleted Publisher Library file's download address; no server-log line.
 
 <a id="fn-a9"></a>
 **f-a9** — `lib/pkp/js/classes/linkAction/PostAndRedirectRequest.js` (identical in the three checkouts): after the post it points `window.location` at the download and schedules `finishCallback_` with `setTimeout(…, 2000)`; a list reload inside that time removes the link element, and the callback throws "There is no handler bound to this element!". Live-probed 2026-09-24 on OJS, four runs (8, 2, 2 and 2 page errors); closing the window right after a download raised nothing, and a wait of 2.1 s after each download removed every occurrence, so a test waits past the two seconds after a download before changing a list.

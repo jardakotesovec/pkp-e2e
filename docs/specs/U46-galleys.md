@@ -746,7 +746,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS3](#ops3) | A preprint's Author is offered "Change File" on every galley and refused on files others uploaded | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OJS3](#ojs3) | A replaced HTML galley file reaches readers who are not signed in up to a day late | ❓ | user-visible | — |
 | [OPS1](#ops1) | A preprint's Author manages the galleys while they may edit the preprint; a journal's Author never does | ✅ | — | issue report (claude), 2026-10-02 — rescoped to the Author |
-| [A2](#a2) | Retired: the galley window's "Close" was thought to drop unsaved changes without asking | ✅ | retired | — |
 
 ### All apps
 
@@ -974,7 +973,7 @@ replaced another way. Basis: probe, 2026-10-02. <sup>f-ops3</sup>
 ### Retired
 
 <a id="a2"></a>
-**A2 — "Close" drops unsaved changes without asking** · ✅ · retired. Overturned by the drive of 2026-09-24: the header "Close" asks as a tab switch does (Rule 6a). <sup>f-a2</sup>
+**A2 — "Close" drops unsaved changes without asking** · ✅ · retired. Overturned: not a bug.
 
 ---
 
@@ -1540,13 +1539,6 @@ its own "Upload File". A preprint server's submission wizard, which
 still shows the legacy grid, headed its "Edit" "Edit a Layout Galley"
 and its add window "Add File".
 Issue report: [pkp-e2e#622](https://github.com/jardakotesovec/pkp-e2e/issues/622) ([docs/issues/U46-A1-galley-edit-window-upload-heading.md](../issues/U46-A1-galley-edit-window-upload-heading.md)).
-
-<a id="fn-f-a2"></a>
-**f-a2** — Retired. Live-probed 2026-09-24 (note h), OJS and OPS: the
-header "Close" asked "The data on this form has changed. Do you wish to
-continue without saving?" in "Edit" and in "Create New Galley". The
-draft's reading of the legacy modal's close button, and an earlier
-sighting in passing, did not match a deliberate drive.
 
 <a id="fn-f-a3"></a>
 **f-a3** — `galleyAdd()` chains `galleyChangeFile()` on any

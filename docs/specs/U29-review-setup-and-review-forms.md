@@ -1002,7 +1002,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A recommendation a reviewer has only saved for later, on a review not yet submitted, was seen once already without its "More Actions" menu; whether that makes it in use is not settled | ❓ | minor | — |
 | [OMP1](#omp1) | A press has no "Reviewer Recommendations" tab | ✅ | — | — |
 | [OMP2](#omp2) | A press words five strings differently and has a guideline box per review stage | ✅ | — | — |
-| [OMP4](#omp4) | Retired: every request to a press's public peer-review API address failed with a server error; a press now serves the record at `api/v1/peerReviews`, as a journal does (Rule 15) | ✅ | retired | PR review (claude), 2026-11-05 — fixed upstream (pkp/pkp-lib#13729) |
 
 ### All apps
 
@@ -1260,7 +1259,7 @@ pasting a list from another document works round it. Basis: probe,
 ### Retired
 
 <a id="omp4"></a>
-**OMP4 — Every request to a press's public peer-review API address fails with a server error** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13729](https://github.com/pkp/pkp-lib/issues/13729), pkp/omp#2552), verified 2026-11-05 at the PR head before its merge and again 2026-11-09 at the merged tip: a press serves its public review record at `api/v1/peerReviews`, as a journal does, and the old `api/v1/publicationPeerReviews` answers 404 instead of a server error. <sup>f-omp4</sup>
+**OMP4 — Every request to a press's public peer-review API address fails with a server error** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13729, pkp/omp#2552).
 
 ---
 
@@ -2299,57 +2298,6 @@ toolbar buttons (Bold, Italic, Superscript, Subscript, Insert/edit link);
 "External Review Guidelines" and "Competing Interests" show eight (plus
 Blockquote, Bullet list, Numbered list).
 Issue report: [pkp-e2e#907](https://github.com/jardakotesovec/pkp-e2e/issues/907) ([docs/issues/U29-OMP3-press-internal-guidelines-no-list-buttons.md](../issues/U29-OMP3-press-internal-guidelines-no-list-buttons.md)).
-
-<a id="fn-f-omp4"></a>
-**f-omp4** — `omp api/v1/publicationPeerReviews/index.php` (added
-2025-11-04, `9ae771fce`, `pkp/pkp-lib#11922`) instantiates
-`PKP\API\v1\publicationPeerReviews\PublicationPeerReviewController`.
-lib/pkp shipped that class from `222d16a881` (2025-10-15) and removed
-it in `2d407aa929` (2026-01-12, `pkp/pkp-lib#12044`), which moved the
-data to `api/v1/peerReviews/PeerReviewController.php`, the class OJS's
-`api/v1/peerReviews/index.php` maps (footnote f-ojs1); OMP's entry point
-was not renamed with it, hence the Since date. Live-probed 2026-11-05 on
-OMP `main` (omp `828150a8fe`, lib/pkp `1ae711024a`), dataset fleet,
-two runs, each address typed in the browser signed out and as the Press
-manager `rvaca`, for published monographs 5 and 14:
-`api/v1/publicationPeerReviews` bare, with `?submissionIds=5`, and
-`open/submissions?submissionIds=5,14`, `open/submissions/summary`,
-`open/submissions/{5,14}` and `open/submissions/{5,14}/summary` under
-it all answered 500, `text/html`, empty body, each with the server log
-line `PHP Fatal error: Uncaught Error: Class "PKP\API\v1\publicationPeerReviews\PublicationPeerReviewController" not found in …/api/v1/publicationPeerReviews/index.php:16`
-(16 crashes per run in the run record). On the press,
-`api/v1/peerReviews…` answers 404
-`{"error":"api.404.endpointNotFound",…}` (OMP maps no such entry point).
-OMP `stable-3_5_0` (omp `e81eefc11c`) answered 404 to both addresses on
-every path, so the crash is `main` only. Fix: map the entry point to
-`\PKP\API\v1\peerReviews\PeerReviewController` (renaming the folder
-to `peerReviews`, as OJS did) or delete it. Kept script
-`shared/playwright/checks/U62/I05B/i05b.js` (part `api`). The book
-page's missing public reviews are
-[*Monograph landing page*'s A26](U69-monograph-landing-page.md#a26).
-Issue report: [pkp-e2e#1086](https://github.com/jardakotesovec/pkp-e2e/issues/1086), retired with the fix; the report deleted, its walk kept (`shared/playwright/checks/issues/press-peer-review-address-server-error/`, which U69 A26's report cites). The team's copy `pkp/pkp-lib#13729` (2026-11-05).
-Fixed by pkp/omp#2552 (`pkp/pkp-lib#13729`), which renames the entry
-point to `api/v1/peerReviews/index.php` and maps it to
-`\PKP\API\v1\peerReviews\PeerReviewController`, the report's
-proposed fix. Walked at the PR head `3ad45f0966`, before its merge,
-against its base `828150a8fe` (lib/pkp `1ae711024a` at both), on the
-dataset fleet reset before each run, with the issue report's kept
-script: at the base steps 1–4 answered 500 with the fatal line above
-and `api/v1/peerReviews/open/submissions/5` 404; at the head steps 1–4
-answered 404 `api.404.endpointNotFound`, no fatal, and
-`api/v1/peerReviews/open/submissions/5` 200
-`{"submissionId":5,"reviewRounds":[],"reviewerRecommendationsSummary":[]}`.
-Its `public` mode at the head published book 16 with Adela Gallego's
-open review made public: `…/open/submissions/16` 200 lists her review
-and its "For author and editor" comment, not the "For editor" one, and
-`…/16/summary` 200; each of those two requests writes
-`PHP Warning:  Attempt to read property "type" on null in …/ReviewerRecommendationSummary.php on line 89`
-(a press has no reviewer recommendation types), as the issue report's
-"What goes with it" foresaw; the PR leaves that line as it is.
-Merged 2026-11-06 as `efbb79bdf7` (its patch the reviewed head's,
-patch-id `2709d5ff99`); the same kept script on a fresh dataset at OMP
-`d93fcd11a4` on 2026-11-09 gave the head's results in both modes,
-the warning included.
 
 ## Reference — entry points & surfaces
 

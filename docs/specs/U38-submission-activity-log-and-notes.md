@@ -569,8 +569,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OMP1](#omp1) | A press's activity log prints "{$formatName}" instead of the format's name when a publication format is created or deleted | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | A Site Administrator whose journal roles are all assistant roles gets "Notes" alone | ❓ | latent | — |
 | [A8](#a8) | An "Open" review's assignment line reads "Anonymous Reviewer" for an editor who is also the author | ❓ | minor | — |
-| [A6](#a6) | Retired: a cancelled revision left two revision lines on "History", and the first one's "Download" opened a blank page; it now leaves no line (Rule 6c) | ✅ | retired | upstream change + claim check (claude), 2026-09-27 — fixed upstream |
-| [A11](#a11) | Retired: a submission's activity log "View changes" opened any edited review on the site by its number; it now answers only for a change made on the submission itself (Rule 5a) | ✅ | retired | upstream sync (claude), 2026-10-09 — fixed upstream (pkp/pkp-lib#13465) |
 
 ### All apps
 
@@ -751,10 +749,10 @@ Basis: probe, 2026-10-04. <sup>[f-omp1](#fn-omp1)</sup>
 ### Retired
 
 <a id="a6"></a>
-**A6 — A cancelled revision leaves lines behind, and a broken "Download"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13288, 2026-09-27), verified 2026-09-27 on OJS and OMP, and on OPS through a galley's "Change File": a revision cancelled with "Cancel", at any step, leaves no line of it, metadata line included, on either "History", and no "Download" is left for the cancelled version (Rule 6c). <sup>[f-a6](#fn-a6)</sup>
+**A6 — A cancelled revision leaves lines behind, and a broken "Download"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13288).
 
 <a id="a11"></a>
-**A11 — A submission's activity log "View changes" opens any edited review on the site by its number, not only the submission's own** {OJS OMP} · ✅ · retired. Fixed upstream (pkp/pkp-lib#13465, 2026-10-08), verified 2026-10-09 on OJS and OMP: a Section Editor who opens the "View changes" address of one of their own submissions with the number of a change made on another submission is shown "The requested resource was not found." and nothing of that review; an editor of the submission the change was made on still presses "View changes" on its line, and the window titled "View Review" opens with the review's old and new values (Rule 5a). <sup>[f-a11](#fn-a11)</sup>
+**A11 — A submission's activity log "View changes" opens any edited review on the site by its number, not only the submission's own** {OJS OMP} · ✅ · retired. Fixed upstream (pkp/pkp-lib#13465).
 
 ---
 
@@ -1333,18 +1331,6 @@ Reviewer's "Submit Review" the line named "Eddie Editor" under "User";
 its "View Email" read "From:" "Site Admin" (the journal's contact) and
 "To:" that editor.
 Issue report: [pkp-e2e#894](https://github.com/jardakotesovec/pkp-e2e/issues/894) ([docs/issues/U38-A5-review-complete-line-names-recipient.md](../issues/U38-A5-review-complete-line-names-recipient.md)).
-
-<a id="fn-a6"></a>
-**f-a6** — Notes j, k. Live-probed 2026-09-24, OJS and OMP ("Submission
-Files", Journal Manager): the list showed the file as before the
-cancelled revision; "Download" on the cancelled version's line took the
-page to a blank page, the request `GET
-$$$call$$$/api/file/file-api/download-file` (that line's `fileId` and
-name) answering 500. Fixed by pkp/pkp-lib#13288 (issue #13286, merge
-`f38c4a4a10`, 2026-09-27): the cancelled revision's entries are
-deleted, "Download" is offered only for a version that is still one of
-the file's revisions, and a stale download answers 404, no longer 500.
-Live-probed 2026-09-27, OJS and OMP, and OPS on a galley: note td7.
 
 <a id="fn-a7"></a>
 **f-a7** — Note l. Live-probed 2026-09-24, all three apps: the file lines

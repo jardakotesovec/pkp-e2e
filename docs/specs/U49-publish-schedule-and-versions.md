@@ -1243,10 +1243,6 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OPS2](#ops2) | The posted acknowledgement is sent even when the post only scheduled the preprint | ❓ | minor | — |
 | [OPS3](#ops3) | An author granted posting by a plugin still finds no Post control on the workflow | ❓ | latent | — |
 | [OPS5](#ops5) | The preprint server's "Post" vocabulary stops short: header pill, email and task notice still say "published" | ❓ | minor | — |
-| [A8](#a8) | Retired: after a publish, post or schedule the Publication area kept the unpublished state until a page reload; fixed in pkp/ui-library#853 before its merge, never on `main` | ✅ | retired | re-probe at the PR head (claude), 2026-09-23 — fixed before merge |
-| [A11](#a11) | Retired: an author's revision summary could carry a script that ran in the editor's browser when "Insert Content" opened; the panel now reads the summary without running it | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/ui-library#1025 |
-| [OJS1](#ojs1) | Retired: with a plain language summary required, the panel's Confirm was refused without naming the summary and publishing was unreachable; it now reaches publishing | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13585 |
-| [OJS3](#ojs3) | Retired: a version address naming a number the article had no version under crashed the article page with a blank server error; it now answers "not found" | ✅ | retired | PR review (claude), 2026-11-02 — fixed by pkp/pkp-lib#13657 |
 
 ### All apps
 
@@ -1726,16 +1722,16 @@ Basis: probe, 2026-10-15. <sup>[f-ops6](#fn-ops6)</sup>
 ### Retired
 
 <a id="a11"></a>
-**A11 — An author's revision summary could carry a script that ran in the editor's browser when "Insert Content" opened** · ✅ · retired. Fixed by pkp/ui-library#1025 (`main`) and #1026 (`ore`), merged 2026-10-21: the panel parses each summary in a document of its own, so nothing in it runs. Never in a release. <sup>[f-a11](#fn-a11)</sup>
+**A11 — An author's revision summary could carry a script that ran in the editor's browser when "Insert Content" opened** · ✅ · retired. Fixed upstream (pkp/ui-library#1025).
 
 <a id="ojs1"></a>
-**OJS1 — A required plain language summary blocked Confirm without naming itself** · ✅ · retired. Fixed by pkp/pkp-lib#13585, reviewed before its merge on 2026-10-21: the "Review Publishing Details" panel's Confirm reaches the confirmation window and publishing on a journal that requires the summary. <sup>[f-ojs1](#fn-ojs1)</sup>
+**OJS1 — A required plain language summary blocked Confirm without naming itself** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13585).
 
 <a id="ojs3"></a>
-**OJS3 — A mistyped version address crashed instead of "not found"** · ✅ · retired. Fixed by pkp/ojs#6003 (`main`) and #6005 (`ore`), merged 2026-10-30, for pkp/pkp-lib#13657: an article's version address whose id names none of its versions, letters included, answers "404 Not Found" (Rule 11). <sup>[f-ojs3](#fn-ojs3)</sup>
+**OJS3 — A mistyped version address crashed instead of "not found"** · ✅ · retired. Fixed upstream (pkp/ojs#6003, for pkp/pkp-lib#13657).
 
 <a id="a8"></a>
-**A8 — The workflow still shows "unpublished" after publishing** · ✅ · retired. Fixed in pkp/ui-library#853 at `51f0c727` before its merge, 2026-09-23; never on `main`. <sup>[f-a8](#fn-a8)</sup>
+**A8 — The workflow still shows "unpublished" after publishing** · ✅ · retired. Fixed upstream (pkp/ui-library#853).
 
 ---
 
@@ -2560,48 +2556,6 @@ and working; OPS identical in shape ("Author's Original 1.0", button
 sentences to "The publication version is "Version of Record 1.0"".
 Strings: `publication.required.versionStage[.assignment|.alreadyAssignment]`.
 
-<a id="fn-a8"></a>
-**f-a8** — The confirmation is the legacy `PublishHandler` window
-(`lib/pkp/templates/controllers/modals/publish/publish.tpl`). Its
-`<pkp-form>` is mounted by `pkp.registry.init` as a separate Vue app, so
-the `markDataChanged` that pkp/ui-library#853 (issue pkp/pkp-lib#13359)
-injects into `Form.vue` is null there; the form saves through `$.ajax`,
-not `useFetch`, and at the PR's earlier head `cab09538`
-`AjaxModalWrapper.vue`'s `onVueFormSuccess()` closed the window with
-`closeModal({formId, data})` without marking it changed.
-`closeSideModalById()` then handed `onClose` `{dataChanged: false}`, and
-`workflowStore.js`'s `triggerDataChange(finishedData)` returned without
-reloading; before the PR the close led to an unconditional
-`triggerDataChange()`. A journal's usual path still updates because the
-"Review Publishing Details" panel's save flags the window slot the
-confirmation then reused. Driven 2026-09-23 at the PR head `cab09538`,
-before its merge, on reset databases: the OMP full suite with
-lib/ui-library at the PR head (OMP `7f9455d5a`) red on scenarios 1, 5, 9,
-10 and 14 and on *Publication metadata*'s scenarios 3 and 5, each waiting
-for "Unpublish" or "Unschedule" after the publish request answered 200
-(the snapshot after scenario 1's publish: "Status: Unscheduled",
-"Preview", "Publish"); the OPS full suite (OPS `15f0b6e0bd`) red on
-scenarios 1, 5, 9, 10 and 15 and on *Publication metadata*'s 3, 5 and 11,
-waiting for "Unpost" or "Unschedule". The same spec files on the same
-databases with lib/ui-library rebuilt at the tip's `2034439a`: OMP 38/38,
-OPS 23/23. OJS (`802202cb3e`), the kept check
-`shared/playwright/checks/sync/ui-library-853/publish-stale.js`: the
-direct path sent no GET in the 5 s after the close and kept "Status:
-Unpublished" with "Preview" and "Schedule For Publication" at
-`cab09538`; at `2034439a` both the panel path and the direct path
-updated. OMP's and OPS's own lib/ui-library pointers (`977e460c`,
-`5d138aa9`) predate the change. Written up for the team in
-`docs/reports/2026-09-23-ui-library-853-publish.md` (a temporary report,
-deleted once addressed; git history keeps it). Fixed at the PR head
-`51f0c727`, before its merge: `onVueFormSuccess()` now calls
-`markDataChanged?.()` before closing. Verified 2026-09-23 on OJS on a
-fresh reset with lib/ui-library at `51f0c727`: `publish-stale.js` read
-`stale: false` on both paths, the workflow refetching the submission and
-its publication after the close; the app PRs' CI with this companion was
-green at `51f0c727` (pkp/ojs#5444 run 35881450909, pkp/omp#2471 run
-35882950730, pkp/ops#1412 run 35883039899), OMP's and OPS's formerly red
-scenarios above and *Publication metadata*'s passing there.
-
 <a id="fn-a9"></a>
 **f-a9** — Live-probed 2026-09-28 (OJS and OMP, two runs each, scratch
 contexts): on an unpublished item that never had a stage, two versions
@@ -2648,40 +2602,6 @@ of the text. No request failed and no
 script error was logged.
 Issue report: [pkp-e2e#548](https://github.com/jardakotesovec/pkp-e2e/issues/548) ([docs/issues/U49-A10-ops-french-date-posted-raw-key.md](../issues/U49-A10-ops-french-date-posted-raw-key.md)).
 Issue report: [pkp-e2e#228](https://github.com/jardakotesovec/pkp-e2e/issues/228) ([docs/issues/U13-A1-french-version-name-raw-key.md](../issues/U13-A1-french-version-name-raw-key.md)), the list of versions to copy from.
-
-<a id="fn-a11"></a>
-**f-a11** — Rests on the maintainer's own live run (2026-10-12/13, ojs
-`1b0f84edae`, lib/pkp `3bcc0a0cb2`, ui-library `3f6a3e8d`, OJS `main`,
-PKP's default dataset) plus today's code read on main, not re-driven
-here: a harmless marker an author saved as a review revision file's
-summary of changes ran in the editor's session when the editor pressed
-"Insert Content" on Publication Settings, and the panel then read "No
-saved summaries found for this submission's review revisions.". No
-crash. Code read 2026-10-13, OJS `main` (ojs `7c6fba2064`, lib/pkp
-`f4c2578c94`, ui-library `c9889f00`), unchanged:
-`InsertSummaryOfChangesModal.vue` `htmlToPlainText()` assigns each
-file's `summaryOfChanges` to `innerHTML` of a `div` made with
-`document.createElement('div')` and reads its `textContent`; the files
-come from the submissions files API with `fileStages` review revision
-(OMP adds internal-review revision through `isOMP()`), and the summary
-is saved as typed by `SubmissionFilesMetadataForm`
-(`api/file/manage-file-api/save-metadata`). The press: the same
-component on OMP's catalog entry form (fn-u), by the code. Since
-ui-library `881503b4` (Blesilda Biazon, 2026-05-28, pkp/pkp-lib#12584,
-"Add 'Summary of Changes/Amendment' field on file revision upload").
-Proposed fix: parse inertly (`DOMParser`, or the `textContent` of a
-`template` element's content). `stable-3_5_0`'s ui-library has no
-`InsertSummaryOfChanges` component, so no release carries it.
-Security-shaped and unreleased: its issue report carries "- **Security**
-unreleased" (REPORT.md).
-Issue report: [pkp-e2e-sec#13](https://github.com/jardakotesovec/pkp-e2e-sec/issues/13), closed.
-Retired 2026-10-21: pkp/ui-library#1025 (squash `e47a48879a`) and #1026
-(`5ddd525f9f`, `ore`) make `htmlToPlainText()` parse through
-`DOMParser`; reviewed before the merge at the heads `4c9a1cc015` and
-`6ed12e947a` (the merged trees the same), the issue walk at each base
-reproducing the script and at each head running nothing, on OJS and OMP
-`main` and OJS `ore`, and again at the apps' tips after the merge (OJS,
-OMP and OPS `main` point at `e47a48879a`, OJS `ore` at `5ddd525f9f`).
 
 <a id="fn-a12"></a>
 **f-a12** — `PKP\publication\Repository::add()` (lib/pkp
@@ -3013,37 +2933,6 @@ the page at once, a reload and the panel then showed "Don't Assign To
 An Issue" checked, the panel's untouched Confirm offering issueless
 publication.
 Issue report: [pkp-e2e#546](https://github.com/jardakotesovec/pkp-e2e/issues/546) ([docs/issues/U49-OJS2-future-issue-schedule-only-publishes-now.md](../issues/U49-OJS2-future-issue-schedule-only-publishes-now.md)).
-
-<a id="fn-ojs3"></a>
-**f-ojs3** — Live-probed 2026-08-29: `GET
-…/article/view/{id}/version/{publicationId}` returned HTTP 500 with an
-empty body for a nonexistent publication id, another submission's
-publication id and an unpublished draft's id alike; only an OLDER
-published version of the same article renders (the current version has
-no version link of its own). Server error log: `PHP Fatal error:
-Uncaught Error: Typed property
-APP\pages\article\ArticleHandler::$publication must not be accessed
-before initialization` — `ArticleHandler`'s `if (!$this->publication)`
-guard reads the typed property before it was ever assigned, so the
-intended not-found response is unreachable. Empty body, no disclosure —
-a robustness bug, nothing security-shaped. Test run 2026-09-16 (OJS,
-scenario 4, the 2026-09-15 tip): the unpublished draft's own address,
-the one its "Preview" opens, answered HTTP 404 with the body "404 Not
-Found" to a signed-out visitor; a nonexistent publication id typed into
-the same address still answered HTTP 500 with an empty body (one typed
-observation on the probe server, not driven by the suite). The current
-version's own id and another submission's were not re-read at that tip.
-Issue report: [pkp-e2e#285](https://github.com/jardakotesovec/pkp-e2e/issues/285), closed.
-Retired 2026-11-02: `pkp/pkp-lib#13657`. `pkp/ojs#6003` (merge
-`822b79f70c`) and its `ore` port `pkp/ojs#6005` (`b4d0d0b84d`) make
-`ArticleHandler::$publication` nullable and answer 404 for a version
-segment that is not all digits, in `initialize()`. Reviewed before the
-merge, each merged tree the reviewed head's; walked again at the tips
-on fresh datasets (OJS `main` `bc4a83e9db`, `ore` `404f86e4f6`): every
-such address, its galley and download 404 with no server log line, the
-article and its own versions 200, the manager's preview of an
-unpublished version still open. 3.5 and earlier never failed here (the
-property is untyped there).
 
 <a id="fn-ojs4"></a>
 **f-ojs4** — Live-probed 2026-09-28, two runs and two debug runs, the

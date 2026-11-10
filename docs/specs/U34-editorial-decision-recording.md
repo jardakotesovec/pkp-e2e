@@ -1159,8 +1159,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | After the language switch the "Email Templates" entry keeps its first-language snippet | ❓ | minor | — |
 | [A11](#a11) | A review-stage decision typed with a past round's number opens the wizard for that round | ❓ | minor | — |
 | [A12](#a12) | A "Select Files" row names its uploader by username: "Uploaded by {username} on {date}" | ❓ | minor | — |
-| [A3](#a3) | Retired: the "Notify Reviewers" letter keeps "{$recipientName}" and each email carries one name | ✅ | retired | — |
-| [OMP1](#omp1) | Retired: a press's "Review Cancel" email read "{$journalName}" where the press's name should be; it now names the press | ✅ | retired | omp#2563 2026-11-09 · fixed |
 | [OPS1](#ops1) | A preprint server's wizard has "Decline Submission" and "Revert Decline" alone, with no review page and a two-source "Attach Files" | ✅ | user-visible | — |
 
 ### All apps
@@ -1354,10 +1352,10 @@ Basis: probe, 2026-10-04. <sup>[f-ops2](#fn-ops2)</sup>
 ### Retired
 
 <a id="a3"></a>
-**A3 — Reviewer names shown where one will be sent** · ✅ · retired. Overturned on screen 2026-09-20 (OJS and OMP): the "Notify Reviewers" letter keeps "{$recipientName}" as a marked token and each reviewer's email carries that reviewer's own name whether or not the text was edited (Rule 4); the code reading behind the entry did not hold. <sup>[f-a3](#fn-a3)</sup>
+**A3 — Reviewer names shown where one will be sent** · ✅ · retired. Overturned: not a bug.
 
 <a id="omp1"></a>
-**OMP1 — The press's "Review Cancel" email leaves "{$journalName}" unfilled** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` (3.5 never had the fault; `pkp/omp#2529` carries the issue's other strings there), for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: a reviewer emailed by "Cancel Review Round" on a press reads the press's name where "{$journalName}" stood (Side effects). <sup>[f-omp1](#fn-omp1)</sup>
+**OMP1 — The press's "Review Cancel" email leaves "{$journalName}" unfilled** · ✅ · retired. Fixed upstream (pkp/omp#2563, for pkp/pkp-lib#13646).
 
 ---
 
@@ -1452,9 +1450,6 @@ their own dates.
 <a id="fn-a2"></a>
 **f-a2** — Note c: every one-page type guards its `Email` with `if (count($authors))`; `Steps::getState()` then returns `[]`, `record.tpl` renders no `<steps>` (`v-if="steps.length"`) and the footer with class `decision__footer--noSteps`; `DecisionPage::created()` skips `openStep`, `isOnLastStep` is true (index −1 === length −1), so the one button reads "Record Decision" and `submit()` posts `actions: []`. The author's assignment is removed through the Participants panel's row menu (*Stage participants*). Live-probed 2026-09-20 on all three apps: the wizard with no page recording at once; the closing sentences as quoted; no new mail for the author and no "An email has been sent" line in the Activity Log.
 
-<a id="fn-a3"></a>
-**f-a3** — Note e: the code reading behind the entry (`Composer.vue::compiledVariables()` overriding `recipientName` with the chips' names through `recipientVariable` when `canChangeRecipients` and `!separateEmails`, `record.tpl` passing no `separate-emails`) does not match the screen: live-probed 2026-09-20 on OJS and OMP, the "Notify Reviewers" letter shows "{$recipientName}" as a token and both reviewers' emails open with their own name, untouched and after an edit alike. Why the override does not reach the field was not traced.
-
 <a id="fn-a4"></a>
 **f-a4** — Note p: `IsRecommendation::addRecommendationQuery()` builds `$queryParticipantIds` from the stage's manager / sub-editor assignments with `!recommendOnly`, and `Repo::editorialTask()->addQuery()` stores `createdBy` = the recommending editor and `participants` = that list; the discussions panel lists a discussion for its participants (*Tasks & discussions*). Live-probed 2026-09-20 on OJS and OMP: the window's "Participants" list the deciding editor alone, the recommender shown as "Created by" on the row and "Message from" in the window; the recommender's own panel lists no discussion.
 
@@ -1494,11 +1489,6 @@ Issue report: [pkp-e2e#859](https://github.com/jardakotesovec/pkp-e2e/issues/859
 <a id="fn-ojs1"></a>
 **f-ojs1** — Note s: OJS `classes/decision/types/Accept.php::runAdditionalActions()` (and `SkipExternalReview`'s through the shared trait) calls `requestPayment()` for every `ACTION_PAYMENT` action present, never reading the action's `requestPayment` value; `RequestPayment::validatePaymentAction()` only checks the key is set. Live-probed 2026-09-20 on OJS, twice on fresh submissions: "Waive" chosen, the author's "The publication fee is due for payment." row and the "Payment Request Notification" email arriving as with the fee requested.
 Issue report: [pkp-e2e#860](https://github.com/jardakotesovec/pkp-e2e/issues/860) ([docs/issues/U34-OJS1-waive-still-requests-publication-fee.md](../issues/U34-OJS1-waive-still-requests-publication-fee.md)).
-
-<a id="fn-omp1"></a>
-**f-omp1** — Note n: OMP's `locale/en/emails.po` `emails.reviewCancel.body` read "{$journalName}", a variable `ReviewCancel` does not carry (`contextName` is the one it has). Live-probed 2026-09-20: the press's email "…agreeing to review "{title}" for {$journalName}."; the journal's named the journal.
-Retired 2026-11-09: fixed by `pkp/omp#2563` (`main`, merge `f81f129c82`, patch `14f4d2670a`, the reviewed head `8eff1e8c2c` unchanged; with the pointer bump to pkp-lib `8c3971dd1e`, `pkp/pkp-lib#13768`), whose OMP `emails.reviewCancel.body` and `emails.reviewerUnassign.body` use `{$contextName}`; `stable-3_5_0` (`pkp/omp#2529`, merge `ae1d900d35`) never had the fault. Walked that day at the merge commit on a freshly loaded PKP dataset fleet, OMP (`checks/sync/pkp-lib-13646/side.sh main merged`; the same kit read the base and the PR head on 2026-11-06, the head already storing `{$contextName}` in both emails and the base `{$journalName}`): after the upgrade 3.5.0.6 → 3.6.0.0, whose `I12903_ReviewerUnassignEmailTemplate` installs both, the stored English "Review Cancel" and "Reviewer Unassign" texts carry `{$contextName}` and no `{$journalName}`; a fresh install takes the new text. PKP's `main` dataset dump was built before the fix, so a fleet loaded from it still stores the old text until PKP rebuilds the dump. See also *Reviewer assignment & management*, its retired OMP3.
-Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 ## Reference — entry points & surfaces
 

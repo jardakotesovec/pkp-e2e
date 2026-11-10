@@ -1513,24 +1513,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A42](#a42) | What the Review Details window shows on a "Request Resent" row, its dated line included, is unsettled | ❓ | minor | — |
 | [A48](#a48) | A review-form answer written as markup may run as script when "View changes" opens the review-form change | ❓ | user-visible | — |
 | [OMP1](#omp1) | A press's review runs without reviewer recommendations, and with a per-stage reviewer pool (Internal vs External Reviewers) | ✅ | — | — |
-| [A8](#a8) | Retired: inverted due dates are refused with a notice at the top right, not silently; the earlier probe missed the notice | ✅ | retired | claim check (claude), 2026-10-05 — overturned |
-| [A24](#a24) | Retired: a modification save on a request with no review completes it because it submits the review on the reviewer's behalf, the behavior upstream designed (pkp/pkp-lib#13337); screens do reach it (Rule 14d) | ✅ | retired | upstream change + claim check (claude), 2026-09-17 — overturned by design |
-| [A25](#a25) | Retired: {OJS} opened from the dashboard popover, a submitted review's Review Details window omitted the recommendation; fixed upstream (pkp/ui-library#971) | ✅ | retired | re-verified live (claude), 2026-09-03 — fixed upstream |
-| [A10](#a10) | Retired: opening the Review Details window now marks a submitted review viewed; the once-dead "Review Viewed" status is the designed behavior | ✅ | retired | upstream rework (claude), 2026-08-29 — overturned by design |
-| [A27](#a27) | Retired: a review thanked, reverted and marked complete again reads "Reviewer Thanked" at once, with no second "Thank Reviewer"; intended, the revert takes back only the completion and the thank already went out | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
-| [A33](#a33) | Retired: a review thanked, taken back and marked complete again names the first thank in Review Details, not the newer completion; intended, the thank stands after a revert | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
-| [A34](#a34) | Retired: the new "Reviewer Reminded" label read as a raw key outside English before its translations arrived; not a finding, translations follow through the usual process | ✅ | retired | @jarda.kotesovec 2026-09-24 · not a finding |
-| [A35](#a35) | Retired: after "Revert Decision", History drops the "Reviewer Thanked" line although the thank-you email went out; intended, History shows only the dates tracked today until an event log replaces it | ✅ | retired | @jarda.kotesovec 2026-09-24 · intended |
-| [A20](#a20) | Retired: with minified scripts on, the Send Reminder, Unassign, Cancel and Reinstate windows opened without their message editor; fixed upstream (each app's script bundle recompiled) | ✅ | retired | re-probe (claude), 2026-08-27 — fixed upstream |
-| [OPS1](#ops1) | Retired: {OPS} the unassign window's never-installed notice template is OPS's deliberate exclusion of all review email templates; no review process, and the window is unreachable | ✅ | retired | maintainer ruling + registry check (claude), 2026-08-27 — overturned |
-| [A11](#a11) | Retired: the change notice reported the pre-change deadlines; fixed upstream (pkp/pkp-lib#13162) | ✅ | retired | rebase check (claude), 2026-08-25 — fixed upstream |
-| [A5](#a5) | Retired: the alternate-template access check it questioned was reverted wholesale upstream (pkp/pkp-lib#10403 revert); all alternates are now listed unconditionally | ✅ | retired | rebase check (claude), 2026-08-25 — moot |
-| [A3](#a3) | Retired: a role-less Site Administrator is refused at the workflow screen; the earlier full-surface observation was of the seeded admin's silent Journal Manager enrollment | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
-| [A9](#a9) | Retired: the Resend window presets each date from its own interval; the earlier collapse was a same-interval coincidence | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
-| [A14](#a14) | Retired: the enroll "required" message appears only on an empty submit and clears on pick, which is ordinary validation | ✅ | retired | claim check (claude), 2026-08-02 — overturned |
-| [A40](#a40) | Retired: on a press, recording a reviewer's competing interests in "Modify Review" submitted an empty review for them; fixed by pkp/pkp-lib#13467 | ✅ | retired | PR review (claude), 2026-10-07 — fixed at pkp/pkp-lib#13467's head |
-| [OMP5](#omp5) | Retired: {OMP} "Save Changes" with nothing entered on an unanswered request submitted an empty review; since pkp/pkp-lib#13467 it submits nothing | ✅ | retired | PR review (claude), 2026-10-07 — fixed at pkp/pkp-lib#13467's head |
-| [OMP3](#omp3) | Retired: {OMP} a press's reviewer removal and cancel emails printed "{$journalName}" where the press's name belonged; they now name the press | ✅ | retired | omp#2563 2026-11-09 · fixed |
 
 ### All apps
 
@@ -1561,21 +1543,6 @@ wrong: the reviewer's own list and the automatic response reminder count
 from the response deadline. The real date is in the row's "Edit" window.
 Basis: probe, 2026-10-03. <sup>[f-a2](#fn-a2)</sup>
 
-<a id="a3"></a>
-**A3 — Retired: the "role-less site admin" was a Journal Manager** · ✅ ·
-retired.
-Does not reproduce. A Site Administrator holding no journal role cannot
-reach the workflow screen at all: the attempt is refused with the Error
-dialog "The current role does not have access to this operation.". Positive
-control: the same account renders the full Administration area. The
-complete add surface observed earlier belonged to the seeded `admin`
-account, which silently holds a Journal Manager role in every journal of
-the install. A manager was observed, not a role-less site admin. The
-Actors section now records the corrected fact. The live behavior is more
-restrictive than was documented, and no open question remains.
-Re-checked: claim check (claude), 2026-08-02 — overturned (was an open
-question). <sup>[f-a3](#fn-a3)</sup>
-
 <a id="a4"></a>
 **A4 — Editorial Notes are one note per reviewer, everywhere** · ❓ ·
 user-visible.
@@ -1594,25 +1561,6 @@ overwrite deserves a word in the window.
 Basis: live probe (a note written on one submission read back verbatim from
 another) + code reading (the note is stored on the user account, not the
 assignment). <sup>[f-a4](#fn-a4)</sup>
-
-<a id="a5"></a>
-**A5 — Alternate templates listed under the wrong access check** · ✅ ·
-retired.
-The Add Reviewer window's template chooser builds its list of alternates to
-the subsequent-round request template by checking, for each alternate,
-whether the *subsequent-round template itself* is accessible to the editor,
-not the alternate. A journal restricting individual alternate templates to
-certain roles would find them offered (or hidden) wholesale.
-Question: is per-alternate access meant to be enforced here? Lean: yes. The
-sibling code path for the first-round template checks each alternate
-individually; the mechanism is in the footnote.
-Basis: code reading. <sup>[f-a5](#fn-a5)</sup>
-
-> **Retired — rebase check (claude), 2026-08-25**: moot upstream. The whole
-> per-user-group email-template access feature was reverted (pkp/pkp-lib#10403
-> revert), removing both loops this entry compares — every alternate is now
-> listed unconditionally, and no per-role template restriction remains to
-> enforce. [A19](#a19)'s unconditional subsequent-round append is unchanged.
 
 <a id="a6"></a>
 **A6 — Assistant-level participants see a shorter reviewers table** · ❓ ·
@@ -1641,48 +1589,6 @@ date "Response due: {date}". The editor has to open "Edit" on each row
 to see by when a reviewer should answer. Basis: probe, 2026-10-03.
 <sup>[f-a7](#fn-a7)</sup>
 
-<a id="a9"></a>
-**A9 — Retired: the Resend window presets dates correctly** · ✅ · retired.
-Does not reproduce. On a journal whose response and review intervals differ,
-the Resend window's fresh pickers arrive preset exactly as a new request's:
-each date is today plus its own configured interval. The earlier "both
-preset to the response interval" observation was made where the two
-intervals coincide, so the apparent collapse was a coincidence, not a
-behavior.
-Re-checked: claim check (claude), 2026-08-02 — overturned (was a defect).
-<sup>[f-a9](#fn-a9)</sup>
-
-<a id="a10"></a>
-**A10 — "Review Viewed" does not mean viewed** · ✅ · retired.
-Opening the legacy "Read Review" window and closing it without confirming
-left the row at "Review Submitted". Viewing never produced "Review Viewed".
-The only route to that status was "Revert Decision" on a "Reviewer Thanked"
-row, so the label misstated what happened in both directions.
-Basis: live probe. <sup>[f-a10](#fn-a10)</sup>
-
-> **Retired — upstream rework (claude), 2026-08-29**: overturned by design.
-> The modify-reviews rework replaced the legacy read window with the Review
-> Details window, and merely opening that window now marks a submitted
-> review viewed — the row flips to "Review Viewed" live and survives a
-> reload (probed 2026-08-29, both apps). The label finally means what it
-> says; Rule 14a records the behavior.
-
-<a id="a11"></a>
-**A11 — The change notice tells the reviewer the old deadlines** · ✅ ·
-retired.
-When an editor saves new due dates in the Edit window, the email telling
-the reviewer their assignment changed reports the dates as they were before
-the edit. The screen shows the new dates; the reviewer is told the wrong
-ones.
-Basis: live probe (both apps; on OJS twice independently, and with both
-date fields). <sup>[f-a11](#fn-a11)</sup>
-
-> **Retired — rebase check (claude), 2026-08-25**: fixed upstream by
-> pkp/pkp-lib#13162 — the notice is now composed from the assignment
-> re-fetched after the edit is saved, so it reports the just-saved dates.
-> Code-anchored, not re-probed. [A12](#a12) (the unreachable opt-out) is
-> untouched and stands.
-
 <a id="a12"></a>
 **A12 — A reviewer who unsubscribes through the "Your review assignment has been changed" email keeps getting it** · 🐞 · medium.
 When an editor changes a reviewer's due dates or review type, the
@@ -1709,19 +1615,6 @@ email. With both fields empty, the only error shown is "This field is
 required." under Subject. The Body never shows one. Basis: probe,
 2026-10-03.
 <sup>[f-a13](#fn-a13)</sup>
-
-<a id="a14"></a>
-**A14 — Retired: the enroll "required" error is ordinary validation** · ✅ ·
-retired.
-Does not reproduce as stated. Driving the sequence cleanly (open the enroll
-form, type, pick a user) shows no "This field is required." message at any
-point. The message appears only after submitting with the field empty, and
-picking a user then clears it; submitting afterwards succeeds. The earlier
-observation most likely read that post-submit state as the post-pick state.
-The empty-submit error is also the generic "This field is required.", not
-an "existing user must be selected" wording.
-Re-checked: claim check (claude), 2026-08-02 — overturned (was a defect).
-<sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
 **A15 — A reviewer's response erases "Reviewer Reminded" from the assignment's History and the Review Report** · 🐞 · low.
@@ -1790,26 +1683,6 @@ Request" and sent as usual. Where templates have been added, the chooser
 lists them and works. The other two ways to add a reviewer, "Create New
 Reviewer" and "Enroll Existing User", show no chooser in this case.
 Basis: probe, 2026-10-03. <sup>[f-a19](#fn-a19)</sup>
-
-<a id="a20"></a>
-**A20 — Four dialogs lose their editor under minified scripts** · ✅ ·
-retired.
-With the server's minified-script bundling on (the production default, and
-the test installs' configuration), the Send Reminder, Unassign, Cancel and
-Reinstate windows opened without their rich-text message. The editor never
-initialized, so the notice could be neither read nor edited. With bundling
-off the same flows worked end to end. The cause was app-side in all three
-apps: the shipped script bundle was not recompiled after the 2026-08
-dialog rework. Reported upstream 2026-08-27.
-Since: 2026-08-26 (the rework's merge) · Basis: probe + code reading.
-<sup>[f-a20](#fn-a20)</sup>
-
-> **Retired — re-probe (claude), 2026-08-27**: fixed upstream the same day
-> it was reported — each app recompiled its shipped script bundle, which
-> now carries the dialogs' handler. Re-verified live with minified scripts
-> on, on fresh installs: scenarios 7 and 11 ran green end to end on OJS and
-> OMP. OPS's unassign observation [OPS1](#ops1) was tracked separately and
-> was itself retired the same day.
 
 <a id="a21"></a>
 **A21 — An early rating shows "No rating" after it is saved** · 🐞 ·
@@ -2255,60 +2128,61 @@ manager types one. Basis: probe, 2026-10-03.
 
 ### OPS
 
-<a id="ops1"></a>
-**OPS1 — Retired: the missing unassign template is deliberate** · ✅ ·
-retired.
-The code observation stands: OPS never installs the default unassign
-notice template, so the Unassign Reviewer window would fail outright
-rather than render. But it is not a finding. The window is unreachable,
-because no Reviewers panel exists anywhere on a preprint server (the
-absence paragraph). And the "missing" pieces match OPS's baseline, which
-deliberately ships no review-flow email templates at all: no review
-request, reminder or cancel notice either (one review-round template in
-its registry against nineteen in OJS's). So the 2026-08 rework's
-template-and-locale companion was never applicable there. The one piece
-OPS did need, the recompiled script bundle, it received ([A20](#a20)).
-The earlier "latent fault" framing measured OPS against the OJS/OMP
-baseline instead of its own.
-Basis: code reading + registry check. <sup>[f-ops1](#fn-ops1)</sup>
-
-> **Retired — maintainer ruling + registry check (claude), 2026-08-27**:
-> overturned (was 🐞). Ruling: OPS has no review process, so a reviewer
-> unassign notice cannot be relevant there — the never-reachable window is
-> the deliberate absence's shadow, not a defect. Registry counts in the
-> footnote.
-
 ### Retired
 
+<a id="a3"></a>
+**A3 — The "role-less site admin" was a Journal Manager** · ✅ · retired. Not reproduced.
+
+<a id="a5"></a>
+**A5 — Alternate templates listed under the wrong access check** · ✅ · retired. Gone: the feature was reverted upstream (pkp/pkp-lib#10403).
+
+<a id="a9"></a>
+**A9 — The Resend window presets dates correctly** · ✅ · retired. Not reproduced.
+
+<a id="a10"></a>
+**A10 — "Review Viewed" does not mean viewed** · ✅ · retired. Fixed upstream.
+
+<a id="a11"></a>
+**A11 — The change notice tells the reviewer the old deadlines** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13162).
+
+<a id="a14"></a>
+**A14 — The enroll "required" error is ordinary validation** · ✅ · retired. Not reproduced.
+
+<a id="a20"></a>
+**A20 — Four dialogs lose their editor under minified scripts** · ✅ · retired. Fixed upstream.
+
+<a id="ops1"></a>
+**OPS1 — The missing unassign template is deliberate** · ✅ · retired. Overturned: not a bug.
+
 <a id="a8"></a>
-**A8 — Inverted due dates are refused without a word** · ✅ · retired. Overturned, 2026-10-05: "Add Reviewer", "Edit" and "Resend Review Request" refuse the inverted pair with a notice at the top right, in the version under development and the 3.5 release; the 2026-08-02 probe most likely looked too late. The notice's wording is [A45](#a45). <sup>[f-a8](#fn-a8)</sup>
+**A8 — Inverted due dates are refused without a word** · ✅ · retired. Overturned: not a bug.
 
 <a id="a24"></a>
-**A24 — A modification save completes an incomplete review** · ✅ · retired. Overturned, 2026-09-17: screens do reach the save (Rule 14d), and completing the request is the editor submitting the review on the reviewer's behalf, designed upstream (pkp/pkp-lib#13337, finished by pkp/pkp-lib#13338); what stays open is [A29](#a29), [A30](#a30), [OMP4](#omp4) and [OMP5](#omp5). <sup>[f-a24](#fn-a24)</sup>
+**A24 — A modification save completes an incomplete review** · ✅ · retired. Overturned: not a bug.
 
 <a id="a25"></a>
-**A25 — The dashboard popover's window drops the recommendation** · ✅ · retired. Fixed upstream (pkp/ui-library#971, `d3e19fc4`), in all three apps' lib/ui-library and re-verified live on OJS, 2026-09-03. <sup>[f-a25](#fn-a25)</sup>
+**A25 — The dashboard popover's window drops the recommendation** · ✅ · retired. Fixed upstream (pkp/ui-library#971).
 
 <a id="a27"></a>
-**A27 — A re-completed review skips "Complete" once it was thanked** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: "Revert Decision" takes back "Mark as Complete" only, and the thank, already sent, stands, so a re-completed review reads "Reviewer Thanked" with no second "Thank Reviewer" (Rule 16). <sup>[f-a27](#fn-a27)</sup>
+**A27 — A re-completed review skips "Complete" once it was thanked** · ✅ · retired. Ruled intended.
 
 <a id="a33"></a>
-**A33 — Review Details names an older thank as the latest step** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: the thank stands after "Revert Decision", so a review marked complete again names that first thank and its date in Review Details (Rule 14a). <sup>[f-a33](#fn-a33)</sup>
+**A33 — Review Details names an older thank as the latest step** · ✅ · retired. Ruled intended.
 
 <a id="a34"></a>
-**A34 — "Reviewer Reminded" is untranslated in other languages** · ✅ · retired. Not a finding, ruled by @jarda.kotesovec on 2026-09-24: a new label arrives in English first and its translations follow through the usual process. <sup>[f-a34](#fn-a34)</sup>
+**A34 — "Reviewer Reminded" is untranslated in other languages** · ✅ · retired. Overturned: not a bug.
 
 <a id="a35"></a>
-**A35 — History drops the thank after "Revert Decision"** · ✅ · retired. Intended, ruled by @jarda.kotesovec on 2026-09-24: History shows only the dates the assignment currently tracks, and a proper event log is to replace it later, so the "Reviewer Thanked" line leaving it after "Revert Decision" stands (Rule 21). <sup>[f-a35](#fn-a35)</sup>
+**A35 — History drops the thank after "Revert Decision"** · ✅ · retired. Ruled intended.
 
 <a id="a40"></a>
-**A40 — On a press, recording a reviewer's competing interests in "Modify Review" submitted an empty review for them** · ✅ · retired. Fixed by pkp/pkp-lib#13467 (for pkp/pkp-lib#13466), verified 2026-10-07 at the PR's head before its merge: the declaration is stored and the request stays open, "Request Sent" or "Request Accepted" (Rule 14d). Confirmed a defect by @beaug on 2026-09-30. <sup>[f-a40](#fn-a40)</sup>
+**A40 — On a press, recording a reviewer's competing interests in "Modify Review" submitted an empty review for them** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13467, for pkp/pkp-lib#13466).
 
 <a id="omp5"></a>
-**OMP5 — A press accepted an empty save as the reviewer's review** · ✅ · retired. Settled by the same fix (pkp/pkp-lib#13467), verified 2026-10-07 at the PR's head: a press's save with nothing entered closes the window and submits nothing, so no empty review closes the request (Rule 14d). <sup>[f-omp5](#fn-omp5)</sup>
+**OMP5 — A press accepted an empty save as the reviewer's review** · ✅ · retired. Settled upstream (pkp/pkp-lib#13467).
 
 <a id="omp3"></a>
-**OMP3 — A press's reviewer removal and cancel emails print "{$journalName}" where the press's name belongs** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` (3.5 never had the fault; `pkp/omp#2529` carries the issue's other strings there), for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: the press's "Reviewer Unassign" and "Review Cancel" emails name the press where they printed "{$journalName}" (Side effects). <sup>[f-omp3](#fn-omp3)</sup>
+**OMP3 — A press's reviewer removal and cancel emails print "{$journalName}" where the press's name belongs** · ✅ · retired. Fixed upstream (pkp/omp#2563, for pkp/pkp-lib#13646).
 
 ---
 
@@ -3382,34 +3256,6 @@ entry doesn't come back: the original observation ran where the two
 intervals were equal, making "both preset to the response interval"
 indistinguishable from correct behavior.
 
-<a id="fn-a10"></a>
-**f-a10** — Live-probed 2026-08-02 (OJS + OMP; shared handler; the claim
-check re-drove both apps, OJS as a Section Editor): open "Read
-Review", close without confirming → row still "Review Submitted" on both
-apps; "Review Viewed" only ever appeared after revert-from-Thanked, both
-apps. Mechanism: the legacy window's viewed-marking branch compared
-strictly against a state new assignments never hold, so it never fired.
-Update 2026-08-29 (modify-reviews rework, pkp/pkp-lib#13156): the legacy
-window and its dead branch are deleted; the Review Details window PUTs
-`…/consider` on open, and the probe of the same date saw the row flip to
-"Review Viewed" live on both apps, surviving reload (note i). A10 retired
-— the recorded defect is now the implemented behavior.
-
-<a id="fn-a11"></a>
-**f-a11** — Live-probed 2026-08-02 (shared mailable): on OJS twice
-independently, then re-driven in the claim check with both date fields —
-a review-due edit (2026-09-27 → 2026-10-11) reported "Submit Review By:
-2026-09-27" and a response-due edit (2026-08-30 → 2026-08-01) reported
-"Accept or Decline By: 2026-08-30" — and on OMP via a calendar-driven
-due-date edit, whose notice also carried the pre-change date. The edit
-saves the new dates on screen while the change-notice
-email carries the old ones — the message is composed before the edit is
-applied (note g). Update 2026-08-25 (rebase check): fixed upstream —
-`EditReviewForm::execute()` now sends `EditReviewNotify` after
-`Repo::reviewAssignment()->edit()`, built from a re-fetched assignment
-(pkp/pkp-lib#13162); A11 retired. The `isset($notification)` guard is
-unchanged, so a files/visibility-only edit still sends nothing.
-
 <a id="fn-a12"></a>
 **f-a12** — Live-probed 2026-08-02 (OJS; shared forms): the
 assignment-changed email type appears neither in the profile's notification
@@ -3617,47 +3463,6 @@ change to an already submitted review affects none of this. Retired
 note i); what the screens leave open is findings A29, A30, OMP4 and OMP5
 (OMP5 retired 2026-10-07 by pkp/pkp-lib#13467).
 
-<a id="fn-a25"></a>
-**f-a25** — Reported by the PKP team (2026-08-31); live-probed the same day
-(OJS), the same submitted review (recommendation "Accept Submission")
-opened on both paths. Dashboard-popover path ("View unread
-recommendation"): no "Recommendation:" heading or value between "Review
-Submitted:" and the Reviewer Comments, and the "Reviewer Recommendation"
-group's "Recommendation" value read "-" (the group and its guidance
-sentence render; only the value is empty). Workflow path, same assignment:
-"Recommendation: Accept Submission" on the info line and in the group.
-Every other item — reviewer name line, guidance paragraph, "Download
-Review Form", the "Review Submitted:" date, both Reviewer Comments blocks
-(seeded marker strings found once on each path), the empty Reviewer Files
-grid, the Reviewer rating row, footer "Cancel" / "Modify Review" / "Mark
-as Complete" — was identical across the paths. Parity control: a
-not-yet-submitted review ("View details" vs the row menu's "Review
-Details") rendered identically on both paths, item for item. The window's
-own API traffic is the same on both paths — the same
-`reviewAssignments/{id}` and `reviewAssignments/{id}/review` GETs, all
-200 — so the omission is in the window's rendering, not a failed or
-missing request. Retired 2026-09-03: fixed by lib/ui-library `d3e19fc4`
-("Set recommendation options when opened from submissions listing",
-pkp/ui-library#971, merged 2026-09-01) — `dashboardPageStore.js` now passes
-`recommendations` into the workflow modal props, and `ReviewDetailsModal.vue`
-/ `ReviewDetailsEditModal.vue` declare the prop required; the commit sits in
-all three apps' `lib/ui-library` as of 2026-09-03 (OJS `762415103f`, OMP
-`a1aefa3fe`, OPS `6bda92fb03`). Verified live 2026-09-03 on OJS
-`762415103f` (env 0, fresh reset): a submitted review with recommendation
-"Accept Submission", opened through the dashboard's Editorial Activity
-popover button "View unread recommendation", showed "Recommendation: Accept
-Submission" on the info line and "Accept Submission" as the "Reviewer
-Recommendation" group's value; the window's full text was
-character-for-character identical to the one opened from the workflow's
-Reviewers panel ("Read Review") — reviewer name line, "Review Submitted:"
-date, both Reviewer Comments blocks, the empty Reviewer Files grid, the
-rating row and the footer buttons. Incidental: opening the window from the
-popover marks the review viewed (the Reviewers row then reads "Review
-Viewed"), which is the existing behavior of Rule 14a, not a discrepancy. A
-parity scenario and tests for the two entry paths remain PARKED by
-maintainer ruling (2026-09-01) pending a separate discussion; none were
-added here.
-
 <a id="fn-a26"></a>
 **f-a26** — Test run 2026-09-12 (OJS and OMP, scenario 11): the message
 to the unassigned throwaway reviewer read subject `Your review for
@@ -3811,73 +3616,6 @@ conditions: the earlier form of *Submissions dashboard* scenario 9's
 test, with no wait before "Cancel", repeated 16 times at `51f0c727`, went
 red twice; both traces show the list GET 14–25 ms before the mark's
 POST. A page reload shows "Review Viewed" and "View recommendation".
-
-<a id="fn-a33"></a>
-**f-a33** — Driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge, on a
-scratch journal. In the window: a submitted review marked complete,
-thanked with the email at 06:10, "Revert Decision" › "OK", then "Read
-Review" and "Mark as Complete" again at 06:12. The row read "Reviewer
-Thanked"; Review Details read `Reviewer Thanked: 2026-09-24 06:10 AM`
-(then `Recommendation: Accept Submission`); History read `Request Sent:
-2026-09-24 06:10 AM` / `Request Accepted: 2026-09-24 06:10 AM` / `Review
-Submitted: 2026-09-24 06:10 AM` / `Reviewer Thanked: 2026-09-24 06:10 AM`
-/ `Review Completed: 2026-09-24 06:12 AM`. The window's own fetch of the
-assignment: `considered` 2 (reconsidered), `dateConsidered` 06:12:41,
-`dateAcknowledged` 06:10:40. By a decision, on a second submission: a
-review thanked at 06:10:56 and reverted, then "Request Revisions" ›
-"Notify Authors" › "Notify Reviewers" (the reviewer ticked) › "Record
-Decision" at 06:12:51. The mail catcher held the reviewer's "Thank you
-for your review" at 06:10:56 and again at 06:12:51; `dateAcknowledged`
-stayed 06:10:56 while `dateConsidered` became 06:12:51; Review Details
-read `Reviewer Thanked: 2026-09-24 06:10 AM` and History ended `Reviewer
-Thanked: 2026-09-24 06:10 AM` / `Review Completed: 2026-09-24 06:12 AM`.
-Control, the same decision: a submitted review never thanked read
-`Reviewer Thanked: 2026-09-24 06:12 AM` in Review Details and `Review
-Completed: 2026-09-24 06:12 AM` then `Reviewer Thanked: 2026-09-24 06:12
-AM` in History. Before the change the window's line on a submitted review
-was always `Review Submitted: {submission date}`. Mechanism:
-`ReviewDetailsInfo.vue` `latestActivity` takes the first non-empty entry
-in a fixed order, the thank first, instead of the latest date;
-`ReviewAssignmentController::markReviewConsidered` sets `considered` to
-RECONSIDERED without touching `dateAcknowledged`, and
-`NotifyReviewers::sendReviewersEmail` stamps `dateAcknowledged` only
-`if (!getDateAcknowledged())`. OMP runs the same component and code paths
-(not driven there).
-
-<a id="fn-a34"></a>
-**f-a34** — Driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge, on two
-scratch journals with the interface switched to Français (Canada), for a
-reviewer sent a reminder and not answering. History: `Demande envoyée :
-2026-09-24 06:15 AM` / `##editor.review.reviewerReminded## : 2026-09-24
-06:15 AM`. Review Details: `##editor.review.reviewerReminded## :
-2026-09-24 06:15 a.m.`; `pkp.localeKeys['editor.review.reviewerReminded']`
-held that placeholder string. Every other new label rendered in French
-(`Demande acceptée`, `Évaluation soumise`, `Recommandation : Accepter la
-soumission`; `editor.review.reviewerThanked` = `Évaluateur-trice
-remercié-e`). Before the change the History line read "{date} Rappel"
-(`common.reminder`, fr_CA "Rappel"). Mechanism: `editor.review.reviewerReminded`
-exists only in `locale/en/editor.po` (1 of 71 locales) and the translator
-has no English fallback; the Vue side receives the same string. OMP uses
-the same keys (not driven there).
-
-<a id="fn-a35"></a>
-**f-a35** — Driven 2026-09-24 on OJS at the PR head `26a5efcb74` (pkp-lib) / `ad0fdd33` (ui-library), before its merge, on two
-reviews of scratch submissions. Before "Revert Decision" on a thanked
-review History read `Request Sent: 2026-09-24 06:10 AM` / `Request
-Accepted: …` / `Review Submitted: …` / `Review Completed: 2026-09-24 06:10
-AM` / `Reviewer Thanked: 2026-09-24 06:10 AM`; after it `Request Sent:
-2026-09-24 06:10 AM` / `Request Accepted: 2026-09-24 06:10 AM` / `Review
-Submitted: 2026-09-24 06:10 AM` and nothing more, while the mail catcher
-held the reviewer's "Thank you for your review" (06:10:56) and the
-assignment still carried `dateAcknowledged`; Review Details read `Review
-Submitted: 2026-09-24 06:10 AM`. Mechanism: `PKPReviewerGridHandler::reviewHistory`
-passes the thank date as `getConsidered() == REVIEW_ASSIGNMENT_UNCONSIDERED
-? null : getDateAcknowledged()`, matching `latestActivity` (note i); the
-code before the change listed `common.acknowledged` in every state, so
-History read "{date} Acknowledged" here (code-read). The "Review Completed"
-line leaving is not new: `unconsiderReview` clears `dateConsidered`, which
-History did not show before. The question was put to the team on the
-change's review thread, 2026-09-24.
 
 <a id="fn-a36"></a>
 **f-a36** — Driven 2026-09-28 (OJS and OMP, two runs each; browser and

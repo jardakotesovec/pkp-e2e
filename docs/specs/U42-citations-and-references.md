@@ -1137,18 +1137,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | "Edit" accepts a repeated reference that "Add" drops | ❓ | minor | — |
 | [A26](#a26) | Whether a lookup that finishes after an editor filled a reference in by hand replaces what was typed has not been seen | ❓ | user-visible | — |
 | [A27](#a27) | On a refused data citation panel, "Jump to next error" and the screen reader's "Go to {field}" buttons leave the cursor on the button | ❓ | minor | — |
-| [A5](#a5) | A reference whose lookup failed for good looks exactly like one still waiting | ✅ | retired | — |
-| [A6](#a6) | References page: the lookup's progress box counts only structured references and says "All 2 done" over five | ✅ | retired | — |
-| [A7](#a7) | A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off | ✅ | retired | — |
-| [A23](#a23) | A new version taken while its references are being looked up shows "Processing references - 0/n" for good | ✅ | retired | — |
-| [A12](#a12) | Retired: an arXiv ID entered for a reference or a data citation lost its version, or was refused with it; fixed by pkp/pkp-lib#13479 | ✅ | retired | PR review (claude), 2026-10-09 — fixed by pkp/pkp-lib#13479, merged |
-| [A1](#a1) | A Site Administrator with no role in the journal is offered the References controls, but every change is refused | ✅ | retired | — |
-| [A18](#a18) | A References change carried to "Review" by the step rail is lost on "Submit" | ✅ | retired | — |
-| [OMP1](#omp1) | A book with no references shows an empty "References" heading | ✅ | retired | — |
-| [A20](#a20) | On a press or a preprint server, a book or preprint with no references shows an empty "References" heading | ✅ | retired | — |
-| [A21](#a21) | Retired: in French the References page's help text, table, "Delete all references" and its two windows show raw codes such as "##submission.citations.structured##" | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A22](#a22) | Retired: a reference author's "ORCID iD" took any web address, and editors' ORCID icon linked to it; fixed by pkp/pkp-lib#13502 | ✅ | retired | PR review (claude), 2026-10-13 — fixed by pkp/pkp-lib#13502, merged |
-| [A28](#a28) | Retired: a reference whose text held an arXiv ID with a dotted subject class ("arXiv:math.AG/0309136") could not be saved in "Edit citation" once the ID was picked out; fixed by pkp/pkp-lib#13537 | ✅ | retired | PR review (claude), 2026-10-15 — fixed by pkp/pkp-lib#13537, merged 2026-10-16 |
 
 ### All apps
 
@@ -1441,40 +1429,40 @@ Report: paused — written and read 2026-10-23, held until a related item is set
 ### Retired
 
 <a id="a1"></a>
-**A1 — A Site Administrator with no journal role cannot change references** · ✅ · retired. Withdrawn 2026-09-24: a Site Administrator's last role in a journal cannot be removed ([User invitations](U06-user-invitations.md)), so the state has no way in, and the reachable neighbour, an administrator left with an unassigned assistant role, gets the read-only page (Actors row 2). <sup>f-a1</sup>
+**A1 — A Site Administrator with no journal role cannot change references** · ✅ · retired. Withdrawn: the state cannot be reached.
 
 <a id="a5"></a>
-**A5 — A reference whose lookup failed for good looks like one still waiting** · ✅ · retired. Answered 2026-10-06 by `pkp/pkp-lib#13308` (`pkp/ui-library#982`, `pkp/pkp-lib#13318`), merged 2026-10-07 (pkp-lib `6aa31ac645`, ui-library `cd58d426`, ojs `1b0f84edae`, omp `866d8d3dd`, ops `1f5f67b289`): a failed row carries "Metadata lookup failed", and the progress box counts it finished (Rules 12, 13). <sup>f-a5</sup>
+**A5 — A reference whose lookup failed for good looks like one still waiting** · ✅ · retired. Settled upstream (pkp/pkp-lib#13308, pkp/ui-library#982).
 
 <a id="a6"></a>
-**A6 — References page: the lookup's progress box counts only structured references and says "All 2 done" over five** · ✅ · retired. Fixed 2026-10-06 by `pkp/pkp-lib#13308` (`pkp/pkp-lib#13318`, `pkp/ui-library#982`), merged 2026-10-07 (pkp-lib `6aa31ac645`, ui-library `cd58d426`, ojs `1b0f84edae`, omp `866d8d3dd`, ops `1f5f67b289`), walked on the apps' `main` the same day: the box counts every reference a lookup was asked for, and leaves out those it was not, also once filled in by hand (Rule 13). <sup>f-a6</sup>
+**A6 — References page: the lookup's progress box counts only structured references and says "All 2 done" over five** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13308, pkp/pkp-lib#13318).
 
 <a id="a7"></a>
-**A7 — A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off** · ✅ · retired. Fixed 2026-10-06 by `pkp/pkp-lib#13308` (`pkp/pkp-lib#13318`), merged 2026-10-07 (pkp-lib `6aa31ac645`, ui-library `cd58d426`, ojs `1b0f84edae`, omp `866d8d3dd`, ops `1f5f67b289`), walked on the apps' `main` the same day: `importCitations()` stores the DOI found in a wizard reference's text with lookup off, as "Add" does (Rule 17). <sup>f-a7</sup>
+**A7 — A DOI in a reference typed while submitting is not recorded as its DOI when metadata lookup is off** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13308, pkp/pkp-lib#13318).
 
 <a id="a12"></a>
-**A12 — An arXiv ID entered for a reference or a data citation loses its version, or is refused with it** · ✅ · retired. Fixed by `pkp/pkp-lib#13479` (for `pkp/pkp-lib#13477`, the team's copy of the issue report), merged 2026-10-09 (pkp-lib `7cc6c81615`; no app's pointer carries it yet), reviewed at the PR's head before the merge and walked at the merge the same day: "Edit citation", the lookup's reading of a reference's text and a data citation of type "ARXIV" all keep the version ([Fields & validation](#fields)). <sup>f-a12</sup>
+**A12 — An arXiv ID entered for a reference or a data citation loses its version, or is refused with it** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13479, for pkp/pkp-lib#13477).
 
 <a id="a23"></a>
-**A23 — A new version taken while its references are being looked up shows "Processing references - 0/n" for good** · ✅ · retired. Fixed 2026-10-06 by `pkp/pkp-lib#13308` (`pkp/pkp-lib#13318`), found at the PR heads and fixed before the merge, merged 2026-10-07 (pkp-lib `6aa31ac645`, ui-library `cd58d426`, ojs `1b0f84edae`, omp `866d8d3dd`, ops `1f5f67b289`): `copyCitations()` queues a lookup of its own for a copy taken mid-lookup (Rule 26). <sup>f-a23</sup>
+**A23 — A new version taken while its references are being looked up shows "Processing references - 0/n" for good** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13308, pkp/pkp-lib#13318).
 
 <a id="a18"></a>
-**A18 — A References change carried to "Review" by the step rail is lost on "Submit"** · ✅ · retired. Overturned 2026-09-29: re-checked on all three apps, the step rail saves the step on the move, so the change is listed on "Review" and submitted with "Submit" › "Submit" (Rule 16). <sup>f-a18</sup>
+**A18 — A References change carried to "Review" by the step rail is lost on "Submit"** · ✅ · retired. Overturned: not a bug.
 
 <a id="omp1"></a>
-**OMP1 — A book with no references shows an empty "References" heading** · ✅ · retired. Widened 2026-09-24: the preprint page showed the same empty heading, so the finding moved to [A20](#a20), retired in its turn. <sup>f-omp1</sup>
+**OMP1 — A book with no references shows an empty "References" heading** · ✅ · retired. Duplicate of A20.
 
 <a id="a20"></a>
-**A20 — On a press or a preprint server, a book or preprint with no references shows an empty "References" heading** · ✅ · retired. Fixed on a press by pkp/omp#2502 and on a preprint server by pkp/ops#1443 (both for pkp/pkp-lib#13189), checked on both 2026-10-09: a book's page and a preprint's page with no references now have no "References" block, as an article's page has none, and one with a reference shows the block as before (Rule 27). <sup>f-a20</sup>
+**A20 — On a press or a preprint server, a book or preprint with no references shows an empty "References" heading** · ✅ · retired. Fixed upstream (pkp/omp#2502, for pkp/pkp-lib#13189).
 
 <a id="a21"></a>
-**A21 — In French the References page shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a21</sup>
+**A21 — In French the References page shows raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a22"></a>
-**A22 — A reference author's "ORCID iD" takes any web address, and editors' ORCID icon links to it** · ✅ · retired. Fixed by `pkp/pkp-lib#13502` (for `pkp/pkp-lib#13501`, the team's copy of the issue report), merged 2026-10-13 (pkp-lib `3608f5e200`; OJS's `lib/pkp` carries it since ojs `5c056f34b7`, OMP's and OPS's not yet), reviewed at the PR's head before the merge and walked at the merge the same day on OJS, OMP and OPS: "Edit citation" refuses a reference author's ORCID iD that is not an ORCID address, a `javascript:` link included, and saves a full, a sandbox or an empty one as before ([Fields & validation](#fields)). <sup>f-a22</sup>
+**A22 — A reference author's "ORCID iD" takes any web address, and editors' ORCID icon links to it** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13502, for pkp/pkp-lib#13501).
 
 <a id="a28"></a>
-**A28 — A reference whose text holds an arXiv ID with a subject class cannot be saved in "Edit citation" once the ID is picked out** · ✅ · retired. Fixed by `pkp/pkp-lib#13537` (for `pkp/pkp-lib#13536`, which took it in from this review's first round), merged 2026-10-16 (pkp-lib `7ce31a8c4b`; no app's pointer carries it yet), reviewed at the PR's round-2 head `d56d57f021` before its merge (the merged head `d7c33942fc` differs from it by a docblock line and a comment): `schemas/citation.json` takes `[a-z.-]+` before the number, and "Edit citation" saves "math.AG/0309136" whether the lookup or a lookup-off "Add" put it there, on OJS, OMP and OPS ([Fields & validation](#fields)). <sup>f-a28</sup>
+**A28 — A reference whose text holds an arXiv ID with a subject class cannot be saved in "Edit citation" once the ID is picked out** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13537, for pkp/pkp-lib#13536).
 
 ---
 
@@ -2572,15 +2560,6 @@ study 2020'` and `dataCitations: [{title: 'Ocean temperature records',
 relationshipType: 'generated'}]`. The review method is stamped from the
 context's default review type (scenarios.md, `reviewRounds[]`).
 
-<a id="fn-f-a1"></a>
-**f-a1 — A1 evidence.** Note a: `PKPCitationController`'s route group omits
-`ROLE_ID_SITE_ADMIN`, while the page's controls follow
-`permissions.canEditPublication`; the `HasRoles` middleware answers 401
-"You are not authorized to access the requested resource." for a user with
-none of the listed roles in the journal. `PKPDataCitationController` and
-`PKPFunderController` list the Site Administrator. Live-probed 2026-09-24:
-note q9; the state the entry described has no way in from the screens.
-
 <a id="fn-f-a2"></a>
 **f-a2 — A2 evidence.** Note e. The unused strings:
 `submission.citations.structured.addRaw.partialSuccess`, `.success`,
@@ -2598,73 +2577,6 @@ Issue report: [pkp-e2e#879](https://github.com/jardakotesovec/pkp-e2e/issues/879
 exists only in lib/pkp's `locale/en/submission.po`; neither OMP's nor OPS's
 `locale/en` overrides it. Live-probed 2026-09-24: q12.
 Issue report: [pkp-e2e#869](https://github.com/jardakotesovec/pkp-e2e/issues/869) ([docs/issues/U42-A4-press-server-lookup-text-says-journal.md](../issues/U42-A4-press-server-lookup-text-says-journal.md)).
-
-<a id="fn-f-a5"></a>
-**f-a5 — A5 evidence.** Notes h and i: `CitationLookupJob::failed()` stores
-FAILED (-1); the row's badge branch tests PROCESSED only, and the progress
-box counts structured citations only. The upstream-sync read of pkp-lib
-#12715 (2026-09-14) found the badge-less wait deferred upstream to
-pkp/pkp-lib#13308. The failed row is not reachable on a test install
-within a run (eight retries span about 21 hours). Live-probed 2026-09-24
-(the waiting half), all three apps: a reference freshly added or just
-reprocessed showed its text with no badge and no details, and the box did
-not count it. At the PR heads of `pkp/pkp-lib#13308` before their merge
-(ui-library `2e330ff4`, pkp-lib `14c8d75c50`, ojs `1f7aa2eca5`;
-2026-10-06, all three apps, PKP's default dataset, the stored status set
-to -1 by SQL for one reference of five, two set to 5): the failed row read
-"Metadata lookup failed" with "Edit", "Delete" and "Reprocess" in its
-menu, the box "Processing references - 3/5" with two still waiting, then
-"4 of 5 references processed, 1 incomplete" ("… 1 failed" from round 3,
-pkp-lib `8653c678b7`) with its description once the others were set to 5, and the page fetched nothing more in 22 s. The
-badge's `<div>` follows both the structured and the unstructured branch of
-`CitationManagerCellCitation.vue` (code; a structured failed row not
-driven). Kept check `shared/playwright/checks/sync/ui-library-982/failed.js`.
-
-<a id="fn-f-a6"></a>
-**f-a6 — A6 evidence.** Note i. Live-probed 2026-09-24: the box absent over
-five unstructured references and "Processing references - 0/2" with two of
-the five structured (note i). The "All {total}" wording is unreachable on a
-test install.
-At the PR heads of `pkp/pkp-lib#13308` before their merge (2026-10-06,
-all three apps, the A6 report's kept `walk.js`, its three modes): "Add"
-of five read "Processing references - 0/5" at once and the page fetched
-the submission and the publication every 7 s; "0/5" with two filled in by
-hand, "2/5" with two set to 5, "All 5 references successfully processed"
-with all five. Two references added while lookup was off, then lookup
-switched on: "Processing references - 0/2" and the 7-second fetches
-(three pairs in 22 s), the same after one was filled in by hand and after
-"Reprocess" on the other; two with their stored status removed (the API
-gave `null`, as after an upgrade from 3.5): the same. Before, at the
-tips the PRs are based on (the same day, `nb` mode), the same two showed
-no box and no fetches in 22 s; "Processing references - 0/1" and the
-fetches came only once one was filled in by hand. Facts:
-`.reports/issues-u42r7/u42r7/a6-facts-{pr13308,tip13308}-<mode>-<app>.json`.
-Round 2 (pkp-lib `097ba6b943`, the same source as `0dc8d84fc7`, which
-only reworks the unit test; ui-library `0185ab12`; ojs `14538bcaf3`;
-2026-10-06, all three apps, the same three modes): "0/5", "2/5", "All 5
-references successfully processed" as before; the two references added
-while lookup was off showed no box and no fetches in 22 s, also after one
-was filled in by hand; "Reprocess" on the other gave "Processing
-references - 0/1" (stored status 1 against the hand-filled one's 0); the
-two with no stored status: no box and no fetches, also after one was
-filled in. Facts `a6-facts-pr13308r2-<mode>-<app>.json`.
-On the apps' `main` after the merge (2026-10-07, all three apps, the same `walk.js`, modes `steps` and `nb`): "0/5", "2/5", "All 5 references successfully processed"; the two references added while lookup was off showed no box and no fetches in 22 s, also after one was filled in by hand; "Reprocess" on the other gave "Processing references - 0/1" (facts `a6-facts-main13308-<mode>-<app>.json`).
-Issue report: [pkp-e2e#883](https://github.com/jardakotesovec/pkp-e2e/issues/883), closed 2026-10-07 with the fix; the report and its kept script deleted (git keeps them).
-
-<a id="fn-f-a7"></a>
-**f-a7 — A7 evidence.** Note k. Live-probed 2026-09-24: the screen half,
-note k (Rule 17). The deposit half is not yet seen: it would take the OJS
-Crossref XML of an article whose references came both ways.
-At the PR heads of `pkp/pkp-lib#13308`, round 3 (pkp-lib `8653c678b7`,
-ui-library `3f6a3e8d`, ojs `b966547ff7`, omp `4d30880ed`, ops
-`02ff6ad581`; 2026-10-06, all three apps, the issue report's kept
-`walk.js` and its `nb` mode): the wizard's "Alpha study 2020.
-https://doi.org/10.1234/abcd" stored with DOI `10.1234/abcd` as the
-"Add"ed one was, both rows a DOI link and the "DOI" box of "Edit" filled
-once lookup was on; OJS's Crossref `citation_list` sent `<doi>` for both
-(facts `.reports/issues-u42r7/u42a7/u42r8-walk-pr13308r4-<app>.json`).
-On the apps' `main` after the merge (2026-10-07, all three apps, the same `walk.js`): the wizard's reference stored with DOI `10.1234/abcd`, shown in the "DOI" box of "Edit" once lookup was on; OJS's Crossref `citation_list` sent `<doi>10.1234/abcd</doi>` (facts `u42r8-walk-main13308-<app>.json`).
-Issue report: [pkp-e2e#872](https://github.com/jardakotesovec/pkp-e2e/issues/872), closed 2026-10-07 with the fix; the report and its kept script deleted (git keeps them).
 
 <a id="fn-f-a8"></a>
 **f-a8 — A8 evidence.** Note m. The funders list shows the same behavior
@@ -2825,86 +2737,11 @@ repeat check); note e (`existsRawCitation()` on "Add"). Live-probed
 was accepted (200), and the list showed "Beta trial 2021" twice, also after
 a reload.
 
-<a id="fn-f-a18"></a>
-**f-a18 — A18 evidence.** Recorded from a probe of 2026-09-24, two runs
-per app: on OJS and OMP the list changed on "Details" and carried to
-"Review" by the step rail never reached the submission, and on OPS
-"Review" showed the old list in three of four reads. Overturned by a
-re-check on 2026-09-29, on checkouts of 2026-09-28 (ojs `9d9f116f38`, omp
-`480045c32`, ops `5da5bc48ad`, lib/pkp `fab29cfeca`, ui-library
-`19802b78`): note b; in four forms of the rail move, two runs per app on
-all three apps, the move sent the step's save within 0.29–0.67 s,
-"Review" listed the new lines (on OPS in every read), and "Submit" ›
-"Submit" completed with them; no write followed in the 8 s after
-completion. The save on a step change is `SubmissionWizardPage.vue`'s
-`currentStepIndex` watcher calling `addAutosaves()`, code older than
-2026-09-24, so the re-check does not explain the earlier reading.
-
 <a id="fn-f-a19"></a>
 **f-a19 — A19 evidence.** Note m (`TableCellOrder`, icon-only buttons).
 Live-probed 2026-09-24, all three apps: the accessibility tree lists two
 unnamed buttons, each holding an image, per row in ordering mode.
 Issue report: [pkp-e2e#619](https://github.com/jardakotesovec/pkp-e2e/issues/619) ([docs/issues/U46-A5-ordering-arrows-unnamed.md](../issues/U46-A5-ordering-arrows-unnamed.md)).
-
-<a id="fn-f-a20"></a>
-**f-a20 — A20 evidence.** Note p (the OMP and OPS template conditions,
-before and after).
-Live-probed 2026-09-24, OMP and OPS, two runs each: an item with no
-references showed the heading "References" over an empty block, with the
-References setting on and off; OJS showed no heading.
-Fixed by pkp/omp#2502 (two lines of `monograph_full.tpl`, merged
-2026-10-09 as omp `77ca57587a`) and pkp/ops#1443 (one line of
-`preprint_details.tpl`, commit `26031aac38`, merged 2026-10-09 as ops
-`dafd9b3263`), both for pkp/pkp-lib#13189 and both the change the issue
-report proposed.
-Live-probed 2026-10-09 on PKP's default test dataset (pkp/datasets
-`1a196c3`), signed out, each side on a newly loaded dataset, with no
-response of 500 or more and no page error. Before (omp `c07d91ced2`, ops
-`6614af8281`, the commit under the merge): the book page `catalog/book/5`
-and the preprint page `preprint/view/2`, neither item with a reference,
-showed the heading "References" over an empty block; the article page
-`article/view/17` showed none. After, at the PR head `52cf201a96` of
-pkp/omp#2502 before its merge (merged locally into omp `c07d91ced2`, the
-same two parents and the same files as the merge `77ca57587a` made later
-that day) and at ops `dafd9b3263`: no "References" block on any of the
-three pages. The neighbour, on both
-sides alike: book 14 and preprint 3, given the one reference "Ridge, A.
-(2021). Tide tables u42r9." in a new version that `dbarnes` published
-(posted), showed "References" over that one paragraph. Walked again
-2026-10-09 after the merges, each on a newly loaded default dataset. On
-`main` at the merged tips (omp `77ca57587a`, ops `dafd9b3263`, ojs
-`7fe6502315`): no "References" block on book 5, preprint 2 or article 17.
-On `stable-3_5_0` at its tips, with the 3.5 twins merged (omp `486cbf9eb0`
-with pkp/omp#2501, ops `399c4ebca3` with pkp/ops#1442): no "References"
-block on book 5 or preprint 2, and the neighbour, book 14 and preprint 3
-given the one reference in a new version, showed "References" over it;
-OJS 3.5 was not run. Kept check
-`shared/playwright/checks/sync/omp-2502/walk.js` (`NB=1` for the
-neighbour).
-Issue report: [pkp-e2e#871](https://github.com/jardakotesovec/pkp-e2e/issues/871), whose
-file and kept script were deleted with the fix (git history keeps them);
-the issue was closed 2026-10-09, at the merge of pkp/omp#2502.
-
-<a id="fn-f-a21"></a>
-**f-a21 — A21 evidence.** None of lib/pkp's `submission.citations.structured*`
-keys (`locale/en/submission.po`) has an entry in
-`locale/fr_CA/submission.po`, and `list.collapse` and `common.moreActions`
-have none in `locale/fr_CA/common.po`. Live-probed 2026-09-30 at ojs
-`7ce98ec09e`, omp `3b0ecf794c`, ops `c8af945bb7` (lib/pkp `3dc90c81a6`),
-two runs, all three apps, metadata lookup off, on a scratch journal with
-English and French (Canada) interface languages, as its Journal Manager
-and as the submitting Author, on a production-stage submission with no
-references, with two, and published; every French read was paired with
-the same read in `/en/`, where the page showed none of the codes. The
-codes above showed in the text, placeholders and accessible names; two
-more sit only in attributes or hidden controls
-(`submission.citations.structured.expandAll`, and
-`submission.citations.structured.reprocessAllCitations` on the hidden
-"Reprocess all references" link). "Ajouter" with a typed reference
-showed "Enregistré" and the new row, listed again after a reload; "Edit
-citation" and the "Delete all references" dialog were closed with
-"Fermer" and "Annuler". No request failed and no script error showed.
-Re-walked 2026-10-04 on main, all three apps (3.5 has no structured References page). The row menu's `common.moreActions` is a released text French (Canada) never received; the rest (`submission.citations.structured*`, `list.collapse`) are main-only texts.
 
 <a id="fn-f-a22"></a>
 **f-a22 — A22 evidence.** lib/pkp `schemas/citation.json:43-45` declares
@@ -2982,33 +2819,6 @@ empty), and pkp/ojs#5925 as ojs `5c056f34b7` (OJS's `lib/pkp` at
 OMP and OPS with `lib/pkp` at the merge (`side.sh merge`): every mode
 reads as at the head.
 Issue report: [pkp-e2e#927](https://github.com/jardakotesovec/pkp-e2e/issues/927), closed 2026-10-13 with the fix; the report, its `fix.diff` and its place under `checks/issues/` deleted at the PR review (git keeps them).
-
-<a id="fn-f-a23"></a>
-**f-a23 — A23 evidence.** `PKP\citation\Repository::copyCitations()`
-(called by `publication\Repository::version()`) inserts each citation
-with its data, `processingStatus` included; the queued chain's jobs carry
-the original's `citationId`. At the PR heads of `pkp/pkp-lib#13308`
-(pkp-lib `0dc8d84fc7`, ui-library `0185ab12`, the ojs#5812 app commit;
-2026-10-06, OJS, PKP's default dataset, submission 17 and its one
-publication 18, kept check
-`shared/playwright/checks/sync/ui-library-982/version.js`): lookup on,
-publication 18 unpublished, three references added (stored status 1, the
-box "Processing references - 0/3"), published, a new version (22) made
-by REST; the copies 4, 5 and 6 at status 1, the queued jobs carrying
-citation ids 1, 2 and 3; the originals then set to 5 by SQL (what
-`IsProcessedJob::handle()` writes): the new version's box read
-"Processing references - 0/3" and the page fetched the submission and
-the publication three times each in 22 s. Before, at the tips (pkp-lib
-`5a5ab2d6c7`, ui-library `a36dc7fe`), the same walk showed no box and no
-fetches, the copies at status 1 just the same (never looked up, nothing
-on screen says so). OMP and OPS share `copyCitations()` (code; not
-walked).
-Round 3 (pkp-lib `8653c678b7`; the same walk, OJS): the queued jobs
-carried the copies' ids 4, 5 and 6 beside 1, 2 and 3; with the originals
-set to 5 the new version read "Processing references - 0/3" (its copies'
-own lookups under way), and with the copies set to 5 too, "All 3
-references successfully processed" and no fetch in 22 s (facts
-`version-facts-pr-r4-ojs`).
 
 <a id="fn-f-a24"></a>
 **f-a24 — A24 evidence.** ui-library
@@ -3147,10 +2957,6 @@ links `https://doi.org/10.1234/f8)`. The same pattern and trim are in
 lookup's first step drops the bracket (Rule 11), so the References row
 of the same reference links `https://doi.org/10.1234/f8`. Live-probed
 2026-10-21: note q26.
-
-<a id="fn-f-omp1"></a>
-**f-omp1 — OMP1 evidence.** Note p. Live-probed 2026-09-24: f-a20, where
-the finding continues as A20.
 
 ## Reference — entry points & surfaces
 

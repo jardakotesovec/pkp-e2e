@@ -927,7 +927,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | A static page and a "Custom Page" item can take the same path, and the static page is then unreachable | ❓ | minor | — |
 | [A8](#a8) | The site's Plugins list offers "Static Pages Plugin", and ticking it changes nothing | ❓ | minor | — |
 | [A9](#a9) | "Paste" on the editor's bar pastes nothing and asks for the keyboard instead | ❓ | minor | — |
-| [A14](#a14) | Retired: a custom block could not be deleted on PostgreSQL, "OK" spinning and the block staying; "OK" now removes it (Rule 24) | ✅ | retired | PR review (claude), 2026-11-04 — fixed upstream (pkp/pkp-lib#13690) |
 
 ### All apps
 
@@ -1251,7 +1250,7 @@ Report: none — pkp-e2e#376 closed 2026-10-14 at the merge of the fix, `pkp/pkp
 ### Retired
 
 <a id="a14"></a>
-**A14 — A custom block could not be deleted on PostgreSQL** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13692](https://github.com/pkp/pkp-lib/pull/13692) on main, [pkp/pkp-lib#13691](https://github.com/pkp/pkp-lib/pull/13691) on 3.5, issue [pkp/pkp-lib#13690](https://github.com/pkp/pkp-lib/issues/13690)), 2026-11-04: on an installation whose database is PostgreSQL, "OK" in a custom block's "Delete" window left the window open with a spinner while the server failed, and the block stayed in the Custom Block Manager's list, the public sidebar and "Sidebar"; "OK" now removes it from all three (Rule 24). <sup>f-a14</sup>
+**A14 — A custom block could not be deleted on PostgreSQL** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13692, for pkp/pkp-lib#13690).
 
 ---
 

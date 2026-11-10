@@ -1303,8 +1303,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OMP1](#omp1) | A press counts series-page visits that no page shows | ✅ | invisible | — |
 | [OMP2](#omp2) | A press offers "Filters" only while it has a series, and names abstract views "Catalog Entries" | ✅ | minor | — |
 | [OPS1](#ops1) | A preprint server offers "Filters" only with two or more sections | ✅ | minor | — |
-| [OMP3](#omp3) | Retired: a book's PDF or "Appendix" file failed to open, so its visit was never counted; both now open and count (Rule 1) | ✅ | retired | upstream sync (claude), 2026-10-05 — fixed upstream (omp `8c807c919`, pkp/pkp-lib#13444) |
-| [A6](#a6) | Retired: In French (Canada), a press's and a preprint server's statistics pages and site statistics settings show codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1766,10 +1764,10 @@ Basis: probe, 2026-09-27. <sup>f-ops1</sup>
 ### Retired
 
 <a id="omp3"></a>
-**OMP3 — A book's PDF or "Appendix" file is never counted** · ✅ · retired. Fixed upstream by omp `8c807c919` (pkp/pkp-lib#13444), verified 2026-10-05 on OMP: from the book page a book's PDF opens in its viewer and downloads, its "Appendix" file downloads, and each visit is counted, the PDF under "File Views" and "PDF" on "Monographs" and the "Appendix" file as a "Supplementary File" in "Download Files" (Rule 1). <sup>f-omp3</sup>
+**OMP3 — A book's PDF or "Appendix" file is never counted** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13444).
 
 <a id="a6"></a>
-**A6 — In French (Canada), a press's and a preprint server's statistics pages and site statistics settings show codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a6</sup> <sup>v</sup> <sup>td8</sup>
+**A6 — In French (Canada), a press's and a preprint server's statistics pages and site statistics settings show codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -2292,22 +2290,6 @@ first work read Total 2 and the second left the table; on again, both
 rows and their figures returned. Whether a JATS view is recorded while
 the plugin is off needs the daily processing (Rule 5).
 
-<a id="fn-v"></a>
-**v** — OMP's and OPS's `locale/fr_CA` files hold empty strings for
-`admin.settings.statistics.{geo,institutions,sushi.public}.description`,
-`stats.publicationStats`, `stats.contextStats`,
-`stats.publications.{abstracts,details,none,countOfTotal}`,
-`stats.publications.downloadReport.*`,
-`stats.publications.totalAbstractViews.timelineInterval`,
-`stats.publications.totalGalleyViews.timelineInterval` and
-`stats.context.{tooltip,downloadReport}.*`; OMP also
-`common.publications`. OJS's are translated, except that its French
-"Articles" heads the JATS column "##stats.jats##". Seen 2026-09-26 (U60
-claim check K2): Administration › Site Settings › "Statistiques" on a
-press and a preprint server showed the three
-`##admin.settings.statistics…##` codes. Live-probed 2026-09-27 (Rule 6;
-A6): td8.
-
 <a id="fn-w"></a>
 **w** — No screen of a test install shows these, because nothing turns
 the day's log into figures there (Rule 5): the daily processing and
@@ -2499,23 +2481,6 @@ file, while its "Collect the visitor's country" held after reopening
 and gave `stats_countries_…`. Control: a journal never saved showed the
 site's level chosen and "Geographic".
 
-<a id="fn-td8"></a>
-**td8** — Live-probed 2026-09-27 (Rule 6; A6), three apps, in French:
-OMP's "Monographs" page showed "##stats.publicationStats##" (browser
-tab), "##common.publications##" (heading and window panel),
-"##stats.publications.details##", "##stats.publications.countOfTotal##",
-"##stats.publications.abstracts##" (chart button) and
-"##stats.publications.totalAbstractViews.timelineInterval##", and its
-window "##stats.publications.downloadReport.description##",
-"##stats.publications.downloadReport.downloadSubmissions.description##"
-and "##stats.publications.downloadReport.downloadSubmissions##"; the
-"Press" page "##stats.contextStats##", "##stats.context.tooltip.label##"
-and its window's three `##stats.context.downloadReport…##` codes. OPS the
-same, except its heading "Prépublications". The site's "Statistiques"
-tab showed the three codes on OMP and OPS, French text on OJS. OJS's
-pages and windows were French except the "JATS" column heading,
-"##stats.jats##".
-
 <a id="fn-td9"></a>
 **td9** — Live-probed 2026-09-27 (Rules 16, 17), three apps, as
 `manager.maya` on `publicknowledge` at "Last 30 days": "Download
@@ -2635,9 +2600,6 @@ fn-b (`counterR5` open to `ROLE_ID_SUB_EDITOR`); the list's fetch is
 `CounterReportsListPanel.vue`'s, and its 401 reaches the "Error" window
 through `ajaxErrorCallback()`. Live-probed 2026-09-27: td6.
 Issue report: [docs/issues/U64-A5-section-editor-counter-r5-error-while-restricted.md](../issues/U64-A5-section-editor-counter-r5-error-while-restricted.md), filed as [pkp-e2e#611](https://github.com/jardakotesovec/pkp-e2e/issues/611).
-
-<a id="fn-f-a6"></a>
-**f-a6** — fn-v. Live-probed 2026-09-27: td8.
 
 <a id="fn-f-a7"></a>
 **f-a7** — Live-probed 2026-09-27, three apps: the icons (`.tooltipButton`)
@@ -2894,31 +2856,6 @@ figures.
 <a id="fn-f-omp2"></a>
 **f-omp2** — fn-e (OMP `StatsHandler::addSectionFilters()`), fn-d (OMP
 `stats.publications.abstracts`). Live-probed 2026-09-27: td14.
-
-<a id="fn-f-omp3"></a>
-**f-omp3** — Live-probed 2026-09-27, OMP scratch press, signed out:
-`catalog/view/{book}/{format}/{file}` answered 500 for the "Appendix"
-file (a blank page); the PDF's view page opened with an empty viewer,
-its `catalog/download/{book}/{format}/{file}?inline=1` answering 500
-and the page's script failing with "PDFJS is not defined" (a separate
-fault of the view page, [Monograph landing page, A23](U69-monograph-landing-page.md#a23))
-and "UnexpectedResponseException". Neither wrote a line to the day's usage
-log; the HTML format wrote one. The same failure is U20's OMP6.
-Re-probed 2026-10-05 after omp `8c807c919` (pkp/pkp-lib#13444), OMP
-scratch press, signed out and as a Reader, two runs: the PDF's view page
-rendered its page with no error bar,
-`catalog/download/{book}/{format}/{file}?inline=1` answering 200
-`application/pdf` (the page's script still fails with "PDFJS is not
-defined", [Monograph landing page, A23](U69-monograph-landing-page.md#a23));
-the bar's "Download", the "Appendix" link and, with "PDF.js PDF Viewer"
-unticked, the "PDF" link each saved the file. The day's usage log took a
-PDF file line (515) for the view and for "Download", a supplementary
-line (531) for "Appendix" and one HTML line for the HTML file. After the
-"Usage statistics file loader task" ran on them, "Monographs" read
-"File Views" 2 ("PDF" 1, "HTML" 1), and "Download Files" listed the PDF
-and HTML files as "Primary File" and the "Appendix" file as
-"Supplementary File".
-Issue report: [pkp-e2e#282](https://github.com/jardakotesovec/pkp-e2e/issues/282) (closed 2026-10-05, fixed by omp `8c807c919`).
 
 <a id="fn-f-omp4"></a>
 **f-omp4** — Live-probed 2026-10-05, OMP scratch press, two runs, as each

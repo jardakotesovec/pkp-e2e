@@ -700,7 +700,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | A failed job's "Delete" removes it for good without asking | ❓ | minor | — |
 | [A5](#a5) | Neither "Delete Caches" button empties the stored copies of public pages | ❓ | latent | — |
 | [OMP1](#omp1) | A press's newer-release notice links "the PKP website" where the others link "this page" | ✅ | minor | — |
-| [A7](#a7) | Retired: On a press or preprint server in French (Canada), Administration shows a code under "Gestion du site" | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -791,7 +790,7 @@ Basis: code. <sup>f-omp1</sup>
 ### Retired
 
 <a id="a7"></a>
-**A7 — On a press or preprint server in French (Canada), Administration shows a code under "Gestion du site"** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a7</sup>
+**A7 — On a press or preprint server in French (Canada), Administration shows a code under "Gestion du site"** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 

@@ -1334,8 +1334,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | "APA" prints a series position as a number of volumes | ❓ | minor | — |
 | [A14](#a14) | A chapter new in a later version is cited as older than it is | ❓ | minor | — |
 | [A28](#a28) | A screen reader meets two "Downloads" headings on a book's page, the chart's with nothing to read under it | ❓ | minor | — |
-| [A3](#a3) | Retired: a version address that named no version failed with a server error; it now answers "404 Not Found" | ✅ | retired | PR review (claude), 2026-11-02 — fixed by pkp/pkp-lib#13657 |
-| [A9](#a9) | Retired: on a press, a reader who opened a book's PDF got an empty viewer, and no download saved the file; every free file now opens or downloads (Rule 13) | ✅ | retired | upstream sync (claude), 2026-10-05 — fixed by omp `8c807c919` (pkp/pkp-lib#13444) |
 
 ### All apps
 
@@ -1726,10 +1724,10 @@ Basis: probe, 2026-10-27. <sup>f-a28</sup>
 ### Retired
 
 <a id="a3"></a>
-**A3 — A version address that named no version failed with a server error** · ✅ · retired. Fixed by pkp/omp#2530 (`main`) and #2531 (`stable-3_5_0`), merged 2026-10-30, for pkp/pkp-lib#13657: a version address whose id names none of the book's versions, letters included, answers "404 Not Found" (Rule 4). <sup>f-a3</sup>
+**A3 — A version address that named no version failed with a server error** · ✅ · retired. Fixed upstream (pkp/omp#2530, for pkp/pkp-lib#13657).
 
 <a id="a9"></a>
-**A9 — On a press, a reader who opens a book's PDF gets an empty viewer, and no download saves the file** · ✅ · retired. Fixed by omp `8c807c919` (pkp/pkp-lib#13444), 2026-10-05: every free file of a book now opens in its view page or downloads under its file name, for visitors and signed-in users alike, and counts as a file view (Rule 13; Side effects). <sup>f-a9</sup>
+**A9 — On a press, a reader who opens a book's PDF gets an empty viewer, and no download saves the file** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13444).
 
 ---
 
@@ -1962,21 +1960,6 @@ Issue report: [pkp-e2e#292](https://github.com/jardakotesovec/pkp-e2e/issues/292
 
 <a id="fn-f-a2"></a>
 **f-a2** — Note g (`getStatusByPublications()` needs a published Version of Record); `canPreview()` lets the Press manager and the Site Administrator in, and the shown publication is published, so no preview notice prints. Live-probed 2026-09-28 (td3): the book's page answered 404 to a visitor and a Reader and opened as published for the Press manager and the Site Administrator; the workflow showed the Author's Original "Status: Published", the Version of Record "Status: Unpublished", and neither "View" nor "Preview". The catalog's leaving it out is Catalog browse's Rule 3.
-
-<a id="fn-f-a3"></a>
-**f-a3** — Note g: the uninitialized typed property `CatalogBookHandler::$publication` when `version/{id}` matches no publication of the submission; the log reads "Typed property APP\pages\catalog\CatalogBookHandler::$publication must not be accessed before initialization" (`CatalogBookHandler.php` line 122). The typed property dates from omp `29fa88508` (2025-03-20). Live-probed 2026-09-28 (td6): 500 for every id tried and every role.
-Issue report: [pkp-e2e#285](https://github.com/jardakotesovec/pkp-e2e/issues/285), closed.
-Retired 2026-11-02: `pkp/pkp-lib#13657`. `pkp/omp#2530` (merge `e7704463ea`) and its
-3.5 port `pkp/omp#2531` (`e9697aaf7e`) turn `$publication` into
-`?Publication = null` and answer 404 for a version segment that is not
-all digits, in `book()` and in `download()` (behind `catalog/view` and
-`catalog/download`); the 3.4 and 3.3 ports `pkp/omp#2533` and #2532 add
-the `download()` check alone (the book page there never failed).
-Reviewed before the merge (report deleted), each merge carrying the
-reviewed head's patch unchanged; walked again at the merge tips on fresh datasets (OMP `main`
-`853bf3b05`, `stable-3_5_0` `9e2a7fd00`, `stable-3_4_0` `e92ae5b6d`,
-`stable-3_3_0` `220e3e2f7`): every such address 404 with no server log
-line, the book and its own version 200.
 
 <a id="fn-f-a4"></a>
 **f-a4** — `monograph_full.tpl` prints `submission.viewingPreview` for any unpublished publication and `submission.outdatedVersion` for any publication that is not the current one, with that publication's empty `datePublished`, which prints as today (note h). Live-probed 2026-09-28 (td7). Live-probed 2026-10-05 (Rule 5b; four runs): the new version's preview read "This is an outdated version published on 2026-10-05. Read the most recent version." with no date saved, and "…published on 2025-01-15." once "Date Published" 2025-01-15 was saved on the version's "Catalog Entry".

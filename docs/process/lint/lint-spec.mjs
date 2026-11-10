@@ -186,6 +186,21 @@ function checkCoverage(doc, out) {
 
 const MARKER_RE = /(⚠\s*)?\[([A-Z]{1,3}\d+)\]\(#([a-z]{1,3}\d+)\)/g;
 
+// A retired entry is one short line: "**A5 — title** · ✅ · retired. <one short reason>." Git, the closed
+// issue and the fixing PR keep the history, so a date, a commit, a footnote mark or a second line is a finding.
+const RETIRED_REASON_WORDS = 15;
+const SHA_RE = /\b(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}\b/;
+function checkRetiredLine(e, head, next, out) {
+    const bad = (msg) => out.push({ line: e.line, check: 'register', msg: `retired entry ${e.id} ${msg} (TEMPLATE "Findings register")` });
+    const m = head.match(/·\s*✅\s*·\s*retired\.\s+(\S.*)$/);
+    if (!m) bad('reads "**ID — title** · ✅ · retired. <reason>." on one line');
+    else if (m[1].split(/\s+/).length > RETIRED_REASON_WORDS) bad(`gives one short reason, at most ${RETIRED_REASON_WORDS} words`);
+    if (next.trim() && !/^(<a id=|---\s*$|#{2,3}\s)/.test(next)) bad('is one line, with nothing under it');
+    if (/<sup>/.test(head)) bad('carries no footnote mark');
+    if (/\b20\d\d-\d\d-\d\d\b/.test(head)) bad('carries no date');
+    if (SHA_RE.test(head)) bad('carries no commit');
+}
+
 function checkRegister(doc, out) {
     if (doc.registerStart >= doc.tailStart) { out.push({ line: 1, check: 'register', msg: 'no "## Findings register" section' }); return; }
     const entries = [], summary = [];
@@ -203,20 +218,26 @@ function checkRegister(doc, out) {
             const crash = crashWord(head);
             if (crash && !CRASH_WORDS.includes(crash))
                 out.push({ line: i + 2, check: 'register', msg: `entry ${hm[1]} crash word "${crash}" is not one of ${CRASH_WORDS.join(' / ')}` });
-            entries.push({ id: hm[1], anchor: anchor[1], badge, crash, line: i + 2, group: doc.h3[i] || '' });
+            const entry = { id: hm[1], anchor: anchor[1], badge, crash, line: i + 2, group: doc.h3[i] || '' };
+            entry.retired = /^retired/i.test(entry.group);
+            entries.push(entry);
+            if (entry.retired) checkRetiredLine(entry, head, doc.lines[i + 2] || '', out);
+            else if (/·\s*retired\.?\s*$|·\s*retired\.\s/.test(head) || (/·\s*$/.test(head) && /^retired\./.test(doc.lines[i + 2] || '')))
+                out.push({ line: i + 2, check: 'register', msg: `entry ${hm[1]} is retired outside the "### Retired" block — it moves there as one line (TEMPLATE "Findings register")` });
             continue;
         }
         const row = line.match(/^\|\s*\[([A-Z]{1,3}\d+)\]\(#([a-z]{1,3}\d+)\)\s*\|/);
         if (row) summary.push({ id: row[1], badge: BADGES.find((b) => line.includes(b)) || null, crash: crashWord(line), line: i + 1 });
     }
-    // summary table ↔ entries, 1:1 on ID and badge, sorted 🐞 → ❓ → ✅
+    // summary table ↔ live entries, 1:1 on ID and badge, sorted 🐞 → ❓ → ✅; a retired entry has no row
     for (const s of summary) {
         const e = entries.find((x) => x.id === s.id);
         if (!e) out.push({ line: s.line, check: 'register', msg: `summary row ${s.id} has no entry` });
+        else if (e.retired) out.push({ line: s.line, check: 'register', msg: `summary row ${s.id}: a retired entry keeps no summary row (TEMPLATE "Findings register")` });
         else if (e.badge && s.badge !== e.badge) out.push({ line: s.line, check: 'register', msg: `summary row ${s.id} badge ${s.badge || '(none)'} ≠ entry badge ${e.badge}` });
         else if ((e.crash || s.crash) && e.crash !== s.crash) out.push({ line: s.line, check: 'register', msg: `summary row ${s.id} crash word ${s.crash || '(none)'} ≠ entry crash word ${e.crash || '(none)'}` });
     }
-    for (const e of entries) if (!summary.some((s) => s.id === e.id))
+    for (const e of entries) if (!e.retired && !summary.some((s) => s.id === e.id))
         out.push({ line: e.line, check: 'register', msg: `entry ${e.id} is missing from the summary table` });
     for (let i = 1; i < summary.length; i++) {
         const [a, b] = [summary[i - 1], summary[i]];
@@ -234,7 +255,7 @@ function checkRegister(doc, out) {
             if (num(e, prefix) !== n + 1)
                 out.push({ line: e.line, check: 'register', msg: `${prefix} IDs must be dense — expected ${prefix}${n + 1}, found ${e.id}` });
         });
-        const live = list.filter((e) => !/^retired/i.test(e.group));
+        const live = list.filter((e) => !e.retired);
         for (let i = 1; i < live.length; i++)
             if (num(live[i], prefix) < num(live[i - 1], prefix))
                 out.push({ line: live[i].line, check: 'register', msg: `${prefix} IDs must be in order — ${live[i].id} after ${live[i - 1].id}` });
@@ -257,7 +278,7 @@ function checkRegister(doc, out) {
         }
     }
     for (const e of entries) {
-        if (/^retired/i.test(e.group)) continue; // TEMPLATE: a retired entry is one line, no body marker needed
+        if (e.retired) continue; // TEMPLATE: a retired entry is one line, no body marker needed
         if (!marked.has(e.id)) out.push({ line: e.line, check: 'register', msg: `entry ${e.id} is never marked in the body` });
         else if (e.badge && e.badge !== '✅' && !warned.has(e.id))
             out.push({ line: e.line, check: 'register', msg: `entry ${e.id} (${e.badge}) has no ⚠ marker in the body — the home mention carries ⚠` });
@@ -305,17 +326,30 @@ function checkLinks(doc, out) {
             }
             if (exists && anchorPart && !anchorsOf(resolved).has(anchorPart))
                 out.push({ line: i + 1, check: 'links', msg: `anchor does not resolve: ${target}` });
+            else if (!filePart && /^fn-/.test(anchorPart || '')) usedFootnotes.add(anchorPart);
         }
         for (const { raw, id } of supMarks(doc.lines[i])) {
             if (!localAnchors.has(id)) out.push({ line: i + 1, check: 'links', msg: `footnote mark <sup>${excerpt(raw, 20)}</sup> has no block #${id}` });
             else usedFootnotes.add(id);
         }
     }
-    // every footnote block in the tail is reached by at least one mark
+    // every footnote block in the tail is reached by at least one mark, by a link to its anchor, or
+    // by another line naming its label ("see f-a20"; hyphenated labels only, a plain "a" proves nothing)
+    const named = new Map();
+    for (let i = 0; i < doc.lines.length; i++) {
+        if (doc.skip[i]) continue;
+        for (const m of doc.lines[i].matchAll(/(?<![\w#-])\w+(?:-\w+)+(?![\w-])/g)) (named.get(m[0]) || named.set(m[0], []).get(m[0])).push(i);
+    }
     for (let i = doc.tailStart; i < doc.lines.length; i++) {
         if (doc.skip[i]) continue;
-        for (const m of doc.lines[i].matchAll(/<a id="(fn-[^"]+)"><\/a>/g))
-            if (!usedFootnotes.has(m[1])) out.push({ line: i + 1, check: 'links', msg: `footnote block #${m[1]} has no mark in the body` });
+        for (const m of doc.lines[i].matchAll(/<a id="(fn-[^"]+)"><\/a>/g)) {
+            if (usedFootnotes.has(m[1])) continue;
+            let end = i + 1;
+            while (end < doc.lines.length && !/^(<a id=|##\s)/.test(doc.lines[end])) end++;
+            const label = ((doc.lines[i + 1] || '').match(/^\*\*([^*]+)\*\*/) || [])[1]?.trim();
+            if ((named.get(label) || []).some((n) => n < i || n >= end)) continue;
+            out.push({ line: i + 1, check: 'links', msg: `footnote block #${m[1]} has no mark in the body` });
+        }
     }
 }
 
@@ -371,7 +405,7 @@ function claimItems(doc) {
         if (/^#{1,6}\s/.test(l)) { cur = null; inEntry = false; sectionItems = []; continue; }
         if (!l.trim() || /^---\s*$/.test(l) || /^\*[^*]+:\*\s*$/.test(l)) { cur = null; inEntry = false; continue; } // blank, rule, *"Profile" section:*
         if (/^<a id="[^"]+"><\/a>\s*$/.test(l)) { cur = null; inEntry = true; continue; }
-        if (/^Findings register/.test(doc.h2[i]) && !inEntry) continue;
+        if (/^Findings register/.test(doc.h2[i]) && (!inEntry || /^retired/i.test(doc.h3[i]))) continue;
         if (/^\|/.test(l)) {
             if (isSep(l) || isSep(doc.lines[i + 1] || '')) { cur = null; continue; }
             cur = { indent: 0, parent: null, lines: [] }; items.push(cur); sectionItems.push(cur);
@@ -825,12 +859,27 @@ function selfTest() {
         console.log(`${hit ? 'pass ' : 'FAIL'} ${check} — ${excerpt(to, 60)}`);
         if (!hit) { fails++; findings.forEach((f) => console.log(`      (got ${f.check}: ${f.msg})`)); }
     }
-    // a one-line entry under "### Retired" needs no body marker (TEMPLATE "Findings register")
-    const retired = GOOD.replace('---\n\n<a id="footnotes"></a>', '### Retired\n\n<a id="a2"></a>\n**A2 — Old finding** · ✅ · retired. Fixed upstream. <sup>[f-a1](#fn-a1)</sup>\n\n---\n\n<a id="footnotes"></a>')
-        .replace('| [OMP1](#omp1) | The press flow lands on the catalog step | ✅ | minor | — |', '| [OMP1](#omp1) | The press flow lands on the catalog step | ✅ | minor | — |\n| [A2](#a2) | Retired: old finding | ✅ | retired | — |');
-    const rf = lintFile(write(retired));
-    if (rf.length) { fails++; console.log('FAIL retired-block fixture produced findings:'); rf.forEach((f) => console.log(`  line ${f.line} — ${f.check} — ${f.msg}`)); }
-    else console.log('pass  retired-block entry without a body marker — 0 findings');
+    // a "### Retired" entry is one short line: no summary row, no footnote, no body marker (TEMPLATE "Findings register")
+    const RLINE = '**A2 — Old finding** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13188).';
+    const retired = GOOD.replace('---\n\n<a id="footnotes"></a>', `### Retired\n\n<a id="a2"></a>\n${RLINE}\n\n---\n\n<a id="footnotes"></a>`);
+    const OMP_ROW = '| [OMP1](#omp1) | The press flow lands on the catalog step | ✅ | minor | — |';
+    const retiredCases = [
+        ['the short retired line passes', retired, false],
+        ['a retired row in the summary', retired.replace(OMP_ROW, `${OMP_ROW}\n| [A2](#a2) | Retired: old finding | ✅ | retired | — |`), true],
+        ['a retired line with a date', retired.replace(RLINE, RLINE.replace('#13188).', '#13188), 2026-08-25.')), true],
+        ['a retired line with a footnote mark', retired.replace(RLINE, `${RLINE} <sup>[f-a1](#fn-a1)</sup>`), true],
+        ['a retired line with a commit', retired.replace(RLINE, RLINE.replace('(pkp/pkp-lib#13188)', '(pkp-lib `a36dc7fe78`)')), true],
+        ['a retired entry of two lines', retired.replace(RLINE, `${RLINE}\nThe tab reads the journal name on all three apps.`), true],
+        ['a retired line with a long reason', retired.replace(RLINE, RLINE.replace('Fixed upstream', 'Fixed upstream and then walked again on a journal, a press and a preprint server by the housekeeping session')), true],
+        ['a retired entry left outside the Retired block', retired.replace('### Retired\n\n', ''), true],
+        ['a footnote only another footnote names', GOOD.replace(' <sup>[f-omp1](#fn-omp1)</sup>', '').replace('omits the resubmitted status.', 'omits the resubmitted status (f-omp1).'), false],
+    ];
+    for (const [name, text, wantHit] of retiredCases) {
+        const findings = lintFile(write(text));
+        const ok = wantHit ? findings.some((f) => f.check === 'register') : findings.length === 0;
+        console.log(`${ok ? 'pass ' : 'FAIL'} retired — ${name}`);
+        if (!ok) { fails++; findings.forEach((f) => console.log(`      (got ${f.check}: ${f.msg})`)); }
+    }
     // Coverage (TEMPLATE "Coverage"): the draft table passes as draft and fails as verified; the final
     // shape is the "Left out" bullets alone, with reason words, no guard cut, no date, no table
     const draftCov = GOOD.replace('## Findings register', '## Coverage\n\n| Who, state or setting | Class | Runs in | Why not |\n|---|---|---|---|\n| Editor (Actors row 1) | main | planned | |\n\n## Findings register');

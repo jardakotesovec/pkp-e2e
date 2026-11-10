@@ -1584,9 +1584,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | Without payments set up, a signed-in reader pressing a locked galley lands on the home page with no word | ❓ | user-visible | — |
 | [A6](#a6) | With the manual method, a bought article or issue never opens | ❓ | user-visible | — |
 | [A32](#a32) | On a journal that requires subscriptions, an article published with no issue stays restricted, and no screen can make it open access | ❓ | user-visible | — |
-| [A2](#a2) | Retired: a "Cost" or "Duration" that is not a number is refused with a notice | ✅ | retired | — |
-| [A3](#a3) | Retired: "Subscription Policies" refuses an empty contact name, email or mailing address | ✅ | retired | — |
-| [A30](#a30) | Retired: an article published with no issue follows the journal's subscription and "registered readers" restrictions | ✅ | retired | — |
 
 ### All apps
 
@@ -2008,13 +2005,13 @@ chrome](U08-navigation-menus-and-site-chrome.md), its OPS2;
 ### Retired
 
 <a id="a2"></a>
-**A2 — A non-numeric cost or duration fails silently** · ✅ · retired. Overturned on screen 2026-09-25: a "Cost" of "forty" or "-5", or a "Duration" of "a" or "-1", keeps the subscription type window open with a notice reading "The cost must be a positive, numeric value." or "The duration must be a positive, numeric value." (Rule 15); the code reading behind the entry did not hold. <sup>f-a2</sup>
+**A2 — A non-numeric cost or duration fails silently** · ✅ · retired. Overturned: not a bug.
 
 <a id="a3"></a>
-**A3 — Required-marked policy fields save empty** · ✅ · retired. Overturned on screen 2026-09-25: "Save" on "Subscription Policies" with the contact's "Name", "Email" or "Mailing Address" empty shows "This field is required." under it and saves nothing (Rule 24); the code reading behind the entry did not hold. <sup>f-a3</sup>
+**A3 — Required-marked policy fields save empty** · ✅ · retired. Overturned: not a bug.
 
 <a id="a30"></a>
-**A30 — An article published with no issue opens its galleys to everyone, past the subscription and "registered readers" restrictions** · ✅ · retired. Fixed upstream (OJS `dde4cc70f4`, pkp/pkp-lib#13594), 2026-10-21: on a journal that requires subscriptions, an article published with "Don't Assign To An Issue" is now restricted like one in a restricted issue, and with "Users must be registered…" ticked a signed-out visitor pressing its galley gets the Login page (Rule 7). <sup>f-a30</sup>
+**A30 — An article published with no issue opens its galleys to everyone, past the subscription and "registered readers" restrictions** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13594).
 
 ---
 

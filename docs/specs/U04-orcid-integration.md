@@ -776,11 +776,7 @@ are the source; badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a
 | [A20](#a20) | Deleting a contributor's unauthenticated iD asks ORCID to cancel a token it never had | ❓ | latent | — |
 | [A24](#a24) | "Resend Verification Email" sends nothing while the first request email still waits to go out | ❓ | latent | — |
 | [OPS1](#ops1) | The author-email toggle exists on a preprint server that can never trigger it | ❓ | latent | — |
-| [A9](#a9) | Retired: the site's "ORCID" tab was read as absent on a single-journal install. It now shows whatever the number of journals (pkp/pkp-lib#13493) | ✅ | retired | PR review (claude), 2026-10-09 — the question is gone at the PR head, before its merge |
-| [A10](#a10) | Deleting a contributor's unauthenticated iD fails: the confirm never completes and the iD stays (regression, pkp/pkp-lib#13003) | ✅ | retired | rebase check (claude), 2026-09-03 — fixed upstream (pkp-lib `ecd12271ed` + `d9e9b3fc7c`), suites green on all three apps |
-| [A12](#a12) | Retired: in French, the contributor's ORCID iD field shows raw codes for its button, questions and notes | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [OMP1](#omp1) | A press requests and verifies iDs but deposits no works | ✅ | user-visible | — |
-| [OPS3](#ops3) | Retired: a preprint server bundled the legacy ORCID Profile plugin. No app ships it now (removed upstream, pkp/pkp-lib#9771) | ✅ | retired | drift sweep (claude), 2026-10-16 — gone in every app |
 
 ### All apps
 
@@ -1181,16 +1177,16 @@ Basis: probe, issue report walk, 2026-10-02. <sup>[f-ops2](#fn-ops2)</sup>
 ### Retired
 
 <a id="a9"></a>
-**A9 — Site ORCID tab on a single-journal install** · ✅ · retired. The question is gone: the tab no longer depends on the number of journals (pkp/pkp-lib#13493, seen at the PR head before its merge), 2026-10-09. <sup>[f-a9](#fn-a9)</sup>
+**A9 — Site ORCID tab on a single-journal install** · ✅ · retired. Settled upstream (pkp/pkp-lib#13493).
 
 <a id="a10"></a>
-**A10 — Deleting a contributor's iD fails outright** · ✅ · retired. Fixed upstream (pkp-lib `ecd12271ed` + `d9e9b3fc7c`, pkp/pkp-lib#13003 follow-ups), 2026-09-03. <sup>[f-a10](#fn-a10)</sup>
+**A10 — Deleting a contributor's iD fails outright** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13003).
 
 <a id="a12"></a>
-**A12 — French: the contributor's ORCID iD field shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-a12](#fn-a12)</sup>
+**A12 — French: the contributor's ORCID iD field shows raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="ops3"></a>
-**OPS3 — Legacy ORCID Profile plugin ships alongside the built-in feature** · ✅ · retired. Gone: no app bundles the plugin any more (removed upstream, pkp/pkp-lib#9771), seen 2026-10-16 (Rule 16). <sup>[f-ops3](#fn-ops3)</sup>
+**OPS3 — Legacy ORCID Profile plugin ships alongside the built-in feature** · ✅ · retired. Gone: the plugin was removed upstream (pkp/pkp-lib#9771).
 
 ---
 
@@ -1995,19 +1991,6 @@ landing (`orcid.failure.contact`, note f) — no per-app recast. Live-probed
 sentence verbatim, "journal manager" unchanged.
 Issue report: [pkp-e2e#738](https://github.com/jardakotesovec/pkp-e2e/issues/738) ([docs/issues/U04-A8-orcid-failure-page-says-journal-manager.md](../issues/U04-A8-orcid-failure-page-says-journal-manager.md)).
 
-<a id="fn-a9"></a>
-**f-a9** — The entry asked whether the site's "ORCID" tab is really
-absent on a single-journal install; it rested on note b's gate as it
-then read (the tab followed `$isMultiContextSite`), the test installs
-all hosting several journals (2026-08-07). Retired 2026-10-09:
-pkp/pkp-lib#13493 (issue pkp/pkp-lib#13283) sets
-`componentAvailability['orcidSiteSettings']` to `true` whatever the
-context count. Live-probed 2026-10-09 at the PR head `e29a720de0`, before its merge
-(OJS, OMP and OPS, on PKP's default test dataset, whose install hosts
-one journal): Site Settings showed "Site Setup" with "Security",
-"Languages", "Bulk Emails", "Statistics" and "ORCID", and "ORCID" stayed
-the last "Site Setup" side tab once a second journal existed (note b).
-
 <a id="fn-a10"></a>
 **f-a10** — POST `api/v1/orcid/deleteForAuthor/{authorId}` answers 500
 with `{"error":"Failed to serialize job of type
@@ -2049,12 +2032,6 @@ every Site Settings load, from the Plugin Gallery's list
 ([Plugins management A1](U62-plugins-management.md#a1)); the ORCID tab
 itself failed nothing, so the entry carries no crash word.
 Issue report: [pkp-e2e#739](https://github.com/jardakotesovec/pkp-e2e/issues/739) ([docs/issues/U04-A11-orcid-tabs-named-after-old-plugin.md](../issues/U04-A11-orcid-tabs-named-after-old-plugin.md)).
-
-<a id="fn-a12"></a>
-**f-a12** — Note n (every code, the two requests answering 200, the
-locale cause). Seen identically on OJS, OMP and OPS in two runs,
-2026-09-28, with no failure behind either request; the English field on
-the same journals is the control.
 
 <a id="fn-a13"></a>
 **f-a13** — Note d: `identityForm.tpl` renders `#deleteOrcidButton` and its
@@ -2316,20 +2293,6 @@ templates; same mechanism as the invitation-template gap recorded in
 verification" on a preprint contributor delivered the "Submission ORCID"
 email (positive control).
 Issue report: [pkp-e2e#519](https://github.com/jardakotesovec/pkp-e2e/issues/519) ([docs/issues/U06-OPS1-preprint-emails-list-misses-sent-emails.md](../issues/U06-OPS1-preprint-emails-list-misses-sent-emails.md)).
-
-<a id="fn-ops3"></a>
-**f-ops3** — `ops-main/plugins/generic/orcidProfile` (submodule, release
-1.3.4.3 / 2023-02-17, lazy-load) — the pre-3.5 plugin generation; absent
-from `ojs-main`/`omp-main` plugin trees. OPS also carries the full built-in
-integration (`ops-main/classes/orcid/*` mirroring OJS minus reviews). An
-`OrcidProfileEmailDataMigration` class inside the plugin suggests it is
-kept for upgrade data migration. Live-probed 2026-08-07: OPS Website
-Settings → Plugins lists one row among Generic Plugins — "ORCID Profile
-Plugin", "Allows for the import of user profile information from ORCID.",
-enable box present and unchecked (enabling not exercised), no error
-rendered; OJS and OMP list no ORCID plugin row (absence controls).
-Retired 2026-10-16: no app lists the plugin any more, and the ops
-checkouts no longer hold it (note q).
 
 ## Reference — entry points & surfaces
 

@@ -1032,7 +1032,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A12](#a12) | A URN that differs from another only in case is accepted as new | ❓ | minor | — |
 | [OJS2](#ojs2) | The JATS XML's publisher ID is the article's number, not the typed Publisher ID | ❓ | minor | — |
 | [OMP3](#omp3) | Readers never see a monograph's URN | ❓ | user-visible | — |
-| [A1](#a1) | Retired: an "Identifiers" tab refuses without saying why | ✅ | retired | — |
 
 ### All apps
 
@@ -1444,7 +1443,7 @@ Basis: probe, 2026-11-05. <sup>f-ops1</sup>
 ### Retired
 
 <a id="a1"></a>
-**A1 — An "Identifiers" tab refuses without saying why** · ✅ · retired. Overturned by the drive of 2026-09-24: every tab names the reason at its top (Rule 4). <sup>f-a1</sup>
+**A1 — An "Identifiers" tab refuses without saying why** · ✅ · retired. Overturned: not a bug.
 
 ---
 
@@ -2062,14 +2061,6 @@ with a URN suffix typed, and so they do on `stable-3_5_0` once their
 first tab has arrived (note f-a17); the OJS issue window asked on "Close", as on
 2026-09-24 (note f). Not driven that day: a tab switch in the format's
 and the file's window, and "Close" from their first tabs.
-
-<a id="fn-f-a1"></a>
-**f-a1** — Retired. Live-probed 2026-09-24 (note q4): every tab shows
-the refusal in a box at its top, on all three apps. The draft's reading of
-the code (the apps' `publicIdentifiersForm.tpl` leave
-`common/formErrors.tpl` commented out or absent) did not match the
-screen. The press file's box that disappears after a refusal is now
-part of OMP5.
 
 <a id="fn-f-a2"></a>
 **f-a2** — `PKPPublicIdentifiersForm::execute()`: `if

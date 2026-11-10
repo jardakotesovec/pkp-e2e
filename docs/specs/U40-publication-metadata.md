@@ -1050,12 +1050,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OJS2](#ojs2) | Whether a scheduled article's terms are offered as suggestions: Rule 7b names no scheduled source | ❓ | minor | — |
 | [OMP3](#omp3) | The press's reset-permissions wording is the older text | ❓ | minor | — |
 | [OPS2](#ops2) | A wizard-chosen license shows beside a sentence promising the server's default | ❓ | minor | — |
-| [A4](#a4) | Retired: publishing leaves the Author's edit permission as it was, and the Author saves at once after an unpublish | ✅ | retired | re-probe (claude), 2026-09-09 — fixed upstream |
-| [A16](#a16) | Retired: on a new version of a published item the permitted Author's Save goes through and the edit is there after a reload | ✅ | retired | re-probe (claude), 2026-09-14 — fixed upstream |
-| [A10](#a10) | Retired: term suggestions follow Rule 7b in all three apps | ✅ | retired | upstream sync (claude), 2026-09-18 — settled to a defect, OMP and OPS; retired upstream sync (claude), 2026-09-21 |
-| [A1](#a1) | Retired: with Plain Language Summary required, every Publication page saves without the summary and a journal's pre-scheduling panel goes through; only an emptied summary is refused | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13585 |
-| [A7](#a7) | Retired: an over-limit abstract is refused on Save with its own message, an empty required one before the save is sent | ✅ | retired | re-probe (claude), 2026-08-28 — overturned |
-| [A9](#a9) | Retired: the wizard's Details step does show Plain Language Summary at "Ask" and at "Require" | ✅ | retired | re-probe (claude), 2026-08-28 — overturned |
 | [OMP1](#omp1) | The book page prints the copyright line outside the License block | ✅ | minor | — |
 | [OMP2](#omp2) | A press applies no abstract requirement or word limit | ✅ | minor | — |
 | [OMP4](#omp4) | Edited volumes carry a Default Chapter License URL | ✅ | user-visible | — |
@@ -1116,17 +1110,6 @@ Question: should the readout stay without the button? Lean: yes. The
 information is still true, and the stage screens show it.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a6</sup>
 
-<a id="a7"></a>
-**A7 — Retired: the abstract limit and requirement are enforced** · ✅ · retired.
-The concern was that the page might only mark an over-limit or empty
-abstract without refusing the save. It refuses both. An over-limit
-abstract is rejected on Save with "The abstract is too long. It should
-be {limit} words or less. It is currently {n} words long." An empty
-required abstract is rejected with "This field is required." before
-anything is sent (Fields & validation). No open question remains.
-Re-checked: re-probe (claude), 2026-08-28 — overturned (was an open
-question). <sup>f-a7</sup>
-
 <a id="a8"></a>
 **A8 — Read-only pages look editable** · ❓ · minor.
 A viewer who may not edit (an Author on a journal, an assistant without
@@ -1136,17 +1119,6 @@ shows their edits gone.
 Question: should the fields be disabled, or a notice shown? Lean: a minor
 UX defect. The banner of Rule 9 covers only the published case.
 Since: live-probed 2026-08-28 · Basis: probe. <sup>f-a8</sup>
-
-<a id="a9"></a>
-**A9 — Retired: the wizard does ask for the plain language summary** · ✅ · retired.
-The draft read the wizard as never showing the field. On the screen, the
-Details step shows "Plain Language Summary" at "Ask the author…" and
-marks it required at "Require the author…". The Review step lists "Plain
-Language Summary None provided" when it was left empty. The setting's
-options work as promised. At "Require" the server once refused the
-wizard's other saves (A1, retired).
-Re-checked: re-probe (claude), 2026-08-28 — overturned (was an open
-question). <sup>f-a9</sup>
 
 <a id="a11"></a>
 **A11 — The automatic copyright holder names the contributor's role** · ❓ · minor.
@@ -1443,17 +1415,23 @@ Basis: probe, 2026-10-03. <sup>f-ops3</sup>
 
 ### Retired
 
+<a id="a7"></a>
+**A7 — The abstract limit and requirement are enforced** · ✅ · retired. Overturned: not a bug.
+
+<a id="a9"></a>
+**A9 — The wizard does ask for the plain language summary** · ✅ · retired. Overturned: not a bug.
+
 <a id="a4"></a>
-**A4 — The Author's edit permission is gone for good after publishing** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13109), verified 2026-09-09 on all three apps: the permission survives publishing, and Save works at once after an unpublish (Rule 9). <sup>f-a4</sup>
+**A4 — The Author's edit permission is gone for good after publishing** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13109).
 
 <a id="a16"></a>
-**A16 — The Author's Save on a new version of a published item is offered and refused** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13312), verified 2026-09-14 on all three apps: the permitted Author's save on the new version goes through while the other version is published, the footer reads "Saved" and the edit is there after a reload (Rule 9). <sup>f-a16</sup>
+**A16 — The Author's Save on a new version of a published item is offered and refused** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13312).
 
 <a id="a1"></a>
-**A1 — Requiring a plain language summary blocked every other save** · ✅ · retired. Fixed by pkp/pkp-lib#13585, reviewed before its merge on 2026-10-21 on all three apps: the Metadata, Permissions & Disclosure and entry pages save without the summary, a journal's "Review Publishing Details" Confirm goes through, and only a save that empties the summary is refused (Rule 5). <sup>f-a1</sup>
+**A1 — Requiring a plain language summary blocked every other save** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13585).
 
 <a id="a10"></a>
-**A10 — Term suggestions did not follow the rule on the press and the preprint server** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12163): the suggestions follow Rule 7b on OJS since 2026-09-18 and on OMP and OPS since 2026-09-21. <sup>f-a10</sup>
+**A10 — Term suggestions did not follow the rule on the press and the preprint server** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12163).
 
 ---
 
@@ -2397,65 +2375,6 @@ persisted, with it ticked Save worked and persisted; fn-i: the readout
 with "Change" once the permission was ticked; the permission-off readout
 state was not separately captured).
 
-<a id="fn-f-a1"></a>
-**f-a1 — A1 evidence (retired).** `PKP\publication\Repository::validate()`: the
-closure "validate the requirement of Plain language summary" adds
-`validator.required` on `plainLanguageSummary.{primaryLocale}` whenever
-`$context->getData('plainLanguageSummary') === METADATA_REQUIRE` and
-`$props['plainLanguageSummary'][$primaryLocale]` is absent — `$props` is
-the request body, so any form that does not send the field fails.
-`editPublication()` calls `validate()` for every `PUT …/publications/{id}`
-(Metadata, Data, Permissions & Disclosure, Issue/Catalog Entry,
-Identifiers, the wizard's Details and For the Editors steps); the
-wizard's Details form sends the field only when the setting is request
-or require, and the start form never does. Code-read 2026-08-28.
-Live-probed 2026-08-28 on all three apps
-(manager, scratch context at "Require…"): untouched Save on Metadata,
-Permissions & Disclosure and the entry page (OJS "Publication Settings")
-answered 400 `{"plainLanguageSummary":{"en":["This field is
-required."]}}` and showed "Please correct one error. Go to
-plainLanguageSummary: This field is required. Jump to next error" with
-no field marked; after storing the summary on Title & Abstract the same
-saves still answered 400. On OMP/OPS the "Catalog Entry" / "Preprint
-entry" page opened next in the same workflow session already showed
-that summary with Save disabled — the error state carried over from
-the previous form. Title & Abstract itself refused an emptied summary
-in the browser with "Go to Plain Language Summary: This field is
-required." Publish leg: OMP "Publish" and OPS "Post" completed (200,
-"Status: Published"/"Posted") with no summary stored; OJS "Schedule For
-Publication" › "Review Publishing Details" › Confirm answered 400 with
-the same body, the panel stayed open with no error text. Wizard leg
-(author, all three apps): "Begin Submission" created the submission but
-the title write answered 400 and the wizard header read "{id} / Author"
-with no title and no message; on Details with the summary empty,
-Continue answered 400 and the dialog "Error An unexpected error has
-occurred. Please reload the page and try again." appeared while the
-rail moved to Contributors; with the summary filled, Details saved and
-the Review step flagged the lost Title "This field is required."
-Retired 2026-10-21: pkp/pkp-lib#13585 drops the closure and adds
-`plainLanguageSummary` to the props `ValidatorFactory::required()`
-checks once the submission is submitted (an edit is refused only when
-it sends the summary empty; a new version must carry it), with a guard
-for an absent prop on a new object. Driven on PKP's default dataset at
-the PR head `93b094ea77` (in `lib/pkp` of OJS `9647ed7204`, OMP
-`56388590e`, OPS `ea14c78745`) and its base `2ea65a9662`, before its
-merge, on the three apps, by the issue walk
-`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js` (deleted at the merge)
-and `shared/playwright/checks/sync/pkp-lib-13585/api-edges.js`
-(base in brackets): Metadata and Permissions & Disclosure "Saved",
-200, before and after a summary was stored [400
-`plainLanguageSummary`]; OJS "Review Publishing Details" Confirm 200,
-the confirmation opened and "Publish" gave "Status: Published" [400, no
-confirmation]; Title & Abstract with the summary emptied still refused
-in the browser ("Go to Plain Language Summary: This field is
-required."). API as the manager: `PUT …/publications/{id}` without the
-summary 200 [400]; `PUT …/publications/{id}/version` 200 [400]; the
-summary sent as `{"en": ""}` 400 "You must complete this field in
-English." (two submission languages) [400 "This field is required."];
-the summary sent for `fr_CA` alone 200, the English one kept [400];
-`POST …/publications` without the summary 400, with it 200 [the same].
-Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323), closed 2026-10-21 at the merge of pkp/pkp-lib#13585 (`1f415a07ca`); the report and its kept walks deleted then, in git history.
-
 <a id="fn-f-a2"></a>
 **f-a2 — A2 evidence.** `Repo::submission()->resetPermissions()` calls
 `_getContextLicenseFieldValue(null, PERMISSIONS_FIELD_COPYRIGHT_YEAR)`
@@ -2487,26 +2406,6 @@ f-a2; the unpublished item's Activity Log gained one new first row
 "2026-08-28 {manager's name} Submission metadata updated" (one version,
 one line) above the author's own earlier "Submission metadata updated"
 rows.
-
-<a id="fn-f-a4"></a>
-**f-a4 — A4 evidence.** Until pkp/pkp-lib#13109: `publishPublication()`
-zeroed `canChangeMetadata` on Author-role assignments;
-`unpublishPublication()` contained no assignment code;
-`canEditPublication()` then denied the author (no published version,
-but no `canChangeMetadata` assignment either) and
-`Schema::canChangeMetadata()` returned false for an assigned user
-without the flag. Code-read 2026-08-28. Live-probed 2026-08-28 on all
-three apps: after "Unpublish" ("Unpost" on OPS) the Author's Title &
-Abstract had Save disabled and no banner (the OPS author had saved
-before the post); the manager's "Edit Assignment" for that Author showed
-the "Permissions" box unticked; ticking it and pressing OK made the
-Author's Save enabled and a title edit persisted. Retired 2026-09-09:
-lib/pkp `18f402e585` (pkp/pkp-lib#13109, in every app 2026-09-08)
-deletes the `StageAssignment` loop from `publishPublication()`;
-live-probed 2026-09-09 on OJS, OMP and OPS (fn-j): the box stays ticked
-through the publish and the unpublish, and right after the unpublish the
-Author's Save on both versions is enabled, answers 200 and persists with
-no re-tick.
 
 <a id="fn-f-a5"></a>
 **f-a5 — A5 evidence.** Client guard `submission.status !==
@@ -2544,16 +2443,6 @@ readout on any Publication page (OJS 11/11, OMP 10/10, OPS 9/9) and
 "Current Submission Language: English" without a button on every stage
 screen.
 
-<a id="fn-f-a7"></a>
-**f-a7 — A7 evidence.** fn-d's live probe of 2026-08-28 (OJS and OPS,
-section with word count 20): the over-limit save was refused by the
-server with "The abstract is too long. It should be 20 words or less.
-It is currently 40 words long."; the emptied abstract was refused in
-the browser with "This field is required." and no request sent. The
-code reading that opened the question ("`validate()` checks neither the
-abstract's presence nor its length") was wrong on the length half; the
-presence half is moot while the browser blocks first.
-
 <a id="fn-f-a8"></a>
 **f-a8 — A8 evidence.** fn-c: `canSubmit=false` disables the submit
 button in `FormPage.vue`; no `isDisabled` reaches the fields. Code-read
@@ -2563,51 +2452,6 @@ only read-only signal was the present-but-disabled "Save"; the Prefix
 input and the Title editor accepted typing; no notice or banner text
 anywhere on the page; a forced click sent nothing; a reload showed the
 stored title.
-
-<a id="fn-f-a9"></a>
-**f-a9 — A9 evidence.** Live-probed 2026-08-28 (Author, "Start A New
-Submission", all three apps): at "Ask the author…" the Details step
-listed Title, Keywords, Abstract, Plain Language Summary, References,
-Comments for the Editor (OMP "Cover Note to Editor", OPS "Comments for
-the Moderator"), and the Review step's Details panel read "… Plain
-Language Summary None provided …" when it was left empty; at "Require
-the author…" the Details step showed "Plain Language Summary *
-Required". The draft's code reading (`Details::__construct()` removing
-the field) did not match the running wizard.
-
-<a id="fn-f-a10"></a>
-**f-a10 — A10 evidence.** Live-probed 2026-08-28 on all three apps
-(manager, scratch context, Postgres test databases): with "ocean
-acidification" saved as a keyword on one submission, typing "acid",
-"ocean", "acidif" or "Ocean" in Keywords on a second submission — and
-"oc" / "ocean acid" on the first — offered only the typed text; the
-field's own lookup (`GET vocabs?vocab=submissionKeyword&…&term=…`,
-observed in the browser's traffic) answered 200 with an empty list
-every time. `PKPVocabController::getMany()` is the path (fn-e); whether
-the install's database or the lookup is at fault was not settled that
-day — no MySQL control was available.
-Live-probed 2026-09-18 again, after pkp/pkp-lib#12163 ("We should limit the
-source of suggestions to published submissions"; lib/pkp `14473fe784`,
-in OJS only that day, OMP and OPS at `1bcd4dd55f`, one commit before
-it). On OJS suggestions appeared as Rule 7b states (fn-e), in each of
-two scratch journals for that journal's own published terms, so the
-question is answered: suggestions are expected, and the lookup was at
-fault, not the database. What is left of the 2026-08-28 observation on
-OJS is by design: that drive saved "ocean acidification" on an
-unpublished submission, which the changed lookup does not offer. On OMP
-and OPS, still on the old lookup, the lists did not follow Rule 7b and
-the empty answer was reproduced (200 with an empty list for a term on a
-published version in the same press or server). The kept check
-(`shared/playwright/checks/sync/pkp-lib-12163/term-suggestions.js`) was
-left for the upstream sync that would find both pointers past
-`14473fe784`.
-Re-run 2026-09-21 on OMP (`7f9455d5a`) and OPS (`53b40233f0`), both with
-lib/pkp `63945bbd82` past `14473fe784`, with the same kept check on
-databases reset that morning (`.reports/sync/s21-12163/`): every read
-matches the OJS record of 2026-09-18 (published sources offered, the
-later-published one without a reload, the unpublished one dropped, the
-other press's or server's term offered only there, the Author's wizard
-list the same). A10 retired.
 
 <a id="fn-f-a11"></a>
 **f-a11 — A11 evidence.** `PKPPublication::getAuthorString()` joins each
@@ -2703,76 +2547,6 @@ completed" on Title after the accepted Confirm showed while the
 publication held a title in both languages, so that counter is not a
 sign of an empty title.
 Issue report: [pkp-e2e#810](https://github.com/jardakotesovec/pkp-e2e/issues/810) ([docs/issues/U40-A15-language-panel-early-pick-keeps-old-title.md](../issues/U40-A15-language-panel-early-pick-keeps-old-title.md)).
-
-<a id="fn-f-a16"></a>
-**f-a16 — A16 evidence.** The change: pkp/pkp-lib#13109 "Author should
-be able to edit metadata if the publication is not published" (lib/pkp
-`74a8d58571..f4db6d22c4`, ojs `05684c7f9d`, omp `14be789b5`, ops
-`9db7bd3d7e`, ui-library `445b8b90`), whose stated intention is the
-issue's own steps: an Author holding the permission edits a new version
-while another is published. Live-probed 2026-09-09 (Rule 9, scenario 3;
-OJS, OMP and OPS, scratch contexts; the Author the submitter with the
-"Edit Assignment" box ticked, version 1.0 published and 1.1 created by
-the manager): the Author's Title & Abstract on "Version of Record 1.1"
-("Author's Original 1.1" on OPS) read "Status: Unpublished", no banner,
-Save enabled; the tunnelled `PUT submissions/{id}/publications/{newId}`
-(`X-Http-Method-Override: PUT`) answered 401 Unauthorized,
-`application/json`, body verbatim
-`{"error":"user.authorization.accessibleWorkflowStage","errorMessage":"You don't currently have access to that stage of the workflow."}`
-(OJS; OMP and OPS answered 401 to the same request, twice each, the
-second after a reload); the browser console logged `Failed to load
-resource: the server responded with a status of 401 (Unauthorized)`;
-on screen, about 1.5 s after the press, the notification "An unexpected
-error has occurred. Please reload the page and try again." with a "×"
-close, the form footer empty, no field marked, the title unchanged on
-reload. Controls: the same save answered 200 and persisted after
-"Unpublish" (all three apps) and on the OJS item whose other version was
-only scheduled. Cause: the per-version gate passes (the page offers
-Save, the publication maps `canCurrentUserChangeMetadata: true`), but
-the write is also behind stage access, and a published submission rests
-in the Done stage (*Workflow screen & stage access*); on a fresh install
-no role holds that stage — `Repo::userGroup()->installSettings()` caps
-the registry's stage lists at Production, so the stage-6 grant
-pkp/pkp-lib#13109 adds to `registry/userGroups.xml` lands only through
-its upgrade migration `I13109_PermitPublishedMetadataEdit` (the Roles
-grid's "Done" box unticked for every role on the scratch contexts; the
-Author's "Edit Assignment" window lists no stages, its hidden field
-`stageId=1`). Corrected 2026-09-12 by pkp/pkp-lib#13312 "Use DONE
-stage only for auth checks" (lib/pkp `65901c4f7a` + `716419c770`, merge
-`0356122fdc`; ojs `0dbb274a45` / omp `ce63a5cd8` / ops `97d8a0d2e8`,
-issue pkp/pkp-lib#13109): `installSettings()` now keeps registry stage
-lists up to `WORKFLOW_STAGE_ID_DONE`, so a fresh install grants stage 6
-as `registry/userGroups.xml` says — read 2026-09-14 from the databases
-installed that day: OJS `publicknowledge` 10 roles with stage 6 (Author,
-Designer, Guest editor, Indexer, Journal editor, Layout Editor,
-Production editor, Proofreader, Section editor, Translator), each
-scratch journal the same 10; OMP 11 `user_group_stage` rows with stage
-6; OPS 3 (manager, Moderator, author). The same change takes Done out
-of every app's `getApplicationStages()` again and adds
-`PKPApplication::getNonWorkflowStages()` (= `[WORKFLOW_STAGE_ID_DONE]`)
-and `getValidStages()` (the app stages plus Done), which
-`WorkflowStageRequiredPolicy` and `submission/maps/Schema::getPropertyStages()`
-iterate; the Roles grid therefore shows no "Done" column any more
-(OJS 2026-09-14: headers "Role Name", "Permission level", "Submission",
-"Review", "Copyediting", "Production"), so the grant is invisible
-there. The manager's header for the same submission shows the
-badge "Published"; version 1.1 reads "Status: Unpublished" and 1.0
-"Status: Published" with the editor warning.
-Retired 2026-09-14: the K1 check re-run at that day's tips (OJS, OMP
-and OPS, scratch contexts; phases seed, tick, publish, version; outputs
-`.reports/U40/s14-k1/`, log `.reports/sync/s14-k1-0914.log`): the
-submitting Author with "Allow this person to make changes to the
-publication…" ticked (already ticked on OPS) opened the new version's
-Title & Abstract ("Version of Record 1.1"; "Author's Original 1.1" on
-OPS) with "Status: Unpublished", no banner and Save enabled; the save
-answered 200 with the footer "Saved" and the edit was there after a
-reload (`au-v2 persisted: true` on all three apps; the Metadata page
-offered Save the same way); the published version stayed read-only
-with "This version has been published and can not be edited." ("…
-has been posted and can not be edited." on OPS) and Save disabled.
-The 401 `user.authorization.accessibleWorkflowStage` refusal of
-2026-09-09 is gone: the Author's fresh-install stage-6 grant now
-satisfies the stage policy for the submission resting in Done.
 
 <a id="fn-f-a17"></a>
 **f-a17 — A17 evidence.** Live-probed 2026-09-09 (OJS, OMP and OPS, the

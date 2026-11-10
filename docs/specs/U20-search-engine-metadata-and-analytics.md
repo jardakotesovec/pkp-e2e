@@ -1043,7 +1043,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS1](#ops1) | A preprint with a "URL Path" announces an HTML full-text address that ends on "404 Not Found" | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
 | [A3](#a3) | The site's own "Google Analytics Plugin" box can be ticked but changes nothing | ❓ | minor | — |
 | [A4](#a4) | The three apps' sitemaps list different kinds of listing pages: only a press lists its categories, and a press omits its Search page | ❓ | minor | — |
-| [OMP6](#omp6) | Every book file address the tags give fails with a server error instead of the file | ✅ | retired | upstream sync (claude), 2026-10-05 — fixed by omp `8c807c919` (pkp/pkp-lib#13444) |
 
 ### All apps
 
@@ -1292,7 +1291,7 @@ Basis: probe, 2026-10-01. <sup>f-ops1</sup>
 ### Retired
 
 <a id="omp6"></a>
-**OMP6 — Every book file address in the tags fails** · ✅ · retired. Fixed by omp `8c807c919` (pkp/pkp-lib#13444), 2026-10-05: each book and chapter file address the tags name answers the file (Rule 12). <sup>f-omp6</sup>
+**OMP6 — Every book file address in the tags fails** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13444).
 
 ---
 

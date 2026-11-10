@@ -709,8 +709,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A12](#a12) | After "Send To Production" the "Copyediting" entry, reached from the workflow menu, heads its discussions panel "Production Tasks & Discussions" | ❓ | minor | claim check (claude), 2026-09-26 — narrowed: a reload shows the Copyediting heading |
 | [OMP1](#omp1) | A press's "Move to Review" returns to External Review or, failing any external round, to Internal Review | ✅ | — | claim check (claude), 2026-09-18 — holds |
 | [OPS1](#ops1) | A preprint server has no Copyediting stage and no Copyeditor role | ✅ | — | claim check (claude), 2026-09-19 — holds |
-| [A2](#a2) | Copyediting: "Upload/Select Files" on "Copyedited Files" opened a window titled "Upload Review File" | ✅ | retired | housekeeping (claude), 2026-10-07 — fixed by pkp/ui-library#1008 |
-| [A9](#a9) | The discussion opened by the "Request Copyedit" message was listed as created by the Copyeditor | ✅ | retired | PR review merge (claude), 2026-10-05 — fixed by pkp/pkp-lib#13385 |
 
 ### All apps
 
@@ -915,10 +913,10 @@ Basis: probe. <sup>[f-ops1](#fn-ops1)</sup>
 ### Retired
 
 <a id="a2"></a>
-**A2 — Copyediting: "Upload/Select Files" on "Copyedited Files" opened a window titled "Upload Review File"** · ✅ · retired. Fixed upstream (pkp/ui-library#1008, for pkp/pkp-lib#13461, merged 2026-10-07), verified 2026-10-07 on OJS and OMP: the window opens titled "Upload/Select Files" above "Copyedited Files" as above "Draft Files" (Rule 5). <sup>[f-a2](#fn-a2)</sup>
+**A2 — Copyediting: "Upload/Select Files" on "Copyedited Files" opened a window titled "Upload Review File"** · ✅ · retired. Fixed upstream (pkp/ui-library#1008, for pkp/pkp-lib#13461).
 
 <a id="a9"></a>
-**A9 — The "Request Copyedit" discussion was listed under the Copyeditor's name** · ✅ · retired. Fixed by pkp/pkp-lib#13385 (for pkp/pkp-lib#12593), merged 2026-10-05, with *Stage participants*' A5; seen fixed on OMP `main`. <sup>[f-a9](#fn-a9)</sup>
+**A9 — The "Request Copyedit" discussion was listed under the Copyeditor's name** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13385, for pkp/pkp-lib#12593).
 
 ---
 

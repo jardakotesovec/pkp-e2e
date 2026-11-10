@@ -1446,9 +1446,6 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [OJS11](#ojs11) | The IEEE citation shown first opens with the number "[1]" | ❓ | minor | — |
 | [OJS13](#ojs13) | "Similar Articles" would leave out an article that shares only some of the keywords | ❓ | latent | — |
 | [OPS4](#ops4) | A preprint server has no HTML or XML reader: those galleys download | ✅ | — | — |
-| [OJS1](#ojs1) | Retired: readers got no other citation format or citation download on an article published outside a published issue | ✅ | retired | citationStyleLanguage#169 2026-10-21 · fixed |
-| [A15](#a15) | Retired: in Japanese, every "Versions" entry reads a raw translation key, with no date or version name | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A2](#a2) | Retired: an older version's PDF opened a reader with no document, and its "Download" got no file | ✅ | retired | pdfJsViewer#83 2026-11-04 · fixed |
 
 ### All apps
 
@@ -2055,13 +2052,13 @@ Basis: probe, 2026-10-01. <sup>[f-ops9](#fn-f-ops9)</sup>
 ### Retired
 
 <a id="ojs1"></a>
-**OJS1 — Readers got no other citation format or citation download on an article published outside a published issue** · ✅ · retired. Fixed by pkp/citationStyleLanguage#169 (pkp/pkp-lib#13595), reviewed before its merge on 2026-10-21 on `main` and `ore`: the article published with no issue and the one published at once into an unpublished issue give every reader the formats and the downloads, an unpublished article's stay refused, and a signed-out refusal is 404, not a server error (Rule 15c). <sup>[f-ojs1](#fn-f-ojs1)</sup>
+**OJS1 — Readers got no other citation format or citation download on an article published outside a published issue** · ✅ · retired. Fixed upstream (pkp/citationStyleLanguage#169, pkp/pkp-lib#13595).
 
 <a id="a15"></a>
-**A15 — In Japanese, every "Versions" entry reads a raw translation key, with no date or version name** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-a15](#fn-f-a15)</sup>
+**A15 — In Japanese, every "Versions" entry reads a raw translation key, with no date or version name** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a2"></a>
-**A2 — An older version's PDF opens a reader with no document, and its "Download" gets no file** · ✅ · retired. Fixed by `pkp/pdfJsViewer#83` (`main`, also on `ore`) and `#84` (3.5), for `pkp/pkp-lib#13694`, the team's copy of the issue report; reviewed before the merge on 2026-11-04 and walked again at the merged tips on `main`, 3.5 and `ore`: the older version's PDF reader shows its document and its "Download" saves the file, on a journal and a preprint server, and an editor's preview of an unpublished version shows its PDF (Rule 12). Issue report closed ([pkp-e2e#219](https://github.com/jardakotesovec/pkp-e2e/issues/219)). <sup>[f-a2](#fn-f-a2)</sup>
+**A2 — An older version's PDF opens a reader with no document, and its "Download" gets no file** · ✅ · retired. Fixed upstream (pkp/pdfJsViewer#83, for pkp/pkp-lib#13694).
 
 ---
 
@@ -3255,17 +3252,6 @@ Knowledge, v. 1, n. 2, 30 Sept.2026.". The earlier file's output rests
 on the plugin's history and was not walked. Raised for the team in A7's
 issue report:
 [pkp-e2e#241](https://github.com/jardakotesovec/pkp-e2e/issues/241) ([docs/issues/U13-A7-abnt-citation-runs-text-together.md](../issues/U13-A7-abnt-citation-runs-text-together.md)).
-
-<a id="fn-f-a15"></a>
-**f-a15** — Note g: each entry is `submission.versionIdentity`
-"{$datePublished} ({$version})", a text since 3.2; `lib/pkp/locale/ja/submission.po`
-holds it with an empty `msgstr`, and `lib/pkp/locale/es_MX/submission.po`
-has no entry; `stable-3_5_0`'s files are the same, and its `locale/en`
-carries the key, so the 3.5 release shows it too (by the code, not
-walked). By the code, 25 of the 70 other languages have no text for it
-(12 lack the entry, 8 hold it empty, 5 have no `submission.po`); A1's
-proposed fix leaves them out. Live-probed 2026-10-05, note q5, two runs:
-OJS, OPS and the press's book page alike.
 
 <a id="fn-f-a16"></a>
 **f-a16** — Note b: on `main`, `Repo::submission()->canPreview()`

@@ -808,7 +808,6 @@ entry notes otherwise; the team settles them on spec review.
 | [OPS3](#ops3) | "Post the preprint" stays offered on a declined preprint | ❓ | minor | — |
 | [OMP1](#omp1) | A press heads every Production view with "Awaiting approval." until the monograph is published, the author's included | ✅ | — | — |
 | [OPS1](#ops1) | A preprint server's Production stage has no "Production Ready Files" list and no notice box | ✅ | — | — |
-| [OMP3](#omp3) | Retired: in French the press's Production notice keeps its French heading, but its paragraph is a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -987,7 +986,7 @@ Basis: probe. <sup>[f-ops3](#fn-ops3)</sup>
 ### Retired
 
 <a id="omp3"></a>
-**OMP3 — In French the press's Production notice is a heading over a raw code** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-omp3](#fn-omp3)</sup>
+**OMP3 — In French the press's Production notice is a heading over a raw code** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -1123,33 +1122,6 @@ the `t` notes hold the drives of the draft's open questions.
 <a id="fn-omp2"></a>
 **f-omp2** — Note f: `PKPApproveSubmissionNotificationManager::updateNotification()` is meant to delete `NOTIFICATION_TYPE_VISIT_CATALOG` and recreate `FORMAT_NEEDS_APPROVED_SUBMISSION` when the current publication has no `datePublished`, and `omp/classes/publication/Repository.php` calls it on unpublish. Live-probed 2026-09-19 on OMP, two monographs (one published on screen, one by seed), one run each: after "Unpublish" (`POST …/publications/{id}/unpublish` 200) the assigned Series editor, the unassigned Press Manager and the author read "Catalog Management" / "The monograph has been approved. …" on the entry, five seconds later too, with the header back at "Production" and "Schedule For Publication" and "Move To Copyediting" offered; a second "Publish" left it at "Catalog Management". Why the unpublish path leaves the row was not traced.
 Issue report: [pkp-e2e#744](https://github.com/jardakotesovec/pkp-e2e/issues/744) ([docs/issues/U70-A6-unpublished-book-notice-still-approved.md](../issues/U70-A6-unpublished-book-notice-still-approved.md)), shared with [Catalog management A6](U70-catalog-management.md#a6).
-
-<a id="fn-omp3"></a>
-**f-omp3** — Note f. OMP `locale/fr_CA/locale.po` (omp checkout
-`3b0ecf794`, lib/pkp `3dc90c81a6`) translates the two titles,
-`notification.type.approveSubmissionTitle` "En attente d'approbation."
-and `notification.type.visitCatalogTitle` "Gestion du catalogue", and
-leaves `notification.type.formatNeedsApprovedSubmission` and
-`notification.type.visitCatalog` empty (`msgstr ""`). Live-probed
-2026-09-30 (U24's French claim check, chunk I30 FRb), two runs, each on
-a scratch press, journal and preprint server with English and French
-(Canada) as interface languages, every French read paired with the same
-read in English. On the press: the manager, the assigned Series editor
-and the Author on a monograph at Production never published, the manager
-and the Author on two published monographs (one of them sent to
-Production and published by the seed); every French read showed the
-heading and the code above, every English read Rule 3d's text. The
-second monograph unpublished in French (the window "Dépublier /
-Êtes-vous certain-e de ne pas vouloir que cela soit publié ? / Dépublier
-/ Annuler", confirmed) was back at Production and still read "Gestion du
-catalogue" with the code for the manager and the Author, on the same
-page and after a reload, and "Catalog Management" in English (OMP2).
-Controls: on the journal the assigned Section Editor read "Avis" with
-the French galley notice, the unassigned manager and the Author no box
-(Rule 3a); on the preprint server no box for anyone (Rule 3e). No
-response of 500 or more and no script error. Evidence:
-`.reports/U24/ccI30frb/prod-*`, kept script
-`shared/playwright/checks/U24/I30/frb.js`.
 
 <a id="fn-ops1"></a>
 **f-ops1** — Notes a, d and m: `workflowConfigEditorialOPS.js` mounts no `FileManager` at Production and `WorkflowNotificationDisplay.vue` returns `null` options on OPS; `PublicationConfig.galleys` mounts `GalleyManager`. Live-probed 2026-09-19 (notes m, t15): the entry with one table, "Production Tasks & Discussions", "Participants", no notice heading, for the manager and the assigned Moderator; the "Galleys" page under "Preprint" offering "Add galley"; the journal and press entries with "Production Ready Files" beside the discussions as the control.

@@ -518,8 +518,6 @@ are the source; badges, Impact and Basis:
 | [A10](#a10) | A registry name has been seen only for a funder the install's registry copy already held, and only on the workflow list | ❓ | latent | — |
 | [A11](#a11) | The grant-number rejection message has never been seen on screen | ❓ | latent | — |
 | [A12](#a12) | The primary-language funder name is marked required, yet a save with any one language filled is accepted | ❓ | minor | — |
-| [A13](#a13) | A saved funder never appears in the Funders table, so it cannot be edited, deleted or reordered, though the published page shows the funding (regression, pkp/pkp-lib#13003) | ✅ | retired | rebase check (claude), 2026-09-03 — fixed upstream (ui-library `f88b7e6a`), suites green on all three apps |
-| [A14](#a14) | Retired: in French the funders list and the "Add Funder" / "Edit Funder" panel show raw codes for their headings, explanations and field labels | ✅ | retired | Jarda 2026-10-08 · overturned |
 | [OPS1](#ops1) | The submitting author edits their own unposted preprint's funders | ✅ | user-visible | — |
 
 ### All apps
@@ -704,10 +702,10 @@ Basis: probe. <sup>f-ops1</sup>
 ### Retired
 
 <a id="a13"></a>
-**A13 — A saved funder never appears in the Funders table** · ✅ · retired. Fixed upstream (ui-library `f88b7e6a`, pkp/pkp-lib#13003 follow-up), 2026-09-03. <sup>f-a13</sup>
+**A13 — A saved funder never appears in the Funders table** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13003).
 
 <a id="a14"></a>
-**A14 — In French the funders list and its panel show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a14</sup>
+**A14 — In French the funders list and its panel show raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -1168,47 +1166,6 @@ name. Server rule (`PKP\funder\Repository::validate()`,
 or a ROR id satisfies the save; no primary-locale check exists. The panel
 is the shared `FunderEditForm` on all three apps; the enforcement gap was
 probed on OJS only.
-
-<a id="fn-f-a13"></a>
-**f-a13 — A13 evidence.** Upstream pkp/pkp-lib#13003 (commit 747af277a)
-moved `funders` from the publication schema (`publication.json`) to the
-submission schema (`submission.json:120`). The manager table is computed
-from `publication.funders` (ui-library
-`src/managers/FunderManager/funderManagerStore.js:25`,
-`items: computed(() => publication.value?.funders ?? [])`) and never
-fetches the funders collection — zero funders GETs in the network log.
-The save POST to `/api/v1/submissions/{n}/publications/{n}/funders`
-returns 200 and the funder persists on the submission: GET
-`submissions/{n}` contains it; GET `submissions/{n}/publications/{n}` no
-longer carries a `funders` property; GET `…/publications/{n}/funders`
-returns it with a `submissionId` and no `publicationId`. Live-probed
-2026-08-29 on OJS (submission 156 / publication 167, manager role,
-typed-name funder): row absent after the save and after a cold reload;
-the reader page's `#funding-data` block shows it. Suites: S1–S4 plus the
-per-app specific tests fail identically on OJS, OMP and OPS at the
-2026-08-29 tips (ojs 0471e029b9 / omp d34542e83 / ops 28d4cb1dff,
-lib/pkp 13b621e42) — the entire suite red at main is this one break;
-per convention the tests stay red until the upstream fix lands (the reds
-are the bug, not drift).
-Retired 2026-09-03: fixed upstream by ui-library `f88b7e6a` ("pkp/pkp-lib#13003
-Move funders to submission"), which points `funderManagerStore` at
-`submission.funders`. Verified green on OJS at `979819ae45` on 2026-08-29
-(full Funding suite; ui-library pointer bumped in `87e6c700c5`, UI rebuilt);
-on 2026-09-03 `f88b7e6a` sits in OMP's and OPS's `lib/ui-library` (OMP
-`a1aefa3fe`, OPS `6bda92fb03`) and the apps' own e2e runs at those tips are
-green (pkp/omp run 33629780688, pkp/ops run 33629815586, both 2026-09-02).
-
-<a id="fn-f-a14"></a>
-**f-a14 — A14 evidence.** Live-probed 2026-09-30 (fn i's probe): every
-code listed in A14 read on all three apps in both runs, as the manager on the
-empty, the filled and the published submission, and in the "Add
-Funder" panel before and after the typed text was picked and in the
-"Edit Funder" panel; `##submission.funders##` also as the table's
-`aria-label`, `##common.moreActions##` as the screen-reader-only column
-header and as each row's "…" button name. The English control read
-"Funders", "Add Funder", "Funder Name", "No funders have been added."
-and the panel's English labels.
-Re-walked 2026-10-04 on main, all three apps (3.5 has no funders list). The list's hidden "More Actions" column header and each row's "…" button name, `common.moreActions`, is a released text French (Canada) never received; the rest (`submission.funders*`, which came with `pkp/pkp-lib#12392`) are main-only texts.
 
 <a id="fn-f-a15"></a>
 **f-a15 — A15 evidence.** Live-probed 2026-10-04 on main, OJS, OMP and OPS

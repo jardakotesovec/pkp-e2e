@@ -967,10 +967,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP3](#omp3) | A press has its own component list and ships "Type" metadata switched on | ✅ | — | — |
 | [OPS1](#ops1) | A preprint server's guidance has a "For Readers" box and no "For Reviewer Suggestion" box | ✅ | — | — |
 | [OPS2](#ops2) | "Author Screening" appears only with a screening plugin, and none is installed | ✅ | — | — |
-| [A13](#a13) | Retired: over an open window a notice's "×" did nothing, or closed the submission's workflow along with the notice; it now removes the notice alone (Rule 16) | ✅ | retired | PR review merge (claude), 2026-10-06 — fixed upstream (pkp/pkp-lib#13188) |
-| [A14](#a14) | Retired: in French (Canada), a press's "Disable Submissions" help reads a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [OMP2](#omp2) | Retired: on a press's public "Submissions" page, "Edit" beside "Copyright Notice" opened "Disable Submissions", not "Author Guidance"; it now opens "Author Guidance" (Rule 25) | ✅ | retired | fix walked (claude), 2026-10-15 — fixed upstream (pkp/omp#2511, pkp/omp#2510) |
-| [OMP1](#omp1) | Retired: a press's "Disable Submissions" help spoke of "new articles", and its "Author Guidance" labelled the copyright box "Copyright notice"; they now read "new monographs" and "Copyright Notice" (Fields) | ✅ | retired | fix walked (claude), 2026-11-09 — fixed upstream (pkp/omp#2563, pkp/omp#2529) |
 
 ### All apps
 
@@ -1201,16 +1197,16 @@ Basis: code. <sup>f-ops2</sup>
 ### Retired
 
 <a id="a13"></a>
-**A13 — Over an open window, a notice's "×" does nothing, or closes the submission's workflow along with the notice** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13188: ui-library#999 on `stable-3_5_0`, cherry-picked to `main` as `a36dc7fe78`, 2026-10-06), verified 2026-10-06 on OJS, OMP and OPS `main`: the refused key's notice goes at a press on its "×" and the "Add a Component" window stays open (Rule 16); in a submission's workflow the notice's "×" no longer closes the workflow. <sup>[f-a13](#fn-f-a13)</sup>
+**A13 — Over an open window, a notice's "×" does nothing, or closes the submission's workflow along with the notice** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13188).
 
 <a id="a14"></a>
-**A14 — In French (Canada), a press's "Disable Submissions" help reads a raw code** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a14</sup>
+**A14 — In French (Canada), a press's "Disable Submissions" help reads a raw code** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="omp2"></a>
-**OMP2 — On a press's public "Submissions" page, "Edit" beside "Copyright Notice" opens "Disable Submissions", not "Author Guidance"** · ✅ · retired. Fixed upstream (`pkp/omp#2511` on `main`, `pkp/omp#2510` on 3.5, for `pkp/pkp-lib#13516`), 2026-10-15: the link now opens "Author Guidance" (Rule 25). <sup>f-omp2</sup>
+**OMP2 — On a press's public "Submissions" page, "Edit" beside "Copyright Notice" opens "Disable Submissions", not "Author Guidance"** · ✅ · retired. Fixed upstream (pkp/omp#2511, for pkp/pkp-lib#13516).
 
 <a id="omp1"></a>
-**OMP1 — A press's "Disable Submissions" help speaks of "new articles", and its "Author Guidance" labels the copyright box "Copyright notice"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: the help reads "Prevent users from submitting new monographs to the press. …" and the box is labelled "Copyright Notice", as on a journal and a preprint server (Fields). <sup>f-omp1</sup>
+**OMP1 — A press's "Disable Submissions" help speaks of "new articles", and its "Author Guidance" labels the copyright box "Copyright notice"** · ✅ · retired. Fixed upstream (pkp/omp#2563, for pkp/pkp-lib#13646).
 
 ---
 
@@ -1857,36 +1853,6 @@ window does not close on it. Live-probed 2026-09-27, two runs per
 app (note td6).
 Issue report: [pkp-e2e#511](https://github.com/jardakotesovec/pkp-e2e/issues/511) ([docs/issues/U62-A9-refused-confirmation-window-keeps-spinning.md](../issues/U62-A9-refused-confirmation-window-keeps-spinning.md)).
 
-<a id="fn-f-a13"></a>
-**f-a13** — Test run 2026-09-27, all three apps (scenario 6, "A malformed
-"Key""): the press on the notice's `button.pkpNotification__closeButton`
-("Close"), resolved visible and enabled, retried until the notice left on
-its own, each attempt answered "`<div … data-cy="active-modal">` subtree
-intercepts pointer events". Live-probed 2026-09-27 by hand, all three
-apps: the point under the "×" belongs to the window's content
-(`DialogContent` … `div.flex.items-start`), and on OJS the page body, the
-notification area and the button all compute `pointer-events: none` while
-the window is open, though the notification layer (`z-index` 1001) is
-painted above the window's (10); a real mouse press there left the notice
-standing and the window open, and the notice left 5.4 s after it showed
-(OJS, OMP, OPS alike).
-Issue report: [pkp-e2e#826](https://github.com/jardakotesovec/pkp-e2e/issues/826), closed 2026-10-06 with the fix.
-Retired 2026-10-06: at ui-library `a36dc7fe78` (ojs `d7cf416029`, omp `a0e6d0a8bc`, ops `7e34fdd57e`) the notification area computes `pointer-events: auto` and the side window and Dialog ignore a press inside `.pkpNotification` (`@interact-outside`); the report's kept walk on the dataset fleet and `checks/sync/ui-library-999/toast-modal.js`, all three apps.
-
-<a id="fn-f-a14"></a>
-**f-a14** — Note c: OMP `locale/fr_CA/manager.po` holds
-`manager.setup.disableSubmissions.description` with an empty `msgstr`;
-`LocaleFile::loadArray()` drops an empty text and `Locale::translate()`
-falls back to no other language. Live-probed 2026-10-04, OMP
-`main`, PKP's default test dataset, the manager `rvaca` with the
-interface in French (Canada): the help read
-`##manager.setup.disableSubmissions.description##` (kept script
-`shared/playwright/checks/issues/press-disable-submissions-help-says-articles/walk.js`,
-`WALK_MODE=nb`). Code read only, not driven: OMP `stable-3_5_0`
-(9c5e24246c) leaves the same text empty, and so does OPS's
-`locale/fr_CA/manager.po` on `main` (c8af945bb7) and `stable-3_5_0`;
-OJS's has a text.
-
 <a id="fn-f-a15"></a>
 **f-a15** — Live-probed 2026-10-06, all three apps, one run each (note
 td15). The window is the legacy `GenreForm` drawn in ui-library's side
@@ -1918,31 +1884,6 @@ Live-probed 2026-09-27, OJS, two journals: no "Copyright" row without a
 copyright notice; an empty row once one was saved; the License Terms in
 it once those were saved on Settings › Distribution › "License".
 Issue report: [pkp-e2e#822](https://github.com/jardakotesovec/pkp-e2e/issues/822) ([docs/issues/U58-OJS1-archiving-pages-copyright-row-license-terms.md](../issues/U58-OJS1-archiving-pages-copyright-row-license-terms.md)).
-
-<a id="fn-f-omp1"></a>
-**f-omp1** — OMP `locale/en/manager.po` had
-`manager.setup.disableSubmissions.description` "Prevent users from
-submitting new articles to the press. …" and an override of
-`manager.setup.copyrightNotice`, "Copyright notice"; OMP's
-`about.copyrightNotice` on the page read "Copyright Notice". Fourteen
-of OMP's translations repeated "articles".
-Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge
-`f81f129c82`, patch `14f4d2670a`, with a pointer bump to pkp-lib
-`8c3971dd1e`) and `pkp/omp#2529` on `stable-3_5_0` (merge `ae1d900d35`,
-patch `940105441`, pointer to pkp-lib `1e5673c7c7`). The English help
-now reads "…new monographs to the press. …", and OMP's override of
-`manager.setup.copyrightNotice` is gone, so pkp-lib's "Copyright Notice"
-shows; `pkp/pkp-lib#13768` (`main`) and `pkp/pkp-lib#13769` (3.5) first
-moved OMP's translations of that key into pkp-lib. English only: other
-languages keep their translation, and 3.4 and 3.3 are unchanged. Both
-patches equal the PR heads walked base vs head on fresh datasets on
-2026-11-06 (`8eff1e8c2c`, `72b39e2d44`; PR review,
-`checks/sync/pkp-lib-13646/`). Walked at both merge commits on freshly
-loaded PKP dataset fleets, 2026-11-09: "Disable Submissions" help reads
-"Prevent users from submitting new monographs to the press. …", the
-Author Guidance box is labelled "Copyright Notice", and the About ›
-"Submissions" heading stays "Copyright Notice".
-Issue reports: "Disable Submissions" [pkp-e2e#831](https://github.com/jardakotesovec/pkp-e2e/issues/831), the label [pkp-e2e#832](https://github.com/jardakotesovec/pkp-e2e/issues/832); both retired with the fix; the reports and their walks deleted. The team's copy of both `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp2"></a>
 **f-omp2** — OMP `templates/frontend/pages/submissions.tpl`: the

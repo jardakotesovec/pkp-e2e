@@ -917,16 +917,6 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A16](#a16) | Merging an account deletes the comments and reports it wrote, while the rest of its work passes to the account it is merged into | ❓ | user-visible | — |
 | [OMP1](#omp1) | On a press, a Site Administrator holding no manager role is offered Content › Comments but the page answers the access-denied page | ❓ | minor | — |
 | [OPS1](#ops1) | On a preprint server, a Site Administrator holding no manager role is offered Content › Comments but the page answers the access-denied page | ❓ | minor | — |
-| [A12](#a12) | Retired: a Journal Manager of one journal could read, approve, hide and delete another journal's comments, and any signed-in account could report them, by requests made by hand; each is now refused as not found | ✅ | retired | PR review (claude), 2026-10-16 — fixed by pkp/pkp-lib#13550 |
-| [A17](#a17) | Retired: anyone could read who reported a comment and why from the public comment list; reports now go to moderators only | ✅ | retired | PR review (claude), 2026-10-16 — fixed by pkp/pkp-lib#13550 |
-| [A18](#a18) | Retired: any signed-in account could comment by hand on unpublished submissions, or with comments off, and learn their title and first author; both are now refused | ✅ | retired | PR review (claude), 2026-10-16 — fixed by pkp/pkp-lib#13550 |
-| [A19](#a19) | Retired: deleting all of a comment's reports at once failed with a server error unless it had exactly one; it now deletes them all | ✅ | retired | PR review (claude), 2026-10-16 — fixed by pkp/pkp-lib#13550 |
-| [A4](#a4) | Retired: with public comments off, the Comments page still opened by address; it is now refused onto the access-denied page | ✅ | retired | PR review (claude), 2026-10-21 — answered by pkp/pkp-lib#13550 |
-| [A20](#a20) | Retired: an account holding no role in the journal was offered the comment box and "Report" and both were refused; both are accepted again | ✅ | retired | @jarda.kotesovec 2026-10-21 · overturned |
-| [A21](#a21) | Retired: a comment request made in one journal on another journal's published article answered a server error; it is now refused as not found | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13550 |
-| [A22](#a22) | Retired: with public comments off, the Comments page's address with one more part still opened the page; it is now refused like the bare address | ✅ | retired | PR review (claude), 2026-10-22 — fixed by pkp/pkp-lib#13550 |
-| [A23](#a23) | Retired: the Comments page's address at the site, with no journal, answered a server error; it now leads to the Login page or the "No journal" notice, as before the PR | ✅ | retired | PR review (claude), 2026-10-22 — fixed by pkp/pkp-lib#13550 |
-| [A11](#a11) | Retired: on a press and a preprint server, deleting a comment removed the task about an unrelated report or comment that shared its number; it now removes only its own tasks {OMP OPS} | ✅ | retired | upstream sync (claude), 2026-09-29 — fixed upstream |
 
 ### All apps
 
@@ -1160,39 +1150,34 @@ Basis: test run. <sup>f-ops1</sup>
 ### Retired
 
 <a id="a4"></a>
-**A4 — The Comments page outlives the setting** · ✅ · retired. Answered by pkp/pkp-lib#13550 (driven at its head `9be1c9efb0`, before its merge, on the three apps, 2026-10-21): with "Enable Public Comments" unticked the page's address now lands on the access-denied page, and the comments wait, kept, for the next switch-on (Rules 2b, 2c); the question, whether the page is meant to stay reachable while the feature is off, is answered no. <sup>f-a4</sup>
+**A4 — The Comments page outlives the setting** · ✅ · retired. Settled upstream (pkp/pkp-lib#13550).
 
 <a id="a11"></a>
-**A11 — Deleting a comment removes unrelated tasks that share its number** {OMP OPS} · ✅ · retired. Fixed upstream (pkp/pkp-lib#12401), on a journal since 2026-09-27 and on a press and a preprint server since 2026-09-29: comments and reports are numbered separately across the site, and deleting a comment used to take with it every moderator's task about the report numbered like the comment and about a comment numbered like one of its reports, in any press or server of the site; it now removes only the tasks about that comment and its own reports (Side effects). <sup>f-a11</sup>
+**A11 — Deleting a comment removes unrelated tasks that share its number** {OMP OPS} · ✅ · retired. Fixed upstream (pkp/pkp-lib#12401).
 
 <a id="a12"></a>
-**A12 — Another journal's comments could be moderated and reported by requests made by hand** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its heads `08024165dd`, 2026-10-16, and `9be1c9efb0`, 2026-10-21, before its merge): every route that takes a comment's number now looks for it in the request's journal only. A Journal Manager of another journal asking for publicknowledge's comment, its reports, its approval or the deletion of its reports, and that journal's Reader reporting it, now get "The requested resource was not found." (`404`), and the comment is untouched; at the base `6ff76591a9` the same requests were carried out. <sup>f-a12</sup>
+**A12 — Another journal's comments could be moderated and reported by requests made by hand** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13550).
 
 <a id="a17"></a>
-**A17 — Anyone could read who reported a comment and why from the public comment list** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its heads `08024165dd`, 2026-10-16, and `9be1c9efb0`, 2026-10-21, before its merge): `GET api/v1/comments/public` with `includeReports` now carries the reports only for a moderator. Signed out and as the comment's writer the answer has no `reports`; the Journal editor still gets them, and on the Comments page "View Report" is unchanged. Report: pkp-e2e-sec#10, closed 2026-11-03. <sup>f-a17</sup>
+**A17 — Anyone could read who reported a comment and why from the public comment list** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13550).
 
 <a id="a18"></a>
-**A18 — Any signed-in account could comment by hand on unpublished submissions and learn their title and first author** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its heads `08024165dd`, 2026-10-16, and `9be1c9efb0`, 2026-10-21, before its merge, on the three apps): a comment on a version that is not published answers `422` "You are only allowed to comment on the most recently published publication.", every comments request is refused while "Enable Public Comments" is off, and nothing is kept or tasked; a comment on the published version with comments on, through the box and by request, is still accepted. Report: pkp-e2e-sec#11, closed 2026-11-03. <sup>f-a18</sup>
+**A18 — Any signed-in account could comment by hand on unpublished submissions and learn their title and first author** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13550).
 
 <a id="a19"></a>
-**A19 — Deleting all of a comment's reports at once failed with a server error unless it had exactly one** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its heads `08024165dd`, 2026-10-16, and `9be1c9efb0`, 2026-10-21, before its merge): `DELETE api/v1/comments/{id}/reports` now deletes every report and its tasks, for two reports, one and none alike. Merged 2026-10-23 and walked again at the merged tip; issue [pkp-e2e#973](https://github.com/jardakotesovec/pkp-e2e/issues/973) closed. <sup>f-a19</sup>
-
+**A19 — Deleting all of a comment's reports at once failed with a server error unless it had exactly one** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13550).
 
 <a id="a20"></a>
-**A20 — An account holding no role in the journal is offered the comment box and "Report", and both are refused** {OJS} · ✅ · retired. Overturned by @jarda.kotesovec, 2026-10-21, and fixed at the PR head `9be1c9efb0` of pkp/pkp-lib#13550, before its merge: such an account writes a comment and reports one again, as any signed-in account does (Actors rows 2 and 3). <sup>f-a20</sup>
-
-> **Reviewed — @jarda.kotesovec, 2026-10-21**: overturned (was ❓). Ruling:
-> "an authenticated user does not require a role in a given context to
-> submit a comment or submit a report."
+**A20 — An account holding no role in the journal is offered the comment box and "Report", and both are refused** {OJS} · ✅ · retired. Overturned: not a bug.
 
 <a id="a21"></a>
-**A21 — A comment request naming another journal's published article answers a server error** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its head `9be1c9efb0`, before its merge, 2026-10-21): the request is refused with "The requested resource was not found." and nothing is kept (Actors row 2). <sup>f-a21</sup>
+**A21 — A comment request naming another journal's published article answers a server error** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13550).
 
 <a id="a22"></a>
-**A22 — With public comments off, the Comments page still opened when its address carried one more part** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its head `035769b365`, before its merge, 2026-10-22): with "Enable Public Comments" unticked, the address ending in "/" and the address carrying one more part ("…/management/settings/userComments/x") land on the access-denied page, "Access denied.", like the bare address (Rule 2b). <sup>f-a22</sup>
+**A22 — With public comments off, the Comments page still opened when its address carried one more part** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13550).
 
 <a id="a23"></a>
-**A23 — The Comments page's address at the site, with no journal, answered a server error** · ✅ · retired. Fixed by pkp/pkp-lib#13550 (driven at its head `035769b365`, before its merge, 2026-10-22): a visitor who is not signed in is sent to the Login page and the Site Administrator gets the notice "No journal was found that matched your request.", as before the PR (Actors row 6). <sup>f-a23</sup>
+**A23 — The Comments page's address at the site, with no journal, answered a server error** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13550).
 
 ---
 
@@ -2018,28 +2003,6 @@ unchanged, "Report" was offered again, and a second and then six more
 reports by the same person were filed, all listed in the panel's
 "Reports" table.
 
-<a id="fn-f-a4"></a>
-**f-a4 — A4 (retired).** Retired 2026-10-21 by pkp/pkp-lib#13550 at its
-head `9be1c9efb0`, before its merge (footnote b: the page's address with
-comments off lands on the access-denied page; walked on the three apps
-with `checks/sync/pkp-lib-13550/walk.js` and the A18 issue walk, at the
-head and the base `d43737309c`). Before it: `ManagementHandler::userComments()` and the API's moderator
-routes read no `enablePublicComments`; only `TemplateManager::setupBackendPage()`
-(the menu) and `ArticleHandler::view()` (the block) do. Live-probed
-2026-09-16 on the three apps: with the box unticked the side menu lost
-Content › Comments on the save's own reload and the address opened the
-full page with every comment under its tabs (the panel's actions were not
-pressed in that state). The question and the lean are the author's; no
-screen settles them. pkp/pkp-lib#13550 makes `UserCommentController::authorize()`
-refuse every comments route while `enablePublicComments` is off (its
-comment: "All /comments endpoints should be inaccessible if comments are
-disabled"): at its head `08024165dd`, before its merge, the page opened by
-address raised the "Error" dialog on the load and on each of the four
-tabs and listed "No Items" with nine comments kept; the list request
-answered `401` (2026-10-16, `checks/sync/pkp-lib-13550/comments-off.js`).
-Round 2 of the PR (head `9be1c9efb0`) adds the page gate, so the page
-follows the setting.
-
 <a id="fn-f-a5"></a>
 **f-a5 — A5.** Footnote b: right after the save request the browser
 navigates to the same address (the console log records the navigation),
@@ -2150,104 +2113,6 @@ page at "?reportId={r}&commentId=" with no panel; the rows stayed, marked
 read.
 Issue report: [pkp-e2e#904](https://github.com/jardakotesovec/pkp-e2e/issues/904) ([docs/issues/U14-A10-deleted-comment-tasks-stay-blank.md](../issues/U14-A10-deleted-comment-tasks-stay-blank.md)).
 
-<a id="fn-f-a11"></a>
-**f-a11 — A11 (retired).** Fixed by pkp/pkp-lib `26ae6431b5` (#12401):
-OJS carried it from 2026-09-27, OMP and OPS from 2026-09-29, when their
-lib/pkp pointers moved to `fab29cfeca` (omp `480045c32`, ops
-`5da5bc48ad`). Re-driven 2026-09-29 on OMP and OPS, scratch contexts,
-with a comment of journal B numbered like one of journal A's two reports:
-A's Journal Manager's Tasks window held one "pending review" row and two
-"requires review" rows before B's Journal Manager deleted that comment,
-and the same three after, the row of the report sharing the number
-included, and A's "Reported" tab still listed the comment with both
-reports; the control, B deleting a comment whose number no report of A
-carried, left the three rows too. The same day, scenario 5 passed on OMP
-and OPS in full-suite runs, where it had failed on 2026-09-27. Before
-the fix, on OMP and OPS (lib/pkp `17a1f01fed`),
-`UserCommentController::delete()` collected the comment's
-report ids, deleted the comment, then ran one
-`Notification::whereIn('assoc_type', [ASSOC_TYPE_COMMENT, ASSOC_TYPE_COMMENT_REPORT])->whereIn('assoc_id', [commentId, …reportIds])->delete()`:
-every type was paired with every id and no context condition applied, so
-it also deleted (`ASSOC_TYPE_COMMENT_REPORT`, commentId), the tasks of
-the report whose id is the comment's, and (`ASSOC_TYPE_COMMENT`,
-reportId), the tasks of the comment whose id is one of the reports',
-across all contexts. `user_comments` and `user_comment_reports` are two
-id sequences that both start at 1 on a fresh install. `26ae6431b5`
-splits the delete into (`ASSOC_TYPE_COMMENT`, commentId) and
-(`ASSOC_TYPE_COMMENT_REPORT`, reportIds). The paired delete came with
-pkp/pkp-lib#12401, lib/pkp `677b737d20` "Delete associated notifications
-when public comments or reports are deleted" (2026-03-04); before it a
-comment's deletion cleared no task at all. Live-probed 2026-09-26, OJS, OMP and
-OPS, scratch contexts only: journal B held one Reader's comment numbered
-c; reports filed in a third scratch journal brought the report numbering
-up to c−1; journal A held one comment with two reports, numbered c and
-c+1. A's Journal Manager's Tasks window listed two "A report was
-submitted for a comment and requires review by a moderator." rows and
-one "A comment has been submitted and is pending review by a moderator."
-row. B's Journal Manager, on B's Content › Comments, pressed the row's
-"…" › "Delete Comment" › "Delete" ("The comment has been deleted
-successfully."). A's Tasks window then listed one report row: report
-c's was gone, report c+1's and the comment's stayed, and A's "Reported"
-tab still listed the comment with both reports in its "Reports" table.
-Seen with c = 52 and c = 61 on OJS and c = 3 on OMP and OPS, the row gone
-each time; the control, B deleting a comment whose number no report of A
-carried, left all three rows on the three apps. The comment-side
-direction was seen on OJS on a freshly reset install, with several
-comments deleted in parallel: a moderator's Tasks window lacked a
-comment's "pending review" row, and the database then held no task for
-that comment and no report of that number, deleted with its own comment.
-Reported to the team on 2026-09-26 and fixed on OJS by `26ae6431b5`.
-Re-driven 2026-09-27 on scratch contexts, OJS with the fix, OMP and OPS
-without: with c = 3, OJS kept report c's row, OMP and OPS lost it, and
-the control left all rows on the three apps; the comment-side direction
-driven on its own (journal A's comment numbered like journal B's
-comment's report; B's manager deleted B's comment on B's Comments page,
-B's own comment row and report row leaving B's panel): OJS kept A's row
-for the Journal Manager and the Editor, OMP lost it for the Press Manager
-and the Press Editor, OPS for the Preprint Server Manager; the landing
-page's "Delete Comment" by the writer (OJS, c = 6) kept report c's row
-too, while the writer's own comment's row left B's manager's panel. In
-the collision and landing drives A's "Reported" tab still listed the
-comment with both reports; no message appeared and no request answered a
-server error.
-
-<a id="fn-f-a12"></a>
-**f-a12 — A12 (retired).** Retired 2026-10-16 by pkp/pkp-lib#13550 (kept walk `checks/sync/pkp-lib-13550/walk.js` and the issue walks under `checks/issues/`, at the head `08024165dd` and the base `6ff76591a9`). Before it: `lib/pkp/api/v1/comments/UserCommentController.php`:
-`get()`, `delete()`, `setApproval()`, `getReports()` and `deleteReports()`
-load the comment with `UserComment::query()->find($commentId)`, the number
-alone, and `getReport()` / `deleteReport()` with
-`withCommentIds([$commentId])->withReportIds([$reportId])`; none compares
-the comment's `contextId` with the request's context, while the list
-routes `getMany()` and `getManyPublicComments()` scope with
-`withContextIds()` (footnotes e, i). The moderator routes check the manager
-role in the request's context only (`roleAuthorizer([SITE_ADMIN,
-MANAGER])`, `Repository::isModerator()`), so a manager of A passes and then
-names B's number; `submitReport()` sits in the signed-in group with no role
-check, and `notifyModerators()` raises the task for the request's context
-(footnote l). The controller is lib/pkp's, identical in the three apps at
-lib/pkp `1ad4a14bb2`; the by-number routes have been unscoped since the
-comments API was added. Live-probed 2026-09-26 under the one exception to
-screen-only driving (an API route no screen calls with another journal's
-number), on fresh scratch journals A and B of OJS, OMP and OPS, as A's
-Journal Manager holding no role in B, from a page of A with the page's
-CSRF token: `GET {A}/api/v1/comments/{B's id}` answered 200 with B's
-unapproved and approved comments; `PUT …/setApproval` with
-`{"approved": true}` answered 200 and approved B's pending comment;
-`GET …/reports` and `…/reports/{id}` answered 200 with B's reports and
-their reasons; `POST …/reports` filed a report on B's approved comment
-(B's report count 1 → 2, the task raised in A); `DELETE` answered 200 and
-B's comment was gone (a following `GET` answered 404). A plain Reader of
-A, `POST {A}/api/v1/comments/{B's approved id}/reports` with a note: 200,
-the report filed and the task raised in A (OJS; the controller identical
-in the three). Control: the same requests naming A's own comment answered
-200. No server error. Hiding (`{"approved": false}`) is the same request
-as the approval and was not sent on its own; `DELETE …/reports/{id}` on
-B's report was not driven. The maintainer ruled on 2026-09-26 that this is
-an ordinary finding (reader comments are unreleased 3.6; stable-3_5_0 has
-none). Reported to the team on 2026-09-26 together with A11; A11's fix,
-pkp/pkp-lib `26ae6431b5`, changes only the notification deletion and
-leaves these by-number lookups as they are.
-
 <a id="fn-f-a13"></a>
 **f-a13 — A13.** `ManagementHandler::userComments()` assigns no
 `pageTitle`, while `announcements()`, which also moved out of settings
@@ -2346,195 +2211,6 @@ they have no comment box. The A10 issue report
 ([pkp-e2e#904](https://github.com/jardakotesovec/pkp-e2e/issues/904))
 names this question and leaves it out; its fix for the blank tasks is
 needed either way.
-
-<a id="fn-f-a17"></a>
-**f-a17 — A17 (retired).** Retired 2026-10-16 by pkp/pkp-lib#13550 (kept walk `checks/sync/pkp-lib-13550/walk.js` and the issue walks under `checks/issues/`, at the head `08024165dd` and the base `6ff76591a9`). Before it: `UserCommentController::getManyPublicComments()` is the
-`GET api/v1/comments/public` route, outside the `has.user` group and
-authorized by `PublicAccessPolicy`; it lists the context's approved
-comments (and the signed-in viewer's own unapproved ones) through
-`UserCommentResource`, whose `toArray()` adds `reports`
-(`UserCommentReportResource`: the reporter's `userName`,
-`userAffiliation`, `userOrcidDisplayValue`, `note`) whenever the query
-carries the key `includeReports`, with no moderator check, while
-`approvedAt` and `approvedByUserName` sit behind
-`mergeWhen(… isModerator())`. No screen sends `includeReports`
-(ui-library and lib/pkp grepped). The key has been ungated since the
-comments API was added (pkp/pkp-lib#11326, `3aa127313b`, 2025-06-18).
-stable-3_5_0 has no `api/v1/comments/`. Live-probed 2026-10-13 on OJS
-`main` (ojs `7c6fba2064`, lib/pkp `f4c2578c94`), two runs from a reset of
-the dataset install, under the one exception to screen-only driving (an
-API route no screen calls with these values): with comments on, a
-comment by `ccorino` on the published article of submission 17
-(publication 18), approved by `rvaca` and reported by `lchristopher`;
-signed out, `GET …/comments/public?publicationIds=18&includeReports=1`
-answered 200 with the comment and its `reports` holding one report with
-the reporter's name ("Leo Christopher"), a non-empty affiliation, the
-ORCID key (empty for this account) and the reason as typed. Control: the
-same list without `includeReports` carried no `reports`, and signed out
-`GET …/comments/{id}/reports` answered 401. No server error in either
-run. OMP and OPS read in the code: the three apps' lib/pkp is the same
-commit, with the same controller and resource, and each app registers
-the `comments` API; no comment box writes comments on a press or a
-server, so there the reports sit only on comments written through the
-API.
-Issue report: pkp-e2e-sec#10, closed 2026-11-03 after the report's kept walk showed the fix at the `main` tips (OJS `e7ce037799`, lib/pkp `1ae711024a`, on the default dataset: no `reports` signed out or as the comment's writer, the moderator still gets them); the report and its kept script are deleted (A report's life). `ore` carries the fix since pkp/pkp-lib#13632 (OJS `ore` lib/pkp `a05aa54421`; walked on the `i13539-ore` companion, 2026-10-28).
-
-<a id="fn-f-a18"></a>
-**f-a18 — A18 (retired).** Retired 2026-10-16 by pkp/pkp-lib#13550 (kept walk `checks/sync/pkp-lib-13550/walk.js` and the issue walks under `checks/issues/`, at the head `08024165dd` and the base `6ff76591a9`). Before it: `UserCommentController::submit()` (the `has.user` group,
-no role check) validates with `formRequests/AddComment`: `rules()` asks
-only `Rule::exists('publications', 'publication_id')`, site-wide, and
-`after()` only that the publication is its submission's current one; no
-check of its status, its context or `enablePublicComments`. The comment
-is created with the request's `contextId` and the answer is a
-`UserCommentResource`, whose `publication` holds `fullTitle` and
-`authorsStringShort` (since pkp/pkp-lib#11576, `1869f217fd`,
-2025-08-28). stable-3_5_0 has no `api/v1/comments/`. Live-probed
-2026-10-13 on OJS `main` (as footnote f-a17), two runs from a reset, with
-`enablePublicComments` saved as off: `ccorino` (Author and Reader in the
-journal, not an author of either submission) `POST …/api/v1/comments` on
-publication 5 (submission 4, Submission stage, unpublished) and 11
-(submission 10, Review stage, unpublished) answered 200 both times, the
-comment kept unapproved, the answer's `publication` reading "Computer
-Skill Requirements for New and Existing Teachers: Implications for
-Policy and Practice" / "Montgomerie et al." and "Condensing Water
-Availability Models to Focus on Specific Water Management Systems" /
-"Novak". No server error. Another journal's publication, OMP and OPS:
-read in the code (same lib/pkp commit in the three apps). Since
-pkp/pkp-lib#13550 the public list (`comments/public`) answers `404` for
-an unpublished or missing publication id, where it answered `200` with
-no items before (seen at the heads `08024165dd` and `9be1c9efb0`).
-Issue report: pkp-e2e-sec#11, closed 2026-11-03 after the report's kept walk showed the fix at the `main` tips (OJS `e7ce037799`, OMP `828150a8f`, OPS `53749f7d2f`, lib/pkp `1ae711024a`, on the default dataset: every comments request refused while comments are off; with them on, a comment on the published version accepted and one on another version refused `422`, nothing else kept); the report and its kept script are deleted (A report's life). `ore` carries the fix since pkp/pkp-lib#13632 (OJS `ore` lib/pkp `a05aa54421`; walked on the `i13539-ore` companion, 2026-10-28).
-
-<a id="fn-f-a19"></a>
-**f-a19 — A19 (retired).** Retired 2026-10-16 by pkp/pkp-lib#13550 (kept walk `checks/sync/pkp-lib-13550/walk.js` and the issue walks under `checks/issues/`, at the head `08024165dd` and the base `6ff76591a9`). Before it: `UserCommentController::deleteReports()` (the
-`DELETE api/v1/comments/{id}/reports` route, moderator-only) passes
-`[$reportIds]`, an array inside an array, to
-`UserCommentReport::withReportIds()`; Laravel's `Query\Builder::whereIn()`
-throws `InvalidArgumentException` ("Nested arrays may not be passed to
-whereIn method.") whenever the array and its one-level flattening differ
-in count, so for none or two and more ids, and the throw comes before
-both the report delete and the `Notification` delete. For one id the
-counts agree and `getBindings()` flattens the binding, so the one report
-and its tasks are deleted. The nested call came in with lib/pkp
-`677b737d20` (pkp/pkp-lib#12401, 2026-03-04, the change that made the
-deletes remove the notifications). Fix (read, not tried):
-`withReportIds($reportIds)`. ui-library's `userCommentStore.js` sends
-only `DELETE comments/{id}` and `DELETE comments/{id}/reports/{reportId}`,
-and the comment panel offers no "delete all reports" control.
-stable-3_5_0 has no `api/v1/comments/`. Live-probed 2026-10-13 on OJS,
-OMP and OPS `main` (lib/pkp `f4c2578c94`, the controller identical in
-the three), two runs each, under the one exception to screen-only
-driving (an API route no screen calls), as the scratch context's Journal
-Manager from a page of the context with its CSRF token, four approved
-comments on one published item with seeded reports: the comment with two
-reports answered 500 with that message, its reports 2 → 2 and their
-tasks 4 → 4 (both reports still in the comment panel's "Reports", the
-comment still on "Reported", the two rows still in the manager's Tasks
-panel); the comment with none answered 500; the comment with one
-answered 200, its report and its two task rows gone. Control: `DELETE
-…/reports/{reportId}` on a fourth comment's one report answered 200, the
-report and its tasks gone. The server log held one
-`[500]: DELETE …/api/v1/comments/{id}/reports` line per failing request
-and no other error.
-Issue report: [pkp-e2e#973](https://github.com/jardakotesovec/pkp-e2e/issues/973), closed 2026-10-23 at the merge of pkp/pkp-lib#13550 (`e41e47b64c`), its walk re-run at the merged tip (ojs `0686a5d520`, lib/pkp `b90815748c`): both reports and their tasks deleted with 200 and no server error; the report and its walk were deleted then (git history keeps them).
-
-<a id="fn-f-a20"></a>
-**f-a20 — A20 (retired).** Retired 2026-10-21: the ruling quoted under
-the entry (@jarda.kotesovec on Mattermost, 2026-10-21) and pkp/pkp-lib#13550
-at its head `9be1c9efb0`, before its merge, where the signed-in routes
-carry only the parent controller's `UserRolesRequiredPolicy`, which
-admits any signed-in account. Probe at that head, 2026-10-21 on OJS's
-default dataset (`checks/sync/pkp-lib-13550/cross-context.js`):
-`zzedd`, every role in publicknowledge removed and a Reader of a second
-journal, typed a comment in the box on publicknowledge's article 17 and
-pressed "Submit" (the comment kept, pending), and pressed "Report" on an
-approved comment with a reason (the report kept); the base `d43737309c`
-the same. Round 1 (head `08024165dd`): pkp/pkp-lib#13550 added `ContextAccessPolicy` to every
-signed-in comments route and puts `submit`, `delete` and `submitReport`
-behind `roleAuthorizer(Role::getAllRoles())`, so an account with no role
-in the request's journal gets `401` `user.authorization.roleBasedAccessDenied`.
-The landing page's comment component (ui-library
-`usePkpCommentsStore.js`) offers the box and "Report" to any signed-in
-user and shows a failed submit through the generic error dialog; a failed
-report just closes the dialog. Probe at the head `08024165dd`, before its
-merge, 2026-10-16: a Reader of a second journal, on publicknowledge's
-article 17, typed a comment and pressed "Submit" (the dialog; nothing
-kept), then "Report" on an approved comment (the window closed; no report
-kept).
-
-<a id="fn-f-a21"></a>
-**f-a21 — A21 (retired).** Retired 2026-10-21 by pkp/pkp-lib#13550 at
-its head `9be1c9efb0`, before its merge, whose `AddComment::after()`
-returns after the not-found error. Probe at that head, 2026-10-21
-(`checks/sync/pkp-lib-13550/cross-context.js`): a second journal's
-account, through that journal's API, on publicknowledge's publication
-18: `422` `{"publicationId":["The requested resource was not found."]}`,
-nothing kept. At that head a refused comment request (`422`) also
-writes an error line with the validation message to the server log
-(Laravel's `ValidationException` through `PKPExceptionHandler`), where
-the base logged nothing; the answer is the same. Round 1 (head
-`08024165dd`): pkp/pkp-lib#13550's `AddComment::after()` looked the
-submission up with the request's journal
-(`Repo::submission()->get($submissionId, $context->getId())`) and adds an
-error when it is not found, but did not return, so the next line called
-`$submission->getCurrentPublication()` on `null`. Probe at the head
-`08024165dd`, before its merge, 2026-10-16: the manager and a Reader of a
-second journal, through that journal's API, on publicknowledge's
-publication 18: `500` both times, nothing kept. At the base `6ff76591a9`
-the same requests were accepted and filed under the second journal (A18).
-Fix tried (`checks/sync/pkp-lib-13550/fix.diff`, `return;` after the
-not-found error): both requests answer `422` "The requested resource was
-not found.", nothing kept.
-
-<a id="fn-f-a22"></a>
-**f-a22 — A22 (retired).** Retired 2026-10-22 by pkp/pkp-lib#13550 at
-its head `035769b365` ("Minor improvement", on the round-2 patch
-`4c6d4d556b`, both on the tip `1f415a07ca`), before its merge, whose
-`ManagementHandler::authorize()` reads the first argument
-(`$firstPageArg = $requestedArgs[0] ?? null`) for the comments-off gate,
-as `settings()` routes on it (`array_shift($args)`). Probe at that head,
-2026-10-22 on OJS's default dataset, freshly loaded, as `dbarnes` with
-comments off (`checks/sync/pkp-lib-13550/extras.js`, e3):
-"…/userComments", "…/userComments/" and "…/userComments/x" all landed on
-"…/user/authorizationDenied?message=user.authorization.accessDenied"
-("Home / Access denied."); at the base `1f415a07ca`, which has no gate,
-all three opened the page headed "Comments" over "No Items". OMP and
-OPS: the same lib/pkp code, not walked. Round 2 (head `9be1c9efb0`): the
-gate compared `$requestedArgs === ['userComments']`, so
-`['userComments', 'x']` passed it, met `CanAccessSettingsPolicy` like any
-other settings tab (passed by a manager with settings permission) and
-rendered the page; a trailing "/" yields `['userComments']` and was
-refused. Probe at that head, 2026-10-21, the same account and setting:
-"…/userComments/x" answered `200` at its own address with the heading
-"Comments", the four tabs and "No Items", the page's text ending in the
-"Error" dialog's title (the capture was cut there), and the list request
-`GET comments` answered `401`. The fix tried then
-(`checks/sync/pkp-lib-13550/page-gate-fix.diff`: compare the first
-argument) is the one the head carries.
-
-<a id="fn-f-a23"></a>
-**f-a23 — A23 (retired).** Retired 2026-10-22 by pkp/pkp-lib#13550 at
-its head `035769b365`, before its merge, whose comments-off gate (footnote
-f-a22) runs only when `$request->getContext()` returns a context, so at
-the site the parent's `ContextAccessPolicy` answers as before. Probe at
-that head, 2026-10-22 on OJS (`checks/sync/pkp-lib-13550/extras.js`,
-e1): `GET /index.php/index/management/settings/userComments` signed out
-landed on the Login page (`login?source=…`), and as `admin` on
-"…/user/authorizationDenied?message=user.authorization.noContext"
-("Home / No journal was found that matched your request."), nothing in
-the server log; the base `1f415a07ca` the same. OMP and OPS: the same
-lib/pkp code, not walked. Round 2 (head `9be1c9efb0`): the gate called
-`$request->getContext()->getData('enablePublicComments')` before
-`ContextAccessPolicy` ran, and at the site there is no context; the
-address answered `500` with an empty body, signed out and as `admin`
-(2026-10-21), the server log reading "PHP Fatal error: Uncaught Error:
-Call to a member function getData() on null in
-…/lib/pkp/pages/management/ManagementHandler.php"; the base `d43737309c`
-gave the answers above. The site-level API address
-(`/index.php/index/api/v1/comments/public`) answers `401` "You are not
-authorized to access the requested resource." at the heads `08024165dd`,
-`9be1c9efb0` and `035769b365`, where the bases answered `404` "The
-requested resource was not found."; no screen calls it.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1.** Footnote m: `omp/pages/management/SettingsHandler::__construct()`

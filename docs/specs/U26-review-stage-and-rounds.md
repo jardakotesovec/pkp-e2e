@@ -762,8 +762,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OMP2](#omp2) | A press collects no reviewer recommendation (intended, confirmed upstream 2026-08-25), and the decision letter still prints "Recommendation:" with nothing after it | ❓ | user-visible | rebase check (claude), 2026-08-25 — form-field half intended |
 | [OMP3](#omp3) | On a press the fresh revisions task reads "Revisions to consider in External Review.", not the journal's "Revision required."; with two authors on the stage, each author gets a different wording | ❓ | minor | — |
 | [OMP1](#omp1) | Presses run an additional Internal Review stage before External Review | ✅ | — | — |
-| [A12](#a12) | Retired: an author who closed "Upload revisions" after the file step saw an empty "Revisions Uploaded" panel until a page reload; fixed in pkp/ui-library#853 before its merge, never on `main` | ✅ | retired | re-probe at the PR head (claude), 2026-09-23 — fixed before merge |
-| [OJS1](#ojs1) | Retired: the author's "Read Review" window on a journal was recorded showing no review text; it shows the remarks shared "For author and editor", as on a press (Rule 15) | ✅ | retired | claim check (claude), 2026-10-07 — not reproduced |
 
 ### All apps
 
@@ -1008,10 +1006,10 @@ apps; two authors 2026-10-07). <sup>[f-omp3](#fn-omp3)</sup>
 ### Retired
 
 <a id="a12"></a>
-**A12 — An upload window closed at the file step leaves the author's panel empty** · ✅ · retired. Fixed in pkp/ui-library#853 at `51f0c727` before its merge, 2026-09-23; never on `main`. <sup>[f-a12](#fn-a12)</sup>
+**A12 — An upload window closed at the file step leaves the author's panel empty** · ✅ · retired. Fixed upstream (pkp/ui-library#853).
 
 <a id="ojs1"></a>
-**OJS1 — Author's read-review window shows no review text** · ✅ · retired. Withdrawn 2026-10-07, not reproduced on a journal: the window shows the remarks the reviewer shared "For author and editor" and, for a form-based review, the questions marked for authors with their answers, as on a press (Rule 15). No change to the window since the 2026-07-31 reading is known, and what that reading saw is not recorded. <sup>[f-ojs1](#fn-ojs1)</sup>
+**OJS1 — Author's read-review window shows no review text** · ✅ · retired. Not reproduced.
 
 ---
 
@@ -1826,60 +1824,6 @@ and an OMP External Review round 1; identical on an OMP Internal Review
 round 1 the same day. Panel mechanism in notes a and i (the editor-side
 revisions `FileManager`, ungated by round status).
 Issue report: [pkp-e2e#858](https://github.com/jardakotesovec/pkp-e2e/issues/858) ([docs/issues/U26-A10-revisions-panel-says-revisions-requested.md](../issues/U26-A10-revisions-panel-says-revisions-requested.md)).
-
-<a id="fn-ojs1"></a>
-**f-ojs1** — The 2026-07-31 probe recorded, on OJS, a free-text review with
-a comment shared for author and editor and an editor-only comment whose
-author window rendered neither, and a decision letter whose reviewer
-appendix listed the recommendation only; the state it ran on is not
-recorded. Re-driven 2026-10-07 on OJS and OMP `main`, two runs each (Rule
-15): the window showed seeded and typed shared remarks; the editor-only
-remark was absent; a form review showed only its questions included for
-authors, with their answers in read-only boxes. The decision letter's "The
-following comments were received from reviewers." listed each review's
-name, "Recommendation: …" (empty on a press, OMP2) and its shared remark,
-not the editor-only one. Also walked 2026-10-04 on PKP's default test
-dataset (OJS submissions 10 and 12, OMP submission 16):
-`shared/playwright/checks/issues/author-read-review-no-text/walk.js`. The
-window is `authorReadReview.tpl` via `AuthorReviewerGridHandler::readReview`
-(note j), shared by OJS and OMP and changed since 2026-07-31 only by
-`f80f5b9483` (an operation the window does not use); no fixing commit is
-known.
-
-<a id="fn-a12"></a>
-**f-a12** — pkp/ui-library#853 (issue pkp/pkp-lib#13359, which keeps
-"File upload modals still reload the table when closed, since a file can
-already be uploaded even if the upload is closed before the final step
-completes") changed, at its earlier head `cab09538`,
-`workflowStore.js`'s `fileUpload()`, which the author's "Upload
-revisions" button uses, from `() => triggerDataChange()` to `async
-(finishedData) => await triggerDataChange(finishedData)`. The legacy
-upload wizard stores the file through its own jQuery request, so nothing
-flagged the window changed, `closeSideModalById()` handed the close
-`{dataChanged: false}`, and `triggerDataChange()` returned without
-reloading. `fileManagerStore.js`'s `fileUpload()`, behind the panels' own
-"Upload", keeps the unconditional `() => triggerDataChange()`. Driven
-2026-09-23 at the PR head `cab09538`, before its merge: on OJS
-(`802202cb3e`), on a fresh reset, the kept check
-`shared/playwright/checks/sync/ui-library-853/upload-stale.js`, after the
-step-1 attach and the header "Close", read 0 rows in the author's
-Revisions Uploaded panel with no request sent after the close, and 1 row
-after a reload; at the tip's lib/ui-library `2034439a`, on the same
-database, 1 row right after the close, with `…/files`,
-`…/stages/3/tasks` and `…/emails/authorEmails` fetched. OMP's test of
-scenario 4, which looks at the panel without reloading, red at the PR
-head and green at `2034439a` on the same database; OJS's test reloads
-the page before it looks. OMP's and OPS's own lib/ui-library pointers
-predate the change. Written up for the team in
-`docs/reports/2026-09-23-ui-library-853-upload.md` (a temporary report,
-deleted once addressed; git history keeps it). Fixed at the PR head
-`51f0c727`, before its merge: `fileUpload()` reloads unconditionally
-again (`async () => await triggerDataChange()`). Verified 2026-09-23 on
-OJS on a fresh reset with lib/ui-library at `51f0c727`: `upload-stale.js`
-read `stale: false`, the panel listing the file right after the close,
-with `…/files`, `…/stages/3/tasks` and `…/emails/authorEmails` fetched;
-OMP's test of scenario 4 passed in pkp/omp#2471's CI with this companion
-at `51f0c727` (run 35882950730).
 
 <a id="fn-omp1"></a>
 **f-omp1** — OMP stage roster and decision registry in note q; internal

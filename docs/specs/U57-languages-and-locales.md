@@ -1000,8 +1000,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A13](#a13) | A form language that is not an interface language gets empty email template boxes, not the default texts | ❓ | minor | — |
 | [A15](#a15) | The sidebar "Language" block is not yet seen with two scripts of one language | ❓ | minor | — |
 | [OMP1](#omp1) | A press's site "Languages" list prints its own asterisk before "Marked locales may be incomplete." | ✅ | — | — |
-| [A4](#a4) | Retired: a text missing from a translation shows as its internal name, not in the primary language | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A9](#a9) | Retired: two scripts of one language carried the same name on the language lists and in "Change Language" | ✅ | retired | claim check (claude), 2026-10-15 — fixed upstream |
 
 ### All apps
 
@@ -1230,10 +1228,10 @@ Basis: probe. <sup>[f-omp1](#fn-omp1)</sup>
 ### Retired
 
 <a id="a4"></a>
-**A4 — Missing translations show internal names** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>[f-a4](#fn-a4)</sup>
+**A4 — Missing translations show internal names** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a9"></a>
-**A9 — Two scripts of one language carry the same name** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13366), 2026-09-27, on `main` and 3.5: the language lists and "Change Language" name each script, seen 2026-10-15; the sidebar block is [A15](#a15). <sup>[f-a9](#fn-a9)</sup>
+**A9 — Two scripts of one language carry the same name** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13366).
 
 ---
 
@@ -1319,9 +1317,6 @@ Issue report: [pkp-e2e#361](https://github.com/jardakotesovec/pkp-e2e/issues/361
 **f-a3** — Seen 2026-09-24 (U09 claim check K1, three apps: from a custom page and from "About the Journal" the links landed on `index.php/index/<locale>`) and 2026-09-25 (U18 claim check K1: "français" linked to the host without the port and landed on `/index.php/index/fr_CA`; back on the journal the pages were French). Live-probed 2026-09-27 (three apps): the links carry `source=127.0.0.1/index.php/…` without the port; chosen from About, from a search result and, with the block in the site's sidebar, from the site's Login page, "français" landed on `/index.php/index/fr_CA`. Cause, read from the code: the block builds `source` from `SERVER_NAME` and the request address, which carry no port, so `PKPPageRouter::_setLocale()` cannot strip the installation's base address (with its port) from it and falls back to `/index/{code}`; "Change Language" passes the full page address and is not affected. The test installs serve on their own ports; a site on the usual ports was not driven.
 Issue report: [pkp-e2e#362](https://github.com/jardakotesovec/pkp-e2e/issues/362) ([docs/issues/U57-A3-language-block-loses-page-on-port.md](../issues/U57-A3-language-block-loses-page-on-port.md)).
 
-<a id="fn-a4"></a>
-**f-a4** — `Locale::translate()` (note p). The `##…##` form of a missing text is PKP's long-standing one. Seen: the Tasks & Discussions panels, the "Users" tab of Users & Roles and Site Settings, all in the French interface; live-probed 2026-09-27 (note p).
-
 <a id="fn-a5"></a>
 **f-a5** — Seen 2026-09-24 (U09 claim check K1, K1-6, three apps): each tick saved and five errors "TypeError: Cannot read properties of undefined (reading 'filter') at Proxy.isInputSelected" were logged. Live-probed 2026-09-27 (three apps): five per tick on Settings › Website, also for a tick without "UI" and a re-tick; none for the same tick in the Settings wizard. Test runs 2026-09-27 (OPS): five per tick again, logged while the "Privacy Statement" tab of Rule 10b showed its empty French box. The cause is in note i.
 Issue report: [pkp-e2e#363](https://github.com/jardakotesovec/pkp-e2e/issues/363) ([docs/issues/U57-A5-forms-language-tick-date-time-script-error.md](../issues/U57-A5-forms-language-tick-date-time-script-error.md)).
@@ -1336,9 +1331,6 @@ Issue report: [pkp-e2e#364](https://github.com/jardakotesovec/pkp-e2e/issues/364
 <a id="fn-a8"></a>
 **f-a8** — `omp/locale/fr_CA/default.po` and `ops/locale/fr_CA/default.po` carry `default.contextSettings.authorGuidelines` and `default.contextSettings.checklist` with empty texts, which `Locale::translate()` answers as the internal name (note p); `ojs/locale/fr_CA/default.po` has both. Code read 2026-09-27. Live-probed 2026-09-27 (OMP, OPS; OJS the control): after a French "Forms" tick and on a press or server created with French under "UI", the French "Author Guidelines" and checklist boxes held the internal names, and `…/fr_CA/about/submissions` showed them, on the seeded press and server too.
 Issue report: [pkp-e2e#360](https://github.com/jardakotesovec/pkp-e2e/issues/360) ([docs/issues/U57-A8-french-default-texts-stored-as-codes.md](../issues/U57-A8-french-default-texts-stored-as-codes.md)).
-
-<a id="fn-a9"></a>
-**f-a9** — Live-probed 2026-09-27 (before the fix): Chinese installed in both scripts and ticked under "UI" on a scratch journal: "Chinese/中文" twice on the journal's list (codes `zh_Hans`, `zh_Hant`), "中文" twice in the block and in "Change Language"; the site's list with every language installed: "Bosnian/bosanski" (`bs`, `bs_Latn`), "Serbian/српски" (`sr`, `sr_Cyrl`), "Uzbek/o‘zbek" (`uz`, `uz_Latn`). Fixed by pkp/pkp-lib#13366 "Fix ui-locale lists distinguish by script for same locale" (merged 2026-09-27, `903e210d71` on `main`, `e7e8deed73` on `stable-3_5_0`): the script joins the name when two listed locales share a language (note a). Live-probed 2026-10-15, three apps, `main` and `stable-3_5_0`, two runs each: Uzbek and Chinese named apart on both lists and in "Change Language" (note a); Bosnian and Serbian not read again; the block is A15.
 
 <a id="fn-a10"></a>
 **f-a10** — Live-probed 2026-09-27, once, on OMP: with German the site's primary language, a fresh browser preferring Japanese opened the site's home at `index/de`, which named the seeded press "Presse de la connaissance du public" (the press holds English and French names, primary English); OJS and OPS showed their English names. Not repeated; a second reading of the site's home with German primary would settle it.

@@ -990,7 +990,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | Two tasks raised within the same second are listed in either order in the Tasks window | ❓ | minor | — |
 | [A13](#a13) | On the site's own home page the Site Administrator's unread count is never displayed at a desktop width: the "Dashboard" entry carries it hidden and the name carries none; a narrow window displays it | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server lists "A reviewer has commented on "Title"." and "Weekly email of outstanding tasks", two events it never raises | ❓ | minor | — |
-| [A14](#a14) | Retired: over an open window a toast's "×" did nothing, or closed the submission's workflow along with the toast; it now removes the toast alone, and the pointer keeps it (Rule 9b) | ✅ | retired | PR review merge (claude), 2026-10-06 — fixed upstream (pkp/pkp-lib#13188) |
 
 ### All apps
 
@@ -1327,7 +1326,8 @@ Basis: probe, 2026-10-20. <sup>[f-ops3](#fn-ops3)</sup>
 ### Retired
 
 <a id="a14"></a>
-**A14 — Over an open window, a notice's "×" does nothing, or closes the submission's workflow along with the notice** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13188: ui-library#999 on `stable-3_5_0`, cherry-picked to `main` as `a36dc7fe78`, 2026-10-06), verified 2026-10-06 on OJS, OMP and OPS `main`: over the open "Notify" panel the warning toast goes at a press on its "×" and stays while the pointer rests on it, the panel open (Rule 9b). The same fault was [Submission intake configuration](U58-submission-intake-configuration.md#a13)'s A13. <sup>[f-a14](#fn-a14)</sup>
+**A14 — Over an open window, a notice's "×" does nothing, or closes the submission's workflow along with the notice** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13188).
+
 ---
 
 <a id="footnotes"></a>
@@ -2299,28 +2299,6 @@ submission's Author (the Author role alone), the link answered
 the page reading "The current role does not have access to this
 operation."; signed in as the Journal Manager, the same link opened the
 submission's workflow.
-
-<a id="fn-a14"></a>
-**f-a14** — While the "Notify" side panel is open, the page body,
-`.app__notifications` and the toast's close button compute
-`pointer-events: none`, and `elementFromPoint` at the "×"'s centre
-returns the window's own `div.flex.items-start`; so neither the press
-nor the container's `:hover` (note g) reaches the toast, and the 5 s
-expiry runs on. Live-probed 2026-09-28 on OJS, OMP and OPS, four runs
-each (Rule 9b): Participants › a row's "More Actions" › "Notify" with
-"Message" empty gave the warning toast over the open side panel; a mouse
-press at the "×"'s centre left it in place, the pointer resting on the
-"×" throughout, and the toast went by itself 5.1–5.3 s after it showed;
-Playwright's locator click timed out after 3 s ("… intercepts pointer
-events") with the same lifetime; the side panel was still open
-afterwards. Controls with no window open: the "×" removed the Profile ›
-"Notifications" save toast (all three apps) and "Notification sent to
-users." after a sent "Notify" (OJS, OMP; on OPS that notice can land in
-the Production entry's own "Notification" box instead, *Stage
-participants* OPS4) within 0.11–0.14 s. The "Add a Component" window's
-refused key shows the same (*Submission intake configuration* A13).
-Issue report: [pkp-e2e#826](https://github.com/jardakotesovec/pkp-e2e/issues/826), closed 2026-10-06 with the fix.
-Retired 2026-10-06: at ui-library `a36dc7fe78` (ojs `d7cf416029`, omp `a0e6d0a8bc`, ops `7e34fdd57e`) `.app__notifications` computes `pointer-events: auto` over an open window, so the press and the container's `:hover` reach the toast, and the side window ignores a press inside `.pkpNotification`; the report's kept walk on the dataset fleet, all three apps: the "Notify" warning gone 0.16–0.19 s after a press on its "×", the panel open; the refused key's notice kept for 8 s under a resting pointer.
 
 <a id="fn-ops1"></a>
 **f-ops1** — OPS's `NotificationSettingsForm` and `NotificationManager` do not

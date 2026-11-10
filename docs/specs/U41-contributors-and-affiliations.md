@@ -1057,8 +1057,6 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OMP1](#omp1) | A book with five or more contributors compacts to bare name-and-affiliation lines | ✅ | user-visible | — |
 | [OMP2](#omp2) | An Edited Volume's book page credits volume editors instead of the contributor list | ✅ | user-visible | — |
 | [OPS1](#ops1) | The submitting author edits their own unposted preprint's contributors | ✅ | user-visible | — |
-| [A15](#a15) | A newly added contributor can land at the top of the list, and of the reader-facing author line, varying between loads (pkp/pkp-lib#13003) | ✅ | retired | rebase check (claude), 2026-09-03 — fixed upstream (pkp-lib `922f895988`), verified live on OJS and OMP |
-| [A23](#a23) | On a French landing page a CRediT role's degree prints as a raw code: texts new in the unreleased version, awaiting translation | ✅ | retired | issues (claude), 2026-10-03 — the team's 2026-10-02 ruling on untranslated new texts |
 
 ### All apps
 
@@ -1640,10 +1638,10 @@ Basis: probe + code reading, 2026-10-03. <sup>f-ops2</sup>
 ### Retired
 
 <a id="a15"></a>
-**A15 — A new contributor can land at the top of the list, varying between loads** · ✅ · retired. Fixed upstream on `main` (pkp-lib `922f895988`, pkp/pkp-lib#13003), 2026-09-03; version 3.5 does not have the fix. <sup>f-a15</sup>
+**A15 — A new contributor can land at the top of the list, varying between loads** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13003).
 
 <a id="a23"></a>
-**A23 — A CRediT role's degree prints as a raw code on a French landing page** · ✅ · retired. Not a defect: the degree words are new in the unreleased version and await their translations (the team's ruling, 2026-10-02); Rule 14 states what the page prints. <sup>f-a23</sup>
+**A23 — A CRediT role's degree prints as a raw code on a French landing page** · ✅ · retired. Overturned: not a bug.
 
 ---
 
@@ -2602,57 +2600,6 @@ context (Author → AUTHOR, Translator → TRANSLATOR, Chapter Author →
 AUTHOR, Volume editor → EDITOR), and a preprint server's only such
 group is "Author".
 Issue report: [pkp-e2e#752](https://github.com/jardakotesovec/pkp-e2e/issues/752) ([docs/issues/U41-A14-one-role-journal-contributor-save-fails.md](../issues/U41-A14-one-role-journal-contributor-save-fails.md)).
-
-<a id="fn-f-a15"></a>
-**f-a15 — A15 evidence.** Mechanism: `PKP\author\DAO::getNextSeq()`
-computes the next sequence with `if ($seq)` — a max sequence of 0 (the
-auto-created author's, left there by `Repository::newAuthorFromUser()`)
-reads as "no contributors", so the new row also gets sequence 0; the
-authors collector orders by sequence with no tiebreak. Live-probed
-2026-08-28 (OJS + OMP, and reproduced independently by both apps' test
-authoring the same day): after adding a second contributor both rows
-held sequence 0 in the database; the new row rendered FIRST on two
-publications and LAST on a third; on one publication the workflow panel
-listed "Alex, Beta" while the landing page and issue table of contents
-printed "Beta; Alex", and ordering mode opened in the reader pages'
-order. "Save Order" stamped 0..n and every surface agreed from then on.
-Shared `lib/pkp` DAO with no app override — OPS runs the same code.
-Retired 2026-09-03: fixed upstream by pkp-lib `922f895988` ("pkp/pkp-lib#13003
-Fix author insertion order glitch"): `classes/author/DAO.php`
-`getNextSeq()` now tests `if ($seq !== null)`, so a new author after the
-seq-0 auto-created author gets seq 1 instead of tying at 0, and
-`classes/author/Collector.php` ORDERBY_SEQUENCE breaks ties by
-`author_id`. The commit sits in all three apps' `lib/pkp` as of
-2026-09-03 (OJS `762415103f`, OMP `a1aefa3fe`, OPS `6bda92fb03`).
-Verified live 2026-09-03 on OJS and OMP (env 0, fresh reset,
-`editor.diana` on `publicknowledge`, one unpublished and one published
-submission per app): after adding a contributor through the panel's
-"Add Contributor" form, the panel showed the auto-created author first
-and the new contributor second immediately after the save and on three
-reloads; all three Preview formats, ordering mode, the landing/book page
-(two loads) and the issue table of contents / catalog line agreed; the
-panel's own API responses carried `seq=0` for the auto-created author
-and `seq=1` for the new one on every publication. Not re-probed on OPS
-(shared pkp-lib mechanism) nor with three or more contributors.
-Not backported: on `stable-3_5_0` (lib/pkp `4045d9241e`, all three
-apps) `getNextSeq()` still tests `if ($seq)` and the collector still
-orders by `seq` alone (`git log --grep=13003` empty), so a list whose
-sequences tie, as most of PKP's 3.5 dataset's multi-contributor items
-do (every contributor at 0), reorders on any contributor save.
-Live-probed 2026-10-15 (`dbarnes`, two runs on fresh resets, "Edit" on
-the first listed contributor and "Save" with nothing changed): that
-contributor went last right after the save, after a reload and, for a
-published item, on its public page: OMP 14 (published) "Michael
-Dawson, Brian Dupuis, Michael Wilson" became "Brian Dupuis, Michael
-Wilson, Michael Dawson", the book page likewise; OMP 4 "Bart Beaty,
-Toby Miller, Ira Wagman, Will Straw" became "Toby Miller, Ira Wagman,
-Will Straw, Bart Beaty"; OPS 7 (posted) "Elinor Ostrom, Frank van
-Laerhoven" reversed in the list and on the preprint page; OJS 4 "Craig
-Montgomerie, Mark Irvine" reversed. The stored sequences stayed at 0;
-a published version shows "Edit" on 3.5, so nothing was unpublished
-first. On `main` the order holds (fn f), also on the 3.5 dataset
-upgraded to `main`, whose sequences stay tied at 0 (the tie-break by
-contributor id).
 
 <a id="fn-f-a16"></a>
 **f-a16 — A16 evidence.** `Repository::newAuthorFromUser()` copies the

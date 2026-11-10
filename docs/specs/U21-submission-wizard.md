@@ -1126,11 +1126,8 @@ are the source; badges, Impact and Basis:
 | [OPS4](#ops4) | The preprint completion screen thanks the viewer, not the submitter | ❓ | latent | — |
 | [OPS6](#ops6) | The "needs an editor" email keeps its journal wording on a preprint server | ❓ | minor | — |
 | [OPS10](#ops10) | A Moderator already on a preprint is not emailed when it is submitted | ❓ | minor | — |
-| [A11](#a11) | An Author-role user with no profile affiliation cannot start a submission at all; "Begin Submission" 500s (regression, pkp-lib `9e2fbac214`) | ✅ | retired | maintainer reproduced independently, 2026-09-01 (admin-created, profile-cleared and multi-role users all crash) |
-| [A20](#a20) | Retired: requiring a plain language summary made the submission wizard refuse saves of other fields, and hang; they now save, and the summary blocks only "Submit" | ✅ | retired | PR review (claude), 2026-10-21 — fixed by pkp/pkp-lib#13585 |
 | [A13](#a13) | Changing the submission language inside the wizard leaves every language-bound value, the copied contributor affiliation and given name included, to be filled for the new language before submitting | ✅ | — | @jarda.kotesovec 2026-09-12 · intended |
 | [OMP1](#omp1) | A press submits by work type (Monograph / Edited Volume), with no section at intake and an optional Series later | ✅ | — | — |
-| [OMP3](#omp3) | A press lists the "Submit As" roles in a changing order, so the preselected role changes between visits | ✅ | retired | issues (claude), 2026-10-01 — not seen again; the order is A21 on every app |
 | [OPS1](#ops1) | A preprint server's wizard is galley-based and single-stage: license & relation questions, moderation-aware messaging, can-post variants | ✅ | — | — |
 
 ### All apps
@@ -1689,13 +1686,13 @@ Basis: probe, 2026-10-21. <sup>[fn-ops11](#fn-ops11)</sup>
 ### Retired
 
 <a id="a11"></a>
-**A11 — No profile affiliation, no submission: the wizard's start 500s** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13265), 2026-09-03. <sup>[fn-a11](#fn-a11)</sup>
+**A11 — No profile affiliation, no submission: the wizard's start 500s** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13265).
 
 <a id="a20"></a>
-**A20 — Requiring a plain language summary made the submission wizard refuse saves of other fields** · ✅ · retired. Fixed by pkp/pkp-lib#13585, reviewed before its merge on 2026-10-21: the start page's title, "Details" and "References" save while the summary is empty, and the summary blocks only "Submit". <sup>[fn-a20](#fn-a20)</sup>
+**A20 — Requiring a plain language summary made the submission wizard refuse saves of other fields** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13585).
 
 <a id="omp3"></a>
-**OMP3 — "Submit As" lists its roles in a changing order** · ✅ · retired. Not seen again on 2026-10-01: a press kept one order across visits; the order no app fixes is [A21](#a21). <sup>[fn-omp3](#fn-omp3)</sup>
+**OMP3 — "Submit As" lists its roles in a changing order** · ✅ · retired. Not reproduced.
 
 ---
 
@@ -2434,37 +2431,6 @@ should fire — not driven: the only site administrator on a test install is
 the seeded `admin` account every suite depends on, and the probe would
 permanently add an Author role to it.
 
-<a id="fn-a11"></a>
-**fn-a11** — A11. Reproduced 2026-09-01 on OJS `main` `d44b186c22` (env 0,
-checkout fully synced: submodules, composer install, npm ci, UI rebuilt,
-DB reset): POST `/api/v1/_test/scenarios/submission` → 500
-`TypeError: PKP\author\Author::getAffiliations(): Return value must be of
-type Traversable|array, null returned` (`Author.php:230`); full suite 21✓
-with everything seeding a submission red. Chain: `Repository::
-newAuthorFromUser()` (unchanged since pkp/pkp-lib#11030) runs
-`setAffiliations($migratedAffiliations ? [$migratedAffiliations] : null)`
-— the null is stored, so `hasData('affiliations')` is true;
-`9e2fbac214` ("Fix addAffiliation() for fresh and lazy-loaded authors",
-merged via `6f0a39733a` `i13003-author-order-fix`) replaced
-`getAffiliations()`'s `getData('affiliations') ?? collect()` with the
-hasData guard, which returns the stored null against the `iterable`
-return type; `DAO::insert()` (line 172) iterates `getAffiliations()` →
-throw. The production path is identical: `PKPSubmissionController::add()`
-(line 736) calls `newAuthorFromUser()` for every Author-role submitter,
-then `Repo::author()->add()`. Prior pkp-lib pointer `13b621e424` green
-(scheduled CI run 33466736951); first red at the `d44b186c22` pointer
-bump (pkp/ojs run 33536204412). Direct probe 2026-09-01 clearing the
-harness of blame (the `_test` endpoints are NOT involved): a plain curl
-session as `author.alex` (no affiliation in `user_settings`) POSTing the
-production `api/v1/submissions` with a valid start payload → 500 with the
-identical TypeError; after inserting the same `user_settings.affiliation`
-row the profile form writes, the identical request → 200, submission
-created. The affiliation-less user shape is legitimate product state:
-`schemas/user.json` marks `affiliation` nullable and `RegistrationForm`
-attaches no required-validator to it. The suite's U21 S1 (pure UI, no
-scenario seeding) also failed at "Begin Submission" in the same run.
-Fix is either side of the mismatch: null-tolerant `getAffiliations()` or
-`collect()` instead of null in `newAuthorFromUser()`. Fix PR pkp/pkp-lib#13265 verified at the PR ref 2026-09-01 (full OJS suite 129/129 green); its first revision broke the with-affiliation branch (`collect($obj)` cast the object's properties to items) and was corrected by the author the same day (`eb4cef9203`, `collect([$migratedAffiliation])`). Upstream-ready report handed to the team 2026-09-01 (`docs/reports/`, deleted once addressed; git history keeps it). Retired 2026-09-03: the fix merged as pkp-lib `eb4cef92` (pkp/pkp-lib#13265) and reached all three apps' `main` (OJS `c499837187`, OMP `a1aefa3fe`, OPS `6bda92fb03`), where the full suites ran green that day (OJS 154, OMP 156, OPS 119 tests).
 <a id="fn-a12"></a>
 **fn-a12** — Emails screen after "Do not send an email.". The off end of
 `submissionAcknowledgement` is stored as no row, and the "Submission
@@ -2632,47 +2598,6 @@ the route and an aborted request on the same save gave "Reconnecting",
 a retry 4.1–4.7 s later answering 200, "Last saved 4 seconds ago", the
 buttons enabled, and the Title kept after a reload.
 Issue report: [pkp-e2e#322](https://github.com/jardakotesovec/pkp-e2e/issues/322) ([docs/issues/U21-A19-wizard-refused-save-hangs-saving.md](../issues/U21-A19-wizard-refused-save-hangs-saving.md)).
-
-<a id="fn-a20"></a>
-**fn-a20** — A20 (retired). pkp-lib `PKPPublication\Repository::validate()`
-checks a required `plainLanguageSummary` against what each save sends,
-not against what the publication holds (as for the Publication pages,
-*Publication metadata* A1); the wizard's other step forms never send the
-summary, and the "Details" form sends its box even when empty. Live-probed 2026-10-01, two
-runs per app on all three (scratch contexts with "Plain Language
-Summary" at require and "Coverage" at ask; kept script
-`shared/playwright/checks/U21/I01/i01.js`, variants `pls`, `plsdetails`,
-`refs`, `relreq`, controls `cov`, `refsctl`): a summary typed on
-"Details" saved (200); "Coverage" typed on "For the Editors" / "For
-Readers" and "Continue" answered 400
-`{"plainLanguageSummary":{"en":["This field is required."]}}`, then
-note fn-a19's hang; "Review" read "Coverage / None provided" under
-"Checking your submission", and after a reload "Coverage" was empty. A
-summary and two lines in "References" on "Details": 200, then 400 for
-the references. A Title change with the summary box empty: 400. OPS,
-"This preprint has not been published elsewhere." answered alone: 400,
-nothing stored. OPS, an answer ticked after the hang, offered by
-"Unsaved Changes" after a reload and sent by "Yes": 400 and the page
-error again; ticked again on "For Readers" after a plain reload: the
-same. Controls, the summary at ask: the same drives answered 200 and
-the text read back after a reload.
-Retired 2026-10-21: pkp/pkp-lib#13585 drops the closure and adds the
-summary to `ValidatorFactory::required()`'s list once the submission is
-submitted, so an edit is refused only when it empties the summary, and
-while the submission is in progress `validateSubmit()` alone requires
-it. Driven on PKP's default dataset at the PR head `93b094ea77` (in
-`lib/pkp` of OJS `9647ed7204`, OMP `56388590e`, OPS `ea14c78745`) and
-its base `2ea65a9662`, before its merge, with the issue walk
-`shared/playwright/checks/issues/plain-summary-required-refuses-other-saves/walk.js` (deleted at the merge)
-on the three apps: at the head the start page's title, a "Details" save
-with the summary empty and the "References" box answered 200, and the
-title and both reference lines read back after a reload; "Review"
-listed "Plain Language Summary" "This field is required." with "Submit"
-disabled until the summary was typed, as at the base; an author's way
-through with the summary typed reached "Submission complete". At the
-base the same saves answered 400 (`plainLanguageSummary`), "Review"
-read "Title / None provided" and "References" came back empty.
-Issue report: [pkp-e2e#323](https://github.com/jardakotesovec/pkp-e2e/issues/323), closed 2026-10-21 at the merge of pkp/pkp-lib#13585 (`1f415a07ca`); the report and its kept walks deleted then, in git history.
 
 <a id="fn-a21"></a>
 **fn-a21** — A21. `PKPSubmissionHandler::getSubmitUserGroups()` (and

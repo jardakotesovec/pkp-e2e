@@ -1157,10 +1157,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP1](#omp1) | The press's Settings › Press page is headed "Setup", not "Press Settings" {OMP} | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server's "Sponsoring organization" is saved and used nowhere {OPS} | ❓ | latent | — |
 | [OPS1](#ops1) | A preprint server has no "Information" tab, Information pages or Information block {OPS} | ✅ | minor | — |
-| [A13](#a13) | Retired: with the masthead not based on enrollments, invitations and masthead changes promised "Your name will appear in the {journal}'s masthead", and reviewers were promised a listing the journal did not show; the invitation screens and email now follow both settings | ✅ | retired | upstream change + walk (claude), 2026-10-23 |
-| [A12](#a12) | Retired: in French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes {OMP OPS} | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A4](#a4) | Retired: a disabled member made "Editorial Masthead" and "Editorial History" fail with a server error; the member now stays listed and both pages open (Rule 14e) | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream |
-| [A5](#a5) | Retired: "Remove User" reached "Editorial History" only after an unrelated change, and a later start date was not known to list; both now show at the next load (Rule 14e) | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream, settled |
 
 ### All apps
 
@@ -1382,16 +1378,16 @@ Basis: probe, 2026-10-01; probe, 2026-11-03 (the email). <sup>f-ops4</sup>
 ### Retired
 
 <a id="a13"></a>
-**A13 — Invitations and masthead changes promise a listing the masthead does not give** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13370's second part: pkp-lib#13603, ui-library#1027, ojs#5979, omp#2524, ops#1460), merged 2026-10-23 on stable-3_5_0 and `main`. <sup>f-a13</sup>
+**A13 — Invitations and masthead changes promise a listing the masthead does not give** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13370).
 
 <a id="a4"></a>
-**A4 — Disabling a listed member breaks the masthead** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13387, 2026-09-24), verified 2026-09-29 on OJS, OMP and OPS: a disabled member stays listed on "Editorial Masthead", "Editorial History" and "Peer Reviewers in Previous Year", and both pages open for every visitor (Rule 14e). <sup>f-a4</sup>
+**A4 — Disabling a listed member breaks the masthead** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13387).
 
 <a id="a5"></a>
-**A5 — Removed and future members wait for an unrelated change** · ✅ · retired. Fixed upstream for "Remove User" (pkp/pkp-lib#13387, 2026-09-24) and settled for start dates, verified 2026-09-29 on OJS, OMP and OPS: a member removed with "Remove User" is on "Editorial History" at the next load, and a member with a later start date is listed from that date on, with no other change (Rule 14e). <sup>f-a5</sup>
+**A5 — Removed and future members wait for an unrelated change** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13387).
 
 <a id="a12"></a>
-**A12 — In French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes** {OMP OPS} · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a12</sup>
+**A12 — In French (Canada), a press's and a preprint server's Masthead settings tab shows untranslated codes** {OMP OPS} · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -2567,35 +2563,6 @@ spec's A6 records what an empty support contact does to registration
 with validation on. Live-probed 2026-09-23 (all three apps, on a scratch
 journal and on one made with Hosted Journals "Create Journal"): notes h
 and td4.
-
-<a id="fn-f-a4"></a>
-**f-a4** — Live-probed 2026-09-23 (all three apps, three drives on two
-seeds): a Section editor listed on the masthead disabled with the users
-list's "Disable User": `about/editorialMasthead` answered 500 with a
-blank page to a signed-out visitor, on reload and to the manager; a past
-member listed on "Editorial History" disabled: `about/editorialHistory`
-answered 500 the same way. "Enable User" and "Remove User" left both
-failing; "Remove Role" on another member, a masthead choice changed or a
-role's box saved brought both back with the disabled member gone, and
-the member enabled again stayed off until the next such change. Server
-log: "Uncaught Error: Call to a member function getId() on null in
-…/lib/pkp/pages/about/AboutContextHandler.php:88". Mechanism: note r.
-Retired 2026-09-29: fixed by pkp/pkp-lib#13387 (`e0c43a1227`,
-2026-09-24; note r); three drives per app on the tips named at the head
-of these notes showed both pages answering normally with the disabled
-members listed (note td12).
-
-<a id="fn-f-a5"></a>
-**f-a5** — Live-probed 2026-09-23 (all three apps): note td12. The
-confirmation of "Remove User" reads "Remove this user from this journal?
-This action will unenroll the user from all roles within this journal."
-("press", "server"). Note r: the cached lists are built with the dates as
-they are at build time, `forgetEditorialCache()` runs only on assignment
-and masthead-choice events, and the lifetime is one year. Retired
-2026-09-29: "Remove User" now clears the lists (pkp/pkp-lib#13387,
-`e0c43a1227`, 2026-09-24; note r), and a later start date, once reached,
-lists the member at the next load (note td12). The confirmation of "Remove
-User" read the same that day on the three apps.
 
 <a id="fn-f-a6"></a>
 **f-a6** — `editorialHistory.tpl` heading key `common.editorialHistory.page`

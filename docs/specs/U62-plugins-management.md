@@ -761,7 +761,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | A Site Administrator with no manager role in a journal cannot switch its plugins | ❓ | minor | — |
 | [A8](#a8) | The theme a journal uses can be switched off | ❓ | user-visible | — |
 | [OMP1](#omp1) | A press's list shows site-wide plugins to the Site Administrator only on a one-press installation | ✅ | invisible | — |
-| [OJS1](#ojs1) | Retired: with its theme switched off, a journal's home page came up blank for every visitor; fixed by pkp/pkp-lib#13549 | ✅ | retired | housekeeping (claude), 2026-10-16 — fixed by pkp/ojs#5948, merged 2026-10-16 |
 | [OMP2](#omp2) | A press lists the category headings in another order | ✅ | invisible | — |
 
 ### All apps
@@ -1023,7 +1022,7 @@ Basis: probe. <sup>f-omp2</sup>
 ### Retired
 
 <a id="ojs1"></a>
-**OJS1 — With its theme switched off, a journal's home page comes up blank for every visitor** · ✅ · retired. Fixed upstream (pkp/ojs#5948 for pkp/pkp-lib#13549, merged 2026-10-16), retired by the housekeeping session 2026-10-16. <sup>f-ojs1</sup>
+**OJS1 — With its theme switched off, a journal's home page comes up blank for every visitor** · ✅ · retired. Fixed upstream (pkp/ojs#5948, for pkp/pkp-lib#13549).
 
 ---
 

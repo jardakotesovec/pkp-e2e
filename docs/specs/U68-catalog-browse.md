@@ -687,7 +687,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | "Series position" orders compare the positions as text | ❓ | minor | — |
 | [A10](#a10) | A page typed past the last one shows the full count above "No titles have been published yet." | ❓ | minor | — |
 | [A12](#a12) | A deleted series' menu item stays on the Navigation tab, its window showing another series | ❓ | minor | — |
-| [A8](#a8) | Retired: In French the catalog pages and the "Browse" block show raw text codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -836,7 +835,7 @@ Basis: probe, 2026-09-27. <sup>f-a12</sup>
 ### Retired
 
 <a id="a8"></a>
-**A8 — The catalog pages and the "Browse" block in French show raw text codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a8</sup>
+**A8 — The catalog pages and the "Browse" block in French show raw text codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -1317,23 +1316,6 @@ and no "New Releases" list while the Catalog page offered "New release
 in category". The expectation, the start date and the 2018 history are
 read from the code and its history.
 Issue report: [pkp-e2e#734](https://github.com/jardakotesovec/pkp-e2e/issues/734) ([docs/issues/U70-A10-U68-A7-category-page-no-new-releases-or-featured.md](../issues/U70-A10-U68-A7-category-page-no-new-releases-or-featured.md)), shared with [Catalog management A10](U70-catalog-management.md#a10).
-
-<a id="fn-f-a8"></a>
-**f-a8** — OMP `locale/fr_CA/locale.po` and `submission.po` hold empty
-strings for `catalog.browseTitles`, `catalog.category.heading`,
-`catalog.noTitles`, `catalog.noTitlesNew`, `catalog.newReleases`,
-`catalog.featured`, `catalog.manage.series.onlineIssn` and `printIssn` (no
-ISSN line shows in any language, [A3](#a3)); `navigation.catalog`
-"Catalogue", `navigation.newReleases` "Nouveautés", `series.series`
-"Séries", `help.previous`, `help.next` and `common.pagination` are
-translated. lib/pkp `Locale::translate()` prints "##{key}##" for a key
-with no text. The browse block's
-`plugins/blocks/browse/locale/fr_CA/locale.po` holds no strings (its `fr`
-file does), hence the block's codes. The Categories spec saw
-"##catalog.browseTitles##" and "##catalog.category.heading##" on a press's
-category page in French (2026-09-25, its A15). Live-probed 2026-09-27
-(note td12). The empty strings and the expectation are read from the code.
-Re-walked 2026-10-02 on main and stable-3_5_0 (codes on both; 3.4 and 3.3 the same empty entries by code).
 
 <a id="fn-f-a9"></a>
 **f-a9** — OMP `4d4f2c519` "Clean up old code" (2026-01-14) removed

@@ -930,13 +930,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A17](#a17) | Audit log records a session ended by a password change in another browser as an IP address change | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A5](#a5) | No journal-level users screen offers the "must change password" box, so a Journal Manager cannot require a forced change on an existing account; only the Site Administrator's Hosted Journals list offers it | ❓ | user-visible | Jarda 2026-08-25 · to triage |
 | [A9](#a9) | The last-login date is recorded on every sign-in, but no users screen shows it, so a manager cannot see when an account last signed in | ❓ | minor | — |
-| [A3](#a3) | Retired: the set-a-new-password page's browser tab showed a raw internal code; it now reads "Reset Password \| {journal name}" (Fields) | ✅ | retired | issues (claude), 2026-10-04 — fixed upstream (pkp/pkp-lib#13132) |
 | [A6](#a6) | With rate limiting on, even the correct password is refused as "Invalid username/email or password" during the cool-down; the concealment is intended | ✅ | latent | Jarda 2026-08-25 |
-| [A13](#a13) | Retired: with "Confirm Access" on, an Administration page left open still deleted journals and saved site settings without the password; such changes are now refused once the period has run out (Rule 16) | ✅ | retired | PR review (claude), 2026-10-20 — fixed upstream (pkp/pkp-lib#13521) |
-| [A12](#a12) | Retired: after a disabled account was refused, the browser's next correct sign-in landed back on the Login page with no message; it now lands at once (Rule 2) | ✅ | retired | issues (claude), 2026-10-19 — fixed upstream (pkp/pkp-lib#12780) |
-| [A7](#a7) | Retired: signed out, the Dashboard address the monthly reminder email links to gave an empty error page; it now opens the Login page (Rule 4) | ✅ | retired | retirement walk (claude), 2026-11-01 — fixed upstream (pkp/pkp-lib#13651) |
-| [A8](#a8) | Retired: a user signed back in by "Keep me logged in" looked signed out on the public site, and "Login As" gave a blank page; such a user is now fully signed in (Rule 5a) | ✅ | retired | retirement walk (claude), 2026-11-01 — fixed upstream (pkp/pkp-lib#12780) |
-| [A14](#a14) | Retired: "Keep me logged in" kept no one signed in once the session ended; a ticked sign-in now lasts its window (Rules 5, 5a) | ✅ | retired | retirement walk (claude), 2026-11-01 — fixed upstream (pkp/pkp-lib#12780) |
 
 ### All apps
 
@@ -1166,38 +1160,22 @@ Since: 2026-08-12 (pkp/pkp-lib#12336) · Basis: probe, 2026-10-21. <sup>[f-a17](
 ### Retired
 
 <a id="a3"></a>
-**A3 — Raw code in the reset page's browser tab** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13132](https://github.com/pkp/pkp-lib/issues/13132), 2026-08-27), verified 2026-10-04 on OJS, OMP and OPS: the set-a-new-password page's tab reads "Reset Password | {journal name}" instead of the internal code "user.login.resetPassword" (Fields). <sup>[f-a3](#fn-a3)</sup>
-
-> **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Fix: resolve the
-> tab title to the translated "Reset Password" string. Already reported as
-> pkp/pkp-lib#13132.
+**A3 — Raw code in the reset page's browser tab** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13132).
 
 <a id="a7"></a>
-**A7 — Signed out, the Dashboard address the monthly reminder email links to gave an empty error page** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13651](https://github.com/pkp/pkp-lib/issues/13651), by [pkp/pkp-lib#13652](https://github.com/pkp/pkp-lib/pull/13652), 2026-10-31), verified 2026-11-01 on OJS, OMP and OPS: signed out, the Dashboard address that ends at the word "dashboard" opens the Login page and signing in there leads to the Dashboard (Rule 4), and the address behind "Logout as" opens the Login page (Rule 15); the server used to fail at both and the browser showed an empty page. <sup>[f-a7](#fn-a7)</sup>
-
-> **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞. Ruling: signed
-> out, the bare dashboard address must behave like every other private
-> address — redirect to the Login page (destination preserved); choosing
-> which dashboard variant to land on happens after the successful sign-in,
-> as it already does for every other route.
+**A7 — Signed out, the Dashboard address the monthly reminder email links to gave an empty error page** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13651, pkp/pkp-lib#13652).
 
 <a id="a8"></a>
-**A8 — A user signed back in by "Keep me logged in" looked signed out on the public site, and "Login As" gave a blank page** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#12780](https://github.com/pkp/pkp-lib/issues/12780), 2026-10-31), verified 2026-11-01 on OJS, OMP and OPS: back after the idle limit, a user signed in with the box ticked is signed in everywhere, the public header naming them, the Login page sending them on and "Login As" impersonating (Rule 5a). From 21 July to 6 October 2026, on `main` and the 3.5 branch only, the editorial pages opened signed in while the public pages and the Login page treated the user as signed out, and "Login As" failed on the server. <sup>[f-a8](#fn-a8)</sup>
-
-> **Reviewed — Jarda Kotěšovec, 2026-08-25**: confirmed 🐞 (filed on
-> review). Ruling: a session whose user cannot be resolved is treated like
-> a signed-out visitor — redirect to Login, never a crash. Same family as
-> the bare-dashboard error (A7): both are missing signed-out guards on
-> older page routes.
+**A8 — A user signed back in by "Keep me logged in" looked signed out on the public site, and "Login As" gave a blank page** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12780).
 
 <a id="a12"></a>
-**A12 — After a disabled account was refused, the next correct sign-in in that browser failed** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#12780](https://github.com/pkp/pkp-lib/issues/12780), 2026-10-06), verified 2026-10-19 on OJS, OMP and OPS: right after a disabled account's refusal, another account's correct sign-in in the same browser lands at once where Rule 3 says; it used to land back on the Login page with no message (Rule 2). <sup>[f-a12](#fn-a12)</sup>
+**A12 — After a disabled account was refused, the next correct sign-in in that browser failed** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12780).
 
 <a id="a13"></a>
-**A13 — With "Confirm Access" on, an Administration page left open still deleted journals and saved site settings without the password** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13521](https://github.com/pkp/pkp-lib/pull/13521), for pkp/pkp-lib#13520, merged 2026-10-20), verified 2026-10-20 on OJS, OMP and OPS with the merged pkp-lib in `lib/pkp`: past the confirmation period, the Security "Save", a journal's removal and its creation from an Administration page left open are refused with "Your access to Administration has expired…" and change nothing, as are the other Administration requests (Rule 16). <sup>[f-a13](#fn-a13)</sup>
+**A13 — With "Confirm Access" on, an Administration page left open still deleted journals and saved site settings without the password** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13521, for pkp/pkp-lib#13520).
 
 <a id="a14"></a>
-**A14 — "Keep me logged in" kept no one signed in once the session ended** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#12780](https://github.com/pkp/pkp-lib/issues/12780), 2026-10-31), verified 2026-11-01 on OJS, OMP and OPS: a user signed in with the box ticked who comes back after the idle limit, or reopens the browser where the installation ends sessions at browser close, is still signed in on every page (Rules 5, 5a); from 6 October 2026 until the fix the Login page showed instead, as if the box had been unticked. <sup>[f-a14](#fn-a14)</sup>
+**A14 — "Keep me logged in" kept no one signed in once the session ended** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12780).
 
 ---
 
@@ -1954,76 +1932,6 @@ verbatim, with only a 2–5-second artificial delay
 limit was introduced 2026-02 by the site-security rate-limiting feature
 (upstream issue pkp/pkp-lib#12162); defaults 5 attempts / 300 s, keyed
 per username+IP (IPv6 /64), configurable in Site Settings → Security.
-
-<a id="fn-a7"></a>
-**f-a7** — Live-probed 2026-08-01 (OJS, OMP, OPS — identical): signed out,
-`{journal}/dashboard` with no operation after it answers HTTP 500 with an
-empty body; every `/dashboard/{op}` address redirects to Login with the
-destination held as `source` and resumes correctly after sign-in. Cause
-pinned 2026-08-25 (review): the bare address resolves "which dashboard is
-home" via `PKPPageRouter::getHomeUrl()`, which starts from
-`Auth::user()->getId()` with no signed-out guard — the only
-anonymous-reachable caller; every other caller runs just after sign-in.
-Fix per ruling: guard `getHomeUrl()` (no user → the login redirect), so
-variant resolution stays post-login.
-Which form of the address fails as typed depends on how many languages
-the journal has; the two probes below read one kind each.
-Live-probed 2026-10-06 (Rule 4; OJS, OMP, OPS; two runs each; scratch
-journals, which have one language; signed out): `{journal}/dashboard`
-answered 500 with an empty page; `{journal}/en/dashboard` 302 to
-`{journal}/dashboard`, then 500; with a final slash,
-`{journal}/en/dashboard/` 302 to `{journal}/dashboard/`, then 500
-(`GET /index.php/{journal}/dashboard/` in the run's server errors).
-`dashboard/editorial` gave the Login page as before.
-Walked 2026-10-07 (Rule 4; OJS, OMP, OPS on `main`; the default dataset,
-whose journal has two languages, en and fr_CA; signed out; kept script
-`shared/playwright/checks/issues/dashboard-address-signed-out-server-error/walk.js`):
-`{journal}/en/dashboard`, `{journal}/en/dashboard/` and
-`{journal}/en/dashboard/index` answered 500 as typed, with no redirect
-(`[500]: GET /index.php/publicknowledge/en/dashboard` in the server
-log); `{journal}/dashboard` 302 to `{journal}/en/dashboard`, then 500;
-`{journal}/en/dashboard/editorial` gave the Login page. On
-`stable-3_5_0` the same walk read the same 500 on each app, the address
-with a final slash included.
-The redirect is `PKPPageRouter::_setLocale()`, which runs before the
-dashboard's handler: on a one-language journal it sends an address with
-a language to the same path without one, and on a journal with more
-than one it sends an address without a language to the same path with
-one ([Languages & locales](U57-languages-and-locales.md#fn-m), note m,
-probed there on the public pages). A scratch journal given a second
-language was not driven at these addresses.
-Walked 2026-10-29 (OJS, OMP, OPS on `main` and `stable-3_5_0`; the
-default dataset; signed out; the same kept script): every read above
-again, and "Logout as" with no `redirectUrl`
-(`{journal}/en/login/signOutAsUser`) answered the same 500
-(`getHomeUrl()` through `LoginHandler::sendHome()`; `signOutAsUser` has
-no access policy); with a `redirectUrl` it went to that page. Upstream:
-`pkp/pkp-lib#13651` (open), fix in PR `pkp/pkp-lib#13652` (open), which
-guards `getHomeUrl()` as the 2026-08-25 ruling asked; tried on `main`,
-it opened the Login page at both addresses.
-Retired: fixed by pkp/pkp-lib#13651 through PR pkp/pkp-lib#13652
-(Jack Henschel), lib/pkp `574aaee095` on `main` and `778febf80b` on
-`stable-3_5_0`, merged 2026-10-31: with no signed-in user,
-`PKPPageRouter::getHomeUrl()` returns the Login address with the
-requested address as `source`. Walked 2026-11-01 on OJS, OMP and OPS,
-`main` (lib/pkp `442148e14e`) and `stable-3_5_0` (lib/pkp
-`c4c0aa8c52`), each on PKP's default dataset, signed out (the kept
-walk, default and `neighbour` modes; no server-log line): each of
-`{journal}/en/dashboard`, `{journal}/en/dashboard/`,
-`{journal}/en/dashboard/index` and `{journal}/dashboard` answered 302
-to `{journal}/en/login?source=…` ("Login | Journal of Public
-Knowledge", the press's and the server's names on OMP and OPS), and
-`dbarnes` signing in there landed on
-`dashboard/editorial?currentViewId=assigned-to-me` ("Assigned to
-me"); `{journal}/en/dashboard/editorial` as before.
-`{journal}/en/login/signOutAsUser` with no `redirectUrl` gave the Login
-page, the address as `source`; with `redirectUrl=…/about` the About
-page. Signed in, the bare address led `dbarnes` to
-`dashboard/editorial` and an Author (`amwandenga` on OJS, `aclark` on
-OMP, `ccorino` on OPS) to `dashboard/mySubmissions`; signed out,
-`{journal}/en/submissions` gave the Login page. The walk was deleted at
-this retirement, with the issue report (git history keeps them).
-Issue report: [pkp-e2e#825](https://github.com/jardakotesovec/pkp-e2e/issues/825) (closed 2026-11-01, fixed by `pkp/pkp-lib#13651`).
 
 <a id="fn-a8"></a>
 **f-a8** — Live-probed 2026-08-25 (OJS): with an aged storage-state session

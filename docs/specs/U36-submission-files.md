@@ -1087,7 +1087,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A18](#a18) | Note text not added is lost without a question when the window closes | ❓ | minor | — |
 | [A22](#a22) | The Activity Log records a new file's upload as a "Revision" | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server has no workflow file lists; its files are its galleys' files | ✅ | — | — |
-| [A1](#a1) | Retired: "Cancel" after revising a file that was renamed left the window open and the new file in place; it now restores the old file (Rule 9) | ✅ | retired | upstream change + claim check (claude), 2026-09-27 — fixed upstream |
 
 ### All apps
 
@@ -1571,7 +1570,7 @@ Basis: probe. <sup>[f-ops1](#fn-ops1)</sup>
 ### Retired
 
 <a id="a1"></a>
-**A1 — "Cancel" after a revision does not restore a file that was renamed** · ✅ · retired. Fixed upstream on 2026-09-27, verified that day on OJS and OMP: "Cancel" after a revision, at any step, puts back a file renamed by anyone since its last upload under the name it had when the wizard opened (Rule 9). <sup>[f-a1](#fn-a1)</sup>
+**A1 — "Cancel" after a revision does not restore a file that was renamed** · ✅ · retired. Fixed upstream.
 
 ---
 

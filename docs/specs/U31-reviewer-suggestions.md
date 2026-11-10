@@ -606,7 +606,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | A matched suggestion is offered nowhere again, even after the reviewer is unassigned or cancelled | ❓ | minor | — |
 | [A4](#a4) | The author loses sight of their suggestions the moment they submit | ❓ | minor | — |
 | [OMP1](#omp1) | Internal Review shows no panel, yet its Add Reviewer window offers the suggestions | ❓ | minor | — |
-| [A1](#a1) | The Funding Coordinator gets an error dialog on the stage instead of the panel | ✅ | retired | issues (claude), 2026-10-04 — fixed upstream |
 
 ### All apps
 
@@ -797,7 +796,7 @@ Basis: probe. <sup>f-omp1</sup>
 ### Retired
 
 <a id="a1"></a>
-**A1 — The Funding Coordinator gets an error dialog instead of the panel** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13191, 2026-09-03), verified 2026-10-04 on OJS and OMP: the Funding Coordinator opens the Submission and Review stages with no "Error" dialog and reads "Reviewers Suggested by Author" there (Actors row 2). <sup>f-a1</sup>
+**A1 — The Funding Coordinator gets an error dialog instead of the panel** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13191).
 
 ---
 

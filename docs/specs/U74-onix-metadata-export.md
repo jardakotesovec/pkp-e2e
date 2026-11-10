@@ -1133,7 +1133,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | A digital format's file size in the book's ONIX product reads whole megabytes followed by ".3" | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A3](#a3) | A saved audience list cannot be emptied again | ❓ | minor | — |
 | [A10](#a10) | A representative's ID, and an agent's phone and email, reach no file | ❓ | minor | — |
-| [A1](#a1) | On a freshly installed press, the ONIX 3.0 tool's "Export Submissions" ended in "The process failed" for every book | ✅ | retired | PR review (claude), 2026-10-05 — fixed by pkp/omp#2372, merged 2026-10-05 |
 
 ### All apps
 
@@ -1445,7 +1444,7 @@ Since: 2012-06-22, a date read from the code's history · Basis: probe, 2026-10-
 ### Retired
 
 <a id="a1"></a>
-**A1 — On a freshly installed press, the ONIX 3.0 tool's "Export Submissions" ended in "The process failed" for every book** · ✅ · retired. Fixed by pkp/omp#2372 (the filter group's input type), merged 2026-10-05. <sup>f-a1</sup>
+**A1 — On a freshly installed press, the ONIX 3.0 tool's "Export Submissions" ended in "The process failed" for every book** · ✅ · retired. Fixed upstream (pkp/omp#2372).
 
 ---
 
@@ -2385,21 +2384,6 @@ scenario sends after the queue has run bounds the read.
 Live-probed 2026-09-28: each of these states was seeded through these
 keys. Test run 2026-09-29, OMP: scenarios 2 to 9 green in the parallel
 project and scenario 1 in the serial one, each seeded as above.
-
-<a id="fn-f-a1"></a>
-**f-a1** — Notes i and j. Live-probed 2026-09-28 (A1), two runs, and
-earlier that day during the format spec's check: every book and set of
-books, validation ticked or not, answered "The process failed …
-supports input classes.submission.Submission[] - array given" with no
-download (note td20), while the Native XML export carried each
-format's ONIX product. The cause is read from the code (note j): the
-alias the declaration relied on went with omp `6f57d1d09`; the
-stable-3_5_0 line still has it, and exports (walked 2026-10-03). An
-install upgraded to `main` exports too: its migration rewrites the
-stored type. Retired 2026-10-05: pkp/omp#2372 declares the filter
-group's input as `class::APP\submission\Submission[]` (note j); at its
-head `f3808dce1`, before its merge, the export completes (note td20).
-Issue report: [pkp-e2e#695](https://github.com/jardakotesovec/pkp-e2e/issues/695), closed 2026-10-05 when pkp/omp#2372 merged.
 
 <a id="fn-f-a2"></a>
 **f-a2** — Note c: the menu offers the page with no role test, the form

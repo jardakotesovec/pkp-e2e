@@ -1488,12 +1488,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A30](#a30) | A task whose owner leaves the submission is left with no owner, and nothing says so | ❓ | minor | — |
 | [A35](#a35) | Once a submission is at Production, a Copyeditor is offered "Workflow Files" with every stage greyed | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server offers a "Workflow Files" source that never holds a file | ❓ | minor | — |
-| [A11](#a11) | Retired: "Cancel" asks before discarding, like the close control | ✅ | retired | — |
-| [A22](#a22) | Retired: leaving the page after a discarded window asks nothing | ✅ | retired | — |
-| [A24](#a24) | Retired: an assistant's "Workflow Files" offers stages that show nothing | ✅ | retired | re-probe (claude), 2026-10-05 — overturned |
-| [A9](#a9) | Retired: editing a discussion that "Notify" or "Assign" opened added a copy of its message instead of changing it; fixed by pkp/pkp-lib#13506 | ✅ | retired | PR review (claude), 2026-10-13 — fixed by pkp/pkp-lib#13506, merged |
-| [A4](#a4) | Retired: a "Find Template" search for "discussion" or "task" opened an "Error" window; fixed by pkp/pkp-lib#13614 | ✅ | retired | upstream sync (claude), 2026-10-27 — fixed by pkp/pkp-lib#13614 |
-| [A8](#a8) | Retired: an Author could not save an edit of their discussion once its first message had an uploaded file; fixed by pkp/pkp-lib#13605 | ✅ | retired | housekeeping (claude), 2026-11-03 — fixed by pkp/pkp-lib#13605 |
 
 ### All apps
 
@@ -1959,22 +1953,22 @@ Basis: probe. <sup>[f-ops2](#fn-ops2)</sup>
 ### Retired
 
 <a id="a11"></a>
-**A11 — "Cancel" loses typed text silently** · ✅ · retired. Overturned on screen 2026-09-23 (all three apps): "Cancel" on a changed window asks "Warning" like the close control and Escape (Rule 11c); the 2026-09-19 observation of a silent "Cancel" did not reproduce. <sup>[f-a11](#fn-a11)</sup>
+**A11 — "Cancel" loses typed text silently** · ✅ · retired. Overturned: not a bug.
 
 <a id="a22"></a>
-**A22 — The leave-page prompt after a discarded window** · ✅ · retired. Overturned on screen 2026-09-29 (all three apps): leaving the page after a window was closed with "Warning" › "Yes" asks nothing, as after a save or an untouched close (Rule 11d); the 2026-09-23 prompt came from test tooling reloading the page within a fraction of a second of the close. <sup>[f-a22](#fn-a22)</sup>
+**A22 — The leave-page prompt after a discarded window** · ✅ · retired. Overturned: not a bug.
 
 <a id="a24"></a>
-**A24 — An assistant's "Workflow Files" stages show nothing** · ✅ · retired. Overturned on screen 2026-10-05 (OJS, OMP): a stage the Copyeditor or Layout Editor cannot use is greyed and cannot be chosen (Rule 14a); the 2026-09-23 observation of stages that showed nothing came from test tooling that recorded the refused choice as an empty stage. <sup>[f-a24](#fn-a24)</sup>
+**A24 — An assistant's "Workflow Files" stages show nothing** · ✅ · retired. Overturned: not a bug.
 
 <a id="a9"></a>
-**A9 — Editing a discussion that "Notify" or "Assign" opened adds a copy of its message instead of changing it** · ✅ · retired. Fixed by `pkp/pkp-lib#13506` (for `pkp/pkp-lib#13505`, the team's copy of the issue report), merged 2026-10-13 (pkp-lib `a4f625a068`; no app's `lib/pkp` carries it yet, pkp/ojs#5927 having closed unmerged), reviewed at the PR's head before the merge and walked at the merge the same day on OJS, OMP and OPS: "Edit" › "Save" on a discussion "Notify" or "Assign" opened keeps one first message, headed with the sender, and replaces its text in place (Rule 15e). <sup>[f-a9](#fn-a9)</sup>
+**A9 — Editing a discussion that "Notify" or "Assign" opened adds a copy of its message instead of changing it** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13506, for pkp/pkp-lib#13505).
 
 <a id="a4"></a>
-**A4 — When adding a task or discussion, a "Find Template" search for "discussion" or "task" opens an "Error" window** · ✅ · retired. Fixed by `pkp/pkp-lib#13614` (pkp-lib `889c945a85`, merged 2026-10-26 as `4aab3a3443`; OJS's, OMP's and OPS's `lib/pkp` at `c27153abdd` carry it), walked 2026-10-27 on OJS, OMP and OPS `main`: the searches answer 200 with no "Error" window, and the word "task" or "discussion" keeps only the templates of that kind (Rule 10a). Issue report closed ([pkp-e2e#417](https://github.com/jardakotesovec/pkp-e2e/issues/417)). <sup>[f-a4](#fn-a4)</sup>
+**A4 — When adding a task or discussion, a "Find Template" search for "discussion" or "task" opens an "Error" window** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13614).
 
 <a id="a8"></a>
-**A8 — An Author cannot save an edit of their discussion once its first message has an uploaded file** · ✅ · retired. Fixed upstream by `pkp/pkp-lib#13605` (for `pkp/pkp-lib#13604`, the team's copy of the issue report), merged 2026-11-02 and carried by OJS's, OMP's and OPS's `main`; walked 2026-11-03 on all three: the Author's rename of their discussion whose first message carries an uploaded file saves and keeps the file (Rule 15d). Issue report closed ([pkp-e2e#423](https://github.com/jardakotesovec/pkp-e2e/issues/423)). <sup>[f-a8](#fn-a8)</sup>
+**A8 — An Author cannot save an edit of their discussion once its first message has an uploaded file** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13605, for pkp/pkp-lib#13604).
 
 ---
 
@@ -2225,9 +2219,6 @@ Issue report: [pkp-e2e#422](https://github.com/jardakotesovec/pkp-e2e/issues/422
 **f-a10** — `EditTask::messages()` maps `dateDue.after_or_equal` to `validation.after_or_equal` "Start date should be greater than or equal to today" (lib/pkp `locale/en/validation.po`). The date field's `min: 'today'` greys earlier days in the picker; typed, it reaches the server (td11, live-probed 2026-09-23).
 Issue report: [pkp-e2e#425](https://github.com/jardakotesovec/pkp-e2e/issues/425) ([docs/issues/U37-A10-past-due-date-speaks-of-start-date.md](../issues/U37-A10-past-due-date-speaks-of-start-date.md)).
 
-<a id="fn-a11"></a>
-**f-a11** — Live 2026-09-19 on all three apps (Production stage's claim check): "Cancel" in the discussions "Add" window closed it with the typed content lost and no prompt. The close control's question: note r. Live-probed 2026-09-23 in three separate drives on all three apps: "Cancel" on a changed window asks "Warning" (td2); the silent close did not reproduce, so the entry is retired.
-
 <a id="fn-a12"></a>
 **f-a12** — Note v: the one-hour closure applies to every user without `MANAGER`/`SUB_EDITOR` in the context (Author, assistant roles, Reviewer) and runs whenever `description` is posted, which the form always does. `NoteAccessPolicy` (write) states the same rule ("Other users can only edit their own headnotes within 1 hour of creation"), so the hour itself is intended (pkp/pkp-lib#12278). Live-probed 2026-09-23 (all three apps): with a scratch item's first message moved back two hours in the database (no seed key does this), the Author's rename and added participant and the Copyeditor's rename were refused, the Journal Manager's and a Section Editor's saved. Since pkp/pkp-lib#13409 the hour binds the submitting Author's edit of the comments-box discussion too (td8); the Author or assistant a Participants message went to is not bound (f-a9).
 
@@ -2262,14 +2253,8 @@ Issue report: [pkp-e2e#418](https://github.com/jardakotesovec/pkp-e2e/issues/418
 **f-a21** — Note r: the message box field has no label, so the error summary's link reads `undefined`. Live-probed 2026-09-23 on all three apps, in the "Add", "Edit" and template windows.
 Issue report: [pkp-e2e#427](https://github.com/jardakotesovec/pkp-e2e/issues/427) ([docs/issues/U37-A21-error-list-calls-message-box-undefined.md](../issues/U37-A21-error-list-calls-message-box-undefined.md)).
 
-<a id="fn-a22"></a>
-**f-a22** — Note r. Live-probed 2026-09-23 on all three apps: the browser's `beforeunload` dialog on the next load after each "Warning" › "Yes", the "Edit" window's included (td16). Live-probed 2026-09-29 on all three apps, two runs: no dialog 2 s or 15 s after a "Warning" › "Yes" of the "Add", "Edit" or template window, nor at once with the closing slide running; with animations disabled a reload issued at once still met it, as did one right after the test tooling's settle wait (4 of 6), because the closed form's handler outlives its window by about 0.3 s (note r). The 2026-09-23 reloads were of that kind, so the entry is retired.
-
 <a id="fn-a23"></a>
 **f-a23** — Note t. Live-probed 2026-09-23 on all three apps: the hint with no "Edit" button for a participating Section Editor who did not create the item, a Copyeditor, the Author and a Reviewer (OJS, OMP).
-
-<a id="fn-a24"></a>
-**f-a24** — Note g. Live-probed 2026-09-23 on OJS and OMP: in a reply box, a Copyeditor's and a Layout Editor's "Select submission stage" offered every stage; "Submission" and "Review" ("Internal Review", "External Review") drew nothing under the list. Overturned 2026-10-05 (note g; OJS and OMP, two runs): those stages are greyed options the browser refuses to select; the 2026-09-23 probe's selection timed out on them and its script swallowed the refusal, recording the stage as empty. An issues-session walk on the default dataset (2026-10-02, OJS and OMP) saw the same greyed stages.
 
 <a id="fn-a25"></a>
 **f-a25** — Note p. Live-probed 2026-09-23 on all three apps: "Add Task Details" and "Edit" with the box ticked showed the drop-down at "Begin Task Upon Saving", greyed; after "Save" the task sat under "Yet to begin" with its "Started" box empty.

@@ -2347,16 +2347,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS2](#ops2) | A preprint server offers "Automatic Deposit" but nothing runs it | ❓ | user-visible | — |
 | [OPS5](#ops5) | A preprint server's DOIs page lists drafts nobody has submitted | ❓ | minor | — |
 | [OJS7](#ojs7) | A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings; intended | ✅ | minor | @bozana 2026-10-07 · ruled intended |
-| [A13](#a13) | A bulk action the server refuses on the DOIs page closes its window and shows no message | ✅ | retired | — |
-| [A25](#a25) | Under "Immediately", declining a submission deletes the DOI its published version shows | ✅ | retired | — |
-| [A26](#a26) | Under "Immediately", "Revert Decline" does not give the work its DOIs back | ✅ | retired | — |
-| [A27](#a27) | The DOIs page no longer lists a declined submission that carries a DOI | ✅ | retired | — |
-| [A28](#a28) | On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency | ✅ | retired | — |
-| [OJS2](#ojs2) | On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it | ✅ | retired | — |
-| [OJS6](#ojs6) | "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it | ✅ | retired | — |
-| [OMP4](#omp4) | With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version | ✅ | retired | — |
-| [OMP5](#omp5) | "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published | ✅ | retired | — |
-| [OPS4](#ops4) | On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's | ✅ | retired | issues (claude), 2026-10-01 — re-verified |
 
 ### All apps
 
@@ -3148,34 +3138,34 @@ Basis: probe, 2026-10-15. <sup>f-ops7</sup>
 ### Retired
 
 <a id="a13"></a>
-**A13 — A bulk action the server refuses on the DOIs page closes its window and shows no message** · ✅ · retired. Fixed by `pkp/ui-library#1016` (for `pkp/pkp-lib#13507`, with `pkp/pkp-lib#13508`), verified 2026-10-13 at the PR heads before their merge on OJS, OMP and OPS; merged 2026-10-14; this page describes the fixed behavior: a refused bulk action leaves an "Error" window with the server's reason, and an "Export DOIs" whose file fails the agency's check lists what the check found (Rules 24, 29). <sup>f-a13</sup>
+**A13 — A bulk action the server refuses on the DOIs page closes its window and shows no message** · ✅ · retired. Fixed upstream (pkp/ui-library#1016, for pkp/pkp-lib#13507).
 
 <a id="a25"></a>
-**A25 — Under "Immediately", declining a submission deletes the DOI its published version shows** · ✅ · retired. Fixed 2026-10-07 at the PR heads of `pkp/pkp-lib#13447` round 2 (`pkp/pkp-lib#13460` `1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`, `pkp/ops#1435` `db0f597851`); merged 2026-10-09; this page describes the fixed behavior: once a version is published, a "Published Manuscript Under Review" one included, a decline keeps every DOI of the work, and the published page its "DOI:" line (Rule 5b). <sup>f-a25</sup>
+**A25 — Under "Immediately", declining a submission deletes the DOI its published version shows** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447, pkp/pkp-lib#13460).
 
 <a id="a26"></a>
-**A26 — Under "Immediately", "Revert Decline" does not give the work its DOIs back** · ✅ · retired. Fixed 2026-10-07 at the same PR heads; merged 2026-10-09; this page describes the fixed behavior: "Revert Decline" gives the current version new DOIs on a journal, a press and a preprint server (Rule 5b). <sup>f-a26</sup>
+**A26 — Under "Immediately", "Revert Decline" does not give the work its DOIs back** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447).
 
 <a id="a27"></a>
-**A27 — The DOIs page no longer lists a declined submission that carries a DOI** · ✅ · retired. Fixed 2026-10-07 at the same PR heads; merged 2026-10-09; this page describes the fixed behavior: the page lists a declined work that carries a DOI, and "In Copyediting, Production, Published or with DOIs" lists it and a work moved back to Review with its DOI (Rules 15, 22). <sup>f-a27</sup>
+**A27 — The DOIs page no longer lists a declined submission that carries a DOI** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447).
 
 <a id="a28"></a>
-**A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · ✅ · retired. Fixed 2026-10-07 at the round-3 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `68d984c2c9`, `pkp/ojs#5903` `fe950f0fd9`, `pkp/omp#2495` `e4cab0c9e9`, `pkp/ops#1435` `69ab8ab1ee`, with `pkp/crossref-ojs#113` `f358a32628` and `pkp/crossref-ops#72` `4968397748`); merged 2026-10-09; this page describes the fixed behavior: "Mark DOIs Registered" and "Deposit DOIs" reach the DOIs of a work's published versions only, and a new version's DOIs read "Unregistered" once it is published (Rules 26, 29; on a press its file DOIs too since [OMP5](#omp5) was fixed). <sup>f-a28</sup>
+**A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447, pkp/pkp-lib#13460).
 
 <a id="ojs2"></a>
-**OJS2 — On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it** · ✅ · retired. Fixed by `pkp/ojs#5935` (for `pkp/pkp-lib#13519`), merged 2026-10-15 as `e591926d11`; walked fixed at the OJS `main` tip the same day. <sup>f-ojs2</sup>
+**OJS2 — On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it** · ✅ · retired. Fixed upstream (pkp/ojs#5935, for pkp/pkp-lib#13519).
 
 <a id="ojs6"></a>
-**OJS6 — "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it** · ✅ · retired. Fixed 2026-10-07 at the round-7 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `ed4299ffcb`); merged 2026-10-09; this page describes the fixed behavior: the per-work actions take only the reviews shown publicly, so a hidden review's kept DOI keeps its status and the deposit leaves the review out (Rules 7b, 29). <sup>f-ojs6</sup>
+**OJS6 — "Deposit DOIs" marks the kept DOI of a review taken out of public view "Submitted", though nothing sends it and the DOIs page no longer lists it** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447, pkp/pkp-lib#13460).
 
 <a id="omp4"></a>
-**OMP4 — With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version** · ✅ · retired. Fixed 2026-10-07 at the round-4 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`); merged 2026-10-09; this page describes the fixed behavior: on a press, as on a journal and a preprint server, "Mark DOIs Unregistered" and "Mark DOIs Needs Sync" reach every version's DOIs and "Mark DOIs Registered" every published version's (Rules 27, 28, 52). <sup>f-omp4</sup>
+**OMP4 — With "DOI Versioning" "Yes", "Mark DOIs Unregistered" on a press cannot undo what "Mark DOIs Registered" set on an earlier version** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447, pkp/pkp-lib#13460).
 
 <a id="omp5"></a>
-**OMP5 — "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published** · ✅ · retired. Fixed 2026-10-07 at the same round-4 PR heads; merged 2026-10-09; this page describes the fixed behavior: a press's version not yet published keeps its file DOIs' status through "Mark DOIs Registered" (Rules 26, 52). <sup>f-omp5</sup>
+**OMP5 — "Mark DOIs Registered" on a press marks the file DOIs of a version not yet published** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447).
 
 <a id="ops4"></a>
-**OPS4 — On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's** · ✅ · retired. Fixed by `pkp/ops#1435` (with `pkp/pkp-lib#13460`), checked 2026-10-07 at the PR heads and again on `main` after the merge of 2026-10-09; this page describes the fixed behavior: a preprint's "Minor Revision" keeps its galleys' DOIs, as on a journal and a press (Rule 12). <sup>f-ops4</sup>
+**OPS4 — On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's** · ✅ · retired. Fixed upstream (pkp/ops#1435, pkp/pkp-lib#13460).
 
 ---
 
@@ -5539,62 +5529,6 @@ alone. Kept check `doi-page-declined.js` re-run 2026-10-07, OJS and OMP
 work with a DOI, the one back at Review with a DOI and the one at Review
 without listed; the filter's request returning the first two: PASS.
 
-<a id="fn-f-a28"></a>
-**f-a28** — At the PR heads of round 2 (`pkp/pkp-lib#13460`
-`1aa1973c66`, `pkp/ojs#5903` `0375b98bde`, `pkp/omp#2495` `c9e1c8a521`,
-`pkp/ops#1435` `db0f597851`), before their merge:
-`Repo::doi()->assignOnVersionCreation()` takes the stage Done, so
-`AssignDOIs::handleVersioned()` mints a new major version's DOIs at
-`version()` (note q41); `PKPDoiController::markSubmissionsRegistered()`
-marks every id of `Repo::doi()->getDoisForSubmission()`, which on OJS
-and OPS walks every publication of the submission and on OMP takes the
-current publication only (OMP4's cause). `depositSubmissions` marks the
-same set "Submitted", and `CrossrefExportPlugin::updateDepositStatus()`
-(OJS line 423, OPS lines 472 and 500) marks it "Registered" after a
-deposit whose XML holds published versions only
-(`getLatestMinorPublicationsForDoiDeposit()`; OPS `STATUS_PUBLISHED`);
-the automatic deposit's job ends in the same update (code, not driven:
-no agency credentials). The deposit query
-(`getAllDepositableSubmissionIds()`) takes the current published version
-with a DOI "Unregistered", "Error" or "Needs Sync". At the tips such a
-version got its DOI at its publication (`VersionDois`), and at the
-round-1 heads too (Done outside the test), so a mark never reached it;
-under "Immediately" round 1 already minted at `version()`. Live-probed
-2026-10-07 by the regression reader rr3 (`.reports/sync/rr3/suspicions.md`
-S1; script `.reports/sync/rr3/scripts/s12.js`; facts
-`.reports/sync/rr3/s12-<app>.json`, `s1-after-mark-<app>.json`,
-`s1-after-publish-<app>.json`, `s12.log`), scratch contexts on
-"copyediting" ("production") and "Yes", a work seeded `published`
-(stage Done) with a galley (OMP a format): "Create New Version" ›
-"Major Revision" on screen gave 2.0 new DOIs (OJS article
-`10.1234/5wr0yx87`, galley `10.1234/t7r28c05`; OPS preprint
-`10.1234/9ade6643`, galley `10.1234/v1vcwa45`), "Unregistered"; "Mark
-DOIs Registered" on the DOIs page (200): "View all"'s "… 2.0
-Unpublished" block read "Registered" on both rows (stored status 3);
-2.0 published (posted) on screen: still "Registered", and the deposit
-query found nothing for the work. OMP: 2.0's DOIs stayed "Unregistered"
-through the mark and after the publish. Control under "No": 2.0 shared
-1.0's DOIs, nothing new minted. No server log line, no crash. Regression
-report `docs/reports/2026-10-07-pkp-lib-13460.md`.
-At the round-3 PR heads (`pkp/pkp-lib#13460` `68d984c2c9`, `pkp/ojs#5903`
-`fe950f0fd9`, `pkp/omp#2495` `e4cab0c9e9`, `pkp/ops#1435` `69ab8ab1ee`,
-`pkp/crossref-ojs#113` `f358a32628`, `pkp/crossref-ops#72`
-`4968397748`), before their merge: "Mark DOIs Registered", "Deposit
-DOIs", OJS `DOIPubIdExportPlugin::markRegistered()` and the Crossref
-plugins' `updateDepositStatus()` (OPS also `markRegistered()`) take
-`Repo::doi()->getPublishedDoisForSubmission()`, the DOIs of the
-published versions only (note q44). Kept check `version-mark-registered.js`
-re-run 2026-10-07, all three apps (`.reports/sync/pr13460r3/version-mark-registered-<app>.json`):
-2.0's DOIs made at "Create New Version" › "Major Revision" (OJS
-`10.1234/5rs46d74`, OPS `10.1234/vhzxg341`) stayed "Unregistered"
-through "Mark DOIs Registered" (200) and after 2.0's publication, and
-the deposit query took them: PASS. The same day 1.0's and 2.0's DOIs
-read "Submitted" after "Deposit DOIs" while an unpublished 3.0's kept
-"Unregistered" (OJS, OPS; note q44). A press's file DOIs still follow
-every version ([OMP5](#omp5)); at round 2 they did too (code), which
-this entry's "a press is not affected" missed. Regression report
-`docs/reports/2026-10-07-pkp-lib-13460.md` (rewritten for round 3).
-
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `IssueGridHandler::publishIssue()` calls
 `Repo::issue()->createDoi()` with no `doiCreationTime` check;
@@ -6041,113 +5975,6 @@ greyed "Harbours" row read "Needs DOI" beside "Chapters without a
 landing page cannot have a DOI." on a book after its publish, under
 "Never" and after "Assign DOIs"; the "Needs DOI" filter left out a book
 missing only that chapter (q33; the filter's rule is note z8).
-
-<a id="fn-f-omp4"></a>
-**f-omp4** — At the tips the three Mark actions act on OMP
-`doi\Repository::getDoisForSubmission()`, which reads the current
-publication only (note z9); OJS and OPS collect every version's DOIs.
-The issue report for [A17](#a17) names the same method in its Cause, and
-its OMP fix covers this case. A press on stable-3_5_0 has no "DOI
-Versioning" (code read). Live-probed 2026-10-05, OMP, three runs, the
-Press Manager on a scratch press with "DOI Versioning" "Yes" and
-"Monographs", "Chapters" and "Publication Formats" ticked: a book published as 1.0 and, after "Major Revision",
-as 2.0; each Mark action set 2.0's "Monograph", "Tides" and "Format /
-PDF" rows and left 1.0's three rows "Unregistered" in "View all", right
-after and after a reload, the stored statuses matching. 1.0's rows never
-left "Unregistered", so the "Needs Sync" and "Unregistered" reads agree
-with the code reading rather than prove it alone. Controls, same
-runs: OJS ("Article", "PDF") and OPS ("Preprint", "PDF") changed both
-versions' blocks for all three actions.
-At the round-3 PR heads of `pkp/pkp-lib#13447` (`pkp/pkp-lib#13460`
-`68d984c2c9`, `pkp/omp#2495` `e4cab0c9e9`), before their merge, "Mark
-DOIs Registered" takes `Repo::doi()->getPublishedDoisForSubmission()`,
-every published version (note q44), while "Mark DOIs Unregistered" and
-"Mark DOIs Needs Sync" keep `getDoisForSubmission()`, the current
-publication and every version's proof files (note z9): the mark now
-reaches what the other two do not, so the entry's first shape (no Mark
-action reaching 1.0) became this one. Live-probed 2026-10-07 by the
-regression reader rr4 (`.reports/sync/rr4/suspicions.md` S2; script
-`.reports/sync/rr4/scripts/s12.js`; facts `.reports/sync/rr4/s12-omp.json`,
-`run-omp-155742.json`), a scratch press on "Yes" with "Monographs",
-"Publication Formats" and "Files" ticked, 1.0 and 2.0 both published:
-"Mark DOIs Registered" on screen (200) turned all six DOIs "Registered"
-(1.0 monograph `10.1234/xhxqz456`, format `10.1234/3xyryq03`); "Mark
-DOIs Unregistered" (200) set 2.0's three and 1.0's file DOI back, and
-1.0's monograph and format DOIs kept "Registered" (stored status 3).
-Again the same day (note q44, with an unpublished 3.0 beside them):
-"Mark DOIs Needs Sync" left 1.0's monograph and format DOIs
-"Registered" and "Mark DOIs Unregistered" after it too. At the tips and
-in round 2 the mark and the unmark took the same set, so nothing stayed
-behind. Regression report `docs/reports/2026-10-07-pkp-lib-13460.md`.
-At the round-4 PR heads (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`), before their merge, OMP
-`getDoisForSubmission()` reads every version (note z9), so "Mark DOIs
-Unregistered" and "Mark DOIs Needs Sync" reach what "Mark DOIs
-Registered" marks. Live-probed 2026-10-07 (note q44; facts
-`.reports/sync/acc4/r4reach-omp.json`), a scratch press on "Yes" with
-"Monographs", "Publication Formats" and "Files" ticked, 1.0 and 2.0
-published and 3.0 unpublished: after "Mark DOIs Registered" every row
-of 1.0's and 2.0's blocks in "View all" read "Registered", after "Mark
-DOIs Needs Sync" "Needs Sync", after "Mark DOIs Unregistered"
-"Unregistered", with 3.0's rows "Unregistered" throughout. The kept
-check `omp-file-and-unmark.js` (its finding 2) passed the same day at
-these heads. The report for [A17](#a17) names its cause and carries
-the refresh (A17's Report line). An issue report of its own was
-written on `main` on 2026-10-09, while the PRs were open
-([pkp-e2e#944](https://github.com/jardakotesovec/pkp-e2e/issues/944));
-it is deleted and its walk kept
-(`checks/issues/press-mark-dois-current-version-only/walk.js`), and
-the issue was closed at the merge of 2026-10-09 (omp `eb4c30aa3c`,
-pkp-lib `51dc842b93`), the walk repeated at the merged tips with the
-same result. That walk on the default dataset
-at the round-9 PR heads (`pkp/pkp-lib#13460` `58c7f454ff`,
-`pkp/omp#2495` `b0ab0a5fb6`), 2026-10-09: on book 14 with three
-published major versions, "Mark DOIs Registered", "Mark DOIs
-Unregistered" and "Mark DOIs Needs Sync" each changed the "Monograph",
-chapter and "Format / PDF" rows of every version in "View all", as on
-the journal and the preprint server beside it
-(`.reports/sync/pr13460r9/omp4-walk.log`). The entry's first shape dates from `main`, so its retirement
-reaches `main` with this page when the PRs merge; the regression report
-and the kept check are dealt with then.
-
-<a id="fn-f-omp5"></a>
-**f-omp5** — At the round-3 PR heads of `pkp/pkp-lib#13447`
-(`pkp/pkp-lib#13460` `68d984c2c9`, `pkp/omp#2495` `e4cab0c9e9`), before
-their merge: "Mark DOIs Registered" marks
-`Repo::doi()->getPublishedDoisForSubmission()`, OMP
-`doi\Repository::getDoisForPublication()` over the published versions,
-whose file branch takes every proof file of the submission
-(`filterBySubmissionIds([submissionId])` with
-`SUBMISSION_FILE_PROOF`), so a version not yet published comes with
-its files (notes z9, q44). A press has no agency plugin, so no deposit
-follows. Live-probed 2026-10-07 by the regression reader rr4
-(`.reports/sync/rr4/suspicions.md` S1; script
-`.reports/sync/rr4/scripts/s12.js`; facts `.reports/sync/rr4/s12-omp.json`,
-`run-omp-155742.json`), a scratch press on "Upon reaching the
-copyediting stage" and "Yes" with "Monographs", "Publication Formats"
-and "Files" ticked, a published book with a format "PDF" and its proof
-file: the version request that "Create New Version" › "Major Revision"
-posts (200) gave 2.0 monograph `10.1234/x50eha35`, format `10.1234/67pxpa79`
-and file `10.1234/5nyykw34`, all "Unregistered"; "Mark DOIs Registered"
-on screen (200): "View all"'s "Version of Record 2.0 Unpublished" block
-read "Monograph" and "Format / PDF" "Unregistered" and "PDF /
-article.pdf" "Registered" (stored status 3), and still so after 2.0's
-publication (200). Again the same day with 3.0 unpublished beside two
-published versions (note q44): its file DOI "Registered" after the mark,
-"Needs Sync" after "Mark DOIs Needs Sync", "Unregistered" after "Mark
-DOIs Unregistered". No server log line. At round 2 the same set was
-marked (OMP `getDoisForSubmission()` ran the same file query; code);
-at the tips a new version had no DOI before its publication under this
-timing. Regression report `docs/reports/2026-10-07-pkp-lib-13460.md`.
-At the round-4 PR heads (`pkp/pkp-lib#13460` `278e44e24a`, `pkp/ojs#5903` `70bff22676`, `pkp/omp#2495` `fded668417`, `pkp/ops#1435` `4d9b2cd4d3`), before their merge, the file
-branch of `getDoisForPublication()` takes only the files of the
-version's own formats (note z9). Live-probed 2026-10-07 (note q44): the
-unpublished 3.0's file DOI `10.1234/df3b0w45` kept "Unregistered"
-through "Mark DOIs Registered", while 1.0's and 2.0's file DOIs turned
-"Registered". The kept check `omp-file-and-unmark.js` (its finding 1)
-passed the same day at these heads: 2.0's file DOI made at "Create New
-Version" stayed "Unregistered" through the mark and after 2.0's
-publication. No issue report; the regression report and the kept check
-are dealt with when the PRs merge.
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — `ops/locale/en/manager.po`

@@ -934,7 +934,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | An emptied second-language field of a default template comes back on save | ❓ | minor | — |
 | [A13](#a13) | A journal's installed signature keeps linking to the address the journal was created at | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server lists "Submission Accepted", which it never sends | ❓ | latent | — |
-| [A11](#a11) | Retired: In French (Canada), "Manage Emails" shows codes instead of some emails' names and descriptions | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1187,7 +1186,7 @@ Basis: probe, 2026-09-26. <sup>f-ops2</sup>
 ### Retired
 
 <a id="a11"></a>
-**A11 — In French (Canada), "Manage Emails" shows codes instead of some emails' names and descriptions** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a11</sup>
+**A11 — In French (Canada), "Manage Emails" shows codes instead of some emails' names and descriptions** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 

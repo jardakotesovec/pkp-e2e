@@ -1507,12 +1507,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OJS12](#ojs12) | Unpublishing an article sends DOAJ nothing, and the DOAJ tool has nothing that removes an article there | ❓ | minor | — |
 | [OMP2](#omp2) | A press's Native XML export reminds the manager to fill in the press's ONIX details | ✅ | minor | — |
 | [OMP3](#omp3) | A press's import creates a series the file names but the press lacks | ✅ | minor | — |
-| [A2](#a2) | Retired: a users import keeps each role's masthead choice, and an export writes it | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream |
-| [A3](#a3) | Retired: a users import keeps each role's start date | ✅ | retired | upstream change + claim check (claude), 2026-09-29 — fixed upstream |
-| [A17](#a17) | Retired: importing a users file again no longer gives a later-dated role again | ✅ | retired | upstream change + claim check (claude), 2026-10-01 — fixed upstream |
-| [A18](#a18) | Retired: an empty or unreadable role date no longer stops a users import part-way | ✅ | retired | upstream change + claim check (claude), 2026-10-01 — fixed upstream |
-| [OJS3](#ojs3) | Retired: PubMed files lost the journal's title once the PubMed tool's Settings were saved with no NLM abbreviation | ✅ | retired | PR review (claude), 2026-10-06 — fixed at pkp/ojs#5897's head |
-| [A5](#a5) | Retired: the daily DOAJ deposit sent other journals' "Needs Sync" articles and unpublished versions to DOAJ | ✅ | retired | PR review (claude), 2026-10-08 — fixed at pkp/ojs#5907's head |
 
 ### All apps
 
@@ -2028,22 +2022,22 @@ Basis: probe, 2026-10-21. <sup>f-omp6</sup>
 ### Retired
 
 <a id="a2"></a>
-**A2 — Users files never keep the masthead choice** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13390), 2026-09-28; seen fixed 2026-09-29: an import keeps each role's masthead choice and an export writes it (Rule 24a). <sup>f-a2</sup>
+**A2 — Users files never keep the masthead choice** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13390).
 
 <a id="a3"></a>
-**A3 — Every imported role starts today** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13390), 2026-09-28; seen fixed 2026-09-29: an import keeps each role's start date (Rule 24b). <sup>f-a3</sup>
+**A3 — Every imported role starts today** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13390).
 
 <a id="a17"></a>
-**A17 — Importing a users file again gives a later-dated role again** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13412), 2026-09-30; seen fixed 2026-10-01: a role that starts or ends on a later date is given once, however often the file is imported (Rule 24). <sup>f-a17</sup>
+**A17 — Importing a users file again gives a later-dated role again** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13412).
 
 <a id="a18"></a>
-**A18 — An empty or unreadable role date stops a users import part-way** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13412), 2026-09-30; seen fixed 2026-10-01: an empty date counts as none, and a date that is not a date costs only its role, with a line saying so (Rule 22c). <sup>f-a18</sup>
+**A18 — An empty or unreadable role date stops a users import part-way** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13412).
 
 <a id="ojs3"></a>
-**OJS3 — PubMed files lost the journal's title once the PubMed tool's Settings were saved with no NLM abbreviation** · ✅ · retired. Fixed by pkp/ojs#5897 (for pkp/pkp-lib#13449), verified 2026-10-06 at the PR's head before its merge: a box saved empty, cleared or as it opens, names the journal by its name, and a saved abbreviation still wins (Rule 30). <sup>f-ojs3</sup>
+**OJS3 — PubMed files lost the journal's title once the PubMed tool's Settings were saved with no NLM abbreviation** · ✅ · retired. Fixed upstream (pkp/ojs#5897, for pkp/pkp-lib#13449).
 
 <a id="a5"></a>
-**A5 — The daily DOAJ deposit sent other journals' "Needs Sync" articles and unpublished versions to DOAJ** · ✅ · retired. Fixed by pkp/ojs#5907 (for pkp/pkp-lib#13469), verified 2026-10-08 at the PR's head before its merge: a journal's daily deposit sends only its own published articles (versions) that read "Not Deposited" or "Needs Sync" (Rule 43). <sup>f-a5</sup>
+**A5 — The daily DOAJ deposit sent other journals' "Needs Sync" articles and unpublished versions to DOAJ** · ✅ · retired. Fixed upstream (pkp/ojs#5907, for pkp/pkp-lib#13469).
 
 ---
 
@@ -3129,33 +3123,6 @@ runs, as the Journal Manager (a Section Editor gets the access-denied
 page at each).
 Issue report: [pkp-e2e#255](https://github.com/jardakotesovec/pkp-e2e/issues/255) ([docs/issues/U63-A1-A19-tool-address-without-tool-raw-text.md](../issues/U63-A1-A19-tool-address-without-tool-raw-text.md)).
 
-<a id="fn-f-a2"></a>
-**f-a2** — `UserXmlPKPUserFilter::parseUser()` (note l): `if
-($userGroup->roleId = Role::ROLE_ID_REVIEWER) { $masthead = true; }`;
-the export side (`PKPUserUserXmlFilter`) has the same assignment, so an
-exported file also reads `<masthead>true</masthead>` for every role.
-Since lib/pkp `8fb142ad3`, 2025-06-10. Live-probed 2026-09-27, OJS and
-OMP (note td14): an account stored as not appearing in journal A (A's
-masthead does not list it) was written `<masthead>true</masthead>` by
-both of A's exports, and after the import into B it is listed on B's
-"Editorial Masthead". Fixed by lib/pkp `85f6b3c074` (pkp/pkp-lib#13390,
-"Fix reviewer role check and start date in user import/export",
-merged 2026-09-28): both filters compare with `==`, and the export
-writes the role's own `masthead`, reviewer roles `true`. Seen fixed
-2026-09-29, OJS and OMP, two runs each (note td14).
-
-<a id="fn-f-a3"></a>
-**f-a3** — `UserXmlPKPUserFilter::parseUser()`: `$dateStart =
-$startDate ?? Core::getCurrentDate();` overwrites the parsed
-`date_start` with today (`$startDate` is never set). Since lib/pkp
-`8fb142ad3`, 2025-06-10. Live-probed 2026-09-27, OJS and OMP (note
-td14): Users & Roles › Users "Start Date" and the roles page read the
-import date; a role with `<date_start>2019-01-01</date_start>` and
-`<date_end>2020-12-31</date_end>` is listed on "Editorial History" as
-"2026 – 2020". Fixed by lib/pkp `85f6b3c074` (pkp/pkp-lib#13390, merged
-2026-09-28), which reads `$dateStart ??= Core::getCurrentDate();`. Seen
-fixed 2026-09-29, OJS and OMP, two runs each (note td14).
-
 <a id="fn-f-a4"></a>
 **f-a4** — `UserXmlPKPUserFilter::importUserPasswordValidation()` adds
 `plugins.importexport.user.error.plainPasswordNotValid` but does not
@@ -3357,64 +3324,6 @@ both hashes; in a move, seeded accounts that had never signed in
 (stored at a lower cost than 12) got the line beside the signed-in
 ones, so every account of the file did (Rule 28).
 Issue report: [pkp-e2e#260](https://github.com/jardakotesovec/pkp-e2e/issues/260) ([docs/issues/U63-A16-users-import-resets-passwords-below-php84.md](../issues/U63-A16-users-import-resets-passwords-below-php84.md)).
-
-<a id="fn-f-a17"></a>
-**f-a17** — Note l. A regression of lib/pkp `85f6b3c074`
-(pkp/pkp-lib#13390, merged 2026-09-28), which began keeping the file's
-`<date_start>`: before it every role started on the import day, so a
-second import found it active and skipped it. The later end date half
-predates it (lib/pkp `8fb142ad3`, 2025-06-10). Live-probed 2026-09-29,
-OJS and OMP, two runs each, and by a separate read of that change the
-same day: a new user given "Section editor" ("Series editor") with
-`<date_start>2027-06-01 00:00:00</date_start>` and no end date, imported
-three times (a second press of "Import Users", then the file uploaded
-again), read the success sentence each time; the stored role rows went
-1, 2, 3, the "Users" list read "Section editor" and "2027-06-01" three
-times, and the roles page listed three rows. Control: `2020-01-01`
-imported twice left one row. A role given 2020-01-01 to 2030-12-31,
-imported twice, read the success sentence twice and left two stored
-rows; "Editorial Masthead" listed the person once, "2020 –", and the
-"Users" list showed no role or start date for that user (the users
-list's own reading, not this feature's). Seen on stable-3_5_0 too (the
-same patch). Written up for the team 2026-09-29 (a temporary report,
-deleted 2026-10-01 once acted on). Fixed by lib/pkp `2e377d27fc`
-(pkp/pkp-lib#13412, PR #13414, merged 2026-09-30): the role is checked
-for an overlapping period of the same role instead of `withActive()` /
-`withEnded()` (note l). Seen fixed 2026-10-01, OJS (lib/pkp
-`2e377d27fc`) and OMP (lib/pkp `887ad73d6c`), two runs each: a
-2027-06-01 start imported three times and a 2020-01-01 to 2030-12-31
-role imported twice each read the success sentence and left one row.
-The fix's own regression: A23.
-
-<a id="fn-f-a18"></a>
-**f-a18** — Note l. lib/pkp `85f6b3c074` (pkp/pkp-lib#13390, merged
-2026-09-28) began reading `<date_start>`: `$dateStartNode?->textContent`
-is `""` for an empty element and `??=` keeps it; before, the file's
-start date was never read, and an empty or free-text one imported like
-a missing one. `<date_end>` was read already (since lib/pkp
-`8fb142ad3`, 2025-06-10). Live-probed 2026-09-29, OJS and OMP, two runs
-each, and by a separate read of that change the same day: three files,
-a role with `<date_start></date_start>`, one with
-`<date_start>soon</date_start>`, one with `<date_end></date_end>`. For
-each, `GET …/management/importexport/plugin/UserImportExportPlugin/import?temporaryFileId=…`
-answered 500 and the "Results" tab (with "Close") stayed empty; the
-user's account was created, not disabled, with no role (its roles page
-listed none), and signed in; in the empty-start file the user after it
-was not created. Users before the failing one were not driven. Server
-log (the test installs run PostgreSQL): `SQLSTATE[22007] … invalid
-input syntax for type timestamp: ""` for the empty start and end dates,
-`Carbon\Exceptions\InvalidFormatException: Could not parse 'soon'` for
-the free text. Control: a file with no `<date_start>` element imported,
-the role starting on the import day. Seen on stable-3_5_0 too (the same
-patch). Written up for the team 2026-09-29 (a temporary report,
-deleted 2026-10-01 once acted on). Fixed by lib/pkp `2e377d27fc`
-(pkp/pkp-lib#13412, PR #13414, merged 2026-09-30): an empty date counts
-as missing, and a date `date_parse()` cannot read whole is reported
-(`plugins.importexport.user.error.invalidRoleDate`) and its role
-skipped (note l). Seen fixed 2026-10-01, OJS and OMP, two runs each:
-the three files of 2026-09-29 answered 200; "soon" gave the new line
-and no role, the empty start and end dates the role from the import
-day, and the user after the empty start was imported.
 
 <a id="fn-f-a19"></a>
 **f-a19** — `PKPToolsHandler::importexport()` (note w) hands the

@@ -1246,9 +1246,6 @@ unless its Basis line says otherwise.
 | [A21](#a21) | "confirm" opened in a browser signed in as another account switches the requesting account's address, and the person there is told nothing | ❓ | minor | — |
 | [A22](#a22) | The Password tab's boxes are not named by their labels for a screen reader | ❓ | minor | — |
 | [A23](#a23) | The email-change message greets a user who has a "Preferred Public Name" by given and family name, unlike the other emails | ❓ | minor | — |
-| [A1](#a1) | Retired: for a user with a role in exactly one journal, a site-level profile address naming a tab landed on the Identity tab with a stray "?0=…" in the address; it now opens the named tab of the journal's profile (Rule 3) | ✅ | retired | upstream change + claim check (claude), 2026-09-18 — fixed upstream |
-| [A3](#a3) | Retired: the emailed "reject" link of an email change requested from the site-level profile answered a blank server error; it now shows the "Decline Invitation" page and the request can be discarded (Rule 6d) | ✅ | retired | upstream change + claim check (claude), 2026-09-18 — fixed upstream |
-| [A15](#a15) | Retired: "Please enter a valid URL." was recorded staying under "Homepage URL" after the corrected address was saved; it goes as soon as a valid address is typed, or with the save (Rule 9c) | ✅ | retired | claim check (claude), 2026-10-07 — withdrawn |
 | [OMP1](#omp1) | A press offers "Chapter Author" and "External Reviewer" as self-service roles; "Internal Reviewer" is never offered | ✅ | invisible | — |
 | [OPS1](#ops1) | A preprint server offers "Reader" and "Author" only and has no "Reviewing interests" box | ✅ | invisible | — |
 
@@ -1715,13 +1712,13 @@ Since: 2025-11-27 · Basis: probe, 2026-10-15. <sup>[f-ops3](#fn-ops3)</sup>
 ### Retired
 
 <a id="a1"></a>
-**A1 — Site-level address loses its tab for a one-journal user** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13181, 2026-09-16), verified 2026-09-18 on OJS, OMP and OPS: a site-level profile address that names a tab forwards a user with a role in exactly one journal to that tab of the journal's profile ("Roles", "Contact", "Notifications" and "Public" seen), with no stray "?0=…" in the address (Rule 3). <sup>[f-a1](#fn-a1)</sup>
+**A1 — Site-level address loses its tab for a one-journal user** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13181).
 
 <a id="a3"></a>
-**A3 — The "reject" link of a site-level email change crashes** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13181, 2026-09-16), verified 2026-09-17 on OJS and 2026-09-18 on OJS, OMP and OPS: the "reject" link of a request made on the site-level profile shows the "Decline Invitation" page, signed in or not, and "Confirm Decline Invitation" discards the request (Rule 6d); where a multi-journal account then lands is [A18](#a18). <sup>[f-a3](#fn-a3)</sup>
+**A3 — The "reject" link of a site-level email change crashes** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13181).
 
 <a id="a15"></a>
-**A15 — A refused homepage's sentence outlives the corrected save** · ✅ · retired. Withdrawn 2026-10-07, not reproduced on OJS, OMP and OPS: "Please enter a valid URL." leaves the box as soon as a valid address is typed, and an address put in without typing loses it with the "Save"; the code behind the Public tab is older than the 2026-09-04 reading, which caught the instant between the saved message and the sentence's removal (Rule 9c). <sup>[f-a15](#fn-a15)</sup>
+**A15 — A refused homepage's sentence outlives the corrected save** · ✅ · retired. Not reproduced.
 
 ---
 
@@ -2667,41 +2664,6 @@ ticked check asks Have I Been Pwned and needs the network; the service
 unreachable, the check refuses nothing (note g). `qwerty123456` is the
 leaked password the fleets refuse (seed-facts; note g); its mismatching
 repeat is `qwerty654321`.
-
-<a id="fn-a1"></a>
-**f-a1** — `ProfileHandler::profile()`: with no context and exactly one
-available context, `$request->redirect($firstContext->getPath(), 'user',
-'profile', null, $args)` — `$args` (the tab name) lands in the `$params`
-slot of `PKPRequest::redirect(?context, ?page, ?op, ?path, ?params, ?anchor)`,
-so the forwarded address reads `…/user/profile?0=roles` and the anchor
-branch (`array_shift($args)` → redirect with `#roles`) never runs on the
-journal-level request. Seen 2026-09-02 (registration probing, all three
-apps): `index/en/user/profile/roles` and the site-level completion page's
-"Edit My Profile" forwarded to `{context}/en/user/profile?0=roles`. Live-probed
-2026-09-03, all three apps: a user with one journal opening
-`index/user/profile/roles` was forwarded to `{journal}/user/profile?0=roles`
-with Identity open; a two-journal user stayed at the site level on Roles.
-Live-probed 2026-09-04 (claim check), all three apps: holds; the forward also drops
-`notificationSettings` (`{journal}/user/profile?0=notificationSettings`,
-Identity open). The fix is to pass `$args` as `$path`. Fixed by
-pkp/pkp-lib#13181 (lib/pkp `aeac6f75cf` "Fix redirect to profile/contact
-after needed login", 2026-09-16), which does exactly that:
-`$request->redirect($firstContext->getPath(), 'user', 'profile', $args)`, in
-all three checkouts (OJS at lib/pkp `14473fe784`, OMP and OPS at
-`1bcd4dd55f`). Live-probed 2026-09-18, all three apps, two runs each on fresh
-scratch contexts (the kept script
-`shared/playwright/checks/sync/pkp-lib-13181/a1-a3-redrive.js`): a one-journal
-author at `index/user/profile/roles`, `/contact`, `/notificationSettings` and
-`/publicProfile`, and at the 2026-09-02 shape `index/en/user/profile/roles`,
-ended on `{context}/user/profile#{tab}` with Roles, Contact, Notifications or
-Public open; no address read `?0=`. The site-level completion page's "Edit
-My Profile" now points at `index/en/user/profile` with no tab named and ended
-on `{context}/user/profile`, Identity open. The site-level registration
-page's "Login" link still carries `…/index/en/user/profile/roles` as its
-`source`, and signing in through it landed on `index/en/index`, never on the
-profile (*Registration & account validation* A5), so that link does not reach
-this forward. The two-journal control stayed at `index/en/user/profile#{tab}`
-with the named tab open. Retired 2026-09-18.
 
 <a id="fn-a2"></a>
 **f-a2** — `PublicProfileForm::uploadProfileImage()`: after

@@ -952,7 +952,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | The Site Administrator's older grid offers "Disable User" and "Remove" on the administrator's own row | ❓ | latent | — |
 | [A18](#a18) | "Roles" leaves out a role that ends on a future date, which "Editorial Masthead" lists, and shows a role that starts on a future date as if held | ❓ | minor | — |
 | [A20](#a20) | A user whose only role ends on a future date cannot be removed from the list or the roles page before that date | ❓ | user-visible | — |
-| [A11](#a11) | Retired: In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1243,7 +1242,7 @@ Basis: probe, 2026-10-01. <sup>f-ops1</sup>
 ### Retired
 
 <a id="a11"></a>
-**A11 — In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a11</sup>
+**A11 — In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -2105,9 +2104,6 @@ Issue report: [pkp-e2e#449](https://github.com/jardakotesovec/pkp-e2e/issues/449
 <a id="fn-f-a10"></a>
 **f-a10** — Code: note k. Live-probed 2026-09-25: note td11. The Vue list
 guards every action but "Edit" and "Email" with not-own-row.
-
-<a id="fn-f-a11"></a>
-**f-a11** — Live-probed 2026-09-25: note td13. Mechanism: note u.
 
 <a id="fn-f-a12"></a>
 **f-a12** — Live-probed 2026-09-25, all three apps: in the list's

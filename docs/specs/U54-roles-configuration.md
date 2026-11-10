@@ -922,7 +922,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | "Abbreviation" is required, and no screen but the role's own window shows it | ❓ | minor | — |
 | [A12](#a12) | "Stage Assignment" was seen both hidden and on screen with every box greyed in the same four window states | ❓ | minor | — |
 | [OPS2](#ops2) | A preprint server offers the "Reviewer" level for a new role | ❓ | minor | — |
-| [OMP1](#omp1) | Retired: In French a press's "Roles" list heads its External Review column with a code | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1222,7 +1221,7 @@ Basis: probe, 2026-10-02. <sup>f-ops3</sup>
 ### Retired
 
 <a id="omp1"></a>
-**OMP1 — A code heads the External Review column in French** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-omp1</sup>
+**OMP1 — A code heads the External Review column in French** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 

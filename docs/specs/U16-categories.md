@@ -990,9 +990,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A5](#a5) | The breadcrumb names only the nearest parent | ❓ | minor | — |
 | [A14](#a14) | A category added after a submission arrives brings no editors | ❓ | minor | — |
 | [A21](#a21) | The "Path" help ends in the word "path", never in a saved category's own path | ❓ | minor | — |
-| [OMP1](#omp1) | Retired: a press's category page showed a broken-picture mark instead of the category's picture; it now shows the picture, upgraded ones included (Rule 12) | ✅ | retired | PR review (claude), 2026-11-05 — fixed upstream (pkp/pkp-lib#13730) |
-| [OMP5](#omp5) | A press's first category page opened after its catalog page, its search results or a settings save failed to load | ✅ | retired | housekeeping (claude), 2026-10-07 — fixed upstream (pkp/pkp-lib#12915), walked on main |
-| [A15](#a15) | Retired: in French, the tab, the delete dialog, the "Select Categories" window and a press's category page show raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1352,13 +1349,13 @@ Basis: probe, 2026-10-02. <sup>f-ops1</sup>
 ### Retired
 
 <a id="omp1"></a>
-**OMP1 — A press's category page shows a broken-picture mark instead of the category's picture** · ✅ · retired. Fixed upstream ([pkp/pkp-lib#13730](https://github.com/pkp/pkp-lib/issues/13730), pkp/omp#2553), verified 2026-11-05 at the PR head before its merge and again 2026-11-09 at the merged tip: a press's category page shows its picture, and both picture addresses answer the picture, for a picture saved on `main` and for one carried over by the upgrade from 3.5 (Rule 12). <sup>f-omp1</sup>
+**OMP1 — A press's category page shows a broken-picture mark instead of the category's picture** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13730, pkp/omp#2553).
 
 <a id="omp5"></a>
-**OMP5 — A press's category page fails after its catalog or a settings save** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12915, merged 2026-10-05), verified 2026-10-07 on OMP: a press's first category page opened after its catalog page or its search results now opens at once (Rule 9). <sup>f-omp5</sup>
+**OMP5 — A press's category page fails after its catalog or a settings save** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12915).
 
 <a id="a15"></a>
-**A15 — Raw codes on the French category screens** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a15</sup>
+**A15 — Raw codes on the French category screens** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -2410,57 +2407,6 @@ Issue report: [pkp-e2e#607](https://github.com/jardakotesovec/pkp-e2e/issues/607
 <a id="fn-f-ops1"></a>
 **f-ops1** — Note k. Live-probed 2026-09-25: note k.
 Issue report: [pkp-e2e#594](https://github.com/jardakotesovec/pkp-e2e/issues/594) ([docs/issues/U16-OPS1-preprint-category-offers-no-moderator.md](../issues/U16-OPS1-preprint-category-offers-no-moderator.md)).
-
-<a id="fn-f-omp5"></a>
-**f-omp5** — Test run 2026-09-25 (Rule 9; scenario 8), the OMP suite,
-every run: right after the sidebar's save (`POST …/api/v1/contexts/{id}`,
-200) and after the block's "Settings" save
-(`settings-plugin-grid/manage?…plugin=browseblockplugin…`, 200), the next
-`GET …/catalog/category/arts` (then `…/category/science`) got no response
-at all, no status: the server log reads "Segmentation fault (core
-dumped)", the test install's PHP 8.3 built-in server (`php -S`) exits
-139 before logging the GET, and the browser reports
-`net::ERR_EMPTY_RESPONSE`; the respawned server answered the same page
-200. The final OMP run the same day failed the same way in scenario 1
-(`…/catalog/category/natural-science`, right after seeding, no "Browse"
-block placed). Live-probed 2026-09-25 (Rule 9), a fresh `php -S` process per
-sequence, as the harness starts it: the catalog index then a category
-page crashed every time (10 of 10), also with a book page between them;
-`search/search` loads the classes as the catalog does; a book page
-opened before the catalog page, or no catalog page at all, left every
-category page at 200; the home and "About" pages load no publication
-class. The fleet's core dump and a run under gdb show the same stack:
-`PKPCatalogHandler::category()` → `DatabaseEngine::buildQuery()` is the
-first code to touch `PKP\publication\PKPPublication`, OPcache replays its
-inheritance-cache entry, autoloads `PKP\publication\DAO` inside the
-replay and dereferences the half-linked parent (`instanceof_function_slow`,
-SIGSEGV; not a stack overflow). The cause is the PHP runtime: php-src
-GH-20469, fixed by php-src PR #22221 in PHP 8.4.23+ and 8.5.8+ and not
-backported to 8.3 (the VM runs 8.3.33, CI pins 8.3).
-`-d opcache.enable=0`, or `-d opcache.file_cache={dir} -d
-opcache.file_cache_only=1`, removes the crash; `pcre.jit=0` and a larger stack do not, and clearing the template
-cache has no effect. OJS and OPS load `APP\publication\DAO` during
-request setup, so the crashing order never occurs there: every OJS and
-OPS page tried (home, archive or preprints list, an article, search,
-then the category page) answered 200. Only the built-in server was run;
-no other server setup was tried. Until the fix the OMP suite opened
-every category page again when it got no answer.
-Retired 2026-10-07 (housekeeping, the issue reporter's verdict "fixed
-upstream"): pkp-lib `a7f5e3081b` (merged as `d1c90fe604` on 2026-10-05,
-pkp/pkp-lib#12915 for pkp/pkp-lib#7527) preloads
-`\APP\submission\Submission` and `\APP\publication\Publication` with
-`class_exists()` in `lib/pkp/includes/bootstrap.php`, the workaround
-the 2026-09-30 housekeeping diagnosis proposed; the PHP bug
-itself remains in 8.3. Walked on main at ojs `92bc2bb467`, omp
-`a0e6d0a8b`, ops `7e34fdd57e` (lib/pkp `e60013c77f` on OJS, `5a5ab2d6c7`
-on OMP and OPS), a freshly reset dataset fleet, PHP 8.3.33 with OPcache
-on: in a fresh OMP server process the first catalog page and then the
-first category page both answered 200 (that order had crashed 10 of 10),
-search results then a category page also 200, and the server log shows
-no process death and no segmentation fault; the OJS and OPS category
-pages all answered 200. The settings-save order was not walked again.
-Kept script: `shared/playwright/checks/issues/press-category-page-no-answer-after-catalog/walk.js`;
-records in `.reports/issues-r5/r5/`.
 
 ## Reference — entry points & surfaces
 

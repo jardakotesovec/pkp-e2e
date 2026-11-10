@@ -521,7 +521,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | The carousel's dots do nothing when pressed and have no name for a screen reader | ❓ | minor | — |
 | [A8](#a8) | A refused "Save Order" (an empty list, or a listed highlight deleted in another tab) shows the generic "An unexpected error has occurred…" dialog | ❓ | minor | — |
 | [A9](#a9) | Replacing a highlight's image on an edit empties "Alternate text", and the highlight saves without one unless it is typed again | ❓ | minor | — |
-| [A7](#a7) | Retired: in the French interface a screen reader names a press's and a server's carousel arrows by raw keys | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -687,7 +686,7 @@ Basis: probe, 2026-11-06; 2026-11-09. <sup>f-a12</sup>
 ### Retired
 
 <a id="a7"></a>
-**A7 — Raw keys on the carousel's arrows in the French interface** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a7</sup>
+**A7 — Raw keys on the carousel's arrows in the French interface** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -1217,35 +1216,6 @@ dots as plain `<span>`s with no role or name. Live-probed 2026-09-16, OJS,
 OMP and OPS: pressing the first or third dot leaves the active slide
 unchanged; `aria-label` and `role` are empty on every dot; the current one
 carries `aria-current="true"`.
-
-<a id="fn-f-a7"></a>
-**f-a7 — A7 evidence.** OMP's and OPS's default-theme `fr_CA` locale
-lack `plugins.themes.default.prevSlide|nextSlide`, which OJS's carries.
-Live-probed 2026-09-16, OJS, OMP and OPS: under `/fr_CA/` the side tab,
-the panel's heading and the carousel's `<h2>` read
-"##common.highlights##", the fourth top tab "##navigation.content##",
-and the arrows' `aria-label` the raw theme keys on OMP and OPS. lib/pkp
-`25182919bf` (the `translations/stable-3_5_0` merge) added
-`common.highlights` "En vedette" and changed `manager.highlights.add`
-from "Ajouter un clou" to "Mettre en vedette". Live-probed 2026-09-24 at
-ojs `71bb244152`, omp `a36551804`, ops `07141ae4df` (lib/pkp
-`25182919bf`), OJS, OMP and OPS, on a scratch journal with English and
-French under "UI" and "Forms": under `/fr_CA/` the side tab and the
-panel's heading "En vedette", the header's buttons "Classer" and "Mettre
-en vedette", the add panel headed "Mettre en vedette" and the edit panel
-"Modifier la mise en vedette", the delete dialog still titled
-"Supprimer le clou"; the carousel's `<h2>` "En vedette", and the site's
-Site Setup tab "En vedette"; the fourth top tab still
-`##navigation.content##`; the arrows' `aria-label` "À la diapositive
-précédente" / "À la diapositive suivante" on OJS and the raw theme keys
-on OMP and OPS. Live-probed 2026-10-04 on `main` and `stable-3_5_0`, OJS,
-OMP and OPS: the arrows as above on both lines. The fourth top tab, which this entry
-carried until 2026-10-05, is out: `navigation.content` was added in
-English on `main` for `pkp/pkp-lib#11783` (2025-09-04), only `en` and
-`hi` carry it in `lib/pkp/locale/*/common.po`, and 3.5's Settings ›
-Website shows three top tabs ("Apparence", "Configuration",
-"Plugiciels") with no such tab; a text new on `main` and awaiting its
-translations is not a defect (team ruling, 2026-10-02).
 
 <a id="fn-f-a8"></a>
 **f-a8 — A8 evidence.** `HighlightsController::order()` answers 400 with

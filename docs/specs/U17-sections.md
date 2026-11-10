@@ -1127,9 +1127,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS3](#ops3) | A section's URL path is not checked: a shared path shows only one section's page, a path with a space or slash no page | ❓ | minor | — |
 | [OPS4](#ops4) | No page of a preprint server links to a section's page | ❓ | minor | — |
 | [OMP1](#omp1) | Series are optional and described for readers; no intake settings, no active-series minimum | ✅ | — | — |
-| [OPS6](#ops6) | One preprint posted without an abstract made the server's harvesting record lists fail | ✅ | retired | PR review (claude), 2026-10-05 — fixed at pkp/ops#1430's head |
-| [OMP5](#omp5) | Retired: a press manager deactivating or reactivating a series was asked about a "section"; the window now asks "…deactivate this series?" ("…activate this series?") | ✅ | retired | omp#2563 2026-11-09 · fixed |
-| [OMP7](#omp7) | Retired: the ISSN help in a press's series window read "which identifying"; it now reads "which identifies" | ✅ | retired | omp#2563 2026-11-09 · fixed |
 
 ### All apps
 
@@ -1521,13 +1518,13 @@ Basis: probe, 2026-10-04. <sup>f-ops7</sup>
 ### Retired
 
 <a id="ops6"></a>
-**OPS6 — A preprint without an abstract broke the server's harvesting** · ✅ · retired. Fixed by pkp/ops#1430 (for pkp/pkp-lib#13445), verified 2026-10-05 at the PR's head before its merge (*[OAI-PMH](U19-oai-pmh.md#ops2)*, note f-ops2). <sup>f-ops6</sup>
+**OPS6 — A preprint without an abstract broke the server's harvesting** · ✅ · retired. Fixed upstream (pkp/ops#1430, for pkp/pkp-lib#13445).
 
 <a id="omp5"></a>
-**OMP5 — A press manager deactivating or reactivating a series is asked about a "section"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked on 2026-11-09: the series' "Inactive" box asks "Are you sure you wish to deactivate this series?" and, pressed again, "Are you sure you wish to activate this series?" (Rule 5). <sup>f-omp5</sup>
+**OMP5 — A press manager deactivating or reactivating a series is asked about a "section"** · ✅ · retired. Fixed upstream (pkp/omp#2563, for pkp/pkp-lib#13646).
 
 <a id="omp7"></a>
-**OMP7 — The ISSN help in a press's series window reads "which identifying"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked on 2026-11-09: the paragraph reads "…an eight-digit number which identifies periodical publications including electronic serials…" (Fields, "ISSN"). <sup>f-omp7</sup>
+**OMP7 — The ISSN help in a press's series window reads "which identifying"** · ✅ · retired. Fixed upstream (pkp/omp#2563, for pkp/pkp-lib#13646).
 
 ---
 
@@ -1754,18 +1751,8 @@ Issue report: [pkp-e2e#484](https://github.com/jardakotesovec/pkp-e2e/issues/484
 <a id="fn-f-omp4"></a>
 **f-omp4** — fn m: `series_categories` is written by `SeriesForm::execute()` and read by `SeriesGridHandler::initialize()` and `SeriesForm::initData()` only. Live-probed 2026-09-25, after the background jobs had run: with "K3 Cat" ticked on a series, its category page read "0 Titles" while the series' page listed the series' book; a category given to a book on its own "Catalog Entry" listed that book ("1 Titles"); the same with the box unticked. The catalog, the book page and the book's "Catalog Entry" categories were unchanged.
 
-<a id="fn-f-omp5"></a>
-**f-omp5** — `SeriesGridCellProvider::getCellActions()` uses `manager.sections.confirmActivateSection` / `confirmDeactivateSection`, which OMP's locale did not override, so a press asked about a "section" in every language (in French a "rubrique"). Live-probed 2026-09-25: note td9.
-Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge `f81f129c82`, patch `14f4d2670a`, the same as the reviewed head `8eff1e8c2c`) and `pkp/omp#2529` on `stable-3_5_0` (merge `ae1d900d35`, patch `940105441`, the same as the reviewed head `72b39e2d44`), English only: OMP's `locale/en/manager.po` now carries `manager.sections.confirmDeactivateSection` and `confirmActivateSection` in a press's words; other languages keep pkp-lib's text until translators change it. The PR heads were walked base vs head on fresh datasets, both lines (PR review, 2026-11-06), and both merge commits on 2026-11-09 on freshly loaded PKP dataset fleets (`checks/sync/pkp-lib-13646/side.sh`): "Inactive" on the "History" series row asked "Are you sure you wish to deactivate this series?", pressing it again "Are you sure you wish to activate this series?"; "OK" saved both ways (200, the box ticked, then unticked).
-Issue report: [pkp-e2e#485](https://github.com/jardakotesovec/pkp-e2e/issues/485), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
-
 <a id="fn-f-omp6"></a>
 **f-omp6** — OMP's `SeriesForm` sets no place in the order for a new series, where the section form puts a new section last (fn i); the list is read by `seq`, so series sharing a value come back in whatever order the database returns (the test installs run PostgreSQL). Live-probed 2026-09-25 (two presses, several drives): note td7.
-
-<a id="fn-f-omp7"></a>
-**f-omp7** — `manager.setup.issnDescription` (fn m), whose English text in OMP read "which identifying". Live-probed 2026-09-25: note td6.
-Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge `f81f129c82`, patch `14f4d2670a`, the same as the reviewed head `8eff1e8c2c`) and `pkp/omp#2529` on `stable-3_5_0` (merge `ae1d900d35`, patch `940105441`, the same as the reviewed head `72b39e2d44`), English only. The PR heads were walked base vs head on fresh datasets, both lines (PR review, 2026-11-06), and both merge commits on 2026-11-09 on freshly loaded PKP dataset fleets (`checks/sync/pkp-lib-13646/side.sh`): the ISSN paragraph of "Add Series" and of a series' "Edit" read "…an eight-digit number which identifies periodical publications including electronic serials…".
-Issue report: [pkp-e2e#486](https://github.com/jardakotesovec/pkp-e2e/issues/486), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-f-omp8"></a>
 **f-omp8** — OMP `seriesForm.tpl` builds the help from a sample address, `{url … page="catalog" op="series" path="Path"}`, passed to `grid.series.urlWillBe`; the typed or saved path never reaches it. Live-probed 2026-09-25: note td6.

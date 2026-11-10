@@ -835,7 +835,6 @@ them on spec review.
 | [A14](#a14) | Ordering a book's chapters: "Cancel ordering" takes away the "No Items" line of a chapter with no authors | 🐞 | low | issues (claude), 2026-10-23 — re-verified |
 | [A1](#a1) | The assistant roles may change a published version's chapters, though not an unpublished one's | ❓ | minor | — |
 | [A9](#a9) | A chapter added to a published Edited Volume may stay without a license | ❓ | minor | — |
-| [A6](#a6) | "Order" could not move a chapter: a dragged chapter stayed where it was | ✅ | retired | housekeeping (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#13453), walked on main |
 
 ### All apps
 
@@ -1043,7 +1042,7 @@ Basis: probe, 2026-10-23. <sup>f-a14</sup>
 ### Retired
 
 <a id="a6"></a>
-**A6 — A chapter could not be moved with "Order"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13453, for pkp/pkp-lib#11718, merged 2026-10-07), verified 2026-10-08 on OMP: after "Order", a chapter dragged above another moves with its author rows, and "Done" keeps the new order on the page and after a reload (Rule 8a). <sup>f-a6</sup>
+**A6 — A chapter could not be moved with "Order"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13453, for pkp/pkp-lib#11718).
 
 ---
 

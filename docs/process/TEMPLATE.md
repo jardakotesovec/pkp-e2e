@@ -593,16 +593,15 @@ status: draft | verified    # verified = the full RUNBOOK loop passed
      commit archaeology goes in the footnote. A finding another feature owns
      gets one line plus a link to that spec, with the full entry there.
 
-     RETIRED ENTRIES. When a defect is fixed upstream or a verdict is
-     overturned, the entry moves to a `### Retired` block at the end of
-     the register as ONE line, anchor and ID kept (IDs stay dense), badge
-     ✅, impact "retired", one clause saying why and when, the footnote
-     mark kept:
+     RETIRED ENTRIES. A defect fixed upstream or a verdict overturned
+     leaves ONE short line in a `### Retired` block at the end of the
+     register, anchor and ID kept (IDs stay dense):
      <a id="a5"></a>
-     **A5 — <short title>** · ✅ · retired. Fixed upstream (pkp/pkp-lib#NNNN),
-     2026-08-25. <sup>f-a5</sup>
-     Its summary row stays (sorted with the ✅ rows); its body markers are
-     removed, and lint does not require one for a Retired entry. A spec
+     **A5 — <short title>** · ✅ · retired. Fixed upstream (pkp/pkp-lib#NNNN).
+     Or "Ruled intended.", "Overturned: not a bug.", "Not reproduced.",
+     "Duplicate of A7.". No date, commit or footnote mark: git and the
+     PR keep the history. Its summary row and body markers go, and its
+     footnote unless something else cites it. A spec
      that has not shipped yet keeps no Retired block: a suspicion the
      claim check did not reproduce is deleted and the IDs renumbered. -->
 

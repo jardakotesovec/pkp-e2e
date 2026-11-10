@@ -1402,17 +1402,8 @@ an entry notes otherwise; the team settles them on spec review.
 | [OMP7](#omp7) | A book's new version changes its format identifiers without leaving deleted records | ❓ | minor | — |
 | [OPS3](#ops3) | "Identify items posted in this section as a(n)" reaches no record | ❓ | minor | — |
 | [OMP1](#omp1) | A press's record is a publication format, not a book | ✅ | invisible | — |
-| [OMP5](#omp5) | Retired: an address with no press answers as the whole site | ✅ | retired | — |
-| [OMP4](#omp4) | A press's OAI-PMH record lists answered a server error once one book was published without an abstract | ✅ | retired | PR review (claude), 2026-10-05 — fixed at pkp/omp#2490's head |
-| [OPS2](#ops2) | One preprint without an abstract made the server's record lists fail | ✅ | retired | PR review (claude), 2026-10-05 — fixed at pkp/ops#1430's head |
-| [A22](#a22) | Retired: once one journal set "DOI Versioning" to "Yes", every journal's OAI-PMH requests answered a server error; fixed by pkp/ojs#5947 | ✅ | retired | PR review (claude), 2026-10-16 — fixed by pkp/ojs#5947, merged 2026-10-16 |
-| [A1](#a1) | Retired: a journal's own OAI address left out its deleted records and listed the first journal's instead; fixed by pkp/pkp-lib#13566 | ✅ | retired | re-probe (claude), 2026-10-22 — fixed on `main`, 3.5 and 3.4 |
-| [A25](#a25) | Retired: other journals' `driver` OAI sets listed journal 1's deleted records; fixed by pkp/pkp-lib#13566 | ✅ | retired | re-probe (claude), 2026-10-22 — confirmed without the fix, fixed |
 
 ### All apps
-
-<a id="a1"></a>
-**A1 — A journal's own OAI address leaves out its deleted records and lists the first journal's instead** {OJS OMP} · ✅ · retired. Fixed by pkp/pkp-lib#13566 (the issue report's proposed fix; ojs `3cf9aa91a8` on `main`, `0b1ae35f04` on `stable-3_5_0`, `3bedd21383` on `stable-3_4_0`; omp `178e8b34b2`, `a150eee76b`, `95fefd0cf0`), verified 2026-10-22 on PostgreSQL at each line's tip against the same tip with only the fix taken out: the report's Steps show the Expected with it and the Observed without. OJS `ore` is not fixed yet. <sup>f-a1</sup>
 
 <a id="a2"></a>
 **A2 — OAI-PMH lists ignore the time of day in "from" and "until" and return the whole day's records** · 🐞 · low.
@@ -1707,9 +1698,6 @@ Question: should a set identifier follow the request's language? Lean:
 the plain address can send the same harvester to either (Rule 19a).
 Basis: probe, 2026-09-26. <sup>f-a21</sup>
 
-<a id="a22"></a>
-**A22 — Once one journal sets "DOI Versioning" to "Yes", every journal's OAI-PMH requests answer a server error** {OJS} · ✅ · retired. Fixed by pkp/ojs#5947 (for pkp/pkp-lib#13547, the issue report's proposed fix), verified 2026-10-16 at the PR's head `dd219baf6d` before its merge, on PostgreSQL: the report's Steps answer at the head where the base answers 500. Merged the same day as ojs `2815f33e65`, a squash of that head on `79c3676d1b` with the same tree; `main` only, no 3.5 twin (3.5 has no per-version records). <sup>f-a22</sup>
-
 <a id="a23"></a>
 **A23 — A journal's `driver` OAI set lists articles that have no galley** {OJS} · 🐞 · low.
 A harvester asking a journal for its `driver` set expects only
@@ -1744,9 +1732,6 @@ nothing in the lists walked. From 3.3 to 3.5 a 2020 change made the
 count too low, which ends the list early; a 2026 rewrite on `main` undid
 that.
 Basis: probe, 2026-10-01. <sup>f-a24</sup>
-
-<a id="a25"></a>
-**A25 — Other journals' `driver` OAI sets may list journal 1's deleted records** {OJS} · ✅ · retired. Confirmed and fixed with A1 by pkp/pkp-lib#13566, verified 2026-10-22 on OJS `main` (PostgreSQL): without the fix a second journal's `driver` set listed journal 1's deleted `article/17`; with it, nothing. <sup>f-a25</sup>
 
 <a id="a26"></a>
 **A26 — On MySQL or MariaDB, an article in no issue may get no datestamp and be left out of lists with "from" or "until"** {OJS} · ❓ · user-visible.
@@ -1919,14 +1904,23 @@ Since: 2026-06-09 · Basis: probe, 2026-10-03. <sup>f-ops5</sup>
 
 ### Retired
 
+<a id="a1"></a>
+**A1 — A journal's own OAI address leaves out its deleted records and lists the first journal's instead** {OJS OMP} · ✅ · retired. Fixed upstream (pkp/pkp-lib#13566).
+
+<a id="a22"></a>
+**A22 — Once one journal sets "DOI Versioning" to "Yes", every journal's OAI-PMH requests answer a server error** {OJS} · ✅ · retired. Fixed upstream (pkp/ojs#5947, for pkp/pkp-lib#13547).
+
+<a id="a25"></a>
+**A25 — Other journals' `driver` OAI sets may list journal 1's deleted records** {OJS} · ✅ · retired. Fixed upstream (pkp/pkp-lib#13566).
+
 <a id="omp4"></a>
-**OMP4 — A press's OAI-PMH record lists answered a server error once one book was published without an abstract** · ✅ · retired. Fixed by pkp/omp#2490 (for pkp/pkp-lib#13445), verified 2026-10-05 at the PR's head before its merge. <sup>f-omp4</sup>
+**OMP4 — A press's OAI-PMH record lists answered a server error once one book was published without an abstract** · ✅ · retired. Fixed upstream (pkp/omp#2490, for pkp/pkp-lib#13445).
 
 <a id="ops2"></a>
-**OPS2 — One preprint without an abstract made the server's record lists fail** · ✅ · retired. Fixed by pkp/ops#1430 (for pkp/pkp-lib#13445), verified 2026-10-05 at the PR's head before its merge. <sup>f-ops2</sup>
+**OPS2 — One preprint without an abstract made the server's record lists fail** · ✅ · retired. Fixed upstream (pkp/ops#1430, for pkp/pkp-lib#13445).
 
 <a id="omp5"></a>
-**OMP5 — An address with no press answers as the whole site** · ✅ · retired. Overturned 2026-09-26: seen on a press's install, the address answers "404 Not Found", as on a journal's (Rule 16a). <sup>f-omp5</sup>
+**OMP5 — An address with no press answers as the whole site** · ✅ · retired. Overturned: not a bug.
 
 ---
 
@@ -2151,10 +2145,6 @@ Issue report: [pkp-e2e#310](https://github.com/jardakotesovec/pkp-e2e/issues/310
 <a id="fn-f-a21"></a>
 **f-a21** — Live-probed 2026-09-26, OJS and OPS: note q19; the record headers read at `…/fr_CA/oai` named "{path}:ARTF". Code: note j (`getLocalizedAbbrev()` under the request's locale).
 
-<a id="fn-f-a22"></a>
-**f-a22** — Live-probed 2026-09-26, OJS, in three drives: while four journals of the install had "DOI Versioning" on, every Identify, list and record request of every journal and of the site-wide address answered 500 with an empty body; after "No" was saved on them, 200; a scratch journal set to "Yes" on screen brought the 500s back for 37 seconds, "No" removed them (note q20). The server log: `SQLSTATE[42804]: Datatype mismatch: 7 ERROR: UNION types text and bigint cannot be matched`, from the per-version branch of `APP\oai\ojs\OAIDAO::getRecordsRecordSetQuery()` (`NULL AS tombstone_id` against the tombstones' bigint), reached through `PKPOAIDAO::getEarliestDatestamp()` and the record lists. The test installs run Postgres; MySQL, whose union typing is looser, was not tried. Fix verified 2026-10-16 at pkp/ojs#5947's head `dd219baf6d` (one commit on `79c3676d1b`, the OJS `main` tip; `lib/pkp` `7a20f715db`), before its merge, on PKP's default dataset (PostgreSQL), the report's kept walk (`checks/issues/doi-versioning-oai-requests-fail/walk.js`, deleted with the report at the merge; in git) at the base and the head, each on a fresh dataset. Base: with "Yes" saved, every address but ListSets answered 500 (the error above), "No" brought them back. Head: every address answered 200 at "Yes", ListRecords and ListIdentifiers holding `article/1` and `article/17` as at "No"; `versions` and `neighbour` as note q20a says. The PR's `tests/classes/oai/OAIDAOTest.php` passed 3 of 3 at the head and failed 2 of 3 against the base's `OAIDAO.php` with the same `UNION types text and bigint` error, journal 1's settings unchanged after both runs. The DRIVER set (`DRIVERDAO`) reads the same query, so it takes the fix too: code only, not driven. MySQL and MariaDB not run (PKP's CI runs the test on both).
-Issue report: [pkp-e2e#281](https://github.com/jardakotesovec/pkp-e2e/issues/281), closed 2026-10-16 at the fix; the team's copy is `pkp/pkp-lib#13547`.
-
 <a id="fn-f-a23"></a>
 **f-a23** — Live-probed 2026-09-26, OJS, three journals, two runs: note q21; the member without a galley had no `publication_galleys` row. Code: note i.
 Issue report: [pkp-e2e#340](https://github.com/jardakotesovec/pkp-e2e/issues/340) ([docs/issues/U19-A23-oai-driver-set-lists-article-without-galley.md](../issues/U19-A23-oai-driver-set-lists-article-without-galley.md)).
@@ -2162,9 +2152,6 @@ Issue report: [pkp-e2e#340](https://github.com/jardakotesovec/pkp-e2e/issues/340
 <a id="fn-f-a24"></a>
 **f-a24** — Live-probed 2026-09-26, OJS: note q21; a second walk of a two-member set answered the parts 1221 1222, 1221 1222, then 1222. Code: note i.
 Issue report: [pkp-e2e#341](https://github.com/jardakotesovec/pkp-e2e/issues/341) ([docs/issues/U19-A24-oai-driver-list-says-more-results.md](../issues/U19-A24-oai-driver-list-says-more-results.md)).
-
-<a id="fn-f-a25"></a>
-**f-a25** — Not walked: note q21's scratch journals listed no deleted record in the set, and note q22 walked journal 1 itself. Code: note i (the `driver` answer filters the journal's own record query, whose deleted-record half asks for journal 1's); `DRIVERPlugin::isDRIVERRecord()` reads a deleted record's `driver` tombstone setting by its tombstone ID, whatever the journal. The question and lean are judgment. Live-probed 2026-10-22, base and head of the A1 fix: note q8a.
 
 <a id="fn-f-a26"></a>
 **f-a26** — Not run: the test installs, and every install the campaign drives, run PostgreSQL; no MySQL or MariaDB was at hand on 2026-10-05. Code: note e; OJS `APP\oai\ojs\OAIDAO::getRecordsRecordSetQuery()` writes the datestamp as `GREATEST(a.last_modified, i.last_modified, p.last_modified)` over `leftJoin('issues AS i', …)`, so for an article in no issue `i.last_modified` is NULL; MySQL's and MariaDB's `GREATEST` returns NULL when any argument is NULL, PostgreSQL's ignores NULL arguments. Read 2026-10-01 for the issue report of A18 (its Cause and "Unverified", [docs/issues/U19-A18-oai-datestamp-stays-after-edit-republish.md](../issues/U19-A18-oai-datestamp-stays-after-edit-republish.md)), which does not copy the expression into its fix. What the record's datestamp then reads in a list without dates was not followed. The question and lean are judgment.
@@ -2186,9 +2173,6 @@ Issue report: [pkp-e2e#299](https://github.com/jardakotesovec/pkp-e2e/issues/299
 **f-omp4** — Live-probed 2026-09-26: a book published with its abstract saved empty on "Title & Abstract" made the press's ListRecords, its GetRecord and the site-wide `set={press}` list answer 500, while the site-wide first page (without the book) and ListIdentifiers answered; the server log: `Dc11SchemaPublicationFormatAdapter::addLocalizedElements(): Argument #3 ($localizedValues) must be of type array, null given`. The book was unpublished again at once. Code: note f (`Dc11SchemaPublicationFormatAdapter::addLocalizedElements(…, array $localizedValues)` receives `$publication->getData('abstract')`, null when never set; OMP's "Title & Abstract" does not require the abstract). Fixed by pkp/omp#2490 (the `(array)` cast and `?array`, as pkp/ojs#5753 did for OJS): walked 2026-10-05 at the PR head `bd8c5a28c6`, before its merge, on the default dataset (the issue report's steps, its kept walk): after the abstract is emptied the press's ListRecords, the site-wide list with and without `set=publicknowledge` and GetRecord of book 14's format answer 200, book 14's record with 20 elements and no `dc:description`; the abstract typed back gives the 21st.
 Issue report: pkp-e2e#253, closed at the merge (the report and its walk deleted; git keeps them).
 
-<a id="fn-f-omp5"></a>
-**f-omp5** — Live-probed 2026-09-26, all three apps, two runs: `{site address}/index.php/nosuchjournal/oai?verb=Identify` and a second unknown path answered "404 Not Found" on the press's install too. The retired entry rested on OMP `OAIHandler::index()`, which has no check of its own for an unknown press path; the request is refused before it.
-
 <a id="fn-f-omp6"></a>
 **f-omp6** — Live-probed 2026-09-26: note q10; the deleted record's set name keeps the space, and the seeded press's series read " Monographs" and " Textbooks" at `…/fr_CA/oai`. Code: note j.
 Issue report: [pkp-e2e#334](https://github.com/jardakotesovec/pkp-e2e/issues/334) ([docs/issues/U19-OMP6-oai-series-set-name-leading-space.md](../issues/U19-OMP6-oai-series-set-name-leading-space.md)).
@@ -2207,9 +2191,6 @@ Issue report: [pkp-e2e#1060](https://github.com/jardakotesovec/pkp-e2e/issues/10
 <a id="fn-f-ops1"></a>
 **f-ops1** — Live-probed 2026-09-26: note q11, the preprint server part. Code: note l; the column name `a.last-modified` came with ops `5df1969511` "pkp/pkp-lib#6963 Port OAI rewrite to Laravel to OPS" (2021-06-11). Postgres answers "column … does not exist".
 Issue report: [pkp-e2e#252](https://github.com/jardakotesovec/pkp-e2e/issues/252) ([docs/issues/U19-OPS1-preprint-server-oai-until-fails.md](../issues/U19-OPS1-preprint-server-oai-until-fails.md)).
-
-<a id="fn-f-ops2"></a>
-**f-ops2** — Live-probed 2026-09-26: a preprint posted with its abstract empty made the server's ListRecords, its GetRecord and the site-wide `set={server}` list answer 500 (`Dc11SchemaPreprintAdapter::addLocalizedElements()`, the same TypeError as OMP4); the preprint was unposted again at once. The Sections spec's note f-ops6 (live-probed 2026-09-25): `Dc11SchemaPreprintAdapter::addLocalizedElements()` receives a null abstract, a TypeError; written up in `docs/reports/2026-09-25-ops-oai-empty-abstract.md`. Fixed by pkp/ops#1430: walked 2026-10-05 at the PR head `113172195a`, before its merge (`checks/U19/K3/k3.js` `PHASES=seed,empty` with `KEEP_EMPTY=1`): a preprint posted with its abstract emptied on "Title & Abstract" is listed by the server's ListRecords and ListIdentifiers, the site-wide list and `set={server}`, all 200, and GetRecord answers it with no `dc:description`; control on the same database at ops `caddbb33da` (the PR's base): the server's ListRecords and that GetRecord 500 with an empty body. The temporary report `docs/reports/2026-09-25-ops-oai-empty-abstract.md` is deleted.
 
 <a id="fn-f-ops3"></a>
 **f-ops3** — Live-probed 2026-09-26: "Working Paper" typed in a section's "Identify items posted in this section as a(n)"; its preprint's record read the two eu-repo words only, and the preprint's page, signed out, did not show the words. Code: note f; ops `512707bc6d` "Additional changes to OAI in PPS" (2019-11-21) removed `getIdentifyType()` from the adapter; the section form still offers the field (`sectionForm.tpl`, `manager.sections.identifyType`).

@@ -864,9 +864,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A2](#a2) | The "ID" column shows a pair's number for linked files and another kind of number for the rest | ❓ | minor | — |
 | [OJS1](#ojs1) | A reader who is not signed in sees a media change on an HTML galley up to a day late | ❓ | user-visible | — |
 | [OPS1](#ops1) | A preprint server offers the "Media" page, but no reader page shows its files | ❓ | user-visible | — |
-| [OMP1](#omp1) | Retired: with "HTML Monograph File" off, a book's HTML file opened as a blank page; the book page's link now downloads it, as a journal's does (Settings bullet 6) | ✅ | retired | upstream change + claim check (claude), 2026-10-05 — fixed upstream |
-| [A7](#a7) | Retired: in French the "Media" page, its windows and the delete dialog show raw codes such as "##publication.mediaFiles.add##" | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A1](#a1) | Retired: a Layout Editor was offered every action on the "Media" page, and each change was refused; the page now shows them the list without the changes | ✅ | retired | ui-library#1030 2026-11-06 · fixed |
 
 ### All apps
 <a id="a2"></a>
@@ -1007,13 +1004,13 @@ Basis: probe, 2026-09-24 (the download); code (the download address).
 ### Retired
 
 <a id="omp1"></a>
-**OMP1 — With "HTML Monograph File" off, a book's HTML file opens as a blank page** · ✅ · retired. Fixed by omp `8c807c919` (pkp/pkp-lib#13444), 2026-10-05: with the plugin off, the book page's link to an HTML file downloads the file, with no error, for a reader who is not signed in, a signed-in Reader and the Press Manager alike (Settings bullet 6). <sup>f-omp1</sup>
+**OMP1 — With "HTML Monograph File" off, a book's HTML file opens as a blank page** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13444).
 
 <a id="a7"></a>
-**A7 — In French the "Media" page and its windows show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a7</sup>
+**A7 — In French the "Media" page and its windows show raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a1"></a>
-**A1 — A Layout Editor is offered every action on the "Media" page, and each change is refused** · ✅ · retired. Fixed by `pkp/ui-library#1030` (also on `ore`), for `pkp/pkp-lib#13647`, the team's copy of the issue report, merged and walked on 2026-11-06: an assigned Layout Editor without the "Permissions" box, or on a preprint server a Moderator whose box was unticked, sees the "Media" list with no "Add Media File" or "Batch Link Media" and only "More Information" in a row's "…" menu, while an editor allowed to change the publication keeps every action and its changes hold (Actors row 2; Rule 7). Issue report: [pkp-e2e#493](https://github.com/jardakotesovec/pkp-e2e/issues/493). <sup>f-a1</sup>
+**A1 — A Layout Editor is offered every action on the "Media" page, and each change is refused** · ✅ · retired. Fixed upstream (pkp/ui-library#1030, for pkp/pkp-lib#13647).
 
 ---
 
@@ -1709,30 +1706,6 @@ unresolved, a signed-in reader got it (120 px). A second sighting: a
 reused galley on a freshly reset install served an earlier install's
 page to a signed-out reader.
 
-<a id="fn-f-a1"></a>
-**f-a1** — Until `pkp/ui-library#1030` (notes b and c), the page's
-offer read only the role on the Production stage; the writes pass `PublicationWritePolicy`, whose
-`PublicationCanBeEditedPolicy` needs `canEditPublication()`, i.e.
-`canChangeMetadata` on the assignment for any non-manager. Install
-defaults: `permitMetadataEdit` true for Section Editor (OJS, OMP) and
-OPS Moderator and Author; absent (false) for Guest Editor and every
-`ROLE_ID_ASSISTANT` group (`registry/userGroups.xml`). The
-`canEdit: permissions.canEditPublication` the editorial config passes
-(note a) carries exactly the server's answer
-(`publication.canCurrentUserChangeMetadata`), but `MediaFileManager.vue`
-declared only `publication` and `submission`. The silent "Save": note s.
-Live-probed 2026-09-24: note q2. Compare the galley page, where on a
-journal the "Permissions" box plays no part (*Galleys*).
-Retired 2026-11-06: fixed by `pkp/ui-library#1030` (`f0ced1a4eb`,
-merged on `main` 2026-11-06, "Hide media file write actions from users
-who cannot edit the publication"; OJS `b1240b419e`, OMP `6334d53ac8`,
-OPS `0872927cc9` bump `lib/ui-library` to it; `ore`:
-`pkp/ui-library#1031`, `4cf74e62`, OJS `ore` `9d9e581d63`), which
-makes `MediaFileManager` read the `canEdit` it is given (note b). The
-issue report's walk, re-run that day on all three apps and on `ore`:
-note q2.
-Issue report: [pkp-e2e#493](https://github.com/jardakotesovec/pkp-e2e/issues/493), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13647` (2026-10-29).
-
 <a id="fn-f-a2"></a>
 **f-a2** — Note d: `MediaFileManagerCellGroupId.vue` shows
 `variantGroupId` (the `variant_groups` key) or `mediaFile.fileId` (the
@@ -1804,26 +1777,6 @@ lines written since a mark with the kit's `serverLog(app)`, and the
 upload's request is the `POST …/publications/{id}/mediaFiles` line,
 the warning the "PHP Warning: foreach() …" line right before it.
 Issue report: [pkp-e2e#494](https://github.com/jardakotesovec/pkp-e2e/issues/494) ([docs/issues/U47-A6-media-jats-upload-server-log-warning.md](../issues/U47-A6-media-jats-upload-server-log-warning.md)).
-
-<a id="fn-f-a7"></a>
-**f-a7** — A7. Live-probed 2026-09-30 at ojs `7ce98ec09e`, omp
-`3b0ecf794`, ops `c8af945bb7` (lib/pkp `3dc90c81a6`, ui-library
-`280f98c5`), two runs per app, each on its own scratch journal, press or
-preprint server with English and French (Canada) as interface
-languages, as its Journal Manager and as the submitting Author, on a
-submission in Production with no media file, one holding a single
-web-resolution "Image" `figure.png`, and the same one published. On the
-second, in French and in English, every window was opened ("Add Media
-File", "Batch Link Media", the row menu's four entries, the delete
-dialog, cancelled). The codes were the same on the three apps, in both
-runs and on every state, the Author seeing the page's three; English
-showed none of them. The row's "…" button's accessible name also reads
-`##common.moreActions##`. None of the `publication.mediaFiles.*` keys
-(lib/pkp `locale/en/submission.po`) nor `common.moreActions`,
-`common.selectedFile` or `common.clickToUploadFiles` (`common.po`) has
-a `fr_CA` entry; the English `publication.mediaFiles.confirmDelete`
-carries the file name. The "More Information" window's History line
-with an empty file name is *Submission activity log & notes*' finding.
 
 <a id="fn-f-a8"></a>
 **f-a8** — Notes b and c. On `main`, lib/pkp

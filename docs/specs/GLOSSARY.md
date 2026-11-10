@@ -366,8 +366,8 @@ The long form of the legend. Each spec's Conventions line carries the three symb
   the symptom says so in screen words, so a tester can tell the app
   breaking from the app declining. A ✅ entry whose impact
   reads *retired* is a former 🐞 or ❓ that was fixed upstream or
-  overturned; its one line says why and when, and any verdict quoted
-  under it is the record of the earlier ruling. A line **Security:
+  overturned; its one line, at the end of the register, says why
+  (the fixing PR and the closed issue keep the history). A line **Security:
   unreleased.** in an entry marks a security weakness in code only `main`
   holds (no release has it); it reads and is tested like any other entry.
   Only entries from before 2026-10-17 carry it: a new security weakness,

@@ -1111,10 +1111,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OPS3](#ops3) | A preprint server's "Reports" offers no report | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server's "Editorial Activity" has no active submissions chart | ✅ | minor | — |
 | [OPS2](#ops2) | A preprint server's "Trends" has four rows, "Submissions Declined" counting every declined preprint | ✅ | minor | — |
-| [A9](#a9) | Retired: the monthly editorial email's attachment counted every journal's active submissions, not the journal's own; fixed by pkp/pkp-lib#13515 | ✅ | retired | upstream sync (claude), 2026-10-16 — fixed by pkp/pkp-lib#13515, merged 2026-10-15 |
-| [OMP5](#omp5) | Retired: A French press's monthly attachment names External Review by a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A13](#a13) | Retired: a French press's or preprint server's monthly email is in English but for the month and the footer | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [OMP2](#omp2) | Retired: a press's "Days to First Editorial Decision" help text said "authors submitting to your journal"; it now says "your press" (Fields) | ✅ | retired | fix walked (claude), 2026-11-09 — fixed by pkp/omp#2563, merged 2026-11-09 |
 
 ### All apps
 
@@ -1530,16 +1526,16 @@ Basis: probe, 2026-10-02. <sup>f-ops4</sup>
 ### Retired
 
 <a id="a9"></a>
-**A9 — Monthly editorial email's attachment counts every journal's active submissions, not the journal's own** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13515 for pkp/pkp-lib#13513, merged 2026-10-15; 3.5 `17711b1864`), retired by the upstream sync 2026-10-16. <sup>f-a9</sup>
+**A9 — Monthly editorial email's attachment counts every journal's active submissions, not the journal's own** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13515, for pkp/pkp-lib#13513).
 
 <a id="omp5"></a>
-**OMP5 — A French press's attachment names External Review by a raw code** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-omp5</sup>
+**OMP5 — A French press's attachment names External Review by a raw code** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a13"></a>
-**A13 — A French press's or preprint server's monthly email is in English** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a13</sup>
+**A13 — A French press's or preprint server's monthly email is in English** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="omp2"></a>
-**OMP2 — A press's "Days to First Editorial Decision" help text says "authors submitting to your journal"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: the press's icon text now ends "…the majority of authors submitting to your press can expect a decision." (Fields). <sup>f-omp2</sup>
+**OMP2 — A press's "Days to First Editorial Decision" help text says "authors submitting to your journal"** · ✅ · retired. Fixed upstream (pkp/omp#2563, for pkp/pkp-lib#13646).
 
 ---
 
@@ -2243,14 +2239,6 @@ Issue report: [docs/issues/U65-A11-monthly-email-login-to-the-the-press.md](../i
 editors assigned to the submission alone. Live-probed 2026-09-28: td10; on a press the unassigned
 administrator's decisions were absent too.
 
-<a id="fn-f-a13"></a>
-**f-a13** — fn p (the month's name by `IntlDateFormatter` in the primary
-locale; the text from the context's primary-language template).
-Live-probed 2026-09-28, a context whose primary language is French
-(Canada), by the task key and by the command-line twin, the same both
-ways: OMP's and OPS's subject and body in English with "août" and the
-French footer; OJS's wholly French.
-
 <a id="fn-f-a14"></a>
 **f-a14** — fn r (`PKPNotificationSettingsForm::execute()`). Live-probed
 2026-09-28, the three apps: a Section Editor pressed "Save" on Profile ›
@@ -2342,14 +2330,6 @@ Issue report: [docs/issues/U65-OMP3-monograph-report-columns-sized-by-other-pres
 <a id="fn-f-omp4"></a>
 **f-omp4** — fn o (`getDecisionMessage()`). Live-probed 2026-09-28: td13.
 Issue report: [docs/issues/U65-OMP4-monograph-report-revert-decline-named-decline.md](../issues/U65-OMP4-monograph-report-revert-decline-named-decline.md), filed as [pkp-e2e#658](https://github.com/jardakotesovec/pkp-e2e/issues/658).
-
-<a id="fn-f-omp5"></a>
-**f-omp5** — fn d (the stages' names) and fn p (the attachment).
-Live-probed 2026-09-28, a press whose primary language is French
-(Canada), by the task key and by the command-line twin: the attachment's
-lines read "Évaluation interne",0 and
-"##workflow.review.externalReview##",3; a French journal's and preprint
-server's attachments name every stage.
 
 <a id="fn-f-omp6"></a>
 **f-omp6** — fn o (`getDecisionMessage()`): OMP's list names every

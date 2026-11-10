@@ -520,7 +520,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A4](#a4) | A Journal Manager or Site Administrator who also authors gets the editors' assignment filter on their personal list | ❓ | minor | — |
 | [A5](#a5) | An old author-dashboard link to a still-incomplete draft opens the draft's workflow panel, a screen the list never offers for a draft | ❓ | minor | — |
 | [OMP1](#omp1) | A press author cannot filter the list by series, even when the press has several | ❓ | minor | — |
-| [A6](#a6) | Retired: in French a submission under review reads a raw code in place of "Review update {completed}/{total}", and the "…" button above the list is named by a raw code | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -664,7 +663,7 @@ Basis: probe, 2026-10-04. <sup>ops2</sup>
 ### Retired
 
 <a id="a6"></a>
-**A6 — In French the review counter and the "…" button show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>a6</sup>
+**A6 — In French the review counter and the "…" button show raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -1128,24 +1127,6 @@ author-dashboard address for their draft landed on the list with the
 draft's workflow panel open (full stage menu and publication tabs); a
 different signed-in author got the authorization-denied page. Not probed
 on OMP/OPS.
-
-<a id="fn-a6"></a>
-**a6 — A6 evidence.** Live-probed 2026-09-30 (Rules 7b, 9; OJS, OMP, OPS,
-two runs; scratch contexts with UI languages English and French (Canada),
-each French read paired with the same read in English; the submitting
-Author at `/fr_CA/dashboard/mySubmissions`, on arrival and on every
-view): the rows in review round 1 with the reviewer accepted and with the
-review completed read `##dashboard.reviewUpdateCounts##` on OJS and OMP
-(English "Review update 0/1" and "Review update 1/1"), on "Soumissions
-actives" and on arrival; the list-level ellipsis button's accessible name
-(`aria-label`) read `##common.moreActions##` on all three apps (English
-"More Actions"). The page's only other code was the header's
-`##common.help##`, present in English too (U08 A1). A draft read
-"Incomplète" (OPS "Production") with "Compléter la soumission", a
-submission declined at the Submission stage "Rejetée", the columns "ID
-Trier / Soumissions / Étape / Activité éditoriale / Actions", the heading
-"Soumissions actives (6)". Neither `dashboard.reviewUpdateCounts` nor
-`common.moreActions` exists in pkp-lib's `fr_CA` locale files (U57 Rule 21a).
 
 <a id="fn-a7"></a>
 **a7 — A7 evidence.** `PKPPageRouter::getHomeUrl()` returns the journal's

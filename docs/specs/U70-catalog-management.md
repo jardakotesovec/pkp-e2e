@@ -839,8 +839,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A13](#a13) | Catalog "Order Features": arrow presses that should move a featured book sometimes do nothing | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A14](#a14) | While ordering featured books, screen readers hear "Increase position of undefined" on every arrow | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A1](#a1) | A Series editor opens the Catalog page by its address, then every action on it is refused | ❓ | minor | — |
-| [A7](#a7) | Retired: In French (Canada) the Catalog page shows raw keys for its tab, headings, buttons, ordering notice and "View Entry" | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A15](#a15) | Retired: In French the Catalog Entry page shows raw keys for its group headings, descriptions and "Update Type" list | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1064,10 +1062,10 @@ Basis: probe, 2026-10-03. <sup>f-a14</sup>
 ### Retired
 
 <a id="a7"></a>
-**A7 — The Catalog page shows raw keys in French** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a7</sup>
+**A7 — The Catalog page shows raw keys in French** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a15"></a>
-**A15 — The Catalog Entry page shows raw keys in French** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a15</sup>
+**A15 — The Catalog Entry page shows raw keys in French** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -1709,22 +1707,6 @@ the report's fix keys the notice on "published or scheduled" and keeps
 it, so only the unpublish half is a defect.
 Issue report: [pkp-e2e#744](https://github.com/jardakotesovec/pkp-e2e/issues/744) ([docs/issues/U70-A6-unpublished-book-notice-still-approved.md](../issues/U70-A6-unpublished-book-notice-still-approved.md)), shared with [Production stage OMP2](U33-production-stage.md#omp2).
 
-<a id="fn-f-a7"></a>
-**f-a7** — Live-probed 2026-09-27, OMP, two runs, as Press manager on
-`{press}/fr_CA/manageCatalog` of a press with French enabled: the keys
-quoted; a book titled in both languages showed its French title. The
-French strings of these keys are empty in the install's `fr_CA` locale
-files. The panel headers' "##common.help##" is the navigation spec's A1.
-Walked 2026-10-03 on main and 3.5, as Press manager in French (Canada)
-(Fields, the Catalog page): "Order Features" read
-"##submission.list.orderFeatures##"; while ordering, "Save Order"
-"##submission.list.saveFeatureOrder##" (beside "Annuler") and the notice
-"##submission.list.orderingFeatures##"; the "Filtres" column's groups
-"##catalog.categories##" and "Série"; the "Add Entry" search box
-"##catalog.manage.findSubmissions##"; the boxes' screen-reader names
-"##catalog.manage.isNotFeatured##", "##catalog.manage.isFeatured##"
-(after a press) and "##catalog.manage.isNotNewRelease##".
-
 <a id="fn-f-a8"></a>
 **f-a8** — Note g. Live-probed 2026-09-27, OMP, two runs, as Press
 manager: "Lantern" typed, five suggestions, no tag; "Save" posted the
@@ -1790,22 +1772,6 @@ Issue report: [pkp-e2e#748](https://github.com/jardakotesovec/pkp-e2e/issues/748
 **f-a14** — Note k. Live-probed 2026-09-27, OMP: every arrow of every row,
 with and without a filter.
 Issue report: [pkp-e2e#747](https://github.com/jardakotesovec/pkp-e2e/issues/747) ([docs/issues/U70-A14-catalog-ordering-arrows-name-undefined.md](../issues/U70-A14-catalog-ordering-arrows-name-undefined.md)).
-
-<a id="fn-f-a15"></a>
-**f-a15** — Note h (the form's strings). Live-probed 2026-09-30, OMP, two
-runs, as a scratch press's Press manager with French (Canada) as the
-interface language, on a book in Production never published and on a
-published one: the keys quoted, as text on the page and in the "Update
-Type" list (listed there in the order quoted, by key); the version's menu
-entry "Catalogue", the heading "PUBLICATION : CATALOGUE" (capitals by the
-page's styling), the labels "Séries", "Position dans cette série (ex:
-livre 2 ou Volume 2)", "Date de publication", "Illustration de
-couverture", "Chemin d'accès URL" with "Un chemin d'accès optionnel
-utilisant l'URL au lieu de l'identifiant.", "Insérer le contenu" and
-"Enregistrer". The same page in English showed no key but the help icon's
-(the navigation spec's A1). The frame's keys on the same screen (the
-side menu's, the header's, the version names) are the workflow screen
-spec's A11 and the navigation spec's A23.
 
 ## Reference — entry points & surfaces
 

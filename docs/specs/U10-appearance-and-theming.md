@@ -1345,8 +1345,6 @@ otherwise; the team settles them on spec review.
 | [OJS4](#ojs4) | The Settings Wizard shows the current issue's table of contents ticked for a journal with no issue, and a save there stores it | ❓ | minor | — |
 | [OJS7](#ojs7) | A journal's homepage image saved without "Alternate text" has no text alternative at all | ❓ | minor | — |
 | [OMP3](#omp3) | A press's public pages load its style sheet twice, the second time at an address that stays the same when another sheet is saved | ❓ | minor | — |
-| [A6](#a6) | Retired: in French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A21](#a21) | Retired: a BMP logo or a style sheet the server misread showed "Saved", stored nothing and removed the one the journal had; the BMP is now refused with the earlier logo kept, and the style sheet is saved | ✅ | retired | upstream sync (claude), 2026-10-19 — fixed upstream (pkp/pkp-lib#13512) |
 | [OJS1](#ojs1) | Only a journal has "Journal Content Organization" | ✅ | minor | — |
 | [OMP1](#omp1) | A press's appearance tabs carry the catalog's fields | ✅ | minor | — |
 | [OPS1](#ops1) | A preprint server's home page has a fixed order | ✅ | minor | — |
@@ -1917,10 +1915,10 @@ Basis: code. <sup>f-ops1</sup>
 ### Retired
 
 <a id="a6"></a>
-**A6 — In French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a6</sup>
+**A6 — In French (Canada), a press's appearance settings and a book's or preprint's download chart show untranslated codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a21"></a>
-**A21 — A BMP logo or a misread style sheet showed "Saved", stored nothing and removed the one the journal had** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13512, 2026-10-16), verified 2026-10-19 on OJS, OMP and OPS: a BMP "Logo" or "Homepage Image" is refused at "Save" and the earlier picture stays, and a ".css" file the server used to take for some other kind of text (one that opens with a comment block and a `:root` rule) is saved and applied (Fields, the upload boxes). <sup>f-a21</sup>
+**A21 — A BMP logo or a misread style sheet showed "Saved", stored nothing and removed the one the journal had** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13512).
 
 ---
 
@@ -2499,45 +2497,6 @@ and its old address (`/public/journals/<id>/styleSheet.css`, OMP
 `presses`, OPS `contexts`) still answered 200 with the file, signed out;
 a removed favicon's and logo's addresses answered 404.
 Issue report: [pkp-e2e#780](https://github.com/jardakotesovec/pkp-e2e/issues/780) ([docs/issues/U10-A5-removed-style-sheet-stays-public.md](../issues/U10-A5-removed-style-sheet-stays-public.md)).
-
-<a id="fn-f-a6"></a>
-**f-a6** — Seen 2026-09-24 on all three apps with the French interface.
-OJS `locale/fr_CA` lacks `manager.setup.journalContentOrganization` and
-its description and option keys: OJS added them in English on `main`
-only (`9486d8e182`, 2025-05-27, `pkp/pkp-lib#9295`) and no language has
-them yet, so under the team's 2026-10-02 ruling on main-only texts they
-await translation and are not part of A6 (read 2026-10-03). OMP's `plugins/themes/default/locale/fr_CA/locale.po`
-holds one entry and the app's `manager.setup.contextSummary` is empty in
-French; OPS's theme locale has empty `displayStats` strings. Code read
-2026-09-24. Live-probed 2026-09-28 (OMP, two runs, OJS and OPS
-the controls): a press's French "Setup" showed
-"##manager.setup.pressThumbnail##",
-"##manager.setup.pressThumbnail.description##",
-"##plugins.block.browse.displayName##" (with "Avancer la position de
-##plugins.block.browse.displayName##"),
-"##manager.setup.displayFeaturedBooks##",
-"##manager.setup.displayFeaturedBooks.label##",
-"##manager.setup.displayNewReleases##",
-"##manager.setup.displayNewReleases.label##", "##catalog.sortBy##",
-"##catalog.sortBy.catalogDescription##",
-"##catalog.sortBy.seriesPositionAsc##" and
-"##catalog.sortBy.seriesPositionDesc##", the other four order choices
-reading "Titres (A-Z)", "Titres (Z-A)", "Date de publication (du plus
-ancien)", "Date de publication (du plus récent)"; its "Advanced"
-"##manager.setup.coverThumbnailsMaxWidth##" and
-"##manager.setup.coverThumbnailsMaxHeight##", each over
-"##manager.setup.coverThumbnailsMaxWidthHeight.description##". A
-journal's and a server's "Setup" and "Advanced" showed none. Beyond
-French (Canada), read in the locale files on `main` 2026-10-03 (a text
-counts as missing when empty or absent; not driven): of OMP's 33
-languages, Greek, Kyrgyz and Vietnamese lack all 42 texts the French
-(Canada) fix holds and 19 others lack some (French (France) three);
-of OPS's 17, Catalan, Croatian, French (France), Indonesian, Kyrgyz,
-Norwegian Bokmål, Portuguese, Spanish and Turkish lack all nine chart
-texts. The "Theme" tab, live-probed 2026-09-24 and 2026-09-28 (all three
-apps, two runs each): on OJS the organization field's five codes and
-nothing else; on OPS the statistics field's label and three choices; on
-OMP 23 codes, the field label "Thème" and its description translated.
 
 <a id="fn-f-a7"></a>
 **f-a7** — Live-probed 2026-09-24 on all three apps ("Logo", "Favicon",

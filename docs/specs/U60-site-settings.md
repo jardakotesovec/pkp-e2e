@@ -895,7 +895,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | A saved "Theme" change does not reach a browser that already opened the site | ❓ | user-visible | — |
 | [A10](#a10) | The reduced page and the site's address count journals differently | ❓ | latent | — |
 | [OPS1](#ops1) | A preprint server offers "Reviewer statistics" with no reviewers to count | ❓ | minor | — |
-| [A2](#a2) | Retired: French (Canada) Site Settings: a press's "Information" tab and a press's or preprint server's "Courriels en lot" description show codes | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1096,7 +1095,7 @@ Basis: code. <sup>f-ops1</sup>
 ### Retired
 
 <a id="a2"></a>
-**A2 — French (Canada) Site Settings: a press's "Information" tab and a press's or preprint server's "Courriels en lot" description show codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a2</sup>
+**A2 — French (Canada) Site Settings: a press's "Information" tab and a press's or preprint server's "Courriels en lot" description show codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 

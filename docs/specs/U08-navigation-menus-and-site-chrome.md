@@ -1325,13 +1325,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A25](#a25) | The editorial header's initials menu stays open when Escape is pressed | ❓ | minor | — |
 | [A27](#a27) | On the site's pages the Site Administrator's "Dashboard" shows a task count but opens the Profile page | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server's side menu has no "Content" group while public comments are off {OPS} | ✅ | minor | — |
-| [A11](#a11) | Retired: the item window's refused saves (no type, a bad path, a bad URL) were thought to say nothing; each shows its reason at the top right (Fields) | ✅ | retired | claim check (claude), 2026-10-07 — overturned |
-| [A17](#a17) | Retired: leaving the page after "Yes" discarded a menu change was thought to still ask about unsaved changes; it asks nothing (Rule 6a) | ✅ | retired | claim check (claude), 2026-10-07 — overturned |
-| [A19](#a19) | Retired: on French pages the installed "Editorial Masthead" item read "##common.editorialMasthead##"; it now reads "Entête" (Rule 12) | ✅ | retired | upstream change + claim check (claude), 2026-09-24 — fixed upstream |
-| [A20](#a20) | Retired: in French the initials menu's language heading read "##common.changeLanguage##"; it now reads "Changer la langue" (Rule 28) | ✅ | retired | upstream change + claim check (claude), 2026-09-24 — fixed upstream |
-| [A23](#a23) | Retired: in French, the side menu's "Content" group {OJS OMP}, "DOIs" entry {OMP OPS}, "Search submissions" box and a press's "Monographs" entry {OMP} read raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A24](#a24) | Retired: in French, the item window's "Query Parameters" box, the menu window's drag handles and a press's "New Releases" type read raw codes | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [OPS3](#ops3) | Retired: {OPS} on a preprint server's French (Canada) pages, screen readers hear the "Developed By" heading as a text key | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1714,25 +1707,25 @@ Basis: probe, 2026-10-03. <sup>f-ops4</sup>
 ### Retired
 
 <a id="a11"></a>
-**A11 — The item window refuses most saves without saying why** · ✅ · retired. Overturned 2026-10-07: re-checked on OJS, OMP and OPS, from "Add item" and an item's "Edit", each refused "Save" (no type, a "URL" that is not a full web address, a "Path" with other characters or already used) shows its reason at the top right while the window stays open (Fields); the earlier check did not recognise the notices. <sup>f-a11</sup>
+**A11 — The item window refuses most saves without saying why** · ✅ · retired. Overturned: not a bug.
 
 <a id="a17"></a>
-**A17 — Discarded changes still hold the page** · ✅ · retired. Overturned 2026-10-07: re-checked on OJS, OMP and OPS, after "Yes" discards a change in the menu window, moving off Settings › Website asks nothing (Rule 6a); the earlier check left within half a second of "Yes". <sup>f-a17</sup>
+**A17 — Discarded changes still hold the page** · ✅ · retired. Overturned: not a bug.
 
 <a id="a19"></a>
-**A19 — The French "Editorial Masthead" item reads a raw code** · ✅ · retired. Fixed upstream by the French translations merge, verified 2026-09-24 on OJS, OMP and OPS: on French pages of a journal with French under "Forms", the installed item reads "Entête" in the header's "About" list, in the Navigation tab's tables and in the item window, and the page it opens is headed "Entête" (Rule 12). <sup>f-a19</sup>
+**A19 — The French "Editorial Masthead" item reads a raw code** · ✅ · retired. Fixed upstream.
 
 <a id="a20"></a>
-**A20 — The French initials menu's language heading reads a raw code** · ✅ · retired. Fixed upstream by the French translations merge, verified 2026-09-24 on OJS, OMP and OPS: with the interface in French the initials menu reads "Changer la langue", "English", "français" (ticked), "Modifier le profil", "Se déconnecter", for every role and for the Site Administrator (Rule 28). <sup>f-a20</sup>
+**A20 — The French initials menu's language heading reads a raw code** · ✅ · retired. Fixed upstream.
 
 <a id="a23"></a>
-**A23 — In French the side menu shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a23</sup>
+**A23 — In French the side menu shows raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a24"></a>
-**A24 — In French the Navigation tab's windows show raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-a24</sup>
+**A24 — In French the Navigation tab's windows show raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="ops3"></a>
-**OPS3 — On a preprint server's French (Canada) pages, screen readers hear the "Developed By" heading as a text key** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>f-ops3</sup>
+**OPS3 — On a preprint server's French (Canada) pages, screen readers hear the "Developed By" heading as a text key** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -2927,17 +2920,6 @@ template draws two levels). No theme in the checkouts overrides
 (note j). Live-probed 2026-09-23 (td1), all three apps: the table then
 listed "primary navigation menu" and "Primary Navigation Menu".
 
-<a id="fn-f-a11"></a>
-**f-a11** — Note l (the refusal recorded as a form-error notification,
-which the page shows) and td2. The messages are
-`manager.navigationMenus.form.typeMissing`, `…customUrlError`,
-`…pathRegEx`, `…duplicatePath`; the unused `…items.form.title.required`
-reads "The menu item title is required.". Entered on the live probe of
-2026-09-23, whose notice pattern (successfully / not saved / error)
-matched none of these texts; overturned by the re-drive of 2026-10-07
-(td2), all three apps, twice, 12 of 12 refusals per case showing their
-notice.
-
 <a id="fn-f-a12"></a>
 **f-a12** — `NavigationMenuItemsFormHandler.js::setType()` replaces the
 line only when the chosen value has a description, and "Choose a
@@ -2964,13 +2946,6 @@ Issue report: [docs/issues/U08-A15-navigation-table-keeps-old-item-titles.md](..
 three apps, on a scratch journal after every item was removed.
 Issue report: [docs/issues/U08-A16-menu-window-without-items-says-all-assigned.md](../issues/U08-A16-menu-window-without-items-says-all-assigned.md), filed as [pkp-e2e#645](https://github.com/jardakotesovec/pkp-e2e/issues/645).
 
-<a id="fn-f-a17"></a>
-**f-a17** — `useFormChanged()`'s `beforeunload` prompt (note j). Entered
-on the live probe of 2026-09-23 (note j), which left the page at once
-after "Yes" and so met the closed window's handler in the 450 ms it
-stays mounted; overturned by the re-drive of 2026-10-07 (note j), all
-three apps, twice: 1 s or 3 s after "Yes", no prompt after any change.
-
 <a id="fn-f-a18"></a>
 **f-a18** — The item window is the legacy form in a legacy side window
 (note l). Live-probed 2026-09-23 (note l), all three apps: four closes
@@ -2985,46 +2960,6 @@ Test run 2026-09-24 on OJS and OPS, and by hand on OPS (note l): no box
 after a refused "Save", the box again after a changed "Title".
 Issue report: [docs/issues/U08-A18-item-window-asks-with-nothing-typed.md](../issues/U08-A18-item-window-asks-with-nothing-typed.md), filed as [pkp-e2e#650](https://github.com/jardakotesovec/pkp-e2e/issues/650).
 Issue report: [docs/issues/U08-A18-item-window-refused-save-closes-unasked.md](../issues/U08-A18-item-window-refused-save-closes-unasked.md), filed as [pkp-e2e#651](https://github.com/jardakotesovec/pkp-e2e/issues/651).
-
-<a id="fn-f-a19"></a>
-**f-a19** — The installed item's title key `common.editorialMasthead`
-(note n) had no `fr_CA` entry: live-probed 2026-09-23 (td4, td11), all
-three apps, the raw code on French pages. lib/pkp `25182919bf` (the
-`translations/stable-3_5_0` merge) added `msgstr "Entête"` to
-`fr_CA/common.po`. Live-probed 2026-09-24 at ojs `71bb244152`, omp
-`a36551804`, ops `07141ae4df` (lib/pkp `25182919bf`), all three apps,
-on a scratch journal with English and French under "UI" and "Forms":
-"Entête" in the header's "À propos" list, in both Navigation tables
-and the Primary menu's row, nested under "À propos" in the menu window,
-and in the item window's French "Title" box, whose type line read "Lien
-vers la page affichant les membres actifs du personnel éditorial."; the
-page it opens titled "Entête", with the trail "Accueil / Entête"; the
-Appearance side tab "Entête". The rest of the "À propos" list: OJS "À
-propos de cette revue, Soumissions, Entête, Déclaration de
-confidentialité, Personne-ressource"; OMP "A propos de la presse,
-Soumissions, Entête, Déclaration de confidentialité, Coordonnées"; OPS
-"À propos du serveur, Soumissions, Entête, Déclaration de
-confidentialité, Personne-ressource". The seeded journal (French under
-"UI" alone) still showed every item in English, "Editorial Masthead"
-included.
-
-<a id="fn-f-a20"></a>
-**f-a20** — `TopNavActions.vue` heads the list with
-`t('common.changeLanguage')` (note g), which had no `fr_CA` entry:
-live-probed 2026-09-23, all three apps, on a scratch journal with
-English and French under "UI", the raw code. lib/pkp `25182919bf` (the
-`translations/stable-3_5_0` merge) added `msgstr "Changer la langue"`
-to `fr_CA/common.po`. Live-probed 2026-09-24 at ojs `71bb244152`, omp
-`a36551804`, ops `07141ae4df` (lib/pkp `25182919bf`), all three apps,
-on a scratch journal with English and French under "UI" and "Forms":
-the menu, named "Navigation de l'usager", read "Changer la langue",
-"English", "français" (ticked), "Modifier le profil", "Se déconnecter"
-for the Journal Manager (on the Profile page and on Settings ›
-Website), a Section Editor, an Assistant, an Author, a Reviewer (OJS,
-OMP; a preprint server installs no Reviewer) and a Reader, and for the
-Site Administrator there and on the site's Administration page. On a
-journal with English alone, "Edit Profile" and "Logout" with no
-language list.
 
 <a id="fn-f-a21"></a>
 **f-a21** — Note g (the switcher drops every context whose name equals
@@ -3049,45 +2984,6 @@ line the box "Search submissions", shown once the group was pressed),
 on OPS, the scratch server's public comments being off by default),
 "Statistics", "Tools", "Administration".
 Issue report: [docs/issues/U08-A22-admin-without-role-dashboard-error.md](../issues/U08-A22-admin-without-role-dashboard-error.md), filed as [pkp-e2e#639](https://github.com/jardakotesovec/pkp-e2e/issues/639).
-
-<a id="fn-f-a23"></a>
-**f-a23** — `navigation.content` (lib/pkp `common.po`) has no `fr_CA`
-entry; `doi.manager.displayName` reads `msgstr ""` in OMP's and OPS's
-`locale/fr_CA/manager.po` and "DOIs" in OJS's. Live-probed 2026-09-24
-at ojs `71bb244152`, omp `a36551804`, ops `07141ae4df` (lib/pkp
-`25182919bf`), all three apps, as the Journal Manager of a scratch
-journal with English and French under "UI" and "Forms", on Settings ›
-Website: the group's text and `aria-label` read
-`##navigation.content##` on OJS and OMP (OPS showed no "Content" group,
-public comments being off, OPS1); the DOIs entry's text and
-`aria-label` read `##doi.manager.displayName##` on OMP and OPS.
-`editor.submission.searchGlobal` (lib/pkp `editor.po`) has no `fr_CA`
-entry, and `common.publications` reads `msgstr ""` in OMP's
-`locale/fr_CA/locale.po` ("Articles" on OJS, "Prépublications" on OPS).
-Live-probed 2026-09-28, two runs, all three apps, on a scratch journal
-with English and French under "UI" and "Forms", as its manager, `admin`,
-Section Editor, Author, Reader and (OJS, OMP) Reviewer, each page read
-in `/en/` as the control, where no code showed: the two codes above held;
-"Editor Dashboard"'s search box showed the placeholder
-`##editor.submission.searchGlobal##` to the manager, `admin` and the
-Section Editor on all three apps, its row named "Résultats de recherche"
-("Search Results" in English); on OMP the "Statistiques" group's first
-entry read `##common.publications##` to the same three, the other
-entries in French. The Author's, Reader's and Reviewer's menus showed no
-code.
-
-<a id="fn-f-a24"></a>
-**f-a24** — `manager.navigationMenus.form.queryParams`, its
-`.description` and `common.dragToReorder` (English "Drag to reorder")
-have no `fr_CA` entry; OMP's `navigation.navigationMenus.newRelease`
-reads `msgstr ""` in its `fr_CA` locale. Live-probed 2026-09-24 at ojs
-`71bb244152`, omp `a36551804`, ops `07141ae4df` (lib/pkp
-`25182919bf`), all three apps, as the Journal Manager of a scratch
-journal with English and French under "UI" and "Forms": the "Entête"
-item's window showed the label and the line under it as the raw codes;
-the Primary menu window's handles carried the `title`
-`##common.dragToReorder##`; on OMP the type list's options included
-`##navigation.navigationMenus.newRelease##`.
 
 <a id="fn-f-a25"></a>
 **f-a25** — Note td19: `Dropdown.vue` has no Escape handler and closes
@@ -3182,10 +3078,6 @@ carried no `publishingMode`, nothing was stored, the radios were
 unmarked on the next load and the header read "Announcements Archives
 About".
 Issue report: [pkp-e2e#380](https://github.com/jardakotesovec/pkp-e2e/issues/380) ([docs/issues/U51-OPS1-posting-mode-says-saved-keeps-nothing.md](../issues/U51-OPS1-posting-mode-says-saved-keeps-nothing.md)).
-
-<a id="fn-f-ops3"></a>
-**f-ops3** — Note s. Live-probed 2026-09-23 (Rule 21), OPS, with OJS and
-OMP the control.
 
 <a id="fn-f-ops4"></a>
 **f-ops4** — Note td21. OPS `locale/en/locale.po`

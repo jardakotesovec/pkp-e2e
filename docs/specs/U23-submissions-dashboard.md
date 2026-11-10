@@ -883,11 +883,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A recommending editor's row before recording; never seen on screen | ❓ | minor | — |
 | [A18](#a18) | An address with a search phrase but no view, or a view the account lacks, opens "Assigned to me" with the phrase and filters dropped | ❓ | minor | — |
 | [OMP1](#omp1) | A press's filter panel never offers a series filter, however many series exist | ❓ | minor | — |
-| [A4](#a4) | Retired: the popover over an editor-cancelled review request blamed the reviewer ("Reviewer cancelled review request") and offered "Resend Review Request" and "View details"; fixed by pkp/pkp-lib#13473 and pkp/ui-library#1012 (Rule 10) | ✅ | retired | PR review (claude), 2026-10-08 — fixed at the PRs' heads |
-| [A6](#a6) | Retired: the overdue-review popover called the missed review a "response"; fixed by pkp/pkp-lib#13473 (Rule 10) | ✅ | retired | PR review (claude), 2026-10-08 — fixed at the PR's head |
-| [A5](#a5) | Retired: a sort switched off stayed in the address and came back on reload; the third click now takes it out of the address, and a reload shows the default order (Rule 5) | ✅ | retired | upstream sync (claude), 2026-10-08 — fixed upstream (pkp/pkp-lib#12736) |
-| [A12](#a12) | Retired: in French a screen reader hears raw codes for the "…" button above the list and for "Loaded", and an accepted reviewer's indicator and a press's "Assigned To Editor" filter field show one | ✅ | retired | Jarda 2026-10-08 · overturned |
-| [A13](#a13) | Retired: in French the recommending editors' line may read a raw code; never seen on screen | ✅ | retired | Jarda 2026-10-08 · overturned |
 
 ### All apps
 
@@ -1080,19 +1075,19 @@ Basis: probe + code. <sup>omp1</sup>
 ### Retired
 
 <a id="a4"></a>
-**A4 — Cancelled-by-editor popover blames the reviewer** · ✅ · retired. Fixed by pkp/pkp-lib#13473 and pkp/ui-library#1012 (for pkp/pkp-lib#13472), verified 2026-10-08 on OJS and OMP at the PRs' heads and again on the merged code (pkp-lib `6d004d2d01`, ui-library `38814ea1`, merged that day): the popover reads "Review request cancelled by editor" and "The editor cancelled this review request on {date}.", and offers "Reinstate Reviewer" alone (Rule 10). <sup>a4</sup>
+**A4 — Cancelled-by-editor popover blames the reviewer** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13473, for pkp/pkp-lib#13472).
 
 <a id="a6"></a>
-**A6 — The overdue-review popover talks about a response** · ✅ · retired. Fixed by pkp/pkp-lib#13473 (for pkp/pkp-lib#13472), verified 2026-10-08 on OJS and OMP at the PR's head and again on the merged code (pkp-lib `6d004d2d01`, merged that day): the popover reads "This reviewer has not completed their review. The review was due on {date}." (Rule 10). <sup>a6</sup>
+**A6 — The overdue-review popover talks about a response** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13473, for pkp/pkp-lib#13472).
 
 <a id="a5"></a>
-**A5 — Submissions dashboard: a sort switched off stays in the address and comes back on reload** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12736, ui-library `7f5e51ca`, 2026-10-08), verified 2026-10-08 on OJS, OMP and OPS built with that change: the third click on "ID" takes the sort out of the address, and a reload shows the default order (Rule 5); the same on My Submissions and, on a journal and a press, on the reviewer's list. <sup>a5</sup>
+**A5 — Submissions dashboard: a sort switched off stays in the address and comes back on reload** · ✅ · retired. Fixed upstream (pkp/pkp-lib#12736).
 
 <a id="a12"></a>
-**A12 — In French the dashboard shows raw codes** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>a12</sup>
+**A12 — In French the dashboard shows raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a13"></a>
-**A13 — The recommending editors' line may read a code in French** · ✅ · retired. Overturned by Jarda, 2026-10-08: a missing translation is no finding (TEMPLATE "Findings register"). <sup>a13</sup>
+**A13 — The recommending editors' line may read a code in French** · ✅ · retired. Overturned: a missing translation is no finding.
 
 ---
 
@@ -1879,45 +1874,6 @@ buttons on the row. The Site-Administrator-as-author rendering rests on
 the shared string alone: an admin-authored submission was not
 constructible without mutating the shared seeded account.
 
-<a id="fn-a4"></a>
-**a4 — A4 evidence.** `ConfigPerStatus` keys the cancelled status
-(set by the editor's Cancel Reviewer — the code comment itself says
-"editor cancelled review request") to title
-`dashboard.reviewAssignment.statusCancelled.title` = "Reviewer cancelled
-review request". The declined status has its own distinct title.
-Live-probed 2026-08-26 (OJS + OMP): after the editor's "Cancel Reviewer" —
-the reviewer took no action at any point — the popover read "Reviewer
-cancelled review request" / "Reviewer has cancelled the review request on
-{date}." on both apps, with "Resend Review Request" and "View details" as
-the buttons.
-Retired 2026-10-08 at the heads of pkp/pkp-lib#13473 (`09f80a196f`) and
-pkp/ui-library#1012 (`e5880958`), before their merge (issue
-pkp/pkp-lib#13472, filed from pkp-e2e#905): the two English texts name
-the editor, and the cancelled status offers "Reinstate Reviewer" in the
-text slot with no primary button. Driven on OJS and OMP, PKP's default
-test dataset freshly loaded, the kept check
-`shared/playwright/checks/sync/pkp-lib-13473/popovers.js`: after the
-editor's "Cancel Reviewer" the popover read "Review request cancelled by
-editor" / "The editor cancelled this review request on 2026-10-08." with
-"Reinstate Reviewer" alone; pressed, it opened the "Reinstate Reviewer"
-window, and once sent ("Reviewer reinstated.") the popover read "Ongoing
-review - request accepted", the Reviewers panel "Request Accepted", and
-the reviewer opened the review. Control at the PRs' bases (pkp-lib
-`151e6e9d69`, ui-library `7f5e51ca`), same dataset: the old texts with
-"Resend Review Request" and "View details"; the resend, sent, left the
-popover and the panel on the cancelled request, and the reviewer got
-"The current user is not assigned as a reviewer for the requested
-document."
-Merged 2026-10-08 18:36 UTC by rebase, `git range-diff` `=` on both:
-pkp-lib `feaedea71f` and `6d004d2d01`, ui-library `8f5e2310`, `b1b5b29e`
-and `38814ea1`. The same drive on OJS and OMP with `lib/pkp` and
-`lib/ui-library` checked out at `6d004d2d01` and `38814ea1` read the
-same. The three apps' pointers took both commits the same evening
-("Update submodules": ojs `49ebfba763`, omp `dd10616a47`, ops
-`0c692f6ae1`).
-Issue report: pkp-e2e#905, closed at the merge (the report and its walk
-deleted; git keeps them).
-
 <a id="fn-a5"></a>
 **a5 — A5 evidence.** Live-probed 2026-08-26 (OJS, manager, 31-row view;
 reproduced twice in separate runs): the third click on a sorted header
@@ -1956,28 +1912,6 @@ third click on "ID" and after a reload the address held
 `currentViewId=active` alone and the rows stood in the default order
 (OJS 20 first, OMP 18 first; OPS one preprint). The fix is in every
 app's own build from that day.
-
-<a id="fn-a6"></a>
-**a6 — A6 evidence.** Live-probed 2026-08-26 (OJS + OMP, same string on
-both): with a response due date of 2026-08-18 and a review due date of
-2026-08-20 on the assignment, the overdue popover read "Review overdue by
-6 days" / "This reviewer has not completed their review. A response was
-due on 2026-08-20." — the review due date under the response label. The
-request-overdue state's description ("This reviewer has not responded to
-the review request. A response was due on {date}") is correct in its own
-context; the review-overdue state reuses the response sentence where a
-review sentence is needed (popover description keys per status in
-`ConfigPerStatus` — fn-k).
-Retired 2026-10-08 at the head of pkp/pkp-lib#13473 (`09f80a196f`),
-before its merge (issue pkp/pkp-lib#13472, filed from pkp-e2e#905). The
-same drive as fn-a4, on OJS and OMP: with the review due date 7 days,
-1 day and 0 days back the popover read "This reviewer has not completed
-their review. The review was due on {that date}."; at the PR's base it
-read "A response was due on {that date}." The response-overdue popover
-reads "A response was due on {date}" at both. Merged 2026-10-08 and
-walked again on the merged code (fn-a4).
-Issue report: pkp-e2e#905, closed at the merge (the report and its walk
-deleted; git keeps them).
 
 <a id="fn-a7"></a>
 **a7 — A7 evidence.** Live-probed 2026-08-26 (OJS + OMP, manager vs
@@ -2046,41 +1980,6 @@ Issue report: [pkp-e2e#901](https://github.com/jardakotesovec/pkp-e2e/issues/901
 entry of `activeFiltersList` (keyed field label + value label), its X
 emitting `removeFilter(name, value)`. The 2026-09-29 probes (fn-i) applied
 one value per field only.
-
-<a id="fn-a12"></a>
-**a12 — A12 evidence.** `common.moreActions` and `common.loaded` (lib/pkp
-`locale/en/common.po`) and `dashboard.reviewAssignment.statusAccepted.title`
-(`locale/en/submission.po`) have no entry in lib/pkp's `locale/fr_CA`;
-OMP's `locale/fr_CA/editor.po` carries `editor.submissions.assignedTo`
-with an empty text, where OJS's and OPS's are translated. Live-probed
-2026-09-30 at ojs `7ce98ec09e`, omp `3b0ecf794c`, ops `c8af945bb7`
-(lib/pkp `3dc90c81a6`), two runs, all three apps, on a scratch context
-with English and French (Canada) interface languages, as its Journal
-Manager and an assigned Section Editor; every French read was paired
-with the same read in `/en/`, where none of the codes showed. The
-"…" button's `aria-label` and its menu's name read the code; no row
-carries a menu button (a row's buttons are "Afficher", "Compléter la
-soumission" on the incomplete row, "Assigner un rédacteur-trice" on a
-Submission-stage row with no editor, and the review indicators); the
-bulk delete was driven to its French confirmation and cancelled. The
-Section Editor had no "…". The accepted-review code showed in the cell
-on every manager view listing a round-1 submission whose reviewer had
-accepted, and as the popover's headline (OJS and OMP); a completed
-review's cell and popover read French, the popover naming the
-recommendation on OJS only (Rule 10). OMP's Filters label read the code
-in both runs. No response of 500 or more and no page error. The
-indicator's French "Afficher plus de details" lacks the accent on
-"détails", a translation typo rather than a code.
-
-<a id="fn-a13"></a>
-**a13 — A13 evidence.** `useDashboardConfigEditorialActivity.js` shows
-`dashboard.recommendOnly.pendingRecommendations` on
-`REVIEW_ROUND_STATUS_PENDING_RECOMMENDATIONS`; the key has no `fr_CA`
-text in lib/pkp on any app (locale files read 2026-09-30). The state
-was not on screen in the 2026-09-30 French probe (fn-a12). It is settled
-by reading the French dashboard row of a round with a recommend-only
-editor assigned and every review confirmed ("Mark as Complete"), as its
-deciding editor.
 
 <a id="fn-a14"></a>
 **a14 — A14 evidence.** In `useDashboardConfigEditorialActivity.js`, a

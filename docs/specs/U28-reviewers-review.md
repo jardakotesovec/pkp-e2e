@@ -1096,9 +1096,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A13](#a13) | The "Read Round {N} Review" window never lists the files that were sent for review | ❓ | minor | — |
 | [A16](#a16) | A refused review-form submit marks the unanswered questions on one form and none on another | ❓ | minor | — |
 | [OMP1](#omp1) | A press's wizard collects no recommendation, and each review stage shows its own guidelines | ✅ | — | — |
-| [A8](#a8) | Retired: "Save for Later" with a required question open did save and confirm after all | ✅ | retired | — |
-| [OMP4](#omp4) | Retired: the press's "Previous Reviews" oddity is every app's (A12) | ✅ | retired | — |
-| [OMP2](#omp2) | Retired: on a press, the email telling editors a review was in said the reviewer "recommends None"; it now reads "Review complete: {reviewer} reviewed #{id} …" with no recommendation (Side effects) | ✅ | retired | omp#2563 2026-11-09 · fixed |
 
 ### All apps
 
@@ -1486,13 +1483,13 @@ Basis: probe, 2026-10-02. <sup>[f-ops1](#fn-ops1)</sup>
 ### Retired
 
 <a id="a8"></a>
-**A8 — "Save for Later" says nothing while a required question is open** · ✅ · retired. Withdrawn 2026-09-05: four later saves on both apps went through with "Your changes have been saved." (Fields step 3). <sup>[f-a8](#fn-a8)</sup>
+**A8 — "Save for Later" says nothing while a required question is open** · ✅ · retired. Not reproduced.
 
 <a id="omp4"></a>
-**OMP4 — A press lists the reviewer's own review as a previous one** · ✅ · retired. Folded into A12 on 2026-09-05: a journal shows the same box once a later round opens without the reviewer. <sup>[f-omp4](#fn-omp4)</sup>
+**OMP4 — A press lists the reviewer's own review as a previous one** · ✅ · retired. Duplicate of A12.
 
 <a id="omp2"></a>
-**OMP2 — On a press, the email telling editors a review is in says the reviewer "recommends None"** · ✅ · retired. Fixed by `pkp/omp#2563` on `main` and `pkp/omp#2529` on 3.5, for `pkp/pkp-lib#13646`, merged and walked 2026-11-09: after a review on a press the editor's email reads "Review complete: Julie Janssen reviewed #17 Smith et al. — …" with no "Recommendation:" line (Side effects "Submitting"). <sup>[f-omp2](#fn-omp2)</sup>
+**OMP2 — On a press, the email telling editors a review is in says the reviewer "recommends None"** · ✅ · retired. Fixed upstream (pkp/omp#2563, for pkp/pkp-lib#13646).
 
 ---
 
@@ -2493,18 +2490,6 @@ empty submit is stated as intended and only the journal's sentence is
 the finding; OMP's locale has no such sentence.
 Issue report: [docs/issues/U28-A7-empty-review-can-be-submitted.md](../issues/U28-A7-empty-review-can-be-submitted.md), filed as [pkp-e2e#583](https://github.com/jardakotesovec/pkp-e2e/issues/583).
 
-<a id="fn-a8"></a>
-**f-a8** — Retired. Seen once per app on 2026-09-04 (a one-question form,
-"Save for Later" with the question unanswered: no toast, no message box,
-the page unchanged) and read then as `reviewStep3Required.js` setting
-`validator.cancelSubmit` for the save. Live-probed 2026-09-05 on OJS and
-OMP, four saves on two assignments per app (a fresh `?step=3` load and the
-landing after "Continue to Step #3"): `POST reviewer/saveStep/{id}?step=3`
-answered 200 and "Your changes have been saved." showed every time, the
-question still unanswered after a reload. The first sighting did not
-reproduce; the body now says the save goes through (Fields step 3,
-scenario 8).
-
 <a id="fn-a9"></a>
 **f-a9** — `Invitation::invite()` (`lib/pkp/classes/invitation/core/Invitation.php`)
 ends by deleting every other PENDING invitation of the same type for the
@@ -2712,38 +2697,6 @@ the Internal Reviewer's step 2 and step 3 dialog showed the internal text,
 the External Reviewer's the external text; `select#reviewerRecommendationId`
 matched nothing and the word "Recommendation" was absent on both stages'
 step 3.
-
-<a id="fn-omp2"></a>
-**f-omp2** — `emails.reviewComplete.subject` read "Review complete:
-{$reviewerName} recommends {$reviewRecommendation} for #{$submissionId}
-…"; `ReviewAssignmentEmailVariable::getRecommendation()` had no
-recommendation to resolve on a press and the placeholder printed "None".
-Live-probed 2026-09-04 on the press, External Review (seeded journal) and
-Internal Review (scratch press): subject "Review complete: {reviewer}
-recommends None for #{id} …" and the body line "*Recommendation:* None";
-first seen the same day in the notifications feature's claim check.
-Retired 2026-11-09: fixed by `pkp/omp#2563` on `main` (merge
-`f81f129c82`, patch `14f4d2670a`, the same as the reviewed head
-`8eff1e8c2c`; OMP's pointer to pkp-lib `8c3971dd1e`) and `pkp/omp#2529`
-on `stable-3_5_0` (merge `ae1d900d35`, patch `940105441`, the same as
-the reviewed head `72b39e2d44`; pointer to pkp-lib `1e5673c7c7`), for
-`pkp/pkp-lib#13646`. OMP now carries its own
-`emails.reviewComplete.subject` = "Review complete: {$reviewerName}
-reviewed #{$submissionId} {$authorsShort} — "{$submissionTitle}"" and
-an `emails.reviewComplete.body` without the recommendation line, and the
-upgrade migration `I13646_ReviewCompleteEmailTemplate` reinstalls the
-`REVIEW_COMPLETE` default for the installed locales. Walked 2026-11-09 at
-both merge commits on freshly loaded PKP dataset fleets
-(`checks/sync/pkp-lib-13646/`): after the upgrades 3.5.0.6 → 3.6.0.0
-(`main`), 3.4.0.12 → 3.5.0.6 and 3.5.0.5 → 3.5.0.6 (3.5) the stored
-English subject was the new one, with no "Recommendation:" line, and the
-editor's email after `jjanssen`'s review of 17 read "Review complete:
-Julie Janssen reviewed #17 Smith et al. — "Open Development: Networked
-Innovations in International Development"". At the PR heads on
-2026-11-06 the same, at the bases "recommends None". The fix is English
-only: French still reads "recommande …" until translators change it, and
-3.4 and 3.3 are not changed.
-Issue report: [pkp-e2e#602](https://github.com/jardakotesovec/pkp-e2e/issues/602), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
 
 <a id="fn-omp3"></a>
 **f-omp3** — The key `reviewer.submission.reviewFormResponse.form.responseRequired`

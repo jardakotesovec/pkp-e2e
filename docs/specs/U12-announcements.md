@@ -1041,9 +1041,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | A short description entered in French alone prints under its English title on the English Announcements page | ❓ | minor | drift sweep (claude), 2026-11-09 — seen on every app |
 | [A18](#a18) | The site's "Add Announcement" and "Edit Announcement" offer "Send an email about this to all registered users.", which never sends anything there | ❓ | minor | — |
 | [OMP1](#omp1) | The settings tab labels the introduction "Additional Information" on a press, "Introduction" elsewhere | ✅ | minor | — |
-| [A2](#a2) | Editing an announcement with a picture the upload check refuses deletes the announcement | ✅ | retired | claim check (claude), 2026-10-27 — fixed upstream, did not reproduce on any app or line |
-| [A4](#a4) | The site's Announcements panel cannot save, edit, delete or search | ✅ | retired | claim check (claude), 2026-09-17 — did not reproduce on any app |
-| [A21](#a21) | An announcement edit whose new picture is refused breaks the announcement's picture, and every later "Save" fails | ✅ | retired | re-walk (claude), 2026-10-27 — fixed upstream, did not reproduce on any app or line |
 
 ### All apps
 
@@ -1344,13 +1341,13 @@ Basis: test run, 2026-10-03. <sup>f-omp2</sup>
 ### Retired
 
 <a id="a2"></a>
-**A2 — Editing an announcement with a picture the upload check refuses deletes the announcement** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13512), 2026-10-16; verified 2026-10-27 on OJS, OMP and OPS `main` and 3.5: a picture refused on an edit keeps the announcement, and a ".jpeg" or upper-case name now saves (Fields "Image"); since [A21](#a21) retired, it keeps its picture too. <sup>f-a2</sup>
+**A2 — Editing an announcement with a picture the upload check refuses deletes the announcement** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13512).
 
 <a id="a4"></a>
-**A4 — The site's panel cannot save** · ✅ · retired. Did not reproduce: the site's Announcements panel adds, edits, deletes and searches on OJS, OMP and OPS, and the site's pages show the result (Rule 16); live-probed 2026-09-17. <sup>f-a4</sup>
+**A4 — The site's panel cannot save** · ✅ · retired. Not reproduced.
 
 <a id="a21"></a>
-**A21 — An announcement edit whose new picture is refused breaks the announcement's picture, and every later "Save" fails** · ✅ · retired. Fixed upstream on 2026-10-27, verified that day on OJS, OMP and OPS `main` and 3.5 (OMP and OPS with the fix applied by hand, their branches not carrying it yet that day): an edit whose new picture is refused stores nothing, the announcement keeps its picture on its pages, and a later "Save", by the same manager or another, goes through (Fields "Image"; Rule 15). <sup>f-a21</sup>
+**A21 — An announcement edit whose new picture is refused breaks the announcement's picture, and every later "Save" fails** · ✅ · retired. Fixed upstream.
 
 ---
 
@@ -2225,30 +2222,6 @@ the only message, the two typed announcements gone from the public site at
 once and from the list after a reload.
 Issue report: [pkp-e2e#762](https://github.com/jardakotesovec/pkp-e2e/issues/762) ([docs/issues/U12-A1-remove-announcement-type-deletes-announcements.md](../issues/U12-A1-remove-announcement-type-deletes-announcements.md)).
 
-<a id="fn-f-a2"></a>
-**f-a2 — A2 evidence.** `PKPAnnouncementController::edit()`'s catch block
-calls `$announcement->delete()` before answering
-`api.400.errorUploadingImage`; the `isValidImage()` compare is note j's.
-The panel's `formSuccess` never runs on a 400, so the row stays until the
-next fetch. Code read 2026-09-17. Live-probed 2026-09-17 (A2), OJS, OMP and OPS:
-`photo.jpeg` and `PHOTO.PNG` on an edit answered the message (PUT 400); the
-row stayed until a reload, then was gone with its page; the announcement's
-`{id}.png` stayed on disk.
-Retired 2026-10-27: fixed by pkp/pkp-lib#13512 (`main` `07bc43fe67`, 3.5
-`092ec34b0f`, 2026-10-16), whose `edit()` catch no longer deletes and whose
-`isValidImage()` lower-cases the extension and takes `jpeg` for `.jpg`
-(note j). Live-probed 2026-10-27, OJS, OMP and OPS `main` (ojs
-`5153465178`, omp `ceae6e275f`, ops `66a3bb98a5`, lib/pkp `c27153abdd`)
-and `stable-3_5_0` (ojs `a9e01889b0`, omp `3c8c7c4964`, ops `07926c35b4`),
-two runs each on PKP's default dataset, as `rvaca` and as `admin`: an edit
-with `photo.jpeg`, `PHOTO.PNG` or `IMG_0001.JPG` saved (PUT 200); an edit
-with a picture still refused (`renamed.jpg`, `notapicture.png`) answered
-PUT 400 and the announcement stayed in the list and on its page after a
-reload (what it kept then is A21, since retired); the report's kept walk, re-run on freshly
-reset fleets on both lines, saved at its refusal step (200) with the
-announcement kept.
-Issue report: [pkp-e2e#770](https://github.com/jardakotesovec/pkp-e2e/issues/770), closed 2026-10-27 at the retirement; the report and its walk were deleted then (git history keeps them).
-
 <a id="fn-f-a3"></a>
 **f-a3 — A3 evidence.** Note k: the edit modal prints through
 `formatShortDate()` and the API validates `date_format:Y-m-d`. Code read 2026-09-17. Live-probed 2026-09-17 (A3), OJS, OMP and OPS: with
@@ -2260,17 +2233,6 @@ expiring 2027-03-31 opened on "Edit Announcement" with "2027-03-30",
 "Save" stored 2027-03-30 and the next "Edit" showed "2027-03-29"; the
 site has no "Date (Short)" of its own.
 Issue report: [pkp-e2e#769](https://github.com/jardakotesovec/pkp-e2e/issues/769) ([docs/issues/U12-A3-announcement-expiry-date-refused-on-edit.md](../issues/U12-A3-announcement-expiry-date-refused-on-edit.md)).
-
-<a id="fn-f-a4"></a>
-**f-a4 — A4 evidence (retired).** The entry rested on a code read:
-`PKPAnnouncementController::getRouteGroupMiddleware()` is `has.user` plus
-`has.roles:1|16`, the `HasRoles` middleware whose matcher failed for
-`index/api/v1/highlights` with no context on 2026-09-16 (*Highlights* A5),
-and the site's panel posts to `index/api/v1/announcements`. Live-probed
-2026-09-17 (A4), OJS, OMP and OPS: every request the site's panel sent (add,
-edit, delete, search, the list's fetch) answered 200 and the site's pages
-showed the result; the failure does not reach this controller. Retired
-2026-09-17.
 
 <a id="fn-f-a5"></a>
 **f-a5 — A5 evidence.** Note l: no template prints `typeId` or the type's
@@ -2509,73 +2471,6 @@ screen's own "Add Announcement" beside it logged nothing; the
 announcement's page, signed out and as `rvaca`, showed its title, date
 and text and logged nothing.
 Issue report: [pkp-e2e#1070](https://github.com/jardakotesovec/pkp-e2e/issues/1070) ([docs/issues/U12-A20-api-announcement-add-logs-warning.md](../issues/U12-A20-api-announcement-add-logs-warning.md)).
-
-<a id="fn-f-a21"></a>
-**f-a21 — A21 evidence.** `Announcement::save()` calls `parent::save()`,
-which stores the request's `image` value (the temporary file reference),
-before `handleImageUpload()` runs `isValidImage()` (note j); on the
-refusal `PKPAnnouncementController::edit()` answers 400 and leaves that
-reference stored. `deleteImage()` reads `fresh()->image`, by then the
-reference with no `uploadName`, so no file is removed. The panel's next
-save sends the stored reference again, which is refused again. Code read
-2026-10-27, lib/pkp `c27153abdd` (`main`) and `3fd17879b3`
-(`stable-3_5_0`). Live-probed 2026-10-27, OJS, OMP and OPS `main` and
-`stable-3_5_0`, two runs each on PKP's default dataset, as `rvaca` and
-(one refused edit) `admin`: an edit with `renamed.jpg` (a PNG) or
-`notapicture.png` (a text file), after "Remove" or without it, answered
-PUT 400; `announcement_settings.image` went from
-`{"name":"photo.png","uploadName":"{id}.png",…,"altText":"…"}` to
-`{"temporaryFileId":N}`; the announcement's page and the public
-Announcements page printed `<img src="…/announcements/?" alt="">`, which
-answered 404, and the folder kept `{id}.png`. A title-only edit then
-answered 400 with the title stored. "Remove" then "Save" answered 200,
-deleted the setting and left `{id}.png`. "Restore Original" then "Save"
-in the refused panel answered 200 with the original setting back, the
-box still listing `renamed.jpg`; a later "Edit" with "Restore Original"
-then "Save" answered 400. No server error beyond the refusal's 400s.
-The kept file (Rule 15): live-probed 2026-10-27, OJS, OMP and OPS `main`
-and OJS `stable-3_5_0`, one run each on freshly reset dataset fleets as
-`rvaca`, identical on all four. The address the announcement's page
-printed after an add with `photo.png` (for example
-`/public-ds2/journals/1/announcements/7.png?…` on OJS; `presses/…` on
-OMP, `contexts/…` on OPS), fetched in the same browser, answered 200
-`image/png` (1850 bytes) after the add, again after the refused edit
-(page picture `…/announcements/?`, 404) and again after "Remove" then
-"Save" (page text-only, setting deleted); the folder kept `7.png`
-throughout. A BMP, SVG or TIFF refused on an edit left the same state
-as `renamed.jpg` (note j).
-Medium: the edit misleads and the page loses its picture silently, but
-"Restore Original" before closing, or "Remove" and a new upload, gets
-round it, and it takes a narrow input (a file whose name and content
-disagree).
-Live-probed 2026-10-27, OJS, OMP, OPS `main` and OJS `stable-3_5_0`: after `rvaca`'s refused edit, `admin`'s title-only "Save" answered PUT 500 `TypeError: Announcement::getImageFilename(): Argument #1 ($temporaryFile) must be of type PKP\file\TemporaryFile, null given` (line 335 on main, 336 on 3.5), with the title stored; `TemporaryFileManager::getFile()` looks the temporary file up for the user who saves (the issue report's walk).
-Retired 2026-10-27: fixed by pkp-lib `334906a436` (`main`) and
-`c31cbe60f8` (`stable-3_5_0`), "pkp-e2e/issues#1076 Fix announcement
-image edit" (Alec Smecher, 2026-10-27, no pkp PR), line for line the
-report's proposed fix: the image check in
-`PKP\announcement\Repository::validate()` (note j), so a refused image
-fails validation before `Announcement::save()` stores the temporary
-reference. OJS carries it at its pointers (ojs `4227223332` on `main`,
-`b877c7e2a3` on `stable-3_5_0`); OMP and OPS had not bumped theirs that
-day (lib/pkp `c27153abdd` on `main`, `3fd17879b3` and `9a0212faff` on
-`stable-3_5_0`). Live-probed 2026-10-27 (Fields "Image"; Rule 15; A21),
-OJS on its pointers and OMP and OPS with the same diff applied to
-lib/pkp, `main` and `stable-3_5_0`, one run each on freshly reset
-default-dataset fleets as `rvaca` and `admin`, identical on all six: an
-edit with "Remove", then `renamed.jpg` (a PNG), then "Save" answered PUT
-400 `{"image":["There was an error uploading this image."]}` with the
-message under "Image" and "Please correct one error.", and
-`announcement_settings.image` kept `{"name":"photo.png","uploadName":"{id}.png",…}`;
-the announcement's page and the public Announcements page still loaded
-the picture (200 `image/png`) with its alternate text, and "Edit" showed
-its preview; a title-only "Save" answered 200 with the title stored, as
-`rvaca` and, after `rvaca`'s refused edit, as `admin`; "Remove" then
-"Save" answered 200, deleted the setting and `{id}.png`, and the
-picture's earlier address answered 404. Neighbours unchanged: an add
-with `photo.png` and a GIF replacing it saved (200, `{id}.gif` beside
-`{id}.png`, A12), a refused add stored nothing, and "Restore Original"
-after a refused edit then "Save" answered 200 with the earlier picture.
-Issue report: [pkp-e2e#1076](https://github.com/jardakotesovec/pkp-e2e/issues/1076), closed 2026-10-27 at the retirement; the report and its walk were deleted then (git history keeps them).
 
 <a id="fn-f-a22"></a>
 **f-a22 — A22 evidence.** `Announcement::imageUrl()`, which
