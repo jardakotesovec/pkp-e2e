@@ -1051,7 +1051,11 @@ merge.
    red at both refs is a flake class (ci-triage), red only at the PR ref
    is the PR's. Traces kept on failure (`--trace retain-on-failure`) save
    a second reproduction.
-7. **Record and report.** Companion row `ready` in ci-triage with what
+7. **Record and report.** A review that ends in a finding the developer
+   has to fix first gets no companion yet: the branch is not pushed and
+   gets no row; the report, its kept check and the sync-log entry go
+   to `main`, and the companion is made in the round that finds the PR
+   fixed. Otherwise: companion row `ready` in ci-triage with what
    the merge session must do, committed on `main` too, since the daily
    session reads `main`'s table and a row on the branch alone is never
    seen; a dated sync-log entry with one line per
