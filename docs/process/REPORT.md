@@ -15,7 +15,7 @@ or a developer's PR that fails the suite) lives apart, under
 product yet and the weekly regression count leaves it out; at the merge
 it is deleted when the PR's last round fixed it, or moved up into
 `docs/reports/` when the merge carries it (MAINTENANCE "PR review" step
-8). An **issue report** is the backlog kind: a defect in a
+9). An **issue report** is the backlog kind: a defect in a
 spec's register, written up under `docs/issues/` by the housekeeping
 session (MAINTENANCE "Issue reports"), filed as a GitHub issue on pkp-e2e
 ("As a GitHub issue" below) and deleted when the issue closes. Research write-ups (a performance round, a

@@ -1004,21 +1004,17 @@ merge.
    base, which makes the checkout the merge result. When the app's
    pointer lags the shared PR's base, name the reviewed or unreviewed
    commits in between in the log. `git submodule update lib/pkp
-   lib/ui-library` and a rebuild put it back at step 7.
+   lib/ui-library` and a rebuild put it back at step 8.
 3. **Read and triage** the diff against the issue's stated intention
-   (sync loop steps 2 and 3) on the companion branch, created from
-   `main` before any edit. Accommodate in place as sync loop step 4 says: the spec
-   spans the change contradicts, lint zero, the persona on a rewritten
-   scenario; a footnote cites the drive "at the PR head `<sha>`, before
-   its merge". New behavior is spent as sync loop step 4 says, on the companion:
-   a bullet one scenario plainly takes, with its assertions, now;
-   anything more a **Planned** item.
+   (sync loop steps 2 and 3), and list the spec spans and the tests the
+   change will make outdated. Nothing is edited yet: the companion
+   comes at step 7, once the findings are settled.
 4. **Hunt regressions** as sync loop step 5: the regression reader
    (`briefs/regression-read.md`) on the app whose checkout holds the
    change, plus direct drives for what the fleets cannot reach (an upgrade
    migration is driven through a PHP driver against the fresh install's
    tables; see `checks/sync/pkp-lib-13317/`). Kept checks go under
-   `shared/playwright/checks/sync/<repo>-<pr>/` on the companion, with the
+   `shared/playwright/checks/sync/<repo>-<pr>/` on `main`, with the
    before-evidence recorded at the previous tip. A confirmed regression,
    security weakness or intention gap follows sync loop step 5's report, filed
    under `docs/reports/pr-review/<date>-<repo>-<pr>.md` (not
@@ -1027,22 +1023,29 @@ merge.
    leaves open is a ❓ in the owning spec, posted in the thread, and the
    team's reply is recorded as the entry's verdict the same day. A fix
    tried here, or offered to the author, is tried on every line it
-   reaches ("Session hygiene", "Every line the change reaches").
-5. **Run the suites on CI at the PR refs.** Push the companion, then
-   `node bin/ci.js dispatch --ref <companion> --<app>-repo <fork>/<app>
-   --<app>-ref <head sha>` for each app with a PR, plus `--pkp-lib-ref
-   pull/<n>/head` and `--ui-library-ref pull/<n>/head` for the shared PRs,
+   reaches ("Session hygiene", "Every line the change reaches"). Every
+   round reads and walks again what the developer changed since the
+   last one: a fix can bring a regression of its own.
+5. **Run the suites on CI at the PR refs**, from `main`, as soon as the
+   refs are known, while steps 3 and 4 go on: the unedited suite is
+   what catches a bug there. `node bin/ci.js dispatch --ref main
+   --<app>-repo <fork>/<app> --<app>-ref <head sha>` for each app with a
+   PR, plus `--pkp-lib-ref pull/<n>/head` and `--ui-library-ref
+   pull/<n>/head` for the shared PRs,
    and `--apps` naming the apps the change can reach (all three for a
    shared PR). Every app then builds the shared PRs whatever its pointers
    say, so an app PR without a submodule bump and an app without a PR of
    its own (at `main`) both run the merge result. Run it in the background
    under the keepalive; it prints each failed and flaky test per app. The
-   VM runs no whole suite for a review. The app PR's own check picks the
-   companion up by name on its next run. A PR that moves only a plugin
+   VM runs no whole suite for a review. A PR that moves only a plugin
    submodule, with no app PR for the pointer, has no dispatch to cite:
    the spec files that read the plugin's output, run on the VM at the PR
    head, stand in, and the verdict says so.
-6. **Reds.** A red that an app without its own PR shows is the PR's once
+6. **Reds.** Each red is one of three: the PR's own bug (a finding,
+   step 4's report), a test an intended change makes outdated (step 7's
+   work, and named in the verdict so the developer expects that red on
+   the PR's check until the companion exists), or noise (a flake class,
+   a PR behind its base). A red that an app without its own PR shows is the PR's once
    the same spec files are green with the submodule rebuilt at the PR's
    base on the same database; that app meets it with its next pointer
    update, so it is a finding, never a companion test edit. A red test
@@ -1051,22 +1054,35 @@ merge.
    red at both refs is a flake class (ci-triage), red only at the PR ref
    is the PR's. Traces kept on failure (`--trace retain-on-failure`) save
    a second reproduction.
-7. **Record and report.** A review that ends in a finding the developer
-   has to fix first gets no companion yet: the branch is not pushed and
-   gets no row; the report, its kept check and the sync-log entry go
-   to `main`, and the companion is made in the round that finds the PR
-   fixed. Otherwise: companion row `ready` in ci-triage with what
-   the merge session must do, committed on `main` too, since the daily
-   session reads `main`'s table and a row on the branch alone is never
-   seen; a dated sync-log entry with one line per
+7. **The companion**, only in a round that leaves no finding the
+   developer has to fix or have ruled intended: until then the suite
+   would be written to follow behavior that is about to change. (A
+   finding that does not touch the behavior the tests follow does not
+   hold it up.) Create it from `main`, named like the app PRs' branch,
+   and accommodate in place as sync loop step 4 says: the spec
+   spans the change contradicts, lint zero, the persona on a rewritten
+   scenario; a footnote cites the drive "at the PR head `<sha>`, before
+   its merge". New behavior is spent as sync loop step 4 says:
+   a bullet one scenario plainly takes, with its assertions, now;
+   anything more a **Planned** item. A change that outdates no spec
+   span and no test needs no companion at all. Push it, and when it
+   changed a test, dispatch once more with `--ref <companion>`; the app
+   PR's own check picks the companion up by name on its next run.
+8. **Record and report.** The report, the kept checks and a dated
+   sync-log entry go to `main`: one line per
    change, the run lines and the CI run ids, and "baselines not advanced"
    stated (a later round replaces the earlier round's entry, and the
-   merge step deletes it once the daily entry records the merge); commit and push the companion; the thread gets the verdict
+   merge step deletes it once the daily entry records the merge). When
+   step 7 made a companion, its row `ready` in ci-triage says what
+   the merge session must do, committed on `main` too, since the daily
+   session reads `main`'s table and a row on the branch alone is never
+   seen. The thread gets the verdict
    (green at the PR ref, needs a rebase, or a regression with the report;
-   and the security line, counts only for anything routed) in the
+   the reds to expect from intended changes; and the security line,
+   counts only for anything routed) in the
    "Findings first, short" shape. Leave the checkouts on the apps'
    tips afterwards so the daily session starts where it expects.
-8. **On the merge ping**, "A developer's PR fails the suite" step 5:
+9. **On the merge ping**, "A developer's PR fails the suite" step 5:
    `npm run fetch-apps -- --update`, confirm the merge with `git
    range-diff <base>..<reviewed head> <new base>..<merged head>` (a rebase
    before the merge is fine when it reads all `=`; anything else is
