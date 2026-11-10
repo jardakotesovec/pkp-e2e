@@ -114,6 +114,12 @@ if real, their specs' own probes will resurface them.)
 ### NOTIF-011 — NOTIFICATION_TYPE_PLUGIN_BASE
 - What: plugin-type base offset constant.
 - Why parked: zero references outside its definition — nothing to specify.
+- Evidence (housekeeping, code-read 2026-11-10): at the `main` tips (OJS
+  407246bb8e, OMP f81f129c82, OPS 40f33453f0; lib/pkp 6035a6fed8 and
+  8c3971dd1e) and on `stable-3_5_0`, the constant appears only at its
+  definition (`lib/pkp/classes/notification/Notification.php` line 46,
+  `0x6000001`); no app, pkp-lib or bundled plugin file names it or its
+  value.
 - Resolves: maintainer ruling to confirm dead (grep evidence already in
   synthesis §4); no probe needed.
 
