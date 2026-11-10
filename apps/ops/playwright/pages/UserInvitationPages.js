@@ -537,6 +537,17 @@ exports.AcceptInvitationWizard = class AcceptInvitationWizard extends BasePage {
             .filter({hasText: "Invitation not accepted. You're logged in as a different user."});
         // "Enter details" (new invitee): the name the manager entered arrives here.
         this.givenNameInput = page.getByLabel(/^Given Name/).first();
+        this.enterDetailsHeading = page.getByRole('heading', {name: /Enter details/});
+        this.countrySelect = page.getByLabel(/^Country of affiliation/);
+        // Rule 17a: the wizard's own "Back", beside the forward button on
+        // every step but the first (scoped to main; no other "Back" there).
+        this.backButton = page.locator('main').getByRole('button', {name: 'Back', exact: true});
+        // An existing user's review step (Fields, accept wizard): the "User
+        // Details" block with its "ORCID iD" line.
+        this.userDetailsHeading = page.getByRole('heading', {name: 'User Details', exact: true});
+        this.orcidNotVerifiedText = page.getByText(
+            'Not verified. You can verify your ORCID iD from your profile section in OPS.'
+        );
         // Rule 17: the steps' "Cancel" and its question.
         this.cancelButton = page.getByRole('button', {name: 'Cancel', exact: true});
         this.cancelDialog = page.getByRole('dialog', {name: 'Cancel Role Invitation Process?'});
@@ -600,6 +611,18 @@ exports.AcceptInvitationWizard = class AcceptInvitationWizard extends BasePage {
     async fillDetails({givenName, country}) {
         await this.givenNameInput.fill(givenName);
         await this.page.getByLabel('Country of affiliation').selectOption({label: country});
+        await this.saveAndContinueButton.click();
+    }
+
+    /** The option the Country select shows as chosen (its label, e.g. "Canada"). */
+    selectedCountry() {
+        return this.countrySelect.locator('option:checked');
+    }
+
+    /** "Enter details": choose a Country and press "Save and continue" (names left as they are). */
+    async chooseCountryAndContinue(country) {
+        await expect(this.enterDetailsHeading).toBeVisible();
+        await this.countrySelect.selectOption({label: country});
         await this.saveAndContinueButton.click();
     }
 

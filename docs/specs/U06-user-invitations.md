@@ -461,11 +461,25 @@ addresses and the tooling recipe are in the footnote. <sup>s</sup>
      empty and the privacy consent unticked (Rule 17). Retype the
      password, tick the privacy consent, and press "Save and continue".
    - **"Enter details"**: Given Name already reads Nova, the name the
-     Journal Manager entered; choose Country Canada.
+     Journal Manager entered.
+   - **The wizard's "Back" on "Enter details"**: type nothing on the step
+     and press the wizard's own "Back" button, not the browser's: "Create
+     OJS account" opens with the username, the password and the privacy
+     consent as they were left (Rule 17a). Press "Save and continue":
+     "Enter details" opens again. Choose Country Canada and press "Save
+     and continue".
    - **"Review & create account"**: the summary shows the chosen username.
      Its Edit button reopens "Enter details", whose "Save and continue"
-     returns here. Press "Accept And Continue to OJS": a dialog announces
-     the new role.
+     returns here.
+   - **A reload of "Review & create account"**: reload the page: "Create
+     OJS account" opens with the chosen username in its box, the Password
+     box empty and the privacy consent unticked (Rule 17a). Retype the
+     password, tick the privacy consent and press "Save and continue":
+     "Enter details" opens holding what that step last saved, Given Name
+     Nova and Country Canada (Rule 17a). Press "Save and continue": "Review
+     & create account" opens again.
+   - **"Accept And Continue to OJS"**: press it: a dialog announces the new
+     role.
    - **"View All Submissions"**: press it: ⚠ [A4](#a4) the sign-in
      screen opens.
    - **The sign-in screen**: signing in with the new credentials succeeds,
@@ -685,14 +699,25 @@ App-specific:
       Role Invitation Process?" opens with "Cancel Invitation Process" and
       "Go Back". Press "Go Back": the "Verify ORCID iD" step is back
       (Rule 17).
+    - **"Cancel Invitation Process" on "Verify ORCID iD"**: press "Cancel"
+      again, then "Cancel Invitation Process": the sign-in screen opens
+      (Rule 17).
+    - **The manager's Users & Roles**: the newcomer's invitation row still
+      reads "Invited {date}": the cancel declined nothing (Rule 17).
+    - **The newcomer's accept link, reopened**: open it again, signed out:
+      the wizard opens on "Verify ORCID iD" again, its first step as Rule 5
+      shapes it for a newcomer with ORCID on (Rule 17).
     - **"Skip ORCID verification"**: press it: "Create OJS account" opens
       (Rule 5).
     - **The verified user's invitation**: invite the throwaway user to a
       further role as in scenario 3 ("Search User", then one new role row,
       sent): their mailbox holds the accept link.
     - **Control**: that accept link, opened signed out, opens the review
-      step directly with no "Verify ORCID iD" step: the step shows only to a
-      recipient without a verified ORCID iD (Rule 5).
+      step directly with no "Verify ORCID iD" step, the step showing only
+      to a recipient without a verified ORCID iD (Rule 5), and the review
+      step shows the user's ORCID iD itself under "User Details" (the
+      footnote names it), not the "Not verified" advice (Fields, accept
+      wizard).
 
 11. **An existing user cancels the accept wizard, and the invitation waits** {OJS OMP OPS}
 
@@ -812,24 +837,10 @@ Left out of the scenarios above, by reason:
     another address, the names "Enter details" shows are the names the
     invitation carries, in the Invitations row, the greeting and the "To"
     line (Rule 15), once fixed
-  - scenario 2's reopened "Create OJS account" reading the Password box
-    empty and the privacy consent unticked before they are filled again
-    (Rule 17)
-  - the "Back" button on the accept wizard's "Enter details", which
-    opens "Create OJS account" with the username, the password and the
-    consent kept,
-    and a reload of "Review & create account", which reopens "Create OJS
-    account" with the username alone kept, "Enter details" then showing
-    what was saved (Rule 17a)
   - the guard for A18: after the "Back" button on the accept wizard's
     "Enter details" and "Save and continue", the names typed there are still in
     their boxes and reach the review step and the account (Rule 17a),
     once fixed
-  - scenario 10's "Cancel Invitation Process" on the newcomer's "Verify
-    ORCID iD": the sign-in screen and the row still "Invited {date}"
-    (Rule 17)
-  - scenario 10's verified user's "Review & create account" showing the
-    iD under "User Details" (Fields, accept wizard)
 - **Rarely met**:
   - a past start date taking effect as the acceptance day, read on the
     member's Current Users row and Edit page (Rule 8): a manager rarely
@@ -1827,7 +1838,13 @@ app's acronym, {email} the searched `rcpt<tag>@mail.test` (note g).
 Scenario 2's taken username is its Journal Manager's `users[]` username;
 the "Cancel" from "Enter details" follows the first "Save and continue"
 with `acc<tag>`, and the reopened link is the same accept link from the
-mail catcher (note u). Scenario 6's second journal is a second
+mail catcher (note u); its "Back" is the wizard's button on "Enter
+details", pressed before anything is typed there (f-a18), and its reload
+a page reload on the review step's address (note u). Scenario 10's
+newcomer reopens the same accept link from the mail catcher after the
+cancel, the manager's row read in the manager's own browser context, and
+its verified user's review step reads the seeded sandbox iD under "User
+Details" (f-a19). Scenario 6's second journal is a second
 `POST scenarios/context` whose `users[]` entry names the first context's
 Journal Manager with `roles: ['manager']` (scenarios.md `users[]`, an
 entry naming an account that already exists); the address "Edit" opens

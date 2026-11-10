@@ -462,6 +462,34 @@ class AcceptInvitationWizard {
         this.cancelDialog = page.getByRole('dialog').filter({hasText: 'Cancel Role Invitation Process?'});
         this.cancelProcessButton = this.cancelDialog.getByRole('button', {name: 'Cancel Invitation Process', exact: true});
         this.goBackButton = this.cancelDialog.getByRole('button', {name: 'Go Back', exact: true});
+        /** The wizard's own "Back" beside the forward button (Rule 17a), not the browser's. */
+        this.backButton = this.footer.getByRole('button', {name: 'Back', exact: true});
+        /** "Enter details": the Country of affiliation select. */
+        this.countrySelect = page.getByLabel('Country of affiliation');
+        /** "Enter details": the first Given Name box (the press's primary language). */
+        this.givenNameField = page.getByLabel(/Given Name/).first();
+    }
+
+    /** The option the Country of affiliation select currently shows. */
+    selectedCountry() {
+        return this.countrySelect.locator('option:checked');
+    }
+
+    /** "Enter details": choose a Country and press "Save and continue", typing nothing else. */
+    async chooseCountryAndContinue(country = 'Canada') {
+        await this.countrySelect.selectOption({label: country});
+        await this.footerButton('Save and continue').click();
+    }
+
+    /**
+     * A review step's text shown under its "User Details" heading: a
+     * paragraph reading `text` whose nearest preceding level-3 heading is
+     * "User Details" (the next one is "Roles").
+     */
+    underUserDetails(text) {
+        return this.page.locator(
+            `xpath=//p[normalize-space()="${text}"][preceding::h3[1][normalize-space()="User Details"]]`,
+        );
     }
 
     /** Press the footer's "Cancel" and wait for "Cancel Role Invitation Process?" (Rule 17). */

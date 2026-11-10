@@ -381,7 +381,18 @@ exports.AcceptInvitationWizard = class AcceptInvitationWizard extends BasePage {
         // The steps rail, found by the review step every recipient gets.
         this.stepsList = page.locator('main').getByRole('list').filter({hasText: 'Review & create account'});
         // "Enter details" (new invitees): the name the manager entered arrives here.
+        // Every step's inputs stay in the page while another step shows, so
+        // these read their stored values from any step.
         this.givenNameInput = page.getByLabel(/^Given Name/).first();
+        this.countrySelect = page.getByLabel(/^Country of affiliation/);
+        // Rule 17a: the wizard's own "Back", beside the forward button on
+        // every step but the first.
+        this.backButton = page.getByRole('button', {name: 'Back', exact: true});
+        // "Review & create account" of an existing user: the "User Details"
+        // section holding the "ORCID iD" line (Fields, accept wizard).
+        this.userDetailsSection = page.getByRole('heading', {name: 'User Details', level: 3}).locator('xpath=../..');
+        this.userDetailsOrcidHeading = this.userDetailsSection.getByRole('heading', {name: 'ORCID iD', level: 4});
+        this.notVerifiedAdvice = page.getByText(/^Not verified\. You can verify your ORCID iD/);
         // Rule 17: "Cancel" beside the forward button, its question and answers.
         this.cancelButton = page.getByRole('button', {name: 'Cancel', exact: true});
         this.cancelDialog = page.getByRole('dialog').filter({hasText: 'Cancel Role Invitation Process?'});
@@ -471,11 +482,29 @@ exports.AcceptInvitationWizard = class AcceptInvitationWizard extends BasePage {
         await this.cancelProcessButton.click();
     }
 
-    /** "Enter details" step (new invitees). */
+    /** "Enter details" step (new invitees); a `givenName` left out is not typed. */
     async fillDetails({givenName, country}) {
         await expect(this.stepHeading(/Enter details/)).toBeVisible();
-        await this.page.getByLabel(/^Given Name/).first().fill(givenName);
-        await this.page.getByLabel(/^Country of affiliation/).selectOption(country);
+        if (givenName !== undefined) {
+            await this.givenNameInput.fill(givenName);
+        }
+        await this.countrySelect.selectOption(country);
+        await this.saveAndContinueButton.click();
+    }
+
+    /** The wizard's own "Back" (not the browser's): one step back (Rule 17a). */
+    async back() {
+        await this.backButton.click();
+    }
+
+    /**
+     * "Create OJS account" reached again with the username kept: retype the
+     * password, tick the consent, "Save and continue" (Rules 17, 17a).
+     */
+    async resumeAccount(password) {
+        await this.expectOnAccountStep();
+        await this.passwordInput.fill(password);
+        await this.privacyCheckbox.check();
         await this.saveAndContinueButton.click();
     }
 

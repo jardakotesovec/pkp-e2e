@@ -7,7 +7,7 @@
  * Spec: docs/specs/U06-user-invitations.md
  *
  * Deliberately NOT covered (register IDs): A2, A3, A4, A7, A8, A9, A11, A12,
- * A13, A14, A15, A16, A17, OMP1, OPS1.
+ * A13, A14, A15, A16, A17, A18, A19, A20, OMP1, OPS1.
  *
  * Every test seeds its own scratch journal (publicknowledge and the seeded
  * roster stay untouched); Mailpit assertions are scoped by unique throwaway
@@ -328,27 +328,63 @@ test.describe('user invitations', () => {
         await expect(usersRoles.invitationRow(recipient)).toContainText(`Invited ${today()}`);
 
         // The accept link, reopened: "Create OJS account" with the chosen
-        // username still in its box (Rule 17); the password retyped.
+        // username still in its box, the Password box empty and the privacy
+        // consent unticked (Rule 17; the kept username is the control);
+        // the password retyped and the consent ticked.
         await page.goto(links.accept);
         await wizard.expectOnAccountStep();
         await expect(wizard.usernameInput).toHaveValue(username);
-        await wizard.passwordInput.fill(password);
-        await wizard.privacyCheckbox.check();
-        await wizard.saveAndContinueButton.click();
+        await expect(wizard.passwordInput).toHaveValue('');
+        await expect(wizard.privacyCheckbox).not.toBeChecked();
+        await wizard.resumeAccount(password);
         // "Enter details" arrives holding the Given Name the Journal Manager
         // entered (Fields, accept wizard).
         await wizard.expectOnDetailsStep();
         await expect(wizard.givenNameInput).toHaveValue('Nova');
-        await wizard.fillDetails({givenName: 'Nova', country: 'CA'});
+
+        // The wizard's own "Back" on "Enter details", nothing typed there:
+        // "Create OJS account" with the username, the password and the
+        // privacy consent as they were left (Rule 17a); "Save and continue"
+        // opens "Enter details" again, where Country Canada is chosen.
+        await wizard.back();
+        await wizard.expectOnAccountStep();
+        await expect(wizard.stepHeading(/Enter details/)).toHaveCount(0);
+        await expect(wizard.usernameInput).toHaveValue(username);
+        await expect(wizard.passwordInput).toHaveValue(password);
+        await expect(wizard.privacyCheckbox).toBeChecked();
+        await wizard.saveAndContinueButton.click();
+        await wizard.expectOnDetailsStep();
+        await wizard.fillDetails({country: 'CA'});
         await wizard.expectOnReviewStep();
         await expect(page.getByText(username)).toBeVisible();
 
         // The review step's Edit button reopens the details, then back.
         await page.getByRole('button', {name: 'Edit', exact: true}).click();
-        await expect(page.getByLabel(/^Country of affiliation/)).toBeVisible();
+        await wizard.expectOnDetailsStep();
+        await expect(wizard.countrySelect).toBeVisible();
         await wizard.saveAndContinueButton.click();
         await wizard.expectOnReviewStep();
 
+        // A reload of "Review & create account": "Create OJS account" with the
+        // chosen username alone kept, the Password box empty and the consent
+        // unticked; retyped, "Save and continue" opens "Enter details" with
+        // what that step last saved, Given Name Nova and Country Canada; its
+        // "Save and continue" returns to the review step (Rule 17a).
+        await page.reload();
+        await wizard.expectOnAccountStep();
+        await expect(wizard.stepHeading(/Review & create account/)).toHaveCount(0);
+        await expect(wizard.usernameInput).toHaveValue(username);
+        await expect(wizard.passwordInput).toHaveValue('');
+        await expect(wizard.privacyCheckbox).not.toBeChecked();
+        await wizard.resumeAccount(password);
+        await wizard.expectOnDetailsStep();
+        await expect(wizard.givenNameInput).toHaveValue('Nova');
+        await expect(wizard.countrySelect).toHaveValue('CA');
+        await wizard.saveAndContinueButton.click();
+        await wizard.expectOnReviewStep();
+        await expect(page.getByText(username)).toBeVisible();
+
+        // "Accept And Continue to OJS": a dialog announces the new role.
         await wizard.accept();
 
         // Spec behavior around A4: the new credentials work via a fresh sign-in.
@@ -922,6 +958,28 @@ test.describe('user invitations', () => {
         await expect(wizard.verifyOrcidButton).toBeVisible();
         await expect(wizard.skipOrcidButton).toBeVisible();
 
+        // "Cancel" again, then "Cancel Invitation Process": the signed-out
+        // newcomer lands on the sign-in screen (Rule 17).
+        await wizard.cancelProcess();
+        await page.waitForURL(/\/login/, {waitUntil: 'commit'});
+        await new LoginPage(page).expectForm();
+
+        // The manager's Users & Roles: the newcomer's row still reads
+        // "Invited {date}", the one invitation sent so far (Rule 17).
+        const usersRoles = new UsersRolesPage(managerPage, path);
+        await usersRoles.goto();
+        await expect(usersRoles.invitationsHeading(1)).toBeVisible();
+        await expect(usersRoles.invitationRow(recipient)).toContainText(`Invited ${today()}`);
+
+        // The newcomer's accept link, reopened signed out: "Verify ORCID iD"
+        // again, its first step with ORCID on (Rules 5, 17); no "Create OJS
+        // account" before it is passed.
+        await page.goto(newcomerLinks.accept);
+        await wizard.expectOnOrcidStep();
+        await expect(wizard.verifyOrcidButton).toBeVisible();
+        await expect(wizard.skipOrcidButton).toBeVisible();
+        await expect(wizard.stepHeading(/Create OJS account/)).toHaveCount(0);
+
         // "Skip ORCID verification": "Create OJS account" opens (Rule 5), with
         // its own "Save and continue" (the control for the step above).
         await wizard.skipOrcid();
@@ -933,13 +991,18 @@ test.describe('user invitations', () => {
         const userLinks = await invitationLinks(pkpMail, {to: inviteeEmail, contains: subject});
 
         // Control: that accept link, signed out, opens the review step directly
-        // with no "Verify ORCID iD" step (Rule 5).
+        // with no "Verify ORCID iD" step (Rule 5), and "User Details" shows the
+        // user's seeded iD itself under "ORCID iD", not the "Not verified"
+        // advice (Fields, accept wizard; fn s, f-a19).
         await page.goto(userLinks.accept);
         await wizard.expectOnReviewStep();
         await expect(wizard.stepPill('Review & create account')).toBeVisible();
         await expect(wizard.stepPill('Verify ORCID iD')).toHaveCount(0);
         await expect(page.getByText('Verify ORCID iD')).toHaveCount(0);
         await expect(wizard.acceptButton).toBeVisible();
+        await expect(wizard.userDetailsOrcidHeading).toBeVisible();
+        await expect(wizard.userDetailsSection.getByText(ORCID_ID, {exact: true})).toBeVisible();
+        await expect(wizard.notVerifiedAdvice).toHaveCount(0);
     });
 
     test('S11: an existing user cancels the accept wizard, and the invitation waits', async ({page, asUser, ojsApi, pkpMail}, testInfo) => {

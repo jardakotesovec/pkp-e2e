@@ -11,7 +11,7 @@
  *
  * Not covered, by register ID (the spec's Coverage section is the record
  * of everything else left out): A2, A3, A4, A7, A8, A9, A11, A12, A13,
- * A14, A15, A16, A17, OMP1.
+ * A14, A15, A16, A17, A18, A19, A20, OMP1.
  *
  * All mutating state lives in per-test scratch presses seeded through the
  * scenario endpoints; `publicknowledge` and the seeded roster are untouched.
@@ -27,6 +27,9 @@ const {
     today,
 } = require('../pages/UserInvitationPages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+
+/** Scenario 10's seeded, verified sandbox iD (fn-s). */
+const VERIFIED_ORCID = 'https://sandbox.orcid.org/0000-0002-1825-0097';
 
 /** Parallel-safe unique tag: single alphanumeric token, ≤32 chars. */
 function makeTag(testInfo, scenarioKey) {
@@ -345,25 +348,60 @@ test.describe('User invitations (U6)', () => {
         await expect(access.invitationRow(recipient)).toContainText(access.invitedOn());
 
         // The accept link, reopened: "Create OMP account" with the chosen
-        // username still in its box (Rule 17); the password is retyped, the
-        // consent ticked, and the step continues.
+        // username still in its box (the positive control), the Password box
+        // empty and the privacy consent unticked (Rule 17); the password is
+        // retyped, the consent ticked, and the step continues.
         await page.goto(acceptUrl);
         await expect(wizard.stepHeading('Create OMP account')).toBeVisible();
         await expect(wizard.usernameField).toHaveValue(username);
+        await expect(wizard.passwordField).toHaveValue('');
+        await expect(wizard.privacyCheckbox).not.toBeChecked();
         await wizard.submitAccount({username, password});
         await expect(wizard.stepHeading('Enter details')).toBeVisible();
         // "Enter details" arrives holding the name the manager entered.
-        await expect(page.getByLabel(/Given Name/).first()).toHaveValue('Nova');
-        await wizard.fillDetails({givenName: 'Nova'});
+        await expect(wizard.givenNameField).toHaveValue('Nova');
+
+        // The wizard's own "Back" on "Enter details", nothing typed there
+        // (A18 is the typed-names case, not asserted): "Create OMP account"
+        // with the username, the password and the consent as left (Rule 17a).
+        await wizard.backButton.click();
+        await expect(wizard.stepHeading('Create OMP account')).toBeVisible();
+        await expect(wizard.stepHeading('Enter details')).toHaveCount(0);
+        await expect(wizard.usernameField).toHaveValue(username);
+        await expect(wizard.passwordField).toHaveValue(password);
+        await expect(wizard.privacyCheckbox).toBeChecked();
+        // "Save and continue": "Enter details" again; Country Canada, onwards.
+        await wizard.footerButton('Save and continue').click();
+        await expect(wizard.stepHeading('Enter details')).toBeVisible();
+        await wizard.chooseCountryAndContinue('Canada');
 
         // Review & create account; its Edit button reopens the details step.
         await expect(wizard.stepHeading('Review & create account')).toBeVisible();
         await expect(page.getByText(username).first()).toBeVisible();
         await page.getByRole('button', {name: 'Edit', exact: true}).click();
-        await expect(page.getByLabel('Country of affiliation')).toBeVisible();
+        await expect(wizard.countrySelect).toBeVisible();
         await wizard.footerButton('Save and continue').click();
         await expect(wizard.stepHeading('Review & create account')).toBeVisible();
 
+        // A reload of "Review & create account": "Create OMP account" with the
+        // chosen username in its box (the positive control), the Password box
+        // empty and the consent unticked (Rule 17a). Retyped and continued,
+        // "Enter details" holds what that step last saved, Given Name Nova
+        // and Country Canada; "Save and continue" reaches the review again.
+        await page.reload();
+        await expect(wizard.stepHeading('Create OMP account')).toBeVisible();
+        await expect(wizard.stepHeading('Review & create account')).toHaveCount(0);
+        await expect(wizard.usernameField).toHaveValue(username);
+        await expect(wizard.passwordField).toHaveValue('');
+        await expect(wizard.privacyCheckbox).not.toBeChecked();
+        await wizard.submitAccount({username, password});
+        await expect(wizard.stepHeading('Enter details')).toBeVisible();
+        await expect(wizard.givenNameField).toHaveValue('Nova');
+        await expect(wizard.selectedCountry()).toHaveText('Canada');
+        await wizard.footerButton('Save and continue').click();
+        await expect(wizard.stepHeading('Review & create account')).toBeVisible();
+
+        // "Accept And Continue to OMP": a dialog announces the new role.
         await wizard.accept();
 
         // The sign-in screen: the new credentials (the fn-s pair, not the
@@ -991,7 +1029,7 @@ test.describe('User invitations (U6)', () => {
                     email: verifiedEmail,
                     givenName: `Ver${tag}`,
                     familyName: 'Verified',
-                    orcid: 'https://sandbox.orcid.org/0000-0002-1825-0097',
+                    orcid: VERIFIED_ORCID,
                     orcidIsVerified: true,
                 },
             ],
@@ -1000,7 +1038,7 @@ test.describe('User invitations (U6)', () => {
 
         // A newcomer's invitation, as in scenario 1.
         const mgrPage = await (await asUser(manager)).newPage();
-        await sendNewUserInvitation(mgrPage, {
+        const {access} = await sendNewUserInvitation(mgrPage, {
             contextPath: path,
             email: newcomer,
             givenName: 'Nova',
@@ -1034,6 +1072,29 @@ test.describe('User invitations (U6)', () => {
         await expect(wizard.stepHeading('Verify ORCID iD')).toBeVisible();
         await expect(wizard.skipOrcidButton).toBeVisible();
 
+        // "Cancel Invitation Process" on "Verify ORCID iD": the sign-in screen
+        // opens for the signed-out newcomer (Rule 17).
+        await wizard.openCancelDialog();
+        await wizard.cancelProcess();
+        await expect(page).toHaveURL(/\/login/);
+        await new LoginPage(page).expectForm();
+
+        // The manager's Users & Roles, in the manager's own browser: the
+        // newcomer's row still reads "Invited {date}" (Rule 17).
+        await access.goto();
+        await access.expectInvitationCount(1);
+        await expect(access.invitationRow(newcomer)).toContainText(access.invitedOn());
+
+        // The newcomer's accept link, reopened signed out: "Verify ORCID iD"
+        // again, its first step as Rule 5 shapes it with ORCID on, both of
+        // its buttons offered and no footer Continue (Rule 17).
+        await page.goto(newcomerMail.acceptUrl);
+        await expect(wizard.stepHeading('Verify ORCID iD')).toBeVisible();
+        await expect(wizard.stepHeading('Create OMP account')).toHaveCount(0);
+        await expect(wizard.verifyOrcidButton).toBeVisible();
+        await expect(wizard.skipOrcidButton).toBeVisible();
+        await expect(wizard.footerButton('Save and continue')).toHaveCount(0);
+
         // "Skip ORCID verification": "Create OMP account" opens, with the
         // footer's own Continue button (the positive control for its absence
         // on the ORCID step).
@@ -1052,7 +1113,9 @@ test.describe('User invitations (U6)', () => {
         const verifiedMail = await fetchInvitationEmail(pkpMail, {to: verifiedEmail, marker: `Invitation${tag}v`});
 
         // Control: that accept link, signed out, opens the review step
-        // directly with no "Verify ORCID iD" step (Rule 5).
+        // directly with no "Verify ORCID iD" step (Rule 5), and the step shows
+        // the seeded iD under "User Details", not the "Not verified" advice
+        // (Fields, accept wizard; fn-a19).
         await page.goto(verifiedMail.acceptUrl);
         await expect(wizard.stepHeading('Review & create account')).toBeVisible();
         await expect(wizard.stepsList).not.toContainText('Verify ORCID iD');
@@ -1060,6 +1123,10 @@ test.describe('User invitations (U6)', () => {
         await expect(wizard.skipOrcidButton).toHaveCount(0);
         await expect(page.getByText('External Reviewer')).toBeVisible();
         await expect(wizard.acceptButton).toBeVisible();
+        await expect(page.getByRole('heading', {name: 'User Details', level: 3})).toBeVisible();
+        await expect(page.getByRole('heading', {name: 'ORCID iD', level: 4})).toBeVisible();
+        await expect(wizard.underUserDetails(VERIFIED_ORCID)).toBeVisible();
+        await expect(page.getByText(/Not verified\./)).toHaveCount(0);
     });
 
     test('S11: an existing user cancels the accept wizard, and the invitation waits', async ({ompApi, asUser, pkpMail, page}, testInfo) => {
