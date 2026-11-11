@@ -1,0 +1,87 @@
+--- a/lib/ui-library/src/components/BodyTextEditor/bodyTextReferenceExport.js
++++ b/lib/ui-library/src/components/BodyTextEditor/bodyTextReferenceExport.js
+@@ -38,14 +38,6 @@
+ 			.filter((reference) => reference?.id != null)
+ 			.map((reference) => [String(reference.id), reference]),
+ 	);
+-	const referenceNumbers = new Map(
+-		/**
+-		 * Create a map of the database reference Ids to the editor list numbers
+-		 * this ensures that in-text number corresponds to the correct reference in the bibliography,
+-		 * even if the references are not in order.
+-		 */
+-		[...referenceById.keys()].map((id, index) => [id, index + 1]),
+-	);
+ 	const citations = [...container.querySelectorAll('cite')].map((citation) => {
+ 		const source = citation.getAttribute('data-source');
+ 		const items = SourceField.fromString(source);
+@@ -85,6 +77,13 @@
+ 	// Also keep references that exist only in the document's bibliography.
+ 	orderedIds.push(...citedIds.filter((id) => !referenceById.has(id)));
+ 
++	/**
++	 * Number the exported references 1..n in the order they are listed, so an
++	 * in-text number matches the reference's place in the exported list (an
++	 * uncited reference is not listed, so it must not take a number).
++	 */
++	const referenceNumbers = new Map(orderedIds.map((id, index) => [id, index + 1]));
++
+ 	const usedIds = new Set(
+ 		[...container.querySelectorAll('[id]')].map((element) => element.id),
+ 	);
+@@ -114,6 +113,12 @@
+ 			entries.set(id, entry);
+ 		}
+ 		entry.classList.add('body-text-reference');
++		if (!entry.querySelector(':scope > .body-text-reference-number')) {
++			const number = document.createElement('span');
++			number.className = 'body-text-reference-number';
++			number.textContent = `[${referenceNumbers.get(id)}] `;
++			entry.prepend(number);
++		}
+ 		if (!entry.id) {
+ 			const baseId = `body-text-ref-${encodeURIComponent(id)}`;
+ 			let anchor = baseId;
+@@ -129,10 +134,16 @@
+ 		const ids = [...new Set(items.map(({id}) => id))];
+ 		// Database IDs identify references, but readers should see their list numbers.
+ 		// Only adjust numeric markers; leave custom text and page details alone.
+-		if (!items.some((item) => item.locator || item.prefix || item.suffix)) {
++		// Rewrite only the markers the editor wrote itself ("[<id>]", "[<id>, <id>]"),
++		// never text an editor typed, such as a year.
++		if (
++			citation.getAttribute('data-citation-mode') !== 'custom' &&
++			!items.some((item) => item.locator || item.prefix || item.suffix)
++		) {
+ 			updateNumericCitationMarker(
+ 				citation,
+ 				ids.map((id) => referenceNumbers.get(id)),
++				ids,
+ 			);
+ 		}
+ 		const referenceLabel = (id) => linkLabel(referenceNumbers.get(id) ?? id);
+@@ -175,7 +186,7 @@
+  * e.g., if the in-text citation is the ref ID [34] but the actual editor's reference list has it as 12th reference  by the order, this function will update the in-text citation to [12].
+  * This ensures that the exported HTML has consistent citation numbers that match the bibliography.
+  */
+-function updateNumericCitationMarker(citation, numbers) {
++function updateNumericCitationMarker(citation, numbers, ids) {
+ 	if (numbers.some((number) => number == null)) return;
+ 	const match = citation.textContent.match(
+ 		/^(\s*)(\[|\()?(\d+(?:\s*[,;–—-]\s*\d+)*)(\]|\))?(\s*)$/,
+@@ -188,7 +199,15 @@
+ 		(!opening && closing)
+ 	)
+ 		return;
++	const written = marker.match(/\d+/g);
+ 	const range = marker.match(/^\d+\s*([–—-])\s*\d+$/);
++	// The editor writes the cited ids as the marker; other digits are the author's own.
++	if (
++		range
++			? written[0] !== ids[0] || written[1] !== ids.at(-1)
++			: written.join(',') !== ids.join(',')
++	)
++		return;
+ 	// Mixed lists and ranges are ambiguous without a full citation formatter.
+ 	if (!range && /[–—-]/.test(marker)) return;
+ 	if (
