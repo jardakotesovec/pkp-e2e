@@ -1,0 +1,55 @@
+diff --git a/lib/ui-library/src/components/BodyTextEditor/bodyTextReferenceExport.js b/lib/ui-library/src/components/BodyTextEditor/bodyTextReferenceExport.js
+index a39f6c39..5cabf09c 100644
+--- a/lib/ui-library/src/components/BodyTextEditor/bodyTextReferenceExport.js
++++ b/lib/ui-library/src/components/BodyTextEditor/bodyTextReferenceExport.js
+@@ -134,15 +134,14 @@ export function exportBodyTextReferences(
+ 		const ids = [...new Set(items.map(({id}) => id))];
+ 		// Keep manually entered citation text, including years like "(2021)".
+ 		// Only generated markers should use the reference-list numbers.
+-		if (
++		const numbers = ids.map((id) => referenceNumbers.get(id));
++		const renumbered =
+ 			citation.getAttribute('data-citation-mode') !== 'custom' &&
+-			!items.some((item) => item.locator || item.prefix || item.suffix)
+-		) {
+-			updateNumericCitationMarker(
+-				citation,
+-				ids.map((id) => referenceNumbers.get(id)),
+-			);
+-		}
++			!items.some((item) => item.locator || item.prefix || item.suffix) &&
++			updateNumericCitationMarker(citation, numbers);
++		// Text added around the editor's marker ("[34, p. 5]", or a sentence typed
++		// on after it) still holds the reference ID in its leading brackets.
++		if (!renumbered) updateLeadingReferenceIds(citation, ids, numbers);
+ 		const referenceLabel = (id) => linkLabel(referenceNumbers.get(id) ?? id);
+ 		const createLink = (id) => {
+ 			const link = document.createElement('a');
+@@ -241,6 +240,27 @@ function updateNumericCitationMarker(citation, numbers) {
+ 	// Use each number's original position so replacing "34" with "4" does not
+ 	// shift later replacements, even when a number is split across styled text.
+ 	replaceTextRanges(citation, replacements);
++	return true;
++}
++
++/**
++ * In a citation's leading "[…]" or "(…)", replace the numbers that are the
++ * citation's own reference IDs with their list numbers; leave other numbers
++ * (pages, years) alone.
++ */
++function updateLeadingReferenceIds(citation, ids, numbers) {
++	if (numbers.some((number) => number == null)) return;
++	const group = citation.textContent.match(/^(\s*[[(])([^\])]*)[\])]/);
++	if (!group) return;
++	const start = group[1].length;
++	const replacements = [...group[2].matchAll(/\d+/g)]
++		.filter((token) => ids.includes(token[0]))
++		.map((token) => ({
++			start: start + token.index,
++			end: start + token.index + token[0].length,
++			text: String(numbers[ids.indexOf(token[0])]),
++		}));
++	if (replacements.length) replaceTextRanges(citation, replacements);
+ }
+ 
+ /** Replace text at its original positions, keeping surrounding elements intact. */

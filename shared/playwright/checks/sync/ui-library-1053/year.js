@@ -15,6 +15,8 @@
 //   E2 Save, "Export to HTML" again
 // At the round-2 heads (ui-library 2e7ac2b537): E1 "Smith (2) found yams.", "(2023)" kept; E2 "(54; 51)", the
 // database ids. With fix2.diff (bin/try-fix.js): "(2021)", "(2023)", then "(4; 1)".
+// Round 3 (ui-library 823859b421) fixes both: the same cases are cite.js R2 and R5 there ("(2022)" kept, "(2; 1)");
+// fix2.diff was removed then, superseded by fix3.diff.
 // Run: PROBE_FEATURE=pr-13767 PROBE_AGENT=pr PROBE_RUN=<side> node bin/probe.js ojs <this file>
 const fs = require('fs');
 const path = require('path');

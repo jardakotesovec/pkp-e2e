@@ -10,9 +10,15 @@
 //   C4 "Export" › "Preview: PDF": the preview's citations and references; "Create PDF": internal links in the file
 //   C5 Delta deleted on "References" (the citations to it stay in the text); "Export to HTML" and "Preview: PDF"
 // Round 2 (ui-library 2e7ac2b537): the markers read [2], [4], [2, 4], the list is numbered "2. ", "4. ", and this
-// "(2021)" (written in as `generated`) is still exported "(2)"; with fix2.diff it stays "(2021)". Round 1 at aa2485f872.
+// "(2021)" (written in as `generated`) is still exported "(2)" (so in round 3 too: a stored document, not an edit).
+// Round 1 at aa2485f872. With fix3.diff (round 3, bin/try-fix.js): R3 "[4, p. 5]", R4 "[1] More text 2020.".
 // Run: PROBE_FEATURE=pr-13767 PROBE_AGENT=pr PROBE_RUN=<side> node bin/probe.js ojs <this file>
 // At the base (ui-library 55ec62ee) C3–C5 show what the export did before: no links, the editor's own markers.
+// Round 3 (heads ui-library 823859b421, pkp-lib c42f9d3412, ojs 85211820ad): R1–R5, after C1's save, make citations on
+// screen in five seeded paragraphs: R1 "(2021)" set in "Selected Element"; R2 Gamma dropped onto a typed "(2022)";
+// R3 "[id, p. 5]" set in "Selected Element"; R4 Alpha dropped at a sentence's end, then End and " More text 2020." typed;
+// R5 Alpha dropped onto a custom "(2021)" (SciFlow merges). Exported at the round-3 heads: "(2021)", "(2022)",
+// "[id, p. 5]" (the database id), R4 typed into the citation and exported with the id, R5 "(2; 1)".
 const fs = require('fs');
 const path = require('path');
 const {forEachApp, launch, signIn, record, sql, outDir, tag} = require('../../../probe');
@@ -101,7 +107,162 @@ forEachApp(async (app) => {
         const cites = await body.citations().evaluateAll((cs) => cs.map((c) => ({text: c.textContent, source: c.getAttribute('data-source')})));
         fact('C1 editor citations', cites);
         await page.screenshot({path: shot('C1-editor')});
+
         fact('C1 save', (await body.save()).status());
+        // Round 2 (ui-library 2e7ac2b5, 823859b4: citationMode "custom" on a "Selected Element" text edit and on a drop
+        // that wraps text). R1–R5 add paragraphs 3–7 before the save; C2's paragraphs follow them.
+        const citeState = () => body.citations().evaluateAll((cs) => cs.map((c) => ({text: c.textContent,
+            mode: c.getAttribute('data-citation-mode'), ids: (() => { try { return JSON.parse(decodeURIComponent(c.getAttribute('data-source') || '')).map((i) => i.id); } catch { return null; } })()})));
+        // a click on the last paragraph's first letters (body.focusEnd() clicks the editor's middle, which can select a citation)
+        const putDoc = (d) => page.evaluate(async ({url, serialized}) => {
+            const fd = new FormData();
+            fd.append('bodyText', serialized);
+            const r = await fetch(url, {method: 'POST', headers: {'X-Csrf-Token': window.pkp.currentUser.csrfToken, 'X-Http-Method-Override': 'PUT'}, body: fd});
+            return r.status;
+        }, {url: api, serialized: JSON.stringify(d)});
+        const newParagraph = async (text) => {
+            const last = await body.paragraphs().last().boundingBox();
+            await page.mouse.click(last.x + 4, last.y + last.height / 2);
+            await page.keyboard.press('ControlOrMeta+End');
+            await page.keyboard.press('Enter'); await page.keyboard.type(text); await page.waitForTimeout(300);
+        };
+        const editInSelectedElement = async (cite, text) => {
+            if (!(await cite.count())) return {missing: true, cites: await citeState()};
+            await cite.click({timeout: 10_000}).catch(async (e) => { await page.screenshot({path: shot('R-click-failed')}); throw e; });
+            await page.waitForTimeout(600);
+            const sel = page.locator('details').filter({has: page.locator('summary', {hasText: 'Selected Element'})}).first();
+            if (await sel.count() && (await sel.getAttribute('open')) === null) { await sel.locator('summary').first().click(); await page.waitForTimeout(600); }
+            const content = page.locator('#citation-content [contenteditable], #citation-content').first();
+            if (!(await content.isVisible().catch(() => false))) return 'no In-text citation field';
+            await content.click();
+            await page.keyboard.press('ControlOrMeta+A');
+            await page.keyboard.type(text);
+            await page.getByRole('button', {name: 'Update', exact: true}).first().click();
+            await page.waitForTimeout(800);
+            // fold "Selected Element" again and put a text caret in the first paragraph, so the reference list is back
+            // on screen and the next drag starts from a reference, not from a page-wide text selection
+            if ((await sel.getAttribute('open')) !== null) await sel.locator('summary').first().click();
+            const p0 = await body.paragraphs().first().boundingBox();
+            await page.mouse.click(p0.x + 4, p0.y + p0.height / 2);
+            await page.waitForTimeout(400);
+            return 'updated';
+        };
+        // drag a listed reference onto a substring of paragraph n (SciFlow wraps the word or (…)/[…] under the drop)
+        const dragOntoText = async (item, n, needle) => {
+            await item.scrollIntoViewIfNeeded();
+            await body.paragraphs().nth(n).scrollIntoViewIfNeeded();
+            const pt = await body.paragraphs().nth(n).evaluate((p, needle) => {
+                const w = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
+                for (let t = w.nextNode(); t; t = w.nextNode()) {
+                    const i = t.data.indexOf(needle);
+                    if (i < 0) continue;
+                    const r = document.createRange(); r.setStart(t, i + 1); r.setEnd(t, i + needle.length - 1);
+                    const b = r.getBoundingClientRect(); return {x: b.x + b.width / 2, y: b.y + b.height / 2};
+                }
+                return null;
+            }, needle);
+            if (!pt) return 'needle not found';
+            const from = await item.boundingBox();
+            await page.mouse.move(from.x + 20, from.y + from.height / 2);
+            await page.mouse.down();
+            await page.mouse.move(from.x + 30, from.y + from.height / 2, {steps: 3});
+            await page.mouse.move(pt.x, pt.y, {steps: 15});
+            await page.mouse.up();
+            await page.waitForTimeout(600);
+            return 'dropped';
+        };
+        const nth = (i) => body.paragraphs().nth(i).locator('cite').first();
+        // a reference's drag and drop as DOM events in the page (dragstart on the reference, dragover and drop on the
+        // editor at a point), through the editor's own drop handler and the PR's adapter; `at` is 'end' of paragraph
+        // n, a substring of it, or 'cite' (the middle of its first citation). The mouse drags of dragReference() miss
+        // once "Selected Element" has opened and shifted the side panel.
+        const synthDrag = async (refIndex, n, at) => {
+            const item = body.referenceItems().nth(refIndex);
+            const para = body.paragraphs().nth(n);
+            await para.scrollIntoViewIfNeeded();
+            const pt = await para.evaluate((p, at) => {
+                let r = document.createRange();
+                if (at === 'cite') { const c = p.querySelector('cite'); if (!c) return null; const b = c.getBoundingClientRect(); return {x: b.x + b.width / 2, y: b.y + b.height / 2}; }
+                const w = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
+                let last = null;
+                for (let t = w.nextNode(); t; t = w.nextNode()) {
+                    if (at !== 'end') { const i = t.data.indexOf(at); if (i >= 0) { r.setStart(t, i + 1); r.setEnd(t, i + at.length - 1); const b = r.getBoundingClientRect(); return {x: b.x + b.width / 2, y: b.y + b.height / 2}; } }
+                    last = t;
+                }
+                if (at !== 'end' || !last) return null;
+                r.setStart(last, last.data.length - 1); r.setEnd(last, last.data.length);
+                const b = r.getBoundingClientRect(); return {x: b.right + 1, y: b.y + b.height / 2};
+            }, at);
+            if (!pt) return 'no drop point';
+            return item.evaluate((el, pt) => {
+                const src = el.querySelector('[draggable="true"]') || el.closest('[draggable="true"]') || el;
+                const dt = new DataTransfer();
+                const ev = (type, target, extra = {}) => target.dispatchEvent(new DragEvent(type, {bubbles: true, cancelable: true, composed: true, dataTransfer: dt, ...extra}));
+                ev('dragstart', src);
+                const target = document.elementFromPoint(pt.x, pt.y);
+                if (!target) return 'nothing at the point';
+                ev('dragenter', target, {clientX: pt.x, clientY: pt.y});
+                ev('dragover', target, {clientX: pt.x, clientY: pt.y});
+                const handled = !ev('drop', target, {clientX: pt.x, clientY: pt.y});
+                ev('dragend', src);
+                return {types: [...dt.types], target: target.tagName + (target.className ? '.' + String(target.className).split(' ')[0] : ''), handled};
+            }, pt);
+        };
+        // the five paragraphs as plain text through the document (typing them in a row scrambles the editor's text);
+        // the citations are then made on screen
+        {
+            const got = await page.evaluate(async (url) => (await fetch(url)).json(), api);
+            const d = typeof got.bodyTextContent === 'string' ? JSON.parse(got.bodyTextContent) : got.bodyTextContent;
+            for (const text of ['R1 Selected Element year: Beta.', 'R2 dropped on text: Gamma (2022) says so.', 'R3 Selected Element page: Delta.',
+                'R4 typed inline: Alpha.', 'R5 merged onto custom: Beta.']) d.content.push({type: 'paragraph', content: [{type: 'text', text}]});
+            fact('R PUT', await putDoc(d));
+            await body.reload();
+        }
+        fact('R paragraphs', await body.paragraphs().allInnerTexts());
+        // R1: Beta cited at the end of p3, its text set to "(2021)" in "Selected Element" (the reader's S2, on screen)
+        fact('R1 drop', await synthDrag(1, 2, 'end'));
+        await page.waitForTimeout(600);
+        fact('R1 edit', await editInSelectedElement(nth(2), '(2021)'));
+        // R2: Gamma dropped onto the typed "(2022)" in p4 (the wrap path the adapter marks custom)
+        const paras = async (k) => fact(k, await body.paragraphs().evaluateAll((ps) => ps.map((p) => p.innerHTML.replace(/<br[^>]*>/g, '').replace(/ data-style="apa"/g, '').slice(0, 300))));
+        await paras('R1 paragraphs');
+        fact('R2 drop', await synthDrag(2, 3, '(2022)'));
+        await paras('R2 paragraphs');
+        await page.screenshot({path: shot('R2')});
+        // R3: Delta cited at the end of p5, a page added in "Selected Element": the editor's marker kept, "p. 5" after it
+        fact('R3 drop', await synthDrag(3, 4, 'end'));
+        await page.waitForTimeout(600);
+        await paras('R3 paragraphs');
+        await page.screenshot({path: shot('R3')});
+        const r3text = ((await nth(4).textContent()) || '').replace(/\]\s*$/, ', p. 5]');
+        fact('R3 edit', {to: r3text, result: await editInSelectedElement(nth(4), r3text)});
+        // R4: Alpha cited at the end of p6, then its digits retyped as a year inside the citation's own text (no panel)
+        fact('R4 drop', await synthDrag(0, 5, 'end'));
+        await page.waitForTimeout(600);
+        // from the keyboard only: a click on the paragraph's first letters, End, and the sentence continued
+        // (" More text 2020."), as an editor does after dropping a citation at a sentence's end
+        const caret = () => page.evaluate(() => { const s = getSelection(); const n = s.anchorNode; const el = n && (n.nodeType === 3 ? n.parentElement : n);
+            return {inCite: !!(el && el.closest('cite')), text: n && n.nodeType === 3 ? n.data : null, offset: s.anchorOffset, collapsed: s.isCollapsed}; });
+        const p5 = await body.paragraphs().nth(5).boundingBox();
+        await page.mouse.click(p5.x + 4, p5.y + p5.height / 2);
+        await page.keyboard.press('End');
+        const r4 = {afterEnd: await caret()};
+        await page.keyboard.type(' More text 2020.');
+        await page.waitForTimeout(300);
+        r4.result = await body.paragraphs().nth(5).evaluate((p) => p.innerHTML.replace(/<br[^>]*>/g, '').replace(/ data-style="apa"/g, ''));
+        fact('R4 caret', r4);
+        await page.waitForTimeout(300);
+        // R5: Beta cited at the end of p7, set to "(2021)", then Alpha dragged onto it (SciFlow merges the two)
+        fact('R5 drop', await synthDrag(1, 6, 'end'));
+        await page.waitForTimeout(600);
+        await editInSelectedElement(nth(6), '(2021)');
+        fact('R5 merge', await synthDrag(0, 6, 'cite'));
+        await page.waitForTimeout(600);
+        fact('R editor citations', await citeState());
+        fact('R save', (await body.save()).status());
+        fact('R paragraphs after', await body.paragraphs().evaluateAll((ps) => ps.map((p) => p.innerHTML.replace(/<br[^>]*>/g, '').slice(0, 300))));
+        fact('R editor citations', await citeState());
+        await page.screenshot({path: shot('R-editor')});
 
         // C2: grouped citation and a non-numeric one, through the document
         const getDoc = await page.evaluate(async (url) => (await fetch(url)).json(), api);
@@ -122,7 +283,7 @@ forEachApp(async (app) => {
         }, {url: api, serialized: JSON.stringify(doc)});
         fact('C2 PUT', put);
         await body.reload();
-        fact('C2 editor citations after reload', await body.citations().evaluateAll((cs) => cs.map((c) => c.textContent)));
+        fact('C2 editor citations after reload', await citeState());
         await body.root().screenshot({path: shot('C2-editor')});
 
         const exportButton = page.getByRole('button', {name: 'Export', exact: true});
