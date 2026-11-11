@@ -21,7 +21,7 @@
  *
  * Not asserted here, by register ID (a 🐞 is never asserted as the contract,
  * a ❓ is parked; the spec's Coverage section records the rest): A2, A4, A5,
- * A6, A7, A8, A9, A10, A11, A12, A14, A17, A18, A19, A20, A21, A22, A23, A24,
+ * A6, A7, A8, A9, A10, A11, A12, A14, A17, A18, A19, A20, A21, A22, A23,
  * A25, A26, OPS2, OPS3. A13 and A16 are passed by S12, which reads the first
  * contributor's name and ORCID field as today's screen shows them.
  *

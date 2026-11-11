@@ -10,7 +10,7 @@
  * Spec: docs/specs/U03-user-profile.md
  *
  * Deliberately NOT covered (register IDs): A2, A4, A5, A6, A7, A8, A9, A10,
- * A11, A12, A13, A14, A16, A17, A18, A19, A20, A21, A22, A23, A24, A25, A26.
+ * A11, A12, A13, A14, A16, A17, A18, A19, A20, A21, A22, A23, A25, A26.
  *
  * Isolation: every account that changes is a throwaway user in a scratch
  * press seeded through the scenario endpoint (unique tags naming the app);

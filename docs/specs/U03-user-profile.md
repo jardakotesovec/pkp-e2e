@@ -239,9 +239,7 @@ types and what the boxes do belong to
      tab shows "You have requested a change of your email to "{new address}".
      We have already sent you an email with directions on how to validate the
      changed email." with a "Cancel" button, and the "Email address" box is
-     read-only. On the site-level profile (Rule 3) the page's own script
-     sometimes fails just after this save; the request is kept and its
-     message sent ⚠ [A24](#a24). The
+     read-only. The
      save ends the account's other signed-in sessions. Another browser
      that signed in with "Keep me logged in" ticked, as the Login page
      offers it, is signed straight back in: its next tab press or page
@@ -1125,9 +1123,8 @@ Left out of the scenarios above, by reason:
     proposes, once fixed [report 2026-10-15]
   - the Contact tab opened, saved and an email change cancelled while the
     French "Signature" box is slow to start, with no script error and the
-    globe beside "Signature" right ([A24](#a24)): the regression test the
-    issue report (`docs/issues/U03-A24-profile-contact-save-script-error.md`)
-    proposes, once fixed [report 2026-10-15]
+    globe beside "Signature" right (the guard of the retired [A24](#a24))
+    [report 2026-10-15]
   - after a password change in one browser, a tab press and a "Save" in
     the other browser's Profile page landing on the Login page with no
     script error ([A25](#a25); Rule 10b): the check the issue report
@@ -1188,7 +1185,6 @@ Left out of the scenarios above, by reason:
   - A21 ("confirm" opened in another account's browser switching the requesting account's address without a word; Actors row "Confirm or reject an email-address change")
   - A22 (the Password tab's boxes not named by their labels for a screen reader; Fields, Password tab)
   - A23 (the email-change message greeting by given and family name; Rule 4)
-  - A24 (the page's script failing after a Contact save on the site-level profile; Rule 6a)
   - A25 (another browser's tab press failing after a password change; Rule 10b)
   - A26 (a Profile page whose session ended elsewhere answering each tab press and "Save" with "##user.authorization.userRequired##"; Rules 6a and 10b)
   - A27 (an API request with a key that is not in the form of one refused with an unfilled "{$error}"; *Side effects*, "On deleting an API key")
@@ -1231,7 +1227,6 @@ unless its Basis line says otherwise.
 | [A18](#a18) | "confirm" and "reject" land an account with roles in more than one journal on the site-level profile, outside the journal where it asked for the email change | 🐞 | minor | @jarda.kotesovec 2026-09-25 · risk accepted |
 | [A19](#a19) | Text typed only into "Signature", "Mailing Address" or "Bio Statement" is lost with no question when another tab is pressed or the page is reloaded | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | After a newcomer registers with an existing reviewing interest, accounts that save their Roles tab list it twice | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [A24](#a24) | The Profile page's Contact tab sometimes logs a script error on opening or saving; the save still works | 🐞 | low · crash: script | issues (claude), 2026-10-15 — re-verified |
 | [A25](#a25) | After a password change, a page left open in another browser drops its next save or tab press instead of going to the Login page | 🐞 | medium · crash: script | issues (claude), 2026-10-15 — re-verified |
 | [A26](#a26) | A Profile page whose session has ended answers each press with the alert "##user.authorization.userRequired##" | 🐞 | low | issues (claude), 2026-11-02 — re-verified |
 | [A27](#a27) | An API request with a malformed key is refused with "{$error}" where the reason should be | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
@@ -1576,25 +1571,6 @@ as the other emails do? Lean: yes; the field exists so the user is
 addressed that way.
 Basis: probe, 2026-10-14. <sup>[f-a23](#fn-a23)</sup>
 
-<a id="a24"></a>
-**A24 — The Profile page's Contact tab sometimes logs a script error on opening or saving; the save still works** · 🐞 · low · crash: script.
-When the Profile page's Contact tab opens, and again after its "Save"
-or the "Cancel" of an email-change request, the page's own script
-sometimes fails in the browser. The save and the cancel still go
-through, every box takes typing, and nothing on screen says anything
-went wrong.
-
-It happens when one language box of the "Signature" field is slow to
-start, as on a loaded browser or computer: never in 96 ordinary saves on
-the default dataset, now and then on a busier test install. Only sites
-with two or more languages meet it; one language has no language marker
-and logs nothing.
-
-What is lost is the globe beside "Signature", which tells whether the
-signature is filled in every language: after the failure it may show
-the wrong state.
-Basis: probe, 2026-10-15. <sup>[f-a24](#fn-a24)</sup>
-
 <a id="a25"></a>
 **A25 — After a password change, a page left open in another browser drops its next save or tab press instead of going to the Login page** · 🐞 · medium · crash: script.
 A password change signs the account out of its other browsers. In such a
@@ -1710,6 +1686,9 @@ lost is only what the person typed.
 Since: 2025-11-27 · Basis: probe, 2026-10-15. <sup>[f-ops3](#fn-ops3)</sup>
 
 ### Retired
+
+<a id="a24"></a>
+**A24 — The Profile page's Contact tab sometimes logged a script error** · ✅ · retired. Fixed upstream (`pkp/pkp-lib#13381`, for `pkp/pkp-lib#13180`).
 
 <a id="a1"></a>
 **A1 — Site-level address loses its tab for a one-journal user** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13181).
@@ -3115,21 +3094,6 @@ read From "Dr. Pia Preferred", To "Pia Plain", and opened "Dear Pia
 Plain,". A "Decline Submission" message composed for an author whose
 preferred name was "Dr. Wren Preferred" read "To: Dr. Wren Preferred" and
 opened "Dear Dr. Wren Preferred," (two runs per app).
-
-<a id="fn-a24"></a>
-**f-a24** — Run records of 2026-10-14 (drift sweep), all three apps: the
-uncaught page error "Cannot read properties of undefined (reading
-'serialize')" at `index/en/user/profile#contact`, about 0.2 s after `POST
-index/$$$call$$$/tab/user/profile-tab/save-contact` answered 200 and the
-notice "Your changes have been saved." showed, in three of six
-site-level email-change saves (OJS r2, OMP r1, OPS r1; the kept script
-`shared/playwright/checks/U03/SW3/sw3.js`, phase `email`); and once on OJS,
-in one of nine impersonation runs (`shared/playwright/checks/U03/SW1/sw1.js`,
-phase `imperson`), at the load of `{context}/user/profile#contact` after a
-reload that followed a Contact save. The message arrived each time. Not
-read: the tab a second after the save (settle by reading the site-level
-Contact tab 1 s after the save over several runs).
-Issue report: [pkp-e2e#969](https://github.com/jardakotesovec/pkp-e2e/issues/969) ([docs/issues/U03-A24-profile-contact-save-script-error.md](../issues/U03-A24-profile-contact-save-script-error.md)).
 
 <a id="fn-a25"></a>
 **f-a25** — The tab press fetches the tab with `GET
