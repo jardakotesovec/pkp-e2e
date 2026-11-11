@@ -122,7 +122,7 @@ under the heading "Role details":
 | "Permission level" | yes | A list of the levels of the "Roles" tab's column. "Create New Role" opens on "Journal Manager" ("Press Manager", "Manager"). On "Edit" it is greyed out and cannot change (Rule 14). A preprint server also offers "Reviewer" ⚠ [OPS2](#ops2) <sup>k</sup> <sup>p</sup> |
 | "Role Name" | yes | One box per form language (Settings bullet 2). Empty: refused (Rule 15) <sup>l</sup> |
 | "Abbreviation" | yes | As "Role Name". Only the role's own window shows it ⚠ [A7](#a7) <sup>l</sup> |
-| "Stage Assignment" | no | One box per stage of the app, named as the list's columns; shown only for the levels of the table below. A role may be saved with no stage ticked (Rule 15) <sup>k</sup> |
+| "Stage Assignment" | no | One box per stage of the app, named as the list's columns; shown only for the levels of the table below. A role may be saved with no stage ticked (Rule 15). No box stands for Done: a new journal's roles that work in Production are stored as working in Done too, though no screen shows it, and "OK" takes Done away ⚠ [A15](#a15) <sup>k</sup> |
 | "Role Options": "Allow user self-registration", "This role is only allowed to recommend a review decision and will require an authorised editor to record a final decision.", "Permit submission metadata edit.", "Consider role in masthead list", "Permit changes to Settings" | no | Which boxes can be changed depends on the level (table below); what each stores: Rule 22 <sup>k</sup> |
 
 Under the fields: "Required fields are marked with an asterisk: *", then
@@ -861,6 +861,8 @@ Left out of the scenarios above, by reason:
     repeating or skipping a role; Rules 2, 4; scenario 1 passes it)
   - A14 (the "Users" tab opened without a reload after a rename; Side
     effects; scenario 4 passes it)
+  - A15 (the window of a role the journal was created with saved, its
+    Done stage taken away with nothing shown; Fields, the role window)
   - OPS3 (the French level name; Fields, the "Roles" tab)
   - OPS1 (the open access sign-in box not kept on a preprint server;
     Rule 23)
@@ -916,6 +918,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | "OK" in an Editor's own role window takes the Settings pages away from every holder of the role | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | Roles list: a saved role jumps to the end, and its pages can repeat one role and skip another | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A14](#a14) | Users & Roles: after a role is renamed, the "Users" tab shows its old name until a reload | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [A15](#a15) | "OK" in a role's window, even with nothing changed, takes away the Done stage of a role the journal was created with, and no screen shows it | 🐞 | invisible | — |
 | [OPS1](#ops1) | A preprint server's "View Preprint Content" sign-in box says "Saved" but keeps nothing, so files stay open | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | A preprint server in French names its Moderator permission level "Éditeur-trice de série" (Series Editor) | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | A role anyone has ever held can never be removed | ❓ | minor | — |
@@ -1160,6 +1163,25 @@ Roles" line of a member's "Disable User" window.
 A reload shows the new name.
 Basis: test run; probe, 2026-10-02. <sup>f-a14</sup>
 
+<a id="a15"></a>
+**A15 — "OK" in a role's window, even with nothing changed, takes away the Done stage of a role the journal was created with** · 🐞 · invisible.
+Every role a new journal, press or preprint server is created with
+whose row has its "Production" box ticked is stored as working in Done
+as well: on a journal ten of its eighteen roles, on a press eleven of
+nineteen, on a preprint server three of five. No column of the "Roles"
+list and no box of the role window shows Done. "OK" in a role's "Edit"
+window stores only the stage boxes the window shows, so after any save
+of the window, one option changed or nothing changed, the role no
+longer works in Done. A manager-level role, given every other stage by
+the same save ([A3](#a3)), loses Done too. Nothing on screen says so:
+the only notice is "Your changes have been saved.", the row's boxes and
+the window's boxes read as before, on the same page and after a reload,
+and no screen can give Done back. The role's members see a published
+submission's screens as before the save. The same save
+also stores the recommend-only option, unticked, for a role that had
+never stored it; the window showed that box unticked before as well.
+Basis: probe, 2026-11-11. <sup>f-a15</sup>
+
 ### OPS
 
 <a id="ops1"></a>
@@ -1313,7 +1335,8 @@ translator), no guestEditor or subscriptionManager, and volumeEditor
 `1,2,3,4,5,6`, chapterAuthor `4,5,6` (self-registering), internalReviewer
 `2`, externalReviewer `3`. OPS: manager, sectionEditor, author (with
 `permitMetadataEdit`) `5,6`; reader; editorialBoardMember. Stage 6 (Done)
-has no column. Earlier drives: the stage boxes of every row on all three
+has no column; what a save of the window does to it: [f-a15](#fn-f-a15).
+Earlier drives: the stage boxes of every row on all three
 apps, live-probed 2026-09-19 (the Production stage's claim check);
 "Consider role in masthead list" per role on fresh scratch contexts,
 live-probed 2026-09-23 (the About pages' claim check: Internal Reviewer
@@ -1473,7 +1496,7 @@ level change: `updatePermitSelfRegistration()` (open for
 `ROLE_ID_REVIEWER, AUTHOR, READER`, else disabled and unchecked),
 `updatePermitMetadataEdit()` (disabled and checked for
 `NOT_CHANGE_METADATA_EDIT_PERMISSION_ROLES` = manager; otherwise enabled,
-unchecked on a level change), `updatePermitSettings()` (open for manager,
+keeping its state), `updatePermitSettings()` (open for manager,
 else disabled and unchecked), `updateStageOptions()` (disables the
 forbidden stages, hides the stage container when none is left enabled,
 does not uncheck), `updateRecommendOnly()` (open for manager and
@@ -1491,7 +1514,12 @@ sequence once the section's animation had ended; a box greyed by a level
 change keeping its tick and stored unticked by "OK" (self-registration
 after "Assistant", a Submission stage after "Reviewer"); the metadata box
 keeping its state through the level changes and ticked by a change to the
-manager level. Earlier reads of "Stage Assignment": [f-a12](#fn-f-a12).
+manager level. Live-probed 2026-11-11 (Rule 13; all three apps, two
+runs): a role made from "Create New Role", taken from the first level
+through "Author" and "Assistant" to "Reviewer" without touching
+"Permit submission metadata edit.", was stored with
+`permit_metadata_edit` 1, the box's ticked start. Earlier reads of
+"Stage Assignment": [f-a12](#fn-f-a12).
 
 <a id="fn-l"></a>
 **l** — `UserGroupForm::__construct()`: `FormValidatorLocale` on `name`
@@ -1588,9 +1616,11 @@ until a reload and gone from "Invite to a role" at once.
 
 <a id="fn-r"></a>
 **r** — What stores each control: `UserGroupStage` rows (the stage boxes),
-`user_groups.permit_self_registration`, `recommend_only`,
-`permit_metadata_edit`, `masthead`, `permit_settings`, and the
-`name`/`abbrev` settings. The readers named in the table are the features'
+`user_groups.permit_self_registration`, `permit_metadata_edit`,
+`masthead`, `permit_settings`, and the `user_group_settings` rows
+`recommendOnly` (absent on an installed role until its window is saved,
+then 0 or 1), `name` and `abbrev`; `user_groups` has no recommend-only
+column (read in the test database 2026-11-11, all three apps). The readers named in the table are the features'
 own: `WorkflowStageAccessPolicy` and the participants'
 `getAssignedStagesByUserGroupId()` (stage gate, "Assign"), `SectionForm`'s
 editorial assignment list, the task template window's `GET
@@ -1937,6 +1967,42 @@ Board Member" in Quinn Ashdown's "Roles" cell throughout ten seconds of
 reads; after a reload the cell read "Advisory Board". The suites read the
 tab after a reload.
 Issue report: [pkp-e2e#438](https://github.com/jardakotesovec/pkp-e2e/issues/438) ([docs/issues/U54-A14-users-tab-keeps-renamed-role-old-name.md](../issues/U54-A14-users-tab-keeps-renamed-role-old-name.md)).
+
+<a id="fn-f-a15"></a>
+**f-a15** — The registries give stage 6 (Done) to every group that has
+stage 5 ([c](#fn-c)); the window's "Stage Assignment" is a checkbox
+group over the app's stages, with no Done box ([k](#fn-k)).
+`UserGroupForm::execute()` → `_assignStagesToUserGroup()` deletes the
+role's `user_group_stage` rows and writes back the posted
+`assignedStages`, or for the manager level `getAlwaysActiveStages()`'s
+keys of `WorkflowStageDAO::getWorkflowStageTranslationKeys()`, filtered
+to the app's stages, so never 6 ([m](#fn-m)); an empty post keeps the
+stored rows ([h](#fn-h)). `recommendOnly` is a `user_group_settings`
+row ([r](#fn-r)), absent on an installed role and written 0 or 1 by
+every save. Live-probed 2026-11-11 (Fields, "Stage Assignment"; all
+three apps, two runs, PKP's default dataset reset before each part, and
+a new scratch context): saved by a manager with "OK", the stored stages
+went OJS "Journal editor" ("Permit changes to Settings" unticked) 1,3,4,5,6
+→ 1,3,4,5; "Section editor" and "Author" (nothing changed) the same;
+"Layout Editor" (nothing changed) 5,6 → 5; OMP "Press editor" ("Permit
+changes to Settings" unticked), "Series editor" and "Author" 1,2,3,4,5,6
+→ 1,2,3,4,5, "Layout Editor" 5,6 → 5; OPS "Moderator" ("Consider role
+in masthead list" unticked) and "Author" 5,6 → 5; every one of them
+went from no `recommendOnly` row to 0. Each save answered "Your changes
+have been saved."; the row's boxes read as before on the same page and
+after a reload, and the reopened window's boxes as before it. On the
+scratch context "OK" with nothing changed did the same (OJS "Journal
+editor", "Section editor"; OMP "Press editor", "Series editor"; OPS
+"Moderator", "Author"). On a published submission, read before and
+after the save as members of those roles (OJS `dbarnes`, `dbuskins`,
+`sberardo`, `shellier`, `amwandenga`; OMP `dbarnes`, `gcox`,
+`mdawson`; OPS `dbuskins`, `ckwantes`), the dashboard's "Published"
+view, the workflow's header buttons and menu, and its "Production"
+entry ("Submission published.", "Production Ready Files", "Production
+Tasks & Discussions", "Participants") read the same. PKP's default
+dataset already carries one such save: OMP's "Volume editor" holds
+stages 1–5 and `recommendOnly` 0, where a new press's holds 1–6 and no
+row. Kept script: `shared/playwright/checks/U54/I32/i32.js`.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP's `locale/fr_CA/submission.po` leaves
