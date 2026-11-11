@@ -9,7 +9,7 @@
   - 3.4: OMP, OPS (code)
   - 3.3: none (code; no preview of an unpublished version)
 - **Introduced** `pkp/pkp-lib#5299` · [2004cab1d5](https://github.com/pkp/omp/commit/2004cab1d5b55cb524c9236359ef7e1646a4b3c5) (OMP, 2022-11-24) and [fa646e5cf7](https://github.com/pkp/ops/commit/fa646e5cf78a7c66dd4aa7252e70c3e332e915eb) (OPS, 2022-11-25) · ajnyga (ajnyga)
-- **Upstream** none found (2026-10-06)
+- **Upstream** `pkp/pkp-lib#13774` (open), covering OMP and `pkp/pkp-lib#13775` (open), covering OPS, the team's copies of this issue (2026-11-10). Before it: none found (2026-10-06)
 - **Tracked in** spec U13 [OPS1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U13-article-landing-page-and-reading.md#ops1); spec U69 [A4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U69-monograph-landing-page.md#a4)
 - **Checked** 2026-10-06, each branch's tip (the commits in Evidence);
   the OJS control on `main` 2026-10-01, at bade233f73

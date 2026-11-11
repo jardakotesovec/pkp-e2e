@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: none (code; no chapter pages)
 - **Introduced** `pkp/omp#1012` for `pkp/pkp-lib#7132` · [bd5eb048df](https://github.com/pkp/omp/commit/bd5eb048df2bca32ea40e7fec7848b653c99afad) · 2021-11-08 · marsilius (nongenti)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13774` (open), the team's copy of this issue (2026-11-10). Before it: none found (2026-10-01)
 - **Tracked in** spec U69 [A20](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U69-monograph-landing-page.md#a20)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

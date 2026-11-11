@@ -2437,7 +2437,7 @@ Live-probed 2026-08-28 cross-app: the unticked contributor showed in
 OJS's issue TOC and search and OPS's archive and search, was dropped
 from OMP's catalog listing, and was credited on every landing page
 (see fn h).
-Issue report: [pkp-e2e#753](https://github.com/jardakotesovec/pkp-e2e/issues/753) ([docs/issues/U41-A3-publication-lists-tick-ignored.md](../issues/U41-A3-publication-lists-tick-ignored.md)).
+Issue report: [pkp-e2e#753](https://github.com/jardakotesovec/pkp-e2e/issues/753) ([docs/issues/U41-A3-publication-lists-tick-ignored.md](../issues/U41-A3-publication-lists-tick-ignored.md)). The team's copy for OPS is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-a4"></a>
 **f-a4 — A4 evidence.** `author.json` `rorId`: `[nullable]` only — no
@@ -2894,7 +2894,7 @@ template line of its own between the entries, outside any `{strip}`, so
 the line break before it shows as a space; the contributor-role loop
 under it wraps the same separator in `{strip}`. `stable-3_5_0`'s
 article template has the same loop (code read, not driven).
-Issue report: [pkp-e2e#957](https://github.com/jardakotesovec/pkp-e2e/issues/957) ([docs/issues/U41-A27-affiliations-space-before-comma.md](../issues/U41-A27-affiliations-space-before-comma.md)).
+Issue report: [pkp-e2e#957](https://github.com/jardakotesovec/pkp-e2e/issues/957) ([docs/issues/U41-A27-affiliations-space-before-comma.md](../issues/U41-A27-affiliations-space-before-comma.md)). The team's copy for OPS is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-a28"></a>
 **f-a28 — A28 evidence.** Live-probed 2026-10-08 (Fields

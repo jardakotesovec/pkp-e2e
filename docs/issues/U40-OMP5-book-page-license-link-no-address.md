@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: OMP (code)
 - **Introduced** `pkp/omp#1975` for `pkp/pkp-lib#10921` · [b3f1d8bc47](https://github.com/pkp/omp/commit/b3f1d8bc47f3ffdc68a28a12ff020d469762d392) · 2025-05-02 · Kaitlin Newson (kaitlinnewson)
-- **Upstream** none found (2026-10-03)
+- **Upstream** `pkp/pkp-lib#13774` (open), the team's copy of this issue (2026-11-10). Before it: none found (2026-10-03)
 - **Tracked in** spec U40 [OMP5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U40-publication-metadata.md#omp5)
 - **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

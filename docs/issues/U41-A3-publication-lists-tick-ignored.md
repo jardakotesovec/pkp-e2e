@@ -9,7 +9,7 @@
   - 3.4: OJS, OPS (code)
   - 3.3: OJS, OMP, OPS (code; OMP's catalog filters from 3.4 on)
 - **Introduced** `pkp/pkp-lib#5025` for `pkp/pkp-lib#2072` · [718ad72e59](https://github.com/pkp/pkp-lib/commit/718ad72e597285d2899932efbd1d87635b90efe7) · 2019-06-26 · Nate Wright (NateWr)
-- **Upstream** `pkp/pkp-lib#7016` (open), reporting the OJS table of contents; its fix PRs `pkp/pkp-lib#7622` and `pkp/ojs#3275` (open since 2022) no longer apply to main, and no PR covers OPS
+- **Upstream** `pkp/pkp-lib#13775` (open), covering OPS, the team's copy of this issue (2026-11-10). Earlier: `pkp/pkp-lib#7016` (open), reporting the OJS table of contents; its fix PRs `pkp/pkp-lib#7622` and `pkp/ojs#3275` (open since 2022) no longer apply to main, and no PR covers OPS
 - **Tracked in** spec U41 [A3](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U41-contributors-and-affiliations.md#a3)
 - **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

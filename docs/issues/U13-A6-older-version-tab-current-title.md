@@ -9,7 +9,7 @@
   - 3.4: OJS, OMP, OPS (code)
   - 3.3: OJS, OMP, OPS (code)
 - **Introduced** `pkp/ojs#2473` and `pkp/omp#705` for `pkp/pkp-lib#4870` · [0639bdf58d](https://github.com/pkp/ojs/commit/0639bdf58d78fac60cb281f233d00e278ecc1c61), [9cc962b167](https://github.com/pkp/omp/commit/9cc962b1674c2a9602a39d9891f064f1e1368e16) · 2019-09-25 · Nate Wright (NateWr)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13775` (open), covering OPS, the team's copy of this issue (2026-11-10). Before it: none found (2026-10-01)
 - **Tracked in** spec U13 [A6](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U13-article-landing-page-and-reading.md#a6) · spec U69 [A5](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U69-monograph-landing-page.md#a5)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

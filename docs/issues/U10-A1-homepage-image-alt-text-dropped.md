@@ -9,7 +9,7 @@
   - 3.4: OMP, OPS (code)
   - 3.3: OMP, OPS (code)
 - **Introduced** `pkp/omp#676` and `pkp/ojs#2376` (the journal template OPS was later copied from) for `pkp/pkp-lib#4683` · [d9ffc0c1ec](https://github.com/pkp/omp/commit/d9ffc0c1ecb112d9def47c1ee69002025709ba1f), [e7c66ecb3c](https://github.com/pkp/ojs/commit/e7c66ecb3c58be1e2e9eed80313c470ace2fabc5) (also in OPS's history, forked from OJS) · 2019-05-14 · E.L. Guerrero (mylonelycomputer)
-- **Upstream** `pkp/pkp-lib#5778` (closed with a fix for OJS only, `pkp/ojs#2715`; OMP and OPS never received it)
+- **Upstream** `pkp/pkp-lib#13775` (open), covering OPS, the team's copy of this issue (2026-11-10). Earlier: `pkp/pkp-lib#5778` (closed with a fix for OJS only, `pkp/ojs#2715`; OMP and OPS never received it)
 - **Tracked in** spec U10 [A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U10-appearance-and-theming.md#a1)
 - **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

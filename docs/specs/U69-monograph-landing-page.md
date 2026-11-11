@@ -1963,15 +1963,15 @@ Issue report: [pkp-e2e#292](https://github.com/jardakotesovec/pkp-e2e/issues/292
 
 <a id="fn-f-a4"></a>
 **f-a4** — `monograph_full.tpl` prints `submission.viewingPreview` for any unpublished publication and `submission.outdatedVersion` for any publication that is not the current one, with that publication's empty `datePublished`, which prints as today (note h). Live-probed 2026-09-28 (td7). Live-probed 2026-10-05 (Rule 5b; four runs): the new version's preview read "This is an outdated version published on 2026-10-05. Read the most recent version." with no date saved, and "…published on 2025-01-15." once "Date Published" 2025-01-15 was saved on the version's "Catalog Entry".
-Issue report: [pkp-e2e#209](https://github.com/jardakotesovec/pkp-e2e/issues/209) ([docs/issues/U13-OPS1-new-version-preview-called-outdated.md](../issues/U13-OPS1-new-version-preview-called-outdated.md)).
+Issue report: [pkp-e2e#209](https://github.com/jardakotesovec/pkp-e2e/issues/209) ([docs/issues/U13-OPS1-new-version-preview-called-outdated.md](../issues/U13-OPS1-new-version-preview-called-outdated.md)). The team's copies are `pkp/pkp-lib#13774` for OMP and `pkp/pkp-lib#13775` for OPS (2026-11-10).
 
 <a id="fn-f-a5"></a>
 **f-a5** — `book.tpl` builds the page title from `getCurrentPublication()`. The same holds on an article's page (Article landing page & reading, its A6). Live-probed 2026-09-28 (td8).
-Issue report: [pkp-e2e#226](https://github.com/jardakotesovec/pkp-e2e/issues/226) ([docs/issues/U13-A6-older-version-tab-current-title.md](../issues/U13-A6-older-version-tab-current-title.md)).
+Issue report: [pkp-e2e#226](https://github.com/jardakotesovec/pkp-e2e/issues/226) ([docs/issues/U13-A6-older-version-tab-current-title.md](../issues/U13-A6-older-version-tab-current-title.md)). The team's copy for OPS is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-a6"></a>
 **f-a6** — Note i: `$authorString` carries the role names in brackets, the chapter's string does not; since the credits gained role names the check never matches. Live-probed 2026-09-28 (td10).
-Issue report: [pkp-e2e#293](https://github.com/jardakotesovec/pkp-e2e/issues/293) ([docs/issues/U69-A6-contents-repeat-book-authors.md](../issues/U69-A6-contents-repeat-book-authors.md)).
+Issue report: [pkp-e2e#293](https://github.com/jardakotesovec/pkp-e2e/issues/293) ([docs/issues/U69-A6-contents-repeat-book-authors.md](../issues/U69-A6-contents-repeat-book-authors.md)). The team's copy is `pkp/pkp-lib#13774` (2026-11-10).
 
 <a id="fn-f-a7"></a>
 **f-a7** — `downloadLink.tpl` prints `{$downloadFile->getDirectSalesPrice()}` before `payment.directSales.purchase`, which carries the amount again. Seen 2026-09-28 (U73 claim check K3). Live-probed 2026-09-28: a price typed "25" reads "25 Purchase PDF (25 USD)", so the number shows as typed.
@@ -1998,7 +1998,7 @@ Issue report: [pkp-e2e#294](https://github.com/jardakotesovec/pkp-e2e/issues/294
 
 <a id="fn-f-a13"></a>
 **f-a13** — Note l: `chapter.tpl` compares `date_format:$dateFormatShort` strings, where `monograph_full.tpl` compares `Y-m-d` (pkp-lib#10169 fixed only the book page). Live-probed 2026-09-28 (td16): both directions. Walked 2026-10-01 on OMP `main` and `stable-3_5_0`, the default dataset's book 14 and its "Chapter 1: Mind Control—Internal or External?", reading the book's and the chapter's page under each of the four "Date (Short)" choices (`PKPDateTimeForm`: "Y-m-d", "d-m-Y", "m/d/Y", "d.m.Y"): dated 2024-12-31, the chapter read "Forthcoming December 31, 2024" under "01-10-2026", "10/01/2026" and "01.10.2026" and "Published" under "2026-10-01", the book "Published" throughout; scheduled for 2027-01-01, the preview's chapter read "Published January 1, 2027" and the book "Forthcoming". A "Custom" format is the 2026-09-28 probe's "d/m/Y" only.
-Issue report: [pkp-e2e#296](https://github.com/jardakotesovec/pkp-e2e/issues/296) ([docs/issues/U69-A13-chapter-page-forthcoming-under-other-date-format.md](../issues/U69-A13-chapter-page-forthcoming-under-other-date-format.md)).
+Issue report: [pkp-e2e#296](https://github.com/jardakotesovec/pkp-e2e/issues/296) ([docs/issues/U69-A13-chapter-page-forthcoming-under-other-date-format.md](../issues/U69-A13-chapter-page-forthcoming-under-other-date-format.md)). The team's copy is `pkp/pkp-lib#13774` (2026-11-10).
 
 <a id="fn-f-a14"></a>
 **f-a14** — Note m: `getCitation()` sets the CSL `original-date` from `$submission->getOriginalPublication()` whenever its date differs from the shown version's, for a chapter as for the book, and the APA style prints it as "Original work published {year}". Live-probed 2026-09-28 (td18).
@@ -2014,7 +2014,7 @@ Issue report: [pkp-e2e#284](https://github.com/jardakotesovec/pkp-e2e/issues/284
 
 <a id="fn-f-a17"></a>
 **f-a17** — `chapter.tpl` prints only `submission.outdatedVersion`; `submission.viewingPreview` is in `monograph_full.tpl` alone. Live-probed 2026-09-28 (td5): the chapter page read "… Volume K1 Unpublished Book Published March 5, 2024 How to Cite …" with no notice for every previewing role.
-Issue report: [pkp-e2e#297](https://github.com/jardakotesovec/pkp-e2e/issues/297) ([docs/issues/U69-A17-unpublished-book-chapter-page-no-preview-notice.md](../issues/U69-A17-unpublished-book-chapter-page-no-preview-notice.md)).
+Issue report: [pkp-e2e#297](https://github.com/jardakotesovec/pkp-e2e/issues/297) ([docs/issues/U69-A17-unpublished-book-chapter-page-no-preview-notice.md](../issues/U69-A17-unpublished-book-chapter-page-no-preview-notice.md)). The team's copy is `pkp/pkp-lib#13774` (2026-11-10).
 
 <a id="fn-f-a18"></a>
 **f-a18** — Note k: `CatalogBookHandler::download()` sends a signed-out buyer to Login with `source` built by `$request->url()`, a full address, and `LoginHandler::signIn()` follows only a `source` starting with "/", so `_redirectAfterLogin()` (its dashboard branch needs an empty `source`) falls back to `PKPPageRouter::getHomeUrl()`, the user's home by role: the press's index for a Reader, `dashboard/editorial` for a manager, sub-editor or assistant role, `dashboard/reviewAssignments` for a Reviewer (untried), `dashboard/mySubmissions` for an Author; a free file's Login (`Validation::redirectLogin()`) carries a path. "Register" on that Login page hands the same `source` to the registration form, and `RegistrationHandler::register()` applies the same path rule. Live-probed 2026-09-28 (td13, td14): the priced file's Login address carried `source=http%3A%2F%2F…`, the free file's `source=%2Findex.php%2F…`. Live-probed 2026-09-29 (td14): the Press manager's sign-in went to `dashboard/editorial`. Walked 2026-10-01 on OMP `main`, the default dataset's book 14 with one "PDF" file set to "Direct Sales" at 25.00 USD with "Manual Fee Payment": signing in on the Login page the file's link opened took `aclark` (Author and Reader) to `dashboard/mySubmissions`, headed "Active submissions (1)", `rvaca` (Press manager) to `dashboard/editorial`, headed "Assigned to me (0)", and a Reader to `{press}/index`; a newcomer who pressed "Register" there and sent the form landed on "Registration complete" ("Thanks for registering! What would you like to do next?"), signed in.
@@ -2026,7 +2026,7 @@ Issue report: [pkp-e2e#286](https://github.com/jardakotesovec/pkp-e2e/issues/286
 
 <a id="fn-f-a20"></a>
 **f-a20** — Note l: a new version copies each chapter with its `datePublished`, and the first date is the source chapter's. Live-probed 2026-09-28 (td17).
-Issue report: [pkp-e2e#298](https://github.com/jardakotesovec/pkp-e2e/issues/298) ([docs/issues/U69-A20-later-version-chapter-repeats-date.md](../issues/U69-A20-later-version-chapter-repeats-date.md)).
+Issue report: [pkp-e2e#298](https://github.com/jardakotesovec/pkp-e2e/issues/298) ([docs/issues/U69-A20-later-version-chapter-repeats-date.md](../issues/U69-A20-later-version-chapter-repeats-date.md)). The team's copy is `pkp/pkp-lib#13774` (2026-11-10).
 
 <a id="fn-f-a21"></a>
 **f-a21** — Note m: `CitationStyleLanguageHandler::setupRequest()` lets an unpublished submission through only for managers, the Site Administrator and assigned sub-editors or assistants, while the block itself shows to everyone `canPreview()` admits. Live-probed 2026-09-28 (td18).

@@ -2257,7 +2257,7 @@ Issue report: [pkp-e2e#473](https://github.com/jardakotesovec/pkp-e2e/issues/473
 **f-omp2** — `monograph_full.tpl` prints `{$pubIdType}` (the plugin's
 `getPubIdType()`, `other::urn`) as the label and the stored value as
 text. Live-probed 2026-09-24 (notes h, q22).
-Issue report: [pkp-e2e#474](https://github.com/jardakotesovec/pkp-e2e/issues/474) ([docs/issues/U44-OMP2-book-page-format-urn-code-label.md](../issues/U44-OMP2-book-page-format-urn-code-label.md)).
+Issue report: [pkp-e2e#474](https://github.com/jardakotesovec/pkp-e2e/issues/474) ([docs/issues/U44-OMP2-book-page-format-urn-code-label.md](../issues/U44-OMP2-book-page-format-urn-code-label.md)). The team's copy is `pkp/pkp-lib#13774` (2026-11-10).
 
 <a id="fn-f-omp3"></a>
 **f-omp3** — `monograph_full.tpl` loops over the pub-id plugins only

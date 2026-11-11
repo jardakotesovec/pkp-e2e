@@ -9,7 +9,7 @@
   - 3.4: OJS, OPS (code)
   - 3.3: OJS, OPS (code)
 - **Introduced** `pkp/ojs#940` for `pkp/pkp-lib#1390` · [dba7c4b5a2](https://github.com/pkp/ojs/commit/dba7c4b5a27a4cef47c433addcd0444ff73d52ab) · 2016-07-22 · Nate Wright (NateWr) (the issue page); `pkp/ojs#1127` for `pkp/pkp-lib#2069` · [325957baf4](https://github.com/pkp/ojs/commit/325957baf4b48a0fc598a8d0da70a94a23eb8d3b) · 2016-12-07 · Nate Wright (NateWr) (every other list, OPS's included)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13775` (open), covering OPS, the team's copy of this issue (2026-11-10). Before it: none found (2026-10-01)
 - **Tracked in** spec U13 [OPS9](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U13-article-landing-page-and-reading.md#ops9) (the journal side was found while writing this report; U13 has no entry for it)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

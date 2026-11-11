@@ -9,7 +9,7 @@
   - 3.4: OJS, OMP, OPS (code)
   - 3.3: OJS, OMP, OPS (code)
 - **Introduced** `pkp/omp#773` for `pkp/pkp-lib#5561` · [7115fe83ac](https://github.com/pkp/omp/commit/7115fe83ac26caf391f42be88373986e0b7893c8) · 2020-02-28 · Nate Wright (NateWr) (book lists); `pkp/ojs#2361` for `pkp/pkp-lib#4557` · [c3ecd6583e](https://github.com/pkp/ojs/commit/c3ecd6583e210a8959d8f8632d334ec1c1688ae4) · 2019-04-29 · commit by thinkbulecount2, PR by E.L. Guerrero (mylonelycomputer) (article lists; OPS copied them)
-- **Upstream** `pkp/pkp-lib#12668` (open, OJS's article lists), `pkp/pkp-lib#12665` (open, OMP's book lists, filed as the cover and title being two links to one page; its discussion proposes the hiding fix this report tries); this report adds OPS, journal issue lists, the detail pages' cover links and the default picture that cannot be named
+- **Upstream** `pkp/pkp-lib#13774` (open), covering OMP and `pkp/pkp-lib#13775` (open), covering OPS, the team's copies of this issue (2026-11-10). Earlier: `pkp/pkp-lib#12668` (open, OJS's article lists), `pkp/pkp-lib#12665` (open, OMP's book lists, filed as the cover and title being two links to one page; its discussion proposes the hiding fix this report tries); this report adds OPS, journal issue lists, the detail pages' cover links and the default picture that cannot be named
 - **Tracked in** spec U68 [A2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U68-catalog-browse.md#a2)
 - **Checked** 2026-10-04, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

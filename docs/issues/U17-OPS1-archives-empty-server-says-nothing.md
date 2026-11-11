@@ -9,7 +9,7 @@
   - 3.4: OPS (code)
   - 3.3: OPS (code)
 - **Introduced** two changes together: [df0ab2a2f5](https://github.com/pkp/ops/commit/df0ab2a2f534b4c3767205d3eda67353d7d8275f) · 2019-09-26 · ajnyga (ajnyga) wrote the empty-list branch with a message key that was never added; `pkp/pkp-lib#5123` for `pkp/pkp-lib#5122` · [cafe5d98cb](https://github.com/pkp/pkp-lib/commit/cafe5d98cb9f3a95492c4bf4512e568499c90ae7) · 2019-10-02 · Alec Smecher (asmecher) made the list an object, so the template's check for an empty list is always false
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#13775` (open), the team's copy of this issue (2026-11-10). Before it: none found (2026-10-02)
 - **Tracked in** spec U17 [OPS1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U17-sections.md#ops1)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

@@ -1772,7 +1772,7 @@ Issue report: [pkp-e2e#1082](https://github.com/jardakotesovec/pkp-e2e/issues/10
 
 <a id="fn-f-ops1"></a>
 **f-ops1** — fn f. Live-probed 2026-09-25 on a scratch server, three runs: note td13. The seeded server is not empty once other suites have posted to it.
-Issue report: [pkp-e2e#488](https://github.com/jardakotesovec/pkp-e2e/issues/488) ([docs/issues/U17-OPS1-archives-empty-server-says-nothing.md](../issues/U17-OPS1-archives-empty-server-says-nothing.md)).
+Issue report: [pkp-e2e#488](https://github.com/jardakotesovec/pkp-e2e/issues/488) ([docs/issues/U17-OPS1-archives-empty-server-says-nothing.md](../issues/U17-OPS1-archives-empty-server-says-nothing.md)). The team's copy is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-ops2"></a>
 **f-ops2** — OPS `locale/en/manager.po` `manager.sections.identifyTypeExamples` "(For example etc.)". Live-probed 2026-09-25, with OJS's window as the control. OPS `Dc11SchemaPreprintAdapter::extractMetadataFromDataObject()` writes the fixed types `info:eu-repo/semantics/preprint` and `info:eu-repo/semantics/draft` and reads nothing from the section; nothing else in OPS or its lib/pkp reads `identifyType` (ops `512707bc6d`, 2019, took the section's value out of the record and left the box). Walked 2026-10-02 on OPS and OJS `main` and `stable-3_5_0`, default test dataset (Settings bullet 11): "Working Paper" typed in the box of "Preprints" saved ("Your changes have been saved.") and showed again on reopening, and all 17 records of `{server}/oai?verb=ListRecords&metadataPrefix=oai_dc` kept only those two `dc:type` values; the same on OJS's "Articles" added `<dc:type>Working Paper</dc:type>` to its records. Kept script: `shared/playwright/checks/issues/section-type-box-no-examples-no-effect/walk.js`.

@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: OMP (code; a format's DOI too)
 - **Introduced** `pkp/omp#152` for `pkp/pkp-lib#836` · [891fda6cec](https://github.com/pkp/omp/commit/891fda6cecc33886602a20ce8f7bcfcbf2bb1e4f) · 2015-10-28 · Nate Wright (NateWr)
-- **Upstream** none found (2026-10-02)
+- **Upstream** `pkp/pkp-lib#13774` (open), the team's copy of this issue (2026-11-10). Before it: none found (2026-10-02)
 - **Tracked in** spec U44 [OMP2](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U44-identifiers.md#omp2)
 - **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

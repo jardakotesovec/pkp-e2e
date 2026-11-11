@@ -9,7 +9,7 @@
   - 3.4: OMP (code)
   - 3.3: none (code; no chapter pages)
 - **Introduced** `pkp/omp#1350` for `pkp/pkp-lib#8679` · [5d855f74fe](https://github.com/pkp/omp/commit/5d855f74feeb2a86206a6493568a8ea620c50401) · 2023-02-28 · Bozana Bokan (bozana)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13774` (open), the team's copy of this issue (2026-11-10). Before it: none found (2026-10-01)
 - **Tracked in** spec U69 [A17](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U69-monograph-landing-page.md#a17)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

@@ -9,7 +9,7 @@
   - 3.4: none (code; one affiliation per contributor)
   - 3.3: none (code; one affiliation per contributor)
 - **Introduced** `pkp/ojs#4639`, `pkp/omp#1819` and `pkp/ops#856` for `pkp/pkp-lib#7135` · [8eaab56f56](https://github.com/pkp/ojs/commit/8eaab56f567ad1daa21261deb2bfab4b65576d52), [17f2661a46](https://github.com/pkp/omp/commit/17f2661a46cb67cabe295071223d64a81e8e42b5), [99b51ba3d4](https://github.com/pkp/ops/commit/99b51ba3d4c8e93e73659c898553fbfef51665dc) · 2025-02-06 · Bozana Bokan (bozana)
-- **Upstream** none found (2026-10-13)
+- **Upstream** `pkp/pkp-lib#13775` (open), covering OPS, the team's copy of this issue (2026-11-10). Before it: none found (2026-10-13)
 - **Tracked in** spec U41 [A27](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U41-contributors-and-affiliations.md#a27)
 - **Checked** 2026-10-13, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

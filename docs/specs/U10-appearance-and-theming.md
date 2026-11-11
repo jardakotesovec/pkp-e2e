@@ -2447,7 +2447,7 @@ read 2026-10-03. Live-probed 2026-09-24 on all three
 apps: typed "Home picture" (and "Our building"), the journal's picture
 read the typed text, the press's and the server's `alt=""`; the tab
 still held the text after a reload.
-Issue report: [pkp-e2e#775](https://github.com/jardakotesovec/pkp-e2e/issues/775) ([docs/issues/U10-A1-homepage-image-alt-text-dropped.md](../issues/U10-A1-homepage-image-alt-text-dropped.md)).
+Issue report: [pkp-e2e#775](https://github.com/jardakotesovec/pkp-e2e/issues/775) ([docs/issues/U10-A1-homepage-image-alt-text-dropped.md](../issues/U10-A1-homepage-image-alt-text-dropped.md)). The team's copy for OPS is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-a2"></a>
 **f-a2** — Seen 2026-09-23 in passing on all three apps (twice): the

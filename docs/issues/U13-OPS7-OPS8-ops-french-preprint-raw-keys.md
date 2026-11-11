@@ -9,7 +9,7 @@
   - 3.4: OPS (code)
   - 3.3: OPS (code)
 - **Introduced** keywords label: not traced; present since at least [271a2052c4](https://github.com/pkp/ops/commit/271a2052c41e141061defd8db68bec848064c1c7) (2020-03-03), which gave it its English text only. PDF tab: `pkp/ops#132` for `pkp/pkp-lib#6759` · [0cc844c694](https://github.com/pkp/ops/commit/0cc844c694f6aba42adbea6e554952222da8f7b6) · 2021-02-14 · Alec Smecher (asmecher)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13775` (open), the team's copy of this issue (2026-11-10). Before it: none found (2026-10-01)
 - **Tracked in** spec U13 [OPS7](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U13-article-landing-page-and-reading.md#ops7), [OPS8](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U13-article-landing-page-and-reading.md#ops8)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

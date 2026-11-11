@@ -171,8 +171,10 @@ function cmdCopies() {
     const byEntry = trackedIn(list);
     // The search misses some, so each repo's recent issues are read as well.
     const hits = new Map();
-    for (const i of ghJson('search', 'issues', '--owner', 'pkp', `${REPO} in:body`, '--include-prs', '--limit', '1000',
-        '--json', 'url,state,createdAt,isPullRequest,body')) {
+    // Issues and PRs are two searches: GitHub refuses one query without `is:issue` or `is:pull-request`.
+    const search = (kind) => ghJson('search', kind, '--owner', 'pkp', `${REPO} in:body`, '--limit', '1000',
+        '--json', 'url,state,createdAt,isPullRequest,body');
+    for (const i of [...search('issues'), ...search('prs')]) {
         const [, repo, n] = i.url.match(/github\.com\/(pkp\/[\w.-]+)\/(?:issues|pull)\/(\d+)/) || [];
         if (repo) hits.set(`${repo}#${n}`, { state: i.state.toLowerCase(), created: i.createdAt.slice(0, 10), pr: i.isPullRequest, body: (i.body || '').replace(/\r/g, '') });
     }

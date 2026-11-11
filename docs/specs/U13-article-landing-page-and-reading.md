@@ -3152,7 +3152,7 @@ Issue report: [pkp-e2e#222](https://github.com/jardakotesovec/pkp-e2e/issues/222
 `getCurrentPublication()->getLocalizedFullTitle()` to the header as the
 page title, whichever publication the page shows. Live-probed
 2026-09-25, note q4, both apps.
-Issue report: [pkp-e2e#226](https://github.com/jardakotesovec/pkp-e2e/issues/226) ([docs/issues/U13-A6-older-version-tab-current-title.md](../issues/U13-A6-older-version-tab-current-title.md)).
+Issue report: [pkp-e2e#226](https://github.com/jardakotesovec/pkp-e2e/issues/226) ([docs/issues/U13-A6-older-version-tab-current-title.md](../issues/U13-A6-older-version-tab-current-title.md)). The team's copy for OPS is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-a7"></a>
 **f-a7** — The "ABNT" answer for a preprint reads
@@ -3527,7 +3527,7 @@ whenever the shown publication is not the current one, previews
 included; the date it names is the day of the preview, the unpublished
 version having no publication date of its own. Live-probed 2026-09-25,
 note q3.
-Issue report: [pkp-e2e#209](https://github.com/jardakotesovec/pkp-e2e/issues/209) ([docs/issues/U13-OPS1-new-version-preview-called-outdated.md](../issues/U13-OPS1-new-version-preview-called-outdated.md)).
+Issue report: [pkp-e2e#209](https://github.com/jardakotesovec/pkp-e2e/issues/209) ([docs/issues/U13-OPS1-new-version-preview-called-outdated.md](../issues/U13-OPS1-new-version-preview-called-outdated.md)). The team's copies are `pkp/pkp-lib#13774` for OMP and `pkp/pkp-lib#13775` for OPS (2026-11-10).
 
 <a id="fn-f-ops2"></a>
 **f-ops2** — Note f: `PreprintHandler::initialize()` overwrites the first
@@ -3561,17 +3561,17 @@ Issue report: [pkp-e2e#240](https://github.com/jardakotesovec/pkp-e2e/issues/240
 **f-ops6** — Note j. The landing page's own "DOI:" line reads the
 publication's DOI object instead and is unaffected. Live-probed
 2026-09-25, note j.
-Issue report: [pkp-e2e#212](https://github.com/jardakotesovec/pkp-e2e/issues/212) ([docs/issues/U13-OPS6-preprint-summary-doi-never-shown.md](../issues/U13-OPS6-preprint-summary-doi-never-shown.md)).
+Issue report: [pkp-e2e#212](https://github.com/jardakotesovec/pkp-e2e/issues/212) ([docs/issues/U13-OPS6-preprint-summary-doi-never-shown.md](../issues/U13-OPS6-preprint-summary-doi-never-shown.md)). The team's copy is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-ops7"></a>
 **f-ops7** — Note c: `preprint.subject` has an empty translation in
 OPS's `locale/fr_CA/locale.po`. Live-probed 2026-09-25, note q5.
-Issue report: [pkp-e2e#207](https://github.com/jardakotesovec/pkp-e2e/issues/207) ([docs/issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md](../issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md)).
+Issue report: [pkp-e2e#207](https://github.com/jardakotesovec/pkp-e2e/issues/207) ([docs/issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md](../issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md)). The team's copy is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-ops8"></a>
 **f-ops8** — Note d: `article.pageTitle` is absent from OPS's French
 locale. Live-probed 2026-09-25, note d.
-Issue report: [pkp-e2e#207](https://github.com/jardakotesovec/pkp-e2e/issues/207) ([docs/issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md](../issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md)).
+Issue report: [pkp-e2e#207](https://github.com/jardakotesovec/pkp-e2e/issues/207) ([docs/issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md](../issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md)). The team's copy is `pkp/pkp-lib#13775` (2026-11-10).
 
 <a id="fn-f-ops9"></a>
 **f-ops9** — Note j: the element at the cover's centre is the keyword
@@ -3587,7 +3587,7 @@ opened the preprint, the rest of the band (beside the author line, the
 keywords and the details line) opened nothing; on the journal's current
 issue page the author line's row, 25 px, opened nothing and the cover's
 middle opened the article. A press's catalog has no such band.
-Issue report: [pkp-e2e#216](https://github.com/jardakotesovec/pkp-e2e/issues/216) ([docs/issues/U13-OPS9-preprint-summary-cover-middle-dead.md](../issues/U13-OPS9-preprint-summary-cover-middle-dead.md)).
+Issue report: [pkp-e2e#216](https://github.com/jardakotesovec/pkp-e2e/issues/216) ([docs/issues/U13-OPS9-preprint-summary-cover-middle-dead.md](../issues/U13-OPS9-preprint-summary-cover-middle-dead.md)). The team's copy for OPS is `pkp/pkp-lib#13775` (2026-11-10).
 
 ## Reference — entry points & surfaces
 

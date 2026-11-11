@@ -11,7 +11,7 @@
 - **Introduced**
   - the comparison: a `pkp/omp` commit for Bugzilla 9038 · [fa2b6ee18f](https://github.com/pkp/omp/commit/fa2b6ee18f18ced6ce14070d28a563e8d8dedd9a) · 2014-12-02 · Alec Smecher (asmecher)
   - on main, role names in every credit line: `pkp/pkp-lib#11765` for `pkp/pkp-lib#857` · [52d3a0f8e7](https://github.com/pkp/pkp-lib/commit/52d3a0f8e70659ff8a1507068866a6abdeb8ec90) · 2025-11-11 · jyhein (jyhein)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13774` (open), the team's copy of this issue (2026-11-10). Before it: none found (2026-10-01)
 - **Tracked in** spec U69 [A6](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U69-monograph-landing-page.md#a6)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

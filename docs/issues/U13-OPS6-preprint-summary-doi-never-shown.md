@@ -9,7 +9,7 @@
   - 3.4: OPS (code)
   - 3.3: none (code; DOIs still come from the DOI plugin there)
 - **Introduced** `pkp/ops` branch `i7014_dois` (no PR) for `pkp/pkp-lib#7014` · [baf9653198](https://github.com/pkp/ops/commit/baf9653198b503cb3c53346443e9ae4f90da8cff) · 2022-01-10 · Erik Hanson (ewhanson)
-- **Upstream** none found (2026-10-01)
+- **Upstream** `pkp/pkp-lib#13775` (open), the team's copy of this issue (2026-11-10). Before it: none found (2026-10-01)
 - **Tracked in** spec U13 [OPS6](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U13-article-landing-page-and-reading.md#ops6)
 - **Checked** 2026-10-01, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
