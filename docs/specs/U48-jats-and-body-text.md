@@ -54,6 +54,7 @@ and every assistant role). <sup>c</sup>
 | **Send a file to the "Body Text" editor** ("Send to Text Editor" on a Word file's row) | • Who is offered it, and on which files, is [Submission files](U36-submission-files.md#row-menu) (Site Administrator, Journal Manager, Editor, Production Editor); its window is [Publish, schedule & versions](U49-publish-schedule-and-versions.md) (its Rule 16). What arrives on "Body Text" is Rule 20 here <sup>c</sup> <sup>d20</sup> |
 | **Download the published JATS XML** (the article page's "JATS XML" link; Rules 10–12) | • Anyone who opens the article's page, signed out included, while the version's box is ticked and the version is published. On a journal that requires subscriptions this holds in a restricted issue too: a visitor its galleys refuse ([Subscriptions](U51-subscriptions.md), its Rule 12) still downloads the XML ⚠ [A22](#a22)<br>• With "Users must be registered and log in to view open access content." on, signed-in visitors only (Settings bullet 2)<br>• Before the version is published: those offered the workflow header's "Preview", and the submitting author by the link's address (Rule 11) <sup>e</sup> <sup>d13</sup> |
 | **Turn the "JATS Template Plugin" on or off** | • Journal Manager, Editor and Site Administrator: on Settings › Website › "Plugins", the plugin row's box (*Plugins management*; Settings bullet 1). Ticking it shows "The plugin "JATS Template Plugin" has been enabled."; unticking asks "Are you sure you want to disable this plugin?" with "OK" and "Cancel", then shows "The plugin "JATS Template Plugin" has been disabled."<br>• A Section Editor who opens Settings › Website reads "The current role does not have access to this operation." <sup>d29</sup> |
+| **"Export to HTML" and "Preview: PDF" › "Create PDF"** on "Body Text" (Rule 24) | • Offered to everyone who opens "Body Text", and carried out for each of them. That includes a Layout Editor or other assistant whose assignment has "Permissions" unticked, whose "Save" on the same page is refused ([A2](#a2))<br>• The Author: the author view has no "Body Text", and the export is refused for the Author too <sup>d32</sup> <sup>d33</sup> |
 
 ## Fields & validation
 
@@ -235,7 +236,9 @@ Nothing on either page is required, and neither page has a form-level
     "Unsaved Changes" badge; undoing back to the saved text hides it
     again. "Save" stores the whole text, hides the badge and reads "Saved"
     for about a second and a half. "Save" can be pressed with nothing
-    changed, and saves again. <sup>g</sup> <sup>n</sup> <sup>d16</sup>
+    changed, and saves again. A text larger than the server accepts is
+    not saved ⚠ [A26](#a26). <sup>g</sup> <sup>n</sup> <sup>d16</sup>
+    <sup>d33</sup>
 16. **Leaving with unsaved changes.** Nothing asks. Choosing another
     entry of the workflow's side menu, closing the workflow, reloading the
     browser page or closing the tab leaves at once, and the changes are
@@ -301,29 +304,57 @@ Nothing on either page is required, and neither page has a form-level
     A figure is not listed on the version's "Media" page (see
     [Media files](U47-media-files.md#media-page)). <sup>q</sup>
     <sup>d22</sup>
-23. **Where the Body Text goes.** The saved text is used nowhere else: the
-    "JATS XML" page's generated XML does not carry it (its body comes from
-    a galley, Rule 2a), and the article's page shows nothing of it
-    ⚠ [A5](#a5). <sup>r</sup> <sup>d23</sup>
+23. **Where the Body Text goes.** "Save" alone puts the text nowhere
+    else: the "JATS XML" page's generated XML does not carry it, and the
+    article's page shows nothing of it ⚠ [A5](#a5). "Export" (Rule 24)
+    makes galleys of it. Once "Export to HTML" has run on a published
+    version, the article's page lists an "HTML" galley that shows the
+    text, and the generated XML's body is that galley's text (Rule 2a,
+    with the tags as text [A7](#a7)). <sup>r</sup> <sup>d23</sup>
+    <sup>d33</sup>
 
 <a id="export"></a>
 24. **"Export": the Body Text as galleys.** The page's "Export" menu
     offers "Export to HTML", which saves the editor's text as an "HTML"
     galley of the version with its figures copied beside it, and
-    "Preview: PDF", a page preview whose "Create PDF" saves the text as a
-    "PDF" galley. A later export of the same version adds a revision to
-    that galley instead of a second one, but exports of one version that
-    reach the server at the same moment each add a galley ⚠ [A23](#a23).
-    The galley list marks these galleys "Generated from text editor" and
-    shows "Revision N" from their file's second version
-    ([Galleys](U46-galleys.md#galleys-page)). On a new version the export
-    gives the copied galley a file of its own, so the published version
-    keeps its text. An author's export is refused, and so is an image
-    from another submission or one whose address is not http(s), with
-    the reason. The same export run outside a web request (a
-    command-line tool or a queued job, with no journal in the request)
-    makes the "PDF" galley but stops with an error for the "HTML" one
-    ⚠ [A24](#a24). <sup>d32</sup>
+    "Preview: PDF", which opens a page headed "Publication: Preview:
+    PDF" showing the text; its "Create PDF" saves the text as a "PDF"
+    galley. After either, the line "HTML galley saved." or "PDF galley
+    saved." shows under "Export". Who may export is Actors row 9. <sup>d32</sup> <sup>d33</sup>
+    - 24a. **The text as the editor shows it.** Both exports take the
+      text as the editor shows it, saved or not. An export saves nothing
+      on "Body Text" itself: "Unsaved Changes" stays, and a reload
+      without "Save" brings back the last saved text while the galley
+      keeps what was exported. On a published version the new or revised
+      galley is what readers get at once ([A3](#a3)). With nothing in the
+      editor, both "Export" items are still enabled, and "Export to HTML"
+      makes an "HTML" galley with no text. <sup>d33</sup>
+    - 24b. **One galley per label, revised.** A later export of the same
+      version adds a revision to that galley instead of a second one, but
+      exports of one version that reach the server at the same moment
+      each add a galley ⚠ [A23](#a23). The galley list marks these
+      galleys "Generated from text editor" and shows "Revision N" from
+      their file's second version
+      ([Galleys](U46-galleys.md#galleys-page)). An export revises only a
+      galley an export made: on a version that already has a "PDF"
+      galley added on "Galleys", "Create PDF" adds a second "PDF" galley,
+      and readers of the published version see "PDF" twice under
+      "Downloads" ⚠ [A25](#a25). <sup>d32</sup> <sup>d33</sup>
+    - 24c. **A new version.** On a new version the export gives the
+      copied galley a file of its own, so the published version keeps its
+      text. The copied file counts as the galley's first, so the first
+      export on the new version already shows "Revision 2". <sup>d32</sup>
+      <sup>d33</sup>
+    - 24d. **Images.** An image taken from another submission stops the
+      export: a window "Error" reads "The HTML references an image that
+      is not attached to this publication's body text." with "OK", and no
+      galley changes. An image whose address is not http(s) (one pasted
+      into the text from an address starting "ftp:", for one) does not
+      stop it: "HTML galley saved." shows, with no window. <sup>d33</sup>
+    - 24e. **Outside a web request.** No screen runs the export there.
+      Run by a command-line tool or a queued job, with no journal in the
+      request, it makes the "PDF" galley but stops with an error for the
+      "HTML" one ⚠ [A24](#a24). <sup>d34</sup>
 
 ## Side effects
 
@@ -382,7 +413,8 @@ Nothing on either page is required, and neither page has a form-level
   data citations in the generated XML's reference list (Rule 2) and the
   "References" section of the Body Text editor (Rule 17).
 - *[Galleys](U46-galleys.md#galleys-page)*: the HTML galley whose text
-  becomes the generated XML's body (Rule 2a).
+  becomes the generated XML's body (Rule 2a), and the galleys "Export"
+  makes and revises (Rules 23, 24).
 - *[Media files](U47-media-files.md#media-page)*: the "Media" page, which
   does not list the Body Text's figures (Rule 22).
 - *[Submission files](U36-submission-files.md#row-menu)*: the file rows'
@@ -761,11 +793,28 @@ Left out of the scenarios above, by reason:
   - a new version's export (Rule 24, footnote d32): after "Create New
     Version", "Export to HTML" on the new version leaves the published
     version's "HTML" galley downloading its own text [upstream 2026-11-09]
-  - the export's refusals (Rule 24, footnote d32): an author's export
-    refused, and an image from another submission or with an address
-    that is not http(s) refused with its reason [upstream 2026-11-09]
-  - the guard for A23 (Rule 24): two exports of one version sent at the
+  - the export's refusals (Actors row 9; Rule 24d, footnote d32): an
+    author's export refused, and an image from another submission
+    refused in the "Error" window; an image whose address is not
+    http(s) exported with no window [upstream 2026-11-09]
+  - the guard for A23 (Rule 24b): two exports of one version sent at the
     same moment leave one galley, the later one a revision [upstream 2026-11-09]
+  - a Layout Editor without "Permissions" exporting (Actors row 9): on
+    "Body Text", "Export to HTML" and "Create PDF" make the version's
+    "HTML" and "PDF" galleys, marked "Generated from text editor" on
+    "Galleys", while "Save" is refused [incidental 2026-11-11]
+  - the export of unsaved text (Rule 24a): a sentence typed and not
+    saved is in the "HTML" galley after "HTML galley saved.",
+    "Unsaved Changes" still shows, and a reload brings back the saved
+    text [incidental 2026-11-11]
+  - the Body Text reaching readers (Rule 23): on a published version,
+    after "Save" alone the article's page lists no "HTML" galley; after
+    "Export to HTML" it lists one showing the text, and the "JATS XML"
+    page's XML holds the text in its body [incidental 2026-11-11]
+  - a new version's first export (Rule 24c): its "HTML" galley reads
+    "Revision 2" on "Galleys" after one export [incidental 2026-11-11]
+  - an export with nothing in the editor (Rule 24a): "Export to HTML"
+    makes an "HTML" galley with no text [incidental 2026-11-11]
 - **Nothing new to test**:
   - a second "Upload" on a version that already has a file, which
     becomes a revision of that one file, listed in its "History"
@@ -781,10 +830,11 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A1 (the tick box offered to a role that may not change it, and
     "Confirm" refused; Actors row 4; Rule 9; scenario 3 passes the box)
-  - A3 (a published version's Body Text still saved; Rule 21)
+  - A3 (a published version's Body Text still saved, and its galleys
+    revised by "Export"; Rules 21, 24a)
   - A4 (a new version's Body Text starting empty; Rule 13)
-  - A5 (the saved Body Text absent from the XML and the article's page;
-    Rule 23)
+  - A5 (the saved Body Text absent from the XML and the article's page
+    until "Export"; Rule 23)
   - A6 (the body taken from the current version's galleys; Rule 2a)
   - A7 (the galley's markup shown as text in one paragraph; Rule 2a;
     scenario 1 reads the galley's text only)
@@ -809,8 +859,12 @@ Left out of the scenarios above, by reason:
   - A20 (a warning in the server's log on each JATS "Upload"; Rule 3;
     scenario 1 uploads without reading the log)
   - A23 (simultaneous exports of one version each adding a galley;
-    Rule 24)
-  - A24 (the HTML export stopping outside a web request; Rule 24)
+    Rule 24b)
+  - A24 (the HTML export stopping outside a web request; Rule 24e)
+  - A25 ("Create PDF" adding a second "PDF" beside an uploaded one;
+    Rule 24b)
+  - A26 (a Body Text too large for the server failing on "Save";
+    Rule 15)
 - **No seed**:
   - the XML that cannot be produced: the reason in place of the XML,
     with no "Download" and no tick box (Rule 7)
@@ -861,11 +915,13 @@ entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | On a subscription journal, the article page's "JATS XML" gives the article's text to visitors its galleys refuse | 🐞 | high | issues (claude), 2026-10-05 — re-verified |
 | [A23](#a23) | Exports of one version's Body Text sent at the same moment each make a galley, so the version gets duplicate "HTML" or "PDF" galleys | 🐞 | low | — |
 | [A24](#a24) | The Body Text's HTML export stops with an error when run outside a web request; the PDF export works | 🐞 | low | — |
+| [A26](#a26) | A Body Text too large for the server fails on "Save" with "The POST data is too large.", and the text is not saved | 🐞 | minor · crash: server | — |
 | [A3](#a3) | A published version's Body Text stays editable | ❓ | minor | — |
 | [A4](#a4) | A new version starts with an empty Body Text, though its JATS file and media are copied | ❓ | user-visible | — |
-| [A5](#a5) | The saved Body Text reaches no reader and not the JATS XML | ❓ | user-visible | — |
+| [A5](#a5) | The saved Body Text reaches readers and the JATS XML only through "Export" | ❓ | user-visible | — |
 | [A10](#a10) | "Upload" on "JATS XML" accepts a text file or a PDF as the article's JATS XML | ❓ | minor | — |
 | [A19](#a19) | Signed in for the "JATS XML" download, the visitor is left on the Login page | ❓ | minor | — |
+| [A25](#a25) | "Create PDF" on a version with an uploaded "PDF" galley adds a second "PDF", and readers see "PDF" twice | ❓ | user-visible | — |
 
 ### All apps
 
@@ -897,17 +953,23 @@ who can open it write, but the server saves the text only for people who
 may change the publication. For a Layout Editor or other assistant, that
 means an editor has ticked "Permissions" on their assignment. An editor
 can do that, but what was typed before is gone unless the person copied
-it out. "Permissions" is unticked by default for the Guest Editor and
+it out. The same person may still use "Export" (Rule 24): "Export to
+HTML" and "Create PDF" turn the unsaved text into the version's "HTML"
+and "PDF" galleys. What they wrote is then kept only in those galleys,
+which readers get once the version is published, while "Body Text"
+loses it. "Permissions" is unticked by default for the Guest Editor and
 every assistant role. So with default roles, every Layout Editor,
 Proofreader or other assistant assigned to an article in Production
 meets this.
 Basis: probe, 2026-10-02. <sup>f-a2</sup>
+Report: refresh owed — a probe of 2026-11-11 (note d33) found that the same Layout Editor's "Export to HTML" and "Create PDF" succeed and keep the unsaved text as galleys, so the text is not lost outright; the report's Summary, steps and Proposed fix (`WorkflowPublicationBodyText.vue`, `workflowConfigEditorialOJS.js`, `canEdit`, `saveDocument()`, `PKPBodyTextController`, `PublicationWritePolicy`) do not say what the read-only page does with "Export" (2026-11-11)
 
 <a id="a3"></a>
 **A3 — A published version's Body Text stays editable** · ❓ · minor.
 On a published version the "Body Text" page keeps the editor and "Save",
-and a save by an editorial role is kept. The version's "JATS XML" page is
-not locked either [A12](#a12).
+and a save by an editorial role is kept. Its "Export" stays too: a new
+export revises the galleys readers open, at once (Rule 24a). The
+version's "JATS XML" page is not locked either [A12](#a12).
 Question: may a published version's production copies change after
 publication?
 Lean: no; lock both once the version is published, as the "JATS XML"
@@ -926,13 +988,16 @@ reason for a new version.
 Basis: probe, 2026-09-25. <sup>f-a4</sup>
 
 <a id="a5"></a>
-**A5 — The saved Body Text goes nowhere** · ❓ · user-visible.
+**A5 — The saved Body Text reaches readers and the JATS XML only through "Export"** · ❓ · user-visible.
 An editor who writes and saves the article on "Body Text" finds it on no
-reader's page, and the "JATS XML" page's generated XML does not carry it:
-its body still comes from an HTML galley, if any.
-Question: is the Body Text meant to feed the generated JATS XML (or a
-reader view) in this release? Lean: yes; until it does, the page stores
-work nobody else sees.
+reader's page, and the "JATS XML" page's generated XML does not carry
+it. "Export to HTML" (Rule 24) puts the text on the article's page as an
+"HTML" galley, and the generated XML then takes its body from that
+galley, with the tags as text ([A7](#a7)).
+Question: should the generated JATS XML take its body from the Body Text
+itself rather than from the exported galley? Lean: yes; the exported
+galley is the right route to readers, but the Body Text keeps the
+structure that the galley's text loses in the XML.
 Basis: probe, 2026-09-25. <sup>f-a5</sup>
 
 <a id="a6"></a>
@@ -1169,6 +1234,28 @@ screen reaches it today: only the page's "Export" menu calls the export,
 and its requests always carry the journal.
 Since: 2026-11-07 (pkp/pkp-lib#13543) · Basis: probe, 2026-11-09. <sup>f-a24</sup>
 
+<a id="a25"></a>
+**A25 — "Create PDF" adds a second "PDF" beside one uploaded on "Galleys"** · ❓ · user-visible.
+On a version that already has a "PDF" galley added on "Galleys", "Create
+PDF" on "Body Text" leaves that galley as it is and adds a second "PDF"
+galley, marked "Generated from text editor" in the list. Readers of the
+published version see "PDF" twice under "Downloads".
+Question: when the version already has a galley of the export's label,
+should the export revise that galley, or warn before it adds a second
+one? Lean: warn; revising a galley uploaded by hand would replace that
+file, but two galleys of one label leave readers to guess.
+Since: 2026-11-07 (pkp/pkp-lib#13543) · Basis: probe, 2026-11-11. <sup>f-a25</sup>
+
+<a id="a26"></a>
+**A26 — A Body Text too large for the server fails on "Save"** · 🐞 · minor · crash: server.
+"Save" on a Body Text larger than the server accepts (8 MB on a test
+install) fails on the server. A window "Error" reads "The POST data is
+too large." with "OK", "Unsaved Changes" stays, and the text is gone
+after a reload. The message tells the person neither that their text is
+what is too large nor how large it may be; the save should be refused
+with that, not fail.
+Basis: probe, 2026-11-11. <sup>f-a26</sup>
+
 ### Retired
 
 <a id="a18"></a>
@@ -1324,6 +1411,12 @@ d6, d20, d28).
 <a id="fn-d32"></a>
 **d32** — Rule 24 merged 2026-11-07 with pkp/pkp-lib#13543: pkp-lib `pkp/pkp-lib#13545` (`6035a6fed8`, merged as `b793c1688b`), `pkp/ui-library#1021` (merge `856ca3ad02`, tree `e5952751`), `pkp/ojs#5946` (merge `9cab42ec39`, tree `969433cad9`), `pkp/omp#2544`, `pkp/ops#1479` (build and dependencies only); each merged tree is the head reviewed in the PR review's sixth round (2026-11-07). Driven on PKP's default OJS dataset at the reviewed heads, rounds 3 to 6 (2026-10-23 to 2026-11-07), with `shared/playwright/checks/sync/pkp-lib-13545/` (`walk.js`, `newversion.js`, `figure.js`, `race.js`, `preview.js`, `cli.php`): `POST …/publications/{id}/bodyText` (HTML) and `…/bodyText/pdf` (PDF) answer 201 and store a galley with `generatedFrom` "editor" (`Repository::createGalleyFile()`), a second export a revision of its file; the galley list's badges need `generatedFrom === 'editor'` ("Generated from text editor", and "Revision N" from `revisionCount` 2); on a new version the copied galley's shared file is replaced by a new submission file (`isShared`), the published version keeping its files; the author's export answers 401 (`WorkflowStageAccessPolicy` on Production); another submission's image and a non-http(s) address answer 422 ("The HTML references an image that is not attached to this publication's body text.", "… that cannot be exported."). A23 and A24 re-run at the merged tips 2026-11-09 (f-a23, f-a24). Not yet driven by a suite (Coverage, Planned). Written up in `docs/reports/2026-10-16-pkp-lib-13545.md` (a temporary report, deleted once acted on; git history keeps it).
 
+<a id="fn-d33"></a>
+**d33** — Live-probed 2026-11-11 (Actors row 9; Rules 15, 23, 24–24d; A2, A3, A5, A25, A26), OJS, two runs on PKP's default dataset, freshly reset before each, `main` at ojs `99014b078f`, lib/pkp `e2078ce20e`, ui-library `55ec62ee` (`shared/playwright/checks/U48/I31/i31.js`). The Layout Editor `gcox` on submission 5 (Production, "Permissions" unticked): the "Export" menu offered "Export to HTML" and "Preview: PDF", both enabled; with a sentence typed and not saved, "Export to HTML" answered 201 and the line "HTML galley saved." showed under "Export" while "Unsaved Changes" stayed; "Create PDF" answered 201 with "PDF galley saved."; "Galleys" in a second tab listed "HTML Generated from text editor" and "PDF Generated from text editor", and the stored galley and the PDF preview held the unsaved sentence. "Save" then answered 401 with the window "Error" / "You are not allowed to edit this publication." / "OK", "HTML galley saved." still showing beside it; after a reload the editor was empty and the galleys kept the sentence. On submission 6, with "Permissions" ticked by `dbarnes` in the assignment's "Edit" ("The stage assignment has been changed."), the same galleys, and "Save" read "Saved" and kept the text over a reload. The Layout Editor was offered "Add galley" on "Galleys" in both states. `dbarnes` on published submission 17 (one uploaded galley "PDF"): after "Save" only, the signed-out article page's "Downloads" listed "PDF" and the "JATS XML" page's XML had no `<body>`; after "Export to HTML" (201, the figure stored beside the galley), "Downloads" listed "PDF" and "HTML", the HTML galley's page showed the saved sentence, and the XML's `<body>` held it as one paragraph with the `<p>` tags as text. A sentence typed after the save and exported unsaved was in the HTML galley a signed-out reader opened. A second export left one HTML galley, "HTML Generated from text editor Revision 2". "Preview: PDF" opened a page headed "Publication: Preview: PDF" (upper-cased on screen) with the text; "Create PDF" answered 201, "PDF galley saved.", the list read "PDF", "HTML Generated from text editor Revision 2", "PDF Generated from text editor", and the signed-out "Downloads" read "PDF", "HTML", "PDF". "Create New Version" copied the three galleys; on the new version's "Body Text" (empty, A4) a third sentence exported revised the new version's "HTML" galley only, listed as "HTML Generated from text editor Revision 2" after that first export there, and the published version's HTML galley, opened signed out, kept the earlier text. The author of 17, `vkarbasizaed`, had no "Body Text" and no "JATS XML" under either version; `POST …/bodyText` and `…/bodyText/pdf` sent as that author from that page answered 401, "The current role does not have access to this operation.", storing nothing. Images pasted into the editor with the clipboard on submission 9, then "Export to HTML": another submission's file address answered 422 with the window "Error" / "The HTML references an image that is not attached to this publication's body text." / "OK", no galley change; an `ftp:` address showed in the editor and the export answered 201 with "HTML galley saved." and no window (in the second run the stored galley's `<img>` had no address left; the first run did not read the file), so the server's "… that cannot be exported." of note d32 never showed. On submission 15, never saved, both items were enabled over the empty editor; two "Export to HTML" presses in two tabs at once answered 201 each and left one "HTML" galley at its second revision, its file holding no text (the probe server answers one request at a time, so A23's case was not reached). About 9 MB pasted on 9 and "Save": note f-a26. Every save the page sent carried its `bodyText` field.
+
+<a id="fn-d34"></a>
+**d34** — Rule 24e: no screen reaches the export outside a web request; only the page's "Export" menu calls it, and its requests carry the journal. Probed 2026-11-09 with a command-line tool (note f-a24); not driven on a screen 2026-11-11 (note d33).
+
 <a id="fn-s"></a>
 **s** — `SubmissionFile\Repository::add()` logs `SUBMISSION_LOG_FILE_UPLOAD` on the file (`submission.event.fileUploaded` "A file "{$filename}" was uploaded for submission {$submissionId} by {$username}.") and `SUBMISSION_LOG_FILE_REVISION_UPLOAD` on the submission (`submission.event.fileRevised` "Revision "{$filename}" was uploaded for file {$submissionFileId}."); `edit()` with a new `fileId` logs `submission.event.revisionUploaded` "A file revision "{$filename}" was uploaded for submission {$submissionId} by {$username}." on both; `delete()` logs `submission.event.fileDeleted` "A file "{$filename}" was deleted for submission {$submissionId} by {$username}." on both. Neither controller sends mail or creates notifications.
 
@@ -1353,17 +1446,17 @@ d6, d20, d28).
 Issue report: [pkp-e2e#567](https://github.com/jardakotesovec/pkp-e2e/issues/567) ([docs/issues/U48-A1-jats-make-available-offered-then-refused.md](../issues/U48-A1-jats-make-available-offered-then-refused.md)).
 
 <a id="fn-f-a2"></a>
-**f-a2** — Note c: `workflowConfigEditorialOJS.js` passes no `canEdit` to `WorkflowPublicationBodyText`, which renders "Save" unconditionally; the save goes through `PublicationWritePolicy` (401). Probe: d3.
+**f-a2** — Note c: `workflowConfigEditorialOJS.js` passes no `canEdit` to `WorkflowPublicationBodyText`, which renders "Save" unconditionally; the save goes through `PublicationWritePolicy` (401). The export (`POST …/bodyText`, `…/bodyText/pdf`) is gated on Production access, not on `PublicationWritePolicy` (note d32), so the same person's export is stored. Probe: d3, d33.
 Issue report: [pkp-e2e#568](https://github.com/jardakotesovec/pkp-e2e/issues/568) ([docs/issues/U48-A2-body-text-save-offered-then-refused.md](../issues/U48-A2-body-text-save-offered-then-refused.md)).
 
 <a id="fn-f-a3"></a>
-**f-a3** — Notes c and g: the Body Text page has no status check, and `canEditPublication()` lets editorial roles write to published versions; the JATS page's published-status test never matches (A12). Probe: d21, d30.
+**f-a3** — Notes c and g: the Body Text page has no status check, and `canEditPublication()` lets editorial roles write to published versions; the JATS page's published-status test never matches (A12). Probe: d21, d30, d33.
 
 <a id="fn-f-a4"></a>
 **f-a4** — Note m. Probe: d15.
 
 <a id="fn-f-a5"></a>
-**f-a5** — Note r. The feature arrived with the SciFlow editor (`@sciflow/editor-start` ^0.0.3 in ui-library `package.json`). Probe: d23.
+**f-a5** — Note r. The feature arrived with the SciFlow editor (`@sciflow/editor-start` ^0.0.3 in ui-library `package.json`). The export of Rule 24 (note d32) is the one path from the Body Text to a galley; `ArticleBody::create()` then reads that galley (note j). Probe: d23, d33.
 
 <a id="fn-f-a6"></a>
 **f-a6** — Note j: `$submission->getCurrentPublication()` inside `ArticleBody::create()`, while `ArticleFront` and `ArticleBack` use the publication passed in. Probe: d9.
@@ -1435,6 +1528,12 @@ Report: `docs/reports/2026-10-16-pkp-lib-13545.md` (finding 1; temporary, delete
 <a id="fn-f-a24"></a>
 **f-a24** — Rule 24, note d32. `Repository::prepareHtmlImages()` builds the submission-file map with `Repo::submissionFile()->getSchemaMap($submission, [])` (`classes/bodyText/Repository.php:407`, from `d830a2a01b`, Vitaliy, 2026-10-20), and the map container takes the `Context` from the request, null outside a web request, while `createGalleyFile()` has already resolved the journal from the submission. `6035a6fed8` ("Make user nullable in case of command line usage") made the user optional only. Probe 2026-11-09, same tips, `cli.php` (a `CommandLineTool`: the site's first admin signed in, no journal in the request; then the user cleared): `createHtmlFile()` on publication 16 twice and on publication 7 with no user each threw `TypeError: PKP\submissionFile\maps\Schema::__construct(): Argument #4 ($context) must be of type PKP\context\Context, null given` (`MapContainer.php:37` ← `submissionFile/Repository.php:105` ← `bodyText/Repository.php:407`), `files` rows unchanged; `createPdfGalley()` stored PDF galleys 4 and 5, the second no-user call a revision. Passing the resolved context (`context-fix.diff` in the kit) stored every call, tried at the PR's round 5. Nothing calls the export outside `PKPBodyTextController` today.
 Report: `docs/reports/2026-10-16-pkp-lib-13545.md` (finding 2; temporary, deleted once acted on); ci-triage "Open regressions".
+
+<a id="fn-f-a25"></a>
+**f-a25** — Rule 24b, note d32: `PKP\bodyText\Repository::createGalleyFile()` looks for the version's galley whose `generatedFrom` is "editor" and revises it, else adds one, so a galley uploaded on "Galleys" under the same label is left as it is (by the code an uploaded "HTML" galley the same; only "PDF" driven). Probe: d33, 2026-11-11, two runs: on published submission 17 with the dataset's uploaded "PDF", "Create PDF" left the list "PDF", "HTML Generated from text editor Revision 2", "PDF Generated from text editor", and the signed-out article page's "Downloads" "PDF", "HTML", "PDF".
+
+<a id="fn-f-a26"></a>
+**f-a26** — Rule 15. Live-probed 2026-11-11, OJS, two runs, `dbarnes` on submission 9: 901 paragraphs (about 9 MB) pasted with the clipboard, "Save": the page's `POST …/api/v1/submissions/9/publications/10/bodyText` (`X-Http-Method-Override: PUT`, multipart, 9,092,967 bytes, its `bodyText` part present) answered 500, the window read "Error" / "The POST data is too large." / "OK", the badge stayed, and the reload showed an empty editor. Server log: "PHP Warning: POST Content-Length of 9092967 bytes exceeds the limit of 8388608 bytes" and `Illuminate\Http\Exceptions\PostTooLargeException` "The POST data is too large." (PHP's `post_max_size`, 8M on the test installs). Probe: d33.
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — Note b and note p: before the fix, OMP's navigation config had no `bodyText` item, so `navigateToMenu('publication_{id}_bodyText')` found no entry after the version form's POST/PUT had run; the address kept `importFileUrl` and `importFileName` (live-probed 2026-10-02). At the PR head `e28a1de30d` (ui-library#979), before its merge, 2026-10-12, `useFileManagerConfig.js` `getManagerConfig()` drops `Actions.FILE_SEND_TO_EDITOR` from every file list's available actions unless `useApp().isOJS()` (`pkp.context.app === 'ojs2'`), so OMP and OPS offer it on no row, for any role; the author ruled (@jarda.kotesovec, 2026-10-12, in the review thread) that a press should not have the action at all. Probe: d28.

@@ -25,8 +25,8 @@
  * - A16 🐞: S2 reads each reference's "Cite", never whether it is greyed.
  * - A19 🐞: S8 reads the download after signing in, never where the tab
  *   stays.
- * - A3, A4 ❓: parked. A5, A6, A8–A10, A13, A15, A17, A18: not on these
- *   scenarios' paths. OMP1: the press's, in that tree.
+ * - A3, A4 ❓: parked. A5, A6, A8–A10, A13, A15, A17, A18, A25, A26: not
+ *   on these scenarios' paths. OMP1: the press's, in that tree.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S2, S3, S5 and S6 run on publicknowledge on their own

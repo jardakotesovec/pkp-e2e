@@ -62,7 +62,7 @@ with no galley shows the single line "No Items". <sup>d</sup> <sup>q5</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
-| **Name** | — | An icon for the file's type, then the galley's label. While the galley has a file, the label is a link that downloads the file; a galley with no file (a remote galley no file was uploaded to, Rule 4, or one whose upload was never finished, Rule 2b) shows the label as plain text. <sup>d</sup> <sup>q1</sup> |
+| **Name** | — | An icon for the file's type, then the galley's label. While the galley has a file, the label is a link that downloads the file; a galley with no file (a remote galley no file was uploaded to, Rule 4, or one whose upload was never finished, Rule 2b) shows the label as plain text. On a journal, a galley made by the Body Text's "Export" ([→ JATS & Body Text](U48-jats-and-body-text.md#export)) shows "Generated from text editor" after its label, and "Revision N" once its file has a second version, as in "HTML Generated from text editor Revision 2". <sup>d</sup> <sup>q1</sup> <sup>q20</sup> |
 | **Language** | — | The name of the galley's language, such as "English". <sup>d</sup> |
 | **More Actions** | — | The "…" button at the end of the row, which opens the row menu: "Edit" or "View", "Change File", "More Information" and "Delete", as Actors offers them. A row with nothing to offer has no button. <sup>d</sup> |
 
@@ -1524,6 +1524,9 @@ PDF galley in the submission wizard's "Upload Files" step with "Add
 File"; once submitted, their rows read "View" only, with no "Add galley"
 and no "Order". On a journal with it ticked, the Author still had no
 controls.
+
+<a id="fn-q20"></a>
+**q20** — Live-probed 2026-11-11 (Fields, Name), OJS, two runs, `dbarnes` on PKP's default dataset, on published submission 17 whose dataset galley "PDF" was uploaded on "Galleys": after the Body Text's first "Export to HTML" the row's name read "HTML Generated from text editor", after the second "HTML Generated from text editor Revision 2", and after "Create PDF" "PDF Generated from text editor", while the uploaded galley read "PDF". On the new version "Create New Version" made, the first export there already read "HTML Generated from text editor Revision 2", the copied file counting as the first. The marks show only on a galley the export stored (its `generatedFrom` "editor"), "Revision N" from its file's revision count (code read with pkp/pkp-lib#13543, merged 2026-11-07).
 
 <a id="fn-f-a1"></a>
 **f-a1** — `useGalleyManagerActions.galleyEdit()` titles the modal
