@@ -1,13 +1,19 @@
 // U26 "Review stage & rounds": the walk of the spec's OJS scenarios on stable-3_5_0, for the differences
 // file docs/specs/lines/stable-3_5_0/U26-review-stage-and-rounds.md.
 //
+// The 3.5 tests (lines/stable-3_5_0/apps/ojs/playwright/tests/U26-review-stage-and-rounds.spec.js) now
+// assert the 13 scenarios. The parts that walked nothing but a scenario (7, 9, 10, 11, 15) are gone from
+// this script; git keeps them. What stays is what no test asserts: the register entries a part reads on
+// the way (A1, A2, A4, A7, A13, retired A12), the `reg` part, and Rule 17's old addresses in every form
+// and for every reader (part s12).
+//
 // Run (the 3.5 install must be up: PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature lines35 --apps ojs):
 //
 //   PKP_E2E_LINE=stable-3_5_0 PROBE_FEATURE=lines35 PROBE_AGENT=u26 PROBE_RUN=s1 PARTS=s1,s2,s3 \
 //       node bin/probe.js ojs shared/playwright/checks/lines/stable-3_5_0/U26/walk.js
 //
 // PROBE_RUN names the run (s1, then s2: every difference is read twice, each run on its own scratch
-// journals). PARTS picks the parts (default: all of them, about seven minutes; two or three parts
+// journals). PARTS picks the parts (default: all of them, about five minutes; two or three parts
 // stay under three minutes, a part takes 15 to 60 s). Every part builds its own scratch journal with
 // throwaway accounts, so parts are independent and nothing on `publicknowledge` or the seeded roster
 // is touched. Needs Mailpit (part s4 and reg's A11 read the editors' mailboxes).
@@ -29,14 +35,8 @@
 //        emails (+ retired A12: the panel read with no reload after the window is closed at its first step)
 //   s5   Request revisions toward a new round (+ A1 and A13 as the screen shows them), then
 //        scenario 6 on the same submission: "Create New Review Round", the past round, the control
-//   s7   Cancel a round: Round 2 built on screen (the two-round seed answers 500 on 3.5), the reviewer's
-//        lists, Round 1 cancelled
 //   s8   Cancelling is blocked once a review is in (+ register A4: the all-declined round's sentence)
-//   s9   Accept out of review; a past round after acceptance
-//   s10  Decline, revert, delete
-//   s11  Recommend-only round; the sole recommending editor
 //   s12  Author reads an open review; "Notifications"; the old addresses (Rule 17, every form, every reader)
-//   s15  A minimum of confirmed reviews
 //   reg  The register entries no scenario passes: A5 (production assistants), A6 (a cancelled round's
 //        previous round), A8 (a past round's panels still act), A11 (the upload window's "Cancel")
 //
@@ -46,10 +46,9 @@ const path = require('path');
 const L = require('./lib');
 const {forEachApp, tag, check, fact, sect, snap, flat, log, idle, statusText, rowsOf} = L;
 
-const ALL = ['s1', 's2', 's3', 's4', 's5', 's7', 's8', 's9', 's10', 's11', 's12', 's15', 'reg'];
+const ALL = ['s1', 's2', 's3', 's4', 's5', 's8', 's12', 'reg'];
 const PARTS = process.env.PARTS && process.env.PARTS !== 'all' ? process.env.PARTS.split(',') : ALL;
 const DECISIONS = ['Request Revisions', 'Accept Submission', 'Create New Review Round', 'Cancel Review Round', 'Decline Submission'];
-const RECOMMENDATIONS = ['Recommend Revisions', 'Recommend Accept', 'Recommend Decline'];
 const REVISED = 'Revised Version Uploaded';
 const has = (list, s) => !!list && list.some((x) => x.includes(s));
 const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -468,67 +467,6 @@ forEachApp(async (app) => {
     };
 
     // ===========================================================================================
-    parts.s7 = async () => {
-        const j = await journal('f');
-        // A two-entry reviewRounds seed answers 500 on 3.5; Round 2 comes from the seeded decision and its
-        // reviewer is added on screen.
-        let twoRoundSeed = 'accepted';
-        try { await seed(j, 's7x', {reviewRounds: [{reviewers: []}, {reviewers: [{username: j.u.rv2, status: 'invited'}]}]}); } catch (e) { twoRoundSeed = flat(e.message, 260); }
-        fact('two-round-seed', twoRoundSeed);
-        const s = await seed(j, 's7', {decisions: ['sendExternalReview', 'newExternalReviewRound'], participants: asEditor(j)});
-        const s2 = await seed(j, 's7b', {participants: asEditor(j)});
-        const ed = await L.actor(app, j.u.ed, j.J);
-        const rv = await L.actor(app, j.u.rv1, j.J);
-        let info;
-        // The reviewer dashboard's six lists, each opened by the address its side-menu entry leads to.
-        const VIEWS = ['reviewer-action-required', 'reviewer-assignments-all', 'reviewer-assignments-completed', 'reviewer-assignments-declined', 'reviewer-assignments-published', 'reviewer-assignments-archived'];
-        const reviewerLists = async (label) => {
-            const out = {}; const headings = {};
-            for (const v of VIEWS) {
-                await rv.page.goto(`/index.php/${j.J}/user/profile`);
-                await rv.page.goto(`/index.php/${j.J}/dashboard/reviewAssignments?currentViewId=${v}`);
-                await idle(rv.page);
-                await rv.page.getByRole('table').first().waitFor({timeout: 30000}).catch(() => {});
-                await idle(rv.page);
-                const sc = await snap(rv.page, `${label}-${v}`);
-                headings[v] = flat((sc.text.main || '').split('\n')[0], 80);
-                out[v] = await rv.page.getByRole('row').filter({hasText: s.tag}).allInnerTexts().then((x) => x.map((y) => flat(y, 200)));
-            }
-            return {headings, rows: out};
-        };
-        await sect('setup', async () => {
-            info = await L.openEditorial(ed, s.id, 'ed-round2-empty');
-            check('given.round2', 'the submission stands on Round 2', info.title, info.title === 'Workflow: Review (Round 2)');
-            await P.addReviewer(ed.page, j.n.rv1);
-            info = await L.openEditorial(ed, s.id, 'ed-round2-invited');
-            fact('round2-reviewers', rowsOf(info, 'Reviewers'));
-            check('given.offered', '"Cancel Review Round" is offered while the only reviewer has not responded', info.actionButtons, (info.actionButtons || []).includes('Cancel Review Round'));
-            const before = await reviewerLists('rv-before');
-            fact('reviewer-lists-before', before);
-            check('control', 'before the cancel, the Reviewer\'s assignment lists held the Round 2 request', before.rows, Object.values(before.rows).some((r) => r.length > 0));
-        });
-        await sect('cancel', async () => {
-            const steps = await decide(ed, 'Cancel Review Round', 'Cancel Review Round', 'cancel');
-            fact('cancel-steps', steps);
-            info = await L.reread(ed, 'ed-after-cancel');
-            const rounds = info.menu.filter((m) => /^Review Round/.test(m));
-            check('cancelled', '"Review Round 2" disappears from the menu and the submission stands on Round 1', {rounds, title: info.title}, eq(rounds, ['Review Round 1']) && info.title === 'Workflow: Review (Round 1)');
-            fact('round1-status-after-cancel', statusText(info));
-            const after = await reviewerLists('rv-after');
-            fact('reviewer-lists-after', after);
-            check('reviewer', 'the withdrawn invitation is in none of the reviewer dashboard\'s assignment lists', after.rows, Object.values(after.rows).every((r) => r.length === 0));
-        });
-        await sect('round1', async () => {
-            info = await L.openEditorial(ed, s2.id, 'ed-second-round1');
-            check('second.given', 'the second submission is on Round 1 with "Cancel Review Round" offered', info.actionButtons, info.title === 'Workflow: Review (Round 1)' && (info.actionButtons || []).includes('Cancel Review Round'));
-            const steps = await decide(ed, 'Cancel Review Round', 'Cancel Review Round', 'cancel-r1');
-            fact('cancel-r1-steps', steps);
-            info = await L.reread(ed, 'ed-second-after');
-            check('second.cancelled', 'with Round 1 cancelled the submission is back on the Submission stage', {title: info.title, menu: info.menu}, info.title === 'Workflow: Submission' && !has(info.menu, 'Review Round'));
-        });
-    };
-
-    // ===========================================================================================
     parts.s8 = async () => {
         const j = await journal('g');
         const p = asEditor(j);
@@ -551,112 +489,6 @@ forEachApp(async (app) => {
             check('mixed', 'a declined reviewer beside an accepted one: the box reads "Awaiting responses from reviewers." and "Cancel Review Round" is absent', {status: statusText(info), buttons: info.actionButtons}, eq(info.status.lines, ['Awaiting responses from reviewers.']) && !info.actionButtons.includes('Cancel Review Round'));
             info = await L.openEditorial(ed, invited.id, 'ed-invited');
             check('control', 'on a round whose only reviewer has not yet responded, "Cancel Review Round" is offered', info.actionButtons, eq(info.actionButtons, DECISIONS));
-        });
-    };
-
-    // ===========================================================================================
-    parts.s9 = async () => {
-        const j = await journal('h');
-        const s = await seed(j, 's9', {participants: asEditor(j)});
-        const s2 = await seed(j, 's9b', {participants: asEditor(j), decisions: ['sendExternalReview', 'newExternalReviewRound', 'accept']});
-        const ed = await L.actor(app, j.u.ed, j.J);
-        await sect('accept', async () => {
-            let info = await L.openEditorial(ed, s.id, 'ed-before');
-            fact('buttons', info.actionButtons);
-            const highlighted = await ed.page.getByRole('button', {name: 'Accept Submission', exact: true}).evaluate((b) => b.className);
-            fact('accept-button-class', highlighted);
-            const steps = await decide(ed, 'Accept Submission', 'Accept Submission', 'accept');
-            fact('accept-steps', steps);
-            info = await L.reread(ed, 'ed-after-accept');
-            check('moved', 'the submission moves to the Copyediting stage', info.title, info.title === 'Workflow: Copyediting');
-            const r1 = await L.selectMenu(ed, 'Review Round 1', 'ed-round1-after');
-            check('after', 'on "Review Round 1" the round is still listed and the box reads "The submission is currently in the Copyediting stage."', statusText(r1), eq(r1.status.lines, ['The submission is currently in the Copyediting stage.']));
-            check('control', 'the box is headed plain "Status", no longer "Round 1 Status"', r1.status.heading, r1.status.heading === 'Status');
-            fact('past-stage-buttons', r1.actionButtons);
-        });
-        await sect('tworounds', async () => {
-            let info = await L.openEditorial(ed, s2.id, 'ed-second');
-            fact('second-title', info.title); fact('second-menu', info.menu);
-            const r1 = await L.selectMenu(ed, 'Review Round 1', 'ed-second-round1');
-            check('past', 'a past round after acceptance: the box, headed plain "Status", reads "The submission advanced to the next review round, was accepted, and is currently in the Copyediting stage."', statusText(r1), eq(r1.status, {heading: 'Status', lines: ['The submission advanced to the next review round, was accepted, and is currently in the Copyediting stage.']}));
-            const r2 = await L.selectMenu(ed, 'Review Round 2', 'ed-second-round2');
-            fact('second-round2-status', statusText(r2));
-        });
-    };
-
-    // ===========================================================================================
-    parts.s10 = async () => {
-        const j = await journal('i');
-        const s = await seed(j, 's10', {participants: [{username: j.u.se, role: 'sectionEditor'}], reviewRounds: [{reviewers: [{username: j.u.rv1, status: 'accepted'}]}]});
-        const mgr = await L.actor(app, j.u.mgr, j.J);
-        const se = await L.actor(app, j.u.se, j.J);
-        await sect('decline', async () => {
-            let info = await L.openEditorial(mgr, s.id, 'mgr-before');
-            check('control', 'before the decline, no "Delete" stands among the Journal Manager\'s buttons', info.actionButtons, !!info.actionButtons && !info.actionButtons.includes('Delete') && info.actionButtons.includes('Decline Submission'));
-            const steps = await decide(mgr, 'Decline Submission', 'Decline Submission', 'decline');
-            fact('decline-steps', steps);
-            info = await L.reread(mgr, 'mgr-declined');
-            check('declined.status', 'the box reads "Submission declined."', statusText(info), eq(info.status.lines, ['Submission declined.']));
-            check('declined.buttons', 'the decision buttons are replaced by "Revert Decline" and "Delete"', info.actionButtons, eq(info.actionButtons, ['Revert Decline', 'Delete']));
-            const si = await L.openEditorial(se, s.id, 'se-declined');
-            check('section-editor', 'the Section Editor\'s buttons are "Revert Decline" alone, with no "Delete"', si.actionButtons, eq(si.actionButtons, ['Revert Decline']));
-            fact('se-status', statusText(si));
-            info = await L.openEditorial(mgr, s.id, 'mgr-declined-reopened');
-            fact('mgr-declined-reopened', {title: info.title, status: info.status, buttons: info.actionButtons});
-            if (!(info.actionButtons || []).includes('Revert Decline')) info = await L.selectMenu(mgr, 'Review Round 1', 'mgr-declined-round1');
-            const rsteps = await decide(mgr, 'Revert Decline', 'Revert Decline', 'revert');
-            fact('revert-steps', rsteps);
-            info = await L.reread(mgr, 'mgr-reverted');
-            check('reverted', 'the submission is back in review and the box again reads "Awaiting responses from reviewers."', {status: statusText(info), buttons: info.actionButtons}, eq(info.status, {heading: 'Round 1 Status', lines: ['Awaiting responses from reviewers.']}) && info.actionButtons.includes('Accept Submission'));
-        });
-    };
-
-    // ===========================================================================================
-    parts.s11 = async () => {
-        const j = await journal('k');
-        const s = await seed(j, 's11', {participants: [{username: j.u.ed, role: 'editor'}, {username: j.u.rec, role: 'sectionEditor'}], reviewRounds: [{reviewers: [{username: j.u.rv1, status: 'declined'}]}]});
-        const sole = await seed(j, 's11b', {reviewRounds: [{reviewers: []}]});
-        const mgr = await L.actor(app, j.u.mgr, j.J);
-        const ed = await L.actor(app, j.u.ed, j.J);
-        const rec = await L.actor(app, j.u.rec, j.J);
-        const wfm = new P.WorkflowPage(mgr.page, j.J);
-        await sect('limit', async () => {
-            let info = await L.openEditorial(mgr, s.id, 'mgr-participants');
-            fact('participants', info.buttons.filter((b) => /More Actions/.test(b)));
-            await wfm.participantMoreActions(j.n.rec).click();
-            await mgr.page.getByRole('menuitem', {name: 'Edit'}).click();
-            const modal = mgr.page.getByRole('dialog').filter({has: mgr.page.locator('input[name="recommendOnly"]')});
-            await modal.locator('input[name="recommendOnly"]').waitFor({timeout: 30000});
-            await snap(mgr.page, 'mgr-edit-participant');
-            await modal.locator('input[name="recommendOnly"]').check();
-            await modal.getByRole('button', {name: 'OK', exact: true}).click();
-            await modal.locator('input[name="recommendOnly"]').waitFor({state: 'hidden', timeout: 30000});
-            await idle(mgr.page);
-        });
-        await sect('recommend', async () => {
-            let ei = await L.openEditorial(ed, s.id, 'ed-before');
-            check('control', 'before the recommendation is recorded, the deciding Editor\'s screen shows no "Recommendation" box', ei.recommendation, ei.recommendation === null);
-            fact('editor-status-before', statusText(ei));
-            let ri = await L.openEditorial(rec, s.id, 'rec-before');
-            check('rec.buttons', 'the recommending editor has no decision buttons; the buttons read "Recommend Revisions", "Recommend Accept", "Recommend Decline"', ri.actionButtons, eq(ri.actionButtons, RECOMMENDATIONS));
-            check('rec.status', 'the box reads "Awaiting recommendations from editors."', statusText(ri), eq(ri.status.lines, ['Awaiting recommendations from editors.']));
-            const steps = await decide(rec, 'Recommend Accept', 'Recommend Accept', 'recommend');
-            fact('recommend-steps', steps);
-            ri = await L.reread(rec, 'rec-after');
-            fact('rec-after', {status: ri.status, buttons: ri.actionButtons, recommendation: ri.recommendation});
-            ei = await L.openEditorial(ed, s.id, 'ed-after');
-            check('ed.box', 'the deciding Editor\'s "Recommendation" box lists "Accept Submission"', ei.recommendation, !!ei.recommendation && ei.recommendation.includes('Accept Submission'));
-            check('ed.status', 'the status box reads "All recommendations are in and a decision is needed."', statusText(ei), eq(ei.status.lines, ['All recommendations are in and a decision is needed.']));
-            fact('ed-buttons-after', ei.actionButtons);
-        });
-        await sect('sole', async () => {
-            await L.openEditorial(mgr, sole.id, 'mgr-sole');
-            await P.assignParticipant(mgr.page, {group: 'Section editor', name: j.n.rec, searchName: j.u.rec, recommendOnly: true});
-            await L.reread(mgr, 'mgr-sole-assigned');
-            const ri = await L.openEditorial(rec, sole.id, 'rec-sole');
-            check('sole.buttons', 'a sole recommending editor gets no buttons of either kind', ri.actionButtons, !(ri.actionButtons || []).some((b) => DECISIONS.concat(RECOMMENDATIONS).includes(b)));
-            check('sole.box', 'the "Recommendation" box reads "You can not make a recommendation until an editor is assigned with permission to record a decision."', ri.recommendation, !!ri.recommendation && ri.recommendation.includes('You can not make a recommendation until an editor is assigned with permission to record a decision.'));
-            check('sole.status', 'with no reviewer the status box reads "Waiting for reviewers to be assigned.", not "Awaiting recommendations from editors."', statusText(ri), eq(ri.status.lines, ['Waiting for reviewers to be assigned.']));
         });
     };
 
@@ -804,36 +636,6 @@ forEachApp(async (app) => {
             const r = await read({page: visitor.page}, forms['with-id']);
             check('old.visitor', 'a visitor who is not signed in gets the same page, not Login', r, is404(r));
             await visitor.close();
-        });
-    };
-
-    // ===========================================================================================
-    parts.s15 = async () => {
-        const j = await journal('n', {review: {numReviewsPerSubmission: 2}});
-        const z = await journal('z');
-        const s = await seed(j, 's15', {participants: asEditor(j), reviewRounds: [{reviewers: [{username: j.u.rv1, status: 'accepted'}]}]});
-        const c = await seed(z, 's15z', {participants: asEditor(z), reviewRounds: [{reviewers: [{username: z.u.rv1, status: 'completed'}]}]});
-        const ed = await L.actor(app, j.u.ed, j.J);
-        const rv = await L.actor(app, j.u.rv1, j.J);
-        const MIN = 'Minimum number of confirmed reviews required: 2.';
-        await sect('minimum', async () => {
-            let info = await L.openEditorial(ed, s.id, 'ed-underway');
-            check('underway', `the box reads "${MIN}" with "Awaiting responses from reviewers." beneath it`, statusText(info), eq(info.status.lines, [MIN, 'Awaiting responses from reviewers.']));
-            await L.reviewerSubmit(rv, s.id);
-            info = await L.openEditorial(ed, s.id, 'ed-submitted');
-            check('submitted', `the box reads "${MIN}" with "New reviews have been submitted." beneath it`, statusText(info), eq(info.status.lines, [MIN, 'New reviews have been submitted.']));
-            const win = await L.editorReadReview(ed, j.n.rv1, {label: 'ed-read-review'});
-            fact('read-review-window', {kind: win.kind, title: win.title, buttons: win.buttons, confirmLabel: win.confirmLabel});
-            info = await L.openEditorial(ed, s.id, 'ed-confirmed');
-            check('confirmed', `once confirmed the box reads "${MIN}" alone; "All reviews are confirmed and a decision is needed." does not appear`, statusText(info), eq(info.status.lines, [MIN]));
-        });
-        await sect('control', async () => {
-            const zed = await L.actor(app, z.u.ed, z.J);
-            let info = await L.openEditorial(zed, c.id, 'z-submitted');
-            fact('control-submitted', statusText(info));
-            await L.editorReadReview(zed, z.n.rv1, {label: 'z-read-review'});
-            info = await L.openEditorial(zed, c.id, 'z-confirmed');
-            check('control', 'on a journal whose minimum is 0 the confirmed review reads "All reviews are confirmed and a decision is needed." with no minimum line', statusText(info), eq(info.status.lines, ['All reviews are confirmed and a decision is needed.']));
         });
     };
 

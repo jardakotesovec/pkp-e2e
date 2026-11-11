@@ -13,7 +13,8 @@ ui-library `fd00e45f`), 2026-11-11. OMP and OPS were not read.
 **Basis.** Scenarios 1 to 12 and 15 were walked on 3.5, twice, each run
 on its own scratch journals; scenario 6 was walked on scenario 5's
 submission. Scenarios 1, 3 to 11 came out the same. Scenarios 2, 12 and
-15 differ and are written out below. Scenarios 13 (a press) and 14 (a
+15 differ and are written out below. The 3.5 tests now assert all
+thirteen on every run. Scenarios 13 (a press) and 14 (a
 preprint server) were not read. Compared in code only: the status
 sentences no scenario reaches ("A review is overdue.", "Returned back to
 review.", "New editorial recommendations have been submitted.",
@@ -174,6 +175,8 @@ Coordinator. <sup>s</sup>
 
 <a id="fn-a"></a>**a** — Walked 2026-11-11, runs `s1` and `s2`, part
 `s12` of `shared/playwright/checks/lines/stable-3_5_0/U26/walk.js`.
+Test: "S12: author reads an open review" in
+`lines/stable-3_5_0/apps/ojs/playwright/tests/U26-review-stage-and-rounds.spec.js`.
 Snapshots in `.reports/lines35/u26/`: `s12-au-open-underway` (no list),
 `s12-au-open-submitted` (the row "{reviewer} Open Read Review" before
 any editor opened the review), `s12-au-read-review-before-confirm` and
@@ -192,7 +195,9 @@ author's window itself is the same template on both lines
 (`authorReadReview.tpl`).
 
 <a id="fn-b"></a>**b** — Walked 2026-11-11, runs `s1` and `s2`, parts
-`s2` and `s15` of the same script. Snapshots: `s2-ed-submitted`,
+`s2` and `s15` of the same script. Tests: "S2: the status line follows
+the reviewers" and "S15: a minimum of confirmed reviews" in the same
+test file as footnote a. Snapshots: `s2-ed-submitted`,
 `s2-ed-read-review` (title "Review: {submission title}", the reviewer's
 name, the sentence 'Once this review has been read, press "Confirm" to
 indicate that the review process may proceed.', the buttons "Download
@@ -218,16 +223,20 @@ Discussions" and "Participants" (`s3-ed-requested`). Code: ui-library
 response component to the review stage; pkp-lib 3.5 has no
 `classes/submission/reviewRound/authorResponse/`.
 
-<a id="fn-s"></a>**s** — The walk: `walk.js` (above), parts `s1` to
-`s15` and `reg`, runs `s1` and `s2`; each part writes
+<a id="fn-s"></a>**s** — The tests:
+`lines/stable-3_5_0/apps/ojs/playwright/tests/U26-review-stage-and-rounds.spec.js`,
+one test per scenario 1 to 12 and 15, all 13 passing on 3.5 on
+2026-11-11. Ten of them are `main`'s tests unchanged, which is what "the
+same" rests on for those scenarios; the tests of scenarios 2, 12 and 15
+follow this page. The walk that found the differences: `walk.js`
+(above), runs `s1` and `s2`, every part on a scratch journal of its own
+with throwaway accounts; each part writes
 `<part>-checks-<run>-ojs.json`, one row per sentence of the scenario
-with what the 3.5 screen gave. Every part runs on a scratch journal of
-its own with throwaway accounts, never on the seeded journal. Two things
-the spec's recipe (its footnote s) needs differently on 3.5: a
-submission seeded with two `reviewRounds[]` entries answers 500, so
-scenario 7's Round 2 comes from the seeded decisions
-`['sendExternalReview', 'newExternalReviewRound']` and its reviewer is
-added on screen with "Add Reviewer"; and a review is confirmed with
+with what the 3.5 screen gave. Its parts for scenarios 7, 9, 10, 11 and
+15 were removed once the tests covered them. The parts that stay read
+what no test asserts: register entries on the way, and the old
+addresses of Rule 17 for every reader. One thing the spec's recipe (its
+footnote s) needs differently on 3.5: a review is confirmed with
 "Confirm", as scenarios 2 and 15 say above. Code compared at pkp-lib
 `origin/main` `e2078ce20e` and ui-library `origin/main` `f2a4757a`: the
 round's status logic (`ReviewRound::determineStatus()`), the status box

@@ -12,3 +12,10 @@ docs/tracking/.reports/
 # line's, and the old lines' runtimes (checkouts/runtimes/: Node releases, the
 # PHP shims; harness.md "The stable lines") — never committed.
 /checkouts/
+
+# The stable lines' suites (lines/<line>/apps/<app>/playwright): runtime state.
+lines/*/apps/*/playwright/.auth/
+lines/*/apps/*/playwright/test-results/
+lines/*/apps/*/playwright/.server-logs/
+lines/*/apps/*/playwright/.last-run.json
+lines/*/apps/*/playwright/.timings/
