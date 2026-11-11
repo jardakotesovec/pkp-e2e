@@ -20,22 +20,24 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A8: S4's "Errors occured:" lines under a successful import are left
- *   unread.
- * - A10: S3 reads the "Production" filter's list as the set it gives;
- *   that the posted preprint is in no stage is read only as its absence
- *   there.
- * - A1, A4–A7, A9, A11–A16, A19–A24: not on these scenarios' paths. OJS1–OJS9: the
- *   journal's. OMP1–OMP3: the press's.
+ * - A8: S4 reads the country line alone among the "Errors occured:" lines.
+ * - A10: S3 reads the posted preprint's absence under "Production" only.
+ * - A1, A4, A6, A7, A9, A11–A16, A19–A26: not on these scenarios' paths.
+ * - OJS1, OJS2, OJS4–OJS12: the journal's. OMP1–OMP6: the press's.
  *
  * Seeding (footnote sc): S2 reads `publicknowledge` with the OPS roster
  * (`assistant.rita` is the Editorial Board Member; a preprint server has
  * no Reviewer); every other scenario seeds its own scratch servers with
  * `POST scenarios/context` (a principal contact, a throwaway Preprint
- * Server Manager named in both servers of S4) and `POST
+ * Server Manager named in both servers of S4, whose two servers also
+ * take `metadata` with the three statements at "request") and `POST
  * scenarios/submission` (`galleys[]` with `preprint.pdf`, `published`). A
  * seeded preprint without `published` is submitted and waits in
- * Production. The files S4 imports are written by the test into its own
+ * Production; its submitter's contributor entry has no Country
+ * (seed-facts). S4's three statements are put on A's preprint with the
+ * publication page's own PUT, sent from the manager's session, since no
+ * submission key sets `dataAvailability` or `fundingStatement` (footnote
+ * sc). The files S4 imports are written by the test into its own
  * output folder from the export it made on screen. Scratch names carry
  * the test's tag.
  *
@@ -52,6 +54,7 @@ const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {EditorialDashboardPage} = require('../pages/EditorialDashboardPage.js');
 const {GalleyFilesPage} = require('../pages/SubmissionFilesPages.js');
+const {PublicationScreen} = require('../pages/PublicationPages.js');
 const {
     ToolsPage,
     NativeXmlPage,
@@ -60,6 +63,7 @@ const {
     deniedSentence,
     resultLines,
     nativeWithUnknownElement,
+    putPublication,
 } = require('../../../../shared/playwright/pages/ImportExportPages.js');
 
 const T = 30_000;
@@ -89,6 +93,19 @@ const AXOLOTL = 'Axolotl limb memory';
 const WOMBAT = 'Wombat notes';
 const GALLEY = 'PDF';
 const PREPRINT_FILE = 'preprint.pdf';
+
+/** S4's three statements: the setting, the field (page, form, name, label) and A's text (Rule 20a). */
+const STATEMENT_METADATA = {plainLanguageSummary: 'request', dataAvailability: 'request', fundingStatement: 'request'};
+const STATEMENT_HTML =
+    '<p>Okapi <strong>notes</strong> <em>in the field</em>, see <a href="https://pkp.sfu.ca">PKP</a> &amp; more</p>';
+const STATEMENT_TEXT = 'Okapi notes in the field, see PKP & more';
+const STATEMENTS = [
+    {page: 'Title & Abstract', form: 'titleAbstract', name: 'plainLanguageSummary', label: 'Plain Language Summary'},
+    {page: 'Data', form: 'dataAvailability', name: 'dataAvailability', label: 'Data Availability Statement'},
+    {page: 'Funding', form: 'fundingStatement', name: 'fundingStatement', label: 'Funding Statement'},
+];
+/** Rule 12's line for a contributor with no Country ({name}: the given name the app prints). */
+const NO_COUNTRY = (givenName) => `The author ${givenName} does not have a country.`;
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + app + worker. */
 function makeTag(scenario, testInfo) {
@@ -369,9 +386,15 @@ test.describe('Import & export', () => {
         await opsApi.createContext({
             tag: a,
             context: contact(a),
+            metadata: STATEMENT_METADATA,
             users: [user(manager, 'Mona', 'Manager', ['manager']), user(ada, 'Ada', 'Lovelace', ['author'])],
         });
-        await opsApi.createContext({tag: b, context: contact(b), users: [{username: manager, roles: ['manager']}]});
+        await opsApi.createContext({
+            tag: b,
+            context: contact(b),
+            metadata: STATEMENT_METADATA,
+            users: [{username: manager, roles: ['manager']}],
+        });
         const okapi = await opsApi.createSubmission({
             tag: `${a}ok`,
             context: a,
@@ -384,9 +407,13 @@ test.describe('Import & export', () => {
         // upload box keeps its file between the imports (Rule 8).
         const side = await page.context().newPage();
 
-        // A's file: "Okapi field notes" exported and downloaded (Rule 16).
+        // A's file: "Okapi field notes", its three statements put on it
+        // first (footnote sc), exported and downloaded (Rule 16).
         const nativeA = new NativeXmlPage(page, a, NATIVE);
         await nativeA.goto();
+        const put = await putPublication(page, a, okapi, Object.fromEntries(STATEMENTS.map((f) => [f.name, {en: STATEMENT_HTML}])));
+        expect(put.status, `the publication's PUT: ${JSON.stringify(put.body).slice(0, 300)}`).toBe(200);
+        for (const f of STATEMENTS) expect(put.body[f.name], f.name).toEqual({en: STATEMENT_HTML});
         await nativeA.openExportTab();
         await nativeA.list.box(OKAPI).check();
         const exported = await nativeA.list.pressExport(nativeA);
@@ -408,14 +435,18 @@ test.describe('Import & export', () => {
         await expect(nativeB.changeFileButton()).toBeVisible();
 
         // "Import": "Import Results" with the success text and the line
-        // ""{number}" - "Okapi field notes"" (Rules 9, 10). A8's error lines
-        // are left unread.
+        // ""{number}" - "Okapi field notes"" (Rules 9, 10). A8's other error
+        // lines are left unread.
         const imported = await nativeB.pressImport();
         await expect(imported).toContainText(IMPORTED);
         const itemLine = resultLines(imported).filter({hasText: new RegExp(`^\\s*"\\d+" - "${OKAPI}"\\s*$`)});
         await expect(itemLine).toHaveCount(1);
         const number = Number(((await itemLine.innerText()).match(/"(\d+)"/) || [])[1]);
         expect(number).toBeGreaterThan(0);
+
+        // The contributor with no Country: among the lines under the success
+        // text, "The author Ada does not have a country." (Rule 12).
+        await expect(resultLines(imported).filter({hasText: new RegExp(`^\\s*${NO_COUNTRY('Ada').replace(/\./g, '\\.')}\\s*$`)})).toHaveCount(1);
 
         // B's Dashboard: "Okapi field notes" under that number in
         // "Production", the stage it had in A; its workflow shows the
@@ -432,6 +463,21 @@ test.describe('Import & export', () => {
         await expect(workflow.contributorsLine()).toContainText('Lovelace');
         await workflow.selectPage('Galleys');
         await expect(new GalleyFilesPage(side, workflow).galleyRow(GALLEY)).toBeVisible({timeout: T});
+
+        // The three statements on the copy's publication pages: "Plain
+        // Language Summary" ("Title & Abstract"), "Data Availability
+        // Statement" ("Data") and "Funding Statement" ("Funding") each read
+        // as in A, the bold, the italics, the link and "&" included (Rule 20a).
+        const publication = new PublicationScreen(side);
+        for (const f of STATEMENTS) {
+            await publication.openPage(f.page);
+            await expect(publication.fieldWrapper(f.form, f.name, 'en'), f.label).toContainText(f.label);
+            const body = publication.richTextBody(f.form, f.name, 'en');
+            await expect(body, f.label).toHaveText(STATEMENT_TEXT, {timeout: T});
+            await expect(body.locator('strong'), f.label).toHaveText('notes');
+            await expect(body.locator('em'), f.label).toHaveText('in the field');
+            await expect(body.locator('a[href="https://pkp.sfu.ca"]'), f.label).toHaveText('PKP');
+        }
 
         // A file that does not match the format: "The process failed…", then
         // "Errors occured:" and "Validation errors:", each with lines; no

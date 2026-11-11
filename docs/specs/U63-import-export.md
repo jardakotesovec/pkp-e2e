@@ -115,7 +115,9 @@ filter, shown once "Search" is pressed: a list reading "Article Title"
 or "Authors" beside a text box, a list of the journal's published issues
 opening on "Any Issue", a list of statuses opening on "Any Status"
 ("Not Deposited", "Marked registered", "Registered", "Submitted", "Needs
-Sync", "Error"), and a "Search" button. <sup>q</sup>
+Sync", "Error"), and a "Search" button. That "Search" narrows the list
+(Rule 36a) and closes the filter, so each further search starts with
+"Search" at the list's top right. <sup>q</sup>
 
 ## Rules & state
 
@@ -234,8 +236,9 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     the line "None or more than one issue matches the given issue
     identification "…"." (the file's issue details quoted). A
     contributor with no Country in the file stays on its submission,
-    with the line "The author {name} does not have a country." (how a
-    Country goes missing:
+    with the line "The author {name} does not have a country.", {name}
+    being the contributor's given name alone: "The author Ada does not
+    have a country." for "Ada Lovelace" (how a Country goes missing:
     [Contributors and affiliations](U41-contributors-and-affiliations.md#a16)).
     <sup>f</sup> <sup>td18</sup>
 12a. **An unknown section.** An article or preprint whose section the
@@ -439,9 +442,10 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     journal lacks is passed over silently. A role the user already holds
     in this journal for a period that overlaps the file's is not given
     again:
-    - when the file's period is the one held (or the file gives the
-      role no start date and no end date, and the held role has begun
-      and not ended), nothing is said, so the same file
+    - when the file's period is the one held, whether that role has
+      begun or starts on a later date (or the file gives the role no
+      start date and no end date, and the held role has begun and not
+      ended), nothing is said, so the same file
       imported again, by a second press of "Import Users" or uploaded
       again, gives no role twice;
     - when the file's period has its own start date and differs from
@@ -451,9 +455,11 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
       overlapping period."; the line names the role, not the period.
       <sup>l</sup>
 
-    Which of the two a file shows that gives the role an end date but no
-    start date, or that meets a held role not yet begun, has not been
-    seen.
+    Which of the two a file shows has not been seen in two cases: a file
+    that gives the role an end date still to come and no start date,
+    and a file that gives the role no dates while the user holds it
+    from a later date. (A file that gives an end date already past and
+    no start date: Rule 24b.)
 
     A period that overlaps none the user holds, such as an earlier,
     ended one, is given beside the held role. An ended role that a
@@ -465,11 +471,16 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     is kept. A role the file marks as not appearing reads "Does not
     appear on the masthead" on the user's roles page ("Edit" on the
     user's row of Settings › Users & Roles › "Users"), and "Editorial
-    Masthead" does not list the person for it. A reviewer role always
-    reads "Appear on the masthead", whatever the file says; the roles
-    page offers no choice for it. An export writes each role's own
-    choice, and a reviewer role's as appearing. <sup>l</sup>
-    <sup>td14</sup>
+    Masthead" does not list the person for it. A reviewer role is kept
+    as appearing, whatever the file says. The roles page offers no
+    choice for it, and its words follow the journal's "Enable listing
+    of reviewers on the masthead" (Settings › Website › "Appearance" ›
+    "Editorial Masthead";
+    [Journal identity & about pages](U07-journal-identity-and-about-pages.md),
+    Settings bullet 3): "Appear on the masthead" while it is ticked,
+    "Does not appear on the masthead" while it is not, as on a new
+    journal. An export writes each role's own choice, and a reviewer
+    role's as appearing. <sup>l</sup> <sup>td14</sup>
 24b. **The start date.** The file's start date for each role is kept:
     "Start Date" on the "Users" list and on the user's roles page reads
     it. A role the file gives no start date starts on the day of the
@@ -505,7 +516,9 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
     Nor is one whose only role starts on a later date (given by an
     invitation or a users import), and "Search" does not find it,
     though Settings › Users & Roles › "Users" lists it ⚠ [A22](#a22).
-    "Search" at the
+    On a press, the list is the one the page opened with: accounts that
+    an import on the same page has just made are missing from it until
+    the page is opened again ⚠ [OMP7](#omp7). "Search" at the
     list's top right shows the filter of Fields; "Search" there narrows
     the list to the accounts in which every word typed appears in the
     name, username, email or affiliation, or in the name of a role the
@@ -514,7 +527,9 @@ Sync", "Error"), and a "Search" button. <sup>q</sup>
 27. **Exporting users.** "Export All Users" opens a window titled
     "Confirm" that asks "Are you sure you wish to export all users?":
     "OK" downloads an .xml file of every account the list holds, with
-    their roles in this journal; "Cancel" closes the window and nothing
+    their roles in this journal, and the window stays open over the
+    list, still asking, until its "Cancel" is pressed ⚠ [A27](#a27).
+    "Cancel" pressed before "OK" closes the window and nothing
     downloads. Ticking rows and pressing "Export Users" downloads the
     file for the ticked accounts only. With no row ticked, "Export
     Users" leaves the tool for a blank page, and nothing downloads
@@ -846,7 +861,8 @@ journal to another) with throwaway accounts. <sup>sc</sup>
 
    Given: Journal Manager of a scratch journal holding three
    submissions, "Okapi field notes", submitted, "Quokka survey", sent
-   for review (on a preprint server, submitted), and "Axolotl limb
+   for review with one file under its round's "Files for Review" (on a
+   preprint server, submitted), and "Axolotl limb
    memory", published (on a journal, in its published issue, beside an
    unpublished issue with nothing in it).
 
@@ -882,6 +898,17 @@ journal to another) with throwaway accounts. <sup>sc</sup>
      press "Export Issues": a tab "Export Issues Results" opens with the
      same sentence and "Download Exported File", which downloads an .xml
      file holding the issue with "Axolotl limb memory" (Rule 18; Fields).
+   - **A file under "Files for Review"** {OJS OMP}: press the "Export
+     Articles" tab ("Export" on a press), press "Select All", then
+     "Select None", tick "Quokka survey" and press "Export Articles"
+     ("Export Submissions"): a new "Export Submissions Results" tab
+     reads "The export completed successfully. Download the exported
+     file from the button below.", then "Warnings encountered:",
+     "Submission" and "The submission file {number} was skipped because
+     it is attached to a record that will not be imported, such as a
+     review assignment or discussion.", {number} being that file's
+     number. "Download Exported File" still downloads an .xml file
+     (Rules 15, 16a).
    - **"Filters"**: on the export tab press "Filters": a panel shows
      beside the list, holding under "Stages" "Submission", "Review",
      "Copyediting" and "Production" ("Submission", "Internal Review",
@@ -905,9 +932,15 @@ journal to another) with throwaway accounts. <sup>sc</sup>
 
 4. **Importing submissions from another journal**
 
-   Given: Journal Manager of two scratch journals, A holding a submitted
-   submission "Okapi field notes" with one contributor and one file, B
-   holding none, and, as files on the computer, a Native XML file of an
+   Given: Journal Manager of two scratch journals, both with the "Plain
+   Language Summary", "Data Availability Statement" and "Funding
+   Statement" enabled ([Publication metadata](U40-publication-metadata.md)),
+   A holding a submitted submission "Okapi field notes" with one
+   contributor, whose Country is empty, and one file, its three
+   statements each reading "Okapi notes in the field, see PKP & more",
+   with "notes" in bold, "in the field" in italics and "PKP" a link to
+   https://pkp.sfu.ca, B holding none, and, as files on the computer, a
+   Native XML file of an
    article placed in an issue of volume 99, number 9, year 2099, which B
    lacks {OJS}, one of a monograph naming a series with the path "zzz"
    and the title "Zed Series", which B lacks {OMP}, and one holding a
@@ -927,11 +960,20 @@ journal to another) with throwaway accounts. <sup>sc</sup>
      ""{number}" - "Okapi field notes"", {number} being its new number
      in B. Any "Errors occured:" lines under it are left unread ⚠
      [A8](#a8) (Rules 9, 10).
+   - **The contributor with no Country**: among the lines under that
+     success text, one reads "The author {name} does not have a
+     country.", {name} being the contributor's given name alone ("The
+     author Ada does not have a country." for "Ada Lovelace") (Rule 12).
    - **B's Dashboard**: B's Dashboard lists "Okapi field notes" in
      "Submission" ("Production" on a preprint server), the stage it had
      in A, and its workflow screen shows its contributor and its file.
      The mail catcher holds no email from the import (Rule 10; Side
      effects bullet 1).
+   - **The three statements**: on the copy's Publication pages in B
+     ([Publication metadata](U40-publication-metadata.md)), "Plain
+     Language Summary", "Data Availability Statement" and "Funding
+     Statement" each read "Okapi notes in the field, see PKP & more" as
+     in A, the bold, the italics, the link and "&" included (Rule 20a).
    - **An unknown issue** {OJS}: back on B's "Import", press "Change
      File", choose the volume 99 file and press "Import": another
      "Import Results" tab opens with the success text of "Import",
@@ -1014,9 +1056,10 @@ journal to another) with throwaway accounts. <sup>sc</sup>
 
    Given: Journal Manager of two scratch journals A and B, whose
    Journal Manager role began at a different moment in each, A holding
-   the throwaway accounts "moss", a Copyeditor, and "fern", an Author,
-   which hold no role in B; every account of A's list has signed in
-   since it was created.
+   the throwaway accounts "moss", a Copyeditor since 1 January 2020,
+   and "fern", an Author whose role is set to "Does not appear on the
+   masthead", which hold no role in B; every account of A's list has
+   signed in since it was created.
 
    - **The "Export Users" tab**: on A's "Users XML Plugin" page press
      "Export Users": the list titled "Current Users", with "Export All
@@ -1054,8 +1097,13 @@ journal to another) with throwaway accounts. <sup>sc</sup>
      (Rules 22, 24, 28).
    - **B's users**: B's Settings › Users & Roles › "Users" lists "moss"
      as Copyeditor and "fern" as Author (Rules 23, 28).
-   - **moss signs in**: moss signs in to B with the password it had in
-     A: the sign-in succeeds (Rule 23).
+   - **The start date and the masthead choice**: press "Edit" on moss's
+     row of B's "Users" list: the roles page lists "Copyeditor" with
+     "Start Date" reading 1 January 2020. Press "Edit" on fern's row:
+     "Author" reads "Does not appear on the masthead" (Rules 24a, 24b,
+     28).
+   - **moss signs in**: moss signs in to B with its password from A
+     (footnote sc): the sign-in succeeds (Rule 23).
    - **Control**: the mail catcher holds no email to moss or fern from
      the import (Rule 28). <sup>sc</sup>
 
@@ -1126,10 +1174,10 @@ journal to another) with throwaway accounts. <sup>sc</sup>
      (Rule 39).
    - **"Export"**: untick "Validate XML before the export and
      registration.", tick "Okapi forest census" and press "Export": the
-     DOAJ file of "Okapi forest census" downloads, and both rows still
-     read "Not Deposited" (Rule 40).
-   - **"Mark registered"**: tick "Axolotl limb memory" and press "Mark
-     registered": the tab shows again, "Axolotl limb memory" reading
+     DOAJ file of "Okapi forest census" downloads; both rows still read
+     "Not Deposited" (Rule 40).
+   - **"Mark registered"**: with only "Axolotl limb memory" ticked,
+     press "Mark registered": the tab shows again, "Axolotl limb memory" reading
      "Marked registered" and "Okapi forest census" "Not Deposited"
      (Rule 41).
    - **The filter**: press "Search": a list reading "Article Title"
@@ -1137,6 +1185,17 @@ journal to another) with throwaway accounts. <sup>sc</sup>
      Status" and a "Search" button show. Choose "Marked registered" in
      the status list and press "Search": only "Axolotl limb memory" is
      listed (Rule 36a; Fields).
+   - **Unpublished and published again**: press "Lovelace; Axolotl limb
+     memory" and unpublish it on its workflow screen
+     ([Publish schedule & versions](U49-publish-schedule-and-versions.md)).
+     Open the DOAJ "Articles" tab again, press "Search", choose "Any
+     Status" in the status list and press the filter's "Search" button:
+     only "Okapi forest census" is listed, and the filter closes. Press
+     "Search" again, choose "Needs Sync" and press the filter's "Search"
+     button: no row is listed. Publish "Axolotl limb memory"
+     again on its workflow screen, then open the DOAJ "Articles" tab:
+     its row reads "Needs Sync" (Rule 44). Tick it and press "Mark
+     registered": it reads "Marked registered" again (Rule 41).
    - **A new version**: press "Lovelace; Axolotl limb memory": its
      workflow screen opens (Rule 36). Publish a new version of it there
      ([Publish schedule & versions](U49-publish-schedule-and-versions.md)),
@@ -1212,6 +1271,135 @@ journal to another) with throwaway accounts. <sup>sc</sup>
 
     A press and a preprint server have no DOAJ tool (scenario 1).
 
+11. **Role dates in a users file** {OJS OMP}
+
+    Given: Journal Manager of a scratch journal and, as files on the
+    computer, two users files of new users, each user with the plain
+    password "rolepass1" and the role "Reader" unless said otherwise:
+    the first gives "ash" the start date "5.1.2024", "birch"
+    "2024-W01-5", "cedar" "2024-01-05 09:30", "dove" "Friday, January
+    5, 2024", and "elder" an empty start date and an empty end date;
+    the second gives "ivy" the role "Copyeditor" from "soon" beside
+    "Reader" with no dates, "juniper" the start date "0000-00-00
+    00:00:00", "kauri" "1704447000", "larch" "Mon, 05 Jan 2024 09:30:00
+    +0000", "maple" the start date "2027-01-01" and the end date
+    "2027-01-01 00:00:00", "nutmeg" the start date "2027-01-01" and the
+    end date "2026-01-01", and, last, "oak" no dates.
+
+    - **The first file**: on the "Users XML Plugin" page's "Import
+      Users" tab press "Upload File", choose the first file and press
+      "Import Users": the "Results" tab reads "The import completed
+      successfully. Users with usernames and email addresses that are
+      not already in use have been imported, along with accompanying
+      user groups." (Rules 22, 22c).
+    - **The start dates**: Settings › Users & Roles › "Users" lists
+      "ash", "birch", "cedar" and "dove" with "Reader", "Start Date"
+      reading 5 January 2024 for each, and "elder" with "Reader", "Start
+      Date" reading the day of the import (Rules 22c, 24b).
+    - **The second file**: back on "Import Users", press "Change File",
+      choose the second file and press "Import Users": a second
+      "Results" tab reads "Import/Export errors:" and no success
+      sentence, with the lines "The role "Copyeditor" of the user "ivy"
+      has not been imported because "soon" is not a valid date.", the
+      same line for the "Reader" role of "juniper" with "0000-00-00
+      00:00:00", of "kauri" with "1704447000" and of "larch" with "Mon,
+      05 Jan 2024 09:30:00 +0000", and "The role "Reader" of the user
+      "maple" has not been imported because its start date is not before
+      its end date.", and the same line for "nutmeg" (Rules 22, 22c).
+    - **The accounts**: the "Users" list now holds "ivy" with "Reader"
+      alone and "oak" with "Reader", and none of "juniper", "kauri",
+      "larch", "maple" and "nutmeg" (Rule 22c).
+    - **Control**: nutmeg signs in with "rolepass1": the sign-in
+      succeeds, though the "Users" list does not list "nutmeg" (Rule
+      22c). <sup>sc</sup>
+
+    A preprint server has no "Users XML Plugin" (scenario 1).
+
+12. **A users file imported again** {OJS OMP}
+
+    Given: Journal Manager of a scratch journal with "Enable listing of
+    reviewers on the masthead" unticked (a new journal's state), holding
+    a throwaway Section Editor "rook" (rook@mail.test), whose role began
+    when the journal was created, and, as files on the computer, three users
+    files, each user with the plain password "rolepass1" and each role
+    set to "Appear on the masthead" unless said otherwise: the
+    first gives "quill" the role "Section editor" ("Series editor" on a
+    press) from "2099-06-01" and "Reader" from "2020-01-01" to
+    "2099-12-31", "sage" "Section editor" with the end date "2020-12-31"
+    and no start date and "Reader" with no dates, "tern" the reviewer
+    role ("Reviewer"; "External Reviewer" on a press) and "Section
+    editor", both with no dates and set to "Does not appear on the
+    masthead", and "wake" "Section editor" from "2019-01-01" to
+    "2020-12-31" alone; the second gives rook "Section editor" from
+    "2020-01-01" with no end date and again from "2015-01-01" to
+    "2016-01-01"; the third gives rook
+    "Section editor" with no dates and quill "Section editor" from
+    "2099-06-01 00:00:00".
+
+    - **The first file**: on the "Users XML Plugin" page's "Import
+      Users" tab press "Upload File", choose the first file and press
+      "Import Users": the "Results" tab reads "The import completed
+      successfully. Users with usernames and email addresses that are
+      not already in use have been imported, along with accompanying
+      user groups." (Rule 22).
+    - **The roles pages**: on Settings › Users & Roles › "Users" press
+      "Edit" on quill's row: the roles page lists "Section editor" from
+      1 June 2099 and "Reader" from 1 January 2020. On sage's: "Section
+      editor" reads "---" under "Start Date", with 31 December 2020
+      beside it, and "Reader" starts on the day of the import. On tern's:
+      the reviewer role reads "Does not appear on the masthead", with no
+      choice offered, as reviewers are not listed on this journal's
+      masthead, and "Section editor" reads "Does not appear on the
+      masthead", with a choice offered (Rules 24a, 24b).
+    - **"Editorial History" and "Editorial Masthead"**: the journal's
+      "Editorial History" page
+      ([Journal identity & about pages](U07-journal-identity-and-about-pages.md))
+      lists, under "Section editor", "wake" with "2019 – 2020" and
+      "sage" with "– 2020". "Editorial Masthead" does not list "tern"
+      (Rules 24a, 24b).
+    - **Imported again**: open Tools › "Users XML Plugin" again, press
+      "Upload File" on "Import Users", choose the first file again and
+      press "Import Users": a new
+      "Results" tab reads the success sentence of "The first file",
+      and quill's roles page still lists "Section editor" and "Reader"
+      once each (Rules 8, 24).
+    - **The "Export Users" list**: press "Export Users": "Current Users"
+      lists "quill", "sage" and "tern", and not "wake", whose only role
+      has ended (Rule 26).
+    - **"Export All Users"**: press "Export All Users", then "OK": an
+      .xml file downloads, holding "quill" and no "wake" (Rule 27).
+      Close the "Confirm" window with its "Cancel" if it is still open
+      ⚠ [A27](#a27), then go on.
+    - **sage's file imported back**: tick "sage" and press "Export
+      Users": an .xml file downloads, holding sage alone, its "Section
+      editor" role with its end date alone (Rules 24b, 27). On "Import
+      Users" press "Change File", choose that file and press "Import
+      Users": the new "Results" tab has no line naming a role of sage's
+      (on a server whose PHP is older than 8.4 it holds "The imported
+      user "sage" password could not be imported as is. A new password
+      is been send to the user email. The user has been imported."
+      [A16](#a16)), and sage's roles page still lists "Section editor"
+      once, "---" under "Start Date" (Rules 24, 24b).
+    - **An overlapping period**: press "Change File", choose the second
+      file and press "Import Users": the new "Results" tab reads
+      "Import/Export errors:", then "The role "Section editor" of the
+      user "rook" has not been imported because the user already holds
+      this role in an overlapping period." once, and no success
+      sentence. "Editorial History" now lists "rook" under "Section
+      editor" with "2015 – 2016", and rook's roles page still lists the
+      current "Section editor" role once, starting on the day the
+      journal was created (Rule 24).
+    - **No dates, and a start written with a time**: press "Change
+      File", choose the third file and press "Import Users": the new
+      "Results" tab reads the success sentence; rook's roles page still
+      lists the current "Section editor" role once, and quill's lists
+      "Section editor" once, from 1 June 2099 (Rules 22c, 24).
+    - **Control**: the mail catcher holds no email to quill, sage, tern,
+      wake or rook from the imports (Side effects bullet 2).
+      <sup>sc</sup>
+
+    A preprint server has no "Users XML Plugin" (scenario 1).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1234,62 +1422,10 @@ Left out of the scenarios above, by reason:
     ([OMP6](#omp6)): the guard the issue report
     (`docs/issues/U63-OMP6-command-line-native-import-export-formats-fail.md`)
     proposes, once fixed [report 2026-10-21]
-  - the roles' masthead choices and start dates carried from one
-    journal to another (Rules 24a, 24b, 28; A2 and A3 retired): in
-    scenario 6, moss's
-    Copyeditor role in A given a start date in the past and fern's
-    Author role set to "Does not appear on the masthead", both read on
-    B's roles pages and "Editorial Masthead" after the move [upstream 2026-09-29]
-  - a reviewer role imported as "Appear on the masthead" whatever the
-    file says (Rule 24a), a role the file gives no start date starting
-    on the day of the import, and a role the file gives as ended listed
-    on "Editorial History" with the file's years (Rule 24b) [upstream 2026-09-29]
-  - a submission's plain language summary, data availability statement
-    and funding statement carried from one journal to another (Rule 20a):
-    in scenario 4, "Okapi field notes" given all three in A, each read
-    on B's copy after the import [upstream 2026-09-30]
-  - an account whose only role has ended, left off "Export Users" and
-    out of the "Export All Users" file, while one with a role that ends
-    on a later date is listed (Rules 26, 27) [incidental 2026-10-01]
-  - a users file imported a second time with a role that starts on a
-    later date and one that ends on a later date: the success sentence
-    again, and each role held once (Rule 24; A17 retired) [upstream 2026-10-01]
-  - a users file with a role date that is not a date and a role whose
-    start date is not before its end date: the line of each, the role
-    not given, the user's other role kept and the user after it
-    imported; a role with an empty date imported as one with none
-    (Rule 22c; A18 retired) [upstream 2026-10-01]
-  - a role the user already holds from another start date: the overlap
-    line and the role not given again, while a period that overlaps
-    none held is given beside it (Rule 24) [upstream 2026-10-01]
-  - a role the file gives an end date already past and no start date:
-    "---" under "Start Date" on the roles page and the end year alone
-    on "Editorial History" (Rule 24b) [upstream 2026-10-01]
-  - a users file whose role dates are written the other usual ways
-    (with a time, in words, day first, as a week date): each role given
-    from its day; an all-zero date, a bare number and a weekday the
-    date does not fall on each refused with the invalid-date line; a
-    start and an end that are the same moment written two ways refused
-    with the period line (Rule 22c) [upstream 2026-10-13]
-  - a role imported from a start date, then from the same start written
-    with a time: the success sentence again and the role held once
-    (Rule 22c) [upstream 2026-10-13]
-  - a role the user holds from an earlier start date, imported from a
-    file that gives it no dates: the success sentence and the role held
-    once (Rule 24) [upstream 2026-10-13]
-  - an ended role with no start date, exported with "Export Users" and
-    imported back into the same journal: no line for the role and no
-    role added (Rule 24b) [upstream 2026-10-13]
   - the guard A9's issue report names, once fixed: an article (a
     preprint) naming a section the journal (server) lacks, imported:
     the import refused whole with "Unknown section …", no submission
     added, the export list unchanged {OJS OPS} [report 2026-10-01]
-  - the daily DOAJ deposit keeping to its journal (retired A5; Rule
-    43): two journals, one with automatic deposit on, the other holding
-    a "Needs Sync" article: the article stays "Needs Sync" and
-    Administration › "View Jobs" lists no deposit for it, while the
-    depositing journal's own "Needs Sync" and "Not Deposited" articles
-    read "Submitted" {OJS} [upstream 2026-10-08]
   - the guard A13's issue report names, once fixed: a users file with
     an element the format does not know, imported: the "Results" tab
     reads "Validation errors:" with the reason {OJS OMP} [report 2026-10-01]
@@ -1343,22 +1479,6 @@ Left out of the scenarios above, by reason:
     DOAJ "Articles" list's "Article Title" and "Authors" search
     finding an article typed in lower case; and its issue link opening
     the window headed with the issue's name {OJS} [report 2026-10-01]
-  - a Native XML file with a contributor that has no Country: the
-    success text, then "The author {name} does not have a country."
-    (Rule 12) [incidental 2026-10-05]
-  - a submission with one file under "Files for Review", exported:
-    under the success text, "Warnings encountered:", "Submission" and
-    the "…was skipped…" line for that file, and the exported file
-    still downloading (Rule 16a) {OJS OMP} [upstream 2026-10-13]
-  - an article that reads "Marked registered", unpublished and
-    published again: in scenario 8, no row for it on "Articles" while
-    it is unpublished, with the status filter on "Any Status" and on
-    "Needs Sync"; published again, its row reading "Needs Sync"
-    (Rule 44) {OJS} [upstream 2026-10-13]
-  - the Native XML Plugin run from the server's command line: a
-    published article (preprint) exported and the file imported back,
-    "The export completed successfully." and the success text of Rule
-    10 printed, the copy added {OJS OPS} (Rule 20b) [upstream 2026-10-19]
 - **Nothing new to test**:
   - "Import" pressed with no file up, and with a file that is not XML
     (Rule 13)
@@ -1422,6 +1542,8 @@ Left out of the scenarios above, by reason:
     Rule 8a)
   - A26 (a published submission imported, looked for on the
     Dashboard's lists; Rule 10)
+  - A27 (the "Confirm" window of "Export All Users" left open after
+    "OK"; Rule 27; scenario 12 marks it)
   - OJS1 (the DOAJ list's issue window heading; Rule 36)
   - OJS2 (the "DOAJ Export Plugin" row kept on the Plugins list while
     "DOAJ Plugin" is off; Rule 3)
@@ -1447,6 +1569,8 @@ Left out of the scenarios above, by reason:
     10a)
   - OMP6 (a press's Native XML import from the command line, and its
     export there with the ONIX details filled; Rule 20b)
+  - OMP7 (the "Export Users" list read on the page of the import that
+    made its accounts; Rule 26)
 - **No seed**:
   - the PubMed file downloading, and the journal title it carries: the
     journal's name before "NLM Title Abbreviation" is saved and after it
@@ -1456,11 +1580,28 @@ Left out of the scenarios above, by reason:
     message (Rule 37), since the test installs cannot reach DOAJ
   - the daily automatic deposit (Rule 43; Settings bullet 4), for the
     same reason
+  - the daily DOAJ deposit keeping to its journal: two journals, one
+    with automatic deposit on, the other holding a "Needs Sync" article
+    that goes on reading "Needs Sync" with no deposit for it on
+    Administration › "View Jobs", while the depositing journal's own
+    "Needs Sync" and "Not Deposited" articles read "Submitted" {OJS}
+    (Rule 43), since no test tool runs the daily deposit, which no
+    screen starts
+  - the Native XML Plugin run from the server's command line: a
+    published article (preprint) exported and the file imported back,
+    "The export completed successfully." and the success text of Rule
+    10 printed, the copy added {OJS OPS} (Rule 20b), since no test tool
+    runs the command line
 - **Owned by another feature**:
   - the Crossref and DataCite tools' pages (Rules 4, 6;
     *[DOIs](U45-dois.md)*, Rule 44, left out of its scenarios)
   - the "Permissions" tab and its reset (Rule 1;
     *[Publication metadata](U40-publication-metadata.md)*, scenario 7)
+  - an imported reviewer role's words on the roles page while "Enable
+    listing of reviewers on the masthead" is ticked, "Appear on the
+    masthead" (Rule 24a;
+    *[Journal identity & about pages](U07-journal-identity-and-about-pages.md)*,
+    Settings bullet 3)
 
 ## Findings register
 
@@ -1488,6 +1629,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A24](#a24) | Paging the export list, the dashboard or a preprint server's archive repeats some submissions and skips others | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A25](#a25) | Native XML import: a file over the upload limit is refused with "File size error." and no limit named | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A26](#a26) | A published article, book or preprint imported with the Native XML Plugin is missing from the Dashboard's "Published" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A27](#a27) | "OK" in "Export All Users" downloads the file but leaves the "Confirm" window open over the list | 🐞 | minor | — |
 | [OJS1](#ojs1) | DOAJ export list's issue link opens the issue's window headed "DOI Plugin Settings" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | With "DOAJ Plugin" switched off, the Plugins list still shows its export tool as on | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Where NLM's site cannot be reached, every PubMed export fails with a "Validation errors:" page | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1500,6 +1642,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OMP4](#omp4) | A press's command-line CSV import stops with a fatal error, imports nothing and leaves an empty submission | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OMP5](#omp5) | A press importing an OMP Native XML export is warned "Unknown element sequence" for every book in a series | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OMP6](#omp6) | From the command line, a press's Native XML import fails on any book with a publication format, and so does the export once the ONIX details are filled | 🐞 | medium · crash: server | issues (claude), 2026-10-21 — re-verified |
+| [OMP7](#omp7) | A press's "Export Users" list leaves out the accounts an import on the same page has just made | 🐞 | minor | — |
 | [A14](#a14) | "Export Users" with no row ticked ends on a blank page: the server fails | ❓ | minor · crash: server | — |
 | [A22](#a22) | "Export Users" leaves out an account whose only role starts on a later date | ❓ | minor | — |
 | [OJS8](#ojs8) | DOAJ "Register" checks nothing, "Validate XML before the export and registration." ticked or not | ❓ | minor | — |
@@ -1795,6 +1938,16 @@ and "Published" now lists only the Done stage. Every published item
 imported this way is left off, for every Dashboard user.
 Basis: probe, 2026-10-21. <sup>f-a26</sup>
 
+<a id="a27"></a>
+**A27 — "OK" in "Export All Users" downloads the file but leaves the "Confirm" window open over the list** · 🐞 · minor.
+A manager presses "Export All Users" on the Users XML Plugin's "Export
+Users" tab and answers "OK" in the "Confirm" window that asks "Are you
+sure you wish to export all users?". The file downloads, and the window
+should close. Instead it stays open, still asking the question, and the
+list behind it cannot be used until the manager presses the window's
+"Cancel", which reads as calling the export off. {OJS OMP}
+Basis: test run, 2026-11-11. <sup>f-a27</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -2019,6 +2172,17 @@ tab, with its formats; that is the way round, within the upload size the
 server allows. One change in OMP fixes both.
 Basis: probe, 2026-10-21. <sup>f-omp6</sup>
 
+<a id="omp7"></a>
+**OMP7 — A press's "Export Users" list leaves out the accounts an import on the same page has just made** · 🐞 · minor.
+A press manager imports a users file on the Users XML Plugin's "Import
+Users" tab, reads the success sentence, and presses the "Export Users"
+tab of the same page. "Current Users" should list the new accounts.
+Instead it is the list the page opened with: none of them is there to
+tick, and the manager may take the import for a failure. Opening the
+tool again lists them. A journal's tool page is built the same way but
+was not driven.
+Basis: test run, 2026-11-11. <sup>f-omp7</sup>
+
 ### Retired
 
 <a id="a2"></a>
@@ -2213,7 +2377,11 @@ country, also gave the country line (Rule 12:
 `NativeXmlPKPAuthorFilter` adds
 `plugins.importexport.common.error.missingCountry` for a contributor
 that is not Anonymous and has no country, a check added with lib/pkp
-`52d3a0f8e7`). A file with an unknown element:
+`52d3a0f8e7`; its `authorName` is `getLocalizedGivenName()`, else the
+organization name, else the file's author id). Test run 2026-11-11,
+OJS, OMP and OPS (Rule 12; scenario 4): for the contributor "Ada
+Lovelace" the line read "The author Ada does not have a country.", and
+no line named "Ada Lovelace". A file with an unknown element:
 "The process failed…", an "Errors occured:" line such as "Filter
 (Native XML submission import) supports input schema(…) - string
 given" with the file's lines, then "Validation errors:"; a file that
@@ -2561,7 +2729,14 @@ the overlap line against one ending sooner. A file ending 2020-01-01
 with no start date, imported twice: the success sentence both times
 and one row with no start. "soon", "2027-02-30", "tomorrow", an empty
 end date, the overlap line from a current role and an earlier period
-given beside it as on 2026-10-01.
+given beside it as on 2026-10-01. Test run 2026-11-11, OJS and OMP
+(Rule 24; scenario 12): the first file imported again (sage's role with
+no start date and an end of 2020-12-31, quill's from 2099-06-01) and
+the third file (quill's from `2099-06-01 00:00:00`) each read the
+success sentence alone and left each role once; neither reaches the
+two cases Rule 24 names as not seen, which the code above reads as
+held (an end still to come, against a begun role ending no sooner) and
+as the overlap line (no dates, against a role from a later date).
 
 <a id="fn-m"></a>
 **m** — `ExportableUsersGridHandler` (lib/pkp
@@ -2733,7 +2908,11 @@ turned the row's "VoR 1.0" into "VoR 1.1"; a published 2.0 added a "VoR
 2.0" row; an unpublished 2.1 changed nothing. A version "Marked
 registered" under "Yes" read "Not Deposited" on the Articles tab once
 "DOI Versioning" was "No": statuses are stored per publication with
-versioning and per submission without it.
+versioning and per submission without it. Test run 2026-11-11, OJS
+(Fields; scenario 8): after the filter's "Search" with "Any Status"
+had listed "Lovelace; Okapi forest census" alone, the filter was gone,
+only the header's "Search" link showing, and its status list could not
+be reached until that link was pressed again.
 
 <a id="fn-r"></a>
 **r** — `PubObjectsExportPlugin::display()` passes `actionNames` from
@@ -2895,8 +3074,8 @@ items were imported:", "Submission", `-"21" - "{title}"`); OMP: note
 f-omp6. Kept script: `shared/playwright/checks/U63/H19/h19.js`.
 
 <a id="fn-sc"></a>
-**sc** — Scenarios. Scenarios 1 to 4 run on OJS, OMP and OPS, 5 and 6
-on OJS and OMP, 7 to 10 on OJS. Scenario 2 reads `publicknowledge`
+**sc** — Scenarios. Scenarios 1 to 4 run on OJS, OMP and OPS, 5, 6,
+11 and 12 on OJS and OMP, 7 to 10 on OJS. Scenario 2 reads `publicknowledge`
 with the roster: `sectioneditor.ana`, `copyeditor.carla` (OPS
 `assistant.rita`, Editorial Board Member), `reviewer.julia` (OJS, OMP),
 `author.alex`, `reader.rosa`, and `manager.maya` for its control, each
@@ -2910,16 +3089,24 @@ a principal contact to reply to) and a throwaway `manager`, named in
 both contexts of scenarios 1, 4 and 6 so that one account manages both;
 `admin` is enrolled as a manager in each, so the users lists hold it
 too. The names in the scenarios ("kiwi", "moss", "Okapi field notes"…)
-stand for the test's tag-prefixed throwaways. Scenario 1: the first
+stand for the test's tag-prefixed throwaways, each with its username
+twice as password, as the roster's. Scenario 1: the first
 context as created, with an `editor` in `users[]` and `roles: {editor:
 {permitSettings: false}}` on OJS and OMP; the second OJS journal
 `plugins: {doajplugin: {enabled: false}}`. Scenario 3: `issues[]` on OJS
 (one `published`, one not) and `POST scenarios/submission` for the three
-submissions, "Quokka survey" with `decisions: ['sendExternalReview']` on
-OJS and OMP, "Axolotl limb memory" `published` (on OJS with `issue` the
-published one); a new press has its ONIX details blank. Scenario 4: A's
+submissions, "Quokka survey" with `decisions: ['sendExternalReview']`
+and one `reviewRounds[]` entry holding one `files[]` file on OJS and
+OMP, "Axolotl limb memory" `published` (on OJS with `issue` the
+published one); a new press has its ONIX details blank. Scenario 4: both
+contexts with `metadata: {plainLanguageSummary: 'request',
+dataAvailability: 'request', fundingStatement: 'request'}`; A's
 submission with a file (`files[]`, or a `galleys[]` entry on OPS, which
-has no `files[]` key); the three further files are written by the test
+has no `files[]` key), its submitter's contributor record made with no
+country, and the three statements put on its publication through the
+publications API the way
+`shared/playwright/checks/sync/pkp-lib-13377/roundtrip.js` puts them,
+since no submission key sets `dataAvailability` or `fundingStatement`; the three further files are written by the test
 from A's export, the way `shared/playwright/checks/U63/K2/k2.js` writes
 them (an `<issue_identification>` of volume 99, number 9, year 2099; a
 `<series>` with path `zzz` and title "Zed Series"; an unknown element
@@ -2928,12 +3115,25 @@ after the first submission). Scenario 5: `users[]` with the `author`
 `<user_groups>` defining each role named, `<date_registered>` and a
 `<masthead>` per role, which the import needs (A13), and wren's password
 an md5 value with `encryption="md5"`. Scenario 6: `users[]` with the
-`copyeditor` and the `author`, each then signed in once through the
+`author`, `masthead: {author: false}`, and "moss" created in A by a
+users import on A's own "Import Users" giving "Copyeditor" a
+`<date_start>` of 2020-01-01 and that password in plain text, since no `users[]` key gives a current
+role a past start (`scenarios.md`, "Field shapes not built yet"); each
+then signed in once through the
 login form, since a seeded account keeps an older stored password until
 then (seed-facts; A15) and the test tools' session sign-in does not
 replace it; the manager's role in each context begins when that context
 is created, a second or two apart in every run seen 2026-10-01; nova's and moss's sign-ins in scenarios 5 and 6 go through
-the login form too. Scenarios 7 to 10: `issues[]` with one `published`
+the login form too. Scenarios 11 and 12: the users files written the
+way `K3/k3.js` writes them, each role's `<date_start>` and
+`<date_end>` as the kept checks
+`shared/playwright/checks/sync/pkp-lib-13414/fixed-dates.js` and
+`role-periods.js` write them (an element left out for "no date", an
+empty element for "empty"), `<masthead>` false for "Does not appear on
+the masthead"; 12's "rook" is a `users[]` `sectionEditor` and its
+files name rook's own username and email. The day of the import is
+the server's, in UTC (`seed-facts.md`). nutmeg's sign-in goes through
+the login form. Scenarios 7 to 10: `issues[]` with one `published`
 issue (7 also an unpublished one) and `POST scenarios/submission` with
 `published` and `issue` for each article, 8's submitted by a throwaway
 `author` named Ada Lovelace; 10 adds `enableDois: true`, `doiPrefix:
@@ -2948,7 +3148,8 @@ scenario's test still runs in the `ojs-serial` project, because most
 open pkp/ojs PRs, whose checks run this suite at their own heads,
 predate that fix (99 of 100 on 2026-10-19), and an OJS older than it
 still fails every OAI list request while any journal is on "Yes"
-(`scenarios.md`). Scenario
+(`scenarios.md`). Scenario 8's
+unpublish and publish again are done on the workflow screen. Scenario
 9's "Register" queues a deposit that fails at connection and stays on
 Administration › "View Failed Jobs" (note u). Live-probed 2026-09-27:
 these keys seeded the claim check's states.
@@ -3061,7 +3262,15 @@ by "Export Users" with `<date_end>` and no `<date_start>`; that file
 imported back into the same journal read no line for the role and
 left the rows unchanged, the results holding only the password lines
 of A15. Control: a role with neither date, written with neither, the
-same.
+same. Since ui-library `1f9fb95e` (pkp/pkp-lib#13370, 2026-10-22),
+`UserInvitationUserGroupsTable.vue` prints `invitation.masthead.show`
+for a reviewer group only while the context's
+`enableEnrollmentMastheadReviewers` is on, and `invitation.masthead.hidden`
+otherwise; the "Appear on the masthead" of 2026-09-29 predates it. Test
+run 2026-11-11, OJS and OMP (Rule 24a; scenario 12): on a new journal
+and a new press, tern's reviewer role, given `<masthead>false</masthead>`,
+read "Does not appear on the masthead" with no control, its stored
+`user_user_groups.masthead` 1.
 
 <a id="fn-td15"></a>
 **td15** — Live-probed 2026-09-27, OJS and OMP, once each: with no row
@@ -3513,6 +3722,21 @@ upstream issue found. Kept script:
 `shared/playwright/checks/U63/H19/h19.js`.
 Issue report: [pkp-e2e#1037](https://github.com/jardakotesovec/pkp-e2e/issues/1037) ([docs/issues/U63-A26-imported-published-submission-off-dashboard-lists.md](../issues/U63-A26-imported-published-submission-off-dashboard-lists.md)).
 
+<a id="fn-f-a27"></a>
+**f-a27** — Note m. `RedirectConfirmationModalHandler::modalConfirm()`
+(lib/pkp `js/controllers/modal/`) sets `document.location` to the
+`exportAllUsers` address and never calls `modalClose()`, which its
+parent `ConfirmationModalHandler::modalConfirm()` does; the address
+answers with the file as a download, so the page stays and the dialog
+it opened (`open-dialog-vue`) stays open. Test runs 2026-11-11, OJS
+(one run) and OMP (two runs) (Rule 27; scenario 12): after "OK" the
+.xml file downloaded and the "Confirm" window, "Are you sure you wish
+to export all users?" with "OK" and "Cancel", was still open 30 s later
+(OMP, one press and one window each time); its overlay kept the list's
+tick boxes from being pressed for 300 s (OJS); "Cancel" then closed it
+(OMP). Scenario 6 leaves the page for journal B after "OK" and does not
+read the window.
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `ExportPublishedSubmissionsListGridCellProvider::getCellActions()`
 `issue`: `AjaxModal(…BackIssueGridHandler/editIssue…,
@@ -3772,6 +3996,18 @@ pkp/pkp-lib#12956 (open, reported on 3.4) names the import and the
 same two lines; the export half has no upstream issue found. Kept
 script: `shared/playwright/checks/U63/H19/h19.js`.
 Issue report: [pkp-e2e#1033](https://github.com/jardakotesovec/pkp-e2e/issues/1033) ([docs/issues/U63-OMP6-command-line-native-import-export-formats-fail.md](../issues/U63-OMP6-command-line-native-import-export-formats-fail.md)).
+
+<a id="fn-f-omp7"></a>
+**f-omp7** — Note m. OMP's `plugins/importexport/users/templates/index.tpl`
+loads the users grid once, as the page opens
+(`{load_url_in_div id="usersGridContainer"}`), with the page's tabs'
+`cache` on, and
+nothing reloads it after "Import Users". OJS has its own copy of the
+template with the same two lines; not driven there. Test run
+2026-11-11, OMP (Rule 26; scenario 12): after "Import Users" pressed
+twice with a file creating quill, sage and tern, the "Export Users" tab
+of the same page held no row for any of them; the press's tool opened
+afresh listed all three.
 
 ## Reference — entry points & surfaces
 

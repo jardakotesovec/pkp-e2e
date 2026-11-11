@@ -3,41 +3,46 @@
  * @file playwright/tests/U63-import-export.spec.js
  *
  * Import & export — OMP suite, one test per canonical scenario the spec
- * runs on a press: S1–S4 (common) and S5–S6 {OJS OMP}, in the press's own
- * words: the Press Manager, a monograph, the Native XML tabs "Import" and
- * "Export", the list "Monographs" with "Export Submissions", the results
- * tab "Results", the "Press Registration" email. S7–S10 are the journal's
- * (PubMed, DOAJ); the journal-only bullets inside the common scenarios
- * ("Export Issues", the unknown issue, "DOAJ Plugin" unticked, the
- * "Sections" filter group) have no press leg here; the press's own legs
- * ride in them: S3's ONIX reminder (OMP2) and "Internal Review" stage,
- * S4's unknown series (OMP3). Everything runs in the parallel `omp`
- * project: every scenario but S2 seeds its own scratch presses.
+ * runs on a press: S1–S4 (common), S5, S6, S11 and S12 {OJS OMP}, in the
+ * press's own words: the Press Manager, a monograph, the Native XML tabs
+ * "Import" and "Export", the list "Monographs" with "Export Submissions",
+ * the results tab "Results", the "Press Registration" email, the "Series
+ * editor" and "External Reviewer" roles. S7–S10 are the journal's (PubMed,
+ * DOAJ); the journal-only bullets inside the common scenarios ("Export
+ * Issues", the unknown issue, "DOAJ Plugin" unticked, the "Sections"
+ * filter group) have no press leg here; the press's own legs ride in them:
+ * S3's ONIX reminder (OMP2) and "Internal Review" stage, S4's unknown
+ * series (OMP3). Everything runs in the parallel `omp` project: every
+ * scenario but S2 seeds its own scratch presses.
  * Spec: docs/specs/U63-import-export.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - OMP1 🐞: S1 never presses "Tab Delimited Content Import Plugin" (its
- *   page answers a server error); its line is read like the others.
- * - A8: S4's "Errors occured:" lines under a successful import are left
- *   unread.
- * - A10: S3 reads the stage filters' lists as the set they give; that the
- *   published monograph is in no stage is read only as its absence there.
- * - A1, A4–A7, A9, A11–A16, A19–A24: not on these scenarios' press paths.
- *   OJS1–OJS9: the journal's.
+ * - OMP1 🐞: S1 never presses "Tab Delimited Content Import Plugin".
+ * - A8 🐞: S4's "Errors occured:" lines under a successful import are left
+ *   unread, the contributor's no-Country line aside.
+ * - A10 🐞: S3's published monograph in no stage is read only as its
+ *   absence from the stage filters' lists.
+ * - A16 🐞: S6's and S12's imports take either form the server's PHP gives.
+ * - A1, A4, A6, A7, A9, A11–A15, A19–A26, OMP4–OMP6: not on these
+ *   scenarios' press paths. OJS1–OJS12: the journal's.
  *
  * Seeding (footnote sc): S2 reads `publicknowledge` with the roster; every
  * other scenario seeds its own scratch presses with `POST
  * scenarios/context` (a principal contact, a throwaway Press Manager named
  * in both presses of S1, S4 and S6; the editor's `permitSettings: false`
- * in S1) and `POST scenarios/submission` (`files[]`, `decisions[]`,
- * `published`). A new press has its ONIX details blank (S3). The files a
- * test imports are written by the test into its own output folder, from
- * an export it made on screen (S4, the series file by `nativeWithSeries`)
- * or by the builders of `shared/playwright/pages/ImportExportPages.js`
- * (S5). Scratch names
- * ("kiwi", "moss") carry the test's tag.
+ * in S1; S4's three statements at `request`; S6's fern `masthead: {author:
+ * false}`; S12's rook a `sectionEditor`) and `POST scenarios/submission`
+ * (`files[]`, `reviewRounds[].files[]`, `decisions[]`, `published`). A new
+ * press has its ONIX details blank (S3). Two test-side workarounds the
+ * footnote names: S4's three statements are put on A's copy through the
+ * publications API (`putPublication`), and S6's moss is made in A by a
+ * users import giving its Copyeditor role a past start. The files a test
+ * imports are written by the test into its own output folder, from an
+ * export it made on screen (S4, the series file by `nativeWithSeries`) or
+ * by `usersXmlFile` (S5, S6, S11, S12). Scratch names ("kiwi", "moss",
+ * "ash", "quill") carry the test's tag.
  *
  * Every absence is read settled (the list's own fetch, the landing after
  * an action) and paired with a positive control taken the same way (M4,
@@ -69,7 +74,12 @@ const {
     md5,
     nativeWithUnknownElement,
     nativeWithSeries,
+    UserRolesPage,
+    putPublication,
+    whole,
+    loose,
 } = require('../../../../shared/playwright/pages/ImportExportPages.js');
+const {AboutPages} = require('../../../../shared/playwright/pages/ContextIdentityPages.js');
 
 const T = 30_000;
 const PRESS = 'publicknowledge';
@@ -101,6 +111,11 @@ const NEW_PASSWORD_SENT = (u) =>
     `The imported user "${u}" password could not be imported as is. A new password is been send to the user email. The user has been imported.`;
 const ROLE_HELD = (u, g) =>
     `The role "${g}" of the user "${u}" has not been imported because the user already holds this role in an overlapping period.`;
+const INVALID_DATE = (u, g, d) => `The role "${g}" of the user "${u}" has not been imported because "${d}" is not a valid date.`;
+const BAD_PERIOD = (u, g) => `The role "${g}" of the user "${u}" has not been imported because its start date is not before its end date.`;
+const SKIPPED_FILE = (n) =>
+    `The submission file ${n} was skipped because it is attached to a record that will not be imported, such as a review assignment or discussion.`;
+const NO_COUNTRY = (name) => `The author ${name} does not have a country.`;
 const NO_MATCH = (u, e) => `The username "${u}" and the e-mail "${e}" do not match to the one and the same existing user.`;
 const ONIX_REMINDER =
     'This press is missing some required information for ONIX metadata used in this export. Please go to Press Settings and fill in the missing details.';
@@ -110,6 +125,23 @@ const QUOKKA = 'Quokka survey';
 const AXOLOTL = 'Axolotl limb memory';
 const WOMBAT = 'Wombat notes';
 const ZED = {path: 'zzz', title: 'Zed Series'};
+/** The press's role names (Fields; users.md): "Section editor" and the reviewer role on a press. */
+const SERIES_EDITOR = 'Series editor';
+const REVIEWER = 'External Reviewer';
+/** The three statements of S4, each as A holds it (Rule 20a): bold, italics, a link and "&". */
+const STATEMENT = '<p>Okapi <strong>notes</strong> <em>in the field</em>, see <a href="https://pkp.sfu.ca">PKP</a> &amp; more</p>';
+const STATEMENT_TEXT = 'Okapi notes in the field, see PKP & more';
+/** Each statement's Publication page and box on a press (U40). */
+const STATEMENT_PAGES = [
+    {key: 'plainLanguageSummary', page: 'Title & Abstract', label: /^Plain Language Summary/},
+    {key: 'dataAvailability', page: 'Data', label: /^Data Availability Statement/},
+    {key: 'fundingStatement', page: 'Funding', label: /^Funding Statement/},
+];
+/** The password of every user of the S11 and S12 files. */
+const ROLE_PASS = 'rolepass1';
+
+/** Today on the server, in UTC (`YYYY-MM-DD`): the day of an import (footnote sc). */
+const today = () => new Date().toISOString().slice(0, 10);
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -185,6 +217,43 @@ async function dashboardSearch(dashboard, phrase) {
     );
     await dashboard.globalSearch(phrase);
     await answered;
+}
+
+/**
+ * A user of the S11 and S12 files: a new account with the plain password
+ * "rolepass1" (or the one given), its roles as `usersXmlFile` takes them
+ * (a name, or `{name, start, end, masthead}`).
+ */
+function fileUser(username, givenName, roles, password = ROLE_PASS) {
+    return {givenName, familyName: 'Rolefile', email: mailOf(username), username, password: {plain: password}, roles};
+}
+
+/** The display name the press's lists print for a `fileUser`. */
+const fileName = (givenName) => `${givenName} Rolefile`;
+
+/**
+ * The rich-text box of a Publication page's field, by its label (the
+ * submission-language column's TinyMCE body).
+ */
+function richBody(page, labelRe) {
+    return page
+        .locator('.pkpFormField')
+        .filter({has: page.locator('label.pkpFormFieldLabel').filter({hasText: labelRe})})
+        .frameLocator('iframe')
+        .first()
+        .locator('body');
+}
+
+/**
+ * Open a user's roles page from Settings › Users & Roles › "Users" ("Edit"
+ * on the row of `email`), the list opened first.
+ */
+async function openRolesPage(list, email) {
+    await list.goto();
+    await expect(list.row(email)).toHaveCount(1, {timeout: T});
+    const roles = new UserRolesPage(list.page);
+    await roles.openFrom(list, email);
+    return roles;
 }
 
 test.describe('Import & export', () => {
@@ -308,7 +377,16 @@ test.describe('Import & export', () => {
             users: [user(manager, 'Mona', 'Manager', ['manager']), user(ada, 'Ada', 'Lovelace', ['author'])],
         });
         const okapi = await ompApi.createSubmission({tag: `${tag}ok`, context: tag, submitter: ada, title: OKAPI});
-        await ompApi.createSubmission({tag: `${tag}qu`, context: tag, submitter: ada, title: QUOKKA, decisions: ['sendExternalReview']});
+        const quokka = await ompApi.createSubmission({
+            tag: `${tag}qu`,
+            context: tag,
+            submitter: ada,
+            title: QUOKKA,
+            decisions: ['sendExternalReview'],
+            reviewRounds: [{files: [{file: 'article.pdf'}]}],
+        });
+        const reviewFile = (quokka.files || []).find((f) => f.reviewRoundId);
+        expect(reviewFile, 'the seeded file under "Files for Review"').toBeTruthy();
         await ompApi.createSubmission({tag: `${tag}ax`, context: tag, submitter: ada, title: AXOLOTL, published: true});
         const page = await pageAs(asUser, manager);
         const native = new NativeXmlPage(page, tag, NATIVE);
@@ -364,6 +442,29 @@ test.describe('Import & export', () => {
         await native.expectTabs(['Import', 'Export']);
         await native.expectSelected('Export');
 
+        // A file under "Files for Review": "Select All", "Select None",
+        // "Quokka survey" ticked and exported: a new "Export Submissions
+        // Results" tab with the sentence, then "Warnings encountered:",
+        // "Submission" and the skipped-file line naming that file's number;
+        // the file still downloads (Rules 15, 16a).
+        await native.openExportTab();
+        await list.selectButton().click();
+        await expect(list.selectButton()).toHaveText('Select None');
+        await list.selectButton().click();
+        for (const title of [OKAPI, QUOKKA, AXOLOTL]) await expect(list.box(title), title).not.toBeChecked();
+        await list.box(QUOKKA).check();
+        const reviewResults = await list.pressExport(native);
+        await expect(native.tabsNamed('Export Submissions Results')).toHaveCount(1);
+        await expect(reviewResults).toContainText(EXPORTED);
+        await expect(reviewResults).toHaveText(
+            new RegExp(`${loose(EXPORTED)}[\\s\\S]*Warnings encountered:\\s*Submission\\s*${loose(SKIPPED_FILE(reviewFile.submissionFileId))}`)
+        );
+        await expect(resultLines(reviewResults).filter({hasText: whole(SKIPPED_FILE(reviewFile.submissionFileId))})).toHaveCount(1);
+        const reviewExport = await native.download(reviewResults);
+        expect(reviewExport.name).toMatch(/\.xml$/);
+        expect(reviewExport.text).toContain(QUOKKA);
+        await native.openExportTab();
+
         // "Filters": the panel's groups and buttons, no "Sections" group on a
         // press; "External Review", then "Submission" too (Rule 14a; Fields).
         // The published monograph matches no stage (A10, read as the lists'
@@ -408,14 +509,27 @@ test.describe('Import & export', () => {
         const b = `${tag}b`;
         const manager = `${tag}mg`;
         const ada = `${tag}al`;
+        // Both presses with the three statements enabled (Rule 20a); the
+        // submitter's account has no country, so neither has its
+        // contributor record (footnote sc; Rule 12).
+        const metadata = {plainLanguageSummary: 'request', dataAvailability: 'request', fundingStatement: 'request'};
         await ompApi.createContext({
             tag: a,
             context: contact(a),
+            metadata,
             users: [user(manager, 'Mona', 'Manager', ['manager']), user(ada, 'Ada', 'Lovelace', ['author'])],
         });
-        await ompApi.createContext({tag: b, context: contact(b), users: [{username: manager, roles: ['manager']}]});
+        await ompApi.createContext({tag: b, context: contact(b), metadata, users: [{username: manager, roles: ['manager']}]});
         const okapi = await ompApi.createSubmission({tag: `${a}ok`, context: a, submitter: ada, title: OKAPI, files: [{file: 'article.pdf'}]});
         const page = await pageAs(asUser, manager);
+        // The three statements put on A's copy through the publications API,
+        // since no submission key sets them (footnote sc, the way
+        // checks/sync/pkp-lib-13377/roundtrip.js puts them).
+        await page.goto(`/index.php/${a}/dashboard/editorial`);
+        await expectSideMenu(page);
+        const put = await putPublication(page, a, okapi, Object.fromEntries(STATEMENT_PAGES.map(({key}) => [key, {en: STATEMENT}])));
+        expect(put.status, JSON.stringify(put.body).slice(0, 300)).toBe(200);
+        for (const {key} of STATEMENT_PAGES) expect(put.body[key]?.en, key).toBe(STATEMENT);
         // Dashboard and settings reads go through a second page, so the
         // Native page's upload box keeps its file between the imports
         // (Rule 8).
@@ -456,6 +570,11 @@ test.describe('Import & export', () => {
         const number = Number(((await itemLine.innerText()).match(/"(\d+)"/) || [])[1]);
         expect(number).toBeGreaterThan(0);
 
+        // The contributor with no Country: among the lines under the success
+        // text, "The author {name} does not have a country.", {name} the
+        // contributor's given name alone (Rule 12).
+        await expect(resultLines(imported).filter({hasText: whole(NO_COUNTRY('Ada'))})).toHaveCount(1);
+
         // B's Dashboard: "Okapi field notes" under that number in
         // "Submission"; its workflow shows the contributor and the file
         // (Rule 10).
@@ -470,6 +589,18 @@ test.describe('Import & export', () => {
         await workflow.gotoEditorial(number);
         await expect(workflow.contributorsLine()).toContainText('Lovelace');
         await expect(workflow.dialog().getByText('article.pdf', {exact: true})).toBeVisible({timeout: T});
+
+        // The three statements on the copy's Publication pages, as in A: the
+        // bold, the italics, the link and "&" (Rule 20a).
+        for (const {page: entry, label} of STATEMENT_PAGES) {
+            await workflow.selectPage(entry);
+            const body = richBody(side, label);
+            await expect(body, entry).toHaveText(STATEMENT_TEXT, {timeout: T});
+            await expect(body.locator('strong'), entry).toHaveText('notes');
+            await expect(body.locator('em'), entry).toHaveText('in the field');
+            await expect(body.locator('a'), entry).toHaveText('PKP');
+            await expect(body.locator('a'), entry).toHaveAttribute('href', 'https://pkp.sfu.ca');
+        }
 
         // An unknown series: before, B's Settings › Press › "Series" has no
         // "Zed Series"; another "Results" tab with the success text, then
@@ -644,23 +775,34 @@ test.describe('Import & export', () => {
         const manager = `${tag}mg`;
         const moss = `${tag}moss`;
         const fern = `${tag}fern`;
+        // fern's Author role "Does not appear on the masthead" (footnote sc).
         await ompApi.createContext({
             tag: a,
             context: contact(a),
-            users: [user(manager, 'Mona', 'Manager', ['manager']), user(moss, 'Moss', 'Copyeditor', ['copyeditor']), user(fern, 'Fern', 'Author', ['author'])],
+            users: [user(manager, 'Mona', 'Manager', ['manager']), {...user(fern, 'Fern', 'Author', ['author']), masthead: {author: false}}],
         });
         // The manager's role in B must start in a later second than in A: equal
         // start dates read as "already imported" and the overlap line of
         // pkp/pkp-lib#13412 would not come (claim check S01, 2026-10-01).
         await new Promise((r) => setTimeout(r, 1100));
         await ompApi.createContext({tag: b, context: contact(b), users: [{username: manager, roles: ['manager']}]});
+        const page = await signInByForm(browser, baseURL, a, manager);
+        const users = new UsersXmlPage(page, a);
+        // moss made in A by a users import on A's own "Import Users": a
+        // Copyeditor since 1 January 2020, its password (the username twice)
+        // in plain text, since no `users[]` key gives a current role a past
+        // start (footnote sc; scenarios.md "Field shapes not built yet").
+        const mossFile = testInfo.outputPath('users-moss-into-a.xml');
+        fs.writeFileSync(mossFile, usersXmlFile([fileUser(moss, 'Moss', [{name: 'Copyeditor', start: '2020-01-01'}], `${moss}${moss}`)]));
+        await users.goto();
+        await users.upload(mossFile);
+        await expectEveryUserImported(await users.pressImport(), {usernames: [moss], successText: USERS_IMPORTED, newPasswordLine: NEW_PASSWORD_SENT});
         // Every account signs in once through the login form (footnote sc).
         for (const who of [moss, fern]) {
             const once = await signInByForm(browser, baseURL, a, who);
+            await expect(once).not.toHaveURL(/\/login/);
             await once.context().close();
         }
-        const page = await signInByForm(browser, baseURL, a, manager);
-        const users = new UsersXmlPage(page, a);
 
         // "Export Users": "Current Users" with "Search" and "Export All
         // Users", the columns, moss and fern, "Export Users" (Rule 26; Fields).
@@ -744,19 +886,291 @@ test.describe('Import & export', () => {
             otherLines: [ROLE_HELD(manager, 'Press manager')],
         });
 
-        // B's users: moss Copyeditor, fern Author (Rules 23, 28); their
-        // masthead choice and start dates (Rules 24a, 24b) left unread.
+        // B's users: moss Copyeditor, fern Author (Rules 23, 28).
         const listB = new UsersListPage(page, b);
         await listB.goto();
+        await expect(listB.row(mailOf(moss))).toHaveCount(1);
+        await expect(listB.row(mailOf(fern))).toHaveCount(1);
         expect(await listB.cellLines(listB.rolesCell(listB.row(mailOf(moss))))).toEqual(['Copyeditor']);
         expect(await listB.cellLines(listB.rolesCell(listB.row(mailOf(fern))))).toEqual(['Author']);
 
-        // moss signs in to B with the password it had in A (Rule 23).
+        // The start date and the masthead choice: moss's roles page lists
+        // "Copyeditor" from 2020-01-01; fern's "Author" reads "Does not
+        // appear on the masthead" (Rules 24a, 24b, 28).
+        const mossRoles = await openRolesPage(listB, mailOf(moss));
+        await mossRoles.expectRole('Copyeditor', [{start: '2020-01-01', end: '---'}]);
+        const fernRoles = await openRolesPage(listB, mailOf(fern));
+        await fernRoles.expectRole('Author', [{masthead: 'Does not appear on the masthead', choice: true}]);
+
+        // moss signs in to B with its password from A (footnote sc; Rule 23).
         const mossB = await signInByForm(browser, baseURL, b, moss);
         await expect(mossB).not.toHaveURL(/\/login/);
         await mossB.context().close();
 
         // Control: no email to moss or fern (Rule 28).
         await expectNoMailBesidesControl(browser, baseURL, pkpMail, b, manager, [moss, fern]);
+    });
+
+    test('S11: role dates in a users file', async ({browser, baseURL, asUser, ompApi}, testInfo) => {
+        test.setTimeout(240_000);
+        const tag = makeTag('s11', testInfo);
+        const manager = `${tag}mg`;
+        const u = (k) => `${tag}${k}`;
+        await ompApi.createContext({tag, context: contact(tag), users: [user(manager, 'Mona', 'Manager', ['manager'])]});
+        // The two files (footnote sc: a left-out element is "no date", an
+        // empty one "empty").
+        const first = testInfo.outputPath('users-role-dates-first.xml');
+        fs.writeFileSync(
+            first,
+            usersXmlFile([
+                fileUser(u('ash'), 'Ash', [{name: 'Reader', start: '5.1.2024'}]),
+                fileUser(u('birch'), 'Birch', [{name: 'Reader', start: '2024-W01-5'}]),
+                fileUser(u('cedar'), 'Cedar', [{name: 'Reader', start: '2024-01-05 09:30'}]),
+                fileUser(u('dove'), 'Dove', [{name: 'Reader', start: 'Friday, January 5, 2024'}]),
+                fileUser(u('elder'), 'Elder', [{name: 'Reader', start: '', end: ''}]),
+            ])
+        );
+        const second = testInfo.outputPath('users-role-dates-second.xml');
+        fs.writeFileSync(
+            second,
+            usersXmlFile([
+                fileUser(u('ivy'), 'Ivy', [{name: 'Copyeditor', start: 'soon'}, 'Reader']),
+                fileUser(u('juniper'), 'Juniper', [{name: 'Reader', start: '0000-00-00 00:00:00'}]),
+                fileUser(u('kauri'), 'Kauri', [{name: 'Reader', start: '1704447000'}]),
+                fileUser(u('larch'), 'Larch', [{name: 'Reader', start: 'Mon, 05 Jan 2024 09:30:00 +0000'}]),
+                fileUser(u('maple'), 'Maple', [{name: 'Reader', start: '2027-01-01', end: '2027-01-01 00:00:00'}]),
+                fileUser(u('nutmeg'), 'Nutmeg', [{name: 'Reader', start: '2027-01-01', end: '2026-01-01'}]),
+                fileUser(u('oak'), 'Oak', ['Reader']),
+            ])
+        );
+        const page = await pageAs(asUser, manager);
+        const side = await page.context().newPage();
+        const users = new UsersXmlPage(page, tag);
+
+        // The first file: "Results" with the success sentence (Rules 22, 22c).
+        await users.goto();
+        await users.expectSelected('Import Users');
+        await users.upload(first);
+        const firstResults = await users.pressImport();
+        await expect(firstResults).toHaveText(USERS_IMPORTED_WHOLE);
+
+        // The start dates: ash, birch, cedar and dove "Reader" from
+        // 2024-01-05; elder "Reader" from the day of the import (Rules 22c,
+        // 24b).
+        const list = new UsersListPage(side, tag);
+        await list.goto();
+        for (const [k, start] of [['ash', '2024-01-05'], ['birch', '2024-01-05'], ['cedar', '2024-01-05'], ['dove', '2024-01-05'], ['elder', today()]]) {
+            const row = list.row(mailOf(u(k)));
+            await expect(row, k).toHaveCount(1);
+            expect(await list.cellLines(list.rolesCell(row)), k).toEqual(['Reader']);
+            await expect(list.startDateCell(row), k).toHaveText(whole(start));
+        }
+
+        // The second file: a second "Results" tab, "Import/Export errors:"
+        // with a line for each refused role and no success sentence (Rules
+        // 22, 22c).
+        await users.openTab('Import Users');
+        await expect(users.changeFileButton()).toBeVisible();
+        await users.upload(second);
+        const secondResults = await users.pressImport();
+        await expect(users.tabsNamed('Results')).toHaveCount(2);
+        await expect(secondResults.getByRole('heading', {name: 'Import/Export errors:', exact: true})).toBeVisible();
+        await expect(resultLines(secondResults)).toHaveText([
+            INVALID_DATE(u('ivy'), 'Copyeditor', 'soon'),
+            INVALID_DATE(u('juniper'), 'Reader', '0000-00-00 00:00:00'),
+            INVALID_DATE(u('kauri'), 'Reader', '1704447000'),
+            INVALID_DATE(u('larch'), 'Reader', 'Mon, 05 Jan 2024 09:30:00 +0000'),
+            BAD_PERIOD(u('maple'), 'Reader'),
+            BAD_PERIOD(u('nutmeg'), 'Reader'),
+        ]);
+        await expect(secondResults).not.toContainText('The import completed successfully.');
+
+        // The accounts: ivy with "Reader" alone, oak with "Reader"; none of
+        // juniper, kauri, larch, maple and nutmeg, the list's count bounding
+        // the read (admin, the manager, the five of the first file, ivy and
+        // oak; Rule 22c).
+        await list.goto();
+        await expect(list.usersHeading(9)).toBeVisible({timeout: T});
+        for (const k of ['ivy', 'oak']) {
+            const row = list.row(mailOf(u(k)));
+            await expect(row, k).toHaveCount(1);
+            expect(await list.cellLines(list.rolesCell(row)), k).toEqual(['Reader']);
+        }
+        for (const k of ['juniper', 'kauri', 'larch', 'maple', 'nutmeg']) {
+            await expect(list.row(mailOf(u(k))), k).toHaveCount(0);
+        }
+
+        // Control: nutmeg signs in with "rolepass1", though the list does not
+        // list it (Rule 22c).
+        const nutmegPage = await signInByForm(browser, baseURL, tag, u('nutmeg'), ROLE_PASS);
+        await expect(nutmegPage).not.toHaveURL(/\/login/);
+        await nutmegPage.context().close();
+    });
+
+    test('S12: a users file imported again', async ({browser, baseURL, asUser, ompApi, pkpMail}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s12', testInfo);
+        const manager = `${tag}mg`;
+        const rook = `${tag}rook`;
+        const quill = `${tag}quill`;
+        const sage = `${tag}sage`;
+        const tern = `${tag}tern`;
+        const wake = `${tag}wake`;
+        // rook's role begins when the press is created (footnote sc).
+        await ompApi.createContext({
+            tag,
+            context: contact(tag),
+            users: [user(manager, 'Mona', 'Manager', ['manager']), user(rook, 'Rook', 'Editor', ['sectionEditor'])],
+        });
+        const created = today();
+        const rookInFile = (roles) => ({givenName: 'Rook', familyName: 'Editor', email: mailOf(rook), username: rook, password: {plain: ROLE_PASS}, roles});
+        const first = testInfo.outputPath('users-again-first.xml');
+        fs.writeFileSync(
+            first,
+            usersXmlFile([
+                fileUser(quill, 'Quill', [{name: SERIES_EDITOR, start: '2099-06-01'}, {name: 'Reader', start: '2020-01-01', end: '2099-12-31'}]),
+                fileUser(sage, 'Sage', [{name: SERIES_EDITOR, end: '2020-12-31'}, 'Reader']),
+                fileUser(tern, 'Tern', [{name: REVIEWER, masthead: false}, {name: SERIES_EDITOR, masthead: false}]),
+                fileUser(wake, 'Wake', [{name: SERIES_EDITOR, start: '2019-01-01', end: '2020-12-31'}]),
+            ])
+        );
+        const second = testInfo.outputPath('users-again-second.xml');
+        fs.writeFileSync(second, usersXmlFile([rookInFile([{name: SERIES_EDITOR, start: '2020-01-01'}, {name: SERIES_EDITOR, start: '2015-01-01', end: '2016-01-01'}])]));
+        const third = testInfo.outputPath('users-again-third.xml');
+        fs.writeFileSync(third, usersXmlFile([rookInFile([SERIES_EDITOR]), fileUser(quill, 'Quill', [{name: SERIES_EDITOR, start: '2099-06-01 00:00:00'}])]));
+        const page = await pageAs(asUser, manager);
+        const side = await page.context().newPage();
+        const users = new UsersXmlPage(page, tag);
+        const list = new UsersListPage(side, tag);
+        const about = new AboutPages(side, tag);
+        /** A role's periods on a roles page as `start|end`, a set (lesson 14c). */
+        const periods = async (roles, role) => (await roles.readRows()).filter((r) => r.role === role).map((r) => `${r.start}|${r.end}`).sort();
+        const expectRookHeldOnce = async () => {
+            const roles = await openRolesPage(list, mailOf(rook));
+            await expect
+                .poll(() => periods(roles, SERIES_EDITOR), {timeout: T, message: "rook's Series editor periods"})
+                .toEqual([`${created}|---`, '2015-01-01|2016-01-01'].sort());
+        };
+
+        // The first file: the success sentence (Rule 22).
+        await users.goto();
+        await users.upload(first);
+        await expect(await users.pressImport()).toHaveText(USERS_IMPORTED_WHOLE);
+
+        // The roles pages: quill "Series editor" from 2099-06-01 and "Reader"
+        // from 2020-01-01; sage "Series editor" "---" with 2020-12-31 beside
+        // it and "Reader" from the day of the import; tern's reviewer role
+        // with no choice offered, its "Series editor" "Does not appear on the
+        // masthead" (Rules 24a, 24b). The reviewer row reads "Does not appear
+        // on the masthead": this press does not list reviewers on its
+        // masthead (a new press's state).
+        const quillRoles = await openRolesPage(list, mailOf(quill));
+        await quillRoles.expectRole(SERIES_EDITOR, [{start: '2099-06-01'}]);
+        await quillRoles.expectRole('Reader', [{start: '2020-01-01'}]);
+        const sageRoles = await openRolesPage(list, mailOf(sage));
+        await sageRoles.expectRole(SERIES_EDITOR, [{start: '---', end: '2020-12-31'}]);
+        await sageRoles.expectRole('Reader', [{start: created}]);
+        const ternRoles = await openRolesPage(list, mailOf(tern));
+        await ternRoles.expectRole(REVIEWER, [{masthead: 'Does not appear on the masthead', choice: false}]);
+        await ternRoles.expectRole(SERIES_EDITOR, [{masthead: 'Does not appear on the masthead', choice: true}]);
+
+        // "Editorial History" lists, under "Series editor", wake with
+        // "2019 – 2020" and sage with "– 2020"; "Editorial Masthead" lists
+        // rook there and not tern (Rules 24a, 24b).
+        await about.goto('history');
+        await expect(about.entryParts(about.listEntry(SERIES_EDITOR, fileName('Wake'))).dateStart).toHaveText(whole('2019 – 2020'));
+        await expect(about.entryParts(about.listEntry(SERIES_EDITOR, fileName('Sage'))).dateStart).toHaveText(whole('– 2020'));
+        await about.goto('masthead');
+        await expect(about.listEntry(SERIES_EDITOR, 'Rook Editor')).toHaveCount(1);
+        await expect(about.main).not.toContainText(fileName('Tern'));
+
+        // Imported again: Tools › "Users XML Plugin" opened again, the first
+        // file uploaded on "Import Users": a new "Results" tab with the
+        // success sentence; quill's roles page lists each role once (Rules
+        // 8, 24). The page opened afresh is also what lets "Export Users"
+        // list the accounts the first import made (OMP7).
+        await users.goto();
+        await users.expectSelected('Import Users');
+        await users.upload(first);
+        const again = await users.pressImport();
+        await expect(users.tabsNamed('Results')).toHaveCount(1);
+        await expect(again).toHaveText(USERS_IMPORTED_WHOLE);
+        const quillAgain = await openRolesPage(list, mailOf(quill));
+        await quillAgain.expectRole(SERIES_EDITOR, [{start: '2099-06-01'}]);
+        await quillAgain.expectRole('Reader', [{start: '2020-01-01'}]);
+
+        // The "Export Users" list: quill, sage and tern, not wake, whose only
+        // role has ended (Rule 26).
+        await users.openExportTab();
+        for (const who of [quill, sage, tern]) await expect(users.row(mailOf(who)), who).toHaveCount(1);
+        await expect(users.row(mailOf(wake))).toHaveCount(0);
+
+        // "Export All Users", "OK": the file holds quill and no wake (Rule 27).
+        await users.exportAllLink().click();
+        await expect(users.confirmWindow()).toHaveCount(1, {timeout: T});
+        const all = await downloadFrom(page, () => users.confirmWindow().getByRole('button', {name: 'OK', exact: true}).click());
+        const allNames = usersInFile(all.text).map((x) => x.username);
+        expect(allNames).toContain(quill);
+        expect(allNames).not.toContain(wake);
+
+        // A27 🐞 (not asserted, M3): "Confirm" may stay open after "OK"; its "Cancel" closes it.
+        if (await users.confirmWindow().isVisible()) {
+            await users.confirmWindow().getByRole('button', {name: 'Cancel', exact: true}).click();
+        }
+        await expect(users.confirmWindow()).toBeHidden({timeout: T});
+
+        // sage's file: sage alone, its "Series editor" role with its end date
+        // alone (Rules 24b, 27); imported back, no line naming a role of
+        // sage's (A16: on a PHP older than 8.4 the new-password line), and
+        // the role still held once, "---" under "Start Date" (Rules 24, 24b).
+        await users.rowBox(mailOf(sage)).check();
+        const sageFile = await downloadFrom(page, () => users.exportUsersButton().click());
+        const inSageFile = usersInFile(sageFile.text);
+        expect(inSageFile.map((x) => x.username)).toEqual([sage]);
+        const sageSeries = inSageFile[0].groups.filter((g) => g.name === SERIES_EDITOR);
+        expect(sageSeries).toHaveLength(1);
+        expect(sageSeries[0].start, 'no start date in the file').toBeNull();
+        expect(sageSeries[0].end).toMatch(/^2020-12-31/);
+        const sageBack = testInfo.outputPath('users-sage-back.xml');
+        fs.writeFileSync(sageBack, sageFile.text);
+        await users.openTab('Import Users');
+        await users.upload(sageBack);
+        const sageResults = await users.pressImport();
+        await expect(users.tabsNamed('Results')).toHaveCount(2);
+        await expectEveryUserImported(sageResults, {usernames: [sage], successText: USERS_IMPORTED, newPasswordLine: NEW_PASSWORD_SENT});
+        await expect(resultLines(sageResults).filter({hasText: `of the user "${sage}"`})).toHaveCount(0);
+        const sageAgain = await openRolesPage(list, mailOf(sage));
+        await sageAgain.expectRole(SERIES_EDITOR, [{start: '---', end: '2020-12-31'}]);
+
+        // An overlapping period: the overlap line once and no success
+        // sentence; "Editorial History" lists rook with "2015 – 2016"; rook's
+        // current role still held once, from the day the press was created
+        // (Rule 24).
+        await users.openTab('Import Users');
+        await users.upload(second);
+        const overlap = await users.pressImport();
+        await expect(users.tabsNamed('Results')).toHaveCount(3);
+        await expect(overlap.getByRole('heading', {name: 'Import/Export errors:', exact: true})).toBeVisible();
+        await expect(resultLines(overlap)).toHaveText([ROLE_HELD(rook, SERIES_EDITOR)]);
+        await expect(overlap).not.toContainText('The import completed successfully.');
+        await about.goto('history');
+        await expect(about.entryParts(about.listEntry(SERIES_EDITOR, 'Rook Editor')).dateStart).toHaveText(whole('2015 – 2016'));
+        await expectRookHeldOnce();
+
+        // No dates, and a start written with a time: the success sentence;
+        // rook's current role still once, quill's "Series editor" once from
+        // 2099-06-01 (Rules 22c, 24).
+        await users.openTab('Import Users');
+        await users.upload(third);
+        const third_ = await users.pressImport();
+        await expect(users.tabsNamed('Results')).toHaveCount(4);
+        await expect(third_).toHaveText(USERS_IMPORTED_WHOLE);
+        await expectRookHeldOnce();
+        const quillLast = await openRolesPage(list, mailOf(quill));
+        await quillLast.expectRole(SERIES_EDITOR, [{start: '2099-06-01'}]);
+
+        // Control: no email to quill, sage, tern, wake or rook from the
+        // imports (Side effects bullet 2).
+        await expectNoMailBesidesControl(browser, baseURL, pkpMail, tag, manager, [quill, sage, tern, wake, rook]);
     });
 });

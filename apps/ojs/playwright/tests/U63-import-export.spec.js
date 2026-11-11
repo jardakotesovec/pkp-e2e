@@ -3,39 +3,44 @@
  * @file playwright/tests/U63-import-export.spec.js
  *
  * Import & export — OJS suite, one test per canonical scenario the spec
- * runs on OJS in the parallel `ojs` project: S1–S4 (common), S5–S6 {OJS
- * OMP}, S7–S9 {OJS}. S10 puts a journal on "DOI Versioning" "Yes", which
- * on an OJS head older than the U19 A22 fix (pkp/ojs#5947, which most open
- * app PRs predate) makes every OJS OAI list request of the install answer
- * 500 while it lasts, so it runs in the `ojs-serial` project, after this one:
- * `tests/serial/U63-import-export.spec.js`.
+ * runs on OJS in the parallel `ojs` project: S1–S4 (common), S5–S6 and
+ * S11–S12 {OJS OMP}, S7–S9 {OJS}. S10 puts a journal on "DOI Versioning"
+ * "Yes", which on an OJS head older than the U19 A22 fix (pkp/ojs#5947,
+ * which most open app PRs predate) makes every OJS OAI list request of the
+ * install answer 500 while it lasts, so it runs in the `ojs-serial`
+ * project, after this one: `tests/serial/U63-import-export.spec.js`.
  * Spec: docs/specs/U63-import-export.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A8: S4's "Errors occured:" lines under a successful import are left
- *   unread.
- * - A10: S3 reads the stage filters' lists as the set they give; that the
- *   published submission is in no stage is read only as its absence there.
- * - OJS4: S7 never presses a PubMed export (outbound HTTP is dead on the
- *   test installs: every one answers a "Validation errors:" page).
- * - OJS8: S9 unticks "Validate XML…" before "Register", as the scenario
- *   says; nothing reads whether the box holds it back.
- * - OJS9: S9 does not await DOAJ's answer; the queued deposit is never
- *   drained here.
- * - A1, A4, A6, A7, A9, A11–A16, A19–A24, OJS1, OJS2, OJS5–OJS7: not on these scenarios'
- *   paths. OMP1–OMP3: the press's.
+ * - A8: S4's "Errors occured:" lines are left unread, the no-Country line
+ *   among them aside.
+ * - A10: S3 reads the stage filters' lists as the set they give.
+ * - A15, A16: S6 and S12 accept either form of a users import's results
+ *   (the success sentence, or the new-password line for each account).
+ * - A22: S12 reads "Export Users" only for accounts with a current role.
+ * - A27: S12 presses the "Confirm" window's "Cancel" after "OK" while the
+ *   window is open; that it stays open is not asserted.
+ * - OJS4: S7 never presses a PubMed export.
+ * - OJS8: S9 unticks "Validate XML…" before "Register".
+ * - OJS9: S9 does not await DOAJ's answer.
+ * - OJS12: S8 reads only the "Articles" list after an unpublish.
+ * - A1, A4, A6, A7, A9, A11–A14, A19–A21, A23–A26, OJS1, OJS2, OJS5–OJS7,
+ *   OJS10, OJS11: not on these scenarios' paths. OMP1–OMP6: the press's.
  *
  * Seeding (footnote sc): S2 reads `publicknowledge` with the roster; every
  * other scenario seeds its own scratch journals with `POST
  * scenarios/context` (a principal contact, a throwaway Journal Manager
- * named in both journals of S1, S4 and S6) and `POST scenarios/submission`
- * (`files[]`, `decisions[]`, `published`, `issue`). The files a test
- * imports are written by the test into its own output folder, from an
- * export it made on screen (S4) or by the builders of
- * `shared/playwright/pages/ImportExportPages.js` (S5). Scratch names
- * ("kiwi", "moss") carry the test's tag.
+ * named in both journals of S1, S4 and S6; S4's `metadata`, S6's
+ * `masthead`) and `POST scenarios/submission` (`files[]`, `reviewRounds[]`,
+ * `decisions[]`, `published`, `issue`). Two test-side workarounds the
+ * footnote names: S4's three statements put through the publications API
+ * (`putPublication`), and S6's moss made by a users import into A. The
+ * files a test imports are written by the test into its own output folder,
+ * from an export it made on screen (S4, S12) or by the builders of
+ * `shared/playwright/pages/ImportExportPages.js` (S5, S6, S11, S12).
+ * Scratch names ("kiwi", "moss") carry the test's tag.
  *
  * Every absence is read settled (the list's own fetch, the landing after
  * an action) and paired with a positive control taken the same way (M4,
@@ -70,7 +75,12 @@ const {
     md5,
     nativeWithIssue,
     nativeWithUnknownElement,
+    UserRolesPage,
+    putPublication,
+    whole,
+    loose,
 } = require('../../../../shared/playwright/pages/ImportExportPages.js');
+const {AboutPages} = require('../../../../shared/playwright/pages/ContextIdentityPages.js');
 const {PublishScreen} = require('../pages/PublishSchedulePages.js');
 
 const T = 30_000;
@@ -102,6 +112,11 @@ const NEW_PASSWORD_SENT = (u) =>
     `The imported user "${u}" password could not be imported as is. A new password is been send to the user email. The user has been imported.`;
 const ROLE_HELD = (u, g) =>
     `The role "${g}" of the user "${u}" has not been imported because the user already holds this role in an overlapping period.`;
+const INVALID_DATE = (u, g, d) => `The role "${g}" of the user "${u}" has not been imported because "${d}" is not a valid date.`;
+const BAD_PERIOD = (u, g) => `The role "${g}" of the user "${u}" has not been imported because its start date is not before its end date.`;
+const SKIPPED_FILE = (n) =>
+    `The submission file ${n} was skipped because it is attached to a record that will not be imported, such as a review assignment or discussion.`;
+const NO_COUNTRY = (name) => `The author ${name} does not have a country.`;
 const NO_MATCH = (u, e) => `The username "${u}" and the e-mail "${e}" do not match to the one and the same existing user.`;
 const SAVED = 'Your changes have been saved.';
 const NONE_SELECTED = 'No objects selected.';
@@ -123,6 +138,14 @@ const OKAPI_CENSUS = 'Okapi forest census';
 const ISSUE_1 = 'Vol. 1 No. 1 (2025)';
 const ISSUE_2 = 'Vol. 1 No. 2 (2026)';
 const PUBLISHED_ISSUE = {volume: 1, number: 1, year: 2025};
+
+/** The three statements of S4, each as A holds it (Rule 20a). */
+const STATEMENT = '<p>Okapi <strong>notes</strong> <em>in the field</em>, see <a href="https://pkp.sfu.ca">PKP</a> &amp; more</p>';
+/** The password of every user of the S11 and S12 files. */
+const ROLE_PASS = 'rolepass1';
+
+/** Today on the server, in UTC (`YYYY-MM-DD`): the day of an import (footnote sc). */
+const today = () => new Date().toISOString().slice(0, 10);
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -378,7 +401,16 @@ test.describe('Import & export', () => {
             ],
         });
         const okapi = await ojsApi.createSubmission({tag: `${tag}ok`, context: tag, submitter: ada, title: OKAPI});
-        await ojsApi.createSubmission({tag: `${tag}qu`, context: tag, submitter: ada, title: QUOKKA, decisions: ['sendExternalReview']});
+        const quokka = await ojsApi.createSubmission({
+            tag: `${tag}qu`,
+            context: tag,
+            submitter: ada,
+            title: QUOKKA,
+            decisions: ['sendExternalReview'],
+            reviewRounds: [{files: [{file: 'article.pdf'}]}],
+        });
+        const reviewFile = (quokka.files || []).find((f) => f.reviewRoundId);
+        expect(reviewFile, 'the seeded file under "Files for Review"').toBeTruthy();
         await ojsApi.createSubmission({tag: `${tag}ax`, context: tag, submitter: ada, title: AXOLOTL, published: true, issue: PUBLISHED_ISSUE});
         const page = await pageAs(asUser, manager);
         const native = new NativeXmlPage(page, tag, NATIVE);
@@ -445,6 +477,27 @@ test.describe('Import & export', () => {
         expect(issueFile.text).toContain('<volume>1</volume>');
         expect(issueFile.text).toContain(AXOLOTL);
 
+        // A file under "Files for Review": "Select All", "Select None",
+        // "Quokka survey" ticked and exported: the sentence, then "Warnings
+        // encountered:", "Submission" and the skipped-file line naming that
+        // file's number; the file still downloads (Rules 15, 16a).
+        await native.openExportTab();
+        await list.selectButton().click();
+        await expect(list.selectButton()).toHaveText('Select None');
+        await list.selectButton().click();
+        for (const title of [OKAPI, QUOKKA, AXOLOTL]) await expect(list.box(title), title).not.toBeChecked();
+        await list.box(QUOKKA).check();
+        const reviewResults = await list.pressExport(native);
+        await expect(native.tabsNamed('Export Submissions Results')).toHaveCount(1);
+        await expect(reviewResults).toContainText(EXPORTED);
+        await expect(reviewResults).toHaveText(
+            new RegExp(`${loose(EXPORTED)}[\\s\\S]*Warnings encountered:\\s*Submission\\s*${loose(SKIPPED_FILE(reviewFile.submissionFileId))}`)
+        );
+        await expect(resultLines(reviewResults).filter({hasText: whole(SKIPPED_FILE(reviewFile.submissionFileId))})).toHaveCount(1);
+        const reviewExport = await native.download(reviewResults);
+        expect(reviewExport.name).toMatch(/\.xml$/);
+        expect(reviewExport.text).toContain(QUOKKA);
+
         // "Filters": the panel's groups and buttons; "Review", then
         // "Submission" too (Rule 14a; Fields). The published article matches
         // no stage (A10, read as the lists' sets).
@@ -490,21 +543,34 @@ test.describe('Import & export', () => {
         const b = `${tag}b`;
         const manager = `${tag}mg`;
         const ada = `${tag}al`;
+        // Both journals ask for the three statements (footnote sc).
+        const metadata = {plainLanguageSummary: 'request', dataAvailability: 'request', fundingStatement: 'request'};
         await ojsApi.createContext({
             tag: a,
             context: contact(a),
+            metadata,
             users: [user(manager, 'Mona', 'Manager', ['manager']), user(ada, 'Ada', 'Lovelace', ['author'])],
         });
-        await ojsApi.createContext({tag: b, context: contact(b), users: [{username: manager, roles: ['manager']}]});
+        await ojsApi.createContext({tag: b, context: contact(b), metadata, users: [{username: manager, roles: ['manager']}]});
+        // The submitter's contributor record carries no Country: the
+        // throwaway account has none (footnote sc).
         const okapi = await ojsApi.createSubmission({tag: `${a}ok`, context: a, submitter: ada, title: OKAPI, files: [{file: 'article.pdf'}]});
         const page = await pageAs(asUser, manager);
         // Dashboard reads go through a second page, so the Native page's
         // upload box keeps its file between the imports (Rule 8).
         const side = await page.context().newPage();
 
-        // A's file: "Okapi field notes" exported and downloaded (Rule 16).
+        // A's file: "Okapi field notes" exported and downloaded (Rule 16),
+        // its three statements put on its publication first through the
+        // publications API, since no submission key sets them (footnote sc).
         const nativeA = new NativeXmlPage(page, a, NATIVE);
         await nativeA.goto();
+        const put = await putPublication(page, a, okapi, {
+            plainLanguageSummary: {en: STATEMENT},
+            dataAvailability: {en: STATEMENT},
+            fundingStatement: {en: STATEMENT},
+        });
+        expect(put.status, `the statements saved: ${JSON.stringify(put.body).slice(0, 300)}`).toBe(200);
         await nativeA.openExportTab();
         await nativeA.list.box(OKAPI).check();
         const exported = await nativeA.list.pressExport(nativeA);
@@ -537,6 +603,11 @@ test.describe('Import & export', () => {
         const number = Number(((await itemLine.innerText()).match(/"(\d+)"/) || [])[1]);
         expect(number).toBeGreaterThan(0);
 
+        // The contributor with no Country: among the lines under the success
+        // text, "The author Ada does not have a country.", the line naming
+        // the contributor by the given name alone (Rule 12).
+        await expect(resultLines(imported).filter({hasText: whole(NO_COUNTRY('Ada'))})).toHaveCount(1);
+
         // B's Dashboard: "Okapi field notes" under that number in
         // "Submission"; its workflow shows the contributor and the file
         // (Rule 10).
@@ -551,6 +622,19 @@ test.describe('Import & export', () => {
         await workflow.gotoEditorial(number);
         await expect(workflow.contributorsLine()).toContainText('Lovelace');
         await expect(workflow.dialog().getByText('article.pdf', {exact: true})).toBeVisible({timeout: T});
+
+        // The three statements: on the copy's Publication pages in B, each
+        // reads as in A, its bold, italics, link and "&" included (Rule 20a).
+        const copy = new PublishScreen(side, b);
+        await copy.gotoWorkflow(number);
+        for (const [entry, editorId] of [
+            ['Title & Abstract', 'titleAbstract-plainLanguageSummary-control-en'],
+            ['Data', 'dataAvailability-dataAvailability-control-en'],
+            ['Funding', 'fundingStatement-fundingStatement-control-en'],
+        ]) {
+            await copy.openEntry(entry);
+            await expect.poll(() => copy.richTextContent(editorId), {timeout: T, message: entry}).toBe(STATEMENT);
+        }
 
         // An unknown issue: another "Import Results" with the success text
         // and the issue line; B gains an unpublished issue 99/9/2099 (Rule 12).
@@ -725,20 +809,34 @@ test.describe('Import & export', () => {
         await ojsApi.createContext({
             tag: a,
             context: contact(a),
-            users: [user(manager, 'Mona', 'Manager', ['manager']), user(moss, 'Moss', 'Copyeditor', ['copyeditor']), user(fern, 'Fern', 'Author', ['author'])],
+            users: [{...user(fern, 'Fern', 'Author', ['author']), masthead: {author: false}}, user(manager, 'Mona', 'Manager', ['manager'])],
         });
         // The manager's role in B must start in a later second than in A: equal
         // start dates read as "already imported" and the overlap line of
         // pkp/pkp-lib#13412 would not come (claim check S01, 2026-10-01).
         await new Promise((r) => setTimeout(r, 1100));
         await ojsApi.createContext({tag: b, context: contact(b), users: [{username: manager, roles: ['manager']}]});
+        const page = await signInByForm(browser, baseURL, a, manager);
+        const users = new UsersXmlPage(page, a);
+
+        // moss, a Copyeditor of A since 1 January 2020, made by a users
+        // import on A's own "Import Users", since no `users[]` key gives a
+        // current role a past start (footnote sc).
+        const mossFile = testInfo.outputPath('moss-into-a.xml');
+        fs.writeFileSync(
+            mossFile,
+            usersXmlFile([
+                {givenName: 'Moss', familyName: 'Copyeditor', email: mailOf(moss), username: moss, password: {plain: `${moss}${moss}`}, roles: [{name: 'Copyeditor', start: '2020-01-01'}]},
+            ])
+        );
+        await users.goto();
+        await users.upload(mossFile);
+        await expect(await users.pressImport()).toHaveText(whole(USERS_IMPORTED));
         // Every account signs in once through the login form (footnote sc).
         for (const who of [moss, fern]) {
             const once = await signInByForm(browser, baseURL, a, who);
             await once.context().close();
         }
-        const page = await signInByForm(browser, baseURL, a, manager);
-        const users = new UsersXmlPage(page, a);
 
         // "Export Users": "Current Users" with "Search" and "Export All
         // Users", the columns, moss and fern, "Export Users" (Rule 26; Fields).
@@ -822,14 +920,23 @@ test.describe('Import & export', () => {
             otherLines: [ROLE_HELD(manager, 'Journal manager')],
         });
 
-        // B's users: moss Copyeditor, fern Author (Rules 23, 28); their
-        // masthead choice and start dates (Rules 24a, 24b) left unread.
+        // B's users: moss Copyeditor, fern Author (Rules 23, 28).
         const listB = new UsersListPage(page, b);
         await listB.goto();
         expect(await listB.cellLines(listB.rolesCell(listB.row(mailOf(moss))))).toEqual(['Copyeditor']);
         expect(await listB.cellLines(listB.rolesCell(listB.row(mailOf(fern))))).toEqual(['Author']);
 
-        // moss signs in to B with the password it had in A (Rule 23).
+        // The start date and the masthead choice: "Edit" on moss's row, its
+        // "Copyeditor" from 2020-01-01; on fern's, "Author" "Does not appear
+        // on the masthead" (Rules 24a, 24b, 28).
+        const rolesB = new UserRolesPage(page);
+        await rolesB.openFrom(listB, mailOf(moss));
+        await rolesB.expectRole('Copyeditor', [{start: '2020-01-01'}]);
+        await listB.goto();
+        await rolesB.openFrom(listB, mailOf(fern));
+        await rolesB.expectRole('Author', [{masthead: 'Does not appear on the masthead', choice: true}]);
+
+        // moss signs in to B with its password from A (footnote sc; Rule 23).
         const mossB = await signInByForm(browser, baseURL, b, moss);
         await expect(mossB).not.toHaveURL(/\/login/);
         await mossB.context().close();
@@ -995,13 +1102,41 @@ test.describe('Import & export', () => {
         await expect(doaj.row(axolotlRow)).toHaveCount(1);
         await expect(doaj.rows()).toHaveCount(1);
 
-        // A new version: the title opens the workflow; a published new
-        // version turns the row to "Needs Sync" (Rules 36, 44).
+        // Unpublished and published again: unpublished on its workflow, no
+        // row under "Any Status" (only "Okapi forest census", the control)
+        // nor under "Needs Sync"; published again, its row reads "Needs
+        // Sync" (Rule 44); ticked and marked, "Marked registered" (Rule 41).
         await doaj.titleLink(axolotlRow).click();
         const workflow = new WorkflowPage(page, tag);
         await workflow.expectOpen(axolotl.submissionId);
-        const version = await createVersion(page, tag, 'true');
         const publish = new PublishScreen(page, tag);
+        await publish.unpublish();
+        await doaj.goto();
+        await doaj.openListTab('Articles');
+        await doaj.openFilter();
+        await doaj.filterByStatus('Any Status');
+        await expect(doaj.row(okapiRow)).toHaveCount(1);
+        await expect(doaj.rows()).toHaveCount(1);
+        // The filter's own "Search" closed the filter (Fields; Rule 36a):
+        // "Search" at the list's top right shows it again (openFilter).
+        await doaj.filterByStatus('Needs Sync');
+        await expect(doaj.emptyLine()).toBeVisible();
+        await expect(doaj.rows()).toHaveCount(0);
+        await publish.gotoWorkflow(axolotl.submissionId);
+        await publish.openEntry('Title & Abstract');
+        await publishOpenVersion(page, tag);
+        await doaj.goto();
+        await doaj.openListTab('Articles');
+        await expect(doaj.status(axolotlRow)).toHaveText('Needs Sync');
+        await doaj.rowBox(axolotlRow).check();
+        await doaj.pressAndLand('markRegistered');
+        await expect(doaj.status(axolotlRow)).toHaveText('Marked registered');
+
+        // A new version: the title opens the workflow; a published new
+        // version turns the row to "Needs Sync" (Rules 36, 44).
+        await doaj.titleLink(axolotlRow).click();
+        await workflow.expectOpen(axolotl.submissionId);
+        const version = await createVersion(page, tag, 'true');
         await publish.gotoVersionPage(axolotl.submissionId, version, 'titleAbstract', 'Title & Abstract');
         await publishOpenVersion(page, tag);
         await doaj.goto();
@@ -1068,5 +1203,296 @@ test.describe('Import & export', () => {
 
         // Control: "Axolotl limb memory", not ticked, "Not Deposited" (Rule 37).
         await expect(doaj.status(axolotlRow)).toHaveText('Not Deposited');
+    });
+
+    test('S11: role dates in a users file', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {
+        test.setTimeout(240_000);
+        const tag = makeTag('s11', testInfo);
+        const manager = `${tag}mg`;
+        await ojsApi.createContext({tag, context: contact(tag), users: [user(manager, 'Mona', 'Manager', ['manager'])]});
+        const u = (name) => `${tag}${name}`;
+        /** A file's user: the plain password "rolepass1" and `roles` (footnote sc). */
+        const entry = (name, roles) => ({
+            givenName: name[0].toUpperCase() + name.slice(1),
+            familyName: 'Dated',
+            email: mailOf(u(name)),
+            username: u(name),
+            password: {plain: ROLE_PASS},
+            roles,
+        });
+        const reader = (start, end) => ({name: 'Reader', start, end});
+        const first = testInfo.outputPath('role-dates-first.xml');
+        fs.writeFileSync(
+            first,
+            usersXmlFile([
+                entry('ash', [reader('5.1.2024')]),
+                entry('birch', [reader('2024-W01-5')]),
+                entry('cedar', [reader('2024-01-05 09:30')]),
+                entry('dove', [reader('Friday, January 5, 2024')]),
+                entry('elder', [reader('', '')]),
+            ])
+        );
+        const second = testInfo.outputPath('role-dates-second.xml');
+        fs.writeFileSync(
+            second,
+            usersXmlFile([
+                entry('ivy', [{name: 'Copyeditor', start: 'soon'}, 'Reader']),
+                entry('juniper', [reader('0000-00-00 00:00:00')]),
+                entry('kauri', [reader('1704447000')]),
+                entry('larch', [reader('Mon, 05 Jan 2024 09:30:00 +0000')]),
+                entry('maple', [reader('2027-01-01', '2027-01-01 00:00:00')]),
+                entry('nutmeg', [reader('2027-01-01', '2026-01-01')]),
+                entry('oak', ['Reader']),
+            ])
+        );
+        const page = await pageAs(asUser, manager);
+        const side = await page.context().newPage();
+        const users = new UsersXmlPage(page, tag);
+        const list = new UsersListPage(side, tag);
+
+        // The first file: the "Results" tab reads the success sentence
+        // (Rules 22, 22c).
+        await users.goto();
+        await users.upload(first);
+        const firstResults = await users.pressImport();
+        await expect(firstResults).toHaveText(whole(USERS_IMPORTED));
+
+        // The start dates: ash, birch, cedar and dove "Reader" from
+        // 2024-01-05; elder "Reader" from the day of the import (Rules 22c,
+        // 24b).
+        await list.goto();
+        for (const who of ['ash', 'birch', 'cedar', 'dove']) {
+            const row = list.row(mailOf(u(who)));
+            await expect(row, who).toHaveCount(1);
+            expect(await list.cellLines(list.rolesCell(row)), who).toEqual(['Reader']);
+            expect(await list.cellLines(list.startDateCell(row)), who).toEqual(['2024-01-05']);
+        }
+        const elderRow = list.row(mailOf(u('elder')));
+        await expect(elderRow).toHaveCount(1);
+        expect(await list.cellLines(list.rolesCell(elderRow))).toEqual(['Reader']);
+        expect(await list.cellLines(list.startDateCell(elderRow))).toEqual([today()]);
+
+        // The second file: a second "Results" tab, "Import/Export errors:"
+        // with a line for each refused role and no success sentence (Rules
+        // 22, 22c).
+        await users.openTab('Import Users');
+        await expect(users.changeFileButton()).toBeVisible();
+        await users.upload(second);
+        const secondResults = await users.pressImport();
+        await expect(users.tabsNamed('Results')).toHaveCount(2);
+        await expect(secondResults.getByRole('heading', {name: 'Import/Export errors:', exact: true})).toBeVisible();
+        const refused = [
+            INVALID_DATE(u('ivy'), 'Copyeditor', 'soon'),
+            INVALID_DATE(u('juniper'), 'Reader', '0000-00-00 00:00:00'),
+            INVALID_DATE(u('kauri'), 'Reader', '1704447000'),
+            INVALID_DATE(u('larch'), 'Reader', 'Mon, 05 Jan 2024 09:30:00 +0000'),
+            BAD_PERIOD(u('maple'), 'Reader'),
+            BAD_PERIOD(u('nutmeg'), 'Reader'),
+        ];
+        await expect
+            .poll(async () => (await resultLines(secondResults).allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim()).sort(), {timeout: T})
+            .toEqual([...refused].sort());
+        await expect(secondResults).not.toContainText('The import completed successfully.');
+
+        // The accounts: ivy "Reader" alone, oak "Reader"; none of juniper,
+        // kauri, larch, maple and nutmeg (Rule 22c).
+        await list.goto();
+        for (const who of ['ivy', 'oak']) {
+            const row = list.row(mailOf(u(who)));
+            await expect(row, who).toHaveCount(1);
+            expect(await list.cellLines(list.rolesCell(row)), who).toEqual(['Reader']);
+        }
+        for (const who of ['juniper', 'kauri', 'larch', 'maple', 'nutmeg']) {
+            await expect(list.row(mailOf(u(who))), who).toHaveCount(0);
+        }
+
+        // Control: nutmeg signs in with "rolepass1", though the list does
+        // not list it (Rule 22c).
+        const nutmeg = await signInByForm(browser, baseURL, tag, u('nutmeg'), ROLE_PASS);
+        await expect(nutmeg).not.toHaveURL(/\/login/);
+        await nutmeg.context().close();
+    });
+
+    test('S12: a users file imported again', async ({browser, baseURL, asUser, ojsApi, pkpMail}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s12', testInfo);
+        const manager = `${tag}mg`;
+        const [quill, sage, tern, wake, rook] = ['quill', 'sage', 'tern', 'wake', 'rook'].map((n) => `${tag}${n}`);
+        const NAMES = {[quill]: ['Quill', 'Quinn'], [sage]: ['Sage', 'Sorrel'], [tern]: ['Tern', 'Teal'], [wake]: ['Wake', 'Willow'], [rook]: ['Rook', 'Raven']};
+        const fullName = (who) => NAMES[who].join(' ');
+        // rook, a Section Editor since the journal was created (footnote sc).
+        await ojsApi.createContext({
+            tag,
+            context: contact(tag),
+            users: [user(manager, 'Mona', 'Manager', ['manager']), user(rook, 'Rook', 'Raven', ['sectionEditor'])],
+        });
+        const created = today();
+        /** A file's user: the plain password "rolepass1" and `roles` (footnote sc). */
+        const entry = (who, roles) => ({
+            givenName: NAMES[who][0],
+            familyName: NAMES[who][1],
+            email: mailOf(who),
+            username: who,
+            password: {plain: ROLE_PASS},
+            roles,
+        });
+        const SE = 'Section editor';
+        const firstFile = testInfo.outputPath('again-first.xml');
+        fs.writeFileSync(
+            firstFile,
+            usersXmlFile([
+                entry(quill, [
+                    {name: SE, start: '2099-06-01'},
+                    {name: 'Reader', start: '2020-01-01', end: '2099-12-31'},
+                ]),
+                entry(sage, [{name: SE, end: '2020-12-31'}, 'Reader']),
+                entry(tern, [
+                    {name: 'Reviewer', masthead: false},
+                    {name: SE, masthead: false},
+                ]),
+                entry(wake, [{name: SE, start: '2019-01-01', end: '2020-12-31'}]),
+            ])
+        );
+        const secondFile = testInfo.outputPath('again-second.xml');
+        fs.writeFileSync(
+            secondFile,
+            usersXmlFile([
+                entry(rook, [
+                    {name: SE, start: '2020-01-01'},
+                    {name: SE, start: '2015-01-01', end: '2016-01-01'},
+                ]),
+            ])
+        );
+        const thirdFile = testInfo.outputPath('again-third.xml');
+        fs.writeFileSync(thirdFile, usersXmlFile([entry(rook, [SE]), entry(quill, [{name: SE, start: '2099-06-01 00:00:00'}])]));
+        const page = await pageAs(asUser, manager);
+        const side = await page.context().newPage();
+        const users = new UsersXmlPage(page, tag);
+        const list = new UsersListPage(side, tag);
+        const roles = new UserRolesPage(side);
+        const about = new AboutPages(side, tag);
+        /** Open `who`'s roles page from the users list ("Edit" on its row). */
+        const rolesOf = async (who) => {
+            await list.goto();
+            await roles.openFrom(list, mailOf(who));
+        };
+        /** The start dates of `who`'s current (not ended) "Section editor" rows. */
+        const currentEditorStarts = async () =>
+            (await roles.readRows()).filter((r) => r.role === SE && r.end === '---').map((r) => r.start);
+
+        // The first file: the success sentence (Rule 22).
+        await users.goto();
+        await users.upload(firstFile);
+        await expect(await users.pressImport()).toHaveText(whole(USERS_IMPORTED));
+
+        // The roles pages: quill "Section editor" from 2099-06-01 and
+        // "Reader" from 2020-01-01; sage "Section editor" "---" with
+        // 2020-12-31 beside it and "Reader" from the day of the import; tern
+        // the reviewer role "Does not appear on the masthead" with no choice
+        // offered (reviewers are not listed on a new journal's masthead),
+        // and "Section editor" "Does not appear on the masthead" with a
+        // choice (Rules 24a, 24b).
+        await rolesOf(quill);
+        await roles.expectRole(SE, [{start: '2099-06-01'}]);
+        await roles.expectRole('Reader', [{start: '2020-01-01'}]);
+        await rolesOf(sage);
+        await roles.expectRole(SE, [{start: '---', end: '2020-12-31'}]);
+        await roles.expectRole('Reader', [{start: today()}]);
+        await rolesOf(tern);
+        await roles.expectRole('Reviewer', [{masthead: 'Does not appear on the masthead', choice: false}]);
+        await roles.expectRole(SE, [{masthead: 'Does not appear on the masthead', choice: true}]);
+
+        // "Editorial History": under "Section editor", wake "2019 – 2020",
+        // sage "– 2020". "Editorial Masthead": no tern; rook, the control,
+        // listed (Rules 24a, 24b).
+        await about.goto('history');
+        await expect(about.entryParts(about.listEntry(SE, fullName(wake))).dateStart).toHaveText(whole('2019 – 2020'));
+        await expect(about.entryParts(about.listEntry(SE, fullName(sage))).dateStart).toHaveText(whole('– 2020'));
+        await about.goto('masthead');
+        expect(await about.listNames(SE)).toContain(fullName(rook));
+        await expect(about.main.getByText(fullName(tern))).toHaveCount(0);
+
+        // Imported again: Tools › "Users XML Plugin" opened again, the first
+        // file once more: the success sentence, and quill's roles each held
+        // once (Rules 8, 24).
+        const tools = new ToolsPage(page, tag);
+        await tools.goto();
+        await tools.openTool('Users XML Plugin');
+        await users.expectSelected('Import Users');
+        await expect(users.uploadButton()).toBeVisible();
+        await users.upload(firstFile);
+        await expect(await users.pressImport()).toHaveText(whole(USERS_IMPORTED));
+        await rolesOf(quill);
+        await roles.expectRole(SE, [{start: '2099-06-01'}]);
+        await roles.expectRole('Reader', [{start: '2020-01-01'}]);
+
+        // The "Export Users" list: quill, sage and tern; no wake, whose only
+        // role has ended (Rule 26).
+        await users.openExportTab();
+        for (const who of [quill, sage, tern]) await expect(users.row(mailOf(who)), who).toHaveCount(1);
+        await expect(users.row(mailOf(wake))).toHaveCount(0);
+
+        // "Export All Users", "OK": the file holds quill and no wake (Rule 27).
+        await users.openExportAllConfirm();
+        const all = await downloadFrom(page, () => users.confirmWindow().getByRole('button', {name: 'OK', exact: true}).click());
+        expect(all.name).toMatch(/\.xml$/);
+        const allNames = usersInFile(all.text).map((x) => x.username);
+        expect(allNames).toContain(quill);
+        expect(allNames).not.toContain(wake);
+        await users.closeConfirmIfOpen(); // A27 🐞: "Cancel" only if "OK" left the window open; whether it stayed is not asserted (M3).
+
+        // sage's file imported back: sage alone, its "Section editor" with
+        // its end date alone (Rules 24b, 27); imported, no line naming a role
+        // of sage's (A16's password line aside, on a PHP older than 8.4), and
+        // "Section editor" still once, "---" under "Start Date" (Rules 24,
+        // 24b).
+        await users.rowBox(mailOf(sage)).check();
+        const sageExport = await downloadFrom(page, () => users.exportUsersButton().click());
+        expect(sageExport.name).toMatch(/\.xml$/);
+        const inSage = usersInFile(sageExport.text);
+        expect(inSage.map((x) => x.username)).toEqual([sage]);
+        const sageEditor = inSage[0].groups.filter((g) => g.name === SE);
+        expect(sageEditor).toHaveLength(1);
+        expect(sageEditor[0].start, 'no start date').toBeNull();
+        expect(sageEditor[0].end).toMatch(/^2020-12-31/);
+        const sageFile = testInfo.outputPath('sage-from-export.xml');
+        fs.writeFileSync(sageFile, sageExport.text);
+        await users.openTab('Import Users');
+        await expect(users.changeFileButton()).toBeVisible();
+        await users.upload(sageFile);
+        const sageResults = await users.pressImport();
+        await expectEveryUserImported(sageResults, {usernames: [sage], successText: USERS_IMPORTED, newPasswordLine: NEW_PASSWORD_SENT});
+        await rolesOf(sage);
+        await roles.expectRole(SE, [{start: '---'}]);
+
+        // An overlapping period: the second file: "Import/Export errors:"
+        // with the overlap line once and no success sentence; "Editorial
+        // History" lists rook "2015 – 2016"; rook's current "Section editor"
+        // still once, from the day the journal was created (Rule 24).
+        await users.openTab('Import Users');
+        await users.upload(secondFile);
+        const overlap = await users.pressImport();
+        await expect(overlap.getByRole('heading', {name: 'Import/Export errors:', exact: true})).toBeVisible();
+        await expect(resultLines(overlap)).toHaveText([ROLE_HELD(rook, SE)]);
+        await expect(overlap).not.toContainText('The import completed successfully.');
+        await about.goto('history');
+        await expect(about.entryParts(about.listEntry(SE, fullName(rook))).dateStart).toHaveText(whole('2015 – 2016'));
+        await rolesOf(rook);
+        await expect.poll(currentEditorStarts, {timeout: T}).toEqual([created]);
+
+        // No dates, and a start written with a time: the third file: the
+        // success sentence; rook's current "Section editor" once, quill's
+        // "Section editor" once, from 2099-06-01 (Rules 22c, 24).
+        await users.openTab('Import Users');
+        await users.upload(thirdFile);
+        await expect(await users.pressImport()).toHaveText(whole(USERS_IMPORTED));
+        await rolesOf(rook);
+        await expect.poll(currentEditorStarts, {timeout: T}).toEqual([created]);
+        await rolesOf(quill);
+        await roles.expectRole(SE, [{start: '2099-06-01'}]);
+
+        // Control: no email to quill, sage, tern, wake or rook from the
+        // imports (Side effects bullet 2).
+        await expectNoMailBesidesControl(browser, baseURL, pkpMail, tag, manager, [quill, sage, tern, wake, rook]);
     });
 });

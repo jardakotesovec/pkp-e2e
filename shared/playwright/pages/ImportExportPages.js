@@ -23,6 +23,12 @@
  * - UsersXmlPage (a ToolPage) — "Users XML Plugin" {OJS OMP}: "Import
  *   Users", the "Current Users" grid with its header links, filter form,
  *   row boxes, "Export Users", and the "Export All Users" "Confirm" window.
+ * - UserRolesPage — a user's roles page ("Edit" on a row of Settings ›
+ *   Users & Roles › "Users"): each role period's start, end and masthead
+ *   choice (U63 Rules 24a, 24b).
+ * - putPublication() — a publication's fields saved through the
+ *   publications API as the signed-in user, the spec's named workaround
+ *   for fields no scenario key sets (U63 S4's three statements).
  * - PubMedPage (a ToolPage) — "PubMed XML Export Plugin" {OJS}: the
  *   "NLM Title Abbreviation" form and the two export lists.
  * - DoajPage (a ToolPage) — "DOAJ Export Plugin" {OJS}: the Settings form,
@@ -74,6 +80,16 @@ function whole(text) {
     return new RegExp(`^\\s*${esc(text)}\\s*$`);
 }
 exports.whole = whole;
+
+/**
+ * A RegExp source matching `text` with any run of white space between its
+ * words: a legacy results panel's text breaks a sentence with a newline
+ * and tabs (friction 2026-11-11).
+ */
+function loose(text) {
+    return esc(text).replace(/ /g, '\\s+');
+}
+exports.loose = loose;
 
 // ---------------------------------------------------------------------------
 // Notices, downloads, the side menu
@@ -861,8 +877,144 @@ class UsersXmlPage extends ToolPage {
             await expect(this.confirmWindow()).toBeVisible({timeout: 1_000});
         }).toPass({timeout: T});
     }
+
+    /**
+     * After "OK" in the "Confirm" window: press its "Cancel" while the
+     * window is still open (U63 A27: "OK" downloads but leaves it open over
+     * the list) and wait for it to close. Asserts nothing about A27 itself,
+     * so it passes unchanged once "OK" closes the window.
+     */
+    async closeConfirmIfOpen() {
+        const cancel = this.confirmWindow().getByRole('button', {name: 'Cancel', exact: true});
+        await expect(async () => {
+            if (await this.confirmWindow().isVisible()) await cancel.click({timeout: 1_000});
+            await expect(this.confirmWindow()).toBeHidden({timeout: 1_000});
+        }).toPass({timeout: T});
+    }
 }
 exports.UsersXmlPage = UsersXmlPage;
+
+// ---------------------------------------------------------------------------
+// A user's roles page ("Edit" on a row of Settings › Users & Roles › "Users")
+// ---------------------------------------------------------------------------
+
+/**
+ * The roles table of a user's roles page (`management/settings/user/{id}`,
+ * the invitation wizard's "Enter details" step for an existing member):
+ * one row per role period, cells "Role", "Start Date", "End Date" (dates
+ * as `YYYY-MM-DD`, "---" for none), the masthead column ("Journal
+ * Masthead" / "Press Masthead": a select, or the fixed words "Appear on
+ * the masthead" on a reviewer role) and the row's action. App-neutral: the
+ * masthead column is read by position, not by its app-worded header.
+ * (Claim check S01, `.reports/U63/ccS01/s01-*-reads-roles-*.json`.)
+ */
+class UserRolesPage extends BasePage {
+    /** @param {import('@playwright/test').Page} page */
+    constructor(page) {
+        super(page);
+        this.table = page
+            .getByRole('main')
+            .getByRole('table')
+            .filter({has: page.getByRole('columnheader', {name: 'Start Date', exact: true})})
+            .first();
+    }
+
+    /**
+     * Press "Edit" on the row of `rowText` (an email address) of the users
+     * list open on the page (`UsersListPage`, read-only here) and wait for
+     * the roles table.
+     *
+     * @param {{row: (text: string) => import('@playwright/test').Locator, chooseAction: (row: import('@playwright/test').Locator, label: string) => Promise<void>}} usersList
+     * @param {string} rowText
+     */
+    async openFrom(usersList, rowText) {
+        await usersList.chooseAction(usersList.row(rowText), 'Edit');
+        await this.expectLoaded();
+    }
+
+    /** The table is up with its first role row. */
+    async expectLoaded() {
+        await expect(this.rows().first()).toBeVisible({timeout: T});
+    }
+
+    /** The table's body rows (each a role period). */
+    rows() {
+        return this.table.locator('tbody tr').filter({has: this.page.getByRole('cell')});
+    }
+
+    /**
+     * Every row as read: `{role, start, end, masthead, choice}`, `masthead`
+     * the select's chosen option (or the cell's words when it has no
+     * select) and `choice` whether a select is offered.
+     */
+    async readRows() {
+        return this.rows().evaluateAll((trs) =>
+            trs.map((tr) => {
+                const tds = [...tr.querySelectorAll('td')];
+                const text = (i) => ((/** @type {HTMLElement} */ (tds[i]) || {innerText: ''}).innerText || '').replace(/\s+/g, ' ').trim();
+                const select = tds[3] ? tds[3].querySelector('select') : null;
+                const masthead = select
+                    ? ((/** @type {HTMLSelectElement} */ (select)).selectedOptions[0]?.textContent || '').replace(/\s+/g, ' ').trim()
+                    : text(3);
+                return {role: text(0), start: text(1), end: text(2), masthead, choice: Boolean(select)};
+            })
+        );
+    }
+
+    /**
+     * Expect the rows of `role` to match `expected` (each a partial
+     * `{start, end, masthead, choice}`), as many rows as entries, in table
+     * order; polled until the table settles (patterns.md lesson 14b).
+     *
+     * @param {string} role the role's name ("Section editor")
+     * @param {Array<{start?: string, end?: string, masthead?: string | RegExp, choice?: boolean}>} expected
+     */
+    async expectRole(role, expected) {
+        await expect
+            .poll(async () => (await this.readRows()).filter((r) => r.role === role), {timeout: T, message: `the "${role}" rows of the roles page`})
+            .toMatchObject(expected);
+    }
+}
+exports.UserRolesPage = UserRolesPage;
+
+/**
+ * Save fields of a publication through the publications API, as the
+ * signed-in user of `page` (a backend page of the context, whose
+ * `pkp.currentUser` carries the CSRF token): a test-side workaround the
+ * spec names where no scenario key sets a field (U63 footnote sc, S4's
+ * three statements, the way `checks/sync/pkp-lib-13377/roundtrip.js` puts
+ * them). Returns the answer's status and body.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} contextPath
+ * @param {{submissionId: number, publicationId: number}} ids
+ * @param {Record<string, unknown>} data e.g. `{dataAvailability: {en: '<p>…</p>'}}`
+ */
+async function putPublication(page, contextPath, {submissionId, publicationId}, data) {
+    const url = `/index.php/${contextPath}/api/v1/submissions/${submissionId}/publications/${publicationId}`;
+    await expect.poll(() => page.evaluate(() => Boolean(/** @type {any} */ (window).pkp?.currentUser?.csrfToken)), {timeout: T}).toBe(true);
+    return page.evaluate(
+        async ({url, data}) => {
+            const token = /** @type {any} */ (window).pkp.currentUser.csrfToken;
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json', 'X-Csrf-Token': token},
+                body: JSON.stringify(data),
+                credentials: 'same-origin',
+            });
+            const text = await res.text();
+            let body = null;
+            try {
+                body = JSON.parse(text);
+            } catch (e) {
+                body = text.slice(0, 800);
+            }
+            return {status: res.status, body};
+        },
+        {url, data}
+    );
+}
+exports.putPublication = putPublication;
 
 // ---------------------------------------------------------------------------
 // PubMed XML Export Plugin {OJS}
@@ -983,7 +1135,7 @@ class DoajPage extends ToolPage {
     /** The grid is fetched: a row or its empty line. */
     async expectListLoaded() {
         await expect(this.grid.locator('tbody').first()).toBeAttached({timeout: T});
-        await expect(this.rows().first().or(this.grid.locator('tbody.empty td').filter({visible: true})).first()).toBeVisible({timeout: T});
+        await expect(this.rows().first().or(this.emptyLine()).first()).toBeVisible({timeout: T});
         await waitForJQueryIdle(this.page);
     }
 
@@ -1007,6 +1159,11 @@ class DoajPage extends ToolPage {
     /** A row by text it holds (a title, "VoR 2.0"). */
     row(text) {
         return this.rows().filter({hasText: text});
+    }
+
+    /** The list's empty line, shown when no row matches. */
+    emptyLine() {
+        return this.grid.locator('tbody.empty td').filter({visible: true});
     }
 
     /** A row's cells, trimmed, in order. */
@@ -1090,14 +1247,28 @@ class DoajPage extends ToolPage {
         return this.filterForm().getByRole('button', {name: 'Search', exact: true});
     }
 
-    /** Show the filter with the header's "Search". */
+    /**
+     * Show the filter with the header's "Search". The grid may come back
+     * from a landing with its filter already shown (its last filter
+     * remembered), where a press would hide it, so "Search" is pressed
+     * only while the filter's lists are hidden, bounded by their showing.
+     */
     async openFilter() {
-        await this.searchLink().click();
-        await expect(this.filterForm()).toBeVisible({timeout: T});
+        await waitForJQueryIdle(this.page);
+        const status = this.filterSelect('statusId');
+        await expect(async () => {
+            if (!(await status.isVisible())) await this.searchLink().click();
+            await expect(status).toBeVisible({timeout: 2_000});
+        }).toPass({timeout: T});
     }
 
-    /** Choose a status in the filter and press its "Search"; resolves once the grid re-fetched. */
+    /**
+     * Choose a status in the filter and press its "Search"; resolves once
+     * the grid re-fetched. The filter's own "Search" closes the filter
+     * (U63 Fields, Rule 36a), so it is shown first when hidden.
+     */
     async filterByStatus(label) {
+        await this.openFilter();
         await this.filterSelect('statusId').selectOption({label});
         const fetched = this.page.waitForResponse((r) => /fetch-grid|fetchGrid/.test(r.url()), {timeout: T});
         await this.filterSearchButton().click();
@@ -1133,15 +1304,39 @@ function userGroupXml(roleId, name, abbrev) {
 }
 
 /**
+ * One role of a user in a Users XML file. A role given as a string is
+ * that role with no dates, appearing on the masthead. As an object
+ * (spec footnote sc, the way the kept checks
+ * `checks/sync/pkp-lib-13414/fixed-dates.js` and `role-periods.js` write
+ * them): `start` / `end` become `<date_start>` / `<date_end>` as given,
+ * left out when undefined ("no date"), an empty element when '' ("empty");
+ * `masthead: false` is "Does not appear on the masthead".
+ *
+ * @param {string | {name: string, start?: string, end?: string, masthead?: boolean}} role
+ */
+function userRoleXml(role) {
+    const r = typeof role === 'string' ? {name: role} : role;
+    return (
+        '\t\t\t<user_user_group>\n' +
+        `\t\t\t\t<user_group_ref>${r.name}</user_group_ref>\n` +
+        (r.start !== undefined ? `\t\t\t\t<date_start>${r.start}</date_start>\n` : '') +
+        (r.end !== undefined ? `\t\t\t\t<date_end>${r.end}</date_end>\n` : '') +
+        `\t\t\t\t<masthead>${r.masthead === false ? 'false' : 'true'}</masthead>\n` +
+        '\t\t\t</user_user_group>\n'
+    );
+}
+
+/**
  * A Users XML file (spec footnote sc: `<user_groups>`, a
  * `<date_registered>` and a `<masthead>` per role, which the import needs,
  * A13). Each user: `{givenName, familyName, email, username, password,
  * roles}`; `password` is `{plain}` or `{encryption, hash}`; `roles` the
- * role names as the journal (press) names them. `<user_groups>` defines the
+ * role names as the journal (press) names them, or role objects with
+ * dates and a masthead choice (`userRoleXml`). `<user_groups>` defines the
  * Reader role, a role every journal and press has, so the import creates
  * no role of its own.
  *
- * @param {Array<{givenName: string, familyName: string, email: string, username: string, password: {plain?: string, encryption?: string, hash?: string}, roles: string[]}>} users
+ * @param {Array<{givenName: string, familyName: string, email: string, username: string, password: {plain?: string, encryption?: string, hash?: string}, roles: Array<string | {name: string, start?: string, end?: string, masthead?: boolean}>}>} users
  */
 function usersXmlFile(users) {
     const body = users
@@ -1149,9 +1344,7 @@ function usersXmlFile(users) {
             const pw = u.password.encryption
                 ? `\t\t\t<password is_disabled="false" must_change="false" encryption="${u.password.encryption}">\n\t\t\t\t<value>${u.password.hash}</value>\n\t\t\t</password>\n`
                 : `\t\t\t<password is_disabled="false" must_change="false">\n\t\t\t\t<value>${u.password.plain}</value>\n\t\t\t</password>\n`;
-            const roles = u.roles
-                .map((r) => `\t\t\t<user_user_group>\n\t\t\t\t<user_group_ref>${r}</user_group_ref>\n\t\t\t\t<masthead>true</masthead>\n\t\t\t</user_user_group>\n`)
-                .join('');
+            const roles = u.roles.map(userRoleXml).join('');
             return (
                 '\t\t<user>\n' +
                 `\t\t\t<givenname locale="en">${u.givenName}</givenname>\n` +
@@ -1182,16 +1375,28 @@ function md5(text) {
 exports.md5 = md5;
 
 /**
- * The users of a Users XML file: `[{username, email, roles}]`, `roles` the
- * `<user_group_ref>` names.
+ * The users of a Users XML file: `[{username, email, roles, groups}]`,
+ * `roles` the `<user_group_ref>` names, `groups` each role with its dates
+ * and masthead choice as written (`{name, start, end, masthead}`, null for
+ * an element the file leaves out).
  *
  * @param {string} xml
  */
 function usersInFile(xml) {
+    const el = (text, name) => {
+        const m = text.match(new RegExp(`<${name}>([^<]*)</${name}>|<${name}\\s*/>`));
+        return m ? m[1] || '' : null;
+    };
     return [...xml.matchAll(/<user>([\s\S]*?)<\/user>/g)].map((m) => ({
         username: (m[1].match(/<username>([^<]*)<\/username>/) || [])[1] || null,
         email: (m[1].match(/<email>([^<]*)<\/email>/) || [])[1] || null,
         roles: [...m[1].matchAll(/<user_group_ref>([^<]*)<\/user_group_ref>/g)].map((r) => r[1]),
+        groups: [...m[1].matchAll(/<user_user_group>([\s\S]*?)<\/user_user_group>/g)].map((g) => ({
+            name: el(g[1], 'user_group_ref'),
+            start: el(g[1], 'date_start'),
+            end: el(g[1], 'date_end'),
+            masthead: el(g[1], 'masthead'),
+        })),
     }));
 }
 exports.usersInFile = usersInFile;
