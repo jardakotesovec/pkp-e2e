@@ -10,13 +10,20 @@ and no CI follows this branch. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `fc6640fa0d` | 2026-11-10 | claude (daily maintenance session) |
-| omp | `ae1d900d35` | 2026-11-10 | claude (daily maintenance session) |
-| ops | `fdc9aa22e3` | 2026-11-10 | claude (daily maintenance session) |
-| pkp-lib | `4fdb2979a1` (omp at `1e5673c7c7`, the same tree; ojs and ops at `7df8c6abac`) | 2026-11-10 | claude (daily maintenance session); ui-library `7cff17025c` (ojs, omp, ops; 2026-11-02, daily maintenance session: pkp/ui-library#1035, the reviewed head's tree); ojs `plugins/generic/jatsTemplate` `fc51429cd4` (2026-10-26, the merge of pkp/jatsTemplate#125, the tree of `96eacdab48`, the pointer of pkp/ojs#5921, 2026-10-12); ojs and ops `plugins/generic/pdfJsViewer` `ce6a128` (2026-10-26, the legacy build); ojs `plugins/generic/oaiJats` `96221e3f4a` (2026-10-26, pkp/oaiJats#89); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
+| ojs | `7cf6c9c60f` | 2026-11-11 | claude (daily maintenance session) |
+| omp | `3f0fd0a7d1` | 2026-11-11 | claude (daily maintenance session) |
+| ops | `e290d8d8af` | 2026-11-11 | claude (daily maintenance session) |
+| pkp-lib | `5af8e67ab4` (ojs, omp and ops at it) | 2026-11-11 | claude (daily maintenance session); ui-library `fd00e45f` (ojs, omp, ops; 2026-11-11, daily maintenance session); ojs `plugins/generic/jatsTemplate` `fc51429cd4` (2026-10-26, the merge of pkp/jatsTemplate#125, the tree of `96eacdab48`, the pointer of pkp/ojs#5921, 2026-10-12); ojs and ops `plugins/generic/pdfJsViewer` `ce6a128` (2026-10-26, the legacy build); ojs `plugins/generic/oaiJats` `96221e3f4a` (2026-10-26, pkp/oaiJats#89); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
 
 ## Read log
 
+- **2026-11-11 (daily session, VM s0) — ojs `fc6640fa0d..7cf6c9c60f` (3), omp `ae1d900d35..3f0fd0a7d1` (3), ops `fdc9aa22e3..e290d8d8af` (3); pkp-lib `4fdb2979a1..5af8e67ab4` (1); ui-library `7cff17025c..fd00e45f` (1; OJS from `228f2aa8d8`, its child). Read in full; baselines advanced.**
+  - pkp-lib `5af8e67ab4` (`~main e2078ce20e`, pkp/pkp-lib#13380 for #13180; the class says stable-only by subject, `git range-diff` shows the same patch, only the comment's issue reference differs) → the `main` read of today carries over. 3.5 callers: `isIncomplete_()` is the same as on `main`. Regression none, security none.
+  - ojs `8ef49167e2`, omp `7d6a4ae3a0`, ops `a257612bd8` (stable-only, "Rebuild js/pkp.min.js file") + pointer bumps `4bc150c796`, `66d98635fa`, `0bd15d9e09` + merges (pkp/ojs#5855, pkp/omp#2469, pkp/ops#1410): the committed bundle, which 3.5 serves by default (`enable_minified = On`), now carries both `isIncomplete_()`'s guard and pkp/pkp-lib#13491's `deactivate` guard (U09 A20's, until now absent from the 3.5 bundle); 3 lines changed per app. Regression none, security none.
+  - ui-library `fd00e45f` (`~main 55ec62ee`, pkp/ui-library#1050 for pkp/pkp-lib#12719): the same `TopNavActions.vue` change; its `public/globals.js` hunk (the dev stub only) differs by context and one whitespace fix. `help.help` is in 3.5's pkp-lib `locale/en/common.po`. Regression none, security none.
+  - Walks on fresh 3.5 dataset fleets: `checks/issues/help-icon-raw-key-name/walk.js` (dataset 2; OJS, OMP, OPS): "Help" in the header and the Tasks strip, "Aide" in French, "Help" for the Author; `checks/issues/profile-contact-save-script-error/walk.js` (dataset 1; three apps): 0 page errors with the French box held, served from the rebuilt bundle. Both walks deleted on `main` today with the retired entries (U08 A1, U03 A24); git keeps them.
+  - Carried over: today's `main` sync confirmed no regression. Open stable-line rows: no row's code moved.
+  - Security: none routed.
 - **2026-11-10 (daily session, VM s1) — ojs `d3e13caf53..fc6640fa0d` (2), omp `eb4c096499..ae1d900d35` (5), ops `ffdd27e05c..fdc9aa22e3` (2); pkp-lib `40990d1523..4fdb2979a1` (6); ui-library unchanged (ojs `228f2aa8d8`, omp and ops `7cff17025c`). Every commit PR-reviewed before its merge; read in full; baselines advanced.**
   - pkp-lib `7df8c6abac` (`~main 221fec03de`, pkp/pkp-lib#13745 for #12520) + merge `5bd26ee348` (patch-id = the head's) → PR-reviewed 2026-11-06 (`upstream-sync.md`). Pointer bumps ojs `4733d0d92d` + merge `fc6640fa0d` (pkp/ojs#6043, `40990d1523` → `7df8c6abac`), omp `38d57d8810` + `6414cec8f3` (#2562, from `c4c0aa8c52`), ops `709f66673c` + `fdc9aa22e3` (#1492, from `e2c62c4b7b`; both older pointers are ancestors of the read `40990d1523`). Regression none, security none.
   - pkp-lib `003c0ec503` (`~main b11ae35cb6`, #13752 for #12899) + merge `03d5890f72` (patch-id = the head's) → PR-reviewed 2026-11-09. Only OMP points past it; ojs#6054 (the OJS bump) is open and OPS has none. Regression none, security none.
