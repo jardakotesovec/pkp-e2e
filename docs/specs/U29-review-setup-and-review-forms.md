@@ -52,7 +52,7 @@ some reviewer has chosen on a submitted review (Rule 18). <sup>c</sup>
 | **Save "Setup" and "Reviewer Guidance"** | • Manager roles and the Site Administrator: the tab's "Save" <sup>c</sup> |
 | **Create, edit, copy, preview, order, activate and deactivate review forms** | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a form not in use (Rule 12); "Copy", "Preview" and the "Active" tick are offered on every form <sup>c</sup> |
 | **Add, edit, delete and order a form's items** | • Manager roles and the Site Administrator, only while the form is not in use (Rule 12): the "Form Items" tab is greyed out for a form in use <sup>c</sup> |
-| **Add, edit, delete, activate and deactivate a reviewer recommendation** {OJS} | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a recommendation not in use (Rule 18); the "Activate" tick is offered on every row<br>• Section Editor, and a role at the Journal Manager level whose settings access is switched off: no screen of theirs offers it, but the app accepts the same changes when they are sent to it directly ⚠ [A13](#a13) <sup>c</sup> |
+| **Add, edit, delete, activate and deactivate a reviewer recommendation** {OJS} | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a recommendation that was not in use when the table was loaded (Rule 18); the "Activate" tick is offered on every row<br>• Section Editor, and a role at the Journal Manager level whose settings access is switched off: no screen of theirs offers it, but the app accepts the same changes when they are sent to it directly ⚠ [A13](#a13) <sup>c</sup> |
 
 ## Fields & validation
 
@@ -111,7 +111,7 @@ required for the form item. (English)" and nothing under the box:
 Recommendations" with the button "Add Recommendation", the columns
 "Recommendations" and "Activate" (a tick per row, with no name for a
 screen reader ⚠ [A12](#a12)), and an unnamed third column holding the
-"More Actions" menu of a row not in use. Its window
+"More Actions" menu of a row not in use (Rule 18). Its window
 ("Add Recommendation" / "Edit Recommendation") has one button, "Save"; a
 refused save shows "This field is required." under each empty required
 box and, at the foot, "Please correct 2 errors." (or "Please correct one
@@ -403,17 +403,22 @@ and "Save" is greyed out until the boxes are filled: <sup>g</sup>
     no notice. <sup>g</sup>
 
 18. **A recommendation in use** (chosen on at least one submitted review)
-    has no "More Actions" menu: it can be neither edited nor deleted, only
-    deactivated and reactivated. Whether an entry is in use already when
-    a reviewer has picked it on the wizard's step 3 and pressed "Save for
-    Later", the review not yet submitted, is not settled ⚠ [A14](#a14).
-    While it is deactivated, the Reviewers
-    table still prints it under the reviewer's status ("Review Submitted",
-    or "Review Viewed" once an editor has opened the review), and the
-    editor's "Read Review" window still lists "Recommendation: {title}" at
-    the top but prints "-" in its "Reviewer Recommendation" section
-    ⚠ [A6](#a6). An entry not in use offers "Edit" (the same window,
-    prefilled, "Edit Recommendation") and "Delete", which asks "Are you
+    can be neither edited nor deleted, only deactivated and reactivated.
+    On a table loaded after the entry came into use, its row has no "More
+    Actions" menu. A table already open when a reviewer submits a review
+    with the entry keeps offering "Edit" and "Delete" on its row until the
+    page is reloaded, and both are then refused ⚠ [A15](#a15). Whether an
+    entry is in use already when a reviewer has picked it on the wizard's
+    step 3 and pressed "Save for Later", the review not yet submitted, is
+    not settled ⚠ [A14](#a14).
+    While it is deactivated, the Reviewers panel still prints it under the
+    reviewer's status ("Review Submitted", "Review Viewed" once an editor
+    has opened the review, or "Reviewer Thanked"). The editor's review
+    window ("Read Review" on the row, or "More Actions" › "Review Details"
+    on a thanked review, whose row has no "Read Review") still lists
+    "Recommendation: {title}" at the top but prints "-" in its "Reviewer
+    Recommendation" section ⚠ [A6](#a6). An entry not in use offers "Edit"
+    (the same window, prefilled, "Edit Recommendation") and "Delete", which asks "Are you
     sure you want to delete the recommendation {title}" (window "Delete
     Recommendation"), "Yes" / "No". The six starting entries can be
     edited and deleted like any other while not in use. <sup>g</sup>
@@ -439,10 +444,13 @@ and "Save" is greyed out until the boxes are filled: <sup>g</sup>
   only when none carries it. <sup>f</sup>
 - **Recommendation actions** {OJS}: the table redraws with no notice;
   nothing is emailed. Deactivating an entry hides it from reviewers who
-  have not yet chosen; a review already submitted with it keeps it in the
-  Reviewers table and in the "Recommendation:" line of the editor's "Read
-  Review" window but loses it in that window's "Reviewer Recommendation"
-  section ⚠ [A6](#a6) (Rule 18). <sup>g</sup>
+  have not yet chosen. A review already submitted with it keeps it in the
+  Reviewers panel, in the "Recommendation:" line of the editor's review
+  window and on the reviewer's own step 3, where it stays selected. It
+  loses it in that window's "Reviewer Recommendation" section, in the
+  review file downloaded from the window, and in the reviewer's own "Read
+  Round {N} Review" window, until the entry is reactivated [A6](#a6)
+  (Rule 18). <sup>g</sup>
 
 ## Settings that modify behavior
 
@@ -878,6 +886,10 @@ Left out of the scenarios above, by reason:
   - "Add Recommendation" closed with "Close" after typing in "Review
     Recommendations" {OJS}: no question, no notice, and the table keeping
     its rows, also after a reload (Rule 17) [incidental 2026-10-05]
+  - a thanked review whose recommendation is deactivated {OJS}: its
+    Reviewers panel row reading "Reviewer Thanked" over the title, and its
+    window, opened from "More Actions" › "Review Details", reading the
+    "Recommendation:" line over "-" in the section (Rule 18) [incidental 2026-11-11]
 - **Rarely met**:
   - ordering the forms and a form's items with "Order", "Done" and "Cancel
     ordering", and the editors' "Review Form" lists following the order
@@ -923,8 +935,9 @@ Left out of the scenarios above, by reason:
   - A5 (a text-type save dropping "Response Options" without the warning;
     Rule 14)
   - A6 (a deactivated recommendation reading "-" in the "Reviewer
-    Recommendation" section and empty in the review file downloaded from
-    the window; Rule 18; scenario 10 marks it)
+    Recommendation" section, empty in the review file downloaded from
+    the window and missing from the reviewer's own "Read Round {N} Review"
+    window; Rule 18; scenario 10 marks it)
   - A7 (the "Reviewer Recommendations" table and the reviewer's list in
     no fixed order; Rule 17; scenario 9 marks it)
   - A8 (a declined request counting in neither column; Rule 12)
@@ -938,6 +951,9 @@ Left out of the scenarios above, by reason:
     access, changing the recommendations without the screen; Actors row 6)
   - A14 (whether a recommendation a reviewer has only saved for later is
     already in use, its "More Actions" menu gone; Rule 18)
+  - A15 (a table left open while a reviewer submits with an entry still
+    offering that entry's "Edit" and "Delete", both refused, one with a
+    raw "##api.406.notAcceptable##"; Rule 18)
   - OMP3 (the "Internal Review Guidelines" toolbar without quote and list
     buttons; Fields)
   - OJS1 (a public review's unticked items and their answers in the
@@ -992,10 +1008,11 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | On "Reviewer Recommendations", a screen reader announces the "Activate" tick boxes and the status dropdown without a name | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A13](#a13) | A Section Editor, or an editor without settings access, can change and switch off a journal's reviewer recommendations | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
 | [OJS1](#ojs1) | A review made public gives anyone, without signing in, the review form answers meant for the editor only | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
+| [A15](#a15) | A "Reviewer Recommendations" table left open while a reviewer submits with one of its entries still offers that entry's "Edit" and "Delete", and both then fail with an unexplained error | 🐞 | minor | — |
 | [A2](#a2) | A form in use can still be deactivated, although the activation confirmation promises it cannot | ❓ | minor | — |
 | [A3](#a3) | A deadline saved as 0 or left empty makes Add Reviewer preset three weeks for the response but four for the review | ❓ | minor | — |
 | [A4](#a4) | A reload on a "Review" side tab lands on "Submission" › "Disable Submissions", although the address names the side tab and a pressed "Submission" side tab survives a reload | ❓ | minor | — |
-| [A6](#a6) | A recommendation deactivated after a reviewer chose it reads "-" in the "Reviewer Recommendation" section of the editor's "Read Review" window while the window's own "Recommendation:" line still names it | ❓ | user-visible | — |
+| [A6](#a6) | A recommendation deactivated after a reviewer chose it reads "-" in the "Reviewer Recommendation" section of the editor's review window while the window's own "Recommendation:" line still names it; the downloaded review file and the reviewer's own window lose it too | ❓ | user-visible | — |
 | [A7](#a7) | The "Reviewer Recommendations" table and the reviewer's list have no fixed order: a new entry is not always last, and an edited or ticked row sometimes stays put and sometimes drops to the bottom | ❓ | minor | — |
 | [A8](#a8) | A form whose only requests were declined reads 0 / 0 and offers "Edit" and "Delete" like a fresh one; deleting it drops it from the declined request | ❓ | minor | — |
 | [A10](#a10) | After a refused "Setup" save, what gives back the greyed-out "Save" is not known | ❓ | minor | — |
@@ -1071,20 +1088,27 @@ nothing ever shows it. Basis: probe, 2026-10-04. <sup>f-a5</sup>
 <a id="a6"></a>
 **A6 — A deactivated recommendation reads "-" in the editor's window** · ❓ · user-visible.
 When a recommendation is deactivated after a reviewer submitted a review
-with it, the Reviewers table still prints it under the reviewer's status
-and the editor's "Read Review" window still lists "Recommendation:
-{title}" among its lines at the top, but the window's "Reviewer
-Recommendation" section prints "-"; reactivating the entry makes the
-section print the title again. The window contradicts itself: the editor
-reads the recommendation at the top and none in the section meant for it.
+with it, the Reviewers panel still prints it under the reviewer's status
+and the editor's review window ("Read Review", or "Review Details" on a
+thanked review) still lists "Recommendation: {title}" among its lines at
+the top, but the window's "Reviewer Recommendation" section prints "-";
+reactivating the entry makes the section print the title again. The
+window contradicts itself: the editor reads the recommendation at the top
+and none in the section meant for it.
 The review file downloaded from the same window ("Download Review Form" ›
-"Editor Form Shows All Review Sections (XML)") had an empty recommendation
-for such a review too, on the one journal where the files were read, while
-the file of a review with an active choice carried the title.
-Question: should the window, and the file downloaded from it, show a
-recommendation whose entry is inactive?
-Lean: yes, and this is a defect, since the review carries it and the table
-and the window's own line show it. Basis: probe.
+"Editor Form Shows All Review Sections (XML)") has an empty recommendation
+for such a review too, and the title again once the entry is reactivated.
+The reviewer loses it as well: their own "Read Round {N} Review" window,
+opened from "Previous Reviews" once a later round exists
+([→ reviewer's review](U28-reviewers-review.md#round-history)), has no
+"Recommendation" heading or value at all while the entry is inactive,
+and shows it again once it is reactivated. Their completed review's step
+3 keeps the entry selected throughout.
+Question: should the editor's window, the file downloaded from it and
+the reviewer's own window show a recommendation whose entry is inactive?
+Lean: yes, and this is a defect, since the review carries it and the
+Reviewers panel, the window's own line and the reviewer's step 3 show
+it. Basis: probe.
 <sup>f-a6</sup>
 
 <a id="a7"></a>
@@ -1194,6 +1218,23 @@ later, and is that intended while the reviewer can still pick another
 before submitting? Lean: yes to both, since the saved review carries the
 entry and an edit or a delete would change or remove what the reviewer
 picked. Basis: probe, 2026-10-07. <sup>f-a14</sup>
+
+<a id="a15"></a>
+**A15 — A "Reviewer Recommendations" table left open while a reviewer submits with one of its entries still offers that entry's "Edit" and "Delete", and both then fail with an unexplained error** · 🐞 · minor.
+A Journal Manager has "Reviewer Recommendations" open while a reviewer
+submits a review choosing one of its entries. The table does not change:
+the row keeps its "More Actions" menu with "Edit" and "Delete" until the
+page is reloaded, although the entry can no longer be edited or deleted
+(Rule 18). "Save" in "Edit Recommendation" then leaves the window open
+and shows the page notice "An unexpected error has occurred. Please
+reload the page and try again."; closed with "Close", the window leaves
+the new title on the row until a reload [A11](#a11). "Yes" on "Delete
+Recommendation" opens a window headed "Error" that reads only
+"##api.406.notAcceptable##", with "OK", and the row then shows without
+its menu. Nothing is changed: a reload shows the entry with its stored
+title and no menu. Neither message tells the manager that the entry is
+now in use, which is why it can no longer be changed.
+Basis: probe, 2026-11-11. <sup>f-a15</sup>
 
 ### OJS
 
@@ -1689,6 +1730,28 @@ requises". The Reviewers table printed the three reviews' recommendations,
 deactivated or not, in the English interface (three reads) and under their
 French names in the French one (two reads). Kept script
 `shared/playwright/checks/U29/I07b/i07b.js`.
+Live-probed 2026-11-11 (Rule 18; Actors row "Add, edit, delete, activate
+and deactivate a reviewer recommendation"; OJS `main`, lib/pkp
+`e2078ce20e`, PKP's default test dataset reset before each of three runs,
+as `rvaca`, `dbarnes` and `jjanssen`): on a freshly loaded table the three
+entries in use ("Revisions Required", "Resubmit for Review", "Decline
+Submission") had no "More Actions" and the three unused ones had one with
+"Edit" and "Delete". The table reads `removable` once, from the `GET
+reviewers/recommendations` of the page load, so a table loaded before an
+entry came into use keeps its menu (finding A15, footnote f-a15).
+Deactivated, submission 13's round 1 printed Julie Janssen's row as
+"Reviewer Thanked" over "Revisions Required", with "Anonymous
+Reviewer/Anonymous Author", "Revert Decision" and "More Actions" and no
+"Read Review" (the dataset's reviews 19-21 on submission 13 are thanked);
+its window opened from "More Actions" › "Review Details" (the menu:
+"Review Details", "Edit", "Cancel Reviewer", "Email Reviewer", "History",
+"Login As", "Editorial Notes") and read "Recommendation:" / "Revisions
+Required" at the top and "Reviewer Recommendation" / "Recommendation" /
+"-" in the section; reactivated, the section read "Revisions Required".
+The unused custom entry "I33 later used r2" offered "Edit Recommendation"
+prefilled and "Delete Recommendation" / "Are you sure you want to delete
+the recommendation I33 later used r2" / "Yes" / "No". Kept script
+`shared/playwright/checks/U29/I33/i33.js`.
 
 <a id="fn-h"></a>
 **h** — `HasReviewDueDate` trait (lib/pkp
@@ -2040,10 +2103,31 @@ up among the active entries only, as the `peer-review-recommendation`
 value. The six "Editor Form Shows All Review Sections (XML)" files of that
 run (three reviews, each in the English and the French interface) carried
 an empty value for the two deactivated choices and "Accept Submission" /
-"Accepter la soumission" for the active one. One run, not repeated on a
-second journal; the PDF entries were not read. The same lookup feeds the
+"Accepter la soumission" for the active one. One run on that journal,
+repeated on PKP's default test dataset below; the PDF entries were not
+read. The same lookup feeds the
 reviews an editor copies into a decision email (`ReviewerComments`); the
 decision page's letter was not read on such a round.
+Live-probed 2026-11-11 on OJS `main` (lib/pkp `e2078ce20e`; the dataset
+and runs of footnote g's 2026-11-11 line), review 19 (`jjanssen`,
+submission 13, "Revisions Required", thanked): the editor's window as
+quoted there, in all three runs. The "Editor Form Shows All Review
+Sections (XML)" file (two runs) carried
+`<meta-name>peer-review-recommendation</meta-name><meta-value></meta-value>`
+with the entry deactivated and `<meta-value>Revisions Required</meta-value>`
+reactivated. After `dbarnes` pressed "Create New Review Round", the
+reviewer's page showed "Previous Reviews" / "Round 1 Review Submitted on
+{date}" / "Read Round 1 Review" (the box shows for a round a later round
+opened without her: the reviewer's-review spec's A12); the window
+"Round 1 Review submitted by you for" read "Recommendation" /
+"Revisions Required" with the entry active, had no "Recommendation"
+anywhere with it deactivated, and read the title again reactivated (three
+runs). Behind it `GET reviews/history/{submissionId}/{reviewRoundId}`
+answered `"recommendation": ""` while the assignment still carried
+`reviewerRecommendationId` 2: `PKPReviewController::getHistory()` uses
+`getLocalizedRecommendation()`, the active-only lookup above. The
+completed review's step 3 kept "Revisions Required" selected throughout.
+Kept script `shared/playwright/checks/U29/I33/i33.js`.
 
 <a id="fn-f-a7"></a>
 **f-a7** — Footnote g: `ReviewerRecommendationController::getMany()`
@@ -2210,6 +2294,30 @@ second journal. The 2026-09-30 walk of footnote f-a13 saw a rename and a
 delete of an entry on a saved draft review refused (406) when sent
 directly. Kept script `shared/playwright/checks/U29/I07b/i07b.js` (phases
 `rev2save`, `deact`).
+
+<a id="fn-f-a15"></a>
+**f-a15** — Footnote g: the table is drawn from one `GET
+reviewers/recommendations` per page load, and each row's menu follows
+that answer's `removable`; nothing redraws it when a reviewer submits.
+`ReviewerRecommendationController::edit()` and `delete()` refuse an entry
+that is not `removable` with 406 `{"error":"##api.406.notAcceptable##"}`;
+the key `api.406.notAcceptable` has no text in the locale files, and the
+delete dialog prints the error as it comes. Live-probed 2026-11-11 on OJS
+`main` (lib/pkp `e2078ce20e`), PKP's default test dataset reset before
+each of three runs: `rvaca` added "I33 later used {run}" (menu "Edit",
+"Delete"), opened "Edit Recommendation" in one tab and "Delete
+Recommendation" in another; `jjanssen` then submitted submission 12's
+review choosing it (stored choice id 7). "Save" with a changed title sent
+`POST …/reviewers/recommendations/7` tunnelled as `PUT`, answered 406;
+the window stayed open with the notice quoted in the entry. "Yes" sent
+the same address tunnelled as `DELETE`, answered 406, and the page's own
+"Error" window showed the raw key (no browser dialog); the table's
+following `GET` drew the row without its menu. "Close" on the edit window
+shut it with no dialog and the row read "I33 later used {run} renamed"
+with its menu until a reload (finding A11). The stored rows were the same
+before and after; after a reload both tabs showed the stored title with
+no menu. No response of 500 or more and no page error in any run. Kept
+script `shared/playwright/checks/U29/I33/i33.js` (phase `race`).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — The public review data is `GET
