@@ -9,7 +9,8 @@
 //   C3 "Export" › "Export to HTML": the stored galley's citations, links and references section
 //   C4 "Export" › "Preview: PDF": the preview's citations and references; "Create PDF": internal links in the file
 //   C5 Delta deleted on "References" (the citations to it stay in the text); "Export to HTML" and "Preview: PDF"
-// With fix.diff applied (bin/try-fix.js) the markers read [1], [2], [1, 2], the year stays, the list is labelled.
+// Round 2 (ui-library 2e7ac2b537): the markers read [2], [4], [2, 4], the list is numbered "2. ", "4. ", and this
+// "(2021)" (written in as `generated`) is still exported "(2)"; with fix2.diff it stays "(2021)". Round 1 at aa2485f872.
 // Run: PROBE_FEATURE=pr-13767 PROBE_AGENT=pr PROBE_RUN=<side> node bin/probe.js ojs <this file>
 // At the base (ui-library 55ec62ee) C3–C5 show what the export did before: no links, the editor's own markers.
 const fs = require('fs');
