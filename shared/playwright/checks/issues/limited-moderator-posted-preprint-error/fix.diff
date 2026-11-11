@@ -1,0 +1,11 @@
+--- a/classes/submission/maps/Schema.php
++++ b/classes/submission/maps/Schema.php
+@@ -99,7 +99,7 @@
+         $decisionTypes = []; /** @var DecisionType[] $decisionTypes */
+ 
+         if ($isOnlyRecommending) {
+-            $decisionTypes[] = Repo::decision()->getDecisionTypesMadeByRecommendingUsers($stageId);
++            $decisionTypes = Repo::decision()->getDecisionTypesMadeByRecommendingUsers($stageId);
+         } else {
+             switch ($submission->getData('status')) {
+                 case Submission::STATUS_DECLINED:

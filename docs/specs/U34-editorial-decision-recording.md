@@ -1119,6 +1119,7 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - the guard for A13 (issue report `docs/issues/U34-A13-decision-address-done-decisions-blank-page.md`): an editor opening the decision page with "Move to Done", "Return to Workflow" or "Return to Done" in its address is refused with an error page, never a blank page or a server error (Rule 2) [report 2026-11-11]
   - the guard for A6 (issue report `docs/issues/U34-A6-revert-decline-typed-on-undeclined-submission.md`): after a real "Revert Decline", "Record Decision" pressed again after the browser's Back, after a reload of the page or in a second tab where it was already open is refused and the author receives one reversal email, and the record page opened on a submission never declined is refused (Rule 12) [report 2026-10-04]
   - the guard for OJS1 (issue report `docs/issues/U34-OJS1-waive-still-requests-publication-fee.md`): "Waive" on the "Request Payment" page of an accept decision gives the Author no fee task and no "Payment Request Notification", and the submission's "Payments" menu reads "Waived" (Rule 16; scenario 10, which marks it today) [report 2026-10-04]
   - the "Notify Reviewers" letter edited before the decision is recorded: each reviewer's email still carries that reviewer's own name alone, never the other reviewers' names (Rule 4): likely a bullet in scenario 6, whose reviewers' mailboxes are read after the accept [upstream 2026-09-29]
@@ -1138,7 +1139,7 @@ Left out of the scenarios above, by reason:
   - A5 (the author notices no screen shows; Side effects)
   - A4 (the recommendation's discussion without its writer; Rule 13; scenario 5 marks it)
   - A12 (the "Select Files" row's uploader shown by username; Rule 9; scenario 1 marks it)
-  - A13 ("Return to Workflow" and "Move to Done" typed into the wizard's address; Rule 2)
+  - A13 ("Return to Workflow", "Move to Done" and "Return to Done" typed into the wizard's address; Rule 2)
   - OPS3 (a posted preprint opened by a Moderator limited to recommendations; Actors row 1)
 - **Owned by another feature**:
   - a recommending editor's "Send for Review" ("Send to Internal Review" on a press) recorded as a real decision (Actors row 3; Settings bullet 6; *Submission stage*)
@@ -1156,10 +1157,10 @@ entry notes otherwise; the team settles them on spec review.
 |----|-----------------------------|------|--------|--------|
 | [A6](#a6) | "Revert Decline" recorded on a submission that is not declined emails the author again and can drop a revisions request | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | A Section Editor's "Find Template" in a decision's email answers "You are not authorized to access the requested resource." | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
-| [A13](#a13) | "Return to Workflow" or "Move to Done" typed into the wizard's address fails with a blank page | 🐞 | low · crash: server | — |
+| [A13](#a13) | An editor who types "Return to Workflow", "Move to Done" or "Return to Done" into a decision page's address gets a blank page | 🐞 | low · crash: server | issues (claude), 2026-11-11 — re-verified |
 | [OJS1](#ojs1) | An editor's "Waive" on an accept decision still asks the Author to pay the publication fee | 🐞 | high | issues (claude), 2026-10-04 — re-verified |
 | [OPS2](#ops2) | Preprint server emails: "Insert Content" describes the server's initials with a raw code | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [OPS3](#ops3) | A Moderator limited to recommendations cannot open a posted preprint: its workflow fails with an "Error" window | 🐞 | medium · crash: server | — |
+| [OPS3](#ops3) | Preprint server: a Moderator limited to recommendations cannot open a posted preprint, an "Error" window instead | 🐞 | medium · crash: server | issues (claude), 2026-11-11 — re-verified |
 | [A1](#a1) | "Create New Review Round" opens a wizard headed "New Review Round" | ❓ | minor | — |
 | [A2](#a2) | A decision with no author assigned opens a wizard with no page, and its closing window still reports an email | ❓ | minor | — |
 | [A4](#a4) | The discussion a recommendation opens lists the deciding editors, not the editor who wrote it | ❓ | minor | — |
@@ -1313,18 +1314,21 @@ line is written for a person to read, and a username is not a name.
 Basis: test run. <sup>[f-a12](#fn-a12)</sup>
 
 <a id="a13"></a>
-**A13 — "Return to Workflow" or "Move to Done" typed into the wizard's address fails with a blank page** · 🐞 · low · crash: server.
-"Return to Workflow" and publishing's "Move to Done" are decisions
-recorded without the wizard (Rule 2). An editor who types the wizard's
-address with either of them expects the wizard or a refusal, as any other
-decision number gets. Instead the app fails: the page is blank, with no
-heading, no message and no way back but the browser's. It happens to
-every editor the wizard admits (Actors row 1): an Editor on a published article
-("Return to Workflow"); on a preprint server the Preprint
-Server Manager and an assigned Moderator, on a preprint in Production
-("Move to Done") or posted ("Return to Workflow"). A recommending editor
-gets the access-denied page instead (Actors row 4). No screen links to
-these addresses, so only a hand-edited address reaches it.
+**A13 — An editor who types "Return to Workflow", "Move to Done" or "Return to Done" into a decision page's address gets a blank page** · 🐞 · low · crash: server.
+The server fails, and the page stays blank, when an editor changes the
+decision number in a decision page's address to "Move to Done" (33),
+"Return to Workflow" (34) or "Return to Done" (35). A decision button on
+the workflow opens the decision page at an address that names the
+decision by number (`decision=29` for "Move To Copyediting"). These
+three are recorded elsewhere: "Move to Done" by the app when a
+submission's first version is published, the other two by the workflow's
+buttons of those names. The blank page has no heading, no message and no
+way back but the browser's. Other decisions the decision page cannot
+show are refused with an error page. These three fail for any editor who
+may record decisions on the submission: "Move to Done" and "Return to
+Done" on a submission in Production, "Return to Workflow" on a published
+one. An editor limited to recommendations is refused with the
+access-denied page instead.
 Basis: probe, 2026-11-11. <sup>[f-a13](#fn-a13)</sup>
 
 ### OJS
@@ -1376,19 +1380,23 @@ the sentence. Released servers have shown it since OPS 3.5.0-2.
 Basis: probe, 2026-10-04. <sup>[f-ops2](#fn-ops2)</sup>
 
 <a id="ops3"></a>
-**OPS3 — A Moderator limited to recommendations cannot open a posted preprint: its workflow fails with an "Error" window** · 🐞 · medium · crash: server.
+**OPS3 — Preprint server: a Moderator limited to recommendations cannot open a posted preprint, an "Error" window instead** · 🐞 · medium · crash: server.
 A Moderator whose assignment to a preprint is "Only allowed to recommend
-an editorial decision" expects to open the preprint's workflow whether
-or not it is posted, as they do while it is in Production ("Post the
-preprint" alone, Actors row 1). Once the preprint is posted, opening it fails, whether
-from "View" on the Dashboard's "Published" view or by its address: the
-app fails on loading the preprint, an "Error" window opens with an "OK"
-button, and after "OK" the workflow shows only the preprint's number,
-with no menu, no header buttons and no panels. The same Moderator without
-the limit, and the Preprint Server Manager, open it with "Return to
-Workflow" offered, and a journal's Section Editor so limited opens a
-published article normally.
-Since: 2026-06-25 · Basis: probe, 2026-11-11. <sup>[f-ops3](#fn-ops3)</sup>
+an editorial decision" expects to open the preprint's workflow once it
+is posted, as they do while it is in Production, where the workflow
+opens and offers them no decision. Instead the app fails on the server
+when it loads the preprint: an "Error" window opens, and after its "OK"
+the workflow shows only the preprint's number, with no menu, no buttons
+and no panels. It fails the same from "View" on the Dashboard's
+"Published" view and from the preprint's address. So the limited
+Moderator loses the posted preprint's workflow pages: its title and
+abstract, metadata, galleys and relations, which the workflow otherwise
+offers them with a "Save", and its activity log. A Preprint Server
+Manager assigned to the preprint with the same limit meets the same
+error. The same Moderator without the limit, and an unassigned Preprint
+Server Manager, open the preprint normally. Only the development branch
+(`main`) fails; no released version does.
+Since: 2026-09-07 · Basis: probe, 2026-11-11. <sup>[f-ops3](#fn-ops3)</sup>
 
 ### Retired
 
@@ -1506,6 +1514,7 @@ Issue report: [pkp-e2e#861](https://github.com/jardakotesovec/pkp-e2e/issues/861
 
 <a id="fn-ops3"></a>
 **f-ops3** — OPS `classes/submission/maps/Schema.php::getAvailableEditorialDecisions()`: at Done the grant for assigned editors added in the 2026 Done work (pkp/pkp-lib#12799, 818b388ed4, 2026-06-25) lets the recommend-only assignment through, and the older recommend-only branch (pkp/pkp-lib#10537, 2024) appends `Repo::decision()->getDecisionTypesMadeByRecommendingUsers($stageId)` as one element (`$decisionTypes[] = …`); OPS's method returns an empty array, so the list holds an array where the lib/pkp `Schema` map expects a `DecisionType`, and `GET api/v1/submissions/{id}` fails with a `TypeError` (500) for that user. OJS assigns the method's result (`=`) and only at the Submission stage, so a recommend-only Section Editor on a published OJS article reads the submission normally (200). stable-3_5_0 OPS returns nothing outside Production (no Done grant): unaffected. A regression of the 2026 Done work (multi-app rule 6). Live-probed 2026-11-11 on OPS `main`, twice, PKP's default dataset (which installs no recommend-only assignment on OPS): the Preprint Server Manager (`dbarnes`) ticked "Only allowed to recommend an editorial decision" in "Edit Assignment" for the Moderator `sberardo` on preprints 1 (Production), 2 (posted) and 4 (Production, declined), "The stage assignment has been changed." and the row's mark shown after a reload. Then for `sberardo`: preprint 2 opened from the Dashboard's "Published" view ("View"), by its address, and by its address with the Production entry selected, each answered `GET api/v1/submissions/2` 500 twice and showed an "Error" window with "OK", after which the workflow held only the number "2"; preprints 1 and 4 opened with "Post the preprint" alone and no "Recommendation" box. Controls: before the limit `sberardo`, and after it `dbarnes`, opened preprint 2 with "Return to Workflow" in the header; on OJS the recommend-only `sberardo` read published submission 1 with `GET submissions/1` 200. The Dashboard's "Assigned to me" and "Published" lists loaded for the limited Moderator.
+Issue report: [docs/issues/U34-OPS3-limited-moderator-posted-preprint-error.md](../issues/U34-OPS3-limited-moderator-posted-preprint-error.md).
 
 <a id="fn-a6"></a>
 **f-a6** — Note b: `DecisionStageValidPolicy` compares the submission's stage with the decision's and `DecisionAllowedPolicy` the user's assignment; nothing reads the submission's status, and `Repository::validate()` does not either. Live-probed 2026-09-20: `decision=16` typed on a queued Submission-stage submission (OJS, OMP) and on a queued preprint (OPS), and `decision=15` on an active review round: the one-page wizard, "Submission Reactivated" on record, the author's email "We have reversed the decision to decline your submission" and the log line "reversed the decision to decline this submission". Walked 2026-10-04 on `main` and `stable-3_5_0`, all three apps (Rule 12; A6), with the kept script `shared/playwright/checks/issues/revert-decline-typed-on-undeclined-submission/walk.js` ("After a reversal" and second-tab modes): after a real "Revert Decline" (OJS 18, OMP 10, OPS 4 of the default dataset), the browser's Back reopened the page with "Record Decision" offered, a second "Record Decision" closed on "Submission Reactivated", the reload reopened the page once more, and a second tab's page recorded again; the author held two "We have reversed the decision to decline your submission" emails and the Activity Log two reversal lines and two email lines. No failed request and no script error. 3.3 (a second open window of the legacy reversal form) is read in the code only, not walked.
@@ -1532,6 +1541,7 @@ Issue report: [pkp-e2e#859](https://github.com/jardakotesovec/pkp-e2e/issues/859
 
 <a id="fn-a13"></a>
 **f-a13** — Note u: `MoveToDone`, `ReturnToWorkflow` and `ReturnToDone` sit in every app's `getDecisionTypes()` roster, so `DecisionTypeRequiredPolicy` accepts their numbers (33, 34, 35) and the stage and assignment policies pass for a deciding editor; `DecisionHandler::record()` then calls `getState()` on the `null` their `getSteps()` returns, a PHP fatal error (the 500 status, an empty body). A recommend-only assignment is stopped earlier by `DecisionAllowedPolicy` ("You do not have permission to record this decision on this submission."). The null steps date from the 2026 Done work (pkp/pkp-lib#12799, 2026-06); stable-3_5_0 has none of the three decisions. Live-probed 2026-11-11 on all three apps on `main`, twice each, PKP's default dataset: `decision/record/{id}?decision=34` answered 500 with an empty page for the Editor (`dbarnes`) on OJS submission 1 (published) and OMP submission 14 (published); on OPS `?decision=33` on preprint 1 (Production) and `?decision=34` on preprint 2 (posted) answered 500 for the Preprint Server Manager (`dbarnes`, unassigned) and the assigned Moderator (`sberardo`); each logged "Call to a member function getState() on null" in `lib/pkp/pages/decision/DecisionHandler.php`. The same addresses for a recommend-only assignment (OJS `sberardo` on submission 1, OPS `sberardo` once limited) read "You do not have permission to record this decision on this submission." `ReturnToDone` (35) read in code only.
+Issue report: [docs/issues/U34-A13-decision-address-done-decisions-blank-page.md](../issues/U34-A13-decision-address-done-decisions-blank-page.md).
 
 <a id="fn-ojs1"></a>
 **f-ojs1** — Note s: OJS `classes/decision/types/Accept.php::runAdditionalActions()` (and `SkipExternalReview`'s through the shared trait) calls `requestPayment()` for every `ACTION_PAYMENT` action present, never reading the action's `requestPayment` value; `RequestPayment::validatePaymentAction()` only checks the key is set. Live-probed 2026-09-20 on OJS, twice on fresh submissions: "Waive" chosen, the author's "The publication fee is due for payment." row and the "Payment Request Notification" email arriving as with the fee requested.

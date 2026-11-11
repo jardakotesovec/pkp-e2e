@@ -1,0 +1,15 @@
+--- a/lib/pkp/pages/decision/DecisionHandler.php	2026-11-11 06:18:55.727751570 +0000
++++ b/lib/pkp/pages/decision/DecisionHandler.php	2026-11-11 06:18:55.739286957 +0000
+@@ -138,6 +138,12 @@
+             $this->reviewRound
+         );
+ 
++        // A decision type without steps (MoveToDone, ReturnToWorkflow, ReturnToDone) is recorded
++        // elsewhere and has no page here (DecisionType::getSteps())
++        if (!$steps) {
++            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException();
++        }
++
+         $templateMgr = TemplateManager::getManager($request);
+ 
+         $templateMgr->setState([
