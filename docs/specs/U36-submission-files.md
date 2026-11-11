@@ -703,6 +703,10 @@ tooling recipe are in the footnote. <sup>s0</sup>
      metadata for file "notes.md" was edited by {username}.", and below
      them the first upload ("A file "article.pdf" was uploaded for
      submission {number} by {username}.") (Rules 13, 13a).
+   - **No line of the cancelled revision**: in the same "History", the
+     row "A file revision "notes.md" was uploaded for submission {number}
+     by {username}." stands once, not twice: the revision cancelled with
+     "Cancel" left no row (Rules 9, 13a).
    - **The earlier version**: press the arrow at the start of the first
      upload's row, then "Download": the PDF first uploaded downloads
      (Rules 8, 13b).
@@ -726,6 +730,11 @@ tooling recipe are in the footnote. <sup>s0</sup>
      titled "Edit a file" opens with "Name the file (e.g., Manuscript;
      Table 1)" holding "article.pdf", and "Save" and "Cancel" (Rule 10;
      Fields).
+   - **"Cancel" with a changed name**: replace "article.pdf" in the box
+     with "Renamed draft" and press "Cancel": nothing asks, the window
+     closes, and the list shows "article.pdf"; reload the page: the list
+     still shows "article.pdf"; choose "Update File Details" on it again:
+     "Edit a file" opens with "article.pdf" in the name box (Rule 10a).
    - **The emptied name**: clear the name box and press "Save": "This
      field is required." shows under the box, and the window stays open
      (Fields).
@@ -893,7 +902,9 @@ tooling recipe are in the footnote. <sup>s0</sup>
      under the heading "Upload Files", opening "Provide any files our
      editorial team may need to evaluate your submission."; the panel
      reads "Upload any files the editorial team will need to evaluate your
-     submission." with an "Upload File" link (Rule 17; Settings bullet 4).
+     submission." with an "Upload File" link; the browser's accessibility
+     inspector shows no upload status on the panel (Rules 17, 17c;
+     Settings bullet 4).
    - **"Cancel upload"**: with the browser's upload slowed so the file
      cannot reach the server before the reload (otherwise the press may
      keep it [A25](#a25)), press "Add File" and pick "article.pdf" in the
@@ -905,6 +916,9 @@ tooling recipe are in the footnote. <sup>s0</sup>
      and "Remove", and "What kind of file is this?" followed by "Article
      Text" and "Other" ("Book Manuscript", "Chapter Manuscript" and "Other"
      on a press) (Rules 17, 18).
+   - **The screen-reader status**: in the browser's accessibility
+     inspector, the panel's status, shown nowhere on screen, reads
+     "Uploading 100% complete" (Rule 17c).
    - **"Review" before a component is chosen**: open the wizard's "Review"
      step: it reads "You must upload at least one Article Text file."
      ("…Book Manuscript file." on a press), and "Submit" is greyed out;
@@ -915,9 +929,10 @@ tooling recipe are in the footnote. <sup>s0</sup>
    - **"Other"**: add "notes.md" with "Add File" and press "Other" on its
      row: a side panel titled "Edit notes.md" opens with the hint "Choose
      the option that best describes this file." and one radio button per
-     component, "Image" and "HTML Stylesheet" not among them; choose
-     "Research Instrument" ("Prospectus" on a press) before pressing
-     "Save" ⚠ [A11](#a11) (Rule 18; Fields).
+     component, "Image", "HTML Stylesheet" and, on a journal,
+     "Multimedia" not among them; choose "Research Instrument"
+     ("Prospectus" on a press) before pressing "Save" ⚠ [A11](#a11)
+     (Rule 18; Fields).
    - **"Remove"**: add "profile-image-400.png" and press "Remove" on its
      row: a window titled "Remove" asks "Are you sure you want to remove
      this file?" with "Yes" and "No"; press "Yes": the row is gone (Rule
@@ -958,7 +973,7 @@ tooling recipe are in the footnote. <sup>s0</sup>
 
 App-specific:
 
-11. **{OPS} No file lists on a preprint server**
+11. **No file lists on a preprint server** {OPS}
 
     Given: Preprint Server Manager, with a submitted preprint whose galley
     "PDF" holds "preprint.pdf".
@@ -976,17 +991,42 @@ App-specific:
       panels are on screen, so the missing file list is not a page that
       failed to load [OPS1](#ops1) (Purpose).
 
+12. **A file's details edited through the REST API** {OJS OMP}
+
+    Given: Editor, on the Submission stage of a submission whose
+    "Submission Files" list holds "article.pdf" as "Article Text".
+
+    - **"History" before the edit**: open "More Actions" › "More
+      Information" on "article.pdf": the window opens on "History"; count
+      its rows that read "The metadata for file "{file name}" was edited
+      by {username}.", then close the window (Rules 13, 13a).
+    - **An edit with a `fileStage`**: from that page, send
+      `PUT {journal}/api/v1/submissions/{id}/files/{fileId}?stageId=1`
+      ({id} the address's `workflowSubmissionId`, {fileId} the file's
+      "No", 1 the Submission stage) with the header `X-Csrf-Token` set to
+      the page's `pkp.currentUser.csrfToken` and the JSON body
+      `{"name": {"en": "API rename"}, "fileStage": 10}` (10 is
+      "Production Ready Files"): it answers 200; reload the page:
+      "Submission Files" lists the file under "API rename" (Rule 10b).
+    - **An edit with an `assocType` and `assocId`**: send it again with
+      `{"name": {"en": "API rename 2"}, "assocType": 520, "assocId": 1}`:
+      it answers 200; reload: "Submission Files" lists the file under
+      "API rename 2" (Rule 10b).
+    - **"History" after the edits**: open "More Information" on "API
+      rename 2": "History" holds two more "The metadata for file…" rows
+      than before, at its top, newest first, one for each edit (Rules
+      10b, 13a).
+    - **Control**: "Submission Files" holds that one file alone: neither
+      edit moved it to another list (Rule 10b).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the file's "History" keeping no line of the revision cancelled with "Cancel": one "A file revision "notes.md" …" line, not two (Rule 9): likely a bullet in scenario 3, which cancels a revision before the "History" it reads [report 2026-10-01]
-  - "Edit a file" left with "Cancel" after the name is changed: no question, the list keeping the old name after a reload, and the window reopening on it (Rule 10a): likely a bullet in scenario 4 before "The rename" [report 2026-10-01]
   - the "Files" panel's "Other" on a file with no component, then "Save" with no radio button chosen: a message under "What kind of file is this?" and no server error ([A11](#a11)): the guard the issue report proposes [report 2026-10-02]
   - "Add Note" with the box empty on a file's "Notes": refused, no note listed and no "Posted new note." line in "History" ([A10](#a10)): the guard the issue report proposes [report 2026-10-02]
   - "Cancel upload" pressed on the full bar with the server's answer held back: no file stored, the panel empty after a reload ([A25](#a25)): the guard the issue report proposes [report 2026-10-02]
-  - the "Files" panel's screen-reader status: none before the first upload, and "Uploading 100% complete" once a file has uploaded (Rule 17c): likely an assertion in scenario 9's "A finished file" bullet [upstream 2026-09-28]
   - "Change File" on step 1 of a new file's upload, then "Complete": the list gains the second file alone ([A14](#a14)): the guard the issue report proposes [report 2026-10-02]
   - in "Upload/Select Files" with "Show files from all accessible workflow stages." ticked, another stage's row: "More Information" loads and the file name downloads ([A19](#a19)): the guard the issue report proposes [report 2026-10-02]
   - "Show events from prior versions" ticked on a file in "Files for Review": the original file's rows are added ([A4](#a4)): the guard the issue report proposes [report 2026-10-02]
@@ -995,7 +1035,6 @@ Left out of the scenarios above, by reason:
   - step 1 of the upload wizard before a component is chosen: the upload box absent from the accessibility snapshot, and each drop-down found by its role and label ([A9](#a9)): the guards the two issue reports propose [report 2026-10-02]
   - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes [report 2026-10-02]
   - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes [incidental 2026-10-05]
-  - the REST API edit with `fileStage`, or `assocType` and `assocId`, beside a new `name`: the file still on its list after a reload, under the new name, with one more "The metadata for file…" line in its "History" (Rule 10b) [incidental 2026-10-23]
 - **Nothing new to test**:
   - "Cancel" after revising a file renamed since its last upload: the previous file back, its rename kept, and no line of the cancelled upload in its "History" (Rule 9)
   - the header "Close" after a revision: the new file kept, the earlier version a "Download" in "History" (Rule 9)
@@ -2480,13 +2519,13 @@ OPS). A scenario's starting files are seeded through the scenario API:
 their component (`genre`, default the first main-work component), uploader
 and note, `reviewRounds[].files[]` on a round's "Files for Review", given to
 the round's seeded reviewers, and `galleys[]` a galley's file; every other
-file in a scenario is uploaded on screen. Where each scenario runs: 1–7 and 9
+file in a scenario is uploaded on screen. Where each scenario runs: 1–7, 9 and 12
 and the first half of 8 on the seeded journal or press `publicknowledge`,
 submissions from `POST scenarios/submission` with submitter `author.alex`
 (on the press `series: 'monographs'`, so the series' editors are assigned
 automatically as on the journal's section ART); 10 and the "Open" review of 8
 on scratch contexts from `POST scenarios/context`; 11 on the seeded preprint
-server. The Journal Manager is `manager.maya`, the Section Editor
+server. The Journal Manager is `manager.maya`, the Editor `editor.diana`, the Section Editor
 `sectioneditor.ana` (assigned automatically), the Copyeditor
 `copyeditor.carla`, the Reviewer `reviewer.julia`, the Author `author.alex`.
 Recipes: 1 — `files: [{file: 'article.pdf'}, {file: 'article.docx'}]`, read as `manager.maya` then
@@ -2521,7 +2560,13 @@ throttled upload. 10 — a scratch journal or press created with `review:
 a throwaway `manager` and `author`; one submitted seed and one with
 `decisions: ['skipExternalReview', 'sendToProduction']`. 11 — a submitted
 preprint with `galleys: [{label: 'PDF', file: 'preprint.pdf'}]`, read as
-`manager.maya`. The recipe is the tooling's: no screen shows it.
+`manager.maya`. 12 — `files: [{file: 'article.pdf'}]`, as `editor.diana`;
+each edit is replayed in that session with the workflow page's CSRF token
+(patterns.md "A request replayed in a role's session") at
+`submissions/{id}/files/{fileId}?stageId=1`, the first with
+`{name: {en: 'API rename'}, fileStage: 10}` (Production Ready Files), the
+second with `{name: {en: 'API rename 2'}, assocType: 520, assocId: 1}`, in
+the shape of the requests the claim check sent (note d23). The recipe is the tooling's: no screen shows it.
 Live-probed 2026-09-23: the claim check seeded its submissions through these
 keys on all three apps, OPS refusing `files[]`.
 

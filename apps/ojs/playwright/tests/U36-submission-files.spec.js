@@ -3,7 +3,7 @@
  * @file playwright/tests/U36-submission-files.spec.js
  *
  * Submission files — OJS suite, one test per canonical scenario the spec
- * runs on OJS (S1–S10; scenario 11 is OPS-only).
+ * runs on OJS (S1–S10 and S12; scenario 11 is OPS-only).
  * Spec: docs/specs/U36-submission-files.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
@@ -19,7 +19,11 @@
  * - A11 🐞: S9 chooses the component before "Save" in "Edit notes.md".
  * - A12 🐞: S4 and S7 read the zip's name as the submission's number, then
  *   hyphens, then "submission-files.zip", without fixing their count.
- * - A4–A6, A8–A10, A13–A24, OPS1: not on these scenarios' paths.
+ * - A25 🐞: S9 presses "Cancel upload" on a throttled upload only.
+ * - A29 🐞: S9 reads the screen-reader status on the empty panel and after
+ *   a finished upload; nothing reads it right after "Cancel upload".
+ * - A30 🐞: S4 leaves "Edit a file" with "Cancel" only.
+ * - A4–A6, A8–A10, A13–A24, A26–A28, OPS1: not on these scenarios' paths.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (A1, A7). Every test seeds its own submission with a unique
@@ -38,7 +42,12 @@
  * Two reads differ from the letter of a bullet: S6 reads "newest first" on
  * the test's own note, since the seeded note and the upload share one
  * second and tie (`.reports/U36/test-ojs-findings.md` T-ojs-1); S9 does not
- * read the spinner a component link shows for the length of one request.
+ * read the spinner a component link shows for the length of one request;
+ * S12 reads its two new "History" rows at the top as a set, since the
+ * grid orders by a whole-second time and the two edits may share a second
+ * (patterns.md parallel lesson 14c). S12 sends the two edits Rule 10b names
+ * with the workflow page's own session and CSRF token, the one request in
+ * this suite no screen sends; its outcome is read on the screens.
  * Waits are web-first (A5). Everything runs in the parallel `ojs` project.
  */
 const path = require('path');
@@ -68,6 +77,7 @@ const {
 
 const JOURNAL = 'publicknowledge';
 const MANAGER = 'manager.maya';
+const EDITOR = 'editor.diana';
 const SECTION_EDITOR = 'sectioneditor.ana';
 const AUTHOR = 'author.alex';
 const REVIEWER = 'reviewer.julia';
@@ -148,6 +158,24 @@ async function openWorkflow(asUser, username, submissionId, {contextPath = JOURN
 async function reland(page, frame, submissionId) {
     await page.goto(page.url());
     await frame.expectOpen(submissionId);
+}
+
+/** A "History" row an "Update File Details" save (or an API edit) adds (Rule 13a). */
+const isMetadataEvent = (event) => /^The metadata for file ".*" was edited by \S+\.$/.test(event);
+
+/**
+ * Rule 10b's edit, sent from an open back-office page in that page's own
+ * session with its CSRF token (the shape U60 uses for a direct request).
+ */
+async function editFileThroughApi(page, submissionId, fileId, body) {
+    await page.waitForFunction(() => !!(window.pkp && window.pkp.currentUser && window.pkp.currentUser.csrfToken), null, {
+        timeout: 30_000,
+    });
+    const token = await page.evaluate(() => window.pkp.currentUser.csrfToken);
+    return await page.request.put(`/index.php/${JOURNAL}/api/v1/submissions/${submissionId}/files/${fileId}?stageId=1`, {
+        headers: {'X-Csrf-Token': token},
+        data: body,
+    });
 }
 
 /** A notice the app shows after a legacy save ("Removed file.", "Note posted."). */
@@ -396,6 +424,9 @@ test.describe('submission files', () => {
         expect(at(metadataEvent), 'the metadata row').toBeGreaterThanOrEqual(0);
         expect(at(firstEvent), 'the first upload below the revision').toBeGreaterThan(Math.max(at(revisionEvent), at(metadataEvent)));
 
+        // No line of the cancelled revision: the revision's row stands once.
+        expect(events.filter((e) => e === revisionEvent), 'the revision row, once').toHaveLength(1);
+
         // The earlier version: the first upload's "Download" fetches the PDF.
         const {download} = await info.downloadFromHistory(firstEvent);
         expect(download.suggestedFilename()).toMatch(/\.pdf$/);
@@ -432,6 +463,24 @@ test.describe('submission files', () => {
         await expect(edit.nameBox()).toHaveValue('article.pdf');
         await expect(edit.saveButton()).toBeVisible();
         await expect(edit.cancelButton()).toBeVisible();
+
+        // "Cancel" with a changed name: nothing asks, the window closes, the
+        // list keeps "article.pdf", after a reload too, and the window
+        // reopens on it.
+        const asked = recordBrowserDialogs(page);
+        await edit.nameBox().fill('Renamed draft');
+        await edit.cancel();
+        await list.expectNames(['article.pdf', 'notes.md', 'article.docx']);
+        await expect(list.row('Renamed draft')).toHaveCount(0);
+        await page.reload();
+        await frame.expectOpen(submissionId);
+        await list.expectNames(['article.pdf', 'notes.md', 'article.docx']);
+        await expect(list.row('Renamed draft')).toHaveCount(0);
+        expect(asked.messages, 'nothing asks on "Cancel"').toEqual([]);
+        asked.stop();
+        await list.choose(list.row('article.pdf'), 'Update File Details');
+        await edit.expectOpen();
+        await expect(edit.nameBox()).toHaveValue('article.pdf');
 
         // The emptied name is refused; the window stays.
         await edit.nameBox().fill('');
@@ -844,6 +893,14 @@ test.describe('submission files', () => {
         const panelBox = await panel.panel().boundingBox();
         expect(guidanceBox && panelBox && guidanceBox.x < panelBox.x, 'the guidance stands left of the panel').toBe(true);
 
+        // No screen-reader status yet, read from the panel's accessibility
+        // tree once it holds the empty panel's "Upload File" (the control,
+        // taken in the same read).
+        let tree = '';
+        await expect.poll(async () => (tree = await panel.ariaTree()), {timeout: 30_000}).toContain('button "Upload File"');
+        expect(tree, 'no status on the empty panel').not.toMatch(/^\s*- status\b/m);
+        await expect(panel.status()).toHaveCount(0);
+
         // "Cancel upload" on a throttled upload: the row goes at once, nothing
         // asks, and a reload finds the panel empty. At 64 bytes/s the browser
         // holds the fixture's request body (about 640 bytes) for some ten
@@ -889,6 +946,10 @@ test.describe('submission files', () => {
         expect(await panel.rowActionNames(pdf)).toEqual(['Edit', 'Remove']);
         await expect(panel.genrePrompt(pdf)).toHaveText('What kind of file is this?');
         expect(await panel.genreButtonNames(pdf)).toEqual([MAIN, 'Other']);
+
+        // The screen-reader status, shown nowhere on screen (the page was
+        // reloaded since "Cancel upload", so this is the finished upload's).
+        await expect(panel.status()).toMatchAriaSnapshot('- status: Uploading 100% complete', {timeout: 30_000});
 
         // "Review" before a component is chosen.
         await wizard.continueTo('Details');
@@ -997,5 +1058,67 @@ test.describe('submission files', () => {
         expect(readyComponents).not.toContain('Transcripts');
         await expect(readyWizard.componentSelect()).toBeVisible();
         await expect(readyWizard.ensuringLink()).toHaveCount(0);
+    });
+
+    test('S12: a file\'s details edited through the REST API', async ({asUser, ojsApi}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s12', testInfo);
+        const {submissionId} = await seed(ojsApi, tag, {files: [{file: 'article.pdf'}]});
+
+        const {page, frame} = await openWorkflow(asUser, EDITOR, submissionId, {stage: 'submission'});
+        const list = new FileList(page, frame, SUBMISSION_FILES);
+        await list.expectNames(['article.pdf']);
+        const fileId = await list.rowNumber(await list.expectRow('article.pdf', {type: MAIN}));
+
+        // "History" before the edit: the "The metadata for file…" rows counted.
+        await list.choose(list.row('article.pdf'), 'More Information');
+        let info = new InformationCenter(page, 'article.pdf');
+        await info.expectOpen();
+        await info.expectTab('History');
+        await info.expectHistoryLoaded();
+        const uploadEvent = `A file "article.pdf" was uploaded for submission ${submissionId} by ${AUTHOR}.`;
+        await expect.poll(() => info.historyEvents()).toContain(uploadEvent);
+        const before = (await info.historyEvents()).filter(isMetadataEvent).length;
+        await info.close();
+
+        // An edit with a `fileStage` (10, "Production Ready Files"): 200, and
+        // after a reload the file is listed under the new name.
+        const first = await editFileThroughApi(page, submissionId, fileId, {name: {en: 'API rename'}, fileStage: 10});
+        expect(first.status(), `the edit with a fileStage answers ${first.status()} ${(await first.text()).slice(0, 300)}`).toBe(200);
+        await page.reload();
+        await frame.expectOpen(submissionId);
+        await list.expectNames(['API rename']);
+        await expect(list.numberCell(list.row('API rename'))).toHaveText(fileId);
+
+        // An edit with an `assocType` and `assocId`: 200, and after a reload
+        // the file is listed under the second name.
+        const second = await editFileThroughApi(page, submissionId, fileId, {name: {en: 'API rename 2'}, assocType: 520, assocId: 1});
+        expect(second.status(), `the edit with an assocType answers ${second.status()} ${(await second.text()).slice(0, 300)}`).toBe(200);
+        await page.reload();
+        await frame.expectOpen(submissionId);
+        await list.expectNames(['API rename 2']);
+        await expect(list.numberCell(list.row('API rename 2'))).toHaveText(fileId);
+
+        // "History" after the edits: two more metadata rows, at its top, one
+        // for each edit (read as a set: the two may share a second).
+        await list.choose(list.row('API rename 2'), 'More Information');
+        info = new InformationCenter(page, 'API rename 2');
+        await info.expectOpen();
+        await info.expectTab('History');
+        await info.expectHistoryLoaded();
+        await expect.poll(async () => (await info.historyEvents()).filter(isMetadataEvent).length).toBe(before + 2);
+        const events = await info.historyEvents();
+        expect(events.slice(0, 2).sort()).toEqual(
+            [
+                `The metadata for file "API rename" was edited by ${EDITOR}.`,
+                `The metadata for file "API rename 2" was edited by ${EDITOR}.`,
+            ].sort()
+        );
+        expect(events.indexOf(uploadEvent), 'the upload below the two edits').toBeGreaterThan(1);
+        await info.close();
+
+        // Control: "Submission Files" holds that one file alone.
+        await list.expectNames(['API rename 2']);
+        await expect(list.rows()).toHaveCount(1);
     });
 });

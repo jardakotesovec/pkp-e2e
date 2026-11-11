@@ -3,7 +3,7 @@
  * @file playwright/tests/U36-submission-files.spec.js
  *
  * Submission files — OMP suite, one test per canonical scenario the spec
- * runs on a press (S1–S10; scenario 11 is OPS-only), in the press's own
+ * runs on a press (S1–S10 and S12; scenario 11 is OPS-only), in the press's own
  * words: "Submission Component" / "Select component" in the upload wizard,
  * "Book Manuscript" as the main-work component (the default of a seeded
  * file), "Prospectus" as the supplementary one, "Image" and "HTML
@@ -24,7 +24,12 @@
  * - A11 🐞: S9 chooses the component before "Save" in "Edit notes.md".
  * - A12 🐞: S4 and S7 read the zip's name as the submission's number, then
  *   hyphens, then "submission-files.zip", without fixing their count.
- * - A4–A6, A8–A10, A13–A24, OPS1: not on these scenarios' paths.
+ * - A25 🐞: S9 presses "Cancel upload" on a throttled upload, before the
+ *   file can reach the server.
+ * - A29 🐞: S9 reads the screen-reader status before the first upload and
+ *   after a finished one; nothing reads it right after "Cancel upload".
+ * - A30 🐞: S4 leaves "Edit a file" with "Cancel" only.
+ * - A4–A6, A8–A10, A13–A24, A26–A28, OPS1: not on these scenarios' paths.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (A1, A7). Every test seeds its own submission with a unique
@@ -46,6 +51,14 @@
  * the test's own note, since the seeded note and the upload share one
  * second and tie (`.reports/U36/test-ojs-findings.md` T-ojs-1); S9 does not
  * read the spinner a component link shows for the length of one request.
+ * S9's screen-reader status is read in the accessibility tree
+ * (`WizardFilesPanel.status()`, a role query), as it is shown nowhere on
+ * screen (Rule 17c).
+ * S12 sends the two REST edits no screen sends (Rule 10b; footnote s0,
+ * recipe 12, note d23) with the workflow page's own session and CSRF token,
+ * and reads their outcome on the screens after a reload; its second edit
+ * waits for the clock's next second, so the two "History" rows it reads
+ * newest first do not share one second and tie as T-ojs-1's did.
  * Waits are web-first (A5). Everything runs in the parallel `omp` project.
  */
 const path = require('path');
@@ -86,6 +99,7 @@ const {
 const PRESS = 'publicknowledge';
 const SERIES = 'monographs';
 const MANAGER = 'manager.maya';
+const EDITOR = 'editor.diana';
 const SECTION_EDITOR = 'sectioneditor.ana';
 const AUTHOR = 'author.alex';
 const REVIEWER = 'reviewer.julia';
@@ -178,6 +192,28 @@ async function openWorkflow(asUser, appContext, username, submissionId, {context
 async function reland(page, frame, submissionId) {
     await page.goto(page.url());
     await frame.expectOpen(submissionId);
+}
+
+/** A "History" row of an edit of the file's details (Rule 13a). */
+const METADATA_EVENT = /^The metadata for file ".*" was edited by \S+\.$/;
+
+/**
+ * Send `PUT submissions/{id}/files/{fileId}?stageId=1` (Rule 10b, note d23)
+ * from the open workflow page, in its session, with its
+ * `pkp.currentUser.csrfToken`, as the U60 suite's direct save does. Local
+ * until the shared page object carries it (proposed:
+ * `editFileDetailsByApi(page, contextPath, submissionId, fileId, body)`).
+ */
+async function editFileByApi(page, contextPath, submissionId, fileId, body) {
+    await page.waitForFunction(() => !!(window.pkp && window.pkp.currentUser && window.pkp.currentUser.csrfToken), null, {
+        timeout: 30_000,
+    });
+    const token = await page.evaluate(() => window.pkp.currentUser.csrfToken);
+    return await page.request.fetch(`/index.php/${contextPath}/api/v1/submissions/${submissionId}/files/${fileId}?stageId=1`, {
+        method: 'PUT',
+        headers: {'X-Csrf-Token': token},
+        data: body,
+    });
 }
 
 /** A notice the app shows after a legacy save ("Removed file.", "Note posted."). */
@@ -426,6 +462,9 @@ test.describe('submission files', () => {
         expect(at(metadataEvent), 'the metadata row').toBeGreaterThanOrEqual(0);
         expect(at(firstEvent), 'the first upload below the revision').toBeGreaterThan(Math.max(at(revisionEvent), at(metadataEvent)));
 
+        // No line of the cancelled revision: the revision row stands once, not twice.
+        expect(events.filter((e) => e === revisionEvent), 'the revision row, once').toHaveLength(1);
+
         // The earlier version: the first upload's "Download" fetches the PDF.
         const {download} = await info.downloadFromHistory(firstEvent);
         expect(download.suggestedFilename()).toMatch(/\.pdf$/);
@@ -462,6 +501,25 @@ test.describe('submission files', () => {
         await expect(edit.nameBox()).toHaveValue('article.pdf');
         await expect(edit.saveButton()).toBeVisible();
         await expect(edit.cancelButton()).toBeVisible();
+
+        // "Cancel" with a changed name: nothing asks, the window closes and
+        // the list keeps "article.pdf", after a reload too; the window reopens
+        // on it (Rule 10a).
+        const asked = recordBrowserDialogs(page);
+        await edit.nameBox().fill('Renamed draft');
+        await edit.cancel();
+        expect(asked.messages, 'nothing asks on "Cancel"').toEqual([]);
+        await list.expectNames(['article.pdf', 'notes.md', 'article.docx']);
+        await expect(list.row('Renamed draft')).toHaveCount(0);
+        await page.reload();
+        await frame.expectOpen(submissionId);
+        await list.expectNames(['article.pdf', 'notes.md', 'article.docx']);
+        await expect(list.row('Renamed draft')).toHaveCount(0);
+        await list.choose(list.row('article.pdf'), 'Update File Details');
+        await edit.expectOpen();
+        await expect(edit.nameBox()).toHaveValue('article.pdf');
+        expect(asked.messages, 'nothing asks on the reload either').toEqual([]);
+        asked.stop();
 
         // The emptied name is refused; the window stays.
         await edit.nameBox().fill('');
@@ -865,6 +923,9 @@ test.describe('submission files', () => {
             'Upload any files the editorial team will need to evaluate your submission.'
         );
         await expect(panel.emptyUploadButton()).toBeVisible();
+        // No screen-reader status yet; the panel's "Upload File", read the
+        // same way through the accessibility tree just above, is the control.
+        await expect(panel.status()).toHaveCount(0);
         const guidance = page.locator('main').getByText(
             'Provide any files our editorial team may need to evaluate your submission.',
             {exact: false}
@@ -920,6 +981,9 @@ test.describe('submission files', () => {
         expect(await panel.rowActionNames(pdf)).toEqual(['Edit', 'Remove']);
         await expect(panel.genrePrompt(pdf)).toHaveText('What kind of file is this?');
         expect(await panel.genreButtonNames(pdf)).toEqual(MAIN_WORK_LINKS);
+
+        // The screen-reader status, shown nowhere on screen (Rule 17c).
+        await expect(panel.status()).toHaveText('Uploading 100% complete');
 
         // "Review" before a component is chosen.
         await continueTo(page, STEPS.details);
@@ -1028,5 +1092,71 @@ test.describe('submission files', () => {
         expect(readyComponents).not.toContain(REMOVED_DEFAULT);
         await expect(readyWizard.componentSelect()).toBeVisible();
         await expect(readyWizard.ensuringLink()).toHaveCount(0);
+    });
+
+    test('S12: a file\'s details edited through the REST API', async ({asUser, ompApi, appContext}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s12', testInfo);
+        const {submissionId} = await seed(ompApi, tag, {files: [{file: 'article.pdf'}]});
+
+        const {page, frame} = await openWorkflow(asUser, appContext, EDITOR, submissionId, {stage: 'submission'});
+        const list = new FileList(page, frame, SUBMISSION_FILES);
+        await list.expectNames(['article.pdf']);
+        const fileId = await list.rowNumber(await list.expectRow('article.pdf', {type: MAIN}));
+
+        // "History" before the edit: its "The metadata for file…" rows, counted.
+        const uploadEvent = `A file "article.pdf" was uploaded for submission ${submissionId} by ${AUTHOR}.`;
+        await list.choose(list.row('article.pdf'), 'More Information');
+        let info = new InformationCenter(page, 'article.pdf');
+        await info.expectOpen();
+        await info.expectTab('History');
+        await info.expectHistoryLoaded();
+        await expect.poll(() => info.historyEvents()).toContain(uploadEvent);
+        const before = (await info.historyEvents()).filter((e) => METADATA_EVENT.test(e)).length;
+        await info.close();
+
+        // An edit with a `fileStage` (10, "Production Ready Files"): 200, and
+        // after a reload the file is on "Submission Files" under the new name.
+        const first = await editFileByApi(page, PRESS, submissionId, fileId, {name: {en: 'API rename'}, fileStage: 10});
+        expect(first.status(), `the first edit answers ${first.status()} ${await first.text()}`).toBe(200);
+        const firstSecond = Math.floor(Date.now() / 1000);
+        await page.reload();
+        await frame.expectOpen(submissionId);
+        await list.expectNames(['API rename']);
+        await list.expectRow('API rename', {type: MAIN});
+
+        // An edit with an `assocType` and `assocId`, in a later second than
+        // the first (the header's note on ties): 200, and the new name.
+        await expect.poll(() => Math.floor(Date.now() / 1000), {timeout: 5_000}).toBeGreaterThan(firstSecond);
+        const second = await editFileByApi(page, PRESS, submissionId, fileId, {
+            name: {en: 'API rename 2'},
+            assocType: 520,
+            assocId: 1,
+        });
+        expect(second.status(), `the second edit answers ${second.status()} ${await second.text()}`).toBe(200);
+        await page.reload();
+        await frame.expectOpen(submissionId);
+        await list.expectNames(['API rename 2']);
+        await list.expectRow('API rename 2', {type: MAIN});
+
+        // "History" after the edits: two more "The metadata for file…" rows,
+        // at its top, newest first, one per edit.
+        await list.choose(list.row('API rename 2'), 'More Information');
+        info = new InformationCenter(page, 'API rename 2');
+        await info.expectOpen();
+        await info.expectTab('History');
+        await info.expectHistoryLoaded();
+        await expect.poll(() => info.historyEvents()).toContain(uploadEvent);
+        const events = await info.historyEvents();
+        expect(events.filter((e) => METADATA_EVENT.test(e)), 'two more metadata rows').toHaveLength(before + 2);
+        expect(events.slice(0, 2)).toEqual([
+            `The metadata for file "API rename 2" was edited by ${EDITOR}.`,
+            `The metadata for file "API rename" was edited by ${EDITOR}.`,
+        ]);
+        await info.close();
+
+        // Control: "Submission Files" holds that one file alone.
+        await list.expectNames(['API rename 2']);
+        await expect(list.rows()).toHaveCount(1);
     });
 });

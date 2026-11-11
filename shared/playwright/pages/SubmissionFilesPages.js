@@ -19,8 +19,8 @@
  *   two drop-downs and upload box, step 2's fields, step 3's "Add Another
  *   File" and "Complete", the "Cancel" link and the header "Close".
  * - EditFileWindow — "Update File Details" ("Edit a file"): the fields,
- *   "Save" / "Cancel", and an HTML file's "Dependent Files" list with its
- *   "Upload File" link.
+ *   "Save" / "Cancel" (each waiting for the window to close), and an
+ *   HTML file's "Dependent Files" list with its "Upload File" link.
  * - InformationCenter — "More Information" ("Information Center: {name}"):
  *   the "History" and "Notes" tabs, a history row's "Download", the notes
  *   with "Add Note" / "Delete", and "Earlier Revision Notes".
@@ -30,7 +30,8 @@
  * - WizardFilesPanel — the submission wizard's "Files" panel on its
  *   "Upload Files" step (the step itself is the app's SubmissionWizardPage):
  *   "Add File", the empty panel, a row's upload progress and "Cancel
- *   upload", the component links, "Edit {name}", "Remove".
+ *   upload", the screen-reader status (read from the accessibility tree),
+ *   the component links, "Edit {name}", "Remove".
  * - captureDownload / zipEntryNames — a download read through Playwright's
  *   download event (a list's name link opens a new tab, so the tab's
  *   download counts too), and the entry names of a downloaded zip.
@@ -713,6 +714,12 @@ exports.EditFileWindow = class EditFileWindow extends BasePage {
         await expect(this.dialog()).toHaveCount(0, {timeout: 30_000});
     }
 
+    /** Press "Cancel" and wait for the window to close (Rule 10a). */
+    async cancel() {
+        await this.cancelButton().click();
+        await expect(this.dialog()).toHaveCount(0, {timeout: 30_000});
+    }
+
     /** The "Dependent Files" heading. */
     dependentHeading() {
         return this.dialog().getByRole('heading', {name: 'Dependent Files', exact: true});
@@ -1072,6 +1079,21 @@ exports.WizardFilesPanel = class WizardFilesPanel extends BasePage {
     /** The empty panel's "Upload File" (a button styled as a link). */
     emptyUploadButton() {
         return this.emptyState().getByRole('button', {name: 'Upload File', exact: true});
+    }
+
+    /**
+     * The panel's screen-reader status ("Uploading {percent}% complete",
+     * Rule 17c): the uploader's `role="status"` element, shown nowhere on
+     * screen, so it is read from the accessibility tree, never as visible
+     * text (`toMatchAriaSnapshot` on it, or `ariaTree()`).
+     */
+    status() {
+        return this.panel().getByRole('status');
+    }
+
+    /** The panel's accessibility tree, as Playwright's aria snapshot text. */
+    async ariaTree() {
+        return await this.panel().ariaSnapshot();
     }
 
     /** The file rows. */
