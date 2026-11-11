@@ -52,7 +52,7 @@ Comments page is refused (Rule 2b).
 | **Report a comment** | • any signed-in visitor, with or without a role in the journal, on another person's comment that is showing, through the comment's "…" menu (Rule 8); a moderator gets the same offer there and nothing more<br>• nobody on their own comment: its menu offers "Delete Comment" and no "Report" (Rule 7) <sup>g</sup> |
 | **Delete a comment from the landing page** | • the comment's own writer, signed in, through the comment's "…" menu (Rule 9); the menu on anyone else's comment offers no "Delete Comment", and a moderator deletes other people's comments on the Comments page only (Rule 14) <sup>h</sup> |
 | **Switch public comments on or off** | • a Journal Manager, an Editor whose role permits settings changes (the Roles screen's "Permit changes to Settings", ticked by default), and a Site Administrator working in the journal, on Settings › Website › Content › "Comments" (Rule 2) <sup>b</sup> |
-| **Open the Comments page** | • a Journal Manager and an Editor, whether or not their role permits settings changes: the Content › Comments menu entry and the page's address while the setting is on (Rule 3); with the setting off the address answers the access-denied page (Rule 2b)<br>• a Site Administrator holding no manager role in the journal: on a journal the page opens; on a press or a preprint server the menu entry is offered but the address answers the access-denied page ⚠ [OMP1](#omp1) ⚠ [OPS1](#ops1) (Rule 17)<br>• a Section Editor, an Assistant, an Author, a Reviewer or a Reader: no menu entry, and the address answers the access-denied page<br>• a visitor who is not signed in: the address answers the Login page<br>• a visitor who is not signed in and the Site Administrator, at the page's address with "index", the site, in place of the journal's path ("…/index.php/index/management/settings/userComments"): the visitor gets the Login page, the Site Administrator the notice "No journal was found that matched your request." <sup>i</sup> <sup>m</sup> |
+| **Open the Comments page** | • a Journal Manager and an Editor, whether or not their role permits settings changes: the Content › Comments menu entry and the page's address while the setting is on (Rule 3); with the setting off the address answers the access-denied page (Rule 2b)<br>• a Site Administrator holding no manager role in the journal: on a journal the page opens; on a press or a preprint server the menu entry is offered but the address answers the access-denied page ⚠ [OMP1](#omp1) ⚠ [OPS1](#ops1) (Rule 17)<br>• a Section Editor, an Assistant, an Author, a Reviewer or a Reader: no menu entry, and the address answers the access-denied page<br>• a visitor who is not signed in: the address answers the Login page<br>• a visitor who is not signed in and the Site Administrator, at the page's address with "index", the site, in place of the journal's path ("…/index.php/index/management/settings/userComments"): the visitor gets the Login page, the Site Administrator the notice {OJS} "No journal was found that matched your request.", {OMP} "No press was found that matched your request.", {OPS} "No server in context!" (a wording *[Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md#ops4)* records as a defect, its OPS4) <sup>i</sup> <sup>m</sup> |
 | **Approve, hide or delete a comment; view or delete a report** | • whoever can open the Comments page (the row above), on every comment of the journal, their own included, while comments are on (Rules 12 to 16); nobody on another journal's comment <sup>j</sup> |
 | **Receive the moderation tasks** | • every Journal Manager and Editor of the journal, in the Tasks panel (Side effects); a Site Administrator holding no manager role in the journal gets none <sup>l</sup> |
 
@@ -418,20 +418,17 @@ Comments page is refused (Rule 2b).
 
 ## Canonical scenarios
 
-Every scenario runs on a scratch journal with throwaway accounts (the
-seeded journal keeps public comments off and has no published article);
-each scenario's accounts, seeding and the mail catcher's address are in its
-footnote. Scenarios 1 to 7 run on a journal, a press and a preprint server
-alike: on a press and a preprint server, where nothing writes a comment,
-their comments come from the tooling. Scenarios 8 to 13 need the article's
-landing page and run on a journal; scenario 14 reads the absence on a press
-and a preprint server. <sup>s0</sup>
+Every scenario runs on a scratch journal with throwaway accounts, since the
+seeded journal keeps public comments off and has no published article; the
+accounts, the seeding and the mail catcher's address are in each
+scenario's footnote. <sup>s0</sup>
 
 1. **Switching public comments on and off** {OJS OMP OPS}
 
    Given: Journal Manager, on a scratch journal with public comments on and
-   a published article carrying one approved comment; a second, fresh
-   scratch journal on which public comments were never switched on.
+   a published article carrying one approved comment and a second approved
+   comment that a Reader has reported; a second, fresh scratch journal on
+   which public comments were never switched on.
 
    - **The "Comments" tab**: open Settings › Website › the "Content" tab ›
      the "Comments" side tab: the box "Enable Public Comments" is ticked,
@@ -451,11 +448,21 @@ and a preprint server. <sup>s0</sup>
      ("…/management/settings/userComments" after the journal's address):
      the access-denied page opens, reading "Access denied.", and no page
      headed "Comments".
+   - **The address ending in "/" or carrying one more part**: open the same
+     address with "/" at its end, then
+     "…/management/settings/userComments/x": each opens the access-denied
+     page, reading "Access denied.".
+   - **The tasks while off**: open the Tasks panel: the row "A comment has
+     been submitted and is pending review by a moderator." about each
+     comment and the row "A report was submitted for a comment and requires
+     review by a moderator." are still there; press the row with the first
+     comment's text under it: the access-denied page opens, reading "Access
+     denied."; press the report's row: the same page.
    - **Switching on again**: tick the box and press "Save": the page
      reloads the same way; the side menu carries Content › Comments again;
-     {OJS} the article's page shows both blocks with the comment exactly
-     as before; {OMP OPS} the Comments page lists the comment again, its
-     "Status" reading "Approved".
+     {OJS} the article's page shows both blocks with the comments exactly
+     as before; {OMP OPS} the Comments page lists the first comment again,
+     its "Status" reading "Approved".
    - **An unsaved tick**: untick the box without pressing "Save", open the
      "Appearance" tab and come back to the "Content" tab's "Comments" side
      tab: the box is still unticked and nothing was asked; open the
@@ -470,8 +477,10 @@ and a preprint server. <sup>s0</sup>
    Given: Journal Manager, on a scratch journal with public comments on and
    a published article carrying three comments: a pending one by a Reader
    whose profile carries a verified ORCID iD and an affiliation, an
-   approved one, and an approved one that a second Reader has reported; a
-   second journal on the site holding a comment of its own.
+   approved one by a Reader whose profile carries an ORCID iD that is not
+   verified and no affiliation, and an approved one, by a Reader with no
+   ORCID iD and no affiliation, that a second Reader has reported; a second
+   journal on the site holding a comment of its own.
 
    - **Content › Comments**: press the side menu's Content › Comments: the
      page headed "Comments" opens with the tabs "All", "Approved",
@@ -509,6 +518,15 @@ and a preprint server. <sup>s0</sup>
      writer's name followed by a solid ORCID icon (a link named "ORCID iD"
      to the writer's iD) and the affiliation on the line below, and the
      sidebar reads "All Comments (3)".
+   - **A writer whose iD is not verified** {OJS}: on the same page, under
+     the comment by the Reader whose iD is not verified, the name is
+     followed by a hollow ORCID icon, a link named "ORCID iD" like the solid
+     one, with no iD written out; it opens the iD's ORCID page in a new tab
+     ⚠ [A15](#a15).
+   - **A writer with no iD, and writers with no affiliation** {OJS}: on the
+     same page, the reported comment's writer's name carries no ORCID icon,
+     and neither that writer nor the writer whose iD is not verified has a
+     line below the name.
    - **"Hide Comment"**: open the reported comment's panel and press "Hide
      Comment": the notice "The comment has been updated successfully.", the
      panel closes and the row leaves "Approved" for "Hidden/Needs
@@ -623,8 +641,8 @@ and a preprint server. <sup>s0</sup>
 6. **Who opens the Comments page** {OJS OMP OPS}
 
    Given: a Section Editor, an Author and a Reader of a scratch journal
-   with public comments on, a signed-out visitor's browser, and the Journal
-   Manager.
+   with public comments on, a signed-out visitor's browser, the Journal
+   Manager and the Site Administrator.
 
    - **The Section Editor**: signed in, the editorial side menu has no
      "Content" group; the Comments page's address
@@ -635,6 +653,15 @@ and a preprint server. <sup>s0</sup>
      address answers the access-denied page.
    - **The Reader**: the address answers the access-denied page.
    - **Signed out**: the address answers the Login page.
+   - **The address at the site, with no journal**: open
+     "…/index.php/index/management/settings/userComments", the page's
+     address with "index", the site, in place of the journal's path: signed
+     out, the Login page opens; signed in as the Site Administrator, the
+     notice {OJS} "No journal was found that matched your request.",
+     {OMP} "No press was found that matched your request.", {OPS} "No
+     server in context!" (a wording
+     *[Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md#ops4)*
+     records as a defect).
    - **Control**: the Journal Manager's side menu holds Content › Comments,
      and the address opens the page headed "Comments". <sup>s6</sup>
 
@@ -670,11 +697,12 @@ and a preprint server. <sup>s0</sup>
      article the block "Comments" holds the link "All Comments (1)" and the
      button "Log in to comment". Press "All Comments (1)": the page scrolls
      to the main block.
-   - **"Log in to comment"**: press it: the journal's Login page opens; sign
-     in as the first Reader: the browser returns to the same article at the
-     comments' address with the main block on screen and, in the version's
-     part, the comment box (its placeholder "What do you think about this
-     publication? Type your comments here.") and "Submit".
+   - **"Log in to comment"**: press either one: the journal's Login page
+     opens; sign in as the first Reader: the browser returns to the same
+     article, its address ending "#public-comments", with the main block on
+     screen and, in the version's part, the comment box (its placeholder
+     "What do you think about this publication? Type your comments here.")
+     and "Submit".
    - **"Submit" while the box is empty**: "Submit" is grayed out; type three
      spaces: still grayed out; type "A first reader comment." in the box:
      "Submit" is enabled.
@@ -687,8 +715,14 @@ and a preprint server. <sup>s0</sup>
      Comment" alone; on the second Reader's comment it offers "Report"
      alone.
    - **Formatting**: type `<b>bold</b> <script>alert(1)</script> plain` in
-     the box and press "Submit": the new comment shows "bold" in bold and
-     "plain", the script gone, and no message appears.
+     the box and press "Submit": the new comment reads "bold plain", "bold"
+     in bold, and no pop-up or notice appears.
+   - **Leaving with text typed**: type "A comment left unsent." in the box
+     and, without pressing "Submit", open the journal's second article:
+     nothing asks about the typed text; press the browser's Back: the
+     article's page shows "A comment left unsent." still in the box; reload
+     the page: the box is empty and no comment reading "A comment left
+     unsent." is listed.
    - **The second Reader**: signed in on the same page, sees the approved
      comment alone, the heading reading "{version} (1)"; the "…" on their
      own comment offers "Delete Comment" alone.
@@ -847,6 +881,58 @@ and a preprint server. <sup>s0</sup>
       Comments leaves the side menu while the landing page reads exactly as
       before: the setting changes only the side menu here. <sup>s14</sup>
 
+15. **Deleting a comment leaves the tasks of others numbered like it** {OJS OMP OPS}
+
+    Given: Journal Manager, on a scratch journal with public comments on and
+    a published article carrying three approved comments, the first
+    reported by a Reader, the second carrying that report's number and the
+    third reported in a report carrying the first comment's number (the
+    numbers the page's address shows with a comment's or a report's panel
+    open), with a row about each comment and each report in the Journal
+    Manager's Tasks panel.
+
+    - **"Delete Comment"**: on the Comments page, on the first comment's row
+      press "…" ("More Actions") › "Delete Comment" and then "Delete": the
+      notice "The comment has been deleted successfully." shows and the
+      table reloads without the row.
+    - **The Tasks panel**: the row "A comment has been submitted and is
+      pending review by a moderator." with the first comment's text under
+      it and the row "A report was submitted for a comment and requires
+      review by a moderator." with its report's reason under it are gone;
+      the "pending review" rows with the second and the third comment's text
+      and the "requires review" row with the third comment's report's
+      reason stay.
+    - **Control**: press the row with the third comment's report's reason:
+      the Comments page opens with the third comment's panel and the report
+      panel on top of it. <sup>s15</sup>
+
+16. **A reader of another journal** {OJS}
+
+    Given: an account registered as a Reader with a second journal of the
+    site and holding no role in this one, and the Journal Manager, of a
+    scratch journal with public comments on and a published article
+    carrying an approved comment by a Reader.
+
+    - **The landing page**: sign in as the account on this journal's Login
+      page and open the article's page: the version's part holds the comment
+      box and "Submit", and the approved comment's "…" offers "Report"
+      alone.
+    - **Writing**: type "A comment from another journal's reader." in the
+      box and press "Submit": the box empties and the comment appears at
+      the top of the version's comments with the notice "Your comment will
+      be visible when the editor approves it" above its date.
+    - **Reporting**: on the approved comment's "…" press "Report", type
+      "Reported by another journal's reader." in the box "Please tell us
+      why you want to report this comment" and press "Submit": the dialog
+      "Report Comment" closes.
+    - **The Comments page**: the Journal Manager: "Hidden/Needs Approval"
+      lists the new comment, its "User" the account's name; "Reported" lists
+      the approved comment, and its panel's "Reports" table holds one row,
+      "Reported By" the account's name and "Reason" "Reported by another
+      journal's reader.".
+    - **Control**: signed out, the article's page lists the approved comment
+      alone; the new comment is not shown. <sup>s16</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -855,18 +941,10 @@ Left out of the scenarios above, by reason:
   - the guard for A14 (issue report `docs/issues/U14-A14-refused-comment-report-loses-reason.md`): once fixed, a reader whose report is refused because the session ended keeps "Report Comment" open with the typed reason under the "Error" window, and a report on a comment hidden meanwhile drops the comment from the list. [report 2026-10-26]
   - the Comments page's browser tab reading "Comments | {journal}" on each of its lists and after a reload (Rule 10; A13) [report 2026-10-04]
   - the comment panel and the report panel for a writer and a reporter whose ORCID iD is not verified: the iD link's address is the bare iD (Fields, the comment panel; A6) [report 2026-10-04]
-  - a comment's deletion leaving the tasks of a report numbered like it, and of a comment numbered like one of its reports, anywhere on the site (Side effects; A11, retired) [upstream 2026-09-29]
-  - under a comment on the landing page, a writer with an unverified ORCID iD: the hollow icon after the name, a link named "ORCID iD" that opens the iD's ORCID page (Rule 6b; the landing-page half A6 used to carry) [upstream 2026-10-01]
-  - under a comment on the landing page, a writer with no ORCID iD and one with no affiliation: no icon after the name, no line below it (Rule 6b) [upstream 2026-10-01]
-  - the comment box left with text typed and not submitted: nothing asked, nothing posted, the box empty after a reload (Fields, the comment box) [upstream 2026-10-01]
-  - an account holding no role in the journal, registered with another journal of the site, writing a comment that waits for approval and filing a report the Comments page lists (Actors rows 2 and 3; A20, retired) [upstream 2026-10-21]
-  - a comment request made by hand in one journal naming another journal's published article, refused with nothing kept (Actors row 2; A21, retired) [upstream 2026-10-21]
-  - a moderator's comment task and report task pressed while public comments are off, landing on the access-denied page (Rules 2b, 16) [upstream 2026-10-21]
-  - with public comments off, the Comments page's address ending in "/" and carrying one more part, both landing on the access-denied page like the bare address (Rule 2b; A22, retired) [upstream 2026-10-22]
-  - the Comments page's address at the site, with no journal: the Login page for a visitor who is not signed in, the notice "No journal was found that matched your request." for the Site Administrator (Actors row 6; A23, retired) [upstream 2026-10-22]
 - **Rarely met**:
   - an Editor whose role does not permit settings changes, refused the "Comments" tab and still opening the Comments page {OJS OMP} (Actors rows 5 and 6; a preprint server has no second manager-level role to untick): unticking "Permit changes to Settings" on a role is a setup few journals make, not a state an editor meets in an ordinary week
   - a Site Administrator holding no manager role in the journal, with no task row in their Tasks panel (Actors row 7): the state needs the Site Administrator's manager role ended on their own edit page, a setup no journal makes in an ordinary week
+  - a comment request made by hand in one journal, which no screen sends, naming another journal's published article (Actors row 2): nobody meets it through the landing page, and the body states the offer, not the answer such a request gets
 - **Nothing new to test**:
   - "Items per page" at another value (Settings bullet 2): the same paging scenario 7 reads at 25
   - "Cancel" on the "Report Comment", "Delete Comment" and "Delete Report" dialogs (Rules 8, 9, 14, 15): the dialogs scenarios 3, 4, 9 and 10 open, left as they are
@@ -1430,7 +1508,8 @@ on two runs, where the sidebar link puts it at 0. Live-probed 2026-10-01
 and opened another page of the journal without pressing "Submit": no
 browser dialog; the browser's Back showed the article with the sentence
 still in the box; a reload showed the box empty, and the comment was not
-listed. An account holding no role in the journal: footnote f-a20.
+listed. An account holding no role in the journal: scenario 16 and
+footnote s16.
 
 <a id="fn-g"></a>
 **g — the "…" menu and reporting.** `PkpCommentsMessageActions` renders
@@ -1816,8 +1895,12 @@ leaves the box unticked; `users[]` takes `{username: 'admin', roles:
 the moderators' tasks like typed ones, and a batch seeded in one call
 shares a second and lists in no fixed order. Mailpit reads scope by
 throwaway recipient (scenarios.md "Mailpit"); its total never moves at
-the 500-message cap. The preamble itself describes how the scenarios are
-set up and names no screen.
+the 500-message cap. Where each scenario runs: scenarios 1 to 7 and 15 on
+a journal, a press and a preprint server, where on a press and a preprint
+server, which have nothing that writes a comment, the comments come from
+`userComments[]`; scenarios 8 to 13 and 16 on a journal, where the landing
+page is; scenario 14 on a press and a preprint server. The preamble itself
+describes how the scenarios are set up and names no screen.
 
 <a id="fn-s1"></a>
 **s1 — scenario 1.** A scratch context seeded `enablePublicComments: true`
@@ -1833,9 +1916,19 @@ read after that reload. The Comments page's address is
 lands on `…/user/authorizationDenied?message=user.authorization.accessDenied`,
 read by the address, the text "Access denied." and the absence of the
 "Comments" heading (footnote b), on the scratch journal and on the fresh
-one. Runs on the three apps; the landing-page bullets on OJS at
-`article/view/{id}`; after the switch-on a press and a preprint server
-read the comment's row on the Comments page, its "Status" "Approved".
+one. The second comment is a second `userComments[]` entry, `approved:
+true` with `reports: [{user, note}]` by a second throwaway `reader`; the
+two entries raise the manager's two "pending review" rows and one
+"requires review" row (footnote l). The address variants are
+`…/userComments/` and `…/userComments/x`, read like the bare address
+(footnote b). The tasks while off are pressed in the Tasks panel (the
+bell on any editorial page) after the untick: each lands on
+`…/user/authorizationDenied?message=user.authorization.accessDenied`
+(footnote b: the task's address is the page's with `?commentId=N`, and
+`&reportId=R` for the report). Runs on the three apps; the landing-page
+bullets on OJS at `article/view/{id}`; after the switch-on a press and a
+preprint server read the first comment's row on the Comments page, its
+"Status" "Approved", located by its "Comment" text.
 
 <a id="fn-s2"></a>
 **s2 — scenario 2.** Throwaway `users[]`: the pending comment's writer a
@@ -1843,8 +1936,16 @@ read the comment's row on the Comments page, its "Status" "Approved".
 footnote f-a6) and with `affiliation`: `users[]` takes the key, and the
 comment shows the affiliation without a visit to Profile › Contact (seen
 2026-10-01). Two more `reader`s: one writes the approved
-comment, the other the approved-and-reported one, reported by the first
-(a reporter must not be the writer). The three `userComments[]` entries
+comment, with `orcid` and `orcidIsVerified: false` (the iD alone, the
+hollow icon) and no `affiliation`; the other, with neither key (a
+throwaway account has no iD and no affiliation by default), writes the
+approved-and-reported one, reported by the first (a reporter must not be
+the writer). The install has no outside network, so the iD's link is read
+by its name ("ORCID iD"), its target (a new tab) and its address
+(`https://orcid.org/{iD}`), not followed (footnote e); the solid and the
+hollow icon are told apart as footnote e says, and a missing icon or
+affiliation line is read beside the verified writer's, which carries both
+(PRINCIPLES M4). The three `userComments[]` entries
 may go in one call: the bullets locate rows by their "User" or "Comment"
 cell, never by position (a batch shares one second and lists in no fixed
 order). A seeded approval's note names the seeding `admin`; the note the
@@ -1886,7 +1987,17 @@ email is one sent to the same recipient by the Users & Roles row's
 
 <a id="fn-s6"></a>
 **s6 — scenario 6.** Throwaway `sectionEditor`, `author` and `reader`
-(on OPS the Section Editor is the Moderator). The access-denied page is
+(on OPS the Section Editor is the Moderator); the Site Administrator is
+`admin`. The site's address is `/index.php/index/management/settings/userComments`:
+signed out it lands on `login?source=…`, and as `admin` on
+`…/user/authorizationDenied?message=user.authorization.noContext` (footnote
+b) on the three apps, and the notice is each app's own
+`user.authorization.noContext` string. Test run 2026-11-11 (scenario 6,
+Actors row 6), the three suites green: the Site Administrator read "No
+journal was found that matched your request." on OJS, "No press was found
+that matched your request." on OMP and "No server in context!" on OPS (the
+string in `ops/locale/en/locale.po`); signed out, the address landed
+on `…/index/en/login?source=…userComments` on the three. The access-denied page is
 `…/user/authorizationDenied?message=user.authorization.roleBasedAccessDenied`,
 answered with HTTP 200 (footnote m); signed out, the address answers the
 Login page with the address as `source`. A Reader's login lands on the
@@ -1910,7 +2021,11 @@ comment" carries the article's address as `source` and returns to
 box, never a scroll position. "Submit" grayed out is the button's
 disabled state, not a missing button. The formatting bullet's text is
 typed as written; bold and "plain" survive, the script does not
-(footnote f). The sidebar's count stays until the next page load.
+(footnote f). The sidebar's count stays until the next page load. The
+unsent text is left by opening the second article's `article/view/{id}`;
+"nothing asks" is read as no browser dialog raised before that page
+loads, and the comment not listed after the reload is read by its text
+(footnote f).
 
 <a id="fn-s9"></a>
 **s9 — scenario 9.** The reporter a `reader`, the writer a second `reader`
@@ -1966,6 +2081,33 @@ Comments page reads "No Items". The landing page is the published item's
 public page, reached from the press's catalog or the server's archive;
 its absence assertions pair with the positive control of the same
 scenario (PRINCIPLES M4). OMP and OPS only.
+
+<a id="fn-s15"></a>
+**s15 — scenario 15.** Readers A and B (`reader`) and the `manager`: the
+first comment A's, `approved: true` with `reports: [{user: B, note}]`; the
+second and the third B's, `approved: true`, the third with `reports:
+[{user: A, note}]`. Comment and report numbers are site-wide, each kind
+counting on its own, and the seed's answer returns them (`userComments[]`
+with `id` and `reports[]`, scenarios.md "The response"). No scenario key
+lines the numbers up; the tooling does it with filler comments and
+reports seeded on a second scratch context until the next report number
+is one above the next comment number, then seeds the scenario's three
+`userComments[]` in one call in the order third (with its report), first
+(with its report), second, so that the third comment's report takes the
+first comment's number and the first comment's report the second
+comment's; the test checks both pairs from the seed's answer before the
+deletion, since another test seeding at the same time moves the
+numbers. The rows are told apart by the text under them
+(footnote l). Three apps; a preprint server's scratch manager is the
+Preprint Server Manager.
+
+<a id="fn-s16"></a>
+**s16 — scenario 16.** The account is a throwaway `reader` of a second
+scratch context, named in that context's `users[]` alone, so it holds no
+role in the scenario's context; the writer of the approved comment a
+`reader` of the scenario's context, and the `manager`. The account signs
+in on the scenario's context's Login page. Its comment and its report are
+the screens' own, not seeded. OJS only, where the landing page is.
 
 <a id="fn-f-a1"></a>
 **f-a1 — A1.** `PkpCommentsNotificationMessageNeedsApproval.vue` shows the

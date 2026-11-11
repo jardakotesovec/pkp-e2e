@@ -3,27 +3,14 @@
  * @file playwright/tests/U14-reader-comments-and-moderation.spec.js
  *
  * Reader comments & moderation — OJS suite, one test per canonical
- * scenario the spec runs on OJS (S1–S7 common; S8–S13 {OJS}; S14 is a
- * press's and a preprint server's absence scenario and has no test here).
+ * scenario the spec runs on OJS (S1–S7 and S15 common; S8–S13 and S16
+ * {OJS}; S14 is a press's and a preprint server's absence scenario and has
+ * no test here).
  * Spec: docs/specs/U14-reader-comments-and-moderation.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓
- * (S2 asserts the writer's notice on the hidden comment, the scenario's
- * own sentence, and nothing about telling the two states apart), A2 ❓
- * (S5 asserts the "pending review" row staying after "Hide Comment", the
- * scenario's sentence), A3 ❓ (S9 asserts the dialog staying open on an
- * empty reason and "Report" offered again; no second report is filed),
- * A4 ❓ (S1 asserts the page refused by address while the setting is off),
- * A5 ❓ (S1 asserts the reload onto Appearance › Theme and no "Saved"),
- * A6 🐞 (the comment panel's unverified iD link is never opened; S2's iD
- * is verified), A15 ❓ (the landing page's hollow icon is not read),
- * A7 ❓ (the "…" button is reached as the article's only button; nothing
- * asserts its name), A8 ❓ (S3 asserts both numbers leaving the address on
- * the report panel's "Close"), A9 ❓, A10 🐞 (S12 and S13 assert the rows
- * staying blank, the scenario's sentence, never what pressing them does),
- * OMP1 and OPS1 (a press's and a preprint server's). The spec's Coverage
- * section records everything else left out.
+ * Deliberately NOT covered (register IDs): A1, A2, A3, A5, A6, A7, A8, A9,
+ * A10, A13, A14, A15, A16 (OMP1 and OPS1 are a press's and a preprint
+ * server's).
  *
  * Isolation: every test seeds its own scratch journal (or two) with
  * throwaway accounts through the scenario endpoint: the context
@@ -41,8 +28,14 @@
  * a short response wait (the app sends nothing on an empty reason). The
  * Comments tab's "Save" reloads the whole page: the test waits for the
  * reload, never for "Saved" (patterns.md pitfall 14). No hard-coded waits.
+ * S15's comment and report numbers are lined up by filler comments and
+ * reports on a second scratch journal (footnote s15) and checked from the
+ * seed's answer before anything is pressed; a parallel seed that moves the
+ * numbers in between costs a fresh attempt on a fresh journal.
  * Everything runs in the parallel `ojs` project; `page` is the signed-out
- * visitor's browser and every signed-in actor opens through `asUser`.
+ * visitor's browser and every signed-in actor opens through `asUser`, but
+ * S16's account, which signs in on the journal's Login page in a context
+ * of its own.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {
@@ -73,6 +66,8 @@ const {DecisionPage} = require('../pages/ReviewStagePages.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
 
 const TEST_ORCID = 'https://orcid.org/0000-0002-1825-0097';
+/** A second test iD, stored not verified (footnote s2). */
+const UNVERIFIED_ORCID = 'https://orcid.org/0000-0001-5109-3700';
 const DATE_TIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2} (AM|PM)$/;
 const TABS = ['All', 'Approved', 'Hidden/Needs Approval', 'Reported'];
 const VERSION_1 = 'Version of Record 1.0';
@@ -178,15 +173,20 @@ test.describe('reader comments & moderation', () => {
         test.slow();
         const tag = makeTag('s1', testInfo);
         const freshTag = makeTag('s1f', testInfo);
-        const {mg, au, ra} = await seedJournal(ojsApi, tag, ['mg', 'au', 'ra']);
+        const {mg, au, ra, rb} = await seedJournal(ojsApi, tag, ['mg', 'au', 'ra', 'rb']);
         // The fresh journal: never switched on, the same manager added to it.
         await seedJournal(ojsApi, freshTag, [], {comments: false, extraUsers: [{username: mg, roles: ['manager']}]});
         const commentText = `S1 approved comment ${tag}.`;
+        const reportedText = `S1 reported comment ${tag}.`;
+        const reason = `S1 report by Rob ${tag}.`;
         const article = await seedArticle(ojsApi, {
             tag,
             context: tag,
             author: au,
-            userComments: [{user: ra, text: commentText, approved: true}],
+            userComments: [
+                {user: ra, text: commentText, approved: true},
+                {user: ra, text: reportedText, approved: true, reports: [{user: rb, note: reason}]},
+            ],
         });
 
         const manager = await pageAs(asUser, mg);
@@ -229,6 +229,28 @@ test.describe('reader comments & moderation', () => {
         // access-denied page (A4's sentence).
         await comments.gotoRefused();
 
+        // The address ending in "/" or carrying one more part: the same page.
+        await comments.gotoRefused('/');
+        await comments.gotoRefused('/x');
+
+        // The tasks while off: the rows about each comment and the report
+        // stay; pressing the comment's row and the report's row lands on
+        // the access-denied page.
+        const tasks = new TasksPanel(manager);
+        await gotoEditorial(manager, tag);
+        await tasks.open();
+        await expect(tasks.rowsOpening(COMMENT_TASK)).toHaveCount(2);
+        await expect(tasks.rowsOpening(COMMENT_TASK).filter({hasText: commentText})).toHaveCount(1);
+        await expect(tasks.rowsOpening(COMMENT_TASK).filter({hasText: reportedText})).toHaveCount(1);
+        await expect(tasks.rowsOpening(REPORT_TASK)).toHaveCount(1);
+        await expect(tasks.rowsOpening(REPORT_TASK).filter({hasText: reason})).toHaveCount(1);
+        await tasks.openTask(tasks.row(commentText));
+        await comments.expectAccessDenied();
+        await gotoEditorial(manager, tag);
+        await tasks.open();
+        await tasks.openTask(tasks.rowsOpening(REPORT_TASK).filter({hasText: reason}));
+        await comments.expectAccessDenied();
+
         // Switching on again: the same reload; the menu entry and the blocks back.
         await settings.goto();
         await expect(settings.box()).not.toBeChecked();
@@ -238,9 +260,11 @@ test.describe('reader comments & moderation', () => {
         await landing.goto(article.submissionId);
         await expect(landing.mainHeading()).toHaveText('Comments on this publication');
         await expect(landing.sidebarHeading()).toHaveText('Comments');
-        await landing.expectAllComments(1);
-        await landing.expectPartCount(VERSION_1, 1);
+        await landing.expectAllComments(2);
+        await landing.expectPartCount(VERSION_1, 2);
+        await expect(landing.comments()).toHaveCount(2);
         await expect(landing.comment(commentText)).toHaveCount(1);
+        await expect(landing.comment(reportedText)).toHaveCount(1);
 
         // An unsaved tick: another tab of the same page keeps it, nothing asked;
         // leaving the page drops it.
@@ -272,20 +296,18 @@ test.describe('reader comments & moderation', () => {
         const tag = makeTag('s2', testInfo);
         const otherTag = makeTag('s2o', testInfo);
         const vr = `${tag}vr`;
-        const {mg, au, ra, rb} = await seedJournal(ojsApi, tag, ['mg', 'au', 'ra', 'rb'], {
-            extraUsers: [{...person(tag, 'vr', 'Vera', 'Verified', ['reader']), orcid: TEST_ORCID, orcidIsVerified: true}],
+        const ra = `${tag}ra`;
+        const affiliation = `Verified Institute ${tag}`;
+        // The pending comment's writer: a verified iD and an affiliation; the
+        // approved comment's: an iD not verified and no affiliation; the
+        // reported comment's (rb): neither (footnote s2).
+        const {mg, au, rb} = await seedJournal(ojsApi, tag, ['mg', 'au', 'rb'], {
+            extraUsers: [
+                {...person(tag, 'vr', 'Vera', 'Verified', ['reader']), orcid: TEST_ORCID, orcidIsVerified: true, affiliation},
+                {...person(tag, 'ra', 'Rosa', 'Reader', ['reader']), orcid: UNVERIFIED_ORCID, orcidIsVerified: false},
+            ],
         });
         await seedJournal(ojsApi, otherTag, ['au', 'ra'], {extraUsers: [{username: mg, roles: ['manager']}]});
-        const affiliation = `Verified Institute ${tag}`;
-
-        // The pending comment's writer sets an affiliation on Profile › Contact
-        // (the seed has no key; a comment shows what the profile holds at load).
-        const writer = await pageAs(asUser, vr);
-        const profile = new ProfilePage(writer, tag);
-        await profile.goto('contact');
-        await profile.country().selectOption({label: 'Canada'});
-        await profile.affiliation('en').fill(affiliation);
-        await profile.save();
 
         const pendingText = `S2 pending comment ${tag}.`;
         const approvedText = `S2 approved comment ${tag}.`;
@@ -405,8 +427,33 @@ test.describe('reader comments & moderation', () => {
         await expect(landing.orcidLink(shown)).toHaveAttribute('href', TEST_ORCID);
         await expect(landing.orcidLink(shown)).toHaveText('');
         await expect(landing.orcidIcon(shown)).toHaveCount(1);
+        await expect(landing.orcidIcon(shown, {verified: false})).toHaveCount(0);
         await expect(landing.affiliation(shown)).toHaveText(affiliation);
         await landing.expectAllComments(3);
+
+        // A writer whose iD is not verified: the hollow icon, a link named
+        // "ORCID iD" with no iD written out, opening the iD's page in a new
+        // tab (read by its target and address, not followed: footnote s2).
+        const unverified = landing.comment(approvedText);
+        await expect(unverified).toHaveCount(1);
+        await expect(landing.author(unverified)).toHaveText('Rosa Reader');
+        await expect(landing.orcidLink(unverified)).toHaveCount(1);
+        await expect(landing.orcidLink(unverified)).toHaveText('');
+        await expect(landing.orcidLink(unverified)).toHaveAttribute('href', UNVERIFIED_ORCID);
+        await expect(landing.orcidLink(unverified)).toHaveAttribute('target', '_blank');
+        await expect(landing.orcidIcon(unverified, {verified: false})).toHaveCount(1);
+        await expect(landing.orcidIcon(unverified)).toHaveCount(0);
+
+        // A writer with no iD, and writers with no affiliation: no icon after
+        // the reported comment's writer's name, no line below either name
+        // (the verified writer's icon and line above are the control).
+        const noOrcid = landing.comment(reportedText);
+        await expect(noOrcid).toHaveCount(1);
+        await expect(landing.author(noOrcid)).toHaveText('Rob Reporter');
+        await expect(landing.author(noOrcid).getByRole('link')).toHaveCount(0);
+        await expect(landing.author(noOrcid).locator('svg, img')).toHaveCount(0);
+        await expect(landing.affiliation(noOrcid)).toHaveCount(0);
+        await expect(landing.affiliation(unverified)).toHaveCount(0);
 
         // "Hide Comment" on the reported comment.
         await comments.openTab('All');
@@ -774,6 +821,18 @@ test.describe('reader comments & moderation', () => {
         await new LoginPage(page).expectForm();
         await expect(page).toHaveURL(/\/login\?source=.*userComments/);
 
+        // The address at the site, with no journal: signed out the Login page;
+        // the Site Administrator the notice that no journal matched.
+        const siteAddress = new CommentsPage(page, tag).siteLevelUrl();
+        await page.goto(siteAddress);
+        await new LoginPage(page).expectForm();
+        await expect(page).toHaveURL(/\/index\/([a-z]{2}(_[A-Z]{2})?\/)?login\?source=.*userComments/);
+        const admin = await pageAs(asUser, 'admin');
+        await admin.goto(siteAddress);
+        await expect(admin.getByText('No journal was found that matched your request.')).toBeVisible({timeout: 30_000});
+        await expect(admin).toHaveURL(/\/user\/authorizationDenied\?message=user\.authorization\.noContext/);
+        await expect(admin.getByRole('heading', {name: 'Comments', exact: true})).toHaveCount(0);
+
         // Control: the Journal Manager's menu holds Content › Comments and the address opens the page.
         const manager = await pageAs(asUser, mg);
         await gotoEditorial(manager, tag);
@@ -889,10 +948,17 @@ test.describe('reader comments & moderation', () => {
         await expect.poll(async () => (await landing.mainBlockPosition()).top).toBeLessThan(120);
         expect((await landing.mainBlockPosition()).top).toBeLessThan(before.top - 100);
 
-        // "Log in to comment": the Login page, then back at the comments with the box.
-        await landing.loginButton(region).click();
+        // "Log in to comment", either one: the sidebar's opens the Login page
+        // (left with the browser's Back), the main block's too; signed in
+        // there, back at the comments with the box.
         const login = new LoginPage(page);
-        await expect(page).toHaveURL(/\/login/);
+        await landing.sidebarLoginButton().click();
+        await expect(page).toHaveURL(new RegExp(`/${tag}/login\\?source=.*article(%2F|/)view(%2F|/)${article.submissionId}`));
+        await login.expectForm();
+        await page.goBack();
+        await expect(landing.loginButton(region)).toBeVisible({timeout: 30_000});
+        await landing.loginButton(region).click();
+        await expect(page).toHaveURL(new RegExp(`/${tag}/login\\?source=.*article(%2F|/)view(%2F|/)${article.submissionId}`));
         await login.expectForm();
         await login.signIn(ra, getPassword(ra));
         await expect(page).toHaveURL(new RegExp(`/article/view/${article.submissionId}#public-comments$`));
@@ -928,7 +994,14 @@ test.describe('reader comments & moderation', () => {
         expect(await landing.openMenu(approved)).toEqual(['Report']);
         await landing.closeMenu();
 
-        // Formatting: bold kept, the script gone, no message.
+        // Formatting: "bold plain", bold kept, the script gone, no pop-up
+        // (any browser dialog raised during the step is recorded) and no notice.
+        const popups = [];
+        const recordPopup = (dialog) => {
+            popups.push(`${dialog.type()}: ${dialog.message()}`);
+            dialog.dismiss().catch(() => {});
+        };
+        page.on('dialog', recordPopup);
         await landing.writeComment(formatted);
         const tagged = landing.comment('plain', region).filter({hasText: 'bold'});
         await expect(tagged).toHaveCount(1);
@@ -937,6 +1010,35 @@ test.describe('reader comments & moderation', () => {
         expect(await landing.body(tagged).innerHTML()).not.toContain('script');
         await expect(page.locator('[role="status"], [role="alert"]').filter({hasText: /\S/})).toHaveCount(0);
         await landing.expectPartCount(VERSION_1, 3);
+        page.off('dialog', recordPopup);
+        expect(popups, 'no pop-up while the formatted comment was submitted and shown').toEqual([]);
+
+        // Leaving with text typed: nothing asks on the way to the second
+        // article; Back shows the text still in the box; a reload empties it
+        // and lists no such comment (the reader's other comments the control).
+        const unsent = 'A comment left unsent.';
+        const asked = [];
+        const recordAsk = (dialog) => {
+            asked.push(`${dialog.type()}: ${dialog.message()}`);
+            dialog.dismiss().catch(() => {});
+        };
+        page.on('dialog', recordAsk);
+        await landing.typeInBox(unsent, region);
+        await landing.goto(secondArticle.submissionId);
+        await expect(page).toHaveURL(new RegExp(`/article/view/${secondArticle.submissionId}$`));
+        await expect(page.getByRole('heading', {name: secondArticle.title})).toBeVisible();
+        expect(asked, 'nothing asked about the typed text').toEqual([]);
+        await page.goBack();
+        await expect(page).toHaveURL(new RegExp(`/article/view/${article.submissionId}#public-comments$`));
+        await expect(landing.box(region)).toHaveValue(unsent, {timeout: 30_000});
+        await page.reload();
+        await expect(landing.box(region)).toBeVisible({timeout: 30_000});
+        await expect(landing.box(region)).toHaveValue('');
+        await expect(landing.comment(firstText, region)).toHaveCount(1);
+        await expect(landing.comment(unsent)).toHaveCount(0);
+        await landing.expectPartCount(VERSION_1, 3);
+        page.off('dialog', recordAsk);
+        expect(asked).toEqual([]);
 
         // The second Reader: the approved comment alone, own menu "Delete Comment".
         const second = await pageAs(asUser, rb);
@@ -1358,5 +1460,192 @@ test.describe('reader comments & moderation', () => {
         await manager.waitForURL(new RegExp(`/management/settings/userComments\\?commentId=${commentA}`), {timeout: 30_000, waitUntil: 'commit'});
         await expect(comments.commentPanel()).toBeVisible({timeout: 30_000});
         await expect(comments.commentPanel().getByText(textA)).toBeVisible();
+    });
+
+    test('S15: deleting a comment leaves the tasks of others numbered like it', async ({asUser, ojsApi}, testInfo) => {
+        test.slow();
+        // The filler journal: its own readers and article (footnote s15).
+        const fillTag = makeTag('s15f', testInfo);
+        const filler = await seedJournal(ojsApi, fillTag, ['au', 'ra', 'rb']);
+        const fillerNote = {user: filler.rb, note: `S15 filler report ${fillTag}.`};
+        let fillerArticles = 0;
+        const seedFiller = (userComments) =>
+            seedArticle(ojsApi, {tag: fillTag, context: fillTag, author: filler.au, suffix: `n${++fillerArticles}`, userComments});
+
+        /**
+         * One attempt: a fresh scenario journal, a filler comment with one
+         * report to read where the two numberings stand, the filler that
+         * puts the next report number one above the next comment number,
+         * then the three comments in one call, in the order third (with its
+         * report), first (with its report), second. Returns the scenario
+         * when the seed's answer shows both pairs lined up, null otherwise.
+         */
+        const attempt = async (n) => {
+            const tag = makeTag(`s15${n}`, testInfo);
+            const names = await seedJournal(ojsApi, tag, ['mg', 'au', 'ra', 'rb']);
+            const texts = {
+                first: `S15 comment one ${tag}.`,
+                second: `S15 comment two ${tag}.`,
+                third: `S15 comment three ${tag}.`,
+                firstReason: `S15 reason against one ${tag}.`,
+                thirdReason: `S15 reason against three ${tag}.`,
+            };
+            const probe = await seedFiller([{user: filler.ra, text: `S15 filler ${fillTag}.`, approved: true, reports: [fillerNote]}]);
+            const gap = probe.userComments[0].reports[0] - probe.userComments[0].id;
+            if (gap < 1) {
+                const reports = Array.from({length: 2 - gap}, () => fillerNote);
+                await seedFiller([{user: filler.ra, text: `S15 filler ${fillTag}.`, approved: true, reports}]);
+            } else if (gap > 1) {
+                await seedFiller(Array.from({length: gap - 1}, () => ({user: filler.ra, text: `S15 filler ${fillTag}.`})));
+            }
+            const article = await seedArticle(ojsApi, {
+                tag,
+                context: tag,
+                author: names.au,
+                userComments: [
+                    {user: names.rb, text: texts.third, approved: true, reports: [{user: names.ra, note: texts.thirdReason}]},
+                    {user: names.ra, text: texts.first, approved: true, reports: [{user: names.rb, note: texts.firstReason}]},
+                    {user: names.rb, text: texts.second, approved: true},
+                ],
+            });
+            const [third, first, second] = article.userComments;
+            const numbers = {first: first.id, firstReport: first.reports[0], second: second.id, third: third.id, thirdReport: third.reports[0]};
+            testInfo.annotations.push({type: 'S15 numbers', description: `attempt ${n}: ${JSON.stringify(numbers)}`});
+            return third.reports[0] === first.id && first.reports[0] === second.id ? {tag, names, texts, numbers} : null;
+        };
+        let scenario = null;
+        for (let n = 1; n <= 3 && !scenario; n++) {
+            scenario = await attempt(n);
+        }
+        expect(scenario, "the third comment's report numbered like the first comment, the first's report like the second").not.toBeNull();
+        const {tag, names, texts, numbers} = scenario;
+
+        // The given: a row about each comment and each report in the Journal Manager's panel.
+        const manager = await pageAs(asUser, names.mg);
+        const tasks = new TasksPanel(manager);
+        await gotoEditorial(manager, tag);
+        await tasks.open();
+        await expect(tasks.rowsOpening(COMMENT_TASK)).toHaveCount(3);
+        await expect(tasks.rowsOpening(REPORT_TASK)).toHaveCount(2);
+        for (const text of [texts.first, texts.second, texts.third, texts.firstReason, texts.thirdReason]) {
+            await expect(tasks.row(text)).toHaveCount(1);
+        }
+        await tasks.close();
+
+        // "Delete Comment" on the first comment's row: the dialog, the notice, the row gone.
+        const comments = new CommentsPage(manager, tag);
+        await comments.goto();
+        await expect(comments.rows()).toHaveCount(3);
+        await comments.deleteFromRow(comments.row(texts.first));
+        await expect(comments.row(texts.first)).toHaveCount(0);
+        await expect(comments.rows()).toHaveCount(2);
+
+        // The Tasks panel: the first comment's row and its report's row gone;
+        // the second's and the third's rows and the third's report's row stay.
+        await gotoEditorial(manager, tag);
+        await tasks.open();
+        await expect(tasks.rowsOpening(COMMENT_TASK).filter({hasText: texts.second})).toHaveCount(1);
+        await expect(tasks.rowsOpening(COMMENT_TASK).filter({hasText: texts.third})).toHaveCount(1);
+        await expect(tasks.rowsOpening(REPORT_TASK).filter({hasText: texts.thirdReason})).toHaveCount(1);
+        await expect(tasks.row(texts.first)).toHaveCount(0);
+        await expect(tasks.row(texts.firstReason)).toHaveCount(0);
+        await expect(tasks.rowsOpening(COMMENT_TASK)).toHaveCount(2);
+        await expect(tasks.rowsOpening(REPORT_TASK)).toHaveCount(1);
+
+        // Control: the third comment's report's row opens the Comments page
+        // with the comment panel and the report panel on top of it.
+        await tasks.openTask(tasks.rowsOpening(REPORT_TASK).filter({hasText: texts.thirdReason}));
+        await manager.waitForURL(/\/management\/settings\/userComments\?/, {timeout: 30_000, waitUntil: 'commit'});
+        await expect(manager).toHaveURL(new RegExp(`reportId=${numbers.thirdReport}(&|$)`));
+        await expect(manager).toHaveURL(new RegExp(`commentId=${numbers.third}(&|$)`));
+        await expect(comments.reportPanel()).toBeVisible({timeout: 30_000});
+        await expect(comments.reportPanel().getByText(texts.thirdReason)).toBeVisible();
+        await expect(comments.commentPanelBehind()).toHaveCount(1);
+        await expect(comments.commentPanelBehind()).toContainText(texts.third);
+    });
+
+    test('S16: a reader of another journal', async ({page, browser, asUser, ojsApi}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s16', testInfo);
+        const otherTag = makeTag('s16o', testInfo);
+        const {mg, au, ra} = await seedJournal(ojsApi, tag, ['mg', 'au', 'ra']);
+        // The account: a Reader of the second journal alone (footnote s16).
+        const outsider = person(otherTag, 'ox', 'Olga', 'Outsider', ['reader']);
+        await seedJournal(ojsApi, otherTag, [], {comments: false, extraUsers: [outsider]});
+        const approvedText = `S16 approved by Rosa ${tag}.`;
+        const newText = "A comment from another journal's reader.";
+        const reason = "Reported by another journal's reader.";
+        const article = await seedArticle(ojsApi, {
+            tag,
+            context: tag,
+            author: au,
+            userComments: [{user: ra, text: approvedText, approved: true}],
+        });
+
+        // The landing page: signed in on this journal's Login page, the box,
+        // "Submit", and "Report" alone on the approved comment.
+        const own = await browser.newContext({storageState: {cookies: [], origins: []}});
+        try {
+            const reader = await own.newPage();
+            const login = new LoginPage(reader);
+            await login.gotoContext(tag);
+            await login.expectForm();
+            await login.signIn(outsider.username, getPassword(outsider.username));
+            const landing = new ArticleCommentsPage(reader, tag);
+            await landing.goto(article.submissionId);
+            const region = landing.partRegion(VERSION_1);
+            await expect(region).toBeVisible();
+            await expect(landing.box(region)).toBeVisible();
+            await expect(landing.submitButton(region)).toBeVisible();
+            await expect(landing.loginButton(region)).toHaveCount(0);
+            const approved = landing.comment(approvedText, region);
+            await expect(approved).toHaveCount(1);
+            expect(await landing.openMenu(approved)).toEqual(['Report']);
+            await landing.closeMenu();
+
+            // Writing: the box empties, the comment tops the list with the
+            // notice above its date.
+            await landing.writeComment(newText);
+            await expect(landing.box(region)).toHaveValue('');
+            const written = landing.comment(newText, region);
+            await expect(written).toHaveCount(1);
+            await expect(landing.comments(region).first()).toHaveText(new RegExp(newText.replace('.', '\\.')));
+            await expect(landing.pendingNotice(written)).toHaveText(PENDING_NOTICE);
+            expect(await landing.noticeBeforeDate(written), 'the notice above the date').toBe(true);
+            await landing.expectPartCount(VERSION_1, 2);
+
+            // Reporting: the dialog's box, "Submit", the dialog closed.
+            const dialog = await landing.openReportDialog(approved);
+            await expect(dialog.getByText('Please tell us why you want to report this comment')).toBeVisible();
+            await landing.reasonBox(dialog).fill(reason);
+            await landing.submitReport(dialog);
+            await expect(landing.reportDialog()).toHaveCount(0);
+        } finally {
+            await own.close();
+        }
+
+        // The Comments page: the new comment on "Hidden/Needs Approval" under
+        // the account's name; the approved one on "Reported" with its report.
+        const manager = await pageAs(asUser, mg);
+        const comments = new CommentsPage(manager, tag);
+        await comments.goto();
+        await comments.openTab('Hidden/Needs Approval');
+        await expect(comments.rows()).toHaveCount(1);
+        await expect(comments.row(newText)).toHaveCount(1);
+        await expect(comments.userCell(comments.row(newText))).toHaveText('Olga Outsider');
+        await comments.openTab('Reported');
+        await expect(comments.rows()).toHaveCount(1);
+        await expect(comments.row(approvedText)).toHaveCount(1);
+        await comments.viewComment(comments.row(approvedText));
+        await expect(comments.reportRows()).toHaveCount(1);
+        expect((await comments.cells(comments.reportRows().first())).slice(0, 2)).toEqual(['Olga Outsider', reason]);
+
+        // Control: signed out, the approved comment alone.
+        const visitor = new ArticleCommentsPage(page, tag);
+        await visitor.goto(article.submissionId);
+        await expect(visitor.comment(approvedText)).toHaveCount(1);
+        await expect(visitor.comments()).toHaveCount(1);
+        await expect(visitor.comment(newText)).toHaveCount(0);
+        await visitor.expectPartCount(VERSION_1, 1);
     });
 });

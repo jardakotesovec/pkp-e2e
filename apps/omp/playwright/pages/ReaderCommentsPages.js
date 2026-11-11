@@ -107,6 +107,18 @@ exports.NO_REPORTS = NO_REPORTS;
 exports.ACCESS_DENIED = ACCESS_DENIED;
 exports.ENABLE_BOX = ENABLE_BOX;
 
+/**
+ * The Tasks panel's row whose sentence is `sentence` and whose text under
+ * it (the comment's text or the report's reason, Side effects) reads
+ * `under` whole. `tasks` is the shared `TasksPanel`, open.
+ */
+function taskRow(tasks, sentence, under) {
+    return tasks
+        .rowsOpening(sentence)
+        .filter({has: tasks.page.locator('.task .details .submission', {hasText: exact(under)})});
+}
+exports.taskRow = taskRow;
+
 /** The notice at the top right holding `text` (the element also holds its "×"). */
 function notice(page, text) {
     return page.locator('.app__notifications').getByText(text).first();
@@ -340,12 +352,26 @@ exports.CommentsPage = class CommentsPage extends BasePage {
 
     /**
      * Open the page by its address while public comments are off: the app
-     * refuses it and lands on the access-denied page (Rule 2b).
+     * refuses it and lands on the access-denied page (Rule 2b). `suffix`
+     * reads the address variants ("/" at the end, "/x" one more part).
      */
-    async gotoRefused() {
-        await this.page.goto(this.url());
-        await expect(this.page).toHaveURL(/\/user\/authorizationDenied/, {timeout: T});
-        await expect(this.page.getByText('Access denied.')).toBeVisible();
+    async gotoRefused(suffix = '') {
+        await this.page.goto(this.url(suffix));
+        await this.expectRefused();
+    }
+
+    /**
+     * The browser is on the access-denied page that refuses the Comments
+     * page while public comments are off (Rule 2b; footnote b:
+     * `…/user/authorizationDenied?message=user.authorization.accessDenied`),
+     * reading "Access denied.", and no page headed "Comments". For a
+     * navigation the caller started (a task row pressed, Rule 16).
+     */
+    async expectRefused() {
+        await expect(this.page).toHaveURL(/\/user\/authorizationDenied\?message=user\.authorization\.accessDenied/, {
+            timeout: T,
+        });
+        await expect(this.page.getByText('Access denied.')).toBeVisible({timeout: T});
         await expect(this.heading).toHaveCount(0);
     }
 

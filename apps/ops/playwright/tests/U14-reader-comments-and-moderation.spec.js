@@ -3,7 +3,7 @@
  * @file playwright/tests/U14-reader-comments-and-moderation.spec.js
  *
  * Reader comments & moderation — OPS suite: one test per canonical
- * scenario the spec runs on a preprint server (S1–S7 common, S14
+ * scenario the spec runs on a preprint server (S1–S7 and S15 common, S14
  * {OMP OPS}), in the server's own vocabulary: Preprint Server Manager,
  * Moderator (the OPS `sectionEditor`), preprint, the preprint's landing
  * page (`preprint/view/{id}`), and a "Content" group that exists only
@@ -15,44 +15,37 @@
  * `editor` user-group key (users.md), so where a common scenario names an
  * Editor the manager is the only moderator level here (footnotes s0, s5):
  * S5 reads the manager's panel and the Moderator's as the control, and
- * has no "Editor's Tasks panel" bullet ({OJS OMP}). S14 reads the
- * preprint's landing page for the absence of any comments block, with the
- * "Comments" settings tab and the Comments page reading "No Items" as the
- * controls (multi-app rule 3).
+ * has no "Editor's Tasks panel" bullet ({OJS OMP}). S6 reads the
+ * site-level address's notice in the server's own wording, "No server in
+ * context!". S14 reads the preprint's landing page for the absence of
+ * any comments block, with the "Comments" settings tab and the Comments
+ * page reading "No Items" as the controls (multi-app rule 3).
  * Spec: docs/specs/U14-reader-comments-and-moderation.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A6 🐞
- * (no unverified iD is seeded; S2's writer carries a verified one), A10 🐞
- * (no submission or account is deleted here), A1 ❓ and A3 ❓ (landing
- * page, OJS), A7 ❓, A9 ❓ and OMP1 ❓ (a Site Administrator holding no
- * manager role is never driven), OPS1 ❓ (the same: never driven). Where
- * a scenario marks a ❓ the test asserts that bullet's own sentence and
- * nothing of the register entry beyond it: S1 waits for the Comments
- * tab's reload onto Appearance › Theme and asserts nothing about a
- * "Saved" status (A5); S1 opens the Comments page by address with the
- * setting off and reads the refusal (A4); S3 reads the address
- * after the report panel's "Close" with neither number (A8); S5 reads
- * the "pending review" row still in the manager's panel after "Hide
- * Comment" (A2). The spec's Coverage section records everything else
- * left out.
+ * Not covered, by register ID: A6 🐞, A10 🐞, A13 🐞, A14 🐞, A1 ❓, A3 ❓,
+ * A7 ❓, A9 ❓, A15 ❓, A16 ❓, OMP1 ❓, OPS1 ❓. A2 ❓, A5 ❓ and A8 ❓ are read
+ * only as their scenarios' own sentences (S5, S1, S3).
  *
  * Seeding: scenario endpoints only. Every test seeds its own scratch
  * preprint server (the context passthrough `enablePublicComments: true`,
  * throwaway accounts whose addresses name app + test,
- * u14s<n>opsw<i>…@mail.test) and a posted preprint carrying its comments
- * and reports through `userComments[]` (footnotes s0–s7, s14).
- * publicknowledge and the seeded users are never changed (A1, A7). A
- * batch seeded in one call shares a second and lists in no fixed order,
- * so rows are located by their "Comment" cell, never by position (M5).
- * S2's affiliation has no seed key and is set on the writer's Profile ›
- * Contact (Country first). Every absence is a settled read paired with a
- * positive control taken the same way (M4, M6): S5's mailbox silence is
- * an exact count of one after a control email the test sends to the same
- * address from Users & Roles › the row's "Email" (A8), its Moderator's
- * panel is read after the manager's showed the effect; S1's and S14's
- * missing "Content" group is read beside the "Statistics" group the same
- * menu keeps; S14's absences sit beside the page's own headings and the
+ * u14s<n>opsw<i>…@mail.test, S2's ORCID iDs and affiliation through the
+ * `users[]` keys) and a posted preprint carrying its comments and
+ * reports through `userComments[]` (footnotes s0–s7, s14, s15). S15
+ * lines the site-wide comment and report numbers up with filler comments
+ * and reports on a second scratch server and checks both pairs from the
+ * seed's answer (`seedNumberedLikeOthers`). publicknowledge and the
+ * seeded users are never changed (A1, A7); `admin` is only signed in
+ * (S6). A batch seeded in one call shares a second and lists in no fixed
+ * order, so rows are located by their "Comment" cell or the text under a
+ * task, never by position (M5). Every absence is a settled read paired
+ * with a positive control taken the same way (M4, M6): S5's mailbox
+ * silence is an exact count of one after a control email the test sends
+ * to the same address from Users & Roles › the row's "Email" (A8), its
+ * Moderator's panel is read after the manager's showed the effect; S15's
+ * gone task rows beside the rows that stay; S1's and S14's missing
+ * "Content" group is read beside the "Statistics" group the same menu
+ * keeps; S14's absences sit beside the page's own headings and the
  * signed-in name. Waits are event-based (the approval, delete and list
  * responses, the settings reload, web-first assertions) — no hard-coded
  * sleeps. Everything runs in the parallel `ops` project.
@@ -67,6 +60,7 @@ const {
     REPORT_TASK,
     NOTICE,
     ACCESS_DENIED,
+    SiteCommentsAddress,
     notice,
 } = require('../pages/ReaderCommentsPages.js');
 const {TasksPanel} = require('../../../../shared/playwright/pages/NotificationsPages.js');
@@ -84,6 +78,7 @@ const DELETE_COMMENT_TEXT = 'Are you sure you want to delete this comment? This 
 const DELETE_REPORT_TEXT = 'Are you sure you want to delete this report? This action cannot be undone.';
 const NOT_FOUND = 'The requested resource was not found.';
 const VERIFIED_ORCID = 'https://orcid.org/0000-0002-1825-0097';
+const UNVERIFIED_ORCID = 'https://orcid.org/0000-0001-5109-3700';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -224,18 +219,87 @@ async function sendControlEmail(page, pkpMail, contextPath, {username, email, su
     await pkpMail.find({to: email, subject, timeoutMs: 30_000});
 }
 
+/**
+ * Scenario 15's numbering (footnote s15): comment and report numbers are
+ * site-wide, each kind counting on its own, and no scenario key lines
+ * them up. Filler comments and reports on a second scratch server move
+ * the two counters until the next report number is one above the next
+ * comment number; then the scenario's three comments go in one call in
+ * the order third (with its report), first (with its report), second, so
+ * the third comment's report takes the first comment's number and the
+ * first comment's report the second comment's. Another test seeding at
+ * the same time moves the numbers, so both pairs are checked from the
+ * seed's answer, and a miss starts over on a fresh scenario server.
+ * Returns that server's tag and cast and the three comments' answers.
+ */
+async function seedNumberedLikeOthers(opsApi, tag, {texts, notes}) {
+    const fillerTag = `${tag}f`;
+    const filler = cast(fillerTag, {readers: 2});
+    const [fa, fb] = filler.readers;
+    await createServer(opsApi, fillerTag, filler);
+    let call = 0;
+    const fill = (userComments) => opsApi.createSubmission({
+        tag: `${fillerTag}s${++call}`,
+        context: fillerTag,
+        submitter: filler.author.username,
+        published: true,
+        title: `Filler ${fillerTag} ${call}`,
+        userComments,
+    });
+    for (let attempt = 1; attempt <= 4; attempt++) {
+        const serverTag = `${tag}t${attempt}`;
+        const people = cast(serverTag, {readers: 2});
+        const [a, b] = people.readers;
+        await createServer(opsApi, serverTag, people);
+        // Read the counters: one filler comment with one report.
+        const probe = await fill([{user: fa.username, text: `Filler ${fillerTag}.`, approved: true, reports: [{user: fb.username, note: `Filler ${fillerTag}.`}]}]);
+        const gap = probe.userComments[0].reports[0] - probe.userComments[0].id;
+        if (gap < 1) {
+            // One comment with 2 - gap reports: the report counter gains on the comment counter.
+            await fill([{
+                user: fa.username,
+                text: `Filler ${fillerTag}.`,
+                approved: true,
+                reports: Array.from({length: 2 - gap}, () => ({user: fb.username, note: `Filler ${fillerTag}.`})),
+            }]);
+        } else if (gap > 1) {
+            // gap - 1 comments without reports: the comment counter catches up.
+            await fill(Array.from({length: gap - 1}, () => ({user: fa.username, text: `Filler ${fillerTag}.`, approved: true})));
+        }
+        const seeded = await postPreprint(opsApi, serverTag, people, {
+            title: `Preprint ${serverTag}`,
+            userComments: [
+                {user: b.username, text: texts.third, approved: true, reports: [{user: a.username, note: notes.third}]},
+                {user: a.username, text: texts.first, approved: true, reports: [{user: b.username, note: notes.first}]},
+                {user: b.username, text: texts.second, approved: true},
+            ],
+        });
+        const [third, first, second] = seeded.userComments;
+        if (third.reports[0] === first.id && first.reports[0] === second.id) {
+            return {serverTag, people, first, second, third};
+        }
+    }
+    throw new Error('S15: the comment and report numbers would not line up in four attempts (footnote s15)');
+}
+
 test.describe('Reader comments & moderation (U14)', () => {
     test('S1: switching public comments on and off', {tag: ['@smoke']}, async ({asUser, opsApi}, testInfo) => {
         test.setTimeout(300_000);
         const tag = makeTag('s1', testInfo);
-        const people = cast(tag, {readers: 1});
-        const [reader] = people.readers;
+        const people = cast(tag, {readers: 2});
+        const [reader, reporter] = people.readers;
         const title = `Preprint ${tag}`;
         const text = `An approved comment on ${tag}.`;
+        const reportedText = `A reported comment on ${tag}.`;
+        const note = `Reported on ${tag}.`;
         await createServer(opsApi, tag, people);
+        // The second approved comment, reported by a second Reader (footnote s1).
         const {submissionId} = await postPreprint(opsApi, tag, people, {
             title,
-            userComments: [{user: reader.username, text, approved: true}],
+            userComments: [
+                {user: reader.username, text, approved: true},
+                {user: reader.username, text: reportedText, approved: true, reports: [{user: reporter.username, note}]},
+            ],
         });
         // The fresh server of the control: no `enablePublicComments`, no comments.
         const freshTag = `${tag}b`;
@@ -276,6 +340,25 @@ test.describe('Reader comments & moderation (U14)', () => {
         // The page by address: refused while the setting is off, onto the
         // access-denied page (the scenario's own sentence; A4).
         await comments.gotoRefused();
+        // The address ending in "/" or carrying one more part: the same page.
+        await comments.gotoRefused('/');
+        await comments.gotoRefused('/x');
+
+        // The tasks while off: both "pending review" rows and the
+        // "requires review" row are still in the Tasks panel; the first
+        // comment's row and the report's row each land on the
+        // access-denied page.
+        let tasks = await openTasks(page, tag);
+        await expect(tasks.rowsOpening(COMMENT_TASK)).toHaveCount(2);
+        await expect(tasks.rowsOpening(COMMENT_TASK).filter({hasText: text})).toHaveCount(1);
+        await expect(tasks.rowsOpening(COMMENT_TASK).filter({hasText: reportedText})).toHaveCount(1);
+        await expect(tasks.rowsOpening(REPORT_TASK)).toHaveCount(1);
+        await expect(tasks.title(tasks.rowsOpening(REPORT_TASK))).toHaveText(note);
+        await tasks.openTask(tasks.rowsOpening(COMMENT_TASK).filter({hasText: text}));
+        await comments.expectRefused();
+        tasks = await openTasks(page, tag);
+        await tasks.openTask(tasks.rowsOpening(REPORT_TASK));
+        await comments.expectRefused();
 
         // Switching on again: the same reload; the "Content" group is back
         // with "Comments" as its only entry.
@@ -288,7 +371,7 @@ test.describe('Reader comments & moderation (U14)', () => {
         await openDashboard(page, tag);
         await expect(menu.groupHeader('Content')).toHaveCount(1);
         expect(await menu.contentEntries()).toEqual(['Comments']);
-        // The comment was kept while the setting was off: the page lists it again.
+        // The comments were kept while the setting was off: the page lists the first again.
         await comments.goto();
         await expect(comments.row(text)).toHaveCount(1);
         await expect(comments.status(comments.row(text))).toHaveText('Approved');
@@ -339,12 +422,19 @@ test.describe('Reader comments & moderation (U14)', () => {
         writer.familyName = 'Verified';
         writer.orcid = VERIFIED_ORCID;
         writer.orcidIsVerified = true;
+        // The approved comment's writer: an iD that is not verified, no
+        // affiliation; the reported comment's writer neither (footnote
+        // s2). Only the landing-page bullets ({OJS}) read them.
+        second.orcid = UNVERIFIED_ORCID;
+        second.orcidIsVerified = false;
         const title = `Preprint ${tag}`;
         const pendingText = `A pending comment on ${tag}.`;
         const approvedText = `An approved comment on ${tag}.`;
         const reportedText = `A reported comment on ${tag}.`;
         const reportNote = `Reported on ${tag}.`;
         const affiliation = `Verified Institute ${tag}`;
+        // The writer's affiliation is the `users[]` key (footnote s2).
+        writer.affiliation = affiliation;
         await createServer(opsApi, tag, people);
         // The second server on the site, with a comment of its own.
         const otherTag = `${tag}b`;
@@ -371,15 +461,6 @@ test.describe('Reader comments & moderation (U14)', () => {
             }),
         ]);
         const pendingId = userComments[0].id;
-
-        // The writer's affiliation: Profile › Contact (Country first, then the field).
-        const writerPage = await (await asUser(writer.username)).newPage();
-        const profile = new ProfilePage(writerPage, tag);
-        await profile.goto('contact');
-        await profile.country().selectOption({label: 'Canada'});
-        await profile.affiliation('en').fill(affiliation);
-        await profile.save();
-        await writerPage.close();
 
         const page = await (await asUser(people.manager.username)).newPage();
         const comments = new CommentsPage(page, tag);
@@ -869,7 +950,20 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(anonPage).toHaveURL(/\/login\?source=.*userComments/, {timeout: 30_000});
         await expect(anonPage.locator('form#login')).toBeVisible();
         await expect(anonPage.getByText(ACCESS_DENIED)).toHaveCount(0);
+
+        // The address at the site, with no preprint server: signed out the
+        // Login page; as the Site Administrator the no-context notice, in
+        // the server's own wording "No server in context!" (OJS: "No
+        // journal was found that matched your request."; footnote s6).
+        const siteAnon = new SiteCommentsAddress(anonPage);
+        await siteAnon.goto();
+        await siteAnon.expectLogin();
         await anon.close();
+        const adminPage = await (await asUser('admin')).newPage();
+        const siteAdmin = new SiteCommentsAddress(adminPage);
+        await siteAdmin.goto();
+        await siteAdmin.expectNoContext();
+        await expect(adminPage.getByText(ACCESS_DENIED)).toHaveCount(0);
 
         // Control: the Preprint Server Manager's side menu holds Content ›
         // Comments, and the address opens the page headed "Comments".
@@ -1017,5 +1111,75 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(book.mainBlock()).toHaveCount(0);
         await expect(book.loginToComment()).toHaveCount(0);
         await anon.close();
+    });
+
+    test('S15: deleting a comment leaves the tasks of others numbered like it', async ({asUser, opsApi}, testInfo) => {
+        test.setTimeout(240_000);
+        const tag = makeTag('s15', testInfo);
+        const texts = {
+            first: `The first comment on ${tag}.`,
+            second: `The second comment on ${tag}.`,
+            third: `The third comment on ${tag}.`,
+        };
+        const notes = {
+            first: `A report on the first comment, ${tag}.`,
+            third: `A report on the third comment, ${tag}.`,
+        };
+        // The second comment carries the first comment's report's number,
+        // the third comment's report the first comment's (footnote s15).
+        const {serverTag, people, first, second, third} = await seedNumberedLikeOthers(opsApi, tag, {texts, notes});
+        expect(first.reports[0], "the first comment's report is numbered like the second comment").toBe(second.id);
+        expect(third.reports[0], "the third comment's report is numbered like the first comment").toBe(first.id);
+
+        const page = await (await asUser(people.manager.username)).newPage();
+        const comments = new CommentsPage(page, serverTag);
+        const commentRow = (tasks, text) => tasks.rowsOpening(COMMENT_TASK).filter({hasText: text});
+        const reportRow = (tasks, note) => tasks.rowsOpening(REPORT_TASK).filter({hasText: note});
+
+        // The Given: a row about each comment and each report in the
+        // Preprint Server Manager's Tasks panel.
+        let tasks = await openTasks(page, serverTag);
+        await expect(tasks.rowsOpening(COMMENT_TASK)).toHaveCount(3);
+        for (const text of Object.values(texts)) {
+            await expect(commentRow(tasks, text)).toHaveCount(1);
+        }
+        await expect(tasks.rowsOpening(REPORT_TASK)).toHaveCount(2);
+        await expect(reportRow(tasks, notes.first)).toHaveCount(1);
+        await expect(reportRow(tasks, notes.third)).toHaveCount(1);
+        await tasks.close();
+
+        // "Delete Comment" on the first comment's row: the notice, the table without the row.
+        await comments.goto();
+        await expect(comments.rows()).toHaveCount(3);
+        await comments.deleteCommentFromRow(comments.row(texts.first));
+        await expect(comments.confirmDialog('Delete Comment')).toBeVisible();
+        await comments.confirmDeleteComment();
+        await expect(notice(page, NOTICE.deleted)).toBeVisible();
+        await expect(comments.row(texts.first)).toHaveCount(0);
+        await expect(comments.rows()).toHaveCount(2);
+        await expect(comments.row(texts.second)).toHaveCount(1);
+        await expect(comments.row(texts.third)).toHaveCount(1);
+
+        // The Tasks panel: the first comment's row and its report's row
+        // are gone; the second's and the third's "pending review" rows and
+        // the third's "requires review" row stay.
+        tasks = await openTasks(page, serverTag);
+        await expect(tasks.rowsOpening(COMMENT_TASK)).toHaveCount(2);
+        await expect(commentRow(tasks, texts.first)).toHaveCount(0);
+        await expect(commentRow(tasks, texts.second)).toHaveCount(1);
+        await expect(commentRow(tasks, texts.third)).toHaveCount(1);
+        await expect(tasks.rowsOpening(REPORT_TASK)).toHaveCount(1);
+        await expect(reportRow(tasks, notes.first)).toHaveCount(0);
+        await expect(reportRow(tasks, notes.third)).toHaveCount(1);
+
+        // Control: the third comment's report's row opens the Comments page
+        // with the third comment's panel and the report panel on top of it.
+        await tasks.openTask(reportRow(tasks, notes.third));
+        await page.waitForURL(/userComments/, {waitUntil: 'commit', timeout: 30_000});
+        await expect(comments.reportPanel()).toBeVisible({timeout: 30_000});
+        await expect(comments.visibleDialogs()).toHaveCount(2);
+        await expect(page).toHaveURL(new RegExp(`commentId=${third.id}\\b`));
+        await expect(page).toHaveURL(new RegExp(`reportId=${third.reports[0]}\\b`));
+        await expect(comments.reportPanel().getByText(notes.third)).toBeVisible();
     });
 });

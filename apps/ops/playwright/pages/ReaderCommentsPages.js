@@ -344,11 +344,21 @@ exports.CommentsPage = class CommentsPage extends BasePage {
 
     /**
      * Open the page by its address while public comments are off: the app
-     * refuses it and lands on the access-denied page (Rule 2b).
+     * refuses it and lands on the access-denied page (Rule 2b). `suffix`
+     * is the address variant ("/", "/x"; footnote s1).
      */
-    async gotoRefused() {
-        await this.page.goto(this.url());
-        await expect(this.page).toHaveURL(/\/user\/authorizationDenied/, {timeout: T});
+    async gotoRefused(suffix = '') {
+        await this.page.goto(this.url(suffix));
+        await this.expectRefused();
+    }
+
+    /**
+     * The browser is on the access-denied page the setting's refusal
+     * answers (`user.authorization.accessDenied`, "Access denied."), with
+     * no page headed "Comments" (Rule 2b; a task pressed while off, Rule 16).
+     */
+    async expectRefused() {
+        await expect(this.page).toHaveURL(/\/user\/authorizationDenied\?message=user\.authorization\.accessDenied/, {timeout: T});
         await expect(this.page.getByText('Access denied.')).toBeVisible();
         await expect(this.heading).toHaveCount(0);
     }
@@ -732,6 +742,46 @@ exports.CommentsPage = class CommentsPage extends BasePage {
 
     errorDialog() {
         return this.page.getByRole('dialog', {name: 'Error', exact: true});
+    }
+};
+
+/**
+ * The notice the site-level address answers the Site Administrator
+ * (`user.authorization.noContext` in the server's own locale; OJS words
+ * it "No journal was found that matched your request.", footnote s6).
+ */
+const NO_CONTEXT = 'No server in context!';
+exports.NO_CONTEXT = NO_CONTEXT;
+
+/**
+ * The Comments page's address at the site, with no preprint server
+ * (`/index.php/index/management/settings/userComments`; Actors row 6,
+ * footnote s6). Signed out it lands on the site's Login page with the
+ * address as `source`; as the Site Administrator on the access-denied
+ * page `user.authorization.noContext` (probe tops, 2026-11-11).
+ */
+exports.SiteCommentsAddress = class SiteCommentsAddress extends BasePage {
+    url() {
+        return this.contextUrl('index', '/management/settings/userComments');
+    }
+
+    async goto() {
+        await this.page.goto(this.url());
+    }
+
+    /** The Login page, the address as its `source`, no access-denied text. */
+    async expectLogin() {
+        await expect(this.page).toHaveURL(/\/index\.php\/index\/(en\/)?login\?source=.*userComments/, {timeout: T});
+        await expect(this.page.locator('form#login')).toBeVisible();
+        await expect(this.page.getByText(NO_CONTEXT)).toHaveCount(0);
+    }
+
+    /** The no-context notice on the access-denied page, and no page headed "Comments". */
+    async expectNoContext() {
+        await expect(this.page).toHaveURL(/\/user\/authorizationDenied\?message=user\.authorization\.noContext/, {timeout: T});
+        // The reader-facing error page has no `main` landmark: read the body.
+        await expect(this.page.getByText(NO_CONTEXT)).toBeVisible();
+        await expect(this.page.locator('h1', {hasText: exact('Comments')})).toHaveCount(0);
     }
 };
 

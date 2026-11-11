@@ -264,6 +264,20 @@ exports.ArticleCommentsPage = class ArticleCommentsPage extends BasePage {
         return article.locator('[class*="NeedsApproval"]');
     }
 
+    /**
+     * The pending notice comes before the comment's date in the page's
+     * order (it shows above it). Waits for both first.
+     */
+    async noticeBeforeDate(article) {
+        await expect(this.pendingNotice(article)).toBeVisible({timeout: 30_000});
+        await expect(this.time(article)).toBeVisible();
+        return article.evaluate((el) => {
+            const notice = el.querySelector('[class*="NeedsApproval"]');
+            const time = el.querySelector('time');
+            return !!notice && !!time && !!(notice.compareDocumentPosition(time) & Node.DOCUMENT_POSITION_FOLLOWING);
+        });
+    }
+
     /** The help icon inside the pending notice. */
     pendingIcon(article) {
         return this.pendingNotice(article).locator('svg, img');
@@ -295,6 +309,17 @@ exports.ArticleCommentsPage = class ArticleCommentsPage extends BasePage {
     async closeMenu() {
         await this.page.getByRole('menu').press('Escape');
         await expect(this.page.getByRole('menuitem')).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
+     * Type `text` into the box key by key after a press on it, as a reader
+     * types (the press gives the page the user activation a browser needs
+     * before it may ask anything on leaving), without pressing "Submit".
+     */
+    async typeInBox(text, scope = this.mainBlock()) {
+        await this.box(scope).click();
+        await this.box(scope).pressSequentially(text);
+        await expect(this.box(scope)).toHaveValue(text);
     }
 
     /**
@@ -627,12 +652,28 @@ exports.CommentsPage = class CommentsPage extends BasePage {
     }
 
     /**
-     * Open the page by its address while public comments are off: the app
-     * refuses it and lands on the access-denied page (Rule 2b).
+     * The page's address at the site, with "index" in place of the
+     * journal's path (Actors row 6).
      */
-    async gotoRefused() {
-        await this.page.goto(this.url());
-        await expect(this.page).toHaveURL(/\/user\/authorizationDenied/, {timeout: 30_000});
+    siteLevelUrl() {
+        return this.siteUrl('/management/settings/userComments');
+    }
+
+    /**
+     * Open the page by its address while public comments are off (with an
+     * optional `suffix`: "/" or one more part, "/x"): the app refuses it
+     * and lands on the access-denied page (Rule 2b).
+     */
+    async gotoRefused(suffix = '') {
+        await this.page.goto(this.url(suffix));
+        await this.expectAccessDenied();
+    }
+
+    /** The context's access-denied page, "Access denied." (Rule 2b), with no page headed "Comments". */
+    async expectAccessDenied() {
+        await expect(this.page).toHaveURL(/\/user\/authorizationDenied\?message=user\.authorization\.accessDenied/, {
+            timeout: 30_000,
+        });
         await expect(this.page.getByText('Access denied.')).toBeVisible();
         await expect(this.heading()).toHaveCount(0);
     }
