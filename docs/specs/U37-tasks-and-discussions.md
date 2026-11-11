@@ -6,6 +6,8 @@ status: verified
 # Tasks & discussions
 
 > Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+>
+> Differs on: [3.5](lines/stable-3_5_0/U37-tasks-and-discussions.md).
 
 ## Purpose
 
@@ -1519,43 +1521,51 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-09-23), unreviewed unless
-an entry notes otherwise; the team settles them on spec review.
+an entry notes otherwise; the team settles them on spec review. "Versions"
+names the versions that show the finding
+([how to read it](lines/README.md#what-a-versions-cell-says)). <sup>[v35](#fn-v35)</sup>
 
-| ID | Finding (one line, symptom) | Bug? | Impact | Review |
-|----|-----------------------------|------|--------|--------|
-| [A1](#a1) | On a press and a preprint server as shipped, saving a discussion or a reply ends in an error dialog, and nobody is emailed or told | 🐞 | user-visible · crash: server | — |
-| [A2](#a2) | The "Add" and "Edit" windows for a task or discussion show "Open for What? Open to What? Beyond Content" under the title | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A3](#a3) | Whoever opens a discussion or replies gets their own message back by email and as a Tasks row | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A5](#a5) | Each template in the "Add" window says it fills "Participants", but choosing one never does | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A6](#a6) | A task's owner is offered "Edit" but cannot save even a new due date on a task someone else opened | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [A7](#a7) | A press or preprint server refuses a discussion edit with a raw key, not the reason | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A10](#a10) | A task's "Due Date" before today is refused with a message about a start date | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A15](#a15) | In French, the template search for a new task or discussion is labelled "find an email template" | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
-| [A16](#a16) | A task due today already reads "Overdue" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A17](#a17) | A closed task past its due date still reads "This task is overdue. Remind the task owner…" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A21](#a21) | A refused task or discussion window tells screen-reader users "Go to undefined" for the empty message box | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A25](#a25) | A discussion turned into a task reads "Begin Task Upon Saving", but the saved task is not begun | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A26](#a26) | After "No" to a Tasks & Discussions box's question, a screen reader hears the box in the opposite state | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A28](#a28) | A discussion turned into a task reads "Task created by …" in its History | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A29](#a29) | A file attached to the first message in the "Add" window never shows in the discussion's History | 🐞 | low | issues (claude), 2026-10-12 — re-verified |
-| [A31](#a31) | A discussion's letter keeps "{$signature}" when its writer is not a participant: auto-added, or a manager stays out | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A32](#a32) | A task's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, have names a screen reader cannot tell apart | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
-| [A33](#a33) | A task's or discussion's History lists the lines one save writes within a second oldest first | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
-| [A34](#a34) | An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later | 🐞 | medium | issues (claude), 2026-10-09 — re-verified |
-| [A36](#a36) | A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
-| [OMP1](#omp1) | A press's discussion window lists an External Review reviewer as "Internal Reviewer" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [OPS1](#ops1) | A preprint server's "Assign Editor" template has no text, and choosing it leaves the message box showing text "Save" ignores | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
-| [A12](#a12) | An hour after writing it, an Author or assistant can change nothing in their own discussion | ❓ | user-visible | — |
-| [A13](#a13) | A closed task cannot be reopened | ❓ | minor | — |
-| [A14](#a14) | A reviewer of an "Anonymous Reviewer/Disclosed Author" review is offered the Author and refused on "Save" | ❓ | minor | — |
-| [A18](#a18) | An item another screen or an auto-added template opened has an empty "Activity" and no History | ❓ | minor | — |
-| [A19](#a19) | The role line under a manager-level participant depends on who looks | ❓ | minor | — |
-| [A20](#a20) | A discussion left with one participant after a removal cannot be saved from "Edit" | ❓ | minor | — |
-| [A23](#a23) | The hint "You can convert this into a task by clicking Edit." shows to people who have no "Edit" | ❓ | minor | — |
-| [A27](#a27) | During Login As, a reply is headed with one person's name and logged under another's | ❓ | minor | — |
-| [A30](#a30) | A task whose owner leaves the submission is left with no owner, and nothing says so | ❓ | minor | — |
-| [A35](#a35) | Once a submission is at Production, a Copyeditor is offered "Workflow Files" with every stage greyed | ❓ | minor | — |
-| [OPS2](#ops2) | A preprint server offers a "Workflow Files" source that never holds a file | ❓ | minor | — |
+| ID | Finding (one line, symptom) | Bug? | Impact | Versions | Review |
+|----|-----------------------------|------|--------|----------|--------|
+| [A1](#a1) | On a press and a preprint server as shipped, saving a discussion or a reply ends in an error dialog, and nobody is emailed or told | 🐞 | user-visible · crash: server | main | — |
+| [A2](#a2) | The "Add" and "Edit" windows for a task or discussion show "Open for What? Open to What? Beyond Content" under the title | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A3](#a3) | Whoever opens a discussion or replies gets their own message back by email and as a Tasks row | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A5](#a5) | Each template in the "Add" window says it fills "Participants", but choosing one never does | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A6](#a6) | A task's owner is offered "Edit" but cannot save even a new due date on a task someone else opened | 🐞 | medium | main | issues (claude), 2026-10-02 — re-verified |
+| [A7](#a7) | A press or preprint server refuses a discussion edit with a raw key, not the reason | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A10](#a10) | A task's "Due Date" before today is refused with a message about a start date | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A15](#a15) | In French, the template search for a new task or discussion is labelled "find an email template" | 🐞 | low | main | issues (claude), 2026-10-09 — re-verified |
+| [A16](#a16) | A task due today already reads "Overdue" | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A17](#a17) | A closed task past its due date still reads "This task is overdue. Remind the task owner…" | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A21](#a21) | A refused task or discussion window tells screen-reader users "Go to undefined" for the empty message box | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A25](#a25) | A discussion turned into a task reads "Begin Task Upon Saving", but the saved task is not begun | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A26](#a26) | After "No" to a Tasks & Discussions box's question, a screen reader hears the box in the opposite state | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A28](#a28) | A discussion turned into a task reads "Task created by …" in its History | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A29](#a29) | A file attached to the first message in the "Add" window never shows in the discussion's History | 🐞 | low | main | issues (claude), 2026-10-12 — re-verified |
+| [A31](#a31) | A discussion's letter keeps "{$signature}" when its writer is not a participant: auto-added, or a manager stays out | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [A32](#a32) | A task's "Started" and "Closed" boxes, and every template's "Auto-add at stage" box, have names a screen reader cannot tell apart | 🐞 | low | main | issues (claude), 2026-10-09 — re-verified |
+| [A33](#a33) | A task's or discussion's History lists the lines one save writes within a second oldest first | 🐞 | low | main | issues (claude), 2026-10-09 — re-verified |
+| [A34](#a34) | An overdue task's "Edit" refuses every "Save" until its due date is moved to today or later | 🐞 | medium | main | issues (claude), 2026-10-09 — re-verified |
+| [A36](#a36) | A manager's reply after being taken off a discussion gets "An unexpected error has occurred" instead of the reason | 🐞 | low | main | issues (claude), 2026-10-09 — re-verified |
+| [OMP1](#omp1) | A press's discussion window lists an External Review reviewer as "Internal Reviewer" | 🐞 | low | main | issues (claude), 2026-10-02 — re-verified |
+| [OPS1](#ops1) | A preprint server's "Assign Editor" template has no text, and choosing it leaves the message box showing text "Save" ignores | 🐞 | low · crash: server | main | issues (claude), 2026-10-02 — re-verified |
+| [A37](#a37) | "Cancel" in the older "Add discussion" window leaves an empty discussion named "—" | 🐞 | user-visible | 3.5 | — |
+| [A38](#a38) | Choosing the blank line of the older window's predefined messages fails on the server, with nothing on screen | 🐞 | invisible · crash: server | 3.5 | — |
+| [A39](#a39) | A discussion started from a predefined message keeps "{$recipientName}" in its first message | 🐞 | user-visible | 3.5 | — |
+| [A40](#a40) | A discussion subject over 255 characters fails on the server and the window says nothing | 🐞 | user-visible · crash: server | 3.5 | — |
+| [A41](#a41) | A refused "OK" in the older "Add discussion" window unticks the participants | 🐞 | minor | 3.5 | — |
+| [A42](#a42) | "Cancel" on a reply in the older discussion window leaves an empty message | 🐞 | user-visible | 3.5 | — |
+| [A12](#a12) | An hour after writing it, an Author or assistant can change nothing in their own discussion | ❓ | user-visible | main 3.5 (code) | — |
+| [A13](#a13) | A closed task cannot be reopened | ❓ | minor | main | — |
+| [A14](#a14) | A reviewer of an "Anonymous Reviewer/Disclosed Author" review is offered the Author and refused on "Save" | ❓ | minor | main 3.5 | — |
+| [A18](#a18) | An item another screen or an auto-added template opened has an empty "Activity" and no History | ❓ | minor | main | — |
+| [A19](#a19) | The role line under a manager-level participant depends on who looks | ❓ | minor | main | — |
+| [A20](#a20) | A discussion left with one participant after a removal cannot be saved from "Edit" | ❓ | minor | main 3.5 | — |
+| [A23](#a23) | The hint "You can convert this into a task by clicking Edit." shows to people who have no "Edit" | ❓ | minor | main | — |
+| [A27](#a27) | During Login As, a reply is headed with one person's name and logged under another's | ❓ | minor | main | — |
+| [A30](#a30) | A task whose owner leaves the submission is left with no owner, and nothing says so | ❓ | minor | main | — |
+| [A35](#a35) | Once a submission is at Production, a Copyeditor is offered "Workflow Files" with every stage greyed | ❓ | minor | main | — |
+| [OPS2](#ops2) | A preprint server offers a "Workflow Files" source that never holds a file | ❓ | minor | main; 3.5 not checked | — |
 
 ### All apps
 
@@ -2018,6 +2028,67 @@ Question: should a preprint server offer "Workflow Files"? Lean: no, a
 defect; hide it, or list the preprint's galley files.
 Basis: probe. <sup>[f-ops2](#fn-ops2)</sup>
 
+### Older versions only
+
+Findings `main` no longer shows and an older version does; the Versions
+column says which. The screens and labels are that version's, described
+in [the differences on 3.5](lines/stable-3_5_0/U37-tasks-and-discussions.md).
+
+<a id="a37"></a>
+**A37 — "Cancel" in the older "Add discussion" window leaves an empty discussion named "—"** · 🐞 · user-visible.
+On 3.5, pressing "Cancel" in "Add discussion" closes the window at once
+and asks nothing, changed or not. After a reload the stage's list holds
+one more row, named "—", with the person's username under "From". The
+person who opened the window and manager-level people see the row, with
+"Edit" and "Delete"; a Section Editor does not. The window's "Close"
+control leaves no such row. `main` has another window, whose "Cancel"
+discards (Rule 11c).
+Basis: probe, 2026-11-11 (OJS 3.5). <sup>[f-a37](#fn-a37)</sup>
+
+<a id="a38"></a>
+**A38 — Choosing the blank line of the older window's predefined messages fails on the server, with nothing on screen** · 🐞 · invisible · crash: server.
+On 3.5, in "Add discussion", choosing a predefined message such as
+"Assign Editor" and then the blank first line of the drop-down changes
+nothing on screen, and the request behind it answers a server error.
+`main` has no such drop-down.
+Basis: probe, 2026-11-11 (OJS 3.5). <sup>[f-a38](#fn-a38)</sup>
+
+<a id="a39"></a>
+**A39 — A discussion started from a predefined message keeps "{$recipientName}" in its first message** · 🐞 · user-visible.
+On 3.5, a discussion started from the predefined message "Assign Editor"
+shows "Dear {$recipientName}," at the top of its first message, for
+everyone who opens it. Each participant's email of the same message
+opens with their own name. On `main` "Save" fills the first message too
+(Rule 10d).
+Basis: probe, 2026-11-11 (OJS 3.5). <sup>[f-a39](#fn-a39)</sup>
+
+<a id="a40"></a>
+**A40 — A discussion subject over 255 characters fails on the server and the window says nothing** · 🐞 · user-visible · crash: server.
+On 3.5, "OK" in "Add discussion" with a "Subject" of 300 characters
+leaves the window open with no message, and the discussion is not saved:
+the request answers a server error. `main` refuses such a name with
+"This may not be greater than 255 characters." (Fields, "Name").
+Basis: probe, 2026-11-11 (OJS 3.5). <sup>[f-a40](#fn-a40)</sup>
+
+<a id="a41"></a>
+**A41 — A refused "OK" in the older "Add discussion" window unticks the participants** · 🐞 · minor.
+On 3.5, when the server refuses "OK" in "Add discussion" (too few
+participants, or a mix of reviewers the review type forbids), the window
+keeps "Subject" and "Message" and puts the "Participants" boxes back as
+they were when it opened. Pressing "OK" again without re-ticking is
+refused again. On `main` the window stays as filled (Rule 8).
+Basis: probe, 2026-11-11 (OJS 3.5). <sup>[f-a41](#fn-a41)</sup>
+
+<a id="a42"></a>
+**A42 — "Cancel" on a reply in the older discussion window leaves an empty message** · 🐞 · user-visible.
+On 3.5, pressing "Cancel" after "Add Message" in a discussion's window
+closes the form and the window and asks nothing. The row then counts one
+more under "Replies" and names the person under "Last Reply", and the
+window lists a message with no text. The window's "Close" control,
+pressed while the reply form is open, leaves nothing. `main` has another
+window.
+Basis: probe, 2026-11-11 (OJS 3.5). <sup>[f-a42](#fn-a42)</sup>
+
 ### Retired
 
 <a id="a11"></a>
@@ -2380,6 +2451,66 @@ Issue report: [pkp-e2e#337](https://github.com/jardakotesovec/pkp-e2e/issues/337
 
 <a id="fn-ops2"></a>
 **f-ops2** — Note g. Live-probed 2026-09-23 on OPS: the manager's and the Moderator's "Workflow Files" offered "Production" alone, its "Production Ready Files" ("These are the files that will be sent for publication") reading "No Items".
+
+<a id="fn-a37"></a>
+**f-a37** — OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`), 2026-11-11.
+Part `s2` of `shared/playwright/checks/lines/stable-3_5_0/U37/walk.js`,
+runs `s1` and `s2`: on an untouched window, a changed one and one whose
+"OK" was just refused (`s2-04-cancel-untouched`, `s2-06-cancel-changed`,
+`s2-08-cancel-after-refusal`, `s2-10-empty-row-strip`). "Cancel" sends
+no request; "Close" sends `delete-query`.
+
+<a id="fn-a38"></a>
+**f-a38** — OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`), 2026-11-11.
+Part `s2` of the same script, runs `s1` and `s2`
+(`s2-14-template-blank-again`): `POST …/fetch-template-body` answers 500,
+"fetchTemplateBody(): Return value must be of type PKP\core\JSONMessage,
+none returned" (`QueriesGridHandler.php:786`).
+
+<a id="fn-a39"></a>
+**f-a39** — OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`), 2026-11-11.
+Part `s2` of the same script, runs `s1` and `s2`
+(`s2-16-template-discussion-window` and the Section Editor's email).
+
+<a id="fn-a40"></a>
+**f-a40** — OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`), 2026-11-11.
+Part `x` of the same script, runs `s1` and `s2`
+(`x-10-mgr-long-subject`): `POST …/update-query` answers 500,
+"SQLSTATE[22001] … value too long for type character varying(255)" on
+`notes.title`. Seen on PostgreSQL; MySQL was not tried.
+
+<a id="fn-a41"></a>
+**f-a41** — OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`), 2026-11-11.
+Parts `s7` and `s11` of the same script, runs `s1` and `s2`
+(`s11-03-se1-two-reviewers`, `s7-06-author-creator-unticked`), and part
+`a14` of `register/walk.js` beside it, runs `r1` and `r2`
+(`a14-03-rv-with-author-ok`).
+
+<a id="fn-a42"></a>
+**f-a42** — OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`), 2026-11-11.
+Part `x` of the same script, runs `s1` and `s3`
+(`x-12-mgr-window-after-reply-cancel`). "Cancel" sends no request;
+"Close" sends `delete-note`. The same cause as A37.
+
+<a id="fn-v35"></a>
+**v35** — The "Versions" column, 3.5 (pilot, `docs/specs/lines/README.md`).
+Read 2026-11-11 on OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`,
+ui-library `fd00e45f`). 3.5 has the older Discussions and no tasks,
+templates, History or "Activity" column, so an entry on one of those
+reads `main`: A2, A5, A6, A7, A10, A13, A15, A16, A17, A18, A21, A23,
+A25, A26, A27, A28, A29, A30, A31, A32, A33, A34 and A35 (the issue
+report's "Affects" bullet in `docs/issues/` where one exists, 3.5's
+code otherwise). Walked on 3.5 and not seen: A3, A36 and OMP1 (their
+issue reports), A19 (five viewers each read the manager's assigned
+role). Walked and seen, twice, with
+`shared/playwright/checks/lines/stable-3_5_0/U37/register/walk.js`: A14
+(a reviewer on an "Anonymous Reviewer/Disclosed Author" review is
+offered the Author; the save is refused, in 3.5's own wording) and A20
+(a rename is refused once only one participant can be ticked). A12: read in 3.5's code only
+(`QueriesAccessHelper::getCanEdit()`, one hour), since passing the hour
+needs a database edit. A1 and OPS1: read in OMP's and OPS's 3.5 code.
+OPS2: OPS was not read. Retired A4, A8 and A9: their fixes have no twin
+on 3.5 and the faulty code is not there.
 
 ## Reference — entry points & surfaces
 
