@@ -3,11 +3,13 @@
 // on OMP and OPS). A tagged submission in Production in `publicknowledge` with three references
 // (Alpha, Beta, Gamma, Delta), as `manager.maya`:
 //   C1 two paragraphs typed; Beta dragged into the first, Delta into the second; "Save"; the editor's citations
-//   C2 the saved document PUT back with a third paragraph citing Beta and Delta at once; the page reloaded
+//   C2 the saved document PUT back with a third paragraph citing Beta and Delta at once, and a fourth whose citation
+//      to Beta reads "(2021)" (a year typed over the marker); the page reloaded
 //   (Alpha and Gamma stay uncited; a decoy submission seeded first makes the reference ids differ from the list numbers)
 //   C3 "Export" › "Export to HTML": the stored galley's citations, links and references section
 //   C4 "Export" › "Preview: PDF": the preview's citations and references; "Create PDF": internal links in the file
 //   C5 Delta deleted on "References" (the citations to it stay in the text); "Export to HTML" and "Preview: PDF"
+// With fix.diff applied (bin/try-fix.js) the markers read [1], [2], [1, 2], the year stays, the list is labelled.
 // Run: PROBE_FEATURE=pr-13767 PROBE_AGENT=pr PROBE_RUN=<side> node bin/probe.js ojs <this file>
 // At the base (ui-library 55ec62ee) C3–C5 show what the export did before: no links, the editor's own markers.
 const fs = require('fs');
@@ -107,6 +109,9 @@ forEachApp(async (app) => {
         const beta = idOf('Beta'), delta = idOf('Delta');
         doc.content.push({type: 'paragraph', content: [{type: 'text', text: 'Third sentence cites both '},
             {type: 'citation', attrs: {source: src([beta, delta])}, content: [{type: 'text', text: `[${beta}, ${delta}]`}]}, {type: 'text', text: '.'}]});
+        // a year typed over a citation's text (as "Selected Element" › "In-text citation" does), the regression reader's S2
+        doc.content.push({type: 'paragraph', content: [{type: 'text', text: 'Fourth sentence: Beta '},
+            {type: 'citation', attrs: {source: src([beta])}, content: [{type: 'text', text: '(2021)'}]}, {type: 'text', text: '.'}]});
         fact('C2 sources as the editor wrote them', cites.map((c) => decodeURIComponent(c.source || '')));
         const put = await page.evaluate(async ({url, serialized}) => {
             const fd = new FormData();
