@@ -16,9 +16,9 @@ not here. `docs/README.md` is the map of the documentation.
   `docs/tracking/incidentals.md`, `docs/tracking/friction.md` and
   `ci-triage.md`, works the queue `npm run backlog` prints for about
   three hours, and writes the specs' defects up as issue reports in
-  `docs/issues/` ("Issue reports"). Check
-  ci-triage FIRST when a CI failure is reported: one root cause often reds
-  ojs, omp and ops as three messages.
+  `docs/issues/` ("Issue reports"). When a CI failure is reported, check
+  ci-triage first: one root cause often reds ojs, omp and ops as three
+  messages.
   A PR or issue link shared with a request to check it before merging is
   a **PR review**: `docs/process/MAINTENANCE.md` "PR review", which
   produces a verdict and, once its findings are settled, a companion

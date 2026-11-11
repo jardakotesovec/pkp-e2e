@@ -188,13 +188,14 @@ Test files cite these by number, so the numbers are stable.
 
 ## Model discipline
 
-- Opus 5.5 runs every role; subagents inherit the session model, no
+- One model runs every role: Opus 5.5 or Fable 5.2, whichever the
+  session was started on. Subagents inherit the session model, no
   per-role pins: no agent is launched on another model because its task
   looks light.
 - A refusal or safeguard flag is not the end of the run: the agent
   carries on with its task after the notice instead of winding down, and
   the safeguard then serves the rest on a fallback model (Opus 5.5 →
-  Opus 4.8, Sonnet 5.5 → Sonnet 5). The agent cannot tell it was
+  Opus 4.8 and Sonnet 5.5 → Sonnet 5, for example). The agent cannot tell it was
   switched, so `npm run check-models` (the transcript) names the model,
   never the agent's own word. When the flag is a false positive on
   legitimate work (security work most often: the maintainers have access
@@ -205,7 +206,8 @@ Test files cite these by number, so the numbers are stable.
   the agent itself on the disposable install, the clean-up said), in this
   order until one gets through: a fresh agent on the session's model,
   description ending "(narrow rerun)"; then Agent `model: sonnet`,
-  "(Sonnet fallback)"; then `model: fable`, "(Fable fallback)".
+  "(Sonnet fallback)"; then, in an Opus session, `model: fable`,
+  "(Fable fallback)".
   `npm run check-models` allows these only in a session that recorded a
   stop. The session carries on with the result on its own model, and the
   result names the model that served it. A spec is written on the

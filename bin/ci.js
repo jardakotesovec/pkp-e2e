@@ -8,15 +8,15 @@
  * slots wait on. This helper starts a run or waits for one, then says what
  * failed.
  *
- *   npm run ci -- watch [<run-id>] [--sha <commit>]
+ *   node bin/ci.js watch [<run-id>] [--sha <commit>]
  *       the push run of HEAD (or of --sha, or that run id); waits for it
- *   npm run ci -- dispatch [--ref <branch>] [--apps ojs,omp] [--ojs-ref <ref>]
- *                          [--ojs-repo <owner/name>] (same for omp, ops)
- *                          [--pkp-lib-ref <sha|pull/<n>/head>] [--ui-library-ref <…>]
- *                          [--php-ini-values <a=b,c=d>] [--no-wait]
+ *   node bin/ci.js dispatch [--ref <branch>] [--apps ojs,omp] [--ojs-ref <ref>]
+ *                           [--ojs-repo <owner/name>] (same for omp, ops)
+ *                           [--pkp-lib-ref <sha|pull/<n>/head>] [--ui-library-ref <…>]
+ *                           [--php-ini-values <a=b,c=d>] [--no-wait]
  *       e2e.yml's workflow_dispatch from --ref (default: the current branch,
  *       which must be pushed), then waits for it
- *   npm run ci -- summary <run-id>
+ *   node bin/ci.js summary <run-id>
  *
  * While waiting it prints one line when a job finishes; at the end the
  * failed and flaky tests per app (from the job logs) and the run's URL.
@@ -214,7 +214,7 @@ function main() {
         const id = Number(opts._[0]);
         process.exit(report(jobState(id), id));
     } else {
-        console.error('usage: npm run ci -- watch [<run-id>] [--sha <c>] | dispatch [--ref <b>] [--apps …] [--<app>-ref …] [--pkp-lib-ref …] [--no-wait] | summary <run-id>');
+        console.error('usage: node bin/ci.js watch [<run-id>] [--sha <c>] | dispatch [--ref <b>] [--apps …] [--<app>-ref …] [--pkp-lib-ref …] [--no-wait] | summary <run-id>');
         process.exit(1);
     }
     console.log(`ci: waiting for run ${run.databaseId}${run.url ? ` ${run.url}` : ''}`);
