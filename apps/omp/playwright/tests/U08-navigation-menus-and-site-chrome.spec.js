@@ -16,8 +16,9 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 🐞: S2 finds the "i" icon as the header's one new-tab link and reads
- *   where it leads; nothing reads its accessible name.
+ * - A1 ✅ (retired 2026-11-11: fixed upstream; its "Help" name is a Planned
+ *   assertion): S2 finds the "i" icon as the header's one new-tab link and
+ *   reads where it leads; nothing reads its accessible name yet.
  * - A2 🐞: no test presses a Series editor's "Dashboard" in the public
  *   header (S2 reads the Series editor's landing on the Dashboard only).
  * - A3 🐞: S9 reads the access-denied page's sentence and address only,
@@ -318,7 +319,7 @@ test.describe('navigation menus & site chrome', () => {
             // The editorial header: the first Tab shows the two skip links;
             // the press's name at the left; the "i" icon, Tasks and the
             // initials at the right; the "i" icon opens "Learning OMP" in a
-            // new tab (A1 aside); the initials open "Change Language" with
+            // new tab (its name "Help" not read); the initials open "Change Language" with
             // English ticked and français, then "Edit Profile" and "Logout"
             // (Rules 27, 27a–27c, 28; Settings bullet 12).
             await ed.waitReady();

@@ -711,7 +711,8 @@ editorial address and as the author on My Submissions): after the delete, the
 old workflow address opens the populated dashboard with an error dialog —
 heading "Error", message "Invalid submission.", button "OK" — stacked over a
 lingering workflow dialog that contains only the submission's id and a raw
-`##common.help##` locale key in place of its help link. The empty shell also
+`##common.help##` locale key in place of its help link (the link reads
+"Help" since `pkp/ui-library#1046`, 2026-11-10). The empty shell also
 paints alone for ~200 ms (warm; longer cold) before the error dialog attaches
 — the transient state an earlier probe recorded as a silent empty page
 (finding A3).

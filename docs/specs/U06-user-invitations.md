@@ -1022,9 +1022,7 @@ appears on the journal masthead for the selected role." under a column named
 "Press Masthead" or "Server Masthead", and the "Invitation Unavailable" page
 closes with "Please contact the journal manager for further assistance.",
 where the role is "Press manager" or "Preprint Server manager".
-"##common.help##" shows in the header of every management page ([Navigation
-menus & site chrome A1](U08-navigation-menus-and-site-chrome.md#a1)); a
-screen reader hears "##userAccess.management.options##" for each Current
+A screen reader hears "##userAccess.management.options##" for each Current
 Users row's menu button on Users & Roles.
 On an existing user's one-step accept page ("Review & create account"), and
 on one-step editorial decision pages such as "Decline Submission", Tab stops
@@ -2033,7 +2031,8 @@ neither app's `locale/en/user.po` overrides; re-read verbatim by the
 Masthead" column); search-step grammar "Enter at least
 one details…" / "…invite to take a additional roles"; raw locale keys
 `##common.help##` and `##userAccess.management.options##` on the management
-screens of all three apps; and (claim check 2026-07-31) the
+screens of all three apps (the help icon's raw key fixed 2026-11-10 by
+`pkp/ui-library#1046`: it reads "Help"); and (claim check 2026-07-31) the
 unavailable-page tail "Please contact the journal manager for further
 assistance." unsubstituted on OMP and OPS. Added by the claim check of
 2026-09-27, all three apps: the send wizard's "Cancel Invitation" dialog
@@ -2063,7 +2062,7 @@ steps on both wizards "Complete the steps for this invitation" (the key
 `invitation.wizard.completeSteps` had no text in any file before); the
 collapsed toggle's hidden text "{$current}/{$total} steps" is left
 (pkp-e2e#543). Issue reports, one
-per cause: the wording slips (pkp-e2e#540, closed 2026-10-27); "as a Author" ([pkp-e2e#541](https://github.com/jardakotesovec/pkp-e2e/issues/541), [docs/issues/U06-A7-invitation-email-role-article.md](../issues/U06-A7-invitation-email-role-article.md)); the journal wording on OMP and OPS ([pkp-e2e#542](https://github.com/jardakotesovec/pkp-e2e/issues/542), [docs/issues/U06-A7-omp-ops-invitation-journal-wording.md](../issues/U06-A7-omp-ops-invitation-journal-wording.md)); the toggle's wrong text, once also the steps list's raw name ([pkp-e2e#543](https://github.com/jardakotesovec/pkp-e2e/issues/543), [docs/issues/U06-A7-invitation-steps-raw-labels.md](../issues/U06-A7-invitation-steps-raw-labels.md)); the invisible Tab stops ([pkp-e2e#544](https://github.com/jardakotesovec/pkp-e2e/issues/544), [docs/issues/U06-A7-accept-page-hidden-steps-button.md](../issues/U06-A7-accept-page-hidden-steps-button.md)). The Users & Roles row button's raw name joined [pkp-e2e#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) ([docs/issues/U53-A5-users-list-row-button-raw-key.md](../issues/U53-A5-users-list-row-button-raw-key.md)); "##common.help##" is U08 A1's.
+per cause: the wording slips (pkp-e2e#540, closed 2026-10-27); "as a Author" ([pkp-e2e#541](https://github.com/jardakotesovec/pkp-e2e/issues/541), [docs/issues/U06-A7-invitation-email-role-article.md](../issues/U06-A7-invitation-email-role-article.md)); the journal wording on OMP and OPS ([pkp-e2e#542](https://github.com/jardakotesovec/pkp-e2e/issues/542), [docs/issues/U06-A7-omp-ops-invitation-journal-wording.md](../issues/U06-A7-omp-ops-invitation-journal-wording.md)); the toggle's wrong text, once also the steps list's raw name ([pkp-e2e#543](https://github.com/jardakotesovec/pkp-e2e/issues/543), [docs/issues/U06-A7-invitation-steps-raw-labels.md](../issues/U06-A7-invitation-steps-raw-labels.md)); the invisible Tab stops ([pkp-e2e#544](https://github.com/jardakotesovec/pkp-e2e/issues/544), [docs/issues/U06-A7-accept-page-hidden-steps-button.md](../issues/U06-A7-accept-page-hidden-steps-button.md)). The Users & Roles row button's raw name joined [pkp-e2e#459](https://github.com/jardakotesovec/pkp-e2e/issues/459) ([docs/issues/U53-A5-users-list-row-button-raw-key.md](../issues/U53-A5-users-list-row-button-raw-key.md)); "##common.help##" was U08 A1's, fixed 2026-11-10 by `pkp/ui-library#1046`.
 
 <a id="fn-a8"></a>
 **f-a8** — Every added row in `UserInvitationUserGroupsTable.vue` renders

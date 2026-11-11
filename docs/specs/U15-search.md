@@ -1262,9 +1262,6 @@ Basis: probe, 2026-10-03. <sup>f-ops4</sup>
 
 ### Seen on the way, owned elsewhere
 
-- The workflow's header shows the raw code "##common.help##" where the help
-  button's label belongs, on all three applications:
-  [Workflow screen & stage access](U24-workflow-screen-and-stage-access.md).
 - On a journal, a Publication Stage chosen in "Review Publishing Details"
   is saved even when the publish is then refused, and only a new version
   recovers: [Publish, schedule & versions](U49-publish-schedule-and-versions.md).

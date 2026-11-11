@@ -532,8 +532,9 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
       OPS") in a new browser tab, the Tasks bell
       ([Notifications center & email preferences](U05-notifications-center-and-email-preferences.md),
       Rule 2) and the user's initials, which open the menu of Rule 28.
-      A screen reader, and the page's text, name the "i" icon
-      "##common.help##" ⚠ [A1](#a1).
+      The "i" icon shows no text and has no tooltip; a screen reader
+      names it "Help" ("Aide" with the interface in French), in the dark
+      bar and in the strip atop the Tasks window alike.
     - 27c. **Skip links.** The first press of the Tab key reveals "Skip to
       main content" and "Skip to main navigation menu".
 28. **The initials menu.** Pressing the initials opens, top to bottom:
@@ -741,8 +742,7 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
   owns the Administration page that the user menu's and the side menu's
   "Administration" open (Rules 18a, 30).
 - [Tasks & discussions](U37-tasks-and-discussions.md) owns the French
-  discussions panel's untranslated texts; the help icon's raw name in the
-  headers is this spec's [A1](#a1).
+  discussions panel's untranslated texts.
 - *Custom pages & blocks* owns the page a "Custom Page" item creates and
   its "Preview".
 - *Appearance & theming* owns the header logo, the "Page Footer", the
@@ -820,7 +820,7 @@ are in the footnote. <sup>y</sup>
      main navigation menu" show; the dark bar shows the journal's name at
      the left and, at the right, an "i" icon, the Tasks bell and their
      initials; press the "i" icon: PKP's "Learning OJS" guide ("Learning
-     OMP", "Learning OPS") opens in a new tab [A1](#a1); press the
+     OMP", "Learning OPS") opens in a new tab; press the
      initials: a menu opens with "Change Language" and the journal's two
      interface languages under it, the current one ticked, then "Edit
      Profile" and "Logout"; press the initials again: the menu closes
@@ -1207,7 +1207,7 @@ Left out of the scenarios above, by reason:
   - a Section Editor's "Dashboard" under the username on the public pages opens the Dashboard, with their task count (Rule 19a; the guard [A2](#a2)'s issue report proposes, shared with Notifications center & email preferences A3) [report 2026-10-03]
   - the eye notices of "Privacy Statement", "Contact" and "About" and the "About" type's description, on a journal, a press and a preprint server: each names the Settings place where the screens put it (Rules 7a–7b; the guard [A6](#a6) and [A13](#a13)'s issue report proposes) [report 2026-10-03]
   - a Site Administrator holding Reader alone in a journal opens "Editor Dashboard": the views and counts show, and no "Error" window opens on the editorial pages (Actors; the guard [A22](#a22)'s issue report proposes) [report 2026-10-03]
-  - the editorial header's "i" icon and the Tasks window's strip: the link's accessible name reads "Help" ("Aide" in French) (Rule 27b; the guard [A1](#a1)'s issue report proposes) [report 2026-10-03]
+  - the editorial header's "i" icon and the Tasks window's strip: the link's accessible name reads "Help" ("Aide" in French) (Rule 27b; the guard of the retired [A1](#a1)) [report 2026-10-03]
   - the public header in a narrow window on French pages: the menu button's name is French, not "Open Menu" (the guard [A7](#a7)'s issue report proposes) [report 2026-10-03]
   - the item window's "Navigation Menu Type": choosing a type and then "Choose a type..." keeps the heading and returns the line under the list to its first text (the guard [A12](#a12)'s issue report proposes) [report 2026-10-03]
   - the "Navigation" table after an item is renamed or removed: each menu's "Navigation Menu Items" cell follows without a reload (the guard [A15](#a15)'s issue report proposes) [report 2026-10-03]
@@ -1246,7 +1246,6 @@ Left out of the scenarios above, by reason:
   - the notice area while an editorial page is left (Rule 31)
   - the Editor and the Production Editor on the Navigation tab: the same tab and the same offer as the Journal Manager in scenarios 3 to 7 (Actors row 1)
 - **Register carries it**:
-  - A1 (the help icon's raw name; Rule 27b; scenario 2 marks it)
   - A2 (a Section Editor's "Dashboard" opening the Profile page; Rule 19a)
   - A3 (the access-denied page's empty heading and last trail step; Rule 26a)
   - A4 (a site menu that cannot be added or edited; Rule 1b)
@@ -1300,7 +1299,6 @@ an entry notes otherwise; the team settles them on spec review.
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
-| [A1](#a1) | Screen readers announce the editorial header's "i" (help) icon as "##common.help##" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A2](#a2) | A Section or Guest Editor's "Dashboard" on the journal's public pages opens the Profile page, with no task count | 🐞 | low | issues (claude), 2026-10-29 — re-verified |
 | [A3](#a3) | The access-denied page a signed-in user gets has an empty heading and an unnamed browser tab | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A4](#a4) | Site Settings › "Navigation": "Add Menu" and a menu's "Edit" open nothing and leave the page dimmed | 🐞 | medium · crash: script | issues (claude), 2026-10-03 — re-verified |
@@ -1327,23 +1325,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS1](#ops1) | A preprint server's side menu has no "Content" group while public comments are off {OPS} | ✅ | minor | — |
 
 ### All apps
-
-<a id="a1"></a>
-**A1 — Screen readers announce the editorial header's "i" (help) icon as "##common.help##"** · 🐞 · low.
-The "i" icon at the top right of every editorial page should be
-announced as "Help". A screen reader announces it as the raw
-translation key "##common.help##" instead, in every language, English
-included. Editors meet it on every editorial page; Authors on My
-Submissions, the submission form, their submission's page and their
-profile.
-
-The same icon sits again in the dark bar atop each window that slides
-in from the right, such as the Tasks window, with the same name there.
-
-Sighted users never see the raw key: the icon shows no text and has no
-tooltip. It still opens the "Learning OJS" ("Learning OMP", "Learning
-OPS") guide in a new tab.
-Since: 2025-04-10 · Basis: probe, 2026-10-03. <sup>f-a1</sup>
 
 <a id="a2"></a>
 **A2 — A Section or Guest Editor's "Dashboard" on the journal's public pages opens the Profile page, with no task count** · 🐞 · low.
@@ -1706,6 +1687,9 @@ Basis: probe, 2026-10-03. <sup>f-ops4</sup>
 
 ### Retired
 
+<a id="a1"></a>
+**A1 — Screen readers announced the "i" (help) icon as a raw code** · ✅ · retired. Fixed upstream (`pkp/ui-library#1046`, for `pkp/pkp-lib#12719`).
+
 <a id="a11"></a>
 **A11 — The item window refuses most saves without saying why** · ✅ · retired. Overturned: not a bug.
 
@@ -1909,7 +1893,7 @@ current one's; then `app__contextTitle`: `{url page="index"}` with the
 context name, else `{$siteTitle}` linking `{$baseUrl}`, else a plain
 `common.software`; then `{if $currentUser}` `<top-nav-actions>`.
 `TopNavActions.vue`: help link `v-if="helpUrl"`, `target="_blank"`,
-screen-reader `t('common.help')` (the key exists in no locale file, A1);
+screen-reader `t('help.help')` ("Help", "Aide" in French);
 `helpUrl` = `Application::getHelpUrl()` (OJS
 `https://docs.pkp.sfu.ca/learning-ojs/`, OMP `…/learning-omp/en/`, OPS
 `…/learning-ops/en/`); the Tasks button (the notifications spec); the
@@ -2701,6 +2685,14 @@ Administration, "Site Settings", "Hosted Journals" and "System
 Information" the sitemap icon (named "Journals", "Presses", "Servers")
 was followed by "Open Journal Systems" ("Open Monograph Press", "Open
 Preprint Systems") as plain text, no link.
+The raw name was fixed 2026-11-10 by `pkp/ui-library#1046` (backport
+`pkp/ui-library#1050` on `stable-3_5_0`). Walked 2026-11-11 (Rule 27b;
+all three apps): `dbarnes`'s header "i" icon and the Tasks window's strip
+are a link named "Help" to the Learning guide in a new tab, "Aide" with
+the interface in French, and the Author (`ccorino`, `aclark` on OMP) gets
+"Help" too; the header's named controls read "Skip to main content",
+"Skip to main navigation menu", the journal's name, "Help", "Tasks [n]"
+and the initials button.
 
 <a id="fn-td19"></a>
 **td19** — The initials menu is ui-library `Dropdown.vue` (inside
@@ -2815,20 +2807,6 @@ enrolling `admin` as manager (every `createContext` does); a throwaway
 browser context, signed out, that signs in as that `author` on the
 site's Login page; the address of the settings bullet {OJS OMP} is
 `index.php/index/management/settings/website`.
-
-<a id="fn-f-a1"></a>
-**f-a1** — `TopNavActions.vue` prints `t('common.help')` in the help
-link's `-screenReader` span; `common.help` exists in no `.po` file of any
-app, lib/pkp or ui-library, so `useLocalize()` returns the raw
-`##common.help##`. The span arrived with ui-library d0d5dfb9 (2025-04-10,
-pkp-lib#10779 "Redesigned Workflow rcX - Help modal") without the key.
-Seen on screen 2026-09-03, 2026-09-06, 2026-09-22 and 2026-09-23 by other
-features' probes and claim checks, all three apps, every role tried: the
-text "##common.help##" beside "Tasks" in the dashboard header, in the side
-windows' strips (the "Assign Participant" window, the upload wizard, the
-workflow windows) and in legacy windows' and the Settings › Workflow
-page's headers.
-Issue report: [docs/issues/U08-A1-help-icon-raw-key-name.md](../issues/U08-A1-help-icon-raw-key-name.md), filed as [pkp-e2e#640](https://github.com/jardakotesovec/pkp-e2e/issues/640).
 
 <a id="fn-f-a2"></a>
 **f-a2** — `PKPNavigationMenuService::getDisplayStatus()`,

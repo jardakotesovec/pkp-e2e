@@ -2585,7 +2585,8 @@ from?", "Publication Stage", "Revision Significance", "Major Revision"
 / "Minor Revision", "Placement", "Publication Timing", "Version and
 Updates", "Display", "Access", "Associated review round" with "Select
 a review round"; no code but the help icon's `##common.help##` (U08
-A1). Mechanism (read, not driven): the keys are missing from every
+A1; the icon reads "Help" since `pkp/ui-library#1046`, 2026-11-10).
+Mechanism (read, not driven): the keys are missing from every
 app's `fr_CA` locale files (`publication.versionSource.*`,
 `publication.versionStage.*`, `publication.revisionSignificance.*`,
 `publication.placement`, `publication.section.description`,

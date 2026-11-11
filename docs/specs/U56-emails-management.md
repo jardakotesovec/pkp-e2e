@@ -1484,7 +1484,8 @@ a reload and for the Site Administrator and the Journal or Press editor.
 Moderation)") and "Password Reset Confirm", untouched and after a saved
 edit, open "Edit Template" with Name, Subject, Body and "Save", no reset
 of any kind; only "Reset All" brought the edited one back. The windows'
-header also carries a help link reading "##common.help##". Code: `EditMailableModal.vue` shows
+header also carries a help link reading "##common.help##" (it reads
+"Help" since `pkp/ui-library#1046`, 2026-11-10). Code: `EditMailableModal.vue` shows
 `mailable.description`, `manager.mailables.addTemplates`, a `ListPanel`
 headed `manager.mailables.templates` "Templates" with `manager.emails.addEmail`
 "Add Template"; per item `localize(item.name)`, `Badge` `common.default`

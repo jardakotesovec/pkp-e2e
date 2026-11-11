@@ -196,8 +196,9 @@ effect.
   and role queries, and the focus with `document.activeElement` and its
   computed opacity; no screen reader was run, so what each one
   announces is unverified.
-- The help link's name "##common.help##" in the Observed block is a
-  separate finding (U08 A1).
+- The help link's name "##common.help##" in the Observed block was a
+  separate finding (U08 A1), fixed on 2026-11-10 by
+  `pkp/ui-library#1046`; the link now reads "Help".
 - Tips walked (PostgreSQL, pkp/datasets c657990 of 2026-10-01): OJS
   b84f8e2e44 (pkp-lib ddd8ab243a, ui-library 64d6736318); OMP 3b0ecf794c
   and OPS c8af945bb7 (pkp-lib 3dc90c81a6, ui-library 280f98c570).

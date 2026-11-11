@@ -17,8 +17,9 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 🐞: S2 presses the help icon by its `target=_blank` link, never by
- *   its name, and asserts the guide's address only.
+ * - A1 ✅ (retired 2026-11-11: fixed upstream; its "Help" name is a Planned
+ *   assertion): S2 presses the help icon by its `target=_blank` link, never
+ *   by its name, and asserts the guide's address only.
  * - A11 ✅ (retired 2026-10-07: the refusal notices are a Planned assertion), A12 🐞: S5 asserts each refused save by the window staying
  *   open and nothing stored, never by the absence of a message or by the
  *   line under the type list.
@@ -289,8 +290,8 @@ test.describe('navigation menus & site chrome', () => {
         // The editorial header: Tab shows the two skip buttons; the dark
         // bar holds the server's name at the left and the "i" icon, the
         // Tasks bell and the initials at the right; the "i" icon opens
-        // "Learning OPS" in a new tab (A1: pressed by its link, not its
-        // name); the initials open "Change Language" with the two
+        // "Learning OPS" in a new tab (pressed by its link, not its name
+        // "Help"); the initials open "Change Language" with the two
         // interface languages, English ticked, then "Edit Profile" and
         // "Logout" (Rules 27, 27a–27c, 28).
         await expect(ed.initialsButton).toBeVisible({timeout: T});
