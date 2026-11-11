@@ -94,6 +94,13 @@ for (const f of specFiles) {
         const filed = [...(b + fn).matchAll(/^Issue report: .*?(docs\/issues\/[\w.-]+\.md)/gm)]
             .map((x) => x[1]).find(exists);
         if (filed) { refreshes.push({ ...item, why: `${filed}: its "Tracked in" lacks the entry` }); continue; }
+        // Its issue closed as fixed and its report deleted: the entry waits for the fix
+        // to show on every app (MAINTENANCE "A report's life"), it owes no report.
+        const closed = (b + fn).match(/^Issue report: \[pkp-e2e#(\d+)\]\([^)]*\) \(closed\b/m);
+        if (closed) { held.push({ ...item, why: `pkp-e2e#${closed[1]} closed, the fix not yet on every app` }); continue; }
+        // A regression report the upstream session deleted as acted on: the same wait.
+        const actedOn = (b + fn).match(/(docs\/reports\/[\w.-]+\.md)`? \(deleted [\d-]+ as acted on/);
+        if (actedOn && !exists(actedOn[1])) { held.push({ ...item, why: `${actedOn[1]} acted on, the fix not yet on every app` }); continue; }
         const report = openReports.get(`${spec}#${anchor}`)
             || ((b + fn).match(/docs\/reports\/[\w.-]+\.md/g) || []).find(exists);
         const incidental = incidentals.find((r) => r[0].startsWith(spec)
