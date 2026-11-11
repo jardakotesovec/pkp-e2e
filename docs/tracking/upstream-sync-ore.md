@@ -13,10 +13,10 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `aa4b02810f` | 2026-11-10 | claude (merge step asked in the thread, VM s1, the ore worktree: pkp/ojs#6058 (bozana `12899-ore`, `caf9206175`, the `lib/pkp` bump to `5f40e69aa9`) merged as `aa4b02810f`) |
-| pkp-lib | `6722bea1ed` (the branch tip, pkp/pkp-lib#13771 merged; ojs's pointer is the PR head `5f40e69aa9`, the same tree) | 2026-11-10 | claude (merge step asked in the thread, VM s1: `5f40e69aa9` has the patch-id of `main`'s reviewed head `b11ae35cb6` (pkp/pkp-lib#13751)) |
+| ojs | `81b4b1f5fc` | 2026-11-11 | claude (daily maintenance session, VM s0, the ore worktree: pkp/ojs#6034 and #6059, the two pointer bumps) |
+| pkp-lib | `5c3c5f9505` (the branch tip, pkp/pkp-lib#13773; ojs at it); ui-library `ebf241be` (the branch tip, pkp/ui-library#1052; ojs at it) | 2026-11-11 | claude (daily maintenance session, VM s0: both `=main`) |
 
-pkp-e2e `ore` tip: `d351b5d0` (2026-11-10, U66/U41 notes for pkp-lib#12899's ore port).
+pkp-e2e `ore` tip: `34731c21` (2026-11-11, U08 A1 and U03 A24 retired).
 
 ## Open
 
@@ -30,6 +30,15 @@ pkp-e2e `ore` tip: `d351b5d0` (2026-11-10, U66/U41 notes for pkp-lib#12899's ore
 
 ## Read log
 
+- **2026-11-11 (daily session, VM s0, the ore worktree) — ojs `ore` `aa4b02810f..81b4b1f5fc` (2 pointer bumps + 2 merges: pkp/ojs#6034, #6059); pkp-lib `ore` `6722bea1ed..5c3c5f9505` (1); ui-library `ore` `b1577b9c2c..ebf241be` (3). Read in full; baselines advanced; pkp-e2e `ore` `d351b5d0..34731c21`.**
+  - Runs (step 0): the pkp/ojs `ore` hook at `81b4b1f5fc` ([42870112875](https://github.com/pkp/ojs/actions/runs/42870112875), 2026-11-10 17:56, after pkp-e2e `ore` `d351b5d0`): green; the earlier run at `2ced3ae781` was cancelled by it.
+  - pkp-lib `5c3c5f9505` (pkp/pkp-lib#13773 for #13180, `=main e2078ce20e`, same patch-id) → the `main` read carries over. OJS `ore`'s committed `js/pkp.min.js` is still the 2026-08-27 build, as on `main`.
+  - ui-library `b94ea735` (pkp/ui-library#1047, a 19-file change under the same issue) reverted by `f479ed79` (#1051), then `ebf241be` (#1052, `=main 55ec62ee`): the range's net diff is `55ec62ee`'s two files. Regression none, security none.
+  - Pointer bumps `4816d8eb38` + merge `2ced3ae781` (ui-library to `ebf241be`), `4f47db453b` + merge `81b4b1f5fc` (pkp-lib to `5c3c5f9505`).
+  - Carried: main's `9058e21d` (U08 A1) cherry-picked as `10500323`, conflicts resolved to ore's text (ore keeps a Retired summary row, its lint's rule); main's `296f5da0` (U03 A24) applied by hand as `34731c21` (ore's entry has its earlier form, no report, no suite-header mention). Walks on fresh ore dataset fleets (OJS): `help-icon-raw-key-name/walk.js` "Help"/"Aide"; `profile-contact-save-script-error/walk.js` (copied from `main` for the run, not committed) 0 page errors, the marker right.
+  - Gate: pkp-e2e `ore` push run [43012651437](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43012651437) at `34731c21`: 3/3 green.
+  - Carried over: today's `main` sync confirmed no regression. Open regression rows: no row's code moved.
+  - Security: none routed.
 - **2026-11-10 (merge step asked in the thread by bozana, VM s1, the ore worktree) — pkp-lib#12899's `ore` port: pkp-lib `ore` `5598f13905..6722bea1ed` (pkp/pkp-lib#13771, bozana, `5f40e69aa9`, merged 13:33 UTC), ojs `ore` `8e022b2591..aa4b02810f` (pkp/ojs#6058, the pointer bump to `5f40e69aa9`). Not PR-reviewed before the merge; it is `main`'s reviewed patch. Baselines advanced; pkp-e2e `ore` `6c860586..d351b5d0`.**
   - Merges: `5f40e69aa9` has the patch-id of `main`'s reviewed head `b11ae35cb6` (and of `main`'s merge `8888001f0a`), the same six files; the merge `6722bea1ed` has its tree. OJS `ore`'s `lib/pkp` is the PR head `5f40e69aa9`, the same tree as the pkp-lib `ore` tip. pkp/pkp-lib#13743 (#12520) still has no `ore` port, so that fault stays on `ore`.
   - Walked at the tip (OJS `aa4b02810f`, `lib/pkp` `5f40e69aa9`), with `main`'s kept scripts copied into the worktree for the run and removed after (`walk.js` with `WALK_DB=ojs_test_s5_ds1` for its one query): on a fresh dataset fleet (`.reports/pr12899o/`) `0a/b-c.12`, `0ab cde12`, `0abcil012`, `0213RCC28`, `0213ICC28` refused `400` by institutions, affiliations, funders and `rors`; `0213rcc28`, `05njb9z20` saved `200`; the author's affiliation put back. `migration.js` on a fresh campaign fleet (`.reports/pr12899om/`): the 16 upgrade-step cases as at `main`'s head.
