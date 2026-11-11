@@ -779,7 +779,7 @@ Left out of the scenarios above, by reason:
   - the guard for A16 (issue report `docs/issues/U48-A16-body-text-cite-never-enabled.md`): "Cite" on "Body Text" is greyed on arrival and, with the cursor in the text, places a citation when pressed with the mouse and from the keyboard. [report 2026-10-02]
   - the guard for A17 (issue report `docs/issues/U48-A17-body-text-side-section-needs-two-presses.md`): pressing "Document Outline" with "References" open opens "Document Outline" alone, and selecting a word opens "Selected Element" alone. [report 2026-10-02]
   - the guard for A1 (issue report `docs/issues/U48-A1-jats-make-available-offered-then-refused.md`): an assigned Layout Editor without "Permissions" sees "Make available with publication" greyed on "JATS XML". [report 2026-10-02]
-  - the guard for A2 (issue report `docs/issues/U48-A2-body-text-save-offered-then-refused.md`): an assigned Layout Editor without "Permissions" sees the "Body Text" read-only, with no "Save". [report 2026-10-02]
+  - the guard for A2 (issue report `docs/issues/U48-A2-body-text-save-offered-then-refused.md`): an assigned Layout Editor without "Permissions" sees the "Body Text" read-only, with no "Save", and "Export" still offered, greyed out while nothing is saved and exporting only the saved text. [report 2026-11-11]
   - the guard for A8 (issue report `docs/issues/U48-A8-published-jats-xml-stays-old-after-edit.md`): with "Make available with publication" ticked, a reader who downloaded "JATS XML" gets the corrected title right after the editor edits it, and the published XML right after publishing. [report 2026-10-02]
   - the guard for A9 (issue report `docs/issues/U48-A9-published-jats-xml-name-url-path.md`): with a URL path set, the downloaded "JATS XML" is named "<path>-publication-<id>-jats.xml", and a reader who downloaded it before the path changed gets the new name. [report 2026-10-02]
   - the guard for A14 (issue report `docs/issues/U48-A14-body-text-opens-with-unsaved-changes.md`): a never-saved Body Text opens without "Unsaved Changes", and "Save" reads "Saved" only when the text is saved, "Send to Text Editor" with an image included. [report 2026-10-02]
@@ -899,7 +899,7 @@ entry notes otherwise; the team settles them on spec review.
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A1](#a1) | A Layout Editor, other assistant or Guest Editor without "Permissions" is offered "Make available with publication", and "Confirm" is refused | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A2](#a2) | A Layout Editor without "Permissions" can write on "Body Text", but "Save" is refused and the text is lost | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
+| [A2](#a2) | A Layout Editor without "Permissions" can write on "Body Text", but "Save" is refused and the text is lost | 🐞 | medium | issues (claude), 2026-11-11 — re-verified |
 | [A6](#a6) | A new or older article version's JATS XML carries the current version's galley text, not its own | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A7](#a7) | An article's generated JATS XML gives its HTML galley as one paragraph with the tags as text | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A8](#a8) | Readers download an article's old JATS XML for up to a day after the editor corrects or publishes it | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
@@ -943,26 +943,23 @@ Basis: probe, 2026-10-02. <sup>f-a1</sup>
 
 <a id="a2"></a>
 **A2 — A Layout Editor without "Permissions" can write on "Body Text", but "Save" is refused and the text is lost** · 🐞 · medium.
-A Layout Editor, Proofreader or other assistant assigned in Production,
-whose assignment has "Permissions" unticked, gets the text editor and an
-active "Save" on "Body Text". They can write for as long as they like;
-"Save" is then refused with a window "Error" reading "You are not
-allowed to edit this publication.". "Unsaved Changes" stays, and the
-text is lost when they reload or leave the page. The page lets anyone
-who can open it write, but the server saves the text only for people who
-may change the publication. For a Layout Editor or other assistant, that
-means an editor has ticked "Permissions" on their assignment. An editor
-can do that, but what was typed before is gone unless the person copied
-it out. The same person may still use "Export" (Rule 24): "Export to
-HTML" and "Create PDF" turn the unsaved text into the version's "HTML"
-and "PDF" galleys. What they wrote is then kept only in those galleys,
-which readers get once the version is published, while "Body Text"
-loses it. "Permissions" is unticked by default for the Guest Editor and
-every assistant role. So with default roles, every Layout Editor,
-Proofreader or other assistant assigned to an article in Production
-meets this.
-Basis: probe, 2026-10-02. <sup>f-a2</sup>
-Report: refresh owed — a probe of 2026-11-11 (note d33) found that the same Layout Editor's "Export to HTML" and "Create PDF" succeed and keep the unsaved text as galleys, so the text is not lost outright; the report's Summary, steps and Proposed fix (`WorkflowPublicationBodyText.vue`, `workflowConfigEditorialOJS.js`, `canEdit`, `saveDocument()`, `PKPBodyTextController`, `PublicationWritePolicy`) do not say what the read-only page does with "Export" (2026-11-11)
+A Guest Editor, Layout Editor, Proofreader or other assistant assigned
+in Production, whose assignment has "Permissions" unticked, gets the
+text editor and an active "Save" on "Body Text". They can write for as
+long as they like; "Save" is then refused with a window "Error" reading
+"You are not allowed to edit this publication.". "Unsaved Changes"
+stays, and the text is lost when they reload or leave the page. The page
+lets anyone who can open it write, but the server saves the text only
+for people who may change the publication. For a Guest Editor or an
+assistant, the server saves it only once an editor has ticked
+"Permissions" on their assignment. They may still use "Export": "Export
+to HTML" and "Create PDF" turn the unsaved text into the version's
+"HTML" and "PDF" galleys. What they wrote is then kept only in those
+galleys, which readers get once the version is published, while "Body
+Text" loses it. "Permissions" is unticked by default for the Guest
+Editor and every assistant role. So with default roles, all of them meet
+this on every article in Production they are assigned to.
+Basis: probe, 2026-11-11. <sup>f-a2</sup>
 
 <a id="a3"></a>
 **A3 — A published version's Body Text stays editable** · ❓ · minor.
