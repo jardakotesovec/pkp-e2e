@@ -355,6 +355,24 @@ Nothing on either page is required, and neither page has a form-level
       Run by a command-line tool or a queued job, with no journal in the
       request, it makes the "PDF" galley but stops with an error for the
       "HTML" one ⚠ [A24](#a24). <sup>d34</sup>
+    - 24f. **Citations.** In both exports, each in-text citation links to
+      the reference it cites, in a section headed "References" that the
+      export adds at the end of the text. The section lists only the cited
+      references, in the order of the side panel's "References", without
+      numbers. A citation whose text is numbers alone, bare or in brackets
+      or parentheses (the editor's own "[10]", the number the panel shows
+      beside the reference, or a year typed over it in "Selected Element"
+      as "(2021)"), shows instead the reference's place in the panel's
+      list ("[2]", "(2)"), the references left uncited counted too. A
+      citation to two references or more keeps its text and is followed by
+      one link per reference, "(Reference 2; Reference 4)" ⚠ [A28](#a28).
+      A citation to a reference since deleted on "References" stops
+      "Export to HTML" and "Preview: PDF": a window "Error" reads "Unable
+      to export references. Missing reference IDs: 12. Citations with
+      invalid or empty sources: 0." with "OK", and no galley changes ⚠
+      [A27](#a27). The generated XML's body (Rule 23) then ends with the
+      heading "References" and the cited references, which its reference
+      list holds too. <sup>d35</sup>
 
 ## Side effects
 
@@ -813,6 +831,12 @@ Left out of the scenarios above, by reason:
     page's XML holds the text in its body [incidental 2026-11-11]
   - a new version's first export (Rule 24c): its "HTML" galley reads
     "Revision 2" on "Galleys" after one export [incidental 2026-11-11]
+  - citations in the export (Rule 24f, footnote d35; pkp/pkp-lib#13767):
+    two of a version's four references dragged into the text; "Export
+    to HTML" makes an "HTML" galley whose two citations link to a
+    "References" section holding those two references; after one of
+    them is deleted on "References", "Export to HTML" stops with the
+    window "Error" and the galley is unchanged [upstream 2026-11-11]
   - an export with nothing in the editor (Rule 24a): "Export to HTML"
     makes an "HTML" galley with no text [incidental 2026-11-11]
 - **Nothing new to test**:
@@ -922,6 +946,8 @@ entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | "Upload" on "JATS XML" accepts a text file or a PDF as the article's JATS XML | ❓ | minor | — |
 | [A19](#a19) | Signed in for the "JATS XML" download, the visitor is left on the Login page | ❓ | minor | — |
 | [A25](#a25) | "Create PDF" on a version with an uploaded "PDF" galley adds a second "PDF", and readers see "PDF" twice | ❓ | user-visible | — |
+| [A27](#a27) | A citation to a reference deleted on "References" stops every export of the Body Text until it is found and removed | ❓ | user-visible | — |
+| [A28](#a28) | A citation to several references is exported with "(Reference 2; Reference 4)" written after it | ❓ | user-visible | — |
 
 ### All apps
 
@@ -1253,6 +1279,33 @@ what is too large nor how large it may be; the save should be refused
 with that, not fail.
 Basis: probe, 2026-11-11. <sup>f-a26</sup>
 
+<a id="a27"></a>
+**A27 — A citation to a deleted reference stops every export** · ❓ · user-visible.
+When a reference cited in the Body Text is deleted on "References", the
+citation stays in the text with its number, and "Export to HTML" and
+"Preview: PDF" both stop with a window "Error": "Unable to export
+references. Missing reference IDs: 12. Citations with invalid or empty
+sources: 0.", until the citation is found and deleted or pointed at
+another reference. Before the citations were linked, the export kept
+such a citation as text.
+Question: should a citation to a missing reference stop the export, or
+be exported as text without a link, with a warning? Lean: export with a
+warning; the error stops the whole galley over one citation, and the
+editor shows nothing to tell which citation lost its reference beyond
+its number.
+Since: the PR review of pkp/pkp-lib#13767 (ui-library#1053, not merged) · Basis: probe, 2026-11-11. <sup>d35</sup>
+
+<a id="a28"></a>
+**A28 — A citation to several references gets "(Reference 2; Reference 4)" after it** · ❓ · user-visible.
+In both exports, a citation to two references or more keeps its own
+text, "[2, 4]", and is followed by a smaller "(Reference 2; Reference
+4)", one link per reference, so readers see the numbers twice.
+Question: should the numbers inside the citation be the links instead
+("[<u>2</u>, <u>4</u>]"), as the issue's example links the marker
+itself? Lean: link the numbers in place where the text is numbers alone,
+and keep the trailing links only for text that names no number.
+Since: the PR review of pkp/pkp-lib#13767 (ui-library#1053, not merged) · Basis: probe, 2026-11-11. <sup>d35</sup>
+
 ### Retired
 
 <a id="a18"></a>
@@ -1413,6 +1466,9 @@ d6, d20, d28).
 
 <a id="fn-d34"></a>
 **d34** — Rule 24e: no screen reaches the export outside a web request; only the page's "Export" menu calls it, and its requests carry the journal. Probed 2026-11-09 with a command-line tool (note f-a24); not driven on a screen 2026-11-11 (note d33).
+
+<a id="fn-d35"></a>
+**d35** — Rule 24f, at the PR heads, before their merge: ui-library `aa2485f872` (`pkp/ui-library#1053`), pkp-lib `5575e6ce33` (`pkp/pkp-lib#13776`, two English strings), ojs `2e292ffc28` (`pkp/ojs#6060`, the pointers), for `pkp/pkp-lib#13767`. `BodyTextEditor.vue::getHTML()` (the one source of "Export to HTML", "Preview: PDF" and "Create PDF"; "Save" stores the editor's JSON and does not pass through it) now calls `editorDocumentToHTML(doc, references, {heading: t('submission.citations'), linkLabel})`, which runs `bodyTextReferenceExport.js::exportBodyTextReferences()` on the serialized HTML: every `<cite data-source>` is read with `SourceField.fromString()`; an id that is neither a reference of the version nor a `[data-type="reference"]` entry of the document, or a source that does not decode as a JSON list of the same length, throws `ReferenceExportError`, shown through `showExportError()` as `publication.bodyText.error.unresolvedReferences`. The cited references, in the panel's order, are appended as `<p data-type="reference" id="body-text-ref-<id>">` in a `<section class="body-text-references" aria-label="References"><h2>References</h2>` (or after the document's own last reference entry); `referenceNumbers` numbers every reference of the version by its place in the panel's list; `updateNumericCitationMarker()` rewrites a marker of digits only (no locator, prefix or suffix) with those numbers; a citation to one reference is wrapped in `<a href="#body-text-ref-<id>" aria-label="Reference N">`, one to several gets a `span.body-text-citation-targets` " (…; …)" of such links after it. Driven 2026-11-11 on OJS, freshly reset, a tagged Production submission in `publicknowledge` whose four references took ids 9–12 (a decoy submission seeded first), as `manager.maya` (`shared/playwright/checks/sync/ui-library-1053/cite.js`): the editor showed "[10]", "[12]" and "[10, 12]"; the "HTML" galley's file and the preview held "[2]", "[4]", "[2, 4] (Reference 2; Reference 4)" and a "References" section with Beta and Delta only, each link's target present and the first link scrolling to Beta; the "PDF" galley carried four link annotations with destinations. Delta deleted through the "References" page's API (`DELETE …/citations/12`, 200): the panel listed three references, the editor still showed "[12]", and both "Export to HTML" and "Preview: PDF" opened the window quoted in the rule, sending no request. The year typed as a citation's text and the XML's body by the regression reader, same heads, a scratch journal (`.reports/sync/rr1/`, S2 and S3): "Smith" and a citation to the second of two references whose "In-text citation" was set to "(2021)" in "Selected Element", "Update", "Save"; the editor read "Smith (2021)" after a reload, the exported galley a reader opens "Smith (2)" (link "(2)", `aria-label` "Reference 2"), since the guard before `updateNumericCitationMarker()` skips only a locator, prefix or suffix; the generated "JATS XML" `<body>` then held "Smith (2)", "References" and the reference's text, beside the same reference in `<back><ref-list>`.
 
 <a id="fn-s"></a>
 **s** — `SubmissionFile\Repository::add()` logs `SUBMISSION_LOG_FILE_UPLOAD` on the file (`submission.event.fileUploaded` "A file "{$filename}" was uploaded for submission {$submissionId} by {$username}.") and `SUBMISSION_LOG_FILE_REVISION_UPLOAD` on the submission (`submission.event.fileRevised` "Revision "{$filename}" was uploaded for file {$submissionFileId}."); `edit()` with a new `fileId` logs `submission.event.revisionUploaded` "A file revision "{$filename}" was uploaded for submission {$submissionId} by {$username}." on both; `delete()` logs `submission.event.fileDeleted` "A file "{$filename}" was deleted for submission {$submissionId} by {$username}." on both. Neither controller sends mail or creates notifications.
