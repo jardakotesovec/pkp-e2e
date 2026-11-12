@@ -201,13 +201,12 @@ long-standing behavior, and the hunt for bugs.
   accommodated in the version's folder by the session that reads the
   version (MAINTENANCE "The stable line", "The ore version"), as
   `main`'s accommodation was, carried over by hand.
-- **A test `main` gets later for a change the version has too** is
-  written for the version as well. When a coverage revision spends a
-  Planned item that came from upstream and the version carries that
-  change (its sync log shows the twin), the same bullet and assertion
-  go into the version's spec and suite and run green there. This holds
-  for items added after the version's copy of the feature was made (the
-  item's date says); an older item is `main`'s alone.
+- **The test for a change the version has too** is written for the
+  version as well, in the session that writes `main`'s: when the
+  version carries the change (its sync log shows the twin), the same
+  bullet and assertion go into the version's spec and suite and run
+  green there. Coverage that was owed on `main` before the version's
+  copy of the feature was made is `main`'s alone.
 - **A correction to a statement**, from something seen in passing, a
   drift sweep or an issue report, is carried to every version whose
   copy holds the same statement. The script or drive that showed it on

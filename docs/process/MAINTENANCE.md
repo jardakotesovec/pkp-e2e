@@ -102,10 +102,12 @@ mid-week.
 A ping about a developer's failing PR during the day follows "A
 developer's PR fails the suite".
 
-**This session never builds.** An upstream change that brings a new
-feature gets its rows (Triage below) and the housekeeping session builds
-it; a shipped spec grows here only by the same-day bullet (sync loop
-step 4), anything more is a Planned item for the housekeeping session.
+**This session never builds a feature.** An upstream change that
+brings a new feature gets its rows (Triage below) and the housekeeping
+session builds it. A shipped spec grows here by the same-day bullet,
+and for anything more by a revision this session runs itself once the
+day's ranges are read and judged (sync loop step 4): coverage is
+written at once, never left for another day.
 Incidentals, friction and flake diagnosis are the housekeeping session's
 too.
 
@@ -255,7 +257,10 @@ What is left, the next morning picks up from the files.
    - every weekday, the specs whose "Left out" lists hold **Planned**
      items ready to write, up to three a morning (as many as the four
      hours allow while their backlog is being cleared, above), in the
-     order of the backlog's section 5. That order puts first what keeps the suites in step
+     order of the backlog's section 5. Every session now writes its own
+     coverage at once (RUNBOOK "Revising a shipped feature"), so this
+     list is what was owed before that rule plus a guard whose bug has
+     since been fixed; when it is empty the step has nothing to do. That order puts first what keeps the suites in step
      with the apps (behavior the team shipped, a guard whose bug is now
      fixed, a coverage request), the oldest such item first; a guard
      whose bug is still open waits. Each spec goes through RUNBOOK
@@ -593,8 +598,11 @@ The apps move; the suite follows. The baselines live in
    given already holds, one bullet) becomes that bullet and an assertion
    in every suite the scenario's badge names; anything more (a scenario of
    its own, bullets across several scenarios, a given to widen) becomes a
-   **Planned** item in the spec's "Left out" list, for the housekeeping
-   session; the rest takes its usual reason word.
+   **Planned** item in the spec's "Left out" list, which this session
+   spends before it ends: once the day's ranges are read and judged, it
+   revises each such spec (RUNBOOK "Revising a shipped feature"), and a
+   revision it cannot finish stays mid-way for the next session to
+   resume first. The rest takes its usual reason word.
    Behavior that contradicts the linked issue's stated intention is a
    finding: a register entry with the commit and the issue in its footnote.
    A register entry the change retires moves to the register's Retired
@@ -1254,7 +1262,8 @@ or "Nothing new to test" moves it to **Planned**; so does a regression
 (a PR read, a CI failure, a user report) on one, unasked. To add or change a test, change or add its scenario
 first (through a writing agent, with the persona on the new text), then
 write the test from it, run it green, and update the PROGRESS test count;
-a request not written the same day is a **Planned** item in the spec.
+a request is written the same day (a ready Planned item does not
+outlive its session, RUNBOOK "Revising a shipped feature").
 A test with no scenario, or a scenario with no test in an app its badge
 names, is a defect either way: `node docs/process/lint/lint-spec.mjs
 --tests <spec>` reports both (the scenarios' badges against the suites'
@@ -1345,7 +1354,8 @@ the answer; the spec and the test are the record.
   (`VERSIONS.md` "After a feature is built").
   A fold that adds behavior to a shipped spec's body, from any source,
   spends its coverage as sync loop step 4 says: a bullet one scenario
-  plainly takes, with its assertions, or a **Planned** item.
+  plainly takes, with its assertions, or a **Planned** item the same
+  session spends through a revision before it ends.
   Maintenance never changes app code beyond what RUNBOOK step 10 allows,
   and never moves content routed to the private security repo.
 - **Keep CI balanced.** CI runs each app as three shards (`run-app.yml`);

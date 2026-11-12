@@ -273,13 +273,17 @@ verified, so there is no draft and no claim check. It starts in one of
 two ways:
 
 - **Planned items.** The spec's "Left out" list holds a **Planned**
-  bullet (TEMPLATE "Coverage"): coverage owed on the spec that was not
-  written on the spot, from an upstream sync, a coverage request or any
-  other session. That bullet is the spec's one backlog. Each item ends
-  with where it came from and the day it was added, which is what
-  `npm run backlog` orders the specs by. The housekeeping session
-  revises up to three such specs a morning, every ready Planned item of
-  a spec in one pass.
+  bullet (TEMPLATE "Coverage"): coverage owed on the spec, from an
+  upstream sync, something seen in passing, a drift sweep, a coverage
+  request or any other session. Each item ends with where it came from
+  and the day it was added. **A ready Planned item does not outlive the
+  session that wrote it**: the session that adds one revises the spec
+  for it before it ends, every ready item of the spec in one pass. A
+  session that has to end first leaves the revision mid-way with its
+  sheet, and the next session resumes it before anything new. The one
+  item that stays is a guard that waits for an open 🐞's fix. What was
+  owed before this rule is the housekeeping session's to clear
+  (MAINTENANCE housekeeping step 8).
 - **A rule change.** A new coverage or scenario rule leaves shipped specs
   behind. The maintainer opens the queue `docs/tracking/coverage-revision.md`,
   one row per spec, deleted when it empties, and launches each revision
