@@ -1,25 +1,35 @@
 // U30 claim check, chunk K1: the editor's "Author Response" table on the OJS
 // review stage — placement, "Response Status", when "Request Response" is
 // enabled, the settings behind it ("Minimum Confirmed Reviews Required",
-// "Notify All Authors") and who is named on the request.
+// "Notify All Authors") and who is named on the request — and where the
+// author's "Author Response" card sits on the stage (Rule 1's last sentence,
+// Rule 6's three states, S1 "The author's view", notes c and h).
 // Spec: docs/specs/U30-author-response-to-reviews.md — Purpose (14–30),
-// Rules 1–3 (87–126), Rule 13 (280–292), Coverage (351–405).
+// Rules 1–3 (84–126), Rule 6 (185–205), Rule 13, S1 (458–463), Coverage.
 //
-// Seeds its own scratch context (a journal with "Minimum Confirmed Reviews
-// Required" 1) plus throwaway submissions on the seeded journal, signs in
-// from the roster and records every screen with screen().
+// Seeds its own scratch context(s) (a journal with "Minimum Confirmed Reviews
+// Required" 1; a journal on open review for the author's Reviewers panel)
+// plus throwaway submissions on the seeded journal, signs in from the roster
+// and records every screen with screen(). This one file is the whole drive:
+// no other script and no input file. Each run keeps its state in
+// outFile('k1-state.json'), so give each run its own PROBE_RUN and run both:
 //
-//   PROBE_FEATURE=U30 PROBE_AGENT=ccK1 node bin/probe.js ojs shared/playwright/checks/U30/K1/k1.js
-//   PHASES=seed,table,card,request,author,response,scratch,notify   (default: all; later phases reuse k1-state-ojs.json)
+//   PROBE_FEATURE=U30 PROBE_AGENT=ccK1s PROBE_RUN=r1 PROBE_NOTES_FEATURE=U30 node bin/probe.js ojs shared/playwright/checks/U30/K1/k1.js
+//   PROBE_FEATURE=U30 PROBE_AGENT=ccK1s PROBE_RUN=r2 PROBE_NOTES_FEATURE=U30 node bin/probe.js ojs shared/playwright/checks/U30/K1/k1.js
+//   PHASES=seed,table,card,request,author,states,open,response,scratch,notify   (default: all; later phases reuse the run's state file)
+//   the card-placement drive alone: PHASES=seed,card,request,author,states,open
+//
+// OJS only: the table and the card exist nowhere else (note a), so `all`
+// skips OMP and OPS.
 const fs = require('fs');
-const path = require('path');
-const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outDir} =
+const {forEachApp, launch, signIn, signOut, screen, shot, record, loc, note, idle, tag, outFile} =
     require('../../../probe');
 
-const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ['seed', 'table', 'card', 'request', 'author', 'response', 'scratch', 'notify'];
+const PHASES = process.env.PHASES ? process.env.PHASES.split(',') : ['seed', 'table', 'card', 'request', 'author', 'states', 'open', 'response', 'scratch', 'notify'];
 const on = (p) => PHASES.includes(p);
 const log = (...a) => console.log(...a);
-const scratchFile = (app) => path.join(outDir(), `k1-state-${app.name}.json`);
+// state per run: outFile() carries PROBE_RUN and the app, so r1 and r2 never share it
+const scratchFile = () => outFile('k1-state.json');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const RESPONSE_TEXT = 'We added the control group the reviewer asked for.';
@@ -44,6 +54,30 @@ async function dialogTexts(page) {
 }
 const wfModal = (page) => page.locator('[role="dialog"]:visible').last();
 
+// Where the card sits: every visible h2–h4 of the workflow dialog in DOM
+// order with its tag and its top on the page (DOM order and drawn order can
+// differ), the card's index among them, what follows it, and the card's box.
+async function placement(page) {
+    const wf = page.getByRole('dialog').first();
+    return wf.evaluate((root) => {
+        const hs = [...root.querySelectorAll('h2, h3, h4')].filter((h) => h.offsetParent !== null);
+        const list = hs.map((h) => ({tag: h.tagName.toLowerCase(), text: h.innerText.trim(), top: Math.round(h.getBoundingClientRect().top + window.scrollY)}));
+        const i = list.findIndex((h) => h.text === 'Author Response');
+        const card = i >= 0 ? hs[i] : null;
+        const sortedByTop = [...list].sort((a, b) => a.top - b.top).map((h) => h.text);
+        return {
+            headings: list,
+            drawnOrderMatchesDom: JSON.stringify(sortedByTop) === JSON.stringify(list.map((h) => h.text)),
+            cardIndex: i,
+            cardIsLast: i >= 0 && i === list.length - 1,
+            before: i > 0 ? list[i - 1].text : null,
+            after: i >= 0 && i < list.length - 1 ? list.slice(i + 1).map((h) => h.text) : [],
+            cardBox: card ? card.parentElement.innerText.trim() : null,
+            cardButtons: card ? [...card.parentElement.querySelectorAll('button')].map((b) => b.innerText.trim()) : [],
+        };
+    });
+}
+
 // The workflow screen is a side modal: screen() carries it in aria.dialogs.
 // This adds the verbatim text, the panel headings in order, the table's
 // rows (DOM text and rendered text per cell) and the button state.
@@ -52,6 +86,7 @@ async function captureWorkflow(page, name) {
     s.dialogText = await dialogTexts(page);
     const wf = page.getByRole('dialog').first();
     s.panels = await wf.locator('h3, h4').allInnerTexts().catch(() => []);
+    s.order = await placement(page).catch((e) => ({error: String(e.message).slice(0, 200)}));
     s.requestResponse = await buttonState(page.getByRole('button', {name: 'Request Response', exact: true}));
     const table = page.getByRole('table', {name: 'Author Response'});
     s.table = null;
@@ -171,15 +206,15 @@ async function authorWindow(page, name) {
 
 forEachApp(async (app) => {
     if (app.name !== 'ojs') return; // the chunk is OJS-only (the table exists nowhere else)
-    let sc = fs.existsSync(scratchFile(app)) ? JSON.parse(fs.readFileSync(scratchFile(app), 'utf8')) : {};
-    const saveScratch = () => fs.writeFileSync(scratchFile(app), JSON.stringify(sc, null, 2));
+    let sc = fs.existsSync(scratchFile()) ? JSON.parse(fs.readFileSync(scratchFile(), 'utf8')) : {};
+    const saveScratch = () => fs.writeFileSync(scratchFile(), JSON.stringify(sc, null, 2));
     const done = (name, data) => { record(`k1-${name}`, data); log(`[${name}]`, JSON.stringify(data).slice(0, 1200)); };
     const ctx = app.contextPath;
 
     // ---- seed: four submissions on the seeded journal, one scratch journal with two ----
     if (on('seed')) {
         const seedPk = async (key, reviewers, extra = {}) => {
-            const t = tag('u30k1' + key.toLowerCase());
+            const t = tag('u30k1s' + key.toLowerCase());
             const title = `U30 K1 ${key} ${t}`;
             const r = await app.api.createSubmission({
                 tag: t, context: ctx, submitter: 'author.alex', title, section: 'ART',
@@ -197,8 +232,42 @@ forEachApp(async (app) => {
         ]);
         await seedPk('B', [{username: 'reviewer.julia', status: 'completed', recommendation: 'pendingRevisions', comments: 'The method needs a control group.'}],
             {participants: [{username: 'author.bea', role: 'author'}]});
+        // Rule 6's other two states, no request: R a Request Revisions round, C an accepted round
+        if (on('states')) {
+            for (const [key, decision] of [['R', 'requestRevisions'], ['C', 'accept']]) {
+                const t = tag('u30k1s' + key.toLowerCase());
+                const title = `U30 K1 ${key} ${t}`;
+                const r = await app.api.createSubmission({
+                    tag: t, context: ctx, submitter: 'author.alex', title, section: 'ART',
+                    decisions: ['sendExternalReview', decision],
+                    participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}],
+                    reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'completed', recommendation: 'pendingRevisions', comments: `Reviewer comments for K1 ${key}.`}]}],
+                });
+                sc[key] = {tag: t, title, id: r.submissionId, round: r.reviewRounds[0].id};
+            }
+        }
+        // open review: a journal whose reviews are open, so the author's Reviewers panel can show (note c)
+        if (on('open')) {
+            const t = tag('u30k1so');
+            const u = {mgr: `${t}m`, rv: `${t}r`, au: `${t}a`};
+            const c = await app.api.createContext({
+                tag: t, context: {name: `U30 K1 open ${t}`},
+                users: [
+                    {username: u.mgr, roles: ['manager'], givenName: 'Mira', familyName: 'Manager'},
+                    {username: u.rv, roles: ['externalReviewer'], givenName: 'Rowan', familyName: 'Openreviewer'},
+                    {username: u.au, roles: ['author'], givenName: 'Ada', familyName: 'Authoress'},
+                ],
+                review: {defaultReviewMode: 'open'},
+            });
+            const o = await app.api.createSubmission({
+                tag: `${t}s`, context: t, submitter: u.au, title: `U30 K1 O ${t}`, decisions: ['sendExternalReview'],
+                reviewRounds: [{reviewers: [{username: u.rv, status: 'completed', recommendation: 'pendingRevisions', comments: `Open reviewer comments for ${t}.`}]}],
+            });
+            sc.O = {tag: t, users: u, contextId: c.contextId, id: o.submissionId, round: o.reviewRounds[0].id, title: `U30 K1 O ${t}`};
+        }
+        if (on('scratch') || on('notify')) {
         // scratch journal: minimum 1
-        const t = tag('u30k1j');
+        const t = tag('u30k1sj');
         const u = {mgr: `${t}m`, rv1: `${t}r1`, rv2: `${t}r2`, au: `${t}a`};
         const c = await app.api.createContext({
             tag: t, context: {name: `U30 K1 ${t}`},
@@ -224,6 +293,7 @@ forEachApp(async (app) => {
         sc.J = {tag: t, users: u, contextId: c.contextId,
             S1: {id: s1.submissionId, round: s1.reviewRounds[0].id, title: `U30 K1 S1 ${t}`},
             S2: {id: s2.submissionId, round: s2.reviewRounds[0].id, title: `U30 K1 S2 ${t}`}};
+        }
         saveScratch();
         done('seeds', sc);
     }
@@ -241,6 +311,12 @@ forEachApp(async (app) => {
             }
             await loc(page, 'K1 table: "Request Response" header button', page.getByRole('button', {name: 'Request Response', exact: true}));
             await loc(page, 'K1 table: the "Author Response" table', page.getByRole('table', {name: 'Author Response'}));
+            await signOut(page);
+            // the sub-editor level: the assigned Section Editor on the ready round
+            await signIn(page, 'sectioneditor.ana');
+            await editorStage(page, app, ctx, sc.A2.id, sc.A2.round);
+            const ana = await captureWorkflow(page, 'table-A2-sectioneditor');
+            out.A2sectionEditor = {panels: ana.panels, table: ana.table, requestResponse: ana.requestResponse};
             done('table', out);
             await signOut(page);
         }
@@ -252,7 +328,7 @@ forEachApp(async (app) => {
             for (const key of ['A1', 'A2']) {
                 await authorStage(page, app, ctx, sc[key].id, sc[key].round);
                 const s = await captureWorkflow(page, `author-stage-${key}-no-request`);
-                out[key] = {panels: s.panels, cardHeading: await page.getByRole('dialog').first().getByRole('heading', {name: 'Author Response'}).count(), submitResponse: await buttonState(page.getByRole('dialog').first().getByRole('button', {name: 'Submit Response', exact: true}))};
+                out[key] = {panels: s.panels, order: s.order, cardHeading: await page.getByRole('dialog').first().getByRole('heading', {name: 'Author Response'}).count(), submitResponse: await buttonState(page.getByRole('dialog').first().getByRole('button', {name: 'Submit Response', exact: true}))};
             }
             done('card', out);
             await signOut(page);
@@ -303,7 +379,99 @@ forEachApp(async (app) => {
             await modal.waitFor({state: 'hidden', timeout: 30_000}).catch(() => {});
             await idle(page);
             const afterSubmit = await captureWorkflow(page, 'author-stage-B-after-submit');
-            done('author', {panels: st.panels, notifications: notif, boxes: s.authorBoxes, submitState, cardAfter: (afterSubmit.dialogText[0] || '').match(/Author Response[\s\S]{0,200}/)?.[0]});
+            // the same read after a reload
+            await authorStage(page, app, ctx, B.id, B.round);
+            const afterReload = await captureWorkflow(page, 'author-stage-B-after-submit-reload');
+            done('author', {panels: st.panels, order: st.order, notifications: notif, boxes: s.authorBoxes, submitState,
+                cardAfter: afterSubmit.order, cardAfterReload: afterReload.order});
+            await signOut(page);
+        }
+
+        // ---- states: the card on a Request Revisions round and an accepted round, no request (Rule 6) ----
+        if (on('states')) {
+            await signIn(page, 'author.alex');
+            const out = {};
+            for (const key of ['R', 'C']) {
+                await authorStage(page, app, ctx, sc[key].id, sc[key].round);
+                await page.getByRole('dialog').first().getByRole('heading', {name: 'Author Response', exact: true}).waitFor({timeout: 15_000}).catch(() => {});
+                const st = await captureWorkflow(page, `author-stage-${key}`);
+                out[key] = {panels: st.panels, order: st.order, status: (st.dialogText[0] || '').match(/Round 1 Status\n+[^\n]*/)?.[0]};
+            }
+            await loc(page, 'K1s author stage: the "Author Response" card heading', page.getByRole('dialog').first().getByRole('heading', {name: 'Author Response', exact: true}));
+            // leave the response window with text typed and unsaved (R), then reopen it
+            // the accepted round's card opens the same window (read only, left by navigating away)
+            out.cWindow = await authorWindow(page, 'author-window-C').then((r) => r.s.authorBoxes).catch((e) => ({error: String(e.message).slice(0, 200)}));
+            const seen = [];
+            const onDialog = async (d) => { seen.push({type: d.type(), message: d.message()}); await d.accept().catch(() => {}); };
+            page.on('dialog', onDialog);
+            await authorStage(page, app, ctx, sc.R.id, sc.R.round);
+            const w = await authorWindow(page, 'author-window-R');
+            const body = w.modal.frameLocator('iframe').first().locator('body');
+            await body.click();
+            await body.pressSequentially('Unsaved text typed before Cancel.');
+            await w.modal.getByRole('button', {name: 'Cancel', exact: true}).click();
+            await sleep(2000);
+            await idle(page);
+            const leave = await screen(page);
+            leave.dialogText = await dialogTexts(page);
+            leave.browserDialogs = [...seen];
+            leave.windowStillOpen = await w.modal.isVisible().catch(() => false);
+            record('author-window-R-after-cancel', leave);
+            await shot(page, 'author-window-R-after-cancel').catch(() => {});
+            // a Vue confirm may stand over the stage: answer it with its own leave button, if any
+            const confirm = page.locator('[role="dialog"]:visible').filter({hasText: /unsaved|discard|leave/i}).last();
+            let confirmButtons = [];
+            if (await confirm.count()) {
+                confirmButtons = await confirm.getByRole('button').allInnerTexts();
+                const yes = confirm.getByRole('button', {name: /^(Yes|OK|Discard|Leave|Close)/}).first();
+                if (await yes.count()) { await yes.click(); await idle(page); }
+            }
+            const again = await authorWindow(page, 'author-window-R-reopened');
+            const reopenedText = await again.modal.frameLocator('iframe').first().locator('body').innerText().catch(() => null);
+            await again.modal.getByRole('button', {name: 'Cancel', exact: true}).click();
+            await sleep(1000);
+            page.off('dialog', onDialog);
+            out.leave = {browserDialogs: seen, vueDialogs: leave.dialogText.slice(1), windowStillOpen: leave.windowStillOpen, confirmButtons, reopenedText};
+            done('states', out);
+            await signOut(page);
+        }
+
+        // ---- open: an open-review journal, the author's Reviewers panel before and after "Mark as Complete" (note c) ----
+        if (on('open')) {
+            const O = sc.O, t = O.tag, u = O.users;
+            const out = {};
+            await signIn(page, u.mgr, {contextPath: t});
+            await editorStage(page, app, t, O.id, O.round);
+            out.editorBefore = (await captureWorkflow(page, 'open-editor-stage')).panels;
+            await page.getByRole('button', {name: 'Request Response', exact: true}).click();
+            await waitRequestPage(page);
+            await captureRequestPage(page, 'open-request-page');
+            out.sent = (await submitRequest(page, 'open-request-sent')).dialogText;
+            await signOut(page);
+            await signIn(page, u.au, {contextPath: t});
+            await authorStage(page, app, t, O.id, O.round);
+            const a1 = await captureWorkflow(page, 'open-author-unconfirmed');
+            out.unconfirmed = {panels: a1.panels, order: a1.order};
+            await signOut(page);
+            await signIn(page, u.mgr, {contextPath: t});
+            await editorStage(page, app, t, O.id, O.round);
+            await wfModal(page).getByRole('button', {name: 'Read Review', exact: true}).first().click();
+            const rd = page.getByRole('dialog').last();
+            await rd.waitFor({timeout: 30_000});
+            await page.waitForFunction(() => { const d = [...document.querySelectorAll('[role=dialog]')].pop(); return d && d.innerText.length > 200; }, null, {timeout: 15_000}).catch(() => {});
+            await idle(page);
+            await rd.getByRole('button', {name: 'Mark as Complete', exact: true}).click();
+            await idle(page);
+            await page.getByRole('dialog').last().getByRole('button', {name: 'Mark as Complete', exact: true}).last().click();
+            await idle(page);
+            await editorStage(page, app, t, O.id, O.round);
+            out.editorAfter = (await captureWorkflow(page, 'open-editor-stage-complete')).panels;
+            await signOut(page);
+            await signIn(page, u.au, {contextPath: t});
+            await authorStage(page, app, t, O.id, O.round);
+            const a2 = await captureWorkflow(page, 'open-author-confirmed');
+            out.confirmed = {panels: a2.panels, order: a2.order};
+            done('open', out);
             await signOut(page);
         }
 
@@ -322,7 +490,9 @@ forEachApp(async (app) => {
                 await more.click();
                 await idle(page);
                 menu = await page.locator('[role="menu"]:visible').getByRole('menuitem').evaluateAll((els) => els.map((e) => ({text: e.textContent.trim(), disabled: e.hasAttribute('disabled') || e.getAttribute('aria-disabled') === 'true'})));
-                await page.keyboard.press('Escape');
+                // never a page-level Escape (patterns pitfall 3b): close the menu on itself
+                const {closeMenu} = require('../../../support/menus.js');
+                await closeMenu(page);
                 await idle(page);
             }
             done('response', {table: s.table, requestResponse: s.requestResponse, beaRowMenu: menu});

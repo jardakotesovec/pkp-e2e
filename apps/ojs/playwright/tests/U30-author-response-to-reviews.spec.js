@@ -891,7 +891,7 @@ test.describe('author response to reviews', () => {
         await expect(table.moreActions(ALEX)).toHaveCount(0);
         await expect(table.requestResponseButton()).toBeDisabled();
 
-        // Control: the author's round 2 ends with no card; the request and
+        // Control: the author's round 2 shows no card; the request and
         // the response belong to round 1 alone (the round's own status box
         // is the positive control that the stage rendered).
         await authorWorkflow.selectRound(2);

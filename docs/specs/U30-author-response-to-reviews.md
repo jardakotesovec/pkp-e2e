@@ -88,7 +88,8 @@ form.
    author, columns "Author" and "Response Status", and the header button
    "Request Response"; once a response exists, a third column without a
    visible heading holds the row actions of Rule 10. In the author view
-   the same stage ends with a card headed "Author Response", only in the
+   the same stage shows a card headed "Author Response" below the
+   "Revisions Uploaded" panel and above the discussions, only in the
    states of Rule 6; in any other state the author sees no card. <sup>c</sup>
 
 <a id="status"></a>
@@ -457,8 +458,9 @@ the footnote. <sup>s</sup>
      request.
    - **The author's view**: Author: open the second submission's review
      stage from My Submissions: the "Notifications" list holds one row for
-     that email, and the stage ends with the card "Author Response"
-     reading "Respond to Reviews" with "Submit Response".
+     that email, and below "Revisions Uploaded" the stage shows the card
+     "Author Response" reading "Respond to Reviews" with "Submit
+     Response", above "Review Tasks & Discussions".
    - **Control**: the first submission's review stage shows the Author no
      "Author Response" card.
 
@@ -551,8 +553,9 @@ the footnote. <sup>s</sup>
      with "Submit Response".
    - **The card without a request**: the co-author opens the review stage
      from My Submissions. The status box reads "Revisions have been
-     requested." and the stage ends with the card "Author Response"
-     reading "Respond to Reviews" with "Submit Response".
+     requested." and below "Revisions Uploaded" the stage shows the card
+     "Author Response" reading "Respond to Reviews" with "Submit
+     Response", above "Review Tasks & Discussions".
    - **The co-author's response**: press it: under "Authors" the only box
      is the Author's name, the co-author having none; type "We will add
      the control group." in the "Author Response" box, tick the box and press
@@ -670,8 +673,9 @@ the footnote. <sup>s</sup>
    - **The author's past round**: Author: open the review stage from My
      Submissions and choose round 1 in the workflow menu: the status box
      reads "The submission has been advanced to the next round of review"
-     and the stage ends with the card "Author Response" reading "Respond
-     to Reviews" with "Submit Response"; press it, type "We answered the
+     and below "Revisions Uploaded" the stage shows the card "Author
+     Response" reading "Respond to Reviews" with "Submit Response", above
+     "Review Tasks & Discussions"; press it, type "We answered the
      first round's reviews." in the "Author Response" box, tick the one box and
      press "Submit Response": the card reads "A response was submitted by
      {name}", {name} being the Author.
@@ -681,7 +685,7 @@ the footnote. <sup>s</sup>
      first round's reviews."; choose round 2: the row still reads
      "Awaiting reviews" with no "…" and "Request Response" greyed.
    - **Control**: Author: choose round 2 in the workflow menu: the stage
-     ends with no "Author Response" card; the request and the response
+     shows no "Author Response" card; the request and the response
      belong to round 1 alone.
 
 ## Coverage
@@ -720,6 +724,8 @@ Left out of the scenarios above, by reason:
     name a round of another submission, in the same journal and in
     another, are refused and leave the response and the round as they
     were; the same requests with the submission's own round go through [upstream 2026-10-20]
+  - the author's card's place (Rule 1), which the author bullets of
+    scenarios 1, 4 and 8 check and the OJS suite does not assert yet [upstream 2026-11-12]
 - **Nothing new to test**:
   - Site Administrator (the Journal Manager's offer, scenarios 1 and 3)
   - Guest Editor (the Section Editor's gate, scenario 6)
@@ -858,6 +864,7 @@ invite author", as if the author had never been asked.
 No setting turns author responses on or off, so every OJS journal on
 `main` meets this.
 Since: 2026-01-23 (pkp/pkp-lib#12207) · Basis: probe, 2026-10-04. <sup>f-a7</sup>
+Report: refresh owed — pkp/ui-library#981 (`f2a4757a`, merged 2026-11-11) moved the author's "Author Response" card from the end of the round to below "Revisions Uploaded" and above "Review Tasks & Discussions", so step 4's "ends with the "Author Response" card" no longer holds; it touched `workflowConfigAuthorOJS.js`, where `AuthorResponseManager` now comes before `DiscussionManager`, and left the condition the Cause quotes unchanged, so the pinned line link there still reads true (2026-11-12)
 
 <a id="a8"></a>
 **A8 — A cancelled reviewer's effect was not seen** · ❓ · minor. Rule 3
@@ -932,7 +939,7 @@ Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-omp1<
 **b** — The response form is `lib/ui-library/src/managers/ReviewRoundResponseManager/useAuthorResponseForm.js`: `addFieldRichTextArea('authorResponse', {toolbar: 'bold italic underline bullist', isRequired: true, isMultilingual: true, label: submission.reviewRound.authorResponse})` and `addFieldOptions('associatedAuthorIds', 'checkbox', {options: authorOptions (the publication's authors), label: submission.authors, description: submission.reviewRound.associatedAuthors.description, isRequired: true})`; `setCanSubmit(canUserSubmitForm)` where `canUserSubmitForm` needs both `hasFormResponseValue` and `hasFormAuthorsValue`, plus (author) no existing response or (editor) an existing one. `isEditor` is `hasCurrentUserAtLeastOneAssignedRoleInStage(submission, stageId, [SUB_EDITOR, MANAGER, SITE_ADMIN])`, which is why an assigned Funding Coordinator (`ROLE_ID_ASSISTANT`) opens the window with "Save" greyed. Server side `ReviewRoundAuthorResponseCommonValidator::commonRules()` requires `authorResponse` (array) and `associatedAuthorIds` (array) and `commonAfter()` checks every id against the publication's authors (the round's `publicationId`, else the current publication). Live-probed 2026-09-06 (Fields rows 6–7): the button greys and enables with the text and the tick in every combination; `author.bea`, assigned on the stage but not a contributor, has no box, while a contributor added on the Contributors list without an account does; one editor box on the seeded journal (one form language).
 
 <a id="fn-c"></a>
-**c** — `workflowConfigEditorialOJS.js`, `[WORKFLOW_STAGE_ID_EXTERNAL_REVIEW].getPrimaryItems()`: `FileManager` (revisions), `FileManager` (review files), `ReviewerManager`, `AuthorResponseRequestManager` (props `submission`, `reviewRoundId`, `reviewRound`, `contextMinReviewsPerSubmission`, `stageId`), `DiscussionManager`, unconditionally. `workflowConfigAuthorOJS.js`, same stage: `WorkflowListingEmails`, `ReviewerManager` (when open/completed assignments exist), `FileManager`, `DiscussionManager`, then `AuthorResponseManager` only when `selectedReviewRound?.isAuthorResponseRequested` or `statusId ∈ {REVIEW_ROUND_STATUS_ACCEPTED, REVIEW_ROUND_STATUS_REVISIONS_REQUESTED}`. Table chrome: `AuthorResponseRequestManager.vue` (`PkpTable` label `submission.reviewRound.authorResponse` "Author Response", description `editor.submission.reviewRound.RequestAuthorResponse.description`); columns from `useReviewRoundAuthorResponseConfig::getColumns()` (`user.role.author` "Author", `editor.submission.reviewRound.responseStatus` "Response Status", and `grid.columns.actions` only when `reviewRound.authorResponse`); rows = participants of the stage whose stage assignment's user group has `roleId === ROLE_ID_AUTHOR` (`AuthorResponseRequestManagerStore::authors`, from `GET submissions/{id}/participants/{stageId}`). Live-probed 2026-09-06 (Rule 1): the table sits after "Reviewers" and before "Review Tasks & Discussions" for every editorial role and the Funding Coordinator; the "Actions" header is `<span class="sr-only">` and the column exists only once a response does (two headers before, three after, read again 2026-09-06); the author's card is an `h4` box after the discussions, absent before any request or decision; reached through the workflow menu from another stage the table first shows "No Items" and fills within seconds.
+**c** — `workflowConfigEditorialOJS.js`, `[WORKFLOW_STAGE_ID_EXTERNAL_REVIEW].getPrimaryItems()`: `FileManager` (revisions), `FileManager` (review files), `ReviewerManager`, `AuthorResponseRequestManager` (props `submission`, `reviewRoundId`, `reviewRound`, `contextMinReviewsPerSubmission`, `stageId`), `DiscussionManager`, unconditionally. `workflowConfigAuthorOJS.js`, same stage: `WorkflowListingEmails`; `ReviewerManager` (redacted) only when the round has an open-review assignment the editor has confirmed (`getOpenAndCompletedReviewAssignmentsForRound()`: `reviewMethod` open and `isConfirmedByEditor`); `FileManager`; then `AuthorResponseManager` only when `selectedReviewRound?.isAuthorResponseRequested` or `statusId ∈ {REVIEW_ROUND_STATUS_ACCEPTED, REVIEW_ROUND_STATUS_REVISIONS_REQUESTED}`; then `DiscussionManager`. That order holds since pkp/ui-library#981 (`f2a4757a`, merged 2026-11-11); before it `AuthorResponseManager` came after `DiscussionManager`. Table chrome: `AuthorResponseRequestManager.vue` (`PkpTable` label `submission.reviewRound.authorResponse` "Author Response", description `editor.submission.reviewRound.RequestAuthorResponse.description`); columns from `useReviewRoundAuthorResponseConfig::getColumns()` (`user.role.author` "Author", `editor.submission.reviewRound.responseStatus` "Response Status", and `grid.columns.actions` only when `reviewRound.authorResponse`); rows = participants of the stage whose stage assignment's user group has `roleId === ROLE_ID_AUTHOR` (`AuthorResponseRequestManagerStore::authors`, from `GET submissions/{id}/participants/{stageId}`). Live-probed 2026-09-06 (Rule 1): the table sits after "Reviewers" and before "Review Tasks & Discussions" for every editorial role and the Funding Coordinator; the "Actions" header is `<span class="sr-only">` and the column exists only once a response does (two headers before, three after, read again 2026-09-06); the author's card is an `h4` box (the stage's other panels are `h3`), absent before any request or decision; reached through the workflow menu from another stage the table first shows "No Items" and fills within seconds. Live-probed 2026-11-12 on OJS `main` (ojs `7fc2376322`, lib/ui-library `51f9eaa1`), two runs (Rule 1; scenarios 1 and 4's author bullets): as `author.alex` the card sits after "Revisions Uploaded" and before "Review Tasks & Discussions" on a requested round, on a "Revisions have been requested." round and on an accepted round, before and after a response and again after a reload, and is absent on a round with a review still out and on a ready round with no request; on an open-review scratch journal the author's "Reviewers" panel is absent while the open review is only submitted and shows between "Notifications" and "Revisions Uploaded" once the editor marked it "Complete" in Read Review, the card still after "Revisions Uploaded"; a completed anonymous review brings the author no "Reviewers" panel; `editor.diana`, an assigned `sectioneditor.ana` and a scratch Journal Manager see the table after "Reviewers" and before "Review Tasks & Discussions". Scenario 8's past round was not re-driven; its card comes from the same list, whose order does not depend on the round's state.
 
 <a id="fn-d"></a>
 **d** — `AuthorResponseRequestManagerCellStatus.vue`: `canRequestReviewRoundAuthorResponse` → `editor.submission.reviewRound.authorResponse.readyToInvite` "Ready to invite author" (CSS `capitalize`, so it may render with capitals) over `…editorCanRequest` "Editor can now request the author's response."; else `reviewHasResponse` → `editor.submission.reviewRound.responseWasSubmitted` "A response was submitted by {$userFullName}" (`authorResponse.submittedByUser.fullName`); else `submission.dashboard.view.awaitingReviews` "Awaiting reviews". The cell reads the store, not the row, so every row is identical. Live-probed 2026-09-06 (Rule 2): all three cells seen, identical on `author.alex`'s and `author.bea`'s rows; the DOM and accessible name read "Ready to invite author" while the rendered text is "Ready To Invite Author" (tests match the DOM string).

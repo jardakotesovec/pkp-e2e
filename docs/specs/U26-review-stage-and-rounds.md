@@ -1030,9 +1030,18 @@ selectedStage?.isCurrentUserDecidingEditor`, AFFW-328), `ParticipantManager`
 publicationSettings.isReviewerSuggestionEnabled`, AFFW-330). Author-view
 primary: `WorkflowListingEmails` (AFFW-350), redacted `ReviewerManager` (guard
 `getOpenAndCompletedReviewAssignmentsForRound(...).length`, AFFW-352),
-`FileManager` `WORKFLOW_REVIEW_REVISIONS` + `DiscussionManager` (AFFW-353),
+`FileManager` `WORKFLOW_REVIEW_REVISIONS` (AFFW-353), then
 `AuthorResponseManager` (guard: response requested or round status ∈
-{ACCEPTED, REVISIONS_REQUESTED}; owned by the author-response feature). Stage
+{ACCEPTED, REVISIONS_REQUESTED}; owned by the author-response feature), then
+`DiscussionManager` (AFFW-353). That order holds since pkp/ui-library#981
+(`f2a4757a`, merged 2026-11-11; OJS `7fc2376322`, `lib/ui-library`
+`51f9eaa1`), which moved the `DiscussionManager` push after the
+`AuthorResponseManager` block; before it the discussions came straight after
+the revisions panel. Driven on OJS 2026-11-12 (two runs): the author's panels
+read "Round 1 Status", "Notifications", "Revisions Uploaded", "Author
+Response", "Review Tasks & Discussions". OMP's `lib/ui-library` pin
+(`55ec62ee`) predates the reorder; a press renders no Author Response panel
+either way (note q). Stage
 access gate: `permissions.accessibleStages` (common config guard) — an
 inaccessible stage renders only "user.authorization.accessibleWorkflowStage"
 text. Round menu: `useWorkflowNavigationConfigOJS.js::getReviewItems()` →
