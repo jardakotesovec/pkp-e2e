@@ -170,6 +170,12 @@ a key built later is deleted from this list.
   them on the screen and put them back with the app's own
   `PUT index/api/v1/site`.
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
+- User: `users[].country` (the profile's country; a contributor copied from a
+  throwaway account has none, and the contributor "Edit" window refuses a
+  save without one, so U21 S5 picks it in that window).
+- Context: the "Copyright Year" basis of Settings › Distribution › License
+  (U40 S7 ticks "Use the article's publication date" on the screen, beside
+  the license, `licenseUrl`, which no key sets either).
 - Submission: `tasks[].ageMinutes` (a seeded discussion or task whose headnote
   is older than the one-hour edit window, pkp/pkp-lib#12278; a walk past the
   window waits it out in wall time).
