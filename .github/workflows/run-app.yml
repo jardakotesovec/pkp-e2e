@@ -124,6 +124,8 @@ jobs:
       TEST_API_KEY: ci-test-key
       MAILPIT_URL: http://127.0.0.1:8025
       PLAYWRIGHT_WORKERS: 4
+      # shared/playwright/support/database.js
+      PKP_E2E_DATABASE: ${{ inputs.database }}
     services:
       postgres:
         image: postgres:16
@@ -259,7 +261,9 @@ jobs:
           IMAGE: ${{ inputs.database == 'mysql' && 'mysql:8.0' || 'mariadb:10.11' }}
           DB: ${{ inputs.app }}_test
         run: |
-          docker run -d --name testdb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root "$IMAGE"
+          # Every deadlock goes to the server's log with both sides; the
+          # "Database log" step prints it when the job fails.
+          docker run -d --name testdb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root "$IMAGE" --innodb-print-all-deadlocks=ON
           # The image's first start runs a server without networking, so an
           # answer over TCP is the real one.
           for i in $(seq 1 60); do
@@ -407,6 +411,10 @@ jobs:
           if find $out -name error-context.md | grep -q .; then echo "attempt_failed=true" >> "$GITHUB_OUTPUT"; fi
           kill $cores_pid 2>/dev/null || true; node bin/ci-cores.js "$PKP_E2E_CORE_DIR" $logs/cores || true
           exit $rc
+
+      - name: Database log (MySQL or MariaDB, red jobs)
+        if: failure() && inputs.database != 'pgsql'
+        run: docker logs testdb 2>&1 | tail -400
 
       # Every server death of the job, green jobs included (a replayed or
       # retried request hides it from the test results): one log line each

@@ -48,7 +48,21 @@ const LINES = {
     'stable-3_4_0': {branch: 'stable-3_4_0', portShift: 2000, dbSuffix: '_3_4', overlays: 'install', php: '8.2', node: '16.20.2'},
     // 3.3 names its locales en_US-style (3.4 moved to `en`).
     'stable-3_3_0': {branch: 'stable-3_3_0', portShift: 3000, dbSuffix: '_3_3', overlays: 'install', php: '8.2', node: '12.22.12', locales: 'en_US,fr_CA'},
+    // The apps' `main` on another database (harness.md "Other databases and
+    // PHP versions"): a second install of `main` beside the PostgreSQL one,
+    // for reproducing what the daily configurations run shows. `db` names
+    // the server in DB_SERVERS. They run `main`'s suite; no lines/ folder.
+    'mysql': {branch: 'main', portShift: 9000, dbSuffix: '_my', overlays: 'main', db: 'mysql'},
+    'mariadb': {branch: 'main', portShift: 10000, dbSuffix: '_ma', overlays: 'main', db: 'mariadb'},
 };
+// The database servers of those lines: the versions PKP's own CI tests on
+// (pkp/pkp-github-actions), each in a container bin/db-server.js starts on
+// demand, shared by the machine's slots (the DB names carry the slot).
+const DB_SERVERS = {
+    mysql: {image: 'docker.io/library/mysql:8.0', port: 3308, container: 'pkp-e2e-mysql'},
+    mariadb: {image: 'docker.io/library/mariadb:10.11', port: 3309, container: 'pkp-e2e-mariadb'},
+};
+const DB_USER = 'pkp';
 const RUNTIMES_DIR = path.join(REPO_ROOT, 'checkouts', 'runtimes');
 
 // Parallel slots (harness.md "Slots"): slot n shifts every port (clear of the
@@ -89,6 +103,10 @@ function dbName(name, line = resolveLine()) {
 /** @returns {{name: string, branch: string, portShift: number, dbSuffix: string, overlays: string, php?: string, node?: string}|null} */
 function resolveLine(name = process.env.PKP_E2E_LINE) {
     if (!name || name === 'main') {
+        // PKP_E2E_PHP=php8.2 runs `main` on another PHP too.
+        if (process.env.PKP_E2E_PHP) {
+            usePhp({name: 'main'});
+        }
         return null;
     }
     if (!LINES[name]) {
@@ -96,8 +114,11 @@ function resolveLine(name = process.env.PKP_E2E_LINE) {
         process.exit(1);
     }
     const line = {name, ...LINES[name]};
-    if (line.php) {
+    if (line.php || process.env.PKP_E2E_PHP) {
         usePhp(line);
+    }
+    if (line.db) {
+        process.env.PKP_E2E_DATABASE = line.db; // shared/playwright/support/database.js
     }
     return line;
 }
@@ -118,7 +139,7 @@ function executable(file) {
  * build under checkouts/runtimes/php<version>/bin/php. Null when none exists.
  */
 function linePhpBinary(line) {
-    const wanted = process.env.PKP_E2E_PHP || `php${line.php}`;
+    const wanted = process.env.PKP_E2E_PHP || `php${line.php}`; // a line without `php` gets here only with PKP_E2E_PHP set
     if (wanted.includes('/')) {
         return executable(path.resolve(wanted)) ? path.resolve(wanted) : null;
     }
@@ -140,7 +161,7 @@ function linePhpBinary(line) {
 function usePhp(line) {
     const binary = linePhpBinary(line);
     if (!binary) {
-        console.error(
+        console.error(process.env.PKP_E2E_PHP ? `PKP_E2E_PHP=${process.env.PKP_E2E_PHP}: no such PHP binary` :
             `${line.name} runs on PHP ${line.php}, which is not installed: no php${line.php} on PATH and no ` +
                 `${path.relative(REPO_ROOT, path.join(RUNTIMES_DIR, `php${line.php}`, 'bin', 'php'))} ` +
                 `(harness.md "The stable lines"; PKP_E2E_PHP=<binary> tries another one)`,
@@ -224,4 +245,4 @@ function configuredApps() {
     return Object.keys(APPS).filter((name) => !!process.env[`${name.toUpperCase()}_ROOT`]);
 }
 
-module.exports = {APPS, LINES, REPO_ROOT, RUNTIMES_DIR, SLOT_PORT_STEP, slotPortShift, resolveApp, resolveLine, resolveSlot, dbName, configuredApps};
+module.exports = {APPS, LINES, DB_SERVERS, DB_USER, REPO_ROOT, RUNTIMES_DIR, SLOT_PORT_STEP, slotPortShift, resolveApp, resolveLine, resolveSlot, dbName, configuredApps};

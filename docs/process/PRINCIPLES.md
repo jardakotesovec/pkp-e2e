@@ -152,9 +152,14 @@ everything else is scratched.
   MySQL hides); a reset tool that forces a cold bootstrap.
 - **D8 — Database-driver agnostic.** Harness code runs against all supported
   databases: app services and the query builder only, no raw driver-specific
-  SQL. The single permitted driver dispatch is the reset tool's
-  drop-and-recreate step. The local fleets choose Postgres; nothing may
-  depend on it.
+  SQL. The permitted driver dispatches are two: the reset tool's
+  drop-and-recreate step, and the isolation level of a scenario build's
+  transaction (`SeedTransaction`). The local fleets choose Postgres;
+  nothing may depend on it, and the daily configurations run holds the
+  suites to that on MySQL and MariaDB (MAINTENANCE "The configurations
+  run"). A test asks which database it is on
+  (`shared/playwright/support/database.js`) only where the spec states
+  that the app answers differently by database.
 - **D9 — Never reach a state by editing the running configuration.** A
   config-dependent state (an expired invitation, a lapsed subscription) gets
   a schema key that produces it for that one entity. Editing

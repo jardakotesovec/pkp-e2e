@@ -62,7 +62,9 @@ The scheduled prompt only points here; this section is the day's order.
    report, a register entry or is dismissed, and its line is deleted).
 4. Check the latest `e2e-tests.yml` run on each app's `main` (harness.md
    "CI") and triage anything red against `ci-triage.md` before calling it
-   new. A daily check also catches a red nobody has reported yet.
+   new. A daily check also catches a red nobody has reported yet. Then
+   read the night's run on the other PHP versions and databases ("The
+   configurations run" below).
 5. Merge any companion whose app PR has merged ("A developer's PR fails
    the suite", step 5).
 6. Read the stable line for regressions ("The stable line:
@@ -74,7 +76,8 @@ The scheduled prompt only points here; this section is the day's order.
    folder `lines/ore/` follows with the same edits.
 7. End pushed: commit and push everything commit-worthy to pkp-e2e `main`,
    and post a one-paragraph summary to the channel: what was synced, what
-   was red and why, what was changed, what the stable line's read found,
+   was red and why, what was changed, what the configurations run
+   showed, what the stable line's read found,
    what `ore` received and whether its suite is green,
    how many security suspicions were read, reproduced and routed (counts
    only), with the day's regression report (sync loop step 5) attached as a file
@@ -891,6 +894,85 @@ section, `upstream-sync-ore.md`, `docs/reports/ore/` and
 `checks/sync/ore/`, and drop `ore` from ci-triage rows; the hook on
 pkp/ojs `ore` is the team's. `stable-3_6_0` gets its own folder, cut
 from `main` on the day PKP cuts the branch (`VERSIONS.md`).
+
+## The configurations run
+
+PKP tests the apps on several combinations of PHP and database: the
+matrix of `.github/workflows/main.yml` in pkp/ojs, the same in pkp/omp
+and pkp/ops. Every push, PR and app check of the campaign runs on one of
+them, PHP 8.3 with PostgreSQL 16. The others run once a day, at 00:37
+UTC, in the workflow `e2e-matrix.yml`: `main`'s three suites against
+the apps' `main` on
+
+| PHP | Database |
+|---|---|
+| 8.2 | PostgreSQL 16 |
+| 8.2 | MariaDB 10.11 |
+| 8.2 | MySQL 8.0 |
+| 8.3 | MySQL 8.0 |
+
+When a day's range changes the matrix in an app's `main.yml`, this
+table, `e2e-matrix.yml` and `run-app.yml` follow it the same day. The
+stable versions' folders are not run on them.
+
+The upstream session reads the night's run once `main` is synced and
+its own checks are triaged:
+
+1. **List.** `node bin/ci.js matrix` prints every test that failed on
+   both tries, with the configurations it failed on, in groups: new;
+   known (a row of ci-triage "Open — red on a configuration only");
+   failed on the usual configuration too (that one is ci-triage's
+   ordinary work, no configuration matter); and red, then green on the
+   retry (a flake: its sighting in "Flake watch" names the
+   configuration). A known row with no red test left is deleted once a
+   second night agrees.
+2. **Read a new red** from the run's evidence first: the artifact
+   `playwright-artifacts-<app>-<n>-php<version>-<database>` holds the
+   failed tries' pages and the servers' logs, the job log the
+   assertion, and on MySQL and MariaDB the step "Database log" every
+   deadlock with both of its sides. Then say whose it is:
+   - **The suite's.** The test or the seeding code leans on something
+     one database gives and another does not, while the app does
+     nothing a user would call wrong: the order of rows nobody ordered,
+     a lock the seeding holds. Fix it so it holds on every
+     configuration and checks no less on PostgreSQL, the same session.
+   - **The app answers differently by design.** Search matches words
+     as the database's own full-text search does; MySQL and MariaDB
+     compare text without regard to upper and lower case. The spec
+     says so where it states the behavior (a correction like any
+     other, "Fix stale artifacts"), and the test asks
+     `shared/playwright/support/database.js` which database it is on
+     and checks what the spec says for each. That helper is for this
+     case alone, never the way round a fault.
+   - **The app's fault.** On that configuration the app does what a
+     user would call wrong, or the database refuses its query.
+3. **Confirm a fault** before anything is written: reproduce it on a
+   reset database of the `mysql` or `mariadb` line (harness.md "Other
+   databases and PHP versions"; `PKP_E2E_PHP=php8.2` when the PHP
+   version is the suspect), with a script kept under
+   `shared/playwright/checks/sync/<slug>/`, and read the cause in the
+   code down to the statement at fault and the reason PostgreSQL does
+   not show it. Nothing unconfirmed reaches a report or a tag.
+4. **Report it** as the sync loop's step 5 reports a regression: the
+   report under `docs/reports/<date>-<repo>-<slug>.md` in REPORT.md's
+   shape, its Summary and steps naming the databases and PHP versions
+   that show it, its **Introduced** line the commit or PR that brought
+   the statement in (`git log -S`, `git blame`; REPORT.md says what to
+   write for a fault older than the history shows), posted in the
+   session's thread the same day tagging @beaug and the developer who
+   made that change ("Who is tagged"). Its Kind is a regression when
+   the configuration showed the behavior right before that change,
+   else a defect. The fault gets a row in ci-triage "Open — red on a
+   configuration only" (`C-<feature>-<n>`), which links the report and
+   the kept script, and an entry in the owning spec's register that
+   names the databases. The test stays red on that configuration until
+   the fix lands, as a known red on `main` does, and the row is the
+   record: no test is skipped or bent for it (PRINCIPLES M3). Anything
+   security-shaped goes the private way, as always.
+5. **Confirm a suite fix** by one run of the configurations it failed
+   on: `node bin/ci.js dispatch --apps <app> --php 8.2 --database mysql`
+   (`e2e.yml` takes one configuration; the push run covers the usual
+   one).
 
 ## Triage: where does a change land?
 

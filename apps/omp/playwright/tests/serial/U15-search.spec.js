@@ -47,6 +47,7 @@ const {
     declineFromStage,
 } = require('../../pages/SearchPages.js');
 const {WorkflowPage} = require('../../../../../shared/playwright/pages/WorkflowPage.js');
+const {onPostgres} = require('../../../../../shared/playwright/support/database.js');
 const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
 
 /** Unique per-run tag: a single alphanumeric token carrying app + scenario. */
@@ -243,7 +244,12 @@ test.describe('Search — the press Search page', () => {
         // holds "publications"; "publication" finds it; "child" finds
         // nothing although the title holds "children"; "children" finds it.
         await expectNothing('publi');
-        await expectFirstAlone('publication');
+        // A word's other forms and a hyphenated pair are matched as the
+        // database's own full-text search matches them (Rule 4 states
+        // PostgreSQL's): asked on PostgreSQL only.
+        if (onPostgres) {
+            await expectFirstAlone('publication');
+        }
         await expectNothing('child');
         await expectFirstAlone('children');
 
@@ -257,7 +263,9 @@ test.describe('Search — the press Search page', () => {
         // in the title.
         await expectFirstAlone(`"${wordA}"`);
         await expectFirstAlone(`${wordA} AND children`);
-        await expectNothing(`${wordA}-children`);
+        if (onPostgres) {
+            await expectNothing(`${wordA}-children`);
+        }
     });
 
     test('S3: Nothing found', async ({page, ompApi}, testInfo) => {

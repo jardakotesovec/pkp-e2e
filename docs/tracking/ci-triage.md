@@ -25,6 +25,18 @@ the log only says where to look.
 |----|---------------------------|------|-----------------|--------|-----------------------------|
 | K-U64-A19 | U64 S8 (COUNTER reports on "Counter R5"): `input[name="begin_date"]` expected the first of next month, received the first of the month after (2026-10-31: expected "2026-11-01", received "2026-12-01"), red at both tries. Journal B's only article is published on the day the test runs, and the app's month arithmetic overflows on 29–31 January and on 31 March, May, August and October | OJS OMP OPS | U64 A19, `docs/issues/U64-A19-counter-r5-earliest-date-skips-month-after-31st.md`, pkp-e2e#1079 (an app defect; the test is right) | Dormant: green on other days, red again on 2027-01-29 … 31 and every overflow day until `CounterR5Report::getEarliestDate()` is fixed upstream; a red on those days is this row, not a regression | 2026-10-31 (nightly 41164101437) / 2026-11-02 (walked on `main` and `stable-3_5_0`) |
 
+## Open — red on a configuration only
+
+Tests red in the daily configurations run (MAINTENANCE "The
+configurations run") and green on the usual configuration, each a
+confirmed fault of the app on that database or PHP version, reported
+and awaiting its fix. `node bin/ci.js matrix` reads this table to tell
+known reds from new ones: the ID starts with `C-`, the Signature names
+each red test as `U<nn> S<n>`, and Apps names the apps.
+
+| ID | Signature (what the run shows) | Apps | Configurations | Report and reproduction | First seen / last confirmed |
+|----|--------------------------------|------|----------------|-------------------------|-----------------------------|
+
 ## Open regressions — confirmed upstream regressions awaiting a fix
 
 One row per regression the sync loop confirmed on reset databases and

@@ -8,7 +8,7 @@
  *   node bin/fetch-apps.js [ojs] [omp] [ops] [--rebuild] [--update] [--line <line>] [--reference <clone>]
  *   (default: all apps, the `main` line)
  *
- * --line stable-3_5_0 | stable-3_4_0 | stable-3_3_0 (or PKP_E2E_LINE)
+ * --line stable-3_5_0 | stable-3_4_0 | stable-3_3_0 | ore | mysql | mariadb (or PKP_E2E_LINE)
  * provisions the same thing for a stable branch beside the `main` checkouts
  * (bin/apps.js LINES, harness.md "The stable lines"); a line that names its
  * own PHP runs composer on it, and one that names its own Node builds its JS
@@ -47,7 +47,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const {execFileSync, spawnSync} = require('child_process');
-const {APPS, REPO_ROOT, RUNTIMES_DIR, resolveLine, resolveSlot, dbName, configuredApps} = require('./apps.js');
+const {APPS, DB_SERVERS, DB_USER, REPO_ROOT, RUNTIMES_DIR, resolveLine, resolveSlot, dbName, configuredApps} = require('./apps.js');
 
 const FORK_OWNER = 'jardakotesovec';
 const UPSTREAM_OWNER = 'pkp';
@@ -266,16 +266,24 @@ function fetchApp(name) {
     fs.mkdirSync(filesDir, {recursive: true});
 
     const db = dbName(name, line);
-    const dbUser = process.env.TEST_DB_USERNAME || os.userInfo().username;
-    const exists = spawnSync('psql', [
-        '-XtAc', `SELECT 1 FROM pg_database WHERE datname = '${db}'`, 'postgres',
-    ], {encoding: 'utf8'});
-    if (exists.status !== 0) {
-        console.error(`  psql failed — is Postgres running? ${exists.stderr}`);
-        process.exit(1);
-    }
-    if (exists.stdout.trim() !== '1') {
-        run(dir, 'createdb', [db]);
+    // A line on MySQL or MariaDB (LINES `db`): its server is a container
+    // (bin/db-server.js), its databases created as PKP's own CI creates them.
+    const server = line && line.db ? DB_SERVERS[line.db] : null;
+    const dbUser = server ? DB_USER : process.env.TEST_DB_USERNAME || os.userInfo().username;
+    if (server) {
+        run(REPO_ROOT, 'node', ['bin/db-server.js', 'start', line.db]);
+        run(REPO_ROOT, 'node', ['bin/db-server.js', 'sql', line.db, `CREATE DATABASE IF NOT EXISTS \`${db}\` DEFAULT CHARACTER SET utf8`]);
+    } else {
+        const exists = spawnSync('psql', [
+            '-XtAc', `SELECT 1 FROM pg_database WHERE datname = '${db}'`, 'postgres',
+        ], {encoding: 'utf8'});
+        if (exists.status !== 0) {
+            console.error(`  psql failed — is Postgres running? ${exists.stderr}`);
+            process.exit(1);
+        }
+        if (exists.stdout.trim() !== '1') {
+            run(dir, 'createdb', [db]);
+        }
     }
 
     const configFile = path.join(dir, 'config.test.inc.php');
@@ -291,7 +299,8 @@ function fetchApp(name) {
                 TEST_DB_NAME: db,
                 TEST_SMTP_PORT: String(slot.smtpPort),
                 TEST_DB_USERNAME: dbUser,
-                TEST_DB_PASSWORD: process.env.TEST_DB_PASSWORD || dbUser,
+                TEST_DB_PASSWORD: server ? DB_USER : process.env.TEST_DB_PASSWORD || dbUser,
+                ...(server ? {TEST_DB_DRIVER: 'mysqli', TEST_DB_PORT: String(server.port)} : {}),
                 TEST_FILES_DIR: filesDir,
                 ...(line && line.locales ? {TEST_LOCALES: line.locales} : {}),
             },

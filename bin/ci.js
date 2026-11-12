@@ -19,6 +19,12 @@
  *       e2e.yml's workflow_dispatch from --ref (default: the current branch,
  *       which must be pushed), then waits for it
  *   node bin/ci.js summary <run-id>
+ *   node bin/ci.js matrix [<run-id> ...]
+ *       the daily configurations run (e2e-matrix.yml; the latest finished
+ *       one, or the runs named): every test that failed, with the PHP and
+ *       database combinations it failed on, set against the latest
+ *       nightly on the usual configuration (MAINTENANCE "The
+ *       configurations run")
  *
  * While waiting it prints one line when a job finishes; at the end the
  * failed and flaky tests per app (from the job logs) and the run's URL.
@@ -27,6 +33,8 @@
  * the keepalive (RUNBOOK "Keep the thread ticking").
  */
 const {execFileSync} = require('child_process');
+const fs = require('fs');
+const path = require('path');
 const {REPO_ROOT} = require('./apps.js');
 
 const WORKFLOW = 'e2e.yml';
@@ -191,6 +199,122 @@ function report(run, runId) {
     return run.conclusion === 'success' ? 0 : 1;
 }
 
+// ---------------------------------------------------------------------------
+// The configurations run
+
+const MATRIX_WORKFLOW = 'e2e-matrix.yml';
+/** "ojs / e2e (ojs, php 8.2, mysql) 2/3" → {app, config: "php 8.2 mysql", shard}; the usual configuration has no config. */
+function jobConfig(name) {
+    const m = name.match(/e2e \((\w+)(?:, php ([\d.]+), (\w+))?\) (\d+)\/\d+/);
+    return m ? {app: m[1], config: m[2] ? `php ${m[2]} ${m[3]}` : '', shard: m[4]} : null;
+}
+
+/**
+ * The rows of ci-triage "Open — red on a configuration only": each names its
+ * test in the Signature cell as `U<nn> S<n>` (several when one cause reds
+ * several) and its apps in the Apps cell.
+ */
+function knownRows() {
+    const file = path.join(REPO_ROOT, 'docs', 'tracking', 'ci-triage.md');
+    const text = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
+    const section = (text.split(/^## Open — red on a configuration only.*$/m)[1] || '').split(/^## /m)[0];
+    const rows = [];
+    for (const line of section.split('\n')) {
+        const cells = line.split('|').map((c) => c.trim());
+        if (cells.length < 5 || !/^C-/.test(cells[1])) continue;
+        const tests = [...cells[2].matchAll(/\b(U\d+) (S\d+)\b/g)].map((m) => `${m[1]} ${m[2]}`);
+        rows.push({id: cells[1], tests, apps: cells[3].toLowerCase()});
+    }
+    return rows;
+}
+
+/** The known row a failed test's title falls under, or null. */
+function knownRow(title, rows) {
+    const m = title.match(/^\[(\w+?)(?:-serial|-solo)?\] › .*?[\/](U\d+)-[^ ]* › .* › (S\d+)[:.]/);
+    if (!m) return null;
+    const app = m[1] === 'shared' ? '' : m[1];
+    return rows.find((r) => r.tests.includes(`${m[2]} ${m[3]}`) && (!app || !r.apps || r.apps.includes(app))) || null;
+}
+
+function latestRun(workflow, event) {
+    const runs = gh(['run', 'list', '--workflow', workflow, ...(event ? ['--event', event] : []), '--status', 'completed', '--limit', '1', '--json', 'databaseId,createdAt,conclusion,url'], {json: true});
+    return runs[0] || null;
+}
+
+function matrix(ids) {
+    const runIds = ids.length ? ids : [(latestRun(MATRIX_WORKFLOW) || {}).databaseId].filter(Boolean);
+    if (!runIds.length) {
+        console.log(`ci: no finished run of ${MATRIX_WORKFLOW}`);
+        return 2;
+    }
+    // test title → Set of configurations; a job that died outside the tests → its errors
+    const failed = new Map();
+    const flaky = new Map();
+    const broken = [];
+    const configs = new Set();
+    for (const id of runIds) {
+        const run = jobState(id);
+        if (run.status !== 'completed') {
+            console.log(`ci: configurations run ${id} is still running (its logs come when it ends) — ${run.url}`);
+            continue;
+        }
+        console.log(`ci: configurations run ${id} ${run.conclusion} — ${run.url}`);
+        const perJob = failures(id) || {};
+        for (const job of (run.jobs || []).filter((j) => j.conclusion !== 'skipped')) {
+            const cfg = jobConfig(job.name);
+            if (!cfg) continue;
+            configs.add(cfg.config || 'php 8.3 pgsql');
+            const f = perJob[job.name] || {failed: new Set(), flaky: new Set(), errors: new Set()};
+            const put = (map, title) => map.set(title, (map.get(title) || new Set()).add(cfg.config || 'php 8.3 pgsql'));
+            for (const t of f.failed) put(failed, t);
+            for (const t of f.flaky) put(flaky, t);
+            if (job.conclusion !== 'success' && !f.failed.size) {
+                broken.push(`${job.name}: ${job.conclusion}${f.errors.size ? ` — ${[...f.errors].map((e) => e.slice(0, 160)).join(' | ')}` : ''}`);
+            }
+        }
+    }
+    // The usual configuration the same night: a test red there too is no configuration finding.
+    const nightly = latestRun(WORKFLOW, 'schedule');
+    const usual = new Set();
+    if (nightly) {
+        for (const f of Object.values(failures(nightly.databaseId) || {})) for (const t of f.failed) usual.add(t);
+        console.log(`ci: the usual configuration (php 8.3 pgsql): nightly ${nightly.databaseId} of ${nightly.createdAt.slice(0, 10)} ${nightly.conclusion}, ${usual.size} failed`);
+    }
+    const all = [...configs].sort();
+    const show = (title, map) => {
+        const on = [...map.get(title)].sort();
+        console.log(`    ${title}\n        on ${on.length === all.length && all.length > 1 ? `all ${all.length} configurations` : on.join(', ')}`);
+    };
+    const rows = knownRows();
+    const own = [...failed.keys()].filter((t) => !usual.has(t) && !knownRow(t, rows)).sort();
+    const known = [...failed.keys()].filter((t) => !usual.has(t) && knownRow(t, rows)).sort();
+    const shared = [...failed.keys()].filter((t) => usual.has(t)).sort();
+    console.log(`ci: configurations: ${all.join(', ')}`);
+    console.log(`  new: failed on a configuration, green on the usual one, no ci-triage row: ${own.length}`);
+    own.forEach((t) => show(t, failed));
+    if (known.length) {
+        console.log(`  known (ci-triage "Open — red on a configuration only"): ${known.length}`);
+        known.forEach((t) => console.log(`    ${knownRow(t, rows).id}  ${t}\n        on ${[...failed.get(t)].sort().join(', ')}`));
+    }
+    const quiet = rows.filter((r) => !known.some((t) => knownRow(t, rows) === r));
+    if (quiet.length && !ids.length) {
+        console.log(`  rows with no red test in this run (fixed? delete the row once a second run agrees): ${quiet.map((r) => r.id).join(', ')}`);
+    }
+    if (shared.length) {
+        console.log(`  failed on the usual configuration too (ci-triage's, no configuration finding): ${shared.length}`);
+        shared.forEach((t) => show(t, failed));
+    }
+    if (flaky.size) {
+        console.log(`  red, then green on the retry: ${flaky.size}`);
+        [...flaky.keys()].sort().forEach((t) => show(t, flaky));
+    }
+    if (broken.length) {
+        console.log(`  jobs that failed outside the tests: ${broken.length}`);
+        broken.forEach((b) => console.log(`    ${b}`));
+    }
+    return own.length || broken.length ? 1 : 0;
+}
+
 function main() {
     const [cmd, ...rest] = process.argv.slice(2);
     const opts = parseArgs(rest);
@@ -220,8 +344,10 @@ function main() {
     } else if (cmd === 'summary') {
         const id = Number(opts._[0]);
         process.exit(report(jobState(id), id));
+    } else if (cmd === 'matrix') {
+        process.exit(matrix(opts._.map(Number)));
     } else {
-        console.error('usage: node bin/ci.js watch [<run-id>] [--sha <c>] | dispatch [--ref <b>] [--apps …] [--<app>-ref …] [--pkp-lib-ref …] [--no-wait] | summary <run-id>');
+        console.error('usage: node bin/ci.js watch [<run-id>] [--sha <c>] | dispatch [--ref <b>] [--apps …] [--<app>-ref …] [--pkp-lib-ref …] [--no-wait] | summary <run-id> | matrix [<run-id> …]');
         process.exit(1);
     }
     console.log(`ci: waiting for run ${run.databaseId}${run.url ? ` ${run.url}` : ''}`);

@@ -55,6 +55,7 @@ use PKP\testing\JobScenarioBuilder;
 use PKP\testing\PKPBootstrapSeeder;
 use PKP\testing\PKPContextScenarioBuilder;
 use PKP\testing\PKPSubmissionScenarioBuilder;
+use PKP\testing\SeedTransaction;
 use PKP\testing\SiteSettingsSeeder;
 use PKP\testing\SpecException;
 use PKP\testing\TaskRunScenarioBuilder;
@@ -265,7 +266,7 @@ abstract class PKPTestController extends PKPBaseController
         }
 
         if ($transaction) {
-            DB::beginTransaction();
+            SeedTransaction::begin();
         }
         try {
             $result = $build();

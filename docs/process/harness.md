@@ -114,7 +114,9 @@ listen there:
 
 Test DBs are **PostgreSQL** locally. The harness code itself is
 DB-driver-agnostic (PRINCIPLES D8), so Postgres is a local choice, not a
-dependency. Postgres-specific defects reproduce in this environment.
+dependency. Postgres-specific defects reproduce in this environment;
+MySQL and MariaDB ones on the lines of "Other databases and PHP
+versions" below.
 
 Two facts worth knowing before you write a test:
 
@@ -314,6 +316,57 @@ line exists.
   `/tmp/.X11-unix` for Xvfb (`systemd-tmpfiles --create` makes it).
   The branches pin Cypress 5.6 (3.3), 12 (3.4), 15 (3.5) and 14 (`main`);
   3.3's fails from Chrome 144 on (141–143 and Electron 85 pass).
+
+### Other databases and PHP versions
+
+PKP tests the apps on PHP 8.2 and 8.3 with PostgreSQL 16, MySQL 8.0 and
+MariaDB 10.11. The fleets above are one of those combinations, PHP 8.3
+with PostgreSQL; the daily configurations run on CI covers the others
+(MAINTENANCE "The configurations run"). Two lines reproduce on a
+machine what that run shows:
+
+| Line | Checkouts | Base ports ojs/omp/ops (slot 0) | Test DBs | Database server |
+|---|---|---|---|---|
+| `mysql` | `checkouts/mysql/<app>` | 17000/17100/17200 | `<app>_test_my` | MySQL 8.0, a container on 127.0.0.1:3308 |
+| `mariadb` | `checkouts/mariadb/<app>` | 18000/18100/18200 | `<app>_test_ma` | MariaDB 10.11, a container on 127.0.0.1:3309 |
+
+- Both are the apps' `main` once more, installed beside the PostgreSQL
+  install, and they run `main`'s suite and seeding code: no `lines/`
+  folder belongs to them. Everything "The stable lines" says of a line
+  holds: `PKP_E2E_LINE=mysql` in front of a harness command
+  (`npm run mount`, `reset:<app>`, `fleet-prep`, `probe-servers`,
+  `npx playwright test -c configs/<app>.config.js <file>`), and
+  `npm run fetch-apps -- --line mysql <app> [--update]` to provision
+  one or move it. Provision the app a reproduction needs when it needs
+  it, and bring it to the commit the red run tested.
+- **The servers** are containers, on docker or podman, whichever
+  answers (`PKP_E2E_CONTAINER` names one): one per database for the
+  whole machine, the slots told apart by their database names.
+  `npm run db -- start mysql` starts it, created on first use, and
+  waits until it answers; `fetch-apps` does that itself and creates the
+  database as PKP's own CI does (`DEFAULT CHARACTER SET utf8`).
+  `npm run db -- status` says what runs. `npm run db -- stop` stops
+  them, which frees their memory and keeps their data: stop them when
+  the reproduction is done, unless another slot's session is at work
+  (`node bin/slot.js status`).
+  `npm run db -- sql mysql "<statement>" [<database>]` runs a statement
+  as root, for a look at a table or at `SHOW ENGINE INNODB STATUS`.
+- **PHP.** `PKP_E2E_PHP=php8.2` in front of a harness command runs the
+  app on that PHP, on any line and on `main`, the way a line's own
+  `php` does ("The stable lines", "Runtimes"). PHP 8.2 with MySQL is
+  `PKP_E2E_LINE=mysql PKP_E2E_PHP=php8.2`; PHP 8.2 with PostgreSQL is
+  `PKP_E2E_PHP=php8.2` on `main`'s own fleet. Both PHPs need their
+  MySQL driver (`php8.2-mysql` and `php8.3-mysql` on the VM), which
+  `reset:<app>` uses too, so no MySQL client program is needed.
+- A test learns the database from
+  `shared/playwright/support/database.js` (`PKP_E2E_DATABASE`, which
+  the line and CI set), and asks only where the spec says the app
+  answers differently by database (PRINCIPLES D8).
+- A scenario build runs in one transaction. On MySQL and MariaDB that
+  transaction reads committed rows, as PostgreSQL's does
+  (`SeedTransaction`): under those databases' own default, two workers
+  seeding at once deadlocked on almost every run. The requests under
+  test keep the database's default.
 
 ### Trying a fix
 
@@ -1058,6 +1111,19 @@ other slots run beside it).
   neither does a push touching only `docs/`, `*.md` files or
   `shared/playwright/checks/` (`e2e.yml` `paths-ignore`): `dispatch` runs
   such a branch when a suite run is wanted.
+- `.github/workflows/e2e-matrix.yml` is the daily configurations run
+  (00:37 UTC, and on dispatch): the three suites on the PHP and
+  database combinations PKP tests on beside the usual one, 36 jobs.
+  `node bin/ci.js matrix [<run-id> …]` lists what failed in the latest
+  one (or the runs named) per configuration, set against the latest
+  nightly and the known rows of ci-triage (MAINTENANCE "The
+  configurations run"). One configuration alone is a dispatch of
+  `e2e.yml`: `node bin/ci.js dispatch --php 8.2 --database mysql`
+  (`-f php_version=` and `-f database=`: `pgsql`, `mysql` or
+  `mariadb`), from any branch and with every other option. Its jobs
+  are named `e2e (<app>, php 8.2, mysql) n/3` and its artifacts end in
+  `-php8.2-mysql`; a red MySQL or MariaDB job prints the server's log,
+  with every deadlock, in the step "Database log".
 - `.github/workflows/run-app.yml` is the reusable job. Each app repo's
   `e2e-tests.yml` calls it on every push and PR with `app_ref` set to the
   commit under test; it runs this repo's `main` unless `e2e_ref` is given.

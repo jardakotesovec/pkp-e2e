@@ -46,6 +46,7 @@ const {PublicationScreen} = require('../../pages/PublicationMetadataPages.js');
 const {DecisionPage} = require('../../pages/ReviewStagePages.js');
 const {WorkflowPage} = require('../../../../../shared/playwright/pages/WorkflowPage.js');
 const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
+const {onPostgres} = require('../../../../../shared/playwright/support/database.js');
 
 /** Unique per-run tag: single alphanumeric token carrying feature, scenario, app and worker. */
 function makeTag(scenario, testInfo) {
@@ -236,8 +237,13 @@ test.describe('Search (queue-drained index)', () => {
         // an irregular form does not find its plural.
         await search.search('publi');
         await search.expectNoResults();
-        await search.search('publication');
-        await expectFirstOnly();
+        // A word's other forms and a hyphenated pair are matched as the
+        // database's own full-text search matches them (Rule 4 states
+        // PostgreSQL's): asked on PostgreSQL only.
+        if (onPostgres) {
+            await search.search('publication');
+            await expectFirstOnly();
+        }
         await search.search('child');
         await search.expectNoResults();
         await search.search('children');
@@ -256,8 +262,10 @@ test.describe('Search (queue-drained index)', () => {
         await expectFirstOnly();
         await search.search(`${titleWord} AND children`);
         await expectFirstOnly();
-        await search.search(`${titleWord}-children`);
-        await search.expectNoResults();
+        if (onPostgres) {
+            await search.search(`${titleWord}-children`);
+            await search.expectNoResults();
+        }
     });
 
     test('S3: Nothing found', async ({page, ojsApi}, testInfo) => {

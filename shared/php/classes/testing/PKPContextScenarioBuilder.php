@@ -620,7 +620,7 @@ abstract class PKPContextScenarioBuilder
             $context = $this->contextFactory->create($contextParams);
         } finally {
             if ($inTransaction) {
-                DB::beginTransaction();
+                SeedTransaction::begin();
             }
         }
 

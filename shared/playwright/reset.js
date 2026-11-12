@@ -113,23 +113,17 @@ function recreateDatabase({driver, host, port, username, password, name}) {
             break;
         }
         case /mysql|mariadb/.test(driver || ''): {
-            const args = [];
-            if (host) {
-                args.push('-h', host);
-            }
-            if (port) {
-                args.push('-P', port);
-            }
-            if (username) {
-                args.push('-u', username);
-            }
-            if (password) {
-                args.push(`-p${password}`);
-            }
-            // The character set PKP's own CI creates its MySQL and MariaDB databases with
-            // (pkp-github-actions prepare-tests.sh), so a run here meets what the team's runs meet.
-            args.push('-e', `DROP DATABASE IF EXISTS \`${name}\`; CREATE DATABASE \`${name}\` DEFAULT CHARACTER SET utf8;`);
-            execFileSync('mysql', args, {stdio: 'inherit', env});
+            // Through PHP's own driver, which the app needs anyway: no client program to install.
+            // The character set is the one PKP's own CI creates its MySQL and MariaDB databases
+            // with (pkp-github-actions prepare-tests.sh), so a run here meets what the team's meet.
+            const php = [
+                'mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);',
+                '[$host, $port, $user, $pass, $name] = array_slice($argv, 1);',
+                '$db = new mysqli($host, $user, $pass, "", (int) $port);',
+                '$db->query("DROP DATABASE IF EXISTS `$name`");',
+                '$db->query("CREATE DATABASE `$name` DEFAULT CHARACTER SET utf8");',
+            ].join(' ');
+            execFileSync('php', ['-r', php, host || '127.0.0.1', port || '3306', username || '', password || '', name], {stdio: 'inherit', env});
             break;
         }
         default:

@@ -50,6 +50,7 @@ const {
 } = require('../../pages/PublicationPages.js');
 const {DecisionPage} = require('../../pages/DecisionPage.js');
 const {WorkflowPage} = require('../../../../../shared/playwright/pages/WorkflowPage.js');
+const {onPostgres} = require('../../../../../shared/playwright/support/database.js');
 const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
 
 // Every `page` in this file is a visitor: no cookies, whatever the worker's
@@ -267,8 +268,13 @@ test.describe('Search (U15)', () => {
         // irregular form does not find its plural.
         await search.search('publi');
         await search.expectNoResults();
-        await search.search('publication');
-        await expectFirstOnly();
+        // A word's other forms and a hyphenated pair are matched as the
+        // database's own full-text search matches them (Rule 4 states
+        // PostgreSQL's): asked on PostgreSQL only.
+        if (onPostgres) {
+            await search.search('publication');
+            await expectFirstOnly();
+        }
         await search.search('child');
         await search.expectNoResults();
         await search.search('children');
@@ -288,8 +294,10 @@ test.describe('Search (U15)', () => {
         await expectFirstOnly();
         await search.search(`${wordTitle} AND children`);
         await expectFirstOnly();
-        await search.search(`${wordTitle}-children`);
-        await search.expectNoResults();
+        if (onPostgres) {
+            await search.search(`${wordTitle}-children`);
+            await search.expectNoResults();
+        }
     });
 
     test('S3: nothing found', async ({page, opsApi}, testInfo) => {

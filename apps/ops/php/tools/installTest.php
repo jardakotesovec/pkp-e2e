@@ -78,6 +78,8 @@ class TestInstallTool extends \PKP\cliTool\InstallTool
             'adminEmail' => 'admin@mail.test',
             'databaseDriver' => Config::getVar('database', 'driver'),
             'databaseHost' => Config::getVar('database', 'host'),
+            // A server on another port than its default (the mysql and mariadb lines' containers).
+            'databasePort' => Config::getVar('database', 'port'),
             'databaseUsername' => Config::getVar('database', 'username'),
             'databasePassword' => Config::getVar('database', 'password', ''),
             'databaseName' => $dbName,

@@ -57,6 +57,7 @@ const {EditorialDashboardPage} = require('../pages/EditorialDashboardPage.js');
 const wizard = require('../pages/SubmissionWizardPages.js');
 const {WebsiteSettings} = require('../../../../shared/playwright/pages/AppearancePages.js');
 const {PluginsTab} = require('../../../../shared/playwright/pages/CustomContentPages.js');
+const {onPostgres} = require('../../../../shared/playwright/support/database.js');
 const {SettingsForm} = require('../../../../shared/playwright/pages/ContextIdentityPages.js');
 const {CategoriesTab, CategoryWindow, CategoryPicker, CategoryPage, BrowseBlock} = require('../../../../shared/playwright/pages/CategoriesPages.js');
 
@@ -209,7 +210,10 @@ test.describe('categories', () => {
         // A path in capitals saves beside "arts" (Fields, "Path").
         window = await tab.openAdd();
         await window.nameBox().fill('Crafts');
-        await window.pathBox().fill('ARTS');
+        // MySQL and MariaDB compare paths without regard to case and refuse
+        // "ARTS" beside "arts" as taken, so there "Crafts" takes a path of
+        // its own and the address in capitals is not asked.
+        await window.pathBox().fill(onPostgres ? 'ARTS' : 'crafts');
         await saveAndClose(page, tab, window);
         await expect(tab.row('Crafts')).toBeVisible({timeout: T});
         await expect(tab.row('Arts')).toBeVisible();
@@ -286,7 +290,7 @@ test.describe('categories', () => {
         await category.expectBareNotFound('science');
         await category.goto('arts');
         await expect(category.heading()).toHaveText('Arts');
-        await category.goto('ARTS');
+        await category.goto(onPostgres ? 'ARTS' : 'crafts');
         await expect(category.heading()).toHaveText('Crafts');
 
         // Control: the "Preprint entry" page, reloaded, now holds

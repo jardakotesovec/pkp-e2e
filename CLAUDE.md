@@ -81,6 +81,14 @@ Operational facts:
   `stable-3_3_0` lines (ports 10000… / 11000…, PHP 8.2) exist the same
   way for walking a particular issue there when the team asks; issue
   reports otherwise read 3.4 and 3.3 in the code (REPORT.md "Affects").
+- Every push, PR and local fleet runs on PHP 8.3 with PostgreSQL. The
+  other PHP and database combinations PKP tests on (PHP 8.2; MySQL 8.0;
+  MariaDB 10.11) run once a day on CI, `e2e-matrix.yml`, and the
+  upstream session reads the result (MAINTENANCE "The configurations
+  run"). The lines `mysql` and `mariadb` (`PKP_E2E_LINE=mysql`, the
+  server a container from `npm run db -- start mysql`) and
+  `PKP_E2E_PHP=php8.2` reproduce one on a machine (harness.md "Other
+  databases and PHP versions").
 - Up to three sessions run at once, each in its own **slot**: a full clone
   of this repo (`/home/e2e/pkp-e2e`, `-s1`, `-s2`) with its own checkouts,
   ports, DBs and Mailpit (`PKP_E2E_SLOT` in `.env`). The SessionStart hook
