@@ -36,10 +36,13 @@
  * preprint servers, each path the test's unique tag (plus a letter), one
  * language, with throwaway accounts (the username twice as password): an
  * Author "Ada Author" who submits every preprint, a Preprint Server Manager
- * in S3 and S7; S6's Site Administrator is `admin`. Preprints are posted by
- * the submission scenario (`published`, no `datePublished`), so every
+ * in S1, S3 and S7; S6's Site Administrator is `admin`. Preprints are posted
+ * by the submission scenario (`published`, no `datePublished`), so every
  * datestamp and "Date" is today, UTC, each with the default abstract unless
- * the scenario names one. The first section's `abbrev` is a bare
+ * the scenario names one; S1's "Still Water" has its abstract saved empty
+ * on its "Title & Abstract" page by the manager, its section "Preprints"
+ * seeded `abstractsNotRequired` (the default section refuses an emptied
+ * abstract). The first section's `abbrev` is a bare
  * string (a locale map stores "Array", scenarios.md). S6 passes
  * `restrictSiteAccess` and `context.country` (the Hosted Servers "Edit"
  * refuses to save a server with no Country, seed-facts); "Enable OAI" (S7),
@@ -74,7 +77,14 @@ const {
     siteContactEmail,
 } = require('../../../../shared/playwright/pages/OaiPages.js');
 const {AccessSettings} = require('../../../../shared/playwright/pages/SubscriptionsPages.js');
-const {openWorkflow, postPreprint, unpostPreprint, statusReadout} = require('../pages/PublicationPages.js');
+const {
+    openWorkflow,
+    openPublicationPage,
+    PublicationScreen,
+    postPreprint,
+    unpostPreprint,
+    statusReadout,
+} = require('../pages/PublicationPages.js');
 
 const M = O.messages;
 const KIND = 'preprint';
@@ -182,6 +192,21 @@ async function expectViewFrame(view, requestUrl) {
     expect(await view.value('Request URL')).toBe(requestUrl);
 }
 
+/**
+ * Save a posted preprint's abstract empty on its "Title & Abstract" page (an
+ * empty `abstract` key gets the default, scenarios.md); bounded by the
+ * publication save, whose answer must carry the emptied abstract.
+ */
+async function emptyAbstractOnScreen(page, tag, item) {
+    await openPublicationPage(page, tag, item.submissionId, item.publicationId);
+    const screen = new PublicationScreen(page);
+    await expect(screen.richTextBody('titleAbstract', 'abstract', 'en')).toContainText('Seeded abstract', {timeout: 30_000});
+    await screen.fillRichText('titleAbstract', 'abstract', 'en', '');
+    const saved = await screen.save();
+    const json = await saved.json();
+    expect(String((json.abstract && json.abstract.en) || '').replace(/<[^>]+>|\s|&nbsp;/g, ''), 'the saved abstract').toBe('');
+}
+
 /** "Unpost" a posted preprint on its workflow (U49 scenario 3's way, the server's words). */
 async function unpostOnScreen(page, tag, submissionId) {
     await openWorkflow(page, tag, submissionId);
@@ -191,13 +216,18 @@ async function unpostOnScreen(page, tag, submissionId) {
 }
 
 test.describe('OAI-PMH', () => {
-    test('S1: A harvester reads a journal\'s address', async ({opsApi, page, baseURL}, testInfo) => {
+    test('S1: A harvester reads a journal\'s address', async ({asUser, opsApi, page, baseURL}, testInfo) => {
         test.slow();
+        test.setTimeout(240_000);
         const tag = makeTag(1, testInfo);
         const other = `${tag}b`;
+        // "Preprints" seeded abstractsNotRequired: the default section refuses
+        // an emptied abstract ("This field is required.", U40), and "Still
+        // Water" is saved without one.
         await seedServer(opsApi, tag, {
+            manager: true,
             context: {name: 'Sea Letters', contactName: 'Pat Contact', contactEmail: 'pat.contact@example.org'},
-            sections: [{abbrev: 'PRE', title: 'Preprints'}],
+            sections: [{abbrev: 'PRE', title: 'Preprints', abstractsNotRequired: true}],
         });
         const tidal = await seedPreprint(opsApi, tag, 'Tidal Patterns', {
             abstract: 'Tides follow the moon.',
@@ -205,6 +235,7 @@ test.describe('OAI-PMH', () => {
             published: true,
             galleys: PDF,
         });
+        const still = await seedPreprint(opsApi, tag, 'Still Water', {published: true});
         const draft = await seedPreprint(opsApi, tag, 'Draft Study');
         await seedServer(opsApi, other);
         const elsewhere = await seedPreprint(opsApi, other, 'Elsewhere', {published: true});
@@ -214,6 +245,10 @@ test.describe('OAI-PMH', () => {
         const today = utcDate();
         const preprintPage = `${baseURL}/index.php/${tag}/preprint/view/${tidal.submissionId}`;
         const galleyAddress = `${preprintPage}/${tidal.galleys[0].id}`;
+
+        // "Still Water" loses its abstract on its "Title & Abstract" page, as
+        // the Preprint Server Manager (footnote s).
+        await emptyAbstractOnScreen(await actorPage(asUser, `${tag}mg`), tag, still);
 
         // Identify: the page "OAI 2.0 Request Results" and the table
         // (Fields, "Identify").
@@ -237,6 +272,7 @@ test.describe('OAI-PMH', () => {
         await expect(page.locator('body')).toContainText('Open Preprint Systems');
         await expectViewFrame(view, address);
         const tidalId = oaiIdentifier(repo, KIND, tidal.submissionId);
+        const stillId = oaiIdentifier(repo, KIND, still.submissionId);
 
         // ListSets: the server, then its section "Preprints" (Rule 7).
         await view.pressQuickLink('ListSets');
@@ -268,14 +304,15 @@ test.describe('OAI-PMH', () => {
         expect(listed && listed.header.setSpecs).toEqual([`${tag}:PRE`]);
         expect(listed && listed.dc && listed.dc.title).toEqual(['Tidal Patterns']);
 
-        // Not listed: "Draft Study" and "Elsewhere", beside "Tidal Patterns" (Rule 3).
+        // Not listed: "Draft Study" and "Elsewhere", beside "Tidal Patterns"
+        // and "Still Water" (Rule 3).
         const titles = list.records.filter((r) => r.dc).flatMap((r) => r.dc.title);
-        expect(titles).toEqual(['Tidal Patterns']);
+        expect(titles).toEqual(['Tidal Patterns', 'Still Water']);
         for (const absent of ['Draft Study', 'Elsewhere']) {
             expect(titles, `${absent} listed`).not.toContain(absent);
         }
         const identifiers = list.headers.map((h) => h.identifier);
-        expect(identifiers).toEqual([tidalId]);
+        expect(identifiers).toEqual([tidalId, stillId]);
         for (const [name, item] of [['Draft Study', draft], ['Elsewhere', elsewhere]]) {
             expect(identifiers, `${name}'s identifier listed`).not.toContain(oaiIdentifier(repo, KIND, item.submissionId));
         }
@@ -306,6 +343,32 @@ test.describe('OAI-PMH', () => {
         expect(dc.relation).toEqual([galleyAddress]);
         expect(dc.identifier).toEqual([preprintPage]);
 
+        // Without an abstract: back on ListRecords, "Still Water" is listed;
+        // its "oai_dc" shows its Dublin Core record, "Title" and no
+        // "Description" (the table "The Dublin Core record").
+        await view.pressQuickLink('ListRecords');
+        const stillBlock = await view.findRecord(stillId);
+        expect(await view.identifierIn(stillBlock)).toBe(stillId);
+        await stillBlock.getByRole('link', {name: 'oai_dc', exact: true}).click();
+        await view.expectLoaded();
+        await expect(view.requestType()).toHaveText('Request was of type GetRecord.');
+        await expect(view.recordHeading(stillId)).toHaveCount(1);
+        await expect(page.getByRole('heading', {name: O.dcHeading, exact: true})).toBeVisible();
+        const stillShown = view.record(stillId);
+        await expect(view.values('Title', stillShown)).toHaveCount(1);
+        expect(await view.valueList('Title', stillShown)).toEqual(['Still Water']);
+        await expect(view.values('Author or Creator', stillShown)).toHaveCount(1);
+        await expect(view.values('Description', stillShown)).toHaveCount(0);
+        await expectViewFrame(view, address);
+        const stillRecord = await oai.getRecord(stillId);
+        expectLiveRecord(stillRecord, stillId, 'Still Water', 'GetRecord of Still Water');
+        const stillDc = /** @type {any} */ (recordOf(stillRecord, stillId)).dc;
+        expect(stillDc.creator).toEqual(['Author, Ada']);
+        expect(stillDc.description).toEqual([]);
+        const stillListed = recordOf(list, stillId);
+        expect(stillListed && stillListed.dc && stillListed.dc.description).toEqual([]);
+        expect(listed && listed.dc && listed.dc.description).toEqual(['Tides follow the moon.']);
+
         // The browser view: back on ListSets, "Records" of "Preprints" lists
         // "Tidal Patterns" (Fields, "The browser view").
         await view.pressQuickLink('ListSets');
@@ -313,7 +376,7 @@ test.describe('OAI-PMH', () => {
         await view.expectLoaded();
         await expect(view.requestType()).toHaveText('Request was of type ListRecords.');
         await expect(view.recordHeading(tidalId)).toHaveCount(1);
-        expect(await view.recordIdentifiers()).toEqual([tidalId]);
+        expect(await view.recordIdentifiers()).toEqual([tidalId, stillId]);
         await expectViewFrame(view, address);
 
         // Control: the second server's ListRecords lists "Elsewhere" (Rule 3).
@@ -389,7 +452,7 @@ test.describe('OAI-PMH', () => {
         const manager = await actorPage(asUser, `${tag}mg`);
         const today = utcDate();
 
-        // Before: "Tidal Patterns", then "Coral Reefs" (Rule 6).
+        // Before: "Tidal Patterns", then "Coral Reefs" (Rules 4b, 6).
         const before = await oai.listAll('ListRecords');
         expect(liveTitles(before)).toEqual(['Tidal Patterns', 'Coral Reefs']);
         const tidalId = identifierOfTitle(before, 'Tidal Patterns');
@@ -414,6 +477,37 @@ test.describe('OAI-PMH', () => {
         const listedGone = expectDeletedRecord(after, tidalId, 'the server\'s ListRecords, unposted');
         expect(listedGone.setSpecs).toEqual(tidalSets);
         expect(after.records.filter((r) => r.header && r.header.identifier === tidalId && !r.header.deleted)).toEqual([]);
+        // ListIdentifiers lists both identifiers, "Tidal Patterns" deleted
+        // (a set: the order of a live and a deleted record is not claimed).
+        const identifiers = await oai.listAll('ListIdentifiers');
+        expect(identifiers.error).toBeNull();
+        expect(sorted(identifiers.headers.map((h) => h.identifier))).toEqual(sorted([tidalId, coralId]));
+        expect(identifiers.headers.find((h) => h.identifier === tidalId)?.deleted, 'Tidal Patterns\'s header').toBe(true);
+        expect(identifiers.headers.find((h) => h.identifier === coralId)?.deleted, 'Coral Reefs\'s header').toBe(false);
+        // The server's own GetRecord: the deleted header, no Dublin Core
+        // (Rules 4b, 15); "Coral Reefs" beside it is live.
+        const ownGone = expectDeletedRecord(await oai.getRecord(tidalId), tidalId, 'the server\'s GetRecord, unposted');
+        expect(ownGone.setSpecs).toEqual(tidalSets);
+        expect(recordOf(await oai.getRecord(tidalId), tidalId)?.dc ?? null).toBeNull();
+        expectLiveRecord(await oai.getRecord(coralId), coralId, 'Coral Reefs', 'the server\'s GetRecord of Coral Reefs, unposted');
+
+        // Its "Earliest Datestamp": the older of the two datestamps the
+        // ListRecords answer showed (Fields, "Identify").
+        const stamps = after.headers.map((h) => String(h.datestamp));
+        expect(stamps).toHaveLength(2);
+        const oldest = sorted(stamps)[0];
+        const identify = await oai.identify();
+        expect(identify.error).toBeNull();
+        expect(identify.identify && identify.identify.earliestDatestamp).toBe(oldest);
+
+        // The server's set, site-wide: "Coral Reefs" live and the deleted
+        // record of "Tidal Patterns" (Rule 4b).
+        const siteSet = await site.listAll('ListRecords', {set: tag});
+        expect(siteSet.error).toBeNull();
+        expect(liveTitles(siteSet)).toEqual(['Coral Reefs']);
+        const siteGone = expectDeletedRecord(siteSet, tidalId, 'the site-wide set, unposted');
+        expect(siteGone.setSpecs).toEqual(tidalSets);
+        expect(sorted(siteSet.headers.map((h) => h.identifier))).toEqual(sorted([tidalId, coralId]));
 
         // Published again ("Post"): the record is back under the same
         // identifier, not deleted; the server lists both (Rule 4).

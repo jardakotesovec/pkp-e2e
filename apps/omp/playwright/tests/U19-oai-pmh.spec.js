@@ -6,56 +6,49 @@
  * common to the three apps, in the press's own words (Press Manager,
  * "Hosted Presses", a book's page at `catalog/book/{id}`, one record per
  * publication format, "oai:{repository identifier}:publicationFormat/{n}",
- * Dublin Core the only format, the press its only set). The {OMP} bullets
- * ride inline: S1's two records of a book with two formats and none for a
- * book with no format (OMP1). S4's "Nothing to list" is {OPS}; on a press it
- * waits for A1's guard (A1 retired 2026-10-22; Planned in the spec).
- * S7 has no press analogue (a press has no "Enable OAI", OMP2); S8–S10 are
- * {OJS}. The {OJS OPS} bullets (keywords, "Publisher", "Relation", a
- * section's set, an unknown set) are not run here.
+ * Dublin Core the only format, the press and its series its sets). The
+ * {OMP} bullets ride inline: S1's two records of a book with two formats
+ * and none for a book with no format (OMP1); S5's series' set. The {OMP OPS}
+ * and {OJS OMP} bullets ride too: S1's book without an abstract (the guard
+ * of the retired OMP4), S3's empty press (the guard of the retired A1).
+ * S4's "Nothing to list" is {OPS} (on a press, S3's empty press). S7 has no
+ * press analogue (a press has no "Enable OAI", OMP2); S8–S11 are {OJS}. The
+ * {OJS OPS} bullets (keywords, "Publisher", "Relation", a section's set, an
+ * unknown set) are not run here.
  * Spec: docs/specs/U19-oai-pmh.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section is the record of everything else left out):
- * - A1 (retired 2026-10-22, fixed by pkp/pkp-lib#13566): no press's
- *   unfiltered list is asserted complete or empty yet; S3 reads "Tidal
- *   Patterns" as no longer live at the press's address and does not read
- *   its deleted record there; the guard is Planned in the spec's Coverage.
- * - A2 🐞, A3 🐞, A20 🐞: S5 gives whole days only, all in the calendar.
- * - A4 🐞: no last part's "Resume" is read.
- * - A5 🐞: no ListMetadataFormats with an identifier is opened in the browser.
- * - A8 🐞: no "Source" is read.
- * - A16 🐞, A17: no argument is given twice; S4's malformed identifier is
- *   "foo".
- * - A18 🐞: S3 never reads the datestamp of the record published again.
- * - OMP3 🐞: no unknown set is asked of a press.
- * - OMP6 🐞: no series (a scratch press has none).
- * - OMP7 ❓: no new version is published.
- * - A6–A15, A19–A24, OJS-only: the journal's, in that suite; OPS*: the
- *   preprint server's.
+ * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
+ * contract, a ❓ is parked; the spec's Coverage section is the record of the
+ * rest): A2 🐞, A3 🐞, A4 🐞, A5 🐞, A6 ❓, A8 🐞, A16 🐞, A17 🐞, A18 🐞,
+ * OMP2 ❓, OMP3 🐞, OMP6 🐞, OMP7 ❓, OMP8 🐞, OMP9 🐞.
  *
  * Seeding: scenario endpoints only, as footnote s says; publicknowledge and
  * the seeded roster are only read. Every scenario runs on its own scratch
  * presses, each path the test's unique tag (plus a letter), one language,
  * with throwaway accounts (the username twice as password): an Author "Ada
- * Author" who submits every book, a Press Manager in S3; S6's Site
- * Administrator is `admin`. Books are published by the submission scenario
+ * Author" who submits every book, a Press Manager in S1 (the emptied
+ * abstract) and S3; S6's Site Administrator is `admin`. Books are published by the submission scenario
  * (`published`, no `datePublished`), so every datestamp and "Date" is
  * today, UTC; each book a record is read of carries a format through
  * `publicationFormats[]` (`{name: 'PDF', file: 'article.pdf'}`, S1's
  * "Tidal Patterns" also `{name: 'EPUB'}`), which builds it available to
- * readers. S6 passes `restrictSiteAccess` and seeds the press's `country`
+ * readers. S1's "Still Water" is seeded unpublished with its "PDF"; the
+ * Press Manager saves its abstract empty on "Title & Abstract" and
+ * publishes it there (an empty `abstract` key gets the default,
+ * scenarios.md). S5 seeds the series "Coastal Studies" (`coast`) and places
+ * "Tidal Patterns" in it (`series`). S6 passes `restrictSiteAccess` and seeds the press's `country`
  * and `acronym`, so the Hosted Presses "Edit" window saves without a
- * Country picked on screen; the unpublish and second publish (S3) and the
- * Hosted Presses window (S6) are the screens'.
+ * Country picked on screen; the emptied abstract and its publish (S1), the
+ * unpublish and second publish (S3) and the Hosted Presses window (S6) are
+ * the screens'.
  *
  * Reading: the visitor is the fixture `page` (no user: signed out). The OAI
  * answers are read raw through OaiPages' OaiRepository, a fresh request
  * context per read (no session, no language cookie, redirects followed),
  * and the browser view ("OAI 2.0 Request Results") is opened in the
- * visitor's page where a scenario reads the page itself (S1, the refusals
- * of S4, the Login pages of S6). A press's unfiltered list is walked
+ * visitor's page where a scenario reads the page itself (S1, S3's deleted
+ * record, ListIdentifiers and Identify, the refusals of S4, S5's ListSets,
+ * the Login pages of S6). A press's unfiltered list is walked
  * through every part ("Resume"). The site-wide address lists every context
  * on the install: its reads are GetRecord and `set`-filtered lists of the
  * scenario's own presses. Every absence is read on a settled answer (a
@@ -205,12 +198,71 @@ async function publishShown(page) {
     await expectStatus(page, 'Published');
 }
 
+/**
+ * Open an unpublished book's "Title & Abstract" by address (the app's own
+ * workflowMenuKey), save its Abstract empty and publish it there: S1's
+ * "Still Water" (footnote s). The save is bounded by the publication's
+ * POST answering OK.
+ */
+async function publishWithoutAbstract(page, contextPath, submissionId, publicationId) {
+    await page.goto(
+        `/index.php/${contextPath}/dashboard/editorial?workflowSubmissionId=${submissionId}&workflowMenuKey=publication_${publicationId}_titleAbstract`
+    );
+    await expect(page.getByRole('heading', {name: 'Publication: Title & Abstract'})).toBeVisible({timeout: 30_000});
+    const save = page.getByRole('button', {name: 'Save', exact: true});
+    await expect(save).toBeVisible({timeout: 30_000});
+    const abstract = page
+        .locator('.pkpFormField')
+        .filter({has: page.locator('label.pkpFormFieldLabel').filter({hasText: /^Abstract/})})
+        .frameLocator('iframe')
+        .first()
+        .locator('body');
+    await expect(abstract).not.toHaveText('', {timeout: 30_000});
+    await abstract.click();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    await expect(abstract).toHaveText('');
+    const saved = page.waitForResponse(
+        (r) => /\/publications\/\d+$/.test(new URL(r.url()).pathname) && r.request().method() === 'POST',
+        {timeout: 30_000}
+    );
+    await save.click();
+    expect((await saved).ok(), 'the Title & Abstract save answers OK').toBe(true);
+    await publishShown(page);
+}
+
+// ---------------------------------------------------------------------------
+// The browser view, local reads (OaiPages is the OJS author's this session)
+// ---------------------------------------------------------------------------
+
+/** "This record has been deleted." inside a record's block. */
+function deletedNote(block) {
+    return block.getByText(O.deleted, {exact: true});
+}
+
+/** "Dublin Core Metadata (oai_dc)" inside a record's block. */
+function dcHeadingIn(block) {
+    return block.getByRole('heading', {name: O.dcHeading, exact: true});
+}
+
+/** Every "OAI Identifier" on the page, without the "oai_dc" and "formats" links' words. */
+async function shownIdentifiers(view) {
+    return (await view.valueList('OAI Identifier')).map((v) => v.replace(/\s*oai_dc\s+formats\s*$/, ''));
+}
+
+/** `YYYY-MM-DDThh:mm:ssZ` of a moment, floored to the second. */
+function utcSecond(date) {
+    return `${date.toISOString().slice(0, 19)}Z`;
+}
+
 test.describe('OAI-PMH', () => {
-    test('S1: A harvester reads a journal\'s address', async ({ompApi, page, baseURL}, testInfo) => {
+    test('S1: A harvester reads a journal\'s address', async ({asUser, ompApi, page, baseURL}, testInfo) => {
         test.slow();
+        test.setTimeout(240_000);
         const tag = makeTag(1, testInfo);
         const other = `${tag}b`;
         await seedPress(ompApi, tag, {
+            manager: true,
             context: {name: 'Sea Letters', contactName: 'Pat Contact', contactEmail: 'pat.contact@example.org'},
         });
         const tidal = await seedBook(ompApi, tag, 'Tidal Patterns', {
@@ -219,9 +271,11 @@ test.describe('OAI-PMH', () => {
             publicationFormats: [{name: 'PDF', file: 'article.pdf'}, {name: 'EPUB'}],
         });
         await seedBook(ompApi, tag, 'Bare Book', {published: true});
+        const still = await seedBook(ompApi, tag, 'Still Water', {publicationFormats: PDF});
         await seedBook(ompApi, tag, 'Draft Study');
         await seedPress(ompApi, other);
         const elsewhere = await seedPublishedBook(ompApi, other, 'Elsewhere');
+        await publishWithoutAbstract(await actorPage(asUser, `${tag}mg`), tag, still.submissionId, still.publicationId);
         const oai = new OaiRepository(String(baseURL), tag);
         const address = oai.address();
         const view = new OaiView(page);
@@ -253,6 +307,7 @@ test.describe('OAI-PMH', () => {
         await expectViewFrame(view, address);
         const tidalIds = formatIds.map((id) => oaiIdentifier(repo, KIND, id));
         const elsewhereIds = elsewhere.publicationFormats.map((f) => oaiIdentifier(repo, KIND, f.id));
+        const stillId = oaiIdentifier(repo, KIND, still.publicationFormats[0].id);
 
         // ListSets: the press alone (Rule 7).
         await view.pressQuickLink('ListSets');
@@ -300,7 +355,8 @@ test.describe('OAI-PMH', () => {
         const identifiers = list.headers.map((h) => h.identifier);
         for (const id of tidalIds) expect(identifiers).toContain(id);
         for (const id of elsewhereIds) expect(identifiers, 'Elsewhere\'s identifier listed').not.toContain(id);
-        expect(list.records.filter((r) => r.header && r.header.setSpecs.includes(tag))).toHaveLength(2);
+        expect(sorted(list.records.filter((r) => r.header && r.header.setSpecs.includes(tag)).map((r) => r.header.identifier)))
+            .toEqual(sorted([...tidalIds, stillId]));
 
         // GetRecord: the header's "oai_dc" opens the Dublin Core record
         // (Rule 11; the table "The Dublin Core record").
@@ -329,6 +385,31 @@ test.describe('OAI-PMH', () => {
             expect(dc.language).toEqual(['eng']);
         }
 
+        // Without an abstract: back on ListRecords, the record of "Still
+        // Water"; its "oai_dc" opens a Dublin Core record with "Title" and no
+        // "Description" row, beside "Tidal Patterns"' one above (the table
+        // "The Dublin Core record"; the guard of the retired OMP4).
+        await view.pressQuickLink('ListRecords');
+        await expect(view.requestType()).toHaveText('Request was of type ListRecords.');
+        const stillBlock = await view.findRecord(stillId);
+        expect(await view.identifierIn(stillBlock)).toBe(stillId);
+        await stillBlock.getByRole('link', {name: 'oai_dc', exact: true}).click();
+        await view.expectLoaded();
+        await expect(view.requestType()).toHaveText('Request was of type GetRecord.');
+        await expect(view.recordHeading(stillId)).toHaveCount(1);
+        const stillShown = view.record(stillId);
+        await expect(dcHeadingIn(stillShown)).toBeVisible();
+        expect(await view.valueList('Title', stillShown)).toEqual(['Still Water']);
+        expect(await view.valueList('Author or Creator', stillShown)).toEqual(['Author, Ada']);
+        await expect(view.values('Description', stillShown)).toHaveCount(0);
+        await expectViewFrame(view, address);
+        const stillRecord = await oai.getRecord(stillId);
+        expectLiveRecord(stillRecord, stillId, 'Still Water', `GetRecord ${stillId}`);
+        expect(/** @type {any} */ (recordOf(stillRecord, stillId)).dc.description, 'Still Water: no description').toEqual([]);
+        expect(/** @type {any} */ (recordOf(list, tidalIds[0])).dc.description, 'control: Tidal Patterns\' description')
+            .toEqual(['Tides follow the moon.']);
+        expect(/** @type {any} */ (recordOf(list, stillId)).dc.description, 'Still Water listed with no description').toEqual([]);
+
         // The browser view: back on ListSets, "Records" of the press lists
         // "Tidal Patterns" (Fields, "The browser view").
         await view.pressQuickLink('ListSets');
@@ -336,8 +417,8 @@ test.describe('OAI-PMH', () => {
         await view.expectLoaded();
         await expect(view.requestType()).toHaveText('Request was of type ListRecords.');
         for (const id of tidalIds) await expect(view.recordHeading(id)).toHaveCount(1);
-        expect(sorted(await view.recordIdentifiers())).toEqual(sorted(tidalIds));
-        expect(await view.valueList('Title')).toEqual(['Tidal Patterns', 'Tidal Patterns']);
+        expect(sorted(await view.recordIdentifiers())).toEqual(sorted([...tidalIds, stillId]));
+        expect(sorted(await view.valueList('Title'))).toEqual(['Still Water', 'Tidal Patterns', 'Tidal Patterns']);
         await expectViewFrame(view, address);
 
         // Control: the second press's ListRecords lists "Elsewhere" (Rule 3).
@@ -401,19 +482,25 @@ test.describe('OAI-PMH', () => {
         expectLiveRecord(await hillOai.getRecord(mountainId), mountainId, 'Mountain Air', 'Hill Notes, Mountain Air');
     });
 
-    test('S3: Records follow publishing', async ({asUser, ompApi, baseURL}, testInfo) => {
+    test('S3: Records follow publishing', async ({asUser, ompApi, page, baseURL}, testInfo) => {
         test.slow();
         test.setTimeout(240_000);
         const tag = makeTag(3, testInfo);
+        const empty = `${tag}e`;
         await seedPress(ompApi, tag, {manager: true});
         const tidal = await seedPublishedBook(ompApi, tag, 'Tidal Patterns');
         await seedPublishedBook(ompApi, tag, 'Coral Reefs');
+        await seedPress(ompApi, empty, {context: {name: 'Empty Shelf'}});
         const oai = new OaiRepository(String(baseURL), tag);
         const site = new OaiRepository(String(baseURL), SITE_PATH);
+        const emptyOai = new OaiRepository(String(baseURL), empty);
+        const view = new OaiView(page);
         const manager = await actorPage(asUser, `${tag}mg`);
         const today = utcDate();
 
-        // Before: "Tidal Patterns", then "Coral Reefs" (Rule 6).
+        // Before: "Tidal Patterns", then "Coral Reefs" (Rules 4b, 6).
+        await view.open(tag, 'verb=ListRecords&metadataPrefix=oai_dc');
+        expect(await view.valueList('Title')).toEqual(['Tidal Patterns', 'Coral Reefs']);
         const before = await oai.listAll('ListRecords');
         expect(liveTitles(before)).toEqual(['Tidal Patterns', 'Coral Reefs']);
         const tidalId = identifierOfTitle(before, 'Tidal Patterns');
@@ -437,11 +524,89 @@ test.describe('OAI-PMH', () => {
         expect(gone && gone.metadata).toBeNull();
         expectLiveRecord(await site.getRecord(coralId), coralId, 'Coral Reefs', 'Control, unpublished');
 
-        // The press's own address: "Coral Reefs" listed, "Tidal Patterns"
-        // not live (Rule 4b).
+        // The press's own address: the visitor reloads ListRecords: "Coral
+        // Reefs" listed, "Tidal Patterns" only as a deleted record under the
+        // same identifier, nothing else (Rule 4b; the guard of the retired A1).
+        await page.reload();
+        await view.expectLoaded();
+        await expect(view.requestType()).toHaveText('Request was of type ListRecords.');
+        expect(sorted(await view.recordIdentifiers())).toEqual(sorted([tidalId, coralId]));
+        const deletedBlock = view.record(tidalId);
+        expect(await view.identifierIn(deletedBlock)).toBe(tidalId);
+        await expect(deletedNote(deletedBlock)).toBeVisible();
+        await expect(dcHeadingIn(deletedBlock)).toHaveCount(0);
+        const coralBlock = view.record(coralId);
+        await expect(dcHeadingIn(coralBlock)).toBeVisible();
+        await expect(deletedNote(coralBlock)).toHaveCount(0);
+        expect(await view.valueList('Title')).toEqual(['Coral Reefs']);
+        const shownDatestamps = [await view.value('Datestamp', deletedBlock), await view.value('Datestamp', coralBlock)];
         const after = await oai.listAll('ListRecords');
         expect(liveTitles(after)).toEqual(['Coral Reefs']);
-        expect(after.records.filter((r) => r.header && r.header.identifier === tidalId && !r.header.deleted)).toEqual([]);
+        expect(sorted(after.headers.map((h) => h.identifier))).toEqual(sorted([tidalId, coralId]));
+        const ownGone = recordOf(after, tidalId);
+        expect(ownGone && ownGone.header.deleted, 'the press lists the deleted record').toBe(true);
+        expect(ownGone && ownGone.metadata).toBeNull();
+
+        // ListIdentifiers at the top of the page: both identifiers (Rule 4b).
+        await view.pressQuickLink('ListIdentifiers');
+        await expect(view.requestType()).toHaveText('Request was of type ListIdentifiers.');
+        expect(sorted(await shownIdentifiers(view))).toEqual(sorted([tidalId, coralId]));
+        await expect(page.getByText(O.deleted, {exact: true})).toHaveCount(1);
+        const ids = await oai.listAll('ListIdentifiers');
+        expect(sorted(ids.headers.map((h) => h.identifier))).toEqual(sorted([tidalId, coralId]));
+        expect(ids.headers.filter((h) => h.deleted).map((h) => h.identifier)).toEqual([tidalId]);
+
+        // GetRecord at the press's own address: the deleted header, no
+        // Dublin Core (Rules 4b, 15).
+        await view.open(tag, `verb=GetRecord&metadataPrefix=oai_dc&identifier=${encodeURIComponent(tidalId)}`);
+        await expect(view.requestType()).toHaveText('Request was of type GetRecord.');
+        await expect(view.recordHeading(tidalId)).toHaveCount(1);
+        expect(await view.identifierIn(view.record(tidalId))).toBe(tidalId);
+        await expect(deletedNote(view.record(tidalId))).toBeVisible();
+        await expect(page.getByRole('heading', {name: O.dcHeading, exact: true})).toHaveCount(0);
+        const ownGet = await oai.getRecord(tidalId);
+        expect(ownGet.error).toBeNull();
+        const ownGetRecord = recordOf(ownGet, tidalId);
+        expect(ownGetRecord && ownGetRecord.header.deleted).toBe(true);
+        expect(ownGetRecord && ownGetRecord.metadata).toBeNull();
+
+        // Its "Earliest Datestamp": the older of the two the list showed
+        // (Fields, "Identify").
+        await view.pressQuickLink('Identify');
+        await expect(view.requestType()).toHaveText('Request was of type Identify.');
+        const older = sorted(shownDatestamps)[0];
+        expect(older).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
+        expect(await view.value('Earliest Datestamp')).toBe(older);
+        const ownIdentify = await oai.identify();
+        expect(ownIdentify.identify && ownIdentify.identify.earliestDatestamp).toBe(older);
+
+        // The press's set, site-wide: "Coral Reefs" and the deleted record of
+        // "Tidal Patterns" (Rule 4b).
+        const siteSet = await site.listAll('ListRecords', {set: tag});
+        expect(siteSet.error).toBeNull();
+        expect(liveTitles(siteSet)).toEqual(['Coral Reefs']);
+        expect(sorted(siteSet.headers.map((h) => h.identifier))).toEqual(sorted([tidalId, coralId]));
+        const siteGone = recordOf(siteSet, tidalId);
+        expect(siteGone && siteGone.header.deleted, 'the site-wide set lists the deleted record').toBe(true);
+
+        // An empty press: "Empty Shelf" lists nothing, its "Earliest
+        // Datestamp" is the moment of the request, and it does not hold
+        // "Tidal Patterns" (Rules 3, 4b, 15; Fields, "Identify").
+        await view.open(empty, 'verb=ListRecords&metadataPrefix=oai_dc');
+        await expect(view.errorHeading()).toBeVisible();
+        await expect(view.errorIntro()).toBeVisible();
+        expect(await view.value('Error Code')).toBe('noRecordsMatch');
+        await expect(view.errorMessage()).toHaveText(M.noRecords);
+        await expect(view.requestType()).toHaveCount(0);
+        expectRefusal(await emptyOai.listRecords(), 'noRecordsMatch', M.noRecords, 'Empty Shelf ListRecords');
+        const asked = utcSecond(new Date());
+        const emptyIdentify = await emptyOai.identify();
+        const answered = utcSecond(new Date());
+        const earliest = emptyIdentify.identify && emptyIdentify.identify.earliestDatestamp;
+        expect(earliest, 'Empty Shelf: the moment of the request').toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/);
+        expect(String(earliest) >= asked && String(earliest) <= answered, `${earliest} within ${asked}..${answered}`).toBe(true);
+        expect(emptyIdentify.identify && emptyIdentify.identify.repositoryName).toBe('Empty Shelf');
+        expectRefusal(await emptyOai.getRecord(tidalId), 'idDoesNotExist', M.noIdentifier, 'Empty Shelf, Tidal Patterns');
 
         // Published again: the record is back under the same identifier,
         // not deleted; the press lists both (Rule 4).
@@ -499,13 +664,15 @@ test.describe('OAI-PMH', () => {
         await expect(view.errorHeading()).toHaveCount(0);
     });
 
-    test('S5: Asking by set and by date', async ({ompApi, baseURL}, testInfo) => {
+    test('S5: Asking by set and by date', async ({ompApi, page, baseURL}, testInfo) => {
         test.slow();
         const tag = makeTag(5, testInfo);
-        await seedPress(ompApi, tag);
-        await seedPublishedBook(ompApi, tag, 'Tidal Patterns');
+        const coast = `${tag}:coast`;
+        await seedPress(ompApi, tag, {series: [{path: 'coast', title: 'Coastal Studies'}]});
+        await seedPublishedBook(ompApi, tag, 'Tidal Patterns', {series: 'coast'});
         await seedPublishedBook(ompApi, tag, 'Hill Review');
         const oai = new OaiRepository(String(baseURL), tag);
+        const view = new OaiView(page);
         const today = utcDate();
         const tomorrow = utcDate(1);
         const yesterday = utcDate(-1);
@@ -518,6 +685,38 @@ test.describe('OAI-PMH', () => {
         expect(pressSet.error).toBeNull();
         expect(liveTitles(pressSet)).toEqual(both);
         expect(pressSet.headers.map((h) => h.datestamp.slice(0, 10))).toEqual([today, today]);
+        const tidalId = identifierOfTitle(pressSet, 'Tidal Patterns');
+        const hillId = identifierOfTitle(pressSet, 'Hill Review');
+        await view.open(tag, `verb=ListRecords&metadataPrefix=oai_dc&set=${tag}`);
+        await expect(view.requestType()).toHaveText('Request was of type ListRecords.');
+        expect(await view.valueList('Title')).toEqual(both);
+        expect((await view.valueList('Datestamp')).map((v) => v.slice(0, 10))).toEqual([today, today]);
+
+        // A series' set: ListSets at the top of the page names the press's
+        // set and "{press path}:coast", nothing else (Rule 7b; the setName is
+        // not read, OMP6).
+        await view.pressQuickLink('ListSets');
+        await expect(view.requestType()).toHaveText('Request was of type ListSets.');
+        await expect(view.setBlocks()).toHaveCount(2);
+        expect(sorted(await view.setSpecs())).toEqual(sorted([tag, coast]));
+        expect(sorted((await oai.listSets()).sets.map((x) => x.spec))).toEqual(sorted([tag, coast]));
+
+        // Back on the press's set: one "setSpec" row each, "Tidal Patterns"
+        // the series', "Hill Review" the press's (Rule 7d).
+        await page.goBack();
+        await view.expectLoaded();
+        await expect(view.requestType()).toHaveText('Request was of type ListRecords.');
+        expect(await view.setSpecs(view.record(tidalId))).toEqual([coast]);
+        expect(await view.setSpecs(view.record(hillId))).toEqual([tag]);
+        expect(/** @type {any} */ (recordOf(pressSet, tidalId)).header.setSpecs).toEqual([coast]);
+        expect(/** @type {any} */ (recordOf(pressSet, hillId)).header.setSpecs).toEqual([tag]);
+
+        // The series' set: "Tidal Patterns" alone, beside the press's set's
+        // two above (Rule 8).
+        const coastSet = await list({set: coast});
+        expect(coastSet.error).toBeNull();
+        expect(liveTitles(coastSet)).toEqual(['Tidal Patterns']);
+        expect(coastSet.headers.map((h) => h.identifier)).toEqual([tidalId]);
 
         // `from` (Rules 4b, 9).
         expect(liveTitles(await list({set: tag, from: today}))).toEqual(both);
