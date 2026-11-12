@@ -4,7 +4,7 @@
  *
  * Submission activity log & notes — OJS suite, one test per canonical
  * scenario the spec runs on OJS (the common scenarios 1 and 2 and the
- * journal-and-press scenarios 3 and 4).
+ * journal-and-press scenarios 3, 4 and 5).
  * Spec: docs/specs/U38-submission-activity-log-and-notes.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
@@ -16,14 +16,17 @@
  *   asserts whether one appears.
  * - A8 ❓: S4's "Open" half counts the two assignment lines and never reads
  *   whose name they carry.
- * - A1 🐞, A2 🐞, A5 🐞, A7 🐞, A4 ❓: no scenario reaches them here.
+ * - A1 🐞, A2 🐞, A5 🐞, A7 🐞, A12 🐞, A4 ❓: no scenario reaches them here.
  * - OMP1: another app's territory.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (A1, A7). Every test seeds its own submission with a unique
  * tag (M5); every note, the decline, the revision, the deletion and the
- * "Login As" are driven on screen (footnote s0). S2 and S3 run on the
- * seeded journal as the Journal Manager `manager.maya`. S1 runs on a
+ * "Login As" are driven on screen (footnote s0). S2, S3 and S5 run on the
+ * seeded journal as the Journal Manager `manager.maya`; S5 adds the Section
+ * Editor `sectioneditor.ana`, assigned through `ART` and not through `REV`
+ * (whose editor is `sectioneditor.ravi`), and its review change is the
+ * manager's "Modify Review" saved on screen, since no key writes one (s0). S1 runs on a
  * scratch journal with throwaway accounts (a manager, a Section Editor
  * assigned through `participants[]`, an Author): it reads "Note posted."
  * and "Note deleted.", which the app queues per user and the next page
@@ -66,6 +69,12 @@ const {
 const {DecisionWizardPage, ComposerPage} = require('../pages/DecisionWizardPages.js');
 const {LoginAsDialog, UserMenu} = require('../pages/LoginSessionsPages.js');
 const {unordered} = require('../../../../shared/playwright/support/order.js');
+const {
+    openReviewDetails,
+    openModifyReview,
+    saveModifyReview,
+    closeReviewDetails,
+} = require('../pages/ReviewStagePages.js');
 
 const JOURNAL = 'publicknowledge';
 const MANAGER = 'manager.maya';
@@ -75,6 +84,9 @@ const AUTHOR_NAME = 'Alex Author';
 const ADMIN = 'admin';
 /** The installer's account as the log prints it (U38 claim check K3, every app). */
 const ADMIN_NAME = 'admin admin';
+const SECTION_EDITOR = 'sectioneditor.ana';
+const REVIEWER = 'reviewer.julia';
+const REVIEWER_NAME = 'Julia Reviewer';
 
 /** The journal's submit line (Rule 3; OJS's own wording, seed-facts). */
 const SUBMIT_LINE = 'Article submitted';
@@ -83,6 +95,10 @@ const UPLOAD_SUBMISSION_FILE = 'Upload Submission File';
 const ANONYMOUS = 'Anonymous Reviewer';
 /** An email line's opening (Rule 7). */
 const EMAIL_LINE = 'An email has been sent:';
+/** A review-change line's opening (Rule 3; U27's wording). */
+const CHANGE_LINE = 'The following was modified in this review: Comments.';
+/** The raw answer to another submission's change (Rule 5a). */
+const NOT_FOUND = 'The requested resource was not found.';
 
 /** "Date": a day alone, year-month-day (Settings bullet 1); a note's date and time (Settings bullet 2). */
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -149,6 +165,28 @@ async function reland(page, frame, submissionId) {
 /** A notice the app shows after a legacy save ("Note posted.", "Note deleted."). */
 function notice(page, text) {
     return page.getByText(text).first();
+}
+
+/** A row of the workflow's "Reviewers" panel, by the reviewer's name. */
+function reviewerRow(page, name) {
+    return page.getByRole('table', {name: 'Reviewers', exact: true}).getByRole('row').filter({hasText: name});
+}
+
+/**
+ * Replace the "For author and editor" comment in the "Modify Review" window:
+ * the form model reads its TinyMCE editor, not the backing textarea (U27 S16).
+ */
+async function setReviewComments(page, html) {
+    const id = 'reviewDetailsForm-comments-control';
+    await page.waitForFunction((editorId) => !!window.tinymce?.get(editorId)?.initialized, id, {timeout: 30_000});
+    await page.evaluate(
+        ([editorId, value]) => {
+            const editor = window.tinymce.get(editorId);
+            editor.setContent(value);
+            editor.fire('change');
+        },
+        [id, html]
+    );
 }
 
 /** The lines as `{user, event}` pairs (the Date cell and the arrow dropped). */
@@ -561,5 +599,82 @@ test.describe('submission activity log & notes', () => {
         expect(manager.accepted).toEqual([{user: anon.people.ra.name, event: accepted(anon.people.ra.name, id)}]);
         expect(manager.declined).toEqual([{user: anon.people.rd.name, event: declined(anon.people.rd.name, id)}]);
         expect(manager.assigned).toEqual([assigned(anon.people.rd.name, id), assigned(anon.people.ra.name, id)].sort());
+    });
+
+    test('S5: a change made on another submission', async ({asUser, ojsApi}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s5', testInfo);
+        const original = `Original comment ${tag}`;
+        const changed = `Changed comment ${tag}`;
+
+        // Given (footnote s0): one submission in ART, the Section Editor's
+        // through the section, and one in REV, not theirs, with a submitted
+        // review whose comment the Journal Manager changes with "Modify
+        // Review" on screen (U27 S16).
+        const own = await seed(ojsApi, `${tag}a`, {section: 'ART'});
+        const other = await seed(ojsApi, `${tag}r`, {
+            section: 'REV',
+            decisions: ['sendExternalReview'],
+            reviewRounds: [{reviewers: [{username: REVIEWER, status: 'completed', comments: original}]}],
+        });
+        const mg = await openWorkflow(asUser, MANAGER, other.submissionId);
+        const read = await openReviewDetails(mg.page, reviewerRow(mg.page, REVIEWER_NAME));
+        await expect(read).toContainText(original);
+        const edit = await openModifyReview(mg.page, read);
+        await setReviewComments(mg.page, `<p>${changed}</p>`);
+        await saveModifyReview(mg.page, edit);
+        await expect(read).toContainText(changed, {timeout: 30_000});
+        await closeReviewDetails(mg.page, read);
+
+        // The change's line: on "History", starting with an arrow; its strip
+        // holds "View changes", whose address names the submission and the
+        // change, each by its number (Rules 3, 5, 5a).
+        await reland(mg.page, mg.frame, other.submissionId);
+        await mg.log.open();
+        const changes = (await mg.log.historyLines()).filter((l) => l.event.startsWith(CHANGE_LINE));
+        expect(changes.map((l) => l.arrow)).toEqual([true]);
+        const changeEvent = changes[0].event;
+        let strip = await mg.log.openStrip(changeEvent);
+        expect(await mg.log.stripActions(strip)).toEqual(['View changes']);
+        const href = await strip.getByRole('link', {name: 'View changes', exact: true}).getAttribute('href');
+        const address = new URL(String(href), mg.page.url());
+        expect(address.pathname).toContain('/view-review-change');
+        expect(address.searchParams.get('submissionId')).toBe(String(other.submissionId));
+        const change = address.searchParams.get('logEntryId');
+        expect(change).toMatch(/^\d+$/);
+        await mg.log.close();
+
+        // The Section Editor's address: an editorial reader of their own
+        // submission (its header offers "Activity Log"), they open the copied
+        // address with that submission's number in place of the other's,
+        // the change's kept: a line of raw text holding "The requested
+        // resource was not found." and nothing of the review (Rule 5a;
+        // Actors row 3).
+        const se = await openWorkflow(asUser, SECTION_EDITOR, own.submissionId);
+        await expect(se.log.button()).toBeVisible();
+        const swapped = new URL(address.toString());
+        swapped.searchParams.set('submissionId', String(own.submissionId));
+        expect(swapped.searchParams.get('logEntryId')).toBe(change);
+        await se.page.goto(swapped.toString());
+        const tab = se.page.locator('body');
+        await expect(tab).toContainText(NOT_FOUND, {timeout: 30_000});
+        const raw = (await tab.innerText()).trim();
+        expect(raw.split('\n'), 'one line of raw text').toHaveLength(1);
+        for (const text of [original, changed, 'Updated Comments', 'Previous Comments']) {
+            expect(raw, `the tab shows nothing of the review ("${text}")`).not.toContain(text);
+        }
+        await expect(se.page.getByRole('dialog')).toHaveCount(0);
+
+        // Control: the Journal Manager, back on the other submission's
+        // "History", presses the line's arrow, then "View changes": the
+        // window holds the comments as they were and as the editor left
+        // them (Actors row 3; Rule 5).
+        await reland(mg.page, mg.frame, other.submissionId);
+        await mg.log.open();
+        strip = await mg.log.openStrip(changeEvent);
+        await strip.getByRole('link', {name: 'View changes', exact: true}).click();
+        const view = mg.page.getByRole('dialog', {name: 'View Review', exact: true});
+        await expect(view).toContainText(changed, {timeout: 30_000});
+        await expect(view).toContainText(original);
     });
 });

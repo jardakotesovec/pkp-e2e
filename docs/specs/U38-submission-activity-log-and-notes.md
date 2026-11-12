@@ -355,9 +355,9 @@ preprint server an Editorial Board Member). <sup>c</sup>
 
 ## Canonical scenarios
 
-Scenarios 1 to 3 run on the seeded journal with ready accounts, each on
-a submission seeded for it; scenario 4, about a person who is both
-author and editor, runs on two scratch journals with throwaway
+Scenarios 1 to 3 and 5 run on the seeded journal with ready accounts,
+each on submissions seeded for it; scenario 4, about a person who is
+both author and editor, runs on two scratch journals with throwaway
 accounts. The accounts, the passwords and the tooling recipe are in the
 footnote. <sup>s0</sup>
 
@@ -511,12 +511,40 @@ footnote. <sup>s0</sup>
 
    A preprint server has no reviews (Rule 9).
 
+5. **A change made on another submission** {OJS OMP}
+
+   Given: Journal Manager and a Section Editor, with two submissions:
+   one the Section Editor is assigned to, and one they are not, whose
+   submitted review an editor changed with "Modify Review".
+
+   - **The change's line**: Journal Manager, on the submission the
+     Section Editor is not assigned to: press "Activity Log": "History"
+     lists "The following was modified in this review: Comments.",
+     starting with an arrow at its left; press the arrow: a strip opens
+     under the line holding "View changes"; press it and copy the address
+     it loads, naming that submission and the change by number (Rules 3,
+     5, 5a). <sup>s0</sup>
+   - **The Section Editor's address**: Section Editor: in the copied
+     address, put the number of the submission they are assigned to in
+     place of the other submission's number, keeping the change's, and
+     open it in the browser's address bar: the tab shows a line of raw
+     text holding "The requested resource was not found." and nothing of
+     that review, none of the comments the control below shows (Rule 5a;
+     Actors row 3).
+   - **Control**: Journal Manager, back on the other submission's
+     "History": press the line's arrow, then "View changes": the window
+     opens with the change, the review's comments as they were and as
+     the editor left them
+     ([→ Reviewer assignment & management](U27-reviewer-assignment-and-management.md#read-review))
+     (Actors row 3; Rule 5).
+
+   A preprint server has no reviews (Rule 9).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for the retired A11 {OJS OMP} (Rule 5a; Actors row 3): a Section Editor opens the "View changes" address of one of their own submissions with the number of a change made on a submission they are not assigned to, and the tab shows a line of raw text holding "The requested resource was not found." and nothing of that review; an editor of the submission the change was made on still presses "View changes" on its line, and the window titled "View Review" opens with the review's old and new comments [report 2026-10-13]
   - "Add Note" with the box empty in "Activity Log & Notes": refused, no note listed and no "Posted new note." line in "History" ([A2](#a2)): the guard the issue report proposes [report 2026-10-02]
   - a "Notify" message, an "Assign" message and a discussion's email: their "History" lines name the editor who sent them under "User" (Rule 4c; [A1](#a1)): the guard the issue report proposes [report 2026-10-04]
   - a Reviewer's "Submit Review": the "Review complete" lines with nothing under "User" (Rule 4c; [A5](#a5)): the guard the issue report proposes [report 2026-10-04]
@@ -1283,7 +1311,7 @@ unless the entry's stored `submissionId` is the request's submission.
 Live-probed 2026-10-09 (Rule 5a), OJS and OMP: f-a11.
 
 <a id="fn-s0"></a>
-**s0** — Accounts: `docs/process/users.md` (the seeded roster; `admin`/`admin`, every other account its username twice; throwaway accounts likewise). Where each scenario runs: 1–3 on the seeded journal, press or preprint server `publicknowledge`, each on a scratch submission from `POST scenarios/submission` with submitter `author.alex`; 4 on two scratch contexts from `POST scenarios/context`. On `publicknowledge` the Journal Manager is `manager.maya`, the Section Editor `sectioneditor.ana` (a Moderator on the preprint server), assigned automatically through the submission's section (`ART`, the press's series `monographs`, `PRE`), the Site Administrator `admin`, the Author `author.alex`. No seed key writes a submission's note or its "Login As", so every note and every step in a scenario's body is driven on screen. Recipes: 1 — no decisions; the Site Administrator's "Login As" is the Section Editor's Participants row's "Login As" (note h), left again through "Logout as {username}"; 2 — no decisions (OJS and OMP on the Submission stage, OPS on Production), the decline recorded on screen, since a seeded decision acts as `admin` (scenarios.md); 3 — `files: [{file: 'article.pdf'}]` (the submitter's file, uploaded through the wizard's "Files" panel before the submit), the revision with the fixture `notes.md`; OPS refuses `files`; 4 — a scratch context at the install's "Default Review Mode" ("Anonymous Reviewer/Anonymous Author", seed-facts) with a throwaway user holding `author` and `sectionEditor` and two throwaway `externalReviewer`s, the submission seeded with that user as `submitter` and in `participants[]` as `sectionEditor`, `decisions: ['sendExternalReview']` and `reviewRounds: [{reviewers: [{username: <the first>, status: 'accepted'}, {username: <the second>, status: 'declined'}]}]`; the "Open" part the same on a second scratch context created with `review: {defaultReviewMode: 'open'}`; the control's Journal Manager is `admin`, whom the tooling enrols as a manager of every context it creates (seed-facts "Users"). The reviewer's own file (Rule 9) is the reviewer's step-3 upload on screen; no seed key writes it. Live-probed 2026-09-24, OJS and OMP: the author-and-editor recipe reaches Rule 9's state.
+**s0** — Accounts: `docs/process/users.md` (the seeded roster; `admin`/`admin`, every other account its username twice; throwaway accounts likewise). Where each scenario runs: 1–3 and 5 on the seeded journal, press or preprint server `publicknowledge` (5 on the journal and the press only), each on scratch submissions from `POST scenarios/submission` with submitter `author.alex`; 4 on two scratch contexts from `POST scenarios/context`. On `publicknowledge` the Journal Manager is `manager.maya`, the Section Editor `sectioneditor.ana` (a Moderator on the preprint server), assigned automatically through the submission's section (`ART`, the press's series `monographs`, `PRE`), the Site Administrator `admin`, the Author `author.alex`. No seed key writes a submission's note or its "Login As", so every note and every step in a scenario's body is driven on screen. Recipes: 1 — no decisions; the Site Administrator's "Login As" is the Section Editor's Participants row's "Login As" (note h), left again through "Logout as {username}"; 2 — no decisions (OJS and OMP on the Submission stage, OPS on Production), the decline recorded on screen, since a seeded decision acts as `admin` (scenarios.md); 3 — `files: [{file: 'article.pdf'}]` (the submitter's file, uploaded through the wizard's "Files" panel before the submit), the revision with the fixture `notes.md`; OPS refuses `files`; 4 — a scratch context at the install's "Default Review Mode" ("Anonymous Reviewer/Anonymous Author", seed-facts) with a throwaway user holding `author` and `sectionEditor` and two throwaway `externalReviewer`s, the submission seeded with that user as `submitter` and in `participants[]` as `sectionEditor`, `decisions: ['sendExternalReview']` and `reviewRounds: [{reviewers: [{username: <the first>, status: 'accepted'}, {username: <the second>, status: 'declined'}]}]`; the "Open" part the same on a second scratch context created with `review: {defaultReviewMode: 'open'}`; the control's Journal Manager is `admin`, whom the tooling enrols as a manager of every context it creates (seed-facts "Users"). The reviewer's own file (Rule 9) is the reviewer's step-3 upload on screen; no seed key writes it. Live-probed 2026-09-24, OJS and OMP: the author-and-editor recipe reaches Rule 9's state. 5 — the Section Editor is `sectioneditor.ana`; the submission assigned to them is in `ART` (the press's series `monographs`), the other in `REV` (the press's series `textbooks`), whose automatic assignment is `sectioneditor.ravi`, not `sectioneditor.ana`, seeded with `decisions: ['sendExternalReview']` and `reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'completed'}]}]`; the change is the Journal Manager's "Modify Review" on that review, its "For author and editor" comment replaced and saved on screen (*Reviewer assignment & management*, scenario 16), since no seed key writes a review change; the copied address is the request "View changes" sends when pressed, read in the browser's network panel as A11's issue report did (pkp-e2e#925, step 2; f-a11), `…/view-review-change?submissionId={n}&logEntryId={n}` (note td14); the change's number is its `logEntryId`, and only its `submissionId` is replaced.
 
 <a id="fn-a1"></a>
 **f-a1** — Note i: `EditorialTaskController` and

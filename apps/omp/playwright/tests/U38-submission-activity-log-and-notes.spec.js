@@ -4,7 +4,7 @@
  *
  * Submission activity log & notes — OMP suite, one test per canonical
  * scenario the spec runs on a press (the common scenarios 1 and 2 and the
- * journal-and-press scenarios 3 and 4), in the press's own words: the
+ * journal-and-press scenarios 3, 4 and 5), in the press's own words: the
  * submit line "Initial submission completed.", the Series editor as the
  * assigned sub-editor, the "External Review" round.
  * Spec: docs/specs/U38-submission-activity-log-and-notes.md
@@ -24,9 +24,12 @@
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (A1, A7). Every test seeds its own submission with a unique
  * tag (M5); every note, the decline, the revision, the deletion and the
- * "Login As" are driven on screen (footnote s0). S2 and S3 run on the
+ * "Login As" are driven on screen (footnote s0). S2, S3 and S5 run on the
  * seeded press, in series `monographs`, as the Press manager
- * `manager.maya`. S1 runs on a scratch press with throwaway accounts (a
+ * `manager.maya`; S5's other submission is in series `textbooks`, whose
+ * Series editor is `sectioneditor.ravi`, so `sectioneditor.ana` (series
+ * `monographs`) is assigned to the first alone, and its "Modify Review" is
+ * driven on screen (s0). S1 runs on a scratch press with throwaway accounts (a
  * manager, a Series editor assigned through `participants[]`, an Author):
  * it reads "Note posted." and "Note deleted.", which the app queues per
  * user and the next page fetch of ANY session of that user takes
@@ -66,6 +69,8 @@ const {
     NOTES_TEXT,
 } = require('../../../../shared/playwright/pages/ActivityLogPages.js');
 const {DecisionWizardPage, ComposerPage} = require('../pages/DecisionWizardPages.js');
+const {openEditorial} = require('../pages/ReviewStagePages.js');
+const {openReadReview, openModifyReview} = require('../pages/ReviewerAssignmentPages.js');
 const {loginAsDialog, confirmLoginAsDialog, userNav} = require('../pages/LoginSessionsPages.js');
 const {unordered} = require('../../../../shared/playwright/support/order.js');
 
@@ -574,5 +579,100 @@ test.describe('submission activity log & notes', () => {
         expect(manager.accepted).toEqual([{user: anon.people.ra.name, event: accepted(anon.people.ra.name, id)}]);
         expect(manager.declined).toEqual([{user: anon.people.rd.name, event: declined(anon.people.rd.name, id)}]);
         expect(manager.assigned).toEqual([assigned(anon.people.rd.name, id), assigned(anon.people.ra.name, id)].sort());
+    });
+
+    test('S5: a change made on another submission', async ({asUser, ompApi, appContext}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s5', testInfo);
+        const before = `Reviewer remarks ${tag}.`;
+        const after = `Editor remarks ${tag}.`;
+        const CHANGE_LINE = 'The following was modified in this review: Comments.';
+        const NOT_FOUND = 'The requested resource was not found.';
+
+        // Given (s0): one monograph in series `monographs`, which
+        // `sectioneditor.ana` is assigned to; another in series `textbooks`
+        // (Series editor `sectioneditor.ravi`) on External Review with
+        // Julia Reviewer's review submitted.
+        const {submissionId: ownId} = await seed(ompApi, `${tag}a`);
+        const {submissionId: otherId} = await seed(ompApi, `${tag}b`, {
+            series: 'textbooks',
+            decisions: ['sendExternalReview'],
+            reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'completed', comments: before}]}],
+        });
+
+        // The change: the Press manager's "Modify Review" on that review,
+        // its "For author and editor" comment replaced and saved on screen
+        // (Reviewer assignment & management, scenario 16).
+        const mg = await openWorkflow(asUser, appContext, MANAGER, otherId);
+        const readModal = await openReadReview(mg.page, await openEditorial(mg.page, PRESS, otherId), 'Julia Reviewer');
+        const {editModal, commentBody} = await openModifyReview(mg.page, readModal, before);
+        await commentBody.click();
+        await commentBody.fill(after);
+        await expect(commentBody).toContainText(after);
+        // Blur so the editor syncs its field before the save.
+        await editModal.getByText('Reviewer Comments', {exact: true}).first().click();
+        await editModal.getByRole('button', {name: 'Save Changes', exact: true}).click();
+        await expect(editModal).toBeHidden({timeout: 20_000});
+        await expect(readModal.getByText(after)).toBeVisible({timeout: 20_000});
+        await readModal.getByRole('button', {name: 'Cancel', exact: true}).click();
+        await expect(readModal).toBeHidden({timeout: 20_000});
+
+        // The change's line, starting with an arrow; its strip holds "View
+        // changes", whose address names that submission and the change,
+        // each by its number (Rules 3, 5, 5a).
+        await mg.frame.gotoEditorial(otherId);
+        await mg.log.open();
+        const changeRow = mg.log.historyRows().filter({hasText: CHANGE_LINE});
+        await expect(changeRow).toHaveCount(1);
+        const changeLine = (await mg.log.historyLines()).filter((l) => l.event.startsWith(CHANGE_LINE));
+        expect(changeLine.map((l) => l.arrow)).toEqual([true]);
+        await mg.log.arrow(changeRow).click();
+        const strip = mg.log.strip(changeRow);
+        const viewChanges = strip.getByRole('link', {name: 'View changes', exact: true});
+        await expect(viewChanges).toBeVisible({timeout: 30_000});
+        expect(await mg.log.stripActions(strip)).toEqual(['View changes']);
+        const address = new URL(/** @type {string} */ (await viewChanges.getAttribute('href')));
+        expect(address.pathname).toMatch(/\/view-review-change$/);
+        expect(address.searchParams.get('submissionId')).toBe(String(otherId));
+        const changeId = address.searchParams.get('logEntryId');
+        expect(changeId).toMatch(/^\d+$/);
+        await mg.log.close();
+
+        // The Section Editor's address: `sectioneditor.ana`, an editorial
+        // reader of their own submission (its header's "Activity Log" is
+        // the read), opens the copied address with that submission's number
+        // in place of the other's, the change's kept: one line of raw text
+        // holding "The requested resource was not found." and nothing of
+        // the review, none of the comments the control shows (Rule 5a;
+        // Actors row 3).
+        const se = await openWorkflow(asUser, appContext, 'sectioneditor.ana', ownId);
+        await expect(se.log.button()).toBeVisible();
+        const swapped = new URL(address.toString());
+        swapped.searchParams.set('submissionId', String(ownId));
+        expect(swapped.searchParams.get('logEntryId')).toBe(changeId);
+        await se.page.goto(swapped.toString());
+        const tab = se.page.locator('body');
+        await expect(tab).toContainText(NOT_FOUND);
+        const raw = await tab.innerText();
+        expect(raw.trim().split('\n'), 'one line of raw text').toHaveLength(1);
+        for (const text of [before, after, 'Updated Comments', 'Previous Comments', 'Julia']) {
+            expect(raw, `nothing of the review ("${text}")`).not.toContain(text);
+        }
+
+        // Control: the Press manager, back on the other submission's
+        // "History": the arrow, then "View changes": the window with the
+        // comments as they were and as the editor left them (Actors row 3;
+        // Rule 5).
+        await reland(mg.page, mg.frame, otherId);
+        await mg.log.open();
+        await mg.log.arrow(changeRow).click();
+        await viewChanges.click();
+        const win = mg.page.getByRole('dialog', {name: 'View Review'});
+        await expect(win).toBeVisible({timeout: 30_000});
+        await expect(win).toContainText('Updated Comments', {timeout: 30_000});
+        await expect(win).toContainText(after);
+        await expect(win).toContainText('Previous Comments');
+        await expect(win).toContainText(before);
+        await expect(win).not.toContainText(NOT_FOUND);
     });
 });
