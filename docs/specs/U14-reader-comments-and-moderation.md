@@ -77,9 +77,9 @@ Comments page is refused (Rule 2b).
 |------------------|-----------|-------|
 | The tabs "All", "Approved", "Hidden/Needs Approval", "Reported" | — | Which comments the table lists (Rule 10). The chosen tab is written into the page's address after "#" and comes back on reload <sup>i</sup> |
 | The comments table: columns "Submission", "Comment", "User", "Status" and an unlabelled "…" ("More Actions") column | — | One row per comment, newest first, 25 per page (Settings bullet 2). "Submission" reads "{submission number}. {authors} ; {title}" (the authors part is the family names, a space on each side of the semicolon), "Comment" the comment's text cut to one line, "User" the writer's name, "Status" as Rule 10b. With nothing to list the table reads "No Items" <sup>i</sup> |
-| The comment panel "View comment details by {writer}" | — | Opened by "View Comment" (Rule 12). Above the title the same submission line as the table's "Submission" cell; then "Comment preview" with the date and time, the text, the writer's name, their ORCID iD when they have one (verified: the iD as a link with a solid icon; not verified: a hollow icon and "{iD} (unauthenticated)", a link that does not open the iD's ORCID page ⚠ [A6](#a6)) and their affiliation; then the "Reports" table; on the right the approval note and the three buttons "Approve Comment", "Delete Comment", "Hide Comment" <sup>j</sup> |
+| The comment panel "View comment details by {writer}" | — | Opened by "View Comment" (Rule 12). Above the title the same submission line as the table's "Submission" cell; then "Comment preview" with the date and time, the text, the writer's name, their ORCID iD when they have one (verified: a solid icon and the iD's ORCID address, such as "https://orcid.org/0000-0002-1825-0097"; not verified: a hollow icon and the address followed by " (unauthenticated)"; in both the text is a link that opens the iD's ORCID page in a new tab) and their affiliation; then the "Reports" table; on the right the approval note and the three buttons "Approve Comment", "Delete Comment", "Hide Comment" <sup>j</sup> |
 | The "Reports" table inside the comment panel: columns "Reported By", "Reason", "Date Reported" and an unlabelled "…" column; described "This is the list of all the users who have reported this comment" | — | One row per report, newest first, 25 per page; with none, "No one has reported this comment yet" (Rule 15) <sup>k</sup> |
-| The report panel "View report details by {reporter}" | — | Opened by "View Report" (Rule 15): "Report preview" with the date and time, the reason as typed, the reporter's name, ORCID iD and affiliation, shown as the comment panel shows the writer's [A6](#a6), and the button "Delete Report" <sup>k</sup> |
+| The report panel "View report details by {reporter}" | — | Opened by "View Report" (Rule 15): "Report preview" with the date and time, the reason as typed, the reporter's name, ORCID iD and affiliation, shown as the comment panel shows the writer's, and the button "Delete Report" <sup>k</sup> |
 
 ## Rules & state
 
@@ -940,7 +940,7 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A14 (issue report `docs/issues/U14-A14-refused-comment-report-loses-reason.md`): once fixed, a reader whose report is refused because the session ended keeps "Report Comment" open with the typed reason under the "Error" window, and a report on a comment hidden meanwhile drops the comment from the list. [report 2026-10-26]
   - the Comments page's browser tab reading "Comments | {journal}" on each of its lists and after a reload (Rule 10; A13) [report 2026-10-04]
-  - the comment panel and the report panel for a writer and a reporter whose ORCID iD is not verified: the iD link's address is the bare iD (Fields, the comment panel; A6) [report 2026-10-04]
+  - the guard for the retired A6: the comment panel and the report panel for a writer and a reporter whose ORCID iD is not verified show the hollow icon and the iD's ORCID address followed by " (unauthenticated)", a link that opens the iD's own ORCID page in a new tab (Fields, the comment panel and the report panel) [report 2026-10-04]
 - **Rarely met**:
   - an Editor whose role does not permit settings changes, refused the "Comments" tab and still opening the Comments page {OJS OMP} (Actors rows 5 and 6; a preprint server has no second manager-level role to untick): unticking "Permit changes to Settings" on a role is a setup few journals make, not a state an editor meets in an ordinary week
   - a Site Administrator holding no manager role in the journal, with no task row in their Tasks panel (Actors row 7): the state needs the Site Administrator's manager role ended on their own edit page, a setup no journal makes in an ordinary week
@@ -980,7 +980,6 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|------------------------------|------|--------|--------|
-| [A6](#a6) | Comments page: the link to an unverified ORCID iD in the comment and report panels opens a wrong address | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A comment deleted with its article or its writer's merged account leaves blank, dead rows in every moderator's Tasks | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A13](#a13) | On the editorial Comments page, the browser tab shows only the journal's name, not "Comments" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A14](#a14) | A reader's comment report the server refuses closes the "Report Comment" window and loses the typed reason | 🐞 | low | @jarda.kotesovec 2026-10-22 · handled separately; issues (claude), 2026-10-26 — re-verified |
@@ -1046,23 +1045,6 @@ entry follows at once, or an oversight? Lean: oversight; landing on
 another tab with no confirmation reads as an accident, and the menu could
 follow on the next page load as the landing pages do. Basis: test run.
 <sup>f-a5</sup>
-
-<a id="a6"></a>
-**A6 — Comments page: the link to an unverified ORCID iD in the comment and report panels opens a wrong address** · 🐞 · low.
-On the Comments page, a moderator who opens a comment ("View Comment")
-or a report ("View Report") sees the writer's or reporter's ORCID iD as
-a link. When the iD is not verified, the link reads
-"https://orcid.org/0000-0001-5109-3700 (unauthenticated)", and pressing
-it opens that whole text as the address,
-`https://orcid.org/0000-0001-5109-3700%20(unauthenticated)`, not the
-person's ORCID page. A verified iD's link opens the right page.
-Nothing is lost. The link's text is the only place the iD shows, so a
-moderator who wants to check the person on ORCID copies that text and
-deletes " (unauthenticated)" from it.
-Moderators meet it on comments and reports by anyone whose account holds
-an ORCID iD that was never verified with ORCID, for example people who
-connected their iD while registering.
-Basis: probe, 2026-10-04. <sup>f-a6</sup>
 
 <a id="a7"></a>
 **A7 — The comment's "…" button has no name for a screen reader** · ❓ · minor.
@@ -1229,6 +1211,9 @@ Basis: test run. <sup>f-ops1</sup>
 
 <a id="a4"></a>
 **A4 — The Comments page outlives the setting** · ✅ · retired. Settled upstream (pkp/pkp-lib#13550).
+
+<a id="a6"></a>
+**A6 — The link to an unverified ORCID iD in the comment and report panels opened a wrong address** · ✅ · retired. Fixed upstream (`pkp/pkp-lib#13476`, `pkp/ui-library#1014`, `pkp/ojs#5913`).
 
 <a id="a11"></a>
 **A11 — Deleting a comment removes unrelated tasks that share its number** {OMP OPS} · ✅ · retired. Fixed upstream (pkp/pkp-lib#12401).
@@ -1440,8 +1425,8 @@ ui-library `64d67363`, pkp-lib `f5bd392a69`, ojs `06fd981b01`; on OJS
 `OrcidUnauthenticated` otherwise; the affiliation is its own element
 below, absent when the profile holds none. Before that change the iD was
 the link's text, with the "(unauthenticated)" suffix for an unverified
-one. The Comments page's two panels still take `userOrcidDisplayValue`
-(footnote f-a6). `PkpCommentsNotificationMessageNeedsApproval`
+one. The Comments page's two panels still write `userOrcidDisplayValue`
+out as the link's text (footnote j). `PkpCommentsNotificationMessageNeedsApproval`
 shows `userComment.awaitingApprovalNotice` with the `Help` icon when the
 viewer is the writer and `isApproved` is false, which is the pending and
 the hidden state alike (A1). Live-probed 2026-09-16 (Rule 6, A1): the
@@ -1635,7 +1620,11 @@ pre-title `{submissionId}. {authorsStringShort} ; {fullTitle}`, title
 `manager.userComment.viewDetailsCommentBy` "View comment details by",
 description the writer's name; `manager.userComment.commentPreview`
 "Comment preview" with `formatShortDateTime(createdAt)`, the text, name,
-ORCID (`Orcid` / `OrcidUnauthenticated` icon and the iD as a link),
+ORCID (the `Orcid` or `OrcidUnauthenticated` icon by
+`isUserOrcidAuthenticated`, then a link with `target="_blank"` whose text
+is `userOrcidDisplayValue`, to which `Identity::getOrcidDisplayValue()`
+adds the "(unauthenticated)" suffix for an unverified iD, and whose
+`href` is the bare iD `userOrcid`),
 affiliation; `UserCommentReportsTable`; the note
 `manager.userComment.approved.note` "This comment was approved on
 {$approvedAt} by {$approvedBy}." (`formatShortDate`) or
@@ -1695,6 +1684,28 @@ tests of scenarios 2, 3 and 13, which waited for one after a view-only
 locally; the "Close" after deleting the comment's two reports still
 refetched the list. The same tests pass at the tip's lib/ui-library
 `2034439a`, where every close refetched.
+The ORCID link: until `pkp/pkp-lib#13476` and `pkp/ui-library#1014`
+(merged 2026-11-11, on OJS `main` with `pkp/ojs#5913`) both panels took
+`userOrcidDisplayValue` as the link's address too, and the report's API
+answer carried no `userOrcid`; from 2026-09-16 to 2026-10-04 an unverified
+iD's link opened `https://orcid.org/0000-0001-5109-3700%20(unauthenticated)`
+in both panels while a verified iD's opened the bare iD. Live-probed
+2026-11-12 on OJS `main` `7fc2376322` (lib/pkp `8959bca71c`, lib/ui-library
+`51f9eaa1b7`) on a freshly reset dataset, with the issue report's kept
+walk (deleted with the report on retirement; git keeps it):
+the comment panel and the report panel for a writer and a reporter whose
+iD is not verified showed the hollow icon and the text
+`https://orcid.org/0000-0001-5109-3700 (unauthenticated)`, the link's
+address `https://orcid.org/0000-0001-5109-3700`, and a press opened a new
+tab at that address; a verified writer's panel showed the solid icon and
+`https://orcid.org/0000-0002-1825-0097` as text and address, opening the
+same; a writer with no iD had no ORCID line. The opened addresses were
+read against a stand-in for orcid.org (the install has no outside
+network). On 2026-11-12 OMP and OPS `main` still pinned lib/ui-library
+`55ec62ee`, two commits behind the fix, so on a press and a preprint
+server the unverified link keeps the suffixed address until their next
+submodule update; those apps have no comment box, so it shows there only
+on comments and reports the tooling makes.
 
 <a id="fn-k"></a>
 **k — reports.** `UserCommentReportsTable.vue`: label
@@ -1709,7 +1720,8 @@ actions `manager.userComment.viewReport` "View Report" and
 like the comments. `UserCommentReportDetailModal.vue`: title
 `manager.userComment.viewReportDetailsBy` "View report details by",
 `manager.userComment.reportPreview` "Report preview", the note, the
-reporter's name, ORCID and affiliation, button "Delete Report".
+reporter's name, ORCID (as the comment panel's, footnote j, fed by
+`UserCommentReportResource`) and affiliation, button "Delete Report".
 `reportDelete()` dialog: `manager.userComment.deleteReport` /
 `manager.userComment.deleteReport.confirm`, actions `common.delete` and
 `common.cancel`; DELETE `comments/{commentId}/reports/{reportId}` deletes
@@ -1933,7 +1945,7 @@ preprint server read the first comment's row on the Comments page, its
 <a id="fn-s2"></a>
 **s2 — scenario 2.** Throwaway `users[]`: the pending comment's writer a
 `reader` with `orcid` and `orcidIsVerified: true` (the solid icon,
-footnote f-a6) and with `affiliation`: `users[]` takes the key, and the
+footnote j) and with `affiliation`: `users[]` takes the key, and the
 comment shows the affiliation without a visit to Profile › Contact (seen
 2026-10-01). Two more `reader`s: one writes the approved
 comment, with `orcid` and `orcidIsVerified: false` (the iD alone, the
@@ -2154,43 +2166,6 @@ on Appearance › Theme with no "Saved" within 6 s; the Setup › Information
 and Setup › Lists forms, the control, showing "Saving" then "Saved" in
 place.
 
-<a id="fn-f-a6"></a>
-**f-a6 — A6.** The comment panel (`UserCommentDetailModal.vue`) and the
-report panel (`UserCommentReportDetailModal.vue`) render a plain link, not
-`PkpOrcidDisplay`, whose `:href` is `userOrcidDisplayValue`, the field
-they also print as its text; `Identity::getOrcidDisplayValue()` appends
-the "(unauthenticated)" suffix to an unverified iD. The comment's API
-answer carries the bare iD as `userOrcid` beside it; the report's
-(`UserCommentReportResource`) does not. Live-probed 2026-09-16, the landing page (journal) and
-the comment panel (the three apps): verified, the address and the text
-`https://orcid.org/0000-0002-1825-0097` with the solid icon; unverified,
-the text and the address both `https://orcid.org/0000-0001-5109-3700
-(unauthenticated)` with the hollow icon. The report panel's unverified
-end was not driven (the same field feeds it). Live-probed 2026-10-01 on a
-journal at ojs `68615b5a32`, twice: the landing page's half is gone with
-pkp/pkp-lib#13422 (ui-library `64d67363`): under a comment the iD is an
-icon link fed `userOrcid`, and a press on the unverified writer's icon
-opened a new tab at `https://orcid.org/0000-0001-5109-3700` (footnote
-e). The comment panel, approved and pending comments alike, and the
-report panel, now driven at its unverified end, were unchanged: the
-unverified link's text and address both carried the suffix, and a press
-opened a new tab at
-`https://orcid.org/0000-0001-5109-3700%20(unauthenticated)`; the verified
-link opened the bare iD. The opened addresses were read against a
-stand-in for orcid.org (the install has no outside network); what ORCID
-answers to the suffixed address was not read. Live-probed 2026-10-04 on
-OJS `main` (`ff004d0973`, lib/ui-library `64d67363`) with the kept walk
-`shared/playwright/checks/issues/comment-panel-unverified-orcid-link-broken/walk.js`:
-both panels' unverified link read and pointed at
-`https://orcid.org/0000-0001-5109-3700 (unauthenticated)` and opened
-`…%20(unauthenticated)`; the verified writer's link opened the bare iD.
-On a press and a preprint server the panels are the same shared code,
-but those apps have no comment box, so the fault shows there only on
-comments and reports the tooling makes, as it made them for the
-2026-09-16 read; the issue report's reach is OJS. The profile's own display
-of an iD is *[ORCID integration](U04-orcid-integration.md)*'s.
-Issue report: [pkp-e2e#902](https://github.com/jardakotesovec/pkp-e2e/issues/902) ([docs/issues/U14-A6-comment-panel-unverified-orcid-link-broken.md](../issues/U14-A6-comment-panel-unverified-orcid-link-broken.md)); the team's copy is `pkp/pkp-lib#13468` (open, 2026-10-09).
-
 <a id="fn-f-a7"></a>
 **f-a7 — A7.** `PkpCommentsMessageActions` renders `PkpDropdownMenu` with
 an icon-only trigger (`MoreOptions`) and sets no trigger label.
@@ -2332,7 +2307,7 @@ unverified writers) all had the accessible name "ORCID iD", no text and
 no `title`; the icons were `#icon-Orcid` for the verified and
 `#icon-OrcidUnauthenticated` for the unverified; hovering either showed
 no tooltip. The comment panel's link still reads "{iD} (unauthenticated)"
-(A6).
+(footnote j).
 
 <a id="fn-f-a16"></a>
 **f-a16 — A16.** `PKP\user\Repository::mergeUsers()` hands the merged

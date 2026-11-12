@@ -22,7 +22,7 @@
  * page reading "No Items" as the controls (multi-app rule 3).
  * Spec: docs/specs/U14-reader-comments-and-moderation.md
  *
- * Not covered, by register ID: A6 🐞, A10 🐞, A13 🐞, A14 🐞, A1 ❓, A3 ❓,
+ * Not covered, by register ID: A10 🐞, A13 🐞, A14 🐞, A1 ❓, A3 ❓,
  * A7 ❓, A9 ❓, A15 ❓, A16 ❓, OMP1 ❓, OPS1 ❓. A2 ❓, A5 ❓ and A8 ❓ are read
  * only as their scenarios' own sentences (S5, S1, S3).
  *

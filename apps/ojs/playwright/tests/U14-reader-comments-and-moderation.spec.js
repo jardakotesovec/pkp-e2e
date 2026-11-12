@@ -8,7 +8,7 @@
  * no test here).
  * Spec: docs/specs/U14-reader-comments-and-moderation.md
  *
- * Deliberately NOT covered (register IDs): A1, A2, A3, A5, A6, A7, A8, A9,
+ * Deliberately NOT covered (register IDs): A1, A2, A3, A5, A7, A8, A9,
  * A10, A13, A14, A15, A16 (OMP1 and OPS1 are a press's and a preprint
  * server's).
  *

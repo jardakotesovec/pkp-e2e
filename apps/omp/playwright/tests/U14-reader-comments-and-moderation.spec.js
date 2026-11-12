@@ -16,7 +16,7 @@
  * Spec: docs/specs/U14-reader-comments-and-moderation.md
  *
  * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
- * contract, a ❓ is parked, not a gap): A6 🐞, A10 🐞, A13 🐞, A14 🐞,
+ * contract, a ❓ is parked, not a gap): A10 🐞, A13 🐞, A14 🐞,
  * A1 ❓, A3 ❓, A7 ❓, A9 ❓, A15 ❓, A16 ❓, OMP1 ❓, OPS1 ❓. Where a
  * scenario marks a ❓ (A2, A5, A8) the test asserts that bullet's own
  * sentence alone.
