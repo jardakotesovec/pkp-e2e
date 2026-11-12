@@ -122,7 +122,11 @@ so neither side starves the other: an **odd day** works incidentals
 and reports owed (steps 6 and 7), an **even day** builds a pending
 feature (step 8). Planned coverage (step 8) follows on every weekday,
 so the suites keep up with what the team ships, and steps 9 to 12
-after it. The day's drift sweep (step 12) comes after the Planned
+after it. **While the backlog's section 5 lists ready items in more
+than three specs, Planned coverage goes first**: straight after step 5,
+as many specs as the four hours allow, and the odd or even day's work
+takes what is left. With three specs or fewer listed, the order above
+holds again. The day's drift sweep (step 12) comes after the Planned
 coverage: the backlog goes first, and once it is worked down the sweep
 is each morning's standing work, the one step that looks for
 statements in a spec that have gone wrong unnoticed. After about
@@ -250,8 +254,9 @@ What is left, the next morning picks up from the files.
      these; a build is the fullest coverage work there is, so it goes
      before a revision);
    - every weekday, the specs whose "Left out" lists hold **Planned**
-     items ready to write, up to three a morning, in the order of the backlog's
-     section 5. That order puts first what keeps the suites in step
+     items ready to write, up to three a morning (as many as the four
+     hours allow while their backlog is being cleared, above), in the
+     order of the backlog's section 5. That order puts first what keeps the suites in step
      with the apps (behavior the team shipped, a guard whose bug is now
      fixed, a coverage request), the oldest such item first; a guard
      whose bug is still open waits. Each spec goes through RUNBOOK

@@ -154,9 +154,7 @@ const owedSpecs = [...bySpec.entries()]
 const cap = (list) => (all ? list : list.slice(0, 5));
 const more = (list) => (!all && list.length > 5 ? `  … ${list.length - 5} more (--all)\n` : '');
 const day = new Date().getDate();
-let out = `Today (day ${day}, ${day % 2 ? 'odd' : 'even'}): refreshes, then `
-    + `${day % 2 ? 'incidentals and reports owed (2, 3)' : 'builds (4)'}, then Planned coverage (5), then friction, `
-    + 'then the day\'s drift sweep when the four hours allow (`npm run hk -- swept` names the spec).\n';
+let out = '';
 const section = (title, count, body) => { out += `\n${title} (${count})\n${body}`; };
 
 // A header fix needs no walk: a join, or a "Tracked in" that lacks the entry.
@@ -179,6 +177,15 @@ section('4. Builds and revisions', builds.length,
 const ready = planned.filter((s) => s.n).sort((a, b) => (b.first > 0) - (a.first > 0)
     || (a.first ? a.firstOldest : a.oldest).localeCompare(b.first ? b.firstOldest : b.oldest)
     || b.first - a.first || a.spec.localeCompare(b.spec));
+// While ready items sit in more than three specs, Planned coverage goes first (MAINTENANCE "The housekeeping session").
+const clearing = ready.length > 3;
+const main = day % 2 ? 'incidentals and reports owed (2, 3)' : 'builds (4)';
+out = `Today (day ${day}, ${day % 2 ? 'odd' : 'even'}): refreshes, then `
+    + (clearing
+        ? `Planned coverage first (5: ${ready.length} specs wait, as many as the four hours allow), then ${main}`
+        : `${main}, then Planned coverage (5)`)
+    + ', then friction, then the day\'s drift sweep when the four hours allow (`npm run hk -- swept` names the spec).\n'
+    + out;
 section('5. Planned coverage, up to three specs a morning in this order',
     `${ready.reduce((n, s) => n + s.n, 0)} items ready in ${ready.length} specs, `
     + `${ready.reduce((n, s) => n + s.first, 0)} of them first: from upstream, a fixed bug or a request; `
