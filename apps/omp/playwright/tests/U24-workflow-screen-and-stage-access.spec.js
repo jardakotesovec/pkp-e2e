@@ -12,18 +12,13 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓,
- * A2 ❓ (S3 asserts only what Rule 9 states as built: the heading with no
- * node, pressing it changing nothing), A3 ❓ (S6 opens the draft by the
- * dashboard address only), A4 ❓, A5 🐞, A6 🐞 (S8 selects the "External
- * Review" entry on a stage the submission has left, Rule 15b; S2 and S9
- * never select it while the round is active), A7 ❓ (S8 reads "Production"
- * alone on the seed published from the Submission stage), A8 ❓, A9 🐞 (S14
- * follows the stale dashboard and My Submissions addresses, never an
- * old-shape one), OMP1 ✅ (the extra stage, group and pages are asserted as
- * present and in place, never for their contents), OMP2 ❓ (S4 and S9 read
- * the Funding Coordinator's roster with "Media" set aside), OMP3 🐞, OPS1 ✅,
- * OPS2 ❓, OPS3 🐞, OPS4 ❓ (the preprint server's territory). The spec's
- * Coverage section records everything else left out.
+ * A2 ❓ (S3 and S12 assert only what Rules 9 and 20b state as built: the
+ * heading with no node), A3 ❓, A4 ❓, A5 🐞, A6 🐞, A7 ❓, A8 ❓, A9 🐞,
+ * A11 🐞, A12 🐞 and A13 🐞 (S12 opens the manager-Author's own monograph at
+ * the Submission stage only, never on a round, and presses no decision),
+ * A14 🐞, A15 🐞, OMP1 ✅, OMP2 ❓, OMP3 🐞, OPS1 ✅, OPS2 ❓, OPS3 🐞, OPS4 ❓,
+ * OPS5 ❓, OPS6 🐞. The spec's Coverage section records everything else left
+ * out.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster are
  * read-only (A1, A7). Every test seeds its own monographs with unique tags
@@ -198,6 +193,29 @@ async function entriesUnder(workflow, stageLabel) {
 async function expectStageOpen(workflow) {
     await expect(workflow.languageLine()).toHaveText(LANGUAGE_LINE);
     await expect(workflow.noAccessBox()).toHaveCount(0);
+}
+
+/**
+ * A stage open in the editorial view (Rules 14, 20b): the main column's
+ * first item is the language line, and no no-access box shows (the line
+ * is the positive control for the box's absence).
+ */
+async function expectStageBegunWithLanguageLine(workflow) {
+    await expect(workflow.languageLine()).toHaveText(LANGUAGE_LINE);
+    await expect(workflow.primaryColumn().locator(':scope > *').first()).toHaveText(LANGUAGE_LINE);
+    await expect(workflow.noAccessBox()).toHaveCount(0);
+}
+
+/**
+ * The author's view of the reader's own monograph (S12, Rules 6, 10, 20a):
+ * the header "Library" alone, the groups "Workflow" and "Publication"
+ * (no "Marketing", OMP1), one version node holding the author's roster.
+ */
+async function expectOwnAuthorView(workflow) {
+    await workflow.expectHeaderButtons(['Library']);
+    expect(await groupLabels(workflow)).toEqual(['Workflow', 'Publication']);
+    await expect(workflow.versionNodes()).toHaveCount(1);
+    expect(await workflow.pagesUnderLatestVersion()).toEqual(PRESS_PAGES_AUTHOR);
 }
 
 test.describe('workflow screen & stage access', () => {
@@ -854,17 +872,20 @@ test.describe('workflow screen & stage access', () => {
 
     test('S12: a manager assigned in another role', async ({asUser, ompApi, appContext}, testInfo) => {
         test.slow();
+        test.setTimeout(300_000);
         const tag = makeTag('s12', testInfo);
         const twoRole = `${tag}ml`;
         const author = `${tag}au`;
         const reviewer = `${tag}rv`;
         // A scratch press (no `series[]`: its monographs are opened by
-        // address) with a Press Manager + Layout Editor account, a
+        // address) with a Press Manager + Layout Editor account that also
+        // holds Author (fn-s, revision seeds 2026-11-12: an author-editor
+        // state needs the global Author role and the submitter), a
         // throwaway Author and an external reviewer for the round.
         await ompApi.createContext({
             tag,
             users: [
-                user(twoRole, 'Mila', 'Manager', ['manager', 'layoutEditor']),
+                user(twoRole, 'Mila', 'Manager', ['manager', 'layoutEditor', 'author']),
                 user(author, 'Ada', 'Author', ['author']),
                 user(reviewer, 'Rex', 'Reviewer', ['externalReviewer']),
             ],
@@ -884,12 +905,21 @@ test.describe('workflow screen & stage access', () => {
             participants: [{username: twoRole, role: 'layoutEditor'}],
         });
         const {submissionId: otherId} = await seedOn(`${tag}b`);
+        // The third monograph, freshly submitted by the two-role account
+        // itself and carrying no `participants`: its one assignment is the
+        // automatic Author one (a scratch press auto-assigns no editor).
+        const {submissionId: ownId} = await ompApi.createSubmission({
+            tag: `${tag}c`,
+            context: tag,
+            submitter: twoRole,
+            title: `Submission ${tag}c`,
+        });
 
         // Assigned as Layout Editor, the account is held to that role's
         // stage set (Actors row 2): the landing round shows the no-access
         // box alone, as do "Submission", "Internal Review" and
         // "Copyediting" (Rules 11, 13).
-        const {workflow} = await workflowAs(asUser, appContext, twoRole, tag);
+        const {page, workflow} = await workflowAs(asUser, appContext, twoRole, tag);
         await workflow.gotoEditorial(submissionId);
         await workflow.expectSelected('Review Round 1');
         await workflow.expectNoAccessOnly();
@@ -912,6 +942,71 @@ test.describe('workflow screen & stage access', () => {
         // "Activity Log" (Actors row 7).
         await workflow.expectHeaderButtons(['Library', WORK_TYPE]);
 
+        // Their own monograph by the dashboard address: the editorial view
+        // on "Submission", the language line heading the main column
+        // above the stage's panels, a "Participants" column with no
+        // "Assign"; the header "Library" and the work-type control, no
+        // "Activity Log"; the "Publication" heading with no version node
+        // under it (A2 ❓: asserted as built, the menu's other groups the
+        // positive control), "Marketing" still listed (Actors rows 1–2;
+        // Rules 11, 14, 20b).
+        await workflow.gotoEditorial(ownId);
+        await expect(page).toHaveURL(/\/dashboard\/editorial/);
+        await workflow.expectStageHeading('Submission');
+        await workflow.expectSelected('Submission');
+        await expectStageBegunWithLanguageLine(workflow);
+        await expect(workflow.panel('Submission Files')).toBeVisible();
+        await expect(workflow.participantsHeading()).toBeVisible();
+        await expect(workflow.participantsAssignButton()).toHaveCount(0);
+        await workflow.expectHeaderButtons(['Library', WORK_TYPE]);
+        await expect(workflow.headerButton('Activity Log')).toHaveCount(0);
+        expect(await groupLabels(workflow)).toEqual(OMP_GROUPS);
+        await expect(workflow.publicationGroup()).toBeVisible();
+        await expect(workflow.versionNodes()).toHaveCount(0);
+        await expect(workflow.pageLink('Title & Abstract')).toHaveCount(0);
+
+        // Their own monograph's later stages: "Copyediting", then
+        // "Production", each with the language line, its not-yet-reached
+        // box, the "Participants" column and no panels, never the
+        // no-access box (Rules 13, 15a, 16, 20b).
+        for (const stage of ['Copyediting', 'Production']) {
+            await workflow.selectStage(stage);
+            await expectStageBegunWithLanguageLine(workflow);
+            await workflow.expectStatus(`The ${stage} stage has not yet been initiated.`);
+            await expect(workflow.participantsHeading()).toBeVisible();
+            await expect(workflow.panelTables()).toHaveCount(0);
+            await expect(workflow.noAccessBox()).toHaveCount(0);
+        }
+
+        // Their own monograph from My Submissions: the author's view, its
+        // header "Library" alone, no "Marketing" group, and a version node
+        // with the author's roster, "Title & Abstract" first (Actors row 3;
+        // Rules 6, 9, 10, 20a).
+        await workflow.gotoAuthor(ownId);
+        await expect(page).toHaveURL(/\/dashboard\/mySubmissions/);
+        await expectOwnAuthorView(workflow);
+
+        // The old author-dashboard address forwards to My Submissions with
+        // the same author's view (Rules 2b, 20a).
+        await workflow.gotoForwarding(workflow.authorDashboardUrl(ownId), ownId);
+        await expect(page).toHaveURL(/\/dashboard\/mySubmissions/);
+        await expectOwnAuthorView(workflow);
+
+        // Their own monograph's older addresses: the editorial workflow
+        // address and every stage-naming address, both shapes, the press's
+        // Internal Review included, turn the account away at the page
+        // (Rules 2a, 20d).
+        const olderPaths = [
+            `/workflow/access/${ownId}`,
+            ...[1, 2, 3, 4, 5].map((n) => `/workflow/index/${ownId}/${n}`),
+            ...['submission', 'internalReview', 'externalReview', 'editorial', 'production'].map(
+                (shape) => `/workflow/${shape}/${ownId}`
+            ),
+        ];
+        for (const path of olderPaths) {
+            await workflow.expectAccessDeniedPage(workflow.contextUrl(tag, path), ACCESS_DENIED.stage);
+        }
+
         // Control: the same account on the second monograph, where it is a
         // plain manager, opens every stage without the box and gets
         // "Activity Log" (Actors rows 2, 7).
@@ -927,6 +1022,17 @@ test.describe('workflow screen & stage access', () => {
         await workflow.selectStage('Production');
         await expectStageOpen(workflow);
         await expect(workflow.headerButton('Activity Log')).toBeVisible();
+
+        // Control, continued: the second monograph's editorial workflow
+        // address and its Production stage address forward to the editorial
+        // dashboard, "Assigned to me", with its panel open (Rules 2a, 20).
+        for (const path of [`/workflow/access/${otherId}`, `/workflow/index/${otherId}/5`]) {
+            await workflow.gotoForwarding(workflow.contextUrl(tag, path), otherId);
+            await expect(page).toHaveURL(/\/dashboard\/editorial/);
+            await expect.poll(() => currentViewId(page), {timeout: 30_000}).toBe('assigned-to-me');
+            expect(workflow.submissionIdFromUrl()).toBe(String(otherId));
+            await expect(workflow.titleLine()).toHaveText(`Submission ${tag}b`);
+        }
     });
 
     test('S13: an assigned Series editor\'s header and publication controls', async ({asUser, ompApi, appContext}, testInfo) => {

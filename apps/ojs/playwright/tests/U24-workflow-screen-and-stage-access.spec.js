@@ -9,14 +9,13 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓,
- * A2 ❓ (S3 asserts only what Rule 9 states as built: the heading with no
- * node, pressing it changing nothing), A3 ❓ (S6 opens the draft by the
- * dashboard address only), A4 ❓, A5 🐞, A6 🐞 (S8 selects the "Review" entry
- * on a stage the submission has left, Rule 15b; S2 never selects it while
- * the round is active), A7 ❓ (S8 reads "Production" alone on the seed
- * published from the Submission stage), A8 ❓, A9 🐞 (S14 follows the stale
- * dashboard and My Submissions addresses, never an old-shape one), OMP1 ✅,
- * OMP2 ❓, OMP3 🐞, OPS1 ✅, OPS2 ❓, OPS3 🐞, OPS4 ❓ (other apps' territory).
+ * A2 ❓ (S3 and S12 assert only what Rules 9 and 20b state as built: the
+ * heading with no node), A3 ❓, A4 ❓, A5 🐞, A6 🐞 (S8 selects "Review" only
+ * on a stage the submission has left), A7 ❓, A8 ❓, A9 🐞 (S14 follows the
+ * stale dashboard and My Submissions addresses only), A11 🐞, A12 🐞 and
+ * A13 🐞 (S12 opens the manager's own submission on its Submission stage,
+ * never a round, and records no decision), A14 🐞, A15 🐞, OMP1 ✅, OMP2 ❓,
+ * OMP3 🐞, OPS1 ✅, OPS2 ❓, OPS3 🐞, OPS4 ❓, OPS5 ❓, OPS6 🐞.
  * The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster are
@@ -731,7 +730,9 @@ test.describe('workflow screen & stage access', () => {
         await ojsApi.createContext({
             tag,
             users: [
-                {username: twoRole, roles: ['manager', 'layoutEditor']},
+                // Author as well: the author-editor state needs the global
+                // Author role beside the submitter (fn-s, revision seeds).
+                {username: twoRole, roles: ['manager', 'layoutEditor', 'author']},
                 {username: author, roles: ['author']},
                 {username: reviewer, roles: ['externalReviewer']},
             ],
@@ -751,6 +752,16 @@ test.describe('workflow screen & stage access', () => {
             participants: [{username: twoRole, role: 'layoutEditor'}],
         });
         const {submissionId: otherId} = await seedOn(`${tag}b`);
+        // The third: freshly submitted by the two-role account itself, its
+        // one assignment the automatic Author one (a scratch journal
+        // auto-assigns no editor).
+        const {submissionId: ownId} = await ojsApi.createSubmission({
+            tag: `${tag}c`,
+            context: tag,
+            submitter: twoRole,
+            title: `Submission ${tag}c`,
+            submitted: true,
+        });
 
         // Assigned as Layout Editor, the account is held to that role's
         // stage set (Actors row 2): the landing round shows the no-access
@@ -778,6 +789,66 @@ test.describe('workflow screen & stage access', () => {
         // The header: "Library" and no "Activity Log" (Actors row 7).
         await workflow.expectHeaderButtons(['Library']);
 
+        // Their own submission by the dashboard address: the editorial view
+        // on "Submission", the language line above the stage's panels, a
+        // Participants column without "Assign"; the header "Library" alone;
+        // the "Publication" group a heading with no node under it, A2
+        // (Actors rows 1–2; Rules 11, 14, 20b).
+        await workflow.gotoEditorial(ownId);
+        await expect(workflow.page).toHaveURL(/\/dashboard\/editorial/);
+        await workflow.expectSelected('Submission');
+        await workflow.expectStageHeading('Submission');
+        await expectStageOpen(workflow);
+        await expect(workflow.panel('Submission Files')).toBeVisible();
+        await expect(workflow.participantsHeading()).toBeVisible();
+        await expect(workflow.participantsAssignButton()).toHaveCount(0);
+        await workflow.expectHeaderButtons(['Library']);
+        expect(await workflow.stageLabels()).toEqual(OJS_STAGES);
+        await expect(workflow.publicationGroup()).toBeVisible();
+        await expect(workflow.versionNodes()).toHaveCount(0);
+        await expect(workflow.pageLink('Title & Abstract')).toHaveCount(0);
+
+        // Their own submission's later stages: the language line, the
+        // not-yet-reached box, the Participants column, no panels and never
+        // the no-access box (Rules 13, 15a, 16, 20b).
+        for (const stage of ['Copyediting', 'Production']) {
+            await workflow.selectStage(stage);
+            await expectStageOpen(workflow);
+            await workflow.expectStatus(`The ${stage} stage has not yet been initiated.`);
+            await expect(workflow.participantsHeading()).toBeVisible();
+            await expect(workflow.panelTables()).toHaveCount(0);
+        }
+
+        // Their own submission from My Submissions: the author's view, its
+        // header "Library" alone, a version node whose pages start "Title &
+        // Abstract"; the old author-dashboard address forwards to the same
+        // view (Actors row 3; Rules 2b, 6, 9, 10, 20a). The node here is the
+        // positive control for its absence in the editorial view above.
+        for (const open of [
+            () => workflow.gotoAuthor(ownId),
+            () => workflow.gotoForwarding(workflow.authorDashboardUrl(ownId), ownId),
+        ]) {
+            await open();
+            await expect(workflow.page).toHaveURL(/\/dashboard\/mySubmissions/);
+            await workflow.expectHeaderButtons(['Library']);
+            await expect(workflow.versionNodes()).toHaveCount(1);
+            expect((await workflow.pagesUnderLatestVersion())[0]).toBe('Title & Abstract');
+        }
+
+        // Their own submission's older addresses: the editorial workflow
+        // address and every stage-naming address turn them away with the
+        // stage gate's page (Rules 2a, 20d).
+        const olderPaths = [
+            `/workflow/access/${ownId}`,
+            ...[1, 3, 4, 5].map((n) => `/workflow/index/${ownId}/${n}`),
+            ...['submission', 'externalReview', 'editorial', 'production'].map(
+                (word) => `/workflow/${word}/${ownId}`
+            ),
+        ];
+        for (const path of olderPaths) {
+            await workflow.expectAccessDeniedPage(workflow.contextUrl(tag, path), ACCESS_DENIED.stage);
+        }
+
         // Control: the same account on the second submission, where it is a
         // plain manager, opens every stage without the box and gets
         // "Activity Log" (Actors rows 2, 7).
@@ -791,6 +862,16 @@ test.describe('workflow screen & stage access', () => {
         await workflow.selectStage('Production');
         await expectStageOpen(workflow);
         await expect(workflow.headerButton('Activity Log')).toBeVisible();
+
+        // Control, continued: its editorial workflow address and its
+        // Production address forward to the editorial dashboard's "Assigned
+        // to me" view with its panel open (Rules 2a, 20).
+        for (const path of [`/workflow/access/${otherId}`, `/workflow/index/${otherId}/5`]) {
+            await workflow.gotoForwarding(workflow.contextUrl(tag, path), otherId);
+            await expect(workflow.page).toHaveURL(/\/dashboard\/editorial/);
+            await expect.poll(() => currentViewId(workflow.page), {timeout: 30_000}).toBe('assigned-to-me');
+            expect(workflow.submissionIdFromUrl()).toBe(String(otherId));
+        }
     });
 
     test('S13: an assigned Section Editor\'s header and publication controls', async ({asUser, ojsApi, appContext}, testInfo) => {
