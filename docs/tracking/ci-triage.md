@@ -29,12 +29,12 @@ the log only says where to look.
 
 Tests red in the daily configurations run (MAINTENANCE "The
 configurations run") and green on the usual configuration, each a
-confirmed fault of the app on that database or PHP version, reported
-and awaiting its fix. `node bin/ci.js matrix` reads this table to tell
+confirmed fault of the app on that database or PHP version, filed as an
+issue labeled `environment-specific` and awaiting its fix. `node bin/ci.js matrix` reads this table to tell
 known reds from new ones: the ID starts with `C-`, the Signature names
 each red test as `U<nn> S<n>`, and Apps names the apps.
 
-| ID | Signature (what the run shows) | Apps | Configurations | Report and reproduction | First seen / last confirmed |
+| ID | Signature (what the run shows) | Apps | Configurations | Issue and reproduction | First seen / last confirmed |
 |----|--------------------------------|------|----------------|-------------------------|-----------------------------|
 
 ## Open regressions — confirmed upstream regressions awaiting a fix

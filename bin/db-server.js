@@ -9,7 +9,8 @@
  * machine's memory is the reason; the data stays in the stopped container).
  *
  *   npm run db -- start <mysql|mariadb>   start it (created on first use) and wait until it answers
- *   npm run db -- stop [mysql|mariadb]    stop it (all when none is named); other slots may be using it
+ *   npm run db -- stop [mysql|mariadb] [--force]   stop it (all when none is named); refused while an
+ *                                         app is connected (another slot's servers?) unless --force
  *   npm run db -- status
  *   npm run db -- sql <mysql|mariadb> "<statement>" [database]   a statement as root, rows as tab-separated text
  *
@@ -95,17 +96,26 @@ function start(eng, s) {
     }
 }
 
-const [cmd, name, ...rest] = process.argv.slice(2);
+const force = process.argv.includes('--force');
+const [cmd, name, ...rest] = process.argv.slice(2).filter((a) => a !== '--force');
 const eng = engine();
 if (cmd === 'start' && name) {
     start(eng, server(name));
 } else if (cmd === 'stop') {
+    let refused = false;
     for (const s of name ? [server(name)] : Object.keys(DB_SERVERS).map(server)) {
-        if (state(eng, s) === 'running') {
-            sh(eng, ['stop', s.container]);
-            console.log(`db-server: ${s.container} stopped`);
+        if (state(eng, s) !== 'running') continue;
+        // The apps connect as DB_USER and keep their connection (persistent = On).
+        const held = Number((sql(eng, s, `SELECT COUNT(*) FROM information_schema.processlist WHERE user = '${DB_USER}'`).stdout || '0').trim()) || 0;
+        if (held && !force) {
+            console.error(`db-server: ${s.container} left running: ${held} app connection(s) open (this slot's servers, or another slot's); stop them first, or --force`);
+            refused = true;
+            continue;
         }
+        sh(eng, ['stop', s.container]);
+        console.log(`db-server: ${s.container} stopped`);
     }
+    if (refused) process.exit(1);
 } else if (cmd === 'status') {
     for (const s of Object.keys(DB_SERVERS).map(server)) console.log(`${s.name}: ${state(eng, s)} (127.0.0.1:${s.port}, ${s.image})`);
 } else if (cmd === 'sql' && name && rest[0]) {
@@ -116,6 +126,6 @@ if (cmd === 'start' && name) {
         process.exit(1);
     }
 } else {
-    console.error('usage: npm run db -- start <mysql|mariadb> | stop [mysql|mariadb] | status | sql <mysql|mariadb> "<statement>" [database]');
+    console.error('usage: npm run db -- start <mysql|mariadb> | stop [mysql|mariadb] [--force] | status | sql <mysql|mariadb> "<statement>" [database]');
     process.exit(1);
 }

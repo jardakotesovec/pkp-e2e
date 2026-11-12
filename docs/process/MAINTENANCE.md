@@ -953,22 +953,27 @@ its own checks are triaged:
    `shared/playwright/checks/sync/<slug>/`, and read the cause in the
    code down to the statement at fault and the reason PostgreSQL does
    not show it. Nothing unconfirmed reaches a report or a tag.
-4. **Report it** as the sync loop's step 5 reports a regression: the
-   report under `docs/reports/<date>-<repo>-<slug>.md` in REPORT.md's
-   shape, its Summary and steps naming the databases and PHP versions
-   that show it, its **Introduced** line the commit or PR that brought
-   the statement in (`git log -S`, `git blame`; REPORT.md says what to
-   write for a fault older than the history shows), posted in the
-   session's thread the same day tagging @beaug and the developer who
-   made that change ("Who is tagged"). Its Kind is a regression when
-   the configuration showed the behavior right before that change,
-   else a defect. The fault gets a row in ci-triage "Open — red on a
-   configuration only" (`C-<feature>-<n>`), which links the report and
-   the kept script, and an entry in the owning spec's register that
-   names the databases. The test stays red on that configuration until
-   the fix lands, as a known red on `main` does, and the row is the
-   record: no test is skipped or bent for it (PRINCIPLES M3). Anything
-   security-shaped goes the private way, as always.
+4. **File it as an issue**, the same day. The fault becomes a 🐞 entry
+   in the owning spec's register, naming the databases or PHP versions
+   that show it, and an issue report under `docs/issues/` written as
+   "Issue reports" below says (`briefs/issue-report.md`), with these
+   differences: its walks run on the `mysql` or `mariadb` line from a
+   reset install, since the dataset fleets are PostgreSQL only; its
+   header carries the **Environment** bullet (REPORT.md "The header"),
+   which gives the issue the label `environment-specific`; and its
+   **Introduced** line names the commit or PR that brought the
+   statement in (`git log -S`, `git blame`), or says how far back it
+   goes when the history does not show a start. It is filed at once
+   (`npm run hk -- file <report> --post`) and posted in the session's
+   thread with the issue's link, tagging @beaug and the developer who
+   made that change ("Who is tagged"). The fault gets a row in
+   ci-triage "Open — red on a configuration only" (`C-<feature>-<n>`)
+   linking the issue and the kept script. The test stays red on that
+   configuration until the fix lands, as a known red on `main` does,
+   and the row is the record: no test is skipped or bent for it
+   (PRINCIPLES M3). When the fix lands the row goes and the issue
+   closes as "A report's life" says. Anything security-shaped goes the
+   private way, as always.
 5. **Confirm a suite fix** by one run of the configurations it failed
    on: `node bin/ci.js dispatch --apps <app> --php 8.2 --database mysql`
    (`e2e.yml` takes one configuration; the push run covers the usual

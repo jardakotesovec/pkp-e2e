@@ -345,10 +345,12 @@ machine what that run shows:
   `npm run db -- start mysql` starts it, created on first use, and
   waits until it answers; `fetch-apps` does that itself and creates the
   database as PKP's own CI does (`DEFAULT CHARACTER SET utf8`).
-  `npm run db -- status` says what runs. `npm run db -- stop` stops
-  them, which frees their memory and keeps their data: stop them when
-  the reproduction is done, unless another slot's session is at work
-  (`node bin/slot.js status`).
+  `npm run db -- status` says what runs. **They run only while a
+  reproduction needs them**, for the machine's memory: the session that
+  starts one stops it when it is done (`npm run db -- stop`, after its
+  own servers: `probe-servers -- --stop`), which keeps the data. The
+  stop refuses while an app still holds a connection, another slot's
+  for instance, and says how many; `--force` stops anyway.
   `npm run db -- sql mysql "<statement>" [<database>]` runs a statement
   as root, for a look at a table or at `SHOW ENGINE INNODB STATUS`.
 - **PHP.** `PKP_E2E_PHP=php8.2` in front of a harness command runs the

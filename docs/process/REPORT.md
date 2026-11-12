@@ -52,6 +52,9 @@ never dropped.
   - 3.5: <apps>[ (code)]
   - 3.4: <apps> (code)
   - 3.3: none (code; <the word it needs, e.g. no Institutions page>)
+[- **Environment** only on <the databases or PHP versions that show it,
+  e.g. MySQL 8.0 and MariaDB 10.11>; <the ones that do not, e.g. not on
+  PostgreSQL 16>]
 - **Introduced** `<repo>#<pr>` for `<repo>#<issue>` · [<sha>](<commit
   URL>) · <date> · <name> (<github handle>) | not traced; present since
   at least [<sha>](<commit URL>) (<date>)
@@ -98,6 +101,14 @@ read; a label changed on GitHub is copied back into the header.
 - **Crash**, only when the app itself failed: a request behind the action
   answered a server error (`server`), or the page's own script failed in
   the browser (`script`), or both.
+- **Environment**, only when the fault shows on some of the databases
+  or PHP versions PKP supports and not on the others (the daily
+  configurations run finds these, MAINTENANCE "The configurations
+  run"): which ones show it, with the versions it was walked on, and
+  which do not. Its label is `environment-specific`. The Summary's
+  first sentence names the environment too, and the steps say which
+  database the install runs on. A report without the bullet was walked
+  on the test installs' PHP 8.3 and PostgreSQL.
 - A fault that could plausibly be a security weakness never gets a
   report, whatever branch carries it: it is a finding in the private
   security repo, and its GitHub issue lives on that repo's tracker
@@ -444,7 +455,8 @@ reports filed before 2026-10-17 live the same way on the private tracker,
   (both for both) from their bullets; `model: <model id>`
   per model the Model bullet names; one of `ojs`, `omp`, `ops` per
   app and one of `main`, `3.5`, `3.4`, `3.3` per version that has a
-  a sub-item naming it under the Affects bullet; and `tracked upstream`
+  a sub-item naming it under the Affects bullet; `environment-specific`
+  when the header has an Environment bullet; and `tracked upstream`
   when the Upstream bullet names a pkp issue or PR. They are a filter on
   top of the header, never the only place a fact is written.
 - The body is the file below the title, header included, unchanged, up

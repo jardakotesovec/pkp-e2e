@@ -47,6 +47,7 @@ function labelsOf(head) {
     if (word('Effort')) L.add(`effort: ${word('Effort')}`);
     const kind = ['regression', 'intention gap', 'defect'].find((k) => bullet(head, 'Kind').startsWith(k));
     if (kind) L.add(kind);
+    if (bullet(head, 'Environment')) L.add('environment-specific');
     const crash = word('Crash');
     if (crash === 'server' || crash === 'both') L.add('crash: server');
     if (crash === 'script' || crash === 'both') L.add('crash: script');
@@ -66,7 +67,7 @@ function labelsOf(head) {
 // Labels outside the header's families (one the team added by hand, the
 // private tracker's own) are never compared or changed.
 const fromHeader = (l) => /^(severity|effort|crash|model): /.test(l)
-    || ['regression', 'intention gap', 'defect', 'ojs', 'omp', 'ops', 'main', '3.5', '3.4', '3.3', 'tracked upstream'].includes(l);
+    || ['regression', 'intention gap', 'defect', 'environment-specific', 'ojs', 'omp', 'ops', 'main', '3.5', '3.4', '3.3', 'tracked upstream'].includes(l);
 
 function report(file) {
     const text = read(`docs/issues/${file}`);
