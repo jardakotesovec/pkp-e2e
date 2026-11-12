@@ -145,43 +145,66 @@ function wait(runId, timeoutMin) {
 
 const ANSI = /\x1b\[[0-9;]*m/g;
 
-/** Failed and flaky test titles per job, from the run's logs. */
-function failures(runId) {
-    let log = '';
+/** One log line's verdict, folded into the job's {failed, flaky, errors}; `mode` is the list being read. */
+function readLine(line, j, mode) {
+    const count = line.match(/^ {2}(\d+) (failed|flaky|passed|did not run|skipped|interrupted)\b/);
+    if (count) return count[2] === 'failed' || count[2] === 'flaky' ? count[2] : null;
+    const title = line.match(/^ {4}(\[\w[\w-]*\] › .+)$/);
+    if (mode && title) {
+        j[mode].add(title[1].trim());
+        return mode;
+    }
+    const err = line.match(/^##\[error\](.+)$/) || line.match(/^::error::(.+)$/);
+    if (err && !/Process completed with exit code/.test(err[1])) j.errors.add(err[1].trim());
+    return line.startsWith('    ') ? mode : null;
+}
+
+/**
+ * Failed and flaky test titles per job, from the run's logs: the whole
+ * run's log in one call, or job by job when the run has too many jobs for
+ * that (the configurations run's 36).
+ */
+function failures(runId, jobs = []) {
+    const perJob = {};
+    const fresh = () => ({failed: new Set(), flaky: new Set(), errors: new Set()});
+    let log = null;
     try {
         log = gh(['run', 'view', String(runId), '--log']);
     } catch {
-        return null;
+        // fall through to the jobs' own logs
     }
-    const perJob = {};
-    let mode = null;
-    for (const raw of log.split('\n')) {
-        const [job, , rest = ''] = raw.split('\t');
-        if (!job) continue;
-        const line = rest.replace(/^\S+Z /, '').replace(ANSI, '');
-        const j = (perJob[job] = perJob[job] || {failed: new Set(), flaky: new Set(), errors: new Set()});
-        const count = line.match(/^ {2}(\d+) (failed|flaky|passed|did not run|skipped|interrupted)\b/);
-        if (count) {
-            mode = count[2] === 'failed' || count[2] === 'flaky' ? count[2] : null;
+    if (log) {
+        let mode = null;
+        for (const raw of log.split('\n')) {
+            const [job, , rest = ''] = raw.split('\t');
+            if (!job) continue;
+            const j = (perJob[job] = perJob[job] || fresh());
+            mode = readLine(rest.replace(/^\S+Z /, '').replace(ANSI, ''), j, mode);
+        }
+        return perJob;
+    }
+    let read = 0;
+    for (const job of jobs) {
+        if (job.status !== 'completed' || job.conclusion === 'skipped') continue;
+        let text;
+        try {
+            text = gh(['api', `repos/{owner}/{repo}/actions/jobs/${job.databaseId}/logs`]);
+        } catch {
             continue;
         }
-        const title = line.match(/^ {4}(\[\w[\w-]*\] › .+)$/);
-        if (mode && title) {
-            j[mode].add(title[1].trim());
-            continue;
-        }
-        if (!line.startsWith('    ')) mode = null;
-        const err = line.match(/^##\[error\](.+)$/) || line.match(/^::error::(.+)$/);
-        if (err && !/Process completed with exit code/.test(err[1])) j.errors.add(err[1].trim());
+        read++;
+        const j = (perJob[job.name] = fresh());
+        let mode = null;
+        for (const raw of text.split('\n')) mode = readLine(raw.replace(/^\S+Z /, '').replace(ANSI, ''), j, mode);
     }
-    return perJob;
+    return read ? perJob : null;
 }
 
 function report(run, runId) {
     console.log(`ci: run ${runId} ${run.conclusion} — ${run.url}`);
     const jobs = (run.jobs || []).filter((j) => j.conclusion !== 'skipped');
     const red = jobs.filter((j) => j.conclusion !== 'success');
-    const perJob = failures(runId) || {};
+    const perJob = failures(runId, jobs) || {};
     for (const job of jobs) {
         const f = perJob[job.name];
         const lines = [];
@@ -259,7 +282,7 @@ function matrix(ids) {
             continue;
         }
         console.log(`ci: configurations run ${id} ${run.conclusion} — ${run.url}`);
-        const perJob = failures(id) || {};
+        const perJob = failures(id, run.jobs || []) || {};
         for (const job of (run.jobs || []).filter((j) => j.conclusion !== 'skipped')) {
             const cfg = jobConfig(job.name);
             if (!cfg) continue;
@@ -277,7 +300,7 @@ function matrix(ids) {
     const nightly = latestRun(WORKFLOW, 'schedule');
     const usual = new Set();
     if (nightly) {
-        for (const f of Object.values(failures(nightly.databaseId) || {})) for (const t of f.failed) usual.add(t);
+        for (const f of Object.values(failures(nightly.databaseId, jobState(nightly.databaseId).jobs || []) || {})) for (const t of f.failed) usual.add(t);
         console.log(`ci: the usual configuration (php 8.3 pgsql): nightly ${nightly.databaseId} of ${nightly.createdAt.slice(0, 10)} ${nightly.conclusion}, ${usual.size} failed`);
     }
     const all = [...configs].sort();
