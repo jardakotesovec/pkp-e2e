@@ -667,10 +667,10 @@ empty statement changes: Rule 18 and Side effects. <sup>j</sup>
 
 Scenarios 1, 2 and 12 only read, and run on the seeded journal with ready
 accounts; every other scenario runs on a scratch journal with throwaway
-accounts, because it saves a tab or a role, or needs members, reviews or
-a sidebar block the seeded journal lacks. The accounts, their passwords,
-the site's contact address, the mail catcher and the tooling recipe are
-in the footnote. <sup>y</sup>
+accounts, because it saves a tab or a role, or needs members, reviews,
+published articles or a sidebar block the seeded journal lacks. The
+accounts, their passwords, the site's contact address, the mail catcher
+and the tooling recipe are in the footnote. <sup>y</sup>
 
 1. **A visitor reads the seeded journal's About pages**
 
@@ -799,16 +799,16 @@ in the footnote. <sup>y</sup>
 
 4. **Save the "Contact" tab; the journal's emails follow the new contact**
 
-   Given: Journal Manager, on a scratch journal that has the principal
-   contact it was created with and no technical support contact, with an
-   Author and, on a journal, the Author's submission in Production and an
-   unpublished issue.
+   Given: Journal Manager, on a scratch journal with its first principal
+   contact, no technical support contact, an Author, the Author's
+   submission in Production and, on a journal, an unpublished issue.
 
    - **A phone alone**: open Settings › Journal › "Contact", type "+1 555
      0100" in the principal contact's "Phone" and press "Save": "This field
      is required." appears under the "Technical Support Contact" group's
      "Name" and "Email address", the footer reads "Please correct 2
-     errors.", and nothing is saved [A3] (Fields).
+     errors.", and nothing is saved, as the Control shows [A3]; leave the
+     phone typed (Fields).
    - **An invalid address**: type "Sam Support" and
      "sam.support@mail.test" in the support contact's "Name" and "Email
      address", replace the principal contact's "Email address" with
@@ -828,21 +828,28 @@ in the footnote. <sup>y</sup>
      and "+1 555 0100", and "pat.principal@mail.test" as a link that opens
      the visitor's mail program; then a block headed "Support Contact" with
      "Sam Support", "Phone" and "+1 555 0199", and its email link (Rule 17).
-   - **The journal's next email** {OJS}: Journal Manager: publish the
-     submission with "Assign To Future Issue and Publish Immediately"
-     ([Publish, schedule & versions](U49-publish-schedule-and-versions.md)
-     Rule 5): the Author's mailbox holds "Publication Published", its
-     sender the journal's title at "pat.principal@mail.test" (Rule 9; Side
-     effects).
-   - **The password reset**: signed out, ask for a password reset of the
-     Author's account through "Forgot your password?" on the Login page
+   - **A new submission's emails**: Author: make and submit a new
+     submission, as [Submission wizard](U21-submission-wizard.md) scenario
+     2 does: the Author's mailbox holds "Thank you for your submission to
+     {journal title}" and the Journal Manager's mailbox "A new submission
+     needs an editor to be assigned", both sent by "Pat Principal" at
+     "pat.principal@mail.test" (Rule 9; Side effects).
+   - **The journal's next email**: Journal Manager: publish the
+     submission as
+     [Publish, schedule & versions](U49-publish-schedule-and-versions.md)
+     scenario 1 does, on a journal with "Assign To Future Issue and
+     Publish Immediately" (its Rule 5): the Author's mailbox holds
+     "Publication Published", its sender the journal's title at
+     "pat.principal@mail.test" (Rule 9; Side effects).
+   - **The password reset**: signed out, ask for the Author's password
+     reset through "Forgot your password?" on the Login page
      ([Login & sessions](U01-login-and-sessions.md)): the email comes from
      "Open Journal Systems" ("Open Monograph Press", "Open Preprint
      Systems") at the site's contact address, not from "Pat Principal"
      (Side effects).
-   - **Control**: before the save, the "Contact" page showed the "Principal
-     Contact" block alone, with the name and address the journal was
-     created with (Rule 17).
+   - **Control**: before "Saved", the "Contact" page, opened signed out,
+     showed the "Principal Contact" block alone, with the name and address
+     the journal was created with (Rule 17).
 
 5. **Change and empty the "Privacy Statement"**
 
@@ -946,11 +953,15 @@ in the footnote. <sup>y</sup>
 
    Given: Journal Manager, on a scratch journal whose Section editor role
    holds three members with the family names "Able", "Baker" and "Carter",
-   Able also holding the Reader role, with a Reader "Dunn" and an Author
-   "Evans" set to "Appear on the masthead" as Author.
+   Able also holding the Reader role, and whose Editorial Board Member
+   role holds three members "Ford", "Grant" and "Hill", the six set to
+   "Appear on the masthead" for their role, with two Readers "Dunn" and
+   "Irwin" and an Author "Evans" set to "Appear on the masthead" as
+   Author.
 
    - **Before**: signed out, "Editorial Masthead" lists Able, Baker and
-     Carter under "Section editor" and has no "Author" heading, and
+     Carter under "Section editor" and Ford, Grant and Hill under
+     "Editorial Board Member", and has no "Author" heading, and
      "Editorial History" lists nobody (Rules 14a, 16).
    - **A role given**: invite Dunn to the Section editor role, starting
      today and set to "Appear on the masthead", as
@@ -970,6 +981,23 @@ in the footnote. <sup>y</sup>
      [User invitations](U06-user-invitations.md#omp1) records); signed out,
      Baker has left "Editorial Masthead" and is not on "Editorial History"
      (Rule 14e; Settings bullet 3).
+   - **A later start date**: invite Irwin as Dunn was, but starting 30
+     days from today; Irwin: accept the invitation from the mailbox;
+     signed out, "Editorial Masthead" does not list Irwin (Rule 14e).
+   - **"Remove User"**: Journal Manager: on Settings › Users & Roles ›
+     "Users" remove Ford with "Remove User", as
+     [Users management](U53-users-management.md) scenario 5 does; signed
+     out, Ford has left "Editorial Masthead", and "Editorial History"
+     lists Ford under "Editorial Board Member" (Rule 14e).
+   - **"Disable User"**: disable Grant's account and then Ford's, whose
+     row stays on the "Users" list (Users management Rule 3), with
+     "Disable User", as its scenario 3 does; signed out,
+     "Editorial Masthead" still lists Grant under "Editorial Board
+     Member", and "Editorial History" still lists Ford (Rule 14e).
+   - **"Merge user"**: merge Hill's account into Evans's with "Merge
+     user", as Users management scenario 6 does, Evans's account being
+     the one kept; signed out, "Editorial Masthead" lists Evans under
+     "Editorial Board Member", and Hill is no longer listed (Rule 14e).
    - **"Consider role in masthead list" ticked**: on Settings › Users &
      Roles › "Roles" open the "Author" role's "Edit", tick "Consider role
      in masthead list" and save the form; signed out, "Editorial Masthead"
@@ -986,8 +1014,9 @@ in the footnote. <sup>y</sup>
 
 9. **"Peer Reviewers in Previous Year"** {OJS OMP}
 
-   Given: a visitor, signed out, on a scratch journal whose "Enable
-   listing of reviewers on the masthead" is ticked, whose Reviewers
+   Given: Journal Manager and a visitor, signed out, on a scratch journal
+   whose "Enable listing of reviewers on the masthead" is unticked, as on
+   every new journal, whose Reviewers
    "Zeta", with the affiliation "Review University" and the verified ORCID
    iD "https://orcid.org/0000-0002-1694-233X", and "Beta" each submitted a
    review last calendar year, whose
@@ -995,14 +1024,34 @@ in the footnote. <sup>y</sup>
    Internal Reviewer "Delta" submitted a review of the Internal Review
    last year.
 
-   - **The block**: open "Editorial Masthead": after the horizontal rule
-     under "View Editorial History" come the heading "Peer Reviewers in
-     Previous Year" and "The editors express their appreciation of the
-     reviewers for {year} listed below." with last year's number, then Beta
-     and Zeta in that order, with no year before either name; "Review
-     University" sits under Zeta's name, beside an ORCID icon that opens a
-     new browser tab at Zeta's iD (Rules 14c, 15).
+   - **The box at its default**: open "Editorial Masthead": the page ends
+     with the line "View Editorial History" and the horizontal rule, with
+     no "Peer Reviewers in Previous Year" heading and no "The editors
+     express their appreciation of the reviewers …" after them, though
+     Beta and Zeta submitted reviews last year (Rule 15; Settings bullet
+     4c).
+   - **Beta's Reviewer row, reviewers not listed**: Journal Manager: on
+     Settings › Users & Roles › "Users" press Beta's "Edit": the Reviewer
+     row ("External Reviewer" on a press) reads "Does not appear on the
+     masthead" (Settings bullet 3).
+   - **The box ticked**: open Settings › Website › "Appearance" ›
+     "Editorial Masthead", tick "Enable listing of reviewers on the
+     masthead" and press "Save" (Settings bullet 4c).
+   - **Beta's Reviewer row, reviewers listed**: press Beta's "Edit" again:
+     the Reviewer row reads "Appear on the masthead" (Settings bullet 3).
+   - **The block**: signed out, open "Editorial Masthead": after the
+     horizontal rule under "View Editorial History" come the heading "Peer
+     Reviewers in Previous Year" and "The editors express their
+     appreciation of the reviewers for {year} listed below." with last
+     year's number, then Beta and Zeta in that order, with no year before
+     either name; "Review University" sits under Zeta's name, beside an
+     ORCID icon that opens a new browser tab at Zeta's iD (Rules 14c, 15).
    - **An internal review** {OMP}: Delta is not listed (Rule 15).
+   - **A listed reviewer disabled**: Journal Manager: disable Beta's
+     account with "Disable User", as
+     [Users management](U53-users-management.md) scenario 3 does; signed
+     out, "Editorial Masthead" still lists Beta under "Peer Reviewers in
+     Previous Year" (Rule 14e).
    - **Control**: Gamma, whose review was submitted this year, is not
      listed while Beta and Zeta, of last year, are (Rule 15).
 
@@ -1051,7 +1100,7 @@ in the footnote. <sup>y</sup>
 
 App-specific:
 
-12. **{OPS} No Information texts and no peer reviewers on a preprint server**
+12. **No Information texts and no peer reviewers on a preprint server** {OPS}
 
     Given: Preprint Server Manager, on the seeded preprint server.
 
@@ -1072,6 +1121,99 @@ App-specific:
       "About" menu gives it, with its heading; and the masthead's role
       headings show above the rule (Rules 14a, 17, 18).
 
+Common to every application:
+
+13. **A masthead not based on enrollments**
+
+    Given: Journal Manager, on a scratch journal with its "Journal
+    Initials" and "Country" set and an empty "Editorial History" text,
+    whose Section editor "Able" is set to "Appear on the masthead", whose
+    past Section editor "Dale" served from 2019 to 2024, and with a Reader
+    "Cole".
+
+    - **Before**: signed out, "Editorial Masthead" lists Able under
+      "Section editor", then the line "View Editorial History"; press
+      "Editorial History" in that line: the "Editorial History" page lists
+      Dale under "Section editor" with "2019 – 2024" (Rules 14, 16).
+    - **The box unticked**: Journal Manager: open Settings › Website ›
+      "Appearance" › "Editorial Masthead" and untick "Present a masthead
+      based on user enrollments": the "Editorial Masthead" list and, on a
+      journal or press, the "Reviewers" group leave the tab at once,
+      before any save; press "Save" (Settings bullet 4a).
+    - **The masthead, its text empty**: open "Editorial Masthead": under
+      the heading "Editorial Masthead" comes the "Edit" link alone, with
+      no role heading, no Able, no "View Editorial History" line and no
+      horizontal rule (Rules 14f, 21).
+    - **Its "Edit" link**: press it: Settings › Journal opens in the same
+      window on its "Masthead" tab (Rule 21); type "Founded in 2001." in
+      "Editorial History" and press "Save": "Saved" (Fields).
+    - **The masthead with its text**: signed out, open "Editorial
+      Masthead": under the heading comes "Founded in 2001." and nothing
+      else, no "Edit" link included (Rule 14f).
+    - **The "Editorial History" address**: signed out, open the address
+      of the "Editorial History" page opened in the first bullet:
+      "Editorial Masthead" opens in its place; as the Journal Manager the
+      same address opens "Editorial Masthead" too (Rule 14f).
+    - **The role window**: Journal Manager: on Settings › Users & Roles ›
+      "Roles" press the "Section editor" role's "Edit": the window has no
+      "Consider role in masthead list" box (Settings bullet 2).
+    - **The user's "Edit" page**: on Settings › Users & Roles › "Users"
+      press Able's "Edit": the roles table has no masthead column, no
+      "Appear on the masthead" or "Does not appear on the masthead" shown
+      (Settings bullet 3).
+    - **"Invite to a role"**: invite Cole to the Section editor role,
+      starting today, as [User invitations](U06-user-invitations.md)
+      scenario 3 does: the role row has no masthead column, so there is
+      no masthead choice to make; send the invitation (Settings bullet 3).
+    - **Cole's side**: Cole: the invitation email in the mailbox says
+      nothing about the masthead; open its accept link: the review step
+      has no masthead column; accept the invitation (Settings bullet 3).
+    - **Ticked again**: Journal Manager: on Settings › Website ›
+      "Appearance" › "Editorial Masthead" tick "Present a masthead based
+      on user enrollments" and press "Save"; signed out, "Editorial
+      Masthead" lists Able under "Section editor" and the line "View
+      Editorial History" as before, and Cole is not listed; "Editorial
+      History" opens again, listing Dale under "Section editor" with
+      "2019 – 2024", and "Founded in 2001." below the list (Rules 14f, 16;
+      Settings bullet 3).
+    - **Cole's masthead choice**: Journal Manager: press Cole's "Edit" on
+      Settings › Users & Roles › "Users": the Section editor row reads
+      "Does not appear on the masthead", the choice the invitation sent
+      while the masthead was not based on enrollments (Settings bullet 3).
+    - **Control**: the "Section editor" role's "Edit" window, opened
+      again after the box was ticked, holds "Consider role in masthead
+      list" (Settings bullet 2).
+
+14. **A published article keeps the journal's name of its day**
+
+    Given: Journal Manager, on a scratch journal titled "Old Probe
+    Journal" with the "Journal Initials" "OPJ", no "Journal Abbreviation",
+    a "Country", no header logo and the "Citation Style Language" plugin
+    on ([→ How to Cite](U13-article-landing-page-and-reading.md#how-to-cite)),
+    holding an article published before the scenario and a second
+    article in Production and, on a journal, an unpublished issue.
+
+    - **The rename**: open Settings › Journal › "Masthead", replace
+      "Journal Title" with "New Probe Journal" and "Journal Initials" with
+      "NPJ", and press "Save": "Saved" (Fields).
+    - **The article published before**: signed out, open the first
+      article's page: the header shows "New Probe Journal" and the browser
+      title ends with "New Probe Journal" (Rule 7), while its "How to
+      Cite" still names "Old Probe Journal" (Rule 7a).
+    - **Its abbreviated citation** {OJS OPS}: under "More Citation
+      Formats" choose "AMA": in place of the journal's name the citation
+      prints "OPJ", the initials of the day it was published, not "NPJ"
+      (Rule 7a; the Masthead tab's "Journal Abbreviation" row).
+    - **An article published after the save**: Journal Manager: publish
+      the second article as
+      [Publish, schedule & versions](U49-publish-schedule-and-versions.md)
+      scenario 1 does, on a journal with "Assign To Future Issue and
+      Publish Immediately" (its Rule 5); signed out, its page's "How to
+      Cite" names "New Probe Journal", and on a journal or preprint server
+      its "AMA" citation prints "NPJ" (Rule 7a).
+    - **Control**: before the save, the first article's page showed "Old
+      Probe Journal" in its header (Rule 7).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1081,17 +1223,9 @@ Left out of the scenarios above, by reason:
   - a reload on a Settings side tab under a later top tab (Website › "Setup" › "Privacy Statement") keeping that side tab (A7; the guard its issue report names) [report 2026-10-03]
   - a new journal's and press's "Information For Readers" "Privacy Statement" link opening the "Privacy Statement" page {OJS OMP} (A9; the guard its issue report names) [report 2026-10-03]
   - the site-level "About Open Monograph Press" page of a site with two presses opening "This site uses" {OMP} (OMP2; Rule 20; the guard its issue report names) [report 2026-10-03]
-  - the masthead not based on enrollments, "Present a masthead based on user enrollments" unticked: the masthead showing under its heading only the "Editorial History" text (and a manager's "Edit" link), or nothing with that text empty, the "Editorial History" address opening the masthead, the other two groups leaving the tab, and, ticked again, both pages listing as before in the saved role order (Rule 14f; Rules 16, 21; Settings bullet 4a) [upstream 2026-09-29]
-  - the masthead not based on enrollments: the role window without "Consider role in masthead list", "Invite to a role", the user's "Edit" page and the invitee's review step without a masthead column, the invitation email without a masthead line, and the new role stored as "Does not appear"; a Reviewer row and its email reading "Does not appear" while reviewers are not listed, "Appear" once they are {OJS OMP} (Settings bullets 2, 3; A13 retired) [upstream 2026-10-23]
-  - "Enable listing of reviewers on the masthead" at its default: no "Peer Reviewers in Previous Year" although reviews were completed last year {OJS OMP} (Rule 15; Settings bullet 4c) [upstream 2026-09-29]
-  - a disabled member staying listed on both pages and under "Peer Reviewers in Previous Year" (Rule 14e; A4 retired) [upstream 2026-09-29]
-  - "Remove User" moving the member to "Editorial History" at the next load, and a member with a later start date listed from that date on (Rule 14e; A5 retired) [upstream 2026-09-29]
-  - "Merge user" of a listed member listing the kept account under the member's role (Rule 14e) [upstream 2026-09-29]
-  - a journal renamed after an article was published: the article's "How to Cite" keeping the old name (and, on a journal or preprint server, the abbreviation or initials it was published with), while an article published after the save carries the new ones (Rule 7a) [upstream 2026-10-26]
-  - a second form language that is the language of the screens (a journal whose primary language is French opened in English, or an English one opened in French): its boxes open on arrival with its button selected, pressing the button hiding them, a reload opening them again, and the "Contact" tab arriving in its own starting state whatever was pressed on "Masthead" (Fields) [incidental 2026-11-03]
-  - after the "Contact" tab is saved, the author's "Thank you for your submission to {journal title}" and the managers' "A new submission needs an editor to be assigned" sent from the new address under the principal contact's "Name", and on a press or preprint server "Publication Published" under its title (Side effects; Rule 9) [upstream 2026-10-26]
 - **Nothing new to test**:
   - a second form language: its boxes behind the language button while the screens are in the primary language, kept open on a tab after leaving it and coming back, each tab with its own button, until the page is loaded again, and each public page in the visitor's language with the primary language's text where that box is empty (Fields; Rule 11; Settings bullet 12)
+  - a second form language that is the language of the screens (a journal whose primary language is French opened in English, or an English one opened in French): its boxes open on arrival with its button selected, pressing the button hiding them, a reload opening them again, and the "Contact" tab arriving in its own starting state whatever was pressed on "Masthead": the language button of the item above, from the other language's side, a variant no scenario takes (Fields)
   - unsaved changes kept while moving between the tabs of a page, and lost without a warning on reloading or leaving it (Rule 5)
   - another order of the roles on Settings › Website › "Appearance" › "Editorial Masthead" (Rule 14a; Settings bullet 4b)
   - the abbreviation, the "Publishing Details", "Sponsoring organization" and "Publisher Identity" saved and shown again on the tab (Fields; Rule 10)
@@ -1117,6 +1251,7 @@ Left out of the scenarios above, by reason:
   - OPS3 (a preprint server's French privacy default arriving as a raw text key; Fields)
   - OPS4 (a preprint server's French masthead heading its Moderators with a raw text key, and a French server's role invitation email naming the role so; Rule 14a)
 - **No seed**:
+  - a member invited with a later start date listed once that date comes (Rule 14e): no seed gives a role a start still to come, and the test installs cannot move the calendar; scenario 8 reads the member not listed after accepting
   - a journal upgraded from a release without the "Enrollment-based Masthead" group, reading its box unticked (Settings bullet 4a): the test installs are never upgraded
   - the newer-release notice on Settings › Journal (Rule 4b; Settings bullet 11): the test installs never reach the internet
   - the site's own "Privacy Statement" set (Rule 18; Settings bullet 10)
@@ -1127,6 +1262,7 @@ Left out of the scenarios above, by reason:
   - the "Journal Summary" in the site's list of journals and on the home page (Rule 8; *Hosted journals*, *Appearance & theming*)
   - the other tabs of the five Settings pages (Rule 2; the features its table names)
   - the "Announcements", "Institutions" and "Comments" pages with their side-menu entries, and the users list's "Edit" (Rule 3; [Announcements](U12-announcements.md), [Institutions](U66-institutions.md), [Reader comments & moderation](U14-reader-comments-and-moderation.md) scenario 6, [User invitations](U06-user-invitations.md) scenario 8)
+  - the invitation email's masthead line for a Reviewer, which follows "Enable listing of reviewers on the masthead" (Settings bullet 3; [User invitations](U06-user-invitations.md) Side effects, the email's masthead sentence); scenario 9 reads the Reviewer row at both ends
   - the error window of a masthead choice changed on a press or preprint server (Settings bullet 3; [User invitations](U06-user-invitations.md#omp1); scenario 8 passes it)
   - when each of the journal's emails is sent (Side effects; each email's own feature, such as [Publish, schedule & versions](U49-publish-schedule-and-versions.md) for "Publication Published")
   - the technical support contact as the sender of the account-validation email ([Registration & account validation](U02-registration-and-account-validation.md) scenario 7)
@@ -2490,7 +2626,7 @@ three `sectioneditor.*` and `assistant.rita` (OPS), every seeded role
 with "Appear on the masthead" (note e); the seed holds no submission, so no
 review. The seeded Section editors (Series editors, Moderators) share the
 family name "Section Editor", so no order among them shows on the seeded
-journal; scenario 7 reads the family-name order. Scenarios 3–11 on a scratch context from `POST scenarios/context`
+journal; scenario 7 reads the family-name order. Scenarios 3–11, 13 and 14 on a scratch context from `POST scenarios/context`
 with throwaway `users[]` (password the username twice, address
 `<username>@mail.test`, each mailbox read in the mail catcher by that
 address); a scratch context arrives with its title "Scratch context {tag}",
@@ -2500,14 +2636,18 @@ header logo, no block in its sidebar, and the default privacy and
 Information texts (seed-facts). The site's contact address, the password
 reset's sender on every test install, is `admin@mail.test` (seed-facts;
 note x). Recipes: 3, 5, 10 — a `manager`, no
-`acronym`. 4 — a `manager` and an `author`; on OJS a submission by the
-author from `POST scenarios/submission` taken to Production
-(`decisions: ['sendExternalReview', 'accept', 'sendToProduction']`) and an
-issue made, not published, on the Issues screen before the scenario (no
-`issues[]` key); the publish by "Assign To Future Issue and Publish
-Immediately" (U49 Rule 5; U49's side effect: "Publication Published" goes
-out when a version goes live); the password reset requested for the
-author's address. 6 — a `manager` and `sidebar: ['informationblockplugin']`.
+`acronym`. 4 — a `manager` and an `author`; a submission by the author
+from `POST scenarios/submission` taken to Production (OJS and OMP
+`decisions: ['sendExternalReview', 'accept', 'sendToProduction']`; on OPS
+Production is the only stage), and on OJS an issue made, not published,
+on the Issues screen before the scenario (no `issues[]` key); the new
+submission made by the author in the wizard on screen after the save,
+the two emails read in the author's and the `manager`'s mailboxes (the
+scratch journal's section has no editor, so the "needs an editor" email
+goes out; Side effects, note x); the publish on screen, on OJS by "Assign
+To Future Issue and Publish Immediately" (U49 Rule 5; U49's side effect:
+"Publication Published" goes out when a version goes live); the password
+reset requested for the author's address. 6 — a `manager` and `sidebar: ['informationblockplugin']`.
 7 — `sectionEditor` users with the family names of the scenario, Mike with
 `affiliation` and `orcid` (the full address the scenario gives) plus
 `orcidIsVerified: true`; the fourth with
@@ -2515,20 +2655,41 @@ author's address. 6 — a `manager` and `sidebar: ['informationblockplugin']`.
 {sectionEditor: false}`; the past members with `roles: ['reader']` and
 `pastRoles` (`{role: 'sectionEditor', dateStart: '2019-01-01', dateEnd:
 '2024-12-31'}` with `affiliation`; two entries for 2015–2016 and 2020–2022).
-8 — a `manager`, three `sectionEditor`s (Able also `reader`), a `reader`
-and an `author`; the invitation, "Remove Role", the masthead choice and the
-role boxes are driven on screen (the invitation's email read in the mail
-catcher). 9 (OJS, OMP) — the context with
-`enableEnrollmentMastheadReviewers: true` (a new context has the box
-unticked, note ad), three `externalReviewer`s, Zeta with
-`affiliation` and a verified `orcid`, and an `author`; a submission per
+8 — a `manager`, three `sectionEditor`s (Able also `reader`), three
+`editorialBoardMember`s (Ford, Grant, Hill), two `reader`s (Dunn, Irwin)
+and an `author`; the two invitations (Irwin's with a Start Date 30 days
+ahead, the probe of note td12), "Remove Role", the masthead choice,
+"Remove User", "Disable User", "Merge user" (Hill merged into Evans) and
+the role boxes are driven on screen (each invitation's email read in the
+mail catcher). A start still to come cannot be seeded (scenarios.md, the
+users' roles), so the day it is reached is not read (Coverage, No seed). 9 (OJS, OMP) — the context without
+`enableEnrollmentMastheadReviewers` (a new context has the box unticked,
+note ad; seed-facts), a `manager`, three `externalReviewer`s, Zeta with
+`affiliation` and a verified `orcid`, and an `author`; the box ticked,
+Beta's "Edit" read and Beta's "Disable User" driven on screen by the
+`manager`; a submission per
 reviewer with `decisions: ['sendExternalReview']` and
 `reviewRounds[].reviewers[]` at `status: 'completed'`, Zeta's and Beta's
 with a `dateCompleted` in the previous calendar year, Gamma's today; on
 OMP an `internalReviewer` Delta completing a round of `stage: internal`
 (`sendInternalReview`) with a `dateCompleted` last year. 11 (OJS, OMP) — an
 `editor`, a `productionEditor` and `roles: {editor: {permitSettings:
-false}}`. 12 — the seeded server, signed in as `manager.maya`.
+false}}`. 12 — the seeded server, signed in as `manager.maya`. 13 — the
+context with `acronym` and `country`, a `manager`, a `sectionEditor` Able,
+a `reader` Cole, and Dale with `roles: ['reader']` and `pastRoles`
+(`{role: 'sectionEditor', dateStart: '2019-01-01', dateEnd:
+'2024-12-31'}`); the two boxes of the "Editorial Masthead" tab, the
+Masthead tab's save, the invitation and its acceptance driven on screen,
+the email read in Cole's mailbox (note f-a13 records the walk behind
+Settings bullets 2 and 3). 14 — the context with `name` "Old Probe
+Journal", `acronym` "OPJ", `country` and `plugins:
+{citationstylelanguageplugin: {enabled: true}}` (the plugin is off on a
+scratch context, seed-facts), a `manager` and an `author`; one submission
+by the author seeded `published: true` before the save (on OJS in a
+published issue), a second taken to Production as in 4, with on OJS an
+unpublished issue made on the Issues screen; the rename and the second
+publish driven on screen; the citations read as note aa's probe of
+2026-10-26 read them.
 
 <a id="fn-z"></a>
 **z** — Live-probed 2026-09-03 and 2026-09-04 (the profile spec's probes

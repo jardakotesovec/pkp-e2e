@@ -315,8 +315,10 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
      * a confirmation dialog (Rule 13) — a global `.last()` would hit it.
      * Within the row the two comboboxes are [role, masthead] in DOM order.
      *
-     * @param {{role: string, startDate: string, masthead?: string}} options
+     * @param {{role: string, startDate: string, masthead?: string|null}} options
      *   role/masthead are the visible option labels; startDate is YYYY-MM-DD.
+     *   `masthead: null` picks nothing there: the row has no masthead column
+     *   while the masthead is not based on enrollments (U07 Settings bullet 3).
      */
     async fillRoleRow({role, startDate, masthead = 'Appear on the masthead'}) {
         const row = this.page
@@ -325,7 +327,9 @@ exports.SendInvitationWizard = class SendInvitationWizard extends BasePage {
             .last();
         await row.getByLabel(/^Select a new role/).selectOption({label: role});
         await row.getByRole('textbox').fill(startDate);
-        await row.getByRole('combobox').last().selectOption({label: masthead});
+        if (masthead !== null) {
+            await row.getByRole('combobox').last().selectOption({label: masthead});
+        }
     }
 
     /** Details step → compose step (POST add + PUT populate happen here). */

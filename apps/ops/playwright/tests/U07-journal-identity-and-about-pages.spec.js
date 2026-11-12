@@ -5,49 +5,39 @@
  * Journal identity & about pages — OPS suite, one test per canonical
  * scenario the spec runs on a preprint server, in the server's own words
  * ("About the Server", "Server Settings", "Server Title", "Moderator",
- * "This server …"): the common scenarios 1–5, 7, 8 and 10, and the
+ * "This server …"): the common scenarios 1–5, 7, 8, 10, 13 and 14, and the
  * server's own scenario 12. Scenarios 6, 9 and 11 are badged {OJS OMP}: a
  * preprint server has no Information texts (scenario 12 reads their
  * absence), no reviews and no manager-level role but the Preprint Server
  * Manager. The bullets a common scenario badges {OJS} (scenario 3's ISSN
- * and address, scenario 4's journal email after a publish) have no surface
- * here and are not run.
+ * and address) have no surface here and are not run.
  * Spec: docs/specs/U07-journal-identity-and-about-pages.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section is the record of everything else left out):
- * - A1 🐞: no test signs the Site Administrator in.
- * - A3 ❓: S4 reads the phone-alone save refused, as the scenario states.
- * - A6 ❓: S1 reads the history page's heading "Editorial History Page",
- *   as the scenario states.
- * - A7 🐞: side tabs are opened by the address naming both tabs
- *   (`#setup/privacy`) or by pressing them; nothing reloads a side tab's
- *   own address.
- * - A8 ❓: S10 reads the notice gone on the next load only.
- * - OPS1 ✅: S12's subject, asserted as the spec states it.
- * - OPS2 ❓, OPS3 🐞: no scenario saves the sponsoring organization or
- *   adds French as a form language.
- * - A2, A9, A10, A11, OMP1, OMP2: other apps' territory or no scenario
- *   here.
- * - U06's OMP1 🐞: S8's masthead choice answers with an error window on a
- *   preprint server; it is dismissed, and the saved choice is asserted.
+ * Deliberately NOT covered (register IDs; the spec's Coverage section is
+ * the record of everything else left out):
+ * - A1 🐞, A7 🐞, OPS3 🐞
+ * - A3 ❓, A6 ❓, A8 ❓ (each read only as its scenario states it), OPS2 ❓
+ * - U06's OMP1 🐞 (S8's masthead choice: its error window is dismissed and
+ *   the saved choice asserted)
  *
  * Seeding: scenario endpoints only. S1, S2 and S12 read the seeded server
  * `publicknowledge` with roster accounts and change nothing there; every
  * other test seeds its own scratch server with throwaway accounts
- * (footnote y), through the user keys `affiliation`, `orcid` /
- * `orcidIsVerified`, `masthead` and `pastRoles[]` (scenarios.md). A
- * scratch server has no Country and no technical support contact
- * (seed-facts): S3 picks a Country and S4 types the support contact as the
- * scenarios' own steps. Every screen change a scenario's step names (the
- * tabs' saves, the invitation, "Remove Role", the masthead choice, the role
- * boxes, "Disable Submissions") is driven on screen. Signed-out reads run
- * in a browser context with an empty storage state (patterns.md, parallel
- * lesson 8); each actor gets its own `asUser` context. Mail is read by
- * unique throwaway recipients (PRINCIPLES A8). No test changes a site
- * setting (S5's site page is only read), so the whole suite runs in the
- * parallel `ops` project.
+ * (footnote y), through the context keys `name`, `acronym`, `country` and
+ * `plugins` (S13, S14) and the user keys `affiliation`, `orcid` /
+ * `orcidIsVerified`, `masthead` and `pastRoles[]` (scenarios.md); S4 and
+ * S14 seed their preprints through `POST scenarios/submission`. A scratch
+ * server has no Country and no technical support contact (seed-facts): S3
+ * picks a Country and S4 types the support contact as the scenarios' own
+ * steps. Every screen change a scenario's step names (the tabs' saves, the
+ * invitations, "Remove Role", the masthead choice, "Remove User", "Disable
+ * User", "Merge user", the role boxes, the "Editorial Masthead" tab's box,
+ * "Disable Submissions", the wizard submission, "Post") is driven on
+ * screen. Signed-out reads run in a browser context with an empty storage
+ * state (patterns.md, parallel lesson 8); each actor gets its own `asUser`
+ * context. Mail is read by unique throwaway recipients (PRINCIPLES A8). No
+ * test changes a site setting (S5's site page is only read), so the whole
+ * suite runs in the parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {
@@ -55,12 +45,27 @@ const {
     RolesTab,
     whole,
 } = require('../../../../shared/playwright/pages/ContextIdentityPages.js');
-const {ServerAboutPages, ServerWebsiteSettings} = require('../pages/ContextIdentityPages.js');
+const {WebsiteSettings} = require('../../../../shared/playwright/pages/AppearancePages.js');
+const {
+    UsersListPage,
+    DisableUserWindow,
+    RemoveUserDialog,
+    MergeUserWindow,
+} = require('../../../../shared/playwright/pages/UsersManagementPages.js');
+const {ArticleLandingPage} = require('../../../../shared/playwright/pages/ArticleLandingPages.js');
+const {
+    ServerAboutPages,
+    ServerWebsiteSettings,
+    rolesTableHeaders,
+    fillNewRoleRowWithoutMasthead,
+} = require('../pages/ContextIdentityPages.js');
 const {
     UsersRolesPage,
     SendInvitationWizard,
     AcceptInvitationWizard,
 } = require('../pages/UserInvitationPages.js');
+const {wizardUrl, expectWizardOpen, completeAndSubmitDraft} = require('../pages/SubmissionWizardPages.js');
+const {openWorkflow, postPreprint} = require('../pages/PublicationPages.js');
 
 const SERVER = 'publicknowledge';
 const SERVER_TITLE = 'Public Knowledge Preprint Server';
@@ -389,11 +394,15 @@ test.describe('journal identity & about pages', () => {
         await expect(site.siteListEntry(tag)).toHaveText(whole('Probe Journal of Identity'), {timeout: T});
     });
 
-    test('S4: save the "Contact" tab; the password reset stays the site\'s', async ({browser, baseURL, asUser, opsApi, pkpMail}, testInfo) => {
+    test('S4: save the "Contact" tab; the server\'s emails follow the new contact', async ({browser, baseURL, asUser, opsApi, pkpMail}, testInfo) => {
         test.slow();
+        test.setTimeout(360_000);
         const tag = makeTag('s4', testInfo);
+        const manager = `${tag}mg`;
         const author = `${tag}au`;
+        const managerEmail = `${manager}@mail.test`;
         const authorEmail = `${author}@mail.test`;
+        const serverTitle = `Scratch context ${tag}`;
         await opsApi.createContext({
             tag,
             users: [
@@ -401,19 +410,19 @@ test.describe('journal identity & about pages', () => {
                 account(tag, 'au', 'Ada', 'Author', ['author']),
             ],
         });
-        const page = await (await asUser(`${tag}mg`)).newPage();
+        // The Author's submission in Production (on a preprint server the
+        // one stage after submission; footnote y).
+        const inProduction = await opsApi.createSubmission({
+            tag: `${tag}p`,
+            context: tag,
+            submitter: author,
+            title: `Production preprint ${tag}`,
+        });
+        const page = await (await asUser(manager)).newPage();
         const visitor = await signedOutPage(browser, baseURL);
         const publicPages = new ServerAboutPages(visitor, tag);
-
-        // Control, before the save: the "Principal Contact" block alone,
-        // with the contact the server was created with (Rule 17).
-        await publicPages.goto('contact');
         const primary = publicPages.contactBlock('primary');
         const support = publicPages.contactBlock('support');
-        await expect(primary.name).toHaveText(whole('Site Admin'));
-        await expect(primary.emailLink).toHaveText(whole('admin@mail.test'));
-        await expect(support.block).toHaveCount(0);
-        await expect(publicPages.contactAddress()).toHaveCount(0);
 
         const settings = new SettingsPages(page, tag);
         const form = await settings.openJournalTab('Contact');
@@ -431,6 +440,19 @@ test.describe('journal identity & about pages', () => {
         await expect(form.errorSummary).toContainText('Please correct 2 errors.');
         await expect(form.saveButton).toBeDisabled();
         expect(requests).toEqual([]);
+
+        // Control, before "Saved" (after the refused phone-only save): the
+        // "Contact" page, signed out, shows the "Principal Contact" block
+        // alone, with the contact the server was created with and no phone
+        // (Rule 17).
+        await publicPages.goto('contact');
+        await expect(primary.heading).toHaveText(whole('Principal Contact'));
+        await expect(primary.name).toHaveText(whole('Site Admin'));
+        await expect(primary.emailLink).toHaveText(whole('admin@mail.test'));
+        await expect(primary.phoneValue).toHaveCount(0);
+        await expect(support.block).toHaveCount(0);
+        await expect(publicPages.contactAddress()).toHaveCount(0);
+        expect(await publicPages.bodyText()).toBe('Contact Principal Contact Site Admin admin@mail.test');
 
         // An invalid address: refused after the press (Fields).
         await form.control('contact-supportName-control').fill('Sam Support');
@@ -475,6 +497,50 @@ test.describe('journal identity & about pages', () => {
         expect(await publicPages.bodyText()).toMatch(
             /^Contact 1 Probe Street Probe City Principal Contact Pat Principal Probe University Phone \+1 555 0100 pat\.principal@mail\.test Support Contact Sam Support Phone \+1 555 0199 sam\.support@mail\.test$/
         );
+
+        // A new submission's emails: the Author completes and submits a new
+        // submission in the wizard, a draft seeded as U21 scenario 2 seeds
+        // it (the seed sends no mail); the Author's "Thank you for your
+        // submission to {server title}" and the manager's "A new submission
+        // needs an editor to be assigned" both come from "Pat Principal" at
+        // the new address (Rule 9; Side effects).
+        const draft = await opsApi.createSubmission({
+            tag: `${tag}w`,
+            context: tag,
+            submitter: author,
+            submitted: false,
+            title: `Wizard preprint ${tag}`,
+        });
+        const authorPage = await (await asUser(author)).newPage();
+        await authorPage.goto(wizardUrl(tag, draft.submissionId));
+        await expectWizardOpen(authorPage);
+        await completeAndSubmitDraft(authorPage);
+        const thanks = await pkpMail.find({to: authorEmail, subject: 'Thank you for your submission', timeoutMs: 30_000});
+        expect(flat(thanks.Subject)).toBe(`Thank you for your submission to ${serverTitle}`);
+        expect(thanks.From.Name).toBe('Pat Principal');
+        expect(thanks.From.Address).toBe('pat.principal@mail.test');
+        const needsEditor = await pkpMail.find({
+            to: managerEmail,
+            subject: 'A new submission needs an editor to be assigned',
+            timeoutMs: 30_000,
+        });
+        expect(needsEditor.From.Name).toBe('Pat Principal');
+        expect(needsEditor.From.Address).toBe('pat.principal@mail.test');
+
+        // The server's next email: the manager posts the submission in
+        // Production (U49 scenario 1); the Author's "Publication Published"
+        // comes in the server's title from the new address (Rule 9; Side
+        // effects).
+        await openWorkflow(page, tag, inProduction.submissionId);
+        await postPreprint(page);
+        const published = await pkpMail.find({
+            to: authorEmail,
+            subject: 'Publication Published',
+            contains: `Production preprint ${tag}`,
+            timeoutMs: 30_000,
+        });
+        expect(published.From.Name).toBe(serverTitle);
+        expect(published.From.Address).toBe('pat.principal@mail.test');
 
         // The password reset, signed out, from the Login page's "Forgot your
         // password?": sent by the site ("Open Preprint Systems" at the
@@ -615,9 +681,10 @@ test.describe('journal identity & about pages', () => {
 
     test('S8: changes to the team show at the next load', async ({browser, baseURL, asUser, opsApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(360_000);
+        test.setTimeout(420_000);
         const tag = makeTag('s8', testInfo);
         const email = (suffix) => `${tag}${suffix}@mail.test`;
+        const EBM = 'Editorial Board Member';
         await opsApi.createContext({
             tag,
             users: [
@@ -625,8 +692,12 @@ test.describe('journal identity & about pages', () => {
                 account(tag, 'ab', 'Ann', 'Able', ['sectionEditor', 'reader']),
                 account(tag, 'ba', 'Ben', 'Baker', ['sectionEditor']),
                 account(tag, 'ca', 'Cal', 'Carter', ['sectionEditor']),
+                account(tag, 'fo', 'Fay', 'Ford', ['editorialBoardMember']),
+                account(tag, 'gr', 'Gus', 'Grant', ['editorialBoardMember']),
+                account(tag, 'hi', 'Hal', 'Hill', ['editorialBoardMember']),
                 account(tag, 'du', 'Dee', 'Dunn', ['reader']),
-                account(tag, 'ev', 'Eve', 'Evans', ['author']),
+                account(tag, 'ir', 'Ivy', 'Irwin', ['reader']),
+                account(tag, 'ev', 'Eve', 'Evans', ['author'], {masthead: {author: true}}),
             ],
         });
         const visitor = await signedOutPage(browser, baseURL);
@@ -634,33 +705,43 @@ test.describe('journal identity & about pages', () => {
         const page = await (await asUser(`${tag}mg`)).newPage();
         const usersRoles = new UsersRolesPage(page, tag);
         const wizard = new SendInvitationWizard(page);
+        const list = new UsersListPage(page, tag);
 
-        // Before: the three Moderators, no "Author" heading; nobody on the
-        // history page (Rules 14a, 16).
+        /** Invite an existing reader to the Moderator role, set to appear, and accept from the mailbox. */
+        const inviteAndAccept = async (suffix, dateStart) => {
+            const subject = `Invitation${tag}${suffix}`;
+            await usersRoles.goto();
+            await usersRoles.inviteToRoleButton.click();
+            await wizard.expectSearchStep();
+            await wizard.searchAndContinue(email(suffix));
+            await expect(wizard.userFoundMessage).toBeVisible();
+            await wizard.fillNewRoleRow(0, {role: ROLE, dateStart, masthead: 'Appear on the masthead'});
+            await wizard.saveAndContinueButton.click();
+            await wizard.setSubject(subject);
+            await wizard.sendAndAwaitConfirmation();
+            const link = await acceptLink(pkpMail, {to: email(suffix), contains: subject});
+            const inviteePage = await signedOutPage(browser, baseURL);
+            const accept = new AcceptInvitationWizard(inviteePage);
+            await accept.open(link);
+            await expect(accept.reviewHeading).toBeVisible({timeout: T});
+            await accept.acceptAndAwaitConfirmation();
+            await inviteePage.context().close();
+        };
+
+        // Before: the three Moderators and the three Editorial Board
+        // Members, no "Author" heading; nobody on the history page (Rules
+        // 14a, 16).
         await about.goto('masthead');
+        await expect(about.listHeadings()).toHaveText([whole(ROLE), whole(EBM)]);
         expect(await about.listNames(ROLE)).toEqual(['Ann Able', 'Ben Baker', 'Cal Carter']);
+        expect(await about.listNames(EBM)).toEqual(['Fay Ford', 'Gus Grant', 'Hal Hill']);
         await expect(about.listHeading('Author')).toHaveCount(0);
         await about.goto('history');
         expect(await about.bodyText()).toBe(HISTORY_EMPTY);
 
         // A role given: Dunn invited to the Moderator role from today, set
         // to appear, and accepting from the mailbox (Rules 14b, 14e).
-        const subject = `Invitation${tag}`;
-        await usersRoles.goto();
-        await usersRoles.inviteToRoleButton.click();
-        await wizard.expectSearchStep();
-        await wizard.searchAndContinue(email('du'));
-        await expect(wizard.userFoundMessage).toBeVisible();
-        await wizard.fillNewRoleRow(0, {role: ROLE, dateStart: today(), masthead: 'Appear on the masthead'});
-        await wizard.saveAndContinueButton.click();
-        await wizard.setSubject(subject);
-        await wizard.sendAndAwaitConfirmation();
-        const link = await acceptLink(pkpMail, {to: email('du'), contains: subject});
-        const dunnPage = await signedOutPage(browser, baseURL);
-        const accept = new AcceptInvitationWizard(dunnPage);
-        await accept.open(link);
-        await expect(accept.reviewHeading).toBeVisible({timeout: T});
-        await accept.acceptAndAwaitConfirmation();
+        await inviteAndAccept('du', today());
         await about.goto('masthead');
         expect(await about.listNames(ROLE)).toEqual(['Ann Able', 'Ben Baker', 'Cal Carter', 'Dee Dunn']);
         await expect(about.entryParts(about.listEntry(ROLE, 'Dee Dunn')).dateStart).toHaveText(
@@ -695,15 +776,8 @@ test.describe('journal identity & about pages', () => {
         await usersRoles.goto();
         await usersRoles.openUserEdit(email('ba'));
         await expect(wizard.stepHeading(/Enter details/)).toBeVisible({timeout: T});
-        await wizard.mastheadSelect(wizard.currentRoleRow(ROLE)).selectOption({label: 'Does not appear on the masthead'});
-        await expect(wizard.mastheadDialog).toBeVisible();
-        const chosen = page.waitForResponse((r) => r.url().includes('/masthead/'));
-        await wizard.mastheadDialog.getByRole('button', {name: 'Confirm'}).click();
-        const chosenStatus = (await chosen).status();
-        await expect(wizard.mastheadDialog).toBeHidden();
-        if (chosenStatus >= 400) {
-            await wizard.dismissErrorDialog();
-        }
+        await wizard.chooseMasthead(wizard.currentRoleRow(ROLE), 'Does not appear on the masthead');
+        await wizard.confirmMastheadChange();
         await page.reload();
         await expect(wizard.stepHeading(/Enter details/)).toBeVisible({timeout: T});
         await expect(wizard.mastheadSelect(wizard.currentRoleRow(ROLE))).toHaveValue('false');
@@ -711,6 +785,59 @@ test.describe('journal identity & about pages', () => {
         expect(await about.listNames(ROLE)).toEqual(['Cal Carter', 'Dee Dunn']);
         await about.goto('history');
         expect(await about.listNames(ROLE)).toEqual(['Ann Able']);
+
+        // A later start date: Irwin invited as Dunn was, starting 30 days
+        // from today, and accepting: not listed (Rule 14e). The control is
+        // Dunn, accepted the same way from today and listed.
+        const later = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+        await inviteAndAccept('ir', later);
+        await about.goto('masthead');
+        expect(await about.listNames(ROLE)).toEqual(['Cal Carter', 'Dee Dunn']);
+        expect(await about.bodyText()).not.toContain('Ivy Irwin');
+
+        // "Remove User" on Ford: off the masthead, onto the history under
+        // "Editorial Board Member" (Rule 14e).
+        await list.goto();
+        await list.chooseAction(list.row(email('fo')), 'Remove User');
+        const remove = new RemoveUserDialog(page);
+        await remove.expectOpen();
+        expect((await remove.ok()).status()).toBe(200);
+        await about.goto('masthead');
+        expect(await about.listNames(EBM)).toEqual(['Gus Grant', 'Hal Hill']);
+        await about.goto('history');
+        await expect(about.listHeadings()).toHaveText([whole(ROLE), whole(EBM)]);
+        expect(await about.listNames(EBM)).toEqual(['Fay Ford']);
+
+        // "Disable User" on Grant, then on Ford, whose row stays on the
+        // list: Grant still on the masthead, Ford still on the history
+        // (Rule 14e).
+        for (const [suffix, name] of [['gr', 'Gus Grant'], ['fo', 'Fay Ford']]) {
+            await list.goto();
+            const row = list.row(email(suffix));
+            await list.chooseAction(row, 'Disable User');
+            const disable = new DisableUserWindow(page, `Disable ${name}`);
+            await disable.expectForm();
+            await disable.ok();
+            await expect(list.disabledIcon(row)).toHaveCount(1);
+        }
+        await about.goto('masthead');
+        expect(await about.listNames(EBM)).toEqual(['Gus Grant', 'Hal Hill']);
+        await about.goto('history');
+        expect(await about.listNames(EBM)).toEqual(['Fay Ford']);
+        expect(await about.listNames(ROLE)).toEqual(['Ann Able']);
+
+        // "Merge user": Hill merged into Evans, Evans's account kept: Evans
+        // listed under "Editorial Board Member", Hill gone (Rule 14e).
+        await list.goto();
+        await list.chooseAction(list.row(email('hi')), 'Merge user');
+        const merge = new MergeUserWindow(page);
+        await merge.expectOpen();
+        await merge.mergeInto(email('ev'));
+        expect((await merge.confirm()).status()).toBe(200);
+        await merge.expectClosed();
+        await about.goto('masthead');
+        expect(await about.listNames(EBM)).toEqual(['Eve Evans', 'Gus Grant']);
+        expect(await about.bodyText()).not.toContain('Hal Hill');
 
         // "Consider role in masthead list" ticked on the Author role: an
         // "Author" heading with Evans (Rule 14e; Settings bullet 2).
@@ -722,7 +849,8 @@ test.describe('journal identity & about pages', () => {
 
         // Unticked on the Moderator role: the heading and Carter and Dunn
         // gone; the history no longer lists Able (Rule 14e; Settings bullet
-        // 2). Control: the "Author" heading with Evans stays.
+        // 2). Control: the "Author" heading with Evans stays, and Ford stays
+        // on the history.
         await roles.setRoleBox(ROLE, MASTHEAD_BOX, false);
         await about.goto('masthead');
         await expect(about.listHeading('Author')).toHaveCount(1);
@@ -732,7 +860,9 @@ test.describe('journal identity & about pages', () => {
         expect(mastheadText).not.toContain('Cal Carter');
         expect(mastheadText).not.toContain('Dee Dunn');
         await about.goto('history');
-        expect(await about.bodyText()).toBe(HISTORY_EMPTY);
+        await expect(about.listHeadings()).toHaveText([whole(EBM)]);
+        expect(await about.listNames(EBM)).toEqual(['Fay Ford']);
+        expect(await about.bodyText()).not.toContain('Ann Able');
     });
 
     test('S10: a server not accepting submissions', async ({asUser, opsApi}, testInfo) => {
@@ -840,5 +970,272 @@ test.describe('journal identity & about pages', () => {
             ).length
         );
         expect(headingsAboveRule).toBe(2);
+    });
+
+    test('S13: a masthead not based on enrollments', async ({browser, baseURL, asUser, opsApi, pkpMail}, testInfo) => {
+        test.slow();
+        test.setTimeout(360_000);
+        const tag = makeTag('s13', testInfo);
+        const email = (suffix) => `${tag}${suffix}@mail.test`;
+        await opsApi.createContext({
+            tag,
+            context: {acronym: 'PMH', country: 'CA'},
+            users: [
+                account(tag, 'mg', 'Mona', 'Manager', ['manager']),
+                account(tag, 'ab', 'Ann', 'Able', ['sectionEditor']),
+                account(tag, 'co', 'Cy', 'Cole', ['reader']),
+                account(tag, 'da', 'Dan', 'Dale', ['reader'], {
+                    pastRoles: [{role: 'sectionEditor', dateStart: '2019-01-01', dateEnd: '2024-12-31'}],
+                }),
+            ],
+        });
+        const visitor = await signedOutPage(browser, baseURL);
+        const about = new ServerAboutPages(visitor, tag);
+        const page = await (await asUser(`${tag}mg`)).newPage();
+        const managerAbout = new ServerAboutPages(page, tag);
+        const website = new WebsiteSettings(page, tag);
+        const roles = new RolesTab(page, tag);
+        const usersRoles = new UsersRolesPage(page, tag);
+        const wizard = new SendInvitationWizard(page);
+        const historyAddress = about.url('history');
+
+        // Before: Able under "Moderator", then the history line; its link
+        // opens "Editorial History", which lists Dale "2019 – 2024" (Rules
+        // 14, 16).
+        await about.goto('masthead');
+        await expect(about.listHeadings()).toHaveText([whole(ROLE)]);
+        expect(await about.listNames(ROLE)).toEqual(['Ann Able']);
+        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await about.historyLink().click();
+        await expect(about.heading).toHaveText(whole('Editorial History Page'));
+        expect(new URL(visitor.url()).pathname).toBe(historyAddress);
+        expect(await about.listNames(ROLE)).toEqual(['Dan Dale']);
+        await expect(about.entryParts(about.listEntry(ROLE, 'Dan Dale')).dateStart).toHaveText(whole('2019 – 2024'));
+
+        // The box unticked: the "Editorial Masthead" list leaves the tab at
+        // once, before any save (a preprint server's tab has no "Reviewers"
+        // group either way); "Save" (Settings bullet 4a).
+        await website.goto();
+        const tab = await website.open('appearance-masthead');
+        await expect(tab.enrollmentBox).toBeChecked();
+        expect(await tab.roles.labels()).toEqual([ROLE, 'Editorial Board Member']);
+        await expect(tab.reviewersField).toHaveCount(0);
+        await tab.enrollmentBox.uncheck();
+        await expect(tab.enrollmentBox).not.toBeChecked();
+        await expect(tab.roles.fieldset).toHaveCount(0);
+        await expect(tab.reviewersField).toHaveCount(0);
+        await expect(tab.enrollmentField).toBeVisible();
+        await tab.save();
+
+        // The masthead, its text empty: under the heading the "Edit" link
+        // alone; no role heading, no Able, no history line, no rule (Rules
+        // 14f, 21).
+        await managerAbout.goto('masthead');
+        await expect(managerAbout.heading).toHaveText(whole('Editorial Masthead'));
+        await expect(managerAbout.editLink).toHaveCount(1);
+        await expect(managerAbout.editLink).toHaveAccessibleName(/^\W*Edit\s+Edit Editorial Masthead$/);
+        await expect(managerAbout.listHeadings()).toHaveCount(0);
+        await expect(managerAbout.historyLine()).toHaveCount(0);
+        await expect(managerAbout.rule()).toHaveCount(0);
+        expect(await managerAbout.bodyText()).toBe('Editorial Masthead Edit Edit Editorial Masthead');
+
+        // Its "Edit" link: Settings › Server on its "Masthead" tab, in the
+        // same window (Rule 21); "Founded in 2001." typed in "Editorial
+        // History" and saved (Fields).
+        await expect(managerAbout.editLink).not.toHaveAttribute('target', /.+/);
+        await managerAbout.editLink.click();
+        const settings = new SettingsPages(page, tag);
+        await expect(settings.heading).toHaveText(whole('Server Settings'));
+        await expect(settings.tab('Masthead')).toHaveAttribute('aria-selected', 'true');
+        expect(page.url()).toContain('/management/settings/context#masthead');
+        const masthead = settings.mastheadForm();
+        await masthead.ready();
+        await masthead.typeRich('masthead-editorialHistory-control', 'Founded in 2001.');
+        await masthead.save();
+
+        // The masthead with its text, signed out: "Founded in 2001." and
+        // nothing else, no "Edit" link (Rule 14f).
+        await about.goto('masthead');
+        await expect(about.heading).toHaveText(whole('Editorial Masthead'));
+        expect(await about.bodyText()).toBe('Editorial Masthead Founded in 2001.');
+        await expect(about.editLink).toHaveCount(0);
+        await expect(about.listHeadings()).toHaveCount(0);
+        await expect(about.rule()).toHaveCount(0);
+
+        // The "Editorial History" address opens "Editorial Masthead", signed
+        // out and as the manager (Rule 14f).
+        await visitor.goto(historyAddress);
+        await expect(about.heading).toHaveText(whole('Editorial Masthead'));
+        expect(new URL(visitor.url()).pathname).toBe(about.url('masthead'));
+        await page.goto(historyAddress);
+        await expect(managerAbout.heading).toHaveText(whole('Editorial Masthead'));
+        expect(new URL(page.url()).pathname).toBe(managerAbout.url('masthead'));
+
+        // The role window: no "Consider role in masthead list" box; its
+        // other boxes are there (Settings bullet 2).
+        await roles.goto();
+        await roles.openRoleWindow(ROLE);
+        await expect(roles.roleWindow.getByRole('checkbox').first()).toBeVisible();
+        await expect(roles.box(MASTHEAD_BOX)).toHaveCount(0);
+        await expect(roles.roleWindow).not.toContainText(MASTHEAD_BOX);
+
+        // The user's "Edit" page: Able's roles table has no masthead column
+        // and shows neither masthead choice; the Moderator row is there
+        // (Settings bullet 3).
+        await usersRoles.goto();
+        await usersRoles.openUserEdit(email('ab'));
+        await expect(wizard.stepHeading(/Enter details/)).toBeVisible({timeout: T});
+        await expect(wizard.currentRoleRow(ROLE)).toBeVisible();
+        expect(await rolesTableHeaders(page)).toEqual(['Role', 'Start Date', 'End Date']);
+        await expect(wizard.mastheadSelect(wizard.currentRoleRow(ROLE))).toHaveCount(0);
+        await expect(page.locator('main')).not.toContainText(/appear on the masthead/i);
+
+        // "Invite to a role": Cole to the Moderator role from today; the
+        // role row has no masthead column, so no masthead choice; sent
+        // (Settings bullet 3).
+        const subject = `Invitation${tag}`;
+        await usersRoles.goto();
+        await usersRoles.inviteToRoleButton.click();
+        await wizard.expectSearchStep();
+        await wizard.searchAndContinue(email('co'));
+        await expect(wizard.userFoundMessage).toBeVisible();
+        expect(await rolesTableHeaders(page)).toEqual(['Role', 'Start Date', 'End Date']);
+        await expect(page.locator('main')).not.toContainText(/appear on the masthead/i);
+        await fillNewRoleRowWithoutMasthead(wizard, 0, {role: ROLE, dateStart: today()});
+        await wizard.saveAndContinueButton.click();
+        await wizard.setSubject(subject);
+        await wizard.sendAndAwaitConfirmation();
+
+        // Cole's side: the email names the role and says nothing about the
+        // masthead; the review step has no masthead column; accepted
+        // (Settings bullet 3).
+        const invitation = await pkpMail.find({to: email('co'), contains: subject});
+        const full = await pkpMail.fullMessage(invitation.ID);
+        expect(full.Text).toContain(ROLE);
+        expect(full.Text).not.toMatch(/masthead/i);
+        const link = pkpMail.extractLink(full.HTML, 'Accept Invitation');
+        expect(link, 'the invitation email carries an accept link').toContain('/invitation/accept');
+        const colePage = await signedOutPage(browser, baseURL);
+        const accept = new AcceptInvitationWizard(colePage);
+        await accept.open(link);
+        await expect(accept.reviewHeading).toBeVisible({timeout: T});
+        await expect(colePage.getByRole('row').filter({hasText: ROLE})).toBeVisible();
+        expect(await rolesTableHeaders(colePage)).toEqual(['Role', 'Start Date', 'End Date']);
+        await expect(colePage.locator('main')).not.toContainText(/masthead/i);
+        await accept.acceptAndAwaitConfirmation();
+
+        // Ticked again: Able under "Moderator" and the history line as
+        // before, Cole not listed; "Editorial History" opens again, Dale
+        // "2019 – 2024" and "Founded in 2001." below the list (Rules 14f,
+        // 16; Settings bullet 3).
+        await website.goto();
+        const again = await website.open('appearance-masthead');
+        await expect(again.enrollmentBox).not.toBeChecked();
+        await again.enrollmentBox.check();
+        await expect(again.roles.fieldset).toBeVisible();
+        await again.save();
+        await about.goto('masthead');
+        await expect(about.listHeadings()).toHaveText([whole(ROLE)]);
+        expect(await about.listNames(ROLE)).toEqual(['Ann Able']);
+        await expect(about.historyLine()).toHaveText(/^\s*View\s+Editorial History\s*$/);
+        await expect(about.rule()).toHaveCount(1);
+        expect(await about.bodyText()).not.toContain('Cy Cole');
+        await about.historyLink().click();
+        await expect(about.heading).toHaveText(whole('Editorial History Page'));
+        expect(new URL(visitor.url()).pathname).toBe(historyAddress);
+        expect(await about.listNames(ROLE)).toEqual(['Dan Dale']);
+        await expect(about.entryParts(about.listEntry(ROLE, 'Dan Dale')).dateStart).toHaveText(whole('2019 – 2024'));
+        // The entry's year and name are separate spans with no space between.
+        expect(await about.bodyText()).toMatch(
+            /^Editorial History Page This section lists past contributors\. Moderator 2019 – 2024 ?Dan Dale Founded in 2001\.$/
+        );
+
+        // Cole's masthead choice: "Does not appear on the masthead", the
+        // choice the invitation sent while the masthead was off (Settings
+        // bullet 3).
+        await usersRoles.goto();
+        await usersRoles.openUserEdit(email('co'));
+        await expect(wizard.stepHeading(/Enter details/)).toBeVisible({timeout: T});
+        await expect(wizard.mastheadChoice(wizard.currentRoleRow(ROLE))).toHaveText(whole('Does not appear on the masthead'));
+
+        // Control: the Moderator role's window holds "Consider role in
+        // masthead list" again (Settings bullet 2).
+        await roles.goto();
+        await roles.openRoleWindow(ROLE);
+        await expect(roles.box(MASTHEAD_BOX)).toHaveCount(1);
+    });
+
+    test('S14: a published preprint keeps the server\'s name of its day', async ({browser, baseURL, asUser, opsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s14', testInfo);
+        const author = `${tag}au`;
+        await opsApi.createContext({
+            tag,
+            context: {name: 'Old Probe Journal', acronym: 'OPJ', country: 'CA'},
+            plugins: {citationstylelanguageplugin: {enabled: true}},
+            users: [account(tag, 'mg', 'Mona', 'Manager', ['manager']), account(tag, 'au', 'Ada', 'Author', ['author'])],
+        });
+        const first = await opsApi.createSubmission({
+            tag: `${tag}a`,
+            context: tag,
+            submitter: author,
+            title: 'First Probe Preprint',
+            published: true,
+        });
+        const second = await opsApi.createSubmission({
+            tag: `${tag}b`,
+            context: tag,
+            submitter: author,
+            title: 'Second Probe Preprint',
+        });
+        const visitor = await signedOutPage(browser, baseURL);
+        const landing = new ArticleLandingPage(visitor, tag, {op: 'preprint'});
+        const chrome = new ServerAboutPages(visitor, tag);
+
+        // Control, before the save: the first preprint's page shows "Old
+        // Probe Journal" in its header (Rule 7).
+        await landing.goto(first.submissionId);
+        await expect(chrome.headerTitle).toHaveText(whole('Old Probe Journal'));
+
+        // The rename: "Server Title" and "Server Initials" replaced and
+        // saved (Fields).
+        const page = await (await asUser(`${tag}mg`)).newPage();
+        const settings = new SettingsPages(page, tag);
+        const form = await settings.openJournalTab('Masthead');
+        await form.control('masthead-name-control').fill('New Probe Journal');
+        await form.control('masthead-acronym-control').fill('NPJ');
+        await form.save();
+
+        // The preprint posted before: the new name in its header and at the
+        // end of its browser title (Rule 7), the old one in its "How to
+        // Cite" (Rule 7a).
+        await landing.goto(first.submissionId);
+        await expect(chrome.headerTitle).toHaveText(whole('New Probe Journal'));
+        await expect(visitor).toHaveTitle(/ \| New Probe Journal$/);
+        await expect(landing.citation()).toContainText('Old Probe Journal');
+        await expect(landing.citation()).not.toContainText('New Probe Journal');
+
+        // Its abbreviated citation: AMA prints "OPJ", the initials of its
+        // posting day, not "NPJ" (Rule 7a).
+        await landing.openFormats();
+        const firstAma = await landing.chooseFormat('AMA');
+        expect(firstAma).toContain('First Probe Preprint');
+        expect(firstAma).toMatch(/\bOPJ\b/);
+        expect(firstAma).not.toMatch(/\bNPJ\b/);
+
+        // A preprint posted after the save: the manager posts the second
+        // (U49 scenario 1); its "How to Cite" names "New Probe Journal" and
+        // its AMA citation prints "NPJ" (Rule 7a).
+        await openWorkflow(page, tag, second.submissionId);
+        await postPreprint(page);
+        await landing.goto(second.submissionId);
+        await expect(landing.citation()).toContainText('New Probe Journal');
+        await expect(landing.citation()).not.toContainText('Old Probe Journal');
+        await landing.openFormats();
+        const secondAma = await landing.chooseFormat('AMA');
+        expect(secondAma).toContain('Second Probe Preprint');
+        expect(secondAma).toMatch(/\bNPJ\b/);
+        expect(secondAma).not.toMatch(/\bOPJ\b/);
     });
 });
