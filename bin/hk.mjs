@@ -307,17 +307,25 @@ function cmdFile() {
 
 // --- swept -----------------------------------------------------------------
 
-// The shipped spec whose PROGRESS note has the oldest "Swept <date>." mark; none counts as oldest.
+// The day's drift sweep (MAINTENANCE housekeeping step 12): the shipped spec whose PROGRESS note has
+// the oldest "Swept <date>." mark, none counting as oldest. Among the never swept, a spec with no kept
+// build-time claim check (no shared/playwright/checks/<row>/K*) goes first: nothing drove its every
+// line under the present rules.
 function cmdSwept() {
+    const kept = (row) => {
+        const dir = path.join(root, 'shared/playwright/checks', row);
+        return fs.existsSync(dir) && fs.readdirSync(dir).some((name) => /^K/.test(name));
+    };
     const rows = read('docs/tracking/PROGRESS.md').split('\n')
         .map((l) => l.split('|').slice(1).map((c) => c.trim()))
         .filter((c) => /^U\d{2}$/.test(c[0] || '') && c[4] === 'done')
-        .map((c) => ({ row: c[0], feature: c[1], swept: (c.slice(5).join('|').match(/Swept (\d{4}-\d{2}-\d{2})\./) || [])[1] || '' }));
+        .map((c) => ({ row: c[0], feature: c[1], swept: (c.slice(5).join('|').match(/Swept (\d{4}-\d{2}-\d{2})\./) || [])[1] || '' }))
+        .map((r) => ({ ...r, kept: kept(r.row) }));
     const never = rows.filter((r) => !r.swept);
-    const next = [...rows].sort((a, b) => a.swept.localeCompare(b.swept))[0];
+    const next = [...rows].sort((a, b) => a.swept.localeCompare(b.swept) || (a.swept ? 0 : a.kept - b.kept))[0];
     if (!next) { console.log('no shipped spec in PROGRESS'); return; }
-    console.log(`${next.row} ${next.feature}: ${next.swept ? `swept ${next.swept}` : 'never swept'}`);
-    console.log(`(${rows.length} shipped specs, ${never.length} never swept)`);
+    console.log(`${next.row} ${next.feature}: ${next.swept ? `swept ${next.swept}` : `never swept${next.kept ? '' : ', no kept build-time claim check'}`}`);
+    console.log(`(${rows.length} shipped specs, ${never.length} never swept, ${never.filter((r) => !r.kept).length} of them with no kept build-time claim check)`);
 }
 
 // --- brief -----------------------------------------------------------------

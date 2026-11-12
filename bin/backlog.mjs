@@ -155,7 +155,8 @@ const cap = (list) => (all ? list : list.slice(0, 5));
 const more = (list) => (!all && list.length > 5 ? `  … ${list.length - 5} more (--all)\n` : '');
 const day = new Date().getDate();
 let out = `Today (day ${day}, ${day % 2 ? 'odd' : 'even'}): refreshes, then `
-    + `${day % 2 ? 'incidentals and reports owed (2, 3)' : 'builds (4)'}, then Planned coverage (5), then friction.\n`;
+    + `${day % 2 ? 'incidentals and reports owed (2, 3)' : 'builds (4)'}, then Planned coverage (5), then friction, `
+    + 'then the day\'s drift sweep (`npm run hk -- swept` names the spec; it starts every weekday).\n';
 const section = (title, count, body) => { out += `\n${title} (${count})\n${body}`; };
 
 // A header fix needs no walk: a join, or a "Tracked in" that lacks the entry.

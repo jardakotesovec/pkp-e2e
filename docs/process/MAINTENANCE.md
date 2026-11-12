@@ -123,10 +123,13 @@ and reports owed (steps 6 and 7), an **even day** builds a pending
 feature (step 8). Planned coverage (step 8) follows on every weekday,
 so the suites keep up with what the team ships, and steps 9 to 12
 after it. After about
-three hours the session starts nothing new, but whatever it started
-(a report, a fold, a build or revision) it finishes in the same
-session, however long that takes, and then ends pushed (step 13). What
-is left, the next morning picks up from the files.
+four hours the session starts nothing new, with one exception: the
+day's drift sweep (step 12) starts every weekday, whatever the clock
+says, because it is the one step that looks for statements in a spec
+that have gone wrong unnoticed. Whatever the session started
+(a report, a fold, a build or revision, the sweep) it finishes in the
+same session, however long that takes, and then ends pushed (step 13).
+What is left, the next morning picks up from the files.
 
 1. Note the start time (`date`). Read the PROGRESS banner, this file,
    `ci-triage.md`, `docs/tracking/incidentals.md` and
@@ -237,7 +240,7 @@ is left, the next morning picks up from the files.
    first: every
    🐞 entry no report covers is written up and filed through "Issue
    reports". A spec is worked whole; the next starts only inside the
-   three hours.
+   four hours.
 8. **Builds and Planned coverage.** In this order, each run to its
    end:
    - a build or revision left mid-way, on any day, resumed from its
@@ -256,7 +259,7 @@ is left, the next morning picks up from the files.
      sheet, writer, reader and test authors, so its scenarios stay one
      coherent set. The specs of one morning share one branch and one CI
      run (RUNBOOK "Several specs in one morning"). A second and a third
-     spec start only inside the three hours.
+     spec start only inside the four hours.
 9. **Friction.** Fold `docs/tracking/friction.md` and delete every row.
    Most rows earn nothing, and that is the expected outcome: a retry or
    a wrong first guess is the ordinary cost of driving a screen, and
@@ -287,10 +290,13 @@ is left, the next morning picks up from the files.
 11. **Stale artifacts and CI balance.** Fix what the day's work showed
    stale, and refresh the shard timings when they drifted ("Keep CI
    balanced").
-12. **Quiet mornings.** When the day's steps left nothing open:
-   - **Drift sweep of one spec**, the one whose PROGRESS note carries the
-     oldest "Swept" date (none counts as oldest; `npm run hk -- swept`
-     names it). Its kept checks
+12. **Drift sweep, and quiet mornings.**
+   - **Drift sweep of one spec, every weekday**: the one whose PROGRESS
+     note carries the oldest "Swept" date (`npm run hk -- swept` names
+     it: none counts as oldest, and among the never swept a spec with no
+     kept build-time claim check goes first). Only the specs at the repo
+     root, which follow `main`, are swept. A sweep the session could not
+     finish is resumed the next morning before a new one starts. Its kept checks
      (`shared/playwright/checks/<feature>/`) run twice at the tips on
      reset databases, under `PROBE_RUN` r1 and r2, since a fact one run
      shows is undetermined; a check whose header has a `RESEED` switch
@@ -308,7 +314,8 @@ is left, the next morning picks up from the files.
      assertion becomes a **Planned** item. The PROGRESS note ends with
      "Swept <date>.", replacing the previous one.
    - **One UNASSIGNED entry** (`docs/tracking/UNASSIGNED.md`), top
-     first: a checker drives it. Live behavior on a shipped spec's
+     first, on a morning whose other steps left nothing open: a checker
+     drives it. Live behavior on a shipped spec's
      screens folds into that spec (a claim with its footnote, the
      coverage as a **Planned** item) and the entry goes; dead code keeps
      its entry with the evidence; one that looks out of scope or like a
@@ -318,7 +325,7 @@ is left, the next morning picks up from the files.
    or newly tracked upstream, fixes merged upstream that still show,
    and anything step 3 left to the maintainer; reports refreshed and
    written, each with its severity and effort, the critical and high
-   first; the head of `npm run backlog` and what the three hours left;
+   first; the head of `npm run backlog` and what the four hours left;
    incidentals worked (deleted as
    already stated, folded with the spec and IDs, not reproduced), what
    is left, the build or revision worked (feature, gate reached, and on
