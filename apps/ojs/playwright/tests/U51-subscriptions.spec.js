@@ -39,7 +39,8 @@
  * `issues[]` (with `galleys`, `datePublished`, `accessStatus`),
  * `restrictArticleAccess` (S15), and
  * scratch articles `published` into an `issue` with their galleys
- * (`accessStatus: 'open'` for a ticked "Open Access" box). S9 also names
+ * (`accessStatus: 'open'` for a ticked "Open Access" box); S2's "Sea Fog"
+ * is `published` with no `issue` ("Don't Assign To An Issue"). S9 also names
  * the journal's principal contact, the recipient of its mail control
  * (the payment notification sent from "Renew"'s payment page).
  *
@@ -307,7 +308,7 @@ test.describe('subscriptions', () => {
         await expectLocked(articleGalley(landing));
     });
 
-    test('S2: subscribers, non-subscribers and the "Subscription" block', async ({page, asUser, ojsApi}, testInfo) => {
+    test('S2: subscribers, non-subscribers and the "Subscription" block', async ({page, asUser, browser, baseURL, ojsApi}, testInfo) => {
         test.setTimeout(360_000);
         const tag = makeTag('s2', testInfo);
         const sam = `${tag}sam`;
@@ -333,6 +334,16 @@ test.describe('subscriptions', () => {
             issues: [first],
         });
         await article(ojsApi, tag, 'a', 'Tidal Patterns', first);
+        // "Sea Fog": published with no `issue`, the state "Don't Assign To An
+        // Issue" gives; its number is the response's `submissionId` (note s0).
+        const seaFog = await ojsApi.createSubmission({
+            tag: `${tag}f`,
+            context: tag,
+            submitter: `${tag}au`,
+            title: 'Sea Fog',
+            published: true,
+            galleys: PDF,
+        });
         const {reader, landing, block} = readerSide(page, tag);
 
         // Control, the visitor: the issue's page locks "PDF" (Rule 10).
@@ -416,6 +427,29 @@ test.describe('subscriptions', () => {
         await expectLocked(tocGalley(N.reader, 'Tidal Patterns'));
         await N.block.link(TEXT.learnMore).click();
         await nsubs.expectOpen();
+
+        // "Sea Fog", in no issue, opened at its address (U13 Rule 1). Signed
+        // out, in a browser with no session: the padlock; "PDF" opens the
+        // Login page with Rule 12's message (Rules 7, 10, 12).
+        const visitor = await (await browser.newContext({baseURL, storageState: {cookies: [], origins: []}})).newPage();
+        recordBrowserDialogs(visitor);
+        const VF = new ArticleLandingPage(visitor, tag);
+        await VF.goto(seaFog.submissionId);
+        await expect(VF.title()).toHaveText('Sea Fog');
+        await expectLocked(articleGalley(VF));
+        await expectLoginWith(visitor, articleGalley(VF), TEXT.loginSubscription);
+        // Nova: the padlock; "PDF" opens the "Subscriptions" page (Rules 7, 10, 12).
+        const NF = new ArticleLandingPage(np, tag);
+        await NF.goto(seaFog.submissionId);
+        await expect(NF.title()).toHaveText('Sea Fog');
+        await expectLocked(articleGalley(NF));
+        await pressAndLand(np, articleGalley(NF));
+        await nsubs.expectOpen();
+        // Sam, active: "Sea Fog"'s "PDF" opens (Rules 7, 12).
+        const SF = new ArticleLandingPage(page, tag);
+        await SF.goto(seaFog.submissionId);
+        await expect(SF.title()).toHaveText('Sea Fog');
+        await expectOpens(page, articleGalley(SF));
     });
 
     test('S3: reading roles, the article\'s Author and the open pages', async ({page, asUser, ojsApi}, testInfo) => {
