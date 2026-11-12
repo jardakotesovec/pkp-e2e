@@ -13,19 +13,13 @@
  * "Recommendation" list.
  * Spec: docs/specs/U29-review-setup-and-review-forms.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
- * (the reminder clock is off on the test installs; S1 saves a slider and
- * reads it back), A2 ❓ (S7 deactivates the form in use and asserts only
- * the scenario's own sentence, never the warning's promise), A3 ❓ (no
- * deadline is saved as 0 or emptied), A4 ❓ (every reload runs the tab
- * chain again without asserting where it landed), A5 🐞 (no item's type is
- * changed after adding response options), A6 ❓ and A7 ❓ (journal-only),
- * A8 ❓ (no declined request is counted), A9 🐞 (S7 reads the "Edit"
- * windows before the deactivation and never presses "OK" on one), OMP3 🐞
- * (nothing is asserted about the internal box's toolbar), OMP4 ✅ retired (no test
- * calls the public peer-review address). The spec's
- * Coverage section records everything else left out.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
+ * - A1 🐞, A2 ❓, A3 ❓, A4 ❓, A5 🐞, A8 ❓, A9 🐞, A10 ❓, OMP3 🐞.
+ * - A6, A7, A11–A15, OJS1: all on a journal's "Reviewer Recommendations"
+ *   or its public review, which a press does not have.
+ * - OMP4 ✅ retired.
  *
  * Seeding: scenario endpoints only. S1–S8 and S13 run on their own scratch
  * press (`POST scenarios/context`, install defaults unless a `review` /
@@ -211,6 +205,15 @@ async function walkToStep3(wizard, submissionId) {
 }
 
 /** A review-form question's own section on step 3 (sections nest; the last match is the question's). */
+/**
+ * The Workflow Settings top tab "Submission" (`#submission-button`). Local:
+ * the shared page object is another author's this session; proposed for it
+ * as `submissionTab`.
+ */
+function submissionTopTab(page) {
+    return page.locator('#submission-button');
+}
+
 function formSection(wizard, question) {
     return wizard.step3Form.locator('.section').filter({hasText: question}).last();
 }
@@ -355,6 +358,23 @@ test.describe('review setup & review forms', () => {
         await settings.openSideTab('Setup');
         await expect(setup.field('Default Response Deadline')).toHaveValue('6');
         await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
+
+        // Through "Submission": still unsaved, press the top tab "Submission"
+        // and then "Review": "Review" shows "Setup", no warning, the box still 6.
+        const submissionTab = submissionTopTab(page);
+        await expect(submissionTab).toHaveText('Submission');
+        await submissionTab.click();
+        await expect(submissionTab).toHaveAttribute('aria-selected', 'true', {timeout: 30_000});
+        await expect(settings.reviewTab).toHaveAttribute('aria-selected', 'false');
+        await expect(setup.field('Default Response Deadline')).toBeHidden();
+        await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
+        await settings.openReviewTab();
+        await expect(settings.sidePanel('Setup')).toBeVisible({timeout: 30_000});
+        await expect(settings.sideTab('Setup')).toHaveAttribute('aria-selected', 'true');
+        await expect(settings.sideTab('Reviewer Guidance')).toHaveAttribute('aria-selected', 'false');
+        await expect(setup.field('Default Response Deadline')).toHaveValue('6');
+        await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
+        expect(prompts).toEqual([]);
 
         // A reload drops the edit with no prompt: the saved value is back.
         await settings.reloadAndOpen('Setup');

@@ -18,9 +18,13 @@
  * tab chain again without asserting where the reload landed), A6 ❓ (S10
  * asserts only the scenario's own sentence: the "-" in the section and the
  * title on the line), A7 ❓ (S9 never asserts the toggled row's position),
- * A8 ❓ (no declined request is seeded), A14 ❓ (no test reads the "More
- * Actions" menu of a recommendation a reviewer has only saved for later),
- * OMP1–OMP4 ✅/🐞 (press-only, in the
+ * A8 ❓ (no declined request is seeded), A10 ❓ (S2 reads "Save" greyed out
+ * and never what gives it back), A11 🐞 (no test opens "Edit
+ * Recommendation"), A12 🐞 (the ticks are read by row, never by their
+ * name), A13 🐞 (no Section Editor opens the recommendations), A14 ❓ (no
+ * test reads the "More Actions" menu of a recommendation a reviewer has
+ * only saved for later), A15 🐞 (S10 loads the table after the reviews),
+ * OJS1 🐞 (no review is made public), OMP1–OMP4 ✅/🐞 (press-only, in the
  * OMP tree). The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only. S1–S10 and S13 run on their own scratch
@@ -58,7 +62,10 @@ const {
     recommendationLine,
     recommendationValue,
     reviewItemBlock,
+    legacyModal,
+    openReviewDetailsFromMenu,
 } = require('../pages/ReviewStagePages.js');
+const {waitForJQueryIdle} = require('../support/legacy.js');
 const {
     ReviewSettingsPage,
     REQUIRED_ERROR,
@@ -222,6 +229,25 @@ function freeTextBoxes(page) {
     return page.locator('#reviewStep3Form iframe[id^="comments"]');
 }
 
+/** Settings › Workflow's "Submission" top tab (screen-notes: `#submission-button`). */
+function submissionTopTab(page) {
+    return page.locator('[id="submission-button"]');
+}
+
+/**
+ * A reviewer row's "Thank Reviewer", sent from its window as it stands;
+ * returns once the legacy form has gone (the thank-you mail goes to the
+ * throwaway reviewer).
+ */
+async function thankReviewer(page, row) {
+    await row.getByRole('button', {name: 'Thank Reviewer', exact: true}).click();
+    const form = legacyModal(page, 'sendThankYouForm').locator('form#sendThankYouForm');
+    await expect(form).toBeVisible({timeout: 30_000});
+    await form.getByRole('button', {name: 'Thank Reviewer', exact: true}).click();
+    await expect(form).toBeHidden({timeout: 30_000});
+    await waitForJQueryIdle(page);
+}
+
 /** The backend sidebar. */
 function siteNav(page) {
     return page.getByRole('navigation', {name: 'Site Navigation'});
@@ -362,6 +388,21 @@ test.describe('review setup & review forms', () => {
         await settings.openSideTab('Setup');
         await expect(setup.field('Default Response Deadline')).toHaveValue('6');
         await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
+
+        // Through "Submission": still unsaved, the "Submission" top tab and
+        // "Review" again: "Review" shows "Setup", no warning, the box still
+        // reads 6 (control: "Submission" did show its own panel between).
+        await submissionTopTab(page).click();
+        await expect(submissionTopTab(page)).toHaveAttribute('aria-selected', 'true', {timeout: 30_000});
+        await expect(settings.reviewTab).toHaveAttribute('aria-selected', 'false');
+        await expect(setup.field('Default Response Deadline')).toBeHidden();
+        await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
+        await settings.openReviewTab();
+        await expect(settings.sidePanel('Setup')).toBeVisible({timeout: 30_000});
+        await expect(settings.sideTab('Setup')).toHaveAttribute('aria-selected', 'true');
+        await expect(setup.field('Default Response Deadline')).toHaveValue('6');
+        await expect(page.locator('[role="dialog"]:visible')).toHaveCount(0);
+        expect(prompts).toEqual([]);
 
         // A reload drops the edit with no prompt: the saved value is back.
         await settings.reloadAndOpen('Setup');
@@ -742,6 +783,36 @@ test.describe('review setup & review forms', () => {
         await expect.poll(async () => unordered(await table.titles())).toEqual(unordered([...DEFAULT_RECOMMENDATIONS, custom]));
         await expect(table.tick(table.row(custom))).toBeChecked();
 
+        // "Add Recommendation" closed: a name typed, then the window's own
+        // "Close" at its top: the window shuts with no question and no
+        // notice (control: the window itself was the one dialog on screen,
+        // read the same way), and the table lists the same seven rows,
+        // none of them the abandoned name; after a reload, still the same.
+        const abandoned = 'Accept pending data';
+        const seven = unordered([...DEFAULT_RECOMMENDATIONS, custom]);
+        const prompts = [];
+        page.on('dialog', (dialog) => {
+            prompts.push(dialog.type());
+            dialog.dismiss().catch(() => {});
+        });
+        await table.openAdd();
+        await table.titleInput.fill(abandoned);
+        await expect(table.titleInput).toHaveValue(abandoned);
+        await expect(page.getByRole('dialog')).toHaveCount(1);
+        await table.window.getByRole('button', {name: 'Close'}).first().click();
+        await expect(table.titleInput).toBeHidden({timeout: 30_000});
+        await expect(page.getByRole('dialog')).toHaveCount(0);
+        await expect(settings.notice('')).toHaveCount(0);
+        await expect.poll(async () => unordered(await table.titles())).toEqual(seven);
+        await expect(table.row(abandoned)).toHaveCount(0);
+        await expect(table.rows()).toHaveCount(7);
+        await settings.reloadAndOpen('Reviewer Recommendations');
+        await expect(table.row(custom)).toBeVisible({timeout: 30_000});
+        expect(unordered(await table.titles())).toEqual(seven);
+        await expect(table.row(abandoned)).toHaveCount(0);
+        await expect(table.rows()).toHaveCount(7);
+        expect(prompts).toEqual([]);
+
         // Untick "See Comments" › "Yes": the row is unticked; the other rows
         // keep their ticks (where the toggled row lands is A7: not fixed, so
         // no order is asserted here).
@@ -773,7 +844,11 @@ test.describe('review setup & review forms', () => {
         const tag = makeTag('s10', testInfo);
         const inUse = 'Accept with minor changes';
         const unused = 'Needs a native speaker';
-        const {manager, reviewer, reviewerName, submissionId} = await seedJournal(ojsApi, tag, {reviewers: [{status: 'accepted'}]});
+        // The Reviewer and a second Reviewer, both with accepted requests.
+        const {manager, reviewer, reviewerName, reviewers, submissionId} = await seedJournal(ojsApi, tag, {
+            reviewers: [{status: 'accepted'}, {status: 'accepted'}],
+        });
+        const second = reviewers[1];
 
         // The two custom entries, made through the tab's own "Add
         // Recommendation" window (the context API has no key for them).
@@ -786,12 +861,26 @@ test.describe('review setup & review forms', () => {
         await expect(table.tick(table.row(inUse))).toBeChecked();
         await expect(table.tick(table.row(unused))).toBeChecked();
 
-        // The reviewer submits a review choosing the first entry.
+        // Both Reviewers submit a review choosing the first entry.
         const reviewerPage = await (await asUser(reviewer)).newPage();
         await performReview(reviewerPage, tag, submissionId, {recommendation: inUse, comments: `Review ${tag}`});
+        const secondPage = await (await asUser(second.username)).newPage();
+        await performReview(secondPage, tag, submissionId, {recommendation: inUse, comments: `Second review ${tag}`});
+
+        // The Journal Manager thanks the second Reviewer: "Read Review" ›
+        // "Mark as Complete", then the row's "Thank Reviewer" (footnote s10),
+        // all before the deactivation.
+        const workflow = new WorkflowPage(page, tag);
+        await workflow.gotoEditorial(submissionId);
+        const secondRow = workflow.panelRow('Reviewers', second.name);
+        const completeModal = await openReviewDetails(page, secondRow);
+        await markReviewComplete(page, completeModal);
+        await closeReviewDetails(page, completeModal);
+        await thankReviewer(page, secondRow);
 
         // The entry in use has no "More Actions" (control: the unused row's
-        // menu, read the same way, is there).
+        // menu, read the same way, is there). The table is loaded fresh,
+        // after both reviews (A15 is never met).
         await settings.goto('Reviewer Recommendations');
         await expect(table.tick(table.row(inUse))).toBeVisible({timeout: 30_000});
         await expect(table.menuButton(table.row(unused))).toBeVisible();
@@ -804,7 +893,6 @@ test.describe('review setup & review forms', () => {
         await table.tick(table.row(inUse)).click();
         await table.answerConfirm(`Are you sure you want to deactivate the recommendation ${inUse}`, 'Yes');
         await expect(table.tick(table.row(inUse))).not.toBeChecked({timeout: 30_000});
-        const workflow = new WorkflowPage(page, tag);
         await workflow.gotoEditorial(submissionId);
         const row = workflow.panelRow('Reviewers', reviewerName);
         await expect(statusCell(row)).toContainText('Review Submitted');
@@ -814,6 +902,21 @@ test.describe('review setup & review forms', () => {
         await expect(recommendationLine(readModal)).toContainText(`Recommendation: ${inUse}`);
         await expect(recommendationValue(readModal)).toHaveText('-');
         await closeReviewDetails(page, readModal);
+
+        // The thanked review: the second Reviewer's row reads "Reviewer
+        // Thanked" with the entry under it and offers no "Read Review"
+        // (control: the Reviewer's row, read the same way, offers it); its
+        // "More Actions" › "Review Details" lists the entry on the
+        // "Recommendation:" line while the section prints "-" (the
+        // scenario's own sentence; A6 is not asserted beyond it).
+        await expect(statusCell(secondRow)).toContainText('Reviewer Thanked');
+        await expect(statusCell(secondRow)).toContainText(inUse);
+        await expect(row.getByRole('button', {name: 'Read Review', exact: true})).toBeVisible();
+        await expect(secondRow.getByRole('button', {name: 'Read Review', exact: true})).toHaveCount(0);
+        const thankedModal = await openReviewDetailsFromMenu(page, secondRow);
+        await expect(recommendationLine(thankedModal)).toContainText(`Recommendation: ${inUse}`);
+        await expect(recommendationValue(thankedModal)).toHaveText('-');
+        await closeReviewDetails(page, thankedModal);
 
         // The unused entry offers "Edit" and "Delete"; "Delete" › "Yes" removes it.
         await settings.goto('Reviewer Recommendations');

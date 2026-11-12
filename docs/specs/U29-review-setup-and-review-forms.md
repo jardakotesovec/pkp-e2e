@@ -474,7 +474,7 @@ read; the list below is what changes *these* screens.
   submissions in the section instead of "None / Free Form Review" (Rule
   12).
 - **The test installs' clock.** The daily reminder task and the mail queue
-  are off on the test installs, so no scenario drives Rule 9. <sup>i</sup>
+  are off on the test installs (Rule 9). <sup>i</sup>
 
 ## Cross-feature interactions
 
@@ -541,10 +541,10 @@ recipe are in the footnote. <sup>s0</sup>
      opens with the line "Minimum number of confirmed reviews required: 1."
      (Rule 8).
    - **The earlier request**: in the Reviewers panel, open the Reviewer's
-     row's "Edit" window: the request keeps what it was made with: "Anonymous Reviewer/Anonymous
-     Author" as its review type, "Publicly Show Reviewer Comments" unticked
-     and "Response Due Date" four weeks from today, the day it was made
-     (Rules 3, 4, 7).
+     row's "Edit" window: the request keeps what it was made with:
+     "Anonymous Reviewer/Anonymous Author" as its review type, "Publicly
+     Show Reviewer Comments" unticked and "Response Due Date" four weeks
+     from today, the day it was made (Rules 3, 4, 7).
    - **The Reviewer's mailbox**: no email has arrived from the save (Rule 2;
      Side effects).
    - **Control**: before the save, "Setup" read the install defaults:
@@ -582,6 +582,9 @@ recipe are in the footnote. <sup>s0</sup>
    - **The tab switch**: change "Default Response Deadline" to 6, press the
      "Reviewer Guidance" side tab without saving and come back to "Setup":
      no warning appeared and the box still reads 6 (Rule 2).
+   - **Through "Submission"**: still without saving, press the
+     "Submission" tab and then "Review" again: "Review" shows "Setup", no
+     warning appeared and the box still reads 6 (Rules 1b, 2).
    - **The reload**: reload the page and open "Setup" again: no prompt
      appeared and the box reads 4 (Rule 2).
    - **Control**: a saved value does survive the reload: scenario 1's values
@@ -748,6 +751,12 @@ recipe are in the footnote. <sup>s0</sup>
      "Active Upon Saving" and press "Save": the window closes and the table
      lists seven rows, "Accept with minor changes" among them, ticked
      (which place it takes is not fixed [A7](#a7)) (Rule 17).
+   - **"Add Recommendation" closed**: press "Add Recommendation", type
+     "Accept pending data" in "Review Recommendations" and press "Close"
+     at the window's top: the window shuts with no question and no
+     notice, and the table lists the same seven rows, none of them
+     "Accept pending data"; reload the page and open "Review" › "Reviewer
+     Recommendations" again: still the same seven rows (Rule 17).
    - **Deactivate an entry**: untick "See Comments" and press "Yes" on "Are
      you sure you want to deactivate the recommendation See Comments": the
      row is unticked, and the table still lists the same seven rows
@@ -762,7 +771,8 @@ recipe are in the footnote. <sup>s0</sup>
 
     Given: Journal Manager, on "Reviewer Recommendations" of a scratch
     journal with two custom entries, "Accept with minor changes", chosen by
-    the Reviewer on a submitted review, and "Needs a native speaker",
+    the Reviewer and by a second Reviewer on submitted reviews, the second
+    one thanked by the Journal Manager, and "Needs a native speaker",
     chosen by nobody.
 
     - **The entry in use**: the row "Accept with minor changes" has no "More
@@ -775,6 +785,12 @@ recipe are in the footnote. <sup>s0</sup>
       still lists "Recommendation: Accept with minor changes" at the top
       while its "Reviewer Recommendation" section prints "-" [A6](#a6)
       (Rules 17, 18; Side effects).
+    - **The thanked review**: in the same Reviewers panel the second
+      Reviewer's row reads "Reviewer Thanked" with "Accept with minor
+      changes" under it and offers no "Read Review"; its "More Actions" ›
+      "Review Details" opens the review window, which lists
+      "Recommendation: Accept with minor changes" at the top while its
+      "Reviewer Recommendation" section prints "-" [A6](#a6) (Rule 18).
     - **The unused entry**: back on the table, the row "Needs a native
       speaker" offers "More Actions" with "Edit" and "Delete"; press
       "Delete" and "Yes" on "Are you sure you want to delete the
@@ -861,8 +877,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U29-A13-section-editor-changes-reviewer-recommendations.md`): the
     reviewer recommendation writes sent as a Section Editor and as a
     manager-level role without settings access, each refused [report 2026-10-05]
-  - an unsaved "Setup" edit staying through "Submission" and back to
-    "Review", and a reload then dropping it (Rule 2) [incidental 2026-09-30]
   - the guard for A11 {OJS} (Rule 18; issue report
     `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`): a
     changed "Review Recommendations" closed with "Close", then "Edit"
@@ -883,13 +897,6 @@ Left out of the scenarios above, by reason:
     request carries deactivated, then "OK" in the reviewer row's "Edit"
     window with nothing changed: the window lists the carried form selected,
     and the request and the reviewer's step 3 keep it. [report 2026-10-04]
-  - "Add Recommendation" closed with "Close" after typing in "Review
-    Recommendations" {OJS}: no question, no notice, and the table keeping
-    its rows, also after a reload (Rule 17) [incidental 2026-10-05]
-  - a thanked review whose recommendation is deactivated {OJS}: its
-    Reviewers panel row reading "Reviewer Thanked" over the title, and its
-    window, opened from "More Actions" › "Review Details", reading the
-    "Recommendation:" line over "-" in the section (Rule 18) [incidental 2026-11-11]
 - **Rarely met**:
   - ordering the forms and a form's items with "Order", "Done" and "Cancel
     ordering", and the editors' "Review Form" lists following the order
@@ -1861,7 +1868,11 @@ text) on both apps: no dialog on the switch, values still present on
 return, saved values after the reload, no `beforeunload` prompt.
 Live-probed 2026-09-28 (Rule 2), OJS and OMP, two runs: "Default Response
 Deadline" changed from 4 to 9 and not saved, then a reload: no page-leave
-question, and "Setup" read 4 once "Review" was opened again.
+question, and "Setup" read 4 once "Review" was opened again. The
+"Through "Submission"" step presses the top tabs "Submission" and
+"Review" with the edit still unsaved (footnote d, 2026-09-30: "Setup"
+shown, address `#review`, the typed value kept); the reload after it
+reads only the box, as every reload here (A4).
 
 <a id="fn-s4"></a>
 **s4** — Scenario 4: `reviewGuidelines` and `competingInterests` saved
@@ -1925,7 +1936,11 @@ later 15-change drive, also 2026-09-06: finding A7), the reviewer's list
 ending with the new entry and without "See Comments" either way. A test
 run 2026-09-26 listed the new entry first in the table (footnote f-a7),
 so the scenario reads the table's rows and the reviewer's options as
-sets.
+sets. The "Add Recommendation" closed step: footnote g, live-probed
+2026-10-05 (the header "Close" after typing, no dialog, no notice, the
+rows unchanged after a reload); the suite reads the rows as a set before
+and after, and reopens the side tab after the reload through the tab
+chain (A4).
 
 <a id="fn-s10"></a>
 **s10** — Scenario 10 (OJS): the submitted review stores
@@ -1934,7 +1949,16 @@ makes `removable` false and hides the `DropdownActions`; the API refuses
 `edit`/`delete` with 406 behind it. The submit itself follows the
 reviewer's-review spec's scenario. Live-probed 2026-09-06 (footnote g): the
 chosen entry's row without "More Actions", an unused custom entry deleted
-through "Delete" › "Yes".
+through "Delete" › "Yes". The thanked review: a second `externalReviewer`
+with an `accepted` request (the context API has no key for the custom
+entry, so both reviews are submitted through the wizard choosing it),
+then, as the Journal Manager, the row's "Read Review" › "Mark as
+Complete" and "Thank Reviewer" (*Reviewer assignment & management*,
+Rules 3 and 16 there), all before the deactivation. Footnote g,
+live-probed 2026-11-11 on PKP's default dataset (a thanked review's row
+"Reviewer Thanked" over the title, no "Read Review", its "More Actions" ›
+"Review Details" window with the "Recommendation:" line and "-" in the
+section).
 
 <a id="fn-s11"></a>
 **s11** — Scenario 11: footnote b, live-probed 2026-09-06 on all three
