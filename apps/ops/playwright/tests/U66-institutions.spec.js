@@ -25,15 +25,16 @@
  * - A9 🐞: no "IP ranges" line here runs past 40 characters.
  * - A10 ❓: every list is read as a set, never in order.
  * - A11 ❓: S1 reads "Jump to next error", never presses it.
- * - A1, A4–A7: not on these scenarios' paths (A1 needs a manager-level
- *   role without "Permit changes to Settings", which a new server comes
- *   without; a role created at the manager level starts unticked, a
- *   Planned item).
+ * - A1 🐞: S3's "Managing editor" member is read on the page's address
+ *   alone, never in the side menu.
+ * - A4–A7, A12, A13: not on these scenarios' paths.
  *
  * Seeding (footnote s): every test seeds its own scratch server with
  * throwaway accounts (the username twice as password) through `POST
  * scenarios/context`: `institutions[]` (S2), `context.supportedLocales` and
- * `supportedFormLocales` `['en', 'fr_CA']` (S2's server B).
+ * `supportedFormLocales` `['en', 'fr_CA']` (S2's server B), `customRoles[]`
+ * "Managing editor" at the manager level, its member a throwaway account
+ * (S3).
  * publicknowledge and the seeded roster are never touched. S1's spare
  * account is the recipient of its mail control.
  *
@@ -344,6 +345,7 @@ test.describe('Institutions', () => {
         const tag = makeTag('s3', testInfo);
         const roles = {
             manager: `${tag}mg`,
+            managingEditor: `${tag}me`,
             sectionEditor: `${tag}se`,
             editorialBoardMember: `${tag}eb`,
             author: `${tag}au`,
@@ -352,13 +354,17 @@ test.describe('Institutions', () => {
         await opsApi.createContext({
             tag,
             users: Object.entries(roles).map(([role, username]) => user(username, 'Una', role, [role])),
+            // "Managing editor", made with "Create New Role" at the manager
+            // level: "Permit changes to Settings" unticked from the start.
+            customRoles: [{key: 'managingEditor', level: 'manager', name: 'Managing editor', abbrev: 'MGE'}],
         });
         const address = new InstitutionsPage(page, tag).url();
 
-        // The Moderator (the Section Editor), the Editorial Board Member (in
-        // the Copyeditor's place), the Author and the Reader: the
-        // access-denied page (Actors row 2).
-        for (const role of ['sectionEditor', 'editorialBoardMember', 'author', 'reader']) {
+        // The member of the role created at the manager level, the Moderator
+        // (the Section Editor), the Editorial Board Member (in the
+        // Copyeditor's place), the Author and the Reader: the access-denied
+        // page (Actors row 2; Settings bullet 3).
+        for (const role of ['managingEditor', 'sectionEditor', 'editorialBoardMember', 'author', 'reader']) {
             const {page: rp} = await actorPage(asUser, roles[role]);
             await rp.goto(address);
             await expect(rp, role).toHaveURL(/\/user\/authorizationDenied/);

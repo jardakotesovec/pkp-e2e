@@ -397,7 +397,9 @@ catcher's address and the tooling recipe are in the footnote. <sup>s</sup>
 
    Given: the throwaway accounts of a scratch journal's Journal Manager,
    an Editor whose role has "Permit changes to Settings" unticked {OJS
-   OMP}, a Section Editor, a Copyeditor (an Editorial Board Member on a
+   OMP}, the member of a role "Managing editor" created with "Create New
+   Role" at the manager level, its "Permit changes to Settings" unticked
+   from the start, a Section Editor, a Copyeditor (an Editorial Board Member on a
    preprint server), an Author, a Reviewer {OJS OMP} and a Reader, and
    the address of its Institutions page: the journal's address followed
    by "management/settings/institutions".
@@ -405,6 +407,10 @@ catcher's address and the tooling recipe are in the footnote. <sup>s</sup>
    - **The Editor without "Permit changes to Settings"** {OJS OMP}:
      signed in, opens the address: the access-denied page, "The current
      role does not have access to this operation." (Actors row 2;
+     Settings bullet 3).
+   - **The role created at the manager level**: the member of "Managing
+     editor", signed in, opens the address: the access-denied page, "The
+     current role does not have access to this operation." (Actors row 2;
      Settings bullet 3).
    - **Section Editor, Copyeditor, Author, Reviewer {OJS OMP} and
      Reader**: each, signed in, opens the address: the same
@@ -509,11 +515,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U66-A9-institution-long-ip-range-save-error.md`): a valid
     range longer than 40 characters on "Add Institution" and on "Edit
     Institution", saved once or refused, the ranges already stored kept [report 2026-09-30]
-  - a role created by "Create New Role" at the manager level (Settings
-    bullet 3; Actors row 2): its "Permit changes to Settings" unticked
-    from the start, and its member refused the Institutions page by its
-    address, on all three apps; scenario 3 checks the refusal with the
-    Editor role, on a journal and a press only [incidental 2026-10-01]
 - **Rarely met**:
   - more than thirty institutions: thirty rows a page and the page
     controls "Previous", the page numbers and "Next" under the list
@@ -1221,7 +1222,11 @@ context's default). Scenario 2: two contexts, B with
 (`127.0.0.1`), A with "Zebra Institute" (`172.16.0.0/12`); the French
 name is typed on screen, since the seed fills the primary language's
 box alone. Scenario 3: `roles: {editor: {permitSettings: false}}` (OJS,
-OMP). Scenario 4: the site's box `POST site
+OMP), and on the three apps `customRoles: [{key: 'managingEditor',
+level: 'manager', name: 'Managing editor', abbrev: 'MGE'}]` (no
+`stages`, which a manager-level entry refuses; the role arrives with
+"Permit changes to Settings" unticked, as "Create New Role" leaves it)
+with the throwaway account `managingEditor` its member. Scenario 4: the site's box `POST site
 {enableInstitutionUsageStats: true}` (site-wide, so the test is `@solo`
 and sets it back to `false` after), the journal's box the context key
 `enableInstitutionUsageStats: true`. Scenario 5: `payments`,

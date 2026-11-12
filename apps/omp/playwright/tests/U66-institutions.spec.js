@@ -27,8 +27,9 @@
  * throwaway accounts (the username twice as password) through `POST
  * scenarios/context`: `institutions[]` (S2), `context.supportedLocales`
  * and `supportedFormLocales` `['en', 'fr_CA']` (S2's press B), `roles:
- * {editor: {permitSettings: false}}` (S3). publicknowledge and the seeded
- * roster are never touched. S1's spare account is the recipient of its
+ * {editor: {permitSettings: false}}` and `customRoles[]` "Managing editor"
+ * at the manager level, its member a throwaway account (S3).
+ * publicknowledge and the seeded roster are never touched. S1's spare account is the recipient of its
  * mail control.
  *
  * Every absence is read settled (the list's own fetch after the action
@@ -339,6 +340,7 @@ test.describe('Institutions', () => {
         const roles = {
             manager: `${tag}mg`,
             editor: `${tag}ed`,
+            managingEditor: `${tag}me`,
             sectionEditor: `${tag}se`,
             copyeditor: `${tag}ce`,
             author: `${tag}au`,
@@ -349,13 +351,17 @@ test.describe('Institutions', () => {
             tag,
             users: Object.entries(roles).map(([role, username]) => user(username, 'Una', role, [role])),
             roles: {editor: {permitSettings: false}},
+            // "Managing editor", made with "Create New Role" at the manager
+            // level: "Permit changes to Settings" unticked from the start.
+            customRoles: [{key: 'managingEditor', level: 'manager', name: 'Managing editor', abbrev: 'MGE'}],
         });
         const address = new InstitutionsPage(page, tag).url();
 
-        // The Press editor without "Permit changes to Settings", the Series
-        // editor, Copyeditor, Author, Reviewer and Reader: the access-denied
-        // page (Actors row 2; Settings bullet 3).
-        for (const role of ['editor', 'sectionEditor', 'copyeditor', 'author', 'externalReviewer', 'reader']) {
+        // The Press editor without "Permit changes to Settings", the member
+        // of the role created at the manager level, the Series editor,
+        // Copyeditor, Author, Reviewer and Reader: the access-denied page
+        // (Actors row 2; Settings bullet 3).
+        for (const role of ['editor', 'managingEditor', 'sectionEditor', 'copyeditor', 'author', 'externalReviewer', 'reader']) {
             const {page: rp} = await actorPage(asUser, roles[role]);
             await rp.goto(address);
             await expect(rp, role).toHaveURL(/\/user\/authorizationDenied/);

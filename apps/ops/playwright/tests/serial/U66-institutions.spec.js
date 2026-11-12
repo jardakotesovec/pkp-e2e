@@ -18,9 +18,7 @@
  *
  * Deliberately NOT covered (register IDs; the spec's Coverage section is
  * the record of everything else left out):
- * - A1–A11: not on this scenario's path (A1 needs a manager-level role
- *   without "Permit changes to Settings", which a preprint server does not
- *   have).
+ * - A1–A13: not on this scenario's path.
  *
  * Seeding (footnote s): the site's box by `POST site`
  * `{enableInstitutionUsageStats: true}`; a scratch server from `POST
