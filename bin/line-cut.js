@@ -9,6 +9,11 @@
  *   node bin/line-cut.js <branch> --feature U26    one feature on top of it
  *   node bin/line-cut.js <branch> --all            every feature (a fresh cut)
  *
+ *   --from <git ref>   copy from that commit's tree instead of the working
+ *                      tree (a version whose suite lived on a branch of this
+ *                      repo: `--all --from origin/ore`)
+ *   --apps ojs,omp     only these apps (a version only some apps have)
+ *
  * The base, for all three apps: the test library the tests are written
  * against (shared/playwright/{support,data,tests}, apps/<app>/playwright/
  * {support,fixtures}), the seeding code (shared/php, apps/<app>/php), the
@@ -27,16 +32,23 @@ const fs = require('fs');
 const path = require('path');
 const {REPO_ROOT, APPS, LINES} = require('./apps.js');
 
-const USAGE = 'usage: node bin/line-cut.js <branch> [--feature U<nn>]… [--all]';
+const {execFileSync} = require('child_process');
+const USAGE = 'usage: node bin/line-cut.js <branch> [--feature U<nn>]… [--all] [--from <git ref>] [--apps ojs,omp,ops]';
 const args = process.argv.slice(2);
 const branch = args.shift();
 const features = [];
 let all = false;
+let from = null;
+let onlyApps = null;
 for (let i = 0; i < args.length; i++) {
     if (args[i] === '--feature' && /^U\d+$/.test(args[i + 1] || '')) {
         features.push(args[++i]);
     } else if (args[i] === '--all') {
         all = true;
+    } else if (args[i] === '--from' && args[i + 1]) {
+        from = args[++i];
+    } else if (args[i] === '--apps' && args[i + 1]) {
+        onlyApps = args[++i].split(',').map((name) => name.trim()).filter(Boolean);
     } else {
         console.error(`line-cut: unknown argument "${args[i]}"\n${USAGE}`);
         process.exit(1);
@@ -48,13 +60,33 @@ if (!branch || !LINES[branch]) {
 }
 
 const lineDir = path.join(REPO_ROOT, 'lines', branch);
-const appNames = Object.keys(APPS);
+const appNames = Object.keys(APPS).filter((name) => !onlyApps || onlyApps.includes(name));
+const git = (...gitArgs) => execFileSync('git', gitArgs, {cwd: REPO_ROOT, maxBuffer: 1 << 28});
+/** A source file's bytes: from the working tree, or from the tree of --from. */
+const read = (file) => (from ? git('show', `${from}:${file}`) : fs.readFileSync(path.join(REPO_ROOT, file)));
+const exists = (file) => {
+    if (!from) {
+        return fs.existsSync(path.join(REPO_ROOT, file));
+    }
+    try {
+        git('cat-file', '-e', `${from}:${file}`);
+        return true;
+    } catch {
+        return false;
+    }
+};
 const copied = [];
 const kept = [];
 const rel = (file) => path.relative(REPO_ROOT, file);
 
 /** Every file under a root-relative directory, as root-relative paths. */
 function filesUnder(dir) {
+    if (from) {
+        return git('ls-tree', '-r', '--name-only', from, '--', dir)
+            .toString()
+            .split('\n')
+            .filter((file) => file && !file.split('/').some((part) => part.startsWith('.') || part === 'test-results'));
+    }
     const start = path.join(REPO_ROOT, dir);
     if (!fs.existsSync(start)) {
         return [];
@@ -102,9 +134,9 @@ function copy(file) {
     }
     fs.mkdirSync(path.dirname(target), {recursive: true});
     if (/^docs\/specs\/[^/]+\.md$/.test(file)) {
-        fs.writeFileSync(target, relinked(fs.readFileSync(path.join(REPO_ROOT, file), 'utf8')));
+        fs.writeFileSync(target, relinked(read(file).toString()));
     } else {
-        fs.copyFileSync(path.join(REPO_ROOT, file), target);
+        fs.writeFileSync(target, read(file));
     }
     copied.push(file);
 }
@@ -162,7 +194,7 @@ function base() {
 
 /** The page objects a test or page-object file reaches, followed through their own requires. */
 function pageObjectsOf(file, seen) {
-    const source = fs.readFileSync(path.join(REPO_ROOT, file), 'utf8');
+    const source = read(file).toString();
     for (const match of source.matchAll(/require\(\s*['"](\.{1,2}\/[^'"]+)['"]\s*\)/g)) {
         let required = path.join(path.dirname(file), match[1]);
         if (!/\.(js|json)$/.test(required)) {
@@ -171,7 +203,7 @@ function pageObjectsOf(file, seen) {
         if (!/(^|\/)playwright\/pages\//.test(required) || seen.has(required)) {
             continue;
         }
-        if (!fs.existsSync(path.join(REPO_ROOT, required))) {
+        if (!exists(required)) {
             continue;
         }
         seen.add(required);

@@ -42,6 +42,9 @@ const APPS = {
 // stable lines").
 const LINES = {
     'stable-3_5_0': {branch: 'stable-3_5_0', portShift: 1000, dbSuffix: '_3_5', overlays: 'main'},
+    // pkp/ojs `ore` (OJS only; MAINTENANCE "The ore branch"). Its ports sit above
+    // every slot's lines (slot 0: 16000, slots 3–5: 20000…).
+    'ore': {branch: 'ore', portShift: 8000, dbSuffix: '_ore', overlays: 'main'},
     'stable-3_4_0': {branch: 'stable-3_4_0', portShift: 2000, dbSuffix: '_3_4', overlays: 'install', php: '8.2', node: '16.20.2'},
     // 3.3 names its locales en_US-style (3.4 moved to `en`).
     'stable-3_3_0': {branch: 'stable-3_3_0', portShift: 3000, dbSuffix: '_3_3', overlays: 'install', php: '8.2', node: '12.22.12', locales: 'en_US,fr_CA'},
