@@ -16,11 +16,12 @@
  *   "User" column of the assignment and removal lines.
  * - A15 🐞: S1 reads the "Assign Editor" email's discussion footer and its
  *   unsubscribe link, never how many footers the email carries.
+ * - A18 🐞: S6 reloads after "Cancel" closed "Assign Participant" only
+ *   with "Search" pressed, never after a role chosen without it.
  * - OJS1 🐞: S8 reads the automatic email's request to send the submission
  *   for review or decline it, never the button name it quotes.
- * - A1 🐞, A4 🐞, A7 🐞, A9 🐞, A11 🐞, A12 🐞, A16 🐞, A2 ❓,
- *   A8 ❓, A13 ❓: no scenario reaches them here.
- * - OMP1, OMP2, OPS1, OPS2, OPS3: other apps' territory.
+ * - A1 🐞, A4 🐞, A7 🐞, A9 🐞, A11 🐞, A12 🐞, A16 🐞, A2 ❓, A8 ❓, A13 ❓.
+ * - OMP1, OPS1, OPS2, OPS3, OPS4: other apps' territory.
  *
  * S3 acts as the shared `manager.maya`, so it reads each "OK" by the
  * save's answer (`save-participant`), never by the notice, which any
@@ -43,9 +44,8 @@
  * person's own Profile › Notifications tab, as footnote s says: S6's
  * unticked "Enable these types of notifications." on "Discussion added."
  * and S8's ticked "Do not send me an email…" on the new-submission row.
- * A message is always sent with a predefined message chosen: with the list
- * left blank the send answers 500 on the Postgres test database
- * (scenarios.md "Decision behaviour worth knowing"). Every absence is read
+ * S6's two templates added in Settings are the context's `taskTemplates[]`
+ * (footnote s, recipe 6). Every absence is read
  * with a settled locator (the exact row list, the exact menu, a
  * recipient-scoped mail read after a control) and paired with a positive
  * control taken the same way (M4, M6). Waits are web-first (A5). Everything
@@ -70,6 +70,7 @@ const {
     RECOMMEND_ONLY_LINE,
 } = require('../../../../shared/playwright/pages/StageParticipantsPages.js');
 const {StartSubmissionPage, SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
+const {waitForJQueryIdle} = require('../support/legacy.js');
 
 const JOURNAL = 'publicknowledge';
 
@@ -109,7 +110,7 @@ const flat = (text) => (text || '').replace(/\s+/g, ' ');
  * `{key: [givenName, familyName, roles]}`; returns them by key with
  * `username`, `name` (the full name) and `email`.
  */
-async function seedJournal(ojsApi, tag, accounts, {contact = false} = {}) {
+async function seedJournal(ojsApi, tag, accounts, {contact = false, extra = {}} = {}) {
     const people = {};
     for (const [key, [givenName, familyName, roles]] of Object.entries(accounts)) {
         const username = `${key}${tag}`;
@@ -123,6 +124,7 @@ async function seedJournal(ojsApi, tag, accounts, {contact = false} = {}) {
         tag,
         context,
         users: Object.values(people).map(({username, givenName, familyName, roles}) => ({username, givenName, familyName, roles})),
+        ...extra,
     });
     return people;
 }
@@ -140,6 +142,28 @@ async function expectRoleLevels(win, levels) {
     let at = 0;
     const shown = levels.map((level) => unordered(options.slice(at, (at += level.length))));
     expect({levels: shown, count: options.length}).toEqual({levels: levels.map(unordered), count: levels.flat().length});
+}
+
+/** A discussion row's "Created by:" line for a person (it shows the username; seed-facts). */
+const createdBy = (person) => new RegExp(`Created by:\\s*${person.username}`);
+
+/**
+ * The "Notify" window's close control ("<", named "Close"). Local: the shared
+ * `NotifyWindow` has none (proposed: `NotifyWindow.closeControl()`).
+ */
+const notifyCloseControl = (win) => win.root.getByRole('button', {name: 'Close', exact: true});
+
+/**
+ * Set a window's predefined-message list back to its blank entry: the
+ * choice posts `fetch-template-body` and empties "Message" (Rule 11b).
+ * Local: proposed as `NotifyWindow.chooseBlankTemplate()`.
+ */
+async function chooseBlankTemplate(page, win) {
+    const fetched = page.waitForResponse((r) => r.url().includes('fetch-template-body'), {timeout: 30_000});
+    await win.templateSelect().selectOption('');
+    await fetched;
+    await waitForJQueryIdle(page);
+    await expect.poll(async () => flat(await win.messageText()).trim(), {timeout: 30_000}).toBe('');
 }
 
 /** Open a signed-in page for `person` (every actor goes through `asUser`, as U32 does). */
@@ -750,16 +774,36 @@ test.describe('stage participants', () => {
 
     test('S6: notify a participant', async ({asUser, ojsApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(300_000);
+        test.setTimeout(540_000);
         const tag = makeTag('s6', testInfo);
         const title = `Submission ${tag}`;
         const message = 'Please check the reference list.';
-        const p = await seedJournal(ojsApi, tag, {
-            mgr: ['Mira', 'Manager', ['manager']],
-            sa: ['Sam', 'Section', ['sectionEditor']],
-            sb: ['Sue', 'Second', ['sectionEditor']],
-            au: ['Ava', 'Author', ['author']],
-        });
+        const DISCUSSION = 'Discussion (Submission)';
+        const TEMPLATE_TEXT = 'Please enter your message.';
+        const REFERENCE = {title: 'Reference check', text: 'Please check the citations.'};
+        const QUERY = {title: 'Author query', text: "Please answer the author's query."};
+        // The given: a third Section Editor assigned to nothing, and two
+        // discussion templates added in Settings on the Submission stage,
+        // one limited to the Author role (footnote s, recipe 6).
+        const p = await seedJournal(
+            ojsApi,
+            tag,
+            {
+                mgr: ['Mira', 'Manager', ['manager']],
+                sa: ['Sam', 'Section', ['sectionEditor']],
+                sb: ['Sue', 'Second', ['sectionEditor']],
+                sc: ['Sid', 'Third', ['sectionEditor']],
+                au: ['Ava', 'Author', ['author']],
+            },
+            {
+                extra: {
+                    taskTemplates: [
+                        {stage: 'submission', title: REFERENCE.title, message: REFERENCE.text},
+                        {stage: 'submission', title: QUERY.title, roles: ['author'], message: QUERY.text},
+                    ],
+                },
+            }
+        );
         const {submissionId} = await ojsApi.createSubmission({
             tag,
             context: tag,
@@ -815,6 +859,15 @@ test.describe('stage participants', () => {
         await expect(discussion.entries().first()).toContainText(message);
         await discussion.close();
 
+        // The discussion's creator: the row reads "Created by:" the Journal
+        // Manager, the sender, and not the recipient (the same row, read the
+        // same way, is the control).
+        await panel.reland();
+        const createdRows = panel.discussionRows(DESK_DISCUSSIONS, DISCUSSION);
+        await expect(createdRows).toHaveCount(1);
+        await expect(createdRows.filter({hasText: createdBy(p.mgr)})).toHaveCount(1);
+        await expect(createdRows.filter({hasText: createdBy(p.sa)})).toHaveCount(0);
+
         // The first Section Editor's Tasks panel.
         const task = DISCUSSION_TASK({creatorName: p.mgr.name, name: 'Discussion (Submission)', message});
         const saPage = await pageFor(asUser, p.sa.username);
@@ -851,6 +904,145 @@ test.describe('stage participants', () => {
         const sbTasks = await openTasks(sbPage, tag);
         await expect(sbTasks.grid()).toBeVisible();
         await expect(sbTasks.rows().filter({hasText: title})).toHaveCount(0);
+
+        // The close control: with only a typed message, the list untouched,
+        // "<" closes the window at once, without a question.
+        const dialogs = new LeavePageDialogs(page);
+        await panel.goto(submissionId, {menuKey: STAGE_KEY.submission});
+        let win2 = await panel.openNotify(p.sa.name);
+        await win2.typeMessage('Draft note.');
+        await notifyCloseControl(win2).click();
+        await win2.expectClosed();
+        expect(dialogs.count()).toBe(0);
+
+        // With a predefined message chosen, "<" asks; the box's "Cancel"
+        // keeps the window as filled, a second "<" and "OK" close it.
+        await panel.reland();
+        win2 = await panel.openNotify(p.sa.name);
+        await win2.chooseTemplate(DISCUSSION);
+        dialogs.answerNext('dismiss');
+        await notifyCloseControl(win2).click();
+        await expect.poll(() => dialogs.count()).toBe(1);
+        expect(dialogs.last()).toMatchObject({type: 'confirm', message: UNSAVED_QUESTION});
+        await expect(win2.notifyButton()).toBeVisible();
+        expect(flat(await win2.messageText()).trim()).toBe(TEMPLATE_TEXT);
+        dialogs.answerNext('accept');
+        await notifyCloseControl(win2).click();
+        await expect.poll(() => dialogs.count()).toBe(2);
+        expect(dialogs.last()).toMatchObject({type: 'confirm', message: UNSAVED_QUESTION});
+        await win2.expectClosed();
+
+        // Escape and a reload: Escape asks the same, its "OK" closes the
+        // "Notify" window and the workflow stays open.
+        await panel.reland();
+        win2 = await panel.openNotify(p.sa.name);
+        await win2.chooseTemplate(DISCUSSION);
+        dialogs.answerNext('accept');
+        await page.keyboard.press('Escape'); // lint-ok: escape the scenario presses Escape on the Notify window (Rule 11d)
+        await expect.poll(() => dialogs.count()).toBe(3);
+        expect(dialogs.last()).toMatchObject({type: 'confirm', message: UNSAVED_QUESTION});
+        await win2.expectClosed();
+        await panel.frame.expectOpen(submissionId);
+        await expect(panel.heading()).toBeVisible();
+        // A reload with a predefined message chosen: the leave-page box;
+        // confirmed, the page reloads.
+        await panel.reland();
+        win2 = await panel.openNotify(p.sa.name);
+        await win2.chooseTemplate(DISCUSSION);
+        dialogs.answerNext('accept');
+        await page.reload();
+        await expect.poll(() => dialogs.count()).toBe(4);
+        expect(dialogs.last().type).toBe('beforeunload');
+        await panel.frame.expectOpen(submissionId);
+        await expect(panel.heading()).toBeVisible();
+        // No discussion added by the close control, Escape or the reload
+        // (the two sent ones listed; the blank-entry send below adds the
+        // third, the bounding control).
+        await expect(panel.discussionRows(DESK_DISCUSSIONS, DISCUSSION)).toHaveCount(2);
+
+        // Back to the blank entry: "Message" empties; a typed message goes
+        // out under "Discussion (Submission)".
+        const funding = 'Please confirm the funding statement.';
+        win2 = await panel.openNotify(p.sa.name);
+        await win2.chooseTemplate(DISCUSSION);
+        expect(flat(await win2.messageText()).trim()).toBe(TEMPLATE_TEXT);
+        await chooseBlankTemplate(page, win2);
+        await win2.typeMessage(funding);
+        await win2.send();
+        await expect(notice(page, NOTICES.notified)).toBeVisible();
+        const fundingMail = await pkpMail.find({to: p.sa.email, contains: funding});
+        expect(fundingMail.Subject).toBe(DISCUSSION);
+        expect(fundingMail.From.Address).toBe(p.mgr.email);
+        expect(flat((await pkpMail.fullMessage(fundingMail.ID)).Text).trim().startsWith(funding)).toBe(true);
+        // The first Section Editor's mailbox holds exactly the two sent
+        // "Discussion (Submission)" emails: nothing from the close control,
+        // Escape or the reload (bounded by the email just found).
+        expect(await pkpMail.count({to: p.sa.email, subject: DISCUSSION})).toBe(2);
+        await pkpMail.expectNone({to: p.sa.email, contains: 'Draft note.', afterControl: {to: p.sa.email, contains: funding}});
+        await panel.reland();
+        await expect(panel.discussionRows(DESK_DISCUSSIONS, DISCUSSION)).toHaveCount(3);
+
+        // Templates added in Settings: offered, each filling "Message" with
+        // its text and sent under its own name, the one limited to the
+        // Author role by a Journal Manager outside it.
+        win2 = await panel.openNotify(p.sa.name);
+        expect(await win2.templateOptions()).toEqual(expect.arrayContaining([REFERENCE.title, QUERY.title]));
+        await win2.chooseTemplate(REFERENCE.title);
+        expect(flat(await win2.messageText()).trim()).toBe(REFERENCE.text);
+        await win2.send();
+        await expect(notice(page, NOTICES.notified)).toBeVisible();
+        await panel.reland();
+        win2 = await panel.openNotify(p.sa.name);
+        await win2.chooseTemplate(QUERY.title);
+        expect(flat(await win2.messageText()).trim()).toBe(QUERY.text);
+        await win2.send();
+        await expect(notice(page, NOTICES.notified)).toBeVisible();
+        for (const t of [REFERENCE, QUERY]) {
+            const m = await pkpMail.find({to: p.sa.email, subject: t.title});
+            expect(m.From.Address).toBe(p.mgr.email);
+            expect(flat((await pkpMail.fullMessage(m.ID)).Text).trim().startsWith(t.text)).toBe(true);
+        }
+        await panel.reland();
+        await expect(panel.discussionRows(DESK_DISCUSSIONS, new RegExp(REFERENCE.title))).toHaveCount(1);
+        await expect(panel.discussionRows(DESK_DISCUSSIONS, new RegExp(QUERY.title))).toHaveCount(1);
+
+        // "Assign" cancelled, then a reload: no leave-page box (the reload
+        // above, read the same way, raised one), and no row for the third
+        // Section Editor.
+        let assign = await panel.openAssign();
+        await assign.chooseRole(ROLE.sectionEditor);
+        await assign.search();
+        await assign.choosePerson(p.sc.name);
+        await assign.cancel();
+        expect(dialogs.count()).toBe(4);
+        dialogs.answerNext('accept'); // only so that a box, if one came, would not stall the reload
+        await page.reload();
+        await panel.frame.expectOpen(submissionId);
+        await expect(panel.heading()).toBeVisible();
+        expect(dialogs.count()).toBe(4);
+        dialogs.queue.length = 0;
+        const panelNames = async () => (await panel.rowLines()).map((lines) => lines[1]).sort();
+        await expect.poll(panelNames).toEqual([p.au.name, p.sa.name, p.sb.name].sort());
+
+        // "Assign" with a typed message and the list on its blank entry: the
+        // third Section Editor added, their email under "Discussion
+        // (Submission)", a fourth discussion.
+        const takeOver = 'Please take over the reference checks.';
+        assign = await panel.openAssign();
+        await assign.chooseRole(ROLE.sectionEditor);
+        await assign.search();
+        await assign.choosePerson(p.sc.name);
+        await expect(assign.templateSelect()).toHaveValue('');
+        await assign.typeMessage(takeOver);
+        await assign.ok();
+        await expect(notice(page, NOTICES.added)).toBeVisible();
+        await expect(panel.row(p.sc.name, ROLE.sectionEditor)).toHaveCount(1);
+        const takeOverMail = await pkpMail.find({to: p.sc.email, contains: takeOver});
+        expect(takeOverMail.Subject).toBe(DISCUSSION);
+        expect(takeOverMail.From.Address).toBe(p.mgr.email);
+        expect(flat((await pkpMail.fullMessage(takeOverMail.ID)).Text).trim().startsWith(takeOver)).toBe(true);
+        await panel.reland();
+        await expect(panel.discussionRows(DESK_DISCUSSIONS, DISCUSSION)).toHaveCount(4);
     });
 
     test("S7: a role's options: recommend only, and no metadata permission", async ({asUser, ojsApi}, testInfo) => {

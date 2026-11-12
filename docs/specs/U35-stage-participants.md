@@ -767,7 +767,12 @@ catcher and the tooling recipe are in the footnote. <sup>s</sup>
    (Production on a preprint server) of a submission with two Section
    Editors assigned, the second of whom has unticked "Enable these types of
    notifications." on the "Discussion added." row of their Notifications
-   tab.
+   tab, the journal also holding a third Section Editor assigned to
+   nothing and, on that stage, two discussion templates added under
+   Settings › Workflow › "Tasks and Discussions": "Reference check",
+   reading "Please check the citations.", and "Author query", limited to
+   the Author role, which neither the Journal Manager nor the Section
+   Editors hold, and reading "Please answer the author's query.".
 
    - **The "Notify" window**: in the first Section Editor's row press "More
      Actions" and choose "Notify": a side panel titled "Notify" shows the
@@ -796,6 +801,9 @@ catcher and the tooling recipe are in the footnote. <sup>s</sup>
      (Submission)"; open it: its participants are the first Section Editor
      and the Journal Manager, and its first entry is "Please check the
      reference list." (Side effects).
+   - **The discussion's creator**: back on the stage's discussions panel,
+     the panel lists "Discussion (Submission)" as created by the Journal
+     Manager, the sender (Side effects).
    - **The first Section Editor's Tasks panel**: First Section Editor: sign
      in and open the header's Tasks panel: it lists "{sender} started a
      discussion: Discussion (Submission): Please check the reference list."
@@ -812,6 +820,68 @@ catcher and the tooling recipe are in the footnote. <sup>s</sup>
      holds no email "Discussion (Submission)"; Second Section Editor: sign
      in and open the header's Tasks panel: it lists no row for the
      discussion (Side effects).
+   - **The close control**: Journal Manager: sign in and open the
+     submission's Submission stage (Production on a preprint server); in
+     the first Section Editor's row choose "Notify", type "Draft
+     note." in "Message", leaving the list "Choose a predefined message…"
+     untouched, and press the window's close control ("<"): the window
+     closes at once, without a question; choose "Notify" in the same row
+     again, choose "Discussion (Submission)" and press "<": a box asks "The
+     data on this form has changed. Do you wish to continue without
+     saving?"; press the box's "Cancel": the window stays, "Message" still
+     reading "Please enter your message."; press "<" again and the box's
+     "OK": the window closes; the stage's discussions panel gains no
+     discussion and the first Section Editor's mailbox holds no new email
+     (Rules 8f, 11c).
+   - **Escape and a reload**: choose "Notify" in the first Section
+     Editor's row, choose "Discussion (Submission)" and press Escape: the
+     same box asks "The data on this form has changed. Do you wish to
+     continue without saving?"; press its "OK": the "Notify" window closes
+     and the workflow stays open; choose "Notify" in that row again, choose
+     "Discussion (Submission)" and reload the page: the browser's
+     leave-page box appears; confirm the reload: the stage's discussions
+     panel gains no discussion and the first Section Editor's mailbox holds
+     no new email (Rule 11d).
+   - **Back to the blank entry**: choose "Notify" in the first Section
+     Editor's row and choose "Discussion (Submission)": "Message" reads
+     "Please enter your message."; choose the list's blank entry again:
+     "Message" empties; type "Please confirm the funding statement." and
+     press "Notify": the window closes with "Notification sent to users.";
+     the first Section Editor's mailbox holds a second email from the
+     Journal Manager with the subject "Discussion (Submission)", its body
+     "Please confirm the funding statement."; the stage's discussions panel
+     lists a third "Discussion (Submission)" (Rule 11b; Side effects).
+   - **Templates added in Settings**: choose "Notify" in the first Section
+     Editor's row: the list "Choose a predefined message…" offers
+     "Reference check" and "Author query"; choose "Reference check":
+     "Message" reads "Please check the citations."; press "Notify": the
+     window closes with "Notification sent to users."; choose "Notify" in
+     that row again and choose "Author query": "Message" reads "Please
+     answer the author's query."; press "Notify": the window closes with
+     "Notification sent to users."; the first Section Editor's mailbox
+     holds an email from the Journal Manager with the subject "Reference
+     check", its body "Please check the citations.", and one with the
+     subject "Author query", its body "Please answer the author's query.";
+     the stage's discussions panel lists a discussion "Reference check"
+     and one "Author query" (Rule 5a; Settings bullet 4; Side effects).
+   - **"Assign" cancelled, then a reload**: press "Assign", choose
+     "Section editor" ("Series editor" on a press, "Moderator" on a
+     preprint server, here and in the next bullet), press "Search", choose
+     the third Section Editor and press "Cancel": the window closes without
+     a question; reload the page: no leave-page box appears, and the
+     "Participants" panel lists no row for the third Section Editor (Rule
+     6c).
+   - **"Assign" with a typed message**: press "Assign", choose "Section
+     editor", press "Search", choose the third Section Editor, leave the
+     list "Choose a predefined message…" on its blank entry, type "Please
+     take over the reference checks." in "Message" and press "OK": the
+     window closes, a notice at the top right of the page reads "User added
+     as a stage participant.", and the panel lists the third Section
+     Editor's row; the third Section Editor's mailbox holds an email from
+     the Journal Manager with the subject "Discussion (Submission)", its
+     body "Please take over the reference checks."; the stage's discussions
+     panel lists a fourth "Discussion (Submission)" (Rules 5b, 6a; Side
+     effects).
    - **Control**: the first Section Editor's email, sent the same way,
      reached their mailbox, so the second one's empty mailbox is not a slow
      delivery (Side effects).
@@ -957,8 +1027,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U35-A15-assign-editor-email-two-footers.md`):
     the Submission stage's "Assign Editor" letter ending with the
     sender's signature and the discussion footer alone [report 2026-10-01]
-  - a guard for retired A5: after "Notify" the discussions panel's row
-    reading "Created by:" the sender [report 2026-10-01]
   - the guard for A9 (issue report
     `docs/issues/U35-A9-permissions-tick-carries-to-other-role.md`):
     in "Assign Participant" a Section Editor chosen, then the role
@@ -975,8 +1043,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U35-A16-notify-message-ignores-email-opt-out.md`):
     "Notify" to a participant who ticked "Do not send me an email…"
     under "Discussion added.", the mailbox empty and the Tasks entry there [report 2026-10-01]
-  - guards for retired A10: a template added in Settings sent from "Notify", and a template
-    limited to a role sent from "Notify" by a manager outside that role [report 2026-10-01]
   - the guard for OPS3 (issue report
     `docs/issues/U35-OPS3-moderator-assigned-email-never-sent.md`):
     a preprint submitted to a section with Moderators under "Editorial
@@ -990,18 +1056,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U35-OMP1-internal-review-no-predefined-message.md`):
     the predefined messages of a press's Internal Review, read as a set
     ("Discussion (Review)" there since pkp/omp#2487) [report 2026-10-01]
-  - a guard for retired A3: a message typed in "Notify" and in "Assign Participant" with the
-    list on its blank entry, the recipient's mailbox and the stage's
-    discussions panel read ("Discussion (…)" since pkp/pkp-lib#13385;
-    Rule 5b) [report 2026-10-01]
-  - "Notify" after the list was set back to its blank entry: "Message"
-    emptied, a typed message sent under the stage's "Discussion (…)"
-    (Rule 11b; A17 retired) [upstream 2026-10-05]
-  - the "Notify" window's close control, asking first or not (Rule 11c) [incidental 2026-09-29]
-  - Escape and a reload on the "Notify" window (Rule 11d) [incidental 2026-09-29]
-  - a reload after "Cancel" closed "Assign Participant", with a role
-    chosen, "Search" pressed and a person chosen, "OK" never pressed,
-    raising no leave-page box (Rule 6c) [report 2026-10-21]
 - **Nothing new to test**:
   - "Cancel" on "Edit Assignment" after a box was changed, and its close control asking first (Rule 8f): scenario 3 cancels only an unchanged window
   - "Assignments" counting open review requests and leaving out published submissions (Fields "Assign Participant")
@@ -1470,7 +1524,7 @@ Basis: test run, 2026-10-01. <sup>[f-ops4](#fn-ops4)</sup>
 **r** — Live-probed 2026-09-22 (Purpose; journal and press): the dashboard's "Needs editor" view listing a submission with no editor; its row's "Assign Editor" opening "Assign Participant" with the Submission stage's roles, search and predefined messages, as the panel's "Assign" does; assigning a Section Editor there taking the submission out of the view. A preprint server's dashboard has no "Needs editor" view. The button is `pages/dashboard/dashboardPageStore.js::participantAssign()` (note o).
 
 <a id="fn-s"></a>
-**s** — Where each scenario runs: scenario 3 on the seeded journal/press/server `publicknowledge` with roster accounts (passwords the username doubled); scenarios 1, 2 and 4–9 on a scratch context from `POST scenarios/context` whose `users[]` are throwaway accounts (password the username twice, address `<username>@mail.test`), every mailbox read in the mail catcher scoped by that address. Scratch submissions come from `POST scenarios/submission` with a throwaway `author` as submitter (`author.alex` in scenario 3). `participants[]` of `{username, role, recommendOnly?, canChangeMetadata?}` writes the row "Assign" writes, without its email or log line, each box defaulting to the role's option; a user seeded there is not offered by that submission's "Assign", so a person a scenario assigns on screen is seeded in the context only. The automatic assignment happens only on the install's first journal, so a scratch submission has no editor unless seeded. Recipes: 1 — `editor`, `manager`, two `sectionEditor`s and the author; a submitted seed with no participants, which carries the needs-an-editor task and the "Needs editor" state the wizard's submit leaves. 2 — a `sectionEditor` seeded as participant on a seed at Copyediting (`sendExternalReview`, `accept`) and twenty-one `copyeditor` users. 3 — a submitted seed on `publicknowledge` (on the press in the `monographs` series), which arrives with its section's editors assigned automatically: `sectioneditor.ana` is edited, `sectioneditor.omar` (`sectioneditor.ravi` on the server) is the control, `manager.maya` signs in. 4 — participants: a `sectionEditor`, a second `sectionEditor` and an `editor` (`manager` on the server) with `recommendOnly: true`, the author; a `productionEditor` in the context only (journal, press). 5 — one user with the roles `sectionEditor` and `copyeditor` (the first alone on the server), seeded as participant in both; the discussion is opened before the scenario through that row's "Notify" with "Discussion (Submission)" ("Discussion (Production)"). 6 — two `sectionEditor` participants; the second signs in and unticks the box on Profile › Notifications before the scenario (no seed key sets it). 7 — two submitted seeds, each with a `sectionEditor` participant, a third `sectionEditor` and an `editor` (a second `manager` on the server) in the context; the Role Options are changed on screen, since the context key `roles` saves them before any assignment exists. 8 — a `submitted: false` draft with the participants of the given (the person holding both roles seeded twice, once per role), the opt-out ticked on Profile › Notifications by that Section Editor before the submit, and the second `editor` holding `author` too; the wizard's submit needs a file with a genre (seed-facts). 9 — two `manager`s, a `sectionEditor` (Moderator) and two `author`s on a scratch server; a submitted seed with no participants. Live-probed 2026-09-22 (all three apps): seeded `participants[]` rows listed on the panel and missing from that submission's "Assign" list; a seeded `recommendOnly` row reading "Only allowed to recommend an editorial decision".
+**s** — Where each scenario runs: scenario 3 on the seeded journal/press/server `publicknowledge` with roster accounts (passwords the username doubled); scenarios 1, 2 and 4–9 on a scratch context from `POST scenarios/context` whose `users[]` are throwaway accounts (password the username twice, address `<username>@mail.test`), every mailbox read in the mail catcher scoped by that address. Scratch submissions come from `POST scenarios/submission` with a throwaway `author` as submitter (`author.alex` in scenario 3). `participants[]` of `{username, role, recommendOnly?, canChangeMetadata?}` writes the row "Assign" writes, without its email or log line, each box defaulting to the role's option; a user seeded there is not offered by that submission's "Assign", so a person a scenario assigns on screen is seeded in the context only. The automatic assignment happens only on the install's first journal, so a scratch submission has no editor unless seeded. Recipes: 1 — `editor`, `manager`, two `sectionEditor`s and the author; a submitted seed with no participants, which carries the needs-an-editor task and the "Needs editor" state the wizard's submit leaves. 2 — a `sectionEditor` seeded as participant on a seed at Copyediting (`sendExternalReview`, `accept`) and twenty-one `copyeditor` users. 3 — a submitted seed on `publicknowledge` (on the press in the `monographs` series), which arrives with its section's editors assigned automatically: `sectioneditor.ana` is edited, `sectioneditor.omar` (`sectioneditor.ravi` on the server) is the control, `manager.maya` signs in. 4 — participants: a `sectionEditor`, a second `sectionEditor` and an `editor` (`manager` on the server) with `recommendOnly: true`, the author; a `productionEditor` in the context only (journal, press). 5 — one user with the roles `sectionEditor` and `copyeditor` (the first alone on the server), seeded as participant in both; the discussion is opened before the scenario through that row's "Notify" with "Discussion (Submission)" ("Discussion (Production)"). 6 — two `sectionEditor` participants and a third `sectionEditor` in the context only; the context's `taskTemplates[]` adds two discussions on `submission` (`production` on the server), "Reference check" with `message` "Please check the citations." and "Author query" with `roles: ['author']` and `message` "Please answer the author's query."; the second participant signs in and unticks the box on Profile › Notifications before the scenario (no seed key sets it). 7 — two submitted seeds, each with a `sectionEditor` participant, a third `sectionEditor` and an `editor` (a second `manager` on the server) in the context; the Role Options are changed on screen, since the context key `roles` saves them before any assignment exists. 8 — a `submitted: false` draft with the participants of the given (the person holding both roles seeded twice, once per role), the opt-out ticked on Profile › Notifications by that Section Editor before the submit, and the second `editor` holding `author` too; the wizard's submit needs a file with a genre (seed-facts). 9 — two `manager`s, a `sectionEditor` (Moderator) and two `author`s on a scratch server; a submitted seed with no participants. Live-probed 2026-09-22 (all three apps): seeded `participants[]` rows listed on the panel and missing from that submission's "Assign" list; a seeded `recommendOnly` row reading "Only allowed to recommend an editorial decision".
 
 <a id="fn-td1"></a>
 **td1** — Live-probed 2026-09-22 (Rules 6a, 8d; all three apps, as Journal Manager on a scratch submission): "User added as a stage participant." after "Assign" and "The stage assignment has been changed." after "Edit", each a notice at the top right of the page about half a second after "OK", with no further action; the panel listing the new row, and the edited row's new third line, at once. Code: note k.

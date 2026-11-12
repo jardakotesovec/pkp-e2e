@@ -258,9 +258,6 @@ a key built later is deleted from this list.
   a scenario that assigns through the form seeds the user in the context and
   leaves them out of `participants[]`.
 - `participants[]` with `role: 'sectionEditor'` seeds a Moderator on OPS.
-- On the Postgres test database a Participants "Assign" or "Notify" with a
-  message typed and no predefined message chosen answers 500, so a script that
-  types a message picks a template first.
 - `Repo::stageAssignment()->build()` uses `firstOr`. Re-assigning the same
   user and role silently keeps the existing row and drops new flags such as
   `canChangeMetadata`. If a participant needs different flags from the

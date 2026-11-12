@@ -27,17 +27,16 @@
  *   A16 🐞, A2 ❓, A8 ❓, A13 ❓: no scenario reaches them here.
  * - OPS1 ✅: S9 reads the manager role offered in "Assign" as the spec's
  *   text. OJS1, OMP1, OMP2: other apps' territory.
- * - T-ops-1 (returned to the fold, not yet in the register): a participant
- *   notice may land in the Production entry's own "Notification" box
- *   instead of the top-right toast; S6 and S9 accept either place
- *   (`participantNotice`) and assert neither as the contract.
+ * - OPS4 🐞: a participant notice may land in the Production entry's own
+ *   "Notification" box instead of the top-right toast; S6 and S9 accept
+ *   either place (`participantNotice`) and assert neither as the contract.
  *
  * S3 acts as the shared `manager.maya`, so it reads each "OK" by the
  * save's answer (`save-participant`), never by the notice, which any
  * concurrent session of that account can take (patterns.md parallel lesson
  * 2); the notice wording is asserted by the tests that act as throwaway
- * accounts: "User added as a stage participant." in S9, "Notification
- * sent to users." and the empty-"Notify" warning in S6. "The stage
+ * accounts: "User added as a stage participant." in S6 and S9,
+ * "Notification sent to users." and the empty-"Notify" warning in S6. "The stage
  * assignment has been changed." is asserted by no test.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
@@ -49,13 +48,14 @@
  * accounts (footnote s), because each reads a mailbox (Mailpit is shared,
  * A8), needs a second manager the roster lacks, or changes a role's
  * options. A person a scenario assigns on screen is seeded in the server
- * only (a seeded participant leaves the "Assign" list). S6's given (the
- * second Moderator's unticked "Enable these types of notifications." on
- * "Discussion added.") has no scenario key and is set on that person's own
- * Profile › Notifications tab, as footnote s says. A message is always sent
- * with a predefined message chosen: with the list left blank the send
- * answers 500 on the Postgres test database (scenarios.md "Decision
- * behaviour worth knowing"). Every absence is read with a settled locator
+ * only (a seeded participant leaves the "Assign" list). S6's given: its
+ * third Moderator is seeded in the server only, its two discussion
+ * templates through the context's `taskTemplates[]` (footnote s, recipe
+ * 6), and the second Moderator's unticked "Enable these types of
+ * notifications." on "Discussion added." has no scenario key and is set
+ * on that person's own Profile › Notifications tab, as footnote s says.
+ * S6 sends typed messages with the list on its blank entry too, from
+ * "Notify" and from "Assign" (Rules 5b, 11b). Every absence is read with a settled locator
  * (the exact row list, the exact menu, a recipient-scoped mail read after
  * a control) and paired with a positive control taken the same way (M4,
  * M6). Waits are web-first (A5). Everything runs in the parallel `ops`
@@ -75,8 +75,10 @@ const {
     TEMPLATE_LABEL,
     REMOVE_SENTENCE,
     RECOMMEND_ONLY_LINE,
+    UNSAVED_QUESTION,
     LeavePageDialogs,
 } = require('../../../../shared/playwright/pages/StageParticipantsPages.js');
+const {waitForJQueryIdle} = require('../support/legacy.js');
 const appContext = require('../support/app.context.js');
 
 const SERVER = 'publicknowledge';
@@ -111,10 +113,11 @@ const flat = (text) => (text || '').replace(/\s+/g, ' ');
 
 /**
  * A scratch preprint server holding the given throwaway accounts, each
- * `{key: [givenName, familyName, roles]}`; returns them by key with
+ * `{key: [givenName, familyName, roles]}`, and any further context keys
+ * in `extra` (`taskTemplates`); returns the accounts by key with
  * `username`, `name` (the full name) and `email`.
  */
-async function seedServer(opsApi, tag, accounts) {
+async function seedServer(opsApi, tag, accounts, extra = {}) {
     const people = {};
     for (const [key, [givenName, familyName, roles]] of Object.entries(accounts)) {
         const username = `${key}${tag}`;
@@ -124,6 +127,7 @@ async function seedServer(opsApi, tag, accounts) {
         tag,
         context: {name: `Server ${tag}`},
         users: Object.values(people).map(({username, givenName, familyName, roles}) => ({username, givenName, familyName, roles})),
+        ...extra,
     });
     return people;
 }
@@ -134,10 +138,33 @@ const part = (person, role, extra = {}) => ({username: person.username, role, ..
 /**
  * A participant notice as a preprint server shows it: the toast at the top
  * right, or, when the Production entry's own notification box drained it
- * first, that box headed "Notification" (an app race, T-ops-1; worked
+ * first, that box headed "Notification" (OPS4; worked
  * around, never asserted as the contract).
  */
 const participantNotice = (page, text) => notice(page, text).or(stageNotice(page, text)).first();
+
+/**
+ * Local helpers for the "Notify" window (the shared `NotifyWindow` is not
+ * edited this session; proposed there as `closeControl()`,
+ * `chooseBlankEntry()` and `pressEscape()`).
+ */
+/** The window's close control ("<", named "Close"), as on "Assign Participant". */
+const notifyCloseControl = (win) => win.root.getByRole('button', {name: 'Close', exact: true});
+
+/**
+ * Set the predefined-message list back to its blank entry: the list still
+ * posts `fetch-template-body`, and "Message" empties once its answer is in.
+ */
+async function chooseBlankEntry(win) {
+    const fetched = win.page.waitForResponse((r) => r.url().includes('fetch-template-body'), {timeout: 30_000});
+    await win.templateSelect().selectOption('');
+    await fetched;
+    await waitForJQueryIdle(win.page);
+    await expect.poll(() => win.messageText(), {timeout: 30_000}).toBe('');
+}
+
+/** Press Escape inside the window (on its list), never on the page (patterns.md pitfall 3b). */
+const pressEscapeIn = (win) => win.templateSelect().press('Escape');
 
 /** Open a signed-in page for `person` (every actor goes through `asUser`). */
 async function pageFor(asUser, username) {
@@ -398,16 +425,30 @@ test.describe('stage participants', () => {
 
     test('S6: notify a participant', async ({asUser, opsApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(300_000);
+        test.setTimeout(480_000);
         const tag = makeTag('s6', testInfo);
         const title = `Preprint ${tag}`;
         const message = 'Please check the reference list.';
-        const p = await seedServer(opsApi, tag, {
-            mgr: ['Mira', 'Manager', ['manager']],
-            sa: ['Sam', 'Moderator', ['sectionEditor']],
-            sb: ['Sue', 'Second', ['sectionEditor']],
-            au: ['Ava', 'Author', ['author']],
-        });
+        const REFERENCE_CHECK = {name: 'Reference check', text: 'Please check the citations.'};
+        const AUTHOR_QUERY = {name: 'Author query', text: "Please answer the author's query."};
+        const p = await seedServer(
+            opsApi,
+            tag,
+            {
+                mgr: ['Mira', 'Manager', ['manager']],
+                sa: ['Sam', 'Moderator', ['sectionEditor']],
+                sb: ['Sue', 'Second', ['sectionEditor']],
+                sc: ['Tia', 'Third', ['sectionEditor']],
+                au: ['Ava', 'Author', ['author']],
+            },
+            {
+                // The given's two templates added under Settings (footnote s, recipe 6).
+                taskTemplates: [
+                    {stage: 'production', title: REFERENCE_CHECK.name, message: REFERENCE_CHECK.text},
+                    {stage: 'production', title: AUTHOR_QUERY.name, roles: ['author'], message: AUTHOR_QUERY.text},
+                ],
+            }
+        );
         const {submissionId} = await opsApi.createSubmission({
             tag,
             context: tag,
@@ -419,8 +460,18 @@ test.describe('stage participants', () => {
         // notifications." on "Discussion added." (no scenario key; footnote s).
         await setNotificationBox(asUser, tag, p.sb.username, DISCUSSION_SETTING, 'allow', false);
 
+        /** A mail to `person` from the manager, its body opening with `text`. */
+        const expectMailFromManager = async (person, subject, text) => {
+            const mail = await pkpMail.find({to: person.email, subject, contains: text});
+            expect(mail.From.Address).toBe(p.mgr.email);
+            const full = await pkpMail.fullMessage(mail.ID);
+            expect(flat(full.Text).trim().startsWith(text)).toBe(true);
+            return full;
+        };
+
         // The "Notify" window.
         const page = await pageFor(asUser, p.mgr.username);
+        const dialogs = new LeavePageDialogs(page);
         const panel = panelOn(page, tag);
         await panel.goto(submissionId, {menuKey: PRODUCTION});
         const win = await panel.openNotify(p.sa.name);
@@ -445,12 +496,8 @@ test.describe('stage participants', () => {
         await expect(participantNotice(page, NOTICES.notified)).toBeVisible();
 
         // The first Moderator's mailbox.
-        const mail = await pkpMail.find({to: p.sa.email, subject: DISCUSSION});
-        expect(mail.From.Address).toBe(p.mgr.email);
-        const full = await pkpMail.fullMessage(mail.ID);
-        const body = flat(full.Text);
-        expect(body.trim().startsWith(message)).toBe(true);
-        expect(body).toContain('Reply to this comment at');
+        const full = await expectMailFromManager(p.sa, DISCUSSION, message);
+        expect(flat(full.Text)).toContain('Reply to this comment at');
         expect(pkpMail.extractLink(full.HTML, 'unsubscribe')).toMatch(/\/notification\/unsubscribe\?/);
 
         // The discussion: one "Discussion (Production)" (the empty "Notify"
@@ -462,6 +509,13 @@ test.describe('stage participants', () => {
         await discussion.expectParticipants([p.sa.username, p.mgr.username]);
         await expect(discussion.entries().first()).toContainText(message);
         await discussion.close();
+
+        // The discussion's creator: the panel lists it as created by the
+        // manager, the sender, not by the recipient.
+        await panel.reland();
+        await expect(rows).toHaveCount(1);
+        await expect(rows.first()).toContainText(`Created by: ${p.mgr.username}`);
+        await expect(rows.first()).not.toContainText(p.sa.username);
 
         // The first Moderator's Tasks panel.
         const task = DISCUSSION_TASK({creatorName: p.mgr.name, name: DISCUSSION, message});
@@ -499,6 +553,125 @@ test.describe('stage participants', () => {
         const sbTasks = await openTasks(sbPage, tag);
         await expect(sbTasks.grid()).toBeVisible();
         await expect(sbTasks.rows().filter({hasText: title})).toHaveCount(0);
+
+        // The close control: with only a typed message (the list untouched)
+        // it closes at once, asking nothing.
+        await panel.goto(submissionId, {menuKey: PRODUCTION});
+        let draft = await panel.openNotify(p.sa.name);
+        await draft.typeMessage('Draft note.');
+        await notifyCloseControl(draft).click();
+        await draft.expectClosed();
+        expect(dialogs.count()).toBe(0);
+        // After a predefined message it asks; the box's "Cancel" keeps the
+        // window as filled, a second press and "OK" close it.
+        draft = await panel.openNotify(p.sa.name);
+        await draft.chooseTemplate(DISCUSSION);
+        dialogs.answerNext('dismiss');
+        await notifyCloseControl(draft).click();
+        await expect.poll(() => dialogs.count()).toBe(1);
+        expect(dialogs.last()).toMatchObject({type: 'confirm', message: UNSAVED_QUESTION});
+        await expect(draft.notifyButton()).toBeVisible();
+        expect(flat(await draft.messageText()).trim()).toBe('Please enter your message.');
+        dialogs.answerNext('accept');
+        await notifyCloseControl(draft).click();
+        await expect.poll(() => dialogs.count()).toBe(2);
+        expect(dialogs.last()).toMatchObject({type: 'confirm', message: UNSAVED_QUESTION});
+        await draft.expectClosed();
+        // Nothing sent: still two discussions (the mailbox is read after the
+        // blank-entry send below, which bounds it).
+        await panel.reland();
+        await expect(panel.discussionRows(DISCUSSIONS, DISCUSSION)).toHaveCount(2);
+
+        // Escape and a reload: Escape asks the same question; its "OK"
+        // closes "Notify" and the workflow stays open.
+        draft = await panel.openNotify(p.sa.name);
+        await draft.chooseTemplate(DISCUSSION);
+        dialogs.answerNext('accept');
+        await pressEscapeIn(draft);
+        await expect.poll(() => dialogs.count()).toBe(3);
+        expect(dialogs.last()).toMatchObject({type: 'confirm', message: UNSAVED_QUESTION});
+        await draft.expectClosed();
+        await panel.frame.expectOpen(submissionId);
+        await expect(panel.heading()).toBeVisible();
+        // A reload with a predefined message chosen raises the leave-page box.
+        draft = await panel.openNotify(p.sa.name);
+        await draft.chooseTemplate(DISCUSSION);
+        dialogs.answerNext('accept');
+        await page.reload();
+        await expect.poll(() => dialogs.count()).toBe(4);
+        expect(dialogs.last().type).toBe('beforeunload');
+        await panel.frame.expectOpen(submissionId);
+        await expect(panel.heading()).toBeVisible();
+        await draft.expectClosed();
+        await expect(panel.discussionRows(DISCUSSIONS, DISCUSSION)).toHaveCount(2);
+
+        // Back to the blank entry: "Message" empties; a typed message goes
+        // out under "Discussion (Production)".
+        const funding = 'Please confirm the funding statement.';
+        const blank = await panel.openNotify(p.sa.name);
+        await blank.chooseTemplate(DISCUSSION);
+        expect(flat(await blank.messageText()).trim()).toBe('Please enter your message.');
+        await chooseBlankEntry(blank);
+        await blank.typeMessage(funding);
+        await blank.send();
+        await expect(participantNotice(page, NOTICES.notified)).toBeVisible();
+        await expectMailFromManager(p.sa, DISCUSSION, funding);
+        // A second email, no more: the close control, Escape and the reload
+        // above sent nothing, nor the typed draft.
+        expect(await pkpMail.count({to: p.sa.email, subject: DISCUSSION})).toBe(2);
+        await pkpMail.expectNone({to: p.sa.email, contains: 'Draft note.', afterControl: {to: p.sa.email, contains: funding}});
+        await panel.reland();
+        await expect(panel.discussionRows(DISCUSSIONS, DISCUSSION)).toHaveCount(3);
+
+        // Templates added in Settings: both offered (the manager-level role
+        // sees the one limited to Authors), both sent under their names.
+        for (const template of [REFERENCE_CHECK, AUTHOR_QUERY]) {
+            const added = await panel.openNotify(p.sa.name);
+            expect((await added.templateOptions()).sort()).toEqual(
+                ['', DISCUSSION, 'Assign Editor', REFERENCE_CHECK.name, AUTHOR_QUERY.name].sort() // the list has no fixed order (spec note f)
+            );
+            await added.chooseTemplate(template.name);
+            expect(flat(await added.messageText()).trim()).toBe(template.text);
+            await added.send();
+            await expect(participantNotice(page, NOTICES.notified)).toBeVisible();
+            await panel.reland();
+        }
+        for (const template of [REFERENCE_CHECK, AUTHOR_QUERY]) {
+            await expectMailFromManager(p.sa, template.name, template.text);
+            await expect(panel.discussionRows(DISCUSSIONS, template.name)).toHaveCount(1);
+        }
+
+        // "Assign" cancelled, then a reload: no question either time, and
+        // no row for the third Moderator (control: the first one's row).
+        let assign = await panel.openAssign();
+        await assign.chooseRole(ROLE.moderator);
+        await assign.search();
+        await assign.choosePerson(p.sc.name);
+        await assign.cancel();
+        expect(dialogs.count()).toBe(4);
+        dialogs.answerNext('accept'); // taken only if a leave-page box comes, which the next read refuses
+        await page.reload();
+        await panel.frame.expectOpen(submissionId);
+        await expect(panel.heading()).toBeVisible();
+        expect(dialogs.count()).toBe(4);
+        dialogs.queue.splice(0);
+        await expect(panel.row(p.sa.name, ROLE.moderator)).toHaveCount(1);
+        await expect(panel.row(p.sc.name)).toHaveCount(0);
+
+        // "Assign" with a typed message and the list on its blank entry.
+        const takeOver = 'Please take over the reference checks.';
+        assign = await panel.openAssign();
+        await assign.chooseRole(ROLE.moderator);
+        await assign.search();
+        await assign.choosePerson(p.sc.name);
+        await expect(assign.templateSelect()).toHaveValue('');
+        await assign.typeMessage(takeOver);
+        await assign.ok();
+        await expect(participantNotice(page, NOTICES.added)).toBeVisible();
+        await expect(panel.row(p.sc.name, ROLE.moderator)).toHaveCount(1);
+        await expectMailFromManager(p.sc, DISCUSSION, takeOver);
+        await panel.reland();
+        await expect(panel.discussionRows(DISCUSSIONS, DISCUSSION)).toHaveCount(4);
     });
 
     test("S7: a role's options: recommend only, and no metadata permission", async ({asUser, opsApi}, testInfo) => {
