@@ -122,12 +122,12 @@ so neither side starves the other: an **odd day** works incidentals
 and reports owed (steps 6 and 7), an **even day** builds a pending
 feature (step 8). Planned coverage (step 8) follows on every weekday,
 so the suites keep up with what the team ships, and steps 9 to 12
-after it. After about
-four hours the session starts nothing new, with one exception: the
-day's drift sweep (step 12) starts every weekday, whatever the clock
-says, because it is the one step that looks for statements in a spec
-that have gone wrong unnoticed. Whatever the session started
-(a report, a fold, a build or revision, the sweep) it finishes in the
+after it. The day's drift sweep (step 12) comes after the Planned
+coverage: the backlog goes first, and once it is worked down the sweep
+is each morning's standing work, the one step that looks for
+statements in a spec that have gone wrong unnoticed. After about
+four hours the session starts nothing new, but whatever it started
+(a report, a fold, a build or revision, a sweep) it finishes in the
 same session, however long that takes, and then ends pushed (step 13).
 What is left, the next morning picks up from the files.
 
@@ -291,12 +291,12 @@ What is left, the next morning picks up from the files.
    stale, and refresh the shard timings when they drifted ("Keep CI
    balanced").
 12. **Drift sweep, and quiet mornings.**
-   - **Drift sweep of one spec, every weekday**: the one whose PROGRESS
-     note carries the oldest "Swept" date (`npm run hk -- swept` names
-     it: none counts as oldest, and among the never swept a spec with no
-     kept build-time claim check goes first). Only the specs at the repo
-     root, which follow `main`, are swept. A sweep the session could not
-     finish is resumed the next morning before a new one starts. Its kept checks
+   - **Drift sweep of one spec, every weekday the four hours allow**,
+     started once the morning's Planned coverage is done: the one whose
+     PROGRESS note carries the oldest "Swept" date (`npm run hk -- swept`
+     names it: none counts as oldest, and among the never swept a spec
+     with no kept build-time claim check goes first). Only the specs at
+     the repo root, which follow `main`, are swept. Its kept checks
      (`shared/playwright/checks/<feature>/`) run twice at the tips on
      reset databases, under `PROBE_RUN` r1 and r2, since a fact one run
      shows is undetermined; a check whose header has a `RESEED` switch
