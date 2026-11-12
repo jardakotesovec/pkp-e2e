@@ -13,10 +13,10 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `81b4b1f5fc` | 2026-11-11 | claude (daily maintenance session, VM s0, the ore worktree: pkp/ojs#6034 and #6059, the two pointer bumps) |
-| pkp-lib | `5c3c5f9505` (the branch tip, pkp/pkp-lib#13773; ojs at it); ui-library `ebf241be` (the branch tip, pkp/ui-library#1052; ojs at it) | 2026-11-11 | claude (daily maintenance session, VM s0: both `=main`) |
+| ojs | `1fedf73275` | 2026-11-12 | claude (daily maintenance session, VM s0, the ore worktree: pkp/pkp-lib#13468's OJS commit, `=main 7fc2376322`) |
+| pkp-lib | `9ca248495e` (the branch tip, pkp/pkp-lib#13468; ojs at it); ui-library `3f904483` (the branch tip, pkp/ui-library#1014; ojs at it) | 2026-11-12 | claude (daily maintenance session, VM s0: all `=main`) |
 
-pkp-e2e `ore` tip: `34731c21` (2026-11-11, U08 A1 and U03 A24 retired).
+pkp-e2e `ore` tip: `918eeb34` (2026-11-12, U14 A6 retired, U30 and U26 follow pkp/ui-library#981).
 
 ## Open
 
@@ -30,6 +30,13 @@ pkp-e2e `ore` tip: `34731c21` (2026-11-11, U08 A1 and U03 A24 retired).
 
 ## Read log
 
+- **2026-11-12 (daily session, VM s0, the ore worktree) — ojs `ore` `81b4b1f5fc..1fedf73275` (1); pkp-lib `ore` `5c3c5f9505..9ca248495e` (1); ui-library `ore` `ebf241be..3f904483` (2). Read in full; baselines advanced; pkp-e2e `ore` `34731c21..918eeb34`.**
+  - Runs (step 0): the pkp/ojs `ore` hook at `1fedf73275` ([43084275791](https://github.com/pkp/ojs/actions/runs/43084275791), 2026-11-11 19:07, after pkp-e2e `ore` `34731c21`): green.
+  - All four `=main` (same patch-ids): ojs `1fedf73275` = `7fc2376322`, pkp-lib `9ca248495e` = `8959bca71c`, ui-library `3f904483` = `51f9eaa1` (pkp/ui-library#1014; pkp/pkp-lib#13468) and `940b25cf` = `f2a4757a` (pkp/ui-library#981). `main`'s verdicts carry over (`upstream-sync.md` 2026-11-12): regression none, security none.
+  - Carried: main's `c3cf0165` (U14 A6 retired) by hand as `0c23991f` (ore's U14 is the pre-revision text; a fold agent, `.reports/ore1112/` in the worktree; dead links to the deleted A6, A17 and A18 reports replaced; the suites' headers drop A6). The A6 walk (copied from `main` for the run, removed after) on a fresh ore dataset fleet, OJS `1fedf73275`: both panels link the unverified iD to `https://orcid.org/0000-0001-5109-3700`; neighbour reads unchanged. main's `f3b63203` (U30 and U26 follow #981), its spec, suite-comment and kept-check parts, as `918eeb34`; one conflict (U30's Left-out list) resolved to ore's text plus the new item, its date tag dropped for ore's lint.
+  - Gate: pkp-e2e `ore` push run [43211539187](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43211539187) at `918eeb34`: 3/3 green.
+  - Carried over: today's `main` sync confirmed no regression. Open regression rows: no row's code moved.
+  - Security: none routed.
 - **2026-11-11 (daily session, VM s0, the ore worktree) — ojs `ore` `aa4b02810f..81b4b1f5fc` (2 pointer bumps + 2 merges: pkp/ojs#6034, #6059); pkp-lib `ore` `6722bea1ed..5c3c5f9505` (1); ui-library `ore` `b1577b9c2c..ebf241be` (3). Read in full; baselines advanced; pkp-e2e `ore` `d351b5d0..34731c21`.**
   - Runs (step 0): the pkp/ojs `ore` hook at `81b4b1f5fc` ([42870112875](https://github.com/pkp/ojs/actions/runs/42870112875), 2026-11-10 17:56, after pkp-e2e `ore` `d351b5d0`): green; the earlier run at `2ced3ae781` was cancelled by it.
   - pkp-lib `5c3c5f9505` (pkp/pkp-lib#13773 for #13180, `=main e2078ce20e`, same patch-id) → the `main` read carries over. OJS `ore`'s committed `js/pkp.min.js` is still the 2026-08-27 build, as on `main`.
