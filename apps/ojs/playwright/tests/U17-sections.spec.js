@@ -16,6 +16,8 @@
  *   {section} section." lines and that the section's name is a link, never
  *   where the link leads; no inactive section's line is read.
  * - A8 🐞: no test ticks "Disable Submissions".
+ * - A11 🐞: S3 never opens the "Articles" window while its review form is
+ *   inactive.
  * - A2, A3 ❓: no test saves a "Word Count" or ticks the indexing box.
  * - A4 ❓, A5 ❓, A9 🐞, A10 🐞: the sections programming interface, which
  *   no screen calls; a kept check drives it (checks/U17/K7).
@@ -30,7 +32,8 @@
  * a Production Editor "Pia Production", a Reviewer "Rex Reviewer", the
  * active review form "Structured Review" (`reviewForms[]`) and "Tidal
  * Patterns" at Review (`decisions`); S3 and S4 "Tidal Patterns" submitted
- * in "Reviews" and in no issue; S4 "Sam Section" ticked under "Essays"
+ * in "Reviews" and in no issue; S3 also Rex Reviewer, the same review form
+ * and "Ocean Currents" in "Articles" at Review; S4 "Sam Section" ticked under "Essays"
  * (`users[].sections`) and one published issue (`issues[]`: without it
  * "Publication Settings" holds no issue choice, footnote s). "Inactive",
  * the editor-only box and "Review Form" have no key and are set on
@@ -52,6 +55,7 @@ const {
     expectNoticeTopRight,
     startFormSections,
 } = require('../../../../shared/playwright/pages/SectionsPages.js');
+const {ReviewSettingsPage} = require('../../../../shared/playwright/pages/ReviewSettingsPages.js');
 const {PublicationScreen} = require('../pages/PublicationMetadataPages.js');
 const {StartSubmissionPage} = require('../pages/SubmissionWizardPage.js');
 const {
@@ -78,6 +82,8 @@ const NOT_ACCEPTING = 'This journal is not accepting submissions at this time.';
 const SIGNED_IN_INVITATION = 'Make a new submission or view your pending submissions.';
 const NO_FORM = 'None / Free Form Review';
 const FORM = 'Structured Review';
+const DEACTIVATE_FORM = 'Are you sure you wish to deactivate this review form? It will no longer be available for new review assignments.';
+const ACTIVATE_FORM = "Are you sure you wish to activate this review form? Once it's assigned to a review you will no longer be able to deactivate it.";
 const EVE_BOX = 'Assign Eve Editor as Journal editor';
 const SAM_BOX = 'Assign Sam Section as Section editor';
 
@@ -140,6 +146,17 @@ async function actorPage(asUser, username) {
     const page = await (await asUser(username)).newPage();
     page.on('dialog', (dialog) => (dialog.type() === 'beforeunload' ? dialog.accept() : dialog.dismiss()));
     return page;
+}
+
+/** Add Reviewer's "Review Form" option that is chosen and reads `title` (none while absent). */
+function chosenForm(modal, title) {
+    return reviewFormSelect(modal).locator('option:checked', {hasText: title});
+}
+
+/** Close the "Add Reviewer" window without assigning (it has no "Cancel"). */
+async function closeAddReviewer(modal) {
+    await modal.getByRole('button', {name: /^Close/}).first().click();
+    await expect(modal).toBeHidden({timeout: 30_000});
 }
 
 /** The "Section" list of the article's "Publication Settings" page. */
@@ -347,11 +364,15 @@ test.describe('Sections', () => {
 
     test('S3: Deactivate and reactivate a section', async ({asUser, ojsApi, visitor}, testInfo) => {
         test.slow();
+        test.setTimeout(240_000);
         const tag = makeTag('s3', testInfo);
         const {manager, author} = await seedJournal(ojsApi, tag, {
             sections: [section('ART', 'Articles', 'Policy for articles.'), section('REV', 'Reviews', 'Policy for reviews.')],
+            extra: [user(`${tag}rv`, 'Rex', 'Reviewer', ['externalReviewer'])],
+            reviewForms: [{title: FORM, elements: [{question: 'Comments', type: 'textarea'}]}],
         });
         const submissionId = await seedArticle(ojsApi, tag, author, 'REV');
+        const oceanId = await seedArticle(ojsApi, tag, author, 'ART', {title: 'Ocean Currents', decisions: ['sendExternalReview']});
         const page = await actorPage(asUser, manager);
         const tab = new SectionsTab(page, tag);
         const policies = new SubmissionsPage(visitor, tag);
@@ -419,8 +440,52 @@ test.describe('Sections', () => {
         await expectNoticeTopRight(page, SAVED, () => win.saveAndClose());
         await expect(tab.inactiveBox('Reviews')).toBeChecked();
 
+        // An inactive default review form {OJS}: "Structured Review" chosen
+        // for "Articles" and saved, then made inactive on "Review Forms"
+        // (Fields, "Review Form"; Settings bullet 6).
+        win = await tab.openEdit('Articles');
+        await win.reviewFormSelect().selectOption({label: FORM});
+        await expectNoticeTopRight(page, SAVED, () => win.saveAndClose());
+        const settings = new ReviewSettingsPage(page, tag);
+        const forms = settings.forms;
+        await settings.goto('Review Forms');
+        await expect(forms.activeBox(forms.row(FORM).first())).toBeChecked();
+        await forms.activeBox(forms.row(FORM).first()).click();
+        await forms.answerConfirm(DEACTIVATE_FORM, 'OK');
+        await expect(forms.savedNotice()).toBeVisible({timeout: 30_000});
+        await expect(forms.activeBox(forms.row(FORM).first())).not.toBeChecked();
+
+        // Add Reviewer on "Ocean Currents", Rex selected: "Review Form" does
+        // not read "Structured Review" (read once the request form's review
+        // type radios are in; the read after reactivation below, taken the
+        // same way, is the control). Closed without assigning.
+        const workflow = new WorkflowPage(page, tag);
+        await workflow.gotoEditorial(oceanId);
+        let modal = await openAddReviewerModal(page);
+        await selectReviewer(page, modal, 'Rex Reviewer');
+        await expect(modal.locator('#regularReviewerForm input[name="reviewMethod"]').first()).toBeVisible();
+        await expect(chosenForm(modal, FORM)).toHaveCount(0);
+        await closeAddReviewer(modal);
+
+        // "Structured Review" active again, the "Articles" window not opened
+        // in between (A11): Add Reviewer preselects it again (Settings
+        // bullet 6).
+        await settings.goto('Review Forms');
+        await forms.activeBox(forms.row(FORM).first()).click();
+        await forms.answerConfirm(ACTIVATE_FORM, 'OK');
+        await expect(forms.savedNotice()).toBeVisible({timeout: 30_000});
+        await expect(forms.activeBox(forms.row(FORM).first())).toBeChecked();
+        await workflow.gotoEditorial(oceanId);
+        modal = await openAddReviewerModal(page);
+        await selectReviewer(page, modal, 'Rex Reviewer');
+        await expect(modal.locator('#regularReviewerForm input[name="reviewMethod"]').first()).toBeVisible();
+        await expect(chosenForm(modal, FORM)).toHaveCount(1);
+        await expect(reviewFormSelect(modal).locator('option:checked')).toHaveText(FORM);
+        await closeAddReviewer(modal);
+
         // Control: "Articles" stayed active, and its block never left the
         // visitor's page (Rule 6).
+        await tab.goto();
         await expect(tab.inactiveBox('Articles')).not.toBeChecked();
         await policies.goto();
         await expect(policies.blockHeadings()).toHaveText(['Articles']);

@@ -687,7 +687,10 @@ are in the footnote. <sup>s</sup>
    Given: Journal Manager, and a visitor, signed out, in a second browser,
    on a scratch journal with the sections "Articles" and "Reviews", whose
    policies read "Policy for articles." and "Policy for reviews.", and the
-   submitted article "Tidal Patterns" in "Reviews", in no issue.
+   submitted article "Tidal Patterns" in "Reviews", in no issue; on a
+   journal also the Reviewer Rex Reviewer, the active review form
+   "Structured Review" and the article "Ocean Currents", in "Articles", at
+   the Review stage.
 
    - **Deactivate from the table**: open Settings › Journal › "Sections"
      (Settings › Server › "Sections" on a preprint server) and press the
@@ -723,6 +726,20 @@ are in the footnote. <sup>s</sup>
      to be made to it." and press "Save": the window closes, "Your changes
      have been saved." shows, and the "Reviews" row's "Inactive" box is
      ticked (Rule 5; Settings bullet 1).
+   - **An inactive default review form** {OJS}: on the "Articles" row
+     press the arrow at its start, then "Edit", choose "Structured Review"
+     in "Review Form" and press "Save". Open Settings › Workflow ›
+     "Review" › "Review Forms" and untick the "Active" box of the
+     "Structured Review" row
+     ([→ review forms](U29-review-setup-and-review-forms.md#forms)). Open
+     "Ocean Currents" at the Review stage, press "Add Reviewer", then
+     "Select Reviewer" on Rex Reviewer: "Review Form" does not read
+     "Structured Review". Back on "Review Forms", tick the "Active" box of
+     "Structured Review" again, without opening the "Articles" window
+     meanwhile [A11](#a11). Open "Ocean Currents" at the Review stage
+     again, press "Add Reviewer", then "Select Reviewer" on Rex Reviewer:
+     "Review Form" reads "Structured Review" (Fields, "Review Form";
+     Settings bullet 6).
    - **Control**: "Articles" stayed active throughout, and its block never
      left the visitor's page (Rule 6). A press deactivates its series in
      scenario 7, with no last-active rule [OMP1](#omp1). <sup>s</sup>
@@ -869,6 +886,10 @@ are in the footnote. <sup>s</sup>
      asterisk: *", "Save" and "Cancel"; "Order of monographs" is set to
      "Title (A-Z)", both tick boxes are unticked, and there is no
      "Categories" field (Fields, the series window).
+   - **The ISSN paragraph**: under "ISSN", the paragraph above "Online
+     ISSN" and "Print ISSN" reads "…is an eight-digit number which
+     identifies periodical publications including electronic serials…"
+     and holds the link "ISSN International Centre" (Fields, "ISSN").
    - **An empty "Path"**: type "The" in "Prefix" and "Monographs" in
      "Title" and press "Save": "This field is required." shows under
      "Path", and the window stays open (Fields, "Path").
@@ -904,6 +925,12 @@ are in the footnote. <sup>s</sup>
      deactivate this series?"; press "OK": the box is
      ticked and "Your changes have been saved." shows. Do the same on
      "Textbooks": its box is ticked too (Rules 5, 6).
+   - **Reactivate a series**: press the ticked "Inactive" box of
+     "Textbooks": the window asks "Are you sure you wish to activate this
+     series?". Press "OK": the box is unticked and "Your changes have been
+     saved." shows. Press the box again: the window asks "Are you sure you
+     wish to deactivate this series?"; press "OK": the box is ticked again
+     (Rule 5; Side effects).
    - **Every series deleted**: press the arrow at the start of "The
      Monographs" row, then "Delete": a window headed "Delete" asks "Are
      you sure you wish to delete this item? This action cannot be
@@ -947,10 +974,6 @@ Left out of the scenarios above, by reason:
     invalid image was uploaded. Accepted formats are .png, .gif, or
     .jpg.", nothing stored and an existing cover kept ([OMP10](#omp10)):
     the guard the issue report proposes [report 2026-10-13]
-  - {OMP} the ISSN paragraph in the series window reading "which
-    identifies" (Fields, "ISSN"; OMP7 retired) [report 2026-10-02]
-  - {OMP} the series list's "Inactive" box asking "…deactivate this
-    series?" ("…activate this series?") (Rule 5; OMP5 retired) [report 2026-10-02]
   - {OMP} the help under a saved series' "Path" showing the series' own
     address ([OMP8](#omp8)): the guard the issue report proposes [report 2026-10-02]
   - {OPS} "Archives" on a server with nothing posted showing a sentence
@@ -965,10 +988,6 @@ Left out of the scenarios above, by reason:
     of 25, as walked), paged with "Next" to the end: each preprint on
     exactly one page (Rule 14d, [OPS7](#ops7)): the guard the issue
     report proposes [incidental 2026-10-05]
-  - {OJS} a section's default review form made inactive, Add Reviewer
-    then not preselecting it for the section's submissions, and
-    preselecting it again once it is active, the section not saved in
-    between (Settings bullet 6) [report 2026-10-13]
 - **Rarely met**:
   - {OJS} "Omit author names for section items from issues' table of
     contents." ticked, the issue's table of contents without the section's
@@ -1674,7 +1693,10 @@ journal keeps "Articles", "ART", "Section default policy"; the server
 `ART` taken to Review by `decisions: ['sendExternalReview']`. Scenario 2:
 `ART` "Articles", `REV` "Reviews", `ESS` "Essays" (OPS paths `articles`,
 `reviews`, `essays`), each with its policy. Scenario 3: `ART` and `REV`
-with their policies, "Tidal Patterns" in `REV`. Scenario 4: `ART`, `REV`
+with their policies, "Tidal Patterns" in `REV`; on OJS an
+`externalReviewer` "Rex Reviewer", the same `reviewForms[]` as scenario 1
+and "Ocean Currents" in `ART` taken to Review by `decisions:
+['sendExternalReview']`. Scenario 4: `ART`, `REV`
 and `ESS`, a `sectionEditor` "Sam Section" with `sections: ['ESS']`,
 "Tidal Patterns" in `REV`; on OJS `issues: [{volume: 1, number: 1, year:
 2026, published: true}]`, without which "Publication Settings" holds no

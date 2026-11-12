@@ -40,7 +40,10 @@
  *
  * Page objects: shared/playwright/pages/SectionsPages.js (the "Series" tab
  * and its "Order" mode, the series window, the "Confirm" and "Delete"
- * windows, the notices, About › "Submissions").
+ * windows, the notices, About › "Submissions"); the series window's "ISSN"
+ * group is read through the local `issnGroup` helper below (revision
+ * 2026-11-12: the ISSN paragraph and the reactivated series, the guards of
+ * the retired OMP7 and OMP5).
  */
 const {test: base, expect} = require('../support/fixtures.js');
 const {
@@ -48,6 +51,7 @@ const {
     SubmissionsPage,
     notices,
     markNotices,
+    expectNotice,
     expectNoticeTopRight,
     noticesGone,
 } = require('../../../../shared/playwright/pages/SectionsPages.js');
@@ -59,7 +63,9 @@ const PATH_REFUSED = /The series path\b/; // OMP2: the words after it are the de
 const PATH_IN_USE = 'The series path already exists. Please enter a unique path.';
 const BAD_ISSN = 'Please enter a valid ISSN.';
 const SAME_ISSN = 'Online and print ISSN must not be the same.';
-const DEACTIVATE_QUESTION = /^\s*Are you sure you wish to deactivate this\b/;
+const DEACTIVATE_QUESTION = 'Are you sure you wish to deactivate this series?';
+const ACTIVATE_QUESTION = 'Are you sure you wish to activate this series?';
+const ISSN_SENTENCE = 'is an eight-digit number which identifies periodical publications including electronic serials';
 const DELETE_QUESTION = 'Are you sure you wish to delete this item? This action cannot be undone.';
 const LAST_ACTIVE = /At least one section must be active/;
 const INACTIVE_BOX = 'Mark this series as inactive and do not allow new submissions to be made to it.';
@@ -88,6 +94,17 @@ const test = base.extend({
 /** Unique per-run tag: single alphanumeric token, feature + scenario + app + worker. */
 function makeTag(scenario, testInfo) {
     return `u17${scenario}omw${testInfo.parallelIndex}${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
+ * The series window's "ISSN" group (its "ISSN" label, the paragraph, the
+ * two boxes) and the paragraph under the label (a local helper: the shared
+ * page object is not this session's to edit).
+ *
+ * @param {import('@playwright/test').Locator} form the window's form
+ */
+function issnGroup(form) {
+    return form.locator('div.section').filter({has: form.page().locator('span.label', {hasText: /^\s*ISSN\s*$/})});
 }
 
 /** A throwaway account for `createContext`'s `users[]`. */
@@ -152,6 +169,22 @@ test.describe('Sections', () => {
         await expect(win.boxGroup('Editorial Assignments')).toHaveCount(1);
         await expect(win.boxGroup('Categories')).toHaveCount(0);
         await expect(win.form()).not.toContainText('Categories');
+
+        // The ISSN paragraph: under "ISSN", above "Online ISSN" and "Print
+        // ISSN", "…an eight-digit number which identifies periodical
+        // publications including electronic serials…" with the link "ISSN
+        // International Centre" (Fields, "ISSN"; OMP7 retired).
+        const issn = issnGroup(win.form());
+        await expect(issn).toHaveCount(1);
+        const issnParagraph = issn.locator('label.description');
+        await expect(issnParagraph).toContainText(ISSN_SENTENCE);
+        await expect(issnParagraph.getByRole('link', {name: 'ISSN International Centre', exact: true})).toBeVisible();
+        const paragraphBox = await issnParagraph.boundingBox();
+        for (const [name, label] of [['onlineIssn', 'Online ISSN'], ['printIssn', 'Print ISSN']]) {
+            await expect(issn.getByLabel(label, {exact: true})).toHaveAttribute('name', name);
+            const boxBox = await win.box(name).boundingBox();
+            expect(paragraphBox && boxBox && paragraphBox.y + paragraphBox.height <= boxBox.y + 1, `the paragraph above "${name}"`).toBe(true);
+        }
 
         // An empty "Path": "The" and "Monographs" typed, "Save" posts
         // nothing, "This field is required." under "Path" and under no other
@@ -266,6 +299,22 @@ test.describe('Sections', () => {
         await tab.reload();
         await expect(tab.inactiveBox('Textbooks')).toBeChecked();
         await expect(tab.inactiveBox('The Monographs')).toBeChecked();
+
+        // Reactivate a series: the ticked box of "Textbooks" asks "…activate
+        // this series?", "OK" unticks it with the notice; pressed again it
+        // asks "…deactivate this series?" and "OK" ticks it again (Rule 5;
+        // Side effects; OMP5 retired).
+        confirm = await tab.pressInactive('Textbooks');
+        await expect(confirm.question()).toHaveText(ACTIVATE_QUESTION);
+        let toggled = await expectNotice(page, SAVED, () => tab.confirm(confirm));
+        expect(toggled.url()).toMatch(/\/series-grid\/activate-series\b/);
+        await expect(tab.inactiveBox('Textbooks')).not.toBeChecked();
+        await expect(tab.inactiveBox('The Monographs')).toBeChecked();
+        confirm = await tab.pressInactive('Textbooks');
+        await expect(confirm.question()).toHaveText(DEACTIVATE_QUESTION);
+        toggled = await expectNotice(page, SAVED, () => tab.confirm(confirm));
+        expect(toggled.url()).toMatch(/\/series-grid\/deactivate-series\b/);
+        await expect(tab.inactiveBox('Textbooks')).toBeChecked();
 
         // Every series deleted: the "Delete" window asks, "OK": the row
         // goes; "Textbooks" too: "No Items" (Rules 6, 7).
