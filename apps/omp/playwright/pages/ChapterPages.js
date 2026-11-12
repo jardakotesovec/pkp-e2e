@@ -48,6 +48,7 @@
  * test author's probes, `.reports/U72/screen-notes.md`).
  */
 const {expect} = require('@playwright/test');
+const {waitForJQueryIdle} = require('../../../../shared/playwright/support/legacy.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 
 const T = 30_000;
@@ -190,6 +191,75 @@ class ChapterList {
     /** Every row arrow in the grid. */
     rowArrows() {
         return this.grid().locator('a.show_extras, a.hide_extras');
+    }
+
+    /** The row arrows on screen (ordering hides them). */
+    visibleRowArrows() {
+        return this.grid().locator('a.show_extras:visible, a.hide_extras:visible');
+    }
+
+    /**
+     * The list as drawn, top to bottom: `# <title>` for each chapter row,
+     * `- <name>` for each author row, and the text of each "No Items" line
+     * on screen (`tbody.category_placeholder`, read by `getClientRects()`:
+     * a hidden one stays in the DOM), each where it stands. A one-shot
+     * read: assert it through `expectLines` (parallel lesson 14b).
+     */
+    async lines() {
+        return this.grid().evaluate((root) => {
+            const shown = (e) => !!(e && e.getClientRects().length);
+            const text = (e) => ((e && e.innerText) || '').replace(/\s+/g, ' ').trim();
+            const out = [];
+            for (const tb of root.querySelectorAll('table > tbody')) {
+                if (tb.classList.contains('ui-sortable-placeholder') || tb.classList.contains('ui-sortable-helper')) {
+                    continue;
+                }
+                if (tb.classList.contains('category_placeholder')) {
+                    if (shown(tb)) {
+                        out.push(text(tb));
+                    }
+                    continue;
+                }
+                if (!tb.classList.contains('category_grid_body')) {
+                    continue;
+                }
+                [...tb.querySelectorAll(':scope > tr.gridRow')].filter(shown).forEach((tr, i) => {
+                    out.push(`${i ? '-' : '#'} ${text(tr.querySelector('td .gridCellContainer'))}`);
+                });
+            }
+            return out;
+        });
+    }
+
+    /**
+     * Poll `lines()` until it equals `expected`; `normalise` maps a read
+     * before the comparison (a list part the spec leaves unordered).
+     */
+    async expectLines(expected, normalise = (l) => l) {
+        await expect.poll(async () => normalise(await this.lines()), {timeout: T}).toEqual(expected);
+    }
+
+    /**
+     * Press a link of the list and wait until the page's jQuery requests
+     * have settled; resolves to the chapter-grid calls the press sent (a
+     * chapter window opens only through one, `add-chapter` or
+     * `edit-chapter`, so an empty answer bounds "no window opens").
+     */
+    async pressAndSettle(locator) {
+        const sent = [];
+        const onRequest = (r) => {
+            if (/\/chapter-grid\//i.test(r.url())) {
+                sent.push(new URL(r.url()).pathname.replace(/^.*\/chapter-grid\//, ''));
+            }
+        };
+        this.page.on('request', onRequest);
+        try {
+            await locator.click();
+            await waitForJQueryIdle(this.page);
+        } finally {
+            this.page.off('request', onRequest);
+        }
+        return sent;
     }
 
     /** The author rows under a chapter. */
@@ -337,16 +407,74 @@ class ChapterList {
         await this.page.mouse.up();
     }
 
-    /** Press "Done", bounded by the save-sequence call. */
+    /**
+     * Drag a chapter by its move handle above (the target block's top
+     * edge) or below (its bottom edge) another chapter, as I08 and H21 did
+     * (a small move first starts the sortable). Resolves once the titles
+     * read the dragged chapter on the far side of the target.
+     *
+     * @param {string} title
+     * @param {string} target
+     * @param {'above'|'below'} where
+     */
+    async dragChapter(title, target, where) {
+        const handle = this.chapterRow(title).locator('a.pkp_linkaction_moveItem');
+        await handle.scrollIntoViewIfNeeded();
+        const a = await handle.boundingBox();
+        const b = await this.chapterBlock(target).boundingBox();
+        if (!a || !b) {
+            throw new Error(`no box for the chapters ${title} / ${target}`);
+        }
+        const d = where === 'above' ? -1 : 1;
+        const x = a.x + a.width / 2;
+        const y = a.y + a.height / 2;
+        const ty = where === 'above' ? b.y + 3 : b.y + b.height - 3;
+        await this.page.mouse.move(x, y);
+        await this.page.mouse.down();
+        await this.page.mouse.move(x, y + 5 * d, {steps: 5});
+        await this.page.mouse.move(x, ty - 4 * d, {steps: 30});
+        await this.page.mouse.move(x, ty, {steps: 4});
+        await this.page.mouse.up();
+        await expect
+            .poll(async () => {
+                const titles = (await this.lines()).filter((l) => l.startsWith('# '));
+                const i = titles.indexOf(`# ${title}`);
+                const j = titles.indexOf(`# ${target}`);
+                return where === 'above' ? i < j : i > j;
+            }, {timeout: T})
+            .toBe(true);
+    }
+
+    /**
+     * Press "Done", bounded by the save-sequence call and the grid's redraw
+     * after it, then by the page's jQuery requests settling. Resolves to
+     * the notice fetches (`notification/fetchNotification`) the press
+     * caused: a page notice reaches the screen only through one.
+     */
     async finishOrdering() {
-        const saved = this.page.waitForResponse(
-            (r) => /save-sequence/i.test(r.url()) && r.request().method() === 'POST',
-            {timeout: T}
-        );
-        await this.doneLink().click();
-        const response = await saved;
-        expect(response.ok(), `save-sequence answered ${response.status()}`).toBe(true);
-        await expect(this.doneLink()).toHaveCount(0, {timeout: T});
+        const noticeFetches = [];
+        const onRequest = (r) => {
+            if (/fetchNotification/i.test(r.url())) {
+                noticeFetches.push(r.url());
+            }
+        };
+        this.page.on('request', onRequest);
+        try {
+            const saved = this.page.waitForResponse(
+                (r) => /save-sequence/i.test(r.url()) && r.request().method() === 'POST',
+                {timeout: T}
+            );
+            const redrawn = this.page.waitForResponse(isGridFetch, {timeout: T});
+            await this.doneLink().click();
+            const response = await saved;
+            expect(response.ok(), `save-sequence answered ${response.status()}`).toBe(true);
+            await redrawn;
+            await expect(this.doneLink()).toHaveCount(0, {timeout: T});
+            await waitForJQueryIdle(this.page);
+        } finally {
+            this.page.off('request', onRequest);
+        }
+        return {noticeFetches};
     }
 
     /** Press "Cancel ordering" (no call is made). */

@@ -20,18 +20,19 @@
  * - A3 🐞: S10 reads nothing of the copied chapter's "Files".
  * - A4 🐞: S6 reads "Date Published" only after a date is typed.
  * - A5 🐞: S3 never presses the Review panel's "Edit".
- * - A6 ✅ retired (fixed upstream, pkp/pkp-lib#13453): no test drags a
- *   chapter yet (a Planned item, Rule 8a); S2 reads that the chapters keep
- *   their order across an author drag.
- * - A7 🐞: S2's drag never leaves an author n-th in the chapter while
- *   (n + 1)-th on Contributors (Rule 8b), and it reloads the page between
- *   one "Done" and the next ordering.
+ * - A7 🐞: S2's author drag never leaves an author n-th in the chapter
+ *   while (n + 1)-th on Contributors (Rule 8b), and after its chapter move
+ *   it reads the authors under "Tides" as a set.
  * - A8 🐞: S8 reads "Harbours"' own address, not the sentence above it.
  * - A9 ❓: no chapter is added to a published Edited Volume.
+ * - A10 🐞: no chapter is titled in the press's second language.
  * - A11 🐞: no test presses "Order" again while the wizard's list is being
- *   ordered.
- * - A12 🐞: no test drags a chapter, with or without authors.
+ *   ordered (S2 presses it on the Chapters page only).
+ * - A12 🐞: S2 never reads where a dragged chapter's "No Items" line stands
+ *   before "Done" or "Cancel ordering".
  * - A13 🐞: no test reads the wizard's Review panel after an "Order".
+ * - A14 🐞: S2 presses "Cancel ordering" only with no chapter left without
+ *   authors, or after that chapter itself was dragged.
  *
  * Seeding: scenario endpoints only; the seeded press and roster are
  * read-only (PRINCIPLES A1, A7). S2, S4–S6, S10 and S11 seed scratch books
@@ -60,12 +61,13 @@ const {
     exactly,
     chaptersMenuKey,
     ChaptersPage,
+    ChapterWindow,
 } = require('../pages/ChapterPages.js');
 const {ContributorsScreen} = require('../pages/ContributorPages.js');
 const {saveLicenseFields} = require('../pages/PublicationPages.js');
 const {publishFromWorkflow} = require('../pages/CatalogPages.js');
 const wizard = require('../pages/SubmissionWizardPages.js');
-const {expectNotice} = require('../../../../shared/playwright/pages/SectionsPages.js');
+const {expectNotice, markNotices, notices} = require('../../../../shared/playwright/pages/SectionsPages.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 
 const PRESS = 'publicknowledge';
@@ -75,6 +77,8 @@ const SERIES_EDITOR = 'sectioneditor.ana';
 const COPYEDITOR = 'copyeditor.carla';
 const LAYOUT_EDITOR = 'layouteditor.leo';
 const NO_ACCESS = "You don't currently have access to that stage of the workflow.";
+/** A greyed title while the list is being ordered: translucent black. */
+const GREYED = /^rgba\(0, 0, 0, 0?\.\d+\)$/;
 
 const OWN_LICENSE = 'https://example.org/own-license';
 const VERSION_LICENSE = 'https://example.org/version-license';
@@ -343,11 +347,22 @@ test.describe('Chapters & work type (U72)', () => {
                 {title: 'Harbours', authors: [ada.email]},
             ],
         });
-        const {page} = await pageAs(asUser, MANAGER);
+        const {page, seen} = await pageAs(asUser, MANAGER);
         const cp = new ChaptersPage(page, PRESS, {appContext});
         const {list} = cp;
         await cp.gotoEditorial(book.submissionId, book.publicationId);
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ada Lovel'), exactly('Ben Barrow')]);
+        const given = ['# Tides', '- Ada Lovel', '- Ben Barrow', '# Harbours', '- Ada Lovel'];
+        await list.expectLines(given);
+        // Positive controls for the ordering reads: before "Order" the titles
+        // are not greyed and both arrows show; the header links' colour is
+        // the one they keep.
+        const color = (locator) => locator.evaluate((e) => getComputedStyle(e).color);
+        await expect(list.titleLink('Tides')).not.toHaveCSS('color', GREYED);
+        await expect(list.titleLink('Tides')).not.toHaveAttribute('disabled');
+        await expect(list.visibleRowArrows()).toHaveCount(2);
+        const orderColor = await color(list.orderLink());
+        const addColor = await color(list.addChapterLink());
 
         // ── "Order" (Rule 8) ──────────────────────────────────────────────
         await expect(list.orderHandles()).toHaveCount(0);
@@ -358,10 +373,36 @@ test.describe('Chapters & work type (U72)', () => {
         await expect(list.doneLink()).toHaveText(exactly('Done'));
         await expect(list.cancelOrderingLink()).toHaveText(exactly('Cancel ordering'));
 
+        // ── While the list is being ordered (Rule 8) ──────────────────────
+        // Greyed: the titles turn a translucent black (the app's disabled
+        // link); a press sends no chapter-grid call, the only way a chapter
+        // window opens (the control is "Its file freed" and the "Add
+        // Chapter" press after it, each opening its window through one).
+        for (const title of ['Tides', 'Harbours']) {
+            await expect(list.titleLink(title)).toHaveCSS('color', GREYED);
+        }
+        await expect(list.visibleRowArrows()).toHaveCount(0);
+        await expect(list.headerLinks()).toHaveText([exactly('Order'), exactly('Add Chapter')]);
+        await expect(list.orderLink()).toHaveCSS('color', orderColor);
+        await expect(list.addChapterLink()).toHaveCSS('color', addColor);
+        expect(await list.pressAndSettle(list.titleLink('Tides')), 'calls sent by pressing "Tides"').toEqual([]);
+        await expect(new ChapterWindow(page, 'Edit Chapter').dialog()).toHaveCount(0);
+        expect(await list.pressAndSettle(list.addChapterLink()), 'calls sent by pressing "Add Chapter"').toEqual([]);
+        await expect(new ChapterWindow(page, 'Add Chapter').dialog()).toHaveCount(0);
+        await list.expectLines(given);
+        expect(await list.pressAndSettle(list.orderLink()), 'calls sent by pressing "Order" again').toEqual([]);
+        await list.expectLines(given);
+        await expect(list.orderHandles()).toHaveCount(5);
+        await expect(list.doneLink()).toHaveText(exactly('Done'));
+        await expect(list.cancelOrderingLink()).toHaveText(exactly('Cancel ordering'));
+        await expect(list.titleLink('Tides')).toHaveCSS('color', GREYED);
+
         // ── Authors reordered (Rules 8a, 8b) ──────────────────────────────
         await list.dragAuthorAbove('Tides', 'Ben Barrow', 'Ada Lovel');
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ben Barrow'), exactly('Ada Lovel')]);
         await list.finishOrdering();
+        await expect(list.titleLink('Tides')).not.toHaveCSS('color', GREYED);
+        await expect(list.visibleRowArrows()).toHaveCount(2);
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ben Barrow'), exactly('Ada Lovel')]);
         await cp.reload();
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ben Barrow'), exactly('Ada Lovel')]);
@@ -374,6 +415,21 @@ test.describe('Chapters & work type (U72)', () => {
         await list.cancelOrdering();
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ben Barrow'), exactly('Ada Lovel')]);
 
+        // ── A chapter moved (Rules 8a, 8c) ────────────────────────────────
+        // The order of the two rows under "Tides" is A7's, read as a set.
+        const tidesAsSet = (l) => [...l.slice(0, 3), ...l.slice(3).sort()];
+        const moved = ['# Harbours', '- Ada Lovel', '# Tides', '- Ada Lovel', '- Ben Barrow'];
+        await list.startOrdering();
+        await list.dragChapter('Harbours', 'Tides', 'above');
+        await list.expectLines(moved, tidesAsSet);
+        await markNotices(page);
+        const {noticeFetches} = await list.finishOrdering();
+        expect(noticeFetches, 'notice fetches after "Done"').toEqual([]);
+        await expect(notices(page, undefined, {fresh: true})).toHaveCount(0);
+        await list.expectLines(moved, tidesAsSet);
+        await cp.reload();
+        await list.expectLines(moved, tidesAsSet);
+
         // ── A contributor deleted (Rule 6; Fields) ────────────────────────
         await cp.frame.selectPage('Contributors');
         const contributors = new ContributorsScreen(page);
@@ -383,6 +439,30 @@ test.describe('Chapters & work type (U72)', () => {
         await expect(list.authorNames('Tides')).toHaveText([exactly('Ben Barrow')]);
         await expect(await list.noAuthorsLine('Harbours')).toHaveText(exactly('No Items'));
         await expect(list.authorRows('Harbours')).toHaveCount(0);
+        const saved = ['# Harbours', 'No Items', '# Tides', '- Ben Barrow'];
+        await list.expectLines(saved);
+
+        // ── A chapter with no authors dragged, then "Cancel ordering" (Rules
+        // 8a, 8c). Where its "No Items" line stands during the drag is A12's,
+        // not read.
+        await list.startOrdering();
+        await list.dragChapter('Harbours', 'Tides', 'below');
+        await list.cancelOrdering();
+        await list.expectLines(saved);
+
+        // ── A drag left without "Done" (Rule 8c) ──────────────────────────
+        await list.startOrdering();
+        await list.dragChapter('Harbours', 'Tides', 'below');
+        const asked = seen.length;
+        await cp.frame.selectPage('Contributors');
+        await expect(contributors.row('Ben Barrow')).toHaveCount(1, {timeout: 30_000});
+        expect(seen.slice(asked), 'browser questions on leaving').toEqual([]);
+        await expect(page.locator('[role="dialog"]:visible, [role="alertdialog"]:visible')).toHaveCount(1);
+        await expect(cp.frame.dialog()).toBeVisible();
+        await cp.openFromMenu();
+        await list.expectLines(saved);
+        await expect(list.doneLink()).toHaveCount(0);
+        await expect(list.visibleRowArrows()).toHaveCount(2);
 
         // ── "Tides" deleted (Rule 9; Fields) ──────────────────────────────
         const dialog = await list.openDelete('Tides');
@@ -397,9 +477,17 @@ test.describe('Chapters & work type (U72)', () => {
         await expect(list.titleCells()).toHaveText([exactly('Harbours')]);
 
         // ── Its file freed (Rules 7, 9) ───────────────────────────────────
-        const win = await list.openEdit('Harbours');
+        // Also the control for the presses while ordering: out of ordering
+        // a title and "Add Chapter" each open their window through a call.
+        expect(await list.pressAndSettle(list.titleLink('Harbours')), 'calls sent by pressing "Harbours"').toContain('edit-chapter');
+        const win = new ChapterWindow(page, 'Edit Chapter');
+        await win.expectOpen();
         expect(sorted(await win.boxStates('files'))).toEqual(['[ ] article.pdf', '[ ] notes.md']);
         await win.cancel();
+        expect(await list.pressAndSettle(list.addChapterLink()), 'calls sent by pressing "Add Chapter"').toContain('add-chapter');
+        const addWin = new ChapterWindow(page, 'Add Chapter');
+        await addWin.expectOpen();
+        await addWin.cancel();
 
         // ── Control: Ben Barrow stays on the book (Rule 9) ────────────────
         await cp.frame.selectPage('Contributors');

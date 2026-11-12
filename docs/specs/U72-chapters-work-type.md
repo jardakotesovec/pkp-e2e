@@ -466,6 +466,12 @@ footnote. <sup>s</sup>
    - **"Order"**: on the book's Chapters page press "Order": a handle shows
      on each chapter and on each author row, with the buttons "Done" and
      "Cancel ordering" (Rule 8).
+   - **While the list is being ordered**: the titles "Tides" and
+     "Harbours" are greyed, and pressing "Tides" opens no window; no
+     arrow shows before either title; "Add Chapter" and "Order" stand
+     above the list as before. Press "Add Chapter": no window opens and
+     the list is unchanged. Press "Order": nothing changes, and "Done" and
+     "Cancel ordering" still show (Rule 8).
    - **Authors reordered**: drag Ben Barrow above Ada Lovel under "Tides"
      and press "Done": the rows under "Tides" read Ben Barrow, then Ada
      Lovel, and still do after a reload; the chapters still read "Tides",
@@ -473,12 +479,30 @@ footnote. <sup>s</sup>
    - **"Cancel ordering"**: press "Order", drag Ada Lovel above Ben Barrow
      and press "Cancel ordering": the rows read Ben Barrow, then Ada Lovel
      again (Rule 8c).
+   - **A chapter moved**: press "Order" and drag "Harbours" by its handle
+     above "Tides": it moves with Ada Lovel's row under it. Press "Done":
+     no notice appears, and the list reads "Harbours" over Ada Lovel's
+     row, then "Tides" over its two author rows; after a reload it reads
+     the same (the order of the two rows under "Tides" is [A7](#a7),
+     neither a pass nor a fail here) (Rules 8a, 8c).
    - **A contributor deleted**: on the version's "Contributors" page
      ("Publication" › the version › "Contributors") delete Ada Lovel (the
      list: [Contributors &
      affiliations](U41-contributors-and-affiliations.md)); back on the
      Chapters page, "Tides" lists Ben Barrow alone and "Harbours" reads
      "No Items" (Rule 6; Fields).
+   - **A chapter with no authors dragged, then "Cancel ordering"**: press
+     "Order", drag "Harbours" by its handle below "Tides" (where its "No
+     Items" line shows during the drag is [A12](#a12), neither a pass nor
+     a fail here) and press "Cancel ordering": the list reads "Harbours"
+     with "No Items" under it, then "Tides" over Ben Barrow's row (Rules
+     8a, 8c).
+   - **A drag left without "Done"**: press "Order", drag "Harbours" by its
+     handle below "Tides" (its "No Items" line: [A12](#a12) again) and,
+     without pressing "Done", open the version's "Contributors" page: no
+     question shows. Open the Chapters page again: it reads "Harbours"
+     with "No Items" under it, then "Tides" over Ben Barrow's row, the
+     order last saved (Rule 8c).
    - **"Tides" deleted**: press the arrow before "Tides", then "Delete": a
      window headed "Delete" reads "Are you sure you wish to delete this
      item? This action cannot be undone.", with "OK" and "Cancel"; press
@@ -739,18 +763,6 @@ Left out of the scenarios above, by reason:
   - the guard for A4 (issue report
     `docs/issues/U50-A4-refused-save-date-published-today.md`): a chapter
     saved without a date reopens with an empty "Date Published" [report 2026-10-04]
-  - the guard for A6 (retired): after "Order", a chapter dragged above
-    another moves with its author rows and keeps its new place after
-    "Done" and a reload (Rule 8a); the order of the authors inside a
-    chapter is no part of it (Rule 8b) [report 2026-10-04]
-  - the list while it is being ordered: the greyed titles that open no
-    window, the hidden arrows, "Add Chapter" and, on the Chapters page,
-    "Order" doing nothing when pressed (Rule 8) [incidental 2026-10-08]
-  - "Done" showing no notice, "Cancel ordering" after a chapter is
-    dragged, and a drag left without "Done" gone once the Chapters page
-    or the wizard is opened again (Rule 8c) [incidental 2026-10-08]
-  - "Cancel ordering" after a chapter that has no authors was dragged,
-    which draws its "No Items" line back under it (Rule 8a) [incidental 2026-10-21]
   - the guard for A7 (issue report
     `docs/issues/U72-A7-chapter-author-order-change-lost.md`): a
     chapter's authors dragged into a place the save used to skip keep
@@ -778,6 +790,9 @@ Left out of the scenarios above, by reason:
     page)
   - "Order" above a single chapter that has an author, after a chapter
     window's "Save" (Fields, the chapter list; scenario 1 passes it)
+  - a drag left without "Done" in the wizard, gone once the wizard has
+    been left and opened again: the same list and the same loss as on
+    the Chapters page (Rule 8c; scenario 2)
   - a Series editor whose assignment carries the metadata-edit
     permission, the Press editor, the Production editor and the Site
     Administrator, offered on an unpublished version what the Press
