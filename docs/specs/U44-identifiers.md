@@ -525,6 +525,11 @@ are in the footnote. <sup>s</sup>
      none either. Tick them again and press "Save": the Metadata page holds
      "pid-a1" again, and the "PDF" galley's "Identifiers" tab "pid-g1"
      (Rule 2; Settings bullet 1).
+   - **Leaving the tab with a typed value** (journal, preprint server):
+     on that open "Identifiers" tab replace "pid-g1" with "pid-g2" and,
+     without pressing "Save", press the window's "Edit Metadata" tab: the
+     window asks "The data on this form has changed. Do you wish to
+     continue without saving?" (Fields, the "Identifiers" tab).
    - **Control**: before the first "Save" on Settings, the Metadata page
      showed no "Publisher ID" (Rules 1, 2). <sup>s</sup>
 
@@ -658,7 +663,8 @@ are in the footnote. <sup>s</sup>
    an individual URN suffix for each published item. You'll find an
    additional URN input field on each item's metadata page.", "Check
    Number" ticked and the prefix "urn:nbn:de:0000-", with two scratch
-   submissions, each carrying a galley "PDF" on a journal.
+   submissions, on a journal each carrying a galley "PDF" and the first
+   also a galley "HTML".
 
    - **The typed box**: open the first submission's workflow, then its
      Publication area, then "Identifiers": the "URN" box is a plain box
@@ -696,6 +702,23 @@ are in the footnote. <sup>s</sup>
      "The given URN suffix is already in use for another published item.
      Please enter a unique URN suffix for each item.", keeps "g1" and
      stays open (Rule 12a).
+   - **A suffix saved on two galleys, neither assigned** {OJS}: on that
+     open tab replace "g1" with "g2" and press "Save": the window closes.
+     Open the first submission's "HTML" galley, "Identifiers", type "g2"
+     in "URN Suffix" and press "Save": the window closes. Open the
+     "HTML" tab again: it shows the URN as a preview, with "What you see
+     is a preview of the URN. Select the checkbox and save the form to
+     assign the URN." and the ticked box "Assign the URN to this galley"
+     ([A7](#a7)); close the window and open the second submission's "PDF"
+     tab: it shows the same URN, the same sentence and the same ticked
+     box. Close it, open the "HTML" tab again and press "Save" with the
+     box ticked: the window closes; open the tab again: it shows the URN,
+     "The URN is assigned to this galley." and a "Clear" link. Open the
+     second submission's "PDF" tab and press "Save" with the box ticked:
+     the tab shows "Errors occurred processing this form" with "The given
+     URN suffix is already in use for another published item. Please
+     enter a unique URN suffix for each item.", still with the preview
+     and the ticked box (Rules 12, 12a, 13).
    - **Control**: on the second submission's "Identifiers" page replace
      the refused URN with "urn:nbn:de:0000-xyz" and press "Save"; reload:
      the box holds "urn:nbn:de:0000-xyz" (Rules 10, 11). <sup>s</sup>
@@ -915,14 +938,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U44-OMP4-press-publish-window-urn-table.md`): a press
     with only "Monographs" ticked seeing the URN sentence, not the
     one-row table, in the "Publish" window [report 2026-10-02]
-  - a URN suffix another galley has saved without its URN being
-    assigned, accepted on a second galley's "Identifiers" tab; the first
-    of the two saved with the box ticked getting the URN and the other's
-    next "Save" refused (Rule 12a) [incidental 2026-10-13]
-  - a switch from a galley's "Identifiers" tab to "Edit Metadata" with
-    a Publisher ID typed and not saved, asking "The data on this form
-    has changed. Do you wish to continue without saving?" (Fields, the
-    "Identifiers" tab) [incidental 2026-10-13]
 - **Rarely met**:
   - a Site Administrator without a manager role in the journal: Settings
     reached on a journal only, and there the "URN" row without "Settings"
@@ -1812,7 +1827,7 @@ greyed.
 Scenario 4 (OJS, OMP): `enablePublicationURN: true`, on OJS
 `enableRepresentationURN: true`, `urnSuffix: 'customId'`, `urnCheckNo:
 true`; two submitted submissions, on OJS each with `galleys: [{label:
-'PDF', …}]`.
+'PDF', …}]`, the first's also `{label: 'HTML', …}`.
 Scenario 5 (OJS): `enablePublisherId: ['galley']`;
 `enablePublicationURN` and `enableRepresentationURN` true,
 `enableIssueURN` false, `urnSuffix: 'default'`, `urnCheckNo: true`;

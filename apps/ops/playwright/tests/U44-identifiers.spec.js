@@ -58,6 +58,8 @@ const {PublicationScreen, openWorkflow, addDiscussion} = require('../pages/Publi
 const METADATA_EVENT = 'Submission metadata updated';
 const SERVER_BOXES = ['Enable for Preprints', 'Enable for Galleys'];
 const PREPRINT_FILE = 'preprint.pdf';
+/** FormHandler's browser confirm on leaving a changed tab (U46 Rule 6a). */
+const FORM_CHANGED = 'The data on this form has changed. Do you wish to continue without saving?';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + app + worker. */
 function makeTag(scenario, testInfo) {
@@ -134,7 +136,7 @@ test.describe('identifiers', () => {
             }),
             opsApi.createSubmission({tag: `${tag}c`, context: tag, submitter: spare}),
         ]);
-        const {page, frame} = await pageAs(asUser, appContext, manager, tag);
+        const {page, frame, asked} = await pageAs(asUser, appContext, manager, tag);
         const ids = new IdentifiersPage(page, frame);
         const galleys = new GalleysPage(page, frame);
         const settings = new PublisherIdSettings(page, tag);
@@ -235,6 +237,16 @@ test.describe('identifiers', () => {
         await galleys.open(submission.submissionId, submission.publicationId);
         tab = await galleys.openIdentifiers('PDF');
         await expect(tab.publisherIdBox()).toHaveValue('pid-g1');
+
+        // Leaving the tab with a typed value: "pid-g2" typed over "pid-g1",
+        // no "Save", the window's "Edit Metadata" tab pressed: the window
+        // asks the question, and nothing else was asked on the way (the
+        // dialog listener accepts it; the bullet ends at the question)
+        // (Fields, the "Identifiers" tab).
+        const askedBefore = asked.length;
+        await tab.publisherIdBox().fill('pid-g2');
+        await tab.tab('Edit Metadata').click();
+        await expect.poll(() => asked.slice(askedBefore), {timeout: 15_000}).toEqual([`confirm: ${FORM_CHANGED}`]);
         await tab.close();
     });
 

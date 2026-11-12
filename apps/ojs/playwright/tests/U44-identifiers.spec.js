@@ -76,6 +76,7 @@ const JOURNAL_BOXES = ['Enable for Publications', 'Enable for Galleys', 'Enable 
 const URN_WINDOW_INTRO = 'Please configure the URN plugin to be able to manage and use URNs in OJS:';
 const URN_KINDS = ['Issues', 'Articles', 'Galleys'];
 const DEFAULT_PATTERNS = ['%j.v%vi%i for issues', '%j.v%vi%i.%a for articles', '%j.v%vi%i.%a.g%g for galleys'];
+const FORM_CHANGED = 'The data on this form has changed. Do you wish to continue without saving?';
 const NAMESPACES = ['', 'urn:nbn:de', 'urn:nbn:at', 'urn:nbn:ch', 'urn:nbn:fi', 'urn:nbn', 'urn'];
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
@@ -229,7 +230,7 @@ test.describe('identifiers', () => {
             }),
             ojsApi.createSubmission({tag: `${tag}c`, context: tag, submitter: spare}),
         ]);
-        const {page, frame} = await pageAs(asUser, manager, tag);
+        const {page, frame, asked} = await pageAs(asUser, manager, tag);
         const ids = new IdentifiersPage(page, frame);
         const galleys = new GalleysPage(page, frame);
         const settings = new PublisherIdSettings(page, tag);
@@ -323,6 +324,14 @@ test.describe('identifiers', () => {
         await galleys.open(submission.submissionId, submission.publicationId);
         tab = await galleys.openIdentifiers('PDF');
         await expect(tab.publisherIdBox()).toHaveValue('pid-g1');
+
+        // Leaving the tab with a typed value: "pid-g2" typed, not saved,
+        // "Edit Metadata" pressed: the window asks the question (Fields,
+        // the "Identifiers" tab).
+        const askedBefore = asked.length;
+        await tab.publisherIdBox().fill('pid-g2');
+        await tab.tab('Edit Metadata').click();
+        await expect.poll(() => asked.slice(askedBefore)).toEqual([`confirm: ${FORM_CHANGED}`]);
         await tab.close();
     });
 
@@ -552,18 +561,22 @@ test.describe('identifiers', () => {
     });
 
     test('S4: type URNs item by item', async ({asUser, ojsApi}, testInfo) => {
-        test.setTimeout(300_000);
+        test.setTimeout(420_000);
         const tag = makeTag('s4', testInfo);
         const {manager, author} = await seedJournal(ojsApi, tag, {
             plugins: urnPlugin({publication: true, galley: true, suffix: 'customId', checkNo: true}),
         });
+        // Both carry a "PDF" galley, the first also an "HTML" one.
         const [first, second] = await Promise.all(
             ['a', 'b'].map((n) =>
                 ojsApi.createSubmission({
                     tag: `${tag}${n}`,
                     context: tag,
                     submitter: author,
-                    galleys: [{label: 'PDF', file: 'article.pdf'}],
+                    galleys: [
+                        {label: 'PDF', file: 'article.pdf'},
+                        ...(n === 'a' ? [{label: 'HTML', file: 'article.pdf'}] : []),
+                    ],
                 })
             )
         );
@@ -635,6 +648,51 @@ test.describe('identifiers', () => {
         await tab.saveRefused();
         await expect(tab.form()).toContainText(TEXT.suffixInUse);
         await expect(tab.urnSuffixBox()).toHaveValue('g1');
+
+        // A suffix saved on two galleys, neither assigned: "g2" accepted on
+        // the second article's "PDF" and on the first's "HTML"; both show
+        // the same URN as a preview (its prefix and suffix boxes) with the
+        // ticked box; "HTML" saved first gets it, the "PDF"'s next "Save"
+        // is refused, still with the preview and the box (Rules 12, 12a,
+        // 13; the box's label read in part, A7).
+        await tab.urnSuffixBox().fill('g2');
+        await tab.save();
+        await galleys.open(first.submissionId, first.publicationId);
+        tab = await galleys.openIdentifiers('HTML');
+        await tab.urnSuffixBox().fill('g2');
+        await tab.save();
+        const expectPreviewG2 = async (/** @type {typeof tab} */ t) => {
+            await expect(t.urnPrefixBox()).toHaveValue(PREFIX);
+            await expect(t.urnSuffixBox()).toHaveValue('g2');
+            await expect(t.urnArea()).toContainText(TEXT.preview);
+            await expect(t.assignBox()).toBeChecked();
+            await expect(t.urnArea()).toContainText('Assign the URN');
+            await expect(t.urnArea()).toContainText('to this galley');
+            await expect(t.urnArea()).not.toContainText(TEXT.assigned('galley'));
+            await expect(t.clearLink()).toHaveCount(0);
+        };
+        tab = await galleys.openIdentifiers('HTML');
+        await expectPreviewG2(tab);
+        await tab.close();
+        await galleys.open(second.submissionId, second.publicationId);
+        tab = await galleys.openIdentifiers('PDF');
+        await expectPreviewG2(tab);
+        await tab.close();
+        await galleys.open(first.submissionId, first.publicationId);
+        tab = await galleys.openIdentifiers('HTML');
+        await expect(tab.assignBox()).toBeChecked();
+        await tab.save();
+        tab = await galleys.openIdentifiers('HTML');
+        await expect(tab.urnArea()).toContainText(`${PREFIX}g2`);
+        await expect(tab.urnArea()).toContainText(TEXT.assigned('galley'));
+        await expect(tab.clearLink()).toBeVisible();
+        await tab.close();
+        await galleys.open(second.submissionId, second.publicationId);
+        tab = await galleys.openIdentifiers('PDF');
+        await expect(tab.assignBox()).toBeChecked();
+        await tab.saveRefused();
+        await expect(tab.form()).toContainText(TEXT.suffixInUse);
+        await expectPreviewG2(tab);
         await tab.close();
 
         // Control: a URN nobody has is saved on the second article (Rules 10, 11).
