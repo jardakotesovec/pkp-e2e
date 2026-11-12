@@ -17,39 +17,25 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 ✅ (retired 2026-11-11: fixed upstream; its "Help" name is a Planned
- *   assertion): S2 finds the "i" icon as the header's one new-tab link and
- *   reads where it leads; nothing reads its accessible name yet.
- * - A2 🐞: no test presses a Section Editor's "Dashboard" in the public
- *   header (S2 reads the Section Editor's landing on the Dashboard only).
- * - A3, A4, A7, A8, A10, A16, A21, A22 🐞: no test reaches
- *   those states (the site's menu window is S8's, which opens none).
- * - A5, A9 ❓: not driven.
- * - A11 ✅ (retired 2026-10-07: the refusal notices are a Planned assertion), A12 🐞: S5 reads each refused save through the window staying
- *   open, the save's own `status: false` answer and nothing stored; it
- *   never asserts that no message shows, nor the type's description line.
- * - A13 🐞: a press's and a preprint server's; S3 reads the journal's
- *   warning notice whole.
- * - A14 ❓: S8 (serial file) opens the site's item window without reading
- *   its type list.
- * - A15 🐞: S4 and S7 never read the "Navigation" cells between an item's
- *   save or removal and a reload.
- * - A18 🐞: S5's back arrow is pressed with a listener that answers "OK"
- *   if the browser asks; nothing asserts that it does.
- * - OJS1 🐞: no test turns payments on.
- * - OPS1, OPS2: another app's territory.
+ * - A2, A3, A4, A6, A7, A16, A21, A22, A26, OJS1 🐞: not asserted.
+ * - A12, A15, A18 🐞: S5 never reads the type's description line, S4 and
+ *   S7 never read the "Navigation" cells between a save and a reload, and
+ *   S5's back arrow is pressed with a listener that answers "OK" if the
+ *   browser asks.
+ * - A13 🐞: a press's and a preprint server's.
+ * - A5, A8, A9, A10, A14, A25, A27 ❓: not driven.
+ * - OPS1, OPS2, OPS4: another app's territory.
  *
  * Seeding: scenario endpoints only. S1–S3 read the seeded journal
  * `publicknowledge` with roster accounts and change nothing there
  * (footnote y); every other test seeds its own scratch journal with a
  * throwaway manager (and author), through `POST scenarios/context`
- * (`users[]`, `issues[]` for S10's three published issues, `plugins` and
- * `sidebar` for S11). S10's "Items per page" is saved on screen as the
- * scenario's action (Settings bullet 16). S11 seeds the "Developed By"
- * block's plugin enabled (`plugins`) and its placement (`sidebar`) on one
- * journal, and on a second journal the plugin enabled and not placed for
- * the "before" control, since no key places the block after the journal
- * exists. Signed-out reads run in a browser context with an empty storage
+ * (`users[]`, `issues[]` for S10's three published issues,
+ * `enablePublicComments` for S9's two journals, `plugins` for S11). S10's
+ * "Items per page" and S11's "Sidebar" placing are saved on screen as the
+ * scenarios' actions (Settings bullets 15, 16). S2's French is chosen in
+ * the initials menu and English chosen back, in the test's own session
+ * (footnote y). Signed-out reads run in a browser context with an empty storage
  * state (patterns.md, parallel lesson 8); S9's visitor signs in there as
  * the scratch Author through the site's Login page, the step under test
  * (Rule 26c); each actor gets its own `asUser` context. Addresses outside the install (the Remote URL item's
@@ -64,6 +50,7 @@ const {
     EditorialChrome,
     whole,
 } = require('../../../../shared/playwright/pages/NavigationChromePages.js');
+const {WebsiteSettings} = require('../../../../shared/playwright/pages/AppearancePages.js');
 const {closeTab} = require('../../../../shared/playwright/support/tabs.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
@@ -76,6 +63,7 @@ const HELP_URL = 'https://docs.pkp.sfu.ca/learning-ojs/';
 const PKP_URL = 'https://pkp.sfu.ca/';
 const BRAND_ALT = 'More information about the publishing system, Platform and Workflow by OJS/PKP.';
 const APP_NAME = 'Open Journal Systems';
+const DEVELOPED_BY = '"Developed By" Block';
 
 const REQUIRED = 'This field is required.';
 const REMOVE_QUESTION = 'Are you sure you wish to delete this item? This action cannot be undone.';
@@ -89,6 +77,11 @@ const MENU_UPDATED = 'Navigation menu was successfully updated';
 const MENU_REMOVED = 'Navigation menu was successfully removed';
 const NO_ITEMS_ASSIGNED = 'No items assigned to this menu. Drag items from Unassigned Menu Items.';
 const ANNOUNCEMENTS_NOTICE = 'This link will only be displayed if you have enabled announcements under Settings > Website.';
+const NO_TYPE = 'Please select a navigation menu type.';
+const NO_URL = 'A URL must be provided';
+const BAD_PATH = "The path field must contain only alphanumeric characters plus '.', '/', '-', and '_'.";
+const PATH_USED = 'This path already exists for another navigation menu item.';
+const ACCESS_DENIED = 'Access denied.';
 const NO_CONTEXT = 'No journal was found that matched your request.';
 const NO_ACCESS = 'The current role does not have access to this operation.';
 const WARNING_NOTICE =
@@ -320,6 +313,7 @@ test.describe('navigation menus & site chrome', () => {
             await expect(chrome.userTopLinks).toHaveCount(1);
             await expect(username).toHaveText(/^\s*manager\.maya\s+\d+\s*$/);
             await expect(chrome.taskCount(username)).toHaveText(/^\s*\d+\s*$/);
+            const listedTasks = Number((await chrome.taskCount(username).textContent()).trim());
             const before = page.url();
             await chrome.pressTop('user', top);
             await expect(chrome.submenu('user', top)).toBeVisible();
@@ -345,6 +339,10 @@ test.describe('navigation menus & site chrome', () => {
             await expect(ed.helpLink).toBeVisible();
             await expect(ed.tasksButton).toBeVisible();
             await expect(ed.initialsButton).toBeVisible();
+            // The number after the username is the Tasks bell's number, a
+            // "0" being a bell with no badge (Rule 19b).
+            expect(await ed.tasksNumber('Tasks')).toBe(listedTasks);
+            if (listedTasks === 0) await expect(ed.tasksBell('Tasks')).toHaveAccessibleName('Tasks');
             await expect(ed.helpLink).toHaveAttribute('target', '_blank');
             const popupPromise = page.context().waitForEvent('page');
             await ed.helpLink.click();
@@ -379,6 +377,36 @@ test.describe('navigation menus & site chrome', () => {
                     return {open: settings.open, selected: settings.items.filter((i) => i.selected).map((i) => i.label)};
                 })
                 .toEqual({open: true, selected: ['Website']});
+
+            // The "i" icon's name, in English and in French: on Settings ›
+            // "Website" it shows no text and no tooltip, and is named "Help"
+            // in the dark bar and in the Tasks window's strip; with French
+            // chosen in the initials menu, "Aide" in both; English chosen
+            // back (Rule 27b).
+            await expect(ed.helpLink).toHaveAccessibleName('Help');
+            expect(await ed.helpShownText()).toBe('');
+            await expect(ed.helpLink).not.toHaveAttribute('title');
+            let tasks = await ed.openTasks('Tasks');
+            await expect(ed.stripHelpLink(tasks)).toHaveAccessibleName('Help');
+            expect(await ed.helpShownText(ed.stripHelpLink(tasks))).toBe('');
+            await page.reload();
+            await ed.waitReady();
+            await ed.openUserMenu();
+            await ed.userMenuLink('français').click();
+            await expect(page).toHaveURL(new RegExp(`/index\\.php/${JOURNAL}/fr_CA/management/settings/website`), {timeout: T});
+            await ed.waitReady();
+            await expect(ed.tasksBell('Tâches')).toBeVisible();
+            await expect(ed.helpLink).toHaveAccessibleName('Aide');
+            expect(await ed.helpShownText()).toBe('');
+            tasks = await ed.openTasks('Tâches');
+            await expect(ed.stripHelpLink(tasks)).toHaveAccessibleName('Aide');
+            await page.reload();
+            await ed.waitReady();
+            await ed.openUserMenu();
+            await ed.userMenuLink('English').click();
+            await expect(page).toHaveURL(new RegExp(`/index\\.php/${JOURNAL}/en/management/settings/website`), {timeout: T});
+            await ed.waitReady();
+            await expect(ed.helpLink).toHaveAccessibleName('Help');
         });
 
         /** A role that opens the journal's home page, presses the username and then "Dashboard". */
@@ -581,7 +609,9 @@ test.describe('navigation menus & site chrome', () => {
             })
             .toEqual({about: 0, underAnnouncements: null});
 
-        // Discarded: "Cancel" asks "Warning"; "Yes" closes; reopened, the
+        // Discarded, nothing left unsaved: "Cancel" asks "Warning"; "Yes"
+        // closes; a second later Settings › "Workflow" in the side menu
+        // opens with no leave question (Rule 6a); back on "Navigation", the
         // menu reads as installed and "Our news" is unassigned again (Rule 6).
         await win.cancelButton.click();
         await expect(win.warningDialog).toBeVisible();
@@ -589,6 +619,19 @@ test.describe('navigation menus & site chrome', () => {
         await expect(win.warningDialog).toContainText(CHANGED_QUESTION);
         await win.warningDialog.getByRole('button', {name: 'Yes', exact: true}).click();
         await expect(win.editor).toBeHidden();
+        const leaveQuestions = [];
+        const onDialog = async (dialog) => {
+            leaveQuestions.push(`${dialog.type()}: ${dialog.message()}`);
+            await dialog.accept().catch(() => {});
+        };
+        page.on('dialog', onDialog);
+        await nav.aSecondLater();
+        await new EditorialChrome(page).chooseSideEntry('Settings', 'Workflow');
+        await expect(page).toHaveURL(new RegExp(`/index\\.php/${tag}/management/settings/workflow`), {timeout: T});
+        await expect(page.locator('main h1, .app__page h1').first()).toBeVisible({timeout: T});
+        page.off('dialog', onDialog);
+        expect(leaveQuestions).toEqual([]);
+        await nav.goto();
         win = await nav.openMenu('Primary Navigation Menu');
         await expect.poll(() => win.outline('assigned')).toEqual(PRIMARY_OUTLINE);
         expect(await win.titles('unassigned')).toContain('Our news');
@@ -679,27 +722,32 @@ test.describe('navigation menus & site chrome', () => {
         await expect(item.fieldError(REQUIRED)).toBeVisible();
         await expect(item.form).toBeVisible();
 
-        // No type: the window stays and nothing is stored (Fields; A11, A12
-        // not asserted).
+        // No type: the window stays and "Please select a navigation menu
+        // type." shows at the top right (Fields; A12 not asserted).
         await item.titleInput().fill('Our page');
         await item.chooseType('Choose a type...');
         let answer = await item.save();
         expect(answer.body && answer.body.status).toBe(false);
         await expect(item.form).toBeVisible();
+        await expect(nav.notice(NO_TYPE)).toBeVisible();
 
-        // Not a web address: the window stays (Fields).
+        // Not a web address: the window stays and "A URL must be provided"
+        // shows at the top right (Fields).
         await item.chooseType('Remote URL');
         await item.urlInput().fill('pkp.sfu.ca');
         answer = await item.save();
         expect(answer.body && answer.body.status).toBe(false);
         await expect(item.form).toBeVisible();
+        await expect(nav.notice(NO_URL)).toBeVisible();
 
-        // A path with other characters: the window stays (Fields).
+        // A path with other characters: the window stays and the path
+        // sentence shows at the top right (Fields).
         await item.chooseType('Custom Page');
         await item.pathInput.fill('my page');
         answer = await item.save();
         expect(answer.body && answer.body.status).toBe(false);
         await expect(item.form).toBeVisible();
+        await expect(nav.notice(BAD_PATH)).toBeVisible();
 
         // A path accepted: the window closes, the notice, "Our page" listed
         // (Fields; Rule 11).
@@ -710,10 +758,10 @@ test.describe('navigation menus & site chrome', () => {
         await expect(nav.notice(ITEM_ADDED)).toBeVisible();
         await expect(nav.row('items', 'Our page')).toHaveCount(1);
 
-        // A path already used: the window stays; its back arrow closes it
-        // (Fields; Rule 11a). Right after the refused "Save" no browser
-        // question comes before the close (T-ojs-3; the scenario says it
-        // asks); one that comes is answered "OK" by the listener.
+        // A path already used: the window stays and "This path already
+        // exists for another navigation menu item." shows at the top right;
+        // its back arrow closes it at once (Fields; Rule 11a; A18: a
+        // browser question, if one comes, is answered "OK" by the listener).
         item = await nav.addItem();
         await item.titleInput().fill('Second page');
         await item.chooseType('Custom Page');
@@ -721,6 +769,7 @@ test.describe('navigation menus & site chrome', () => {
         answer = await item.save();
         expect(answer.body && answer.body.status).toBe(false);
         await expect(item.form).toBeVisible();
+        await expect(nav.notice(PATH_USED)).toBeVisible();
         const questions = [];
         page.on('dialog', async (dialog) => {
             questions.push(dialog.message());
@@ -894,9 +943,10 @@ test.describe('navigation menus & site chrome', () => {
         await ojsApi.createContext({
             tag: first,
             context: {name: {en: firstName}},
+            enablePublicComments: true,
             users: [{username: author, givenName: 'Ada', familyName: 'Author', email: `${author}@mail.test`, roles: ['author']}],
         });
-        await ojsApi.createContext({tag: second, context: {name: {en: secondName}}});
+        await ojsApi.createContext({tag: second, context: {name: {en: secondName}}, enablePublicComments: true});
 
         // No role in the second journal: "View Profile" from its header
         // opens the Profile page with the editorial header and no side
@@ -961,6 +1011,27 @@ test.describe('navigation menus & site chrome', () => {
         await aed.openSwitcher();
         await aed.switcherLink(firstName).click();
         await expect(admin).toHaveURL(new RegExp(`/index\\.php/${first}/dashboard/editorial`));
+
+        // The switcher from "Comments": the first journal's Content ›
+        // "Comments", then the second journal: its "Comments" page; then
+        // the seeded journal, whose public comments are off: the
+        // access-denied page reading "Access denied." (Rule 29a).
+        await aed.waitReady();
+        await aed.chooseSideEntry('Content', 'Comments');
+        await expect(admin).toHaveURL(new RegExp(`/index\\.php/${first}/management/settings/userComments`), {timeout: T});
+        await expect(admin.getByRole('heading', {level: 1, name: 'Comments'})).toBeVisible({timeout: T});
+        await aed.waitReady();
+        await aed.openSwitcher();
+        await aed.switcherLink(secondName).click();
+        await expect(admin).toHaveURL(new RegExp(`/index\\.php/${second}/management/settings/userComments`), {timeout: T});
+        await aed.waitReady();
+        await expect(aed.contextTitle).toHaveText(whole(secondName));
+        await expect(admin.getByRole('heading', {level: 1, name: 'Comments'})).toBeVisible({timeout: T});
+        await aed.openSwitcher();
+        await aed.switcherLink(JOURNAL_NAME).click();
+        await expect(admin).toHaveURL(new RegExp(`/index\\.php/${JOURNAL}(/en)?/user/authorizationDenied`), {timeout: T});
+        await expect(admin.getByText(ACCESS_DENIED, {exact: true})).toBeVisible({timeout: T});
+        await expect(admin.getByText(NO_ACCESS)).toHaveCount(0);
 
         // "Administration": the Site Administrator's username list on the
         // first journal holds it; it opens the Administration page (Rule 18).
@@ -1061,30 +1132,37 @@ test.describe('navigation menus & site chrome', () => {
         await expect(home.nextLink).toBeVisible();
     });
 
-    test('S11: the "Developed By" block', async ({ojsApi, visitor}, testInfo) => {
+    test('S11: the "Developed By" block', async ({asUser, ojsApi, visitor}, testInfo) => {
         test.slow();
         const tag = makeTag('11', testInfo);
-        const control = `${tag}c`;
-        const placed = `${tag}p`;
-        const plugins = {developedbyblockplugin: {enabled: true}};
-        await seedJournal(ojsApi, control, {plugins});
-        await seedJournal(ojsApi, placed, {plugins, sidebar: ['developedbyblockplugin']});
+        const manager = await seedJournal(ojsApi, tag, {plugins: {developedbyblockplugin: {enabled: true}}});
 
-        // Control, before the block is placed: the plugin enabled alone
-        // puts no "Open Journal Systems" link in the sidebar (Rule 21).
-        const before = new PublicChrome(visitor, control);
-        await before.goto();
-        await expect(before.footerBrandLink).toBeVisible();
-        await expect(before.developedByLink(APP_NAME)).toHaveCount(0);
+        // Control, before the save: the plugin enabled alone puts no "Open
+        // Journal Systems" link in the sidebar (Rule 21).
+        const chrome = new PublicChrome(visitor, tag);
+        await chrome.goto();
+        await expect(chrome.footerBrandLink).toBeVisible();
+        await expect(chrome.developedByLink(APP_NAME)).toHaveCount(0);
         await expect(visitor.locator('.block_developed_by')).toHaveCount(0);
 
-        // Every page: placed, the sidebar holds the link to PKP's page about
-        // the application after the hidden heading "Developed By", on the
-        // home page, "About the Journal" and the Search page (Rule 21).
-        const chrome = new PublicChrome(visitor, placed);
+        // Placed: Settings › Website › "Appearance" › "Setup", the block
+        // ticked in the "Sidebar" list, "Save" (Settings bullet 15).
+        const page = await actorPage(asUser, manager);
+        const settings = new WebsiteSettings(page, tag);
+        await settings.goto();
+        const setup = await settings.open('appearance-setup');
+        await expect(setup.sidebar.box(DEVELOPED_BY)).not.toBeChecked();
+        await setup.sidebar.box(DEVELOPED_BY).check();
+        await setup.save();
+
+        // Every page: the visitor reloads; the sidebar holds the link to
+        // PKP's page about the application after the hidden heading
+        // "Developed By", on the home page, "About the Journal" and the
+        // Search page (Rule 21).
         for (const [where, path] of [['home', ''], ['About the Journal', '/about'], ['Search', '/search']]) {
             await test.step(where, async () => {
-                await chrome.goto(path);
+                if (path) await chrome.goto(path);
+                else await chrome.reload();
                 const block = chrome.sidebar.locator('.block_developed_by');
                 await expect(block).toHaveCount(1);
                 const link = chrome.developedByLink(APP_NAME);

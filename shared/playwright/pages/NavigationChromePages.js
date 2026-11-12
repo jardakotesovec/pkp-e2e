@@ -334,6 +334,16 @@ class NavigationTab extends BasePage {
         const controls = await this.openRowControls('items', title);
         return this.openItemWindowBy(controls.getByRole('link', {name: 'Edit', exact: true}));
     }
+
+    /**
+     * Wait a second after a side window closed, on a page timer, before
+     * the next move ("a second later", spec U08 Rule 6a): the modal store
+     * keeps a closed window's slot, and with it the window's leave-page
+     * prompt, for 450 ms (patterns.md pitfall 4f).
+     */
+    async aSecondLater() {
+        await this.page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 1_000)));
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -739,11 +749,14 @@ class EditorialChrome extends BasePage {
         this.switcherButton = this.switcher.locator('button').first();
         this.switcherLinks = this.switcher.locator('a');
         this.contextTitle = this.bar.locator('a.app__contextTitle');
-        // The "i" icon: the one link opening a new tab (its name is spec A1's).
+        // The name at the left, a link or (a site with no name) plain text.
+        this.contextName = this.bar.locator('.app__contextTitle');
+        // The "i" icon: the one link opening a new tab (named "Help", Rule 27b).
         this.helpLink = this.bar.locator('a[target="_blank"]').first();
         this.tasksButton = this.bar.getByRole('button', {name: /^Tasks/});
         this.initialsButton = page.locator('header.app__header [data-cy="app-user-nav"] button').first();
-        this.userMenu = page.locator('nav[aria-label="User Navigation"]').first();
+        // The initials menu ("User Navigation", "Navigation de l'usager"): by place, not by its translated name.
+        this.userMenu = page.locator('header.app__header [data-cy="app-user-nav"] nav').first();
         this.userMenuLinks = this.userMenu.locator('a');
         this.sideNav = page.locator('nav#app-nav');
     }
@@ -751,6 +764,56 @@ class EditorialChrome extends BasePage {
     async waitReady() {
         await expect(this.bar).toBeVisible({timeout: T});
         await expect(this.initialsButton).toBeVisible({timeout: T});
+    }
+
+    /** Whether the name at the left of the dark bar is (or sits in) a link. */
+    async contextNameIsLink() {
+        await expect(this.contextName).toBeVisible({timeout: T});
+        return this.contextName.evaluate((e) => !!e.closest('a'));
+    }
+
+    /**
+     * The words an "i" icon link shows on screen: its text outside the
+     * screen-reader-only span (the ui-library's `-screenReader` class), so
+     * '' for an icon that shows no text.
+     *
+     * @param {import('@playwright/test').Locator} [link] the dark bar's by default, or a strip's
+     */
+    async helpShownText(link = this.helpLink) {
+        await expect(link).toBeVisible({timeout: T});
+        return link.evaluate((a) => {
+            const clone = a.cloneNode(true);
+            clone.querySelectorAll('.-screenReader, .sr-only').forEach((n) => n.remove());
+            return clone.textContent.replace(/\s+/g, ' ').trim();
+        });
+    }
+
+    /** The Tasks bell by its name in the interface language ("Tasks", "Tâches"), a number after it or not. */
+    tasksBell(name = 'Tasks') {
+        return this.bar.getByRole('button', {name: new RegExp(`^${esc(name)}(\\s+\\d+)?$`)});
+    }
+
+    /** The Tasks bell's number: the one after its name, 0 when it shows none. */
+    async tasksNumber(name = 'Tasks') {
+        const bell = this.tasksBell(name);
+        await expect(bell).toBeVisible({timeout: T});
+        const words = flat(await bell.textContent());
+        const m = words.match(/(\d+)$/);
+        return m ? Number(m[1]) : 0;
+    }
+
+    /** Press the Tasks bell and return its window, open (a dialog named as the bell). */
+    async openTasks(name = 'Tasks') {
+        await this.tasksBell(name).click();
+        const win = this.page.getByRole('dialog', {name, exact: true});
+        await expect(win).toBeVisible({timeout: T});
+        await expect(this.stripHelpLink(win)).toBeVisible({timeout: T});
+        return win;
+    }
+
+    /** The "i" icon in the strip atop a side window. */
+    stripHelpLink(win) {
+        return win.locator('a[target="_blank"]').first();
     }
 
     /** Open the initials menu. */

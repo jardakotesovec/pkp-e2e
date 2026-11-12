@@ -15,9 +15,7 @@
  * chain"). It puts "Login" back and removes its "PKP" item before it
  * returns, and a best-effort restore runs even when the test fails midway.
  *
- * Not asserted here, by register ID: A4 🐞 (no test presses the site's
- * "Add Menu" or a menu's "Edit", which open no window), A14 ❓ (the site's
- * item window is opened without reading its type list). The site's only
+ * Not asserted here, by register ID: A4 🐞, A14 ❓, A27 ❓. The site's only
  * menu is never removed ("Remove" is answered "Cancel"): no screen could
  * give it back (the spec's Coverage, "No seed").
  *
@@ -27,7 +25,7 @@
  * an empty storage state (patterns.md, parallel lesson 8).
  */
 const {test: base, expect} = require('../../support/fixtures.js');
-const {NavigationTab, PublicChrome, whole} = require('../../../../../shared/playwright/pages/NavigationChromePages.js');
+const {NavigationTab, PublicChrome, EditorialChrome, whole} = require('../../../../../shared/playwright/pages/NavigationChromePages.js');
 
 const SITE = 'index';
 const T = 30_000;
@@ -36,6 +34,7 @@ const ITEM_ADDED = 'Navigation menu item was successfully added';
 const ITEM_UPDATED = 'Navigation menu item was successfully updated';
 const ITEM_REMOVED = 'Navigation menu item was successfully removed';
 const SITE_ITEMS = ['Register', 'Login', 'admin', 'Dashboard', 'View Profile', 'Administration', 'Logout'];
+const APP_NAME = 'Open Journal Systems';
 
 const sorted = (list) => [...list].sort();
 
@@ -88,6 +87,17 @@ test.describe('navigation menus & site chrome (the site)', () => {
             await expect.poll(() => nav.rowTitles('menus')).toEqual(['User Navigation Menu']);
             await expect.poll(async () => sorted(await nav.rowTitles('items'))).toEqual(sorted(SITE_ITEMS));
             await expect(nav.row('items', 'Search')).toHaveCount(0);
+
+            // The dark bar of a site with no name: "Open Journal Systems" at
+            // its left as plain text, not a link; control: the "i" icon
+            // beside it is a link (Rule 27a).
+            const ed = new EditorialChrome(page);
+            await ed.waitReady();
+            await expect(ed.contextName).toHaveText(whole(APP_NAME));
+            expect(await ed.contextNameIsLink()).toBe(false);
+            await expect(ed.bar.getByRole('link', {name: APP_NAME})).toHaveCount(0);
+            await expect(ed.helpLink).toHaveAccessibleName('Help');
+            expect(await ed.contextName.evaluate((name, help) => !!(name.compareDocumentPosition(help) & Node.DOCUMENT_POSITION_FOLLOWING), await ed.helpLink.elementHandle())).toBe(true);
 
             // The menu kept: "Remove" asks; "Cancel": the row stays (Rules 1b, 9).
             await nav.openRemove('menus', 'User Navigation Menu');
@@ -145,6 +155,25 @@ test.describe('navigation menus & site chrome (the site)', () => {
             await expect(nav.row('items', 'PKP')).toHaveCount(0);
             added = false;
             await expect.poll(async () => sorted(await nav.rowTitles('items'))).toEqual(sorted(SITE_ITEMS));
+
+            // The Site Administrator on the site's home page, a wide window:
+            // the username carries no number; its list opens, and
+            // "Dashboard" in it carries none either (Rule 19c).
+            expect(page.viewportSize().width).toBeGreaterThanOrEqual(992);
+            const own = new PublicChrome(page, SITE, {locale: 'en'});
+            await own.goto();
+            const adminTop = /^\s*admin\b/;
+            const username = own.topLink('user', adminTop);
+            await expect(own.userTopLinks).toHaveCount(1);
+            await expect(username).toHaveText(whole('admin'));
+            await expect(own.taskCount(username)).toHaveCount(0);
+            await own.pressTop('user', adminTop);
+            await expect(own.submenu('user', adminTop)).toBeVisible();
+            const dashboard = own.submenuLink('user', adminTop, /^\s*Dashboard\b/);
+            await expect(dashboard).toBeVisible();
+            await expect(own.taskCount(dashboard)).toBeHidden();
+            await expect.poll(async () => (await dashboard.innerText()).trim()).toBe('Dashboard');
+            await expect.poll(async () => (await own.submenuLink('user', adminTop, 'View Profile').innerText()).trim()).toBe('View Profile');
         } finally {
             // Best-effort restore of the site's items, whatever failed above.
             if (renamed || added) {

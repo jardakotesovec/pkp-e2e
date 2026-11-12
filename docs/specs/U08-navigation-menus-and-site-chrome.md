@@ -811,10 +811,10 @@ are in the footnote. <sup>y</sup>
    - **The Journal Manager's user menu**: sign in, then press the
      journal's name in the editorial header: the journal's home page opens
      (Rule 27a); at the top right the header shows their username, then
-     the Tasks bell's number ("0" without a badge); press the username: a
-     list opens with "Dashboard", "View Profile" and "Logout", and the
-     page stays as it was (Rules 18, 19b). Press "Dashboard": the Dashboard
-     opens (Rule 19a).
+     the Tasks bell's number ("{username} 0" with none); press the
+     username: a list opens with "Dashboard", "View Profile" and
+     "Logout", and the page stays as it was (Rules 18, 19b). Press
+     "Dashboard": the Dashboard opens (Rule 19a).
    - **The Journal Manager's editorial header**: on the Dashboard, before
      pressing anything, press Tab: "Skip to main content" and "Skip to
      main navigation menu" show; the dark bar shows the journal's name at
@@ -836,6 +836,16 @@ are in the footnote. <sup>y</sup>
      "Editorial Activity", "Users", "Counter R5" and "Reports". Choose
      "Settings" › "Website": the "Settings" group is open and "Website" is
      highlighted (Rule 30).
+   - **The "i" icon's name, in English and in French**: on Settings ›
+     "Website", the dark bar's "i" icon shows no text, and a screen
+     reader names it "Help"; press the Tasks bell: the Tasks window
+     opens, and the "i" icon in the strip at its top is named "Help"
+     too. Reload the page, press the initials and choose French under
+     "Change Language": with the interface in French, a screen reader
+     names the dark bar's "i" icon "Aide"; press the Tasks bell: the
+     icon in the Tasks window's strip is named "Aide" too. Reload the
+     page, press the initials and choose English in the same list
+     (Rule 27b).
    - **The assistant**: sign in, open the journal's home page and press
      the username: the same three entries; press "Dashboard": the
      Dashboard opens; its side menu holds "Editor Dashboard" and "Start A
@@ -936,11 +946,14 @@ are in the footnote. <sup>y</sup>
      "Search" from "Unassigned Menu Items" onto "Our news": "Search" does
      not sit under "Our news". Drag "About" onto "Announcements": "About" and the items
      under it do not go under "Announcements" (Rule 5a).
-   - **Discarded**: press "Cancel": a window "Warning" asks "The data on
-     this form has changed. Do you wish to continue without saving?";
-     press "Yes": the window closes; press the title "Primary Navigation
-     Menu" again: "Our news" is back in "Unassigned Menu Items" and the
-     menu reads as before the drags (Rule 6).
+   - **Discarded, nothing left unsaved**: press "Cancel": a window
+     "Warning" asks "The data on this form has changed. Do you wish to
+     continue without saving?"; press "Yes": the window closes; a second
+     later, press Settings › "Workflow" in the side menu: it opens with
+     no leave question (Rule 6a). Open Settings › Website ›
+     "Setup" › "Navigation" again and press the title "Primary
+     Navigation Menu": "Our news" is back in "Unassigned Menu Items" and
+     the menu reads as before the drags (Rule 6).
    - **Asked, then kept**: drag "Our news" onto "Archives" again; press
      "Cancel": "Warning" asks the same; press "No": the window is back,
      "Our news" still under "Archives", and "Archives" carries no red
@@ -1078,9 +1091,10 @@ are in the footnote. <sup>y</sup>
 
 8. **The site's own Navigation tab**
 
-   Given: Site Administrator, on a site hosting the seeded journal and
-   scratch journals, whose own menus are the installed ones, and a
-   visitor, signed out, on the site's home page in a second browser.
+   Given: Site Administrator, on a site with no name hosting the seeded
+   journal and scratch journals, whose own menus are the installed ones,
+   and a visitor, signed out, on the site's home page in a second
+   browser.
 
    - **The tab**: open Administration › "Site Settings" › "Site Setup" ›
      "Navigation": the same two tables as a journal's; "Navigation" lists
@@ -1088,6 +1102,10 @@ are in the footnote. <sup>y</sup>
      items, "Register", "Login", the Site Administrator's username,
      "Dashboard", "View Profile", "Administration" and "Logout", with no
      "Search" (Rules 1b, 2, 10).
+   - **The dark bar of a site with no name**: at the left of the dark
+     bar, where a named site's name would stand, "Open Journal Systems"
+     ("Open Monograph Press", "Open Preprint Systems") stands as plain
+     text, not a link (Rule 27a).
    - **The menu kept**: press the "Settings" arrow of "User Navigation
      Menu", then "Remove": the window "Remove" asks "Are you sure you wish
      to delete this item? This action cannot be undone."; press "Cancel":
@@ -1105,6 +1123,10 @@ are in the footnote. <sup>y</sup>
    - **An item removed**: press the "Settings" arrow of "PKP", then
      "Remove" and "OK": "Navigation menu item was successfully removed"
      shows and "PKP" leaves the table (Rule 13).
+   - **The Site Administrator on the site's home page**: open the site's
+     home page in a wide browser window: the username at the top right
+     carries no number; press it: its list opens, and "Dashboard" in it
+     carries no number either (Rule 19c).
    - **Control**: while "PKP" existed, the visitor's site home page showed
      no "PKP" link, a new item belonging to no menu, and no primary menu
      (Rules 2, 11).
@@ -1112,9 +1134,11 @@ are in the footnote. <sup>y</sup>
 9. **The journals switcher, and a journal where the user holds no role**
 
    Given: two scratch journals, a first and a second, each with the Site
-   Administrator as a Journal Manager and English as its one interface
-   language, a throwaway Author of the first journal who holds no role
-   in the second, and a visitor, signed out, in a second browser.
+   Administrator as a Journal Manager, English as its one interface
+   language and public comments on, beside the seeded journal, whose
+   public comments are off, a throwaway Author of the first journal who
+   holds no role in the second, and a visitor, signed out, in a second
+   browser.
 
    - **No role in the journal**: Author: sign in, open the second
      journal's home page, press the username and choose "View Profile":
@@ -1138,6 +1162,12 @@ are in the footnote. <sup>y</sup>
      (Rule 29a). Choose "Edit Profile" in the initials menu, then the first
      journal in the sitemap list: the first journal's Dashboard opens
      (Rule 29a).
+   - **The switcher from "Comments"**: Site Administrator: in the first
+     journal's side menu choose "Content" › "Comments", then the second
+     journal in the sitemap list: the second journal's "Comments" page
+     opens; choose the seeded journal in the sitemap list: the
+     access-denied page opens, reading "Access denied.", that journal's
+     public comments being off (Rule 29a).
    - **"Administration"**: open the first journal's home page and press
      the username: the list holds "Dashboard", "View Profile",
      "Administration" and "Logout"; press "Administration": the
@@ -1207,23 +1237,15 @@ Left out of the scenarios above, by reason:
   - a Section Editor's "Dashboard" under the username on the public pages opens the Dashboard, with their task count (Rule 19a; the guard [A2](#a2)'s issue report proposes, shared with Notifications center & email preferences A3) [report 2026-10-03]
   - the eye notices of "Privacy Statement", "Contact" and "About" and the "About" type's description, on a journal, a press and a preprint server: each names the Settings place where the screens put it (Rules 7a–7b; the guard [A6](#a6) and [A13](#a13)'s issue report proposes) [report 2026-10-03]
   - a Site Administrator holding Reader alone in a journal opens "Editor Dashboard": the views and counts show, and no "Error" window opens on the editorial pages (Actors; the guard [A22](#a22)'s issue report proposes) [report 2026-10-03]
-  - the editorial header's "i" icon and the Tasks window's strip: the link's accessible name reads "Help" ("Aide" in French) (Rule 27b; the guard of the retired [A1](#a1)) [report 2026-10-03]
   - the public header in a narrow window on French pages: the menu button's name is French, not "Open Menu" (the guard [A7](#a7)'s issue report proposes) [report 2026-10-03]
   - the item window's "Navigation Menu Type": choosing a type and then "Choose a type..." keeps the heading and returns the line under the list to its first text (the guard [A12](#a12)'s issue report proposes) [report 2026-10-03]
   - the "Navigation" table after an item is renamed or removed: each menu's "Navigation Menu Items" cell follows without a reload (the guard [A15](#a15)'s issue report proposes) [report 2026-10-03]
   - the menu window with no items at all: neither panel claims items are assigned or sends the manager to drag (the guard [A16](#a16)'s issue report proposes) [report 2026-10-03]
   - the item window opened and closed with nothing typed: no "The data on this form has changed" box and no leave question (the guard of [A18](#a18)'s first issue report) [report 2026-10-03]
   - the item window after a refused "Save": the back arrow asks before closing and the entries stay until the manager answers (the guard of [A18](#a18)'s second issue report) [report 2026-10-03]
-  - the top-right notices scenario 5 states for "No type", "Not a web address", "A path with other characters" and "A path already used": no suite asserts them yet (Fields; scenario 5) [incidental 2026-10-07]
-  - the menu window after a change discarded with "Yes": Settings › "Workflow" in the side menu, pressed a second later, asks nothing (Rule 6a; the guard of the retired [A17](#a17)) [incidental 2026-10-07]
   - the journals switcher on a site with two journals of one name: each offers the other (Rule 29; the guard [A21](#a21)'s issue report proposes) [report 2026-10-03]
   - on a journal, the menu's "Edit" window: "Subscriptions" and "My Subscriptions" carry the crossed-out eye and open their notices (Rule 7a; the guard [OJS1](#ojs1)'s issue report proposes) [report 2026-10-03]
   - a preprint server's settings address typed with the site's path: the refusal names the missing server in words a user understands, as a journal's and a press's do (Rule 26c; the guard [OPS4](#ops4)'s issue report proposes) [report 2026-10-03]
-  - scenario 11's "Placed": "\"Developed By\" Block" ticked in the "Sidebar" list on screen and saved with "Save"; the suites place the block before the scenario starts (Rule 21; Settings bullet 15) [sweep 2026-10-28]
-  - scenario 2's Journal Manager: the number after the username is the Tasks bell's number; the suites check that a number is there, not which (Rule 19b) [sweep 2026-10-28]
-  - the Site Administrator's journals switcher on "Comments": the chosen journal's Comments page, and the access-denied page reading "Access denied." when that journal's public comments are off (Rule 29a) [sweep 2026-10-28]
-  - Administration's dark bar while the site has no name: "Open Journal Systems" ("Open Monograph Press", "Open Preprint Systems") as plain text, not a link (Rule 27a) [sweep 2026-10-28]
-  - the Site Administrator on the site's home page in a wide window: "Dashboard" in the username's list and the username itself show no number (Rule 19c) [incidental 2026-10-29]
 - **Rarely met**:
   - "Publishing Mode" set to "OJS will not be used to publish the journal's contents online." {OJS}: "Current Issue" and "Archives" leaving the header (Settings bullet 2; item types table)
   - a Reader with no side menu while "Disable Submissions" is on (Actors row 8)
@@ -2798,11 +2820,15 @@ issues in the context's `issues[]` (each `{volume, number, year,
 published: true}`; each is made current as it is published, so the last
 one is "Current"); "Lists" is saved on screen.
 11 — `plugins: {developedbyblockplugin: {enabled: true}}`, the
-"Sidebar" ticked on screen. 8 — as `admin`, on a site where any scratch
-context exists (the side tab needs a second context, seed-facts); it
+"Sidebar" ticked on screen. 2 — French is chosen in the initials menu on
+screen and English chosen back before the next role signs in. 8 — as
+`admin`, on a site where any scratch context exists (the side tab needs a second context, seed-facts) and
+with no "Site Name", as every fresh fleet has it (seed-facts); it
 changes the site's own items, which every test on the install shares,
 so it runs alone and puts "Login" back. 9 — two scratch contexts, each
-enrolling `admin` as manager (every `createContext` does); a throwaway
+enrolling `admin` as manager (every `createContext` does) and each
+seeded `enablePublicComments: true`, while `publicknowledge` keeps
+comments off (seed-facts); a throwaway
 `author` in the first's `users[]` only; the visitor is a second
 browser context, signed out, that signs in as that `author` on the
 site's Login page; the address of the settings bullet {OJS OMP} is

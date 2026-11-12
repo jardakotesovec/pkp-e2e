@@ -19,9 +19,14 @@
  *   never removed with "OK" (no screen could give it back).
  * - A14 ❓: the site's "Navigation Menu Type" list is not read; the item
  *   window is asserted by its heading and the save.
+ * - A27 ❓: the site's home page is read in a wide window only.
+ *
+ * Seeding: a scratch server (the site's pages need two contexts) and the
+ * site's "Site Name" emptied through `POST site` `title: ''`, the install
+ * state S8's given names ("a site with no name").
  */
 const {test, expect} = require('../../support/fixtures.js');
-const {whole, PublicChrome, NavigationTab} = require('../../../../../shared/playwright/pages/NavigationChromePages.js');
+const {whole, PublicChrome, EditorialChrome, NavigationTab} = require('../../../../../shared/playwright/pages/NavigationChromePages.js');
 
 const T = 30_000;
 
@@ -37,6 +42,11 @@ function makeTag(scenario, testInfo) {
 async function signedOutPage(browser, baseURL) {
     const context = await browser.newContext({baseURL, storageState: {cookies: [], origins: []}, reducedMotion: 'reduce'});
     return context.newPage();
+}
+
+/** The user menu's top-level entry of a signed-in user. */
+function userTop(username) {
+    return new RegExp(`^\\s*${username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
 }
 
 /** Rename an item of the tab through its "Edit" window; waits for the notice. */
@@ -67,6 +77,7 @@ test.describe('navigation menus & site chrome (the site)', () => {
         // A scratch server, so the site hosts two or more contexts and
         // offers the tab (Rule 1b).
         await opsApi.createContext({tag: makeTag('s8', testInfo)});
+        await opsApi.setSite({title: ''});
         const page = await (await asUser('admin')).newPage();
         page.on('dialog', (dialog) => dialog.accept().catch(() => {}));
         const tab = new NavigationTab(page, SITE);
@@ -90,6 +101,18 @@ test.describe('navigation menus & site chrome (the site)', () => {
                 ['Register', 'Login', 'admin', 'Dashboard', 'View Profile', 'Administration', 'Logout'].sort()
             );
             await expect(tab.row('items', 'Search')).toHaveCount(0);
+
+            // The dark bar of a site with no name: at its left "Open
+            // Preprint Systems" as plain text, not a link; the bar's
+            // right-hand part is there (Rule 27a).
+            const ed = new EditorialChrome(page);
+            const barName = ed.bar.locator('.app__contextTitle');
+            await expect(barName).toHaveText(whole('Open Preprint Systems'));
+            expect(await barName.evaluate((e) => !!e.closest('a') || !!e.querySelector('a'))).toBe(false);
+            await expect(ed.bar.getByRole('link', {name: 'Open Preprint Systems', exact: true})).toHaveCount(0);
+            await expect(ed.contextTitle).toHaveCount(0);
+            await expect(ed.helpLink).toBeVisible();
+            await expect(ed.initialsButton).toBeVisible();
 
             // The menu kept: "Remove" asks; "Cancel": the row stays (Rules 1b, 9).
             const dialog = await tab.openRemove('menus', 'User Navigation Menu');
@@ -135,6 +158,26 @@ test.describe('navigation menus & site chrome (the site)', () => {
             );
             await expect(tab.row('items', 'PKP')).toHaveCount(0, {timeout: T});
             await expect(tab.rows('items')).toHaveCount(7);
+
+            // The Site Administrator on the site's home page, in a wide
+            // window: the username at the top right carries no number;
+            // pressed, its list opens, and "Dashboard" in it shows no
+            // number either; the list's four entries are the control
+            // (Rule 19c).
+            expect((page.viewportSize() || {width: 0}).width).toBeGreaterThanOrEqual(1024);
+            const adminSite = new PublicChrome(page, SITE, {locale: 'en'});
+            await adminSite.goto();
+            const username = adminSite.topLink('user', userTop('admin'));
+            await expect(username).toHaveText(whole('admin'), {useInnerText: true});
+            await expect(adminSite.taskCount(username)).toHaveCount(0);
+            await adminSite.pressTop('user', userTop('admin'));
+            const list = adminSite.submenuLinks('user', userTop('admin'));
+            await expect(list).toHaveText([whole('Dashboard'), whole('View Profile'), whole('Administration'), whole('Logout')], {
+                useInnerText: true,
+            });
+            const dashboard = list.filter({hasText: /^\s*Dashboard\b/});
+            await expect(dashboard).toBeVisible();
+            await expect(adminSite.taskCount(dashboard)).toBeHidden();
         } finally {
             await restoreSite(page, tab);
         }
