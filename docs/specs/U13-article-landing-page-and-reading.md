@@ -845,11 +845,14 @@ footnote. <sup>s</sup>
 
    Given: a visitor, signed out, on a scratch journal (preprint server)
    with "Citation Style Language" on, and an article published twice,
-   both times today ({today} below, the day the scenario runs): its
-   first version, titled "Tidal Patterns", on a journal in the published
-   issue "Vol. 1 No. 1 (2026)", and its current version, titled "Tidal
-   Patterns Revised"; each version carries a galley "PDF" and, on a
-   journal, a galley "HTML".
+   both times today ({today} below): its first version, titled "Tidal
+   Patterns", on a journal in the published issue "Vol. 1 No. 1
+   (2026)", and its current version, titled "Tidal Patterns Revised";
+   each version carries a galley "PDF" (the file "article.pdf";
+   "preprint.pdf" on a preprint server), with no URL Path, a galley
+   "Print" (the same file), with the URL Path "print", and, on a
+   journal, a galley "HTML"; {print number} below is the number the
+   tooling recipe returns for the first version's "Print".
 
    - **The current version's page**: open the article's address: the
      page is headed "Tidal Patterns Revised", and under "Published"
@@ -872,17 +875,27 @@ footnote. <sup>s</sup>
    - **"most recent version"**: press "most recent version" in the
      notice: the article's address opens, headed "Tidal Patterns
      Revised" (Rule 5).
-   - **The older version's PDF reader**: go back to the older version's
-     page and press "PDF": the PDF reader page shows the title "Tidal
-     Patterns" and, between the bar and the viewer, "This is an outdated
-     version published on {today}. Read the most recent version.", the
-     date written like "2026-09-25". Press the arrow: the
-     article's address opens (Rule 12; Fields, the PDF reader page).
+   - **The older version's PDF reader**: back on the older version's
+     page, press "PDF": the PDF reader page shows the title "Tidal
+     Patterns" and, between the bar and the viewer, the same notice, the
+     date written like "2026-09-25". Press the arrow: the article's
+     address opens (Rule 12; Fields, the PDF reader page).
+   - **The older version's document**: back on the older version's page,
+     press "PDF" again: the viewer shows the document. Both versions share
+     this file ([Galleys](U46-galleys.md)); the "Download" link's address
+     marks the older one's, carrying "/version/" and the number this
+     page's address ends in. Press "Download": "article.pdf"
+     ("preprint.pdf") downloads (Rule 12; Fields, the PDF reader page).
    - **The older version's HTML reader** {OJS}: on the older version's
      page press "HTML": the HTML reader page shows the same notice with
      the date written like "September 25, 2026", and its bar reads the
      current version's title, "Tidal Patterns Revised". Press the title:
      the article's address opens (Rule 12; Fields, the HTML reader page).
+   - **An older galley without the version part**: type the article's
+     address followed by "/" and the number the older version's "PDF"
+     link's address ends in: the article's page opens, headed "Tidal
+     Patterns Revised". With {print number} in its place: the "404 Not
+     Found" page (Rules 2, 13a).
    - **A version that does not exist** {OPS}: type the article's address
      followed by "/version/999999": the "404 Not Found" page (Rule 2).
    - **The home page's summary** {OPS}: on the preprint server's home
@@ -952,12 +965,16 @@ footnote. <sup>s</sup>
 
 6. **"How to Cite": another format, a download and the settings window**
 
-   Given: the Journal Manager, and a visitor, signed out, in a second
-   browser, on a scratch journal named "Coastal Review" (a scratch
-   preprint server named "Coastal Preprints") with "Citation Style
-   Language" on and its "Settings" window never saved, and the article
-   "Tidal Patterns in Coastal Waters" published there, on a journal in
-   the published issue "Vol. 1 No. 1 (2026)".
+   Given: the Journal Manager, a visitor, signed out, in a second
+   browser, and on a journal its Reader in a third, on a scratch journal
+   named "Coastal Review" (a scratch preprint server named "Coastal
+   Preprints") with "Citation Style Language" on and its "Settings"
+   window never saved, and the article "Tidal Patterns in Coastal
+   Waters" published there, on a journal in the published issue "Vol. 1
+   No. 1 (2026)"; on a journal also "Reef Notes", published with no
+   issue, and "Reef Survey", published at once into the unpublished
+   issue "Vol. 2 No. 1 (2026)"; and "Harbour Currents", submitted and in
+   Production, not yet published.
 
    - **The citation**: the visitor opens the article's page: the side
      column (at its foot on a journal) shows "How to Cite" over an "APA"
@@ -978,6 +995,16 @@ footnote. <sup>s</sup>
      Citation Formats" and "Endnote/Zotero/Mendeley (RIS)": the file
      "Tidal+Patterns+in+Coastal+Waters.ris" downloads ([A8](#a8))
      (Rule 15b).
+   - **An article outside a published issue** {OJS}: the visitor opens
+     "Reef Notes", presses "More Citation Formats" and chooses "IEEE":
+     the citation changes in place to another text. Press "More Citation
+     Formats" and "BibTeX": the file "Reef+Notes.bib" downloads. On "Reef
+     Survey" the same: the citation changes, and "Reef+Survey.bib"
+     downloads. The visitor then opens "Tidal Patterns in Coastal Waters"
+     again (Rule 15c).
+   - **The Reader** {OJS}: the Reader, signed in, does the same on "Reef
+     Notes" and "Reef Survey": "IEEE" changes each citation in place, and
+     "Reef+Notes.bib" and "Reef+Survey.bib" download (Rule 15c).
    - **No email**: the mail catcher holds no email to the journal's
      accounts from the visitor's steps (Side effects).
    - **The settings window**: the Journal Manager opens Settings ›
@@ -1006,6 +1033,15 @@ footnote. <sup>s</sup>
      "London, U.K." shows nowhere, neither in a citation nor in the
      "BibTeX" file: the article was published while the box was empty,
      and the place recorded then stays (Rule 16).
+   - **An article published after "OK"**: the Journal Manager publishes
+     "Harbour Currents" from its workflow, on a journal into "Vol. 1 No. 1
+     (2026)" (on a preprint server, posts it), as
+     [Publish, schedule & versions](U49-publish-schedule-and-versions.md)
+     describes. The visitor opens its page: on a preprint server its IEEE citation
+     under "How to Cite" carries "London, U.K."; on a journal it does not.
+     Press "More Citation Formats" and "BibTeX": the file
+     "Harbour+Currents.bib" carries "London, U.K.". The visitor then opens
+     "Tidal Patterns in Coastal Waters" again (Rule 16).
    - **Switching the plugin off**: the Journal Manager unticks the
      "Citation Style Language" row: it asks "Are you sure you want to
      disable this plugin?"; press "OK": "The plugin "Citation Style
@@ -1022,18 +1058,39 @@ footnote. <sup>s</sup>
 
 7. **The PDF viewer switched off, and the downloads chart**
 
-   Given: a visitor, signed out, on a scratch journal (preprint server)
-   with "PDF.JS PDF Viewer" off and "Usage statistics display options"
-   set to "Use bar type of the chart for usage statistics display.", and
-   a published article "Tidal Patterns" carrying a galley "PDF" (the
-   file "article.pdf"; "preprint.pdf" on a preprint server).
+   Given: a visitor, signed out, and the Journal Manager, on a scratch
+   journal (preprint server) with "PDF.JS PDF Viewer" off and "Usage
+   statistics display options" set to "Use bar type of the chart for
+   usage statistics display.", and two published articles: "Tidal
+   Patterns", published today, carrying a galley "PDF" (the file
+   "article.pdf"; "preprint.pdf" on a preprint server); and "Harbour
+   Currents", published on 2024-03-05, carrying the galleys "PDF" and
+   "Word" (a Word file), whose downloads the usage statistics counted
+   yesterday: three of "PDF" and two of "Word".
 
-   - **"PDF" with the viewer off**: open the article's page and press
+   - **"PDF" with the viewer off**: open "Tidal Patterns" and press
      "PDF": "article.pdf" ("preprint.pdf") downloads, and the browser
      stays on the article's page (Settings bullet 1; Rule 11).
    - **The "Downloads" chart**: the main column carries a section headed
      "Downloads" with an empty chart, since the test install never
      counts the downloads ([A3](#a3)) (Rule 17; Side effects).
+   - **The months of an article published this year**: on "Tidal
+     Patterns" the chart's bars are labelled with month and year ("Oct
+     2026"), from January of this year to the current month, and no "All
+     time" button shows under it (Rule 17a).
+   - **An article first published in 2024**: open "Harbour Currents":
+     its chart shows the last twelve months, the current month last,
+     with the button "All time" under it. Press "All time": the bars run
+     from "Jan 2024" to the current month, the months before March 2024
+     at 0, and the button reads "Last 12 months"; press it: the last
+     twelve months show again (Rule 17a).
+   - **Counted downloads**: on the same chart the bar of yesterday's
+     month stands at 5, the three "PDF" downloads and the two "Word" ones
+     together (Rule 17b).
+   - **The Journal Manager's statistics**: the Journal Manager opens
+     Statistics › "Articles" and shows its chart's "Files" line: it
+     reads 5 for yesterday, the figure of "Harbour Currents"' bar (Rule
+     17b; [Statistics — usage](U64-usage-statistics.md)).
    - **Control**: the seeded journal, at the install default "Do not
      display submission usage statistics chart for reader.", shows no
      "Downloads" section on scenario 1's article pages (Settings
@@ -1131,9 +1188,6 @@ Left out of the scenarios above, by reason:
     preprint with a URL Path, its non-PDF galley link downloading the
     file, and its ID addresses with a galley and a version part
     forwarding to the URL Path address with that part kept [report 2026-10-01]
-  - an article published with no issue, and one published at once into
-    an unpublished issue: another citation format and a download,
-    signed out and as a Reader {OJS} (Rule 15c; OJS1, retired) [upstream 2026-10-21]
   - the guard for OPS7 and OPS8 (Rule 21; issue report
     `docs/issues/U13-OPS7-OPS8-ops-french-preprint-raw-keys.md`): a preprint's
     page and its PDF reader shown in French, with no `##` code in the
@@ -1143,9 +1197,6 @@ Left out of the scenarios above, by reason:
     with "Recommend Articles by Author" on, two published articles by one
     contributor, one of them outside an issue, each listing the other
     under "Most read articles by the same author(s)" {OJS} [report 2026-10-01]
-  - the place in "Publisher Location" reaching an article published
-    after it was typed, in a preprint's IEEE citation and in both apps'
-    "BibTeX" file, while an article published before keeps none (Rule 16) [upstream 2026-10-02]
   - the guard for OPS1 (Rule 4, Rule 5; issue report
     `docs/issues/U13-OPS1-new-version-preview-called-outdated.md`): a new
     version's preview showing the preview notice alone, and an older
@@ -1171,9 +1222,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U13-OJS12-public-review-never-shown.md`): a
     confirmed review marked "Publicly Show Reviewer Comments" shown on
     the published article's page, a private or unconfirmed one not {OJS} [report 2026-10-01]
-  - an older version's PDF reader page showing the document, and its
-    "Download" saving the file, on a journal and a preprint server
-    (Rule 12, scenario 3; A2 retired) [report 2026-10-01]
   - the guard for OJS9 (Rule 11; issue report
     `docs/issues/U13-OJS9-lens-formulas-not-typeset.md`): an
     XML galley with a TeX formula opened in the Lens reader, the formula
@@ -1247,24 +1295,6 @@ Left out of the scenarios above, by reason:
     written once A13 is fixed: a new version's "PDF" (and, on a journal,
     "HTML") pressed on its preview opening the reader with no outdated
     notice, while an older published version's reader keeps it [incidental 2026-10-02]
-  - an older version's galley typed by its number with no version part:
-    the article's page for a galley with no URL Path, the "404 Not
-    Found" page for one with a URL Path (Rule 13a) [incidental 2026-10-05]
-  - the months of the "Downloads" chart: January of the first
-    version's year to the current month; an article first published
-    more than twelve months back showing the last twelve, "All time"
-    and "Last 12 months" (Rule 17a) [incidental 2026-10-27]
-  - the "Downloads" chart of an article with counted downloads, a Word
-    file's among them, reading what the "Files" line of Statistics ›
-    "Articles" reads (Rule 17b) [incidental 2026-10-27]
-  - the chart keeping its figures after downloads are processed (seeded
-    figures on a test install), until "Delete Data Caches" (Rule 17c) [incidental 2026-10-27]
-  - a highlight drawn in the PDF reader, the return arrow pressed: the
-    browser asking whether to leave, and the reader opened again
-    showing the PDF without the highlight (Fields, the PDF reader page) [other 2026-11-09]
-  - the PDF reader's "Tools" › "Open" showing a PDF from the reader's
-    computer under the same bar, its title and "Download" unchanged
-    (Fields, the PDF reader page) [other 2026-11-09]
 - **Rarely met**:
   - a galley whose component was made a dependent one after the galley
     was built, which the page no longer lists (Rule 10; Settings
@@ -1306,6 +1336,14 @@ Left out of the scenarios above, by reason:
   - a page in a language the site marks "*" (incomplete), each label its
     translation lacks shown as a raw key: a wording variant of
     scenario 8's French page (Rule 21a)
+  - a highlight drawn in the PDF reader, then the return arrow: the
+    browser asking whether to leave, and the reader opened again
+    showing the PDF without the highlight: one of the viewer's own
+    tools, under the bar scenario 2 reads (Fields, the PDF reader page)
+  - the PDF reader's "Tools" › "Open" showing a PDF from the reader's
+    computer under the same bar, its title and "Download" unchanged: the
+    viewer's own menu, under the bar scenario 2 reads (Fields, the PDF
+    reader page)
 - **Register carries it**:
   - A5 (the Author's "View submission" on the preview; Rule 4;
     scenario 4 passes it)
@@ -1376,6 +1414,11 @@ Left out of the scenarios above, by reason:
 - **No seed**:
   - the "DOI:" line of a version with a DOI (Fields, the landing page;
     Rule 14)
+  - the "Downloads" chart keeping the figures it read at its first
+    opening after more downloads are counted, until a Site Administrator
+    presses "Delete Data Caches": a test install has counted downloads
+    only as seeded with the article, before its page is first opened
+    (Rule 17c)
 - **Owned by another feature**:
   - a visitor opening a galley on a journal with subscriptions (Actors
     row 3; *Subscriptions & open access control*)
@@ -3055,11 +3098,14 @@ preprint already sits there) and the scheduled one by `published: true`
 with `issue: {volume: 2, number: 1, year: 2015}` (seed facts). The
 others run on their own scratch context from `POST scenarios/context`,
 with throwaway `users[]` (password: the username twice): `manager` and
-`author` everywhere, `reader` in scenario 5; OJS contexts that need a
+`author` everywhere, `reader` in scenario 5 and in scenario 6 on OJS; OJS contexts that need a
 published issue seed `issues: [{volume: 1, number: 1, year: 2026,
 published: true}]` and publish into it with `issue`. Per scenario:
 scenario 2 at the context's defaults; scenario 3 with `plugins:
-{citationstylelanguageplugin: {enabled: true}}`, its second version
+{citationstylelanguageplugin: {enabled: true}}` and the galleys "PDF"
+(no `urlPath`) and "Print" (`urlPath: 'print'`, the same fixture),
+{print number} being the "Print" entry's `galleys[].id` in the seed's
+answer, its second version
 made on screen as `manager`, since no key makes one ("Create New
 Version", the title changed on "Title & Abstract", then "Publish":
 [Publish, schedule & versions](U49-publish-schedule-and-versions.md),
@@ -3068,9 +3114,25 @@ first context and `restrictSiteAccess: true` ("Users must be
 registered…") for the second; scenario 6 with `context.name` "Coastal
 Review" ("Coastal Preprints") and the same `plugins` entry, the
 visitor's steps read against the mail catcher (Mailpit,
-`http://127.0.0.1:8025`) scoped by the context's addresses; scenario 7
+`http://127.0.0.1:8025`) scoped by the context's addresses; on OJS
+also the unpublished issue `{volume: 2, number: 1, year: 2026}` in
+`issues[]`, "Reef Notes" published with no `issue`, and "Reef Survey"
+submitted by a second throwaway account with the author role, not by
+`author`, and published on screen as `manager` with "Assign To Future Issue and
+Publish Immediately" into that issue, since a `published` seed into an
+unpublished issue schedules the article instead (scenarios.md); the
+publish emails the submitter, so with `author` as the submitter the
+no-email check would find that email (test run 2026-11-12);
+"Harbour Currents" carried to Production by OJS `decisions:
+['sendExternalReview', 'accept', 'sendToProduction']` (a submitted
+preprint already sits there) and published on screen as `manager`
+after the "OK", so that its publish records the place; scenario 7
 with `plugins: {pdfjsviewerplugin: {enabled: false}}` and `themeOptions:
-{displayStats: 'bar'}`; scenario 8 with `context.supportedLocales` and
+{displayStats: 'bar'}`, "Harbour Currents" with `datePublished:
+'2024-03-05'`, the galleys "PDF" and "Word" (`article.docx` on OJS; the
+OPS suite brings a Word fixture of its own) and `usage: [{daysAgo: 1,
+fileViews: [3, 2]}]`, the counted downloads Rule 17c says a scenario
+seeds, and the statistics read as `manager`; scenario 8 with `context.supportedLocales` and
 `supportedSubmissionLocales` `['en', 'fr_CA']`, the title, abstract and
 `keywords` as locale maps and the "HTML" galley at `locale: 'fr_CA'`
 (a `/fr_CA/` address switches the session to French, seed facts, so the

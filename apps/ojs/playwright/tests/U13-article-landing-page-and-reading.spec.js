@@ -12,18 +12,15 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A3 ❓: S7 reads the drawn chart; the sentence it removes is not read.
- * - A5 🐞: S4's Author reads the preview's notice; its "View submission"
- *   is not pressed.
+ * - A3 ❓, A17 ❓: S7 reads the drawn chart and its visible heading.
+ * - A5 🐞: S4's Author's "View submission" is not pressed.
  * - A6 🐞: the older version's browser tab is never read.
  * - A8 🐞: S6's RIS file is read for its name only.
- * - A1, A4, A7, A9, A10, A13, A14, OJS1–OJS13: not on these scenarios' paths (S8
- *   reads no "Versions" entry in French; S3 and S6 publish into a
- *   published issue; no "ABNT", no "Additional Citation Formats" all
- *   unticked, no bracketed address; the Publication Facts, the
- *   recommendation lists and the Lens page's script error are left alone;
- *   the PDF reader's arrow is read on an article in no issue only).
- *   OPS1–OPS9: the preprint server's, in that tree.
+ * - A11 🐞: S1's keywords are read in either order.
+ * - OJS6 🐞: the PDF reader's arrow is named on an article in no issue only.
+ * - OJS11 ❓: S6's primary IEEE citation is read as containing the chosen one.
+ * - A1, A4, A7, A9, A10, A12, A13, A14, A16, OJS2–OJS5, OJS7–OJS10,
+ *   OJS12–OJS15: not on these scenarios' paths. OPS1–OPS9: the OPS tree.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1 and S4 run on publicknowledge (S1 signed out,
@@ -31,11 +28,14 @@
  * `reader.rosa`); the others on scratch journals with throwaway accounts
  * (the username twice as password), as footnote s says: the version's
  * display values, `galleys[]` with `urlPath` and `genre`, `citationsRaw`,
- * `issues[]`, `plugins`,
- * `themeOptions`, `context.enabled`, `restrictSiteAccess` (S5) and the
- * locale maps. No key makes a second version: S3 uses "Create New
+ * `issues[]`, `plugins`, `themeOptions`, `context.enabled`,
+ * `restrictSiteAccess` (S5), the locale maps, and S7's `datePublished`
+ * and `usage[]`. No key makes a second version: S3 uses "Create New
  * Version" (U49's opener, which waits for the version to load), changes
- * the title on "Title & Abstract" and publishes.
+ * the title on "Title & Abstract" and publishes. S6 publishes "Reef
+ * Survey" (into an unpublished issue at once) and "Harbour Currents"
+ * (after "OK") on screen as its Journal Manager, since a seed into an
+ * unpublished issue schedules instead.
  *
  * The visitor is the fixture `page`: no default user is set, so its
  * context is signed out (patterns.md "Fixture selection"); every signed-in
@@ -66,6 +66,7 @@ const {
     todayCandidates,
 } = require('../../../../shared/playwright/pages/ArticleLandingPages.js');
 const {PublishScreen} = require('../pages/PublishSchedulePages.js');
+const {StatsPage, utcDay, dayLabel} = require('../../../../shared/playwright/pages/UsageStatsPages.js');
 
 const JOURNAL = 'publicknowledge';
 const MANAGER = 'manager.maya';
@@ -104,6 +105,8 @@ async function seedJournal(ojsApi, tag, {extra = [], ...keys} = {}) {
 
 /** The published issue the scenarios name. */
 const ISSUE_2026 = {volume: 1, number: 1, year: 2026};
+/** S6's unpublished issue {OJS}. */
+const FUTURE_ISSUE_2026 = {volume: 2, number: 1, year: 2026};
 
 /** The server's today, read from a date the page wrote: one of the runner's two candidates. */
 function expectToday(date) {
@@ -132,6 +135,61 @@ async function publishShownVersion(page, pub) {
     await confirm.getByRole('button', {name: 'Publish', exact: true}).click();
     await published;
     await expect(page.getByRole('button', {name: 'Unpublish', exact: true})).toBeVisible({timeout: 30_000});
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** The chart's month labels ("Oct 2026") from one month to another, both included. */
+function monthLabels(fromYear, fromMonth, toYear, toMonth) {
+    const out = [];
+    for (let n = fromYear * 12 + fromMonth - 1; n <= toYear * 12 + toMonth - 1; n++) {
+        out.push(`${MONTHS[n % 12]} ${Math.floor(n / 12)}`);
+    }
+    return out;
+}
+
+/**
+ * The "Downloads" chart's bars as Chart.js holds them: `{labels, values}`
+ * (a local reader beside the shared `chartReading()`, which reads values
+ * alone).
+ *
+ * @param {InstanceType<typeof ArticleLandingPage>} landing
+ */
+async function chartBars(landing) {
+    return landing.downloadsChart().locator('canvas.usageStatsGraph').evaluate((canvas) => {
+        const w = /** @type {any} */ (window);
+        const chart = w.Chart && w.Chart.getChart ? w.Chart.getChart(canvas) : null;
+        if (!chart) return {labels: [], values: []};
+        return {labels: [...chart.data.labels], values: [...chart.data.datasets[0].data].map(Number)};
+    });
+}
+
+/** The button under the chart ("All time" / "Last 12 months"). */
+function chartToggle(landing) {
+    return landing.downloadsChart().locator('button.usageStatsToggle');
+}
+
+/**
+ * S6 {OJS}, Rule 15c: on each `[submissionId, bib file name]` the reader
+ * opens the page, chooses "IEEE" under "More Citation Formats" (the
+ * citation changes in place, the address stays) and downloads "BibTeX".
+ *
+ * @param {InstanceType<typeof ArticleLandingPage>} landing
+ * @param {Array<[number, string]>} articles
+ */
+async function readOutsideIssue(landing, articles) {
+    for (const [id, bibName] of articles) {
+        await landing.goto(id);
+        const before = flat(await landing.citation().innerText());
+        const address = landing.page.url();
+        await landing.openFormats();
+        const ieee = await landing.chooseFormat('IEEE');
+        expect(ieee).not.toBe(before);
+        expect(landing.page.url()).toBe(address);
+        await landing.openFormats();
+        const bib = await landing.downloadCitation('BibTeX');
+        expect(bib.name).toBe(bibName);
+    }
 }
 
 test.describe('article landing page and reading', () => {
@@ -391,18 +449,22 @@ test.describe('article landing page and reading', () => {
             plugins: {citationstylelanguageplugin: {enabled: true}},
             issues: [{...ISSUE_2026, published: true}],
         });
-        const {submissionId} = await ojsApi.createSubmission({
+        const {submissionId, galleys} = await ojsApi.createSubmission({
             tag,
             context: tag,
             submitter: author,
             title: 'Tidal Patterns',
             galleys: [
                 {label: 'PDF', file: 'article.pdf'},
+                {label: 'Print', file: 'article.pdf', urlPath: 'print'},
                 {label: 'HTML', file: 'article.html'},
             ],
             published: true,
             issue: ISSUE_2026,
         });
+        // {print number}: the first version's "Print" galley, as the seed
+        // answers it (footnote s).
+        const printNumber = galleys.find((g) => g.label === 'Print').id;
 
         // The second version, made on screen as the Journal Manager: "Create
         // New Version", the new title on "Title & Abstract", "Publish".
@@ -480,6 +542,21 @@ test.describe('article landing page and reading', () => {
         await expect(page).toHaveURL(addressPattern(article));
         await expect(landing.title()).toHaveText('Tidal Patterns Revised');
 
+        // The older version's document: back on its page, "PDF" again: the
+        // viewer shows the document; the shared file's "Download" address
+        // carries "/version/" and this page's publication number; pressed,
+        // it saves "article.pdf" (Rule 12; Fields, the PDF reader page).
+        const olderPublication = olderUrl.match(/\/version\/(\d+)$/)[1];
+        await page.goto(olderUrl);
+        await expect(landing.title()).toHaveText('Tidal Patterns');
+        const olderPdfHref = await landing.galleyLink('PDF').getAttribute('href');
+        await landing.openGalley('PDF');
+        await reader.expectLoaded();
+        await expect(reader.titleLink()).toHaveText('Tidal Patterns');
+        await expect.poll(() => reader.pdfPageCount(), {timeout: 30_000}).toBeGreaterThan(0);
+        expect(await reader.downloadLink().getAttribute('href')).toContain(`/version/${olderPublication}/`);
+        expect(await reader.download()).toBe('article.pdf');
+
         // The older version's HTML reader: the notice with the date written
         // out, the bar reading the current title; the title opens the
         // article's address (Rule 12; Fields, the HTML reader page).
@@ -493,8 +570,20 @@ test.describe('article landing page and reading', () => {
         await expect(page).toHaveURL(addressPattern(article));
         await expect(landing.title()).toHaveText('Tidal Patterns Revised');
 
+        // An older galley without the version part: the older "PDF"'s
+        // number (no URL Path) after the article's address opens the
+        // article's page; {print number} (URL Path "print") answers "404 Not
+        // Found" (Rules 2, 13a).
+        const olderPdfNumber = (olderPdfHref || '').match(/\/(\d+)$/);
+        expect(olderPdfNumber, `the older "PDF" link "${olderPdfHref}" ends in a number`).not.toBeNull();
+        await page.goto(landing.url(submissionId, {galley: olderPdfNumber[1]}));
+        await expect(landing.title()).toHaveText('Tidal Patterns Revised');
+        await expectNotFoundPage(page, landing.url(submissionId, {galley: printNumber}));
+
         // Control: the article's address carries no notice; the older
         // page's, read the same way, carried one (Rule 5).
+        await landing.goto(submissionId);
+        await expect(landing.title()).toHaveText('Tidal Patterns Revised');
         await expect(landing.notices()).toHaveCount(0);
         await page.goto(olderUrl);
         await expect(landing.notices()).toHaveCount(1);
@@ -649,13 +738,14 @@ test.describe('article landing page and reading', () => {
         test.setTimeout(300_000);
         const tag = makeTag('s6', testInfo);
         const spare = `${tag}x`;
+        const reader = `${tag}rd`;
         const {manager, author} = await seedJournal(ojsApi, tag, {
             context: {name: 'Coastal Review'},
             plugins: {citationstylelanguageplugin: {enabled: true}},
-            issues: [{...ISSUE_2026, published: true}],
-            extra: [user(spare, 'Xena', 'Spare', ['author'])],
+            issues: [{...ISSUE_2026, published: true}, FUTURE_ISSUE_2026],
+            extra: [user(spare, 'Xena', 'Spare', ['author']), user(reader, 'Rhea', 'Reader', ['reader'])],
         });
-        const [{submissionId}, control] = await Promise.all([
+        const [{submissionId}, control, reefNotes, reefSurvey, harbour] = await Promise.all([
             ojsApi.createSubmission({
                 tag,
                 context: tag,
@@ -665,9 +755,35 @@ test.describe('article landing page and reading', () => {
                 issue: ISSUE_2026,
             }),
             ojsApi.createSubmission({tag: `${tag}c`, context: tag, submitter: spare}),
+            // "Reef Notes": published with no issue (Rule 15c).
+            ojsApi.createSubmission({tag: `${tag}n`, context: tag, submitter: author, title: 'Reef Notes', published: true}),
+            // "Reef Survey": submitted, published on screen below. Its
+            // submitter is the spare account, whom the publish emails
+            // (AuthorPublicationPublished), so the silence read on the
+            // other accounts stays the visitor's own.
+            ojsApi.createSubmission({tag: `${tag}s`, context: tag, submitter: spare, title: 'Reef Survey'}),
+            // "Harbour Currents": in Production, published after "OK".
+            ojsApi.createSubmission({
+                tag: `${tag}h`,
+                context: tag,
+                submitter: author,
+                title: 'Harbour Currents',
+                decisions: ['sendExternalReview', 'accept', 'sendToProduction'],
+            }),
         ]);
         const landing = new ArticleLandingPage(page, tag);
         const articlePath = `/index.php/${tag}/article/view/${submissionId}`;
+
+        // "Reef Survey" published at once into the unpublished issue "Vol.
+        // 2 No. 1 (2026)", on screen as the Journal Manager ("Assign To
+        // Future Issue and Publish Immediately"; footnote s).
+        const managerPage = await (await asUser(manager)).newPage();
+        const dialogs = recordBrowserDialogs(managerPage);
+        const pub = new PublishScreen(managerPage, tag);
+        await pub.gotoWorkflow(reefSurvey.submissionId);
+        await pub.openEntry('Title & Abstract');
+        await pub.publish({futureIssueLabel: /Vol\. 2 No\. 1 \(2026\)/});
+        await pub.expectStatus('Published');
 
         // The citation: "How to Cite" at the foot of the side column, over
         // an APA citation naming the title, the journal and the address
@@ -713,11 +829,22 @@ test.describe('article landing page and reading', () => {
         const ris = await landing.downloadCitation('Endnote/Zotero/Mendeley (RIS)');
         expect(ris.name).toBe('Tidal+Patterns+in+Coastal+Waters.ris');
 
+        // An article outside a published issue: on "Reef Notes" (no issue)
+        // and "Reef Survey" (published into an unpublished issue) "IEEE"
+        // changes the citation in place and "BibTeX" downloads, signed out;
+        // then the visitor is back on the first article (Rule 15c).
+        const reefArticles = [[reefNotes.submissionId, 'Reef+Notes.bib'], [reefSurvey.submissionId, 'Reef+Survey.bib']];
+        await readOutsideIssue(landing, reefArticles);
+        await landing.goto(submissionId);
+        await expect(landing.title()).toHaveText('Tidal Patterns in Coastal Waters');
+
+        // The Reader, signed in, does the same on both (Rule 15c).
+        const readerPage = await (await asUser(reader)).newPage();
+        await readOutsideIssue(new ArticleLandingPage(readerPage, tag), reefArticles);
+
         // No email to the journal's accounts from the visitor's steps,
         // bounded by a "Notify" the test sends to its spare (Side effects;
         // A8).
-        const managerPage = await (await asUser(manager)).newPage();
-        const dialogs = recordBrowserDialogs(managerPage);
         const notify = new PublishScreen(managerPage, tag);
         await notify.gotoWorkflow(control.submissionId);
         await notify.openStage('Submission');
@@ -725,6 +852,7 @@ test.describe('article landing page and reading', () => {
         const afterControl = {to: mailOf(spare), subject: NOTIFY_SUBJECT, contains: `Control ${tag}`};
         await pkpMail.expectNone({to: mailOf(manager), afterControl});
         await pkpMail.expectNone({to: mailOf(author), afterControl});
+        await pkpMail.expectNone({to: mailOf(reader), afterControl});
 
         // The settings window as a new journal has it: no primary format,
         // every additional format and both downloads ticked, no publisher
@@ -795,9 +923,30 @@ test.describe('article landing page and reading', () => {
         const bibAfter = await landing.downloadCitation('BibTeX');
         expect(bibAfter.text).not.toContain('London, U.K.');
 
+        // An article published after "OK": "Harbour Currents", published
+        // from its workflow into "Vol. 1 No. 1 (2026)", records the place:
+        // its IEEE citation on a journal prints none, its "BibTeX" file
+        // carries it; then the visitor is back on the first article
+        // (Rule 16).
+        await pub.gotoWorkflow(harbour.submissionId);
+        await pub.openEntry('Title & Abstract');
+        await pub.publish({backIssueLabel: /Vol\. 1 No\. 1 \(2026\)/});
+        await pub.expectStatus('Published');
+        await landing.goto(harbour.submissionId);
+        await expect(landing.title()).toHaveText('Harbour Currents');
+        await expect(landing.citation()).toContainText('Harbour Currents');
+        expect(flat(await landing.citation().innerText())).not.toContain('London, U.K.');
+        await landing.openFormats();
+        const harbourBib = await landing.downloadCitation('BibTeX');
+        expect(harbourBib.name).toBe('Harbour+Currents.bib');
+        expect(harbourBib.text).toContain('London, U.K.');
+        await landing.goto(submissionId);
+        await expect(landing.title()).toHaveText('Tidal Patterns in Coastal Waters');
+
         // Switching the plugin off: the question, the notice, no
         // "Settings" on the row; the visitor's page has no "How to Cite"
         // (Settings bullet 4; Fields, the settings window).
+        await settings.openPlugins();
         await expect(settings.arrow()).toHaveCount(1);
         const question = await settings.noticeDuring(TEXT.pluginDisabled('Citation Style Language'), () => settings.setEnabled(false));
         expect(question).toContain(TEXT.disableQuestion);
@@ -818,14 +967,14 @@ test.describe('article landing page and reading', () => {
         await expect(landing.formatLinks()).toHaveText(['MLA']);
     });
 
-    test('S7: the PDF viewer switched off, and the downloads chart', async ({page, ojsApi}, testInfo) => {
-        test.setTimeout(180_000);
+    test('S7: the PDF viewer switched off, and the downloads chart', async ({page, asUser, ojsApi}, testInfo) => {
+        test.setTimeout(240_000);
         const tag = makeTag('s7', testInfo);
-        const {author} = await seedJournal(ojsApi, tag, {
+        const {manager, author} = await seedJournal(ojsApi, tag, {
             plugins: {pdfjsviewerplugin: {enabled: false}},
             themeOptions: {displayStats: 'bar'},
         });
-        const [{submissionId}, seeded] = await Promise.all([
+        const [{submissionId}, harbour, seeded] = await Promise.all([
             ojsApi.createSubmission({
                 tag,
                 context: tag,
@@ -833,6 +982,21 @@ test.describe('article landing page and reading', () => {
                 title: 'Tidal Patterns',
                 galleys: [{label: 'PDF', file: 'article.pdf'}],
                 published: true,
+            }),
+            // "Harbour Currents": first published 2024-03-05, three "PDF"
+            // and two "Word" downloads counted yesterday (footnote s).
+            ojsApi.createSubmission({
+                tag: `${tag}h`,
+                context: tag,
+                submitter: author,
+                title: 'Harbour Currents',
+                galleys: [
+                    {label: 'PDF', file: 'article.pdf'},
+                    {label: 'Word', file: 'article.docx'},
+                ],
+                published: true,
+                datePublished: '2024-03-05',
+                usage: [{daysAgo: 1, fileViews: [3, 2]}],
             }),
             ojsApi.createSubmission({
                 tag: `${tag}p`,
@@ -862,6 +1026,53 @@ test.describe('article landing page and reading', () => {
         const chart = await landing.chartReading();
         expect(chart.type).toBe('bar');
         expect(chart.values.every((v) => v === 0)).toBe(true);
+
+        // The months of an article published this year: January of this
+        // year to the current month, labelled "Oct 2026", and no "All
+        // time" under the chart (Rule 17a).
+        const now = await page.evaluate(() => ({year: new Date().getFullYear(), month: new Date().getMonth() + 1}));
+        await expect.poll(async () => (await chartBars(landing)).labels).toEqual(monthLabels(now.year, 1, now.year, now.month));
+        await expect(chartToggle(landing)).toHaveCount(0);
+
+        // An article first published in 2024: the last twelve months, the
+        // current month last, and "All time" under the chart; "All time"
+        // runs the bars from "Jan 2024", the months before March 2024 at 0,
+        // and turns into "Last 12 months", which narrows back (Rule 17a).
+        const allMonths = monthLabels(2024, 1, now.year, now.month);
+        const lastTwelve = allMonths.slice(-12);
+        const harbourLanding = new ArticleLandingPage(page, tag);
+        await harbourLanding.goto(harbour.submissionId);
+        await expect(harbourLanding.title()).toHaveText('Harbour Currents');
+        await expect.poll(async () => (await chartBars(harbourLanding)).labels, {timeout: 30_000}).toEqual(lastTwelve);
+        await expect(chartToggle(harbourLanding)).toHaveText('All time');
+
+        // Counted downloads: the bar of yesterday's month stands at 5, the
+        // three "PDF" and the two "Word" downloads (Rule 17b).
+        const yesterday = utcDay(1);
+        const yesterdayMonth = `${MONTHS[Number(yesterday.slice(5, 7)) - 1]} ${yesterday.slice(0, 4)}`;
+        const twelve = await chartBars(harbourLanding);
+        expect(twelve.values[twelve.labels.indexOf(yesterdayMonth)]).toBe(5);
+        expect(twelve.values.reduce((a, b) => a + b, 0)).toBe(5);
+
+        await chartToggle(harbourLanding).click();
+        await expect(chartToggle(harbourLanding)).toHaveText('Last 12 months');
+        await expect.poll(async () => (await chartBars(harbourLanding)).labels).toEqual(allMonths);
+        const all = await chartBars(harbourLanding);
+        expect(all.labels[0]).toBe('Jan 2024');
+        expect(all.values.slice(0, 2)).toEqual([0, 0]);
+        expect(all.values[all.labels.indexOf(yesterdayMonth)]).toBe(5);
+        await chartToggle(harbourLanding).click();
+        await expect(chartToggle(harbourLanding)).toHaveText('All time');
+        await expect.poll(async () => (await chartBars(harbourLanding)).labels).toEqual(lastTwelve);
+
+        // The Journal Manager's statistics: Statistics › "Articles", its
+        // chart's "Files" line reads 5 for yesterday, the figure of
+        // "Harbour Currents"' bar (Rule 17b).
+        const managerPage = await (await asUser(manager)).newPage();
+        const stats = new StatsPage(managerPage, tag, 'articles');
+        await stats.goto();
+        await stats.pressChart('Files');
+        await expect.poll(async () => Object.fromEntries(await stats.timeline())[dayLabel(yesterday)], {timeout: 30_000}).toBe('5');
 
         // Control: the seeded journal, at the install default, shows no
         // "Downloads" section on an article's page, read the same way

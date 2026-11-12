@@ -20,6 +20,8 @@
  * - A1 🐞: S8 never reads the "Versions" list or the label line in French.
  * - A3 ❓: S7 reads the "Downloads" heading and the chart only, never the
  *   sentence.
+ * - U64 A17 🐞 ("File Views" leaves a Word file out): S7 reads the
+ *   statistics chart's "Files" line, never the table's "File Views".
  * - A5 🐞: the Author never presses "View submission" (S4).
  * - A6 🐞: an older version's browser tab is never read (S3).
  * - A7 🐞, A8 🐞: "ABNT" is never chosen; the RIS file is read for its name
@@ -28,8 +30,10 @@
  * - A10 🐞: no reference carries an address in parentheses (S1).
  * - OPS1 🐞: no new version is previewed.
  * - OPS2 🐞, OPS3 🐞: S2 types the URL-Path preprint's number address
- *   alone (no galley or version part) and never a galley's number address
- *   once it has a URL Path.
+ *   alone (no galley or version part) and never a current galley's number
+ *   address once it has a URL Path; S3's older "Print" typed by its number
+ *   with no version part is Rule 13a's "404 Not Found", which a journal
+ *   answers too.
  * - OPS5 🐞: the PDF reader's return arrow is pressed, never named.
  * - OPS6 🐞: no preprint here has a DOI.
  * - OPS7 🐞, OPS8 🐞: S8 reads the French keyword's value, never its label,
@@ -52,16 +56,24 @@
  * `plugins` (CSL on in S3 and S6, "PDF.JS PDF Viewer" off in S7),
  * `themeOptions.displayStats` (S7), `context.enabled: false` and
  * `restrictSiteAccess` (S5), `context.name` (S6) and the two languages
- * (S8). A seeded category is named by its own path (`eng`, not
- * `applied-science/eng`: the key refuses the parent's prefix). S3's second
- * version is made on screen as the server's Manager ("Create New Version"
- * once the version has loaded, the title changed on "Title & Abstract",
- * then "Post").
+ * (S8); S7's "Harbour Currents" with `datePublished: '2024-03-05'`, a
+ * "Word" galley of the suite's own `preprint.docx` and `usage: [{daysAgo:
+ * 1, fileViews: [3, 2]}]`. A seeded category is named by its own path
+ * (`eng`, not `applied-science/eng`: the key refuses the parent's prefix).
+ * S3's second version is made on screen as the server's Manager ("Create
+ * New Version" once the version has loaded, the title changed on "Title &
+ * Abstract", then "Post"), and {print number} is the first version's
+ * "Print" `galleys[].id` in the seed's answer; S6's "Harbour Currents" is
+ * seeded submitted (in Production) and posted on screen by the Manager
+ * after the settings window's "OK".
  *
  * Page objects: shared/playwright/pages/ArticleLandingPages.js (the
  * landing page, the reader page, the summaries, the "Citation Style
  * Language" row and window), the label line's parts included
- * (`ArticleLandingPage.labelLineParts()`).
+ * (`ArticleLandingPage.labelLineParts()`); S7's statistics through
+ * shared/playwright/pages/UsageStatsPages.js (`StatsPage`), and the chart's
+ * month labels and "All time" button through local helpers here
+ * (`chartMonths()`, `chartToggle()`).
  *
  * The visitor is the fixture `page` (no user is set anywhere in this file,
  * so it carries no session); every other actor comes from `asUser`. Every
@@ -97,6 +109,7 @@ const {
     postPreprint,
     addDiscussion,
 } = require('../pages/PublicationPages.js');
+const {StatsPage, utcDay, dayLabel} = require('../../../../shared/playwright/pages/UsageStatsPages.js');
 
 const SERVER = 'publicknowledge';
 const AUTHOR = 'author.alex';
@@ -136,6 +149,43 @@ async function seedServer(opsApi, tag, {extra = [], ...keys} = {}) {
 /** The preprint page of a server (`preprint/view/…`); `locale` "en" on the bilingual seeded server. */
 function landingOf(page, contextPath, locale = '') {
     return new ArticleLandingPage(page, contextPath, {op: 'preprint', locale});
+}
+
+/** Today, `YYYY-MM-DD`, on the servers' clock (UTC). */
+function utcToday() {
+    return utcDay(0);
+}
+
+/** A `YYYY-MM[-DD]` month moved by `k` months, `YYYY-MM`. */
+function shiftMonth(iso, k) {
+    const d = new Date(Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1 + k, 1));
+    return d.toISOString().slice(0, 7);
+}
+
+/** A month as the "Downloads" chart labels its bar ("Nov 2026"). */
+function chartMonthLabel(iso) {
+    return new Date(`${iso.slice(0, 7)}-01T00:00:00Z`).toLocaleDateString('en-US', {month: 'short', year: 'numeric', timeZone: 'UTC'});
+}
+
+/** Every month from `from` to `to` (`YYYY-MM[-DD]`), as the chart labels them. */
+function monthsBetween(from, to) {
+    const out = [];
+    for (let m = from.slice(0, 7); m <= to.slice(0, 7); m = shiftMonth(m, 1)) out.push(chartMonthLabel(m));
+    return out;
+}
+
+/** The "Downloads" chart's bar labels as drawn (null until it is drawn). */
+async function chartMonths(landing) {
+    return landing.downloadsChart().locator('canvas.usageStatsGraph').evaluate((canvas) => {
+        const w = /** @type {any} */ (window);
+        const chart = w.Chart && w.Chart.getChart ? w.Chart.getChart(canvas) : null;
+        return chart ? [...chart.data.labels].map(String) : null;
+    });
+}
+
+/** The chart's "All time" / "Last 12 months" button. */
+function chartToggle(landing) {
+    return landing.downloadsChart().locator('button.usageStatsToggle');
 }
 
 /** An element's words, spaces collapsed. */
@@ -366,11 +416,16 @@ test.describe('article landing page and reading', () => {
             context: tag,
             submitter: author,
             title: 'Tidal Patterns',
-            galleys: [{label: 'PDF', file: 'preprint.pdf'}],
+            galleys: [
+                {label: 'PDF', file: 'preprint.pdf'},
+                {label: 'Print', file: 'preprint.pdf', urlPath: 'print'},
+            ],
             published: true,
         });
         const id = submission.submissionId;
         const day = today();
+        // {print number}: the first version's "Print" galley, from the seed's answer.
+        const printNumber = submission.galleys.find((g) => g.label === 'Print').id;
 
         // Setup (the scenario's given): the Manager makes the second
         // version on screen, retitles it and posts it (footnote s).
@@ -427,6 +482,8 @@ test.describe('article landing page and reading', () => {
         await expect(landing.versionEntries().nth(1).locator('a')).toHaveCount(0);
         await expect(landing.versionLink(currentName)).toHaveAttribute('href', articleUrl);
         await expect(landing.galleyLink('PDF')).toHaveAttribute('href', new RegExp(`^${escapeRe(`${baseURL}${olderPath}`)}/\\d+$`));
+        const olderPdfNumber = (await landing.galleyLink('PDF').getAttribute('href') || '').split('/').pop();
+        const olderVersion = olderPath.split('/').pop();
         await expect(landing.citation()).toContainText('Tidal Patterns');
         await expect(landing.citation()).not.toContainText('Revised');
         await expect(landing.citation()).toContainText(`${baseURL}${landing.url(id)}`);
@@ -466,6 +523,30 @@ test.describe('article landing page and reading', () => {
         await reader.returnLink().click();
         await expect(page).toHaveURL(articleUrl);
         await expect(landing.title()).toHaveText('Tidal Patterns Revised');
+
+        // The older version's document: "PDF" again from the older page; the
+        // viewer shows the document; the file both versions share is told
+        // apart by "Download"'s address, which carries "/version/" and the
+        // number the older page's address ends in; "Download" saves
+        // "preprint.pdf" (Rule 12; Fields, the PDF reader page).
+        await page.goto(olderPath);
+        await expect(landing.notices()).toHaveText([TEXT.outdated(day)]);
+        await landing.openGalley('PDF');
+        await reader.expectLoaded();
+        await expect(reader.titleLink()).toHaveText('Tidal Patterns');
+        await expect.poll(() => reader.pdfPageCount(), {timeout: 30_000}).toBeGreaterThan(0);
+        await expect(reader.downloadLink()).toHaveAttribute('href', new RegExp(`/version/${olderVersion}/`));
+        expect(await reader.download()).toBe('preprint.pdf');
+
+        // An older galley without the version part: the older "PDF"'s number
+        // after the article's address opens the article's page, headed
+        // "Tidal Patterns Revised"; {print number} there answers "404 Not
+        // Found" (Rules 2, 13a).
+        await page.goto(landing.url(id, {galley: olderPdfNumber}));
+        await expect(page).toHaveURL(articleUrl);
+        await expect(landing.title()).toHaveText('Tidal Patterns Revised');
+        await expect(landing.notices()).toHaveCount(0);
+        await expectNotFoundPage(page, landing.url(id, {galley: printNumber}));
 
         // A version that does not exist: "404 Not Found" (Rule 2).
         await expectNotFoundPage(page, landing.url(id, {version: 999999}));
@@ -600,6 +681,15 @@ test.describe('article landing page and reading', () => {
             galleys: [{label: 'PDF', file: 'preprint.pdf'}],
             published: true,
         });
+        // "Harbour Currents": submitted, so in Production on a preprint
+        // server, not yet posted; the Manager posts it after "OK".
+        const harbour = await opsApi.createSubmission({
+            tag: `${tag}h`,
+            context: tag,
+            submitter: author,
+            title: 'Harbour Currents',
+            galleys: [{label: 'PDF', file: 'preprint.pdf'}],
+        });
         const control = await opsApi.createSubmission({tag: `${tag}c`, context: tag, submitter: spare, title: `Control ${tag}`});
         const id = submission.submissionId;
         const landing = landingOf(page, tag);
@@ -715,6 +805,23 @@ test.describe('article landing page and reading', () => {
         await expect(landing.downloadFormatLinks()).toHaveText(['BibTeX']);
         expect((await landing.downloadCitation('BibTeX')).text).not.toContain('London, U.K.');
 
+        // An article published after "OK": the Manager posts "Harbour
+        // Currents" from its workflow; its IEEE citation, the primary format
+        // now, carries "London, U.K.", and so does its "BibTeX" file; the
+        // visitor then opens "Tidal Patterns in Coastal Waters" again (Rule 16).
+        await openWorkflow(managerPage, tag, harbour.submissionId);
+        await postPreprint(managerPage);
+        await landing.goto(harbour.submissionId);
+        await expect(landing.title()).toHaveText('Harbour Currents');
+        await expect(landing.citation()).toContainText('Harbour Currents');
+        await expect(landing.citation()).toContainText('London, U.K.');
+        await landing.openFormats();
+        const harbourBib = await landing.downloadCitation('BibTeX');
+        expect(harbourBib.name).toBe('Harbour+Currents.bib');
+        expect(harbourBib.text).toContain('London, U.K.');
+        await landing.goto(id);
+        await expect(landing.title()).toHaveText('Tidal Patterns in Coastal Waters');
+
         // Switching the plugin off: it asks, then "…has been disabled." and
         // the row offers no "Settings"; the visitor's page has no "How to
         // Cite" (Settings bullet 4).
@@ -742,10 +849,10 @@ test.describe('article landing page and reading', () => {
         await expect(landing.formatLinks()).toHaveText(['MLA']);
     });
 
-    test('S7: the PDF viewer switched off, and the downloads chart', async ({page, opsApi}, testInfo) => {
+    test('S7: the PDF viewer switched off, and the downloads chart', async ({page, asUser, opsApi}, testInfo) => {
         test.setTimeout(180_000);
         const tag = makeTag('s7', testInfo);
-        const {author} = await seedServer(opsApi, tag, {
+        const {manager, author} = await seedServer(opsApi, tag, {
             plugins: {pdfjsviewerplugin: {enabled: false}},
             themeOptions: {displayStats: 'bar'},
         });
@@ -756,6 +863,22 @@ test.describe('article landing page and reading', () => {
             title: 'Tidal Patterns',
             galleys: [{label: 'PDF', file: 'preprint.pdf'}],
             published: true,
+        });
+        // "Harbour Currents": posted on 2024-03-05, its "PDF" downloaded
+        // three times and its "Word" twice yesterday, as the usage
+        // statistics count them (footnote s; Rule 17c).
+        const harbour = await opsApi.createSubmission({
+            tag: `${tag}h`,
+            context: tag,
+            submitter: author,
+            title: 'Harbour Currents',
+            datePublished: '2024-03-05',
+            galleys: [
+                {label: 'PDF', file: 'preprint.pdf'},
+                {label: 'Word', file: 'preprint.docx'},
+            ],
+            published: true,
+            usage: [{daysAgo: 1, fileViews: [3, 2]}],
         });
         const seeded = await opsApi.createSubmission({
             tag: `${tag}p`,
@@ -783,6 +906,54 @@ test.describe('article landing page and reading', () => {
         const chart = await landing.chartReading();
         expect(chart && chart.type).toBe('bar');
         expect(chart && chart.values.every((v) => v === 0)).toBe(true);
+
+        // The months of a preprint posted this year: one bar per month,
+        // labelled "Mon YYYY", January of this year to the current month,
+        // and no "All time" button (Rule 17a; Harbour Currents' chart below
+        // is the control that shows the button).
+        const thisYear = monthsBetween(`${utcToday().slice(0, 4)}-01`, utcToday());
+        await expect.poll(() => chartMonths(landing), {timeout: 30_000}).toEqual(thisYear);
+        await expect(chartToggle(landing)).toHaveCount(0);
+
+        // A preprint first posted in 2024: the last twelve months, the
+        // current month last, with "All time" under the chart; "All time"
+        // runs from "Jan 2024" to the current month, the months before March
+        // 2024 at 0, the button then reading "Last 12 months", which narrows
+        // it back (Rule 17a).
+        const lastTwelve = monthsBetween(shiftMonth(utcToday(), -11), utcToday());
+        const allTime = monthsBetween('2024-01', utcToday());
+        await landing.goto(harbour.submissionId);
+        await expect(landing.title()).toHaveText('Harbour Currents');
+        await expect.poll(() => chartMonths(landing), {timeout: 30_000}).toEqual(lastTwelve);
+        await expect(chartToggle(landing)).toHaveText('All time');
+        await chartToggle(landing).click();
+        await expect.poll(() => chartMonths(landing)).toEqual(allTime);
+        const wide = await landing.chartReading();
+        expect(wide && wide.values.slice(0, 2)).toEqual([0, 0]);
+        await expect(chartToggle(landing)).toHaveText('Last 12 months');
+        await chartToggle(landing).click();
+        await expect.poll(() => chartMonths(landing)).toEqual(lastTwelve);
+        await expect(chartToggle(landing)).toHaveText('All time');
+
+        // Counted downloads: the bar of yesterday's month stands at 5, the
+        // three "PDF" downloads and the two "Word" ones; every other bar at
+        // 0 (Rule 17b).
+        const counted = await landing.chartReading();
+        const yesterdayMonth = chartMonthLabel(utcDay(1));
+        expect(counted && counted.values[lastTwelve.indexOf(yesterdayMonth)]).toBe(5);
+        expect(counted && counted.values.reduce((a, b) => a + b, 0)).toBe(5);
+
+        // The Preprint Server Manager's statistics: Statistics › "Preprints",
+        // the chart's "Files" line reads 5 for yesterday, the figure of the
+        // bar (Rule 17b).
+        const managerPage = await (await asUser(manager)).newPage();
+        const stats = new StatsPage(managerPage, tag, 'articles');
+        await stats.goto();
+        await expect(stats.heading).toHaveText('Preprints');
+        await stats.pressChart('Files');
+        await expect
+            .poll(async () => Object.fromEntries(await stats.timeline())[dayLabel(utcDay(1))], {timeout: 30_000})
+            .toBe('5');
 
         // Control: the seeded server, at "Do not display…", shows no
         // "Downloads" section on a preprint's page (Settings bullet 6).
