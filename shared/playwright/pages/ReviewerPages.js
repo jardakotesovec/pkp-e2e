@@ -260,13 +260,21 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
     /**
      * @param {import('@playwright/test').Page} page
      * @param {string} contextPath
-     * @param {{privateBoxLabel?: string}} [options] the app's label of the
-     *   editor-only box ("For editor" on OJS, "For editor only" on OMP)
+     * @param {{privateBoxLabel?: string, submitLabel?: string, confirmText?: string}} [options]
+     *   privateBoxLabel: the app's label of the editor-only box ("For
+     *   editor" on OJS, "For editor only" on OMP); submitLabel and
+     *   confirmText: step 3's "Submit Review" button and its confirmation
+     *   text in another interface language (U28 S6 submits from the French
+     *   interface, `contextPath` then being `{path}/fr_CA`: "Soumettre
+     *   l'évaluation", "Voulez-vous vraiment envoyer cette évaluation ?";
+     *   the dialog's "OK" stays "OK"). Only the step-3 submit and the tab
+     *   reads (by number) are language-free; the rest is English.
      */
     constructor(page, contextPath, options = {}) {
         super(page);
         this.contextPath = contextPath;
         this.privateBoxLabel = options.privateBoxLabel || 'For editor';
+        this.confirmText = options.confirmText || 'Are you sure you want to submit this review?';
 
         // Header
         this.previousReviewsBox = page.locator('div').filter({has: page.getByRole('heading', {name: 'Previous Reviews', exact: true})}).last();
@@ -295,7 +303,7 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
         this.recommendationSelect = page.locator('select#reviewerRecommendationId');
         this.recommendationError = page.locator('label#reviewerRecommendationId-error.error');
         this.saveForLaterButton = page.getByRole('button', {name: 'Save for Later', exact: true});
-        this.submitReviewButton = page.getByRole('button', {name: 'Submit Review', exact: true});
+        this.submitReviewButton = page.getByRole('button', {name: options.submitLabel || 'Submit Review', exact: true});
         this.messageBox = page.locator('#reviewStep3MessageBox');
         this.reviewerFilesGrid = page.locator('#reviewAttachmentsGridContainer');
         this.uploadFileLink = this.reviewerFilesGrid.getByRole('link', {name: 'Upload File', exact: true});
@@ -640,7 +648,7 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
 
     /** The in-page "Confirm" dialog "Submit Review" opens. */
     confirmDialog() {
-        return this.page.getByRole('dialog').filter({hasText: 'Are you sure you want to submit this review?'});
+        return this.page.getByRole('dialog').filter({hasText: this.confirmText});
     }
 
     /** Press "Submit Review" and wait for the confirmation to appear. */

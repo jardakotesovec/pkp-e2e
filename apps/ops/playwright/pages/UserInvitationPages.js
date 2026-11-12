@@ -6,7 +6,8 @@
  * Three surfaces:
  * - UsersRolesPage — Settings → Users & Roles (Users tab): the Invitations
  *   table + "Invite to a role" button (UserInvitationManager.vue) above the
- *   Current Users list (UserAccessManager.vue).
+ *   Current Users list (UserAccessManager.vue), and the Roles tab's grid
+ *   with its "Create New Role" window (U28 scenario 17).
  * - SendInvitationWizard — {ctx}/invitation/create/userRoleAssignment (and the
  *   edit/editUser modes of the same wizard).
  * - AcceptInvitationWizard — the emailed accept-link flow
@@ -20,6 +21,7 @@
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('../../../../shared/playwright/pages/BasePage.js');
+const {waitForJQueryIdle} = require('../support/legacy.js');
 
 exports.UsersRolesPage = class UsersRolesPage extends BasePage {
     /**
@@ -85,6 +87,71 @@ exports.UsersRolesPage = class UsersRolesPage extends BasePage {
     /** The Roles grid's data rows. */
     roleRows() {
         return this.page.locator('#roleGridContainer tr.gridRow');
+    }
+
+    /** The "Create New Role" window's form (a legacy modal, `#userGroupForm`). */
+    roleForm() {
+        return this.page.locator('form#userGroupForm');
+    }
+
+    /** The role window's "Permission level" select. */
+    permissionLevel() {
+        return this.roleForm().getByRole('combobox', {name: /^Permission level/});
+    }
+
+    /**
+     * The role window's "Stage Assignment" block (`#userGroupStageContainer`:
+     * the "Stage Assignment" label over the stage boxes). The app shows and
+     * hides it with a 600 ms jQuery animation the harness's motion switch
+     * does not reach (U28 screen-notes).
+     */
+    stageAssignment() {
+        return this.roleForm().locator('#userGroupStageContainer');
+    }
+
+    /**
+     * A "Stage Assignment" box by its stage name, found by its label whether
+     * shown or hidden (a role locator drops it once the block is hidden).
+     *
+     * @param {string} stage
+     */
+    stageBox(stage) {
+        return this.stageAssignment().getByLabel(stage, {exact: true});
+    }
+
+    /**
+     * Press the Roles grid's "Create New Role" and return the window's form,
+     * loaded and settled. Call after `openRolesTab()`.
+     */
+    async openCreateRole() {
+        await this.page.locator('#roleGridContainer')
+            .getByRole('link', {name: 'Create New Role', exact: true})
+            .click();
+        await expect(this.permissionLevel()).toBeVisible({timeout: 30_000});
+        await this.settleRoleForm();
+        return this.roleForm();
+    }
+
+    /**
+     * Choose a "Permission level" in the role window and wait for the
+     * "Stage Assignment" block's show/hide animation to end.
+     *
+     * @param {string} label
+     */
+    async choosePermissionLevel(label) {
+        await this.permissionLevel().selectOption({label});
+        await this.settleRoleForm();
+    }
+
+    /** jQuery idle and no element `:animated` (the block's slide). */
+    async settleRoleForm() {
+        await waitForJQueryIdle(this.page);
+        await this.page.waitForFunction(
+            // eslint-disable-next-line no-undef
+            () => !window.jQuery || window.jQuery(':animated').length === 0,
+            null,
+            {timeout: 30_000}
+        );
     }
 
     /**

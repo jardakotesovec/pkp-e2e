@@ -10,18 +10,18 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
- * - A1 🐞, A2 🐞, A4 🐞, A5 🐞, A6 🐞, A7 🐞, A9 🐞, A10 🐞, A12 🐞 (walked
- *   where a scenario passes through them — S3's file refusal, S7's empty
- *   submit, S10's reminder link, S11's dateless line, S14's archived
- *   wizard — and asserted neither way).
- * - A3 ❓, A11 ❓, A13 ❓ (parked).
- * - Retired: A8, OMP4. OMP1–OMP3 and OPS1 are the other apps'.
+ * - A1 🐞, A2 🐞, A4 🐞, A5 🐞, A6 🐞, A7 🐞, A9 🐞, A10 🐞, A12 🐞, A14 🐞,
+ *   A15 🐞, A17 🐞, A18 🐞.
+ * - A3 ❓, A11 ❓, A13 ❓, A16 ❓.
+ * - Retired: A8, OMP2, OMP4. OMP1, OMP3 and OPS1 are the other apps'.
  *
  * Seeding: scenario endpoints only. publicknowledge and the 18 seeded users
  * are read-only; scenarios 1–7, 11, 12, 14, 16 and 18 use scratch
  * submissions on the seeded journal with reviewer.julia / reviewer.paul,
- * author.alex and sectioneditor.ana; scenarios 8, 9, 10 and 13 seed a
- * scratch journal through the `review` / `reviewForms[]` passthrough keys
+ * author.alex and sectioneditor.ana (S6 also has editor.diana assign
+ * sectioneditor.ravi on screen and reads manager.maya's mailbox);
+ * scenarios 8, 9, 10 and 13 seed a scratch journal through the `review` /
+ * `reviewForms[]` / `metadata` passthrough keys
  * with throwaway users whose addresses carry app + test
  * (u28s10ojsw0…@mail.test). Mail is read by recipient plus the tag-bearing
  * submission title (PRINCIPLES A8); silence claims are bounded by the
@@ -48,6 +48,8 @@ const {
     saveEditReview,
     setEditReviewFile,
     pickDate,
+    assignParticipant,
+    reviewTypeRadio,
     openActivityLog,
     closeSideWindow,
     openReviewDetails,
@@ -76,6 +78,13 @@ const REVIEWER_MAIL = `${REVIEWER}@mail.test`;
 const SECOND_REVIEWER = 'reviewer.paul';
 const SECOND_REVIEWER_NAME = 'Paul Reviewer';
 const AUTHOR = 'author.alex';
+/** S6: the editors the seeded submission's stage holds when it comes in (the section's and the participant). */
+const STAGE_EDITORS = ['sectioneditor.ana', 'editor.diana', 'sectioneditor.omar'];
+/** S6: the Section Editor added to the stage with "Assign" afterwards. */
+const ADDED_EDITOR = 'sectioneditor.ravi';
+const ADDED_EDITOR_NAME = 'Ravi Section Editor';
+/** S6: the Journal Manager, on no Participants panel. */
+const MANAGER_MAIL = 'manager.maya@mail.test';
 const SECOND_FIXTURE = path.join(__dirname, '..', 'fixtures', 'files', 'profile-image-400.png');
 const SECOND_FIXTURE_NAME = 'profile-image-400.png';
 const NO_GUIDELINES = 'This publisher has not set any reviewer guidelines.';
@@ -95,6 +104,11 @@ const GRID_DATE = /[A-Z][a-z]+ \d{1,2}, \d{4}/;
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
     return `u28${scenario}ojsw${testInfo.parallelIndex}${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/** A Date as the list writes it, year-month-day (local calendar, as pickDate picks it). */
+function isoDate(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 function daysFromNow(n) {
@@ -117,6 +131,7 @@ async function seedInReview(ojsApi, tag, {
     participants = context === JOURNAL ? [{username: EDITOR, role: 'sectionEditor'}] : [],
     published = false,
     title = `Submission ${tag}`,
+    extra = {},
 } = {}) {
     const result = await ojsApi.createSubmission({
         tag,
@@ -127,6 +142,7 @@ async function seedInReview(ojsApi, tag, {
         reviewRounds: rounds || [{reviewers}],
         participants,
         ...(published ? {published: true} : {}),
+        ...extra,
     });
     return {submissionId: result.submissionId, title};
 }
@@ -627,11 +643,25 @@ test.describe('reviewer\'s review', () => {
 
     test('S6: submit a free-form review', {tag: '@smoke'}, async ({asUser, ojsApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(240_000);
+        test.setTimeout(360_000);
         const tag = makeTag('s6', testInfo);
         const {submissionId, title} = await seedInReview(ojsApi, tag, {
-            reviewers: [{username: REVIEWER, status: 'accepted'}],
+            reviewers: [
+                {username: REVIEWER, status: 'accepted'},
+                {username: SECOND_REVIEWER, status: 'accepted'},
+            ],
         });
+
+        // The second Section Editor joins the stage after the submission came
+        // in: editor.diana's "Assign" on the Participants panel (a seeded
+        // participant is not everything "Assign" leaves, footnote s).
+        const dianaPage = await (await asUser('editor.diana')).newPage();
+        const dianaWorkflow = new WorkflowPage(dianaPage, JOURNAL);
+        await dianaWorkflow.gotoEditorial(submissionId);
+        await assignParticipant(dianaPage, {group: 'Section editor', name: ADDED_EDITOR_NAME, searchName: 'Ravi'});
+        await dianaPage.reload();
+        await expect(dianaWorkflow.participantRow(ADDED_EDITOR_NAME)).toBeVisible({timeout: 30_000});
+        await dianaPage.close();
 
         // Before the submit the reviewer's "Tasks" panel holds "Review pending."
         // for the submission.
@@ -706,11 +736,15 @@ test.describe('reviewer\'s review', () => {
         await after.tasks.close();
 
         // Every editor assigned to the stage gets "Review complete: …" with
-        // the recommendation in the subject.
-        for (const editor of ['sectioneditor.ana', 'editor.diana', 'sectioneditor.omar']) {
+        // the recommendation in the subject; the editor added with "Assign"
+        // gets the same email as those assigned when the submission came in.
+        for (const editor of STAGE_EDITORS) {
             const mail = await pkpMail.find({to: `${editor}@mail.test`, subject: 'Review complete', contains: tag});
             expect(mail.Subject).toContain('recommends Revisions Required');
         }
+        const addedMail = await pkpMail.find({to: `${ADDED_EDITOR}@mail.test`, subject: 'Review complete', contains: tag});
+        expect(addedMail.Subject).toContain(`${REVIEWER_NAME} recommends Revisions Required`);
+        expect(addedMail.Subject).toContain(title);
 
         // The editor's "Tasks" panel gains no entry for it (bounded by the
         // mail that the same submit sent).
@@ -731,7 +765,62 @@ test.describe('reviewer\'s review', () => {
             `The round 1 review assigned to ${REVIEWER_NAME} for submission ${submissionId} has been completed.`
         );
 
-        // Control: "View" opens the wizard on "4. Completion".
+        // A review submitted in French: the second Reviewer saves step 3 in
+        // English, then submits it from the French interface (the wizard at
+        // {journal}/fr_CA/…, footnote s).
+        const paulPage = await (await asUser(SECOND_REVIEWER)).newPage();
+        const paulWizard = new ReviewWizardPage(paulPage, JOURNAL);
+        await paulWizard.goto(submissionId);
+        await walkToStep3(paulWizard);
+        await paulWizard.typeComments(`Clear and complete. ${tag}`);
+        await paulWizard.chooseRecommendation('Accept Submission');
+        await paulWizard.saveForLater();
+        const frWizard = new ReviewWizardPage(paulPage, `${JOURNAL}/fr_CA`, {
+            submitLabel: 'Soumettre l\'évaluation',
+            confirmText: 'Voulez-vous vraiment envoyer cette évaluation ?',
+        });
+        await paulPage.goto(frWizard.url(submissionId, 3));
+        await frWizard.expectStep(3);
+        await expect(frWizard.submitReviewButton).toBeEnabled();
+        await frWizard.submitReview();
+        await frWizard.expectStep(4);
+
+        // Each editor, the one added with "Assign" included, holds a second
+        // email, in French: "Évaluation terminée: …", its body "{reviewer} a
+        // terminé son évaluation : …", its links on the French pages. The
+        // subject's tail is not asserted (footnote n); it is logged.
+        for (const editor of [...STAGE_EDITORS, ADDED_EDITOR]) {
+            const mail = await pkpMail.find({to: `${editor}@mail.test`, subject: 'terminée', contains: tag});
+            expect(mail.Subject.startsWith('Évaluation terminée: '), `subject "${mail.Subject}"`).toBe(true);
+            console.log(`S6 French subject to ${editor}: ${mail.Subject}`);
+            const full = await pkpMail.fullMessage(mail.ID);
+            expect(full.Text).toMatch(new RegExp(`${SECOND_REVIEWER_NAME} a terminé son évaluation\\s*:`));
+            const links = [...full.HTML.matchAll(/<a\b[^>]*href=(["'])([^"']+)\1/gi)]
+                .map((m) => m[2])
+                .filter((href) => href.includes(`/${JOURNAL}/`));
+            expect(links.length, 'the email links into the journal').toBeGreaterThan(0);
+            for (const href of links) {
+                expect(href).toMatch(new RegExp(`/${JOURNAL}/fr_CA(?:[/?#]|$)`));
+            }
+        }
+
+        // The Journal Manager, on no Participants panel, holds neither email
+        // (bounded by the first Section Editor's copies of both).
+        await pkpMail.expectNone({
+            to: MANAGER_MAIL,
+            subject: 'Review complete',
+            contains: tag,
+            afterControl: {to: EDITOR_MAIL, subject: 'Review complete', contains: tag},
+        });
+        await pkpMail.expectNone({
+            to: MANAGER_MAIL,
+            subject: 'terminée',
+            contains: tag,
+            afterControl: {to: EDITOR_MAIL, subject: 'terminée', contains: tag},
+        });
+
+        // Control: "View" on the first Reviewer's row opens the wizard on
+        // "4. Completion".
         await list.goto('completed');
         await list.openWizard(list.row(tag), 'View');
         await wizard.expectCompleted();
@@ -936,31 +1025,48 @@ test.describe('reviewer\'s review', () => {
         const tag = makeTag('s9', testInfo);
         const manager = `mgr${tag}`;
         const reviewer = `rev${tag}`;
+        const anonReviewer = `anon${tag}`;
         const author = `au${tag}`;
+        const authorFamily = `Author${tag}`;
+        const AGENCY = 'Agency Alpha';
         await ojsApi.createContext({
             tag,
             review: {restrictReviewerFileAccess: true, defaultReviewMode: 'open'},
+            metadata: {agencies: 'request'},
             users: [
                 {username: manager, roles: ['manager']},
-                {username: author, roles: ['author'], givenName: 'Open', familyName: `Author${tag}`},
+                {username: author, roles: ['author'], givenName: 'Open', familyName: authorFamily},
                 {username: reviewer, roles: ['externalReviewer'], givenName: 'Restricted', familyName: `Reviewer${tag}`},
+                {username: anonReviewer, roles: ['externalReviewer'], givenName: 'Hidden', familyName: `Reviewer${tag}`},
             ],
         });
         const {submissionId, title} = await seedInReview(ojsApi, tag, {
             context: tag,
             submitter: author,
-            reviewers: [{username: reviewer, status: 'invited'}],
+            reviewers: [
+                {username: reviewer, status: 'invited'},
+                {username: anonReviewer, status: 'invited'},
+            ],
+            extra: {supportingAgencies: [AGENCY]},
         });
 
-        // Manager: one file into the round, ticked for the reviewer.
+        // Manager: one file into the round, ticked for the first reviewer;
+        // the second reviewer's review type set to "Anonymous
+        // Reviewer/Anonymous Author" in the row's "Edit" window (the review
+        // method is no seed key, footnote s).
         const managerPage = await (await asUser(manager)).newPage();
         const workflow = new WorkflowPage(managerPage, tag);
         await workflow.gotoEditorial(submissionId);
         await uploadRoundFiles(managerPage, [FIXTURE_PDF]);
         await grantFilesToReviewer(managerPage, workflow, 'Restricted', [FIXTURE_PDF_NAME]);
+        const anonRow = workflow.panelRow('Reviewers', 'Hidden');
+        await expect(anonRow).toBeVisible({timeout: 30_000});
+        const editModal = await openEditReview(managerPage, anonRow);
+        await reviewTypeRadio(editModal, 'Anonymous Reviewer/Anonymous Author').check();
+        await saveEditReview(managerPage, editModal);
 
         // Reviewer: no "Review Files" list on step 1 (control: the rest of
-        // the step is there); "Open", and the details window names the authors.
+        // the step is there); "Open".
         const page = await (await asUser(reviewer)).newPage();
         const wizard = new ReviewWizardPage(page, tag);
         await wizard.goto(submissionId);
@@ -968,10 +1074,15 @@ test.describe('reviewer\'s review', () => {
         await expect(wizard.reviewFilesGrid(1)).toHaveCount(0);
         await expect(page.locator('#reviewStep1Form')).not.toContainText('Review Files');
         expect(await wizard.step1Value('Review Type')).toBe('Open');
+
+        // "View All Submission Details" on an "Open" review: the authors and
+        // the supporting agency, with the title and the abstract.
         const details = await wizard.openSubmissionDetails();
         await expect(details).toContainText(title);
         await expect(details).toContainText(`Seeded abstract for ${tag}.`);
         await expect(details).toContainText('Authors');
+        await expect(details).toContainText(authorFamily);
+        await expect(details).toContainText(AGENCY);
         await details.getByRole('button', {name: 'Close', exact: true}).click();
         await expect(details).toBeHidden({timeout: 30_000});
 
@@ -994,8 +1105,27 @@ test.describe('reviewer\'s review', () => {
             await expect(filters).not.toContainText(text);
         }
         await list.closeFilters(filters);
-        // Control for the setting's "off" end: S4 (the list is on step 1) and
-        // S2 (an anonymous request's window names no authors).
+
+        // The same window on an anonymous review: the second Reviewer's step
+        // 1 reads "Anonymous Reviewer/Anonymous Author"; the window shows the
+        // title and the abstract (the settled read's positive control) and
+        // neither the authors nor the agency.
+        const anonPage = await (await asUser(anonReviewer)).newPage();
+        const anonWizard = new ReviewWizardPage(anonPage, tag);
+        await anonWizard.goto(submissionId);
+        await anonWizard.expectStep(1);
+        expect(await anonWizard.step1Value('Review Type')).toBe('Anonymous Reviewer/Anonymous Author');
+        const anonDetails = await anonWizard.openSubmissionDetails();
+        await expect(anonDetails).toContainText(title);
+        await expect(anonDetails).toContainText(`Seeded abstract for ${tag}.`);
+        await expect(anonDetails).not.toContainText('Authors');
+        await expect(anonDetails).not.toContainText(authorFamily);
+        await expect(anonDetails).not.toContainText(AGENCY);
+        await anonDetails.getByRole('button', {name: 'Close', exact: true}).click();
+        await expect(anonDetails).toBeHidden({timeout: 30_000});
+        // Control for the setting's "off" end: S3 (an unanswered request's
+        // step 1 shows "Review Files") and S2 (an anonymous request's window
+        // names no authors).
     });
 
     test('S10: one-click access', async ({asUser, browser, baseURL, ojsApi, pkpMail}, testInfo) => {
@@ -1061,13 +1191,27 @@ test.describe('reviewer\'s review', () => {
             await wizard1.expectOpen();
             await wizard1.expectStep(1);
 
-            // Response overdue: the manager moves the response date into the
-            // past through the row's "Edit" window; the list row reads so.
+            // Response due today: the manager sets the response date to today
+            // in the row's "Edit" window, the review date left on its later
+            // day; the list row still asks for an answer by today's date.
             const row = workflow.panelRow('Reviewers', 'Oneclick');
+            const todayModal = await openEditReview(managerPage, row);
+            const today = daysFromNow(0);
+            await pickDate(managerPage, todayModal, 'responseDueDate', today);
+            await saveEditReview(managerPage, todayModal);
+            const list = new ReviewerAssignmentsPage(page1, tag);
+            await list.goto('actionRequired');
+            await expect(list.row(tag)).toContainText(`Please accept or decline this request by ${isoDate(today)}`);
+            await expect(list.row(tag)).not.toContainText(RESPONSE_OVERDUE);
+            await expect(list.rowAction(list.row(tag), 'Respond to request')).toBeVisible();
+
+            // Response overdue: the manager sets the response date to
+            // yesterday's date the same way; the list row reads so.
+            await managerPage.reload();
+            await workflow.expectOpen();
             const editModal = await openEditReview(managerPage, row);
             await pickDate(managerPage, editModal, 'responseDueDate', daysFromNow(-1));
             await saveEditReview(managerPage, editModal);
-            const list = new ReviewerAssignmentsPage(page1, tag);
             await list.goto('actionRequired');
             await expect(list.row(tag)).toContainText(RESPONSE_OVERDUE);
             await expect(list.rowAction(list.row(tag), 'Respond to request')).toBeVisible();

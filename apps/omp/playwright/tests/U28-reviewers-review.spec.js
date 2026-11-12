@@ -15,14 +15,13 @@
  * Not covered, by register ID (the spec's Coverage section is the record of
  * everything else left out; 🐞 findings are never asserted as contract,
  * PRINCIPLES M3, and a claim parked on an open ❓ is not a coverage gap):
- * A1, A2, A3, A4, A5, A6 (the refusal's shape only; that the file is refused
- * is asserted), A7 (the empty submit is driven as scenario 7 prescribes,
- * nothing about it beyond the mail's arrival), A9, A10, A11 (scenario 14's
- * archived wizard is driven as written), A12, A13, OMP3. Retired: A8, OMP2,
- * OMP4.
+ * A1, A2, A3, A4, A5, A6, A7, A9, A10, A11, A12, A13, A14, A15, A16, A17,
+ * A18, OMP3. Retired: A8, OMP2, OMP4.
  *
  * Seeding: scenario endpoints only. Scenarios 1–4, 6, 7, 11, 12, 14 and 18
- * run on the seeded press with the roster reviewers and scratch monographs;
+ * run on the seeded press with the roster reviewers and scratch monographs
+ * (6 adds ravi to the stage through "Assign" and submits paul's review from
+ * the French interface, `fr_CA` being a UI language of the press);
  * scenarios 5, 8, 9, 10, 13 and 15 on scratch presses configured through
  * the `review` and `reviewForms` passthrough keys with throwaway accounts
  * (5 for its server-fed toast, screen notes tomp). Mailpit is shared: every
@@ -50,6 +49,7 @@ const {
     openTasksPanel,
     closeTopModal,
     uploadRoundReviewFile,
+    assignParticipant,
 } = require('../pages/ReviewStagePages.js');
 const {
     reviewerRow,
@@ -62,6 +62,8 @@ const {
     activityLogRow,
     openReadReview,
     moveDueDate,
+    setReviewType,
+    isoDate,
     sendReminder,
     cancelReviewer,
     resendReviewRequest,
@@ -72,6 +74,9 @@ const PK = 'publicknowledge';
 const ANA = 'sectioneditor.ana';
 const JULIA = 'reviewer.julia';
 const PAUL = 'reviewer.paul';
+const RAVI = 'sectioneditor.ravi';
+const MAYA = 'manager.maya';
+const ANONYMOUS = 'Anonymous Reviewer/Anonymous Author';
 const PRIVATE_BOX = 'For editor only';
 const ACCESS_DENIED = 'The current role does not have access to this operation.';
 const NOT_ASSIGNED = 'The current user is not assigned as a reviewer for the requested document.';
@@ -259,6 +264,33 @@ function positions(text, phrases) {
         }
         return at;
     });
+}
+
+/**
+ * Step 3 in the French interface (`/{press}/fr_CA/reviewer/submission/{id}`):
+ * "Soumettre l'évaluation" and its confirmation "Voulez-vous vraiment
+ * envoyer cette évaluation ?" › "OK"; step 4 then reads "Évaluation
+ * envoyée" (screen notes tompr). Proposed for the shared `ReviewWizardPage`:
+ * a `labels` option (or `submitReview({labels})`) so the wizard can be
+ * driven in another interface language.
+ */
+async function submitReviewInFrench(page, contextPath, submissionId) {
+    await page.goto(`/index.php/${contextPath}/fr_CA/reviewer/submission/${submissionId}`);
+    await expect(page.getByRole('heading', {name: /^Évaluation :/, level: 1})).toBeVisible({timeout: 30_000});
+    const tab = page.getByRole('tab', {name: /^3\./});
+    await expect(tab).toHaveAttribute('aria-selected', 'true', {timeout: 30_000});
+    await expect(tab).not.toHaveClass(/\bui-tabs-loading\b/, {timeout: 30_000});
+    await page.getByRole('button', {name: "Soumettre l'évaluation", exact: true}).click();
+    const dialog = page.getByRole('dialog').filter({hasText: 'Voulez-vous vraiment envoyer cette évaluation'});
+    await expect(dialog).toBeVisible({timeout: 30_000});
+    await dialog.getByRole('button', {name: 'OK', exact: true}).click();
+    await expect(dialog).toBeHidden({timeout: 30_000});
+    await expect(page.getByRole('heading', {name: 'Évaluation envoyée'})).toBeVisible({timeout: 30_000});
+}
+
+/** Every address of the install an email's HTML links to (entities decoded). */
+function installLinks(html) {
+    return [...html.matchAll(/href="([^"]*\/index\.php\/[^"]*)"/g)].map((m) => m[1].replace(/&amp;/g, '&'));
 }
 
 test.describe("Reviewer's review (U28)", () => {
@@ -664,7 +696,22 @@ test.describe("Reviewer's review (U28)", () => {
 
     test('S6: submit a free-form review', async ({ompApi, asUser, pkpMail}, testInfo) => {
         const tag = makeTag(testInfo, 'u28s6');
-        const seeded = await seedExternal(ompApi, tag, [{username: JULIA, status: 'accepted'}]);
+        const seeded = await seedExternal(ompApi, tag, [
+            {username: JULIA, status: 'accepted'},
+            {username: PAUL, status: 'accepted'},
+        ]);
+
+        // The given: a second Series Editor added to the stage with "Assign"
+        // after the monograph came in (a seeded participant is not
+        // everything "Assign" leaves, footnote s); the Press Manager maya
+        // stays off the Participants panel.
+        const dianaPage = await (await asUser('editor.diana')).newPage();
+        const dianaModal = await openEditorial(dianaPage, PK, seeded.submissionId);
+        await assignParticipant(dianaPage, dianaModal, {
+            group: 'Series editor',
+            query: 'ravi',
+            resultName: 'Ravi Section Editor',
+        });
 
         // Before the submit, the reviewer's header "Tasks" panel holds
         // "Review pending." for the monograph (the control for its clearing).
@@ -736,9 +783,15 @@ test.describe("Reviewer's review (U28)", () => {
         tasks = await openTasksPanel(page);
         await expect(taskRow(tasks, titleFor(tag))).toHaveCount(0);
 
-        // The assigned editor's mailbox holds "Review complete: …" (its
-        // "reviewed #{id}" subject, OMP2 retired, is U05 scenario 11's).
-        await pkpMail.find({to: getEmail(ANA), subject: 'Review complete', contains: tag});
+        // The editor's side: the assigned editor's mailbox holds "Review
+        // complete: {reviewer} reviewed #{id} …", no recommendation. The
+        // editor added with "Assign": the second Series Editor's mailbox
+        // holds the same email.
+        for (const editor of [ANA, RAVI]) {
+            const mail = await pkpMail.find({to: getEmail(editor), subject: 'Review complete', contains: tag});
+            expect(mail.Subject.startsWith(`Review complete: Julia Reviewer reviewed #${seeded.submissionId} `)).toBe(true);
+            expect(mail.Subject).not.toMatch(/recommend/i);
+        }
 
         // The Section Editor's header "Tasks" panel gains no entry for it
         // (bounded by the panel's own table); the Reviewers panel row reads
@@ -757,6 +810,48 @@ test.describe("Reviewer's review (U28)", () => {
                 `The round 1 review assigned to Julia Reviewer for submission ${seeded.submissionId} has been completed.`
             )
         ).toBeVisible();
+
+        // A review submitted in French: paul types "Clear and complete." on
+        // step 3 and saves for later in English, then submits the same step
+        // from the French interface. Each editor's mailbox, ravi's
+        // included, holds "Évaluation terminée: …", its body reading
+        // "{reviewer} a terminé son évaluation : …" and its links opening
+        // the French pages. (Past "Évaluation terminée: " the subject is
+        // footnote n's "recommande Aucun-e" and is not asserted; it is
+        // logged for the findings.)
+        const paulPage = await (await asUser(PAUL)).newPage();
+        const {wizard: paulWizard} = reviewerScreens(paulPage, PK);
+        await walkToStep3(paulWizard, seeded.submissionId);
+        await paulWizard.typeComments('Clear and complete.');
+        await paulWizard.saveForLater();
+        await submitReviewInFrench(paulPage, PK, seeded.submissionId);
+        for (const editor of [ANA, RAVI]) {
+            const mail = await pkpMail.find({to: getEmail(editor), subject: 'terminée', contains: tag});
+            expect(mail.Subject.startsWith('Évaluation terminée: ')).toBe(true);
+            console.log(`[U28 S6 omp] French subject to ${editor}: ${mail.Subject}`);
+            const full = await pkpMail.fullMessage(mail.ID);
+            expect(full.Text).toContain('Paul Reviewer a terminé son évaluation :');
+            const links = installLinks(full.HTML);
+            expect(links.length).toBeGreaterThan(0);
+            for (const link of links) {
+                expect(link).toContain(`/index.php/${PK}/fr_CA`);
+            }
+        }
+
+        // The Press Manager, on no Participants panel, holds neither email:
+        // read the same way as ana's French one, which bounds the wait.
+        await pkpMail.expectNone({
+            to: getEmail(MAYA),
+            subject: 'Review complete',
+            contains: tag,
+            afterControl: {to: getEmail(ANA), subject: 'terminée', contains: tag},
+        });
+        await pkpMail.expectNone({
+            to: getEmail(MAYA),
+            subject: 'terminée',
+            contains: tag,
+            afterControl: {to: getEmail(ANA), subject: 'terminée', contains: tag},
+        });
     });
 
     test('S7: nothing stops an empty review', async ({ompApi, asUser, pkpMail}, testInfo) => {
@@ -951,28 +1046,40 @@ test.describe("Reviewer's review (U28)", () => {
         const tag = makeTag(testInfo, 'u28s9');
         const fileName = `${tag}A.txt`;
         const reviewer = `rv${tag}`;
+        const anonymousReviewer = `ra${tag}`;
         const press = {
             path: tag,
             ...(await seedScratchPress(ompApi, tag, {
-                users: [{username: reviewer, roles: ['externalReviewer'], givenName: `Rv${tag}`, familyName: 'Reviewer'}],
+                users: [
+                    {username: reviewer, roles: ['externalReviewer'], givenName: `Rv${tag}`, familyName: 'Reviewer'},
+                    {username: anonymousReviewer, roles: ['externalReviewer'], givenName: `Ra${tag}`, familyName: 'Reviewer'},
+                ],
                 review: {restrictReviewerFileAccess: true, defaultReviewMode: 'open'},
             })),
         };
         const seeded = await seedScratchMonograph(ompApi, tag, press, {
-            reviewers: [{username: reviewer, status: 'invited'}],
+            reviewers: [
+                {username: reviewer, status: 'invited'},
+                {username: anonymousReviewer, status: 'invited'},
+            ],
         });
 
-        // The editor puts one file on the round and ticks it for the reviewer.
+        // The editor puts one file on the round and ticks it for the first
+        // reviewer, and sets the second reviewer's review type to
+        // "Anonymous Reviewer/Anonymous Author" in the row's "Edit" window
+        // (the review method is no seed key, footnote s).
         const editorPage = await (await asUser(press.manager)).newPage();
         const modal = await openEditorial(editorPage, tag, seeded.submissionId);
         await uploadRoundReviewFile(editorPage, modal, fileName);
         await grantFileToReviewer(editorPage, reviewerRow(modal, `Rv${tag} Reviewer`), fileName);
+        await setReviewType(editorPage, reviewerRow(modal, `Ra${tag} Reviewer`), ANONYMOUS);
 
         // Step 1 shows no "Review Files" list at all (bounded by the step's
-        // other content); "Review Type" reads "Open", and the details
-        // window names the authors with the title and the abstract.
-        // Controls: scenario 4 (the setting off) and scenario 2 (the
-        // anonymous window naming no authors) on the seeded press.
+        // other content); "Review Type" reads "Open". "View All Submission
+        // Details" on an "Open" review: the window names the authors with
+        // the title and the abstract. Controls: scenario 3 (the setting off,
+        // "Review Files" on an unanswered request's step 1) and scenario 2
+        // (the anonymous window naming no authors) on the seeded press.
         const page = await (await asUser(reviewer)).newPage();
         const {list, wizard} = reviewerScreens(page, tag);
         await wizard.goto(seeded.submissionId);
@@ -1008,6 +1115,23 @@ test.describe("Reviewer's review (U28)", () => {
         await expect(filters.getByText('Issues', {exact: true})).toHaveCount(0);
         await expect(filters.getByRole('button', {name: 'Clear Filters', exact: true})).toBeVisible();
         await closeFilters(page, filters);
+
+        // The same window on an anonymous review: the second reviewer's
+        // step 1 reads "Anonymous Reviewer/Anonymous Author"; the window
+        // shows the title and the abstract (the positive reads, taken once
+        // its content is in) and not the authors.
+        const anonPage = await (await asUser(anonymousReviewer)).newPage();
+        const {wizard: anonWizard} = reviewerScreens(anonPage, tag);
+        await anonWizard.goto(seeded.submissionId);
+        await expect(anonPage.getByText('Review Type', {exact: true})).toBeVisible();
+        await expect(anonPage.locator('main')).not.toContainText('Loading');
+        expect(await anonWizard.step1Value('Review Type')).toBe(ANONYMOUS);
+        const anonDetails = await anonWizard.openSubmissionDetails();
+        await expect(anonDetails).toContainText(titleFor(tag));
+        await expect(anonDetails).toContainText(`Seeded abstract for ${tag}.`);
+        await expect(anonDetails.getByText('Authors', {exact: true})).toHaveCount(0);
+        await expect(anonDetails).not.toContainText(`Au${tag}`);
+        await anonWizard.closeDialog(anonDetails);
     });
 
     test('S10: one-click access', async ({ompApi, asUser, pkpMail, browser, baseURL}, testInfo) => {
@@ -1058,10 +1182,22 @@ test.describe("Reviewer's review (U28)", () => {
         await firstWizard.expectOpen(titleFor(tag));
         await expect(firstWizard.acceptButton).toBeVisible();
 
-        // Response overdue: the manager moves "Response Due Date" into the
-        // past through the row's "Edit" window (on a fresh load of the
-        // workflow: the calendar the Add Reviewer window initialised sits
-        // under a later window); the reviewer's row reads the overdue
+        // Response due today: the manager sets "Response Due Date" to today
+        // through the row's "Edit" window (on a fresh load of the workflow:
+        // the calendar the Add Reviewer window initialised sits under a
+        // later window), "Review Due Date" left on its later date; the
+        // reviewer's row reads "Please accept or decline this request by
+        // {today}" with "Respond to request".
+        modal = await openEditorial(editorPage, tag, seeded.submissionId);
+        await moveDueDate(editorPage, reviewerRow(modal, `Rv${tag} Reviewer`), 'responseDueDate', daysFromNow(0));
+        await firstList.goto('actionRequired');
+        const todayRow = firstList.row(tag);
+        await expect(todayRow).toContainText(`Please accept or decline this request by ${isoDate(daysFromNow(0))}`);
+        await expect(todayRow).not.toContainText('Deadline for responding');
+        await expect(firstList.rowAction(todayRow, 'Respond to request')).toBeVisible();
+
+        // Response overdue: the manager sets "Response Due Date" to
+        // yesterday's date in the same window; the row reads the overdue
         // wording with "Respond to request".
         modal = await openEditorial(editorPage, tag, seeded.submissionId);
         await moveDueDate(editorPage, reviewerRow(modal, `Rv${tag} Reviewer`), 'responseDueDate', daysFromNow(-1));
@@ -1092,8 +1228,8 @@ test.describe("Reviewer's review (U28)", () => {
         await thirdWizard.accept();
         await pkpMail.find({to: contactEmail, subject: 'Review accepted', contains: titleFor(tag)});
 
-        // Review overdue: the manager moves "Review Due Date" into the past
-        // the same way (to the response date's day: the window refuses an
+        // Review overdue: the manager sets "Review Due Date" to yesterday's
+        // date the same way (the response date's day: the window refuses an
         // earlier one); the row reads the overdue wording with "Finish
         // review".
         modal = await openEditorial(editorPage, tag, seeded.submissionId);
@@ -1539,9 +1675,17 @@ test.describe("Reviewer's review (U28)", () => {
         await wizard.submitReview();
         await wizard.expectCompleted();
 
-        // The "Review complete" email reaches the stage's editor (its
-        // "reviewed #{id}" subject, OMP2 retired, is U05 scenario 11's).
-        await pkpMail.find({to: press.editorEmail, subject: 'Review complete', contains: titleFor(tag)});
+        // The editor's email: the stage's editor's mailbox holds "Review
+        // complete: {reviewer} reviewed #{id} …", naming no recommendation
+        // in its subject, and its body has no "Recommendation:" line (read
+        // against the body's own opening line and its "Type:" line).
+        const mail = await pkpMail.find({to: press.editorEmail, subject: 'Review complete', contains: titleFor(tag)});
+        expect(mail.Subject.startsWith(`Review complete: Ir${tag} Reviewer reviewed #${internal.submissionId} `)).toBe(true);
+        expect(mail.Subject).not.toMatch(/recommend/i);
+        const body = (await pkpMail.fullMessage(mail.ID)).Text;
+        expect(body).toContain(`Ir${tag} Reviewer completed the following review:`);
+        expect(body).toContain('Type:');
+        expect(body).not.toMatch(/Recommendation\s*:/);
 
         // External Review: step 2 shows the "External Review Guidelines".
         const externalPage = await (await asUser(externalReviewer)).newPage();

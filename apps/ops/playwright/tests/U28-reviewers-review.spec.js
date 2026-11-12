@@ -142,8 +142,8 @@ test.describe("reviewer's review (U28) — OPS absence", () => {
         // control, taken the same way: the installed groups' rows render.
         const users = new UsersRolesPage(managerPage, tag);
         await users.goto();
-        await managerPage.getByRole('tab', {name: 'Roles', exact: true}).click();
-        const roleRows = managerPage.locator('#roleGridContainer tr.gridRow');
+        await users.openRolesTab();
+        const roleRows = users.roleRows();
         await expect(roleRows.filter({hasText: 'Preprint Server manager'})).toBeVisible();
         await expect(roleRows.filter({hasText: 'Moderator'})).toBeVisible();
         // …and no row names any reviewer role (bounded by the same grid's
@@ -155,30 +155,33 @@ test.describe("reviewer's review (U28) — OPS absence", () => {
         // …its "Create New Role" window still offers the "Reviewer"
         // permission level (a legacy modal; form `#userGroupForm`, a
         // "Cancel" link and an "OK" button).
-        await managerPage.locator('#roleGridContainer')
-            .getByRole('link', {name: 'Create New Role', exact: true})
-            .or(managerPage.locator('#roleGridContainer').getByRole('button', {name: 'Create New Role', exact: true}))
-            .first().click();
-        const roleForm = managerPage.locator('#userGroupForm');
-        const level = roleForm.getByRole('combobox', {name: /^Permission level/});
-        await expect(level).toBeVisible();
+        const roleForm = await users.openCreateRole();
+        const level = users.permissionLevel();
         await expect(level.locator('option', {hasText: /^Reviewer$/})).toHaveCount(1);
-        // Positive control, read the same way: at a stage-taking level
-        // ("Moderator"; the window opens on "Manager", which, like
-        // "Reviewer" and "Reader", takes no stage) the only stage,
-        // "Production", is offered enabled…
-        const production = roleForm.getByRole('checkbox', {name: 'Production', exact: true});
-        await level.selectOption({label: 'Moderator'});
+
+        // ── "Create New Role" at "Reviewer" ─────────────────────────────────
+        // Positive control, read the same way (a level chosen, the block's
+        // 600 ms jQuery slide waited out): at a stage-taking level
+        // ("Moderator") the "Stage Assignment" list shows, its "Production"
+        // box offered enabled. (The window opens on "Manager",
+        // which takes no stage: the block is already hidden there.)
+        const stageAssignment = users.stageAssignment();
+        const production = users.stageBox('Production');
+        await users.choosePermissionLevel('Moderator');
+        await expect(stageAssignment).toBeVisible();
+        await expect(stageAssignment.getByText('Stage Assignment', {exact: true})).toBeVisible();
+        await expect(production).toBeVisible();
         await expect(production).toBeEnabled();
-        // …and choosing "Reviewer" greys it out (bounded by the same
-        // window having just rendered). The spec's "the only stage" is not
-        // asserted: between 2026-09-08 and 2026-09-12 (pkp/pkp-lib#13109,
-        // then #13312) the "Stage Assignment" list and the Roles grid
-        // carried a second stage, "Done", enabled under "Reviewer"
-        // (T-ops-1, folded into the spec's scenario 17 footnote); the
-        // stage count stays unasserted either way.
-        await level.selectOption({label: 'Reviewer'});
-        await expect(production).toBeDisabled();
+        // …and choosing "Reviewer" hides the whole "Stage Assignment" list,
+        // its "Production" box with it (bounded by the same block having
+        // just shown). The stage count stays unasserted: between 2026-09-08
+        // and 2026-09-12 (pkp/pkp-lib#13109, then #13312) the list carried a
+        // second stage, "Done", enabled under "Reviewer" (T-ops-1, folded
+        // into the spec's scenario 17 footnote).
+        await users.choosePermissionLevel('Reviewer');
+        await expect(stageAssignment).toBeHidden();
+        await expect(stageAssignment.getByText('Stage Assignment', {exact: true})).toBeHidden();
+        await expect(production).toBeHidden();
         // …while the role still saves: "OK" closes the window and the grid
         // lists the new role at the "Reviewer" level (the sixth row).
         const roleName = `Scratch Reviewer ${tag}`;

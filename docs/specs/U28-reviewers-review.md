@@ -415,8 +415,12 @@ give no access to any screen in this spec. <sup>l</sup>
   Review": a reviewer working in French sends "Évaluation terminée:
   {reviewer} recommande {recommendation} pour #{id} {authors} — {title}",
   its body reading "{reviewer} a terminé son évaluation : …" and its links
-  opening the French pages, to editors who work in English. The editors'
-  header "Tasks" panel gains no entry; any other notice of the review on
+  opening the French pages, to editors who work in English. On a press
+  the French email still names a recommendation, "Aucun-e", in its
+  subject and in a "Recommandation :" line, although the English one
+  names none: the press's own wording of this email is not translated
+  into French yet, so the French wording that names one is sent. The
+  editors' header "Tasks" panel gains no entry; any other notice of the review on
   their screens is *Notifications center & email preferences*'s. The
   reviewer's own "Review
   pending." task is cleared, the activity log records "The round {N} review
@@ -508,11 +512,11 @@ forms*. <sup>o</sup>
 ## Canonical scenarios
 
 Scenarios 1 to 7, 11, 12, 14, 16 and 18 run on the seeded journal with
-ready accounts and scratch submissions; scenarios 8, 9, 10, 13 and 15 run
-on a scratch journal configured for them, with throwaway accounts; scenario
-17 runs on the seeded preprint server and, for its variant, on a scratch
-one. Each email is read in the mailbox of the address it was sent to.
-Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
+ready accounts and scratch submissions, scenarios 8, 9, 10, 13 and 15 on a
+scratch journal configured for them with throwaway accounts, and scenario
+17 on the seeded preprint server and, for its home-made role, a scratch
+one. Each email is read in the mailbox of the address it was sent to; the
+accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
 1. **The request appears in the reviewer's list**
 
@@ -649,7 +653,10 @@ Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
 6. **Submit a free-form review**
 
    Given: Reviewer, on step 3 of an accepted request whose submission has
-   an assigned Section Editor.
+   an assigned Section Editor, a second Section Editor added to the stage
+   with "Assign" after the submission came in, and a second Reviewer with
+   an accepted request on the same submission; a Journal Manager not on
+   the submission's Participants panel.
 
    - **Step 3**: shows, in order, the "Review Files" list, "Review" with
      the boxes "For author and editor" and "For editor" {OJS} / "For editor
@@ -676,13 +683,27 @@ Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **The editor's side**: the mailbox of each editor assigned to the
      stage holds "Review complete: …" with the recommendation in its
      subject ({OMP}: "Review complete: {reviewer} reviewed #{id} …", no
-     recommendation); the Section
+     recommendation); the first Section
      Editor's header "Tasks" panel gains no entry; the Reviewers panel row
      reads "Review Submitted", and the submission's activity log records
      "The round 1 review assigned to {reviewer} for submission {id} has
      been completed.".
-   - **Control**: "View" on the list row opens the wizard on
-     "4. Completion".
+   - **The editor added with "Assign"**: the second Section Editor's
+     mailbox holds the same "Review complete: …" as the editors assigned
+     when the submission came in.
+   - **A review submitted in French**: second Reviewer: on step 3 type
+     "Clear and complete." into "For author and editor" ({OJS}: choose
+     "Accept Submission") and press "Save for Later"; switch the interface
+     to French and, on the same step, press "Submit Review" and confirm,
+     both now in French. Each editor's mailbox, the second Section
+     Editor's included, holds a second email, "Évaluation terminée: …",
+     its body reading "{reviewer} a terminé son évaluation : …" and its
+     links opening the French pages, although the editors work in
+     English.
+   - **The Journal Manager**: the Journal Manager's mailbox holds neither
+     "Review complete: …" nor "Évaluation terminée: …".
+   - **Control**: "View" on the first Reviewer's list row opens the wizard
+     on "4. Completion".
 
 7. **Nothing stops an empty review**
 
@@ -752,20 +773,28 @@ Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
    Given: Reviewer, on a scratch journal with "Restrict File Access" on and
    "Default Review Mode" "Open", with one section, no issues and no
-   categories, holding an unanswered request with one ticked file.
+   categories, holding an unanswered request with one ticked file on a
+   submission that records the supporting agency "Agency Alpha" {OJS},
+   where a second Reviewer holds an unanswered "Anonymous
+   Reviewer/Anonymous Author" request.
 
-   - **Step 1**: shows no "Review Files" list. "Review Type" reads "Open";
-     press "View All Submission Details": the window names the authors,
-     with the title and the abstract; close it.
+   - **Step 1**: shows no "Review Files" list. "Review Type" reads "Open".
+   - **"View All Submission Details" on an "Open" review**: press it: the
+     window names the authors and {OJS} the supporting agency "Agency
+     Alpha", with the title and the abstract; close it.
    - **After accepting**: tick the privacy box, press "Accept Review,
      Continue to Step #2", then "Continue to Step #3": step 3 lists the
      file under "Review Files" and its name downloads it.
    - **"Filters" on a bare journal**: on "My Assignments as Reviewer" press
      "Filters": the window offers "Days since last activity" alone, with
      "Clear Filters" and "Apply Filters".
-   - **Control**: on the seeded journal (the setting off) the list is on
-     step 1 before acceptance (scenario 4), and the window of its
-     "Anonymous Reviewer/Anonymous Author" request names no authors
+   - **The same window on an anonymous review**: second Reviewer: step 1's
+     "Review Type" reads "Anonymous Reviewer/Anonymous Author"; press "View
+     All Submission Details": the window shows the title and the abstract,
+     and neither the authors nor {OJS} "Agency Alpha"; close it.
+   - **Control**: on the seeded journal (the setting off) an unanswered
+     request's step 1 shows "Review Files" (scenario 3), and the window of
+     its "Anonymous Reviewer/Anonymous Author" request names no authors
      (scenario 2).
 
 10. **One-click access**
@@ -780,12 +809,16 @@ Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
       in a second signed-out browser: the wizard again. Open it once more
       in the first browser, still signed in as the reviewer: the wizard
       again.
-    - **Response overdue**: Journal Manager: in the row's "Edit" window
-      move "Response Due Date" into the past
+    - **Response due today**: Journal Manager: in the row's "Edit" window
+      set "Response Due Date" to today's date, leaving "Review Due Date" on
+      its later date
       ([→ deadlines](U27-reviewer-assignment-and-management.md#due-dates)).
-      Reviewer: the list row reads "Deadline for responding to this request
-      has passed. Please accept or decline this request at the earliest."
-      with "Respond to request".
+      Reviewer: the list row reads "Please accept or decline this request
+      by {today's date}" with "Respond to request".
+    - **Response overdue**: Journal Manager: in the same window set
+      "Response Due Date" to yesterday's date. Reviewer: the list row reads
+      "Deadline for responding to this request has passed. Please accept or
+      decline this request at the earliest." with "Respond to request".
     - **A reminder's link**: Journal Manager: press the row's "Send
       Reminder" and send it
       ([→ reminders](U27-reviewer-assignment-and-management.md#reminders)).
@@ -796,10 +829,10 @@ Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
     - **The acceptance**: tick the privacy box and press "Accept Review,
       Continue to Step #2": the journal's principal contact's mailbox holds
       "Review accepted: …", nobody being assigned to the submission.
-    - **Review overdue**: Journal Manager: move "Review Due Date" into the
-      past the same way. Reviewer: the row reads "Deadline for completing
-      this review has passed. Please complete the review at the earliest."
-      with "Finish review".
+    - **Review overdue**: Journal Manager: set "Review Due Date" to
+      yesterday's date the same way. Reviewer: the row reads "Deadline for
+      completing this review has passed. Please complete the review at the
+      earliest." with "Finish review".
     - **The link after the submit**: press "Save and continue", "Continue
       to Step #3", type "Sound method, thin data." into "For author and
       editor" ({OJS}: and choose "Accept Submission"), press "Submit
@@ -811,10 +844,11 @@ Accounts, passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 11. **Read an earlier round's review**
 
-    Given: Reviewer, assigned on round 2 of two submissions whose round-1
-    requests they submitted and accepted but never finished, and a second
-    Reviewer assigned on round 2 of a third submission whose round-1
-    request they declined with the typed reason "No time this month".
+    Given: Reviewer, assigned on round 2 of two submissions, having
+    submitted their round-1 review of the first and accepted but never
+    finished their round-1 request on the second, and a second Reviewer
+    assigned on round 2 of a third submission whose round-1 request they
+    declined with the typed reason "No time this month".
 
     - **"Previous Reviews"**: the first submission's wizard opens with
       "Previous Reviews" above the tabs, reading "Round 1 Review Submitted
@@ -920,9 +954,10 @@ App-specific:
       Guidelines" link opens the "Internal Review Guidelines" text in a
       dialog.
     - **The submit**: type "Internal remarks." into "For author and
-      editor", press "Submit Review" and "OK": the assigned editor's
-      mailbox holds "Review complete: {reviewer} reviewed #{id} …",
-      naming no recommendation.
+      editor", press "Submit Review" and "OK": "4. Completion" opens.
+    - **The editor's email**: the assigned editor's mailbox holds "Review
+      complete: {reviewer} reviewed #{id} …", naming no recommendation in
+      its subject, and its body has no "Recommendation:" line.
     - **External Review**: External Reviewer: step 2 shows the "External
       Review Guidelines" text.
     - **Control**: on a journal, step 3 carries the "Recommendation" list
@@ -961,19 +996,20 @@ App-specific:
     - **Roles**: Settings › Users & Roles › Roles lists no reviewer group
       among the installed roles (a journal lists "Reviewer", a press
       "Internal Reviewer" and "External Reviewer"); its "Create New Role"
-      window still offers the "Reviewer" permission level, and choosing it
-      hides the "Stage Assignment" list with its "Production" box, while
-      the role still saves.
+      window still offers the "Reviewer" permission level.
+    - **"Create New Role" at "Reviewer"**: choose the "Reviewer" permission
+      level: the whole "Stage Assignment" list is hidden, its "Production"
+      box with it, and the role still saves.
     - **A home-made reviewer role**: a user holding such a role, alone or
       beside Author, signs in on the server's login page and lands on the
       list's page: the sidebar shows a "My Assignments as Reviewer" heading
-      with no entries under it, the page is headed "undefined (0)", its
+      with no entries, the page is headed "undefined (0)", its
       table reads "No Items" over "Showing 0 to 0 of 0", and an "Error"
       window reads "The current role does not have access to this
       operation." with "OK". The wizard's address still shows the bare
       "404 Not Found" page ⚠ [OPS1](#ops1).
-    - **Control**: the "Editor Dashboard" group and its list open
-      normally. <sup>p</sup>
+    - **Control**: Preprint Server Manager: the "Editor Dashboard" group's
+      list holds the preprint. <sup>p</sup>
 
 18. **Who is refused**
 
@@ -1003,8 +1039,6 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the "Supporting Agencies" row in the "View All Submission Details" window: shown on a review type that discloses the authors, absent on an anonymous one (Rule 7): likely a bullet in scenario 9, which opens the window on an "Open" review [upstream 2026-09-29]
-  - {OPS} "Reviewer" chosen in "Create New Role" hiding the whole "Stage Assignment" list, not only greying out its "Production" box (scenario 17, "Roles") [incidental 2026-09-30]
   - a reviewer asked again after a round they left unfinished reading "The review was not completed." on that round's "Previous Reviews" row, and no row ending in "Submitted on" without a date ([A2](#a2); Rule 14): the guard the issue report proposes, once fixed [report 2026-10-02]
   - a round-1 reviewer whose submission gets round 2 without them, and a press's Internal Reviewer after "Send to External Review" {OMP}, finding no "Previous Reviews" box on their review, while a reviewer asked again on round 2 finds the round-1 line ([A12](#a12); Actors row 8, Rule 14): the guard the issue report proposes, once fixed [report 2026-10-02]
   - a reviewer who saves a text, empties the box, saves again and reopens the review finding the box empty, and the editor reading no text ([A4](#a4); Rule 13): the guard the issue report proposes, once fixed [report 2026-10-02]
@@ -1017,16 +1051,12 @@ Left out of the scenarios above, by reason:
   - a reviewer's one-click link opened in a browser signed in as another user showing "You are signed in as a different user", and "Sign out and continue" opening the review as the reviewer ([A10](#a10); Actors row 9, Rule 16): the guard the issue report proposes, once fixed [report 2026-10-02]
   - a reviewer typing a first answer on a review form with a required question seeing no "Please fill in required fields." box and no "This field is required." mark, "Save for Later" then showing "Your changes have been saved." alone, and a refused "Submit Review" still showing both ([A14](#a14); Fields step 3): the guard the issue report proposes, once fixed [report 2026-10-02]
   - {OMP} a press's review form refused for an unanswered required question opening its box with "Please fill in required fields." as a journal's does ([OMP3](#omp3); Fields step 3): the guard the issue report proposes, once fixed [report 2026-10-02]
-  - {OMP} the email telling a press's assigned editors a review is in reading "Review complete: {reviewer} reviewed #{id} …" and naming no recommendation in its subject or body (Side effects "Submitting"; OMP2 retired) [report 2026-10-02]
   - text typed into "For author and editor" alone, then the "2.
     Guidelines" tab, asking "The data on this form has changed. Do you
     wish to continue without saving?", "Cancel" keeping the text
     ([A15](#a15); Rule 18): the guard the issue report proposes, once
     fixed [report 2026-10-02]
-  - an unanswered request, response due today and review later, reading "Please accept or decline this request by {date}" with "Respond to request", and "Deadline for responding to this request has passed." from the next day (Rule 3): likely a bullet in scenario 10, beside "Response overdue" [incidental 2026-10-05]
   - {OPS} a user invited to a home-made "Reviewer"-level role beside Author landing on "Active submissions" after sign-in, with no "My Assignments as Reviewer" group and the typed reviewer-list address refused ([OPS1](#ops1); Purpose, scenario 17): the guard the issue report proposes, once fixed [report 2026-10-02]
-  - an editor added to the stage with "Assign" receiving "Review complete: …" beside the editors assigned when the submission came in, and a Journal Manager not on the Participants panel receiving none (Side effects "Submitting"): likely a bullet in scenario 6 [incidental 2026-10-15]
-  - a review submitted from the French interface reaching editors who work in English as "Évaluation terminée: …", with links to the French pages (Side effects "Submitting"): likely a bullet in scenario 6 [incidental 2026-10-15]
 - **Rarely met**:
   - the "Read Round {N} Review" window of a round declined with an empty message, showing the "Decline Review Request" window's prefilled text in place of a typed reason (Rule 14)
 - **Nothing new to test**:
@@ -1035,6 +1065,7 @@ Left out of the scenarios above, by reason:
   - a changed review-form answer left through the address bar, which asks the browser's own leave-page question (Rule 18)
   - a one-click link after a decline, dead the same way as after a submit (Rule 16, Side effects)
   - an empty Privacy Statement: step 1 without the consent box, one tick fewer (Fields, Settings)
+  - {OMP} the recommendation "Aucun-e" in a press's French "Évaluation terminée: …" email, a wording variant of scenario 6's French email that changes once the press's wording is translated (Side effects "Submitting")
 - **Register carries it**:
   - A1 (the search box, "Sort" and the pager leaving the rows as they were; Rules 3–4)
   - A2 (the dateless "Round {N} Review Submitted on" line of an unfinished round; Rule 14)
@@ -1056,6 +1087,7 @@ Left out of the scenarios above, by reason:
   - OMP3 (the press's review-form refusal opening with a raw key; Fields)
   - OPS1 (a home-made reviewer role landing on a page headed "undefined (0)" that lists nothing under an "Error" window; Purpose, scenario 17)
 - **No seed**:
+  - {OMP} a press submission's supporting agencies in the "View All Submission Details" window of an "Open" review (Rule 7)
   - "Attachments" in the "Read Round {N} Review" window, for an earlier round whose review carried a reviewer file (Rule 14)
   - {OJS} a journal's own reviewer recommendations lengthening step 3's "Recommendation" list (Fields, Settings)
 - **Owned by another feature**:
@@ -2160,7 +2192,18 @@ body "Daniel Barnes, Paul Hudson a terminé son évaluation : …",
 `/publicknowledge/fr_CA/…`, sent to the same editors, who work in
 English. `users.locales` read `[]` for every editor and reviewer before
 and after the language switch: the app stores no editor language for
-the email to follow.
+the email to follow. The press's French email (Side effects
+"Submitting"): OMP2's fix put the press's own `emails.reviewComplete.subject`
+and `.body` into OMP's `locale/en/emails.po` only; OMP's `locale/fr_CA/emails.po`
+has neither key, so the fr_CA text falls back to pkp-lib's, which carries
+`{$reviewRecommendation}` ("Aucun-e" on a press). A missing translation,
+not a register entry. Seen in the 2026-11-12 OMP test run (scenario 6):
+the French submit's subject to both Section Editors read "Évaluation
+terminée: Paul Reviewer recommande Aucun-e pour #{id} Author — {title}",
+and the same email's text on another monograph carried
+"*Recommandation :* Aucun-e"; the English one carries no recommendation
+in subject or body. The OMP suite asserts the subject only up to
+"Évaluation terminée: ".
 
 <a id="fn-o"></a>
 **o** — Settings: `restrictReviewerFileAccess` (label
@@ -2233,9 +2276,12 @@ the level of their installed reviewer groups), choosing "Reviewer"
 hides the whole "Stage Assignment" block (`#userGroupStageContainer`,
 read settled 1.5 s after the choice, re-driven 2026-09-30 in three runs):
 its "Production" box is disabled and unticked and the hint "You need to
-define a stage to assign to." sits in the page, both hidden, while at
-"Manager", the level the window opens on, the block shows with
-"Production" greyed; "OK" saved "Scratch Reviewer" · "Reviewer" as a
+define a stage to assign to." sits in the page, both hidden. At
+"Manager", the level the window opens on, the block is hidden the same
+way (the container `display: none`, the box disabled); only "Moderator"
+shows it, the box enabled, and choosing "Reviewer" again hides it (read
+settled on OPS in the 2026-11-12 test run: `toBeHidden()`, since the
+jQuery `show/hide('slow')` takes 600 ms); "OK" saved "Scratch Reviewer" · "Reviewer" as a
 sixth row; Users › More Actions › "Edit" opened "Invite user to take a
 role" offering it, and the invitation's "Accept And Continue to OPS"
 opens the dialog "You've been assigned a new role in OPS" ("View All
@@ -2316,11 +2362,19 @@ categories. Mail is read in Mailpit at the fleet's port by the recipient's
 address and, for a roster reviewer, scoped by the scratch submission's
 title. An overdue row is produced by moving the due date into the past
 through the editor's row "Edit" window (the screen's only route to a past
-date), never by waiting. Per scenario: 1 and 2: julia seeded `invited`. 3:
+date), never by waiting, and a response due today the same way (the
+assignment's due dates are not seed keys). Per scenario: 1 and 2: julia seeded `invited`. 3:
 julia `invited` on a round with one uploaded file ticked for her; paul
 holds no assignment there; the resend is the row's "Resend Review
 Request". 4: julia `accepted`, two files uploaded to the round, one
-ticked. 5, 6 and 16: julia `accepted`; 16's round 2 is "Create New Review
+ticked. 5, 6 and 16: julia `accepted`; on 6, `reviewer.paul` `accepted`
+beside her, `sectioneditor.ravi` (OMP: as Series Editor) assigned on screen
+by `editor.diana` through the Participants panel's "Assign" after the
+seed, since a seeded participant is not everything "Assign" leaves, and
+`manager.maya` the Journal Manager on no Participants panel; paul saves in
+English and submits from the wizard opened at `{journal}/fr_CA/reviewer/submission/{id}`
+(the French interface; the email follows the request's language,
+footnote n); 16's round 2 is "Create New Review
 Round" recorded on screen and julia added again through "Add Reviewer".
 7: two submissions, julia `accepted` on both. 8: a scratch journal with
 `reviewForms[]` holding one active form of four `elements[]`, a
@@ -2329,9 +2383,14 @@ Round" recorded on screen and julia added again through "Add Reviewer".
 and a `dropdownbox` (`options: ['Biology', 'Physics']`); the throwaway
 reviewer seeded `accepted` with `reviewForm: "<title>"`. 9: a scratch
 journal with `review: {restrictReviewerFileAccess: true,
-defaultReviewMode: 'open'}`, the throwaway reviewer seeded `invited` with
-one uploaded file ticked (a submission seeded after the mode is set
-carries "Open"). 10: a scratch journal with `review:
+defaultReviewMode: 'open'}` and `metadata: {agencies: 'request'}`, a
+throwaway `manager` and two throwaway `externalReviewer`s seeded
+`invited`, the first with one uploaded file ticked (a submission seeded
+after the mode is set carries "Open"); on OJS the submission carries
+`supportingAgencies: ['Agency Alpha']` (OMP answers 400 on the key); the
+second reviewer's review type is set to "Anonymous Reviewer/Anonymous
+Author" in the manager's row "Edit" window, the review method being no
+seed key. 10: a scratch journal with `review:
 {reviewerAccessKeysEnabled: true}`, `context.contactEmail` a throwaway
 address (the principal contact's mailbox), a throwaway `manager` and
 `externalReviewer`, and no `participants[]`; the reviewer is added through

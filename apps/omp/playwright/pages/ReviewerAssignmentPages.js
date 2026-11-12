@@ -857,6 +857,19 @@ async function moveDueDate(page, row, fieldName, date) {
 }
 
 /**
+ * Change the row's review type through its Edit window: tick the "Review
+ * Type" radio `label` ("Open", "Anonymous Reviewer/Anonymous Author", …)
+ * and save. The screens' only route to a second review type on one
+ * submission, the review method being no seed key (U28 footnote s, S9).
+ */
+async function setReviewType(page, row, label) {
+    const editModal = await openEditReview(page, row);
+    await reviewTypeRadio(editModal, label).check();
+    await expect(reviewTypeRadio(editModal, label)).toBeChecked();
+    await saveEditReview(editModal);
+}
+
+/**
  * Press the overdue row's "Send Reminder" (a row control, not a menu
  * entry) and send the "Review Reminder" window as it comes (template
  * preset, message loaded into TinyMCE `message`). Resolves once the window
@@ -1119,6 +1132,7 @@ module.exports = {
     clearCompetingInterestsPolicy,
     saveEditReview,
     moveDueDate,
+    setReviewType,
     sendReminder,
     cancelReviewer,
     resendReviewRequest,
