@@ -61,7 +61,7 @@
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
-const {waitForJQueryIdle} = require('../support/legacy.js');
+const {waitForJQueryIdle, legacyAnswerApplied} = require('../support/legacy.js');
 const {captureDownload, FORM_CHANGED_QUESTION, DELETE_QUESTION} = require('./SubmissionFilesPages.js');
 
 /** The question the browser asks when a changed window is closed (Rule 3b). */
@@ -85,6 +85,59 @@ exports.DROP_PROMPT = DROP_PROMPT;
 /** The refusal page's whole text (Rules 8b, 10b). */
 const FORBIDDEN = '403 Forbidden';
 exports.FORBIDDEN = FORBIDDEN;
+
+/** The page notice of an "OK" pressed before the file has uploaded (Rule 3a). */
+const FILE_REQUIRED = 'A library file is required. Please ensure that you have chosen and uploaded a file.';
+exports.FILE_REQUIRED = FILE_REQUIRED;
+
+/**
+ * The page notices shown at the top right reading `text` (patterns.md
+ * locator pitfall 14c: `.app__notifications .pkpNotification`, outside
+ * every window; a legacy form's refusal is the user's trivial
+ * notification, fetched by the page after the answer, parallel lesson 2).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} text
+ */
+exports.pageNotices = function pageNotices(page, text) {
+    return page.locator('[role="status"].app__notifications .pkpNotification').filter({hasText: text, visible: true});
+};
+
+const UPLOAD_REQUEST = /upload-?file/i;
+
+/**
+ * Hold the browser's library upload requests back (spec note s, scenario
+ * 1's "OK" before the upload): every upload the page sends waits at the
+ * route until `release()`, so a chosen file stays "still uploading" for as
+ * long as the test needs. `intercepted` settles once an upload has
+ * reached the route; `release()` lets it through, waits for its answer and
+ * removes the route.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.holdUploads = async function holdUploads(page) {
+    /** @type {() => void} */
+    let open = () => {};
+    const gate = new Promise((resolve) => { open = () => resolve(undefined); });
+    /** @type {() => void} */
+    let arrived = () => {};
+    const intercepted = new Promise((resolve) => { arrived = () => resolve(undefined); });
+    await page.route(UPLOAD_REQUEST, async (route) => {
+        arrived();
+        await gate;
+        await route.continue().catch(() => {});
+    });
+    return {
+        intercepted,
+        async release() {
+            const answered = page.waitForResponse((r) => UPLOAD_REQUEST.test(r.url()), {timeout: 30_000});
+            open();
+            await answered;
+            await page.unroute(UPLOAD_REQUEST);
+            await waitForJQueryIdle(page);
+        },
+    };
+};
 
 /** The window titles. */
 const SUBMISSION_LIBRARY = 'Submission Library';
@@ -705,6 +758,16 @@ exports.LibraryFileWindow = class LibraryFileWindow extends BasePage {
         await expect(this.changeFileButton()).toBeVisible({timeout: 30_000});
     }
 
+    /**
+     * Choose a file in the upload area without waiting for its upload (an
+     * upload `holdUploads()` keeps back stays "still uploading").
+     *
+     * @param {string} file the file's path
+     */
+    async chooseFile(file) {
+        await this.uploadArea().locator('input[type="file"]').setInputFiles(file);
+    }
+
     /** "Edit"'s "File" line value ("File Name", "File Size", "Date uploaded"). */
     fileLine(label) {
         return this.form()
@@ -743,6 +806,11 @@ exports.LibraryFileWindow = class LibraryFileWindow extends BasePage {
         return this.form().getByRole('link', {name: 'Cancel', exact: true});
     }
 
+    /** The window's own message area at the top of the form (`#libraryFileUploadNotification`). */
+    messageArea() {
+        return this.form().locator('#libraryFileUploadNotification');
+    }
+
     /** The window's close button. */
     closeButton() {
         return this.dialog().getByRole('button', {name: 'Close', exact: true}).first();
@@ -759,6 +827,24 @@ exports.LibraryFileWindow = class LibraryFileWindow extends BasePage {
     async ok() {
         await this.okButton().click();
         await this.expectClosed();
+    }
+
+    /**
+     * Press "OK" on a form the server refuses (Rule 3a: no file uploaded):
+     * waits for the save's answer and for the page to apply it (the refused
+     * form is swapped for a new one holding the posted values; patterns.md
+     * "A legacy form's answer is not the form taking it"). The window stays;
+     * the caller reads it and the page notice.
+     */
+    async okRefused() {
+        const formId = await this.form().getAttribute('id', {timeout: 30_000});
+        const answered = this.page.waitForResponse(
+            (r) => r.request().method() === 'POST' && /(save|update)-?file/i.test(r.url()),
+            {timeout: 30_000}
+        );
+        await this.okButton().click();
+        await answered;
+        await legacyAnswerApplied(this.page, formId || 'uploadForm');
     }
 
     /** Press "Cancel" at the foot and wait for the window to close. */

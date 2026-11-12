@@ -20,9 +20,10 @@
  *   app's two-second timer ends there) before anything redraws a list.
  * - A10 ❓: the "403 Forbidden" pages are read by their text, never by the
  *   status they are sent with.
- * - A11 🐞: S1 closes "Add a file" only after an "OK" the browser's own
- *   checks refused, never after an "OK" with no file.
- * - A3–A5, A7: not on these scenarios' paths. A8 retired 2026-10-07 (pkp/pkp-lib#13432). OMP1 ✅ is asserted
+ * - A11 🐞: after an "OK" refused for a missing file, S1 closes "Add a
+ *   file" with the "Cancel" at its foot, never with its close button.
+ * - A3–A5, A7: not on these scenarios' paths. A8 (retired) is guarded by
+ *   S2's and S4's deleted file's download address. OMP1 ✅ is asserted
  *   through the "Contracts" group every list read shows first.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
@@ -36,7 +37,9 @@
  * submission; S5's second press ticks the Copyeditor's Submission stage
  * with `roles.copyeditor.stages`. Every window close, page leave and
  * sign-in change runs with a browser-dialog recorder on the page; the
- * question is asserted where S1 quotes it. Downloads are read through
+ * question is asserted where S1 quotes it. S1's "OK" before the upload
+ * holds the browser's upload request back with a route until the second
+ * notice has gone (footnote s). Downloads are read through
  * Playwright's download event; the public address through its response
  * headers in a signed-out context (headless Chromium turns an inline PDF
  * into a download), a refusal through the page's text. Every absence is
@@ -118,6 +121,84 @@ async function signedOutPage(browser, baseURL) {
     return {context, page};
 }
 
+/** The notice an "OK" before the upload raises (Fields "File"; Rule 3a). */
+const FILE_REQUIRED = 'A library file is required. Please ensure that you have chosen and uploaded a file.';
+
+/**
+ * The page's notice reading `text`: a toast at the top right,
+ * `.app__notifications .pkpNotification`, whose text ends with its "×
+ * Close" control.
+ */
+function pageNotice(page, text) {
+    return page.locator('.app__notifications .pkpNotification').filter({hasText: text});
+}
+
+/**
+ * Press "OK" in `win` with no file uploaded and read the refusal (Rule 3a):
+ * the save's answer comes, the notice shows at the top right of the page,
+ * nothing shows inside the window (no refusal under a field, no message
+ * area text; read once the notice is up, its positive control), the
+ * window stays with `name` and `type`; then the notice goes by itself.
+ */
+async function expectFileRequired(page, win, {name, type}) {
+    const saved = page.waitForResponse((r) => /\/save-file\b/.test(r.url()) && r.request().method() === 'POST', {timeout: 30_000});
+    await win.okButton().click();
+    await saved;
+    const notice = pageNotice(page, FILE_REQUIRED);
+    await expect(notice).toBeVisible({timeout: 15_000});
+    const box = await notice.boundingBox();
+    const viewport = page.viewportSize();
+    expect(box, 'the notice has a box').toBeTruthy();
+    expect(box.x + box.width / 2).toBeGreaterThan(viewport.width / 2);
+    expect(box.y + box.height / 2).toBeLessThan(viewport.height / 2);
+    await expect(win.heading()).toBeVisible();
+    await expect(win.nameBox()).toHaveValue(name);
+    await win.expectSelectedType(type);
+    await expect(win.dialog()).not.toContainText(FILE_REQUIRED);
+    await expect(win.form().locator('label.error:visible')).toHaveCount(0);
+    await expect(win.form().locator('.pkp_notification:visible').filter({hasText: /\S/})).toHaveCount(0);
+    await expect(notice).toBeHidden({timeout: 15_000});
+    await expect(win.heading()).toBeVisible();
+}
+
+/**
+ * Hold the next upload request of `page` until `release()` (footnote s:
+ * the upload is still running when "OK" is pressed). `held` resolves once
+ * the request is waiting; `uploaded` once its answer is back.
+ */
+async function holdNextUpload(page) {
+    const pattern = /\/upload-file\b/;
+    let release = () => {};
+    const gate = new Promise((resolve) => { release = resolve; });
+    let markHeld = () => {};
+    const held = new Promise((resolve) => { markHeld = resolve; });
+    await page.route(pattern, async (route) => {
+        markHeld();
+        await gate;
+        await route.continue();
+    }, {times: 1});
+    const uploaded = page.waitForResponse((r) => pattern.test(r.url()), {timeout: 60_000});
+    uploaded.catch(() => {});
+    return {held, release, uploaded};
+}
+
+/**
+ * Open `url` (the address a library file's name downloaded from) in a
+ * second page of `page`'s signed-in context and read its body; the page is
+ * closed after (Rule 5).
+ */
+async function readInSecondTab(page, url) {
+    const second = await page.context().newPage();
+    recordBrowserDialogs(second);
+    try {
+        const answer = await readAddress(second, url);
+        await expect(second.locator('body')).toHaveText(FORBIDDEN);
+        return answer;
+    } finally {
+        await second.close();
+    }
+}
+
 test.describe('submission and publisher libraries', () => {
     test('S1: a file shared through the Submission Library', {tag: '@smoke'}, async ({asUser, ompApi}, testInfo) => {
         test.slow();
@@ -188,6 +269,29 @@ test.describe('submission and publisher libraries', () => {
         await add.cancel();
         expect(ed.dialogs.messages).toHaveLength(2);
         await list.expectAllEmpty(TYPES);
+
+        // ── "OK" before the upload ───────────────────────────────────────
+        // "Early agreement", "Permissions", no file, "OK": the window stays
+        // with both, nothing in it, the notice at the top right comes and
+        // goes; article.pdf chosen, its upload held back (footnote s), "OK":
+        // the same; the foot's "Cancel" (A11: not the close button): closed,
+        // every group "No Items" (Fields "File"; Rules 3a, 3b).
+        add = await list.openAdd();
+        await add.nameBox().fill('Early agreement');
+        await add.nameBox().press('Tab');
+        await add.chooseType('Permissions');
+        await expectFileRequired(ed.page, add, {name: 'Early agreement', type: 'Permissions'});
+        const upload = await holdNextUpload(ed.page);
+        await add.uploadArea().locator('input[type="file"]').setInputFiles(ARTICLE_PDF);
+        await upload.held;
+        await expect(add.form().locator('input[name="temporaryFileId"]')).toHaveValue('');
+        await expectFileRequired(ed.page, add, {name: 'Early agreement', type: 'Permissions'});
+        upload.release();
+        await upload.uploaded;
+        await add.cancel();
+        expect(ed.dialogs.messages).toHaveLength(2);
+        await list.expectAllEmpty(TYPES);
+        await list.expectNotListed('Early agreement');
 
         // ── "Add a file" ─────────────────────────────────────────────────
         // "Author agreement", "Permissions", article.pdf: the button reads
@@ -375,8 +479,16 @@ test.describe('submission and publisher libraries', () => {
             expect(replaced.contentLength).toBe(fs.statSync(REPLACEMENT_PDF).size);
 
             // ── "Delete" on the tab ──────────────────────────────────────
-            // The row goes and "Permissions" reads "No Items"; signed out,
-            // the noted address: "403 Forbidden" (Rules 5, 10b).
+            // "Author guide" downloads, the page staying, its address
+            // kept; the row goes and "Permissions" reads "No Items";
+            // signed out, the address noted for "Journal guide": "403
+            // Forbidden" (Rules 5, 8a, 10b).
+            const guideBeforeDelete = await list.download('Author guide');
+            expect(guideBeforeDelete.download.suggestedFilename()).toMatch(/\.pdf$/);
+            expect(guideBeforeDelete.after).toBe(guideBeforeDelete.before);
+            const guideDownloadAddress = guideBeforeDelete.download.url();
+            expect(guideDownloadAddress).toMatch(/download-?library-?file/i);
+            expect(guideDownloadAddress).toMatch(new RegExp(`libraryFileId=${guideId}\\b`));
             const del = await list.openDelete('Author guide');
             await expect(del.dialog()).toContainText(DELETE_QUESTION);
             await del.confirm();
@@ -386,6 +498,13 @@ test.describe('submission and publisher libraries', () => {
 
             await readAddress(out.page, guideAddress);
             await expect(out.page.locator('body')).toHaveText(FORBIDDEN);
+
+            // ── The deleted file's download address ──────────────────────
+            // The Press Manager opens it: a bare "403 Forbidden" (Rule 5);
+            // the tab still lists "Internal report" (the positive control
+            // of the same session).
+            await readInSecondTab(mg.page, guideDownloadAddress);
+            await list.expectFiles('Other', ['Internal report']);
 
             // ── Control ──────────────────────────────────────────────────
             // "Internal report"'s address (not public) and a number no file
@@ -569,9 +688,18 @@ test.describe('submission and publisher libraries', () => {
         await list.expectNotListed('Journal guide');
 
         // ── The "Delete" dialog ──────────────────────────────────────────
-        // Titled "Delete", its question, "OK" and "Cancel"; "Cancel": the
+        // "Old contract" downloads, the page staying, its address kept;
+        // titled "Delete", its question, "OK" and "Cancel"; "Cancel": the
         // row stays; "Delete" again, "OK": gone, "Reports" "No Items"
-        // (Rule 5).
+        // (Rules 5, 8a).
+        const oldId = decided.libraryFiles[1].id;
+        const oldDownload = await list.download('Old contract');
+        expect(oldDownload.download.suggestedFilename()).toMatch(/\.pdf$/);
+        expect(oldDownload.after).toBe(oldDownload.before);
+        const oldAddress = oldDownload.download.url();
+        expect(oldAddress).toMatch(/download-?library-?file/i);
+        expect(oldAddress).toMatch(new RegExp(`libraryFileId=${oldId}\\b`));
+        expect(oldAddress).toMatch(new RegExp(`submissionId=${decided.submissionId}\\b`));
         let del = await list.openDelete('Old contract');
         await expect(del.dialog()).toContainText(DELETE_QUESTION);
         await expect(del.okButton()).toBeVisible();
@@ -582,6 +710,13 @@ test.describe('submission and publisher libraries', () => {
         await del.confirm();
         await list.expectEmpty('Reports');
         await list.expectNotListed('Old contract');
+        await list.expectFiles('Permissions', ['Author contract']);
+
+        // ── The deleted file's download address ──────────────────────────
+        // A second tab: a bare "403 Forbidden", closed (Rule 5); the
+        // window under it still lists "Author contract".
+        await readInSecondTab(ed.page, oldAddress);
+        await expect(ed.library.heading()).toBeVisible();
         await list.expectFiles('Permissions', ['Author contract']);
 
         // ── "Library Files" ──────────────────────────────────────────────

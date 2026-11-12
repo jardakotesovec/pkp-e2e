@@ -355,6 +355,20 @@ footnote. <sup>s</sup>
      still reads "No Items"; press "Add a file", type "Draft name" in
      "Name" and press "Cancel" at the foot of the window: it closes
      without asking, and nothing is added (Rules 3, 3b).
+   - **"OK" before the upload**: press "Add a file", type "Early
+     agreement" in "Name", choose "Permissions" in "Type" and press "OK"
+     with no file chosen: the window stays open with "Early agreement" in
+     "Name" and "Permissions" in "Type", nothing shows inside the window,
+     and the notice "A library file is required. Please ensure that you
+     have chosen and uploaded a file." appears at the top right of the
+     page about a second after the press and goes by itself about five
+     seconds after it. Once the notice has gone, choose "article.pdf"
+     under "File" and press "OK" before its upload has finished
+     <sup>s</sup>: the window stays open with the same "Name" and "Type",
+     and the same notice appears and goes. Press "Cancel" at the foot of
+     the window, not its close button, which after this refusal closes
+     without asking [A11](#a11): the window closes, and every group still
+     reads "No Items" (Fields "File"; Rules 3a, 3b).
    - **"Add a file"**: press "Add a file", type "Author agreement" in
      "Name", choose "Permissions" in "Type" and upload "article.pdf" under
      "File": the button then reads "Change File"; press "OK": the window
@@ -426,15 +440,21 @@ footnote. <sup>s</sup>
      in "Type", upload "replacement.pdf" under "Replace file" and press
      "OK": "Author guide" is listed under "Permissions", and "Other" lists
      "Internal report" alone; open "Author guide"'s "Edit": "File Name"
-     reads "replacement.pdf" and the address is the one noted; press
+     reads "replacement.pdf" and the address is "Journal guide"'s; press
      "Cancel" (Rules 4, 10c).
-   - **The same address, the new file**: sign out and open the noted
+   - **The same address, the new file**: sign out and open "Journal guide"'s
      address again: the new file opens; saved, it is named
      "replacement-PER.pdf" (Rules 8a, 10c).
-   - **"Delete" on the tab**: Journal Manager: press the arrow of "Author
-     guide", then "Delete", then "OK": the row is gone and "Permissions"
-     reads "No Items" again; signed out, the noted address shows a page
-     reading "403 Forbidden" (Rules 5, 10b).
+   - **"Delete" on the tab**: Journal Manager: press "Author guide": the
+     file downloads, and the page stays where it was; copy the address it
+     downloaded from out of the browser's downloads. Press the arrow of
+     "Author guide", then "Delete", then "OK": the row is gone and
+     "Permissions" reads "No Items" again; signed out, the address noted
+     for "Journal guide" shows a page reading "403 Forbidden"
+     (Rules 5, 8a, 10b).
+   - **The deleted file's download address**: Journal Manager: open the
+     address "Author guide" downloaded from: a bare page reading "403
+     Forbidden" (Rule 5).
    - **Control**: signed out, "Internal report"'s address, whose "Public
      Access" is unticked, shows a page reading "403 Forbidden", and so
      does the same address with "999999" in place of the file's number
@@ -492,11 +512,16 @@ footnote. <sup>s</sup>
      and "Old contract" under "Reports"; neither "Other submission file"
      nor "Journal guide" is listed, and "Other" reads "No Items"
      (Rule 1a).
-   - **The "Delete" dialog**: press the arrow of "Old contract", then
-     "Delete": a dialog titled "Delete" reads "Are you sure you wish to
-     delete this item? This action cannot be undone." with "OK" and
+   - **The "Delete" dialog**: press "Old contract": the file downloads,
+     and the page stays where it was; copy the address it downloaded from
+     out of the browser's downloads. Press the arrow of "Old contract",
+     then "Delete": a dialog titled "Delete" reads "Are you sure you wish
+     to delete this item? This action cannot be undone." with "OK" and
      "Cancel"; press "Cancel": the row stays; press "Delete" again, then
-     "OK": the row is gone, and "Reports" reads "No Items" (Rule 5).
+     "OK": the row is gone, and "Reports" reads "No Items" (Rules 5, 8a).
+   - **The deleted file's download address**: in a second browser tab,
+     open the address "Old contract" downloaded from: a bare page reading
+     "403 Forbidden"; close that tab (Rule 5).
    - **"Library Files"**: close the window, press "Decline Submission"
      and, on its email page, press "Attach Files", then "Attach Library
      Files" ([→ Attach Files](U34-editorial-decision-recording.md#attach-files)):
@@ -560,14 +585,12 @@ footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - "OK" in "Add a file" before a file has uploaded, with none chosen and with one still uploading, keeps the window open, adds nothing and shows "A library file is required. Please ensure that you have chosen and uploaded a file." at the top right (Fields "File"; Rule 3a) [report 2026-10-07]
   - the guard for A11 (issue report `docs/issues/U08-A18-item-window-refused-save-closes-unasked.md`), after A11's fix: the close button of "Add a file" after an "OK" refused for a missing file asks "The data on this form has changed. Do you wish to continue without saving?"; until the fix the window closes without asking, as A11 records (Rule 3b) [report 2026-10-03]
   - the guard for A1 (issue report `docs/issues/U39-A1-submission-library-file-403-for-participants.md`), after A1's fix: an assigned Copyeditor, standing for every role A1 names, and on a preprint server the Moderator and the Author press a Submission Library file's name in the "Submission Library" window and the file downloads, the page staying on the workflow screen; until the fix they get the bare "403 Forbidden" page A1 records (Actors row 3; Rule 8b) [report 2026-10-13]
   - the guard for A9 and A12 (issue report `docs/issues/U39-A9-A12-library-download-redraws-list.md`), after A9's and A12's fixes: a row's strip with "Edit" and "Delete", opened within two seconds of a download, is still open three seconds later, and a second file's name pressed within two seconds of the first leaves the browser's console without "There is no handler bound to this element!"; until the fix the strip closes by itself and the console shows it, as A12 and A9 record (Rule 8a) [report 2026-10-13]
   - the guard for A3 (issue report `docs/issues/U39-A3-library-description-starred-not-required.md`), after A3's fix: "Description" in both libraries' "Add a file" and "Edit" carries no required-field star, or keeps the star and refuses an empty description, whichever the team chooses; until the fix it is starred and saves empty, as A3 records (Fields "Description") [incidental 2026-10-07]
   - the guard for A4 (issue report `docs/issues/U39-A4-library-download-name-cut.md`), after A4's fix: a file whose uploaded name holds its extension earlier on, and one of 127 characters or more, downloads under its name with the type code before one extension ("notes-pdf-draft.pdf" added as "Marketing" as "notes-pdf-draft-MAR.pdf"); until the fix such names download cut, as A4 records ("notes-MAR.pdf") (Rule 8a) [incidental 2026-10-07]
   - the guard for A5 (issue report `docs/issues/U39-A5-library-delete-strict-mode-error.md`), after A5's fix: "Delete" › "OK" in the Submission Library removes the file on an install running in strict mode; until the fix the dialog stays open and the file stays, as A5 records (Rule 5a; Settings bullet 3) [report 2026-10-03]
-  - after "Delete" › "OK", the address a Submission Library file's name downloaded from, opened again, shows a bare page reading "403 Forbidden", and so does a deleted Publisher Library file's (Rule 5; A8 retired) [upstream 2026-10-07]
 - **Nothing new to test**:
   - a recommending editor's "Notify Editors" page {OJS OMP}: its "Library Files", and the attached file's copy listed in the discussion the recommendation opens (Actors row 8; Rule 11c)
   - the "Request Author Response" page {OJS}: the Editor's and an assigned Section Editor's "Library Files" (Actors row 8; Rule 11a)
@@ -842,7 +865,7 @@ Basis: probe. <sup>[f-omp1](#fn-omp1)</sup>
 **q** — `lib/pkp/js/controllers/form/FormHandler.js`: a changed field sets `formChangesTracked`, and `containerCloseHandler()` then asks `confirm()` with `form.dataHasChanged` "The data on this form has changed. Do you wish to continue without saving?"; "Cancel" at the foot unregisters the form first. A submit that passes the browser's own checks clears `formChangesTracked` before the server answers, so after the refused "OK" with no file (Rule 3a) the close button no longer asks (A11); a refusal by the browser's checks ("This field is required.") never reaches that point. Live-probed 2026-09-24 (Rule 3b; all three apps, both libraries): a fresh "Add a file" and an "Edit" with a change asked on "Close", "OK" closing the window with no row added; after "OK" with no file uploaded, "Close" asked nothing and no row was added (twice per app; again 2026-10-07, both libraries, twice per app, after the refusal's notice had shown); "Cancel" asked nothing; leaving the page with "Add a file" filled in raised the browser's leave-page question.
 
 <a id="fn-s"></a>
-**s** — Accounts: `docs/process/users.md` (the seeded roster; `admin`/`admin`, every other account its username twice; throwaway accounts likewise). Where each scenario runs: 1 on the seeded journal, press or preprint server `publicknowledge`, on a scratch submission from `POST scenarios/submission` with submitter `author.alex` (section ART; series `monographs` on the press; section PRE on the preprint server); 2 to 5 on scratch contexts from `POST scenarios/context`, each with its own throwaway `users[]` and its submissions submitted by its throwaway `author`. A Publisher Library change on `publicknowledge` would reach every other suite's "Library Files" list, and a scenario that reads a downloaded name or deletes a file seeds a scratch context, since stored names collide across workers on `publicknowledge` (scenarios.md). On `publicknowledge` the Editor is `editor.diana` (OJS, OMP; a preprint server enrols no editor, so the Preprint Server Manager `manager.maya` takes the Editor's part there) and the Author `author.alex`. A library file named in a given is seeded through `libraryFiles[]` on the context (Publisher Library) or the submission (Submission Library), `{name, type}` with the fixture default; everything else in a scenario's body is done on screen. Uploads from the browser: `article.pdf` is the OJS and OMP fixture; OPS has `preprint.pdf`, so its suite uploads and seeds that and reads every name with "preprint" in place of "article" ("preprint-OTH.pdf", "preprint-PER.pdf"). `replacement.pdf` (scenario 2) is each app's own fixture, a one-page PDF distinct from `article.pdf` and `preprint.pdf`. After any download, a test waits until the list it pressed in has been drawn again at the end of the app's two-second timer (the list replaced, its request done and the file's name link enabled again) before it reads or presses anything in that list (A9, A12). Recipes: 1 — no decisions, no `libraryFiles`; the Control's "History" is *Submission activity log & notes*' window. 2 — a context with a throwaway `manager`; nothing else. 3 — a context with throwaway `manager`, `editor` (OJS, OMP), `sectionEditor` and `author`, and `libraryFiles: [{name: 'Journal guide', type: 'Other'}]`; the submission with the Section Editor in `participants[]` as `sectionEditor` (a Moderator on OPS). 4 — a context with throwaway `manager`, `editor` (OJS, OMP) and `author`, and `libraryFiles: [{name: 'Journal guide', type: 'Other'}]`; the decided submission with no decisions (OJS and OMP on the Submission stage, OPS on Production) and `libraryFiles: [{name: 'Author contract', type: 'Permissions'}, {name: 'Old contract', type: 'Reports'}]`, the second submission with `libraryFiles: [{name: 'Other submission file', type: 'Other'}]`; "Author contract" is the context's only Permissions file, so its stored name is `article-PER.pdf` (the response's `fileName`); the decline is recorded on screen and the Author's email read in the mail catcher, Mailpit at `http://127.0.0.1:8025` (scenarios.md). 5 {OJS OMP} — a context with throwaway `manager`, `editor`, `copyeditor` and `author`, and `libraryFiles: [{name: 'Journal guide', type: 'Other'}]`; the submission with `decisions: ['sendExternalReview', 'accept', 'sendToProduction']`, the Copyeditor in `participants[]` as `copyeditor`, and `libraryFiles: [{name: 'Editor contract', type: 'Permissions'}]`; the second context the same plus `roles: {copyeditor: {stages: {submission: true}}}` (the Copyeditor's "Stage Assignment" box "Submission" ticked, saved as the role's "Edit" window saves it; note d). Live-probed 2026-09-24: both `libraryFiles[]` keys seeded scratch journals and submissions on all three apps. Test run 2026-09-24: every suite green on its first run, OJS and OMP scenarios 1–5, OPS 1–4.
+**s** — Accounts: `docs/process/users.md` (the seeded roster; `admin`/`admin`, every other account its username twice; throwaway accounts likewise). Where each scenario runs: 1 on the seeded journal, press or preprint server `publicknowledge`, on a scratch submission from `POST scenarios/submission` with submitter `author.alex` (section ART; series `monographs` on the press; section PRE on the preprint server); 2 to 5 on scratch contexts from `POST scenarios/context`, each with its own throwaway `users[]` and its submissions submitted by its throwaway `author`. A Publisher Library change on `publicknowledge` would reach every other suite's "Library Files" list, and a scenario that reads a downloaded name or deletes a file seeds a scratch context, since stored names collide across workers on `publicknowledge` (scenarios.md). On `publicknowledge` the Editor is `editor.diana` (OJS, OMP; a preprint server enrols no editor, so the Preprint Server Manager `manager.maya` takes the Editor's part there) and the Author `author.alex`. A library file named in a given is seeded through `libraryFiles[]` on the context (Publisher Library) or the submission (Submission Library), `{name, type}` with the fixture default; everything else in a scenario's body is done on screen. Uploads from the browser: `article.pdf` is the OJS and OMP fixture; OPS has `preprint.pdf`, so its suite uploads and seeds that and reads every name with "preprint" in place of "article" ("preprint-OTH.pdf", "preprint-PER.pdf"). `replacement.pdf` (scenario 2) is each app's own fixture, a one-page PDF distinct from `article.pdf` and `preprint.pdf`. After any download, a test waits until the list it pressed in has been drawn again at the end of the app's two-second timer (the list replaced, its request done and the file's name link enabled again) before it reads or presses anything in that list (A9, A12). Scenario 1's "OK" before the upload: the test holds the browser's upload request back (a route that answers only after the second notice has gone, as note td4's drive held it six seconds), reads the notice while it shows and the window's own message area empty, and reads the groups after "Cancel". Scenarios 2 and 4, the deleted file's download address: the address is the download's own URL (`download.url()`: `FileApiHandler` `downloadLibraryFile` with `libraryFileId`, and `submissionId` in the Submission Library; note d), opened after the delete in a second page of the same signed-in browser context. Recipes: 1 — no decisions, no `libraryFiles`; the Control's "History" is *Submission activity log & notes*' window. 2 — a context with a throwaway `manager`; nothing else. 3 — a context with throwaway `manager`, `editor` (OJS, OMP), `sectionEditor` and `author`, and `libraryFiles: [{name: 'Journal guide', type: 'Other'}]`; the submission with the Section Editor in `participants[]` as `sectionEditor` (a Moderator on OPS). 4 — a context with throwaway `manager`, `editor` (OJS, OMP) and `author`, and `libraryFiles: [{name: 'Journal guide', type: 'Other'}]`; the decided submission with no decisions (OJS and OMP on the Submission stage, OPS on Production) and `libraryFiles: [{name: 'Author contract', type: 'Permissions'}, {name: 'Old contract', type: 'Reports'}]`, the second submission with `libraryFiles: [{name: 'Other submission file', type: 'Other'}]`; "Author contract" is the context's only Permissions file, so its stored name is `article-PER.pdf` (the response's `fileName`); the decline is recorded on screen and the Author's email read in the mail catcher, Mailpit at `http://127.0.0.1:8025` (scenarios.md). 5 {OJS OMP} — a context with throwaway `manager`, `editor`, `copyeditor` and `author`, and `libraryFiles: [{name: 'Journal guide', type: 'Other'}]`; the submission with `decisions: ['sendExternalReview', 'accept', 'sendToProduction']`, the Copyeditor in `participants[]` as `copyeditor`, and `libraryFiles: [{name: 'Editor contract', type: 'Permissions'}]`; the second context the same plus `roles: {copyeditor: {stages: {submission: true}}}` (the Copyeditor's "Stage Assignment" box "Submission" ticked, saved as the role's "Edit" window saves it; note d). Live-probed 2026-09-24: both `libraryFiles[]` keys seeded scratch journals and submissions on all three apps. Test run 2026-09-24: every suite green on its first run, OJS and OMP scenarios 1–5, OPS 1–4.
 
 <a id="fn-td1"></a>
 **td1** — Live-probed 2026-09-24 (Rule 1b; OJS, OMP): an assigned Layout Editor on a submission at Copyediting, and an assigned Copyeditor on "Production" and on a submission in review, saw "You don't currently have access to that stage of the workflow." in place of the panels with "Preview" and "Library" in the header; the window was titled "Submission Library" and carried "Add a file" and "View Document Library", and "Layout note" added as "Other" listed. A preprint server has no assistant on the workflow.
