@@ -96,18 +96,7 @@ for (const name of names) {
 
 // The line's Config.php edit: the same line `main` carries. 3.4 has the
 // namespaced define `main` had; 3.3 keeps it in Config.inc.php, unnamespaced.
-const CONFIG_EDITS = [
-    {
-        file: 'Config.php',
-        before: "define('CONFIG_FILE', \\PKP\\core\\Core::getBaseDir() . '/config.inc.php');",
-        after: "define('CONFIG_FILE', getenv('PKP_CONFIG_FILE') ?: \\PKP\\core\\Core::getBaseDir() . '/config.inc.php');",
-    },
-    {
-        file: 'Config.inc.php',
-        before: "define('CONFIG_FILE', Core::getBaseDir() . DIRECTORY_SEPARATOR . 'config.inc.php');",
-        after: "define('CONFIG_FILE', getenv('PKP_CONFIG_FILE') ?: Core::getBaseDir() . DIRECTORY_SEPARATOR . 'config.inc.php');",
-    },
-];
+const {CONFIG_EDITS} = require('./config-edit.js');
 
 /**
  * The line's Node for its JS build (LINES `node`), downloaded once from

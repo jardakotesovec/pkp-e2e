@@ -196,6 +196,10 @@ jobs:
           mkdir -p "e2e/checkouts/$LINE"
           ln -s "$GITHUB_WORKSPACE/app" "e2e/checkouts/$LINE/${{ inputs.app }}"
           echo "PKP_E2E_LINE=$LINE" >> "$GITHUB_ENV"
+          # A stable branch's lib/pkp may predate the PKP_CONFIG_FILE hook the
+          # harness selects its test config through: the same one-line edit
+          # fetch-apps makes in a line's checkout.
+          node e2e/bin/config-edit.js app
           echo "- suite: lines/$LINE/ (version folder)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Pin the submodules
