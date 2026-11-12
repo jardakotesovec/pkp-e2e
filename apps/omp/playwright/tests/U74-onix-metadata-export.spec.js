@@ -83,6 +83,7 @@ const {
     openAddMarket,
     OnixToolPage,
     onixProducts,
+    onixMessage,
     descendants,
     texts,
     children,
@@ -653,8 +654,8 @@ test.describe('ONIX metadata & export (U74)', () => {
     test('S6: The ONIX tool, from the press\'s details to an export', async ({asUser, ompApi, appContext}, testInfo) => {
         const tag = makeTag('s6', testInfo);
         // Given: none of the four ONIX details; "Tidewater Tales" published
-        // with the format "Paperback", "Harbour Lights" in the Submission
-        // stage (footnote s).
+        // with the format "Paperback" while they were blank, "Harbour
+        // Lights" in the Submission stage with no format (footnote s).
         const press = await scratchPress(ompApi, tag);
         await seedBook(ompApi, `${tag}t`, {
             context: press.path,
@@ -664,7 +665,7 @@ test.describe('ONIX metadata & export (U74)', () => {
             publicationFormats: [{name: 'Paperback'}],
         });
         await ompApi.createSubmission({tag: `${tag}h`, context: press.path, submitter: press.au.username, title: 'Harbour Lights', submitted: true});
-        const {page} = await pageAs(asUser, press.mg.username);
+        const {page, seen} = await pageAs(asUser, press.mg.username);
 
         // The details missing (Rule 16; Settings bullet 1): from the Tools list.
         const tools = new ToolsPage(page, press.path);
@@ -705,23 +706,76 @@ test.describe('ONIX metadata & export (U74)', () => {
         await expect(onix.list.exportButton()).toBeVisible();
 
         // Exporting (Rule 18): the results tab added and opened, the
-        // success text and the download; the "Warnings encountered:" block
-        // (the book published before the press had a publisher) is not read.
+        // success text and the download.
         await onix.list.box('Tidewater Tales').check();
         const results = await onix.list.pressExport(onix);
         await onix.expectTabs(['Export', 'Export Submissions Results']);
         await onix.expectSelected('Export Submissions Results');
         await expect(results).toContainText('The export completed successfully.', {timeout: 30_000});
-        const download = results.getByRole('button', {name: 'Download Exported File', exact: true});
+        const download = onix.downloadButton(results);
         await expect(download).toBeVisible();
         const file = await downloadFrom(page, () => download.click());
         expect(file.name).toMatch(/^onix30-.*\.xml$/);
         expect(file.text).toContain('ONIXMessage');
         expect(file.text).toMatch(/<Product[\s>]/);
 
-        // Control: "Publisher Code" emptied brings the reminder back
-        // (Settings bullet 1).
+        // A book published without a publisher (Rule 18): the warning
+        // under the button; the export completed all the same.
+        await expect(onix.resultsHeading(results, 'Warnings encountered:')).toBeVisible();
+        await expect(onix.resultsLines(results).filter({hasText: exactly(TEXT.noPublisher('Tidewater Tales'))})).toHaveCount(1);
+        await expect(results).toContainText(TEXT.exported);
+        await expect(download).toBeVisible();
+
+        // No format among the ticked books, validated (Rule 18b; Fields,
+        // the export page): the tool reopened from Tools.
+        await onix.openFromTools();
+        await onix.list.expectTitles(['Tidewater Tales', 'Harbour Lights']);
+        for (const title of ['Tidewater Tales', 'Harbour Lights']) {
+            await expect(onix.list.box(title)).not.toBeChecked();
+        }
+        await expect(onix.validationBox()).toBeChecked();
+        await onix.list.box('Harbour Lights').check();
+        const failed = await onix.list.pressExport(onix);
+        await expect(failed).toContainText(TEXT.exportFailed, {timeout: 30_000});
+        await expect(onix.resultsHeading(failed, 'Errors occured:')).toBeVisible();
+        await expect(failed.getByText('Generic Items', {exact: true})).toBeVisible();
+        await expect(
+            onix.resultsLines(failed).filter({hasText: 'ONIXMessage'}).filter({hasText: 'Missing child element(s).'}).first()
+        ).toBeVisible();
+        // The failure text read above settles the tab; the button the
+        // successful export showed is absent here.
+        await expect(onix.downloadButton(failed)).toHaveCount(0);
+
+        // No format among the ticked books, not validated (Rules 18b, 24b).
+        await onix.openFromTools();
+        await expect(onix.list.box('Harbour Lights')).not.toBeChecked();
+        await onix.list.box('Harbour Lights').check();
+        await onix.validationBox().uncheck();
+        await expect(onix.validationBox()).not.toBeChecked();
+        const bare = await onix.list.pressExport(onix);
+        await expect(bare).toContainText(TEXT.exported, {timeout: 30_000});
+        const bareDownload = onix.downloadButton(bare);
+        await expect(bareDownload).toBeVisible();
+        const bareFile = await downloadFrom(page, () => bareDownload.click());
+        expect(bareFile.name).toMatch(/^onix30-.*\.xml$/);
+        const message = await onixMessage(page, bareFile.text);
+        expect(message.n).toBe('ONIXMessage');
+        // The header opens the file and names the press by its "Publisher
+        // Code"; no product, against the first file's (read above).
+        expect(message.c.map((k) => k.n)[0]).toBe('Header');
+        const header = children(message, 'Header');
+        expect(header).toHaveLength(1);
+        expect(descendants(header[0], 'SenderIdentifier').flatMap((id) => texts(id, 'IDValue'))).toEqual(['TWP-01']);
+        expect(descendants(message, 'Product')).toHaveLength(0);
+
+        // Control: open Settings › Press › "Masthead", empty "Publisher
+        // Code": the reminder comes back (Settings bullet 1). The spec's
+        // "Leave site?" on the way is not met after the export (finding
+        // T-omp-1, revision 2026-11-12): the dialogs seen are read once
+        // Masthead has loaded and saved, past any page-leave question.
+        const before = seen.length;
         await emptyPublisherCode(page, press.path);
+        expect(seen.slice(before).map((d) => d.type), 'no page-leave question on the way to Masthead').toEqual([]);
         await onix.open();
         await onix.expectReminderOnly();
     });

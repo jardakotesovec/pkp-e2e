@@ -189,10 +189,12 @@ otherwise one tab, "Export", holding: <sup>i</sup>
 | **Validate XML before the export and registration.** | No | One box, ticked when the page opens. <sup>i</sup> |
 | **Select All**, **Export Submissions** | — | Two buttons under the list (Rules 17, 18). <sup>i</sup> |
 
-Leaving the page after typing a search or changing the validation box
-asks the browser's "Leave site?" question; after ticking books or
-pressing "Select All" the page is left without a question. On return
-nothing is ticked and the box is ticked again. <sup>td19</sup>
+Leaving the page after typing a search asks the browser's "Leave
+site?" question. So does leaving it after changing the validation box,
+until "Export Submissions" is pressed: once an export is made, the file
+downloaded or not, the page is left without a question, as it is after
+ticking books or pressing "Select All". On return nothing is ticked and
+the box is ticked again. <sup>td19</sup>
 
 ## Rules & state
 
@@ -799,9 +801,10 @@ footnote. <sup>s</sup>
 6. **The ONIX tool, from the press's details to an export**
 
    Given: Press manager, on a scratch press whose four ONIX details are
-   blank and whose "Masthead" is otherwise complete, holding the
-   published book "Tidewater Tales", with the format "Paperback", and
-   the book "Harbour Lights" in the Submission stage.
+   blank and whose "Masthead" is otherwise complete, holding the book
+   "Tidewater Tales", published with the format "Paperback" while those
+   details were blank, and the book "Harbour Lights" in the Submission
+   stage, with no publication format.
 
    - **The details missing**: open Tools › "Import/Export" › "ONIX 3.0
      Monograph Export Plugin": the page, headed with the tool's name,
@@ -826,13 +829,36 @@ footnote. <sup>s</sup>
      reading "The export completed successfully." with a "Download
      Exported File" button. Press the button: a file downloads whose name
      starts "onix30-" and ends ".xml", holding a "Product" element (Rule
-     18). The "Warnings encountered:" block under the button, there
-     because "Tidewater Tales" was published before the press had a
-     "Press Publisher Name" (Rule 18), is neither a pass nor a fail here.
-   - **Control**: on Settings › Press › "Masthead" empty "Publisher Code"
-     and press "Save": the ONIX tool's page again shows only "This press
-     is missing some required information. Please go to Press Settings
-     and fill in the missing details." (Settings bullet 1). <sup>s</sup>
+     18).
+   - **A book published without a publisher**: under the button, the
+     tab shows the heading "Warnings encountered:" and the line "No
+     publisher is recorded for "Tidewater Tales", so the press name is
+     used as the publisher. To record a publisher, use the command-line
+     tool tools/stampIdentityMetadata.php."; the export completed all
+     the same, its button there (Rule 18).
+   - **No format among the ticked books, validated**: open the ONIX tool
+     again: nothing is ticked and "Validate XML before the export and
+     registration." is ticked (Fields, the export page). Tick "Harbour
+     Lights" alone and press "Export Submissions": the "Export
+     Submissions Results" tab reads "The process failed. Check below for
+     errors/warnings.", then "Errors occured:", "Generic Items" and an
+     error line that names "ONIXMessage" and says "Missing child
+     element(s).", with no "Download Exported File" button (Rule 18b).
+   - **No format among the ticked books, not validated**: open the ONIX
+     tool again, tick "Harbour Lights" alone, untick "Validate XML
+     before the export and registration." and press "Export
+     Submissions": the tab reads "The export completed successfully.
+     Download the exported file from the button below." with a "Download
+     Exported File" button. Press the button: the downloaded file holds
+     a header naming the press by its "Publisher Code", TWP-01, and no
+     "Product" element (Rules 18b, 24b).
+   - **Control**: open Settings › Press › "Masthead": the browser asks
+     no "Leave site?" question, since an export was made after the
+     validation box was changed (Fields, the export page). Empty
+     "Publisher Code" and press "Save": the ONIX tool's
+     page again shows only "This press is missing some required
+     information. Please go to Press Settings and fill in the missing
+     details." (Settings bullet 1). <sup>s</sup>
 
 7. **The trade data in a Native XML file**
 
@@ -984,10 +1010,6 @@ Left out of the scenarios above, by reason:
   - the guard A16's issue report names, once fixed: "Export
     Submissions" pressed with no book ticked: the alert "No objects
     selected.", no results tab opened and no request failing [report 2026-10-01]
-  - an export whose ticked books have no publication format, with the
-    validation box ticked and unticked (Rule 18b) [upstream 2026-10-02]
-  - the "Warnings encountered:" line for a book published while the
-    press's "Press Publisher Name" was blank (Rule 18) [upstream 2026-10-05]
   - the guard for A6 (issue report
     `docs/issues/U74-A6-market-edit-fills-in-gst-tax-type.md`): a
     market saved with "Taxation Type" empty reopens in its "Edit"
@@ -1029,9 +1051,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U74-A13-representative-type-change-listed-twice.md`):
     a supplier switched to "Agent" is listed under "Agents" only,
     before any reload [report 2026-10-03]
-  - a digital format's product in the ONIX tool's file stating a file
-    size worked out from the format's approved files (Rule 24c; its
-    value is A22) [incidental 2026-10-13]
 - **Rarely met**:
   - a format that has used all nine sales-rights types, whose "Add
     Sales Rights" list is empty (Rule 10)
@@ -1042,8 +1061,8 @@ Left out of the scenarios above, by reason:
     (Rule 18)
   - a "Publisher Code" of spaces saved as blank, and a "Publisher Code
     Type" that cannot be emptied once saved (Settings bullet 1)
-  - leaving the export page after a search or a changed validation box
-    (Fields, the export page)
+  - leaving the export page after a search, or after a changed
+    validation box with no export made since (Fields, the export page)
   - the Press editor, Production editor and Site Administrator, offered
     what the Press manager is (Actors rows 1–5)
 - **Register carries it**:
@@ -1089,6 +1108,12 @@ Left out of the scenarios above, by reason:
     until a reload; Fields, the "Representatives" page; Rule 8a)
   - A22 (a digital format's file size written as whole megabytes
     followed by ".3"; Rule 24c)
+- **No seed**:
+  - a digital format's product in the ONIX tool's file stating a file
+    size worked out from the format's files approved with "Approve
+    Proof" (Rule 24c; its figure is A22): no seeded format has a file
+    approved with "Approve Proof", and for a format with no files the
+    size stated is itself A22's symptom
 - **Owned by another feature**:
   - the Author's view without a "Marketing" group (Actors row 1;
     *[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#side-menu)*)
@@ -2015,6 +2040,13 @@ page, on the Submission-stage book its Submission stage, and on the
 draft "Make a Submission: Upload Files". "Leave site?" came after a
 typed search or a changed validation box, never after ticks or "Select
 All"; on return nothing was ticked and the box was ticked.
+Test run 2026-11-12, OMP (scenario 6): with "Harbour Lights" ticked,
+the box unticked, "Export Submissions" and "Download Exported File"
+pressed, opening Settings › Press › "Masthead" by address asked no
+"Leave site?" question. Two probes the same day agreed: the box
+unticked and the page left by address asked the question; the box
+unticked, then "Export Submissions" pressed, with or without the
+download, and the page left the same way asked nothing.
 
 <a id="fn-j"></a>
 **j** — `Onix30ExportPlugin::display()` `exportSubmissionsBounce` adds
@@ -2350,8 +2382,12 @@ the refused delete's browser pop-up is accepted before the dialog's
 `context.country` and `context.acronym`, without which its "Masthead"
 refuses "Save". Scenario 6 seeds none of the four ONIX keys; "Tidewater
 Tales" is published with `publicationFormats: [{name: 'Paperback'}]`
-(with no format the validated export fails, Rule 18b), "Harbour Lights" `submitted: true` with no
-decision. Scenarios 7 and 8 seed `publisher`, `location`, `codeType:
+(with no format the validated export fails, Rule 18b) before the
+scenario fills the details, so its publication records no publisher
+and its export carries Rule 18's warning; "Harbour Lights" is
+`submitted: true` with no decision and no `publicationFormats`. Its
+two "Harbour Lights" exports and the warning were driven on
+2026-10-02 (note td20). Scenarios 7 and 8 seed `publisher`, `location`, `codeType:
 'Proprietary (01)'` and `codeValue` (scenario 7 `publisher: 'Tidewater
 Press'`), on both presses of scenario 8, whose B holds no book; a
 scratch press's principal contact is "Site Admin" <admin@mail.test>.

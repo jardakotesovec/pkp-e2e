@@ -45,7 +45,7 @@
  */
 const {expect} = require('@playwright/test');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
-const {ToolPage, SubmissionExportList} = require('../../../../shared/playwright/pages/ImportExportPages.js');
+const {ToolsPage, ToolPage, SubmissionExportList} = require('../../../../shared/playwright/pages/ImportExportPages.js');
 const {exactly, pastCloseWindow, DeleteDialog} = require('./PublicationFormatPages.js');
 const {waitForJQueryIdle} = require('../../../../shared/playwright/support/legacy.js');
 
@@ -76,6 +76,11 @@ const TEXT = {
     onixTool: 'ONIX 3.0 Monograph Export Plugin',
     onixMissing: 'This press is missing some required information. Please go to Press Settings and fill in the missing details.',
     validation: 'Validate XML before the export and registration.',
+    exported: 'The export completed successfully. Download the exported file from the button below.',
+    exportFailed: 'The process failed. Check below for errors/warnings.',
+    /** @param {string} title */
+    noPublisher: (title) =>
+        `No publisher is recorded for "${title}", so the press name is used as the publisher. To record a publisher, use the command-line tool tools/stampIdentityMetadata.php.`,
 };
 
 /** The "Audience" page's five lists: form field name → label. */
@@ -806,6 +811,29 @@ class OnixToolPage extends ToolPage {
     validationLabel() {
         return this.page.locator('#export-tab label').filter({has: this.page.locator('input[name="validation"]')});
     }
+
+    /** Open the tool from the Tools list (Tools › "Import/Export") and wait for its "Monographs" list. */
+    async openFromTools() {
+        const tools = new ToolsPage(this.page, this.contextPath);
+        await tools.goto();
+        await tools.openTool(TEXT.onixTool);
+        await this.list.expectLoaded();
+    }
+
+    /** A results tab's "Download Exported File". */
+    downloadButton(results) {
+        return results.getByRole('button', {name: 'Download Exported File', exact: true});
+    }
+
+    /** A results tab's block heading ("Warnings encountered:", "Errors occured:"). */
+    resultsHeading(results, name) {
+        return results.getByRole('heading', {name, exact: true});
+    }
+
+    /** A results tab's message lines (each a list item). */
+    resultsLines(results) {
+        return results.getByRole('listitem');
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -843,6 +871,27 @@ async function onixProducts(page, xml) {
             out[name] = [...format.children].filter((k) => k.localName === 'Product').map(tree);
         }
         return out;
+    }, xml);
+}
+
+/**
+ * Read an ONIX tool export file in the browser: its root element as a
+ * tree (`{n, t, c}` as `onixProducts`), namespaces dropped.
+ *
+ * @param {import('@playwright/test').Page} page any open page (the parser is the browser's)
+ * @param {string} xml
+ * @returns {Promise<OnixNode>}
+ */
+async function onixMessage(page, xml) {
+    return page.evaluate((text) => {
+        const doc = new DOMParser().parseFromString(text, 'application/xml');
+        /** @param {Element} el */
+        const tree = (el) => ({
+            n: el.localName,
+            t: el.children.length ? '' : (el.textContent || '').trim(),
+            c: [...el.children].map(tree),
+        });
+        return tree(doc.documentElement);
     }, xml);
 }
 
@@ -889,6 +938,7 @@ module.exports = {
     OnixExportList,
     OnixToolPage,
     onixProducts,
+    onixMessage,
     descendants,
     texts,
     children,
