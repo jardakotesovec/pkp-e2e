@@ -42,7 +42,7 @@ account. <sup>b</sup>
 | **Switch announcements on and configure them** (Settings › Website › Setup › Announcements) | • manager-level roles of that journal with "Permit changes to Settings"<br>• Site Administrator working in the journal (the same tab)<br>• Section Editor, Assistant, Author, Reviewer, Reader: no Website settings at all; the settings address answers the access-denied page <sup>b</sup> |
 | **Open the journal's Announcements page; add, edit and delete announcements; add, edit and remove announcement types** | • manager-level roles of that journal, with or without "Permit changes to Settings" (Rule 3)<br>• Site Administrator working in the journal<br>• the page opens by its address even while announcements are switched off (Rule 2) ⚠ [A8](#a8)<br>• Section Editor, Assistant, Author, Reviewer, Reader: the access-denied page, and no "Announcements" entry in their side menu <sup>b</sup> <sup>c</sup> |
 | **Open the site's Announcements tab; configure, add, edit, delete site announcements and their types** | • Site Administrator, on the Site Settings, only while the site hosts two or more journals (Rule 16)<br>• Journal Manager: never; the Site Settings are the administrator's alone <sup>d</sup> |
-| **Read the Announcements page, an announcement's page and the home page list** | • any visitor, signed in or not, while the journal's "Enable announcements" is ticked (Rule 2); with it unticked every announcement address answers "404 Not Found" and the header carries no "Announcements" item <sup>e</sup> |
+| **Read the Announcements page, an announcement's page and the home page list** | • any visitor, signed in or not, while the journal's "Enable announcements" is ticked (Rule 2) <sup>e</sup> |
 | **Follow the "Edit" link on the public Announcements page** | • manager-level roles of that journal and the Site Administrator working in it, signed in: the link "Edit" (read to a screen reader as "Edit" followed by "Edit Announcements"; by "Open a new page to edit this information" on a press) opens the journal's Announcements page on its "Announcements" tab (Rule 9); nobody else sees it, and neither the announcement's page nor the home page carries one <sup>e</sup> |
 | **Be told about a new announcement** | • every user holding a role in that journal, the person who posted it included, unless the "A new announcement has been created." row ("New announcement." on a press) of their profile's Notifications tab says otherwise (Side effects); a Site Administrator with no role in the journal is not told, a case that cannot be seen on a test install, whose administrator holds a role in every journal<br>• nobody for a site announcement (Rule 16) <sup>f</sup> |
 | **Read the announcement feed** {OJS} | • any visitor, through the feed links, while announcements are on and a manager has enabled the "Announcement Feed Plugin", which a fresh journal has off (Rule 18) <sup>g</sup> |
@@ -161,9 +161,9 @@ discards the changes. <sup>g</sup>
    appears as the first row of the list with no reload; the row shows its
    title and the three buttons alone, and its posted date, today, prints
    under the title on the Announcements page and the home page. It is
-   public from that moment, on the Announcements page and, within the
-   "Display on Homepage" count, on the home page; there is no draft state
-   and no publish step. Closing the panel with its close control, or
+   public from that moment (Rule 17), on the Announcements page and,
+   within the "Display on Homepage" count, on the home page. Closing the
+   panel with its close control, or
    leaving the page by typing another address, drops what was typed with
    no warning, and "Add Announcement" opens an empty panel again; a
    picture already inserted into a box stays stored at its address
@@ -190,8 +190,8 @@ discards the changes. <sup>g</sup>
    closes the dialog and keeps everything.
    <sup>c</sup> <sup>j</sup> <sup>f-a12</sup>
 8. **Expiry.** An announcement with an "Expiry Date" is public until the
-   day before that date: from the first moment of the expiry date it is
-   gone from the Announcements page, the home page and the feed, and its
+   day before that date: from the start of that day on the install's
+   clock it is gone from the Announcements page, the home page and the feed, and its
    own page sends the visitor to the Announcements page instead. A past
    date on a new announcement makes it invisible from the start. An
    expired announcement stays in the manager's list, and clearing the date
@@ -352,9 +352,9 @@ discards the changes. <sup>g</sup>
     announcement feed plugin. <sup>g</sup>
 19. **The programming interface.** The Announcements panel searches,
     adds, edits and deletes announcements through the install's
-    programming interface, which programs outside the apps can also call
-    (the address is in the footnote). With each announcement it lists,
-    the interface gives, as its `_href`, the interface's own address for
+    programming interface, which programs outside the apps can also call.
+    With each announcement it lists, the interface gives, as its `_href`,
+    the interface's own address for
     reading that announcement back on its own (not its public page). For a journal's announcement that address points at
     the site instead of the journal, and the site refuses it; the
     journal's own address for the same announcement gives it ⚠
@@ -388,11 +388,16 @@ discards the changes. <sup>g</sup>
   server ([A14](#a14); Rule 14). Both the notification and the email are
   queued, as one job for the users notified alone and one for those
   emailed too: they arrive when the site's background jobs run; a test
-  install never runs them by itself. An announcement deleted before the
-  jobs run mails nobody: its job fails, and the Site Administrator's
-  Administration › "View Failed Jobs" lists it. The template is edited
+  install never runs them by itself. The template is edited
   under Settings › Workflow › Emails as "New Announcement" (*Emails
   management*). <sup>f</sup>
+- **An announcement deleted before its jobs run** mails nobody. Each of
+  its jobs fails at the next run of the site's background jobs and is
+  tried again at a later run, once five seconds have passed since its
+  last try. Only after its third failed try does the Site
+  Administrator's Administration › "View Failed Jobs" list the job: one row
+  per job (two for an announcement queued as two jobs), "Failed At" the
+  time of that third try, and no row names the announcement. <sup>f</sup>
 - **The image** is stored as a file in the journal's (or the site's)
   public files directory. "Remove" then "Save" deletes it; deleting the
   announcement does not ([A12](#a12)). How a tester sees a kept file:
@@ -413,11 +418,9 @@ discards the changes. <sup>g</sup>
 ## Settings that modify behavior
 
 - **"Enable announcements"** (Settings › Website › Setup › Announcements;
-  default unticked). Unticked: no public announcement page, no header
-  item, no home page block, no side menu entry; on a journal a feed
-  address lands on the home page (Rule 2). Ticked: all of those, the side
-  menu entry the moment the save succeeds and the rest from the next page
-  load. <sup>m</sup>
+  default unticked). Unticked, the public pages, header item, home page
+  block and side menu entry are gone; ticked, they show (Rule 2).
+  <sup>m</sup>
 - **"Introduction"** (the same tab; default empty). Filled: the text
   prints under the heading of the Announcements page (Rule 9). Empty:
   nothing between the heading and the list. <sup>m</sup>
@@ -429,11 +432,10 @@ discards the changes. <sup>g</sup>
   journal's). The same effects for the site's Announcements page and home
   page (Rule 16). <sup>d</sup>
 - **"Permit changes to Settings"** (Settings › Users & Roles › Roles, a
-  role's edit form; ticked on every default manager-level role, and the
-  manager role's own row offers no "Edit"). Unticked on an Editor or
-  Production Editor: the role loses the journal's settings and the
-  Announcements settings tab with them, and keeps the Announcements page
-  (Rule 3); on a preprint server no manager-level role can be changed.
+  role's edit form; ticked on every default manager-level role; which
+  can lose it: Actors). Unticked on an Editor or Production Editor: the
+  role loses the journal's settings and the Announcements settings tab
+  with them, and keeps the Announcements page (Rule 3).
   *Users management* owns the role form. <sup>b</sup>
 - **"Forms"** column (Settings › Website › Setup › Languages; default the
   primary language only). Each language ticked adds that language to the
@@ -456,8 +458,7 @@ discards the changes. <sup>g</sup>
   tab. <sup>f</sup>
 - **"Announcement Feed Plugin"** {OJS} (Settings › Website › Plugins ›
   Installed Plugins › Generic; default disabled). Enabled: the feeds
-  answer and the block can be placed; with announcements off a feed
-  address then lands on the journal's home page. Disabled: the feeds
+  answer and the block can be placed. Disabled: the feeds
   answer "404 Not Found" and the block is gone from the sidebar choices.
   Its "Display feed links…" choice (default none saved: the block on the
   home page alone) and "Limit feed to" (default empty: every unexpired
@@ -530,9 +531,11 @@ footnote.
    - **A refused count**: type "abc" in "Display on Homepage" and press
      "Save": "This is not a valid integer." sits under the box, the tab
      reads "Please correct one error." with a "Jump to next error" link,
-     and "Save" is grayed out; replace the value with "-1": "Save" is live
-     again and, pressed, is refused with "This must be at least 0."
-     (Fields).
+     the notice "The form was not saved because 1 error(s) were
+     encountered. Please correct these errors and try again." shows at
+     the top right of the screen, and "Save" is grayed out; replace the
+     value with "-1": "Save" is live again and, pressed, is refused with
+     "This must be at least 0." and the same notice (Fields).
    - **Saved**: type "News from the editors." in "Introduction" and "2" in
      "Display on Homepage" and press "Save": the side menu gains an
      "Announcements" entry with its own icon between "DOIs" and
@@ -564,7 +567,8 @@ footnote.
 
    Given: Journal Manager, on a scratch journal with announcements on and
    "Display on Homepage" at 2, with no announcements and no announcement
-   types.
+   types; "today" and "tomorrow" are the install's (UTC by default), the
+   browser at or east of its time zone ([A3](#a3) when west).
 
    - **The empty list**: press "Announcements" in the side menu: the
      "Announcements" tab reads "No items found." with a "Search" box and
@@ -580,12 +584,15 @@ footnote.
      "Announcement Type"; press "Save": the panel stays open, "Please
      correct one error." appears under the fields above "Save" with "Go
      to Title: This field is required." and "Jump to next error", "This
-     field is required." sits under "Title", and "Save" is grayed out
-     (Fields; Rule 13).
+     field is required." sits under "Title", the notice "The form was not
+     saved because 1 error(s) were encountered. Please correct these
+     errors and try again." shows at the top right of the screen, and
+     "Save" is grayed out (Fields; Rule 13).
    - **A refused date and a refused file**: type "Call for papers" in
      "Title" and "tomorrow" in "Expiry Date" and press "Save": "The date
      format is not valid. Enter each date in the format YYYY-MM-DD." sits
-     under "Expiry Date" with "Please correct one error."; clear "Expiry
+     under "Expiry Date" with "Please correct one error." and the same
+     notice at the top right of the screen; clear "Expiry
      Date"; drop a text file (notes.txt) in "Image": "notes.txt" is listed
      in the box with "You can't upload files of this type." under its name
      and a "REMOVE FILE" link, "Please correct one error." shows, and
@@ -710,13 +717,13 @@ footnote.
 
 4. **The email and who gets it**
 
-   Given: Journal Manager, on a scratch journal with announcements on,
-   with a throwaway Reader whose Notifications tab keeps its defaults, an
-   Author whose "Enable these types of notifications." is unticked on the
-   "A new announcement has been created." row ("New announcement." on a
-   press) of that tab, and a Section Editor whose "Do not
-   send me an email for these types of notifications." is ticked on that
-   row.
+   Given: Journal Manager and the Site Administrator, on a scratch
+   journal with announcements on, with a throwaway Reader whose
+   Notifications tab keeps its defaults, an Author whose "Enable these
+   types of notifications." is unticked on the "A new announcement has
+   been created." row ("New announcement." on a press) of that tab, and a
+   Section Editor whose "Do not send me an email for these types of
+   notifications." is ticked on that row.
 
    - **The row's defaults**: open Profile › Notifications as the Journal
      Manager: the row "A new announcement has been created." ("New
@@ -734,6 +741,10 @@ footnote.
      is the first row; signed out, it is already on the Announcements
      page, while nothing has reached the mail catcher: the email waits
      for the site's background jobs (Rule 17; Side effects).
+   - **Deleted before the jobs run**: press "Add Announcement", type
+     "Cancelled meeting" in "Title", tick the email box and press "Save":
+     "Cancelled meeting" is the first row; press "Delete" on it, then
+     "Yes": the row is gone (Rule 7; Side effects).
    - **The email**: run the site's background jobs: the mail catcher holds one
      "New Announcement" email for the Journal Manager, who posted it, and
      one for the Reader: the subject "Call for papers", the From line
@@ -745,6 +756,14 @@ footnote.
    - **Who gets nothing**: the mail catcher holds no email for the Author
      or the Section Editor, and none titled "Board meeting" for anyone
      (Side effects).
+   - **The deleted announcement's jobs**: the mail catcher holds no
+     email titled "Cancelled meeting" for anyone; wait at least five
+     seconds and run the site's background jobs again, then once more
+     after another five seconds; signed in as the Site Administrator, open
+     Administration › "View Failed Jobs": it lists the deleted
+     announcement's two jobs, the one for the Section Editor, notified
+     alone, and the one for the users emailed, each in a row naming no
+     announcement, "Failed At" the time of the last run (Side effects).
    - **Nothing else**: the Journal Manager's Tasks panel reads "No Items"
      (Side effects).
    - **Control**: a Reader of the seeded journal, who holds no role in the
@@ -857,8 +876,9 @@ footnote.
    Given: Journal Manager, on a scratch journal with announcements on,
    the "Announcement Feed Plugin" enabled and its block placed in the
    sidebar with no "Display feed links…" choice saved, with one
-   announcement "Older notice" (announcement text "Posted first.") and one
-   expired announcement "Old news".
+   announcement "Older notice" (announcement text "Posted first."), one
+   announcement "Brief notice" (short description "Summary only." and no
+   announcement text) and one expired announcement "Old news".
 
    - **The newest by hand**: on the Announcements page press "Add
      Announcement", type "Newer notice" in "Title" and "Posted second." in
@@ -874,6 +894,9 @@ footnote.
      its "Announcement" text; "Old news" is in none; the RSS 2.0 feed's
      dates are readable, the Atom and RSS 1.0 feeds' are not
      ([A15](#a15)) (Rules 8, 18).
+   - **An announcement with no text**: each feed also lists "Brief
+     notice" with its title, its posted date and its page's address and
+     no text; "Summary only." is in none (Rule 18).
    - **Announcements switched off**: as the Journal Manager untick
      "Enable announcements" on Settings › Website › Setup › Announcements
      and press "Save": signed out, each feed's address now lands on the
@@ -888,6 +911,80 @@ footnote.
    Settings › Website › Plugins › Installed Plugins › Generic lists no
    "Announcement Feed Plugin" there, so the scenario has no analogue on
    OMP or OPS beyond that absence (Rule 18).
+
+8. **Pictures an announcement takes**
+
+   Given: Journal Manager and the Site Administrator, on a scratch
+   journal with announcements on and "Display on Homepage" at 1, with no
+   announcements.
+
+   - **A text file named ".png"**: on the Announcements page press "Add
+     Announcement", type "Not a picture" in "Title" and drop a text file
+     named "notapicture.png" in "Image": the box lets it in with no
+     message and lists it under its name with "Alternate text" and
+     "Remove" (its empty preview is
+     *[Categories](U16-categories.md#a17)* A17's); press "Save": "There
+     was an error uploading this image." sits under "Image", "Please
+     correct one error." shows, and the notice "The form was not saved
+     because 1 error(s) were encountered. Please correct these errors and
+     try again." shows at the top right of the screen; close the panel
+     and reload the page: the list reads "No items found." (Fields
+     "Image").
+   - **Four pictures added**: add four announcements, each by pressing
+     "Add Announcement", typing its title, dropping its picture in
+     "Image", typing its text in "Alternate text" and pressing "Save":
+     "Notice 1", with "First notice." in "Short Description", the JPEG
+     picture "photo.jpeg" and "Picture 1"; "Notice 2", with the JPEG
+     picture "IMG_0001.JPG" (an upper-case name) and "Picture 2"; "Notice
+     3", with the WebP picture "photo.webp" and "Picture 3"; "Notice 4",
+     with the icon "photo.ico" and "Picture 4". Each "Save" closes the
+     panel and puts the new row first; signed out, the Announcements page
+     lists the four summaries, each with its picture described by its
+     alternate text, each announcement's page shows its picture so
+     described, and the home page block's summary of "Notice 4", the
+     newest, shows "Picture 4" (Fields "Image"; Rules 9–11, 15).
+   - **New pictures on an edit**: press "Edit" on "Notice 1", press
+     "Remove", drop the JPEG picture "IMG_0001.JPG" in "Image", type "New
+     picture 1" in "Alternate text" and press "Save"; do the same on
+     "Notice 2" with "photo.jpeg" and "New picture 2", on "Notice 3" with
+     "photo.webp" and "New picture 3", and on "Notice 4" with "photo.ico"
+     and "New picture 4": each "Save" closes the panel; signed out, each
+     announcement's page and its summary on the Announcements page show
+     its picture described by its new alternate text (Fields "Image";
+     Rules 6, 15).
+   - **Two refused edits**: press "Edit" on "Notice 1", press "Remove",
+     drop "renamed.jpg", a PNG picture under a JPEG's name, in "Image" and
+     press "Save":
+     "There was an error uploading this image." sits under "Image", with
+     "Please correct one error." and the same notice; close the panel; do
+     the same on "Notice 2": refused the same way; signed out, the page of
+     "Notice 1" still shows "First notice." and its picture described "New
+     picture 1", the page of "Notice 2" its picture described "New picture
+     2", and their summaries on the Announcements page the same (Fields
+     "Image"; Rule 15).
+   - **The same manager's save**: press "Edit" on "Notice 1", change only
+     "Title" to "Notice 1 revised" and press "Save": the panel closes and
+     the row reads "Notice 1 revised"; signed out, its page shows the
+     heading "Notice 1 revised", "First notice." and its picture
+     described "New picture 1" (Fields "Image").
+   - **The picture removed after a refusal**: signed out, copy the
+     address of the picture on the page of "Notice 1 revised" (the
+     browser's "Copy image address"); as the Journal Manager press "Edit"
+     on it, press "Remove", then "Save": signed out, its page and its
+     summary on the Announcements page show "First notice." and no
+     picture, and the copied address no longer opens the picture
+     ([Rule 15](#kept-file); Fields "Image").
+   - **Another manager's save**: sign in as the Site Administrator, open
+     the journal's Announcements page from the side menu, press "Edit" on
+     "Notice 2", change only "Title" to "Notice 2 revised" and press
+     "Save": the panel closes and the row reads "Notice 2 revised";
+     signed out, its page shows the heading "Notice 2 revised" and its
+     picture described "New picture 2" (Fields "Image").
+   - **Control**: signed out, the Announcements page lists "Notice 1
+     revised" with no picture, "Notice 2 revised", "Notice 3" and "Notice
+     4" each with its picture described "New picture 2", "New picture 3"
+     and "New picture 4", and no "Not a picture": the refused add stored
+     nothing (Fields "Image"; Rule 9). <sup>s8</sup>
 
 ## Coverage
 
@@ -907,16 +1004,9 @@ Left out of the scenarios above, by reason:
   - the guard for A7 (issue report `docs/issues/U12-A7-announcement-feed-limit-keeps-oldest.md`): with "Limit feed to" set below the number of current announcements, the three feeds carry the newest ones and RSS 2.0's channel date is the newest's. [report 2026-10-03]
   - the guard for A15 (issue report `docs/issues/U12-A15-announcement-feed-dates-percent-signs.md`): the Atom and RSS 1.0 feeds' dates are well-formed RFC 3339 and W3CDTF values. [report 2026-10-03]
   - the guard for A3 (issue report `docs/issues/U12-A3-announcement-expiry-date-refused-on-edit.md`): an unchanged "Save" on "Edit Announcement" keeps the expiry date, with another "Date (Short)" and with a browser west of the install's time zone. [report 2026-10-03]
-  - an edit whose new picture is refused on "Save", since A21 retired (Fields "Image"; Rule 15): with a PNG named ".jpg" the announcement keeps its text and its earlier picture on its page and the public Announcements page; a later "Save" of the title alone (the panel closed, "Edit" pressed again and only "Title" changed) goes through, by the same Journal Manager and by the Site Administrator; "Remove" then "Save" leaves the pages text-only and the picture's earlier address no longer opens it ([Rule 15](#kept-file)). [report 2026-10-27]
-  - pictures that save since A2 retired (Fields "Image"): a JPEG named ".jpeg", a picture with an upper-case extension, a WebP picture and an icon (".ico") save on "Add Announcement" and "Edit Announcement" and show on the announcement's page and its summaries. [incidental 2026-10-27]
-  - a text file named ".png" passing the "Image" box and refused on "Save" (Fields "Image"): on "Add Announcement" nothing is added. [incidental 2026-10-27]
   - the guard for A12 (issue report `docs/issues/U12-A12-announcement-image-files-left-behind.md`): deleting an announcement with a picture, and replacing its picture with one of another type, leave no file behind: the picture's earlier address no longer opens it ([Rule 15](#kept-file)), on a context and on the site. [report 2026-10-03]
   - the guard for A22, once fixed (Rules 15, 16): a site announcement with a picture, the newest of the site's: the site's home page, the site's Announcements page and the announcement's own page open for a signed-out visitor and for the Site Administrator after signing in, each showing the picture, on OJS, OMP and OPS. [incidental 2026-10-29]
-  - the notice on a refused "Save" (Fields): scenario 1's refused count and scenario 2's empty save and refused date also show "The form was not saved because 1 error(s) were encountered. Please correct these errors and try again." [sweep 2026-11-09]
-  - scenario 1's "Saved": the side menu entry's own icon, which only the press's suite checks (Rule 3). [sweep 2026-11-09]
-  - scenario 2's "Expired": no message on the expired announcement's address and on the unknown one, which no suite checks (Rule 10). [sweep 2026-11-09]
-  - an announcement added with the email box ticked and deleted before the background jobs run (Side effects): nobody is emailed, and Administration › "View Failed Jobs" lists its job. [sweep 2026-11-09]
-  - an announcement with an empty "Announcement" text in the feeds {OJS} (Rule 18): listed with its title, date and address and no text, its short description left out. [sweep 2026-11-09]
+  - the number of rows on "View Failed Jobs" for scenario 4's deleted announcement: two, one per job (Side effects); the suites read every row that names its jobs but not how many. [report 2026-11-12]
 - **Nothing new to test**:
   - an unsaved tick on the settings tab kept across a tab switch and
     lost on leaving the page (Fields)
@@ -929,8 +1019,6 @@ Left out of the scenarios above, by reason:
     a line of wording on the panel scenario 5 opens
   - the "Display feed links…" choices and the "OK" / "Cancel" window
     {OJS} (Fields; Rule 18)
-  - a saved image replaced by a new upload (Rule 15): scenario 2 removes
-    one
   - another journal's announcement address landing on the Announcements
     page (Rule 10): scenario 2 opens an expired and an unknown one
   - a file over the server's upload limit refused in the "Image" box
@@ -951,23 +1039,19 @@ Left out of the scenarios above, by reason:
   - no history entry for an add, edit or delete (Side effects): no
     screen shows one; scenario 4 reads the Tasks panel
 - **Register carries it**:
-  - A1 (the announcements of a removed type deleted with it, and the
-    tab's list showing them until a reload; Rule 13; scenario 3 marks
-    it)
-  - A8 (the Announcements page reached by address, accepting
-    announcements and sending the email while "Enable announcements" is
-    unticked; Rule 2)
+  - A1 (a removed type's announcements deleted with it, and listed
+    until a reload; Rule 13; scenario 3 marks it)
+  - A8 (the Announcements page open by address, accepting announcements
+    and sending the email while announcements are off; Rule 2)
   - A14 (the English sentence in the email of a French-primary press or
     preprint server; Rule 14)
   - A13 (an edited type's old name shown until a reload; Rule 13;
     scenario 3 marks it)
-  - A12 (the image file left in the public files after a delete or a
-    replacement of another type, and every delete's warning in the
-    server's error log; Rules 7, 15)
+  - A12 (the picture's file kept after a delete or a replacement of
+    another type, and every delete's error-log warning; Rules 7, 15)
   - A11 (an unsaved title left on the row after "Edit Announcement" is
     closed, and stored by the next "Save"; Rule 6)
-  - A9 ("Send an email about this to all registered users." ticked on an
-    edit; Fields "Send Email")
+  - A9 (the email box ticked on an edit; Fields "Send Email")
   - A3 ("Date (Short)" set to another format; Settings)
   - A7 ("Limit feed to" set {OJS}; Rule 18)
   - A15 and A16 (the Atom and RSS 1.0 feeds' dates, the browser's feed
@@ -978,17 +1062,16 @@ Left out of the scenarios above, by reason:
     scenario 1 marks it)
   - A17 (a short description or full text entered in French alone
     printed on the English pages; Rule 14; scenario 5 marks it)
-  - A18 ("Send an email about this to all registered users." offered on
-    the site's panel and sending nothing; Rule 16; scenario 6 marks it)
-  - A19 (a journal's announcement read on its own through the
-    programming interface, at the address its list gives; Rule 19)
+  - A18 (the email box offered on the site's panel, sending nothing;
+    Rule 16; scenario 6 marks it)
+  - A19 (a journal's announcement read alone by program at the address
+    its list gives; Rule 19)
   - A20 (the warning an add by program without the email choice
     leaves; Rule 19)
-  - A22 (a site announcement with a picture on the site's home page,
-    Announcements page and its own page; Rules 15, 16)
-  - OMP2 (a press's home page carrying the site's announcements while
-    the press has no "Display on Homepage" count; Rule 11; scenario 6
-    marks it)
+  - A22 (a site announcement with a picture breaking the site's pages;
+    Rules 15, 16)
+  - OMP2 (a press's home page carrying the site's announcements; Rule
+    11; scenario 6 marks it)
 - **No seed**:
   - an Editor whose role has "Permit changes to Settings" unticked
     reaching the Announcements page and refused the settings {OJS OMP}
@@ -1349,6 +1432,9 @@ Basis: test run, 2026-10-03. <sup>f-omp2</sup>
 <a id="a21"></a>
 **A21 — An announcement edit whose new picture is refused breaks the announcement's picture, and every later "Save" fails** · ✅ · retired. Fixed upstream.
 
+<a id="a23"></a>
+**A23 — A deleted announcement's two jobs: one failed row or two** · ✅ · retired. Answered: each job leaves its own row.
+
 ---
 
 <a id="footnotes"></a>
@@ -1603,8 +1689,35 @@ recipient emailed), "Delete" › "Yes" removed it, and the drain then
 logged its `PKP\jobs\notifications\NewAnnouncementNotifyUsers` as
 "Failed" (exception `invalid.job.payload`), leaving no job queued and no
 mail for the Reader; `admin`'s Administration › "View Failed Jobs" (the
-page headed "Failed Jobs") listed the job. Drains after the other kept
-checks' deletions failed such jobs the same way.
+page headed "Failed Jobs") listed the job, its row reading "ID", "Job"
+`PKP\jobs\notifications\NewAnnouncementNotifyUsers`, "Queue" `queue`,
+"Connection" `database`, "Failed At" and the row actions, nothing naming
+the announcement; every other failed announcement job's row read the
+same but for "ID" and "Failed At". Drains after the other kept checks'
+deletions failed such jobs the same way. That probe's drain was the
+probe kit's, which runs the worker again after six-second pauses until
+nothing is left, so it covered the job's three tries.
+Code read 2026-11-12 (Side effects, a deletion before the jobs run):
+`notifyUsers()` queues one `NewAnnouncementNotifyUsers` per chunk of the
+users notified alone and one per chunk of those emailed too, in one
+`Bus::batch` (no `allowFailures`); `NewAnnouncementNotifyUsers::handle()`
+throws `JobException::INVALID_PAYLOAD` when the announcement is gone and
+does not check the batch's cancelled state, so each job fails on its
+own; `PKP\jobs\BaseJob` (`lib/pkp/jobs/BaseJob.php`) sets `$tries` 3
+and `$backoff` 5, so a failed try releases the job back to the queue
+until the third, which writes its `failed_jobs` row.
+Test runs 2026-11-12 (Side effects; scenario 4), OJS, OMP and OPS
+`main`, scenario 4's "Cancelled meeting" (two jobs: the Section Editor
+notified alone, the users emailed): after one
+`php lib/pkp/tools/jobs.php run` both jobs were back in `jobs` with
+`attempts` 1 (2 on OMP, where another test's drain had tried them
+first) and `available_at` five seconds later, none in `failed_jobs`,
+and "View Failed Jobs" listed no row for them; once the worker had been
+run again past each pause, the page listed the announcement's failed
+jobs, on OJS and OPS two rows, both "Job"
+`PKP\jobs\notifications\NewAnnouncementNotifyUsers`, their "Failed At"
+the same second on OPS and at most one second apart on OJS, neither
+naming the announcement (the OMP run did not count its rows).
 
 <a id="fn-g"></a>
 **g — the feed (OJS).** `plugins/generic/announcementFeed/` (OJS only;
@@ -2164,7 +2277,17 @@ absences are read with `expectNone` against the Reader's mail
 configured base address (seed-facts), so the suite opens the link's path
 on its own origin. The Tasks panel is the header's. The control reads
 `reader.rosa`'s inbox, the roster reader with no role in the scratch
-journal (note f).
+journal (note f). The deleted announcement's jobs are read as `admin`
+(the Site Administrator, enrolled as a manager in every scratch
+context, seed-facts) on Administration › "View Failed Jobs", the page
+headed "Failed Jobs" (note f); drains after other tests' deletions fail
+such jobs too (note f). One `runJobs()` leaves a job that failed a try
+released back to the queue for five seconds (`BaseJob` `$tries` 3,
+`$backoff` 5, note f), and the `_test/jobs` count it waits on leaves
+out jobs not yet available, so the suite runs `runJobs()` again after
+each pause until the page lists the announcement's rows; each row is
+read by its payload's announcement, and the suite reads one or more
+rows, not how many.
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** `POST scenarios/context` with
@@ -2198,8 +2321,9 @@ ticked and drained as s4.
 `enableAnnouncements: true`, `plugins: {announcementfeedplugin: {enabled:
 true}}`, `sidebar: ['AnnouncementFeedBlockPlugin']` (no `settings`, so no
 "Display feed links…" choice is saved), `announcements[]` "Older notice"
-(`description` "Posted first.") and "Old news" (`dateExpire` `2020-01-01`)
-and the `manager`; the newest is added by hand because seeded
+(`description` "Posted first."), "Brief notice" (`descriptionShort`
+"Summary only.", no `description`) and "Old news" (`dateExpire`
+`2020-01-01`) and the `manager`; the newest is added by hand because seeded
 announcements share a posted second (scenarios.md). The feed addresses
 are `gateway/plugin/AnnouncementFeedGatewayPlugin/{atom,rss2,rss}` (note
 g); the dates of [A15](#a15) are the `<updated>`, `<published>`,
@@ -2209,6 +2333,23 @@ journal is seeded with `enableAnnouncements: true` and no `plugins` key
 test reads Settings › Website › Plugins for no "Announcement Feed Plugin"
 row, with the "Web Feed Plugin" row those apps ship as its positive
 control, and the three feed addresses for "404 Not Found" (note g).
+
+<a id="fn-s8"></a>
+**s8 — scenario 8 seeding.** `POST scenarios/context` with
+`enableAnnouncements: true`, `numAnnouncementsHomepage: 1` and the
+`manager`. The Site Administrator is `admin`, enrolled as a manager in
+every scratch context (seed-facts). The files are the kept check's
+fixtures in `shared/playwright/checks/U12/I27A/` (`photo.jpeg`,
+`IMG_0001.JPG`, `photo.webp`, the PNG `renamed.jpg`, the text file
+`notapicture.png`) and the 16×16 icon `photo.ico` that
+`shared/playwright/checks/U12/SWA/swa.js` builds. As in s2, the picture
+never loads on the test installs (seed-facts), so the suite asserts the
+summary's and the page's `<img>` with its alternate text and the stored
+file `public/…/announcements/{id}.{ext}` (`.jpg` for both JPEGs, `.webp`,
+`.ico`; note j), never the rendered picture, and after "Remove" the
+file's absence in place of the copied address. The refused add's
+absence is read after a reload. Signed-out reads run in a second
+browser context, and the Site Administrator signs in in a third.
 
 <a id="fn-f-a1"></a>
 **f-a1 — A1 evidence.** `AnnouncementTypeGridRow::initialize()` builds the

@@ -26,7 +26,8 @@
  *
  * Not asserted here, by register ID: A9 🐞 (no edit ticks the email box),
  * A14 🐞 (the press's primary language is English, so the email's sentence
- * is the English one either way). S4's Notifications-row givens for the
+ * is the English one either way). Not read either: how many failed rows the deleted
+ * announcement's jobs leave (two, Side effects; a Planned item): S4 asserts at least one. S4's Notifications-row givens for the
  * Author and the Series editor are set through Profile › Notifications by
  * the test, as footnote s4 says (the tab is *Notifications center & email
  * preferences*'; there is no seed key for it).
@@ -43,6 +44,7 @@ const {test: base, expect} = require('../../support/fixtures.js');
 const {AnnouncementsPage, SiteAnnouncementsTab, PublicAnnouncements} = require('../../pages/AnnouncementsPages.js');
 const {ProfilePage, SAVED_MESSAGE} = require('../../../../../shared/playwright/pages/ProfilePage.js');
 const {TasksPanel, successToasts} = require('../../../../../shared/playwright/pages/NotificationsPages.js');
+const {AdministrationPage, FailedJobsPage} = require('../../../../../shared/playwright/pages/AdminPages.js');
 const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
 const {getEmail} = require('../../../../../shared/playwright/data/users.js');
 
@@ -51,6 +53,7 @@ const NEW_ANNOUNCEMENT_SETTING = 'notificationNewAnnouncement';
 const SITE = 'index';
 const CFP = 'Call for papers';
 const CFP_SHORT = 'Deadline 1 June.';
+const CANCELLED = 'Cancelled meeting';
 const T = 30_000;
 
 /** A visitor's page: a second browser context with no session at all (parallel lesson 8). */
@@ -81,6 +84,24 @@ function scratchUser(tag, key, given, family, roles) {
         email: `${tag}${key}@mail.test`,
         roles,
     };
+}
+
+/**
+ * "Failed At" on the Failed Jobs page ("2026-11-12 22:40:01 UTC 0",
+ * `JobResource::$dateFormat` 'Y-m-d G:i:s T Z') as epoch milliseconds, or
+ * NaN when the cell reads otherwise.
+ */
+function failedAtMs(text) {
+    const match = /^(\d{4}-\d{2}-\d{2}) (\d{1,2}):(\d{2}):(\d{2}) UTC\b/.exec(text.trim());
+    if (!match) {
+        return NaN;
+    }
+    return Date.parse(`${match[1]}T${match[2].padStart(2, '0')}:${match[3]}:${match[4]}Z`);
+}
+
+/** Whether a failed job's payload (the list's own data) names the announcement `id`. */
+function namesAnnouncement(row, id) {
+    return new RegExp(`announcementId[^;]{0,8};i:${id};`).test(JSON.stringify(row.payload ?? ''));
 }
 
 /** Save the visible Profile tab and wait for its "Your changes have been saved." notice. */
@@ -191,12 +212,31 @@ test.describe('Announcements (U12), queued email and the site', () => {
         expect(await pkpMail.count({to: manager.email, subject: CFP})).toBe(0);
         expect(await pkpMail.count({to: reader.email, subject: CFP})).toBe(0);
 
+        // Deleted before the jobs run: "Cancelled meeting" with the email
+        // box ticked is the first row (unless it shares its posted second
+        // with "Call for papers": the list orders by that date alone);
+        // "Delete" › "Yes" removes the row (Rule 7; Side effects).
+        panel = await list.openAdd();
+        await panel.fill({title: CANCELLED});
+        await panel.sendEmailBox().check();
+        const cancelled = await panel.save();
+        await expect(list.row(CANCELLED)).toHaveCount(1, {timeout: T});
+        if (cancelled.datePosted !== cfp.datePosted) {
+            await expect(list.titles().first()).toHaveText(CANCELLED);
+        }
+        await list.openDelete(CANCELLED);
+        await list.answerDelete('Yes');
+        await expect(list.row(CANCELLED)).toHaveCount(0);
+        await expect(list.row(CFP)).toHaveCount(1);
+
         // The email: after the jobs, one "New Announcement" email each for
         // the Press Manager, who posted it, and the Reader: the subject,
         // the From line, the body's bold title, short description, the
         // "full announcement" link and the Unsubscribe footer; the link
         // opens the announcement's page (Side effects; Rule 10).
+        const drainStart = Date.now();
         runJobs();
+        const drainEnd = Date.now();
         const control = {to: reader.email, subject: CFP};
         const readerMail = await pkpMail.find(control);
         const managerMail = await pkpMail.find({to: manager.email, subject: CFP});
@@ -224,6 +264,64 @@ test.describe('Announcements (U12), queued email and the site', () => {
         await pkpMail.expectNone({to: seriesEditor.email, afterControl: control});
         for (const user of [manager, reader, author, seriesEditor]) {
             await pkpMail.expectNone({to: user.email, subject: 'Board meeting', afterControl: control});
+        }
+
+        // The deleted announcement's job: no email titled "Cancelled
+        // meeting" for anyone of the press (the Site Administrator, a
+        // manager there, read by the press's path in the link, against his
+        // "Call for papers" read the same way); as the Site Administrator,
+        // Administration › "View Failed Jobs" lists its job, "Failed At" the
+        // time the jobs ran (their last run, T-omp-1), in a row naming no
+        // announcement; the job is told by the announcement's number in the
+        // payload the page's own list load carries. How many rows (one or
+        // two, Side effects) is a Planned item, not asserted.
+        for (const user of [manager, reader, author, seriesEditor]) {
+            await pkpMail.expectNone({to: user.email, subject: CANCELLED, afterControl: control});
+        }
+        const adminEmail = getEmail('admin');
+        await pkpMail.expectNone({
+            to: adminEmail,
+            subject: CANCELLED,
+            contains: tag,
+            afterControl: {to: adminEmail, subject: CFP, contains: tag},
+        });
+        const adminPage = await (await asUser('admin')).newPage();
+        await new AdministrationPage(adminPage).goto();
+        const failedJobs = new FailedJobsPage(adminPage);
+        await failedJobs.openFromAdministration();
+        // The job is tried three times, at least five seconds apart, before
+        // it is listed (T-omp-1): the jobs are run again, after each pause,
+        // and the page reloaded, until a row names it.
+        const jobsOfCancelled = async () =>
+            (await failedJobs.allRows()).filter((row) => namesAnnouncement(row, cancelled.id));
+        let ours = await jobsOfCancelled();
+        let lastDrainEnd = drainEnd;
+        await expect
+            .poll(
+                async () => {
+                    if (!ours.length) {
+                        runJobs();
+                        lastDrainEnd = Date.now();
+                        await failedJobs.reload();
+                        ours = await jobsOfCancelled();
+                    }
+                    return ours.length;
+                },
+                {message: 'failed jobs naming the deleted announcement', timeout: 90_000, intervals: [1_000, 2_000, 5_000]}
+            )
+            .toBeGreaterThan(0);
+        for (const job of ours) {
+            const row = await failedJobs.findRow(job.id);
+            expect(row, `failed job ${job.id} on the page`).not.toBeNull();
+            if (!row) {
+                continue;
+            }
+            await expect(row).toBeVisible();
+            await expect(row).not.toContainText(CANCELLED);
+            const failedAt = failedAtMs(await failedJobs.cells(job.id).nth(4).innerText());
+            expect(failedAt, `"Failed At" of job ${job.id}`).toBeGreaterThanOrEqual(Math.floor(drainStart / 1000) * 1000);
+            expect(failedAt, `"Failed At" of job ${job.id}`).toBeLessThanOrEqual(lastDrainEnd + 1000);
+            await expect(failedJobs.cells(job.id).nth(1)).toHaveText(String(job.displayName));
         }
 
         // Nothing else: the Press Manager's Tasks panel reads "No Items"

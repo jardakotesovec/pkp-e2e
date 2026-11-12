@@ -3,10 +3,10 @@
  * @file playwright/tests/U12-announcements.spec.js
  *
  * Announcements — OPS suite, one test per canonical scenario as a preprint
- * server runs it: S1, S2, S3 and S5 (common) here, plus S7's absence (a
- * preprint server installs no "Announcement Feed Plugin", multi-app rule
- * 3); S4 (the email, which drains the site's job queue) and S6 (the site's
- * own announcements, a fleet-global setting) in
+ * server runs it: S1, S2, S3, S5 and S8 (common) here, plus S7's absence
+ * (a preprint server installs no "Announcement Feed Plugin", multi-app
+ * rule 3); S4 (the email, which drains the site's job queue) and S6 (the
+ * site's own announcements, a fleet-global setting) in
  * playwright/tests/serial/U12-announcements.spec.js.
  * Spec: docs/specs/U12-announcements.md
  *
@@ -18,36 +18,34 @@
  * key), the Author and the Reader, and the stored picture lives under
  * `public/contexts/<id>/announcements/` (footnote s2).
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
- * (S3 asserts the remove dialog's sentence and the type's row gone, never
- * what becomes of the type's announcement), A3 🐞 (the short
- * date format stays YYYY-MM-DD),
- * A5 🐞 (S3 chooses a type and reads it chosen again, never that the
- * public pages print it nowhere), A6 ❓ (S3 presses no "none"), A7 🐞, A8 ❓
- * (no announcement is added while the box is unticked), A9 ❓ (no edit
- * ticks the email box), A10 🐞 (S1 reads the empty page's heading,
- * introduction and empty list, never the missing sentence), A11 🐞 (no
- * panel is closed unsaved), A12 🐞 (the deleted announcement's file is not
- * read), A13 🐞 (S3 reads the edited type's row after a reload, never the
- * stale row), A14 🐞 (the mail's sentence is read for its presence only),
- * A15 🐞 and A16 🐞 (a journal's feed), OMP1 (a press). The spec's Coverage
- * section records everything else left out.
+ * Deliberately NOT covered (register IDs; the spec's Coverage section
+ * records everything else left out): A1, A3, A5, A6, A7, A8, A9, A10, A11,
+ * A12, A13, A14, A15, A16, A17, A18, A19, A20, A22, OMP1, OMP2.
  *
  * Seeding: scenario endpoints only, through the context passthroughs
  * `enableAnnouncements`, `numAnnouncementsHomepage`, `announcements[]` and
  * `context.supportedFormLocales` for the second form language
  * (scenarios.md "POST scenarios/context"); no settings screen is driven to
  * reach a given. Every scenario runs on a scratch server with throwaway
- * accounts (footnotes s1–s7): the seeded server keeps announcements off
+ * accounts (footnotes s1–s8): the seeded server keeps announcements off
  * and no test changes it. Announcements seeded in one request share a
  * posted second (scenarios.md), so S3 finds rows by title. The picture
  * never loads on the test installs (seed-facts): the suite asserts the
  * `<img>` with its alternate text and the stored file under the server's
- * public files directory, never the rendered picture. Signed-out reads run
+ * public files directory, never the rendered picture; S8's pictures are
+ * the kept check's files (shared/playwright/checks/U12/I27A/) and the icon
+ * SWA builds, and its refused text file's empty preview (Categories A17)
+ * is read neither way. S2's "today" and "tomorrow" are UTC, the install's
+ * zone, and the browser runs in the machine's zone, UTC on the VM and on
+ * CI (a browser west of it meets A3). Signed-out reads run
  * in a second browser context with an empty storage state (patterns.md,
  * parallel lesson 8). Every absence is a settled read with a positive
- * control taken the same way (M4, M6): the "404 Not Found" page against
+ * control taken the same way (M4, M6): the refused saves' notice read as
+ * a fresh one at the top right, the expired and unknown addresses' "no
+ * message" against the Announcements page opened by its own address, the
+ * text file named ".png" let in with no message against the refusal the
+ * same box shows on "Save", the refused add's absence after a reload
+ * against the four saved ones, the "404 Not Found" page against
  * the same address answering once the box is ticked, the header without
  * "Announcements" against "Archives" in the same list, the side menu
  * without its entry against "Settings" in the same list, the refused text
@@ -61,6 +59,7 @@
 const fs = require('fs');
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
+const {expectNoticeTopRight} = require('../../../../shared/playwright/pages/SectionsPages.js');
 const {
     AnnouncementsSettingsTab,
     SideMenu,
@@ -84,6 +83,13 @@ const REQUIRED = 'This field is required.';
 const ACCESS_DENIED = 'The current role does not have access to this operation.';
 const TYPE_REFUSED = "You can't upload files of this type.";
 const DATE_REFUSED = 'The date format is not valid. Enter each date in the format YYYY-MM-DD.';
+const NOT_SAVED_ONE = 'The form was not saved because 1 error(s) were encountered. Please correct these errors and try again.';
+const IMAGE_REFUSED = 'There was an error uploading this image.';
+/** The kept check's pictures (footnote s8). */
+const PICTURES = path.resolve(__dirname, '../../../../shared/playwright/checks/U12/I27A');
+/** A 16×16 icon (an ICO holding a PNG), the one `shared/playwright/checks/U12/SWA/swa.js` builds (footnote s8). */
+const ICO_B64 =
+    'AAABAAEAEBAAAAEAIABSAAAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAQAAAAEAgGAAAAH/P/YQAAABlJREFUeJxjOGFj858SzDBqwKgBowYMFwMA7fE/HyYCVCYAAAAASUVORK5CYII=';
 const SETTINGS_SENTENCE =
     'Announcements may be published to inform readers of server news and events. Published announcements will appear on the Announcements page.';
 
@@ -121,6 +127,16 @@ function announcementsDir(contextId) {
     // Relative to the app root, as the app reads it (make-test-config.js).
     const pub = path.resolve(appRoot, m ? m[1].trim() : 'public');
     return path.join(pub, 'contexts', String(contextId), 'announcements');
+}
+
+/**
+ * The reader-facing page's main region as text, once its heading is on
+ * screen (a server-rendered page, settled after its navigation).
+ */
+async function publicMainText(page) {
+    const main = page.locator('.pkp_structure_main');
+    await expect(main.locator('h1').first()).toBeVisible({timeout: 30_000});
+    return (await main.innerText()).replace(/\s+/g, ' ').trim();
 }
 
 /** The access-denied page at `url`, as the signed-in `page`'s user. */
@@ -191,26 +207,43 @@ test.describe('announcements', () => {
 
         // A refused count: "abc" is not an integer, "-1" is below zero;
         // between the two "Save" comes back to life (Fields).
+        // Each refusal shows the notice at the top right (Fields).
         await settings.countInput().fill('abc');
-        await settings.saveRefused('Please correct one error.');
+        await expectNoticeTopRight(page, NOT_SAVED_ONE, () => settings.saveRefused('Please correct one error.'));
         await expect(settings.fieldError(settings.countField())).toHaveText('This is not a valid integer.');
         await expect(settings.errorSummary()).toContainText('Jump to next error');
         await settings.countInput().fill('-1');
         await expect(settings.saveButton()).toBeEnabled();
-        await settings.saveRefused('Please correct one error.');
+        await expectNoticeTopRight(page, NOT_SAVED_ONE, () => settings.saveRefused('Please correct one error.'));
         await expect(settings.fieldError(settings.countField())).toHaveText('This must be at least 0.');
 
-        // Saved: the side menu gains "Announcements" between "DOIs" and
-        // "Settings" with no reload; after a reload it sits above "DOIs"
-        // (Rules 2, 3).
+        // Saved: the side menu gains "Announcements" with its own icon
+        // between "DOIs" and "Settings" with no reload (a window marker set
+        // before the save survives it); after a reload it sits above
+        // "DOIs" (Rules 2, 3).
         await settings.typeIntroduction('News from the editors.');
         await settings.countInput().fill('2');
         await expect(settings.saveButton()).toBeEnabled();
+        await page.evaluate(() => {
+            // @ts-ignore a marker on the window the save must not reload away
+            window.__u12NoReload = true;
+        });
         await settings.save();
         await expect(menu.announcementsEntry()).toBeVisible();
+        // @ts-ignore the marker
+        expect(await page.evaluate(() => window.__u12NoReload), 'the page was not reloaded').toBe(true);
         labels = await menu.topLevelLabels();
-        expect(labels.indexOf('Announcements')).toBeGreaterThan(labels.indexOf('DOIs'));
-        expect(labels.indexOf('Announcements')).toBeLessThan(labels.indexOf('Settings'));
+        expect(labels.indexOf('DOIs')).toBeGreaterThanOrEqual(0);
+        expect(labels.indexOf('Announcements')).toBe(labels.indexOf('DOIs') + 1);
+        expect(labels.indexOf('Settings')).toBe(labels.indexOf('Announcements') + 1);
+        const icons = await menu.topLevelIcons();
+        const own = icons.find((entry) => entry.label === 'Announcements');
+        expect(own && own.icons, 'the entry carries one icon').toBe(1);
+        const others = icons.filter((entry) => entry.label !== 'Announcements' && entry.icons > 0);
+        expect(others.length, 'the other entries carry icons too').toBeGreaterThan(0);
+        for (const other of others) {
+            expect(other.drawing, `the icon is not the one of "${other.label}"`).not.toBe(own && own.drawing);
+        }
         await page.reload();
         await expect(menu.announcementsEntry()).toBeVisible();
         labels = await menu.topLevelLabels();
@@ -327,7 +360,7 @@ test.describe('announcements', () => {
         await expect(panel.sendEmailBox()).toBeVisible();
         await expect(panel.sendEmailBox()).not.toBeChecked();
         await expect(panel.typeField()).toHaveCount(0);
-        await panel.saveRefused('Please correct one error.');
+        await expectNoticeTopRight(page, NOT_SAVED_ONE, () => panel.saveRefused('Please correct one error.'));
         await expect(panel.errorLink(`Go to Title: ${REQUIRED}`)).toBeVisible();
         await expect(panel.errorSummary().getByRole('button', {name: 'Jump to next error', exact: true})).toBeVisible();
         await expect(panel.fieldError(panel.titleField())).toHaveText(REQUIRED);
@@ -339,7 +372,7 @@ test.describe('announcements', () => {
         // grayed out; removed, "Save" is live (Fields).
         await panel.titleInput().fill('Call for papers');
         await panel.expiryInput().fill('tomorrow');
-        await panel.saveRefused('Please correct one error.');
+        await expectNoticeTopRight(page, NOT_SAVED_ONE, () => panel.saveRefused('Please correct one error.'));
         await expect(panel.fieldError(panel.expiryField())).toHaveText(DATE_REFUSED);
         await expect(panel.fieldError(panel.titleField())).toHaveCount(0);
         await panel.expiryInput().fill('');
@@ -491,14 +524,24 @@ test.describe('announcements', () => {
         await expect(home.first.titleLink).toHaveText('Call for papers');
         await expect(home.first.summary).toContainText('Deadline 1 June.');
         await expect(home.more).toHaveCount(0);
+        // "With no message": the page each address lands on reads exactly
+        // as the Announcements page opened by its own address (the
+        // positive read, taken first), with no notice on it.
+        await publicList.goto();
+        const listAsIs = await publicMainText(visitor);
+        expect(listAsIs).toContain('Call for papers');
         await view.goto(workshopId);
         await expect(visitor).toHaveURL(/\/announcement$/);
         await expect(publicList.heading()).toHaveText('Announcements');
         await expect(view.container()).toHaveCount(0);
         expect(await publicList.titles()).toEqual(['Call for papers']);
+        expect(await publicMainText(visitor), 'the expired address shows no message').toBe(listAsIs);
+        await expect(visitor.locator('.cmp_notification, .pkp_notification')).toHaveCount(0);
         await view.goto(999999);
         await expect(visitor).toHaveURL(/\/announcement$/);
         await expect(publicList.heading()).toHaveText('Announcements');
+        expect(await publicMainText(visitor), 'the unknown address shows no message').toBe(listAsIs);
+        await expect(visitor.locator('.cmp_notification, .pkp_notification')).toHaveCount(0);
         await list.viewLink('Workshop 2027').click();
         await expect(page).toHaveURL(/\/announcement$/);
         await expect(new PublicAnnouncements(page, tag).heading()).toHaveText('Announcements');
@@ -855,5 +898,240 @@ test.describe('announcements', () => {
         await expect(sidebar.getByText('Web Feed Plugin', {exact: true})).toBeVisible();
         await expect(sidebar.locator('input[type=checkbox][value="AnnouncementFeedBlockPlugin"]')).toHaveCount(0);
         await expect(sidebar).not.toContainText('Announcement Feed');
+    });
+
+    test('S8: pictures an announcement takes', async ({browser, baseURL, asUser, opsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(420_000);
+        const tag = makeTag('s8', testInfo);
+        const manager = `${tag}mg`;
+        const {contextId} = await opsApi.createContext({
+            tag,
+            enableAnnouncements: true,
+            numAnnouncementsHomepage: 1,
+            users: [account(tag, 'mg', 'Mona', 'Manager', 'manager')],
+        });
+        const page = await (await asUser(manager)).newPage();
+        const visitor = await (await signedOut(browser, baseURL)).newPage();
+        const admin = new AnnouncementsPage(page, tag);
+        const list = admin.list();
+        const publicList = new PublicAnnouncements(visitor, tag);
+        const view = new AnnouncementView(visitor, tag);
+        const home = homeBlock(visitor);
+        const dir = announcementsDir(contextId);
+        const picture = (name) => path.join(PICTURES, name);
+        const ico = testInfo.outputPath('photo.ico');
+        fs.writeFileSync(ico, Buffer.from(ICO_B64, 'base64'));
+        const stored = (id, ext) => fs.existsSync(path.join(dir, `${id}.${ext}`));
+
+        // A text file named ".png": the box lets it in with no message and
+        // lists it under its name with "Alternate text" and "Remove" (its
+        // preview not read: Categories A17); "Save" is refused under
+        // "Image" with the summary and the notice; closed and reloaded, the
+        // list reads "No items found." (Fields "Image").
+        await admin.goto();
+        await expect(list.emptyMessage()).toBeVisible();
+        let panel = await list.openAdd();
+        await panel.titleInput().fill('Not a picture');
+        await panel.chooseFile(picture('notapicture.png'));
+        await expect(panel.chosenFileName()).toHaveText('notapicture.png');
+        await expect(panel.altTextInput()).toBeVisible();
+        await expect(panel.removeButton()).toBeVisible();
+        await expect(panel.fieldError(panel.imageField())).toHaveCount(0);
+        await expect(panel.refusedFile()).toHaveCount(0);
+        await expect(panel.errorSummary()).toHaveCount(0);
+        await expectNoticeTopRight(page, NOT_SAVED_ONE, () => panel.saveRefusedByServer('Please correct one error.'));
+        // The positive read of "no message" above: the same box, the same
+        // locator, now carries the refusal.
+        await expect(panel.imageError()).toHaveText(IMAGE_REFUSED);
+        await expect(panel.errorLink(`Go to Image: ${IMAGE_REFUSED}`)).toBeVisible();
+        await panel.close();
+        await page.reload();
+        await expect(admin.heading()).toHaveText('Announcements');
+        await expect(list.emptyMessage()).toBeVisible();
+        await expect(list.rows()).toHaveCount(0);
+
+        // Four pictures added: a ".jpeg", an upper-case ".JPG", a WebP and
+        // an icon, each with its alternate text; each "Save" closes the
+        // panel and puts the new row first (Fields "Image"; Rule 5).
+        const added = [
+            {title: 'Notice 1', file: picture('photo.jpeg'), alt: 'Picture 1', ext: 'jpg', short: 'First notice.'},
+            {title: 'Notice 2', file: picture('IMG_0001.JPG'), alt: 'Picture 2', ext: 'jpg'},
+            {title: 'Notice 3', file: picture('photo.webp'), alt: 'Picture 3', ext: 'webp'},
+            {title: 'Notice 4', file: ico, alt: 'Picture 4', ext: 'ico'},
+        ];
+        // The list orders by the posted time, kept to the second, and the
+        // four adds here take less than a second each, where a person takes
+        // longer: each "Save" waits until the clock (the install's own, the
+        // same machine) has left the second the previous one was posted
+        // in, so "first" means the newest (scenarios.md: a shared posted
+        // second leaves the order arbitrary).
+        const ids = {};
+        let postedBy = 0;
+        for (const [n, notice] of added.entries()) {
+            panel = await list.openAdd();
+            await panel.titleInput().fill(notice.title);
+            if (notice.short) {
+                await panel.typeShortDescription(notice.short);
+            }
+            await panel.uploadImage(notice.file);
+            await panel.altTextInput().fill(notice.alt);
+            const nextSecond = Math.floor(postedBy / 1000) * 1000 + 1000;
+            await expect.poll(() => Date.now(), {message: 'a new posted second'}).toBeGreaterThanOrEqual(nextSecond);
+            await panel.save();
+            postedBy = Date.now();
+            await expect(list.rows()).toHaveCount(n + 1);
+            await expect.poll(() => list.rowTitles().then((titles) => titles[0]), {message: `"${notice.title}" is the first row`}).toBe(notice.title);
+            ids[notice.title] = await list.idOf(notice.title);
+            expect(stored(ids[notice.title], notice.ext), `${notice.title}'s picture is stored as .${notice.ext}`).toBe(true);
+        }
+
+        // Signed out: the Announcements page lists the four summaries, each
+        // picture described by its alternate text; each announcement's page
+        // shows its picture so described; the home page block's summary of
+        // "Notice 4", the newest, shows "Picture 4" (Rules 9–11, 15).
+        await publicList.goto();
+        await expect(publicList.articles()).toHaveCount(4);
+        expect((await publicList.titles()).sort()).toEqual(['Notice 1', 'Notice 2', 'Notice 3', 'Notice 4']);
+        await expect(publicList.container()).not.toContainText('Not a picture');
+        for (const notice of added) {
+            await expect(publicList.summary(notice.title).image).toHaveAttribute('alt', notice.alt);
+        }
+        for (const notice of added) {
+            await view.goto(ids[notice.title]);
+            await expect(view.heading()).toHaveText(notice.title);
+            await expect(view.image()).toHaveAttribute('alt', notice.alt);
+        }
+        await gotoHome(visitor, tag);
+        await expect(home.articles).toHaveCount(1);
+        await expect(home.first.titleLink).toHaveText('Notice 4');
+        await expect(home.first.image).toHaveAttribute('alt', 'Picture 4');
+
+        // New pictures on an edit: "Remove", a new picture of the same type
+        // and a new alternate text; each "Save" closes the panel; signed
+        // out, each page and summary shows the new description (Fields
+        // "Image"; Rules 6, 15).
+        const replaced = [
+            {title: 'Notice 1', file: picture('IMG_0001.JPG'), alt: 'New picture 1', ext: 'jpg'},
+            {title: 'Notice 2', file: picture('photo.jpeg'), alt: 'New picture 2', ext: 'jpg'},
+            {title: 'Notice 3', file: picture('photo.webp'), alt: 'New picture 3', ext: 'webp'},
+            {title: 'Notice 4', file: ico, alt: 'New picture 4', ext: 'ico'},
+        ];
+        for (const notice of replaced) {
+            panel = await list.openEdit(notice.title);
+            await expect(panel.preview()).toBeVisible();
+            await panel.removeButton().click();
+            await expect(panel.preview()).toHaveCount(0);
+            await panel.uploadImage(notice.file);
+            await panel.altTextInput().fill(notice.alt);
+            await panel.save();
+            await expect(list.row(notice.title)).toBeVisible();
+            expect(stored(ids[notice.title], notice.ext), `${notice.title}'s new picture is stored as .${notice.ext}`).toBe(true);
+        }
+        await publicList.goto();
+        for (const notice of replaced) {
+            await expect(publicList.summary(notice.title).image).toHaveAttribute('alt', notice.alt);
+        }
+        for (const notice of replaced) {
+            await view.goto(ids[notice.title]);
+            await expect(view.heading()).toHaveText(notice.title);
+            await expect(view.image()).toHaveAttribute('alt', notice.alt);
+        }
+
+        // Two refused edits: "Remove", a PNG named ".jpg", "Save": refused
+        // under "Image" with the summary and the notice; the panel closed;
+        // signed out, both keep their text and their picture, on their
+        // pages and in their summaries, and the files stay (Fields "Image";
+        // Rule 15).
+        for (const title of ['Notice 1', 'Notice 2']) {
+            panel = await list.openEdit(title);
+            await panel.removeButton().click();
+            await panel.uploadImage(picture('renamed.jpg'));
+            await expectNoticeTopRight(page, NOT_SAVED_ONE, () => panel.saveRefusedByServer('Please correct one error.'));
+            await expect(panel.imageError()).toHaveText(IMAGE_REFUSED);
+            await panel.close();
+        }
+        await view.goto(ids['Notice 1']);
+        await expect(view.heading()).toHaveText('Notice 1');
+        await expect(view.description()).toContainText('First notice.');
+        await expect(view.image()).toHaveAttribute('alt', 'New picture 1');
+        await view.goto(ids['Notice 2']);
+        await expect(view.heading()).toHaveText('Notice 2');
+        await expect(view.image()).toHaveAttribute('alt', 'New picture 2');
+        await publicList.goto();
+        await expect(publicList.summary('Notice 1').summary).toContainText('First notice.');
+        await expect(publicList.summary('Notice 1').image).toHaveAttribute('alt', 'New picture 1');
+        await expect(publicList.summary('Notice 2').image).toHaveAttribute('alt', 'New picture 2');
+        expect(stored(ids['Notice 1'], 'jpg'), "Notice 1's picture is kept").toBe(true);
+        expect(stored(ids['Notice 2'], 'jpg'), "Notice 2's picture is kept").toBe(true);
+
+        // The same manager's save: only "Title" changed, the save goes
+        // through; signed out, the page shows the new heading, the text and
+        // the picture (Fields "Image").
+        panel = await list.openEdit('Notice 1');
+        await panel.titleInput().fill('Notice 1 revised');
+        await panel.save();
+        await expect(list.row('Notice 1 revised')).toBeVisible();
+        await expect(list.row('Notice 1')).toHaveCount(0);
+        await view.goto(ids['Notice 1']);
+        await expect(view.heading()).toHaveText('Notice 1 revised');
+        await expect(view.description()).toContainText('First notice.');
+        await expect(view.image()).toHaveAttribute('alt', 'New picture 1');
+
+        // The picture removed after a refusal: the picture's address as the
+        // page prints it, then "Remove" and "Save": signed out, the page and
+        // the summary are text-only, and the file that address named is
+        // gone (Rule 15, footnote s8; Fields "Image").
+        const copied = await view.image().getAttribute('src');
+        expect(copied || '', 'the printed address names the stored file').toMatch(new RegExp(`/announcements/${ids['Notice 1']}\\.jpg(\\?|$)`));
+        expect(stored(ids['Notice 1'], 'jpg')).toBe(true);
+        panel = await list.openEdit('Notice 1 revised');
+        await expect(panel.preview()).toBeVisible();
+        await panel.removeButton().click();
+        await expect(panel.preview()).toHaveCount(0);
+        await panel.save();
+        await view.goto(ids['Notice 1']);
+        await expect(view.heading()).toHaveText('Notice 1 revised');
+        await expect(view.description()).toContainText('First notice.');
+        await expect(view.image()).toHaveCount(0);
+        await publicList.goto();
+        await expect(publicList.summary('Notice 1 revised').summary).toContainText('First notice.');
+        await expect(publicList.summary('Notice 1 revised').image).toHaveCount(0);
+        expect(stored(ids['Notice 1'], 'jpg'), 'the removed picture is gone from the public files').toBe(false);
+
+        // Another manager's save: the Site Administrator, from the side
+        // menu, changes only "Title" of "Notice 2"; signed out, its page
+        // shows the new heading and the picture (Fields "Image").
+        const adminPage = await (await asUser('admin')).newPage();
+        await adminPage.goto(`/index.php/${tag}/dashboard/editorial`);
+        await new SideMenu(adminPage).announcementsEntry().click();
+        const siteAdmin = new AnnouncementsPage(adminPage, tag);
+        await expect(siteAdmin.heading()).toHaveText('Announcements');
+        await expect(adminPage).toHaveURL(/management\/settings\/announcements/);
+        const adminList = siteAdmin.list();
+        await expect(adminList.rows()).toHaveCount(4);
+        panel = await adminList.openEdit('Notice 2');
+        await expect(panel.preview()).toBeVisible();
+        await panel.titleInput().fill('Notice 2 revised');
+        await panel.save();
+        await expect(adminList.row('Notice 2 revised')).toBeVisible();
+        await expect(adminList.row('Notice 2')).toHaveCount(0);
+        await adminPage.close();
+        await view.goto(ids['Notice 2']);
+        await expect(view.heading()).toHaveText('Notice 2 revised');
+        await expect(view.image()).toHaveAttribute('alt', 'New picture 2');
+
+        // Control: signed out, the Announcements page lists the four, the
+        // first text-only and the other three with their pictures, and no
+        // "Not a picture": the refused add stored nothing (Fields "Image";
+        // Rule 9).
+        await publicList.goto();
+        await expect(publicList.articles()).toHaveCount(4);
+        expect((await publicList.titles()).sort()).toEqual(['Notice 1 revised', 'Notice 2 revised', 'Notice 3', 'Notice 4']);
+        await expect(publicList.summary('Notice 1 revised').image).toHaveCount(0);
+        await expect(publicList.summary('Notice 2 revised').image).toHaveAttribute('alt', 'New picture 2');
+        await expect(publicList.summary('Notice 3').image).toHaveAttribute('alt', 'New picture 3');
+        await expect(publicList.summary('Notice 4').image).toHaveAttribute('alt', 'New picture 4');
+        await expect(publicList.container()).not.toContainText('Not a picture');
     });
 });

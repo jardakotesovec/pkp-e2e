@@ -12,13 +12,17 @@
  *
  * Coverage boundaries are declared in the parallel suite's header
  * (playwright/tests/U12-announcements.spec.js); this file adds only:
- * - S4 reads the mail after the drain, never "still nothing before the
- *   jobs run": another serial worker's drain may pop the job first, and
- *   footnote s4 drains and reads (that reading would need `@solo`);
  * - the "New Announcement" email's "full announcement" link carries the
  *   config `base_url` host (worker 0's port, seed-facts), so S4 opens the
  *   link's path on its own origin;
  * - S6's Tasks silence is not re-read (S4 reads it once on a journal).
+ *
+ * S4 carries `@solo` and runs alone in the `ojs-solo` project: it reads
+ * "nothing yet, until the jobs run" and deletes an announcement before
+ * its job runs, and another serial worker's drain could run that job
+ * first (patterns.md parallel lesson 7); its own drain is the only one, so
+ * the deleted announcement's failed job is read with "Failed At" inside
+ * that drain.
  *
  * S6 carries `@solo` and runs alone in the `ojs-solo` project: its notices
  * ("Announcement type added.", "…removed.") are the Site
@@ -37,6 +41,7 @@ const {test, expect} = require('../../support/fixtures.js');
 const {ProfilePage, SAVED_MESSAGE} = require('../../../../../shared/playwright/pages/ProfilePage.js');
 const {successToasts, TasksPanel} = require('../../../../../shared/playwright/pages/NotificationsPages.js');
 const {runJobs} = require('../../../../../shared/playwright/support/jobs.js');
+const {AdministrationPage, FailedJobsPage} = require('../../../../../shared/playwright/pages/AdminPages.js');
 const {
     SiteAnnouncementsTab,
     AnnouncementsPage,
@@ -54,6 +59,30 @@ const ENABLE_LABEL = 'Enable these types of notifications.';
 const EMAIL_LABEL = 'Do not send me an email for these types of notifications.';
 const SITE = 'index';
 const ADMIN_MAIL = 'admin@mail.test';
+const NOTIFY_JOB = 'PKP\\jobs\\notifications\\NewAnnouncementNotifyUsers';
+
+/** The announcement a failed notify job carried, read from its payload (the page's own list load), or null. */
+function announcementOfJob(row) {
+    // The list gives the payload decoded (the model casts it to an array);
+    // a string is parsed the same way.
+    let payload = row.payload || {};
+    if (typeof payload === 'string') {
+        try {
+            payload = JSON.parse(payload);
+        } catch {
+            payload = {data: {command: payload}};
+        }
+    }
+    const command = String((payload.data && payload.data.command) || '');
+    const m = command.match(/announcementId\\?";i:(\d+);/);
+    return m ? Number(m[1]) : null;
+}
+
+/** A "Failed At" cell ("2026-11-12 22:31:05 UTC 0") as a time. */
+function failedAtTime(text) {
+    const m = String(text).match(/(\d{4}-\d{2}-\d{2}) (\d{1,2}):(\d{2}):(\d{2})/);
+    return m ? Date.parse(`${m[1]}T${m[2].padStart(2, '0')}:${m[3]}:${m[4]}Z`) : NaN;
+}
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -139,7 +168,7 @@ async function restoreSite(site) {
 }
 
 test.describe('announcements (queued email; the site)', () => {
-    test('S4: the email and who gets it', async ({browser, baseURL, asUser, ojsApi, pkpMail}, testInfo) => {
+    test('S4: the email and who gets it @solo', async ({browser, baseURL, asUser, ojsApi, pkpMail}, testInfo) => {
         test.slow();
         test.setTimeout(300_000);
         const tag = makeTag('s4', testInfo);
@@ -206,13 +235,30 @@ test.describe('announcements (queued email; the site)', () => {
         await publicList.goto();
         expect((await publicList.titles()).sort()).toEqual(['Board meeting', 'Call for papers']);
 
+        // Deleted before the jobs run: "Cancelled meeting", added with the
+        // email box ticked, is listed; "Delete" › "Yes" removes the row
+        // (Rule 7; Side effects).
+        const cancelledId = await addAnnouncement(list, {title: 'Cancelled meeting', shortDescription: 'Called off.', sendEmail: true});
+        expect(cancelledId, 'the add answered with its number').toBeGreaterThan(0);
+        await list.deleteAnnouncement('Cancelled meeting');
+        await expect(list.row('Cancelled meeting')).toHaveCount(0);
+        await expect(list.row('Call for papers')).toBeVisible();
+
         // The email: the site's background jobs run; the mail catcher
         // holds one "New Announcement" email for the Journal Manager and
         // one for the Reader, subject the title, From the manager, the body
         // with the title in bold, the short description, the sentence with
         // its "full announcement" link and the Unsubscribe footer; the link
         // opens the announcement's page (Side effects; Rule 10).
+        // Signed out, "Call for papers" is already public while nothing has
+        // reached the mail catcher: the email waits for the site's
+        // background jobs; the Reader's email after the drain below is the
+        // positive control of this read (Rule 17; Side effects).
+        expect(await pkpMail.count({to: mailOf(reader), contains: tag}), 'no mail before the jobs run').toBe(0);
+        expect(await pkpMail.count({to: mailOf(manager), contains: tag}), 'no mail before the jobs run').toBe(0);
+        const drainStart = Date.now();
         runJobs();
+        const drainEnd = Date.now();
         const managerMail = await pkpMail.find({to: mailOf(manager), contains: tag});
         const readerMail = await pkpMail.find({to: mailOf(reader), contains: tag});
         for (const [who, summary] of [
@@ -248,6 +294,59 @@ test.describe('announcements (queued email; the site)', () => {
         for (const username of [manager, reader, author, sectionEditor]) {
             expect(await pkpMail.count({to: mailOf(username), subject: 'Board meeting'}), `no "Board meeting" mail to ${username}`).toBe(0);
         }
+
+        // The deleted announcement's job: no email titled "Cancelled
+        // meeting" for anyone, read after the Reader's arrived (the
+        // Reader, the manager and the Site Administrator, who are mailed
+        // for "Call for papers", are its positive controls); as the Site
+        // Administrator, Administration › "View Failed Jobs" lists the
+        // job, "Failed At" the time the jobs ran, in a row naming no
+        // announcement; the row count (two, Side effects) is a Planned item, not read.
+        await pkpMail.find({to: ADMIN_MAIL, subject: 'Call for papers', contains: tag});
+        for (const address of [mailOf(manager), mailOf(reader), mailOf(author), mailOf(sectionEditor), ADMIN_MAIL]) {
+            expect(await pkpMail.count({to: address, subject: 'Cancelled meeting', contains: tag}), `no "Cancelled meeting" mail to ${address}`).toBe(0);
+        }
+        // The job is tried three times, five seconds apart, before it
+        // fails (lib/pkp BaseJob $tries 3, $backoff 5), and one drain
+        // leaves it released for its next try (T-ojs-1): the jobs run
+        // again after each delay until the Failed Jobs page lists it.
+        const adminPage = await (await asUser('admin')).newPage();
+        const administration = new AdministrationPage(adminPage);
+        await administration.goto();
+        const failed = new FailedJobsPage(adminPage);
+        await failed.openFromAdministration();
+        await expect(failed.heading).toHaveText('Failed Jobs');
+        let ours = (await failed.allRows()).filter((row) => announcementOfJob(row) === cancelledId);
+        let lastDrainEnd = drainEnd;
+        await expect
+            .poll(
+                async () => {
+                    if (ours.length === 0) {
+                        runJobs();
+                        lastDrainEnd = Date.now();
+                        await failed.goto();
+                        ours = (await failed.allRows()).filter((row) => announcementOfJob(row) === cancelledId);
+                    }
+                    return ours.length;
+                },
+                {message: `the deleted announcement ${cancelledId}'s job is listed`, intervals: [5_500], timeout: 90_000}
+            )
+            .toBeGreaterThan(0);
+        await administration.goto();
+        await failed.openFromAdministration();
+        for (const job of ours) {
+            const row = await failed.findRow(job.id);
+            expect(row, `failed job ${job.id} on screen`).not.toBeNull();
+            const cells = failed.cells(job.id);
+            await expect(cells.nth(0)).toHaveText(String(job.id));
+            await expect(cells.nth(1)).toHaveText(NOTIFY_JOB);
+            const failedAt = failedAtTime(await cells.nth(4).innerText());
+            expect(failedAt, `job ${job.id} failed while the jobs ran`).toBeGreaterThanOrEqual(Math.floor(drainStart / 1000) * 1000);
+            expect(failedAt, `job ${job.id} failed while the jobs ran`).toBeLessThanOrEqual(lastDrainEnd + 1000);
+            await expect(failed.row(job.id)).not.toContainText('Cancelled meeting');
+            await expect(failed.row(job.id)).not.toContainText(tag);
+        }
+        await adminPage.close();
 
         // Nothing else: the manager's Tasks panel reads "No Items" after
         // the jobs ran; then a submission seeded on the journal is the

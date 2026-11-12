@@ -16,7 +16,8 @@
  *   the side tabs "Settings", "Announcements" and "Announcement Types", the
  *   same settings form, the site's list panel and types grid.
  * - SideMenu — the editorial layout's "Site Navigation" panelmenu: its
- *   top-level entries in order ("Announcements" sits among them).
+ *   top-level entries in order ("Announcements" sits among them), with
+ *   their icons (`topLevelIcons`).
  * - AnnouncementsPage — the server's Announcements page
  *   (`management/settings/announcements`): the "Announcements" tab's list
  *   panel (search, rows, "View" / "Edit" / "Delete", "Add Announcement",
@@ -28,7 +29,9 @@
  *   Description" and "Announcement", the "Image" dropzone with its preview,
  *   "Alternate text", "Remove" and "Restore Original", "Expiry Date", the
  *   "Announcement Type" radios, "Send Email", the language buttons, the
- *   error summary and "Save".
+ *   error summary and "Save"; a file the box lets in whatever its content
+ *   (`chooseFile`) and a "Save" the server refuses (`saveRefusedByServer`,
+ *   S8).
  * - PublicAnnouncements / AnnouncementView / homeBlock / primaryNavItems —
  *   the reader's side: the Announcements page, an announcement's page, the
  *   home page block and skip link, the header's primary navigation.
@@ -282,6 +285,24 @@ exports.SideMenu = class SideMenu {
     announcementsEntry() {
         return this.nav().locator('[role="button"]').filter({hasText: /^\s*Announcements\s*$/}).first();
     }
+
+    /**
+     * Each top-level entry's label with its icon's drawing (the `d` of the
+     * entry's `svg path`s, joined; '' for an entry with no icon), in DOM
+     * order, read like `topLevelLabels()`.
+     */
+    async topLevelIcons() {
+        await expect(this.nav()).toBeVisible({timeout: T});
+        return this.nav().evaluate((nav) =>
+            [...nav.querySelectorAll('[role="button"]')]
+                .filter((el) => !el.closest('[role="region"]'))
+                .map((el) => ({
+                    label: el.getAttribute('aria-label') || (el.textContent || '').replace(/\s+/g, ' ').trim(),
+                    icons: el.querySelectorAll('svg').length,
+                    drawing: [...el.querySelectorAll('svg path')].map((p) => p.getAttribute('d') || '').join(' '),
+                }))
+        );
+    }
 };
 
 // -------------------------------------------------------------------------
@@ -303,8 +324,11 @@ class AnnouncementsList {
         return this.panel.locator('.listPanel__item');
     }
 
+    /** The row whose title reads exactly `title` ("Notice 1" is not "Notice 1 revised"). */
     row(title) {
-        return this.rows().filter({has: this.page.locator('.listPanel__itemTitle', {hasText: title})});
+        return this.rows().filter({
+            has: this.page.locator('.listPanel__itemTitle', {hasText: new RegExp(`^\\s*${escapeRe(title)}\\s*$`)}),
+        });
     }
 
     async rowTitles() {
@@ -751,6 +775,54 @@ const AnnouncementPanel = class AnnouncementPanel {
         await this.fileInput().setInputFiles(filePath);
         await uploaded;
         await expect(this.preview()).toBeVisible({timeout: T});
+    }
+
+    /**
+     * Drop a file into the box the box lets in whatever its content (a text
+     * file named ".png", footnote s8), bounded by its temporary-file upload
+     * answering OK, and wait for the box's "Alternate text" and "Remove";
+     * the preview is not waited for (its emptiness is Categories A17's).
+     *
+     * @param {string | {name: string, mimeType: string, buffer: Buffer}} file
+     */
+    async chooseFile(file) {
+        const uploaded = this.page.waitForResponse(
+            (r) => /temporaryFiles/.test(r.url()) && r.request().method() === 'POST' && r.ok(),
+            {timeout: T}
+        );
+        await this.fileInput().setInputFiles(file);
+        await uploaded;
+        await expect(this.altTextInput()).toBeVisible({timeout: T});
+        await expect(this.removeButton()).toBeVisible({timeout: T});
+    }
+
+    /** The chosen file's name as the box lists it (`.dz-filename`). */
+    chosenFileName() {
+        return this.imageField().locator('.dz-filename');
+    }
+
+    /** The first message under "Image" (the box repeats a save's refusal in its file list). */
+    imageError() {
+        return this.fieldError(this.imageField()).first();
+    }
+
+    /**
+     * Press Save on a panel the server refuses (a picture "Save" turns
+     * down, Fields "Image"): bounded by the announcements API answering
+     * 400; the summary reads `summary` and the panel stays open. Returns
+     * the refusal's body.
+     */
+    async saveRefusedByServer(summary = 'Please correct one error.') {
+        const refused = this.page.waitForResponse(
+            (r) => /\/api\/v1\/announcements(\/\d+)?$/.test(r.url()) && r.request().method() === 'POST',
+            {timeout: T}
+        );
+        await this.saveButton().click();
+        const response = await refused;
+        expect(response.status(), 'the save is refused').toBe(400);
+        await expect(this.errorSummary()).toContainText(summary, {timeout: T});
+        await expect(this.dialog).toBeVisible();
+        return response.json().catch(() => null);
     }
 
     saveButton() {

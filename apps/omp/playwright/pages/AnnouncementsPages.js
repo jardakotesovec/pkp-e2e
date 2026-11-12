@@ -73,6 +73,17 @@ function sideMenuEntry(page, label) {
 exports.sideMenuEntry = sideMenuEntry;
 
 /**
+ * The notices at the top right of the back office (`.app__notifications`)
+ * reading `text`, such as a refused form's "The form was not saved because
+ * 1 error(s) were encountered. …" (Fields). They are the page's own
+ * client-side toasts, gone about five seconds after they show.
+ */
+function pageNotices(page, text) {
+    return page.locator('.app__notifications .pkpNotification').filter({hasText: text});
+}
+exports.pageNotices = pageNotices;
+
+/**
  * Wait until a TinyMCE editor is initialized and return its body (inside
  * the editor's iframe, `#{id}_ifr`).
  */
@@ -657,8 +668,13 @@ exports.AnnouncementPanel = class AnnouncementPanel {
         return this.dialog().locator('input[type=file]').first();
     }
 
-    /** Drop a file the box accepts: bounded by the temporary-file upload answering. */
-    async uploadImage(file) {
+    /**
+     * Drop a file the box lets in, bounded by the temporary-file upload
+     * answering and the "Alternate text" box showing; the preview picture
+     * is not read (a file that is no picture shows an empty one, Categories
+     * A17).
+     */
+    async chooseImage(file) {
         const uploaded = this.page.waitForResponse(
             (r) => /temporaryFiles/.test(r.url()) && r.request().method() === 'POST',
             {timeout: T}
@@ -666,7 +682,23 @@ exports.AnnouncementPanel = class AnnouncementPanel {
         await this.fileInput().setInputFiles(file);
         const response = await uploaded;
         expect(response.ok(), `image upload answered ${response.status()}`).toBe(true);
+        await expect(this.altTextInput()).toBeVisible({timeout: T});
+    }
+
+    /** Drop a picture the box accepts: `chooseImage`, then its preview. */
+    async uploadImage(file) {
+        await this.chooseImage(file);
         await expect(this.preview()).toHaveCount(1, {timeout: T});
+    }
+
+    /** The chosen file's name as the box lists it (the dropzone's entry). */
+    chosenFileName() {
+        return this.imageField().locator('.dz-filename');
+    }
+
+    /** The message under "Image" after a refused "Save" ("There was an error uploading this image."). */
+    imageError() {
+        return this.imageField().locator('.pkpFieldError').first();
     }
 
     /** Drop a file the box refuses (client-side, nothing sent): the refusal is waited for. */

@@ -289,6 +289,11 @@ exports.SideMenu = class SideMenu {
     announcementsEntry() {
         return this.nav().locator('[role="button"]').filter({hasText: /^\s*Announcements\s*$/}).first();
     }
+
+    /** The entry's own icon (the `svg` beside its label, Rule 3). */
+    announcementsIcon() {
+        return this.announcementsEntry().locator('svg');
+    }
 };
 
 // -------------------------------------------------------------------------
@@ -749,6 +754,30 @@ const AnnouncementPanel = class AnnouncementPanel {
         return this.refusedFile().locator('a.dz-remove');
     }
 
+    /** The message under "Image" ("There was an error uploading this image."); the box prints it twice, once for screen readers. */
+    imageError() {
+        return this.fieldError(this.imageField()).first();
+    }
+
+    /**
+     * Drop a file the box lets in (named as a picture), bounded by its
+     * temporary-file upload answering OK, and wait for "Alternate text":
+     * unlike `uploadImage()` it does not wait on the preview, which a file
+     * that is not the picture its name says leaves empty (Categories A17).
+     *
+     * @param {string | {name: string, mimeType: string, buffer: Buffer}} file
+     */
+    async dropImage(file) {
+        const uploaded = this.page.waitForResponse(
+            (r) => /temporaryFiles/.test(r.url()) && r.request().method() === 'POST' && r.ok(),
+            {timeout: T}
+        );
+        await this.fileInput().setInputFiles(file);
+        await uploaded;
+        await expect(this.altTextInput()).toBeVisible({timeout: T});
+        await expect(this.removeButton()).toBeVisible({timeout: T});
+    }
+
     /** Drop an image into the box, bounded by its temporary-file upload answering OK, and wait for the preview. */
     async uploadImage(filePath) {
         const uploaded = this.page.waitForResponse(
@@ -802,6 +831,25 @@ const AnnouncementPanel = class AnnouncementPanel {
         await expect(this.saveButton()).toBeDisabled();
     }
 
+    /**
+     * Press Save on a panel the server refuses (the announcements API
+     * answering 400, e.g. a picture whose content is not its name's): the
+     * summary reads `summary` and the panel stays open. Returns the
+     * refusal's body.
+     */
+    async saveRefusedByServer(summary = 'Please correct one error.') {
+        const refused = this.page.waitForResponse(
+            (r) => /\/api\/v1\/announcements(\/\d+)?$/.test(r.url()) && r.request().method() === 'POST',
+            {timeout: T}
+        );
+        await this.saveButton().click();
+        const response = await refused;
+        expect(response.status(), 'the save is refused with a 400').toBe(400);
+        await expect(this.errorSummary()).toContainText(summary, {timeout: T});
+        await expect(this.dialog).toBeVisible();
+        return response.json().catch(() => null);
+    }
+
     /** The panel's close control. */
     async close() {
         await this.dialog.getByRole('button', {name: 'Close', exact: true}).first().click();
@@ -809,6 +857,36 @@ const AnnouncementPanel = class AnnouncementPanel {
     }
 };
 exports.AnnouncementPanel = AnnouncementPanel;
+
+/** The back office's page notices (the toasts at the top right of the screen). */
+function pageNotices(page) {
+    return page.locator('.app__notifications .pkpNotification');
+}
+exports.pageNotices = pageNotices;
+
+/**
+ * The page notice reading `text` shows at the top right of the screen;
+ * then it is closed by its own close control, so the next refusal's
+ * notice is read alone (the notice otherwise stays about five seconds).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} text
+ */
+exports.expectPageNotice = async function expectPageNotice(page, text) {
+    const notice = pageNotices(page).filter({hasText: text});
+    await expect(notice).toHaveCount(1, {timeout: T});
+    await expect(notice).toBeVisible();
+    await expect(notice).toHaveText(new RegExp(`^\\s*${text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*×?\\s*(Close)?\\s*$`));
+    await expect
+        .poll(async () => {
+            const box = await notice.boundingBox();
+            const view = page.viewportSize() || {width: 1280, height: 720};
+            return !!box && box.x + box.width / 2 > view.width / 2 && box.y + box.height / 2 < view.height / 2;
+        }, {message: 'the notice sits at the top right of the screen', timeout: T})
+        .toBe(true);
+    await notice.getByRole('button', {name: 'Close'}).click();
+    await expect(notice).toHaveCount(0, {timeout: T});
+};
 
 // -------------------------------------------------------------------------
 // The reader's side (Rules 9–12, 18)
