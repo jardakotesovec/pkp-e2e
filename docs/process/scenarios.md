@@ -223,7 +223,10 @@ a key built later is deleted from this list.
 
 - Decision constants are easy to misread. `Decision::PENDING_REVISIONS = 4`
   (not 1) and `ReviewRound::REVIEW_ROUND_STATUS_REVISIONS_REQUESTED = 1` (not
-  8). Grep before quoting.
+  8); OPS's "Decline Submission" and "Revert Decline" are `INITIAL_DECLINE`
+  (8) and `REVERT_INITIAL_DECLINE` (16), not `DECLINE` (6) and
+  `REVERT_DECLINE` (15), and a typed decision address with the wrong number
+  reads "This decision could not be found.". Grep before quoting.
 - `requestRevisions` followed by `newExternalRound` overwrites round 1's
   status (reset to `PENDING_REVIEWERS` by `runAdditionalActions`). Read "round
   1 closed with revisions" from the decision history, not from

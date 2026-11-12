@@ -213,7 +213,9 @@ exports.ParticipantsPanel = class ParticipantsPanel extends BasePage {
     /** Open the submission's workflow by address (on a stage when `menuKey` is given) and wait for the panel. */
     async goto(submissionId, {menuKey = null} = {}) {
         await this.frame.gotoEditorial(submissionId, {menuKey});
-        await expect(this.heading()).toBeVisible({timeout: 30_000});
+        await expect(this.heading(), menuKey ? undefined
+            : 'no Participants panel: a published (Done) submission opens on its Done view, which has none; pass {menuKey: \'workflow_5\'} (Production)')
+            .toBeVisible({timeout: 30_000});
     }
 
     /** Land the same address afresh (after a window closed, before the next row action). */

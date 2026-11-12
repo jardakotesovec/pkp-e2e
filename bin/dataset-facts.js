@@ -125,7 +125,9 @@ function readFacts(name, line) {
             WHEN ra.date_completed IS NOT NULL THEN 'completed' WHEN ra.date_confirmed IS NOT NULL THEN 'accepted' ELSE 'not responded' END`;
         // An assistant is offered only on the stages of the role it was assigned in, so that column names the role.
         const groupName = `coalesce((SELECT setting_value FROM user_group_settings gs WHERE gs.user_group_id = ug.user_group_id AND gs.setting_name = 'name' ${preferEn}), 'role ' || ug.role_id)`;
-        const people = (roles, withRole = false) => `(SELECT string_agg(DISTINCT u.username${withRole ? ` || ' (' || ${groupName} || ')'` : ''}, ', ') FROM stage_assignments sa
+        // An editor assigned "Only allowed to recommend" carries the mark: such assignments are rare and hard to find otherwise.
+        const mark = (withRole) => (withRole ? ` || ' (' || ${groupName} || ')'` : ` || CASE WHEN sa.recommend_only = 1 THEN ' (recommend only)' ELSE '' END`);
+        const people = (roles, withRole = false) => `(SELECT string_agg(DISTINCT u.username${mark(withRole)}, ', ') FROM stage_assignments sa
             JOIN users u ON u.user_id = sa.user_id JOIN user_groups ug ON ug.user_group_id = sa.user_group_id
             WHERE sa.submission_id = s.submission_id AND ug.role_id IN (${roles}))`;
         const submissions = q(`
