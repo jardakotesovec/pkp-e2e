@@ -491,7 +491,10 @@ one at a time and put back what they changed. <sup>sc</sup>
    Website › "Plugins", with a second scratch journal and the Site
    Administrator signed in in a second browser, and "Google Analytics
    Plugin" unticked in both journals and on the site's list (a new
-   journal's and a new installation's state).
+   journal's and a new installation's state); {OJS} the first journal
+   uses "Default Theme" (a new journal's theme) and holds a published
+   issue, Vol. 1 No. 1 (2025), with one published article, "Tides of
+   the Harbour".
 
    - **Ticking**: tick the "Google Analytics Plugin" box: nothing asks
      first, and the notice "The plugin "Google Analytics Plugin" has
@@ -507,10 +510,16 @@ one at a time and put back what they changed. <sup>sc</sup>
      this plugin?", with "OK" and "Cancel". Press "OK": the notice "The
      plugin "Google Analytics Plugin" has been disabled." shows. Reload
      the page: the box is unticked (Rule 9).
-   - **Control**: tick the box again (the enabled notice shows), untick
-     it and press "Cancel" in the "Disable" window: the window closes
-     with the box still ticked, and after a reload it is still ticked
-     (Rule 9). <sup>sc</sup>
+   - **The theme in use, unticked** {OJS}: untick the "Default Theme"
+     box under "Theme Plugins" and press "OK" in the "Disable" window
+     ⚠ [A8](#a8). Open the journal's home page: it still shows its
+     current issue, Vol. 1 No. 1 (2025), and that issue's article
+     "Tides of the Harbour" (Rule 12).
+   - **Control**: back on Settings › Website › "Plugins", tick the
+     "Google Analytics Plugin" box again (the enabled notice shows),
+     untick it and press "Cancel" in the "Disable" window: the window
+     closes with the box still ticked, and after a reload it is still
+     ticked (Rule 9). <sup>sc</sup>
 
 3. **The site's plugins**
 
@@ -612,9 +621,13 @@ one at a time and put back what they changed. <sup>sc</sup>
    Given: Site Administrator, on a scratch journal's Settings › Website
    › "Plugins", where the scenario's own "Harbour Test Plugin" is
    installed at version 1.0.0.0 and ticked, with, as files on the
-   computer, its package at 1.0.1.0, a package of a block plugin of the
-   scenario's own, "Harbour Block Plugin", and one of another generic
-   plugin of its own, "Harbour Other Plugin".
+   computer, its package at 1.0.1.0, whose upgrade file holds one step
+   with no range that writes a line to a file on the server, a package
+   of a block plugin of the scenario's own, "Harbour Block Plugin", one
+   of another generic plugin of its own, "Harbour Other Plugin", and
+   one of a generic plugin of its own at version 1.0.0.0 whose
+   installation step makes a table in the database, "Harbour Table
+   Plugin".
 
    - **"Upgrade Plugin"**: press the "Harbour Test Plugin" arrow: its
      line ends with "Delete" and "Upgrade". Press "Upgrade": a window
@@ -633,6 +646,9 @@ one at a time and put back what they changed. <sup>sc</sup>
    - **The newer version**: open the row's "Upgrade" again and "Save"
      the "Harbour Test Plugin" 1.0.1.0 package the same way: the notice "Successfully upgraded to version
      1.0.1.0" shows, and the row is still ticked (Rule 18).
+   - **The upgrade's own step**: the file the 1.0.1.0 step writes to
+     holds its line; the file and the read are in the footnote
+     (Rule 18).
    - **"Delete", "Cancel"**: press "Delete" in the row's arrow: a window
      headed "Delete" reads "Are you sure you wish to delete this plugin
      from the system?", with "OK" and "Cancel". Press "Cancel": the
@@ -640,6 +656,14 @@ one at a time and put back what they changed. <sup>sc</sup>
    - **"Delete", "OK"**: press "Delete" again and "OK": the notice
      "Plugin "Harbour Test Plugin" successfuly deleted" shows ⚠
      [A7](#a7), and the row leaves the list (Rule 21).
+   - **A plugin's table, after "Delete"**: press "Upload A New Plugin",
+     press "Upload File" in the window, choose the "Harbour Table
+     Plugin" package and press "Save": the notice "Successfully
+     installed version 1.0.0.0" shows, and "Harbour Table Plugin" is
+     listed under "Generic Plugins". Press "Delete" in its arrow and
+     "OK" in the "Delete" window: the row leaves the list, and the
+     table its installation step made is still in the database
+     (Rule 21).
    - **The site's list**: open Administration › "Site Settings" ›
      "Plugins": "Generic Plugins" has no "Harbour Test Plugin" row
      (Rule 21; Side effects bullet 2).
@@ -659,15 +683,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U62-A1-plugin-gallery-offline-stays-loading.md`): "Plugin Gallery" on an installation that cannot reach PKP's site shows an empty list, with no server error [report 2026-10-02]
   - the guard for A5 (issue report
     `docs/issues/U62-A5-failed-upgrade-removes-plugin.md`): an upgrade through a row's "Upgrade" whose own upgrade step fails leaves the old version listed, ticked and working [report 2026-10-02]
-  - Rule 12's journal home page with its theme unticked (OJS1,
-    retired): it answers 200 and shows its current issue [report 2026-10-02]
-  - an upgrade's own steps (Rule 18): a newer version whose upgrade
-    file holds a step with no range and one limited to the
-    application's versions runs both, each checked by what it leaves
-    behind on the server (Rule 18) [upstream 2026-10-27]
-  - a plugin's tables, still in the database after its "Delete", "OK",
-    with the test package and the table read Rule 21's footnote names
-    (Rule 21) [incidental 2026-11-05]
 - **Nothing new to test**:
   - a tick made in the Settings Wizard's "Plugins" tab showing on the
     journal's own list, and the reverse (Rule 3)
@@ -698,7 +713,8 @@ Left out of the scenarios above, by reason:
   - A10 (a file that is not a ".tar.gz" archive, refused in the
     server's own words; Rule 17)
   - A11 (an upgrade step limited to the plugin's own earlier versions,
-    skipped; Rule 18)
+    skipped, and one limited to the application's versions, run;
+    Rule 18)
   - A12 (an installation whose own database step fails, reported
     installed; the other plugins' steps run again; Rule 16)
   - A13 (a theme's failed installation: the notice's raw markup and
@@ -1571,7 +1587,24 @@ the scenarios; the block plugin and "Harbour Other Plugin" of scenario
 1.0.0.0 installed and ticked, is an upload through "Upload A New
 Plugin" and a tick on the scratch journal's list (or `plugins:
 {<plugin>: {enabled: true}}` once installed) before the scenario
-starts. Live-probed 2026-09-27: on each scratch context Users & Roles
+starts. Its 1.0.1.0 package carries an `upgrade.xml` with one `<code>`
+step outside any `<upgrade>` range, appending a line to a file at an
+absolute path baked into the package, as `upgradeFiles()` in
+`shared/playwright/checks/U62/I27C/i27c.js` builds its `always` step
+(fn-m, f-a11); the test reads that file on the server. "Harbour Table
+Plugin" is built by `shared/playwright/checks/U62/I05B/pkg.js` with
+`kind: 'generic'` and `fail: false`, and its table is read with fn-x's
+table read after "Delete"; it is uploaded only after "Harbour Test
+Plugin" is deleted, since every later installation or upgrade runs its
+install step again, which throws on its own table (f-a12). The table
+stays in the test database (Rule 21), under the run-tagged product
+name. Scenario 2's {OJS} given is
+`issues: [{volume: 1, number: 1, year: 2025, published: true}]`
+on the first scratch journal and a
+submission published into that issue through the submission
+scenario's `issue` key, titled "Tides of the Harbour"; the journal is
+left with "Default Theme" unticked, which no other test reads.
+Live-probed 2026-09-27: on each scratch context Users & Roles
 lists `admin` as "Journal manager" ("Press manager", "Preprint Server
 manager"), and "Google Analytics Plugin" arrives unticked.
 

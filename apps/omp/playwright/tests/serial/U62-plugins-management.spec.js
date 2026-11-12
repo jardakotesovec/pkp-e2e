@@ -22,12 +22,9 @@
  * installation of two or more presses (OMP1, S4), while the site's list
  * shows it (S3).
  *
- * Not asserted here, by register ID: A1 (the "Plugin Gallery" tab is never
- * pressed; its list's server error on every landing is not this suite's),
- * A2 (S4 opens "Upload A New Plugin" and leaves the missing line
- * unasserted either way), A7 (S5's Delete notice is read with either
- * spelling), A3, A4, A5, A6, A8, A9, A10 (the register carries them, the
- * spec's Coverage section).
+ * Not covered, by register ID (the spec's Coverage section is the record
+ * of everything else left out): A1, A2, A3, A4, A5, A6, A7, A8, A9, A10,
+ * A11, A12, A13.
  *
  * Seeding (footnote sc): scratch presses from `POST scenarios/context`
  * with a throwaway Press Manager (the username twice as password); the
@@ -35,9 +32,20 @@
  * press; every actor is opened through `asUser`. The plugin packages are
  * built at run time by `shared/playwright/support/pluginPackages.js`, each
  * plugin under a product name carrying the test's own run tag (spec A5:
- * the installation keeps a plugin's recorded version).
+ * the installation keeps a plugin's recorded version). S5's "Harbour Test
+ * Plugin" 1.0.1.0 adds an `upgrade.xml` with one step outside any range
+ * that appends a line to a file in the test's output folder, as
+ * `upgradeFiles()` in `shared/playwright/checks/U62/I27C/i27c.js` builds its
+ * `always` step; "Harbour Table Plugin" is ported from the kept builder
+ * `shared/playwright/checks/U62/I05B/pkg.js` (`fail: false`). The test
+ * reads the step's file and asks the database for the table through the
+ * app's own schema facade in a CLI call (`hasTable()`, footnote x's table
+ * read without the PostgreSQL function, PRINCIPLES D8). The table stays in
+ * the test database (Rule 21), under the run-tagged product name.
  */
 const fs = require('fs');
+const path = require('path');
+const {execFileSync} = require('child_process');
 const {test, expect} = require('../../support/fixtures.js');
 const {
     WebsitePluginsPage,
@@ -108,6 +116,7 @@ const HARBOUR_TEST = 'Harbour Test Plugin';
 const HARBOUR_ROOT = 'Harbour Root Plugin';
 const HARBOUR_BLOCK = 'Harbour Block Plugin';
 const HARBOUR_OTHER = 'Harbour Other Plugin';
+const HARBOUR_TABLE = 'Harbour Table Plugin';
 
 /** Every product name a package of this run may have installed (the afterAll's list). */
 const products = [];
@@ -151,6 +160,157 @@ async function untickWithNotice(list, id, name) {
     await markNotices(list.page);
     await list.confirmDisable(id);
     await expectFreshNotice(list.page, DISABLED(name));
+}
+
+/**
+ * A 1.0.1.0 package whose `upgrade.xml` holds one `<code>` step outside any
+ * `<upgrade>` range; the step appends one JSON line to `markerFile` (an
+ * absolute path baked into the package, since a web request carries no
+ * environment of ours), as `upgradeFiles()` in
+ * shared/playwright/checks/U62/I27C/i27c.js builds its `always` step.
+ */
+function buildWithUpgradeStep(dir, spec, markerFile) {
+    buildPlugin(dir, spec);
+    const {product, version} = spec;
+    const cls = `${product[0].toUpperCase()}${product.slice(1)}Marker`;
+    const src = path.join(dir, `src-${product}-${version}`);
+    fs.writeFileSync(
+        path.join(src, product, 'upgrade.xml'),
+        `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE install SYSTEM "../../../lib/pkp/dtd/install.dtd">
+<install version="${version}">
+	<code file="plugins/generic/${product}/${cls}.php" class="${cls}" function="mark" step="always" />
+</install>
+`,
+    );
+    fs.writeFileSync(
+        path.join(src, product, `${cls}.php`),
+        `<?php
+/** U62 S5 scratch upgrade step: appends one line to a file of the test's own. */
+class ${cls}
+{
+    public static function mark($installer, $attr)
+    {
+        file_put_contents(${JSON.stringify(markerFile)}, json_encode(['product' => '${product}', 'step' => $attr['step'] ?? null]) . "\\n", FILE_APPEND);
+        return true;
+    }
+}
+`,
+    );
+    const out = path.join(dir, `${product}-${version}.tar.gz`);
+    execFileSync('tar', ['--format', 'ustar', '-czf', out, '-C', src, product], {env: {...process.env, COPYFILE_DISABLE: '1'}});
+    return out;
+}
+
+/**
+ * A generic plugin at 1.0.0.0 whose installation step
+ * (`getInstallMigration()`) creates the table `<product>_t` and returns, as
+ * shared/playwright/checks/U62/I05B/pkg.js builds it with `kind: 'generic'`
+ * and `fail: false` (ported here, without its marker file: a test imports no
+ * kept check). Returns the package's path.
+ */
+function buildTablePlugin(dir, {product, displayName}) {
+    const {className} = pluginNames(product);
+    const ns = `APP\\plugins\\generic\\${product}`;
+    const mig = `${className}Migration`;
+    const table = `${product}_t`;
+    const src = path.join(dir, `src-${product}-table`);
+    fs.rmSync(src, {recursive: true, force: true});
+    const files = {
+        'version.xml': `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE version SYSTEM "../../../lib/pkp/dtd/pluginVersion.dtd">
+<version>
+	<application>${product}</application>
+	<type>plugins.generic</type>
+	<release>1.0.0.0</release>
+	<date>2026-11-12</date>
+	<lazy-load>1</lazy-load>
+	<class>${className}</class>
+</version>
+`,
+        [`${className}.php`]: `<?php
+namespace ${ns};
+
+require_once __DIR__ . '/${mig}.php';
+
+use PKP\\plugins\\GenericPlugin;
+
+class ${className} extends GenericPlugin
+{
+    public function getDisplayName()
+    {
+        return '${displayName}';
+    }
+
+    public function getDescription()
+    {
+        return 'A scratch plugin of the U62 tests: its installation step creates a table.';
+    }
+
+    public function getInstallMigration()
+    {
+        return new ${mig}();
+    }
+}
+`,
+        [`${mig}.php`]: `<?php
+namespace ${ns};
+
+use Illuminate\\Database\\Migrations\\Migration;
+use Illuminate\\Database\\Schema\\Blueprint;
+use Illuminate\\Support\\Facades\\Schema;
+
+class ${mig} extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('${table}', function (Blueprint $table) {
+            $table->bigIncrements('id');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('${table}');
+    }
+}
+`,
+        'index.php': `<?php
+require_once __DIR__ . '/${className}.php';
+return new \\${ns}\\${className}();
+`,
+    };
+    for (const [rel, body] of Object.entries(files)) {
+        fs.mkdirSync(path.join(src, product), {recursive: true});
+        fs.writeFileSync(path.join(src, product, rel), body);
+    }
+    const out = path.join(dir, `${product}-1.0.0.0.tar.gz`);
+    execFileSync('tar', ['--format', 'ustar', '-czf', out, '-C', src, product], {env: {...process.env, COPYFILE_DISABLE: '1'}});
+    return {path: out, table, ...pluginNames(product)};
+}
+
+/** The lines in a file on the server ([] while it is not there). */
+function fileLines(file) {
+    return fs.existsSync(file) ? fs.readFileSync(file, 'utf8').split('\n').filter(Boolean) : [];
+}
+
+/**
+ * Whether the installation's database has a table, through the app's own
+ * schema facade in a CLI call on the worker's install (driver-agnostic,
+ * PRINCIPLES D8; `PKP_CONFIG_FILE` points it at the test config).
+ *
+ * @param {string} table lower-case letters, digits and "_"
+ */
+function hasTable(table) {
+    if (!/^[a-z0-9_]+$/.test(table)) throw new Error(`hasTable: unexpected name ${table}`);
+    const out = execFileSync(
+        'php',
+        ['-r', `require 'tools/bootstrap.php'; echo \\Illuminate\\Support\\Facades\\Schema::hasTable('${table}') ? 'yes' : 'no';`],
+        {cwd: process.env.PKP_APP_ROOT, env: process.env, encoding: 'utf8', timeout: 60_000},
+    );
+    const answer = out.trim().split('\n').pop();
+    if (answer !== 'yes' && answer !== 'no') throw new Error(`hasTable(${table}): unexpected output ${out}`);
+    return answer === 'yes';
 }
 
 test.describe('plugins management', () => {
@@ -540,12 +700,15 @@ test.describe('plugins management', () => {
         const testPlugin = pluginNames(`u62s5test${run}`);
         const blockPlugin = pluginNames(`u62s5block${run}`);
         const otherPlugin = pluginNames(`u62s5other${run}`);
-        products.push(testPlugin.product, blockPlugin.product, otherPlugin.product);
+        const tablePlugin = buildTablePlugin(dir, {product: `u62s5table${run}`, displayName: HARBOUR_TABLE});
+        products.push(testPlugin.product, blockPlugin.product, otherPlugin.product, tablePlugin.product);
+        const stepFile = path.join(dir, 'upgrade-step.jsonl');
         const pkg = {
             test100: buildPlugin(dir, {product: testPlugin.product, version: '1.0.0.0', displayName: HARBOUR_TEST}),
-            test101: buildPlugin(dir, {product: testPlugin.product, version: '1.0.1.0', displayName: HARBOUR_TEST}),
+            test101: buildWithUpgradeStep(dir, {product: testPlugin.product, version: '1.0.1.0', displayName: HARBOUR_TEST}, stepFile),
             block: buildPlugin(dir, {product: blockPlugin.product, version: '1.0.0.0', displayName: HARBOUR_BLOCK, category: 'blocks'}),
             other: buildPlugin(dir, {product: otherPlugin.product, version: '1.0.0.0', displayName: HARBOUR_OTHER}),
+            table: tablePlugin.path,
         };
 
         const ap = await signedIn(asUser, 'admin');
@@ -589,10 +752,15 @@ test.describe('plugins management', () => {
         await expect(list.row(blockPlugin.id)).toHaveCount(0);
 
         // The newer version: upgraded, still ticked (Rule 18).
+        expect(fileLines(stepFile), 'no step line before the upgrade').toEqual([]);
         await markNotices(ap);
         await list.upgrade(testPlugin.id, pkg.test101);
         await expectFreshNotice(ap, UPGRADED('1.0.1.0'));
         await expect(list.box(testPlugin.id)).toBeChecked();
+
+        // The upgrade's own step: its file holds its one line (Rule 18;
+        // footnote sc).
+        expect(fileLines(stepFile).map((l) => JSON.parse(l))).toEqual([{product: testPlugin.product, step: 'always'}]);
 
         // "Delete", "Cancel": the window, nothing sent, the row stays (Rule 21).
         let confirm = await list.openDelete(testPlugin.id);
@@ -617,6 +785,23 @@ test.describe('plugins management', () => {
         await list.confirmDelete();
         await expectFreshNotice(ap, DELETED(HARBOUR_TEST));
         await expect(list.row(testPlugin.id)).toHaveCount(0, {timeout: T});
+
+        // A plugin's table, after "Delete": "Harbour Table Plugin" installed,
+        // listed under "Generic Plugins"; its table there (none before the
+        // upload, the read's control); "Delete", "OK": the row leaves, the
+        // table stays (Rule 21; footnotes sc, x).
+        expect(hasTable(tablePlugin.table), 'no table before the upload').toBe(false);
+        await markNotices(ap);
+        await list.upload(pkg.table);
+        await expectFreshNotice(ap, INSTALLED('1.0.0.0'));
+        await expect(list.rowIn('Generic Plugins', tablePlugin.id)).toBeVisible({timeout: T});
+        await expect(list.rowName(tablePlugin.id)).toHaveText(HARBOUR_TABLE);
+        expect(hasTable(tablePlugin.table), 'the table after the install').toBe(true);
+        await list.openDelete(tablePlugin.id);
+        await list.confirmDelete();
+        await expect(list.row(tablePlugin.id)).toHaveCount(0, {timeout: T});
+        await expect(list.rowIn('Generic Plugins', GA.id)).toBeVisible();
+        expect(hasTable(tablePlugin.table), 'the table after "Delete"').toBe(true);
 
         // The site's list: no row; "Google Analytics Plugin" as the control
         // (Rule 21; Side effects bullet 2).
