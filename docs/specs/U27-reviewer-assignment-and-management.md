@@ -838,11 +838,12 @@ review forms* unless said otherwise. <sup>n</sup>
 
 ## Canonical scenarios
 
-Scenarios 2, 3, 4, 6, 7, 9, 11 and 20 run on a scratch journal with
+Scenarios 2, 3, 4, 5, 6, 7, 9, 11, 20 and 21 run on a scratch journal with
 throwaway accounts: a Journal Manager who also holds the Reviewer role and
 a reviewer pool past thirty (2), a fresh address (3), a user to enroll (4),
-reviewers whose mailbox and task list are read (6, 7, 9, 11), an active
-review form (9) and a review setup of the journal's own (20). Every other
+an editor whose notices no other test reads (5), reviewers whose
+mailbox and task list are read (6, 7, 9, 11), an active review form (9), a review setup of the journal's own (20) and a
+competing-interests policy (21). Every other
 scenario, and scenario 20's control, runs on the seeded journal with ready
 accounts and scratch submissions. Each email is read in the mailbox of the
 address it was sent to. The accounts, the passwords and the tooling recipe
@@ -862,6 +863,9 @@ are in the footnote. <sup>s</sup>
      review setup.
    - **"Change"**: press it: the search shows again. Select the same
      reviewer again.
+   - **"Close" with a reviewer picked**: press "Close" in the window's top
+     bar: the window closes at once, nothing asks, and no row is added.
+     Press "Add Reviewer" again and select the first reviewer.
    - **The add**: press "Add Reviewer": the notice reads "{name} was
      assigned to review this submission and sent an email notification."
      and the row reads "Request Sent" (its "Response due:" line is missing
@@ -871,9 +875,9 @@ are in the footnote. <sup>s</sup>
      records the assignment. Verify the email arrived: a request submitted
      with the letter emptied creates the row without any feedback and sends
      nothing ⚠ [A18](#a18).
-   - **"Editorial Notes"**: open the row's "More Actions" menu: it lists
-     "Review Details", "Edit", "Unassign Reviewer", "Email Reviewer" and
-     "History" in that order, then "Editorial Notes" and "Log Response".
+   - **"Editorial Notes"**: open the row's "More Actions" menu: it lists,
+     in order, only "Review Details", "Edit", "Unassign Reviewer", "Email
+     Reviewer", "History", "Login As", "Editorial Notes" and "Log Response".
      Press "Editorial Notes": the window shows one text field under the guidance
      "Record notes about this reviewer that you would like to make visible
      to other administrators, managers and all editors. Notes will be
@@ -949,11 +953,22 @@ are in the footnote. <sup>s</sup>
    Given: Journal Manager, in the Add Reviewer window of a round, with an
    Author of the journal who holds no reviewer role.
 
+   - **The enroll form's "Close"**: choose "Enroll Existing User", type the
+     Author's name into "Search By Name" without picking a suggestion, and
+     press the window's top "Close": it asks "The data on this form has
+     changed. Do you wish to continue without saving?". Press "OK": the
+     window closes and no row is added. Press the panel's "Add Reviewer"
+     again.
    - **"Enroll Existing User"**: choose it: the form is headed "Enroll an
      Existing User as Reviewer" with "Search By Name", a one-option
-     reviewer role select, and no "Appear on the masthead" box. Press "Add Reviewer" with the field empty: "This field is
-     required." shows under the box. Type the Author's name and pick them:
-     the message clears. Press "Add Reviewer": the row reads "Request Sent".
+     reviewer role select, and no "Appear on the masthead" box. Press "Add
+     Reviewer" with the field empty: "This field is required." shows under
+     the box.
+   - **A name typed, not picked**: type the Author's name and click outside
+     the box without picking a suggestion: the name is cleared. Press "Add
+     Reviewer": "This field is required." shows under the box again.
+   - **The pick**: type the Author's name and pick them: the message
+     clears. Press "Add Reviewer": the row reads "Request Sent".
    - **The users list**: the journal's users list shows the user now also
      holds the Reviewer role.
    - **Control**: typing the name of an existing reviewer into the same
@@ -970,10 +985,11 @@ are in the footnote. <sup>s</sup>
    - **Inverted dates**: set "Review Due Date" before "Response Due Date",
      press "Add Reviewer" and look at once: a notice at the top right, gone
      by itself within seconds, reads "There was an error adding the
-     reviewer …" (Fields) [A45](#a45); no assignment is created and the
-     window stays open.
-   - **Control**: correct the dates and press "Add Reviewer": the row
-     appears.
+     reviewer as review due date must be equal or greater than responde
+     due date." [A45](#a45); no assignment is created and the window stays
+     open.
+   - **Control**: set "Review Due Date" to the same day as "Response Due
+     Date" and press "Add Reviewer": the row appears.
 
 6. **Edit an assignment, reviewer is told**
 
@@ -983,19 +999,30 @@ are in the footnote. <sup>s</sup>
    - **"Edit", the dates**: open the row's "Edit": the "Edit Review" window
      shows the guidance "Review due date must be greater or equal to
      response due date.". Set "Review Due Date" before "Response Due Date",
-     save and look at once: the same notice refuses it [A45](#a45) and
-     the window stays open.
-     Set "Review Due Date" a week after the original date and save.
+     save and look at once: the notice "There was an error adding the
+     reviewer as review due date must be equal or greater than responde
+     due date." refuses it at the top right [A45](#a45) and the window
+     stays open. Set "Review Due Date" a week after the original date and
+     save.
    - **The reviewer's side**: Reviewer: sign in: the header's Tasks panel
      holds "Review pending." and "Review assignment updated." for the
      submission, and the mailbox holds the change notice.
-   - **"Files To Be Reviewed"**: Editor: open "Edit" again and untick every
-     file: "No Files Selected" appears. Tick the first file back: the
-     warning disappears. Save. Reviewer: the files offered for review are
-     the first file alone.
+   - **"Close" with a change**: Editor: open "Edit" again, set "Review Due
+     Date" two weeks after the original date and press the window's top
+     "Close": it asks "The data on this form has changed. Do you wish to
+     continue without saving?". Press "Cancel": the window stays open with
+     the new date in place. Press "Close" again, then "OK": the window
+     closes and the row is unchanged. Open "Edit" again: it shows the date
+     saved before. Press "Close" with nothing changed: the window closes at
+     once.
+   - **"Files To Be Reviewed"**: open "Edit" again and untick every file:
+     "No Files Selected" appears. Tick the first file back: the warning
+     disappears. Save.
+   - **The reviewer's files**: Reviewer: "Respond to request" opens step 1:
+     "Review Files" lists the first file alone.
    - **Control**: the reviewer's mailbox holds no second change notice and
-     the Tasks panel no second "Review assignment updated.": an edit that
-     changes only the file ticks sends nothing. <sup>s</sup>
+     the Tasks panel no second "Review assignment updated.": a files-only
+     edit sends nothing. <sup>s</sup>
 
 7. **Remind an overdue reviewer**
 
@@ -1066,32 +1093,51 @@ are in the footnote. <sup>s</sup>
      complete." appears; in the still-open window "Mark as Complete" is
      disabled and "Modify Review" stays available; the row turns
      "Complete" and offers "Thank Reviewer" and "Revert Decision".
-   - **The reviewer's side**: Reviewer: sign in: the Tasks panel holds no
-     "Review pending." for the submission. Editor: the submission's
+   - **Review Details on "Complete"**: press "Cancel" in the window, then
+     open the row's "More Actions" › "Review Details": the dated line reads
+     "Review Completed: {date and time}". Press "Cancel": the submission's
      activity log records the completion.
-   - **"Thank Reviewer"**: press it, then "Thank Reviewer" in the window:
-     the notice reads "Thank you email sent to reviewer.", the row reads
-     "Reviewer Thanked", and the
-     thank-you is in the reviewer's mailbox. The row's "History" lists
-     "Request Sent", "Request Accepted", "Review Submitted", "Review
-     Completed" and "Reviewer Thanked", each followed by its date and
-     time.
+   - **The reviewer's side**: Reviewer: sign in: the Tasks panel holds no
+     "Review pending." for the submission.
+   - **"Thank Reviewer"**: Editor: press it, then "Thank Reviewer" in the
+     window: the notice reads "Thank you email sent to reviewer.", the row
+     reads "Reviewer Thanked", and the thank-you is in the reviewer's
+     mailbox. The row's "History" lists "Request Sent", "Request
+     Accepted", "Review Submitted", "Review Completed" and "Reviewer
+     Thanked", each followed by its date and time.
+   - **Review Details on "Reviewer Thanked"**: open the row's "More
+     Actions" › "Review Details": the dated line reads "Reviewer Thanked:
+     {date and time}". Note the date and time, then press "Cancel".
    - **"Revert Decision"**: press it and confirm "Unconsider this Review":
      the row returns to "Review Viewed" with no notice. "Read Review" shows
-     the comments unchanged, and the activity log records the revert.
+     the comments unchanged and the dated line "Review Submitted: {date
+     and time}", and the activity log records the revert. The row's
+     "History" ends at "Review Submitted", with no "Review Completed" and
+     no "Reviewer Thanked" line.
+   - **Marked complete again**: press "Read Review", then "Mark as
+     Complete" and confirm: the row reads "Reviewer Thanked" at once and
+     offers "Revert Decision" alone, with no "Thank Reviewer". Press
+     "Cancel", then open the row's "More Actions" › "Review Details": the
+     dated line reads "Reviewer Thanked:" with the date and time noted
+     before the revert. The row's "History" lists that "Reviewer Thanked"
+     date again, followed by the new "Review Completed" one.
    - **The second reviewer's review**: Reviewer (the second): accept the
-     request and submit a review. Editor: that row reads "Review
-     Submitted".
-   - **"Revert Decision" on "Complete"**: press that row's "Read Review",
-     then "Mark as Complete" and confirm: the row reads "Complete". Press
-     "Revert Decision" and confirm "Unconsider this Review": the row
-     returns to "Review Submitted" with no notice, and "Read Review" shows
-     the comments unchanged.
-   - **Thank without email**: press that row's "Read Review", then "Mark as
-     Complete" and confirm: the row reads "Complete" and offers "Thank
-     Reviewer"; press "Thank Reviewer" and submit the window
-     with "Do not send email to Reviewer." ticked: the notice reads "Review
-     marked as acknowledged. Email not sent." and the row reads "Reviewer
+     request and submit a review.
+   - **"Revert Decision" on "Complete"**: Editor: that row reads "Review
+     Submitted". Press its "Read Review", then "Mark as Complete" and
+     confirm: the row reads "Complete". Press "Revert Decision" and confirm
+     "Unconsider this Review": the row returns to "Review Submitted" with
+     no notice, and "Read Review" shows the comments unchanged.
+   - **"Close" in "Thank Reviewer"**: press that row's "Read Review", then
+     "Mark as Complete" and confirm: the row reads "Complete" and offers
+     "Thank Reviewer". Press "Thank Reviewer", type "Many thanks." at the
+     end of the message, tick "Do not send email to Reviewer." and press
+     "Close" at the top right: it asks "The data on this form has changed.
+     Do you wish to continue without saving?". Press "Cancel": the window
+     stays open with the changed message.
+   - **Thank without email**: with "Do not send email to Reviewer." ticked,
+     press "Thank Reviewer" in the window: the notice reads "Review marked
+     as acknowledged. Email not sent." and the row reads "Reviewer
      Thanked".
    - **Control**: the second reviewer's mailbox holds no thank-you, while
      the first reviewer's holds one. <sup>s</sup>
@@ -1156,7 +1202,14 @@ are in the footnote. <sup>s</sup>
     - **"Resend Review Request"**: open it: the message, the "Do not send
       email to Reviewer." box and fresh "Response Due Date" and "Review Due
       Date" pickers, each preset from its own configured interval as at add
-      time. Keep the dates and send: the notice reads "Request to reconsider
+      time. Note the preset "Review Due Date".
+    - **Inverted dates**: set "Review Due Date" before "Response Due Date"
+      and press "Resend Review Request": the notice "There was an error
+      adding the reviewer as review due date must be equal or greater than
+      responde due date." shows at the top right [A45](#a45), a browser
+      alert as well ⚠ [A46](#a46), and the window stays open.
+    - **The resend**: set "Review Due Date" back to its preset date and
+      press "Resend Review Request": the notice reads "Request to reconsider
       the review assignment was sent.", the row reads "Request Resent" (its
       "Response due:" line prints the review deadline ⚠ [A2](#a2)), and the
       reviewer's mailbox holds the reconsider request.
@@ -1176,14 +1229,13 @@ App-specific:
       list does not apply the split ⚠ [OMP2](#omp2).
     - **Internal Review's "Enroll Existing User"**: type the External
       Reviewer's name into "Search By Name": no one is found, the list
-      offers only "No Matches".
-    - **Control**: type the Author's name: found.
+      offers only "No Matches". Type the Author's name instead: found.
     - **External Review's "Add Reviewer"**: record "Send to External
       Review", press "Add Reviewer" there and repeat: now the External
       Reviewer is found and the Internal one is not [OMP1](#omp1).
     - **External Review's "Enroll Existing User"**: type the Internal
-      Reviewer's name: only "No Matches" is offered; the Author's name is
-      still found.
+      Reviewer's name: only "No Matches" is offered.
+    - **Control**: in the same form, the Author's name is still found.
       <sup>o</sup> <sup>s</sup>
 
 14. **The recommendation runs through the table** {OJS}
@@ -1304,20 +1356,63 @@ App-specific:
       selects "Anonymous Reviewer/Anonymous Author" and leaves "Publicly
       Show Reviewer Comments" unticked. <sup>s</sup>
 
+21. **A journal that asks about competing interests**
+
+    Given: Journal Manager, on a round of a journal whose "Competing
+    Interests" policy is set, where one Reviewer submitted a review
+    answering "I do not have any competing interests" and a second
+    Reviewer's request is unanswered ({OMP}: and a third Reviewer's too).
+
+    - **The submitted review**: its row reads "Review Submitted" with no
+      "Competing Interests" badge. Press "Read Review": a "Competing
+      Interests" group follows the summary block, its "Declaration"
+      reading "I do not have any competing interests".
+    - **"Modify Review", a declared interest**: press "Modify Review" and
+      confirm "Modify this review?": the "Modify Review" window's
+      "Competing Interests" group offers "Declaration" with "I do not have
+      any competing interests" ticked and "I may have competing interests
+      (Specify below)". Choose the second: a "Competing Interests" box
+      opens. Type "I co-authored a paper with the author." into it and
+      press "Save Changes": the view window's "Declaration" reads "I may
+      have competing interests", followed by "Competing Interests" and "I
+      co-authored a paper with the author.".
+    - **The row and the activity log**: press "Cancel": the row carries the
+      "Competing Interests" badge. The submission's activity log lists
+      "The following was modified in this review: Reviewer Competing
+      Interests." attributed to the Journal Manager.
+    - **A press's unanswered request** {OMP}: open the third Reviewer's
+      "More Actions" › "Review Details", press "Modify Review", confirm,
+      and press "Save Changes" with nothing entered: the "Modify Review"
+      window closes. Press "Cancel": the row still reads "Request Sent".
+      Open "Modify Review" on that row the same way, choose "I may have
+      competing interests (Specify below)", type "I co-authored a paper
+      with the author." and press "Save Changes", then "Cancel": the row
+      reads "Request Sent" with the "Competing Interests" badge.
+    - **The unanswered request**: open the second Reviewer's "More Actions"
+      › "Review Details": its "Competing Interests" group's "Declaration"
+      reads "-". Press "Cancel".
+    - **The policy emptied**: on Settings › Workflow › Review, "Reviewer
+      Guidance", empty "Competing Interests" and save it. Back on the
+      submission's review stage, the first Reviewer's row still carries the
+      "Competing Interests" badge, and its "Review Details" still shows the
+      "Competing Interests" group with the statement.
+    - **The answer still editable**: press "Modify Review" and confirm: the
+      "Competing Interests" group is still offered. Choose "I do not have
+      any competing interests" and press "Save Changes": the view window's
+      "Declaration" reads "I do not have any competing interests". Press
+      "Cancel": the row's "Competing Interests" badge is gone, and the
+      activity log lists one more "The following was modified in this
+      review: Reviewer Competing Interests." row.
+    - **Control**: the second Reviewer's "Review Details" now shows no
+      "Competing Interests" group: without a policy and without an answer
+      the group is absent. <sup>s</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the Review Details dated line past "Review Submitted:": "Review Completed:" on a review marked complete, "Reviewer Thanked:" on a thanked one, "Review Submitted:" again after "Revert Decision" (Rule 14a): likely bullets in scenario 9, which walks these states on the row and reads "History" on the thanked one [upstream 2026-09-29]
-  - the reviewer's own file listed under "Reviewer Files", read-only, in the Review Details window (Rule 14a): reached through the reviewer's upload on their own screens, which scenario 9's reviewer skips [upstream 2026-09-29]
-  - the thanked review marked complete again after "Revert Decision" turning "Reviewer Thanked" at once, with "Revert Decision" alone and no second "Thank Reviewer" (Rule 16): likely a bullet in scenario 9, after its "Revert Decision" [upstream 2026-09-29]
-  - Review Details on that review naming the first thank and its date (Rule 14a): the same bullet [upstream 2026-09-29]
-  - History ending at "Review Submitted" after "Revert Decision" on the thanked review, then, once it is marked complete again, listing the first "Reviewer Thanked" date followed by the new "Review Completed" (Rule 21): the same place in scenario 9 [upstream 2026-09-29]
   - {OJS} the Review Details window opened from the dashboard's "View unread recommendation" showing the recommendation, as the row's window does (Rule 14a): likely a bullet in scenario 14 [upstream 2026-09-29]
-  - the competing-interests answer in "Modify Review": preset to the reviewer's answer, changed to a statement and back to "I do not have any competing interests", the row's badge added and removed with it, and the "…Reviewer Competing Interests." row in the activity log (Rules 2, 14b, Side effects): needs a journal with a "Competing Interests" policy, which no scenario sets [upstream 2026-09-29]
-  - answers given under a "Competing Interests" policy kept after the policy is emptied: the badge and the group still shown, the answer still editable, and new reviewers no longer asked (Settings, Rule 2): the same journal, with its policy then emptied [upstream 2026-09-29]
-  - the "Edit Review" window's top "Close" asking first after a change to the review due date, the "Review Type" or the "Public Visibility" box (no other control tried), the window kept open on "Cancel" and the change dropped on "OK", and closing at once with nothing changed (Fields): likely a bullet in scenario 6, which opens the row's "Edit" [incidental 2026-09-29]
   - the guard for A16 (issue report
     `docs/issues/U13-OJS8-impossible-typed-date-saved-wrong.md`): a review
     due date typed in another format ("11/12/2030") in the "Edit" and "Add
@@ -1371,21 +1466,11 @@ Left out of the scenarios above, by reason:
     `docs/issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md`):
     on a press, "Mark as Complete" on an unanswered request with no review
     stays blocked with its message, and the request stays open [report 2026-10-03]
-  - the guard for retired A40 and OMP5 (pkp/pkp-lib#13467): on a press,
-    "Save Changes" with only a competing-interests declaration, or with
-    nothing entered, on an unanswered request keeps the row "Request
-    Sent" (Rule 14d): needs a press with a "Competing Interests" policy,
-    which no scenario sets [upstream 2026-10-07]
   - the guard for A13 (issue report
     `docs/issues/U27-A13-email-reviewer-sends-empty-body.md`):
     "Email Reviewer" sent with a Subject and an empty Body is refused with
     "Please provide the email body text.", and no email reaches the
     reviewer [report 2026-10-03]
-  - the inverted-date refusal's notice: in "Add Reviewer" and in "Edit", the window open and the notice "There was an error adding the reviewer as review due date must be equal or greater than responde due date." at the top right (Fields, Rule 9): likely the inverted-date bullets of scenarios 5 and 6, which already press the refusal [incidental 2026-10-05]
-  - "Resend Review Request" refusing inverted dates with the window kept open, and accepting equal ones (Fields, Rule 9): likely a bullet in scenario 12, before its send [incidental 2026-10-05]
-  - the Add Reviewer window's top-bar "Close" with a reviewer picked closing at once, nothing asked and no reviewer added (Fields): likely a bullet in scenario 1, after its "Change" [incidental 2026-10-15]
-  - the "Thank Reviewer" window's "Close" asking "The data on this form has changed. Do you wish to continue without saving?" after a changed message with "Do not send email to Reviewer." ticked as well, and "Cancel" keeping the window with the change (Fields): likely a bullet in scenario 9, which thanks the reviewer [incidental 2026-10-05]
-  - the "Enroll Existing User" form's top "Close" asking "The data on this form has changed. Do you wish to continue without saving?" with a name typed in "Search By Name" but not picked, "OK" closing it with nobody added; such a name cleared when the box loses focus and refused with "This field is required." (Fields, Enroll Existing User mode): likely bullets in scenario 4, which opens the form [incidental 2026-10-23]
 - **Rarely met**:
   - submitting a review for the reviewer: "Save Changes" in "Modify Review" on an unanswered, an accepted or a "Request Resent" row, with the row, its menu, the reviewer's side and the missing acceptance email after it, and {OJS} the save refused without a "Recommendation" (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a request with no review: "Request Sent:", "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", the empty blocks, and "Mark as Complete" disabled beside its recommendation message {OJS} or, with a review form, its incomplete-review message (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -1397,7 +1482,6 @@ Left out of the scenarios above, by reason:
   - the ORCID iD link styles in the reviewer search (Rule 5): shown only on a journal with ORCID enabled and reviewers who linked an iD
   - narrowing the reviewer search with a "Filters" slider (Rule 6): a pool of a page or two is read whole, never narrowed
   - the "{N} active" badge on a reviewer with a review underway (Rule 5): read only when an editor weighs a busy reviewer against a free one, not on every add
-  - the "Competing Interests" group in the Review Details window ("Declaration": "I do not have any competing interests", "I may have competing interests" with the statement, or "-"), and the row's "Competing Interests" badge (Rules 2, 14a, 14c, Settings): met only on a journal that sets a "Competing Interests" policy, which the install leaves empty, or on reviews answered while one was set
 - **Nothing new to test**:
   - the "Reviewing Interests" tag field of Create New Reviewer (Fields): filled only when an editor creates an account with interests to record
   - the chooser's refill on a pick (Fields): needs an alternate template a journal seldom adds
@@ -1408,6 +1492,7 @@ Left out of the scenarios above, by reason:
   - "View changes" opened to its "View Review" window (Side effects): scenario 16 reads the action, not the window behind it
   - "Cancel" in the Add Reviewer window with a reviewer chosen, and in the "Edit Review" window with a due date changed, closing without a question (Fields): a close control
   - the second ends of covered controls: an edit changing only the review type (Rule 12), the XML exports (Rule 15), a logged decline (Rule 20)
+  - "Resend Review Request" accepting a review due date equal to the response due date (Rule 9): the same date rule scenario 5 presses in "Add Reviewer"
   - the press's Internal Review stage running scenarios 1–12 as External Review does (Purpose; scenario 13 covers what differs)
 - **Register carries it**:
   - A6 (an assistant-level participant's table omitting declined and cancelled rows; Actors row 2, Rule 17)
@@ -1464,6 +1549,8 @@ Left out of the scenarios above, by reason:
   - adding a suggested reviewer, and the window opened from a suggestion (Side effects, Settings; *Reviewer suggestions*)
   - the one-click keyed link in request and reminder emails (Settings; *Reviewer's review*)
   - an unassigned or cancelled reviewer leaving the submission's discussions (Side effects; *Tasks & discussions*, scenario 11)
+  - the reviewer's own file listed under "Reviewer Files", read-only, in the Review Details window (Rule 14a; *Reviewer's review*, scenario 7)
+  - new reviewers no longer asked about competing interests once the "Competing Interests" policy is emptied (Settings; *Reviewer's review*, scenario 13)
 
 ## Findings register
 
@@ -3070,21 +3157,35 @@ uploaded through the round's Files for Review panel first; a reviewer
 named in the seed leaves the Add Reviewer search, so a scenario that adds
 through the screen keeps a spare reviewer out of the seed. Scratch journals
 come from `POST scenarios/context` with throwaway `users[]` (role keys
-`manager`, `author`, `externalReviewer`, `funding`); the mail catcher is
+`manager`, `editor`, `author`, `externalReviewer`, `funding`); the mail catcher is
 Mailpit, read by the recipient's address and, for a roster reviewer,
 scoped by the scratch submission's title. Overdue rows are produced with a
 passed due date rather than waited for. Per scenario: 1 seeds no reviewer
-and adds two roster reviewers on screen. 2: a scratch journal with a
+and adds two roster reviewers on screen; `editor.diana` manages the journal
+and the roster reviewers hold roles in it alone, so their rows offer
+"Login As" ([→ who may impersonate whom](U01-login-and-sessions.md#who-may-impersonate),
+read on the same journal's Reviewers table in that spec's scenario 8), and
+no account on the test install holds an authenticated ORCID iD (note
+f-a1), so no row offers "Send Review To ORCID". 2: a scratch journal with a
 throwaway `manager`, an `author`, a user holding `['externalReviewer',
 'manager']`, a second `externalReviewer` seeded `invited`, and thirty more
 throwaway `externalReviewer` accounts never assigned, so the opening list
 pages and one of them is the entry read. 3: a scratch
 journal; the fresh address is a throwaway mailbox never used before. 4: a
 scratch journal with a throwaway `author` to enroll and an
-`externalReviewer` for the control. 5: any round with a spare roster
-reviewer; the seed carries no files, so nothing is uploaded. 6: a scratch
+`externalReviewer` for the control. 5: a scratch journal (OMP: press)
+with a throwaway `editor` (OMP: a throwaway `manager`), an `author` who
+submits, and a throwaway `externalReviewer` kept out of the round's seed;
+the seed carries no files, so nothing is uploaded. The inverted-date
+refusal's notice is a form-error notice the app hands to whichever of the
+signed-in account's pages loads next, so on the seeded journal a parallel
+test signed in as the same roster editor can take it before the scenario
+looks. 6: a scratch
 journal with a throwaway `externalReviewer` seeded
-`invited`, two files uploaded to the round before the edit. 7: a scratch
+`invited`, two files uploaded to the round before the edit; the files are
+read on the reviewer's step 1, which lists them before any answer while
+"Restrict File Access" is off, the scratch journal's install default
+(seed-facts.md; *Reviewer's review*, its Rule 7). 7: a scratch
 journal with three throwaway reviewers, two seeded `invited` and one
 `accepted`; one invited reviewer is given a past response date through
 the Edit window (the screen's only route to backdating, finding A17), and
@@ -3115,6 +3216,13 @@ round's seed; the control is a scratch submission on `publicknowledge`
 with a spare roster reviewer, the seeded journal being at the install
 defaults (seed-facts.md: both deadlines 4 weeks, "Anonymous
 Reviewer/Anonymous Author", "Publicly Show Reviewer Comments" off).
+21: a scratch journal (OMP: press) created with the `review` passthrough
+setting `competingInterests` to a policy text, a throwaway
+`externalReviewer` seeded `completed` (which records the "I do not have
+any competing interests" answer, scenarios.md `reviewRounds[]`) and a
+second seeded `invited`, on OMP a third seeded `invited` for the press
+bullet; the policy is emptied on screen in "Reviewer Guidance" (the
+screen is *Review setup & review forms*).
 Claim check 2026-08-02: scenario 1 driven end-to-end as a Section
 Editor (previously covered by other roles); scenarios 8–14 re-driven as a
 Section Editor on OJS with OMP twins for 9, 13 and 14; scenario 15 stands
@@ -3138,7 +3246,10 @@ asserts the "{N} active" badge either way (note c). Claim check 2026-09-17
 journal's Journal Manager on a review submitted through the reviewer's own
 screens with both comment blocks, a file and {OJS} "Revisions Required";
 every bullet held, "Cancel" with nothing typed asking nothing, and "View
-changes" sitting behind the log row's "Settings" arrow.
+changes" sitting behind the log row's "Settings" arrow. Test run
+2026-11-12 (OJS and OMP): scenario 5 runs on the scratch journal (press)
+above rather than with `editor.diana` on `publicknowledge`, and every
+bullet held there.
 
 <a id="fn-a1"></a>
 **f-a1** — `useReviewerManagerConfig.js::getItemActions`: the guard reads

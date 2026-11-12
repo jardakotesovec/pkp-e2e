@@ -3,35 +3,21 @@
  * @file playwright/tests/U27-reviewer-assignment.spec.js
  *
  * Reviewer assignment & management — OJS suite, one test per canonical
- * scenario the spec runs on OJS (common scenarios 1–12 and 16–20 +
+ * scenario the spec runs on OJS (common scenarios 1–12, 16–21 +
  * OJS-specific 14; scenario 13 is OMP-only, 15 OPS-only — they live in
  * those trees).
  * Spec: docs/specs/U27-reviewer-assignment-and-management.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
- * Coverage section is the record of everything else left out):
- * - A1 🐞, A2 🐞, A7 🐞, A9 🐞, A12 🐞, A13 🐞, A14 🐞, A16 🐞,
- *   A15 🐞, A18 🐞, A19 🐞, A21 🐞, A22 🐞, A26 🐞, A30 🐞, A31 🐞 (the refusals and races these
- *   name are walked where a scenario passes through them — S5's inverted
- *   dates, S6's refused edit, the settle-then-rate in S9, S11's unassign
- *   notice read by recipient and title — and asserted neither way).
- * - A3 ❓, A4 ❓, A6 ❓, A17 ❓, A23 ❓, A29 ❓ (parked; S14
- *   and S16 anchor the recommendation on the "Recommendation:" line only).
- * - Retired: A5, A10 (opening the window marks the row "Review Viewed" by
- *   design; S9 asserts it as contract), A11, A24 (an editor's "Modify
- *   Review" save submitting the review for the reviewer is the designed
- *   behavior, spec Rule 14d, under Budget: no test drives it yet), A25,
- *   A27, A33, A35 (the thank stands after a revert, intended), A34 (not a
- *   finding: translation lag).
- * - S10 note: the two PDFs are asserted as real downloads; the author-only /
- *   full content split is asserted on the same menu's XML exports (mpdf
- *   compresses PDF text streams — the split is byte-identical logic).
+ * Deliberately NOT covered (register IDs; the spec's Coverage section is
+ * the record of everything else left out):
+ * - 🐞 A1, A2, A7, A12, A13, A15, A16, A18, A19, A21, A22, A26, A30, A31,
+ *   A32, A36, A37, A39, A43, A44, A45, A46, A47, A49, A50.
+ * - ❓ A4, A6, A17, A23, A28, A29, A38, A41, A42, A48.
  *
  * Seeding: scenario endpoints only; publicknowledge and the 18 seeded users
  * are read-only. Tests that mutate roles/accounts (S2–S4), need a private
- * toast queue, a bounded task list or a throwaway mailbox (S1, S6, S7, S9,
- * S11, S12) run on scratch journals with throwaway users whose addresses
+ * toast queue, a bounded task list or a throwaway mailbox (S1, S5, S6, S7,
+ * S9, S11, S12, S21) run on scratch journals with throwaway users whose addresses
  * carry app + test in the username (u27s7ojsw0…@mail.test). Mail assertions
  * on seeded reviewers are scoped by recipient + the scratch submission's
  * unique tag-bearing title. Silence claims are bounded (pkpMail.count after
@@ -83,15 +69,37 @@ const {
     revertReviewDecision,
     openModifyReview,
     cancelModifyReview,
+    closeWindowAsking,
+    datedLine,
+    openReviewDetailsFromMenu,
+    openReviewHistory,
+    historyLines,
+    competingInterestsGroup,
+    declareCompetingInterests,
+    saveModifyReview,
+    statusCell,
     waitForJQueryIdle,
     waitForLegacyFormSettled,
 } = require('../pages/ReviewStagePages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {ReviewerAssignmentsPage, ReviewWizardPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
+const {ReviewSettingsPage} = require('../../../../shared/playwright/pages/ReviewSettingsPages.js');
+const {legacyAnswerApplied} = require('../support/legacy.js');
 
 const JOURNAL = 'publicknowledge';
 const REVIEW_PENDING = 'Review pending.';
 const ASSIGNMENT_UPDATED = 'Review assignment updated.';
 const DATE_RULE = 'Review due date must be greater or equal to response due date.';
+/**
+ * The inverted-date refusal's notice. The spec quotes it whole ("There was
+ * an error adding the reviewer as review due date must be equal or greater
+ * than responde due date."); its two faults, "adding the reviewer" in Edit
+ * and Resend and the typo "responde", are register A45 and are matched
+ * either way, so the fix does not red this read.
+ */
+const INVERTED_DATES_NOTICE =
+    /There was an error .+ as review due date must be equal or greater than respon(?:de|se) due date\./;
+const FORM_CHANGED = 'The data on this form has changed. Do you wish to continue without saving?';
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -161,6 +169,9 @@ async function openTaskRows(page, sentence, title) {
     return {tasks, rows: tasks.row(sentence).filter({hasText: title})};
 }
 
+/** The app's short date and time ("2026-11-12 04:07 AM"), as a pattern source. */
+const DATE_TIME = '\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2} [AP]M';
+
 /** A review-history line ("{label}: {date}", the label in bold) of the row's History window. */
 function historyLine(historyModal, label) {
     return historyModal
@@ -225,14 +236,25 @@ test.describe('reviewer-assignment', () => {
         await expect(modal.locator('#regularReviewerForm')).toBeHidden();
         await selectReviewer(editorPage, modal, firstName);
 
+        // "Close" with a reviewer picked: the top bar's "Close" closes the
+        // window at once, nothing asks (the enroll form's and the Edit
+        // window's "Close" do ask, S4 and S6), and no row is added (the
+        // table's empty state, whose place the add's row takes below).
+        expect(await closeWindowAsking(editorPage, modal)).toBeNull();
+        const reviewers = editorPage.getByRole('table', {name: 'Reviewers', exact: true});
+        await expect(reviewers).toContainText('No Items');
+        await expect(workflow.panelRow('Reviewers', firstName)).toHaveCount(0);
+        const reopened = await openAddReviewerModal(editorPage);
+        await selectReviewer(editorPage, reopened, firstName);
+
         // The add: the notice names the reviewer and the email, the row reads
         // "Request Sent" (the missing response-deadline second line is
         // register A7 — asserted neither way).
-        await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+        await reopened.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
         await expect(
             notice(editorPage, `${firstName} was assigned to review this submission and sent an email notification.`)
         ).toBeVisible({timeout: 30_000});
-        await expect(modal).toHaveCount(0, {timeout: 30_000});
+        await expect(reopened).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(editorPage);
         const row = workflow.panelRow('Reviewers', firstName);
         await expect(row).toBeVisible();
@@ -255,20 +277,20 @@ test.describe('reviewer-assignment', () => {
         ).toBeVisible();
         await closeSideWindow(log);
 
-        // The row's "More Actions" menu lists "Review Details", "Edit",
-        // "Unassign Reviewer", "Email Reviewer" and "History" in that order,
-        // then "Editorial Notes" and "Log Response". The manager-level
-        // editor's menu also carries a "Login As" entry between "History"
-        // and "Editorial Notes" (the spec's Coverage list owns it to
-        // *Sign-in & sessions*), read out of the sequence.
+        // The row's "More Actions" menu lists, in order, only "Review
+        // Details", "Edit", "Unassign Reviewer", "Email Reviewer", "History",
+        // "Login As" (the manager-level editor may impersonate a reviewer
+        // who holds roles in this journal alone), "Editorial Notes" and
+        // "Log Response"; no "Send Review To ORCID" (no iD on the install).
         const menu = await openRowMenu(editorPage, row);
         const entries = (await menu.getByRole('menuitem').allTextContents()).map((s) => s.trim());
-        expect(entries.filter((s) => s !== 'Login As')).toEqual([
+        expect(entries).toEqual([
             'Review Details',
             'Edit',
             'Unassign Reviewer',
             'Email Reviewer',
             'History',
+            'Login As',
             'Editorial Notes',
             'Log Response',
         ]);
@@ -596,37 +618,69 @@ test.describe('reviewer-assignment', () => {
         const managerPage = await (await asUser(manager)).newPage();
         const workflow = new WorkflowPage(managerPage, tag);
         await workflow.gotoEditorial(submissionId);
-        const modal = await openAddReviewerModal(managerPage);
-        await modal.getByRole('link', {name: 'Enroll Existing User'}).click();
-
-        // The form: its heading, "Search By Name", a one-option reviewer role
-        // select and the ticked, disabled masthead box.
         const enrollModal = managerPage
             .getByRole('dialog')
             .filter({has: managerPage.locator('form#enrollExistingReviewerForm')});
         const form = enrollModal.locator('form#enrollExistingReviewerForm');
-        await expect(
-            form.getByRole('heading', {name: 'Enroll an Existing User as Reviewer'})
-        ).toBeVisible({timeout: 30_000});
+        const nameInput = form.locator('input[id^="userId_input"]');
+        const heading = form.getByRole('heading', {name: 'Enroll an Existing User as Reviewer'});
+        const openEnrollForm = async () => {
+            const modal = await openAddReviewerModal(managerPage);
+            await modal.getByRole('link', {name: 'Enroll Existing User'}).click();
+            await expect(heading).toBeVisible({timeout: 30_000});
+            // The footer's file grid lands above the button after the form.
+            await waitForLegacyFormSettled(managerPage, enrollModal);
+        };
+
+        // The enroll form's "Close": the Author's name typed into "Search
+        // By Name", no suggestion picked; the window's top "Close" asks
+        // first, and "OK" closes it with no row added (the table's empty
+        // state, whose place the pick's row takes below).
+        await openEnrollForm();
+        await nameInput.pressSequentially(enrollee, {delay: 30});
+        expect(await closeWindowAsking(managerPage, enrollModal, {answer: 'accept'})).toBe(FORM_CHANGED);
+        const reviewers = managerPage.getByRole('table', {name: 'Reviewers', exact: true});
+        await expect(reviewers).toContainText('No Items');
+        await expect(workflow.panelRow('Reviewers', enrollee)).toHaveCount(0);
+
+        // "Enroll Existing User": its heading, "Search By Name", a one-option
+        // reviewer role select and no masthead box (reviewers are not listed
+        // on a new journal, pkp/pkp-lib#13370).
+        await openEnrollForm();
         await expect(form.getByText('Search By Name')).toBeVisible();
         const roleSelect = form.locator('select[name="userGroupId"]');
         await expect(roleSelect).toBeVisible();
         await expect(roleSelect.locator('option')).toHaveCount(1);
-        // No masthead box while reviewers are not listed (pkp/pkp-lib#13370).
         await expect(form.locator('input[name="masthead"]')).toHaveCount(0);
 
-        // An empty field is refused with "This field is required." above it;
-        // picking a name clears the message (the press once the footer's
-        // file grid has landed above the button).
-        await waitForLegacyFormSettled(managerPage, enrollModal);
-        await form.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+        // An empty field is refused with "This field is required." under the
+        // box (each refusal swaps the form for a new one).
+        const pressAdd = async () => {
+            await form.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+            await legacyAnswerApplied(managerPage, 'enrollExistingReviewerForm');
+        };
         const required = form.getByText('This field is required.');
+        await pressAdd();
         await expect(required).toBeVisible({timeout: 30_000});
-        await expect(form.locator('input[id^="userId_input"]')).toBeVisible();
-        const nameInput = form.locator('input[id^="userId_input"]');
-        await nameInput.pressSequentially(enrollee, {delay: 30});
+        await expect(nameInput).toBeVisible();
+
+        // A name typed, not picked: left by a click outside the box, it is
+        // cleared (the suggestion list showed it, the positive read), and
+        // "Add Reviewer" is refused the same way.
         const menu = managerPage.locator('ul.ui-autocomplete').filter({visible: true});
         const match = menu.locator('li').filter({hasText: enrollee});
+        await nameInput.pressSequentially(enrollee, {delay: 30});
+        await expect(match).toBeVisible({timeout: 30_000});
+        await expect(nameInput).toHaveValue(enrollee);
+        await heading.click();
+        await expect(nameInput).toHaveValue('');
+        await pressAdd();
+        await expect(required).toBeVisible({timeout: 30_000});
+        await expect(enrollModal).toHaveCount(1);
+        await expect(nameInput).toHaveValue('');
+
+        // The pick: the message clears.
+        await nameInput.pressSequentially(enrollee, {delay: 30});
         await expect(match).toBeVisible({timeout: 30_000});
         await match.click();
         await expect(required).toBeHidden();
@@ -667,13 +721,27 @@ test.describe('reviewer-assignment', () => {
     test('S5: deadlines are validated', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
-        const {submissionId} = await seedInReview(ojsApi, tag);
+        const editor = `ed${tag}`;
+        const author = `au${tag}`;
+        const reviewer = `rev${tag}`;
+        // Scratch journal: the refusal's notice is a form-error notice fetched
+        // for the signed-in user, so it is read by an editor no other test
+        // signs in as (parallel lesson 2); the reviewer stays out of the seed.
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: editor, roles: ['editor']},
+                {username: author, roles: ['author']},
+                {username: reviewer, roles: ['externalReviewer']},
+            ],
+        });
+        const {submissionId} = await seedInReview(ojsApi, tag, {context: tag, submitter: author});
 
-        const editorPage = await (await asUser('sectioneditor.ana')).newPage();
-        const workflow = new WorkflowPage(editorPage, JOURNAL);
+        const editorPage = await (await asUser(editor)).newPage();
+        const workflow = new WorkflowPage(editorPage, tag);
         await workflow.gotoEditorial(submissionId);
         const modal = await openAddReviewerModal(editorPage);
-        await selectReviewer(editorPage, modal, 'Julia Reviewer');
+        await selectReviewer(editorPage, modal, reviewer);
 
         // "Files To Be Reviewed" on a round with no files (the seed carries
         // none): the list is empty and the inline warning "No Files
@@ -685,24 +753,31 @@ test.describe('reviewer-assignment', () => {
         // The permanent guidance sentence states the rule.
         await expect(modal.getByText(DATE_RULE)).toBeVisible();
 
-        // Review due date before the response due date: submitting adds
-        // nothing — the window stays open (its notice, Planned with A45's
-        // wording, is asserted neither way).
+        // Inverted dates: the review due date a week out, before the
+        // response due date (four weeks out); "Add Reviewer" is refused
+        // with the notice at the top right, gone by itself within seconds;
+        // the window stays open and nothing is added.
         await pickDate(editorPage, modal, 'reviewDueDate', daysFromNow(7));
         await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+        const refusal = notice(editorPage, INVERTED_DATES_NOTICE);
+        await expect(refusal).toBeVisible({timeout: 30_000});
         await waitForJQueryIdle(editorPage);
         await expect(modal.locator('input[id^="responseDueDate"]').first()).toBeVisible();
-        await expect(workflow.panelRow('Reviewers', 'Julia Reviewer')).toHaveCount(0);
+        await expect(workflow.panelRow('Reviewers', reviewer)).toHaveCount(0);
+        await expect(refusal).toBeHidden({timeout: 30_000});
 
-        // Correcting the dates succeeds and the row appears.
-        await pickDate(editorPage, modal, 'reviewDueDate', daysFromNow(35));
+        // Control: the review due date on the response due date's day is
+        // accepted and the row appears.
+        await pickDate(editorPage, modal, 'reviewDueDate', daysFromNow(4 * 7));
+        await expect(dueDateValue(modal, 'reviewDueDate')).toHaveValue(ymd(daysFromNow(4 * 7)));
+        await expect(dueDateValue(modal, 'responseDueDate')).toHaveValue(ymd(daysFromNow(4 * 7)));
         await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
         await expect(modal).toHaveCount(0, {timeout: 30_000});
         await waitForJQueryIdle(editorPage);
         // Exactly one row: the refused submit created nothing (a leftover
         // assignment would have made this second add a refused duplicate).
-        await expect(workflow.panelRow('Reviewers', 'Julia Reviewer')).toHaveCount(1);
-        await expect(workflow.panelRow('Reviewers', 'Julia Reviewer')).toContainText('Request Sent');
+        await expect(workflow.panelRow('Reviewers', reviewer)).toHaveCount(1);
+        await expect(workflow.panelRow('Reviewers', reviewer)).toContainText('Request Sent');
     });
 
     test('S6: edit an assignment, reviewer is told', async ({asUser, ojsApi, pkpMail}, testInfo) => {
@@ -741,9 +816,10 @@ test.describe('reviewer-assignment', () => {
         await uploadReviewFiles(managerPage, workflow, [fileOne, fileTwo]);
 
         // "Edit", the dates: the window shows the rule; an inverted pair is
-        // refused with the window staying open (its notice not asserted);
-        // a week later than the original (+4 weeks, the form's own default)
-        // saves. Calendar picks — the widget discards typed dates (A16).
+        // refused with the notice at the top right and the window staying
+        // open; a week later than the original (+4 weeks, the form's own
+        // default) saves. Calendar picks — the widget discards typed dates
+        // (A16).
         const editModal = await openEditReview(managerPage, row);
         await expect(editModal.getByText(DATE_RULE)).toBeVisible();
         await pickDate(managerPage, editModal, 'reviewDueDate', daysFromNow(7));
@@ -753,6 +829,7 @@ test.describe('reviewer-assignment', () => {
         );
         await editModal.getByRole('button', {name: 'OK', exact: true}).click();
         await refused;
+        await expect(notice(managerPage, INVERTED_DATES_NOTICE)).toBeVisible({timeout: 30_000});
         await waitForJQueryIdle(managerPage);
         await expect(editModal.locator('form#editReviewForm')).toBeVisible();
         await pickDate(managerPage, editModal, 'reviewDueDate', daysFromNow(5 * 7));
@@ -772,10 +849,28 @@ test.describe('reviewer-assignment', () => {
             subject: 'Your review assignment has been changed',
         });
 
-        // "Files To Be Reviewed": no file ticked shows "No Files Selected";
-        // one ticked back clears it; save.
+        // "Close" with a change: the review due date moved to two weeks after
+        // the original; the top "Close" asks first. "Cancel" keeps the
+        // window with the new date in place; "Close" again and "OK" closes
+        // it, the row unchanged, and "Edit" opened again shows the date
+        // saved before. With nothing changed, "Close" closes at once.
         await managerPage.reload();
         await workflow.expectOpen();
+        const rowBefore = (await statusCell(row).innerText()).trim();
+        const editClose = await openEditReview(managerPage, row);
+        await expect(dueDateValue(editClose, 'reviewDueDate')).toHaveValue(ymd(daysFromNow(5 * 7)));
+        await pickDate(managerPage, editClose, 'reviewDueDate', daysFromNow(6 * 7));
+        expect(await closeWindowAsking(managerPage, editClose, {answer: 'dismiss'})).toBe(FORM_CHANGED);
+        await expect(editClose.locator('form#editReviewForm')).toBeVisible();
+        await expect(dueDateValue(editClose, 'reviewDueDate')).toHaveValue(ymd(daysFromNow(6 * 7)));
+        expect(await closeWindowAsking(managerPage, editClose, {answer: 'accept'})).toBe(FORM_CHANGED);
+        await expect(statusCell(row)).toHaveText(rowBefore);
+        const editReopened = await openEditReview(managerPage, row);
+        await expect(dueDateValue(editReopened, 'reviewDueDate')).toHaveValue(ymd(daysFromNow(5 * 7)));
+        expect(await closeWindowAsking(managerPage, editReopened)).toBeNull();
+
+        // "Files To Be Reviewed": no file ticked shows "No Files Selected";
+        // one ticked back clears it; save.
         const editModal2 = await openEditReview(managerPage, row);
         const boxOne = editReviewFileCheckbox(editModal2, fileOne.name);
         const boxTwo = editReviewFileCheckbox(editModal2, fileTwo.name);
@@ -794,11 +889,17 @@ test.describe('reviewer-assignment', () => {
         await expect(noFiles).toBeHidden();
         await saveEditReview(managerPage, editModal2);
 
-        // Reviewer: the files offered for review are the first file alone.
-        await reviewerPage.goto(`/index.php/${tag}/reviewer/submission/${submissionId}`);
-        const offered = reviewerPage.getByRole('row').filter({hasText: fileOne.name});
-        await expect(offered).toBeVisible({timeout: 30_000});
-        await expect(reviewerPage.getByRole('row').filter({hasText: fileTwo.name})).toHaveCount(0);
+        // The reviewer's files: "Respond to request" on their list opens
+        // step 1, whose "Review Files" lists the first file alone (read once
+        // the grid has loaded; the first file is the positive read).
+        const assignments = new ReviewerAssignmentsPage(reviewerPage, tag);
+        await assignments.goto('actionRequired');
+        await assignments.openWizard(assignments.row(title), 'Respond to request');
+        const wizard = new ReviewWizardPage(reviewerPage, tag);
+        await wizard.expectReviewFilesSettled(1);
+        const stepFiles = wizard.reviewFilesGrid(1);
+        await expect(stepFiles.getByRole('row').filter({hasText: fileOne.name})).toBeVisible({timeout: 30_000});
+        await expect(stepFiles.getByRole('row').filter({hasText: fileTwo.name})).toHaveCount(0);
 
         // Control: the mailbox holds no second change notice and the Tasks
         // panel no second "Review assignment updated.": an edit changing only
@@ -1007,7 +1108,7 @@ test.describe('reviewer-assignment', () => {
 
     test('S9: read, rate, mark complete, thank — and take it back', async ({asUser, ojsApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(420_000);
+        test.setTimeout(540_000);
         const tag = makeTag('s9', testInfo);
         const manager = `mgr${tag}`;
         const author = `au${tag}`;
@@ -1108,6 +1209,14 @@ test.describe('reviewer-assignment', () => {
         await expect(row.getByRole('button', {name: 'Thank Reviewer', exact: true})).toBeVisible();
         await expect(row.getByRole('button', {name: 'Revert Decision', exact: true})).toBeVisible();
 
+        // Review Details on "Complete": "More Actions" › "Review Details";
+        // the dated line reads "Review Completed: {date and time}".
+        const completedDetails = await openReviewDetailsFromMenu(managerPage, row);
+        await expect(datedLine(completedDetails, 'Review Completed')).toHaveText(
+            new RegExp(`^Review Completed:\\s*${DATE_TIME}$`)
+        );
+        await closeReviewDetails(managerPage, completedDetails);
+
         // The reviewer's side: the Tasks panel no longer holds "Review
         // pending." for the submission (read the same way as the control
         // above). Editor: the activity log records the completion.
@@ -1150,7 +1259,18 @@ test.describe('reviewer-assignment', () => {
         for (const label of ['Request Sent', 'Request Accepted', 'Review Submitted', 'Review Completed', 'Reviewer Thanked']) {
             await expect(historyLine(historyModal, label)).toHaveText(new RegExp(`${label}:\\s*\\d{4}-\\d{2}-\\d{2}`));
         }
+        const thankedInHistory = (await historyLine(historyModal, 'Reviewer Thanked').innerText())
+            .replace(/\s+/g, ' ')
+            .trim();
         await closeSideWindow(historyModal);
+
+        // Review Details on "Reviewer Thanked": the dated line reads
+        // "Reviewer Thanked: {date and time}", noted for the re-completion.
+        const thankedDetails = await openReviewDetailsFromMenu(managerPage, row);
+        const thankedLine = datedLine(thankedDetails, 'Reviewer Thanked');
+        await expect(thankedLine).toHaveText(new RegExp(`^Reviewer Thanked:\\s*${DATE_TIME}$`));
+        const thankedAt = (await thankedLine.innerText()).replace(/\s+/g, ' ').trim();
+        await closeReviewDetails(managerPage, thankedDetails);
 
         // Revert Decision → "Unconsider this Review" → "Review Viewed" with no
         // notice (the toast area is empty once the row has changed; the
@@ -1168,6 +1288,9 @@ test.describe('reviewer-assignment', () => {
         const revertedModal = await openReviewDetails(managerPage, row);
         await expect(revertedModal.getByText(`Shared comment ${tag}`)).toBeVisible({timeout: 30_000});
         await expect(revertedModal.getByText(`Private remark ${tag}`)).toBeVisible();
+        await expect(datedLine(revertedModal, 'Review Submitted')).toHaveText(
+            new RegExp(`^Review Submitted:\\s*${DATE_TIME}$`)
+        );
         await closeReviewDetails(managerPage, revertedModal);
         const log2 = await openActivityLog(managerPage);
         await expect(
@@ -1176,6 +1299,46 @@ test.describe('reviewer-assignment', () => {
             })
         ).toBeVisible();
         await closeSideWindow(log2);
+
+        // The row's "History" ends at "Review Submitted": no "Review
+        // Completed" and no "Reviewer Thanked" line (both read above, before
+        // the revert).
+        const revertedHistory = await openReviewHistory(managerPage, row);
+        await expect(historyLine(revertedHistory, 'Review Submitted')).toBeVisible();
+        const afterRevert = await historyLines(revertedHistory);
+        expect(afterRevert.map((line) => line.split(':')[0])).toEqual([
+            'Request Sent',
+            'Request Accepted',
+            'Review Submitted',
+        ]);
+        await closeSideWindow(revertedHistory);
+
+        // Marked complete again: the row reads "Reviewer Thanked" at once and
+        // offers "Revert Decision" alone, no "Thank Reviewer"; Review Details
+        // names the first thank and its noted date, and History lists that
+        // "Reviewer Thanked" date again, followed by the new "Review
+        // Completed" one.
+        const againModal = await openReviewDetails(managerPage, row);
+        await markReviewComplete(managerPage, againModal);
+        await closeReviewDetails(managerPage, againModal);
+        await expect(statusTitle(row)).toHaveText('Reviewer Thanked', {timeout: 30_000});
+        await expect(row.getByRole('button', {name: 'Revert Decision', exact: true})).toBeVisible();
+        await expect(row.getByRole('button', {name: 'Thank Reviewer', exact: true})).toHaveCount(0);
+        const againDetails = await openReviewDetailsFromMenu(managerPage, row);
+        await expect(datedLine(againDetails, 'Reviewer Thanked')).toHaveText(thankedAt);
+        await closeReviewDetails(managerPage, againDetails);
+        const againHistory = await openReviewHistory(managerPage, row);
+        await expect(historyLine(againHistory, 'Review Completed')).toBeVisible();
+        const afterAgain = await historyLines(againHistory);
+        expect(afterAgain.map((line) => line.split(':')[0])).toEqual([
+            'Request Sent',
+            'Request Accepted',
+            'Review Submitted',
+            'Reviewer Thanked',
+            'Review Completed',
+        ]);
+        expect(afterAgain[3]).toBe(thankedInHistory);
+        await closeSideWindow(againHistory);
 
         // The unanswered row: the second reviewer's row has no "Actions"
         // button (the thanked row's "Revert Decision" is the same cell's
@@ -1221,10 +1384,8 @@ test.describe('reviewer-assignment', () => {
         await expect(revertedSecond.getByText(`Second comment ${tag}`)).toBeVisible({timeout: 30_000});
         await closeReviewDetails(managerPage, revertedSecond);
 
-        // Thank without email: Read Review, Mark as Complete and confirm —
-        // the row reads "Complete" and offers "Thank Reviewer"; then Thank
-        // Reviewer with "Do not send email to Reviewer." ticked — the notice
-        // says so and the row reads "Reviewer Thanked".
+        // Read Review, Mark as Complete and confirm: the row reads "Complete"
+        // and offers "Thank Reviewer".
         const secondModal = await openReviewDetails(managerPage, unansweredRow);
         await markReviewComplete(managerPage, secondModal);
         await closeReviewDetails(managerPage, secondModal);
@@ -1233,7 +1394,24 @@ test.describe('reviewer-assignment', () => {
         await unansweredRow.getByRole('button', {name: 'Thank Reviewer', exact: true}).click();
         const thankModal2 = legacyModal(managerPage, 'sendThankYouForm');
         await expect(thankModal2.locator('form#sendThankYouForm')).toBeVisible({timeout: 30_000});
+        await waitForLegacyFormSettled(managerPage, thankModal2);
+
+        // "Close" in "Thank Reviewer": "Many thanks." typed at the end of the
+        // message and "Do not send email to Reviewer." ticked; "Close" asks
+        // first, and "Cancel" keeps the window with the changed message.
+        const thankMessage = thankModal2.frameLocator('iframe').first().locator('body');
+        await expect(thankMessage).not.toBeEmpty({timeout: 30_000});
+        await thankMessage.click();
+        await managerPage.keyboard.press('Control+End');
+        await managerPage.keyboard.type(' Many thanks.');
         await thankModal2.locator('input[name="skipEmail"]').check();
+        expect(await closeWindowAsking(managerPage, thankModal2, {answer: 'dismiss'})).toBe(FORM_CHANGED);
+        await expect(thankModal2.locator('form#sendThankYouForm')).toBeVisible();
+        await expect(thankMessage).toContainText('Many thanks.');
+        await expect(thankModal2.locator('input[name="skipEmail"]')).toBeChecked();
+
+        // Thank without email: with the box ticked, "Thank Reviewer" in the
+        // window; the notice says so and the row reads "Reviewer Thanked".
         await thankModal2
             .locator('form#sendThankYouForm')
             .getByRole('button', {name: 'Thank Reviewer', exact: true})
@@ -1514,13 +1692,33 @@ test.describe('reviewer-assignment', () => {
 
         // "Resend Review Request": the message, the skip box and fresh date
         // pickers preset from their configured intervals (4 weeks each on a
-        // scratch journal), kept as they are.
+        // scratch journal); the preset "Review Due Date" is noted.
         await clickRowAction(managerPage, row, 'Resend Review Request');
         const resendModal = legacyModal(managerPage, 'resendRequestReviewerForm');
         await expect(resendModal.locator('.tox-tinymce')).toHaveCount(1, {timeout: 30_000});
         await expect(resendModal.locator('input[name="skipEmail"]')).toBeVisible();
         await expect(dueDateValue(resendModal, 'responseDueDate')).toHaveValue(ymd(daysFromNow(4 * 7)));
         await expect(dueDateValue(resendModal, 'reviewDueDate')).toHaveValue(ymd(daysFromNow(4 * 7)));
+        const presetReviewDue = daysFromNow(4 * 7);
+
+        // Inverted dates: the review due date a week out, before the response
+        // due date; "Resend Review Request" is refused with the notice at the
+        // top right and the window stays open (the browser alert that comes
+        // with it is register A46, asserted neither way; Playwright
+        // dismisses it).
+        await pickDate(managerPage, resendModal, 'reviewDueDate', daysFromNow(7));
+        await resendModal
+            .locator('form#resendRequestReviewerForm')
+            .getByRole('button', {name: 'Resend Review Request', exact: true})
+            .click();
+        await expect(notice(managerPage, INVERTED_DATES_NOTICE)).toBeVisible({timeout: 30_000});
+        await waitForJQueryIdle(managerPage);
+        await expect(resendModal.locator('form#resendRequestReviewerForm')).toBeVisible();
+        await waitForLegacyFormSettled(managerPage, resendModal);
+
+        // The resend: "Review Due Date" set back to its preset date.
+        await pickDate(managerPage, resendModal, 'reviewDueDate', presetReviewDue);
+        await expect(dueDateValue(resendModal, 'reviewDueDate')).toHaveValue(ymd(presetReviewDue));
         await resendModal
             .locator('form#resendRequestReviewerForm')
             .getByRole('button', {name: 'Resend Review Request', exact: true})
@@ -1939,5 +2137,165 @@ test.describe('reviewer-assignment', () => {
         await expect(reviewTypeRadio(controlModal, 'Open')).not.toBeChecked();
         await expect(publicVisibilityCheckbox(controlModal)).not.toBeChecked();
         await closeSideWindow(controlModal);
+    });
+
+    test('S21: a journal that asks about competing interests', async ({asUser, ojsApi}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s21', testInfo);
+        const manager = `mgr${tag}`;
+        const managerName = `Mgr${tag} Manager`;
+        const author = `au${tag}`;
+        const reviewer = `rev${tag}`;
+        const unanswered = `revb${tag}`;
+        const policy = `Disclose any competing interests ${tag}.`;
+        const statement = 'I co-authored a paper with the author.';
+        const ciLogLine = 'The following was modified in this review: Reviewer Competing Interests.';
+        // Scratch journal with a "Competing Interests" policy (the `review`
+        // passthrough); the seeded `completed` review records "I do not have
+        // any competing interests", the second request stays unanswered.
+        // The policy is emptied on screen, as the scenario does.
+        await ojsApi.createContext({
+            tag,
+            users: [
+                {username: manager, givenName: `Mgr${tag}`, familyName: 'Manager', roles: ['manager']},
+                {username: author, roles: ['author']},
+                {username: reviewer, roles: ['externalReviewer']},
+                {username: unanswered, roles: ['externalReviewer']},
+            ],
+            review: {competingInterests: {en: policy}},
+        });
+        const {submissionId} = await seedInReview(ojsApi, tag, {
+            context: tag,
+            submitter: author,
+            reviewers: [
+                {username: reviewer, status: 'completed'},
+                {username: unanswered, status: 'invited'},
+            ],
+        });
+
+        const managerPage = await (await asUser(manager)).newPage();
+        const workflow = new WorkflowPage(managerPage, tag);
+        await workflow.gotoEditorial(submissionId);
+        const row = workflow.panelRow('Reviewers', reviewer);
+        const secondRow = workflow.panelRow('Reviewers', unanswered);
+        const badge = (r) => statusCell(r).getByText('Competing Interests', {exact: true});
+        const ciLogRows = (log) => log.getByRole('row').filter({hasText: ciLogLine});
+
+        // The submitted review: "Review Submitted" with no badge (the badge
+        // shows in this same cell below). "Read Review": the "Competing
+        // Interests" group follows the summary block, its "Declaration"
+        // reading "I do not have any competing interests".
+        await expect(statusTitle(row)).toHaveText('Review Submitted');
+        await expect(badge(row)).toHaveCount(0);
+        const readModal = await openReviewDetails(managerPage, row);
+        await awaitReviewDetailsSettled(readModal);
+        const group = competingInterestsGroup(readModal);
+        await expect(group).toBeVisible({timeout: 30_000});
+        await expect(group).toHaveText(/^\s*Competing Interests\s*Declaration\s*I do not have any competing interests\s*$/);
+        const summary = datedLine(readModal, 'Review Submitted');
+        await expect(summary).toBeVisible();
+        expect(
+            await summary.evaluate(
+                (line, other) => Boolean(line.compareDocumentPosition(other) & Node.DOCUMENT_POSITION_FOLLOWING),
+                await group.elementHandle()
+            )
+        ).toBe(true);
+
+        // "Modify Review", a declared interest: the window's group offers
+        // "Declaration" with the reviewer's answer ticked and the second
+        // radio; the second opens a "Competing Interests" box for the
+        // statement. "Save Changes": the view window's "Declaration" reads
+        // "I may have competing interests", then "Competing Interests" and
+        // the statement.
+        const editModal = await openModifyReview(managerPage, readModal);
+        const editGroup = competingInterestsGroup(editModal);
+        await expect(editGroup).toBeVisible({timeout: 30_000});
+        await expect(editGroup.getByText('Declaration', {exact: true})).toBeVisible();
+        await expect(
+            editGroup.getByRole('radio', {name: 'I do not have any competing interests', exact: true})
+        ).toBeChecked();
+        const declareRadio = editGroup.getByRole('radio', {
+            name: 'I may have competing interests (Specify below)',
+            exact: true,
+        });
+        await expect(declareRadio).not.toBeChecked();
+        await declareCompetingInterests(managerPage, editModal, statement);
+        await expect(declareRadio).toBeChecked();
+        await expect(editGroup.getByText('Competing Interests', {exact: true}).last()).toBeVisible();
+        await saveModifyReview(managerPage, editModal);
+        await expect(group).toHaveText(
+            new RegExp(`Declaration\\s*I may have competing interests\\s*Competing Interests\\s*${statement.replace('.', '\\.')}`),
+            {timeout: 30_000}
+        );
+
+        // The row and the activity log: the badge is on the row, and the
+        // log lists the change attributed to the Journal Manager.
+        await closeReviewDetails(managerPage, readModal);
+        await expect(badge(row)).toBeVisible({timeout: 30_000});
+        const log = await openActivityLog(managerPage);
+        await expect(ciLogRows(log)).toHaveCount(1);
+        await expect(ciLogRows(log).first()).toContainText(managerName);
+        await closeSideWindow(log);
+
+        // The unanswered request: its "Review Details" group reads
+        // "Declaration" over "-" (the window's "Request Sent:" line the
+        // positive read of a loaded window).
+        const unansweredModal = await openReviewDetailsFromMenu(managerPage, secondRow);
+        await expect(datedLine(unansweredModal, 'Request Sent')).toBeVisible();
+        await expect(competingInterestsGroup(unansweredModal)).toHaveText(
+            /^\s*Competing Interests\s*Declaration\s*-\s*$/
+        );
+        await closeReviewDetails(managerPage, unansweredModal);
+
+        // The policy emptied on Settings › Workflow › Review, "Reviewer
+        // Guidance" (the box holds the policy first, the positive read).
+        const settings = new ReviewSettingsPage(managerPage, tag);
+        await settings.goto('Reviewer Guidance');
+        const policyBox = settings.guidance.richBody('competingInterests');
+        await expect(policyBox).toContainText(policy, {timeout: 30_000});
+        await settings.guidance.typeInto('competingInterests', '');
+        await expect(policyBox).toHaveText('');
+        await settings.guidance.save();
+
+        // Back on the review stage: the first row keeps its badge, and its
+        // "Review Details" still shows the group with the statement.
+        await workflow.gotoEditorial(submissionId);
+        await expect(badge(row)).toBeVisible({timeout: 30_000});
+        const keptModal = await openReviewDetails(managerPage, row);
+        await awaitReviewDetailsSettled(keptModal);
+        const keptGroup = competingInterestsGroup(keptModal);
+        await expect(keptGroup).toContainText('I may have competing interests', {timeout: 30_000});
+        await expect(keptGroup).toContainText(statement);
+
+        // The answer still editable: "Modify Review" still offers the group;
+        // "I do not have any competing interests" saved, the "Declaration"
+        // reads it, the badge is gone, and the log lists one more row.
+        const keptEdit = await openModifyReview(managerPage, keptModal);
+        const keptEditGroup = competingInterestsGroup(keptEdit);
+        await expect(keptEditGroup).toBeVisible({timeout: 30_000});
+        await keptEditGroup
+            .getByRole('radio', {name: 'I do not have any competing interests', exact: true})
+            .check();
+        await saveModifyReview(managerPage, keptEdit);
+        await expect(keptGroup).toHaveText(
+            /^\s*Competing Interests\s*Declaration\s*I do not have any competing interests\s*$/,
+            {timeout: 30_000}
+        );
+        await closeReviewDetails(managerPage, keptModal);
+        await expect(statusTitle(row)).toHaveText('Review Viewed');
+        await expect(badge(row)).toHaveCount(0);
+        const log2 = await openActivityLog(managerPage);
+        await expect(ciLogRows(log2)).toHaveCount(2);
+        await closeSideWindow(log2);
+
+        // Control: the second reviewer's "Review Details" shows no
+        // "Competing Interests" group now (its "Request Sent:" line read
+        // first, in the same settled window).
+        const controlModal = await openReviewDetailsFromMenu(managerPage, secondRow);
+        await expect(datedLine(controlModal, 'Request Sent')).toBeVisible();
+        await expect(controlModal.getByText('For author and editor')).toBeVisible();
+        await expect(competingInterestsGroup(controlModal)).toHaveCount(0);
+        await closeReviewDetails(managerPage, controlModal);
     });
 });

@@ -718,9 +718,11 @@ async function closeLegacyWindow(page, modal) {
  * table.
  */
 async function openActivityLog(page) {
+    // Bounded: a Review Details window left open covers the header, and the
+    // default wait would eat the whole test timeout.
     await page
         .getByRole('button', {name: 'Activity Log', exact: true})
-        .click();
+        .click({timeout: 20_000});
     const log = page.getByRole('dialog', {name: /Activity Log/});
     await expect(log.getByRole('table').first()).toBeVisible({timeout: 30_000});
     return log;
@@ -901,8 +903,220 @@ async function resendReviewRequest(page, row) {
     await expect(row).toContainText('Request Resent', {timeout: 20_000});
 }
 
+/**
+ * Wait out the modal store's close slot (patterns.md pitfall 4f): for 450
+ * ms after a window closes the page still counts it as open, and an opener
+ * pressed again in that time opens nothing. A page timer longer than the
+ * app's, before the next opener.
+ */
+async function pastWindowCloseSlot(page) {
+    await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 500)));
+}
+
+/**
+ * Press a legacy window's top "Close" (its header button) and answer any
+ * browser question the press raises: `answer` 'accept' is the question's
+ * "OK", 'dismiss' its "Cancel". A changed form asks "The data on this form
+ * has changed. Do you wish to continue without saving?" through the
+ * browser's confirm() inside the click (FormHandler.containerCloseHandler,
+ * screen notes ccI29), so the handler is on before the press and the
+ * question is in the returned list once the click resolves. An empty list
+ * with the window gone is "closes at once, nothing asks"; the caller reads
+ * the window's state.
+ *
+ * @returns {Promise<string[]>} the questions asked, in order
+ */
+async function pressTopClose(page, window, answer = 'dismiss') {
+    const asked = [];
+    const onDialog = (dialog) => {
+        asked.push(dialog.message());
+        (answer === 'accept' ? dialog.accept() : dialog.dismiss()).catch(() => {});
+    };
+    page.on('dialog', onDialog);
+    try {
+        await window.getByRole('button', {name: 'Close', exact: true}).first().click();
+        // A question raised by the press is reported before the click
+        // returns; the jQuery close (or the kept window) settles after it.
+        await waitForJQueryIdle(page);
+    } finally {
+        page.off('dialog', onDialog);
+    }
+    return asked;
+}
+
+/**
+ * Open the row's "More Actions" › "Review Details" (the same Vue window as
+ * "Read Review", Rule 14a) and return it settled on its enabled "Modify
+ * Review" (openReadReview's signal).
+ */
+async function openRowReviewDetails(page, row) {
+    const menu = await openRowMenu(page, row);
+    await menuEntry(menu, 'Review Details').click();
+    const readModal = reviewDetailsModal(page);
+    await expect(readModal).toBeVisible({timeout: 20_000});
+    await expect(
+        readModal.getByRole('button', {name: 'Modify Review', exact: true})
+    ).toBeEnabled({timeout: 20_000});
+    return readModal;
+}
+
+/**
+ * Press "Modify Review" in a settled Review Details window, confirm "Modify
+ * this review?", and return the stacked "Modify Review" window once its
+ * "Save Changes" shows and every rich-text box it shows is initialized (a
+ * request with no review has no comment to settle on, so openModifyReview's
+ * text wait does not apply).
+ */
+async function openModifyReviewWindow(page, readModal) {
+    await readModal
+        .getByRole('button', {name: 'Modify Review', exact: true})
+        .click();
+    const dialog = page
+        .locator('[data-cy="dialog"]')
+        .filter({hasText: 'Modify this review?'});
+    await dialog
+        .getByRole('button', {name: 'Modify Review', exact: true})
+        .click({timeout: 10_000});
+    const editModal = page.getByRole('dialog', {name: /^Modify Review/});
+    await expect(
+        editModal.getByRole('button', {name: 'Save Changes', exact: true})
+    ).toBeVisible({timeout: 20_000});
+    const frames = editModal.locator('iframe.tox-edit-area__iframe');
+    await expect(frames.first()).toBeVisible({timeout: 20_000});
+    for (const frame of await frames.all()) {
+        await waitForEditorReady(page, await editorIdOf(frame));
+    }
+    return editModal;
+}
+
+/**
+ * Press "Save Changes" in the "Modify Review" window and resolve once the
+ * window has closed (the view window refreshes under it).
+ */
+async function saveModifyReview(editModal) {
+    await editModal.getByRole('button', {name: 'Save Changes', exact: true}).click();
+    await expect(editModal).toBeHidden({timeout: 20_000});
+}
+
+/**
+ * Close the "Review Details" window with its "Cancel" and resolve once it
+ * has gone (the rows behind it are mounted again only then, pitfall 6).
+ */
+async function cancelReviewDetails(readModal) {
+    await readModal.getByRole('button', {name: 'Cancel', exact: true}).click();
+    await expect(readModal).toBeHidden({timeout: 20_000});
+}
+
+/** The "Competing Interests" group of a Review Details or Modify Review window. */
+function competingInterestsGroup(scope) {
+    return scope.getByRole('group', {name: 'Competing Interests', exact: true});
+}
+
+/** A "Declaration" radio of the Modify Review window, by its exact label. */
+function declarationRadio(editModal, label) {
+    return competingInterestsGroup(editModal).getByRole('radio', {name: label, exact: true});
+}
+
+/**
+ * Type a statement into the "Competing Interests" box the "I may have
+ * competing interests (Specify below)" choice opens (a TinyMCE box inside
+ * the group), once its editor is initialized, and blur it so the form
+ * takes the text.
+ */
+async function typeCompetingInterests(page, editModal, text) {
+    const frame = competingInterestsGroup(editModal).locator('iframe.tox-edit-area__iframe').first();
+    await expect(frame).toBeVisible({timeout: 20_000});
+    await waitForEditorReady(page, await editorIdOf(frame));
+    const body = frame.contentFrame().locator('body');
+    await body.click();
+    await body.fill(text);
+    await expect(body).toContainText(text);
+    // Blur so TinyMCE syncs its field (the group label, as scenario 16 does).
+    await editModal.getByText('Reviewer Comments', {exact: true}).first().click();
+}
+
+/** The row's "Competing Interests" badge (status cell, Rule 2). */
+function competingInterestsBadge(row) {
+    return row.getByText('Competing Interests', {exact: true});
+}
+
+/** A date and time as the review windows print it ("2026-11-12 04:27 AM"). */
+const DATE_TIME = '\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2} [AP]M';
+
+/**
+ * The milestones of an open "History" window in screen order, each
+ * `{name, date}` ("Request Sent: 2026-11-12 04:27 AM"). The window is read
+ * whole once openHistory has settled it on "Request Sent:".
+ */
+async function historyMilestones(historyModal) {
+    const text = await historyModal.innerText();
+    const re = new RegExp(`(Request Sent|Request Accepted|Request Declined|Review Submitted|Review Completed|Reviewer Thanked|Reviewer Reminded|Review Cancelled):\\s*(${DATE_TIME})`, 'g');
+    return [...text.matchAll(re)].map((m) => ({name: m[1], date: m[2]}));
+}
+
+/**
+ * The date and time on a Review Details window's dated line `label`
+ * ("Review Completed"), once the line reads so.
+ */
+async function datedLine(readModal, label) {
+    const re = new RegExp(`${label}:\\s*(${DATE_TIME})`);
+    await expect(readModal).toContainText(re);
+    return (await readModal.innerText()).match(re)[1];
+}
+
+/**
+ * Type `text` at the end of a legacy window's TinyMCE message (the
+ * `message` editor of "Thank Reviewer"), once the editor is initialized.
+ */
+async function appendToMessage(page, idPrefix, text) {
+    const frame = page.locator(`iframe[id^="${idPrefix}"]`).last();
+    await waitForEditorReady(page, await editorIdOf(frame));
+    const body = frame.contentFrame().locator('body');
+    await body.click();
+    await page.keyboard.press('ControlOrMeta+End');
+    await page.keyboard.type(` ${text}`);
+    await expect(body).toContainText(text);
+}
+
+/**
+ * Empty the press's "Competing Interests" policy on Settings › Workflow ›
+ * Review › "Reviewer Guidance" and save it (U27 scenario 21 drives this
+ * step on screen; the policy itself is seeded through the context's
+ * `review` passthrough). Resolves on the form's "Saved".
+ */
+async function clearCompetingInterestsPolicy(page, contextPath) {
+    const {PressReviewSettingsPage} = require('./ReviewSettingsPages.js');
+    const settings = new PressReviewSettingsPage(page, contextPath);
+    await settings.goto('Reviewer Guidance');
+    const frame = page.locator('iframe[id^="reviewerGuidance-competingInterests-control"]').first();
+    await expect(frame).toBeVisible({timeout: 30_000});
+    await waitForEditorReady(page, await editorIdOf(frame));
+    const body = frame.contentFrame().locator('body');
+    await expect(body).toContainText(/\w/);
+    await body.click();
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    await expect(body).toHaveText('');
+    await settings.guidance.save();
+}
+
 module.exports = {
     reviewerPanel,
+    pastWindowCloseSlot,
+    pressTopClose,
+    openRowReviewDetails,
+    openModifyReviewWindow,
+    saveModifyReview,
+    cancelReviewDetails,
+    competingInterestsGroup,
+    declarationRadio,
+    typeCompetingInterests,
+    competingInterestsBadge,
+    DATE_TIME,
+    historyMilestones,
+    datedLine,
+    appendToMessage,
+    clearCompetingInterestsPolicy,
     saveEditReview,
     moveDueDate,
     sendReminder,

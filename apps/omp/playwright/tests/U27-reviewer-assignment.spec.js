@@ -6,20 +6,22 @@
  * docs/specs/U27-reviewer-assignment-and-management.md). One test per
  * canonical scenario the spec runs on a press, in OMP vocabulary (press,
  * monograph, External Review per the glossary; the reviewer roster splits
- * julia/paul → External, amara/adam → Internal): common scenarios 1–12 and
- * 16–20 run on External Review, plus the OMP-specific stage-split scenario
+ * julia/paul → External, amara/adam → Internal): common scenarios 1–12,
+ * 16–20 and 21 run on External Review, plus the OMP-specific stage-split scenario
  * 13 and the {OMP} control of scenario 14 as an absence test (no
  * recommendation surfaces on a press — OMP1 ✅). Scenario 15 is OPS-only.
- * The editor-side read window is the Vue "Review Details" modal with its
+ * S21's scratch press gets its "Competing Interests" policy through the
+ * same `review` passthrough, and the scenario's own step empties it on
+ * screen. The editor-side read window is the Vue "Review Details" modal with its
  * "Modify Review" partner (pkp/pkp-lib#13156 — Rules 14a/14b). S20's
  * scratch press is created with the context's `review` passthrough (the
  * press's Settings › Workflow › Review, never driven on screen).
  *
  * Not covered, by register ID (the spec's Coverage section is the record of
  * everything else left out; 🐞 findings are never asserted as contract):
- * OMP2, OMP4, OMP5, OMP6, A2, A7, A12, A13, A16, A17, A18, A19,
- * A21, A22, A23, A26, A27, A29, A30, A31, A1, A4, A6, A15, A25, A33, A34, A35 (A24 is
- * retired: spec Rule 14d, under Budget, no test drives it yet).
+ * A1, A2, A4, A6, A7, A12, A13, A15, A16, A17, A18, A19, A21, A22, A23,
+ * A26, A28, A29, A30, A31, A32, A36, A37, A38, A39, A41, A42, A43, A44,
+ * A45, A46, A47, A48, A49, A50, OMP2, OMP4, OMP6.
  *
  * Seeding: scenario endpoints only. Tests that read a server-fed notice
  * ("{name} was assigned…", "Reviewer removed.") or a reviewer's mailbox or
@@ -103,12 +105,49 @@ const {
     rateReview,
     markReviewComplete,
     openModifyReview,
+    pastWindowCloseSlot,
+    pressTopClose,
+    openRowReviewDetails,
+    openModifyReviewWindow,
+    saveModifyReview,
+    cancelReviewDetails,
+    competingInterestsGroup,
+    declarationRadio,
+    typeCompetingInterests,
+    competingInterestsBadge,
+    DATE_TIME,
+    historyMilestones,
+    datedLine,
+    appendToMessage,
+    clearCompetingInterestsPolicy,
+    reviewDetailsText,
 } = require('../pages/ReviewerAssignmentPages.js');
+const {
+    ReviewerAssignmentsPage,
+    ReviewWizardPage,
+} = require('../../../../shared/playwright/pages/ReviewerPages.js');
 const {UsersAccessPage} = require('../pages/UserInvitationPages.js');
+const {waitForJQueryIdle} = require('../../../../shared/playwright/support/legacy.js');
 const fs = require('fs');
 
 const PK = 'publicknowledge';
 const DATE_RULE = 'Review due date must be greater or equal to response due date.';
+/**
+ * The inverted-date refusal (Fields, Rule 9). Its wording is register
+ * finding A45 ("responde"; "adding the reviewer" in Edit and Resend), so
+ * the tests match the sentence with those words left open, never the
+ * misspelling itself (PRINCIPLES M3).
+ */
+const DATE_REFUSAL = /review due date must be equal or greater than respon\w* due date\./;
+const ADD_REFUSAL = /There was an error adding the reviewer as review due date must be equal or greater than respon\w* due date\./;
+/**
+ * A notice reading exactly `sentence`: the notice's text is the sentence
+ * and its dismiss button ("×", read "Close").
+ */
+function noticeReading(sentence) {
+    return new RegExp(`^\\s*${sentence.source}\\s*×\\s*Close\\s*$`);
+}
+const ANY_REFUSAL = /There was an error \w+ the reviewer as review due date must be equal or greater than respon\w* due date\./;
 
 /** Parallel-safe unique tag: single alphanumeric token, ≤32 chars. */
 function makeTag(testInfo, scenarioKey) {
@@ -219,7 +258,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         // request form and no submit button below the list (the search
         // box is the positive control on the same window; the form is kept
         // hidden until a reviewer is chosen, so hidden is the read).
-        const addModal = await openAddReviewer(page, modal);
+        let addModal = await openAddReviewer(page, modal);
         await expect(
             addModal.getByRole('button', {name: 'Add Reviewer', exact: true})
         ).toBeHidden();
@@ -258,6 +297,23 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await searchReviewerList(page, addModal, `First${tag}`);
         await selectReviewerAndAwaitForm(page, addModal, `First${tag} Reviewer`);
 
+        // "Close" with a reviewer picked: the window's top-bar "Close"
+        // closes it at once, with no question asked, and no row is added
+        // (the panel's own "Add Reviewer" is the positive control for the
+        // row read); then "Add Reviewer" again and the first reviewer
+        // selected.
+        const asked = await pressTopClose(page, addModal, 'dismiss');
+        await expect(addModal.getByRole('heading', {name: 'Locate a Reviewer'})).toBeHidden({timeout: 20_000});
+        expect(asked).toEqual([]);
+        await expect(
+            reviewerPanel(modal).getByRole('button', {name: 'Add Reviewer', exact: true})
+        ).toBeVisible();
+        await expect(reviewerRow(modal, `First${tag} Reviewer`)).toHaveCount(0);
+        await pastWindowCloseSlot(page);
+        addModal = await openAddReviewer(page, modal);
+        await searchReviewerList(page, addModal, `First${tag}`);
+        await selectReviewerAndAwaitForm(page, addModal, `First${tag} Reviewer`);
+
         // The add: the notice, the "Request Sent" row (its "Response due:"
         // line is register finding A7, unasserted), the request email
         // under the manager's name, and the activity-log entry.
@@ -284,14 +340,12 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await log.getByRole('button', {name: 'Close', exact: true}).click();
         await expect(log).toBeHidden({timeout: 20_000});
 
-        // "Editorial Notes": the row's "More Actions" menu lists "Review
-        // Details", "Edit", "Unassign Reviewer", "Email Reviewer" and
-        // "History" in that order, then "Editorial Notes" and "Log
-        // Response" (Rule 3's order). The signed-in Press Manager's menu
-        // also holds "Login As" between "History" and "Editorial Notes"
-        // (Actors row 7, owned by *Sign-in & sessions*; an Editor's menu
-        // is the seven). Pressing "Editorial Notes" opens one text field
-        // under the audience guidance.
+        // "Editorial Notes": the row's "More Actions" menu lists, in
+        // order, only "Review Details", "Edit", "Unassign Reviewer",
+        // "Email Reviewer", "History", "Login As", "Editorial Notes" and
+        // "Log Response" (the whole menu, read as one list). Pressing
+        // "Editorial Notes" opens one text field under the audience
+        // guidance.
         const modal2 = await openEditorial(page, tag, seeded.submissionId);
         const row2 = reviewerRow(modal2, `First${tag} Reviewer`);
         const orderMenu = await openRowMenu(page, row2);
@@ -596,6 +650,28 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const modal = await openEditorial(page, tag, seeded.submissionId);
         let addModal = await openAddReviewer(page, modal);
 
+        // The enroll form's "Close": the Author's name typed into "Search
+        // By Name" and no suggestion picked (the autocomplete's own answer
+        // bounds the typing), the top "Close" asks "The data on this form
+        // has changed. Do you wish to continue without saving?"; "OK"
+        // closes the window and no row is added (the panel's "Add
+        // Reviewer" is the positive control); "Add Reviewer" again.
+        await addModal.getByText('Enroll Existing User', {exact: true}).click();
+        await expect(enrollSearchBox(addModal)).toBeVisible({timeout: 20_000});
+        await awaitRequestFormReady(page, addModal);
+        await enrollAutocomplete(page, addModal, `Enrolee${tag}`);
+        const asked = await pressTopClose(page, addModal, 'accept');
+        expect(asked).toEqual([
+            'The data on this form has changed. Do you wish to continue without saving?',
+        ]);
+        await expect(addModal.getByRole('heading', {name: 'Locate a Reviewer'})).toBeHidden({timeout: 20_000});
+        await expect(
+            reviewerPanel(modal).getByRole('button', {name: 'Add Reviewer', exact: true})
+        ).toBeVisible();
+        await expect(reviewerRow(modal, `Enrolee${tag} Person`)).toHaveCount(0);
+        await pastWindowCloseSlot(page);
+        addModal = await openAddReviewer(page, modal);
+
         // "Enroll Existing User": the form's heading, "Search By Name" and the
         // one-option reviewer role select; no masthead box while reviewers are
         // not listed (pkp/pkp-lib#13370).
@@ -619,8 +695,22 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const required = addModal.getByText('This field is required.');
         await expect(required).toBeVisible({timeout: 10_000});
 
-        // The autocomplete offers users of the press with no reviewer role;
-        // picking one clears the message and the add goes through.
+        // A name typed, not picked: the Author's name typed and the box
+        // left (a click on the form's heading) without a suggestion picked
+        // is cleared; "Add Reviewer" shows "This field is required." under
+        // the box again.
+        await enrollAutocomplete(page, addModal, `Enrolee${tag}`);
+        await expect(enrollSearchBox(addModal)).toHaveValue(`Enrolee${tag}`);
+        await addModal.getByText('Enroll an Existing User as Reviewer').click();
+        await expect(enrollSearchBox(addModal)).toHaveValue('');
+        await addModal
+            .getByRole('button', {name: 'Add Reviewer', exact: true})
+            .click();
+        await expect(required).toBeVisible({timeout: 10_000});
+
+        // The pick: the autocomplete offers users of the press with no
+        // reviewer role; picking one clears the message and the add goes
+        // through.
         const suggestions = await enrollAutocomplete(page, addModal, `Enrolee${tag}`);
         await suggestions.getByText(`Enrolee${tag} Person`).first().click();
         await expect(required).toBeHidden();
@@ -652,13 +742,21 @@ test.describe('Reviewer assignment & management (U27)', () => {
 
     test('S5: deadlines are validated', async ({ompApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u27s5');
-        const seeded = await seedExternal(ompApi, tag);
+        // Scratch press: the refusal's notice is a server-fed form-error
+        // notice (Form::validate, NOTIFICATION_TYPE_FORM_ERROR), drained by
+        // whichever page of the user loads next, so it is read by a
+        // throwaway manager no other test signs in as (parallel lesson 2).
+        const reviewer = `rev${tag}`;
+        const {manager, seeded} = await seedScratchPress(ompApi, tag, [
+            {username: reviewer, roles: ['externalReviewer'], givenName: `Due${tag}`, familyName: 'Reviewer'},
+        ]);
+        const reviewerName = `Due${tag} Reviewer`;
 
-        const page = await (await asUser('manager.maya')).newPage();
-        const modal = await openEditorial(page, PK, seeded.submissionId);
+        const page = await (await asUser(manager)).newPage();
+        const modal = await openEditorial(page, tag, seeded.submissionId);
         const addModal = await openAddReviewer(page, modal);
-        await searchReviewerList(page, addModal, 'Julia');
-        await selectReviewerAndAwaitForm(page, addModal, 'Julia Reviewer');
+        await searchReviewerList(page, addModal, `Due${tag}`);
+        await selectReviewerAndAwaitForm(page, addModal, reviewerName);
 
         // "Files To Be Reviewed": the round carries no files (the seed
         // uploads none), so the list is empty — no file row, no box to
@@ -672,9 +770,11 @@ test.describe('Reviewer assignment & management (U27)', () => {
         // The permanent guidance sentence states the rule.
         await expect(addModal.getByText(DATE_RULE)).toBeVisible();
 
-        // Review due BEFORE response due (calendar picks — A16): submitting
-        // creates nothing and the window stays open (its notice, Planned
-        // with A45's wording, unasserted).
+        // Inverted dates (calendar picks — A16): "Add Reviewer", read at
+        // once: a notice at the top right, gone by itself within seconds,
+        // refuses the dates (its wording is register finding A45, so the
+        // sentence is matched with the misspelt word left open); no
+        // assignment is created and the window stays open.
         await pickDate(page, addModal, 'reviewDueDate', daysFromNow(7));
         const refused = page.waitForResponse((r) =>
             r.url().includes('update-reviewer')
@@ -683,18 +783,31 @@ test.describe('Reviewer assignment & management (U27)', () => {
             .getByRole('button', {name: 'Add Reviewer', exact: true})
             .click();
         await refused;
+        const notice = page
+            .locator('.app__notifications .pkpNotification')
+            .filter({hasText: DATE_REFUSAL});
+        await expect(notice).toBeVisible({timeout: 20_000});
+        await expect(notice).toHaveText(noticeReading(ADD_REFUSAL));
+        await expect(notice).toBeHidden({timeout: 30_000});
         await expect(
             addModal.getByRole('button', {name: 'Add Reviewer', exact: true})
         ).toBeVisible();
+        await expect(addModal.getByText(DATE_RULE)).toBeVisible();
 
-        // Correcting the dates lets the submission through.
+        // Control: "Review Due Date" on the same day as "Response Due
+        // Date" (four weeks, the seeded press's preset) is taken: the row
+        // appears.
         await pickDate(page, addModal, 'reviewDueDate', daysFromNow(28));
+        await expect(dateAltField(addModal, 'responseDueDate')).toHaveValue(isoDate(daysFromNow(28)));
         await addModal
             .getByRole('button', {name: 'Add Reviewer', exact: true})
             .click();
-        const row = reviewerRow(modal, 'Julia Reviewer');
+        const row = reviewerRow(modal, reviewerName);
         await expect(row).toBeVisible({timeout: 20_000});
         await expect(row).toContainText('Request Sent');
+        // The refused press created no assignment: the reviewer has the one
+        // row the accepted press added.
+        await expect(row).toHaveCount(1);
     });
 
     test('S6: edit an assignment, reviewer is told', async ({ompApi, asUser, pkpMail}, testInfo) => {
@@ -718,10 +831,11 @@ test.describe('Reviewer assignment & management (U27)', () => {
         const row = reviewerRow(modal, `Rev${tag} Reviewer`);
 
         // "Edit", the dates: the window shows the date rule; the inverted
-        // dates are refused and the window stays open (notice unasserted);
-        // then the review due date moves a week past the original 4 weeks
-        // (calendar picks — A16). The files added after the assignment are
-        // ticked here so the later files-only edit has boxes to untick.
+        // dates are refused, read at once, by the notice at the top right
+        // (A45's wording left open) and the window stays open; then the
+        // review due date moves a week past the original 4 weeks (calendar
+        // picks — A16). The files added after the assignment are ticked
+        // here so the later files-only edit has boxes to untick.
         let editModal = await openEditReview(page, row);
         await expect(editModal.getByText(DATE_RULE)).toBeVisible();
         await pickDate(page, editModal, 'reviewDueDate', daysFromNow(7));
@@ -730,6 +844,11 @@ test.describe('Reviewer assignment & management (U27)', () => {
         );
         await editModal.getByRole('button', {name: 'OK', exact: true}).click();
         await refused;
+        const notice = page
+            .locator('.app__notifications .pkpNotification')
+            .filter({hasText: DATE_REFUSAL});
+        await expect(notice).toBeVisible({timeout: 20_000});
+        await expect(notice).toHaveText(noticeReading(ANY_REFUSAL));
         await expect(editModal.getByText('Review Type')).toBeVisible();
         await pickDate(page, editModal, 'reviewDueDate', daysFromNow(35));
         const fileBoxes = editModal.locator('input[name="selectedFiles[]"]');
@@ -756,6 +875,38 @@ test.describe('Reviewer assignment & management (U27)', () => {
             subject: 'Your review assignment has been changed',
         });
 
+        // "Close" with a change: "Review Due Date" two weeks past the
+        // original date and the top "Close": it asks "The data on this form
+        // has changed. Do you wish to continue without saving?"; "Cancel"
+        // keeps the window with the new date; "Close" again and "OK" close
+        // it with the row unchanged; "Edit" again shows the date saved
+        // before; "Close" with nothing changed closes at once.
+        const changedQuestion = 'The data on this form has changed. Do you wish to continue without saving?';
+        // A fresh landing first: a calendar opened from a second Edit window
+        // on the same page never takes the day click (S7, run 4 of
+        // 2026-09-13).
+        await openEditorial(page, tag, seeded.submissionId);
+        await expect(row).toContainText('Request Sent');
+        const rowBefore = (await row.innerText()).replace(/\s+/g, ' ').trim();
+        editModal = await openEditReview(page, row);
+        await expect(dateAltField(editModal, 'reviewDueDate')).toHaveValue(isoDate(daysFromNow(35)));
+        await pickDate(page, editModal, 'reviewDueDate', daysFromNow(42));
+        let asked = await pressTopClose(page, editModal, 'dismiss');
+        expect(asked).toEqual([changedQuestion]);
+        await expect(editModal.getByText('Review Type')).toBeVisible();
+        await expect(dateAltField(editModal, 'reviewDueDate')).toHaveValue(isoDate(daysFromNow(42)));
+        asked = await pressTopClose(page, editModal, 'accept');
+        expect(asked).toEqual([changedQuestion]);
+        await expect(editModal.getByText('Review Type')).toBeHidden({timeout: 20_000});
+        await expect(row).toHaveText(rowBefore, {useInnerText: true});
+        await pastWindowCloseSlot(page);
+        editModal = await openEditReview(page, row);
+        await expect(dateAltField(editModal, 'reviewDueDate')).toHaveValue(isoDate(daysFromNow(35)));
+        asked = await pressTopClose(page, editModal, 'dismiss');
+        await expect(editModal.getByText('Review Type')).toBeHidden({timeout: 20_000});
+        expect(asked).toEqual([]);
+        await pastWindowCloseSlot(page);
+
         // "Files To Be Reviewed": untick every file: "No Files Selected"
         // appears; tick the first back: it disappears. Save.
         editModal = await openEditReview(page, row);
@@ -771,12 +922,17 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await expect(noFiles).toBeHidden();
         await saveEditWindow(editModal);
 
-        // The reviewer's request page offers the first file alone.
-        await revPage.goto(
-            `/index.php/${tag}/en/reviewer/submission/${seeded.submissionId}`
-        );
-        const filesGrid = revPage.locator('#reviewFilesStep1');
-        await expect(filesGrid.getByText(fileA)).toBeVisible({timeout: 20_000});
+        // The reviewer's files: "Respond to request" on their list opens
+        // step 1, whose "Review Files" lists the first file alone (the
+        // grid's own load bounds the absence).
+        const list = new ReviewerAssignmentsPage(revPage, tag);
+        await list.goto('actionRequired');
+        await list.openWizard(list.row(`Submission ${tag}`), 'Respond to request');
+        const wizard = new ReviewWizardPage(revPage, tag, {privateBoxLabel: 'For editor only'});
+        await wizard.expectStep(1);
+        await wizard.expectReviewFilesSettled(1);
+        const filesGrid = wizard.reviewFilesGrid(1);
+        await expect(filesGrid.getByText(fileA)).toBeVisible();
         await expect(filesGrid.getByText(fileB)).toHaveCount(0);
 
         // Control: a files-only edit sent nothing — one change notice and
@@ -1133,17 +1289,25 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await expect(row.getByRole('button', {name: 'Thank Reviewer'})).toBeVisible();
         await expect(row.getByRole('button', {name: 'Revert Decision'})).toBeVisible();
 
-        // The reviewer's side: "Review pending." is gone from the Tasks
-        // panel (the table bounds the read); the activity log records the
-        // completion.
-        await revPage.goto(`/index.php/${tag}/en/dashboard/reviewAssignments`);
-        tasks = await openTasksPanel(revPage);
-        await expect(tasks.getByText('Review pending.')).toHaveCount(0);
-        await closeTopModal(revPage);
+        // Review Details on "Complete": the row's "More Actions" › "Review
+        // Details" reads "Review Completed: {date and time}" on its dated
+        // line (no "Review Submitted:" line any more); "Cancel"; the
+        // activity log records the completion.
+        readModal = await openRowReviewDetails(page, row);
+        await datedLine(readModal, 'Review Completed');
+        await expect(readModal.getByText('Review Submitted:')).toHaveCount(0);
+        await cancelReviewDetails(readModal);
         let log = await openActivityLog(page);
         await expect(activityLogRow(log, 'has confirmed a review')).toBeVisible();
         await log.getByRole('button', {name: 'Close', exact: true}).click();
         await expect(log).toBeHidden({timeout: 20_000});
+
+        // The reviewer's side: "Review pending." is gone from the Tasks
+        // panel (the table bounds the read).
+        await revPage.goto(`/index.php/${tag}/en/dashboard/reviewAssignments`);
+        tasks = await openTasksPanel(revPage);
+        await expect(tasks.getByText('Review pending.')).toHaveCount(0);
+        await closeTopModal(revPage);
         modal = await openEditorial(page, tag, seeded.submissionId);
         row = reviewerRow(modal, reviewerName);
 
@@ -1161,21 +1325,27 @@ test.describe('Reviewer assignment & management (U27)', () => {
             to: reviewerEmail,
             subject: 'Thank you for your review',
         });
-        const historyModal = await openHistory(page, row);
-        for (const milestone of ['Request Sent', 'Request Accepted', 'Review Submitted', 'Review Completed', 'Reviewer Thanked']) {
-            // Each milestone reads "{milestone}: {date and time}" (the text
-            // sits directly in the window, so the window's own text is read).
-            await expect(historyModal).toContainText(
-                new RegExp(`${milestone}:\\s*\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2} [AP]M`)
-            );
-        }
+        let historyModal = await openHistory(page, row);
+        let milestones = await historyMilestones(historyModal);
+        expect(milestones.map((m) => m.name)).toEqual(
+            expect.arrayContaining(['Request Sent', 'Request Accepted', 'Review Submitted', 'Review Completed', 'Reviewer Thanked'])
+        );
         await closeLegacyWindow(page, historyModal);
+
+        // Review Details on "Reviewer Thanked": the dated line reads
+        // "Reviewer Thanked: {date and time}"; the date is noted.
+        await pastWindowCloseSlot(page);
+        readModal = await openRowReviewDetails(page, row);
+        const firstThanked = await datedLine(readModal, 'Reviewer Thanked');
+        await cancelReviewDetails(readModal);
 
         // "Revert Decision" asks "Unconsider this Review"; confirming returns
         // the thanked row to "Review Viewed" with no notice (the thank toast
         // has expired first, so a zero read after the row's change means
-        // what it says), the comments are unchanged, and the revert is
-        // logged.
+        // what it says); "Read Review" shows the comments unchanged and the
+        // dated line "Review Submitted: {date and time}"; the revert is
+        // logged; History ends at "Review Submitted", with no "Review
+        // Completed" and no "Reviewer Thanked".
         await expect(page.getByText('Thank you email sent to reviewer.')).toBeHidden({
             timeout: 20_000,
         });
@@ -1191,25 +1361,49 @@ test.describe('Reviewer assignment & management (U27)', () => {
         readModal = await openReadReview(page, modal, reviewerName);
         await expect(readModal.getByText(shared)).toBeVisible();
         await expect(readModal.getByText(priv)).toBeVisible();
-
-        // Thank without email. NOT driven on the reverted row: "Mark as
-        // Complete" again on it lands straight on "Reviewer Thanked" with
-        // "Revert Decision" alone, never on "Complete" with a "Thank
-        // Reviewer" button (finding T-omp-5), so the skip-email thank runs
-        // on the second reviewer once the control reads above are done:
-        // they submit their review, the review is marked complete, and
-        // "Thank Reviewer" is sent with "Do not send email to Reviewer."
-        // ticked: the notice, the "Reviewer Thanked" row, and no thank-you
-        // in their mailbox (bounded by the thank request's own response;
-        // the first reviewer's thank-you above is the positive control).
-        await readModal
-            .getByRole('button', {name: 'Cancel', exact: true})
-            .click();
-        await expect(readModal).toBeHidden({timeout: 20_000});
+        await datedLine(readModal, 'Review Submitted');
+        await expect(readModal.getByText(/Review Completed:|Reviewer Thanked:/)).toHaveCount(0);
+        await cancelReviewDetails(readModal);
         log = await openActivityLog(page);
         await expect(activityLogRow(log, 'as unconsidered')).toBeVisible();
         await log.getByRole('button', {name: 'Close', exact: true}).click();
         await expect(log).toBeHidden({timeout: 20_000});
+        modal = await openEditorial(page, tag, seeded.submissionId);
+        row = reviewerRow(modal, reviewerName);
+        historyModal = await openHistory(page, row);
+        milestones = await historyMilestones(historyModal);
+        expect(milestones.length).toBeGreaterThan(0);
+        expect(milestones[milestones.length - 1].name).toBe('Review Submitted');
+        expect(milestones.map((m) => m.name)).not.toContain('Review Completed');
+        expect(milestones.map((m) => m.name)).not.toContain('Reviewer Thanked');
+        await closeLegacyWindow(page, historyModal);
+
+        // Marked complete again: "Read Review", "Mark as Complete" and
+        // confirm: the row reads "Reviewer Thanked" at once and offers
+        // "Revert Decision" alone, no "Thank Reviewer"; its "Review
+        // Details" reads "Reviewer Thanked:" with the date noted before the
+        // revert; History lists that "Reviewer Thanked" date again,
+        // followed by the new "Review Completed" one.
+        await pastWindowCloseSlot(page);
+        readModal = await openReadReview(page, modal, reviewerName);
+        await markReviewComplete(page, readModal);
+        await cancelReviewDetails(readModal);
+        await expect(statusTitle(row, 'Reviewer Thanked')).toBeVisible({timeout: 20_000});
+        await expect(row.getByRole('button', {name: 'Revert Decision'})).toBeVisible();
+        await expect(row.getByRole('button', {name: 'Thank Reviewer'})).toHaveCount(0);
+        readModal = await openRowReviewDetails(page, row);
+        expect(await datedLine(readModal, 'Reviewer Thanked')).toBe(firstThanked);
+        await cancelReviewDetails(readModal);
+        historyModal = await openHistory(page, row);
+        milestones = await historyMilestones(historyModal);
+        const names = milestones.map((m) => m.name);
+        const thankedAt = names.indexOf('Reviewer Thanked');
+        expect(thankedAt).toBeGreaterThanOrEqual(0);
+        expect(milestones[thankedAt].date).toBe(firstThanked);
+        expect(names.indexOf('Review Completed')).toBeGreaterThan(thankedAt);
+        await closeLegacyWindow(page, historyModal);
+
+        // The second reviewer's review: they accept and submit.
         const secondPage = await (await asUser(second)).newPage();
         await completeReview(secondPage, tag, seeded.submissionId, {
             comment: `Second remarks ${tag}.`,
@@ -1228,10 +1422,7 @@ test.describe('Reviewer assignment & management (U27)', () => {
         // it says), and "Read Review" shows the comments unchanged.
         readModal = await openReadReview(page, modal, secondName);
         await markReviewComplete(page, readModal);
-        await readModal
-            .getByRole('button', {name: 'Cancel', exact: true})
-            .click();
-        await expect(readModal).toBeHidden({timeout: 20_000});
+        await cancelReviewDetails(readModal);
         await expect(doneRow).toContainText('Complete', {timeout: 20_000});
         await expect(doneRow.getByRole('button', {name: 'Revert Decision'})).toBeVisible();
         await expect(page.getByText('The review has been marked as complete.')).toBeHidden({
@@ -1243,24 +1434,38 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await expect(toasts(page)).toHaveCount(0);
         readModal = await openReadReview(page, modal, secondName);
         await expect(readModal.getByText(secondRemarks)).toBeVisible();
-        await readModal
-            .getByRole('button', {name: 'Cancel', exact: true})
-            .click();
-        await expect(readModal).toBeHidden({timeout: 20_000});
+        await cancelReviewDetails(readModal);
 
-        // Thank without email: "Read Review", "Mark as Complete" and
-        // confirm again: the row reads "Complete" and offers "Thank
-        // Reviewer".
+        // "Close" in "Thank Reviewer": "Read Review", "Mark as Complete"
+        // and confirm: the row reads "Complete" and offers "Thank
+        // Reviewer"; in its window "Many thanks." typed at the end of the
+        // message and "Do not send email to Reviewer." ticked, the top
+        // "Close" asks "The data on this form has changed. Do you wish to
+        // continue without saving?"; "Cancel" keeps the window with the
+        // changed message.
         readModal = await openReadReview(page, modal, secondName);
         await markReviewComplete(page, readModal);
-        await readModal
-            .getByRole('button', {name: 'Cancel', exact: true})
-            .click();
-        await expect(readModal).toBeHidden({timeout: 20_000});
-        await expect(doneRow).toContainText('Complete', {timeout: 20_000});
+        await cancelReviewDetails(readModal);
+        await expect(statusTitle(doneRow, 'Complete')).toBeVisible({timeout: 20_000});
         await expect(doneRow.getByRole('button', {name: 'Thank Reviewer'})).toBeVisible();
         thankModal = await openThankReviewer(page, doneRow);
+        await appendToMessage(page, 'message', 'Many thanks.');
         await skipEmailBox(thankModal).check();
+        const asked = await pressTopClose(page, thankModal, 'dismiss');
+        expect(asked).toEqual([
+            'The data on this form has changed. Do you wish to continue without saving?',
+        ]);
+        await expect(
+            thankModal.getByRole('button', {name: 'Thank Reviewer', exact: true})
+        ).toBeVisible();
+        await expect(
+            page.frameLocator('iframe[id^="message"]').last().locator('body')
+        ).toContainText('Many thanks.');
+        await expect(skipEmailBox(thankModal)).toBeChecked();
+
+        // Thank without email: with the box ticked, "Thank Reviewer" in the
+        // window: the notice "Review marked as acknowledged. Email not
+        // sent." and the row "Reviewer Thanked".
         const thanked = page.waitForResponse((r) =>
             r.url().includes('thank-reviewer') && r.request().method() === 'POST'
         );
@@ -1272,9 +1477,16 @@ test.describe('Reviewer assignment & management (U27)', () => {
             page.getByText('Review marked as acknowledged. Email not sent.')
         ).toBeVisible({timeout: 20_000});
         await expect(doneRow).toContainText('Reviewer Thanked', {timeout: 20_000});
+
+        // Control: the second reviewer's mailbox holds no thank-you (the
+        // thank request's own answer bounds the read), while the first
+        // reviewer's holds one (found above).
         expect(
             await pkpMail.count({to: `${second}@mail.test`, subject: 'Thank you for your review'})
         ).toBe(0);
+        expect(
+            await pkpMail.count({to: reviewerEmail, subject: 'Thank you for your review'})
+        ).toBe(1);
     });
 
     test('S10: download the review', async ({ompApi, asUser}, testInfo) => {
@@ -1522,6 +1734,36 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await expect(dateAltField(resendModal, 'reviewDueDate')).toHaveValue(
             isoDate(daysFromNow(28))
         );
+        const presetReviewDue = daysFromNow(28);
+
+        // Inverted dates: "Review Due Date" before "Response Due Date" and
+        // "Resend Review Request": the notice at the top right refuses them
+        // (A45's wording left open) and the window stays open. The browser
+        // alert the refusal also raises is register finding A46: answered,
+        // never asserted.
+        await pickDate(page, resendModal, 'reviewDueDate', daysFromNow(7));
+        const dismissAlert = (dialog) => dialog.dismiss().catch(() => {});
+        page.on('dialog', dismissAlert);
+        const refused = page.waitForResponse((r) =>
+            r.url().includes('update-resend-request-reviewer')
+        );
+        await resendModal
+            .getByRole('button', {name: 'Resend Review Request', exact: true})
+            .click();
+        await refused;
+        const notice = page
+            .locator('.app__notifications .pkpNotification')
+            .filter({hasText: DATE_REFUSAL});
+        await expect(notice).toBeVisible({timeout: 20_000});
+        await expect(notice).toHaveText(noticeReading(ANY_REFUSAL));
+        await waitForJQueryIdle(page);
+        page.off('dialog', dismissAlert);
+        await expect(
+            resendModal.getByRole('button', {name: 'Resend Review Request', exact: true})
+        ).toBeVisible();
+
+        // The resend: "Review Due Date" back to its preset date.
+        await pickDate(page, resendModal, 'reviewDueDate', presetReviewDue);
         await resendModal
             .getByRole('button', {name: 'Resend Review Request', exact: true})
             .click();
@@ -2063,5 +2305,174 @@ test.describe('Reviewer assignment & management (U27)', () => {
         ).toBeChecked();
         await expect(reviewTypeRadio(controlAdd, 'Open')).not.toBeChecked();
         await expect(publicVisibilityBox(controlAdd)).not.toBeChecked();
+    });
+
+    test('S21: a press that asks about competing interests', async ({ompApi, asUser}, testInfo) => {
+        const tag = makeTag(testInfo, 'u27s21');
+        const statement = 'I co-authored a paper with the author.';
+        const modifiedRow = 'The following was modified in this review: Reviewer Competing Interests.';
+        // Scratch press whose "Competing Interests" policy is set through
+        // the context's `review` passthrough (Settings › Workflow › Review ›
+        // "Reviewer Guidance", never driven to set it): the first reviewer's
+        // `completed` review records "I do not have any competing
+        // interests" (scenarios.md `reviewRounds[]`); the second and third
+        // requests are unanswered.
+        const answered = `rva${tag}`;
+        const unanswered = `rvb${tag}`;
+        const third = `rvc${tag}`;
+        const {manager, seeded} = await seedScratchPress(
+            ompApi,
+            tag,
+            [
+                {username: answered, roles: ['externalReviewer'], givenName: `Ans${tag}`, familyName: 'Reviewer'},
+                {username: unanswered, roles: ['externalReviewer'], givenName: `Una${tag}`, familyName: 'Reviewer'},
+                {username: third, roles: ['externalReviewer'], givenName: `Thr${tag}`, familyName: 'Reviewer'},
+            ],
+            [
+                {username: answered, status: 'completed'},
+                {username: unanswered, status: 'invited'},
+                {username: third, status: 'invited'},
+            ],
+            {context: {review: {competingInterests: {en: `Disclose any relationship with the authors ${tag}.`}}}}
+        );
+        const answeredName = `Ans${tag} Reviewer`;
+        const unansweredName = `Una${tag} Reviewer`;
+        const thirdName = `Thr${tag} Reviewer`;
+        const managerName = `Mgr${tag} Manager`;
+
+        const page = await (await asUser(manager)).newPage();
+        let modal = await openEditorial(page, tag, seeded.submissionId);
+
+        // The submitted review: "Review Submitted" with no "Competing
+        // Interests" badge (the status line is the positive control in the
+        // same cell); "Read Review": the "Competing Interests" group follows
+        // the summary block ("Review Submitted:" and its date) and comes
+        // before "Reviewer Comments", its "Declaration" reading "I do not
+        // have any competing interests".
+        let row = reviewerRow(modal, answeredName);
+        await expect(statusTitle(row, 'Review Submitted')).toBeVisible();
+        await expect(competingInterestsBadge(row)).toHaveCount(0);
+        let readModal = await openReadReview(page, modal, answeredName);
+        let group = competingInterestsGroup(readModal);
+        await expect(group.getByRole('heading', {name: 'Declaration'})).toBeVisible();
+        await expect(group).toContainText('I do not have any competing interests');
+        const order = await reviewDetailsText(readModal);
+        expect(order.indexOf('Review Submitted:')).toBeGreaterThanOrEqual(0);
+        expect(order.indexOf('Competing Interests')).toBeGreaterThan(order.indexOf('Review Submitted:'));
+        expect(order.indexOf('Reviewer Comments')).toBeGreaterThan(order.indexOf('Competing Interests'));
+
+        // "Modify Review", a declared interest: the window's group offers
+        // "Declaration" with "I do not have any competing interests" ticked
+        // and "I may have competing interests (Specify below)"; choosing the
+        // second opens a "Competing Interests" box; the statement saved,
+        // the view window's "Declaration" reads "I may have competing
+        // interests", then "Competing Interests" and the statement.
+        let editModal = await openModifyReviewWindow(page, readModal);
+        await expect(declarationRadio(editModal, 'I do not have any competing interests')).toBeChecked();
+        const mayHave = declarationRadio(editModal, 'I may have competing interests (Specify below)');
+        await expect(mayHave).not.toBeChecked();
+        await expect(competingInterestsGroup(editModal).locator('iframe.tox-edit-area__iframe')).toHaveCount(0);
+        await mayHave.check();
+        await typeCompetingInterests(page, editModal, statement);
+        await saveModifyReview(editModal);
+        group = competingInterestsGroup(readModal);
+        await expect(group).toContainText('I may have competing interests', {timeout: 20_000});
+        await expect(group).not.toContainText('I do not have any competing interests');
+        const declared = (await group.innerText()).replace(/\s+/g, ' ');
+        expect(declared.indexOf(statement)).toBeGreaterThan(declared.lastIndexOf('Competing Interests'));
+        expect(declared.indexOf('I may have competing interests')).toBeLessThan(declared.lastIndexOf('Competing Interests'));
+
+        // The row and the activity log: the row carries the badge; the log
+        // lists the modification attributed to the Press Manager.
+        await cancelReviewDetails(readModal);
+        await expect(competingInterestsBadge(row)).toBeVisible({timeout: 20_000});
+        let log = await openActivityLog(page);
+        await expect(activityLogRow(log, modifiedRow)).toContainText(managerName, {timeout: 30_000});
+        await log.getByRole('button', {name: 'Close', exact: true}).click();
+        await expect(log).toBeHidden({timeout: 20_000});
+
+        // {OMP} A press's unanswered request: "Save Changes" with nothing
+        // entered closes the window and leaves the row "Request Sent" (no
+        // review submitted for the reviewer: retired A40/OMP5's guard);
+        // the same with a declared statement keeps "Request Sent" and adds
+        // the badge.
+        modal = await openEditorial(page, tag, seeded.submissionId);
+        let thirdRow = reviewerRow(modal, thirdName);
+        await expect(thirdRow).toContainText('Request Sent');
+        readModal = await openRowReviewDetails(page, thirdRow);
+        editModal = await openModifyReviewWindow(page, readModal);
+        await saveModifyReview(editModal);
+        await cancelReviewDetails(readModal);
+        await expect(statusTitle(thirdRow, 'Request Sent')).toBeVisible({timeout: 20_000});
+        await expect(competingInterestsBadge(thirdRow)).toHaveCount(0);
+        modal = await openEditorial(page, tag, seeded.submissionId);
+        thirdRow = reviewerRow(modal, thirdName);
+        await expect(statusTitle(thirdRow, 'Request Sent')).toBeVisible();
+        readModal = await openRowReviewDetails(page, thirdRow);
+        editModal = await openModifyReviewWindow(page, readModal);
+        await declarationRadio(editModal, 'I may have competing interests (Specify below)').check();
+        await typeCompetingInterests(page, editModal, statement);
+        await saveModifyReview(editModal);
+        await cancelReviewDetails(readModal);
+        await expect(competingInterestsBadge(thirdRow)).toBeVisible({timeout: 20_000});
+        await expect(statusTitle(thirdRow, 'Request Sent')).toBeVisible();
+
+        // The unanswered request: the second reviewer's "Review Details"
+        // shows the group with "Declaration" reading "-".
+        let secondRow = reviewerRow(modal, unansweredName);
+        readModal = await openRowReviewDetails(page, secondRow);
+        group = competingInterestsGroup(readModal);
+        await expect(group.getByRole('heading', {name: 'Declaration'})).toBeVisible();
+        await expect(group).toHaveText(/Declaration\s*-\s*$/);
+        await cancelReviewDetails(readModal);
+
+        // The policy emptied on Settings › Workflow › Review › "Reviewer
+        // Guidance" (the scenario's own step, driven on screen): the first
+        // reviewer's row keeps its badge and its "Review Details" the group
+        // with the statement.
+        await clearCompetingInterestsPolicy(page, tag);
+        modal = await openEditorial(page, tag, seeded.submissionId);
+        row = reviewerRow(modal, answeredName);
+        await expect(competingInterestsBadge(row)).toBeVisible();
+        // (The log's "…Reviewer Competing Interests." rows so far, counted
+        // for the later "one more" read; the log opens from the workflow
+        // header, which a stacked Review Details window covers.)
+        log = await openActivityLog(page);
+        await expect(activityLogRow(log, modifiedRow)).toBeVisible({timeout: 30_000});
+        const loggedBefore = await log.getByRole('row').filter({hasText: modifiedRow}).count();
+        await log.getByRole('button', {name: 'Close', exact: true}).click();
+        await expect(log).toBeHidden({timeout: 20_000});
+        readModal = await openReadReview(page, modal, answeredName);
+        group = competingInterestsGroup(readModal);
+        await expect(group).toContainText('I may have competing interests');
+        await expect(group).toContainText(statement);
+
+        // The answer still editable: "Modify Review" still offers the group;
+        // "I do not have any competing interests" saved, the view window's
+        // "Declaration" reads it, the badge goes, and the log has one more
+        // "…Reviewer Competing Interests." row.
+        editModal = await openModifyReviewWindow(page, readModal);
+        await expect(competingInterestsGroup(editModal)).toBeVisible();
+        await declarationRadio(editModal, 'I do not have any competing interests').check();
+        await saveModifyReview(editModal);
+        group = competingInterestsGroup(readModal);
+        await expect(group).toContainText('I do not have any competing interests', {timeout: 20_000});
+        await expect(group).not.toContainText(statement);
+        await cancelReviewDetails(readModal);
+        await expect(statusTitle(row, 'Review Viewed').or(statusTitle(row, 'Review Submitted'))).toBeVisible({timeout: 20_000});
+        await expect(competingInterestsBadge(row)).toHaveCount(0);
+        log = await openActivityLog(page);
+        await expect(log.getByRole('row').filter({hasText: modifiedRow})).toHaveCount(loggedBefore + 1, {timeout: 30_000});
+        await log.getByRole('button', {name: 'Close', exact: true}).click();
+        await expect(log).toBeHidden({timeout: 20_000});
+
+        // Control: without a policy and without an answer the second
+        // reviewer's "Review Details" shows no "Competing Interests" group
+        // (its "Reviewer Comments" group is the positive control).
+        modal = await openEditorial(page, tag, seeded.submissionId);
+        secondRow = reviewerRow(modal, unansweredName);
+        readModal = await openRowReviewDetails(page, secondRow);
+        await expect(readModal.getByRole('group', {name: 'Reviewer Comments'})).toBeVisible();
+        await expect(competingInterestsGroup(readModal)).toHaveCount(0);
     });
 });

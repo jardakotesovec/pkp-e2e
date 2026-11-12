@@ -1659,6 +1659,168 @@ exports.cancelModifyReview = async function cancelModifyReview(page, editModal) 
     await expect(exports.reviewDetailsModal(page)).toBeVisible({timeout: 30_000});
 };
 
+/**
+ * Press a side window's top "Close" and answer the browser question its
+ * form may raise ("The data on this form has changed. Do you wish to
+ * continue without saving?", FormHandler's confirm()). Returns the
+ * question's text, or null when the window closed without asking; the
+ * read is bounded by the window going (nothing asked) or the question
+ * arriving. With `answer: 'accept'` the window is gone on return; with
+ * 'dismiss' it is still open.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} window the open dialog
+ * @param {{answer?: 'accept' | 'dismiss'}} [options]
+ * @returns {Promise<string | null>}
+ */
+exports.closeWindowAsking = async function closeWindowAsking(page, window, {answer = 'accept'} = {}) {
+    const asked = [];
+    const onDialog = async (dialog) => {
+        asked.push(dialog.message());
+        if (answer === 'accept') {
+            await dialog.accept();
+        } else {
+            await dialog.dismiss();
+        }
+    };
+    page.on('dialog', onDialog);
+    try {
+        await window.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect
+            .poll(async () => asked.length > 0 || (await window.count()) === 0, {
+                message: 'the window closed or asked',
+                timeout: 30_000,
+            })
+            .toBe(true);
+    } finally {
+        page.off('dialog', onDialog);
+    }
+    if (answer === 'accept') {
+        await expect(window).toHaveCount(0, {timeout: 30_000});
+    }
+    await waitForJQueryIdle(page);
+    return asked[0] ?? null;
+};
+
+/**
+ * The Review Details window's dated line (Rule 14a): the `h2` "{step}:"
+ * with the date and time beside it, read whole ("Review Completed:
+ * 2026-11-12 04:07 AM").
+ *
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ * @param {string} step "Review Submitted", "Review Completed", "Reviewer Thanked", …
+ */
+exports.datedLine = function datedLine(modal, step) {
+    return modal.getByRole('heading', {name: `${step}:`, exact: true}).locator('xpath=..');
+};
+
+/**
+ * Open a row's "More Actions" › "Review Details" (the menu's way into the
+ * window the "Read Review" button opens) and return the window settled.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.openReviewDetailsFromMenu = async function openReviewDetailsFromMenu(page, row) {
+    await exports.clickRowAction(page, row, 'Review Details');
+    const modal = exports.reviewDetailsModal(page);
+    await expect(modal).toBeVisible({timeout: 30_000});
+    await exports.awaitReviewDetailsSettled(modal);
+    return modal;
+};
+
+/**
+ * The row's "History" window, opened from its menu; returns it once its
+ * list is in. Lines are read through `historyLines()`.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.openReviewHistory = async function openReviewHistory(page, row) {
+    await exports.clickRowAction(page, row, 'History');
+    const modal = page.getByRole('dialog').filter({has: page.locator('.pkp_review_history')});
+    await expect(modal.getByRole('heading', {name: 'History'})).toBeVisible({timeout: 30_000});
+    await expect(modal.locator('.pkp_review_history > div').first()).toBeVisible({timeout: 30_000});
+    return modal;
+};
+
+/**
+ * The History window's lines in screen order, each "{milestone}: {date}"
+ * with its whitespace folded.
+ *
+ * @param {import('@playwright/test').Locator} historyModal from openReviewHistory
+ * @returns {Promise<string[]>}
+ */
+exports.historyLines = async function historyLines(historyModal) {
+    const lines = await historyModal.locator('.pkp_review_history > div').allInnerTexts();
+    return lines.map((s) => s.replace(/\s+/g, ' ').trim()).filter(Boolean);
+};
+
+/**
+ * The review's "Competing Interests" group in the Review Details or the
+ * "Modify Review" window (shown while the journal has a policy or the
+ * review carries an answer).
+ *
+ * @param {import('@playwright/test').Locator} modal the window
+ */
+exports.competingInterestsGroup = function competingInterestsGroup(modal) {
+    return modal.getByRole('group', {name: 'Competing Interests'});
+};
+
+/**
+ * In the "Modify Review" window: choose "I may have competing interests
+ * (Specify below)" and write the statement into the "Competing Interests"
+ * box it opens (a TinyMCE whose id carries "-competingInterests-").
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} editModal from openModifyReview
+ * @param {string} statement
+ */
+exports.declareCompetingInterests = async function declareCompetingInterests(page, editModal, statement) {
+    await exports
+        .competingInterestsGroup(editModal)
+        .getByRole('radio', {name: 'I may have competing interests (Specify below)', exact: true})
+        .check();
+    const editorId = await page.waitForFunction(
+        () => {
+            const mce = window.tinymce || window.tinyMCE;
+            const editor = (mce?.get() || []).find((e) => /-competingInterests-/.test(e.id));
+            return editor?.initialized ? editor.id : false;
+        },
+        null,
+        {timeout: 30_000}
+    );
+    await page.evaluate(
+        ([id, value]) => {
+            const editor = window.tinymce.get(id);
+            editor.setContent(value);
+            editor.fire('change');
+        },
+        [await editorId.jsonValue(), `<p>${statement}</p>`]
+    );
+};
+
+/**
+ * Press the "Modify Review" window's "Save Changes" and return once the
+ * review's save has answered and the window has closed (no question is
+ * asked before a review is marked complete).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} editModal from openModifyReview
+ */
+exports.saveModifyReview = async function saveModifyReview(page, editModal) {
+    const saved = page.waitForResponse(
+        (r) =>
+            /\/reviewAssignments\/\d+\/review$/.test(r.url().split('?')[0]) &&
+            r.request().method() === 'POST' &&
+            r.ok(),
+        {timeout: 30_000}
+    );
+    await editModal.getByRole('button', {name: 'Save Changes', exact: true}).click();
+    await saved;
+    await expect(editModal).toBeHidden({timeout: 30_000});
+};
+
 // ---------------------------------------------------------------------------
 // The review setup's effects on the stage: the request windows' presets,
 // the round status's lines, the Reviewers row's status cell and the Review
