@@ -51,6 +51,12 @@ const LISTS = {
     copyedited: 'Copyedited Files',
 };
 const DISCUSSIONS_PANEL = 'Copyediting Tasks & Discussions';
+/**
+ * The same panel's heading on the "Copyediting" entry selected from the
+ * workflow menu after "Send To Production" (U32 A12, Rule 10); a reload of
+ * that entry heads it DISCUSSIONS_PANEL again.
+ */
+const DISCUSSIONS_PANEL_AFTER_MOVE = 'Production Tasks & Discussions';
 const PRODUCTION_READY = 'Production Ready Files';
 
 /** The line under each list's heading (Rule 1). */
@@ -139,6 +145,19 @@ async function selectStage(modal, label) {
     });
 }
 
+/**
+ * Reload the page on the stage entry it shows and wait for the entry's
+ * heading again; returns the workflow modal of the reloaded page.
+ */
+async function reloadEntry(page, label) {
+    await page.reload();
+    const modal = workflowModal(page);
+    await expect(modal.getByRole('heading', {name: `Workflow: ${label}`})).toBeVisible({
+        timeout: 20_000,
+    });
+    return modal;
+}
+
 // ---------------------------------------------------------------------
 // The notice box (Rule 3)
 // ---------------------------------------------------------------------
@@ -173,6 +192,17 @@ async function expectNoNotice(modal) {
 function mainHeadings(modal) {
     return primaryRegion(modal).getByRole('heading', {
         name: /^(Notification|Draft Files|Copyediting Tasks & Discussions|Copyedited Files)$/,
+    });
+}
+
+/**
+ * The main column's list and discussions-panel headings, whatever stage
+ * names the discussions panel ("Copyediting …" or "Production Tasks &
+ * Discussions", A12). `toHaveText` on the array asserts order and count.
+ */
+function entryPanelHeadings(modal) {
+    return primaryRegion(modal).getByRole('heading', {
+        name: /^(Draft Files|.* Tasks & Discussions|Copyedited Files)$/,
     });
 }
 
@@ -514,6 +544,7 @@ module.exports = {
     STAGE_STATUS,
     LISTS,
     DISCUSSIONS_PANEL,
+    DISCUSSIONS_PANEL_AFTER_MOVE,
     PRODUCTION_READY,
     LIST_DESCRIPTIONS,
     SELECT_WINDOW_TITLES,
@@ -528,11 +559,13 @@ module.exports = {
     openCopyediting,
     openAuthorCopyediting,
     selectStage,
+    reloadEntry,
     noticeHeading,
     noticeBox,
     expectNotice,
     expectNoNotice,
     mainHeadings,
+    entryPanelHeadings,
     statusHeading,
     fileList,
     filePanel,

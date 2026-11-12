@@ -10,15 +10,7 @@
  * after an internal round only, OMP1). Scenario 10 is OPS's.
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A1, A6, A8, A10 (no scenario reaches them);
- * A7 (S4 deletes the copyedited file and reads the row gone, not the
- * notice after), A4 (S3 deletes the task through the panel's own "Delete",
- * the working path; nothing is asserted about copyedits clearing it), A5
- * (S1 reads the recommending Series editor's screen without the decision
- * buttons, and nothing about recommendation controls). A3: S4 reads the
- * "Assign a copyeditor…" notice before the upload as Rule 3a's working
- * path (no discussion exists); the ❓ about the assignment is parked.
- * OMP1 ✅ is asserted in S7 and S9.
+ * of everything else left out): A1, A4, A5, A6, A7, A8, A10, A13.
  *
  * Seeding: scenario endpoints only; scratch monographs ride the read-only
  * `publicknowledge` press in series `monographs` (its submit-time
@@ -57,6 +49,7 @@ const {
     STAGE_STATUS,
     LISTS,
     DISCUSSIONS_PANEL,
+    DISCUSSIONS_PANEL_AFTER_MOVE,
     PRODUCTION_READY,
     SELECT_WINDOW_TITLES,
     UPLOAD_WIZARD_TITLES,
@@ -67,10 +60,12 @@ const {
     openCopyediting,
     openAuthorCopyediting,
     selectStage,
+    reloadEntry,
     noticeHeading,
     expectNotice,
     expectNoNotice,
     mainHeadings,
+    entryPanelHeadings,
     statusHeading,
     fileList,
     listHeading,
@@ -222,15 +217,21 @@ test.describe('Copyediting stage (U32)', () => {
         await expectNoNotice(mayaModal);
 
         // The recommending Series editor: the four panels with "Assign" on
-        // "Participants"; neither decision button. (The scenario claims the
-        // panels alone; this screen showed no notice box, returned as
-        // finding T-omp-1 and not asserted either way.)
+        // "Participants"; neither decision button.
         const raviPage = await (await asUser('sectioneditor.ravi')).newPage();
         const raviModal = await openEditorial(raviPage, PK, seeded.submissionId);
         await expect(mainHeadings(raviModal)).toHaveText([LISTS.draft, DISCUSSIONS_PANEL, LISTS.copyedited]);
         await expect(participantsHeading(raviModal)).toBeVisible();
         await expect(participantsPanel(raviModal).getByRole('button', {name: 'Assign'})).toBeVisible();
         await expectNoDecisionButtons(raviModal);
+
+        // The recommending Series editor's notice box: assigned through
+        // "Assign" after the acceptance, no notice box above "Draft Files"
+        // (A11 ❓). Bounded by the Press Editor's notice on the same entry
+        // (read above) and by this screen's own "Draft Files" heading, first
+        // in the main column (the panel order read above).
+        await expect(listHeading(raviModal, LISTS.draft)).toBeVisible();
+        await expectNoNotice(raviModal);
     });
 
     test('S2: accept a monograph with its revision', async ({ompApi, asUser}, testInfo) => {
@@ -512,21 +513,24 @@ test.describe('Copyediting stage (U32)', () => {
         await expect(fileRow(modal2, PRODUCTION_READY, copyedited).first()).toBeVisible({timeout: 20_000});
         await expect(fileRow(modal2, PRODUCTION_READY, draft)).toHaveCount(0);
 
-        // The "Copyediting" entry after the move: the lists and the
-        // discussions panel under the status box, no buttons, no notice.
+        // The "Copyediting" entry after the move, from the workflow menu:
+        // the lists and a discussions panel headed "Production Tasks &
+        // Discussions" (A12) under the status box, no buttons, no notice.
         await selectStage(modal2, 'Copyediting');
         await expectPlainStatus(modal2, STAGE_STATUS.inProduction);
-        // The discussions panel is read by its "Tasks & Discussions" suffix:
-        // the scenario names no heading, and the entry showed it headed
-        // "Production Tasks & Discussions" after the move (finding T-omp-2).
-        await expect(
-            primaryRegion(modal2).getByRole('heading', {name: /^(Draft Files|.* Tasks & Discussions|Copyedited Files)$/})
-        ).toHaveText([LISTS.draft, /Tasks & Discussions$/, LISTS.copyedited]);
+        await expect(entryPanelHeadings(modal2)).toHaveText([LISTS.draft, DISCUSSIONS_PANEL_AFTER_MOVE, LISTS.copyedited]);
         await expect(fileRow(modal2, LISTS.draft, draft).first()).toBeVisible();
         await expect(fileRow(modal2, LISTS.copyedited, copyedited).first()).toBeVisible();
         await expectNoDecisionButtons(modal2);
         await expect(actionsRegion(modal2).getByRole('button')).toHaveCount(0);
         await expectNoNotice(modal2);
+
+        // The same entry after a reload: the panel between the two lists is
+        // headed "Copyediting Tasks & Discussions" (Rule 10).
+        const modal3 = await reloadEntry(page, 'Copyediting');
+        await expectPlainStatus(modal3, STAGE_STATUS.inProduction);
+        await expect(entryPanelHeadings(modal3)).toHaveText([LISTS.draft, DISCUSSIONS_PANEL, LISTS.copyedited]);
+        await expect(fileRow(modal3, LISTS.copyedited, copyedited).first()).toBeVisible();
 
         // The Author's mailbox.
         await pkpMail.find({to: press.authorEmail, subject: AUTHOR_MAILS.sentToProduction});

@@ -10,16 +10,9 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A7 🐞: S4 deletes the last copyedited file and asserts nothing about the
- *   Editor's notice afterwards.
- * - A6 🐞, A8 ❓, A10 ❓, A1 ❓: no scenario reaches them here.
- * - A3 ❓: S4 seeds the Copyeditor without a message and reads the Editor's
- *   notice only after the upload (its absence), never the flip that the
- *   assignment did not make.
- * - A5 ❓: S1 reads the recommending Section Editor's panels and "Assign"
- *   and the absence of the two decision buttons; nothing touches
- *   recommendation controls.
- * - OMP1 ✅, OPS1 ✅: other apps' territory.
+ * - A6 🐞, A7 🐞, A13 🐞.
+ * - A1 ❓, A3 ❓, A4 ❓, A5 ❓, A8 ❓, A10 ❓, A11 ❓.
+ * - Retired: A2, A9. OMP1 and OPS1 are the other apps'.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (A1, A7). Every test seeds its own submission with a unique
@@ -61,6 +54,7 @@ const {
     DRAFT_FILES,
     COPYEDITED_FILES,
     DISCUSSIONS,
+    PRODUCTION_DISCUSSIONS,
     DRAFT_DESCRIPTION,
     COPYEDITED_DESCRIPTION,
     SEND_TO_PRODUCTION,
@@ -191,6 +185,9 @@ test.describe('copyediting stage', () => {
         // decision button: the exact button list, empty, against the
         // manager's list of two read the same way.
         await omarStage.expectPanelHeadings(['Notification', ...PANELS]);
+        // The recommending Section Editor's notice box: on a journal, not
+        // assigned through "Assign", the Editor's sentence word for word.
+        await omarStage.expectNotice(NOTICE_ASSIGN);
         await expect(omarStage.frame.participantsAssignButton()).toBeVisible();
         await omarStage.expectDecisionButtons([]);
         await expect(omarStage.decisionButton(SEND_TO_PRODUCTION)).toHaveCount(0);
@@ -538,24 +535,28 @@ test.describe('copyediting stage', () => {
         await expect(stage.fileRows('Production Ready Files')).toHaveCount(1);
         await expect(stage.fileRow('Production Ready Files', draft.name)).toHaveCount(0);
 
-        // The "Copyediting" entry after the move: the two lists and the
-        // discussions panel under the status box, no buttons, no notice
-        // (Rule 10). The tasks panel here is titled by the submission's now
-        // active stage ("Production Tasks & Discussions"), not "Copyediting
-        // …", so its heading is read tolerantly; the spec's Rule 10 names it
-        // only "the discussions panel".
+        // The "Copyediting" entry after the move: the two lists around the
+        // discussions panel headed "Production Tasks & Discussions" (A12),
+        // under the status box, no buttons, no notice (Rule 10). The exact
+        // ordered heading list is the settled read of the notice's absence.
         await stage.frame.selectStage('Copyediting');
         await stage.frame.expectStatusAbovePanel(IN_PRODUCTION, DRAFT_FILES);
+        await stage.expectPanelHeadings(['Status', DRAFT_FILES, PRODUCTION_DISCUSSIONS, COPYEDITED_FILES, 'Participants']);
         await expect(stage.table(DRAFT_FILES)).toBeVisible();
         await expect(stage.table(COPYEDITED_FILES)).toBeVisible();
-        await expect(
-            stage.frame.dialog().getByRole('heading', {name: /Tasks & Discussions$/, level: 3})
-        ).toBeVisible();
-        await expect(stage.frame.participantsHeading()).toBeVisible();
         await expect(stage.noticeHeading()).toHaveCount(0);
         await expect(stage.fileRow(DRAFT_FILES, draft.name)).toBeVisible();
         await expect(stage.fileRow(COPYEDITED_FILES, copyedited.name)).toBeVisible();
         await stage.expectDecisionButtons([]);
+
+        // The same entry after a reload: the panel between the two lists is
+        // headed "Copyediting Tasks & Discussions" (Rule 10); the status box
+        // and the lists stay the entry's.
+        await stage.reloadEntry();
+        await stage.frame.expectStatusAbovePanel(IN_PRODUCTION, DRAFT_FILES);
+        await stage.expectPanelHeadings(['Status', DRAFT_FILES, DISCUSSIONS, COPYEDITED_FILES, 'Participants']);
+        await expect(stage.fileRow(DRAFT_FILES, draft.name)).toBeVisible();
+        await expect(stage.fileRow(COPYEDITED_FILES, copyedited.name)).toBeVisible();
 
         // The Author's mailbox.
         const message = await pkpMail.find({

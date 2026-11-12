@@ -50,6 +50,8 @@ const NOTICE_AWAITING = 'Awaiting Copyedits.';
 const DRAFT_FILES = 'Draft Files';
 const COPYEDITED_FILES = 'Copyedited Files';
 const DISCUSSIONS = 'Copyediting Tasks & Discussions';
+/** The same panel's heading on the entry reached from the menu after the move (register A12). */
+const PRODUCTION_DISCUSSIONS = 'Production Tasks & Discussions';
 const DRAFT_DESCRIPTION = 'These are files from the review stage which are to be copyedited';
 const COPYEDITED_DESCRIPTION = 'These are edited files that will be taken to the production stage';
 const SEND_TO_PRODUCTION = 'Send To Production';
@@ -66,6 +68,7 @@ exports.NOTICE_AWAITING = NOTICE_AWAITING;
 exports.DRAFT_FILES = DRAFT_FILES;
 exports.COPYEDITED_FILES = COPYEDITED_FILES;
 exports.DISCUSSIONS = DISCUSSIONS;
+exports.PRODUCTION_DISCUSSIONS = PRODUCTION_DISCUSSIONS;
 exports.DRAFT_DESCRIPTION = DRAFT_DESCRIPTION;
 exports.COPYEDITED_DESCRIPTION = COPYEDITED_DESCRIPTION;
 exports.SEND_TO_PRODUCTION = SEND_TO_PRODUCTION;
@@ -112,6 +115,16 @@ exports.CopyeditingStagePage = class CopyeditingStagePage extends BasePage {
     async reland() {
         await this.page.goto(this.page.url());
         await this.frame.expectOpen();
+    }
+
+    /**
+     * Reload the page on the "Copyediting" entry (the browser's reload, not
+     * a new navigation): the address the menu left keeps the entry's key,
+     * so the reloaded workflow opens on it again (spec scenario 6, Rule 10).
+     */
+    async reloadEntry() {
+        await this.page.reload();
+        await this.frame.expectStageHeading('Copyediting');
     }
 
     // ---------------------------------------------------------------------

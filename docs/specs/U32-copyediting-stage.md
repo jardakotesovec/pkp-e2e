@@ -423,10 +423,15 @@ the footnote. <sup>s</sup>
      "Copyediting": the same four panels, with "Assign" on the
      "Participants" panel; no "Send To Production", no "Move to Review",
      and no "Recommend Revisions", "Recommend Accept" or "Recommend
-     Decline" control [A5](#a5) (Actors row 6). The notice box turns on
-     how they joined the submission (Actors row 2): on a journal it reads
+     Decline" control [A5](#a5) (Actors row 6).
+   - **The recommending Section Editor's notice box**: on the same screen,
+     whether a notice box shows depends on how they joined the submission
+     (Actors row 2):
+     on a journal, where they were not assigned through "Assign", it reads
      "Assign a copyeditor using the Assign link in the Participants list."
-     as for the Editor; on a press none shows [A11](#a11).
+     as for the Editor; on a press, where they were assigned through
+     "Assign" after the acceptance, no notice box shows above "Draft Files"
+     [A11](#a11).
    - **Control**: no status box sits above "Draft Files": the notice box
      takes that slot while the submission is active here (Rule 2).
 
@@ -553,8 +558,10 @@ the footnote. <sup>s</sup>
      workflow menu: the two file lists and a discussions panel, headed
      "Production Tasks & Discussions" [A12](#a12), show under the status
      box "The submission is currently in the Production stage.", with no
-     decision buttons and no notice; reload the page: the panel between
-     the two lists is headed "Copyediting Tasks & Discussions" (Rule 10).
+     decision buttons and no notice (Rule 10).
+   - **The same entry after a reload**: reload the page on that entry: the
+     panel between the two lists is headed "Copyediting Tasks &
+     Discussions" (Rule 10).
    - **The Author's mailbox**: holds the email "Next steps for publishing
      your submission" (Side effects).
    - **Control**: before the decision the same "Copyediting" entry offered
@@ -650,12 +657,6 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the only copyedited file deleted: the "Assign a copyeditor…" notice back for the assigned editor ([A7](#a7)): the guard the issue report proposes [report 2026-10-04]
   - the "Notification" box "Assign a copyeditor using the Assign link in the Participants list." for an assigned editor after "Accept and Skip Review", after {OMP} "Accept Submission" on Internal Review and after "Move To Copyediting" from Production ([A6](#a6); Rule 3): the guard the issue report proposes, once fixed [report 2026-10-02]
-  - scenario 1's recommending Section Editor bullet, no notice box on a
-    press (A11; Actors row 2): no assertion in the OMP suite [upstream 2026-09-29]
-  - scenario 6's "Copyediting" entry bullet, the panel headed "Production
-    Tasks & Discussions" from the workflow menu and "Copyediting Tasks &
-    Discussions" after a reload (Rule 10): the OJS and OMP suites read only
-    the "Tasks & Discussions" ending and never reload [upstream 2026-09-29]
 - **Rarely met**:
   - both lists back with their earlier files after a second acceptance, the newly ticked files joining "Draft Files" beside them (Rule 9b): accepting again a submission moved back to review is not an ordinary week's action; scenario 7 stops at the hidden "Copyediting" entry
   - "Stage Assignment" changed on the Roles form, Copyediting unticked for Copyeditor and ticked for Layout Editor (Settings bullet 1): a manager changes a role's stages rarely, not in an ordinary week
