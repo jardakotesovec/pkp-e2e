@@ -3,52 +3,58 @@
  * @file playwright/tests/U41-contributors-and-affiliations.spec.js
  *
  * Contributors & affiliations — OMP suite: one test per canonical scenario
- * the spec runs on a press (S1–S9 common, S10 press-only, S11 {OJS OMP}),
- * in the press's own vocabulary: Press Manager, monograph, catalog book
- * page, catalog list. The press markers ride inside the common tests: the
- * FOUR seeded press contributor roles and the press-flavored last-AUTHOR
- * leg (S5), the catalog list honoring the publication-lists tick (S7, the
- * rule's clean side; A3 🐞 is the journal's and the preprint server's),
- * the five-contributor book page compacting to one names-only line
- * (OMP1 ✅, S6's second monograph), the Edited Volume's "(ed)" credit
- * (OMP2 ✅, S10) and the author's read-only workflow list (S9; the
- * editable author is the preprint server's OPS1). S11 reads the reviewer
- * page's own publication fetch, never a request the screens would not
- * send (the Frame). S3's publish dialog is the press's: the header button
- * reads "Publish" and opens the "Schedule For Publication" window at once
- * (Rule 2's OMP leg in *Publish, schedule & versions*), so the journal's
- * "Review Publishing Details" step of the spec's sentence has no press end.
+ * the spec runs on a press (S1–S9, S12 and S13 common, S10 press-only, S11
+ * {OJS OMP}), in the press's own vocabulary: Press Manager, monograph,
+ * catalog book page, catalog list. The press markers ride inside the
+ * common tests: the FOUR seeded press contributor roles and the
+ * press-flavored last-AUTHOR leg (S5), the catalog list honoring the
+ * publication-lists tick (S7), the five-contributor book page (OMP1, S6),
+ * the Edited Volume's "(ed)" credit (OMP2, S10) and the author's read-only
+ * workflow list (S9). S11 reads the reviewer page's own publication fetch;
+ * S12 sends footnote s12's contributor edits, which no screen sends, in
+ * the Press Manager's signed-in session (the Frame's one exception). S3's
+ * publish dialog is the press's: the header button reads "Publish" and
+ * opens the "Schedule For Publication" window at once.
  * Spec: docs/specs/U41-contributors-and-affiliations.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
- * (the row never shows affiliations: nothing asserts the row's affiliation
- * line either way, and S6's five contributors carry none), A2 ❓ (S3
- * asserts the publish dialog's own sentence, never its silence about the
- * missing contact), A3 🐞 (journal/preprint-only), A5 🐞 (every affiliation
- * takes the typed-name path; the browser-side registry query is stubbed
- * to an empty result set, ContributorPages.stubRegistrySearch), A6 ❓ (S9
- * asserts the scenario's own sentence, the badge absent on the read-only
- * list), A7 🐞 (S4 asserts the inline refusal only, never the foot
- * summary), A9/A10 🐞 (the boxes are located structurally, not by their
- * accessible names), A11 ❓, A12 🐞 (S5 reaches the confirm button by a
- * /delete/i name match), A4 ❓, A8 ❓, A13 ❓, A14 🐞, A16 🐞 (the seeded
- * contributor's missing Country is filled once before any edit, never
- * asserted), A17 ❓, A18 ❓, OPS1 ✅ and OPS2 🐞 (preprint-only). The spec's
- * Coverage section records everything else left out.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
+ * - A1 🐞: nothing reads a row's affiliation line or S6's dangling comma.
+ * - A2 ❓: S3 reads the publish window's own sentence, never its silence.
+ * - A3 🐞: journal and preprint server only.
+ * - A5 🐞: S4's registry-backed step answers the browser's registry
+ *   search with one stubbed record (stubRegistryRecords) and closes the
+ *   "Error" after "Add" with a handler, never reading it or the nameless
+ *   entry's red line; elsewhere the search is stubbed empty.
+ * - A6 ❓: S9 reads the scenario's own sentence, the badge absent.
+ * - A7 🐞: S4 reads the inline refusal only, never the foot's list.
+ * - A9, A10 🐞: the boxes and links are reached by structure, not by name.
+ * - A12 🐞: S5 reaches the confirm button by a /delete/i name match.
+ * - A16 ❓: the seeded contributor's missing Country is filled once before
+ *   its first edit, never asserted.
+ * - A21 ❓: S13 reads "Author" and "1/2 languages completed" as its
+ *   scenario states them, never the question.
+ * - A22 🐞: S13 reloads before reopening "Edit Role".
+ * - A25 🐞: S1 reaches the CRediT drop-downs by row position.
+ * - A30, A31, A32, A33 🐞: S12 resends the affiliations and names the type.
+ * - A4, A8, A11, A13, A14, A17, A18, A19, A20, A24, A26, A27, A28, A29,
+ *   OPS1, OPS2: not read.
  *
- * Seeding: scenario endpoints only. S2, S9 and S10's book pages run on the
- * seeded press with the ready accounts and only add their own tagged
- * submissions and contributors; S1 and S3 read a mailbox scoped to the
+ * Seeding: scenario endpoints only. S2, S9 and S12 run on the seeded
+ * press with the ready accounts and only add their own tagged submissions
+ * and contributors; S1 and S3 read a mailbox scoped to the
  * submitter's address (footnote s1), so like U40's S1 they run on a
  * scratch press with throwaway users whose addresses carry app + test
  * (u41s1ompw0…@mail.test) rather than enrolling a throwaway author in
  * publicknowledge; every other test seeds its own scratch press because it
  * changes press settings or roles, publishes, or reads a reviewer's
  * assignment. publicknowledge and the 18 seeded users are never changed
- * (A1, A7). There is no contributor seeding key — the add/edit panel IS
- * the surface under test, so contributors beyond the auto-created
- * submitter are always recorded through it. Every absence is a settled
+ * (A1, A7). S12's second contributor comes from the submission seed's
+ * `contributors[]`; everywhere else the add/edit panel IS the surface
+ * under test, so contributors beyond the auto-created submitter are
+ * recorded through it. S13's French pages are read signed out at
+ * `/fr_CA/` and the English ones at `/en/`. Every absence is a settled
  * read paired with a positive control taken the same way; a mailbox
  * silence is bounded by a discussion email the test itself sends to a
  * second throwaway author (A8, `pkpMail.expectNone`); an Activity Log
@@ -62,7 +68,9 @@ const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage
 const {
     ContributorsScreen,
     stubRegistrySearch,
+    stubRegistryRecords,
 } = require('../pages/ContributorPages.js');
+const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 const {
     expectWizardOpen,
     continueTo,
@@ -149,7 +157,7 @@ function scratchUser(tag, key, given, family, roles) {
  * adds a second author (the mailbox control's recipient), `reviewer` an
  * external reviewer, `review` the Review settings passthrough.
  */
-function scratchPressSpec(tag, {locales, other = false, reviewer = false, review} = {}) {
+function scratchPressSpec(tag, {locales, context, other = false, reviewer = false, review} = {}) {
     return {
         tag,
         ...(locales
@@ -160,6 +168,7 @@ function scratchPressSpec(tag, {locales, other = false, reviewer = false, review
                   },
               }
             : {}),
+        ...(context ? {context} : {}),
         ...(review ? {review} : {}),
         users: [
             scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
@@ -409,6 +418,30 @@ async function saveSettingsForm(page, form) {
     await saved;
 }
 
+/**
+ * Send a request to the context's API in the page's own signed-in session,
+ * the way a screen does (its API address and CSRF token read off the
+ * page): footnote s12's program edits, which no screen sends (Rule 4a).
+ * Called on an idle back-office page of the context.
+ */
+async function apiInSession(page, method, path, body) {
+    const {base, csrfToken} = await page.evaluate(() => {
+        const pkp = /** @type {any} */ (window).pkp || {};
+        return {
+            base: (pkp.context && pkp.context.apiBaseUrl) || null,
+            csrfToken: (pkp.currentUser && pkp.currentUser.csrfToken) || null,
+        };
+    });
+    expect(base, 'the page carries the context API address').toBeTruthy();
+    expect(csrfToken, 'the page carries a CSRF token').toBeTruthy();
+    return page.request.fetch(`${String(base).replace(/\/$/, '')}/${path}`, {
+        method,
+        headers: {'X-Csrf-Token': String(csrfToken)},
+        ...(body === undefined ? {} : {data: body}),
+        failOnStatusCode: false,
+    });
+}
+
 /** The book page's authors block and its per-contributor credits. */
 function authorsBlock(page) {
     return page.locator('.item.authors');
@@ -545,6 +578,81 @@ test.describe('Contributors & affiliations (U41)', () => {
         await screen.savePanel(dialog);
         await expect(screen.row('Alan Mwandenga')).toBeVisible();
 
+        // "Close" and the Escape key: "Closed" typed, then the panel's
+        // "Close": it shuts at once, with no question (the list behind
+        // reads by role again, which a window stacked over it would hide,
+        // and the page holds no dialog but the workflow's own) and no
+        // notice; "Escaped" typed, then Escape: the same; neither sent a
+        // contributor write, and after the page's own reload the row
+        // still reads "Alan Mwandenga" (Rule 4).
+        const writes = [];
+        const onWrite = (request) => {
+            if (request.url().includes('/contributors') && request.method() !== 'GET') {
+                writes.push(request.url());
+            }
+        };
+        const notices = page.locator('.pkpNotification');
+        await expect(notices).toHaveCount(0, {timeout: 30_000});
+        const workflowDialogs = await page.getByRole('dialog').count();
+        page.on('request', onWrite);
+        dialog = await screen.openRowEdit('Alan Mwandenga');
+        await screen.fillPersonFields(dialog, {family: 'Closed'});
+        await screen.closePanel(dialog);
+        await expect(screen.row('Alan Mwandenga')).toBeVisible();
+        await expect(page.getByRole('dialog')).toHaveCount(workflowDialogs);
+        await expect(notices).toHaveCount(0);
+        dialog = await screen.openRowEdit('Alan Mwandenga');
+        await screen.fillPersonFields(dialog, {family: 'Escaped'});
+        await screen.escapePanel(dialog);
+        await expect(screen.row('Alan Mwandenga')).toBeVisible();
+        await expect(page.getByRole('dialog')).toHaveCount(workflowDialogs);
+        await expect(notices).toHaveCount(0);
+        await screen.reload();
+        page.off('request', onWrite);
+        expect(writes, 'contributor writes sent by "Close" and Escape').toEqual([]);
+        await expect(screen.row('Alan Mwandenga')).toBeVisible();
+        await expect(screen.row('Closed')).toHaveCount(0);
+        await expect(screen.row('Escaped')).toHaveCount(0);
+
+        // The CRediT table: "No Items" until "Add Another Role"; a row
+        // arrives on "Conceptualization" with "Degree" empty, a second one
+        // on "Conceptualization" too, and each row's list shows
+        // "Conceptualization" grayed out (the drop-downs reached by row
+        // position, never by their labels, A25); "Remove Role" on the
+        // second row and Save: reopened, the one row on
+        // "Conceptualization" with "Degree" still empty (Fields).
+        dialog = await screen.openRowEdit('Alan Mwandenga');
+        await expect(screen.creditRolesTable(dialog)).toContainText('No Items');
+        await expect(screen.creditRows(dialog)).toHaveCount(0);
+        await screen.addCreditRow(dialog);
+        await expect(screen.creditRolesTable(dialog)).not.toContainText('No Items');
+        await expect(screen.creditRoleSelect(dialog, 0).locator('option:checked')).toHaveText(
+            'Conceptualization'
+        );
+        await expect(screen.creditDegreeSelect(dialog, 0)).toHaveValue('');
+        await screen.addCreditRow(dialog);
+        await expect(screen.creditRoleSelect(dialog, 1).locator('option:checked')).toHaveText(
+            'Conceptualization'
+        );
+        await expect(screen.creditDegreeSelect(dialog, 1)).toHaveValue('');
+        for (const index of [0, 1]) {
+            const select = screen.creditRoleSelect(dialog, index);
+            await expect(
+                select.locator('option').filter({hasText: /^Conceptualization$/})
+            ).toBeDisabled();
+            // Control: a role no row shows stays offered.
+            await expect(select.locator('option').filter({hasText: /^Data Curation$/})).toBeEnabled();
+        }
+        await screen.removeCreditRow(dialog, 1);
+        await screen.savePanel(dialog);
+        dialog = await screen.openRowEdit('Alan Mwandenga');
+        await expect(screen.creditRows(dialog)).toHaveCount(1, {timeout: 30_000});
+        await expect(screen.creditRoleSelect(dialog, 0).locator('option:checked')).toHaveText(
+            'Conceptualization'
+        );
+        await expect(screen.creditDegreeSelect(dialog, 0)).toHaveValue('');
+        await screen.closePanel(dialog);
+
         // An Anonymous contributor: no name fields, ROR ID, Homepage URL,
         // Bio Statement or Affiliations (each absence bounded by the Email
         // field on screen), only Email, Country, Contributor Roles, CRediT
@@ -638,20 +746,20 @@ test.describe('Contributors & affiliations (U41)', () => {
             family,
             email: `${tag}bora@mail.test`,
         });
-        // Pin the starting order (submitter first) — see pinOrder.
-        await pinOrder(page, screen, 'Alex Author');
+        // No "Save Order" is pressed before the Preview read and the
+        // Control (footnote s2: the order a new contributor takes with no
+        // saved order is what they read).
 
-        // Control: before "Save Order", the list shows the submitting
-        // author first and the added contributor second on a reload, and
-        // "Abbreviated" names their family name (Rule 6).
-        screen = await openContributors(page, PK, submissionId);
-        await expect(screen.rows().first()).toContainText('Alex Author');
-        await expect(screen.rows().nth(1)).toContainText(`Bora ${family}`);
-
-        // Preview (Rule 7): "Abbreviated" is the first contributor's
+        // Preview (Rules 6, 7): with no "Save Order" pressed yet, after a
+        // reload the list shows the submitting author first and the added
+        // contributor second; "Abbreviated" is the first contributor's
         // family name plus "et al."; "Full" lists both names with their
         // roles in parentheses, semicolon-separated; the "Publication
         // Lists" row is the third format.
+        screen = await openContributors(page, PK, submissionId);
+        await expect(screen.rows()).toHaveCount(2);
+        await expect(screen.rows().first()).toContainText('Alex Author');
+        await expect(screen.rows().nth(1)).toContainText(`Bora ${family}`);
         let preview = await screen.openPreview();
         await expect(screen.previewRow(preview, 'Abbreviated')).toContainText(
             'Author et al.'
@@ -660,6 +768,19 @@ test.describe('Contributors & affiliations (U41)', () => {
             `Alex Author (Author); Bora ${family} (Author)`
         );
         await expect(screen.previewRow(preview, 'Publication Lists')).toBeVisible();
+        await screen.closePreview(preview);
+
+        // Control: still before any "Save Order", the same order on a
+        // second reload, and "Abbreviated" again naming the submitting
+        // author's family name (Rule 6).
+        await screen.reload();
+        await expect(screen.rows()).toHaveCount(2);
+        await expect(screen.rows().first()).toContainText('Alex Author');
+        await expect(screen.rows().nth(1)).toContainText(`Bora ${family}`);
+        preview = await screen.openPreview();
+        await expect(screen.previewRow(preview, 'Abbreviated')).toContainText(
+            'Author et al.'
+        );
         await screen.closePreview(preview);
 
         // Ordering mode (Rule 6): Preview and Add Contributor give way to
@@ -875,12 +996,16 @@ test.describe('Contributors & affiliations (U41)', () => {
         await closeActivityLog(page);
     });
 
-    test('S4: record typed affiliations with per-language names', async ({asUser, ompApi}, testInfo) => {
-        test.slow();
+    test('S4: record affiliations, typed and registry-backed', async ({asUser, ompApi}, testInfo) => {
+        test.setTimeout(300_000);
         const tag = makeTag('s4', testInfo);
         const instA = `Alpha Institute ${tag}`;
-        const instAFr = `Institut Alpha ${tag}`;
-        const instB = `Beta Institute ${tag}`;
+        const registry = {
+            ror: 'https://ror.org/0213rcc28',
+            name: 'Simon Fraser University',
+            country: 'Canada',
+        };
+        const refusal = 'Please provide affiliation name in the submission primary locale.';
         await ompApi.createContext(
             scratchPressSpec(tag, {locales: ['en', 'fr_CA']})
         );
@@ -893,13 +1018,26 @@ test.describe('Contributors & affiliations (U41)', () => {
         });
 
         const page = await (await asUser(`${tag}mg`)).newPage();
-        await stubRegistrySearch(page);
+        // The registry search goes from the browser to api.ror.org: a stub
+        // answers it with the one record (Simon Fraser University); the
+        // typed-text option renders whatever the answer.
+        await stubRegistryRecords(page, [registry]);
         const screen = await openContributors(page, tag, submissionId);
 
-        // Typed path: text alone offers no "Add" — it appears only once a
-        // suggestion (here the typed text itself) is picked. (The seeded
-        // contributor arrives without a Country — filled once so the later
-        // saves exercise only the affiliation rules.)
+        /** A row emptied of its primary-language name, anchored by its red marker. */
+        const emptiedRow = (dialog) =>
+            screen
+                .affiliationsField(dialog)
+                .getByRole('row')
+                .filter({hasText: 'The primary language English is required'});
+
+        // A typed institution: text alone offers no "Add" — it appears
+        // only once a suggestion (here the typed text itself) is picked;
+        // the institution joins the list with "Edit institution name" and
+        // "Remove institution" behind its "Click to edit or delete"
+        // expander (Fields). (The seeded contributor arrives without a
+        // Country — filled once so the later saves exercise only the
+        // affiliation rules, A16.)
         let dialog = await screen.openRowEdit('Ada Author');
         await screen.fillPersonFields(dialog, {country: 'Canada'});
         await screen.typeInstitution(dialog, instA);
@@ -908,69 +1046,114 @@ test.describe('Contributors & affiliations (U41)', () => {
         await screen.suggestion(dialog, instA).click();
         await expect(screen.affiliationAddButton(dialog)).toBeVisible();
         await screen.affiliationAddButton(dialog).click();
-
-        // The typed row carries a completeness status and, via its "…"
-        // menu, "Edit institution name" with one box per language.
         const rowA = screen.affiliationRow(dialog, instA);
-        await expect(rowA).toBeVisible();
+        await expect(rowA).toBeVisible({timeout: 30_000});
+        const menu = await screen.openAffiliationRowMenu(dialog, instA);
+        await expect(menu).toHaveText(['Edit institution name', 'Remove institution']);
+
+        // The per-language names: "Edit institution name" opens one box
+        // per language with a "{count} of {total} languages completed"
+        // status (Fields).
         await expect(rowA).toContainText('1 of 2 languages completed');
-        await screen.openAffiliationRowAction(dialog, instA, 'Edit institution name');
+        await page.getByRole('menuitem', {name: 'Edit institution name', exact: true}).click();
         const boxes = screen.affiliationNameBoxes(dialog, instA);
         await expect(boxes).toHaveCount(2);
-        await boxes.nth(1).fill(instAFr);
-        await expect(rowA).toContainText('All translations available');
 
-        // A second typed institution; save the contributor and reopen —
-        // both are there (any number of affiliations).
-        await screen.addTypedInstitution(dialog, instB);
+        // An empty primary-language name: cleared and Save pressed, the
+        // save is refused with the inline message (the foot's list, A7,
+        // never read); the name typed back (the emptied row re-anchored
+        // by its primary-language-required marker) (Fields).
+        await boxes.first().fill('');
+        await screen.saveButton(dialog).click();
+        await expect(dialog.getByText(refusal)).toBeVisible({timeout: 30_000});
+        await emptiedRow(dialog).locator('input[name="name"]').first().fill(instA);
+
+        // A registry-backed institution: the suggestion shows its country
+        // and the ROR mark with a link to its record; picked and added,
+        // the entry's row links to the registry record and offers only
+        // "Remove institution" (Fields). Workaround for A5 🐞, not an
+        // assertion of it: on a test install the server cannot fetch the
+        // record into its registry copy (Rule 16), and the "Error" window
+        // that follows "Add" is closed with its "OK" by a handler whenever
+        // it shows; nothing below reads it or the nameless entry's red
+        // line (M3).
+        const suggestion = await screen.searchRegistry(dialog, registry.name, registry.ror);
+        await expect(suggestion).toContainText(registry.name);
+        await expect(suggestion.locator('sub')).toHaveText(registry.country);
+        await expect(suggestion.locator('svg').first()).toBeVisible();
+        await expect(suggestion.locator(`a[href="${registry.ror}"]`)).toBeVisible();
+        await page.addLocatorHandler(
+            page
+                .getByRole('dialog', {name: 'Error', exact: true})
+                .filter({hasText: 'An unexpected error has occurred.'}),
+            async (window) => {
+                await window.getByRole('button', {name: 'OK', exact: true}).click();
+            }
+        );
+        await suggestion.click();
+        await screen.addPickedRegistryEntry(dialog);
+        const registryRow = screen.registryAffiliationRow(dialog, registry.ror);
+        await expect(registryRow).toBeVisible({timeout: 30_000});
+        await expect(registryRow.locator(`a[href="${registry.ror}"]`).first()).toBeVisible();
+        const registryActions = await screen.openAffiliationRowMenu(dialog, registryRow);
+        await expect(registryActions).toHaveText(['Remove institution']);
+        await closeMenu(page);
+
+        // Both saved: Save the contributor and reopen "Edit": both
+        // institutions are there (Rule 4; Fields).
         await screen.savePanel(dialog);
         dialog = await screen.openRowEdit('Ada Author');
-        await expect(screen.affiliationRow(dialog, instA)).toBeVisible();
-        await expect(screen.affiliationRow(dialog, instB)).toBeVisible();
+        await expect(screen.affiliationRow(dialog, instA)).toBeVisible({timeout: 30_000});
+        await expect(screen.registryAffiliationRow(dialog, registry.ror)).toBeVisible();
 
-        // Control: the second institution's French box stayed empty and
-        // its save was not refused — only the submission language's copy
-        // is ever required (Fields).
-        await expect(screen.affiliationRow(dialog, instB)).toContainText(
-            '1 of 2 languages completed'
-        );
-
-        // A save without the submission language's name is refused with
-        // the inline message (Fields & validation; the garbled summary
-        // line of A7 is never asserted).
+        // A refused "Edit" saves nothing: in the reopened "Edit", the
+        // typed institution's submission-language box cleared and Save
+        // pressed: refused with the same message; "Close", then the
+        // page's own reload: the contributor's "Edit" lists the
+        // institution as before, its submission-language box reading its
+        // name (Fields; Rule 4).
         await screen.openAffiliationRowAction(dialog, instA, 'Edit institution name');
         await screen.affiliationNameBoxes(dialog, instA).first().fill('');
         await screen.saveButton(dialog).click();
-        await expect(
-            dialog.getByText(
-                'Please provide affiliation name in the submission primary locale.'
-            )
-        ).toBeVisible({timeout: 30_000});
+        await expect(dialog.getByText(refusal)).toBeVisible({timeout: 30_000});
+        await screen.closePanel(dialog);
+        await screen.reload();
+        dialog = await screen.openRowEdit('Ada Author');
+        await expect(screen.affiliationRow(dialog, instA)).toBeVisible({timeout: 30_000});
+        // Control: the second language's box stayed empty throughout and
+        // no save was refused for it — only the submission language's copy
+        // is ever required (Fields).
+        await expect(screen.affiliationRow(dialog, instA)).toContainText(
+            '1 of 2 languages completed'
+        );
+        await screen.openAffiliationRowAction(dialog, instA, 'Edit institution name');
+        await expect(screen.affiliationNameBoxes(dialog, instA).first()).toHaveValue(instA);
+        await expect(screen.affiliationNameBoxes(dialog, instA).nth(1)).toHaveValue('');
+        await screen.closePanel(dialog);
 
-        // Restore the name (the emptied row is re-anchored by its
-        // primary-language-required marker) and remove the second
-        // institution: "Are you sure?" — Yes deletes it.
-        const emptiedRow = screen
-            .affiliationsField(dialog)
-            .getByRole('row')
-            .filter({hasText: 'The primary language English is required'});
-        await emptiedRow.locator('input[name="name"]').first().fill(instA);
-        await screen.openAffiliationRowAction(dialog, instB, 'Remove institution');
+        // Removing one: "Remove institution" on the typed one (its menu is
+        // offered while its name boxes are shut, so in a reopened "Edit"):
+        // "Are you sure?" asks "The affiliation {name} will be deleted.";
+        // "Yes" removes it, and a save persists the removal, the registry
+        // entry kept (Fields).
+        dialog = await screen.openRowEdit('Ada Author');
+        await screen.openAffiliationRowAction(dialog, instA, 'Remove institution');
         const confirm = page
             .getByRole('dialog')
             .filter({hasText: 'will be deleted'});
         await expect(confirm.getByText('Are you sure?')).toBeVisible();
-        await expect(confirm).toContainText(`The affiliation ${instB} will be deleted.`);
+        await expect(confirm).toContainText(`The affiliation ${instA} will be deleted.`);
         await confirm.getByRole('button', {name: 'Yes', exact: true}).click();
-        await expect(screen.affiliationRow(dialog, instB)).toHaveCount(0, {
+        await expect(screen.affiliationRow(dialog, instA)).toHaveCount(0, {
             timeout: 30_000,
         });
         await screen.savePanel(dialog);
-
-        // The removal and the restored name persisted.
         dialog = await screen.openRowEdit('Ada Author');
-        await expect(screen.affiliationRow(dialog, instA)).toBeVisible();
-        await expect(screen.affiliationRow(dialog, instB)).toHaveCount(0);
+        await expect(screen.registryAffiliationRow(dialog, registry.ror)).toBeVisible({
+            timeout: 30_000,
+        });
+        await expect(screen.affiliationRow(dialog, instA)).toHaveCount(0);
+        await screen.closePanel(dialog);
     });
 
     test('S5: manage the press contributor roles', async ({asUser, ompApi}, testInfo) => {
@@ -1300,8 +1483,28 @@ test.describe('Contributors & affiliations (U41)', () => {
             family,
             email: `${tag}cara@mail.test`,
         });
-        // Pin the list order (Ada first) — see pinOrder.
+        // The seeded contributor arrives without a Country (A16), so a
+        // save with nothing changed would be refused: it is filled once
+        // here, before the order is pinned (Ada first) — see pinOrder.
+        let dialog = await screen.openRowEdit('Ada Author');
+        await screen.fillPersonFields(dialog, {country: 'Canada'});
+        await screen.savePanel(dialog);
         await pinOrder(managerPage, screen, 'Ada Author');
+
+        // "Save" with nothing changed: the first contributor's "Edit"
+        // saved untouched leaves it first in the list after a reload, and
+        // the book page, read signed out, still credits it first (Rule 6).
+        dialog = await screen.openRowEdit('Ada Author');
+        await screen.savePanel(dialog);
+        await screen.reload();
+        await expect(screen.rows()).toHaveCount(2);
+        await expect(screen.rows().first()).toContainText('Ada Author');
+        await expect(screen.rows().nth(1)).toContainText(`Cara ${family}`);
+        await page.goto(bookUrl(tag, submissionId));
+        const unchangedCredits = authorsBlock(page).locator('.sub_item');
+        await expect(unchangedCredits).toHaveCount(2, {timeout: 30_000});
+        await expect(unchangedCredits.first()).toContainText('Ada Author');
+        await expect(unchangedCredits.nth(1)).toContainText(`Cara ${family}`);
 
         // Control: before any untick, "Publication Lists" and "Full" read
         // the same names and roles (Rule 7).
@@ -1315,7 +1518,7 @@ test.describe('Contributors & affiliations (U41)', () => {
         await screen.closePreview(preview);
 
         // Untick "Publication Lists" on the second contributor (Rule 8).
-        let dialog = await screen.openRowEdit(`Cara ${family}`);
+        dialog = await screen.openRowEdit(`Cara ${family}`);
         await screen.publicationListsBox(dialog).uncheck();
         await screen.savePanel(dialog);
 
@@ -1344,15 +1547,13 @@ test.describe('Contributors & affiliations (U41)', () => {
         await expect(authorLine).not.toContainText(`Cara ${family}`);
 
         // "Abbreviated" ignores the tick: re-tick the second contributor,
-        // untick the first (the seeded contributor's missing Country
-        // filled once, A16): "Publication Lists" omits the first while
+        // untick the first: "Publication Lists" omits the first while
         // "Abbreviated" still reads the first's family name plus "et al."
         // (Rule 8).
         dialog = await screen.openRowEdit(`Cara ${family}`);
         await screen.publicationListsBox(dialog).check();
         await screen.savePanel(dialog);
         dialog = await screen.openRowEdit('Ada Author');
-        await screen.fillPersonFields(dialog, {country: 'Canada'});
         await screen.publicationListsBox(dialog).uncheck();
         await screen.savePanel(dialog);
         preview = await screen.openPreview();
@@ -1684,5 +1885,208 @@ test.describe('Contributors & affiliations (U41)', () => {
         const full = await publicationFetchedByReviewer(openTag, open.submissionId);
         expect(full.authors.map((a) => a.fullName)).toEqual(['Ada Author']);
         expect(full.authorsString).toContain('Ada Author');
+    });
+
+    test('S12: a contributor edited by a program', async ({asUser, ompApi}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s12', testInfo);
+        const inst = 'Probe Institute';
+        const {submissionId, publicationId, contributors} = await ompApi.createSubmission({
+            tag,
+            context: PK,
+            submitter: 'author.alex',
+            title: `Submission ${tag}`,
+            contributors: [
+                {givenName: 'Robin', familyName: 'Okafor', email: 'robin@example.test'},
+            ],
+        });
+        const contributor = `submissions/${submissionId}/publications/${publicationId}/contributors/${contributors[0].id}`;
+
+        // The given: "Probe Institute" added to Robin Okafor's "Edit" as a
+        // typed institution (no seed key exists for affiliations).
+        const page = await (await asUser('manager.maya')).newPage();
+        await stubRegistrySearch(page);
+        const screen = await openContributors(page, PK, submissionId, {publicationId});
+        let dialog = await screen.openRowEdit('Robin Okafor');
+        await screen.addTypedInstitution(dialog, inst);
+        await screen.savePanel(dialog);
+
+        /** Reload, then read the row's "Edit": email, country, and close. */
+        async function readEdit(name, {email, institution = false}) {
+            await screen.reload();
+            await expect(screen.row(name)).toBeVisible();
+            const edit = await screen.openRowEdit(name);
+            await expect(edit.locator('input[name="email"]')).toHaveValue(email, {
+                timeout: 30_000,
+            });
+            await expect(
+                screen.field(edit, /^Country/).locator('select option:checked')
+            ).toHaveText('Canada');
+            if (institution) {
+                await expect(screen.affiliationRow(edit, inst)).toBeVisible();
+            }
+            await screen.closePanel(edit);
+        }
+
+        // An edit that resends the affiliations: the type `PERSON`, the
+        // given name "Dana" and the affiliations as the GET of the same
+        // address gave them; after a reload the row reads "Dana Okafor",
+        // and its "Edit" still shows the email, "Canada" and the
+        // institution (Rule 4a).
+        const read = await apiInSession(page, 'GET', contributor);
+        expect(read.status(), 'the contributor GET').toBe(200);
+        const record = await read.json();
+        let answer = await apiInSession(page, 'PUT', contributor, {
+            contributorType: 'PERSON',
+            givenName: {en: 'Dana'},
+            affiliations: record.affiliations,
+        });
+        expect(answer.status(), `the resend edit answered ${await answer.text()}`).toBe(200);
+        await readEdit('Dana Okafor', {email: 'robin@example.test', institution: true});
+        await expect(screen.row('Robin Okafor')).toHaveCount(0);
+
+        // An edit of the given name alone: the type `PERSON` and "Kim";
+        // after a reload the row reads "Kim Okafor", its "Edit" still the
+        // email and "Canada" (the institution not read: an edit that
+        // leaves the affiliations out removes them, A30) (Rule 4a).
+        answer = await apiInSession(page, 'PUT', contributor, {
+            contributorType: 'PERSON',
+            givenName: {en: 'Kim'},
+        });
+        expect(answer.status(), `the given-name edit answered ${await answer.text()}`).toBe(200);
+        await readEdit('Kim Okafor', {email: 'robin@example.test'});
+        await expect(screen.row('Dana Okafor')).toHaveCount(0);
+
+        // The type sent empty, with "kim@example.test" as the email: the
+        // answer refuses it with "This field is required." for the type;
+        // after a reload the row still reads "Kim Okafor" and its "Edit"
+        // the old email (Rule 4a).
+        answer = await apiInSession(page, 'PUT', contributor, {
+            contributorType: null,
+            email: 'kim@example.test',
+        });
+        expect(answer.status()).toBe(400);
+        expect(await answer.json()).toEqual({contributorType: ['This field is required.']});
+        await readEdit('Kim Okafor', {email: 'robin@example.test'});
+
+        // Control: the same edit naming the type `PERSON` goes through:
+        // after a reload the "Edit" shows "kim@example.test" and the row
+        // still reads "Kim Okafor" (Rule 4a).
+        answer = await apiInSession(page, 'PUT', contributor, {
+            contributorType: 'PERSON',
+            email: 'kim@example.test',
+        });
+        expect(answer.status(), `the control edit answered ${await answer.text()}`).toBe(200);
+        await readEdit('Kim Okafor', {email: 'kim@example.test'});
+    });
+
+    test("S13: role names in the reader's language", async ({asUser, ompApi, page}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s13', testInfo);
+        const french = 'Auteur-e';
+        await ompApi.createContext(
+            scratchPressSpec(tag, {
+                context: {
+                    primaryLocale: 'en',
+                    supportedLocales: ['en', 'fr_CA'],
+                    supportedFormLocales: ['en', 'fr_CA'],
+                },
+            })
+        );
+        const {submissionId} = await ompApi.createSubmission({
+            tag: `${tag}s`,
+            context: tag,
+            submitter: `${tag}au`,
+            title: `Submission ${tag}`,
+            decisions: ['skipExternalReview', 'sendToProduction'],
+            published: true,
+        });
+
+        /**
+         * Read the book page and the catalog line in one language, signed
+         * out (the `page` fixture carries no session): the credited role
+         * name and the "{name} ({role})" author line. The page's own
+         * `lang` is the positive control that the address took.
+         */
+        async function readPages(locale, role) {
+            await page.goto(`/index.php/${tag}/${locale}/catalog/book/${submissionId}`);
+            await expect(page.locator('html')).toHaveAttribute('lang', locale === 'en' ? /^en/ : /^fr/);
+            const credits = authorsBlock(page).locator('.sub_item');
+            await expect(credits).toHaveCount(1, {timeout: 30_000});
+            await expect(credits.first()).toContainText('Ada Author');
+            await expect(credits.first().locator('.contributor_roles .value')).toHaveText(role);
+            await page.goto(`/index.php/${tag}/${locale}/catalog`);
+            await expect(page.locator('html')).toHaveAttribute('lang', locale === 'en' ? /^en/ : /^fr/);
+            await expect(catalogAuthorLine(page, `Submission ${tag}`)).toHaveText(
+                `Ada Author (${role})`,
+                {timeout: 30_000}
+            );
+        }
+
+        // The French pages before: the role reads "Author" on the book
+        // page and "Ada Author (Author)" in the catalog (Rule 15a; A21).
+        await readPages('fr_CA', 'Author');
+        // Control, before the save: the English pages read the same.
+        await readPages('en', 'Author');
+
+        // "Edit Role" on the "Author" row: "Role Name" holds "Author" with
+        // "1/2 languages completed" under it; "French" adds "Role Name in
+        // French", empty, with its own "1/2 languages completed"
+        // (Fields "Role Name"; A21).
+        const managerPage = await (await asUser(`${tag}mg`)).newPage();
+        await openContributorRolesSettings(managerPage, tag);
+        await openRoleRowAction(managerPage, 'Author', 'Edit');
+        let editRole = managerPage.getByRole('dialog', {name: 'Edit Role'});
+        const primaryBox = (d) => d.getByRole('textbox', {name: /^Role Name(?! in)/});
+        const frenchBox = (d) => d.getByRole('textbox', {name: 'Role Name in French'});
+        const completed = (d) =>
+            d.getByText('1/2 languages completed', {exact: true}).filter({visible: true});
+        await expect(primaryBox(editRole)).toHaveValue('Author', {timeout: 30_000});
+        await expect(completed(editRole)).toHaveCount(1);
+        await expect(frenchBox(editRole)).toBeHidden();
+        await editRole.getByRole('button', {name: 'French', exact: true}).click();
+        await expect(frenchBox(editRole)).toBeVisible();
+        await expect(frenchBox(editRole)).toHaveValue('');
+        await expect(completed(editRole)).toHaveCount(2);
+
+        // "Close": "Auteur-e" typed, then "Close": the window shuts at
+        // once with no question (no dialog left, the roles table readable
+        // behind it); after the page's own reload the reopened window's
+        // French box is empty, nothing saved (A22's before-reload state is
+        // never read) (Rule 12).
+        await frenchBox(editRole).fill(french);
+        await editRole.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(editRole).toHaveCount(0, {timeout: 30_000});
+        await expect(managerPage.getByRole('dialog')).toHaveCount(0);
+        await expect(roleRow(managerPage, 'Author')).toBeVisible();
+        await managerPage.reload();
+        await managerPage.locator('#contributorRoles-button').click();
+        await expect(rolesTable(managerPage)).toBeVisible({timeout: 30_000});
+        await openRoleRowAction(managerPage, 'Author', 'Edit');
+        editRole = managerPage.getByRole('dialog', {name: 'Edit Role'});
+        await expect(primaryBox(editRole)).toHaveValue('Author', {timeout: 30_000});
+        await editRole.getByRole('button', {name: 'French', exact: true}).click();
+        await expect(frenchBox(editRole)).toHaveValue('');
+
+        // The French name saved: "Contributor role saved" (Rule 12).
+        await frenchBox(editRole).fill(french);
+        const saved = managerPage.waitForResponse(
+            (r) =>
+                r.url().includes('/contributorRoles') &&
+                ['POST', 'PUT'].includes(r.request().method()),
+            {timeout: 30_000}
+        );
+        await editRole.getByRole('button', {name: 'Save', exact: true}).click();
+        const response = await saved;
+        expect(response.ok(), `the role save answered ${response.status()}`).toBe(true);
+        await expect(managerPage.getByText('Contributor role saved')).toBeVisible({
+            timeout: 30_000,
+        });
+
+        // The French pages after: "Auteur-e" on the book page and
+        // "Ada Author (Auteur-e)" in the catalog (Rule 15a).
+        await readPages('fr_CA', french);
+        // Control, after the save: the English pages still read "Author".
+        await readPages('en', 'Author');
     });
 });

@@ -49,6 +49,21 @@
  * as "The primary language English is required", so a row filtered by the
  * institution name loses it); the emptied list's "No items found."
  * (`emptyMessage`) and a preview row's display cell (`previewValue`).
+ *
+ * Added 2026-11-12 (the second revision, S1/S4/S12): the page's own reload
+ * back onto the screen (`reload`: the address keeps `workflowMenuKey`);
+ * the panel's Escape (`closePanelWithEscape`); the CRediT table's rows by
+ * position (`creditRoleRows`, `creditRoleSelect`, `creditDegreeSelect`,
+ * `pressAddAnotherRole`, `creditRemoveButton`: every row's selects share
+ * one id, A25, so they are reached by row and position, never by label);
+ * a registry-backed affiliation through a browser-side registry answer the
+ * test supplies (`stubRegistryRecord`, `registrySuggestion`,
+ * `addRegistryAffiliation`, `registryAffiliationRow`; the "Add" is bounded
+ * by the screen's own `api/v1/rors` request, whatever it answers, A5); the
+ * affiliation row's menu items (`affiliationRowMenuItems`); and the
+ * contributor edit a program sends (Rule 4a, fn o), sent in the signed-in
+ * page's own session with its CSRF token (`readContributorThroughApi`,
+ * `editContributorThroughApi`).
  */
 const {expect} = require('@playwright/test');
 const {waitForEditorReady} = require('../../../../shared/playwright/support/richtext.js');
@@ -89,6 +104,20 @@ exports.ContributorsScreen = class ContributorsScreen {
             this.page.getByRole('heading', {name: 'Preprint: Contributors'})
         ).toBeVisible({timeout: 30_000});
         await expect(this.panel()).toBeVisible();
+    }
+
+    /**
+     * The page's own reload, back onto the screen: the workflow address
+     * keeps `workflowMenuKey=publication_{id}_contributors`, so the reload
+     * lands on "Preprint: Contributors" again.
+     */
+    async reload() {
+        await this.page.reload();
+        await expect(
+            this.page.getByRole('heading', {name: 'Preprint: Contributors'})
+        ).toBeVisible({timeout: 30_000});
+        await expect(this.panel()).toBeVisible({timeout: 30_000});
+        await expect(this.rows().first()).toBeVisible({timeout: 30_000});
     }
 
     /** The contributors list panel (ContributorManager mount), or the
@@ -232,6 +261,18 @@ exports.ContributorsScreen = class ContributorsScreen {
         await expect(panel).toHaveCount(0, {timeout: 30_000});
     }
 
+    /**
+     * Shut the open panel with the Escape key, pressed in one of its
+     * boxes (spec Rule 4: the panel shuts at once, nothing saved).
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {import('@playwright/test').Locator} box a control inside the panel
+     */
+    async closePanelWithEscape(panel, box) {
+        await box.press('Escape');
+        await expect(panel).toHaveCount(0, {timeout: 30_000});
+    }
+
     /** A "Contributor Type" radio ("Person", "Organization or group",
      * "Anonymous"). */
     typeRadio(panel, label) {
@@ -284,6 +325,44 @@ exports.ContributorsScreen = class ContributorsScreen {
         await expect(row.locator('select[name="degree"]')).toBeVisible({timeout: 10_000});
         await row.locator('select[name="degree"]').selectOption({label: degree});
         return row;
+    }
+
+    /** The CRediT table's rows, in order ("No Items" shows none). */
+    creditRoleRows(panel) {
+        return this.creditRolesTable(panel).locator('tbody tr').filter({
+            has: this.page.locator('select'),
+        });
+    }
+
+    /** A CRediT row's "Select a new role (required)" drop-down (the row's
+     * first select; every row's carries the same id, A25). */
+    creditRoleSelect(row) {
+        return row.locator('select').nth(0);
+    }
+
+    /** A CRediT row's "Degree" drop-down (the row's second select). */
+    creditDegreeSelect(row) {
+        return row.locator('select').nth(1);
+    }
+
+    /** A CRediT row's "Remove Role" button. */
+    creditRemoveButton(row) {
+        return row.getByRole('button', {name: 'Remove Role', exact: true});
+    }
+
+    /**
+     * Press "Add Another Role" once and wait until the table holds one row
+     * more than before (a press made before the last row is drawn is
+     * lost: screen-notes ccI07b).
+     */
+    async pressAddAnotherRole(panel) {
+        const rows = this.creditRoleRows(panel);
+        const before = await rows.count();
+        await this.creditRolesTable(panel)
+            .getByRole('button', {name: 'Add Another Role', exact: true})
+            .click();
+        await expect(rows).toHaveCount(before + 1, {timeout: 10_000});
+        await expect(this.creditRoleSelect(rows.nth(before))).toBeVisible();
     }
 
     /** A form field's control id (FieldBase compileId). */
@@ -404,6 +483,21 @@ exports.ContributorsScreen = class ContributorsScreen {
     }
 
     /**
+     * The row of an institution, kept by its position: a row whose name
+     * box is cleared loses the name, and "Edit" may list the entries in
+     * another order than they were added (screen-notes ccI07b), so the
+     * position is read once the named row shows.
+     */
+    async affiliationRowKept(panel, name) {
+        await expect(this.affiliationRow(panel, name)).toBeVisible({timeout: 30_000});
+        const index = await this.affiliationsField(panel)
+            .locator('tbody tr')
+            .evaluateAll((rows, text) => rows.findIndex((row) => (row.textContent || '').includes(text)), name);
+        expect(index).toBeGreaterThanOrEqual(0);
+        return this.affiliationRowAt(panel, index);
+    }
+
+    /**
      * A typed entry's per-language name box, "Type the institution name in
      * {language}" (open behind "Edit institution name"; the accessible name
      * grows with the next box's label once a box is emptied, so it is
@@ -463,6 +557,90 @@ exports.ContributorsScreen = class ContributorsScreen {
             .getByRole('button', {name: 'Click to edit or delete'})
             .click();
         await this.page.getByRole('menuitem', {name: action, exact: true}).click();
+    }
+
+    /** The items of the open affiliation-row menu, in order. */
+    affiliationRowMenuItems() {
+        return this.page.locator('[data-reka-menu-content][role="menu"]').getByRole('menuitem');
+    }
+
+    /**
+     * Answer the browser-side registry search with one registry record for
+     * the queries `match` accepts, and pass every other query on to the
+     * earlier route (the empty answer `stubRegistrySearch` gives). The
+     * record has the registry's v2 shape the field reads
+     * (FieldAffiliationsRorAutoSuggest.vue `mapSuggestion`).
+     *
+     * @param {import('@playwright/test').Page} page
+     * @param {{match: RegExp, ror: string, name: string, country: string}} record
+     */
+    static async stubRegistryRecord(page, {match, ror, name, country}) {
+        await page.route('https://api.ror.org/**', (route) => {
+            const query = new URL(route.request().url()).searchParams.get('query') || '';
+            if (!match.test(query)) {
+                return route.fallback();
+            }
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                headers: {'Access-Control-Allow-Origin': '*'},
+                body: JSON.stringify({
+                    items: [
+                        {
+                            id: ror,
+                            status: 'active',
+                            names: [{value: name, types: ['ror_display', 'label'], lang: 'en'}],
+                            locations: [{geonames_details: {country_name: country}}],
+                        },
+                    ],
+                }),
+            });
+        });
+    }
+
+    /** The registry suggestion that links to the given ROR record. */
+    registrySuggestion(panel, ror) {
+        return this.affiliationsField(panel)
+            .locator('li.autosuggest__results-item')
+            .filter({has: this.page.locator(`a[href="${ror}"]`)});
+    }
+
+    /** The affiliation row that links to the given ROR record. */
+    registryAffiliationRow(panel, ror) {
+        return this.affiliationsField(panel)
+            .locator('tbody tr')
+            .filter({has: this.page.locator(`a[href="${ror}"]`)});
+    }
+
+    /**
+     * Type a registry query and wait for the suggestion that links to the
+     * record; returns that suggestion (not yet picked).
+     */
+    async searchRegistry(panel, query, ror) {
+        const field = this.affiliationsField(panel);
+        const search = field.locator('input.pkpAutosuggest__input');
+        await search.click();
+        await search.pressSequentially(query, {delay: 15});
+        const suggestion = this.registrySuggestion(panel, ror);
+        await expect(suggestion).toBeVisible({timeout: 15_000});
+        return suggestion;
+    }
+
+    /**
+     * Pick a registry suggestion and press "Add", bounded by the screen's
+     * own `api/v1/rors` request (the server's fetch of the record into its
+     * registry copy), whatever it answers: on a test install it fails and
+     * an error dialog follows (spec Rule 16, A5), which the caller handles
+     * without reading it.
+     */
+    async addRegistryAffiliation(panel, suggestion) {
+        await suggestion.click();
+        const added = this.page.waitForResponse(
+            (r) => r.url().includes('/api/v1/rors') && r.request().method() === 'POST',
+            {timeout: 30_000}
+        );
+        await this.affiliationsField(panel).getByRole('button', {name: 'Add', exact: true}).click();
+        await added;
     }
 
     /**
@@ -545,5 +723,49 @@ exports.ContributorsScreen = class ContributorsScreen {
             .click();
         await deleted;
         await expect(this.row(name)).toHaveCount(0, {timeout: 30_000});
+    }
+
+    // ------------------------------------------------------------------
+    // The contributor edit a program sends (spec Rule 4a, fn o)
+
+    /**
+     * Send a request to one contributor's address
+     * (`api/v1/submissions/{id}/publications/{id}/contributors/{id}`) in the
+     * signed-in page's own session, with its CSRF token; the page is an
+     * idle back-office page of the context. Returns Playwright's
+     * APIResponse, whatever its status.
+     *
+     * @param {'GET'|'PUT'} method
+     * @param {{contextPath: string, submissionId: number, publicationId: number, contributorId: number}} address
+     * @param {object} [body] sent as JSON
+     */
+    async contributorRequest(method, {contextPath, submissionId, publicationId, contributorId}, body) {
+        await this.page.waitForFunction(
+            () => Boolean(/** @type {any} */ (window).pkp?.currentUser?.csrfToken),
+            null,
+            {timeout: 30_000}
+        );
+        const token = await this.page.evaluate(() => /** @type {any} */ (window).pkp.currentUser.csrfToken);
+        return await this.page.request.fetch(
+            `/index.php/${contextPath}/api/v1/submissions/${submissionId}/publications/${publicationId}/contributors/${contributorId}`,
+            {
+                method,
+                headers: {'X-Csrf-Token': token},
+                ...(body === undefined ? {} : {data: body}),
+                failOnStatusCode: false,
+            }
+        );
+    }
+
+    /** The contributor as the API gives it (a GET of its address). */
+    async readContributorThroughApi(address) {
+        const response = await this.contributorRequest('GET', address);
+        expect(response.status()).toBe(200);
+        return await response.json();
+    }
+
+    /** A program's edit of the contributor (a PUT of its address). */
+    async editContributorThroughApi(address, body) {
+        return await this.contributorRequest('PUT', address, body);
     }
 };

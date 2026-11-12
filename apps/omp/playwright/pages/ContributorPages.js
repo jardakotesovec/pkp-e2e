@@ -22,6 +22,13 @@
  *   so no test depends on the public registry. The typed-text option the
  *   tests pick renders independently of the suggestions payload
  *   (Autosuggest `allowCustom`), so the hand-typed path is unchanged.
+ * - stubRegistryRecords — the same query answered with given records,
+ *   for a registry pick (S4); the server-side record fetch "Add" makes
+ *   stays unstubbed.
+ *
+ * Revised 2026-11-12: the CRediT rows by position, Escape on the panel,
+ * the page's own reload, the affiliation row's menu read, the registry
+ * pick.
  *
  * Note on request bounding: the panel writes ride POST with
  * X-Http-Method-Override (jQuery in the panel, useFetch elsewhere), so
@@ -38,6 +45,36 @@ const {expect} = require('@playwright/test');
 const {stubRegistrySearch} = require('./FundingPages.js');
 
 exports.stubRegistrySearch = stubRegistrySearch;
+
+/**
+ * Answer the Affiliations field's browser-side registry query
+ * (api.ror.org) with the given records, `{ror, name, country}`, those
+ * whose name's first word the query carries, in the registry's v2 shape
+ * the field reads (name, country, the record link). The server-side fetch
+ * "Add" makes is not stubbed: on a test install it fails (spec A5).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {{ror: string, name: string, country: string}[]} records
+ */
+exports.stubRegistryRecords = async function stubRegistryRecords(page, records) {
+    await page.route('https://api.ror.org/**', (route) => {
+        const query = decodeURIComponent(route.request().url()).toLowerCase();
+        const items = records
+            .filter((record) => query.includes(record.name.toLowerCase().split(' ')[0]))
+            .map((record) => ({
+                id: record.ror,
+                names: [{lang: 'en', types: ['ror_display', 'label'], value: record.name}],
+                status: 'active',
+                locations: [{geonames_details: {country_name: record.country}}],
+            }));
+        return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            headers: {'Access-Control-Allow-Origin': '*'},
+            body: JSON.stringify({items}),
+        });
+    });
+};
 
 exports.ContributorsScreen = class ContributorsScreen {
     /**
@@ -72,6 +109,19 @@ exports.ContributorsScreen = class ContributorsScreen {
         await expect(
             this.page.getByRole('heading', {name: 'Publication: Contributors'})
         ).toBeVisible({timeout: 30_000});
+    }
+
+    /**
+     * Reload the page the browser is on (the Contributors page opened by
+     * its address, which carries the workflow menu key) and wait for the
+     * screen heading and its first row.
+     */
+    async reload() {
+        await this.page.reload();
+        await expect(
+            this.page.getByRole('heading', {name: 'Publication: Contributors'})
+        ).toBeVisible({timeout: 30_000});
+        await expect(this.rows().first()).toBeVisible({timeout: 30_000});
     }
 
     /** The workflow menu's "Contributors" entry (always present). */
@@ -391,6 +441,67 @@ exports.ContributorsScreen = class ContributorsScreen {
     }
 
     /**
+     * The table's role rows (the empty table's "No Items" row has no
+     * select, so it never counts).
+     */
+    creditRows(dialog) {
+        return this.creditRolesTable(dialog)
+            .locator('tbody tr')
+            .filter({has: this.page.locator('select')});
+    }
+
+    /**
+     * A row's "Select a new role (required)" drop-down, by row position:
+     * every row's selects share one id and the labels all point at the
+     * first row (spec A25), so neither the id nor the label reaches a
+     * later row.
+     */
+    creditRoleSelect(dialog, index) {
+        return this.creditRows(dialog).nth(index).locator('select').first();
+    }
+
+    /** A row's "Degree" drop-down, by row position (see creditRoleSelect). */
+    creditDegreeSelect(dialog, index) {
+        return this.creditRows(dialog).nth(index).locator('select').nth(1);
+    }
+
+    /**
+     * Press "Add Another Role" and wait for the new row. A press issued
+     * while the table is still drawing the previous row can draw nothing,
+     * so the press is repeated, bounded, only while the count is unchanged.
+     */
+    async addCreditRow(dialog) {
+        const before = await this.creditRows(dialog).count();
+        const add = dialog.getByRole('button', {name: 'Add Another Role', exact: true});
+        await expect(async () => {
+            if ((await this.creditRows(dialog).count()) === before) {
+                await add.click({timeout: 2_000});
+            }
+            await expect(this.creditRows(dialog)).toHaveCount(before + 1, {timeout: 3_000});
+        }).toPass({intervals: [500, 1_000], timeout: 30_000});
+    }
+
+    /** Press a row's "Remove Role" and wait for the row to go. */
+    async removeCreditRow(dialog, index) {
+        const before = await this.creditRows(dialog).count();
+        await this.creditRows(dialog)
+            .nth(index)
+            .getByRole('button', {name: 'Remove Role', exact: true})
+            .click();
+        await expect(this.creditRows(dialog)).toHaveCount(before - 1, {timeout: 30_000});
+    }
+
+    /**
+     * Shut an open panel with the Escape key (pressed in the field the
+     * focus sits in) and wait for it to go.
+     */
+    async escapePanel(dialog) {
+        // lint-ok: escape Rule 4 claims the key; the contributor panel is the top layer and shuts on it
+        await this.page.keyboard.press('Escape');
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
      * Press "Add Another Role" and pick a role and a degree on the new
      * row (each cell holds a native select; the role's is first).
      */
@@ -467,6 +578,66 @@ exports.ContributorsScreen = class ContributorsScreen {
             .getByRole('button', {name: 'Click to edit or delete'})
             .click();
         await this.page.getByRole('menuitem', {name: action, exact: true}).click();
+    }
+
+    /**
+     * Open an affiliation row's expander ("Click to edit or delete"), by
+     * the typed name or a row locator, and return its menu items, for a read of what it offers; the caller picks one
+     * or presses Escape.
+     */
+    async openAffiliationRowMenu(dialog, name) {
+        const row = typeof name === 'string' ? this.affiliationRow(dialog, name) : name;
+        await row.getByRole('button', {name: 'Click to edit or delete'}).click();
+        const items = this.page.getByRole('menuitem');
+        await expect(items.first()).toBeVisible({timeout: 30_000});
+        return items;
+    }
+
+    /** A registry suggestion, by its link to the record. */
+    registrySuggestion(dialog, ror) {
+        return this.affiliationsField(dialog)
+            .locator('li.autosuggest__results-item')
+            .filter({has: this.page.locator(`a[href="${ror}"]`)});
+    }
+
+    /**
+     * Type a query into the institution search box, wait for the
+     * registry's answer (fired from the browser) and return the suggestion
+     * for the given record.
+     */
+    async searchRegistry(dialog, query, ror) {
+        const input = this.affiliationsField(dialog).locator('input.pkpAutosuggest__input');
+        await input.click();
+        const answered = this.page.waitForResponse(
+            (r) => r.url().startsWith('https://api.ror.org/'),
+            {timeout: 30_000}
+        );
+        await input.pressSequentially(query, {delay: 15});
+        await answered;
+        const suggestion = this.registrySuggestion(dialog, ror);
+        await expect(suggestion).toBeVisible({timeout: 30_000});
+        return suggestion;
+    }
+
+    /**
+     * Press "Add" on a picked registry suggestion, bounded by the server's
+     * answer to the record fetch the press makes (`POST …/rors`), whatever
+     * that answer is.
+     */
+    async addPickedRegistryEntry(dialog) {
+        const fetched = this.page.waitForResponse(
+            (r) => /\/api\/v1\/rors\/?(\?|$)/.test(r.url()) && r.request().method() === 'POST',
+            {timeout: 30_000}
+        );
+        await this.affiliationAddButton(dialog).click();
+        await fetched;
+    }
+
+    /** A registry-backed affiliation's row, by its link to the record. */
+    registryAffiliationRow(dialog, ror) {
+        return this.affiliationsField(dialog)
+            .locator('tbody tr')
+            .filter({has: this.page.locator(`a[href="${ror}"]`)});
     }
 
     /**

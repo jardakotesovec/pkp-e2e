@@ -28,8 +28,13 @@
  * src/managers/ContributorRoleManager/*, confirmed against the running app
  * while this suite was built (2026-08-28).
  *
- * The browser-side ROR registry stub is FundingPages.stubRegistrySearch
- * (the Affiliations field queries the same api.ror.org endpoint family).
+ * The browser-side ROR registry stubs: FundingPages.stubRegistrySearch
+ * (an empty answer; the Affiliations field queries the same api.ror.org
+ * endpoint family) and stubRegistryRecords here (an answer carrying given
+ * records). requestInSession sends a program's request in the page
+ * user's signed-in session (spec Rule 4a). Revised 2026-11-12: the
+ * CRediT rows, the registry pick, the Escape key, the "Edit Role"
+ * window's language button and boxes.
  */
 const {expect} = require('@playwright/test');
 
@@ -488,6 +493,178 @@ exports.ContributorsPanel = class ContributorsPanel {
             .getByRole('textbox', {name: new RegExp(`^Type the institution name in ${language}`)})
             .first();
     }
+    /**
+     * Shut an open side panel with the Escape key (Rule 4: at once, with no
+     * question, nothing saved), pressed in the given box of the panel
+     * (by default its first box).
+     *
+     * @param {import('@playwright/test').Locator} dialog
+     * @param {import('@playwright/test').Locator} [target]
+     */
+    async closePanelByEscape(dialog, target = dialog.locator('input:visible').first()) {
+        await target.press('Escape');
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
+     * The CRediT table's role rows (each with a role and a degree select
+     * and "Remove Role"; the empty table's "No Items" line is no row here).
+     * The rows' selects all carry the same ids, so a row is taken by its
+     * position (ccI07b note).
+     */
+    creditRows(dialog) {
+        return this.creditRolesField(dialog).locator('tbody tr').filter({has: this.page.locator('select')});
+    }
+
+    /** A CRediT row's "Select a new role (required)" drop-down. */
+    creditRoleSelect(row) {
+        return row.locator('select').first();
+    }
+
+    /** A CRediT row's "Degree" drop-down. */
+    creditDegreeSelect(row) {
+        return row.locator('select').nth(1);
+    }
+
+    /**
+     * Press the CRediT table's "Add Another Role" once and wait for the new
+     * row. A press issued while the previous row is still being drawn can
+     * be lost (ccI07b note), so the press is repeated only while the row
+     * count has not grown, never past one new row.
+     */
+    async addAnotherCreditRow(dialog) {
+        const rows = this.creditRows(dialog);
+        const before = await rows.count();
+        const button = this.creditRolesField(dialog).getByRole('button', {name: 'Add Another Role', exact: true});
+        await expect(async () => {
+            if ((await rows.count()) === before) {
+                await button.click({timeout: 2_000});
+            }
+            await expect(rows).toHaveCount(before + 1, {timeout: 2_000});
+        }).toPass({intervals: [1_000], timeout: 30_000});
+        return rows.nth(before);
+    }
+
+    /** The registry suggestion for one ROR record (its link is the record's address). */
+    registrySuggestion(dialog, ror) {
+        return this.affiliationsField(dialog)
+            .locator('li.autosuggest__results-item')
+            .filter({has: this.page.locator(`a[href="${ror}"]`)});
+    }
+
+    /**
+     * Type a query into the Affiliations search box and wait for the
+     * registry's answer (the field debounces, then queries from the
+     * browser); returns the suggestion for the given record.
+     */
+    async searchRegistry(dialog, query, ror) {
+        const search = this.affiliationsField(dialog).locator('input.pkpAutosuggest__input');
+        await search.click();
+        const answered = this.page.waitForResponse((r) => r.url().startsWith('https://api.ror.org/'), {
+            timeout: 30_000,
+        });
+        await search.pressSequentially(query, {delay: 15});
+        await answered;
+        const suggestion = this.registrySuggestion(dialog, ror);
+        await expect(suggestion).toBeVisible({timeout: 30_000});
+        return suggestion;
+    }
+
+    /** A registry-backed affiliation's row, by its link to the record. */
+    registryAffiliationRow(dialog, ror) {
+        return this.affiliationsField(dialog)
+            .locator('tbody tr')
+            .filter({has: this.page.locator(`a[href="${ror}"]`)});
+    }
+
+    /**
+     * Press "Add" on a picked registry suggestion, bounded by the server's
+     * answer to the record fetch the press makes (`POST …/rors`).
+     */
+    async addPickedRegistryEntry(dialog) {
+        const fetched = this.page.waitForResponse(
+            (r) => /\/api\/v1\/rors\/?(\?|$)/.test(r.url()) && r.request().method() === 'POST',
+            {timeout: 30_000}
+        );
+        await this.affiliationAddButton(dialog).click();
+        await fetched;
+    }
+
+    /**
+     * Open an affiliation row's "Click to edit or delete" menu and return
+     * its items (the menu portals, so they are looked up on the page).
+     */
+    async openAffiliationMenu(row) {
+        await row.getByRole('button', {name: 'Click to edit or delete'}).click();
+        const items = this.page.getByRole('menuitem');
+        await expect(items.first()).toBeVisible({timeout: 30_000});
+        return items;
+    }
+
+};
+
+/**
+ * Answer the Affiliations field's browser-side registry query
+ * (api.ror.org/v2/organizations, fired from the user's own browser) with
+ * the given registry records when the query names one of them, and with
+ * an empty result set otherwise — a hermetic stand-in for the public
+ * registry (the browser is not behind the test install's dead proxy).
+ * Each record is shaped as the registry's v2 answer the field maps
+ * (FieldAffiliationsRorAutoSuggest.vue `mapSuggestion`): its display
+ * name, its status and its first location's country.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {Array<{ror: string, name: string, country: string}>} records
+ */
+exports.stubRegistryRecords = async function stubRegistryRecords(page, records) {
+    await page.route('https://api.ror.org/**', (route) => {
+        const query = decodeURIComponent(route.request().url()).toLowerCase();
+        const items = records
+            .filter((record) => query.includes(record.name.toLowerCase().split(' ')[0]))
+            .map((record) => ({
+                id: record.ror,
+                names: [{lang: 'en', types: ['ror_display', 'label'], value: record.name}],
+                status: 'active',
+                locations: [{geonames_details: {country_name: record.country}}],
+            }));
+        return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            headers: {'Access-Control-Allow-Origin': '*'},
+            body: JSON.stringify({items}),
+        });
+    });
+};
+
+/**
+ * Send a request to the context's REST API in the signed-in session of
+ * the page's user, the way a program would send the same edit (spec Rule
+ * 4a, fn o and s12): the API address and the CSRF token are read off the
+ * page (`pkp.context.apiBaseUrl`, `pkp.currentUser.csrfToken`), so the
+ * page must be an idle back-office page of the context. Returns
+ * Playwright's APIResponse and never throws for a status.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} method GET | PUT
+ * @param {string} path below the API base, e.g. 'submissions/12/publications/13/contributors/14'
+ * @param {object} [body] sent as JSON
+ */
+exports.requestInSession = async function requestInSession(page, method, path, body) {
+    await page.waitForFunction(
+        () => !!(window.pkp && window.pkp.context && window.pkp.context.apiBaseUrl && window.pkp.currentUser && window.pkp.currentUser.csrfToken),
+        null,
+        {timeout: 30_000}
+    );
+    const {base, csrfToken} = await page.evaluate(() => ({
+        base: window.pkp.context.apiBaseUrl,
+        csrfToken: window.pkp.currentUser.csrfToken,
+    }));
+    return page.request.fetch(`${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`, {
+        method,
+        headers: {'X-Csrf-Token': csrfToken},
+        ...(body === undefined ? {} : {data: body}),
+        failOnStatusCode: false,
+    });
 };
 
 exports.ContributorRolesScreen = class ContributorRolesScreen {
@@ -611,6 +788,44 @@ exports.ContributorRolesScreen = class ContributorRolesScreen {
     /** Close an Add/Edit Role panel without saving (its header "Close"). */
     async closeRoleDialog(dialog) {
         await dialog.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /** The "Edit Role" window's language button ("French") at its top. */
+    languageButton(dialog, language) {
+        return dialog.getByRole('button', {name: language, exact: true});
+    }
+
+    /** The primary language's "Role Name" box. */
+    primaryRoleNameBox(dialog) {
+        return dialog.getByRole('textbox', {name: /^Role Name\b(?! in )/});
+    }
+
+    /** Another language's "Role Name in {language}" box. */
+    roleNameBox(dialog, language) {
+        return dialog.getByRole('textbox', {name: `Role Name in ${language}`, exact: true});
+    }
+
+    /**
+     * The shown "{count}/{total} languages completed" lines under the
+     * boxes (a language's box and its line stay in the DOM, hidden, until
+     * its button is pressed).
+     */
+    completionLines(dialog, text) {
+        return dialog.getByText(text, {exact: true}).filter({visible: true});
+    }
+
+    /**
+     * Press an Add/Edit Role window's "Save", bounded by the contributor
+     * roles API answering OK, and wait for the window to close.
+     */
+    async saveRoleDialog(dialog) {
+        const saved = this.page.waitForResponse(
+            (r) => r.url().includes('/contributorRoles') && r.request().method() !== 'GET' && r.ok(),
+            {timeout: 30_000}
+        );
+        await dialog.getByRole('button', {name: 'Save', exact: true}).click();
+        await saved;
         await expect(dialog).toHaveCount(0, {timeout: 30_000});
     }
 };

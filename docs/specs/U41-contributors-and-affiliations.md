@@ -461,11 +461,12 @@ screen, Rule 12): <sup>e</sup>
 
 ## Canonical scenarios
 
-Scenarios 1–3, 6, 7, 9 and 10 run on the seeded journal with ready
-accounts and scratch submissions; scenarios 4, 5, 8 and 11 run on a
+Scenarios 1–3, 6, 7, 9, 10 and 12 run on the seeded journal with ready
+accounts and scratch submissions; scenarios 4, 5, 8, 11 and 13 run on a
 scratch journal with throwaway accounts, because each needs the journal
 set up differently (a second submission language, added contributor
-roles, the competing-interests requirement, a review type). Each
+roles, the competing-interests requirement, a review type, French as a
+form language). Each
 scenario's accounts, seeding and the mail catcher's address are in its
 footnote.
 
@@ -505,6 +506,22 @@ footnote.
      and press Save (Fields; Rule 4).
    - **Edit**: open the person's "Edit", type "Mwandenga" as Family Name
      and press Save: the row updates to "Alan Mwandenga" (Rule 4).
+   - **"Close" and the Escape key**: open the person's "Edit" again,
+     type "Closed" as Family Name and press "Close" at the panel's top:
+     the panel shuts at once, with no question and no notice; open
+     "Edit" again, type "Escaped" as Family Name and press the Escape
+     key: the panel shuts the same way; reload the page: the row still
+     reads "Alan Mwandenga" (Rule 4).
+   - **The CRediT table**: open the person's "Edit": "CRediT roles and
+     the degrees of contribution" reads "No Items"; press "Add Another
+     Role": a row arrives on "Conceptualization" with "Degree" empty;
+     press "Add Another Role" again: a second row arrives on
+     "Conceptualization" too, and each row's "Select a new role
+     (required)" list shows "Conceptualization" grayed out (open each
+     list by its own drop-down: a click on the second row's label lands
+     in the first row, ⚠ [A25](#a25)); press "Remove Role" on the second
+     row and press Save; reopen "Edit": the table holds the one row,
+     "Conceptualization", with "Degree" still empty (Fields).
    - **An Anonymous contributor**: press "Add Contributor" and choose
      "Anonymous": there are no name fields, ROR ID, Homepage URL, Bio
      Statement or Affiliations, only Email, Country, Contributor Roles,
@@ -521,19 +538,19 @@ footnote.
    - **Nothing else happens**: no email arrived in the mail catcher from
      these saves, and the submission's Activity Log & Notes → History
      has no new entry (Side effects).
-   - **Control**: the log's silence is read against scenario 3's line:
-     "Set Primary Contact" on this same submission writes one
-     "Submission metadata updated" entry (Side effects). <sup>s1</sup>
+   - **Control**: press "Set Primary Contact" on the "Alan Mwandenga"
+     row: History now shows one new entry, "Submission metadata
+     updated" (Side effects). <sup>s1</sup>
 
 2. **Reorder and preview the display formats**
 
-   Given: Journal Manager, on the seeded journal, with scenario 1's
-   submission: two Person contributors with distinct family names, as
-   scenario 1 leaves it once its organization and its Anonymous row are
-   deleted.
+   Given: Journal Manager, on the seeded journal, with a submitted
+   scratch submission and one added Person contributor, the two with
+   distinct family names.
 
-   - **Preview**: the list shows the submitting author first and the
-     added contributor second; press "Preview": "List of Contributors"
+   - **Preview**: with no "Save Order" pressed yet on the submission,
+     the list shows the submitting author first and the added
+     contributor second; press "Preview": "List of Contributors"
      shows "Abbreviated" as the first contributor's family name plus
      "et al.", and "Full" as both names, each followed by "(Author)" and
      separated by a semicolon (Rules 6, 7).
@@ -574,7 +591,7 @@ footnote.
      the remaining row still shows only "Set Primary Contact": the
      submission now has no primary contact, and nothing warned about it
      (Rules 5, 10).
-   - **The publish dialog**: on a journal press "Schedule For
+   - **The publish dialog**: on a journal, press "Schedule For
      Publication", the button in the Publication area's header beside
      "Status: Unscheduled", and continue past "Review Publishing Details"
      (its "Confirm" button) to the final window; on a press the same
@@ -606,7 +623,9 @@ footnote.
 4. **Record affiliations, typed and registry-backed**
 
    Given: Journal Manager, on a scratch journal with a second submission
-   language, editing a contributor of a scratch submission.
+   language, editing a contributor of a scratch submission; a registry
+   search for "Simon Fraser University" finds that one institution, in
+   Canada.
 
    - **A typed institution**: under "Affiliations", type "Probe
      Institute" (four or more characters), pick the typed text from the
@@ -621,21 +640,27 @@ footnote.
      affiliation name in the submission primary locale." under the
      field and "Please correct one error." at the foot, whose error list
      a screen reader reads as "Go to Affiliations: [object Object]"
-     ([A7](#a7)); type "Probe Institute" back into the box (Fields). In
-     "Add Contributor" the same refusal still adds the contributor
+     ([A7](#a7)); type "Probe Institute" back into the box (Fields).
+     Refused in "Add Contributor", Save would still add the contributor
      ([A24](#a24)).
-   - **A registry-backed institution**: type "Simon Fraser University",
-     pick the suggestion that shows its country and the ROR mark, and
-     press "Add": the entry's row links to the registry record and
-     offers only "Remove institution". Where the registry copy lacks it
-     and the server cannot reach the registry (Rule 16),
-     "Add" instead raises "Error": "An unexpected error has occurred.
-     Please reload the page and try again." ("OK" closes it); the entry
-     is added anyway, and reopened after Save its row shows only the
-     registry link and, in red, "The primary language English is
-     required" ([A5](#a5)) (Fields).
+   - **A registry-backed institution**: type "Simon Fraser University":
+     its suggestion shows the name, "Canada", the ROR mark and a link to
+     its registry record; pick it and press "Add": the entry joins the
+     list, its row linking to the registry record, and its "Click to edit
+     or delete" button offers only "Remove institution" (Fields). Where
+     the journal's server cannot fetch the record (Rule 16), "Add" also
+     raises an "Error" dialog; close it with "OK" (⚠ [A5](#a5)).
    - **Both saved**: Save the contributor and reopen "Edit": both
-     institutions are there (Rule 4; Fields).
+     institutions are there, the registry-backed one by its link to the
+     registry record (Rule 4; Fields). Where the server could not fetch
+     the record, that row shows no name (⚠ [A5](#a5)).
+   - **A refused "Edit" saves nothing**: in the reopened "Edit", open
+     "Edit institution name" on "Probe Institute", clear the submission
+     language's box and press Save: the save is refused with
+     "Please provide affiliation name in the submission primary locale."
+     under the field; press "Close" and reload the page: the
+     contributor's "Edit" lists "Probe Institute" as before, its
+     submission-language box reading "Probe Institute" (Fields; Rule 4).
    - **Removing one**: press "Remove institution" on "Probe Institute":
      "Are you sure?" asks "The affiliation Probe Institute will be
      deleted."; "Yes" removes it (Fields).
@@ -722,6 +747,10 @@ footnote.
    Given: Journal Manager, then Reader, on the seeded journal, with
    scenario 6's published item and its two contributors.
 
+   - **"Save" with nothing changed**: open the first contributor's
+     "Edit" and press Save without changing anything: after a reload
+     the list still shows that contributor first, and the landing page
+     still credits it first (Rule 6).
    - **The untick**: edit the second of the two contributors, untick
      "Include this contributor when identifying authors in lists of
      publications." and Save: "Preview" now omits them from the
@@ -826,23 +855,78 @@ App-specific:
       contributor list (Rule 17). A preprint server installs no review
       stage, so the scenario has no end there. <sup>s11</sup>
 
+Common to every application:
+
+12. **A contributor edited by a program**
+
+    Given: Journal Manager, on the seeded journal, with a scratch
+    submission whose second contributor, "Robin Okafor", has the email
+    "robin@example.test", the country "Canada" and the typed
+    institution "Probe Institute".
+
+    - **An edit that resends the affiliations**: a program using the
+      Journal Manager's API key (*[User profile](U03-user-profile.md)*)
+      sends an edit of "Robin Okafor" that names the contributor type
+      `PERSON` and carries "Dana" as the given name and the affiliations
+      as it read them; reload the "Contributors" page: the row reads
+      "Dana Okafor", and its "Edit" still shows "robin@example.test",
+      "Canada" and "Probe Institute" under "Affiliations" (Rule 4a).
+    - **An edit of the given name alone**: the program sends an edit
+      that names the type `PERSON` and carries only "Kim" as the given
+      name: after a reload the row reads "Kim Okafor", and its "Edit"
+      still shows "robin@example.test" and "Canada"; the institution is
+      not read here, because an edit that leaves the affiliations out
+      removes them (⚠ [A30](#a30)) (Rule 4a).
+    - **The type sent empty**: the program sends an edit with the
+      contributor type empty and "kim@example.test" as the email: its
+      answer refuses the edit with "This field is required." for the
+      contributor type; after a reload the row still reads "Kim Okafor"
+      and its "Edit" still shows "robin@example.test" (Rule 4a).
+    - **Control**: the same edit naming the type `PERSON` goes through:
+      after a reload the contributor's "Edit" shows "kim@example.test",
+      and the row still reads "Kim Okafor" (Rule 4a). <sup>s12</sup>
+
+13. **Role names in the reader's language**
+
+    Given: a Reader and the Journal Manager, on a scratch journal whose
+    primary language is English, with French ticked under "UI" and
+    "Forms" on its "Languages" tab, holding a published scratch
+    submission whose one contributor, its submitting author, holds the
+    "Author" role.
+
+    - **The French pages before**: browse in French (the address with
+      "fr_CA" after the journal's path,
+      [Languages & locales](U57-languages-and-locales.md#language-addresses))
+      and open the item's landing page: the contributor is credited with
+      the role name "Author"; the item's listing (an issue's table of
+      contents, a press's catalog, a preprint server's archive) reads the
+      contributor's name followed by "(Author)" (Rule 15a; ⚠ [A21](#a21)).
+    - **"Edit Role"**: as the Journal Manager, on Settings → Workflow →
+      Submission → "Contributor Roles", open "Edit" behind the "Author"
+      row's "…" menu: the "Role Name" box shows "Author", with "1/2
+      languages completed" under it; press "French" at the top of the
+      window: the box "Role Name in French" shows, empty, with "1/2
+      languages completed" under it (Fields "Role Name"; ⚠ [A21](#a21)).
+    - **"Close"**: type "Auteur-e" in "Role Name in French" and press
+      "Close" at the top of the window: it shuts at once, with no
+      question; reload the page, open the "Author" row's "Edit" again
+      and press "French": "Role Name in French" is empty, nothing saved.
+      Reopened before the reload, the window would still hold the typed
+      name (⚠ [A22](#a22)) (Rule 12).
+    - **The French name saved**: type "Auteur-e" in "Role Name in
+      French" and press Save: "Contributor role saved" appears (Rule 12).
+    - **The French pages after**: browsing in French, reload the landing
+      page: the contributor is credited with "Auteur-e", and the listing
+      reads the contributor's name followed by "(Auteur-e)" (Rule 15a).
+    - **Control**: the same landing page and listing in English read
+      "Author" and the name followed by "(Author)", before the save and
+      after it (Rule 15a). <sup>s13</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - a new contributor joining last before any "Save Order" is pressed,
-    on a press and a preprint server, where the suites save an order
-    before they read it (Rule 6): scenario 2's "Preview" and "Control" [upstream 2026-09-29]
-  - role names in the reader's language: a French reader's "Author" on
-    the landing page and in the listings' author lines, "Auteur-e" once
-    the role's French name is saved, the English pages unchanged
-    (Rule 15a) [incidental 2026-09-29]
-  - the "Edit Role" window's language button, the other language's box
-    shown once it is pressed, and "{count}/{total} languages completed"
-    under each box (Fields "Role Name") [incidental 2026-09-29]
-  - "Close" on "Edit Role" leaving at once, with no question, and a
-    reload showing nothing saved (Rule 12) [incidental 2026-09-29]
   - the guard for A14 (issue report
     `docs/issues/U41-A14-one-role-journal-contributor-save-fails.md`): on
     a journal with one contributor role, a contributor added from the
@@ -876,22 +960,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U41-OPS2-competing-interests-label-raw-markup.md`):
     scenario 8 on a preprint server, the contributor form's field
     labelled "Competing Interests" [report 2026-10-03]
-  - a CRediT role's degree on a French landing page reading in French,
-    once the degree words gain their French translation (Rule 14; A23,
-    retired) [incidental 2026-10-05]
-  - "Close" and the Escape key shutting the contributor panel at once,
-    with no question, and a reload showing nothing saved (Rule 4) [incidental 2026-10-07]
-  - an "Edit" refused for a hand-entered institution's missing name
-    saving nothing: after "Close" and a reload, the contributor as
-    before (Fields "Affiliations") [incidental 2026-10-07]
-  - the CRediT table's "Add Another Role": a new row on
-    "Conceptualization" with no degree picked, a role a row shows
-    grayed out in every row's list, and "Save" with "Degree" still empty
-    keeping the role with no degree (Fields "CRediT roles and the
-    degrees of contribution") [incidental 2026-10-07]
-  - "Edit" and "Save" with nothing changed leaving the contributor in
-    its place, in the list after a reload and on the published item's
-    page (Rule 6) [incidental 2026-10-15]
   - an article, book or preprint page with four contributors listing a
     contributor's two affiliations in the order "Edit" lists them
     ([A26](#a26)): the guard the issue report proposes [report 2026-10-13]
@@ -904,17 +972,6 @@ Left out of the scenarios above, by reason:
   - a contributor whose hand-entered institution is named in a language
     then unticked under "Metadata" saved with nothing changed, the save
     going through ([A28](#a28)): the guard the issue report proposes [report 2026-10-13]
-  - a program's contributor edit through the programming interface that
-    names the type and sends only a new given name, keeping the family
-    name, email and country, and one that also resends the affiliations
-    as read, keeping each (Rule 4a) [incidental 2026-10-19]
-  - a program's contributor edit that sends the type empty, refused with
-    "This field is required." and the contributor unchanged after a
-    reload (Rule 4a) [incidental 2026-10-29]
-  - a contributor with a registry-backed affiliation, on a journal that
-    takes a language with no two-letter code (Central Kurdish), saved
-    from "Edit" unchanged: the save going through and the entry still
-    the registry's after a reload (Rule 16; pkp/pkp-lib#12520) [upstream 2026-11-06]
 - **Nothing new to test**:
   - Preferred Public Name (Fields): another text box on the form
     scenario 1 fills
@@ -929,6 +986,10 @@ Left out of the scenarios above, by reason:
   - the Contributors entry, the affiliations field and the registry
     lookup with no setting to remove them (Settings): every scenario's
     given
+  - a CRediT role's degree on a French landing page in French (Rule 14):
+    a wording variant of the degree scenario 6 reads in English; the
+    degree words exist only in English, so there is no French text to
+    read
 - **Register carries it**:
   - A4 (a typed ROR ID surviving the type switch; Fields)
   - A7 (the screen-reader error list's "Go to Affiliations: [object
@@ -992,6 +1053,12 @@ Left out of the scenarios above, by reason:
     scenario 4's institution, so no named registry-backed affiliation
     can be built there; an install whose copy holds it, as PKP's
     default test dataset's does, builds one
+  - a contributor with a registry-backed affiliation, on a journal that
+    takes a language with no two-letter code (Central Kurdish), saved
+    from "Edit" unchanged, the save going through and the entry still
+    the registry's after a reload (Rule 16): it needs a named
+    registry-backed affiliation, which the test installs cannot build
+    (the item above)
 - **Owned by another feature**:
   - the ORCID iD field while ORCID is enabled (Fields; Settings; *ORCID
     integration*)
@@ -2266,24 +2333,34 @@ so the submitter is a throwaway account (created on a scratch context,
 the only place users are created, and submitting to the seeded journal,
 as U40's scenario 1 does); the absence is read against a positive
 control the test itself sends the same way (scenarios.md "Mailpit").
-The log is the submission's Activity Log & Notes → History.
+The log is the submission's Activity Log & Notes → History. The
+"Close" and Escape reads and the CRediT table run on the "Alan
+Mwandenga" contributor, through the panel (no seed key exists for
+CRediT roles, scenarios.md "Field shapes not built yet"); the reload
+after "Close" and Escape is the page's own.
 
 <a id="fn-s2"></a>
-**s2 — scenario 2 seeding.** The scenario-1 submission with two PERSON
-contributors with distinct family names. "et al." from
+**s2 — scenario 2 seeding.** A scratch submission of its own (the
+roster author as submitter), plus one PERSON contributor added through
+the panel, the two with distinct family names; scenario 1's submission
+is not reused, its Control having moved the primary contact. "et al." from
 `submission.shortAuthor`; the format strings refresh because Preview
-re-fetches the publication. The suites still open with a Save-Order pin
-(submitter first), a workaround from when A15 made "Abbreviated" and the
-row order nondeterministic; since A15's retirement (2026-09-03) it is
-belt-and-braces, not load-bearing. The version copy: the typed
+re-fetches the publication. The Preview read and the Control are taken
+before any "Save Order" on the submission, in all three apps: the order
+a new contributor takes with no saved order is what they read. The
+Save-Order pin the suites once opened with (submitter first) dates from
+A15, retired 2026-09-03, and is dropped. The version copy: the typed
 affiliation is added through the contributor form before the copy (no
 seed key exists for contributors or affiliations, scenarios.md "Field
 shapes not built yet"); "Create New Version" is the Publication area's
 side-menu item (*Publish, schedule & versions*).
 
 <a id="fn-s3"></a>
-**s3 — scenario 3 seeding.** Same submission; the submitting author's
-contributor is the seeded primary contact (created at submission). The
+**s3 — scenario 3 seeding.** A scratch submission of its own, its
+submitter a throwaway account for the mailbox read's scoping (as s1),
+plus a second PERSON contributor added through the panel; the OMP suite
+runs it on a scratch press. The submitting author's contributor is the
+seeded primary contact (created at submission). The
 log read is Activity Log & Notes → History; the mailbox read and its
 positive control as in s1. Suite runs of 2026-09-16: on OJS the
 "Review Publishing Details" Confirm added a second "Submission metadata
@@ -2298,14 +2375,27 @@ suite leaves the publish step to *Publish, schedule & versions*.
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** The multilingual leg needs a scratch
-journal with a second submission language. The registry leg needs
-internet browser-side (suggestions come live from the public registry)
-AND server-side (the record cache) — the campaign's test installs block
-server-side egress, so there the registry leg deterministically shows
-A5's shape and suites cover the typed-name path plus that shape. The
-empty-name refusal: clear the submission language's "Type the
+journal with a second submission language. The registry leg's search
+runs in the browser against the public registry; the suites answer it
+themselves (`page.route` on `https://api.ror.org/**`) with one v2
+record, Simon Fraser University (`https://ror.org/0213rcc28`, country
+"Canada"), so the public registry is never reached. The campaign's test
+installs block the server's own internet access, so their registry copy
+is empty and "Add" sends `POST …/api/v1/rors`, answered 404, after which
+A5's "Error" dialog ("An unexpected error has occurred. Please reload
+the page and try again.") shows over the panel; reopened after Save,
+the registry row reads "The primary language English is required"
+beside its link. A5 is a 🐞, so no suite asserts either (PRINCIPLES
+M3): each closes the dialog with "OK" whenever it shows, without
+reading it, and asserts the suggestion (name, "Canada", the ROR mark,
+the record link), the row's record link, its menu of "Remove
+institution" alone, and the row kept after Save and reopen. Suite runs
+of 2026-11-12, S4 green in all three apps. The empty-name refusal: clear the submission language's "Type the
 institution name in {language}" box under "Edit institution name"
-before Save (fn d).
+before Save (fn d). The refused "Edit" is a second edit of the same
+contributor after "Both saved", so "Probe Institute" is stored before
+the refusal; the read after "Close" and the reload is that contributor's
+"Edit" › "Edit institution name".
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** Scratch journal (roles are mutated); one
@@ -2329,8 +2419,10 @@ set is built through the panel.
 
 <a id="fn-s7"></a>
 **s7 — scenario 7 seeding.** The scenario-6 publications; re-publish or
-edit as needed after the untick. The cross-app assertion pair is the
-point: OMP omits, OJS/OPS show (A3). The "Abbreviated" read re-ticks
+edit as needed after the untick. The unchanged "Save" runs first, on
+the first contributor of the published version, and is read in the
+list after a reload and on the landing page, signed out. The cross-app
+assertion pair is the point: OMP omits, OJS/OPS show (A3). The "Abbreviated" read re-ticks
 the second contributor and unticks the first through the same form,
 then reads Preview.
 
@@ -2378,6 +2470,35 @@ assignment; the full list, with an Authors row in the reviewer's
 submission-details view, on the open one). OPS answers 400 on `review`
 and `reviewRounds` (scenarios.md "OPS:"), so the suite there carries
 nothing for this scenario.
+
+<a id="fn-s12"></a>
+**s12 — scenario 12 seeding.** Seeded journal, Journal Manager (ready
+account). One scratch submission whose `contributors[]` entry is
+`{givenName: "Robin", familyName: "Okafor", email:
+"robin@example.test"}` (country `CA`, scenarios.md "`contributors[]`");
+"Probe Institute" is added through that contributor's "Edit" as a typed
+institution (no seed key exists for affiliations), and the edits go to
+the submission's current, unpublished version. The requests are fn o's:
+a by-hand tester sends them with `curl` and the Journal Manager's API
+key; the suites send them in the Journal Manager's signed-in session
+with `apiAs(page, 'PUT', …)` (patterns.md, "A request replayed in a
+role's session"), the affiliations resent as the `GET` of the same
+address gave them. The empty type is `contributorType: null`. Every read
+is the "Contributors" page and the contributor's "Edit" after a reload.
+All three apps.
+
+<a id="fn-s13"></a>
+**s13 — scenario 13 seeding.** A scratch context from `POST
+scenarios/context` with `primaryLocale: 'en'`, `supportedLocales: ['en',
+'fr_CA']` and `supportedFormLocales: ['en', 'fr_CA']` (scenarios.md
+"`context`"), throwaway accounts (a manager, an author as `submitter`);
+one submission seeded `published: true`, on a journal in a published
+issue from `issues[]` through the submission's `issue` key. The French
+pages are the landing page and the listing at `/fr_CA/` (an issue's
+table of contents, the catalog, the archive), read signed out; the
+English pages at `/en/`. The "Edit Role" window is fn e's; the reload
+after "Close" is the page's own, before the window is reopened (A22).
+All three apps.
 
 <a id="fn-f-a1"></a>
 **f-a1 — A1 evidence.** `ContributorsListPanel.vue` binds the row
