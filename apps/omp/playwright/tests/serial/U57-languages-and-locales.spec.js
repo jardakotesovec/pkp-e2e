@@ -14,25 +14,24 @@
  * and runs by itself in the `omp-solo` project after the serial one
  * (harness.md "Project chain"; `omp-serial` greps `@solo` out). Each test
  * puts back what it changed in a `finally`, even when it fails midway:
- * English the site's primary language again first (scenario 3), then
- * German removed through its row's "Remove" (footnote s). Each also starts
- * from the site as installed, taking off a German a failed earlier run
- * left behind.
+ * English the site's primary language again first (scenario 3), then each
+ * language a scenario installs taken off through its row's "Remove"
+ * (German; in scenario 2 also whichever Uzbek and Chinese languages are
+ * still there), each tried even when an earlier one fails (footnote s).
+ * Each also starts from the site as installed, taking off what a failed
+ * earlier run left behind (`putBack()`).
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
- * (no press here holds a submission language the site lacks), A6 🐞, A7
- * 🐞, A10 ❓ (S3's first visitor reads the site's home in German; the
- * presses' names on it are not read), A12 ❓ (the menu's names on "Site
- * Settings" are not read), A13 ❓ (S1 does not read the German template
- * boxes of a form-only German as empty, only that its own text is gone), A2, A3, A5, A8, A9, A11 (the
- * parallel file's scenarios). OMP1 ✅ is read as the press's line under the
- * site's list. The spec's Coverage section records everything else left
- * out.
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
+ * A2 ❓, A3 🐞, A5 🐞, A6 🐞, A7 🐞, A8 🐞, A10 ❓, A11 ❓, A12 ❓, A13 ❓,
+ * A14 🐞, A15 ❓. OMP1 ✅ is read as the press's line under the site's
+ * list. The spec's Coverage section records everything else left out.
  *
  * Seeding (footnote s): no harness key installs a language, so scenarios 2
  * and 3 install German through "Install Locale" before their steps and
- * seed their German presses after it (scratch presses from
+ * seed their German presses after it, scenario 2 ticking Uzbek, Uzbek
+ * (Latin) and Chinese in simplified and traditional characters in the
+ * same "Save" (scratch presses from
  * `POST scenarios/context`, their languages through `context.*Locales`
  * and `context.primaryLocale`); throwaway accounts come from the same
  * request (the username twice as password). The Site Administrator is
@@ -42,8 +41,7 @@
  * seconds on a fresh install, minutes on a fleet after a full run (an
  * install 145 s and a removal 62 s with 457 journals on OJS), so every
  * wait across one allows `SITE_CHANGE` (eight minutes) and each test as
- * many of them as it makes changes, its `finally` included. Each test also
- * starts by putting back what a failed earlier run left (`restore()`).
+ * many of them as it makes changes, its `finally` included.
  */
 const {test: base, expect} = require('../../support/fixtures.js');
 const {AdministrationPage} = require('../../../../../shared/playwright/pages/AdminPages.js');
@@ -82,6 +80,50 @@ const PRIMARY_DEFINED = 'German/Deutsch defined as primary locale.';
 const SAVED = 'Locale settings saved.';
 const LEAVE = 'The data on this form has changed. Do you wish to continue without saving?';
 const OUR_TEXT = 'Unser Text.';
+
+/** The languages the scenarios install, taken off again (footnote s). */
+const SCRIPTS = ['uz', 'uz_Latn', 'zh_Hans', 'zh_Hant'];
+const ADDED = ['de', ...SCRIPTS];
+
+/**
+ * Put the site back as installed, as each test does before it starts and
+ * in its `finally` (footnote s): English the site's primary language again
+ * first, then every language of `ADDED` still there taken off through its
+ * row's "Remove", each tried even when an earlier step fails; the first
+ * failure is thrown once all were tried, and the list is then confirmed
+ * as installed (English and French (Canada), English primary).
+ */
+async function putBack(page) {
+    const site = new SiteLanguagesList(page);
+    const failures = [];
+    try {
+        await site.makePrimaryIfNot('en');
+    } catch (error) {
+        failures.push(error);
+    }
+    for (const code of ADDED) {
+        try {
+            await site.removeIfInstalled(code);
+        } catch (error) {
+            failures.push(error);
+        }
+    }
+    if (failures.length) {
+        throw failures[0];
+    }
+    await site.restore({remove: []});
+}
+
+/** The names of the two scripts of Uzbek and of Chinese, each installed beside the other (Fields). */
+const SCRIPT_NAMES = {
+    uz: 'Uzbek/o‘zbek',
+    uz_Latn: 'Uzbek (Latin)/o‘zbek (lotin)',
+    zh_Hans: 'Chinese (Simplified)/中文（简体）',
+    zh_Hant: 'Chinese (Traditional)/中文（繁體）',
+};
+
+/** A row's name on a language list (its "Locale" cell without the asterisk). */
+const nameCell = (grid, code) => grid.row(code).locator(`[id="cell-${code}-locale"]`);
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + app + worker. */
 function makeTag(scenario, testInfo) {
@@ -161,7 +203,7 @@ test.describe('languages and locales: the site', () => {
         const mp = await signedIn(asUser, manager);
         const site = new SiteLanguagesList(ap);
         const tab = new JournalLanguagesTab(mp, tag);
-        await site.restore();
+        await putBack(ap);
         try {
             // Administration's "Change Language": the site's languages, each
             // named in its own language, the tick beside the one being read,
@@ -316,26 +358,41 @@ test.describe('languages and locales: the site', () => {
             await expect(win.box('de')).toHaveCount(0);
             await win.cancel();
         } finally {
-            await new SiteLanguagesList(ap).restore();
+            await putBack(ap);
         }
     });
 
     test('S2: disabling and enabling a site language @solo', async ({asUser, ompApi}, testInfo) => {
-        test.setTimeout(5 * SITE_CHANGE);
+        // Eight site changes (an install, a disable, an enable, two removals
+        // and the `finally`'s three), and the refused one.
+        test.setTimeout(10 * SITE_CHANGE);
         const tagA = makeTag(2, testInfo);
         const tagB = `${tagA}de`;
         const ap = await signedIn(asUser, 'admin');
         const site = new SiteLanguagesList(ap);
         const wizardLabels = {hostedLabel: HOSTED, setupTab: WIZARD_TAB};
-        await site.restore();
+        await putBack(ap);
         try {
-            // Given: German installed and enabled; the first press with
-            // English and German everywhere, the second German-primary.
-            const installed = await site.install(['de']);
+            // Given: German, Uzbek, Uzbek (Latin) and the two Chinese
+            // installed and enabled in one "Save"; the first press with
+            // English and German everywhere and the other four under "UI"
+            // alone, the second German-primary.
+            // (Five languages in one "Save" took over six minutes for four
+            // on a full fleet: twice the ceiling of one change.)
+            await site.goto();
+            const install = await site.openInstall();
+            for (const code of ADDED) {
+                await install.box(code).check();
+            }
+            const installed = await install.save({timeout: 2 * SITE_CHANGE});
             expect(installed.status()).toBe(200);
             await ompApi.createContext({
                 tag: tagA,
-                context: {supportedLocales: ['en', 'de'], supportedFormLocales: ['en', 'de'], supportedSubmissionLocales: ['en', 'de']},
+                context: {
+                    supportedLocales: ['en', ...ADDED],
+                    supportedFormLocales: ['en', 'de'],
+                    supportedSubmissionLocales: ['en', 'de'],
+                },
             });
             await ompApi.createContext({tag: tagB, context: {primaryLocale: 'de', supportedLocales: ['de', 'en']}});
 
@@ -396,6 +453,56 @@ test.describe('languages and locales: the site', () => {
             await expect(wizard.website.cell('de', 'uiLocale')).not.toBeChecked();
             await expect(wizard.website.cell('de', 'formLocale')).not.toBeChecked();
 
+            // Two scripts of one language: each named with its script on
+            // the site's list (with the asterisk) and on "Website Languages"
+            // (without), and in "Change Language"; Uzbek (Latin) installed
+            // alone takes the plain name, and "Install Locale" offers it by
+            // its script's name again (Fields, the paragraph after "Change
+            // Language"; Rule 5).
+            await site.goto();
+            for (const code of SCRIPTS) {
+                await expect(nameCell(site, code)).toHaveText(SCRIPT_NAMES[code]);
+                await expect(site.asterisk(code)).toHaveText('*');
+            }
+            await expect(nameCell(site, 'en')).toHaveText('English/English');
+            wizard = await openWizardLanguages(ap, tagA, wizardLabels);
+            for (const code of SCRIPTS) {
+                await expect(nameCell(wizard.website, code)).toHaveText(SCRIPT_NAMES[code]);
+                await expect(wizard.website.asterisk(code)).toHaveCount(0);
+            }
+            await new JournalLanguagesTab(ap, tagA).settings.goto('website');
+            const links = (await new LanguageMenu(ap).read()).map((i) => [i.text, i.heading ? 'heading' : i.ticked]);
+            expect(links[0]).toEqual(['Change Language', 'heading']);
+            expect(links).toContainEqual(['English', true]);
+            for (const name of ['o‘zbek', 'o‘zbek (lotin)', '中文（简体）', '中文（繁體）']) {
+                expect(links).toContainEqual([name, false]);
+            }
+            await site.goto();
+            await site.pressRemove('uz');
+            const uzRemoved = await site.answer('Remove', 'OK');
+            expect(uzRemoved.status()).toBe(200);
+            await expect(site.row('uz')).toHaveCount(0);
+            // The list as answered still draws the uz_Latn row with its
+            // script's name; read after a reload (T-omp-1).
+            await site.reload();
+            await expect(site.row('uz')).toHaveCount(0);
+            await expect(nameCell(site, 'uz_Latn')).toHaveText('Uzbek/o‘zbek');
+            await expect(site.asterisk('uz_Latn')).toHaveText('*');
+            await expect(nameCell(site, 'zh_Hans')).toHaveText(SCRIPT_NAMES.zh_Hans);
+            wizard = await openWizardLanguages(ap, tagA, wizardLabels);
+            await expect(wizard.website.row('uz')).toHaveCount(0);
+            await expect(nameCell(wizard.website, 'uz_Latn')).toHaveText('Uzbek/o‘zbek');
+            await expect(nameCell(wizard.website, 'zh_Hant')).toHaveText(SCRIPT_NAMES.zh_Hant);
+            await site.goto();
+            await site.pressRemove('uz_Latn');
+            const uzLatnRemoved = await site.answer('Remove', 'OK');
+            expect(uzLatnRemoved.status()).toBe(200);
+            await expect(site.row('uz_Latn')).toHaveCount(0);
+            const offered = await site.openInstall();
+            await expect(offered.boxByLabel('Uzbek (Latin)/o‘zbek (lotin) (uz_Latn)')).toBeVisible();
+            await expect(offered.box('uz_Latn')).toHaveCount(1);
+            await offered.cancel();
+
             // Control: the site's primary language cannot be disabled (Rule 3b).
             await site.goto();
             await site.enableBox('en').click();
@@ -405,7 +512,7 @@ test.describe('languages and locales: the site', () => {
             await expect(site.enableBox('en')).toBeChecked();
             await expect(site.primaryRadio('en')).toBeChecked();
         } finally {
-            await new SiteLanguagesList(ap).restore();
+            await putBack(ap);
         }
     });
 
@@ -415,7 +522,7 @@ test.describe('languages and locales: the site', () => {
         const nora = `${tag}nora`;
         const ap = await signedIn(asUser, 'admin');
         const site = new SiteLanguagesList(ap);
-        await site.restore();
+        await putBack(ap);
         try {
             // Given: German installed and enabled; Nora with English names only.
             const installed = await site.install(['de']);
@@ -465,7 +572,7 @@ test.describe('languages and locales: the site', () => {
             await expect(english).toHaveURL(siteHome('en'));
             expect(await pageLang(english)).toMatch(/^en/);
         } finally {
-            await new SiteLanguagesList(ap).restore();
+            await putBack(ap);
         }
     });
 });

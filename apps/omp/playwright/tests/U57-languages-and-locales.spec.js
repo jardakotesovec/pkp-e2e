@@ -11,17 +11,9 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 ❓, A6 🐞, A7 🐞, A8 🐞, A10 ❓, A12 ❓, A13 ❓, OMP1 (the
- * serial file).
- * Passed through with their own claim left unasserted: A3 🐞 (S8 reads the
- * language "français" lands in, not whether it is the site's home or the
- * page the reader was on), A5 🐞 (S5 does not read the page's script
- * errors), A8 🐞 (no test opens the French "Author Guidelines"), A11 ❓
- * (S6's second visitor sends plain "en", footnote s). A6 is an app race between two
- * French form-language installs at once (ci-triage "Two contexts adding
- * French at the same moment"): a 500 on the "Forms"/"Submissions" tick or
- * on the French seed here is that race, not this suite's defect. The
- * spec's Coverage section records everything else left out.
+ * A2 ❓, A3 🐞, A5 🐞, A6 🐞, A7 🐞, A8 🐞, A10 ❓, A11 ❓, A12 ❓, A13 ❓,
+ * A14 🐞, A15 ❓, OMP1 ✅ (the serial file). The spec's Coverage section
+ * records everything else left out.
  *
  * Seeding (footnote s): every scenario runs on its own scratch press from
  * `POST scenarios/context` (`context.supportedLocales` for "UI", the

@@ -10,17 +10,8 @@
  * Spec: docs/specs/U57-languages-and-locales.md
  *
  * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
- * contract, a ❓ is parked, not a gap): A1 🐞, A2 ❓, A3 🐞, A5 🐞,
- * A6 🐞, A7 🐞, A8 🐞, A10 ❓, A11 ❓, A12 ❓, A13 ❓ (the serial file's
- * scenario 1), and U07 OPS3 🐞. Where a test passes
- * through one it leaves the finding's own claim unasserted either way: S5
- * ticks "Forms" without reading the page's script errors (A5), and reads
- * the French "Privacy Statement" box a "Forms" tick fills as filled, not
- * its words, which on a preprint server are an internal name (OPS3); S8
- * reads the French "Privacy Statement" page as French and not the English
- * statement, not the statement's words (OPS3); S6's visitors send plain
- * "de" and "en", never "en-US" (A11); S8 reads the page "français" opens
- * as French and leaves where it lands unread (A3).
+ * contract, a ❓ is parked, not a gap): A1 🐞, A2 ❓, A3 🐞, A5 🐞, A6 🐞,
+ * A7 🐞, A8 🐞, A10 ❓, A11 ❓, A12 ❓, A13 ❓, A14 🐞, A15 ❓, U07 OPS3 🐞.
  * The spec's Coverage section records everything else left out.
  *
  * Seeding (footnote s): each of scenarios 4–8 runs on its own scratch

@@ -9,12 +9,8 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A2 ❓,
- * A6 🐞, A7 🐞, A8 🐞 (OMP OPS), A12 ❓, A13 ❓ (the serial file's
- * scenario 1). Passed through with their own
- * claim left unasserted: A3 🐞 (S8 reads the language "français" lands in,
- * not whether it is the site's home or the page the reader was on), A5 🐞
- * (S5 does not read the page's script errors), A11 ❓ (S6's second visitor
- * sends plain "en", footnote s). A6 is an app race between two French
+ * A3 🐞, A5 🐞, A6 🐞, A7 🐞, A8 🐞 (OMP OPS), A11 ❓, A14 🐞, A15 ❓; A1, A10,
+ * A12, A13 (the serial file's scenarios). A6 is an app race between two French
  * form-language installs at once (ci-triage "Two contexts adding French at
  * the same moment"): a 500 on the "Forms"/"Submissions" tick or on the
  * French seed here is that race, not this suite's defect. The spec's
