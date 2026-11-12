@@ -16,22 +16,22 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section records everything else left out): A3, A4 and A5
- * (🐞: the registry pick the server cannot cache — every funder takes the
- * typed-name path with the browser-side registry query stubbed, and a
- * second typed-name funder stands in for S1's and S3's registry funder;
- * the wizard table's stale read after a save, never asserted either way;
- * the ordering arrows' missing names, reached positionally); A1 and A8
- * (only the scenario's own sentence is asserted: the "Funders are
- * required." warning, never the submit's state; the re-tick's level saved
- * at "Do not request…", never what the radios arrived on); A2, A6, A7, A9,
- * A10, A11 and A12 (❓, no assertion).
+ * spec's Coverage section is the record of everything else left out):
+ * A1 ❓, A2 ❓, A3 🐞, A4 🐞, A5 🐞, A6 ❓, A7 ❓, A8 ❓, A9 ❓, A10 ❓,
+ * A11 ❓, A12 ❓, A15 🐞.
  *
  * Hermeticity: the Funder field queries the public ROR registry from the
- * BROWSER; the suite stubs that query to an empty result set
- * (FundingPages.stubRegistrySearch) so no test depends on api.ror.org —
- * the typed-name path under test renders its typed-text option
- * independently of the suggestions payload.
+ * BROWSER; the suite stubs that query (FundingPages.stubRegistrySearch) so
+ * no test depends on api.ror.org: to an empty result set for the
+ * typed-name path (its typed-text option renders independently of the
+ * suggestions payload), and to the one NSERC record
+ * (`fixtures/ror-nserc-v2.json`) for S1's registry funder the install
+ * already holds, whose record the same test seeds into the install's
+ * registry copy with `POST site` `rors` (scenarios.md "`rors`": a parallel
+ * test seeds only the record its own pick reads). The spec's other
+ * registry funder (NIH, a funder the copy lacks) cannot be picked on this
+ * install (A3): a second typed-name funder stands in for it in S1's and
+ * S3's ordering and delete legs.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only at the server level — S1, S2, S3 and S5 mutate only their
@@ -39,7 +39,12 @@
  * on a scratch server, for the mailbox read's scoping); S4's settings
  * mutation runs on a scratch preprint server with throwaway users. There is
  * no funder seeding key — the add/edit panel IS the surface under test, so
- * funders are always recorded through it. Waits are event-based (funders
+ * funders are always recorded through it. S1 also adds one record to the
+ * install's site-wide registry copy (`POST site` `rors`, idempotent, never
+ * removed; no other test reads that record's absence). S1's French read
+ * runs in a fresh sign-in of its own (a `/fr_CA/` visit switches the
+ * session's language, patterns.md parallel lesson 9, which the cached
+ * session would leak). Waits are event-based (funders
  * API responses, form-save responses, web-first assertions) — no
  * hard-coded sleeps. Every absence read is bounded by a positive control
  * taken the same way (PRINCIPLES M4, M6; the mailbox read by the discussion
@@ -47,7 +52,10 @@
  * Abstract" save the test makes). Everything runs in the parallel `ops`
  * project.
  */
+const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
+const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const {FundingScreen, stubRegistrySearch} = require('../pages/FundingPages.js');
 const {
     PublicationScreen,
@@ -79,6 +87,15 @@ const LEVELS = {
     require: 'Require the author to add funder metadata before accepting their submission.',
 };
 const NO_FUNDERS = 'No funders have been added.';
+// The registry funder the install's registry copy holds (footnote s1): its
+// ROR API v2 record, seeded into the copy and answering the browser-side
+// search.
+// eslint-disable-next-line import/no-dynamic-require
+const NSERC_RECORD = require(path.join(__dirname, '..', 'fixtures', 'ror-nserc-v2.json'));
+const NSERC = 'Natural Sciences and Engineering Research Council of Canada';
+const NSERC_ROR = 'https://ror.org/01h531d29';
+const FR_CONFIRM_DELETE =
+    'Êtes-vous certain-e de vouloir supprimer cet élément ? Cette opération est irréversible.';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -88,6 +105,19 @@ function makeTag(scenario, testInfo) {
 /** A throwaway account's address (users.md: `<username>@mail.test`). */
 function mailOf(username) {
     return `${username}@mail.test`;
+}
+
+/**
+ * A fresh sign-in through the Login page in its own browser context, for a
+ * session whose language the test switches (patterns.md parallel lesson 9:
+ * the cached session would carry French into other tests).
+ */
+async function freshLogin(browser, baseURL, username) {
+    const context = await browser.newContext({baseURL, storageState: {cookies: [], origins: []}});
+    const page = await context.newPage();
+    await page.goto(`/index.php/${PK}${PK_PREFIX}/login`);
+    await new LoginPage(page).signIn(username, getPassword(username));
+    return {context, page};
 }
 
 /**
@@ -134,10 +164,14 @@ async function saveTitlePrefix(page, contextPath, submissionId, prefix) {
 }
 
 test.describe('Funding (U43)', () => {
-    test('S1: record and revise funding in the workflow', {tag: '@smoke'}, async ({asUser, opsApi, pkpMail}, testInfo) => {
+    test('S1: record and revise funding in the workflow', {tag: '@smoke'}, async ({asUser, opsApi, pkpMail, browser, baseURL}, testInfo) => {
         test.slow();
-        test.setTimeout(300_000);
+        test.setTimeout(360_000);
         const tag = makeTag('s1', testInfo);
+        // The install's own registry copy holds NSERC (footnote s1; the
+        // `rors` key, idempotent: the same id comes back each time).
+        const seeded = await opsApi.setSite({rors: [NSERC_RECORD]});
+        expect(seeded.rors.map((r) => r.ror)).toEqual([NSERC_ROR]);
         // The Author is a throwaway account (created on a scratch server,
         // enrolled on the seeded server by the submission seed as the
         // wizard would), so the mailbox read below is scoped to an address
@@ -268,9 +302,9 @@ test.describe('Funding (U43)', () => {
         // "Edit": the typed-name funder's "…" → "Edit": the panel is titled
         // "Edit Funder", prefilled with the name and the one grant row, the
         // blank second row gone; the Grant Number changed to "5678" and
-        // saved; reopened: "5678" is there; dismissed (Fields; Rule 5). The
-        // panel's dismiss control reads "Close" (T-ops-1 in the findings
-        // file: the spec's "Cancel").
+        // saved; reopened: "5678" is there; "Close" at the panel's top
+        // dismisses it — the panel offers "Close" and "Save", no "Cancel"
+        // (Fields; Rule 5).
         await funding.openRowAction(nameA, 'Edit');
         let editPanel = funding.dialog('Edit Funder');
         await expect(editPanel).toBeVisible({timeout: 30_000});
@@ -290,6 +324,9 @@ test.describe('Funding (U43)', () => {
         await expect(editPanel.locator('input[name="grantNumber"]')).toHaveValue('5678', {
             timeout: 30_000,
         });
+        await expect(editPanel.getByRole('button', {name: 'Close', exact: true})).toBeVisible();
+        await expect(funding.saveButton(editPanel)).toBeVisible();
+        await expect(editPanel.getByRole('button', {name: 'Cancel', exact: true})).toHaveCount(0);
         await funding.closePanel(editPanel);
 
         // "Delete": "…" → "Delete" on the stand-in: the confirmation asks
@@ -317,6 +354,41 @@ test.describe('Funding (U43)', () => {
         await expect(funding.row(nameA)).toBeVisible();
         await expect(funding.rows()).toHaveCount(1);
 
+        // "A registry funder the install already holds": "Add Funder",
+        // NSERC typed and its suggestion picked — the one showing a
+        // country and the ROR mark (the browser-side search answered with
+        // the record the copy holds); the pick answers from the copy with
+        // no error window (no server fetch, fn d); Save: the panel closes
+        // and the list shows the registry's name with the ROR mark beside
+        // it (Fields; A10 is the unconfirmed rest, not asserted).
+        await stubRegistrySearch(page, {records: [NSERC_RECORD]});
+        await funding.addFunderButton().click();
+        const registryPanel = funding.dialog('Add Funder');
+        await expect(registryPanel).toBeVisible({timeout: 30_000});
+        const nsercOption = await funding.searchRegistry(registryPanel, NSERC);
+        await expect(nsercOption.locator('sub')).toHaveText('Canada');
+        await expect(nsercOption.getByRole('img').first()).toBeVisible();
+        await expect(
+            nsercOption.getByRole('link', {name: 'Open link in a new tab.'})
+        ).toHaveAttribute('href', NSERC_ROR);
+        const rorsAnswer = await funding.pickRegistryOption(nsercOption);
+        expect(rorsAnswer.status()).toBe(200);
+        await expect(registryPanel.getByRole('link', {name: NSERC_ROR})).toBeVisible({
+            timeout: 30_000,
+        });
+        await expect(registryPanel.locator('.pkpFormField--funder')).toContainText(NSERC);
+        await expect(
+            page.getByText('An unexpected error has occurred. Please reload the page and try again.')
+        ).toHaveCount(0);
+        await funding.savePanel(registryPanel);
+        await expect(funding.row(NSERC)).toBeVisible({timeout: 30_000});
+        await expect(funding.rorMark(NSERC)).toBeVisible();
+        await expect(funding.rows()).toHaveCount(2);
+        // The typed-name funder's row carries no mark (the same read, its
+        // positive control the NSERC row's mark above).
+        await expect(funding.rorMark(nameA)).toHaveCount(0);
+        await stubRegistrySearch(page);
+
         // "Nothing else happens": the submission's Activity Log & Notes →
         // History has no new entry after the adds, edits, deletes and
         // reorders (Side effects); its positive control is a "Title &
@@ -334,6 +406,115 @@ test.describe('Funding (U43)', () => {
         // way (A8).
         const afterControl = await sendMailControl({asUser, api: opsApi, tag});
         await pkpMail.expectNone({to: mailOf(author), afterControl});
+
+        // "The list in French": the same Funding screen, its address's
+        // "/en" swapped for "/fr_CA", in a fresh sign-in of the manager
+        // (the French visit switches that session's language).
+        const nameFr = `Fondation Exemple ${tag}`;
+        const french = await freshLogin(browser, baseURL, 'manager.maya');
+        try {
+            const fr = french.page;
+            await stubRegistrySearch(fr);
+            await fr.goto(
+                `/index.php/${PK}${PK_PREFIX}/dashboard/editorial?workflowSubmissionId=${submissionId}`
+            );
+            const frFunding = new FundingScreen(fr);
+            await frFunding.openFromWorkflow();
+            const englishUrl = fr.url();
+            expect(englishUrl).toContain(`/index.php/${PK}/en/`);
+            await fr.goto(englishUrl.replace(`/index.php/${PK}/en/`, `/index.php/${PK}/fr_CA/`));
+
+            // "Order" reads "Trier"; pressed, it relabels "Enregistrer
+            // l'ordre", which saves the order as it stands (Rules 7, 14).
+            const trier = fr.getByRole('button', {name: 'Trier', exact: true});
+            await expect(trier).toBeVisible({timeout: 30_000});
+            await expect(frFunding.anyLocaleRow(nameA)).toBeVisible({timeout: 30_000});
+            await expect(fr.getByRole('button', {name: 'Order', exact: true})).toHaveCount(0);
+            await trier.click();
+            const saveOrderFr = fr.getByRole('button', {name: "Enregistrer l'ordre", exact: true});
+            await expect(saveOrderFr).toBeVisible();
+            await expect(trier).toHaveCount(0);
+            const frOrderSaved = fr.waitForResponse(
+                (r) =>
+                    r.url().includes('/funders/order') &&
+                    r.request().method() === 'POST' &&
+                    r.ok(),
+                {timeout: 30_000}
+            );
+            await saveOrderFr.click();
+            await frOrderSaved;
+            await expect(trier).toBeVisible({timeout: 30_000});
+
+            // "Test Foundation"'s "…" menu: its two entries read French;
+            // the second opens the delete confirmation in French; its
+            // cancel button leaves "Test Foundation" listed (Rules 6, 14).
+            await frFunding.anyLocaleRowMenuButton(nameA).click();
+            await expect(fr.getByRole('menuitem', {name: 'Modifier', exact: true})).toBeVisible({
+                timeout: 10_000,
+            });
+            await expect(fr.getByRole('menuitem', {name: 'Supprimer', exact: true})).toBeVisible();
+            await expect(fr.getByRole('menuitem')).toHaveCount(2);
+            await fr.getByRole('menuitem', {name: 'Supprimer', exact: true}).click();
+            const frConfirm = fr.getByRole('dialog').filter({hasText: FR_CONFIRM_DELETE});
+            await expect(frConfirm).toBeVisible({timeout: 30_000});
+            await expect(frConfirm.getByRole('heading', {name: 'Supprimer'})).toBeVisible();
+            await expect(frConfirm.getByRole('button', {name: 'OK', exact: true})).toBeVisible();
+            await frConfirm.getByRole('button', {name: 'Annuler', exact: true}).click();
+            await expect(frConfirm).toHaveCount(0, {timeout: 30_000});
+            await expect(frFunding.anyLocaleRow(nameA)).toBeVisible();
+
+            // The other button above the table opens the panel; the typed
+            // text picked: "Ajouter" under the grants, "Enregistrer",
+            // "Fermer" and "Supprimer" under the chosen funder read French
+            // (Rule 14); the pre-filled name box left as it is.
+            await frFunding.buttonBesideOrder(trier).click();
+            const frPanel = frFunding.anyLocalePanel();
+            await expect(frPanel).toBeVisible({timeout: 30_000});
+            const frSearch = frFunding.searchInput(frPanel);
+            await frSearch.click();
+            await frSearch.pressSequentially(nameFr, {delay: 15});
+            await frPanel
+                .locator('li.autosuggest__results-item')
+                .filter({hasText: nameFr})
+                .first()
+                .click();
+            await expect(frPanel.locator('input[name="name"]').first()).toHaveValue(nameFr, {
+                timeout: 10_000,
+            });
+            await expect(frPanel.getByRole('button', {name: 'Ajouter', exact: true})).toBeVisible();
+            await expect(
+                frPanel.getByRole('button', {name: 'Enregistrer', exact: true})
+            ).toBeVisible();
+            await expect(frPanel.getByRole('button', {name: 'Fermer', exact: true})).toBeVisible();
+            await expect(
+                frPanel
+                    .locator('.pkpFormField--funder')
+                    .getByRole('button', {name: 'Supprimer', exact: true})
+            ).toBeVisible();
+            await expect(frPanel.getByRole('button', {name: 'Save', exact: true})).toHaveCount(0);
+
+            // The French "Save": the panel closes and "Fondation Exemple"
+            // is listed at once; reloaded, it is still listed, beside
+            // "Test Foundation" (its position is A7's question, not
+            // asserted) (Rule 14).
+            const frSaved = fr.waitForResponse(
+                (r) =>
+                    r.url().includes('/funders') &&
+                    r.request().method() === 'POST' &&
+                    r.ok(),
+                {timeout: 30_000}
+            );
+            await frPanel.getByRole('button', {name: 'Enregistrer', exact: true}).click();
+            await frSaved;
+            await expect(frPanel).toHaveCount(0, {timeout: 30_000});
+            await expect(frFunding.anyLocaleRow(nameFr)).toBeVisible({timeout: 30_000});
+            await fr.reload();
+            await expect(trier).toBeVisible({timeout: 30_000});
+            await expect(frFunding.anyLocaleRow(nameFr)).toBeVisible({timeout: 30_000});
+            await expect(frFunding.anyLocaleRow(nameA)).toBeVisible();
+        } finally {
+            await french.context.close();
+        }
     });
 
     test('S2: declare funding while submitting', {tag: '@smoke'}, async ({asUser, opsApi}, testInfo) => {

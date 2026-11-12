@@ -237,8 +237,10 @@ and the mail catcher's address are in its footnote.
 
 1. **Record and revise funding in the workflow**
 
-   Given: Journal Manager, on the seeded journal, with a scratch
-   submission at any stage before publication.
+   Given: Journal Manager, on the seeded journal, whose install's own
+   copy of the ROR registry already holds "Natural Sciences and
+   Engineering Research Council of Canada", with a scratch submission at
+   any stage before publication.
 
    - **"Funding"**: open the submission's workflow, then its Publication
      area, then "Funding": the screen is headed "Publication: Funding"
@@ -291,9 +293,31 @@ and the mail catcher's address are in its footnote.
      action cannot be undone."; press "Cancel": it is still listed;
      delete again and press "OK": the row is gone, and the typed-name
      funder alone remains (Rule 6).
+   - **A registry funder the install already holds**: press "Add
+     Funder", type "Natural Sciences and Engineering Research Council of
+     Canada" and pick the suggestion of that name showing a country and
+     the ROR mark (the search must answer in the browser, as for the
+     registry funder above); Save: the panel closes and the list shows
+     "Natural Sciences and Engineering Research Council of Canada" with
+     the ROR mark beside it, whether or not the journal's server can
+     reach the registry (Fields).
    - **Nothing else happens**: no email arrived in the mail catcher from
      these adds, edits, deletes and reorders, and the submission's
      Activity Log & Notes → History has no new entry (Side effects).
+   - **The list in French**: open the same "Funding" screen with
+     "/fr_CA" in place of "/en" in its address: "Order" reads "Trier";
+     press it: the button relabels "Enregistrer l'ordre"; press that to
+     save the order as it stands. Open "Test Foundation"'s "…" menu: its
+     two entries ("Edit" and "Delete" in English) read French; choose the
+     second: the delete confirmation reads French; press its cancel
+     button: "Test Foundation" is still listed. Press the other button
+     above the table ("Add Funder" in English), type "Fondation Exemple"
+     in the funder search field and pick the typed text from the top of
+     the suggestions: the panel's "Add" under the grants, its "Save" and
+     "Close" and the "Delete" under the chosen funder read French; leave
+     the pre-filled name box as it is and press the French "Save": the
+     panel closes and "Fondation Exemple" is listed at once; reload the
+     page: it is still listed (Rules 6, 7, 14).
    - **Control**: before the first add, the same list read "No funders
      have been added." (Rule 3). <sup>s1</sup>
 
@@ -430,9 +454,6 @@ and the mail catcher's address are in its footnote.
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the list in French: "Trier" / "Enregistrer l'ordre", the row menu
-    and the delete confirmation in French, and a funder saved through
-    the French panel listed at once and after a reload (Rule 14) [incidental 2026-09-30]
   - the guard for A5 (issue report
     `docs/issues/U46-A5-ordering-arrows-unnamed.md`): in ordering mode each
     funder row's up and down arrows carry names that say the direction and
@@ -442,9 +463,6 @@ Left out of the scenarios above, by reason:
     hand-entered funder's name boxes, each named for its own language
     alone [report 2026-10-03]
   - the guard for A4 (issue report `docs/issues/U42-A10-wizard-data-citations-funders-stale-press-server.md`): on a press and a preprint server, a funder added in the submission wizard shows in its table and on "Review" at once, without a reload [report 2026-10-04]
-  - a registry pick of a funder the install's copy of the registry
-    already holds, saved and listed with its registry name (Fields;
-    A10) [incidental 2026-10-05]
 - **Nothing new to test**:
   - grant validation on while the registry service is unreachable, the
     check skipped and the save going through (Settings): the save
@@ -958,10 +976,10 @@ journal's funders setting at its default ("ask" or any enabled level).
 The registry leg needs internet BOTH browser-side (the suggestions come
 live from the public registry) and server-side (the record cache) — the
 campaign's test installs block server-side egress, so there the registry
-leg deterministically fails per A3 and suites cover the typed-name path
-plus A3's failure shape instead. "Search a well-known funder" — e.g.
-"National Institutes of Health"; the grant DOI needs only the right
-shape, not a real DOI (validation is format-only unless the
+leg deterministically fails per A3, and the suites record a second
+typed-name funder in the registry funder's place. "Search a well-known
+funder" — e.g. "National Institutes of Health"; the grant DOI needs
+only the right shape, not a real DOI (validation is format-only unless the
 grant-validation setting is on). There is no funder seed key: funders
 are always recorded through the panel, here and in every scenario whose
 given holds one. The empty save, the DOI-format refusal and the dropped
@@ -972,7 +990,24 @@ a scratch context, the only place users are created, and submitting to
 the seeded journal, as U40's scenario 1 does); the absence is read
 against a positive control the test itself sends the same way
 (scenarios.md "Mailpit"). The log is the submission's Activity Log &
-Notes → History, read before and after the edits.
+Notes → History, read before and after the edits. The held registry
+funder is NSERC (`https://ror.org/01h531d29`, the funder f-a10's walk
+picked). A fresh campaign install's registry copy is empty, so the
+suites put the record there before the pick with `POST site` `rors`
+(scenarios.md "`rors`"), sending NSERC's ROR API v2 record from the
+fixture `ror-nserc-v2.json`. The key is idempotent (a held id is
+rewritten and keeps its id) and parallel-safe, as long as no test reads
+the absence of a record another test seeds. The browser-side search is
+answered with the same record: the suites' `stubRegistrySearch` returns
+it as `{items: [record]}` to a query its names match, and an empty set
+to every other query. The pick then needs no server fetch (fn d), so it
+holds on the test installs' blocked egress: on the 2026-11-12 runs, on
+all three apps, the pick's `POST rors` answered 200 with the held
+record, no error window appeared, and the list showed "Natural Sciences
+and Engineering Research Council of Canada" with the ROR mark. The
+French leg uses the seeded journal's `fr_CA` interface language
+(seed-facts: supported `en`, `fr_CA`); the French strings it meets are
+fn i's.
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** A roster author account; journal at the

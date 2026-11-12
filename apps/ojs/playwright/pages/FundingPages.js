@@ -10,13 +10,16 @@
  *   same FunderManager as mounted on the wizard's Details step: the funders
  *   table (aria-label "Funders"), the Order / Save Order and Add Funder top
  *   buttons, the row "…" (More Actions) menus, the Add/Edit Funder side
- *   panel (typed-name path + grants sub-table) and the delete confirmation.
+ *   panel (typed-name path, the registry pick of a held record, grants
+ *   sub-table), the delete confirmation, and locale-neutral reads of the
+ *   same pieces for the French list (Rule 14).
  * - stubRegistrySearch — routes the browser-side ROR registry query
  *   (api.ror.org, fired straight from the Funder field) to an empty result
- *   set, so no test depends on the public registry being reachable. The
- *   typed-text option the tests pick renders independently of the
- *   suggestions payload (Autosuggest `allowCustom`), so the manual-name
- *   path under test is unchanged by the stub.
+ *   set, or to the given registry records whose names match the query, so
+ *   no test depends on the public registry being reachable. The typed-text
+ *   option the tests pick renders independently of the suggestions
+ *   payload (Autosuggest `allowCustom`), so the manual-name path under
+ *   test is unchanged by the stub.
  * - landingFunders — the article landing page's "Funders" block and its
  *   funder entries in display order (Rule 9).
  *
@@ -25,27 +28,38 @@
  * src/components/Form/fields/FieldFunder*.vue, confirmed against the
  * running app while this suite was built (2026-08-28) and revised
  * (2026-09-16: the panel's refusals, the Funder field's two states, the
- * grant rows, the row menu, the wizard's sections and its require warning).
+ * grant rows, the row menu, the wizard's sections and its require warning;
+ * 2026-11-12: the held registry record's pick, the ROR mark, the French
+ * list).
  */
 const {expect} = require('@playwright/test');
 const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 
 /**
- * Answer the Funder field's browser-side registry query with an empty
- * result set (no suggestions, no error dialog) — hermetic replacement for
- * the live api.ror.org call. Call once per page before opening the panel.
+ * Answer the Funder field's browser-side registry query — hermetic
+ * replacement for the live api.ror.org call. With no records, every query
+ * gets an empty result set (no suggestions, no error dialog). With
+ * records (ROR API v2 organization objects, the shape `POST site` `rors`
+ * seeds, scenarios.md), a query is answered with the records one of whose
+ * names contains the typed text, as `{items: [...]}` — the registry's own
+ * search shape. Call once per page before opening the panel.
  *
  * @param {import('@playwright/test').Page} page
+ * @param {Array<{names: Array<{value: string}>}>} [records]
  */
-exports.stubRegistrySearch = async function stubRegistrySearch(page) {
-    await page.route('https://api.ror.org/**', (route) =>
-        route.fulfill({
+exports.stubRegistrySearch = async function stubRegistrySearch(page, records = []) {
+    await page.route('https://api.ror.org/**', (route) => {
+        const query = (new URL(route.request().url()).searchParams.get('query') || '').toLowerCase();
+        const items = query
+            ? records.filter((r) => r.names.some((n) => n.value.toLowerCase().includes(query)))
+            : [];
+        return route.fulfill({
             status: 200,
             contentType: 'application/json',
             headers: {'Access-Control-Allow-Origin': '*'},
-            body: JSON.stringify({items: []}),
-        })
-    );
+            body: JSON.stringify({number_of_results: items.length, items}),
+        });
+    });
 };
 
 exports.FundingScreen = class FundingScreen {
@@ -191,8 +205,10 @@ exports.FundingScreen = class FundingScreen {
      * wait for the panel to close.
      *
      * @param {import('@playwright/test').Locator} panel
+     * @param {{saveLabel?: string}} [options] the Save button's label in
+     *   the interface language (Rule 14: "Enregistrer" in French)
      */
-    async savePanel(panel) {
+    async savePanel(panel, {saveLabel = 'Save'} = {}) {
         const saved = this.page.waitForResponse(
             (r) =>
                 r.url().includes('/funders') &&
@@ -200,7 +216,7 @@ exports.FundingScreen = class FundingScreen {
                 r.ok(),
             {timeout: 30_000}
         );
-        await panel.getByRole('button', {name: 'Save', exact: true}).click();
+        await panel.getByRole('button', {name: saveLabel, exact: true}).click();
         await saved;
         await expect(panel).toHaveCount(0, {timeout: 30_000});
     }
@@ -277,8 +293,8 @@ exports.FundingScreen = class FundingScreen {
      * field so you can search again). Scoped to the Funder field, so the
      * grant rows' own "Delete" links never match.
      */
-    deleteChosenFunderButton(panel) {
-        return this.funderField(panel).getByRole('button', {name: 'Delete', exact: true});
+    deleteChosenFunderButton(panel, label = 'Delete') {
+        return this.funderField(panel).getByRole('button', {name: label, exact: true});
     }
 
     /**
@@ -344,6 +360,107 @@ exports.FundingScreen = class FundingScreen {
     /** Close an open row menu without choosing (Escape on the menu itself, support/menus.js). */
     async closeRowMenu() {
         await closeMenu(this.page);
+    }
+
+    // --- The registry path on a held record (revision 2026-11-12; the
+    // copy seeded with `POST site` `rors`, the browser search answered by
+    // stubRegistrySearch with the same record).
+
+    /**
+     * The registry suggestion for a name: the autosuggest item carrying
+     * the name and its own registry-record link (the typed-text item has
+     * neither the country nor the link, Fields; A6).
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {string} name
+     */
+    registrySuggestion(panel, name) {
+        return panel
+            .locator('li.autosuggest__results-item')
+            .filter({hasText: name})
+            .filter({has: this.page.locator('a[target="_blank"]')});
+    }
+
+    /**
+     * Type a registry funder's name in the search box and return its
+     * registry suggestion once it shows.
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {string} name
+     */
+    async searchRegistry(panel, name) {
+        const search = this.funderSearchInput(panel);
+        await search.click();
+        await search.pressSequentially(name, {delay: 10});
+        const suggestion = this.registrySuggestion(panel, name).first();
+        await expect(suggestion).toBeVisible({timeout: 30_000});
+        return suggestion;
+    }
+
+    /**
+     * Pick a registry suggestion, bounded by the app's own `POST …/rors`
+     * answer (the copy lookup the pick makes, fn d). Returns that response.
+     *
+     * @param {import('@playwright/test').Locator} suggestion from searchRegistry()
+     */
+    async pickRegistrySuggestion(suggestion) {
+        const looked = this.page.waitForResponse(
+            (r) => /\/api\/v1\/rors\/?(\?|$)/.test(r.url()) && r.request().method() === 'POST',
+            {timeout: 30_000}
+        );
+        await suggestion.click();
+        return looked;
+    }
+
+    /**
+     * A row's ROR mark: the registry logo, an unnamed inline svg the
+     * accessibility tree reads as an image (none on a typed-name row).
+     */
+    rorMark(name) {
+        return this.row(name).getByRole('img');
+    }
+
+    // --- Locale-neutral reads (Rule 14). In another interface language
+    // the table's own name, the "Add Funder" button and the panel's title
+    // are not the English strings, so these find the list's pieces by
+    // structure and take the labels the scenario names as arguments.
+
+    /** A list row by the funder's name, in any interface language. */
+    anyRow(name) {
+        return this.page.getByRole('row').filter({hasText: name});
+    }
+
+    /**
+     * The top-controls button labelled `label` ("Order" / "Trier", or its
+     * "Save Order" state).
+     */
+    topButton(label) {
+        return this.page.getByRole('button', {name: label, exact: true});
+    }
+
+    /**
+     * The other button beside the ordering button above the table ("Add
+     * Funder" in English), found through the controls group both share.
+     *
+     * @param {string} sortLabel the ordering button's label in this language
+     */
+    addButtonBeside(sortLabel) {
+        return this.topButton(sortLabel)
+            .locator('xpath=..')
+            .getByRole('button')
+            .filter({hasNotText: sortLabel});
+    }
+
+    /** The add/edit panel in any language: the dialog holding the Funder field. */
+    anyPanel() {
+        return this.page
+            .getByRole('dialog')
+            .filter({has: this.page.locator('.pkpFormField--funder')});
+    }
+
+    /** A row's "…" menu button, in any language (the row's one button outside ordering mode). */
+    anyRowMenuButton(name) {
+        return this.anyRow(name).getByRole('button');
     }
 
     // --- The wizard's Details step (Rule 10, 11).

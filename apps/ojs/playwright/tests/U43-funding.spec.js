@@ -6,31 +6,44 @@
  * OJS (S1–S5 common; S6 {OJS OMP}).
  * Spec: docs/specs/U43-funding.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓
- * (S4 asserts the Review step's "Funders are required." warning only,
- * never whether the submit is enabled), A2 ❓, A3 🐞 (every funder takes
- * the typed-name path; the browser-side registry query is stubbed to an
- * empty result set, and the registry funder of S1 and S3 is stood in for
- * by a second typed-name funder), A4 🐞, A5 🐞 (the ordering arrows are
- * reached positionally; nothing asserts their accessibility), A6 ❓, A7 ❓
- * (S1 and S3 add every funder before ordering), A8 ❓ (S4 picks the "Do
- * not request…" level itself on the re-tick, asserting nothing about what
- * arrived preselected), A9 ❓, A10 ❓, A11 ❓, A12 ❓ (every name box is
- * left as it arrives or filled), OPS1 (preprint-only,
- * in that tree). The spec's Coverage section records everything else
- * left out.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
+ * - A3 🐞: the registry funder of S1 and S3 (a pick the install's copy
+ *   lacks) is stood in for by a second typed-name funder; only S1's held
+ *   record (NSERC, seeded into the copy) takes the registry path.
+ * - A1 ❓: S4 reads the Review step's "Funders are required." warning
+ *   only, never whether the submit is enabled.
+ * - A5 🐞: the ordering arrows are reached positionally; nothing reads
+ *   their names.
+ * - A7 ❓: S1 and S3 add every funder before ordering; the funder S1 adds
+ *   through the French panel is read for presence, never position.
+ * - A8 ❓: S4 picks the "Do not request…" level itself on the re-tick.
+ * - A10 ❓: S1 reads the held registry funder's name on the workflow list
+ *   only, never in the wizard or on the published page.
+ * - A12 ❓: every name box is left as it arrives or filled.
+ * - A15 🐞: S1 leaves "Edit Funder" with "Close" only after a saved
+ *   change, with no grant row added or deleted.
+ * - A2, A4, A6, A9, A11: not on these scenarios' paths; OPS1 is the
+ *   preprint server's, in that tree.
  *
  * Hermeticity: the Funder field queries the public ROR registry from the
- * BROWSER; the suite stubs that query to an empty result set
- * (FundingPages.stubRegistrySearch) so no test depends on api.ror.org —
- * the typed-name path under test renders its typed-text option
- * independently of the suggestions payload.
+ * BROWSER; the suite stubs that query (FundingPages.stubRegistrySearch):
+ * an empty result set everywhere but S1, whose stub answers a query
+ * NSERC's names match with NSERC's registry record (the fixture
+ * ../fixtures/ror-nserc-v2.json, the same record S1 seeds into the
+ * install's copy), so no test depends on api.ror.org — the typed-name
+ * path renders its typed-text option independently of the suggestions
+ * payload.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only for settings (S4 and S6 run on scratch journals with
  * throwaway users). There is no funder seeding key — the add/edit panel IS
- * the surface under test, so funders are always recorded through it. The
+ * the surface under test, so funders are always recorded through it. S1's
+ * given, NSERC held in the install's registry copy, is `POST site` `rors`
+ * (idempotent, parallel-safe; no test of this suite reads an empty copy).
+ * S1's French leg runs last in that test: a /fr_CA/ visit switches the
+ * test's own session to French. The
  * mailbox silence (S1) is read in the shared Mailpit scoped to a throwaway
  * submitter's address the test created on a scratch journal (users are
  * created there and nowhere else) and bounded by a mail the test itself
@@ -59,6 +72,28 @@ const EMPTY_LIST = 'No funders have been added.';
 const FUNDER_REQUIRED = 'Search and select a Funder or enter a Funder name';
 const DOI_FORMAT = 'This is not formatted correctly.';
 const FUNDERS_REQUIRED = 'Funders are required.';
+/**
+ * The registry funder the install's copy already holds (S1, footnote s1):
+ * NSERC's ROR API v2 record, seeded into the copy with `POST site` `rors`
+ * and answering the browser-side search stub (scenarios.md "rors").
+ */
+const NSERC = require('../fixtures/ror-nserc-v2.json');
+const NSERC_NAME = 'Natural Sciences and Engineering Research Council of Canada';
+const NSERC_ROR = 'https://ror.org/01h531d29';
+/** The French list's strings (Rule 14; footnote i). */
+const FR = {
+    order: 'Trier',
+    saveOrder: "Enregistrer l'ordre",
+    menu: ['Modifier', 'Supprimer'],
+    confirmTitle: 'Supprimer',
+    confirm: 'Êtes-vous certain-e de vouloir supprimer cet élément ? Cette opération est irréversible.',
+    ok: 'OK',
+    cancel: 'Annuler',
+    add: 'Ajouter',
+    save: 'Enregistrer',
+    close: 'Fermer',
+    deleteChosen: 'Supprimer',
+};
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -237,13 +272,15 @@ async function orderFirst(page, funding, name) {
 test.describe('funding', () => {
     test('S1: record and revise funding in the workflow', {tag: '@smoke'}, async ({asUser, ojsApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(360_000);
+        test.setTimeout(480_000);
         const tag = makeTag('s1', testInfo);
         const controlTag = makeTag('s1c', testInfo);
         // The throwaway submitter (the mailbox the silence is read in) and
         // the spare (the control mail's recipient) live on a scratch
         // journal and each submit to the seeded journal (footnote s1).
         const {author, spare} = await seedJournal(ojsApi, tag, {spare: true});
+        // The given: the install's copy of the registry holds NSERC
+        // (footnote s1; the key is idempotent and parallel-safe).
         const [{submissionId}, control] = await Promise.all([
             ojsApi.createSubmission({
                 tag,
@@ -257,12 +294,16 @@ test.describe('funding', () => {
                 submitter: spare,
                 title: `Submission ${controlTag}`,
             }),
+            ojsApi.setSite({rors: [NSERC]}),
         ]);
         const nameA = `Test Foundation ${tag}`;
         const nameB = `Beta Foundation ${tag}`;
+        const nameFr = `Fondation Exemple ${tag}`;
 
+        // The browser-side registry search answers with NSERC's record for
+        // a query its names match, and with nothing otherwise.
         const page = await (await asUser('manager.maya')).newPage();
-        await stubRegistrySearch(page);
+        await stubRegistrySearch(page, [NSERC]);
         const pub = new PublicationScreen(page, JOURNAL);
         let funding = await openFunding(page, JOURNAL, submissionId);
 
@@ -393,6 +434,34 @@ test.describe('funding', () => {
         await expect(funding.row(nameA)).toBeVisible();
         await expect(funding.rows()).toHaveCount(1);
 
+        // A registry funder the install already holds: NSERC's suggestion
+        // shows its country and the ROR mark with its registry link; the
+        // pick is answered from the install's copy (no error window, on a
+        // server that cannot reach the registry); Save closes the panel and
+        // the list shows the registry name with the ROR mark beside it
+        // (Fields; Rule 4).
+        await funding.addFunderButton().click();
+        const registryPanel = funding.dialog('Add Funder');
+        await expect(registryPanel).toBeVisible({timeout: 30_000});
+        const suggestion = await funding.searchRegistry(registryPanel, NSERC_NAME);
+        await expect(suggestion.locator('sub')).toHaveText('Canada');
+        await expect(suggestion.locator('svg').first()).toBeVisible();
+        await expect(suggestion.locator(`a[href="${NSERC_ROR}"]`)).toBeVisible();
+        const lookedUp = await funding.pickRegistrySuggestion(suggestion);
+        expect(lookedUp.status()).toBe(200);
+        await expect(funding.funderField(registryPanel)).toContainText(NSERC_NAME, {timeout: 30_000});
+        await expect(
+            funding.funderField(registryPanel).locator(`a[href="${NSERC_ROR}"]`).first()
+        ).toBeVisible();
+        await expect(funding.funderNameBoxes(registryPanel)).toHaveCount(0);
+        await expect(page.getByRole('dialog', {name: 'Error', exact: true})).toHaveCount(0);
+        await funding.savePanel(registryPanel);
+        await expect(funding.row(NSERC_NAME)).toBeVisible({timeout: 30_000});
+        await expect(funding.rorMark(NSERC_NAME)).toHaveCount(1);
+        // Control: the typed-name row beside it carries no ROR mark.
+        await expect(funding.rorMark(nameA)).toHaveCount(0);
+        await expect(funding.rows()).toHaveCount(2);
+
         // Nothing else happens: the Activity Log has no new entry from the
         // adds, edits, deletes and reorders (Side effects) …
         expect(await activityLogRowCount(pub)).toBe(logBefore);
@@ -412,6 +481,68 @@ test.describe('funding', () => {
             author,
             spare,
         });
+
+        // The list in French: the same "Funding" screen with "/fr_CA" in
+        // place of "/en" in its address (Rule 14; footnote i).
+        funding = await openFunding(page, JOURNAL, submissionId);
+        const englishUrl = page.url();
+        expect(englishUrl).toContain(`/${JOURNAL}/en/`);
+        await page.goto(englishUrl.replace(`/${JOURNAL}/en/`, `/${JOURNAL}/fr_CA/`));
+        await expect(funding.anyRow(nameA)).toBeVisible({timeout: 30_000});
+
+        // "Order" reads "Trier"; pressed, it relabels "Enregistrer
+        // l'ordre"; that pressed saves the order as it stands (Rule 7).
+        await expect(funding.topButton(FR.order)).toBeVisible();
+        await funding.topButton(FR.order).click();
+        await expect(funding.topButton(FR.saveOrder)).toBeVisible({timeout: 30_000});
+        await expect(funding.topButton(FR.order)).toHaveCount(0);
+        const frOrderSaved = page.waitForResponse(
+            (r) =>
+                r.url().includes('/funders/order') &&
+                r.request().method() === 'POST' &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await funding.topButton(FR.saveOrder).click();
+        await frOrderSaved;
+        await expect(funding.topButton(FR.order)).toBeVisible({timeout: 30_000});
+
+        // The row menu reads French: its two entries; the second opens the
+        // delete confirmation in French; its cancel button leaves "Test
+        // Foundation" listed (Rules 6, 14).
+        await funding.anyRowMenuButton(nameA).click();
+        const frItems = page.getByRole('menuitem');
+        await expect(frItems).toHaveText(FR.menu, {timeout: 30_000});
+        await frItems.nth(1).click();
+        const frConfirm = page.getByRole('dialog').filter({hasText: FR.confirm});
+        await expect(frConfirm).toBeVisible({timeout: 30_000});
+        await expect(frConfirm).toContainText(FR.confirmTitle);
+        await expect(frConfirm.getByRole('button', {name: FR.ok, exact: true})).toBeVisible();
+        await frConfirm.getByRole('button', {name: FR.cancel, exact: true}).click();
+        await expect(frConfirm).toHaveCount(0, {timeout: 30_000});
+        await expect(funding.anyRow(nameA)).toBeVisible();
+
+        // The other button above the table opens the panel; the typed
+        // text picked, the panel's "Add" under the grants, "Save", "Close"
+        // and the "Delete" under the chosen funder read French; the
+        // pre-filled box left as it is, the French "Save" closes the panel
+        // and the funder is listed at once (no position asserted, A7) and
+        // after a reload (Rule 14).
+        await funding.addButtonBeside(FR.order).click();
+        const frPanel = funding.anyPanel();
+        await expect(frPanel).toBeVisible({timeout: 30_000});
+        await funding.pickTypedFunder(frPanel, nameFr);
+        await expect(funding.funderNameBoxes(frPanel).first()).toHaveValue(nameFr);
+        await expect(frPanel.getByRole('button', {name: FR.add, exact: true})).toBeVisible();
+        await expect(frPanel.getByRole('button', {name: FR.save, exact: true})).toBeVisible();
+        await expect(frPanel.getByRole('button', {name: FR.close, exact: true})).toBeVisible();
+        await expect(funding.deleteChosenFunderButton(frPanel, FR.deleteChosen)).toBeVisible();
+        await funding.savePanel(frPanel, {saveLabel: FR.save});
+        await expect(funding.anyRow(nameFr)).toBeVisible({timeout: 30_000});
+        await page.reload();
+        await expect(funding.anyRow(nameA)).toBeVisible({timeout: 30_000});
+        await expect(funding.anyRow(nameFr)).toBeVisible();
+        await expect(funding.topButton(FR.order)).toBeVisible();
     });
 
     test('S2: declare funding while submitting', {tag: '@smoke'}, async ({asUser, ojsApi}, testInfo) => {

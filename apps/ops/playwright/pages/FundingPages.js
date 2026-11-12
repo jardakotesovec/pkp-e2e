@@ -30,6 +30,11 @@
  * bounded by the funders API response and the panel closing; nothing is
  * asserted about the (stale) table either way.
  *
+ * Added 2026-11-12 (S1's registry-copy and French legs): stubRegistrySearch
+ * takes `records`; `registryOption`, `searchRegistry`,
+ * `pickRegistryOption`, `rorMark`, and the locale-neutral `anyLocaleRow`,
+ * `anyLocaleRowMenuButton`, `buttonBesideOrder`, `anyLocalePanel`.
+ *
  * Added 2026-09-16 (the coverage revision): the panel's parts by name
  * (`searchInput`, `pickTypedText`, `nameBox`, `deleteFunderButton`,
  * `funderFieldError`, `grantsTable`, `grantRows`, `grantDoiError`,
@@ -51,19 +56,25 @@
 const {expect} = require('@playwright/test');
 
 /**
- * Answer the Funder field's browser-side registry query with an empty
- * result set (no suggestions, no error dialog) — hermetic replacement for
- * the live api.ror.org call. Call once per page before opening the panel.
+ * Answer the Funder field's browser-side registry query with a fixed
+ * result set — hermetic replacement for the live api.ror.org call. Empty
+ * by default (no suggestions, no error dialog); `records` are ROR API v2
+ * organization records answered as `{items: records}` (the record the
+ * scenario API's `POST site` `rors` key seeds into the install's copy —
+ * scenarios.md "`rors`"). Call once per page before opening the panel; a
+ * later call replaces the earlier answer.
  *
  * @param {import('@playwright/test').Page} page
+ * @param {{records?: Array<object>}} options
  */
-exports.stubRegistrySearch = async function stubRegistrySearch(page) {
+exports.stubRegistrySearch = async function stubRegistrySearch(page, {records = []} = {}) {
+    await page.unroute('https://api.ror.org/**');
     await page.route('https://api.ror.org/**', (route) =>
         route.fulfill({
             status: 200,
             contentType: 'application/json',
             headers: {'Access-Control-Allow-Origin': '*'},
-            body: JSON.stringify({items: []}),
+            body: JSON.stringify({items: records}),
         })
     );
 };
@@ -439,6 +450,89 @@ exports.FundingScreen = class FundingScreen {
         );
         await form.getByRole('button', {name: 'Save', exact: true}).click();
         await saved;
+    }
+
+    /**
+     * A registry suggestion in the panel's Funder field: the option of
+     * that name carrying a registry-record link ("Open link in a new
+     * tab.") — the typed-text option above it carries none (Fields).
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {string} name
+     */
+    registryOption(panel, name) {
+        return panel
+            .getByRole('option')
+            .filter({hasText: name})
+            .filter({has: this.page.getByRole('link', {name: 'Open link in a new tab.'})});
+    }
+
+    /**
+     * Type a name in the panel's search box and wait for its registry
+     * suggestion (the browser-side query answered by stubRegistrySearch
+     * with the record). Returns the option, not yet picked.
+     *
+     * @param {import('@playwright/test').Locator} panel
+     * @param {string} name
+     */
+    async searchRegistry(panel, name) {
+        const search = this.searchInput(panel);
+        await search.click();
+        await search.pressSequentially(name, {delay: 15});
+        const option = this.registryOption(panel, name);
+        await expect(option).toBeVisible({timeout: 30_000});
+        return option;
+    }
+
+    /**
+     * Pick a registry suggestion, bounded by the panel's own `POST …/rors`
+     * (the install's registry copy answering the pick) — returned so the
+     * caller asserts its status.
+     *
+     * @param {import('@playwright/test').Locator} option from searchRegistry()
+     * @returns {Promise<import('@playwright/test').Response>}
+     */
+    async pickRegistryOption(option) {
+        const answered = this.page.waitForResponse(
+            (r) => /\/api\/v1\/rors\b/.test(r.url()) && r.request().method() === 'POST',
+            {timeout: 30_000}
+        );
+        await option.click();
+        return answered;
+    }
+
+    /** The ROR mark beside a listed funder's name (an icon-only image in
+     * the name cell; a typed-name funder's cell carries none). */
+    rorMark(name) {
+        return this.row(name).getByRole('cell').first().getByRole('img');
+    }
+
+    /**
+     * Locale-neutral reads of the workflow list, for an interface language
+     * whose strings for the table's name and the "…" button are not
+     * asserted (Rule 14's French read): a list row by the funder's name,
+     * its one button (the "…" menu outside ordering mode), the second of
+     * the two buttons above the table (beside "Order", whatever its
+     * label), and the open Add/Edit panel (the side panel holding the
+     * Funder field).
+     */
+    anyLocaleRow(name) {
+        return this.page.getByRole('row').filter({hasText: name});
+    }
+
+    anyLocaleRowMenuButton(name) {
+        return this.anyLocaleRow(name).getByRole('button');
+    }
+
+    buttonBesideOrder(orderButton) {
+        return orderButton.locator('xpath=following-sibling::button[1]');
+    }
+
+    anyLocalePanel() {
+        return this.page
+            .getByRole('dialog')
+            .filter({has: this.page.locator('.pkpFormField--funder')})
+            .filter({hasNot: this.page.getByRole('dialog')});
     }
 
     /** The delete confirmation dialog (Rule 6). */
