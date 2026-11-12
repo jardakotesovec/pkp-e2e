@@ -261,8 +261,11 @@ What is left, the next morning picks up from the files.
      whose bug is still open waits. Each spec goes through RUNBOOK
      "Revising a shipped feature" with all its ready items: its own
      sheet, writer, reader and test authors, so its scenarios stay one
-     coherent set. The specs of one morning share one branch and one CI
-     run (RUNBOOK "Several specs in one morning"). A second and a third
+     coherent set. An item that came from upstream is written for
+     every stable version that carries the change too, in its folder
+     (`VERSIONS.md` "After a feature is built"). The specs of one
+     morning share one branch and one CI run (RUNBOOK "Several specs in
+     one morning"). A second and a third
      spec start only inside the four hours.
 9. **Friction.** Fold `docs/tracking/friction.md` and delete every row.
    Most rows earn nothing, and that is the expected outcome: a retry or
@@ -502,7 +505,12 @@ and it says what its register entries say. When the issue closes, the
 report and its kept script are deleted; git and the closed issue keep
 the history. The register entry follows the reason: fixed, the entry
 retires with the fixing PR as its reason once a walk on the apps' `main`
-shows the fix (housekeeping step 3, or the sync); won't fix or risk
+shows the fix (housekeeping step 3, or the sync), and when the report's
+severity is medium or higher the session looks for the fix in every
+stable version with a folder (the version's sync log,
+`git merge-base --is-ancestor` or `git cherry` in its checkout): a
+version without it is named in the day's summary as a backport
+candidate, with the fixing PR; won't fix or risk
 accepted, the entry keeps its place and gains the Reviewed blockquote
 with the team's ruling; not a bug, the entry is overturned and retires
 (TEMPLATE "Findings register"); a duplicate, the footnote points at the
@@ -774,9 +782,10 @@ cherry-picks of fixes `main` gets.
 `ore` is a version with a folder, `lines/ore/` (`VERSIONS.md`): the OJS
 specs, tests, page objects, test library and seeding code as they
 described the branch point, moved since only by what the team ported.
-The folder gets incremental updates only: nothing is built on it, its
-specs carry no Planned list, and no coverage revision or drift sweep
-touches it. A new feature `ore` alone would get is a question for the
+The folder is kept on par with `main` for what changes as it happens
+(`VERSIONS.md` "After a feature is built"): ports, the tests that
+follow them, and corrections. Nothing is built on it, its specs carry
+no Planned list, and no drift sweep touches it. A new feature `ore` alone would get is a question for the
 maintainer. Baselines and the read log:
 `docs/tracking/upstream-sync-ore.md`.
 
@@ -1327,6 +1336,11 @@ the answer; the spec and the test are the record.
   holding the verbatim on-screen strings, the reader on the rewritten
   spans, lint zero, and the spec named in the report; a correction too
   large or uncertain to fold becomes that spec's ❓ entry with a lean.
+  A corrected claim is carried to every stable version whose copy of
+  the spec holds the same statement (`lines/<branch>/docs/specs/`): the
+  script or drive that showed it runs once on the version's install,
+  and the version's copy takes the same edit when it shows the same
+  (`VERSIONS.md` "After a feature is built").
   A fold that adds behavior to a shipped spec's body, from any source,
   spends its coverage as sync loop step 4 says: a bullet one scenario
   plainly takes, with its assertions, or a **Planned** item.

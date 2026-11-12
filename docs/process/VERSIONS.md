@@ -151,10 +151,11 @@ is not a second place to collect bugs. What a build-out meets that
 `docs/tracking/incidentals.md`, so the housekeeping session drives it
 on `main` and it is reported from there, the report saying which
 versions show it; the version's spec keeps the marker its text needs
-meanwhile. A fault only the version shows gets no register entry: a
-report under `docs/reports/<branch>/`, a ci-triage row that names the
-version, and `test.fixme` on the version's test (MAINTENANCE has the
-details under `ore`).
+meanwhile. A fault only the version shows gets no register entry. One
+of medium severity or higher (REPORT.md) gets a report for the team
+under `docs/reports/<branch>/`, a ci-triage row that names the version,
+and `test.fixme` on the version's test (MAINTENANCE has the details
+under `ore`); a lower one only the `test.fixme` with its reason.
 
 What a checker sees on another feature's screen goes into that
 feature's row of the version's progress file, one line with the kept
@@ -191,19 +192,34 @@ version's folder dispatches its run as the gate.
 
 ## After a feature is built
 
-A version's folder gets incremental updates only. It is not swept for
-drift (MAINTENANCE housekeeping step 12 sweeps `main`'s specs) and its
-coverage is not revised on its own: what its specs and tests hold was
-checked when the folder was cut or the feature built, and after that
-they move with the product.
+A version's specs and tests are kept on par with `main`'s for everything
+that changes them as it happens. Only the searching stays `main`'s: the
+drift sweep (MAINTENANCE housekeeping step 12), new coverage for
+long-standing behavior, and the hunt for bugs.
 
-- **A backport that changes what the version's spec or tests state** is
+- **A port that changes what the version's spec or tests state** is
   accommodated in the version's folder by the session that reads the
-  stable line (MAINTENANCE "The stable line"), as `main`'s accommodation
-  was, carried over by hand.
-- **A correction to `main`'s spec that also holds for the version** is
-  carried over by the session that makes it. Nothing does this
-  automatically; the version's copy stays as accurate as it was built.
+  version (MAINTENANCE "The stable line", "The ore version"), as
+  `main`'s accommodation was, carried over by hand.
+- **A test `main` gets later for a change the version has too** is
+  written for the version as well. When a coverage revision spends a
+  Planned item that came from upstream and the version carries that
+  change (its sync log shows the twin), the same bullet and assertion
+  go into the version's spec and suite and run green there.
+- **A correction to a statement**, from something seen in passing, a
+  drift sweep or an issue report, is carried to every version whose
+  copy holds the same statement. The script or drive that showed it on
+  `main` runs once on the version's install: when the version shows the
+  same, its copy takes the same edit, with the test when a test asserts
+  the statement; when it does not, the version's text stays.
+- **A bug fixed on `main` and still in a version.** When an entry of
+  medium severity or higher retires on `main` as fixed, the session
+  looks for the fix in every version with a folder and names a version
+  without it to the team as a backport candidate (MAINTENANCE "A
+  report's life").
+- **New coverage for long-standing behavior** (the rest of `main`'s
+  Planned items) is `main`'s alone: a version's specs carry no Planned
+  list.
 - **A change to the process, the template or a lint** is applied to
   every version's files in the same commit.
 - **The seeding keys are the same in every copy** (`scenarios.md`). A
