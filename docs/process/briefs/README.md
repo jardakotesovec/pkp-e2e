@@ -42,4 +42,5 @@ never writes a brief from scratch, and it never writes rules into one.
    counts, never findings. Do not widen it.
 6. In a build-out for a stable version (`VERSIONS.md`), fill the path
    slots with the version's files (`lines/<branch>/…`) and append the
-   version block (`version.md`) to the brief, its two slots filled.
+   version block (`version.md`) to the brief, its two slots filled. The
+   persona's brief takes no block; its glossary path is the version's.

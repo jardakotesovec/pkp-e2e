@@ -102,8 +102,7 @@ const CONVENTIONS_LINE = '> Conventions (markers, badges, footnotes): [Reading a
 function checkShape(doc, out) {
     for (let i = 0; i < doc.tailStart; i++) {
         const line = doc.lines[i];
-        // A stable version's spec (lines/<branch>/docs/specs/) points at the one glossary, at the root.
-        if (/^>\s*Conventions/.test(line) && line.trim().replace('](../../../../docs/specs/GLOSSARY.md#', '](GLOSSARY.md#') !== CONVENTIONS_LINE) {
+        if (/^>\s*Conventions/.test(line) && line.trim() !== CONVENTIONS_LINE) {
             out.push({ line: i + 1, check: 'shape', msg: 'the Conventions line is the one-line GLOSSARY pointer, verbatim (TEMPLATE title block)' });
         }
     }

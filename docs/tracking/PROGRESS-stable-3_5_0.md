@@ -21,7 +21,7 @@ local final run (`VERSIONS.md` step 8).
 | U05 | Notifications center & email preferences | OJS OMP OPS | | pending |  |
 | U06 | User invitations | OJS OMP OPS | | pending |  |
 | U07 | Journal identity & about pages | OJS OMP OPS | | pending |  |
-| U08 | Navigation menus & site chrome | OJS OMP OPS | | pending |  |
+| U08 | Navigation menus & site chrome | OJS OMP OPS | | pending | To drive (seen in U26's build, 2026-11-12): the back-office header link reads "##common.help##" on OMP and OPS where OJS reads "Help" (`lines/stable-3_5_0/shared/playwright/checks/U26-stable-3_5_0/K1/k1.js`). |
 | U09 | Custom pages & blocks | OJS OMP OPS | | pending |  |
 | U10 | Appearance & theming | OJS OMP OPS | | pending |  |
 | U11 | Highlights | OJS OMP OPS | | pending |  |
@@ -40,7 +40,7 @@ local final run (`VERSIONS.md` step 8).
 | U24 | Workflow screen & stage access | OJS OMP OPS | | pending |  |
 | U25 | Submission stage | OJS OMP OPS | | pending |  |
 | U27 | Reviewer assignment & management | OJS OMP | | pending |  |
-| U28 | Reviewer's review | OJS OMP | | pending |  |
+| U28 | Reviewer's review | OJS OMP | | pending | To drive (seen in U26's build, 2026-11-12): on OMP the reviewer's past-round window "Round 1 Review submitted by you for {title}" heads the book's details "Article Metadata" (`lines/stable-3_5_0/shared/playwright/checks/U26-stable-3_5_0/K3/k3.js`). |
 | U29 | Review setup & review forms | OJS OMP | | pending |  |
 | U30 | Author response to reviews | OJS | | pending |  |
 | U31 | Reviewer suggestions | OJS OMP | | pending |  |
@@ -51,7 +51,7 @@ local final run (`VERSIONS.md` step 8).
 | U36 | Submission files | OJS OMP OPS | | pending |  |
 | U38 | Submission activity log & notes | OJS OMP OPS | | pending |  |
 | U39 | Submission & Publisher Libraries | OJS OMP OPS | | pending |  |
-| U40 | Publication metadata | OJS OMP OPS | | pending |  |
+| U40 | Publication metadata | OJS OMP OPS | | pending | To drive (seen in U26's build, 2026-11-12): on OPS a preprint's Author opening the workflow lands on "Title & Abstract", whose request answers 500 and an Error window covers the workflow, on the seeded server and scratch ones, whose section stores no abstract word limit; check first whether a section made on screen does the same (`lines/stable-3_5_0/shared/playwright/checks/U26-stable-3_5_0/K2/k2.js`, `old.js`). |
 | U41 | Contributors & affiliations | OJS OMP OPS | | pending |  |
 | U42 | Citations & references | OJS OMP OPS | | pending |  |
 | U43 | Funding | OJS OMP OPS | | pending |  |

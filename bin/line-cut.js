@@ -11,7 +11,8 @@
  *
  * The base, for all three apps: the test library the tests are written
  * against (shared/playwright/{support,data,tests}, apps/<app>/playwright/
- * {support,fixtures}), the seeding code (shared/php, apps/<app>/php), one
+ * {support,fixtures}), the seeding code (shared/php, apps/<app>/php), the
+ * glossary (docs/specs/GLOSSARY.md), one
  * Playwright config per app, and links to what exists once (bin/ and the
  * top-level files of shared/playwright/), so a copied file's relative
  * requires resolve inside the folder as they do at the root.
@@ -109,14 +110,14 @@ function copy(file) {
 }
 
 /**
- * A copied spec's links to what exists once (the glossary, issue reports,
- * process and tracking files) are pointed back at the root; its links to
- * other specs stay beside it, where the version's own copies are or will be.
+ * A copied spec's links to what exists once (issue reports, process and
+ * tracking files) are pointed back at the root; its links to the glossary
+ * and to other specs stay beside it, where the version's own copies are or
+ * will be.
  */
 function relinked(text) {
     const up = '../../../../docs/';
     return text
-        .replace(/\]\((GLOSSARY\.md(?:#[^)]*)?)\)/g, `](${up}specs/$1)`)
         .replace(/\]\(\.\.\/(issues|process|tracking|reports)\//g, `](${up}$1/`);
 }
 
@@ -139,6 +140,8 @@ function base() {
             link(path.join('shared', 'playwright', entry.name));
         }
     }
+    // The glossary is product vocabulary: the version has its own.
+    copy('docs/specs/GLOSSARY.md');
     const dirs = ['shared/playwright/support', 'shared/playwright/data', 'shared/playwright/tests', 'shared/php'];
     for (const app of appNames) {
         dirs.push(`apps/${app}/playwright/support`, `apps/${app}/playwright/fixtures`, `apps/${app}/php`);

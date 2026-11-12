@@ -12,7 +12,7 @@ and the data differ from version to version, so each version has its own:
 
 | In `lines/<branch>/` | What |
 |---|---|
-| `docs/specs/` | the specs |
+| `docs/specs/` | the specs and the glossary (`GLOSSARY.md`: the product's words differ between versions too) |
 | `apps/<app>/playwright/tests/`, `shared/playwright/tests/` | the tests |
 | `apps/<app>/playwright/pages/`, `shared/playwright/pages/` | the page objects |
 | `apps/<app>/playwright/{support,fixtures}/`, `shared/playwright/{support,data}/` | the test library the tests are written against: fixtures, helpers, users, seed roster, upload files |
@@ -75,9 +75,9 @@ order.
 3. **Copy and draft.** `node bin/line-cut.js <branch> --feature U<nn>`
    copies `main`'s spec, tests and page objects for the feature; a file
    the folder already holds is kept. The spec's links to what exists
-   once (the glossary, issue reports) are pointed at the root; its links
-   to other specs stay beside it and resolve as those features are
-   built. The copy's frontmatter goes to
+   once (issue reports) are pointed at the root; its links to the
+   glossary and to other specs stay beside it, and the latter resolve
+   as those features are built. The copy's frontmatter goes to
    `status: draft`. A spec author (`briefs/spec-author.md`, situation "a
    copy of `main`'s spec, to be made true for the version") then reads
    the version's code against `main`'s for everything the spec's
@@ -110,7 +110,10 @@ order.
    version cannot run becomes an absence scenario with a positive
    control, as an app without the feature gets one (multi-app rule 3).
 7. **Readability.** As a revision's: the persona reads only what
-   changed against `main`'s text.
+   changed against `main`'s text, with the version's glossary. Its brief
+   takes no version block: it reads one document and knows nothing of
+   versions. A word the version's glossary still gives in `main`'s form
+   is corrected there by the rewrite.
 8. **Tests.** One test author per app (`briefs/test-author.md`,
    situation "revision") makes the copied suite assert the version's
    scenarios: a page object is changed in the version's folder, and a
@@ -129,8 +132,15 @@ order.
     finding in the private repo (`../pkp-e2e-sec/security_policy.md`).
 
 A finding the build meets on the version goes into the version's
-register. When `main` shows it too and `main`'s register does not hold
-it, it is added there as well, by the fold.
+register. One that `main`'s register does not hold gets a row in
+`docs/tracking/incidentals.md` naming the version's entry, so the
+housekeeping session drives it on `main` and adds it there when `main`
+shows it too.
+
+What a checker sees on another feature's screen goes into that
+feature's row of the version's progress file, one line with the kept
+script as evidence, for that feature's own build to drive.
+`docs/tracking/incidentals.md` stays `main`'s.
 
 ## Starting a build-out
 
