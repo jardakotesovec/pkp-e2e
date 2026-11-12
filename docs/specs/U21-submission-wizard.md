@@ -316,8 +316,12 @@ itself enforces before submission is Rule 13.
     reloads the wizard so every step reflects it. A section change can
     change what the Details step requires (Rule 13). A language change
     saves the language only; the Review step then asks for the new
-    language's title, metadata, contributor names and typed institution
-    names, the ones copied from the author's profile included [A13](#a13).
+    language's title, metadata and contributor names. A typed institution
+    name, the one copied from the author's profile included, needs the new
+    language too: the contributor's "Edit" window refuses to save their
+    given name in the new language until the institution's name in that
+    language is typed as well, so the author fills in both in the one
+    window [A13](#a13).
     With only one language
     and one open section, no "Submitting to…" line or "Change" control
     appears at all. The exception is a press, where the work-type line and
@@ -603,7 +607,7 @@ them live are the subject of *Submission intake configuration*.
 
 ## Canonical scenarios
 
-Scenarios 1 to 4, 6, 9, 14 and 15 run on the seeded journal with ready
+Scenarios 1 to 4, 6, 14 and 15 run on the seeded journal with ready
 accounts, as do the assigned-editor half of scenario 11 and the
 install-default bullet of scenario 17; the drafts and submissions are
 scratch, and so is the section that waives abstracts in scenario 6 on a
@@ -622,6 +626,10 @@ recipe are in the footnote. <sup>s</sup>
      in "Title", tick the Submission Checklist and Privacy Consent boxes,
      and pick a Section on a journal or preprint server, or a Submission
      Type on a press, if offered.
+   - **Leaving with a title typed**: before pressing "Begin Submission",
+     open My Submissions from the sidebar: it opens with nothing asked on
+     the way out. Choose "Start A New Submission" again and fill the start
+     form the same way, Wizard start in "Title".
    - **"Begin Submission"**: press it: the wizard opens on the "Upload
      Files" step, with the new submission's number shown above the heading.
    - **No affiliation**: an Author whose profile carries no affiliation
@@ -685,6 +693,13 @@ recipe are in the footnote. <sup>s</sup>
      arriving [A4](#a4), flashes "Saving" about a minute after the wizard
      opened, as it reaches "Last saved 1 minute ago", and then ticks "Last
      saved {n} seconds ago".
+   - **A change typed between saves**: when the footer reads "Last saved
+     40 seconds ago", type "Typed between saves." in the abstract and
+     stop: "Saving" flashes about 20 seconds after the typing, as the
+     footer reaches "Last saved 1 minute ago", not a minute after the
+     typing. Then leave the step untouched: the footer passes "Last saved
+     1 minute ago" again without flashing "Saving", a step with no change
+     sending nothing.
    - **"Save for Later"**: press it: the "Saved for Later" screen shows a
      link back into the wizard, labeled with the draft's contributors and
      title, and the note "We have emailed a copy of this link to you at
@@ -727,7 +742,8 @@ recipe are in the footnote. <sup>s</sup>
 
 5. **Change settings midway**
 
-   Given: Author, on a draft in a journal with two open sections and two
+   Given: Author, whose profile carries a typed affiliation, on a draft
+   they started as Author in a journal with two open sections and two
    submission languages, and a second journal with one submission
    language and one open section.
 
@@ -742,6 +758,20 @@ recipe are in the footnote. <sup>s</sup>
    - **Review, one panel per language**: press "Continue" until "Review":
      the Details and For the Editors panels each appear twice, once per
      language.
+   - **Review, the new language's values**: on the same "Review", the
+     problems banner appears; the Details panel asks for the title in the
+     new language, and the Contributors panel for your given name in it:
+     "The given name is missing in {new language} for one or more of the
+     contributors.", with no complaint about the affiliation copied from
+     your profile [A13](#a13). "Submit" is disabled.
+   - **Review, the given name typed**: press the Contributors panel's
+     "Edit", open your entry's "Edit" window, type your given name in the
+     new language and press "Save": the window stays open and refuses,
+     with "Please provide affiliation name in the submission primary
+     locale." under "Affiliations" [A13](#a13). Nothing is saved. Press
+     the window's "Close", then "Continue" until "Review": the
+     Contributors panel still names only the missing given name, with no complaint
+     about the affiliation, and "Submit" is still disabled.
    - **One section, one language: the start form**: on the second
      journal, open "Make a Submission": the start form shows no
      "Submission Language" list and, on a journal or preprint server, no
@@ -801,7 +831,8 @@ recipe are in the footnote. <sup>s</sup>
 
 8. **A draft outlives the closing**
 
-   Given: Author, with a draft started while submissions were open.
+   Given: Author and Journal Manager, the Author with a draft started
+   while submissions were open.
 
    - **Closing**: Journal Manager: switch off accepting submissions.
    - **The draft**: Author: reopen the draft: the wizard still opens, and
@@ -814,8 +845,9 @@ recipe are in the footnote. <sup>s</sup>
    Given: two signed-in users with no role in the journal (for example a
    Reviewer of another journal on the same site, or a bare reader account).
 
-   - **The start screen**: the first user: open "Make a Submission" and
-     begin a submission: the wizard opens normally.
+   - **The start screen**: the first user: open "Make a Submission", type
+     No role in "Title" and press "Begin Submission": the wizard opens on
+     its first step, "Upload Files".
    - **The account afterwards**: it holds the journal's Author role. On a
      preprint server the enrolment happens on merely opening the start
      screen [OPS2](#ops2).
@@ -954,14 +986,23 @@ App-specific:
     - **Upload Files**: Author: press "Add File", type PDF as the Galley
       Label, and upload the file, picking its Preprint Component when
       asked.
-    - **For Readers**: the fourth step, titled "For Readers", asks for the
+    - **"Order"**: add a second galley the same way, labelled Appendix.
+      Press "Order" on "Files": each galley gets a drag handle, and
+      "Done" and "Cancel ordering" are offered. Drag Appendix above PDF
+      and press "Done": "Files" lists Appendix first. Reload the page:
+      the wizard reopens on "Upload Files", Appendix still first. Press
+      "Order" again, drag PDF above Appendix and press "Cancel ordering":
+      Appendix stays first.
+    - **For Readers**: the fourth step, "For Readers", asks for the
       License and the required "Relation status" answer. There is no
       Reviewer Suggestions step.
-    - **Submitting**: the submit dialog says a moderator will review the
-      preprint before posting, and "Submission complete" repeats it.
-    - **Control**: a Preprint Server Manager submitting their own preprint:
-      the dialog and completion screen say they can post it themselves
-      [OPS1](#ops1), and no acknowledgement email arrives [OPS5](#ops5).
+    - **Submitting**: "Submit" is enabled despite the reload
+      [OPS9](#ops9); its dialog says a moderator will review the preprint
+      before posting, and "Submission complete" repeats it.
+    - **Control**: the Preprint Server Manager, submitting as "Preprint
+      Server manager" in "Submit As": the dialog and completion screen
+      say they can post it [OPS1](#ops1), and no acknowledgement email
+      arrives [OPS5](#ops5).
       <sup>m</sup> <sup>q</sup>
 
 16. **The copyright confirmation**
@@ -984,12 +1025,28 @@ App-specific:
 17. **Required metadata blocks the submit**
 
     Given: Author, on a complete draft in a journal whose setup requires
-    keywords during submission and asks for subjects and a data
-    availability statement without requiring them.
+    keywords and the plain language summary during submission, asks for
+    subjects and a data availability statement without requiring them,
+    and keeps references at the install default.
 
-    - **"Details"**: the step shows a "Keywords" field; leave it empty and
-      reach "Review": the problems banner (scenario 6) appears, the Details
-      panel carries the keywords complaint, and "Submit" is disabled.
+    - **Saves before the summary is typed**: on the same journal, open
+      "Make a Submission", type Summary required in "Title", tick any
+      confirmation box offered and press "Begin Submission". On the new
+      draft's "Details", type "A reference for the wizard scenario." in
+      the references box, leave the plain language summary empty and
+      press "Continue": no "Error" dialog opens. Reload the page: the
+      wizard reopens on "Upload Files"; press "Continue": "Details" shows
+      Summary required in "Title" and the reference in the references
+      box.
+    - **"Details"**: on the complete draft the step shows a "Keywords"
+      field; leave it empty, and the plain language summary too, and
+      reach "Review": the problems banner (scenario 6) appears, the
+      Details panel carries the keywords complaint and the summary's, and
+      "Submit" is disabled.
+    - **The summary typed**: press the Details panel's "Edit", type
+      "A summary for readers." in the plain language summary and return to
+      "Review": the summary's complaint is gone, the keywords complaint
+      stays, and "Submit" is still disabled.
     - **"Edit"**: press the Details panel's "Edit", type wizard in
       "Keywords" and return to "Review": the complaint is gone and "Submit"
       is enabled.
@@ -1018,11 +1075,6 @@ Left out of the scenarios above, by reason:
   - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names) [report 2026-10-01]
   - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names) [report 2026-10-01]
   - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names) [report 2026-10-01]
-  - a journal that requires the plain language summary: the start page's title, a "Details" save before the summary is typed and the "References" box all saved, and "Submit" disabled until the summary is typed (Settings, "Metadata asked of authors"; A20, retired) [report 2026-10-01]
-  - the Review step after a language change asking for the new language's title, contributor names and typed institution names, the affiliation copied from the author's profile included, with "Submit" disabled until they are typed (Rule 11): likely bullets in scenario 5, which changes the language and reaches Review [upstream 2026-09-29]
-  - the timer's minute counted from the last save, not from the end of typing: scenario 3's "Saving" coming as the footer reaches "Last saved 1 minute ago", and a step with no change sending nothing (Rule 9): the suites move the page's clock on a minute after the typing, which cannot tell the two readings apart [incidental 2026-09-30]
-  - leaving the start screen with a title typed, for My Submissions, asking nothing (Rule 4): likely a bullet after scenario 1's "The start screen" [incidental 2026-10-05]
-  - "Order" on a preprint's "Upload Files": a galley dragged above another and "Done" keeping the new order in "Files", also after a reload, and "Cancel ordering" leaving the order as it was {OPS} (Rule 7): likely a bullet in scenario 15 [incidental 2026-10-21]
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold
@@ -1071,6 +1123,7 @@ Left out of the scenarios above, by reason:
 - **Owned by another feature**:
   - the Upload Files panel and its file types (*Submission files*)
   - the contributors panel (*Contributors & affiliations*)
+  - typing a contributor's given name and institution name in the new language together, in the one "Edit" window, after a language change, which clears the complaints Rule 11 raises (*Contributors & affiliations*, scenario 4)
   - the references and data-citations sections, and their appearance at the "ask" end (*Citations & references*)
   - the Funders list, and its appearance at the "ask" end (*Funding*, scenario 2)
   - the meaning of the Details and For the Editors metadata fields (*Publication metadata*)
@@ -1292,17 +1345,27 @@ nothing else, and the wizard leans on the Review step's check for what the
 new language still lacks: the title, the required metadata, each
 contributor's given name and each typed institution's name. The
 contributor record copied from the author's profile is one of those
-values, so the Contributors panel reads "The primary language French
-(Canada) is required" under Affiliations and Review refuses with "The
-affiliation name is missing in French (Canada) for one or more
-affiliations for one or more of the contributors." until it is typed. A
+values: after a change to French (Canada), the contributor's "Edit"
+window on the Contributors step reads "The primary language French (Canada) is required" under
+Affiliations. Review asks for the given name first: while it is missing
+in French (Canada), Review's Contributors panel reads only "The given name is
+missing in French (Canada) for one or more of the contributors." Typing
+that given name alone does not get past it: the "Edit" window's "Save"
+is refused with "Please provide affiliation name in the submission
+primary locale." under Affiliations, nothing is saved, and Review still
+names only the given name. The window saves the new given name only
+together with the institution's French (Canada) name. Review's own
+sentence for the institution, "The affiliation name is missing in French
+(Canada) for one or more affiliations for one or more of the
+contributors.", shows only for a contributor whose given name was
+already there in French (Canada). A
 registry-picked institution has no per-language name and is exempt, which
 is why authors whose profile text matched a registry record never saw the
 prompt while the profile copy still linked such matches; since
 2026-09-12 the copy is always a typed name (pkp/pkp-lib#13317), so they
 see it like everyone else. Copying values into a new language happens
 only on the workflow's language change after submission.
-Since: 2026-09-12 · Basis: probe. <sup>[fn-a13](#fn-a13)</sup>
+Since: 2026-09-12 · Basis: probe; test run, 2026-11-12. <sup>[fn-a13](#fn-a13)</sup>
 
 > **Reviewed — @jarda.kotesovec, 2026-09-12**: ✅ intended (was ❓). The
 > wizard's language change relies on validation and the author updates
@@ -2473,7 +2536,37 @@ messages, so the limitation predates the PR for typed text; the same
 planting at pkp-lib `b48c22ca06` stored the `ror` and no name, the
 population the PR moves. Not driven on OMP or OPS (their checkouts lack
 the change; the wizard code is shared). Ruled expected by
-@jarda.kotesovec in the session's thread, 2026-09-12.
+@jarda.kotesovec in the session's thread, 2026-09-12. The two messages of
+that drive came from two authors, the one with the affiliation message
+already holding both given names. `validateSubmit()` checks the authors
+in order and `break`s out of the whole authors loop after the
+`missingContributorLanguage` error, so the author missing a given name,
+and every author after them, has no affiliation checked (nor a later
+author's name); the affiliation loop's own `break` leaves only that
+author's affiliations. Test run 2026-11-12 on all three apps (scenario 5;
+a single contributor, the Author, whose profile affiliation was typed in
+English and stored as an English name with no `ror`): after "Change" to
+French (Canada), Review's Contributors panel read "The given name is
+missing in French (Canada) for one or more of the contributors." and
+nothing about the affiliation. The contributor's Edit window read "The
+primary language French (Canada) is required" under Affiliations on OJS
+and OPS (OJS also "1 of 2 languages completed"); on OMP it was read
+before the change only, listing the copied affiliation. In the same runs
+the given name "Adèle" typed in French (Canada) in that window, a country
+picked first, and "Save" pressed: `POST …/contributors/{id}` answered 400
+on all three apps, the window stayed open with "Please provide affiliation
+name in the submission primary locale." under Affiliations (OJS and OMP
+also "Type the institution name in French (Canada) * Required" on the
+copied row, the foot "Please correct one error." with "Go to Affiliations:
+[object Object]", U41 A7), and Review's Contributors panel afterwards read
+"The given name is missing in French (Canada) for one or more of the
+contributors." alone, "Submit" disabled. The refusal is the contributor
+form's own affiliation check in lib/pkp (*Contributors & affiliations*,
+the Affiliations field), so "The affiliation name is missing…" on Review
+needs a contributor whose given name in the new language was saved
+before the change, as in the 2026-09-12 drive. The suites assert the
+400, the open window with that message, and Review's given-name sentence
+alone with "Submit" disabled.
 
 <a id="fn-a14"></a>
 **fn-a14** — A14. The start form offers the user's groups with
@@ -2875,7 +2968,7 @@ Mailpit, one shared instance at `MAILPIT_URL` (default
 `http://127.0.0.1:8025`, scenarios.md), read by recipient address, never
 by position (PRINCIPLES A8); drafts and submissions are
 scratch, created through the UI or the scenario submission endpoint
-(`submitted: false` for drafts). Scenarios 1–4, 6, 9, 14, 15 and the
+(`submitted: false` for drafts). Scenarios 1–4, 6, 14, 15 and the
 assigned-editor half of 11: `author.alex` (or the app's author roster
 account). 1's no-affiliation bullet: a throwaway Author whose profile
 `affiliation` is empty; 1's plugin bullets: `manager.maya` reads Settings →
@@ -2884,16 +2977,37 @@ disabled; OPS lists none). 2's comments bullet needs a section with no
 assigned editor (a scratch journal's section) and reads the discussion on
 the workflow screen at `/dashboard/editorial?workflowSubmissionId={id}` and
 the copy in the mail catcher; 2's log bullet reads the activity log there.
-3 reads the mail catcher for the resume link and opens it signed out. 4
+3 reads the mail catcher for the resume link and opens it signed out;
+its between-saves bullet runs on the page's own clock (installed before
+the wizard loads), moved to 40 seconds after the first save before the
+typing and on from there, so the save is read against the last save and
+not against the typing. 4
 needs `sectioneditor.ana` assigned to the draft's submission for the
 control (the scenario builder's `participants[]` passthrough, or manually
 as `manager.maya` through the workflow screen's Participants panel — note
 f) and `manager.maya` for the manager's cancel; 4's deleted-address bullet
 re-types the cancelled draft's `submission?id={id}` address. 5: a scratch
 journal with two open sections and two submission languages (the context
-builder's `sections[]` and `supportedSubmissionLocales` passthroughs), and
-for the one-section bullets a second scratch journal at the builder's
-defaults (no `sections[]`, no `supportedSubmissionLocales`: one section,
+builder's `sections[]` and `supportedSubmissionLocales` passthroughs), its
+throwaway Author's profile carrying a typed affiliation (no registry
+identifier) that reaches the draft's Contributors as Rule 5's copy. Both
+routes give that copy: OMP and OPS start the draft through the start
+form (run 2026-11-12: OMP's Contributors step listed the affiliation,
+OPS stored it as an English name with no `ror`); OJS seeds it with the
+submission scenario builder as the Author in the Author role, whose
+contributor entry comes from the `newAuthorFromUser()` call the start
+form makes (run
+2026-11-12: the stored affiliation held the profile text in English, no
+`ror`, and the Contributors step's Edit window asked for its French
+name). The builder route was not run on OMP or OPS; the call is shared
+lib/pkp code. A builder-seeded draft's Review shows no affiliation
+complaint while the given name is missing (Rule 11), which is no sign
+that the copy is absent. The contributor's "Edit" window requires a
+country, which the users builder does not seed (a profile made by
+registering always has one), so 5's given-name bullet picks "Canada"
+there before "Save"; with the country empty "Save" sends nothing and the
+form's one error is "Go to Country: This field is required." 5's one-section bullets: a second scratch
+journal at the builder's defaults (no `sections[]`, no `supportedSubmissionLocales`: one section,
 one submission language; a scratch press at the same defaults for the
 press half). 6's
 contributor bullet: a scratch submission whose second contributor carries a
@@ -2907,14 +3021,19 @@ flips `disableSubmissions`, section flags (`editorRestricted`,
 `isInactive`, the section form's word count for 12's word-limit bullet)
 and "Reviewer Suggestion at Submission" (Settings → Workflow → Review) on a
 scratch journal; 12's policy bullet: one of the open scratch sections
-seeded with a `policy`. 9: two scratch users with no role in the context. 10 sets
+seeded with a `policy`. 9: a scratch journal, and two scratch users with
+no role in it. 10 sets
 Workflow → Emails' "Submission Confirmation" (all authors, submitting
 author only, off; the copy to the contact; an extra copy address) on a
 scratch journal, with throwaway contributor and copy addresses for
-mail-catcher scoping. 16: a scratch journal with a copyright notice (the
-context's `copyrightNotice`); 17: a scratch journal seeded `metadata:
-{keywords: 'require', subjects: 'request', dataAvailability: 'request'}`,
-and for the control a second one with `keywords` `off` (the seeded
+mail-catcher scoping. 15's order bullet: a second galley uploaded in the
+same visit as the first (OPS8 breaks one added after a reload). 16: a
+scratch journal with a copyright notice (the context's
+`copyrightNotice`); 17: a scratch journal seeded
+`metadata: {keywords: 'require', subjects: 'request', dataAvailability: 'request', plainLanguageSummary: 'require'}`
+(`citations` left at the fresh context's `request`), its
+saves-before-the-summary bullet on a second draft started there through
+the start form, and for the control a second one with `keywords` `off` (the seeded
 context asks for keywords by install default, so its Details step shows
 the field; run 2026-09-07 on all three apps), with a throwaway Author on
 each; 17's install-default bullet: the seeded context as `author.alex`

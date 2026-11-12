@@ -24,7 +24,9 @@
  * list's primary-contact badge were added on the 2026-09-07 revision; the
  * start form's field legends and section policy, the rail's unreached
  * entries, the required mark, the Data Availability Statement and Subjects
- * fields and the bare 404 page on 2026-09-12.
+ * fields and the bare 404 page on 2026-09-12; the References box, the
+ * Plain Language Summary editor, the Review panels' per-field items, the
+ * step-save wait and the save "Error" dialog on the 2026-11-12 revision.
  */
 const path = require('path');
 const {expect} = require('@playwright/test');
@@ -408,6 +410,47 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
         await fillTinyMce(this.page, `titleAbstract-title-control-${locale}`, text);
     }
 
+    /** The Details step's References box (shown while the journal asks for references). */
+    referencesInput() {
+        return this.page.locator('main').getByRole('textbox', {name: /^References/});
+    }
+
+    /** The Details step's Plain Language Summary editor (a TinyMCE iframe; shown when asked for). */
+    plainLanguageSummaryEditor(locale = 'en') {
+        return this.page.locator(`#titleAbstract-plainLanguageSummary-control-${locale}_ifr`);
+    }
+
+    /** Fill the Details step's Plain Language Summary (replaces the current text). */
+    async fillPlainLanguageSummary(text, locale = 'en') {
+        await fillTinyMce(this.page, `titleAbstract-plainLanguageSummary-control-${locale}`, text);
+    }
+
+    /**
+     * A pending wait for the step save of the Details forms (the
+     * `…/publications/{id}` PUT, tunnelled as POST) whose body carries
+     * `field` (a form field name such as `citationsRaw`). Arm BEFORE the
+     * press that saves the step: "Continue" queues the save and the
+     * wizard's half-second timer sends it, so a reload pressed in between
+     * leaves it unsent.
+     */
+    armFieldSave(submissionId, field, timeout = 45_000) {
+        return this.page.waitForResponse(
+            (r) =>
+                r.url().includes(`/submissions/${submissionId}/publications/`) &&
+                r.request().method() === 'POST' &&
+                (r.request().postData() || '').includes(`${field}`),
+            {timeout}
+        );
+    }
+
+    /**
+     * The "Error" dialog the wizard opens on a refused save ("An unexpected
+     * error has occurred. Please reload the page and try again.").
+     */
+    saveErrorDialog() {
+        return this.page.getByRole('dialog').filter({hasText: 'An unexpected error has occurred'});
+    }
+
     /** The Details step's Keywords chip input (present only when asked for). */
     keywordsInput(locale = 'en') {
         return this.page.locator(`#titleAbstract-keywords-control-${locale}`);
@@ -481,7 +524,8 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
     async openContributorEdit(name) {
         await this.contributorItem(name).getByRole('button', {name: 'Edit', exact: true}).click();
         const modal = this.contributorEditModal();
-        await expect(modal.locator('[id^="contributor-givenName"]')).toBeVisible({timeout: 30_000});
+        // One given-name box per language on a multilingual journal.
+        await expect(modal.locator('[id^="contributor-givenName"]').first()).toBeVisible({timeout: 30_000});
         return modal;
     }
 
@@ -507,6 +551,28 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
     /** The ORCID field's "Request verification" button (a contributor with no verified iD). */
     contributorRequestVerificationButton(modal) {
         return modal.getByRole('button', {name: 'Request verification'});
+    }
+
+    /** The panel's own "Save" button. */
+    contributorSaveButton(modal) {
+        return modal.getByRole('button', {name: 'Save', exact: true});
+    }
+
+    /**
+     * Press the panel's "Save" and return the answer to its contributor
+     * request (`POST …/contributors/{id}`, the edit's tunnelled PUT). A save
+     * the form refuses client-side (a required box empty) sends nothing, so
+     * the wait is bounded by the caller's timeout.
+     */
+    async saveContributorEdit(modal, timeout = 30_000) {
+        const [response] = await Promise.all([
+            this.page.waitForResponse(
+                (r) => /\/contributors\/\d+/.test(r.url()) && r.request().method() !== 'GET',
+                {timeout}
+            ),
+            this.contributorSaveButton(modal).click(),
+        ]);
+        return response;
     }
 
     /** Close the panel without saving (its "Close" button). */
@@ -541,6 +607,17 @@ exports.SubmissionWizardPage = class SubmissionWizardPage extends BasePage {
         return this.page
             .locator('.submissionWizard__reviewPanel')
             .filter({has: this.page.getByRole('heading', {name, exact: typeof name === 'string'})});
+    }
+
+    /**
+     * One field of a Review summary panel, by the field's h4 ("Title",
+     * "Keywords", "Plain Language Summary", …): its complaint ("This field
+     * is required.") sits inside it, above the heading.
+     */
+    reviewItem(panelName, fieldName) {
+        return this.reviewPanel(panelName)
+            .locator('.submissionWizard__reviewPanel__item')
+            .filter({has: this.page.getByRole('heading', {name: fieldName, exact: true})});
     }
 
     /** Jump back to a step through its Review panel's Edit button. */

@@ -15,7 +15,7 @@
  * site). What the scenarios leave out is the spec's Coverage section.
  *
  * Not covered (register IDs; PRINCIPLES M3): OPS2, OPS3, OPS4, OPS5, OPS6,
- * OPS7, A1, A2, A4, A5, A6, A7, A8.
+ * OPS7, OPS8, OPS9, OPS11, A1, A2, A4, A5, A6, A7, A8, A18.
  *
  * Seeding: scenario endpoints only. Drafts (`submitted: false`) on the
  * read-only `publicknowledge` server for author-only flows; scratch servers
@@ -24,7 +24,8 @@
  * passthrough keys: `copyrightNotice`, `metadata`,
  * `submissionAcknowledgement` and its copies, `sections[]` with
  * `wordCount`, `policy` and `abstractsNotRequired`,
- * `supportedSubmissionLocales`; a second scratch server at the builder's
+ * `supportedSubmissionLocales`, a throwaway's profile `affiliation`; a
+ * second scratch server at the builder's
  * defaults is scenario 5's one-section, one-language server), a section is
  * mutated, or Mailpit is read (PRINCIPLES A8 — every mail assertion is
  * scoped by a unique throwaway recipient). The settings scenarios 7, 8, 9
@@ -55,9 +56,21 @@ const {
     sectionPolicy,
     expectStep,
     expectWizardOpen,
+    fillStartForm,
+    submitAsGroup,
     beginSubmission,
     continueTo,
     addGalleyFile,
+    galleyRows,
+    galleyRow,
+    galleyOrderLink,
+    galleyOrderDoneLink,
+    galleyCancelOrderingLink,
+    galleyDragHandles,
+    startGalleyOrdering,
+    dragGalley,
+    finishGalleyOrdering,
+    cancelGalleyOrdering,
     setRelationStatus,
     openReview,
     problemsBanner,
@@ -68,10 +81,19 @@ const {
     richTextBody,
     wizardField,
     wizardFieldLabel,
+    referencesBox,
+    errorDialog,
     reviewItem,
     addKeyword,
     contributorRows,
     addContributor,
+    editFromReviewPanel,
+    openContributorEdit,
+    contributorInput,
+    contributorCountry,
+    contributorAffiliations,
+    saveContributorEdit,
+    closeContributorEdit,
     confirmSubmit,
     completeAndSubmitDraft,
     saveForLater,
@@ -107,16 +129,18 @@ function makeTag(testInfo, scenarioKey) {
  * Seed a scratch preprint server whose path is the tag, with throwaway users
  * (usernames prefixed by the tag so their mail.test addresses are unique per
  * run) and any context passthrough keys (`settings`) the scenario's given
- * names. Returns {path, users: {key: {username, email, name}}}.
+ * names; `userExtras` adds per-user keys (a profile `affiliation`). Returns
+ * {path, users: {key: {username, email, name}}}.
  */
 async function seedServer(
     opsApi,
     tag,
     userKeys,
-    {locales = null, submissionLocales = null, sections = null, settings = {}, context = {}} = {}
+    {locales = null, submissionLocales = null, sections = null, settings = {}, context = {}, userExtras = {}} = {}
 ) {
     const roleByKey = {
         manager: ['manager'],
+        managerauthor: ['manager', 'author'],
         moderator: ['sectionEditor'],
         author: ['author'],
         reader: ['reader'],
@@ -133,6 +157,7 @@ async function seedServer(
             familyName: 'Tester',
             email: `${username}@mail.test`,
             roles: roleByKey[key],
+            ...(userExtras[key] || {}),
         };
     });
     const contextSpec = {name: {en: `U21 Server ${tag}`}, ...context};
@@ -315,10 +340,31 @@ test.describe('Submission wizard (U21)', () => {
         await page.goto(`/index.php/${PK}${PK_PREFIX}/dashboard/mySubmissions`);
         await page.getByRole('link', {name: 'Start A New Submission'}).click();
 
-        // …which lands on the "Make a Submission" start form; fill it and
-        // begin (scenario 1; publicknowledge has one open section and one
+        // …which lands on the "Make a Submission" start form; fill it
+        // (scenario 1; publicknowledge has one open section and one
         // submission language, so neither choice renders — Rule 4).
-        await beginSubmission(page, {title: `Submission ${tag}`});
+        await fillStartForm(page, {title: 'Wizard start'});
+
+        // Leaving with a title typed: before "Begin Submission", open My
+        // Submissions from the sidebar: it opens with nothing asked on the
+        // way out (Rule 4) — no browser leave-page question, bounded by the
+        // arrival on the list (its "Active submissions" heading), which is
+        // the positive control read on the page left for.
+        const asked = [];
+        page.on('dialog', async (dialog) => {
+            asked.push(`${dialog.type()}: ${dialog.message()}`);
+            await dialog.accept().catch(() => {});
+        });
+        const mySub = new MySubmissionsPage(page, PK);
+        await mySub.openView('Active submissions');
+        await expect(page).toHaveURL(/\/dashboard\/mySubmissions/);
+        await expect(mySub.startNewSubmissionLink()).toBeVisible();
+        expect(asked).toEqual([]);
+
+        // Choose "Start A New Submission" again, fill the start form the
+        // same way and begin.
+        await mySub.startNewSubmissionLink().click();
+        await beginSubmission(page, {title: 'Wizard start'});
 
         // The wizard opened on Upload Files with the submission's number
         // shown above the heading (Rules 5, 7).
@@ -551,6 +597,78 @@ test.describe('Submission wizard (U21)', () => {
         await flashed;
         await expect(footer(page)).toContainText(/Last saved \d+ seconds? ago/);
 
+        // A change typed between saves (Rule 9): the timer's minute runs
+        // from the last save, not from the end of typing. Every save the
+        // page sends and every "Saving" flash of the footer are counted
+        // from here on (the flashes by an observer in the page, which the
+        // fake clock does not touch).
+        const saves = [];
+        page.on('request', (r) => {
+            if (/\/publications\/\d+/.test(r.url()) && ['POST', 'PUT'].includes(r.method())) {
+                saves.push(r.postData() || '');
+            }
+        });
+        await page.evaluate(() => {
+            const node = document.querySelector('.submissionWizard__footer');
+            window.__u21Flashes = 0;
+            let saving = /Saving/.test(node.textContent || '');
+            new MutationObserver(() => {
+                const now = /Saving/.test(node.textContent || '');
+                if (now && !saving) {
+                    window.__u21Flashes++;
+                }
+                saving = now;
+            }).observe(node, {subtree: true, childList: true, characterData: true});
+        });
+        const flashes = () => page.evaluate(() => window.__u21Flashes);
+        // Move the page's clock until the footer reads "Last saved 40
+        // seconds ago" (it refreshes every 3 s, so the reading lands at 40
+        // to 42), then type in the abstract and stop.
+        await page.clock.fastForward(36_000);
+        await expect
+            .poll(async () => {
+                const text = await footer(page).innerText();
+                if (!/Last saved 4[0-2] seconds ago/.test(text)) {
+                    await page.clock.fastForward(1_000);
+                }
+                return text;
+            }, {timeout: 30_000})
+            .toMatch(/Last saved 4[0-2] seconds ago/);
+        await fillRichText(page, CONTROLS.abstract, 'Typed between saves.');
+        // 15 s after the typing (55 to 57 s after the last save) nothing has
+        // been sent and the footer has not flashed (the save that follows
+        // below is the bound)…
+        await page.clock.fastForward(15_000);
+        await expect(footer(page)).toContainText(/Last saved 5\d seconds ago/);
+        expect(saves).toHaveLength(0);
+        expect(await flashes()).toBe(0);
+        // …and the save comes as the footer reaches "Last saved 1 minute
+        // ago", about 20 s after the typing, not a minute after it: the
+        // clock is moved on only 6 s more (21 to 23 s after the typing).
+        const betweenSaved = page.waitForResponse(
+            (r) =>
+                /\/publications\/\d+/.test(r.url()) &&
+                ['POST', 'PUT'].includes(r.request().method()) &&
+                r.ok(),
+            {timeout: 30_000}
+        );
+        await page.clock.fastForward(6_000);
+        const between = await betweenSaved;
+        expect(between.request().postData() || '').toContain('Typed+between+saves.');
+        await expect.poll(flashes, {timeout: 20_000}).toBe(1);
+        expect(saves).toHaveLength(1);
+        await expect(footer(page)).toContainText(/Last saved \d+ seconds? ago/);
+        // Then the step left untouched: the footer passes "Last saved 1
+        // minute ago" again without flashing "Saving", and nothing is sent
+        // (the one save above, counted the same way, is the positive
+        // control).
+        await page.clock.fastForward(62_000);
+        await expect(footer(page)).toContainText('Last saved 1 minute ago', {timeout: 20_000});
+        await page.clock.fastForward(3_000);
+        await expect(footer(page)).toContainText('Last saved 1 minute ago');
+        expect(saves).toHaveLength(1);
+        expect(await flashes()).toBe(1);
+
         // "Save for Later" lands on the Saved for Later screen: a resume
         // link labeled with the draft's contributors and title, and the
         // emailed-copy note (Rule 10).
@@ -699,7 +817,9 @@ test.describe('Submission wizard (U21)', () => {
     test('S5: change the submission settings midway (section and language)', async ({opsApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s5');
         // Two open sections and two submission languages, seeded through
-        // the context scenario (sections[] + supportedSubmissionLocales).
+        // the context scenario (sections[] + supportedSubmissionLocales);
+        // the throwaway Author's profile carries a typed affiliation (no
+        // registry identifier; a bare string lands under English).
         const server = await seedServer(opsApi, tag, ['author'], {
             locales: ['en', 'fr_CA'],
             submissionLocales: ['en', 'fr_CA'],
@@ -707,21 +827,26 @@ test.describe('Submission wizard (U21)', () => {
                 {abbrev: 'PRE', title: {en: 'Preprints'}},
                 {abbrev: 'SEC', title: {en: 'Second Section'}},
             ],
+            userExtras: {author: {affiliation: `Typed Institute ${tag}`}},
         });
 
-        const seeded = await seedDraft(opsApi, tag, {
-            context: server.path,
-            submitter: server.users.author.username,
-        });
+        // The draft is started as Author through the start form, so its
+        // Contributors entry is the one "Begin Submission" makes, the
+        // profile's affiliation copied onto it as typed text (Rule 5; the
+        // submission scenario builder's entry for an Author submitter makes
+        // the same copy, footnote s).
+        const page = await (await asUser(server.users.author.username)).newPage();
+        await page.goto(startUrl(server.path));
+        await beginSubmission(page, {title: `Submission ${tag}`, section: 'Preprints', language: 'English'});
 
         // With two open sections and two languages, the wizard states what
         // is being submitted, with a "Change" control (Rules 7, 11).
-        const page = await (await asUser(server.users.author.username)).newPage();
-        await page.goto(wizardUrl(server.path, seeded.submissionId));
-        await expectWizardOpen(page);
         await expect(submittingToLine(page)).toContainText(
             'Submitting to the Preprints section in English.'
         );
+        // A galley first, so that what "Review" raises below is the new
+        // language's alone (Files satisfied).
+        await addGalleyFile(page);
 
         // "Change Submission Settings" offers the section and the language;
         // pick the other pair and save: the wizard reloads and the line
@@ -744,6 +869,7 @@ test.describe('Submission wizard (U21)', () => {
         await continueTo(page, STEPS.details);
         await continueTo(page, STEPS.contributors);
         await continueTo(page, STEPS.readers);
+        await setRelationStatus(page);
         await openReview(page);
         await expect(reviewPanel(page, /^Details \(/)).toHaveCount(2);
         await expect(reviewPanel(page, 'Details (English)')).toBeVisible();
@@ -752,6 +878,57 @@ test.describe('Submission wizard (U21)', () => {
         await expect(reviewPanel(page, 'For Readers (English)')).toBeVisible();
         await expect(reviewPanel(page, 'For Readers (French (Canada))')).toBeVisible();
         await expect(reviewPanel(page, 'Files')).toHaveCount(1);
+
+        // Review, the new language's values (Rule 11, A13): the problems
+        // banner; the French Details panel asks for the title (the English
+        // one, holding the typed title, does not: the control read the same
+        // way); the Contributors panel asks for your given name in French,
+        // with no complaint yet about the affiliation copied from your
+        // profile (the given-name sentence in the same panel is the
+        // positive control); "Submit" is disabled.
+        await expect(problemsBanner(page)).toContainText(PROBLEMS_BANNER);
+        await expect(
+            reviewItem(reviewPanel(page, 'Details (French (Canada))'), 'Title')
+        ).toContainText('This field is required.');
+        const englishTitle = reviewItem(reviewPanel(page, 'Details (English)'), 'Title');
+        await expect(englishTitle).toContainText(`Submission ${tag}`);
+        await expect(englishTitle).not.toContainText('This field is required.');
+        const contributorsPanel = reviewPanel(page, 'Contributors');
+        await expect(contributorsPanel).toContainText(
+            'The given name is missing in French (Canada) for one or more of the contributors.'
+        );
+        await expect(contributorsPanel.getByText(/The affiliation name is missing/)).toHaveCount(0);
+        await expect(submitButton(page)).toBeDisabled();
+
+        // Review, the given name typed (A13): the Contributors panel's
+        // "Edit" goes back to Contributors; the Author types the given name
+        // in French in the entry's "Edit" window and saves. The users[]
+        // builder takes no country, and the window requires one, so one is
+        // picked first (a profile affiliation typed by hand always comes
+        // with a country; harness need). The spec's bullet has "Review" then
+        // name the affiliation's complaint; the window instead refuses the
+        // save until the copied affiliation's French name is typed too, so
+        // nothing is saved and "Review" still names the given name alone
+        // (finding T-ops-2 of the 2026-11-12 revision's second pass, as
+        // T-ojs-2 on OJS); this asserts that reading.
+        await editFromReviewPanel(page, 'Contributors');
+        await expectStep(page, STEPS.contributors);
+        const entry = await openContributorEdit(page, server.users.author.name);
+        await contributorCountry(entry).selectOption('CA');
+        await contributorInput(entry, 'givenName-fr_CA').fill('Adèle');
+        const saved = await saveContributorEdit(entry);
+        expect(saved.status()).toBe(400);
+        await expect(contributorAffiliations(entry)).toContainText(
+            'Please provide affiliation name in the submission primary locale.'
+        );
+        await expect(entry).toHaveCount(1);
+        await closeContributorEdit(entry);
+        await openReview(page, {viaRail: true});
+        await expect(contributorsPanel).toContainText(
+            'The given name is missing in French (Canada) for one or more of the contributors.'
+        );
+        await expect(contributorsPanel.getByText(/The affiliation name is missing/)).toHaveCount(0);
+        await expect(submitButton(page)).toBeDisabled();
 
         // Positive control for the one-section bullets: this server's start
         // form offers the "Section" and "Submission Language" lists.
@@ -1020,10 +1197,12 @@ test.describe('Submission wizard (U21)', () => {
         await expect(authorBox).toBeVisible({timeout: 20_000});
         await expect(authorBox).not.toBeChecked();
 
-        // The start screen admits them and the wizard opens normally
-        // (Rule 3, scenario 9).
+        // The start screen admits them: type No role in "Title" and press
+        // "Begin Submission": the wizard opens on its first step, "Upload
+        // Files" (Rule 3, scenario 9; beginSubmission waits for that step).
         await readerPage.goto(startUrl(server.path));
-        await beginSubmission(readerPage, {title: `Submission ${tag}`});
+        await beginSubmission(readerPage, {title: 'No role'});
+        await expect(readerPage.locator('.submissionWizard__submissionDetails')).toContainText('No role');
 
         // Afterwards the account holds the server's Author role.
         await readerPage.goto(`/index.php/${server.path}/user/profile`);
@@ -1487,28 +1666,68 @@ test.describe('Submission wizard (U21)', () => {
         await expect(mayaPage.getByText('Make a Submission')).toHaveCount(0);
     });
 
-    test('S15: the preprint wizard is galley-based; a can-post submitter gets the post-it variant', async ({opsApi, asUser}, testInfo) => {
+    test('S15: the preprint wizard is galley-based; galleys are ordered; a can-post submitter gets the post-it variant', async ({opsApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s15');
-        const server = await seedServer(opsApi, tag, ['manager']);
-        const manager = server.users.manager;
-        const seeded = await seedDraft(opsApi, tag, {
-            context: server.path,
-            submitter: manager.username,
-        });
-
-        const page = await (await asUser(manager.username)).newPage();
-        await page.goto(wizardUrl(server.path, seeded.submissionId));
+        // Author on the seeded server, on a fresh draft (scenario 15).
+        const seeded = await seedDraft(opsApi, tag);
+        const page = await (await asUser('author.alex')).newPage();
+        await page.goto(wizardUrl(PK, seeded.submissionId, {localePrefix: PK_PREFIX}));
         await expectWizardOpen(page);
 
-        // The galley flow: "Add File" asks for the Galley Label first, then
-        // the upload demands the Preprint Component (scenario 15 / OPS1).
+        // Upload Files: "Add File" asks for the Galley Label first, then the
+        // upload demands the Preprint Component (scenario 15 / OPS1).
         await addGalleyFile(page, {label: 'PDF'});
 
-        // The fourth step is "For Readers": a License choice, the required
-        // "Relation status" question, and "Comments for the Moderator".
+        // "Order" (Rule 7): a second galley the same way, labelled
+        // Appendix, in the same visit (a galley added after a reload is
+        // OPS8's). Before "Order" the rows carry no drag handle and neither
+        // "Done" nor "Cancel ordering" shows (the control for the mode).
+        await addGalleyFile(page, {label: 'Appendix'});
+        await expect(galleyRows(page)).toHaveText([/PDF/, /Appendix/]);
+        await expect(galleyOrderLink(page)).toBeVisible();
+        await expect(galleyDragHandles(page)).toHaveCount(0);
+        await expect(galleyOrderDoneLink(page)).toBeHidden();
+        await expect(galleyCancelOrderingLink(page)).toBeHidden();
+        // Press "Order": each galley gets a drag handle, and "Done" and
+        // "Cancel ordering" are offered.
+        await startGalleyOrdering(page);
+        await expect(galleyDragHandles(page)).toHaveCount(2);
+        await expect(galleyRow(page, 'PDF').locator('.pkp_linkaction_moveItem:visible')).toHaveCount(1);
+        await expect(galleyRow(page, 'Appendix').locator('.pkp_linkaction_moveItem:visible')).toHaveCount(1);
+        await expect(galleyCancelOrderingLink(page)).toBeVisible();
+        // Drag Appendix above PDF and press "Done": "Files" lists Appendix
+        // first.
+        await dragGalley(page, 'Appendix', 'PDF');
+        const sequence = await finishGalleyOrdering(page);
+        expect(sequence.ok()).toBe(true);
+        await expect(galleyRows(page)).toHaveText([/Appendix/, /PDF/]);
+        await expect(galleyDragHandles(page)).toHaveCount(0);
+        // Reload the page: the wizard reopens on "Upload Files", Appendix
+        // still first.
+        await page.reload();
+        await expectWizardOpen(page);
+        await expectStep(page, STEPS.files);
+        await expect(galleyRows(page)).toHaveText([/Appendix/, /PDF/], {timeout: 20_000});
+        // Press "Order" again, drag PDF above Appendix and press "Cancel
+        // ordering": Appendix stays first.
+        await startGalleyOrdering(page);
+        await dragGalley(page, 'PDF', 'Appendix');
+        await cancelGalleyOrdering(page);
+        await expect(galleyRows(page)).toHaveText([/Appendix/, /PDF/]);
+        await expect(galleyDragHandles(page)).toHaveCount(0);
+
+        // For Readers: the fourth step, "For Readers": a License choice,
+        // the required "Relation status" question, and "Comments for the
+        // Moderator". There is no Reviewer Suggestions step (the rail names
+        // five steps, "For Readers" among them: the control read the same
+        // way).
         await continueTo(page, STEPS.details);
         await continueTo(page, STEPS.contributors);
         await continueTo(page, STEPS.readers);
+        const railLabels = page.locator('.pkpSteps__buttons .pkpSteps__step__label');
+        await expect(railLabels).toHaveCount(5);
+        await expect(railLabels.nth(3)).toContainText(STEPS.readers);
+        await expect(railEntry(page, STEPS.reviewerSuggestions)).toHaveCount(0);
         await expect(page.getByRole('heading', {name: 'License', exact: true})).toBeVisible();
         await expect(page.getByRole('radio', {name: 'CC Attribution 4.0', exact: true})).toBeVisible();
         const relationGroup = page.getByRole('group', {name: /Relation status/});
@@ -1519,22 +1738,49 @@ test.describe('Submission wizard (U21)', () => {
         ).toBeVisible();
         await setRelationStatus(page);
 
-        // Review lists the galley under its "Files" panel with its label
-        // and component (OPS1).
+        // Submitting: "Submit" is enabled despite the reload (what the
+        // Files panel lists after it is OPS9's and OPS11's and is not
+        // asserted); its dialog says a moderator will review the preprint
+        // before posting, and "Submission complete" repeats it (OPS1).
         await openReview(page);
         await expect(problemsBanner(page)).toHaveCount(0);
-        const filesPanel = reviewPanel(page, 'Files');
-        await expect(filesPanel.getByRole('link', {name: 'PDF'}).first()).toBeVisible();
-        await expect(filesPanel).toContainText('Preprint Text');
-
-        // Control — a submitter who may post their own preprint: the
-        // confirmation dialog and the completion screen carry the can-post
-        // variant (OPS1; no mail assertion here — register OPS5).
-        await confirmSubmit(page, {message: SUBMIT_DIALOGS.canPost});
+        await expect(submitButton(page)).toBeEnabled();
+        await confirmSubmit(page, {message: SUBMIT_DIALOGS.moderated});
         await expect(
-            page.getByText('Thank you for submitting your preprint. You can now')
+            page.getByText('Once the moderator has reviewed your submission')
         ).toBeVisible();
-        await expect(page.getByRole('link', {name: 'post your preprint'})).toBeVisible();
+
+        // Control: the Preprint Server Manager, also an Author (a scratch
+        // server: a roster account is never enrolled in a new role, A7),
+        // submitting as "Preprint Server manager" in "Submit As": the
+        // dialog and the completion screen say they can post it (OPS1; no
+        // mail assertion — register OPS5).
+        const server = await seedServer(opsApi, tag, ['managerauthor']);
+        const manager = server.users.managerauthor;
+        const managerPage = await (await asUser(manager.username)).newPage();
+        await managerPage.goto(startUrl(server.path));
+        await expect(
+            submitAsGroup(managerPage).getByRole('radio', {name: 'Author', exact: true})
+        ).toBeVisible({timeout: 20_000});
+        await beginSubmission(managerPage, {
+            title: `Submission ${tag}`,
+            submitAs: 'Preprint Server manager',
+        });
+        await addGalleyFile(managerPage, {label: 'PDF'});
+        await continueTo(managerPage, STEPS.details);
+        // The start form leaves the abstract empty, and the section asks
+        // for one.
+        await fillRichText(managerPage, CONTROLS.abstract, 'An abstract for the wizard scenario.');
+        await continueTo(managerPage, STEPS.contributors);
+        await continueTo(managerPage, STEPS.readers);
+        await setRelationStatus(managerPage);
+        await openReview(managerPage);
+        await expect(problemsBanner(managerPage)).toHaveCount(0);
+        await confirmSubmit(managerPage, {message: SUBMIT_DIALOGS.canPost});
+        await expect(
+            managerPage.getByText('Thank you for submitting your preprint. You can now')
+        ).toBeVisible();
+        await expect(managerPage.getByRole('link', {name: 'post your preprint'})).toBeVisible();
     });
 
     test('S16: the copyright confirmation gates Submit and is logged', async ({opsApi, asUser}, testInfo) => {
@@ -1597,13 +1843,22 @@ test.describe('Submission wizard (U21)', () => {
     test('S17: required metadata blocks the submit', async ({opsApi, asUser}, testInfo) => {
         const tag = makeTag(testInfo, 'u21s17');
 
-        // A server whose setup requires keywords during submission and asks
-        // for subjects and a data availability statement without requiring
-        // them (seeded through `metadata: {keywords: 'require', subjects:
-        // 'request', dataAvailability: 'request'}`), a complete draft
-        // (scenario 17).
+        // A server whose setup requires keywords and the plain language
+        // summary during submission, asks for subjects and a data
+        // availability statement without requiring them, and keeps
+        // references at the fresh context's `request` (seeded through
+        // `metadata: {keywords: 'require', subjects: 'request',
+        // dataAvailability: 'request', plainLanguageSummary: 'require'}`),
+        // a complete draft (scenario 17).
         const server = await seedServer(opsApi, tag, ['author'], {
-            settings: {metadata: {keywords: 'require', subjects: 'request', dataAvailability: 'request'}},
+            settings: {
+                metadata: {
+                    keywords: 'require',
+                    subjects: 'request',
+                    dataAvailability: 'request',
+                    plainLanguageSummary: 'require',
+                },
+            },
         });
         const author = server.users.author;
         const seeded = await seedDraft(opsApi, tag, {
@@ -1611,16 +1866,48 @@ test.describe('Submission wizard (U21)', () => {
             submitter: author.username,
         });
         const page = await (await asUser(author.username)).newPage();
+
+        // Saves before the summary is typed (Rule 9, A20 retired): on the
+        // same server, "Make a Submission" with Summary required in
+        // "Title". On the new draft's "Details", type the reference, leave
+        // the summary empty and press "Continue": the step's save is
+        // answered and no "Error" dialog opens (bounded by that answer and
+        // the arrival on "Contributors", read on the same page).
+        await page.goto(startUrl(server.path));
+        await beginSubmission(page, {title: 'Summary required'});
+        await continueTo(page, STEPS.details);
+        await expect(wizardFieldLabel(page, /^Plain Language Summary/)).toContainText('Required');
+        await expect(richTextBody(page, CONTROLS.title)).toContainText('Summary required');
+        await referencesBox(page).fill('A reference for the wizard scenario.');
+        const detailsSaved = page.waitForResponse(
+            (r) => /\/publications\/\d+/.test(r.url()) && ['POST', 'PUT'].includes(r.request().method()),
+            {timeout: 30_000}
+        );
+        await continueTo(page, STEPS.contributors);
+        const detailsAnswer = await detailsSaved;
+        expect(detailsAnswer.status()).toBe(200);
+        await expect(footer(page).getByRole('button', {name: 'Continue', exact: true})).toBeVisible();
+        await expect(errorDialog(page)).toHaveCount(0);
+        // Reload the page: the wizard reopens on "Upload Files"; press
+        // "Continue": "Details" shows the title and the reference.
+        await page.reload();
+        await expectWizardOpen(page);
+        await expectStep(page, STEPS.files);
+        await continueTo(page, STEPS.details);
+        await expect(richTextBody(page, CONTROLS.title)).toContainText('Summary required');
+        await expect(referencesBox(page)).toHaveValue('A reference for the wizard scenario.');
+
+        // On the complete draft: "Details" shows a "Keywords" field; leave
+        // it empty, and the plain language summary too, and reach Review:
+        // the problems banner, the keywords complaint and the summary's on
+        // the Details panel, and a disabled Submit (Rule 13).
         await page.goto(wizardUrl(server.path, seeded.submissionId));
         await expectWizardOpen(page);
         await addGalleyFile(page);
-
-        // "Details" shows a "Keywords" field; leave it empty and reach
-        // Review: the problems banner, the keywords complaint on the
-        // Details panel, and a disabled Submit (Rule 13).
         await continueTo(page, STEPS.details);
         await expect(wizardField(page, /^Keywords/)).toBeVisible();
         await expect(wizardFieldLabel(page, /^Keywords/)).toContainText('Required');
+        await expect(wizardFieldLabel(page, /^Plain Language Summary/)).toContainText('Required');
         // Asked, not required: "Details" also shows a data availability
         // statement and "For Readers" a field for subjects, neither marked
         // required (the Keywords mark above is the control); both stay
@@ -1636,7 +1923,23 @@ test.describe('Submission wizard (U21)', () => {
         await expect(problemsBanner(page)).toContainText(PROBLEMS_BANNER);
         const detailsPanel = reviewPanel(page, 'Details');
         const keywordsItem = reviewItem(detailsPanel, 'Keywords');
+        const summaryItem = reviewItem(detailsPanel, 'Plain Language Summary');
         await expect(keywordsItem).toContainText('This field is required.');
+        await expect(summaryItem).toContainText('This field is required.');
+        await expect(submitButton(page)).toBeDisabled();
+
+        // The summary typed: "Edit" on the Details panel, type the summary,
+        // return to Review: the summary's complaint is gone, the keywords
+        // complaint stays (the control read the same way), and "Submit" is
+        // still disabled.
+        await detailsPanel.getByRole('button', {name: 'Edit', exact: true}).click();
+        await expectStep(page, STEPS.details);
+        await fillRichText(page, CONTROLS.plainLanguageSummary, 'A summary for readers.');
+        await openReview(page, {viaRail: true});
+        await expect(summaryItem).toContainText('A summary for readers.');
+        await expect(summaryItem).not.toContainText('This field is required.');
+        await expect(keywordsItem).toContainText('This field is required.');
+        await expect(problemsBanner(page)).toContainText(PROBLEMS_BANNER);
         await expect(submitButton(page)).toBeDisabled();
 
         // With both left empty, "Review" raises no complaint about either

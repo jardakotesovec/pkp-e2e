@@ -19,7 +19,9 @@
  * Added on the 2026-09-12 revision: the rail's reached/unreached entries
  * and "Back", the start form's legends and section policy, the required
  * mark, Review items and the bare 404 page. Added for U22's 2026-09-13
- * revision: `saveForLaterAt` (a draft saved on a named step).
+ * revision: `saveForLaterAt` (a draft saved on a named step). Added on the
+ * 2026-11-12 revision: `fillStartForm` (the start form filled, not sent)
+ * with its "Submit As" choice, and the galley grid's "Order" mode.
  */
 const path = require('path');
 const {expect} = require('../support/fixtures.js');
@@ -187,12 +189,12 @@ async function fillStartTitle(page, title) {
 }
 
 /**
- * Complete the "Make a Submission" start form and press "Begin Submission".
- * Ticks whatever confirmation boxes the form offers; picks a section and/or
- * submission language when a label is given (both radios render only when
- * the server offers a choice — Rule 4). Resolves once the wizard has opened.
+ * Fill the "Make a Submission" start form without sending it: the Title,
+ * a submission language, section and "Submit As" role when a label is given
+ * (each list renders only when the server leaves a choice — Rules 4, 4a),
+ * and whatever confirmation boxes the form offers ticked.
  */
-async function beginSubmission(page, {title, section = null, language = null}) {
+async function fillStartForm(page, {title, section = null, language = null, submitAs = null}) {
     await expect(
         page.getByRole('heading', {name: /Make a Submission/}).first()
     ).toBeVisible({timeout: 20_000});
@@ -202,6 +204,9 @@ async function beginSubmission(page, {title, section = null, language = null}) {
     }
     if (section) {
         await page.getByRole('radio', {name: section, exact: true}).check();
+    }
+    if (submitAs) {
+        await submitAsGroup(page).getByRole('radio', {name: submitAs, exact: true}).check();
     }
     const requirements = page.getByRole('checkbox', {
         name: /meets all of these requirements/,
@@ -215,6 +220,19 @@ async function beginSubmission(page, {title, section = null, language = null}) {
     if (await privacy.count()) {
         await privacy.check();
     }
+}
+
+/** The start form's "Submit As" group (offered with two submitting roles, Rule 4a). */
+function submitAsGroup(page) {
+    return page.getByRole('group', {name: /^Submit As/});
+}
+
+/**
+ * Complete the "Make a Submission" start form (`fillStartForm`) and press
+ * "Begin Submission". Resolves once the wizard has opened on its first step.
+ */
+async function beginSubmission(page, {title, section = null, language = null, submitAs = null}) {
+    await fillStartForm(page, {title, section, language, submitAs});
     await page.getByRole('button', {name: 'Begin Submission'}).click();
     await page.waitForURL(/[?&]id=\d+/, {waitUntil: 'commit', timeout: 30_000});
     await expectWizardOpen(page);
@@ -313,6 +331,95 @@ async function addGalleyFile(page, {label = 'PDF', genre = 'Preprint Text', file
     ).toBeVisible({timeout: 20_000});
 }
 
+/**
+ * The Upload Files step's legacy "Files" grid of galleys (OPS1): the grid
+ * that carries "Add File" (and, from two galleys on, "Order").
+ */
+function galleyGrid(page) {
+    return page
+        .locator('.pkp_controllers_grid')
+        .filter({has: page.getByRole('link', {name: 'Add File', exact: true})});
+}
+
+/** The galley grid's rows, in screen order. */
+function galleyRows(page) {
+    return galleyGrid(page).locator('tr.gridRow');
+}
+
+/** A galley grid row by its label. */
+function galleyRow(page, label) {
+    return galleyRows(page).filter({has: page.getByRole('link', {name: label, exact: true})});
+}
+
+/** The grid's "Order", "Done" and "Cancel ordering" links (Rule 7). */
+function galleyOrderLink(page) {
+    return galleyGrid(page).getByRole('link', {name: 'Order', exact: true});
+}
+
+function galleyOrderDoneLink(page) {
+    return galleyGrid(page).getByRole('link', {name: 'Done', exact: true});
+}
+
+function galleyCancelOrderingLink(page) {
+    return galleyGrid(page).getByRole('link', {name: 'Cancel ordering', exact: true});
+}
+
+/** The rows' drag handles, shown only while ordering. */
+function galleyDragHandles(page) {
+    return galleyRows(page).locator('.pkp_linkaction_moveItem:visible');
+}
+
+/** Press "Order": the mode's "Done" and "Cancel ordering" show. */
+async function startGalleyOrdering(page) {
+    await waitForJQueryIdle(page);
+    await galleyOrderLink(page).click();
+    await expect(galleyOrderDoneLink(page)).toBeVisible({timeout: 20_000});
+}
+
+/**
+ * Drag the galley row `from` onto the top of the row `to` with the mouse
+ * (jQuery UI sortable needs a real press, a few steps of move and a
+ * release; `dragTo` is too quick for it — SectionsPages.drag), then wait
+ * until `from` stands first of the two.
+ */
+async function dragGalley(page, from, to) {
+    const source = galleyRow(page, from);
+    const target = galleyRow(page, to);
+    await expect(source).toHaveClass(/\bordering\b/, {timeout: 20_000});
+    const sb = await source.boundingBox();
+    const tb = await target.boundingBox();
+    if (!sb || !tb) {
+        throw new Error(`dragGalley: no box for "${from}" or "${to}"`);
+    }
+    await page.mouse.move(sb.x + 40, sb.y + sb.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(sb.x + 40, sb.y + sb.height / 2 - 5, {steps: 5});
+    await page.mouse.move(tb.x + 40, tb.y + 3, {steps: 20});
+    await page.mouse.move(tb.x + 40, tb.y + 2, {steps: 2});
+    await page.mouse.up();
+    await expect(galleyRows(page).first()).toContainText(from);
+}
+
+/** "Done": waits for the order's save (`save-sequence`) and the grid's redraw. */
+async function finishGalleyOrdering(page) {
+    const saved = page.waitForResponse(
+        (r) => r.request().method() === 'POST' && /save-sequence/.test(r.url()),
+        {timeout: 30_000}
+    );
+    await galleyOrderDoneLink(page).click();
+    const response = await saved;
+    await expect(galleyOrderDoneLink(page)).toBeHidden({timeout: 20_000});
+    await waitForJQueryIdle(page);
+    return response;
+}
+
+/** "Cancel ordering": the mode ends and the grid redraws in its stored order. */
+async function cancelGalleyOrdering(page) {
+    await galleyCancelOrderingLink(page).click();
+    await expect(galleyCancelOrderingLink(page)).toBeHidden({timeout: 20_000});
+    await waitForJQueryIdle(page);
+}
+
 /** Answer the For Readers step's required "Relation status" question. */
 async function setRelationStatus(
     page,
@@ -354,6 +461,11 @@ function reviewPanel(page, heading) {
     return page
         .locator('.submissionWizard__reviewPanel')
         .filter({has: page.getByRole('heading', {name: heading, exact: true})});
+}
+
+/** Press a Review panel's "Edit"; the wizard goes back to that panel's step. */
+async function editFromReviewPanel(page, heading) {
+    await reviewPanel(page, heading).getByRole('button', {name: 'Edit', exact: true}).click();
 }
 
 /**
@@ -451,6 +563,7 @@ const CONTROLS = {
     title: 'titleAbstract-title-control-en',
     abstract: 'titleAbstract-abstract-control-en',
     keywords: 'titleAbstract-keywords-control-en',
+    plainLanguageSummary: 'titleAbstract-plainLanguageSummary-control-en',
     moderatorNote: 'commentsForTheEditors-commentsForTheEditors-control',
 };
 
@@ -487,6 +600,19 @@ function wizardField(page, labelRe) {
  */
 function wizardFieldLabel(page, labelRe) {
     return wizardField(page, labelRe).locator('label.pkpFormFieldLabel');
+}
+
+/**
+ * The Details step's "References" box (a plain textarea, shown when the
+ * server asks for references: the fresh context's `request`).
+ */
+function referencesBox(page) {
+    return page.getByRole('textbox', {name: /^References/});
+}
+
+/** The wizard's "Error" dialog (a refused save, Rule 9c). */
+function errorDialog(page) {
+    return page.getByRole('dialog').filter({hasText: 'An unexpected error has occurred'});
 }
 
 /** A Review-step panel's item by its field label ("Abstract", "Keywords"…). */
@@ -559,7 +685,8 @@ function contributorEditModal(page) {
 async function openContributorEdit(page, name) {
     await contributorItem(page, name).getByRole('button', {name: 'Edit', exact: true}).click();
     const modal = contributorEditModal(page);
-    await expect(modal.locator('[id^="contributor-givenName"]')).toBeVisible({timeout: 30_000});
+    // A server with two submission languages has one given-name box per language.
+    await expect(modal.locator('[id^="contributor-givenName"]').first()).toBeVisible({timeout: 30_000});
     return modal;
 }
 
@@ -585,6 +712,24 @@ function contributorBioBody(modal, locale = 'en') {
 /** The ORCID field's "Request verification" button (a contributor with no verified iD). */
 function contributorRequestVerificationButton(modal) {
     return modal.getByRole('button', {name: 'Request verification'});
+}
+
+/**
+ * Press the panel's "Save" and return the contributor save's response
+ * (`POST …/contributors/{id}`); the panel stays open when the save is
+ * refused. A form the client refuses (a required field empty) sends
+ * nothing, so this times out.
+ */
+async function saveContributorEdit(modal, {timeout = 30_000} = {}) {
+    const page = modal.page();
+    const [response] = await Promise.all([
+        page.waitForResponse(
+            (r) => /\/contributors\/\d+/.test(r.url()) && r.request().method() !== 'GET',
+            {timeout}
+        ),
+        modal.getByRole('button', {name: 'Save', exact: true}).click(),
+    ]);
+    return response;
 }
 
 /** Close the panel without saving (its "Close" button). */
@@ -636,19 +781,35 @@ module.exports = {
     expectStep,
     expectWizardOpen,
     fillStartTitle,
+    fillStartForm,
+    submitAsGroup,
     beginSubmission,
     continueTo,
     addGalleyFile,
+    galleyGrid,
+    galleyRows,
+    galleyRow,
+    galleyOrderLink,
+    galleyOrderDoneLink,
+    galleyCancelOrderingLink,
+    galleyDragHandles,
+    startGalleyOrdering,
+    dragGalley,
+    finishGalleyOrdering,
+    cancelGalleyOrdering,
     setRelationStatus,
     openReview,
     problemsBanner,
     reviewPanel,
+    editFromReviewPanel,
     confirmationHeading,
     copyrightCheckbox,
     fillRichText,
     richTextBody,
     wizardField,
     wizardFieldLabel,
+    referencesBox,
+    errorDialog,
     reviewItem,
     addKeyword,
     contributorRows,
@@ -660,6 +821,7 @@ module.exports = {
     contributorAffiliations,
     contributorBioBody,
     contributorRequestVerificationButton,
+    saveContributorEdit,
     closeContributorEdit,
     addContributor,
     confirmSubmit,

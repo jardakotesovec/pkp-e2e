@@ -139,15 +139,22 @@ async function fillStartTitle(page, title) {
 }
 
 /**
- * Complete the "Make a Submission" start form and press "Begin Submission".
- * Ticks whatever confirmation boxes the form offers; picks the work type
- * when a label regex is given (Monograph arrives preselected). Resolves once
- * the wizard has opened.
+ * Complete the "Make a Submission" start form without pressing "Begin
+ * Submission": pick the submission language when given (a press with two
+ * submission languages preselects none and refuses the form without one),
+ * type the title, pick the work type when a label regex is given (Monograph
+ * arrives preselected) and tick whatever confirmation boxes the form offers.
  */
-async function beginSubmission(page, {title, workType = null}) {
+async function fillStartForm(page, {title, workType = null, language = null}) {
     await expect(
         page.getByRole('heading', {name: /Make a Submission/}).first()
     ).toBeVisible({timeout: 20_000});
+    if (language) {
+        await page
+            .getByRole('group', {name: /^Submission Language/})
+            .getByRole('radio', {name: language, exact: true})
+            .check();
+    }
     await fillStartTitle(page, title);
     if (workType) {
         await page.getByRole('radio', {name: workType}).check();
@@ -164,6 +171,15 @@ async function beginSubmission(page, {title, workType = null}) {
     if (await privacy.count()) {
         await privacy.check();
     }
+}
+
+/**
+ * Complete the "Make a Submission" start form (fillStartForm) and press
+ * "Begin Submission". Resolves once the wizard has opened on its first
+ * step.
+ */
+async function beginSubmission(page, {title, workType = null, language = null}) {
+    await fillStartForm(page, {title, workType, language});
     await page.getByRole('button', {name: 'Begin Submission'}).click();
     await page.waitForURL(/[?&]id=\d+/, {waitUntil: 'commit', timeout: 30_000});
     await expectWizardOpen(page);
@@ -343,6 +359,8 @@ function copyrightCheckbox(page) {
 const CONTROLS = {
     title: 'titleAbstract-title-control-en',
     keywords: 'titleAbstract-keywords-control-en',
+    abstract: 'titleAbstract-abstract-control-en',
+    plainLanguageSummary: 'titleAbstract-plainLanguageSummary-control-en',
     editorNote: 'commentsForTheEditors-commentsForTheEditors-control',
 };
 
@@ -392,6 +410,22 @@ function reviewItem(panel, label) {
  */
 function startFormLegend(page, text) {
     return page.locator('legend').filter({hasText: text});
+}
+
+/**
+ * The Details step's "References" box (a plain textarea, its own form,
+ * shown while the press asks for references: the install default).
+ */
+function referencesBox(page) {
+    return page.getByRole('textbox', {name: 'References', exact: true});
+}
+
+/**
+ * The wizard's "Error" dialog ("An unexpected error has occurred. Please
+ * reload the page and try again."), which a refused step save opens.
+ */
+function saveErrorDialog(page) {
+    return page.getByRole('dialog').filter({hasText: /An unexpected error has occurred/});
 }
 
 /** Add a keyword chip on the Details step (Enter commits the term). */
@@ -458,7 +492,9 @@ function contributorEditModal(page) {
 async function openContributorEdit(page, name) {
     await contributorItem(page, name).getByRole('button', {name: 'Edit', exact: true}).click();
     const modal = contributorEditModal(page);
-    await expect(modal.locator('[id^="contributor-givenName"]')).toBeVisible({timeout: 30_000});
+    // A multilingual press shows one given-name box per language (and a
+    // progress mark per box): the first box anchors the read.
+    await expect(modal.locator('[id^="contributor-givenName"]').first()).toBeVisible({timeout: 30_000});
     return modal;
 }
 
@@ -484,6 +520,22 @@ function contributorBioBody(modal, locale = 'en') {
 /** The ORCID field's "Request verification" button (a contributor with no verified iD). */
 function contributorRequestVerificationButton(modal) {
     return modal.getByRole('button', {name: 'Request verification'});
+}
+
+/**
+ * Press the panel's "Save" and return the contributor save's answer (a
+ * refused save leaves the panel open, so nothing else is waited for).
+ */
+async function saveContributorEdit(modal, {timeout = 30_000} = {}) {
+    const page = modal.page();
+    const [response] = await Promise.all([
+        page.waitForResponse(
+            (r) => /\/contributors\/\d+/.test(r.url()) && r.request().method() !== 'GET',
+            {timeout}
+        ),
+        modal.getByRole('button', {name: 'Save', exact: true}).click(),
+    ]);
+    return response;
 }
 
 /** Close the panel without saving (its "Close" button). */
@@ -527,6 +579,7 @@ module.exports = {
     gotoStep,
     expectWizardOpen,
     fillStartTitle,
+    fillStartForm,
     beginSubmission,
     continueTo,
     uploadWizardFile,
@@ -541,6 +594,8 @@ module.exports = {
     wizardFieldLabel,
     reviewItem,
     startFormLegend,
+    referencesBox,
+    saveErrorDialog,
     addKeyword,
     contributorRows,
     contributorItem,
@@ -551,6 +606,7 @@ module.exports = {
     contributorAffiliations,
     contributorBioBody,
     contributorRequestVerificationButton,
+    saveContributorEdit,
     closeContributorEdit,
     addContributor,
     confirmSubmit,
