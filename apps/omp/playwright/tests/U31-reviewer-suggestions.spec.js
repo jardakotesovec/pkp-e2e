@@ -11,12 +11,6 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap):
- * - A1 ✅ (retired 2026-10-07, fixed upstream by pkp/pkp-lib#13191): S4
- *   walks the Funding Coordinator onto the Submission and External stages and
- *   still presses "OK" on an "Error" dialog if one comes; the panel the
- *   role now sees is a Planned assertion (the spec's Coverage). The suite
- *   asserts what the role IS offered next: the suggestions list inside Add
- *   Reviewer and the "Selected Reviewer" path that succeeds.
  * - A5 🐞: S4 presses the inner "Create New Reviewer" form's "Add Reviewer"
  *   as the Funding Coordinator, bounded by the grid's own answer, then closes
  *   the windows; the unresponsive form, and whether Nova stays pending for the
@@ -82,6 +76,7 @@ const {
     reviewerListEntry,
 } = require('../pages/ReviewerAssignmentPages.js');
 const {decisionButton, walkDecisionWizard} = require('../pages/ReviewStagePages.js');
+const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 const {
     ReviewerSuggestionStep,
     ReviewerRequestWindow,
@@ -186,53 +181,10 @@ async function openAddReviewerWindow(page, workflow) {
     return modal;
 }
 
-/**
- * Land on a stage that may stack an "Error" dialog over the workflow (A1,
- * walked, never asserted): wait for the dialog or the landmark, and press
- * "OK" when the dialog is the one that came.
- */
-async function landPastErrorDialog(page, landmark) {
-    const error = page.getByRole('dialog', {name: 'Error', exact: true});
-    await expect(error.or(landmark).first()).toBeVisible({timeout: 30_000});
-    if (await error.count()) {
-        await error.getByRole('button', {name: 'OK', exact: true}).click();
-        await expect(error).toBeHidden({timeout: 30_000});
-    }
-    await expect(landmark).toBeVisible({timeout: 30_000});
-}
-
-/**
- * The Reviewers panel's "Add Reviewer" as a role whose list fetch stacks the
- * "Error" dialog over the opening window (A1, walked): press it, dismiss the
- * dialog when it comes, and return the window once its search box is there.
- */
-async function openAddReviewerPastErrorDialog(page) {
-    await page.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
-    const modal = page.getByRole('dialog').filter({has: page.locator('.listPanel--selectReviewer')});
-    await landPastErrorDialog(page, modal.locator('.listPanel--selectReviewer input.pkpSearch__input'));
-    return modal;
-}
-
-/**
- * Close every open "Add Reviewer" window as the Funding Coordinator. On the
- * press the "Error" dialog (A1: the list's refresh answers 401) stacks over
- * the windows again after the inner form's "Add Reviewer", and its overlay
- * intercepts every click beneath it, so "OK" is pressed whenever it is the
- * topmost dialog, and the windows are closed in between.
- */
-async function closeWindowsPastErrorDialog(page) {
-    const error = page.getByRole('dialog', {name: 'Error', exact: true});
+/** Close every open "Add Reviewer" window, the topmost first. */
+async function closeWindows(page) {
     while (await ReviewerRequestWindow.all(page).count()) {
-        if (await error.count()) {
-            await error.getByRole('button', {name: 'OK', exact: true}).click();
-            await expect(error).toBeHidden({timeout: 30_000});
-            continue;
-        }
         await new ReviewerRequestWindow(page).close();
-    }
-    if (await error.count()) {
-        await error.getByRole('button', {name: 'OK', exact: true}).click();
-        await expect(error).toBeHidden({timeout: 30_000});
     }
 }
 
@@ -958,17 +910,53 @@ test.describe('reviewer-suggestions', () => {
         const workflow = workflowFor(page, tag);
         const reviewers = () => workflow.dialog();
 
-        // External Review, then Submission, then back: the "Error" dialog
-        // (A1) is dismissed when it comes, never asserted.
-        await workflow.gotoEditorial(submissionId, {menuKey: key});
-        await landPastErrorDialog(page, reviewerPanel(reviewers()));
-        await workflow.gotoEditorial(submissionId, {menuKey: 'workflow_1'});
-        await landPastErrorDialog(page, workflow.participantsHeading());
-        await workflow.gotoEditorial(submissionId, {menuKey: key});
-        await landPastErrorDialog(page, reviewerPanel(reviewers()));
+        const panel = new SuggestedReviewersPanel(page);
+        const errorDialog = page.getByRole('dialog', {name: 'Error', exact: true});
 
-        // The Reviewers panel's own Add Reviewer offers both suggestions.
-        let modal = await openAddReviewerPastErrorDialog(page);
+        // External Review (Actors rows 2–3): the panel lists Kay and Nova,
+        // each row ending in a "…" menu holding one action, "Add Reviewer";
+        // no "Error" dialog stacks over the stage (the retired A1's guard),
+        // read once the panel's own list fetch has answered.
+        await workflow.gotoEditorial(submissionId, {menuKey: key});
+        await workflow.expectStageHeading(EXTERNAL_ROUND_1);
+        await panel.loaded();
+        await expect(panel.heading()).toBeVisible();
+        await expect(panel.rows()).toHaveCount(2);
+        for (const person of [kay, nova]) {
+            await expect(panel.row(fullName(person))).toContainText(person.affiliation);
+            await expect(panel.moreActionsButton(fullName(person))).toBeVisible();
+            const items = await panel.openMenu(fullName(person));
+            await expect(items).toHaveCount(1);
+            await expect(items).toHaveText('Add Reviewer');
+            await closeMenu(page);
+            await expect(items).toHaveCount(0);
+        }
+        await expect(errorDialog).toHaveCount(0);
+
+        // Submission stage: the same panel lists both, with no action on
+        // either row (the Participants row's own "…" is the control that
+        // buttons render here); no "Error" dialog either.
+        await workflow.gotoEditorial(submissionId, {menuKey: 'workflow_1'});
+        await workflow.expectStageHeading('Submission');
+        await panel.loaded();
+        await expect(panel.heading()).toBeVisible();
+        await expect(panel.rows()).toHaveCount(2);
+        await expect(page.getByRole('button', {name: 'Ava Author More Actions', exact: true})).toBeVisible();
+        for (const person of [kay, nova]) {
+            const row = panel.row(fullName(person));
+            await expect(row).toContainText(`${person.givenName[0]}${person.familyName[0]}`);
+            await expect(row).toContainText(person.affiliation);
+            await expect(row).toContainText(person.suggestionReason);
+            await expect(row.getByRole('button')).toHaveCount(0);
+        }
+        await expect(errorDialog).toHaveCount(0);
+
+        // Back on External Review, the Reviewers panel's own Add Reviewer
+        // offers both suggestions.
+        await workflow.gotoEditorial(submissionId, {menuKey: key});
+        await workflow.expectStageHeading(EXTERNAL_ROUND_1);
+        await expect(reviewerPanel(reviewers())).toBeVisible({timeout: 30_000});
+        let modal = await openAddReviewerWindow(page, workflow);
         let list = new SuggestionList(page, modal);
         await expect(list.heading()).toBeVisible();
         await expect(list.entries()).toHaveCount(2);
@@ -985,13 +973,12 @@ test.describe('reviewer-suggestions', () => {
         await expect(request.selectedReviewerName()).toHaveText(fullName(kay));
         await request.submit();
         await expect(ReviewerRequestWindow.all(page)).toHaveCount(0);
-        await landPastErrorDialog(page, reviewerPanel(reviewers()));
-        await expect(reviewerRow(reviewers(), fullName(kay))).toBeVisible();
+        await expect(reviewerRow(reviewers(), fullName(kay))).toBeVisible({timeout: 30_000});
 
         // Nova: the inner "Create New Reviewer" window, filled in; its "Add
         // Reviewer" is pressed and bounded by the grid's answer (A5: the
         // outcome is asserted neither way), then every window is closed.
-        modal = await openAddReviewerPastErrorDialog(page);
+        modal = await openAddReviewerWindow(page, workflow);
         list = new SuggestionList(page, modal);
         await expect(list.entry(fullName(nova))).toBeVisible();
         await list.select(fullName(nova));
@@ -1002,7 +989,7 @@ test.describe('reviewer-suggestions', () => {
         await expect(inner.createEmail()).toHaveValue(nova.email);
         await inner.username().fill(novaUsername);
         await inner.submit();
-        await closeWindowsPastErrorDialog(page);
+        await closeWindows(page);
 
         // Control: the Press Manager on the same External Review stage meets
         // no dialog; Kay has left the panel (Rule 11) and is still listed on

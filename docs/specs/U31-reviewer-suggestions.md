@@ -567,9 +567,6 @@ Left out of the scenarios above, by reason:
     the wizard, add a suggestion and then the same address in other
     capitals, and assert the second is refused with "The email has already
     been taken." [report 2026-10-04]
-  - scenario 4's first two bullets, the Funding Coordinator's panel on
-    both stages (Actors rows 2–3; A1 retired): the scenario states them,
-    the suite does not assert them yet [report 2026-10-07]
 - **Nothing new to test**:
   - assigned Section Editor, Guest Editor and Site Administrator (the Journal Manager's offer, scenarios 2 and 3)
   - Reviewer and Reader (no screen offers them anything)

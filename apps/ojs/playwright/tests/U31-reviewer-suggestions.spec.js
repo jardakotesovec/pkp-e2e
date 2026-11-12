@@ -7,14 +7,9 @@
  * they live in those trees).
  * Spec: docs/specs/U31-reviewer-suggestions.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap):
- * - A1 ✅ (retired 2026-10-07, fixed upstream by pkp/pkp-lib#13191): S4
- *   walks the Funding Coordinator onto the Submission and Review stages and
- *   still presses "OK" on an "Error" dialog if one comes; the panel the
- *   role now sees is a Planned assertion (the spec's Coverage). The suite
- *   asserts what the role IS offered next: the suggestions list inside Add
- *   Reviewer and the "Selected Reviewer" path that succeeds.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
  * - A5 🐞: S4 presses the inner "Create New Reviewer" form's "Add Reviewer"
  *   as the Funding Coordinator, bounded by the grid's own answer, then closes
  *   the windows; the unresponsive form, and whether Nova stays pending for the
@@ -41,9 +36,8 @@
  * created with `review: {reviewerSuggestionEnabled: true}` and throwaway
  * users whose addresses carry app + test; publicknowledge (the setting off,
  * seed-facts) hosts only S1's control: a seeded draft of author.alex and a
- * seeded submission in review read by manager.maya (A1: the journal itself
- * stays untouched). Suggestions on submitted
- * submissions come from `reviewerSuggestions[]`; an address once turned into
+ * seeded submission in review read by manager.maya (PRINCIPLES A1: the
+ * journal itself stays untouched). Suggestions on submitted submissions come from `reviewerSuggestions[]`; an address once turned into
  * a reviewer holds the role for every submission of the journal, so each
  * submission gets fresh addresses for the Create and Enroll paths. Mailpit
  * sits at its cap, so mail is read per fresh recipient plus the tag-bearing
@@ -160,30 +154,13 @@ function reviewerRow(workflow, name) {
 }
 
 /**
- * Land on a stage that may stack an "Error" dialog over the workflow (A1,
- * walked, never asserted): wait for the dialog or the landmark, and press
- * "OK" when the dialog is the one that came.
+ * The "Reviewers Suggested by Author" heading sits below the Participants
+ * heading, in the same column.
  */
-async function landPastErrorDialog(page, landmark) {
-    const error = page.getByRole('dialog', {name: 'Error', exact: true});
-    await expect(error.or(landmark).first()).toBeVisible({timeout: 30_000});
-    if (await error.count()) {
-        await error.getByRole('button', {name: 'OK', exact: true}).click();
-        await expect(error).toBeHidden({timeout: 30_000});
-    }
-    await expect(landmark).toBeVisible({timeout: 30_000});
-}
-
-/**
- * The Reviewers panel's "Add Reviewer" as a role whose list fetch stacks the
- * "Error" dialog over the opening window (A1, walked): press it, dismiss the
- * dialog when it comes, and return the window once its search box is there.
- */
-async function openAddReviewerPastErrorDialog(page) {
-    await page.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
-    const modal = page.getByRole('dialog').filter({has: page.locator('.listPanel--selectReviewer')});
-    await landPastErrorDialog(page, modal.locator('.listPanel--selectReviewer input.pkpSearch__input'));
-    return modal;
+async function expectUnderParticipants(workflow, panel) {
+    const participants = await workflow.participantsHeading().boundingBox();
+    const suggested = await panel.heading().boundingBox();
+    expect(participants && suggested && participants.y < suggested.y, 'panel under Participants').toBe(true);
 }
 
 test.describe('reviewer-suggestions', () => {
@@ -889,17 +866,55 @@ test.describe('reviewer-suggestions', () => {
         const workflow = new WorkflowPage(page, tag);
         const panel = new SuggestedReviewersPanel(page);
 
-        // Review stage, then Submission stage, then back: the "Error" dialog
-        // (A1) is dismissed when it comes, never asserted.
+        // Review stage: under Participants, "Reviewers Suggested by Author"
+        // lists Kay and Nova, each row ending in a "…" menu holding "Add
+        // Reviewer"; no "Error" dialog comes (A1, retired: the panel loads
+        // for this role).
         await workflow.gotoEditorial(submissionId, {menuKey: key});
-        await landPastErrorDialog(page, workflow.panel('Reviewers'));
-        await workflow.gotoEditorial(submissionId, {menuKey: 'workflow_1'});
-        await landPastErrorDialog(page, workflow.participantsHeading());
-        await workflow.gotoEditorial(submissionId, {menuKey: key});
-        await landPastErrorDialog(page, workflow.panel('Reviewers'));
+        await workflow.expectStageHeading('Review (Round 1)');
+        await panel.loaded();
+        await expect(panel.heading()).toBeVisible();
+        await expectUnderParticipants(workflow, panel);
+        await expect(panel.rows()).toHaveCount(2);
+        for (const person of [kay, nova]) {
+            const row = panel.row(fullName(person));
+            await expect(row).toContainText(person.affiliation);
+            await expect(row).toContainText(person.suggestionReason);
+            await expect(panel.moreActionsButton(fullName(person))).toBeVisible();
+        }
+        for (const person of [kay, nova]) {
+            const items = await panel.openMenu(fullName(person));
+            await expect(items).toHaveCount(1);
+            await expect(items).toHaveText('Add Reviewer');
+            await page.keyboard.press('Escape');
+            await expect(items).toHaveCount(0);
+        }
+        await expect(page.getByRole('dialog', {name: 'Error', exact: true})).toHaveCount(0);
 
-        // The Reviewers panel's own Add Reviewer offers both suggestions.
-        let modal = await openAddReviewerPastErrorDialog(page);
+        // Submission stage: the same panel lists both, no action on either
+        // row (the participant's own menu is the control).
+        await workflow.gotoEditorial(submissionId, {menuKey: 'workflow_1'});
+        await workflow.expectStageHeading('Submission');
+        await panel.loaded();
+        await expect(panel.heading()).toBeVisible();
+        await expectUnderParticipants(workflow, panel);
+        await expect(panel.rows()).toHaveCount(2);
+        for (const person of [kay, nova]) {
+            const row = panel.row(fullName(person));
+            await expect(row).toContainText(person.affiliation);
+            await expect(row).toContainText(person.suggestionReason);
+            await expect(row.getByRole('button')).toHaveCount(0);
+            await expect(panel.moreActionsButton(fullName(person))).toHaveCount(0);
+        }
+        await expect(page.getByRole('button', {name: 'Ava Author More Actions', exact: true})).toBeVisible();
+        await expect(page.getByRole('dialog', {name: 'Error', exact: true})).toHaveCount(0);
+
+        // Back on the Review stage, the Reviewers panel's own Add Reviewer
+        // offers both suggestions.
+        await workflow.gotoEditorial(submissionId, {menuKey: key});
+        await workflow.expectStageHeading('Review (Round 1)');
+        await panel.loaded();
+        let modal = await openAddReviewerModal(page);
         let list = new SuggestionList(page, modal);
         await expect(list.heading()).toBeVisible();
         await expect(list.entries()).toHaveCount(2);
@@ -914,15 +929,15 @@ test.describe('reviewer-suggestions', () => {
         await expect(ReviewerRequestWindow.all(page)).toHaveCount(1);
         await expect(request.selectedReviewerLabel()).toBeVisible();
         await expect(request.selectedReviewerName()).toHaveText(fullName(kay));
+        await expect(request.dialog()).toContainText(kay.email);
         await request.submit();
         await expect(ReviewerRequestWindow.all(page)).toHaveCount(0);
-        await landPastErrorDialog(page, workflow.panel('Reviewers'));
         await expect(reviewerRow(workflow, fullName(kay))).toBeVisible();
 
         // Nova: the inner "Create New Reviewer" window, filled in; its "Add
         // Reviewer" is pressed and bounded by the grid's answer (A5: the
         // outcome is asserted neither way), then every window is closed.
-        modal = await openAddReviewerPastErrorDialog(page);
+        modal = await openAddReviewerModal(page);
         list = new SuggestionList(page, modal);
         await expect(list.entry(fullName(nova))).toBeVisible();
         await list.select(fullName(nova));
