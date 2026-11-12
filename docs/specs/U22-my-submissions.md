@@ -420,8 +420,9 @@ App-specific:
 
    Given: a scratch journal with three throwaway accounts holding two roles
    each, Author and Reviewer {OJS OMP}, Author and Section Editor, and
-   Section Editor and Reviewer {OJS OMP}, each on the journal's login page.
-   <sup>s5</sup>
+   Section Editor and Reviewer {OJS OMP}, a fourth holding only the Reader
+   role, a fifth only the Author role and a sixth no role in the journal,
+   each on the journal's login page. <sup>s5</sup>
 
    - **Author and Reviewer** {OJS OMP}: sign in: the browser lands on the
      reviewer dashboard, with the "My Submissions as Author" group still in
@@ -431,21 +432,22 @@ App-specific:
      sidebar (Rule 3).
    - **Section Editor and Reviewer** {OJS OMP}: sign in: the browser lands
      on the Dashboard (Rule 3).
-   - **Control**: an account holding only the Author role on the same
-     journal lands on My Submissions, as in scenario 1 (Rule 3).
+   - **Reader only**: sign in: the browser lands on the journal's home
+     page (Rule 3). Open the retired submission-list address
+     `{journal path}/submissions`: the access-denied page (Rule 3).
+   - **No role in the journal**: sign in: the browser lands on the
+     journal's home page (Rule 3). Open `{journal path}/submissions`: the
+     access-denied page (Rule 3).
+   - **Control**: the Author-only account signs in: the browser lands on
+     My Submissions (Rule 3).
 
-   A preprint server has no Reviewer role, so only the Author and Section
-   Editor account runs there.
+   A preprint server has no Reviewer role, so the two accounts holding
+   Reviewer do not run there.
 
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
-- **Planned**:
-  - an account holding a single Reader-level role, or no role in the
-    journal, landing on the journal's home page after signing in on the
-    journal's login page, and getting the access-denied page at the
-    retired submission-list address `{journal path}/submissions` (Rule 3) [incidental 2026-10-13]
 - **Rarely met**:
   - a change someone else makes showing on the list only after a workflow
     panel closes or the page reloads, and not after pressing the open
@@ -466,6 +468,9 @@ Left out of the scenarios above, by reason:
     as in scenario 4
   - reopening the open panel's recorded address from a bookmark (Rule 8):
     scenario 1's old author-dashboard link opens the panel from an address
+  - an account holding only a role created at the "Reader" permission
+    level (Rule 3): it lands and is refused as scenario 5's Reader-only
+    account is
 - **Register carries it**:
   - A2 (a submission declined during review keeping the review counter;
     Rule 7e)
@@ -1065,16 +1070,24 @@ popover wording per fn-h.
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** A scratch journal from `POST scenarios/context`
-with four throwaway accounts: `roles: ['author', 'externalReviewer']`,
-`['author', 'sectionEditor']`, `['sectionEditor', 'externalReviewer']` and
-`['author']` (the control); on OPS, which has no reviewer key, only the
-`['author', 'sectionEditor']` account (its Section Editor is the Moderator
-group) and the control. Landings per fn-c: the reviewer dashboard is
-`dashboard/reviewAssignments`, the Dashboard `dashboard/editorial` (its
-"Assigned to me" view), My Submissions `dashboard/mySubmissions`; the
-suites may reach each landing through the retired `{journal
-path}/submissions` address, which forwards the same way (Rule 3), as
-scenario 1's does.
+with five throwaway accounts: `roles: ['author', 'externalReviewer']`,
+`['author', 'sectionEditor']`, `['sectionEditor', 'externalReviewer']`,
+`['reader']` and `['author']` (the control); on OPS, which has no
+reviewer key, the `['author', 'sectionEditor']` account (its Section Editor
+is the Moderator group), the `['reader']` account and the control. The
+account with no role in the journal is a throwaway minted with
+`roles: ['reader']` in a helper context from a second
+`POST scenarios/context` and never enrolled in the scratch journal (fn-c's
+"account with no role in the journal", live-probed 2026-10-13). Landings
+per fn-c: the reviewer dashboard is `dashboard/reviewAssignments`, the
+Dashboard `dashboard/editorial` (its "Assigned to me" view), My
+Submissions `dashboard/mySubmissions`, the journal's home page
+`{journal path}/index`; the suites may reach each of the first three
+through the retired `{journal path}/submissions` address, which forwards
+the same way (Rule 3), as scenario 1's does. The Reader-only and no-role
+accounts are refused at that address, so their landing is read by
+signing in on the scratch journal's own login page; the refusal reads
+"The current role does not have access to this operation." (fn-c).
 
 <a id="fn-a1"></a>
 **a1 — A1 evidence.** `dashboard.reviewUpdateCounts` and the

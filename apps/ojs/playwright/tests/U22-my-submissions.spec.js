@@ -8,14 +8,9 @@
  * publication" feeder (Rule 7d: issue scheduling).
  * Spec: docs/specs/U22-my-submissions.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓
- * (S4 asserts the review counter exactly as scenario 4 states it; if the
- * ruling reverses, the spec and the assertion move together), A2 ❓ (S3
- * declines from the Submission stage, so a declined-during-review row is
- * read neither way), A3 ❓, A4 ❓, A5 ❓ (S1's old link points at a submitted
- * submission only), OMP1 ❓, OPS1 ❓, OPS2 🐞 (other apps' territory).
- * The spec's Coverage section records everything else left out.
+ * Deliberately NOT covered (register IDs; the spec's Coverage section
+ * records the rest): A1 ❓, A2 ❓, A3 ❓, A4 ❓, A5 ❓, A7 🐞, A8 🐞, OMP1 ❓,
+ * OPS1 ❓, OPS2 🐞.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S2, S4 and S5 isolate on scratch journals with throwaway
@@ -32,6 +27,7 @@
 const {test, expect} = require('../support/fixtures.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 const {SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
+const {freshLogin} = require('../pages/LoginSessionsPages.js');
 const {
     uploadViaWizard,
     uploadWizardDialog,
@@ -593,25 +589,39 @@ test.describe('my submissions', () => {
         await openSub.closeActivityPopover(openRow);
     });
 
-    test('S5: landing for an account holding other roles too', async ({asUser, ojsApi}, testInfo) => {
+    test('S5: landing for an account holding other roles too', async ({asUser, browser, baseURL, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
-        // A scratch journal with four throwaway accounts: three holding two
-        // roles each and the author-only control (fn-s5). The sign-in
-        // fixture caches cookies at the site login, so each landing is read
-        // through the retired submission-list address, which forwards the
-        // same way as the journal's own login (Rule 3, fn-c).
+        // A scratch journal with five throwaway accounts: three holding two
+        // roles each, one holding only Reader and the author-only control;
+        // the account with no role in the journal is minted with Reader in
+        // a helper context and never enrolled in the scratch journal
+        // (fn-s5). The sign-in fixture caches cookies at the site login, so
+        // the first three landings and the control's are read through the
+        // retired submission-list address, which forwards the same way as
+        // the journal's own login (Rule 3, fn-c); the Reader-only and
+        // no-role accounts are refused there, so theirs are read by a real
+        // sign-in on the scratch journal's own login page.
         const authorReviewer = `${tag}ar`;
         const authorEditor = `${tag}ae`;
         const editorReviewer = `${tag}er`;
+        const readerOnly = `${tag}rd`;
         const authorOnly = `${tag}au`;
+        const noRole = `${tag}nr`;
         await ojsApi.createContext({
             tag,
             users: [
                 {username: authorReviewer, givenName: 'Ann', familyName: 'Authorreviewer', roles: ['author', 'externalReviewer']},
                 {username: authorEditor, givenName: 'Abe', familyName: 'Authoreditor', roles: ['author', 'sectionEditor']},
                 {username: editorReviewer, givenName: 'Eve', familyName: 'Editorreviewer', roles: ['sectionEditor', 'externalReviewer']},
+                {username: readerOnly, givenName: 'Rea', familyName: 'Reader', roles: ['reader']},
                 {username: authorOnly, givenName: 'Ada', familyName: 'Author', roles: ['author']},
+            ],
+        });
+        await ojsApi.createContext({
+            tag: `${tag}h`,
+            users: [
+                {username: noRole, givenName: 'Nor', familyName: 'Ole', roles: ['reader']},
             ],
         });
 
@@ -641,12 +651,38 @@ test.describe('my submissions', () => {
         await expect(erPage.getByRole('heading', {level: 1})).toHaveText(/Assigned to me/);
 
         // Control: the author-only account lands on My Submissions, as in
-        // scenario 1 (Rule 3).
+        // scenario 1 (Rule 3); its list and sidebar are the positive
+        // control of the two refusals below.
         const auPage = await (await asUser(authorOnly)).newPage();
         const auSub = new MySubmissionsPage(auPage, tag);
         await auSub.gotoRetiredListAddress();
         await expect(auPage).toHaveURL(/\/dashboard\/mySubmissions/);
         await auSub.expectViewHeading('Active submissions');
+        await expect(auSub.sideNav()).toBeVisible();
         await expect(auSub.menuGroupLink()).toBeVisible();
+
+        // Reader only, then no role in the journal: signed in on the
+        // journal's own login page, the browser lands on the journal's home
+        // page ({journal path}/index); the retired submission-list address
+        // then gives the access-denied page, with no list and no sidebar
+        // (Rule 3, fn-c).
+        for (const username of [readerOnly, noRole]) {
+            const {context, page} = await freshLogin(browser, baseURL, username, {contextPath: tag});
+            try {
+                await expect(page, `${username} lands on the journal's home page`).toHaveURL(
+                    new RegExp(`/index\\.php/${tag}/index$`),
+                    {timeout: 30_000}
+                );
+                await expect(page.getByRole('heading', {level: 1, name: `Scratch context ${tag}`})).toBeVisible();
+                const sub = new MySubmissionsPage(page, tag);
+                await page.goto(sub.retiredListUrl());
+                await expect(sub.accessDenied()).toBeVisible({timeout: 30_000});
+                await expect(page.getByRole('heading', {name: /^Active submissions/})).toHaveCount(0);
+                await expect(sub.sideNav()).toHaveCount(0);
+                await expect(sub.menuGroupLink()).toHaveCount(0);
+            } finally {
+                await context.close();
+            }
+        }
     });
 });

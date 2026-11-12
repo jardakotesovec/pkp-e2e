@@ -10,18 +10,9 @@
  * four views and no row ever offers "Submit revisions").
  * Spec: docs/specs/U22-my-submissions.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): OPS2 🐞
- * (S2 stops at the confirm dialog's OFFER and takes the Cancel path; neither
- * a successful deletion nor the refusal is asserted, so the two {OJS OMP}
- * bullets after the confirm step do not run here), OPS1 ❓ (S2 and the
- * absence test assert the spec's current OPS text — drafts under "Active
- * submissions" with a "Production" bubble, no "Incomplete submissions" view
- * — and move with the spec if the ruling flips), A3 ❓ (S3's "Scheduled for
- * publication (0)" is arithmetic over its own seeding, not a claim that no
- * feeder exists), A1 ❓, A2 ❓, A4 ❓, A5 ❓ (S1's old link points at a
- * submitted preprint only), OMP1 ❓. The spec's Coverage section records
- * everything else left out.
+ * Deliberately NOT covered (Findings register IDs): OPS2 🐞, A7 🐞, A8 🐞,
+ * OPS1 ❓, A1 ❓, A2 ❓, A3 ❓, A4 ❓, A5 ❓, OMP1 ❓. The spec's Coverage
+ * section records everything else left out.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1 and the absence test ride author.alex's own rows in
@@ -34,9 +25,12 @@
  * saved-step key). The sign-in fixture caches cookies at the site login and
  * asserts nothing about where sign-in lands, so S1's and S5's landings are
  * read through the retired `{server}/submissions` address, which forwards
- * the same way (fn-s1, fn-s5). Mailpit reads (S2, S3) are scoped by the
- * throwaway author's address (PRINCIPLES A8) and taken as a before/after
- * count settled by the scenario's own list reads. Waits are event-based
+ * the same way (fn-s1, fn-s5); S5's Reader-only and no-role accounts are
+ * refused there, so they and S5's author-only control sign in on the
+ * scratch server's own login page in a fresh context of their own (fn-s5).
+ * Mailpit reads (S2, S3) are scoped by the throwaway author's address
+ * (PRINCIPLES A8) and taken as a before/after count settled by the
+ * scenario's own list reads. Waits are event-based
  * (auto-wait on rows, headings, badges, dialogs and the landing URL); no
  * hard-coded sleeps. Everything runs in the parallel `ops` project.
  */
@@ -53,6 +47,9 @@ const {
     wizardUrl,
     saveForLaterAt,
 } = require('../pages/SubmissionWizardPages.js');
+// A fresh, unshared context signed in on a server's own login page (the
+// sign-in fixture caches its sessions at the site login).
+const {freshLogin} = require('../pages/LoginSessionsPages.js');
 
 const SERVER = 'publicknowledge';
 const DAYS_FILTER = 'Days since last activity';
@@ -463,30 +460,40 @@ test.describe('my submissions', () => {
         await expect(row.getByText('Revision requested')).toHaveCount(0);
     });
 
-    test('S5: landing for an account holding other roles too', async ({asUser, opsApi}, testInfo) => {
+    test('S5: landing for an account holding other roles too', async ({asUser, opsApi, browser, baseURL}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
+        const helperTag = makeTag('s5h', testInfo);
         // A scratch preprint server with the one two-role account a
         // preprint server can hold — Author and Section Editor, OPS's
-        // `sectionEditor` key being the Moderator group — and the
-        // author-only control (fn-s5; the two Reviewer combinations are
-        // {OJS OMP}: OPS has no reviewer key). Each session is cached at the
-        // site login by the fixture, so every landing is read through the
-        // retired list address, which forwards the same way (Rule 3).
+        // `sectionEditor` key being the Moderator group — a Reader-only
+        // account and the author-only control; the account with no role in
+        // the server is minted with `reader` in a helper server and never
+        // enrolled in this one (fn-s5; the two Reviewer combinations are
+        // {OJS OMP}: OPS has no reviewer key).
         const authorModerator = `${tag}am`;
         const authorOnly = `${tag}ao`;
+        const readerOnly = `${tag}rd`;
+        const noRole = `${helperTag}nr`;
         await opsApi.createContext({
             tag,
             users: [
                 user(authorModerator, 'Abe', 'Authormod', ['author', 'sectionEditor']),
                 user(authorOnly, 'Ada', 'Authonly', ['author']),
+                user(readerOnly, 'Rhea', 'Readonly', ['reader']),
             ],
+        });
+        await opsApi.createContext({
+            tag: helperTag,
+            users: [user(noRole, 'Nora', 'Norole', ['reader'])],
         });
 
         // Author and Section Editor (Moderator): the browser lands on the
         // Dashboard, its "Assigned to me" view under the "Editor Dashboard"
         // group, with the "My Submissions as Author" group still in the
-        // sidebar (Rule 3).
+        // sidebar (Rule 3). The fixture's session is cached at the site
+        // login, so the landing is read through the retired list address,
+        // which forwards the same way (fn-s5).
         const amPage = await (await asUser(authorModerator)).newPage();
         const amSub = new MySubmissionsPage(amPage, tag);
         const amDash = new EditorialDashboardPage(amPage, tag);
@@ -494,16 +501,45 @@ test.describe('my submissions', () => {
         await amDash.expectLanded(0);
         await expect(amSub.menuGroupLink()).toBeVisible();
 
-        // Control: the author-only account lands on My Submissions, as in
-        // scenario 1 (Rule 3) — its sidebar carries the author group and no
-        // "Editor Dashboard" group (the two-role sidebar above is the
-        // positive control for that absence).
-        const aoPage = await (await asUser(authorOnly)).newPage();
-        const aoSub = new MySubmissionsPage(aoPage, tag);
-        const aoDash = new EditorialDashboardPage(aoPage, tag);
-        await aoSub.gotoRetiredListAddress();
-        await aoSub.expectLanded(0);
-        await expect(aoDash.menuGroupLink()).toHaveCount(0);
-        await expect(aoSub.sideNav()).not.toContainText('Editor Dashboard');
+        // Control: the author-only account, signed in on the server's own
+        // login page, lands on My Submissions, as in scenario 1 (Rule 3) —
+        // its sidebar carries the author group and no "Editor Dashboard"
+        // group (the two-role sidebar above is the positive control for
+        // that absence). The retired list address forwards it to the same
+        // list: the positive control for the two refusals below.
+        const ao = await freshLogin(browser, baseURL, authorOnly, {contextPath: tag});
+        try {
+            const aoSub = new MySubmissionsPage(ao.page, tag);
+            const aoDash = new EditorialDashboardPage(ao.page, tag);
+            await aoSub.expectLanded(0);
+            await expect(aoDash.menuGroupLink()).toHaveCount(0);
+            await expect(aoSub.sideNav()).not.toContainText('Editor Dashboard');
+            await aoSub.gotoRetiredListAddress();
+            await aoSub.expectLanded(0);
+            await expect(aoSub.accessDenied()).toHaveCount(0);
+        } finally {
+            await ao.context.close();
+        }
+
+        // Reader only, and no role in the server: signed in on the server's
+        // own login page, each lands on the server's home page; the retired
+        // list address `{server}/submissions` then gives the access-denied
+        // page — no list, no sidebar (Rule 3; the author-only control above
+        // reached the list at the same address).
+        for (const username of [readerOnly, noRole]) {
+            const signedIn = await freshLogin(browser, baseURL, username, {contextPath: tag});
+            try {
+                const sub = new MySubmissionsPage(signedIn.page, tag);
+                await sub.expectServerHome(username);
+                await expect(sub.sideNav()).toHaveCount(0);
+                await sub.gotoRetiredListAddressRefused();
+                await expect(signedIn.page.getByRole('heading', {name: /^Active submissions/})).toHaveCount(0);
+                await expect(sub.sideNav()).toHaveCount(0);
+                await expect(sub.menuGroupLink()).toHaveCount(0);
+                await expect(signedIn.page.getByRole('table')).toHaveCount(0);
+            } finally {
+                await signedIn.context.close();
+            }
+        }
     });
 });

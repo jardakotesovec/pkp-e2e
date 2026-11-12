@@ -11,12 +11,8 @@
  * analogue; S3 walks that view at zero and asserts nothing about why.
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A1 (S4 asserts the post-upload and
- * under-review counters exactly as scenario 4 states them; the register's
- * question is whether the counter SHOULD be author-visible), A2, A3, A4,
- * A5, OMP1 (S3 asserts the Filters panel's present field and the absent
- * "Assigned To Editor" only, never the missing series filter), OPS1 and
- * OPS2 (the OPS suite's territory).
+ * of everything else left out): A1, A2, A3, A4, A5, A7, A8, OMP1, OPS1 and
+ * OPS2.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1 rides publicknowledge as author.alex (with author.bea
@@ -24,7 +20,11 @@
  * S2–S5 isolate on scratch presses with throwaway users, because sidebar
  * badge counts and landings need a list only the test controls. S2 seeds
  * its resume step through the wizard itself ("Save for Later" on
- * "Details", fn-s2). Mailpit reads (S2, S3) are scoped by the throwaway
+ * "Details", fn-s2). S5's Reader-only and no-role accounts sign in through
+ * the scratch press's own login form in a fresh browser context (the
+ * fixture's cached session is a site login, which decides no landing), the
+ * no-role account minted in a second, helper press and never enrolled in
+ * the first (fn-s5). Mailpit reads (S2, S3) are scoped by the throwaway
  * author's address (PRINCIPLES A8) and taken as a before/after count
  * settled by the scenario's own list read. Waits are event-based
  * (auto-wait on rows, headings, badges, dialogs and the landing URL) — no
@@ -32,6 +32,8 @@
  */
 const {test, expect} = require('../support/fixtures.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
+const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const {
     STEPS,
     wizardUrl,
@@ -116,6 +118,35 @@ const sideNav = (page) => page.locator('#app-nav');
 async function landThrough(page, contextPath, landingPath) {
     await page.goto(`/index.php/${contextPath}/submissions`);
     await page.waitForURL((url) => url.pathname.includes(landingPath), {waitUntil: 'commit'});
+}
+
+/**
+ * Sign in on a press's own login page in a fresh, state-less browser
+ * context (Rule 3: that page decides the landing) and wait for the
+ * redirect away from /login. Returns the page; the caller closes its
+ * context.
+ */
+async function signInOnPressLogin(browser, baseURL, contextPath, username) {
+    const context = await browser.newContext({baseURL, storageState: {cookies: [], origins: []}});
+    const page = await context.newPage();
+    const login = new LoginPage(page);
+    await login.gotoContext(contextPath);
+    await login.signIn(username, getPassword(username));
+    return page;
+}
+
+/**
+ * The press's public home page `{press}/index`, signed in: the press name
+ * as the page heading and the account's own menu in the header, and no
+ * backend sidebar.
+ */
+async function expectPressHome(page, contextPath, username) {
+    await page.waitForURL((url) => url.pathname.endsWith(`/index.php/${contextPath}/index`), {waitUntil: 'commit'});
+    await expect(page.getByRole('heading', {level: 1, name: `Scratch context ${contextPath}`, exact: true})).toBeVisible({
+        timeout: 30_000,
+    });
+    await expect(page.getByRole('link', {name: username, exact: true})).toBeVisible();
+    await expect(sideNav(page)).toHaveCount(0);
 }
 
 /** The access-denied page with the given sentence, and no backend sidebar. */
@@ -650,17 +681,21 @@ test.describe('My submissions (U22)', () => {
         await expect(popover).toContainText('Open');
     });
 
-    test('S5: landing for an account holding other roles too', async ({asUser, ompApi}, testInfo) => {
+    test('S5: landing for an account holding other roles too', async ({asUser, ompApi, browser, baseURL}, testInfo) => {
         const tag = makeTag('s5', testInfo);
-        // A scratch press with the three two-role accounts and the author-
-        // only control (fn-s5; OMP's `sectionEditor` is the Series Editor
-        // group). Each session is cached at the site login by the fixture,
-        // so every landing is read through the retired list address, which
-        // forwards the same way (Rule 3).
+        // A scratch press with the three two-role accounts, the author-only
+        // control and the Reader-only account (fn-s5; OMP's `sectionEditor`
+        // is the Series Editor group). The fixture caches each two-role and
+        // control session at the site login, so those landings are read
+        // through the retired list address, which forwards the same way
+        // (Rule 3); the Reader-only and no-role accounts, which that address
+        // refuses, sign in on the press's own login page.
         const authorReviewer = `${tag}ar`;
         const authorEditor = `${tag}as`;
         const editorReviewer = `${tag}sr`;
         const authorOnly = `${tag}ao`;
+        const readerOnly = `${tag}rd`;
+        const noRole = `${tag}nr`;
         await ompApi.createContext({
             tag,
             users: [
@@ -668,7 +703,14 @@ test.describe('My submissions (U22)', () => {
                 user(authorEditor, 'Bo', 'Authed', ['author', 'sectionEditor']),
                 user(editorReviewer, 'Cy', 'Edrev', ['sectionEditor', 'externalReviewer']),
                 user(authorOnly, 'Di', 'Authonly', ['author']),
+                user(readerOnly, 'Ed', 'Readonly', ['reader']),
             ],
+        });
+        // The no-role account: a Reader in a helper press, never enrolled in
+        // the scratch press (fn-s5).
+        await ompApi.createContext({
+            tag: `${tag}h`,
+            users: [user(noRole, 'Flo', 'Norole', ['reader'])],
         });
 
         // Author and Reviewer: the reviewer dashboard, with the "My
@@ -711,5 +753,24 @@ test.describe('My submissions (U22)', () => {
         await expect(mySub.menuGroupLink()).toBeVisible();
         await expect(sideNav(aoPage)).not.toContainText('Editor Dashboard');
         await expect(sideNav(aoPage)).not.toContainText('My Assignments as Reviewer');
+
+        // Reader only, then no role in the press: signed in on the press's
+        // own login page, each lands on the press's home page; the retired
+        // list address then gives the access-denied page (Rule 3, fn-c).
+        // The control above is the positive of the same address.
+        for (const username of [readerOnly, noRole]) {
+            const page = await signInOnPressLogin(browser, baseURL, tag, username);
+            try {
+                await expectPressHome(page, tag, username);
+                await page.goto(`/index.php/${tag}/submissions`);
+                await page.waitForURL((url) => url.pathname.includes('/user/authorizationDenied'), {
+                    waitUntil: 'commit',
+                });
+                await expectAccessDenied(page, ROLE_DENIED);
+                await expect(page.getByRole('link', {name: username, exact: true})).toBeVisible();
+            } finally {
+                await page.context().close();
+            }
+        }
     });
 });

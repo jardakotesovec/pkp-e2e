@@ -82,4 +82,35 @@ exports.MySubmissionsPage = class MySubmissionsPage extends withOpsWorkflowPanel
     editorAssignmentFilterLabels() {
         return ['Assigned To Editor', 'Assigned to Moderator'];
     }
+
+    /**
+     * The server's home page, `{server}/index`, where an account holding
+     * neither an author nor an editorial role lands from the server's own
+     * login page (U22 Rule 3, fn-s5): the reader-side page whose "Site
+     * Navigation" carries the signed-in account's user menu.
+     *
+     * @param {string} username the signed-in account
+     */
+    async expectServerHome(username) {
+        await expect(this.page).toHaveURL(new RegExp(`/index\\.php/${this.contextPath}/index$`), {
+            timeout: 30_000,
+        });
+        await expect(
+            this.page
+                .getByRole('navigation', {name: 'Site Navigation'})
+                .getByRole('link', {name: username, exact: true})
+        ).toBeVisible({timeout: 30_000});
+    }
+
+    /**
+     * Open the retired list address `{server}/submissions` for an account
+     * it refuses (U22 Rule 3, fn-s5): the browser is sent to the
+     * access-denied page, `user/authorizationDenied`, which is returned
+     * with its refusal sentence on screen.
+     */
+    async gotoRetiredListAddressRefused() {
+        await this.page.goto(this.retiredListUrl());
+        await expect(this.page).toHaveURL(/\/user\/authorizationDenied/, {timeout: 30_000});
+        await expect(this.accessDenied()).toBeVisible({timeout: 30_000});
+    }
 };
