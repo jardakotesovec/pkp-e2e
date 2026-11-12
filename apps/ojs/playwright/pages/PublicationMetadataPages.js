@@ -18,8 +18,10 @@
  *   state), the Participants panel's "Notify" window (the one mail a
  *   test causes itself, the positive control of every mailbox absence),
  *   the refused saves (the server's 4xx and the client-side "This field
- *   is required." that sends nothing), the abstract's word-limit line and
- *   the Permissions & Disclosure fields with their lock state. The U49
+ *   is required." that sends nothing, and an inline error read under one
+ *   named field), the abstract's word-limit line, the Metadata term
+ *   fields' suggestion list (typed without Enter, bounded by its lookup)
+ *   and the Permissions & Disclosure fields with their lock state. The U49
  *   PublishScreen extends this class with the publish-flow specifics.
  * - Issue helpers (legacy jQuery grid at /manageIssues) — create a future
  *   issue, publish it without notifying users, and set its published date
@@ -362,6 +364,69 @@ exports.PublicationScreen = class PublicationScreen {
     }
 
     /**
+     * The inline error carrying the given text inside the form field whose
+     * label reads `label` (e.g. the "Plain Language Summary" editor's own
+     * "This field is required."), so an error under another field never
+     * answers for it.
+     *
+     * @param {string} label the field's label as shown
+     * @param {string} text
+     */
+    fieldErrorUnder(label, text) {
+        return this.page
+            .locator('.pkpFormField')
+            .filter({has: this.page.locator('.pkpFormFieldLabel', {hasText: label})})
+            .locator('.pkpFieldError')
+            .filter({hasText: text});
+    }
+
+    /**
+     * The open term list under a Metadata term field (Keywords, Subjects,
+     * …): one option per entry, the typed text first (U40 Rule 7b), then
+     * the suggestions (a headlessui combobox; probed 2026-11-12,
+     * `.reports/U40/tojsr`).
+     */
+    termOptions() {
+        return this.page.getByRole('listbox').getByRole('option');
+    }
+
+    /**
+     * Type a term into an empty Metadata term field without pressing Enter
+     * and wait for the suggestion lookup the typing sends
+     * (`GET …/vocabs?…&term={term}`, fetched a quarter of a second after
+     * typing stops); returns that answer, the bound of every "not offered"
+     * read that follows. The list itself is filled a further quarter of a
+     * second after the answer, so a caller reads it with an auto-waited
+     * locator assertion.
+     *
+     * @param {import('@playwright/test').Locator} field the term field's input
+     * @param {string} term
+     */
+    async typeTermForSuggestions(field, term) {
+        const answered = this.page.waitForResponse(
+            (r) => {
+                if (!r.url().includes('/vocabs?') || r.request().method() !== 'GET') {
+                    return false;
+                }
+                return new URL(r.url()).searchParams.get('term') === term;
+            },
+            {timeout: 30_000}
+        );
+        await field.click();
+        await field.pressSequentially(term, {delay: 15});
+        const response = await answered;
+        expect(response.ok()).toBe(true);
+        return response;
+    }
+
+    /** Empty a term field's typed text (no chip added) and wait for its list to close. */
+    async clearTypedTerm(field) {
+        await field.fill('');
+        await expect(field).toHaveValue('');
+        await expect(this.termOptions()).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
      * The first rich-text field's "Word Count: {n}/{limit}" line (the
      * Abstract's on Title & Abstract; a Plain Language Summary line follows
      * it when that field is enabled).
@@ -675,7 +740,9 @@ exports.PublicationScreen = class PublicationScreen {
                 name: 'Assign To Future Issue and Publish Immediately',
             });
             await expect(futureRadio).toBeVisible({timeout: 30_000});
-            await this.awaitAssignmentPreselected(panel);
+            // No awaitAssignmentPreselected here: on a journal whose only
+            // issue is a future one the panel preselects no radio (U40 S6,
+            // 2026-11-12); the panel came back settled on its status answer.
             await futureRadio.check();
             await this.selectIssueOption(panel, futureIssueLabel);
         } else if (backIssueLabel) {

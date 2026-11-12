@@ -7,7 +7,8 @@
  * monograph (U49's dialog; U24 S8 drives it to watch the submission leave
  * Done by itself), and the "Permissions & Disclosure" license boxes typed
  * and saved (U72 S8's given), and "Create New Version" (U73 S9), a version retitled and a shown version
- * published (U69 S6, S7). The frame itself (header, menu, status box, the return
+ * published (U69 S6, S7), and the "Metadata" page's Keywords box typed
+ * without Enter to read its suggestion list (U40 S2). The frame itself (header, menu, status box, the return
  * and delete dialogs) is the shared `WorkflowPage`.
  */
 const {expect} = require('@playwright/test');
@@ -162,4 +163,58 @@ async function publishShownVersion(page) {
     ).toBeVisible({timeout: 30_000});
 }
 
-module.exports = {UNPUBLISH_QUESTION, unpublishFromWorkflow, saveLicenseFields, createNewVersion, retitleVersion, publishShownVersion};
+/**
+ * The open "Metadata" page's Keywords field (its `.pkpFormField`, found by
+ * the label).
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function keywordsField(page) {
+    return page
+        .locator('.pkpFormField')
+        .filter({has: page.locator('label.pkpFormFieldLabel').filter({hasText: /^Keywords/})});
+}
+
+/**
+ * On the open "Metadata" page, type `term` into the Keywords box without
+ * pressing Enter, bounded by the list's own fetch (`api/v1/vocabs?…&term=`,
+ * sent a quarter of a second after the typing stops, U40 fn-e). Resolves
+ * with the list's options (a locator inside the field, the typed text
+ * first) and the terms that fetch answered with. Added for U40 S2
+ * (Rule 7b).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} term
+ * @returns {Promise<{options: import('@playwright/test').Locator, answered: string[]}>}
+ */
+async function typeKeywordForSuggestions(page, term) {
+    const field = keywordsField(page);
+    const box = field.getByRole('combobox', {name: 'Keywords'});
+    const fetched = page.waitForResponse(
+        (r) => {
+            const url = new URL(r.url());
+            return url.pathname.endsWith('/vocabs') && url.searchParams.get('term') === term;
+        },
+        {timeout: 30_000}
+    );
+    await box.click();
+    await box.fill(term);
+    const response = await fetched;
+    expect(response.ok(), `the suggestion fetch answered ${response.status()}`).toBe(true);
+    const answered = (await response.json()).map((entry) => entry.name);
+    return {options: field.getByRole('option'), answered};
+}
+
+/**
+ * Empty the open "Metadata" page's Keywords box (no chip added), resolved
+ * once its suggestion list has closed.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+async function clearKeywordBox(page) {
+    const field = keywordsField(page);
+    await field.getByRole('combobox', {name: 'Keywords'}).fill('');
+    await expect(field.getByRole('option')).toHaveCount(0, {timeout: 30_000});
+}
+
+module.exports = {UNPUBLISH_QUESTION, unpublishFromWorkflow, saveLicenseFields, createNewVersion, retitleVersion, publishShownVersion, keywordsField, typeKeywordForSuggestions, clearKeywordBox};

@@ -216,7 +216,9 @@ descriptions as raw codes ⚠ [OPS3](#ops3). <sup>g</sup>
      already recorded for the same item and language on a published
      version in this journal. The first entry of the list is always the
      typed text itself, in every app, so a suggestion is an entry below
-     it. A term on a submission that is not
+     it. A suggestion identical to the typed text is not listed again:
+     a term typed in full shows once, as the typed text, whether or not
+     it is offered. A term on a submission that is not
      published (still in the workflow, declined, or unpublished again)
      is not offered ⚠ [OJS2](#ojs2), and neither is another journal's
      term. The Author
@@ -562,7 +564,10 @@ catcher's address are in its footnote.
    Given: Journal Manager, on a scratch journal with a scratch submission;
    on a journal or preprint server the submission's section sets a "Word
    Count" of 50, and a second scratch submission sits in a section set to
-   "Do not require abstracts".
+   "Do not require abstracts"; the journal also holds two more
+   submissions, a published one with the keyword "tidal mixing" and an
+   unpublished one with the keyword "tidal pools", and a second scratch
+   journal holds a published submission with the keyword "tidal bores".
 
    - **Nothing enabled**: on Settings › Workflow › Submission › "Metadata" untick every
      "Enable … metadata" box and save: the submission's "Metadata" page
@@ -575,6 +580,13 @@ catcher's address are in its footnote.
      and the chip goes; add it again, then "benthic flux", a term nobody
      has used before: both become chips; Save and reload: both chips are
      there (Rule 7; Fields).
+   - **Keyword suggestions**: type "tidal" in Keywords without pressing
+     Enter: the list under the field opens with "tidal" and offers
+     "tidal mixing" below it, the published submission's term, and
+     neither "tidal pools" (the unpublished submission's term) nor "tidal
+     bores" (the other journal's); clear the field and type "tidal
+     mixing" in full: the list holds "tidal mixing" once, as the typed
+     text; clear the field (Rule 7b).
    - **Coverage off and on**: type "Pacific, 2020s" in Coverage and Save;
      disable Coverage on the settings screen, then re-enable it: the value
      is back (Rule 6).
@@ -592,13 +604,24 @@ catcher's address are in its footnote.
      Settings).
    - **Over the word limit** (journal, preprint server): on the first
      submission's "Title & Abstract" the Abstract shows "Word Count:
-     {n}/50"; type the word "over" 51 times into the Abstract: the counter
+     {n}/50"; replace it with the word "over" 51 times: the counter
      gains a red error mark; press Save: the save is refused with "The
      abstract is too long. It should be 50 words or less. It is currently
      51 words long." and nothing is saved (Rule 5; Fields).
    - **No abstract required** (journal, preprint server): on the second
      submission's "Title & Abstract" clear the Abstract and press Save:
      "Saved" (Rule 5; Fields).
+   - **A required summary**: on the settings screen choose "Require the
+     author…" under "Enable plain language summary metadata" and save. On
+     the first submission, its summary still empty, press Save on
+     "Metadata", then on "Permissions & Disclosure": "Saved" each time.
+     On "Title & Abstract" type "A summary for every reader." as Plain
+     Language Summary and press Save: "Saved"; press Save on "Metadata"
+     and on "Permissions & Disclosure" again: "Saved" each time. Back on
+     "Title & Abstract" clear the summary and press Save: the save is
+     refused with "This field is required." under Plain Language Summary;
+     reload: the summary reads "A summary for every reader." (Rules 4, 5;
+     Fields; Settings; [A1](#a1)).
    - **Control**: before the untick the "Metadata" page showed "Keywords",
      enabled on a fresh journal, with a Save button (Rule 6).
      <sup>s2</sup>
@@ -615,7 +638,8 @@ catcher's address are in its footnote.
      Disclosure", in every app (Rule 1; Actors row 2); open "Title &
      Abstract": on a journal or press the fields are shown but Save is
      disabled, and nothing typed persists on reload; on a preprint server
-     the page saves like scenario 1 [OPS1](#ops1) (Rules 9, 10).
+     Save is offered and a save shows "Saved" beside the button
+     [OPS1](#ops1) (Rules 9, 10).
    - **An unsaved edit**: type "The" as Prefix, open "Metadata" and come
      back to "Title & Abstract": no prompt appeared and Prefix is empty
      (Rule 10).
@@ -645,18 +669,24 @@ catcher's address are in its footnote.
    - **After an unpublish**: Journal Manager: unpublish. Author: "The"
      typed as Prefix on the other version now saves as well and is there
      after a reload (Rule 9).
-   - **A scheduled article** (journal only): on the second submission tick
-     the permission the same way, then schedule it to the future issue by
-     the dependable route under Cross-feature interactions; its header
-     reads "Status: Scheduled"; its Title & Abstract is read-only for the
-     Author with no banner at all (Rule 9); Journal Manager: its
-     "Permissions & Disclosure" shows Copyright Holder and Copyright Year
-     still locked with their descriptions and License URL still empty, the
-     seeded journal having no default license: scheduling fills nothing
-     (Rule 12); after the Journal Manager's "Create New Version", the
-     Author saves on the new version while the scheduled one stays
+   - **A scheduled article** (journal only): Journal Manager: on the
+     second submission tick the permission the same way, then schedule it
+     to the future issue: save "Assign To Future Issue and Schedule Only"
+     on the Publication area's "Publication Settings" page first, then
+     pick it again in the "Schedule For Publication" panel; its header
+     reads "Status: Scheduled". Author: its Title & Abstract is read-only,
+     with no banner at all (Rule 9).
+   - **The scheduled article's permission fields** (journal only): Journal
+     Manager: its "Permissions & Disclosure" shows Copyright Holder and
+     Copyright Year still locked with their descriptions and License URL
+     still empty, the seeded journal having no default license:
+     scheduling fills nothing (Rule 12).
+   - **A new version beside the scheduled one** (journal only): Journal
+     Manager: on the scheduled article's Publication area press "Create
+     New Version" and confirm. Author: a save on
+     the new version shows "Saved", while the scheduled version stays
      read-only (Rule 9).
-   - **Control**: the lock is the Author's: the Journal Manager's Title &
+   - **Control**: before the unpublish, the Journal Manager's Title &
      Abstract on the published version stays editable, with the banner
      "Warning: This version has been published. Editing it may impact the
      published content." (Rule 8). <sup>s3</sup>
@@ -741,7 +771,8 @@ catcher's address are in its footnote.
    preprint server; the submission's Author; for the controls, a
    published submission and one with two versions; on a journal, an
    article whose only version was published as "Author's Original",
-   assigned to no issue.
+   assigned to no issue, and one published as "Version of Record" with
+   "Assign To Future Issue and Publish Immediately".
 
    - **The readout and the button**: any Publication page reads "Current
      Submission Language: {first language}" with a "Change" button; every
@@ -770,6 +801,10 @@ catcher's address are in its footnote.
      two versions, there is neither readout nor "Change" on any
      Publication page, while the stage screens keep the readout
      ([A6](#a6)) (Rule 13a).
+   - **Published to a future issue at once** (journal only): the article
+     published as "Version of Record" with "Assign To Future Issue and
+     Publish Immediately" reads "Status: Published" and shows neither the
+     readout nor "Change" on any Publication page (Rule 13a).
    - **An article published as Author's Original** (journal only): the
      article whose only version was published as "Author's Original"
      still shows "Change" beside "Status: Published", and confirming a
@@ -784,9 +819,10 @@ catcher's address are in its footnote.
 7. **Reset every item's permissions**
 
    Given: Journal Manager, on a scratch journal with one published item
-   carrying an overridden Copyright Holder (scenario 5), one unpublished
-   submission and one declined submission, on a journal with Copyright
-   Year set to "Use the article's publication date"; the unpublished
+   whose Copyright Holder was overridden to "Example Society", one
+   unpublished and one declined submission, on a journal or preprint
+   server the license "CC Attribution 4.0" and, on a journal, Copyright
+   Year "Use the article's publication date"; the unpublished
    submission's Author.
 
    - **The confirm box**: open Tools › Permissions and press "Reset Article
@@ -799,17 +835,17 @@ catcher's address are in its footnote.
    - **OK**: reload, press again, OK: the toast "Article permissions were
      successfully reset." appears (Rule 14).
    - **The published item**: its Permissions & Disclosure now shows the
-     journal's default holder instead of "Example Society", and the
-     landing page's copyright line follows (Rule 14).
+     journal's name instead of "Example Society", and the landing page
+     reads "Copyright (c) {year} {journal name}" (Rule 14).
    - **Every other submission**: the unpublished and the declined
      submission's pages also carry filled-in values, unlocked, and each
      item's Activity Log gains one "Submission metadata updated" line
      attributed to you ([A3](#a3)) (Rule 14; Side effects).
-   - **The year**: on a journal set to the article's publication date, and
-     on a preprint server, their Copyright Year reads 1970 ([A2](#a2));
-     on a press it reads the current year (Rule 14).
+   - **The year**: on a journal and on a preprint server, their
+     Copyright Year reads 1970 ([A2](#a2)); on a press it reads the
+     current year (Rule 14).
    - **Nobody else is told**: no email has arrived from the reset, and the
-     Author, signed in, finds no notification of it (Side effects).
+     Author's Tasks panel lists nothing about it (Side effects).
    - **Control**: before OK the published item's Permissions & Disclosure
      read "Example Society" and the unpublished submission's Copyright
      Holder and Copyright Year were locked and empty (Rules 11, 12).
@@ -866,8 +902,10 @@ App-specific:
 
 10. **A chapter license for an edited volume** {OMP}
 
-    Given: Press Manager, on a scratch press with an Edited Volume and a
-    Monograph submission.
+    Given: Press Manager, on a scratch press whose default license is "CC
+    Attribution 4.0", with an Edited Volume and a Monograph submission,
+    and a second scratch press, with no default license, holding an
+    Edited Volume.
 
     - **The Edited Volume**: on its "Permissions & Disclosure" a fourth
       field, "Default Chapter License URL", appears locked with an Override
@@ -875,6 +913,14 @@ App-specific:
     - **The override**: press Override, type
       "https://example.org/chapter-license", Save, reload: the address is
       kept (Rule 11).
+    - **A press with no license**: on the second press's Edited Volume,
+      "Permissions & Disclosure" shows "Default Chapter License URL"
+      plain-editable, with no description and no "Override"; type
+      "https://example.org/volume-license" in License URL and press Save:
+      "Saved", and "Default Chapter License URL" stays plain-editable with
+      no sentence; reload: it is locked with "Override" and "The license
+      will be set automatically to https://example.org/volume-license when
+      this is published." (Fields).
     - **Control**: on the Monograph the field is absent [OMP4](#omp4)
       (Fields). <sup>s10</sup>
 
@@ -938,26 +984,6 @@ Left out of the scenarios above, by reason:
     offered no "Add Funder", and the published page's funders stay as they were [report 2026-10-05]
   - Tools › Permissions: Cancel in the reset confirm box leaves the button usable, and pressing it again asks again (A13; the guard its issue report names) [report 2026-10-03]
   - a press with License Terms and no license: a book page without its own License URL shows the "License" heading and the terms, with no link in the block (OMP5; the guard its issue report names) [report 2026-10-03]
-  - a journal that requires the plain language summary: the
-    Metadata and Permissions & Disclosure pages saved before and after
-    the summary is stored, and an emptied summary on Title & Abstract
-    still refused (Rule 5; A1, retired) [upstream 2026-10-21]
-  - term suggestions: a term on another submission's published version
-    offered below the typed text, and a term on a submission not
-    published, or in another journal, not offered (Rule 7b): likely a
-    bullet in scenario 2's "Keywords", with a published submission
-    added to its given [upstream 2026-09-29]
-  - on a press with no license, "Default Chapter License URL" plain-editable
-    until the volume's own License URL is saved, then, after a reload,
-    locked with "Override" and the sentence naming the volume's license,
-    the address itself for a non-Creative Commons one (Fields "Default
-    Chapter License URL"): likely a bullet in scenario 10, on a second
-    scratch press left unlicensed [incidental 2026-09-29]
-  - on a journal, an article published as "Version of Record" with
-    "Assign To Future Issue and Publish Immediately" showing neither the
-    readout nor "Change" on its Publication pages (Rule 13a): likely a
-    case in scenario 6's "Without the button", with such an article
-    added to its given [incidental 2026-10-07]
 - **Nothing new to test**:
   - a term added twice showing two chips until Save and one on the
     reopened page (Rule 7a)
@@ -1725,6 +1751,9 @@ entries of that vocabulary on published versions in the context
 (`withContextIdAndPublishedPublications()`), in the requested locale,
 filtered by the typed term (a partial, case-insensitive match; the
 controller caps the list at 200, read not driven); `allowCustom: true`.
+`FieldControlledVocab.setSuggestions()` drops every answer whose name
+equals the typed text (`this.inputValue !== suggestion.value.name`),
+so a term typed in full is listed once (test run 2026-11-12, fn-s2).
 Every typing sends a fresh request about a quarter of a second after
 the typing stops, so nothing is cached between reads.
 `FieldBaseAutosuggest` also supports a "vocabularies" browser
@@ -2233,10 +2262,8 @@ positive control the same way (scenarios.md "Mailpit").
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** Scratch journal (the metadata settings are
-mutated) with one scratch submission. Set Plain Language Summary to off
-first (a required summary refused every Metadata save until
-pkp/pkp-lib#13585, A1, retired); the summary bullet
-enables it at "Ask", never "Require". The word-limit and no-abstract
+mutated) with one scratch submission. The summary bullet enables
+Plain Language Summary at "Ask". The word-limit and no-abstract
 bullets (OJS, OPS) seed the journal's `sections[]` with `wordCount: 50`
 on the first section and `abstractsNotRequired: true` on a second, with
 one scratch submission in each; the Publisher ID box for publications is
@@ -2244,6 +2271,23 @@ one scratch submission in each; the Publisher ID box for publications is
 Monographs", OPS "Enable for Preprints"; each suite's S2 ticked its
 app's box and ran green 2026-09-15, the OJS screen read that day
 showing "Enable for Publications" and no "Enable for Articles").
+The suggestion bullet's three sources are seeded through the
+submission scenario's `keywords` display value (scenarios.md "The
+version's display values"; OMP takes it too): one submission
+`published: true` with "tidal mixing" and one `submitted: true` only
+with "tidal pools" in the scenario's journal, and one `published: true`
+with "tidal bores" in a second scratch journal; the list is fetched a
+quarter of a second after typing stops (fn-e), so each read waits for
+it. Test run 2026-11-12, all three apps (the stem asserted in the OJS
+and OPS suites, probed on OMP): "tidal mixing" typed in full listed once, as
+the typed text, though the list's lookup answered
+`[{"name":"tidal mixing"}]`; "tidal pools" and "tidal bores" listed once each, the
+lookup answering `[]`; the stem "tidal" listed "tidal" then "tidal
+mixing". The bullet therefore types the stem: a whole term's read
+cannot tell offered from not offered (Rule 7b; fn-e). The
+required-summary bullet sets the summary to `require` on the
+screen and runs last, after the word-limit and no-abstract bullets,
+whose Title & Abstract saves an empty required summary would refuse.
 
 <a id="fn-s3"></a>
 **s3 — scenario 3 seeding.** A roster Author's own submitted submission
@@ -2303,7 +2347,12 @@ Issue and Schedule Only" on the Publication Settings page first, then
 re-picking it in the "Schedule For Publication" panel — opened without
 that saved choice the panel published the article instead (*Publish,
 schedule & versions*, 2026-08-28); reached that way 2026-10-07, the
-change was accepted (f-a5).
+change was accepted (f-a5). The future-issue leg (OJS-only): an article
+published with "Publication Stage" "Version of Record" and "Assign To
+Future Issue and Publish Immediately" into a scratch future issue,
+which publishes at once as continuous publication (fn-s3); seen
+2026-10-07 with neither readout nor button on its Publication pages
+(f-ojs1).
 
 <a id="fn-s7"></a>
 **s7 — scenario 7 seeding.** Scratch journal (every submission in it is
@@ -2316,8 +2365,12 @@ preprint server; a press keeps the current year (fn-h). Live-probed
 behaved exactly like the unpublished one on each app. The absence read
 after the reset: the unpublished submission's throwaway submitter, in
 the mail catcher (Mailpit, `http://127.0.0.1:8025`, scoped by that
-address, with a positive control; scenarios.md "Mailpit") and on the
-dashboard after signing in.
+address, with a positive control; scenarios.md "Mailpit") and in the
+header's Tasks panel after signing in, opened on My Submissions, with a
+positive control (a discussion that does reach the Author, or another
+participant's panel). The license is set on Settings › Distribution ›
+License (OJS and OPS); the press keeps none, its copyright line showing
+without one (OMP1).
 
 <a id="fn-s8"></a>
 **s8 — scenario 8 seeding.** Scratch journal; the "Data" entry's
@@ -2344,7 +2397,12 @@ the Issues feature's matter.
 <a id="fn-s10"></a>
 **s10 — scenario 10 seeding.** OMP scratch press with one Edited Volume
 and one Monograph submission (work type is chosen in the wizard's start
-form). Live-probed 2026-08-28 (f-omp4).
+form), its "CC Attribution 4.0" saved on Settings › Distribution ›
+License; a second OMP scratch press left at the install default ("Other
+license URL" with an empty address, no default license) with one Edited
+Volume and its own throwaway manager. Live-probed
+2026-08-28 and 2026-09-29, the unlicensed press with the volume's
+`https://example.org/volume-license` (f-omp4).
 
 <a id="fn-s11"></a>
 **s11 — scenario 11 seeding.** OPS roster Author; the wizard's License

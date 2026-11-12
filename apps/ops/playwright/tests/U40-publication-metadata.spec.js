@@ -15,18 +15,11 @@
  * own sentence.
  * Spec: docs/specs/U40-publication-metadata.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section records everything else left out): A1 (✅
- * retired by pkp/pkp-lib#13585; the "Require" level is a Planned item),
- * A2, A3, A13 and A15 (🐞: the 1970 year and the reset's reach
- * into unposted items, the greyed button after Cancel, the panel acting
- * before its loading settles are never asserted either way); A5 (no
- * scheduling on a preprint server); A8, A11, A14 and OPS2 (only the
- * scenario's own sentence is asserted: the typed Prefix, the holder
- * sentence with its "(Author)", the panel's refusal, the License URL
- * description beneath the wizard's choice); A10 (✅ retired 2026-09-21), A12 and A17
- * (never exercised).
+ * Not covered, by register ID (the spec's Coverage section is the record of
+ * everything else left out; 🐞 findings are never asserted as contract,
+ * PRINCIPLES M3, and a claim parked on an open ❓ is not a coverage gap):
+ * A2, A13, A15, A19, A21, A22, OJS1, OMP5, OPS3 (🐞); A3, A5, A6, A8, A11,
+ * A12, A14, A17, A18, A20, OJS2, OMP3, OPS2 (❓). Retired: A1, A10.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only at the server level — S1, S3, S4 and S12 mutate only their
@@ -59,6 +52,8 @@ const {
     addDiscussion,
     licenseBlock,
     expectPrecedes,
+    typeKeywordForSuggestions,
+    clearKeywordBox,
 } = require('../pages/PublicationPages.js');
 const {EditorialDashboardPage} = require('../pages/EditorialDashboardPage.js');
 const {ContributorsScreen} = require('../pages/ContributorPages.js');
@@ -324,16 +319,51 @@ test.describe('Publication metadata (U40)', () => {
         test.slow();
         test.setTimeout(240_000);
         const tag = makeTag('s2', testInfo);
+        const otherServer = `${tag}b`;
         // The first section (the renamed default) sets a Word Count of 50;
-        // a second section does not require abstracts (footnote s2).
-        await opsApi.createContext({
-            tag,
-            users: contextUsers(tag),
-            sections: [
-                {abbrev: 'PRE', title: {en: 'Preprints'}, wordCount: 50},
-                {abbrev: 'NOA', title: {en: 'No Abstracts'}, abstractsNotRequired: true},
-            ],
-        });
+        // a second section does not require abstracts (footnote s2). A
+        // second scratch server holds the other server's term.
+        await Promise.all([
+            opsApi.createContext({
+                tag,
+                users: contextUsers(tag),
+                sections: [
+                    {abbrev: 'PRE', title: {en: 'Preprints'}, wordCount: 50},
+                    {abbrev: 'NOA', title: {en: 'No Abstracts'}, abstractsNotRequired: true},
+                ],
+            }),
+            opsApi.createContext({tag: otherServer, users: contextUsers(otherServer)}),
+        ]);
+        // The suggestion bullet's three sources, through the `keywords`
+        // display value (footnote s2): a posted preprint with "tidal
+        // mixing" and a submitted-only one with "tidal pools" on this
+        // server, a posted one with "tidal bores" on the other server.
+        await Promise.all([
+            opsApi.createSubmission({
+                tag: `${tag}p`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: `Posted ${tag}`,
+                published: true,
+                keywords: ['tidal mixing'],
+            }),
+            opsApi.createSubmission({
+                tag: `${tag}u`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: `Unposted ${tag}`,
+                submitted: true,
+                keywords: ['tidal pools'],
+            }),
+            opsApi.createSubmission({
+                tag: `${otherServer}p`,
+                context: otherServer,
+                submitter: `${otherServer}au`,
+                title: `Other server ${tag}`,
+                published: true,
+                keywords: ['tidal bores'],
+            }),
+        ]);
         const [{submissionId}, second] = await Promise.all([
             opsApi.createSubmission({
                 tag: `${tag}s`,
@@ -401,8 +431,6 @@ test.describe('Publication metadata (U40)', () => {
         // Keywords (Rule 7): Enter adds the typed term as a chip with its
         // "Remove {term}" button; the chip's button removes it; "benthic
         // flux", a term nobody has used before, is accepted as typed.
-        // (Suggestions from other submissions are Rule 7b's, retired A10's —
-        // never asserted.)
         const chip = page.getByRole('button', {name: 'Remove ocean acidification'});
         await keywordsInput.click();
         await keywordsInput.pressSequentially('ocean acidification', {delay: 15});
@@ -432,6 +460,36 @@ test.describe('Publication metadata (U40)', () => {
         await expect(screen.input('metadata', 'coverage', 'en')).toHaveValue(
             'Pacific, 2020s'
         );
+
+        // Keyword suggestions (Rule 7b), each read bounded by the list's
+        // own fetch: the fetch answers "tidal mixing", the posted
+        // preprint's term, and nothing for "tidal pools" (not posted) or
+        // "tidal bores" (the other server's), which show only as the
+        // typed text. The list never repeats the typed text below itself,
+        // so "tidal mixing" also reads as the typed text alone, where the
+        // scenario says it is offered again below it (finding T-ops-1,
+        // .reports/U40/rev1112/test-ops-findings.md, the OMP T-omp-1's
+        // twin). Positive control, the same read: the stem "tidal" lists
+        // "tidal mixing" below the typed text, and nothing else. Clearing
+        // the box closes the list.
+        let typed = await typeKeywordForSuggestions(page, 'tidal mixing');
+        expect(typed.answered).toEqual(['tidal mixing']);
+        await expect(typed.options).toHaveText(['tidal mixing']);
+        await clearKeywordBox(page);
+        typed = await typeKeywordForSuggestions(page, 'tidal pools');
+        expect(typed.answered).toEqual([]);
+        await expect(typed.options).toHaveText(['tidal pools']);
+        await clearKeywordBox(page);
+        typed = await typeKeywordForSuggestions(page, 'tidal bores');
+        expect(typed.answered).toEqual([]);
+        await expect(typed.options).toHaveText(['tidal bores']);
+        await clearKeywordBox(page);
+        typed = await typeKeywordForSuggestions(page, 'tidal');
+        expect(typed.answered).toEqual(['tidal mixing']);
+        await expect(typed.options).toHaveText(['tidal', 'tidal mixing']);
+        await clearKeywordBox(page);
+        await expect(chip).toBeVisible();
+
         panel = await openMetadataSettings(page, tag);
         await panel.getByRole('checkbox', {name: 'Enable coverage metadata'}).uncheck();
         await saveSettingsPanel(page, panel);
@@ -449,9 +507,8 @@ test.describe('Publication metadata (U40)', () => {
             {timeout: 30_000}
         );
 
-        // Plain Language Summary: enabled at "Ask the author…" (never
-        // "Require": A1 retired, a Planned item): "Title & Abstract" shows "Plain Language
-        // Summary" after Abstract (Rule 5; Fields; Settings). Publisher ID:
+        // Plain Language Summary: enabled at "Ask the author…":
+        // "Title & Abstract" shows "Plain Language Summary" after Abstract (Rule 5; Fields; Settings). Publisher ID:
         // "Enable for Preprints" under "Publisher ID": the "Metadata" page
         // also shows "Publisher ID" (Fields; Settings); a preprint server
         // has no "Article Number".
@@ -526,6 +583,61 @@ test.describe('Publication metadata (U40)', () => {
         expect(
             ((await screen.readRichText('titleAbstract', 'abstract', 'en')) || '').replace(/<[^>]+>|\s|&nbsp;/g, '')
         ).toBe('');
+
+        // A required summary (last: the earlier Title & Abstract saves
+        // carry an empty summary, footnote s2): "Require the author…"
+        // saved on the settings screen; on the first submission, its
+        // summary still empty, Metadata and Permissions & Disclosure each
+        // save with "Saved"; the summary typed on Title & Abstract saves;
+        // both other pages save again; the summary cleared is refused in
+        // the browser with "This field is required." under Plain Language
+        // Summary and nothing sent, and the reload reads the stored
+        // summary (Rules 4, 5; Fields; Settings; A1 retired).
+        const summary = 'A summary for every reader.';
+        panel = await openMetadataSettings(page, tag);
+        await panel
+            .getByRole('radio', {
+                name: 'Require the author to provide a plain language summary before accepting their submission.',
+                exact: true,
+            })
+            .check();
+        await saveSettingsPanel(page, panel);
+        const saveBothOtherPages = async () => {
+            for (const entry of ['Metadata', 'Permissions & Disclosure']) {
+                await openWorkflow(page, tag, submissionId);
+                await screen.openPage(entry);
+                await expect(screen.saveButton()).toBeEnabled({timeout: 30_000});
+                await screen.save();
+            }
+        };
+        await saveBothOtherPages();
+        await openWorkflow(page, tag, submissionId);
+        await screen.openPage('Title & Abstract');
+        await expect(summaryWrapper).toContainText('Plain Language Summary', {timeout: 30_000});
+        await screen.fillRichText('titleAbstract', 'plainLanguageSummary', 'en', summary);
+        await screen.save();
+        await saveBothOtherPages();
+        await openWorkflow(page, tag, submissionId);
+        await screen.openPage('Title & Abstract');
+        await expect(
+            screen.richTextBody('titleAbstract', 'plainLanguageSummary', 'en')
+        ).toContainText(summary, {timeout: 30_000});
+        await expect(screen.fieldError('titleAbstract', 'plainLanguageSummary', 'en')).toHaveCount(0);
+        await screen.fillRichText('titleAbstract', 'plainLanguageSummary', 'en', '');
+        const refusedSaves = watchPublicationSaves(page);
+        await screen.saveButton().click();
+        await expect(screen.fieldError('titleAbstract', 'plainLanguageSummary', 'en')).toHaveText(
+            REQUIRED,
+            {timeout: 30_000}
+        );
+        await expect(screen.goToErrorButton('Plain Language Summary')).toBeVisible();
+        refusedSaves.stop();
+        expect(refusedSaves.seen).toEqual([]);
+        await openWorkflow(page, tag, submissionId);
+        await screen.openPage('Title & Abstract');
+        await expect(
+            screen.richTextBody('titleAbstract', 'plainLanguageSummary', 'en')
+        ).toContainText(summary, {timeout: 30_000});
     });
 
     test('S3: the author before and after posting', async ({asUser, opsApi}, testInfo) => {
@@ -542,8 +654,9 @@ test.describe('Publication metadata (U40)', () => {
         // The author view: the Preprint area lists "Title & Abstract" and
         // "Metadata" and no "Permissions & Disclosure" (Rule 1; Actors row
         // 2; the manager's view below lists it — the positive control).
-        // Before posting, the submitting author's own page saves like an
-        // editor's ([OPS1]).
+        // Before posting, Save is offered on the submitting author's own
+        // page and a save shows "Saved" beside the button ([OPS1]; `save()`
+        // waits for the accepted POST and the footer's "Saved").
         const authorPage = await (await asUser('author.alex')).newPage();
         await openWorkflow(authorPage, PK, submissionId, {author: true});
         const authorScreen = new PublicationScreen(authorPage);
@@ -662,8 +775,8 @@ test.describe('Publication metadata (U40)', () => {
         await expect(prefix).toHaveValue('');
         await expect(authorScreen.saveButton()).toBeDisabled();
 
-        // Control: the lock is the Author's: the manager's Title & Abstract
-        // on the posted version stays editable, with the "Warning: This
+        // Control, read before the unpost: the lock is the Author's: the
+        // manager's Title & Abstract on the posted version stays editable, with the "Warning: This
         // version has been published…" banner (Rule 8).
         await openPublicationPage(managerPage, PK, submissionId, publicationId);
         await expect(managerScreen.publishedWarning()).toBeVisible({timeout: 30_000});
@@ -1241,9 +1354,11 @@ test.describe('Publication metadata (U40)', () => {
 
         const managerPage = await (await asUser(`${tag}mg`)).newPage();
 
-        // Give the server a default license and pin the holder to the
-        // server itself, so the reset's outcome is deterministic (the
-        // "Author" holder string is A11's open question).
+        // The given's "CC Attribution 4.0" license, set on Settings ›
+        // Distribution › License (no `licenseUrl` passthrough yet,
+        // scenarios.md "Field shapes not built yet"; footnote s7), the
+        // holder pinned to the server itself so the reset's outcome is
+        // deterministic (the "Author" holder string is A11's question).
         const licensePanel = await openLicenseSettings(managerPage, tag);
         await licensePanel.getByRole('radio', {name: 'Server', exact: true}).check();
         await licensePanel
@@ -1317,8 +1432,8 @@ test.describe('Publication metadata (U40)', () => {
         ).toBeVisible({timeout: 30_000});
 
         // The published item: its Permissions & Disclosure now shows the
-        // server's default holder instead of "Example Society", and the
-        // landing page's copyright line follows (Rule 14; the unposted
+        // server's name instead of "Example Society", and the landing page
+        // reads "Copyright (c) {year} {server name}" (Rule 14; the unposted
         // item's values after the reset are A2/A3 territory — not
         // asserted).
         await openWorkflow(managerPage, tag, submissionId);

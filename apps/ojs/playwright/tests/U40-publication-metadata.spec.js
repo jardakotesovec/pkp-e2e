@@ -3,37 +3,29 @@
  * @file playwright/tests/U40-publication-metadata.spec.js
  *
  * Publication metadata — OJS suite, one test per canonical scenario the
- * spec runs on OJS (S1–S8 and S12 common; S9 {OJS}; scenarios 10 and 11
- * are OMP's and OPS's, in their trees). Scenario 3's journal-only
- * scheduled leg and scenario 6's visibility controls run as the tail of
- * S3 and S6 (one test per scenario; the scheduled leg's second submission
- * is seeded in S3 itself).
+ * spec runs on OJS (S1–S8 and S12 common; S9 {OJS}; S10 and S11 are OMP's
+ * and OPS's, in their trees).
  * Spec: docs/specs/U40-publication-metadata.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ✅
- * retired (pkp/pkp-lib#13585; no test sets Plain Language Summary to
- * "Require" yet, a Planned item; S2 enables it at "Ask"), A2 🐞 / A3 ❓ (S7 and S9 assert only the scenarios' own
- * sentences after the reset: the published item's rewrite and, on the
- * issue basis, the unpublished item's current year; the 1970 year and the
- * per-version log lines are not asserted), A5 ❓ (S3 reaches "Scheduled"
- * and checks the edit lock, the new version and the empty Permissions &
- * Disclosure, never the language button), A6 ❓ (S6 asserts only the
- * "Change" button's absence once published or versioned), A8 ❓ (S3 and
- * S12 assert only the scenarios' own sentences: Save disabled, the fields
- * shown, nothing typed kept), A10 ✅ retired 2026-09-21 (no term suggestion is asserted),
- * A11 ❓ (the automatic holder's description is asserted only up to the
- * contributor's name), A12 ❓ (no empty custom copyright statement), A13 🐞
- * (S7's Cancel leg asserts only that nothing was reset and reloads before
- * the second attempt), A14 ❓ (S6's empty-abstract Confirm refusal is
- * asserted as the scenario writes it, not the "recommended" wording),
- * A15 🐞 (S6 gates the language panel on its own loading before picking),
- * A17 ❓ (the Author's Contributors page on the new version is not
- * opened), OJS1 🐞 (scenario 6's leg on an article published as Author's
- * Original is skipped), OJS2 ❓ (no scheduled article's
- * terms are read as suggestions), OMP1–OMP5 and OPS1–OPS2 (press- and
- * preprint-only, in those trees). The spec's Coverage section records
- * everything else left out.
+ * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
+ * contract, a ❓ is parked, not a gap):
+ * - A2 🐞, A3 ❓: S7 and S9 never read the 1970 year, the other
+ *   submissions' rewritten fields or the per-version log lines.
+ * - A5 ❓: S3's scheduled article is never offered a language change.
+ * - A6 ❓: S6's published and versioned items are read for "Change"
+ *   alone (the future-issue article's bullet states the readout too).
+ * - A8 ❓: S3 and S12 read Save disabled and nothing kept, never the
+ *   fields' look.
+ * - A11 ❓: the automatic holder's description is read up to the name.
+ * - A12 ❓, A18 ❓, A19 🐞, A21 🐞, A22 🐞: no test reaches those states.
+ * - A13 🐞: S7 reloads after Cancel instead of reading the button.
+ * - A14 ❓: S6's refused Confirm is read as the scenario words it.
+ * - A15 🐞: S6 waits for the language panel to load before picking.
+ * - A17 ❓: the Author's Contributors page on a new version is not opened.
+ * - A20 ❓: the sentence beside an overridden License URL is never read.
+ * - OJS1 🐞: S6's leg on an article published as Author's Original.
+ * - OJS2 ❓: no scheduled article's terms are read as suggestions.
+ * The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only for settings (S1, S3, S4 and S12 touch only their own
@@ -84,9 +76,9 @@ const mailOf = (username) => `${username}@mail.test`;
  * author (plus, with `spare`, a third author-role account the mailbox
  * controls are addressed to); returns their usernames.
  *
- * @param {{bilingual?: boolean, spare?: boolean, sections?: object[]}} options
+ * @param {{bilingual?: boolean, spare?: boolean, sections?: object[], issues?: object[]}} options
  */
-async function seedJournal(ojsApi, tag, {bilingual = false, spare = false, sections} = {}) {
+async function seedJournal(ojsApi, tag, {bilingual = false, spare = false, sections, issues} = {}) {
     const context = bilingual
         ? {
               primaryLocale: 'en',
@@ -124,6 +116,7 @@ async function seedJournal(ojsApi, tag, {bilingual = false, spare = false, secti
         ...(context ? {context} : {}),
         ...(sections ? {sections} : {}),
         users,
+        ...(issues ? {issues} : {}),
     });
     return {manager: `${tag}mg`, author: `${tag}au`, spare: spare ? `${tag}x` : null};
 }
@@ -155,9 +148,11 @@ async function saveMetadataSettings(page) {
 
 /**
  * Configure Settings › Distribution › License on a scratch journal:
- * optional Copyright Holder radio, license radio, and License Terms text.
+ * optional Copyright Holder radio, license radio, Copyright Year basis
+ * radio ("Use the article's publication date" / "Use the issue's
+ * publication date", the default) and License Terms text.
  */
-async function configureLicenseSettings(page, contextPath, {holder, license, terms} = {}) {
+async function configureLicenseSettings(page, contextPath, {holder, license, yearBasis, terms} = {}) {
     await page.goto(`/index.php/${contextPath}/management/settings/distribution`);
     await page.locator('#license-button').click();
     const anchor = page.getByRole('radio', {name: 'CC Attribution 4.0', exact: true});
@@ -167,6 +162,9 @@ async function configureLicenseSettings(page, contextPath, {holder, license, ter
     }
     if (license) {
         await page.getByRole('radio', {name: license, exact: true}).check();
+    }
+    if (yearBasis) {
+        await page.getByRole('radio', {name: yearBasis, exact: true}).check();
     }
     if (terms) {
         await page.waitForFunction(
@@ -393,6 +391,12 @@ test.describe('publication metadata', () => {
                 {abbrev: 'NOA', title: 'No abstracts', abstractsNotRequired: true},
             ],
         });
+        // The suggestion sources (footnote s2): in this journal a published
+        // submission with "tidal mixing" and a submitted, unpublished one
+        // with "tidal pools"; in a second scratch journal a published one
+        // with "tidal bores".
+        const otherJournal = `${tag}b`;
+        const other = await seedJournal(ojsApi, otherJournal);
         const [{submissionId}, noAbstract] = await Promise.all([
             ojsApi.createSubmission({
                 tag: `${tag}s`,
@@ -407,6 +411,31 @@ test.describe('publication metadata', () => {
                 submitter: author,
                 section: 'NOA',
                 title: `Submission ${tag}n`,
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}p`,
+                context: tag,
+                submitter: author,
+                section: 'ART',
+                title: `Submission ${tag}p`,
+                keywords: ['tidal mixing'],
+                published: true,
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}u`,
+                context: tag,
+                submitter: author,
+                section: 'ART',
+                title: `Submission ${tag}u`,
+                keywords: ['tidal pools'],
+            }),
+            ojsApi.createSubmission({
+                tag: `${otherJournal}o`,
+                context: otherJournal,
+                submitter: other.author,
+                title: `Submission ${otherJournal}o`,
+                keywords: ['tidal bores'],
+                published: true,
             }),
         ]);
 
@@ -500,6 +529,33 @@ test.describe('publication metadata', () => {
             'Pacific Ocean, 2020'
         );
 
+        // Keyword suggestions (Rule 7b), each read bounded by the lookup the
+        // typing sends. "tidal mixing", the published submission's term,
+        // typed in full: the list opens with the typed text. The scenario's
+        // "offers it again below it" is T-ojs-1 in the findings file: a
+        // suggestion equal to the typed text is never listed below it, so
+        // the list reads the typed entry alone.
+        const options = pub.termOptions();
+        await pub.typeTermForSuggestions(keywords, 'tidal mixing');
+        await expect(options).toHaveText(['tidal mixing'], {timeout: 30_000});
+        await pub.clearTypedTerm(keywords);
+        // "tidal pools", the unpublished submission's term, and "tidal
+        // bores", the other journal's: each only as the typed text.
+        for (const term of ['tidal pools', 'tidal bores']) {
+            await pub.typeTermForSuggestions(keywords, term);
+            await expect(options).toHaveText([term], {timeout: 30_000});
+            await pub.clearTypedTerm(keywords);
+        }
+        // The positive control of those two absences, taken the same way
+        // (T-ojs-1): the shared stem "tidal" lists the typed text, then the
+        // published term below it, and neither the unpublished submission's
+        // term nor the other journal's.
+        await pub.typeTermForSuggestions(keywords, 'tidal');
+        await expect(options).toHaveText(['tidal', 'tidal mixing'], {timeout: 30_000});
+        await pub.clearTypedTerm(keywords);
+        // No chip was added by any of the reads.
+        await expect(page.getByRole('button', {name: /^Remove tidal/})).toHaveCount(0);
+
         // Disabling Coverage hides the field but keeps the stored value;
         // re-enabling shows it again.
         await openMetadataSettings(page, tag);
@@ -522,7 +578,7 @@ test.describe('publication metadata', () => {
             {timeout: 30_000}
         );
 
-        // Plain Language Summary at "Ask" (never "Require": A1 retired, a Planned item), and the
+        // Plain Language Summary at "Ask" ("Require" is the last bullet, below), and the
         // Publisher ID for publications plus the Article Number, on the
         // same settings screen. The Publisher ID box reads "Enable for
         // Publications" on this journal (the spec's "Enable for Articles"
@@ -596,6 +652,55 @@ test.describe('publication metadata', () => {
         await pub.gotoWorkflow(noAbstract.submissionId);
         await pub.openEntry('Title & Abstract');
         expect(await pub.richTextContent('titleAbstract-abstract-control-en')).toBe('');
+
+        // A required summary (last: the word-limit and no-abstract saves
+        // above would be refused with an empty required summary; footnote
+        // s2). The settings screen's "Require the author…" under "Enable
+        // plain language summary metadata", saved.
+        await openMetadataSettings(page, tag);
+        const requireSummary = page.getByRole('radio', {
+            name: 'Require the author to provide a plain language summary before accepting their submission.',
+        });
+        await expect(requireSummary).toBeVisible({timeout: 30_000});
+        await requireSummary.check();
+        await saveMetadataSettings(page);
+
+        // The first submission, its summary still empty: "Metadata" and
+        // "Permissions & Disclosure" save ("Saved" each time).
+        const summaryEditor = 'titleAbstract-plainLanguageSummary-control-en';
+        await pub.gotoWorkflow(submissionId);
+        await pub.openEntry('Title & Abstract');
+        await expect(page.locator('input[name="prefix-en"]')).toBeVisible({timeout: 30_000});
+        expect(await pub.richTextContent(summaryEditor)).toBe('');
+        await pub.openEntry('Metadata');
+        await pub.save();
+        await pub.openEntry('Permissions & Disclosure');
+        await pub.save();
+
+        // The summary typed on "Title & Abstract" saves; "Metadata" and
+        // "Permissions & Disclosure" save again.
+        await pub.openEntry('Title & Abstract');
+        await pub.setRichText(summaryEditor, '<p>A summary for every reader.</p>');
+        await pub.save();
+        await pub.openEntry('Metadata');
+        await pub.save();
+        await pub.openEntry('Permissions & Disclosure');
+        await pub.save();
+
+        // Cleared again on "Title & Abstract", the save is refused with
+        // "This field is required." under Plain Language Summary, and a
+        // reload shows the stored summary.
+        await pub.openEntry('Title & Abstract');
+        expect(await pub.richTextContent(summaryEditor)).toContain('A summary for every reader.');
+        await pub.setRichText(summaryEditor, '');
+        await pub.saveRefusedInPlace(
+            pub.fieldErrorUnder('Plain Language Summary', 'This field is required.')
+        );
+        await expect(pub.goToFieldButton('Plain Language Summary')).toBeVisible();
+        await pub.gotoWorkflow(submissionId);
+        await pub.openEntry('Title & Abstract');
+        await expect(page.locator('input[name="prefix-en"]')).toBeVisible({timeout: 30_000});
+        expect(await pub.richTextContent(summaryEditor)).toContain('A summary for every reader.');
     });
 
     test('S3: the Author before and after publication', async ({asUser, ojsApi}, testInfo) => {
@@ -784,11 +889,24 @@ test.describe('publication metadata', () => {
         await managerPub.scheduleToFutureIssue(/Vol\. 2 No\. 1 \(2015\)/);
         await managerPub.expectStatus('Scheduled');
 
-        // Scheduling fills nothing (Rule 12): the Journal Manager's
+        // A scheduled article, the Author's side: the page is read-only
+        // with no banner at all (Rule 9); the fields are shown (control for
+        // the absent banner text).
+        await authorPub.gotoWorkflow(scheduledId, {author: true});
+        await authorPub.openEntry('Title & Abstract');
+        await expect(prefix).toBeVisible({timeout: 30_000});
+        await expect(prefix).toHaveValue('A');
+        await expect(authorPub.saveButton()).toBeDisabled();
+        await expect(authorPage.getByText('can not be edited')).toHaveCount(0);
+        await expect(editorWarning).toHaveCount(0);
+
+        // The scheduled article's permission fields: scheduling fills
+        // nothing (Rule 12). The Journal Manager's
         // "Permissions & Disclosure" shows Copyright Holder and Copyright
         // Year still locked with their descriptions and License URL still
         // empty and plain-editable, the seeded journal having no default
         // license (control: the two "Override" links are offered).
+        await managerPub.gotoWorkflow(scheduledId);
         await managerPub.openEntry('Permissions & Disclosure');
         const fields = managerPub.permissionsFields();
         await expect(fields.holder).toBeDisabled({timeout: 30_000});
@@ -802,17 +920,8 @@ test.describe('publication metadata', () => {
         await expect(fields.licenseDescription).toHaveCount(0);
         await expect(fields.overrides).toHaveCount(2);
 
-        // The Author's page is read-only with no banner at all (Rule 9);
-        // the fields are shown (control for the absent banner text).
-        await authorPub.gotoWorkflow(scheduledId, {author: true});
-        await authorPub.openEntry('Title & Abstract');
-        await expect(prefix).toBeVisible({timeout: 30_000});
-        await expect(prefix).toHaveValue('A');
-        await expect(authorPub.saveButton()).toBeDisabled();
-        await expect(authorPage.getByText('can not be edited')).toHaveCount(0);
-        await expect(editorWarning).toHaveCount(0);
-
-        // "Create New Version" is offered on the scheduled item.
+        // A new version beside the scheduled one: "Create New Version" is
+        // offered on the scheduled item.
         await managerPub.gotoWorkflow(scheduledId);
         await expect(managerPub.createNewVersionLink()).toBeVisible({timeout: 30_000});
         await managerPub.createNewVersion({expectLabel: V2});
@@ -1110,8 +1219,14 @@ test.describe('publication metadata', () => {
         test.slow();
         test.setTimeout(420_000);
         const tag = makeTag('s6', testInfo);
-        const {manager, author} = await seedJournal(ojsApi, tag, {bilingual: true});
-        const [{submissionId}, published, versioned] = await Promise.all([
+        // A future issue (never published) for the article published into
+        // it at once (footnote s6, the future-issue leg).
+        const futureYear = new Date().getFullYear() + 1;
+        const {manager, author} = await seedJournal(ojsApi, tag, {
+            bilingual: true,
+            issues: [{volume: 9, number: 1, year: futureYear}],
+        });
+        const [{submissionId}, published, versioned, futureIssued] = await Promise.all([
             ojsApi.createSubmission({
                 tag: `${tag}s`,
                 context: tag,
@@ -1130,6 +1245,12 @@ test.describe('publication metadata', () => {
                 context: tag,
                 submitter: author,
                 title: `Submission ${tag}v`,
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}f`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}f`,
             }),
         ]);
         const instName = `Institw${tag}`;
@@ -1169,6 +1290,28 @@ test.describe('publication metadata', () => {
         await pub.openVersionEntry('Version of Record 1.0', 'Title & Abstract');
         await expect(pub.saveButton()).toBeVisible({timeout: 30_000});
         await expect(pub.changeLanguageButton()).toHaveCount(0);
+
+        // Published to a future issue at once (journal only): published as
+        // "Version of Record" with "Assign To Future Issue and Publish
+        // Immediately", the article reads "Status: Published" and no
+        // Publication page shows the readout or "Change" (positive control:
+        // both are on its Title & Abstract before the publish).
+        await pub.gotoWorkflow(futureIssued.submissionId);
+        await pub.openEntry('Title & Abstract');
+        await expect(pub.languageReadoutLine()).toContainText('English', {timeout: 30_000});
+        await expect(pub.readoutChangeButton()).toBeVisible();
+        await pub.publish({
+            futureIssueLabel: new RegExp(`Vol\\. 9 No\\. 1 \\(${futureYear}\\)`),
+        });
+        await pub.expectStatus('Published');
+        for (const entry of ['Title & Abstract', 'Metadata']) {
+            await pub.gotoWorkflow(futureIssued.submissionId);
+            await pub.openEntry(entry);
+            await expect(pub.saveButton()).toBeVisible({timeout: 30_000});
+            await expect(page.getByText(PUBLISHED_WARNING)).toBeVisible({timeout: 30_000});
+            await expect(page.getByText('Current Submission Language:')).toHaveCount(0);
+            await expect(pub.changeLanguageButton()).toHaveCount(0);
+        }
 
         // Control: the Author never gets the button: their stage screen
         // shows the readout, their Publication pages neither readout nor
@@ -1317,10 +1460,13 @@ test.describe('publication metadata', () => {
         const managerPage = await (await asUser(manager)).newPage();
         const pub = new PublicationScreen(managerPage, tag);
 
-        // Journal defaults: a CC license and terms; no holder chosen, so
-        // the default holder is the journal's name (keeps A11 out).
+        // Journal defaults: the "CC Attribution 4.0" license, terms and
+        // Copyright Year "Use the article's publication date" (the given; a
+        // fresh journal uses the issue's); no holder chosen, so the default
+        // holder is the journal's name (keeps A11 out).
         await configureLicenseSettings(managerPage, tag, {
             license: 'CC Attribution 4.0',
+            yearBasis: "Use the article's publication date",
             terms: `<p>License terms ${tag}.</p>`,
         });
 

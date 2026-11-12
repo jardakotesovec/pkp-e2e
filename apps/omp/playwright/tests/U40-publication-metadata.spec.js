@@ -18,18 +18,11 @@
  * do not run here; S12's participant is the press's Copyeditor.
  * Spec: docs/specs/U40-publication-metadata.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ✅
- * retired (pkp/pkp-lib#13585; "Require" is a Planned item), A2 🐞 (journal/preprint-only; the press's year is asserted as the
- * scenario's own sentence), A13 🐞 (S7's Cancel asserts only that nothing
- * was reset and reloads before pressing again), OJS1 🐞 (journal-only),
- * OMP5 🐞 (S5 asserts the scenario's sentence, never where the link
- * leads), A3 ❓ (S7 asserts the scenario's own sentence on the unpublished
- * and declined items), A5 ❓, A6 ❓, A8 ❓ (a read-only page's fields are
- * asserted typeable only as the scenario's own sentence), A10 ✅ retired 2026-09-21, A11 ❓
- * (S5 matches the contributor's name inside the holder sentence, not the
- * role suffix), A12 ❓, A14 ❓ (journal/preprint-only), A15 ❓, A17 ❓, OMP3 ❓,
- * OPS2 ❓. The spec's Coverage section records everything else left out.
+ * Not covered, by register ID (the spec's Coverage section is the record of
+ * everything else left out; 🐞 findings are never asserted as contract,
+ * PRINCIPLES M3, and a claim parked on an open ❓ is not a coverage gap):
+ * A2, A13, A15, A19, A21, A22, OJS1, OMP5, OPS3 (🐞); A3, A5, A6, A8, A11,
+ * A12, A14, A17, A18, A20, OJS2, OMP3, OPS2 (❓). Retired: A1, A10.
  *
  * Seeding: scenario endpoints only. S3, S4 and S12 run on the seeded press
  * with the ready accounts and only add their own tagged submissions; every
@@ -38,7 +31,7 @@
  * press settings, rewrites every submission in the press, or reads a
  * mailbox (S1's mailbox silence needs a throwaway submitter, footnote s1,
  * so S1 runs on a scratch press). publicknowledge and the 18 seeded users
- * are never changed (A7; A1 until pkp/pkp-lib#13585). Every absence is a settled read paired with a
+ * are never changed (A7). Every absence is a settled read paired with a
  * positive control taken the same way; a mailbox silence is bounded by a
  * discussion email the test itself sends to a second throwaway account
  * (A8, `pkpMail.expectNone`). Waits are event-based (publication/context
@@ -46,7 +39,11 @@
  * no hard-coded sleeps. Everything runs in the parallel `omp` project.
  */
 const {test, expect} = require('../support/fixtures.js');
-const {unpublishFromWorkflow: unpublishDialog} = require('../pages/PublicationPages.js');
+const {
+    unpublishFromWorkflow: unpublishDialog,
+    typeKeywordForSuggestions,
+    clearKeywordBox,
+} = require('../pages/PublicationPages.js');
 const {waitForEditorReady} = require('../../../../shared/playwright/support/richtext.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {
@@ -57,7 +54,9 @@ const {
 const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
 const CC_BY = 'https://creativecommons.org/licenses/by/4.0';
-const CC_BY_SA = 'https://creativecommons.org/licenses/by-sa/4.0';
+/** S10's addresses: the chapter override and the unlicensed press's volume license. */
+const CHAPTER_LICENSE = 'https://example.org/chapter-license';
+const VOLUME_LICENSE = 'https://example.org/volume-license';
 const CC_BY_SENTENCE =
     'This work is licensed under a Creative Commons Attribution 4.0 International License.';
 const PUBLISHED_WARNING =
@@ -602,19 +601,57 @@ test.describe('Publication metadata (U40)', () => {
     test('S2: the Metadata page mirrors the press\'s metadata setup', async ({asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s2', testInfo);
-        await ompApi.createContext({
-            tag,
-            users: [
-                scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
-                scratchUser(tag, 'au', 'Ada', 'Author', ['author']),
-            ],
-        });
-        const {submissionId} = await ompApi.createSubmission({
-            tag: `${tag}s`,
-            context: tag,
-            submitter: `${tag}au`,
-            title: `Submission ${tag}`,
-        });
+        const otherTag = `${tag}x`;
+        await Promise.all([
+            ompApi.createContext({
+                tag,
+                users: [
+                    scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
+                    scratchUser(tag, 'au', 'Ada', 'Author', ['author']),
+                ],
+            }),
+            ompApi.createContext({
+                tag: otherTag,
+                users: [scratchUser(otherTag, 'au', 'Ola', 'Author', ['author'])],
+            }),
+        ]);
+        // The suggestion sources (footnote s2): a published book with
+        // "tidal mixing" and a submitted-only one with "tidal pools" in
+        // this press, and a published book with "tidal bores" in a second
+        // press, each through the `keywords` display value.
+        const [{submissionId}] = await Promise.all([
+            ompApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: `Submission ${tag}`,
+            }),
+            ompApi.createSubmission({
+                tag: `${tag}p`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: `Published ${tag}`,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+                published: true,
+                keywords: ['tidal mixing'],
+            }),
+            ompApi.createSubmission({
+                tag: `${tag}u`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: `Unpublished ${tag}`,
+                keywords: ['tidal pools'],
+            }),
+            ompApi.createSubmission({
+                tag: `${otherTag}p`,
+                context: otherTag,
+                submitter: `${otherTag}au`,
+                title: `Other press ${tag}`,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+                published: true,
+                keywords: ['tidal bores'],
+            }),
+        ]);
 
         const page = await (await asUser(`${tag}mg`)).newPage();
 
@@ -688,6 +725,23 @@ test.describe('Publication metadata (U40)', () => {
             'Pacific, 2020s'
         );
 
+        // Keyword suggestions (Rule 7b), each read bounded by the list's
+        // own fetch. The stem "tidal" opens the list with the typed text
+        // and offers "tidal mixing", the published book's term, below it;
+        // the fetch answers that term alone, so neither "tidal pools" (not
+        // published) nor "tidal bores" (another press's) is offered, the
+        // offered term being the same read's positive control. "tidal
+        // mixing" typed in full lists it once, as the typed text (the
+        // fetch still answers it). Clearing the box closes the list.
+        let typed = await typeKeywordForSuggestions(page, 'tidal');
+        expect(typed.answered).toEqual(['tidal mixing']);
+        await expect(typed.options).toHaveText(['tidal', 'tidal mixing']);
+        await clearKeywordBox(page);
+        typed = await typeKeywordForSuggestions(page, 'tidal mixing');
+        expect(typed.answered).toEqual(['tidal mixing']);
+        await expect(typed.options).toHaveText(['tidal mixing']);
+        await clearKeywordBox(page);
+
         // Disabling Coverage hides the field but keeps the value; on
         // re-enabling, the stored value is back.
         await openMetadataSettings(page, tag);
@@ -741,6 +795,54 @@ test.describe('Publication metadata (U40)', () => {
         await expect(field(page, /^Publisher ID/)).toBeVisible();
         await expect(field(page, /^Keywords/)).toBeVisible();
         await expect(field(page, /^Article Number/)).toHaveCount(0);
+
+        // A required summary, last (footnote s2): "Require the author…"
+        // chosen on the settings screen. With the summary still empty,
+        // "Metadata" and "Permissions & Disclosure" save ("Saved" each).
+        await openMetadataSettings(page, tag);
+        await form
+            .getByRole('radio', {
+                name: 'Require the author to provide a plain language summary before accepting their submission.',
+            })
+            .check();
+        await saveSettingsForm(page, form);
+        await openWorkflow(page, tag, submissionId);
+        await openPublicationPage(page, 'Metadata');
+        await savePublicationForm(page);
+        await openPublicationPage(page, 'Permissions & Disclosure');
+        await savePublicationForm(page);
+
+        // On "Title & Abstract" the summary typed saves; "Metadata" and
+        // "Permissions & Disclosure" save again ("Saved" each).
+        const summary = 'A summary for every reader.';
+        await openPublicationPage(page, 'Title & Abstract');
+        const summaryBody = richBody(page, /^Plain Language Summary/);
+        await summaryBody.click();
+        await summaryBody.fill(summary);
+        await savePublicationForm(page);
+        await openPublicationPage(page, 'Metadata');
+        await savePublicationForm(page);
+        await openPublicationPage(page, 'Permissions & Disclosure');
+        await savePublicationForm(page);
+
+        // Back on "Title & Abstract" the summary cleared is refused with
+        // "This field is required." under Plain Language Summary; the
+        // reload reads the stored summary.
+        await openPublicationPage(page, 'Title & Abstract');
+        await expect(summaryBody).toContainText(summary, {timeout: 30_000});
+        await summaryBody.click();
+        await page.keyboard.press('ControlOrMeta+a');
+        await page.keyboard.press('Delete');
+        await saveButton(page).click();
+        await expect(
+            field(page, /^Plain Language Summary/).locator('.pkpFieldError')
+        ).toHaveText('This field is required.', {timeout: 30_000});
+        await expect(page.locator('.pkpFormPage__status', {hasText: 'Saved'})).toHaveCount(0);
+        await openWorkflow(page, tag, submissionId);
+        await openPublicationPage(page, 'Title & Abstract');
+        await expect(richBody(page, /^Plain Language Summary/)).toContainText(summary, {
+            timeout: 30_000,
+        });
     });
 
     test('S3: the press author before and after publication', async ({asUser, ompApi}, testInfo) => {
@@ -1616,14 +1718,36 @@ test.describe('Publication metadata (U40)', () => {
     test('S10: an Edited Volume carries a Default Chapter License URL', async ({asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s10', testInfo);
-        await ompApi.createContext({
-            tag,
-            users: [
-                scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
-                scratchUser(tag, 'au', 'Ada', 'Author', ['author']),
-            ],
+        // The second press is left at the install default, with no license,
+        // and has its own throwaway manager (footnote s10).
+        const bareTag = `${tag}n`;
+        await Promise.all([
+            ompApi.createContext({
+                tag,
+                users: [
+                    scratchUser(tag, 'mg', 'Mona', 'Manager', ['manager']),
+                    scratchUser(tag, 'au', 'Ada', 'Author', ['author']),
+                ],
+            }),
+            ompApi.createContext({
+                tag: bareTag,
+                users: [
+                    scratchUser(bareTag, 'mg', 'Nora', 'Manager', ['manager']),
+                    scratchUser(bareTag, 'au', 'Ola', 'Author', ['author']),
+                ],
+            }),
+        ]);
+        const bareVolume = await ompApi.createSubmission({
+            tag: `${bareTag}v`,
+            context: bareTag,
+            submitter: `${bareTag}au`,
+            title: `Bare volume ${tag}`,
+            workType: 'editedVolume',
         });
         const managerPage = await (await asUser(`${tag}mg`)).newPage();
+        // No passthrough sets a press's license (scenarios.md "Field shapes
+        // not built yet", `licenseUrl`), so the given's license is saved on
+        // Settings › Distribution › License.
         await setLicenseSettings(managerPage, tag, {license: 'CC Attribution 4.0'});
         const [volume, monograph] = await Promise.all([
             ompApi.createSubmission({
@@ -1650,24 +1774,51 @@ test.describe('Publication metadata (U40)', () => {
         await expect(chapterField).toBeVisible();
         await expect(chapterField.locator('input').first()).toBeDisabled();
         await expect(chapterField.getByRole('button', {name: 'Override'})).toBeVisible();
-        await expect(
-            chapterField.getByText(
-                'The license will be set automatically to CC Attribution 4.0 when this is published.'
-            )
-        ).toBeVisible();
+        await expect(chapterField.locator('.pkpFormField__description')).toHaveText(
+            'The license will be set automatically to CC Attribution 4.0 when this is published.'
+        );
 
-        // Override with another license address; the value survives Save
-        // and reload, unlocked.
+        // Override with "https://example.org/chapter-license"; the address
+        // survives Save and reload, unlocked.
         await chapterField.getByRole('button', {name: 'Override'}).click();
-        await chapterField.locator('input').first().fill(CC_BY_SA);
+        await chapterField.locator('input').first().fill(CHAPTER_LICENSE);
         await savePublicationForm(managerPage);
         await openWorkflow(managerPage, tag, volume.submissionId);
         await openPublicationPage(managerPage, 'Permissions & Disclosure');
-        await expect(chapterField.locator('input').first()).toHaveValue(CC_BY_SA, {
+        await expect(chapterField.locator('input').first()).toHaveValue(CHAPTER_LICENSE, {
             timeout: 30_000,
         });
         await expect(chapterField.locator('input').first()).toBeEnabled();
         await expect(chapterField.getByRole('button', {name: 'Override'})).toHaveCount(0);
+
+        // A press with no license: its Edited Volume's chapter field is
+        // plain-editable, with no description and no "Override" (the
+        // first press's field, read the same way above, carried both).
+        // License URL "https://example.org/volume-license" saves; the
+        // chapter field stays plain with no sentence until a reload,
+        // which locks it behind "Override" and the sentence naming the
+        // volume's license.
+        const bareManager = await (await asUser(`${bareTag}mg`)).newPage();
+        await openWorkflow(bareManager, bareTag, bareVolume.submissionId);
+        await openPublicationPage(bareManager, 'Permissions & Disclosure');
+        const bareChapter = field(bareManager, /^Default Chapter License URL/);
+        const bareLicense = field(bareManager, /^License URL/).locator('input').first();
+        await expect(bareChapter.locator('input').first()).toBeEditable({timeout: 30_000});
+        await expect(bareLicense).toBeEditable();
+        await expect(bareChapter.locator('.pkpFormField__description')).toHaveCount(0);
+        await expect(bareChapter.getByRole('button', {name: 'Override'})).toHaveCount(0);
+        await bareLicense.fill(VOLUME_LICENSE);
+        await savePublicationForm(bareManager);
+        await expect(bareChapter.locator('input').first()).toBeEditable();
+        await expect(bareChapter.locator('.pkpFormField__description')).toHaveCount(0);
+        await expect(bareChapter.getByRole('button', {name: 'Override'})).toHaveCount(0);
+        await openWorkflow(bareManager, bareTag, bareVolume.submissionId);
+        await openPublicationPage(bareManager, 'Permissions & Disclosure');
+        await expect(bareChapter.locator('input').first()).toBeDisabled({timeout: 30_000});
+        await expect(bareChapter.getByRole('button', {name: 'Override'})).toBeVisible();
+        await expect(bareChapter.locator('.pkpFormField__description')).toHaveText(
+            `The license will be set automatically to ${VOLUME_LICENSE} when this is published.`
+        );
 
         // Control: a Monograph has no such field — bounded by the page's
         // other license fields rendering.

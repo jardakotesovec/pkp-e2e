@@ -43,6 +43,10 @@
  *   `switchOffPublishedEmail` (the Author's Profile › Notifications opt-out
  *   of the "Publication Published" email, saved through the tab's own
  *   Save).
+ * - Added 2026-11-12 (U40's revision): the "Metadata" page's Keywords
+ *   suggestion list (`keywordsField`, `typeKeywordForSuggestions`,
+ *   `clearKeywordBox`; Rule 7b), each read bounded by the list's own
+ *   `api/v1/vocabs` fetch.
  *
  * Labels are the live locale strings (ops + lib/pkp locale/en/*.po at the
  * pinned commits); DOM shapes from lib/ui-library WorkflowPublicationForm /
@@ -787,3 +791,63 @@ async function switchOffPublishedEmail(page, contextPath) {
 }
 
 exports.switchOffPublishedEmail = switchOffPublishedEmail;
+
+/**
+ * The open "Metadata" page's Keywords field (label, chips, the typing box
+ * and its suggestion list).
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function keywordsField(page) {
+    return page
+        .locator('.pkpFormField')
+        .filter({has: page.locator('#metadata-keywords-control-en')});
+}
+
+exports.keywordsField = keywordsField;
+
+/**
+ * Type a term into the open "Metadata" page's Keywords box without pressing
+ * Enter, resolved once the suggestion list's own fetch for that term
+ * (`GET api/v1/vocabs?…&term=<term>`) has answered (Rule 7b; the list is
+ * fetched a quarter of a second after typing stops). Returns the list's
+ * options (the typed text first, then the suggestions) and the names the
+ * fetch answered.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} term
+ * @returns {Promise<{options: import('@playwright/test').Locator, answered: string[]}>}
+ */
+async function typeKeywordForSuggestions(page, term) {
+    const field = keywordsField(page);
+    const box = field.getByRole('combobox', {name: 'Keywords'});
+    const fetched = page.waitForResponse(
+        (r) => {
+            const url = new URL(r.url());
+            return url.pathname.endsWith('/vocabs') && url.searchParams.get('term') === term;
+        },
+        {timeout: 30_000}
+    );
+    await box.click();
+    await box.fill(term);
+    const response = await fetched;
+    expect(response.ok(), `the suggestion fetch answered ${response.status()}`).toBe(true);
+    const answered = (await response.json()).map((entry) => entry.name);
+    return {options: field.getByRole('option'), answered};
+}
+
+exports.typeKeywordForSuggestions = typeKeywordForSuggestions;
+
+/**
+ * Empty the open "Metadata" page's Keywords box (no chip added), resolved
+ * once its suggestion list has closed.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+async function clearKeywordBox(page) {
+    const field = keywordsField(page);
+    await field.getByRole('combobox', {name: 'Keywords'}).fill('');
+    await expect(field.getByRole('option')).toHaveCount(0, {timeout: 30_000});
+}
+
+exports.clearKeywordBox = clearKeywordBox;
