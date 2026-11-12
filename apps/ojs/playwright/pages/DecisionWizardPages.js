@@ -806,6 +806,30 @@ exports.ComposerPage = class ComposerPage {
         }, id);
     }
 
+    /**
+     * Type at the end of the letter, as a user would: the settled letter's
+     * last block (the blank paragraph under the signature) takes the cursor
+     * at its end, then the text is typed (U34 S6 "Notify Reviewers" edited;
+     * screen-notes tojsr).
+     *
+     * @param {string} text
+     */
+    async typeAtEndOfLetter(text) {
+        const id = await this.editorId();
+        await this.settledLetterRead(() =>
+            this.page.evaluate((i) => /** @type {any} */ (window).tinymce.get(i).getContent({format: 'text'}), id)
+        );
+        await this.page.evaluate((i) => {
+            const editor = /** @type {any} */ (window).tinymce.get(i);
+            editor.focus();
+            const body = editor.getBody();
+            const last = body.lastElementChild || body;
+            editor.selection.select(last, true);
+            editor.selection.collapse(false);
+        }, id);
+        await this.page.keyboard.type(text);
+    }
+
     /** A TinyMCE toolbar button by its visible text ("Attach Files", "Insert Content"). */
     toolbarButton(label) {
         return this.page.locator('.tox-tbtn:visible').filter({hasText: new RegExp(`^${escape(label)}$`)});

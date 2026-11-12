@@ -19,16 +19,10 @@
  * Spec: docs/specs/U34-editorial-decision-recording.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): OPS2 🐞
- * (S9 reads the "Insert Content" rows for the server's name, the authors
- * and the title, never the initials row's untranslated description), A8 ❓
- * (the markup and empty rows of the same window), and *Production stage*'s
- * OPS2 🐞 (S9 reads the "Submission Reactivated" window's title, that its
- * text names the preprint and its "unless you chose to skip" sentence,
- * never the "submission stage" it names); A6 🐞, A9 🐞, OJS1 🐞,
- * A1 ❓, A2 ❓, A4 ❓, A5 ❓, A7 ❓, A10 ❓, A11 ❓ (journal and press surfaces a
- * preprint server never shows). OPS1 ✅ is what S9 asserts. The spec's
- * Coverage section records everything else left out.
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): OPS2 🐞,
+ * OPS3 🐞, A6 🐞, A9 🐞, A13 🐞, OJS1 🐞, A1 ❓, A2 ❓, A4 ❓, A5 ❓, A7 ❓, A8 ❓,
+ * A10 ❓, A11 ❓, A12 ❓, and *Production stage*'s OPS2 🐞. OPS1 ✅ is what S9
+ * asserts. The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only; `publicknowledge` and the seeded
  * roster are read-only (A1, A7). S9 runs on a scratch preprint server with
@@ -73,9 +67,10 @@ const DECLINE_TEMPLATE = 'Submission Declined';
 const DECLINE_SUBJECT = 'Your submission has been declined';
 const REVERT_SUBJECT = 'We have reversed the decision to decline your submission';
 
-/** The refusals a typed address answers (Actors rows 2 and 4; Rule 12). */
+/** The refusals a typed address answers (Actors rows 1, 2 and 4; Rule 12). */
 const NOT_FOUND_DECISION = 'This decision could not be found. Please provide a recognized decision type.';
 const NO_ROLE_ACCESS = 'The current role does not have access to this operation.';
+const NOT_PERMITTED_DECISION = 'You do not have permission to record this decision on this submission.';
 
 /** Footnote s1's decision numbers: "Decline Submission" and "Recommend Accept". */
 const DECISION_DECLINE = 8;
@@ -326,6 +321,17 @@ test.describe('editorial decision recording (U34) — OPS', () => {
         await moderator.workflow.expectAccessDeniedPage(
             DecisionPage.recordUrl(tag, seeded.submissionId, DECISION_RECOMMEND_ACCEPT),
             NOT_FOUND_DECISION
+        );
+
+        // ── The limited Moderator's "Decline Submission" address ─────────
+        // The same Moderator types the "Decline Submission" address on the
+        // preprint in Production (queued again after the revert, where the
+        // Manager's entry offers that button: the control above): the
+        // access-denied page "You do not have permission to record this
+        // decision on this submission." (Rule 12; Actors row 1; OPS1).
+        await moderator.workflow.expectAccessDeniedPage(
+            DecisionPage.recordUrl(tag, seeded.submissionId, DECISION_DECLINE),
+            NOT_PERMITTED_DECISION
         );
 
         // ── The Author by address ────────────────────────────────────────

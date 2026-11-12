@@ -20,7 +20,9 @@
  *   the button on a declined monograph only.
  * - A9 🐞 (a Series editor's "Find Template" refused): S2 searches as the
  *   Press Editor, whose search works.
- * - OJS1 🐞, OPS2 🐞, OPS1 ✅: other apps' territory.
+ * - A13 🐞 (the "Move to Done", "Return to Workflow" and "Return to Done"
+ *   addresses' blank page): nothing types those addresses.
+ * - OJS1 🐞, OPS2 🐞, OPS3 🐞, OPS1 ✅: other apps' territory.
  * - A1 ❓ ("New Review Round" heading), A2 ❓ (the wizard with no page), A11 ❓
  *   (a past round's number): nothing opens those wizards.
  * - A4 ❓ (the recommendation's discussion lists the deciding editor, not its
@@ -33,6 +35,8 @@
  *   message are not asserted.
  * - A8 ❓ ("Insert Content" rows as raw markup): S2 reads the title row and
  *   the row count; the signature row's text is not asserted.
+ * - A12 ❓ (the "Select Files" uploader line names a username): S1 reads the
+ *   line as the scenario writes it, marked.
  * - A10 ❓ (the "Email Templates" snippet after the language switch): S8
  *   reads the French subject and letter; the snippet's language is not
  *   asserted.
@@ -1078,6 +1082,7 @@ test.describe('editorial decision recording (U34)', () => {
         const rv3 = `${tag}r3`;
         const EDITOR_DISPLAY = 'Erin Editor';
         const names = {[rv1]: 'Rita Reviewer', [rv2]: 'Rae Reviewer', [rv3]: 'Rob Reviewer'};
+        const EDITED_SENTENCE = 'This letter was edited for the test.';
         // Given: a scratch press whose "Minimum Confirmed Reviews Required"
         // is 2; three submissions: two reviews submitted and no file; two
         // reviews the Editor confirms on screen; a second round holding one
@@ -1174,6 +1179,12 @@ test.describe('editorial decision recording (U34)', () => {
         await composer.addRecipient(names[rv2]);
         await composer.expectRecipients([names[rv1], names[rv2]]);
 
+        // ── "Notify Reviewers" edited ────────────────────────────────────
+        // The sentence typed at the end of "Message", then "Continue"
+        // (Rule 4).
+        await composer.typeAtEndOfLetter(EDITED_SENTENCE);
+        await expect.poll(() => composer.letterText(), {timeout: 30_000}).toMatch(/This letter was edited for the test\.\s*$/);
+
         // ── "Record Decision" with nothing ticked ────────────────────────
         // Back on "Select Files" (the last page carries "Record Decision"),
         // "Record Decision": "Submission Accepted"; nothing is copied: the
@@ -1191,14 +1202,18 @@ test.describe('editorial decision recording (U34)', () => {
 
         // ── The reviewers' side ──────────────────────────────────────────
         // Each reviewer's mailbox holds "Thank you for your review" from the
-        // Editor, carrying that reviewer's own name and the accept sentence;
-        // each row reads "Reviewer Thanked" with "Revert Decision"; the
-        // Activity Log's line (Rule 4; Side effects).
-        for (const username of [rv1, rv2]) {
+        // Editor, carrying that reviewer's own name, not the other
+        // reviewer's, though the letter was edited (the typed sentence is
+        // the edit's positive control), and the accept sentence; each row
+        // reads "Reviewer Thanked" with "Revert Decision"; the Activity
+        // Log's line (Rule 4; Side effects).
+        for (const [username, other] of [[rv1, rv2], [rv2, rv1]]) {
             const thanks = await pkpMail.find({to: mailOf(username), subject: SUBJECT.thankYou, contains: firstTitle});
             expect(thanks.From).toEqual({Name: EDITOR_DISPLAY, Address: mailOf(editor)});
             const full = await pkpMail.fullMessage(thanks.ID);
-            expect(full.Text).toContain(names[username]);
+            expect(full.Text).toContain(`Dear ${names[username]},`);
+            expect(full.Text).toContain(EDITED_SENTENCE);
+            expect(full.Text).not.toContain(names[other]);
             expect(full.Text).toContain('We have chosen to accept this submission without revisions.');
         }
         await frame.selectRound(1);
