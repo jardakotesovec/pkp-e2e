@@ -7,21 +7,20 @@
  * Spec: docs/specs/U11-highlights.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
- * (S2 never presses ordering mode's "Cancel"), A2 ❓ (every "URL" typed is
- * a full web address), A3 🐞 (no title carries formatting), A4 🐞 (S1
- * closes no panel without "Save"; S4's refused edit ends the test), A5 🐞
- * (the site's Highlights tab is never opened; no site highlight is seeded
- * or asserted), A6 ❓ (S3 reads which dot is on and presses none), A8 ❓,
- * A9 ❓ (S1 replaces no image). The spec's Coverage section records
- * everything else left out.
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
+ * A2 ❓, A3 🐞, A4 🐞, A6 ❓, A8 ❓, A9 ❓, A10 🐞, A11 🐞, A12 🐞. The spec's
+ * Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only. Every scenario runs on a scratch journal
  * with throwaway accounts (footnotes s1–s4); there is no highlight seed key,
  * so every highlight is added through the "Add Highlight" panel, the
  * surface under test. Scenario 4's second form language comes from the
- * context passthrough `supportedFormLocales` (scenarios.md "POST
- * scenarios/context"), never from the Languages screen. The suite asserts
+ * context passthroughs `supportedLocales` and `supportedFormLocales`
+ * (scenarios.md "POST scenarios/context"), never from the Languages
+ * screen. Its site bullet saves a highlight on the site's own list (the
+ * Site Administrator `admin`, the install's English and French), which
+ * shows on the site's home page every test shares: it is kept short and
+ * deleted in a `finally` (footnote s4). The suite asserts
  * the slide's `<img>`, its alternate text and the stored file under the
  * journal's public files directory, not the rendered picture (which loads
  * on the test installs since the 2026-11-06 drift sweep, footnote g). Signed-out
@@ -34,12 +33,12 @@
  * button's address is followed against a routed stand-in for example.org,
  * so no test reaches an outside address. Waits are event-based (highlights
  * API responses, temporary-file uploads, web-first assertions) — no
- * hard-coded sleeps. Everything runs in the parallel `ojs` project.
+ * hard-coded sleeps.
  */
 const fs = require('fs');
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
-const {HighlightsTab, carousel} = require('../pages/HighlightsPages.js');
+const {HighlightsTab, SiteHighlightsTab, carousel, pageNotice} = require('../pages/HighlightsPages.js');
 const {PublicationScreen} = require('../pages/PublicationMetadataPages.js');
 const {TasksPanel} = require('../../../../shared/playwright/pages/NotificationsPages.js');
 
@@ -49,6 +48,9 @@ const REQUIRED = 'This field is required.';
 const ACCESS_DENIED = 'The current role does not have access to this operation.';
 const NOTIFY_SUBJECT = 'Discussion (Submission)';
 const TYPE_REFUSED = "You can't upload files of this type.";
+const NONE_COMPLETED = '0/2 languages completed';
+const SITE_TITLE = 'Site news';
+const NOT_SAVED_3 = 'The form was not saved because 3 error(s) were encountered. Please correct these errors and try again.';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -75,6 +77,12 @@ function highlightsDir(contextId) {
     // Relative to the app root, as the app reads it (make-test-config.js).
     const pub = path.resolve(appRoot, m ? m[1].trim() : 'public');
     return path.join(pub, 'journals', String(contextId), 'highlights');
+}
+
+/** The site's home page (footnote s4: `index/`). */
+async function gotoSiteHome(page) {
+    await page.goto('/index.php/index');
+    await expect(page.locator('.pkp_structure_main .page_index_site')).toBeVisible({timeout: 30_000});
 }
 
 /** A signed-out browser context (no inherited storage state). */
@@ -129,7 +137,8 @@ test.describe('highlights', () => {
         // required; "Save" with nothing filled is refused in place with
         // "Please correct 3 errors.", one "Go to …" button per fault, "Jump
         // to next error", the message under each of the three fields and
-        // Save grayed out (Fields).
+        // Save grayed out; the page notice reads "The form was not saved
+        // because 3 error(s) …" (Fields).
         let panel = await tab.openAdd();
         for (const field of [panel.titleField(), panel.descriptionField(), panel.urlField(), panel.buttonLabelField(), panel.imageField()]) {
             await expect(field).toBeVisible();
@@ -141,6 +150,9 @@ test.describe('highlights', () => {
         await expect(panel.label(panel.buttonLabelField())).toHaveText(/^\s*Button Label\s*$/);
         await expect(panel.label(panel.imageField())).toHaveText(/^\s*Image\s*$/);
         await panel.saveRefused('Please correct 3 errors.');
+        // The page notice shows for a few seconds: read first.
+        await expect(pageNotice(page, NOT_SAVED_3)).toBeVisible();
+        await expect(pageNotice(page, NOT_SAVED_3)).toHaveCount(1);
         await expect(panel.errorLink(`Go to Title: ${REQUIRED}`)).toBeVisible();
         await expect(panel.errorLink(`Go to URL: ${REQUIRED}`)).toBeVisible();
         await expect(panel.errorLink(`Go to Button Label: ${REQUIRED}`)).toBeVisible();
@@ -567,6 +579,20 @@ test.describe('highlights', () => {
         await expect(panel.label(panel.buttonLabelField('fr_CA'))).toContainText('Button Label in French');
         await expect(panel.buttonLabelInput('fr_CA')).toBeVisible();
 
+        // The language counts: each of the six boxes, English and French,
+        // carries "0/2 languages completed" (Fields; Rule 11). The count is
+        // the text of a globe icon at the box's start (inside the left edge
+        // of "Button Label"), read by a screen reader and shown as the
+        // icon's hover tooltip; it is not printed under the box.
+        for (const name of /** @type {const} */ (['title', 'description', 'urlText'])) {
+            for (const locale of ['en', 'fr_CA']) {
+                await expect(panel.languageCount(name, locale), `the count of ${name} (${locale})`).toHaveText(NONE_COMPLETED);
+                await expect(panel.languageCountIcon(name, locale)).toBeVisible();
+                await panel.languageCountIcon(name, locale).hover();
+                await expect(panel.tooltip(NONE_COMPLETED), `the tooltip of ${name} (${locale})`).toBeVisible();
+            }
+        }
+
         // A French-only save refused: "Please correct 2 errors." with the
         // message under "Title" and under "Button Label" (Fields; Rule 11).
         await panel.typeTitle('Appel à contributions', 'fr_CA');
@@ -618,5 +644,83 @@ test.describe('highlights', () => {
         await panel.saveRefused('Please correct one error.');
         await expect(panel.fieldError(panel.titleField())).toHaveText('You must complete this field in English.');
         await expect(panel.fieldError(panel.buttonLabelField())).toHaveCount(0);
+
+        // The site's highlights, Site Administrator: the site's own list
+        // starts empty (the given); "Add Highlight" and the language button
+        // show the French boxes (Rules 3, 11).
+        const admin = await (await asUser('admin')).newPage();
+        const site = new SiteHighlightsTab(admin);
+        await site.goto();
+        await expect(site.emptyMessage()).toBeVisible();
+        await expect(site.rows()).toHaveCount(0);
+        try {
+            panel = await site.openAdd();
+            await expect(panel.titleField('fr_CA')).toBeHidden();
+            await panel.localeButton('French').click();
+            await expect(panel.titleField('fr_CA')).toBeVisible();
+            await expect(panel.label(panel.titleField('fr_CA'))).toContainText('Title in French');
+            await expect(panel.label(panel.descriptionField('fr_CA'))).toContainText('Description in French');
+            await expect(panel.label(panel.buttonLabelField('fr_CA'))).toContainText('Button Label in French');
+
+            // Saved in both languages: the panel closes and "Site news" is
+            // the list's only row (Rules 5, 11).
+            await panel.typeTitle(SITE_TITLE);
+            await panel.typeTitle('Nouvelles du site', 'fr_CA');
+            await panel.urlInput().fill('https://example.org/site');
+            await panel.buttonLabelInput().fill('Read');
+            await panel.buttonLabelInput('fr_CA').fill('Lire');
+            await panel.save();
+            await expect(site.rows()).toHaveCount(1);
+            await expect(site.row(SITE_TITLE)).toBeVisible();
+            await expect(site.emptyMessage()).toHaveCount(0);
+
+            // Signed out, the site's address opens the site's home page
+            // with the carousel above the list of journals: one slide,
+            // "Site news" with a "Read" button, without arrows or a dot
+            // (Rules 2, 4, 13).
+            await gotoSiteHome(visitor);
+            await expect(home.block).toBeVisible();
+            await expect(home.siteBlocks.first()).toHaveClass(/highlights/);
+            await expect(home.siteBlocks.nth(1)).toHaveClass(/journals/);
+            await expect(home.slides).toHaveCount(1);
+            await expect(home.titleOf(home.slide(0))).toHaveText(SITE_TITLE);
+            await expect(home.buttonOf(home.slide(0))).toHaveText('Read');
+            await expect(home.buttonOf(home.slide(0))).toHaveAttribute('href', 'https://example.org/site');
+            await expect(home.prev).toBeHidden();
+            await expect(home.next).toBeHidden();
+            await expect(home.dots).toHaveCount(1);
+            await expect(home.dots.first()).toBeHidden();
+
+            // "Edit" and the language button read the French back; the
+            // panel's close control closes it (Rules 6, 11).
+            panel = await site.openEdit(SITE_TITLE);
+            await panel.expectTitleText(SITE_TITLE);
+            await panel.localeButton('French').click();
+            await panel.expectTitleText('Nouvelles du site', 'fr_CA');
+            await expect(panel.buttonLabelInput('fr_CA')).toHaveValue('Lire');
+            await panel.close();
+
+            // "Delete", then "Yes": the list reads "No items found." and,
+            // signed out, the site's home page carries no carousel, the
+            // list of journals now its first block (Rules 3, 8).
+            await site.deleteButton(SITE_TITLE).click();
+            await expect(site.deleteDialog()).toContainText(
+                `Are you sure you want to delete ${SITE_TITLE}? This action can not be undone.`
+            );
+            await site.confirmDelete();
+            await expect(site.emptyMessage()).toBeVisible();
+            await expect(site.rows()).toHaveCount(0);
+            await gotoSiteHome(visitor);
+            await expect(home.siteBlocks.first()).toHaveClass(/journals/);
+            await expect(home.block).toHaveCount(0);
+        } finally {
+            // The site's home page is shared by every test: a failure above
+            // must not leave the highlight behind.
+            await site.goto().catch(() => {});
+            while ((await site.row(SITE_TITLE).count().catch(() => 0)) > 0) {
+                await site.deleteButton(SITE_TITLE).first().click();
+                await site.confirmDelete();
+            }
+        }
     });
 });

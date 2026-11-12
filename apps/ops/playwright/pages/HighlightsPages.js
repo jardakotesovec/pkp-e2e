@@ -20,8 +20,12 @@
  *   "Button Label" boxes (one per form language), the "Image" dropzone with
  *   its preview, "Alternate text", "Remove" and "Restore Original", the
  *   language buttons at the top, the error summary and "Save".
+ * - SiteHighlightsTab — Administration › Site Settings › Site Setup ›
+ *   Highlights: the same list panel on the site's own list (Rules 12, 13).
+ * - pageNotice(page, text) — a page notice at the top right (the refused
+ *   save's "The form was not saved because…").
  * - carousel(page) — the home page's `.highlights` block: slides, arrows,
- *   dots.
+ *   dots; on the site's home page the blocks of `div.page_index_site`.
  *
  * Labels are the live locale strings; DOM shapes from lib/ui-library
  * src/components/ListPanel/highlights/*, src/components/Form/fields/
@@ -206,6 +210,50 @@ exports.HighlightsTab = class HighlightsTab {
     }
 };
 
+/**
+ * The site's Highlights tab (Administration › Site Settings › Site Setup ›
+ * Highlights, footnote c: `admin/settings#highlights` under the site's
+ * `index` path), shown only while the install hosts two or more servers
+ * (Rule 12). The list panel, its rows, the panels and the delete dialog are
+ * the server tab's.
+ */
+exports.SiteHighlightsTab = class SiteHighlightsTab extends exports.HighlightsTab {
+    /** @param {import('@playwright/test').Page} page */
+    constructor(page) {
+        super(page, 'index');
+    }
+
+    /** Open the Site Settings, the "Site Setup" tab when it is not current, then "Highlights". */
+    async goto() {
+        await this.page.goto('/index.php/index/en/admin/settings');
+        const setupTab = this.page.locator('#setup-button').first();
+        await expect(setupTab).toBeVisible({timeout: T});
+        if ((await setupTab.getAttribute('aria-selected')) !== 'true') {
+            await setupTab.click();
+        }
+        await this.sideTab().click();
+        await expect(this.panel()).toBeVisible({timeout: T});
+    }
+
+    /** The Site Setup side tab "Highlights". */
+    sideTab() {
+        return this.page.getByRole('tab', {name: 'Highlights', exact: true}).first();
+    }
+};
+
+/**
+ * A page notice at the top right (`.app__notifications .pkpNotification`,
+ * patterns.md pitfall 14c) carrying `text`. A Vue form's refusal notice is
+ * raised in the page itself, not fetched, so a scratch account reads it
+ * safely (parallel lesson 2).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} text
+ */
+exports.pageNotice = function pageNotice(page, text) {
+    return page.locator('.app__notifications .pkpNotification').filter({hasText: text});
+};
+
 const HighlightPanel = class HighlightPanel {
     /**
      * @param {import('@playwright/test').Page} page
@@ -251,6 +299,14 @@ const HighlightPanel = class HighlightPanel {
     /** A field's label element (its text carries "{Field} in French" on a second language). */
     label(field) {
         return field.locator('label.pkpFormFieldLabel').first();
+    }
+
+    /**
+     * A multilingual box's "{n}/2 languages completed" (`.multilingualProgress`,
+     * a screen-reader text beside its icon; Fields).
+     */
+    languageCount(field) {
+        return field.locator('.multilingualProgress');
     }
 
     /** The field's message under its box (`.pkpFieldError`). */
@@ -448,5 +504,10 @@ exports.carousel = function carousel(page) {
          * carousel first, then the archive header and "Latest preprints".
          */
         pageBlocks: page.locator('.pkp_structure_main > div.page_index_server > div'),
+        /**
+         * The site's home page's blocks (`div.page_index_site`'s children):
+         * the site's carousel first, then the list of servers (Rule 13).
+         */
+        siteBlocks: page.locator('.pkp_structure_main > div.page_index_site > div'),
     };
 };

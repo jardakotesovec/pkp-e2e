@@ -13,13 +13,8 @@
  * Spec: docs/specs/U11-highlights.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞
- * (S2 never presses ordering mode's "Cancel"), A2 ❓ (every "URL" typed is
- * a full web address), A3 🐞 (no title carries formatting), A4 🐞 (S1
- * closes no panel without "Save"; S4's refused edit ends the test), A5 🐞
- * (the site's Highlights tab is never opened; no site highlight is seeded
- * or asserted), A6 ❓ (S3 reads which dot is on and presses none), A8 ❓,
- * A9 ❓ (S1 replaces no image).
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
+ * A2 ❓, A3 🐞, A4 🐞, A6 ❓, A8 ❓, A9 ❓, A10 🐞, A11 🐞, A12 🐞.
  * The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only. Every scenario runs on a scratch server
@@ -27,7 +22,11 @@
  * so every highlight is added through the "Add Highlight" panel, the
  * surface under test. Scenario 4's second form language comes from the
  * context passthrough `supportedFormLocales` (scenarios.md "POST
- * scenarios/context"), never from the Languages screen. The suite asserts
+ * scenarios/context"), never from the Languages screen; its site bullet
+ * signs in as `admin` on the site's own Highlights tab, which the scratch
+ * server (the install's second) brings out, and deletes its one site
+ * highlight before the test ends, so the shared site's home page carries a
+ * carousel only for those few steps (footnote s4). The suite asserts
  * the slide's `<img>`, its alternate text and the stored file under the
  * server's public files directory, not the rendered picture (which loads
  * on the test installs since the 2026-11-06 drift sweep, footnote g). Signed-out
@@ -46,7 +45,7 @@
 const fs = require('fs');
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
-const {HighlightsTab, carousel} = require('../pages/HighlightsPages.js');
+const {HighlightsTab, SiteHighlightsTab, carousel, pageNotice} = require('../pages/HighlightsPages.js');
 const {PublicationScreen, openWorkflow, addDiscussion} = require('../pages/PublicationPages.js');
 const {TasksPanel} = require('../../../../shared/playwright/pages/NotificationsPages.js');
 
@@ -55,6 +54,8 @@ const PNG = path.resolve(__dirname, '../fixtures/files/profile-image-400.png');
 const REQUIRED = 'This field is required.';
 const ACCESS_DENIED = 'The current role does not have access to this operation.';
 const TYPE_REFUSED = "You can't upload files of this type.";
+const NOT_SAVED_THREE = 'The form was not saved because 3 error(s) were encountered. Please correct these errors and try again.';
+const LANGUAGES_NONE = '0/2 languages completed';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -152,7 +153,16 @@ test.describe('highlights', () => {
         await expect(panel.label(panel.urlField())).toHaveText(/^\s*URL\s*$/);
         await expect(panel.label(panel.buttonLabelField())).toHaveText(/^\s*Button Label\s*$/);
         await expect(panel.label(panel.imageField())).toHaveText(/^\s*Image\s*$/);
+        // The page notice (Fields): armed before the press, since it stands
+        // for a few seconds only; none stood before it, and it goes on its
+        // own (which also uncovers the panel's boxes under it).
+        const notice = pageNotice(page, NOT_SAVED_THREE);
+        await expect(notice).toHaveCount(0);
+        const noticeShown = expect(notice).toBeVisible({timeout: 30_000});
+        noticeShown.catch(() => {});
         await panel.saveRefused('Please correct 3 errors.');
+        await noticeShown;
+        await expect(notice).toHaveText(new RegExp(`^\\s*${NOT_SAVED_THREE.replace(/[.()]/g, '\\$&')}\\s*(×\\s*Close)?\\s*$`));
         await expect(panel.errorLink(`Go to Title: ${REQUIRED}`)).toBeVisible();
         await expect(panel.errorLink(`Go to URL: ${REQUIRED}`)).toBeVisible();
         await expect(panel.errorLink(`Go to Button Label: ${REQUIRED}`)).toBeVisible();
@@ -162,6 +172,7 @@ test.describe('highlights', () => {
         await expect(panel.fieldError(panel.buttonLabelField())).toHaveText(REQUIRED);
         await expect(panel.fieldError(panel.descriptionField())).toHaveCount(0);
         await expect(panel.fieldError(panel.imageField())).toHaveCount(0);
+        await expect(notice).toHaveCount(0, {timeout: 30_000});
 
         // The first highlight: Save closes the panel and "Call for papers"
         // is the only row, with no reload; signed out, the slide is the
@@ -582,6 +593,17 @@ test.describe('highlights', () => {
         await expect(panel.label(panel.buttonLabelField('fr_CA'))).toContainText('Button Label in French');
         await expect(panel.buttonLabelInput('fr_CA')).toBeVisible();
 
+        // The language counts: each of the six boxes, English and French,
+        // carries "0/2 languages completed"; "URL" and "Image", single
+        // boxes, carry none (Fields; Rule 11).
+        for (const locale of ['en', 'fr_CA']) {
+            for (const field of [panel.titleField(locale), panel.descriptionField(locale), panel.buttonLabelField(locale)]) {
+                await expect(panel.languageCount(field)).toHaveText(LANGUAGES_NONE);
+            }
+        }
+        await expect(panel.languageCount(panel.urlField())).toHaveCount(0);
+        await expect(panel.languageCount(panel.imageField())).toHaveCount(0);
+
         // A French-only save refused: "Please correct 2 errors." with the
         // message under "Title" and under "Button Label" (Fields; Rule 11).
         await panel.typeTitle('Appel à contributions', 'fr_CA');
@@ -633,5 +655,93 @@ test.describe('highlights', () => {
         await panel.saveRefused('Please correct one error.');
         await expect(panel.fieldError(panel.titleField())).toHaveText('You must complete this field in English.');
         await expect(panel.fieldError(panel.buttonLabelField())).toHaveCount(0);
+
+        // The site's highlights, Site Administrator (Rules 3, 4, 5, 6, 8,
+        // 11, 13; footnote s4). The site's list and home page are shared by
+        // every test on the install, so the bullet is kept short and its
+        // highlight is deleted before the test ends, by the bullet itself
+        // or, on a failure, by the clean-up below. The scratch server
+        // seeded above is the second server that shows the site's tab and
+        // opens the site's home page (Rule 12).
+        const admin = await (await asUser('admin')).newPage();
+        const site = new SiteHighlightsTab(admin);
+        let siteClean = false;
+        try {
+            // The given: the site holds no highlights of its own.
+            await site.goto();
+            await expect(site.emptyMessage()).toBeVisible();
+            await expect(site.rows()).toHaveCount(0);
+
+            // "Add Highlight" and the language button: the French boxes
+            // (the site's English and French).
+            panel = await site.openAdd();
+            await expect(panel.titleField('fr_CA')).toBeHidden();
+            await panel.localeButton('French').click();
+            await expect(panel.titleField('fr_CA')).toBeVisible();
+            await expect(panel.label(panel.titleField('fr_CA'))).toContainText('Title in French');
+            await expect(panel.label(panel.descriptionField('fr_CA'))).toContainText('Description in French');
+            await expect(panel.label(panel.buttonLabelField('fr_CA'))).toContainText('Button Label in French');
+
+            // Saved in both languages: the panel closes and "Site news" is
+            // the list's only row.
+            await panel.typeTitle('Site news');
+            await panel.typeTitle('Nouvelles du site', 'fr_CA');
+            await panel.urlInput().fill('https://example.org/site');
+            await panel.buttonLabelInput().fill('Read');
+            await panel.buttonLabelInput('fr_CA').fill('Lire');
+            await panel.save();
+            await expect(site.rows()).toHaveCount(1);
+            await expect(site.row('Site news')).toBeVisible();
+            await expect(site.emptyMessage()).toHaveCount(0);
+
+            // Signed out, the site's address opens the site's home page:
+            // the carousel above the list of servers, one slide "Site news"
+            // with a "Read" button, without arrows or a dot.
+            await visitor.goto('/index.php/index');
+            await expect(home.siteBlocks.last()).toHaveClass(/servers/, {timeout: 30_000});
+            await expect(home.siteBlocks).toHaveCount(2);
+            await expect(home.siteBlocks.first()).toHaveClass(/highlights/);
+            await expect(home.slides).toHaveCount(1);
+            await expect(home.titleOf(home.slide(0))).toHaveText('Site news');
+            await expect(home.buttonOf(home.slide(0))).toHaveText('Read');
+            await expect(home.buttonOf(home.slide(0))).toHaveAttribute('href', 'https://example.org/site');
+            await expect(home.prev).toBeHidden();
+            await expect(home.next).toBeHidden();
+            await expect(home.dots.first()).toBeHidden();
+
+            // "Edit" and the language button read the French back; the
+            // panel's close control closes it.
+            panel = await site.openEdit('Site news');
+            await panel.expectTitleText('Site news');
+            await panel.localeButton('French').click();
+            await panel.expectTitleText('Nouvelles du site', 'fr_CA');
+            await expect(panel.buttonLabelInput('fr_CA')).toHaveValue('Lire');
+            await panel.close();
+
+            // Deleted: the list reads "No items found." and, signed out,
+            // the site's home page carries no carousel, the list of
+            // servers (the positive read) moving up.
+            await site.deleteButton('Site news').click();
+            await expect(site.deleteDialog()).toContainText(
+                'Are you sure you want to delete Site news? This action can not be undone.'
+            );
+            await site.confirmDelete();
+            siteClean = true;
+            await expect(site.rows()).toHaveCount(0);
+            await expect(site.emptyMessage()).toBeVisible();
+            await visitor.goto('/index.php/index');
+            await expect(home.siteBlocks.first()).toHaveClass(/servers/, {timeout: 30_000});
+            await expect(home.siteBlocks).toHaveCount(1);
+            await expect(home.block).toHaveCount(0);
+        } finally {
+            if (!siteClean) {
+                // A failure above leaves the shared site's highlight: delete it.
+                await site.goto();
+                while ((await site.row('Site news').count()) > 0) {
+                    await site.deleteButton('Site news').first().click();
+                    await site.confirmDelete();
+                }
+            }
+        }
     });
 });

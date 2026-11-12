@@ -55,8 +55,10 @@ seconds. "Title", "Description" and "Button Label" are entered per
 language when the form has more than one: a language button at the top
 of the panel shows the second language's boxes, labelled "{Field} in
 {language}" (Rule 11). With two form languages each of these boxes, in
-either language, carries "{n}/2 languages completed" under it, n being
-how many of the two languages are filled. <sup>d</sup> <sup>e</sup>
+either language, carries a globe icon at its start (inside the left edge
+of "Button Label"); pointing at it shows "{n}/2 languages completed", and
+a screen reader hears the same, n being how many of the two languages are
+filled. <sup>d</sup> <sup>e</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
@@ -274,6 +276,9 @@ address are in its footnote.
      is required." and a "Jump to next error" button, "This field is
      required." sits under each of the three fields, and "Save" is grayed
      out (Fields).
+   - **The page notice**: at that same "Save", a notice on the page reads
+     "The form was not saved because 3 error(s) were encountered. Please
+     correct these errors and try again." for a few seconds (Fields).
    - **The first highlight**: type "Call for papers" in "Title",
      "Submissions open until June." in "Description",
      "https://example.org/cfp" in "URL" and "Read more" in "Button Label",
@@ -381,15 +386,21 @@ address are in its footnote.
 
 4. **Highlights in a second language**
 
-   Given: Journal Manager, on a scratch journal that offers its visitors
-   French beside English and has French ticked under "Forms" on Settings ›
-   Website › Setup › Languages, with one highlight "Call for papers"
-   (button "Read more") entered in English only.
+   Given: Journal Manager and the Site Administrator, on a site with
+   English and French and no highlights of its own, hosting the seeded
+   journal and a scratch journal that offers its visitors French beside
+   English, has French ticked under "Forms" on Settings › Website › Setup
+   › Languages and holds one highlight "Call for papers" (button "Read
+   more") entered in English only.
 
    - **The two-language panel**: on Settings › Website › Setup › Highlights
      press "Add Highlight" and press the language button at the top of
      the panel: it shows the boxes "Title in French", "Description in
      French" and "Button Label in French" (Fields; Rule 11).
+   - **The language counts**: each of the six boxes, "Title",
+     "Description" and "Button Label" and their French boxes, carries the
+     globe icon, and pointing at each icon shows "0/2 languages
+     completed" (Fields; Rule 11).
    - **A French-only save refused**: type "Appel à contributions" in
      "Title in French", "Lire" in "Button Label in French" and
      "https://example.org/appel" in "URL", leave "Title" and "Button
@@ -413,6 +424,23 @@ address are in its footnote.
      "Save": the panel
      stays open with "You must complete this field in English." under
      "Title" (Fields "Title").
+   - **The site's highlights, Site Administrator**: open Administration ›
+     Site Settings › Site Setup › Highlights, press "Add Highlight" and
+     press the language button at the top of the panel: it shows "Title
+     in French", "Description in French" and "Button Label in French";
+     type "Site news" in "Title", "Nouvelles du site" in "Title in
+     French", "https://example.org/site" in "URL", "Read" in "Button
+     Label" and "Lire" in "Button Label in French" and press "Save" (on
+     3.5 nothing can be saved here [A5](#a5)): the panel closes and "Site
+     news" is the list's only row; signed out, the site's address opens
+     the site's home page with a carousel above the list of journals, its
+     one slide reading "Site news" with a "Read" button, without arrows or
+     a dot; press "Edit" on "Site news" and the language button: "Title
+     in French" reads "Nouvelles du site" and "Button Label in French"
+     "Lire"; close the panel with its close control, press "Delete" on
+     "Site news", then "Yes": the list reads "No items found." and, signed
+     out, the site's home page carries no carousel (Rules 3, 4, 5, 6, 8,
+     11, 13).
    - **Control**: signed out, the home page in English shows "Second call"
      with the button "Read on" (Rule 11). <sup>s4</sup>
 
@@ -443,14 +471,6 @@ Left out of the scenarios above, by reason:
     `main`): the Site Administrator adds and orders a site
     highlight on a two-journal site, and a signed-out visitor sees it as
     the site's carousel with its button [other 2026-11-05]
-  - "Title" and "Button Label" entered in a second language at site scope
-    (Rule 11), possible on `main` since A5's fix [other 2026-11-05]
-  - the page notice a refused save shows (Fields): scenario 1's empty
-    save also reading "The form was not saved because 3 error(s) were
-    encountered. Please correct these errors and try again." [sweep 2026-11-06]
-  - "{n}/2 languages completed" under "Title", "Description" and "Button
-    Label" with two form languages (Fields; Rule 11): scenario 4's
-    two-language panel reading "0/2 languages completed" under each box [sweep 2026-11-06]
 - **Nothing new to test**:
   - a file over the server's upload limit refused in the "Image" box
     (Fields): the same box's refusal scenario 1 meets with a text file,
@@ -819,8 +839,15 @@ these errors and try again." (n = 3, 1, 2, 1, 1); with French under
 "Forms" every "Title", "Description" and "Button Label" box of "Add
 Highlight", English and French, carried `form.multilingualProgress`
 "0/2 languages completed", and an "Edit Highlight" with the English
-"Title" and "Button Label" filled read "1/2 languages completed" under
-those two and "0/2" under "Description".
+"Title" and "Button Label" filled read "1/2 languages completed" for
+those two and "0/2" for "Description". Test run 2026-11-12 (Fields), OJS:
+the count is not a printed line; it is a `.-screenReader` span inside an
+`aria-hidden` globe icon button at the box's start (20×24 at the left of
+"Title" and "Description", 40×40 over the left edge of "Button Label"),
+and hovering the icon shows the tooltip "0/2 languages completed" on all
+six boxes; filling "Button Label" turned it to "1/2 languages completed".
+OMP and OPS read the same count text on the six boxes (the shared
+`pkp-lib` form component).
 
 <a id="fn-e"></a>
 **e — validation and the unchecked URL.** `Repository::validate()` runs
@@ -1131,7 +1158,17 @@ journal `publicknowledge`'s home page signed out.
 seed-facts), `context.supportedFormLocales: ['en', 'fr_CA']` (French
 under "Forms" too; scenarios.md "POST scenarios/context") and the
 `manager`. The English-only highlight is added through the panel after
-the seed. The French pages are the `/fr_CA/` addresses (note l).
+the seed. The French pages are the `/fr_CA/` addresses (note l). The Site
+Administrator is `admin` (password `admin`), enrolled as a manager in
+every scratch context (seed-facts); the scratch context beside
+`publicknowledge` is what shows the site's tab and opens the site's home
+page (notes c, k). The site's languages are the install's `en,fr_CA`
+(note d). The site's tab is `admin/settings#highlights` under the site's
+`index` path (note c), its home page `index/` (note k). The site's
+highlights are shared by every test on the install, so the bullet deletes
+its highlight before it ends and the suite runs it apart from tests that
+read the site's home page. On 3.5 the site's save fails (A5): the bullet
+runs on `main` alone.
 
 <a id="fn-f-a1"></a>
 **f-a1 — A1 evidence.** `HighlightsListPanel.vue`, the "Cancel" button in

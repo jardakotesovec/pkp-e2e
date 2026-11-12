@@ -12,12 +12,15 @@
  * - HighlightsTab — Settings › Website › Setup › Highlights: the list panel
  *   (rows, "No items found.", "Order" / "Save Order" / "Cancel" / "Add
  *   Highlight"), the ordering arrows and the "Delete Highlight" dialog.
+ * - SiteHighlightsTab — the same list on Administration › Site Settings ›
+ *   Site Setup › Highlights (the site's own highlights).
  * - HighlightPanel — the "Add Highlight" / "Edit Highlight" side panel:
  *   its five fields (the TinyMCE "Title" and "Description", "URL", "Button
  *   Label", the "Image" dropzone with its preview, "Alternate text",
  *   "Remove" and "Restore Original"), the language toggle, the refusal
- *   summary and "Save" / "Close".
- * - HomeCarousel — the press home page's carousel: the block, its slides
+ *   summary, the language counts, the page's notice and "Save" / "Close".
+ * - HomeCarousel — the press home page's carousel (and the site's, on the
+ *   site's home page above the list of presses): the block, its slides
  *   (headline, description, button, picture), the arrows and the dots.
  *
  * Labels are the live locale strings; DOM shapes from lib/ui-library
@@ -218,6 +221,39 @@ exports.HighlightsTab = class HighlightsTab {
     }
 };
 
+/**
+ * The site's Highlights tab: Administration › Site Settings › "Site Setup"
+ * › "Highlights" (`/index.php/index/<locale>/admin/settings`), offered on a
+ * site with two or more presses (Rule 12). The list panel, its panel and
+ * dialog are the press tab's; only the way in differs. The admin page has
+ * two `#setup-button` tabs (the top "Site Setup" and Appearance's inner
+ * "Setup"), so the top tab is taken by its name and the side tab inside
+ * the first `#setup` panel.
+ */
+exports.SiteHighlightsTab = class SiteHighlightsTab extends exports.HighlightsTab {
+    /** Open the Site Settings and the "Highlights" side tab under "Site Setup". */
+    async goto({locale = 'en'} = {}) {
+        await this.page.goto(`/index.php/index/${locale}/admin/settings`);
+        await this.openTab();
+    }
+
+    /** Select "Site Setup" › "Highlights" on the Site Settings page already open. */
+    async openTab() {
+        const setupTab = this.page.getByRole('tab', {name: 'Site Setup', exact: true});
+        await expect(setupTab).toBeVisible({timeout: T});
+        if ((await setupTab.getAttribute('aria-selected')) !== 'true') {
+            await setupTab.click();
+        }
+        await this.sideTab().click();
+        await expect(this.panel()).toBeVisible({timeout: T});
+    }
+
+    /** The "Highlights" side tab under "Site Setup". */
+    sideTab() {
+        return this.page.locator('#setup').first().locator('#highlights-button');
+    }
+};
+
 exports.HighlightPanel = class HighlightPanel {
     /**
      * @param {import('@playwright/test').Page} page
@@ -289,6 +325,24 @@ exports.HighlightPanel = class HighlightPanel {
     /** A field's inline error. */
     fieldError(field) {
         return field.locator('.pkpFieldError');
+    }
+
+    /**
+     * A localized field's language count ("{n}/2 languages completed"): the
+     * MultilingualProgress globe beside the box, whose text is read to a
+     * screen reader and shown as its tooltip.
+     */
+    languageCount(field) {
+        return field.locator('.multilingualProgress');
+    }
+
+    /**
+     * The page's notice (the app's notification area, not the panel) whose
+     * text holds `text`: a refused save also shows "The form was not saved
+     * because {n} error(s) were encountered. …" there for a few seconds.
+     */
+    pageNotice(text) {
+        return this.page.locator('.app__notifications .pkpNotification').filter({hasText: text});
     }
 
     /** The refusal summary above "Save" ("Please correct {n} errors." and its buttons). */
@@ -477,6 +531,19 @@ exports.HomeCarousel = class HomeCarousel {
     /** The first block of the page (skipping the anchor the theme puts first). */
     firstBlock() {
         return this.pageBlock().locator('> :not(a)').first();
+    }
+
+    /**
+     * On the site's home page (`goto('index')`), the list of presses, when it
+     * comes after the carousel in the page's content block (Rule 13).
+     */
+    pressListAfterCarousel() {
+        return this.pageBlock().locator('> .highlights ~ .presses');
+    }
+
+    /** On the site's home page, the list of presses ("Presses"). */
+    pressList() {
+        return this.pageBlock().locator('> .presses');
     }
 
     /** The carousel block (absent while the list is empty). */

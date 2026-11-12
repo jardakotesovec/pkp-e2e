@@ -15,8 +15,14 @@
  *   "Button Label" boxes (one per form language), the "Image" dropzone with
  *   its preview, "Alternate text", "Remove" and "Restore Original", the
  *   language buttons at the top, the error summary and "Save".
+ * - SiteHighlightsTab — the same list on Administration › Site Settings ›
+ *   Site Setup › Highlights (`index/admin/settings#highlights`), the Site
+ *   Administrator's; its panel is the same HighlightPanel.
  * - carousel(page) — the home page's `.highlights` block: slides, arrows,
- *   dots.
+ *   dots (the journal's home page or the site's).
+ * - pageNotice(page, text) — a notice of the page's own
+ *   (`.app__notifications`), such as a refused save's "The form was not
+ *   saved because …".
  *
  * Labels are the live locale strings; DOM shapes from lib/ui-library
  * src/components/ListPanel/highlights/*, src/components/Form/fields/
@@ -201,6 +207,36 @@ exports.HighlightsTab = class HighlightsTab {
     }
 };
 
+/**
+ * The site's list (Site Settings › Site Setup › Highlights), the Site
+ * Administrator's: the same list panel and HighlightPanel as a journal's.
+ * The Site Settings carry two `#setup-button` (the outer "Site Setup" tab
+ * comes first).
+ */
+exports.SiteHighlightsTab = class SiteHighlightsTab extends exports.HighlightsTab {
+    /** @param {import('@playwright/test').Page} page */
+    constructor(page) {
+        super(page, 'index');
+    }
+
+    /** Open the Site Settings, the outer "Site Setup" tab, then "Highlights". */
+    async goto({locale = 'en'} = {}) {
+        await this.page.goto(`/index.php/index/${locale}/admin/settings`);
+        const setupTab = this.page.locator('#setup-button').first();
+        await expect(setupTab).toBeVisible({timeout: T});
+        if ((await setupTab.getAttribute('aria-selected')) !== 'true') {
+            await setupTab.click();
+        }
+        await this.sideTab().click();
+        await expect(this.panel()).toBeVisible({timeout: T});
+    }
+
+    /** The "Highlights" side tab of "Site Setup". */
+    sideTab() {
+        return this.page.getByRole('tab', {name: 'Highlights', exact: true}).first();
+    }
+};
+
 const HighlightPanel = class HighlightPanel {
     /**
      * @param {import('@playwright/test').Page} page
@@ -306,6 +342,31 @@ const HighlightPanel = class HighlightPanel {
      */
     async expectTitleText(text, locale = 'en') {
         await expect(await this.richBody(this.titleField(locale))).toHaveText(text, {timeout: T});
+    }
+
+    /**
+     * The "{n}/2 languages completed" line under a per-language box
+     * (`title`, `description` or `urlText`, the "Button Label").
+     *
+     * @param {'title' | 'description' | 'urlText'} name
+     * @param {string} locale
+     */
+    languageCount(name, locale = 'en') {
+        return this.dialog.locator(`#highlight-${name}-multilingualProgress-${locale}`);
+    }
+
+    /**
+     * The globe icon that carries a box's language count: at the start of
+     * a rich-text box, inside the left edge of a plain one; its text is the
+     * screen reader's and the hover tooltip's, never printed.
+     */
+    languageCountIcon(name, locale = 'en') {
+        return this.languageCount(name, locale).locator('button');
+    }
+
+    /** The hover tooltip reading `text` (a `v-popper` popper on the body). */
+    tooltip(text) {
+        return this.page.locator('.v-popper__popper').filter({hasText: text});
     }
 
     /** The language button at the top of a two-language panel ("French"). */
@@ -440,5 +501,18 @@ exports.carousel = function carousel(page) {
         activeDot: block.locator('.swiper-pagination-bullet-active'),
         /** The home page's block that holds the carousel and its siblings (`div.page_index_journal`). */
         pageBlocks: page.locator('.pkp_structure_main > div.page_index_journal > div'),
+        /** The site's home page's blocks (`div.page_index_site`: the carousel, then the journals). */
+        siteBlocks: page.locator('.pkp_structure_main > div.page_index_site > div'),
     };
+};
+
+/**
+ * A notice of the page's own reading `text` (`.app__notifications`): it
+ * shows for a few seconds, so it is read right after the action.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} text
+ */
+exports.pageNotice = function pageNotice(page, text) {
+    return page.locator('.app__notifications .pkpNotification').filter({hasText: text});
 };
