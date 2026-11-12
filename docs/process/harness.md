@@ -1027,7 +1027,10 @@ must not share its fleet with another runner. A run with a filter (file or folde
 `--grep-invert`, `--last-failed`, `--only-changed`) skips both resets,
 because filtered runs are the ones that share a fleet (a test author
 beside the harness agent); `--no-reset` skips them on a whole-suite run
-too. The app pass's database is gone after the run; its error contexts
+too. Two runs of one app at once share its worker servers as well, and
+the run that started them stops them when it ends, so the other fails
+mid-run ("An unexpected error has occurred"): one app's runs go one at
+a time. The app pass's database is gone after the run; its error contexts
 and traces stay in `<out>/app`.
 
 A run longer than about four minutes outlives the prompt cache of the agent

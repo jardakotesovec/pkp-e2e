@@ -302,7 +302,7 @@ abstract class PKPUsageStatsSeeder
             return;
         }
         $publication = $submission->getCurrentPublication();
-        if ((int) $publication->getData('status') !== \PKP\publication\PKPPublication::STATUS_PUBLISHED) {
+        if ((int) $publication->getData('status') !== \PKP\submission\PKPSubmission::STATUS_PUBLISHED) {
             throw new SpecException('usage', 'The version is not published (an issue not yet published schedules it), and the listener records visits to a published version only');
         }
         [$page, $viewOp] = $this->workPage();

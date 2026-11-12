@@ -1018,7 +1018,7 @@ abstract class PKPSubmissionScenarioBuilder
                 $lastRound = $reviewRoundDao->getLastReviewRoundBySubmissionId($submissionId, $plan['stageId']);
                 $roundNumber = $lastRound ? $lastRound->getRound() + 1 : 1;
                 $publicationId = $submission->getData('publications')
-                    ->filter(fn ($publication) => $publication->getData('status') !== \PKP\publication\PKPPublication::STATUS_PUBLISHED)
+                    ->filter(fn ($publication) => $publication->getData('status') !== \PKP\submission\PKPSubmission::STATUS_PUBLISHED)
                     ->reduce(fn ($a, $b) => $a && $a->getId() > $b->getId() ? $a : $b)
                     ?->getId();
                 $round = $reviewRoundDao->build(
