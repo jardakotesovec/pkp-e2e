@@ -3,7 +3,8 @@
  * @file playwright/tests/U49-publish-schedule-and-versions.spec.js
  *
  * Publish, schedule & versions — OMP suite: one test per canonical scenario
- * the spec runs on a press (S1–S10 common, S14 {OMP}, S17–S18 {OJS OMP}),
+ * the spec runs on a press (S1–S10 and S19 common, S14 {OMP}, S17–S18
+ * {OJS OMP}),
  * in the press's own vocabulary: Press Manager, monograph, catalog book
  * page, the "Publish" button whose confirmation window is titled "Schedule
  * For Publication", scheduling by a future "Date Published" on the Catalog
@@ -16,20 +17,22 @@
  * Spec: docs/specs/U49-publish-schedule-and-versions.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A5 🐞
- * (S5 fills and publishes a Summary of Changes without asserting the
- * amendment notice either way), A6 🐞 (S4 asserts the reader page's date
- * line only BEFORE the draft, never the rewritten line after it), A1 ❓,
- * A2 ❓ (S8 asserts the on-screen absence only), A3 ❓, A4 ❓ (S6 never
- * asserts the re-selection), A7 ❓, OMP1 ❓ (S9 and S14 assert the window's
- * wording as the scenario's own sentence, nothing about its promise),
- * OJS1–OJS3, OPS1–OPS5 (other apps). The spec's Coverage section records
- * everything else left out.
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
+ * A5 🐞 (S5 publishes a Summary of Changes without asserting the amendment
+ * notice either way), A6 🐞 (S4 reads the date line only before the
+ * draft), A10, A12, A14–A17 🐞 (French screens, versions made by program),
+ * A18 🐞 (S4 seeds no publication format, so no upload line), A1 ❓, A2 ❓
+ * (S8 asserts the on-screen absence only), A3 ❓, A4 ❓, A7 ❓ (S1 asserts
+ * the stage sentence as the scenario's own line, nothing about its
+ * meaning), A9 ❓, A13 ❓, OMP1 ❓ (S9 and S14 assert the window's wording
+ * only); OJS2, OJS4–OJS7, OPS1–OPS6 (other apps).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (A1, A7): the mailbox- and profile-scoped tests (S1, S3,
  * S4, S5, S14) run on scratch presses with throwaway users whose addresses
- * carry app + test (u49omps1w0…@mail.test); the rest only add their own
+ * carry app + test (u49omps1w0…@mail.test), and S19 on a scratch press
+ * with ORCID enabled (`orcid: {enabled: true}`); the rest only add their own
  * tagged submissions to publicknowledge. Mailpit reads are scoped by those
  * recipients (A8); every absence claim is a settled read paired with a
  * positive control taken the same way, and every mailbox silence is
@@ -443,19 +446,26 @@ test.describe('Publish, schedule & versions (U49)', () => {
 
         // The publish button reads "Publish"; its confirmation window is
         // titled "Schedule For Publication" even on a press (Rule 2), states
-        // all requirements are met, names the version to be assigned and
-        // carries the requirement-shaped stage sentence under the all-met
-        // line (the scenario's own sentence; A7's verdict is parked).
+        // all requirements are met and, on a press, carries the stage
+        // sentence (A7, the scenario's own line; its verdict is parked) and
+        // the stage version line instead of "The publication version is …"
+        // (Rule 4). The stage line read first is the settled bound of that
+        // absence.
         const modal = await openPublishModal(managerPage);
         await expect(
             modal.getByText('All publication requirements have been met.')
         ).toBeVisible();
-        await expect(modal.getByText('Version of Record 1.0').first()).toBeVisible();
         await expect(
             modal.getByText(
                 'The publication must have a version stage assigned before it can be published.'
             )
         ).toBeVisible();
+        await expect(
+            modal.getByText(
+                'The stage version that will be assigned to the publication is "Version of Record 1.0"'
+            )
+        ).toBeVisible();
+        await expect(modal.getByText('The publication version is')).toHaveCount(0);
         await confirmPublish(managerPage, modal);
         await expectStatus(managerPage, 'Published');
 
@@ -559,28 +569,43 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expect(controlModal).toHaveCount(0, {timeout: 30_000});
     });
 
-    test('S3: unpublish takes the book down and clears the author notice', async ({asUser, ompApi, page}, testInfo) => {
-        test.setTimeout(240_000);
+    test('S3: unpublish takes the book down, clears the author notice, and an earlier version unpublishes alone', async ({asUser, ompApi, page}, testInfo) => {
+        test.setTimeout(300_000);
         const tag = makeTag('s3', testInfo);
+        const title = `Submission ${tag}`;
+        const secondTitle = `Second ${tag}`;
         await ompApi.createContext({tag, users: scratchUsers(tag)});
-        const {submissionId} = await ompApi.createSubmission({
-            tag: `${tag}s`,
-            context: tag,
-            submitter: `${tag}au`,
-            title: `Submission ${tag}`,
-            decisions: ['skipExternalReview', 'sendToProduction'],
-            published: true,
-        });
+        // The second submission (same Author) gets its second version on
+        // screen below (footnote s3: no key makes one); its notices are the
+        // Author's Tasks' positive control.
+        const [{submissionId}, second] = await Promise.all([
+            ompApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: `${tag}au`,
+                title,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+                published: true,
+            }),
+            ompApi.createSubmission({
+                tag: `${tag}t`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: secondTitle,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+                published: true,
+            }),
+        ]);
 
         // Control: the author's task notice exists and the catalog page is
         // live before the unpublish.
         const authorPage = await (await asUser(`${tag}au`)).newPage();
         const tasksBefore = await openTasks(authorPage, tag, {author: true});
-        await expect(
-            tasksBefore.getByText(publishedNotice(`Submission ${tag}`))
-        ).toBeVisible({timeout: 30_000});
+        await expect(tasksBefore.getByText(publishedNotice(title))).toBeVisible({
+            timeout: 30_000,
+        });
         await page.goto(bookUrl(tag, submissionId));
-        await expect(page.getByText(`Submission ${tag}`).first()).toBeVisible({
+        await expect(page.getByText(title).first()).toBeVisible({
             timeout: 30_000,
         });
 
@@ -602,14 +627,75 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expectLogLine(managerPage, 'The submission was unpublished.');
         await expectLogLine(managerPage, /returned this submission to the workflow\./);
 
-        // The author's task notice is gone too: their Tasks read "No Items".
+        // The author's task notice naming this submission is gone; the
+        // second submission's notice, read in the same list, is its
+        // settled positive control.
         const tasksAfter = await openTasks(authorPage, tag, {author: true});
-        await expect(tasksAfter.getByText('No Items')).toBeVisible({
+        await expect(tasksAfter.getByText(publishedNotice(secondTitle))).toBeVisible({
             timeout: 30_000,
         });
+        await expect(tasksAfter.getByText(publishedNotice(title))).toHaveCount(0);
+
+        // The earlier of two published versions (Rule 9a): the second
+        // submission gets "Version of Record 1.1" from an untouched "Create
+        // New Version", with an abstract of its own, published from the
+        // window that opens directly on a press.
+        await openWorkflow(managerPage, tag, second.submissionId);
+        const dialog = await openCreateVersionDialog(managerPage);
+        const newPubId = await confirmCreateVersion(managerPage, dialog);
         await expect(
-            tasksAfter.getByText(publishedNotice(`Submission ${tag}`))
-        ).toHaveCount(0);
+            managerPage.getByRole('link', {name: 'Version of Record 1.1', exact: true})
+        ).toBeVisible({timeout: 30_000});
+        await expect(
+            managerPage.getByRole('heading', {name: 'Publication: Title & Abstract'})
+        ).toBeVisible({timeout: 30_000});
+        await expectStatus(managerPage, 'Unpublished');
+        const abstractBody = richBody(managerPage, /^Abstract/);
+        await abstractBody.click();
+        await abstractBody.fill(`V2 abstract ${tag}`);
+        await abstractBody.blur();
+        await savePublicationForm(managerPage);
+        await publishFromWorkflow(managerPage);
+        await expectStatus(managerPage, 'Published');
+
+        // Open "Version of Record 1.0", press "Unpublish" and confirm: that
+        // version alone reads "Status: Unpublished", offering "Preview" and
+        // "Publish".
+        await openWorkflow(managerPage, tag, second.submissionId, {
+            menuKey: `publication_${second.publicationId}_titleAbstract`,
+        });
+        await expect(
+            managerPage.getByRole('heading', {name: 'Publication: Title & Abstract'})
+        ).toBeVisible({timeout: 30_000});
+        await expectStatus(managerPage, 'Published');
+        await unpublishFromWorkflow(managerPage);
+        await expectStatus(managerPage, 'Unpublished');
+        await expect(
+            rightControls(managerPage).getByRole('button', {name: 'Preview', exact: true})
+        ).toBeVisible({timeout: 30_000});
+        await expect(
+            rightControls(managerPage).getByRole('button', {name: 'Publish', exact: true})
+        ).toBeVisible();
+
+        // "Version of Record 1.1" still reads "Status: Published", with
+        // "Unpublish".
+        await openWorkflow(managerPage, tag, second.submissionId, {
+            menuKey: `publication_${newPubId}_titleAbstract`,
+        });
+        await expect(
+            managerPage.getByRole('heading', {name: 'Publication: Title & Abstract'})
+        ).toBeVisible({timeout: 30_000});
+        await expectStatus(managerPage, 'Published');
+        await expect(
+            managerPage.getByRole('button', {name: 'Unpublish', exact: true})
+        ).toBeVisible();
+
+        // Signed out, the reader page stays live as the later version: the
+        // 1.1 abstract is what it serves.
+        const live = await page.goto(bookUrl(tag, second.submissionId));
+        expect(live.status()).toBe(200);
+        await expect(page.getByText(secondTitle).first()).toBeVisible({timeout: 30_000});
+        await expect(page.getByText(`V2 abstract ${tag}`).first()).toBeVisible();
     });
 
     test('S4: create a new version — copy, notices, readers keep the old one', async ({asUser, ompApi, page, pkpMail}, testInfo) => {
@@ -1419,5 +1505,86 @@ test.describe('Publish, schedule & versions (U49)', () => {
         expect(await mdItems.count()).toBeGreaterThan(0);
         await expect(mdItems.filter({hasText: 'Send to Text Editor'})).toHaveCount(0);
         await closeMenu(managerPage);
+    });
+
+    test('S19: an unauthenticated ORCID iD warns, and the publish goes through', async ({asUser, ompApi, page}, testInfo) => {
+        test.setTimeout(240_000);
+        const tag = makeTag('s19', testInfo);
+        const title = `Orcid ${tag}`;
+        const controlTitle = `Plain ${tag}`;
+        const warningHead = 'The following issues were found, but will not prevent publishing';
+        const warningLine = 'Unauthenticated ORCiDs for contributors detected.';
+        // A scratch press with ORCID enabled (footnote s19: the "Public
+        // Sandbox" API and dummy credentials); the first submission's
+        // contributor holds ORCID's example iD unauthenticated, the
+        // second's none.
+        await ompApi.createContext({tag, orcid: {enabled: true}, users: scratchUsers(tag)});
+        const [{submissionId}, control] = await Promise.all([
+            ompApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: `${tag}au`,
+                title,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+                author: {orcid: '0000-0002-1825-0097', orcidIsVerified: false},
+            }),
+            ompApi.createSubmission({
+                tag: `${tag}c`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: controlTitle,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+            }),
+        ]);
+
+        // The warning: a press opens the window directly from "Publish"; it
+        // lists the unauthenticated line under the warning heading and,
+        // under the list, still the all-met text and its "Publish" button
+        // (Rule 4).
+        const managerPage = await (await asUser(`${tag}mg`)).newPage();
+        await openWorkflow(managerPage, tag, submissionId);
+        await openPublicationPage(managerPage, 'Title & Abstract');
+        await expectStatus(managerPage, 'Unscheduled');
+        const modal = await openPublishModal(managerPage);
+        await expect(modal.getByText(warningHead)).toBeVisible({timeout: 30_000});
+        await expect(modal.getByText(warningLine)).toBeVisible();
+        await expect(
+            modal.getByText('All publication requirements have been met.')
+        ).toBeVisible();
+        await expect(
+            modal.getByRole('button', {name: 'Publish', exact: true})
+        ).toBeVisible();
+
+        // Published: Confirm closes the window, the head reads "Status:
+        // Published" with "Unpublish", and no notice repeats the warning
+        // (read once the new state has settled; the window's line above is
+        // its positive control).
+        await confirmPublish(managerPage, modal);
+        await expect(modal).toHaveCount(0, {timeout: 30_000});
+        await expectStatus(managerPage, 'Published');
+        await expect(managerPage.getByText(warningLine)).toHaveCount(0);
+        await expect(managerPage.getByText(warningHead)).toHaveCount(0);
+
+        // The reader page is live (signed out).
+        const live = await page.goto(bookUrl(tag, submissionId));
+        expect(live.status()).toBe(200);
+        await expect(page.getByText(title).first()).toBeVisible({timeout: 30_000});
+
+        // Control: the second submission, taken the same way to its
+        // window, shows no warning list; the all-met text and its button
+        // are the settled bound. Closed without confirming.
+        await openWorkflow(managerPage, tag, control.submissionId);
+        await openPublicationPage(managerPage, 'Title & Abstract');
+        const controlModal = await openPublishModal(managerPage);
+        await expect(
+            controlModal.getByText('All publication requirements have been met.')
+        ).toBeVisible({timeout: 30_000});
+        await expect(
+            controlModal.getByRole('button', {name: 'Publish', exact: true})
+        ).toBeVisible();
+        await expect(controlModal.getByText(warningHead)).toHaveCount(0);
+        await expect(controlModal.getByText(warningLine)).toHaveCount(0);
+        await controlModal.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(controlModal).toHaveCount(0, {timeout: 30_000});
     });
 });

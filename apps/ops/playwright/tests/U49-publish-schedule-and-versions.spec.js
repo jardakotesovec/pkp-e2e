@@ -3,39 +3,30 @@
  * @file playwright/tests/U49-publish-schedule-and-versions.spec.js
  *
  * Publish, schedule & versions — OPS suite, one test per canonical COMMON
- * scenario as a preprint server runs it (S1–S10, in OPS vocabulary: the
- * publish button is "Post", the confirmation window "Post the preprint",
- * the states "Unposted"/"Scheduled"/"Posted", the way back "Unpost", the
- * flow direct — no "Review Publishing Details" panel and no issues; the
- * date route on the Preprint entry page is what schedules) plus the
- * OPS-specific S15 (Post the preprint: the window, the acknowledgement to
- * every contributor, the future-date leg and the "Do not send an email."
- * server) and S16 (the author cannot post). S11–S13 are {OJS}, S14 {OMP},
- * S17 and S18 {OJS OMP}: a preprint server installs no review stage and
- * mounts no "Production Ready Files" list, so they have no test here and
- * no absence test either. Every bold lead of a scenario has its assertion
- * here; a bullet the register marks carries only the scenario's own
- * sentence.
+ * scenario as a preprint server runs it (S1–S10 and S19, in OPS
+ * vocabulary: the publish button is "Post", the confirmation window "Post
+ * the preprint", the states "Unposted"/"Scheduled"/"Posted", the way back
+ * "Unpost", the flow direct — no "Review Publishing Details" panel and no
+ * issues; the date route on the Preprint entry page is what schedules)
+ * plus the OPS-specific S15 (Post the preprint: the window, the
+ * acknowledgement to every contributor, the future-date leg and the "Do
+ * not send an email." server) and S16 (the author cannot post). S11–S13
+ * are {OJS}, S14 {OMP}, S17 and S18 {OJS OMP}: a preprint server installs
+ * no review stage and mounts no "Production Ready Files" list, so they
+ * have no test here and no absence test either.
  * Spec: docs/specs/U49-publish-schedule-and-versions.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section records everything else left out): OPS1, OPS2,
- * OPS4 and OPS5 (the scheduled state, the acknowledgement's arrival matched
- * template-neutrally on "Posted Acknowledgement", the "Publication
- * Published" mail's arrival and the notice's presence are asserted; the
- * never-posts half, the scheduled post's acknowledgement, which template
- * goes out and the "published" wordings are not); OPS3 (the stock
- * no-Post-control side only); A1 (the scenario's own recipients only);
- * A5 and A6 (the summary's reader-side presence and the date line after a
- * draft are not asserted either way); A7 (the window's stage sentence);
- * A2, A3, A4 (S8 asserts what the screens offer; the rest has no OPS
- * surface); OJS2, OJS3, OMP1 (no OPS surface).
+ * Deliberately NOT covered (register IDs; the spec's Coverage section is
+ * the record of everything else left out): A5, A6, A10, A12, A14–A18,
+ * OPS1, OPS4, OPS6 (🐞); A1, A2, A3, A4, A9, A13, OPS2, OPS3, OPS5 (❓);
+ * OJS2, OJS4–OJS7, OMP1 (other apps).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only — PK tests mutate only their own seeded submissions; every
- * Mailpit read and the Profile › Notifications opt-out run on a scratch
- * preprint server with throwaway unique-recipient users (A8, A7). Every
+ * Mailpit read, the Profile › Notifications opt-out and S5's server
+ * rename run on a scratch preprint server with throwaway unique-recipient
+ * users (A8, A7), and S19 on a scratch server with ORCID enabled
+ * (`orcid: {enabled: true}`). Every
  * absence read is bounded by a positive control taken the same way
  * (PRINCIPLES M4, M6): the mailbox by a mail the same act delivers to a
  * throwaway address, the Tasks panel by its rendered table and a notice
@@ -54,7 +45,11 @@ const {
     preprintDateLine,
     preprintVersionsList,
     switchOffPublishedEmail,
+    identityGroup,
+    identityListItems,
+    IDENTITY_SENTENCE,
 } = require('../pages/PublicationPages.js');
+const {SettingsPages} = require('../../../../shared/playwright/pages/ContextIdentityPages.js');
 const {ContributorsScreen} = require('../pages/ContributorPages.js');
 const {
     wizardUrl,
@@ -68,6 +63,9 @@ const PK = 'publicknowledge';
 const PK_PREFIX = '/en';
 const DATE_FORMAT_ERROR = 'The date must be in the format YYYY-MM-DD, such as 2019-01-01.';
 const NEW_VERSION_NOTICE = 'A new version of a submission was created';
+const STAGE_SENTENCE = 'The publication must have a version stage assigned before it can be published.';
+const ORCID_WARNING_HEAD = 'The following issues were found, but will not prevent publishing';
+const ORCID_WARNING_LINE = 'Unauthenticated ORCiDs for contributors detected.';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -303,6 +301,21 @@ async function expectActivityLogLines(page, texts) {
     await expect(logModal).toHaveCount(0, {timeout: 30_000});
 }
 
+/**
+ * Assert the open Preprint entry page's "Identity" group: "Server
+ * Identity", its sentence and a list opening "Server Title: {name}"
+ * (Fields).
+ */
+async function expectIdentity(page, serverName) {
+    const group = identityGroup(page);
+    await expect(group).toBeVisible({timeout: 30_000});
+    await expect(group).toContainText('Server Identity');
+    await expect(group).toContainText(IDENTITY_SENTENCE);
+    await expect(identityListItems(page).first()).toHaveText(
+        new RegExp(`^\\s*Server Title:\\s*${serverName}\\s*$`)
+    );
+}
+
 /** Fill "Date Posted" on the OPEN Preprint entry page and save (the form is
  * `issueEntry`; its save PUTs onto the publication — tunneled POST). */
 async function saveDatePosted(page, screen, date) {
@@ -351,8 +364,9 @@ test.describe('Publish, schedule & versions (U49)', () => {
         test.slow();
         const tag = makeTag('s1', testInfo);
         const title = `Preprint ${tag}`;
+        const serverName = `Scratch context ${tag}`;
         await opsApi.createContext({tag, users: contextUsers(tag)});
-        const {submissionId} = await opsApi.createSubmission({
+        const {submissionId, publicationId} = await opsApi.createSubmission({
             tag: `${tag}s`,
             context: tag,
             submitter: `${tag}au`,
@@ -371,10 +385,19 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expect(tasksBefore.getByText('No Items')).toBeVisible({timeout: 30_000});
         await expect(tasksBefore.getByText(title)).toHaveCount(0);
 
+        // "Control" (before the Confirm): the Preprint entry page has no
+        // "Identity" group — its "Access" group, read the same way, bounds
+        // the absence (Fields).
+        const managerPage = await (await asUser(`${tag}mg`)).newPage();
+        await openEntryPage(managerPage, tag, submissionId, publicationId);
+        await expect(
+            managerPage.getByRole('group', {name: 'Access', exact: true})
+        ).toBeVisible({timeout: 30_000});
+        await expect(identityGroup(managerPage)).toHaveCount(0);
+
         // "The Publication area": the stage view's "Post the preprint"
         // button lands on the Publication area; the head reads "Status:
         // Unposted" (Rule 1).
-        const managerPage = await (await asUser(`${tag}mg`)).newPage();
         await openWorkflow(managerPage, tag, submissionId);
         await managerPage
             .getByRole('button', {name: 'Post the preprint', exact: true})
@@ -385,16 +408,22 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expectStatus(managerPage, 'Unposted');
 
         // "The confirmation window": "Post" opens it directly (Rule 2); it
-        // states "All requirements have been met." and names "Author's
-        // Original 1.0" (Rule 4). The requirement-shaped stage sentence is
-        // A7's — only the version name is asserted. Confirm.
+        // states "All requirements have been met.", then, on a preprint
+        // server, the stage sentence (A7's ❓, asserted as the scenario's
+        // own line) and the stage version line instead of "The
+        // publication version is …" (Rule 4) — the stage line, read first,
+        // bounds that absence. Confirm.
         const dialog = await openPostWindow(
             managerPage,
             'Are you sure you want to post this?'
         );
         await expect(dialog).toContainText('Post the preprint');
         await expect(dialog).toContainText('All requirements have been met.');
-        await expect(dialog).toContainText(`${AO} 1.0`);
+        await expect(dialog).toContainText(STAGE_SENTENCE);
+        await expect(dialog).toContainText(
+            `The stage version that will be assigned to the publication is "${AO} 1.0"`
+        );
+        await expect(dialog.getByText('The publication version is')).toHaveCount(0);
         await confirmPostWindow(managerPage, dialog);
 
         // "Published": "Status: Posted", the offered control flips to
@@ -411,11 +440,18 @@ test.describe('Publish, schedule & versions (U49)', () => {
         });
 
         // "The Activity Log": the OPS-worded post line and the Done-stage
-        // move by the acting manager (Side effects).
+        // move by the acting manager (Side effects; the "Submission
+        // metadata updated" line is a journal's).
         await expectActivityLogLines(managerPage, [
             'The submission was posted.',
             'Mona Manager moved this submission to the Done stage.',
         ]);
+
+        // "The "Identity" group": the version's Preprint entry page now
+        // ends with "Identity", headed "Server Identity", its sentence and
+        // a list opening "Server Title:" with the server's name (Fields).
+        await openEntryPage(managerPage, tag, submissionId, publicationId);
+        await expectIdentity(managerPage, serverName);
 
         // "The Author's side": the "Publication Published" email
         // (recipient-scoped, A8, with the tag as content marker) and the
@@ -479,18 +515,32 @@ test.describe('Publish, schedule & versions (U49)', () => {
         ).toHaveCount(0);
     });
 
-    test('S3: unpost takes the preprint down and clears the author notice', async ({asUser, opsApi, page}, testInfo) => {
+    test('S3: unpost takes the preprint down, clears the author notice, and an earlier version unposts alone', async ({asUser, opsApi, page}, testInfo) => {
         test.slow();
+        test.setTimeout(300_000);
         const tag = makeTag('s3', testInfo);
         const title = `Preprint ${tag}`;
+        const secondTitle = `Second ${tag}`;
         await opsApi.createContext({tag, users: contextUsers(tag)});
-        const {submissionId} = await opsApi.createSubmission({
-            tag: `${tag}s`,
-            context: tag,
-            submitter: `${tag}au`,
-            title,
-            published: true,
-        });
+        // The second preprint (same Author) gets its second version on
+        // screen below (footnote s3: no key makes one); its notice is the
+        // Author's Tasks' positive control.
+        const [{submissionId}, second] = await Promise.all([
+            opsApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: `${tag}au`,
+                title,
+                published: true,
+            }),
+            opsApi.createSubmission({
+                tag: `${tag}t`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: secondTitle,
+                published: true,
+            }),
+        ]);
 
         // "Control": before the unpost the reader page is live and the
         // Author's Tasks hold the posting notice (S1's state).
@@ -526,11 +576,72 @@ test.describe('Publish, schedule & versions (U49)', () => {
             'Mona Manager returned this submission to the workflow.',
         ]);
 
-        // "The Author's Tasks": the notice is gone; the grid reads "No
-        // Items" (Side effects).
+        // "The Author's Tasks": the notice naming this preprint is gone;
+        // the second preprint's notice, read in the same list, is its
+        // settled positive control (Side effects).
         const tasksAfter = await openTasksPanel(authorPage, {reload: true});
-        await expect(tasksAfter.getByText('No Items')).toBeVisible({timeout: 30_000});
+        await expect(tasksAfter.getByText(secondTitle).first()).toBeVisible({
+            timeout: 30_000,
+        });
         await expect(tasksAfter.getByText(title)).toHaveCount(0);
+
+        // "The earlier of two published versions" (Rule 9a): the second
+        // preprint gets "Author's Original 1.1" from an untouched "Create
+        // New Version", retitled so the reader page tells the versions
+        // apart, and posted.
+        await openWorkflow(managerPage, tag, second.submissionId);
+        const newPublication = await createNewVersionViaDialog(managerPage);
+        await expect(
+            managerPage.getByRole('link', {name: `${AO} 1.1`, exact: true})
+        ).toBeVisible({timeout: 30_000});
+        await openMenuKey(
+            managerPage,
+            tag,
+            second.submissionId,
+            `publication_${newPublication.id}_titleAbstract`
+        );
+        const screen = new PublicationScreen(managerPage);
+        await screen.fillRichText('titleAbstract', 'title', 'en', `${secondTitle} v2`);
+        await screen.save();
+        await postNow(managerPage);
+
+        // Open "Author's Original 1.0", "Unpost" and confirm: that version
+        // alone reads "Status: Unpublished", offering "Preview" and "Post".
+        await openMenuKey(
+            managerPage,
+            tag,
+            second.submissionId,
+            `publication_${second.publicationId}_titleAbstract`
+        );
+        await expectStatus(managerPage, 'Posted');
+        await unpostPreprint(managerPage);
+        await expectStatus(managerPage, 'Unpublished');
+        await expect(
+            controlsRight(managerPage).getByRole('button', {name: 'Preview', exact: true})
+        ).toBeVisible({timeout: 30_000});
+        await expect(
+            controlsRight(managerPage).getByRole('button', {name: 'Post', exact: true})
+        ).toBeVisible();
+
+        // "Author's Original 1.1" still reads "Status: Posted", with
+        // "Unpost".
+        await openMenuKey(
+            managerPage,
+            tag,
+            second.submissionId,
+            `publication_${newPublication.id}_titleAbstract`
+        );
+        await expectStatus(managerPage, 'Posted');
+        await expect(
+            controlsRight(managerPage).getByRole('button', {name: 'Unpost', exact: true})
+        ).toBeVisible({timeout: 30_000});
+
+        // Signed out, the reader page stays live as the later version.
+        const live = await gotoReaderPage(page, tag, second.submissionId);
+        expect(live?.status()).toBe(200);
+        await expect(
+            page.getByRole('heading', {name: `${secondTitle} v2`, exact: true})
+        ).toBeVisible({timeout: 30_000});
     });
 
     test('S4: create a new version', async ({asUser, opsApi, page, pkpMail}, testInfo) => {
@@ -650,12 +761,19 @@ test.describe('Publish, schedule & versions (U49)', () => {
 
     test('S5: post the new version', async ({asUser, opsApi, page, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(300_000);
+        test.setTimeout(360_000);
         const tag = makeTag('s5', testInfo);
         const title = `Preprint ${tag}`;
         const author = `${tag}au`;
-        await opsApi.createContext({tag, users: contextUsers(tag)});
-        const {submissionId} = await opsApi.createSubmission({
+        const serverName = `Scratch context ${tag}`;
+        // Country and initials seeded so the Masthead's "Save" takes the
+        // title alone (seed-facts: a scratch context has neither).
+        await opsApi.createContext({
+            tag,
+            context: {country: 'CA', acronym: 'U49'},
+            users: contextUsers(tag),
+        });
+        const {submissionId, publicationId} = await opsApi.createSubmission({
             tag: `${tag}s`,
             context: tag,
             submitter: author,
@@ -712,6 +830,13 @@ test.describe('Publish, schedule & versions (U49)', () => {
         ).toHaveCount(0);
         await screen.fillRichText('issueEntry', 'summaryOfChanges', 'en', 'Figure 2 corrected.');
         await screen.save();
+
+        // "The earlier version's identity": on the same page, the not yet
+        // posted minor version shows the "Identity" group with the list of
+        // "Author's Original 1.0", opening "Server Title:" with the
+        // server's name (Fields).
+        await expectStatus(managerPage, 'Unpublished');
+        await expectIdentity(managerPage, serverName);
 
         // "The email switched off": the Author switches the email of the
         // "…was published." row off on Profile › Notifications and saves
@@ -798,6 +923,26 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expect(page.getByText(`${title} v2`)).toHaveCount(0);
         await expect(preprintVersionsList(page)).toContainText(`(${AO} 1.0)`);
         await expect(preprintVersionsList(page)).not.toContainText(`(${AO} 1.1)`);
+
+        // "The journal renamed": Settings › Server › "Masthead": "Renamed
+        // Journal" typed in "Server Title" and saved (a Journal identity
+        // act). The preprint page's header, signed out, carries the new
+        // name (the rename's positive control); "Author's Original 1.0"'s
+        // "Identity" list on Preprint entry still names the server by its
+        // old name (Fields).
+        const settings = new SettingsPages(managerPage, tag);
+        const masthead = await settings.openJournalTab('Masthead');
+        await expect(masthead.control('masthead-name-control')).toHaveValue(serverName);
+        await masthead.control('masthead-name-control').fill('Renamed Journal');
+        await masthead.save();
+        await gotoReaderPage(page, tag, submissionId);
+        await expect(page.locator('.pkp_site_name')).toContainText('Renamed Journal', {
+            timeout: 30_000,
+        });
+        await openEntryPage(managerPage, tag, submissionId, publicationId);
+        await expectStatus(managerPage, 'Posted');
+        await expectIdentity(managerPage, serverName);
+        await expect(identityGroup(managerPage)).not.toContainText('Renamed Journal');
     });
 
     test('S6: minor and major numbering', async ({asUser, opsApi}, testInfo) => {
@@ -1337,5 +1482,85 @@ test.describe('Publish, schedule & versions (U49)', () => {
         await expect(
             managerPage.getByRole('button', {name: 'Post', exact: true})
         ).toBeVisible({timeout: 30_000});
+    });
+
+    test('S19: an unauthenticated ORCID iD warns, and the post goes through', async ({asUser, opsApi, page}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s19', testInfo);
+        const title = `Orcid ${tag}`;
+        const controlTitle = `Plain ${tag}`;
+        // A scratch server with ORCID enabled (footnote s19: the "Public
+        // Sandbox" API and dummy credentials); the first preprint's
+        // contributor holds ORCID's example iD unauthenticated, the
+        // second's none. Both are submitted, which on a preprint server is
+        // the Production stage.
+        await opsApi.createContext({tag, orcid: {enabled: true}, users: contextUsers(tag)});
+        const [{submissionId}, control] = await Promise.all([
+            opsApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: `${tag}au`,
+                title,
+                author: {orcid: '0000-0002-1825-0097', orcidIsVerified: false},
+            }),
+            opsApi.createSubmission({
+                tag: `${tag}c`,
+                context: tag,
+                submitter: `${tag}au`,
+                title: controlTitle,
+            }),
+        ]);
+
+        // "The warning": "Post" opens the "Post the preprint" window
+        // directly; it lists the unauthenticated line under the warning
+        // heading and, under the list, still "All requirements have been
+        // met." with its "Post" button (Rule 4).
+        const managerPage = await (await asUser(`${tag}mg`)).newPage();
+        await openWorkflow(managerPage, tag, submissionId);
+        const dialog = await openPostWindow(managerPage, 'Are you sure you want to post this?');
+        await expect(dialog).toContainText('Post the preprint');
+        await expect(dialog.getByText(ORCID_WARNING_HEAD)).toBeVisible({timeout: 30_000});
+        await expect(dialog.getByText(ORCID_WARNING_LINE)).toBeVisible();
+        await expect(dialog).toContainText('All requirements have been met.');
+        await expect(
+            dialog.getByRole('button', {name: 'Post', exact: true}).last()
+        ).toBeVisible();
+
+        // "Published": Confirm: the window closes, the head reads "Status:
+        // Posted" with "Unpost", no notice repeats the warning (read once
+        // the new state has settled; the window's line above is its
+        // positive control), and the preprint page is live, signed out
+        // (Rule 4).
+        await confirmPostWindow(managerPage, dialog);
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
+        await expect(
+            managerPage.getByRole('button', {name: 'Unpost', exact: true})
+        ).toBeVisible({timeout: 30_000});
+        await expectStatus(managerPage, 'Posted');
+        await expect(managerPage.getByText(ORCID_WARNING_LINE)).toHaveCount(0);
+        await expect(managerPage.getByText(ORCID_WARNING_HEAD)).toHaveCount(0);
+        const live = await gotoReaderPage(page, tag, submissionId);
+        expect(live?.status()).toBe(200);
+        await expect(page.getByRole('heading', {name: title})).toBeVisible({
+            timeout: 30_000,
+        });
+
+        // "Control": the second preprint, taken the same way to its
+        // window, shows no warning list; the all-met text and its "Post"
+        // button are the settled bound. Closed without confirming.
+        await openWorkflow(managerPage, tag, control.submissionId);
+        const controlDialog = await openPostWindow(
+            managerPage,
+            'Are you sure you want to post this?'
+        );
+        await expect(controlDialog).toContainText('All requirements have been met.');
+        await expect(
+            controlDialog.getByRole('button', {name: 'Post', exact: true}).last()
+        ).toBeVisible();
+        await expect(controlDialog.getByText(ORCID_WARNING_HEAD)).toHaveCount(0);
+        await expect(controlDialog.getByText(ORCID_WARNING_LINE)).toHaveCount(0);
+        await controlDialog.getByRole('button', {name: 'Close', exact: true}).first().click();
+        await expect(controlDialog).toHaveCount(0, {timeout: 30_000});
+        await expectStatus(managerPage, 'Unposted');
     });
 });

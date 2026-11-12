@@ -39,6 +39,12 @@
  * Settings page's summary editor is `issueEntry-summaryOfChanges-control-en`
  * and its date box `input[name="datePublished"]`; the publish window and the
  * refused window close through the header's "Close".
+ *
+ * Revision facts (probed 2026-11-12, `.reports/U49/tojsr`): the Publication
+ * Settings page of a published version ends with the `group` "Identity"
+ * ("Journal Identity", the sentence, a list of "Journal Title: …" lines);
+ * an item never published has no such group, and a minor version not yet
+ * published shows its predecessor's list.
  */
 const {expect} = require('@playwright/test');
 const {closeMenu: closeOpenMenu} = require('../../../../shared/playwright/support/menus.js');
@@ -285,6 +291,28 @@ exports.PublishScreen = class PublishScreen extends PublicationScreen {
     /** The entry page's or panel's "Update Type" select. */
     updateTypeSelect(scope = this.page) {
         return scope.locator('select[name="updateType"]');
+    }
+
+    /**
+     * A group of the Publication Settings page by its heading ("Access",
+     * "Identity"; a `group` named by its legend).
+     */
+    entryGroup(name) {
+        return this.page.getByRole('group', {name, exact: true});
+    }
+
+    /**
+     * The Publication Settings page's "Identity" group (U49 Fields: the
+     * "Journal Identity" sentence and list, on a published version and on a
+     * minor version not yet published; absent before the first publish).
+     */
+    identityGroup() {
+        return this.entryGroup('Identity');
+    }
+
+    /** The "Identity" group's list lines ("Journal Title: {name}", …). */
+    identityLines() {
+        return this.identityGroup().getByRole('listitem');
     }
 
     /** The entry page's "Publication Date" box. */

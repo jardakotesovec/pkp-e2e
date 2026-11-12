@@ -3,29 +3,32 @@
  * @file playwright/tests/U49-publish-schedule-and-versions.spec.js
  *
  * Publish, schedule & versions — OJS suite, one test per canonical
- * scenario the app runs: the common scenarios 1–10, the journal-only
- * scenarios 11–13 and the {OJS OMP} scenarios 17 and 18.
+ * scenario the app runs: the common scenarios 1–10 and 19, the
+ * journal-only scenarios 11–13 and the {OJS OMP} scenarios 17 and 18.
  * Spec: docs/specs/U49-publish-schedule-and-versions.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓
- * (S4 asserts the participating editor's receipt and the reviewer's
- * silence; the submitting author's copy is asserted neither way), A2 ❓
- * (S8 asserts what the screens offer; the server-side roster is a code
- * observation), A3 ❓ (every published version here is a Version of
- * Record; S6's published-submission button reads "Publish" and is matched
- * by regex, never asserted), A4 ❓ (S6 asserts "Minor Revision" greyed for
- * a stage with no versions; the silent re-select is not), A5 🐞 (S5 saves
- * and publishes a summary; its reader-side rendering is asserted neither
- * way), A6 🐞 (S4 reads the date line before the draft only), A7 ❓
- * (press and preprint server only), OJS1 ✅ retired (pkp/pkp-lib#13585; a
- * journal requiring the summary is a Planned item), OJS2 🐞 (S11 and S12 schedule on a journal with a
- * published back issue, or through the Publication-Settings-first route;
- * no test picks "Schedule Only" as a first pick on a published-issue-less
- * journal), OJS3 ✅ retired (pkp/pkp-lib#13657; S4 asserts only the
- * draft's own address, a mistyped number's 404 is a Planned item), OMP1,
- * OPS1–OPS5 (other apps' trees). The spec's Coverage section records
- * everything else left out.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
+ * - A5 🐞 (the amendment notice): S5 saves and publishes a summary; its
+ *   reader-side rendering is asserted neither way.
+ * - A6 🐞 (the draft's day as the "Published" date): S4 reads the date line
+ *   before the draft only.
+ * - A18 🐞 (the upload line nobody made): S4 reads "A new version was
+ *   created." only.
+ * - OJS2 🐞 (the first "Schedule Only" pick): S11 and S12 schedule on a
+ *   journal with a published back issue or through the
+ *   Publication-Settings-first route.
+ * - OJS4 🐞, OJS5 🐞: S19's iD is unauthenticated under the default API; no
+ *   refused Confirm leaves a stage-less panel.
+ * - A10 🐞, A12 🐞, A14–A17 🐞, A13 ❓: French, the programming interface and
+ *   cover pictures; nothing here drives them.
+ * - A1 ❓ (S4 asserts the participating editor's receipt and the reviewer's
+ *   silence; the submitting author's copy neither way), A2 ❓ (S8 asserts
+ *   what the screens offer), A3 ❓ (every published version is a Version of
+ *   Record; S6's button is matched by regex), A4 ❓ (S6 asserts "Minor
+ *   Revision" greyed only), A9 ❓, OJS7 ❓: parked.
+ * - A7 ❓, OMP1, OPS1–OPS6: other apps' territory.
  *
  * Seeding: scenario endpoints only. publicknowledge is read-only — S9
  * seeds its own submissions there (one scheduled into the seeded,
@@ -38,8 +41,9 @@
  * "Publication Published" the test itself causes the same way, publishing a
  * second scratch submission on the same journal (to the same address for a
  * scheduling silence, to a spare author's for an opt-out silence; M6); the
- * Tasks silences are settled reads of the author's Tasks grid paired with
- * S1's positive read; the Activity Log lines are row reads. No
+ * Tasks silences are settled reads of the author's Tasks grid paired with a
+ * positive read of the same grid (S1's, or S3's second submission's notice);
+ * the Activity Log lines are row reads. No
  * hard waits — flows are bounded by API responses and web-first assertions;
  * the one known timing quirk (the occasionally swallowed first press of
  * "Schedule For Publication", spec fn-k) is absorbed by the POM's bounded
@@ -58,6 +62,7 @@ const {
     EditorialDashboardPage,
 } = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
 const {ProfilePage} = require('../../../../shared/playwright/pages/ProfilePage.js');
+const {SettingsPages} = require('../../../../shared/playwright/pages/ContextIdentityPages.js');
 
 const JOURNAL = 'publicknowledge';
 const FIXTURES = path.join(__dirname, '..', 'fixtures', 'files');
@@ -66,6 +71,15 @@ const PMUR_REFUSAL =
 const NO_SUMMARIES = "No saved summaries found for this submission's review revisions.";
 const DATE_FORMAT = 'The date must be in the format YYYY-MM-DD, such as 2019-01-01.';
 const PUBLISHED_ROW = 'A new version of your submission, "Title", was published.';
+const IDENTITY_SENTENCE =
+    'This metadata was recorded at the time of publication and will not change if the publisher updates its identity settings. To correct it, use the CLI batch tool.';
+const ORCID_WARNING_HEAD = 'The following issues were found, but will not prevent publishing';
+const ORCID_WARNING = 'Unauthenticated ORCiDs for contributors detected.';
+/** ORCID's own example iD (spec fn-s19). */
+const EXAMPLE_ORCID = '0000-0002-1825-0097';
+/** A scratch journal's published back issue (scenarios.md `issues[]`). */
+const BACK_ISSUE = {volume: 1, number: 1, year: 2020};
+const BACK_ISSUE_LABEL = /Vol\. 1 No\. 1 \(2020\)/;
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -81,11 +95,13 @@ function todays() {
 
 /**
  * Seed a scratch journal with a throwaway manager and author (plus any
- * extra users); returns the usernames keyed by their short role.
+ * extra users, and any further context-scenario keys: `issues`, `orcid`,
+ * `metadata`, `context`); returns the usernames keyed by their short role.
  */
-async function seedJournal(ojsApi, tag, extraUsers = []) {
+async function seedJournal(ojsApi, tag, extraUsers = [], contextKeys = {}) {
     await ojsApi.createContext({
         tag,
+        ...contextKeys,
         users: [
             {
                 username: `${tag}mg`,
@@ -122,7 +138,7 @@ function reviewerUser(tag) {
  * Seed a submission through one external review round (the reviewer
  * accepted), Accept and Send To Production; `published` takes it live.
  */
-function seedThroughReview(ojsApi, {tag, context, submitter, reviewer, published = false, participants}) {
+function seedThroughReview(ojsApi, {tag, context, submitter, reviewer, published = false, participants, issue}) {
     return ojsApi.createSubmission({
         tag,
         context,
@@ -131,6 +147,7 @@ function seedThroughReview(ojsApi, {tag, context, submitter, reviewer, published
         decisions: ['sendExternalReview', 'accept', 'sendToProduction'],
         reviewRounds: [{reviewers: [{username: reviewer, status: 'accepted'}]}],
         ...(participants ? {participants} : {}),
+        ...(issue ? {issue} : {}),
         published,
     });
 }
@@ -208,6 +225,14 @@ test.describe('publish, schedule & versions', () => {
         await pub.openEntry('Title & Abstract');
         await pub.expectStatus('Unscheduled');
 
+        // Control, before the Confirm: the Publication Settings page has no
+        // "Identity" group (positive control: the page's "Access" group,
+        // which precedes it on a published version, is drawn).
+        await pub.openEntry('Publication Settings');
+        await expect(pub.entryGroup('Access')).toBeVisible({timeout: 30_000});
+        await expect(pub.identityGroup()).toHaveCount(0);
+        await pub.openEntry('Title & Abstract');
+
         // "Schedule For Publication" opens "Review Publishing Details":
         // "Assign To Current/Back Issue" arrives preselected before anything
         // is picked; keep it, pick the back issue and fill the stage.
@@ -246,8 +271,21 @@ test.describe('publish, schedule & versions', () => {
             page.getByRole('heading', {name: `Submission ${tag}s`})
         ).toBeVisible({timeout: 30_000});
 
-        // Activity log: "The submission was published." and the Done-stage
-        // move in the manager's name.
+        // The "Identity" group: the version's Publication Settings page now
+        // ends with it, "Journal Identity", its sentence, and a list
+        // opening "Journal Title:" with the journal's name (Fields).
+        await pub.openEntry('Publication Settings');
+        await expect(pub.identityGroup()).toBeVisible({timeout: 30_000});
+        await expect(pub.identityGroup()).toContainText('Journal Identity');
+        await expect(pub.identityGroup()).toContainText(IDENTITY_SENTENCE);
+        await expect(pub.identityLines().first()).toHaveText(
+            `Journal Title: Scratch context ${tag}`
+        );
+
+        // Activity log: "The submission was published.", the Done-stage
+        // move and the panel Confirm's "Submission metadata updated", all
+        // in the manager's name (the seed's own metadata lines are the
+        // Author's).
         const log = await pub.openActivityLog();
         await expect(
             log.getByRole('row').filter({hasText: 'The submission was published.'}).first()
@@ -256,6 +294,13 @@ test.describe('publish, schedule & versions', () => {
             log
                 .getByRole('row')
                 .filter({hasText: 'Mona Manager moved this submission to the Done stage.'})
+                .first()
+        ).toBeVisible();
+        await expect(
+            log
+                .getByRole('row')
+                .filter({hasText: 'Mona Manager'})
+                .filter({hasText: 'Submission metadata updated'})
                 .first()
         ).toBeVisible();
         await log.getByRole('button', {name: 'Close', exact: true}).first().click();
@@ -367,13 +412,25 @@ test.describe('publish, schedule & versions', () => {
         test.setTimeout(300_000);
         const tag = makeTag('s3', testInfo);
         const {manager, author} = await seedJournal(ojsApi, tag);
-        const {submissionId} = await ojsApi.createSubmission({
-            tag: `${tag}s`,
-            context: tag,
-            submitter: author,
-            title: `Submission ${tag}s`,
-            published: true,
-        });
+        // Scenario 1's published submission, and a second published one by
+        // the same Author whose second version is made and published on
+        // screen below (fn-s3).
+        const [{submissionId}, second] = await Promise.all([
+            ojsApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}s`,
+                published: true,
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}t`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}t`,
+                published: true,
+            }),
+        ]);
 
         // Control: the reader page is live and the author's Tasks carry the
         // "was published" notice before the unpublish.
@@ -412,16 +469,60 @@ test.describe('publish, schedule & versions', () => {
         ).toBeVisible();
         await log.getByRole('button', {name: 'Close', exact: true}).first().click();
 
-        // The author's task notice is gone too — their Tasks read
-        // "No Items" (the seeded publish's notice was their only one).
+        // The author's task notice naming this submission is gone, read in
+        // the same grid that still carries the second submission's notice
+        // (the positive control that the grid has loaded its rows).
         await authorPage.goto(`/index.php/${tag}/dashboard/mySubmissions`);
         const tasksAfter = await openTasks(authorPage);
-        await expect(tasksAfter.getByText('No Items').first()).toBeVisible({
+        await expect(publishedNoticeRows(tasksAfter, `Submission ${tag}t`).first()).toBeVisible({
             timeout: 30_000,
         });
+        await expect(publishedNoticeRows(tasksAfter, `Submission ${tag}s`)).toHaveCount(0);
+
+        // The earlier of two published versions: the second submission
+        // gains "Version of Record 1.1" (untouched dialog) and publishes it
+        // through the panel, which arrives pre-answered (no issues here).
+        await pub.gotoWorkflow(second.submissionId);
+        await pub.confirmVersionDialog(await pub.openCreateVersionDialog());
+        await pub.openVersionEntry('Version of Record 1.1', 'Title & Abstract');
+        const panel = await pub.openPublishPanel();
+        await expect(panel.locator('select[name="versionStage"]')).toHaveValue('VoR');
+        await expect(panel.locator('select[name="versionIsMinor"]')).toHaveValue('true');
+        await panel.getByRole('button', {name: 'Confirm', exact: true}).click();
+        const confirmation = pub.confirmationDialog('Are you sure you want to publish this?');
+        await expect(confirmation.getByText('Version of Record 1.1').first()).toBeVisible({
+            timeout: 30_000,
+        });
+        await pub.confirmPublish(confirmation, 'Publish');
+        await pub.expectStatus('Published');
+
+        // "Unpublish" on "Version of Record 1.0": that version alone reads
+        // "Status: Unpublished", offering "Preview" and "Publish" (Rule 9a).
+        await pub.openVersionEntry('Version of Record 1.0', 'Title & Abstract');
+        await pub.expectStatus('Published');
+        await pub.unpublishVersion();
+        await expect(pub.previewButton()).toBeVisible({timeout: 30_000});
         await expect(
-            tasksAfter.locator('tr').filter({hasText: 'was published'})
+            pub.rightControls().getByRole('button', {name: 'Publish', exact: true})
+        ).toBeVisible();
+        await expect(
+            pub.rightControls().getByRole('button', {name: 'Unpublish', exact: true})
         ).toHaveCount(0);
+
+        // "Version of Record 1.1" still reads "Status: Published".
+        await pub.openVersionEntry('Version of Record 1.1', 'Title & Abstract');
+        await pub.expectStatus('Published');
+        await expect(
+            pub.rightControls().getByRole('button', {name: 'Unpublish', exact: true})
+        ).toBeVisible();
+
+        // Signed out, the reader page stays live as the later version: its
+        // "Versions" list holds "Version of Record 1.1" alone.
+        expect(await readerStatus(page, tag, second.submissionId)).toBe(200);
+        await expect(page.locator('.sub_item.versions li')).toHaveCount(1, {timeout: 30_000});
+        await expect(page.locator('.sub_item.versions li')).toContainText(
+            '(Version of Record 1.1)'
+        );
     });
 
     test('S4: create a new version', async ({asUser, ojsApi, page, pkpMail}, testInfo) => {
@@ -439,19 +540,30 @@ test.describe('publish, schedule & versions', () => {
                 roles: ['sectionEditor'],
             },
             reviewerUser(tag),
+        ], {issues: [{...BACK_ISSUE, published: true}]});
+        // A published submission in the journal's published issue, with an
+        // accepted reviewer left on it and a participating Section Editor
+        // (fn-s4), through the review round and on to Production so the
+        // draft's Preview is offered (Actors row 4); and a second published
+        // submission on the same journal.
+        const [{submissionId}, other] = await Promise.all([
+            seedThroughReview(ojsApi, {
+                tag: `${tag}s`,
+                context: tag,
+                submitter: author,
+                reviewer: `${tag}rv`,
+                participants: [{username: `${tag}se`, role: 'sectionEditor'}],
+                published: true,
+                issue: BACK_ISSUE,
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}o`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}o`,
+                published: true,
+            }),
         ]);
-        // A published submission with an accepted reviewer left on it and
-        // a participating Section Editor (fn-s4), through the review round
-        // and on to Production so the draft's Preview is offered (Actors
-        // row 4).
-        const {submissionId} = await seedThroughReview(ojsApi, {
-            tag: `${tag}s`,
-            context: tag,
-            submitter: author,
-            reviewer: `${tag}rv`,
-            participants: [{username: `${tag}se`, role: 'sectionEditor'}],
-            published: true,
-        });
 
         // Control: the side menu lists the one published version and the
         // reader page's date line carries no "Updated on".
@@ -484,6 +596,26 @@ test.describe('publish, schedule & versions', () => {
             `Submission ${tag}s`
         );
 
+        // The new version's publish button reads "Publish" (the submission
+        // counts as published, Rule 2) and opens "Review Publishing
+        // Details" with the copied stage, "Minor Revision" and "Assign To
+        // Current/Back Issue" with the published issue chosen (Rule 3b);
+        // "Cancel" closes the panel.
+        await expect(pub.publishButton()).toHaveText('Publish', {timeout: 30_000});
+        const panel = await pub.openPublishPanelExpectingIssueFields();
+        await expect(panel.locator('select[name="versionStage"]')).toHaveValue('VoR');
+        await expect(panel.locator('select[name="versionIsMinor"]')).toHaveValue('true');
+        await expect(
+            panel.getByRole('radio', {name: 'Assign To Current/Back Issue'})
+        ).toBeChecked({timeout: 30_000});
+        await expect(panel.locator('select[name="issueId"] option:checked')).toHaveText(
+            BACK_ISSUE_LABEL,
+            {timeout: 30_000}
+        );
+        await pub.cancelPanel(panel);
+        await expect(pub.publishPanel()).toBeHidden({timeout: 30_000});
+        await pub.expectStatus('Unpublished');
+
         // Readers still get the old version: the page is live and its
         // Versions list shows nothing new (one entry).
         expect(await readerStatus(page, tag, submissionId)).toBe(200);
@@ -491,15 +623,29 @@ test.describe('publish, schedule & versions', () => {
 
         // The draft by address: the address the draft's "Preview" opens is
         // the reader page's with "/version/" and the draft's own number; a
-        // signed-out reader is not served the draft there (what the tip
-        // answers is recorded in the run; a mistyped number's 404, the
-        // retired OJS3, is a Planned item).
+        // signed-out reader gets the plain "404 Not Found" page there.
         const previewUrl = await pub.pressPreview();
         expect(previewUrl).toContain(`/article/view/${submissionId}/version/${draftId}`);
         const draftResponse = await page.goto(previewUrl);
         expect(draftResponse && draftResponse.status()).toBe(404);
         await expect(page.locator('body')).toContainText('404 Not Found');
         await expect(page.getByRole('heading', {name: `Submission ${tag}s`})).toHaveCount(0);
+
+        // A version address naming no version: "999999" and "abc" in place
+        // of the draft's number, and the second submission's reader page
+        // with this draft's number, each answer the plain "404 Not Found"
+        // page (Rule 11; positive control: the second submission's own
+        // reader page is live).
+        expect(await readerStatus(page, tag, other.submissionId)).toBe(200);
+        for (const address of [
+            `/index.php/${tag}/article/view/${submissionId}/version/999999`,
+            `/index.php/${tag}/article/view/${submissionId}/version/abc`,
+            `/index.php/${tag}/article/view/${other.submissionId}/version/${draftId}`,
+        ]) {
+            const response = await page.goto(address);
+            expect(response && response.status(), address).toBe(404);
+            await expect(page.locator('body'), address).toContainText('404 Not Found');
+        }
 
         // The participating editor gets the email and the task notice; the
         // assigned reviewer gets neither (bounded by the editor's receipt).
@@ -541,7 +687,7 @@ test.describe('publish, schedule & versions', () => {
                 email: spareEmail,
                 roles: ['author'],
             },
-        ]);
+        ], {context: {country: 'CA', acronym: 'SCJ'}});
         const authorEmail = `${tag}au@mail.test`;
         // The Author's published submission, and a spare author's
         // unpublished one for the mailbox control (its "Publication
@@ -599,6 +745,15 @@ test.describe('publish, schedule & versions', () => {
         );
         await pub.save();
 
+        // The earlier version's identity: the not yet published minor
+        // version shows the "Identity" group with the list of "Version of
+        // Record 1.0", opening "Journal Title:" with the journal's name.
+        await expect(pub.identityGroup()).toBeVisible({timeout: 30_000});
+        await expect(pub.identityGroup()).toContainText('Journal Identity');
+        await expect(pub.identityLines().first()).toHaveText(
+            `Journal Title: Scratch context ${tag}`
+        );
+
         // The email switched off: the Author, on Profile › Notifications
         // under "Submission Events", ticks the row's "Do not send me an
         // email…" box (the box the row offers) and saves.
@@ -622,6 +777,7 @@ test.describe('publish, schedule & versions', () => {
         const panel = await pub.openPublishPanel();
         await expect(panel.locator('select[name="versionStage"]')).toHaveValue('VoR');
         await expect(pub.updateTypeSelect(panel)).toHaveValue('correction');
+        await expect(pub.issueAssignmentGroup(panel)).toHaveCount(0);
         await panel.getByRole('button', {name: 'Confirm', exact: true}).click();
         const confirmation = pub.confirmationDialog(
             'Are you sure you want to publish this?'
@@ -686,6 +842,28 @@ test.describe('publish, schedule & versions', () => {
         await expect(page.locator('.sub_item.versions')).toContainText(
             '(Version of Record 1.0)'
         );
+
+        // The journal renamed: Settings › Journal › "Masthead", "Renamed
+        // Journal" saved (a U07 act; positive control: the reader page's
+        // header now carries the new name) …
+        const settings = new SettingsPages(managerPage, tag);
+        const masthead = await settings.openJournalTab('Masthead');
+        await masthead.control('masthead-name-control').fill('Renamed Journal');
+        await masthead.save();
+        await page.goto(`/index.php/${tag}/article/view/${submissionId}`);
+        await expect(page.locator('.pkp_site_name')).toContainText('Renamed Journal', {
+            timeout: 30_000,
+        });
+
+        // … and "Version of Record 1.0"'s "Identity" list still names the
+        // journal by its old name (Fields).
+        await pub.gotoWorkflow(submissionId);
+        await pub.openVersionEntry('Version of Record 1.0', 'Publication Settings');
+        await expect(pub.identityGroup()).toBeVisible({timeout: 30_000});
+        await expect(pub.identityLines().first()).toHaveText(
+            `Journal Title: Scratch context ${tag}`
+        );
+        await expect(pub.identityGroup()).not.toContainText('Renamed Journal');
     });
 
     test('S6: minor and major numbering', async ({asUser, ojsApi}, testInfo) => {
@@ -1422,7 +1600,11 @@ test.describe('publish, schedule & versions', () => {
         test.slow();
         test.setTimeout(300_000);
         const tag = makeTag('s13', testInfo);
-        const {manager, author} = await seedJournal(ojsApi, tag);
+        // A journal with no issues whose settings require a plain language
+        // summary (fn-s13), and a submission without one.
+        const {manager, author} = await seedJournal(ojsApi, tag, [], {
+            metadata: {plainLanguageSummary: 'require'},
+        });
         const {submissionId} = await ojsApi.createSubmission({
             tag: `${tag}s`,
             context: tag,
@@ -1459,6 +1641,19 @@ test.describe('publish, schedule & versions', () => {
             page.getByRole('heading', {name: `Submission ${tag}s`})
         ).toBeVisible({timeout: 30_000});
         await expect(page.locator('.item.issue .title')).toHaveCount(0);
+
+        // The required summary: nothing on the way checked it (the panel's
+        // Confirm above reached the window like any other), and the
+        // published version carries none — its Title & Abstract page marks
+        // "Plain Language Summary" required (the journal's setting, the
+        // positive control) over an empty box (OJS6; Rule 4).
+        await pub.openEntry('Title & Abstract');
+        const summaryLabel = managerPage.locator(
+            'label[for="titleAbstract-plainLanguageSummary-control-en"]'
+        );
+        await expect(summaryLabel).toContainText('Plain Language Summary', {timeout: 30_000});
+        await expect(summaryLabel.locator('.pkpFormFieldLabel__required')).toHaveCount(1);
+        expect(await pub.richTextContent('titleAbstract-plainLanguageSummary-control-en')).toBe('');
 
         // Control: once the journal has an issue, the same panel (on a
         // second submission) carries the "Issue Assignment" choices.
@@ -1601,5 +1796,98 @@ test.describe('publish, schedule & versions', () => {
         await expect(mdItems.filter({hasText: 'Update File Details'})).toHaveCount(1);
         await expect(mdItems.filter({hasText: 'Send to Text Editor'})).toHaveCount(0);
         await pub.closeMenu();
+    });
+
+    test('S19: an unauthenticated ORCID iD warns, and the publish goes through', async ({asUser, ojsApi, page}, testInfo) => {
+        test.slow();
+        test.setTimeout(300_000);
+        const tag = makeTag('s19', testInfo);
+        // A scratch journal with ORCID enabled (the default Public Sandbox
+        // API, dummy credentials) and no issues; two submissions in
+        // Production, the first's contributor holding an unauthenticated
+        // iD, the second's none (fn-s19).
+        const {manager, author} = await seedJournal(ojsApi, tag, [], {orcid: {enabled: true}});
+        const [{submissionId}, second] = await Promise.all([
+            ojsApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}s`,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+                author: {orcid: EXAMPLE_ORCID, orcidIsVerified: false},
+            }),
+            ojsApi.createSubmission({
+                tag: `${tag}c`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}c`,
+                decisions: ['skipExternalReview', 'sendToProduction'],
+            }),
+        ]);
+
+        const managerPage = await (await asUser(manager)).newPage();
+        const pub = new PublishScreen(managerPage, tag);
+
+        // "Review Publishing Details": the panel shows no "Issue
+        // Assignment" (positive control: its version selects are there);
+        // "Version of Record" and "Major Revision", Confirm.
+        await pub.gotoWorkflow(submissionId);
+        await pub.openEntry('Title & Abstract');
+        const panel = await pub.openPublishPanel();
+        await expect(panel.locator('select[name="versionStage"]')).toBeVisible();
+        await expect(pub.issueAssignmentGroup(panel)).toHaveCount(0);
+        await expect(panel.locator('input[name="assignment"]')).toHaveCount(0);
+        await pub.fillVersionDetails(panel);
+        await panel.getByRole('button', {name: 'Confirm', exact: true}).click();
+
+        // The warning: the window lists the unauthenticated-iD line under
+        // its heading, and under the list still shows the all-met text and
+        // its "Publish" button (Rule 4).
+        const confirmation = pub.confirmationDialog('Are you sure you want to publish this?');
+        await expect(confirmation.getByText(ORCID_WARNING_HEAD)).toBeVisible({timeout: 30_000});
+        await expect(confirmation.getByText(ORCID_WARNING)).toBeVisible();
+        await expect(
+            confirmation.getByText('All publication requirements have been met.')
+        ).toBeVisible();
+        await expect(
+            confirmation.getByRole('button', {name: 'Publish', exact: true})
+        ).toBeVisible();
+        await expect(
+            confirmation.getByText('The following requirements must be met before this can be published.')
+        ).toHaveCount(0);
+
+        // Published: the window closes, the head reads "Status: Published"
+        // with "Unpublish", no notice repeats the warning, and the reader
+        // page is live.
+        await pub.confirmPublish(confirmation, 'Publish');
+        await expect(confirmation).toHaveCount(0, {timeout: 30_000});
+        await pub.expectStatus('Published');
+        await expect(
+            pub.rightControls().getByRole('button', {name: 'Unpublish', exact: true})
+        ).toBeVisible({timeout: 30_000});
+        await expect(managerPage.getByText(ORCID_WARNING)).toHaveCount(0);
+        expect(await readerStatus(page, tag, submissionId)).toBe(200);
+        await expect(
+            page.getByRole('heading', {name: `Submission ${tag}s`})
+        ).toBeVisible({timeout: 30_000});
+
+        // Control: the second submission, taken the same way to its
+        // confirmation window, shows no warning list (the all-met text and
+        // "Publish" are the positive control of the read); closed unconfirmed.
+        await pub.gotoWorkflow(second.submissionId);
+        await pub.openEntry('Title & Abstract');
+        const controlPanel = await pub.openPublishPanel();
+        await pub.fillVersionDetails(controlPanel);
+        await controlPanel.getByRole('button', {name: 'Confirm', exact: true}).click();
+        const controlWindow = pub.confirmationDialog('Are you sure you want to publish this?');
+        await expect(
+            controlWindow.getByText('All publication requirements have been met.')
+        ).toBeVisible({timeout: 30_000});
+        await expect(
+            controlWindow.getByRole('button', {name: 'Publish', exact: true})
+        ).toBeVisible();
+        await expect(controlWindow.getByText(ORCID_WARNING_HEAD)).toHaveCount(0);
+        await expect(controlWindow.getByText(ORCID_WARNING)).toHaveCount(0);
+        await pub.closeWindow(controlWindow);
     });
 });

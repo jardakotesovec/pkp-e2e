@@ -541,14 +541,14 @@ In French most of its headings and descriptions are raw codes
 ## Canonical scenarios
 
 Scenarios 1–4, 6–10 and 16–18 run on the seeded journal with ready
-accounts and scratch submissions; scenarios 5 and 11–15 run on a scratch
-journal with throwaway accounts: scenario 5 because a journal must have
-no issues for it and its Author changes an email setting, the others
-because each needs its own issues, a future-dated item or its own email
-setting. A press and preprint server have no issues; their scheduling is
-the date route of scenarios 14 and 15. The
-publish button and window are labelled per Rule 2; the mail catcher and
-each scenario's seeding are in its footnote.
+accounts and scratch submissions; scenarios 5, 11–15 and 19 run on a
+scratch journal with throwaway accounts: scenario 5 because a journal
+must have no issues for it, its Author changes an email setting and the
+journal is renamed, the others because each needs its own issues, a
+future-dated item or a setting of its own. A press and preprint server
+have no issues; their scheduling is the date route of scenarios 14 and
+15. The publish button and window are labelled per Rule 2; the mail
+catcher and each scenario's seeding are in its footnote.
 
 1. **Publish a submission and see it live**
 
@@ -563,35 +563,44 @@ each scenario's seeding are in its footnote.
      the catalog until it has been published…" (Rule 17).
    - **"Review Publishing Details"** {OJS}: press "Schedule For
      Publication": the panel opens with "Assign To Current/Back Issue"
-     already preselected (Fields); keep it, pick the published issue in
+     preselected (Fields); keep it, pick the published issue in
      "Issue", choose "Version of Record" as Publication Stage and "Major
      Revision" as Revision Significance, and Confirm (Rule 3).
    - **The confirmation window**: on a press or preprint server the
-     publish button ("Publish" / "Post") opens it directly (Rule 2). It
-     states "All publication requirements have been met." ("All
-     requirements have been met." on a preprint server) and names the
-     version to be assigned, "Version of Record 1.0" ("Author's Original
-     1.0" on a preprint server); on a press or preprint server a
-     requirement-shaped stage sentence sits under the all-met line
-     ([A7](#a7)) (Rule 4). Confirm.
+     publish button opens it directly (Rule 2). It states "All
+     publication requirements have been met." ("All requirements have
+     been met." on a preprint server), then, on a journal, "The
+     publication version is "Version of Record 1.0""; on a press or
+     preprint server, instead, "The publication must have a version stage
+     assigned before it can be published." ([A7](#a7)) and "The stage
+     version that will be assigned to the publication is "Version of
+     Record 1.0"" ("Author's Original 1.0") (Rule 4). Confirm.
    - **Published**: the window closes and, with no page reload, the head
      reads "Status: Published" ("Posted") with "Unpublish" ("Unpost") in
      place of the publish button; the reader page is live (Rules 4, 8).
    - **The notices** {OMP}: the Production stage's banner is replaced by
      "Status / Submission published." and the catalog notice (Rule 17).
+   - **The "Identity" group** {OJS OPS}: the version's Publication
+     Settings page (Preprint Entry) now ends with the group "Identity",
+     headed "Journal Identity" ("Server Identity"); it reads "This
+     metadata was recorded at the time of publication and will not change
+     if the publisher updates its identity settings. To correct it, use
+     the CLI batch tool." and a list opening "Journal Title:" ("Server
+     Title:") with the journal's name (Fields).
    - **The Activity Log**: the workflow's Activity Log & Notes → History
      shows "The submission was published." and "{user} moved this
      submission to the Done stage.", and on a journal also "Submission
-     metadata updated", which the panel's Confirm added (Side effects).
+     metadata updated" (Side effects).
    - **The Author's side**: the Author finds the "Publication Published"
      email in the mail catcher, its sender the journal's name at the
      principal contact's address, not the Journal Manager (a preprint
      server's copy still says "published", [OPS5](#ops5)), and the task
      notice "A new version of your submission, "{title}", was published."
      under Tasks (Side effects).
-   - **Control**: before the Confirm, the reader page was not there and
-     the Author's Tasks held no such notice (Rule 8; Side effects).
-     <sup>s1</sup>
+   - **Control**: before the Confirm, the reader page was not there,
+     the Author's Tasks held no such notice (Rule 8; Side effects), and
+     the Publication Settings page (Preprint Entry) had no "Identity"
+     group {OJS OPS} (Fields). <sup>s1</sup>
 
 2. **A declined submission cannot be published**
 
@@ -618,8 +627,10 @@ each scenario's seeding are in its footnote.
 
 3. **Unpublish**
 
-   Given: Journal Manager, on scenario 1's published submission, and its
-   submitting Author.
+   Given: Journal Manager, on scenario 1's published submission, with its
+   submitting Author, and on a second scratch submission with two
+   published versions, "Version of Record 1.0" and "Version of Record
+   1.1" ("Author's Original 1.0" and "1.1" on a preprint server).
 
    - **"Unpublish"**: the Publication area offers "Unpublish"
      ("Unpost" on a preprint server); press it: the red dialog asks "Are
@@ -629,17 +640,25 @@ each scenario's seeding are in its footnote.
    - **The Activity Log**: adds "The submission was unpublished." (worded
      with "unposted" on a preprint server) and "{user} returned this
      submission to the workflow." (Side effects).
-   - **The Author's Tasks**: the task notice from scenario 1 is gone; the
-     list reads "No Items" (Side effects).
+   - **The Author's Tasks**: the notice naming this submission is gone
+     (Side effects).
+   - **The earlier of two published versions**: on the second
+     submission, open "Version of Record 1.0" ("Author's Original 1.0"),
+     press "Unpublish" ("Unpost") and confirm: that version alone reads
+     "Status: Unpublished", offering "Preview" and "Publish" ("Post");
+     "Version of Record 1.1" ("Author's Original 1.1") still reads
+     "Status: Published" ("Posted"); and, signed out, the reader page
+     stays live as the later version (Rule 9a).
    - **Control**: before the unpublish, the reader page was live and the
      Tasks list held the notice (scenario 1). <sup>s3</sup>
 
 4. **Create a new version**
 
    Given: Journal Manager, on the seeded journal, with a published scratch
-   submission that has, besides its submitting Author, a stage-assigned
-   participant and an assigned reviewer {OJS OMP}, the manager holding
-   no stage assignment on it; and a Reader.
+   submission (on a journal, in the journal's published issue) that has,
+   besides its submitting Author, a stage-assigned participant and an
+   assigned reviewer {OJS OMP}, the manager holding no stage assignment
+   on it; a second published scratch submission; and a Reader.
 
    - **"Create New Version"**: side menu › "Create New Version": the
      dialog asks which version to copy metadata from, the Publication
@@ -656,6 +675,17 @@ each scenario's seeding are in its footnote.
      the draft opens (Actors row 4), the reader page's address with
      "/version/" and the draft's own number, answers the plain "404 Not
      Found" page (Rule 11).
+   - **A version address naming no version** {OJS}: Reader: the same
+     address with "999999" in place of the draft's number, the same
+     address with "abc" in place of it, and the second submission's
+     reader page address with "/version/" and this draft's number each
+     answer the plain "404 Not Found" page (Rule 11).
+   - **The new version's publish button** {OJS}: open "Version of Record
+     1.1" from the side menu and press "Publish" (the submission counting
+     as published, Rule 2): "Review Publishing Details" opens with
+     "Version of Record" as Publication Stage, "Minor Revision" as
+     Revision Significance and "Assign To Current/Back Issue" with the
+     published issue chosen (Rule 3b); press "Cancel": the panel closes.
    - **The emails and notices**: the submitting Author and the
      stage-assigned participant get the email "A new version was created
      for "{title}"" and the task notice "A new version of a submission
@@ -686,6 +716,11 @@ each scenario's seeding are in its footnote.
    - **The details**: Update Type arrives on "New Version"; choose
      "Correction", type "Figure 2 corrected." in Summary of Changes, and
      save (Fields; Rule 13).
+   - **The earlier version's identity** {OJS OPS}: on the same page (the
+     Preprint Entry page on a preprint server), the not yet published
+     minor version shows the "Identity" group with the list of "Version
+     of Record 1.0" ("Author's Original 1.0"), opening "Journal Title:"
+     ("Server Title:") with the journal's name (Fields).
    - **The email switched off**: Author: on Profile › Notifications,
      under "Submission Events", find the row reading exactly "A new
      version of your submission, "Title", was published.": its "Do not
@@ -707,6 +742,13 @@ each scenario's seeding are in its footnote.
      and confirm: the reader page stays live, its "Versions" list reading
      only "{date} (Version of Record 1.0)" ("Author's Original 1.0")
      (Rule 9a).
+   - **The journal renamed** {OJS OPS}: on Settings › Journal ›
+     "Masthead" (Settings › Server on a preprint server) type "Renamed
+     Journal" in "Journal Title" ("Server Title") and save (a
+     [Journal identity](U07-journal-identity-and-about-pages.md) act);
+     then open "Version of Record 1.0" ("Author's Original 1.0") on
+     Publication Settings (Preprint Entry): its "Identity" list still
+     names the journal by its old name (Fields).
    - **Control**: scenario 1's Author, with the email left on, received
      both the email and the notice (Side effects). <sup>s5</sup>
 
@@ -898,13 +940,18 @@ each scenario's seeding are in its footnote.
 
 13. **No issues, no choices** {OJS}
 
-    Given: Journal Manager, on a scratch journal with no issues created,
-    with a scratch submission in Production.
+    Given: Journal Manager, on a scratch journal with no issues created
+    whose settings require a plain language summary, with a scratch
+    submission in Production that has no such summary.
 
     - **"Schedule For Publication"**: the panel shows no "Issue
       Assignment" at all; choose "Version of Record" and "Major Revision"
       and Confirm: the window offers immediate publication; Confirm: the
       article is published without an issue (Rule 15).
+    - **The required summary**: nothing on the way checked the summary
+      the journal requires: the panel's Confirm above reached the window
+      like any other, and the version published without one
+      ([OJS6](#ojs6)) (Rule 4).
     - **Control**: on scenario 11's journal, which has issues, the same
       panel carries the "Issue Assignment" choices (Rule 5).
       <sup>s13</sup>
@@ -1013,25 +1060,35 @@ each scenario's seeding are in its footnote.
       "Production Ready Files" list, so it has no such action.
       <sup>s18</sup>
 
+19. **An unauthenticated ORCID iD warns, and the publish goes through**
+
+    Given: Journal Manager, on a scratch journal with ORCID enabled (and,
+    on a journal, no issues created), with two scratch submissions in
+    Production, the first's contributor holding an unauthenticated ORCID
+    iD and the second's contributor none.
+
+    - **"Review Publishing Details"** {OJS}: on the first submission
+      press "Schedule For Publication": the panel shows no "Issue
+      Assignment"; choose "Version of Record" and "Major Revision" and
+      Confirm (Rules 3, 15).
+    - **The warning**: the confirmation window ("Post the preprint" on a
+      preprint server; a press or preprint server opens it directly from
+      "Publish" / "Post") lists "Unauthenticated ORCiDs for contributors
+      detected." under "The following issues were found, but will not
+      prevent publishing", and under the list still shows "All
+      publication requirements have been met." ("All requirements have
+      been met.") with its "Publish" ("Post") button (Rule 4).
+    - **Published**: Confirm: the window closes, the head reads "Status:
+      Published" ("Posted") with "Unpublish" ("Unpost"), no notice
+      repeats the warning, and the reader page is live (Rule 4).
+    - **Control**: the second submission, taken the same way to its
+      confirmation window, shows no warning list (Rule 4). <sup>s19</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - an article's version address with an id that is none of its
-    versions (a mistyped number, another article's version, "abc")
-    answering "404 Not Found" (Rule 11; retired OJS3,
-    pkp/pkp-lib#13657) [upstream 2026-11-02]
-  - a new version of an article in an issue, made by an untouched
-    version dialog, opening "Review Publishing Details" on its first
-    publish with the copied stage, "Minor Revision" and that issue
-    chosen (Rule 3b) [incidental 2026-09-29]
-  - "Unpublish" ("Unpost") on the earlier of two published versions:
-    only it reads "Status: Unpublished" with "Preview" and "Publish"
-    ("Post"), the later one stays "Published" ("Posted") and the reader
-    page stays live (Rule 9a) [incidental 2026-09-29]
-  - a journal's "Submission metadata updated" line from the panel's
-    Confirm, read in scenario 1's Activity Log (Side effects) [incidental 2026-09-29]
   - the guard for OPS1 (issue report
     `docs/issues/U49-OPS1-scheduled-preprint-never-posted.md`): a preprint
     posted with a future "Date Posted" reading "Status: Posted" once the
@@ -1061,24 +1118,6 @@ Left out of the scenarios above, by reason:
     preprint's first post emailing its contributors "Preprint Posted
     Acknowledgement", a later version "New Version Posted Acknowledgement",
     each ending in the server's signature rather than a raw "{$signature}" [report 2026-10-02]
-  - the "Identity" group on the Publication Settings page of a
-    published article ("Journal Identity") and the Preprint Entry page
-    of a posted preprint ("Server Identity") with its sentence and
-    list; no such group before the first publish; the list unchanged
-    after the journal is renamed; and a minor version showing the
-    earlier version's list before it is published (Fields, the
-    Publication Settings page) [upstream 2026-10-01]
-  - on a scratch journal with ORCID enabled, a submission in Production
-    whose contributor holds an unauthenticated iD: the confirmation
-    window lists "Unauthenticated ORCiDs for contributors detected."
-    under "The following issues were found, but will not prevent
-    publishing", still offers "Publish" ("Post"), and confirming
-    publishes it, in every app; a submission without an iD on the same
-    journal shows no list (Rule 4; Settings) [upstream 2026-10-09]
-  - a journal that requires the plain language summary: "Review
-    Publishing Details" Confirm reaching the confirmation window and
-    "Publish" publishing a version without a summary {OJS} (Rule 4;
-    OJS1, retired) [upstream 2026-10-21]
 - **Rarely met**:
   - two contributors holding the same verified iD, warned about with
     "Duplicate ORCiDs for contributors detected.", and two sharing one
@@ -3108,7 +3147,10 @@ journal's "Submission metadata updated" fn-aa's (no seeded context has
 a DOI prefix, so no DOI line joins them). The
 email's sender (the context's name, the principal contact's address) is
 fn-x's; a scratch context's principal contact is the `contactEmail` it
-was created with.
+was created with. The "Identity" group (OJS, OPS) is read on the shown
+version's Publication Settings / Preprint Entry page before the publish
+(absent) and after it (fn-j); its "Journal Title:" / "Server Title:"
+line carries the context's name in its primary language.
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** Decline a scratch submission (journal/press:
@@ -3120,7 +3162,12 @@ significance to reach the refusal — Rule 7's late refusal, live-probed
 
 <a id="fn-s3"></a>
 **s3 — scenario 3 seeding.** Scenario 1's published submission; check
-the author's Tasks after confirming the unpublish.
+the author's Tasks after confirming the unpublish. The second
+submission is a `published: true` seed whose second version is made on
+screen (scenarios.md: no key makes a second version: the header's
+"Create New Version", untouched) and then published (on OJS through the
+panel, fn-h); the earlier version is unpublished from its own version
+page, and the reader page is fetched signed out after it (fn-q).
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** A published scratch submission with an
@@ -3128,10 +3175,19 @@ assigned reviewer left on it (for A1's recipient check) on OJS/OMP; on
 OPS any posted preprint. The participant and reviewer come from the
 submission scenario's `participants[]` and `reviewRounds[].reviewers[]`;
 the acting manager is a roster manager holding no stage assignment on
-it. The draft's address is the one its "Preview" opens, the reader page's
-version address with the new version's number, fetched by a signed-out
-visitor and read for the "404 Not Found" page (fn-ojs3); the log line
-is fn-aa's.
+it. On OJS the published seed carries the submission scenario's `issue`
+key naming a published issue (the seeded journal's Vol 1 No 2 (2014), or
+a scratch journal's own published issue), so the untouched new
+version's panel arrives with that issue chosen (fn-h); the panel is
+opened and cancelled, never confirmed. The second published submission
+is a plain `published: true` seed on the same journal. The draft's
+address is the one its "Preview" opens, the reader page's version
+address with the new version's number; it and the three addresses
+naming no version (the article's with `999999` and with `abc`, the
+second submission's with the draft's number) are fetched by a
+signed-out visitor and read for the "404 Not Found" page (fn-r; the
+crash they answered before was fixed upstream, OJS3); the log line is
+fn-aa's.
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** A published scratch submission and its
@@ -3146,7 +3202,11 @@ Notifications › "Submission Events", the row worded like the task
 notice, its "Do not send me an email…" box ticked (fn-x); the Author's silence is read in
 Mailpit scoped to their address, bounded by the notice's arrival and a
 positive control of the test's own. The unpublish leg leaves version 1.0
-published (fn-q).
+published (fn-q). The "Identity" group (OJS, OPS) is read on the new
+version's entry page before the publish, then the context is renamed
+on Settings › Journal › "Masthead" (Settings › Server on a preprint
+server, its "Server Title"), the Masthead form's own save, and the
+group re-read on version 1.0's page after the unpublish leg (fn-j).
 
 <a id="fn-s6"></a>
 **s6 — scenario 6 seeding.** A submission with one "Version of Record"
@@ -3215,7 +3275,11 @@ when the journal has no future issue left (fn-m).
 
 <a id="fn-s13"></a>
 **s13 — scenario 13 seeding.** A brand-new scratch journal with no
-issues created and one production-ready submission.
+issues created, seeded with the context scenario key
+`metadata: {plainLanguageSummary: 'require'}` (Settings › Workflow ›
+Submission › "Metadata", the plain language summary at "require"), and one
+production-ready submission with no summary (fn-ojs6; the Confirm that
+once stopped in the panel was fixed upstream, OJS1).
 
 <a id="fn-s14"></a>
 **s14 — scenario 14 seeding.** Scratch press; Catalog Entry page (the
@@ -3259,6 +3323,20 @@ seeded press too, where the Word row's menu then offers no "Send to Text
 Editor" (fn-v, at the PR head `e28a1de30d`). The picker opens with no
 selection (fn-v). The preprint server's absence rests on fn-v: the
 OPS workflow mounts no file manager.
+
+<a id="fn-s19"></a>
+**s19 — scenario 19 seeding.** One scratch context per app created with
+`orcid: {enabled: true}` (scenarios.md: the "Public Sandbox" API and
+dummy credentials, enough for every screen the switch gates; on OJS no
+`issues[]`), two submissions moved to Production (a preprint server:
+submitted), the first with the submission scenario's `author` key,
+`{orcid: '0000-0002-1825-0097', orcidIsVerified: false}` (ORCID's own
+example iD; the iD alone, the typed-in unauthenticated state), the
+second with none. The window's list and its lines are fn-l's
+(live-probed on all three apps); the reader page is fetched signed out
+after the confirm. Under the member API with a verified iD an
+issue-less journal publish fails instead (OJS4), which is why the iD
+here is unauthenticated and the API the default.
 
 ## Reference — entry points & surfaces
 

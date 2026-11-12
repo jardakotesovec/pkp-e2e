@@ -43,6 +43,9 @@
  *   `switchOffPublishedEmail` (the Author's Profile › Notifications opt-out
  *   of the "Publication Published" email, saved through the tab's own
  *   Save).
+ * - Added 2026-11-12 (U49's revision): the Preprint entry page's
+ *   "Identity" group (`identityGroup`, `identityListItems`,
+ *   `IDENTITY_SENTENCE`).
  * - Added 2026-11-12 (U40's revision): the "Metadata" page's Keywords
  *   suggestion list (`keywordsField`, `typeKeywordForSuggestions`,
  *   `clearKeywordBox`; Rule 7b), each read bounded by the list's own
@@ -758,6 +761,38 @@ function preprintVersionsList(page) {
 }
 
 exports.preprintVersionsList = preprintVersionsList;
+
+/** The Identity group's sentence (Fields; lib/pkp locale). */
+const IDENTITY_SENTENCE =
+    'This metadata was recorded at the time of publication and will not change if the publisher updates its identity settings. To correct it, use the CLI batch tool.';
+
+exports.IDENTITY_SENTENCE = IDENTITY_SENTENCE;
+
+/**
+ * The open Preprint entry page's "Identity" group (U49 Fields; added
+ * 2026-11-12, U49's revision): absent until the version, or an earlier
+ * one, has been posted; then it ends the page, reading "Server Identity",
+ * IDENTITY_SENTENCE and a list opening "Server Title: {name}" (live
+ * 2026-11-12: a `group` named "Identity", its list items `li`).
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function identityGroup(page) {
+    return page.getByRole('group', {name: 'Identity', exact: true});
+}
+
+exports.identityGroup = identityGroup;
+
+/**
+ * The Identity group's list rows ("Server Title: …", …), in page order.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+function identityListItems(page) {
+    return identityGroup(page).getByRole('listitem');
+}
+
+exports.identityListItems = identityListItems;
 
 /**
  * As the signed-in user, switch off the email of Profile › Notifications ›
