@@ -785,6 +785,19 @@ seeded reader visits. <sup>sc</sup>
      date}.". Each message shows under "Apply" while the range still
      reads "{the day 50 days ago} — {the day 40 days ago}" and "Total"
      still 4 (Rule 8; Fields).
+   - **The list closed without a range**: with the list still open,
+     press the calendar button: the list closes. Open the list and click
+     the heading "Articles": the list closes within about a second. Open
+     the list and press Shift+Tab: the keyboard focus moves back off the
+     calendar button, and the list closes within about a second.
+     After each, the range still reads "{the day 50 days ago} — {the day
+     40 days ago}" and "Total" 4. Open the list, replace the dates in the
+     two boxes with the date 80 days ago and the date 70 days ago, each
+     as YYYY-MM-DD, and press the calendar button without pressing
+     "Apply": the list closes, the range and "Total" unchanged. Open the
+     list again: the boxes still hold the date 80 days ago and the date
+     70 days ago, and the range still reads "{the day 50 days ago} —
+     {the day 40 days ago}" (Fields "The date range").
    - **"Journal"**: open Statistics › "Journal" ("Press", "Server"): the
      journal's row reads 5. Choose "Last 90 days": 9; "Last 12 months":
      9; "All dates": 10, the chart running by month from January 2001
@@ -861,6 +874,15 @@ seeded reader visits. <sup>sc</sup>
      the journal's name and 3. "Download Timeline" gives
      "stats_context_timeline_…" with one line per day (Rules 14, 16, 17;
      Fields).
+   - **A reader's visits** {OMP}: in a browser where nobody is signed
+     in, open the book page of "Axolotl limb memory" ([Monograph landing
+     page](U69-monograph-landing-page.md)) and press the link of its PDF
+     file, then the link of its "Appendix" file. Today's server log
+     (where it lies and how to read it, in the footnote) gains a line
+     for each: the PDF's of type "PDF", the "Appendix" file's
+     "Supplementary File". The Journal Manager opens Statistics › "Monographs" again:
+     "Axolotl limb memory" still reads "File Views" 6, since the figures
+     never include today (Rules 1, 2).
    - **Control**: no file from "Articles" names "Wombat notes", read
      only outside the range (Rule 16). <sup>sc</sup>
 
@@ -1172,10 +1194,6 @@ seeded reader visits. <sup>sc</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the date range list closed without choosing a range (the calendar
-    button pressed again, a click outside it, the focus leaving it), and
-    typed dates kept in the boxes while not applied (Fields "The date
-    range") [incidental 2026-09-29]
   - a Journal Manager's "Do not collect any geographical data" on a site that collects geographical data: the choice still selected after a reload, and no "Download Geographic" in the "Download Report" window (the guard for A4, once fixed) [report 2026-10-02]
   - "All dates" on Statistics › "Articles" of a context with nothing published and of one whose earliest publication is dated before 2001: no "Error" window, the monthly chart from January 2001 (the guard for A1, once fixed) [report 2026-10-02]
   - a Section Editor's "Statistics" menu and the "Counter R5" address while the journal's COUNTER statistics are restricted: no "Counter R5" entry, the access-denied page (the guard for A5, once fixed) [report 2026-10-02]
@@ -1191,7 +1209,6 @@ Left out of the scenarios above, by reason:
   - the SUSHI "Item Master Report (IR)" asked with the authors shown, for a work whose first author alone has an ORCID iD: only that author carries an iD (Rule 23; the guard for A16, once fixed) {OJS OPS} [incidental 2026-10-13]
   - "Counter R5" of a context whose first publication is dated the 31st of a month followed by a shorter one: "Start Date" offers the first day of the next month (Rule 21; the guard for A19, once fixed) [report 2026-11-02]
   - a reader downloading an article's Word galley and its PDF galley, the day processed: "File Views" and "Total" on "Articles" count both, as the chart's "Files" and "Download Files" do (Rule 1; the guard for A17, once fixed) [incidental 2026-10-23]
-  - a reader opening a book's PDF and its "Appendix" file from the book page, each visit a line in the day's log <sup>j</sup>, of type PDF and "Supplementary File" (Rule 1; OMP3, retired) {OMP} [upstream 2026-10-05]
 - **Nothing new to test**:
   - the site as the COUNTER platform on an installation without a "Site
     Name", whose reports keep the journal's name (Rule 24)
@@ -2361,7 +2378,13 @@ renamed default) and "Reviews" on OJS and OPS, OJS `issues[]` both
 `published` in 2024 with each work's `issue`. Scenario 4: the work's
 `datePublished` 2024-03-05. Scenario 5: as scenario 3 without the
 issues, "Axolotl limb memory" with a third galley of `genre: 'Data Set'`
-(OMP a format whose file has no `genre`, an "Appendix"). Scenario 6: 31
+(OMP a format whose file has no `genre`, an "Appendix"); its OMP
+reader opens the book page `{press}/catalog/book/{id}` from a fresh
+browser context and presses the two formats' links, and the test reads
+today's usage log, `usage_events_YYYYMMDD.log` in
+`{files_dir}/usageStats/usageEventLogs` (fn-j), for a line of assoc type
+515 (a file view) naming the PDF file and one of 531 (a supplementary
+file view) naming the "Appendix" file. Scenario 6: 31
 works, seeded in parallel. Scenarios 7, 8 and 10 change the
 installation, so they run `@solo` and put it back in a `finally`
 (scenarios.md `POST site`): scenario 7 sets `enableGeoUsageStats:

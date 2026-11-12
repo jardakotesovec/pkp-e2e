@@ -530,6 +530,54 @@ test.describe('Statistics — usage', () => {
             await expect(total()).toHaveText('4');
         }
 
+        // The list closed without a range, three ways: the calendar button
+        // again, a click on the heading "Articles", Shift+Tab off the
+        // button; each fetches nothing and leaves the range and the figure
+        // (Fields "The date range"). The list open before each is the
+        // positive control.
+        const unchanged = async () => {
+            await expect(stats.range).toHaveText(range5040);
+            await expect(total()).toHaveText('4');
+        };
+        await expect(stats.rangeList).toBeVisible();
+        let fetched = await stats.statsFetchesDuring(async () => {
+            await stats.calendarButton.click();
+            await expect(stats.rangeList).toBeHidden({timeout: T});
+        });
+        expect(fetched, 'the calendar button again fetches nothing').toEqual([]);
+        await unchanged();
+        await expect(stats.heading).toHaveText(W.articles);
+        await stats.openRangeList();
+        fetched = await stats.statsFetchesDuring(async () => {
+            await stats.heading.click();
+            await expect(stats.rangeList).toBeHidden({timeout: 2_500});
+        });
+        expect(fetched, 'a click outside fetches nothing').toEqual([]);
+        await unchanged();
+        await stats.openRangeList();
+        await expect(stats.calendarButton).toBeFocused();
+        fetched = await stats.statsFetchesDuring(async () => {
+            await page.keyboard.press('Shift+Tab');
+            await expect(stats.calendarButton).not.toBeFocused();
+            await expect(stats.rangeList).toBeHidden({timeout: 2_500});
+        });
+        expect(fetched, 'the focus leaving fetches nothing').toEqual([]);
+        await unchanged();
+
+        // Typed dates not applied: the list closed by the button, the range
+        // kept; reopened, the boxes still hold them (Fields "The date range").
+        await stats.typeCustomRange(utcDay(80), utcDay(70));
+        fetched = await stats.statsFetchesDuring(async () => {
+            await stats.calendarButton.click();
+            await expect(stats.rangeList).toBeHidden({timeout: T});
+        });
+        expect(fetched, 'typed dates closed unapplied fetch nothing').toEqual([]);
+        await unchanged();
+        await stats.openRangeList();
+        await expect(stats.startBox).toHaveValue(utcDay(80));
+        await expect(stats.endBox).toHaveValue(utcDay(70));
+        await expect(stats.range).toHaveText(range5040);
+
         // Control: Enter in the first box applies nothing (Fields), on the
         // page opened afresh.
         await stats.goto();

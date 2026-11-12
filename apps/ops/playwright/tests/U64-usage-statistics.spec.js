@@ -21,7 +21,9 @@
  * spec's Coverage section is the record of everything else left out):
  * - A5: S9 never opens the Moderator's "Counter R5" while the server is
  *   restricted.
- * - A1–A4, A7–A11: not on these scenarios' paths. OJS1–OJS6: the
+ * - A12: S4 closes the list three ways, never by Escape. A13: S4 reads the
+ *   boxes only over dates typed and not applied.
+ * - A1–A4, A7–A11, A14–A19: not on these scenarios' paths. OJS1–OJS7: the
  *   journal's. OMP1, OMP2, OMP4: the press's.
  *
  * Seeding (footnote sc): S1 and S2 read `publicknowledge` with the OPS
@@ -488,6 +490,40 @@ test.describe('Statistics — usage', () => {
             await expect(stats.range).toHaveText(range5040);
             await expect(total()).toHaveText('4');
         }
+
+        // The list closed without a range: the calendar button again, a
+        // click outside, the focus leaving it; each fetches nothing and the
+        // range and the figure stay (Fields "The date range").
+        await expect(stats.heading).toHaveText(W.articles);
+        const unchanged = async (what) => {
+            await expect(stats.range, `${what}: the range stays`).toHaveText(range5040);
+            await expect(total(), `${what}: "Total" stays`).toHaveText('4');
+        };
+        const closedBy = async (what, action, timeout = T) => {
+            const sent = await stats.statsFetchesDuring(async () => {
+                await action();
+                await expect(stats.rangeList, `${what} closes the list`).toBeHidden({timeout});
+            });
+            expect(sent, `${what} fetches nothing`).toEqual([]);
+            await unchanged(what);
+        };
+        await expect(stats.rangeList).toBeVisible();
+        await closedBy('the calendar button, the list open', () => stats.calendarButton.click());
+        await stats.openRangeList();
+        await closedBy('a click on the heading', () => stats.heading.click(), 3_000);
+        await stats.openRangeList();
+        await expect(stats.calendarButton).toBeFocused();
+        await closedBy('Shift+Tab off the calendar button', async () => {
+            await page.keyboard.press('Shift+Tab');
+            await expect(stats.calendarButton).not.toBeFocused();
+        }, 3_000);
+        // Dates typed and not applied stay in the boxes; the page keeps its range.
+        await stats.typeCustomRange(utcDay(80), utcDay(70));
+        await closedBy('the calendar button over typed dates', () => stats.calendarButton.click());
+        await stats.openRangeList();
+        await expect(stats.startBox).toHaveValue(utcDay(80));
+        await expect(stats.endBox).toHaveValue(utcDay(70));
+        await unchanged('reopened over typed dates');
 
         // Control: Enter in the first box applies nothing (Fields), on the
         // page opened afresh.

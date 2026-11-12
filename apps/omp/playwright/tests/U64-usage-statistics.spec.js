@@ -33,7 +33,9 @@
  * the press (home page). A scratch press has no series, so its
  * "Monographs" page has no "Filters". Scratch names ("Axolotl limb
  * memory") live in the test's own press, so a search or a count reads that
- * press alone.
+ * press alone. S5's signed-out reader is the one visit made on screen; its
+ * effect is read in today's usage log on disk (footnote j), the one place a
+ * visit shows before the daily task processes it.
  *
  * Every absence is read settled (the table's own fetch after the action
  * that would change it, the stats requests sent while an action that must
@@ -43,6 +45,8 @@
  * screen's own answer (A5); the one page timer waits out the modal store's
  * slot after a Download window closes (patterns.md pitfall 4).
  */
+const fs = require('fs');
+const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
 const {EditorialChrome} = require('../../../../shared/playwright/pages/NavigationChromePages.js');
 const {
@@ -94,6 +98,10 @@ const PDF = {name: 'PDF', file: 'article.pdf', genre: 'Book Manuscript'};
 const HTML = {name: 'HTML', file: 'article.html', genre: 'Book Manuscript'};
 /** A format whose file has no `genre`: an "Appendix", a supplementary file. */
 const APPENDIX = {name: 'Appendix', file: 'notes.md'};
+/** Usage log line types (footnote j): a file view, a supplementary file view; a PDF file's `fileType`. */
+const LOG_FILE_VIEW = 515;
+const LOG_SUPPLEMENTARY_VIEW = 531;
+const LOG_TYPE_PDF = 2;
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -158,6 +166,46 @@ const RANGE_30_FILE = () => `${utcDay(31)} to ${utcDay(1)}`;
 /** A file name of the statistics downloads: "stats_{part}_{UTC date}T{HH-MM_SS}.csv". */
 function statsFileName(part) {
     return new RegExp(`^stats_${part}_${utcDay(0)}T\\d{2}-\\d{2}_\\d{2}\\.csv$`);
+}
+
+/** "Within about a second" (Fields "The date range"), with room for a loaded worker. */
+const ABOUT_A_SECOND = 2_500;
+
+/** The range text and the row's "Total" as an applied range left them (S4). */
+async function expectRangeKept(stats, range, total) {
+    await expect(stats.range).toHaveText(range);
+    await expect(total()).toHaveText('4');
+}
+
+/**
+ * Today's usage event log (footnote j: `usage_events_YYYYMMDD.log` in
+ * `{files_dir}/usageStats/usageEventLogs`, the install's UTC day), with
+ * `files_dir` read from the app's test config the way the harness writes it.
+ */
+function usageLogFile() {
+    const appRoot = process.env.PKP_APP_ROOT;
+    const cfg = fs.readFileSync(path.join(appRoot, 'config.test.inc.php'), 'utf8');
+    const m = cfg.match(/^files_dir\s*=\s*"?([^"\n]+?)"?\s*$/m);
+    const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return path.join(path.resolve(appRoot, m[1].trim()), 'usageStats', 'usageEventLogs', `usage_events_${day}.log`);
+}
+
+/** The file-view lines (`submissionFileId` set) of one book in today's usage log: `[{assocType, submissionFileId, fileType}]`. */
+function fileVisitLines(file, submissionId) {
+    if (!fs.existsSync(file)) return [];
+    return fs
+        .readFileSync(file, 'utf8')
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => {
+            try {
+                return JSON.parse(line);
+            } catch {
+                return null;
+            }
+        })
+        .filter((e) => e && e.submissionId === submissionId && e.submissionFileId)
+        .map((e) => ({assocType: e.assocType, submissionFileId: e.submissionFileId, fileType: e.fileType}));
 }
 
 /** Open a Statistics entry from the side menu; resolves once the page's first fetch answered. */
@@ -478,6 +526,38 @@ test.describe('Statistics — usage', () => {
             await expect(total()).toHaveText('4');
         }
 
+        // The list closed without a range: the calendar button again, a
+        // click on the heading, Shift+Tab off the button; then typed dates
+        // left unapplied, kept in the boxes (Fields "The date range").
+        await expect(stats.rangeList, 'control: the list is still open').toBeVisible();
+        const closings = await stats.statsFetchesDuring(async () => {
+            await stats.calendarButton.click();
+            await expect(stats.rangeList).toBeHidden({timeout: T});
+            await expectRangeKept(stats, range5040, total);
+
+            await stats.openRangeList();
+            await stats.heading.click();
+            await expect(stats.rangeList, 'a click on the heading closes the list within about a second').toBeHidden({timeout: ABOUT_A_SECOND});
+            await expectRangeKept(stats, range5040, total);
+
+            await stats.openRangeList();
+            await expect(stats.calendarButton, 'control: the focus is on the calendar button').toBeFocused();
+            await page.keyboard.press('Shift+Tab');
+            await expect(stats.calendarButton).not.toBeFocused();
+            await expect(stats.rangeList, 'Shift+Tab closes the list within about a second').toBeHidden({timeout: ABOUT_A_SECOND});
+            await expectRangeKept(stats, range5040, total);
+
+            await stats.typeCustomRange(utcDay(80), utcDay(70));
+            await stats.calendarButton.click();
+            await expect(stats.rangeList).toBeHidden({timeout: T});
+            await expectRangeKept(stats, range5040, total);
+            await stats.openRangeList();
+            await expect(stats.startBox).toHaveValue(utcDay(80));
+            await expect(stats.endBox).toHaveValue(utcDay(70));
+            await expectRangeKept(stats, range5040, total);
+        });
+        expect(closings, 'closing the list without a range fetches nothing').toEqual([]);
+
         // Control: Enter in the first box applies nothing (Fields), on the
         // page opened afresh.
         await stats.goto();
@@ -508,7 +588,7 @@ test.describe('Statistics — usage', () => {
         await expect.poll(async () => (await journal.timeline())[0], {timeout: T}).toEqual(['January 2001', '0']);
     });
 
-    test('S5: downloading the spreadsheets', async ({asUser, ompApi}, testInfo) => {
+    test('S5: downloading the spreadsheets', async ({asUser, ompApi, browser, baseURL}, testInfo) => {
         test.setTimeout(240_000);
         const tag = makeTag('s5', testInfo);
         const p = await seedPress(ompApi, tag, {usage: [{daysAgo: 1, views: 3}]});
@@ -621,6 +701,38 @@ test.describe('Statistics — usage', () => {
         expect(file.name).toMatch(statsFileName('context_timeline'));
         expect(file.parts.columns).toEqual(['Date', 'Label', 'Total']);
         expect(file.parts.rows.map((r) => r[0])).toEqual(Array.from({length: 31}, (_, i) => utcDay(31 - i)));
+
+        // A reader's visits: signed out, the book page's PDF link and its
+        // "Appendix" link each write a line to today's usage log, a file view
+        // and a supplementary file view; "Monographs" still reads "File
+        // Views" 6, today never counted (Rules 1, 2; footnotes sc, j).
+        const [pdfFormat, , appendixFormat] = axolotl.publicationFormats;
+        expect([pdfFormat.name, appendixFormat.name]).toEqual(['PDF', 'Appendix']);
+        const log = usageLogFile();
+        expect(fileVisitLines(log, axolotl.submissionId), 'no file line before the reader').toEqual([]);
+        const readerContext = await browser.newContext({baseURL, storageState: {cookies: [], origins: []}});
+        const reader = await readerContext.newPage();
+        const bookUrl = `/index.php/${tag}/catalog/book/${axolotl.submissionId}`;
+        const formatLink = (name) => reader.getByRole('main').getByRole('link', {name: new RegExp(`${name}$`)});
+        await reader.goto(bookUrl);
+        await expect(reader.getByRole('main').getByRole('heading', {level: 1})).toHaveText(AXOLOTL, {timeout: T});
+        await formatLink('PDF').click();
+        await expect(reader).toHaveURL(new RegExp(`/catalog/view/${axolotl.submissionId}/${pdfFormat.id}/${pdfFormat.submissionFileId}$`), {timeout: T});
+        const pdfLine = {assocType: LOG_FILE_VIEW, submissionFileId: pdfFormat.submissionFileId, fileType: LOG_TYPE_PDF};
+        await expect.poll(() => fileVisitLines(log, axolotl.submissionId), {timeout: T}).toEqual([pdfLine]);
+        await reader.goto(bookUrl);
+        const saved = reader.waitForEvent('download', {timeout: T});
+        await formatLink('Appendix').click();
+        expect((await saved).suggestedFilename()).toBe(APPENDIX.file);
+        await expect
+            .poll(() => fileVisitLines(log, axolotl.submissionId).map(({assocType, submissionFileId}) => [assocType, submissionFileId]), {timeout: T})
+            .toEqual([
+                [LOG_FILE_VIEW, pdfFormat.submissionFileId],
+                [LOG_SUPPLEMENTARY_VIEW, appendixFormat.submissionFileId],
+            ]);
+        await readerContext.close();
+        await stats.goto();
+        await expect(stats.cells(AXOLOTL).nth(2)).toHaveText('6');
     });
 
     test('S6: more than one page of monographs', async ({asUser, ompApi}, testInfo) => {
