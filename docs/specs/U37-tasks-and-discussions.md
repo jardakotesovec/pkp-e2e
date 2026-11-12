@@ -855,16 +855,18 @@ and the tooling recipe are in the footnote. <sup>s</sup>
      ({roles}) posted a response on {date}" and "Discussion created by
      …"; the mailbox holds an email with the subject "Figure permissions"
      carrying the reply (Rules 4, 13b; Side effects).
-   - **A workflow file** {OJS OMP}: Section Editor: press "Add New
+   - **The stages offered** {OJS OMP}: Section Editor: press "Add New
      Message", then "Attach Files" on the box: the "Attach Files" window
      offers "Upload File" and "Workflow Files"; press "Attach Workflow
-     Files", choose "Submission" in "Select submission stage" and attach
-     "article.pdf": it is listed under the box with "Remove"; type "The
-     signed form is attached." and press "Save": the message shows a link
-     to "article.pdf" that downloads the file; the Journal Manager's email
-     of this reply has "article.pdf" attached, and "Submission Files"
-     still lists "article.pdf" once (Actors row 9; Rules 12, 14, 14b;
-     Side effects).
+     Files": "Select submission stage" opens with no stage chosen and
+     offers the stages from "Submission" up to "Production" (Rule 14a).
+   - **A workflow file** {OJS OMP}: choose "Submission" in "Select
+     submission stage" and attach "article.pdf": it is listed under the
+     box with "Remove"; type "The signed form is attached." and press
+     "Save": the message shows a link to "article.pdf" that downloads the
+     file; the Journal Manager's email of this reply has "article.pdf"
+     attached, and "Submission Files" still lists "article.pdf" once
+     (Actors row 9; Rules 12, 14, 14a, 14b; Side effects).
    - **Control**: in the Journal Manager's window the same discussion
      shows the "Edit" button and the "Close this Discussion" box, and its
      row the "More Actions" button, none of which the Section Editor was
@@ -903,6 +905,9 @@ and the tooling recipe are in the footnote. <sup>s</sup>
      "Participants": their radio button disappears; press "Save": "There
      should be one user responsible for the task." shows under
      "Participants" (Rules 8c, 11a).
+   - **Leaving the page with unsaved changes**: reload the page: the
+     browser's leave-page prompt shows; dismiss it to stay on the page
+     (Rule 11d).
    - **"Cancel" on a changed window**: press "Cancel": a "Warning" asks
      "The data on this form has changed. Do you wish to continue without
      saving?" with "Yes" and "No"; press "No": the window is as it was,
@@ -911,6 +916,13 @@ and the tooling recipe are in the footnote. <sup>s</sup>
      panel still reads "No Items" (Rule 11c).
    - **An untouched window**: press "Add", then "Cancel": the window closes
      at once, with no question (Rule 11c).
+   - **Leaving the page once the window has closed**: reload the page: it
+     reloads with no leave-page prompt; press "Add", type "Margin note" in
+     "Name", press "Cancel" and "Yes" in the "Warning", and reload the
+     page: no prompt; press "Add", type "Margin note" in "Name" and "Please
+     check the margins." in the message box, tick the Section Editor,
+     press "Save", and reload the page: no prompt, and "Margin note" is
+     listed under "In progress" (Rules 11b, 11c, 11d).
    - **Control**: press "Add", type "Layout question" in "Name" and "Is
      the layout final?" in the message box, tick the Section Editor and
      press "Save": the discussion is saved under "In progress", so the
@@ -931,6 +943,15 @@ and the tooling recipe are in the footnote. <sup>s</sup>
      not change; press Enter: "DISCUSSION - Assign Editor" is listed and
      "DISCUSSION - Discussion (Production)" is not; press the box's clear
      control: the whole list is back (Rule 10a).
+   - **A kind in the search**: type "task" in "Find Template" and press
+     Enter: no template is listed, every one of the stage being a
+     discussion; replace the search with "discussion" and press Enter:
+     "DISCUSSION - Discussion (Production)" and "DISCUSSION - Assign
+     Editor" are listed; replace it with "discussion assign" and press
+     Enter: "DISCUSSION - Assign Editor" is listed and "DISCUSSION -
+     Discussion (Production)" is not; no "Error" window opens at any of
+     the three; press the box's clear control: the whole list is back
+     (Rule 10a; Settings bullet 1).
    - **Choosing a template**: type "Layout check" in "Name", then press
      "DISCUSSION - Discussion (Production)": "Name" reads "Discussion
      (Production)", the message box "Please enter your message.", and
@@ -1054,10 +1075,13 @@ and the tooling recipe are in the footnote. <sup>s</sup>
    two Section Editors and its Author assigned, whose panel holds the
    discussion "Proof corrections", which the Journal Manager opened with
    the first Section Editor and the Author, its first message "Please
-   send your corrections.".
+   send your corrections.", and a second discussion, which the Journal
+   Manager's "Notify" on the Participants panel sent to the second
+   Section Editor with the message "Please check the figures.".
 
-   - **The row menu**: "More Actions" offers, in this order, "Edit", "Add
-     Task Details", "History" and "Delete", the last in red (Rule 5).
+   - **The row menu**: the "More Actions" of "Proof corrections" offers,
+     in this order, "Edit", "Add Task Details", "History" and "Delete",
+     the last in red (Rule 5).
    - **"Edit"**: choose it: a window titled "Production Tasks &
      Discussions" opens with the badge "In progress"; "Participants" lists
      the Journal Manager, the first Section Editor and the Author ticked,
@@ -1076,10 +1100,10 @@ and the tooling recipe are in the footnote. <sup>s</sup>
      lists the Journal Manager and the two Section Editors, and the first
      message reads "Please send your final corrections.", with the date and
      time it had before the edit (Rules 12, 15a).
-   - **"History"**: choose it in the row's "More Actions": a side window
-     titled "History", with "Final proof corrections" under the title,
-     shows a table "Date", "User", "Event", newest first, whose "User"
-     cells give full names; its events include "{the second Section
+   - **"History"**: choose it in the "More Actions" of "Final proof
+     corrections": a side window titled "History", with "Final proof
+     corrections" under the title, shows a table "Date", "User", "Event",
+     newest first, whose "User" cells give full names; its events include "{the second Section
      Editor's username} ({roles}) added by {the Journal Manager's username}
      ({roles}) on {date}", "{the Author's username} ({roles}) removed by …",
      "profile-image-400.png uploaded by {the Journal Manager's username} on
@@ -1089,10 +1113,36 @@ and the tooling recipe are in the footnote. <sup>s</sup>
      18).
    - **The Author's panel**: Author: open the submission at Production (on
      a preprint server, the "Production Tasks & Discussions" page of the
-     preprint's entries): the panel no longer lists the discussion (Actors
-     row 1).
-   - **"Delete"**: Journal Manager: choose "Delete" in the row's "More
-     Actions": a dialog titled "Delete" asks "Are you sure you wish to
+     preprint's entries): the panel no longer lists "Final proof
+     corrections" (Actors row 1).
+   - **The second Section Editor's open window**: second Section Editor:
+     open the submission at Production, open "Final proof corrections",
+     press "Add New Message" and type "No corrections from me.", and
+     leave the window open.
+   - **Taken off meanwhile**: Journal Manager: choose "Edit" in the "More
+     Actions" of "Final proof corrections", untick the second Section
+     Editor and press "Save": the window closes (Rules 11b, 15a).
+   - **The reply refused**: second Section Editor: in the window still
+     open, press "Save": an "Error" window with "OK" reads "You do not
+     have permission to modify this discussion."; press "OK" and reload
+     the page: the panel no longer lists "Final proof corrections" (Rule
+     13d).
+   - **Nothing saved**: Journal Manager: open "Final proof corrections":
+     no message reads "No corrections from me." (Rule 13d).
+   - **The discussion "Notify" opened**: the row of the second
+     discussion, the one "Notify" sent, reads "Created by: {the Journal Manager's username}"; choose "Edit"
+     in its "More Actions": the message box holds "Please check the
+     figures."; replace the name with "Figure check" and press "Save":
+     the row reads "Figure check"; open it: "Discussion" holds one
+     message, headed "Message from {the Journal Manager's username}" and
+     reading "Please check the figures."; choose "Edit" again, replace the
+     message with "Please check figures 2 and 3." and press "Save"; open
+     "Figure check": it still holds one message, headed "Message from
+     {the Journal Manager's username}" with the date and time it had
+     before, now reading "Please check figures 2 and 3." (Rules 15a, 15e,
+     21).
+   - **"Delete"**: choose "Delete" in the "More Actions" of "Final proof
+     corrections": a dialog titled "Delete" asks "Are you sure you wish to
      delete this item? This action cannot be undone." with "OK", in red,
      and "Cancel"; press "Cancel": the row stays; choose "Delete" again and
      press "OK": the row is gone, also after a reload; the first Section
@@ -1143,6 +1193,18 @@ and the tooling recipe are in the footnote. <sup>s</sup>
      3"; open "Figure 3": in place of "Add New Message" it reads "To add a
      new message, please assign yourself as a participant." (Actors rows
      1, 4).
+   - **The Author's rename, the file kept**: Author: choose "Edit" in the
+     "More Actions" of "Figure 3": "profile-image-400.png" is listed under
+     the message box with "Remove"; replace the name with
+     "Figure 3 corrected" and press "Save": the window closes and the row reads
+     "Figure 3 corrected"; open it: the first message still shows the link
+     to "profile-image-400.png" (Rule 15d).
+   - **The Author's rename, the file removed**: choose "Edit" in the "More
+     Actions" of "Figure 3 corrected", press "Remove" beside
+     "profile-image-400.png", replace the name with "Figure 3 final" and
+     press "Save": the window closes and the row reads "Figure 3 final";
+     open it: the first message shows no link to "profile-image-400.png"
+     (Rule 15d).
    - **Control**: the Journal Manager's panel also lists "Editorial
      notes", which the Author's panel did not (Actors row 1).
 
@@ -1267,7 +1329,8 @@ App-specific:
     Discussions" panel holds "Copyedit the manuscript", a task between the
     Journal Manager, who created it, and the Copyeditor, its owner, not
     started and due fourteen days from today, and "Editorial notes", a
-    discussion between the Journal Manager and the Section Editor.
+    discussion between the Journal Manager and the Section Editor; and a
+    second submission, at Production, with the Layout Editor assigned.
 
     - **The Copyeditor's panel**: it lists "Copyedit the manuscript" under
       "Yet to begin", with "Task Owner: {the Copyeditor's username}", and
@@ -1286,6 +1349,19 @@ App-specific:
       "notes.md" (Actors row 9; Rules 13b, 14b).
     - **Completed from the window**: tick "Complete this task" and press
       "Save": the badge reads "Closed" (Rule 17b).
+    - **The Copyeditor's stages**: close the window, open "Copyedit the
+      manuscript" again, press "Add New Message", then "Attach Files" on
+      the box and "Attach Workflow Files": "Select submission stage"
+      offers the stages from "Submission" up to "Production", and only
+      "Copyediting" can be chosen; the other stages are greyed, cannot be
+      chosen and give no reason (Rule 14a).
+    - **The Layout Editor's stages**: Layout Editor: open the second
+      submission at Production and press "Add" on "Production Tasks &
+      Discussions", then "Attach Files" on the message box and "Attach
+      Workflow Files": "Select submission stage" offers the stages from
+      "Submission" up to "Production", and only "Production" can be
+      chosen; the other stages are greyed, cannot be chosen and give no
+      reason (Rule 14a).
     - **The Journal Manager's side**: Journal Manager: the task sits under
       "Closed"; its "History" includes "Task initiated by {the
       Copyeditor's username} ({roles}) on {date}", "{the Copyeditor's
@@ -1379,18 +1455,11 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - no leave-page question once the window has closed, by "Save", by "Warning" › "Yes" or untouched (Rule 11d; A22 retired) [incidental 2026-09-29]
-  - the "Select submission stage" list of "Workflow Files" offering the stages up to Production and never Done (Rule 14a): likely a bullet in scenario 1's "A workflow file", read before "Submission" is chosen [upstream 2026-09-29]
-  - the browser's leave-page prompt while the window holds unsaved changes (Rule 11d) [incidental 2026-09-29]
-  - an edit of the comments-box discussion, by the submitting Author within the hour and by the Journal Manager, and of the recommendation discussion, each replacing the first message in place (Rules 15a, 15c, 21) [upstream 2026-09-30]
-  - a "Find Template" search for "task", "discussion" and a phrase holding one of them lists the matching templates of that kind, with no "Error" window (Rule 10a; A4 retired) [report 2026-10-02]
   - the guard for A16-A17 (issue report `docs/issues/U37-A16-A17-task-due-today-or-closed-reads-overdue.md`): scenario 4 closes its task three days past due and reads "Task closed by …" in "Activity", and a task due today shows a badge and a line that agree (Rules 2d, 2e) [report 2026-10-02]
   - the guard for A6 (issue report `docs/issues/U37-A6-task-owner-cannot-save-edit.md`): scenario 10's task owner (an assistant or the Author who did not write the first message) saves a new due date from "Edit", and a rewrite of the first message is still refused (Rule 15c) [report 2026-10-02]
   - the guard for OPS1 (issue report `docs/issues/U35-OPS2-preprint-assign-editor-message-not-filled.md`): on a preprint server, "Assign Editor" chosen in the "Add" window fills "Message" with its letter and saves (Rule 10d) [report 2026-10-02]
   - the guard for A3 (issue report `docs/issues/U37-A3-writer-told-of-own-message.md`): after an opening and a reply, the writer's mailbox and Tasks list stay empty while the other participants get both (Side effects) [report 2026-10-02]
   - the guard for A5 (issue report `docs/issues/U37-A5-template-says-it-fills-participants.md`): pressing a template leaves "Participants" unchanged and its line names only what it fills (Rule 10d) [report 2026-10-02]
-  - a discussion opened by "Notify" or "Assign", renamed and then given a new text through "Edit", keeps one first message, its text replaced in place and headed with the sender (Rules 15a, 15e; A9 retired; owed once OJS's, OMP's and OPS's `lib/pkp` carry pkp/pkp-lib#13506) [report 2026-10-02]
-  - an Author renames their own discussion whose first message carries an uploaded file, and the save keeps the file; after the file's "Remove", the rename saves with no file (Rule 15d; A8 retired) [report 2026-10-02]
   - the guard for A7 (issue report `docs/issues/U37-A7-press-server-edit-refusal-raw-key.md`): on a press and a preprint server, the two edit refusals read "You can only edit your own discussion message." and "This discussion message can only be edited within 1 hour of creation." (Rule 15c) [report 2026-10-02]
   - the guard for A10 (issue report `docs/issues/U37-A10-past-due-date-speaks-of-start-date.md`): a past "Due Date" typed into the box is refused with a message that names the due date (Rule 2d) [report 2026-10-02]
   - the guard for A2 (issue report `docs/issues/U37-A2-discussion-window-placeholder-subtitle.md`): the "Add" and "Edit" windows hold no placeholder line under the title (Rule 10) [report 2026-10-02]
@@ -1404,9 +1473,8 @@ Left out of the scenarios above, by reason:
   - the guard for A26 (issue report `docs/issues/U37-A26-no-answer-box-screen-reader-opposite-state.md`): after "No" in a row box's question, the box reads to a screen reader as it looks (Rule 16) [report 2026-10-02]
   - the guard for A25 (issue report `docs/issues/U37-A25-converted-task-not-begun.md`): a discussion turned into a task through "Add Task Details" or "Edit" is saved begun, under "In progress" (Rule 15b) [report 2026-10-02]
   - the guard for A28 (issue report `docs/issues/U37-A28-converted-task-history-says-task-created.md`): a converted discussion's History keeps "Discussion created by …" as its oldest line (Rule 18) [report 2026-10-02]
-  - an assistant's "Select submission stage": the Copyeditor on a submission at Copyediting can choose only "Copyediting", and the Layout Editor at Production only "Production", the other stages greyed (Rule 14a; A24 retired) [incidental 2026-10-05]
-  - a Section Editor taken off a discussion while its window is open, refused a reply with "You do not have permission to modify this discussion." and no longer seeing the item after a reload (Rule 13d) [incidental 2026-10-05]
 - **Rarely met**:
+  - an edit of the comments-box discussion, by the submitting Author within the hour and by the Journal Manager, and of the recommendation discussion, each keeping one first message, its text replaced in place (Rules 15a, 15c, 15e, 21)
   - a participant whose account is disabled: still named on their items and ticked in "Edit", not offered to new items, sent no email and no Tasks row (Rule 22; Side effects)
 - **Nothing new to test**:
   - the Editor, the Production editor and the Site Administrator (Actors, "Manager-level"): the Journal Manager's offer, which the scenarios read as the Journal Manager
@@ -2030,7 +2098,7 @@ Basis: probe. <sup>[f-ops2](#fn-ops2)</sup>
 **r** — `handleFormSubmission()`: on success `setInitialState()`, `onDataChangedFn()` (panel refetch), `closeModal()`; no notify. Client-side required check `Form.vue` → `validator.required` "This field is required.", summary `form.errorSummaryOne` / `form.errorSummaryMany`. `useFormChanged(form, …, {warnOnClose: true})`: `beforeunload` handler while changed; a close callback registered with `SideModal` asks `common.warning` "Warning" / `form.dataHasChanged` with `common.yes` / `common.no`. The form's `@cancel` calls the same injected `closeModal`, so "Cancel" asks too (A11, retired). The `beforeunload` handler goes on the form's `onUnmounted`: with animations off, the closed form outlives its window by about 0.3–0.5 s and still counts as changed, so a reload issued in that gap asks (A22, retired); with the closing slide running, the window and the handler go together. Live-probed 2026-09-23 (Rule 11; Rule 25b; all three apps): no "… errors detected!" line anywhere; the footer "Please correct one error." / "Please correct {n} errors." with "Jump to next error" and no request; the screen-reader list's "Go to undefined" (A21); "Cancel", the close control and Escape all asking on a changed "Add", "Edit" or template window, a "Find Template" search alone not counting, "No" keeping the typed text, "Yes" discarding it; an untouched window closing at once; a leave-page prompt after a typed name, and after a "Yes" discard (A22, retired), none after an untouched close; a save closing the window with no notice. Live-probed 2026-09-29 (Rule 11d; A22; all three apps, two runs; the Journal Manager and a Section Editor): no prompt on a reload or a typed address 2 s or 15 s after a save or a discard; a prompt only for a reload issued within the gap above with animations disabled; with the closing slide running, none even at once (td16). Test run 2026-09-23 (Rule 11a; scenario 2; all three apps): after the task was refused with nobody ticked, ticking two participants left "This field is required." under the owner list, and choosing an owner let "Save" send again; on OJS a press of "Save" before that waited on a `disabled` button for three minutes, the window showing "Please correct one error." with the owner's line only, the message under "Participants" gone.
 
 <a id="fn-s"></a>
-**s** — Accounts: `users.md` (the seeded roster; `admin`/`admin`, everyone else their username twice; throwaway accounts the username twice). Where each scenario runs: 1–7, 10 and the first part of 11 on the seeded journal, press or preprint server `publicknowledge`, with scratch submissions from `POST scenarios/submission` (submitter `author.alex`); 8, 9 and the "Open" part of 11 on scratch contexts from `POST scenarios/context` with throwaway users. On `publicknowledge` the Journal Manager is `manager.maya`, the Section Editor `sectioneditor.ana` and the second Section Editor of 6 `sectioneditor.omar` (`sectioneditor.ravi` on the preprint server), both assigned automatically through the submission's section (`ART`, the press's series `monographs`, `PRE`), the Copyeditor `copyeditor.carla`, the Reviewers `reviewer.julia` and `reviewer.paul`, the Author `author.alex`. Stages: Production is `decisions: ['skipExternalReview', 'sendToProduction']` on OJS and OMP and the submitted seed itself on OPS; Copyediting (10) `decisions: ['skipExternalReview']` with `participants: [{username: 'copyeditor.carla', role: 'copyeditor'}]`; the review round (11) `decisions: ['sendExternalReview']` with `reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}, {username: 'reviewer.paul', status: 'accepted'}]}]`. An item a scenario's given names is seeded with `tasks[]`, which saves it as the "Add" window does, acting as its creator; its emails are faked, so a given item leaves nothing in a mailbox, and every step in a scenario's body is driven on screen. Recipes: 1 — `files: [{file: 'article.pdf'}]` on OJS and OMP (OPS refuses `files`), no tasks; 2, 3 — no tasks; 4 — `{title: 'Update the references', type: 'task', creator: 'manager.maya', participants: ['manager.maya', 'sectioneditor.ana'], owner: 'sectioneditor.ana', dateDue: <three days before today>}`, begun by the default `started`, a past `dateDue` being the key's one lifted rule; 5 — `{title: 'Cover image', creator: 'manager.maya', participants: ['manager.maya', 'sectioneditor.ana']}`; 6 — `{title: 'Proof corrections', creator: 'manager.maya', participants: ['manager.maya', 'sectioneditor.ana', 'author.alex'], message: 'Please send your corrections.'}`, whose seeded Tasks rows are the ones "Delete" takes back; 7 — `{title: 'Proof queries', creator: 'sectioneditor.ana', participants: ['sectioneditor.ana', 'author.alex']}` and `{title: 'Editorial notes', creator: 'manager.maya', participants: ['manager.maya', 'sectioneditor.ana']}`, read as `author.alex`, then `manager.maya`; 8 — a scratch context with throwaway `manager`, `sectionEditor` and `author` users and one submission at Production with the section editor in `participants[]` and `{title: 'Layout notes', creator: <the manager>, participants: [<the manager>, <the section editor>]}`, the templates at the install default; the Section Editor's refusal is the manager's Settings › Workflow address typed; 9 — a scratch context with the same three users; the box is ticked on screen first, then the submission is seeded, submitted with the section editor in `participants[]`, which runs the auto-add at the submit as the wizard's does; 10 — `{title: 'Copyedit the manuscript', type: 'task', creator: 'manager.maya', participants: ['manager.maya', 'copyeditor.carla'], owner: 'copyeditor.carla', dateDue: <fourteen days after today>, started: false}` and "Editorial notes" as in 7, read as `copyeditor.carla`, then `manager.maya`; 11 — the anonymous part on `publicknowledge`, whose "Default Review Mode" is "Anonymous Reviewer/Anonymous Author" (seed-facts); the "Open" part on a scratch journal or press created with `review: {defaultReviewMode: 'open'}` and throwaway `sectionEditor`, `author` and three `externalReviewer` users, seeded as `accepted`, `invited` and `declined`; "Cancel Reviewer" is driven on screen, since no seed key cancels a request. On a preprint server the roster has no `copyeditor.carla`, `layouteditor.leo` or `reviewer.julia`. A seeded `accepted` reviewer lands on step 1 of the review form, which has no panel; the panel shows from step 3. No seed key ages a first message, so the past-the-hour state (Rule 15c) has no seed. Live-probed 2026-09-23: `participants[]`, `tasks[]`, `taskTemplates[]` (with `include`, `roles`, `dueInterval`), `users[]` (with `disabled`), `reviewRounds[]` and `review.defaultReviewMode` each seeded what the screens then showed.
+**s** — Accounts: `users.md` (the seeded roster; `admin`/`admin`, everyone else their username twice; throwaway accounts the username twice). Where each scenario runs: 1–7, 10 and the first part of 11 on the seeded journal, press or preprint server `publicknowledge`, with scratch submissions from `POST scenarios/submission` (submitter `author.alex`); 8, 9 and the "Open" part of 11 on scratch contexts from `POST scenarios/context` with throwaway users. On `publicknowledge` the Journal Manager is `manager.maya`, the Section Editor `sectioneditor.ana` and the second Section Editor of 6 `sectioneditor.omar` (`sectioneditor.ravi` on the preprint server), both assigned automatically through the submission's section (`ART`, the press's series `monographs`, `PRE`), the Copyeditor `copyeditor.carla`, the Reviewers `reviewer.julia` and `reviewer.paul`, the Author `author.alex`. Stages: Production is `decisions: ['skipExternalReview', 'sendToProduction']` on OJS and OMP and the submitted seed itself on OPS; Copyediting (10) `decisions: ['skipExternalReview']` with `participants: [{username: 'copyeditor.carla', role: 'copyeditor'}]`; the review round (11) `decisions: ['sendExternalReview']` with `reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}, {username: 'reviewer.paul', status: 'accepted'}]}]`. An item a scenario's given names is seeded with `tasks[]`, which saves it as the "Add" window does, acting as its creator; its emails are faked, so a given item leaves nothing in a mailbox, and every step in a scenario's body is driven on screen. Recipes: 1 — `files: [{file: 'article.pdf'}]` on OJS and OMP (OPS refuses `files`), no tasks; 2, 3 — no tasks; 4 — `{title: 'Update the references', type: 'task', creator: 'manager.maya', participants: ['manager.maya', 'sectioneditor.ana'], owner: 'sectioneditor.ana', dateDue: <three days before today>}`, begun by the default `started`, a past `dateDue` being the key's one lifted rule; 5 — `{title: 'Cover image', creator: 'manager.maya', participants: ['manager.maya', 'sectioneditor.ana']}`; 6 — `{title: 'Proof corrections', creator: 'manager.maya', participants: ['manager.maya', 'sectioneditor.ana', 'author.alex'], message: 'Please send your corrections.'}`, whose seeded Tasks rows are the ones "Delete" takes back, and the second discussion sent on screen from the Participants panel's "Notify" to the second Section Editor before the scenario starts, no seed key opening one; the second Section Editor's open window and the Journal Manager's "Edit" run in two browsers at once; 7 — `{title: 'Proof queries', creator: 'sectioneditor.ana', participants: ['sectioneditor.ana', 'author.alex']}` and `{title: 'Editorial notes', creator: 'manager.maya', participants: ['manager.maya', 'sectioneditor.ana']}`, read as `author.alex`, then `manager.maya`; 8 — a scratch context with throwaway `manager`, `sectionEditor` and `author` users and one submission at Production with the section editor in `participants[]` and `{title: 'Layout notes', creator: <the manager>, participants: [<the manager>, <the section editor>]}`, the templates at the install default; the Section Editor's refusal is the manager's Settings › Workflow address typed; 9 — a scratch context with the same three users; the box is ticked on screen first, then the submission is seeded, submitted with the section editor in `participants[]`, which runs the auto-add at the submit as the wizard's does; 10 — `{title: 'Copyedit the manuscript', type: 'task', creator: 'manager.maya', participants: ['manager.maya', 'copyeditor.carla'], owner: 'copyeditor.carla', dateDue: <fourteen days after today>, started: false}` and "Editorial notes" as in 7, read as `copyeditor.carla`, then `manager.maya`, and a second submission at Production with `participants: [{username: 'layouteditor.leo', role: 'layoutEditor'}]`, read as `layouteditor.leo`; 11 — the anonymous part on `publicknowledge`, whose "Default Review Mode" is "Anonymous Reviewer/Anonymous Author" (seed-facts); the "Open" part on a scratch journal or press created with `review: {defaultReviewMode: 'open'}` and throwaway `sectionEditor`, `author` and three `externalReviewer` users, seeded as `accepted`, `invited` and `declined`; "Cancel Reviewer" is driven on screen, since no seed key cancels a request. On a preprint server the roster has no `copyeditor.carla`, `layouteditor.leo` or `reviewer.julia`. A seeded `accepted` reviewer lands on step 1 of the review form, which has no panel; the panel shows from step 3. No seed key ages a first message, so the past-the-hour state (Rule 15c) has no seed. Live-probed 2026-09-23: `participants[]`, `tasks[]`, `taskTemplates[]` (with `include`, `roles`, `dueInterval`), `users[]` (with `disabled`), `reviewRounds[]` and `review.defaultReviewMode` each seeded what the screens then showed.
 
 <a id="fn-t"></a>
 **t** — `DiscussionManagerFormDisplayModal.vue`: title `workItem.title`, badge, `common.edit` "Edit" in `#actions` for write access (`disabled: isWorkItemClosed || isLoadingWorkItem`); refetches `…/tasks/{id}` and `refreshFormData()` after each save. The same `useDiscussionManagerForm` in display mode (`canSubmit: false` until `toggleSaveBtnOnDisplayMode()`; save keeps the window open). Task details: `task.startedBy` "Task started by", `common.startDate` "Start Date"; hints `discussion.form.taskInfoConvertToTask` / `…ReopenAndConvertToTask`. Messages: `DiscussionMessages.vue` — `discussion.messageFrom` "Message from {$from}" with `createdByUsername` (or "system"), `formatShortDateTime(dateCreated)`, contents, `File` links per note file; `discussion.addNewMessage` "Add New Message". Live-probed 2026-09-23 (Rule 12; all three apps): the title, badge and "Edit" for the manager, the creator and the task owner, absent for other participants, greyed on a closed item; the numbered participants with their roles; the task details and the convert hints; messages oldest first under "Message from {username}" with date and time; file links downloading the file; "Save" live after a box or "Add New Message", then "Saved" and greyed again; "Start this task", "Complete this task" and "Close this Discussion" plus "Save" starting, closing and reopening the item (one earlier run that saw these boxes do nothing did not reproduce in two later chunks).

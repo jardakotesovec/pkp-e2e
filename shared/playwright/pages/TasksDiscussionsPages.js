@@ -26,7 +26,10 @@
  * - `HistoryWindow` — the row menu's "History" window;
  * - `QuestionDialog` — the small confirm dialogs ("Warning", "Delete",
  *   "Start this task", "Close this Discussion", "Apply Template", "Confirm
- *   Automatic Addition"), each named by its title;
+ *   Automatic Addition") and the "Error" window a refused reply opens,
+ *   each named by its title;
+ * - `PagePrompts` — the browser's own boxes (the leave-page `beforeunload`
+ *   prompt of Rule 11d), recorded and answered;
  * - `TaskTemplatesTab` and `TemplateWindow` — Settings › Workflow › "Tasks
  *   and Discussions" (`managers/TaskTemplateManager/`): the table, its stage
  *   groups, a template's "Auto-add at stage" box and "More Actions", and the
@@ -63,7 +66,16 @@
  *   message box is TinyMCE over `textarea#discussionForm-description-control`;
  *   the discussion window's reply box is `…-newMessage-control`;
  * - the Vue "start task" and every other PUT goes out as a POST with
- *   `X-Http-Method-Override` (screen-notes hU37), so saves are awaited by URL.
+ *   `X-Http-Method-Override` (screen-notes hU37), so saves are awaited by URL;
+ * - the leave-page prompt comes from each open form's own `beforeunload`
+ *   handler (ui-library `useFormChanged`), removed when the form unmounts;
+ *   a closed side window's form unmounts up to about two seconds after the
+ *   window hides with the harness's motion off (screen-notes ccI29,
+ *   tojs3712), so a "no prompt" read first waits for the page to hold no
+ *   such handler (`TasksDiscussionsPanel.expectLeaveUnguarded()`);
+ * - the "Workflow Files" stage list is a native `select` with no
+ *   placeholder (no stage chosen reads as the value ""), a stage the person
+ *   cannot choose an `option[disabled]` with no title (tojs3712).
  */
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
@@ -89,6 +101,7 @@ const TEXT = {
         'The form was not saved because 1 error(s) were encountered. Please correct these errors and try again.',
     warning: 'The data on this form has changed. Do you wish to continue without saving?',
     noAccessToAdd: 'To add a new message, please assign yourself as a participant.',
+    noPermissionToModify: 'You do not have permission to modify this discussion.',
     convertHint: 'You can convert this into a task by clicking Edit.',
     convertHintClosed: 'You can convert this into a task by re-opening the discussion and clicking Edit.',
     templatesLabel: 'Templates to get you started!',
@@ -215,6 +228,58 @@ class QuestionDialog {
     }
 }
 
+/**
+ * The browser's own boxes a page raises (the leave-page `beforeunload`
+ * prompt of Rule 11d; any `confirm()`), recorded as `{type, message}` in
+ * order. Every box is accepted, so a navigation that meets one goes on,
+ * unless `dismissNext()` queued a dismissal for the next one (stay on the
+ * page). Register it before the page's first move and attach no other
+ * `dialog` listener to the page: two listeners answer one box twice.
+ */
+class PagePrompts {
+    /** @param {import('@playwright/test').Page} page */
+    constructor(page) {
+        this.page = page;
+        /** @type {{type: string, message: string, answer: string}[]} */
+        this.seen = [];
+        /** @type {string[]} */
+        this.queue = [];
+        page.on('dialog', (dialog) => {
+            const answer = this.queue.shift() || 'accept';
+            this.seen.push({type: dialog.type(), message: dialog.message(), answer});
+            (answer === 'accept' ? dialog.accept() : dialog.dismiss()).catch(() => {});
+        });
+    }
+
+    /** Dismiss the next box (the page stays) instead of accepting it. */
+    dismissNext() {
+        this.queue.push('dismiss');
+    }
+
+    /** How many boxes the page raised so far. */
+    count() {
+        return this.seen.length;
+    }
+
+    /** The boxes' types, in order. */
+    types() {
+        return this.seen.map((box) => box.type);
+    }
+
+    /**
+     * Reload the way the browser's reload button does, with a dismissal
+     * queued for the prompt it raises: the page stays, so nothing waits for
+     * a load (Playwright's `reload()` would wait for one that never comes).
+     * Returns once the prompt was raised.
+     */
+    async reloadAndStay() {
+        const before = this.count();
+        this.dismissNext();
+        await this.page.evaluate(() => window.location.reload()).catch(() => {});
+        await expect.poll(() => this.count(), {timeout: 30_000, message: 'the reload raised a box'}).toBe(before + 1);
+    }
+}
+
 class TasksDiscussionsPanel extends BasePage {
     /**
      * @param {import('@playwright/test').Page} page
@@ -263,6 +328,30 @@ class TasksDiscussionsPanel extends BasePage {
     async reland() {
         await this.page.goto(this.page.url());
         await this.expectSettled();
+    }
+
+    /**
+     * Wait until no form on the page would raise the leave-page prompt
+     * (Rule 11d): a side window that closed keeps its form, and the form's
+     * `beforeunload` handler, mounted for a moment after it hides, up to
+     * about two seconds with the harness's motion off (screen-notes ccI29;
+     * with the app's own closing slide the two coincide). Read through a
+     * cancelable synthetic `beforeunload` the page's handlers answer;
+     * nothing is sent. Call it before a "no prompt" reload, so what the
+     * reload shows is the page's settled state, not the closing form.
+     */
+    async expectLeaveUnguarded() {
+        await expect
+            .poll(
+                () =>
+                    this.page.evaluate(() => {
+                        const event = new Event('beforeunload', {cancelable: true});
+                        window.dispatchEvent(event);
+                        return event.defaultPrevented;
+                    }),
+                {timeout: 30_000, message: 'a form on the page still guards against leaving'}
+            )
+            .toBe(false);
     }
 
     /**
@@ -871,6 +960,16 @@ class ItemWindow extends BasePage {
     removeButtons() {
         return this.messageField().getByRole('button', {name: 'Remove', exact: true});
     }
+
+    /** The "Remove" control beside the file `name` under the message box. */
+    removeButton(name) {
+        return this.messageField()
+            .locator('div')
+            .filter({has: this.page.getByText(name, {exact: true})})
+            .filter({has: this.page.getByRole('button', {name: 'Remove', exact: true})})
+            .last()
+            .getByRole('button', {name: 'Remove', exact: true});
+    }
 }
 
 class DiscussionWindow extends BasePage {
@@ -1039,6 +1138,25 @@ class DiscussionWindow extends BasePage {
         await expect(this.savedStatus()).toBeVisible({timeout: 30_000});
     }
 
+    /**
+     * "Save" with a reply typed, refused by the server (Rule 13d): the
+     * note request answers 4xx and the "Error" window opens over the
+     * discussion window; returns the window, unanswered.
+     */
+    async saveReplyRefused() {
+        const answered = this.page.waitForResponse(
+            (r) => /\/tasks\/\d+\/notes?$/.test(new URL(r.url()).pathname) && r.request().method() !== 'GET',
+            {timeout: 30_000}
+        );
+        await this.pressSave();
+        const status = (await answered).status();
+        expect(status, `the refused reply answered ${status}`).toBeGreaterThanOrEqual(400);
+        expect(status).toBeLessThan(500);
+        const error = new QuestionDialog(this.page, 'Error');
+        await error.expectOpen();
+        return error;
+    }
+
     /** "Save" after a status box: the start/close/open request answers 200 and "Saved" shows. */
     async saveStatus() {
         const answered = this.page.waitForResponse(
@@ -1130,6 +1248,25 @@ class AttachFilesWindow extends BasePage {
 
     async chooseStage(label) {
         await this.stageSelect().selectOption({label});
+    }
+
+    /** A stage of the list by its label (an `option`; a greyed one is `disabled`). */
+    stageOption(label) {
+        return this.stageSelect().locator('option').filter({hasText: exactText(label)});
+    }
+
+    /**
+     * The stage list as `{label, disabled, title}`, in order (Rule 14a; a
+     * greyed stage's `title` would be the reason it gives). Waits for the
+     * list to be filled.
+     */
+    async stageOptions() {
+        await expect(this.stageSelect().locator('option').first()).toBeAttached({timeout: 30_000});
+        return this.stageSelect()
+            .locator('option')
+            .evaluateAll((options) =>
+                options.map((o) => ({label: o.textContent.trim(), disabled: o.disabled, title: o.title || ''}))
+            );
     }
 
     /** A file's box in the chosen stage's lists. */
@@ -1441,6 +1578,7 @@ module.exports = {
     AttachFilesWindow,
     HistoryWindow,
     QuestionDialog,
+    PagePrompts,
     TaskTemplatesTab,
     TemplateWindow,
     downloadFromNewTab,

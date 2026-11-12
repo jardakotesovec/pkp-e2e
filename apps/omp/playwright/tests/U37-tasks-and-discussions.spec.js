@@ -9,36 +9,13 @@
  * Stage" and "External Review Stage", and the External Review round.
  * Spec: docs/specs/U37-tasks-and-discussions.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section is the record of everything else left out):
- * - A1 🐞: the install mounts the app-changes row 12 overlay (bin/mount.js),
- *   so a press saves and notifies as a journal does; nothing reads the
- *   as-shipped crash.
- * - A2 🐞: no test reads the line under the "Add" window's title.
- * - A3 🐞: mail reads pick the message by its text; nothing counts the
- *   writer's own copy, and S5's no-mail control reads only mails that do
- *   not carry the reply.
- * - A5 🐞: S3 reads "Name", the message and the task box after a template
- *   press, never "Participants".
- * - A21 🐞: S2 and S8 read the field errors and the summary line, never the
- *   screen-reader list under it.
- * - A22 ✅ (retired 2026-09-29): every page still accepts the browser's
- *   leave-page prompt; no test asserts whether it appears.
- * - A25 🐞, A28 🐞: S5 reads the converted task's row, owner, date and
- *   messages, never whether it is started or its History's first line.
- * - A26 🐞: S4, S5 and S9 read the state after "No" only after a reload.
- * - A6 🐞: S10 reads the Copyeditor's menu entries and never saves "Edit".
- * - OMP1 🐞: S11 reads the reviewers' round line, never the role word
- *   under their name.
- * - A13 ❓: S4 reads that the closed task moved to "Closed" only.
- * - A18 ❓: S9 never reads the auto-added item's "Activity" or History.
- * - A20 ❓: S11 reads the cancelled reviewer's item's participants, never
- *   its "Edit".
- * - A7 🐞, A10 🐞, A15 🐞, A16 🐞, A17 🐞, A24 🐞,
- *   A29 🐞, A31 🐞, A12 ❓, A14 ❓, A19 ❓, A23 ❓, A27 ❓, A30 ❓: no scenario
- *   reaches them here.
- * - OPS1, OPS2: other apps' territory.
+ * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
+ * contract, a ❓ is parked, not a gap; the spec's Coverage section is the
+ * record of everything else left out): A1 🐞, A2 🐞, A3 🐞, A5 🐞, A6 🐞,
+ * A7 🐞, A10 🐞, A15 🐞, A16 🐞, A17 🐞, A21 🐞, A25 🐞, A26 🐞, A28 🐞,
+ * A29 🐞, A31 🐞, A32 🐞, A33 🐞, A34 🐞, A36 🐞, OMP1 🐞, A12 ❓, A13 ❓,
+ * A14 ❓, A18 ❓, A19 ❓, A20 ❓, A23 ❓, A27 ❓, A30 ❓, A35 ❓; OPS1 and
+ * OPS2 do not arise on a press.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (A1, A7). Every test seeds its own submission with a unique
@@ -55,9 +32,15 @@
  * Author", every discussion email's "Reply to this comment at …" line),
  * then by its text. Every absence is read settled (the panel's three groups
  * fetched, an exact list, a mail read after a control) and paired with a
- * positive control taken the same way (M4, M6). A move issued at once after a side window closes can
- * still meet the closing form's leave-page handler (spec Rule 11d):
- * every page accepts the prompt. S9's auto-add box is ticked on screen,
+ * positive control taken the same way (M4, M6). With the harness's motion
+ * off, a closed side window's form keeps its leave-page handler for about
+ * half a second after the window hides (screen-notes ccI29), where a
+ * person's closing slide leaves none: every page accepts the prompt, and
+ * S2, which reads the prompt (spec Rule 11d), records every one and waits
+ * for the page's own "beforeunload" listeners to fall back to the count it
+ * had with no window open (read through DevTools) before each move. S6's
+ * second discussion is sent on screen with the Participants panel's
+ * "Notify" (no seed key opens one). S9's auto-add box is ticked on screen,
  * then the submission is seeded, as footnote s says; S11's "Cancel
  * Reviewer" is the Reviewers panel's own control. Waits are web-first (A5).
  * Everything runs in the parallel `omp` project.
@@ -67,6 +50,8 @@ const {test, expect} = require('../support/fixtures.js');
 const {TasksPanel} = require('../../../../shared/playwright/pages/NotificationsPages.js');
 const {ReviewWizardPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
 const {cancelReviewer} = require('../pages/ReviewerAssignmentPages.js');
+const {ParticipantsPanel} = require('../../../../shared/playwright/pages/StageParticipantsPages.js');
+const appContext = require('../support/app.context.js');
 const {
     TEXT,
     TasksDiscussionsPanel,
@@ -85,6 +70,7 @@ const SECTION_EDITOR = 'sectioneditor.ana';
 const SECOND_SECTION_EDITOR = 'sectioneditor.omar';
 const AUTHOR = 'author.alex';
 const COPYEDITOR = 'copyeditor.carla';
+const LAYOUT_EDITOR = 'layouteditor.leo';
 const REVIEWER = 'reviewer.julia';
 const SECOND_REVIEWER = 'reviewer.paul';
 
@@ -253,6 +239,116 @@ async function mailWith(pkpMail, username, subject, submissionId, text) {
 /** The names of a mail's attachments. */
 const attachmentNames = (message) => (message.Attachments || []).map((a) => a.FileName);
 
+/** The press's workflow stages as "Select submission stage" lists them, up to Production (Rule 14a; footnote g). */
+const WORKFLOW_STAGES = ['Submission', 'Internal Review', 'External Review', 'Copyediting', 'Production'];
+
+/**
+ * "Select submission stage" of an open "Workflow Files" window: no stage
+ * chosen, the press's stages listed; with `only`, that stage alone can be
+ * chosen and every other one is greyed, with no word beside it (Rule 14a).
+ */
+async function expectStageList(attach, {only = null} = {}) {
+    const select = attach.stageSelect();
+    const options = select.locator('option');
+    await expect(options).toHaveText(WORKFLOW_STAGES);
+    await expect(select).toHaveValue('');
+    await expect(select.locator('option:checked')).toHaveCount(0);
+    if (only) {
+        for (const stage of WORKFLOW_STAGES) {
+            const option = options.filter({hasText: new RegExp(`^${esc(stage)}$`)});
+            if (stage === only) {
+                await expect(option).toBeEnabled();
+            } else {
+                await expect(option, `"${stage}" greyed`).toBeDisabled();
+                await expect(option).not.toHaveAttribute('title', /./);
+            }
+        }
+        await attach.chooseStage(only);
+        await expect(select.locator('option:checked')).toHaveText(only);
+    }
+}
+
+/**
+ * A signed-in page that records every browser leave-page prompt
+ * (`beforeunload`): each is accepted, but the one asked while `stayNext`
+ * is set is dismissed, so the page stays (spec Rule 11d). Other browser
+ * boxes are dismissed.
+ */
+async function promptRecordingPage(asUser, username) {
+    const page = await (await asUser(username)).newPage();
+    const prompts = {seen: [], stayNext: false};
+    page.on('dialog', (dialog) => {
+        if (dialog.type() === 'beforeunload') {
+            prompts.seen.push(dialog.type());
+            const stay = prompts.stayNext;
+            prompts.stayNext = false;
+            (stay ? dialog.dismiss() : dialog.accept()).catch(() => {});
+        } else {
+            dialog.dismiss().catch(() => {});
+        }
+    });
+    return {page, prompts};
+}
+
+/** The number of `beforeunload` listeners on the page's window, read through DevTools (no request to the app). */
+async function leaveListeners(page) {
+    const cdp = await page.context().newCDPSession(page);
+    try {
+        const {result} = await cdp.send('Runtime.evaluate', {expression: 'window'});
+        const {listeners} = await cdp.send('DOMDebugger.getEventListeners', {objectId: result.objectId});
+        return listeners.filter((l) => l.type === 'beforeunload').length;
+    } finally {
+        await cdp.detach().catch(() => {});
+    }
+}
+
+/**
+ * A closed side window's form has let go of the page: its leave-page
+ * listeners are back to the count the page had with no window open (the
+ * harness's motion lever leaves them up for about half a second after the
+ * window hides, where a person's closing slide leaves none; screen-notes
+ * ccI29).
+ */
+async function windowLetGo(page, baseline) {
+    await expect.poll(() => leaveListeners(page), {timeout: 15_000, message: 'the closed window\'s leave-page listeners gone'}).toBe(baseline);
+}
+
+/**
+ * A reply's "Save" refused by the server: the note request answers a 4xx
+ * and an "Error" window opens with `message` and "OK" (Rule 13d).
+ */
+async function saveReplyRefused(win, message) {
+    const page = win.page;
+    const answered = page.waitForResponse(
+        (r) => /\/tasks\/\d+\/notes?$/.test(new URL(r.url()).pathname) && r.request().method() !== 'GET',
+        {timeout: 30_000}
+    );
+    await win.pressSave();
+    const answer = await answered;
+    expect(answer.status(), `the refused reply answered ${answer.status()}`).toBeGreaterThanOrEqual(400);
+    expect(answer.status()).toBeLessThan(500);
+    const error = page.getByRole('dialog', {name: 'Error', exact: true});
+    await expect(error).toBeVisible({timeout: 30_000});
+    await expect(error).toContainText(message);
+    await expect(error.getByRole('button', {name: 'OK', exact: true})).toBeVisible();
+    return error;
+}
+
+/**
+ * Wait for the template search's answer to `words` (Enter in "Find
+ * Template"), and require it to be 200 (Rule 10a; the retired A4 was a 500).
+ */
+async function searchTemplates(add, words) {
+    const answered = add.page.waitForResponse(
+        (r) => /\/editTaskTemplates$/.test(new URL(r.url()).pathname) && new URL(r.url()).searchParams.get('search') === words,
+        {timeout: 30_000}
+    );
+    await add.findTemplate().fill(words);
+    await add.findTemplate().press('Enter');
+    const answer = await answered;
+    expect(answer.status(), `the search "${words}" answered ${answer.status()}`).toBe(200);
+}
+
 test.describe('tasks and discussions', () => {
     test('S1: open a discussion and reply', {tag: '@smoke'}, async ({asUser, ompApi, pkpMail}, testInfo) => {
         test.slow();
@@ -366,10 +462,9 @@ test.describe('tasks and discussions', () => {
         ]);
         await mailWith(pkpMail, MANAGER, NAME_, submissionId, REPLY);
 
-        // A workflow file: "Attach Files" offers both sources; "Submission"
-        // and article.pdf; listed with "Remove"; saved, the message links it
-        // and it downloads; the Journal Manager's email carries it, and
-        // "Submission Files" still lists it once.
+        // The stages offered: "Attach Files" offers both sources; "Select
+        // submission stage" opens with no stage chosen and lists the stages
+        // from "Submission" up to "Production".
         await se.panel.reland();
         const seWin2 = await se.panel.openItem(NAME_);
         await seWin2.addNewMessage();
@@ -377,6 +472,12 @@ test.describe('tasks and discussions', () => {
         expect(await attach.sourceHeadings()).toEqual(['Upload File', 'Workflow Files']);
         await expect(attach.uploadButton()).toBeVisible();
         await attach.openWorkflowFiles();
+        await expectStageList(attach);
+
+        // A workflow file: "Submission" and article.pdf; listed with
+        // "Remove"; saved, the message links it and it downloads; the
+        // Journal Manager's email carries it, and "Submission Files" still
+        // lists it once.
         await attach.chooseStage('Submission');
         await attach.attachWorkflowFile('article.pdf');
         await expect(seWin2.attachedFile('article.pdf')).toBeVisible();
@@ -413,7 +514,12 @@ test.describe('tasks and discussions', () => {
         const {submissionId} = await seed(ompApi, tag, {decisions: TO_PRODUCTION});
         const NAME_ = 'Layout question';
         const MESSAGE = 'Is the layout final?';
-        const jm = await panelAs(asUser, MANAGER, submissionId, 'production');
+        const MARGIN = 'Margin note';
+        const {page, prompts} = await promptRecordingPage(asUser, MANAGER);
+        const jm = {page, panel: new TasksDiscussionsPanel(page, PRESS, {title: PANEL.production})};
+        await jm.panel.gotoEditorial(submissionId, MENU_KEY.production);
+        // The page's own leave-page listeners with no window open.
+        const baseline = await leaveListeners(page);
 
         // Required fields: "Save" at once.
         let add = await jm.panel.openAdd();
@@ -463,6 +569,19 @@ test.describe('tasks and discussions', () => {
         await add.saveExpectRefused();
         await expect(add.fieldError('participants')).toHaveText(TEXT.oneOwner);
 
+        // Leaving the page with unsaved changes: the reload raises the
+        // browser's leave-page prompt; dismissed, the page stays, the window
+        // as it was. The reload the dismissal cancelled never settles, so it
+        // is left to time out on its own.
+        expect(prompts.seen).toEqual([]);
+        prompts.stayNext = true;
+        const asked = page.waitForEvent('dialog', {predicate: (d) => d.type() === 'beforeunload', timeout: 30_000});
+        page.reload({timeout: 30_000}).catch(() => {});
+        await asked;
+        expect(prompts.seen).toEqual(['beforeunload']);
+        await expect(add.root).toBeVisible();
+        await expect(add.nameField()).toHaveValue(NAME_);
+
         // "Cancel" on a changed window: "Warning"; "No" keeps it; Escape asks
         // again; "Yes" closes it and the panel is as it was.
         await add.cancelButton().click();
@@ -474,7 +593,7 @@ test.describe('tasks and discussions', () => {
         await expect(add.nameField()).toHaveValue(NAME_);
         await add.nameField().focus();
         // lint-ok: escape Rule 11c claims the key; the focus is in the window's box and the window is the top layer
-        await jm.page.keyboard.press('Escape');
+        await page.keyboard.press('Escape');
         await warning.expectOpen(TEXT.warning);
         await warning.answer('Yes');
         await expect(add.root).toHaveCount(0, {timeout: 30_000});
@@ -484,18 +603,50 @@ test.describe('tasks and discussions', () => {
         await expect(jm.panel.itemRows()).toHaveCount(0);
 
         // An untouched window closes at once.
+        await windowLetGo(page, baseline);
         await jm.panel.reland();
         add = await jm.panel.openAdd();
         await add.cancelUntouched();
 
+        // Leaving the page once the window has closed: untouched, after
+        // "Warning" › "Yes", and after a successful "Save", the reload asks
+        // nothing; the saved discussion is listed.
+        await windowLetGo(page, baseline);
+        await page.reload();
+        await jm.panel.expectSettled();
+        expect(prompts.seen).toEqual(['beforeunload']);
+        add = await jm.panel.openAdd();
+        await add.nameField().fill(MARGIN);
+        await add.cancelButton().click();
+        await add.warning().expectOpen(TEXT.warning);
+        await add.warning().answer('Yes');
+        await expect(add.root).toHaveCount(0, {timeout: 30_000});
+        await windowLetGo(page, baseline);
+        await page.reload();
+        await jm.panel.expectSettled();
+        expect(prompts.seen).toEqual(['beforeunload']);
+        await expect(jm.panel.itemRows()).toHaveCount(0);
+        add = await jm.panel.openAdd();
+        await add.nameField().fill(MARGIN);
+        await add.typeMessage('Please check the margins.');
+        await add.tick(SECTION_EDITOR);
+        await add.saveExpectClosed();
+        await windowLetGo(page, baseline);
+        await page.reload();
+        await jm.panel.expectSettled();
+        expect(prompts.seen).toEqual(['beforeunload']);
+        await jm.panel.expectInGroup(MARGIN, 'In progress');
+
         // Control: the same discussion with the Section Editor ticked saves.
-        await jm.panel.reland();
         add = await jm.panel.openAdd();
         await add.nameField().fill(NAME_);
         await add.typeMessage(MESSAGE);
         await add.tick(SECTION_EDITOR);
         await add.saveExpectClosed();
+        await windowLetGo(page, baseline);
+        await jm.panel.reland();
         await jm.panel.expectInGroup(NAME_, 'In progress');
+        expect(prompts.seen).toEqual(['beforeunload']);
     });
 
     test('S3: templates in the "Add" window', async ({asUser, ompApi, pkpMail}, testInfo) => {
@@ -524,6 +675,29 @@ test.describe('tasks and discussions', () => {
         await add.findTemplate().press('Enter');
         await expect(add.templateButton('Discussion', 'Discussion (Production)')).toHaveCount(0, {timeout: 30_000});
         await expect(add.templateButton('Discussion', 'Assign Editor')).toBeVisible();
+        await add.clearSearch().click();
+        await expect(add.templateButton('Discussion', 'Discussion (Production)')).toBeVisible({timeout: 30_000});
+        await expect.poll(() => add.templateNames()).toEqual(all);
+
+        // A kind in the search: "task" lists none (every template of the
+        // stage is a discussion), "discussion" both, "discussion assign"
+        // "Assign Editor" alone; each search answered, and no "Error"
+        // window; the clear control brings the whole list back.
+        const errorWindow = jm.page.getByRole('dialog', {name: 'Error', exact: true});
+        await searchTemplates(add, 'task');
+        await expect(add.noTemplatesLine()).toBeVisible({timeout: 30_000});
+        await expect(add.templateList().getByRole('button')).toHaveCount(0);
+        await expect(errorWindow).toHaveCount(0);
+        await searchTemplates(add, 'discussion');
+        await expect(add.templateButton('Discussion', 'Discussion (Production)')).toBeVisible({timeout: 30_000});
+        await expect(add.templateButton('Discussion', 'Assign Editor')).toBeVisible();
+        await expect.poll(() => add.templateNames()).toEqual(all);
+        await expect(add.noTemplatesLine()).toHaveCount(0);
+        await expect(errorWindow).toHaveCount(0);
+        await searchTemplates(add, 'discussion assign');
+        await expect(add.templateButton('Discussion', 'Discussion (Production)')).toHaveCount(0, {timeout: 30_000});
+        await expect(add.templateButton('Discussion', 'Assign Editor')).toBeVisible();
+        await expect(errorWindow).toHaveCount(0);
         await add.clearSearch().click();
         await expect(add.templateButton('Discussion', 'Discussion (Production)')).toBeVisible({timeout: 30_000});
         await expect.poll(() => add.templateNames()).toEqual(all);
@@ -794,10 +968,27 @@ test.describe('tasks and discussions', () => {
         const OLD_TEXT = 'Please send your corrections.';
         const NEW_TEXT = 'Please send your final corrections.';
         const IMAGE = 'profile-image-400.png';
+        const REFUSED_REPLY = 'No corrections from me.';
+        const NOTIFIED = 'Discussion (Production)';
+        const NOTIFY_TEXT = 'Please check the figures.';
+        const FIGURE_CHECK = 'Figure check';
+        const FIGURE_TEXT = 'Please check figures 2 and 3.';
         const {submissionId} = await seed(ompApi, tag, {
             decisions: TO_PRODUCTION,
             tasks: [{title: OLD, creator: MANAGER, participants: [MANAGER, SECTION_EDITOR, AUTHOR], message: OLD_TEXT}],
         });
+
+        // The given's second discussion: the Journal Manager's "Notify" on
+        // the Participants panel to the second Section Editor (no seed key
+        // opens one; a predefined message is chosen first, scenarios.md
+        // "Decision behaviour worth knowing").
+        const jmPage = await pageFor(asUser, MANAGER);
+        const participants = new ParticipantsPanel(jmPage, PRESS, {appContext});
+        await participants.goto(submissionId, {menuKey: MENU_KEY.production});
+        const notify = await participants.openNotify(NAME[SECOND_SECTION_EDITOR], ROLE.sectionEditor);
+        await notify.chooseTemplate(NOTIFIED);
+        await notify.typeMessage(NOTIFY_TEXT);
+        await notify.send();
 
         // The Author sees the discussion before the edit (the control for
         // "no longer" below), and the Section Editor holds its Tasks row
@@ -813,7 +1004,8 @@ test.describe('tasks and discussions', () => {
         await seTasks.close();
 
         // The row menu, in order, "Delete" in red.
-        const jm = await panelAs(asUser, MANAGER, submissionId, 'production');
+        const jm = {page: jmPage, panel: new TasksDiscussionsPanel(jmPage, PRESS, {title: PANEL.production})};
+        await jm.panel.gotoEditorial(submissionId, MENU_KEY.production);
         let win = await jm.panel.openItem(OLD);
         const firstHead = flat(await win.messageHead(0).innerText());
         await win.close();
@@ -896,6 +1088,67 @@ test.describe('tasks and discussions', () => {
         await au.panel.expectNoRow(NEW);
         await expect(au.panel.row(OLD)).toHaveCount(0);
 
+        // The second Section Editor's open window: a reply typed, not saved.
+        const se2 = await panelAs(asUser, SECOND_SECTION_EDITOR, submissionId, 'production');
+        const se2Win = await se2.panel.openItem(NEW);
+        await se2Win.addNewMessage();
+        await se2Win.typeReply(REFUSED_REPLY);
+
+        // Taken off meanwhile: the Journal Manager's "Edit" unticks them.
+        await jm.panel.reland();
+        const takeOff = await jm.panel.openEdit(NEW);
+        await expect(takeOff.participantBox(SECOND_SECTION_EDITOR)).toBeChecked();
+        await takeOff.tick(SECOND_SECTION_EDITOR, false);
+        await takeOff.saveExpectClosed();
+
+        // The reply refused in the window still open: "Error" with the
+        // reason and "OK"; after a reload the panel no longer lists the
+        // discussion (control: the Notify discussion is still theirs).
+        const refused = await saveReplyRefused(se2Win, 'You do not have permission to modify this discussion.');
+        await refused.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(refused).toHaveCount(0, {timeout: 30_000});
+        await se2.panel.reland();
+        await se2.panel.expectInGroup(NOTIFIED, 'In progress');
+        await se2.panel.expectNoRow(NEW);
+
+        // Nothing saved: the Journal Manager reads no such message.
+        await jm.panel.reland();
+        win = await jm.panel.openItem(NEW);
+        await expect(win.messages()).toHaveCount(1);
+        await expect(win.messageBody(0)).toHaveText(NEW_TEXT);
+        await expect(win.discussion()).not.toContainText(REFUSED_REPLY);
+        await win.close();
+
+        // The discussion "Notify" opened: the sender under "Created by:";
+        // "Edit" holds the message sent; a rename keeps it as the one first
+        // message under the sender; a new text replaces it in place, at the
+        // time it had.
+        await jm.panel.reland();
+        await expect(jm.panel.ownerLine(NOTIFIED)).toHaveText(`Created by: ${MANAGER}`);
+        let notifyEdit = await jm.panel.openEdit(NOTIFIED);
+        await expect.poll(() => notifyEdit.messageText()).toBe(NOTIFY_TEXT);
+        await notifyEdit.nameField().fill(FIGURE_CHECK);
+        await notifyEdit.saveExpectClosed();
+        await jm.panel.reland();
+        await expect(jm.panel.row(FIGURE_CHECK)).toHaveCount(1);
+        await expect(jm.panel.row(NOTIFIED)).toHaveCount(0);
+        win = await jm.panel.openItem(FIGURE_CHECK);
+        await expect(win.messages()).toHaveCount(1);
+        await expect(win.messageHead(0)).toContainText(`Message from ${MANAGER}`);
+        await expect(win.messageBody(0)).toHaveText(NOTIFY_TEXT);
+        const notifyHead = flat(await win.messageHead(0).innerText());
+        await win.close();
+        await jm.panel.reland();
+        notifyEdit = await jm.panel.openEdit(FIGURE_CHECK);
+        await notifyEdit.typeMessage(FIGURE_TEXT);
+        await notifyEdit.saveExpectClosed();
+        await jm.panel.reland();
+        win = await jm.panel.openItem(FIGURE_CHECK);
+        await expect(win.messageBody(0)).toHaveText(FIGURE_TEXT);
+        await expect(win.messages()).toHaveCount(1);
+        expect(flat(await win.messageHead(0).innerText())).toBe(notifyHead);
+        await win.close();
+
         // "Delete": "Cancel" keeps the row; "OK" removes it and its Tasks row.
         await jm.panel.reland();
         let dialog = await jm.panel.openDelete(NEW);
@@ -932,6 +1185,8 @@ test.describe('tasks and discussions', () => {
         const QUERIES = 'Proof queries';
         const NOTES = 'Editorial notes';
         const FIGURE = 'Figure 3';
+        const CORRECTED = 'Figure 3 corrected';
+        const FINAL = 'Figure 3 final';
         const REPLY = 'The proofs look fine.';
         const IMAGE = 'profile-image-400.png';
         const {submissionId} = await seed(ompApi, tag, {
@@ -1008,6 +1263,43 @@ test.describe('tasks and discussions', () => {
         await expect(jmWin.noAccessLine()).toBeVisible();
         await expect(jmWin.addNewMessageButton()).toHaveCount(0);
         await jmWin.close();
+
+        // The Author's rename, the file kept: "Edit" lists the upload with
+        // "Remove"; saved, the row takes the new name and the first message
+        // still links the file.
+        await win.close();
+        await au.panel.reland();
+        let edit = await au.panel.openEdit(FIGURE);
+        await expect(edit.attachedFile(IMAGE)).toBeVisible();
+        await expect(edit.removeButtons()).toHaveCount(1);
+        await edit.nameField().fill(CORRECTED);
+        await edit.saveExpectClosed();
+        await au.panel.reland();
+        await expect(au.panel.row(CORRECTED)).toHaveCount(1);
+        await expect(au.panel.row(FIGURE)).toHaveCount(0);
+        win = await au.panel.openItem(CORRECTED);
+        await expect(win.messages()).toHaveCount(1);
+        await expect(win.fileLink(IMAGE)).toHaveCount(1);
+        await win.close();
+
+        // The Author's rename, the file removed: "Remove", then the rename
+        // saves, and the first message no longer links the file.
+        await au.panel.reland();
+        edit = await au.panel.openEdit(CORRECTED);
+        await expect(edit.attachedFile(IMAGE)).toBeVisible();
+        await edit.removeButtons().first().click();
+        await expect(edit.attachedFile(IMAGE)).toHaveCount(0);
+        await expect(edit.removeButtons()).toHaveCount(0);
+        await edit.nameField().fill(FINAL);
+        await edit.saveExpectClosed();
+        await au.panel.reland();
+        await expect(au.panel.row(FINAL)).toHaveCount(1);
+        await expect(au.panel.row(CORRECTED)).toHaveCount(0);
+        win = await au.panel.openItem(FINAL);
+        await expect(win.messages()).toHaveCount(1);
+        await expect(win.messageBody(0)).toHaveText('Here is the corrected figure 3.');
+        await expect(win.fileLink(IMAGE)).toHaveCount(0);
+        await win.close();
 
         // Control: the Journal Manager's panel lists "Editorial notes", which
         // the Author's did not.
@@ -1257,6 +1549,11 @@ test.describe('tasks and discussions', () => {
                 {title: NOTES, creator: MANAGER, participants: [MANAGER, SECTION_EDITOR]},
             ],
         });
+        // The second submission, at Production with the Layout Editor (footnote s).
+        const production = await seed(ompApi, makeTag('s10l', testInfo), {
+            decisions: TO_PRODUCTION,
+            participants: [{username: LAYOUT_EDITOR, role: 'layoutEditor'}],
+        });
 
         // The Copyeditor's panel: the task under "Yet to begin", its menu.
         const ce = await panelAs(asUser, COPYEDITOR, submissionId, 'copyediting');
@@ -1298,6 +1595,26 @@ test.describe('tasks and discussions', () => {
         await win.statusBox('Complete this task').check();
         await win.saveStatus();
         await expect(win.badge('Closed')).toBeVisible();
+
+        // The Copyeditor's stages: the window closed and opened again,
+        // "Attach Workflow Files" lists every stage up to Production and
+        // only "Copyediting" can be chosen.
+        await win.close();
+        await ce.panel.reland();
+        const again = await ce.panel.openItem(TASK);
+        await again.addNewMessage();
+        const ceAttach = await again.openAttachFiles();
+        await ceAttach.openWorkflowFiles();
+        await expectStageList(ceAttach, {only: 'Copyediting'});
+
+        // The Layout Editor's stages, on the second submission at
+        // Production: from the "Add" window's message box, only "Production"
+        // can be chosen.
+        const le = await panelAs(asUser, LAYOUT_EDITOR, production.submissionId, 'production');
+        const leAdd = await le.panel.openAdd();
+        const leAttach = await leAdd.openAttachFiles();
+        await leAttach.openWorkflowFiles();
+        await expectStageList(leAttach, {only: 'Production'});
 
         // The Journal Manager's side: under "Closed"; the History; the reply by email with the file.
         const jm = await panelAs(asUser, MANAGER, submissionId, 'copyediting');
