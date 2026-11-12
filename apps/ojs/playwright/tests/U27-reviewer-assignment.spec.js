@@ -82,6 +82,7 @@ const {
     waitForLegacyFormSettled,
 } = require('../pages/ReviewStagePages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {EditorialDashboardPage} = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
 const {ReviewerAssignmentsPage, ReviewWizardPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
 const {ReviewSettingsPage} = require('../../../../shared/playwright/pages/ReviewSettingsPages.js');
 const {legacyAnswerApplied} = require('../support/legacy.js');
@@ -1753,8 +1754,13 @@ test.describe('reviewer-assignment', () => {
         test.slow();
         test.setTimeout(240_000);
         const tag = makeTag('s14', testInfo);
+        // A second Reviewer's review is seeded submitted and unread (fn s):
+        // the dashboard's "View unread recommendation" opens it.
         const {submissionId} = await seedInReview(ojsApi, tag, {
-            reviewers: [{username: 'reviewer.adam', status: 'accepted'}],
+            reviewers: [
+                {username: 'reviewer.adam', status: 'accepted'},
+                {username: 'reviewer.julia', status: 'completed', recommendation: 'pendingRevisions'},
+            ],
         });
 
         const reviewerPage = await (await asUser('reviewer.adam')).newPage();
@@ -1787,6 +1793,30 @@ test.describe('reviewer-assignment', () => {
         await closeReviewDetails(editorPage, readModal);
         await expect(row).toContainText('Complete');
         await expect(row).toContainText('Accept Submission');
+
+        // The dashboard's "View unread recommendation": on the submissions
+        // list, the second Reviewer's indicator in the submission's entry
+        // opens a popover whose button opens the "Review Details: {title}"
+        // window, the one the Reviewers panel opens, with that Reviewer's
+        // recommendation on its "Recommendation:" line.
+        const dash = new EditorialDashboardPage(editorPage, JOURNAL);
+        await dash.goto();
+        await dash.searchFor(tag);
+        const entry = dash.row(tag);
+        await expect(entry).toBeVisible({timeout: 30_000});
+        const popover = await dash.openActivityPopoverFor(entry, /Review completed on/, 'Julia Reviewer');
+        await popover.getByRole('button', {name: 'View unread recommendation', exact: true}).click();
+        const dashModal = dash.reviewDetailsDialog();
+        await expect(dashModal).toBeVisible({timeout: 30_000});
+        await expect(dashModal).toHaveAccessibleName(`Review Details: Submission ${tag}`);
+        await awaitReviewDetailsSettled(dashModal);
+        await expect(dashModal).toContainText('Julia Reviewer');
+        const dashRecommendation = dashModal
+            .getByText('Recommendation:', {exact: true})
+            .locator('xpath=..');
+        await expect(dashRecommendation).toContainText('Revisions Required');
+        await expect(dashRecommendation).not.toContainText('Accept Submission');
+        await closeReviewDetails(editorPage, dashModal);
     });
 
     test('S16: the editor modifies a submitted review', async ({asUser, ojsApi}, testInfo) => {

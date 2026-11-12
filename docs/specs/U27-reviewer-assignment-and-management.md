@@ -1241,16 +1241,26 @@ App-specific:
 14. **The recommendation runs through the table** {OJS}
 
     Given: Editor, on a "Complete" row of a journal (the end of scenario
-    9's "Mark as Complete").
+    9's "Mark as Complete"), with a second Reviewer's submitted review
+    unread.
 
     - **The status cell**: shows the reviewer's recommendation under
       "Complete".
     - **"Review Details"**: the window displays it read-only, on its
       "Recommendation:" line and again in the "Reviewer Recommendation"
-      group ⚠ [A23](#a23). Changing it on the reviewer's behalf runs
-      through "Modify Review" (scenario 16).
-    - **Control** {OMP}: on a press neither the status cell nor the window
-      shows any recommendation [OMP1](#omp1).
+      group ⚠ [A23](#a23). The Editor changes it through "Modify Review"
+      (scenario 16).
+    - **The dashboard's "View unread recommendation"**: on the submissions
+      dashboard list, click the second Reviewer's indicator in the
+      submission's entry
+      ([→ review activity indicators](U23-submissions-dashboard.md#review-indicators))
+      and press "View unread recommendation" in its popover: the "Review
+      Details: {submission title}" window opens, the same window the
+      Reviewers panel opens, with the second Reviewer's recommendation on
+      its "Recommendation:" line.
+    - **Control** {OMP}: a press's submitted review shows no recommendation
+      in the Reviewers panel's "Review Details" or, once "Complete", its
+      status cell [OMP1](#omp1).
 
 15. **No reviewer surfaces on a preprint server** {OPS}
 
@@ -1412,7 +1422,6 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - {OJS} the Review Details window opened from the dashboard's "View unread recommendation" showing the recommendation, as the row's window does (Rule 14a): likely a bullet in scenario 14 [upstream 2026-09-29]
   - the guard for A16 (issue report
     `docs/issues/U13-OJS8-impossible-typed-date-saved-wrong.md`): a review
     due date typed in another format ("11/12/2030") in the "Edit" and "Add
@@ -3200,7 +3209,8 @@ other holding `['externalReviewer', 'funding']`, seeded `accepted` and
 assigned to the stage through `participants[]` as `funding`. 12: a roster
 reviewer seeded `declined`. 13: a monograph seeded `decisions:
 ['sendInternalReview']` with `reviewRounds[].stage: 'internal'`; "Send to
-External Review" recorded on screen. 14: 9's end state; the press control
+External Review" recorded on screen. 14: 9's end state, plus a second reviewer seeded `completed` (the
+unread review opened from the dashboard); the press control
 on a monograph with a `completed` reviewer. 15: any seeded preprint. 17:
 `author.alex` submits, `reviewer.julia` seeded `invited`. 18:
 `assistant.rita` assigned through `participants[]` as `funding`,
