@@ -103,6 +103,19 @@ function exact(text) {
     return new RegExp(`^\\s*${escapeRegExp(text)}\\s*$`);
 }
 
+/**
+ * The icon in the `span` before an ORCID link, told apart by its drawing
+ * alone (footnote e): solid = the 24-unit svg's filled `#A6CE39` disc,
+ * hollow = the 32-unit svg with `#7FAA26` rings.
+ */
+function orcidIcon(link) {
+    const span = link.locator('xpath=preceding-sibling::span[1]');
+    return {
+        solid: span.locator('svg path[fill="#A6CE39"]'),
+        hollow: span.locator('svg[viewBox="0 0 32 32"]').filter({has: link.page().locator('path[fill="#7FAA26"]')}),
+    };
+}
+
 exports.TABS = TABS;
 exports.COMMENT_TASK = COMMENT_TASK;
 exports.REPORT_TASK = REPORT_TASK;
@@ -573,7 +586,16 @@ exports.CommentsPage = class CommentsPage extends BasePage {
 
     /** The icon before the ORCID link: the solid (verified) one carries the filled green disc. */
     orcidSolidIcon() {
-        return this.orcidLink().locator('xpath=preceding-sibling::span[1]').locator('svg path[fill="#A6CE39"]');
+        return orcidIcon(this.orcidLink()).solid;
+    }
+
+    /**
+     * The hollow (not verified) icon before the panel's ORCID link: the
+     * 32-unit svg whose rings are `#7FAA26`; nothing else tells the two
+     * icons apart (footnote e; screen notes, tops).
+     */
+    orcidHollowIcon() {
+        return orcidIcon(this.orcidLink()).hollow;
     }
 
     /**
@@ -689,6 +711,25 @@ exports.CommentsPage = class CommentsPage extends BasePage {
 
     deleteReportButton() {
         return this.reportPanel().getByRole('button', {name: 'Delete Report', exact: true});
+    }
+
+    /**
+     * The ORCID iD link in "Report preview", after the reporter's name. On
+     * OPS's pinned lib/ui-library its `href` is the text, suffix included
+     * (footnote j), so only the address's start is matched here.
+     */
+    reportOrcidLink() {
+        return this.reportPanel().locator('a[href^="https://orcid.org/"]');
+    }
+
+    /** The solid (verified) icon before the report panel's ORCID link. */
+    reportOrcidSolidIcon() {
+        return orcidIcon(this.reportOrcidLink()).solid;
+    }
+
+    /** The hollow (not verified) icon before the report panel's ORCID link. */
+    reportOrcidHollowIcon() {
+        return orcidIcon(this.reportOrcidLink()).hollow;
     }
 
     /** A report row's "…" menu button (the row's only button). */

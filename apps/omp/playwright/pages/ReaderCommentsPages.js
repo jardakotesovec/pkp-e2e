@@ -578,14 +578,30 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         return this.commentPanel().getByRole('button', {name: 'Close', exact: true});
     }
 
-    /** The ORCID iD link inside the panel's preview. */
-    orcidLink() {
-        return this.commentPanel().locator('a[href^="https://orcid.org/"]');
+    /**
+     * The ORCID iD link inside a panel's preview: the comment panel's by
+     * default, or the report panel's when `dialog` is `reportPanel()`. On a
+     * press the address of an unverified iD carries the " (unauthenticated)"
+     * suffix as well (the pinned lib/ui-library before the fix, footnote j),
+     * so the prefix finds both.
+     */
+    orcidLink(dialog = this.commentPanel()) {
+        return dialog.locator('a[href^="https://orcid.org/"]');
     }
 
     /** The icon before the ORCID link: the solid (verified) one carries the filled green disc. */
-    orcidSolidIcon() {
-        return this.orcidLink().locator('xpath=preceding-sibling::span[1]').locator('svg path[fill="#A6CE39"]');
+    orcidSolidIcon(dialog = this.commentPanel()) {
+        return this.orcidLink(dialog).locator('xpath=preceding-sibling::span[1]').locator('svg path[fill="#A6CE39"]');
+    }
+
+    /**
+     * The hollow (unverified) icon before the ORCID link: a white disc drawn
+     * first inside the green ring `#7FAA26`, and no filled green disc.
+     */
+    orcidHollowIcon(dialog = this.commentPanel()) {
+        return this.orcidLink(dialog)
+            .locator('xpath=preceding-sibling::span[1]')
+            .locator('svg:has(> path:first-child[fill="#fff"]):has(> path[fill="#7FAA26"]):not(:has(path[fill="#A6CE39"]))');
     }
 
     /**

@@ -347,7 +347,8 @@ test.describe('Reader comments & moderation (U14)', () => {
         writer.orcid = VERIFIED_ORCID;
         writer.orcidIsVerified = true;
         // The approved comment's writer: an iD that is not verified, no
-        // affiliation (the Given; read on the landing page, {OJS}, alone).
+        // affiliation (the Given; read in its comment panel here, and on the
+        // landing page, {OJS}, alone).
         second.orcid = UNVERIFIED_ORCID;
         second.orcidIsVerified = false;
         const title = `Monograph ${tag}`;
@@ -457,6 +458,7 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(comments.orcidLink()).toHaveAttribute('href', VERIFIED_ORCID);
         await expect(comments.orcidLink()).toHaveText(VERIFIED_ORCID);
         await expect(comments.orcidSolidIcon()).toHaveCount(1);
+        await expect(comments.orcidHollowIcon()).toHaveCount(0);
         await expect(panel.getByText(affiliation)).toBeVisible();
         await expect(comments.noReports()).toBeVisible();
         await expect(comments.approvalNote()).toHaveText(APPROVING_NOTE);
@@ -479,6 +481,25 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(comments.approveButton()).toBeDisabled();
         await expect(comments.hideButton()).toBeEnabled();
         await expect(page).toHaveURL(new RegExp(`commentId=${pendingId}\\b`));
+        await comments.closeCommentPanel();
+        await expect(page).not.toHaveURL(/commentId=/);
+
+        // The panel of a writer whose iD is not verified: after the name, the
+        // hollow icon (no solid disc, which the verified writer's panel above
+        // carried: the control) and the link reading the iD's address with
+        // " (unauthenticated)", opening in a new tab. Its address is read on
+        // OJS alone until OMP updates lib/ui-library past the fix (footnotes
+        // s2 and j); the text and the icon are read here.
+        await comments.viewComment(comments.row(approvedText));
+        await expect(comments.panelHeading()).toBeVisible();
+        await expect(comments.orcidLink()).toHaveCount(1);
+        await expect(comments.orcidLink()).toHaveText(`${UNVERIFIED_ORCID} (unauthenticated)`);
+        await expect(comments.orcidLink()).toHaveAttribute('target', '_blank');
+        await expect(comments.orcidHollowIcon()).toHaveCount(1);
+        await expect(comments.orcidSolidIcon()).toHaveCount(0);
+        expect(await comments.commentPanel().innerText()).toContain(
+            `${fullName(second)}\n${UNVERIFIED_ORCID} (unauthenticated)`
+        );
         await comments.closeCommentPanel();
         await expect(page).not.toHaveURL(/commentId=/);
 
@@ -515,6 +536,12 @@ test.describe('Reader comments & moderation (U14)', () => {
         const tag = makeTag('s3', testInfo);
         const people = cast(tag, {readers: 3});
         const [writer, rob, rita] = people.readers;
+        // Both reporters carry an iD that is not verified (the Given), so
+        // whichever report "View Report" opens shows the hollow icon.
+        for (const reporter of [rob, rita]) {
+            reporter.orcid = UNVERIFIED_ORCID;
+            reporter.orcidIsVerified = false;
+        }
         const title = `Monograph ${tag}`;
         const reportedText = `A twice reported comment on ${tag}.`;
         const cleanText = `A never reported comment on ${tag}.`;
@@ -587,6 +614,18 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(comments.deleteReportButton()).toBeVisible();
         await expect(page).toHaveURL(/reportId=\d+/);
         await expect(page).toHaveURL(new RegExp(`commentId=${reportedId}\\b`));
+
+        // The reporter's iD, not verified: in the same "Report preview", after
+        // the reporter's name, the hollow icon (no solid disc) and the link
+        // reading the iD's address with " (unauthenticated)", opening in a
+        // new tab. Its address is read on OJS alone until OMP updates
+        // lib/ui-library past the fix (footnotes s3 and j).
+        await expect(comments.orcidLink(report)).toHaveCount(1);
+        await expect(comments.orcidLink(report)).toHaveText(`${UNVERIFIED_ORCID} (unauthenticated)`);
+        await expect(comments.orcidLink(report)).toHaveAttribute('target', '_blank');
+        await expect(comments.orcidHollowIcon(report)).toHaveCount(1);
+        await expect(comments.orcidSolidIcon(report)).toHaveCount(0);
+        expect(await report.innerText()).toContain(`${reporterOf[firstNote]}\n${UNVERIFIED_ORCID} (unauthenticated)`);
 
         // "Close" on the report panel: the comment panel stays open, and
         // both numbers leave the address (the scenario's own sentence; A8).

@@ -878,6 +878,19 @@ exports.CommentsPage = class CommentsPage extends BasePage {
         return panel.locator('a[href*="orcid.org"]');
     }
 
+    /**
+     * The icon right before a panel's iD link (the comment or the report
+     * panel), told apart by its own drawing, since the panel's icon carries
+     * no class or label of its own: the solid icon is the ui-library's
+     * `Orcid`, whose disc is the path filled #A6CE39; the hollow one is
+     * `OrcidUnauthenticated`, the ring drawn on a 32-unit box.
+     */
+    panelOrcidIcon(panel = this.commentPanel(), {verified = true} = {}) {
+        return this.orcidLink(panel)
+            .locator('xpath=preceding-sibling::span[1]')
+            .locator(verified ? 'svg:has(path[fill="#A6CE39"])' : 'svg[viewBox="0 0 32 32"]');
+    }
+
     /** The list refetch that follows an action closing the panel. */
     listRefetch() {
         return this.page.waitForResponse(

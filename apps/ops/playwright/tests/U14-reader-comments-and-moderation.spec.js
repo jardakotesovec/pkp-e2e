@@ -29,8 +29,8 @@
  * Seeding: scenario endpoints only. Every test seeds its own scratch
  * preprint server (the context passthrough `enablePublicComments: true`,
  * throwaway accounts whose addresses name app + test,
- * u14s<n>opsw<i>…@mail.test, S2's ORCID iDs and affiliation through the
- * `users[]` keys) and a posted preprint carrying its comments and
+ * u14s<n>opsw<i>…@mail.test, S2's and S3's ORCID iDs and S2's
+ * affiliation through the `users[]` keys) and a posted preprint carrying its comments and
  * reports through `userComments[]` (footnotes s0–s7, s14, s15). S15
  * lines the site-wide comment and report numbers up with filler comments
  * and reports on a second scratch server and checks both pairs from the
@@ -79,6 +79,7 @@ const DELETE_REPORT_TEXT = 'Are you sure you want to delete this report? This ac
 const NOT_FOUND = 'The requested resource was not found.';
 const VERIFIED_ORCID = 'https://orcid.org/0000-0002-1825-0097';
 const UNVERIFIED_ORCID = 'https://orcid.org/0000-0001-5109-3700';
+const SECOND_UNVERIFIED_ORCID = 'https://orcid.org/0000-0002-1694-233X';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -423,8 +424,8 @@ test.describe('Reader comments & moderation (U14)', () => {
         writer.orcid = VERIFIED_ORCID;
         writer.orcidIsVerified = true;
         // The approved comment's writer: an iD that is not verified, no
-        // affiliation; the reported comment's writer neither (footnote
-        // s2). Only the landing-page bullets ({OJS}) read them.
+        // affiliation (read in its comment panel); the reported comment's
+        // writer neither (footnote s2).
         second.orcid = UNVERIFIED_ORCID;
         second.orcidIsVerified = false;
         const title = `Preprint ${tag}`;
@@ -552,6 +553,21 @@ test.describe('Reader comments & moderation (U14)', () => {
         await comments.closeCommentPanel();
         await expect(page).not.toHaveURL(/commentId=/);
 
+        // The panel of a writer whose iD is not verified: after the name,
+        // the hollow icon (no solid one, where the verified writer's panel
+        // above carried it) and the iD's address with " (unauthenticated)",
+        // a link to a new tab. Its address is read on OJS alone until OPS
+        // updates lib/ui-library past the fix (footnotes s2, j).
+        await comments.viewComment(comments.row(approvedText));
+        await expect(panel.getByText(fullName(second)).first()).toBeVisible();
+        await expect(comments.orcidLink()).toHaveCount(1);
+        await expect(comments.orcidLink()).toHaveText(`${UNVERIFIED_ORCID} (unauthenticated)`);
+        await expect(comments.orcidLink()).toHaveAttribute('target', '_blank');
+        await expect(comments.orcidHollowIcon()).toHaveCount(1);
+        await expect(comments.orcidSolidIcon()).toHaveCount(0);
+        await expect(panel.getByText(fullName(writer))).toHaveCount(0);
+        await comments.closeCommentPanel();
+
         // "Hide Comment" on the reported comment: the notice, the row
         // leaves "Approved" for "Hidden/Needs Approval", stays on
         // "Reported", and under "All" reads "Hidden/Needs Approval, Reported".
@@ -585,6 +601,11 @@ test.describe('Reader comments & moderation (U14)', () => {
         const tag = makeTag('s3', testInfo);
         const people = cast(tag, {readers: 3});
         const [writer, rob, rita] = people.readers;
+        // Both reporters carry an ORCID iD that is not verified (footnote s3).
+        rob.orcid = UNVERIFIED_ORCID;
+        rob.orcidIsVerified = false;
+        rita.orcid = SECOND_UNVERIFIED_ORCID;
+        rita.orcidIsVerified = false;
         const title = `Preprint ${tag}`;
         const reportedText = `A twice reported comment on ${tag}.`;
         const cleanText = `A never reported comment on ${tag}.`;
@@ -607,6 +628,7 @@ test.describe('Reader comments & moderation (U14)', () => {
         });
         const reportedId = userComments[0].id;
         const reporterOf = {[notes.rob]: fullName(rob), [notes.rita]: fullName(rita)};
+        const orcidOf = {[notes.rob]: rob.orcid, [notes.rita]: rita.orcid};
 
         const page = await (await asUser(people.manager.username)).newPage();
         const comments = new CommentsPage(page, tag);
@@ -657,6 +679,17 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(comments.deleteReportButton()).toBeVisible();
         await expect(page).toHaveURL(/reportId=\d+/);
         await expect(page).toHaveURL(new RegExp(`commentId=${reportedId}\\b`));
+
+        // The reporter's iD, not verified: after the reporter's name the
+        // hollow icon (no solid one) and the iD's address with
+        // " (unauthenticated)", a link to a new tab. Its address is read on
+        // OJS alone until OPS updates lib/ui-library past the fix
+        // (footnotes s3, j).
+        await expect(comments.reportOrcidLink()).toHaveCount(1);
+        await expect(comments.reportOrcidLink()).toHaveText(`${orcidOf[firstNote]} (unauthenticated)`);
+        await expect(comments.reportOrcidLink()).toHaveAttribute('target', '_blank');
+        await expect(comments.reportOrcidHollowIcon()).toHaveCount(1);
+        await expect(comments.reportOrcidSolidIcon()).toHaveCount(0);
 
         // "Close" on the report panel: the comment panel stays open, and
         // both numbers leave the address (the scenario's own sentence; A8).

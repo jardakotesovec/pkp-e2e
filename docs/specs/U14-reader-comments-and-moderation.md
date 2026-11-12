@@ -480,7 +480,8 @@ scenario's footnote. <sup>s0</sup>
    approved one by a Reader whose profile carries an ORCID iD that is not
    verified and no affiliation, and an approved one, by a Reader with no
    ORCID iD and no affiliation, that a second Reader has reported; a second
-   journal on the site holding a comment of its own.
+   scratch journal with public comments on, a Journal Manager and one
+   approved comment of its own.
 
    - **Content › Comments**: press the side menu's Content › Comments: the
      page headed "Comments" opens with the tabs "All", "Approved",
@@ -495,7 +496,7 @@ scenario's footnote. <sup>s0</sup>
      "Reported" the reported one, its "Status" reading "Reported". The
      chosen tab is written into the page's address after "#", and a reload
      comes back on it.
-   - **Another journal's comment**: on no tab.
+   - **Another journal's comment**: its text is on no tab.
    - **The comment panel**: on the pending comment's row press "…" ("More
      Actions") › "View Comment": the panel "View comment details by
      {writer}" opens over the page, with the same submission line as the
@@ -513,16 +514,20 @@ scenario's footnote. <sup>s0</sup>
      approved on {date} by {moderator}.", "Approve Comment" is grayed out
      and "Hide Comment" enabled; press "Close": the number leaves the
      address.
+   - **The panel of a writer whose iD is not verified**: on that writer's
+     row press "…" › "View Comment": "Comment preview" shows, after the
+     writer's name, a hollow ORCID icon and the iD's ORCID address
+     followed by " (unauthenticated)"; the text is a link that opens the
+     iD's ORCID page in a new tab.
    - **The landing page after the approval** {OJS}: signed out, the
      article's page lists the comment with its date and time, its text, the
      writer's name followed by a solid ORCID icon (a link named "ORCID iD"
      to the writer's iD) and the affiliation on the line below, and the
      sidebar reads "All Comments (3)".
    - **A writer whose iD is not verified** {OJS}: on the same page, under
-     the comment by the Reader whose iD is not verified, the name is
-     followed by a hollow ORCID icon, a link named "ORCID iD" like the solid
-     one, with no iD written out; it opens the iD's ORCID page in a new tab
-     ⚠ [A15](#a15).
+     that writer's comment, the name is followed by a hollow ORCID icon, a
+     link named "ORCID iD" like the solid one, with no iD written out; it
+     opens the iD's ORCID page in a new tab ⚠ [A15](#a15).
    - **A writer with no iD, and writers with no affiliation** {OJS}: on the
      same page, the reported comment's writer's name carries no ORCID icon,
      and neither that writer nor the writer whose iD is not verified has a
@@ -536,15 +541,15 @@ scenario's footnote. <sup>s0</sup>
      comment is gone and the sidebar reads "All Comments (2)"; its writer,
      signed in, sees it with the notice "Your comment will be visible when
      the editor approves it" above its date ⚠ [A1](#a1).
-   - **Control**: the second journal's Comments page lists its own comment
-     alone and none of this journal's. <sup>s2</sup>
+   - **Control**: the second journal's Journal Manager: its Comments page
+     lists its own comment alone and none of this journal's. <sup>s2</sup>
 
 3. **Reports on the Comments page** {OJS OMP OPS}
 
    Given: Journal Manager, on a scratch journal with public comments on and
    a published article carrying two approved comments, one of them reported
-   twice, by two Readers with reasons of their own, the other never
-   reported.
+   twice, by two Readers whose profiles carry an ORCID iD that is not
+   verified, with reasons of their own, the other never reported.
 
    - **The "Reported" tab**: lists the reported comment alone, its "Status"
      reading "Reported".
@@ -558,6 +563,10 @@ scenario's footnote. <sup>s0</sup>
      with "Report preview": the date and time, the reason as typed and the
      reporter's name, and the button "Delete Report"; the address carries
      the report's number as well as the comment's.
+   - **The reporter's iD, not verified**: in the same "Report preview",
+     after the reporter's name, a hollow ORCID icon and the iD's ORCID
+     address followed by " (unauthenticated)"; the text is a link that
+     opens the iD's ORCID page in a new tab.
    - **"Close" on the report panel**: press it: the comment panel stays
      open, and both numbers leave the address, the comment's included
      ⚠ [A8](#a8).
@@ -940,7 +949,6 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A14 (issue report `docs/issues/U14-A14-refused-comment-report-loses-reason.md`): once fixed, a reader whose report is refused because the session ended keeps "Report Comment" open with the typed reason under the "Error" window, and a report on a comment hidden meanwhile drops the comment from the list. [report 2026-10-26]
   - the Comments page's browser tab reading "Comments | {journal}" on each of its lists and after a reload (Rule 10; A13) [report 2026-10-04]
-  - the guard for the retired A6: the comment panel and the report panel for a writer and a reporter whose ORCID iD is not verified show the hollow icon and the iD's ORCID address followed by " (unauthenticated)", a link that opens the iD's own ORCID page in a new tab (Fields, the comment panel and the report panel) [report 2026-10-04]
 - **Rarely met**:
   - an Editor whose role does not permit settings changes, refused the "Comments" tab and still opening the Comments page {OJS OMP} (Actors rows 5 and 6; a preprint server has no second manager-level role to untick): unticking "Permit changes to Settings" on a role is a setup few journals make, not a state an editor meets in an ordinary week
   - a Site Administrator holding no manager role in the journal, with no task row in their Tasks panel (Actors row 7): the state needs the Site Administrator's manager role ended on their own edit page, a setup no journal makes in an ordinary week
@@ -1957,19 +1965,30 @@ by its name ("ORCID iD"), its target (a new tab) and its address
 (`https://orcid.org/{iD}`), not followed (footnote e); the solid and the
 hollow icon are told apart as footnote e says, and a missing icon or
 affiliation line is read beside the verified writer's, which carries both
-(PRINCIPLES M4). The three `userComments[]` entries
-may go in one call: the bullets locate rows by their "User" or "Comment"
-cell, never by position (a batch shares one second and lists in no fixed
+(PRINCIPLES M4). In the panel of the writer whose iD is not verified
+the link's text reads `https://orcid.org/{iD} (unauthenticated)` and its
+address `https://orcid.org/{iD}`, without the suffix (footnote j); the
+address is read on OJS alone until OMP and OPS update lib/ui-library past
+the fix, the text and the icon on the three apps. The three
+`userComments[]` entries may go in one call: the bullets locate rows by
+their "User" or "Comment" cell, never by position (a batch shares one second and lists in no fixed
 order). A seeded approval's note names the seeding `admin`; the note the
 scenario reads is the one after the on-screen "Approve Comment", which
-names the manager. The second journal is a second scratch context with its
-own published submission and one comment. The landing-page bullets run on
+names the manager. The second journal is a second scratch context seeded
+`enablePublicComments: true`, with its own published submission and one
+`approved: true` comment, located by its "Comment" text; its Comments page
+is opened by a `manager` of that context (on OJS the scenario's manager,
+enrolled there too; on OMP and OPS the second context's own). The landing-page bullets run on
 OJS, signed out and then as the writer.
 
 <a id="fn-s3"></a>
 **s3 — scenario 3.** Two approved `userComments[]` by one `reader`; the
 first with `reports: [{user, note}, {user, note}]` by two other `reader`s,
-the second with none. Two reports seeded in one call share a second, so
+the second with none. Both reporters are seeded with `orcid` and
+`orcidIsVerified: false` (footnote s2), so whichever report "View Report"
+opens shows the hollow icon; the link is read as in scenario 2's panel,
+its address on OJS alone until OMP and OPS update lib/ui-library past the
+fix (footnote j). Two reports seeded in one call share a second, so
 "the first row" is whichever the table lists first and no order between
 them is asserted. The address after "View Report" reads
 `?commentId={n}&reportId={r}` (footnote k); the A8 read is the address

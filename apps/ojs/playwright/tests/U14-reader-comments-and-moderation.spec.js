@@ -68,6 +68,8 @@ const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const TEST_ORCID = 'https://orcid.org/0000-0002-1825-0097';
 /** A second test iD, stored not verified (footnote s2). */
 const UNVERIFIED_ORCID = 'https://orcid.org/0000-0001-5109-3700';
+/** A third test iD, the second reporter's in S3, stored not verified (footnote s3). */
+const SECOND_UNVERIFIED_ORCID = 'https://orcid.org/0000-0002-9079-593X';
 const DATE_TIME = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2} (AM|PM)$/;
 const TABS = ['All', 'Approved', 'Hidden/Needs Approval', 'Reported'];
 const VERSION_1 = 'Version of Record 1.0';
@@ -381,15 +383,10 @@ test.describe('reader comments & moderation', () => {
         await expect(panel.getByText(pendingText)).toBeVisible();
         await expect(comments.orcidLink(panel)).toHaveAttribute('href', TEST_ORCID);
         await expect(comments.orcidLink(panel)).toHaveText(TEST_ORCID);
-        // The icon sits right before the link (an image element; the panel's
-        // markup carries no icon class of its own).
-        expect(
-            await comments.orcidLink(panel).evaluate((a) => {
-                const before = a.previousElementSibling;
-                return !!before && (/^(img|svg)$/i.test(before.tagName) || !!before.querySelector('svg, img'));
-            }),
-            'an icon right before the iD'
-        ).toBe(true);
+        // The solid icon right before the link; the hollow one is not there
+        // (the unverified writer's panel below is its control).
+        await expect(comments.panelOrcidIcon(panel)).toHaveCount(1);
+        await expect(comments.panelOrcidIcon(panel, {verified: false})).toHaveCount(0);
         await expect(panel.getByText(affiliation)).toBeVisible();
         await expect(comments.noReports()).toBeVisible();
         await expect(comments.note()).toHaveText(APPROVE_NOTE);
@@ -413,6 +410,21 @@ test.describe('reader comments & moderation', () => {
         await expect(comments.hideButton()).toBeEnabled();
         await comments.closeCommentPanel();
         await expect(manager).not.toHaveURL(/commentId=/);
+
+        // The panel of a writer whose iD is not verified: the hollow icon and
+        // the iD written out with " (unauthenticated)", a link to the iD's
+        // own page (no suffix) in a new tab; the address is read on OJS
+        // (footnotes s2, j; the guard of the retired A6). The verified
+        // writer's panel above is the control for the icons.
+        const unverifiedPanel = await comments.viewComment(comments.row(approvedText));
+        await expect(comments.panelPerson(unverifiedPanel)).toHaveText('Rosa Reader');
+        await expect(comments.orcidLink(unverifiedPanel)).toHaveCount(1);
+        await expect(comments.orcidLink(unverifiedPanel)).toHaveText(`${UNVERIFIED_ORCID} (unauthenticated)`);
+        await expect(comments.orcidLink(unverifiedPanel)).toHaveAttribute('href', UNVERIFIED_ORCID);
+        await expect(comments.orcidLink(unverifiedPanel)).toHaveAttribute('target', '_blank');
+        await expect(comments.panelOrcidIcon(unverifiedPanel, {verified: false})).toHaveCount(1);
+        await expect(comments.panelOrcidIcon(unverifiedPanel)).toHaveCount(0);
+        await comments.closeCommentPanel();
 
         // The landing page after the approval, signed out.
         const landing = new ArticleCommentsPage(page, tag);
@@ -495,12 +507,23 @@ test.describe('reader comments & moderation', () => {
     test('S3: reports on the Comments page', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s3', testInfo);
-        const {mg, au, ra, rb, rc} = await seedJournal(ojsApi, tag, ['mg', 'au', 'ra', 'rb', 'rc']);
+        // Both reporters carry an iD that is not verified, each its own
+        // (footnote s3), so whichever report is listed first shows the hollow icon.
+        const reporterOrcids = {[`${tag}rb`]: UNVERIFIED_ORCID, [`${tag}rc`]: SECOND_UNVERIFIED_ORCID};
+        const {mg, au, ra} = await seedJournal(ojsApi, tag, ['mg', 'au', 'ra'], {
+            extraUsers: [
+                {...person(tag, 'rb', 'Rob', 'Reporter', ['reader']), orcid: reporterOrcids[`${tag}rb`], orcidIsVerified: false},
+                {...person(tag, 'rc', 'Rita', 'Third', ['reader']), orcid: reporterOrcids[`${tag}rc`], orcidIsVerified: false},
+            ],
+        });
+        const rb = `${tag}rb`;
+        const rc = `${tag}rc`;
         const reportedText = `S3 twice reported comment ${tag}.`;
         const cleanText = `S3 never reported comment ${tag}.`;
         const reasonB = `S3 reason by Rob ${tag}.`;
         const reasonC = `S3 reason by Rita ${tag}.`;
         const reporters = {[reasonB]: 'Rob Reporter', [reasonC]: 'Rita Third'};
+        const reporterOrcid = {[reasonB]: reporterOrcids[rb], [reasonC]: reporterOrcids[rc]};
         await seedArticle(ojsApi, {
             tag,
             context: tag,
@@ -549,6 +572,19 @@ test.describe('reader comments & moderation', () => {
         await expect(comments.deleteReportButton()).toBeVisible();
         await expect(manager).toHaveURL(new RegExp(`reportId=\\d+`));
         await expect(manager).toHaveURL(new RegExp(`commentId=${commentId}`));
+
+        // The reporter's iD, not verified: the hollow icon and the iD with
+        // " (unauthenticated)", a link to the iD's own page (no suffix) in a
+        // new tab; the address is read on OJS (footnotes s3, j). The comment's
+        // writer has no iD, so the report panel's link is the reporter's alone.
+        await expect(comments.orcidLink(report)).toHaveCount(1);
+        await expect(comments.orcidLink(report)).toHaveText(`${reporterOrcid[firstReason]} (unauthenticated)`);
+        await expect(comments.orcidLink(report)).toHaveAttribute('href', reporterOrcid[firstReason]);
+        await expect(comments.orcidLink(report)).toHaveAttribute('target', '_blank');
+        await expect(comments.panelOrcidIcon(report, {verified: false})).toHaveCount(1);
+        // No solid icon: read in the same place the hollow one is found (S2
+        // reads the solid one in a verified writer's panel).
+        await expect(comments.panelOrcidIcon(report)).toHaveCount(0);
 
         // "Close" on the report panel: the comment panel stays, both numbers
         // leave the address (A8's marked sentence).
