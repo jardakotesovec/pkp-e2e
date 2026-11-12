@@ -7,32 +7,19 @@
  * Manager, Series Editor, "Validate Email (Press Registration)").
  * Spec: docs/specs/U56-emails-management.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A4 🐞, A5 🐞, OMP1 🐞, OMP2 🐞, A6 ❓, A8 ❓, and Submission wizard
- * A12 🐞 (U21). Where a test passes through one it leaves the finding's own
- * claim unasserted either way: S1 reads the list's order without the three
- * ORCID rows (A2) and reads "Sent From" › "Reader" marked and unmarked but
- * not the list it leaves (A8); S2 reads the "Editorial statistics"
- * description up to its last words (A1), not which "Notify Primary
- * Contact" choice is selected (OMP2), and not the "Submission
- * Confirmation" choices after "Do not send an email." is saved (A12); S3
- * finds the "Add Template" window as "Edit Template" or "Add Template"
- * (A4) and reads the "Remove Template" sentence up to the template's name
- * (A5); S4 reads the one-template window's "Save" and not whether it
- * offers anything else (A6). No test presses "Edit" on "User Role
- * Masthead Visibility Update Notification" (OMP1: the page stays frozen
- * behind a spinner until a reload). The short full-screen spinner before a
- * window opens is a transient no test reads. The spec's Coverage section
- * records everything else left out.
+ * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
+ * contract, a ❓ is parked, not a gap): A1 🐞, A2 🐞, A4 🐞, A5 🐞, A12 🐞,
+ * OMP1 🐞, OMP2 🐞, A6 ❓, A8 ❓, and Submission wizard A12 🐞 (U21). The
+ * spec's Coverage section records everything else left out.
  *
  * Seeding (footnote s): scenario 1 reads `publicknowledge` only, as
  * `manager.maya` and `sectioneditor.ana` (the Series Editor); scenarios
  * 2–5 each run on their own scratch press from `POST scenarios/context`
  * with a throwaway Press Manager (scenario 4 adds a throwaway Author and
  * two drafts, whose manuscript the Author uploads in the wizard's first
- * step as every OMP wizard walk does; scenario 5 the forms in English and
- * French through `supportedFormLocales`), and scenarios 3 and 5 read
+ * step as every OMP wizard walk does; scenario 5 English and French under
+ * "UI" and "Forms" through `supportedLocales` and `supportedFormLocales`),
+ * and scenarios 3 and 5 read
  * `publicknowledge` as `manager.maya` in a second browser. Every actor is
  * opened through `asUser` (no default user: a multi-actor test sets none,
  * patterns.md "Fixture selection"). Scenario 4's confirmations are read
@@ -47,6 +34,7 @@ const {
     WorkflowEmailsSettingsPage,
     isRedLettering,
 } = require('../../../../shared/playwright/pages/EmailsPages.js');
+const {LanguageMenu} = require('../../../../shared/playwright/pages/LanguagesPages.js');
 
 const SEEDED = 'publicknowledge';
 const LIST_COUNT = 56;
@@ -770,6 +758,29 @@ test.describe('emails management', () => {
         await expect(manage.subjectBox('fr_CA')).toBeVisible();
         await expect(manage.subjectBox('fr_CA')).toHaveValue('');
         await expect(manage.nameBox('fr_CA')).toHaveValue('Refus court');
+
+        // "Gérer les courriels" (Rule 6a): the back arrow, then French
+        // through "Change Language". The email's own window covers the
+        // initials, so its back arrow is pressed too. A row named by a code
+        // (A2, "##…##") passes; the rows' visible "Edit" is A12, read
+        // neither way.
+        await manage.closeWindow(manage.templateWindow());
+        await manage.closeWindow(win);
+        await new LanguageMenu(mp).choose('français', 'fr_CA');
+        await expect(mp).toHaveURL(new RegExp(`/index\\.php/${tag}/fr_CA/management/settings/manageEmails`));
+        await manage.waitForList();
+        await expect(mp.getByRole('heading', {name: 'Gérer les courriels', exact: true, level: 1})).toBeVisible();
+        await expect(manage.pageHeading()).toHaveCount(0);
+        await expect(manage.rows()).toHaveCount(LIST_COUNT);
+        const french = await manage.rowsRead();
+        const frenchNames = french.map((r) => r.name);
+        expect(frenchNames).toContain('Confirmation de soumission');
+        // The English name gone, read beside its French one above.
+        expect(frenchNames).not.toContain(ACK_EMAIL);
+        for (const row of french) {
+            expect(row.description, `"${row.name}" has a description`).toBeTruthy();
+            await expect(manage.mailableRow(row.name).getByRole('button'), `the button of "${row.name}"`).toHaveAccessibleName(`Modifier ${row.name}`);
+        }
 
         // Control: the seeded press's window has no language button (Rule 20).
         const sp = await signedIn(asUser, 'manager.maya');

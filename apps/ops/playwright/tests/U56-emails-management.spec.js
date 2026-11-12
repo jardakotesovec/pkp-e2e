@@ -13,35 +13,23 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A4 🐞, A5 🐞, OPS1 🐞, A6 ❓, A8 ❓, OPS2 ❓, and Submission wizard
- * A12 🐞 (U21). Where a test passes through one it leaves the finding's own
- * claim unasserted either way: S2 reads the "Editorial statistics"
- * description without the context's word (A1) and does not read the
- * "Submission Acknowledgement (Pending Moderation)" choices after "Do not
- * send an email." is saved (A12); S3 finds the "Add Template" window as
- * "Edit Template" or "Add Template" (A4) and reads the "Remove Template"
- * sentence up to the template's name (A5), and reads the "Insert Content"
- * rows' descriptions as present, not their wording (OPS1); S4 reads the
- * one-template window's "Save" and not whether it offers anything else
- * (A6); S1 presses "Sent From" › "Reader" and reads its marked state, not
- * the list it leaves (A8), and does not name "Submission Accepted" among
- * the rows (OPS2; S5 opens it as the scenario's email). The short
- * full-screen spinner before a window opens is a transient no test reads.
- * The spec's Coverage section records everything else left out.
+ * A4 🐞, A5 🐞, A12 🐞, OPS1 🐞, A6 ❓, A8 ❓, OPS2 ❓, and Submission wizard
+ * A12 🐞 (U21). The spec's Coverage section records everything else left
+ * out.
  *
  * Seeding (footnote s): scenario 1 reads `publicknowledge` only, as
  * `manager.maya` and `sectioneditor.ana` (a Moderator); scenarios 2–5 each
  * run on their own scratch server from `POST scenarios/context` with a
  * throwaway Preprint Server Manager (scenario 4 adds a throwaway Author and
  * two drafts the wizard finishes, its galley added at "Upload Files";
- * scenario 5 the forms in English and French through
- * `supportedFormLocales`), and scenarios 3 and 5 read `publicknowledge` as
- * `manager.maya` in a second browser. Every actor is opened through
- * `asUser` (no default user: a multi-actor test sets none, patterns.md
- * "Fixture selection"). Scenario 4's confirmations are read in Mailpit by
- * the Author's throwaway address (PRINCIPLES A8); the confirmation is sent
- * by the wizard's submit itself, so no job queue is drained and the suite
- * runs in the parallel project.
+ * scenario 5 English and French under "UI" and "Forms" through
+ * `supportedLocales` and `supportedFormLocales`), and scenarios 3 and 5
+ * read `publicknowledge` as `manager.maya` in a second browser. Every
+ * actor is opened through `asUser` (no default user: a multi-actor test
+ * sets none, patterns.md "Fixture selection"). Scenario 4's confirmations
+ * are read in Mailpit by the Author's throwaway address (PRINCIPLES A8);
+ * the confirmation is sent by the wizard's submit itself, so no job queue
+ * is drained and the suite runs in the parallel project.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {wizardUrl, expectWizardOpen, completeAndSubmitDraft} = require('../pages/SubmissionWizardPages.js');
@@ -50,9 +38,19 @@ const {
     WorkflowEmailsSettingsPage,
     isRedLettering,
 } = require('../../../../shared/playwright/pages/EmailsPages.js');
+const {LanguageMenu} = require('../../../../shared/playwright/pages/LanguagesPages.js');
 
 const SEEDED = 'publicknowledge';
 const LIST_COUNT = 17;
+/** The preprint server's 17 emails by their English names (Rule 6). */
+const SERVER_EMAILS = [
+    'Moderator Assigned (Auto)', 'New Announcement', 'New Version Created', 'New Version Posted',
+    'Notify Other Authors', 'Password Reset Confirm', 'Posted Acknowledgement',
+    'Reinstate Submission Declined Without Review', 'Statistics Report Notification', 'Submission Accepted',
+    'Submission Acknowledgement (No Moderation Required)', 'Submission Acknowledgement (Pending Moderation)',
+    'Submission Confirmation (Other Authors)', 'Submission Declined', 'User Created',
+    'Validate Email (Server Registration)', 'Validate Email (Site)',
+];
 const REGISTRATION_EMAIL = 'Validate Email (Server Registration)';
 const ACK_EMAIL = 'Submission Acknowledgement (Pending Moderation)';
 const ACK_NO_MODERATION = 'Submission Acknowledgement (No Moderation Required)';
@@ -807,6 +805,29 @@ test.describe('emails management', () => {
         await expect(manage.subjectBox('fr_CA')).toBeVisible();
         await expect(manage.subjectBox('fr_CA')).toHaveValue('');
         await expect(manage.nameBox('fr_CA')).toHaveValue('Refus court');
+
+        // "Gérer les courriels" (Rule 6a): the back arrow, then French
+        // through "Change Language". The email's own window covers the
+        // initials, so its back arrow is pressed too. A row named by a code
+        // ("##…##", a missing translation) passes; the rows' visible "Edit"
+        // is A12, read neither way.
+        await manage.closeWindow(manage.templateWindow());
+        await manage.closeWindow(win);
+        await new LanguageMenu(mp).choose('français', 'fr_CA');
+        await expect(mp).toHaveURL(new RegExp(`/index\\.php/${tag}/fr_CA/management/settings/manageEmails`));
+        await manage.waitForList();
+        await expect(mp.getByRole('heading', {name: 'Gérer les courriels', exact: true, level: 1})).toBeVisible();
+        await expect(manage.pageHeading()).toHaveCount(0);
+        await expect(manage.rows()).toHaveCount(LIST_COUNT);
+        const french = await manage.rowsRead();
+        const frenchNames = french.map((r) => r.name);
+        expect(frenchNames).toContain('Confirmation de soumission');
+        // No English name left, read on the same list that holds the French one.
+        expect(frenchNames.filter((n) => SERVER_EMAILS.includes(n)), 'no row under its English name').toEqual([]);
+        for (const row of french) {
+            expect(row.description, `"${row.name}" has a description`).toBeTruthy();
+            await expect(manage.mailableRow(row.name).getByRole('button'), `the button of "${row.name}"`).toHaveAccessibleName(`Modifier ${row.name}`);
+        }
 
         // Control: the seeded server's window has no language button (Rule 20).
         const sp = await signedIn(asUser, 'manager.maya');

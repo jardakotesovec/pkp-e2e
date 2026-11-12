@@ -741,8 +741,8 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      Scratch Journal team and press "Save": "Saved" beside the button
      (Rule 1; Settings bullet 1).
    - **The Author's first submission**: the Author submits the first draft
-     through the [submission wizard](U21-submission-wizard.md). The
-     Author's mailbox holds the email "Submission Confirmation" (on a
+     through the [submission wizard](U21-submission-wizard.md). Their
+     mailbox holds the email "Submission Confirmation" (on a
      preprint server "Submission Acknowledgement (Pending Moderation)"),
      ending with "The Scratch Journal team" (Rule 2; Settings bullet 1).
    - **A one-template email**: press "Add and edit templates", search
@@ -752,8 +752,8 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      button ⚠ [A6](#a6). Note the body. Replace "Body" with Thank you
      for your submission. and press "Save": "Saved", and the window
      closes about a second later (Rules 9, 11, 18).
-   - **The Author's second submission**: the Author submits the second draft.
-     The Author's mailbox holds a second confirmation reading
+   - **The Author's second submission**: the Author submits the second
+     draft; their mailbox holds a second confirmation reading
      "Thank you for your submission." without "The Scratch Journal team"
      (Rule 2; Side effects).
    - **The site's placeholders**: search Password Reset Confirm with Enter
@@ -786,18 +786,17 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
 5. **Templates in two languages**
 
-   Given: Journal Manager, on a scratch journal whose forms are in English
-   and French, its templates as installed, and the seeded journal's
-   Journal Manager in a second browser.
+   Given: Journal Manager, on a scratch journal with English and French
+   ticked under "UI" and "Forms", its templates as installed, and the
+   seeded journal's Journal Manager in a second browser.
 
    - **The language button**: open Settings › Workflow › "Emails", press
-     "Add and edit templates", search Review Request (on a preprint server
-     Submission Accepted) with Enter, press "Edit" on "Review Request" (on
-     a preprint server "Submission Accepted"), then "Edit" on the default
-     row: "Edit Template" has at its top right a "French" button beside
-     the text "English", and under each field "2/2 languages completed";
-     on a preprint server "Subject" and "Body" read "1/2 languages
-     completed" (Rule 20).
+     "Add and edit templates", search Review Request with Enter, press
+     "Edit" on "Review Request" (on a preprint server, search and open
+     Submission Accepted), then "Edit" on the default row: "Edit Template"
+     has at its top right a "French" button beside the text "English", and
+     under each field "2/2 languages completed"; on a preprint server
+     "1/2 languages completed" under "Subject" and "Body" (Rule 20).
    - **The French twins**: press "French": beside each field its French
      twin appears, labelled "French"; on a preprint server the French
      "Subject" and "Body" are empty. Press "French" again: the twins are
@@ -818,11 +817,22 @@ accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      cannot take it further. in the English "Body", empty the French
      "Subject", and press "Save": "Saved", and a row "Short decline" with
      "Edit" and "Remove" follows the default row. Press its "Edit":
-     "Subject" reads "1/2 languages completed", and after "French" is
-     pressed its French twin is empty (Rule 20).
+     "1/2 languages completed" under "Subject"; press "French": the
+     French "Subject" is empty (Rule 20).
+   - **"Gérer les courriels"**: press the back arrow on "Edit Template"
+     and again on "Review Request" (on a preprint server "Submission
+     Accepted"), so that both windows close, then pick French with
+     "Change Language"
+     ([Languages & locales](U57-languages-and-locales.md#change-language)):
+     the page reads "Gérer les courriels" and lists 66 rows (56 on a
+     press, 17 on a preprint server), "Confirmation de soumission" among
+     them. A row whose name is a code (an ORCID row ⚠ [A2](#a2), or
+     "##…##", a missing translation) does not fail the step. A
+     screen reader names each row's button "Modifier" and the row's name;
+     the button's visible word is ⚠ [A12](#a12), not judged (Rule 6a).
    - **Control**: the seeded journal's Journal Manager opens the same
-     email's default template there the same way: "Edit Template" has no
-     language button (Rule 20). <sup>s</sup>
+     default template there: "Edit Template" has no language button
+     (Rule 20). <sup>s</sup>
 
 ## Coverage
 
@@ -830,9 +840,6 @@ Left out of the scenarios above, by reason:
 
 - **Planned**:
   - the guard for OMP2 (issue report `docs/issues/U56-OMP2-press-notify-primary-contact-unselected.md`): a new press's "Emails" tab opens with "Notify Primary Contact" at "No", as a journal's and a preprint server's do (Fields, the "Emails" tab; scenario 2) [report 2026-10-04]
-  - the French (Canada) "Gérer les courriels" rows' button: it reads
-    "Edit" while a screen reader names it "Modifier {email name}"
-    (Rule 6a; A12) [incidental 2026-10-05]
   - the guard for A4 (issue report `docs/issues/U56-A4-add-template-window-titled-edit-template.md`): "Add Template" opens a window titled "Add Template", and an existing template's window stays "Edit Template" (Rule 12; scenario 3) [report 2026-10-04]
   - the guard for A5 (issue report `docs/issues/U56-A5-remove-template-confirmation-names-subject.md`): "Remove" on an added template whose name and subject differ asks about the template by the name its row shows (Rule 17; scenario 3) [report 2026-10-04]
 - **Nothing new to test**:
@@ -1643,7 +1650,7 @@ the wizard's "Submit" (a seeded submission sends no email; the wizard's
 submit does); both confirmations are read in Mailpit through
 `pkpMail.find()` scoped to the Author's address. Scenario 5's context
 adds `context: {supportedLocales: ['en', 'fr_CA'], supportedFormLocales:
-['en', 'fr_CA']}`. See `docs/process/scenarios.md` and `users.md`.
+['en', 'fr_CA']}`, French (Canada) under "UI" and "Forms". See `docs/process/scenarios.md` and `users.md`.
 
 <a id="fn-t"></a>
 **t** — Live-probed 2026-09-26 (Rule 19; A6), all three apps, on scratch
