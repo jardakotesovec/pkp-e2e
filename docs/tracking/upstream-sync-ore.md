@@ -1,10 +1,11 @@
-# Upstream sync, the ore branch — last-read `ore` commits
+# Upstream sync, the ore version — last-read `ore` commits
 
 The last commit of each repo's `ore` branch the daily session has read
-and carried into the pkp-e2e `ore` branch (`docs/process/MAINTENANCE.md`
-"The ore branch"). `ore` is the branch the ORE project runs OJS from in
-production until the 3.6 stable release; OJS only, temporary. The
-pkp-e2e `ore` branch is its suite, cut from `main` at `2853af70` (the
+and carried into the folder `lines/ore/` (`docs/process/MAINTENANCE.md`
+"The ore version"). `ore` is the branch the ORE project runs OJS from in
+production until the 3.6 stable release; OJS only, temporary. Its suite
+is the folder `lines/ore/` on pkp-e2e `main` since 2026-11-12; until
+then it was the pkp-e2e branch `ore`, cut from `main` at `2853af70` (the
 daily sync of 2026-10-14, which reviewed the three branch-point tips
 below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 `upstream-sync.md`.
@@ -16,17 +17,16 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 | ojs | `1fedf73275` | 2026-11-12 | claude (daily maintenance session, VM s0, the ore worktree: pkp/pkp-lib#13468's OJS commit, `=main 7fc2376322`) |
 | pkp-lib | `9ca248495e` (the branch tip, pkp/pkp-lib#13468; ojs at it); ui-library `3f904483` (the branch tip, pkp/ui-library#1014; ojs at it) | 2026-11-12 | claude (daily maintenance session, VM s0: all `=main`) |
 
-pkp-e2e `ore` tip: `918eeb34` (2026-11-12, U14 A6 retired, U30 and U26 follow pkp/ui-library#981).
+The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U14 A6 retired, U30 and U26 follow pkp/ui-library#981), its specs brought to the present template by script: the Planned lists dropped, retired entries one line. CI from the folder at the same OJS commit as the branch's last run, the same counts (run 43259507107 against 43211539187: 543 + 38 + 33 passed, 1 skipped).
 
 ## Open
 
 - Phase 1 of the set-up (plan of 2026-10-16), the rest of it:
   `bin/line-range.js --branch ore`, `bin/report-models.mjs` reading
   `docs/reports/ore/`, REPORT.md "Affects" with an `ore` sub-item and
-  the ten open regressions marked for it. Done 2026-10-16: the ore
-  worktree beside each slot clone (harness.md "The ore worktree": slot
-  number n+4, fetch-apps' `PKP_E2E_APP_BRANCH=ore`, `bin/slot.js`
-  counting it with its slot).
+  the ten open regressions marked for it. The ore worktrees beside
+  the slot clones went with the switch of 2026-11-12: each slot has
+  `checkouts/ore/ojs` as a line (harness.md "The stable lines").
 
 ## Read log
 
