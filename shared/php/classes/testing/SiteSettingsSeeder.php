@@ -57,12 +57,20 @@
  *   "Platform" ticked with no ID, and an ID other than 1–17 letters,
  *   digits, "_", "." and "/" (ticked or not). The install values are
  *   false and null (a `0` row and no ID row).
+ * - rors (U43) — no Site Settings field: records in the install's own copy
+ *   of the ROR registry, the site-wide cache a Funder or affiliation pick
+ *   reads its registry name from. A list of ROR API v2 organization
+ *   records as api.ror.org returns them, each written as the app writes a
+ *   fetched pick (RorRegistrySeeder, which documents the shape and its
+ *   refusals). Leaves the site record alone; the response's `rors` lists
+ *   each record as `POST rors` answers it.
  *
  * The site row is read under a row lock (as the `bulkEmails` context key
  * does), because PKPSiteService::edit writes back the whole record it read:
  * a parallel `bulkEmails` seed's id would otherwise be written out. The lock
  * does not make a suite that sets the Site Name safe to run beside one that
- * reads it: that is the serial project's job (PRINCIPLES A7, A9).
+ * reads it: that is the serial project's job (PRINCIPLES A7, A9). The same
+ * lock serializes two `rors` seeds of one id (the copy's id is unique).
  */
 
 namespace PKP\testing;
@@ -103,7 +111,7 @@ class SiteSettingsSeeder
     {
         $root = new Spec($data);
         if ($data === []) {
-            throw new SpecException('', 'Nothing to set: name at least one site key (' . implode(', ', array_merge(['title'], array_keys(self::STATISTICS_KEYS), self::PLATFORM_KEYS, ['counterR5StartDate'])) . ')');
+            throw new SpecException('', 'Nothing to set: name at least one site key (' . implode(', ', array_merge(['title'], array_keys(self::STATISTICS_KEYS), self::PLATFORM_KEYS, ['counterR5StartDate', 'rors'])) . ')');
         }
 
         // Parse phase: no writes.
@@ -135,16 +143,21 @@ class SiteSettingsSeeder
         if ($platform) {
             $params += $this->parsePlatform($root, $site);
         }
+        $rorSeeder = new RorRegistrySeeder();
+        $rorPlans = $root->has('rors') ? $rorSeeder->parse($root->childList('rors')) : null;
         $root->assertConsumed();
 
-        // Execute phase: the tab's save.
-        $siteService = app()->get('site'); /** @var \PKP\services\PKPSiteService $siteService */
-        $errors = $siteService->validate($params, $locales, $primaryLocale);
-        if (!empty($errors)) {
-            $key = (string) array_key_first($errors);
-            throw new SpecException(explode('.', $key)[0], 'The site\'s save would refuse this: ' . json_encode($errors));
+        // Execute phase: the tab's save (when a site key is named), then the
+        // registry copy's records.
+        if ($params !== []) {
+            $siteService = app()->get('site'); /** @var \PKP\services\PKPSiteService $siteService */
+            $errors = $siteService->validate($params, $locales, $primaryLocale);
+            if (!empty($errors)) {
+                $key = (string) array_key_first($errors);
+                throw new SpecException(explode('.', $key)[0], 'The site\'s save would refuse this: ' . json_encode($errors));
+            }
+            $site = $siteService->edit($site, $params, Application::get()->getRequest());
         }
-        $site = $siteService->edit($site, $params, Application::get()->getRequest());
 
         $response = ['title' => (object) array_filter((array) $site->getData('title'), fn ($v) => $v !== null && $v !== '')];
         foreach (array_keys(self::STATISTICS_KEYS) as $key) {
@@ -158,6 +171,9 @@ class SiteSettingsSeeder
         if ($platform) {
             $response['isSiteSushiPlatform'] = (bool) $site->getData('isSiteSushiPlatform');
             $response['sushiPlatformID'] = $site->getData('sushiPlatformID');
+        }
+        if ($rorPlans !== null) {
+            $response['rors'] = $rorSeeder->seed($rorPlans);
         }
         return $response;
     }

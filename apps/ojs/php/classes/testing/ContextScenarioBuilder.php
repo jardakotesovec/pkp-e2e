@@ -45,7 +45,22 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
             'abstractsNotRequired' => (bool) $spec->get('abstractsNotRequired', false),
             'identifyType' => $spec->get('identifyType'),
             'hideTitle' => BootstrapSeeder::parseHideTitle($spec),
+            // U23: the section window's "Mark this section as inactive…" and
+            // editors-only boxes (context scenario only; the bootstrap
+            // payload reads neither).
+            'isInactive' => self::parseStructureBox($spec, 'isInactive', 'Mark this section as inactive and do not allow new submissions to be made to it.'),
+            'editorRestricted' => self::parseStructureBox($spec, 'editorRestricted', 'Items can only be submitted by Editors and Section Editors.'),
         ];
+    }
+
+    /**
+     * The section window's and the "Inactive" box's refusal of the last
+     * active section (SectionForm::validate, SectionGridHandler::
+     * deactivateSection: "At least one section must be active. …").
+     */
+    protected function lastActiveRefusal(): ?string
+    {
+        return __('manager.sections.confirmDeactivateSection.error');
     }
 
     protected function addStructure(Context $context, array $plan, int $sequence): int

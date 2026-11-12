@@ -110,6 +110,13 @@ class BootstrapSeeder extends PKPBootstrapSeeder
                 if (($plan['hideTitle'] ?? null) !== null) {
                     $params['hideTitle'] = $plan['hideTitle'];
                 }
+                // U23: the window's "Mark this section as inactive…" and
+                // editors-only boxes, written only when the entry names them.
+                foreach (['isInactive', 'editorRestricted'] as $box) {
+                    if (($plan[$box] ?? null) !== null) {
+                        $params[$box] = $plan[$box];
+                    }
+                }
                 $defaultSection = $existing->first();
                 Repo::section()->edit($defaultSection, $params);
                 return $defaultSection->getId();
@@ -119,7 +126,10 @@ class BootstrapSeeder extends PKPBootstrapSeeder
         $section = Repo::section()->newDataObject();
         $section->setData('contextId', $context->getId());
         $section->setData('sequence', $sequence);
-        $section->setData('editorRestricted', false);
+        $section->setData('editorRestricted', $plan['editorRestricted'] ?? false);
+        if (($plan['isInactive'] ?? null) !== null) {
+            $section->setData('isInactive', $plan['isInactive']);
+        }
         $section->setData('metaIndexed', true);
         $section->setData('metaReviewed', true);
         $section->setData('abstractsNotRequired', $plan['abstractsNotRequired'] ?? false);

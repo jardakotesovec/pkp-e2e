@@ -497,6 +497,37 @@ abstract class PKPContextScenarioBuilder
     }
 
     /**
+     * A tick box of the section (series) window read from a structure
+     * entry (U23: `isInactive`, `editorRestricted`): true ticked, false
+     * unticked, null when the key is absent (the box as a new entry has
+     * it, unticked); a non-boolean is a 400 naming the box by its label.
+     */
+    protected static function parseStructureBox(Spec $spec, string $key, string $label): ?bool
+    {
+        if (!$spec->has($key)) {
+            return null;
+        }
+        $value = $spec->get($key);
+        if (!is_bool($value)) {
+            throw new SpecException("{$spec->path}.{$key}", "{$key} must be a boolean (true: the window's \"{$label}\" box ticked, false: unticked)");
+        }
+        return $value;
+    }
+
+    /**
+     * The refusal the app's section window and its grid's "Inactive" box
+     * give when the last active entry would be made inactive (OJS, OPS:
+     * "At least one section must be active. …"), or null where the window
+     * has no such check (OMP's series window). A structure list whose
+     * every entry carries `isInactive: true` is refused with it (400,
+     * before the context exists).
+     */
+    protected function lastActiveRefusal(): ?string
+    {
+        return null;
+    }
+
+    /**
      * Parse app-overlay root keys (OJS: `issues[]`, U08). Returns an opaque
      * plan; the default reads nothing, so an overlay key another app does
      * not have is left unconsumed and answers 400.
@@ -543,6 +574,14 @@ abstract class PKPContextScenarioBuilder
             fn (Spec $spec) => $this->parseStructure($spec),
             $root->childList($this->structureKey())
         );
+        // U23: a new context's structures are the declared ones (the first
+        // renames the hook-created default), so a list whose every entry is
+        // inactive is the state the window refuses (where it does).
+        if ($structurePlans !== []
+            && count(array_filter($structurePlans, fn (array $plan) => ($plan['isInactive'] ?? null) === true)) === count($structurePlans)
+            && ($refusal = $this->lastActiveRefusal()) !== null) {
+            throw new SpecException($this->structureKey() . '.' . (count($structurePlans) - 1) . '.isInactive', $refusal);
+        }
         $categoryPlans = CategorySeeder::parse(
             $root,
             (string) $contextParams['primaryLocale'],

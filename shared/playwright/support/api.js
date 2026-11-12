@@ -93,9 +93,13 @@ class PkpApi {
      * 'disabled'`, `enableInstitutionUsageStats: false`, `isSushiApiPublic:
      * true`; `counterR5StartDate: null`, no row, is the install state;
      * "Platform" and "Platform ID" go back with `isSiteSushiPlatform: false,
-     * sushiPlatformID: null`).
+     * sushiPlatformID: null`). The exception is `rors` (U43): records added
+     * to the install's own copy of the ROR registry, each a ROR API v2
+     * organization record as api.ror.org returns it (the object a registry
+     * search stub answers with). It leaves the site record alone and is
+     * idempotent, so a parallel test may send it; the record stays.
      *
-     * @param {object} spec {title?, enableGeoUsageStats?, enableInstitutionUsageStats?, isSushiApiPublic?, isSiteSushiPlatform?, sushiPlatformID?, counterR5StartDate?}
+     * @param {object} spec {title?, enableGeoUsageStats?, enableInstitutionUsageStats?, isSushiApiPublic?, isSiteSushiPlatform?, sushiPlatformID?, counterR5StartDate?, rors?}
      */
     async setSite(spec) {
         return this._post(`${API_BASE}/site`, spec);

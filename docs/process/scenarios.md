@@ -19,15 +19,16 @@ With a wrong header it answers 403. See `harness.md` for the variable and for
 `bin/mount.js`, which copies the PHP code into the app checkouts.
 
 Every mutating request but `scenarios/job` and `scenarios/task` (below) runs
-inside one database transaction and under a mail fake. A failed build rolls
-back, so it never leaves half-created state, with one exception seen: a
-`scenarios/context` request refused on `sidebar` (a 400) left its context
-behind on all three apps, path taken (K3), so a retry takes a new path. Mail
-sent while seeding is dropped, but each mailable is still built the way the
-app's mailer builds it before sending, so the `email_log` rows the app writes
-next to a send carry the compiled subject and body, as they do after a real
-send. Only mail sent by the test's own actions reaches Mailpit. The acting
-user during a build is the installer's `admin` account.
+inside one database transaction and under a mail fake (a submission's
+`citationsLookup` is built just after that transaction commits, below). A
+failed build rolls back, so it never leaves half-created state, with one
+exception seen: a `scenarios/context` request refused on `sidebar` (a 400)
+left its context behind on all three apps, path taken (K3), so a retry takes
+a new path. Mail sent while seeding is dropped, but each mailable is still
+built the way the app's mailer builds it before sending, so the `email_log`
+rows the app writes next to a send carry the compiled subject and body, as
+they do after a real send. Only mail sent by the test's own actions reaches
+Mailpit. The acting user during a build is the installer's `admin` account.
 
 Validation is strict. There is no JSON schema. The builders read the request
 through the `Spec` reader (`shared/php/classes/testing/Spec.php`), and any key
@@ -48,7 +49,8 @@ Implementation: `shared/php/api/v1/_test/PKPTestController.php` and the
 builders in `shared/php/classes/testing/` (`PKPBootstrapSeeder`,
 `PKPContextScenarioBuilder`, `PKPSubmissionScenarioBuilder`, `Spec`,
 `UserSeeder`, `ContextFactory`, `LibraryFileSeeder` (both `libraryFiles[]`
-keys), `SiteSettingsSeeder` (`POST site`, app-neutral, no subclass),
+keys), `SiteSettingsSeeder` (`POST site`, app-neutral, no subclass; its
+`rors` key is `RorRegistrySeeder`),
 `PKPUsageStatsSeeder` (every `usage[]` key; each app's `UsageStatsSeeder` adds
 its line fields, its work page and, on OJS, the issue and JATS visits), and
 `ApiCall`, which runs an app API controller's own action on the JSON body a
@@ -208,9 +210,7 @@ a key built later is deleted from this list.
   `articleNumber` does not read it.
 - Section: `sections[].hideAuthor` (OJS), the section form's "Omit author
   names for section items from issues' table of contents."; it is ticked on
-  screen; `sections[].isInactive` and `sections[].editorRestricted`, the
-  form's "Mark this section as inactive…" and "Items can only be submitted by
-  Editors and Section Editors." boxes, ticked on screen.
+  screen.
 - Submission: `contributors[].biography` and `contributors[].roles` (a "Bio
   Statement", a role other than "Author"); set in the Contributors window,
   which names a scratch submitter "{given} {family}".
@@ -421,6 +421,25 @@ has only when given (three apps).
 `sections[]` (OJS, OPS): same shape as in the bootstrap payload. The first
 entry renames the default section.
 
+An entry's `isInactive` and `editorRestricted` (booleans, context scenario
+only; the bootstrap payload reads neither) are the section window's "Mark
+this section as inactive and do not allow new submissions to be made to
+it." and "Items can only be submitted by Editors and Section Editors." (OPS
+"Items can only be submitted by Managers and Moderators.") boxes ticked
+(`true`) or unticked, stored as its "Save" stores them (`is_inactive`,
+`editor_restricted` 1 / 0); without the key the box is unticked. On the
+renamed default section they are saved with the rename. Every section
+listed, inactive and editors-only ones included, shows in the editorial
+dashboard's "Filters" "Section" field with nothing marking them (U23 S5),
+and an Author's "Make a Submission" page leaves both kinds out (with one
+section left it shows no "Section" choice). A list whose every entry is
+inactive is a 400 with the window's own refusal, "At least one section
+must be active. Visit the workflow settings to disable all submissions to
+this journal." ("…server."), naming the last entry's `isInactive`; a
+non-boolean is a 400. As with `hideTitle`, the screen's "Save" re-saves the
+window's other fields, which the key does not, and nothing on screen
+differs (parity ledger).
+
 ### `series[]`
 
 `series[]` (OMP; OJS and OPS answer 400): each `{path, title?, description?}`
@@ -437,7 +456,24 @@ before the press exists): a missing path, a path with anything but letters,
 digits, `/`, `.`, `_` and `-` ("The series path must consist of only letters
 and numbers."), longer than the box's 32 characters, or named twice ("The
 series path already exists. Please enter a unique path."), a title or
-description locale the press's forms lack. Series are added in list order
+description locale the press's forms lack. `onlineIssn` and `printIssn`
+(U20) are the window's "Online ISSN" and "Print ISSN" boxes, each a
+non-empty string as typed (an empty box is the key left out), stored in the
+series' `onlineIssn` / `printIssn` row, the other box's row left empty;
+refused (400, before the press exists) as the window's "Save" refuses: a
+value its ISSN check rejects ("Please enter a valid ISSN.", check digit
+included, a lowercase "x" refused), or the two equal ("Online and print
+ISSN must not be the same."). What a reader sees of them: a book's page
+carries "citation_issn" and its file view pages "DC.Source.ISSN" from the
+series' "Online ISSN" alone, so a print-only series gives neither (U20
+Rule 17). An entry's `isInactive` and `editorRestricted` (booleans, U23)
+are the window's "Mark this series as inactive and do not allow new
+submissions to be made to it." and "Don't allow authors to submit directly
+to this series." boxes ticked at "Add Series" (posted as "1"; `false` or no
+key, unticked), stored in the series row's `is_inactive` and
+`editor_restricted`; a non-boolean is a 400. Unlike a section, every series
+of a press may be inactive: the window has no last-active check, so such a
+list is accepted. Series are added in list order
 before `categories[]` and `users[]`, whose `series` sub-editor assignments
 name them by path, and the submission scenario's `series` key places a book in
 one. Every seeded series is stored at order 0, as one added through "Add
@@ -729,7 +765,8 @@ added afterwards, typed or seeded, queues the lookup's job chain (one row in
 the `jobs` table per reference, first job `ExtractPidsJob`); the test install
 runs no job runner, so the chain never runs and the reference stays at
 processing status −2, queued (0 is a reference added while the lookup was off;
-since pkp/pkp-lib#13308). Applies to the three apps alike; a non-boolean is a 400.
+since pkp/pkp-lib#13308); `citationsLookup` (below) seeds one whose lookup
+failed for good. Applies to the three apps alike; a non-boolean is a 400.
 
 ### `enablePublisherId`
 
@@ -2048,12 +2085,62 @@ text), before the submit and as the submitter, so a draft carries it too. The
 rows are the screen's: one reference per non-blank line in line order, ends
 trimmed and inner runs of spaces shrunk to one, a repeated line kept as a
 second reference (the wizard's rule, not the References page's "Add", which
-drops a repeat); with lookup off no DOI is kept from the text (the wizard
-path's own behavior, U42 A7), with lookup on each reference queues the chain
-(`citationsMetadataLookup` above). The key does not read the context's
-References setting: references seeded on a context with
-`metadata.citations: 'off'` are the "switched off with references kept" state.
+drops a repeat). With lookup off each reference keeps the identifiers written
+in its text, picked out as the lookup's first step picks them (U42 Rule 17,
+since pkp/pkp-lib#13537, which retired U42 A7): a DOI, an arXiv ID with its
+version, a handle, a web address, a URN, each in its own setting row, with
+processing status 0 and no job queued; the line
+`Alpha study 2020. https://doi.org/10.1234/abcd` keeps the DOI
+`10.1234/abcd` (three apps, 2026-11-12). With lookup on each reference
+queues the chain instead (`citationsMetadataLookup` above) and keeps no
+identifier until the chain's first step runs (`citationsLookup` below). The
+key does not read the context's References setting: references seeded on a
+context with `metadata.citations: 'off'` are the "switched off with
+references kept" state.
 A string that is not text is a 400. The three apps alike.
+
+### `citationsLookup`
+
+`citationsLookup: 'failed'`: every reference `citationsRaw` queued for the
+metadata lookup ends with its lookup failed for good, the state a live site
+reaches when a lookup service stays unreachable through the chain's eight
+retries (about a day): the row's "Metadata lookup failed" badge (U42 Rules
+12, 13). It needs `citationsRaw` with at least one reference and a context
+created with `citationsMetadataLookup: true`; without either, or with any
+other value, the request is a 400 naming `citationsLookup` (with lookup off
+no lookup is queued). Built after the build's transaction commits (the
+database queue inserts the chain's job only then), with the app's own code:
+the chain's first step (`ExtractPidsJob`) runs through the app's queue
+worker, so the identifiers in the text are picked out as Rule 11 step 1
+says; for a reference that then has a DOI the Crossref step runs too (it
+returns at once on a DOI); the next service step (Crossref for a reference
+with no DOI, OpenAlex for one with a DOI) is then failed by its own spent
+retry budget (`retryAfterServiceError` at `MAX_SERVICE_RETRIES`, HTTP
+504), through the queue's own failure: the job and the rest of the chain
+deleted, the citation's processing status −1 (FAILED), a "Citation
+metadata lookup abandoned" log line and the "Exception: Citation {id}: …
+abandoned after 8 retries (HTTP 504)" line in the server log, and one
+`failed_jobs` row per reference (queue `queue`, the job's class as its
+name). No request leaves the server. The response's `citationsLookup`
+lists `{citationId, failedJobId, job}` per reference, in line order. On a
+failure after the commit the submission is deleted (the app's own delete)
+and the request answers 500. The three apps alike.
+
+Facts a test relies on: the References page of such a submission shows the
+reference's text with "Metadata lookup failed" under it, its "…" menu
+offers "Edit", "Delete" and "Reprocess", and the box under the "Add" box
+reads "{processed} of {total} references processed, {failed} failed" ("0
+of 1 references processed, 1 failed" for one reference) with its
+"The metadata lookup could not be completed …" text; no job is left
+queued, so the page does not refresh itself and `runJobs()` does not touch
+these references. The `failed_jobs` rows are the fleet's: they show on
+Administration › "Failed Jobs" and count in its total, and its "Requeue
+All Failed Jobs" puts them back on the queue (U61 S8, `@solo`), so a
+serial test that seeds the key moves the total U61's serial tests read
+before and after a delete. One deviation, in the parity ledger: the eight
+delayed retries are not run, so the `failed_jobs` payload is the job's
+first try (no `serviceRetries`, no delay in its serialized command) where
+a live site stores the eighth retry's (`serviceRetries` 8 and its delay).
 
 ### `dataCitations[]`
 
@@ -2166,6 +2253,16 @@ format, also (driven equal on screen):
   link reading the format's name that opens the address in a new tab, and the
   Publication Formats row reads "This item is remotely hosted.". Nothing
   checks the address's form.
+- `urlPath` (U20; a non-empty string as typed): the window's "URL Path"
+  box, stored as the format's `url_path`. A value the window's own check
+  refuses ("This may only contain letters, numbers, dashes, underscores and
+  periods.": letters and digits in runs joined by single `.`, `-` or `_`)
+  is a 400, and so is `urlPath` beside `urlRemote` (the window hides the box
+  once the remote box is ticked). Nothing checks a repeat, on screen or in
+  the seed. A reader fact: the book page's link to the format's file is
+  `catalog/view/{book's urlPath or id}/{format's urlPath}/{file id}`, while
+  the view page's "DC.Identifier" and "DC.Identifier.URI" take the format's
+  number (U20 Rule 17).
 - `price` (needs `file`; a string as typed, `"25"`, or a whole number): the
   file row's terms link, "Direct Sales" with "Price" typed, "Save"
   (`salesType=directSales&price=25`), instead of "Open Access". The window's
@@ -2599,7 +2696,8 @@ The response returns `tag`, `submissionId`, `publicationId`, `stageId`,
 `uploader`; the root entries in order, then each round's), `tasks[]` (`id`,
 `title`, `type`, `stage`, in the order seeded), `libraryFiles[]` (as the
 context's), `mediaFiles[]`, `publicationFormats[]`, `jats`, `contributors[]`
-and, on OMP with the key, `chapters[]` (above). `stageId` is the submission's
+and, with their keys, `citationsLookup[]` (`citationId`, `failedJobId`,
+`job`) and, on OMP, `chapters[]` (above). `stageId` is the submission's
 stored stage after the build, not the stage the screen names: on OPS
 `published: true` leaves it at 6 (`WORKFLOW_STAGE_ID_DONE`, the posted state),
 while an unposted preprint reads the Production stage's 5. It does not echo
@@ -2615,7 +2713,9 @@ shares, the way Administration › Site Settings saves them: the tab's "Save"
 sends `PUT index/api/v1/site`, whose request turns each empty string into null
 before the site service's own validate and edit, and a locale left null has
 its row deleted. The client is `pkpApi.setSite(spec)`. The body names at least
-one key (`{}` is a 400); any other key is a 400.
+one key (`{}` is a 400); any other key is a 400. One key, `rors`, is no Site
+Settings field: the install's own copy of the ROR registry, site-wide like the
+rest.
 
 ### `title`
 
@@ -2693,6 +2793,64 @@ without one they keep the context's name. Parity-checked on the three apps:
 the rows, the tab as it reopens and a "PR" download equal the screen's, both
 ways.
 
+### `rors`
+
+Records in the install's own copy of the ROR registry (the `rors` and
+`ror_settings` tables), the site-wide copy a registry pick in the Funder
+field (U43) or an affiliation field (U41) reads its name from. Every
+campaign fleet's copy is empty, and its server cannot fetch a record (the
+dead-port `[proxy]`, harness.md "config.test.inc.php"), so without the key
+every registry pick meets U43 A3: `POST rors` answers 404 and the screen
+shows "An unexpected error has occurred. Please reload the page and try
+again.".
+
+A list of one or more ROR API v2 organization records, each as
+`https://api.ror.org/v2/organizations/<id>` returns it. That is the object
+the Funder field's browser-side search gets in `items[]`, so one fixture
+answers the suite's search stub (`page.route('https://api.ror.org/**')`
+fulfilled with `{items: [record]}`, as `stubRegistrySearch` does with an
+empty list) and seeds the copy. Each record is written the way `POST rors`
+(`PKPRorController::addOrEdit`) writes a pick the copy lacks once its
+server has fetched the record: `Repo::ror()->mapFromApiRecord()`, then
+`updateOrInsert()`. Stored: `id` as the `ror`; `status` (`active` is
+active, any other value inactive); and from `names[]` the `ror_display`
+name, whose `lang` is the display locale, plus the first `label` of each
+other language, keyed by the record's own `lang` (`en`, `fr`; null is
+`no_lang_code`), never the app's `fr_CA`; `searchPhrase` is the id followed
+by the `ror_display` name and every `label`. Acronyms and aliases are stored only for a record that has
+no other name (its first name). The record's other v2 fields (`admin`,
+`domains`, `established`, `external_ids`, `links`, `locations`,
+`relationships`, `types`) are accepted and stored nowhere, as by the app:
+the suggestion's country comes from `locations` in the browser alone.
+
+Refusals (400): an empty list, or not a list; an `id` other than a full
+`https://ror.org/…` address of the registry's pattern (`POST rors`'s own
+check); a `status` other than `active`, `inactive` or `withdrawn`; a name
+entry without a non-empty `value`, with a `lang` that is neither a string
+nor null, or with `types` outside `ror_display`, `label`, `alias`,
+`acronym`; no names at all (`POST rors` answers such a record 404); any
+other key, in the record or in a name entry; the same `id` twice. The
+response adds `rors`, each record read back as
+`{id, ror, displayLocale, isActive, name}` (what `POST rors` answers,
+without its `_href`). A request with `rors` alone runs no Site Settings
+save.
+
+A record the copy holds is rewritten from the given one by the same call,
+so the key is idempotent: the same `id` comes back each time. The record
+stays until the database is rebuilt; no key removes it.
+
+What a pick of a seeded record does, on the three apps (the parity fact a
+suite relies on): the Funder field's suggestion is picked, `POST rors`
+answers 200 with the held record (no fetch, no error window), the panel
+shows the name and the registry link, and after "Save" the funders list
+shows the registry's name with the ROR mark beside it. The stored funder
+carries the ROR id and no name of its own: the list reads the name from the
+copy, in the submission's languages. Parity-checked 2026-11-12 with NSERC
+(`https://ror.org/01h531d29`, "Natural Sciences and Engineering Research
+Council of Canada", French label "Conseil de Recherches en Sciences
+Naturelles et en Génie du Canada"): the rows equal those `POST rors` writes
+after a real fetch.
+
 ### Facts a suite meets
 
 - Every fleet starts with no Site Name, and every shipped suite reads the site
@@ -2727,6 +2885,12 @@ ways.
   state. The request reads the site row under the same lock as the context
   scenario's `bulkEmails`, so the two never write each other's value out (four
   of each at once over two servers).
+- `rors` is the exception: it adds to the copy and leaves the site record
+  alone, so a parallel test sends it and leaves the record in place (two
+  seeds of one id at once wait on the same site-row lock). A test seeds only
+  the record its own pick reads, and never one whose absence another test
+  reads: a registry pick on an empty copy is A3's failure shape (U43), and
+  a held record changes it for every context of the fleet.
 
 ## `POST scenarios/job`
 

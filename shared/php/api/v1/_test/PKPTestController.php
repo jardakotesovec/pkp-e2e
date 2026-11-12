@@ -20,7 +20,8 @@
  * - POST bootstrap             — declarative base seed (warm calls no-op)
  * - POST scenarios/context     — scratch context
  * - POST scenarios/submission  — submission at a declared end-state
- * - POST site                  — the site's own settings (SiteSettingsSeeder)
+ * - POST site                  — the site's own settings (SiteSettingsSeeder) and
+ *                                its ROR registry copy's records (RorRegistrySeeder, U43)
  * - POST scenarios/job         — a queued or failed test job (JobScenarioBuilder)
  * - POST scenarios/task        — a routine task run (TaskRunScenarioBuilder):
  *                                UpdateIPGeoDB ending in error, its report
@@ -171,7 +172,11 @@ abstract class PKPTestController extends PKPBaseController
 
     public function submissionScenario(Request $illuminateRequest): JsonResponse
     {
-        return $this->runBuilder(fn () => $this->submissionScenarioBuilder()->build((array) $illuminateRequest->json()->all()));
+        $builder = $this->submissionScenarioBuilder();
+        return $this->runBuilder(
+            fn () => $builder->build((array) $illuminateRequest->json()->all()),
+            afterCommit: fn (array $result) => $builder->afterCommit($result)
+        );
     }
 
     /**
@@ -252,10 +257,13 @@ abstract class PKPTestController extends PKPBaseController
     /**
      * Shared builder harness: Mail::fake, admin as acting user, one DB
      * transaction (the job and task builders opt out of the fake and the
-     * transaction, and own their failure hygiene). SpecException → 400 with
-     * the dotted specKey; anything else → 500 with the exception summary.
+     * transaction, and own their failure hygiene). `$afterCommit` takes the
+     * build's result once the transaction has committed and returns it
+     * extended (the submission builder's queued-job states, U42); it owns
+     * its failure hygiene. SpecException → 400 with the dotted specKey;
+     * anything else → 500 with the exception summary.
      */
-    protected function runBuilder(callable $build, bool $transaction = true, bool $fakeMail = true): JsonResponse
+    protected function runBuilder(callable $build, bool $transaction = true, bool $fakeMail = true, ?callable $afterCommit = null): JsonResponse
     {
         if ($fakeMail) {
             $this->fakeMail();
@@ -272,6 +280,9 @@ abstract class PKPTestController extends PKPBaseController
             $result = $build();
             if ($transaction) {
                 DB::commit();
+            }
+            if ($afterCommit !== null) {
+                $result = $afterCommit($result);
             }
             return response()->json($result, 200);
         } catch (SpecException $e) {

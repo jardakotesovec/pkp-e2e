@@ -176,6 +176,13 @@
  *   blank lines skipped, and with the context's citationsMetadataLookup
  *   on the lookup job chain queued per row), before the submit and as the
  *   submitter. A list is joined with newlines, one line per entry.
+ * - citationsLookup ('failed') — every reference citationsRaw queued for
+ *   the metadata lookup ends with its lookup failed for good, the row's
+ *   "Metadata lookup failed" (U42; CitationLookupSeeder, after the
+ *   commit: the chain's own steps through the app's queue worker, its
+ *   service step failed by its own spent retry budget). Needs
+ *   citationsRaw with a reference and the context's
+ *   citationsMetadataLookup on; any other value is a 400.
  * - dataCitations[] {title*, relationshipType*, identifierType?,
  *   identifier?, repository?, year?, authors? [{givenName?, familyName?,
  *   orcid?}], url?} — the Data Citations table's "Add Data Citation" ›
@@ -319,6 +326,34 @@ abstract class PKPSubmissionScenarioBuilder
     use HasReviewDueDate;
 
     public const REVIEWER_STATUSES = ['invited', 'accepted', 'declined', 'completed'];
+
+    /** The `citationsLookup` state to build once the build has committed (U42), or null. */
+    private ?CitationLookupSeeder $citationLookupSeeder = null;
+
+    /**
+     * The part of a build that runs after its transaction commits: the
+     * failed lookups of `citationsLookup` (U42), whose job chains the
+     * database queue inserts only at the commit. On failure the committed
+     * submission is deleted (Repo::submission()->delete, the app's own
+     * delete) before the error goes back.
+     */
+    public function afterCommit(array $response): array
+    {
+        if ($this->citationLookupSeeder === null) {
+            return $response;
+        }
+        $seeder = $this->citationLookupSeeder;
+        $this->citationLookupSeeder = null;
+        try {
+            return $response + ['citationsLookup' => $seeder->failQueuedLookups()];
+        } catch (\Throwable $e) {
+            $submission = Repo::submission()->get((int) $response['submissionId']);
+            if ($submission) {
+                Repo::submission()->delete($submission);
+            }
+            throw $e;
+        }
+    }
 
     /** Default "For author and editor" text of a completed seeded review. */
     public const DEFAULT_REVIEW_COMMENTS = 'Seeded review comments for {tag}.';
@@ -693,6 +728,7 @@ abstract class PKPSubmissionScenarioBuilder
         $filePlans = $this->parseFiles($context, $root, $submitter, $submitted, $participantPlans);
         $taskPlans = $this->parseTasks($root, $submitted, $tag);
         $citationsRaw = $this->parseCitationsRaw($root);
+        $citationsLookup = CitationLookupSeeder::parse($root, $context, $citationsRaw);
         $dataCitationPlans = $this->parseDataCitations($root);
         $mediaFilePlans = $this->parseMediaFiles($context, $root, $submitted, $locale);
         $formatPlans = $this->parsePublicationFormats($context, $root, $locale, $submitted);
@@ -726,6 +762,12 @@ abstract class PKPSubmissionScenarioBuilder
 
         // ---- Execute phase.
         $request = Application::get()->getRequest();
+        // citationsLookup (U42): the lookup chains the build queues are
+        // recorded now and failed after the commit (afterCommit()).
+        if ($citationsLookup !== null) {
+            $this->citationLookupSeeder = new CitationLookupSeeder();
+            $this->citationLookupSeeder->watch();
+        }
 
         // The seeding request is site-wide, but the services and listeners the
         // build invokes (notification managers, mailables) read

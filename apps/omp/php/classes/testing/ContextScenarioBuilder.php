@@ -11,7 +11,8 @@
  *
  * @brief OMP scratch-press scenario (note: OMP's Context::add hook creates NO
  * default series; user series assignments resolve by path). `series[]`
- * (U70): each entry {path*, title?, description?} is Settings › Press ›
+ * (U70): each entry {path*, title?, description?, onlineIssn?, printIssn?}
+ * (the ISSNs U20) is Settings › Press ›
  * "Series" › "Add Series" › "Save", run through the window's own
  * SeriesForm::execute. The press's ONIX details (U74) `publisher`,
  * `location`, `codeType`, `codeValue`: Settings › Press › "Masthead", the
@@ -30,6 +31,7 @@ use PKP\testing\PaymentSettingsSeeder;
 use PKP\testing\PKPContextScenarioBuilder;
 use PKP\testing\Spec;
 use PKP\testing\SpecException;
+use PKP\validation\ValidatorISSN;
 
 class ContextScenarioBuilder extends PKPContextScenarioBuilder
 {
@@ -128,8 +130,9 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
      * in the list (a scratch press has no other series); `title` a string
      * (the primary locale) or a locale map over the press's form
      * languages, default the path, required in the primary locale;
-     * `description` the same shape, typed into the rich-text box. Parse
-     * phase: no writes.
+     * `description` the same shape, typed into the rich-text box;
+     * `onlineIssn` / `printIssn` (U20) the "Online ISSN" / "Print ISSN"
+     * boxes as typed. Parse phase: no writes.
      */
     protected function parseStructure(Spec $spec): array
     {
@@ -169,11 +172,40 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
         }
         $description = $localized('description', null);
 
+        // `onlineIssn` / `printIssn` (U20): the window's "Online ISSN" and
+        // "Print ISSN" boxes as typed, refused as its checks refuse them:
+        // each the window's own ISSN validator (FormValidatorISSN's
+        // ValidatorISSN, the check digit included), and the two not equal.
+        $issns = [];
+        foreach (['onlineIssn' => 'Online ISSN', 'printIssn' => 'Print ISSN'] as $key => $box) {
+            $issns[$key] = '';
+            if (!$spec->has($key)) {
+                continue;
+            }
+            $value = $spec->get($key);
+            if (!is_string($value) || trim($value) === '') {
+                throw new SpecException("{$spec->path}.{$key}", "{$key} is the \"{$box}\" box as typed, a non-empty string (an empty box is the key left out)");
+            }
+            if (!(new ValidatorISSN())->isValid(trim($value))) {
+                throw new SpecException("{$spec->path}.{$key}", "Please enter a valid ISSN. (the window's refusal of \"{$box}\" " . json_encode($value) . ')');
+            }
+            $issns[$key] = $value;
+        }
+        if ($issns['onlineIssn'] !== '' && $issns['onlineIssn'] === $issns['printIssn']) {
+            throw new SpecException("{$spec->path}.printIssn", 'Online and print ISSN must not be the same.');
+        }
+
         return [
             'specPath' => $spec->path,
             'path' => $path,
             'title' => $title,
             'description' => $description,
+            'onlineIssn' => $issns['onlineIssn'],
+            'printIssn' => $issns['printIssn'],
+            // U23: the window's "Mark this series as inactive…" and
+            // "Don't allow authors…" boxes (no last-active check on a press).
+            'isInactive' => self::parseStructureBox($spec, 'isInactive', 'Mark this series as inactive and do not allow new submissions to be made to it.'),
+            'editorRestricted' => self::parseStructureBox($spec, 'editorRestricted', "Don't allow authors to submit directly to this series."),
         ];
     }
 
@@ -208,8 +240,14 @@ class ContextScenarioBuilder extends PKPContextScenarioBuilder
                 $plan['description']
             )));
             $form->setData('path', $plan['path']);
-            $form->setData('onlineIssn', '');
-            $form->setData('printIssn', '');
+            $form->setData('onlineIssn', $plan['onlineIssn']);
+            $form->setData('printIssn', $plan['printIssn']);
+            // U23: a ticked box posts its value "1"; an unticked one is absent.
+            foreach (['isInactive', 'editorRestricted'] as $box) {
+                if (($plan[$box] ?? null) === true) {
+                    $form->setData($box, '1');
+                }
+            }
             $form->setData('sortOption', $sortOptions[0]);
             $form->setData('temporaryFileId', '');
             $form->execute();

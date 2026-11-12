@@ -113,7 +113,8 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
      * one; `file` a fixture basename, the format row's "Change File";
      * `genre` (U64, needs `file`) the upload wizard's component for it;
      * `approved` / `available` (U45, booleans, default true) whether the
-     * row's "Awaiting Approval" / "Not Available" link is pressed.
+     * row's "Awaiting Approval" / "Not Available" link is pressed;
+     * `urlPath` (U20) the window's "URL Path" box as typed.
      *
      * @return array<int, array{path: string, name: array<string, string>, fixture: ?array}>
      */
@@ -175,6 +176,21 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
                     }
                 }
             }
+            // `urlPath` (U20): the window's "URL Path" box as typed. The
+            // window hides the box once "This format will be available at a
+            // separate website." is ticked, so a remote format takes none;
+            // its pattern is the window's own check, run on the form at
+            // seedPublicationFormats.
+            $urlPath = null;
+            if ($spec->has('urlPath')) {
+                $urlPath = $spec->get('urlPath');
+                if (!is_string($urlPath) || trim($urlPath) === '') {
+                    throw new SpecException("{$spec->path}.urlPath", 'urlPath is the "URL Path" box as typed, a non-empty string (an empty box is the key left out)');
+                }
+                if ($urlRemote !== null) {
+                    throw new SpecException("{$spec->path}.urlPath", 'urlPath does not apply to a remote format (urlRemote): the window hides "URL Path" once "This format will be available at a separate website." is ticked');
+                }
+            }
             // `price` (U69): the file row's "Set Terms", "Direct Sales" with
             // the price typed, instead of "Open Access". Checked by the
             // window's own form at execute (ApprovedProofForm's pattern).
@@ -212,6 +228,7 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
                 'genreId' => $spec->has('genre') ? $this->resolveUploadGenreId($context, $spec) : null,
                 'physical' => $physical,
                 'urlRemote' => $urlRemote,
+                'urlPath' => $urlPath,
                 'price' => $price,
             ] + $this->parseFormatCatalogData($context, $spec) + $this->parseFormatTrade($spec);
         }
@@ -466,7 +483,14 @@ class SubmissionScenarioBuilder extends PKPSubmissionScenarioBuilder
                 $form->setData('isbn10', '');
                 $form->setData('isbn13', '');
                 $form->setData('remoteURL', $plan['urlRemote'] ?? '');
-                $form->setData('urlPath', '');
+                $form->setData('urlPath', $plan['urlPath'] ?? '');
+                // The window's own "URL Path" check (U20), its message the
+                // refusal; the form's other checks are the parse phase's.
+                foreach ($form->_checks as $check) {
+                    if ($check->getField() === 'urlPath' && !$check->isValid()) {
+                        throw new SpecException("{$plan['path']}.urlPath", 'The "Add publication format" window would refuse this "URL Path": ' . $check->getMessage());
+                    }
+                }
                 $formatId = (int) $form->execute();
 
                 // The format's "Edit" › "Metadata" tab (U69): each code and
