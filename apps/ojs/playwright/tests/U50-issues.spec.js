@@ -3,12 +3,13 @@
  * @file playwright/tests/U50-issues.spec.js
  *
  * Issues — OJS suite, the parallel part: one test per canonical scenario
- * the journal runs outside the serial project (S2–S8, S10). S1 and S9 read
- * the issue email after the site's background jobs run, so they live in
- * ./serial/U50-issues.spec.js. S11 is the press's and the preprint
- * server's absence, in the OMP and OPS trees; its journal-side control
- * (the Journal Manager's "Content" › "Issues", the visitor's "Current" and
- * `issue/current` opening "Vol. 1 No. 2 (2014)") rides in S7 here.
+ * the journal runs outside the serial project (S2, S4–S8, S10). S1 and S9
+ * read the issue email, and S3 the mail catcher, after the site's
+ * background jobs run, so they live in ./serial/U50-issues.spec.js. S11 is
+ * the press's and the preprint server's absence, in the OMP and OPS trees;
+ * its journal-side control (the Journal Manager's "Content" › "Issues",
+ * the visitor's "Current" and `issue/current` opening "Vol. 1 No. 2
+ * (2014)") rides in S7 here.
  * Spec: docs/specs/U50-issues.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
@@ -21,12 +22,16 @@
  *   read; S1 and S2 replace or empty it.
  * - A12 🐞: S6 reads the deleted issue's article page offline, never its
  *   workflow header.
+ * - A16 🐞: S2 types a "URL Path" beside the description, so the question
+ *   it reads never rests on the description alone.
  * - A3 ❓: S6 reads the "Delete" question's text, never that it says
  *   nothing about the articles.
  * - A15 ❓: S9 presses "OK" in "Publish Issue" without reading the box's
  *   arrival state.
- * - A2, A5, A6, A7, A8, A11, A13, A14, A21, A22: not on these scenarios'
- *   paths.
+ * - A22 ❓: S3 reads a never-ordered section's articles as a set (the
+ *   first read, and the moved article's section "in either order").
+ * - A2, A5, A6, A7, A8, A11, A13, A14, A17, A18, A19, A21: not on these
+ *   scenarios' paths.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S7 runs on publicknowledge with `manager.maya`,
@@ -34,17 +39,15 @@
  * and only reads its seeded issues; every other test seeds its own scratch
  * journal with throwaway accounts (the username twice as password), as
  * footnote s0 says: `issues[]` with `published`, `datePublished` and
- * `galleys[]`, `sections[]` with `hideTitle` (S3), `publishingMode` (S8),
- * `restrictArticleAccess` and `plugins` (S10), and scratch submissions
- * `published` into an `issue` (scheduled when the issue is unpublished).
+ * `galleys[]`, `publishingMode` (S8), `restrictArticleAccess` and
+ * `plugins` (S10), and scratch submissions `published` into an `issue`
+ * (scheduled when the issue is unpublished).
  *
  * Every absence is read settled and paired with a positive control taken
- * the same way (M4, M6); S3's mailbox silence is bounded by a "Notify" the
- * test sends to a spare account of its own journal (A8). Browser dialogs
- * are recorded and answered on every manager page ("The data on this form
- * has changed…"). The visitor is a browser context with no session
- * (patterns.md lesson 8). Waits are web-first or bounded by the screen's
- * own answer (A5).
+ * the same way (M4, M6). Browser dialogs are recorded and answered on
+ * every manager page ("The data on this form has changed…"). The visitor
+ * is a browser context with no session (patterns.md lesson 8). Waits are
+ * web-first or bounded by the screen's own answer (A5).
  */
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
@@ -66,12 +69,9 @@ const {
     IssueReader,
     notice,
 } = require('../../../../shared/playwright/pages/IssuesPages.js');
-const {PublicationScreen} = require('../pages/PublicationMetadataPages.js');
-const {PublishScreen} = require('../pages/PublishSchedulePages.js');
 
 const FILES = path.join(__dirname, '..', 'fixtures', 'files');
 const file = (name) => path.join(FILES, name);
-const NOTIFY_SUBJECT = 'Discussion (Submission)';
 const PK = 'publicknowledge';
 const PK_PUBLISHED = 'Vol. 1 No. 2 (2014)';
 const PK_FUTURE = 'Vol. 2 No. 1 (2015)';
@@ -129,23 +129,6 @@ async function visitorPage(browser, baseURL, contextPath) {
     const context = await browser.newContext({baseURL, storageState: {cookies: [], origins: []}});
     const page = await context.newPage();
     return {page, reader: new IssueReader(page, contextPath)};
-}
-
-/** Group a table-of-contents outline (`# Section`, titles) into sections, titles sorted. */
-function bySection(outline) {
-    /** @type {Record<string, string[]>} */
-    const out = {};
-    let current = '';
-    for (const line of outline) {
-        if (line.startsWith('# ')) {
-            current = line.slice(2);
-            out[current] = out[current] || [];
-        } else {
-            (out[current] = out[current] || []).push(line);
-        }
-    }
-    for (const key of Object.keys(out)) out[key].sort();
-    return out;
 }
 
 test.describe('issues', () => {
@@ -325,143 +308,6 @@ test.describe('issues', () => {
         await form.urlPathBox().fill('autumn-2026');
         await form.save();
         await expect(notice(page, TEXT.saved).first()).toBeVisible();
-    });
-
-    test('S3: the table of contents: its order and a removed article', async ({asUser, browser, baseURL, ojsApi, pkpMail}, testInfo) => {
-        test.setTimeout(360_000);
-        const tag = makeTag('s3', testInfo);
-        const author = `${tag}au`;
-        const spare = `${tag}x`;
-        const current = issue(1, 1, 2026);
-        const future = issue(1, 2, 2026);
-        const {manager} = await seedJournal(ojsApi, tag, {
-            extra: [user(author, 'Ada', 'Author', ['author']), user(spare, 'Xena', 'Spare', ['author'])],
-            sections: [
-                {abbrev: 'ART', title: 'Articles'},
-                {abbrev: 'REV', title: 'Reviews', hideTitle: true},
-            ],
-            issues: [{...current, published: true}, future],
-        });
-        // The three published articles in the order named (footnote s0).
-        await article(ojsApi, tag, 'a', author, 'Tidal Patterns', current, {section: 'ART'});
-        await article(ojsApi, tag, 'b', author, 'Coastal Winds', current, {section: 'ART'});
-        const review = await article(ojsApi, tag, 'c', author, 'A Review of Tides', current, {section: 'REV'});
-        const [, control] = await Promise.all([
-            article(ojsApi, tag, 'd', author, 'Storm Surges', future, {section: 'ART'}),
-            ojsApi.createSubmission({tag: `${tag}e`, context: tag, submitter: spare}),
-        ]);
-        const {page, issues} = await managerPage(asUser, manager, tag);
-        const {page: visitor, reader} = await visitorPage(browser, baseURL, tag);
-        const name = 'Vol. 1 No. 1 (2026)';
-
-        // What the tab lists: "Items" 3, the articles under their sections,
-        // "Order", and no "Open Access" column (Rule 9; Settings 1, 4).
-        await issues.goto('Back Issues');
-        await expect(issues.items('Back Issues', name)).toHaveText('3');
-        let win = await issues.openManagement('Back Issues', name);
-        await expect.poll(async () => bySection(await win.tocOutline())).toEqual({
-            Articles: ['Coastal Winds', 'Tidal Patterns'],
-            Reviews: ['A Review of Tides'],
-        });
-        await expect(win.tocOrdering().orderLink()).toBeVisible();
-        await expect(win.tocColumns()).toHaveText(['Title']);
-        await win.close();
-
-        // The scheduled issue lists "Storm Surges" (Rule 9).
-        await issues.showTab('Future Issues');
-        win = await issues.openManagement('Future Issues', 'Vol. 1 No. 2 (2026)');
-        await expect.poll(() => win.tocOutline()).toEqual(['# Articles', 'Storm Surges']);
-        await win.close();
-
-        // The reader side: "Articles" with its two, "A Review of Tides"
-        // with no heading (Rule 23; Settings 4).
-        await reader.gotoHome();
-        await reader.pressHeader('Current');
-        let pageOutline = await reader.tocOutline();
-        expect(pageOutline).toHaveLength(4);
-        expect(pageOutline[0]).toBe('# Articles');
-        expect(pageOutline.slice(1, 3).sort()).toEqual(['Coastal Winds', 'Tidal Patterns']);
-        expect(pageOutline[3]).toBe('A Review of Tides');
-        const issueUrl = visitor.url();
-        await reader.articleLink('A Review of Tides').click();
-        await expect(new ArticleLandingPage(visitor, tag).title()).toHaveText('A Review of Tides');
-        const reviewUrl = visitor.url();
-        await visitor.goto(issueUrl);
-
-        // "Order", then "Done": the lower "Articles" row dragged up (Rule 10).
-        await issues.showTab('Back Issues');
-        win = await issues.openManagement('Back Issues', name);
-        // Read once both rows are in (the window's list loads after it opens).
-        let before = [];
-        await expect
-            .poll(async () => (before = (await win.tocOutline()).filter((l) => l === 'Tidal Patterns' || l === 'Coastal Winds')).length, {timeout: 30_000})
-            .toBe(2);
-        const [upper, lower] = before;
-        const ordering = win.tocOrdering();
-        await ordering.start();
-        await win.dragArticle(lower, upper, 'above');
-        const done = await ordering.done();
-        expect(done.ok()).toBe(true);
-        await expect.poll(() => win.tocOutline()).toEqual(['# Articles', lower, upper, '# Reviews', 'A Review of Tides']);
-        await visitor.reload();
-        await expect.poll(() => reader.tocOutline()).toEqual(['# Articles', lower, upper, 'A Review of Tides']);
-
-        // "Order", then "Cancel ordering": the order "Done" saved (Rule 10).
-        await ordering.start();
-        await win.dragArticle(lower, upper, 'below');
-        await ordering.cancel();
-        await expect.poll(() => win.tocOutline()).toEqual(['# Articles', lower, upper, '# Reviews', 'A Review of Tides']);
-
-        // "Submission": the article's workflow (Rule 11).
-        const frame = new WorkflowPage(page, tag);
-        await (await win.articleLink('A Review of Tides', 'Submission')).click();
-        await frame.expectOpen(review.submissionId);
-        const workflowUrl = page.url();
-        expect(workflowUrl).toContain(`workflowSubmissionId=${review.submissionId}`);
-
-        // "Remove": the question, then the article and its section's
-        // heading leave the tab (Rule 12).
-        await issues.goto('Back Issues');
-        win = await issues.openManagement('Back Issues', name);
-        const remove = await win.openRemove('A Review of Tides');
-        await expect(remove.getByRole('heading')).toHaveText(TEXT.removeTitle);
-        await expect(remove).toContainText(TEXT.removeQuestion);
-        const removed = await issues.answer(remove, 'OK', REQUEST.removeArticle);
-        expect(removed && removed.ok()).toBe(true);
-        await expect.poll(() => win.tocOutline()).toEqual(['# Articles', lower, upper]);
-
-        // After the removal: gone from the page, its page offline; the
-        // workflow reads "Unscheduled" and "Schedule For Publication" opens
-        // on the same issue; the History line (Rules 12, 23; Side effects).
-        await visitor.goto(issueUrl);
-        await expect.poll(() => reader.tocOutline()).toEqual(['# Articles', lower, upper]);
-        await expectNotFoundPage(visitor, reviewUrl);
-        await page.goto(workflowUrl);
-        await frame.expectOpen(review.submissionId);
-        await frame.gotoEditorial(review.submissionId, {menuKey: `publication_${review.publicationId}_titleAbstract`});
-        await frame.expectPublicationStatus('Unscheduled');
-        const publish = new PublishScreen(page, tag);
-        const panel = await publish.openPublishPanelExpectingIssueFields();
-        await publish.awaitAssignmentPreselected(panel);
-        await expect(panel.getByRole('radio', {name: 'Assign To Current/Back Issue'})).toBeChecked();
-        await expect(panel.locator('select[name="issueId"] option:checked')).toHaveText(name);
-        await publish.cancelPanel(panel);
-        const log = new ActivityLogWindow(page, frame);
-        await log.open();
-        expect((await log.historyLines()).map((l) => l.event)).toContain('The submission was unpublished.');
-        await log.close();
-
-        // Control: the page keeps the saved order; no email about the
-        // removal, bounded by a "Notify" to the spare (Side effects; A8).
-        await visitor.goto(issueUrl);
-        await expect.poll(() => reader.tocOutline()).toEqual(['# Articles', lower, upper]);
-        const notify = new PublicationScreen(page, tag);
-        await notify.gotoWorkflow(control.submissionId);
-        await notify.openStage('Submission');
-        await notify.notifyParticipant('Xena Spare', `<p>Control ${tag}</p>`);
-        const afterControl = {to: mailOf(spare), subject: NOTIFY_SUBJECT, contains: `Control ${tag}`};
-        await pkpMail.expectNone({to: mailOf(author), afterControl});
-        await pkpMail.expectNone({to: mailOf(manager), afterControl});
     });
 
     test('S4: issue galleys and the "Full Issue"', async ({asUser, browser, baseURL, ojsApi}, testInfo) => {

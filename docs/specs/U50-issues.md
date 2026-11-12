@@ -766,13 +766,14 @@ catcher's address, background-jobs command and tooling recipe. <sup>s0</sup>
 3. **The table of contents: its order and a removed article**
 
    Given: Journal Manager, and a visitor signed out in a second browser,
-   on a scratch journal with the sections "Articles" and "Reviews",
-   "Reviews" with "Omit the title of this section from issues' table of
-   contents." ticked, the published, current issue "Vol. 1 No. 1
-   (2026)" holding the published articles "Tidal Patterns" and "Coastal
-   Winds" in "Articles" and "A Review of Tides" in "Reviews", and the
-   unpublished issue "Vol. 1 No. 2 (2026)" into which "Storm Surges" is
-   scheduled.
+   on a scratch journal with the sections "Articles" and "Reviews", in
+   that order, "Reviews" with "Omit the title of this section from
+   issues' table of contents." ticked, the published, current issue
+   "Vol. 1 No. 1 (2026)" holding the published articles "Tidal Patterns"
+   and "Coastal Winds" in "Articles" and "A Review of Tides" in
+   "Reviews", and the unpublished issue "Vol. 1 No. 2 (2026)" into which
+   "Storm Surges" (in "Articles") and "A Review of Storms" (in
+   "Reviews") are scheduled.
 
    - **What the tab lists**: on "Issues" › "Back Issues" the "Vol. 1
      No. 1 (2026)" row reads "Items" 3; its arrow › "Edit" opens the
@@ -781,7 +782,8 @@ catcher's address, background-jobs command and tooling recipe. <sup>s0</sup>
      list, and no "Open Access" column (Rule 9; Fields; Settings bullets
      1, 4).
    - **The scheduled issue**: on "Future Issues", "Vol. 1 No. 2
-     (2026)"'s "Edit" lists "Storm Surges" under "Articles" (Rule 9).
+     (2026)"'s "Edit" lists "Storm Surges" under "Articles", then "A
+     Review of Storms" under "Reviews" (Rule 9).
    - **The reader side**: the visitor presses "Current": the issue's
      page lists "Tidal Patterns" and "Coastal Winds" under the heading
      "Articles", and "A Review of Tides" with no section heading above
@@ -795,9 +797,41 @@ catcher's address, background-jobs command and tooling recipe. <sup>s0</sup>
    - **"Order", then "Cancel ordering"**: press "Order", drag the upper
      of the two "Articles" rows below the other and press "Cancel
      ordering": the tab shows the order "Done" saved (Rule 10).
-   - **"Submission"**: on the "A Review of Tides" row press the arrow,
-     then "Submission": the article's workflow opens; note the
-     workflow's address and go back to "Issues" (Rule 11).
+   - **An article dragged toward another section, and one above its
+     heading**: press "Order"; drag "A Review of Tides" up between the
+     two "Articles" rows and release it: it is still under the "Reviews"
+     heading. Drag the lower of the two "Articles" rows above the
+     "Articles" heading and release it. Press "Done": the tab lists that
+     article first under
+     "Articles", the other after it, and "A Review of Tides" under
+     "Reviews"; the visitor, reloading the issue's page, sees the two
+     "Articles" articles in the same order, then "A Review of Tides"
+     (Rules 10, 10b).
+   - **"Done" with no message, then a drag left unsaved**: press
+     "Order", drag the lower of the two "Articles" rows above the other
+     and press "Done": no message shows, and the tab keeps the new order.
+     Press "Order" again, drag the lower of the two "Articles" rows above
+     the other, then press the window's "Issue Data" tab: it opens, and
+     no question is asked. Press "Table of Contents": the list is out of
+     "Order", with no "Done" or "Cancel ordering" under it, and lists the
+     two "Articles" articles in the order "Done" saved (Rule 10).
+   - **A section dragged by its heading**: press "Order"; drag the
+     "Articles" heading and release it with the pointer on the lower of
+     its two articles: the list is as it was. Drag the "Reviews" heading above
+     the "Articles" heading and release it: "Reviews" moves up with "A
+     Review of Tides", and "Articles" follows with its two articles in
+     their order. Press "Done": the tab keeps that order, and the
+     visitor, reloading the issue's page, sees "A Review of Tides" first,
+     with no section heading above it, then the heading "Articles" with
+     its two articles (Rules 10a, 23; Settings bullet 4). Close the
+     window: Settings › Journal › "Sections" still lists "Articles" above
+     "Reviews", and on "Issues" › "Future Issues", "Vol. 1 No. 2
+     (2026)"'s "Edit" still lists "Articles" above "Reviews". Back on
+     "Back Issues", "Vol. 1 No. 1 (2026)"'s "Edit" lists "Reviews" above
+     "Articles" (Rule 10a).
+   - **"Submission"**: "A Review of Tides"'s arrow › "Submission": the
+     article's workflow opens; note its address and go back to "Issues"
+     (Rule 11).
    - **"Remove"**: on "Vol. 1 No. 1 (2026)"'s "Table of Contents",
      "A Review of Tides"'s arrow › "Remove": a window "Remove Article
      From Issue" asks "Are you sure you wish to remove this article from
@@ -813,9 +847,21 @@ catcher's address, background-jobs command and tooling recipe. <sup>s0</sup>
      (see [Submission activity log &
      notes](U38-submission-activity-log-and-notes.md#history)) holds
      "The submission was unpublished." (Side effects).
+   - **An article moved to another section**: on "Issues" › "Future
+     Issues", "Vol. 1 No. 2 (2026)"'s "Edit": "Storm Surges"'s arrow ›
+     "Submission" opens the article's workflow (Rule 11). In its side menu, under "Publication", open the version's
+     "Publication Settings" (see [Workflow screen & stage
+     access](U24-workflow-screen-and-stage-access.md#publication-tabs)),
+     choose "Reviews" in "Section" and press "Save". Back on "Issues" ›
+     "Future Issues", "Vol. 1 No. 2 (2026)"'s "Edit" lists "Storm Surges"
+     and "A Review of Storms" under "Reviews", in either order ⚠
+     [A22](#a22), and no "Articles" heading; the row's arrow › "Preview"
+     opens the issue's page listing both articles and no "Articles"
+     heading (Rules 10b, 22; Settings bullet 4).
    - **Control**: the visitor's issue page still lists "Tidal Patterns"
-     and "Coastal Winds" in the saved order, and the mail catcher holds
-     no email about the removal (Rule 12; Side effects). <sup>s0</sup>
+     and "Coastal Winds" in the saved order. Run the site's background
+     jobs: the mail catcher holds no email that arrived after "OK" on
+     "Remove" (Rule 12; Side effects). <sup>s0</sup>
 
 4. **Issue galleys and the "Full Issue"**
 
@@ -1099,24 +1145,6 @@ Left out of the scenarios above, by reason:
   - the guard for A8 (issue report
     `docs/issues/U50-A8-future-issues-number-as-text.md`): "Future
     Issues" listing No. 2 before No. 10 of one volume and year [report 2026-10-02]
-  - in the table of contents' "Order", an article dragged toward
-    another section still under its own heading after "Done", and one
-    dragged to the top of its own section, or dropped above that
-    section's heading, saved first with the others in their order
-    (Rule 10b; [A10](#a10) retired) [upstream 2026-10-08]
-  - in the table of contents' "Order", a section dragged by its heading
-    above another section and kept after "Done" on the tab and on the
-    issue's page, with the journal's "Sections" list and another issue's
-    table of contents unchanged; a heading released inside its own
-    section leaving the list as it was (Rule 10a; [A9](#a9) and
-    [A20](#a20) retired) [incidental 2026-10-08]
-  - "Done" in "Order" showing no message; then a drag left unsaved by
-    pressing "Issue Data", and "Table of Contents" showing the order
-    "Done" saved, no question asked (Rule 10; [A22](#a22)) [incidental 2026-10-08]
-  - an article's "Section" changed on its Publication Settings, then
-    the issue's "Table of Contents" and page listing it under the new
-    section, and a section left with no article gone from both (Rule
-    10b) [incidental 2026-10-08]
   - the guard for A16 (issue report
     `docs/issues/U09-A19-static-page-content-change-lost-on-close.md`,
     pkp-e2e#375): text typed only in "Description" on "Issue Data",
@@ -1165,7 +1193,7 @@ Left out of the scenarios above, by reason:
   - A21 (an issue's saved section order changing after the journal's
     sections are reordered; Rules 10a, 23)
   - A22 (a section's never-ordered articles changing order between
-    loads; Rule 10)
+    loads; Rule 10; scenario 3 passes it)
 - **No seed**:
   - "Delayed Open Access" set to a number of months, and the "Access
     status" and "Open access date" "Publish Issue" then sets (Settings
@@ -1595,7 +1623,7 @@ claim still read only in the code says so where it is made.
 **sc** — OJS `templates/controllers/grid/settings/sections/form/sectionForm.tpl` `hideTitle` (`manager.sections.hideTocTitle` "Omit the title of this section from issues' table of contents."); read by `setupIssueTemplate()` and `Repo::submission()->getInSections()` (reader side only; the editors' `TocGridCategoryRow::getCategoryLabel()` prints the title regardless).
 
 <a id="fn-s0"></a>
-**s0** — Scenario seeding. Scenario 7 runs on `publicknowledge` with `manager.maya` (the Journal Manager), `sectioneditor.ana`, `copyeditor.carla`, `author.alex` and `reader.rosa`, passwords as `docs/process/users.md` gives them; its issues are the seeded "Vol. 1 No. 2 (2014)" (published, current) and "Vol. 2 No. 1 (2015)" (unpublished), which it only reads; the controls of scenarios 9 and 11 read the same journal. Scenario 11 runs on OMP and OPS `publicknowledge` as `manager.maya` (the Press Manager, the Preprint Server Manager). Every other scenario runs on its own scratch journal from `POST scenarios/context`, with throwaway `users[]` (password: the username twice): `manager` in each, plus `author` and `reader` in scenario 1, `sectionEditor`, `subscriptionManager`, `reader`, `author` and `externalReviewer` in scenario 9, `reader` in scenario 10. Issues come from `issues[]` (`{volume, number, year}`, `published: true` for a published one, `datePublished` where a date is named, `galleys: [{label: 'PDF', file: 'article.pdf'}]` in scenario 10); the last published entry is the current issue, so scenario 5 lists 2024, 2026, then 2025. Articles are scratch submissions from `POST scenarios/submission` with `title`, `published: true` and `issue` (`{volume, number, year}`); into an unpublished issue that gives a scheduled article; `section` names the section by its abbrev. Scenario 1: the article's submitter is `author`. Scenario 3: `sections: [{abbrev: 'ART', title: 'Articles'}, {abbrev: 'REV', title: 'Reviews', hideTitle: true}]`, the three published articles seeded in the order named. Scenario 8: `publishingMode: 'subscription'`; scenario 9: `publishingMode: 'none'`. Scenario 10: `restrictArticleAccess: true` and `plugins: {pdfjsviewerplugin: {enabled: false}}`. Uploads are the fixtures `profile-image-400.png` (the cover), `article.pdf`, `replacement.pdf` and `notes.md`, and `cover.svg`, a small SVG image not yet among the fixtures. "Run the site's background jobs" is `runJobs()` (`shared/playwright/support/jobs.js`), so the tests that read the issue email belong in the serial project; the mail catcher is Mailpit at `MAILPIT_URL` (default `http://127.0.0.1:8025`), scoped by recipient address. The site's home page is `index.php/index` (seed facts: every enabled journal on one page). The visitor is a browser with no session.
+**s0** — Scenario seeding. Scenario 7 runs on `publicknowledge` with `manager.maya` (the Journal Manager), `sectioneditor.ana`, `copyeditor.carla`, `author.alex` and `reader.rosa`, passwords as `docs/process/users.md` gives them; its issues are the seeded "Vol. 1 No. 2 (2014)" (published, current) and "Vol. 2 No. 1 (2015)" (unpublished), which it only reads; the controls of scenarios 9 and 11 read the same journal. Scenario 11 runs on OMP and OPS `publicknowledge` as `manager.maya` (the Press Manager, the Preprint Server Manager). Every other scenario runs on its own scratch journal from `POST scenarios/context`, with throwaway `users[]` (password: the username twice): `manager` in each, plus `author` and `reader` in scenario 1, `sectionEditor`, `subscriptionManager`, `reader`, `author` and `externalReviewer` in scenario 9, `reader` in scenario 10. Issues come from `issues[]` (`{volume, number, year}`, `published: true` for a published one, `datePublished` where a date is named, `galleys: [{label: 'PDF', file: 'article.pdf'}]` in scenario 10); the last published entry is the current issue, so scenario 5 lists 2024, 2026, then 2025. Articles are scratch submissions from `POST scenarios/submission` with `title`, `published: true` and `issue` (`{volume, number, year}`); into an unpublished issue that gives a scheduled article; `section` names the section by its abbrev. Scenario 1: the article's submitter is `author`. Scenario 3: `sections: [{abbrev: 'ART', title: 'Articles'}, {abbrev: 'REV', title: 'Reviews', hideTitle: true}]` (the journal's order, "Articles" first), the three published articles seeded in the order named, and "Storm Surges" (`ART`) and "A Review of Storms" (`REV`) scheduled into "Vol. 1 No. 2 (2026)"; every drag is a mouse drag, the row pressed, moved in steps and released on its target (note td18), and "Storm Surges"'s "Section" is changed on screen. Scenario 8: `publishingMode: 'subscription'`; scenario 9: `publishingMode: 'none'`. Scenario 10: `restrictArticleAccess: true` and `plugins: {pdfjsviewerplugin: {enabled: false}}`. Uploads are the fixtures `profile-image-400.png` (the cover), `article.pdf`, `replacement.pdf` and `notes.md`, and `cover.svg`, a small SVG image not yet among the fixtures. "Run the site's background jobs" is `runJobs()` (`shared/playwright/support/jobs.js`), so the tests that read the issue email belong in the serial project; the mail catcher is Mailpit at `MAILPIT_URL` (default `http://127.0.0.1:8025`), scoped by recipient address. The site's home page is `index.php/index` (seed facts: every enabled journal on one page). The visitor is a browser with no session.
 
 <a id="fn-td1"></a>
 **td1** — Live-probed 2026-09-25 (the absence paragraph), as Journal Manager and signed out: the OMP side menu reads "Content › Catalog" and the OPS menu has no "Content" group; neither has "Issues" (OJS: "Content › Issues"). The press's header has no "Current" and no "Archives"; the server's has "Archives" only, opening its preprints. On OMP and OPS, `issue/archive`, `issue/current`, `issue/view/1` and `manageIssues` answer the "404 Not Found" page.
