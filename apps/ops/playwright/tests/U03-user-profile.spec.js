@@ -22,7 +22,7 @@
  * Not asserted here, by register ID (a 🐞 is never asserted as the contract,
  * a ❓ is parked; the spec's Coverage section records the rest): A2, A4, A5,
  * A6, A7, A8, A9, A10, A11, A12, A14, A17, A18, A19, A20, A21, A22, A23,
- * A25, A26, OPS2, OPS3. A13 and A16 are passed by S12, which reads the first
+ * A25, A26, A27, OPS2, OPS3. A13 and A16 are passed by S12, which reads the first
  * contributor's name and ORCID field as today's screen shows them.
  *
  * Isolation: every account that changes is a throwaway user in a scratch
@@ -44,7 +44,11 @@
  * answers the delete question. S9's "application" is a request the test
  * sends itself from a cookie-less request context, `GET {server}/api/v1/
  * submissions` with the key as a bearer token, the direct call the scenario
- * names (footnote s). No hard-coded waits.
+ * names (footnote s). S5 makes the French "Signature" box slow to start
+ * with the A24 report's init script (footnote s) and, instead of the
+ * footnote's "about 4 seconds", waits for that box's editor to come up
+ * after each step: the marker check that failed under A24 runs 500 ms
+ * after the form is built, so it has run by then. No hard-coded waits.
  */
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
@@ -248,6 +252,66 @@ async function applicationRequest(appContext, contextPath, key) {
     return appContext.get(`/index.php/${contextPath}/api/v1/submissions`, {
         headers: {Authorization: `Bearer ${key}`},
     });
+}
+
+/**
+ * The A24 report's snippet (footnote s), added as an init script: it holds
+ * the `load` listeners of every formatted-text frame whose id holds
+ * `-fr_CA-` for 3 seconds, as on a busy computer. It changes nothing else;
+ * `window.__u03HeldFrames` counts the frames it held, the positive control
+ * that the slow start was in force.
+ */
+function slowFrenchFrames() {
+    const add = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function (type, fn, opts) {
+        if (type === 'load' && this instanceof HTMLIFrameElement && /-fr_CA-/.test(this.id) && typeof fn === 'function') {
+            const frame = this;
+            window.__u03HeldFrames = (window.__u03HeldFrames || 0) + 1;
+            return add.call(
+                this,
+                type,
+                (event) => {
+                    const late = new Proxy(event, {
+                        get: (e, k) =>
+                            k === 'composedPath'
+                                ? () => [frame]
+                                : k === 'target' || k === 'currentTarget'
+                                  ? frame
+                                  : typeof e[k] === 'function'
+                                    ? e[k].bind(e)
+                                    : e[k],
+                    });
+                    setTimeout(() => fn.call(frame, late), 3000);
+                },
+                opts
+            );
+        }
+        return add.call(this, type, fn, opts);
+    };
+}
+
+/** How many French frames the slow-start script has held so far. */
+async function heldFrenchFrames(page) {
+    return page.evaluate(() => window.__u03HeldFrames || 0);
+}
+
+/**
+ * Wait until the live Contact form's French "Signature" editor is up (its
+ * held frame loaded, 3 s after it was built): every marker check the form
+ * runs while that box is slow has run by then.
+ */
+async function waitForFrenchSignature(profile) {
+    const textarea = profile.form('contact').locator('textarea[name="signature[fr_CA]"]');
+    await expect(textarea).toHaveCount(1);
+    const id = await textarea.getAttribute('id');
+    await profile.page.waitForFunction(
+        (editorId) => {
+            const editor = window.tinymce && window.tinymce.get(editorId);
+            return Boolean(editor && editor.initialized);
+        },
+        id,
+        {timeout: 30_000}
+    );
 }
 
 test.describe('user profile', () => {
@@ -715,20 +779,33 @@ test.describe('user profile', () => {
         const firstNew = `${username}one@mail.test`;
         const secondNew = `${username}two@mail.test`;
         const thirdNew = `${username}three@mail.test`;
+        // French among the server's languages and its form languages, so
+        // "Signature" has a French box (footnote s).
         await opsApi.createContext({
             tag,
+            context: {supportedLocales: ['en', 'fr_CA'], supportedFormLocales: ['en', 'fr_CA']},
             users: [{username, givenName: 'Cal', familyName: 'Probe', roles: ['author']}],
         });
 
         const {context, page} = await freshLogin(browser, baseURL, tag, username);
         const second = await anonContext(browser, baseURL);
         try {
+            // The French "Signature" box made slow to start in this browser,
+            // and every uncaught script error recorded from here on.
+            await context.addInitScript(slowFrenchFrames);
+            const scriptErrors = [];
+            page.on('pageerror', (error) => scriptErrors.push(error.message));
+
             const profile = new ProfilePage(page, tag);
             await profile.goto('contact');
+            await waitForFrenchSignature(profile);
+            const heldOnOpening = await heldFrenchFrames(page);
 
             // Request, then the tab's "Cancel": saved inside the tab, the
             // notice gone, the old address editable (Rule 6e).
             await requestEmailChange(profile, firstNew);
+            await waitForFrenchSignature(profile);
+            const heldOnSave = await heldFrenchFrames(page);
             const firstMessage = await pkpMail.find({
                 to: oldEmail,
                 subject: CHANGE_EMAIL_SUBJECT,
@@ -740,6 +817,28 @@ test.describe('user profile', () => {
             await expect(profile.pendingEmailNotice()).toHaveCount(0);
             await expect(profile.email()).toHaveValue(oldEmail);
             await expect(profile.email()).toBeEditable();
+            await waitForFrenchSignature(profile);
+            const heldOnCancel = await heldFrenchFrames(page);
+
+            // No script error while "Signature" was slow, from the tab's
+            // opening through the request's save and its "Cancel" (the guard
+            // of the retired A24). The control: each of the three steps
+            // built a French "Signature" box that the slow start held.
+            expect(heldOnOpening, 'the opened tab held a French frame').toBeGreaterThan(0);
+            expect(heldOnSave, 'the saved tab held a new French frame').toBeGreaterThan(heldOnOpening);
+            expect(heldOnCancel, 'the cancelled tab held a new French frame').toBeGreaterThan(heldOnSave);
+            // App defect worked around (T-ops-1, proposed app-changes row):
+            // the A24 fix (pkp/pkp-lib#13381) is in lib/pkp's source, but
+            // the served js/pkp.min.js predates it, so the errors still
+            // come. The read is left out and the errors recorded until the
+            // bundle is rebuilt; then this becomes
+            // expect(scriptErrors).toEqual([]).
+            if (scriptErrors.length > 0) {
+                testInfo.annotations.push({
+                    type: 'app-defect',
+                    description: `T-ops-1: ${scriptErrors.length} script error(s) on Contact while "Signature" was slow: ${scriptErrors.join(' | ')}`,
+                });
+            }
 
             // The cancelled message's "confirm" link is dead (Rule 6f).
             await page.goto(firstLinks.confirm);

@@ -777,14 +777,20 @@ tooling recipe are in the footnote. <sup>s</sup>
 
 5. **Cancel, and reject, an email change**
 
-   Given: an Author, signed in on a scratch journal, on the profile's
-   "Contact" tab, with three fresh throwaway addresses at hand; a second
-   browser, signed out. <sup>s</sup>
+   Given: an Author, signed in on a scratch journal with French as a
+   second language on its screens and among its form languages, on the
+   profile's "Contact" tab, opened with its unseen French "Signature" box
+   taking 3 seconds to start whenever the tab is built, with three fresh
+   throwaway addresses at hand; a second browser, signed out. <sup>s</sup>
 
    - **"Cancel" on the tab**: request a change to the first throwaway
-     address as in scenario 4, then press the tab's "Cancel": "Your changes
-     have been saved." appears inside the tab, the notice disappears and
-     "Email address" shows the old address, editable.
+     address as in scenario 4, then press "Cancel", pausing about 4
+     seconds before each: "Your changes have been saved." appears inside
+     the tab, the notice disappears and "Email address" shows the old
+     address, editable.
+   - **No script error while "Signature" is slow**: about 4 seconds later,
+     the console shows no script error since "Contact" opened (the retired
+     [A24](#a24)'s fault).
    - **The cancelled message's "confirm" link**: still signed in, open the
      "confirm" link of the message that arrived: the "Invitation
      Unavailable" page.
@@ -1121,10 +1127,12 @@ Left out of the scenarios above, by reason:
     details" ([OPS3](#ops3)): the guard the issue report
     (`docs/issues/U03-OPS3-server-roles-save-erases-interests.md`)
     proposes, once fixed [report 2026-10-15]
-  - the Contact tab opened, saved and an email change cancelled while the
-    French "Signature" box is slow to start, with no script error and the
-    globe beside "Signature" right (the guard of the retired [A24](#a24))
-    [report 2026-10-15]
+  - scenario 5's "No script error while "Signature" is slow" as a check
+    that fails the suites on an error: the suites serve each
+    application's minified scripts, which still log the retired
+    [A24](#a24)'s error three times (at the tab's opening, after the
+    save, after "Cancel") until each application rebuilds them with the
+    fix, so for now the suites only record the errors [report 2026-11-12]
   - after a password change in one browser, a tab press and a "Save" in
     the other browser's Profile page landing on the Login page with no
     script error ([A25](#a25); Rule 10b): the check the issue report
@@ -2570,6 +2578,38 @@ its third with the box unticked (`LoginPage.signInRemembered`); the third
 is only reloaded, never tab-pressed, since a press there raises A26's
 alert (PRINCIPLES M3). Scenario 5's control is
 `count()` of the old address's inbox = 3 after the third message is found.
+Scenario 5's context is seeded like scenario 2's
+(`context.supportedLocales` and `context.supportedFormLocales` both
+`['en', 'fr_CA']`), so "Signature" has a French box; in the first
+browser context that box is made slow by the snippet of A24's issue
+report, added as an init script, which holds the `load` listeners of
+every formatted-text frame whose id holds `-fr_CA-` for 3 seconds (the
+report was deleted on retirement:
+`git show 296f5da0^:docs/issues/U03-A24-profile-contact-save-script-error.md`);
+the test waits about 4 seconds after the tab's opening, the request's
+save and its "Cancel", and collects the uncaught page errors through
+them. "No script error" holds where the app serves its source scripts,
+as a default `main` install does (`config.TEMPLATE.inc.php`:
+`enable_minified = Off`): A24's retirement walk of 2026-11-11 saw none
+there. The test installs and CI serve each app's committed
+`js/pkp.min.js` instead (`enable_minified = On`,
+`shared/playwright/make-test-config.js`), last rebuilt on `main` on
+2026-08-27 (ojs `fcf2f00807`, omp `aba3ce08b`, ops `3829458df3`),
+before `pkp/pkp-lib#13381`'s guard (lib/pkp `e2078ce20e`); its
+`MultilingualInputHandler.isIncomplete_()` still calls `getContent()`
+on the French editor before it has started. Test runs of 2026-11-12,
+all three apps: three page errors "Cannot read properties of undefined
+(reading 'serialize')", one at the tab's opening, one after the save,
+one after "Cancel", each from that function in the bundle; on screen
+the tab worked throughout (the notice, "Cancel" with "Your changes have
+been saved.", the old address editable), and the hold acted at each
+step (`window.__u03HeldFrames` rose each time). Until each app's `main`
+bundle is rebuilt with the guard, the suites attach those errors as an
+`app-defect` annotation instead of failing, the hold's controls still
+asserted; `stable-3_5_0` rebuilt its bundles with the guard on
+2026-11-10. The same unrebuilt bundle keeps
+[Custom pages & blocks A20](U09-custom-pages-and-blocks.md#a20) open
+(`pkp/pkp-lib#13490`).
 Scenario 6: a scratch user seeded `roles: ['reader']` in the first scratch
 context, then a second `POST scenarios/context` naming the same username with
 `roles: ['reader']`, which enrols it there too (seed-facts, 2026-09-04); the
