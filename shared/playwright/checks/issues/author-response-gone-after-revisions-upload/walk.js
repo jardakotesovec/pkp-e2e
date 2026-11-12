@@ -5,8 +5,8 @@
 //   "Author Response" card; 5 "Upload revisions" (Article Text, u30e-revision.txt); the round again;
 //   6 the decision email's "Submit Author Response" pressed; 7 dbarnes reads the "Author Response" table
 //   and sends "Request Response" (the way round); 8 jnovak opens submission 10 again.
-// The kit builds nothing. A press shows no card at all (U30 OMP1, the companion walk
-// ../press-author-response-button-leads-nowhere/walk.js); a preprint server has no review.
+// The kit builds nothing, and the script needs only ./lib.js, the kit and the OJS page objects. A press
+// shows no card at all (U30 OMP1, its own report); a preprint server has no review.
 // WALK_MODE=neighbour runs only the neighbour check for a fix trial: submission 7 (author dsokoloff)
 // gets "Request Revisions" with "Revisions will be subject to a new round of peer reviews." (a decision
 // whose email carries no "Submit Author Response"), and the author's round still shows no card.
@@ -16,7 +16,6 @@
 //   (3.5: PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 in front, the 3.5 fleet's feature)
 const {forEachApp, launch, signIn, screen, shot, record, note} = require('../../../probe');
 const K = require('./lib.js');
-const A1 = require('../author-response-request-leaves-no-trace/lib.js');
 
 const MODE = process.env.WALK_MODE || 'steps';
 const CASES = {
@@ -97,10 +96,10 @@ forEachApp(async (app) => {
         }
         await signIn(page, 'dbarnes');
         await step('s7-table', async () => {                                                        // 7
-            await A1.openEditorial(page, app, c.id);
-            return A1.readTable(page, null);
+            await K.openResponseTable(page, app, c.id);
+            return K.readResponseTable(page, null);
         });
-        await step('s7-request', () => A1.sendRequest(page, app, c.id, null));
+        await step('s7-request', () => K.sendRequest(page, app, c.id, null));
         await signIn(page, c.author);
         await step('s8-author-after-request', async () => {                                       // 8
             const out = await K.authorView(page, app, c.id, {menuKey: c.menuKey});

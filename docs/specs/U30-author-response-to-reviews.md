@@ -759,7 +759,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A1](#a1) | Editors' "Author Response" table still reads "Ready to invite author" after the request was sent | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A3](#a3) | A Funding coordinator is offered "Request Response" and "Delete" on "Author Response", then refused | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | "Request Author Response" page opened by its address: "Cancel" and the sent dialog lead to "404 Not Found" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A7](#a7) | Author who uploads revisions first can no longer respond to the reviewers, as the decision email asks | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
+| [A7](#a7) | Author who uploads revisions first can no longer respond to the reviewers, as the decision email asks | 🐞 | medium | issues (claude), 2026-11-12 — re-verified |
 | [A10](#a10) | Anyone, without signing in, can read an author's response that also answers reviews the editor kept private | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OMP1](#omp1) | Press author's "Submit Author Response" email button opens a review round with nothing to respond in | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A2](#a2) | Nobody is told when the author's response arrives | ❓ | user-visible | — |
@@ -853,18 +853,18 @@ probe. <sup>f-a6</sup>
 An author asked for revisions gets an email that asks them both to
 respond to the reviewers ("Submit Author Response") and to upload their
 revised files, in no set order. If they upload the revised file first,
-the round's "Author Response" card disappears. The email's button then
+the author's "Author Response" card disappears. The email's button then
 opens the round with no card and no response form, so the response the
 email asked for cannot be written.
 
 The only way back is for an editor to send a separate "Request
-Response", and the round's "Author Response" table still reads "Ready to
-invite author", as if the author had never been asked.
+Response", and the editors' "Author Response" table still reads "Ready
+to invite author", as if the author had never been asked.
 
-No setting turns author responses on or off, so every OJS journal on
-`main` meets this.
-Since: 2026-01-23 (pkp/pkp-lib#12207) · Basis: probe, 2026-10-04. <sup>f-a7</sup>
-Report: refresh owed — pkp/ui-library#981 (`f2a4757a`, merged 2026-11-11) moved the author's "Author Response" card from the end of the round to below "Revisions Uploaded" and above "Review Tasks & Discussions", so step 4's "ends with the "Author Response" card" no longer holds; it touched `workflowConfigAuthorOJS.js`, where `AuthorResponseManager` now comes before `DiscussionManager`, and left the condition the Cause quotes unchanged, so the pinned line link there still reads true (2026-11-12)
+No release carries author responses yet: the fault is on `main` only and
+would ship with the next release, where no setting turns the feature
+off, so every OJS journal would meet it.
+Since: 2026-01-23 (pkp/pkp-lib#12207) · Basis: probe, 2026-11-12. <sup>f-a7</sup>
 
 <a id="a8"></a>
 **A8 — A cancelled reviewer's effect was not seen** · ❓ · minor. Rule 3
