@@ -2640,9 +2640,11 @@ note x). Recipes: 3, 5, 10 — a `manager`, no
 from `POST scenarios/submission` taken to Production (OJS and OMP
 `decisions: ['sendExternalReview', 'accept', 'sendToProduction']`; on OPS
 Production is the only stage), and on OJS an issue made, not published,
-on the Issues screen before the scenario (no `issues[]` key); the new
-submission made by the author in the wizard on screen after the save,
-the two emails read in the author's and the `manager`'s mailboxes (the
+on the Issues screen before the scenario; the new submission a draft
+seeded for the author with `submitted: false` and completed by the author
+in the submission wizard on screen after the save, as
+[Submission wizard](U21-submission-wizard.md) scenario 2 does; the two
+emails read in the author's and the `manager`'s mailboxes (the
 scratch journal's section has no editor, so the "needs an editor" email
 goes out; Side effects, note x); the publish on screen, on OJS by "Assign
 To Future Issue and Publish Immediately" (U49 Rule 5; U49's side effect:
@@ -2686,9 +2688,10 @@ Journal", `acronym` "OPJ", `country` and `plugins:
 {citationstylelanguageplugin: {enabled: true}}` (the plugin is off on a
 scratch context, seed-facts), a `manager` and an `author`; one submission
 by the author seeded `published: true` before the save (on OJS in a
-published issue), a second taken to Production as in 4, with on OJS an
-unpublished issue made on the Issues screen; the rename and the second
-publish driven on screen; the citations read as note aa's probe of
+published issue), a second taken to Production as in 4; on OJS both
+issues seeded as `issues[]` entries, the published one with
+`published: true`, the other unpublished (the default); the rename and
+the second publish driven on screen; the citations read as note aa's probe of
 2026-10-26 read them.
 
 <a id="fn-z"></a>
