@@ -707,6 +707,7 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   `test:<app>`, `test:final` and `fleet-prep` take one machine-wide lock
   (`shared/playwright/test-lock.js`): shared among one slot's runs, so a
   session's three test authors (RUNBOOK step 8) still run side by side,
+  though two runs of one app take turns (they share its worker servers),
   and exclusive against other slots, because concurrent fleets on these
   cores turn the suites flaky. Slots take turns in request order: a run
   joins its slot's hold only while no other slot has a run that asked

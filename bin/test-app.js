@@ -63,7 +63,7 @@ if (!appName || !APPS[appName]) {
 }
 // All three passes under one hold of the machine's test lock, so another
 // slot never runs between them (shared/playwright/test-lock.js).
-require('../shared/playwright/test-lock.js').acquire(`test:${appName} ${callerArgs.join(' ')}`);
+require('../shared/playwright/test-lock.js').acquire(`test:${appName} ${callerArgs.join(' ')}`, {app: appName});
 // A stable version with a suite of its own (lines/<branch>/, selected by
 // PKP_E2E_LINE) runs from its folder's config.
 const lineConfig = `lines/${process.env.PKP_E2E_LINE}/${appName}.config.js`;

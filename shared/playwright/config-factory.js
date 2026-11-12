@@ -198,7 +198,7 @@ function definePkpConfig({appName, appRoot, suiteDir, sharedTestDir, basePort}) 
     refuseSoloBesideOthersWithoutDeps(appName);
     // One slot's runs at a time on this machine (test-lock.js); a no-op in
     // workers, under test-app/test-final/fleet-prep (they hold it) and on CI.
-    require('./test-lock.js').acquire(`playwright ${process.argv.slice(2).join(' ')}`);
+    require('./test-lock.js').acquire(`playwright ${process.argv.slice(2).join(' ')}`, {app: appName});
     require('./mailpit.js').ensureMailpit();
     loadEnv(appRoot);
     // The suite (tests, POMs, runtime state) lives in the pkp-e2e repo;

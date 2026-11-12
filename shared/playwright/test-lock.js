@@ -7,9 +7,13 @@
  * is exclusive BETWEEN slots and shared WITHIN one: a session's own
  * concurrent runs (one test author per app, RUNBOOK step 8) run side by
  * side as before, while a run from another slot waits until the holding
- * slot's last run has ended.
+ * slot's last run has ended. Within a slot, runs of the SAME app take
+ * turns: they share that app's worker servers, and the first run to end
+ * stops them under the other (ERR_CONNECTION_REFUSED mid-run).
  *
- *   acquire()                      block until this slot holds the machine
+ *   acquire(label, {app})          block until this slot holds the machine
+ *                                  and no other run of `app` in this slot
+ *                                  is active
  *                                  (config-factory.js, test-app.js,
  *                                  test-final.js, fleet-prep.js call it)
  *   node shared/playwright/test-lock.js status
@@ -137,7 +141,7 @@ function lockDisabled() {
  *
  * @param {string} label what is running, for the status line other slots see
  */
-function acquire(label = process.argv.slice(1).join(' ')) {
+function acquire(label = process.argv.slice(1).join(' '), {app = null} = {}) {
     if (process.env.PKP_E2E_LOCK_OWNER || lockDisabled()) return;
     const {resolveSlot} = require('../../bin/apps.js');
     const slot = resolveSlot().n;
@@ -151,15 +155,18 @@ function acquire(label = process.argv.slice(1).join(' ')) {
         cmd: label.replace(/\s+/g, ' ').slice(0, 200),
         since: new Date().toISOString(),
         state: 'queued',
+        app,
     };
     writeJsonAtomic(ownerFile, me);
+    // Another active run of the same app in this slot (the worker servers are per app).
+    const sameAppBusy = () => app && liveOwners(slot).some((o) => o.pid !== me.pid && o.app === app && o.state === 'active');
     process.env.PKP_E2E_LOCK_OWNER = String(process.pid);
 
     // First report after 3 s: an uncontended acquire takes about a second.
     let lastReport = Date.now() - WAIT_REPORT_MS + 3000;
     for (;;) {
         const h = machineHolder();
-        if (h && h.slot === slot && alive(slotHolder(slot)) && !earlierWaiter(slot, me.since)) {
+        if (h && h.slot === slot && alive(slotHolder(slot)) && !earlierWaiter(slot, me.since) && !sameAppBusy()) {
             // Active BEFORE the second look: a holder letting go withdraws
             // first and then counts active runs, so either it sees us, or we
             // see it gone and queue again.
@@ -171,7 +178,9 @@ function acquire(label = process.argv.slice(1).join(' ')) {
         if (!slotHolder(slot)) spawnHolder(slot);
         if (Date.now() - lastReport >= WAIT_REPORT_MS) {
             const who = h ? describeHolder(h) : 'nobody yet (the lock is being taken)';
-            console.error(`test-lock: slot ${slot} waiting for the machine's test lock, held by ${who}`);
+            console.error(h && h.slot === slot && sameAppBusy()
+                ? `test-lock: slot ${slot} waiting for its other ${app} run to end (one run per app at a time: they share the worker servers)`
+                : `test-lock: slot ${slot} waiting for the machine's test lock, held by ${who}`);
             lastReport = Date.now();
         }
         sleepSync(250);
