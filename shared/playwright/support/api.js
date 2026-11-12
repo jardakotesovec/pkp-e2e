@@ -129,17 +129,31 @@ class PkpApi {
     }
 
     async _post(url, data) {
-        const response = await this.context.post(url, {
-            data,
-            failOnStatusCode: false,
-        });
-        if (!response.ok()) {
+        // A deadlock is the database asking for the transaction to be run
+        // again, and MariaDB asks it of parallel submission builds on a
+        // freshly reset install (a DELETE on a table of a few rows scans
+        // it and meets the other build's locked rows; the first MariaDB
+        // runs, 2026-11-12). A submission build is one transaction, rolled
+        // back whole, so the same request goes again. No other build is
+        // repeated: a context build commits its context before the rest.
+        const repeatable = url.endsWith('/scenarios/submission');
+        for (let attempt = 1; ; attempt++) {
+            const response = await this.context.post(url, {
+                data,
+                failOnStatusCode: false,
+            });
+            if (response.ok()) {
+                return response.json();
+            }
             const body = await response.text();
+            if (repeatable && attempt < 4 && response.status() === 500 && body.includes('SQLSTATE[40001]')) {
+                await new Promise((resolve) => setTimeout(resolve, 50 * attempt + Math.floor(Math.random() * 100)));
+                continue;
+            }
             throw new Error(
                 `POST ${url} failed: ${response.status()}\n${body.slice(0, 2000)}`
             );
         }
-        return response.json();
     }
 }
 
