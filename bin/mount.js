@@ -7,7 +7,8 @@
  *   node bin/mount.js [ojs] [omp] [ops]     (default: every app with <APP>_ROOT set)
  *
  * Per app: copies apps/<app>/php/** to the app root, shared/php/** to
- * lib/pkp/ and apps/<app>/playwright/fixtures/files/** to
+ * lib/pkp/ (a line with its own copy under lines/<line>/ mounts that copy
+ * instead, lines/README.md) and apps/<app>/playwright/fixtures/files/** to
  * classes/testing/fixtures/ (a line whose LINES entry says
  * `overlays: 'install'`, 3.4 and 3.3, gets shared/php-lines/<line>/** at the
  * app root instead: the install tool and the user tool, harness.md "The
@@ -50,8 +51,15 @@ function overlayFiles(appName) {
         walk(linePhp, linePhp, '');
         return pairs;
     }
-    const appPhp = path.join(REPO_ROOT, 'apps', appName, 'php');
-    const sharedPhp = path.join(REPO_ROOT, 'shared', 'php');
+    // A version with a folder of its own (lines/<line>/, lines/README.md)
+    // mounts its own copy of the overlays where it holds one; main's serve
+    // the rest (an app the version folder does not cover yet).
+    const own = (...parts) => {
+        const dir = line && path.join(REPO_ROOT, 'lines', line.name, ...parts);
+        return dir && fs.existsSync(dir) ? dir : path.join(REPO_ROOT, ...parts);
+    };
+    const appPhp = own('apps', appName, 'php');
+    const sharedPhp = own('shared', 'php');
     const fixtures = path.join(REPO_ROOT, 'apps', appName, 'playwright', 'fixtures', 'files');
     walk(appPhp, appPhp, '');
     walk(sharedPhp, sharedPhp, path.join('lib', 'pkp'));

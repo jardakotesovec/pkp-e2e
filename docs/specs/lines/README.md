@@ -1,39 +1,26 @@
-# Differences on older versions (pilot)
+# Differences on 3.5 (pilot notes)
 
-A spec in `docs/specs/` describes `main`. This folder holds, per stable
-version and per feature, only what that version does differently:
+The two files under `stable-3_5_0/` list what OJS 3.5 does differently
+from `main`'s spec for "Review stage & rounds" (U26) and "Tasks &
+discussions" (U37). They come from the pilot's first shape, which kept
+only the differences per version.
 
-```
-docs/specs/lines/<branch>/U<nn>-<feature>.md
-```
+The model now is a whole spec per version, in `lines/<branch>/docs/specs/`
+(`lines/README.md`). These two files are the notes for building the 3.5
+specs of those two features and are deleted once the specs exist.
 
-A feature with no file here has no known difference on that version.
-This is a pilot on `stable-3_5_0` with two features, to judge the shape
-before any rule in `docs/process/` changes.
-
-## Reading a differences file
-
-- **Anything not listed is assumed the same as the spec.** The file's
-  "Basis" line says what that rests on: which scenarios were walked on
-  the version and which parts were only compared in the code.
-- **The headings are the spec's own**, and only the ones where something
-  differs appear. An entry names the spec's rule number, Actors row,
-  field label, setting or scenario number, and is one of three kinds:
-  - **not here**: the spec has it, this version does not;
-  - **different here**: both have it and it behaves differently. The
-    rule or scenario is written out whole, as this version has it, so
-    the reader needs no merge of two texts;
-  - **only here**: this version has something `main` no longer has.
-- **Findings are not in these files.** A spec's Findings register lists
-  every finding once, and its "Versions" column says which versions
-  show it. A finding `main` no longer shows and an older version still
-  does sits under "Older versions only" in that register. A differences
-  file states what the version's screen does, as a spec does, and marks
-  the spot with ⚠ and a link to that entry.
-- **Evidence is in the footnotes**, as in a spec: the commits read, the
-  date, the kept script and its snapshots.
+Reading one: the headings are the spec's own, and only the ones where
+something differs appear. An entry is **not here** (the spec has it, 3.5
+does not), **different here** (written out whole as 3.5 has it) or
+**only here** (3.5 has something `main` no longer has). Anything not
+listed was assumed the same; the file's "Basis" line says what was
+walked on 3.5 and what was only compared in the code.
 
 ## What a "Versions" cell says
+
+The registers of `main`'s U26 and U37 specs carry a "Versions" column
+from the same first shape. It goes with these files, once each version's
+spec has its own register.
 
 - `main 3.5`: seen on both.
 - `main`: seen on `main`; walked on 3.5 and not there, or 3.5 has no
