@@ -14,7 +14,8 @@
  *   (`ops/templates/frontend/pages/search.tpl`): the header's "Search" link
  *   (`lib/pkp/templates/frontend/components/header.tpl`,
  *   `.pkp_navigation_search_wrapper`), the box `input#query` with its
- *   sr-only label, the "Advanced filters" date selects
+ *   visible label "Search preprints for" (`<label for="query">`, no
+ *   placeholder), the "Advanced filters" date selects
  *   (`PKPTemplateManager::smartyHtmlSelectDateA11y()`: `#dateFromYear`,
  *   `#dateFromMonth`, `#dateFromDay`, `#dateTo…`, each with a leading blank
  *   option), the "Search" button, the results `ul.search_results > li`
@@ -31,9 +32,12 @@
  * - ArchiveHeaderSearch — the archive header's search form on the server's
  *   home page and its Preprints page
  *   (`ops/templates/frontend/components/searchForm_archive.tpl`:
- *   `form.pkp_search[role=search][aria-label="Preprint Search"]`, a box read
- *   out as "Search Query", a "Search" button; it submits to the Search
- *   page).
+ *   `form.pkp_search[role=search][aria-label="Preprint Search"]`, a box
+ *   under the visible label "Search Query", a "Search" button; it submits
+ *   to the Search page), inside the grey panel `section.archiveHeader`
+ *   whose second part lists the server's top-level categories as links
+ *   (`frontend/components/archiveHeader.tpl`, the default theme's
+ *   `archiveHeader.less`: background `@bg-shade`, contents centred).
  *
  * Labels are the live locale strings (ops + lib/pkp locale/en at the pinned
  * commits), confirmed against the running OPS fleet while this suite was
@@ -109,6 +113,27 @@ exports.SearchPage = class SearchPage extends BasePage {
     /** The Search page's own form (box, Advanced filters, button). */
     form() {
         return this.page.locator('.page_search form.cmp_form');
+    }
+
+    /** The visible label above the search box ("Search preprints for"). */
+    queryLabel() {
+        return this.form().locator('label[for="query"]');
+    }
+
+    /**
+     * The label's and the box's rendered boxes ({top, bottom}), read once
+     * the theme's stylesheet is in (patterns.md parallel lesson 16).
+     */
+    async queryLabelLayout() {
+        await this.stylesApplied();
+        await expect(this.queryLabel()).toBeVisible();
+        return this.form().evaluate((form) => {
+            const rect = (selector) => {
+                const b = /** @type {Element} */ (form.querySelector(selector)).getBoundingClientRect();
+                return {top: b.top, bottom: b.bottom};
+            };
+            return {label: rect('label[for="query"]'), box: rect('input#query')};
+        });
     }
 
     /** The search box, by its label "Search preprints for" (shown since pkp/ops#1422; no placeholder). */
@@ -355,6 +380,65 @@ exports.ArchiveHeaderSearch = class ArchiveHeaderSearch extends BasePage {
         return this.page
             .locator('.archiveHeader_search')
             .getByRole('search', {name: 'Preprint Search', exact: true});
+    }
+
+    /** The grey panel holding the search form and the category links. */
+    panel() {
+        return this.page.locator('section.archiveHeader');
+    }
+
+    /** The visible label above the archive box ("Search Query"). */
+    queryLabel() {
+        return this.form().locator('label[for="query"]');
+    }
+
+    /** The panel's category links (top-level categories only). */
+    categoryLinks() {
+        return this.panel().locator('.archiveHeader_categories').getByRole('link');
+    }
+
+    /** One category link by its name. */
+    categoryLink(name) {
+        return this.panel()
+            .locator('.archiveHeader_categories')
+            .getByRole('link', {name, exact: true});
+    }
+
+    /**
+     * The panel's rendered layout, read once the theme's stylesheet is in
+     * (patterns.md parallel lesson 16): the panel's background colour and
+     * box, and the boxes of the label's text, the box, the button and the
+     * first category link ({left, right, top, bottom, centre}); the label
+     * is a full-width block, so its text's own extent is measured.
+     */
+    async panelLayout() {
+        await this.stylesApplied();
+        await expect(this.panel()).toBeVisible();
+        return this.panel().evaluate((panel) => {
+            /** @param {DOMRect} b */
+            const box = (b) => ({
+                left: b.left,
+                right: b.right,
+                top: b.top,
+                bottom: b.bottom,
+                centre: b.left + b.width / 2,
+            });
+            const label = panel.querySelector('.archiveHeader_search label[for="query"]');
+            const range = document.createRange();
+            range.selectNodeContents(/** @type {Node} */ (label));
+            const rect = (selector) => {
+                const el = panel.querySelector(selector);
+                return el ? box(el.getBoundingClientRect()) : null;
+            };
+            return {
+                background: getComputedStyle(panel).backgroundColor,
+                panel: box(panel.getBoundingClientRect()),
+                labelText: box(range.getBoundingClientRect()),
+                input: rect('.archiveHeader_search input#query'),
+                button: rect('.archiveHeader_search button[type="submit"]'),
+                category: rect('.archiveHeader_categories a'),
+            };
+        });
     }
 
     /** The form's box, labelled "Search Query" (shown since pkp/ops#1422; no placeholder). */

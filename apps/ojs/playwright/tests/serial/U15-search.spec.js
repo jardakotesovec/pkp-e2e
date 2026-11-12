@@ -13,15 +13,11 @@
  * and then drains the queue with runJobs() — which pops the SHARED queue
  * and is only safe in the serial project (patterns.md parallel lesson 7).
  *
- * Deliberately NOT covered (register IDs from the spec's Findings
- * register — a 🐞 is never asserted as the contract, a ❓ is parked, not a
- * gap): A1 🐞, A2 ❓, A3 🐞, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A9 🐞, A10 🐞,
- * A11 🐞, A12 🐞, A13 🐞, A14 🐞, A15 🐞, A16 ❓, OJS1 🐞 (S1 reads the
- * single-hit status line only; the plural is never read), OJS2 🐞 (S8's
- * Control reads the select blank after a limited search, as the scenario
- * states; no test pages through a journal-limited result), OJS3 ❓ (S9
- * asserts the scenario as written: the visitor lands on the Login page).
- * The spec's Coverage section records everything else left out.
+ * Deliberately NOT covered (the spec's Findings register; a 🐞 is never
+ * asserted as the contract, a ❓ is parked, not a gap): A1 🐞, A2 ❓, A3 🐞,
+ * A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A9 🐞, A10 ❓, A11 🐞, A12 🐞, A13 🐞,
+ * A14 ❓, A15 ❓, A16 ❓, A17 🐞, A18 🐞, A19 🐞, OJS1 🐞, OJS2 🐞, OJS3 ❓,
+ * OJS4 🐞. The spec's Coverage section records the rest.
  *
  * Seeding: scenario endpoints only, on scratch journals with throwaway
  * users; publicknowledge is never touched. The made-up search words are
@@ -29,8 +25,10 @@
  * prefix of another and nothing from an earlier run on this long-lived
  * database can match). S7 sets the two published dates through the
  * workflow's "Publication Settings" page before publishing (the API has no
- * date key). Every absence claim is paired with a positive control taken
- * the same way (PRINCIPLES M4). The default `page` carries no storage
+ * date key), and moves one of them a week later on the same page after
+ * publishing, with no queue drain before the visitor's search. Every
+ * absence claim is paired with a positive control taken the same way
+ * (PRINCIPLES M4). The default `page` carries no storage
  * state, so it is the visitor of every scenario; signed-in actors come
  * from `asUser`. Mailpit is one shared instance, so S1's mail read is
  * scoped to this scratch journal's throwaway addresses. The suite runs
@@ -81,6 +79,10 @@ const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** A seeded user's email (scenarios.md: `<username>@mail.test`). */
 const emailOf = (username) => `${username}@mail.test`;
+
+/** The banner over every Publication page of a published version (fn-s7). */
+const PUBLISHED_WARNING =
+    'Warning: This version has been published. Editing it may impact the published content.';
 
 /** Editorial decisions that carry a seeded submission to Production without publishing it. */
 const TO_PRODUCTION = ['skipExternalReview', 'sendToProduction'];
@@ -136,6 +138,17 @@ test.describe('Search (queue-drained index)', () => {
         await search.openFromHeader();
         await expect(search.queryBox()).toHaveValue('');
         await expect(search.headerSearchLink()).toHaveCount(0); // absent on the Search page itself
+
+        // The box's label: "Search articles for" shows above the box and is
+        // its accessible name (one textbox answers to it); the empty box
+        // shows no hint text (no placeholder; Control: the box's own
+        // `name` attribute read the same way).
+        await expect(search.queryLabel()).toHaveText('Search articles for');
+        await search.expectLabelAboveBox();
+        await expect(search.queryBox()).toHaveAccessibleName('Search articles for');
+        await expect(page.getByRole('textbox', {name: 'Search articles for', exact: true})).toHaveCount(1);
+        await expect(search.queryBox()).toHaveAttribute('name', 'query');
+        await expect(search.queryBox()).not.toHaveAttribute('placeholder');
 
         // The title word finds exactly that article: title, contributors,
         // published date, no galley links.
@@ -466,12 +479,12 @@ test.describe('Search (queue-drained index)', () => {
         // workflow's Publication Settings page, then publishes it.
         const managerPage = await (await asUser(manager)).newPage();
         const publication = new PublicationScreen(managerPage, tag);
+        const dateField = managerPage.locator(
+            '[data-cy="workflow-primary-items"] input[name="datePublished"]'
+        );
         const dateAndPublish = async (submissionId, date) => {
             await publication.gotoWorkflow(submissionId);
             await publication.openEntry('Publication Settings');
-            const dateField = managerPage.locator(
-                '[data-cy="workflow-primary-items"] input[name="datePublished"]'
-            );
             await expect(dateField).toBeVisible({timeout: 30_000});
             await dateField.fill(date);
             await publication.save();
@@ -530,6 +543,40 @@ test.describe('Search (queue-drained index)', () => {
         await expect(search.resultByTitle(firstTitle)).toHaveCount(1);
         await expect(search.resultByTitle(fifteenthTitle)).toHaveCount(1);
         await search.expectDateBlank('dateFrom');
+
+        // The Journal Manager moves a date: on the published 1st's article's
+        // "Publication Settings" (the published-version banner showing), the
+        // "Publication Date" saved as the 8th, a week later; no republish,
+        // the article still reads "Status: Published". Content-verified
+        // save: a late form refresh can revert a fill, so each bounded
+        // attempt passes only when the save's answer holds the new date.
+        await publication.gotoWorkflow(firstId);
+        await publication.openEntry('Publication Settings');
+        await expect(managerPage.getByText(PUBLISHED_WARNING)).toBeVisible({timeout: 30_000});
+        await expect(dateField).toHaveValue('2024-06-01', {timeout: 30_000});
+        await expect(async () => {
+            await dateField.fill('2024-06-08');
+            const response = await publication.save();
+            const saved = await response.json();
+            expect(String(saved.datePublished ?? '')).toMatch(/^2024-06-08/);
+        }).toPass({intervals: [1_000, 2_000], timeout: 90_000});
+        await publication.expectStatus('Published');
+
+        // The visitor, at once (no runJobs() since the save, Rule 12): the
+        // word lists both, the moved article's result showing the 8th;
+        // "Published After" the 2nd (the day after its old date, all three
+        // parts) still lists both (Rule 9), the selects showing the 2nd.
+        await search.search(word);
+        await expect(search.results()).toHaveCount(2);
+        await expect(search.resultByTitle(firstTitle).locator('.meta .published')).toHaveText('2024-06-08');
+        await expect(search.resultByTitle(fifteenthTitle).locator('.meta .published')).toHaveText('2024-06-15');
+        const second = {year: '2024', month: 'Jun', day: '2'};
+        await search.setDate('dateFrom', second);
+        await search.submit();
+        await expect(search.results()).toHaveCount(2);
+        await expect(search.resultByTitle(firstTitle)).toHaveCount(1);
+        await expect(search.resultByTitle(fifteenthTitle)).toHaveCount(1);
+        await search.expectDate('dateFrom', second);
 
         // A journal with nothing published (Rule 9): the Year lists under
         // both filters offer only blank entries and the page reads "No

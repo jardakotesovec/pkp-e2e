@@ -19,14 +19,9 @@
  * the serial project (patterns.md parallel lesson 7). Every scenario that
  * expects a hit seeds through the scenario API and drains once.
  *
- * Deliberately NOT covered (register IDs from the spec's Findings
- * register — a 🐞 is never asserted as the contract, a ❓ is parked, not a
- * gap): A1 🐞, A2 ❓, A3 🐞, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A9 🐞, A10 🐞,
- * A11 🐞, A12 🐞, A13 🐞, A14 🐞, A15 🐞, A16 ❓, OPS1 🐞 (S1 reads the
- * single-hit status line only, whose text is right; the plural is never
- * read), OPS2 ❓, OPS3 🐞, OPS4 🐞 (S12 asserts the declined preprint's
- * listing and its title's address, never the "404 Not Found" the title
- * opens). The spec's Coverage section records everything else left out.
+ * Deliberately NOT covered (register IDs; the spec's Coverage section
+ * records everything else left out): A1, A2, A3, A4, A5, A6, A7, A8, A9,
+ * A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, OPS1, OPS2, OPS3, OPS4.
  *
  * Seeding: scenario endpoints only (a scratch server per test, with its own
  * throwaway Manager and Author; passwords are the username twice). Search
@@ -153,6 +148,16 @@ test.describe('Search (U15)', () => {
         await search.openFromHeader();
         await expect(search.queryBox()).toHaveValue('');
         await expect(search.headerSearchLink()).toHaveCount(0);
+
+        // The box's label (Fields "Search box"): "Search preprints for"
+        // shows above the box and is its accessible name (the box above is
+        // found by that name); the empty box carries no hint text.
+        await expect(search.queryLabel()).toBeVisible();
+        await expect(search.queryLabel()).toHaveText('Search preprints for');
+        const labelLayout = await search.queryLabelLayout();
+        expect(labelLayout.label.bottom).toBeLessThanOrEqual(labelLayout.box.top);
+        await expect(search.queryBox()).toBeVisible();
+        await expect(search.queryBox()).not.toHaveAttribute('placeholder');
 
         // The word from one title lists exactly that preprint: title,
         // contributors, date line, no galley links (Rules 3, 6).
@@ -492,6 +497,7 @@ test.describe('Search (U15)', () => {
         const [word] = makeWords(1);
         const titleFirst = `Notes on ${word} first day`;
         const titleFifteenth = `Notes on ${word} fifteenth day`;
+        // The scratch server's Manager (contextUsers) moves a date later on.
         await opsApi.createContext({tag, users: contextUsers(tag)});
         // A second scratch server on which no publication date has ever been
         // entered: nothing posted, no submission at all.
@@ -582,6 +588,46 @@ test.describe('Search (U15)', () => {
         await search.expectDateBlank('dateFrom');
         await search.expectDateBlank('dateTo');
 
+        // Control for the moved date below: "Published After" the 2nd, the
+        // day after the first preprint's date, lists only the 15th's
+        // preprint while that date stands.
+        const second = {year: 2024, month: 'Jun', day: 2};
+        await search.setDate('dateFrom', second);
+        await search.submit();
+        await search.expectOnlyResult(titleFifteenth);
+        await expect(search.result(titleFirst)).toHaveCount(0);
+
+        // The Manager moves a date: on the posted first preprint's Preprint
+        // entry page (the published-version banner shown), "Date Posted"
+        // set a week later, to the 8th, and saved, without posting again.
+        await openPreprintEntry(managerPage, tag, first.submissionId, first.publicationId);
+        await expect(screen.publishedWarning()).toBeVisible({timeout: 30_000});
+        const movedInput = screen.input('issueEntry', 'datePublished');
+        await expect(movedInput).toHaveValue('2024-06-01');
+        await movedInput.fill('2024-06-08');
+        await screen.save();
+
+        // The visitor, at once (Rules 9, 12): no runJobs() between the save
+        // and these reads (the result line and the filters read the
+        // publication's own date, and an edit queues no index job, A3, so
+        // another serial worker's drain cannot change them). The word
+        // alone: both listed, the first preprint's line showing the 8th.
+        await search.clearDate('dateFrom');
+        await search.search(word);
+        await expect(search.result(titleFirst)).toHaveCount(1);
+        await expect(search.result(titleFifteenth)).toHaveCount(1);
+        await expect(search.results()).toHaveCount(2);
+        await expect(search.resultDetails(titleFirst)).toContainText('Posted 2024-06-08');
+        await expect(search.resultDetails(titleFirst)).not.toContainText('Posted 2024-06-01');
+
+        // "Published After" the 2nd (all three parts): both listed now.
+        await search.setDate('dateFrom', second);
+        await search.submit();
+        await expect(search.result(titleFirst)).toHaveCount(1);
+        await expect(search.result(titleFifteenth)).toHaveCount(1);
+        await expect(search.results()).toHaveCount(2);
+        await search.expectDate('dateFrom', second);
+
         // A server with nothing posted (Rule 9): the Year lists under both
         // filters offer only blank entries and the page reads "No Results".
         const emptySearch = new SearchPage(page, emptyTag);
@@ -596,7 +642,15 @@ test.describe('Search (U15)', () => {
         const tag = makeTag('s10', testInfo);
         const [word] = makeWords(1);
         const title = `Notes on ${word}`;
-        await opsApi.createContext({tag, users: contextUsers(tag)});
+        const categoryPath = `${tag}cat`;
+        const categoryName = 'Field Studies';
+        // One top-level category (fn-s10: a scratch server created without
+        // the key has none, so no category line).
+        await opsApi.createContext({
+            tag,
+            categories: [{path: categoryPath, title: categoryName}],
+            users: contextUsers(tag),
+        });
         await opsApi.createSubmission({
             tag: `${tag}a`,
             context: tag,
@@ -609,13 +663,53 @@ test.describe('Search (U15)', () => {
         const archive = new ArchiveHeaderSearch(page, tag);
         const search = new SearchPage(page, tag);
 
-        // The home page's archive header: an empty box and a "Search"
-        // button; submitting opens the Search page with the word in its box
-        // and the one preprint, its date line reading "Downloads: 0 -
-        // Submitted {date} - Posted {date}" (Rule 17).
+        // The home page's archive header and its label (Fields "Preprint
+        // server: search box", Rule 17): a grey panel holding the label
+        // "Search Query" (the box's accessible name), an empty box with no
+        // hint text, a "Search" button, and the category's name as a link
+        // to its page.
         await archive.gotoHome();
+        await expect(archive.panel()).toBeVisible();
+        await expect(archive.queryLabel()).toBeVisible();
+        await expect(archive.queryLabel()).toHaveText('Search Query');
+        await expect(archive.queryBox()).toBeVisible();
         await expect(archive.queryBox()).toHaveValue('');
+        await expect(archive.queryBox()).not.toHaveAttribute('placeholder');
         await expect(archive.searchButton()).toBeVisible();
+        await expect(archive.categoryLink(categoryName)).toBeVisible();
+        await expect(archive.categoryLink(categoryName)).toHaveAttribute(
+            'href',
+            new RegExp(`/${tag}/preprints/category/${categoryPath}$`)
+        );
+        await expect(archive.categoryLinks()).toHaveCount(1);
+
+        // Its layout: a grey background (the three channels equal, darker
+        // than white); stacked: the label above the box, the button beside
+        // the box on the same line, the category below both; each line
+        // centred in the panel (a few pixels' tolerance for the category
+        // chip's trailing margin).
+        const layout = await archive.panelLayout();
+        const rgb = (layout.background.match(/\d+/g) || []).map(Number);
+        expect(rgb.length).toBeGreaterThanOrEqual(3);
+        expect(rgb[0]).toBe(rgb[1]);
+        expect(rgb[1]).toBe(rgb[2]);
+        expect(rgb[0]).toBeLessThan(255);
+        expect(rgb[0]).toBeGreaterThan(128);
+        const {panel, labelText, input, button, category} = layout;
+        if (!input || !button || !category) throw new Error('archive header part missing');
+        expect(labelText.bottom).toBeLessThanOrEqual(input.top);
+        expect(button.left).toBeGreaterThanOrEqual(input.right - 1);
+        expect(button.top).toBeLessThan(input.bottom);
+        expect(button.bottom).toBeGreaterThan(input.top);
+        expect(category.top).toBeGreaterThanOrEqual(Math.max(input.bottom, button.bottom));
+        const tolerance = 10;
+        expect(Math.abs(labelText.centre - panel.centre)).toBeLessThanOrEqual(tolerance);
+        expect(Math.abs((input.left + button.right) / 2 - panel.centre)).toBeLessThanOrEqual(tolerance);
+        expect(Math.abs(category.centre - panel.centre)).toBeLessThanOrEqual(tolerance);
+
+        // A search from the header: submitting opens the Search page with
+        // the word in its box and the one preprint, its date line reading
+        // "Downloads: 0 - Submitted {date} - Posted {date}" (Rule 17).
         await archive.search(word);
         await search.expectOpen();
         await expect(search.queryBox()).toHaveValue(word);

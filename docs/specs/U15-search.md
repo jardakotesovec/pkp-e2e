@@ -322,8 +322,12 @@ shared. <sup>b</sup>
   the issue again lists them only once the background job has run (Rule
   12). The issue flow belongs to *Issues*. <sup>k</sup>
 - Deleting a submission drops its index entries with it at once; nothing
-  is queued. No screen deletes a single version of an article, and no
-  screen deletes a published article directly: it is returned to the
+  is queued. A rebuild job that publishing or unpublishing queued for the
+  article and that is still waiting when the submission is deleted fails
+  when the site's background jobs run, and is listed on the Site
+  Administrator's Failed Jobs page ⚠ [A20](#a20). No screen deletes a
+  single version of an article, and no screen deletes a published
+  article directly: it is returned to the
   workflow, declined and then deleted
   ([Submission stage](U25-submission-stage.md#delete)). <sup>k</sup>
 - Installing or upgrading the site rebuilds the whole index. The system
@@ -418,7 +422,7 @@ configuration file (config.inc.php), search section; no screen shows them.
 
 Every scenario runs on a scratch journal holding the published articles it
 names, each carrying a made-up word that appears nowhere else on the site;
-scenarios 4, 5, 9 and 12 sign in with throwaway accounts on it. The site's
+scenarios 4, 5, 7, 9 and 12 sign in with throwaway accounts on it. The site's
 background jobs have run since the articles were published, so the index
 holds them (Rule 12): a search that expects a hit is judged only once the
 jobs have run. The tooling recipe, the mail catcher's address and how the
@@ -432,6 +436,11 @@ jobs are run are in the footnote. <sup>s</sup>
    - **The header's "Search" link**: on the journal's home page press
      "Search" in the header: the page "Search" opens with an empty search
      box.
+   - **The box's label**, on a journal or server: "Search articles for"
+     ("Search preprints for" on a server) shows above the search box, and
+     a screen reader (or the browser's accessibility inspector) reads it
+     out as the box's name; the empty box shows no hint text inside it
+     (Fields "Search box"). A press's label is read in scenario 11.
    - **A title word**: type the made-up word from one article's title and
      press "Search": the list holds exactly that article: its title, its
      contributors and its published date, and no galley links.
@@ -548,10 +557,10 @@ jobs are run are in the footnote. <sup>s</sup>
 
 7. **Narrow by publication date** {OJS OPS}
 
-   Given: a visitor, on a scratch journal with two articles sharing a
-   made-up word in their titles, one published on the 1st of a month and
-   one on the 15th, and a second scratch journal on which no publication
-   date has ever been entered.
+   Given: a visitor and the Journal Manager, on a scratch journal with two
+   articles sharing a made-up word in their titles, one published on the
+   1st of a month and one on the 15th, and a second scratch journal on
+   which no publication date has ever been entered.
 
    - **Both listed**: type the word and press "Search": both are listed.
    - **"Published After"**: under "Advanced filters", set "Published After"
@@ -570,6 +579,17 @@ jobs are run are in the footnote. <sup>s</sup>
      "Published After" choose that month in "Month" and 10 in "Day",
      leaving "Year" blank; press "Search": both articles are listed and
      the three selects go blank (Rule 9).
+   - **The Journal Manager moves a date**: signed in, open the workflow of
+     the article published on the 1st, and under "Publication Settings"
+     ("Preprint Entry" on a server) set "Publication Date" ("Date Posted"
+     on a server) to the 8th of the same month, a week later, and save it,
+     without republishing the article.
+   - **The visitor, at once**: with no wait for the site's background
+     jobs, type the word and press "Search": that article's result shows
+     the 8th as its published date; under "Advanced filters" set
+     "Published After" to the 2nd of that month, the day after its old
+     date (Year, Month and Day all chosen), and press "Search": both
+     articles are listed (Rules 9, 12).
    - **A journal with nothing published**: on the second scratch journal
      open the Search page: the Year lists under both filters offer only
      blank entries and the page reads "No Results" (Rule 9).
@@ -623,14 +643,19 @@ Preprint-server-specific:
 
 10. **Search from the archive header** {OPS}
 
-    Given: a visitor, on a scratch preprint server holding one posted
-    preprint with its own made-up word in its title.
+    Given: a visitor, on a scratch preprint server with one top-level
+    category, holding one posted preprint with its own made-up word in its
+    title.
 
-    - **The home page's archive header**: shows an empty search box and a
-      "Search" button above the latest preprints. Type the preprint's
-      made-up word and press "Search": the Search page opens with the word
-      in its search box and that one preprint listed, its date line reading
-      "Downloads: 0 - Submitted {date} - Posted {date}".
+    - **The home page's archive header and its label**: above the latest
+      preprints, a grey panel whose contents are centred and stacked: first
+      the label "Search Query", then an empty search box with a "Search"
+      button beside it, and on a line below them the category's name as a
+      link (Fields "Preprint server: search box", Rule 17).
+    - **A search from the header**: type the preprint's made-up word and
+      press "Search": the Search page opens with the word in its search box
+      and that one preprint listed, its date line reading "Downloads: 0 -
+      Submitted {date} - Posted {date}".
     - **The Preprints page**: the same box and button sit at its top and
       behave the same way.
     - **Control**: return to the home page: its archive box is empty again
@@ -646,6 +671,8 @@ Press-specific:
     - **The header's "Search" link**: on the press's home page press
       "Search" in the header: the page "Search" shows the heading and, at
       its foot, a search box and a "Search" button.
+    - **The box's label**: "Search Query" shows above the search box
+      (Fields "Press: search box").
     - **The word**: type the book's made-up word and press "Search": the
       page reads "1 Titles" and "One title was found which matched your
       search for "{word}"." with a "Search again" link, and lists the book
@@ -691,13 +718,11 @@ Left out of the scenarios above, by reason:
   - a word that is only in a published HTML galley finds the article, book or preprint once the queue has run (Rule 3; A11) [report 2026-10-03]
   - a title corrected and a contributor added on a published article, book or preprint are found by their new words once the queue has run, and the old title word no longer finds it (Rule 12; A3) [report 2026-10-03]
   - with A1 fixed, a Year alone under "Published Before", and a Year and Month without a Day, limit the results and show the date applied (Rule 9) [report 2026-10-03]
-  - a published article's or preprint's date saved a week later (Rule 12): the result shows the new date and "Published After" the day after the old date finds it, at once with no queue run (Rules 9, 12) [incidental 2026-10-13]
   - on the site-wide Search page, a journal chosen under "By Journal" stays selected after the search and its page 2 lists that journal's articles only (Rule 10; OJS2) [report 2026-10-03]
   - on a press and a server, a published book or preprint returned to the workflow keeps its page, its place in the catalog or preprint list and its search result for a visitor (Rule 2; OMP3, OPS4) [report 2026-10-03]
   - a Search address asking for the sort by published date, newest or oldest first, lists the results in date order (Rule 14; A12) [report 2026-10-03]
   - a Search address whose page number is not a number, on a search that finds something, shows the first page of results (Rule 8; A13) [report 2026-10-03]
   - a search that finds several items gives the screen-reader status line "Found {N} items." with the count, on a journal and on a preprint server (Rule 7; OJS1, OPS1) [report 2026-10-03]
-  - the Search page's box shows its label above it ("Search articles for", "Search preprints for" on a server, "Search Query" on a press) and no hint text, and a preprint server's archive header shows "Search Query" above its box, centred over the category links (Fields rows "Search box", "Press: search box" and "Preprint server: search box"; Rule 17) [upstream 2026-10-15]
 - **Rarely met**:
   - "Items per page" changed on Settings › Website › Setup › Lists, the
     results per page following it (Rule 8, Settings): the Journal Manager
@@ -749,6 +774,8 @@ Left out of the scenarios above, by reason:
   - A3 (edits after publication never reaching the index; Rule 12)
   - A19 (an item imported published by Native XML never reaching the
     index; Rule 12)
+  - A20 (a rebuild job still waiting when its article is deleted failing
+    and listed on the Failed Jobs page; Side effects)
   - A8 and A12 (the address-only refinements, paging keeping the sort
     alone, the date sort answering an error page; Rules 8, 14)
   - A17 (a sort the page does not know answering an empty error page;
@@ -831,6 +858,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A14](#a14) | A day the month does not have is offered, and applied as the next month's date | ❓ | minor | — |
 | [A15](#a15) | The Year lists follow the dates entered on unpublished articles too | ❓ | minor | — |
 | [A16](#a16) | Whether a journal's own configuration should govern its presence on the site-wide Search page | ❓ | latent | — |
+| [A20](#a20) | A search-index job still waiting when its article is deleted fails and is listed among the failed jobs | ❓ | minor · crash: server | — |
 | [OJS3](#ojs3) | On a journal that does not publish online, a visitor is sent to Login instead of being told | ❓ | minor | — |
 | [OPS2](#ops2) | A server's does-not-post gate cannot be reached from its settings, and would show a raw code if it were | ❓ | minor | — |
 | [OMP2](#omp2) | The press's Search page is a different page: one box at the foot, no filters, its own wording | ✅ | user-visible | — |
@@ -1105,6 +1133,23 @@ Only a rebuild of the index from the command line brings the imported
 items into search. 3.5 queues the indexing at the end of the import;
 `main` lost that step with its search rewrite. (Rule 12)
 Since: 2025-08 (about a year). Basis: probe, 2026-10-22. <sup>f-a19</sup>
+
+<a id="a20"></a>
+**A20 — A search-index job still waiting when its article is deleted fails and is listed among the failed jobs** · ❓ · minor · crash: server.
+Publishing or unpublishing a version queues a job that rebuilds the
+article's index entry (Side effects). When the submission is deleted
+before that job runs, the job fails with a server error when the site's
+background jobs run, and the Site Administrator finds it on the
+Administration › "View Failed Jobs" page
+([System administration](U61-system-administration.md)). The index is
+not harmed: the deleted article's entries went with it, and nothing a
+visitor sees changes. 3.5 also failed such a job, with a message naming
+its data as invalid; `main` fails it with a raw program error. Seen
+once, on a journal, after another test had deleted the article.
+Question: should a job whose submission is gone finish quietly?
+Lean: yes; it has nothing left to do, and a failed job sends the
+administrator looking for a fault that does not exist.
+Since: 2025-08 (about a year). Basis: test run, 2026-11-12. <sup>f-a20</sup>
 
 ### OJS
 
@@ -1810,7 +1855,10 @@ with `search.searchResults.foundSingle` (OJS/OPS only; OMP renders
 `catalog.browseTitles`, fn-g). The mail read: `pkpMail` scoped to the
 scratch context's throwaway addresses (`<username>@mail.test`), zero
 messages after the searches; the Mailpit inbox is shared, so scope the
-read (scenarios.md "Mailpit").
+read (scenarios.md "Mailpit"). The label step (OJS/OPS): the visible
+label `<label for="query">` reading `search.searchFor` ("Search articles
+for", OPS "Search preprints for"), the box found by that accessible name,
+and no `placeholder` on `input#query` (fn-b, re-probed 2026-10-15).
 
 <a id="fn-s2"></a>
 **s2** — Tokens placed in `abstract` and in a contributor's `familyName`
@@ -1871,6 +1919,13 @@ f-a1: "Sep + 2 … (no Year) → unfiltered, all three selects blank"). The
 journal with nothing published: a second `POST scenarios/context` with no
 submission at all, so `getDateBoundaries()` is empty and each Year list
 yields a single blank entry (fn-h, the empty-journal probe of 2026-09-02).
+The moved date: the scratch context's manager (from its `users[]`)
+edits the published version's date field in the workflow and presses
+"Save" past the banner "Warning: This version has been published. Editing
+it may impact the published content." (fn-k); no `runJobs()` runs between
+that save and the visitor's search, since the result line and the date
+filters read the publication's own `date_published`, not
+`submissions_fulltext` (fn-k).
 
 <a id="fn-s8"></a>
 **s8** — Two scratch journals, one article each; site-level address
@@ -1892,12 +1947,17 @@ radio checked, so "restore" means choosing open access. Live-probed
 <a id="fn-s10"></a>
 **s10** — `section.archiveHeader_search form.pkp_search` on `index` and
 `preprints`; `submission.dates` string preceded by the download count.
-Live-probed 2026-09-02 (fn-p).
+Live-probed 2026-09-02 (fn-p). The category: one entry in the context
+scenario's `categories[]` (scenarios.md "`categories[]`"; a scratch server
+created without the key has none, so no category line); the label is the
+visible `<label for="query">` `common.searchQuery`, the panel's centring
+the theme's `archiveHeader.less` (fn-p, re-probed 2026-10-15).
 
 <a id="fn-s11"></a>
 **s11** — `catalog.browseTitles` renders "1 Titles" (no singular form);
 `catalog.foundTitleSearch`; named anchor `search-form`. Live-probed
-2026-09-02 (fn-g).
+2026-09-02 (fn-g). The label: `<label for="query">` `common.searchQuery`
+in `searchForm_simple.tpl` (fn-b, re-probed 2026-10-15).
 
 <a id="fn-s12"></a>
 **s12** — Two published articles seeded as fn-s, the manager from the
@@ -2153,6 +2213,24 @@ Results"; indexing that one item by hand made search find it. On OJS
 with that job run search reported "Found one item." Report:
 `docs/reports/2026-10-22-pkp-lib-8920.md`; kept script
 `shared/playwright/checks/sync/pkp-lib-8920/metadata-changed.js`.
+
+<a id="fn-f-a20"></a>
+**f-a20** — fn-k: `UpdateSubmissionSearchJob::handle()` calls
+`Repo::submission()->get($this->submissionId)` and then
+`$submission->getData('publications')` with no null check, so a job
+whose submission was deleted throws "Call to a member function getData()
+on null" and Laravel records it in `failed_jobs`. pkp/pkp-lib#8920
+(lib/pkp `b44cf27793`, 2025-08-01) removed the 3.5 guard
+`if (!$submission) throw new JobException(JobException::INVALID_PAYLOAD)`;
+on 3.5 the job failed too, with that named exception (code, not driven).
+The job class is shared, so OMP and OPS read the same (code). Test run
+2026-11-12, OJS serial suite: a `tools/jobs.php run` drain of the shared
+queue after S2 printed four such errors, and the slot's `failed_jobs`
+held four `UpdateSubmissionSearchJob` rows, all for one submission that
+no longer existed and that another suite's jobs had queued; no U15 screen
+showed a change, and the OMP and OPS runs printed no such error. Not yet
+driven on purpose: publishing or unpublishing a scratch article, deleting
+it before any queue run and running the queue once would settle it.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — fn-g: `templates/frontend/pages/search.tpl` passes `count`

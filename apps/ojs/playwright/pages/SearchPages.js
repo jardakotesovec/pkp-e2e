@@ -109,6 +109,27 @@ exports.SearchPage = class SearchPage extends BasePage {
         return this.page.locator('input#query');
     }
 
+    /** The box's visible label (`label[for="query"]`, "Search articles for"). */
+    queryLabel() {
+        return this.page.locator('.page_search label[for="query"]');
+    }
+
+    /**
+     * The label sits above the box: its bottom edge at or above the box's
+     * top edge (a layout read on a settled page, never a click target).
+     */
+    async expectLabelAboveBox() {
+        await expect(this.queryLabel()).toBeVisible();
+        await expect(this.queryBox()).toBeVisible();
+        const label = await this.queryLabel().boundingBox();
+        const box = await this.queryBox().boundingBox();
+        expect(label).not.toBeNull();
+        expect(box).not.toBeNull();
+        if (label && box) {
+            expect(label.y + label.height).toBeLessThanOrEqual(box.y + 1);
+        }
+    }
+
     /**
      * The form's "Search" button. Anchored on the template's own
      * `button.submit` because its accessible name carries a trailing

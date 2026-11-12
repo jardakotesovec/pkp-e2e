@@ -11,16 +11,9 @@
  * Scenarios 8 and 9 are OJS-only, 10 is OPS-only.
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): OMP1, OMP3, A3, A4, A5, A6, A7, A8, A9,
- * A10, A11, A12, A13, A16; A1, A2, A14 and A15 concern the date filters a
- * press lacks; OJS1–3 and OPS1–3 are the other applications'. Results are
- * matched by title, never by position (A4). The status line of scenario 1
- * is a journal's and a server's; a press renders its "1 Titles" count
- * instead and the line is not asserted here. OMP3 (folded from T-omp-1,
- * 2026-09-13): a declined book's title in the results opens "404 Not
- * Found" for the visitor on a press, so S12 asserts the folded bullet's
- * press half — the listing and the title's address after the decline —
- * and never the page it opens (M3).
+ * of everything else left out): OMP1, OMP3, A1, A2, A3, A4, A5, A6, A7,
+ * A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, OJS1, OJS2,
+ * OJS3, OJS4, OPS1, OPS2, OPS3, OPS4.
  *
  * Serial project, on purpose (PRINCIPLES A9, patterns.md parallel lesson
  * 7): publishing queues the index refresh (Rule 12) and the fleets run with
@@ -121,6 +114,16 @@ async function seedBook(ompApi, {tag, submitter, title, abstract, published = tr
         published,
     });
     return submissionId;
+}
+
+/** The visible label of the press's search box (S11), local to this suite. */
+const searchQueryLabel = (search) => search.form.locator('label[for="query"]');
+
+/** True when the label's box ends at or above the search box's top edge. */
+async function labelIsAboveBox(search) {
+    const label = await searchQueryLabel(search).boundingBox();
+    const box = await search.box.boundingBox();
+    return !!label && !!box && label.y + label.height <= box.y + 1;
 }
 
 test.describe('Search — the press Search page', () => {
@@ -461,6 +464,13 @@ test.describe('Search — the press Search page', () => {
         await expect(search.results).toHaveCount(0);
         await expect(search.countLine).toHaveCount(0);
         await expect(search.statusLine).toHaveCount(0);
+
+        // The box's label: "Search Query" shows above the search box, and
+        // is the box's accessible name (Fields "Press: search box", fn-s11).
+        await expect(searchQueryLabel(search)).toBeVisible();
+        await expect(searchQueryLabel(search)).toHaveText('Search Query');
+        await expect(search.box).toHaveAccessibleName('Search Query');
+        await expect.poll(() => labelIsAboveBox(search)).toBe(true);
 
         // The word: "1 Titles", the one-title sentence with "Search again",
         // and the book with its cover, title, contributors and date; still
