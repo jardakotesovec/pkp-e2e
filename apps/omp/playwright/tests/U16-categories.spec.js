@@ -15,8 +15,6 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - OMP1 ✅ retired: S1 uploads a "Cover Image" and never reads the picture on the
- *   press's category page (only its description).
  * - OMP2 🐞: S8 reads the block's category links as a set and the
  *   sub-category's indent, never their order or where "Physics" stands.
  * - OMP3 🐞: S8 reads "Browse" as the block's text, never as a heading.
@@ -28,8 +26,9 @@
  * - A11 🐞: S1 presses the arrows with the pointer only.
  * - A12, A16, A17, A19 🐞, A3, A4, A5, A14 ❓: no test reaches those
  *   states or reads those parts.
- * - A2, A6, A7, A8, A13 🐞: no test sets another order, follows or reads
- *   the picture, types a "/" path, or submits with an editor ticked.
+ * - A2, A6, A7, A8, A13 🐞: no test sets another order, follows the
+ *   picture or reads its alternate text, types a "/" path, or submits
+ *   with an editor ticked.
  * - A10, A18, A20, OPS1: the journal's and preprint server's block and
  *   breadcrumb, the delete dialog's box (serial S2 types in it), and the
  *   preprint server's window.
@@ -315,21 +314,30 @@ test.describe('Categories', () => {
         await win.languageButton('French').click();
         await expect(win.nameBox('fr_CA')).toHaveValue('Sciences');
         await win.typeDescription('Work in the natural sciences.');
-        await win.uploadCover(path.join(FILES, 'profile-image-400.png'));
+        expect((await win.uploadCover(path.join(FILES, 'profile-image-400.png'))).status()).toBe(200);
         await win.pathBox().fill('natural-science');
         expect((await win.save()).status()).toBe(200);
         await expect(win.root()).toHaveCount(0);
         await expect(tab.savedNotice()).toBeVisible();
 
-        // The visitor's page: breadcrumb, heading, the description,
-        // "Subcategories" with "Physics" alone (Rules 11, 12; the picture is
-        // not read; OMP1 retired).
+        // The visitor's page: breadcrumb, heading, a small copy of the
+        // picture that loads (a decoded image smaller than the 400-pixel
+        // upload, not a broken-picture mark; a press sets no 100-pixel
+        // bound), the description, "Subcategories" with "Physics" alone
+        // (Rules 11, 12).
         const cat = new CategoryPage(visitor, tag);
         await cat.goto('natural-science');
         expect(await cat.crumbs()).toEqual(['Home', 'Science']);
         await expect(cat.crumbLinks()).toHaveText(['Home']);
         await expect(cat.currentCrumb()).toHaveText('Science');
         await expect(cat.heading()).toHaveText('Science');
+        await expect(cat.picture()).toBeVisible();
+        await expect.poll(async () => (await cat.pictureSize()).naturalWidth, {timeout: 30_000}).toBeGreaterThan(0);
+        const size = await cat.pictureSize();
+        expect(size.complete, 'the small copy has finished loading').toBe(true);
+        expect(size.naturalHeight).toBeGreaterThan(0);
+        expect(size.naturalWidth).toBeLessThan(400);
+        expect(size.naturalHeight).toBeLessThan(400);
         await expect(cat.description()).toHaveText('Work in the natural sciences.');
         await expect(cat.subcategories().getByRole('heading')).toHaveText('Subcategories');
         await expect(cat.subcategoryLinks()).toHaveText(['Physics']);

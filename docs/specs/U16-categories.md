@@ -540,21 +540,21 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      window titled "Edit Category" holds "Science" in "Name", "Sciences"
      in "Name in French", "science" in "Path" and, on a journal or press,
      "Assign Eve Editor as Journal editor" ("…as Press editor") ticked.
-     Type "Work in the natural sciences." in "Description", upload
-     "profile-image-400.png" in "Cover Image", change "Path" to
-     "natural-science" and press "Save": "Category saved" shows
-     (Rules 4, 6).
+     Type "Work in the natural sciences." in "Description", upload a
+     400 × 400 PNG in "Cover Image", change "Path" to "natural-science"
+     and press "Save": "Category saved" shows (Rules 4, 6).
    - **The visitor's page, with its description and picture**: the visitor
      opens the journal's address followed by
      "catalog/category/natural-science" ("preprints/category/" on a preprint
      server): the breadcrumb reads "Home" then "Science", "Home" a link and
      "Science" not; the page is headed "Science"; it shows a small copy of
-     the picture, at most 100 × 100 pixels, and "Work
-     in the natural sciences."; "Subcategories" lists "Physics" alone, as a
-     link (Fields, the category's page; Rules 11, 12).
+     the picture, on a press as on a journal, and "Work in the natural
+     sciences."; on a journal and a preprint server the copy is drawn at
+     most 100 × 100 pixels; "Subcategories" lists "Physics" alone, as a link
+     (Fields, the category's page; Rules 11, 12).
    - **Nothing listed yet**: the same page reads "0 Items" ("0 Titles"
-     on a press) and lists no article; the message "Nothing has been
-     published in this category yet." does not show [A1](#a1) (Rule 9).
+     on a press) and lists no article and none of Rule 9's empty-category
+     messages [A1](#a1).
    - **The old address and the address in capitals**: the address ending
      in "category/science" shows a bare page reading "404 Not Found",
      with no header and no links. The address ending in "category/arts"
@@ -724,11 +724,10 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **A sub-category's page, over two pages**: press "Physics" under
      "Subcategories": the breadcrumb reads "Home", "Science", "Physics",
      "Science" now a link; the page is headed "Physics", reads "3 Items" and
-     has no "Subcategories". The list shows two of the three articles, then
-     "1
-     - 2 of 3 items" and the page numbers; press "2": the list shows the
-     third article and "3 - 3 of 3 items" (Fields, the category's page;
-     Rules 8, 9, 11).
+     has no "Subcategories". The list shows two of the three articles,
+     then "1 - 2 of 3 items" and the page numbers; press "2": the list
+     shows the third article and "3 - 3 of 3 items" (Fields, the
+     category's page; Rules 8, 9, 11).
    - **A press's page** {OMP}: the same page reads "3 Titles", shows the
      heading "All Books" over the first two books and no page numbers
      ([Appearance & theming](U10-appearance-and-theming.md#omp2) records
@@ -845,8 +844,6 @@ Left out of the scenarios above, by reason:
     proposes [report 2026-10-02]
   - a file that is not a picture put in "Cover Image", leaving no preview
     and no request ([A17](#a17)): the guard the issue report proposes [report 2026-10-02]
-  - {OMP} a press's category page loading its picture (OMP1, retired):
-    the guard the issue report proposed [report 2026-10-02]
   - a category's "Order of articles" set to "Title (A-Z)" and "Title
     (Z-A)" over three items, the page following each ([A2](#a2)): the
     guard the issue report proposes [report 2026-10-02]
