@@ -160,6 +160,12 @@ how many of the requested count were done.
 
 ## After a feature is built
 
+A version's folder gets incremental updates only. It is not swept for
+drift (MAINTENANCE housekeeping step 12 sweeps `main`'s specs) and its
+coverage is not revised on its own: what its specs and tests hold was
+checked when the folder was cut or the feature built, and after that
+they move with the product.
+
 - **A backport that changes what the version's spec or tests state** is
   accommodated in the version's folder by the session that reads the
   stable line (MAINTENANCE "The stable line"), as `main`'s accommodation
