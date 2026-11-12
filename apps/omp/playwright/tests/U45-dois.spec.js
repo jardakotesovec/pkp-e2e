@@ -3,8 +3,8 @@
  * @file playwright/tests/U45-dois.spec.js
  *
  * DOIs — OMP suite, one test per canonical scenario the spec runs on a
- * press (S1–S11 common, S19 {OMP}; S12–S18 are the journal's and the
- * preprint server's), in the press's own words: the Press Manager, a
+ * press (S1–S11, S20 and S21 common, S19 {OMP}; S12–S18, S22 and S23 are
+ * the journal's and the preprint server's), in the press's own words: the Press Manager, a
  * monograph, the "Monographs" tab and its "Monograph" row, the catalog
  * book page, the "Publish" button whose window is titled "Schedule For
  * Publication". The journal-only bullets inside the common scenarios
@@ -37,31 +37,35 @@
  *   log's warning is not a screen.
  * - A22 🐞: `DoisPage.chooseBulkAction` waits the "Bulk Actions" menu out
  *   before answering a window; the menu left open is not asserted.
- * - OMP2 🐞, A1, A2, A4–A7, A9–A12, A15–A20: not on these scenarios'
- *   press paths ("Immediately…" is only refused, in S8). A25–A27 are
- *   retired (a decline and "Revert Decline" under "Immediately…", a
- *   declined book carrying a DOI on the page); their paths are Planned
- *   items. A28 is retired: S11 marks the book registered while its major
- *   version is unpublished, its chapter and format rows included.
- * - OMP4 and OMP5 are retired: S11 now runs "Mark DOIs Unregistered" with
- *   1.0 and 2.0 published, every row of both blocks read back; "Mark DOIs
- *   Needs Sync" on two published versions and an unpublished version's
- *   file DOI ("Files" is not ticked in S11) are Planned items.
- *   OJS1–OJS8, OPS1–OPS3, OPS5: the journal's and the preprint server's
- *   (OPS4 retired).
+ * - A17 🐞: S11 does not read 1.0's block right after 2.0 is published.
+ * - T-omp-3 (returned to the fold, no register ID yet): S21 does not read
+ *   the published "Published Manuscript Under Review" book page signed
+ *   out; on a press it answers "not found" while the book is at Review.
+ * - OMP2 🐞, A1, A2, A4–A7, A9–A12, A15, A16, A18–A20: not on these
+ *   scenarios' press paths. A25–A28, OMP4 and OMP5 are retired (S11, S21
+ *   run their paths). OJS1–OJS8, OPS1–OPS3, OPS5: the journal's and the
+ *   preprint server's (OPS4 retired).
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch press with
  * throwaway accounts (the username twice as password), as footnote sc
  * says: `doiPrefix`, `doiCreationTime`, `doiSuffixType`, `doiVersioning`,
  * `enabledDoiTypes` (`chapter` and `representation` in S4, S5, S7, S9–S11,
- * `file` in S4), `context.acronym` (S8), the editor's `permitSettings:
- * false` (S2); works through the submission scenario (`decisions[]`,
- * `published`, `chapters[]` "Tides" with `page: true` and "Harbours"
+ * S20, `file` in S4, S11, S20), `context.acronym` (S8), the editor's
+ * `permitSettings: false` (S2); works through the submission scenario
+ * (`decisions[]`, S4's "Moss regrowth" `sendExternalReview` and `accept`
+ * and "Coral spawning" `initialDecline`, `published`, `submitted: false`
+ * for S20's draft, `chapters[]` "Tides" with `page: true` and "Harbours"
  * without, `publicationFormats[]` "PDF" with `article.pdf` and in S5 "EPUB"
  * with `approved: false`). The DOI settings are driven on screen only where
- * the scenario tests them; "Harbours"' "Chapter Page" (S4, S5) and S4's
- * "EPUB" are set on screen, as the scenarios say. A DOI typed by hand carries the run's tag after
+ * the scenario tests them, and in S20 and S21 for "Immediately…", which
+ * has no key (chosen on "Setup" before the works are seeded); "Harbours"'
+ * "Chapter Page" (S4, S5, S20), the "EPUB" formats of S4 and S20, S4's
+ * "Move to Review", S21's declines and "Revert Decline" are on screen, as
+ * the scenarios say. S21's "Published Manuscript Under Review" 1.0 is made
+ * with "Create New Version" and published: a press's publish window
+ * names no stage. A draft takes no publication format, so S20's draft
+ * carries "Tides" alone. A DOI typed by hand carries the run's tag after
  * the spec's example value ("10.1234/e2e-a1-{tag}"): a typed DOI must be
  * unused on the whole install (Rule 9), and the fleet's database outlives
  * a run.
@@ -73,6 +77,7 @@
  * actions (A8). Waits are web-first or bounded by the screen's own answer
  * (A5).
  */
+const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {ActivityLogWindow} = require('../../../../shared/playwright/pages/ActivityLogPages.js');
@@ -90,11 +95,13 @@ const {
     readerDoiLink,
     readerFormatDoiLinks,
     readerFormatDoiLabel,
+    whole,
 } = require('../../../../shared/playwright/pages/DoisPages.js');
-const {openEditorial, decisionButton, walkDecisionWizard, expectStageLabel} = require('../pages/ReviewStagePages.js');
+const {openEditorial, decisionButton, walkDecisionWizard, expectStageLabel, stageLabel} = require('../pages/ReviewStagePages.js');
 const {ChaptersPage} = require('../pages/ChapterPages.js');
 const {PublicationFormatsPage} = require('../pages/PublicationFormatPages.js');
 const {MonographLandingPage} = require('../pages/MonographLandingPages.js');
+const wizard = require('../pages/SubmissionWizardPages.js');
 
 const PRESS = 'publicknowledge';
 const PREFIX = '10.1234';
@@ -105,6 +112,8 @@ const TIDES = 'Tides';
 const HARBOURS = 'Harbours';
 const FORMAT_PDF = 'Format / PDF';
 const FORMAT_EPUB = 'Format / EPUB';
+const EPUB_FILE_ROW = 'EPUB / article.pdf';
+const ARTICLE_PDF = path.join(__dirname, '../fixtures/files/article.pdf');
 /** "Monographs", "Chapters" and "Publication Formats" ticked (scenarios 5, 7, 9–11). */
 const BOOK_KINDS = ['publication', 'chapter', 'representation'];
 /** The chapter "Tides" with its "Chapter Page" ticked. */
@@ -112,6 +121,7 @@ const TIDES_SEED = {title: TIDES, page: true};
 const AXOLOTL = 'Axolotl limb memory';
 const TARDIGRADE = 'Tardigrade desiccation';
 const CORAL = 'Coral spawning';
+const MOSS = 'Moss regrowth';
 const KINDS = ['Monographs', 'Chapters', 'Publication Formats', 'Files'];
 const PATTERN_BOXES = ['Submissions', 'Chapters', 'Publication Formats', 'Files'];
 const ENABLE_SENTENCE = 'Allow Digital Object Identifiers (DOIs) to be assigned to work published by this press.';
@@ -297,6 +307,56 @@ async function tickChapterPage(page, tag, submissionId, publicationId, title) {
     await expect(win.chapterPageBox()).not.toBeChecked();
     await win.chapterPageBox().check();
     await win.save();
+}
+
+/**
+ * As the Press Manager: Settings › Distribution › "DOIs" › "Setup",
+ * "Automatic DOI Assignment" "Immediately, when an item is created (only
+ * with the default DOI suffix)", "Save": "Saved", read back (footnote sc:
+ * the choice has no scenario key).
+ */
+async function chooseImmediately(page, tag) {
+    const settings = new DoiSettings(page, tag);
+    await settings.goto('Setup');
+    await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+    await settings.save(settings.setup);
+    await settings.goto('Setup');
+    expect(await settings.creationTimeShown()).toBe(IMMEDIATELY);
+}
+
+/**
+ * "Create New Version" with its "Publication Stage" and "Revision
+ * Significance" chosen by label; returns the new version's publication id.
+ */
+async function createStagedVersion(page, frame, stage, significance) {
+    const item = await frame.revealPublicationEntry('Create New Version');
+    await frame.expectVersionLoaded();
+    await item.click();
+    const dialog = page.getByRole('dialog', {name: 'Create New Version'});
+    await expect(dialog).toBeVisible({timeout: 30_000});
+    await expect(dialog.getByLabel('Publication Stage')).toBeVisible({timeout: 30_000});
+    await dialog.getByLabel('Publication Stage').selectOption({label: stage});
+    await dialog.getByLabel('Revision Significance').selectOption({label: significance});
+    const created = page.waitForResponse((r) => /\/publications\/\d+\/version/.test(r.url()) && r.request().method() === 'POST', {timeout: 30_000});
+    await dialog.getByRole('button', {name: 'Confirm', exact: true}).click();
+    const response = await created;
+    expect(response.ok(), 'the new version is made').toBe(true);
+    await expect(dialog).toHaveCount(0, {timeout: 30_000});
+    return (await response.json()).id;
+}
+
+/**
+ * Record a decision on the work's workflow: the stage label reads `stage`
+ * (a string read whole, or a RegExp), the button `button` opens its wizard,
+ * headed as `heading` matches, and the wizard is walked to its completion.
+ */
+async function recordDecision(page, tag, submissionId, stage, button, heading) {
+    const modal = await openEditorial(page, tag, submissionId);
+    if (typeof stage === 'string') await expectStageLabel(modal, stage);
+    else await expect(stageLabel(modal)).toHaveText(stage, {timeout: 30_000});
+    await decisionButton(modal, button).click();
+    await expect(page.getByRole('heading', {level: 1, name: heading})).toBeVisible({timeout: 30_000});
+    await walkDecisionWizard(page);
 }
 
 /**
@@ -605,28 +665,44 @@ test.describe('DOIs', () => {
     test('S4: DOIs made at the move to Copyediting', async ({asUser, ompApi}, testInfo) => {
         test.setTimeout(360_000);
         const tag = makeTag('s4', testInfo);
-        const {manager, mary} = await seedPress(ompApi, tag, {doiPrefix: PREFIX, enabledDoiTypes: [...BOOK_KINDS, 'file']});
+        const {manager, ada, mary} = await seedPress(ompApi, tag, {doiPrefix: PREFIX, enabledDoiTypes: [...BOOK_KINDS, 'file']});
         const tardigrade = await seedBook(ompApi, tag, 'ta', mary, TARDIGRADE, {
             publicationFormats: [{name: 'PDF', file: 'article.pdf'}],
             chapters: [TIDES_SEED, {title: HARBOURS}],
         });
+        // "Moss regrowth" at Copyediting with its DOI, "Coral spawning"
+        // declined at the Submission stage without one (footnote sc).
+        const moss = await seedBook(ompApi, tag, 'mo', mary, MOSS, {decisions: ['sendExternalReview', 'accept']});
+        const coral = await seedBook(ompApi, tag, 'co', ada, CORAL, {decisions: ['initialDecline']});
         const page = await pageAs(asUser, manager);
         const dois = new DoisPage(page, tag);
         const logBefore = await activityLines(page, tag, tardigrade.submissionId);
+        const mossRow = dois.row(moss.submissionId);
+        const coralRow = dois.row(coral.submissionId);
 
         // Control: before the decision the list holds the book, its
         // "Monograph" row empty and "Needs DOI", and "DOI Assigned" leaves
-        // it out, the filter's settled list showing its empty line (Rules
-        // 5, 15, 22).
+        // it out while it lists "Moss regrowth" (Rules 5, 15, 22).
         await dois.goto();
         const before = dois.row(tardigrade.submissionId);
         await expect(dois.rowLink(before)).toHaveText(new RegExp(`— ${TARDIGRADE}\\s*$`));
         await dois.expand(before, tardigrade.submissionId);
         await expect(dois.doiBox(before, MONOGRAPH)).toHaveValue('');
         await expect(dois.doiBadge(before, MONOGRAPH)).toHaveText('Needs DOI');
+        // Declined without a DOI: the list holds "Tardigrade desiccation" and
+        // "Moss regrowth", not "Coral spawning" (Rules 15, 22).
+        await expect(dois.rowLink(mossRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
+        await expect(coralRow).toHaveCount(0);
         await dois.pressFilter('DOI Assigned');
-        await expect(dois.emptyLine()).toBeVisible();
+        await expect(dois.rowLink(mossRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
         await expect(before).toHaveCount(0);
+        await dois.pressFilter('DOI Assigned');
+        // ... nor the filter "In Copyediting, Production, Published or with
+        // DOIs", which lists "Moss regrowth" (Rules 15, 22).
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.rowLink(mossRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
+        await expect(coralRow).toHaveCount(0);
+        await dois.pressFilter(TEXT.workflowFilter);
 
         // The decision: "Accept and Skip Review" (Rule 5).
         const modal = await openEditorial(page, tag, tardigrade.submissionId);
@@ -706,6 +782,36 @@ test.describe('DOIs', () => {
         const epubDoi = await doiValue(dois.doiBox(row, FORMAT_EPUB));
         expect(harboursDoi).not.toBe(epubDoi);
         await expect(dois.doiBox(row, TIDES)).toHaveValue(tidesDoi);
+
+        // Sent back to Review, then declined: "Move to Review" on "Moss
+        // regrowth"; the filter "In Copyediting, Production, Published or
+        // with DOIs" lists it with its DOI; lifted, then "Decline Submission"
+        // at Review: the list and the filter still hold it with the same DOI
+        // (Rules 15, 22).
+        await dois.goto();
+        await dois.expand(mossRow, moss.submissionId);
+        const mossDoi = await doiValue(dois.doiBox(mossRow, MONOGRAPH));
+        await recordDecision(page, tag, moss.submissionId, 'Copyediting', 'Move to Review', /^Move to (Review|Submission)/);
+        await expect(stageLabel(await openEditorial(page, tag, moss.submissionId))).toHaveText(/^External Review/, {timeout: 30_000});
+        await dois.goto();
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.rowLink(mossRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
+        await dois.expand(mossRow, moss.submissionId);
+        await expect(dois.doiBox(mossRow, MONOGRAPH)).toHaveValue(mossDoi);
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.clearFilterButton(TEXT.workflowFilter)).toHaveCount(0);
+        await recordDecision(page, tag, moss.submissionId, /^External Review/, 'Decline Submission', /Decline Submission/);
+        await dois.goto();
+        await expect(dois.rowLink(mossRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
+        await dois.expand(mossRow, moss.submissionId);
+        await expect(dois.doiBox(mossRow, MONOGRAPH)).toHaveValue(mossDoi);
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.rowLink(mossRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
+        await dois.expand(mossRow, moss.submissionId);
+        await expect(dois.doiBox(mossRow, MONOGRAPH)).toHaveValue(mossDoi);
+        // Declined without a DOI, read again under the filter beside the
+        // declined "Moss regrowth" (Rules 15, 22).
+        await expect(coralRow).toHaveCount(0);
     });
 
     test('S5: DOIs made at publication', async ({browser, baseURL, asUser, ompApi}, testInfo) => {
@@ -1303,7 +1409,7 @@ test.describe('DOIs', () => {
     test('S11: a DOI per major version ("DOI Versioning" "Yes")', async ({browser, baseURL, asUser, ompApi}, testInfo) => {
         test.setTimeout(300_000);
         const tag = makeTag('s11', testInfo);
-        const {manager, ada} = await seedPress(ompApi, tag, {doiPrefix: PREFIX, doiVersioning: true, enabledDoiTypes: BOOK_KINDS});
+        const {manager, ada} = await seedPress(ompApi, tag, {doiPrefix: PREFIX, doiVersioning: true, enabledDoiTypes: [...BOOK_KINDS, 'file']});
         const axolotl = await seedBook(ompApi, tag, 'ax', ada, AXOLOTL, {
             published: true,
             chapters: [TIDES_SEED],
@@ -1315,6 +1421,20 @@ test.describe('DOIs', () => {
         const changed = `${PREFIX}/e2e-v2-${tag}`;
         const chapterChanged = `${PREFIX}/e2e-c4-${tag}`;
         const row = dois.row(axolotl.submissionId);
+        const V1 = 'Version of Record 1.0';
+        const V2 = 'Version of Record 2.0';
+        const ROWS = [MONOGRAPH, TIDES, FORMAT_PDF, FILE_ROW];
+        // Every row of each block in `versions` reads `status` in "View all".
+        const expectBlocks = async (versions, status) => {
+            await dois.expand(row, axolotl.submissionId);
+            await dois.openVersionsWindow(row);
+            for (const version of versions) {
+                for (const type of ROWS) {
+                    await expect(dois.versionDoiBadge(dois.versionBlock(version), type), `${version} ${type}`).toHaveText(whole(status));
+                }
+            }
+            await dois.closeVersionsWindow();
+        };
 
         // Control: before the major version, no "There are … versions." and
         // no "View all" (Rule 20).
@@ -1323,6 +1443,7 @@ test.describe('DOIs', () => {
         const doi1 = await doiValue(dois.doiBox(row, MONOGRAPH));
         const tides1 = await doiValue(dois.doiBox(row, TIDES));
         const format1 = await doiValue(dois.doiBox(row, FORMAT_PDF));
+        const file1 = await doiValue(dois.doiBox(row, FILE_ROW));
         await expect(dois.editButton(row)).toBeVisible();
         await expect(dois.versionsBar(row)).toHaveCount(0);
 
@@ -1347,25 +1468,23 @@ test.describe('DOIs', () => {
         // its creation, different from 1.0's, which keep theirs (Rule 50).
         const tides2 = await doiValue(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), TIDES));
         const format2 = await doiValue(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), FORMAT_PDF));
+        const file2 = await doiValue(dois.versionDoiBox(dois.versionBlock('Version of Record 2.0'), FILE_ROW));
         expect(tides2).not.toBe(tides1);
         expect(format2).not.toBe(format1);
+        expect(file2).not.toBe(file1);
         await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 1.0'), TIDES)).toHaveValue(tides1);
         await expect(dois.versionDoiBox(dois.versionBlock('Version of Record 1.0'), FORMAT_PDF)).toHaveValue(format1);
         await dois.closeVersionsWindow();
 
         // Marked registered before its publication: 1.0's rows read
-        // "Registered", 2.0's keep "Unregistered", its chapter and format
-        // rows included (Rules 20, 26, 52).
+        // "Registered", 2.0's keep "Unregistered", its chapter, format and
+        // file rows included; a press's file row: 2.0's "PDF / {file name}"
+        // keeps "Unregistered" while 1.0's reads "Registered" (Rules 20, 26, 52).
         await dois.goto();
         await dois.runBulk('Mark DOIs Registered', [axolotl.submissionId]);
         await dois.expectNotice(TEXT.markedRegistered);
-        await dois.expand(row, axolotl.submissionId);
-        await dois.openVersionsWindow(row);
-        for (const type of [MONOGRAPH, TIDES, FORMAT_PDF]) {
-            await expect(dois.versionDoiBadge(dois.versionBlock('Version of Record 1.0'), type)).toHaveText(/^\s*Registered\s*$/);
-            await expect(dois.versionDoiBadge(dois.versionBlock('Version of Record 2.0'), type)).toHaveText(/^\s*Unregistered\s*$/);
-        }
-        await dois.closeVersionsWindow();
+        await expectBlocks([V1], 'Registered');
+        await expectBlocks([V2], 'Unregistered');
 
         // The major version published: it keeps the DOIs it got at its
         // creation, still "Unregistered"; its page shows its own, 1.0's page
@@ -1380,32 +1499,36 @@ test.describe('DOIs', () => {
         await expect(dois.versionDoiBadge(block2, MONOGRAPH)).toHaveText(/^\s*Unregistered\s*$/);
         await expect(dois.versionDoiBox(block2, TIDES)).toHaveValue(tides2);
         await expect(dois.versionDoiBox(block2, FORMAT_PDF)).toHaveValue(format2);
+        // A press's file row: 2.0's still "Unregistered" (Rules 26, 52).
+        await expect(dois.versionDoiBox(block2, FILE_ROW)).toHaveValue(file2);
+        await expect(dois.versionDoiBadge(block2, FILE_ROW)).toHaveText(/^\s*Unregistered\s*$/);
         await dois.closeVersionsWindow();
         await expectBookDoi(reader, tag, axolotl.submissionId, AXOLOTL, doi2);
         await expectBookDoi(reader, tag, axolotl.submissionId, AXOLOTL, doi1, {version: axolotl.publicationId});
 
-        // Unmarked, every version: with 1.0 and 2.0 published, "Mark DOIs
-        // Unregistered" sets every row of 1.0's block, "Registered" until
-        // then, back to "Unregistered", and 2.0's rows read the same
-        // (Rules 27, 52).
-        await dois.goto();
-        await dois.expand(row, axolotl.submissionId);
-        await dois.openVersionsWindow(row);
-        for (const type of [MONOGRAPH, TIDES, FORMAT_PDF]) {
-            await expect(dois.versionDoiBadge(dois.versionBlock('Version of Record 1.0'), type)).toHaveText(/^\s*Registered\s*$/);
-        }
-        await dois.closeVersionsWindow();
+        // Unmarked, every version: with 1.0 and 2.0 published (1.0's block
+        // not read after the publish, A17), "Mark DOIs Unregistered" sets
+        // every row of both blocks to "Unregistered" (Rules 27, 52).
         await dois.goto();
         await dois.runBulk('Mark DOIs Unregistered', [axolotl.submissionId]);
         await dois.expectNotice(TEXT.markedUnregistered);
-        await dois.expand(row, axolotl.submissionId);
-        await dois.openVersionsWindow(row);
-        for (const version of ['Version of Record 1.0', 'Version of Record 2.0']) {
-            for (const type of [MONOGRAPH, TIDES, FORMAT_PDF]) {
-                await expect(dois.versionDoiBadge(dois.versionBlock(version), type)).toHaveText(/^\s*Unregistered\s*$/);
-            }
-        }
-        await dois.closeVersionsWindow();
+        await expectBlocks([V1, V2], 'Unregistered');
+
+        // Marks on two published major versions: "Mark DOIs Registered",
+        // "Mark DOIs Needs Sync" and "Mark DOIs Unregistered" each change
+        // every row of both blocks (Rules 20, 26–28, 52).
+        await dois.goto();
+        await dois.runBulk('Mark DOIs Registered', [axolotl.submissionId]);
+        await dois.expectNotice(TEXT.markedRegistered);
+        await expectBlocks([V1, V2], 'Registered');
+        await dois.goto();
+        await dois.runBulk('Mark DOIs Needs Sync', [axolotl.submissionId]);
+        await dois.expectNotice(TEXT.markedStale);
+        await expectBlocks([V1, V2], 'Needs Sync');
+        await dois.goto();
+        await dois.runBulk('Mark DOIs Unregistered', [axolotl.submissionId]);
+        await dois.expectNotice(TEXT.markedUnregistered);
+        await expectBlocks([V1, V2], 'Unregistered');
 
         // A minor version: still "There are 2 versions."; the window holds
         // 1.0's block and 2.1's, "Unpublished", with 2.0's DOI (Rules 12, 20).
@@ -1501,5 +1624,156 @@ test.describe('DOIs', () => {
         await expect(dois.rowBadge(row)).toHaveText('Registered');
         await dois.expand(row, axolotl.submissionId);
         await expect(dois.doiBadge(row, MONOGRAPH)).toHaveText('Registered');
+    });
+
+    test('S20: DOIs made when an item is created ("Immediately…")', async ({asUser, ompApi}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s20', testInfo);
+        const {manager, ada} = await seedPress(ompApi, tag, {doiPrefix: PREFIX, enabledDoiTypes: [...BOOK_KINDS, 'file']});
+        const page = await pageAs(asUser, manager);
+        await chooseImmediately(page, tag);
+        const coral = await seedBook(ompApi, tag, 'co', ada, CORAL, {
+            submitted: false,
+            files: [{file: 'article.pdf'}],
+            chapters: [TIDES_SEED],
+        });
+        const axolotl = await seedBook(ompApi, tag, 'ax', ada, AXOLOTL, {decisions: TO_PRODUCTION, chapters: [{title: HARBOURS}]});
+        const dois = new DoisPage(page, tag);
+        const coralRow = dois.row(coral.submissionId);
+        const axRow = dois.row(axolotl.submissionId);
+
+        // Control: before the final "Submit", "DOI Assigned" lists "Axolotl
+        // limb memory", not "Coral spawning" (Rules 5a, 22).
+        await dois.goto();
+        await dois.pressFilter('DOI Assigned');
+        await expect(dois.rowLink(axRow)).toHaveText(new RegExp(`— ${AXOLOTL}\\s*$`));
+        await expect(coralRow).toHaveCount(0);
+
+        // The final "Submit": the Author finishes the draft (Rule 5a).
+        const author = await pageAs(asUser, ada);
+        await author.goto(wizard.wizardUrl(tag, coral.submissionId));
+        await wizard.expectWizardOpen(author);
+        await wizard.continueTo(author, wizard.STEPS.details);
+        await wizard.continueTo(author, wizard.STEPS.contributors);
+        await wizard.continueTo(author, wizard.STEPS.editors);
+        await wizard.openReview(author);
+        await expect(wizard.problemsBanner(author)).toHaveCount(0);
+        await wizard.confirmSubmit(author);
+
+        // The submitted work's DOIs: listed "Unpublished"; its "Monograph"
+        // row holds a "Default" DOI reading "Unregistered" (Rules 5a, 6a, 16, 17).
+        await dois.goto();
+        await expect(dois.rowLink(coralRow)).toHaveText(new RegExp(`— ${CORAL}\\s*$`));
+        await expect(dois.rowBadge(coralRow)).toHaveText('Unpublished');
+        await dois.expand(coralRow, coral.submissionId);
+        const coralDoi = await doiValue(dois.doiBox(coralRow, MONOGRAPH));
+        await expect(dois.doiBadge(coralRow, MONOGRAPH)).toHaveText('Unregistered');
+
+        // A press's chapter: "Tides" holds a DOI of the same shape, its own,
+        // "Unregistered" (Rules 5a, 45). The format and file rows the
+        // scenario names have no draft to ride on (T-omp-1).
+        const coralTides = await doiValue(dois.doiBox(coralRow, TIDES));
+        expect(coralTides).not.toBe(coralDoi);
+        await expect(dois.doiBadge(coralRow, TIDES)).toHaveText('Unregistered');
+
+        // A chapter's page and a format added: "Harbours"' "Chapter Page"
+        // ticked, a format "EPUB" added and given a file; with no publish and
+        // no "Assign DOIs" its "Harbours", "Format / EPUB" and "EPUB / {file
+        // name}" rows each hold a DOI, "Unregistered" (Rules 5a, 48).
+        await dois.expand(axRow, axolotl.submissionId);
+        await expect(dois.doiBox(axRow, HARBOURS)).toHaveValue('');
+        await expect(dois.doiLabel(axRow, FORMAT_EPUB)).toHaveCount(0);
+        await doiValue(dois.doiBox(axRow, MONOGRAPH));
+        await tickChapterPage(page, tag, axolotl.submissionId, axolotl.publicationId, HARBOURS);
+        const formats = new PublicationFormatsPage(page, tag);
+        await formats.gotoEditorial(axolotl.submissionId, axolotl.publicationId);
+        const add = await formats.openAdd();
+        await add.typeName('EPUB');
+        await add.ok();
+        await expect(formats.formatRow('EPUB')).toHaveCount(1, {timeout: 30_000});
+        await formats.uploadWithChangeFile('EPUB', ARTICLE_PDF);
+        await dois.goto();
+        await dois.expand(axRow, axolotl.submissionId);
+        const added = [];
+        for (const type of [HARBOURS, FORMAT_EPUB, EPUB_FILE_ROW]) {
+            added.push(await doiValue(dois.doiBox(axRow, type)));
+            await expect(dois.doiBadge(axRow, type), type).toHaveText('Unregistered');
+        }
+        expect(new Set(added).size, 'three different DOIs').toBe(3);
+        await expect(dois.rowBadge(axRow)).toHaveText('Unpublished');
+    });
+
+    test('S21: a declined submission\'s DOIs ("Immediately…")', async ({asUser, ompApi}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s21', testInfo);
+        const {manager, ada, mary} = await seedPress(ompApi, tag, {doiPrefix: PREFIX});
+        const page = await pageAs(asUser, manager);
+        await chooseImmediately(page, tag);
+        const axolotl = await seedBook(ompApi, tag, 'ax', ada, AXOLOTL);
+        const tardigrade = await seedBook(ompApi, tag, 'ta', mary, TARDIGRADE, {decisions: ['sendExternalReview']});
+        const dois = new DoisPage(page, tag);
+        const axRow = dois.row(axolotl.submissionId);
+        const taRow = dois.row(tardigrade.submissionId);
+
+        // Given: "Tardigrade desiccation" at Review, published as "Published
+        // Manuscript Under Review" 1.0 with its DOI: on a press the stage is
+        // chosen in "Create New Version" (the publish window names none,
+        // T-omp-2), then the version is published.
+        let frame = await openVersion(page, tag, tardigrade.submissionId, tardigrade.publicationId);
+        const pmurId = await createStagedVersion(page, frame, 'Published Manuscript Under Review (PMUR)', 'Major Revision');
+        await openVersion(page, tag, tardigrade.submissionId, pmurId);
+        await publishOpenVersion(page);
+
+        // Control: before the decline "DOI Assigned" lists "Axolotl limb
+        // memory" (Rules 5a, 22).
+        await dois.goto();
+        await dois.pressFilter('DOI Assigned');
+        await expect(dois.rowLink(axRow)).toHaveText(new RegExp(`— ${AXOLOTL}\\s*$`));
+        await dois.pressFilter('DOI Assigned');
+
+        // Before the decline: listed, its "Monograph" row holding a DOI that
+        // reads "Unregistered" (Rules 5a, 15).
+        await dois.expand(axRow, axolotl.submissionId);
+        const before = await doiValue(dois.doiBox(axRow, MONOGRAPH));
+        await expect(dois.doiBadge(axRow, MONOGRAPH)).toHaveText('Unregistered');
+
+        // "Decline Submission": the DOIs page no longer lists it, while it
+        // lists "Tardigrade desiccation" (Rules 5b, 15).
+        await recordDecision(page, tag, axolotl.submissionId, 'Submission', 'Decline Submission', /Decline Submission/);
+        await dois.goto();
+        await expect(dois.rowLink(taRow)).toHaveText(new RegExp(`— ${TARDIGRADE}\\s*$`));
+        await expect(axRow).toHaveCount(0);
+
+        // "Revert Decline": listed again, its "Monograph" row holding a new
+        // "Default" DOI, "Unregistered"; "Needs DOI" does not list it, and
+        // lifted the list holds it again (Rules 5b, 6a, 22).
+        await recordDecision(page, tag, axolotl.submissionId, 'Declined', 'Revert Decline', /Revert Decline/);
+        await dois.goto();
+        await expect(dois.rowLink(axRow)).toHaveText(new RegExp(`— ${AXOLOTL}\\s*$`));
+        await dois.expand(axRow, axolotl.submissionId);
+        const after = await doiValue(dois.doiBox(axRow, MONOGRAPH));
+        expect(after, 'a new DOI').not.toBe(before);
+        await expect(dois.doiBadge(axRow, MONOGRAPH)).toHaveText('Unregistered');
+        await dois.pressFilter('Needs DOI');
+        await expect(dois.clearFilterButton('Needs DOI')).toBeVisible();
+        await expect(axRow).toHaveCount(0);
+        await dois.pressFilter('Needs DOI');
+        await expect(dois.clearFilterButton('Needs DOI')).toHaveCount(0);
+        await expect(dois.rowLink(axRow)).toHaveText(new RegExp(`— ${AXOLOTL}\\s*$`));
+
+        // A published "Published Manuscript Under Review": after "Decline
+        // Submission" at Review the DOIs page still lists it with the same
+        // DOI (Rules 5b, 15). Its book page is not read signed out: on a
+        // press it answers "not found" while the submission is not published
+        // (T-omp-3).
+        await dois.expand(taRow, tardigrade.submissionId);
+        const taDoi = await doiValue(dois.doiBox(taRow, MONOGRAPH));
+        await recordDecision(page, tag, tardigrade.submissionId, /^External Review/, 'Decline Submission', /Decline Submission/);
+        await expect(stageLabel(await openEditorial(page, tag, tardigrade.submissionId))).toHaveText('Declined', {timeout: 30_000});
+        await dois.goto();
+        await expect(dois.rowLink(taRow)).toHaveText(new RegExp(`— ${TARDIGRADE}\\s*$`));
+        await dois.expand(taRow, tardigrade.submissionId);
+        await expect(dois.doiBox(taRow, MONOGRAPH)).toHaveValue(taDoi);
+        await expect(dois.doiBadge(taRow, MONOGRAPH)).toHaveText('Unregistered');
     });
 });

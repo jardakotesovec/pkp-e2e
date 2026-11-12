@@ -3,42 +3,34 @@
  * @file playwright/tests/U45-dois.spec.js
  *
  * DOIs — OPS suite, one test per canonical scenario the spec runs on a
- * preprint server (S1–S11 common, S12–S13 {OJS OPS}; S14–S19 are the
- * journal's and the press's), in the preprint server's own words: the
- * Preprint Server Manager, a preprint that is "Posted", the "Preprints"
- * tab with its list "Preprint DOIs", the row type "Preprint", the kinds
- * "Preprints" and "Preprint galleys, such as a published PDF", "Upon
- * reaching the production stage" (acting at the preprint's final
- * "Submit"), the versions "Author's Original {n}". A preprint server has no
+ * preprint server (S1–S11, S20, S21 common; S12, S13, S22 {OJS OPS};
+ * S14–S19 and S23 are the journal's and the press's), in the preprint
+ * server's own words: the Preprint Server Manager, a preprint that is
+ * "Posted", the "Preprints" tab with its list "Preprint DOIs", the row type
+ * "Preprint", the kinds "Preprints" and "Preprint galleys, such as a
+ * published PDF", "Upon reaching the production stage" (acting at the
+ * preprint's final "Submit"), the versions "Author's Original {n}", the
+ * decisions on the "Production" entry. A preprint server has no
  * manager-level role but the Preprint Server Manager, so the Editor
  * bullets of S1 and S2 are the journal's and the press's; S3 has no
- * "Issues" box (read absent beside the "Publication Status" filters).
- * Everything runs in the parallel `ops` project: every setting is per
- * scratch server, and a preprint server's "DOI Versioning" "Yes" breaks no
- * OAI read (the OJS-only U19 A22).
+ * "Issues" box (read absent beside the "Publication Status" filters); S4's
+ * declined and sent-back works and S21's "Published Manuscript Under
+ * Review" are the journal's and the press's. Everything runs in the
+ * parallel `ops` project: every setting is per scratch server, and a
+ * preprint server's "DOI Versioning" "Yes" breaks no OAI read (the
+ * OJS-only U19 A22).
  * Spec: docs/specs/U45-dois.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section is the record of everything else left out):
- * - OPS1 🐞: S2 reads the "DOIs" box ticked by the start of its sentence;
- *   the sentence's wording is not asserted.
- * - A3 🐞: S7's refused values are read as the notice and the box back to
- *   its old value; the missing reason is not asserted.
- * - A4 🐞: after S13's "Deposit DOIs" the item's agency panel is not read.
- * - A8 🐞: rows' tick boxes are reached by their place in the row; their
- *   missing name is not asserted.
- * - A14 🐞: S9 reads the "Mark DOIs Needs Sync" question up to "…previously
- *   submitted DOIs."; its "stale" sentence is not asserted.
- * - OPS5 ❓: S4's draft is read through the "DOI Assigned" filter before
- *   its "Submit", never as listed or unlisted.
- * - OPS2 ❓, OPS3 🐞, A2, A7, A9–A12, A15–A20: not on these scenarios'
- *   paths ("Immediately…" is only refused, in S8). OPS4, A25, A26, A28
- *   are retired (a minor version's galleys keep their DOIs; a decline and
- *   "Revert Decline" under "Immediately…"; S11 now marks the preprint
- *   registered while its major version is unposted); the other paths are
- *   Planned items. OJS1–OJS8, OMP1–OMP3: the journal's and the press's
- *   (A27, OMP4 and OMP5 retired).
+ * Deliberately NOT covered (register IDs; the spec's Coverage section is
+ * the record of everything else left out):
+ * - OPS1 🐞: the "DOIs" box's sentence (S2 reads the box alone).
+ * - A3 🐞: the reason a refused DOI gets (S7).
+ * - A4 🐞: the agency panel after "Deposit DOIs" (S13, S22).
+ * - A8 🐞: the rows' tick boxes' names.
+ * - A14 🐞: the "stale" sentence of "Mark DOIs Needs Sync" (S9).
+ * - A17 🐞: 1.0's block after a major version is posted (S11, S22).
+ * - OPS5 ❓: a draft listed or not (S4, S20 read "DOI Assigned" alone).
+ * - OPS6 🐞, OPS7 🐞, A18 🐞, A30 🐞: what a deposit sends.
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch preprint server
@@ -47,10 +39,12 @@
  * `enabledDoiTypes`, `doiVersioning`, `context.acronym`, the Crossref
  * plugin with `registrationAgency`; preprints through the submission
  * scenario (`published`, `galleys[]` with `preprint.pdf`, `submitted:
- * false` for S4's draft). A seeded preprint without `published` is
- * submitted and waits in Production, unposted. The DOI settings, the
- * agency choice and the plugin row are driven on screen only where the
- * scenario tests them. A DOI typed by hand carries the run's tag after the
+ * false` for the drafts of S4 and S20). A seeded preprint without
+ * `published` is submitted and waits in Production, unposted. The DOI
+ * settings, the agency choice and the plugin row are driven on screen
+ * only where the scenario tests them, and "Immediately…", which no key
+ * makes yet, in S20 and S21 before their preprints are seeded (footnote
+ * sc). Second versions, postings and the decisions are made on screen. A DOI typed by hand carries the run's tag after the
  * spec's example value ("10.1234/e2e-a1-{tag}"): a typed DOI must be
  * unused on the whole install (Rule 9), and the fleet's database outlives
  * a run.
@@ -64,6 +58,7 @@
  * after the actions (A8). Waits are web-first or bounded by the screen's
  * own answer (A5).
  */
+const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
 const {AO} = require('../../../../shared/playwright/support/version-stage.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
@@ -82,8 +77,23 @@ const {
     readerDoiItem,
     readerDoiLink,
 } = require('../../../../shared/playwright/pages/DoisPages.js');
+const {GalleyManager} = require('../../../../shared/playwright/pages/GalleysPages.js');
 const {openWorkflow, openPublicationPage, postPreprint, unpostPreprint} = require('../pages/PublicationPages.js');
-const {wizardUrl, expectWizardOpen, completeAndSubmitDraft} = require('../pages/SubmissionWizardPages.js');
+const {
+    STEPS,
+    wizardUrl,
+    expectWizardOpen,
+    expectStep,
+    galleyRow,
+    continueTo,
+    setRelationStatus,
+    openReview,
+    problemsBanner,
+    confirmSubmit,
+    completeAndSubmitDraft,
+} = require('../pages/SubmissionWizardPages.js');
+const {ProductionStagePage} = require('../pages/ProductionStagePages.js');
+const {DecisionPage} = require('../pages/DecisionPage.js');
 
 const SERVER = 'publicknowledge';
 const PREFIX = '10.1234';
@@ -103,6 +113,7 @@ const NEVER = 'Never';
 const METADATA_EVENT = 'Submission metadata updated';
 const DEPOSITOR = {depositorName: 'Public Knowledge Project', depositorEmail: 'doi@mail.test'};
 const PREPRINT_FILE = 'preprint.pdf';
+const GALLEY_FILE = path.join(__dirname, '..', 'fixtures', 'files', PREPRINT_FILE);
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + app + worker. */
 function makeTag(scenario, testInfo) {
@@ -213,6 +224,61 @@ async function createVersion(page, tag, significance = null) {
     const publication = await (await created).json();
     await expect(dialog).toHaveCount(0, {timeout: 30_000});
     return publication.id;
+}
+
+/** Every status badge of a "View all" block, top to bottom (one per row of its table). */
+function blockBadges(block) {
+    return block.locator('tbody tr .doiListItem__itemMetadata--badge');
+}
+
+/**
+ * Settings › Distribution › "DOIs" › "Setup": "Automatic DOI Assignment"
+ * set to "Immediately, when an item is created (only with the default DOI
+ * suffix)" and saved, read back after a reload. No scenario key makes the
+ * choice yet (scenarios.md "Field shapes not built yet"), so footnote sc
+ * has S20 and S21 choose it here before their preprints are seeded.
+ */
+async function chooseImmediately(page, tag) {
+    const settings = new DoiSettings(page, tag);
+    await settings.goto('Setup');
+    await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+    await settings.save(settings.setup);
+    await settings.goto('Setup');
+    expect(await settings.creationTimeShown()).toBe(IMMEDIATELY);
+}
+
+/**
+ * The Author walks a seeded draft that already carries its galley from
+ * "Upload Files" to the final "Submit" (the galley read on the first step,
+ * none added), answering the required Relation status.
+ */
+async function submitDraftWithGalley(page, galleyLabel = 'PDF') {
+    await expectStep(page, STEPS.files);
+    await expect(galleyRow(page, galleyLabel)).toBeVisible({timeout: 30_000});
+    await continueTo(page, STEPS.details);
+    await continueTo(page, STEPS.contributors);
+    await continueTo(page, STEPS.readers);
+    await setRelationStatus(page);
+    await openReview(page);
+    await expect(problemsBanner(page)).toHaveCount(0);
+    await confirmSubmit(page);
+}
+
+/**
+ * Record a decision from the preprint's "Production" entry ("Decline
+ * Submission", "Revert Decline"): the wizard's one "Notify Authors" step,
+ * then "Record Decision" up to the completion window titled `done`, and
+ * back to the workflow.
+ */
+async function recordProductionDecision(page, appContext, tag, submissionId, button, done) {
+    const stage = new ProductionStagePage(page, tag, {appContext});
+    await stage.gotoProduction(submissionId);
+    await stage.decisionButton(button).click();
+    const decision = new DecisionPage(page);
+    await decision.expectOpen(button);
+    await decision.recordDecision(done);
+    await decision.viewSubmission();
+    await stage.frame.expectOpen(submissionId);
 }
 
 /** The Activity Log's lines of `event`, read on the preprint's workflow and the window closed. */
@@ -957,22 +1023,31 @@ test.describe('DOIs', () => {
     });
 
     test('S11: a DOI per major version ("DOI Versioning" "Yes")', async ({browser, baseURL, asUser, opsApi}, testInfo) => {
-        test.setTimeout(300_000);
+        test.setTimeout(360_000);
         const tag = makeTag('s11', testInfo);
-        // "Yes" is a new preprint server's default; seeded explicitly all the same.
-        const {manager, ada} = await seedServer(opsApi, tag, {doiPrefix: PREFIX, doiVersioning: true});
-        const axolotl = await seedPreprint(opsApi, tag, 'ax', ada, AXOLOTL, {published: true});
+        // "Yes" is a new preprint server's default; seeded explicitly all the
+        // same, with the galley kind ticked and a galley "PDF" (footnote sc).
+        const {manager, ada} = await seedServer(opsApi, tag, {
+            doiPrefix: PREFIX,
+            doiVersioning: true,
+            enabledDoiTypes: ['publication', 'representation'],
+        });
+        const axolotl = await seedPreprint(opsApi, tag, 'ax', ada, AXOLOTL, {published: true, galleys: [{label: 'PDF', file: PREPRINT_FILE}]});
         const page = await pageAs(asUser, manager);
         const dois = new DoisPage(page, tag);
         const reader = await readerPage(browser, baseURL);
         const changed = `${PREFIX}/e2e-v2-${tag}`;
         const row = dois.row(axolotl.submissionId);
+        const block10 = () => dois.versionBlock(`${AO} 1.0`);
+        const block20 = () => dois.versionBlock(`${AO} 2.0`);
 
         // Control: before the major version, no "There are … versions." and
-        // no "View all" (Rule 20).
+        // no "View all", the row's "Edit" being there (Rule 20).
         await dois.goto();
         await dois.expand(row, axolotl.submissionId);
+        expect(await dois.doiTypes(row)).toEqual([PREPRINT, 'PDF']);
         const doi1 = await doiValue(dois.doiBox(row, PREPRINT));
+        await expect(dois.doiBox(row, 'PDF')).toHaveValue(MADE);
         await expect(dois.editButton(row)).toBeVisible();
         await expect(dois.versionsBar(row)).toHaveCount(0);
 
@@ -990,8 +1065,8 @@ test.describe('DOIs', () => {
             new RegExp(`^\\s*${AO} 1\\.0 \\(.+\\)\\s*$`),
             new RegExp(`^\\s*${AO} 2\\.0 Unpublished\\s*$`),
         ]);
-        await expect(dois.versionDoiBox(dois.versionBlock(`${AO} 1.0`), PREPRINT)).toHaveValue(doi1);
-        const doi2 = await doiValue(dois.versionDoiBox(dois.versionBlock(`${AO} 2.0`), PREPRINT));
+        await expect(dois.versionDoiBox(block10(), PREPRINT)).toHaveValue(doi1);
+        const doi2 = await doiValue(dois.versionDoiBox(block20(), PREPRINT));
         expect(doi2).not.toBe(doi1);
         await dois.closeVersionsWindow();
 
@@ -1002,28 +1077,49 @@ test.describe('DOIs', () => {
         await dois.expectNotice(TEXT.markedRegistered);
         await dois.expand(row, axolotl.submissionId);
         await dois.openVersionsWindow(row);
-        await expect(dois.versionDoiBadge(dois.versionBlock(`${AO} 1.0`), PREPRINT)).toHaveText(/^\s*Registered\s*$/);
-        await expect(dois.versionDoiBadge(dois.versionBlock(`${AO} 2.0`), PREPRINT)).toHaveText(/^\s*Unregistered\s*$/);
+        await expect(dois.versionDoiBadge(block10(), PREPRINT)).toHaveText(/^\s*Registered\s*$/);
+        await expect(dois.versionDoiBadge(block20(), PREPRINT)).toHaveText(/^\s*Unregistered\s*$/);
         await dois.closeVersionsWindow();
 
         // The major version posted: it keeps the DOI it got at its creation,
         // still "Unregistered"; its page shows it, 1.0's page keeps 1.0's
-        // (Rules 12, 26, 43).
+        // (Rules 12, 26, 43). 2.0's "PDF" DOI is noted for "A minor
+        // version's galley". 1.0's block is not read after the posting (A17).
         await postVersion(page, tag, axolotl.submissionId, majorId);
         await dois.goto();
         await dois.expand(row, axolotl.submissionId);
         await dois.openVersionsWindow(row);
-        const block2 = dois.versionBlock(`${AO} 2.0`);
-        await expect(dois.versionDoiBox(block2, PREPRINT)).toHaveValue(doi2);
-        await expect(dois.versionDoiBadge(block2, PREPRINT)).toHaveText(/^\s*Unregistered\s*$/);
+        await expect(dois.versionDoiBox(block20(), PREPRINT)).toHaveValue(doi2);
+        await expect(dois.versionDoiBadge(block20(), PREPRINT)).toHaveText(/^\s*Unregistered\s*$/);
+        const galley2 = await doiValue(dois.versionDoiBox(block20(), 'PDF'));
         await dois.closeVersionsWindow();
         await expectReaderDoi(reader, tag, axolotl.submissionId, doi2);
         await expectReaderDoi(reader, tag, axolotl.submissionId, doi1, {version: axolotl.publicationId});
 
+        // Marks on two published major versions: "Mark DOIs Registered",
+        // "Mark DOIs Needs Sync", then "Mark DOIs Unregistered", each turning
+        // every row of 1.0's block and of 2.0's (Rules 20, 26–28, 52).
+        for (const [action, notice, status] of [
+            ['Mark DOIs Registered', TEXT.markedRegistered, 'Registered'],
+            ['Mark DOIs Needs Sync', TEXT.markedStale, 'Needs Sync'],
+            ['Mark DOIs Unregistered', TEXT.markedUnregistered, 'Unregistered'],
+        ]) {
+            await dois.goto();
+            await dois.runBulk(action, [axolotl.submissionId]);
+            await dois.expectNotice(notice);
+            await dois.expand(row, axolotl.submissionId);
+            await dois.openVersionsWindow(row);
+            const whole = new RegExp(`^\\s*${status}\\s*$`);
+            await expect(blockBadges(block10()), `1.0 after "${action}"`).toHaveText([whole, whole]);
+            await expect(blockBadges(block20()), `2.0 after "${action}"`).toHaveText([whole, whole]);
+            await dois.closeVersionsWindow();
+        }
+
         // A minor version: still "There are 2 versions."; the window holds
-        // 1.0's block and 2.1's, "Unpublished", with 2.0's DOI (Rules 12, 20).
+        // 1.0's block and 2.1's, "Unpublished", with 2.0's DOI and, in its
+        // "PDF" row, 2.0's galley DOI (Rules 12, 20).
         await openPublicationPage(page, tag, axolotl.submissionId, majorId);
-        await createVersion(page, tag, 'Minor Revision');
+        const minorId = await createVersion(page, tag, 'Minor Revision');
         await dois.goto();
         await dois.expand(row, axolotl.submissionId);
         await expect(dois.versionsBar(row)).toContainText(TEXT.versionsLine(2));
@@ -1032,21 +1128,35 @@ test.describe('DOIs', () => {
             new RegExp(`^\\s*${AO} 1\\.0 \\(.+\\)\\s*$`),
             new RegExp(`^\\s*${AO} 2\\.1 Unpublished\\s*$`),
         ]);
-        const block21 = dois.versionBlock(`${AO} 2.1`);
-        await expect(dois.versionDoiBox(block21, PREPRINT)).toHaveValue(doi2);
+        const block21 = () => dois.versionBlock(`${AO} 2.1`);
+        await expect(dois.versionDoiBox(block21(), PREPRINT)).toHaveValue(doi2);
+        await expect(dois.versionDoiBox(block21(), 'PDF')).toHaveValue(galley2);
 
         // One "Edit" for the window: 2.1's DOI changed; 2.0's page shows it,
         // 1.0's keeps its own (Rules 12, 20, 43).
         await expect(dois.versionsEditButton()).toHaveText(/^\s*Edit\s*$/);
         await dois.versionsEditButton().click();
         await expect(dois.versionsEditButton()).toHaveText(/^\s*Save\s*$/);
-        await dois.versionDoiBox(block21, PREPRINT).fill(changed);
+        await dois.versionDoiBox(block21(), PREPRINT).fill(changed);
         const saved = page.waitForResponse((r) => /\/api\/v1\/dois\/\d+/.test(r.url()) && r.request().method() !== 'GET', {timeout: 30_000});
         await dois.versionsEditButton().click();
         expect((await saved).status()).toBe(200);
         await dois.expectNotice(TEXT.updated);
         await expectReaderDoi(reader, tag, axolotl.submissionId, changed, {version: majorId});
         await expectReaderDoi(reader, tag, axolotl.submissionId, doi1, {version: axolotl.publicationId});
+
+        // A minor version's galley: 2.1 posted, its "PDF" row in "View all"
+        // still holds 2.0's galley DOI (Rules 12, 20).
+        await postVersion(page, tag, axolotl.submissionId, minorId);
+        await dois.goto();
+        await dois.expand(row, axolotl.submissionId);
+        await dois.openVersionsWindow(row);
+        await expect(dois.versionHeadings()).toHaveText([
+            new RegExp(`^\\s*${AO} 1\\.0 \\(.+\\)\\s*$`),
+            new RegExp(`^\\s*${AO} 2\\.1 \\(.+\\)\\s*$`),
+        ]);
+        await expect(dois.versionDoiBox(block21(), 'PDF')).toHaveValue(galley2);
+        await dois.closeVersionsWindow();
         await reader.context().close();
     });
 
@@ -1249,5 +1359,236 @@ test.describe('DOIs', () => {
 
         // No mail about the deposits (Side effects), bounded by the control.
         await expectNoMailBesidesControl(browser, baseURL, pkpMail, tag, manager, [ada, mary]);
+    });
+
+    test('S20: DOIs made when a preprint is created ("Immediately…")', async ({asUser, opsApi, appContext}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s20', testInfo);
+        const {manager, ada, mary} = await seedServer(opsApi, tag, {
+            doiPrefix: PREFIX,
+            enabledDoiTypes: ['publication', 'representation'],
+        });
+        const page = await pageAs(asUser, manager);
+        await chooseImmediately(page, tag);
+        const galleys = [{label: 'PDF', file: PREPRINT_FILE}];
+        const coral = await seedPreprint(opsApi, tag, 'co', mary, CORAL, {submitted: false, galleys});
+        const axolotl = await seedPreprint(opsApi, tag, 'ax', ada, AXOLOTL);
+        const dois = new DoisPage(page, tag);
+        const coRow = dois.row(coral.submissionId);
+        const axRow = dois.row(axolotl.submissionId);
+
+        // Control: before the final "Submit", "DOI Assigned" does not list
+        // "Coral spawning", read on the filter's own settled fetch (Rules 5a,
+        // 22; OPS5 not read); its other end follows the "Submit".
+        await dois.goto();
+        await dois.pressFilter('DOI Assigned');
+        await expect(dois.clearFilterButton('DOI Assigned')).toBeVisible();
+        await expect(coRow).toHaveCount(0);
+
+        // The final "Submit": the Author finishes "Coral spawning", its
+        // galley already on "Upload Files" (Rule 5a).
+        const author = await pageAs(asUser, mary);
+        await author.goto(wizardUrl(tag, coral.submissionId));
+        await expectWizardOpen(author);
+        await submitDraftWithGalley(author);
+
+        // The submitted preprint's DOIs: listed "Unpublished"; its "Preprint"
+        // row and its "PDF" row each hold "10.1234/" and eight characters,
+        // the two different, both "Unregistered" (Rules 5a, 6a, 16, 17).
+        await dois.goto();
+        await expect(dois.rowBadge(coRow)).toHaveText('Unpublished');
+        await dois.expand(coRow, coral.submissionId);
+        expect(await dois.doiTypes(coRow)).toEqual([PREPRINT, 'PDF']);
+        const preprintDoi = await doiValue(dois.doiBox(coRow, PREPRINT));
+        const galleyDoi = await doiValue(dois.doiBox(coRow, 'PDF'));
+        expect(galleyDoi).not.toBe(preprintDoi);
+        await expect(dois.doiBadge(coRow, PREPRINT)).toHaveText('Unregistered');
+        await expect(dois.doiBadge(coRow, 'PDF')).toHaveText('Unregistered');
+        await dois.pressFilter('DOI Assigned');
+        await expect(dois.rowLink(coRow)).toHaveText(new RegExp(`— ${CORAL}\\s*$`));
+
+        // A galley added: "Axolotl limb memory", in Production, gets a "PDF"
+        // galley on its "Galleys" page; on "DOIs" its "PDF" row holds a DOI
+        // of the same shape, "Unregistered", at once, with no posting and no
+        // "Assign DOIs" (Rule 5a).
+        const frame = new WorkflowPage(page, tag, {appContext, labels: {publicationGroup: 'Preprint'}});
+        const galleyManager = new GalleyManager(page, frame);
+        await galleyManager.open(axolotl.submissionId, axolotl.publicationId);
+        await galleyManager.addGalley({label: 'PDF', component: 'Preprint Text', file: GALLEY_FILE, name: PREPRINT_FILE});
+        await galleyManager.expectLabels(['PDF']);
+        await dois.goto();
+        await expect(dois.rowBadge(axRow)).toHaveText('Unpublished');
+        await dois.expand(axRow, axolotl.submissionId);
+        await expect(dois.doiRow(axRow, 'PDF')).toHaveCount(1);
+        await doiValue(dois.doiBox(axRow, 'PDF'));
+        await expect(dois.doiBadge(axRow, 'PDF')).toHaveText('Unregistered');
+    });
+
+    test('S21: a declined preprint\'s DOIs ("Immediately…")', async ({asUser, opsApi, appContext}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s21', testInfo);
+        const {manager, ada} = await seedServer(opsApi, tag, {doiPrefix: PREFIX});
+        const page = await pageAs(asUser, manager);
+        await chooseImmediately(page, tag);
+        const axolotl = await seedPreprint(opsApi, tag, 'ax', ada, AXOLOTL);
+        const dois = new DoisPage(page, tag);
+        const row = dois.row(axolotl.submissionId);
+
+        // Before the decline: listed, its "Preprint" row holding a DOI that
+        // reads "Unregistered" (Rules 5a, 15).
+        await dois.goto();
+        await dois.expand(row, axolotl.submissionId);
+        await doiValue(dois.doiBox(row, PREPRINT));
+        await expect(dois.doiBadge(row, PREPRINT)).toHaveText('Unregistered');
+
+        // Control: "DOI Assigned" lists it (Rules 5a, 22).
+        await dois.pressFilter('DOI Assigned');
+        await expect(dois.rowLink(row)).toHaveText(new RegExp(`— ${AXOLOTL}\\s*$`));
+        await dois.pressFilter('DOI Assigned');
+        await expect(dois.clearFilterButton('DOI Assigned')).toHaveCount(0);
+
+        // "Decline Submission": a preprint server still lists it, its
+        // "Preprint" row empty and reading "Needs DOI" (Rules 5b, 15).
+        await recordProductionDecision(page, appContext, tag, axolotl.submissionId, 'Decline Submission', 'Submission Declined');
+        await dois.goto();
+        await expect(dois.rowLink(row)).toHaveText(new RegExp(`— ${AXOLOTL}\\s*$`));
+        await dois.expand(row, axolotl.submissionId);
+        await expect(dois.doiBox(row, PREPRINT)).toHaveValue('');
+        await expect(dois.doiBadge(row, PREPRINT)).toHaveText('Needs DOI');
+
+        // "Revert Decline": listed, its "Preprint" row holding "10.1234/" and
+        // eight characters, "Unregistered" (Rules 5b, 6a).
+        await recordProductionDecision(page, appContext, tag, axolotl.submissionId, 'Revert Decline', 'Submission Reactivated');
+        await dois.goto();
+        await dois.expand(row, axolotl.submissionId);
+        await doiValue(dois.doiBox(row, PREPRINT));
+        await expect(dois.doiBadge(row, PREPRINT)).toHaveText('Unregistered');
+
+        // "Needs DOI" no longer lists it, read on the filter's settled empty
+        // list; lifted, it is listed again (Rules 5b, 22).
+        await dois.pressFilter('Needs DOI');
+        await expect(dois.clearFilterButton('Needs DOI')).toBeVisible();
+        await expect(dois.emptyLine()).toBeVisible();
+        await expect(row).toHaveCount(0);
+        await dois.pressFilter('Needs DOI');
+        await expect(dois.clearFilterButton('Needs DOI')).toHaveCount(0);
+        await expect(dois.rowLink(row)).toHaveText(new RegExp(`— ${AXOLOTL}\\s*$`));
+    });
+
+    test('S22: deposits under "DOI Versioning" "Yes"', async ({asUser, opsApi}, testInfo) => {
+        test.setTimeout(420_000);
+        const tag = makeTag('s22', testInfo);
+        const {manager, ada, mary} = await seedServer(opsApi, tag, {
+            doiPrefix: PREFIX,
+            doiVersioning: true,
+            plugins: {crossrefplugin: {enabled: true, settings: DEPOSITOR}},
+            registrationAgency: 'crossrefplugin',
+        });
+        const axolotl = await seedPreprint(opsApi, tag, 'ax', ada, AXOLOTL, {published: true});
+        const tardigrade = await seedPreprint(opsApi, tag, 'ta', mary, TARDIGRADE, {published: true});
+        const coral = await seedPreprint(opsApi, tag, 'co', mary, CORAL, {published: true});
+        const page = await pageAs(asUser, manager);
+        const dois = new DoisPage(page, tag);
+        const axRow = dois.row(axolotl.submissionId);
+        const taRow = dois.row(tardigrade.submissionId);
+        const coRow = dois.row(coral.submissionId);
+        const block = (n) => dois.versionBlock(`${AO} ${n}`);
+        const exactly = (status) => new RegExp(`^\\s*${status}\\s*$`);
+        /** Open a row's "View all" window on a fresh page. */
+        const viewAll = async (row, id) => {
+            await dois.goto();
+            await dois.expand(row, id);
+            await dois.openVersionsWindow(row);
+        };
+
+        // Given: each preprint posted as 1.0 with its DOI, "Unregistered".
+        await dois.goto();
+        for (const r of [axRow, taRow, coRow]) await expect(dois.rowBadge(r)).toHaveText('Unregistered');
+
+        // A major version not yet posted: "View all" holds 1.0's block and
+        // 2.0's, "Unpublished", each "Preprint" row with a DOI of its own,
+        // "Unregistered" (Rules 5, 12, 20).
+        await openPublicationPage(page, tag, axolotl.submissionId, axolotl.publicationId);
+        const axMajor = await createVersion(page, tag, 'Major Revision');
+        await viewAll(axRow, axolotl.submissionId);
+        await expect(dois.versionHeadings()).toHaveText([
+            new RegExp(`^\\s*${AO} 1\\.0 \\(.+\\)\\s*$`),
+            new RegExp(`^\\s*${AO} 2\\.0 Unpublished\\s*$`),
+        ]);
+        const ax1 = await doiValue(dois.versionDoiBox(block('1.0'), PREPRINT));
+        const ax2 = await doiValue(dois.versionDoiBox(block('2.0'), PREPRINT));
+        expect(ax2).not.toBe(ax1);
+        await expect(dois.versionDoiBadge(block('1.0'), PREPRINT)).toHaveText(exactly('Unregistered'));
+        await expect(dois.versionDoiBadge(block('2.0'), PREPRINT)).toHaveText(exactly('Unregistered'));
+        await dois.closeVersionsWindow();
+
+        // "Deposit DOIs" with the new version unposted: 1.0's row "Submitted",
+        // 2.0's keeps "Unregistered" (Rule 29).
+        const deposited = await dois.runBulk('Deposit DOIs', [axolotl.submissionId]);
+        expect(deposited.status()).toBe(200);
+        await dois.expectNotice(TEXT.depositQueued);
+        await viewAll(axRow, axolotl.submissionId);
+        await expect(dois.versionDoiBadge(block('1.0'), PREPRINT)).toHaveText(exactly('Submitted'));
+        await expect(dois.versionDoiBadge(block('2.0'), PREPRINT)).toHaveText(exactly('Unregistered'));
+        await dois.closeVersionsWindow();
+
+        // Two posted major versions: "Tardigrade desiccation"'s 2.0, posted,
+        // holds a DOI of its own, "Unregistered" (Rules 12, 32).
+        await openPublicationPage(page, tag, tardigrade.submissionId, tardigrade.publicationId);
+        const taMajor = await createVersion(page, tag, 'Major Revision');
+        await postVersion(page, tag, tardigrade.submissionId, taMajor);
+        await viewAll(taRow, tardigrade.submissionId);
+        await expect(dois.versionHeadings()).toHaveText([
+            new RegExp(`^\\s*${AO} 1\\.0 \\(.+\\)\\s*$`),
+            new RegExp(`^\\s*${AO} 2\\.0 \\(.+\\)\\s*$`),
+        ]);
+        const ta1 = await doiValue(dois.versionDoiBox(block('1.0'), PREPRINT));
+        const ta2 = await doiValue(dois.versionDoiBox(block('2.0'), PREPRINT));
+        expect(ta2).not.toBe(ta1);
+        await expect(dois.versionDoiBadge(block('2.0'), PREPRINT)).toHaveText(exactly('Unregistered'));
+        await dois.closeVersionsWindow();
+
+        // A posted minor version: "Coral spawning"'s 1.1 posted, its expanded
+        // view has no "There are … versions." line and no "View all", its
+        // "Edit" being there (Rule 20).
+        await openPublicationPage(page, tag, coral.submissionId, coral.publicationId);
+        const coMinor = await createVersion(page, tag, 'Minor Revision');
+        await postVersion(page, tag, coral.submissionId, coMinor);
+        await dois.goto();
+        await dois.expand(coRow, coral.submissionId);
+        await expect(dois.versionName(coRow)).toHaveText(new RegExp(`^\\s*${AO} 1\\.1\\s*$`));
+        const co = await doiValue(dois.doiBox(coRow, PREPRINT));
+        await expect(dois.editButton(coRow)).toBeVisible();
+        await expect(dois.versionsBar(coRow)).toHaveCount(0);
+        await expect(dois.viewAllButton(coRow)).toHaveCount(0);
+
+        // Control: "Axolotl limb memory"'s 2.0, right after its posting,
+        // still reads "Unregistered" (Rule 26).
+        await postVersion(page, tag, axolotl.submissionId, axMajor);
+        await viewAll(axRow, axolotl.submissionId);
+        await expect(dois.versionDoiBox(block('2.0'), PREPRINT)).toHaveValue(ax2);
+        await expect(dois.versionDoiBadge(block('2.0'), PREPRINT)).toHaveText(exactly('Unregistered'));
+        await dois.closeVersionsWindow();
+
+        // "Deposit All" after the postings (Rule 29a): "Axolotl limb
+        // memory"'s 2.0 "Submitted" (its 1.0 not read, A17); both of
+        // "Tardigrade desiccation"'s blocks "Submitted"; "Coral spawning"'s
+        // DOI, the one 1.0 and 1.1 share, "Submitted".
+        await dois.depositAllButton().click();
+        const all = dois.dialog(TEXT.depositAllTitle);
+        await expect(all).toBeVisible();
+        const depositedAll = await dois.confirmAction(all, TEXT.depositAllTitle);
+        expect(depositedAll.status()).toBe(200);
+        await dois.expectNotice(TEXT.depositQueued);
+        await viewAll(axRow, axolotl.submissionId);
+        await expect(dois.versionDoiBadge(block('2.0'), PREPRINT)).toHaveText(exactly('Submitted'));
+        await dois.closeVersionsWindow();
+        await viewAll(taRow, tardigrade.submissionId);
+        await expect(dois.versionDoiBadge(block('1.0'), PREPRINT)).toHaveText(exactly('Submitted'));
+        await expect(dois.versionDoiBadge(block('2.0'), PREPRINT)).toHaveText(exactly('Submitted'));
+        await dois.closeVersionsWindow();
+        await dois.expand(coRow, coral.submissionId);
+        await expect(dois.doiBox(coRow, PREPRINT)).toHaveValue(co);
+        await expect(dois.doiBadge(coRow, PREPRINT)).toHaveText('Submitted');
     });
 });

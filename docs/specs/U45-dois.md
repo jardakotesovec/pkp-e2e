@@ -228,9 +228,12 @@ links under the list. <sup>g</sup>
     choice saves only with "DOI Format" "Default" (Fields). An item of a
     ticked kind gets its DOI as soon as it exists: <sup>q42</sup>
     - at the final "Submit" of the submission wizard, the submission's
-      version and, on a journal and a preprint server, its galleys; on
-      a press its chapters that have their page (Rule 47), its
-      publication formats and their files too;
+      version, with, on a journal and a preprint server, its galleys,
+      and on a press its chapters that have their page (Rule 47). A
+      press's draft has no publication formats: the wizard's steps
+      ("Upload Files", "Details", "Contributors", "For the Editors",
+      "Review") offer none, so a book's formats and their files get
+      their DOIs when they are added (next bullet);
     - later, at once: a galley, a publication format or a file of a
       format when it is added, and a chapter when its "Chapter Page" is
       ticked;
@@ -250,7 +253,13 @@ links under the list. <sup>g</sup>
     "Unregistered", in every version; a DOI in any other status
     ("Submitted", "Registered", "Needs Sync", "Error") stays. Once a version is published, a "Published
     Manuscript Under Review" version included, the decline deletes none
-    of the work's DOIs, and the published page keeps its "DOI:" line. On
+    of the work's DOIs, and on a journal the published page keeps its
+    "DOI:" line. A press shows readers no page for a book until a
+    Version of Record of it is published
+    ([Monograph landing page](U69-monograph-landing-page.md), Rule 3),
+    so a book whose only published version is a "Published Manuscript
+    Under Review" shows its DOI on no public page, before the decline
+    or after it; the DOIs page lists the book with that DOI. On
     a journal and a press a declined work left with no DOI leaves the
     DOIs page (Rule 15). "Revert Decline" gives the work's current
     version new DOIs at once for the ticked kinds, its own and its
@@ -318,18 +327,18 @@ links under the list. <sup>g</sup>
     review out of Rule 7's conditions, under every "Automatic DOI
     Assignment" choice:
     unticking its "Public Visibility" box in the reviewer row's "Edit"
-    window, and "Revert Decision" on a review row reading "Complete"
+    window, and "Revert Decision" on a review row reading "Complete" or
+    "Reviewer Thanked"
     ([Reviewer assignment & management](U27-reviewer-assignment-and-management.md),
-    Rule 16). Its row then leaves the DOIs page, and:
+    Rule 16). After the revert the review no longer counts as read, even
+    when a "Notify Reviewers" email had made it count. <sup>q46</sup>
+    Its row then leaves the DOIs page, and:
     - a DOI reading "Unregistered" is deleted, so a review that
       qualifies again starts without one (Rule 7a) [OJS7](#ojs7);
     - a DOI reading "Submitted", "Registered", "Needs Sync" or "Error"
       stays with its status, and the row shows it again once the review
       qualifies again; until then "Deposit All" leaves it alone
       (Rule 29a). <sup>q49</sup>
-
-    "Revert Decision" on a row reading "Reviewer Thanked" changes
-    nothing here: the review still counts as read. <sup>q46</sup> <sup>q49</sup>
 
     "Cancel Reviewer" on a review that counts as read
     ([→ Unassign vs Cancel](U27-reviewer-assignment-and-management.md#unassign);
@@ -1389,7 +1398,9 @@ throwaway accounts. <sup>sc</sup>
    book carries two chapters, "Tides" with its "Chapter Page" ticked and
    "Harbours" without, and a publication format "PDF" with a file; on a
    preprint server "Tardigrade desiccation" is an Author's unfinished
-   draft instead.
+   draft instead; on a journal and a press also "Moss regrowth" at
+   Copyediting with its DOI, and "Coral spawning", declined at the
+   Submission stage without a DOI.
 
    - **The decision**: open "Tardigrade desiccation"'s workflow and
      record "Accept and Skip Review"
@@ -1423,11 +1434,22 @@ throwaway accounts. <sup>sc</sup>
      add a publication format named "EPUB" on the book's "Publication
      Formats" page
      ([Publication formats & proof terms](U73-publication-formats-proof-terms.md)).
-     On "DOIs" "Harbours" is no longer greyed, the note under the table
-     is gone, and "Harbours" and "Format / EPUB" have no DOI and read
-     "Needs DOI". Publish the book
+     On "DOIs" "Harbours" is no longer greyed, the note is gone, and
+     "Harbours" and "Format / EPUB" have no DOI and read "Needs DOI".
+     Publish the book from Copyediting
      ([Publish, schedule & versions](U49-publish-schedule-and-versions.md)):
      both now hold a DOI (Rules 47, 48).
+   - **Sent back to Review, then declined** (journal, press): on "Moss
+     regrowth"'s workflow record "Move to Review"
+     ([Editorial decision recording](U34-editorial-decision-recording.md)):
+     on "DOIs" the filter "In Copyediting, Production, Published or with
+     DOIs" lists it, its "Article" row ("Monograph") holding its DOI.
+     Press the filter again to lift it, and on the workflow record
+     "Decline Submission": the list still holds it with the same DOI, and
+     the filter still lists it (Rules 15, 22).
+   - **Declined without a DOI** (journal, press): neither the list nor
+     the filter "In Copyediting, Production, Published or with DOIs"
+     holds "Coral spawning" (Rules 15, 22).
    - **Control**: before the decision (on a preprint server, before the
      final "Submit"), "DOI Assigned" did not list "Tardigrade
      desiccation"; on a journal and a press the list without a filter
@@ -1543,7 +1565,9 @@ throwaway accounts. <sup>sc</sup>
    holding "Axolotl limb memory" and "Tardigrade desiccation", both
    published without a DOI; on a press "Chapters" and "Publication
    Formats" are ticked too and "Axolotl limb memory" carries the chapter
-   "Tides", its "Chapter Page" ticked, and a publication format "PDF".
+   "Tides", its "Chapter Page" ticked, and a publication format "PDF";
+   on a journal "Article galleys, such as a published PDF" is ticked
+   too and "Axolotl limb memory" carries a galley "PDF" without a DOI.
 
    - **The "None" format**: on Settings › Distribution › "DOIs" "DOI
      Format" has "None - Suffixes must be entered manually on the DOI
@@ -1584,6 +1608,10 @@ throwaway accounts. <sup>sc</sup>
    - **Cleared**: press "Edit", empty "Axolotl limb memory"'s "Article"
      box and press "Save": the row reads "Needs DOI"; the work's own
      "DOI:" line goes, a chapter's stays (Rules 10, 18, 43, 54).
+   - **Only a galley's DOI left** {OJS}: "Axolotl limb memory"'s badge
+     reads "Needs DOI". Press "Edit", type "10.1234/e2e-g2" in the "PDF"
+     row's box and press "Save": the badge reads "Unregistered", while
+     the "Article" row stays empty and reads "Needs DOI" (Rules 18, 31).
    - **Control**: on "Tardigrade desiccation" press "Edit", then "Save"
      with nothing changed: the editing closes (Rule 18). <sup>sc</sup>
 
@@ -1725,9 +1753,12 @@ throwaway accounts. <sup>sc</sup>
     the copyediting stage", "…production stage") and "DOI Versioning"
     "Yes" (a preprint server's default), holding "Axolotl limb memory",
     published with its DOI as version 1.0, which puts it at Done;
-    on a press "Chapters" and "Publication Formats" are ticked too and
-    the book carries the chapter "Tides", its "Chapter Page" ticked, and
-    a publication format "PDF", both with their DOIs.
+    on a press "Chapters", "Publication Formats" and "Files" are ticked
+    too and the book carries the chapter "Tides", its "Chapter Page"
+    ticked, and a publication format "PDF" with a file, each with its
+    DOI; on a preprint server "Preprint galleys, such as a published
+    PDF" is ticked too and the preprint carries a galley "PDF" with its
+    DOI.
 
     - **A major version**: on the work's workflow press "Create New
       Version" and choose "Major Revision"
@@ -1747,11 +1778,23 @@ throwaway accounts. <sup>sc</sup>
       2.0: in "View all" its "Article" row keeps the DOI it got at its
       creation, still "Unregistered"; the article's page shows it, and
       1.0's page keeps 1.0's DOI (Rules 12, 26, 43).
-    - **Unmarked, every version** {OMP}: in "View all" every row of
-      1.0's block still reads "Registered"; close the window, tick the
+    - **A press's file row** {OMP}: at the step "Marked registered
+      before its publication" 2.0's "PDF / {file name}" row kept
+      "Unregistered" while 1.0's read "Registered"; after "The major
+      version published" it still reads "Unregistered" (Rules 26, 52).
+    - **Unmarked, every version** {OMP}: 1.0's block, after the
+      publish, is not read [A17](#a17); close the window, tick the
       book and run "Mark DOIs Unregistered": "Items successfully marked
       unregistered"; in "View all" every row of 1.0's block and of 2.0's
       reads "Unregistered" (Rules 27, 52).
+    - **Marks on two published major versions**: close the window, tick
+      the work and run "Mark DOIs Registered": "Items successfully
+      marked registered", and in "View all" every row of 1.0's block and
+      of 2.0's reads "Registered". Run "Mark DOIs Needs Sync" on it:
+      "Items successfully marked needs sync", and every row of both
+      blocks reads "Needs Sync". Run "Mark DOIs Unregistered": "Items
+      successfully marked unregistered", and every row of both blocks
+      reads "Unregistered" (Rules 20, 26–28, 52).
     - **A minor version**: press "Create New Version" and choose "Minor
       Revision": the expanded view still reads "There are 2 versions.";
       "View all" holds 1.0's block and the new minor version's, 2.1,
@@ -1769,6 +1812,12 @@ throwaway accounts. <sup>sc</sup>
       DOI in 2.1's block with "10.1234/e2e-c4" and press "Save": the
       table of contents on 2.0's page shows "10.1234/e2e-c4" in "Tides"'
       DOI line, and on 1.0's page "Tides" keeps 1.0's DOI (Rules 50, 54).
+    - **A minor version's galley** {OPS}: at the step "The major version
+      published" note the DOI in the "PDF" row of 2.0's block; at "A
+      minor version" 2.1's block held that DOI in its "PDF" row. Post 2.1
+      ("Post the preprint",
+      [Publish, schedule & versions](U49-publish-schedule-and-versions.md)):
+      in "View all" 2.1's "PDF" row still holds it (Rules 12, 20).
     - **Control**: before the major version, the expanded view had no
       "There are … versions." line and no "View all" (Rule 20).
       <sup>sc</sup>
@@ -1945,7 +1994,8 @@ throwaway accounts. <sup>sc</sup>
     Given: a Journal Manager, on a scratch journal with the prefix
     "10.1234" and "Articles" ticked, the "DataCite Manager Plugin" enabled
     and no agency chosen, holding "Axolotl limb memory", published with
-    its DOI.
+    its DOI, and "Tardigrade desiccation", published with its DOI and a
+    galley "PDF".
 
     - **DataCite chosen**: on the "Registration" tab choose "DataCite" in
       "Registration Agency": the block "DataCite Settings" opens with
@@ -1970,6 +2020,22 @@ throwaway accounts. <sup>sc</sup>
       Are you sure you want to deposit these records?"; press "Deposit
       DOIs": "Items successfully submitted for deposit", and the row reads
       "Submitted" (Rules 29, 30).
+    - **An article registered before galley DOIs**: tick "Tardigrade
+      desiccation" and run "Mark DOIs Registered": "Items successfully
+      marked registered", and its "Article" row reads "Registered"
+      (Rule 26). On "Setup" tick "Article galleys, such as a published
+      PDF" and press "Save"; on "DOIs" tick "Tardigrade desiccation" and
+      run "Assign DOIs": its "PDF" row holds a DOI beginning "10.1234/",
+      reading "Unregistered" (Rules 4, 25).
+    - **"Deposit All" takes the galley's DOI**: press "Deposit All" and
+      press "Deposit all DOIs": "Items successfully submitted for
+      deposit"; "Tardigrade desiccation"'s "PDF" row reads "Submitted"
+      and its "Article" row keeps "Registered" (Rule 29a).
+    - **Galleys without "Articles"**: on "Setup" untick "Articles" and
+      press "Save"; on "DOIs" tick "Tardigrade desiccation" and run "Mark
+      DOIs Unregistered": its "PDF" row reads "Unregistered". Press
+      "Deposit All" and "Deposit all DOIs": the "PDF" row reads
+      "Submitted" (Rules 27, 29a).
     - **Control**: before DataCite was saved, the DOIs page had no
       "Deposit All" (Rule 36). <sup>sc</sup>
 
@@ -1979,8 +2045,9 @@ throwaway accounts. <sup>sc</sup>
     "10.1234", "Articles" and "Peer Review" ticked, the other DOI
     settings at the install defaults, and "Publicly Show Reviewer
     Comments" ticked as the default on Settings › Workflow › Review,
-    holding "Axolotl limb memory" and "Tardigrade desiccation" in
-    Review, each with one review the reviewer has submitted.
+    holding a published issue Vol. 1 No. 1 (2025), and "Axolotl limb
+    memory" and "Tardigrade desiccation" in Review, each with one review
+    the reviewer has submitted.
 
     - **Accept with the reviewers notified**: on "Axolotl limb memory"
       record "Accept Submission", sending its "Notify Reviewers" email
@@ -2007,6 +2074,43 @@ throwaway accounts. <sup>sc</sup>
       "Publicly Show Reviewer Comments" and press "OK":
       the work's expanded view has the "Article" row only, its DOI
       unchanged (Rule 7b).
+    - **Shown publicly again**: in the same "Edit" window tick "Publicly
+      Show Reviewer Comments" again and press "OK": the "Peer Review
+      {number}" row is back, empty and reading "Needs DOI" (Rules 7a, 7b;
+      [OJS7](#ojs7)).
+    - **Published**: publish "Tardigrade desiccation" from Copyediting
+      into Vol. 1 No. 1
+      ([Publish, schedule & versions](U49-publish-schedule-and-versions.md)):
+      its "Peer Review {number}" row holds a DOI beginning "10.1234/",
+      "Unregistered" (Rules 5, 7a).
+    - **"Revert Decision" on a "Complete" review**: on "Tardigrade
+      desiccation"'s "Review Round 1", where the reviewer row reads
+      "Complete", press its "Revert Decision" and confirm
+      "Unconsider this Review"
+      ([Reviewer assignment & management](U27-reviewer-assignment-and-management.md)):
+      on "DOIs" the work's expanded view has the "Article" row only
+      (Rule 7b).
+    - **"Revert Decision" on "Reviewer Thanked"**: do the same on
+      "Axolotl limb memory"'s reviewer row, which reads "Reviewer
+      Thanked": on "DOIs" the work's expanded view has the "Article" row
+      only (Rule 7b).
+    - **"Immediately…"**: on Settings › Distribution › "DOIs" choose
+      "Immediately, when an item is created (only with the default DOI
+      suffix)" in "Automatic DOI Assignment" and press "Save": "Saved".
+      On "Axolotl limb memory"'s "Review Round 1" open the review's "Read
+      Review" and press "Mark as Complete": the work's expanded view has
+      its "Peer Review {number}" row again at once, holding a DOI
+      beginning "10.1234/" and reading "Unregistered" (Rules 5a, 7).
+      Untick "Publicly Show Reviewer Comments" in the reviewer row's
+      "Edit" window and press "OK": the row leaves the expanded view.
+      Tick the box again the same way: the row is back at once, holding
+      a different DOI beginning "10.1234/" and reading "Unregistered"
+      (Rules 5a, 7b; [OJS7](#ojs7)).
+    - **"Mark as Complete" under "Immediately…"**: on "Tardigrade
+      desiccation" open the review's "Read Review" and press "Mark as
+      Complete": the work's expanded view has a "Peer Review {number}"
+      row at once, holding a DOI beginning "10.1234/" and reading
+      "Unregistered" (Rules 5a, 7).
     - **Control**: before either decision, the DOIs page listed both
       works, "Unpublished", each expanded view holding the "Article" row
       only, empty and reading "Needs DOI" (Rules 7, 15). <sup>sc</sup>
@@ -2035,6 +2139,16 @@ throwaway accounts. <sup>sc</sup>
       (Rules 6a, 8).
     - **The issue's page**: signed out, the issue's page shows "DOI:" with
       "https://doi.org/{the issue's DOI}" (Rule 43).
+    - **"Immediately…": an issue at its creation**: on Settings ›
+      Distribution › "DOIs" choose "Immediately, when an item is created
+      (only with the default DOI suffix)" in "Automatic DOI Assignment"
+      and press "Save": "Saved". On the side menu's "Issues", under
+      "Future Issues", press "Create Issue", type 1 in "Volume", 3 in
+      "Number" and 2026 in "Year", untick "Title" and press "Save"
+      ([Issues](U50-issues.md)): on "DOIs" the "Issues" tab lists "Vol. 1
+      No. 3 (2026)" with the badge "Unpublished"; expanded, its "Issue"
+      row holds "10.1234/" followed by eight characters, "Unregistered"
+      (Rules 5a, 6a, 8, 16).
     - **Control**: before "Publish Issue", the issue's "Issue" row had no
       DOI (Rule 8). <sup>sc</sup>
 
@@ -2058,13 +2172,188 @@ throwaway accounts. <sup>sc</sup>
       successfully marked registered", and its row reads "Registered"
       (Rule 26). <sup>sc</sup>
 
+20. **DOIs made when an item is created ("Immediately…")**
+
+    Given: a Journal Manager and an Author, on a scratch journal with
+    the prefix "10.1234", "Automatic DOI Assignment" "Immediately, when
+    an item is created (only with the default DOI suffix)" and the
+    galley box ticked ("Article galleys, such as a published PDF",
+    "Preprint galleys, such as a published PDF"; a press ticks
+    "Chapters", "Publication Formats" and "Files" instead), holding the
+    Author's unfinished draft "Coral spawning" (on a preprint server
+    with a galley "PDF"; on a press with the chapter "Tides", its
+    "Chapter Page" ticked),
+    and "Axolotl limb memory" in Production (on a press with the chapter
+    "Harbours", its "Chapter Page" unticked).
+
+    - **The final "Submit"**: as the Author, open "Coral spawning" and
+      finish it with the wizard's final "Submit"
+      ([Submission wizard](U21-submission-wizard.md)) (Rule 5a).
+    - **The submitted work's DOIs**: as the Journal Manager open "DOIs":
+      "Coral spawning" is listed with the badge "Unpublished"; expanded,
+      its "Article" row ("Monograph", "Preprint") holds "10.1234/"
+      followed by eight characters and reads "Unregistered"; on a
+      preprint server its "PDF" row holds a DOI of the same shape,
+      different from the preprint's (Rules 5a, 6a, 16, 17).
+    - **A press's chapter** {OMP}: the book's "Tides" row holds a DOI
+      of the same shape, different from the monograph's, and reads
+      "Unregistered" (Rules 5a, 45).
+    - **A galley added** (journal, preprint server): on "Axolotl limb
+      memory" add a galley "PDF" ([Galleys](U46-galleys.md)): on "DOIs"
+      its expanded view has a "PDF" row holding "10.1234/" followed by
+      eight characters, "Unregistered", at once (Rule 5a).
+    - **A chapter's page and a format added** {OMP}: on "Axolotl limb
+      memory" tick "Harbours"' "Chapter Page" in its "Edit Chapter"
+      window on the book's "Chapters" page
+      ([Chapters & work type](U72-chapters-work-type.md)) and save it,
+      then add a publication format named "EPUB" on the book's
+      "Publication Formats" page and give it a file
+      ([Publication formats & proof terms](U73-publication-formats-proof-terms.md)):
+      on "DOIs" the "Harbours", "Format / EPUB" and "EPUB / {file name}"
+      rows each hold a DOI of the same shape, "Unregistered", with no
+      publish and no "Assign DOIs" (Rules 5a, 48).
+    - **Control**: before the final "Submit", "DOI Assigned" did not
+      list "Coral spawning" (Rules 5a, 22). <sup>sc</sup>
+
+21. **A declined submission's DOIs ("Immediately…")**
+
+    Given: a Journal Manager, on a scratch journal with the prefix
+    "10.1234" and "Automatic DOI Assignment" "Immediately, when an item
+    is created (only with the default DOI suffix)", holding "Axolotl limb
+    memory", submitted after that choice was saved and not published
+    (on a journal and a press at the Submission stage); on a journal and
+    a press also "Tardigrade desiccation" at Review, a version of it
+    published as "Published Manuscript Under Review" 1.0 with its DOI.
+
+    - **Before the decline**: open "DOIs": "Axolotl limb memory" is
+      listed, its "Article" row ("Monograph", "Preprint") holding a DOI
+      that reads "Unregistered" (Rules 5a, 15).
+    - **"Decline Submission"**: on its workflow record "Decline
+      Submission"
+      ([Editorial decision recording](U34-editorial-decision-recording.md)):
+      on a journal and a press "DOIs" no longer lists it; on a preprint
+      server it is still listed, its "Preprint" row empty and reading
+      "Needs DOI" (Rules 5b, 15).
+    - **"Revert Decline"**: record "Revert Decline": "DOIs" lists it,
+      its "Article" row holding "10.1234/" followed by eight characters,
+      "Unregistered". Press "Needs DOI": it is not listed; press "Needs
+      DOI" again to lift it (Rules 5b, 6a, 22).
+    - **A published "Published Manuscript Under Review"** (journal,
+      press): on a journal, signed out, "Tardigrade desiccation"'s page
+      shows "DOI:" with "https://doi.org/{its DOI}" (a press shows no
+      page for the book, Rule 5b). On its review round record
+      "Decline Submission": on "DOIs" it is still listed, its "Article"
+      row ("Monograph") holding the same DOI, and on a journal its page
+      still shows the same "DOI:" line (Rules 5b, 15, 43).
+    - **Control**: before the decline, "DOI Assigned" listed "Axolotl
+      limb memory" (Rules 5a, 22). <sup>sc</sup>
+
+22. **Deposits under "DOI Versioning" "Yes"** {OJS OPS}
+
+    Given: a Journal Manager, on a scratch journal with the prefix
+    "10.1234", "Automatic DOI Assignment" as installed ("Upon reaching
+    the copyediting stage", "…production stage"), "DOI Versioning" "Yes"
+    (a preprint server's default) and Crossref chosen and configured
+    (its depositor fields saved; on a journal its "Publisher" and
+    "Online ISSN" saved), holding "Axolotl limb memory", "Tardigrade
+    desiccation" and "Coral spawning", each published as version 1.0
+    with its DOI, "Unregistered".
+
+    - **A major version not yet published**: on "Axolotl limb memory"'s
+      workflow press "Create New Version" and choose "Major Revision"
+      ([Publish, schedule & versions](U49-publish-schedule-and-versions.md)):
+      on "DOIs" its "View all" window holds 1.0's block and 2.0's,
+      "Unpublished", each "Article" ("Preprint") row with a DOI of its
+      own reading "Unregistered" (Rules 5, 12, 20).
+    - **"Deposit DOIs" with the new version unpublished**: close the
+      window, tick "Axolotl limb memory" and run "Deposit DOIs": "Items
+      successfully submitted for deposit"; in "View all" 1.0's row reads
+      "Submitted" and 2.0's keeps "Unregistered" (Rule 29).
+    - **Two published major versions**: on "Tardigrade desiccation"
+      press "Create New Version", choose "Major Revision" and publish
+      2.0 (on a preprint server "Post the preprint"): in its "View all"
+      2.0's block holds a DOI of its own, "Unregistered" (Rules 12, 32).
+    - **A published minor version**: on "Coral spawning" press "Create
+      New Version", choose "Minor Revision" and publish 1.1: its
+      expanded view has no "There are … versions." line and no "View
+      all" (Rule 20).
+    - **"Deposit All" after the publications**: publish "Axolotl limb
+      memory"'s 2.0, then press "Deposit All" and "Deposit all DOIs":
+      "Items successfully submitted for deposit". In "Axolotl limb
+      memory"'s "View all" 2.0's row reads "Submitted"; in "Tardigrade
+      desiccation"'s both blocks read "Submitted"; "Coral spawning"'s
+      "Article" ("Preprint") row, the DOI 1.0 and 1.1 share, reads
+      "Submitted" (Rule 29a).
+    - **Control**: right after its publication, before "Deposit All",
+      "Axolotl limb memory"'s 2.0 row still read "Unregistered"
+      (Rule 26). <sup>sc</sup>
+
+23. **Peer-review DOIs after publication, with Crossref** {OJS}
+
+    Given: a Journal Manager, on a scratch journal with the prefix
+    "10.1234", "Articles" and "Peer Review" ticked, "Automatic DOI
+    Assignment" as installed ("Upon reaching the copyediting stage"),
+    Crossref chosen and configured (its depositor fields, "Publisher"
+    and "Online ISSN" saved) and "Publicly Show Reviewer Comments" ticked
+    as the default on Settings › Workflow › Review, holding "Axolotl limb
+    memory" and "Tardigrade desiccation", each published as a version of
+    record with its DOI ("Unregistered") and one review the reviewer has
+    submitted and no editor has marked complete.
+
+    - **Reviews not yet read**: open "DOIs" and expand both works: each
+      has the "Article" row alone, reading "Unregistered" (Rule 7).
+    - **An article registered by hand**: tick "Tardigrade desiccation"
+      and run "Mark DOIs Registered": "Items successfully marked
+      registered", and its "Article" row reads "Registered" (Rule 26).
+    - **"Deposit All" before the reviews are read**: press "Deposit All"
+      and "Deposit all DOIs": "Items successfully submitted for
+      deposit"; "Axolotl limb memory"'s "Article" row reads "Submitted",
+      "Tardigrade desiccation"'s keeps "Registered", and neither work has
+      a "Peer Review {number}" row (Rules 7, 29a).
+    - **"Mark as Complete" after publication**: on each work's "Review
+      Round 1" open the review's "Read Review" and press "Mark as
+      Complete"
+      ([Reviewer assignment & management](U27-reviewer-assignment-and-management.md)):
+      each work's expanded view now has a "Peer Review {number}" row,
+      empty and reading "Needs DOI" (Rules 7, 7a).
+    - **"Assign DOIs"**: tick both works and run "Assign DOIs": "Items
+      successfully assigned new DOIs"; each "Peer Review {number}" row
+      holds a DOI beginning "10.1234/", reading "Unregistered", and each
+      "Article" row keeps its DOI and status (Rules 7a, 25).
+    - **A review's DOI marked with its work**: tick "Axolotl limb memory"
+      alone and run "Mark DOIs Registered": its "Article" and "Peer
+      Review {number}" rows read "Registered" (Rule 26).
+    - **"Deposit All" takes a review's DOI**: press "Deposit All" and
+      "Deposit all DOIs": "Tardigrade desiccation"'s "Peer Review
+      {number}" row reads "Submitted" and its "Article" row keeps
+      "Registered"; "Axolotl limb memory"'s two rows keep "Registered"
+      (Rule 29a).
+    - **A registered review taken out of public view**: on "Axolotl limb
+      memory"'s "Review Round 1" choose "Edit" in the reviewer row's
+      "More Actions" menu, untick "Publicly Show Reviewer Comments" and
+      press "OK": its expanded view has the "Article" row alone, reading
+      "Registered" (Rule 7b). Tick the work and run "Deposit DOIs":
+      "Items successfully submitted for deposit", and the "Article" row
+      reads "Submitted" (Rule 29). Tick "Publicly Show Reviewer Comments"
+      again in the same window: the "Peer Review {number}" row is back
+      with the DOI it had, reading "Registered" (Rules 7b, 29).
+    - **A "Needs Sync" review taken out of public view**: tick
+      "Tardigrade desiccation" and run "Mark DOIs Needs Sync": "Items
+      successfully marked needs sync", and its "Article" and "Peer Review
+      {number}" rows read "Needs Sync" (Rule 28). Untick its review's
+      "Publicly Show Reviewer Comments" the same way: the review's row
+      leaves. Press "Deposit All" and "Deposit all DOIs": its "Article"
+      row reads "Submitted" (Rule 29a). Tick the box again: the review's
+      row is back, reading "Needs Sync" (Rules 7b, 29a).
+    - **Control**: before "Mark as Complete", neither work's expanded
+      view had a "Peer Review {number}" row, after "Deposit All" too
+      (Rule 7). <sup>sc</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - A review taken out of public view whose DOI reads "Registered" or "Submitted": "Deposit DOIs" and the "Mark DOIs …" actions on its work leave that DOI's status, seen on its row once public again, and the reviews file (Rule 29b) leaves the review out (OJS6 retired; Rules 7b, 29) [upstream 2026-10-07]
-  - A review that qualifies again after losing its "Unregistered" DOI (OJS7, ruled intended): under "Immediately…" a new, different DOI at once; under "Upon reaching the copyediting stage" its row reads "Needs DOI" until "Assign DOIs" or the next publication (Rules 7a, 7b; scenario 17 stops at the untick) [upstream 2026-10-07]
   - the guard for A19 (Rule 35; issue report
     `docs/issues/U45-A19-agency-choice-unticks-every-doi-kind.md`): a
     journal and a preprint server with the galley kind ticked before a
@@ -2083,13 +2372,6 @@ Left out of the scenarios above, by reason:
     under "DOI Versioning" "Yes", a new major version published over a
     version whose DOI reads "Registered" turns that DOI "Needs Sync" in
     the "View all" window [report 2026-10-12]
-  - under "DOI Versioning" "Yes", a preprint's "Minor Revision" keeping
-    its galley's DOI: once 2.1 made from 2.0 is posted, its block in the
-    "View all" window holds 2.0's galley DOI {OPS} (Rules 12, 20; OPS4
-    retired) [upstream 2026-10-07]
-  - under "DOI Versioning" "Yes", a work whose 1.0 and a minor 1.1 are
-    published showing no "There are … versions." line and no "View
-    all" (Rule 20) [incidental 2026-10-15]
   - the guard for OMP2 (Rule 45; issue report
     `docs/issues/U45-OMP2-file-row-doi-save-error.md`): a DOI typed into a
     book's empty file row and saved answers "DOI(s) successfully updated"
@@ -2132,100 +2414,12 @@ Left out of the scenarios above, by reason:
     with the queue held, a published issue ticked on the "Issues" tab
     reading "Submitted" right after "Deposit DOIs" is confirmed, an
     unticked article beside it still "Unregistered" {OJS} [upstream 2026-10-09]
-  - "Mark DOIs Registered", "Mark DOIs Needs Sync" and "Mark DOIs
-    Unregistered" on a work with two published major versions under "DOI
-    Versioning" "Yes", every block of the "View all" window changing
-    {OJS OPS}, and on a press "Mark DOIs Registered" and "Mark DOIs Needs
-    Sync" changing every published version's block, chapter and format
-    rows included {OMP} (Rules 20, 26–28, 52; OMP4 retired) [incidental 2026-10-05]
-  - a press with "Files" ticked and "DOI Versioning" "Yes": "Mark DOIs
-    Registered" on a book whose new major version is not yet published
-    leaving that version's file row ("PDF / article.pdf") "Unregistered",
-    and still so once it is published {OMP} (Rules 26, 52; OMP5 retired) [upstream 2026-10-07]
-  - a journal with Crossref configured and "Peer Review" ticked, a work
-    published as a version of record with a public review that does not
-    count as read: no "Peer Review {number}" row, "Deposit All" turning
-    the "Article" row "Submitted", and after "Mark as Complete" the
-    review's row reading "Needs DOI"; on a second such work whose
-    "Article" row was marked "Registered" by "Mark DOIs Registered",
-    "Mark as Complete" and "Assign DOIs", then "Deposit All" turning the
-    review's row "Submitted" and the "Article" row staying "Registered"
-    {OJS} (Rules 7, 7a, 26, 29) [upstream 2026-10-07]
-  - a work at Review whose version is published as a "Published
-    Manuscript Under Review", with a public review that does not count as
-    read: no "Peer Review {number}" row, "Deposit DOIs" turning the
-    "Article" row "Submitted" and "Mark DOIs Registered" on a twin turning
-    it "Registered", and after "Mark as Complete" the review's row
-    reading "Needs DOI" {OJS} (Rules 7, 26, 29) [upstream 2026-10-07]
-  - "Upon reaching the copyediting stage": a review that comes to count
-    as read after the move getting its DOI when the version is
-    published {OJS} (Rule 7a) [upstream 2026-10-07]
-  - a published work's review that comes to count as read: "Assign
-    DOIs" giving it its DOI, then "Mark DOIs Registered" (or "Deposit
-    DOIs") turning its row "Registered" ("Submitted") with the "Article"
-    row {OJS} (Rules 7a, 26, 29) [upstream 2026-10-07]
-  - "Revert Decision" on a "Complete" review deleting its "Unregistered"
-    DOI, the row leaving the DOIs page, and on a "Reviewer Thanked" one
-    changing nothing; a "Registered" or "Submitted" review DOI kept
-    through "Public Visibility" unticked, its row hidden and shown again
-    with that status once the box is ticked {OJS} (Rule 7b) [upstream 2026-10-07]
-  - a review DOI reading "Needs Sync" (after "Mark DOIs Registered" and
-    "Mark DOIs Needs Sync") kept through "Public Visibility" unticked:
-    its row hidden, and "Deposit All" turning the work's other rows
-    "Submitted" while the review's stays "Needs Sync" {OJS} (Rules 7b,
-    29a) [incidental 2026-10-15]
-  - "Deposit DOIs" on a work whose new major version is not yet
-    published: the published versions' DOIs reading "Submitted", the new
-    version's "Unregistered", and "Deposit All" sending them once it is
-    published {OJS OPS} (Rules 26, 29; A28 retired) [upstream 2026-10-07]
-  - an article whose own DOI was cleared while its galley keeps one,
-    its badge reading "Unregistered" {OJS} (Rule 31) [incidental 2026-10-05]
-  - a DataCite journal with the galley kind ticked: "Deposit All"
-    turning "Submitted" the "PDF" row of a work whose "Article" row was
-    marked "Registered" before galley DOIs were turned on, the "Article"
-    row keeping "Registered"; and on a journal with the galley kind
-    ticked and "Articles" not, the "PDF" row turning "Submitted" {OJS}
-    (Rule 29a; OJS5 narrowed to the work without an article DOI) [upstream 2026-10-08]
-  - "DOI Versioning" "Yes" with Crossref configured: "Deposit All" on a
-    work with 1.0 and 2.0 published turning both blocks of "View all"
-    "Submitted", on a work with 1.0 and a minor 1.1 published turning
-    their shared DOI "Submitted", and leaving "Registered" a 1.0 marked
-    so before its 2.0 was published {OJS OPS} (Rule 29a) [upstream 2026-10-08]
-  - "Immediately, when an item is created": the final "Submit" giving
-    the version its DOI (a journal's and a preprint server's galleys,
-    a press's chapters with their page, formats and files theirs), a
-    preprint server's listed draft none; a galley, a format or a format's file added later and a
-    chapter's page ticked later getting theirs at once (Rules 5a, 48) [upstream 2026-10-07]
-  - "Immediately…" and new versions: under "No" the new version
-    sharing its source's DOIs, under "Yes" a "Major Revision" getting
-    its own at once and a "Minor Revision" sharing them (Rules 5a, 11,
-    12, 50) [upstream 2026-10-07]
-  - "Immediately…": an issue saved with "Create Issue" listed on the
-    "Issues" tab with its DOI before "Publish Issue" {OJS} (Rules 5a, 8) [upstream 2026-10-07]
-  - "Immediately…": a completed review, publicly shown, getting its
-    "Peer Review {number}" row and DOI at "Mark as Complete" {OJS}
-    (Rules 5a, 7) [upstream 2026-10-07]
-  - "Immediately…" and "Decline Submission": a work with no published
-    version losing its "Unregistered" DOIs while one marked "Registered"
-    stays, and a work whose "Published Manuscript Under Review" version
-    is published keeping every DOI and its page's "DOI:" line (Rule 5b;
-    A25 retired) [upstream 2026-10-07]
-  - "Immediately…": "Revert Decline" giving the declined work's current
-    version new DOIs, the work no longer listed by "Needs DOI" (Rule 5b;
-    A26 retired) [upstream 2026-10-07]
-  - a declined submission carrying a DOI listed on the DOIs page and by
-    "In Copyediting, Production, Published or with DOIs", one moved back
-    from Copyediting to Review with its DOI listed by that filter, and a
-    declined one with no DOI listed by neither {OJS OMP} (Rules 15, 22;
-    A27 retired) [upstream 2026-10-07]
-  - "Upon reaching the copyediting stage": a new version made while the
-    submission is at Copyediting or Production getting the DOIs it lacks
-    at once, and one made at Review after a "Published Manuscript Under
-    Review" version was published getting none until its publication
-    (Rules 5, 12) [upstream 2026-10-07]
 - **Rarely met**:
   - a press with "Chapters" or "Publication Formats" ticked and "Monographs" not: the same books listed, each with only those kinds' rows, the badge read from the first row {OMP} (Rule 46)
+  - under "Upon reaching the copyediting stage", a new version of a work whose earlier version was published as a "Published Manuscript Under Review": made while the work is at Copyediting or Production, it gets the DOIs it lacks at once; made at Review, none until its own publication {OJS OMP} (Rules 5, 12)
+  - a work at Review whose version is published as a "Published Manuscript Under Review", with a public review that does not count as read: no "Peer Review {number}" row, its "Article" row turned "Submitted" by "Deposit DOIs" or "Registered" by "Mark DOIs Registered", and after "Mark as Complete" the review's row reading "Needs DOI" {OJS} (Rules 7, 7a, 26, 29)
   - a journal switched from "DOI Versioning" "Yes" to "No" with 1.0 and 2.0 published on DOIs of their own: "Deposit All" turning 2.0's DOI "Submitted" and leaving 1.0's "Unregistered", as "View all" shows once "Yes" is saved again (Rule 29a)
+  - under "Immediately…", a declined work none of whose versions is published, whose DOI reads "Submitted", "Registered", "Needs Sync" or "Error": the decline keeps that DOI (Rule 5b)
 - **Nothing new to test**:
   - the Site Administrator on the DOIs page: the Journal Manager's page of scenarios 1 and 3 (Actors row 2)
   - another manager-level press role or the Site Administrator on a book's chapter and format rows: the Press Manager's rows of scenarios 4, 5 and 7 (Actors rows 2–3)
@@ -2248,12 +2442,13 @@ Left out of the scenarios above, by reason:
   - the "Registration" filters on a press counting chapter and format DOIs whether or not their kind is ticked, and never a file's (Rule 51)
   - the "Custom pattern" "Chapters" and "Publication Formats" boxes and their "%c", "%f" and "%x" symbols {OMP} (Rule 49)
   - a publish under "Never" adding no "Submission metadata updated": no DOI is made, as in the saves of scenarios 5 and 7 that add no line (Side effects)
+  - "Immediately…" and new versions: under "No" the new version sharing its source's DOIs, under "Yes" a "Major Revision" getting its own at once and a "Minor Revision" sharing them, the same DOIs scenarios 10 and 11 show under the installed choice (Rules 5a, 11, 12, 50)
 - **Register carries it**:
   - A2 (a made DOI under "None", and a peer review's under "Custom pattern", reading the prefix and a bare "/", a press's chapters and formats included; Rules 6b, 49)
   - A9 (a pattern symbol with nothing to fill it, such as "%c" in a press's "Publication Formats" box; Rules 6c, 49)
   - A7 (a typed DOI outside the journal's prefix; Rule 18)
   - A10 ("Assign DOIs" while a newer version is unpublished, and under "Yes" the minor version's own DOI at its publication; Rules 11, 12, 17)
-  - A17 (a new major version leaving the earlier DOI's status; Rule 32)
+  - A17 (a new major version leaving the earlier DOI's status, so that "Deposit All" then leaves a 1.0 marked "Registered" before its 2.0 was published as it is; Rules 29a, 32)
   - OPS5 (a preprint server listing unfinished drafts; Rule 15)
   - A11 (searching by a DOI's start, on a press by a chapter's, format's or file's DOI while its kind is ticked; Rule 21)
   - A12 (clearing a "Registration" filter after "Unregistered"; Rule 22)
@@ -2289,11 +2484,13 @@ Left out of the scenarios above, by reason:
   - A29 (an install upgraded from 3.3 keeping an old leftover prefix, an upgrade no test runs; Fields, "DOI Prefix")
 - **No seed**:
   - the "Export DOIs" download, "Items successfully exported" and what the file holds: the test installs cannot reach the agency's site (Rules 29, 29b; Side effects)
+  - the reviews file of a work whose review was taken out of public view, which leaves that review out: no screen shows the file the deposit sends (Rules 29, 29b)
   - a deposit the agency answers with an error: "Error", "View Error" and the "Registration Error Message" window, and a review's "Error" DOI kept through "Public Visibility" unticked (Rules 7b, 17, 33)
   - a deposit the agency accepted: the panel's "Registered" through the agency and "View Record" (Rules 30, 33)
 - **Owned by another feature**:
   - an unsaved change on the "Setup" or "Registration" tab lost on leaving the page (Fields; *Journal identity & about pages*, Rule 5)
   - an older version's chapter page under "DOI Versioning" "No", meant to show the current version's chapter DOI, answering a server error {OMP} (Rule 54; *Monograph landing page*, its A19)
+  - a book whose only published version is a "Published Manuscript Under Review" answering "404 Not Found" to readers, so its DOI shows on no public page {OMP} (Rule 5b; *Monograph landing page*, its Rule 3 and scenario 5)
 
 ## Findings register
 
@@ -2846,7 +3043,8 @@ Basis: probe, 2026-10-15. <sup>f-ojs5</sup>
 <a id="ojs7"></a>
 **OJS7 — A review that loses its "Unregistered" DOI and qualifies again gets a new DOI under "Immediately…" and none under the other settings** · ✅ · minor.
 Unticking a review's "Public Visibility", or "Revert Decision" on its
-"Complete" row, deletes its "Unregistered" DOI (Rule 7b), as the team
+"Complete" or "Reviewer Thanked" row, deletes its "Unregistered" DOI
+(Rule 7b), as the team
 intends. When the editor then ticks the box again or presses "Mark as
 Complete" again, the review qualifies again (Rule 7): under
 "Immediately…" it gets a different DOI at once. Under the other
@@ -3987,7 +4185,11 @@ version under "No" shared the work's and the galley's DOIs. OMP:
 "Harbours"' "Chapter Page" ticked and saved, and a format "EPUB" added,
 each got its DOI at once; under "DOI Versioning" "Yes" a published
 book's "Major Revision" had new DOIs for the book, its chapter and its
-format at once, and a "Minor Revision" of that shared them.
+format at once, and a "Minor Revision" of that shared them. Test run
+2026-11-12 (Rule 5a; scenario 20), OMP: OMP's wizard steps are "Upload
+Files", "Details", "Contributors", "For the Editors" and "Review", with
+no publication format; the draft's final "Submit" gave the monograph
+and "Tides" their DOIs.
 
 <a id="fn-q43"></a>
 **q43** — At the same PR heads, before their merge:
@@ -4003,7 +4205,16 @@ a journal and a press (notes f-a25, f-a26). At the round-2 heads
 `RevertInitialDecline` decision runs `Repo::submission()->createDois()` (each
 app's: the current publication and its galleys, or its chapters,
 formats and files). The kept checks of notes f-a25 and f-a26 passed
-there, 2026-10-07.
+there, 2026-10-07. Test run 2026-11-12 (Rule 5b; scenario 21), OMP: a
+book at External Review whose "Published Manuscript Under Review" 1.0
+was published (status 3, with its DOI; the submission's `status` 1,
+`stage_id` 3) answered 404 on `catalog/book/{id}` to a signed-out
+browser before the decline: `CatalogBookHandler::book()` refuses a
+submission whose status is not `STATUS_PUBLISHED`, which
+`submission\Repository::getStatusByPublications()` sets only for a
+published Version of Record; OJS's `ArticleHandler` reads the
+publication's own status. The DOIs page kept the book and its DOI
+through the decline.
 
 <a id="fn-q13"></a>
 **q13** — Live-probed 2026-09-26 (Rule 6b; A2), all three apps: under
@@ -4109,9 +4320,22 @@ Registered", Crossref's `updateDepositStatus()`) and
 Sync"). `createDois()` keeps its own public-visibility test; the mark
 and deposit lists have none, so a review whose "Submitted" or
 "Registered" DOI outlived an untick is still marked with its work (note
-f-ojs6). "Revert Decision" (`unconsiderReview()`) clears
-`date_considered` only, so a review confirmed by the "Notify Reviewers"
-email (`date_acknowledged`) still counts as read after it. The team's
+f-ojs6). "Revert Decision" (`PKPReviewerGridHandler::unconsiderReview()`)
+sets `considered` to `REVIEW_ASSIGNMENT_UNCONSIDERED` and clears
+`date_considered`. Until lib/pkp `d1f20f891e` a review confirmed by the
+"Notify Reviewers" email (`date_acknowledged`) still counted as read
+after it; that commit (`pkp/pkp-lib#13602`, 2026-11-04, "Public reviews
+visible to author before editor confirmation") makes
+`ReviewAssignment::isConfirmedByEditor()` false whenever `considered`
+is `REVIEW_ASSIGNMENT_UNCONSIDERED`, `date_acknowledged`
+notwithstanding, so `edit()` runs `removeUnregisteredDoi()` for a
+"Reviewer Thanked" review too (checkout `ad75b174f0`). Test run
+2026-11-12 (Rule 7b; scenario 17), OJS, the step run twice: after
+"Revert Decision" on "Axolotl limb memory"'s row, read "Reviewer
+Thanked" just before, the DOIs page showed the work with one row,
+"Article" "Unregistered", and no "Peer Review" row; under
+"Immediately…" "Mark as Complete" then gave the review a DOI at once.
+The team's
 message in the review thread, 2026-10-07: the per-work path takes only
 reviews confirmed by the editor; a review's unregistered DOI is removed
 when it stops being confirmed and publicly visible, under every setting;
@@ -4140,7 +4364,7 @@ and took the row off the page, and ticking it again showed it with the
 same DOI and status; on a third twin the untick deleted the
 "Unregistered" review DOI, and ticking again showed the row empty and
 "Needs DOI". "Revert Decision" on a "Reviewer Thanked" review kept its
-row and DOI. On a journal switched to "Immediately…" on screen: "Mark as
+row and DOI then, before `d1f20f891e`. On a journal switched to "Immediately…" on screen: "Mark as
 Complete" gave the review `10.1234/b5k6vq86` at once; the untick
 deleted it and took the row away; ticking again gave a new one,
 `10.1234/2k33x443`; "Revert Decision" deleted that; "Accept Submission"
@@ -4188,7 +4412,13 @@ Sync" review ticked again was not driven: the row follows the review's
 visibility (note j), not its DOI's status. "Revert Decision" on review
 21's "Reviewer Thanked" row (DOI "Needs Sync") kept the row, the DOI,
 its place in the public review data and in "Deposit All"; the reviewer
-row turned "Review Viewed" with "Read Review".
+row turned "Review Viewed" with "Read Review". That was before lib/pkp
+`d1f20f891e` (note q46): since it the revert makes
+`isConfirmedByEditor()` false, which takes the review off the rows and
+out of `getExportableDOIsPeerReviewIds()` and OJS
+`doi\DAO::getAllDepositableSubmissionIds()` (both
+`whereConfirmedByEditor()`), while `removeUnregisteredDoi()` keeps a
+"Needs Sync" DOI, as for an untick (code, checkout `ad75b174f0`; not driven).
 
 <a id="fn-i"></a>
 **i** — `ojs/classes/controllers/grid/issues/IssueGridHandler.php`
@@ -5047,35 +5277,63 @@ twice): `manager` as the Journal Manager everywhere, `editor` with
 `roles: {editor: {permitSettings: false}}` in scenario 2 (OJS, OMP),
 `author` submitters named "Ada Lovelace" and "Mary Anning"
 (`givenName`, `familyName`) in scenario 3, an `author` for scenario 4's
-draft on OPS, and an `externalReviewer` in scenario 17. The DOI
+draft on OPS and scenario 20's draft, and an `externalReviewer` in
+scenarios 17 and 23. The DOI
 settings are the context keys of scenarios.md: `doiPrefix: '10.1234'`
 everywhere but scenario 2; `doiCreationTime` `publication` (scenarios
-3, 5, 18) or `never` (6, 7, 8, 14); `doiSuffixType: 'none'` (7);
-`enabledDoiTypes` with `representation` (5, 12; on OMP also 4, 7, 9,
-10, 11), `chapter` (OMP: 4, 5, 7, 9, 10, 11), `file` (4, OMP),
-`peerReview` (17) or `issue` (18); `doiVersioning` `false` on OPS in
-scenario 10 and `true` in 11; `context.acronym: 'JPK'` in scenario 8.
-Scenarios 11 and 15 put a journal on "DOI Versioning" "Yes". On an
+3, 5, 18) or `never` (6, 7, 8, 14); "Immediately, when an item is
+created" has no key yet (scenarios.md, "Field shapes not built yet"),
+so scenarios 20 and 21 choose it on the "Setup" tab before their works
+are seeded, and 17 and 18 choose it on screen as one of their steps;
+`doiSuffixType: 'none'` (7); `enabledDoiTypes` with `representation`
+(5, 12, 20; OJS 7; OPS 11; on OMP also 4, 7, 9, 10, 11), `chapter`
+(OMP: 4, 5, 7, 9, 10, 11, 20), `file` (OMP: 4, 11, 20), `peerReview`
+(17, 23) or `issue` (18); scenario 16 ticks the galley kind on screen;
+`doiVersioning` `false` on OPS in scenario 10 and `true` in 11 and 22;
+`context.acronym: 'JPK'` in scenario 8. Scenarios 11, 15 and 22 put a
+journal on "DOI Versioning" "Yes". On an
 OJS checkout older than `pkp/ojs#5947` (ojs `2815f33e65`, merged
 2026-10-16) that makes every OJS OAI request of the install fail while
 it lasts ([OAI-PMH, A22](U19-oai-pmh.md#a22), retired), and most open
 pkp/ojs PRs, whose checks run this suite at their own heads, predate
-that fix (99 of 100 on 2026-10-19). So the OJS tests of scenarios 11
-and 15 run in the `ojs-serial` project, after the parallel suite, and
+that fix (99 of 100 on 2026-10-19). So the OJS tests of scenarios 11,
+15 and 22 run in the `ojs-serial` project, after the parallel suite, and
 each sets "No" back on screen before it ends. The agency: `plugins: {crossrefplugin |
 dataciteplugin: {enabled: true, settings: {depositorName,
-depositorEmail}}}` with `registrationAgency` (scenarios 13, 14, 15),
-the DataCite plugin enabled alone in scenario 16, none in 12 and 19;
-`publisherInstitution` and `onlineIssn` in scenarios 12 and 13 (OJS).
+depositorEmail}}}` with `registrationAgency` (scenarios 13, 14, 15,
+22, 23), the DataCite plugin enabled alone in scenario 16, none in 12
+and 19; `publisherInstitution` and `onlineIssn` in scenarios 12, 13, 22
+and 23 (OJS).
 Works through `POST scenarios/submission`: `decisions[]` for the
-Copyediting, Production and Review stages, `published: true`,
+Copyediting, Production and Review stages (scenario 4's "Moss
+regrowth" `sendExternalReview` then `accept`, its DOI made by that move;
+its "Coral spawning" `initialDecline`), `published: true`,
 `galleys[]` "PDF" (`article.pdf`, `preprint.pdf`), OMP's
-`publicationFormats[]` "PDF" (with `file` in scenarios 4 and 5) and in
-scenario 5 "EPUB" with `file` and `approved: false`, OMP's `chapters[]`
-"Tides" with `page: true` (4, 5, 7, 9, 10, 11) and "Harbours" without
-(4, 5), `submitted: false` for scenario 4's draft on OPS, `issue` into `issues[]` entries
-(published or not), and in scenario 17 `reviewRounds[].reviewers[]`
-`completed` with the context's `review.defaultReviewPublicVisibility`.
+`publicationFormats[]` "PDF" (with `file` in scenarios 4, 5 and 11)
+and in scenario 5 "EPUB" with `file` and `approved: false`, OMP's
+`chapters[]` "Tides" with `page: true` (4, 5, 7, 9, 10, 11, 20) and
+"Harbours" without (4, 5, 20), `submitted: false` for scenario 4's
+draft on OPS and scenario 20's draft in every app, `issue` into
+`issues[]` entries (published or not), and in scenarios 17 and 23
+`reviewRounds[].reviewers[]` `completed` with the context's
+`review.defaultReviewPublicVisibility` (23's works `published: true`
+besides). The scenario tooling refuses `publicationFormats` with
+`submitted: false` (400, "The \"Publication Formats\" page is on the
+workflow, which a draft does not have"), so scenario 20's draft on a
+press has the chapter alone. No key makes a second version or sets a
+version's stage, so scenarios 9–11 and 22 press "Create New Version" on
+screen, and scenario 21's "Published Manuscript Under Review" is chosen
+on screen before the decline: on a journal in the publish panel's
+"Publication Stage"; on a press, whose "Publish" window ("Schedule For
+Publication") names no stage and reads "The stage version that will be
+assigned to the publication is \"Version of Record 1.0\"", in "Create
+New Version"'s "Publication Stage" ("Author's Original (AO)",
+"Published Manuscript Under Review (PMUR)", "Version of Record (VoR)",
+empty as it arrives) with "Major Revision", and that new version is
+published (seen 2026-11-12). Scenario 4's "Move to
+Review", the declines and "Revert Decline" of scenario 21, and the
+publishes, "Mark as Complete" and "Revert Decision" of scenarios 17 and
+23 are recorded on screen.
 The Activity Log and the mail catcher are read after each action; on a
 journal a publish through "Review Publishing Details" › "Confirm" adds
 one more "Submission metadata updated" whatever the DOI setting
@@ -5087,7 +5345,8 @@ screen.
 Queued deposits are never drained: their jobs fail at connection on
 the test installs (seed-facts), so no scenario reads a status after
 them. Scenarios 1–11 run on all three apps, 12 and 13 on OJS and OPS,
-14–18 on OJS, 19 on OMP. In the scenarios {its number} is the number
+14–18 on OJS, 19 on OMP, 20 and 21 on all three, 22 on OJS and OPS and
+23 on OJS. In the scenarios {its number} is the number
 the item's row shows, the submission's. Live-probed 2026-09-26: these
 keys seeded every scratch journal, press and preprint server of the
 check on all three apps; the chapter and format keys are the U72 and
@@ -5757,7 +6016,9 @@ DOI". A "Registered" review DOI came back unchanged
 reaching the copyediting stage" an untick and a tick left the row empty
 and "Needs DOI"; under "Immediately…" the tick gave `10.1234/2k33x443`
 for the deleted `10.1234/b5k6vq86`. The team's stated intention covers
-the removal, not the way back (note q46).
+the removal, not the way back (note q46). Since lib/pkp `d1f20f891e`
+(note q46) "Revert Decision" on a "Reviewer Thanked" row deletes the
+"Unregistered" DOI the same way (test run 2026-11-12, scenario 17).
 
 <a id="fn-f-ojs8"></a>
 **f-ojs8** — At the round-8 PR heads of `pkp/pkp-lib#13447` (note q48),

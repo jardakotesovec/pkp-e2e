@@ -2,8 +2,8 @@
 /**
  * @file playwright/tests/serial/U45-dois.spec.js
  *
- * DOIs — the two OJS scenarios that cannot run beside the parallel suite:
- * S11 and S15 put a scratch journal on "DOI Versioning" "Yes", and while
+ * DOIs — the three OJS scenarios that cannot run beside the parallel suite:
+ * S11, S15 and S22 put a scratch journal on "DOI Versioning" "Yes", and while
  * any journal of the install is set so on an OJS checkout older than
  * `2815f33e65` (pkp/ojs#5947, which fixed U19 A22 on `main` on 2026-10-16),
  * every OJS OAI request answers 500 on PostgreSQL. The app repos' PR checks
@@ -26,7 +26,10 @@
  * Seeding: scenario endpoints only, a scratch journal with a throwaway
  * Journal Manager and Author (footnote sc): `doiPrefix`, `doiVersioning`,
  * the Crossref plugin with its depositor fields and `registrationAgency`,
- * a work seeded `published`. The typed DOI carries the run's tag (Rule 9).
+ * `publisherInstitution` / `onlineIssn` (S22), works seeded `published`;
+ * "Create New Version" and the publishes are pressed on screen. The typed
+ * DOI carries the run's tag (Rule 9). Deposits are never drained, so S22
+ * reads "Submitted" right after "Deposit DOIs" / "Deposit All".
  */
 const {test, expect} = require('../../support/fixtures.js');
 const {ArticleLandingPage} = require('../../../../../shared/playwright/pages/ArticleLandingPages.js');
@@ -46,6 +49,8 @@ const PREFIX = '10.1234';
 const MADE = defaultDoiPattern(PREFIX);
 const ARTICLE = 'Article';
 const AXOLOTL = 'Axolotl limb memory';
+const TARDIGRADE = 'Tardigrade desiccation';
+const CORAL = 'Coral spawning';
 const DEPOSITOR = {depositorName: 'Public Knowledge Project', depositorEmail: 'doi@mail.test'};
 const VERSIONING_YES = 'Yes, assign a unique DOI to every version of an article.';
 const VERSIONING_NO = 'No, all versions of an article should have the same DOI.';
@@ -151,6 +156,19 @@ async function createVersion(page, tag, isMinor) {
     return publish.confirmVersionDialog(dialog);
 }
 
+/**
+ * Every DOI row of each named block of the open "View all" window reads
+ * `status` (each block's rows counted first, so an empty block fails).
+ */
+async function expectEveryRow(dois, headings, status) {
+    for (const heading of headings) {
+        const badges = dois.versionBlock(heading).locator('tbody tr .doiListItem__itemMetadata--badge');
+        await expect(badges.first()).toBeVisible({timeout: 30_000});
+        const count = await badges.count();
+        await expect(badges, `${heading}: every row ${status}`).toHaveText(Array(count).fill(new RegExp(`^\\s*${status}\\s*$`)));
+    }
+}
+
 test.describe('DOIs (serial)', () => {
     test('S11: a DOI per major version ("DOI Versioning" "Yes")', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {
         test.setTimeout(300_000);
@@ -220,6 +238,24 @@ test.describe('DOIs (serial)', () => {
             await dois.closeVersionsWindow();
             await expectReaderDoi(reader, tag, axolotl.submissionId, doi2);
             await expectReaderDoi(reader, tag, axolotl.submissionId, doi1, {version: axolotl.publicationId});
+
+            // Marks on two published major versions: "Mark DOIs Registered",
+            // "Mark DOIs Needs Sync", then "Mark DOIs Unregistered", each
+            // changing every row of 1.0's block and of 2.0's (Rules 20,
+            // 26–28, 52).
+            for (const [action, notice, status] of [
+                ['Mark DOIs Registered', 'Items successfully marked registered', 'Registered'],
+                ['Mark DOIs Needs Sync', 'Items successfully marked needs sync', 'Needs Sync'],
+                ['Mark DOIs Unregistered', 'Items successfully marked unregistered', 'Unregistered'],
+            ]) {
+                await dois.goto();
+                await dois.runBulk(action, [axolotl.submissionId]);
+                await dois.expectNotice(notice);
+                await dois.expand(row, axolotl.submissionId);
+                await dois.openVersionsWindow(row);
+                await expectEveryRow(dois, ['Version of Record 1.0', 'Version of Record 2.0'], status);
+                await dois.closeVersionsWindow();
+            }
 
             // A minor version: still "There are 2 versions."; the window holds
             // 1.0's block and 2.1's, "Unpublished", with 2.0's DOI (Rules 12, 20).
@@ -335,6 +371,129 @@ test.describe('DOIs (serial)', () => {
             await settings.setPluginEnabled('crossrefplugin', false);
             await expectButton(false);
             await reader.context().close();
+        } finally {
+            await restoreVersioningNo(page, tag);
+        }
+    });
+    test('S22: deposits under "DOI Versioning" "Yes"', async ({asUser, ojsApi}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s22', testInfo);
+        const {manager, ada} = await seedJournal(ojsApi, tag, {
+            doiPrefix: PREFIX,
+            doiVersioning: true,
+            plugins: {crossrefplugin: {enabled: true, settings: DEPOSITOR}},
+            registrationAgency: 'crossrefplugin',
+            publisherInstitution: 'Public Knowledge Project',
+            onlineIssn: '1234-5679',
+        });
+        const page = await pageAs(asUser, manager);
+        try {
+            const seed = (key, title) => ojsApi.createSubmission({tag: `${tag}${key}`, context: tag, submitter: ada, title, published: true});
+            const axolotl = await seed('ax', AXOLOTL);
+            const tardigrade = await seed('ta', TARDIGRADE);
+            const coral = await seed('co', CORAL);
+            const dois = new DoisPage(page, tag);
+            const screen = new PublicationScreen(page, tag);
+            const axRow = dois.row(axolotl.submissionId);
+            const taRow = dois.row(tardigrade.submissionId);
+            const coRow = dois.row(coral.submissionId);
+            const v1 = 'Version of Record 1.0';
+            const v2 = 'Version of Record 2.0';
+            const badge = (heading) => dois.versionDoiBadge(dois.versionBlock(heading), ARTICLE);
+            const box = (heading) => dois.versionDoiBox(dois.versionBlock(heading), ARTICLE);
+            const openWindow = async (row, id) => {
+                await dois.goto();
+                await dois.expand(row, id);
+                await dois.openVersionsWindow(row);
+            };
+
+            // A major version not yet published: "View all" holds 1.0's block
+            // and 2.0's, "Unpublished", each "Article" row a DOI of its own,
+            // "Unregistered" (Rules 5, 12, 20).
+            await screen.gotoVersionPage(axolotl.submissionId, axolotl.publicationId, 'titleAbstract', 'Title & Abstract');
+            const axMajor = await createVersion(page, tag, 'false');
+            await openWindow(axRow, axolotl.submissionId);
+            await expect(dois.versionHeadings()).toHaveText([
+                /^\s*Version of Record 1\.0 \(.+\)\s*$/,
+                /^\s*Version of Record 2\.0 Unpublished\s*$/,
+            ]);
+            await expect(box(v1)).toHaveValue(MADE);
+            await expect(box(v2)).toHaveValue(MADE);
+            expect(await box(v2).inputValue()).not.toBe(await box(v1).inputValue());
+            await expect(badge(v1)).toHaveText(/^\s*Unregistered\s*$/);
+            await expect(badge(v2)).toHaveText(/^\s*Unregistered\s*$/);
+            await dois.closeVersionsWindow();
+
+            // "Deposit DOIs" with the new version unpublished: 1.0 "Submitted",
+            // 2.0 keeps "Unregistered" (Rule 29).
+            const deposited = await dois.runBulk('Deposit DOIs', [axolotl.submissionId]);
+            expect(deposited.status()).toBe(200);
+            await dois.expectNotice('Items successfully submitted for deposit');
+            await dois.expand(axRow, axolotl.submissionId);
+            await dois.openVersionsWindow(axRow);
+            await expect(badge(v1)).toHaveText(/^\s*Submitted\s*$/);
+            await expect(badge(v2)).toHaveText(/^\s*Unregistered\s*$/);
+            await dois.closeVersionsWindow();
+
+            // Two published major versions: 2.0's block a DOI of its own,
+            // "Unregistered" (Rules 12, 32).
+            await screen.gotoVersionPage(tardigrade.submissionId, tardigrade.publicationId, 'titleAbstract', 'Title & Abstract');
+            const taMajor = await createVersion(page, tag, 'false');
+            await screen.gotoVersionPage(tardigrade.submissionId, taMajor, 'titleAbstract', 'Title & Abstract');
+            await publishOpenVersion(page, tag);
+            await openWindow(taRow, tardigrade.submissionId);
+            await expect(dois.versionHeadings()).toHaveText([
+                /^\s*Version of Record 1\.0 \(.+\)\s*$/,
+                /^\s*Version of Record 2\.0 \(.+\)\s*$/,
+            ]);
+            await expect(box(v2)).toHaveValue(MADE);
+            expect(await box(v2).inputValue()).not.toBe(await box(v1).inputValue());
+            await expect(badge(v2)).toHaveText(/^\s*Unregistered\s*$/);
+            await dois.closeVersionsWindow();
+
+            // A published minor version: no "There are … versions." line and no
+            // "View all", the expanded view's DOI table on screen (Rule 20).
+            await screen.gotoVersionPage(coral.submissionId, coral.publicationId, 'titleAbstract', 'Title & Abstract');
+            const coMinor = await createVersion(page, tag, 'true');
+            await screen.gotoVersionPage(coral.submissionId, coMinor, 'titleAbstract', 'Title & Abstract');
+            await publishOpenVersion(page, tag);
+            await dois.goto();
+            await dois.expand(coRow, coral.submissionId);
+            await expect(dois.versionName(coRow)).toHaveText(/^\s*Version of Record 1\.1\s*$/);
+            await expect(dois.doiBox(coRow, ARTICLE)).toHaveValue(MADE);
+            const coDoi = await dois.doiBox(coRow, ARTICLE).inputValue();
+            await expect(dois.versionsBar(coRow)).toHaveCount(0);
+            await expect(dois.viewAllButton(coRow)).toHaveCount(0);
+
+            // Control: right after its publication, before "Deposit All",
+            // "Axolotl limb memory"'s 2.0 row still reads "Unregistered"
+            // (Rule 26).
+            await screen.gotoVersionPage(axolotl.submissionId, axMajor, 'titleAbstract', 'Title & Abstract');
+            await publishOpenVersion(page, tag);
+            await openWindow(axRow, axolotl.submissionId);
+            await expect(badge(v2)).toHaveText(/^\s*Unregistered\s*$/);
+            await dois.closeVersionsWindow();
+
+            // "Deposit All" after the publications: "Axolotl limb memory"'s
+            // 2.0 "Submitted"; both of "Tardigrade desiccation"'s blocks
+            // "Submitted"; "Coral spawning"'s shared DOI "Submitted" (Rule 29a).
+            await dois.depositAllButton().click();
+            const all = dois.dialog('Deposit all DOIs');
+            await expect(all).toBeVisible();
+            expect((await dois.confirmAction(all, 'Deposit all DOIs')).status()).toBe(200);
+            await dois.expectNotice('Items successfully submitted for deposit');
+            await dois.expand(axRow, axolotl.submissionId);
+            await dois.openVersionsWindow(axRow);
+            await expect(badge(v2)).toHaveText(/^\s*Submitted\s*$/);
+            await dois.closeVersionsWindow();
+            await dois.expand(taRow, tardigrade.submissionId);
+            await dois.openVersionsWindow(taRow);
+            await expect(badge(v1)).toHaveText(/^\s*Submitted\s*$/);
+            await expect(badge(v2)).toHaveText(/^\s*Submitted\s*$/);
+            await dois.closeVersionsWindow();
+            await dois.expand(coRow, coral.submissionId);
+            await expect(dois.doiBox(coRow, ARTICLE)).toHaveValue(coDoi);
+            await expect(dois.doiBadge(coRow, ARTICLE)).toHaveText('Submitted');
         } finally {
             await restoreVersioningNo(page, tag);
         }

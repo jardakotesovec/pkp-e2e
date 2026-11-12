@@ -3,42 +3,21 @@
  * @file playwright/tests/U45-dois.spec.js
  *
  * DOIs — OJS suite, one test per canonical scenario the spec runs on OJS
- * in the parallel `ojs` project (S1–S10 common, S12–S13 {OJS OPS},
- * S14, S16–S18 {OJS}). S11 and S15 put a journal on "DOI Versioning"
- * "Yes", which on an OJS head older than the U19 A22 fix (pkp/ojs#5947,
- * which most open app PRs predate) makes every OJS OAI request of the
- * install answer 500 while it lasts, so they run in the `ojs-serial` project,
- * after this one: `tests/serial/U45-dois.spec.js`. S19 is the press's.
+ * in the parallel `ojs` project (S1–S10, S20, S21 common, S12–S13 {OJS
+ * OPS}, S14, S16–S18, S23 {OJS}). S11, S15 and S22 put a journal on "DOI
+ * Versioning" "Yes", which on an OJS head older than the U19 A22 fix
+ * (pkp/ojs#5947, which most open app PRs predate) makes every OJS OAI
+ * request of the install answer 500 while it lasts, so they run in the
+ * `ojs-serial` project, after this one: `tests/serial/U45-dois.spec.js`.
+ * S19 is the press's.
  * Spec: docs/specs/U45-dois.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section is the record of everything else left out):
- * - A3 🐞: S7's refused values are read as the notice and the box back to
- *   its old value; the missing reason is not asserted.
- * - A4 🐞: after S13's "Deposit DOIs" the item's agency panel is not read.
- * - A8 🐞: rows' tick boxes are reached by their place in the row; their
- *   missing name is not asserted.
- * - A14 🐞: S9 reads the "Mark DOIs Needs Sync" question up to "…previously
- *   submitted DOIs."; its "stale" sentence is not asserted.
- * - OJS3 🐞: S14 reads the ISSN publish warning as listed, never its count.
- * - OJS7 ✅ (ruled intended): S17 unticks "Public Visibility" and reads
- *   the review's row gone; ticking it again (a new DOI, or "Needs DOI")
- *   is a Planned item.
- * - A2, A7, A9–A12, A15–A20, OJS1, OJS5, OJS8: not on these
- *   scenarios' paths ("Immediately…" is only refused, in S8; S17's
- *   journal has no agency, so its review DOIs are never deposited; S13
- *   presses "Deposit All" on a Crossref journal under "DOI Versioning"
- *   "No" with one version per work, and S16's DataCite journal has no
- *   galley kind and no second version). A25–A28 are retired
- *   (a decline and "Revert Decline" under "Immediately…", a declined work
- *   carrying a DOI on the page; serial S11 now marks the work registered
- *   while its major version is unpublished), and so is OJS6 (a hidden
- *   review's kept DOI marked by "Deposit DOIs") and OJS2 (a DataCite
- *   issue export or deposit failing on the server); the other paths are
- *   Planned items.
- *   OMP1–OMP3, OPS1–OPS3, OPS5: the press's and the preprint server's
- *   (OMP4, OMP5 and OPS4 retired).
+ * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
+ * contract, a ❓ is parked; the spec's Coverage section is the record of
+ * everything else): A2, A3, A4, A7, A8, A9, A10, A11, A12, A14, A15, A16,
+ * A17, A18, A19, A20, A21, A22, A23, A24, A29, A30, OJS1, OJS3, OJS4,
+ * OJS5, OJS8, OJS9, OJS10, OJS11, OJS12, OJS13; OMP1–OMP3, OPS1–OPS3,
+ * OPS5–OPS7 are the press's and the preprint server's.
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch journal with
@@ -48,8 +27,13 @@
  * `registrationAgency`, `publisherInstitution` / `onlineIssn`, `issues[]`,
  * `review.defaultReviewPublicVisibility`; works through the submission
  * scenario (`decisions[]`, `published`, `issue`, `galleys[]`,
- * `reviewRounds[]`). The DOI settings, the agency choice and the plugin
- * rows are driven on screen only where the scenario tests them. A DOI
+ * `reviewRounds[]`, `submitted: false`). The DOI settings, the agency
+ * choice and the plugin rows are driven on screen only where the scenario
+ * tests them, with one exception: "Immediately…" has no key yet, so S20
+ * and S21 choose it on "Setup" before their works are seeded (footnote
+ * sc); a second version, a "Published Manuscript Under Review" publish,
+ * the declines, "Revert Decline", "Move to Review", "Mark as Complete" and
+ * "Revert Decision" are recorded on screen, as footnote sc says. A DOI
  * typed by hand carries the run's tag after the spec's example value
  * ("10.1234/e2e-a1-{tag}"): a typed DOI must be unused on the whole
  * install (Rule 9), and the fleet's database outlives a run.
@@ -82,6 +66,8 @@ const {
     readerDoiLink,
     issueDoiLink,
 } = require('../../../../shared/playwright/pages/DoisPages.js');
+const {IssuesAdmin} = require('../../../../shared/playwright/pages/IssuesPages.js');
+const {GalleyManager} = require('../../../../shared/playwright/pages/GalleysPages.js');
 const {PublishScreen} = require('../pages/PublishSchedulePages.js');
 const {PublicationScreen, publishIssue} = require('../pages/PublicationMetadataPages.js');
 const {
@@ -93,9 +79,12 @@ const {
     openEditReview,
     publicVisibilityCheckbox,
     saveEditReview,
+    revertReviewDecision,
 } = require('../pages/ReviewStagePages.js');
 const {DecisionWizardPage} = require('../pages/DecisionWizardPages.js');
+const {SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
 
+const ARTICLE_PDF = require('path').join(__dirname, '..', 'fixtures', 'files', 'article.pdf');
 const JOURNAL = 'publicknowledge';
 const PREFIX = '10.1234';
 const MADE = defaultDoiPattern(PREFIX);
@@ -108,6 +97,7 @@ const ISSUE_1 = 'Vol. 1 No. 1 (2025)';
 const ISSUE_1_OPTION = /Vol\. 1 No\. 1 \(2025\)/;
 const ISSUE_2 = 'Vol. 1 No. 2 (2026)';
 const ISSUE_2_OPTION = /Vol\. 1 No\. 2 \(2026\)/;
+const ISSUE_3 = 'Vol. 1 No. 3 (2026)';
 const GALLEYS = 'Article galleys, such as a published PDF';
 const KINDS = ['Articles', 'Issues', GALLEYS, 'Peer Review'];
 const CROSSREF_KINDS = ['Articles', 'Issues', 'Peer Review'];
@@ -236,7 +226,10 @@ async function assignIssue(page, tag, submissionId, publicationId, radio, issueO
 
 /** The publish confirmation window (publish or schedule). */
 function publishWindow(page) {
-    return page.getByRole('dialog').filter({hasText: /Are you sure you want to (publish|schedule) this/}).last();
+    return page
+        .getByRole('dialog')
+        .filter({hasText: /Are you sure you want to (publish|schedule) this|All publication requirements have been met/})
+        .last();
 }
 
 /**
@@ -247,12 +240,13 @@ function publishWindow(page) {
  * details were saved before (a seeded Production item). Returns the
  * window, open.
  */
-async function openPublishWindow(page, tag, {issueOption = null} = {}) {
+async function openPublishWindow(page, tag, {issueOption = null, stage = 'VoR'} = {}) {
     const publish = new PublishScreen(page, tag);
     const window = publishWindow(page);
     const panel = await publish.pressPublish({or: window});
     if (panel) {
-        for (const [name, value] of [['versionStage', 'VoR'], ['versionIsMinor', 'false']]) {
+        if (stage !== 'VoR') await panel.locator('select[name="versionStage"]').selectOption(stage);
+        for (const [name, value] of [['versionStage', stage], ['versionIsMinor', 'false']]) {
             const box = panel.locator(`select[name="${name}"]`);
             if ((await box.count()) > 0 && (await box.isVisible()) && !(await box.inputValue())) {
                 await box.selectOption(value);
@@ -310,6 +304,107 @@ async function expectNoMailBesidesControl(browser, baseURL, pkpMail, tag, manage
         expect(await pkpMail.count({to: mailOf(other)}), `no mail to ${other}`).toBe(0);
     }
     await visitor.context().close();
+}
+
+/**
+ * The one row of the list shown whose name link reads `name` exactly,
+ * with the item's number read off the row (an item the test made on
+ * screen, whose number no seed returned).
+ */
+async function rowByName(dois, name) {
+    const row = dois.rows().filter({has: dois.page.locator('.listPanel__itemTitle a', {hasText: new RegExp(`^\\s*${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`)})});
+    await expect(row).toHaveCount(1, {timeout: 30_000});
+    const id = Number(((await row.getAttribute('id')) || '').replace(/^list-item-[a-z]+-/, ''));
+    expect(id, `the row of ${name} carries its number`).toBeGreaterThan(0);
+    return {row, id};
+}
+
+/**
+ * Open the work's "Review Round 1" from its workflow, whatever page the
+ * workflow opens on (a published work's opens on its publication).
+ */
+async function openRound1(workflow, submissionId) {
+    await workflow.frame.gotoEditorial(submissionId);
+    await workflow.selectRound(1);
+}
+
+/**
+ * Tick or untick "Publicly Show Reviewer Comments" in the reviewer row's
+ * "Edit" window on the work's "Review Round 1" and press "OK".
+ */
+async function setReviewVisibility(page, workflow, submissionId, shown) {
+    await openRound1(workflow, submissionId);
+    const edit = await openEditReview(page, workflow.reviewerRow('Rhea Reviewer'));
+    await expect(publicVisibilityCheckbox(edit)).toBeChecked({checked: !shown});
+    await publicVisibilityCheckbox(edit).setChecked(shown);
+    await saveEditReview(page, edit);
+}
+
+/**
+ * Press "Deposit All" and its window's "Deposit all DOIs"; waits for the
+ * action's answer (200), the list's refetch and the notice.
+ */
+async function depositAll(dois) {
+    await dois.depositAllButton().click();
+    const all = dois.dialog(TEXT.depositAllTitle);
+    await expect(all).toBeVisible({timeout: 30_000});
+    const response = await dois.confirmAction(all, TEXT.depositAllTitle);
+    expect(response.status(), 'Deposit All answers 200').toBe(200);
+    await dois.expectNotice(TEXT.depositQueued);
+}
+
+/**
+ * "Automatic DOI Assignment" set to "Immediately, when an item is created
+ * (only with the default DOI suffix)" on Settings › Distribution › "DOIs"
+ * › "Setup" and saved: the choice has no scenario key yet (footnote sc).
+ */
+async function chooseImmediately(page, tag) {
+    const settings = new DoiSettings(page, tag);
+    await settings.goto('Setup');
+    await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+    await settings.save(settings.setup);
+}
+
+/**
+ * The Author finishes a seeded draft with the wizard's final "Submit": a
+ * file uploaded on "Upload Files", every step continued, "Submit" and the
+ * window's "Submit" (U21's screens).
+ */
+async function submitDraft(page, tag, submissionId) {
+    const wizard = new SubmissionWizardPage(page, tag);
+    await wizard.goto(submissionId);
+    await wizard.expectStep('Upload Files');
+    await wizard.uploadFile();
+    await wizard.continueTo('Details');
+    await wizard.continueTo('Contributors');
+    await wizard.continueTo('For the Editors');
+    await wizard.continueToReview(submissionId);
+    await wizard.submitAndConfirm();
+}
+
+/**
+ * Record a decision on the work's workflow by its button (the stage the
+ * workflow opens on), walking its wizard with every email as it arrives.
+ * The wizard is known by its breadcrumb's last item, the button's words:
+ * "Move to Review"'s page is headed "Move to Submission" (U32 A13).
+ */
+async function recordOnWorkflow(page, tag, submissionId, button) {
+    const workflow = new ReviewWorkflowPage(page, tag);
+    await workflow.gotoEditorial(submissionId);
+    await workflow.frame.actionButton(button).click();
+    const decision = new DecisionPage(page);
+    await expect(page.getByRole('navigation', {name: 'You are here:'}).getByRole('listitem').last()).toHaveText(button, {timeout: 30_000});
+    await decision.completeAll();
+}
+
+/**
+ * The list shown holds exactly the works titled `titles`, read settled
+ * (the row links' count, then their words, as a set: lesson 14c).
+ */
+async function expectListedExactly(dois, titles) {
+    await expect(dois.rowLink(dois.rows())).toHaveCount(titles.length, {timeout: 30_000});
+    const names = await dois.rowNames();
+    expect(names.map((n) => n.replace(/^.* — /, '')).sort()).toEqual([...titles].sort());
 }
 
 test.describe('DOIs', () => {
@@ -594,15 +689,20 @@ test.describe('DOIs', () => {
     test('S4: DOIs made at the move to Copyediting', async ({asUser, ojsApi}, testInfo) => {
         test.setTimeout(240_000);
         const tag = makeTag('s4', testInfo);
-        const {manager, mary} = await seedJournal(ojsApi, tag, {doiPrefix: PREFIX});
+        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {doiPrefix: PREFIX});
         const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE);
+        // "Moss regrowth" reached Copyediting from a review round, its DOI
+        // made by that move; "Coral spawning" declined at the Submission
+        // stage without a DOI (footnote sc).
+        const moss = await seedWork(ojsApi, tag, 'mo', ada, MOSS, {decisions: ['sendExternalReview', 'accept']});
+        const coral = await seedWork(ojsApi, tag, 'co', ada, CORAL, {decisions: ['initialDecline']});
         const page = await pageAs(asUser, manager);
         const dois = new DoisPage(page, tag);
 
         // Control: before the decision the list holds the work, its
         // "Article" row empty and "Needs DOI", and "DOI Assigned" leaves it
-        // out, the filter's settled list showing its empty line (Rules 5,
-        // 15, 22).
+        // out, the filter's settled list holding "Moss regrowth" alone, the
+        // work with a DOI (Rules 5, 15, 22).
         await dois.goto();
         const before = dois.row(tardigrade.submissionId);
         await expect(dois.rowLink(before)).toHaveText(new RegExp(`— ${TARDIGRADE}\\s*$`));
@@ -610,7 +710,7 @@ test.describe('DOIs', () => {
         await expect(dois.doiBox(before, ARTICLE)).toHaveValue('');
         await expect(dois.doiBadge(before, ARTICLE)).toHaveText('Needs DOI');
         await dois.pressFilter('DOI Assigned');
-        await expect(dois.emptyLine()).toBeVisible();
+        await expectListedExactly(dois, [MOSS]);
         await expect(before).toHaveCount(0);
         const logBefore = await activityLines(page, tag, tardigrade.submissionId);
 
@@ -638,6 +738,44 @@ test.describe('DOIs', () => {
         const logAfter = await activityLines(page, tag, tardigrade.submissionId);
         expect(logAfter.length).toBe(logBefore.length + 1);
         expect(byManager(logAfter).length).toBe(byManager(logBefore).length + 1);
+
+        // Sent back to Review, then declined (journal, press): after "Move to
+        // Review" the "Workflow" filter lists "Moss regrowth" with its DOI;
+        // after "Decline Submission" the list and the filter still hold it,
+        // the DOI the same (Rules 15, 22).
+        await dois.goto();
+        const moRow = dois.row(moss.submissionId);
+        await dois.expand(moRow, moss.submissionId);
+        const mossDoi = await doiValue(dois.doiBox(moRow, ARTICLE));
+        await recordOnWorkflow(page, tag, moss.submissionId, 'Move to Review');
+        await workflow.frame.expectStage(/^Review/);
+        await dois.goto();
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.clearFilterButton(TEXT.workflowFilter)).toBeVisible();
+        await expect(dois.rowLink(moRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
+        await dois.expand(moRow, moss.submissionId);
+        await expect(dois.doiBox(moRow, ARTICLE)).toHaveValue(mossDoi);
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.clearFilterButton(TEXT.workflowFilter)).toHaveCount(0);
+        await recordOnWorkflow(page, tag, moss.submissionId, 'Decline Submission');
+        await dois.goto();
+        await expect(dois.rowLink(moRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
+        await dois.expand(moRow, moss.submissionId);
+        await expect(dois.doiBox(moRow, ARTICLE)).toHaveValue(mossDoi);
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.rowLink(moRow)).toHaveText(new RegExp(`— ${MOSS}\\s*$`));
+
+        // Declined without a DOI (journal, press): neither the "Workflow"
+        // filter's list (holding "Moss regrowth" and "Tardigrade
+        // desiccation", the positive control) nor the list without a filter
+        // (holding the same and nothing else) holds "Coral spawning"
+        // (Rules 15, 22).
+        await expectListedExactly(dois, [MOSS, TARDIGRADE]);
+        await expect(dois.row(coral.submissionId)).toHaveCount(0);
+        await dois.pressFilter(TEXT.workflowFilter);
+        await expect(dois.clearFilterButton(TEXT.workflowFilter)).toHaveCount(0);
+        await expectListedExactly(dois, [MOSS, TARDIGRADE]);
+        await expect(dois.row(coral.submissionId)).toHaveCount(0);
     });
 
     test('S5: DOIs made at publication, a galley\'s included', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {
@@ -821,8 +959,13 @@ test.describe('DOIs', () => {
     test('S7: type, change and clear a DOI by hand', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {
         test.setTimeout(300_000);
         const tag = makeTag('s7', testInfo);
-        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {doiPrefix: PREFIX, doiCreationTime: 'never', doiSuffixType: 'none'});
-        const axolotl = await seedWork(ojsApi, tag, 'ax', ada, AXOLOTL, {published: true});
+        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {
+            doiPrefix: PREFIX,
+            doiCreationTime: 'never',
+            doiSuffixType: 'none',
+            enabledDoiTypes: ['publication', 'representation'],
+        });
+        const axolotl = await seedWork(ojsApi, tag, 'ax', ada, AXOLOTL, {published: true, galleys: [{label: 'PDF', file: 'article.pdf'}]});
         const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE, {published: true});
         const page = await pageAs(asUser, manager);
         const dois = new DoisPage(page, tag);
@@ -830,6 +973,7 @@ test.describe('DOIs', () => {
         const reader = await readerPage(browser, baseURL);
         const first = `${PREFIX}/e2e-a1-${tag}`;
         const second = `${PREFIX}/e2e-a2-${tag}`;
+        const galleyTyped = `${PREFIX}/e2e-g2-${tag}`;
         const logBefore = (await activityLines(page, tag, axolotl.submissionId)).length;
 
         // The "None" format and its "DOI management page" link (Fields; Rule 6b).
@@ -896,6 +1040,23 @@ test.describe('DOIs', () => {
         await expect(dois.doiBox(axRow, ARTICLE)).toHaveValue('');
         await expect(dois.doiBadge(axRow, ARTICLE)).toHaveText('Needs DOI');
         await expectReaderDoi(reader, tag, axolotl.submissionId, null);
+
+        // Only a galley's DOI left {OJS}: the badge reads "Needs DOI"; a DOI
+        // typed in the "PDF" row turns it "Unregistered" while the "Article"
+        // row stays empty and "Needs DOI" (Rules 18, 31).
+        await dois.goto();
+        await expect(dois.rowBadge(axRow)).toHaveText('Needs DOI');
+        await dois.expand(axRow, axolotl.submissionId);
+        expect(await dois.doiTypes(axRow)).toEqual([ARTICLE, 'PDF']);
+        await expect(dois.doiBox(axRow, 'PDF')).toHaveValue('');
+        await dois.startEditing(axRow);
+        await dois.doiBox(axRow, 'PDF').fill(galleyTyped);
+        await dois.saveEditing(axRow);
+        await dois.expectNotice(TEXT.updated);
+        await expect(dois.doiBox(axRow, 'PDF')).toHaveValue(galleyTyped);
+        await expect(dois.rowBadge(axRow)).toHaveText('Unregistered');
+        await expect(dois.doiBox(axRow, ARTICLE)).toHaveValue('');
+        await expect(dois.doiBadge(axRow, ARTICLE)).toHaveText('Needs DOI');
 
         // Control: "Edit", then "Save" with nothing changed closes the
         // editing and sends nothing (Rule 18).
@@ -1407,15 +1568,17 @@ test.describe('DOIs', () => {
     test('S16: DataCite', async ({asUser, ojsApi}, testInfo) => {
         test.setTimeout(240_000);
         const tag = makeTag('s16', testInfo);
-        const {manager, ada} = await seedJournal(ojsApi, tag, {
+        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {
             doiPrefix: PREFIX,
             plugins: {dataciteplugin: {enabled: true}},
         });
         const axolotl = await seedWork(ojsApi, tag, 'ax', ada, AXOLOTL, {published: true});
+        const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE, {published: true, galleys: [{label: 'PDF', file: 'article.pdf'}]});
         const page = await pageAs(asUser, manager);
         const dois = new DoisPage(page, tag);
         const settings = new DoiSettings(page, tag);
         const row = dois.row(axolotl.submissionId);
+        const taRow = dois.row(tardigrade.submissionId);
 
         // Control: before DataCite is saved, no "Deposit All" (Rule 36).
         await dois.goto();
@@ -1467,6 +1630,48 @@ test.describe('DOIs', () => {
         await dois.expectNotice(TEXT.depositQueued);
         await dois.expand(row, axolotl.submissionId);
         await expect(dois.doiBadge(row, ARTICLE)).toHaveText('Submitted');
+
+        // An article registered before galley DOIs: "Mark DOIs Registered"
+        // (Rule 26); the galley box ticked and saved, "Assign DOIs" gives
+        // the "PDF" row a DOI, "Unregistered" (Rules 4, 25).
+        await dois.runBulk('Mark DOIs Registered', [tardigrade.submissionId]);
+        await dois.expectNotice(TEXT.markedRegistered);
+        await dois.expand(taRow, tardigrade.submissionId);
+        expect(await dois.doiTypes(taRow)).toEqual([ARTICLE]);
+        await expect(dois.doiBadge(taRow, ARTICLE)).toHaveText('Registered');
+        await settings.goto('Setup');
+        await settings.kindBox(GALLEYS).check();
+        await settings.save(settings.setup);
+        await dois.goto();
+        await dois.runBulk('Assign DOIs', [tardigrade.submissionId]);
+        await dois.expectNotice(TEXT.assigned);
+        await dois.expand(taRow, tardigrade.submissionId);
+        expect(await dois.doiTypes(taRow)).toEqual([ARTICLE, 'PDF']);
+        await expect(dois.doiBox(taRow, 'PDF')).toHaveValue(MADE);
+        await expect(dois.doiBadge(taRow, 'PDF')).toHaveText('Unregistered');
+        await expect(dois.doiBadge(taRow, ARTICLE)).toHaveText('Registered');
+
+        // "Deposit All" takes the galley's DOI: the "PDF" row "Submitted",
+        // the "Article" row keeps "Registered" (Rule 29a).
+        await depositAll(dois);
+        await dois.expand(taRow, tardigrade.submissionId);
+        await expect(dois.doiBadge(taRow, 'PDF')).toHaveText('Submitted');
+        await expect(dois.doiBadge(taRow, ARTICLE)).toHaveText('Registered');
+
+        // Galleys without "Articles": "Mark DOIs Unregistered" turns the
+        // "PDF" row "Unregistered"; "Deposit All" turns it "Submitted"
+        // (Rules 27, 29a).
+        await settings.goto('Setup');
+        await settings.kindBox('Articles').uncheck();
+        await settings.save(settings.setup);
+        await dois.goto();
+        await dois.runBulk('Mark DOIs Unregistered', [tardigrade.submissionId]);
+        await dois.expectNotice(TEXT.markedUnregistered);
+        await dois.expand(taRow, tardigrade.submissionId);
+        await expect(dois.doiBadge(taRow, 'PDF')).toHaveText('Unregistered');
+        await depositAll(dois);
+        await dois.expand(taRow, tardigrade.submissionId);
+        await expect(dois.doiBadge(taRow, 'PDF')).toHaveText('Submitted');
     });
 
     test('S17: peer-review DOIs', async ({asUser, ojsApi}, testInfo) => {
@@ -1477,6 +1682,7 @@ test.describe('DOIs', () => {
             doiPrefix: PREFIX,
             enabledDoiTypes: ['publication', 'peerReview'],
             review: {defaultReviewPublicVisibility: true},
+            issues: [{volume: 1, number: 1, year: 2025, published: true}],
             extra: [user(reviewer, 'Rhea', 'Reviewer', ['externalReviewer'])],
         });
         const inReview = {decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: reviewer, status: 'completed'}]}]};
@@ -1484,9 +1690,11 @@ test.describe('DOIs', () => {
         const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE, inReview);
         const page = await pageAs(asUser, manager);
         const dois = new DoisPage(page, tag);
+        const settings = new DoiSettings(page, tag);
         const workflow = new ReviewWorkflowPage(page, tag);
         const wizard = new DecisionWizardPage(page);
         const peerReview = /^Peer Review \d+$/;
+        const anyDoi = new RegExp(`^${PREFIX.replace('.', '\\.')}/.+`);
 
         // Control: before either decision, the DOIs page lists both works,
         // "Unpublished", each with the "Article" row only, empty and "Needs
@@ -1574,7 +1782,7 @@ test.describe('DOIs', () => {
 
         // "Public Visibility" unticked in the row's "Edit" window: the
         // expanded view has the "Article" row only, the article's DOI
-        // unchanged (Rule 7b). Ticking it again is OJS7's question.
+        // unchanged (Rule 7b).
         await workflow.gotoEditorial(tardigrade.submissionId);
         await workflow.frame.selectRound(1);
         const edit = await openEditReview(page, workflow.reviewerRow('Rhea Reviewer'));
@@ -1585,6 +1793,88 @@ test.describe('DOIs', () => {
         await dois.expand(taRow, tardigrade.submissionId);
         expect(await dois.doiTypes(taRow)).toEqual([ARTICLE]);
         await expect(dois.doiBox(taRow, ARTICLE)).toHaveValue(taArticleDoi);
+
+        // Shown publicly again: the "Peer Review {number}" row is back,
+        // empty and "Needs DOI" (Rules 7a, 7b; OJS7).
+        await setReviewVisibility(page, workflow, tardigrade.submissionId, true);
+        await dois.goto();
+        await dois.expand(taRow, tardigrade.submissionId);
+        expect(await dois.doiTypes(taRow)).toEqual([ARTICLE, taTypes[1]]);
+        await expect(dois.doiBox(taRow, taTypes[1])).toHaveValue('');
+        await expect(dois.doiBadge(taRow, taTypes[1])).toHaveText('Needs DOI');
+
+        // Published from Copyediting into Vol. 1 No. 1: the review's row
+        // holds a DOI, "Unregistered" (Rules 5, 7a).
+        await assignIssue(page, tag, tardigrade.submissionId, tardigrade.publicationId, 'Assign To Current/Back Issue', ISSUE_1_OPTION);
+        await openPublication(page, tag, tardigrade.submissionId, tardigrade.publicationId);
+        await publishOpenVersion(page, tag, {issueOption: ISSUE_1_OPTION});
+        await dois.goto();
+        await dois.expand(taRow, tardigrade.submissionId);
+        await expect(dois.doiBox(taRow, taTypes[1])).toHaveValue(anyDoi);
+        await expect(dois.doiBadge(taRow, taTypes[1])).toHaveText('Unregistered');
+
+        // "Revert Decision" on a "Complete" review: the work's expanded view
+        // has the "Article" row only (Rule 7b).
+        await openRound1(workflow, tardigrade.submissionId);
+        await expect(workflow.reviewerRow('Rhea Reviewer')).toContainText('Complete', {timeout: 30_000});
+        await revertReviewDecision(page, workflow.reviewerRow('Rhea Reviewer'));
+        await dois.goto();
+        await dois.expand(taRow, tardigrade.submissionId);
+        expect(await dois.doiTypes(taRow)).toEqual([ARTICLE]);
+
+        // "Revert Decision" on "Reviewer Thanked": the scenario's "keeps its
+        // DOI, 'Unregistered'" is T-ojs-1 in the findings file: since
+        // pkp/pkp-lib#13602 the revert takes the review out of "counts as
+        // read" here too, so its row leaves, the "Article" row alone
+        // (Rule 7b as the app reads it).
+        await openRound1(workflow, axolotl.submissionId);
+        await expect(workflow.reviewerRow('Rhea Reviewer')).toContainText('Reviewer Thanked', {timeout: 30_000});
+        await revertReviewDecision(page, workflow.reviewerRow('Rhea Reviewer'));
+        await dois.goto();
+        await dois.expand(axRow, axolotl.submissionId);
+        expect(await dois.doiTypes(axRow)).toEqual([ARTICLE]);
+
+        // "Immediately…" saved. The scenario's untick and tick on "Axolotl
+        // limb memory" need a review that counts as read, which the revert
+        // above ended (T-ojs-1), so "Mark as Complete" comes first: the
+        // row at once, with a DOI (Rules 5a, 7). Then taken out of public
+        // view: its row leaves; shown again: back at once with a new DOI,
+        // "Unregistered" (Rules 5a, 7b; OJS7).
+        await settings.goto('Setup');
+        await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+        await settings.save(settings.setup);
+        await openRound1(workflow, axolotl.submissionId);
+        const axRead = await openReviewDetails(page, workflow.reviewerRow('Rhea Reviewer'));
+        await markReviewComplete(page, axRead);
+        await closeReviewDetails(page, axRead);
+        await dois.goto();
+        await dois.expand(axRow, axolotl.submissionId);
+        expect(await dois.doiTypes(axRow)).toEqual(axTypes);
+        const axImmediate = await doiValue(dois.doiBox(axRow, axTypes[1]), anyDoi);
+        await setReviewVisibility(page, workflow, axolotl.submissionId, false);
+        await dois.goto();
+        await dois.expand(axRow, axolotl.submissionId);
+        expect(await dois.doiTypes(axRow)).toEqual([ARTICLE]);
+        await setReviewVisibility(page, workflow, axolotl.submissionId, true);
+        await dois.goto();
+        await dois.expand(axRow, axolotl.submissionId);
+        expect(await dois.doiTypes(axRow)).toEqual(axTypes);
+        await expect(dois.doiBox(axRow, axTypes[1])).toHaveValue(anyDoi);
+        expect(await dois.doiBox(axRow, axTypes[1]).inputValue()).not.toBe(axImmediate);
+        await expect(dois.doiBadge(axRow, axTypes[1])).toHaveText('Unregistered');
+
+        // "Mark as Complete" under "Immediately…": "Tardigrade
+        // desiccation"'s review row at once, with a DOI, "Unregistered"
+        // (Rules 5a, 7).
+        await openRound1(workflow, tardigrade.submissionId);
+        const again = await openReviewDetails(page, workflow.reviewerRow('Rhea Reviewer'));
+        await markReviewComplete(page, again);
+        await closeReviewDetails(page, again);
+        await dois.goto();
+        await dois.expand(taRow, tardigrade.submissionId);
+        expect(await dois.doiTypes(taRow)).toEqual([ARTICLE, taTypes[1]]);
+        await expect(dois.doiBox(taRow, taTypes[1])).toHaveValue(anyDoi);
+        await expect(dois.doiBadge(taRow, taTypes[1])).toHaveText('Unregistered');
     });
 
     test('S18: issue DOIs, and an article scheduled under "Upon publication"', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {
@@ -1645,6 +1935,281 @@ test.describe('DOIs', () => {
         await expect(reader.locator('.obj_issue_toc')).toBeVisible();
         await expect(issueDoiLink(reader)).toHaveText(resolving(issueDoi));
         await reader.context().close();
+
+        // "Immediately…": an issue at its creation. The choice saved on
+        // "Setup"; "Create Issue" Vol. 1 No. 3 (2026), "Title" unticked: the
+        // "Issues" tab lists it "Unpublished", its "Issue" row holding a
+        // made DOI, "Unregistered" (Rules 5a, 6a, 8, 16).
+        const settings = new DoiSettings(page, tag);
+        await settings.goto('Setup');
+        await settings.creationTimeSelect().selectOption({label: IMMEDIATELY});
+        await settings.save(settings.setup);
+        const issues = new IssuesAdmin(page, tag);
+        await issues.goto('Future Issues');
+        const {dialog, form} = await issues.openCreate();
+        await form.volumeBox().fill('1');
+        await form.numberBox().fill('3');
+        await form.yearBox().fill('2026');
+        await form.showBox('Title').uncheck();
+        await form.save();
+        await expect(dialog).toHaveCount(0);
+        await dois.goto();
+        await dois.openTab('Issues');
+        const created = await rowByName(dois, ISSUE_3);
+        await expect(dois.rowBadge(created.row)).toHaveText('Unpublished');
+        await dois.expand(created.row, created.id);
+        expect(await dois.doiTypes(created.row)).toEqual(['Issue']);
+        await expect(dois.doiBox(created.row, 'Issue')).toHaveValue(MADE);
+        await expect(dois.doiBadge(created.row, 'Issue')).toHaveText('Unregistered');
+    });
+    test('S20: DOIs made when an item is created ("Immediately…")', async ({asUser, ojsApi}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s20', testInfo);
+        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {
+            doiPrefix: PREFIX,
+            enabledDoiTypes: ['publication', 'representation'],
+        });
+        const page = await pageAs(asUser, manager);
+        const dois = new DoisPage(page, tag);
+        // "Immediately…" has no key yet (footnote sc): chosen on "Setup"
+        // before the works are seeded.
+        await chooseImmediately(page, tag);
+        const coral = await seedWork(ojsApi, tag, 'co', ada, CORAL, {submitted: false, participants: []});
+        const axolotl = await seedWork(ojsApi, tag, 'ax', mary, AXOLOTL, {decisions: TO_PRODUCTION});
+        const coRow = dois.row(coral.submissionId);
+        const axRow = dois.row(axolotl.submissionId);
+
+        // Control: before the final "Submit", "DOI Assigned" lists
+        // "Axolotl limb memory", submitted after the choice, and not the
+        // draft (Rules 5a, 22).
+        await dois.goto();
+        await dois.pressFilter('DOI Assigned');
+        await expectListedExactly(dois, [AXOLOTL]);
+        await expect(coRow).toHaveCount(0);
+
+        // The final "Submit": the Author finishes the draft (Rule 5a).
+        const authorPage = await pageAs(asUser, ada);
+        await submitDraft(authorPage, tag, coral.submissionId);
+
+        // The submitted work's DOIs: "Unpublished"; its "Article" row a made
+        // DOI, "Unregistered" (Rules 5a, 6a, 16, 17).
+        await dois.goto();
+        await expect(dois.rowLink(coRow)).toHaveText(new RegExp(`— ${CORAL}\\s*$`));
+        await expect(dois.rowBadge(coRow)).toHaveText('Unpublished');
+        await dois.expand(coRow, coral.submissionId);
+        expect(await dois.doiTypes(coRow)).toEqual([ARTICLE]);
+        await expect(dois.doiBox(coRow, ARTICLE)).toHaveValue(MADE);
+        await expect(dois.doiBadge(coRow, ARTICLE)).toHaveText('Unregistered');
+
+        // A galley added: its "PDF" row holds a made DOI, "Unregistered", at
+        // once (Rule 5a).
+        await dois.expand(axRow, axolotl.submissionId);
+        expect(await dois.doiTypes(axRow)).toEqual([ARTICLE]);
+        const galleys = new GalleyManager(page, new WorkflowPage(page, tag));
+        await galleys.open(axolotl.submissionId, axolotl.publicationId);
+        await galleys.addGalley({label: 'PDF', component: 'Article Text', file: ARTICLE_PDF, name: 'article.pdf'});
+        await galleys.expectLabels(['PDF']);
+        await dois.goto();
+        await dois.expand(axRow, axolotl.submissionId);
+        expect(await dois.doiTypes(axRow)).toEqual([ARTICLE, 'PDF']);
+        await expect(dois.doiBox(axRow, 'PDF')).toHaveValue(MADE);
+        await expect(dois.doiBadge(axRow, 'PDF')).toHaveText('Unregistered');
+    });
+
+    test('S21: a declined submission\'s DOIs ("Immediately…")', async ({browser, baseURL, asUser, ojsApi}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s21', testInfo);
+        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {doiPrefix: PREFIX});
+        const page = await pageAs(asUser, manager);
+        const dois = new DoisPage(page, tag);
+        await chooseImmediately(page, tag);
+        const axolotl = await seedWork(ojsApi, tag, 'ax', ada, AXOLOTL);
+        const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE, {decisions: ['sendExternalReview']});
+        const axRow = dois.row(axolotl.submissionId);
+        const taRow = dois.row(tardigrade.submissionId);
+        const reader = await readerPage(browser, baseURL);
+
+        // "Tardigrade desiccation"'s version published as "Published
+        // Manuscript Under Review" 1.0 on screen (footnote sc).
+        await openPublication(page, tag, tardigrade.submissionId, tardigrade.publicationId);
+        await publishOpenVersion(page, tag, {stage: 'PMUR'});
+
+        // Before the decline: listed, its "Article" row a DOI, "Unregistered"
+        // (Rules 5a, 15); control: "DOI Assigned" lists it (Rules 5a, 22).
+        await dois.goto();
+        await dois.expand(axRow, axolotl.submissionId);
+        await expect(dois.doiBox(axRow, ARTICLE)).toHaveValue(MADE);
+        await expect(dois.doiBadge(axRow, ARTICLE)).toHaveText('Unregistered');
+        await dois.pressFilter('DOI Assigned');
+        await expectListedExactly(dois, [AXOLOTL, TARDIGRADE]);
+        await dois.clearFilter('DOI Assigned');
+
+        // "Decline Submission": the list no longer holds it, the other work
+        // still there (Rules 5b, 15).
+        await recordOnWorkflow(page, tag, axolotl.submissionId, 'Decline Submission');
+        await dois.goto();
+        await expectListedExactly(dois, [TARDIGRADE]);
+        await expect(axRow).toHaveCount(0);
+
+        // "Revert Decline": listed again with a made DOI, "Unregistered";
+        // "Needs DOI" does not list it, the filter's settled list empty;
+        // pressed again, lifted (Rules 5b, 6a, 22).
+        await recordOnWorkflow(page, tag, axolotl.submissionId, 'Revert Decline');
+        await dois.goto();
+        await dois.expand(axRow, axolotl.submissionId);
+        await expect(dois.doiBox(axRow, ARTICLE)).toHaveValue(MADE);
+        await expect(dois.doiBadge(axRow, ARTICLE)).toHaveText('Unregistered');
+        await dois.pressFilter('Needs DOI');
+        await expect(dois.clearFilterButton('Needs DOI')).toBeVisible();
+        await expect(dois.emptyLine()).toBeVisible();
+        await expect(axRow).toHaveCount(0);
+        await dois.pressFilter('Needs DOI');
+        await expect(dois.clearFilterButton('Needs DOI')).toHaveCount(0);
+        await expectListedExactly(dois, [AXOLOTL, TARDIGRADE]);
+
+        // A published "Published Manuscript Under Review": its page shows
+        // the DOI; declined on its review round, the list still holds it
+        // with the same DOI and its page the same "DOI:" line (Rules 5b,
+        // 15, 43).
+        await dois.expand(taRow, tardigrade.submissionId);
+        const taDoi = await doiValue(dois.doiBox(taRow, ARTICLE));
+        await expectReaderDoi(reader, tag, tardigrade.submissionId, taDoi);
+        await recordOnWorkflow(page, tag, tardigrade.submissionId, 'Decline Submission');
+        await dois.goto();
+        await dois.expand(taRow, tardigrade.submissionId);
+        await expect(dois.doiBox(taRow, ARTICLE)).toHaveValue(taDoi);
+        await expectReaderDoi(reader, tag, tardigrade.submissionId, taDoi);
+        await reader.context().close();
+    });
+
+    test('S23: peer-review DOIs after publication, with Crossref', async ({asUser, ojsApi}, testInfo) => {
+        test.setTimeout(360_000);
+        const tag = makeTag('s23', testInfo);
+        const reviewer = `${tag}rv`;
+        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {
+            doiPrefix: PREFIX,
+            enabledDoiTypes: ['publication', 'peerReview'],
+            plugins: {crossrefplugin: {enabled: true, settings: DEPOSITOR}},
+            registrationAgency: 'crossrefplugin',
+            publisherInstitution: 'Public Knowledge Project',
+            onlineIssn: '1234-5679',
+            review: {defaultReviewPublicVisibility: true},
+            extra: [user(reviewer, 'Rhea', 'Reviewer', ['externalReviewer'])],
+        });
+        const reviewed = {decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: reviewer, status: 'completed'}]}], published: true};
+        const axolotl = await seedWork(ojsApi, tag, 'ax', ada, AXOLOTL, reviewed);
+        const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE, reviewed);
+        const page = await pageAs(asUser, manager);
+        const dois = new DoisPage(page, tag);
+        const workflow = new ReviewWorkflowPage(page, tag);
+        const axRow = dois.row(axolotl.submissionId);
+        const taRow = dois.row(tardigrade.submissionId);
+        const anyDoi = new RegExp(`^${PREFIX.replace('.', '\\.')}/.+`);
+        const peerReview = /^Peer Review \d+$/;
+        /** The work's two rows' statuses, the review's row read by its place. */
+        const expectRows = async (row, id, article, review) => {
+            await dois.expand(row, id);
+            const types = await dois.doiTypes(row);
+            if (review === null) {
+                expect(types).toEqual([ARTICLE]);
+            } else {
+                expect(types.length).toBe(2);
+                expect(types[1]).toMatch(peerReview);
+                await expect(dois.doiBadge(row, types[1])).toHaveText(review);
+            }
+            await expect(dois.doiBadge(row, ARTICLE)).toHaveText(article);
+            return types;
+        };
+
+        // Reviews not yet read: each work the "Article" row alone,
+        // "Unregistered" (Rule 7).
+        await dois.goto();
+        await expectRows(axRow, axolotl.submissionId, 'Unregistered', null);
+        await expectRows(taRow, tardigrade.submissionId, 'Unregistered', null);
+        const axArticleDoi = await doiValue(dois.doiBox(axRow, ARTICLE));
+        const taArticleDoi = await doiValue(dois.doiBox(taRow, ARTICLE));
+
+        // An article registered by hand (Rule 26).
+        await dois.runBulk('Mark DOIs Registered', [tardigrade.submissionId]);
+        await dois.expectNotice(TEXT.markedRegistered);
+        await expectRows(taRow, tardigrade.submissionId, 'Registered', null);
+
+        // "Deposit All" before the reviews are read: "Axolotl limb memory"
+        // "Submitted", "Tardigrade desiccation" kept "Registered", neither
+        // with a review row; the Control (Rules 7, 29a).
+        await depositAll(dois);
+        await expectRows(axRow, axolotl.submissionId, 'Submitted', null);
+        await expectRows(taRow, tardigrade.submissionId, 'Registered', null);
+
+        // "Mark as Complete" after publication: each work a "Peer Review
+        // {number}" row, empty and "Needs DOI" (Rules 7, 7a).
+        for (const work of [axolotl, tardigrade]) {
+            await openRound1(workflow, work.submissionId);
+            const modal = await openReviewDetails(page, workflow.reviewerRow('Rhea Reviewer'));
+            await markReviewComplete(page, modal);
+            await closeReviewDetails(page, modal);
+        }
+        await dois.goto();
+        const axTypes = await expectRows(axRow, axolotl.submissionId, 'Submitted', 'Needs DOI');
+        const taTypes = await expectRows(taRow, tardigrade.submissionId, 'Registered', 'Needs DOI');
+        await expect(dois.doiBox(axRow, axTypes[1])).toHaveValue('');
+        await expect(dois.doiBox(taRow, taTypes[1])).toHaveValue('');
+
+        // "Assign DOIs": each review row a DOI, "Unregistered"; each
+        // "Article" row keeps its DOI and status (Rules 7a, 25).
+        await dois.runBulk('Assign DOIs', [axolotl.submissionId, tardigrade.submissionId]);
+        await dois.expectNotice(TEXT.assigned);
+        await expectRows(axRow, axolotl.submissionId, 'Submitted', 'Unregistered');
+        await expectRows(taRow, tardigrade.submissionId, 'Registered', 'Unregistered');
+        await expect(dois.doiBox(axRow, axTypes[1])).toHaveValue(anyDoi);
+        await expect(dois.doiBox(taRow, taTypes[1])).toHaveValue(anyDoi);
+        await expect(dois.doiBox(axRow, ARTICLE)).toHaveValue(axArticleDoi);
+        await expect(dois.doiBox(taRow, ARTICLE)).toHaveValue(taArticleDoi);
+        const axReviewDoi = await dois.doiBox(axRow, axTypes[1]).inputValue();
+
+        // A review's DOI marked with its work (Rule 26).
+        await dois.runBulk('Mark DOIs Registered', [axolotl.submissionId]);
+        await dois.expectNotice(TEXT.markedRegistered);
+        await expectRows(axRow, axolotl.submissionId, 'Registered', 'Registered');
+
+        // "Deposit All" takes a review's DOI: "Tardigrade desiccation"'s
+        // review row "Submitted", its "Article" row "Registered"; "Axolotl
+        // limb memory"'s two rows "Registered" (Rule 29a).
+        await depositAll(dois);
+        await expectRows(taRow, tardigrade.submissionId, 'Registered', 'Submitted');
+        await expectRows(axRow, axolotl.submissionId, 'Registered', 'Registered');
+
+        // A registered review taken out of public view: the "Article" row
+        // alone, "Registered" (Rule 7b); "Deposit DOIs" turns it "Submitted"
+        // (Rule 29); shown again, the review's row is back with its DOI,
+        // "Registered" (Rules 7b, 29).
+        await setReviewVisibility(page, workflow, axolotl.submissionId, false);
+        await dois.goto();
+        await expectRows(axRow, axolotl.submissionId, 'Registered', null);
+        const deposited = await dois.runBulk('Deposit DOIs', [axolotl.submissionId]);
+        expect(deposited.status()).toBe(200);
+        await dois.expectNotice(TEXT.depositQueued);
+        await expectRows(axRow, axolotl.submissionId, 'Submitted', null);
+        await setReviewVisibility(page, workflow, axolotl.submissionId, true);
+        await dois.goto();
+        await expectRows(axRow, axolotl.submissionId, 'Submitted', 'Registered');
+        await expect(dois.doiBox(axRow, axTypes[1])).toHaveValue(axReviewDoi);
+
+        // A "Needs Sync" review taken out of public view: both rows "Needs
+        // Sync" (Rule 28); unticked, the review's row leaves; "Deposit
+        // All" turns the "Article" row "Submitted" (Rule 29a); ticked
+        // again, the review's row is back, "Needs Sync" (Rules 7b, 29a).
+        await dois.runBulk('Mark DOIs Needs Sync', [tardigrade.submissionId]);
+        await dois.expectNotice(TEXT.markedStale);
+        await expectRows(taRow, tardigrade.submissionId, 'Needs Sync', 'Needs Sync');
+        await setReviewVisibility(page, workflow, tardigrade.submissionId, false);
+        await dois.goto();
+        await expectRows(taRow, tardigrade.submissionId, 'Needs Sync', null);
+        await depositAll(dois);
+        await expectRows(taRow, tardigrade.submissionId, 'Submitted', null);
+        await setReviewVisibility(page, workflow, tardigrade.submissionId, true);
+        await dois.goto();
+        await expectRows(taRow, tardigrade.submissionId, 'Submitted', 'Needs Sync');
     });
 });
 
