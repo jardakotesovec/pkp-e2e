@@ -198,6 +198,41 @@ exports.AuthorResponseCard = class AuthorResponseCard extends BasePage {
         return this.modal().getByRole('button', {name: 'View Submitted Response', exact: true});
     }
 
+    /**
+     * The card's place on the author's stage (Rule 1): its heading follows
+     * the heading `above` ("Revisions Uploaded") and precedes the heading
+     * `below` ("Review Tasks & Discussions") in the workflow window, read
+     * by document order once all three headings are on screen.
+     */
+    async expectPlacedBetween(above, below) {
+        const modal = this.modal();
+        await expect(modal.getByRole('heading', {name: above, exact: true})).toBeVisible({timeout: 30_000});
+        await expect(modal.getByRole('heading', {name: below, exact: true})).toBeVisible({timeout: 30_000});
+        await this.expectVisible();
+        await expect
+            .poll(
+                () =>
+                    modal.evaluate(
+                        (root, [a, b]) => {
+                            const headings = [...root.querySelectorAll('h1, h2, h3, h4, h5, h6')];
+                            const find = (text) => headings.find((h) => h.textContent.trim() === text);
+                            const top = find(a);
+                            const card = find('Author Response');
+                            const bottom = find(b);
+                            if (!top || !card || !bottom) {
+                                return 'missing';
+                            }
+                            const follows = (x, y) =>
+                                Boolean(x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING);
+                            return follows(top, card) && follows(card, bottom) ? 'between' : 'out of place';
+                        },
+                        [above, below]
+                    ),
+                {timeout: 30_000}
+            )
+            .toBe('between');
+    }
+
     /** The card's status text ("Respond to Reviews" / "A response was submitted by …"). */
     async expectStatus(pattern) {
         await expect(this.heading().locator('xpath=ancestor::div[1]')).toContainText(pattern, {
@@ -318,6 +353,40 @@ exports.RequestAuthorResponsePage = class RequestAuthorResponsePage extends Base
     /** The TinyMCE "Message" body (the composer's iframe). */
     messageBody() {
         return this.page.locator('iframe[id^="composer-body"]').first().contentFrame().locator('body');
+    }
+
+    /**
+     * A field's own error under it (Rule 4a): `subject` or `body` (the
+     * "Message" editor). The Composer renders `#composer-<field>-error`.
+     */
+    fieldError(field) {
+        return this.page.locator(`#composer-${field}-error`);
+    }
+
+    /** The generic "Error" dialog (Rule 4a's other refusals). */
+    errorDialog() {
+        return this.page.getByRole('dialog', {name: 'Error', exact: true});
+    }
+
+    /** Empty the "Message" editor (select all, delete). */
+    async clearMessage() {
+        await this.messageBody().click();
+        await this.page.keyboard.press('ControlOrMeta+A');
+        await this.page.keyboard.press('Delete');
+        await expect(this.messageBody()).toHaveText('', {timeout: 10_000});
+    }
+
+    /**
+     * Press "Submit Request" and return the status of the request it sends,
+     * for a press the page is expected to refuse (Rule 4a).
+     */
+    async pressSubmitExpectingAnswer() {
+        const answer = this.page.waitForResponse(
+            (r) => r.url().includes('/authorResponse/requestResponse') && r.request().method() === 'POST',
+            {timeout: 30_000}
+        );
+        await this.submitRequestButton().click();
+        return (await answer).status();
     }
 
     addCcBccButton() {

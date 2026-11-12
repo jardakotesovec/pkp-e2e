@@ -7,13 +7,8 @@
  * absence scenario, in those trees).
  * Spec: docs/specs/U30-author-response-to-reviews.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 ❓, A3 🐞, A4 🐞, A5 ✅ (retired), A6 ❓, A7 🐞, A8 ❓, OMP1 🐞. Where a test
- * passes through one (S1 and S8 send a request, S2 reads the editor's side
- * after a response, S6 walks the Funding Coordinator and the typed address,
- * S5 reads the minimum's email) it asserts the effect the spec states and
- * leaves the finding's own claim unasserted either way.
+ * Deliberately NOT covered (Findings register): A1, A2, A3, A4, A6, A7, A8,
+ * OMP1.
  *
  * Seeding: scenario endpoints only. publicknowledge and the 18 seeded users
  * are read-only; scenarios 1–4, 6 and 8 use scratch submissions on the seeded
@@ -21,7 +16,9 @@
  * Revisions decision through the wizard (a seeded decision sends no email);
  * scenario 5 seeds a scratch journal through the `review:
  * {numReviewsPerSubmission: 1, defaultReviewMode: 'open'}` passthrough with
- * throwaway users whose addresses carry app + test. There is no scenario-API
+ * throwaway users whose addresses carry app + test; scenario 6 adds a
+ * scratch journal with its own throwaway Author, and sends its console
+ * requests from the signed-in page (footnote s). There is no scenario-API
  * key for a submitted author response, so the response states are reached by
  * driving the window the feature is about (A4 in scenarios.md sense: the
  * behaviour under test). Mail is read by recipient plus the tag-bearing
@@ -56,6 +53,8 @@ const ALEX = 'Alex Author';
 const BEA = 'Bea Author';
 const ROUND_1_HEADING = 'Workflow: Review (Round 1)';
 const ADVANCED_SENTENCE = 'The submission has been advanced to the next round of review';
+const REVISIONS_UPLOADED = 'Revisions Uploaded';
+const TASKS_AND_DISCUSSIONS = 'Review Tasks & Discussions';
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -272,6 +271,61 @@ async function authorSubmitResponse(page, card, {text, onBehalfOf, reposition = 
     await window.expectClosed();
 }
 
+/**
+ * Send a request from the signed-in page's console (footnote s): the page's
+ * own API address and CSRF token, `fetch` inside the page, so the session is
+ * the role's own. Returns the answer's status and its JSON (or null).
+ */
+async function consoleRequest(page, method, path, body) {
+    await page.waitForFunction(
+        () => Boolean(window.pkp && window.pkp.currentUser && window.pkp.currentUser.csrfToken && window.pkp.context && window.pkp.context.apiBaseUrl),
+        null,
+        {timeout: 30_000}
+    );
+    return page.evaluate(
+        async ({method, path, body}) => {
+            const base = window.pkp.context.apiBaseUrl.replace(/\/$/, '');
+            const response = await fetch(`${base}/${path}`, {
+                method,
+                headers: {'X-Csrf-Token': window.pkp.currentUser.csrfToken, 'Content-Type': 'application/json'},
+                body: body === undefined ? undefined : JSON.stringify(body),
+            });
+            let json = null;
+            try {
+                json = await response.json();
+            } catch {
+                // not JSON
+            }
+            return {status: response.status, json};
+        },
+        {method, path, body}
+    );
+}
+
+/**
+ * Read a submission's round 1, its author response and its publication's
+ * author ids as the signed-in `admin` (footnote s: the other round's id and
+ * response id are read as admin), from its editorial workflow page.
+ */
+async function readRoundAsAdmin(adminPage, contextPath, submissionId) {
+    await new WorkflowPage(adminPage, contextPath).gotoEditorial(submissionId);
+    const submission = await consoleRequest(adminPage, 'GET', `submissions/${submissionId}`);
+    expect(submission.status).toBe(200);
+    const round = submission.json.reviewRounds[0];
+    expect(round.authorResponse, `submission ${submissionId} holds a response`).not.toBeNull();
+    const publication = await consoleRequest(
+        adminPage,
+        'GET',
+        `submissions/${submissionId}/publications/${submission.json.currentPublicationId}`
+    );
+    expect(publication.status).toBe(200);
+    return {
+        roundId: round.id,
+        responseId: round.authorResponse.id,
+        authorIds: publication.json.authors.map((author) => author.id),
+    };
+}
+
 /** Open the workflow "Activity Log & Notes" modal and wait for its grid. */
 async function openActivityLog(page) {
     await page.getByRole('button', {name: 'Activity Log', exact: true}).click();
@@ -340,12 +394,40 @@ test.describe('author response to reviews', () => {
         // The declined request contributes no block to the message.
         await expect(message).not.toContainText('Reviewer 2:');
 
-        // "Cancel" returns to the round, nothing sent; then send for real.
+        // "Cancel" returns to the round, nothing sent.
         await requestPage.cancelButton().click();
         await expect(table.table()).toBeVisible({timeout: 30_000});
+
+        // An emptied "Subject", then an emptied "Message" (Rule 4a, the
+        // guard of the retired A5): each press is refused with that field's
+        // own "This field is required." and no "Error" dialog. Each press
+        // is bounded by its own refused answer; the field error is the
+        // positive control the dialog's absence is read against.
+        await expect(table.requestResponseButton()).toBeEnabled({timeout: 30_000});
+        await table.requestResponseButton().click();
+        await requestPage.expectLoaded();
+        await requestPage.subject().fill('');
+        const subjectStatus = await requestPage.pressSubmitExpectingAnswer();
+        expect(subjectStatus < 200 || subjectStatus > 299, `emptied Subject answered ${subjectStatus}`).toBe(true);
+        await expect(requestPage.fieldError('subject')).toContainText('This field is required.');
+        await expect(requestPage.errorDialog()).toHaveCount(0);
+        await expect(requestPage.messageBody()).toContainText('The following comments were received from reviewers.');
+        await requestPage.subject().fill(REQUEST_SUBJECT);
+        await requestPage.clearMessage();
+        const messageStatus = await requestPage.pressSubmitExpectingAnswer();
+        expect(messageStatus < 200 || messageStatus > 299, `emptied Message answered ${messageStatus}`).toBe(true);
+        await expect(requestPage.fieldError('body')).toContainText('This field is required.');
+        await expect(requestPage.errorDialog()).toHaveCount(0);
+        // "Cancel": the round shows again. That no request went out on the
+        // way is read below: after the real send the mailbox holds one.
+        await requestPage.cancelButton().click();
+        await expect(table.table()).toBeVisible({timeout: 30_000});
+
+        // "Submit Request" for real.
         await sendRequestViaUi(page, table, requestPage);
 
-        // The email to the Author, and exactly one of it (Cancel sent none).
+        // The email to the Author, and exactly one of it (neither "Cancel"
+        // nor the two refused presses sent one).
         const authorMail = `author.alex@mail.test`;
         const sent = await pkpMail.find({to: authorMail, contains: `${tag} B`, subject: REQUEST_SUBJECT});
         expect(await pkpMail.count({to: authorMail, contains: `${tag} B`, subject: REQUEST_SUBJECT})).toBe(1);
@@ -372,6 +454,7 @@ test.describe('author response to reviews', () => {
         await card.expectVisible();
         await card.expectStatus(/Respond to Reviews/i);
         await expect(card.submitButton()).toBeVisible();
+        await card.expectPlacedBetween(REVISIONS_UPLOADED, TASKS_AND_DISCUSSIONS);
         await expect(
             authorPage.getByRole('listitem').filter({hasText: REQUEST_EMAIL_ROW}).first()
         ).toBeVisible({timeout: 30_000});
@@ -607,6 +690,8 @@ test.describe('author response to reviews', () => {
         await beaWorkflow.expectStatus('Revisions have been requested.', 'Round 1 Status');
         await beaCard.expectVisible();
         await beaCard.expectStatus(/Respond to Reviews/i);
+        await expect(beaCard.submitButton()).toBeVisible();
+        await beaCard.expectPlacedBetween(REVISIONS_UPLOADED, TASKS_AND_DISCUSSIONS);
 
         // The only "Authors" box is the submitting author's; the co-author
         // (a stage assignment, not a contributor) has none.
@@ -735,7 +820,8 @@ test.describe('author response to reviews', () => {
     });
 
     test('S6: who may request', async ({asUser, ojsApi, pkpMail}, testInfo) => {
-        test.slow();
+        // Three submissions, two of them answered through the window first.
+        test.setTimeout(360_000);
         const tag = makeTag('s6', testInfo);
         const {submissionId, reviewRoundId, title} = await seedReviewedRound(ojsApi, tag, {
             reviewers: [{username: 'reviewer.julia', status: 'completed'}],
@@ -746,6 +832,69 @@ test.describe('author response to reviews', () => {
             ],
         });
         const DENIED = 'The current role does not have access to this operation.';
+        const alexMail = 'author.alex@mail.test';
+        const beaMail = 'author.bea@mail.test';
+
+        // Beside it: a second submission of the Author's in this journal
+        // (the co-author assigned as on the first, the Section Editor not),
+        // and one on a scratch journal with its own Author. Titles share no
+        // substring, so each mailbox read is scoped to one submission.
+        const second = await seedReviewedRound(ojsApi, `${tag}b`, {
+            title: `Second ${tag}`,
+            reviewers: [{username: 'reviewer.paul', status: 'completed'}],
+            participants: [{username: 'author.bea', role: 'author'}],
+        });
+        const otherJournal = `${tag}c`;
+        const otherAuthor = `${otherJournal}au`;
+        const OTHER_AUTHOR_NAME = 'Sam Scratch';
+        await ojsApi.createContext({
+            tag: otherJournal,
+            users: [
+                {username: `${otherJournal}rv`, roles: ['externalReviewer']},
+                {username: otherAuthor, roles: ['author'], givenName: 'Sam', familyName: 'Scratch'},
+            ],
+        });
+        const other = await seedReviewedRound(ojsApi, otherJournal, {
+            context: otherJournal,
+            submitter: otherAuthor,
+            title: `Other ${tag}`,
+            reviewers: [{username: `${otherJournal}rv`, status: 'completed'}],
+        });
+
+        // The second submission: asked once by the Journal Manager, answered
+        // by the Author through the window.
+        const managerPage = await (await asUser('manager.maya')).newPage();
+        const managerWorkflow = new WorkflowPage(managerPage, JOURNAL);
+        const managerTable = new AuthorResponseTable(managerPage);
+        await managerWorkflow.gotoEditorial(second.submissionId);
+        await managerTable.expectVisible();
+        await sendRequestViaUi(managerPage, managerTable, new RequestAuthorResponsePage(managerPage, JOURNAL));
+        const alexSetupPage = await (await asUser('author.alex')).newPage();
+        const alexSetupWorkflow = new WorkflowPage(alexSetupPage, JOURNAL);
+        const alexSetupCard = new AuthorResponseCard(alexSetupPage);
+        await gotoReady(alexSetupPage, () => alexSetupWorkflow.gotoAuthor(second.submissionId));
+        await alexSetupCard.expectVisible();
+        await authorSubmitResponse(alexSetupPage, alexSetupCard, {text: 'Our answer to the reviews.', onBehalfOf: ALEX});
+        await alexSetupCard.expectStatus(STATUS.submittedBy(ALEX));
+
+        // The scratch journal's submission: asked once by admin (a manager
+        // of every scratch journal), answered by its Author.
+        const adminPage = await (await asUser('admin')).newPage();
+        const adminWorkflow = new WorkflowPage(adminPage, otherJournal);
+        const adminTable = new AuthorResponseTable(adminPage);
+        await adminWorkflow.gotoEditorial(other.submissionId);
+        await adminTable.expectVisible();
+        await sendRequestViaUi(adminPage, adminTable, new RequestAuthorResponsePage(adminPage, otherJournal));
+        const otherPage = await (await asUser(otherAuthor)).newPage();
+        const otherWorkflow = new WorkflowPage(otherPage, otherJournal);
+        const otherCard = new AuthorResponseCard(otherPage);
+        await gotoReady(otherPage, () => otherWorkflow.gotoAuthor(other.submissionId));
+        await otherCard.expectVisible();
+        await authorSubmitResponse(otherPage, otherCard, {
+            text: 'Our answer from the other journal.',
+            onBehalfOf: OTHER_AUTHOR_NAME,
+        });
+        await otherCard.expectStatus(STATUS.submittedBy(OTHER_AUTHOR_NAME));
 
         // The assigned Section Editor: the table is ready and the button opens
         // the request page, its address holding the round id.
@@ -778,8 +927,6 @@ test.describe('author response to reviews', () => {
         await anaRequest.submit();
         await anaRequest.viewSubmissionSummaryLink().click();
         await expect(anaTable.table()).toBeVisible({timeout: 30_000});
-        const alexMail = 'author.alex@mail.test';
-        const beaMail = 'author.bea@mail.test';
         const toAlex = await pkpMail.find({to: alexMail, contains: title, subject: REQUEST_SUBJECT});
         const toBea = await pkpMail.find({to: beaMail, contains: title, subject: REQUEST_SUBJECT});
         expect(toBea.ID).toBe(toAlex.ID);
@@ -787,6 +934,73 @@ test.describe('author response to reviews', () => {
         expect(requestHtml).toMatch(greetingNaming(ALEX, BEA));
         expect(await pkpMail.count({to: alexMail, contains: title, subject: REQUEST_SUBJECT})).toBe(1);
         expect(await pkpMail.count({to: beaMail, contains: title, subject: REQUEST_SUBJECT})).toBe(1);
+
+        // Requests naming another submission's round (Rule 11, the guard of
+        // the retired A11): the other rounds' ids, response ids and author
+        // ids are read as admin; then the Section Editor, then the Journal
+        // Manager, each on this submission's round, send from the console a
+        // delete, an edit and a "Request Response" naming this submission
+        // with the second submission's round, then with the scratch
+        // journal's: each is answered with a status outside 200–299.
+        const secondRound = await readRoundAsAdmin(adminPage, JOURNAL, second.submissionId);
+        const otherRound = await readRoundAsAdmin(adminPage, otherJournal, other.submissionId);
+        const crossRequests = (round) => [
+            ['DELETE', `reviews/${submissionId}/${round.roundId}/authorResponse/${round.responseId}`, undefined],
+            [
+                'PUT',
+                `reviews/${submissionId}/${round.roundId}/authorResponse/${round.responseId}`,
+                {authorResponse: {en: 'Rewritten from another submission.'}, associatedAuthorIds: round.authorIds},
+            ],
+            [
+                'POST',
+                `reviews/${submissionId}/${round.roundId}/authorResponse/requestResponse`,
+                {subject: REQUEST_SUBJECT, body: 'Please respond to the reviews.', locale: 'en'},
+            ],
+        ];
+        const managerOnThisRound = new WorkflowPage(managerPage, JOURNAL);
+        await managerOnThisRound.gotoEditorial(submissionId);
+        await new AuthorResponseTable(managerPage).expectVisible();
+        for (const [who, onRoundPage] of [
+            ['Section Editor', anaPage],
+            ['Journal Manager', managerPage],
+        ]) {
+            for (const round of [secondRound, otherRound]) {
+                for (const [method, path, body] of crossRequests(round)) {
+                    const {status} = await consoleRequest(onRoundPage, method, path, body);
+                    expect(
+                        status < 200 || status > 299,
+                        `${who}: ${method} ${path} answered ${status}`
+                    ).toBe(true);
+                }
+            }
+        }
+
+        // The second submission's round is as it was: the Author's response
+        // and its text; the mailboxes hold one request per submission.
+        await gotoReady(managerPage, () => managerWorkflow.gotoEditorial(second.submissionId));
+        await managerTable.expectVisible();
+        await managerTable.expectStatus(ALEX, STATUS.submittedBy(ALEX));
+        const secondView = await openEditorView(managerPage, managerTable, ALEX);
+        await expect(secondView.body()).toContainText('Our answer to the reviews.');
+        await expect(secondView.body()).not.toContainText('Rewritten from another submission.');
+        await secondView.cancel();
+        for (const mailbox of [alexMail, beaMail]) {
+            await pkpMail.find({to: mailbox, contains: second.title, subject: REQUEST_SUBJECT});
+            expect(await pkpMail.count({to: mailbox, contains: second.title, subject: REQUEST_SUBJECT})).toBe(1);
+            expect(await pkpMail.count({to: mailbox, contains: title, subject: REQUEST_SUBJECT})).toBe(1);
+        }
+
+        // The other journal's round: its Author still reads their response,
+        // and their mailbox still holds one request.
+        await gotoReady(otherPage, () => otherWorkflow.gotoAuthor(other.submissionId));
+        await otherCard.expectStatus(STATUS.submittedBy(OTHER_AUTHOR_NAME));
+        const otherView = await openCardWindow(otherPage, otherCard, 'view');
+        await expect(otherView.body()).toContainText('Our answer from the other journal.');
+        await expect(otherView.body()).not.toContainText('Rewritten from another submission.');
+        await otherView.cancel();
+        const otherMail = `${otherAuthor}@mail.test`;
+        await pkpMail.find({to: otherMail, contains: other.title, subject: REQUEST_SUBJECT});
+        expect(await pkpMail.count({to: otherMail, contains: other.title, subject: REQUEST_SUBJECT})).toBe(1);
 
         // The Funding Coordinator is offered the button, but it leads to the
         // access-denied page (A3 — the offer is not asserted).
@@ -807,7 +1021,6 @@ test.describe('author response to reviews', () => {
         expect(alexPage.url()).toContain('authorizationDenied');
 
         // The Journal Manager by a wrong round: "Invalid review round.".
-        const managerPage = await (await asUser('manager.maya')).newPage();
         const managerRequest = new RequestAuthorResponsePage(managerPage, JOURNAL);
         await managerRequest.goto(submissionId, 99999);
         await expect(managerPage.locator('body')).toContainText('Invalid review round.');
@@ -866,6 +1079,7 @@ test.describe('author response to reviews', () => {
         await card.expectVisible();
         await card.expectStatus(/Respond to Reviews/i);
         await expect(card.submitButton()).toBeVisible();
+        await card.expectPlacedBetween(REVISIONS_UPLOADED, TASKS_AND_DISCUSSIONS);
         await authorSubmitResponse(authorPage, card, {
             text: "We answered the first round's reviews.",
             onBehalfOf: ALEX,

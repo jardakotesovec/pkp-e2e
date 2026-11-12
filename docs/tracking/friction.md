@@ -13,3 +13,4 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
+2026-11-12 · U30 · test author tojs · footnote s says the console PUT body takes the other submission's author ids "read as admin", but `GET submissions/{id}` carries no publication authors, so a probe round went to finding `GET submissions/{id}/publications/{pubId}` `.authors[].id` · footnote s (or scenarios.md) naming the publications endpoint as where author ids come from

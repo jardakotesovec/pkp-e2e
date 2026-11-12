@@ -410,9 +410,10 @@ form.
 Scenarios 1 to 4, 6 and 8 run on the seeded journal with ready accounts
 and scratch submissions; scenario 5, which raises "Minimum Confirmed
 Reviews Required" and conducts its reviews openly, runs on a scratch
-journal configured for both, with throwaway accounts; the press and
-preprint-server absence, scenario 7, runs on the seeded press and preprint
-server with ready accounts. A review that is "in" is a completed
+journal configured for both, with throwaway accounts, and scenario 6
+also reads a scratch journal's submission with its throwaway Author; the
+press and preprint-server absence, scenario 7, runs on the seeded press
+and preprint server with ready accounts. A review that is "in" is a completed
 review the scenario starts from. Each email is read in the mailbox of the
 address it was sent to. Accounts, passwords and the tooling recipe are in
 the footnote. <sup>s</sup>
@@ -441,6 +442,15 @@ the footnote. <sup>s</sup>
      control group.".
    - **"Cancel"**: press "Cancel": the workflow screen shows the round
      again and no request reaches the Author's mailbox.
+   - **An emptied "Subject", then an emptied "Message"**: press "Request
+     Response" again, clear "Subject" and press "Submit Request": "This
+     field is required." shows under "Subject", no "Error" dialog opens,
+     and "Message" still holds "The following comments were received from
+     reviewers.". Type "Request For Author Response To Reviewer Feedback"
+     in "Subject", clear "Message" and press "Submit Request": "This field
+     is required." shows under "Message" and no dialog opens. Press
+     "Cancel": the round shows again and still no request has reached the
+     Author's mailbox.
    - **"Submit Request"**: press "Request Response" again, then "Submit
      Request": the dialog "Request for review response sent" opens, and
      its link "View Submission Summary" returns to the round, where the
@@ -603,7 +613,11 @@ the footnote. <sup>s</sup>
    Given: Section Editor and Funding Coordinator assigned to the review
    stage, Author, a co-author with an account assigned to the review
    stage, and Journal Manager, with a ready round (its one review in) on a
-   submission in the Section Editor's section.
+   submission in the Section Editor's section; beside it, a second
+   submission of the Author's in review in this journal, and a submission
+   in review on a scratch journal with its own Author, each round asked
+   once for a response and holding its Author's, "Our answer to the
+   reviews." and "Our answer from the other journal." respectively.
 
    - **Section Editor**: open the round: the "Author Response" table reads
      "Ready to invite author" and "Request Response" is enabled; press it:
@@ -616,6 +630,22 @@ the footnote. <sup>s</sup>
      Author's mailbox and the co-author's hold the same email, "Request
      For Author Response To Reviewer Feedback", whose greeting "Hello"
      names both, in either order.
+   - **Requests naming another submission's round**: Section Editor, then
+     Journal Manager, on this round: in the browser's console send three
+     requests <sup>s</sup> naming this submission with the second
+     submission's round, a delete of its response, an edit setting its
+     text to "Rewritten from another submission." and a "Request
+     Response", then again with the scratch journal's round: each is
+     answered with a status outside 200–299. Journal Manager: open the
+     second submission's round: the row still reads "A response was
+     submitted by {name}" and "…" › "View" shows "Our answer to the
+     reviews."; the Author's and co-author's mailboxes still hold one
+     request per submission.
+   - **The other journal's round**: the scratch journal's Author: open the
+     submission's review stage from My Submissions: the card still reads
+     "A response was submitted by {name}", "View Submitted Response" shows
+     "Our answer from the other journal.", and their mailbox still holds
+     one request.
    - **Funding Coordinator**: open the round: the same table with "Request
      Response" enabled; press it: the access-denied page "The current role
      does not have access to this operation." shows instead of the request
@@ -697,35 +727,26 @@ Left out of the scenarios above, by reason:
     `docs/issues/U30-A1-author-response-request-leaves-no-trace.md`):
     after "Submit Request" the editor's "Author Response" row reads
     "Response requested", for a second editor of the submission too [report 2026-10-04]
-  - the guard for A3 (issue report `docs/issues/U30-A3-funding-coordinat
-    or-author-response-refused.md`): an assigned Funding coordinator
-    sees no "Request Response" and no "Delete" on the "Author Response"
-    table, and "View" opens the response read-only [report 2026-10-04]
-  - the guard for A4 (issue report `docs/issues/U30-A4-request-author-re
-    sponse-typed-address-returns-nowhere.md`): the "Request Author
-    Response" page opened by its address, without a return address, then
-    "Cancel", the sent dialog's link and Escape each open the submission [report 2026-10-04]
-  - Rule 4a's field messages (A5 retired, pkp/pkp-lib#13715): an
-    emptied "Subject", then an emptied "Message", at "Submit Request"
-    shows "This field is required." under the field and no "Error"
-    dialog; filled again, the request goes out [report 2026-10-04]
-  - the guard for A7 (issue report `docs/issues/U30-A7-author-response-g
-    one-after-revisions-upload.md`): after "Request Revisions" the
-    author uploads a revised file first, and the "Author Response" card
-    stays and the decision email's "Submit Author Response" opens the
-    response form [report 2026-10-04]
-  - the guard for OMP1 (issue report `docs/issues/U30-OMP1-press-author-
-    response-button-leads-nowhere.md`), once the team rules that presses
-    get author responses: the "Author Response" table and card on both
-    of a press's review stages, and the decision email's button opening
-    the response form [report 2026-10-04]
-  - the guard for A11, retired (Rule 11): a Section Editor's and a
-    Journal Manager's delete, edit and "Request Response" request that
-    name a round of another submission, in the same journal and in
-    another, are refused and leave the response and the round as they
-    were; the same requests with the submission's own round go through [upstream 2026-10-20]
-  - the author's card's place (Rule 1), which the author bullets of
-    scenarios 1, 4 and 8 check and the OJS suite does not assert yet [upstream 2026-11-12]
+  - the guard for A3 (issue report
+    `docs/issues/U30-A3-funding-coordinator-author-response-refused.md`):
+    an assigned Funding coordinator sees no "Request Response" and no
+    "Delete" on the "Author Response" table, and "View" opens the
+    response read-only [report 2026-10-04]
+  - the guard for A4 (issue report
+    `docs/issues/U30-A4-request-author-response-typed-address-returns-nowhere.md`):
+    the "Request Author Response" page opened by its address, without a
+    return address, then "Cancel", the sent dialog's link and Escape each
+    open the submission [report 2026-10-04]
+  - the guard for A7 (issue report
+    `docs/issues/U30-A7-author-response-gone-after-revisions-upload.md`):
+    after "Request Revisions" the author uploads a revised file first, and
+    the "Author Response" card stays and the decision email's "Submit
+    Author Response" opens the response form [report 2026-10-04]
+  - the guard for OMP1 (issue report
+    `docs/issues/U30-OMP1-press-author-response-button-leads-nowhere.md`),
+    once the team rules that presses get author responses: the "Author
+    Response" table and card on both of a press's review stages, and the
+    decision email's button opening the response form [report 2026-10-04]
 - **Nothing new to test**:
   - Site Administrator (the Journal Manager's offer, scenarios 1 and 3)
   - Guest Editor (the Section Editor's gate, scenario 6)
@@ -984,7 +1005,7 @@ Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-omp1<
 **q** — `AuthorResponse::isPublic()`: true when the round's non-declined, non-cancelled `review_assignments` rows all have `is_review_publicly_visible` set; surfaced in `ReviewRoundAuthorResponseResource` as `isPublic` and consumed by `lib/ui-library/src/frontend/components/PkpOpenReview/PkpOpenReviewAuthorResponseContent.vue`. `AuthorResponse` also carries a `doiId` whose settings form fields are commented out in `ojs classes/components/forms/context/DoiSetupSettingsForm.php` ("Functionality for author response DOIs exists but is not currently supported"), so no screen sets it. No screen in this feature shows either. The open peer review record is `GET api/v1/peerReviews/open/submissions/{submissionId}` (OJS only, signed out); live-probed 2026-10-13 (Side effects bullet 6; A10): a round with one public review of three carried the response with `isPublic` false, note f-a10.
 
 <a id="fn-s"></a>
-**s** — Scenario tooling. Ready accounts: `editor.diana` (Editor; manager level), `manager.maya` (Journal Manager), `sectioneditor.ana` (Section Editor of "Articles"), `assistant.rita` (Funding Coordinator, review-stage access), `reviewer.julia` and `reviewer.paul` (Reviewers), `author.alex` (submitter) and `author.bea` (co-author with an account, never a contributor); passwords per `docs/process/users.md`. A submission in review: `POST scenarios/submission` `{submitter: 'author.alex', decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}]}], participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]}`. A review that is in: `status: 'completed'`, with the optional `recommendation` (OJS only: `accept` by default, `pendingRevisions` = "Revisions Required") and `comments` (the "For author and editor" text; default "Seeded review comments for {tag}."); the seed runs the reviewer wizard's own steps, so the app's "Review complete…" and "Thank you for your submission…" emails go out and a mailbox count is matched by the submission title. The round id for a typed address comes from the seed response (`reviewRounds[].id`). Scenario 1: two submissions, one `accepted`, one `completed` with `recommendation: 'pendingRevisions', comments: 'The method needs a control group.'` beside `{username: 'reviewer.paul', status: 'declined'}` in the same `reviewers[]`; the seeded journal's review mode is anonymous, so the email's heading reads "Reviewer 1:"; a test waits for the composer (the iframe present and "Loading" gone) before "Submit Request", and reads the sent email by the submission title in `author.alex`'s mailbox. Scenario 2: scenario 1's ready submission after one request; the signed-out click on the email's button is a fresh browser context opening the href; `editor.diana`'s mailbox is counted by the submission title before and after. Scenario 3: scenario 2's state (the request sent and `author.alex`'s response submitted through the window); after "Delete" › "OK" a test polls the table for "Ready to invite author" (note l). Scenario 4: `decisions: ['sendExternalReview']` with the reviewer `completed` and `{username: 'author.bea', role: 'author'}` in `participants`, then the Request Revisions decision recorded by `manager.maya` through the wizard, as scenario 7's press decision is, which sends the decision email the Author's bullet reads in `author.alex`'s mailbox by the submission title (a seeded `requestRevisions` sends none); the co-author opens the round from My Submissions; the co-author is a stage assignment, not a contributor, so the "Authors" boxes show one name. Scenario 5: `POST scenarios/context` with `review: {numReviewsPerSubmission: 1, defaultReviewMode: 'open'}` and `users[]` holding a `manager`, two `externalReviewer`s and an `author`, then a submission with the first reviewer `completed` (`recommendation: 'pendingRevisions', comments: 'Shorten the introduction.'`) and the second `accepted`; a submission seeded after the mode is set carries open as its assignments' review type (seed-facts 2026-09-05), so the email's block is headed with the first reviewer's full name and no colon (note g); a roster reviewer named on a scratch context is assigned but not enrolled (seed-facts 2026-09-05), hence the throwaway reviewers. Scenario 6: scenario 1's ready shape without the declined reviewer (section "Articles", `sectioneditor.ana` assigned) plus `{username: 'assistant.rita', role: 'funding'}` and `{username: 'author.bea', role: 'author'}` in `participants`; the one request email is found in `author.alex`'s and `author.bea`'s mailboxes by the submission title (both addresses sit in its To header, note n); the wrong-round address uses `reviewRoundId=99999`; the Journal Manager's real-round address is opened without `ret`, hence the A4 aside. Scenario 7: OMP `decisions: ['sendExternalReview']` with `reviewRounds: [{stage: 'external', reviewers: [{username: 'reviewer.julia', status: 'completed'}]}]` (no `recommendation` on a press) and the Request Revisions decision recorded by `editor.diana` through the wizard ("Require New Review Round" › "Next", "Notify Authors", "Notify Reviewers", "Record Decision"), which sends the decision email the scenario reads; OPS a plain submitted preprint (OPS refuses `reviewRounds`), with `manager.maya` as Preprint Server Manager, `sectioneditor.ana` as Moderator and `author.alex` as its Author, the address typed with `stageId=3&reviewRoundId=1`. Scenario 8: `decisions: ['sendExternalReview']` with two `reviewRounds[]` entries, `[{reviewers: [{username: 'reviewer.julia', status: 'completed'}]}, {reviewers: [{username: 'reviewer.paul', status: 'accepted'}]}]`: the decision seeds the first entry into round 1 and the entry left over builds round 2 (the shape note m relies on; seed-facts 2026-09-06), so round 1 is the past round and round 2 the current one; the response is written through the window on round 1, never seeded; the request email is read in `author.alex`'s mailbox by the submission title. Emails are read in Mailpit by recipient address (PRINCIPLES A8; the roster mailboxes are shared, so a test matches the submission title in the subject line's body or uses a throwaway author). The request page's address: `…/reviewResponse/requestAuthorResponse?stageId=3&reviewRoundId={id}&submissionId={id}` (on a press `stageId=3` is External Review).
+**s** — Scenario tooling. Ready accounts: `editor.diana` (Editor; manager level), `manager.maya` (Journal Manager), `sectioneditor.ana` (Section Editor of "Articles"), `assistant.rita` (Funding Coordinator, review-stage access), `reviewer.julia` and `reviewer.paul` (Reviewers), `author.alex` (submitter) and `author.bea` (co-author with an account, never a contributor); passwords per `docs/process/users.md`. A submission in review: `POST scenarios/submission` `{submitter: 'author.alex', decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}]}], participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]}`. A review that is in: `status: 'completed'`, with the optional `recommendation` (OJS only: `accept` by default, `pendingRevisions` = "Revisions Required") and `comments` (the "For author and editor" text; default "Seeded review comments for {tag}."); the seed runs the reviewer wizard's own steps, so the app's "Review complete…" and "Thank you for your submission…" emails go out and a mailbox count is matched by the submission title. The round id for a typed address comes from the seed response (`reviewRounds[].id`). Scenario 1: two submissions, one `accepted`, one `completed` with `recommendation: 'pendingRevisions', comments: 'The method needs a control group.'` beside `{username: 'reviewer.paul', status: 'declined'}` in the same `reviewers[]`; the seeded journal's review mode is anonymous, so the email's heading reads "Reviewer 1:"; a test waits for the composer (the iframe present and "Loading" gone) before "Submit Request", and reads the sent email by the submission title in `author.alex`'s mailbox; each press with an emptied field is answered with that field's error and sends no email (note f-a5), and the mailbox is counted by the submission title after that bullet's "Cancel". Scenario 2: scenario 1's ready submission after one request; the signed-out click on the email's button is a fresh browser context opening the href; `editor.diana`'s mailbox is counted by the submission title before and after. Scenario 3: scenario 2's state (the request sent and `author.alex`'s response submitted through the window); after "Delete" › "OK" a test polls the table for "Ready to invite author" (note l). Scenario 4: `decisions: ['sendExternalReview']` with the reviewer `completed` and `{username: 'author.bea', role: 'author'}` in `participants`, then the Request Revisions decision recorded by `manager.maya` through the wizard, as scenario 7's press decision is, which sends the decision email the Author's bullet reads in `author.alex`'s mailbox by the submission title (a seeded `requestRevisions` sends none); the co-author opens the round from My Submissions; the co-author is a stage assignment, not a contributor, so the "Authors" boxes show one name. Scenario 5: `POST scenarios/context` with `review: {numReviewsPerSubmission: 1, defaultReviewMode: 'open'}` and `users[]` holding a `manager`, two `externalReviewer`s and an `author`, then a submission with the first reviewer `completed` (`recommendation: 'pendingRevisions', comments: 'Shorten the introduction.'`) and the second `accepted`; a submission seeded after the mode is set carries open as its assignments' review type (seed-facts 2026-09-05), so the email's block is headed with the first reviewer's full name and no colon (note g); a roster reviewer named on a scratch context is assigned but not enrolled (seed-facts 2026-09-05), hence the throwaway reviewers. Scenario 6: scenario 1's ready shape without the declined reviewer (section "Articles", `sectioneditor.ana` assigned) plus `{username: 'assistant.rita', role: 'funding'}` and `{username: 'author.bea', role: 'author'}` in `participants`; the one request email is found in `author.alex`'s and `author.bea`'s mailboxes by the submission title (both addresses sit in its To header, note n); the wrong-round address uses `reviewRoundId=99999`; the second submission is `author.alex`'s, seeded like the first with `reviewer.paul` `completed`, its request sent by `manager.maya` through "Request Response" › "Submit Request" and `author.alex`'s response written through the window with the one box ticked; the scratch journal is `POST scenarios/context` with `users[]` holding an `externalReviewer` and an `author`, a submission by that author with the reviewer `completed`, its request sent by `admin` (a manager in every scratch context) through the page and its author's response written through the window; the six requests are sent from the signed-in page's console with the page's CSRF token, `DELETE` and `PUT reviews/{submissionId}/{reviewRoundId}/authorResponse/{responseId}` (notes l, k; the `PUT` body `{authorResponse: {en: 'Rewritten from another submission.'}, associatedAuthorIds: [the other submission's author]}`, note b) and `POST reviews/{submissionId}/{reviewRoundId}/authorResponse/requestResponse` (`{subject, body, locale}`, note f), with scenario 6's submission id and the other round's id and response id from the seed and the other submission's `reviewRounds[]` (note h), read as `admin`; a test counts any answer outside 2xx as refused, and the mailboxes by the other submissions' titles; the Journal Manager's real-round address is opened without `ret`, hence the A4 aside. Scenario 7: OMP `decisions: ['sendExternalReview']` with `reviewRounds: [{stage: 'external', reviewers: [{username: 'reviewer.julia', status: 'completed'}]}]` (no `recommendation` on a press) and the Request Revisions decision recorded by `editor.diana` through the wizard ("Require New Review Round" › "Next", "Notify Authors", "Notify Reviewers", "Record Decision"), which sends the decision email the scenario reads; OPS a plain submitted preprint (OPS refuses `reviewRounds`), with `manager.maya` as Preprint Server Manager, `sectioneditor.ana` as Moderator and `author.alex` as its Author, the address typed with `stageId=3&reviewRoundId=1`. Scenario 8: `decisions: ['sendExternalReview']` with two `reviewRounds[]` entries, `[{reviewers: [{username: 'reviewer.julia', status: 'completed'}]}, {reviewers: [{username: 'reviewer.paul', status: 'accepted'}]}]`: the decision seeds the first entry into round 1 and the entry left over builds round 2 (the shape note m relies on; seed-facts 2026-09-06), so round 1 is the past round and round 2 the current one; the response is written through the window on round 1, never seeded; the request email is read in `author.alex`'s mailbox by the submission title. Emails are read in Mailpit by recipient address (PRINCIPLES A8; the roster mailboxes are shared, so a test matches the submission title in the subject line's body or uses a throwaway author). The request page's address: `…/reviewResponse/requestAuthorResponse?stageId=3&reviewRoundId={id}&submissionId={id}` (on a press `stageId=3` is External Review).
 
 <a id="fn-f-a1"></a>
 **f-a1** — Note e: neither `AuthorResponseRequestManagerCellStatus.vue` nor `canRequestReviewRoundAuthorResponse` reads `isAuthorResponseRequested`, and `PKPReviewController::requestAuthorResponse()` refuses only when a response exists, so a second `POST …/requestResponse` sends a second email and sets the flag again. The author's config (note c) does read the flag. Live-probed 2026-09-06: three sends on one round, each `POST …/requestResponse` 200, three Mailpit messages, three "Notifications" rows and three "An email has been sent" log rows, the table unchanged throughout.
