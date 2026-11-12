@@ -3,13 +3,15 @@
  * @file playwright/tests/U20-search-engine-metadata-and-analytics.spec.js
  *
  * Search-engine metadata & analytics — OMP suite, one test per canonical
- * scenario: S1–S8, all common to the three apps, in the press's own words
+ * scenario: S1–S8, common to the three apps, in the press's own words
  * (Press Manager, a book's page at `catalog/book/{id}`, the wizard's first
  * tab "Setup", "…of the press…"), with the {OMP} and {OMP OPS} bullets
- * inline ("Catalog", "New Releases" and the category pages in the
- * sitemap, the book's "PDF" file entry, the unpublish and publish-again
- * reads of S2, "citation_publisher" and "citation_publication_date", the
- * book's file page in S6 and the earlier version's file page in S7). The
+ * inline ("Catalog", "New Releases", the series and category pages in the
+ * sitemap, the book's chapter page and "PDF" file entries, the unpublish
+ * and publish-again reads of S2, "citation_publisher" and
+ * "citation_publication_date", the file for sale and the book's file page
+ * in S6 and the earlier version's file page in S7), and S9 {OMP}, a
+ * chapter's page and the book's file view pages. The
  * {OJS} bullets (issues, "Search", "Current", "Archive", the journal's
  * issue, section and keyword tags) and the {OPS} one (no Dublin Core
  * plugin) have no press end and are not run here.
@@ -18,10 +20,12 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - OMP3 🐞, OMP5 🐞: the file page's "DC.Type" and "DC.Identifier.URI"
- *   are never read.
+ * - OMP3 🐞, OMP5 🐞: no page's "DC.Type" is read but the book's
+ *   ("Text.Book"), and no file view page's "DC.Identifier.URI".
  * - OMP4 🐞: S7 never reads the sitemap after "Create New Version".
- * - OMP1 🐞, OMP2 🐞: every book has one format, "PDF", with one PDF file.
+ * - OMP1 🐞, OMP2 🐞: no book page's "citation_pdf_url" is read where the
+ *   book has two PDF files outside its chapters.
+ * - OMP7 🐞: no URN is assigned.
  * - A1 🐞, A5 🐞, A6 🐞, A7 🐞: no description with a quote mark or
  *   markup, no expired announcement, no contributor without names in the
  *   submission's language, no "&" in an abstract.
@@ -40,9 +44,14 @@
  * (Ada Author) who submits every book, a Press Manager in S1, S2 and
  * S5–S8, a Reader and a Press Manager in S3. The Site Administrator of S5
  * is the installer's `admin`, whom every scratch press enrols as a
- * manager. The "PDF" format (approved, available, its file open access)
- * comes from the submission scenario's `publicationFormats[]`, the
- * category "Cat One" from the context's `categories[]`. No test passes
+ * manager. The formats (approved, available, their files open access, or
+ * "Direct Sales" with `price`, and S9's "URL Path" `urlPath`) come from the
+ * submission scenario's `publicationFormats[]`, the chapters from
+ * `chapters[]`, Ben Writer from `contributors[]`, the book's "URL Path" from
+ * `urlPath`; the category "Cat One" from the context's `categories[]`, the
+ * series (S9's with their "Print ISSN" / "Online ISSN") from `series[]`.
+ * The series page's heading is empty on `main` (U17 OMP9), so S2 knows the
+ * series page by its address and its "0 Titles". No test passes
  * `plugins`: the plugins are as a new press has them and S6 and S8 change
  * them on screen; "Description", "Custom Tags" and the Google Analytics
  * number are typed on their own screens. The unpublish, the second
@@ -55,9 +64,9 @@
  * worker's port, so every address is compared by its path. Every Settings
  * › Website › "Plugins" load fires the Plugin Gallery grid's server 500
  * (U62's finding), and a file page's viewer logs "PDFJS is not defined"
- * (U69 A23): neither is asserted here. S6 follows the book page's
- * "citation_pdf_url"; no file entry of the sitemap is followed, and S6 and
- * S7 read the file page's source only, never its viewer. Every absence is read settled and paired with a
+ * (U69 A23): neither is asserted here. S6 follows the book pages'
+ * "citation_pdf_url"; no file entry of the sitemap is followed, and S6, S7
+ * and S9 read the file page's source only, never its viewer. Every absence is read settled and paired with a
  * positive control taken the same way (M4, M6): a sitemap's missing
  * entries beside the entries it lists, a missing tag beside the tags the
  * same source carries or carried one step earlier, a missing arrow beside
@@ -179,10 +188,26 @@ function filePath(contextPath, submissionId, format) {
  * @param {number} submissionId
  */
 async function openPdfFormat(page, submissionId) {
-    const link = page.locator(`a[href*="/catalog/view/${submissionId}/"]`).filter({hasText: 'PDF'});
+    return followLink(page, page.locator(`a[href*="/catalog/view/${submissionId}/"]`).filter({hasText: 'PDF'}), /\/catalog\/view\//);
+}
+
+/** A format's download link (the file's link) on a book or chapter page, by the format's name. */
+function formatLink(page, name) {
+    return page.locator('a.cmp_download_link').filter({hasText: new RegExp(`^\\s*${name}\\s*$`)});
+}
+
+/**
+ * Press a link (one match) and read the page it opens as "view source"
+ * shows it: the main frame's navigation answer whose address matches.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} link
+ * @param {RegExp} address
+ */
+async function followLink(page, link, address) {
     await expect(link).toHaveCount(1, {timeout: 30_000});
     const navigated = page.waitForResponse(
-        (r) => r.request().isNavigationRequest() && r.request().frame() === page.mainFrame() && /\/catalog\/view\//.test(r.url()),
+        (r) => r.request().isNavigationRequest() && r.request().frame() === page.mainFrame() && address.test(r.url()),
         {timeout: 30_000}
     );
     await link.click();
@@ -339,11 +364,18 @@ test.describe('Search-engine metadata & analytics', () => {
             enableAnnouncements: true,
             announcements: [{title: 'Call for Papers'}],
             categories: [{path: 'cat-one', title: 'Cat One'}],
+            series: [{path: 'sea-series', title: 'Sea Series'}],
         });
         const announcementId = context.announcements[0].id;
-        const tidal = await seedBook(ompApi, tag, 'Tidal Patterns', {published: true, publicationFormats: PDF_FORMAT});
+        const tidal = await seedBook(ompApi, tag, 'Tidal Patterns', {
+            published: true,
+            publicationFormats: PDF_FORMAT,
+            chapters: [{title: 'Chapter One Tides', page: true}, {title: 'Chapter Two Calm'}],
+        });
         const tidalId = tidal.submissionId;
         const [pdf] = tidal.publicationFormats;
+        const [chapterOne, chapterTwo] = tidal.chapters;
+        const chapterPath = bookPath(tag, tidalId) + `/chapter/${chapterOne.id}`;
         const draft = await seedBook(ompApi, tag, 'Draft Study', {submitted: true});
         await seedPress(ompApi, other, {manager: false});
         const elsewhere = await seedBook(ompApi, other, 'Elsewhere', {published: true});
@@ -363,16 +395,41 @@ test.describe('Search-engine metadata & analytics', () => {
         await visitor.goto(sitemap.paths[login + 2]);
         await expect(visitor.getByRole('heading', {name: 'Call for Papers', level: 1})).toBeVisible({timeout: 30_000});
 
-        // Published work: the book's page follows "Catalog", then the page
-        // of its "PDF" file; the page of "Cat One" follows "New Releases"
-        // (Rules 2, 4; Fields, "What the sitemap lists"). The file entry is
-        // read, never followed.
+        // Published work: the book's page follows "Catalog", then one
+        // chapter page, then the page of its "PDF" file; after "New
+        // Releases" the page of "Sea Series", then that of "Cat One" (Rules
+        // 2, 4; Fields, "What the sitemap lists"). The file entry is read,
+        // never followed.
         const catalog = sitemap.paths.indexOf(at(tag, '/catalog'));
         expect(catalog).toBeGreaterThan(0);
-        expect(sitemap.paths.slice(catalog + 1, catalog + 3)).toEqual([bookPath(tag, tidalId), filePath(tag, tidalId, pdf)]);
+        expect(sitemap.paths.slice(catalog + 1, catalog + 4)).toEqual([
+            bookPath(tag, tidalId),
+            chapterPath,
+            filePath(tag, tidalId, pdf),
+        ]);
         const releases = sitemap.paths.indexOf(at(tag, '/catalog/newReleases'));
         expect(releases).toBeGreaterThan(catalog);
-        expect(sitemap.paths[releases + 1]).toBe(at(tag, '/catalog/category/cat-one'));
+        expect(sitemap.paths.slice(releases + 1)).toEqual([at(tag, '/catalog/series/sea-series'), at(tag, '/catalog/category/cat-one')]);
+
+        // A chapter on its own page: its entry opens the page of "Chapter
+        // One Tides", the one chapter listed; "Chapter Two Calm", its box
+        // unticked, has no entry (Fields, "What the sitemap lists";
+        // Settings bullet 15).
+        const chapterEntries = sitemap.paths.filter((p) => p.includes('/chapter/'));
+        expect(chapterEntries).toEqual([chapterPath]);
+        expect(sitemap.paths).not.toContain(bookPath(tag, tidalId) + `/chapter/${chapterTwo.id}`);
+        await visitor.goto(chapterPath);
+        await expect(visitor.getByRole('heading', {name: 'Chapter One Tides', level: 1})).toBeVisible({timeout: 30_000});
+        await expect(visitor.getByRole('heading', {name: 'Chapter Two Calm'})).toHaveCount(0);
+
+        // A series: the entry after "New Releases" opens the page of "Sea
+        // Series", its book-less list (Fields, "What the sitemap lists").
+        // The page's heading is empty on `main` (U17 OMP9), so the page is
+        // known by its address and its list, never by the heading.
+        await visitor.goto(sitemap.paths[releases + 1]);
+        await expect(visitor).toHaveURL(new RegExp(`/index\\.php/${tag}/catalog/series/sea-series$`));
+        await expect(visitor.locator('.page_catalog_series')).toBeVisible({timeout: 30_000});
+        await expect(visitor.locator('.page_catalog_series')).toContainText('0 Titles');
 
         // Not in the sitemap: no entry opens "Draft Study", and none lies
         // under the second press's address (Rule 2), beside the book it lists.
@@ -393,6 +450,7 @@ test.describe('Search-engine metadata & analytics', () => {
         expect(unpublished.status).toBe(200);
         expect(unpublished.paths).toContain(at(tag, '/catalog'));
         expect(unpublished.paths).toContain(at(tag, '/catalog/category/cat-one'));
+        expect(unpublished.paths).toContain(at(tag, '/catalog/series/sea-series'));
         for (const path of unpublished.paths) {
             expect(path, 'no entry of the unpublished book').not.toMatch(new RegExp(`/catalog/(book|view)/${tidalId}(/|$)`));
         }
@@ -669,6 +727,10 @@ test.describe('Search-engine metadata & analytics', () => {
         const bookId = book.submissionId;
         const [pdf] = book.publicationFormats;
         const bookPage = bookPath(tag, bookId);
+        const sale = await seedBook(ompApi, tag, 'Sale Tides', {
+            published: true,
+            publicationFormats: [{name: 'PDF', file: 'article.pdf', price: '25'}],
+        });
         const page = await actorPage(asUser, `${tag}mg`);
         const dublinCore = new PluginRow(page, tag, PLUGIN_IDS.dublinCore);
         const scholar = new PluginRow(page, tag, PLUGIN_IDS.googleScholar);
@@ -724,6 +786,20 @@ test.describe('Search-engine metadata & analytics', () => {
         const [pdfUrl] = metaContents(source, 'citation_pdf_url');
         const {download: saved} = await captureDownload(visitor, () => visitor.goto(pathOf(pdfUrl)).catch(() => {}));
         expect(saved.suggestedFilename()).toBe('article.pdf');
+
+        // A file for sale: the book's page of "Sale Tides" carries one
+        // "citation_pdf_url"; its address lands the visitor on Login, where
+        // the open-access one above saved the file (Rule 12; OMP2).
+        const saleSource = await readSource(visitor, bookPath(tag, sale.submissionId));
+        expect(saleSource.status).toBe(200);
+        expect(metaContents(saleSource, 'citation_title')).toEqual(['Sale Tides']);
+        const salePdf = metaContents(saleSource, 'citation_pdf_url');
+        expect(salePdf).toHaveLength(1);
+        expect(pathOf(salePdf[0])).toMatch(new RegExp(`/catalog/download/${sale.submissionId}/`));
+        await visitor.goto(pathOf(salePdf[0]));
+        await expect(visitor).toHaveURL(new RegExp(`/index\\.php/${tag}/login\\?source=`));
+        await expect(new LoginPage(visitor).form).toBeVisible({timeout: 30_000});
+        await visitor.goto(bookPage);
 
         // The book's file page: the "PDF" format's link on the book's page
         // opens it; its source carries "DC." tags and no "citation_" tag, and
@@ -975,5 +1051,110 @@ test.describe('Search-engine metadata & analytics', () => {
         const again = await readSource(visitor, at(tag));
         expect(again.body).toContain(X.gtagScript);
         expect(again.body).toContain("'G-TEST12345'");
+    });
+
+    test("S9: A chapter's page and a book's file view pages", async ({ompApi, visitor}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s9', testInfo);
+        await seedPress(ompApi, tag, {
+            manager: false,
+            series: [
+                {path: 'print-series', title: 'Print Series', printIssn: '0317-8471'},
+                {path: 'online-series', title: 'Online Series', onlineIssn: '1234-5679'},
+            ],
+        });
+        const tidal = await seedBook(ompApi, tag, 'Tidal Patterns', {
+            published: true,
+            series: 'print-series',
+            urlPath: 'sea-study',
+            abstract: 'Tides follow the moon.',
+            contributors: [{givenName: 'Ben', familyName: 'Writer', email: `${tag}bw@mail.test`}],
+            publicationFormats: [
+                {name: 'PDF', file: 'article.pdf', urlPath: 'pdf'},
+                {name: 'Chapter PDF', file: 'article.pdf'},
+            ],
+            chapters: [
+                {
+                    title: 'Chapter One Tides',
+                    abstract: 'Tides turn twice a day.',
+                    page: true,
+                    authors: [`${tag}au`],
+                    files: ['publicationFormats.1'],
+                },
+            ],
+        });
+        const [pdf, chapterPdf] = tidal.publicationFormats;
+        const coastal = await seedBook(ompApi, tag, 'Coastal Notes', {
+            published: true,
+            series: 'online-series',
+            publicationFormats: PDF_FORMAT,
+        });
+        const bookPage = bookPath(tag, 'sea-study');
+        const viewAddress = /\/catalog\/view\//;
+
+        // Control: the book's page of "Tidal Patterns" carries
+        // "citation_title" "Tidal Patterns" and two "citation_author" tags
+        // (Rule 12).
+        const book = await readSource(visitor, bookPage);
+        expect(book.status).toBe(200);
+        expect(metaContents(book, 'citation_title')).toEqual(['Tidal Patterns']);
+        expect(metaContents(book, 'citation_author')).toEqual(['Ada Author', 'Ben Writer']);
+
+        // The chapter's page: "Chapter One Tides" in the table of contents
+        // opens it; its tags name the chapter (title, one author, its
+        // abstract) and the book's identifiers ("DC.Identifier" the book's
+        // "URL Path", "DC.Identifier.URI" the book's page) (Rule 16;
+        // Settings bullet 15).
+        const chapter = await followLink(visitor, visitor.getByRole('link', {name: 'Chapter One Tides', exact: true}), /\/chapter\//);
+        expect(chapter.status).toBe(200);
+        expect(pathOf(chapter.url)).toBe(`${bookPage}/chapter/${tidal.chapters[0].id}`);
+        await expect(visitor.getByRole('heading', {name: 'Chapter One Tides', level: 1})).toBeVisible();
+        expect(metaContents(chapter, 'citation_title')).toEqual(['Chapter One Tides']);
+        expect(metaContents(chapter, 'citation_author')).toEqual(['Ada Author']);
+        expect(metaContents(chapter, 'citation_abstract')).toEqual(['Tides turn twice a day.']);
+        expect(metaContents(chapter, 'DC.Title')).toEqual(['Chapter One Tides']);
+        expect(metaContents(chapter, 'DC.Creator.PersonalName')).toEqual(['Ada Author']);
+        expect(metaContents(chapter, 'DC.Description')).toEqual(['Tides turn twice a day.']);
+        expect(metaContents(chapter, 'DC.Identifier')).toEqual(['sea-study']);
+        expect(metaContents(chapter, 'DC.Identifier.URI').map(pathOf)).toEqual([bookPage]);
+
+        // The whole book's file page: back on the book's page, the "PDF"
+        // format's link opens `catalog/view/sea-study/pdf/{file}`; the
+        // book's title, both authors and abstract; "DC.Identifier" keeps the
+        // format's number in place of "pdf"; no "DC.Source.ISSN", "Print
+        // Series" having only a "Print ISSN" (Rule 17).
+        await visitor.goto(bookPage);
+        const whole = await followLink(visitor, formatLink(visitor, 'PDF'), viewAddress);
+        expect(whole.status).toBe(200);
+        expect(pathOf(whole.url)).toBe(at(tag, `/catalog/view/sea-study/pdf/${pdf.submissionFileId}`));
+        expect(metaContents(whole, 'DC.Title')).toEqual(['Tidal Patterns']);
+        expect(metaContents(whole, 'DC.Creator.PersonalName')).toEqual(['Ada Author', 'Ben Writer']);
+        expect(metaContents(whole, 'DC.Description')).toEqual(['Tides follow the moon.']);
+        const fileNumber = pathOf(whole.url).split('/').pop();
+        expect(metaContents(whole, 'DC.Identifier')).toEqual([`sea-study/${pdf.id}/${fileNumber}`]);
+        expect(metaContents(whole, 'DC.Identifier')[0]).toMatch(/^sea-study\/\d+\/\d+$/);
+        expect(metaContents(whole, 'DC.Source.ISSN')).toEqual([]);
+
+        // The chapter's file page: on the chapter's page, the "Chapter PDF"
+        // format's link; the chapter's title and its one author, no
+        // "DC.Description" holding the book's abstract, no "DC.Source.ISSN"
+        // (Rule 17).
+        await visitor.goto(pathOf(chapter.url));
+        const chapterFile = await followLink(visitor, formatLink(visitor, 'Chapter PDF'), viewAddress);
+        expect(chapterFile.status).toBe(200);
+        expect(pathOf(chapterFile.url)).toBe(at(tag, `/catalog/view/sea-study/${chapterPdf.id}/${chapterPdf.submissionFileId}`));
+        expect(metaContents(chapterFile, 'DC.Title')).toEqual(['Chapter One Tides']);
+        expect(metaContents(chapterFile, 'DC.Creator.PersonalName')).toEqual(['Ada Author']);
+        expect(metaContents(chapterFile, 'DC.Description')).not.toContain('Tides follow the moon.');
+        expect(metaContents(chapterFile, 'DC.Source.ISSN')).toEqual([]);
+
+        // A series with an "Online ISSN": the "PDF" link on the book's page
+        // of "Coastal Notes" opens a view page carrying "DC.Source.ISSN"
+        // "1234-5679" (Rule 17).
+        await visitor.goto(bookPath(tag, coastal.submissionId));
+        const online = await followLink(visitor, formatLink(visitor, 'PDF'), viewAddress);
+        expect(online.status).toBe(200);
+        expect(metaContents(online, 'DC.Title')).toEqual(['Coastal Notes']);
+        expect(metaContents(online, 'DC.Source.ISSN')).toEqual(['1234-5679']);
     });
 });

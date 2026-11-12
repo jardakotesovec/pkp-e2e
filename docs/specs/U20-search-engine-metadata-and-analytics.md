@@ -566,6 +566,9 @@ in. <sup>i</sup> <sup>q14</sup>
 - [Search](U15-search.md) owns the Search page the sitemap lists; this
   spec's "Search Indexing" concerns outside search engines, not the
   journal's own search.
+- [Sections](U17-sections.md) owns the series whose pages a press's
+  sitemap lists, and the finding on those pages that scenario 2 meets
+  ([OMP9](U17-sections.md#omp9)).
 - *OAI-PMH* is the other channel through which outside services read the
   journal's metadata; nothing is shared with the tags or the sitemap.
 - *Languages & locales* owns the interface languages (Rules 4, 8).
@@ -611,10 +614,14 @@ the tooling recipe are in the footnote. <sup>s</sup>
    announcement "Call for Papers", where the Author Ada Author's article
    "Tidal Patterns" is published (on a journal in the published issue
    Vol. 1 No. 1 (2024); on a press with the publication format "PDF",
-   approved and available, holding an open-access PDF file, the press
-   having the category "Cat One"), her "Draft Study" is submitted and
-   still in the workflow and, on a journal, her "Future Tides" is
-   scheduled in the unpublished issue Vol. 1 No. 2 (2026); and a second
+   approved and available, holding an open-access PDF file, and two
+   chapters, "Chapter One Tides", whose "Show this chapter on its own
+   page and link to that page from the book's table of contents." is
+   ticked, and "Chapter Two Calm", whose box is unticked, the press
+   having the category "Cat One" and the series "Sea Series"), her
+   "Draft Study" is submitted and still in the workflow and, on a
+   journal, her "Future Tides" is scheduled in the unpublished issue
+   Vol. 1 No. 2 (2026); and a second
    scratch journal where the article "Elsewhere" is published, on a
    journal in its own published issue Vol. 1 No. 1 (2024).
 
@@ -625,10 +632,23 @@ the tooling recipe are in the footnote. <sup>s</sup>
      Papers" (Rule 3; Settings bullet 9).
    - **Published work**: on a journal, the page of Vol. 1 No. 1 follows
      "Archive" (Rule 2a; [OJS2](#ojs2)). On a press, the book's page of
-     "Tidal Patterns" follows "Catalog", followed by the page of its
-     "PDF" file, and the page of "Cat One" follows "New Releases". On a
-     preprint server, the last entry opens the preprint's page of "Tidal
-     Patterns" (Rules 2, 4; Fields, "What the sitemap lists").
+     "Tidal Patterns" follows "Catalog", followed by one chapter page,
+     then the page of its "PDF" file; after "New Releases" come the page
+     of "Sea Series", then the page of "Cat One". On a preprint server,
+     the last entry opens the preprint's page of "Tidal Patterns" (Rules
+     2, 4; Fields, "What the sitemap lists").
+   - **A chapter on its own page** {OMP}: follow the chapter page's
+     entry: it opens the page of "Chapter One Tides", the one chapter
+     listed; "Chapter Two Calm", whose box is unticked, has no entry
+     (Fields, "What the sitemap lists"; Settings bullet 15).
+   - **A series** {OMP}: follow the entry after "New Releases": it opens
+     the series' page at {journal address}/catalog/series/sea-series,
+     which reads "0 Titles", "All Books" and "No titles have been
+     published yet.". Its heading and the last step of the trail above
+     it are empty, and the browser tab reads only "|" and the press's
+     name, so "Sea Series" shows nowhere on the page, a fault
+     [Sections](U17-sections.md#omp9) records (Fields, "What the sitemap
+     lists").
    - **Not in the sitemap**: no entry opens "Draft Study", none is the
      page of Vol. 1 No. 2 {OJS}, and no address lies under the second
      journal's address (Rule 2).
@@ -768,7 +788,9 @@ the tooling recipe are in the footnote. <sup>s</sup>
    No. 1 (2024); on a journal and a preprint server with the keyword
    "tides" and a "PDF" galley holding a PDF file; on a press with the
    publication format "PDF", approved and available, holding an
-   open-access PDF file.
+   open-access PDF file, beside a second book, "Sale Tides", whose one
+   format, "PDF", approved and available, holds a PDF file for sale
+   ("Direct Sales").
 
    - **Google Scholar's tags**: the visitor opens the article's page of
      "Tidal Patterns" and views its source. The hidden header carries
@@ -803,6 +825,10 @@ the tooling recipe are in the footnote. <sup>s</sup>
    - **The PDF address** {OMP}: the visitor opens the address the book
      page's "citation_pdf_url" gives: the browser saves the "PDF"
      format's file, article.pdf (Rule 12).
+   - **A file for sale** {OMP}: the visitor opens the book's page of
+     "Sale Tides" and views its source: it carries one
+     "citation_pdf_url". Open the address it gives: the Login page opens
+     (Rule 12; [OMP2](#omp2)).
    - **The book's file page** {OMP}: on the book's page, press the "PDF"
      format's link: the file's page opens; its source
      carries "DC." tags and no "citation_" tag, and its "DC.Identifier"
@@ -918,6 +944,62 @@ the tooling recipe are in the footnote. <sup>s</sup>
      the visitor's home page, reloaded, still held no "googletagmanager"
      (Rule 19). <sup>s</sup>
 
+9. **A chapter's page and a book's file view pages** {OMP}
+
+   Given: a visitor, signed out, on a scratch press whose plugins nobody
+   has touched, with the series "Print Series", whose only ISSN is the
+   "Print ISSN" "0317-8471", and "Online Series", whose "Online ISSN" is
+   "1234-5679", where the Author Ada Author's book "Tidal Patterns", in
+   "Print Series", with the "URL Path" "sea-study", the abstract "Tides
+   follow the moon." and a second contributor, Ben Writer, is published
+   with the publication format "PDF", its "URL Path" "pdf", and the
+   format "Chapter PDF", each approved and available and holding an
+   open-access PDF file, and with the chapter "Chapter One Tides", by Ada
+   Author alone, with the abstract "Tides turn twice a day.", its "Show
+   this chapter on its own page and link to that page from the book's
+   table of contents." ticked, holding the "Chapter PDF" file; and where
+   her book "Coastal Notes", in "Online Series", is published with the
+   format "PDF", approved and available, holding an open-access PDF
+   file.
+
+   - **The chapter's page**: the visitor opens the book's page of "Tidal
+     Patterns" and presses "Chapter One Tides" in its table of contents:
+     the chapter's page opens. Its source carries "citation_title"
+     "Chapter One Tides", one "citation_author", "Ada Author", and
+     "citation_abstract" "Tides turn twice a day."; "DC.Title" "Chapter
+     One Tides", one "DC.Creator.PersonalName", "Ada Author", and
+     "DC.Description" "Tides turn twice a day."; and the book's
+     identifiers: "DC.Identifier" "sea-study" and "DC.Identifier.URI" the
+     address of the book's page (Rule 16; Settings bullet 15;
+     [OMP3](#omp3)).
+   - **The whole book's file page**: back on the book's page, press the
+     "PDF" format's link: the file's view page opens at {journal
+     address}/catalog/view/sea-study/pdf/ followed by the file's number,
+     {journal address} being the address of the press's home page. Its
+     source carries "DC.Title" "Tidal Patterns", two
+     "DC.Creator.PersonalName", "Ada Author" and "Ben Writer", and
+     "DC.Description" "Tides follow the moon."; its "DC.Identifier" reads
+     "sea-study/", then a number in place of "pdf" (the format's own
+     number), then "/" and the file's number from the page's address;
+     and it carries no
+     "DC.Source.ISSN", "Print Series" having only a "Print ISSN" (Rule
+     17; [OMP3](#omp3), [OMP5](#omp5)).
+   - **The chapter's file page**: on the chapter's page, press the
+     "Chapter PDF" format's link: the file's view page opens. Its source
+     carries "DC.Title" "Chapter One Tides" and one
+     "DC.Creator.PersonalName", "Ada Author", no "DC.Description" holding
+     "Tides follow the moon.", and no "DC.Source.ISSN" (Rule 17).
+   - **A series with an "Online ISSN"**: open the book's page of "Coastal
+     Notes" and press its "PDF" format's link: the view page's source
+     carries "DC.Source.ISSN" "1234-5679" (Rule 17).
+   - **Control**: the book's page of "Tidal Patterns" carries
+     "citation_title" "Tidal Patterns" and two "citation_author" tags,
+     "Ada Author" and "Ben Writer" (Rule 12). <sup>s</sup>
+
+   A journal and a preprint server have no chapter pages, and a galley's
+   view page there carries no plugin tag (Rule 13), so this scenario has
+   no analogue there.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -933,12 +1015,6 @@ Left out of the scenarios above, by reason:
   - OMP4 {OMP} (a published book with a chapter page and "Create New Version", then the new version published: the sitemap lists the chapter page at the address the book's page links to, and it opens; Rule 2c) [report 2026-10-03]
   - A6 (an author whose account holds an English name only submits in French: "citation_author" and "DC.Creator.PersonalName" carry the full name; Fields, "citation_author") [report 2026-10-03]
   - OMP5 {OMP} (a book file's view page: "DC.Identifier.URI" names that view page; Rule 17) [report 2026-10-03]
-  - {OMP} a chapter with "Show this chapter on its own page…" ticked: its entry in the sitemap, and its page's own tags, the chapter's title, contributors and abstract beside the book's identifiers (Fields, "What the sitemap lists"; Rule 16; Settings bullet 15) [incidental 2026-10-05]
-  - {OMP} a series' page in the sitemap (Fields, "What the sitemap lists") [incidental 2026-10-05]
-  - {OMP} a book whose only PDF file is for sale ("Direct Sales"): the address its "citation_pdf_url" gives sends a signed-out visitor to the Login page (Rule 12) [report 2026-10-07]
-  - {OMP} a book and its "PDF" format with a "URL Path" each: the "PDF" link opens a view page whose address carries both, while its "DC.Identifier" keeps the format's number (Rule 17) [incidental 2026-10-13]
-  - {OMP} a chapter's file view page beside a whole-book file's: the chapter's title and contributors on the first, the book's title, contributors and abstract on the second (Rule 17) [incidental 2026-10-13]
-  - {OMP} a series with only a "Print ISSN": a file's view page carries no "DC.Source.ISSN"; with an "Online ISSN", that one (Rule 17) [incidental 2026-10-13]
 - **Rarely met**:
   - "User Registration" set to "The Journal Manager will register all
     user accounts. …", which takes "Register" out of the sitemap
@@ -1011,6 +1087,9 @@ Left out of the scenarios above, by reason:
   - leaving the "Search Indexing" tab with a change unsaved (Fields;
     *[Journal identity & about
     pages](U07-journal-identity-and-about-pages.md)*, Rule 5)
+  - {OMP} the series' name on the series' page the sitemap leads to,
+    which scenario 2 does not read (Fields, "What the sitemap lists";
+    *[Sections](U17-sections.md#omp9)*, its register)
   - {OJS} the LOCKSS and CLOCKSS pages' "Description" row (Side effects;
     [Archiving & preservation](U67-archiving-preservation.md))
   - {OMP} a book file's link that downloads the file instead of opening
@@ -1346,7 +1425,7 @@ OMP's own code.
 **q1** — Live-probed 2026-09-26 (Purpose, the absence paragraph; the plugins table), all three apps, on a new scratch context of each, as its manager: under "Generic Plugins" OJS and OMP listed "Dublin Core Indexing Plugin" ticked (OJS "…in article views…", OMP "…in monograph views…"); every app listed "Google Scholar Indexing Plugin" ticked and "Google Analytics Plugin" unticked, with the descriptions the table quotes; OPS listed no Dublin Core row. Signed out, a posted preprint's page source held no "DC." tag and no Dublin Core schema link, and seven "citation_" tags; an OJS article page held 17 "DC." tags, an OMP book page 13.
 
 <a id="fn-q2"></a>
-**q2** — Live-probed 2026-09-26 (Rules 1, 2, 2c; the sitemap table), all three apps, signed out: `{journal address}/sitemap` answered `application/xml`, shown inline, Chromium printing "This XML file does not appear to have any style information associated with it. The document tree is shown below." above the tree; each entry held its address alone; the entries came in the table's order on every read, on contexts made with nothing enabled too. A submitted item, a scheduled one and a second context's item never appeared. On a press and a preprint server "Unpublish" ("Unpost") on the workflow removed the item at the next load and publishing again restored it; on a journal publishing, unpublishing and republishing an article changed nothing (OJS2). A scan of 14 other editorial, administration and public pages found no other link to the sitemap. OMP: a chapter with "Show this chapter on its own page…" ticked was listed and an unticked one was not; "Not Available" on the format, or "Not Available" in the file's terms, removed the file's entry and "Available" or "Open Access" restored it (the priced end not driven); a file still "Awaiting Approval" on its own row was listed. After "Create New Version" on a published book the entry `catalog/book/sea-study/chapter/1` gave way to `…/chapter/3`, which answered "404 Not Found", while the book read "Status: Unpublished" for the new version (OMP4). The seeded press listed "New Releases", both series and all seven categories; the seeded journal and server, holding the same categories, listed none. OPS listed both posted preprints and not the submitted or scheduled one. Walked again 2026-10-03 (Rule 2c; OMP4), OMP `main` and `stable-3_5_0`, on PKP's default test dataset (`shared/playwright/checks/issues/sitemap-new-version-chapter-pages-404/walk.js`): signed out, the sitemap listed book 14's chapter 1 as `…/catalog/book/14/chapter/54`, which opened "Chapter 1: Mind Control—Internal or External?"; after "Create New Version" it listed `…/catalog/book/14/chapter/72` instead, which answered "404 Not Found", and still did after the new version was published, while the book's page linked the chapter as `…/chapter/54`, which opened it, before and after; the book and file entries stayed.
+**q2** — Live-probed 2026-09-26 (Rules 1, 2, 2c; the sitemap table), all three apps, signed out: `{journal address}/sitemap` answered `application/xml`, shown inline, Chromium printing "This XML file does not appear to have any style information associated with it. The document tree is shown below." above the tree; each entry held its address alone; the entries came in the table's order on every read, on contexts made with nothing enabled too. A submitted item, a scheduled one and a second context's item never appeared. On a press and a preprint server "Unpublish" ("Unpost") on the workflow removed the item at the next load and publishing again restored it; on a journal publishing, unpublishing and republishing an article changed nothing (OJS2). A scan of 14 other editorial, administration and public pages found no other link to the sitemap. OMP: a chapter with "Show this chapter on its own page…" ticked was listed and an unticked one was not; "Not Available" on the format, or "Not Available" in the file's terms, removed the file's entry and "Available" or "Open Access" restored it (the priced end not driven); a file still "Awaiting Approval" on its own row was listed. After "Create New Version" on a published book the entry `catalog/book/sea-study/chapter/1` gave way to `…/chapter/3`, which answered "404 Not Found", while the book read "Status: Unpublished" for the new version (OMP4). The seeded press listed "New Releases", both series and all seven categories; the seeded journal and server, holding the same categories, listed none. OPS listed both posted preprints and not the submitted or scheduled one. Walked again 2026-10-03 (Rule 2c; OMP4), OMP `main` and `stable-3_5_0`, on PKP's default test dataset (`shared/playwright/checks/issues/sitemap-new-version-chapter-pages-404/walk.js`): signed out, the sitemap listed book 14's chapter 1 as `…/catalog/book/14/chapter/54`, which opened "Chapter 1: Mind Control—Internal or External?"; after "Create New Version" it listed `…/catalog/book/14/chapter/72` instead, which answered "404 Not Found", and still did after the new version was published, while the book's page linked the chapter as `…/chapter/54`, which opened it, before and after; the book and file entries stayed. Test run 2026-11-12 (scenario 2, "A series"), OMP `main`, signed out, on a scratch press: the sitemap's entry after "New Releases", `{journal address}/catalog/series/sea-series`, opened a page at that address whose `h1` and last trail step were empty and whose `<title>` read "| {press name}", above "0 Titles", the heading "All Books" and "No titles have been published yet."; a series holding a published book showed the same empty heading and title above "1 Titles" and the book (the fault of [Sections](U17-sections.md#omp9)).
 
 <a id="fn-q3"></a>
 **q3** — Live-probed 2026-09-26 (Rule 2a; OJS2), OJS: on a scratch journal with a published issue holding two published articles and a third article published with "Don't Assign To An Issue" ("This will be published immediately without any issue association."), the sitemap listed the issue's page (`issue/view/7`) and none of the three articles or their galleys, while the issue page linked the articles and their galleys; the same on two other scratch journals and on `publicknowledge`.
@@ -1418,7 +1497,7 @@ OMP's own code.
 **q25** — Live-probed 2026-09-26 (Actors preamble, rows 3, 4; Fields, the tab; Rule 24; Side effects), all three apps: the heading, text and help texts as quoted, the "sitemap" link opening `{journal address}/en/sitemap` in a new tab. Distribution's tabs: OJS "License", "DOIs", "Search Indexing", "Payments", "Statistics", "Access", "Archiving"; OMP the first five; OPS "License", "DOIs", "Search Indexing", "Access", "Statistics". Every save showed "Saving" and then "Saved", one save storing both boxes; empty boxes, quote marks, markup and plain words were saved as typed. With English and French, "French" and "English" buttons sat above the form, "French" showing "Description in French" and "Custom Tags in French", each field reading "0/2 languages completed". A change typed and not saved survived a switch to another Distribution tab and back, and was dropped with no question on leaving or reloading the page. The Settings Wizard (Administration › "Hosted Journals", the row's arrow › "Settings wizard"; top tabs "Journal Settings" / "Setup" / "Server Settings", "Plugins", "Users"; side tab "Search Indexing") arrived with the journal's values; its "Save" gave "Saved", and the journal's own tab and home page showed the change. The journal's manager got the access-denied page at the wizard's address. At the tab's address the Site Administrator, the Journal Manager and the Editor (OJS, OMP) opened it; the Section Editor, an assistant, the Reviewer, the Author and the Reader got "The current role does not have access to this operation"; signed out, Login. A Site Administrator whose manager role was removed (the Reader role kept) opened the tab on OJS and got the access-denied page on OMP and OPS, while the wizard's "Save" worked on all three. No email reached the mail catcher, and no notification or activity-log entry followed a save.
 
 <a id="fn-s"></a>
-**s** — Seeding for the scenarios. Each scenario runs on OJS, OMP and OPS, on scratch contexts of its own from `POST scenarios/context` (`docs/process/scenarios.md`), with throwaway `users[]` (password: the username twice, `docs/process/users.md`): a `manager` (the Journal Manager, Press Manager or Preprint Server Manager) in scenarios 1, 2 and 5 to 8, an `author` (`givenName` "Ada", `familyName` "Author") who submits every item, and in scenario 3 a `reader` and a `manager`; the Site Administrator of scenario 5 is the installer's `admin` (password `admin`), whom every scratch context enrols as a manager; the visitor is a second browser context, signed out. Items come from `POST scenarios/submission` by the `author`, `published: true`. No scenario passes `plugins`: every context has its plugins as a new context has them (`docs/process/seed-facts.md`: the two indexing plugins ticked, no Dublin Core row on a preprint server, "Google Analytics Plugin" unticked), and scenarios 6 and 8 change them on screen; "Description", "Custom Tags" and the Google Analytics window are typed on their own screens. Scenario 1: the context alone (a scratch context's "About the Journal" text is empty and its principal contact is "Site Admin", seed-facts). Scenario 2: `enableAnnouncements: true` with `announcements: [{title: "Call for Papers"}]`; "Tidal Patterns" published and "Draft Study" `submitted: true`; on OJS `issues: [{volume: 1, number: 1, year: 2024, published: true}, {volume: 1, number: 2, year: 2026}]`, "Tidal Patterns" with `issue` Vol. 1 No. 1, and "Future Tides" `published: true` with `issue` Vol. 1 No. 2, which leaves it scheduled; on OMP `categories: [{path: "cat-one", title: "Cat One"}]` and, on "Tidal Patterns", `publicationFormats: [{name: "PDF", file: "article.pdf"}]`, which the key builds approved and available with its file open access; a second context with "Elsewhere" published (on OJS into its own `issues: [{volume: 1, number: 1, year: 2024, published: true}]`); the unpublish and the second publish are the screens'. Scenario 3: three contexts, `name` "Open Waters", "Members Only" with `restrictSiteAccess: true` and the `reader`, and "Hidden Bay" with `context.enabled: false` and the `manager`. Scenario 4: `publicknowledge`, read signed out (English and French are its interface languages, seed-facts), and a scratch context with its primary language alone. Scenario 5: a scratch context with its primary language alone and "Tidal Patterns" published. Scenario 6: `context` `name` "Sea Letters", `acronym` "SL"; "Tidal Patterns" with `abstract` "Tides follow the moon.", `citationsRaw` of two lines and `datePublished` `2024-03-05`, in the context's own first section ("Articles" on a journal); on OJS and OPS `keywords: ["tides"]` and `galleys: [{label: "PDF", file: "article.pdf"}]` (OPS `preprint.pdf`), on OJS with `issue` into `issues: [{volume: 1, number: 1, year: 2024, published: true}]`; on OMP `publicationFormats: [{name: "PDF", file: "article.pdf"}]` (a press refuses `keywords`). Scenario 7: "Tidal Patterns" published, on OMP with the "PDF" format of scenario 6; no key makes a second version, so the new version is the screens' ("Create New Version"). Scenario 8: "Tidal Patterns" published. The mail catcher is not read: nothing is emailed (Side effects).
+**s** — Seeding for the scenarios. Scenarios 1 to 8 run on OJS, OMP and OPS and scenario 9 on OMP alone, each on scratch contexts of its own from `POST scenarios/context` (`docs/process/scenarios.md`), with throwaway `users[]` (password: the username twice, `docs/process/users.md`): a `manager` (the Journal Manager, Press Manager or Preprint Server Manager) in scenarios 1, 2 and 5 to 8, an `author` (`givenName` "Ada", `familyName` "Author") who submits every item, and in scenario 3 a `reader` and a `manager`; the Site Administrator of scenario 5 is the installer's `admin` (password `admin`), whom every scratch context enrols as a manager; the visitor is a second browser context, signed out. Items come from `POST scenarios/submission` by the `author`, `published: true`. No scenario passes `plugins`: every context has its plugins as a new context has them (`docs/process/seed-facts.md`: the two indexing plugins ticked, no Dublin Core row on a preprint server, "Google Analytics Plugin" unticked), and scenarios 6 and 8 change them on screen; "Description", "Custom Tags" and the Google Analytics window are typed on their own screens. Scenario 1: the context alone (a scratch context's "About the Journal" text is empty and its principal contact is "Site Admin", seed-facts). Scenario 2: `enableAnnouncements: true` with `announcements: [{title: "Call for Papers"}]`; "Tidal Patterns" published and "Draft Study" `submitted: true`; on OJS `issues: [{volume: 1, number: 1, year: 2024, published: true}, {volume: 1, number: 2, year: 2026}]`, "Tidal Patterns" with `issue` Vol. 1 No. 1, and "Future Tides" `published: true` with `issue` Vol. 1 No. 2, which leaves it scheduled; on OMP `categories: [{path: "cat-one", title: "Cat One"}]`, `series: [{path: "sea-series", title: "Sea Series"}]` and, on "Tidal Patterns", `publicationFormats: [{name: "PDF", file: "article.pdf"}]`, which the key builds approved and available with its file open access, and `chapters: [{title: "Chapter One Tides", page: true}, {title: "Chapter Two Calm"}]`; a second context with "Elsewhere" published (on OJS into its own `issues: [{volume: 1, number: 1, year: 2024, published: true}]`); the unpublish and the second publish are the screens'. Scenario 3: three contexts, `name` "Open Waters", "Members Only" with `restrictSiteAccess: true` and the `reader`, and "Hidden Bay" with `context.enabled: false` and the `manager`. Scenario 4: `publicknowledge`, read signed out (English and French are its interface languages, seed-facts), and a scratch context with its primary language alone. Scenario 5: a scratch context with its primary language alone and "Tidal Patterns" published. Scenario 6: `context` `name` "Sea Letters", `acronym` "SL"; "Tidal Patterns" with `abstract` "Tides follow the moon.", `citationsRaw` of two lines and `datePublished` `2024-03-05`, in the context's own first section ("Articles" on a journal); on OJS and OPS `keywords: ["tides"]` and `galleys: [{label: "PDF", file: "article.pdf"}]` (OPS `preprint.pdf`), on OJS with `issue` into `issues: [{volume: 1, number: 1, year: 2024, published: true}]`; on OMP `publicationFormats: [{name: "PDF", file: "article.pdf"}]` (a press refuses `keywords`), and a second book "Sale Tides" with `publicationFormats: [{name: "PDF", file: "article.pdf", price: "25"}]`, the file's terms "Direct Sales". Scenario 7: "Tidal Patterns" published, on OMP with the "PDF" format of scenario 6; no key makes a second version, so the new version is the screens' ("Create New Version"). Scenario 8: "Tidal Patterns" published. Scenario 9: no `manager`; `series: [{path: "print-series", title: "Print Series", printIssn: "0317-8471"}, {path: "online-series", title: "Online Series", onlineIssn: "1234-5679"}]` (`series[]` in `docs/process/scenarios.md`); "Tidal Patterns" with `series` "print-series", `urlPath` "sea-study", `abstract` "Tides follow the moon.", `contributors: [{givenName: "Ben", familyName: "Writer", email: …}]`, `publicationFormats: [{name: "PDF", file: "article.pdf", urlPath: "pdf"}, {name: "Chapter PDF", file: "article.pdf"}]` (`publicationFormats[]`, the same file) and `chapters: [{title: "Chapter One Tides", abstract: "Tides turn twice a day.", page: true, authors: [the `author`'s username], files: ["publicationFormats.1"]}]`; "Coastal Notes" with `series` "online-series" and the "PDF" format. The mail catcher is not read: nothing is emailed (Side effects).
 
 <a id="fn-f-a1"></a>
 **f-a1** — Note g: the "description" tag is built by string concatenation with no `htmlspecialchars()`, unlike every plugin tag (which escape their content); the context API's `PKPSchemaService::sanitize()` casts to string and strips nothing. A double quote therefore closes the attribute, and a ">" closes the tag, the rest printing as page text. Live-probed 2026-09-26, all three apps: note q11.
