@@ -271,6 +271,10 @@ Nothing on either page is required, and neither page has a form-level
     the editor reads "Importing document" with its current step:
     "Downloading document…", "Loading converter…", "Converting…", then
     "Uploading images…" when the file holds images. Then the box goes.
+    "Loading converter…" shows only on the first import since the browser
+    page was loaded: the converter stays loaded, so a later import on the
+    same page, even after moving to another part of the workflow, goes
+    from "Downloading document…" straight to "Converting…".
     The import runs once per send; reloading the page does not repeat it.
     <sup>p</sup> <sup>d20</sup>
     - 20a. **What arrives.** The converted text replaces whatever the
@@ -284,8 +288,8 @@ Nothing on either page is required, and neither page has a form-level
       empty text, not the import. <sup>d20</sup>
     - 20b. **A file that cannot be converted.** A file that is not what
       its name says (a text file named ".docx", for one) runs the box
-      through "Downloading document…", "Loading converter…" and
-      "Converting…", then the box reads "Import failed" with the
+      through the steps of Rule 20 up to "Converting…", then the box
+      reads "Import failed" with the
       converter's message and a "Dismiss" button. "Dismiss" closes the
       box. Nothing is imported and the editor keeps its text.
       <sup>p</sup> <sup>d20</sup>
@@ -434,7 +438,7 @@ Nothing on either page is required, and neither page has a form-level
 
 ## Canonical scenarios
 
-Scenarios 2–6 run on the seeded journal with ready accounts,
+Scenarios 2–6 and 10 run on the seeded journal with ready accounts,
 scenarios 1, 7 and 8 on a scratch journal with throwaway accounts, and
 scenario 9 on the seeded press and preprint server. The accounts,
 passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v</sup>
@@ -443,9 +447,11 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
 
    Given: Journal Manager, on a scratch journal, with a scratch article
    in Production titled "JATS scenario article", whose abstract holds a
-   bulleted list of "First point" and "Second point", whose version
-   lists the two references "Alpha, A. (2020). First reference." and
-   "Beta, B. (2021). Second reference.", and which has an HTML galley
+   bulleted list of "First point" and "Second point" and the sentence
+   `Write <i>species names</i> in italics`, its tag typed as text and its
+   last word, "italics", set in italics with the editor's button, whose
+   version lists the two references "Alpha, A. (2020). First reference."
+   and "Beta, B. (2021). Second reference.", and which has an HTML galley
    whose text begins "A small HTML file", with no JATS file uploaded.
 
    - **The generated XML**: open the article's workflow and note the
@@ -457,8 +463,10 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
      the line "This JATS file is generated automatically by the
      submission metadata" under it (Fields; Rule 1).
    - **What the XML carries**: it holds the journal's name, "JATS
-     scenario article", the abstract's two points as a list, and at the
-     end a reference list with both references (Rule 2).
+     scenario article", the abstract's two points as a list, the typed
+     `<i>species names</i>` as text, not markup, and "italics" as italic
+     markup, and at the end a reference list with both references
+     (Rule 2).
    - **The HTML galley's text**: the XML holds a body part (the
      `<body>` element) with the galley's text, "A small HTML file…"
      ⚠ [A7](#a7) (Rule 2a).
@@ -466,14 +474,22 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
      replace the "Title" with "Revised JATS article" and press "Save";
      choose "JATS XML" again: the XML holds "Revised JATS article"
      (Rule 1).
+   - **A reference with a DOI**: choose "References" under the version,
+     type "Gamma, C. (2022). Third reference. https://doi.org/10.1234/x."
+     in its "References" box and press "Add" (see
+     *[References](U42-citations-and-references.md)*, scenario 1); choose
+     "JATS XML" again: the XML's reference list holds that reference with
+     its text as typed, and its doi.org address marked as the reference's
+     DOI (Rule 2).
    - **"Download" of the generated XML**: press "Download": the browser
-     saves a file named "jats-{n}-{date}-{time}.xml", {n} the version's
-     internal number, the date as YYYYMMDD and the time as HHMMSS by the
-     browser's clock (Rule 7).
+     saves "jats-{n}-{date}-{time}.xml", {n} the version's internal number
+     in the address's `publication_{n}_jats` ([→ Workflow
+     screen](U24-workflow-screen-and-stage-access.md#deep-link)), {date}
+     YYYYMMDD and {time} HHMMSS by the browser's clock (Rule 7).
    - **"Upload"**: press "Upload" and choose the JATS file "article.xml",
      whose title reads "A JATS fixture article": the toast "Your file has
-     been uploaded." shows, the XML shown is the file's, with "Uploaded
-     JATS fixture", the line reads "Last Modification at {date} by
+     been uploaded." shows, the XML shown is the file's, with that title,
+     the line reads "Last Modification at {date} by
      {username}", {date} the upload time as YYYY-MM-DD HH:MM:SS by the
      server's clock and {username} the Journal Manager's username, and "More Information"
      and "Delete" appear (Rule 3; Fields, the line under the XML).
@@ -509,8 +525,9 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
    whose "Submission Files" list holds the Word file "article.docx"
    (the heading "K3 Imported Heading", the paragraphs "K3 imported
    paragraph before the figure." and "K3 imported paragraph after the
-   figure.", and between them an image captioned "K3 figure caption"),
-   and whose Body Text was never saved.
+   figure.", and between them an image captioned "K3 figure caption")
+   and the file "notes.docx", a text file named as a Word file, and
+   whose Body Text was never saved.
 
    - **The page**: open the article's workflow, then side menu
      "Publication" › the version › "Body Text": the page is headed
@@ -550,6 +567,16 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
      effects).
    - **The "Media" page**: choose "Media" under the version: its list
      holds no "figure.png" (Rule 22).
+   - **A file that cannot be converted**: choose "Submission" in the
+     side menu; on the "notes.docx" row of "Submission Files" press
+     "More Actions" › "Send to Text Editor", choose the article's one
+     existing version in the window "Send File to Text Editor" and press
+     "Confirm": the workflow opens the version's "Body Text", and the box
+     above the editor reads "Importing document" with "Downloading
+     document…", "Loading converter…" and "Converting…", then "Import
+     failed" with the converter's message and "Dismiss". Press "Dismiss":
+     the box closes, and the editor still holds "First sentence.", the
+     citation and the figure: nothing was imported (Rules 20, 20b).
    - **"Send to Text Editor"**: choose "Submission" in the side menu; on
      the "article.docx" row of "Submission Files" press "More Actions" ›
      "Send to Text Editor": the window "Send File to Text Editor" asks
@@ -558,8 +585,10 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
      and press "Confirm" (Actors row 6).
    - **The import**: the workflow opens the version's "Body Text", and a
      box above the editor reads "Importing document" with its current
-     step, "Downloading document…", "Loading converter…", "Converting…",
-     then "Uploading images…"; then the box goes (Rule 20).
+     step, "Downloading document…", "Converting…", then "Uploading
+     images…"; then the box goes. No "Loading converter…" shows: the
+     "notes.docx" import already loaded the converter on this page
+     (Rule 20).
    - **What arrives**: the editor holds only the file's content, in
      order "K3 Imported Heading", "K3 imported paragraph before the
      figure.", the figure captioned "K3 figure caption" and "K3 imported
@@ -607,9 +636,9 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
 4. **The published "JATS XML" link**
 
    Given: Journal Manager and a signed-out visitor, on the seeded
-   journal, with a published scratch article that has a PDF galley
-   "PDF", no uploaded JATS file and "Make available with publication"
-   unticked.
+   journal, with a published scratch article, its version "Version of
+   Record 1.0", that has a PDF galley "PDF", no uploaded JATS file and
+   "Make available with publication" unticked.
 
    - **No link while unticked**: the visitor opens the article's page on
      the journal's public site: it lists "PDF" and no "JATS XML" (Rule
@@ -623,6 +652,9 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
      the box is unticked again (Rule 9).
    - **"Confirm"**: tick the box again and press "Confirm": the window
      closes, the box stays ticked, and no toast shows (Rule 9).
+   - **The version in the XML**: the XML on the page names the
+     version's stage, "Version of Record", and its number, "1.0"
+     (Rule 2).
    - **The link**: the visitor reloads the article's page: it lists
      "JATS XML" next to "PDF". Press "JATS XML": the browser saves
      "submission-{n}-publication-{m}-jats.xml", {n} and {m} the numbers
@@ -668,8 +700,10 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
 
    Given: Journal Manager, on the seeded journal, with a published
    scratch article whose version has the uploaded JATS file
-   "article.xml", whose title reads "A JATS fixture article", and "Make
-   available with publication" ticked.
+   "article.xml", whose title reads "A JATS fixture article", "Make
+   available with publication" ticked, and an "HTML" galley that "Export
+   to HTML" made from its Body Text, which reads "Text of the first
+   version."
 
    - **The published version's page**: open the article's workflow,
      then side menu "Publication" › the published version › "JATS XML":
@@ -687,6 +721,16 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
      "Delete", then "Delete JATS File": the page shows the generated XML
      and the line "This JATS file is generated automatically by the
      submission metadata" (Rules 1, 5, 13).
+   - **The new version's export**: choose "Body Text" under the new
+     version, type "Text of the second version." in the editor and press
+     "Export" › "Export to HTML": the line "HTML galley saved." shows
+     under "Export" (Rule 24). Choose "Galleys" under the new version:
+     its "HTML" reads "Generated from text editor" and "Revision 2" after
+     this first export there (Rule 24c).
+   - **The published version's galley**: open the article's page on the
+     journal's public site and press "HTML": the galley shows "Text of
+     the first version." and no "Text of the second version." (Rule
+     24c).
    - **Control**: choose "JATS XML" under the published version again: it
      still shows "A JATS fixture article" and the line noted above (Rule
      13). <sup>v</sup>
@@ -748,25 +792,66 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
      and the public page shows the monograph's (preprint's) title.
      <sup>v</sup>
 
+10. **Export the Body Text**
+
+    Given: Journal Manager, on the seeded journal, with a scratch article
+    in Production that has no galleys and whose Body Text was never
+    saved, and a second scratch article in Production whose saved Body
+    Text holds the figure "figure.png".
+
+    - **"Export" over an empty editor**: open the article's workflow,
+      then side menu "Publication" › the version › "Body Text": with
+      nothing in the editor, the page's "Export" menu offers "Export to
+      HTML" and "Preview: PDF", both enabled. Press "Export to HTML": the
+      line "HTML galley saved." shows under "Export" (Rules 24, 24a).
+    - **The empty "HTML" galley**: choose "Galleys" under the version: it
+      lists one galley, "HTML", marked "Generated from text editor" with
+      no "Revision" (Rule 24b). Press the label "HTML", which downloads
+      the galley's file (see *[Galleys](U46-galleys.md#galleys-page)*):
+      the file holds no text (Rule 24a).
+    - **Unsaved text exported**: choose "Body Text" under the version,
+      type "Saved sentence." in the editor, press "Insert" › "Figure",
+      choose "figure.png" and press "Save". Type "Unsaved sentence." after
+      the figure, without "Save", and press "Export" › "Export to HTML":
+      "HTML galley saved." shows under "Export" and "Unsaved Changes"
+      still shows (Rule 24a).
+    - **A reload**: reload the browser page: the editor holds "Saved
+      sentence." and the figure, and no "Unsaved sentence." (Rule 24a).
+    - **The galley revised**: choose "Galleys" under the version: it
+      still lists one "HTML", now marked "Generated from text editor" and
+      "Revision 2". On its row press "More Actions" › "Edit": "Dependent
+      Files" lists the figure (see *Galleys*); press "Cancel" (Rules 24,
+      24b).
+    - **The galley's text in the "JATS XML"**: choose "JATS XML" under
+      the version: the XML holds a body part with "Saved sentence." and
+      "Unsaved sentence." ⚠ [A7](#a7) (Rules 2a, 23, 24a).
+    - **"Preview: PDF" and "Create PDF"**: choose "Body Text" under the
+      version and press "Export" › "Preview: PDF": a page headed
+      "Publication: Preview: PDF" shows "Saved sentence.". Press "Create
+      PDF": the line "PDF galley saved." shows (Rule 24). Choose
+      "Galleys": it lists "HTML" and "PDF", the "PDF" marked "Generated
+      from text editor" (Rule 24b).
+    - **An image from another submission**: choose "Body Text" under the
+      version. In a second browser tab open the second article's "Body
+      Text", copy its figure and paste it into this article's text after
+      "Saved sentence."; press "Export" › "Export to HTML": a window
+      "Error" reads "The HTML references an image that is not attached to
+      this publication's body text." with "OK". Press "OK", then "Undo":
+      the pasted figure goes. Choose "Galleys": "HTML" still reads
+      "Revision 2" (Rule 24d).
+    - **An "ftp:" image**: choose "Body Text" under the version and paste
+      into the text, as HTML, `<img src="ftp://example.org/figure.png">`:
+      the editor keeps it. Press "Export" › "Export to HTML": "HTML galley
+      saved." shows, no window (Rule 24d).
+    - **Control**: press "Undo", then choose "Galleys": it lists one
+      "HTML", now at "Revision 3", and one "PDF": each export revised the
+      galley an earlier export made (Rule 24b). <sup>v</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the version and the CRediT roles in the generated XML (Rule 2,
-    footnote h; pkp/pkp-lib#13464): the "JATS XML" of a version published
-    as "Version of Record" 1.0 names that stage and that number, and a
-    contributor's CRediT role given the degree "Lead" is carried with its
-    name and its degree [upstream 2026-10-10]
-  - a tag typed as text in the generated XML (Rule 2, footnote h;
-    pkp/pkp-lib#13378): an abstract typed as "Write <i>species names</i>
-    in italics", with one more word set in italics by the editor's
-    button, shows in the "JATS XML" the typed tag as text and the word in
-    italics [upstream 2026-10-10]
-  - the identifiers of a reference in the generated XML (Rule 2,
-    footnote h; pkp/pkp-lib#13563): a reference "… https://doi.org/10.1234/x."
-    added on "References" shows in the "JATS XML" the DOI marked as a DOI,
-    with the text as typed [upstream 2026-10-20]
   - the guard for A22 {OJS} (issue report
     `docs/issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md`):
     an article in a restricted issue with "Make available with publication"
@@ -784,37 +869,8 @@ Left out of the scenarios above, by reason:
   - the guard for A9 (issue report `docs/issues/U48-A9-published-jats-xml-name-url-path.md`): with a URL path set, the downloaded "JATS XML" is named "<path>-publication-<id>-jats.xml", and a reader who downloaded it before the path changed gets the new name. [report 2026-10-02]
   - the guard for A14 (issue report `docs/issues/U48-A14-body-text-opens-with-unsaved-changes.md`): a never-saved Body Text opens without "Unsaved Changes", and "Save" reads "Saved" only when the text is saved, "Send to Text Editor" with an image included. [report 2026-10-02]
   - the guard for A15 (issue report `docs/issues/U48-A15-body-text-leaving-loses-text-unasked.md`): with unsaved text on "Body Text", choosing another side-menu entry asks "The data on this form has changed. Do you wish to continue without saving?", and "Cancel" keeps the text. [report 2026-10-02]
-  - the guard for A18 (retired): sending an unreadable file to "Body Text" ends the import with "Import failed" and its reason. [report 2026-10-02]
-  - the Body Text's "Export" menu (Rule 24, footnote d32;
-    pkp/pkp-lib#13543): "Export to HTML" makes one "HTML" galley marked
-    "Generated from text editor", its figure copied, and a second export
-    shows "Revision 2" on it; "Preview: PDF" › "Create PDF" makes one
-    "PDF" galley the same way [upstream 2026-11-09]
-  - a new version's export (Rule 24, footnote d32): after "Create New
-    Version", "Export to HTML" on the new version leaves the published
-    version's "HTML" galley downloading its own text [upstream 2026-11-09]
-  - the export's refusals (Actors row 9; Rule 24d, footnote d32): an
-    author's export refused, and an image from another submission
-    refused in the "Error" window; an image whose address is not
-    http(s) exported with no window [upstream 2026-11-09]
   - the guard for A23 (Rule 24b): two exports of one version sent at the
     same moment leave one galley, the later one a revision [upstream 2026-11-09]
-  - a Layout Editor without "Permissions" exporting (Actors row 9): on
-    "Body Text", "Export to HTML" and "Create PDF" make the version's
-    "HTML" and "PDF" galleys, marked "Generated from text editor" on
-    "Galleys", while "Save" is refused [incidental 2026-11-11]
-  - the export of unsaved text (Rule 24a): a sentence typed and not
-    saved is in the "HTML" galley after "HTML galley saved.",
-    "Unsaved Changes" still shows, and a reload brings back the saved
-    text [incidental 2026-11-11]
-  - the Body Text reaching readers (Rule 23): on a published version,
-    after "Save" alone the article's page lists no "HTML" galley; after
-    "Export to HTML" it lists one showing the text, and the "JATS XML"
-    page's XML holds the text in its body [incidental 2026-11-11]
-  - a new version's first export (Rule 24c): its "HTML" galley reads
-    "Revision 2" on "Galleys" after one export [incidental 2026-11-11]
-  - an export with nothing in the editor (Rule 24a): "Export to HTML"
-    makes an "HTML" galley with no text [incidental 2026-11-11]
 - **Nothing new to test**:
   - a second "Upload" on a version that already has a file, which
     becomes a revision of that one file, listed in its "History"
@@ -830,6 +886,9 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A1 (the tick box offered to a role that may not change it, and
     "Confirm" refused; Actors row 4; Rule 9; scenario 3 passes the box)
+  - A2 (a Layout Editor without "Permissions", whose "Save" is refused,
+    turning the unsaved text into the version's "HTML" and "PDF" galleys
+    with "Export"; Actors row 9; scenario 3 presses "Save" only)
   - A3 (a published version's Body Text still saved, and its galleys
     revised by "Export"; Rules 21, 24a)
   - A4 (a new version's Body Text starting empty; Rule 13)
@@ -868,6 +927,8 @@ Left out of the scenarios above, by reason:
 - **No seed**:
   - the XML that cannot be produced: the reason in place of the XML,
     with no "Download" and no tick box (Rule 7)
+  - a contributor's CRediT roles in the generated XML (Rule 2): no seed
+    gives a contributor a CRediT role
 - **Owned by another feature**:
   - a press's file rows offering no "Send to Text Editor", a Word
     file's included (Purpose; *[Submission
@@ -875,6 +936,10 @@ Left out of the scenarios above, by reason:
     schedule & versions](U49-publish-schedule-and-versions.md)*,
     scenario 18)
   - the author view listing neither page (Actors preamble; *[Workflow
+    screen & stage access](U24-workflow-screen-and-stage-access.md)*,
+    scenario 7)
+  - the Author's "Export" refused, which no screen offers the Author:
+    the author view lists no "Body Text" (Actors row 9; *[Workflow
     screen & stage access](U24-workflow-screen-and-stage-access.md)*,
     scenario 7)
   - a Funding Coordinator on a submission in Review offered no "Body
@@ -1388,7 +1453,7 @@ d6, d20, d28).
 **p** — `useWorkflowVersionForm.js` `goToBodyTextWithImport()` sets the query parameters `importFileUrl` and `importFileName` and navigates to `publication_{id}_bodyText`, after creating the version (POST `…/version`) or assigning a version stage (PUT) when chosen, or directly for an existing staged version. Code read at the PR head `85384f34ca` (ui-library#979), before its merge, 2026-09-28: `WorkflowPublicationBodyText.vue` hands the two parameters to `BodyTextEditor.vue` as `importFile` and clears them on `import-finished`, so a reload does not import again. `useDocumentImport.js` `importDocument()` runs the stages `download`, `load` (only while pandoc-wasm is not yet loaded on the page), `convert` and `upload`, which `BodyTextImportStatus.vue` shows in a `role="status"` box: `publication.bodyText.import.importing` "Importing document" and the stage label (`…downloading` "Downloading document…", `…loadingConverter` "Loading converter…", `…converting` "Converting…", `…uploadingImages` "Uploading images…"). pandoc-wasm reads the file with the reader `IMPORT_READERS` names for its extension (`docx: 'docx+styles'`, the only entry; `documentImportFormats.js`) into a JSON AST with `extract-media`; `@sciflow/pandoc-ast` `parsePandocAST()` turns it into the editor's document; each image the document uses is uploaded as a dependent file of the Body Text (`useDependentFileUpload`, note q) and `rewriteMediaSrc()` points the figure at it; `stripHeader()` drops a leading header node. The `upload` stage is set for every file, images or not (code read only: no Word file without images was driven, Rule 20). `applyImportedDocument()` ("Import `props.importFile`, if any, replacing the current document.") sets the editor's `doc` to the converted document, which replaces what the editor held and marks it dirty (Rule 20a); on `main` before the PR, `PandocConverter.vue` converted to HTML and `editorView.pasteHTML(html)` inserted it at the current selection, before the existing text. The PR's author (@jarda.kotesovec, 2026-09-28, in the review thread) ruled the replace intended: "import should replace body text". Failure: an empty conversion or an untranslatable AST throws with pandoc's message (or `publication.bodyText.import.failed`), and the box reads `publication.bodyText.import.failed` "Import failed", the message and `common.dismiss` "Dismiss" (Rule 20b; d20). In the code and not seen on screen: `…importedWithWarnings` "Imported with warnings" with `…warnings` "{count} part(s) of the document need attention. Unconverted blocks are marked in the document.", and per image `…missingImage` "The image {path} could not be extracted from the document and was replaced by a placeholder." or `…uploadFailed` "The image {path} could not be uploaded ({error}) and was replaced by a placeholder.", the image then drawn as a crossed-out box (`MISSING_IMAGE_SRC`). There is no import control of its own on the page. At the PR heads `817c6a22a5` (ui-library#1044) and `81049023de` (ojs#6027), before their merge, 2026-11-05 (pkp-lib#13714; `checks/sync/ui-library-1044/subdir.js`, OJS, the dataset fleet's install served once more from a subdirectory, `/ojs`): the `load` stage fetches `pandoc.wasm` from the site's base URL (`useUrl()` `assetUrl`, on `pkp.site.baseUrl`), where `main` before them fetched the root-absolute `/js/build/pandoc.wasm` Vite emits; from a subdirectory that address answered the server's 404 page, and the box read "Import failed" with "WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 3c 21 64 6f @+0" (the page's `<!do`). A response other than 2xx now stops the import with "Failed to load pandoc.wasm: HTTP 404" (the status), walked with the file answered 404. Equations (MathJax 4, `tex-svg.js`) draw the glyphs that file lacks (`\mathbb`, `\mathcal`, `\mathfrak`) from `js/build/mathjax-fonts/mathjax-newcm-font/svg/dynamic/` in the installation, which ojs#6027's build copies there; before them from cdn.jsdelivr.net, and with the CDN unreachable the equation read "dynamic file 'double-struck' failed to load" in place of its drawing. At the domain root the import worked on both sides, and the font address moved there the same way.
 
 <a id="fn-d20"></a>
-**d20** — At the PR head `85384f34ca` (ui-library#979), before its merge, 2026-09-28 (Purpose; Actors row 6; Rules 20, 20a, 20b; A18), OJS, on a scratch submission in Production: the "notes.md" row of "Submission Files" offered "Update File Details", "More Information" and "Delete" only, and a Word file's row on "Production Ready Files" (a heading, two paragraphs and a PNG figure captioned "K3 figure caption") offered "Send to Text Editor" first. Into a saved "Saved first line RR1", "Send to Text Editor" on the Word file › that version › "Confirm" ran "Importing document" through "Downloading document…", "Loading converter…", "Converting…" and "Uploading images…", then the box went; the editor held only "K3 Imported Heading", "K3 imported paragraph before the figure.", the figure with "K3 figure caption" and "K3 imported paragraph after the figure.", with "Unsaved Changes" and no question asked. A reload without "Save" brought back "Saved first line RR1" and did not import again. A second send into the same version, then "Save" and a reload, kept the figure. A text file named ".docx" ran "Downloading document…", "Loading converter…", "Converting…", then the box read "Import failed", "ERROR: couldn't unpack docx container: Did not find end of central directory signature" and "Dismiss"; "Dismiss" closed it and the editor kept its text. Earlier, live-probed 2026-09-25 (Rules 20, 20a; A14), OJS, two runs before pkp/ui-library#979: "Send to Text Editor" on "notes.md" and on a Word file holding a heading, two paragraphs and an image › an existing version › "Confirm" opened that version's "Body Text" with the box's steps in order ("Uploading images…" for the Word file only); the heading, the text and the figure with its caption arrived, with "Unsaved Changes". After a reload without "Save" the text was gone and the import did not run again. "Create New Version" in the window created the version and opened its "Body Text" with the import. Into a never-saved version the Word file made the button read "Saved" beside the badge (the Body Text was saved, then the image uploaded). Superseded by the PR: both files then landed before a saved "Saved first line K3", and the text file named ".docx" ran to "Converting…", then the box went with no message and no "Dismiss" (A18).
+**d20** — At the PR head `85384f34ca` (ui-library#979), before its merge, 2026-09-28 (Purpose; Actors row 6; Rules 20, 20a, 20b; A18), OJS, on a scratch submission in Production: the "notes.md" row of "Submission Files" offered "Update File Details", "More Information" and "Delete" only, and a Word file's row on "Production Ready Files" (a heading, two paragraphs and a PNG figure captioned "K3 figure caption") offered "Send to Text Editor" first. Into a saved "Saved first line RR1", "Send to Text Editor" on the Word file › that version › "Confirm" ran "Importing document" through "Downloading document…", "Loading converter…", "Converting…" and "Uploading images…", then the box went; the editor held only "K3 Imported Heading", "K3 imported paragraph before the figure.", the figure with "K3 figure caption" and "K3 imported paragraph after the figure.", with "Unsaved Changes" and no question asked. A reload without "Save" brought back "Saved first line RR1" and did not import again. A second send into the same version, then "Save" and a reload, kept the figure. A text file named ".docx" ran "Downloading document…", "Loading converter…", "Converting…", then the box read "Import failed", "ERROR: couldn't unpack docx container: Did not find end of central directory signature" and "Dismiss"; "Dismiss" closed it and the editor kept its text. Test run 2026-11-12 (Rules 20, 20b), OJS, scenario 2: the "notes.docx" import, the first on the browser page, read "Downloading document…", "Loading converter…", "Converting…", then "Import failed"; the "article.docx" import after it, reached through "Submission" in the side menu without a reload, read "Downloading document…", "Converting…" and "Uploading images…", with no "Loading converter…" (the box's text sampled every 25 ms). Code: `useDocumentImport.js` `importDocument()` sets the `load` stage only while its page-wide pandoc promise is unset (note p). Earlier, live-probed 2026-09-25 (Rules 20, 20a; A14), OJS, two runs before pkp/ui-library#979: "Send to Text Editor" on "notes.md" and on a Word file holding a heading, two paragraphs and an image › an existing version › "Confirm" opened that version's "Body Text" with the box's steps in order ("Uploading images…" for the Word file only); the heading, the text and the figure with its caption arrived, with "Unsaved Changes". After a reload without "Save" the text was gone and the import did not run again. "Create New Version" in the window created the version and opened its "Body Text" with the import. Into a never-saved version the Word file made the button read "Saved" beside the badge (the Body Text was saved, then the image uploaded). Superseded by the PR: both files then landed before a saved "Saved first line K3", and the text file named ".docx" ran to "Converting…", then the box went with no message and no "Dismiss" (A18).
 
 <a id="fn-d21"></a>
 **d21** — Live-probed 2026-09-25 (Rule 21; A3), OJS: on a seed-published version (two runs) and on one published on screen, the Journal Manager's "After publication" saved on "Body Text" and survived a reload; the same version's "JATS XML" offered "Upload" (Rule 8).
@@ -1436,7 +1501,7 @@ d6, d20, d28).
 **d31** — Live-probed 2026-09-25 (Settings bullet 3; Actors), OJS, two runs: Roles › "Layout Editor" › "Edit" lists "Permit submission metadata edit." unticked under "Role Options"; the assignment's "Edit Assignment" window carries "Permissions" with "Allow this person to make changes to the publication, such as the title, abstract, metadata and other publication details. …". A Layout Editor whose assignment carried it got "Upload", "More Information", "Delete", "Download" and working saves; at the default, "More Information", "Download" and refusals. Ticking the role's box and pressing "OK" made a default Layout Editor's save succeed; unticking it again took the permission from the Layout Editor whose assignment had carried it.
 
 <a id="fn-v"></a>
-**v** — Scenario seeding. Every article is a scratch submission from `POST scenarios/submission`, brought to Production with `decisions: ['sendExternalReview', 'accept', 'sendToProduction']` unless said otherwise; the published ones add `published: true`. Scenarios 2 to 6 run on `publicknowledge` as `manager.maya` (the Journal Manager), with `author.alex` as submitter; passwords as `docs/process/users.md` gives them. The mail catcher is Mailpit at `MAILPIT_URL` (default `http://127.0.0.1:8025`), scoped by recipient address. Scenarios 1, 7 and 8 run on their own scratch journal from `POST scenarios/context`, with throwaway `users[]` (password: the username twice): `manager` and `author` (the submitter), and `reader` in scenario 8. Scenario 1: `title: 'JATS scenario article'`, an `abstract` holding a `<ul>` with "First point" and "Second point", `citationsRaw` the two reference lines, `galleys: [{label: 'HTML', file: 'article.html'}]`; the upload is the fixture `article.xml` (a small JATS article titled "A JATS fixture article"). Scenario 2: `citationsRaw` the same two lines, `files: [{file: 'article.docx'}]` (the fixture is `shared/playwright/checks/U48/K3/k3-figure.docx` under a plain name: the heading, the two paragraphs and a PNG figure with its caption, as the given quotes them); "Insert" › "Figure" takes the fixture `figure.png`. Scenario 3: the Production article with `participants: [{username: 'layouteditor.leo', role: 'layoutEditor'}]` (`canChangeMetadata` left to the role, unticked at the install default) and `jats: {file: 'article.xml'}`; the Review article with `decisions: ['sendExternalReview']`, `participants: [{username: 'assistant.rita', role: 'funding'}]` and `jats: {file: 'article.xml'}`. Scenario 4: `galleys: [{label: 'PDF', file: 'article.pdf'}]` and no `jats` key; the visitor is a browser with no session. Scenario 5: `jats: {makePublic: true}`, unpublished; another Author `author.bea`, the Reader `reader.rosa`. Scenario 6: `jats: {file: 'article.xml', makePublic: true}`; the seed uploads as `admin`, so both lines read "by admin". Scenario 7: the context with `plugins: {jatstemplateplugin: {enabled: false}}`, the article with `jats: {makePublic: true}`; the control runs on `publicknowledge` as `manager.maya`. Scenario 8: the context with `restrictArticleAccess: true`, the article with `jats: {makePublic: true}`. Scenario 9: OMP and OPS `publicknowledge` as `manager.maya` (the Press Manager, the Preprint Server Manager), the submission `published: true`, on OMP after `decisions: ['skipExternalReview', 'sendToProduction']`, on OPS with none.
+**v** — Scenario seeding. Every article is a scratch submission from `POST scenarios/submission`, brought to Production with `decisions: ['sendExternalReview', 'accept', 'sendToProduction']` unless said otherwise; the published ones add `published: true`. Scenarios 2 to 6 and 10 run on `publicknowledge` as `manager.maya` (the Journal Manager), with `author.alex` as submitter; passwords as `docs/process/users.md` gives them. The mail catcher is Mailpit at `MAILPIT_URL` (default `http://127.0.0.1:8025`), scoped by recipient address. Scenarios 1, 7 and 8 run on their own scratch journal from `POST scenarios/context`, with throwaway `users[]` (password: the username twice): `manager` and `author` (the submitter), and `reader` in scenario 8. Scenario 1: `title: 'JATS scenario article'`, an `abstract` holding a `<ul>` with "First point" and "Second point", `citationsRaw` the two reference lines, `galleys: [{label: 'HTML', file: 'article.html'}]`; the abstract's sentence is stored as the rich-text box stores a typed "<" (note h), `<p>Write &lt;i&gt;species names&lt;/i&gt; in <em>italics</em></p>`; the upload is the fixture `article.xml` (a small JATS article titled "A JATS fixture article"); the third reference is typed on screen, as the scenario says. Scenario 2: `citationsRaw` the same two lines, `files: [{file: 'article.docx'}, {file: 'notes.docx'}]` (the `article.docx` fixture is `shared/playwright/checks/U48/K3/k3-figure.docx` under a plain name: the heading, the two paragraphs and a PNG figure with its caption, as the given quotes them; `notes.docx` is a plain text file under a Word file's name, as note d20 drove it); "Insert" › "Figure" takes the fixture `figure.png`. Scenario 3: the Production article with `participants: [{username: 'layouteditor.leo', role: 'layoutEditor'}]` (`canChangeMetadata` left to the role, unticked at the install default) and `jats: {file: 'article.xml'}`; the Review article with `decisions: ['sendExternalReview']`, `participants: [{username: 'assistant.rita', role: 'funding'}]` and `jats: {file: 'article.xml'}`. Scenario 4: `galleys: [{label: 'PDF', file: 'article.pdf'}]` and no `jats` key, the seed's publish giving the version "Version of Record" 1.0; the visitor is a browser with no session. Scenario 5: `jats: {makePublic: true}`, unpublished; another Author `author.bea`, the Reader `reader.rosa`. Scenario 6: `jats: {file: 'article.xml', makePublic: true}`; the seed uploads as `admin`, so both lines read "by admin". No key makes a Body Text or an exported galley: before the scenario the test types "Text of the first version." on the published version's "Body Text" and presses "Export to HTML" there (Rule 24a; [A3](#a3)), as note d33 drove it. Scenario 7: the context with `plugins: {jatstemplateplugin: {enabled: false}}`, the article with `jats: {makePublic: true}`; the control runs on `publicknowledge` as `manager.maya`. Scenario 8: the context with `restrictArticleAccess: true`, the article with `jats: {makePublic: true}`. Scenario 9: OMP and OPS `publicknowledge` as `manager.maya` (the Press Manager, the Preprint Server Manager), the submission `published: true`, on OMP after `decisions: ['skipExternalReview', 'sendToProduction']`, on OPS with none. Scenario 10: two submissions brought to Production, neither with a `galleys` key; no key makes a Body Text, so the second article's figure is placed on screen before the scenario ("Insert" › "Figure", `figure.png`, then "Save"). Both pastes put HTML holding one `<img>` on the clipboard: the second article's figure's address, then `ftp://example.org/figure.png`. One export at a time, never two at once ([A23](#a23)).
 
 <a id="fn-f-a1"></a>
 **f-a1** — Note c: the tick box's only guard is `loadingContentError == null`; `updateVisibility()` hits `PublicationWritePolicy`, which refuses a user whose assignment lacks `canChangeMetadata` (`api.submissions.403.userCantEdit`, answered 401); the box is not reset (note l). Probe: d2.

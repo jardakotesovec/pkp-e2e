@@ -3,43 +3,52 @@
  * @file playwright/tests/U48-jats-and-body-text.spec.js
  *
  * JATS & Body Text — OJS suite, one test per canonical scenario the spec
- * runs on OJS (S1–S8; S9 is the press's and the preprint server's
+ * runs on OJS (S1–S8 and S10; S9 is the press's and the preprint server's
  * absence, in the OMP and OPS trees).
  * Spec: docs/specs/U48-jats-and-body-text.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's "Left out" list is the record of everything else):
+ * spec's Coverage section is the record of everything else left out):
  * - A1 🐞: S3's Layout Editor is offered the tick box; nothing asserts it
  *   either way, and no role that may not edit presses it.
  * - A2 🐞: S3 presses the "Save" the Layout Editor is offered, as the
  *   scenario does; only the refusal and the unchanged text are asserted,
  *   never that the button is offered to that role.
- * - A7 🐞: S1 reads the galley's text inside the XML's body, never its
- *   paragraphs or markup.
+ * - A7 🐞: S1 and S10 read the galley's text inside the XML's body, never
+ *   its paragraphs or markup.
  * - A11 🐞: S3's Funding Coordinator never presses "Download".
  * - A12 🐞: a published version's "Upload" and "Delete" are never read
  *   (S4 and S6 use the published page's box and XML only).
  * - A14 🐞: "Unsaved Changes" is never read on a never-saved Body Text's
- *   arrival (S2, S3); S2 reads it only after its first save.
+ *   arrival (S2, S3, S10); S2 reads it only after its first save.
  * - A16 🐞: S2 reads each reference's "Cite", never whether it is greyed.
  * - A19 🐞: S8 reads the download after signing in, never where the tab
  *   stays.
- * - A3, A4 ❓: parked. A5, A6, A8–A10, A13, A15, A17, A18, A25, A26: not
- *   on these scenarios' paths. OMP1: the press's, in that tree.
+ * - A20 🐞: S1 uploads without reading the server's log.
+ * - A23 🐞: S6 and S10 export one at a time, each export awaited.
+ * - A3, A4, A5 ❓: parked (S6's given exports on a published version and
+ *   S10's "JATS XML" reads an exported body, as the scenarios say). A6,
+ *   A8–A10, A13, A15, A17, A22, A24–A26: not on these scenarios' paths.
+ *   OMP1: the press's, in that tree.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
- * are read-only. S2, S3, S5 and S6 run on publicknowledge on their own
- * scratch submissions (`manager.maya`, submitter `author.alex`; S3's
+ * are read-only. S2, S3, S5, S6 and S10 run on publicknowledge on their
+ * own scratch submissions (`manager.maya`, submitter `author.alex`; S3's
  * `layouteditor.leo` and `assistant.rita` as participants, S5's
  * `author.bea` and `reader.rosa`); S1, S4, S7 and S8 run on scratch
  * journals with throwaway accounts (the username twice as password; S4's
  * "no toast" is read on a page of an account no other test signs in as,
  * patterns.md parallel lesson 2), as footnote v
- * says: `abstract`, `citationsRaw`, `galleys[]`, `files[]`, `decisions`,
- * `participants[]`, `published`, `jats` (`file`, `makePublic`) and the
- * context's `plugins` (S7) and `restrictArticleAccess` (S8). No key makes
- * a second version: S6 uses "Create New Version" (U49's opener).
+ * says: `abstract`, `citationsRaw`, `galleys[]`, `files[]` (S2's
+ * `article.docx` and `notes.docx`, a text file under a Word name),
+ * `decisions`, `participants[]`, `published`, `jats` (`file`,
+ * `makePublic`) and the context's `plugins` (S7) and
+ * `restrictArticleAccess` (S8). No key makes a second version: S6 uses
+ * "Create New Version" (U49's opener). No key makes a Body Text or an
+ * exported galley: S6's given and S10's second article are written on
+ * screen before the scenario, as footnote v says; S10's pastes put HTML
+ * with one `<img>` on the context's clipboard (permission granted).
  *
  * Every absence is read settled and paired with a positive control taken
  * the same way (M4, M6): the JATS page's buttons are read as one exact
@@ -79,6 +88,8 @@ const {
 } = require('../../../../shared/playwright/pages/JatsBodyTextPages.js');
 const {PublicationScreen} = require('../pages/PublicationMetadataPages.js');
 const {PublishScreen} = require('../pages/PublishSchedulePages.js');
+const {ReferencesPage} = require('../../../../shared/playwright/pages/CitationsPages.js');
+const {BodyTextExport, ExportedGalleys, EXPORT_TEXT, watchImportBox, importBoxTexts} = require('../pages/BodyTextExportPages.js');
 
 const JOURNAL = 'publicknowledge';
 const MANAGER = 'manager.maya';
@@ -86,11 +97,19 @@ const AUTHOR = 'author.alex';
 const PRODUCTION = ['sendExternalReview', 'accept', 'sendToProduction'];
 const REF_ALPHA = 'Alpha, A. (2020). First reference.';
 const REF_BETA = 'Beta, B. (2021). Second reference.';
+const REF_GAMMA = 'Gamma, C. (2022). Third reference. https://doi.org/10.1234/x.';
+/** `Write <i>species names</i> in italics`, its tag typed as text and "italics" set in italics (footnote v). */
+const TYPED_TAG_STORED = '<p>Write &lt;i&gt;species names&lt;/i&gt; in <em>italics</em></p>';
 const FIXTURE_TITLE = 'A JATS fixture article';
 /** What article.docx (a heading, two paragraphs, a figure with its caption) imports as, and nothing else. */
 const IMPORTED_TEXT =
     /^K3 Imported Heading K3 imported paragraph before the figure\.[\s\S]*K3 figure caption[\s\S]*K3 imported paragraph after the figure\.$/;
 const NOTIFY_SUBJECT = 'Discussion (Submission)';
+const IMPORT_FAILED = 'Import failed';
+const UPLOADING_IMAGES = 'Uploading images…';
+const FTP_IMAGE = 'ftp://example.org/figure.png';
+const FIRST_VERSION_TEXT = 'Text of the first version.';
+const SECOND_VERSION_TEXT = 'Text of the second version.';
 const FILES = path.join(__dirname, '..', 'fixtures', 'files');
 const fixture = (name) => path.join(FILES, name);
 
@@ -194,7 +213,8 @@ test.describe('JATS & Body Text', () => {
                 context: tag,
                 submitter: author,
                 title: 'JATS scenario article',
-                abstract: '<p>Two points:</p><ul><li>First point</li><li>Second point</li></ul>',
+                // The sentence as the rich-text box stores a typed "<" (note h).
+                abstract: `<p>Two points:</p><ul><li>First point</li><li>Second point</li></ul>${TYPED_TAG_STORED}`,
                 citationsRaw: [REF_ALPHA, REF_BETA],
                 decisions: PRODUCTION,
                 galleys: [{label: 'HTML', file: 'article.html'}],
@@ -221,12 +241,15 @@ test.describe('JATS & Body Text', () => {
         await expect(jats.line()).toHaveText(TEXT.generatedLine);
 
         // What the XML carries: the journal's name, the title, the
-        // abstract's two points as a list, both references at the end
-        // (Rule 2); the HTML galley's text in a body part (Rule 2a).
+        // abstract's two points as a list, the typed tag as text beside the
+        // italic word, both references at the end (Rule 2); the HTML
+        // galley's text in a body part (Rule 2a).
         let xml = await jats.xmlText();
         expect(xml).toContain(`Scratch context ${tag}`);
         expect(xml).toContain('JATS scenario article');
         expect(xml).toMatch(/<list[^>]*>[\s\S]*First point[\s\S]*Second point[\s\S]*<\/list>/);
+        expect(xml).toContain('Write &lt;i&gt;species names&lt;/i&gt; in <italic>italics</italic>');
+        expect(xml).not.toContain('<italic>species names</italic>');
         expect(xml).toMatch(/<ref-list>[\s\S]*Alpha, A\. \(2020\)\. First reference\.[\s\S]*Beta, B\. \(2021\)\. Second reference\.[\s\S]*<\/ref-list>\s*<\/back>/);
         expect(xml).toMatch(/<body>[\s\S]*A small HTML file[\s\S]*<\/body>/);
 
@@ -238,17 +261,35 @@ test.describe('JATS & Body Text', () => {
         await jats.openFromMenu();
         await expect(jats.xml()).toContainText('Revised JATS article');
 
-        // "Download" of the generated XML: "jats-{n}-{date}-{time}.xml" by
-        // the browser's clock (Rule 7).
+        // A reference with a DOI, added on "References": in the XML's
+        // reference list with its text as typed and its doi.org address
+        // marked as its DOI (Rule 2).
+        const references = new ReferencesPage(page, frame);
+        await references.open();
+        await references.add(REF_GAMMA);
+        await jats.openFromMenu();
+        xml = await jats.xmlText();
+        const gamma = xml.match(/<mixed-citation>(Gamma, C\.[\s\S]*?)<\/mixed-citation>/);
+        expect(gamma, 'the third reference in the reference list').not.toBeNull();
+        expect(flat((gamma?.[1] ?? '').replace(/<[^>]+>/g, ''))).toBe(REF_GAMMA);
+        expect(gamma?.[1]).toMatch(/<pub-id pub-id-type="doi"[^>]*>10\.1234\/x<\/pub-id>/);
+        expect(xml).toMatch(/<ref-list>[\s\S]*Alpha, A\.[\s\S]*Beta, B\.[\s\S]*Gamma, C\.[\s\S]*<\/ref-list>/);
+
+        // "Download" of the generated XML: "jats-{n}-{date}-{time}.xml",
+        // {n} the number in the address's `publication_{n}_jats`, by the
+        // browser's clock (Rule 7).
+        const menuKey = frame.menuKeyFromUrl() || '';
+        expect(menuKey).toMatch(/^publication_\d+_jats$/);
+        const versionNumber = menuKey.split('_')[1];
         let before = await browserStamp(page);
         let saved = await jats.download();
         let after = await browserStamp(page);
         let name = saved.name.match(/^jats-(\d+)-(\d{8}-\d{6})\.xml$/);
         expect(name, saved.name).not.toBeNull();
-        expect(Number(name?.[1])).toBe(submission.publicationId);
+        expect(name?.[1]).toBe(versionNumber);
         expect(name?.[2] >= before && name?.[2] <= after, `${name?.[2]} between ${before} and ${after}`).toBe(true);
 
-        // "Upload": the toast, the file's XML, the line with the server's
+        // "Upload": the toast, the file's XML with its title, the line with the server's
         // time and the manager's username, "More Information" and "Delete"
         // (Rule 3; Fields, the line under the XML).
         const uploadFrom = serverStamp(new Date(Date.now() - 2000));
@@ -333,7 +374,7 @@ test.describe('JATS & Body Text', () => {
             submitter: AUTHOR,
             title: `Body text ${tag}`,
             citationsRaw: [REF_ALPHA, REF_BETA],
-            files: [{file: 'article.docx'}],
+            files: [{file: 'article.docx'}, {file: 'notes.docx'}],
             decisions: PRODUCTION,
         });
         const {page, frame, body} = await pageAs(asUser, MANAGER, JOURNAL);
@@ -429,37 +470,72 @@ test.describe('JATS & Body Text', () => {
         await expect(media.rows()).toHaveCount(0);
         await expect(media.nameCell('figure.png')).toHaveCount(0);
 
+        // A file that cannot be converted: "notes.docx" sent to the one
+        // version; the box steps through "Downloading document…", "Loading
+        // converter…" and "Converting…", then reads "Import failed" with the
+        // converter's message and "Dismiss"; "Dismiss" closes it and the
+        // editor keeps its text, citation and figure (Rules 20, 20b).
+        await frame.selectStage('Submission');
+        let files = new FileList(page, frame, 'Submission Files');
+        await files.choose(files.row('notes.docx'), 'Send to Text Editor');
+        let send = new SendToTextEditorWindow(page);
+        await send.expectOpen();
+        await send.chooseVersion(submission.publicationId);
+        await watchImportBox(page);
+        await send.confirm();
+        await body.expectLoaded();
+        await expect
+            .poll(async () => (await importBoxTexts(page)).at(-1) ?? '', {timeout: 60_000})
+            .toMatch(/^Import failed /);
+        const failedSteps = (await importBoxTexts(page, {stop: true})).filter(Boolean);
+        const failedOrder = TEXT.importSteps.map((label) => failedSteps.findIndex((s) => s === `${TEXT.importing} ${label}`));
+        expect(failedOrder.every((i) => i >= 0), JSON.stringify(failedSteps)).toBe(true);
+        expect([...failedOrder].sort((a, b) => a - b), JSON.stringify(failedSteps)).toEqual(failedOrder);
+        expect(failedSteps.slice(failedOrder[2] + 1), JSON.stringify(failedSteps)).toHaveLength(1);
+        const failedBox = body.importStatus();
+        await expect(failedBox).toHaveCount(1);
+        await expect(failedBox.locator('p')).toHaveText([IMPORT_FAILED, /\S/]);
+        await expect(failedBox.getByRole('button', {name: 'Dismiss', exact: true})).toBeVisible();
+        await failedBox.getByRole('button', {name: 'Dismiss', exact: true}).click();
+        await expect(body.importStatus()).toHaveCount(0);
+        await expect.poll(() => body.editorText()).toContain('First sentence.');
+        await expect(body.citations()).toHaveCount(1);
+        await expect(body.figures()).toHaveCount(1);
+        expect(await body.editorText()).not.toContain('Word document');
+
         // "Send to Text Editor": the window, "Create New Version" first,
         // then the one version; that version, "Confirm" (Actors row 6).
         await frame.selectStage('Submission');
-        const files = new FileList(page, frame, 'Submission Files');
+        files = new FileList(page, frame, 'Submission Files');
         await files.choose(files.row('article.docx'), 'Send to Text Editor');
-        const send = new SendToTextEditorWindow(page);
+        send = new SendToTextEditorWindow(page);
         await send.expectOpen();
         await expect(send.dialog()).toContainText(TEXT.sendQuestion);
         const options = await send.options();
         expect(options.map((o) => o.value)).toEqual(['create', String(submission.publicationId)]);
         expect(options[0].label).toBe(TEXT.createNewVersion);
         await send.chooseVersion(submission.publicationId);
-        await body.watchImport();
+        await watchImportBox(page);
         await send.confirm();
 
         // The import: the version's "Body Text" opens, the box above the
-        // editor steps through its steps in order, then goes (Rule 20).
+        // editor steps through its steps in order, "Uploading images…" last,
+        // then goes (Rule 20). "Loading converter…" shows on the first
+        // import of the page only, which "notes.docx" was (T-ojs-1, a spec
+        // correction): it is read there.
         await body.expectLoaded();
         await expect
             .poll(async () => {
-                const steps = await body.importSteps();
-                return steps.some((s) => s.includes('Converting')) && steps[steps.length - 1] === '';
+                const steps = await importBoxTexts(page);
+                return steps.some((s) => s.includes(UPLOADING_IMAGES)) && steps[steps.length - 1] === '';
             }, {timeout: 30_000})
             .toBe(true);
-        await body.stopWatchingImport();
-        const steps = (await body.importSteps()).filter(Boolean);
+        const steps = (await importBoxTexts(page, {stop: true})).filter(Boolean);
         for (const step of steps) {
             expect(step).toContain(TEXT.importing);
         }
         const firstAt = (label) => steps.findIndex((s) => s.includes(label));
-        const order = TEXT.importSteps.map(firstAt);
+        const order = [TEXT.importSteps[0], TEXT.importSteps[2], UPLOADING_IMAGES].map(firstAt);
         expect(order.every((i) => i >= 0), JSON.stringify(steps)).toBe(true);
         expect([...order].sort((a, b) => a - b), JSON.stringify(steps)).toEqual(order);
         await expect(body.importStatus()).toHaveCount(0);
@@ -626,6 +702,11 @@ test.describe('JATS & Body Text', () => {
         await expectNoNotice(page);
         const shown = flat(await jats.xmlText());
 
+        // The version in the XML: its stage, "Version of Record", and its
+        // number, "1.0" (Rule 2).
+        expect(shown).toMatch(/<article-version [^>]*content-type="article-lifecycle-stage"[^>]*vocab-term="Version of Record"/);
+        expect(shown).toMatch(/<article-version [^>]*content-type="semantic-version-number"[^>]*designator="1\.0"/);
+
         // The link: "JATS XML" next to "PDF"; it saves
         // "submission-{n}-publication-{m}-jats.xml", the numbers of its
         // address, holding the XML the page shows (Actors row 7; Rules 9,
@@ -723,8 +804,8 @@ test.describe('JATS & Body Text', () => {
         expect(jm.page.url()).toBe(linkUrl);
     });
 
-    test('S6: a new version keeps the JATS file', async ({asUser, ojsApi}, testInfo) => {
-        test.setTimeout(240_000);
+    test('S6: a new version keeps the JATS file', async ({asUser, ojsApi, browser, baseURL}, testInfo) => {
+        test.setTimeout(300_000);
         const tag = makeTag('s6', testInfo);
         const submission = await ojsApi.createSubmission({
             tag,
@@ -735,12 +816,20 @@ test.describe('JATS & Body Text', () => {
             jats: {file: 'article.xml', makePublic: true},
             published: true,
         });
-        const {page, frame, jats} = await pageAs(asUser, MANAGER, JOURNAL);
+        const {page, frame, jats, body} = await pageAs(asUser, MANAGER, JOURNAL);
+        const exporter = new BodyTextExport(page, frame);
+
+        // The given: no key makes a Body Text or an exported galley, so the
+        // published version's "HTML" galley is exported on screen first
+        // (footnote v; Rule 24a).
+        await body.open(submission.submissionId, submission.publicationId);
+        await body.typeAtEnd(FIRST_VERSION_TEXT);
+        expect((await exporter.exportToHtml()).status()).toBe(201);
+        await expect(exporter.status()).toHaveText(EXPORT_TEXT.htmlSaved);
 
         // The published version's page: the fixture, the box ticked, the
         // line naming the uploader (Fields).
-        await frame.gotoEditorial(submission.submissionId);
-        await jats.openFromMenu();
+        await jats.open(submission.submissionId, submission.publicationId);
         await expect(jats.xml()).toContainText(FIXTURE_TITLE);
         await expect(jats.makePublicBox()).toBeChecked();
         const noted = flat(await jats.line().innerText());
@@ -770,6 +859,30 @@ test.describe('JATS & Body Text', () => {
         await jats.confirmDelete();
         await expect(jats.line()).toHaveText(TEXT.generatedLine);
         await expect(jats.xml()).not.toContainText(FIXTURE_TITLE);
+
+        // The new version's export: "Body Text" under the new version, a
+        // sentence typed, "Export to HTML": "HTML galley saved." (Rule 24);
+        // its "Galleys" list the "HTML" as "Generated from text editor" and
+        // "Revision 2" after this first export there (Rule 24c).
+        await body.open(submission.submissionId, newPublicationId);
+        await body.typeAtEnd(SECOND_VERSION_TEXT);
+        await expect(exporter.status()).toHaveCount(0);
+        expect((await exporter.exportToHtml()).status()).toBe(201);
+        await expect(exporter.status()).toHaveText(EXPORT_TEXT.htmlSaved);
+        const galleys = new ExportedGalleys(page, frame);
+        await galleys.open(submission.submissionId, newPublicationId);
+        await galleys.expectNames([`HTML ${EXPORT_TEXT.generated} Revision 2`]);
+
+        // The published version's galley: the article's page, "HTML": the
+        // first version's text, none of the second's (Rule 24c).
+        const visitor = await visitorPage(browser, baseURL);
+        await openArticle(visitor, JOURNAL, submission.submissionId);
+        const htmlLink = articleLinks(visitor).filter({hasText: /^\s*HTML\s*$/});
+        await expect(htmlLink).toHaveCount(1);
+        await htmlLink.click();
+        const galleyText = visitor.frameLocator('iframe').first().locator('body');
+        await expect(galleyText).toContainText(FIRST_VERSION_TEXT, {timeout: 30_000});
+        await expect(galleyText).not.toContainText(SECOND_VERSION_TEXT);
 
         // Control: the published version still shows the fixture and the
         // noted line (Rule 13).
@@ -878,5 +991,158 @@ test.describe('JATS & Body Text', () => {
         const direct = await pressJatsLink(other);
         expect(direct.name).toBe(`submission-${open.submissionId}-publication-${open.publicationId}-jats.xml`);
         await expect(other).toHaveURL(new RegExp(`/article/view/${open.submissionId}$`));
+    });
+
+    test('S10: export the Body Text', async ({asUser, ojsApi}, testInfo) => {
+        test.setTimeout(300_000);
+        const tag = makeTag('s10', testInfo);
+        const [submission, other] = await Promise.all([
+            ojsApi.createSubmission({tag, context: JOURNAL, submitter: AUTHOR, title: `Export ${tag}`, decisions: PRODUCTION}),
+            ojsApi.createSubmission({tag: `${tag}o`, context: JOURNAL, submitter: AUTHOR, title: `Export ${tag}o`, decisions: PRODUCTION}),
+        ]);
+        const {page, frame, body, jats} = await pageAs(asUser, MANAGER, JOURNAL);
+        const exporter = new BodyTextExport(page, frame);
+        const galleys = new ExportedGalleys(page, frame);
+        await exporter.allowClipboard();
+
+        // The given: no key makes a Body Text, so the second article's
+        // figure is placed and saved on screen, in a second tab (footnote v).
+        const tab = await page.context().newPage();
+        const otherFrame = new WorkflowPage(tab, JOURNAL);
+        const otherBody = new BodyTextPage(tab, otherFrame);
+        await otherBody.open(other.submissionId, other.publicationId);
+        await otherBody.typeAtEnd(`Other ${tag}.`);
+        expect((await otherBody.insertFigure(fixture('figure.png'))).ok()).toBe(true);
+        await expect(otherBody.figures()).toHaveCount(1);
+        expect((await otherBody.save()).ok()).toBe(true);
+        await expect(otherBody.unsavedBadge()).toBeHidden();
+
+        // "Export" over an empty editor: "Export to HTML" and "Preview: PDF",
+        // both enabled; "Export to HTML": "HTML galley saved." (Rules 24,
+        // 24a).
+        await page.bringToFront();
+        await frame.gotoEditorial(submission.submissionId);
+        await body.openFromMenu();
+        await expect.poll(() => body.editorText(), {timeout: 30_000}).toBe('');
+        await exporter.openMenu();
+        await expect(exporter.menuItems()).toHaveText([EXPORT_TEXT.exportHtml, EXPORT_TEXT.previewPdf]);
+        await expect(exporter.menuItem(EXPORT_TEXT.exportHtml)).toBeEnabled();
+        await expect(exporter.menuItem(EXPORT_TEXT.previewPdf)).toBeEnabled();
+        await expect(exporter.status()).toHaveCount(0);
+        expect((await exporter.exportToHtml({menuOpen: true})).status()).toBe(201);
+        await expect(exporter.status()).toHaveText(EXPORT_TEXT.htmlSaved);
+
+        // The empty "HTML" galley: one galley, "HTML", "Generated from text
+        // editor" with no "Revision" (Rule 24b); its label downloads a file
+        // that holds no text (Rule 24a).
+        await frame.selectPage('Galleys');
+        await galleys.expectLoaded();
+        await galleys.expectNames([`HTML ${EXPORT_TEXT.generated}`]);
+        const empty = await galleys.downloadByLink('HTML');
+        expect(empty.text).toMatch(/<html[\s\S]*<body>[\s\S]*<\/body>/);
+        expect(flat((empty.text.match(/<body>([\s\S]*)<\/body>/) || ['', 'missing'])[1])).toBe('');
+
+        // Unsaved text exported: "Saved sentence.", the figure, "Save"; then
+        // "Unsaved sentence." after the figure, unsaved, and "Export to
+        // HTML": "HTML galley saved." and "Unsaved Changes" stays (Rule 24a).
+        await body.openFromMenu();
+        await body.typeAtEnd('Saved sentence.');
+        expect((await body.insertFigure(fixture('figure.png'))).ok()).toBe(true);
+        await expect(body.figures()).toHaveCount(1);
+        expect((await body.save()).ok()).toBe(true);
+        await expect(body.unsavedBadge()).toBeHidden();
+        await body.typeAtEnd('Unsaved sentence.');
+        await expect(body.unsavedBadge()).toBeVisible();
+        await expect(exporter.status()).toHaveCount(0);
+        expect((await exporter.exportToHtml()).status()).toBe(201);
+        await expect(exporter.status()).toHaveText(EXPORT_TEXT.htmlSaved);
+        await expect(body.unsavedBadge()).toBeVisible();
+
+        // A reload: "Saved sentence." and the figure, no "Unsaved sentence."
+        // (Rule 24a).
+        await body.reload();
+        await expect.poll(() => body.editorText(), {timeout: 30_000}).toBe('Saved sentence.');
+        await expect(body.figures()).toHaveCount(1);
+
+        // The galley revised: one "HTML", "Generated from text editor" and
+        // "Revision 2"; its "Edit" lists the figure under "Dependent Files";
+        // "Cancel" (Rules 24, 24b).
+        await frame.selectPage('Galleys');
+        await galleys.expectLoaded();
+        await galleys.expectNames([`HTML ${EXPORT_TEXT.generated} Revision 2`]);
+        const edit = await galleys.openEditByLink('HTML');
+        await expect(galleys.dependentFilesHeading(edit)).toBeVisible();
+        await expect(galleys.dependentFileRows(edit)).toHaveCount(1);
+        await expect(galleys.dependentFileRows(edit).locator('a[href*="download-file"]')).toHaveText(/^\s*figure-\d+-\d+\.png\s*$/);
+        await edit.cancel();
+
+        // The galley's text in the "JATS XML": a body part with both
+        // sentences (Rules 2a, 23, 24a; A7).
+        await jats.openFromMenu();
+        const xmlBody = (await jats.xmlText()).match(/<body>([\s\S]*)<\/body>/);
+        expect(xmlBody, 'a body part in the XML').not.toBeNull();
+        expect(xmlBody?.[1]).toContain('Saved sentence.');
+        expect(xmlBody?.[1]).toContain('Unsaved sentence.');
+
+        // "Preview: PDF": "Publication: Preview: PDF" showing "Saved
+        // sentence."; "Create PDF": "PDF galley saved." (Rule 24); "Galleys"
+        // lists "HTML" and "PDF", the "PDF" generated (Rule 24b).
+        await body.openFromMenu();
+        await exporter.openPdfPreview();
+        await expect(exporter.previewHeading()).toHaveText(EXPORT_TEXT.previewHeading);
+        await expect(exporter.previewBody()).toContainText('Saved sentence.', {timeout: 30_000});
+        expect((await exporter.createPdf()).status()).toBe(201);
+        await expect(exporter.previewStatus()).toHaveText(EXPORT_TEXT.pdfSaved, {timeout: 30_000});
+        await frame.selectPage('Galleys');
+        await galleys.expectLoaded();
+        await galleys.expectNames([`HTML ${EXPORT_TEXT.generated} Revision 2`, `PDF ${EXPORT_TEXT.generated}`]);
+
+        // An image from another submission: the second article's figure
+        // (read in the second tab) pasted after "Saved sentence.": "Export
+        // to HTML" is refused in the "Error" window; "OK", then "Undo": the
+        // pasted image goes; "HTML" still at "Revision 2" (Rule 24d).
+        await tab.bringToFront();
+        await otherBody.reload();
+        await expect(otherBody.figures()).toHaveCount(1);
+        const foreign = (await otherBody.figures().first().getAttribute('src')) || '';
+        expect(foreign).toMatch(new RegExp(`submissionId=${other.submissionId}\\b`));
+        await page.bringToFront();
+        await body.openFromMenu();
+        await expect(exporter.images()).toHaveCount(1);
+        await body.paragraphs().filter({hasText: /^Saved sentence\.$/}).click();
+        await page.keyboard.press('End');
+        await exporter.pasteHtml(`<img src="${foreign}">`);
+        await expect(exporter.images()).toHaveCount(2);
+        await expect(exporter.imagesAt(foreign)).toHaveCount(1);
+        expect((await exporter.exportToHtml()).status()).toBe(422);
+        await expect(frame.errorDialog()).toBeVisible({timeout: 30_000});
+        await expect(frame.errorDialog()).toContainText(EXPORT_TEXT.foreignImage);
+        await frame.dismissErrorDialog();
+        await body.toolbarButton('Undo').click();
+        await expect(exporter.images()).toHaveCount(1);
+        await expect(exporter.imagesAt(foreign)).toHaveCount(0);
+        await frame.selectPage('Galleys');
+        await galleys.expectLoaded();
+        await galleys.expectNames([`HTML ${EXPORT_TEXT.generated} Revision 2`, `PDF ${EXPORT_TEXT.generated}`]);
+
+        // An "ftp:" image pasted as HTML: the editor keeps it; "Export to
+        // HTML": "HTML galley saved.", no window (Rule 24d).
+        await body.openFromMenu();
+        await body.focusEnd();
+        await exporter.pasteHtml(`<img src="${FTP_IMAGE}">`);
+        await expect(exporter.imagesAt(FTP_IMAGE)).toHaveCount(1);
+        await expect(exporter.status()).toHaveCount(0);
+        expect((await exporter.exportToHtml()).status()).toBe(201);
+        await expect(exporter.status()).toHaveText(EXPORT_TEXT.htmlSaved);
+        await expect(frame.errorDialog()).toHaveCount(0);
+
+        // Control: "Undo", then "Galleys": one "HTML" at "Revision 3" and one
+        // "PDF": each export revised the galley an earlier one made (Rule
+        // 24b).
+        await body.toolbarButton('Undo').click();
+        await expect(exporter.imagesAt(FTP_IMAGE)).toHaveCount(0);
+        await frame.selectPage('Galleys');
+        await galleys.expectLoaded();
+        await galleys.expectNames([`HTML ${EXPORT_TEXT.generated} Revision 3`, `PDF ${EXPORT_TEXT.generated}`]);
     });
 });
