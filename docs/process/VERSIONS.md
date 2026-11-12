@@ -205,7 +205,9 @@ long-standing behavior, and the hunt for bugs.
   written for the version as well. When a coverage revision spends a
   Planned item that came from upstream and the version carries that
   change (its sync log shows the twin), the same bullet and assertion
-  go into the version's spec and suite and run green there.
+  go into the version's spec and suite and run green there. This holds
+  for items added after the version's copy of the feature was made (the
+  item's date says); an older item is `main`'s alone.
 - **A correction to a statement**, from something seen in passing, a
   drift sweep or an issue report, is carried to every version whose
   copy holds the same statement. The script or drive that showed it on

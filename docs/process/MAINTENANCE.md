@@ -261,9 +261,11 @@ What is left, the next morning picks up from the files.
      whose bug is still open waits. Each spec goes through RUNBOOK
      "Revising a shipped feature" with all its ready items: its own
      sheet, writer, reader and test authors, so its scenarios stay one
-     coherent set. An item that came from upstream is written for
-     every stable version that carries the change too, in its folder
-     (`VERSIONS.md` "After a feature is built"). The specs of one
+     coherent set. An item that came from upstream after a stable
+     version's copy of the feature was made is written for that
+     version too when it carries the change, in its folder
+     (`VERSIONS.md` "After a feature is built"); the backlog older
+     than the copies is `main`'s alone. The specs of one
      morning share one branch and one CI run (RUNBOOK "Several specs in
      one morning"). A second and a third
      spec start only inside the four hours.
