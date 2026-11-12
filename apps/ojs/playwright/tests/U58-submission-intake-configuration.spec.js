@@ -6,19 +6,12 @@
  * scenario the spec runs on OJS (S1–S7, all common).
  * Spec: docs/specs/U58-submission-intake-configuration.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A2 🐞
- * (no test opens the "Media" page after a delete), A7 🐞 and A8 🐞 (no help
- * text is asserted), A9 🐞 (no French list is read), A10 🐞 (no name of
- * spaces is saved), A12 🐞 (S7 presses "Cancel" after the refused delete and
- * never asserts the spinner), OJS1 🐞 (no LOCKSS page is read), A1 ❓ (S6 and
- * S7 assert an added component is listed, never its place), A3 ❓ (no key of
- * a deleted component is re-used), A4 ❓ ("Multimedia"'s window is never
- * opened), A5 ❓ (S2 never presses the Reader's "view your pending
- * submissions"), A6 ❓ (no site-wide privacy statement is configured), A11 ❓
- * (no default link's address is asserted), OMP3, OPS1, OPS2 (press- and
- * server-only, in those trees; S3 asserts OJS's "For Reviewer Suggestion"
- * box). The spec's Coverage section records everything else left out.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
+ * - A2 🐞, A7 🐞, A8 🐞, A9 🐞, A10 🐞, A12 🐞, A15 🐞, OJS1 🐞.
+ * - A1 ❓, A3 ❓, A4 ❓, A5 ❓, A6 ❓, A11 ❓.
+ * - OMP3, OPS1, OPS2: press- and server-only, in those trees.
  *
  * Seeding: scenario endpoints only. S1 reads the seeded journal signed out,
  * read-only. S2–S7 each run on their own scratch journal
@@ -61,7 +54,9 @@ const SECTION_POLICY = 'Section default policy';
 const SIGNED_OUT_LINE = 'Login or Register to make a submission.';
 const SIGNED_IN_LINE = 'Make a new submission or view your pending submissions.';
 const NOT_ACCEPTING_LINE = 'This journal is not accepting submissions at this time.';
-const SIDE_TAB_NAMES = ['Disable Submissions', 'Author Guidance', 'Metadata', 'Components', 'Contributor Roles'];
+const DISABLE_HELP =
+    'Prevent users from submitting new articles to the journal. Submissions can be disabled for individual journal sections on the journal sections settings page.';
+const SIDE_TAB_NAMES =['Disable Submissions', 'Author Guidance', 'Metadata', 'Components', 'Contributor Roles'];
 const INSTALL_COMPONENTS = [
     'Article Text',
     'Research Instrument',
@@ -114,6 +109,21 @@ function recordDialogs(page) {
         (d.type() === 'beforeunload' ? d.accept() : d.dismiss()).catch(() => {});
     });
     return asked;
+}
+
+/** A top tab of "Workflow Settings" by its name ("Submission", "Review"). */
+function topTab(page, name) {
+    return page.getByRole('main').getByRole('tab', {name, exact: true}).first();
+}
+
+/** "Author Guidance": the copyright box's own label (its `for` names the box's editor). */
+function copyrightLabel(page) {
+    return page.locator('#instructions label[for^="submissionGuidanceSettings-copyrightNotice-control"]');
+}
+
+/** "Disable Submissions": the help under the side tab's heading (the box's description). */
+function disableHelp(page) {
+    return page.locator('#disableSubmissions .pkpFormField__description');
 }
 
 /** A dashboard view's heading ("Assigned to me (0)", "Action Required by me (0)", "Active submissions (0)"). */
@@ -328,6 +338,9 @@ test.describe('submission intake configuration', () => {
         await expect(guidance.label('For Reviewer Suggestion')).toHaveCount(1);
         await expect(guidance.label('For Readers')).toHaveCount(0);
 
+        // The copyright box's label: exactly "Copyright Notice", case included (Fields; the retired OMP1's guard).
+        await expect(copyrightLabel(page)).toHaveText(/^\s*Copyright Notice\s*$/);
+
         // A reload keeps "Author Guidance" (Rule 1).
         await settings.reload();
         await expect(settings.sideTab('Author Guidance')).toHaveAttribute('aria-selected', 'true', {timeout: T});
@@ -346,6 +359,32 @@ test.describe('submission intake configuration', () => {
         await guidance.ready();
         expect(await guidance.text('Author Guidelines')).toMatch(new RegExp(`^${DEFAULT_GUIDELINES_OPENING.replace(/\./g, '\\.')}`));
         expect(asked, 'nothing asks before the reload').toEqual([]);
+
+        // Another tab of the page and back: the side tab and its unsaved tick
+        // kept; the address names only "Submission", so a reload opens
+        // "Disable Submissions" without asking, the tick dropped (Rules 1b, 2a, 2b).
+        const subjects = settings.metadata.box('Enable subject metadata');
+        await settings.openSideTab('Metadata');
+        await expect(subjects).not.toBeChecked();
+        await subjects.check();
+        await expect(subjects).toBeChecked();
+        const reviewTab = topTab(page, 'Review');
+        await reviewTab.click();
+        await expect(reviewTab).toHaveAttribute('aria-selected', 'true', {timeout: T});
+        await settings.submissionTab.click();
+        await expect(settings.submissionTab).toHaveAttribute('aria-selected', 'true', {timeout: T});
+        await expect(settings.sideTab('Metadata')).toHaveAttribute('aria-selected', 'true');
+        await expect(settings.sidePanel('Metadata')).toBeVisible();
+        await expect(subjects).toBeChecked();
+        await expect(page).toHaveURL(/#submission$/);
+        await page.locator('main h1').first().click();
+        await settings.reload();
+        await expect(settings.sideTab('Disable Submissions')).toHaveAttribute('aria-selected', 'true', {timeout: T});
+        await settings.disableForm.ready();
+        expect(asked, 'nothing asks before the reload').toEqual([]);
+        await settings.openSideTab('Metadata');
+        await expect(subjects).not.toBeChecked();
+        await settings.openSideTab('Author Guidance');
 
         // Texts saved: "Saving", then "Saved", no page notice (Rule 2).
         await guidance.type('Author Guidelines', 'Send your manuscript as a Word file');
@@ -449,6 +488,11 @@ test.describe('submission intake configuration', () => {
         await expect(settings.disableBox()).not.toBeChecked();
         await settings.disableBox().check();
         await saveShowingStatus(page, settings.disableForm);
+
+        // The tab's help: the journal's sentence, "journal sections" its one link (Fields).
+        const help = disableHelp(page);
+        await expect(help).toHaveText(DISABLE_HELP);
+        await expect(help.getByRole('link')).toHaveText(['journal sections']);
 
         // The visitor's page: the not-accepting sentence, no link (Rules 4d, 23c).
         await vAbout.reload();

@@ -626,6 +626,9 @@ recipe are in the footnote. <sup>s</sup>
      Suggestion" box; a preprint server shows "For Readers" where a
      journal shows "For the Editors", and no "For Reviewer Suggestion"
      [OPS1](#ops1) (Fields).
+   - **The copyright box's label**: on the same tab the copyright box's
+     label reads exactly "Copyright Notice", capital "N" included, on a
+     journal, a press and a preprint server alike (Fields).
    - **A reload**: reload the page: "Author Guidance" is still the open
      side tab (Rule 1).
    - **Typed, not saved**: replace the text of "Author Guidelines" with
@@ -635,6 +638,14 @@ recipe are in the footnote. <sup>s</sup>
      a submission to this journal.". Reload the settings page: nothing
      asks first, and "Author Guidelines" opens "Authors are invited to
      make a submission to this journal." again (Rules 2, 7).
+   - **Another tab of the page and back**: press the side tab "Metadata":
+     "Enable subject metadata" is unticked. Tick it, without saving, and
+     press the page's tab "Review" ("Preprint Server Library" on a
+     preprint server) and then "Submission": "Metadata" is the open side
+     tab again, with "Enable subject metadata" still ticked. Reload the
+     page: nothing asks first, and the page opens on the side tab
+     "Disable Submissions". Press "Metadata": "Enable subject metadata"
+     is unticked. Press "Author Guidance" (Rules 1b, 2a, 2b).
    - **Texts saved**: replace the text of "Author Guidelines" with Send
      your manuscript as a Word file, of "Before you begin" with Read the
      guidelines first, of "Submission Checklist" with The manuscript is
@@ -687,6 +698,16 @@ recipe are in the footnote. <sup>s</sup>
      "Disable Submissions" shows a heading and a box of that name,
      unticked. Tick the box and press "Save": "Saving" and then "Saved"
      (Fields; Rules 2, 4).
+   - **The tab's help**: the help on the side tab reads "Prevent users
+     from submitting new articles to the journal. Submissions can be
+     disabled for individual journal sections on the journal sections
+     settings page.", with "journal sections" a link. On a press it reads
+     "Prevent users from submitting new monographs to the press.
+     Submissions can be disabled for individual press series on the
+     press series settings page.", "press series" the link; on a preprint
+     server "Prevent users from submitting new preprints to the server.
+     Submissions can be disabled for individual server sections on the
+     server sections settings page.", "server sections" the link (Fields).
    - **The visitor's page**: the visitor reloads the "Submissions" page:
      the line under the heading reads "This journal is not accepting
      submissions at this time." ("This press …", "This server …"), with
@@ -703,9 +724,9 @@ recipe are in the footnote. <sup>s</sup>
      "Submissions" page: "Login or Register to make a submission.". The
      Author reloads it: "Make a new submission or view your pending
      submissions." (Rule 5).
-   - **Control**: while submissions were disabled, the visitor's page
-     still showed "Author Guidelines", "Submission Preparation Checklist"
-     and "Privacy Statement" under the sentence (Rules 4f, 24).
+   - **Control**: at "The visitor's page", before "Accepting again",
+     "Author Guidelines", "Submission Preparation Checklist" and "Privacy
+     Statement" still show under the sentence (Rules 4f, 24).
      <sup>s</sup>
 
 5. **The "Metadata" tab**
@@ -841,11 +862,6 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A12 (issue report
     `docs/issues/U62-A9-refused-confirmation-window-keeps-spinning.md`): a refused delete of a component in use closes its "Delete" window once the alert is closed [report 2026-10-02]
-  - a reload opening "Disable Submissions" after another tab of the
-    page and back (Rule 1b): scenario 3 reloads on a side tab it pressed [incidental 2026-09-29]
-  - unsaved boxes and choices kept through another tab of the page and
-    back, and dropped on leaving (Rules 2a, 2b): scenario 3 checks typed
-    text through a side tab and a reload [incidental 2026-09-29]
   - a component's "Name" of one space refused with a sentence in the
     notice, not a raw code ([A10](#a10)): the guard the issue report
     proposes [report 2026-10-02]
@@ -853,10 +869,6 @@ Left out of the scenarios above, by reason:
     other help ([A7](#a7)): the guard the issue report proposes [report 2026-10-04]
   - the "Add a Component" window's labels and helps reading as Fields
     gives them ([A8](#a8)): the guard the issue report proposes [report 2026-10-04]
-  - each app's "Disable Submissions" help naming its own kind of work
-    ("new monographs to the press" on a press), and the "Author
-    Guidance" copyright box labelled "Copyright Notice" on the three
-    apps (Fields; OMP1 retired) [upstream 2026-11-09]
 - **Nothing new to test**:
   - the Editor and the Production Editor while their role keeps "Permit
     changes to Settings" (Actors row 1): the same tabs as the Journal

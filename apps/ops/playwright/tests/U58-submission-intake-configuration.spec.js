@@ -14,18 +14,8 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 ❓: S6 and S7 never read where an added component stands.
- * - A2 🐞: no test opens the "Media" page after a delete.
- * - A3 ❓: no test reuses a deleted component's key.
- * - A5 ❓: S2's Reader does not press "view your pending submissions".
- * - A8 🐞, A10 🐞: the "Key" help is not read; no name of only spaces.
- * - A9 🐞: no French interface.
- * - A11 ❓: the default texts' links are not followed.
- * - A12 🐞: S7 presses "Cancel" after the refused delete; the window's
- *   state in between is not read.
- * - OPS1 ✅, OPS2 ✅: S3 asserts them as the scenario states.
- * - A4, A6, A7, OJS1, OMP3: no scenario step here, or another
- *   app's surface.
+ * A1 ❓, A2 🐞, A3 ❓, A4 ❓, A5 ❓, A6 ❓, A7 🐞, A8 🐞, A9 🐞, A10 🐞,
+ * A11 ❓, A12 🐞, A15 🐞, OJS1 🐞, OMP3 ✅.
  *
  * Seeding: scenario endpoints only (footnote s). S1 reads the seeded
  * server `publicknowledge` signed out and changes nothing; S2–S7 each seed
@@ -84,6 +74,11 @@ const DEFAULT_GUIDELINES_OPENING = 'Researchers are invited to submit a preprint
 const DEFAULT_CHECKLIST_OPENING = 'All submissions must meet the following requirements.';
 const DEFAULT_UPLOAD_HELP_OPENING = 'Upload the preprint you would like to share.';
 const SECTION_DEFAULT_POLICY = 'Section default policy';
+
+const SUBJECTS = 'Enable subject metadata';
+const LIBRARY_TAB = 'Preprint Server Library';
+const DISABLE_HELP =
+    'Prevent users from submitting new preprints to the server. Submissions can be disabled for individual server sections on the server sections settings page.';
 
 const SIDE_TAB_NAMES = ['Disable Submissions', 'Author Guidance', 'Metadata', 'Components', 'Contributor Roles'];
 
@@ -233,6 +228,24 @@ async function closeWindowAsked(page, win) {
     await expect(win.form()).toHaveCount(0, {timeout: T});
     await pastCloseWindow(page);
     return message;
+}
+
+/** "Author Guidance": the copyright box's own label, found by the box it names. */
+function copyrightLabel(page) {
+    return page.locator('#instructions label[for^="submissionGuidanceSettings-copyrightNotice-control"]');
+}
+
+/** A tab of the Workflow Settings page itself ("Submission", "Preprint Server Library"), pressed and shown. */
+async function openPageTab(page, name, hash) {
+    const tab = page.getByRole('main').getByRole('tab', {name, exact: true}).first();
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true', {timeout: T});
+    await page.waitForURL((url) => url.hash === `#${hash}`, {waitUntil: 'commit', timeout: T});
+}
+
+/** "Disable Submissions": the help under the side tab's heading. */
+function disableHelp(wf) {
+    return wf.sidePanel('Disable Submissions').locator('.pkpFormField__description').first();
 }
 
 /** "Save" on a settings form: "Saving" and then "Saved", with no page notice (Rule 2). */
@@ -452,6 +465,12 @@ test.describe('submission intake configuration (U58) — OPS', () => {
         await expect(guidance.label('For the Editors')).toHaveCount(0);
         await expect(guidance.label('For Reviewer Suggestion')).toHaveCount(0);
 
+        // The copyright box's label: exactly "Copyright Notice", capital "N"
+        // included (Fields; the retired OMP1's guard). The box's own label,
+        // read by the box it names, compared case-sensitively.
+        await expect(copyrightLabel(page)).toHaveCount(1);
+        await expect(copyrightLabel(page)).toHaveText(/^\s*Copyright Notice\s*$/);
+
         // A reload keeps "Author Guidance" open (Rule 1).
         await wf.reload();
         await expect(wf.sideTab('Author Guidance')).toHaveAttribute('aria-selected', 'true', {timeout: T});
@@ -477,6 +496,38 @@ test.describe('submission intake configuration (U58) — OPS', () => {
         await expect(wf.sideTab('Author Guidance')).toHaveAttribute('aria-selected', 'true', {timeout: T});
         await guidance.ready();
         expect(await guidance.text('Author Guidelines')).toMatch(new RegExp(`^${DEFAULT_GUIDELINES_OPENING.replace(/\./g, '\\.')}`));
+
+        // Another tab of the page and back: an unsaved tick on "Metadata"
+        // kept through "Preprint Server Library" and "Submission", which
+        // re-shows "Metadata"; a reload asks nothing, opens "Disable
+        // Submissions" and drops the tick (Rules 1b, 2a, 2b).
+        const md = wf.metadata;
+        await wf.openSideTab('Metadata');
+        await expect(md.box(SUBJECTS)).not.toBeChecked();
+        await md.box(SUBJECTS).check();
+        await expect(md.box(SUBJECTS)).toBeChecked();
+        await openPageTab(page, LIBRARY_TAB, 'library');
+        await openPageTab(page, 'Submission', 'submission');
+        await expect(wf.sideTab('Metadata')).toHaveAttribute('aria-selected', 'true', {timeout: T});
+        await expect(wf.selectedSideTab()).toHaveCount(1);
+        await expect(md.box(SUBJECTS)).toBeChecked();
+        const askedAgain = [];
+        const onDialogAgain = (d) => {
+            askedAgain.push(d.type());
+            d.accept().catch(() => {});
+        };
+        page.on('dialog', onDialogAgain);
+        await wf.reload();
+        page.off('dialog', onDialogAgain);
+        expect(askedAgain, 'the reload asks nothing').toEqual([]);
+        await expect(wf.sideTab('Disable Submissions')).toHaveAttribute('aria-selected', 'true', {timeout: T});
+        await expect(wf.selectedSideTab()).toHaveCount(1);
+        await wf.disableForm.ready();
+        await wf.openSideTab('Metadata');
+        await expect(md.box(SUBJECTS)).not.toBeChecked();
+        // Control: the keywords box, ticked at install, read on the same tab.
+        await expect(md.box('Enable keyword metadata')).toBeChecked();
+        await wf.openSideTab('Author Guidance');
 
         // Texts saved: "Saving", "Saved", no notice (Rule 2).
         await guidance.type('Author Guidelines', 'Send your manuscript as a Word file');
@@ -578,11 +629,19 @@ test.describe('submission intake configuration (U58) — OPS', () => {
         await wf.disableBox().check();
         await saveShowingStatus(page, wf.disableForm);
 
-        // The visitor's page: the not-accepting sentence with no link; the
-        // parts stay under it (Rules 4d, 4f, 23c, 24).
+        // The tab's help: the preprint server's sentence, "server sections"
+        // its one link (Fields).
+        await expect(disableHelp(wf)).toHaveText(whole(DISABLE_HELP), {useInnerText: true});
+        await expect(disableHelp(wf).getByRole('link')).toHaveText([whole('server sections')]);
+
+        // The visitor's page: the not-accepting sentence with no link
+        // (Rules 4d, 23c).
         await visitor.reload();
         await expectLine(visitor, NOT_ACCEPTING);
         await expect(visitor.noticeLinks()).toHaveCount(0);
+
+        // Control: at the visitor's page, before "Accepting again", the
+        // parts still show under the sentence (Rules 4f, 24).
         expect(await partHeadingNames(visitor)).toEqual(
             expect.arrayContaining(['Author Guidelines', 'Submission Preparation Checklist', 'Privacy Statement'])
         );
@@ -626,7 +685,6 @@ test.describe('submission intake configuration (U58) — OPS', () => {
         const wf = new WorkflowSubmissionSettings(page, tag, {listTitle: LIST_TITLE});
         const md = wf.metadata;
         const KEYWORDS = 'Enable keyword metadata';
-        const SUBJECTS = 'Enable subject metadata';
         const KW_ASK = 'Ask the author to suggest keywords during submission.';
         const KW_NONE = 'Do not request keywords from the author during submission.';
         const KW_REQUIRE = 'Require the author to suggest keywords before accepting their submission.';

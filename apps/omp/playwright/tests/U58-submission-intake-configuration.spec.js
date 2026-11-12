@@ -15,13 +15,9 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A1 ❓: S6 and S7 read an added component listed, never its place.
- * - A2 🐞, A3 ❓, A4 ❓, A6 ❓, A9 🐞, A10 🐞, A11 ❓: no test reads them.
- * - A5 ❓: the Reader's "view your pending submissions" is never pressed.
- * - A7 🐞, A8 🐞: no help text is read.
- * - A12 🐞: S7 closes the pop-up and presses "Cancel", never reading the
- *   spinner or pressing "OK" again.
- * - OJS1, OPS1, OPS2: another app's territory.
+ * - A1 ❓, A2 🐞, A3 ❓, A4 ❓, A5 ❓, A6 ❓, A7 🐞, A8 🐞, A9 🐞, A10 🐞,
+ *   A11 ❓, A12 🐞, A15 🐞
+ * - OJS1, OPS1, OPS2 (another app's)
  *
  * Seeding: scenario endpoints only. S1 reads the seeded press
  * `publicknowledge` signed out and changes nothing; S2–S7 each seed their
@@ -101,10 +97,39 @@ const LOOKUP_BOX = 'Enable references structuring and metadata lookup';
 const FUNDERS_BOX = 'Enable funder metadata';
 const GRANT_BOX = 'Enable Grant ID validation.';
 const COVERAGE_BOX = 'Enable coverage metadata';
+const DISABLE_HELP =
+    'Prevent users from submitting new monographs to the press. Submissions can be disabled for individual press series on the press series settings page.';
 
 /** Unique per-run tag: single alphanumeric token, feature + scenario + app + worker. */
 function makeTag(scenario, testInfo) {
     return `u58${scenario}omw${testInfo.parallelIndex}${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/**
+ * An "Author Guidance" box's label by its field name (`copyrightNotice`),
+ * read for its exact words and case (proposed for the page object as
+ * `GuidanceForm.boxLabel`).
+ */
+function guidanceBoxLabel(page, field) {
+    return page.locator(`#instructions label[for^="submissionGuidanceSettings-${field}-control"]`);
+}
+
+/** "Disable Submissions": the side tab's help (proposed as `WorkflowSubmissionSettings.disableHelp`). */
+function disableHelp(page) {
+    return page.locator('#disableSubmissions-disableSubmissions-description');
+}
+
+/**
+ * Press a tab of the Workflow Settings page ("Review", "Submission") and
+ * wait for it to be the open one and its name in the address (proposed
+ * as `WorkflowSubmissionSettings.openPageTab`).
+ */
+async function openPageTab(page, name, id) {
+    const tab = page.getByRole('main').getByRole('tab', {name, exact: true}).first();
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true', {timeout: T});
+    await expect(page.locator(`#${id}`)).toBeVisible({timeout: T});
+    await page.waitForURL((url) => url.hash === `#${id}`, {waitUntil: 'commit', timeout: T});
 }
 
 /** A signed-out browser page on the worker's server (no inherited storage state). */
@@ -442,6 +467,12 @@ test.describe('submission intake configuration', () => {
         await expect(guidance.label('For Reviewer Suggestion')).toHaveCount(1);
         await expect(guidance.label('For the Editors')).toHaveCount(1);
 
+        // The copyright box's label: exactly "Copyright Notice", capital
+        // "N" included (the guard of the retired OMP1); the box beside it
+        // ("Review and Submit") read the same way as the positive control.
+        await expect(guidanceBoxLabel(page, 'copyrightNotice')).toHaveText(/^\s*Copyright Notice\s*$/, {timeout: T});
+        await expect(guidanceBoxLabel(page, 'reviewHelp')).toHaveText(/^\s*Review and Submit\s*$/, {timeout: T});
+
         // A reload keeps "Author Guidance".
         await workflow.reload();
         await expect(workflow.sideTab('Author Guidance')).toHaveAttribute('aria-selected', 'true', {timeout: T});
@@ -466,6 +497,34 @@ test.describe('submission intake configuration', () => {
         await guidance.ready();
         expect(await guidance.text('Author Guidelines')).toMatch(new RegExp(`^${GUIDELINES_OPENING.replace(/\./g, '\\.')}`));
         expect(asked, 'nothing asks before the reload').toEqual([]);
+
+        // Another tab of the page and back: an unsaved tick on "Metadata"
+        // survives "Review" and "Submission"; the address then names only
+        // "Submission", so a reload opens "Disable Submissions", asks
+        // nothing and drops the tick (Rules 1b, 2a, 2b).
+        const md = workflow.metadata;
+        await workflow.openSideTab('Metadata');
+        await expect(md.box(SUBJECTS_BOX)).not.toBeChecked();
+        await expect(md.box(KEYWORDS_BOX)).toBeChecked();
+        await md.box(SUBJECTS_BOX).check();
+        await expect(md.box(SUBJECTS_BOX)).toBeChecked();
+        await openPageTab(page, 'Review', 'review');
+        await expect(workflow.sidePanel('Metadata')).toBeHidden();
+        await openPageTab(page, 'Submission', 'submission');
+        await expect(workflow.sideTab('Metadata')).toHaveAttribute('aria-selected', 'true', {timeout: T});
+        await expect(workflow.sidePanel('Metadata')).toBeVisible({timeout: T});
+        await expect(md.box(SUBJECTS_BOX)).toBeChecked();
+        expect(new URL(page.url()).hash, 'the address names only "Submission"').toBe('#submission');
+        await workflow.reload();
+        await expect(workflow.sideTab('Disable Submissions')).toHaveAttribute('aria-selected', 'true', {timeout: T});
+        await expect(workflow.sideTab('Metadata')).toHaveAttribute('aria-selected', 'false');
+        await workflow.disableForm.ready();
+        await expect(workflow.disableBox()).not.toBeChecked();
+        expect(asked, 'nothing asks before the reload').toEqual([]);
+        await workflow.openSideTab('Metadata');
+        await expect(md.box(SUBJECTS_BOX)).not.toBeChecked();
+        await expect(md.box(KEYWORDS_BOX)).toBeChecked();
+        await workflow.openSideTab('Author Guidance');
 
         // Texts saved: "Saving", then "Saved", and no notice on the page.
         await guidance.type('Author Guidelines', 'Send your manuscript as a Word file');
@@ -573,10 +632,16 @@ test.describe('submission intake configuration', () => {
         expect(disabled.statuses).toContain('Saving');
         expect(disabled.statuses[disabled.statuses.length - 1]).toBe('Saved');
 
-        // The visitor's page: the not-accepting sentence, no link; the
-        // parts still shown under it (the scenario's control).
+        // The tab's help: the press's sentence, "press series" its one link.
+        const help = disableHelp(page);
+        await expect(help).toHaveText(DISABLE_HELP, {useInnerText: true, timeout: T});
+        await expect(help.getByRole('link')).toHaveText(['press series']);
+
+        // The visitor's page: the not-accepting sentence, no link.
         await visitor.reload();
         await expectNoticeLine(visitor, NOT_ACCEPTING, []);
+        // Control, read here while submissions are disabled (before
+        // "Accepting again"): the three parts still stand under the sentence.
         await expectPartHeadings(visitor, PARTS);
 
         // The Author's page: the same.
