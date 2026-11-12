@@ -170,6 +170,9 @@ a key built later is deleted from this list.
   them on the screen and put them back with the app's own
   `PUT index/api/v1/site`.
 - Decision: `toAuthor`, `toReviewers`, `toEditor`.
+- Submission: `contributors[].creditRoles` (a contributor's CRediT roles with
+  their degrees; U48's generated "JATS XML" read of a role and its degree
+  waits under "No seed" for it).
 - User: `users[].country` (the profile's country; a contributor copied from a
   throwaway account has none, and the contributor "Edit" window refuses a
   save without one, so U21 S5 picks it in that window).
