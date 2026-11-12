@@ -1032,8 +1032,9 @@ affected rows and in the next Mattermost summary.
   the change that brought the problem in: the author of the commit or
   PR the report's **Introduced** line names, every author when it
   names several. The handle comes from this table; a developer who is
-  not in it (someone outside the team, a change never traced) is named
-  in the post without a tag.
+  not in it (someone who has left the team or was never on it, a change
+  never traced) is named in the post without a tag, and @beaug, tagged
+  on a regression report anyway, is the one who takes it up for them.
 
   | GitHub | Mattermost |
   |---|---|
