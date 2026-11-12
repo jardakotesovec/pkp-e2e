@@ -95,14 +95,14 @@ if (fs.existsSync(cacheDir)) {
 // project runs, and the probe server's `_test` API cannot seed before that.
 console.log('reset: done — next run will cold-bootstrap. Until the setup project has run (`npm run fleet-prep -- --feature <id>`, or any Playwright run), the probe server cannot seed.');
 
-function recreateDatabase({driver, host, username, password, name}) {
+function recreateDatabase({driver, host, port, username, password, name}) {
     const env = {...process.env};
     switch (true) {
         case /postgres/.test(driver || ''): {
             if (password) {
                 env.PGPASSWORD = password;
             }
-            const hostArgs = host ? ['-h', host] : [];
+            const hostArgs = [...(host ? ['-h', host] : []), ...(port ? ['-p', port] : [])];
             const userArgs = username ? ['-U', username] : [];
             // --force: with `persistent = On` in the test config (make-test-config.js) the fleet's
             // php -S servers keep a PDO connection open between requests, and a plain dropdb then
@@ -117,13 +117,18 @@ function recreateDatabase({driver, host, username, password, name}) {
             if (host) {
                 args.push('-h', host);
             }
+            if (port) {
+                args.push('-P', port);
+            }
             if (username) {
                 args.push('-u', username);
             }
             if (password) {
                 args.push(`-p${password}`);
             }
-            args.push('-e', `DROP DATABASE IF EXISTS \`${name}\`; CREATE DATABASE \`${name}\` DEFAULT CHARACTER SET utf8mb4;`);
+            // The character set PKP's own CI creates its MySQL and MariaDB databases with
+            // (pkp-github-actions prepare-tests.sh), so a run here meets what the team's runs meet.
+            args.push('-e', `DROP DATABASE IF EXISTS \`${name}\`; CREATE DATABASE \`${name}\` DEFAULT CHARACTER SET utf8;`);
             execFileSync('mysql', args, {stdio: 'inherit', env});
             break;
         }

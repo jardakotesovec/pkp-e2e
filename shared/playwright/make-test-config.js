@@ -15,6 +15,8 @@
  *
  *   PLAYWRIGHT_BASE_PORT  fleet base port (default 8000)
  *   TEST_DB_NAME          database name, must contain "test" (default ojs_test)
+ *   TEST_DB_DRIVER        postgres9 (default) or mysqli (MySQL and MariaDB)
+ *   TEST_DB_HOST / TEST_DB_PORT   server address (default 127.0.0.1, the driver's port)
  *   TEST_DB_USERNAME / TEST_DB_PASSWORD   DB credentials (default ojs / ojs)
  *   TEST_FILES_DIR        files dir (default <appRoot>/../files-test)
  *   TEST_PUBLIC_FILES_DIR public files dir, RELATIVE to the app root
@@ -68,8 +70,9 @@ const PATCHES = {
         enable_beacon: 'Off',
     },
     database: {
-        driver: 'postgres9',
-        host: '127.0.0.1',
+        driver: process.env.TEST_DB_DRIVER || 'postgres9',
+        host: process.env.TEST_DB_HOST || '127.0.0.1',
+        ...(process.env.TEST_DB_PORT ? {port: process.env.TEST_DB_PORT} : {}),
         username: process.env.TEST_DB_USERNAME || 'ojs',
         password: process.env.TEST_DB_PASSWORD || 'ojs',
         name: dbName,

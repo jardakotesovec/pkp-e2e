@@ -70,6 +70,14 @@ on:
         description: extra php.ini values for setup-php, comma-separated, after the job's opcache.jit=disable (e.g. opcache.jit=1235 for a run with the JIT)
         type: string
         default: ''
+      php_version:
+        description: the PHP to run on, 8.3 or 8.2 (one configuration of the daily e2e-matrix run, for a re-run or a PR)
+        type: string
+        default: '8.3'
+      database:
+        description: pgsql, mysql (8.0) or mariadb (10.11)
+        type: string
+        default: pgsql
 
 # A newer push to a branch cancels its older run, except on main: parallel
 # slots push there, and each push's own run is its gate (RUNBOOK step 10),
@@ -93,6 +101,8 @@ jobs:
       pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
       ui_library_ref: ${{ inputs.ui_library_ref || '' }}
       php_ini_values: ${{ inputs.php_ini_values || '' }}
+      php_version: ${{ inputs.php_version || '8.3' }}
+      database: ${{ inputs.database || 'pgsql' }}
   omp:
     # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
     if: (github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e') && contains(format(',{0},', inputs.apps || 'ojs,omp,ops'), ',omp,')
@@ -106,6 +116,8 @@ jobs:
       pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
       ui_library_ref: ${{ inputs.ui_library_ref || '' }}
       php_ini_values: ${{ inputs.php_ini_values || '' }}
+      php_version: ${{ inputs.php_version || '8.3' }}
+      database: ${{ inputs.database || 'pgsql' }}
   ops:
     # Like pkp's schedule.yml: the nightly runs only on the canonical repo.
     if: (github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e') && contains(format(',{0},', inputs.apps || 'ojs,omp,ops'), ',ops,')
@@ -119,6 +131,8 @@ jobs:
       pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
       ui_library_ref: ${{ inputs.ui_library_ref || '' }}
       php_ini_values: ${{ inputs.php_ini_values || '' }}
+      php_version: ${{ inputs.php_version || '8.3' }}
+      database: ${{ inputs.database || 'pgsql' }}
   # The ore version (pkp/ojs `ore`, OJS only; docs/process/VERSIONS.md):
   # its suite is the folder lines/ore/. Nightly here; pushes and PRs on
   # pkp/ojs `ore` run it through that repo's hook.

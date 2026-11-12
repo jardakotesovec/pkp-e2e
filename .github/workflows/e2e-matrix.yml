@@ -1,0 +1,42 @@
+# The daily configurations run: the three suites on every PHP and database
+# combination PKP's own CI tests the apps on (the matrix of main.yml in
+# pkp/ojs, pkp/omp and pkp/ops), apart from PHP 8.3 with PostgreSQL, which
+# is what every push, app hook and the nightly of e2e.yml runs on. The
+# upstream session reads its result (docs/process/MAINTENANCE.md "The
+# configurations run"). One configuration alone, for a re-run or a PR, is a
+# dispatch of e2e.yml: `node bin/ci.js dispatch --php 8.2 --database mysql`.
+name: e2e-matrix
+
+on:
+  schedule:
+    # Before the nightly (03:17) and the housekeeping session (05:00 Prague),
+    # so its 36 jobs are out of the way of their runs.
+    - cron: '37 0 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-matrix-${{ github.event_name == 'workflow_dispatch' && github.run_id || 'schedule' }}
+  cancel-in-progress: true
+
+jobs:
+  run:
+    # Like pkp's schedule.yml: the scheduled run only on the canonical repo.
+    if: github.event_name != 'schedule' || github.repository == 'jardakotesovec/pkp-e2e'
+    name: ${{ matrix.app }}
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [ojs, omp, ops]
+        config:
+          - {php: '8.2', database: pgsql}
+          - {php: '8.2', database: mariadb}
+          - {php: '8.2', database: mysql}
+          - {php: '8.3', database: mysql}
+    uses: ./.github/workflows/run-app.yml
+    with:
+      app: ${{ matrix.app }}
+      app_repo: pkp/${{ matrix.app }}
+      app_ref: main
+      e2e_ref: ${{ github.sha }}
+      php_version: ${{ matrix.config.php }}
+      database: ${{ matrix.config.database }}

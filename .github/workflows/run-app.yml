@@ -90,10 +90,27 @@ on:
         required: false
         type: string
         default: ''
+      php_version:
+        description: >-
+          the PHP the app runs on: 8.3 (every app hook and push run) or
+          8.2 (the daily configurations run, e2e-matrix.yml)
+        required: false
+        type: string
+        default: '8.3'
+      database:
+        description: >-
+          pgsql (PostgreSQL 16; every app hook and push run), mysql
+          (MySQL 8.0) or mariadb (MariaDB 10.11): the servers PKP's own
+          CI tests on (pkp/pkp-github-actions)
+        required: false
+        type: string
+        default: pgsql
 
 jobs:
   e2e:
-    name: e2e (${{ inputs.app }}) ${{ matrix.shard }}/3
+    # The usual configuration keeps its plain name (the app repos' checks
+    # are known by it); another one says which it is.
+    name: e2e (${{ inputs.app }}${{ (inputs.php_version != '8.3' || inputs.database != 'pgsql') && format(', php {0}, {1}', inputs.php_version, inputs.database) || '' }}) ${{ matrix.shard }}/3
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -137,7 +154,18 @@ jobs:
           FALLBACK: ${{ inputs.e2e_ref }}
           LINE: ${{ inputs.line }}
           APP: ${{ inputs.app }}
+          PHP_VERSION: ${{ inputs.php_version }}
+          DATABASE: ${{ inputs.database }}
         run: |
+          case "$DATABASE" in pgsql|mysql|mariadb) ;; *) echo "::error::database \"$DATABASE\" is not pgsql, mysql or mariadb"; exit 1 ;; esac
+          # Artifacts of another configuration than the usual one carry its
+          # name: the daily configurations run holds several per app.
+          tag=""
+          if [ "$PHP_VERSION" != "8.3" ] || [ "$DATABASE" != "pgsql" ]; then
+            tag="-php$PHP_VERSION-$DATABASE"
+            echo "- configuration: PHP $PHP_VERSION, $DATABASE" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           ref="$FALLBACK"
           line="$LINE"
           # An e2e_ref that names a version with a folder on main is that
@@ -221,11 +249,35 @@ jobs:
           pin lib/pkp pkp-lib "$PKP_LIB_REF"
           pin lib/ui-library ui-library "$UI_LIBRARY_REF"
 
-      - name: Set up PHP 8.3
+      # MySQL 8.0 and MariaDB 10.11 are the versions PKP's own CI installs
+      # (pkp/pkp-github-actions action.yml), and the database is created as
+      # its prepare-tests.sh creates it. The Postgres service above starts
+      # for these runs too and stays unused.
+      - name: Start MySQL or MariaDB
+        if: inputs.database != 'pgsql'
+        env:
+          IMAGE: ${{ inputs.database == 'mysql' && 'mysql:8.0' || 'mariadb:10.11' }}
+          DB: ${{ inputs.app }}_test
+        run: |
+          docker run -d --name testdb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root "$IMAGE"
+          # The image's first start runs a server without networking, so an
+          # answer over TCP is the real one.
+          for i in $(seq 1 60); do
+            mysql -h 127.0.0.1 -P 3306 -uroot -proot -e 'SELECT VERSION()' 2>/dev/null && break
+            [ "$i" = 60 ] && { docker logs testdb | tail -40; echo "::error::$IMAGE did not come up"; exit 1; }
+            sleep 2
+          done
+          auth="IDENTIFIED BY 'pkp'"
+          [ "${{ inputs.database }}" = mysql ] && auth="IDENTIFIED WITH mysql_native_password BY 'pkp'"
+          mysql -h 127.0.0.1 -P 3306 -uroot -proot -e "CREATE DATABASE \`$DB\` DEFAULT CHARACTER SET utf8; CREATE USER 'pkp'@'%' $auth; GRANT ALL ON \`$DB\`.* TO 'pkp'@'%' WITH GRANT OPTION;"
+          line="database: $(mysql -h 127.0.0.1 -P 3306 -upkp -ppkp -N -e 'SELECT VERSION()' 2>/dev/null)"
+          echo "$line"; echo "- $line" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set up PHP ${{ inputs.php_version }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-          extensions: bcmath, bz2, curl, gd, intl, mbstring, opcache, pdo_pgsql, pgsql, soap, xml, zip
+          php-version: ${{ inputs.php_version }}
+          extensions: bcmath, bz2, curl, gd, intl, mbstring, mysqli, mysqlnd, opcache, pdo_mysql, pdo_pgsql, pgsql, soap, xml, zip
           # The JIT off, as PHP ships and as the VM runs: setup-php turns
           # the tracing JIT on by default, and a crash in JIT-compiled code
           # killed fresh `php -S` workers on CI (ci-triage "A `php -S` worker
@@ -314,6 +366,7 @@ jobs:
           OMP_ROOT: ${{ github.workspace }}/app
           OPS_ROOT: ${{ github.workspace }}/app
           TEST_DB_NAME: ${{ inputs.app }}_test
+          TEST_DB_DRIVER: ${{ inputs.database == 'pgsql' && 'postgres9' || 'mysqli' }}
           TEST_DB_USERNAME: pkp
           TEST_DB_PASSWORD: pkp
           TEST_FILES_DIR: ${{ runner.temp }}/files-test
@@ -368,16 +421,17 @@ jobs:
         if: always() && steps.deaths.outputs.count != '' && steps.deaths.outputs.count != '0'
         uses: actions/upload-artifact@v4
         with:
-          name: server-deaths-${{ inputs.app }}-${{ matrix.shard }}
+          name: server-deaths-${{ inputs.app }}-${{ matrix.shard }}${{ steps.e2e.outputs.tag }}
           path: e2e/${{ steps.e2e.outputs.suite }}/.server-logs/
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 14
 
       # Per-test durations of this shard (timed-shards.js), the input of
-      # `npm run shard-timings`; uploaded on red runs too.
+      # `npm run shard-timings`; uploaded on red runs too. Only the usual
+      # configuration's times feed the split.
       - name: Upload test timings
-        if: always()
+        if: always() && steps.e2e.outputs.tag == ''
         uses: actions/upload-artifact@v4
         with:
           name: timings-${{ inputs.app }}-${{ matrix.shard }}
@@ -393,7 +447,7 @@ jobs:
         if: failure() || steps.suite.outputs.attempt_failed == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts-${{ inputs.app }}-${{ matrix.shard }}
+          name: playwright-artifacts-${{ inputs.app }}-${{ matrix.shard }}${{ steps.e2e.outputs.tag }}
           path: |
             e2e/${{ steps.e2e.outputs.suite }}/test-results/
             e2e/${{ steps.e2e.outputs.suite }}/.server-logs/
