@@ -15,7 +15,8 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
- * - A1 ❓, A2 ❓, A3 ❓, A7 ❓, A8 ❓, OMP1 ❓.
+ * - A1 🐞, A2 ❓, A3 ❓, A9 ❓, A10 🐞, A11 ❓, A15 🐞, A17 🐞, A18 ❓
+ *   (A7, A8, A14, A16 and OMP1 are journal or press only).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. Tests that assert counts or sidebar badges isolate on
@@ -74,6 +75,61 @@ function makeTag(scenario, testInfo) {
     return `u23${scenario}opw${testInfo.parallelIndex}${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/*
+ * Local helpers for the 2026-11-12 revision's new bullets. The shared
+ * EditorialDashboardPage is owned by another author this session, so these
+ * live here; their proposed POM names are in the revision's return.
+ */
+
+/**
+ * The page's polite live region while it holds "Loaded" (Rule 5). The
+ * backend layout renders two announcer elements (`.announcer`, both
+ * `#announcer`); the list's notice lands in one of them, so the match is by
+ * its text.
+ */
+function loadedAnnouncement(page) {
+    return page.locator('.announcer').filter({hasText: /^\s*Loaded\s*$/});
+}
+
+/** The chips row's "Clear Filters" beside the chips (Rule 6), never the
+ * Filters panel's own (the panel renders outside `#app-main`). */
+function chipsRowClearFilters(page) {
+    return page.locator('#app-main').getByRole('button', {name: 'Clear Filters', exact: true});
+}
+
+/** The list's own heading ("{view} ({count})"), read while a panel whose
+ * title is a level-1 heading too ("Filters") is open over it: the open
+ * panel hides the page behind it from the accessibility tree, so the read
+ * is by element, not by role. */
+function listHeading(page) {
+    return page.locator('h1').filter({hasText: /\(\d+\)/});
+}
+
+/** The open Filters panel's own "Clear Filters" at its foot (Rule 8b). */
+function panelClearFilters(dash) {
+    return dash.filtersModal().getByRole('button', {name: 'Clear Filters', exact: true});
+}
+
+/** The open Filters panel's "Days since last activity" slider. */
+function daysSlider(dash) {
+    return dash.filtersModal().getByRole('slider');
+}
+
+/** The label text beside a "Section" checkbox of the open Filters panel. */
+function filterCheckboxLabel(dash, label) {
+    return dash.filterCheckbox(label).locator('xpath=ancestor::label[1]');
+}
+
+/** Every data row's cell text under a column header, in row order. */
+async function columnTexts(page, header) {
+    const headers = await page.locator('table thead th').allInnerTexts();
+    const index = headers.findIndex((h) => new RegExp(`^\\s*${header}\\b`, 'i').test(h));
+    expect(index, `column "${header}" among ${JSON.stringify(headers)}`).toBeGreaterThanOrEqual(0);
+    return page
+        .locator('table tbody tr')
+        .evaluateAll((rows, i) => rows.map((r) => (r.children[i] ? r.children[i].innerText.trim() : null)), index);
+}
+
 /** Throwaway-user shorthand for scratch-server seeding. */
 function user(username, givenName, familyName, roles) {
     return {username, givenName, familyName, email: `${username}@mail.test`, roles};
@@ -109,6 +165,20 @@ test.describe('submissions dashboard (editorial)', () => {
         });
         const dash = new EditorialDashboardPage(page, tag);
         await dash.expectViewHeading('Assigned to me', 0);
+
+        // "Loaded": once the list has loaded, the page's polite live region
+        // holds "Loaded" for a screen reader; the word shows nowhere on the
+        // page: the region is the one element carrying it, and it is the
+        // visually hidden (sr-only, 1×1 px, clipped) announcer (Rule 5,
+        // fn-s1).
+        const loaded = loadedAnnouncement(page);
+        await expect(loaded).toHaveCount(1);
+        await expect(loaded).toHaveAttribute('aria-live', 'polite');
+        await expect(page.getByText(/\bLoaded\b/)).toHaveCount(1);
+        await expect(page.getByText(/\bLoaded\b/)).toHaveClass(/\bsr-only\b/);
+        const loadedBox = await loaded.boundingBox();
+        expect(loadedBox && loadedBox.width <= 1 && loadedBox.height <= 1).toBe(true);
+        await expect(page.getByText('Assigned to me', {exact: true}).first()).toBeVisible(); // positive control for the visible-text read
 
         // The sidebar's "Editor Dashboard" group, with the "Search
         // submissions" box at its top and one entry per view, each badge
@@ -328,6 +398,54 @@ test.describe('submissions dashboard (editorial)', () => {
         await dash.expectViewHeading('Active submissions', 3);
         await expect(dash.searchBox()).toHaveValue('');
 
+        // "Clear Filters" beside the chips: with the search and the Days
+        // filter at 30 committed again (an empty list), it drops the filter
+        // and keeps the search phrase with its chip: the list holds the
+        // searched row again (Rules 6, 8b; fn-s3). The chip's X then brings
+        // the full view back.
+        await dash.searchFor(`arta${tag}`);
+        await dash.expectViewHeading('Active submissions', 1);
+        await dash.openFilters();
+        await dash.setDaysSinceLastActivity(30);
+        await dash.applyFilters();
+        await expect(dash.filterChip(DAYS_FILTER)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 0);
+        await chipsRowClearFilters(page).click();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
+        await expect(dash.searchChip(`arta${tag}`)).toBeVisible();
+        await expect(dash.row(`arta${tag}`)).toBeVisible();
+        await expect(dash.row(`artb${tag}`)).toHaveCount(0);
+        await expect(chipsRowClearFilters(page)).toHaveCount(0);
+        await dash.clearSearchChip();
+        await dash.expectViewHeading('Active submissions', 3);
+        await expect(dash.searchChip()).toHaveCount(0);
+
+        // A phrase typed without Enter narrows nothing: the list stays whole;
+        // on "Published" the box still holds it, over the view's full list
+        // with no chip and no phrase in the address (Rule 6; the view's own
+        // fetch, read through its heading, bounds the read). Then the box
+        // is emptied so the control starts clean (fn-s3).
+        const box = dash.searchBox();
+        await box.click();
+        await box.pressSequentially(`arta${tag}`, {delay: 25});
+        await expect(box).toHaveValue(`arta${tag}`);
+        await dash.expectViewHeading('Active submissions', 3);
+        await expect(dash.row(`artb${tag}`)).toBeVisible();
+        await expect(dash.searchChip()).toHaveCount(0);
+        await dash.openView('Published');
+        await dash.expectViewHeading('Published', 1);
+        await expect(dash.row(`pubs${tag}`)).toBeVisible();
+        await expect(dash.searchBox()).toHaveValue(`arta${tag}`);
+        await expect(dash.searchChip()).toHaveCount(0);
+        expect(new URL(page.url()).searchParams.get('searchPhrase')).toBeNull();
+        expect(new URL(page.url()).searchParams.get('currentViewId')).toBe('published');
+        await dash.searchBox().fill('');
+        await expect(dash.searchBox()).toHaveValue('');
+        await dash.expectViewHeading('Published', 1);
+        await dash.openView('Active submissions');
+        await dash.expectViewHeading('Active submissions', 3);
+
         // Control: the in-page box narrows the current view and never
         // reaches beyond it: the posted preprint's title finds nothing on
         // "Active submissions".
@@ -342,7 +460,7 @@ test.describe('submissions dashboard (editorial)', () => {
         expect(await pkpMail.count({to: `${author}@mail.test`})).toBe(0);
     });
 
-    test('S4: global search finds a declined preprint', async ({asUser, opsApi}, testInfo) => {
+    test('S4: global search finds a declined preprint; a number in either box', async ({asUser, opsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s4', testInfo);
         const mgr = `${tag}mg`;
@@ -353,9 +471,24 @@ test.describe('submissions dashboard (editorial)', () => {
                 user(`${tag}au`, 'Ada', 'Author', ['author']),
             ],
         });
-        // One declined preprint plus one active as noise (fn-s4).
-        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `decl${tag}`, decisions: ['decline']});
-        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `acta${tag}`});
+        // A scratch server, so the plain titles the scenario names are this
+        // test's own: one declined preprint and four active ones. "Lake
+        // survey" is seeded first and its ID {n} read from the seed's
+        // answer; two titles hold that ID ("Report number {n} on lakes",
+        // "Code {n}7 river notes"), and "Other study" is the row the number
+        // drops. Every title and abstract holds no other digit (fn-s4; the
+        // default abstract carries the seed tag, whose random part has
+        // digits).
+        const ABSTRACT = 'A plain abstract.';
+        const seed = (title, extra = {}) =>
+            opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title, abstract: ABSTRACT, ...extra});
+        await seed('Declined study', {decisions: ['decline']});
+        const {submissionId: n} = await seed('Lake survey');
+        const REPORT = `Report number ${n} on lakes`;
+        const CODE = `Code ${n}7 river notes`;
+        await seed(REPORT);
+        await seed(CODE);
+        await seed('Other study');
 
         const page = await (await asUser(mgr)).newPage();
         const dash = new EditorialDashboardPage(page, tag);
@@ -364,19 +497,19 @@ test.describe('submissions dashboard (editorial)', () => {
         // search box is the positive control for the box disappearing on
         // Search Results.
         await dash.openView('Active submissions');
-        await dash.expectViewHeading('Active submissions', 1);
+        await dash.expectViewHeading('Active submissions', 4);
         await expect(dash.searchBox()).toBeVisible();
 
         // The sidebar's box searches everything — declined preprints
         // included — and opens the "Search Results" view with the row's
         // Stage cell reading "Declined", the phrase as a chip, and no
         // in-page search box (Rule 7).
-        await dash.globalSearch(`decl${tag}`);
+        await dash.globalSearch('Declined study');
         await dash.expectViewHeading('Search Results', 1);
-        const declRow = dash.row(`decl${tag}`);
+        const declRow = dash.row('Declined study');
         await expect(declRow).toBeVisible();
         await expect(dash.stageCell(declRow)).toHaveText(/^\s*Declined\s*$/);
-        await expect(dash.searchChip(`decl${tag}`)).toBeVisible();
+        await expect(dash.searchChip('Declined study')).toBeVisible();
         await expect(dash.searchBox()).toHaveCount(0);
 
         // Filters on the results: a filter chip joins the phrase chip, the
@@ -386,7 +519,7 @@ test.describe('submissions dashboard (editorial)', () => {
         await dash.setDaysSinceLastActivity(30);
         await dash.applyFilters();
         await expect(dash.filterChip(DAYS_FILTER)).toBeVisible();
-        await expect(dash.searchChip(`decl${tag}`)).toBeVisible();
+        await expect(dash.searchChip('Declined study')).toBeVisible();
         await dash.expectViewHeading('Search Results', 0);
         await expect(declRow).toHaveCount(0);
 
@@ -401,25 +534,56 @@ test.describe('submissions dashboard (editorial)', () => {
         // Clearing the filter too: the page returns to "Active submissions",
         // the view the search started from, with its in-page box back.
         await dash.clearFiltersButton().click();
-        await dash.expectViewHeading('Active submissions', 1);
-        await expect(dash.row(`acta${tag}`)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 4);
+        await expect(dash.row('Lake survey')).toBeVisible();
         await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
         await expect(dash.searchBox()).toBeVisible();
 
+        // A number in the in-page box lists the submission with that ID and
+        // every one whose title holds those digits, even inside a longer
+        // number; "Other study" drops (Rule 6). The chip's X brings the full
+        // view back.
+        await dash.searchFor(String(n));
+        await dash.expectViewHeading('Active submissions', 3);
+        for (const title of ['Lake survey', REPORT, CODE]) {
+            await expect(dash.row(title)).toBeVisible();
+        }
+        await expect(dash.row('Other study')).toHaveCount(0);
+        await expect(dash.searchChip(String(n))).toBeVisible();
+        await dash.clearSearchChip();
+        await dash.expectViewHeading('Active submissions', 4);
+        await expect(dash.row('Other study')).toBeVisible();
+
+        // The sidebar's box matches a number the same way: "Search Results
+        // (3)" lists the same three (Rules 6, 7); the phrase chip's X
+        // returns the page to "Active submissions", its in-page box empty.
+        await dash.globalSearch(String(n));
+        await dash.expectViewHeading('Search Results', 3);
+        for (const title of ['Lake survey', REPORT, CODE]) {
+            await expect(dash.row(title)).toBeVisible();
+        }
+        await expect(dash.row('Other study')).toHaveCount(0);
+        await dash.clearSearchChip();
+        await dash.expectViewHeading('Active submissions', 4);
+        await expect(dash.row('Other study')).toBeVisible();
+        await expect(dash.searchBox()).toBeVisible();
+        await expect(dash.searchBox()).toHaveValue('');
+
         // Control: only the sidebar's search reaches a declined preprint
         // from here: the in-page box finds nothing.
-        await dash.searchFor(`decl${tag}`);
+        await dash.searchFor('Declined study');
         await dash.expectViewHeading('Active submissions', 0);
         await expect(page.getByText('No Items')).toBeVisible();
     });
-
     test('S5: filter the list; the Moderator panel has no assigned-to field', async ({asUser, opsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
-        const SECOND_SECTION = 'Second section';
-        // A two-section server (the first entry renames the default
-        // section, fn-s5) with the Moderator assigned to one preprint and a
-        // second preprint in the second section; both fresh (the idle one
+        const SECTIONS = ['Preprints', 'Archive', 'Editorials'];
+        // A three-section server (the first entry renames the default
+        // section; "Archive" inactive, "Editorials" restricted to editors,
+        // both through the context's section keys, scenarios.md
+        // "sections[]"; fn-s5) with the Moderator assigned to one preprint
+        // and a second preprint in "Archive"; both fresh (the idle one
         // cannot be seeded: a 30-day floor leaves nothing, fn-s5), plus one
         // posted, so "Published" has a full list after the view switch.
         const mgr = `${tag}mg`;
@@ -428,7 +592,8 @@ test.describe('submissions dashboard (editorial)', () => {
             tag,
             sections: [
                 {abbrev: 'PRE', title: 'Preprints'},
-                {abbrev: 'SEC', title: SECOND_SECTION},
+                {abbrev: 'ARC', title: 'Archive', isInactive: true},
+                {abbrev: 'EDI', title: 'Editorials', editorRestricted: true},
             ],
             users: [
                 user(mgr, 'Greta', 'Manager', ['manager']),
@@ -440,11 +605,16 @@ test.describe('submissions dashboard (editorial)', () => {
             tag, context: tag, submitter: `${tag}au`, title: `acta${tag}`,
             participants: [{username: mod, role: 'sectionEditor'}],
         });
-        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `actb${tag}`, section: 'SEC'});
+        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `actb${tag}`, section: 'ARC'});
         await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `pubs${tag}`, published: true});
 
         const page = await (await asUser(mgr)).newPage();
         const dash = new EditorialDashboardPage(page, tag);
+        const dialogs = [];
+        page.on('dialog', (dialog) => {
+            dialogs.push(dialog.message());
+            dialog.dismiss().catch(() => {});
+        });
         await dash.goto('?currentViewId=active');
         await dash.expectViewHeading('Active submissions', 2);
 
@@ -472,15 +642,31 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(dash.row(`actb${tag}`)).toBeVisible();
         await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
 
-        // "Section": tick the second section and apply: the list narrows to
-        // the preprint in that section, with a chip for the filter above
-        // the table (Fields table); "Clear Filters" restores the view.
+        // Inactive and editor-only sections: "Section" lists all three, each
+        // with its checkbox, and nothing beside the inactive or the
+        // editor-only one marks it: each label reads the section's title
+        // alone, and the panel names neither state (Fields table; the
+        // titles are the positive control). Then "Close".
         modal = await dash.openFilters();
         await expect(modal.getByText('Section', {exact: true})).toBeVisible();
-        await expect(dash.filterCheckbox('Preprints')).toBeVisible(); // positive control for the field
-        await dash.filterCheckbox(SECOND_SECTION).check();
+        for (const title of SECTIONS) {
+            await expect(dash.filterCheckbox(title)).toBeVisible();
+            await expect(dash.filterCheckbox(title)).not.toBeChecked();
+            await expect(filterCheckboxLabel(dash, title)).toHaveText(new RegExp(`^\\s*${title}\\s*$`));
+        }
+        await expect(modal.getByRole('checkbox')).toHaveCount(SECTIONS.length);
+        await expect(modal).toContainText('Archive');
+        await expect(modal).not.toContainText(/inactive|restricted|editors only|moderators only/i);
+        await dash.closeFilters();
+        await dash.expectViewHeading('Active submissions', 2);
+
+        // "Section": tick "Archive" and apply: the list narrows to the
+        // preprint in that section, with a chip for the filter above the
+        // table (Fields table); "Clear Filters" restores the view.
+        await dash.openFilters();
+        await dash.filterCheckbox('Archive').check();
         await dash.applyFilters();
-        await expect(dash.filterChip(`Section: ${SECOND_SECTION}`)).toBeVisible();
+        await expect(dash.filterChip('Section: Archive')).toBeVisible();
         await dash.expectViewHeading('Active submissions', 1);
         await expect(dash.row(`actb${tag}`)).toBeVisible();
         await expect(dash.row(`acta${tag}`)).toHaveCount(0);
@@ -494,21 +680,26 @@ test.describe('submissions dashboard (editorial)', () => {
         // nothing until a name is typed; type the Moderator's name, pick
         // them and apply: the list narrows to the preprint they are
         // assigned to, with a chip for the filter.
-        modal = await dash.openFilters();
-        await expect(modal.getByText(ASSIGNED_FILTER)).toBeVisible();
-        const assignedField = dash.filterSuggestField(ASSIGNED_FILTER);
-        await assignedField.click();
-        await expect(dash.suggestOptions()).toHaveCount(0);
-        await assignedField.pressSequentially('Mira', {delay: 25});
-        await expect(dash.suggestOptions().filter({hasText: 'Mira Moderator'})).toBeVisible();
-        await expect(dash.suggestOptions()).toHaveCount(1);
-        await dash.pickSuggestOption('Mira Moderator');
-        await dash.applyFilters();
         const moderatorChip = `${ASSIGNED_FILTER}: Mira Moderator`;
-        await expect(dash.filterChip(moderatorChip)).toBeVisible();
-        await dash.expectViewHeading('Active submissions', 1);
-        await expect(dash.row(`acta${tag}`)).toBeVisible();
-        await expect(dash.row(`actb${tag}`)).toHaveCount(0);
+        const applyModeratorFilter = async ({checkEmptySuggest = false} = {}) => {
+            const panel = await dash.openFilters();
+            await expect(panel.getByText(ASSIGNED_FILTER)).toBeVisible();
+            const assignedField = dash.filterSuggestField(ASSIGNED_FILTER);
+            await assignedField.click();
+            if (checkEmptySuggest) {
+                await expect(dash.suggestOptions()).toHaveCount(0);
+            }
+            await assignedField.pressSequentially('Mira', {delay: 25});
+            await expect(dash.suggestOptions().filter({hasText: 'Mira Moderator'})).toBeVisible();
+            await expect(dash.suggestOptions()).toHaveCount(1);
+            await dash.pickSuggestOption('Mira Moderator');
+            await dash.applyFilters();
+            await expect(dash.filterChip(moderatorChip)).toBeVisible();
+            await dash.expectViewHeading('Active submissions', 1);
+            await expect(dash.row(`acta${tag}`)).toBeVisible();
+            await expect(dash.row(`actb${tag}`)).toHaveCount(0);
+        };
+        await applyModeratorFilter({checkEmptySuggest: true});
 
         // A chip's X: with that filter still active, add the Days filter at
         // 30 (the list empties), then press the Days chip's X: that chip
@@ -537,6 +728,57 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
         await expect(dash.clearFiltersButton()).toHaveCount(0);
 
+        // The panel's own "Clear Filters", "Close" and unapplied changes
+        // (Rules 8b, 8c): back on "Active submissions" with the Moderator
+        // filter applied again, the panel shows the Moderator chosen.
+        await dash.openView('Active submissions');
+        await dash.expectViewHeading('Active submissions', 2);
+        await applyModeratorFilter();
+        modal = await dash.openFilters();
+        await expect(modal.getByText('Mira Moderator')).toBeVisible();
+        // The panel's "Clear Filters" only empties its fields: the field
+        // empties, the panel stays open, and the list behind it keeps its
+        // chip and its count.
+        await panelClearFilters(dash).click();
+        await expect(modal.getByText('Mira Moderator')).toHaveCount(0);
+        await expect(modal.getByText(ASSIGNED_FILTER)).toBeVisible(); // the field itself is still there
+        await expect(modal.getByRole('button', {name: 'Apply Filters', exact: true})).toBeVisible();
+        await expect(dash.filterChip(moderatorChip)).toHaveCount(1);
+        await expect(listHeading(page)).toHaveText(/^\s*Active submissions \(1\)\s*$/);
+        // "Close" keeps the applied filter: the chip and the count stay, and
+        // "Filters" reopens with the Moderator chosen.
+        await dash.closeFilters();
+        await expect(dash.filterChip(moderatorChip)).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`acta${tag}`)).toBeVisible();
+        modal = await dash.openFilters();
+        await expect(modal.getByText('Mira Moderator')).toBeVisible();
+        // Unapplied changes: set Days at 30 and "Close" without applying:
+        // nothing asks, the list stays as it was with the Moderator's chip
+        // alone, and "Filters" reopens with the slider not at 30.
+        await dash.setDaysSinceLastActivity(30);
+        await dash.closeFilters();
+        await expect(dash.filterChip(moderatorChip)).toBeVisible();
+        await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`acta${tag}`)).toBeVisible();
+        await expect(page.locator('[data-cy="active-modal"]')).toHaveCount(0);
+        await expect(page.getByRole('dialog')).toHaveCount(0);
+        await expect(page.getByRole('alertdialog')).toHaveCount(0);
+        modal = await dash.openFilters();
+        await expect(daysSlider(dash)).toHaveAttribute('aria-valuenow', /^\d+$/); // positive control: the slider reads a value
+        await expect(daysSlider(dash)).not.toHaveAttribute('aria-valuenow', '30');
+        await expect(modal.getByText('Mira Moderator')).toBeVisible();
+        // The panel's "Clear Filters", then "Apply Filters": the chip goes
+        // and the full view is back.
+        await panelClearFilters(dash).click();
+        await dash.applyFilters();
+        await expect(dash.filterChip(moderatorChip)).toHaveCount(0);
+        await dash.expectViewHeading('Active submissions', 2);
+        await expect(dash.row(`actb${tag}`)).toBeVisible();
+        await expect(dash.clearFiltersButton()).toHaveCount(0);
+        expect(dialogs).toEqual([]);
+
         // Control: the Moderator's panel has no "Assigned to Moderator"
         // field, while the Days field is there.
         const modPage = await (await asUser(mod)).newPage();
@@ -548,7 +790,6 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(modDash.filterSuggestField(ASSIGNED_FILTER)).toHaveCount(0);
         await expect(modPanel.getByRole('combobox')).toHaveCount(0);
     });
-
     test('S6: "View" opens the workflow in place and the address follows', async ({asUser, opsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s6', testInfo);
@@ -612,6 +853,9 @@ test.describe('submissions dashboard (editorial)', () => {
         const dash = new EditorialDashboardPage(page, tag);
         await dash.goto('?currentViewId=active');
         await dash.expectViewHeading('Active submissions', 31);
+        await expect(dash.dataRows()).toHaveCount(30);
+        // The default order, read on arrival, for the third click's reload.
+        const arrivalOrder = await columnTexts(page, 'ID');
 
         // Click "ID": rows order descending and the address records the sort
         // (Rule 4/5).
@@ -634,14 +878,35 @@ test.describe('submissions dashboard (editorial)', () => {
         );
         await expect(dash.dataRows().first()).toContainText(byIdMin.title);
 
-        // "Days" sorts the same way (the address is the observable claim:
-        // every seeded row shares one idle time, so no reorder is visible;
-        // fn-s7).
+        // A third click on "ID" switches the sort off: the address no longer
+        // records it but keeps the view; reloaded, the rows stand in the
+        // default order, the one read on arrival (Rule 5; the guard of the
+        // retired A5; fn-s7).
+        await dash.sortButton('ID').click();
+        await page.waitForURL(
+            (url) =>
+                !url.searchParams.has('sortColumn') &&
+                !url.searchParams.has('sortDirection') &&
+                url.searchParams.get('currentViewId') === 'active',
+            {waitUntil: 'commit'}
+        );
+        await page.reload();
+        await dash.expectViewHeading('Active submissions', 31);
+        await expect(dash.dataRows()).toHaveCount(30);
+        expect(await columnTexts(page, 'ID')).toEqual(arrivalOrder);
+        expect(new URL(page.url()).searchParams.has('sortColumn')).toBe(false);
+
+        // "Days": the address follows the same way; every row reads 0 days,
+        // so the order is not judged (fn-s7).
         await dash.sortButton('Days').click();
         await page.waitForURL(
             (url) => url.searchParams.get('sortColumn') === 'lastActivity',
             {waitUntil: 'commit'}
         );
+        await expect(dash.dataRows()).toHaveCount(30);
+        const days = await columnTexts(page, 'Days');
+        expect(days).toHaveLength(30);
+        expect(days.every((d) => d === '0'), `Days cells: ${JSON.stringify(days)}`).toBe(true);
 
         // Back to the ID sort for a deterministic page split.
         await dash.sortButton('ID').click();
@@ -664,8 +929,10 @@ test.describe('submissions dashboard (editorial)', () => {
         // for the address otherwise following the list state).
         await expect(dash.pager()).toBeVisible();
         await expect(dash.dataRows()).toHaveCount(30);
+        await expect(page.getByText(/Showing 1 to 30 of 31/)).toBeVisible();
         const urlBeforePaging = page.url();
         await dash.pager().getByRole('button', {name: /Next/}).click();
+        await expect(page.getByText(/Showing 31 to \d+ of 31/)).toBeVisible();
         await expect(dash.dataRows()).toHaveCount(1);
         // Descending sort → page 2 holds the lowest ID.
         await expect(dash.dataRows().first()).toContainText(byIdMin.title);

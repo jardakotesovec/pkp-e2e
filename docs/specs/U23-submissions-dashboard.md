@@ -167,9 +167,12 @@ the account's roles, never on which dashboard page it opens from:
    the last. A screen reader announces "Go to Previous"
    and "Go to Page {n}", but plain "Next" ⚠ [A10](#a10). Which page is
    showing is never part of the address (Rule 4). An empty view shows a
-   single "No Items" row. Each time the list finishes loading (on
-   arrival, after a search or a sort), a screen reader hears "Loaded";
-   nothing of it shows on screen.
+   single "No Items" row. A screen reader hears "Loaded" when a search, a
+   sort or a view chosen in the sidebar asks for a new list, and when the
+   page opens at its address with no view named, as signing in does. It
+   hears it before the rows arrive, and hears nothing when the page opens
+   at an address that names its view, as every reload does ⚠ [A19](#a19).
+   Nothing of it shows on screen.
    The author's and reviewer's lists reuse this table with their own
    columns (theirs have no "Days"). <sup>f</sup>
 <a id="search"></a>
@@ -264,7 +267,9 @@ the account's roles, never on which dashboard page it opens from:
      - all reviews confirmed: "All reviews are confirmed and a decision is
        needed." Where the journal counts a minimum, it reads "Minimum
        required number of reviews have been confirmed. A decision is
-       needed." instead;
+       needed." instead. A round whose every reviewer was cancelled or
+       declined reads the all-confirmed sentence too, though it holds no
+       review ⚠ [A20](#a20);
      - otherwise: the per-reviewer indicators alone.
    - 9f. **In review, with recommending editors on board** {OJS OMP},
      checked before 9e. Instead of 9e's "Assign Reviewers" and
@@ -435,6 +440,8 @@ scenario's starting state are in its footnote.
      to me" view, under the sidebar's "Editor Dashboard" group, which has
      one entry per view with a count badge and the "Search submissions" box
      at its top.
+   - **"Loaded"**: on the landing, a screen reader hears "Loaded" (when
+     it is heard: [A19](#a19)); the word shows nowhere on the page.
    - **The "Reviews overdue" badge** {OJS OMP}: its count badge is colored
      while it reads 0; the other badges are plain.
    - **The table**: the heading names the view with its count ("Published
@@ -493,6 +500,16 @@ scenario's starting state are in its footnote.
    - **Switching views**: open "Published": both chips are gone and the
      search box is empty; back on "Active submissions", the full view
      shows.
+   - **"Clear Filters" beside the chips**: search for target again and
+     apply "Days since last activity" at 30 as above; press the "Clear
+     Filters" beside the chips: the filter's chip goes, the "Search:
+     target" chip stays, and the list holds "Search target" again
+     ("Active submissions (1)"); press the search chip's X: the full view
+     is back.
+   - **A phrase typed without Enter**: type target into the box and do
+     not press Enter: the list stays whole ("Active submissions (3)");
+     open "Published": the box still holds target, over the view's full
+     list ("Published (1)") with no chip; delete target from the box.
    - **Mailbox**: none of the above sent an email; the mail catcher holds
      nothing new.
    - **Control**: type Published study into the in-page search box on
@@ -502,7 +519,10 @@ scenario's starting state are in its footnote.
 4. **Global search**
 
    Given: Journal Manager, on "Active submissions" of a journal holding one
-   declined submission titled "Declined study" and one active one.
+   declined submission titled "Declined study" and four active ones: one
+   titled "Lake survey", whose ID is written {n} below, two whose titles
+   hold that ID, "Report number {n} on lakes" and "Code {n}7 river notes"
+   (for ID 116, "Code 1167 river notes"), and one titled "Other study".
 
    - **The sidebar box**: type Declined study into the sidebar's "Search
      submissions" box and submit: the "Search Results" view opens, listing
@@ -517,6 +537,14 @@ scenario's starting state are in its footnote.
    - **Clearing the filter too**: press "Clear Filters": the page returns
      to "Active submissions", the view the search started from, with its
      in-page search box back above the list.
+   - **A number, in either box**: type {n} into the in-page search box and
+     press Enter: "Active submissions (3)" lists "Lake survey", "Report
+     number {n} on lakes" and "Code {n}7 river notes", and "Other study"
+     is gone; press the search chip's X: the full view is back. Type {n}
+     into the sidebar's "Search submissions" box and submit: "Search
+     Results (3)" lists the same three; press the phrase chip's X: the
+     page returns to "Active submissions"; leave its in-page search box
+     empty.
    - **Control**: type Declined study into that in-page search box and
      press Enter: "Active submissions (0)"; only the sidebar's search reaches a declined
      submission from here. <sup>s4</sup>
@@ -525,8 +553,10 @@ scenario's starting state are in its footnote.
 
    Given: Journal Manager, on "Active submissions" of a journal where one
    submission has been idle for 30 days or more and the others are fresh,
-   with two sections and one submission in the second {OJS OPS}; a Section
-   Editor of the same journal, assigned to one submission.
+   with three sections {OJS OPS}: the default one, "Archive", marked
+   inactive and holding one submission, and "Editorials", restricted to
+   editors; a Section Editor of the same journal, assigned to one
+   submission.
 
    - **"Filters"**: press it: a side panel titled "Filters" opens with
      "Days since last activity", "Clear Filters" and "Apply Filters"; set
@@ -535,7 +565,11 @@ scenario's starting state are in its footnote.
      follows, and a chip for the filter shows above the table with "Clear
      Filters" beside it.
    - **"Clear Filters"**: press it: the full view is back.
-   - **"Section"** {OJS OPS}: press "Filters", tick the second section in
+   - **Inactive and editor-only sections** {OJS OPS}: press "Filters":
+     "Section" lists all three sections, each with its checkbox and
+     nothing beside the inactive or the editor-only one to mark it; press
+     "Close".
+   - **"Section"** {OJS OPS}: press "Filters", tick "Archive" in
      "Section" and press "Apply Filters": the list narrows to the
      submission in that section, with a chip for the filter above the
      table; press "Clear Filters".
@@ -551,6 +585,18 @@ scenario's starting state are in its footnote.
      list shows the Section Editor's submission again.
    - **Switching views**: with that chip still active, open "Published":
      the chip is gone and the view shows its full list.
+   - **The panel's own "Clear Filters", "Close" and unapplied changes**:
+     back on "Active submissions", apply the "Assigned To Editor" filter
+     for the Section Editor again; press "Filters": the Section Editor
+     shows chosen in the field; press the panel's "Clear Filters": the
+     field empties, the panel stays open, and the list behind it keeps its
+     chip and its count; press "Close": the chip and the count stay, and
+     "Filters" reopens with the Section Editor chosen. Set "Days since
+     last activity" to 30 and press "Close" without "Apply Filters":
+     nothing asks, the list stays as it was with the "Assigned To Editor"
+     chip alone, and "Filters" reopens with the slider not at 30. Press
+     the panel's "Clear Filters", then "Apply Filters": the chip goes and
+     the full view is back.
    - **Control**: Section Editor: open the same panel: there is no
      "Assigned To Editor" field, while "Days since last activity" is there.
      <sup>s5</sup>
@@ -577,11 +623,15 @@ scenario's starting state are in its footnote.
    - **"ID"**: click the header: the rows reorder by ID, descending, and
      the address records the sort; click again: ascending, the address
      following.
-   - **"Days"**: click it: the rows reorder by idle time the same way, the
-     address following.
-   - **Paging**: on a view with more than 30 rows, pager controls sit under
-     the list, and page 2 shows the rest; the address does not record
-     which page is showing.
+   - **A third click on "ID"**: click it once more: the sort is off, and
+     the address no longer records it but keeps the view; reload: the rows
+     stand in the default order, the one the view showed before the first
+     click.
+   - **"Days"**: click it: the address follows the same way; every row
+     reads 0 days, so order is not judged.
+   - **Paging**: pager controls sit under the list; page 2 reads "Showing
+     31 to {last} of {total}" (which rows: [A16](#a16)); the address does
+     not record the page.
    - **Control**: reloading the sorted address brings the rows back in the
      same order. <sup>s7</sup>
 
@@ -602,15 +652,17 @@ scenario's starting state are in its footnote.
 
 9. **Review activity at a glance** {OJS OMP}
 
-   Given: Journal Manager; four submissions in review: one whose round has
-   no reviewers yet, one whose round has two review requests out,
-   unanswered, and a third reviewer who declined, one whose author was
-   asked for revisions this round, and one asked for revisions to be taken
-   to a new review round.
+   Given: Journal Manager, on "Active submissions"; five submissions in
+   review: "Bare study", whose round has no reviewers yet; "Pending
+   study", whose round has two review requests out, unanswered, and a
+   third reviewer who declined; "Revise study", whose author was asked
+   for revisions this round; "Resubmit study", asked for revisions to be
+   taken to a new review round; "Accepted study", whose single reviewer
+   has accepted.
 
-   - **No reviewers yet**: the first row's cell offers "Assign Reviewers";
+   - **No reviewers yet**: "Bare study"'s cell offers "Assign Reviewers";
      press it: the Add Reviewer window opens; close it.
-   - **Two requests out**: the second row's cell shows two countdown
+   - **Two requests out**: "Pending study"'s cell shows two countdown
      indicators and an icon for the declined reviewer, and the submission
      lists under "Awaiting reviews".
    - **A popover**: click one countdown indicator: it names the reviewer,
@@ -634,11 +686,23 @@ scenario's starting state are in its footnote.
      popover offers "View recommendation" ⚠ [→ Reviewer assignment &
      management](U27-reviewer-assignment-and-management.md#a32).
      The submission now lists under "Reviews submitted" too.
-   - **Revisions asked**: the third row's cell reads "Revisions requested
-     from author" and the fourth's "Revisions requested from the author to
-     be taken to a new review round".
-   - **Control**: the other reviewer's indicator is still a countdown ring
-     whose popover reads "Awaiting Response from the reviewer".
+   - **Revisions asked**: "Revise study"'s cell reads "Revisions requested
+     from author" and "Resubmit study"'s "Revisions requested from the
+     author to be taken to a new review round".
+   - **A cancelled reviewer**: on "Accepted study", click the reviewer's
+     countdown ring: its popover reads "Ongoing review - request
+     accepted"; press "Cancel Reviewer": the window the workflow's
+     Reviewers panel opens for cancelling that reviewer appears; cancel
+     the reviewer there
+     ([→ unassign vs cancel](U27-reviewer-assignment-and-management.md#unassign)):
+     back on the list, the reviewer's indicator is an icon (the sentence
+     the cell now shows above it: [A20](#a20)), and its popover reads
+     "Review request cancelled by editor" with "Reinstate Reviewer" as its
+     only action; press it: the window the Reviewers panel's "Reinstate
+     Reviewer" opens appears; close it.
+   - **Control**: on "Pending study", the other reviewer's indicator is
+     still a countdown ring whose popover reads "Awaiting Response from the
+     reviewer".
      <sup>s9</sup>
 
 10. **The conflict row**
@@ -816,21 +880,14 @@ Left out of the scenarios above, by reason:
     the other header none ([A15](#a15)): the guard the issue report
     (`docs/issues/U23-A15-dashboard-sorted-header-not-announced.md`)
     proposes, once fixed [report 2026-10-21]
-  - the "Section" field with inactive or editor-only sections (Fields) [incidental 2026-09-29]
-  - the panel's own "Clear Filters", "Close" and unapplied changes (Rules 8b, 8c) [incidental 2026-09-29]
-  - the "Loaded" a screen reader hears once the list has loaded (Rule 5) [incidental 2026-09-30]
   - the guard for A10 (issue report `docs/issues/U23-A10-pager-next-lacks-spoken-label.md`): on a list with two pages, every pager button carries a "Go to …" name, "Go to Next" included [report 2026-10-04]
-  - the guard for the retired A4 and A6 and for the day count (pkp/pkp-lib#13472, Rule 10): the popover of a request the editor cancelled reads "Review request cancelled by editor" and offers "Reinstate Reviewer" alone, which puts the reviewer back; that of an accepted review past its deadline says "The review was due on {date}"; a response due tomorrow reads 1 day; it needs a cancelled reviewer and an overdue review, which no scenario sets [report 2026-10-13]
-  - the guard for the retired A5 (Rule 5): in scenario 7 ("Sort and page"), a third click on "ID" leaves the address without `sortColumn` and `sortDirection`, and a reload shows the default order [upstream 2026-10-08]
-  - a number in the search box listing the submission with that ID and those whose titles hold its digits, in either box (Rules 6, 7) [incidental 2026-10-05]
-  - the "Clear Filters" beside the chips dropping the filters and keeping the search chip (Rule 8b) [incidental 2026-10-05]
-  - a phrase typed without Enter staying in the box on the next view, over its full list with no chip (Rule 6) [incidental 2026-10-05]
 - **Nothing new to test**:
   - the "Showing {first} to {last} of {total}" line under the list, and "Previous" and "Next" that cannot be pressed at the ends of the pager (Rule 5)
   - Site Administrator holding Journal Manager in the journal, journal-wide like the Journal Manager (Actors row 2; the Journal Manager's views, scenario 2)
   - a Site Administrator whose editorial roles in the journal are only Section Editor ones, assigned-only like the Section Editor (Rule 3; the Section Editor's views, scenario 2)
   - assistants, assigned-only like the Section Editor (Actors row 2; the Section Editor's views, scenario 2)
   - an assigned Section Editor getting the same popovers and buttons (Rule 10; the Journal Manager's, scenario 9)
+  - "Loaded" heard after a search, a sort or a view chosen in the sidebar (Rule 5; the same word in the same place as on the landing, scenario 1)
 - **Register carries it**:
   - A2 ("Complete submission" landing the editor in the author's wizard)
   - A3 (the conflict notice saying "Journal Manager" whoever is looking)
@@ -843,9 +900,13 @@ Left out of the scenarios above, by reason:
   - A16 (paging repeats and skips submissions sharing one date and time; Rule 5)
   - A17 (strict mode on: the sidebar's search failing; Rule 7, Settings bullet 4)
   - A18 (a search address with no view, or one the account lacks, opening "Assigned to me" without its search; Rule 4)
+  - A19 ("Loaded" heard before the rows arrive, and not at all at an address naming its view; Rule 5)
+  - A20 (a round whose every reviewer was cancelled or declined reading "All reviews are confirmed and a decision is needed."; Rule 9e)
   - OMP1 (no series filter on a press)
 - **No seed**:
   - "Reviews overdue" (Rule 2) and the "Review Request overdue by {days} days" popover (Rule 10): no seed backdates a request or a review deadline
+  - the "Review overdue by {days} days" popover of an accepted review past its deadline, with "Edit Due Date", "View details" and "Cancel Reviewer" (Rule 10): no seed backdates a review deadline
+  - a countdown ring reading 1 for a response due tomorrow, at any hour of today (Rule 10): no seed sets a due date to a chosen day
   - "Author revisions submitted" (Rule 2), "Revisions submitted" and "New review round to be created" (Rule 9e): no seed uploads the author's revisions
   - the "Categories" filter narrowing to a submission in a category (Fields): no seed puts a submission in a category, and a scratch journal gets no categories
   - recommending editors on board: the three recommendation messages {OJS OMP} (Rule 9f)
@@ -856,6 +917,7 @@ Left out of the scenarios above, by reason:
   - the Reviewer's and Author's sidebar groups beside the editorial one (Rule 1; *Reviewer's review*, scenario 1; *My Submissions*, scenario 3)
   - the old submissions address forwarding to the account's home list (Rule 4; *My Submissions*, "Landing")
   - the side effects of the row and popover actions (Side effects; *Stage participants*; *Reviewer assignment & management*, scenarios 1, 6, 11 and 12)
+  - what "Reinstate Reviewer" does once confirmed in its window, the reviewer put back on the round (Rule 10; *Reviewer assignment & management*, scenario 11)
   - disabling submissions hiding "Start A New Submission" (Settings; *Submission wizard*, scenario 7)
   - My Submissions and the reviewer's list reusing the table, search, filters and selection (Cross-feature; *My Submissions*, scenarios 2 and 3; *Reviewer's review*, scenario 1)
   - what "View" opens (Cross-feature; *Workflow screen & stage access*, scenario 1), the "Assign Editor" window (*Stage participants*) and the Add Reviewer window (*Reviewer assignment & management*, scenario 1)
@@ -874,6 +936,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
 | [A17](#a17) | With strict mode on, every search from the sidebar's "Search submissions" box fails and shows "Search Results (0)" | 🐞 | low · crash: server | — |
 | [A1](#a1) | Section Editors and assistants have no "Declined" view, so a declined submission they are assigned to drops out of every view; on 3.5 nothing on the dashboard brings it back | 🐞 | medium | upstream sync (claude), 2026-10-28 — regression report |
+| [A19](#a19) | A screen reader hears "Loaded" before the list has loaded, and nothing when the page opens at an address naming its view, as on every reload | 🐞 | minor | — |
 | [A2](#a2) | Editors are offered "Complete submission" on other people's incomplete submissions, landing them in the author's wizard | ❓ | minor | — |
 | [A3](#a3) | The author/reviewer conflict notice always says "as a Journal Manager", whoever is looking, on presses and preprint servers too | ❓ | minor | — |
 | [A7](#a7) | Declined and cancelled reviewers show no activity indicator at all to assigned Section Editors and assistants | ❓ | minor | — |
@@ -882,6 +945,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A11](#a11) | Two values chosen in one filter field: one chip or two? | ❓ | minor | — |
 | [A14](#a14) | A recommending editor's row before recording; never seen on screen | ❓ | minor | — |
 | [A18](#a18) | An address with a search phrase but no view, or a view the account lacks, opens "Assigned to me" with the phrase and filters dropped | ❓ | minor | — |
+| [A20](#a20) | A round whose every reviewer was cancelled or declined reads "All reviews are confirmed and a decision is needed." on the dashboard row | ❓ | user-visible | — |
 | [OMP1](#omp1) | A press's filter panel never offers a series filter, however many series exist | ❓ | minor | — |
 
 ### All apps
@@ -1057,6 +1121,34 @@ landing view or under "Search Results"? Lean: 🐞; the address is the
 page's record of a search (Rule 4), and dropping it silently shows
 submissions the person did not ask for.
 Basis: probe, 2026-10-05. <sup>a18</sup>
+
+<a id="a19"></a>
+**A19 — "Loaded" comes before the list, and never on a reload** · 🐞 · minor.
+A screen-reader user expects to hear "Loaded" once the list's rows are
+on screen. After a search, a sort or a view chosen in the sidebar, the
+page says "Loaded" the moment it asks for the new list, before the rows
+arrive, so the user is told the list is ready while it is still
+loading. When the page opens at an address that already names its view,
+as every reload and every bookmarked view does, nothing is said once the
+list arrives. Of the ways to open the page, only the address with no
+view, where signing in lands, gets "Loaded". Seen on a press and a
+preprint server; a journal runs the same page.
+Basis: test run + code, 2026-11-12. <sup>a19</sup>
+
+<a id="a20"></a>
+**A20 — A round with only cancelled reviewers claims confirmed reviews** · ❓ · user-visible.
+When every reviewer on the current round has been cancelled, the
+submission's Editorial Activity cell reads "All reviews are confirmed
+and a decision is needed." above the cancelled reviewer's icon, though
+no review exists and none was confirmed. Expected, by Rule 9e: the
+per-reviewer indicators alone. A round whose reviewers all declined
+takes the same sentence, as on the review stage ([Review stage & rounds
+A4](U26-review-stage-and-rounds.md#a4)). Seen on a press; not seen on a
+journal, whose dashboard picks the sentence the same way.
+Question: what should the cell say for a round whose reviewers were all
+cancelled or declined? Lean: as for A4 of the review stage, "a decision
+is needed" can stand, "all reviews are confirmed" is wrong.
+Basis: test run + code, 2026-11-12. <sup>a20</sup>
 
 ### OMP
 
@@ -1270,7 +1362,8 @@ view; "Next" and "Go to Page 2" fetched `offset=30`, "Previous" and "Go
 to Page 1" `offset=0`; the address stayed `?currentViewId=active`
 throughout and a reload returned to page 1 with 30 rows. The load
 notice is `dashboardPageStore.js` calling `announce(t('common.loaded'))`
-into the page's `aria-live="polite"` region once a fetch completes.
+into the page's `aria-live="polite"` region as a new list is requested,
+not once it arrives, and not for the first list (fn-a19).
 Live-probed 2026-09-30 (all three apps, two runs): the region held
 "Loaded" on arrival and after a search in English (Journal Manager), and
 its code (fn-a12) on arrival for the Journal Manager and the Section
@@ -1625,7 +1718,10 @@ in on the journal's own login page (`{path}/login`): landing on
 overdue" badge color is the attention variant (fn-d). The copyediting
 cell's count is expected at 0, since a seeded submission carries no files
 (scenarios.md); the suites match the label and read the number. The
-"No Items" control uses whichever view's badge reads 0.
+"No Items" control uses whichever view's badge reads 0. The "Loaded" leg
+reads the page's polite live region right after the sign-in landing,
+whose address names no view (an address naming one stays silent, fn-a19),
+and the page's visible text for its absence (fn-f).
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** A scratch journal with a throwaway Journal
@@ -1649,7 +1745,12 @@ combined bullet asserts the two chips, "Clear Filters" and an empty list.
 The mailbox bullet reads the mail catcher (Mailpit, one shared instance
 at `MAILPIT_URL`, default `http://127.0.0.1:8025`) and compares its total
 (`messageCount()`) before and after, paired with a positive control the
-test sends itself.
+test sends itself. The chips-row "Clear Filters" leg re-commits the search
+and the Days filter at 30 (an empty list, as above) and reads the search
+chip alone and "(1)" after the press (fn-i, 2026-10-05). The no-Enter leg
+types into the box without Enter, opens "Published" and reads the box's
+value, the heading and the absent chip (fn-g, 2026-10-05), then empties the
+box so the control starts clean.
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** A scratch journal; one submission declined
@@ -1658,7 +1759,12 @@ stays quiet) plus one active as noise; start the search from "Active
 submissions" (a non-default view, so the return is observable). The Days
 filter at 30 on today's rows empties the results; the filter chip and the
 view name are the observables (Rule 7's filters-on-results and
-phrase-cleared-alone legs live-probed 2026-08-26, fn-h).
+phrase-cleared-alone legs live-probed 2026-08-26, fn-h). The four active
+submissions are the number leg's: "Lake survey" seeded first, its ID read
+from the seed's answer, then "Report number {ID} on lakes" and "Code
+{ID}7 river notes", and "Other study" as the row the number drops; every
+title and abstract holds no other digit, as in the probes of fn-g and
+fn-h (2026-10-05).
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** A scratch journal; the idle submission
@@ -1666,17 +1772,29 @@ cannot be seeded, because the scenario endpoints cannot backdate last
 activity (checked 2026-08-26), so the suites set the slider to 30 against
 fresh rows and assert the chip, the narrowing (to no rows) and the
 restore; the slider keeps rows idle *at or above* the value (fn-i). The
-"Section" leg (OJS and OPS) needs a two-section scratch context
-(`sections: [{abbrev: …}, {abbrev: …}]`) with one submission seeded under
-the second (`section: <abbrev>`); OMP's context accepts no `series[]`
-and its panel has no series field (OMP1). The "Assigned To Editor" leg
+"Section" legs (OJS and OPS) need a three-section scratch context,
+`sections: [{abbrev: …}, {abbrev: …, isInactive: true}, {abbrev: …,
+editorRestricted: true}]`, the first entry renaming the default section,
+with one submission seeded under the second (`section: <abbrev>`). The
+two keys are the section window's "Mark this section as inactive…" and
+"Items can only be submitted by Editors and Section Editors." (OPS
+"…Managers and Moderators.") boxes ticked (scenarios.md `sections[]`; a
+probe of the same shape in fn-i, 2026-09-29). OMP seeds the same three
+as `series[]` with the same two keys (the series window's boxes,
+scenarios.md `series[]`) and one monograph in the inactive series, but
+its panel has no series field (OMP1), so no leg reads them on screen.
+The "Assigned To Editor" leg
 needs the throwaway Section Editor assigned to one submission
 (`participants: [{username: <se>, role: 'sectionEditor'}]`); the suggest
 list is opened without typing first, then the name is typed and picked.
 The chip's-X leg adds the Days filter at 30 on top (the list empties)
 and drops the Days chip: the editor's chip and its one row are back. The
 "Switching views" bullet opens "Published" with the editor's chip still
-active. The Section Editor's control leg reuses the same account.
+active. The panel leg applies the "Assigned To Editor" filter again on
+"Active submissions" and reads the panel, the chip and the heading count
+after each press (fn-i, 2026-09-29); "not at 30" is the slider's value
+read on reopening. The Section Editor's control leg reuses the same
+account.
 
 <a id="fn-s6"></a>
 **s6 — scenario 6 seeding.** The seeded journal: a scratch submission by
@@ -1694,7 +1812,9 @@ claim. The Days-*ordering* leg has its own seeding constraint (checked
 same-day database every row ties at 0 days and reordering by idle time is
 not observable — the test may limit the Days assertion to the address
 recording the sort and the list refetching, as the paging leg may be
-dropped.
+dropped. The third-click leg reads the address (`currentViewId` alone,
+no `sortColumn` or `sortDirection`) and, after a reload, compares the
+rows with the order read on arrival (fn-a5).
 
 <a id="fn-s8"></a>
 **s8 — scenario 8 seeding.** {OJS OMP} A scratch journal; one submission
@@ -1703,15 +1823,17 @@ a throwaway Section Editor to assign. On OMP the submission stage precedes
 internal review as on OJS.
 
 <a id="fn-s9"></a>
-**s9 — scenario 9 seeding.** {OJS OMP} Four submissions moved to review
+**s9 — scenario 9 seeding.** {OJS OMP} Five submissions moved to review
 (`decisions: ['sendExternalReview']`): one with `reviewRounds:
 [{reviewers: []}]`, one with two reviewers `invited` and a third
 `status: 'declined'`, one with `decisions: ['sendExternalReview',
-'requestRevisions']` and one with `decisions: ['sendExternalReview',
+'requestRevisions']`, one with `decisions: ['sendExternalReview',
 'resubmit']` (the "Request Revisions" decision with and without "Require
-New Review Round"). OJS runs it on the seeded journal (`manager.maya`,
+New Review Round"), and one with a single reviewer `status: 'accepted'`
+(a cancelled status has no key, scenarios.md, so the editor cancels on
+screen). OJS runs it on the seeded journal (`manager.maya`,
 `author.alex`, `reviewer.julia` and `reviewer.paul` invited,
-`reviewer.amara` declined); OMP on a scratch press with throwaway
+`reviewer.amara` declined, `reviewer.adam` accepted); OMP on a scratch press with throwaway
 reviewers, since the roster reviewers are not enrolled on a scratch
 context. Seed the two open requests as invited, not accepted (observed
 2026-08-26): the "Awaiting Response from the reviewer" popover belongs to
@@ -1720,6 +1842,14 @@ request accepted" popover instead, which is what the "accepted request"
 bullet reads after the reviewer's on-screen accept. The declined
 reviewer's icon and popover are the declined row of the Rule 10 table
 (fn-k). "View details" opens the "Review Details: {title}" window (fn-k).
+The cancel leg presses the popover's "Cancel Reviewer", confirms in the
+"Cancel Reviewer" window (fn-k) and reads the cancelled row of the Rule 10
+table after the list refetches; the "Reinstate Reviewer" window is opened
+and closed unsubmitted (what a reinstatement does is *Reviewer assignment
+& management*'s). "Its only action" counts the popover's action buttons:
+every popover also renders the review-type badge as a button (seen
+2026-11-12, OMP), so a count of all its buttons reads two. The cell's
+sentence after the cancel is A20's (fn-a20) and is not asserted.
 The reviewer accepts and later completes through their own wizard
 ([reviewer flows](U28-reviewers-review.md)), the list reloaded after
 each.
@@ -2080,6 +2210,46 @@ kept the phrase ("Assigned to me (0)" with the chip), and
 script error or failed request. An earlier sighting on the default
 dataset (2026-10-01, OJS and OPS, `?searchPhrase=20` listing other
 submissions) fits this fallback; that walk was not repeated.
+
+<a id="fn-a19"></a>
+**a19 — A19 evidence.** `dashboardPageStore.js` announces only from its
+`watch` on `[submissionsUrl, submissionsQuery, currentPage]`
+(`immediate: false`): `announce(t('common.loading'))`, then `await
+fetchSubmissions({clearData: true})` and `announce(t('common.loaded'))`.
+`fetchSubmissions()` calls `useFetchPaginated`'s `fetch` without
+returning its promise, so the `await` does not wait for the request, and
+the store's first `fetchSubmissions(false)` at setup sits outside the
+watch and announces nothing. An address with no `currentViewId` gets the
+landing view's id written after mount, which fires the watch; one that
+already names its view does not (code, OJS `main`; the store is
+ui-library's, shared by the three apps). Seen 2026-11-12 during the
+revision's test runs, two probe runs per app, the polite `#announcer`
+region sampled from page load: OPS (scratch Preprint Server Manager)
+held "Loaded" after signing in at `…/dashboard/editorial`, stayed empty
+for 3 s at `?currentViewId=active` with the list on screen, and after a
+search (Enter) and a click on "ID" went to "Loading" and "Loaded" in the
+same millisecond, before the list's request answered; OMP (scratch Press
+Manager) held "Loaded" after signing in, at the bare
+`…/dashboard/editorial` and after "Published" was chosen in the sidebar,
+and stayed empty in every read (12 to 15 reads over about 2 s) at
+`?currentViewId=active`. OJS was not driven. Scenario 1's leg reads the
+region after the sign-in landing, which announces, and stays green.
+
+<a id="fn-a20"></a>
+**a20 — A20 evidence.** lib/pkp `ReviewRound::determineStatus()` skips
+cancelled and declined assignments in its scan of the round's
+assignments, so a round holding only such assignments is not empty and
+falls through to `REVIEW_ROUND_STATUS_REVIEWS_COMPLETED`, which the
+activity cell renders as the all-confirmed sentence (fn-j); neither app
+overrides the method (code, OJS and OMP `main`). The review stage's own
+status box takes the same status (*Review stage & rounds* f-a4, the
+declined case). Seen 2026-11-12 in scenario 9's OMP run (scratch Press
+Manager, one run): after "Cancel Reviewer" on the round's single
+accepted reviewer, the row's Editorial Activity cell read "All reviews
+are confirmed and a decision is needed." above the "Review request
+cancelled by editor" indicator. Not driven on OJS; the declined-only
+round not driven on the dashboard. The suites do not assert the
+sentence either way.
 
 <a id="fn-omp1"></a>
 **omp1 — OMP1 evidence.** OMP's
