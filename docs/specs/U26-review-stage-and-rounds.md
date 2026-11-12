@@ -1370,6 +1370,14 @@ Merged 2026-11-06 (pkp-lib `d1f20f891e`, ui-library `357a18eabf`, each
 `=` the round-4 head; OJS `3c14717777`, OMP `10ceb8e44b`, OPS
 `c90786e51d` point at both): `walk.js`, `revert.js` and `legacy.js`
 read as at round 4 on fresh datasets, OJS and OMP.
+The "`main` API fix" (pkp/pkp-lib#13790, merged 2026-11-12 as
+`3e078689a5`, `=` the reviewed `ad75b174f0`; OJS `3c99722dc8`, OMP
+`61df357b9`, OPS `c74e5bf190` point at it) also blanks the API's
+`reviewerRecommendationId` and `reviewerRecommendationType` where the
+reviewer fields are blanked, so the author no longer reads the
+recommendation before the confirmation (the editor still does), and the
+old author grid lists only confirmed open reviews: `walk.js` at the
+merged tips, OJS (OMP's dataset review has no recommendation).
 
 <a id="fn-k"></a>
 **k** — `WorkflowListingEmails.vue` (AFFW-350/351): fetches
