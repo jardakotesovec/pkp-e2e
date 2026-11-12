@@ -404,11 +404,15 @@ published. <sup>s</sup>
 
 1. **Books added to the catalog with "Add Entry"**
 
-   Given: Press manager and an Author, on a scratch press with no
-   published book, where the Author's "Lantern Harbour" sits in
-   Production, the Author's "Lantern Tides" sits in Production with
-   "Date Published" 2020-05-05 saved on its Catalog Entry page, and the
-   Author's "Lantern Draft" sits at the Submission stage.
+   Given: Press manager and an Author, on a scratch press with ORCID on
+   ("Enable ORCID functionality" ticked under Settings › Users & Roles ›
+   "ORCID") and no published book, where the Author's "Lantern Harbour",
+   whose contributor, the Author, carries an unauthenticated ORCID iD,
+   sits in Production, the Author's "Lantern Tides" sits in
+   Production with "Date Published" 2020-05-05 saved on its Catalog
+   Entry page, the Author's "Quiet Shoals" sits in Production,
+   scheduled for 2030-01-01, and the Author's "Lantern Draft" sits at
+   the Submission stage.
 
    - **Nothing published yet**: the Press manager opens the side menu's
      "Content" › "Catalog": the page is headed "Catalog", with the tab
@@ -432,6 +436,10 @@ published. <sup>s</sup>
      closes and the list reloads with "Lantern Harbour" and "Lantern
      Tides" under the column headings "Featured" and "New release"
      (Rule 12; Fields).
+   - **The contributor's unauthenticated ORCID iD**: the Catalog page
+     shows no notice or warning about "Lantern Harbour"'s iD. Press
+     "Lantern Harbour"'s "View Entry": the book's public page opens (Rule
+     12c; Fields, the Catalog page).
    - **The published book's workflow**: on the Catalog page press
      "Lantern Harbour"'s "View Submission": the book has moved to Done
      (the stage bubble reads "Published"), and its Activity Log holds
@@ -440,10 +448,15 @@ published. <sup>s</sup>
      "The monograph has been approved. Please visit Marketing and
      Publication to manage its catalog details, using the links just
      above.", with no links above it ⚠ [A2](#a2) (Rule 14).
-   - **The Author's side**: the mail catcher holds a "Publication
-     Published" email for the Author about each of the two books, and a
-     task notice for each waits under the Author's Tasks (Side effects
-     bullet 2).
+   - **A scheduled book**: open "Quiet Shoals" from the Dashboard and
+     choose its Production stage: it shows the same "Catalog Management"
+     box and text in place of "Awaiting approval." (Rule 14).
+     Back on "Content" › "Catalog", the list holds "Lantern Harbour" and
+     "Lantern Tides" and not "Quiet Shoals" (Rule 1).
+   - **The Author's side**: the mail catcher holds, for both books, the
+     Author's "Publication Published" email, and the Author's Tasks one
+     row each, "A new version of your submission, "{title}", was
+     published." (Side effects bullet 2).
    - **Control**: on the Catalog page press "Add Entry" again and type
      Lantern: nothing is suggested, since both books are now published
      and "Lantern Draft" is still at the Submission stage; press "Close"
@@ -595,9 +608,14 @@ published. <sup>s</sup>
 5. **A book's Catalog Entry page: series, cover and URL Path**
 
    Given: Press manager and a visitor signed out, on a scratch press
-   with the series "History" and two published books, "Harbour
-   Currents", in no series and with no cover, and "Tidal Patterns",
-   whose URL Path is harbour.
+   with the Country Canada, whose settings held, when its books were
+   published, the Press Name Tideline Press, the Press Initials TLP,
+   the Publisher Tideline Publishing, the Publisher Location Halifax,
+   the Publisher Code Type "Proprietary (01)" and the Publisher Code
+   TLP01, with the series
+   "History", two published books, "Harbour Currents", in no series and
+   with no cover, and "Tidal Patterns", whose URL Path is harbour, and a
+   third book, "River Notes", in Production and never published.
 
    - **The page**: the Press manager opens "Content" › "Catalog",
      presses "Harbour Currents"' "View Submission", and in its workflow
@@ -607,6 +625,14 @@ published. <sup>s</sup>
      Updates", "Display", "Access" and "Identity", top to bottom, and
      "Save" at the foot. The "Series" list's first choice is empty
      (Fields, the "Catalog Entry" page).
+   - **"Press Identity"**: the "Identity" group holds "Press Identity",
+     with nothing to fill in. It reads "This metadata was recorded at the
+     time of publication and will not change if the publisher updates
+     its identity settings. To correct it, use the CLI batch tool.", then
+     the lines "Press Name:" with Tideline Press, "Press Initials:" with
+     TLP, "Publisher:" with Tideline Publishing, "Publisher Location:"
+     with Halifax, "Publisher Code Type:" with Proprietary (01) and
+     "Publisher Code:" with TLP01 (Fields, the "Catalog Entry" page).
    - **Series and position saved**: choose "History" in "Series", type
      Book 2 in "Series Position" and press "Save": "Saving", then
      "Saved", shows beside the button. Reload: the page shows "History"
@@ -624,9 +650,9 @@ published. <sup>s</sup>
      in "Alternate text" and press "Save". Reload: the preview and
      "Cover of the book" are back (Rule 13f; Fields).
    - **The cover for readers**: the visitor opens the press's public
-     catalog page and the book's page: both show the cover as its small
-     copy, no wider than 106 and no taller than 100 pixels (Rule 13f;
-     Settings bullet 4).
+     catalog page and the book's page: both show the cover's small copy,
+     the image file itself no wider than 106 and no taller than 100
+     pixels (Rule 13f; Settings bullet 4).
    - **"Remove"**: on "Catalog Entry" press "Remove": the box shows
      "Upload File" and "Restore Original" (Fields). Press "Save": the
      visitor's book page, reloaded, shows the default picture in place
@@ -643,6 +669,17 @@ published. <sup>s</sup>
      On the Catalog page, "Harbour Currents"' "View Entry" opens the
      book's page at an address ending in harbour-2 in place of the
      book's number (Rule 13g).
+   - **A book never published**: open "River Notes" from the Dashboard
+     and choose "Publication" › the version › "Catalog Entry": the page
+     shows the five groups "Placement", "Publication Timing", "Version
+     and Updates", "Display" and "Access", and no "Identity" group
+     (Fields, the "Catalog Entry" page).
+   - **The press renamed**: the Press manager opens Settings › Press ›
+     "Masthead" ([Journal identity & about pages](U07-journal-identity-and-about-pages.md)),
+     replaces the "Press Name" with Renamed Press and presses "Save".
+     Back on "Harbour Currents"' "Catalog Entry", reloaded, "Press
+     Identity" still reads "Press Name:" with Tideline Press, its other
+     lines as before (Fields, the "Catalog Entry" page).
    - **Control**: on "Catalog Entry" choose the empty first choice in
      "Series" and press "Save": the visitor's "History" series page no
      longer lists "Harbour Currents", and the Catalog page's "Filters" ›
@@ -738,17 +775,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U70-A14-catalog-ordering-arrows-name-undefined.md`):
     after "Order Features", each arrow's name for a screen reader carries
     the book's title [report 2026-10-03]
-  - a scheduled book's Production stage shows the "Catalog
-    Management" notice, not "Awaiting approval." (Rule 14) [incidental 2026-10-05]
-  - the "Identity" group's content on a published book, "Press
-    Identity" with its sentence and the list of what was recorded; no
-    "Identity" group on a book never published; and the list unchanged
-    after the press is renamed (Fields, the "Catalog Entry" page;
-    scenario 5 reads the group's heading only) [upstream 2026-10-01]
-  - on a scratch press with ORCID on, "Add Entry" › "Save" with a book
-    whose contributor has an unauthenticated ORCID iD: the panel
-    closes with no notice, the book is in the list and its public page
-    answers (Rule 12c; Settings bullet 6) [upstream 2026-10-09]
 - **Rarely met**:
   - "Add Entry" › "Save" of a book whose "Date Published" lies in the
     future: the book is scheduled, stays off the list and is still
@@ -1608,8 +1634,8 @@ and OPS as `manager.maya` (the Journal Manager, the Preprint Server
 Manager), its control on OMP `publicknowledge` as `manager.maya` (the
 Press manager); the published article, preprint and book are scratch
 submissions of `author.alex` from `POST scenarios/submission` with
-`published: true` (the book of the control through `decisions:
-['skipExternalReview', 'sendToProduction']` first, so it has a
+`published: true` (the book of the control through
+`decisions: ['skipExternalReview', 'sendToProduction']` first, so it has a
 Production stage); passwords as `docs/process/users.md` gives them.
 The Catalog page's address is `{context}/manageCatalog`. Every other
 scenario builds its own scratch press through `POST scenarios/context`
@@ -1619,23 +1645,37 @@ scenarios 1, 2, 3 and 5, two `author` accounts with `givenName`/`familyName` Nov
 in scenario 4, and `sectionEditor` (the Series editor), `marketing`
 (the Marketing and sales coordinator), `author` and `reader` in
 scenario 6. Scenario 3's press carries `catalogSortOption: 'title-ASC'`;
-scenario 4's `categories: [{path: 'arts', title: 'Arts'}, {path:
-'science', title: 'Science', children: [{path: 'physics', title:
-'Physics'}]}]` and `series: [{path: 'history', title: 'History'}]`;
-scenario 5's the same `series`. Books come from
+scenario 4's
+`categories: [{path: 'arts', title: 'Arts'}, {path: 'science', title: 'Science', children: [{path: 'physics', title: 'Physics'}]}]`
+and `series: [{path: 'history', title: 'History'}]`;
+scenario 5's the same `series`, with
+`context: {name: 'Tideline Press', acronym: 'TLP', country: 'CA'}`,
+`publisher: 'Tideline Publishing'`, `location: 'Halifax'`,
+`codeType: 'Proprietary (01)'` and `codeValue: 'TLP01'` (the
+Masthead's "Save" of the rename needs the initials and a country:
+without the country it shows "Please correct one error." and "Go to
+Country: This field is required." and saves nothing; test run
+2026-11-12). Books come from
 `POST scenarios/submission` with `title`, the author as `submitter`,
 `published: true` and `datePublished` where a date is named. Scenario
-1's two Production books take `decisions: ['skipExternalReview',
-'sendToProduction']`, "Lantern Tides" also `datePublished:
-'2020-05-05'` without `published`, and "Lantern Draft" no decision.
+1's two Production books take
+`decisions: ['skipExternalReview', 'sendToProduction']`, "Lantern
+Tides" also `datePublished: '2020-05-05'` without `published`, and "Lantern Draft" no decision;
+its press carries `orcid: {enabled: true}`, "Lantern Harbour"
+`author: {orcid: '0000-0002-1825-0097', orcidIsVerified: false}`, and
+"Quiet Shoals" the same decisions with `published: true` and
+`datePublished: '2030-01-01'`, a date after today, which the seed's
+publish schedules on OMP.
 Scenario 3: `featured: [{in: 'catalog', position: n}]` with n = 1, 2, 3
-for "Oak", "Elm", "Ash", seeded in that order, and `newRelease: [{in:
-'catalog'}]` for "Birch" and "Maple". Scenario 4: each book's
+for "Oak", "Elm", "Ash", seeded in that order, and
+`newRelease: [{in: 'catalog'}]` for "Birch" and "Maple". Scenario 4: each book's
 `categories` (the paths) or `series: 'history'`; "Harbour Currents"
-`featured: [{in: 'catalog'}]`, "Tidal Patterns" `featured: [{in:
-'category', path: 'arts'}]`; each book an `abstract` holding none of
+`featured: [{in: 'catalog'}]`, "Tidal Patterns"
+`featured: [{in: 'category', path: 'arts'}]`; each book an `abstract` holding none of
 the words searched (the default abstract names the tag). Scenario 5:
-"Tidal Patterns" `urlPath: 'harbour'`; the cover is the fixture
+"Tidal Patterns" `urlPath: 'harbour'`; "River Notes"
+`decisions: ['skipExternalReview', 'sendToProduction']` without
+`published`; the cover is the fixture
 `profile-image-400.png`, uploaded on screen (OMP's submission scenario
 takes no cover). The visitor's pages: the public catalog
 `{press}/catalog`, "New Releases" `{press}/catalog/newReleases`, a
@@ -1644,6 +1684,9 @@ series' page `{press}/catalog/series/{path}`, a book's page the row's
 recipient address; the visitor is a browser with no session. The
 seeded press's catalog lists whatever earlier runs published
 (`docs/process/seed-facts.md`), so no scenario reads its list.
+Scenario 1's Tasks row is the one note g quotes; scenario 5's small copy
+is measured as the image's own size (`naturalWidth` × `naturalHeight`),
+not as drawn on the page: a 400×400 upload gave a 100×100 file (note h).
 Live-probed 2026-09-27: `manager.maya` held a manager-level role on the
 seeded journal and preprint server, and the seeded press's Catalog page
 listed 19 books, each left by an earlier run.

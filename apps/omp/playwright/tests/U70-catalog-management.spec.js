@@ -14,21 +14,11 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A2 🐞: S1 reads the "Catalog Management" notice's heading and sentence,
- *   never whether links stand above it.
- * - A11 🐞: S3 reads the ordering notice's "…to change the order of features
- *   on the homepage.", never its "Drag-and-drop" opening, and drags nothing.
- * - A13 🐞: S3 never presses the last featured book's down arrow.
- * - A14 🐞: the arrows are located by their place, never by their
- *   screen-reader names.
- * - A3 🐞: S4 reads the whole catalog after a filter as a set of rows, never
- *   its order.
- * - A8, A9 🐞: every "Add Entry" › "Save" follows a clicked suggestion and
- *   its tag; no book is chosen twice.
- * - A4, A5, A6, A10, A12 🐞 and A1 ❓: no test reaches those states.
+ * A2, A3, A4, A5, A6, A8, A9, A10, A11, A12, A13, A14 🐞; A1 ❓.
  *
  * Seeding: scenario endpoints only. S1–S6 each build a scratch press with
- * throwaway accounts (the username twice as password) as footnote s says;
+ * throwaway accounts (the username twice as password) as footnote s says
+ * (S1's with ORCID on, S5's with the press identity its books record);
  * S7 adds one published book of `author.alex` to publicknowledge, whose
  * settings and roster stay untouched and whose list is never read. Every
  * actor gets its own `asUser` context (no default user, patterns.md
@@ -49,6 +39,7 @@ const {test: base, expect} = require('../support/fixtures.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {TasksPanel} = require('../../../../shared/playwright/pages/NotificationsPages.js');
 const {EditorialSideMenu} = require('../pages/ReaderCommentsPages.js');
+const {SettingsPages} = require('../../../../shared/playwright/pages/ContextIdentityPages.js');
 const {unpublishFromWorkflow} = require('../pages/PublicationPages.js');
 const {openProduction, pressNoticeHeading, expectPressNotice, PRESS_NOTICES} = require('../pages/ProductionStagePages.js');
 const {
@@ -64,6 +55,17 @@ const PRODUCTION = ['skipExternalReview', 'sendToProduction'];
 const PUBLISHED_LOG = 'The submission was published.';
 const METADATA_UPDATED = 'Submission metadata updated';
 const ACCESS_DENIED = 'The current role does not have access to this operation.';
+const IDENTITY_SENTENCE =
+    'This metadata was recorded at the time of publication and will not change if the publisher updates its identity settings. To correct it, use the CLI batch tool.';
+/** S5's press as its settings held it when the books were published (footnote s). */
+const IDENTITY_LINES = [
+    'Press Name: Tideline Press',
+    'Press Initials: TLP',
+    'Publisher: Tideline Publishing',
+    'Publisher Location: Halifax',
+    'Publisher Code Type: Proprietary (01)',
+    'Publisher Code: TLP01',
+];
 const FORM_REFUSED = 'The form was not saved because 1 error(s) were encountered. Please correct these errors and try again.';
 
 /** The Author's task notice for a published book (Side effects bullet 2). */
@@ -159,10 +161,14 @@ test.describe('Catalog management', () => {
     test('S1: Books added to the catalog with "Add Entry"', async ({asUser, ompApi, pkpMail}, testInfo) => {
         test.slow();
         const tag = makeTag('s1', testInfo);
-        const {manager, author} = await seedPress(ompApi, tag);
-        const harbour = await seedBook(ompApi, tag, 1, 'Lantern Harbour', {decisions: PRODUCTION});
+        const {manager, author} = await seedPress(ompApi, tag, {orcid: {enabled: true}});
+        const harbour = await seedBook(ompApi, tag, 1, 'Lantern Harbour', {
+            decisions: PRODUCTION,
+            author: {orcid: '0000-0002-1825-0097', orcidIsVerified: false},
+        });
         const tides = await seedBook(ompApi, tag, 2, 'Lantern Tides', {decisions: PRODUCTION, datePublished: '2020-05-05'});
         await seedBook(ompApi, tag, 3, 'Lantern Draft');
+        const shoals = await seedBook(ompApi, tag, 4, 'Quiet Shoals', {decisions: PRODUCTION, published: true, datePublished: '2030-01-01'});
 
         const page = await actorPage(asUser, manager);
         const catalog = new CatalogPage(page, tag);
@@ -217,8 +223,25 @@ test.describe('Catalog management', () => {
         await expect(catalog.rowTitle('Lantern Tides')).toBeVisible();
         await expect(catalog.columnHeadings()).toHaveText(['Featured', 'New release']);
 
+        // The contributor's unauthenticated ORCID iD: no notice or warning
+        // on the Catalog page, read once the list has reloaded with both
+        // books (the positive control above); "View Entry" opens the
+        // book's public page (Rule 12c).
+        await expect(catalog.noticeTexts()).toHaveCount(0);
+        await expect(page.getByText(/orcid/i)).toHaveCount(0);
+        await expect(page.getByText(/following issues were found/i)).toHaveCount(0);
+        const bookPage = page.waitForResponse(
+            (r) => r.request().resourceType() === 'document' && /\/catalog\/book\//.test(new URL(r.url()).pathname),
+            {timeout: T}
+        );
+        await catalog.viewEntry('Lantern Harbour').click();
+        expect((await bookPage).status(), 'the book\'s public page answers').toBe(200);
+        await expect(page).toHaveURL(new RegExp(`/${tag}/catalog/book/${harbour.submissionId}$`));
+        await expect(page.locator('.obj_monograph_full h1.title')).toHaveText('Lantern Harbour');
+
         // The published book's workflow: Done, the log line, and the
         // "Catalog Management" notice in place of "Awaiting approval." (Rule 14).
+        await catalog.goto();
         await catalog.viewSubmission('Lantern Harbour').click();
         await workflow.expectOpen(harbour.submissionId);
         await workflow.expectStage('Published');
@@ -228,6 +251,19 @@ test.describe('Catalog management', () => {
         await workflow.selectStage('Production');
         await expectPressNotice(workflow.dialog(), PRESS_NOTICES.catalog);
         await expect(pressNoticeHeading(workflow.dialog(), PRESS_NOTICES.awaiting)).toHaveCount(0);
+
+        // A scheduled book: the same "Catalog Management" box in place of
+        // "Awaiting approval." (Rule 14); the Catalog page lists the two
+        // published books and not the scheduled one (Rule 1).
+        await workflow.gotoEditorial(shoals.submissionId);
+        await workflow.selectStage('Production');
+        await expectPressNotice(workflow.dialog(), PRESS_NOTICES.catalog);
+        await expect(pressNoticeHeading(workflow.dialog(), PRESS_NOTICES.awaiting)).toHaveCount(0);
+        await catalog.openFromSideMenu();
+        await expect(catalog.rows()).toHaveCount(2);
+        await expect(catalog.rowTitle('Lantern Harbour')).toBeVisible();
+        await expect(catalog.rowTitle('Lantern Tides')).toBeVisible();
+        await expect(catalog.rowTitle('Quiet Shoals')).toHaveCount(0);
 
         // The Author's side: a "Publication Published" email and a task
         // notice for each book (Side effects bullet 2).
@@ -604,9 +640,19 @@ test.describe('Catalog management', () => {
     test('S5: A book\'s Catalog Entry page: series, cover and URL Path', async ({asUser, ompApi, visitor}, testInfo) => {
         test.setTimeout(240_000);
         const tag = makeTag('s5', testInfo);
-        const {manager} = await seedPress(ompApi, tag, {series: [{path: 'history', title: 'History'}]});
+        const {manager} = await seedPress(ompApi, tag, {
+            series: [{path: 'history', title: 'History'}],
+            // The Masthead's "Save" of the rename needs the initials and a
+            // country (T-omp-1: footnote s names the initials alone).
+            context: {name: 'Tideline Press', acronym: 'TLP', country: 'CA'},
+            publisher: 'Tideline Publishing',
+            location: 'Halifax',
+            codeType: 'Proprietary (01)',
+            codeValue: 'TLP01',
+        });
         const harbour = await seedBook(ompApi, tag, 1, 'Harbour Currents', {published: true});
         await seedBook(ompApi, tag, 2, 'Tidal Patterns', {published: true, urlPath: 'harbour'});
+        const river = await seedBook(ompApi, tag, 3, 'River Notes', {decisions: PRODUCTION});
 
         const page = await actorPage(asUser, manager);
         const catalog = new CatalogPage(page, tag);
@@ -630,6 +676,16 @@ test.describe('Catalog management', () => {
         expect(saveBox.y, '"Save" stands below the last group').toBeGreaterThan(lastBox.y);
         await expect(entry.seriesOptions().first()).toHaveText('');
         await expect(entry.seriesSelect()).toHaveValue('');
+
+        // "Press Identity": nothing to fill in (the "Access" group's box,
+        // read the same way, is the positive control), the sentence, then
+        // each line with what the press's settings held at publication
+        // (Fields, the Catalog Entry page).
+        await expect(entry.pressIdentityLabel()).toHaveText('Press Identity');
+        await expect(entry.group('Identity').locator('input, select, textarea, button')).toHaveCount(0);
+        await expect(entry.group('Access').locator('input, select, textarea')).not.toHaveCount(0);
+        await expect(entry.pressIdentity()).toContainText(IDENTITY_SENTENCE);
+        await expect(entry.pressIdentityLines()).toHaveText(IDENTITY_LINES);
 
         // Series and position saved: "Saving", then "Saved"; kept after a
         // reload; one "Submission metadata updated" line (Rule 13; Side effects bullet 3).
@@ -715,6 +771,31 @@ test.describe('Catalog management', () => {
         await catalog.viewEntry('Harbour Currents').click();
         await expect(page).toHaveURL(/\/catalog\/book\/harbour-2$/);
         await expect(page.locator('.obj_monograph_full h1.title')).toHaveText('Harbour Currents');
+
+        // A book never published: the five groups, no "Identity" (Fields,
+        // the Catalog Entry page; the six read on "Harbour Currents" above
+        // are the positive control).
+        await workflow.gotoEditorial(river.submissionId);
+        await entry.openFromWorkflow();
+        await expect.poll(() => entry.groupNames(), {timeout: T}).toEqual(['Placement', 'Publication Timing', 'Version and Updates', 'Display', 'Access']);
+        await expect(entry.group('Identity')).toHaveCount(0);
+        await expect(entry.pressIdentityLabel()).toHaveCount(0);
+
+        // The press renamed: Settings › Press › "Masthead" saves Renamed
+        // Press; "Press Identity" still reads Tideline Press, its other
+        // lines as before (Fields, the Catalog Entry page).
+        const masthead = await new SettingsPages(page, tag).openJournalTab('Masthead');
+        await expect(masthead.control('masthead-name-control')).toHaveValue('Tideline Press');
+        await masthead.control('masthead-name-control').fill('Renamed Press');
+        await masthead.save();
+        const mastheadAgain = await new SettingsPages(page, tag).openJournalTab('Masthead');
+        await expect(mastheadAgain.control('masthead-name-control')).toHaveValue('Renamed Press');
+        await workflow.gotoEditorial(harbour.submissionId);
+        await entry.openFromWorkflow();
+        await entry.reload();
+        await expect(entry.pressIdentity()).toContainText(IDENTITY_SENTENCE);
+        await expect(entry.pressIdentityLines()).toHaveText(IDENTITY_LINES);
+        await expect(entry.pressIdentity()).not.toContainText('Renamed Press');
 
         // Control: no series, then neither the series page nor the Catalog
         // page's "History" filter lists the book (Rules 1, 13a).

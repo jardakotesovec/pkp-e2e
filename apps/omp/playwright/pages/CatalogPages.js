@@ -17,7 +17,10 @@
  *   catalog" box, its suggestions, the chosen books' tags, "Save", "Close".
  * - CatalogEntryPage — a version's "Catalog Entry" page in the workflow:
  *   the groups, "Series", "Series Position", the "Cover Image" box, "URL
- *   Path", "Save" with its "Saving"/"Saved" line, the form's refusals.
+ *   Path", the "Identity" group's read-only "Press Identity" (an HTML
+ *   field: its sentence, then a `ul` of "Label: value" lines; probed
+ *   2026-11-12, .reports/U70/screen-notes.md tompr), "Save" with its
+ *   "Saving"/"Saved" line, the form's refusals.
  * - PublicCatalog — what a visitor reads: the press's public catalog, "New
  *   Releases", a series' page and a book's page (titles in order, the
  *   series position above a title, the cover picture and its size); for
@@ -555,6 +558,26 @@ class CatalogEntryPage extends BasePage {
 
     urlPathBox() {
         return this.form().locator('input[name="urlPath"]');
+    }
+
+    // --- "Identity" (a published book's only) ------------------------------------
+
+    /** The "Press Identity" field's label in the "Identity" group. */
+    pressIdentityLabel() {
+        return this.form().locator('.pkpFormField--html .pkpFormFieldLabel', {hasText: /^\s*Press Identity\s*$/});
+    }
+
+    /** The "Press Identity" field's text: the sentence, then the list. */
+    pressIdentity() {
+        return this.form()
+            .locator('.pkpFormField--html')
+            .filter({has: this.page.locator('.pkpFormFieldLabel', {hasText: /^\s*Press Identity\s*$/})})
+            .locator('.pkpFormField__control--html');
+    }
+
+    /** The list's lines ("Press Name: Tideline Press", …), top to bottom. */
+    pressIdentityLines() {
+        return this.pressIdentity().locator('li');
     }
 
     // --- "Cover Image" ---------------------------------------------------------
