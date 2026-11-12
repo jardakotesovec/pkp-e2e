@@ -149,6 +149,8 @@ function copy(file) {
  */
 function relinked(text) {
     const up = '../../../../docs/';
+    // A version's spec carries no Planned list (docs/process/VERSIONS.md).
+    text = text.replace(/^- \*\*Planned\*\*:.*\n(?:(?: {2,}.*|)\n)*?(?=- \*\*|\S)/m, '');
     return text
         .replace(/\]\(\.\.\/(issues|process|tracking|reports)\//g, `](${up}$1/`);
 }

@@ -1,0 +1,1 @@
+../../../../shared/playwright/config-factory.js

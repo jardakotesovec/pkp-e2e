@@ -14,6 +14,7 @@
  *                           [--ojs-repo <owner/name>] (same for omp, ops)
  *                           [--pkp-lib-ref <sha|pull/<n>/head>] [--ui-library-ref <…>]
  *                           [--php-ini-values <a=b,c=d>] [--no-wait]
+ *                           [--line <branch>]   a stable version's suite, from lines/<branch>/
  *       e2e.yml's workflow_dispatch from --ref (default: the current branch,
  *       which must be pushed), then waits for it
  *   node bin/ci.js summary <run-id>
@@ -82,6 +83,8 @@ function dispatch(opts) {
     add('ui_library_ref', opts['ui-library-ref']);
     add('apps', opts.apps);
     add('php_ini_values', opts['php-ini-values']);
+    // A stable version's folder (lines/<line>/, docs/process/VERSIONS.md); name the app refs with it.
+    add('line', opts.line);
     const list = () => gh(['run', 'list', '--workflow', WORKFLOW, '--event', 'workflow_dispatch', '--branch', ref, '--limit', '20', '--json', 'databaseId,url,createdAt'], {json: true});
     const before = new Set(list().map((r) => r.databaseId));
     const out = gh(['workflow', 'run', WORKFLOW, '--ref', ref, ...fields]);

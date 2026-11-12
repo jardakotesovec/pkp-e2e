@@ -1,0 +1,1 @@
+../../../../shared/playwright/mailpit.js

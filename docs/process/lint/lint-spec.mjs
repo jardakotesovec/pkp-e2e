@@ -571,6 +571,8 @@ function checkTests(file, root = APPS_ROOT) {
     const scenarios = scenariosOf(doc);
     const byN = new Map(scenarios.map((s) => [s.n, s]));
     for (const app of APPS) {
+        // A stable version's folder holds the apps the version has (ore: OJS alone); an app with no folder there is not checked.
+        if (/[\\/]lines[\\/][^\\/]+[\\/]apps$/.test(root) && !fs.existsSync(path.join(root, app))) continue;
         const expected = scenarios.filter((s) => s.apps.includes(app));
         const tests = suiteTests(feature, app, root);
         if (!tests.length) {

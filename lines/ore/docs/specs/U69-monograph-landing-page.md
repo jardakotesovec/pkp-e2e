@@ -1,0 +1,1967 @@
+---
+name: monograph-landing-page
+status: verified
+---
+
+# Monograph landing page {OMP}
+
+> Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
+
+## Purpose
+
+Every published book of a press has a public page of its own, the
+**book's page**: the page a reader reaches from the catalog, a series or
+category page, a search result, the home page's lists, a link someone
+shared or the book's address typed by hand. It shows what the book is
+(title, contributors, synopsis, keywords, dates and versions, series,
+categories, references, how to cite it), its **table of contents** (the
+chapters of the shown version), and the files readers get: each
+publication format the press made available, as a link to a remote copy
+or to its files. A free file opens in a view page of its own (a PDF in a
+PDF viewer, an HTML file in an HTML page) or downloads under its file
+name; a file for sale leads a signed-in reader to the press's payment
+page. A chapter whose "Chapter Page" box is
+ticked gets a **chapter page** of its own, reached from the table of
+contents. This spec describes the book's page, the chapter pages, their
+addresses and versions, the two view pages, the purchase of a file up to
+the payment page, and the "How to Cite" block and "Downloads" chart as a
+press shows them. <sup>a</sup>
+
+Several blocks on the page are described by the feature that fills them:
+the contributors and their biographies
+([Contributors & affiliations](U41-contributors-and-affiliations.md)),
+the "License", copyright, "Data Availability Statement" and "Funding
+Statement" blocks ([Publication metadata](U40-publication-metadata.md)),
+"Funders" ([Funding](U43-funding.md)), the "DOI:" lines
+([DOIs](U45-dois.md)), a format's URN
+([Identifiers](U44-identifiers.md)), the "References" block's content
+([Citations & references](U42-citations-and-references.md)), the images
+of an HTML file ([Media files](U47-media-files.md)) and the page's
+metadata for search engines
+([Search engine metadata & analytics](U20-search-engine-metadata-and-analytics.md)).
+What a press builds for this page is built elsewhere: the formats, their
+files and terms in
+[Publication formats & proof terms](U73-publication-formats-proof-terms.md),
+the chapter list in [Chapters & work type](U72-chapters-work-type.md), the
+catalog entry (cover, series, categories, URL Path) in
+[Catalog management](U70-catalog-management.md). The payment page itself
+and the press's payment settings are
+[Payments & APCs](U52-payments-and-apcs.md)'. <sup>a</sup>
+
+A journal and a preprint server do not install the book's page. Their
+published item's page is the article's (the preprint's) page of
+[Article landing page & reading](U13-article-landing-page-and-reading.md),
+which has galleys in place of publication formats, no table of contents
+and no chapter pages. A journal that sells articles marks with its price
+the galley links of an article published in an issue whose "Access
+status" is "Subscription" ("Requires Subscription or Fee PDF (USD 5)",
+[Subscriptions](U51-subscriptions.md)); a preprint server sells nothing.
+On both, the journal's (server's) address followed by "catalog/book/"
+and a number answers the "404 Not Found" page. <sup>b</sup> <sup>td1</sup>
+
+## Actors & permissions
+
+The pages are public: a **visitor** needs no account, and signing in, as
+a Reader or in any other role, changes nothing in a published version's
+pages. A press that requires visitors to sign in ("Users must be
+registered and log in to view the press site.") or that the Site
+Administrator has not enabled ("Enable this press to appear publicly on
+the site") sends a signed-out visitor who opens any address of this spec
+to the Login page ([Journal identity & about
+pages](U07-journal-identity-and-about-pages.md), its Rule 22). "The
+assistant roles" below are the press's Copyeditor, Designer, Funding
+coordinator, Indexer, Layout Editor, Marketing and sales coordinator,
+Proofreader and Editorial Board Member. <sup>c</sup>
+
+| Action | Who may, and when |
+|--------|--------------------|
+| **Read a published book's page and its chapter pages** (the current version, or an older one at its own address) | • anyone, signed in or not (Rules 1–4) <sup>c</sup> |
+| **Open an unpublished version's page** (the preview) | • the Press manager, Press editor, Production editor, Series editor and the assistant roles, assigned or not, and the Site Administrator, under the preview notice (a Series editor or assistant role not assigned to the book is meant to open it once the book has reached copyediting or production, but it opens for them at every earlier stage too, a declined book included ⚠ [A27](#a27)), and its chapter pages too, though a new version's fail on a "DOI Versioning" "No" press [A19](#a19) (Rule 5); the workflow's "Preview" opens it for those it is offered to ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md), its Rule 6)<br>• the book's Author, by typing the page's address<br>• anyone else gets the "404 Not Found" page (Rule 3): a visitor, a Reader, a Reviewer, and an Author, Volume editor, Chapter Author or Translator of the press who is not on the book<br>• a submission its author never finished answers "404 Not Found" to everyone, the Press manager, the Site Administrator and its own Author included <sup>c</sup> <sup>td5</sup> |
+| **Open a free file** ("Open Access" terms) | • anyone who may read the page (Rule 13)<br>• on a preview, no one: every file's link opens the "404 Not Found" page (Rule 5c) [A24](#a24)<br>• on a press with "Users must be registered and log in to view open access content." ticked (Settings bullet 6): signed-in users only; a visitor who presses a free file's link gets the Login page first, and once signed in there the file's view page <sup>j</sup> <sup>td13</sup> |
+| **Buy a file for sale** ("Direct Sales" terms) | • a signed-in user, whatever the role (the press's own staff and the Site Administrator too), on a press whose payment method is set up and that has a currency (Rule 14)<br>• a visitor gets the Login page first, and once signed in there not the payment page but the page an ordinary sign-in opens for their role, and a newcomer who registers from that Login page "Registration complete" (Rule 14) [A18](#a18) <sup>k</sup> <sup>td14</sup> |
+| **Receive the "Manual Payment Notification"** | • the press's principal contact, when a buyer presses "Send notification of payment" (Side effects) <sup>q</sup> |
+| **Show the citation in another format; download a citation** | • anyone who may read the page, while the "Citation Style Language" plugin is on (Rule 19)<br>• on a preview, the Press manager, Press editor, Production editor, the Site Administrator and a Series editor or assistant role assigned to the book; for the book's Author, and for a Series editor or assistant role not assigned to it, another format changes nothing and a download opens the "404 Not Found" page ⚠ [A21](#a21) <sup>m</sup> <sup>td18</sup> |
+| **Change the settings of "Settings that modify behavior"** | • whoever opens the Settings pages ([→ settings access](U07-journal-identity-and-about-pages.md#settings-access)), on Settings › Website › "Plugins" ([Plugins management](U62-plugins-management.md#plugin-links)), "Appearance" and Settings › Distribution › "Payments"; "Enable this press to appear publicly on the site" the Site Administrator <sup>r</sup> |
+| **Decide what the pages show** (formats, files and terms, chapters, catalog entry, contributors) | • the roles the building features name: [Publication formats & proof terms](U73-publication-formats-proof-terms.md), [Chapters & work type](U72-chapters-work-type.md), [Catalog management](U70-catalog-management.md), [Contributors & affiliations](U41-contributors-and-affiliations.md) |
+
+## Fields & validation
+
+The book's page, the chapter page and the payment page carry the press's
+header and footer ([Navigation menus & site
+chrome](U08-navigation-menus-and-site-chrome.md)) and, while blocks are
+placed, the sidebar; the two view pages carry none of these, only their
+own bar. The book's page and the chapter page have no trail ("Home / …")
+above the title; the payment page has "Home / Manual Fee Payment". A part
+appears only when the version has something to put in it (Rule 7),
+except the copyright line. <sup>d</sup>
+
+<a id="book-page"></a>
+**The book's page.** The browser tab reads "{title} | {press name}", or
+"{title}: {subtitle} | {press name}" when the version has a subtitle, the
+title being the current version's even on an older version's page
+⚠ [A5](#a5). Two columns: the main column with the book's text, and
+beside it a narrower column with the cover, the files and the details.
+Top to bottom, the main column holds: <sup>d</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| **Notices** | — | The preview notice (Rule 5), the older-version notice (Rule 6), or both, the preview notice first. |
+| **Title**, **subtitle** | — | The shown version's title and subtitle as the page heading. <sup>d</sup> |
+| **Contributors** | — | The contributor list described in [Contributors & affiliations](U41-contributors-and-affiliations.md), its Rule 14 (the compact line of five or more, [OMP1](U41-contributors-and-affiliations.md#omp1); an Edited Volume's volume editors, [OMP2](U41-contributors-and-affiliations.md#omp2)). |
+| **"DOI:"** | — | The version's DOI, described in [DOIs](U45-dois.md), its Rule 43. |
+| **"Keywords:"** | — | The version's keywords in the interface language, joined by commas, as plain text, in no fixed order ([→ Article landing page & reading, A11](U13-article-landing-page-and-reading.md#a11)). <sup>d</sup> |
+| **"Synopsis"** | — | The version's abstract, as formatted in the editor. <sup>d</sup> |
+| **"Plain Language Summary"** | — | The plain language summary, under its own heading. <sup>d</sup> |
+| **Table of contents** | — | The chapters of Rule 10, with no visible heading (a screen reader reads "Chapters"). |
+| **"Downloads"** | — | The chart of Rule 20, only when the theme is set to show one. |
+| **"Author Biography"** / **"Author Biographies"** | — | Described in [Contributors & affiliations](U41-contributors-and-affiliations.md), its Rule 14. |
+| **"References"** | — | The version's references, as on an article's page ([→ the "References" block](U13-article-landing-page-and-reading.md#references)); a book with no references has no "References" heading (Rule 7). |
+
+The side column, top to bottom: <sup>d</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| **Cover** | — | The small copy of the version's "Cover Image" ([Catalog management](U70-catalog-management.md), its Rule 13f), or the press's default book picture when it has none. Not a link; a screen reader hears the cover's "Alternate text". <sup>d</sup> <sup>td24</sup> |
+| **Files** | — | The remote formats and the files of Rule 11, with no visible heading (a screen reader reads "Downloads"). |
+| **"Published"** ("Forthcoming") | — | The date line of Rule 8. |
+| **"Versions"** | — | The list of Rule 9. |
+| **"Series"** | — | The series' name with its prefix, a link to the series' page ([Catalog browse](U68-catalog-browse.md), Rule 1); under it "Online ISSN" and "Print ISSN", each with the series' number, when set ([Sections](U17-sections.md#omp-series)). <sup>d</sup> |
+| **"Categories"** | — | The version's categories, each a link to the category's page ([Categories](U16-categories.md)). <sup>d</sup> |
+| **"Data Availability Statement"**, **"Funding Statement"** | — | Described in [Publication metadata](U40-publication-metadata.md), its Rule 15. |
+| **Copyright line**, **"License"** | — | Described in [Publication metadata](U40-publication-metadata.md) ([OMP1](U40-publication-metadata.md#omp1), [OMP5](U40-publication-metadata.md#omp5)). |
+| **Format details** | — | One block per approved, available format that has something to show (Rule 12); a plain file format gets none. |
+| **"How to Cite"** | — | Rule 19, at the foot of the column. |
+
+A version with funders also shows "Funders" in the side column
+([Funding](U43-funding.md), its Rule 9).
+
+<a id="chapter-page"></a>
+**The chapter page.** Opened from a chapter's title in the table of
+contents (Rule 15). The browser tab reads "{chapter title} | {press
+name}", or "{chapter title}: {subtitle} | {press name}" when the chapter
+has a subtitle ("Tides: Low and high | …"). Main column, top to bottom:
+<sup>e</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| **Notice** | — | The older-version notice of Rule 18. |
+| **Title**, **subtitle** | — | The chapter's title and subtitle as the page heading. <sup>e</sup> |
+| **Chapter authors** | — | The chapter's authors, each shown as the book page's contributor list shows a contributor ([Contributors & affiliations](U41-contributors-and-affiliations.md), its Rule 14); an Edited Volume's chapter shows its own authors, never the volume editors. <sup>e</sup> |
+| **"DOI:"** | — | The chapter's DOI as a link ([DOIs](U45-dois.md)). <sup>e</sup> |
+| **"Synopsis"** | — | The chapter's own abstract, when it has one. <sup>e</sup> |
+| **"Author Biography"** / **"Author Biographies"** | — | The chapter authors' Bio Statements, as on the book's page. <sup>e</sup> |
+
+Side column, top to bottom: <sup>e</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| **Cover** | — | The same cover picture as the book version's page, here a link to that page. <sup>e</sup> |
+| **Files** | — | The chapter's files, as the book page's side column lists files (Rule 11); no remote format. <sup>e</sup> |
+| **"Volume"** | — | The book version's title, a link to its book page. <sup>e</sup> |
+| **"Pages"** | — | The chapter's "Pages", when set. <sup>e</sup> |
+| **"Published"** ("Forthcoming") | — | The chapter's date line (Rule 16). |
+| **"Versions"** | — | The chapter's list of Rule 17, only when the book has more than one published version. |
+| **"Series"**, **"Categories"** | — | As on the book's page. <sup>e</sup> |
+| **Copyright line**, **"License"** | — | The book version's copyright line; the chapter's own "License URL" when it has one ([Chapters & work type](U72-chapters-work-type.md), its Rule 12), the version's otherwise, as a Creative Commons badge for a known license or a link reading "License". <sup>e</sup> |
+| **"How to Cite"** | — | The chapter's citation (Rule 19). |
+
+<a id="pdf-view"></a>
+**The PDF view page.** Opened from a free PDF file while "PDF.js PDF
+Viewer" is on (Rule 13). The browser tab reads "{format name} view of the
+file {file name}" ("PDF view of the file article.pdf"). A bar across the
+top holds, left to right: <sup>f</sup> <sup>td22</sup>
+
+| Field (UI label) | Required? | Rules |
+|------------------|-----------|-------|
+| **Return arrow** | — | An arrow with no visible text; a screen reader reads "Return to view details about {title}", the title of the file's version (an older version's own title on its file). Opens the book's current page. <sup>f</sup> |
+| **File name** | — | The file's name, plain text. <sup>f</sup> |
+| **"Download"** | — | Downloads the PDF under its file name, the page staying as it is; a screen reader reads "Download Download PDF". <sup>f</sup> |
+
+Under the bar the PDF viewer fills the page and shows the PDF, with its
+own page, zoom, search, print and download controls; the viewer's own
+download button also saves the file under its name. On an older
+version's file an outdated-version notice sits between the bar and the
+viewer (Rule 13a). Each time the page opens, its own script also fails,
+which the reader does not see: the browser's console reads "PDFJS is
+not defined" ⚠ [A23](#a23). <sup>f</sup>
+
+<a id="html-view"></a>
+**The HTML view page.** Opened from a free HTML file while "HTML
+Monograph File" is on (Rule 13). The browser tab reads as the PDF view
+page's ("HTML view of the file {file name}"). A bar across the top holds
+only a return arrow, which opens the book's page and whose name for a
+screen reader is a raw code, "##monograph.return##" ⚠ [A10](#a10), and
+the title of the file's version as a link that opens the book's current
+page; there is no "Download". Under the bar the HTML file fills the
+page, with its images ([Media files](U47-media-files.md), its Rule 5);
+on an older version's file the outdated-version notice (Rule 13a) sits
+between them. <sup>f</sup>
+<sup>td21</sup>
+A link in the file written "omp://press", the plugin's shorthand for
+the press, opens the press's home page. In a file that also holds a
+link to another book, written "omp://monograph/{number}", the file
+shows but none of its "omp://" links works: each keeps its written
+address, and pressing it does nothing ⚠ [A25](#a25). <sup>td26</sup>
+
+**The payment page.** A buyer's "Purchase" link leads to the payment page
+of the press's method. With "Manual Fee Payment" it is headed "Manual
+Fee Payment" and reads, top to bottom: the press's "Manual Payment
+Instructions"; "Title" with the file's name and "Fee" with the file's
+price and the press's currency code in brackets ("25.00 (USD)"), both
+values in bold; then "Send notification of payment" as an underlined
+link, not a button. A journal's page puts the instructions under
+"Title" and "Fee" and shows the link as a button
+([Payments & APCs](U52-payments-and-apcs.md#manual-page)). <sup>k</sup> <sup>td14</sup>
+
+## Rules & state
+
+**Reaching the page**
+
+1. **What leads there.** The book summaries of the catalog, a series'
+   page, "New Releases", a category's page and the home page's lists
+   ([→ book summary](U68-catalog-browse.md#book-summary)); a search
+   result ([Search](U15-search.md)); the Catalog page's "View Entry"
+   ([Catalog management](U70-catalog-management.md)); the workflow
+   header's "View" and "Preview" ([Workflow screen & stage
+   access](U24-workflow-screen-and-stage-access.md), its Rule 6); and, on
+   a chapter page, the cover and "Volume" (Rule 18). <sup>g</sup>
+2. **The page's address.** The press's address followed by
+   "catalog/book/" and the book's number, or its **URL Path** once one is
+   saved on the "Catalog Entry" page ([Catalog
+   management](U70-catalog-management.md)). With a URL Path saved, the
+   press's own links use it, except a chapter page's cover and "Volume",
+   which use the book's number; the number address still opens the same
+   page without changing the address. An address with a URL Path the
+   book used before is meant to forward to the current one; today it
+   shows a server error page ⚠ [A16](#a16). <sup>g</sup> <sup>td2</sup>
+3. **Nothing published, no page.** A book is published once a Version of
+   Record of it is published. Until then its address answers the "404 Not
+   Found" page to a visitor and to a Reader, and so does the address of
+   any of its versions. A scheduled book answers the same until its date.
+   A book whose only published version is an "Author's Original" (a version
+   added with "Create New Version" and the "Publication Stage" "Author's
+   Original (AO)") answers the same to a visitor and a Reader, as the
+   catalog leaves it out
+   too ([Catalog browse](U68-catalog-browse.md), its Rule 3), while the
+   Press manager and the Site Administrator who type its address get its
+   page with no preview notice ⚠ [A2](#a2). <sup>g</sup> <sup>td3</sup>
+   - 3a. **An address that names no book.** A number or URL Path that no
+     book of the press has sends a visitor to the Login page, and a
+     signed-in user to an error page with no heading, its browser tab
+     "| {press name}", reading "An invalid published submission was
+     specified.". An unpublished book's address answers "404 Not Found"
+     instead ⚠ [A1](#a1). <sup>g</sup> <sup>td4</sup>
+
+**Versions**
+
+4. **Which version the page shows.** The book's address shows the
+   **current version**, the latest published one. Each older published
+   version has an address of its own, reached from the "Versions" list
+   (Rule 9): the book's address followed by "/version/" and an id the
+   link carries, not the version's number. A version address that names
+   an unpublished version of the book answers the "404 Not Found" page to
+   a visitor; one whose id names no version of the book fails with a
+   server error page ⚠ [A3](#a3). <sup>g</sup> <sup>td6</sup>
+5. **The preview.** An unpublished version's page opens for those Actors
+   row 2 names under the notice "This is a preview and has not been
+   published. View submission". It looks as it will once published,
+   except for its dates: a version with no date saved has no "Published"
+   line and no "Versions" list; one with a date saved has the line
+   ("Forthcoming" for a date after today, Rule 8) and a "Versions"
+   heading listing only the book's published versions, none on a book
+   never published. <sup>g</sup> <sup>td7</sup>
+   - 5a. **"View submission".** It opens the book's workflow for those
+     whose workflow offers "Preview". The book's Author gets the
+     access-denied page instead, as on an article's preview
+     ([→ Article landing page & reading, A5](U13-article-landing-page-and-reading.md#a5)),
+     and a Series editor or assistant role not assigned to the book gets
+     the Submissions page behind an "Error" window reading "The current
+     role does not have access to this operation." with "OK".
+   - 5b. **Chapter pages and new versions.** The unpublished book's
+     chapter pages open for the same people, without the preview notice
+     ⚠ [A17](#a17). A new version being prepared for a published book,
+     opened at its version address, carries the older-version notice of
+     Rule 6 under the preview notice ⚠ [A4](#a4). The notice is dated
+     today, or, once a "Date Published" is saved on the version's
+     "Catalog Entry", with that date. On a press whose "DOI Versioning"
+     reads "No" (Settings bullet 15), the new version's chapter links
+     open a blank server error page [A19](#a19).
+   - 5c. **Files.** The preview lists the version's formats and files
+     as a published page does (Rule 11), but every file's link opens the
+     "404 Not Found" page, for everyone who may open the preview: no file
+     can be read from a preview ⚠ [A24](#a24).
+6. **An older version's notice.** An older version's page opens with
+   "This is an outdated version published on {date}. Read the most recent
+   version.", the date being that version's own, in the press's short
+   date format; "most recent version" opens the book's address. The page
+   is headed with the older version's title, but the browser tab reads
+   the current version's title [A5](#a5). <sup>g</sup> <sup>td8</sup>
+7. **Empty parts are left out.** Every part of the page's tables appears
+   only when the version has something to put in it, except the
+   copyright line. A book with a title, one contributor, an abstract and
+   no chapter, format, series, category or references shows the title,
+   the contributor, "Synopsis", the cover (the default picture),
+   "Published" and "Versions" and the copyright line "Copyright (c)
+   {year} {press name}", and no other heading. <sup>d</sup>
+   <sup>td24</sup>
+8. **The date line.** Under "Published": the first version's page, its
+   date; a later version's, "{first version's date} — Updated on {this
+   version's date}", both in the press's long date format ([Appearance &
+   theming](U10-appearance-and-theming.md), its Rule 31), such as "March
+   5, 2024". A shown version dated after today, which only a preview
+   shows, reads "Forthcoming" in place of "Published". <sup>h</sup>
+   <sup>td9</sup>
+   - 8a. **The first date.** It is the earliest date any version of the
+     book carries, published or not, and a version with no date yet, such
+     as one just made with "Create New Version", counts as today: while
+     it exists, every version's line reads "{today} — Updated on {that
+     version's date}"
+     ([→ Publish, schedule & versions, A6](U49-publish-schedule-and-versions.md#a6)).
+9. **The "Versions" list.** Every published version, the newest first,
+   each as "{date} ({version name})" in the short date format:
+   "2024-03-05 (Version of Record 1.0)". The list shows with a single
+   version too. The version shown is plain text; the current version
+   links to the book's address and each older one to its own address
+   (Rule 4). A version not yet published, or unpublished since, is not
+   listed. <sup>h</sup> <sup>td23</sup>
+
+**Contents, formats and files**
+
+10. **The table of contents.** The shown version's chapters, in the
+    order of its Chapters page: the order they were added in, until
+    another is saved there with "Order" and "Done" ([Chapters & work
+    type](U72-chapters-work-type.md), its Rule 8a). An order saved on a
+    published version shows the next time the book's page opens, with
+    nothing published again: a page that listed "Tides", "Harbours",
+    "Estuaries" lists "Estuaries", "Tides", "Harbours" once "Estuaries"
+    is moved above "Tides". Each chapter is listed with: <sup>i</sup> <sup>td10</sup>
+    - its title and subtitle, a link to its chapter page when the
+      chapter has one (Rule 15), plain text otherwise; on an older
+      version's page it opens that version's chapter page only where Rule
+      15a allows [A19](#a19);
+    - its authors' names, joined by commas. The line is meant to be left
+      out when the chapter's authors are the book's, but it is shown for
+      every chapter that has authors ⚠ [A6](#a6);
+    - its DOI as "DOI: https://doi.org/…", a link ([DOIs](U45-dois.md));
+    - the files of the chapter (a format file ticked in the chapter's
+      "Files"), as links grouped by format in the order of the
+      Publication Formats page, which moves a format to the end of its
+      list when it is saved
+      ([→ Publication formats & proof terms, A14](U73-publication-formats-proof-terms.md#a14)),
+      each link as Rule 11 words it.
+11. **The files and remote formats.** The side column lists the formats
+    of the shown version that read "Available" ([Publication formats &
+    proof terms](U73-publication-formats-proof-terms.md), its Side
+    effects), in the order of the Publication Formats page (Rule 10):
+    <sup>i</sup>
+    - a remote format as a link reading the format's name, which opens
+      its remote address in a new tab;
+    - each file with "Open Access" or "Direct Sales" terms that no chapter
+      holds, under its format. A file a chapter holds is listed under
+      that chapter only (Rule 10). A file set "Not Available", or with no
+      terms, is not listed, and a format with no listed file and no
+      remote address shows nothing here.
+    - 11a. **The link text.** A format with one listed file shows one
+      link reading the format's name, such as "PDF". A "Direct Sales"
+      file on a press with a currency reads "{price} Purchase {format}
+      ({price} {currency code})", the price as typed in the file's terms:
+      "25.00 Purchase PDF (25.00 USD)", the price twice ⚠ [A7](#a7). On a
+      press with no currency it reads the format's name alone, like a
+      free file
+      ([→ Publication formats & proof terms, A9](U73-publication-formats-proof-terms.md#a9)).
+    - 11b. **A format with several files.** The format's name, then for
+      each file its name followed by a link reading the file's name
+      again, the files in no fixed order (the same steps taken twice
+      listed a format's two files either way round). The link never
+      shows a price, so a file for sale there looks
+      like a free one until it is pressed ⚠ [A8](#a8). <sup>td11</sup>
+    - 11c. **The link address.** The press's address followed by
+      "catalog/view/", the book's URL Path or number, the format's URL
+      Path or number and the file's number; on an older version's page
+      "version/" and the version's id follow the book's part.
+12. **A format's details.** Each available format that also reads
+    "Approved" gets a block in the side column, in format order, holding
+    what the format has of: <sup>p</sup> <sup>td12</sup>
+    - its name as a small heading, only when the version has more than
+      one available format (a screen reader reads "Details about the
+      available publication format: {format}", or "Details about this
+      monograph" for a single format);
+    - each identification code, its type's name with its code as the
+      label ("ISBN-13 (15)") and the code under it;
+    - each publication date, its role's name with its code as the label
+      ("Publication date (01)") and the date under it, written
+      2024-03-05; a date entered in the "Date Format" the date's window
+      preselects, "YYYYMMDD (H)", adds "Hijri Calendar" under it;
+    - its URN ([Identifiers](U44-identifiers.md), its
+      [OMP2](U44-identifiers.md#omp2)) and its DOI as "DOI:" and a link
+      ([DOIs](U45-dois.md), its Rule 43);
+    - for a physical format, "Physical Dimensions" with its width, height
+      and thickness joined by " x ", each with its unit.
+    A format with none of these gets no block. A format that reads
+    "Awaiting Approval" gets none, while its files and remote link are
+    listed all the same (Rule 11).
+
+**Opening and buying files**
+
+13. **Opening a free file.** What a free file's link does depends on the
+    file: <sup>j</sup> <sup>td13</sup>
+    - a PDF, including one of a supplementary component such as
+      "Appendix", opens the PDF view page (Fields) while "PDF.js PDF
+      Viewer" is on (Settings bullet 1);
+    - an HTML file opens the HTML view page (Fields) while "HTML
+      Monograph File" is on (Settings bullet 2); off, its link downloads
+      the file under its file name;
+    - any other file (an EPUB, a Markdown file), or a PDF with the
+      viewer off, downloads under its file name, the browser staying on
+      the book's page.
+    - 13a. **An older version's file.** Its view page carries the notice
+      "This is an outdated version published on {date}. Read the most
+      recent version.", the date written year-month-day ("2026-09-28"),
+      whose link opens the book's current page.
+    - 13b. **Where a file fails.** On a preview no file opens (Rule 5c)
+      [A24](#a24). An HTML file that links another book shows, but its
+      "omp://" links do nothing (Fields, the HTML view page)
+      [A25](#a25).
+    - 13c. **Sign-in for free files.** On a press with "Users must be
+      registered and log in to view open access content." ticked
+      (Settings bullet 6), a visitor who presses a free file's link gets
+      the Login page first, and once signed in there the file's view
+      page.
+14. **Buying a file for sale.** A "Direct Sales" file's link, on a press
+    whose payment method is set up (Settings bullet 9): <sup>k</sup> <sup>td14</sup>
+    - pressed by a visitor, leads to the Login page, which says nothing
+      of the purchase (only "Required fields are marked with an
+      asterisk: *" above the form). Once signed in there, the buyer does
+      not reach the payment page but lands where an ordinary sign-in
+      takes their role: a Reader on the press's home page, an Author on
+      "My Submissions" (headed "Active submissions"), a Press manager on
+      the Dashboard's list headed "Assigned to me". A newcomer who presses "Register" on that Login
+      page and sends the form lands on "Registration complete", signed
+      in ⚠ [A18](#a18);
+    - pressed by a signed-in user, whatever the role (the press's own
+      staff and the Site Administrator too), opens the payment page at
+      once. With "Manual Fee Payment", "Send notification of payment"
+      emails the press (Side effects) and shows "Payment Notification"
+      with "Payment notification sent" and "Continue" ([Payments &
+      APCs](U52-payments-and-apcs.md), its Rule 10); "Continue" leads
+      back to the file's link, which opens the payment page again. A
+      press has no list of payments.
+      No screen records a manual payment, so a buyer who paid by hand
+      never gets the file ⚠ [A11](#a11).
+    - with "Paypal Fee Payment", the link opens that method's payment
+      page ([Payments & APCs](U52-payments-and-apcs.md), its Rule 9); on
+      a press with only its "Account Name" filled (no "Client ID" or
+      "Secret"), a page with no heading reading "A transaction error
+      occurred. Please contact the press manager for details.".
+    - 14a. **Where the purchase stops.** On a press with no currency, or
+      whose method is not set up (no "Manual Payment Instructions", no
+      PayPal "Account Name"), a signed-in user who presses the link is
+      sent to the catalog page with no message
+      ([→ Publication formats & proof terms, A9](U73-publication-formats-proof-terms.md#a9)).
+    - 14b. **"Enable" is not read.** Whether the press's "Payments" tab
+      has "Enable" ticked changes nothing here: with it unticked and the
+      currency and method kept, the file is still sold ⚠ [A12](#a12).
+      <sup>td15</sup>
+
+**Chapter pages**
+
+15. **Which chapters get a page.** A chapter whose "Chapter Page" box is
+    ticked, or that has a DOI ([Chapters & work
+    type](U72-chapters-work-type.md), its Rule 10), has a page at the
+    book's address followed by "/chapter/" and the chapter's number. The
+    number stays the same in every version that carries the chapter.
+    The address of a chapter without its page, or of a chapter the shown
+    version does not carry, answers the "404 Not Found" page. <sup>l</sup>
+    - 15a. **An older version's chapter page.** Its address is
+      "…/version/{id}/chapter/{number}". It opens only on a press whose
+      "DOI Versioning" reads "Yes" (Settings bullet 15); on any other
+      press it shows a server error page ⚠ [A19](#a19).
+16. **The chapter's date line.** Under "Published", on a book whose
+    "Publication Dates" reads "Each chapter may have its own publication
+    date." (Settings bullet 11), the chapter's own "Date Published" when
+    it has one; otherwise the version's date. A later version of the
+    chapter reads "{first date} — Updated on {this date}", the first date
+    being the chapter's in the first version that carries it; with the
+    chapters' own dates, a new version copies the chapter's "Date
+    Published", so the line repeats that date ⚠ [A20](#a20). A chapter new
+    in a later version reads that version's date alone. <sup>l</sup>
+    - 16a. **"Forthcoming".** The heading reads "Forthcoming" when the
+      version's date lies after today. The chapter page compares the two
+      dates as written in the press's "Date (Short)" format, and only
+      the year-first format a press starts with ("2026-10-01") sorts
+      them in date order. Under each of the three other choices
+      ("01-10-2026", "10/01/2026", "01.10.2026"), or a "Custom" one such
+      as "d/m/Y", the heading can come out wrong, depending on the day
+      the page is read: a chapter of a book published on December 31,
+      2024 and read on October 1, 2026 is headed "Forthcoming", and in
+      the preview a chapter of a book scheduled for January 1, 2027 is
+      headed "Published" ⚠ [A13](#a13). <sup>td16</sup>
+17. **The chapter's "Versions" list.** Shown only when the book has more
+    than one published version: every published version, newest first,
+    as on the book's page. A version that carries the chapter links to
+    the chapter's page in that version (the shown one plain text; an
+    older one's link, Rule 15a); the oldest of them, when older versions
+    exist, adds " — Chapter created". A version without the chapter is
+    plain text; after the chapter's creation it reads "{date} ({version
+    name}) — Without this chapter". <sup>l</sup> <sup>td17</sup>
+18. **The chapter page's links.** The cover and "Volume" open the book's
+    page in the shown version. On an older version's chapter page (Rule
+    15a) the notice "This is an outdated version published on {date}.
+    Read the most recent version." leads to the chapter's current page
+    when the current version carries the chapter, and to the book's page
+    otherwise. <sup>l</sup>
+
+**Around the page**
+
+19. **"How to Cite".** While the "Citation Style Language" plugin is on
+    (Settings bullet 3), the book's page and every chapter page end their
+    side column with the "How to Cite" block, whose parts, formats,
+    downloads and settings window are those of an article's page
+    ([→ How to Cite](U13-article-landing-page-and-reading.md#how-to-cite),
+    its Rules 15a, 15b and 16). <sup>m</sup> <sup>td18</sup>
+    - 19a. **A book's citation.** On the book's page it cites the shown
+      version as a book: its authors (a contributor whose role is "Volume
+      editor" as an editor, one whose role is "Translator" as a
+      translator), its title, its series position, which "APA" prints as
+      "(Vols. 3)" ⚠ [A22](#a22) and "MLA" leaves out (the series' title
+      reaches only the "BibTeX" and "RIS" files), the press as
+      publisher, the version's date, and the book's DOI link or, without
+      a DOI, its address. A book with no contributor (one a Press
+      manager submitted without an entry for themselves) is cited from
+      its title.
+    - 19b. **A chapter's citation.** On a chapter page it cites the
+      chapter: its authors, its title, "In" the book's contributors (on a
+      Monograph its authors, left out when they are the chapter's own; on
+      an Edited Volume its volume editors "(Ed.)" and translators
+      "(Trans.)", then any contributor with the "Author" role), the
+      book's title, its series position and the chapter's pages ("(Vols.
+      3, pp. 1-20)"), the press, and the chapter's DOI link or, without
+      a DOI, its address. On a later version the "APA" citation adds
+      "(Original work published {year})", the book's first year, even for
+      a chapter that version added ⚠ [A14](#a14).
+20. **The "Downloads" chart.** While "Usage statistics display options"
+    (Settings bullet 5) is on a chart, the book's page carries a section
+    headed "Downloads" with a bar or a line chart of the book's
+    downloads by month, as an article's page does
+    ([Article landing page & reading](U13-article-landing-page-and-reading.md),
+    its Rule 17, and its [A3](U13-article-landing-page-and-reading.md#a3)).
+    A chapter page has no chart. <sup>n</sup> <sup>td19</sup>
+    - 20a. **Months and files.** The chart shows the last twelve months.
+      When the book has downloads from earlier months, a button "All
+      time" under it widens the chart to every month from January of the
+      first year with downloads, and then reads "Last 12 months".
+      Downloads of a supplementary component's file, such as "Appendix",
+      are not charted ([Usage statistics](U64-usage-statistics.md), its
+      Rule 1).
+21. **The pages in French.** With French (Canada) as the interface
+    language, two texts read wrong ⚠ [A15](#a15): <sup>o</sup> <sup>td20</sup>
+    - in "Versions": each version's name, as "{date}
+      (##publication.versionStage.display##)" with the date in the
+      press's short format ("2026-09-28
+      (##publication.versionStage.display##)");
+    - a priced file's link reads "25.00 Achat (25.00 USD)", without the
+      format's name.
+    - 21a. **What is translated.** "Synopsis", "Versions", "Séries",
+      "Mots-clés :" and the notices.
+22. **Open peer review.** The page carries no reviews. An "Open" review
+    can be made public: "Publicly Show Reviewer Comments" ticked in the
+    reviewer row's "Edit" window before "Mark as Complete", whose dialog
+    then adds "This review will be made publicly visible alongside the
+    article."
+    ([→ Reviewer assignment & management](U27-reviewer-assignment-and-management.md#read-review),
+    its Rule 14a), or arriving ticked on every new request of a press
+    that makes reviews public by default (Settings bullet 16). Once the
+    book is published, its page shows neither that review's comments,
+    nor the reviewer's name, nor any review heading, to a visitor, a
+    Reader or the Press manager. The page reads as for a book whose
+    review was left private ⚠ [A26](#a26). <sup>t</sup>
+
+## Side effects
+
+- **Usage statistics.** Each opening of a book's page counts as a view of
+  the book, and each opening of a chapter page as a view of the chapter
+  ([Usage statistics](U64-usage-statistics.md), its Rule 1). Each
+  opening of a file's view page, each "Download" there and each
+  download from a file's link counts as a view of the file, a
+  supplementary component's file (such as "Appendix") as a
+  "Supplementary File" (the same Rule 1). <sup>q</sup>
+- **"Manual Payment Notification"** (Rule 14). "Send notification of
+  payment" emails the press's principal contact from the buyer's name and
+  address, subject "Manual Payment Notification": "A manual payment needs
+  to be processed for the press {press name} and the user {buyer's name}
+  (username "{username}"). The item being paid for is "{file name}". The
+  cost is {price} ({currency code}). This email was generated by the Open
+  Monograph Press Manual Payment plugin." The price is written as typed
+  in the file's terms ("The cost is 25 (USD)."), where the payment page
+  shows "25.00 (USD)". Pressing it again sends it again. The email and
+  its missing row in "Manage Emails" are [Payments &
+  APCs](U52-payments-and-apcs.md)' (its Side effects). <sup>q</sup> <sup>td25</sup>
+- **No other email, no notice.** Reading the pages, opening a file,
+  reaching the payment page or downloading a citation sends no email and
+  leaves no notice. <sup>q</sup>
+
+## Settings that modify behavior
+
+1. **"PDF.js PDF Viewer"** (Settings › Website › "Plugins" › "Installed
+   Plugins", "Generic Plugins"). On for a new press: a free PDF opens the PDF view page (Rule
+   13). Off: its link downloads the file under its file name. <sup>r</sup>
+2. **"HTML Monograph File"** (same list). On for a new press: a free HTML
+   file opens the HTML view page. Off: its link downloads the file (Rule
+   13; [Media files](U47-media-files.md), its Settings bullet 6). <sup>r</sup>
+3. **"Citation Style Language"** (same list). Off for a new press: no
+   "How to Cite" block. On: the block of Rule 19 on the book's page and
+   the chapter pages, and the plugin row's "Settings" ([Article landing
+   page & reading](U13-article-landing-page-and-reading.md), its Settings
+   bullet 4). <sup>r</sup>
+4. **The "Citation Style Language" "Settings" window** (bullet 3's
+   "Settings"). On a new press: no primary format chosen (APA shown),
+   every additional format and both download formats ticked, no
+   publisher location. Each field's effect: [Article landing page &
+   reading](U13-article-landing-page-and-reading.md), its Rule 16. <sup>m</sup>
+5. **"Usage statistics display options"** (Settings › Website ›
+   "Appearance" › "Theme", [Appearance &
+   theming](U10-appearance-and-theming.md), its Rule 9). "Do not display
+   submission usage statistics chart for reader." on a new press: no
+   chart. A bar or line choice: the "Downloads" section of Rule 20.
+   <sup>n</sup>
+6. **"Users must be registered and log in to view open access content."**
+   (Settings › Users & Roles › "Site Access Options", under "View
+   Monograph Content"; unticked). Ticked: a visitor who presses a free
+   file's link gets the Login page first, and once signed in there the
+   file's view page (Actors row 3; Rule 13c); the pages themselves stay
+   open. <sup>j</sup> <sup>r</sup>
+7. **"Users must be registered and log in to view the press site."**
+   (same tab; unticked). Ticked: a visitor who opens any address of this
+   spec gets the Login page (Actors; [Journal identity & about
+   pages](U07-journal-identity-and-about-pages.md), its Rule 22). <sup>c</sup>
+8. **"Enable this press to appear publicly on the site"** (Administration
+   › Hosted Presses › the press's "Edit"; ticked on every press a test
+   install creates). Unticked: a visitor gets the Login page (Actors).
+   <sup>c</sup>
+9. **"Currency" and "Payment Plugins"** (Settings › Distribution ›
+   "Payments", [→ Payments tab](U52-payments-and-apcs.md#payments-tab);
+   the tab shows these fields only while its "Enable" is ticked). A new
+   press has no currency and "Manual Fee Payment" chosen without
+   instructions. With a currency saved, a "Direct Sales" file's link
+   shows its price (Rule 11a). With a currency and "Manual Payment
+   Instructions" holding text, the link leads to the payment page; with
+   "Paypal Fee Payment" and only its "Account Name", to a transaction
+   error page (Rule 14). Without instructions or an "Account Name", a
+   signed-in buyer is sent to the catalog page (Rule 14a). <sup>k</sup>
+10. **"Enable"** (the same tab; unticked on a new press). Neither end
+    changes these pages (Rule 14b) [A12](#a12). <sup>k</sup>
+11. **"Publication Dates"** (per book: the editorial view's "Marketing" ›
+    "Publication Dates", [Chapters & work
+    type](U72-chapters-work-type.md), its Settings bullet 1). Neither
+    option saved on a new book, which works as "All chapters will use
+    the publication date of the monograph.": a chapter page shows the
+    version's date. "Each chapter may have its own publication date.":
+    the chapter's own date when it has one (Rule 16). <sup>l</sup>
+12. **"Chapter Page"** (per chapter: its window's "Show this chapter on
+    its own page and link to that page from the book's table of
+    contents.", [Chapters & work type](U72-chapters-work-type.md), its
+    Rule 10). Unticked on a new chapter: the title is plain text and the
+    chapter has no page. Ticked, or the chapter has a DOI: the title
+    links to its page (Rules 10, 15). On a chapter with a DOI the box
+    stays enabled under "(This chapter will always be shown on its own
+    page because it has a DOI.)"; unticked and saved, it reopens ticked
+    and the chapter keeps its page and link. <sup>l</sup>
+13. **"Date" and "Date (Short)"** (Settings › Website › "Setup" › "Date &
+    Time", [Appearance & theming](U10-appearance-and-theming.md), its
+    Rule 31). The long format writes the date lines (Rules 8, 16), the
+    short one the "Versions" lists and the book page's notices (Rules 6,
+    9); any short format but the year-first one a new press has can
+    head a published chapter "Forthcoming" and a scheduled one
+    "Published" (Rule 16a) [A13](#a13). <sup>h</sup>
+14. **Settings other features describe.** The work type, whose Edited
+    Volume credits its volume editors
+    ([Contributors & affiliations](U41-contributors-and-affiliations.md#omp2));
+    the DOI settings for monographs, chapters and publication formats
+    ([DOIs](U45-dois.md)); the URN plugin
+    ([Identifiers](U44-identifiers.md)); the press's and the version's
+    license ([Publication metadata](U40-publication-metadata.md)) and the
+    cover sizes ([Catalog management](U70-catalog-management.md)) each
+    add, gate or shape a part of these pages; their rules are there. Two
+    such settings change nothing here: a format's "Publisher ID" shows
+    nowhere on these pages ([Identifiers](U44-identifiers.md), its Rule
+    21), and a contributor with "Include this contributor when
+    identifying authors in lists of publications." unticked is still
+    credited on the book's page, while the catalog's listing leaves them
+    out ([Contributors & affiliations](U41-contributors-and-affiliations.md),
+    its Rule 8). <sup>d</sup>
+15. **"DOI Versioning"** (Settings › Distribution › "DOIs" › "Setup",
+    [DOIs](U45-dois.md), its Rules 11 and 12). "No" (the default): an
+    older version's chapter page, and a new version's (Rule 5b), shows a
+    server error page [A19](#a19). "Yes": an older version's chapter page
+    opens (Rules 15a, 17, 18); a new version's is untried. <sup>l</sup>
+16. **"Publicly Show Reviewer Comments"** (Settings › Workflow › Review ›
+    "Setup", the box "Make reviewer comments publicly visible with
+    published content"; [Review setup & review
+    forms](U29-review-setup-and-review-forms.md), its Rule 4). Unticked on
+    a new press. Ticked: every new review request arrives with its own
+    "Publicly Show Reviewer Comments" ticked. At either end the book's
+    page shows no review (Rule 22) [A26](#a26). <sup>t</sup>
+
+## Cross-feature interactions
+
+- [Publication formats & proof terms](U73-publication-formats-proof-terms.md):
+  builds the formats, their files, terms, approval, availability and URL
+  Paths this page lists (Rules 11, 12); its A9 is the priced file on a
+  press with no payment method (Rules 11a, 14a), its A14 the format order
+  that shifts when a format is saved (Rules 10, 11).
+- [Chapters & work type](U72-chapters-work-type.md): the chapter list,
+  "Chapter Page", chapter authors, files, dates and licenses the table of
+  contents and the chapter pages show (Rules 10, 15–18).
+- [Catalog management](U70-catalog-management.md) and
+  [Catalog browse](U68-catalog-browse.md): the catalog entry (cover,
+  series, categories, URL Path), "View Entry", and the book summaries
+  that lead here (Rules 1, 2).
+- [Payments & APCs](U52-payments-and-apcs.md): the "Payments" tab, the
+  payment page, "Send notification of payment" and its email (Rule 14;
+  Side effects).
+- [Contributors & affiliations](U41-contributors-and-affiliations.md):
+  the contributor list, the biographies and an Edited Volume's credits.
+- [Publication metadata](U40-publication-metadata.md),
+  [Funding](U43-funding.md), [Citations & references](U42-citations-and-references.md),
+  [DOIs](U45-dois.md), [Identifiers](U44-identifiers.md): the blocks and
+  lines of the Fields tables they describe; DOIs' "DOI Versioning" also
+  decides whether an older version's chapter page opens (Settings bullet
+  15).
+- [Media files](U47-media-files.md): the images an HTML file shows, and
+  what an HTML file's link does with "HTML Monograph File" off (its
+  Settings bullet 6).
+- [Search engine metadata & analytics](U20-search-engine-metadata-and-analytics.md):
+  the tags of the book's page, the chapter pages and the file pages (its
+  Rules 16, 17).
+- [Usage statistics](U64-usage-statistics.md): the views these pages
+  count, the file views included.
+- [Publish, schedule & versions](U49-publish-schedule-and-versions.md):
+  publishing, scheduling, "Create New Version", the version names, and its
+  A6 (the date line rewritten by a new version).
+- [Workflow screen & stage access](U24-workflow-screen-and-stage-access.md):
+  the header's "View" and "Preview" that open this page.
+- [Article landing page & reading](U13-article-landing-page-and-reading.md):
+  the journal's and preprint server's counterpart, and the home of the
+  "How to Cite" block, its settings window and the "Downloads" chart.
+- [Subscriptions](U51-subscriptions.md): a journal's priced galley link
+  (the absence paragraph).
+- [Appearance & theming](U10-appearance-and-theming.md): the date formats
+  and the chart choice.
+- [Journal identity & about pages](U07-journal-identity-and-about-pages.md):
+  a press closed to signed-out visitors (Settings bullets 7, 8).
+- [Plugins management](U62-plugins-management.md): the Plugins list where
+  the plugins of Settings bullets 1–3 are switched.
+- [Sections](U17-sections.md), [Categories](U16-categories.md): the series
+  and category pages the side column links to.
+- [Reviewer assignment & management](U27-reviewer-assignment-and-management.md)
+  and [Review setup & review forms](U29-review-setup-and-review-forms.md):
+  the "Publicly Show Reviewer Comments" box on a review and the press's
+  default for it, which the book's page never shows (Rule 22; Settings
+  bullet 16).
+
+## Canonical scenarios
+
+Scenarios 1 to 9 read books published for them on scratch presses with
+throwaway accounts, because the seeded press's catalog holds what earlier
+runs published, and scenario 10 runs on a scratch journal and a scratch
+preprint server. The accounts, their passwords, the mail catcher and the
+tooling recipe are in the footnote. <sup>s</sup>
+
+1. **A published book's page**
+
+   Given: a visitor, on a scratch press, and its published Monograph
+   "Shorelines", subtitle "Essays on the Coast", URL Path "shorelines",
+   by Ada Quill and Lee Marsh, with an abstract, the keywords alpha and
+   beta gamma, a plain language summary, the series "Monographs", the
+   category "History", the date 2024-03-05, no chapter, no references,
+   and three approved, available formats: "PDF" holding article.pdf on "Open
+   Access", "Online" at the remote address https://example.org/shorelines,
+   and the physical "Paperback", with no file, the "ISBN-13 (15)" code
+   978-951-98548-9-2, a "Publication date (01)" of 20240305 in the "Date
+   Format" its window preselects, a width of 130 and a height of 200.
+
+   - **The address**: open the press's address followed by
+     "catalog/book/shorelines": the book's page opens under the press's
+     header, with no trail ("Home / …") above the title, and the browser
+     tab reads "Shorelines: Essays on the Coast | {press name}" (Rule 2;
+     Fields, the book's page).
+   - **The main column**: top to bottom, with no notice above them: the
+     heading "Shorelines" with "Essays on the Coast"; Ada Quill and Lee
+     Marsh; "Keywords:" followed by alpha and beta gamma joined by a
+     comma, in either order; "Synopsis" over the abstract; and "Plain
+     Language Summary" over the summary, the last heading of the
+     column. There is no "References" heading, the book having no
+     references, and no "Downloads" chart, the press being on "Do not
+     display submission usage statistics chart for reader." (Fields,
+     the book's page; Rule 7; Settings bullet 5).
+   - **The side column**: top to bottom: the press's default book
+     picture, not a link; the links "PDF" and "Online", in either order,
+     and none for "Paperback", which holds no file; "Published" with
+     "March 5, 2024"; "Versions" with "2024-03-05 (Version of Record
+     1.0)" as plain text; "Series" with "Monographs", a link to the
+     series' page; "Categories" with "History", a link to the category's
+     page; a copyright line; and "Paperback"'s details. There is no "How
+     to Cite", the "Citation Style Language" plugin being off on a new
+     press (Fields, the book's page; Rules 8, 9, 11; Settings bullet 3).
+   - **"Paperback"'s details**: the block is headed "Paperback", the
+     book having more than one available format, and holds "ISBN-13
+     (15)" with 978-951-98548-9-2 under it, "Publication date (01)" with
+     2024-03-05 and "Hijri Calendar" under it, and "Physical Dimensions"
+     with 130 and 200, each followed by its unit, joined by " x ". "PDF"
+     and "Online" have no block (Rule 12).
+   - **"Online"**: press it: https://example.org/shorelines opens in a
+     new tab (Rule 11).
+   - **"PDF"'s address**: the link's address is the press's address
+     followed by "catalog/view/shorelines/", then the format's and the
+     file's numbers (Rules 2, 11c).
+   - **The number address**: open the press's address followed by
+     "catalog/book/" and the book's number: the same page opens, and the
+     address stays as typed (Rule 2).
+   - **Control**: a second published book of the press, "Bare", with
+     only a title, the contributor Ada Quill and an abstract, shows the
+     title, Ada Quill, "Synopsis", the default book picture,
+     "Published", "Versions" and the copyright line "Copyright (c)
+     {year} {press name}", and no other heading (Rule 7). <sup>s</sup>
+
+2. **The table of contents, a chapter's page and the "Downloads" chart**
+
+   Given: a visitor, on a scratch press that gives chapters DOIs and
+   shows the downloads chart as bars, and two of its books, published
+   on 2024-03-05 and both by Ada Quill and Lee Marsh: "Coastlines", its
+   "Publication Dates" left as a new book has it, with the formats
+   "PDF" holding article.pdf and "Chapter PDF" holding replacement.pdf,
+   both on "Open Access", and the chapters "Tides", subtitle "Low and
+   high", by Lee Marsh, with its page, a DOI, the synopsis "How the sea
+   rises and falls.", the pages 1-20 and replacement.pdf, then
+   "Harbours", with no author, no page and no DOI; and "Reef Notes", on
+   "Each chapter may have its own publication date.", with the chapters
+   "Reef", its "Date Published" 2024-06-01, and "Lagoon", with no date
+   of its own, both with their pages.
+
+   - **The table of contents**: open "Coastlines"' page: the main column
+     lists the chapters in the order they were added: "Tides" with "Low
+     and high", a link, followed by "Lee Marsh", by "DOI:
+     https://doi.org/" and the chapter's DOI as a link, and by a link
+     "Chapter PDF"; then "Harbours" as plain text (Rule 10).
+   - **The side column's files**: they list "PDF" and no "Chapter PDF",
+     a file a chapter holds being listed under that chapter only
+     (Rule 11).
+   - **"Downloads"**: the main column holds a section headed "Downloads"
+     with a bar chart of the book's downloads by month, over the last
+     twelve months (Rules 20, 20a).
+   - **"Tides"' page**: press "Tides": the address is "Coastlines"'
+     address followed by "/chapter/" and the chapter's number, and the
+     browser tab reads "Tides: Low and high | {press name}". The main
+     column holds, with no notice above them, the heading "Tides" with
+     "Low and high", Lee Marsh, "DOI:" with the chapter's DOI as a link,
+     and "Synopsis" over "How the sea rises and falls."; the side column
+     holds the default book picture as a link to the book's page, the
+     link "Chapter PDF" and no other file, "Volume" with "Coastlines" as
+     a link, "Pages" with 1-20, and "Published" with "March 5, 2024",
+     the version's date, and no "Versions". The page has no "Downloads"
+     chart (Fields, the
+     chapter page; Rules 15, 16, 17, 20; Settings bullet 11).
+   - **"Volume"**: press "Coastlines" under "Volume": "Coastlines"' page
+     opens (Rule 18).
+   - **Chapters with their own dates**: open "Reef Notes"' page and
+     press "Reef": its "Published" reads "June 1, 2024". Back on the
+     book's page, press "Lagoon": its "Published" reads "March 5, 2024",
+     the version's date (Rule 16; Settings bullet 11).
+   - **Control**: "Coastlines"' address followed by "/chapter/" and
+     the number the tooling reports for "Harbours" opens the "404 Not
+     Found" page (Rule 15). <sup>s</sup>
+
+3. **Opening a free PDF and a free HTML file**
+
+   Given: a visitor, on a scratch press, and its published book
+   "Shorelines" with the formats "PDF" holding article.pdf and "HTML"
+   holding article.html, both on "Open Access".
+
+   - **"PDF"**: on the book's page press "PDF": the PDF view page opens
+     without the press's header, footer or sidebar, its browser tab
+     reading "PDF view of the file article.pdf". The bar across the top
+     holds, left to right, an arrow with no visible text, which a screen
+     reader reads "Return to view details about Shorelines", article.pdf
+     as plain text, and "Download", which a screen reader reads
+     "Download Download PDF". The PDF viewer fills the page under the
+     bar and shows article.pdf, its toolbar reading "of 1". Press
+     "Download": the browser saves article.pdf and the page stays as it
+     is; the viewer's own download button saves article.pdf too
+     (Rule 13; Fields, the PDF view page).
+   - **The return arrow**: press it: the book's page opens (Fields, the
+     PDF view page).
+   - **"HTML"**: press "HTML": the HTML view page opens without the
+     press's header, footer or sidebar, its browser tab reading "HTML
+     view of the file article.html". Its bar holds only a return arrow,
+     whose name for a screen reader is [A10](#a10), neither a pass nor
+     a fail here, and "Shorelines" as a link, with no "Download"; under
+     the bar the HTML file's text fills the page (Rule 13; Fields, the
+     HTML view page).
+   - **The title**: press "Shorelines": the book's page opens (Fields,
+     the HTML view page).
+   - **Control**: the mail catcher holds no email after the two files
+     were opened (Side effects, "No other email, no notice").
+     <sup>s</sup>
+
+4. **A file for sale bought with "Manual Fee Payment"**
+
+   Given: a Reader and a visitor, on a scratch press that sells in US
+   dollars with "Manual Fee Payment" and its "Manual Payment
+   Instructions" filled, and its published book "Shorelines" with the
+   format "PDF" holding article.pdf on "Direct Sales" at a price typed
+   as 25.
+
+   - **The link**: signed out, open the book's page: article.pdf's link
+     reads "Purchase PDF (25 USD)" after the price; the bare price
+     before it is [A7](#a7), neither a pass nor a fail here (Rule 11a).
+   - **The payment page**: Reader: sign in, open the book's page and
+     press the link: the payment page opens with the press's header and
+     footer and the trail "Home / Manual Fee Payment", headed "Manual
+     Fee Payment", with "Title" article.pdf and "Fee" "25.00 (USD)". The
+     mail catcher holds no email yet (Rule 14; Fields, the payment page;
+     Side effects, "No other email, no notice").
+   - **"Send notification of payment"**: press it: the page shows
+     "Payment Notification" with "Payment notification sent" and
+     "Continue" (Rule 14).
+   - **The press's principal contact**: the mail catcher holds one email
+     to the principal contact, from the Reader's name and address,
+     subject "Manual Payment Notification", reading "A manual payment
+     needs to be processed for the press {press name} and the user
+     {Reader's name} (username "{Reader's username}"). The item being
+     paid for is "article.pdf". The cost is 25 (USD). This email was
+     generated by the Open Monograph Press Manual Payment plugin." (Actors
+     row 5; Side effects, "Manual Payment Notification").
+   - **"Continue"**: press it: the payment page opens again, with "Fee"
+     "25.00 (USD)" (Rule 14).
+   - **Control**: the Reader signs out and presses the link again: the
+     Login page opens, not the payment page, and where signing in there
+     lands is [A18](#a18), neither a pass nor a fail here (Actors row 4;
+     Rule 14). <sup>s</sup>
+
+5. **An unpublished book: the preview, and "404 Not Found" for everyone else**
+
+   Given: Press manager, the Author, a Reader, an External Reviewer,
+   another Author of the press who is not on the book, and a visitor,
+   on a scratch press with the Author's book "Draft Tides" in
+   Production, never published and with no date saved, the Author's
+   second submission left unfinished in the wizard, and the published
+   book "Shorelines".
+
+   - **The Press manager's preview**: Press manager: open "Draft Tides"'
+     workflow and press "Preview" in its header: the book's page opens
+     under the notice "This is a preview and has not been published.
+     View submission", with no "Published" line and no "Versions" list
+     (Actors row 2; Rule 5).
+   - **"View submission"**: press it: "Draft Tides"' workflow opens
+     (Rule 5a).
+   - **The Author**: Author: type the book's address, the press's
+     address followed by "catalog/book/" and the book's number: the page
+     opens under the same notice (Actors row 2).
+   - **Everyone else**: the visitor, signed out, then the Reader, the
+     External Reviewer and the other Author, each signed in in turn,
+     open the same address: each gets the "404 Not Found" page (Actors
+     row 2; Rule 3).
+   - **The unfinished submission**: its address, the press's address
+     followed by "catalog/book/" and its number, opens the "404 Not
+     Found" page for the Press manager and for the Author (Actors row 2).
+   - **Control**: the visitor opens "Shorelines"' page, which shows no
+     preview notice (Rules 3, 5). <sup>s</sup>
+
+6. **An older version beside the current one**
+
+   Given: a visitor, on a scratch press, and its book first published on
+   2024-03-05 as "Tides" (Version of Record 1.0), then published again
+   today as a second version retitled "Tides Revised".
+
+   - **The current page**: open the book's address: it is headed "Tides
+     Revised"; "Published" reads "March 5, 2024 — Updated on {today}",
+     {today} being today's date written like the first; "Versions"
+     lists, newest first, the second version as today's date written
+     year-month-day and its version name in brackets, in plain text, and
+     "2024-03-05 (Version of Record 1.0)" as a link (Rules 4, 8, 9).
+   - **The older version**: press "2024-03-05 (Version of Record 1.0)":
+     the address is the book's address followed by "/version/" and an
+     id; the page opens under "This is an outdated version published on
+     2024-03-05. Read the most recent version." and is headed "Tides",
+     while which title its browser tab names is [A5](#a5), neither a
+     pass nor a fail here; "Published" reads "March 5, 2024"; in
+     "Versions" the first version is plain text and the second a link to
+     the book's address (Rules 4, 6, 8, 9).
+   - **"most recent version"**: press it: the book's address opens,
+     headed "Tides Revised" (Rule 6).
+   - **Control**: the current version's page carries no outdated-version
+     notice (Rule 6). <sup>s</sup>
+
+7. **An older version's chapter pages, on a press with "DOI Versioning" "Yes"**
+
+   Given: a visitor, on a scratch press whose "DOI Versioning" reads
+   "Yes", and its book "Coastlines", first published on 2024-03-05 with
+   the chapters "Tides" and "Coda", then published again today as a
+   second version from which "Coda" was removed and to which "Harbours"
+   was added, every chapter with its page.
+
+   - **"Tides" now**: open the book's page and press "Tides": its
+     "Versions" lists, newest first, the second version, today's date
+     written year-month-day and its version name in brackets, as plain
+     text, and "2024-03-05 (Version of Record 1.0)" as a link (Rule 17).
+   - **"Tides" in the first version**: press "2024-03-05 (Version of
+     Record 1.0)": the address is the book's address followed by
+     "/version/", an id, "/chapter/" and the same chapter number as
+     before, and the page opens under "This is an outdated version
+     published on {date}. Read the most recent version.", {date} being
+     the first version's. Press "Coastlines" under "Volume": the first
+     version's book page opens, under its own outdated-version notice.
+     Go back and press "most recent version": "Tides"' current page
+     opens (Rules 15, 15a, 18).
+   - **"Harbours"**: on the book's page press "Harbours": its "Versions"
+     lists the second version followed by " — Chapter created", as plain
+     text, and "2024-03-05 (Version of Record 1.0)" as plain text
+     (Rule 17).
+   - **"Coda" in the first version**: on the book's page press
+     "2024-03-05 (Version of Record 1.0)" under "Versions", then "Coda"
+     in that page's table of contents: "Coda"'s page opens under the
+     outdated-version notice, and its "Versions" lists the second
+     version, today's date written year-month-day and its version name
+     in brackets, followed by " — Without this chapter", as plain text,
+     and "2024-03-05 (Version of Record 1.0)" as plain text. Press "most
+     recent version": the book's current page opens (Rules 10, 17, 18).
+   - **Control**: the book's address followed by "/chapter/" and
+     "Coda"'s number opens the "404 Not Found" page, the current version
+     not carrying "Coda" (Rule 15). <sup>s</sup>
+
+8. **"How to Cite" on a book and a chapter**
+
+   Given: a visitor, on a scratch press with the "Citation Style
+   Language" plugin on and DOIs switched off, and its published
+   Monograph "Shorelines" by Ada Quill and Lee Marsh, dated 2024-03-05,
+   in no series, with the chapter "Tides" by Lee Marsh, on the pages
+   1-20, with its page.
+
+   - **The book's citation**: open the book's page: its side column ends
+     with "How to Cite", citing the book in "APA" with the authors Quill
+     and Marsh, the title "Shorelines", the press's name as publisher,
+     the version's date and the book's address, the press's address
+     followed by "catalog/book/" and the book's number (Rules 19, 19a;
+     Settings bullet 4).
+   - **Another format**: choose "MLA" among the block's other formats
+     ([→ How to Cite](U13-article-landing-page-and-reading.md#how-to-cite)):
+     the citation's text changes, still naming Quill, Marsh and
+     "Shorelines" (Actors row 6; Rule 19).
+   - **A download**: choose the "BibTeX" download in the same list: the
+     browser saves a file (Actors row 6; Rule 19).
+   - **The chapter's citation**: press "Tides" in the table of contents:
+     the chapter page's side column ends with "How to Cite", citing
+     Marsh, "Tides", "In" Quill and Marsh, "Shorelines", the pages 1-20,
+     the press's name and the chapter's address, the book's address
+     followed by "/chapter/" and the chapter's number (Rule 19b).
+   - **Control**: on a new press, where the plugin is off, a published
+     book's page has no "How to Cite" (Settings bullet 3). <sup>s</sup>
+
+9. **Free files for signed-in users only**
+
+   Given: a Reader and a visitor, on a scratch press with "Users must be
+   registered and log in to view open access content." ticked, and its
+   published book "Shorelines" with the format "PDF" holding article.pdf
+   on "Open Access".
+
+   - **The page**: signed out, open the book's page: it opens, with the
+     link "PDF" (Settings bullet 6).
+   - **"PDF"**: press it: the Login page opens (Rule 13c).
+   - **Signed in there**: sign in as the Reader on that Login page: the
+     PDF view page of article.pdf opens (Actors row 3; Rule 13c).
+   - **Control**: back on the book's page, pressing "PDF" again opens the
+     PDF view page with no Login page (Actors row 3). <sup>s</sup>
+
+10. **No book's page on a journal or a preprint server** {OJS OPS}
+
+    Given: a visitor, on a scratch journal that requires subscriptions
+    and charges 5 US dollars for "Purchase Article", with an article
+    carrying the galley "PDF" published in the journal's one published
+    issue, whose "Access status" is "Subscription", and on a scratch
+    preprint server with a posted preprint carrying the galley "PDF".
+
+    - **The journal**: open the journal's address followed by
+      "catalog/book/" and the article's number: the "404 Not Found" page
+      opens. The article's page lists its galley, whose link reads
+      "Requires Subscription or Fee PDF (USD 5)", and no table of
+      contents (Purpose, the absence paragraph).
+    - **The preprint server**: open the server's address followed by
+      "catalog/book/" and the preprint's number: the "404 Not Found" page
+      opens. The preprint's page lists its galley "PDF", with no price,
+      and no table of contents (Purpose, the absence paragraph).
+    - **Control**: on a scratch press, the press's address followed by
+      "catalog/book/" and a published book's number opens the book's
+      page (Rule 2). <sup>s</sup>
+
+## Coverage
+
+Left out of the scenarios above, by reason:
+
+- **Nothing new to test**:
+  - an unassigned Series editor or assistant role opening the preview
+    (Actors row 2)
+  - "View submission" on a preview for the book's Author (the
+    access-denied page) and for an unassigned Series editor or
+    assistant role (the "Error" window) (Rule 5a)
+  - a dated preview: its date line and a "Versions" heading listing only
+    the published versions (Rule 5)
+  - a scheduled version's preview headed "Forthcoming" (Rule 8)
+  - an older version's file on a view page, under the outdated-version
+    notice (Rule 13a)
+  - another citation format or a citation download on a preview, by a
+    role assigned to the book (Actors row 6)
+  - a version with no date yet starting every date line with today
+    (Rule 8a)
+  - "All time" and "Last 12 months" on a book with downloads older than
+    twelve months (Rule 20a)
+  - a book with no contributor cited from its title (Rule 19a)
+  - a signed-in Reader, or any other role, reading a published book's
+    pages, which read as they do for a visitor (Actors row 1;
+    scenarios 1, 2)
+  - the press's staff, the Site Administrator and every other signed-in
+    role pressing a file for sale, offered the payment page as the
+    Reader is (Actors row 4; Rule 14; scenario 4)
+- **Register carries it**:
+  - A1 (an address that names no book; Rule 3a)
+  - A2 (a book published only as an "Author's Original"; Rule 3)
+  - A3 (a version address that names no version; Rule 4)
+  - A4 (a new version's preview under both notices, dated today or
+    with the version's saved date; Rule 5b)
+  - A5 (an older version's browser tab; Rule 6; scenario 6 passes it)
+  - A6 (a chapter whose authors are the book's still shows its author
+    line; Rule 10)
+  - A7 (a priced file's link shows its price twice; Rule 11a; scenario
+    4 passes it)
+  - A8 (a format with several files; Rule 11b)
+  - A10 (the HTML view page's return arrow; Fields, the HTML view page;
+    scenario 3 passes it)
+  - A11 (a manual purchase never completed; Rule 14)
+  - A12 ("Enable" unticked on a press that sells; Rule 14b; Settings
+    bullet 10)
+  - A13 (a short date format other than the year-first one heading a
+    chapter "Forthcoming" or "Published"; Rule 16a)
+  - A14 (a later version's "Original work published" on a chapter that
+    version added; Rule 19b)
+  - A15 (the pages in French; Rule 21)
+  - A16 (a book's earlier URL Path; Rule 2)
+  - A17 (an unpublished book's chapter page without the preview notice;
+    Rule 5b)
+  - A18 (where a visitor who signs in or registers to buy lands; Rule
+    14; scenario 4 passes it)
+  - A19 (an older version's chapter page, and a new version's in its
+    preview, on a press with "DOI Versioning" "No"; Rules 5b, 15a)
+  - A20 (a later version's chapter with its own date; Rule 16)
+  - A21 (the book's Author or an unassigned role using a preview's
+    citation; Actors row 6)
+  - A22 ("APA"'s "(Vols. 3)" for a series position; Rules 19a, 19b)
+  - A23 (the PDF view page's script error; Fields, the PDF view page;
+    scenario 3 passes it)
+  - A24 (a preview's file links; Rule 5c)
+  - A25 (an HTML file linking another book, its "omp://" links doing
+    nothing; Fields, the HTML view page)
+  - A26 (a review made public, missing from the published book's page;
+    Rule 22; Settings bullet 16)
+- **No seed**:
+  - a purchase completed through PayPal (Rule 14)
+- **Owned by another feature**:
+  - the Settings pages and the plugin switches (Actors row 7;
+    *[Plugins management](U62-plugins-management.md)*, scenario 2)
+  - building the formats, the chapters, the catalog entry and the
+    contributors (Actors row 8; *[Publication formats & proof
+    terms](U73-publication-formats-proof-terms.md)*, *[Chapters & work
+    type](U72-chapters-work-type.md)*, *[Catalog
+    management](U70-catalog-management.md)*, *[Contributors &
+    affiliations](U41-contributors-and-affiliations.md)*)
+  - "Paypal Fee Payment" with only its "Account Name": the transaction
+    error page (Rule 14; Settings bullet 9; *[Payments &
+    APCs](U52-payments-and-apcs.md)*)
+  - a file for sale on a press with no currency or no method set up
+    (Rule 14a; *[Publication formats & proof
+    terms](U73-publication-formats-proof-terms.md)*, scenario 6)
+  - the "Citation Style Language" "Settings" window's choices (Settings
+    bullet 4; *[Article landing page &
+    reading](U13-article-landing-page-and-reading.md)*, scenario 6)
+  - "HTML Monograph File" off, an HTML file's link downloading the file
+    (Settings bullet 2; *[Media files](U47-media-files.md)*)
+  - the file views a file's opening or download counts (Side effects;
+    *[Usage statistics](U64-usage-statistics.md)*)
+  - "Users must be registered and log in to view the press site."
+    ticked, or the press not enabled (Settings bullets 7, 8; *[Journal
+    identity & about pages](U07-journal-identity-and-about-pages.md)*)
+  - "Chapter Page" unticked on a chapter with a DOI (Settings bullet 12;
+    *[Chapters & work type](U72-chapters-work-type.md)*, scenario 9)
+  - the date formats (Settings bullet 13; *[Appearance &
+    theming](U10-appearance-and-theming.md)*, scenario 7)
+  - an Edited Volume's credits, the DOIs, URNs, licenses and cover sizes
+    (Settings bullet 14; *[Contributors &
+    affiliations](U41-contributors-and-affiliations.md)*, scenario 10;
+    *[DOIs](U45-dois.md)*; *[Identifiers](U44-identifiers.md)*;
+    *[Publication metadata](U40-publication-metadata.md)*; *[Catalog
+    management](U70-catalog-management.md)*, scenario 5)
+
+## Findings register
+
+Verdicts are the author's judgment (claude, 2026-09-28), unreviewed unless
+an entry notes otherwise; the team settles them on spec review.
+
+| ID | Finding (one line, symptom) | Bug? | Impact | Review |
+|----|-----------------------------|------|--------|--------|
+| [A8](#a8) | In a format with several files, a file for sale shows no price | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A15](#a15) | In French (Canada), a book's purchase link drops the format's name, and the "Format Availability" window is titled "Approbation du format" | 🐞 | low | issues (claude), 2026-10-08 — narrowed to the two wrong texts, locale files re-read |
+| [A16](#a16) | A book's earlier URL Path shows a server error page | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
+| [A19](#a19) | An older version's chapter page of a book shows a blank server error page to every reader | 🐞 | medium · crash: server | issues (claude), 2026-10-06 — re-verified |
+| [A1](#a1) | On a press, a book address that names no book opens the Login page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A3](#a3) | A version address that names no version fails with a server error | 🐞 | low · crash: server | issues (claude), 2026-10-01 — re-verified |
+| [A4](#a4) | A new version's preview also calls itself outdated, dated today or with the version's saved date | 🐞 | low | issues (claude), 2026-10-06 — re-verified |
+| [A5](#a5) | An older version's browser tab names the current version | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A6](#a6) | A book's table of contents repeats the book's authors under every chapter | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A7](#a7) | A priced file's link shows its price twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A10](#a10) | On a press, the return arrow of a book's HTML view page is announced as the code "##monograph.return##" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A12](#a12) | A press that unticks "Enable" on its Payments tab still sells its priced files | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A13](#a13) | On a press whose short date format is not year-first, a published chapter's page is headed "Forthcoming" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A17](#a17) | Previewing an unpublished book, its chapter pages carry no notice that they are a preview | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A18](#a18) | A visitor who signs in or registers to buy a book file lands on their home page, not the payment page | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A20](#a20) | A chapter with its own date reads "June 1, 2024 — Updated on June 1, 2024" in a book's later version | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
+| [A23](#a23) | A press's PDF view page fails in its own script, "PDFJS is not defined", every time it opens | 🐞 | low · crash: script | upstream sync (claude), 2026-10-05 — re-verified |
+| [A25](#a25) | A book's HTML file that links another book shows with every "omp://" link dead | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
+| [A26](#a26) | A review made public never shows on the published book's page | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
+| [A27](#a27) | A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
+| [A24](#a24) | On a press, every file link on a book's preview opens "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
+| [A11](#a11) | A buyer who pays by hand never gets the file | ❓ | user-visible | — |
+| [A2](#a2) | A book published only as an Author's Original has no page | ❓ | minor | — |
+| [A21](#a21) | On a preview, "How to Cite" works only for the roles assigned to the book | ❓ | minor | — |
+| [A22](#a22) | "APA" prints a series position as a number of volumes | ❓ | minor | — |
+| [A14](#a14) | A chapter new in a later version is cited as older than it is | ❓ | minor | — |
+
+### All apps
+
+<a id="a1"></a>
+**A1 — On a press, a book address that names no book opens the Login page instead of "404 Not Found"** · 🐞 · low.
+On a press, a visitor who opens a book address with a number or URL
+Path the press does not have is sent to the Login page. A visitor who
+signs in there, like anyone already signed in, gets an error page
+instead: its heading is empty, its browser tab reads "| {press name}",
+and its text is "An invalid published submission was specified.". In
+both cases the answer should be "404 Not Found".
+Nothing is lost, since there is no book to show. But a mistyped or
+stale link asks the visitor to sign in for something that does not
+exist, and a crawler is redirected instead of being told the address
+is gone.
+The press already answers "404 Not Found" in the neighbouring case, an
+unpublished book's address opened by a visitor. A journal and a
+preprint server answer "404 Not Found" for this case, an article or
+preprint address that names nothing.
+Basis: probe, 2026-10-01. <sup>f-a1</sup>
+
+<a id="a2"></a>
+**A2 — A book published only as an Author's Original has no page** · ❓ · minor.
+A book whose only published version is an "Author's Original" answers "404
+Not Found" to readers, and the catalog leaves it out, although the
+workflow shows that version "Status: Published". The Press manager and
+the Site Administrator who type the book's address get its page as if
+published, with no preview notice, "Published {Version of Record date} —
+Updated on {Author's Original date}" and "Versions" "{date} (Author's
+Original 1.0)"; the workflow, which shows the Version of Record "Status:
+Unpublished", offers them neither "View" nor "Preview".
+Question: should a published Author's Original make the book public on a
+press? Lean: intended; only a Version of Record puts a book in the catalog,
+but the workflow could say so.
+Basis: probe, 2026-09-28. <sup>f-a2</sup>
+
+<a id="a3"></a>
+**A3 — A version address that names no version fails with a server error** · 🐞 · low · crash: server.
+A book's address followed by "/version/" and an id that is none of the
+book's versions (a mistyped number, another book's version, or letters
+such as "abc") shows a blank server error page instead of "404 Not
+Found", to visitors, Readers, the Press manager and the Site
+Administrator alike: the app fails.
+Basis: probe, 2026-10-01. <sup>f-a3</sup>
+
+<a id="a4"></a>
+**A4 — A new version's preview also calls itself outdated** · 🐞 · low.
+Previewing a new, unpublished version of a published book shows the
+preview notice and, under it, "This is an outdated version published on
+{today's date}. Read the most recent version." While the version has no
+publication date the line prints the day of the preview, and once a
+"Date Published" is saved on the version's "Catalog Entry" it prints
+that date. The version is the newest there is, and "most recent
+version" leads to the published version's page. A journal's preview
+page shows the preview notice alone. The editor or author checking the
+new version is told it is outdated and already published; readers never
+see the line.
+Basis: probe, 2026-10-06. <sup>f-a4</sup>
+
+<a id="a5"></a>
+**A5 — An older version's browser tab names the current version** · 🐞 · low.
+An older version's page is headed with that version's title, but its
+browser tab (and a bookmark made from it) reads the current version's
+title. A reader who bookmarks the version they cite gets a bookmark
+named after another version. The fault shows only when a later version
+was published under a different title.
+Basis: probe, 2026-10-01. <sup>f-a5</sup>
+
+<a id="a6"></a>
+**A6 — A book's table of contents repeats the book's authors under every chapter** · 🐞 · low.
+A book's page names the book's authors at the top, and its table of
+contents is meant to show a chapter's author line only when the
+chapter's authors differ from the book's. The chapter's author line is
+shown also where the chapter's authors are the book's: a book by one
+author lists that author again under each of its chapters, and a book by
+several authors lists them all again under a chapter credited to all of
+them.
+The names shown are correct; the repeated lines only add noise to the
+table of contents.
+On `main` no setting avoids it. On 3.5 and earlier the lines are left
+out once the "Author" role's "Show role title in contributor list" box
+(Settings › Users & Roles › Roles) is unticked; it is ticked on a new
+press.
+Basis: probe, 2026-10-01. <sup>f-a6</sup>
+
+<a id="a7"></a>
+**A7 — A priced file's link shows its price twice** · 🐞 · low.
+The link of a file for sale reads "25.00 Purchase PDF (25.00 USD)": the
+bare price, then the sentence with the price again.
+Basis: probe, 2026-10-01. <sup>f-a7</sup>
+
+<a id="a8"></a>
+**A8 — In a format with several files, a file for sale shows no price** · 🐞 · low.
+A format with more than one listed file shows each file's name twice, as
+text and as a link, and the link of a file for sale reads only its name:
+no price and no "Purchase". The reader cannot tell it from a free file
+until the link leads to the Login or payment page.
+Basis: probe, 2026-10-01. <sup>f-a8</sup>
+
+<a id="a10"></a>
+**A10 — On a press, the return arrow of a book's HTML view page is announced as the code "##monograph.return##"** · 🐞 · low.
+The return arrow at the top left of a book's HTML view page has no
+visible text, and a screen reader announces it as the code
+"##monograph.return##". On the PDF view page the same arrow is
+announced "Return to view details about" and the book's title.
+A blind reader cannot tell where the arrow leads. The arrow works and
+opens the book's page, and the link beside it, read out as the book's
+title, opens the same page. The arrow has no hover tooltip, so sighted
+readers never see the code.
+The code is announced on every HTML book file, in every language the
+press offers, English included. The page is the one the "HTML Monograph
+File" plugin shows, and the plugin is on by default.
+Basis: probe, 2026-10-01. <sup>f-a10</sup>
+
+<a id="a11"></a>
+**A11 — A buyer who pays by hand never gets the file** · ❓ · user-visible.
+With "Manual Fee Payment", a buyer's "Send notification of payment" emails
+the press, and "Continue" leads back to the payment page. A press has no
+list of payments, and no menu leads to one.
+No screen records a manual payment, so the file stays for sale to that buyer however they paid.
+Question: should a press be able to record a manual payment, or should
+"Manual Fee Payment" be withheld from direct sales? Lean: record it; the
+method's own description says the manager records receipt.
+Basis: probe, 2026-09-28. <sup>f-a11</sup>
+
+<a id="a12"></a>
+**A12 — A press that unticks "Enable" on its Payments tab still sells its priced files** · 🐞 · low.
+A press that sells book files unticks "Enable" on Settings ›
+Distribution › "Payments" and saves, expecting payments to stop. The
+tab then hides the currency and the payment method, as if payments
+were off. A signed-in reader who opens a priced file's link still gets
+the payment page with the fee and the press's payment instructions.
+The press is not told that the box changed nothing. A buyer is treated
+exactly as before the box was unticked, so nobody pays without getting
+what a buyer got before. To stop selling, the press must change each
+priced file's terms.
+The fault shows on a press that has a currency, a payment method and a
+file set to "Direct Sales". On a journal the same box does turn
+payments off.
+Basis: probe, 2026-10-01. <sup>f-a12</sup>
+
+<a id="a13"></a>
+**A13 — On a press whose short date format is not year-first, a published chapter's page is headed "Forthcoming"** · 🐞 · low.
+On a press that has changed its "Date (Short)" setting, a published
+chapter's page can be headed "Forthcoming" above its publication date:
+a chapter of a book published on December 31, 2024 reads "Forthcoming
+December 31, 2024". The book's own page reads "Published".
+The other way round, a chapter of a book scheduled for a later date can
+read "Published" in an editor's preview while the book's page reads
+"Forthcoming".
+Only the heading is wrong, and whether it is wrong changes with the day
+the page is read: on part of each month under a day-first format, on
+part of each year under the month-first one, depending on the day or
+month the book was published.
+It needs a chapter with its own page. The year-first format, which a
+press has until someone changes the setting, is not affected; the three
+other choices the setting offers (day-month-year, month/day/year,
+day.month.year) are.
+Basis: probe, 2026-10-01. <sup>f-a13</sup>
+
+<a id="a14"></a>
+**A14 — A chapter new in a later version is cited as older than it is** · ❓ · minor.
+On a later version of a book, a chapter's "APA" citation adds "(Original
+work published {year})", the book's first year, even for a chapter that
+version added: "Harbours", added in 2026, is cited "(2026). Harbours. …
+(Original work published 2024)".
+Question: should a chapter's citation date from its own first version?
+Lean: yes, a defect; the chapter did not exist in that year.
+Basis: probe, 2026-09-28. <sup>f-a14</sup>
+
+<a id="a15"></a>
+**A15 — In French (Canada), a book's purchase link drops the format's name, and the "Format Availability" window is titled "Approbation du format"** · 🐞 · low.
+On a press shown in French (Canada), two texts say something other than
+their English. A reader who opens a book with a file for sale sees the
+purchase link without the format's name: "25.00 Achat (25.00 USD)",
+where the English page reads "25.00 Purchase PDF (25.00 USD)". An
+editor who presses a format's availability link on the book's
+"Publication Formats" page gets a window titled "Approbation du format"
+("Format Approval"), where English titles it "Format Availability".
+
+Nothing is lost and both tasks get done: the link still opens the
+purchase, and the window's own sentence says that the format will be
+available to readers. For a format with a single file the link is the
+only place the book's page names the format, so the French reader is
+not told which format the price buys. The press cannot change either
+text from its settings.
+
+A press shows both when "Français (Canada)" is among the languages it
+offers; the link also needs payments turned on and a file priced for
+direct sale. "Français" (France) has the same purchase link, and the
+right window title.
+Every version name reads "{date} (##publication.versionStage.display##)", as on an article's page ([→ Article landing page & reading, A1](U13-article-landing-page-and-reading.md#a1)), whose report covers it.
+Basis: probe, 2026-10-01 and 2026-10-04; code, 2026-10-08. <sup>f-a15</sup>
+
+<a id="a16"></a>
+**A16 — A book's earlier URL Path shows a server error page** · 🐞 · medium · crash: server.
+After a book's URL Path changes (a later version saved a new one), the
+address with the old path shows a blank server error page instead of
+the book: bookmarks, shared links and search engines' links to it break.
+A URL Path saved on a new, unpublished version does the same at once,
+to visitors and to the Press manager, until that version is published.
+The app fails.
+Since: 2024-06-26 (two years) · Basis: probe, 2026-10-01. <sup>f-a16</sup>
+
+<a id="a17"></a>
+**A17 — Previewing an unpublished book, its chapter pages carry no notice that they are a preview** · 🐞 · low.
+An editor who previews an unpublished book sees "This is a preview and
+has not been published. View submission" at the top of the book's page.
+A chapter's page opened from that preview shows no such notice, and so
+no link back to the submission.
+When the book carries a date, the chapter's page also reads "Published
+{date}" or "Forthcoming {date}", as the book's page does, so it looks
+like a public page. A book carries a date when it was published and
+then unpublished, or is scheduled, or its "Date Published" was typed in
+"Catalog Entry".
+Readers are not affected: to them the address answers "404 Not Found".
+It needs a chapter with its own page in a book, or a version, that is
+not published. A chapter has its own page when "Show this chapter on
+its own page and link to that page from the book's table of contents."
+is ticked in its window; the box is unticked on a new chapter.
+Basis: probe, 2026-10-01. <sup>f-a17</sup>
+
+<a id="a18"></a>
+**A18 — A visitor who signs in or registers to buy a book file lands on their home page, not the payment page** · 🐞 · low.
+A visitor who follows the link of a book file for sale gets the Login
+page. After signing in there they expect the payment page for that
+file. They land where an ordinary sign-in would take them: the press's
+home page, "My Submissions" or the Dashboard, by role. A newcomer who
+chooses "Register" on that Login page, fills the form and sends it
+lands on "Registration complete", signed in.
+The Login page and the page they land on say nothing of the purchase.
+The buyer, now signed in, must find the book again and follow the
+file's link a second time, which opens the payment page at once.
+The fault shows on a press that sells files: a currency and a payment
+method under Settings › Distribution › "Payments", and a file set to
+"Direct Sales".
+A free file's Login page returns to the file (Rule 13c).
+Basis: probe, 2026-10-01. <sup>f-a18</sup>
+
+<a id="a19"></a>
+**A19 — An older version's chapter page of a book shows a blank server error page to every reader** · 🐞 · medium · crash: server.
+The server fails when a reader opens a chapter's page in an older
+version of a book. Instead of the chapter under the "This is an outdated
+version" notice, the reader gets a blank server error page. All three
+ways in fail: the address typed, the chapter's link in the older
+version's table of contents, and the older version's link in the chapter
+page's "Versions" list.
+Editors meet the same page in the preview of a book's second or later
+version before it is published: each chapter's link in the preview's
+table of contents fails. The preview of a book's first version, and
+every book page, still open, and so do the current version's chapter
+pages.
+It needs three things, for both pages, and the first is the default:
+- the press's "DOI Versioning" reads "No", as it does until someone
+  changes it;
+- the chapter has its own page ("Chapter Page" is a tick on each
+  chapter);
+- the chapter has no DOI in the version shown, which is every chapter
+  of a press that assigns no chapter DOIs. A new version's chapter
+  carries the DOI its chapter had when the version was made.
+A chapter DOI assigned later saves only one of the two pages. Assigned
+between "Create New Version" and "Publish", it goes to the published
+version's chapter: that version's page opens once it is the older one,
+but the preview still fails. Assigned after "Publish", it goes to the
+new version's chapter, and the older version's page still fails.
+Basis: probe, 2026-10-06. <sup>f-a19</sup>
+
+<a id="a20"></a>
+**A20 — A chapter with its own date reads "June 1, 2024 — Updated on June 1, 2024" in a book's later version** · 🐞 · low.
+On a book whose chapters carry their own publication dates, a chapter's
+page in a later version of the book gives the same date twice: "June 1,
+2024 — Updated on June 1, 2024". A reader is told the chapter was
+updated on the day it was first published.
+A new version copies each chapter with its "Date Published", and the
+page prints the chapter's first date and its date in this version
+whether or not they differ. The line stays that way until an editor
+types another date into the chapter.
+It needs a book set to "Each chapter may have its own publication
+date.", which is a choice made per book and not what a new book has, a
+chapter with its own page and date, and a second published version.
+Basis: probe, 2026-10-01. <sup>f-a20</sup>
+
+<a id="a21"></a>
+**A21 — On a preview, "How to Cite" works only for the roles assigned to the book** · ❓ · minor.
+On an unpublished book's preview, the book's Author and a Series editor
+or assistant role not assigned to the book see the citation, but
+choosing another format leaves it unchanged and a download opens the
+"404 Not Found" page. The Press manager and the roles assigned to the
+book get the other format and the file.
+Question: should everyone who may preview a book use its citation
+formats? Lean: yes, a defect; the block is offered to them. The same
+refusal on a journal's published articles outside a published issue was
+a defect, since fixed ([→ Article landing page & reading, OJS1](U13-article-landing-page-and-reading.md#ojs1)).
+Basis: probe, 2026-09-28. <sup>f-a21</sup>
+
+<a id="a22"></a>
+**A22 — "APA" prints a series position as a number of volumes** · ❓ · minor.
+A book at position 3 of its series is cited in "APA" as "Tides (Vols.
+3)", which reads as a work in three volumes, and its chapters as "(Vols.
+3, pp. 1-20)"; the series' title shows only in the "BibTeX" and "RIS"
+files.
+Question: should "APA" print a series position as one? Lean: yes, a
+defect; a place in a series is not a count of volumes.
+Basis: probe, 2026-09-28. <sup>f-a22</sup>
+
+<a id="a23"></a>
+**A23 — A press's PDF view page fails in its own script, "PDFJS is not defined", every time it opens** · 🐞 · low · crash: script.
+Each time a reader opens a book's PDF on a press, the PDF view page's
+own script fails: the browser's console reads "PDFJS is not defined".
+The reader sees nothing of it: the viewer under the bar shows the PDF
+and "Download" saves it all the same.
+The page also loads and runs the PDF viewer's two scripts a second
+time outside the viewer, where nothing uses them. Nothing is lost; the
+error is noise for anyone watching a press's pages for script
+failures.
+It happens on every PDF view page while "PDF.js PDF Viewer" is on, as
+it is on a new press.
+Basis: probe, 2026-10-05. <sup>f-a23</sup>
+
+<a id="a24"></a>
+**A24 — On a press, every file link on a book's preview opens "404 Not Found"** · 🐞 · medium.
+A preview of an unpublished book, or of a new version of a published
+one, lists the version's files as the published page will. Pressing any
+of them opens the "404 Not Found" page instead of the file's view page.
+This happens for every file type, viewer or download, and for everyone
+who may open the preview: the press's managers and editors, its series
+editors and assistants, and the book's authors. On the published book's
+page the same links work.
+
+The files can still be downloaded from the book's workflow. What cannot
+be checked before publishing is the file as readers will get it, in its
+viewer.
+Basis: probe, 2026-10-13. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — A book's HTML file that links another book shows with every "omp://" link dead** · 🐞 · medium.
+A book's HTML file holding a link written "omp://monograph/{number}",
+the "HTML Monograph File" plugin's shorthand for another book of the
+press, opens in the HTML view page, but the app gives up preparing it
+and serves it as stored: its "omp://…" links, that one and any
+"omp://press" link in the same file, keep their written address and
+pressing one does nothing, its embedded figures do not load, and
+placeholders such as "{$pressTitle}" show as written. A visitor, a
+Reader and the Press manager get the same. A file whose only such link
+is written "omp://press" is prepared in full, with that link opening the
+press's home page. The same fault, an address built from a single value
+where a list is required, gives a book's old URL Path its blank error
+page ([A16](#a16)).
+Worked until a 2024 change to how the app builds its addresses, read from the code's history: a regression.
+Since: 2024-06-26 (two years), a date read from the code's history · Basis: probe, 2026-10-13. <sup>f-a25</sup>
+
+<a id="a26"></a>
+**A26 — A review made public never shows on the published book's page** · 🐞 · medium.
+An editor ticks "Publicly Show Reviewer Comments" on an "Open" review
+and presses "Mark as Complete", whose dialog says "This review will be
+made publicly visible alongside the article." Once the book is
+published, its page shows no review at all: no comments, no reviewer's
+name, no review heading, for a visitor or for the editor.
+
+The press believes its reviews are public, and nobody learns that
+readers never see them.
+
+It concerns presses that publish reviews. An editor ticks the box on
+each review. A press can also have it ticked on every new review: the
+setting "Make reviewer comments publicly visible with published content"
+(Settings › Workflow › Review › "Setup") does that, and it is off until
+the press turns it on. A journal's article page has the same fault, with
+a different fix
+([pkp-e2e#218](https://github.com/jardakotesovec/pkp-e2e/issues/218)).
+Basis: probe, 2026-10-13. <sup>f-a26</sup>
+
+<a id="a27"></a>
+**A27 — A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included** · 🐞 · medium.
+An unassigned Series editor or assistant role opens an unpublished book's page by its address while the book is still in submission or review, or after it was declined, as on an article's page, where the full entry stands ([→ Article landing page & reading, A16](U13-article-landing-page-and-reading.md#a16)).
+Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
+
+### Retired
+
+<a id="a9"></a>
+**A9 — On a press, a reader who opens a book's PDF gets an empty viewer, and no download saves the file** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13444).
+
+---
+
+<a id="footnotes"></a>
+## Footnotes — mechanism & evidence
+
+<a id="fn-a"></a>
+**a** — OMP `pages/catalog/CatalogBookHandler.php` (ops `book`, `view`, `download`) renders `templates/frontend/pages/book.tpl`, which includes `frontend/objects/monograph_full.tpl` (the book) or `frontend/objects/chapter.tpl` (`$isChapterRequest`). Files: `frontend/components/publicationFormats.tpl` and `downloadLink.tpl`; contributors: `frontend/components/authors.tpl`. Viewers: `plugins/generic/pdfJsViewer` (hooks `CatalogBookHandler::view`, `::download`, late) and `plugins/generic/htmlMonographFile` (the same hooks). How to cite: `plugins/generic/citationStyleLanguage` on `CatalogBookHandler::book`, `Templates::Catalog::Book::Details`, `Templates::Catalog::Chapter::Details`. Purchase: the fall-through of `CatalogBookHandler::download()` into `OMPPaymentManager`, and `pages/payment/PaymentHandler::plugin()` for a method's callback. Code read on checkout omp `3cd59e944` (lib/pkp `17a1f01fed`), 2026-09-28. The OMP default theme overrides none of these templates. ui-library's `PkpCite` is mounted by no template (UNASSIGNED item 30 records it for the article page); the legacy CSL block is the only one. Live-probed 2026-09-28 (Purpose): on scratch presses the home page's two lists, the catalog, a series page, a category page, "New Releases" and a search each lead to the book; the book's page, a chapter page, both view pages and the payment page as the sections above describe.
+
+<a id="fn-b"></a>
+**b** — OJS and OPS `pages/catalog/index.php` route only `category`, `fullSize` and `thumbnail` to `CatalogHandler`; neither app has `CatalogBookHandler`, `pages/payment` exists in OJS only (its own payment types), OPS has no payment code. Live-probed 2026-09-28 (the absence paragraph): on a scratch journal requiring subscriptions with a "Purchase Article" fee of 5 USD, an article published in its one published issue showed a galley link reading "Requires Subscription or Fee PDF (USD 5)"; pressed signed out it led to Login ("Subscription or article purchase required to access item."), pressed by a Reader to "Manual Fee Payment" ("Fee" "5.00 (USD)"). A scratch server's preprint page showed its galleys, no table of contents, no chapter pages and nothing for sale.
+
+<a id="fn-td1"></a>
+**td1** — Live-probed 2026-09-28 (the absence paragraph): on the seeded journal and preprint server, `catalog/book/1`, `catalog/book/1/chapter/1`, `catalog/view/1/1/1`, `catalog/download/1/1/1` and `catalog/book/{a published item's number}` answered "404 Not Found", signed out and as the Journal Manager (Server Manager). Control: on the seeded press `catalog/book/1` sent a visitor to Login and gave the Press manager "An invalid published submission was specified." (Rule 3a).
+
+<a id="fn-c"></a>
+**c** — `CatalogBookHandler::authorize()` adds `ContextRequiredPolicy` and `OmpPublishedSubmissionAccessPolicy` (whose `OmpPublishedSubmissionRequiredPolicy` resolves the number or URL Path and checks nothing about status); `PKPHandler::authorize()` adds `RestrictedSiteAccessPolicy` for `restrictSiteAccess` and a press not enabled. `book()` throws not found when the submission is not `STATUS_PUBLISHED` and the user is absent or `Repo::submission()->canPreview()` is false; `canPreview()` passes any user holding `ROLE_ID_MANAGER`, `ROLE_ID_SUB_EDITOR`, `ROLE_ID_ASSISTANT` or `ROLE_ID_SUBSCRIPTION_MANAGER` in the press (`_roleCanPreview()`, assignment not read) and any user with an Author stage assignment on the book; an incomplete submission is never previewable. Role names from OMP `locale/en/default.po` and lib/pkp `locale/en/default.po`. Live-probed 2026-09-28 (Actors preamble, rows 1, 7, 8; Settings bullets 7, 8): a published book's page and its chapter page read the same for a visitor and 23 signed-in accounts (every role of a new press, assigned and not, the book's Author, both kinds of Reviewer, the Site Administrator). Settings › Users & Roles › "Roles" on a new press listed 19 roles, eight of them at "Assistant", the eight the preamble names. On a press requiring sign-in, and on one created not enabled, a signed-out visitor who opened the book, a version, a chapter page, a file's view or download address, a priced file or the press home landed on Login; that press's signed-in Reader read the pages. "Enable this press to appear publicly on the site" sits only in the Site Administrator's Hosted Presses › "Edit" window (the journal's and server's box likewise).
+
+<a id="fn-td5"></a>
+**td5** — Live-probed 2026-09-28 (Actors row 2; Rule 5): on scratch presses with an unpublished book in Production, the book's page opened under the preview notice for the Press manager, Press editor, Production editor, an assigned and an unassigned Series editor, an assigned and an unassigned Copyeditor, the other seven assistant roles (unassigned), the book's Author and the Site Administrator. A visitor, a Reader, an External and an Internal Reviewer, and another Author, a Volume editor, a Chapter Author and a Translator not on the book got "404 Not Found"; a submission its author never finished answered "404 Not Found" to every role. The workflow offered "Preview" to the Press manager and the assigned Series editor, and the book's Author neither "Preview" nor "View". The book's chapter page opened for every previewing role without a notice, reading "Published March 5, 2024" (A17).
+
+<a id="fn-d"></a>
+**d** — `monograph_full.tpl`: title `getLocalizedFullTitle(null, 'html')`; `authors.tpl`; `.item.doi` (`doi.readerDisplayName` "DOI:"); `.item.keywords` (`common.keywords` through `semicolon` "{$label}: ", joined by `common.commaListSeparator`); `.item.abstract` (`submission.synopsis` "Synopsis", OMP `locale/en/submission.po`; always rendered); plain language summary; `.item.chapters` (heading `pkp_screen_reader` `submission.chapters`); hook `Templates::Catalog::Book::Main`; the chart; `.item.author_bios`; `.item.references` when `count($citations)` or `citationsRaw` (pkp/omp#2502, read 2026-10-09 at its head `52cf201a96` before its merge, and merged that day as omp `77ca57587a`: before it the template tested `$citations`, which a version with no references also passed, and printed the heading over an empty `.value`; the re-read is in td24). Side column: `.item.cover` (`getLocalizedCoverImageThumbnailUrl()`, falling back to `templates/images/book-default_t.png`; `alt` from the cover's `altText`); `.item.files` (`submission.downloads`, screen reader only); `.item.date_published` with `.sub_item.versions`; `.item.series` (`series.series`, `catalog.manage.series.onlineIssn` / `printIssn`) linking `catalog/series/{path}`; `.item.categories` (`catalog.categories`) linking `catalog/category/{path}`; data availability, funding statement, funders, copyright (`submission.copyrightStatement`), license; `.item.publication_format` blocks; hook `Templates::Catalog::Book::Details`. `book.tpl` sets `pageTitle` from `getCurrentPublication()->getLocalizedFullTitle()` (book) or the chapter's full title; `headerHead.tpl` appends " | {context name}". No template of the page includes `breadcrumbs.tpl`. Live-probed 2026-09-28 (Fields intro, the book's page): tabs "K2 Minimal Book | {press name}" and, with a subtitle, "K2 Full Book: A Subtitle | {press name}"; the two columns side by side at 1280 px; the parts in the tables' order; the view pages without header, footer or sidebar, the payment page with them and the trail "Home / Manual Fee Payment". Keywords typed "alpha", "beta gamma" (stored in that order) read "alpha, beta gamma" in three runs and "beta gamma, alpha" in one. A format with no code, date, identifier or physical box got no details block. Settings bullet 14: a format's Publisher ID "pid-k3", saved and read back, appeared nowhere in the book page's HTML; a contributor unticked from "Include this contributor when identifying authors in lists of publications." on a new version was still listed under "Authors", while the catalog's line named only the other author; an Edited Volume's new version credited its volume editor "(ed)"; a press license saved on screen showed on a book published after it and not on one published before; a 400 × 400 cover showed as a 100 × 100 copy.
+
+<a id="fn-td24"></a>
+**td24** — Live-probed 2026-09-28 (Rule 7; Fields, Cover): the bare book showed the screen-reader "Authors" heading, "Synopsis", an empty "References", the default book picture (not a link, empty alternate text), "Published", "Versions" and "Copyright (c) 2024 {press name}", and no other heading. A cover saved with "Alternate text" showed its small copy with that text, not a link. Re-read 2026-10-09 at the PR head `52cf201a96` of pkp/omp#2502 (issue pkp/pkp-lib#13189), before its merge, merged locally into omp `c07d91ced2`; the PR merged that day as omp `77ca57587a`, whose tree is the one read (Rule 7; Fields, "References"; scenario 1): a published book with no references ("Bomb Canada and Other Unkind Remarks in the American Media", book 5 of PKP's default dataset) had no "References" block on its page, where the same book on `c07d91ced2` without the change showed the "References" heading with nothing under it; a book given one reference in a new version ("Ridge, A. (2021). Tide tables u42r9.") showed "References" over that reference, with the change and without it. The "empty "References"" of the 2026-09-28 read is that earlier state.
+
+<a id="fn-e"></a>
+**e** — `chapter.tpl`: notice as note l; title `$chapter->getLocalizedFullTitle()`; `authors.tpl` with `$chapterAuthors` (the edited-volume swap needs `!$isChapterRequest`); DOI from `$chapterDoiObject` (the chapter's, or a sibling version's per `CatalogBookHandler`); abstract only when set; hook `Templates::Catalog::Chapter::Main`; bios of the chapter authors; side: cover wrapped in a link to `catalog/book/{id}` (current) or `…/{bestId}/version/{pid}`; the chapter's files through `publicationFormats.tpl` with `$isChapterRequest` (remote formats skipped); `.item.monograph` with `chapter.volume` "Volume" and `chapter.pages` "Pages" (OMP `locale/en/submission.po`); date and versions (note l); series, categories, copyright; license from the chapter's `licenseUrl` or the publication's, the CC badge from `getCCLicenseBadge()` of the chapter's URL when set; hook `Templates::Catalog::Chapter::Details`. Live-probed 2026-09-28 (Fields, the chapter page): tab "Tides: Low and high | {press name}"; the parts in the tables' order; an Edited Volume's chapter listed its own authors; "Pages 1-20"; the chapter's own "License URL" as a Creative Commons badge, an unknown one as a link reading "License"; the cover and "Volume" linked `…/catalog/book/{number}` (older version `…/version/{id}`), a number even with a URL Path saved. On a book with no cover the cover link had no name for a screen reader, seen in one run; what it reads with a cover is not settled.
+
+<a id="fn-f"></a>
+**f** — OMP `plugins/generic/pdfJsViewer/templates/display.tpl`: `<title>` `catalog.viewableFile.title` "{$type} view of the file {$title}" (format name, file name); `.return` link to `catalog/book/{bestId}` with screen-reader text `catalog.viewableFile.return` "Return to view details about {$monographTitle}"; `.title` a plain `span` with the file's name (OJS's template links the title instead); `.download` to `$downloadUrl` (`catalog/download/…?inline=1`) with `common.download` and `common.downloadPdf`; an inline script calling `PDFJS.getDocument()` against pdf.js 2.6.347, whose build defines no `PDFJS` global; the viewer iframe `pdf.js/web/viewer.html?file={downloadUrl}`; the outdated notice with `filePublication`'s raw `datePublished` when `!$isLatestPublication`. `plugins/generic/htmlMonographFile/templates/display.tpl`: the same `<title>`; `.return` with screen-reader text `monograph.return`, a key no locale file of OMP, lib/pkp or the plugin defines; `.title` linking `catalog/book/{bestId}/{formatBestId}/{fileBestId}`, an address `book()` reads as the current book page; the iframe loads `$downloadUrl`, which the plugin's `downloadCallback()` answers with the file's HTML (`HtmlGalleyHelper::getHTMLContents()`, media resolved) and returns, firing its own `UsageEvent`; a file whose `omp://monograph/` link makes `handleOmpUrl()` throw falls through to `CatalogBookHandler::download()`, which serves the file as stored (A25). Live-probed 2026-09-28 and 2026-10-05: see td22 and td21. OJS and OPS galley PDFs render in their viewer and download as "article.pdf" and "preprint.pdf".
+
+<a id="fn-td22"></a>
+**td22** — Live-probed 2026-09-28, before omp `8c807c919` (Fields, the PDF view page; A9): tab "PDF view of the file article.pdf" ("Free view of the file article.pdf" for a format named "Free"); the bar, left to right, the return arrow ("Return to view details about {title}", the older version's title on an older file, opening the current page), the file name as plain text, "Download" named "Download Download PDF". Pressing "Download" left the page as it was, and the browser's download of "192.html" was cancelled; the address alone answered 500 with an empty page. The viewer's toolbar read "of 0" pages under a red bar "Unexpected server response." ("More Information" adds "Unexpected server response (500) while retrieving PDF …"); its own "Download" started "document.pdf" and failed. Re-driven 2026-10-05 on OMP `main` at omp `8c807c919` (two runs; a visitor, a Reader and the Press manager; also on an older version's file, a supplementary PDF and a book with a URL Path): the bar's "Download" carries the `download` attribute and `…/catalog/download/{book}/{format}/{file}?inline=1`, and pressing it saved article.pdf (243 bytes) with the page unchanged; the frame `pdf.js/web/viewer.html?file=…` fetched the file 200 `application/pdf`, `inline;filename=article.pdf`; the toolbar read "1" "of 1", one page rendered, no red bar; the viewer's own "Download" saved article.pdf. "Zoom In" moved "Automatic Zoom" to 140%, "Find in Document" opened its find bar, and "Print", "Open File", "Switch to Presentation Mode" and "Tools" were enabled; "Previous Page" and "Next Page" were disabled on the one-page file. "PDFJS is not defined" was logged on every PDF view page (A23).
+
+<a id="fn-td21"></a>
+**td21** — Live-probed 2026-09-28 (Fields, the HTML view page; A10): tab "HTML view of the file article.html"; the bar holds only the return arrow (named "##monograph.return##", opening the book's page) and the title link (the file's version title, opening the current page), no "Download"; the HTML showed with its image. On an older version's file the notice read "This is an outdated version published on 2026-09-28. Read the most recent version.". The fixture's `article.css` answered 404.
+
+<a id="fn-td26"></a>
+**td26** — Live-probed 2026-10-05 (Fields, the HTML view page; A25; two runs): on a scratch press, the Press manager uploaded two HTML files into one "HTML" format of an unpublished book ("Change File", "Set Terms" "Open Access") and published it; the book's page listed both for a visitor, a Reader and the Press manager. The file holding only a link `omp://press` opened under the tab "HTML view of the file …" with its frame reading "Press link Visit the press.", the link's address the press's home page, followed inside the frame to the press's home page. `HtmlGalleyHelper::handleOmpUrl()` rewrites `omp://press` and `omp://monograph/{id}` links; the second fails (f-a25).
+
+<a id="fn-g"></a>
+**g** — `CatalogBookHandler::book()`: `version/{publicationId}` picks that publication from the submission's publications into the typed property `public Publication $publication` (no default), so an id matching none leaves it uninitialized and the following `!$this->publication` throws "must not be accessed before initialization" (a server error); an unpublished publication without `canPreview()` throws not found; a non-numeric first argument that is not the version's `urlPath` and has no sub-path is meant to redirect to the current `urlPath` (or id), but passes a string path to `PKPRequest::redirect()`, which takes `?array $path` since lib/pkp bee9547b49 (2024-06-26), so the redirect throws a TypeError, a server error (A16); a numeric one is never redirected. The URL Path resolves through `Repo::submission()->getByUrlPath()`. An unknown number or path fails `OmpPublishedSubmissionRequiredPolicy` with `user.authorization.invalidPublishedSubmission` "An invalid published submission was specified." (OMP `locale/en/locale.po`), and `PKPPageRouter::handleAuthorizationFailure()` sends a signed-out user to Login and a signed-in one to `user/authorizationDenied`. Submission status: `Repo::submission()->getStatusByPublications()` returns published only for a published publication whose `versionStage` is the final stage (Version of Record); the current publication is the last published one in version order (`getCurrentPublicationIdByPublications()`). Notices: `submission.viewingPreview` (link `dashboard/editorial?workflowSubmissionId={id}`) when the shown publication is not published, and `submission.outdatedVersion` whenever it is not the current publication, with `datePublished|date_format:$dateFormatShort`. Incidentals: the URL Path (U70 claim check K5, 2026-09-27: `catalog/book/{path}` opens, catalog links use the path, `catalog/book/{id}` still opens); the Author's Original only (U68 claim check K2, 2026-09-27: the book's page answered 404); the unknown number (U16 claim check K4, 2026-09-25: `catalog/book/999999` landed a visitor on Login). Live-probed 2026-09-28: see td2–td8.
+
+<a id="fn-td2"></a>
+**td2** — Live-probed 2026-09-28 (Rules 1, 2; A16): every link that leads to the book (the catalog, series and category pages, "New Releases", both home-page lists, a search result, "View Entry") used its URL Path "harbour"; the workflow's "View" and "Preview" opened the page in the same tab. `…/catalog/book/{number}` opened the page and kept the address. After a new version saved "harbour-2" and was published, `…/catalog/book/harbour` answered 500 with a blank page to a visitor, while `…/harbour/version/{id}` still opened; while "harbour-2" sat on the unpublished version, `…/catalog/book/harbour-2` answered the same to a visitor and the Press manager. The chapter page's cover and "Volume" linked `…/catalog/book/{number}`.
+
+<a id="fn-td3"></a>
+**td3** — Live-probed 2026-09-28 (Rule 3; A2): "404 Not Found" for a visitor and a Reader at an unpublished book in Production and its version address, a book scheduled for 2031-01-10 and its version address, and a book whose only published version is "Author's Original 1.0" (made on screen) at its book address and both version addresses; the catalog listed none of them. The Press manager and the Site Administrator got the Author's Original book's page with no notice.
+
+<a id="fn-td4"></a>
+**td4** — Live-probed 2026-09-28 (Rule 3a; A1): signed out, `catalog/book/999999`, `…/no-such-path`, `…/0` and `…/999999/version/1` landed on Login; the seeded Reader got `user/authorizationDenied` reading "An invalid published submission was specified.", with no heading and the tab "| Public Knowledge Press". OJS `article/view/999999` and OPS `preprint/view/999999` answered "404 Not Found" to both.
+
+<a id="fn-td6"></a>
+**td6** — Live-probed 2026-09-28 (Rule 4; A3): older versions at `…/version/{publication id}`, the ids the "Versions" links carry; a new unpublished version's address answered 404 to a visitor and a Reader; `version/999999`, another book's version id and `version/abc` answered 500 with a blank page to a visitor, a Reader, the Press manager and the Site Administrator.
+
+<a id="fn-td7"></a>
+**td7** — Live-probed 2026-09-28 (Rule 5; A4): with no date saved the preview had no "Published" and no "Versions"; with a date saved, "Published" and the date ("Forthcoming" for 2031-01-10) and a "Versions" heading over an empty list. "View submission" (`dashboard/editorial?workflowSubmissionId={id}`) took the Press manager and the Site Administrator to the workflow, gave the book's Author the access-denied page, and an unassigned Series editor and Copyeditor the Submissions page behind an "Error" window. A new version's preview showed both notices, the second "…published on 2026-09-28.", the new version's date being empty. Re-probed 2026-10-05 (Rules 5, 5a, 5b; A4, A17; two runs, the Rule 5 drive four): the preview opened under "This is a preview and has not been published. View submission" for the Press manager, an assigned and an unassigned Series editor, an unassigned Copyeditor, the book's Author (typing the address) and the Site Administrator, on a book never published and on a published book's new version; a Reader and a visitor got "404 Not Found". With no date saved, no "Published" and no "Versions"; dated 2024-06-01 on a book never published, "Published" "June 1, 2024" over an empty "Versions"; dated 2031-01-10, "Forthcoming" "January 10, 2031". A new version with "Date Published" 2025-01-15 saved on its "Catalog Entry" (the box read 2025-01-15 after a reload) read "Published" "March 5, 2024 — Updated on January 15, 2025" and "Versions" "2024-03-05 (Version of Record 1.0)" alone, while the published page kept "March 5, 2024". "View submission" opened the workflow (`dashboard/editorial?workflowSubmissionId={id}…&workflowMenuKey=workflow_5`) for the Press manager, the assigned Series editor and the Site Administrator; the Author got `user/authorizationDenied` "The current role does not have access to this operation."; the unassigned Series editor and Copyeditor the Submissions page ("Assigned to me (0)") behind the "Error" window with "OK". The unpublished book's chapter page opened with no notice for every previewing role, "Published June 1, 2024" on the dated book; a Reader and a visitor typing its address got "404 Not Found".
+
+<a id="fn-td8"></a>
+**td8** — Live-probed 2026-09-28 (Rule 6; A5): the older version "Tides" opened from "Versions" read "This is an outdated version published on 2024-03-05. Read the most recent version." ("…05-03-2024." after "Date (Short)" d-m-Y); heading "Tides", tab "Tides Revised | …"; "most recent version" opened the book's address.
+
+<a id="fn-h"></a>
+**h** — `monograph_full.tpl` `.item.date_published`: the label is `catalog.forthcoming` "Forthcoming" when the publication's `datePublished` (as `Y-m-d`) is after today's, `catalog.published` "Published" otherwise (pkp-lib#10169 fixed the comparison here); `$firstPublication` is computed in `book()` by reducing every publication of the submission (published or not) to the earliest `datePublished` (a publication without a date compares as earliest); the value is `submission.updatedOn` "{$datePublished} — Updated on {$dateUpdated}" with `$dateFormatLong` otherwise the first date alone. Versions: `array_reverse($monograph->getPublishedPublications())`, each `submission.versionIdentity` "{$datePublished} ({$version})" with `$dateFormatShort` and `versionString`; the list sits inside the date block, so a publication without a date shows neither. Seed fact (scenarios.md, `datePublished`): OMP shows "March 5, 2024" and "2024-03-05 (Version of Record 1.0)". A publication without a date prints as today: lib/pkp `PKPTemplateManager::smartyDateFormat()` formats it through `new Carbon(null)` (22c03902e1, 2024-09-06). Live-probed 2026-09-28: see td9, td23.
+
+<a id="fn-td9"></a>
+**td9** — Live-probed 2026-09-28 (Rule 8): one version "March 5, 2024"; a second one published on the day "March 5, 2024 — Updated on September 28, 2026", "September 28 2026 — …" after the long format "F j Y" was chosen; the Press manager's preview of a book scheduled for 2031-01-10 "Forthcoming" "January 10, 2031". Right after "Create New Version" the live page read "September 28, 2026 — Updated on March 5, 2024", and with an unpublished third version "September 28, 2026 — Updated on September 28, 2026".
+
+<a id="fn-td23"></a>
+**td23** — Live-probed 2026-09-28 (Rule 9): one version: "Versions" with "2024-03-05 (Version of Record 1.0)" in plain text; two: newest first, the shown one plain, the current one linking to the book's address, the older to `…/version/{id}`; a third, unpublished version and a second one unpublished again were not listed; "28-09-2026 (Version of Record 1.1)" after a short-format change.
+
+<a id="fn-i"></a>
+**i** — Table of contents: `monograph_full.tpl` `.item.chapters` over `ChapterDAO::getByPublicationId()` (the chapter list's `seq`); the title link when `isPageEnabled()`, to `catalog/book/{bestId}/chapter/{sourceChapterId}` or `…/version/{pid}/chapter/{sourceChapterId}`; the authors line when `$authorString != $chapter->getAuthorNamesAsString()`, where `$authorString` is `Publication::getAuthorString()` ("{name} ({roles})" joined by "; ") and the chapter's is the bare names joined by ", ", so the two never match; the chapter's DOI `doiObject` (or a sibling version's); chapter files `pluck_files by="chapter"`, then per `$publicationFormats` `by="publicationFormat"`, the link through `downloadLink.tpl`. Side column: `CatalogBookHandler::book()` keeps formats with `getIsAvailable()` (remote ones also in `remotePublicationFormats`) and files whose `directSalesPrice` is not null in an available format (`availableFiles`); `publicationFormats.tpl` prints a remote format (`urlRemote`, `target="_blank"`, not on a chapter page), a single file as `pub_format_single`, several as the format's name then per file `span.name` and a `downloadLink.tpl` with `useFilename=true`. `downloadLink.tpl`: with `useFilename` the file's name alone; otherwise, when `getDirectSalesPrice()` and `$currency`, the bare price followed by `payment.directSales.purchase` "Purchase {$format} ({$amount} {$currency})" (OMP `locale/en/locale.po`), else the format's name; the address `catalog/view/{bookBestId}/{formatBestId}/{fileBestId}` or with `version/{pid}` when the publication is not the current one. Incidental (U73 claim check K3, 2026-09-28): "25.00 Purchase PDF (25.00 USD)"; a two-file format listed "replacement.pdf", "article.pdf" where a one-file format read "PDF". Live-probed 2026-09-28: see td10, td11; the side column listed a press's formats in the Publication Formats page's order, and after a format was set "Not Available", or its approval revoked, the page and the side column both moved it last. Walked 2026-10-09 on OMP `main` (omp `57a9235110`, lib/pkp `27938abd4c`; Rule 10), two runs, each on a scratch press of its own, first seen 2026-10-08: a published Monograph's page, signed out, listed "Tides", "Harbours", "Estuaries", the order they were added in; the Press manager opened the published version's Chapters page (under "Warning: This version has been published. Editing it may impact the published content."), pressed "Order", dragged "Estuaries" above "Tides" and pressed "Done" (the chapters' `seq` then 1 "Estuaries", 2 "Tides", 3 "Harbours"); the page, opened again signed out with the version neither unpublished nor published again, listed "Estuaries", "Tides", "Harbours", "Tides" and "Harbours" each still followed by its author. Until pkp/pkp-lib#13453 (merged 2026-10-07) "Order" could not move a chapter ([Chapters & work type](U72-chapters-work-type.md), its retired A6), so only the order the chapters were added in could be read before. Walked 2026-10-01 on OMP `main` (issue report `docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md`, Evidence, seen in passing): on the default dataset's book 14, after a second version was published, its two files under "PDF" changed places from one run of the same steps to the next (cause not traced; seen on the side column, the table of contents' order not read).
+
+<a id="fn-td10"></a>
+**td10** — Live-probed 2026-09-28 (Rule 10; A6): "Tides" (page ticked, subtitle "Low and high") a link to `…/chapter/{n}`, "Harbours" and "Coda" plain text; a single-author book showed its author under each chapter with authors, a two-contributor book's chapter credited to both "Ada Author, Lee Second", a chapter with no authors no name; each chapter's file links under the chapter only, none in the side column; the chapter's DOI "DOI: https://doi.org/10.1234/…" as a link.
+
+<a id="fn-td11"></a>
+**td11** — Live-probed 2026-09-28 (Rule 11b; A8): format "Two" read "Two", "replacement.pdf" with a link "replacement.pdf", "article.pdf" with a link "article.pdf"; the priced file's link had no price and no "Purchase", and led a visitor to Login and a Reader to "Manual Fee Payment" ("Fee" "25.00 (USD)"); the free one opened its view page.
+
+<a id="fn-p"></a>
+**p** — `monograph_full.tpl` `.item.publication_format`, per available format `{if $publicationFormat->getIsApproved()}`, skipped when it has no identification codes, no publication dates, no stored public identifier or DOI and is not physical; the heading `monograph.publicationFormatDetails` "Details about the available publication format: {$format}" (screen reader) plus the visible `.item_heading` name when `count($publicationFormats) > 1`, else `monograph.miscellaneousDetails` "Details about this monograph"; codes `IdentificationCode::getNameForONIXCode()` (ONIX list 5) and value; dates `PublicationDate::getNameForONIXCode()` and `getReadableDates()` (a range joined by an em dash; "Hijri Calendar" under a Hijri date); public identifiers labelled with the plugin's raw `getPubIdType()` (U44's OMP2); the format's DOI with `doi.readerDisplayName`; `monograph.publicationFormat.productDimensions` "Physical Dimensions" with `getDimensions()` (width, height, thickness each followed by its unit code, joined by `monograph.publicationFormat.productDimensionsSeparator` " x "). Seed-facts (U44 claim check K4, 2026-09-24): the block shows only once the format reads "Approved" and "Available". Live-probed 2026-09-28: see td12; a date seeded without a format read "2024-03-05" with "Hijri Calendar" under it, one in "YYYYMMDD" "2024-03-05" alone; the URN block read "other::urn" with the URN as plain text, the DOI line "DOI:" with a link.
+
+<a id="fn-td12"></a>
+**td12** — Live-probed 2026-09-28 (Rule 12): one block, for "Paperback", with the visible heading "Paperback" and the screen-reader heading "Details about the available publication format: Paperback", the labels "ISBN-13 (15)" and "Publication date (01)", "Physical Dimensions" "130mm x 200mm" ("150mm x 230mm x 20mm" with a thickness); "PDF" (approved, nothing else) no block; a single available format "Details about this monograph". "Paperback" set "Awaiting Approval": its block gone, its and a remote format's links still listed.
+
+<a id="fn-j"></a>
+**j** — `CatalogBookHandler::view()` calls `download(…, true)`. `download()` answers not found for a format that is missing, not available or remote, a publication not published or not the format's, a file not of the format or with a null `directSalesPrice`; a dependent file of an HTML file and a publication's media file are served early. For a free file (`directSalesPrice === '0'`) or one the user has paid (`OMPCompletedPaymentDAO::hasPaidPurchaseFile()`): a signed-out user on a press with `restrictMonographAccess` is sent to Login (`Validation::redirectLogin()`); `view` offers the file to `CatalogBookHandler::view` (pdfJsViewer takes `application/pdf`, htmlMonographFile `text/html`); then `CatalogBookHandler::download` (htmlMonographFile serves `text/html`; pdfJsViewer only sets `inline`); otherwise it fires the `UsageEvent` with `publication: $publication`, the local variable, and serves the file through `app()->get('file')->download()`, `inline` when `?inline=1`, as an attachment under its name otherwise. Before omp `8c807c919` (pkp/pkp-lib#13444, 2026-10-05) the event read the typed property `$this->publication`, which `download()` never sets, so every such download threw "Typed property APP\pages\catalog\CatalogBookHandler::$publication must not be accessed before initialization" (A9, retired). `restrictMonographAccess` is OMP `UserAccessForm`'s `manager.setup.restrictMonographAccess` "Users must be registered and log in to view open access content." (OMP `locale/en/manager.po`). Before that fix (seed-facts, 2026-09-28, U73 claim check K3, K4; U54 claim check K1, K4): every `catalog/download/…` answered 500, the view page logged "PDFJS is not defined"; U47 claim check K2 (2026-09-24): with "HTML Monograph File" off an HTML file answered 500 with a blank page. Live-probed 2026-09-28 and 2026-10-05: see td13.
+
+<a id="fn-td13"></a>
+**td13** — Live-probed 2026-09-28, before omp `8c807c919` (Actors row 3; Rule 13; A9): signed out, "PDF" opened the PDF view page, "HTML" the HTML view page, an EPUB or a "notes.md" file's link a blank page (500); with "PDF.js PDF Viewer" or "HTML Monograph File" switched off by the Press manager, their links answered 500 with a blank page; the same on a chapter page's file link and for a signed-in Reader. On a press with "…view open access content." ticked, "PDF" sent a visitor to `login?source=/index.php/{press}/catalog/view/…`, and signing in there as a Reader landed on the PDF view page. An older version's file carried "This is an outdated version published on 2026-09-28. …" on both view pages, whose link opened the current page, while the book's date line read "September 28, 2026"; a changed short date format was not tried on the view pages. Re-driven 2026-10-05 on OMP `main` at omp `8c807c919` (Actors row 3; Rule 13; two runs; a visitor, a Reader and the Press manager): "PDF" and a supplementary "Appendix" PDF opened the PDF view page (tab "SuppPdf view of the file replacement.pdf" for the second); "HTML" the HTML view page; notes.md (a Book Manuscript file and an "Appendix" file) and the .epub answered 200 `attachment;filename=…` and were saved under their names (98 and 954 bytes), the browser staying on the book's page; with "PDF.js PDF Viewer" off article.pdf (243 bytes), and with "HTML Monograph File" off article.html (282 bytes), downloaded the same way. An older version's PDF, HTML and other file opened or downloaded; no `catalog/view` or `catalog/download` address answered 500. On the press with "…view open access content." ticked, a visitor's "PDF" landed on `login?source=%2Findex.php%2F{press}%2Fcatalog%2Fview%2F…`, and signing in there as the Reader landed on the PDF view page with the PDF shown.
+
+<a id="fn-k"></a>
+**k** — Fall-through of `CatalogBookHandler::download()` for a priced, unpaid file: no user → redirect to Login with `source` the file's `view` address; `OMPPaymentManager::isConfigured()` (the chosen plugin's `isConfigured()`, the manual plugin needing `manualInstructions`, PayPal `accountName`, and the context's `currency`) false → redirect to `catalog`; otherwise `createQueuedPayment(PAYMENT_TYPE_PURCHASE_FILE, …)` with `setRequestUrl()` `catalog/view/{submissionId}/{formatId}/{fileId}`, `queuePayment()` and the plugin's payment form. `paymentsEnabled` is read by no OMP code but the form's `showWhen`. Manual plugin (`plugins/paymethod/manual`): `paymentForm.tpl` ("Manual Fee Payment", "Title" `getPaymentName()` = the file's name, "Fee" `%.2f` with the currency code, `plugins.paymethod.manual.sendNotificationOfPayment`); `handle()` op `notify` sends `ManualPaymentNotify` and shows `message.tpl` with "Payment Notification", "Payment notification sent" and `common.continue` to the queued payment's request URL. `OMPPaymentManager::fulfillQueuedPayment()` writes the completed payment that `hasPaidPurchaseFile()` reads, reached from PayPal's return through `pages/payment/PaymentHandler::plugin()`; OMP has no `pages/payments`, and nothing in OMP completes a manual payment (Payments & APCs, its note b). The settings form: `PKPPaymentSettingsForm`. Live-probed 2026-09-28: see td14, td15. With "Paypal Fee Payment" and only "Account Name" saved ("Client ID" and "Secret" empty), a Reader's priced link opened a page with the tab "| {press name}", no heading and "A transaction error occurred. Please contact the press manager for details.", and the browser made no outside request; being sent on to PayPal, and a paid file opening free afterwards, need a live PayPal account a test install does not reach. The "Payments" tab on a new press showed "Enable" alone. The Press manager, a Series editor, a Copyeditor, a Reviewer, an Author, a Reader and the Site Administrator each got "Manual Fee Payment" from the priced link.
+
+<a id="fn-td14"></a>
+**td14** — Live-probed 2026-09-28 (Actors rows 4, 5; Rule 14; Fields, the payment page; A18): the link read "25 Purchase PDF (25 USD)" (price typed "25"). Signed out it led to Login, and signing in there as a Reader landed on the press's home page, for "PDF" and for a several-file format's priced file. The Reader's payment page: "Manual Fee Payment", the press's instructions, "Title" "article.pdf", "Fee" "25.00 (USD)"; "Send notification of payment" led to "Payment Notification", "Payment notification sent" and "Continue", and "Continue" to the payment page again. No "Payments" in the Press manager's menu; `{press}/payments` answered 404. A press with no currency: link "PDF", to the catalog; USD without instructions: "25 Purchase PDF (25 USD)", to the catalog. Live-probed 2026-09-29, two runs, a press with USD, "Manual Fee Payment" and instructions (Actors row 4; Rule 14; Fields, the payment page; A18): signed out, the link led to `login?source=http://…/catalog/view/{id}/{format}/{file}`, a Login page with only "Required fields are marked with an asterisk: *" above the form; signing in there as a Reader landed on `{press}/index`, as the Press manager on `dashboard/editorial`, headed "Assigned to me (0)", tab "Submissions"; the Reader, signed in, pressing the link again got the payment page at once. That page: "Home / Manual Fee Payment", "Manual Fee Payment", the instructions, then a borderless table with "Title" and "Fee" and their values in bold, then "Send notification of payment" as an underlined text link (`paymentForm.tpl`); a journal's page, same run, showed a bordered table with the labels in bold, the instructions under it and the link styled as a button, and its Login page read "Subscription or article purchase required to access item. …".
+
+<a id="fn-td15"></a>
+**td15** — Live-probed 2026-09-28 (Rule 14b; A12): "Enable" unticked and saved ("Saved"); after a reload the tab showed "Enable" alone; the Reader's and a visitor's link still read "25 Purchase PDF (25 USD)", and it still opened "Manual Fee Payment".
+
+<a id="fn-l"></a>
+**l** — `CatalogBookHandler::setChapter()` finds the chapter by `getBySourceChapterId()` within the shown publication (not found otherwise); `book()` answers not found when `!isPageEnabled()` (`Chapter::isPageEnabled()` true for the stored flag or a DOI). Dates: `$datePublished` is the chapter's `datePublished` when `getEnableChapterPublicationDates()` and set, else the publication's; `$firstDatePublished` from `getChaptersFirstPublishedDate()` (the source chapter's publication, with the chapter's own date under the same rule). `chapter.tpl` labels "Forthcoming" when `$publication->getData('datePublished')|date_format:$dateFormatShort > $smarty.now|date_format:$dateFormatShort`, a string comparison in the press's short format. Versions only when `count(getPublishedPublications()) > 1`; `$chapterPublicationIds` are the publications whose copy of the chapter has its page; suffixes `submission.chapterCreated` " — Chapter created" and `submission.withoutChapter` "{$name} — Without this chapter" (OMP `locale/en/submission.po`). The notice links to `catalog/book/{bestId}/chapter/{sourceChapterId}` when the current publication is among `$chapterPublicationIds`, else to the book. The older-version chapter page throws in `ChapterDAO::getCurrentPublicationChapterDoi()` (`count()` on an integer, called from `CatalogBookHandler.php` line 189) unless the press has DOI versioning on (A19). Live-probed 2026-09-28: see td16, td17; "Tides" is `/chapter/61` in both versions; an unticked chapter, a removed one, an unknown number, another book's chapter number and an unpublished book's chapter (for a visitor) answered 404. On a published chapter with a DOI, "Chapter Page" unticked and saved reopened ticked and the page stayed.
+
+<a id="fn-td16"></a>
+**td16** — Live-probed 2026-09-28 (Rule 16a; A13): under "d/m/Y" a 2024-12-31 book's chapter read "Forthcoming", its book "Published"; a 2024-03-05 book's chapter "Published"; a chapter of a book scheduled for 2027-01-15 "Published" in the Press manager's preview, its book "Forthcoming". Under the default format that scheduled chapter read "Forthcoming", and a visitor got 404. With "Each chapter may have its own publication date." a chapter dated 2024-06-01 read "June 1, 2024", one without its own date the version's "December 31, 2024"; "All chapters…" gave both the version's date.
+
+<a id="fn-td17"></a>
+**td17** — Live-probed 2026-09-28 (Rules 15a, 16, 17, 18; A19, A20), on a press with "DOI Versioning" "Yes": "Tides"' current "Versions" read "2026-09-28 (Version of Record 1.1)" plain and "2024-03-05 (Version of Record 1.0)" as a link; "Harbours" (added in version 2) "2026-09-28 (Version of Record 1.1) — Chapter created" and version 1 plain; "Coda" (removed in version 2), at its older address, "2026-09-28 (Version of Record 1.1) — Without this chapter". The older chapter page's notice led to "Tides"' current page, and for "Coda" to the book's; its cover and "Volume" to `…/version/{id}`. On a press left at "No" the older chapter address answered 500 with a blank page, typed and from "Versions". With chapter dates, "Tides"' current page read "June 1, 2024 — Updated on June 1, 2024"; without, "Reef" "March 5, 2024 — Updated on September 28, 2026"; "Harbours" "September 28, 2026".
+
+<a id="fn-m"></a>
+**m** — `CitationStyleLanguagePlugin::getTemplateData()` (OMP branch: submission, publication, chapter from the hook), `getCitation()` with `setDocumentType()`: a book (`type` book, `setBookAuthors()` mapping the contributor role identifiers EDITOR, TRANSLATOR, AUTHOR, `addSeriesInformation()` collection title, `seriesPosition` as volume and the series editors, `publisher` the press's name, `serialNumber` from approved formats' codes, `URL` `catalog/book/{urlPath or id}`); a chapter (`type` chapter, chapter authors as author and the book's as container-author, dropped when equal, `container-title` the book's title, pages, URL with `/chapter/{sourceChapterId}`). `citation-block.blade` with `submission.howToCite` and the formats list as on an article. `pages/CitationStyleLanguageHandler::setupRequest()` lets an unpublished submission through only for managers, the Site Administrator and assigned sub-editors or assistants (`canUserAccess()`). A book with no contributor has no author to cite and opens with its title. Live-probed 2026-09-28: see td18.
+
+<a id="fn-td18"></a>
+**td18** — Live-probed 2026-09-28 (Actors row 6; Rule 19; A14, A21, A22): APA "Quillfeather, A., & Second, B. (2024). Tides (Vols. 3). K5 Press …. {address}"; MLA without the series; BibTeX "series={Monographs}", "volume={3}", RIS "T3 - Monographs"; an Edited Volume "Quillfeather, A. (2024). Edited Book (L. Editor, Ed.; T. Translator, Trans.)."; a chapter "Quillfeather, A. (2024). Tides: Low and high. In A. Quillfeather & B. Second, K5 Chapter Book (Vols. 3, pp. 1-20)."; an Edited Volume's chapter "In L. Editor (Ed.), & T. Translator (Trans.), Edited Book (pp. 1-10)"; a DOI link ends the citation where there is one; a download is named after the book's title, on a chapter page too ("Tides.bib"). A later version's chapter "Harbours", added in 2026: "(2026). Harbours. … (Original work published 2024)". A book a Press manager submitted without a contributor: "Manager Book. (2024). {press name}. {address}". On a preview, "MLA" changed the text and "BibTeX" downloaded for the Press manager, Press editor, Production editor, the Site Administrator and an assigned Series editor and Copyeditor; for the book's Author and an unassigned Series editor and Copyeditor the format's request answered 404 and "BibTeX" opened "404 Not Found".
+
+<a id="fn-n"></a>
+**n** — `monograph_full.tpl` `.item.downloads_chart` when the active theme's `displayStats` is not `none`, `displayUsageStatsGraph($monograph->getId())`, the canvas and `.usageStatsUnavailable` ("Download data is not yet available.") as on an article; `chapter.tpl` has no chart. Live-probed 2026-09-28: see td19.
+
+<a id="fn-td19"></a>
+**td19** — Live-probed 2026-09-28 (Rule 20; Settings bullet 5): with "bar", a book without downloads showed "Downloads" with a bar chart of zeros from January, and never "Download data is not yet available."; "line" drew a line chart; a chapter page had no chart. A book with downloads in July 2025 and September 2026 showed twelve months and "All time", which widened the chart to 21 months from "Jan 2025" and then read "Last 12 months". Seeded downloads, 2 and 1 of the "Book Manuscript" PDF and 5 of an "Appendix" file, charted 3. The OJS and OPS pages drew their zeros the same way.
+
+<a id="fn-o"></a>
+**o** — OMP `locale/fr_CA`: empty `msgstr` for `submission.plainLanguageSummary`, `plugins.themes.default.displayStats.downloads`, `catalog.published`, `catalog.forthcoming`, `catalog.categories`, `catalog.manage.series.onlineIssn`, `catalog.manage.series.printIssn`, `catalog.viewableFile.title`, `catalog.viewableFile.return`, `doi.readerDisplayName`, `chapter.volume`, `chapter.pages`, `submission.chapterCreated`, `submission.withoutChapter`, `submission.editorName`, `submission.authorListSeparator`, `monograph.publicationFormatDetails`; `payment.directSales.purchase` reads "Achat ({$amount} {$currency})" with no format. Translated: `submission.synopsis` "Synopsis", `series.series` "Séries", lib/pkp's `submission.versions`, `common.keywords`, `submission.outdatedVersion`, `submission.viewingPreview`. Incidental (U10 claim check K1, 2026-09-24): "24.09.2026 (##publication.versionStage.display##)" and "##catalog.published##" on a press's book page, under a short date format other than the default. Live-probed 2026-09-28: see td20.
+
+<a id="fn-td20"></a>
+**td20** — Live-probed 2026-09-28 (Rule 21; A15): a new press offers no language choice in its header; the French pages were opened with "fr_CA" in the address. Raw codes where OMP's French (Canada) lacks a text (note o); "2026-09-28 (##publication.versionStage.display##)##submission.chapterCreated##" and "##submission.withoutChapter##" alone; "25.00 Achat (25.00 USD)"; "Ceci est une version obsolète publiée le 2024-03-05. Consulter la version la plus récente." and "Ceci est un aperçu et n'a pas été publié. Afficher la soumission" translated; the English pages showed no raw code. The French file view page failed as in English (A9, before its fix of 2026-10-05). The OJS and OPS French item pages read "2026-09-28 (##publication.versionStage.display##)" too.
+
+<a id="fn-t"></a>
+**t** — Lib/pkp's `OpenReviewComponent` (the public-review display's data) is used by no OMP handler or template: `CatalogBookHandler::book()` prepares no review data and `monograph_full.tpl` mounts no review display (code read on checkout omp `3b0ecf794`, lib/pkp `3dc90c81a6`, 2026-10-05). Live-probed 2026-10-05 (Rule 22; Settings bullet 16; A26), OMP `main`, two runs, on a scratch press with "Default Review Mode" "Open" and "Publicly Show Reviewer Comments" off: Settings › Workflow › Review › "Setup" offered "Publicly Show Reviewer Comments" with the box "Make reviewer comments publicly visible with published content". Two books in External Review, each with one submitted Open review whose "For author and editor" comment carried a unique word. On the first, the reviewer row's "More Actions" › "Edit" offered "Publicly Show Reviewer Comments" unticked, to the Press manager and to the book's assigned Series editor; ticked and saved (`is_review_publicly_visible` true), it reopened ticked. "Read Review" › "Mark as Complete" read "Mark this review as complete? This review will be made publicly visible alongside the article. You can still modify this review after marking it as complete. You will have the opportunity to thank the reviewer in the next step."; confirmed, "The review has been marked as complete." and the row "Complete". The second book's review, left unticked, got the dialog without the "publicly visible" sentence. Both were accepted and published as a Version of Record. Each book's page, read by a visitor (twice, the second after a reload), and the first also by the press's Reader and the Press manager, held its title, "Authors", "Synopsis", "References", "Published", "Versions" and the copyright line: neither review's comment in the text or the page's source, no reviewer name ("Rhea Openreviewer"), no review heading, no request for review data, no failed request; the catalog page showed neither comment. Other end: a second press with "Publicly Show Reviewer Comments" on, its book seeded published with a submitted Open review whose box was ticked (not marked complete): no review on the book's page. No server error, page error or console error in either run.
+
+<a id="fn-q"></a>
+**q** — `CatalogBookHandler::book()` fires `UsageEvent` with `ASSOC_TYPE_SUBMISSION` for the book's page and `ASSOC_TYPE_CHAPTER` for a chapter page; the file download's event is note j's, the HTML plugin's its own (note f). `ManualPaymentNotify` (template key `MANUAL_PAYMENT_NOTIFICATION`, installed by the plugin's `emailTemplates.xml`) is sent from the user to the press's `contactEmail`/`contactName`, subject and body from `plugins/paymethod/manual/locale/en/emails.po` in the press's primary language. No other mail or notification is raised by these handlers. Live-probed 2026-09-28: see td25; the day's usage log gained one book line per book page opened and one chapter line per chapter page, and none for a file pressed ("PDF", "HTML", another file), where OJS and OPS log one per galley view and download (A9, before its fix). Live-probed 2026-10-05 at omp `8c807c919` (Side effects; two runs; the run's own presses): one line of type 515 per opening of a PDF or HTML view page, per bar "Download" and per download from a file's link (`catalog/download/{book}/{format}/{file}` 7 lines for three roles' PDF views and downloads and one more view), type 531 for each "Appendix" file (notes.md, replacement.pdf, 3 each); an older version's raw-file download was logged under the current version's address.
+
+<a id="fn-td25"></a>
+**td25** — Live-probed 2026-09-28 (Side effects): from "Rae Reader" at the buyer's address to "Pat Contact", the principal contact, no copy; subject "Manual Payment Notification"; the body as quoted, with the press's name, the buyer's name and username, "article.pdf" and "The cost is 25 (USD)." (the payment page "25.00 (USD)"); a second press sent a second message. "Manage Emails" has no row for it (33 rows; "Payment" finds "No items found."). The Reader's reading, file opening, citation download and payment page moved no mailbox and showed no notice.
+
+<a id="fn-r"></a>
+**r** — Plugin defaults: `plugins/generic/pdfJsViewer/settings.xml` and `plugins/generic/htmlMonographFile/settings.xml` install `enabled` true per press; the Citation Style Language plugin declares none (off). Display names: "PDF.js PDF Viewer", "HTML Monograph File", "Citation Style Language" (each plugin's `locale/en/locale.po`). Seed-facts (U13 claim check K2, 2026-09-25): "PDF.js PDF Viewer" and "HTML Monograph File" arrive ticked on a press; the Citation Style Language plugin is off on a scratch context (U07 claim check K2, 2026-09-23). "View Monograph Content" group: seed-facts note of U48 claim check K2, 2026-09-25. Live-probed 2026-09-28 (Settings bullets 1–3, 6; Actors row 7): on a new press "PDF.js PDF Viewer" and "HTML Monograph File" arrive ticked and "Citation Style Language" unticked; unticking a plugin asks "Are you sure you want to disable this plugin?"; the Press manager and the Press editor open "Plugins", "Appearance" and "Payments", and a Series editor gets "The current role does not have access to this operation." there; "…view open access content." sits under "View Monograph Content", unticked on a new press.
+
+<a id="fn-s"></a>
+**s** — Scenario seeding. Every press, journal and server is a scratch
+context from `POST scenarios/context` with throwaway `users[]` (passwords
+the username twice, `docs/process/users.md`): a `manager` (Press manager),
+an `author` (the books' submitter, `givenName: 'Ada', familyName:
+'Quill'`, so that her own contributor entry reads "Ada Quill") and, where
+a scenario names them, a `reader` (Reader), a `reviewer` (External
+Reviewer) and a second `author2` (Author); the visitor is signed out.
+Every book is a scratch submission from `POST scenarios/submission` with
+`author` as `submitter`, `submitted: true`, `decisions:
+['skipExternalReview', 'sendToProduction']`, `published: true` and
+`datePublished: '2024-03-05'`; "Lee Marsh" is `contributors: [{givenName:
+'Lee', familyName: 'Marsh', email: 'lee.marsh@mail.test'}]`, named by that
+address in `chapters[].authors`. Formats seed through
+`publicationFormats[]` (approved and available, a file on "Open Access"
+unless `price` is given), chapters through `chapters[]`.
+Scenario 1: the press with `series: [{path: 'monographs', title:
+'Monographs'}]` and `categories: [{path: 'history', title: 'History'}]`;
+the book with `subtitle`, `abstract`, `keywords: ['alpha', 'beta gamma']`,
+`plainLanguageSummary`, `series: 'monographs'`, `categories: ['history']`,
+`urlPath: 'shorelines'` and `publicationFormats: [{name: 'PDF', file:
+'article.pdf'}, {name: 'Online', urlRemote:
+'https://example.org/shorelines'}, {name: 'Paperback', physical: true,
+identificationCodes: [{type: 'ISBN-13 (15)', value:
+'978-951-98548-9-2'}], publicationDates: [{role: 'Publication date (01)',
+date: '20240305'}], metadata: {productComposition: 'Single-component
+retail product (00)', width: 130, height: 200}}]` (no `dateFormat`, so the
+window's preselected "YYYYMMDD (H)"); "Bare" with `title`, `abstract`
+and no other key. Scenario 2: the press with `enabledDoiTypes:
+['publication', 'chapter']`, `doiPrefix: '10.1234'` and `themeOptions:
+{displayStats: 'bar'}`; "Coastlines" with the two formats (`{name: 'PDF',
+file: 'article.pdf'}`, `{name: 'Chapter PDF', file: 'replacement.pdf'}`)
+and `chapters: [{title: 'Tides', subtitle: 'Low and high', abstract: 'How
+the sea rises and falls.', pages: '1-20', page: true, authors: [Lee
+Marsh], files: ['publicationFormats.1']}, {title: 'Harbours'}]`, the
+publish making a DOI for the chapter with its page alone, and the
+response's `chapters[].id` being the number a chapter's address takes
+("Tides" seeded as 53 opened at `…/chapter/53`), which the control uses
+for "Harbours"; "Reef Notes"
+with `enableChapterPublicationDates: true` and `chapters: [{title: 'Reef',
+datePublished: '2024-06-01', page: true}, {title: 'Lagoon', page:
+true}]`. Scenario 3: `[{name: 'PDF', file: 'article.pdf'}, {name: 'HTML',
+file: 'article.html'}]`. Scenario 4: the press with `payments: {currency:
+'USD', paymentPluginName: 'ManualPayment', manualInstructions: '…'}` and
+`context.contactName` / `contactEmail` for the principal contact;
+`[{name: 'PDF', file: 'article.pdf', price: '25'}]`; the "Manual Payment
+Notification" is sent at once, not queued, so the mail catcher is read
+with no job queue run (test run 2026-09-28). Scenario 5: "Draft Tides" without
+`published` (it rests in Production), the unfinished submission with
+`submitted: false`, "Shorelines" published; the other Author is `author2`.
+Scenarios 6 and 7: the first version seeded as above ("Tides"; "Coastlines"
+with `chapters: [{title: 'Tides', page: true}, {title: 'Coda', page:
+true}]`), then, as `manager`, "Create New Version"
+(`PublicationPages.createNewVersion`), for scenario 6 the title changed
+to "Tides Revised" on "Title & Abstract", for scenario 7 "Coda" deleted
+and "Harbours" added with "Chapter Page" ticked on the version's Chapters
+page, and the version published on screen that day; scenario 7's press
+with `doiPrefix: '10.1234'` and `doiVersioning: true`. Scenario 8: the
+press with `enableDois: false` and `plugins: {citationstylelanguageplugin:
+{enabled: true}}`; `chapters: [{title: 'Tides', pages: '1-20', page:
+true, authors: [Lee Marsh]}]`; its control on a scratch press with no
+`plugins` key. Scenario 9: the press with `restrictMonographAccess:
+true`. Scenario 10: OJS with `publishingMode: 'subscription'` and
+`payments: {currency: 'USD', paymentPluginName: 'ManualPayment',
+manualInstructions: '…', purchaseArticleFee: 5}` and `issues: [{volume:
+1, number: 1, year: 2026, published: true}]` (an issue made under the
+subscription mode takes "Subscription" access, which is what puts the
+price on the galley link; with no issue the article's galleys carry no
+price, `ArticleHandler` requiring a subscription only through an issue;
+test run 2026-09-28, as U69 claim check K1 seeded it),
+the article `published: true` into that issue (the submission's `issue`)
+with `galleys: [{label: 'PDF', file: 'article.pdf'}]`;
+OPS with the preprint `published: true` and `galleys: [{label: 'PDF',
+file: 'preprint.pdf'}]`; the control on an OMP scratch press.
+Live-probed 2026-09-28: `publicationFormats[]` (with `price`,
+`urlRemote`, `physical`, `identificationCodes[]`, `publicationDates[]`,
+`metadata`), `chapters[]` with `page` and `files`, `series`,
+`categories`, `urlPath`, `datePublished`, `contributors[]`, and the
+press's `payments`, `plugins`, `themeOptions`, `restrictMonographAccess`
+and `doiVersioning` each seeded the state it names; a second version was
+made on screen with "Create New Version".
+
+<a id="fn-f-a1"></a>
+**f-a1** — Note g (policy failure → Login or `user/authorizationDenied`). An unpublished book's address is refused later, in `book()`, with not found. Live-probed 2026-09-28, signed out and signed in (td4).
+Issue report: [pkp-e2e#292](https://github.com/jardakotesovec/pkp-e2e/issues/292) ([docs/issues/U69-A1-unknown-book-address-asks-sign-in.md](../../../../docs/issues/U69-A1-unknown-book-address-asks-sign-in.md)).
+
+<a id="fn-f-a2"></a>
+**f-a2** — Note g (`getStatusByPublications()` needs a published Version of Record); `canPreview()` lets the Press manager and the Site Administrator in, and the shown publication is published, so no preview notice prints. Live-probed 2026-09-28 (td3): the book's page answered 404 to a visitor and a Reader and opened as published for the Press manager and the Site Administrator; the workflow showed the Author's Original "Status: Published", the Version of Record "Status: Unpublished", and neither "View" nor "Preview". The catalog's leaving it out is Catalog browse's Rule 3.
+
+<a id="fn-f-a3"></a>
+**f-a3** — Note g: the uninitialized typed property `CatalogBookHandler::$publication` when `version/{id}` matches no publication of the submission; the log reads "Typed property APP\pages\catalog\CatalogBookHandler::$publication must not be accessed before initialization" (`CatalogBookHandler.php` line 122). The typed property dates from omp `29fa88508` (2025-03-20). Live-probed 2026-09-28 (td6): 500 for every id tried and every role.
+Issue report: [pkp-e2e#285](https://github.com/jardakotesovec/pkp-e2e/issues/285) (docs/issues/U69-A3-version-address-no-version-server-error.md).
+
+<a id="fn-f-a4"></a>
+**f-a4** — `monograph_full.tpl` prints `submission.viewingPreview` for any unpublished publication and `submission.outdatedVersion` for any publication that is not the current one, with that publication's empty `datePublished`, which prints as today (note h). Live-probed 2026-09-28 (td7). Live-probed 2026-10-05 (Rule 5b; four runs): the new version's preview read "This is an outdated version published on 2026-10-05. Read the most recent version." with no date saved, and "…published on 2025-01-15." once "Date Published" 2025-01-15 was saved on the version's "Catalog Entry".
+Issue report: [pkp-e2e#209](https://github.com/jardakotesovec/pkp-e2e/issues/209) ([docs/issues/U13-OPS1-new-version-preview-called-outdated.md](../../../../docs/issues/U13-OPS1-new-version-preview-called-outdated.md)).
+
+<a id="fn-f-a5"></a>
+**f-a5** — `book.tpl` builds the page title from `getCurrentPublication()`. The same holds on an article's page (Article landing page & reading, its A6). Live-probed 2026-09-28 (td8).
+Issue report: [pkp-e2e#226](https://github.com/jardakotesovec/pkp-e2e/issues/226) ([docs/issues/U13-A6-older-version-tab-current-title.md](../../../../docs/issues/U13-A6-older-version-tab-current-title.md)).
+
+<a id="fn-f-a6"></a>
+**f-a6** — Note i: `$authorString` carries the role names in brackets, the chapter's string does not; since the credits gained role names the check never matches. Live-probed 2026-09-28 (td10).
+Issue report: [pkp-e2e#293](https://github.com/jardakotesovec/pkp-e2e/issues/293) ([docs/issues/U69-A6-contents-repeat-book-authors.md](../../../../docs/issues/U69-A6-contents-repeat-book-authors.md)).
+
+<a id="fn-f-a7"></a>
+**f-a7** — `downloadLink.tpl` prints `{$downloadFile->getDirectSalesPrice()}` before `payment.directSales.purchase`, which carries the amount again. Seen 2026-09-28 (U73 claim check K3). Live-probed 2026-09-28: a price typed "25" reads "25 Purchase PDF (25 USD)", so the number shows as typed.
+Issue report: [pkp-e2e#289](https://github.com/jardakotesovec/pkp-e2e/issues/289) ([docs/issues/U69-A7-A8-priced-file-link-price-twice-or-missing.md](../../../../docs/issues/U69-A7-A8-priced-file-link-price-twice-or-missing.md)).
+
+<a id="fn-f-a8"></a>
+**f-a8** — `publicationFormats.tpl` prints `span.name` and then `downloadLink.tpl` with `useFilename=true`, which skips the price branch. The two-file listing by file name seen 2026-09-28 (U73 claim check K3). Live-probed 2026-09-28 (td11): the priced file among two.
+Issue report: [pkp-e2e#289](https://github.com/jardakotesovec/pkp-e2e/issues/289) ([docs/issues/U69-A7-A8-priced-file-link-price-twice-or-missing.md](../../../../docs/issues/U69-A7-A8-priced-file-link-price-twice-or-missing.md)).
+
+<a id="fn-f-a9"></a>
+**f-a9** — Before the fix (note j): every free-file download reached the `UsageEvent` built with the never-set `$this->publication`; `view` of a PDF showed the pdfJsViewer page, whose inline `PDFJS` script fails (A23) and whose viewer loaded the failing download. The typed property dates from omp `29fa88508` (2025-03-20, pkp/pkp-lib#10671); the event's `publication: $this->publication` argument from omp `591d7a0e7` (2026-08-26, pkp/pkp-lib#12311, "pass publication to usage event"), which set it in `book()` but not in `download()`. Live-probed 2026-09-26 (U20 claim check), 2026-09-27 (U64), 2026-09-28 (U73 claim check K3, K4, three runs): `GET {press}/catalog/download/{book}/{format}/{file}`, with and without `?inline=1`, current or older version, answered 500 with the log line above; the view page logged "PDFJS is not defined" and "UnexpectedResponseException". Live-probed 2026-09-28 (td13, td22; two runs of each drive): 22 download 500s and 9 view 500s across the runs, "PDFJS is not defined" and "UnexpectedResponseException" on every PDF view page; the bar's "Download" and the viewer's both cancelled; the French view page (`{press}/fr_CA/catalog/download/…?inline=1`) the same. The same failure was recorded where it showed elsewhere: Search engine metadata & analytics' OMP6, Usage statistics' OMP3, Media files' OMP1 (HTML plugin off), each retired with this entry. Fixed upstream by omp `8c807c919` (pkp/pkp-lib#13444, 2026-10-05), whose `download()` passes the local `$publication` to the event (note j). Live-probed 2026-10-05 on OMP `main` at that commit (Rule 13; two runs; a visitor, a Reader and the Press manager): no `catalog/view` or `catalog/download` address answered 500 in any phase; the viewer read "of 1", and the bar's and the viewer's download saved article.pdf (243 bytes); notes.md, an .epub, article.pdf (viewer off) and article.html (HTML plugin off) answered `attachment` with their names; an older version's files opened or downloaded; for the priced file, a completed payment row for the Reader (as PayPal's return writes it, since no screen on a test install completes one) opened its PDF view page with the PDF shown and "Download" saved it, while the Press manager without one got the "Manual Fee Payment" page; each opening and download wrote a usage-log line (note q). PKP's default test dataset walked the same day agreed. "PDFJS is not defined" is still logged (A23).
+Issue report: [pkp-e2e#282](https://github.com/jardakotesovec/pkp-e2e/issues/282) (closed).
+
+<a id="fn-f-a10"></a>
+**f-a10** — Note f: `monograph.return` is defined in no locale file of OMP, lib/pkp or the plugin. Live-probed 2026-09-28 (td21).
+Issue report: [pkp-e2e#288](https://github.com/jardakotesovec/pkp-e2e/issues/288) ([docs/issues/U69-A10-html-view-page-return-arrow-raw-key.md](../../../../docs/issues/U69-A10-html-view-page-return-arrow-raw-key.md)).
+
+<a id="fn-f-a11"></a>
+**f-a11** — Note k. The manual plugin's own description reads "The manager will manually record receipt of a user's payment (outside of this software)."; nothing in OMP calls `fulfillQueuedPayment()` for a manual payment. The OMP purchase path dates from the early direct-sales work, and the missing record may be long-standing, hence ❓. Live-probed 2026-09-28 (td14): "Continue" led back to the payment page and the Reader's link stayed priced; the Press manager's menu has no "Payments", and `{press}/payments` and `{press}/management/settings/payments` answered 404, where OJS's `{journal}/payments` opens its payment lists and OPS has none.
+
+<a id="fn-f-a12"></a>
+**f-a12** — Note k: `paymentsEnabled` is read only by the form's `showWhen`; `OMPPaymentManager::isConfigured()` ignores it, where OJS's payment paths check it. Live-probed 2026-09-28 (td15).
+Issue report: [pkp-e2e#294](https://github.com/jardakotesovec/pkp-e2e/issues/294) ([docs/issues/U69-A12-payments-enable-unticked-press-still-sells.md](../../../../docs/issues/U69-A12-payments-enable-unticked-press-still-sells.md)).
+
+<a id="fn-f-a13"></a>
+**f-a13** — Note l: `chapter.tpl` compares `date_format:$dateFormatShort` strings, where `monograph_full.tpl` compares `Y-m-d` (pkp-lib#10169 fixed only the book page). Live-probed 2026-09-28 (td16): both directions. Walked 2026-10-01 on OMP `main` and `stable-3_5_0`, the default dataset's book 14 and its "Chapter 1: Mind Control—Internal or External?", reading the book's and the chapter's page under each of the four "Date (Short)" choices (`PKPDateTimeForm`: "Y-m-d", "d-m-Y", "m/d/Y", "d.m.Y"): dated 2024-12-31, the chapter read "Forthcoming December 31, 2024" under "01-10-2026", "10/01/2026" and "01.10.2026" and "Published" under "2026-10-01", the book "Published" throughout; scheduled for 2027-01-01, the preview's chapter read "Published January 1, 2027" and the book "Forthcoming". A "Custom" format is the 2026-09-28 probe's "d/m/Y" only.
+Issue report: [pkp-e2e#296](https://github.com/jardakotesovec/pkp-e2e/issues/296) ([docs/issues/U69-A13-chapter-page-forthcoming-under-other-date-format.md](../../../../docs/issues/U69-A13-chapter-page-forthcoming-under-other-date-format.md)).
+
+<a id="fn-f-a14"></a>
+**f-a14** — Note m: `getCitation()` sets the CSL `original-date` from `$submission->getOriginalPublication()` whenever its date differs from the shown version's, for a chapter as for the book, and the APA style prints it as "Original work published {year}". Live-probed 2026-09-28 (td18).
+
+<a id="fn-f-a15"></a>
+**f-a15** — Note o. Seen 2026-09-24 (U10 claim check K1): the version names and "Published". Live-probed 2026-09-28 (td20): the priced link and the version names. The window's title is [Publication formats, proof & terms A25](U73-publication-formats-proof-terms.md#a25)'s.
+Issue report: [pkp-e2e#291](https://github.com/jardakotesovec/pkp-e2e/issues/291) ([docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md](../../../../docs/issues/U69-A15-omp-french-purchase-link-and-availability-title-wrong.md)).
+Issue report (the version names): [pkp-e2e#228](https://github.com/jardakotesovec/pkp-e2e/issues/228) ([docs/issues/U13-A1-french-version-name-raw-key.md](../../../../docs/issues/U13-A1-french-version-name-raw-key.md)).
+
+<a id="fn-f-a16"></a>
+**f-a16** — Note g: the forward to the current URL Path passes a string to `PKPRequest::redirect()`, whose path argument is `?array` since lib/pkp bee9547b49 (2024-06-26); the log reads "Uncaught TypeError: PKP\core\PKPRequest::redirect(): Argument #4 ($path) must be of type ?array, string given, called in pages/catalog/CatalogBookHandler.php on line 132". Live-probed 2026-09-28 (td2): `{press}/catalog/book/harbour` and `…/harbour-2` answered 500. A regression: the forward worked before that change.
+Issue report: [pkp-e2e#284](https://github.com/jardakotesovec/pkp-e2e/issues/284) ([docs/issues/U69-A16-earlier-url-path-server-error.md](../../../../docs/issues/U69-A16-earlier-url-path-server-error.md)).
+
+<a id="fn-f-a17"></a>
+**f-a17** — `chapter.tpl` prints only `submission.outdatedVersion`; `submission.viewingPreview` is in `monograph_full.tpl` alone. Live-probed 2026-09-28 (td5): the chapter page read "… Volume K1 Unpublished Book Published March 5, 2024 How to Cite …" with no notice for every previewing role.
+Issue report: [pkp-e2e#297](https://github.com/jardakotesovec/pkp-e2e/issues/297) ([docs/issues/U69-A17-unpublished-book-chapter-page-no-preview-notice.md](../../../../docs/issues/U69-A17-unpublished-book-chapter-page-no-preview-notice.md)).
+
+<a id="fn-f-a18"></a>
+**f-a18** — Note k: `CatalogBookHandler::download()` sends a signed-out buyer to Login with `source` built by `$request->url()`, a full address, and `LoginHandler::signIn()` follows only a `source` starting with "/", so `_redirectAfterLogin()` (its dashboard branch needs an empty `source`) falls back to `PKPPageRouter::getHomeUrl()`, the user's home by role: the press's index for a Reader, `dashboard/editorial` for a manager, sub-editor or assistant role, `dashboard/reviewAssignments` for a Reviewer (untried), `dashboard/mySubmissions` for an Author; a free file's Login (`Validation::redirectLogin()`) carries a path. "Register" on that Login page hands the same `source` to the registration form, and `RegistrationHandler::register()` applies the same path rule. Live-probed 2026-09-28 (td13, td14): the priced file's Login address carried `source=http%3A%2F%2F…`, the free file's `source=%2Findex.php%2F…`. Live-probed 2026-09-29 (td14): the Press manager's sign-in went to `dashboard/editorial`. Walked 2026-10-01 on OMP `main`, the default dataset's book 14 with one "PDF" file set to "Direct Sales" at 25.00 USD with "Manual Fee Payment": signing in on the Login page the file's link opened took `aclark` (Author and Reader) to `dashboard/mySubmissions`, headed "Active submissions (1)", `rvaca` (Press manager) to `dashboard/editorial`, headed "Assigned to me (0)", and a Reader to `{press}/index`; a newcomer who pressed "Register" there and sent the form landed on "Registration complete" ("Thanks for registering! What would you like to do next?"), signed in.
+Issue report: [pkp-e2e#295](https://github.com/jardakotesovec/pkp-e2e/issues/295) ([docs/issues/U69-A18-sign-in-to-buy-file-skips-payment-page.md](../../../../docs/issues/U69-A18-sign-in-to-buy-file-skips-payment-page.md)).
+
+<a id="fn-f-a19"></a>
+**f-a19** — Note l. Live-probed 2026-09-28 (td17): 500 at `{press}/catalog/book/{id}/version/{id}/chapter/{n}`, typed, from the older version's table of contents and from "Versions", with the book named by number or URL Path, on every press left at "DOI Versioning" "No"; the same page opened on a press seeded with it "Yes". Live-probed 2026-10-05 (Rule 5b; Actors row 2; two runs): on a press left at "DOI Versioning" "No", a published book with "Chapter One" ("Chapter Page" ticked) and a new version made with "Create New Version", the preview's "Chapter One" (`catalog/book/{id}/version/{newPubId}/chapter/{n}`) answered 500 with an empty page for the Press manager; the log read "Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, int given" from `ChapterDAO::getCurrentPublicationChapterDoi()` via `CatalogBookHandler::book()`, this entry's trace. "Yes" not tried for a new version.
+Issue report: [pkp-e2e#286](https://github.com/jardakotesovec/pkp-e2e/issues/286) ([docs/issues/U69-A19-older-version-chapter-page-server-error.md](../../../../docs/issues/U69-A19-older-version-chapter-page-server-error.md)).
+
+<a id="fn-f-a20"></a>
+**f-a20** — Note l: a new version copies each chapter with its `datePublished`, and the first date is the source chapter's. Live-probed 2026-09-28 (td17).
+Issue report: [pkp-e2e#298](https://github.com/jardakotesovec/pkp-e2e/issues/298) ([docs/issues/U69-A20-later-version-chapter-repeats-date.md](../../../../docs/issues/U69-A20-later-version-chapter-repeats-date.md)).
+
+<a id="fn-f-a21"></a>
+**f-a21** — Note m: `CitationStyleLanguageHandler::setupRequest()` lets an unpublished submission through only for managers, the Site Administrator and assigned sub-editors or assistants, while the block itself shows to everyone `canPreview()` admits. Live-probed 2026-09-28 (td18).
+
+<a id="fn-f-a22"></a>
+**f-a22** — Note m: `seriesPosition` is passed as the CSL `volume`, which the APA style prints as "(Vols. {n})". Live-probed 2026-09-28 (td18).
+
+<a id="fn-f-a23"></a>
+**f-a23** — Note f: OMP's own `plugins/generic/pdfJsViewer/templates/display.tpl` loads `pdf.js/build/pdf.js` and `pdf.js/web/viewer.js` into the outer page and runs an inline script calling `PDFJS.workerSrc` and `PDFJS.getDocument()` for a `pdfCanvas` element no version of the template has; pdf.js has defined no `PDFJS` global since its version 2 (omp 02393cf8bf, 2019-05-13, updated the library and left the script), so the script throws at its first line. The viewer is the iframe `pdf.js/web/viewer.html?file=…`, which loads the library for itself. OJS's and OPS's viewer plugin (the shared pkp/pdfJsViewer) has only the iframe script (code). Walked 2026-10-01 on OMP `main` and `stable-3_5_0`, the default dataset's book 5, "Epilogue"'s "PDF", signed out: the console logged "Uncaught ReferenceError: PDFJS is not defined" each time; on 3.5 the viewer showed the PDF ("of 1") and "Download" saved `epilogue.pdf`; on `main` the file request also answered 500 (A9, since fixed). Seen before: 2026-09-26 to 2026-09-28 on every PDF view page (f-a9); on 3.4 and 3.3 the same two lines (code). Upstream `pkp/pkp-lib#6425` (closed) notes the error in two comments and left it. Live-probed 2026-10-05 on `main` at omp `8c807c919` (two runs; a visitor, a Reader and the Press manager; the current and an older version's file, a supplementary PDF, a bought file, a book with a URL Path, the French view page): "Uncaught ReferenceError: PDFJS is not defined" on every PDF view page opened, the viewer showing the PDF ("of 1").
+Issue report: [pkp-e2e#283](https://github.com/jardakotesovec/pkp-e2e/issues/283) ([docs/issues/U69-A9-pdf-view-page-script-error.md](../../../../docs/issues/U69-A9-pdf-view-page-script-error.md)).
+
+<a id="fn-f-a24"></a>
+**f-a24** — Note j: `CatalogBookHandler::download()`, which `view()` calls, answers not found for any publication that is not published and never asks `Repo::submission()->canPreview()`, where `book()` does (note c). Refused on OMP `main` and `stable-3_5_0` (walked 2026-10-04 for the issue report pkp-e2e#920, its Cause's reach) and on 3.4 and 3.3 (code, same report). Live-probed 2026-10-05 (Rule 5c; Actors row 3; two runs): a new version of a published book, its formats "PDF" (article.pdf) and "HTML" (article.html) copied with the version, links `catalog/view/{id}/version/{pubId}/{formatId}/{fileId}`: "HTML" and "PDF" pressed by the Press manager, an unassigned Series editor, an unassigned Copyeditor, the book's Author and the Site Administrator each opened "404 Not Found"; the workflow header's "Preview" led to the same page and links. A book never published (`catalog/view/{id}/{formatId}/{fileId}`): the same for the Press manager, a Series editor, the Author and the Site Administrator. A visitor typing those addresses: "404 Not Found". Control: the published version's "HTML" and "PDF" opened their view pages. A journal's and a server's new-version preview opened the "PDF" reader page (200), whose file request then answered 404 (Article landing page & reading, its Rule 12 and A2).
+Issue report: [pkp-e2e#963](https://github.com/jardakotesovec/pkp-e2e/issues/963) ([docs/issues/U69-A24-book-preview-file-links-not-found.md](../../../../docs/issues/U69-A24-book-preview-file-links-not-found.md)).
+
+<a id="fn-f-a25"></a>
+**f-a25** — OMP `plugins/generic/htmlMonographFile/classes/HtmlGalleyHelper::handleOmpUrl()` passes `$urlParts[1]` (a string) as the path of `PKPRequest::url()`, whose path is `?array` since lib/pkp bee9547b49 (2024-06-26, the change behind A16); `Hook::call()` logs the plugin's TypeError and carries on, and `CatalogBookHandler::download()` then serves the file as stored, its `omp://` links unrewritten (before omp `8c807c919` it failed on A9's line instead). OJS's `htmlArticleGalley` twin passes a list. 3.5 (code): the same call in `HtmlMonographFilePlugin.php` against the same signature and the same hook catch. Fix shape as A16's: `[$urlParts[1]]`. The A16 issue report (pkp-e2e#284) names this caller in its Cause and leaves it out of its fix. Live-probed 2026-10-05 before omp `8c807c919` (Fields, the HTML view page; two runs; a visitor, a Reader and the Press manager): the file holding `omp://monograph/{id}` opened the tab "HTML view of the file i05-monograph-link-r1-omp.html", whose frame `catalog/download/{id}/{format}/{file}?inline=1` answered 500 and stayed empty; the log read "TypeError: PKP\core\PKPRequest::url(): Argument #4 ($path) must be of type ?array, string given, called in …/htmlMonographFile/classes/HtmlGalleyHelper.php on line 159", then "Uncaught Error: Typed property APP\pages\catalog\CatalogBookHandler::$publication must not be accessed before initialization in …/CatalogBookHandler.php:533". Re-probed the same day at omp `8c807c919` (A25's symptom; two runs; the same three users): a file holding "See also the other book and the press." with links `omp://monograph/{id}` and `omp://press` opened its HTML view page, its frame `catalog/download/{id}/{format}/{file}?inline=1` answering 200 `text/html` with the text shown; both links kept their `omp://` addresses, and pressing either changed neither the frame's nor the page's address, opened no tab and raised no page error; the server logged the TypeError above at each opening, and no request answered an error. The file whose only link is `omp://press` still had it rewritten to the press's home page and followed there. Control: td26.
+Issue report: [pkp-e2e#284](https://github.com/jardakotesovec/pkp-e2e/issues/284) ([docs/issues/U69-A16-earlier-url-path-server-error.md](../../../../docs/issues/U69-A16-earlier-url-path-server-error.md)), joined 2026-10-13.
+
+<a id="fn-f-a26"></a>
+**f-a26** — Note t: OMP never prepares or mounts the display; OJS's `ArticleHandler::view()` prepares it and its template never mounts it (U13 OJS12). The OJS12 issue report ([pkp-e2e#218](https://github.com/jardakotesovec/pkp-e2e/issues/218), [docs/issues/U13-OJS12-public-review-never-shown.md](../../../../docs/issues/U13-OJS12-public-review-never-shown.md)) found the OMP twin in the code and proposes a fix for the article page's template only, which does not reach a book's page. OMP `stable-3_5_0`: not driven; OJS 3.5 has no "Publicly Show Reviewer Comments" (that report's Affects). Live-probed 2026-10-05 (two runs): note t.
+Issue report: [pkp-e2e#962](https://github.com/jardakotesovec/pkp-e2e/issues/962) ([docs/issues/U69-A26-book-page-public-review-never-shown.md](../../../../docs/issues/U69-A26-book-page-public-review-never-shown.md)).
+
+<a id="fn-f-a27"></a>
+**f-a27** — Note c: the same `canPreview()` role shortcut as U13 A16, with no stage check on `main` since pkp/pkp-lib#12245 (`768b0a3991`, Alec Smecher, 2026-02-18); the fix, the release check (3.5, 3.4 and 3.3 do not have it) and the evidence are there. Live-probed 2026-09-30, OMP `main`, seeded data: unassigned `mfritz` (Copyeditor) and `cturner` (Proofreader) opened books 3, 6 and 18, before copyediting. Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
+Issue report (with U13 A16): [pkp-e2e#921](https://github.com/jardakotesovec/pkp-e2e/issues/921) ([docs/issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md](../../../../docs/issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md)).
+
+## Reference — entry points & surfaces
+
+| Entry | Path | Atom |
+|-------|------|------|
+| The book's page, current and older versions | `{press}/catalog/book/{id or urlPath}`, `…/version/{publicationId}` | ROUTE-055 (op `book`), AFFR-075, AFFR-052, AFFR-053, AFFR-054, AFFR-055, AFFR-057, AFFR-061 |
+| A chapter page | `{press}/catalog/book/{id}/chapter/{sourceChapterId}`, `…/version/{publicationId}/chapter/{sourceChapterId}` | ROUTE-055, AFFR-077 |
+| The file links, remote formats and purchase links | `{press}/catalog/view/{book}/{format}/{file}`, `…/view/{book}/version/{pid}/{format}/{file}` | ROUTE-055 (op `view`), AFFR-076 |
+| A file download | `{press}/catalog/download/{book}/{format}/{file}[?inline=1]` | ROUTE-055 (op `download`) |
+| The PDF view page | `catalog/view/…` for a PDF, plugin "PDF.js PDF Viewer" | PLUG-022, AFFR-048 |
+| The HTML view page | `catalog/view/…` for an HTML file, plugin "HTML Monograph File" | PLUG-018, AFFR-051 |
+| "How to Cite" | the block on both pages; `{press}/citationstylelanguage/get/{style}`, `…/download/{ris|bibtex}` | PLUG-008, AFFR-066 |
+| The "Downloads" chart | the book's page, theme option `displayStats` | AFFR-056 |
+| The payment page and the payment method's callback | the purchase link's fall-through; `{press}/payment/plugin/{PaymentPlugin}/…` | ROUTE-065 |
+| The payments settings (owned by Payments & APCs) | Settings › Distribution › "Payments" | AFFM-094 |
+| "Manual Payment Notification" (owned by Payments & APCs) | the manual plugin's "Send notification of payment" | MAIL-075 |
+| The cover server (owned by Catalog browse; unused by this page) | `$$$call$$$/submission/cover/cover`, `…/thumbnail` | GRID-099 |
+
+## Reference — code anchors
+
+- Handler: OMP `pages/catalog/CatalogBookHandler.php` (`book()`, `view()`, `download()`, `setChapter()`, `setChapterPublicationIds()`, `getSourceChapter()`, `getChaptersFirstPublishedDate()`); `classes/security/authorization/OmpPublishedSubmissionAccessPolicy.php`, `OmpPublishedSubmissionRequiredPolicy.php`; lib/pkp `classes/submission/Repository.php` (`canPreview()`, `getStatusByPublications()`, `getCurrentPublicationIdByPublications()`); lib/pkp `classes/core/PKPPageRouter.php` (`handleAuthorizationFailure()`).
+- Templates: OMP `templates/frontend/pages/book.tpl`, `templates/frontend/objects/monograph_full.tpl`, `templates/frontend/objects/chapter.tpl`, `templates/frontend/components/authors.tpl`, `publicationFormats.tpl`, `downloadLink.tpl`; lib/pkp `templates/frontend/components/headerHead.tpl`.
+- Models: OMP `classes/publication/Publication.php` (`getLocalizedCoverImageThumbnailUrl()`), `classes/monograph/Chapter.php` (`isPageEnabled()`, `getAuthorNamesAsString()`), `classes/publicationFormat/PublicationFormat.php` (`getDimensions()`), `IdentificationCode.php`, `PublicationDate.php`; lib/pkp `classes/publication/PKPPublication.php` (`getAuthorString()`).
+- Viewers: OMP `plugins/generic/pdfJsViewer/PdfJsViewerPlugin.php`, `templates/display.tpl`; `plugins/generic/htmlMonographFile/HtmlMonographFilePlugin.php`, `templates/display.tpl`, `classes/HtmlGalleyHelper.php`.
+- Citation: `plugins/generic/citationStyleLanguage/CitationStyleLanguagePlugin.php` (`getTemplateData()`, `getCitation()`, `setBookAuthors()`, `setBookChapterAuthors()`, `addSeriesInformation()`), `pages/CitationStyleLanguageHandler.php`, `templates/citation-block.blade`, `templates/citation-styles/ris.blade`.
+- Payments: OMP `classes/payment/omp/OMPPaymentManager.php`, `classes/payment/omp/OMPCompletedPaymentDAO.php`, `pages/payment/PaymentHandler.php`, `plugins/paymethod/manual/ManualPaymentPlugin.php`, `templates/paymentForm.tpl`, `mailables/ManualPaymentNotify.php`, `plugins/paymethod/paypal/PaypalPaymentPlugin.php`; lib/pkp `classes/payment/PaymentManager.php`, `classes/components/forms/context/PKPPaymentSettingsForm.php`; OMP `classes/components/forms/context/UserAccessForm.php` (`restrictMonographAccess`).
+- Locale: OMP `locale/en/locale.po`, `submission.po`, `manager.po` and `locale/fr_CA/*`; lib/pkp `locale/en/submission.po`.

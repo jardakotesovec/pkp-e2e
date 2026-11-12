@@ -19,7 +19,7 @@ A test author needs four parts of this file: "The two playwright layers",
 variant servers, and "Running". "config.test.inc.php" and "Env vars" are
 look-up. Everything else serves other work and is read by heading when a
 brief or MAINTENANCE names it: "The stable lines", "Trying a fix" and
-"Dataset fleets" (issue reports, regression reads), "The ore worktree",
+"Dataset fleets" (issue reports, regression reads),
 "The plugin sandbox" (plugin reviews), "Slots" and "CI" (the session
 itself).
 
@@ -142,9 +142,17 @@ the folder's suite, and one file runs with
 `npx playwright test -c lines/stable-3_5_0/<app>.config.js`.
 `node bin/line-cut.js` fills the folder. No suite runs on 3.4 or 3.3.
 
+`ore` (pkp/ojs `ore`, OJS only, MAINTENANCE "The ore version") is a line
+the same way, with the folder `lines/ore/`:
+`npm run fetch-apps -- --line ore ojs` provisions `checkouts/ore/ojs`,
+and every command above takes `PKP_E2E_LINE=ore`. Its ports sit where
+slots 6 to 8 would (slot 0: 16000), so those slots stay unused while the
+line exists.
+
 | Line | Checkouts | Base ports ojs/omp/ops (slot 0) | Test DBs | PHP | Node (JS build) | Overlays |
 |---|---|---|---|---|---|---|
 | `stable-3_5_0` | `checkouts/stable-3_5_0/<app>` | 9000/9100/9200 | `<app>_test_3_5` | system `php` (8.3) | system (22) | the line folder's own copy (`lines/stable-3_5_0/`) |
+| `ore` | `checkouts/ore/ojs` (OJS only) | 16000 | `ojs_test_ore` | system `php` (8.3) | system (22) | the line folder's own copy (`lines/ore/`) |
 | `stable-3_4_0` | `checkouts/stable-3_4_0/<app>` | 10000/10100/10200 | `<app>_test_3_4` | `/usr/bin/php8.2` | 16.20.2 | install and user tools only |
 | `stable-3_3_0` | `checkouts/stable-3_3_0/<app>` | 11000/11100/11200 | `<app>_test_3_3` | `/usr/bin/php8.2` | 12.22.12 | install and user tools only |
 
@@ -306,66 +314,6 @@ the folder's suite, and one file runs with
   `/tmp/.X11-unix` for Xvfb (`systemd-tmpfiles --create` makes it).
   The branches pin Cypress 5.6 (3.3), 12 (3.4), 15 (3.5) and 14 (`main`);
   3.3's fails from Chrome 144 on (141–143 and Electron 85 pass).
-
-### The ore worktree
-
-Beside each slot clone sits an **ore worktree**, `<clone>-ore`: a git
-worktree of the clone on the pkp-e2e branch `ore` (MAINTENANCE "The ore
-branch"), with its own `checkouts/ojs` on pkp/ojs `ore` and that branch's
-`lib/pkp` and `lib/ui-library` pointers. OJS only: OMP and OPS have no
-`ore`. It belongs to its slot, so the session in slot n works in its own
-`-ore` and in no other.
-
-| Slot | Worktree | Its slot number | OJS port | Test DB | Mailpit (SMTP) |
-|---|---|---|---|---|---|
-| 0 | `/home/e2e/pkp-e2e-ore` | 4 | 12300 | `ojs_test_s4` | 8029 (1029) |
-| 1 | `/home/e2e/pkp-e2e-s1-ore` | 5 | 12600 | `ojs_test_s5` | 8030 (1030) |
-| 2 | `/home/e2e/pkp-e2e-s2-ore` | 6 | 16000 | `ojs_test_s6` | 8031 (1031) |
-
-- **Identity.** Its `.env` says `PKP_E2E_SLOT=<n+4>`,
-  `PKP_E2E_APP_BRANCH=ore` and `OJS_ROOT=./checkouts/ojs`, so ports, DB,
-  files dir, Mailpit and API key are its own ("Slots"), and fetch-apps
-  follows pkp `ore` instead of `main` and defaults to OJS alone. No line
-  is provisioned there.
-- **Running.** Every harness command run from the worktree uses the
-  `ore` branch's suite, overlays and kit against its checkout:
-  `npm run reset:ojs`, `npx playwright test -c configs/ojs.config.js <file>`,
-  `fleet-prep`, `bin/probe.js`. Whole suites still run on CI (the
-  branch's push runs,
-  `node bin/ci.js dispatch --ref <branch> --apps ojs`). To the test lock it is its own slot, so its runs and the
-  clone's take turns as two slots' runs do.
-- **Moving it.** `npm run fetch-apps -- --update` then `npm run mount`
-  in the worktree brings the checkout to pkp `ore`'s tip;
-  `git pull --rebase` moves the worktree's branch. A PR into `ore` checks out its
-  companion there (`git switch -c <companion> origin/ore`).
-- **The branch is the clone's.** Worktrees share the clone's `.git`, so
-  the local branch `ore` lives in the slot clone and `git checkout ore`
-  there is refused while the worktree holds it: work on `ore` in the
-  worktree. Commit and push from the worktree as from the clone.
-- **Part of the slot.** `bin/slot.js` counts the worktree with its
-  slot: the hook lists `ore/ojs`, a release stops `php -S` servers
-  serving from it, and the slot frees only when the worktree is clean
-  too (nothing uncommitted, untracked, stashed or unpushed).
-- **The ore branch's harness** is `main`'s as at the branch point, plus
-  harness commits cherry-picked onto `ore` because the worktree needs
-  them (fetch-apps' `PKP_E2E_APP_BRANCH`). A harness fix
-  that `main` gets is cherry-picked once an `ore` run or the worktree
-  shows the need, like a test-only change.
-- **Provisioning**, slot n with clone `<clone>`:
-
-  ```bash
-  git -C <clone> fetch origin
-  git -C <clone> worktree add -b ore <clone>-ore origin/ore   # without -b once the branch exists
-  cd <clone>-ore
-  printf 'PKP_E2E_SLOT=<n+4>\nPKP_E2E_APP_BRANCH=ore\nOJS_ROOT=./checkouts/ojs\n' > .env
-  npm ci
-  npm run fetch-apps -- --reference <clone>   # borrows the clone's checkouts/ojs objects
-  npm run mount
-  ```
-
-- **Teardown** (MAINTENANCE "The ore branch"):
-  `git -C <clone> worktree remove --force <clone>-ore`, `git -C <clone> branch -D ore`, and
-  `dropdb ojs_test_s<n+4>`.
 
 ### Trying a fix
 
@@ -677,8 +625,8 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
 - **Identity.** `PKP_E2E_SLOT=<n>` in the clone's `.env` makes it slot n
   (`resolveSlot()` in `bin/apps.js`): every port shifted by
   `slotPortShift(n)`, +n×300 for slots 0–2 and the same again 4000 higher
-  for each three numbers above them, which the ore worktrees use (clear of the lines' +1000, +2000, +3000 and of the
-  +0…+91 bands; `slot.js` keeps a literal copy), DB suffix `_s<n>`, Mailpit
+  for each three numbers above them (clear of the lines' +1000, +2000, +3000 and of the
+  +0…+91 bands; the `ore` line's +8000 takes the place of slots 6 to 8; `slot.js` keeps a literal copy), DB suffix `_s<n>`, Mailpit
   8025+n / SMTP 1025+n, the key suffix `-s<n>`. `fetch-apps` bakes them
   into each checkout's `.env.playwright` and `config.test.inc.php`. Unset
   is slot 0, CI's values. The per-slot key is a tripwire: a run that adopts
@@ -769,8 +717,8 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   `npm ci`, `npm run fetch-apps -- --reference /home/e2e/pkp-e2e` (borrows
   slot 0's objects), the same with `--line stable-3_5_0` (and
   `stable-3_4_0`, `stable-3_3_0` when the slot needs them), `npm run mount`
-  for every line, the ore worktree beside it ("The ore worktree"), then
-  add the clone to `~/.pkp-e2e-slots/slots.json`.
+  for every line, `npm run fetch-apps -- --line ore ojs` for the `ore`
+  line, then add the clone to `~/.pkp-e2e-slots/slots.json`.
 
 ## Runtime model
 
@@ -968,7 +916,7 @@ to spot: seeding succeeds and the browser step dies.
 - `PLAYWRIGHT_BASE_PORT` / `PLAYWRIGHT_WORKERS`: worker 0's port, and the
   worker count (unset = auto-detect, see above). A second runner beside
   the session's own takes a base whose whole band (+0 … +91) is clear of
-  every slot, line and ore worktree ("Slots"): 13000, 13100 and 13200
+  every slot and line ("Slots"): 13000, 13100 and 13200
   for OJS, OMP and OPS, plus 300 times the slot's number.
 - Flake-hunting levers (`shared/playwright/support/throttle.js`): opt-in,
   never in CI or a final. Each acts on every context the fixtures open

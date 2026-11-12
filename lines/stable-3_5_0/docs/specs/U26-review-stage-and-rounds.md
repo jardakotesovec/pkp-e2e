@@ -766,10 +766,6 @@ App-specific:
 
 Left out of the scenarios above, by reason:
 
-- **Planned**:
-  - after "Request Revisions", the author's only revised file deleted: the revisions task back in the author's Tasks panel ([A9](#a9)): the guard the issue report proposes [report 2026-10-04]
-  - on a round with no revision request, the "Revisions Uploaded" description makes no claim about a request ([A10](#a10)): the guard the issue report proposes [report 2026-10-04]
-  - after "Resubmit for Review" and the Author's first uploaded file: "Upload revisions" still offered ([A1](#a1)): the guard the issue report proposes [other 2026-10-02]
 - **Rarely met**:
   - "Returned back to review." once every review was confirmed before the return, and the reviewer sentences otherwise (Rules 5–6, Cross-feature): sending a submission back from Copyediting is not an ordinary week's action
   - deleting the only revised file flipping the status back to "requested" (Rule 7): an author seldom deletes their only revised file; the task half of the path is A9

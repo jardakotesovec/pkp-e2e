@@ -53,6 +53,18 @@ on:
         required: false
         type: string
         default: ''
+      line:
+        description: >-
+          a stable version whose suite is a folder of this repo,
+          lines/<line>/ (docs/process/VERSIONS.md), e.g. ore or
+          stable-3_5_0: the suite, its seeding code and its config come
+          from that folder. Empty runs main's suite. A caller that still
+          names such a version as its e2e_ref (an app hook written when
+          the version's suite was a pkp-e2e branch) gets the folder on
+          main too.
+        required: false
+        type: string
+        default: ''
       pkp_lib_ref:
         description: >-
           pin lib/pkp to this pkp/pkp-lib commit (a full sha or
@@ -123,9 +135,32 @@ jobs:
         env:
           COMPANION: ${{ inputs.companion_branch }}
           FALLBACK: ${{ inputs.e2e_ref }}
+          LINE: ${{ inputs.line }}
+          APP: ${{ inputs.app }}
         run: |
           ref="$FALLBACK"
-          if [ -n "$COMPANION" ] && [ "$COMPANION" != "main" ] \
+          line="$LINE"
+          # An e2e_ref that names a version with a folder on main is that
+          # version: its suite is main's lines/<version>/, not a branch.
+          if [ -z "$line" ] && [ -n "$FALLBACK" ] && [ "$FALLBACK" != "main" ] \
+             && curl -sfI "https://raw.githubusercontent.com/jardakotesovec/pkp-e2e/main/lines/$FALLBACK/$APP.config.js" >/dev/null; then
+            line="$FALLBACK"
+            ref="main"
+            echo "e2e_ref $FALLBACK is a version folder on main: running lines/$line/"
+          fi
+          suite="apps/$APP/playwright"
+          config="configs/$APP.config.js"
+          if [ -n "$line" ]; then
+            suite="lines/$line/apps/$APP/playwright"
+            config="lines/$line/$APP.config.js"
+          fi
+          echo "line=$line" >> "$GITHUB_OUTPUT"
+          echo "suite=$suite" >> "$GITHUB_OUTPUT"
+          echo "config=$config" >> "$GITHUB_OUTPUT"
+          # A push to the version's own branch names that branch as the
+          # companion (the hook passes the ref's name): it is the version,
+          # not a companion, whatever pkp-e2e branch of that name still exists.
+          if [ -n "$COMPANION" ] && [ "$COMPANION" != "main" ] && [ "$COMPANION" != "$line" ] \
              && git ls-remote --exit-code --heads https://github.com/jardakotesovec/pkp-e2e.git "refs/heads/$COMPANION" >/dev/null 2>&1; then
             ref="$COMPANION"
             echo "companion branch found in pkp-e2e: $COMPANION"
@@ -151,6 +186,18 @@ jobs:
       # A dispatch may pin the shared code to an open pkp-lib or ui-library
       # PR (e2e.yml pkp_lib_ref / ui_library_ref), before the installs read
       # composer.lock and package-lock.json.
+      # A version's tools resolve its app at checkouts/<line>/<app>
+      # (bin/apps.js); PKP_E2E_LINE selects the version for every later step.
+      - name: Place the app for the version's suite
+        if: steps.e2e.outputs.line != ''
+        env:
+          LINE: ${{ steps.e2e.outputs.line }}
+        run: |
+          mkdir -p "e2e/checkouts/$LINE"
+          ln -s "$GITHUB_WORKSPACE/app" "e2e/checkouts/$LINE/${{ inputs.app }}"
+          echo "PKP_E2E_LINE=$LINE" >> "$GITHUB_ENV"
+          echo "- suite: lines/$LINE/ (version folder)" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Pin the submodules
         if: inputs.pkp_lib_ref != '' || inputs.ui_library_ref != ''
         working-directory: app
@@ -283,20 +330,21 @@ jobs:
           # Each pass writes its own output folder: a run empties its output
           # folder first, so with one folder the solo pass wiped the error
           # contexts of the first two, flaky first attempts included (2026-09-26).
-          out=apps/$app/playwright/test-results
-          logs=apps/$app/playwright/.server-logs
+          cfg=${{ steps.e2e.outputs.config }}
+          out=${{ steps.e2e.outputs.suite }}/test-results
+          logs=${{ steps.e2e.outputs.suite }}/.server-logs
           node bin/ci-cores.js "$PKP_E2E_CORE_DIR" $logs/cores --watch & cores_pid=$!
-          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=shared --project=$app --output=$out/app || rc=1
+          npx playwright test -c $cfg --retries=1 --shard=$shard --project=shared --project=$app --output=$out/app || rc=1
           # Reset and bootstrap again before the serial pass (bin/test-app.js):
           # the site-level @solo tests re-save every context of the install, and
           # the app pass leaves hundreds. The setup project is one test, so it
           # is not sharded.
           if ! { node bin/with-app.js $app shared/playwright/reset.js \
-                 && npx playwright test -c configs/$app.config.js --retries=1 --project=setup --reporter=line --output=$out/setup; }; then
+                 && npx playwright test -c $cfg --retries=1 --project=setup --reporter=line --output=$out/setup; }; then
             echo "::error::the reset before the serial pass failed"; rc=1
           fi
-          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-serial --no-deps --pass-with-no-tests --output=$out/serial || rc=1
-          npx playwright test -c configs/$app.config.js --retries=1 --shard=$shard --project=$app-solo --no-deps --pass-with-no-tests --output=$out/solo || rc=1
+          npx playwright test -c $cfg --retries=1 --shard=$shard --project=$app-serial --no-deps --pass-with-no-tests --output=$out/serial || rc=1
+          npx playwright test -c $cfg --retries=1 --shard=$shard --project=$app-solo --no-deps --pass-with-no-tests --output=$out/solo || rc=1
           # A flaky test (red, then green on the retry) leaves its failed
           # attempt's error-context.md; say so, so the artifact step uploads it.
           if find $out -name error-context.md | grep -q .; then echo "attempt_failed=true" >> "$GITHUB_OUTPUT"; fi
@@ -310,14 +358,14 @@ jobs:
         id: deaths
         if: always()
         working-directory: e2e
-        run: node bin/server-deaths.js apps/${{ inputs.app }}/playwright/.server-logs
+        run: node bin/server-deaths.js ${{ steps.e2e.outputs.suite }}/.server-logs
 
       - name: Upload the deaths' logs and backtraces
         if: always() && steps.deaths.outputs.count != '' && steps.deaths.outputs.count != '0'
         uses: actions/upload-artifact@v4
         with:
           name: server-deaths-${{ inputs.app }}-${{ matrix.shard }}
-          path: e2e/apps/${{ inputs.app }}/playwright/.server-logs/
+          path: e2e/${{ steps.e2e.outputs.suite }}/.server-logs/
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 14
@@ -329,7 +377,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: timings-${{ inputs.app }}-${{ matrix.shard }}
-          path: e2e/apps/${{ inputs.app }}/playwright/.timings/
+          path: e2e/${{ steps.e2e.outputs.suite }}/.timings/
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 30
@@ -343,8 +391,8 @@ jobs:
         with:
           name: playwright-artifacts-${{ inputs.app }}-${{ matrix.shard }}
           path: |
-            e2e/apps/${{ inputs.app }}/playwright/test-results/
-            e2e/apps/${{ inputs.app }}/playwright/.server-logs/
+            e2e/${{ steps.e2e.outputs.suite }}/test-results/
+            e2e/${{ steps.e2e.outputs.suite }}/.server-logs/
           # upload-artifact@v4 skips hidden dirs by default — without this the
           # .server-logs/ half of the path silently uploads nothing.
           include-hidden-files: true

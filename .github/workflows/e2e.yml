@@ -62,6 +62,10 @@ on:
         description: the apps to run, comma-separated (a PR on one app need not run the other two)
         type: string
         default: 'ojs,omp,ops'
+      line:
+        description: a stable version's folder to run the suite from (lines/<line>/, e.g. ore or stable-3_5_0); empty runs main's suite. Name the app refs of that version with it (ojs_ref ore).
+        type: string
+        default: ''
       php_ini_values:
         description: extra php.ini values for setup-php, comma-separated, after the job's opcache.jit=disable (e.g. opcache.jit=1235 for a run with the JIT)
         type: string
@@ -85,6 +89,7 @@ jobs:
       app_repo: ${{ inputs.ojs_repo || 'pkp/ojs' }}
       app_ref: ${{ inputs.ojs_ref || 'main' }}
       e2e_ref: ${{ github.sha }}
+      line: ${{ inputs.line || '' }}
       pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
       ui_library_ref: ${{ inputs.ui_library_ref || '' }}
       php_ini_values: ${{ inputs.php_ini_values || '' }}
@@ -97,6 +102,7 @@ jobs:
       app_repo: ${{ inputs.omp_repo || 'pkp/omp' }}
       app_ref: ${{ inputs.omp_ref || 'main' }}
       e2e_ref: ${{ github.sha }}
+      line: ${{ inputs.line || '' }}
       pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
       ui_library_ref: ${{ inputs.ui_library_ref || '' }}
       php_ini_values: ${{ inputs.php_ini_values || '' }}
@@ -109,6 +115,19 @@ jobs:
       app_repo: ${{ inputs.ops_repo || 'pkp/ops' }}
       app_ref: ${{ inputs.ops_ref || 'main' }}
       e2e_ref: ${{ github.sha }}
+      line: ${{ inputs.line || '' }}
       pkp_lib_ref: ${{ inputs.pkp_lib_ref || '' }}
       ui_library_ref: ${{ inputs.ui_library_ref || '' }}
       php_ini_values: ${{ inputs.php_ini_values || '' }}
+  # The ore version (pkp/ojs `ore`, OJS only; docs/process/VERSIONS.md):
+  # its suite is the folder lines/ore/. Nightly here; pushes and PRs on
+  # pkp/ojs `ore` run it through that repo's hook.
+  ojs-ore:
+    if: github.event_name == 'schedule' && github.repository == 'jardakotesovec/pkp-e2e'
+    uses: ./.github/workflows/run-app.yml
+    with:
+      app: ojs
+      app_repo: pkp/ojs
+      app_ref: ore
+      e2e_ref: ${{ github.sha }}
+      line: ore

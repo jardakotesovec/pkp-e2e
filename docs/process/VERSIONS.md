@@ -52,6 +52,17 @@ built feature by feature through the build-out below, because nothing in
 it can be assumed. A feature the folder does not hold has not been
 built for the version, and nothing is claimed about it.
 
+**A version whose suite lived on a branch of this repo** (`ore`):
+`node bin/line-cut.js ore --all --from origin/ore --apps ojs` copies
+that branch's files, and its specs are brought to the present template
+once.
+
+**A version's specs carry no Planned list.** Coverage a version does
+not have at its cut is not owed there: `line-cut` leaves the Planned
+bullet of "Left out" behind, and a build-out's scenario writer places
+what is ready and drops the guards that wait for a fix. A guard reaches
+the version with the backport of its fix.
+
 ## The build-out: one feature of a version
 
 The loop is the runbook's (`RUNBOOK.md` "The loop"), with the same
@@ -106,7 +117,8 @@ order.
    step 8's tests check them.
 6. **Scenarios.** As a revision's step 2 (`briefs/scenario-writer.md`,
    situation "revision"): the scenarios exist, and each is brought in
-   line with the folded body. The numbers stay `main`'s: a scenario the
+   line with the folded body, and the Planned bullet goes (above). The
+   numbers stay `main`'s: a scenario the
    version cannot run becomes an absence scenario with a positive
    control, as an app without the feature gets one (multi-app rule 3).
 7. **Readability.** As a revision's: the persona reads only what
@@ -131,11 +143,18 @@ order.
     version is released code, so anything security-shaped is a released
     finding in the private repo (`../pkp-e2e-sec/security_policy.md`).
 
-A finding the build meets on the version goes into the version's
-register. One that `main`'s register does not hold gets a row in
-`docs/tracking/incidentals.md` naming the version's entry, so the
-housekeeping session drives it on `main` and adds it there when `main`
-shows it too.
+**Bugs are pursued on `main`.** A version's register is the copy of
+`main`'s, kept true for the version: an entry the version does not show
+is retired, and one a backport fixes is retired with the backport. It
+is not a second place to collect bugs. What a build-out meets that
+`main`'s register does not hold gets a row in
+`docs/tracking/incidentals.md`, so the housekeeping session drives it
+on `main` and it is reported from there, the report saying which
+versions show it; the version's spec keeps the marker its text needs
+meanwhile. A fault only the version shows gets no register entry: a
+report under `docs/reports/<branch>/`, a ci-triage row that names the
+version, and `test.fixme` on the version's test (MAINTENANCE has the
+details under `ore`).
 
 What a checker sees on another feature's screen goes into that
 feature's row of the version's progress file, one line with the kept
@@ -157,6 +176,18 @@ that ends early (the model discipline's stops, or context running low)
 leaves whole features behind and the row of the unfinished one says the
 last gate reached. The report names each feature built, its counts, and
 how many of the requested count were done.
+
+## CI
+
+The reusable workflow (`.github/workflows/run-app.yml`) takes a `line`:
+the suite, its seeding code and its config then come from
+`lines/<line>/`, and the app is the caller's `app_ref`. A caller that
+names a version as its `e2e_ref`, as an app repo's hook on that branch
+does, gets the same once `main` holds the folder.
+`node bin/ci.js dispatch --line <branch> --apps <apps> --<app>-ref <branch>`
+runs a version's suite from the current pkp-e2e branch. A push to
+pkp-e2e does not run version suites: the session that changed a
+version's folder dispatches its run as the gate.
 
 ## After a feature is built
 
