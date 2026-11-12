@@ -2,27 +2,29 @@
 /**
  * @file playwright/tests/U26-review-stage-absence.spec.js
  *
- * Review stage & rounds — OPS suite, the ABSENCE test only, spec scenario
- * 14. OPS installs no review stage: a preprint server's workflow goes
- * straight from submission to Production (spec footnote p, an install
- * fact), so scenarios 1–13 carry badges that exclude a preprint server and
- * the whole feature costs this ONE test, with a positive control per
- * absence. Spec: docs/specs/U26-review-stage-and-rounds.md; its Coverage
- * section is the record of everything else left out.
+ * Review stage & rounds — OPS suite, spec scenario 14 only. OPS installs no
+ * review stage: a preprint server's workflow goes straight from submission
+ * to Production (spec footnote p, an install fact), so scenarios 1–13 and
+ * 15 carry badges that exclude a preprint server and the whole feature
+ * costs this ONE test: the Preprint Server Manager's workflow with a
+ * positive control per absence, and the preprint's Author typing the two
+ * old author-dashboard addresses (Rule 17). Spec:
+ * docs/specs/U26-review-stage-and-rounds.md; its Coverage section is the
+ * record of everything else left out.
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):
- * - A1 🐞, OJS1 🐞, A9 🐞, A10 🐞 (review-stage surfaces that do not exist
- *   on a preprint server).
- * - A2 ❓, A3 ❓, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, OMP2 ❓, OMP3 ❓, OMP1 ✅
- *   (journal and press review surfaces; nothing to assert or park here).
+ * Deliberately NOT covered (register IDs from the spec's Findings register):
+ * - A1 🐞, A9 🐞, A10 🐞, A13 🐞, A14 🐞.
+ * - A2 ❓, A3 ❓, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A11 ❓, OMP2 ❓, OMP3 ❓.
+ * - OMP1 ✅.
  *
- * Seeding: a scratch preprint server + one submitted preprint via the
- * scenario endpoints (throwaway manager/author). `publicknowledge` and the
- * seeded roster are not touched. No hard-coded waits; runs in the parallel
- * `ops` project.
+ * Seeding: a scratch preprint server with a throwaway Preprint Server
+ * Manager and Author, and one submitted preprint via the scenario endpoints
+ * (on OPS it lands directly on the Production stage). `publicknowledge` and
+ * the seeded roster are not touched. No hard-coded waits; runs in the
+ * parallel `ops` project.
  */
 const {test, expect} = require('../support/fixtures.js');
+const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 
 /** Single hyphenless alphanumeric token — tag conventions in patterns.md. */
 function makeTag(prefix) {
@@ -36,7 +38,7 @@ test.describe('review stage & rounds (U26) — OPS absence', () => {
         const author = `a${tag}`;
 
         // Scratch preprint server with a throwaway Preprint Server Manager and
-        // author; one seeded (submitted, unposted) preprint — on OPS it lands
+        // Author; one seeded (submitted, unposted) preprint — on OPS it lands
         // directly on the Production stage.
         await pkpApi.createContext({
             tag,
@@ -95,5 +97,34 @@ test.describe('review stage & rounds (U26) — OPS absence', () => {
         await expect(workflow.getByText('Files for Review')).toHaveCount(0);
         await expect(workflow.getByText('Revisions Uploaded')).toHaveCount(0);
         await expect(workflow.getByText('Reviewers', {exact: true})).toHaveCount(0);
+
+        // Old addresses, the preprint's Author (Rule 17): the old
+        // author-dashboard link lands on My Submissions with that
+        // preprint's workflow open…
+        const authorPage = await (await asUser(author)).newPage();
+        const authorWorkflow = new WorkflowPage(authorPage, tag);
+        await authorWorkflow.gotoForwarding(
+            authorWorkflow.authorDashboardUrl(seeded.submissionId),
+            seeded.submissionId
+        );
+        await expect(authorPage).toHaveURL(/\/dashboard\/mySubmissions\?/);
+        expect(authorWorkflow.submissionIdFromUrl()).toBe(String(seeded.submissionId));
+        await expect(authorWorkflow.dialog()).toContainText(`Submission ${tag}`);
+
+        // …and the old per-round address answers a bare "404 Not Found"
+        // page, with the preprint's id and without one: the heading is the
+        // page's only text (positive control: the heading itself), and no
+        // workflow opens.
+        for (const suffix of [`/${seeded.submissionId}`, '']) {
+            const response = await authorPage.goto(
+                `/index.php/${tag}/authorDashboard/reviewRoundInfo${suffix}`
+            );
+            expect(response?.status()).toBe(404);
+            await expect(
+                authorPage.getByRole('heading', {name: '404 Not Found', exact: true})
+            ).toBeVisible();
+            await expect(authorPage.locator('body')).toHaveText(/^\s*404 Not Found\s*$/);
+            await expect(authorPage.locator('[data-cy="sidemodal-header"]')).toHaveCount(0);
+        }
     });
 });

@@ -368,9 +368,10 @@ separate scratch journals with throwaway accounts: an editor whose mailbox
 scenario 4 reads, a reviewer whose assignment lists scenario 7 reads, and a
 Section Editor as the only editorial participant; scenario 15's journal
 alone has "Minimum Confirmed Reviews Required" set to 2 (the others keep the
-default of 0). Every other scenario runs on the seeded journal with ready
-accounts and scratch submissions. Accounts, passwords and the tooling recipe
-are in the footnote. <sup>s</sup>
+default of 0). Scenario 14 runs on a scratch preprint server with a
+throwaway Preprint Server Manager and Author. Every other scenario runs on
+the seeded journal with ready accounts and scratch submissions. Accounts,
+passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 1. **Round 1 opens with the submission**
 
@@ -435,30 +436,32 @@ are in the footnote. <sup>s</sup>
 4. **Author uploads a revision**
 
    Given: Author, on a round that reads "Revisions have been requested.",
-   with one Editor assigned to the stage and a second Editor of the journal
-   not assigned to it.
+   with one Editor assigned to the stage and a second Editor not assigned
+   to it.
 
    - **"Upload revisions", first step only**: press "Upload revisions",
      attach a file in the upload window's first step, then close the
      window through its header "Close" without finishing, accepting the
      browser's leave-without-saving prompt if it asks (the window's own
-     "Cancel" link is a different path [A11](#a11)): the "Revisions
-     Uploaded" panel lists the file all the same.
-   - **The Editor's screen**: Editor: the box reads "Revisions have been
-     submitted and a decision is needed."
+     "Cancel" link is a different path [A11](#a11)); then, without
+     reloading, read the "Revisions Uploaded" panel behind the window: it
+     lists the file as the window closes.
+   - **The Editor's screen**: the assigned Editor, in a session opened
+     before the upload, reloading without signing in: the box reads
+     "Revisions have been submitted and a decision is needed."
    - **Tasks**: Author: the "Revision required." task is gone from the
      header's Tasks panel.
-   - **Mailbox**: the assigned Editor's mailbox holds an email with the
-     subject "Revised Version Uploaded", sent under the Author's own name
-     and address.
+   - **Mailbox**: the assigned Editor has an email with the subject
+     "Revised Version Uploaded", sent under the Author's own name and
+     address.
    - **A second upload the same day**: Author: press "Upload revisions"
      again and complete the upload: the panel lists both files, and the
-     assigned Editor's mailbox holds no second notice.
+     assigned Editor gets no second notice.
    - **After the Editor signs in**: Editor: sign in again. Author: upload a
-     third file: a fresh "Revised Version Uploaded" email arrives in the
-     Editor's mailbox.
+     third file: a fresh "Revised Version Uploaded" email reaches the
+     Editor.
    - **Control**: the Editor not assigned to the stage has no "Revised
-     Version Uploaded" email in their mailbox. <sup>s</sup>
+     Version Uploaded" email. <sup>s</sup>
 
 5. **Request revisions toward a new round**
 
@@ -654,14 +657,22 @@ App-specific:
 
 14. **No review stage on a preprint server** {OPS}
 
-    Given: Preprint Server Manager, on any preprint's workflow.
+    Given: Preprint Server Manager, on a preprint's workflow, and that
+    preprint's Author ready to sign in.
 
     - **The workflow menu**: it offers no Review entry. The stages go
       straight to Production, and no round, reviewer or review file
       surface exists anywhere on the screen.
-    - **Control**: the same screen offers the Production stage's own
-      controls (for example posting or declining the preprint), so the
-      workflow itself is working. <sup>p</sup> <sup>s</sup>
+    - **Old addresses, the preprint's Author**: Author: open
+      `{journal}/authorDashboard/submission/{id}` with the preprint's id
+      (the server's address in place of `{journal}`): My Submissions opens
+      with that preprint's workflow open. Open
+      `{journal}/authorDashboard/reviewRoundInfo/{id}`, then the same
+      address without an id: a bare "404 Not Found" page each time.
+    - **Control**: Preprint Server Manager: the preprint's workflow
+      offers the Production stage's own controls (for example posting or
+      declining the preprint), so the workflow itself is working.
+      <sup>p</sup> <sup>s</sup>
 
 15. **A minimum of confirmed reviews** {OJS OMP}
 
@@ -691,10 +702,7 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - after "Request Revisions", the author's only revised file deleted: the revisions task back in the author's Tasks panel ([A9](#a9)): the guard the issue report proposes [report 2026-10-04]
   - on a round with no revision request, the "Revisions Uploaded" description makes no claim about a request ([A10](#a10)): the guard the issue report proposes [report 2026-10-04]
-  - scenario 4's first bullet read with no reload: the "Revisions Uploaded" panel listing the file as the closed upload window goes (Side effects, "Author uploads a revised file"): the OJS suite reloads the page before it reads the panel [upstream 2026-09-29]
   - after "Resubmit for Review" and the Author's first uploaded file: "Upload revisions" still offered ([A1](#a1)): the guard the issue report proposes [other 2026-10-02]
-  - on a journal, scenario 12's "Read Review" remark (Rule 15; [OJS1](#ojs1) retired): the scenario states it, so a missing remark fails it there too; the OJS suite does not assert it yet [incidental 2026-10-07]
-  - the two old addresses on a preprint server, typed by the preprint's Author (Rule 17) {OPS}: scenario 14 opens a preprint's workflow as the Preprint Server Manager and types no address [other 2026-10-12]
 - **Rarely met**:
   - "Returned back to review." once every review is confirmed, and the reviewer sentences until then (Rules 5–6, Cross-feature): sending a submission back from Copyediting is not an ordinary week's action, and the sentence needs every review confirmed after the return
   - deleting the only revised file flipping the status back to "requested" (Rule 7): an author seldom deletes their only revised file; the task half of the path is A9
@@ -705,7 +713,7 @@ Left out of the scenarios above, by reason:
   - editorial roles filing revisions through the "Revisions Uploaded" panel's own controls (Actors row 4; the panel of scenario 4)
   - round created: the internal notice surfaces nowhere (Side effects)
   - the old per-round address in its other two forms, with the submission, stage and round after it and with a language in it (Rule 17; the same "404 Not Found" page scenario 12's "Old addresses" bullet reads with an id and without one)
-  - the old per-round address typed by an Author of another submission, an Editor, the round's Reviewer, a visitor who is not signed in or, on a preprint server, the Preprint Server Manager (Rule 17; the same "404 Not Found" page scenario 12's "Old addresses" bullet reads as the submission's Author)
+  - the old per-round address typed by an Author of another submission, an Editor, the round's Reviewer, a visitor who is not signed in or, on a preprint server, the Preprint Server Manager (Rule 17; the same "404 Not Found" page scenario 12's "Old addresses" bullet reads as the submission's Author, and scenario 14's as the preprint's Author)
 - **Register carries it**:
   - A5 (production assistant roles with no way in; one assigned elsewhere refused; Actors row 1)
   - A2 (the same status box for every role; the author gets the editor's wording; Actors row 2, Rule 4)
@@ -1644,7 +1652,10 @@ and accepts on screen before the author's first step; the letter comes from
 a decision the editor records on screen; the control submission seeds
 `reviewer.paul` `status: 'completed'`; the old addresses are typed. 13: a
 monograph seeded with no decision; "Send to External Review" recorded on
-screen. 14: any seeded preprint. 15: a scratch journal created with
+screen. 14: a scratch preprint server from `POST scenarios/context` with
+throwaway `manager` and `author`, the author's preprint seeded through
+`POST scenarios/submission` (it sits on Production); the Author types the
+old addresses. 15: a scratch journal created with
 `review: {numReviewsPerSubmission: 2}` and throwaway `editor`, `author`
 and `externalReviewer`; the editor is assigned to the stage through
 `participants[]`, the submission seeds `decisions: ['sendExternalReview']`

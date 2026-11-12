@@ -10,8 +10,7 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
- * - A1 🐞, A9 🐞, A10 🐞, A14 🐞; OJS1 ✅ retired 2026-10-07 (the window
- *   shows the shared remark; S12 asserting it is a Planned item).
+ * - A1 🐞, A9 🐞, A10 🐞, A14 🐞.
  * - A2 ❓, A3 ❓ (spec instruction: no assertion touches the read-review
  *   window's attachments section), A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓.
  * - U27-register A21 🐞 / A22 🐞 / A23 ❓ / A24 ❓ (the Vue "Review Details"
@@ -63,6 +62,8 @@ const ALL_CONFIRMED = 'All reviews are confirmed and a decision is needed.';
 /** The status box's first line on a journal whose minimum of confirmed reviews is 2 (S15). */
 const MINIMUM_LINE = 'Minimum number of confirmed reviews required: 2.';
 const MINIMUM_LINE_PREFIX = 'Minimum number of confirmed reviews required';
+/** The open reviewer's remark "For author and editor" (S12). */
+const SHARED_REMARK = 'Shared remarks for the author.';
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -375,16 +376,25 @@ test.describe('review stage & rounds', () => {
         await before.tasks.close();
 
         // "Upload revisions", first step only: attach a file, close the
-        // window without finishing — the panel lists the file all the same.
+        // window through its header "Close" without finishing. Without
+        // reloading, the "Revisions Uploaded" panel behind the window lists
+        // the file as the window closes (the panel is read empty of it
+        // first, and no page load happens between the close and the read).
         const authorWorkflow = new WorkflowPage(authorPage, tag);
         await authorWorkflow.gotoAuthor(submissionId);
+        await expect(authorWorkflow.panel('Revisions Uploaded')).toBeVisible();
+        await expect(authorWorkflow.panelRow('Revisions Uploaded', fileOne.name)).toHaveCount(0);
+        let authorLoads = 0;
+        const countLoad = () => authorLoads++;
+        authorPage.on('load', countLoad);
         await authorPage.getByRole('button', {name: 'Upload revisions', exact: true}).click();
         await uploadFirstStepOnly(authorPage, {file: fileOne});
-        await authorPage.reload();
-        await authorWorkflow.expectOpen();
         await expect(authorWorkflow.panelRow('Revisions Uploaded', fileOne.name)).toBeVisible();
+        authorPage.off('load', countLoad);
+        expect(authorLoads).toBe(0);
 
-        // Editor view: status flipped.
+        // The Editor's screen: the assigned Editor, in the session opened
+        // before the upload, reloads without signing in: the status flipped.
         await editorPage.reload();
         await workflow.expectOpen();
         await workflow.expectStatus('Round 1 Status', 'Revisions have been submitted and a decision is needed.');
@@ -952,12 +962,11 @@ test.describe('review stage & rounds', () => {
         await expect(reviewersTable).toHaveCount(0);
         await expect(readReview).toHaveCount(0);
 
-        // The open reviewer shares a remark with the author and submits (the
-        // journal's window shows it since OJS1 retired; asserting it is a
-        // Planned item).
+        // The open reviewer shares a remark with the author ("For author and
+        // editor") and submits with the recommendation "Accept Submission".
         await performReview(juliaPage, JOURNAL, submissionId, {
             recommendation: 'Accept Submission',
-            comments: 'Shared remarks for the author.',
+            comments: SHARED_REMARK,
         });
 
         // Submitted, not yet confirmed: still no reviewer listed (Rule 15,
@@ -975,8 +984,9 @@ test.describe('review stage & rounds', () => {
         await closeReviewDetails(editorPage, editorModal);
 
         // The author reads the open review: reviewer's name, completion date
-        // and recommendation. (Review text: a Planned assertion since OJS1
-        // retired; attachments section: register A3, not asserted.)
+        // and recommendation, then the typed remark under "Reviewer Comments"
+        // › "For author and editor" (attachments section: register A3, not
+        // asserted).
         await authorWorkflow.gotoAuthor(submissionId);
         const reviewerRow = authorWorkflow.panelRow('Reviewers', 'Julia Reviewer');
         await expect(reviewerRow).toBeVisible();
@@ -990,6 +1000,17 @@ test.describe('review stage & rounds', () => {
         await expect(readModal).toContainText('Completed:');
         await expect(readModal).toContainText('Recommendation:');
         await expect(readModal).toContainText('Accept Submission');
+        await expect(
+            readModal.getByRole('heading', {level: 3, name: 'Reviewer Comments', exact: true})
+        ).toBeVisible();
+        const sharedHeading = readModal.getByRole('heading', {level: 4, name: 'For author and editor', exact: true});
+        await expect(sharedHeading).toBeVisible();
+        // The remark is the block right under its heading (the template's
+        // reveal-more box), and that heading follows "Reviewer Comments".
+        await expect(sharedHeading.locator('xpath=following-sibling::div[1]')).toContainText(SHARED_REMARK);
+        await expect(
+            sharedHeading.locator('xpath=preceding-sibling::h3[1]')
+        ).toHaveText('Reviewer Comments');
         await readModal.getByRole('button', {name: 'Close'}).click();
         await expect(readModal).toHaveCount(0, {timeout: 30_000});
 

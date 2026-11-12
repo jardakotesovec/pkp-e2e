@@ -110,6 +110,14 @@ async function signInFresh(browser, baseURL, username) {
     await context.close();
 }
 
+/**
+ * The round's "Revisions Uploaded" panel table (the file manager's table is
+ * named by the panel title), in the editorial or the author view.
+ */
+function revisionsUploadedTable(modal) {
+    return primaryRegion(modal).getByRole('table', {name: 'Revisions Uploaded', exact: true});
+}
+
 /** Seed straight into External Review round 1 (skip-internal entry). */
 async function seedInExternalReview(ompApi, tag, {reviewers = [], extraRounds = [], extraDecisions = []} = {}) {
     return seedMonograph(ompApi, tag, {
@@ -331,6 +339,14 @@ test.describe('Review stage & rounds (U26)', () => {
             resultName: `Ed${tag} Editor`,
         });
 
+        // The Editor's screen is read by the assigned Editor in a session
+        // opened before the upload (a cached session, not a sign-in, so the
+        // same-day throttle below stays armed); the box still reads the
+        // requested sentence (control for the flip read after the upload).
+        const edPage = await (await asUser(editor)).newPage();
+        const edModal = await openEditorial(edPage, tag, seeded.submissionId);
+        await expectRoundStatus(edModal, 1, STATUS.revisionsRequested);
+
         // The author holds a revisions task (control for its later removal).
         const authorPage = await (await asUser(author)).newPage();
         await authorPage.goto(`/index.php/${tag}/en/dashboard/mySubmissions`);
@@ -339,19 +355,31 @@ test.describe('Review stage & rounds (U26)', () => {
         await closeTopModal(authorPage);
 
         // "Upload revisions", first step only: attach the file, then close
-        // the window without finishing.
+        // the window through its header "Close" without finishing.
         const authorModal = await openAuthorView(authorPage, tag, seeded.submissionId);
+        await expect(revisionsUploadedTable(authorModal)).toBeVisible({timeout: 15_000});
+        await expect(revisionsUploadedTable(authorModal).getByText(file1)).toHaveCount(0);
         await authorModal.getByRole('button', {name: 'Upload revisions'}).click();
         const wizard = await startUploadWizard(authorPage, file1);
+        let authorLoads = 0;
+        const countLoad = () => authorLoads++;
+        authorPage.on('load', countLoad);
         await closeUploadWizard(authorPage, wizard);
-        // The Revisions Uploaded panel lists the file all the same.
+        // Without reloading, the "Revisions Uploaded" panel behind the
+        // window lists the file as the window closes; no page load happened
+        // between the close and the read.
         await expect(
-            primaryRegion(authorModal).getByText(file1).first()
+            revisionsUploadedTable(authorModal).getByRole('row').filter({hasText: file1})
         ).toBeVisible({timeout: 15_000});
+        authorPage.off('load', countLoad);
+        expect(authorLoads).toBe(0);
 
-        // Editor view: the round status flipped to its submitted partner.
-        const mgrModal2 = await openEditorial(mgrPage, tag, seeded.submissionId);
-        await expectRoundStatus(mgrModal2, 1, STATUS.revisionsSubmitted);
+        // The Editor's screen: the assigned Editor reloads, without signing
+        // in, and the box reads the submitted sentence.
+        await edPage.reload();
+        const edModal2 = workflowModal(edPage);
+        await expect(edModal2.getByRole('heading', {name: /^Workflow:/}).first()).toBeVisible({timeout: 20_000});
+        await expectRoundStatus(edModal2, 1, STATUS.revisionsSubmitted);
 
         // The author's task is gone (the panel's own answer bounds the read).
         await authorPage.goto(`/index.php/${tag}/en/dashboard/mySubmissions`);
