@@ -413,7 +413,9 @@ exports.PublicationScreen = class PublicationScreen {
             {timeout: 30_000}
         );
         await field.click();
-        await field.pressSequentially(term, {delay: 15});
+        // One input event, so one lookup: typed key by key, a late answer to
+        // a shorter prefix could refill the list after clearTypedTerm().
+        await field.fill(term);
         const response = await answered;
         expect(response.ok()).toBe(true);
         return response;
