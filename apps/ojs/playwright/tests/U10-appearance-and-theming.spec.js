@@ -15,11 +15,15 @@
  * - A5 🐞: S1 never opens the removed style sheet's address.
  * - A7 🐞: every refused file is dropped on its box, and neither "Upload
  *   File" nor "Save" is pressed on that box's tab afterwards.
+ * - A16 🐞: S3's BMP "Logo" refusal reads the form's foot alone, never what
+ *   the box shows under it.
  * - A8, A9, OJS5, OJS6 🐞: no test reaches those states (no "3:05PM"
  *   time, no empty "Custom", never all three organization boxes
  *   unticked, no heading levels read).
  * - A1 🐞 {OMP OPS}: not a journal's.
  * - A2, OJS7 ❓: S3 always types an "Alternate text".
+ * - A14 ❓: S5 compares the masthead's headings with the list's order as
+ *   read, never a fixed order between roles of one level.
  * - OJS2 ❓: no issue is created on a journal that never saved "Theme".
  * - OJS3 ❓: S6 and S9 never read the order of "Latest Publications".
  * - OJS4 ❓: S2 never reads the journal's organization after the wizard's
@@ -32,14 +36,17 @@
  * published outside any issue (`POST scenarios/submission` `published`);
  * S7 and S8 announcements with one on the home page
  * (`enableAnnouncements`, `numAnnouncementsHomepage`, `announcements[]`),
- * S8 English and French under "UI" and "Forms"
+ * S7 French under "UI" alone (`context.supportedLocales`, "Forms" left at
+ * the primary language), S8 English and French under "UI" and "Forms"
  * (`context.supportedLocales`, `supportedFormLocales`); S9 the categories
  * (`categories[]`); S10 one published issue (`issues[]`). "Developed By"
  * Block, "Consider role in masthead list" and "Publishing Mode" are
- * changed on screen, as the scenarios do. Pictures, the style sheet and
- * the favicon are made in the test and uploaded on screen. The "Date &
- * Time" labels follow the browser's clock, pinned to the spec's example
- * (24 September 2026, 3:05 in the afternoon) on the manager's page; the
+ * changed on screen, as the scenarios do; S5's "Editorial Masthead" boxes
+ * are the scenario's own steps. Pictures (the BMP "Logo" included), the
+ * style sheet and the favicon are made in the test and uploaded on
+ * screen. The "Date & Time" labels follow the browser's clock, pinned to the
+ * spec's example (24 September 2026, 3:05 in the afternoon) on the
+ * manager's page; the
  * public dates are the server's today. Signed-out reads run in a browser
  * context with an empty storage state (patterns.md, parallel lesson 8);
  * each actor gets its own `asUser` context. Everything runs in the
@@ -222,7 +229,29 @@ function pngBuffer(w, h, seed = 0) {
 }
 
 const png = (name, w, h, seed = 0) => ({name, mimeType: 'image/png', buffer: pngBuffer(w, h, seed)});
-const RED_HEADINGS = {name: 'red-headings.css', mimeType: 'text/css', buffer: Buffer.from('h1, h2, h3, h4, h5, h6 { color: rgb(255, 0, 0); }\n')};
+/** A style sheet that opens with a comment block and a `:root` rule, then colours every heading red (footnote sc). */
+const RED_HEADINGS = {
+    name: 'red-headings.css',
+    mimeType: 'text/css',
+    buffer: Buffer.from('/*\n * red-headings.css\n * U10 S1: a comment block first\n */\n:root {\n  --u10-accent: #ff0000;\n}\nh1, h2, h3, h4, h5, h6 { color: rgb(255, 0, 0); }\n'),
+};
+/** A w×h 24-bit BMP picture of one colour. */
+function bmpBuffer(w, h, [r, g, b]) {
+    const row = Math.ceil((w * 3) / 4) * 4;
+    const buf = Buffer.alloc(54 + row * h);
+    buf.write('BM', 0, 'ascii');
+    buf.writeUInt32LE(buf.length, 2);
+    buf.writeUInt32LE(54, 10);
+    buf.writeUInt32LE(40, 14);
+    buf.writeInt32LE(w, 18);
+    buf.writeInt32LE(h, 22);
+    buf.writeUInt16LE(1, 26);
+    buf.writeUInt16LE(24, 28);
+    buf.writeUInt32LE(row * h, 34);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) buf.set([b, g, r], 54 + y * row + x * 3);
+    return buf;
+}
+const LOGO_BMP = {name: 'logo.bmp', mimeType: 'image/bmp', buffer: bmpBuffer(120, 40, [204, 0, 0])};
 /** A 1×1 JPEG picture. */
 const PHOTO_JPG = {
     name: 'photo.jpg',
@@ -298,10 +327,12 @@ test.describe('appearance & theming', () => {
         await expect(home.additionalContent).toHaveCount(0);
         await expect(home.main).not.toContainText('Welcome text');
 
-        // The style sheet: the box shows the file's own name and "Remove",
-        // still after "Save" (T-ojs-1), then on the next load "styleSheet.css"
-        // as a link (Fields, "Advanced"); the visitor's heading turns red, the
-        // Dashboard's headings do not (Rule 26).
+        // The style sheet, a comment block and a `:root` rule first: the box
+        // shows the file's own name and "Remove", still after "Save" (T-ojs-1;
+        // Fields, the upload boxes: a ".css" file is saved whatever it holds),
+        // then on the next load "styleSheet.css" as a link (Fields,
+        // "Advanced"); the visitor's heading turns red, the Dashboard's
+        // headings do not (Rule 26).
         const uploads = countUploads(page);
         const sheet = advanced.styleSheet;
         expect(await sheet.choose(RED_HEADINGS)).toBe(200);
@@ -633,6 +664,44 @@ test.describe('appearance & theming', () => {
             expect(await home.footerAboveBrand()).toBe(true);
         }
 
+        // A BMP "Logo" refused: over the saved logo, on the tab loaded again,
+        // "logo.bmp" chosen and saved: "Saved" does not show, and the form's
+        // foot reads "Please correct one error." with "Jump to next error"
+        // (what the box itself shows is A16's, not read); reloaded, the box
+        // shows "logo.png" again, and the visitor's header still shows the
+        // logo (Fields, the upload boxes).
+        await settings.reload();
+        setup = await settings.open('appearance-setup');
+        await expect(logo.thumbnail).toHaveAttribute('src', savedPreview);
+        await logo.removeButton.click();
+        await logo.expectUploadOffered(true);
+        expect(await logo.choose(LOGO_BMP)).toBe(200);
+        const refusedSave = await setup.pressSave();
+        expect(refusedSave.status(), 'the save with a BMP logo is refused').toBe(400);
+        await expect(setup.errorSummary).toContainText('Please correct one error.');
+        await expect(setup.jumpToErrorButton).toBeVisible();
+        await expect(setup.savedStatus).toHaveCount(0);
+        await settings.reload();
+        setup = await settings.open('appearance-setup');
+        await expect(logo.thumbnail).toHaveAttribute('src', savedPreview);
+        await expect(logo.altText).toHaveValue('Journal logo');
+        await home.goto();
+        expect((await home.logoShown()).src).toBe(logoSrc);
+        await expect(home.textNameLink).toHaveCount(0);
+
+        // "Logo" replaced by another PNG in one save: "Remove", "logo2.png"
+        // with "Journal logo", "Save": the logo's address noted before now
+        // opens "logo2.png" (Side effects).
+        await logo.removeButton.click();
+        await logo.expectUploadOffered(true);
+        const logo2 = png('logo2.png', 400, 100, 2);
+        expect(await logo.choose(logo2)).toBe(200);
+        await logo.altText.fill('Journal logo');
+        await setup.save();
+        const swapped = await visitor.goto(logoSrc);
+        expect(swapped && swapped.status()).toBe(200);
+        expect(Buffer.compare(await swapped.body(), logo2.buffer), 'the old address serves logo2.png').toBe(0);
+
         // "Logo" removed: "Restore Original" shows; saved, the header shows the
         // name again (Rule 20) and the logo's address no longer opens the
         // picture (Side effects).
@@ -775,6 +844,7 @@ test.describe('appearance & theming', () => {
         const SECTION_EDITOR = 'Section editor';
         const BOARD = 'Editorial Board Member';
         const PRODUCTION = 'Production editor';
+        const LAYOUT = 'Layout Editor';
         const page = await actorPage(asUser, manager);
         const settings = new WebsiteSettings(page, tag);
         const roles = new RolesTab(page, tag);
@@ -805,8 +875,8 @@ test.describe('appearance & theming', () => {
         await expect(masthead.reviewersBox).toHaveCount(1);
         await expect(masthead.reviewersBox).not.toBeChecked();
 
-        // Control: before the "Save" the masthead page's last role heading is
-        // "Editorial Board Member" (Rule 28).
+        // Control: before the tab's first "Save" the masthead page's last role
+        // heading is "Editorial Board Member" (Rule 28).
         await about.goto('masthead');
         await expect(about.listHeadings()).toHaveText([EDITOR, SECTION_EDITOR, BOARD].map(whole));
 
@@ -821,7 +891,9 @@ test.describe('appearance & theming', () => {
         expect(order.indexOf(PRODUCTION)).toBeLessThan(order.indexOf(SECTION_EDITOR));
 
         // Reordered: "Editorial Board Member" first; the masthead page and the
-        // history page head with it, the others in the list's order (Rule 28).
+        // history page head with it, the others in the list's order, a role
+        // with no member ("Production editor") having no heading (Rule 28;
+        // U07 Rule 14a).
         await masthead.roles.moveToTop(BOARD);
         order = await masthead.roles.labels();
         expect(order[0]).toBe(BOARD);
@@ -838,10 +910,58 @@ test.describe('appearance & theming', () => {
 
         // A role ticked after the first save: last in the list (Rule 28;
         // Settings bullet 24).
-        await roles.setRoleBox('Layout Editor', MASTHEAD_BOX, true);
+        await roles.setRoleBox(LAYOUT, MASTHEAD_BOX, true);
         await settings.goto();
         masthead = await settings.open('appearance-masthead');
-        expect(await masthead.roles.labels()).toEqual([...order, 'Layout Editor']);
+        expect(await masthead.roles.labels()).toEqual([...order, LAYOUT]);
+
+        // "Present a masthead based on user enrollments" unticked: "Editorial
+        // Board Member" one down, to second; the box unticked, the list and
+        // "Reviewers" leave the tab before any save; saved and reloaded, the
+        // box is still unticked and the list not on the tab (Fields,
+        // "Editorial Masthead"; Rule 28a; Settings bullet 15a).
+        await masthead.roles.downArrow(BOARD).click();
+        await expect.poll(() => masthead.roles.labels().then((l) => l.indexOf(BOARD)), {timeout: T}).toBe(1);
+        const movedOrder = await masthead.roles.labels();
+        const saves = countSaves(page);
+        await masthead.enrollmentBox.uncheck();
+        await expect(masthead.enrollmentBox).not.toBeChecked();
+        await expect(masthead.rolesField).toHaveCount(0);
+        await expect(masthead.reviewersField).toHaveCount(0);
+        await expect(masthead.enrollmentField).toBeVisible();
+        expect(saves).toHaveLength(0);
+        await masthead.save();
+        expect(saves).toHaveLength(1);
+        await settings.reload();
+        masthead = await settings.open('appearance-masthead');
+        await expect(masthead.enrollmentBox).not.toBeChecked();
+        await expect(masthead.enrollmentField).toBeVisible();
+        await expect(masthead.rolesField).toHaveCount(0);
+        await expect(masthead.reviewersField).toHaveCount(0);
+
+        // Ticked again: the list is back in the order saved with the box
+        // unticked, "Editorial Board Member" second; saved, the visitor's
+        // masthead headings follow the list's order, the roles with no member
+        // left out (same-level roles have no fixed order, A14: the order is
+        // the list's as read) (Rule 28a).
+        await masthead.enrollmentBox.check();
+        await expect(masthead.rolesField).toBeVisible();
+        await expect.poll(() => masthead.roles.labels(), {timeout: T}).toEqual(movedOrder);
+        await expect(masthead.reviewersField).toBeVisible();
+        await masthead.save();
+        await about.goto('masthead');
+        await expect(about.listHeadings()).toHaveText(movedOrder.filter((r) => r !== PRODUCTION && r !== LAYOUT).map(whole));
+
+        // "Enable listing of reviewers on the masthead": ticked and saved,
+        // still ticked after a reload (Fields, "Editorial Masthead"; Settings
+        // bullet 15b).
+        await expect(masthead.reviewersBox).not.toBeChecked();
+        await masthead.reviewersBox.check();
+        await masthead.save();
+        await settings.reload();
+        masthead = await settings.open('appearance-masthead');
+        await expect(masthead.reviewersBox).toBeChecked();
+        await expect(masthead.enrollmentBox).toBeChecked();
     });
 
     test('S6: the "Lists" tab: refused numbers, then one entry a page', async ({asUser, ojsApi, visitor}, testInfo) => {
@@ -932,12 +1052,15 @@ test.describe('appearance & theming', () => {
         test.slow();
         const tag = makeTag('s7', testInfo);
         const {manager} = await seedJournal(ojsApi, tag, {
+            context: {supportedLocales: ['en', 'fr_CA']},
             enableAnnouncements: true,
             numAnnouncementsHomepage: 1,
             announcements: [{title: 'Call for papers'}],
         });
         const {y, m, d} = today();
         const home = new PublicLook(visitor, tag);
+        const english = new PublicLook(visitor, tag, {locale: 'en'});
+        const french = new PublicLook(visitor, tag, {locale: 'fr_CA'});
         const page = await actorPage(asUser, manager);
         await page.clock.setFixedTime(EXAMPLE_MOMENT);
         const settings = new WebsiteSettings(page, tag);
@@ -992,12 +1115,25 @@ test.describe('appearance & theming', () => {
         await home.reload();
         await expect(home.announcementDate).toHaveText(whole(`${d}.${m}.${y}`));
 
-        // "Custom": the dates print in the typed pattern (Rule 33).
+        // French for visitors alone: the tab has no "French" button and no
+        // French choices beside the English ones; the French home page keeps
+        // the installation's default "Date (Short)" though "24.09.2026" is
+        // saved (Rule 3b; Settings bullets 26, 27).
+        await expect(dt.group('dateFormatShort', 'en')).toBeVisible();
+        await expect(dt.languageButton('French')).toHaveCount(0);
+        await expect(dt.group('dateFormatShort', 'fr_CA')).toHaveCount(0);
+        await french.goto();
+        await expect(visitor.locator('html')).toHaveAttribute('lang', /^fr/);
+        await expect(french.announcementDate).toHaveText(whole(`${y}-${m}-${d}`));
+
+        // "Custom": the dates print in the typed pattern (Rule 33), read on
+        // the English page (the French visit switched the visitor's language).
         await dt.custom('dateFormatShort').check();
         await dt.customBox('dateFormatShort').fill('d/m/Y');
         await dt.save();
-        await home.reload();
-        await expect(home.announcementDate).toHaveText(whole(`${d}/${m}/${y}`));
+        await english.goto();
+        await expect(visitor.locator('html')).toHaveAttribute('lang', /^en/);
+        await expect(english.announcementDate).toHaveText(whole(`${d}/${m}/${y}`));
     });
 
     test('S8: a journal in two languages', async ({asUser, ojsApi, visitor}, testInfo) => {

@@ -540,7 +540,10 @@ class MastheadForm extends AppearanceForm {
         // roles list and "Reviewers" show while the box is ticked.
         this.enrollmentField = field('enableEnrollmentMasthead-');
         this.enrollmentBox = this.enrollmentField.locator('input[type="checkbox"]');
+        // The roles list, gone from the form (not hidden) while the
+        // enrollment box is unticked, "Reviewers" with it.
         const rolesField = field('mastheadUserGroupIds');
+        this.rolesField = rolesField;
         this.roles = new OrderableList(page, rolesField);
         this.description = rolesField.locator('.pkpFormField__description');
         // "Reviewers": its note and the "Enable listing of reviewers on the

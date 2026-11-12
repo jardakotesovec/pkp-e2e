@@ -817,8 +817,9 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
    Given: Journal Manager, on a scratch journal with nothing published
    whose "Journal Summary" (Settings › Journal › "Masthead") reads "A
    journal for testing.", a visitor, signed out, in a second browser,
-   and two files: "red-headings.css", a style sheet whose one rule
-   colours every heading red, and "picture.png", a PNG picture.
+   and two files: "red-headings.css", a style sheet that opens with a
+   comment block and a `:root` rule, then one rule that colours every
+   heading red, and "picture.png", a PNG picture.
 
    - **The home page, nothing set**: the visitor opens the journal's
      address: the header, the footer and an empty page between them; on
@@ -850,10 +851,12 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
      text" stands at the foot of the home page, after "About the
      Journal"; the "About the Journal" page, opened from the header's
      "About" menu, does not show it (Rules 12, 19).
-   - **The style sheet**: press "Upload File" under "Journal style sheet"
-     ("Press style sheet", "Server style sheet") and choose
-     "red-headings.css": the box shows "red-headings.css" and "Remove";
-     press "Save": "Saved", and the box still reads "red-headings.css".
+   - **The style sheet, a comment block and a `:root` rule first**: press
+     "Upload File" under "Journal style sheet" ("Press style sheet",
+     "Server style sheet") and choose "red-headings.css": the box shows
+     "red-headings.css" and "Remove"; press "Save": "Saved", and the box
+     still reads "red-headings.css" (Fields, the upload boxes: a ".css"
+     file is saved whatever it holds).
      Reload the page and open "Advanced": the box shows "styleSheet.css",
      a link to the stored file, and "Remove" (Fields, "Advanced"). The
      visitor reloads the home page: the heading "About the Journal" is
@@ -926,9 +929,9 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
 3. **The logo, the thumbnail, the homepage image and the page footer**
 
    Given: Journal Manager, on a scratch journal, a visitor, signed out,
-   in a second browser, and four PNG pictures: "logo.png", 1600 × 160
+   in a second browser, four PNG pictures: "logo.png", 1600 × 160
    pixels; "logo2.png", another picture; "thumb.png"; and "home.png", 300
-   × 100 pixels.
+   × 100 pixels, and "logo.bmp", a BMP picture.
 
    - **"Logo" uploaded**: open Settings › Website › "Appearance" ›
      "Setup", press "Upload File" under "Logo" and choose "logo.png": a
@@ -978,10 +981,21 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
      visitor's reloaded home page shows the picture in its body again,
      and the header's background no longer holds it (Rule 18).
    - **"Page Footer"**: open the side tab "Setup", type "Footer line" in
-     "Page Footer"
-     and press "Save". The visitor reloads the home page, then "About the
-     Journal": "Footer line" stands at the foot of both, above the
-     application's logo (Rule 22).
+     "Page Footer" and press "Save". The visitor reloads the home page,
+     then "About the Journal": "Footer line" stands at the foot of both,
+     above the application's logo (Rule 22).
+   - **A BMP "Logo" refused**: reload the page and open "Setup". Press
+     "Remove" under "Logo", press "Upload File", choose "logo.bmp" and
+     press "Save": "Saved" does not show, and the form's foot reads
+     "Please correct one error." with "Jump to next error" [A16](#a16).
+     Reload the page and open "Setup": the "Logo" box shows "logo.png"
+     again. The visitor reloads the home page: the header still shows
+     the logo (Fields, the upload boxes).
+   - **"Logo" replaced by another PNG in one save**: press "Remove" under
+     "Logo", press "Upload File", choose "logo2.png", type "Journal logo"
+     in its "Alternate text" and press "Save": "Saved". The visitor opens
+     the logo's address noted before: it shows "logo2.png" (Side
+     effects).
    - **"Logo" removed**: press "Remove" under "Logo": "Restore Original"
      shows; press "Save". The visitor reloads the home page: the header
      shows the journal's name again (Rule 20); the logo's address noted
@@ -1028,8 +1042,9 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
      save there is refused now [A4](#a4)) (Rule 25).
    - **Its plugin switched on again**: tick "Web Feed Plugin" on
      "Plugins" › "Installed Plugins". Reload and open "Appearance" ›
-     "Setup": "Sidebar" lists "Web Feed Plugin" ticked and first again; the visitor's
-     reloaded sidebar shows its block first again (Rule 25).
+     "Setup": "Sidebar" lists "Web Feed Plugin" ticked and first again;
+     the visitor's reloaded sidebar shows its block first again
+     (Rule 25).
    - **None ticked**: untick every box in "Sidebar" and press "Save". The
      visitor reloads the home page, then opens "About the Journal": no
      page has a sidebar, and the content keeps its width and stands in
@@ -1069,9 +1084,11 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
      the place of its permission level (Rule 28; Settings bullet 24).
    - **Reordered**: press the up arrow of "Editorial Board Member" until
      the row stands first, and press "Save": "Saved". The visitor opens
-     "Editorial Masthead" from the header's "About" menu: "Editorial Board
-     Member" is the first role heading, the others following in the
-     list's order; the visitor presses "Editorial History" in the line
+     "Editorial Masthead" from the header's "About" menu: the role
+     headings follow the list's order, "Editorial Board Member" first,
+     a role with no member having none
+     ([Journal identity & about pages](U07-journal-identity-and-about-pages.md),
+     Rule 14a); the visitor presses "Editorial History" in the line
      "View Editorial History": that page's first role heading is
      "Editorial Board Member" too (Rule 28).
    - **A role ticked after the first save** {OJS OMP}: on Settings ›
@@ -1079,9 +1096,26 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
      "Layout Editor" the same way. Reload Settings › Website and open
      "Editorial Masthead": "Layout Editor" stands last in the list
      (Rule 28; Settings bullet 24).
-   - **Control**: before the "Save", the visitor's "Editorial Masthead"
-     page listed "Editorial Board Member" as its last role heading
-     (Rule 28).
+   - **"Present a masthead based on user enrollments" unticked**: press
+     the down arrow of "Editorial Board Member" once: it stands second.
+     Untick "Present a masthead based on user enrollments": the list
+     and, on a journal and a press, "Reviewers" leave the tab before
+     any save. Press "Save": "Saved". Reload the page and open
+     "Editorial Masthead": the box is still unticked, and the list is
+     not on the tab (Fields, "Editorial Masthead"; Rule 28a; Settings
+     bullet 15a).
+   - **Ticked again**: tick "Present a masthead based on user
+     enrollments": the list is back, "Editorial Board Member" second, in
+     the order saved with the box unticked. Press "Save": "Saved". The
+     visitor reloads "Editorial Masthead": the role headings follow the
+     list's order again (Rule 28a).
+   - **"Enable listing of reviewers on the masthead"** {OJS OMP}: tick
+     it and press "Save": "Saved". Reload the page and open "Editorial
+     Masthead": the box is still ticked (Fields, "Editorial Masthead";
+     Settings bullet 15b).
+   - **Control**: before the tab's first "Save", the visitor's
+     "Editorial Masthead" page listed "Editorial Board Member" as its
+     last role heading (Rule 28).
 
 6. **The "Lists" tab: refused numbers, then one entry a page**
 
@@ -1119,12 +1153,13 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
 
 7. **Date formats, from the tab to the public pages**
 
-   Given: Journal Manager, on a scratch journal with announcements on,
-   "Display on Homepage" at 1 and one announcement, "Call for papers",
-   posted today, a published book {OMP}, and a visitor, signed out, in
-   a second browser. The dates below are written for 24 September 2026
-   at 3:05 in the afternoon; the tab and the pages show the tester's
-   own day and time in the same patterns.
+   Given: Journal Manager, on a scratch journal with French ticked
+   under "UI" but not under "Forms", announcements on, "Display on
+   Homepage" at 1 and one announcement, "Call for papers", posted today,
+   a published book with one chapter that has a page of its own {OMP},
+   and a visitor, signed out, in a second browser. The dates below are
+   written for 24 September 2026 at 3:05 in the afternoon; the tab and
+   the pages show the tester's own day and time in the same patterns.
 
    - **The tab as it opens**: open Settings › Website › "Setup" › "Date &
      Time": under "Date and Time Formats", five groups, each choice but
@@ -1144,6 +1179,16 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
      announcement's posted date reads "24.09.2026" (Rule 31). {OMP} The
      book's page gives its "Published" date as "24 September 2026", and
      the catalog lists the book with the same date (Rule 31).
+   - **A chapter's page** {OMP}: the visitor opens the book's chapter
+     page ([Monograph landing page](U69-monograph-landing-page.md)): it
+     gives the "Published" date as "24 September 2026" (Rule 31).
+   - **French for visitors alone**: the "Date & Time" tab has no
+     "French" button at its top. The visitor opens the home page in
+     French, {journal address}/fr_CA: the announcement's posted date
+     reads "2026-09-24", the installation's default, though "24.09.2026"
+     is saved. {OMP} The book's page in French gives its date as
+     "septembre 24, 2026" [A13](#a13) (Rule 3b; Settings bullets 26,
+     27).
    - **"Custom"**: under "Date (Short)" choose "Custom", type "d/m/Y" in
      its box and press "Save". The visitor reloads the home page: the
      announcement's date reads "24/09/2026" (Rule 33).
@@ -1156,8 +1201,10 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
    Given: Journal Manager, working in English, on a scratch journal
    whose primary language is English, with French ticked under "UI" and
    "Forms", announcements on, "Display on Homepage" at 1 and one
-   announcement posted today, a visitor, signed out, in a second
-   browser, and "logo.png", a PNG picture.
+   announcement posted today, a published book {OMP}, a visitor, signed
+   out, in a second browser, and "logo.png", a PNG picture. The dates
+   below are written for 24 September 2026; the pages show the tester's
+   own day in the same patterns.
 
    - **A French footer alone**: open Settings › Website › "Appearance" ›
      "Setup", press "French" at the top of the tab, type "Pied de page"
@@ -1174,9 +1221,15 @@ passwords and the tooling recipe are in the footnote. <sup>sc</sup>
      leave the French "Logo" empty and press "Save". The visitor reloads
      the French page: its header shows the logo, with "Journal logo" as
      its description (Rule 3).
+   - **A book's date per language** {OMP}: the visitor opens the book's
+     page in French: its date reads "septembre 24, 2026" [A13](#a13).
+     Open "Setup" › "Date & Time", press "French", choose "24 septembre
+     2026" under the French "Date" and press "Save". The visitor reloads
+     the book's page in French: "24 septembre 2026"; in English it still
+     reads "September 24, 2026" (Rule 3a).
    - **Dates per language**: open "Setup" › "Date & Time", press
      "French", choose "24.09.2026" under the French "Date (Short)" and
-     press "Save". The visitor reloads both pages: the announcement's
+     press "Save". The visitor reloads both home pages: the announcement's
      posted date reads "24.09.2026" on the French one and "2026-09-24" on
      the English one (Rule 3a).
    - **Control**: before the first "Save", the foot of the English page
@@ -1237,7 +1290,6 @@ Left out of the scenarios above, by reason:
   - the guard for A20 (issue report `docs/issues/U10-A20-removed-thumbnail-stays-public.md`): once fixed, "Remove" under the thumbnail and "Save" leave its address answering 404, also when another language keeps its own thumbnail, which stays. [report 2026-10-19]
   - the guard for A16 (issue report `docs/issues/U10-A16-upload-box-server-refusal-no-message.md`): once fixed, a "Logo" refused for its size shows the server's message under the box [report 2026-10-07]
   - the guard for A16 (issue report `docs/issues/U10-A16-logo-save-refusal-no-message-under-box.md`): once fixed, a BMP or SVG "Logo" refused at "Save" shows "There was an error uploading this image." under the box, and a PNG "Homepage Image" saved beside it is not lost [report 2026-10-20]
-  - a BMP chosen for "Logo" over a saved logo and saved: refused with "Please correct one error.", the earlier logo back in the box after a reload and still in the visitor's header; and a ".css" file that opens with a comment block and a `:root` rule, saved as the style sheet and applied on the public pages (Fields, the upload boxes) [upstream 2026-10-19]
   - the "Homepage Image" description typed in scenario 3 read on a press's and a preprint server's home page, as on a journal's (A1; the guard its issue report names) [report 2026-10-03]
   - the names a screen reader hears for the "Editorial Masthead" arrows ("Increase position of {role}" for an up arrow) and for each "Sidebar" box (the block's name alone) (A3; the guard its issue report names) [report 2026-10-03]
   - a placed block's plugin turned off, then a "Page Footer" saved on "Setup" without a refusal (A4; the guard its issue report names) [report 2026-10-01]
@@ -1247,12 +1299,6 @@ Left out of the scenarios above, by reason:
   - a French upload box's drop area reading the French text (A12; the guard its issue report names) [report 2026-10-03]
   - a journal's home page with "Latest Publications" showing each article title as a heading one level below the list's heading {OJS} (OJS6; the guard its issue report names) [report 2026-10-03]
   - a press category holding more books than "Items per page" showing page links, its page 2 listing the next book {OMP} (OMP2; the guard its issue report names) [report 2026-10-03]
-  - a press's French pages giving a book's date in the default format before a French "Date" is saved, and in the saved one after, the English pages unchanged {OMP} (Rule 3a) [incidental 2026-09-29]
-  - French ticked under "UI" alone: "Date & Time" without a "French" button, and a press's French pages keeping the default format after an English "Date" is saved {OMP} (Rule 3b) [incidental 2026-09-29]
-  - a chapter's page printing the book's "Date" {OMP} (Rule 31) [incidental 2026-09-29]
-  - "Present a masthead based on user enrollments" unticked: the list and "Reviewers" leaving the tab before any save; saved, the box still unticked after a reload; ticked again and saved, the list back in its saved order, a role moved just before the box was unticked included (Fields, "Editorial Masthead"; Rule 28a; Settings bullet 15a) [upstream 2026-09-29]
-  - "Enable listing of reviewers on the masthead" ticked and saved, still ticked after a reload {OJS OMP} (Fields, "Editorial Masthead"; Settings bullet 15b) [upstream 2026-09-29]
-  - a saved "Logo" PNG removed and replaced by another PNG in one save: the logo's old address then opens the new picture (Side effects bullet 2) [incidental 2026-10-21]
 - **Nothing new to test**:
   - a role newly considered for the masthead on a preprint server, before and after the tab's first save {OPS} (Rule 28; Settings bullet 24)
   - the Editor and the Production Editor on the same tabs: the same fields and saves as the Journal Manager in scenarios 1 to 10 (Actors row 1)
@@ -1268,10 +1314,10 @@ Left out of the scenarios above, by reason:
   - A10 (a browser that opened the journal before keeping the old header colour after a "Colour" save; Rule 6a)
   - A11 (the French "Entête" description naming a journal on a press and a preprint server; Rule 36)
   - A12 (the French upload boxes' drop area, refusal and "Remove file" in English; Rule 35)
-  - A13 (the default French date in the English word order {OMP}; Rule 3a)
+  - A13 (the default French date in the English word order {OMP}; Rules 3a, 3b; scenarios 7 and 8 mark it)
   - A14 (roles of the same level changing places on "Editorial Masthead" before its first save; Rule 28)
   - A15 (the refused file's hidden "Remove file" leaving "Save" disabled; Fields, the upload boxes)
-  - A16 (a "Logo" the server fails on, the box left with a warning sign and no message; Fields, the upload boxes)
+  - A16 (a "Logo" the server fails on, the box left with a warning sign and no message; Fields, the upload boxes; scenario 3 marks it)
   - A17 (a "Sidebar" block whose label holds a double quote or "&", its arrows' names carrying HTML code; Rule 23)
   - A18 (a "Custom" pattern with "S", the ordinal ending missing from a discussion's messages; Rule 33a)
   - A19 (the French time written "a.m." on a discussion's messages and "AM" on a library file; Rule 3c)
@@ -2410,7 +2456,8 @@ visitor is a fresh signed-out browser context. Pictures, the style sheet
 and the favicon are test fixtures uploaded on screen; the "Date & Time"
 labels follow the browser's clock, so a test pins it or computes the
 expected strings from today. Recipes: 1 — `context.description` (the
-"Journal Summary"); the style sheet's one rule colours `h1`–`h6` red. 2
+"Journal Summary"); the style sheet opens with a `/* … */` comment block and a `:root`
+rule, then one rule colouring `h1`–`h6` red. 2
 — nothing seeded; the wizard is `admin`'s. 3 — nothing seeded; the
 site's home page lists every context of the install, so the test finds
 the scratch journal's row. 4 — nothing seeded: the plugin is ticked on
@@ -2422,10 +2469,18 @@ each current, and one more account per role with the role in
 `POST scenarios/submission` seeds with `published: true` and no `issue`;
 OPS eleven with `published: true`. 7 — `enableAnnouncements: true`,
 `numAnnouncementsHomepage: 1`, `announcements: [{title: 'Call for
-papers'}]`; OMP one submission with `published: true`. 8 —
-`context.supportedLocales` and `context.supportedFormLocales` `['en',
-'fr_CA']` and the announcement keys of 7; the French page is the
-journal's address with the `fr_CA` segment. 9 — two submissions with
+papers'}]`, `context.supportedLocales` `['en', 'fr_CA']` with
+`supportedFormLocales` left at `['en']`; the French page is the
+journal's address with the `fr_CA` segment; OMP one submission with
+`published: true` and `chapters: [{title: 'Chapter one', page: true}]`
+(`scenarios.md`, the OMP `chapters[]` key),
+the chapter page opened from its title in the book's table of contents.
+8 —
+`context.supportedLocales` and `context.supportedFormLocales`
+`['en', 'fr_CA']` and the announcement keys of 7; the French page is the
+journal's address with the `fr_CA` segment; OMP one submission with
+`published: true`, its French page the book's address with the same
+segment. 9 — two submissions with
 `published: true` and no `issue`; `categories: [{path: 'arts', title:
 'Arts'}, {path: 'science', title: 'Science', children: [{path:
 'physics', title: 'Physics'}]}]`. 10 — `issues: [{volume: 1, number: 1,

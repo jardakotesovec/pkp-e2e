@@ -9,9 +9,10 @@
  * thumbnail", "Server Summary", "Moderator", "Latest preprints", the
  * server's Settings › Website at `/index.php/<server>/management/settings/website`.
  * The {OJS OMP} bullets of scenario 5 (a role ticked for the masthead
- * before and after the first save) and the {OJS} and {OMP} bullets of
- * scenarios 6 and 7 cost the server no assertion; the {OPS} bullets of
- * scenarios 1 and 6 ("Latest preprints") are read here.
+ * before and after the first save, "Enable listing of reviewers on the
+ * masthead") and the {OJS} and {OMP} bullets of scenarios 6, 7 and 8 (a
+ * book's and a chapter's dates) cost the server no assertion; the {OPS}
+ * bullets of scenarios 1 and 6 ("Latest preprints") are read here.
  * Spec: docs/specs/U10-appearance-and-theming.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
@@ -24,7 +25,11 @@
  * - A5 🐞: S1 never opens the removed style sheet's address.
  * - A7, A8, A9 🐞: no test refuses a file through "Upload File", picks
  *   the "3:05PM" time or saves an empty "Custom".
+ * - A16 🐞: S3's BMP "Logo" refusal reads the form's foot alone, never
+ *   what the box shows under it.
  * - A2 ❓: every logo is saved with its "Alternate text".
+ * - A14 ❓: S5 compares the masthead's headings with the list's order as
+ *   read, never a fixed order between roles of one level.
  *
  * Seeding: scenario endpoints only (footnote sc). Every scenario runs on its
  * own scratch server with a throwaway Preprint Server Manager
@@ -35,11 +40,13 @@
  * `sectionEditor`); S6 seeds eleven preprints posted today
  * (`POST scenarios/submission`, `published: true`); S7 and S8 seed
  * announcements on with "Display on Homepage" at 1 and one announcement
- * (`enableAnnouncements`, `numAnnouncementsHomepage`, `announcements`), S8
- * French under "UI" and "Forms" (`context.supportedLocales`,
- * `supportedFormLocales`). The plugin S4 enables and every picture, style
- * sheet and favicon are driven on screen, as the scenarios say; the files
- * are made in the test. The Site Administrator of S2 is `admin`, enrolled
+ * (`enableAnnouncements`, `numAnnouncementsHomepage`, `announcements`), S7
+ * French under "UI" alone (`context.supportedLocales`, "Forms" left at the
+ * primary language), S8 French under "UI" and "Forms"
+ * (`context.supportedLocales`, `supportedFormLocales`). The plugin S4
+ * enables, S5's "Editorial Masthead" boxes and every picture, style sheet
+ * and favicon are driven on screen, as the scenarios say; the files (the
+ * BMP "Logo" included) are made in the test. The Site Administrator of S2 is `admin`, enrolled
  * as a manager in every scratch server. Signed-out reads run in a second
  * browser context with an empty storage state (patterns.md, parallel
  * lesson 8); every actor gets its own `asUser` context. Every absence is a
@@ -205,6 +212,23 @@ function png(w, h, [r, g, b]) {
     return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', zlib.deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
 }
 
+/** A w×h 24-bit BMP picture of one colour. */
+function bmp(w, h, [r, g, b]) {
+    const row = Math.ceil((w * 3) / 4) * 4;
+    const buf = Buffer.alloc(54 + row * h);
+    buf.write('BM', 0, 'ascii');
+    buf.writeUInt32LE(buf.length, 2);
+    buf.writeUInt32LE(54, 10);
+    buf.writeUInt32LE(40, 14);
+    buf.writeInt32LE(w, 18);
+    buf.writeInt32LE(h, 22);
+    buf.writeUInt16LE(1, 26);
+    buf.writeUInt16LE(24, 28);
+    buf.writeUInt32LE(row * h, 34);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) buf.set([b, g, r], 54 + y * row + x * 3);
+    return buf;
+}
+
 /** A minimal baseline JPEG (1×1). */
 const JPEG = Buffer.from(
     '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
@@ -212,7 +236,12 @@ const JPEG = Buffer.from(
 );
 
 const FILES = {
-    css: {name: 'red-headings.css', mimeType: 'text/css', buffer: Buffer.from('h1, h2, h3, h4, h5, h6 { color: red; }\n')},
+    // A comment block and a `:root` rule first, then the one rule colouring every heading red (footnote sc).
+    css: {
+        name: 'red-headings.css',
+        mimeType: 'text/css',
+        buffer: Buffer.from('/*\n * red-headings.css\n * U10 S1: a comment block first\n */\n:root {\n  --u10-accent: #ff0000;\n}\nh1, h2, h3, h4, h5, h6 { color: red; }\n'),
+    },
     picture: {name: 'picture.png', mimeType: 'image/png', buffer: png(40, 30, [40, 160, 40])},
     icon: {name: 'icon.png', mimeType: 'image/png', buffer: png(32, 32, [0, 120, 0])},
     photo: {name: 'photo.jpg', mimeType: 'image/jpeg', buffer: JPEG},
@@ -220,7 +249,17 @@ const FILES = {
     logo2: {name: 'logo2.png', mimeType: 'image/png', buffer: png(400, 60, [30, 30, 200])},
     thumb: {name: 'thumb.png', mimeType: 'image/png', buffer: png(120, 120, [120, 30, 160])},
     home: {name: 'home.png', mimeType: 'image/png', buffer: png(300, 100, [30, 120, 160])},
+    logoBmp: {name: 'logo.bmp', mimeType: 'image/bmp', buffer: bmp(120, 40, [204, 0, 0])},
 };
+
+/** The settings saves (non-GET requests to `api/v1/contexts/{id}`) the page sends from now on. */
+function countSaves(page) {
+    const sent = [];
+    page.on('request', (r) => {
+        if (/\/api\/v1\/contexts\/\d+/.test(r.url()) && r.method() !== 'GET') sent.push(r.url());
+    });
+    return sent;
+}
 
 test.describe('appearance & theming', () => {
     test('S1: a new preprint server home page, its summary, its additional content and a style sheet', {tag: '@smoke'}, async ({asUser, opsApi, visitor}, testInfo) => {
@@ -288,10 +327,12 @@ test.describe('appearance & theming', () => {
         await expect(home.additionalContent).toHaveCount(0);
         await expect(visitor.getByText('Welcome text')).toHaveCount(0);
 
-        // The style sheet: chosen, the box shows its name and "Remove";
-        // right after "Saved" it still reads the chosen file's name and
-        // "Remove"; once the tab is loaded again, "styleSheet.css" as a link
-        // to the stored file and "Remove" (Fields, "Advanced").
+        // The style sheet, a comment block and a `:root` rule first: chosen,
+        // the box shows its name and "Remove"; right after "Saved" it still
+        // reads the chosen file's name and "Remove" (Fields, the upload
+        // boxes: a ".css" file is saved whatever it holds); once the tab is
+        // loaded again, "styleSheet.css" as a link to the stored file and
+        // "Remove" (Fields, "Advanced").
         await home.goto();
         const themeHeadingColour = await home.colourOf(home.aboutHeading);
         expect(themeHeadingColour).not.toBe(RED);
@@ -620,11 +661,51 @@ test.describe('appearance & theming', () => {
             expect(await home.footerAboveBrand()).toBe(true);
         }
 
+        // A BMP "Logo" refused: over the saved logo, on the page reloaded,
+        // "Remove", "logo.bmp" chosen and saved: the save is refused,
+        // "Saved" does not show, and the form's foot reads "Please correct
+        // one error." with "Jump to next error" (what the box itself shows
+        // is A16's, not read; the positive control for "Saved" is every
+        // save above). Reloaded, the box shows the saved "logo.png" again,
+        // and the visitor's header still shows the logo (Fields, the upload
+        // boxes).
+        await website.reload();
+        setup = await website.open('appearance-setup');
+        logo = setup.logo();
+        await expect(logo.thumbnail).toHaveAttribute('src', savedPreview || '');
+        await logo.removeButton.click();
+        await logo.expectUploadOffered(true);
+        expect(await logo.choose(FILES.logoBmp)).toBe(200);
+        const refusedSave = await setup.pressSave();
+        expect(refusedSave.status(), 'the save with a BMP logo is refused').toBe(400);
+        await expect(setup.errorSummary).toContainText('Please correct one error.');
+        await expect(setup.jumpToErrorButton).toBeVisible();
+        await expect(setup.savedStatus).toHaveCount(0);
+        await website.reload();
+        setup = await website.open('appearance-setup');
+        logo = setup.logo();
+        await expect(logo.thumbnail).toHaveAttribute('src', savedPreview || '');
+        await expect(logo.altText).toHaveValue('Journal logo');
+        await home.goto();
+        expect((await home.logoShown()).src).toBe(logoAddress);
+        await expect(home.textNameLink).toHaveCount(0);
+
+        // "Logo" replaced by another PNG in one save: "Remove", "logo2.png"
+        // with "Journal logo", "Save": the logo's address noted before now
+        // opens "logo2.png" (Side effects).
+        await logo.removeButton.click();
+        await logo.expectUploadOffered(true);
+        expect(await logo.choose(FILES.logo2)).toBe(200);
+        await logo.altText.fill('Journal logo');
+        await setup.save();
+        const swapped = await visitor.goto(logoAddress);
+        expect(swapped && swapped.status()).toBe(200);
+        expect(Buffer.compare(await swapped.body(), FILES.logo2.buffer), 'the old address serves logo2.png').toBe(0);
+
         // "Logo" removed: "Restore Original" shows; saved, the server's name
         // is back, and the logo's address no longer opens the picture
-        // (Rule 20; Side effects). Control: the address opened it before.
-        const opened = await visitor.goto(logoAddress);
-        expect(opened && opened.status()).toBe(200);
+        // (Rule 20; Side effects). Control: the address opened "logo2.png"
+        // just before.
         setup = await openTab(website, 'appearance-setup');
         logo = setup.logo();
         await logo.removeButton.click();
@@ -767,8 +848,8 @@ test.describe('appearance & theming', () => {
         const pub = new PublicLook(visitor, tag);
         const roleHeadings = visitor.locator('.page_masthead h2');
 
-        // Control: before the "Save", the visitor's masthead lists
-        // "Editorial Board Member" last (Rule 28).
+        // Control: before the tab's first "Save", the visitor's masthead
+        // lists "Editorial Board Member" last (Rule 28).
         await pub.goto('/about/editorialMasthead');
         await expect(roleHeadings).toHaveText(['Moderator', 'Editorial Board Member']);
 
@@ -777,7 +858,7 @@ test.describe('appearance & theming', () => {
         // (Fields, "Editorial Masthead"; Rule 28). Above it the enrollment
         // masthead box, ticked on a new server (pkp-lib#13370, which also
         // took "Reviewers" off a server, having no review stages).
-        const masthead = await openTab(website, 'appearance-masthead');
+        let masthead = await openTab(website, 'appearance-masthead');
         await expect(masthead.enrollmentBox).toBeChecked();
         await expect(masthead.description).toHaveText(MASTHEAD_INTRO);
         expect(await masthead.roles.read()).toEqual([
@@ -791,17 +872,62 @@ test.describe('appearance & theming', () => {
         await expect(masthead.form).not.toContainText('Reviewers');
 
         // Reordered: "Editorial Board Member" first, "Saved"; the visitor's
-        // masthead and history head with it, the other following (Rule 28).
+        // masthead and history head with it, the role headings in the
+        // list's order as read (every role here has a member, so each has
+        // its heading; U07 Rule 14a) (Rule 28).
         expect(await masthead.roles.moveToTop('Editorial Board Member')).toBe(1);
+        const order = await masthead.roles.labels();
+        expect(order[0]).toBe('Editorial Board Member');
         await masthead.save();
         await pub.goto();
         await pub.openFromMenu('About', 'Editorial Masthead');
         await expect(pub.heading).toHaveText('Editorial Masthead');
-        await expect(roleHeadings).toHaveText(['Editorial Board Member', 'Moderator']);
+        await expect(roleHeadings).toHaveText(order);
         await visitor.locator('.page_masthead').getByRole('link', {name: 'Editorial History', exact: true}).click();
         await expect(visitor).toHaveURL(/\/about\/editorialHistory$/);
         await expect(pub.heading).toHaveText(/^Editorial History/);
         await expect(roleHeadings.first()).toHaveText('Editorial Board Member');
+
+        // "Present a masthead based on user enrollments" unticked: "Editorial
+        // Board Member" one down, to second; the box unticked, the list
+        // leaves the tab before any save (a preprint server has no
+        // "Reviewers" to leave with it); saved and reloaded, the box is
+        // still unticked and the list not on the tab (Fields, "Editorial
+        // Masthead"; Rule 28a; Settings bullet 15a). The form's own box
+        // and "Save" stay: the positive control for the list's absence.
+        await masthead.roles.downArrow('Editorial Board Member').click();
+        await expect.poll(() => masthead.roles.labels().then((l) => l.indexOf('Editorial Board Member')), {timeout: T}).toBe(1);
+        const movedOrder = await masthead.roles.labels();
+        const saves = countSaves(page);
+        await masthead.enrollmentBox.uncheck();
+        await expect(masthead.enrollmentBox).not.toBeChecked();
+        await expect(masthead.enrollmentField).toBeVisible();
+        await expect(masthead.rolesField).toHaveCount(0);
+        await expect(masthead.form).not.toContainText(MASTHEAD_INTRO);
+        await expect(masthead.saveButton).toBeVisible();
+        expect(saves).toHaveLength(0);
+        await masthead.save();
+        expect(saves).toHaveLength(1);
+        await website.reload();
+        masthead = await website.open('appearance-masthead');
+        await expect(masthead.enrollmentBox).not.toBeChecked();
+        await expect(masthead.enrollmentField).toBeVisible();
+        await expect(masthead.rolesField).toHaveCount(0);
+        await expect(masthead.reviewersField).toHaveCount(0);
+
+        // Ticked again: the list is back in the order saved with the box
+        // unticked, "Editorial Board Member" second, and still nothing after
+        // it on a preprint server; saved, the visitor's masthead headings
+        // follow the list's order as read (A14 not read) (Rule 28a).
+        await masthead.enrollmentBox.check();
+        await expect(masthead.rolesField).toBeVisible();
+        await expect.poll(() => masthead.roles.labels(), {timeout: T}).toEqual(movedOrder);
+        expect(movedOrder[1]).toBe('Editorial Board Member');
+        await expect(masthead.reviewersField).toHaveCount(0);
+        await masthead.save();
+        await pub.goto('/about/editorialMasthead');
+        await expect(pub.heading).toHaveText('Editorial Masthead');
+        await expect(roleHeadings).toHaveText(movedOrder);
     });
 
     test('S6: the "Lists" tab: refused numbers, then one entry a page', async ({asUser, opsApi, visitor}, testInfo) => {
@@ -883,6 +1009,7 @@ test.describe('appearance & theming', () => {
         test.setTimeout(240_000);
         const tag = makeTag('s7', testInfo);
         const {manager} = await seedServer(opsApi, tag, {
+            context: {supportedLocales: ['en', 'fr_CA']},
             enableAnnouncements: true,
             numAnnouncementsHomepage: 1,
             announcements: [{title: 'Call for papers'}],
@@ -892,6 +1019,8 @@ test.describe('appearance & theming', () => {
         await page.clock.setFixedTime(new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate(), 15, 5, 0));
         const website = new WebsiteSettings(page, tag, THUMBNAIL);
         const pub = new PublicLook(visitor, tag);
+        const english = new PublicLook(visitor, tag, {locale: 'en'});
+        const french = new PublicLook(visitor, tag, {locale: 'fr_CA'});
 
         // Control: before the first "Save", the announcement's date reads
         // the short default (Fields, "Date & Time"; Rule 31).
@@ -929,12 +1058,30 @@ test.describe('appearance & theming', () => {
         await pub.reload();
         await expect(pub.announcementDate).toHaveText(day.shortDots);
 
-        // "Custom": "d/m/Y" under "Date (Short)" (Rule 33).
+        // French for visitors alone: the tab has no "French" button and no
+        // French choices beside the English ones (the English group the
+        // positive control); the French home page keeps the installation's
+        // default "Date (Short)" though "24.09.2026" is saved, the English
+        // one reading the saved pattern (Rule 3b; Settings bullets 26, 27).
+        await expect(dates.group('dateFormatShort', 'en')).toBeVisible();
+        await expect(dates.languageButton('French')).toHaveCount(0);
+        await expect(dates.form.locator('.pkpFormLocales button')).toHaveCount(0);
+        await expect(dates.group('dateFormatShort', 'fr_CA')).toHaveCount(0);
+        await french.goto();
+        await expect(visitor.locator('html')).toHaveAttribute('lang', /^fr/);
+        await expect(french.announcementDate).toHaveText(day.short);
+        await english.goto();
+        await expect(visitor.locator('html')).toHaveAttribute('lang', /^en/);
+        await expect(english.announcementDate).toHaveText(day.shortDots);
+
+        // "Custom": "d/m/Y" under "Date (Short)" (Rule 33), read on the
+        // English page (the French visit switched the visitor's language).
         await dates.custom('dateFormatShort').check();
         await dates.customBox('dateFormatShort').fill('d/m/Y');
         await dates.save();
-        await pub.goto();
-        await expect(pub.announcementDate).toHaveText(day.shortSlash);
+        await english.goto();
+        await expect(visitor.locator('html')).toHaveAttribute('lang', /^en/);
+        await expect(english.announcementDate).toHaveText(day.shortSlash);
     });
 
     test('S8: a preprint server in two languages', async ({asUser, opsApi, visitor}, testInfo) => {
