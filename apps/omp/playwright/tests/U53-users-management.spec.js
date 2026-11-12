@@ -21,7 +21,7 @@
  * Every test seeds its own scratch press with throwaway accounts (the
  * seeded roster and publicknowledge stay untouched); the Site Administrator
  * `admin` is enrolled as a manager of every scratch press and is the
- * signed-in actor of S1 (S7 and S8, the Site Administrator's notices, run
+ * signed-in actor of S1's grid and S6's last "Merge user" window (S7 and S8, the Site Administrator's notices, run
  * alone: `serial/U53-users-management.spec.js`). Every actor is opened
  * through `asUser` (no default user: a multi-actor test sets none,
  * patterns.md "Fixture selection"); sign-ins the scenarios drive by hand run in fresh anonymous
@@ -409,15 +409,29 @@ test.describe('users management', () => {
     test('S6: merge a duplicate account', async ({asUser, ompApi, browser, baseURL}, testInfo) => {
         test.slow();
         const tag = makeTag(6, testInfo);
+        const second = `${tag}b`;
         const manager = `m${tag}`;
+        const secondManager = `mb${tag}`;
         const ash = `qa${tag}`;
         const ashdown = `qd${tag}`;
+        const lena = `l${tag}`;
+        // A second press: the second Press Manager and Lena, whom the Press
+        // Manager does not manage there (note s).
+        await ompApi.createContext({
+            tag: second,
+            users: [
+                {username: secondManager, givenName: 'Bo', familyName: 'Secondmanager', roles: ['manager']},
+                {username: lena, givenName: 'Lena', familyName: 'Ortiz', roles: ['author']},
+            ],
+        });
         await ompApi.createContext({
             tag,
             users: [
                 {username: manager, givenName: 'Mara', familyName: 'Scratchmanager', roles: ['manager']},
                 {username: ash, givenName: 'Quinn', familyName: 'Ash', roles: ['author', 'reader']},
                 {username: ashdown, givenName: 'Quinn', familyName: 'Ashdown', roles: ['author']},
+                {username: secondManager, roles: ['manager']},
+                {username: lena, roles: ['author']},
             ],
         });
         const submission = await ompApi.createSubmission({
@@ -442,7 +456,7 @@ test.describe('users management', () => {
         await merge.expectOpen();
         await expect(merge.grid.title('Merge into this User')).toBeVisible();
         expect(await merge.grid.columns()).toEqual(GRID_COLUMNS);
-        for (const address of ['admin@mail.test', mail(manager), mail(ashdown)]) {
+        for (const address of ['admin@mail.test', mail(manager), mail(ashdown), mail(lena)]) {
             await expect(merge.grid.row(address)).toHaveCount(1);
         }
         await expect(merge.grid.row(mail(ash))).toHaveCount(1);
@@ -451,6 +465,8 @@ test.describe('users management', () => {
         // The site administrator's row offers nothing: only accounts the manager may act on in
         // full offer "Merge into this User" (Rule 16; pkp/pkp-lib#13494).
         await expect(merge.grid.arrow('admin@mail.test')).toHaveCount(0);
+        // Nor Lena's, who holds a role in a press this manager does not manage (Rule 16a).
+        await expect(merge.grid.arrow(mail(lena))).toHaveCount(0);
         for (const address of [mail(ashdown), mail(manager)]) {
             expect(await merge.grid.actionLabels(address)).toContain('Merge into this User');
         }
@@ -500,6 +516,36 @@ test.describe('users management', () => {
         await login.gotoContext(tag);
         await login.submitCredentials(ash, pw(ash));
         await expect(qp.getByText('Invalid username/email or password. Please try again.')).toBeVisible();
+
+        // The second Press Manager, in another browser: Lena, every press of
+        // hers managed by this manager, offers "Merge into this User" (Rule 16a).
+        const bp = await signedIn(asUser, secondManager);
+        const bList = new UsersListPage(bp, tag);
+        const bMerge = new MergeUserWindow(bp);
+        await bList.goto();
+        await bList.chooseAction(bList.row(mail(ashdown)), 'Merge user');
+        await bMerge.expectOpen();
+        await expect(bMerge.grid.row(mail(lena))).toHaveCount(1);
+        await expect(bMerge.grid.arrow(mail(lena))).toHaveCount(1);
+        expect(await bMerge.grid.actionLabels(mail(lena))).toContain('Merge into this User');
+
+        // The Site Administrator, in another browser: every row but Quinn
+        // Ashdown's offers "Merge into this User", the administrator's own and
+        // Lena's included (Rule 16a).
+        const ap = await signedIn(asUser, 'admin');
+        const aList = new UsersListPage(ap, tag);
+        const aMerge = new MergeUserWindow(ap);
+        await aList.goto();
+        await aList.chooseAction(aList.row(mail(ashdown)), 'Merge user');
+        await aMerge.expectOpen();
+        const others = ['admin@mail.test', mail(manager), mail(secondManager), mail(lena)];
+        await expect(aMerge.grid.rows()).toHaveCount(others.length + 1);
+        await expect(aMerge.grid.row(mail(ashdown))).toHaveCount(1);
+        await expect(aMerge.grid.arrow(mail(ashdown))).toHaveCount(0);
+        for (const address of others) {
+            await expect(aMerge.grid.arrow(address)).toHaveCount(1);
+            expect(await aMerge.grid.actionLabels(address), address).toContain('Merge into this User');
+        }
 
         // Control: the account is gone, not left without a role (Rules 16,
         // 17). The same search finds Quinn Ashdown by her username first.
@@ -590,6 +636,38 @@ test.describe('users management', () => {
             await expect(list.table.locator('tbody tr td:first-child')).toHaveText(
                 ['22', '23', '24', '25', '26', '27', '28'].map((n) => `Page${n} Filler`)
             );
+
+            // The last row's menu: a 600 px window, the last row's (a Reader's)
+            // "…" scrolled to 30 px above its bottom edge (Rule 7; note s).
+            const viewport = mp.viewportSize();
+            await mp.setViewportSize({width: viewport.width, height: 600});
+            const lastRow = rows.last();
+            await expect(list.nameCell(lastRow)).toHaveText('Page28 Filler');
+            await expect(list.rolesCell(lastRow)).toHaveText('Reader');
+            const lastButton = list.menuButton(lastRow);
+            await lastButton.evaluate((b) => window.scrollBy(0, b.getBoundingClientRect().bottom - (window.innerHeight - 30)));
+            await expect
+                .poll(() => lastButton.evaluate((b) => Math.round(window.innerHeight - b.getBoundingClientRect().bottom)))
+                .toBe(30);
+            await lastButton.click();
+            const menu = mp.getByRole('menu');
+            await expect(menu).toBeVisible();
+            await expect
+                .poll(async () => {
+                    const m = await menu.boundingBox();
+                    const b = await lastButton.boundingBox();
+                    return {
+                        noRoomBelow: m.height > 600 - (b.y + b.height),
+                        aboveButton: m.y + m.height <= b.y,
+                        insideWindow: m.y >= 0 && m.x >= 0 && m.y + m.height <= 600 && m.x + m.width <= viewport.width,
+                    };
+                })
+                .toEqual({noRoomBelow: true, aboveButton: true, insideWindow: true});
+            for (const label of ['Edit', 'Email', 'Remove User', 'Disable User', 'Merge user']) {
+                await expect(menu.getByRole('menuitem', {name: label, exact: true})).toBeInViewport({ratio: 1});
+            }
+            await list.closeMenu(lastRow);
+            await mp.setViewportSize(viewport);
 
             // A search: typing alone changes nothing, Enter runs it (Rules 4, 6a, 6b).
             const harbourRequests = [];

@@ -9,19 +9,13 @@
  * absence of any reviewer role, with the Author role as the control).
  * Spec: docs/specs/U53-users-management.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A3 ❓, A7 🐞, A8 ❓, A13 🐞. Where a test passes through one (S4
- * reads the menus of rows outside the manager's reach, S3 opens "Enable
- * User", S5 reaches the removed user's roles page through her row, S7 reads
- * the grid's rows) it asserts the effect the spec states and leaves the
- * finding's own claim unasserted either way.
- * The spec's Coverage section records everything else left out.
+ * Deliberately NOT covered (register IDs): A1 🐞, A2 🐞, A3 ❓, A7 🐞,
+ * A8 ❓, A13 🐞.
  *
  * Every test seeds its own scratch preprint server with throwaway accounts
  * (the seeded roster and publicknowledge stay untouched); the Site
  * Administrator `admin` is enrolled as a manager of every scratch server and
- * is the signed-in actor of S1 (S7 and S8, the Site Administrator's
+ * a signed-in actor of S1 and S6 (S7 and S8, the Site Administrator's
  * notices, run alone: `serial/U53-users-management.spec.js`). Every actor
  * is opened through `asUser` (no default user: a multi-actor test sets
  * none, patterns.md
@@ -412,12 +406,26 @@ test.describe('users management', () => {
         const manager = `m${tag}`;
         const ash = `qa${tag}`;
         const ashdown = `qd${tag}`;
+        const second = `${tag}b`;
+        const secondManager = `mb${tag}`;
+        const lena = `l${tag}`;
+        // A second server the Preprint Server Manager holds no role in, with
+        // the manager of both servers and Lena Ortiz (footnote s).
+        await opsApi.createContext({
+            tag: second,
+            users: [
+                {username: secondManager, givenName: 'Bo', familyName: 'Secondmanager', roles: ['manager']},
+                {username: lena, givenName: 'Lena', familyName: 'Ortiz', roles: ['author']},
+            ],
+        });
         await opsApi.createContext({
             tag,
             users: [
                 {username: manager, givenName: 'Mara', familyName: 'Scratchmanager', roles: ['manager']},
                 {username: ash, givenName: 'Quinn', familyName: 'Ash', roles: ['author', 'reader']},
                 {username: ashdown, givenName: 'Quinn', familyName: 'Ashdown', roles: ['author']},
+                {username: secondManager, roles: ['manager']},
+                {username: lena, roles: ['author']},
             ],
         });
         const submission = await opsApi.createSubmission({
@@ -446,11 +454,15 @@ test.describe('users management', () => {
             await expect(merge.grid.row(address)).toHaveCount(1);
         }
         await expect(merge.grid.row(mail(ash))).toHaveCount(1);
+        await expect(merge.grid.row(mail(lena))).toHaveCount(1);
         await expect(merge.grid.arrow(mail(ashdown))).toHaveCount(1);
         await expect(merge.grid.arrow(mail(ash))).toHaveCount(0);
-        // The site administrator's row offers nothing: only accounts the manager may act on in
-        // full offer "Merge into this User" (Rule 16; pkp/pkp-lib#13494).
+        // The Site Administrator's row and Lena's, who holds a role in a
+        // server this manager does not manage, offer nothing: only accounts
+        // the manager may act on in full offer "Merge into this User"
+        // (Rules 16, 16a; pkp/pkp-lib#13494).
         await expect(merge.grid.arrow('admin@mail.test')).toHaveCount(0);
+        await expect(merge.grid.arrow(mail(lena))).toHaveCount(0);
         for (const address of [mail(ashdown), mail(manager)]) {
             expect(await merge.grid.actionLabels(address)).toContain('Merge into this User');
         }
@@ -501,6 +513,35 @@ test.describe('users management', () => {
         await login.submitCredentials(ash, pw(ash));
         await expect(qp.getByText('Invalid username/email or password. Please try again.')).toBeVisible();
 
+        // The second Preprint Server Manager, in another browser: Lena's row
+        // offers "Merge into this User", every server she holds a role in
+        // being one this manager manages (Rule 16a).
+        const bp = await signedIn(asUser, secondManager);
+        const bList = new UsersListPage(bp, tag);
+        const bMerge = new MergeUserWindow(bp);
+        await bList.goto();
+        await bList.chooseAction(bList.row(mail(ashdown)), 'Merge user');
+        await bMerge.expectOpen();
+        await expect(bMerge.grid.arrow(mail(lena))).toHaveCount(1);
+        expect(await bMerge.grid.actionLabels(mail(lena))).toContain('Merge into this User');
+
+        // The Site Administrator, in another browser: every row but Quinn
+        // Ashdown's offers "Merge into this User", her own and Lena's
+        // included (Rule 16a).
+        const ap = await signedIn(asUser, 'admin');
+        const aList = new UsersListPage(ap, tag);
+        const aMerge = new MergeUserWindow(ap);
+        await aList.goto();
+        await aList.chooseAction(aList.row(mail(ashdown)), 'Merge user');
+        await aMerge.expectOpen();
+        const others = ['admin@mail.test', mail(manager), mail(secondManager), mail(lena)];
+        await expect(aMerge.grid.rows()).toHaveCount(others.length + 1);
+        await expect(aMerge.grid.arrow(mail(ashdown))).toHaveCount(0);
+        await expect(aMerge.grid.row(mail(ashdown))).toHaveCount(1);
+        for (const address of others) {
+            expect(await aMerge.grid.actionLabels(address), address).toContain('Merge into this User');
+        }
+
         // Control: the account is gone, not left without a role (Rules 16,
         // 17). The same search finds Quinn Ashdown by her username first.
         await list.goto();
@@ -513,7 +554,7 @@ test.describe('users management', () => {
         await expect(merge.grid.rows()).toHaveCount(0);
     });
 
-    // S1 acts as `admin` and reads no notice. S7 and S8 read the Site
+    // S1 and S6 act as `admin` and read no notice. S7 and S8 read the Site
     // Administrator's notices, which the next `admin` page of ANY test
     // fetches and clears (patterns.md parallel lesson 2), so they run alone
     // in the solo project: `serial/U53-users-management.spec.js`.
@@ -590,6 +631,38 @@ test.describe('users management', () => {
             await expect(list.table.locator('tbody tr td:first-child')).toHaveText(
                 ['22', '23', '24', '25', '26', '27', '28'].map((n) => `Page${n} Filler`)
             );
+
+            // The last row's menu (Rule 7; footnote s: the window 600 px
+            // tall, the last row's "…" 30 px above its bottom).
+            const viewport = mp.viewportSize();
+            await mp.setViewportSize({width: viewport.width, height: 600});
+            const lastRow = rows.last();
+            await expect(list.nameCell(lastRow)).toHaveText('Page28 Filler');
+            await expect(list.rolesCell(lastRow)).toHaveText('Reader');
+            const lastButton = list.menuButton(lastRow);
+            await expect
+                .poll(() =>
+                    lastButton.evaluate((b) => {
+                        window.scrollBy(0, b.getBoundingClientRect().bottom - (window.innerHeight - 30));
+                        return Math.round(window.innerHeight - b.getBoundingClientRect().bottom);
+                    })
+                )
+                .toBe(30);
+            await list.openMenu(lastRow);
+            const menu = mp.getByRole('menu');
+            await expect(menu).toBeInViewport({ratio: 1});
+            for (const label of ['Edit', 'Email', 'Remove User', 'Disable User', 'Merge user']) {
+                await expect(menu.getByRole('menuitem', {name: label, exact: true})).toBeInViewport({ratio: 1});
+            }
+            // Above the button, which has no room under it for the menu.
+            const gap = async () => {
+                const m = await menu.boundingBox();
+                const b = await lastButton.boundingBox();
+                return {above: m.y + m.height <= b.y, roomBelow: 600 - (b.y + b.height) >= m.height};
+            };
+            await expect.poll(gap).toEqual({above: true, roomBelow: false});
+            await list.closeMenu(lastRow);
+            await mp.setViewportSize(viewport);
 
             // A search: typing alone changes nothing, Enter runs it (Rules 4, 6a, 6b).
             const harbourRequests = [];

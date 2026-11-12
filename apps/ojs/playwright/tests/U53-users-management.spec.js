@@ -6,20 +6,15 @@
  * on OJS (scenarios 1–8, all common).
  * Spec: docs/specs/U53-users-management.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A3 ❓, A7 🐞, A8 ❓, A13 🐞. Where a test passes through one (S4
- * reads the menus of rows outside the manager's reach, S3 opens "Enable
- * User", S5 reaches the removed user's roles page through her row, S7 reads
- * the grid's rows) it asserts the effect the spec states and leaves the
- * finding's own claim unasserted either way.
- * The spec's Coverage section records everything else left out.
+ * Deliberately NOT covered (the spec's Findings register; a 🐞 is never
+ * asserted as the contract, a ❓ is parked, not a gap): A1 🐞, A2 🐞, A3 ❓,
+ * A7 🐞, A8 ❓, A13 🐞. The spec's Coverage section records the rest.
  *
  * Every test seeds its own scratch journal with throwaway accounts (the
  * seeded roster and publicknowledge stay untouched); the Site Administrator
- * `admin` is enrolled as a manager of every scratch journal and is the
- * signed-in actor of S1 (S7 and S8, the Site Administrator's notices, run
- * alone: `serial/U53-users-management.spec.js`). Every actor is opened
+ * `admin` is enrolled as a manager of every scratch journal and is a
+ * signed-in actor of S1 and S6 (S7 and S8, the Site Administrator's notices,
+ * run alone: `serial/U53-users-management.spec.js`). Every actor is opened
  * through `asUser` (no default user: a multi-actor test sets none,
  * patterns.md "Fixture selection"); sign-ins the scenarios drive by hand run in fresh anonymous
  * contexts. Mailpit reads are scoped by the throwaway recipient addresses,
@@ -102,6 +97,20 @@ function listRefresh(page) {
     return page.waitForResponse((r) => /\/api\/v1\/users\?/.test(r.url()) && r.request().method() === 'GET', {
         timeout: 30_000,
     });
+}
+
+/**
+ * Scroll the document until a locator's bottom edge sits `gap` px above the
+ * window's bottom edge (spec note s: the last row's "…" 30 px above it).
+ * Resolves with the gap read back once the scroll has landed.
+ */
+async function scrollToGapAboveBottom(locator, gap) {
+    await locator.evaluate((el, g) => {
+        window.scrollBy(0, el.getBoundingClientRect().bottom - (window.innerHeight - g));
+    }, gap);
+    await expect
+        .poll(() => locator.evaluate((el) => Math.round(window.innerHeight - el.getBoundingClientRect().bottom)))
+        .toBe(gap);
 }
 
 test.describe('users management', () => {
@@ -404,15 +413,29 @@ test.describe('users management', () => {
     test('S6: merge a duplicate account', async ({asUser, ojsApi, browser, baseURL}, testInfo) => {
         test.slow();
         const tag = makeTag(6, testInfo);
+        const second = `${tag}b`;
         const manager = `m${tag}`;
         const ash = `qa${tag}`;
         const ashdown = `qd${tag}`;
+        const bothManager = `mb${tag}`;
+        const lena = `l${tag}`;
+        // A second journal, which the Journal Manager does not manage, with
+        // the manager of both journals and Lena Ortiz (spec note s).
+        await ojsApi.createContext({
+            tag: second,
+            users: [
+                {username: bothManager, givenName: 'Bo', familyName: 'Bothmanager', roles: ['manager']},
+                {username: lena, givenName: 'Lena', familyName: 'Ortiz', roles: ['author']},
+            ],
+        });
         await ojsApi.createContext({
             tag,
             users: [
                 {username: manager, givenName: 'Mara', familyName: 'Scratchmanager', roles: ['manager']},
                 {username: ash, givenName: 'Quinn', familyName: 'Ash', roles: ['author', 'reader']},
                 {username: ashdown, givenName: 'Quinn', familyName: 'Ashdown', roles: ['author']},
+                {username: bothManager, roles: ['manager']},
+                {username: lena, roles: ['author']},
             ],
         });
         const submission = await ojsApi.createSubmission({
@@ -437,15 +460,18 @@ test.describe('users management', () => {
         await merge.expectOpen();
         await expect(merge.grid.title('Merge into this User')).toBeVisible();
         expect(await merge.grid.columns()).toEqual(GRID_COLUMNS);
-        for (const address of ['admin@mail.test', mail(manager), mail(ashdown)]) {
+        for (const address of ['admin@mail.test', mail(manager), mail(ashdown), mail(lena)]) {
             await expect(merge.grid.row(address)).toHaveCount(1);
         }
         await expect(merge.grid.row(mail(ash))).toHaveCount(1);
         await expect(merge.grid.arrow(mail(ashdown))).toHaveCount(1);
+        await expect(merge.grid.arrow(mail(manager))).toHaveCount(1);
         await expect(merge.grid.arrow(mail(ash))).toHaveCount(0);
-        // The site administrator's row offers nothing: only accounts the manager may act on in
-        // full offer "Merge into this User" (Rule 16; pkp/pkp-lib#13494).
+        // The Site Administrator's row and Lena's (a role in a journal this
+        // manager does not manage) offer nothing: only accounts the manager
+        // may act on in full offer "Merge into this User" (Rule 16a).
         await expect(merge.grid.arrow('admin@mail.test')).toHaveCount(0);
+        await expect(merge.grid.arrow(mail(lena))).toHaveCount(0);
         for (const address of [mail(ashdown), mail(manager)]) {
             expect(await merge.grid.actionLabels(address)).toContain('Merge into this User');
         }
@@ -495,6 +521,36 @@ test.describe('users management', () => {
         await login.gotoContext(tag);
         await login.submitCredentials(ash, pw(ash));
         await expect(qp.getByText('Invalid username/email or password. Please try again.')).toBeVisible();
+
+        // The second Journal Manager, who manages both journals: Lena's row
+        // offers "Merge into this User" there (Rule 16a).
+        const bp = await signedIn(asUser, bothManager);
+        const bothList = new UsersListPage(bp, tag);
+        const bothMerge = new MergeUserWindow(bp);
+        await bothList.goto();
+        await bothList.chooseAction(bothList.row(mail(ashdown)), 'Merge user');
+        await bothMerge.expectOpen();
+        await expect(bothMerge.grid.row(mail(lena))).toHaveCount(1);
+        await expect(bothMerge.grid.arrow(mail(lena))).toHaveCount(1);
+        expect(await bothMerge.grid.actionLabels(mail(lena))).toContain('Merge into this User');
+
+        // The Site Administrator: every row but Quinn Ashdown's, the account
+        // being merged, offers "Merge into this User", the administrator's
+        // own and Lena's included (Rule 16a).
+        const ap = await signedIn(asUser, 'admin');
+        const adminList = new UsersListPage(ap, tag);
+        const adminMerge = new MergeUserWindow(ap);
+        await adminList.goto();
+        await adminList.chooseAction(adminList.row(mail(ashdown)), 'Merge user');
+        await adminMerge.expectOpen();
+        const remaining = ['admin@mail.test', mail(manager), mail(bothManager), mail(lena)];
+        await expect(adminMerge.grid.rows()).toHaveCount(remaining.length + 1);
+        await expect(adminMerge.grid.row(mail(ashdown))).toHaveCount(1);
+        await expect(adminMerge.grid.arrow(mail(ashdown))).toHaveCount(0);
+        for (const address of remaining) {
+            await expect(adminMerge.grid.arrow(address)).toHaveCount(1);
+            expect(await adminMerge.grid.actionLabels(address), address).toContain('Merge into this User');
+        }
 
         // Control: the account is gone, not left without a role (Rules 16,
         // 17). The same search finds Quinn Ashdown by her username first.
@@ -585,6 +641,33 @@ test.describe('users management', () => {
             await expect(list.table.locator('tbody tr td:first-child')).toHaveText(
                 ['22', '23', '24', '25', '26', '27', '28'].map((n) => `Page${n} Filler`)
             );
+
+            // The last row's menu (Rule 7): a 600 px window, the last row's
+            // "…" (a Reader's) 30 px above its bottom edge; the menu opens
+            // above the button, wholly inside the window, every action in view.
+            const fullSize = mp.viewportSize();
+            await mp.setViewportSize({width: fullSize.width, height: 600});
+            const lastRow = rows.last();
+            await expect(list.nameCell(lastRow)).toHaveText('Page28 Filler');
+            await expect(list.rolesCell(lastRow)).toHaveText('Reader');
+            const lastButton = list.menuButton(lastRow);
+            await list.stylesApplied();
+            await scrollToGapAboveBottom(lastButton, 30);
+            await lastButton.click();
+            const menu = mp.getByRole('menu');
+            await expect(menu).toBeVisible();
+            for (const label of ['Edit', 'Email', 'Remove User', 'Disable User', 'Merge user']) {
+                await expect(menu.getByRole('menuitem', {name: label, exact: true})).toBeInViewport({ratio: 1});
+            }
+            await expect(menu).toBeInViewport({ratio: 1});
+            await expect
+                .poll(async () => {
+                    const [m, b] = await Promise.all([menu.boundingBox(), lastButton.boundingBox()]);
+                    return Math.round(b.y - (m.y + m.height));
+                }, {message: 'the menu ends above the button'})
+                .toBeGreaterThanOrEqual(0);
+            await list.closeMenu(lastRow);
+            await mp.setViewportSize(fullSize);
 
             // A search: typing alone changes nothing, Enter runs it (Rules 4, 6a, 6b).
             const harbourRequests = [];

@@ -475,7 +475,7 @@ The Site Administrator's "Add User" (step 1) and "Edit User" windows
 
 Every scenario runs on a scratch journal of its own with throwaway
 accounts and the Site Administrator enrolled as on every scratch journal
-(scenarios 4 and 5 with a second scratch journal beside it), scenarios 1
+(scenarios 4, 5 and 6 with a second scratch journal beside it), scenarios 1
 to 6 signed in as a throwaway Journal Manager and 7 and 8 as the Site
 Administrator; emails are read in the mail catcher. The accounts, the
 passwords and the tooling recipe are in the footnote. <sup>s</sup>
@@ -506,6 +506,12 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      Users" list).
    - **The second page**: press the page button 2: the list shows the
      last 7 rows (Rule 5).
+   - **The last row's menu**: make the browser window short and scroll
+     until the "…" at the end of the list's last row, a Reader's, sits
+     just above the window's bottom edge, with no room under it for the
+     menu. Press that "…": the menu opens above the button, wholly inside
+     the window, its "Edit", "Email", "Remove User", "Disable User" and
+     "Merge user" all in view (Rule 7).
    - **A search**: type harbour in the search box: the list does not
      change. Press Enter: the heading reads "Current Users (1)", and the
      list holds Quinn Ashdown's row alone (Rules 4, 6a, 6b).
@@ -652,10 +658,12 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
 
 6. **Merge a duplicate account**
 
-   Given: Journal Manager, on a scratch journal with two accounts for
-   one person: Quinn Ash, who holds the Author and Reader roles, submitted
-   "Tidal Patterns" and is signed in in a second browser, and Quinn
-   Ashdown, who holds the Author role.
+   Given: Journal Manager, who holds no role in a second scratch journal,
+   on a scratch journal with two accounts for one person (Quinn Ash, who
+   holds the Author and Reader roles, submitted "Tidal Patterns" and is
+   signed in in a second browser, and Quinn Ashdown, who holds the Author
+   role), Lena Ortiz, an Author here and in the second journal, and a
+   second Journal Manager, who manages both journals.
 
    - **The "Merge user" window**: on Settings › Users & Roles press the
      "…" of Quinn Ash's row, then "Merge user": the side window "Merge
@@ -663,8 +671,10 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      into this User", with the columns "Given Name", "Family Name",
      "Username", "Roles" and "Email" (or "Email address"). Quinn
      Ashdown's row and the Journal Manager's own offer "Merge into this
-     User"; the Site Administrator's row and Quinn Ash's have no arrow
-     and offer nothing (Rules 16, 16a; Fields, the shared list).
+     User". The Site Administrator's row, Quinn Ash's and Lena Ortiz's
+     have no arrow and offer nothing, Lena holding a role in a journal
+     this Journal Manager does not manage (Rules 16, 16a; Fields, the
+     shared list).
    - **The search form**: press the "Search" link above the list: the
      form opens with the box "Search", the role select on "All Roles"
      and "Include users with no roles in this journal." unticked. Type
@@ -687,6 +697,17 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **Quinn Ash, in the second browser**: she opens her profile: the
      Login page shows, her session having ended. Signing in with Quinn
      Ash's username and password is refused (Rule 17).
+   - **The second Journal Manager**: in another browser, signed in as
+     the manager of both journals, open this journal's Settings › Users
+     & Roles and press the "…" of Quinn Ashdown's row, then "Merge
+     user": in the "Merge user" window Lena Ortiz's row offers "Merge
+     into this User", since every journal she holds a role in is one
+     this manager manages (Rule 16a).
+   - **The Site Administrator**: in another browser, open this journal's
+     Settings › Users & Roles and press the "…" of Quinn Ashdown's row,
+     then "Merge user": every row of the "Merge user" window but Quinn
+     Ashdown's offers "Merge into this User", the Site Administrator's
+     own and Lena Ortiz's included (Rule 16a).
    - **Control**: the Journal Manager presses "Merge user" on Quinn
      Ashdown's row, opens the search form, types Quinn Ash's username, as
      the "Confirm" dialog gave it, in "Search", ticks "Include users with no roles in this journal." and
@@ -795,9 +816,6 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the last rows' menus staying in the window (Rule 7): with a short
-    window, the "…" of the list's last row opens its menu above the
-    button, every action visible and pressable [upstream 2026-10-27]
   - the guard for A15 (issue report
     `docs/issues/U53-A15-merge-fails-for-discussion-opener.md`): a manager
     merges an account that opened a discussion on a submission into another
@@ -837,14 +855,6 @@ Left out of the scenarios above, by reason:
   - the guard for A5 (issue report
     `docs/issues/U53-A5-users-list-row-button-raw-key.md`): every row's "…"
     button on the users list has an accessible name with no "##" [report 2026-10-02]
-  - the "Merge user" window opened by a manager on a journal where a user
-    also holds a role in another journal the manager does not manage:
-    that user's row has no arrow, while a manager of both journals is
-    offered "Merge into this User" on it (Rule 16a) [upstream 2026-10-13]
-  - the "Merge user" window opened by the Site Administrator: every row
-    but the account being merged and a second Site Administrator's offers
-    "Merge into this User", the administrator's own and other journals'
-    users included (Rule 16a) [upstream 2026-10-13]
 - **Nothing new to test**:
   - a "Username" outside the characters the Fields section allows, on
     "Add User", whose refusal the Fields section does not quote (Fields
@@ -904,6 +914,9 @@ Left out of the scenarios above, by reason:
     reply in a discussion as a named account)
   - a site "Minimum password length (characters)" other than 6
     (Settings bullet 2; a site setting no key sets)
+  - a second Site Administrator's row in the Site Administrator's "Merge
+    user" window, which has no arrow (Rule 16a; no key makes a second
+    Site Administrator)
 - **Owned by another feature**:
   - the Section Editor and every other role refused Users & Roles (Actors
     row 1; *[Journal identity & about pages](U07-journal-identity-and-about-pages.md)*,
@@ -1998,12 +2011,15 @@ twice; email `<username>@mail.test`). The context factory enrols `admin`
 scratch context, with no start date. Scenarios 1 to 6 sign in as the
 first `users[]` entry, `roles: ['manager']` (the Journal Manager, Press
 Manager, Preprint Server Manager), whose row therefore follows `admin`'s;
-scenarios 7 and 8, and scenario 1's grid bullet, sign in as `admin`.
+scenarios 7 and 8, scenario 1's grid bullet and scenario 6's Site
+Administrator bullet sign in as `admin`.
 Scenario 1: after the manager, Quinn Ashdown `author` with
 `affiliation: 'Harbour University'` and an `orcid` iD
 (`orcidIsVerified: false`), Nova Reyes `reader` with `pastRoles:
 [{role: 'author'}]`, then 28 `reader` entries whose names, usernames and
-addresses contain none of "harbour", "nova", "quinn" and "author".
+addresses contain none of "harbour", "nova", "quinn" and "author"; for
+the last row's menu the window is set 600 px tall and the last row's
+"…" scrolled to 30 px above its bottom (note q).
 Scenarios 2 and 3: Quinn Ashdown `author`; scenario 3 signs her in in a
 second browser first. Scenario 4: a first scratch journal with Quinn
 Ashdown `author` and Nova Reyes `{roles: [], pastRoles: [{role:
@@ -2011,11 +2027,16 @@ Ashdown `author` and Nova Reyes `{roles: [], pastRoles: [{role:
 it), then this journal naming both again with `author` (the roles are
 added to the existing accounts) and Lena Ortiz `author`. Scenario 5: a first
 scratch journal with a `manager` of its own and Quinn Ashdown `author`,
-then this journal naming Quinn with `author` and `reader`. Scenario 6:
-Quinn Ash `author` and `reader`, Quinn Ashdown `author`; "Tidal
+then this journal naming Quinn with `author` and `reader`. Scenario 6: a
+first scratch journal with the second Journal Manager `manager` and
+Lena Ortiz `author`, then this journal naming, after its Journal
+Manager, Quinn Ash `author` and `reader`, Quinn Ashdown `author`, and
+both accounts of the first journal again, the second Journal Manager
+with `manager` and Lena with `author`; "Tidal
 Patterns" from `POST scenarios/submission` with Quinn Ash as
 `submitter`, which gives her the Author place on its Participants panel;
-Quinn Ash signed in in a second browser. Scenario 7: Lena Ortiz
+Quinn Ash signed in in a second browser, the second Journal Manager
+and `admin` in a third and a fourth. Scenario 7: Lena Ortiz
 `author`; Rosa's address is `rosa-<tag>@mail.test`, and "Suggest"
 answers `rdelgado` with a number on every run after the first. Scenario
 8: Lena Ortiz `author`, and on OJS and OMP Rui Tanaka `externalReviewer`;
