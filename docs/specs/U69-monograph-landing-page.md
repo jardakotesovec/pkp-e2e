@@ -843,18 +843,19 @@ tooling recipe are in the footnote. <sup>s</sup>
 
 2. **The table of contents, a chapter's page and the "Downloads" chart**
 
-   Given: a visitor, on a scratch press that gives chapters DOIs and
-   shows the downloads chart as bars, and two of its books, published
-   on 2024-03-05 and both by Ada Quill and Lee Marsh: "Coastlines", its
-   "Publication Dates" left as a new book has it, with the formats
-   "PDF" holding article.pdf and "Chapter PDF" holding replacement.pdf,
-   both on "Open Access", and the chapters "Tides", subtitle "Low and
-   high", by Lee Marsh, with its page, a DOI, the synopsis "How the sea
+   Given: a visitor and the Press manager, on a scratch press that gives
+   chapters DOIs and shows the downloads chart as bars, and two of its
+   books, published on 2024-03-05 and both by Ada Quill and Lee Marsh:
+   "Coastlines", its "Publication Dates" left as a new book has it,
+   with the formats "PDF" holding article.pdf and "Chapter PDF"
+   holding replacement.pdf, both on "Open Access", and the chapters
+   "Tides", subtitle "Low and high", by Lee Marsh, with its page, a DOI, the synopsis "How the sea
    rises and falls.", the pages 1-20 and replacement.pdf, then
    "Harbours", with no author, no page and no DOI; and "Reef Notes", on
    "Each chapter may have its own publication date.", with the chapters
    "Reef", its "Date Published" 2024-06-01, and "Lagoon", with no date
-   of its own, both with their pages.
+   of its own, both with their pages; and a third book, "Tidepools",
+   published today.
 
    - **The table of contents**: open "Coastlines"' page: the main column
      lists the chapters in the order they were added: "Tides" with "Low
@@ -885,15 +886,31 @@ tooling recipe are in the footnote. <sup>s</sup>
      press "Reef": its "Published" reads "June 1, 2024". Back on the
      book's page, press "Lagoon": its "Published" reads "March 5, 2024",
      the version's date (Rule 16; Settings bullet 11).
+   - **A book published this year**: open "Tidepools"' page: its
+     "Downloads" chart runs from January of the current year to the
+     current month, each month labelled with its name and the year, the
+     first "Jan" and the current year, and no "All time" button shows
+     under it (Rule 20a).
+   - **A new chapter order**: Press manager: on "Reef Notes"' published
+     version's Chapters page (the workflow's "Publication" › the version
+     › "Chapters", [Chapters & work type](U72-chapters-work-type.md)),
+     press "Order", drag "Lagoon" above "Reef" and press "Done". Signed
+     out, with nothing published again, open "Reef Notes"' page: its
+     table of contents lists "Lagoon", then "Reef" (Rule 10).
    - **Control**: "Coastlines"' address followed by "/chapter/" and
      the number the tooling reports for "Harbours" opens the "404 Not
      Found" page (Rule 15). <sup>s</sup>
 
 3. **Opening a free PDF and a free HTML file**
 
-   Given: a visitor, on a scratch press, and its published book
-   "Shorelines" with the formats "PDF" holding article.pdf and "HTML"
-   holding article.html, both on "Open Access".
+   Given: a visitor, on a scratch press with its published book
+   "Shorelines", whose formats are "PDF" holding article.pdf, "HTML"
+   holding article.html, "Press link" holding press.html, an HTML file
+   whose one link, "Visit the press", is written "omp://press", and
+   "Notes" holding notes.md, a Markdown file, all on "Open Access", and
+   on a second scratch press with "PDF.js PDF Viewer" off and its
+   published book "Coastlines" with the format "PDF" holding article.pdf
+   on "Open Access".
 
    - **"PDF"**: on the book's page press "PDF": the PDF view page opens
      without the press's header, footer or sidebar, its browser tab
@@ -917,7 +934,17 @@ tooling recipe are in the footnote. <sup>s</sup>
      HTML view page).
    - **The title**: press "Shorelines": the book's page opens (Fields,
      the HTML view page).
-   - **Control**: the mail catcher holds no email after the two files
+   - **"omp://press"**: press "Press link": the HTML view page of
+     press.html opens. Press "Visit the press" in it: the press's home
+     page opens (Fields, the HTML view page).
+   - **A Markdown file**: open "Shorelines"' page again and press
+     "Notes": the browser saves notes.md under its file name and stays
+     on the book's page (Rule 13).
+   - **"PDF" with the viewer off**: on the second press, open
+     "Coastlines"' page and press "PDF": the browser saves article.pdf
+     under its file name and stays on the book's page, with no PDF view
+     page (Rule 13; Settings bullet 1).
+   - **Control**: the mail catcher holds no email after the files above
      were opened (Side effects, "No other email, no notice").
      <sup>s</sup>
 
@@ -925,19 +952,26 @@ tooling recipe are in the footnote. <sup>s</sup>
 
    Given: a Reader and a visitor, on a scratch press that sells in US
    dollars with "Manual Fee Payment" and its "Manual Payment
-   Instructions" filled, and its published book "Shorelines" with the
-   format "PDF" holding article.pdf on "Direct Sales" at a price typed
-   as 25.
+   Instructions" reading "Pay by bank transfer.", and its published
+   book "Shorelines" with the format "PDF" holding article.pdf on
+   "Direct Sales" at a price typed as 25.
 
    - **The link**: signed out, open the book's page: article.pdf's link
      reads "Purchase PDF (25 USD)" after the price; the bare price
      before it is [A7](#a7), neither a pass nor a fail here (Rule 11a).
+   - **The Login page**: press the link: the Login page opens and says
+     nothing of the purchase, only "Required fields are marked with an
+     asterisk: *" above the form (Rule 14).
    - **The payment page**: Reader: sign in, open the book's page and
      press the link: the payment page opens with the press's header and
      footer and the trail "Home / Manual Fee Payment", headed "Manual
      Fee Payment", with "Title" article.pdf and "Fee" "25.00 (USD)". The
      mail catcher holds no email yet (Rule 14; Fields, the payment page;
      Side effects, "No other email, no notice").
+   - **The page's order**: under the heading, top to bottom: "Pay by
+     bank transfer.", then "Title" and "Fee" with their values in bold,
+     then "Send notification of payment" as an underlined link, not a
+     button (Fields, the payment page).
    - **"Send notification of payment"**: press it: the page shows
      "Payment Notification" with "Payment notification sent" and
      "Continue" (Rule 14).
@@ -989,7 +1023,8 @@ tooling recipe are in the footnote. <sup>s</sup>
 
    Given: a visitor, on a scratch press, and its book first published on
    2024-03-05 as "Tides" (Version of Record 1.0), then published again
-   today as a second version retitled "Tides Revised".
+   today as a second version retitled "Tides Revised", and its second
+   published book, "Shorelines".
 
    - **The current page**: open the book's address: it is headed "Tides
      Revised"; "Published" reads "March 5, 2024 — Updated on {today}",
@@ -1007,6 +1042,10 @@ tooling recipe are in the footnote. <sup>s</sup>
      the book's address (Rules 4, 6, 8, 9).
    - **"most recent version"**: press it: the book's address opens,
      headed "Tides Revised" (Rule 6).
+   - **A version address that names no version**: open the book's
+     address followed by "/version/999999", then by "/version/abc",
+     then by "/version/" and the id the tooling reports for
+     "Shorelines"' version: each opens the "404 Not Found" page (Rule 4).
    - **Control**: the current version's page carries no outdated-version
      notice (Rule 6). <sup>s</sup>
 
@@ -1116,11 +1155,6 @@ tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the "Downloads" chart of a book first published in the current
-    year: January to the current month, and no "All time" (Rule 20a) [incidental 2026-10-27]
-  - the "Downloads" chart keeping its figures after downloads are
-    processed (seeded figures on a test install), until "Delete Data
-    Caches" (Rule 20b) [incidental 2026-10-27]
   - the guard for A20 (issue report
     `docs/issues/U69-A20-later-version-chapter-repeats-date.md`): a later
     version's chapter page printing one date when its two dates are
@@ -1164,21 +1198,13 @@ Left out of the scenarios above, by reason:
     `docs/issues/U69-A19-older-version-chapter-page-server-error.md`):
     an older version's chapter page opening under the outdated notice
     on a press with "DOI Versioning" "No" [report 2026-10-01]
-  - a book's version address with an id that is none of its versions
-    (a mistyped number, another book's version, "abc") answering "404
-    Not Found" (Rule 4; retired A3, pkp/pkp-lib#13657) [upstream 2026-11-02]
   - the guard for A16 (issue report
     `docs/issues/U69-A16-earlier-url-path-server-error.md`): a book whose
     later version was published under a new URL Path, opened by the
     earlier one, forwarding to the book's current address [report 2026-10-01]
-  - a free PDF's link downloading the file under its name with "PDF.js
-    PDF Viewer" off, and a free file that is neither PDF nor HTML (an
-    EPUB, a Markdown file) downloading under its name (Rule 13; Settings
-    bullet 1) [upstream 2026-10-05]
   - the guard for A23 (issue report
     `docs/issues/U69-A9-pdf-view-page-script-error.md`): the PDF view
     page opening with no script error [report 2026-10-01]
-  - a format with two files listing them in either order (Rule 11b) [incidental 2026-10-02]
   - the guard for A5 (Rule 6; issue report
     `docs/issues/U13-A6-older-version-tab-current-title.md`): an
     older version's page, published under another title than the current
@@ -1187,17 +1213,6 @@ Left out of the scenarios above, by reason:
     `docs/issues/U13-OPS1-new-version-preview-called-outdated.md`): a new
     version's preview showing the preview notice alone, and an older
     published version's page keeping the outdated notice [report 2026-10-01]
-  - the Login page a file for sale leads a visitor to, saying nothing of
-    the purchase (Rule 14) [incidental 2026-09-29]
-  - the payment page's order, the press's instructions first, and
-    "Send notification of payment" as an underlined link (Fields, the
-    payment page) [incidental 2026-09-29]
-  - an HTML file linking the press with "omp://press", the link opening
-    the press's home page (Fields, the HTML view page) [incidental 2026-10-05]
-  - a published book's table of contents listing its chapters in a new
-    order, after the last chapter is moved above the first with
-    "Order" and "Done" on the published version's Chapters page
-    (Rule 10) [other 2026-10-13]
 - **Nothing new to test**:
   - an unassigned Series editor or assistant role opening the preview
     (Actors row 2)
@@ -1222,6 +1237,9 @@ Left out of the scenarios above, by reason:
   - the press's staff, the Site Administrator and every other signed-in
     role pressing a file for sale, offered the payment page as the
     Reader is (Actors row 4; Rule 14; scenario 4)
+  - a format with two files, listing them in either order (Rule 11b):
+    no scenario's format holds two files, and a test that takes either
+    order asserts nothing about the order
 - **Register carries it**:
   - A1 (an address that names no book; Rule 3a)
   - A2 (a book published only as an "Author's Original"; Rule 3)
@@ -1265,6 +1283,10 @@ Left out of the scenarios above, by reason:
     Rule 20; scenario 2 passes it)
 - **No seed**:
   - a purchase completed through PayPal (Rule 14)
+  - the "Downloads" chart keeping the figures of the page's first
+    opening after later downloads are processed, until a Site
+    Administrator presses "Delete Data Caches" (Rule 20b): no tool
+    processes downloads after a page has been opened
 - **Owned by another feature**:
   - the Settings pages and the plugin switches (Actors row 7;
     *[Plugins management](U62-plugins-management.md)*, scenario 2)
@@ -1913,15 +1935,27 @@ response's `chapters[].id` being the number a chapter's address takes
 for "Harbours"; "Reef Notes"
 with `enableChapterPublicationDates: true` and `chapters: [{title: 'Reef',
 datePublished: '2024-06-01', page: true}, {title: 'Lagoon', page:
-true}]`. Scenario 3: `[{name: 'PDF', file: 'article.pdf'}, {name: 'HTML',
-file: 'article.html'}]`. Scenario 4: the press with `payments: {currency:
-'USD', paymentPluginName: 'ManualPayment', manualInstructions: '…'}` and
+true}]`; "Tidepools" without `datePublished`, so the publish stamps
+today; the reorder on "Reef Notes"' Chapters page is driven on screen
+as `manager`. Scenario 3: "Shorelines"' formats are
+`{name: 'PDF', file: 'article.pdf'}`,
+`{name: 'HTML', file: 'article.html'}`,
+`{name: 'Press link', file: 'press.html'}` and
+`{name: 'Notes', file: 'notes.md'}`, press.html being a small HTML file
+not yet among the fixtures whose one link, "Visit the press", has the
+address `omp://press`; the second press with
+`plugins: {pdfjsviewerplugin: {enabled: false}}` and "Coastlines" with
+`{name: 'PDF', file: 'article.pdf'}`. Scenario 4: the press with
+`payments: {currency: 'USD', paymentPluginName: 'ManualPayment'}`,
+`manualInstructions: 'Pay by bank transfer.'` in the same map, and
 `context.contactName` / `contactEmail` for the principal contact;
 `[{name: 'PDF', file: 'article.pdf', price: '25'}]`; the "Manual Payment
 Notification" is sent at once, not queued, so the mail catcher is read
 with no job queue run (test run 2026-09-28). Scenario 5: "Draft Tides" without
 `published` (it rests in Production), the unfinished submission with
 `submitted: false`, "Shorelines" published; the other Author is `author2`.
+Scenario 6's "Shorelines" is a second published seed, and the id its
+mistyped-address step takes is that seed's `publicationId`.
 Scenarios 6 and 7: the first version seeded as above ("Tides"; "Coastlines"
 with `chapters: [{title: 'Tides', page: true}, {title: 'Coda', page:
 true}]`), then, as `manager`, "Create New Version"

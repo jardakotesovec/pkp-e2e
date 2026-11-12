@@ -23,7 +23,12 @@
  * - A6 🐞: S2 reads the author line of a chapter whose authors differ from
  *   the book's; no chapter shares the book's authors.
  * - A14 ❓, A22 ❓: S8's book is in no series and has one version.
- * - A1–A4, A8, A11–A13, A15–A17, A19–A21: no scenario reaches those states.
+ * - A25 🐞: S3's press.html holds its "omp://press" link alone; no file
+ *   links another book.
+ * - A28 🐞: S2 reads the chart's own "Downloads" heading, never the count
+ *   of headings a screen reader meets.
+ * - A1, A2, A4, A8, A11–A13, A15–A17, A19–A21, A24, A26, A27: no scenario
+ *   reaches those states.
  *
  * Seeding: scenario endpoints only, as footnote s says: every press is a
  * scratch press (`createContext`) with throwaway accounts (the username
@@ -33,9 +38,14 @@
  * second Author where a scenario names them. Every book is a scratch
  * submission sent to Production (`skipExternalReview`,
  * `sendToProduction`) and, unless the scenario says otherwise, published
- * on 2024-03-05; its formats come from `publicationFormats[]` (approved,
- * available, the file on "Open Access" unless `price` is given), its
- * chapters from `chapters[]`. S6 and S7 make their second version on
+ * on 2024-03-05 ("Tidepools" in S2 on the day of the run); its formats
+ * come from `publicationFormats[]` (approved, available, the file on "Open
+ * Access" unless `price` is given; press.html is the suite's own fixture,
+ * whose one link is written "omp://press"), its chapters from
+ * `chapters[]`. S3's second press switches "PDF.js PDF Viewer" off through
+ * `plugins`. S2's new chapter order is made on screen as the Press
+ * manager (the published version's Chapters page, "Order", a drag,
+ * "Done"). S6 and S7 make their second version on
  * screen as the Press manager ("Create New Version", then "Title &
  * Abstract" or the version's Chapters page, then "Publish"), since no
  * scenario key builds a later version. The visitor is the fixture `page`,
@@ -49,7 +59,7 @@
  * project; its "no email yet" is bounded by that email itself (exactly
  * one to the principal contact's own address, counted from the seed).
  * S3's "no email" is read on the press's principal contact (the Press
- * manager's address) and the book's Author, bounded by a password reset
+ * manager's address) and the two presses' Authors, bounded by a password reset
  * each requested after the files were opened (a mail sent at once, as
  * U07 reads it) and counted from the seed.
  *
@@ -86,6 +96,8 @@ const FIRST_VERSION = '2024-03-05 (Version of Record 1.0)';
 const LEE_EMAIL = 'lee.marsh@mail.test';
 const LEE = {givenName: 'Lee', familyName: 'Marsh', email: LEE_EMAIL};
 const REMOTE = 'https://example.org/shorelines';
+/** The chart's month names (`plugins.themes.default.displayStats.monthInitials`, English). */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** Unique per-run tag: one alphanumeric token, feature + scenario + app + worker. */
 function makeTag(scenario, testInfo) {
@@ -166,6 +178,79 @@ async function visibleWords(link) {
             .replace(/\s+/g, ' ')
             .trim()
     );
+}
+
+/**
+ * The Chapters page's chapter titles as drawn, top to bottom (the list's
+ * `# <title>` lines). A one-shot read: poll it.
+ *
+ * @param {import('../pages/ChapterPages.js').ChapterList} list
+ */
+async function chapterTitles(list) {
+    return (await list.lines()).filter((l) => l.startsWith('# ')).map((l) => l.slice(2));
+}
+
+/**
+ * While the Chapters page is ordering, drag chapter `title` by its move
+ * handle onto the top edge of chapter `target`'s block (a small move first
+ * starts the sortable), and wait until the list reads `title` above
+ * `target`. Kept here so the suite leans only on the list's locators.
+ *
+ * @param {import('../pages/ChapterPages.js').ChapterList} list
+ * @param {import('@playwright/test').Page} page
+ * @param {string} title
+ * @param {string} target
+ */
+async function dragChapterAbove(list, page, title, target) {
+    const handle = list.chapterRow(title).locator('a.pkp_linkaction_moveItem');
+    await expect(handle).toBeVisible({timeout: 30_000});
+    await handle.scrollIntoViewIfNeeded();
+    const a = await handle.boundingBox();
+    const b = await list.chapterBlock(target).boundingBox();
+    if (!a || !b) {
+        throw new Error(`no box for the chapters ${title} / ${target}`);
+    }
+    const x = a.x + a.width / 2;
+    const y = a.y + a.height / 2;
+    const ty = b.y + 3;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y - 5, {steps: 5});
+    await page.mouse.move(x, ty + 4, {steps: 30});
+    await page.mouse.move(x, ty, {steps: 4});
+    await page.mouse.up();
+    await expect
+        .poll(async () => {
+            const titles = await chapterTitles(list);
+            return titles.indexOf(title) >= 0 && titles.indexOf(title) < titles.indexOf(target);
+        }, {timeout: 30_000})
+        .toBe(true);
+}
+
+/** The Login page's one line above its form (`common.requiredField`). */
+const TEXT_REQUIRED = 'Required fields are marked with an asterisk: *';
+
+/**
+ * The Login page's words between its heading and its form, one entry per
+ * block (`.page_login`'s children after the h1, up to `form#login`). Read
+ * on the server-rendered page after its navigation.
+ */
+async function loginLinesAboveForm(page) {
+    return page.locator('.page_login').evaluate((root) => {
+        const out = [];
+        let seen = false;
+        for (const el of Array.from(root.children)) {
+            if (el.tagName === 'H1') {
+                seen = true;
+                continue;
+            }
+            if (el.tagName === 'FORM') break;
+            if (!seen) continue;
+            const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+            if (text) out.push(text);
+        }
+        return out;
+    });
 }
 
 /** The Login page: its address and heading. */
@@ -307,9 +392,11 @@ test.describe('Monograph landing page (U69)', () => {
         await expect.poll(() => book.visiblePartHeadings(), {timeout: 30_000}).toEqual([TEXT.synopsis, TEXT.published, TEXT.versions]);
     });
 
-    test("S2: The table of contents, a chapter's page and the \"Downloads\" chart", async ({page, ompApi}, testInfo) => {
+    test("S2: The table of contents, a chapter's page and the \"Downloads\" chart", async ({page, asUser, ompApi}, testInfo) => {
         const tag = makeTag('s2', testInfo);
+        const mg = account(tag, 'mg', 'Mona', 'Manager', ['manager']);
         const press = await seedPress(ompApi, tag, {
+            extra: [mg],
             enabledDoiTypes: ['publication', 'chapter'],
             doiPrefix: '10.1234',
             themeOptions: {displayStats: 'bar'},
@@ -343,6 +430,8 @@ test.describe('Monograph landing page (U69)', () => {
                 {title: 'Lagoon', page: true},
             ],
         });
+        // "Tidepools", published today: no `datePublished`, so the publish stamps it.
+        const tidepools = await seedBook(ompApi, press, 3, {title: 'Tidepools', datePublished: undefined});
         const [tides, harbours] = coastlines.chapters;
         const book = new MonographLandingPage(page, tag);
         const coastlinesUrl = bookUrl(tag, coastlines.submissionId);
@@ -372,6 +461,10 @@ test.describe('Monograph landing page (U69)', () => {
         await expect(book.downloadsChart().locator('h2.label')).toHaveText(TEXT.downloads);
         await expect.poll(() => book.chartShape(), {timeout: 30_000}).not.toBeNull();
         expect(await book.chartShape()).toEqual({type: 'bar', months: 12});
+        // The span from January 2024 is longer than twelve months: "All
+        // time" under the chart, the positive control of "Tidepools'"
+        // absence below (Rule 20a).
+        await expect(book.chartToggle()).toHaveText('All time');
 
         // "Tides"' page (Fields, the chapter page; Rules 15, 16, 17, 20;
         // Settings bullet 11).
@@ -413,6 +506,33 @@ test.describe('Monograph landing page (U69)', () => {
         await expect(book.title()).toHaveText('Lagoon');
         await expect(book.publishedValue()).toHaveText('March 5, 2024');
 
+        // A book published this year: January of the current year to the
+        // current month, each "{month} {year}", and no "All time" (Rule 20a).
+        // The months are the browser's clock, as the chart script's are.
+        const now = new Date();
+        const thisYear = MONTHS.slice(0, now.getMonth() + 1).map((m) => `${m} ${now.getFullYear()}`);
+        await book.goto(tidepools.submissionId);
+        await expect(book.title()).toHaveText('Tidepools');
+        await expect.poll(() => book.chartLabels(), {timeout: 30_000}).toEqual(thisYear);
+        expect(thisYear[0]).toBe(`Jan ${now.getFullYear()}`);
+        await expect(book.chartToggle()).toHaveCount(0);
+
+        // A new chapter order: the Press manager drags "Lagoon" above "Reef"
+        // on the published version's Chapters page and presses "Done";
+        // signed out, nothing published again, the table of contents
+        // follows (Rule 10).
+        await book.goto(reefNotes.submissionId);
+        await expect(book.tocTitles()).toHaveText([/^\s*Reef\s*$/, /^\s*Lagoon\s*$/]);
+        const mp = await pageAs(asUser, mg.username);
+        const chapters = new ChaptersPage(mp, tag);
+        await chapters.gotoEditorial(reefNotes.submissionId, reefNotes.publicationId);
+        await chapters.list.startOrdering();
+        await dragChapterAbove(chapters.list, mp, 'Lagoon', 'Reef');
+        await chapters.list.finishOrdering();
+        await expect.poll(() => chapterTitles(chapters.list), {timeout: 30_000}).toEqual(['Lagoon', 'Reef']);
+        await book.goto(reefNotes.submissionId);
+        await expect(book.tocTitles()).toHaveText([/^\s*Lagoon\s*$/, /^\s*Reef\s*$/]);
+
         // Control: "Harbours" has no page (Rule 15).
         await expectNotFoundPage(page, bookUrl(tag, coastlines.submissionId, {chapter: harbours.id}));
     });
@@ -426,11 +546,23 @@ test.describe('Monograph landing page (U69)', () => {
             publicationFormats: [
                 {name: 'PDF', file: 'article.pdf'},
                 {name: 'HTML', file: 'article.html'},
+                {name: 'Press link', file: 'press.html'},
+                {name: 'Notes', file: 'notes.md'},
             ],
         });
+        // The second press, "PDF.js PDF Viewer" off, and its "Coastlines".
+        const viewerOff = await seedPress(ompApi, `${tag}v`, {plugins: {pdfjsviewerplugin: {enabled: false}}});
+        const coastlines = await seedBook(ompApi, viewerOff, 1, {title: 'Coastlines', publicationFormats: [{name: 'PDF', file: 'article.pdf'}]});
         const pdf = shorelines.publicationFormats.find((f) => f.name === 'PDF');
         const html = shorelines.publicationFormats.find((f) => f.name === 'HTML');
-        const mailBefore = {mg: await pkpMail.count({to: mg.email}), au: await pkpMail.count({to: press.au.email})};
+        const pressLink = shorelines.publicationFormats.find((f) => f.name === 'Press link');
+        const notes = shorelines.publicationFormats.find((f) => f.name === 'Notes');
+        const offPdf = coastlines.publicationFormats[0];
+        const mailBefore = {
+            mg: await pkpMail.count({to: mg.email}),
+            au: await pkpMail.count({to: press.au.email}),
+            au2: await pkpMail.count({to: viewerOff.au.email}),
+        };
         const book = new MonographLandingPage(page, tag);
         const viewer = new ViewableFilePage(page);
         const shorelinesUrl = bookUrl(tag, shorelines.submissionId);
@@ -493,15 +625,57 @@ test.describe('Monograph landing page (U69)', () => {
         await expect(page).toHaveURL(new RegExp(`${escapeRe(shorelinesUrl)}(/|$)`));
         await expect(book.title()).toHaveText('Shorelines');
 
-        // Control: no email to the principal contact or the Author after
-        // the two files were opened, bounded by a password reset each
-        // (Side effects, "No other email, no notice").
+        // "omp://press": "Press link" opens press.html's HTML view page; its
+        // "Visit the press" opens the press's home page, in the file's
+        // frame (Fields, the HTML view page).
+        await book.fileLink(pressLink.id, pressLink.submissionFileId).click();
+        await expect(page).toHaveURL(endsWith(fileUrl(tag, shorelines.submissionId, pressLink.id, pressLink.submissionFileId)));
+        await viewer.expectLoaded();
+        await expect(page).toHaveTitle(TEXT.viewTitle('Press link', 'press.html'));
+        await expect(viewer.htmlLink('Visit the press')).toHaveAttribute('href', new RegExp(`/index\\.php/${tag}(/index)?/?$`));
+        await viewer.htmlLink('Visit the press').click();
+        await expect.poll(() => viewer.htmlFrameUrl(), {timeout: 30_000}).toMatch(new RegExp(`/index\\.php/${tag}(/index)?/?$`));
+        await expect(viewer.htmlBody()).toContainText(press.name);
+
+        // A Markdown file: "Notes" saves notes.md under its name, the
+        // browser staying on the book's page (Rule 13).
+        await book.goto(shorelines.submissionId);
+        const {download: notesSaved, newTab: notesTab} = await captureDownload(page, () =>
+            book.fileLink(notes.id, notes.submissionFileId).click()
+        );
+        expect(notesSaved.suggestedFilename()).toBe('notes.md');
+        expect(notesTab, 'no new tab').toBe(false);
+        await expect(page).toHaveURL(endsWith(shorelinesUrl));
+        await expect(book.title()).toHaveText('Shorelines');
+
+        // "PDF" with the viewer off: the second press's "PDF" saves
+        // article.pdf under its name, the browser staying on the book's
+        // page, no PDF view page (Rule 13; Settings bullet 1).
+        const offBook = new MonographLandingPage(page, viewerOff.path);
+        const coastlinesUrl = bookUrl(viewerOff.path, coastlines.submissionId);
+        await offBook.goto(coastlines.submissionId);
+        await expect(offBook.title()).toHaveText('Coastlines');
+        const {download: offSaved, newTab: offTab} = await captureDownload(page, () =>
+            offBook.fileLink(offPdf.id, offPdf.submissionFileId).click()
+        );
+        expect(offSaved.suggestedFilename()).toBe('article.pdf');
+        expect(offTab, 'no new tab').toBe(false);
+        await expect(page).toHaveURL(endsWith(coastlinesUrl));
+        await expect(offBook.title()).toHaveText('Coastlines');
+        await expect(viewer.bar()).toHaveCount(0);
+
+        // Control: no email to the principal contact or the Authors after
+        // the files were opened, bounded by a password reset each (Side
+        // effects, "No other email, no notice").
         await requestPasswordReset(page, tag, mg.email);
         await requestPasswordReset(page, tag, press.au.email);
+        await requestPasswordReset(page, viewerOff.path, viewerOff.au.email);
         await pkpMail.find({to: mg.email, subject: 'Password Reset Confirmation'});
         await pkpMail.find({to: press.au.email, subject: 'Password Reset Confirmation'});
+        await pkpMail.find({to: viewerOff.au.email, subject: 'Password Reset Confirmation'});
         expect(await pkpMail.count({to: mg.email}), 'the principal contact got the reset alone').toBe(mailBefore.mg + 1);
         expect(await pkpMail.count({to: press.au.email}), 'the Author got the reset alone').toBe(mailBefore.au + 1);
+        expect(await pkpMail.count({to: viewerOff.au.email}), "the second press's Author got the reset alone").toBe(mailBefore.au2 + 1);
     });
 
     test('S4: A file for sale bought with "Manual Fee Payment"', async ({page, asUser, ompApi, pkpMail}, testInfo) => {
@@ -527,6 +701,14 @@ test.describe('Monograph landing page (U69)', () => {
         await visitorBook.goto(shorelines.submissionId);
         await expect(visitorBook.fileLink(pdf.id, pdf.submissionFileId)).toHaveText(/Purchase PDF \(25 USD\)\s*$/);
 
+        // The Login page: the link leads there, and above the form it says
+        // only "Required fields are marked with an asterisk: *", nothing of
+        // the purchase (Rule 14).
+        await visitorBook.fileLink(pdf.id, pdf.submissionFileId).click();
+        await expectLoginPage(page);
+        await expect(page.locator('form#login')).toBeVisible();
+        await expect.poll(() => loginLinesAboveForm(page), {timeout: 30_000}).toEqual([TEXT_REQUIRED]);
+
         // The payment page, as the Reader: the press's header and footer,
         // the trail, "Title" and "Fee" (Rule 14; Fields, the payment page).
         const rp = await pageAs(asUser, rd.username);
@@ -541,6 +723,25 @@ test.describe('Monograph landing page (U69)', () => {
         await expect(pay.trail()).toHaveText(trailText('Home', TEXT.manualPayment));
         await expect(pay.rowValue('Title')).toHaveText('article.pdf');
         await expect(pay.rowValue('Fee')).toHaveText('25.00 (USD)');
+
+        // The page's order under the heading: the instructions, "Title" and
+        // "Fee" with their values in bold, then "Send notification of
+        // payment" as an underlined link, not a button (Fields, the payment
+        // page).
+        expect(await pay.outlineUnderHeading()).toEqual([
+            'p: Pay by bank transfer.',
+            'row: Title = article.pdf',
+            'row: Fee = 25.00 (USD)',
+            `p: ${TEXT.sendNotification}`,
+        ]);
+        for (const label of ['Title', 'Fee']) {
+            expect((await pay.drawn(pay.rowValue(label))).fontWeight, `${label}'s value in bold`).toBeGreaterThanOrEqual(600);
+        }
+        const notify = await pay.drawn(pay.notifyLink());
+        expect(notify.tag).toBe('a');
+        expect(notify.className).not.toMatch(/button/);
+        expect(notify.textDecoration).toContain('underline');
+        await expect(pay.root().getByRole('button')).toHaveCount(0);
         // "No email yet" is bounded below: the principal contact's mailbox
         // holds exactly one email once the notification has been sent.
 
@@ -644,6 +845,7 @@ test.describe('Monograph landing page (U69)', () => {
         const mg = account(tag, 'mg', 'Mona', 'Manager', ['manager']);
         const press = await seedPress(ompApi, tag, {extra: [mg]});
         const tides = await seedBook(ompApi, press, 1, {title: 'Tides'});
+        const shorelines = await seedBook(ompApi, press, 2, {title: 'Shorelines'});
         const v1 = tides.publicationId;
         const tidesUrl = bookUrl(tag, tides.submissionId);
 
@@ -680,6 +882,16 @@ test.describe('Monograph landing page (U69)', () => {
         await book.pressMostRecentVersion(endsWith(tidesUrl));
         await expect(book.title()).toHaveText('Tides Revised');
         await expect(book.notices()).toHaveCount(0);
+
+        // A version address that names no version: a number none has,
+        // "abc", and "Shorelines"' own version each open "404 Not Found"
+        // (Rule 4); the first version's address above is the positive
+        // control, as is "Shorelines"' own page.
+        for (const version of [999999, 'abc', shorelines.publicationId]) {
+            await expectNotFoundPage(page, bookUrl(tag, tides.submissionId, {version}));
+        }
+        await book.goto(shorelines.submissionId);
+        await expect(book.title()).toHaveText('Shorelines');
     });
 
     test('S7: An older version\'s chapter pages, on a press with "DOI Versioning" "Yes"', async ({page, asUser, ompApi}, testInfo) => {

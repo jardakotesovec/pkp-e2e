@@ -216,6 +216,29 @@ class MonographLandingPage extends ArticleLandingPage {
         });
     }
 
+    /**
+     * The drawn chart's month labels ("Jan 2026", …), left to right; null
+     * until it is drawn. A one-shot read: poll it (parallel lesson 14b).
+     *
+     * @returns {Promise<string[]|null>}
+     */
+    async chartLabels() {
+        return this.downloadsChart().locator('canvas.usageStatsGraph').evaluate((canvas) => {
+            const w = /** @type {any} */ (window);
+            const chart = w.Chart && w.Chart.getChart ? w.Chart.getChart(canvas) : null;
+            return chart ? (chart.data.labels || []).map(String) : null;
+        });
+    }
+
+    /**
+     * The button under the chart ("All time", "Last 12 months"), which the
+     * chart script adds only past twelve months (`button.usageStatsToggle`,
+     * `lib/pkp/js/usage-stats-chart.js`).
+     */
+    chartToggle() {
+        return this.downloadsChart().locator('button.usageStatsToggle');
+    }
+
     // --- the table of contents (Rule 10) ------------------------------------
 
     /** Every chapter entry, top to bottom. */
@@ -551,6 +574,20 @@ class ViewableFilePage extends BasePage {
         return this.page.frameLocator('iframe[name="htmlFrame"]').locator('body');
     }
 
+    /** A link inside the HTML file, by its words. */
+    htmlLink(name) {
+        return this.page.frameLocator('iframe[name="htmlFrame"]').getByRole('link', {name, exact: true});
+    }
+
+    /**
+     * The HTML frame's current address (the frame the file loaded in, or
+     * the page a link inside it opened there); '' while it has none.
+     */
+    htmlFrameUrl() {
+        const frame = this.page.frame({name: 'htmlFrame'});
+        return frame ? frame.url() : '';
+    }
+
     /** Any of the press's chrome (header, footer, sidebar, the page wrapper). */
     pressChrome() {
         return this.page.locator('.pkp_structure_head, .pkp_structure_footer_wrapper, .pkp_structure_sidebar, .pkp_structure_page');
@@ -589,6 +626,59 @@ class ManualPaymentPage extends BasePage {
 
     notifyLink() {
         return this.root().getByRole('link', {name: TEXT.sendNotification, exact: true});
+    }
+
+    /**
+     * The page under its heading, top to bottom, one entry per block:
+     * `p: <text>` for a paragraph (the instructions, the notify line),
+     * `row: <label> = <value>` for each row of the "Title" / "Fee" table.
+     * Read on the server-rendered page after its navigation.
+     *
+     * @returns {Promise<string[]>}
+     */
+    async outlineUnderHeading() {
+        return this.root().evaluate((root) => {
+            const text = (e) => ((e && e.textContent) || '').replace(/\s+/g, ' ').trim();
+            const out = [];
+            let seen = false;
+            for (const el of Array.from(root.children)) {
+                if (el.tagName === 'H1') {
+                    seen = true;
+                    continue;
+                }
+                if (!seen) continue;
+                if (el.tagName === 'TABLE') {
+                    for (const tr of Array.from(el.querySelectorAll('tr'))) {
+                        out.push(`row: ${text(tr.querySelector('td.label'))} = ${text(tr.querySelector('td.value'))}`);
+                    }
+                } else {
+                    out.push(`${el.tagName.toLowerCase()}: ${text(el)}`);
+                }
+            }
+            return out;
+        });
+    }
+
+    /**
+     * How a part is drawn: its computed font weight and text decoration,
+     * its tag and class, after the page's stylesheets are in (parallel
+     * lesson 16).
+     *
+     * @param {import('@playwright/test').Locator} locator
+     */
+    async drawn(locator) {
+        await this.stylesApplied();
+        return locator.evaluate((el) => {
+            // the innermost element holding the words (a value's <strong>)
+            const inner = el.querySelector('*:not(:has(*))');
+            const s = getComputedStyle(inner && (inner.textContent || '').trim() ? inner : el);
+            return {
+                tag: el.tagName.toLowerCase(),
+                className: el.className,
+                fontWeight: Number(s.fontWeight),
+                textDecoration: s.textDecorationLine,
+            };
+        });
     }
 
     async expectLoaded() {
