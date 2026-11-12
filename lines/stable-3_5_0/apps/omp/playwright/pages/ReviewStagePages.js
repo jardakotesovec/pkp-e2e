@@ -15,10 +15,20 @@
  * "Mark as Complete", the "Recommendation" box and "Change decision", the
  * recommend-only flag, the discussions rows, the author's "Notifications"
  * list and "Read Review" window, the Library and the stage uploads).
+ *
+ * The 3.5 copy (lines/stable-3_5_0/): the editor's "Read Review" is the
+ * legacy window titled "Review: {submission title}" (form#readReviewForm)
+ * confirmed with "Confirm" (`readReviewWindow`, `openReadReview`,
+ * `confirmReview`, and `confirmReviewAsEditor` changed in place); `main`'s
+ * Vue "Review Details" window and its "Mark as Complete" are not on 3.5.
+ * Added for the 3.5 suite: `addReviewer` and `acceptReviewRequest` (the
+ * OJS 3.5 page object's steps, which drive a press unchanged), the
+ * "Request Revisions" choice window's open/close/option helpers, and
+ * `closeUploadWizard` returning the browser question it answered.
  */
 const {expect} = require('../support/fixtures.js');
 const {WorkflowPage: WorkflowFrame} = require('../../../../shared/playwright/pages/WorkflowPage.js');
-const {waitForJQueryIdle} = require('../../../../shared/playwright/support/legacy.js');
+const {waitForJQueryIdle, waitForLegacyFormSettled} = require('../../../../shared/playwright/support/legacy.js');
 const {waitForEditorReady, editorIdOf} = require('../../../../shared/playwright/support/richtext.js');
 
 /** Round status sentences (lib/pkp locale, editor wording — Rule 5). */
@@ -43,6 +53,7 @@ const STATUS = {
         'The submission advanced to the next review round, was accepted, and is currently in the Copyediting stage.',
     minimumConfirmed:
         'Minimum required number of reviews have been confirmed. A decision is needed.',
+    externalNotInitiated: 'The External Review stage has not yet been initiated.',
 };
 
 /**
@@ -286,24 +297,30 @@ async function completeReviewAsReviewer(page, contextPath, submissionId, comment
     await page.goto(
         `/index.php/${contextPath}/en/reviewer/submission/${submissionId}`
     );
-    const acceptButton = page.getByRole('button', {
-        name: /Accept Review, Continue to Step #2/,
-    });
-    const saveContinue = page.getByRole('button', {name: 'Save and continue'});
-    await expect(acceptButton.or(saveContinue).first()).toBeVisible({
+    // Whichever step remains: a fresh invitation offers "Accept Review,
+    // Continue to Step #2", a seeded accepted one revisits step 1 with
+    // "Save and continue", and one accepted on screen reopens on step 2
+    // with "Continue to Step #3" (3.5). The steps are jQuery tabs whose
+    // past panels stay in the DOM hidden, so every read is visible-only.
+    const acceptButton = page
+        .getByRole('button', {name: /Accept Review, Continue to Step #2/})
+        .filter({visible: true});
+    const saveContinue = page.getByRole('button', {name: 'Save and continue'}).filter({visible: true});
+    const step3 = page.getByRole('button', {name: 'Continue to Step #3'}).filter({visible: true});
+    await expect(acceptButton.or(saveContinue).or(step3).first()).toBeVisible({
         timeout: 20_000,
     });
     if (await acceptButton.count()) {
         // A privacy-consent checkbox may gate the accept button.
-        const consent = page.locator('input[type="checkbox"][name="privacyConsent"]');
+        const consent = page.locator('input[type="checkbox"][name="privacyConsent"]').filter({visible: true});
         if (await consent.count()) {
             await consent.check();
         }
         await acceptButton.click();
-    } else {
+    } else if (await saveContinue.count()) {
         await saveContinue.click();
     }
-    await page.getByRole('button', {name: 'Continue to Step #3'}).click();
+    await step3.click();
     const commentsFrame = page.locator('iframe[id^="comments"]').first();
     const commentsBody = commentsFrame.contentFrame().locator('body');
     await expect(commentsBody).toBeVisible({timeout: 20_000});
@@ -329,44 +346,149 @@ async function completeReviewAsReviewer(page, contextPath, submissionId, comment
 }
 
 /**
- * Editor confirms a submitted review from the Reviewers panel: the row's
- * "Read Review" opens the Vue "Review Details" side window
- * (pkp/pkp-lib#13156), whose "Mark as Complete" asks "Mark this review as
- * complete?" in a confirmation dialog. The window is anchored by its dialog
- * title — its [data-cy="active-modal"] wrapper computes visibility:hidden —
- * and its load-settled signal is the "Modify Review" footer button
- * enabling (no timeouts: PRINCIPLES A5). The window stays open after the
- * confirm, so it is closed with its "Cancel" button — and the workflow
- * modal's DOM is unmounted while the window is open, so the row can only
- * be read back after the close.
+ * 3.5: a reviewer's row in the Reviewers panel (the table named
+ * "Reviewers"; the author's view lists the same table once a review they
+ * may read exists).
  */
-async function confirmReviewAsEditor(page, modal, reviewerName) {
-    const row = modal
-        .locator('[data-cy="reviewer-manager"]')
+function reviewerRow(modal, reviewerName) {
+    return modal
+        .getByRole('table', {name: 'Reviewers', exact: true})
         .getByRole('row')
         .filter({hasText: reviewerName});
-    await row.getByRole('button', {name: 'Read Review'}).click();
-    const readModal = page.getByRole('dialog', {name: /^Review Details:/});
-    await expect(
-        readModal.getByRole('button', {name: 'Modify Review', exact: true})
-    ).toBeEnabled({timeout: 20_000});
-    await readModal
-        .getByRole('button', {name: 'Mark as Complete', exact: true})
-        .click();
-    const dialog = page
-        .locator('[data-cy="dialog"]')
-        .filter({hasText: 'Mark this review as complete?'});
-    await dialog
-        .getByRole('button', {name: 'Mark as Complete', exact: true})
-        .click();
-    // The completion toast (client-emitted) bounds the save; the row is
-    // only in the DOM again once the window is closed.
-    await expect(
-        page.getByText('The review has been marked as complete.').first()
-    ).toBeVisible({timeout: 20_000});
-    await readModal.getByRole('button', {name: 'Cancel', exact: true}).click();
-    await expect(readModal).toBeHidden({timeout: 20_000});
+}
+
+/**
+ * 3.5: the "Read Review" window, the legacy `readReviewForm` window titled
+ * "Review: {submission title}" (the editor's carries "Confirm" at its
+ * foot; the author's the same form, read only).
+ */
+function readReviewWindow(page) {
+    return page.getByRole('dialog').filter({has: page.locator('form#readReviewForm')});
+}
+
+/**
+ * 3.5: press a reviewer row's "Read Review" as the editor and return the
+ * window, settled (its AJAX-loaded parts in, "Confirm" shown).
+ */
+async function openReadReview(page, row) {
+    await row.getByRole('button', {name: 'Read Review', exact: true}).click();
+    const win = readReviewWindow(page);
+    await expect(win.getByRole('button', {name: 'Confirm', exact: true})).toBeVisible({timeout: 30_000});
+    await waitForLegacyFormSettled(page, win);
+    return win;
+}
+
+/**
+ * 3.5: press the window's "Confirm" and wait until it has closed (the
+ * legacy wrapper can linger hidden in the DOM: the wait is on its content).
+ */
+async function confirmReview(page, win) {
+    await win.getByRole('button', {name: 'Confirm', exact: true}).click();
+    await expect(win.getByRole('button', {name: 'Confirm', exact: true})).toBeHidden({timeout: 30_000});
+    await waitForJQueryIdle(page);
+}
+
+/**
+ * Editor confirms a submitted review from the Reviewers panel. 3.5: the
+ * row's "Read Review" opens the legacy window titled "Review: {submission
+ * title}", whose "Confirm" confirms the review and closes it; the row then
+ * reads "Complete".
+ */
+async function confirmReviewAsEditor(page, modal, reviewerName) {
+    const row = reviewerRow(modal, reviewerName);
+    const win = await openReadReview(page, row);
+    await confirmReview(page, win);
     await expect(row).toContainText('Complete', {timeout: 20_000});
+}
+
+/**
+ * Add a reviewer to the selected round through the Reviewers panel's
+ * "Add Reviewer" window (search → select → review type → add). The OJS
+ * 3.5 page object's step; it drives a press unchanged (screen-notes ccK2).
+ * `method` is a review type radio label ("Open").
+ */
+async function addReviewer(page, name, {method} = {}) {
+    await page.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+    const modal = page
+        .getByRole('dialog')
+        .filter({has: page.locator('.listPanel--selectReviewer')});
+    const search = modal.locator('.listPanel--selectReviewer input.pkpSearch__input');
+    await expect(search).toBeVisible({timeout: 30_000});
+    await search.fill(name);
+    await search.press('Enter');
+    // Selecting a reviewer copies the request template into the window's
+    // TinyMCE editor; selected before the editor is initialized, the
+    // letter posts empty and the add fails on the empty mail body.
+    await page.waitForFunction(() => {
+        const textarea = document.querySelector(
+            '#reviewerFormFooter textarea[name="personalMessage"]'
+        );
+        const mce = window.tinyMCE || window.tinymce;
+        return !!(textarea && mce?.get(textarea.id)?.initialized);
+    }, undefined, {timeout: 30_000});
+    await modal.getByText(`Select ${name}`).click();
+    await waitForJQueryIdle(page);
+    await expect(
+        modal.frameLocator('iframe[id^="personalMessage"]').locator('body')
+    ).not.toHaveText('', {timeout: 30_000});
+    if (method) {
+        await modal.getByRole('radio', {name: method, exact: true}).check();
+    }
+    // The footer's file grid and its warning move the button until settled.
+    await waitForLegacyFormSettled(page, modal);
+    await modal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+    await expect(modal).toHaveCount(0, {timeout: 30_000});
+    await waitForJQueryIdle(page);
+}
+
+/**
+ * The reviewer accepts the request on their own page and stops at step 2
+ * (the review under way, not submitted). The OJS 3.5 page object's step.
+ */
+async function acceptReviewRequest(page, contextPath, submissionId) {
+    await page.goto(`/index.php/${contextPath}/en/reviewer/submission/${submissionId}`);
+    const acceptButton = page
+        .getByRole('button', {name: /Accept Review, Continue to Step #2/})
+        .filter({visible: true});
+    await expect(acceptButton).toBeVisible({timeout: 30_000});
+    const privacy = page.locator('input[name="privacyConsent"]').filter({visible: true});
+    if (await privacy.count()) {
+        await privacy.check();
+    }
+    await acceptButton.click();
+    await expect(
+        page.getByRole('button', {name: 'Continue to Step #3'}).filter({visible: true})
+    ).toBeVisible({timeout: 30_000});
+}
+
+/** The "Request Revisions" choice window's two options (Rule 11). */
+const REVISIONS_OPTIONS = {
+    sameRound: 'Revisions will not be subject to a new round of peer reviews.',
+    newRound: 'Revisions will be subject to a new round of peer reviews.',
+};
+
+/** 3.5: the "Request Revisions" choice window, a dialog carrying "Require New Review Round". */
+function requestRevisionsChoice(page) {
+    return page.getByRole('dialog').filter({hasText: 'Require New Review Round'});
+}
+
+/** Press "Request Revisions" and return the choice window, open with its options. */
+async function openRequestRevisionsChoice(page, modal) {
+    await decisionButton(modal, DECISIONS.requestRevisions).click();
+    const dlg = requestRevisionsChoice(page);
+    await expect(dlg.getByText(REVISIONS_OPTIONS.sameRound)).toBeVisible({timeout: 15_000});
+    return dlg;
+}
+
+/** One option's radio in the choice window, by its label. */
+function revisionsOption(dlg, label) {
+    return dlg.getByRole('radio', {name: label, exact: true});
+}
+
+/** Close the choice window with its header "Close"; the choice is abandoned. */
+async function closeRequestRevisionsChoice(dlg) {
+    await dlg.getByRole('button', {name: 'Close', exact: true}).first().click();
+    await expect(dlg).toBeHidden({timeout: 15_000});
 }
 
 /**
@@ -508,10 +630,18 @@ async function assignParticipant(
         timeout: 20_000,
     });
     await dlg.getByRole('combobox').first().selectOption({label: group});
+    // The group filter and the search each reload the user grid; a radio
+    // ticked on a grid still reloading is thrown away with it (seen
+    // 2026-11-12 on 3.5, tomp: the form stayed open on OK). Tick the
+    // result row's own radio once jQuery is idle, and read it back.
+    await waitForJQueryIdle(page);
     await dlg.getByRole('textbox', {name: 'Search User By Name'}).fill(query);
     await dlg.getByRole('button', {name: 'Search', exact: true}).click();
-    await expect(dlg.getByText(resultName)).toBeVisible({timeout: 20_000});
-    await dlg.getByRole('radio').first().check();
+    await waitForJQueryIdle(page);
+    const resultRow = dlg.getByRole('row').filter({hasText: resultName});
+    await expect(resultRow).toBeVisible({timeout: 20_000});
+    await resultRow.getByRole('radio').check();
+    await expect(resultRow.getByRole('radio')).toBeChecked();
     if (recommendOnly) {
         await dlg.locator('#recommendOnly').check();
     }
@@ -683,11 +813,20 @@ async function startUploadWizard(page, fileName) {
  * data on this form has changed. Do you wish to continue without saving?"
  * in a browser confirm, which is accepted (Playwright dismisses it
  * otherwise and the window stays). Live-driven 2026-09-12 (tomp).
+ * Returns the question's text, or null when the window closed without
+ * asking (the confirm is raised inside the click, so the window's going
+ * bounds the read).
  */
 async function closeUploadWizard(page, wizard) {
-    page.once('dialog', (dialog) => dialog.accept());
+    let asked = null;
+    page.once('dialog', async (dialog) => {
+        asked = dialog.message();
+        await dialog.accept();
+    });
     await wizard.getByRole('button', {name: 'Close', exact: true}).click();
     await expect(wizard.locator('select[id^="genreId"]')).toBeHidden({timeout: 20_000});
+    await waitForJQueryIdle(page);
+    return asked;
 }
 
 /** The stage's Participants panel (the Vue participant manager). */
@@ -1000,8 +1139,8 @@ class DecisionWorkflow {
     }
 
     /**
-     * The editor's "Read Review" › "Mark as Complete" on a reviewer's row
-     * (`confirmReviewAsEditor`); the row then reads "Complete".
+     * The editor's "Read Review" › "Confirm" on a reviewer's row (3.5;
+     * `confirmReviewAsEditor`); the row then reads "Complete".
      */
     async confirmReview(reviewerName) {
         await confirmReviewAsEditor(this.page, this.frame.dialog(), reviewerName);
@@ -1174,7 +1313,18 @@ module.exports = {
     walkDecisionWizard,
     requestRevisions,
     completeReviewAsReviewer,
+    reviewerRow,
+    readReviewWindow,
+    openReadReview,
+    confirmReview,
     confirmReviewAsEditor,
+    addReviewer,
+    acceptReviewRequest,
+    REVISIONS_OPTIONS,
+    requestRevisionsChoice,
+    openRequestRevisionsChoice,
+    revisionsOption,
+    closeRequestRevisionsChoice,
     completeUploadWizard,
     uploadRoundReviewFile,
     completeStandaloneUploadWizard,

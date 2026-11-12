@@ -13,13 +13,12 @@ the repo root.
 
 ## State of the pilot (`stable-3_5_0`, branch `lines-pilot`)
 
-- The folder's base is in place for OJS, OMP and OPS: the test library,
-  the seeding code and a config per app. Each app installs, seeds and
-  signs every persona in on 3.5 from it.
-- "Review stage & rounds" (U26), OJS: 13 tests and their page objects,
-  adapted from a walk of the scenarios and green. The feature has not
-  been through the build-out yet.
-- `docs/specs/lines/stable-3_5_0/` holds two lists of differences (U26,
-  U37) from the pilot's first shape: notes for building those two
-  specs, deleted once the specs exist.
+- The folder's base is in place for OJS, OMP and OPS: the glossary, the
+  test library, the seeding code and a config per app.
+- "Review stage & rounds" (U26) is built for all three apps through the
+  build-out, the first feature and its shakedown: the spec, 13 OJS, 14
+  OMP and 1 OPS tests, and the claim check's kept scripts.
+- `docs/specs/lines/stable-3_5_0/` holds one list of differences (U37)
+  from the pilot's first shape: notes for building that spec, deleted
+  once it exists.
 - The 3.5 suite does not run in CI yet.

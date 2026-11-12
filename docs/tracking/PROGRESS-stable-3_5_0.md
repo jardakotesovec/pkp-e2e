@@ -12,7 +12,7 @@ local final run (`VERSIONS.md` step 8).
 
 | Row | Feature | Apps | Scenarios | Status | Note |
 |---|---|---|---|---|---|
-| U26 | Review stage & rounds | OJS OMP | | pending | OJS: 13 tests and the page objects adapted from a walk of the scenarios, green. Not through the loop yet: no spec in the folder, OMP not started. Notes: `docs/specs/lines/stable-3_5_0/U26-review-stage-and-rounds.md`; walk `lines/stable-3_5_0/shared/playwright/checks/U26-stable-3_5_0/W1/`. |
+| U26 | Review stage & rounds | OJS OMP | 15 | done | 13 OJS · 14 OMP · 1 OPS (+setup; S1–S12 common, S13 {OMP}, S14 the {OPS} absence, S15 {OJS OMP}). 5🐞+11❓+1✅. Headliner A1. 1 sighting on an existing entry of the private file. Rarely met: 4 states; nothing new to test: 6; No seed: an overdue review, a day-old "Revised Version Uploaded" notice. Built 2026-11-12. |
 | U37 | Tasks & discussions | OJS OMP OPS | | pending | Nothing built. `main`'s 11 OJS tests all fail on 3.5 (the feature was rebuilt on `main`). Notes: `docs/specs/lines/stable-3_5_0/U37-tasks-and-discussions.md`; walk `lines/stable-3_5_0/shared/playwright/checks/U37-stable-3_5_0/W1/`. |
 | U01 | Login & sessions | OJS OMP OPS | | pending |  |
 | U02 | Registration & account validation | OJS OMP OPS | | pending |  |

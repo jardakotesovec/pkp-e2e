@@ -46,8 +46,10 @@
  * - performReview — 3.5: step 3's recommendation list is the field
  *   `recommendation` (`reviewerRecommendationId` on `main`).
  *
- * The 3.5 suite's copy (lines/stable-3_5_0/, pilot): only the functions
- * marked "3.5" differ from main's file.
+ * The 3.5 suite's copy (lines/stable-3_5_0/): only the functions marked
+ * "3.5" differ from main's file (uploadFirstStepOnly returns the browser's
+ * question, setRecommendOnly opens the row's "More Actions" menu), and
+ * WorkflowPage.selectStage and WorkflowPage.deleteDialog are added.
  *
  * Labels are the live locale strings (lib/pkp/locale/en/*.po); the DOM shapes
  * were confirmed against a live install (aria snapshots, 2026-07-31; the
@@ -268,6 +270,20 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
         await this.frame.selectStage('Submission');
     }
 
+    /** Select a stage entry ("Review", "Copyediting", …) and wait for "Workflow: {label}". */
+    async selectStage(label) {
+        await this.frame.selectStage(label);
+    }
+
+    /**
+     * The "Delete" button's question, the dialog "Delete" reading "Are you
+     * sure you want to permanently delete this submission?" with "Confirm"
+     * and "Cancel" (the shared frame's confirm dialog).
+     */
+    deleteDialog() {
+        return this.frame.confirmDialog('delete');
+    }
+
     /** The "Reviewers Suggested by Author" panel under Participants (shared POM). */
     suggestedReviewers() {
         return new SuggestedReviewersPanel(this.page);
@@ -377,18 +393,22 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
     }
 
     /**
-     * Participants row › "Edit" › tick "Assignment privileges" (the
-     * recommend-only flag) › "OK": the assignment becomes a recommending one
-     * (no seed key; scenarios.md "Decision behaviour worth knowing").
+     * Participants row › "{Name} More Actions" › "Edit" › tick the
+     * recommend-only flag › "OK": the assignment becomes a recommending one
+     * (no seed key; scenarios.md "Decision behaviour worth knowing"). 3.5:
+     * the row's menu is the "{Name} More Actions" button with menu items;
+     * the legacy form's wrapper can linger hidden after the save, so the
+     * wait is on the box's visibility, not on a count.
      */
     async setRecommendOnly(name) {
-        await exports.clickRowAction(this.page, this.participantRow(name), 'Edit');
+        await this.participantMoreActions(name).click();
+        await this.page.getByRole('menuitem', {name: 'Edit'}).click();
         const form = this.page.getByRole('dialog').filter({has: this.page.locator('input[name="recommendOnly"]')});
         const box = form.locator('input[name="recommendOnly"]');
         await expect(box).toBeVisible({timeout: 30_000});
         await box.check();
         await form.getByRole('button', {name: 'OK', exact: true}).click();
-        await expect(form).toBeHidden({timeout: 30_000});
+        await expect(box).toBeHidden({timeout: 30_000});
         await waitForJQueryIdle(this.page);
     }
 
@@ -675,18 +695,30 @@ async function attachInWizard(dialog, {genre, file}) {
  * deletes the file it uploaded (FileUploadWizardHandler.wizardCancelRequested),
  * so it is not "closing without finishing".
  *
+ * 3.5: with a file attached, the header "Close" raises the browser's own
+ * question "The data on this form has changed. Do you wish to continue
+ * without saving?" (a native confirm); it is answered "OK" here and its
+ * message returned, null when the screen asked nothing.
+ *
  * @param {import('@playwright/test').Page} page
  * @param {{genre?: string, file?: string | {name: string, mimeType: string, buffer: Buffer}}} options
+ * @returns {Promise<string | null>} the browser question's message
  */
 exports.uploadFirstStepOnly = async function uploadFirstStepOnly(page, {genre = 'Article Text', file = FIXTURE_PDF} = {}) {
     const dialog = uploadWizardDialog(page);
     await attachInWizard(dialog, {genre, file});
     // A browser confirm() on the way out would be dismissed by default,
-    // which keeps the window open; accept one if the screen asks.
-    page.once('dialog', (d) => d.accept().catch(() => {}));
+    // which keeps the window open; accept it and keep what it asked.
+    /** @type {string | null} */
+    let question = null;
+    page.once('dialog', (d) => {
+        question = d.message();
+        d.accept().catch(() => {});
+    });
     await dialog.getByRole('button', {name: 'Close', exact: true}).click();
     await expect(dialog).toHaveCount(0, {timeout: 30_000});
     await waitForJQueryIdle(page);
+    return question;
 };
 
 /**

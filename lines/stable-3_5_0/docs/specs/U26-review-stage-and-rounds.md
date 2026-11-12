@@ -1,6 +1,6 @@
 ---
 name: review-stage-and-rounds
-status: draft
+status: verified
 ---
 
 # Review stage & rounds {OJS OMP}

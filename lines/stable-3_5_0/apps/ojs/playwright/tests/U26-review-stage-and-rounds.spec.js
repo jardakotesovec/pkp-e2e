@@ -2,27 +2,15 @@
 /**
  * @file lines/stable-3_5_0/apps/ojs/playwright/tests/U26-review-stage-and-rounds.spec.js
  *
- * Review stage & rounds — the OJS 3.5 suite (stable-3_5_0, pilot), one test
- * per canonical scenario the spec runs on OJS (common scenarios 1–12 and the
+ * Review stage & rounds — the OJS suite of stable-3_5_0, one test per
+ * canonical scenario the spec runs on OJS (common scenarios 1–12 and the
  * journal-and-press scenario 15; scenario 13 is OMP-only, 14 OPS-only).
- * Spec: docs/specs/U26-review-stage-and-rounds.md, read with its 3.5
- * differences, docs/specs/lines/stable-3_5_0/U26-review-stage-and-rounds.md
- * (scenarios 2, 12 and 15 as written there; every other one is the spec's).
- * On 3.5 the editor confirms a review with "Confirm" in the legacy "Review:
- * {submission title}" window, the author reads an open review as soon as
- * it is submitted, and there is no author response to reviews.
+ * Spec: lines/stable-3_5_0/docs/specs/U26-review-stage-and-rounds.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register,
- * the ones its "Versions" column shows on 3.5; a 🐞 is never asserted as
- * contract, a ❓ is parked, not a gap; the spec's Coverage section is the
- * record of everything else left out):
- * - A1 🐞, A9 🐞, A10 🐞, A13 🐞, A14 🐞 (all "main 3.5").
- * - A2 ❓, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A11 ❓ (all "main 3.5").
- * - A3 ❓ ("3.5 not checked"; spec instruction: no assertion touches the
- *   read-review window's attachments section, S12 reads the window's text
- *   above it and the editor-only remark's absence only).
- * - The U27 register's A21–A24 are about `main`'s Vue "Review Details"
- *   window, which 3.5 does not have.
+ * Deliberately NOT covered (register IDs; the spec's Coverage section is
+ * the record of everything else left out):
+ * - 🐞 A1, A9, A10, A13, A14.
+ * - ❓ A2, A3, A4, A5, A6, A7, A8, A11, A15.
  *
  * Seeding: scenario endpoints only. publicknowledge and the seeded roster are
  * read-only (scratch submissions are the isolation unit; journal-level or
@@ -53,7 +41,6 @@ const {
     signInAgain,
     openReadReview,
     confirmReview,
-    waitForJQueryIdle,
     FIXTURE_PDF_NAME,
 } = require('../pages/ReviewStagePages.js');
 
@@ -71,6 +58,11 @@ const MINIMUM_LINE_PREFIX = 'Minimum number of confirmed reviews required';
 /** S12's two remarks: "For author and editor" and "For editor". */
 const SHARED_REMARK = 'Shared remarks for the author.';
 const PRIVATE_REMARK = 'Private remarks for the editor.';
+/** The "Request Revisions" window's two options (Rule 11). */
+const IN_ROUND_CHOICE = 'Revisions will not be subject to a new round of peer reviews.';
+const NEW_ROUND_CHOICE = 'Revisions will be subject to a new round of peer reviews.';
+const ALL_RECOMMENDATIONS = 'All recommendations are in and a decision is needed.';
+const WAITING = 'Waiting for reviewers to be assigned.';
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -342,7 +334,10 @@ test.describe('review stage & rounds', () => {
         const tag = makeTag('s4', testInfo);
         const editor = `edi${tag}`;
         const otherEditor = `edo${tag}`;
+        const sectionEditor = `se${tag}`;
+        const funding = `fc${tag}`;
         const author = `au${tag}`;
+        const authorName = 'Avery Authorly';
         const title = `Submission ${tag}`;
         const fileOne = inMemoryFile(`${tag}-rev1.txt`);
         const fileTwo = inMemoryFile(`${tag}-rev2.txt`);
@@ -352,19 +347,26 @@ test.describe('review stage & rounds', () => {
         // editor (footnote s) — the editor assigns themselves on screen. The
         // assignment dialog offers no "Journal manager" group; "Journal
         // editor" is the manager-level stage-assignable group. The second
-        // editor is never assigned (the control mailbox).
+        // editor is never assigned (the control mailbox). The Section Editor
+        // and the Funding Coordinator are assigned through `participants[]`.
         await ojsApi.createContext({
             tag,
             users: [
                 {username: editor, roles: ['editor']},
                 {username: otherEditor, roles: ['editor']},
-                {username: author, roles: ['author']},
+                {username: sectionEditor, roles: ['sectionEditor']},
+                {username: funding, roles: ['funding']},
+                {username: author, givenName: 'Avery', familyName: 'Authorly', roles: ['author']},
             ],
         });
         const {submissionId} = await seedInReview(ojsApi, tag, {
             context: tag,
             submitter: author,
             decisions: ['sendExternalReview', 'requestRevisions'],
+            participants: [
+                {username: sectionEditor, role: 'sectionEditor'},
+                {username: funding, role: 'funding'},
+            ],
         });
 
         const editorPage = await (await asUser(editor)).newPage();
@@ -385,14 +387,22 @@ test.describe('review stage & rounds', () => {
         await before.tasks.close();
 
         // "Upload revisions", first step only: attach a file, close the
-        // window without finishing — the panel lists the file all the same.
+        // window through its header "Close" without finishing — the browser
+        // asks first; answered "OK", the panel lists the file at once and
+        // after a reload.
         const authorWorkflow = new WorkflowPage(authorPage, tag);
         await authorWorkflow.gotoAuthor(submissionId);
+        await expect(authorWorkflow.panel('Revisions Uploaded').getByRole('cell', {name: 'No Items'})).toBeVisible();
         await authorPage.getByRole('button', {name: 'Upload revisions', exact: true}).click();
-        await uploadFirstStepOnly(authorPage, {file: fileOne});
+        const question = await uploadFirstStepOnly(authorPage, {file: fileOne});
+        expect(question).toBe('The data on this form has changed. Do you wish to continue without saving?');
+        await expect(authorWorkflow.panelRow('Revisions Uploaded', fileOne.name)).toBeVisible();
         await authorPage.reload();
         await authorWorkflow.expectOpen();
         await expect(authorWorkflow.panelRow('Revisions Uploaded', fileOne.name)).toBeVisible();
+        // Scenario 5's control: after this in-round upload the bottom
+        // "Upload revisions" button is still offered.
+        await expect(authorPage.getByRole('button', {name: 'Upload revisions', exact: true})).toBeVisible();
 
         // Editor view: status flipped.
         await editorPage.reload();
@@ -405,10 +415,20 @@ test.describe('review stage & rounds', () => {
         await expect(after.rows).toHaveCount(0);
         await after.tasks.close();
 
-        // The assigned editor's mailbox holds the revised-version notice, sent
-        // under the author's own name and address.
-        const notice = await pkpMail.find({to: `${editor}@mail.test`, subject: REVISED_SUBJECT});
-        expect(notice.From.Address).toBe(`${author}@mail.test`);
+        // The assigned Editor's and Section Editor's mailboxes each hold the
+        // revised-version notice, sent under the author's own name and
+        // address; the assigned Funding Coordinator's holds none (bounded by
+        // the Section Editor's notice, taken the same way).
+        for (const recipient of [editor, sectionEditor]) {
+            const notice = await pkpMail.find({to: `${recipient}@mail.test`, subject: REVISED_SUBJECT});
+            expect(notice.From.Address).toBe(`${author}@mail.test`);
+            expect(notice.From.Name).toBe(authorName);
+        }
+        await pkpMail.expectNone({
+            to: `${funding}@mail.test`,
+            subject: REVISED_SUBJECT,
+            afterControl: {to: `${sectionEditor}@mail.test`, subject: REVISED_SUBJECT},
+        });
 
         // A second upload the same day: the panel lists both files, and no
         // second notice reaches the same editor. The notice is sent at the
@@ -449,7 +469,21 @@ test.describe('review stage & rounds', () => {
         const editorPage = await (await asUser('sectioneditor.ana')).newPage();
         const workflow = new WorkflowPage(editorPage, JOURNAL);
         await workflow.gotoEditorial(submissionId);
-        await workflow.clickRequestRevisions({newRound: true});
+
+        // The choice window, closed and reopened on the same page, shows the
+        // choice last ticked (positive control: the window first opens with
+        // the in-round choice preselected).
+        let choice = await workflow.openRequestRevisionsWindow();
+        await expect(workflow.revisionOption(choice, IN_ROUND_CHOICE)).toBeChecked();
+        await expect(workflow.revisionOption(choice, NEW_ROUND_CHOICE)).not.toBeChecked();
+        await workflow.revisionOption(choice, NEW_ROUND_CHOICE).check();
+        await workflow.closeRequestRevisionsWindow(choice);
+        choice = await workflow.openRequestRevisionsWindow();
+        await expect(workflow.revisionOption(choice, NEW_ROUND_CHOICE)).toBeChecked();
+        await expect(workflow.revisionOption(choice, IN_ROUND_CHOICE)).not.toBeChecked();
+
+        // Keep that choice and complete the wizard.
+        await workflow.pressNext(choice);
         const decision = new DecisionPage(editorPage);
         // The new-round choice continues under the wizard name "Resubmit for
         // Review" (Rule 11).
@@ -702,6 +736,12 @@ test.describe('review stage & rounds', () => {
         const {submissionId: acceptedId} = await seedInReview(ojsApi, `${tag}b`, {
             decisions: ['sendExternalReview', 'newExternalReviewRound', 'accept'],
         });
+        // The third submission was accepted with "Accept and Skip Review"
+        // from the Submission stage and sits in Copyediting with no round.
+        const {submissionId: skippedId} = await seedInReview(ojsApi, `${tag}c`, {
+            decisions: ['skipExternalReview'],
+            reviewRounds: [],
+        });
 
         const editorPage = await (await asUser('sectioneditor.ana')).newPage();
         const workflow = new WorkflowPage(editorPage, JOURNAL);
@@ -731,6 +771,15 @@ test.describe('review stage & rounds', () => {
             'The submission advanced to the next review round, was accepted, and is currently in the Copyediting stage.'
         );
         await expect(workflow.statusBox('Round 1 Status')).toHaveCount(0);
+
+        // Accepted without review: the third submission, in Copyediting,
+        // has a "Review" entry with no round; selected, its box reads that
+        // the stage has not yet been initiated.
+        await workflow.gotoEditorial(skippedId);
+        await workflow.expectPageTitle('Copyediting');
+        await expect(workflow.roundLink(1)).toHaveCount(0);
+        await workflow.selectStage('Review');
+        await workflow.expectStatus('Status', 'The Review stage has not yet been initiated.');
     });
 
     test('S10: decline, revert, delete', async ({asUser, ojsApi}, testInfo) => {
@@ -775,6 +824,24 @@ test.describe('review stage & rounds', () => {
             await expect(workflow.decisionButton(label)).toHaveCount(0);
         }
 
+        // "Delete", cancelled: the Journal Manager's "Delete" asks first,
+        // with "Confirm" and "Cancel"; "Cancel" leaves the submission as it
+        // was, still declined with both buttons offered (read again after a
+        // reload).
+        await managerWorkflow.decisionButton('Delete').click();
+        const deleteDialog = managerWorkflow.deleteDialog();
+        await expect(deleteDialog).toBeVisible({timeout: 30_000});
+        await expect(deleteDialog).toContainText('Are you sure you want to permanently delete this submission?');
+        await expect(deleteDialog.getByRole('button', {name: 'Confirm', exact: true})).toBeVisible();
+        await deleteDialog.getByRole('button', {name: 'Cancel', exact: true}).click();
+        await expect(deleteDialog).toHaveCount(0, {timeout: 30_000});
+        await managerWorkflow.expectStatus('Round 1 Status', 'Submission declined.');
+        await managerPage.reload();
+        await managerWorkflow.expectOpen();
+        await managerWorkflow.expectStatus('Round 1 Status', 'Submission declined.');
+        await expect(managerWorkflow.decisionButton('Revert Decline')).toBeVisible();
+        await expect(managerWorkflow.decisionButton('Delete')).toBeVisible();
+
         // Revert Decline restores the round's reviewer-derived status.
         await managerWorkflow.decisionButton('Revert Decline').click();
         await decision.expectOpen('Revert Decline');
@@ -814,27 +881,21 @@ test.describe('review stage & rounds', () => {
             submitter: scratchAuthor,
             reviewRounds: [{reviewers: []}],
         });
+        // The third submission: set up like the first, its round with no
+        // reviewer.
+        const {submissionId: noReviewerId} = await seedInReview(ojsApi, `${tag}c`, {
+            reviewRounds: [{reviewers: []}],
+        });
 
         // A Journal Manager limits omar's participation to recommendations
-        // (stage-participants surface, per the spec's recipe; a fellow section
-        // editor's save of this form is silently discarded — see report note).
+        // on the first and the third submission (stage-participants surface,
+        // per the spec's recipe).
         const managerPage = await (await asUser('manager.maya')).newPage();
         const managerWorkflow = new WorkflowPage(managerPage, JOURNAL);
         await managerWorkflow.gotoEditorial(submissionId);
-        await managerWorkflow.participantMoreActions('Omar Section Editor').click();
-        await managerPage.getByRole('menuitem', {name: 'Edit'}).click();
-        const editModal = managerPage
-            .getByRole('dialog')
-            .filter({has: managerPage.locator('input[name="recommendOnly"]')});
-        await expect(editModal.locator('input[name="recommendOnly"]')).toBeVisible({timeout: 30_000});
-        await editModal.locator('input[name="recommendOnly"]').check();
-        await editModal.getByRole('button', {name: 'OK', exact: true}).click();
-        // The legacy form's success closes the modal; the wrapper can linger
-        // hidden in the DOM, so wait on visibility, not on count.
-        await expect(editModal.locator('input[name="recommendOnly"]')).toBeHidden({
-            timeout: 30_000,
-        });
-        await waitForJQueryIdle(managerPage);
+        await managerWorkflow.setRecommendOnly('Omar Section Editor');
+        await managerWorkflow.gotoEditorial(noReviewerId);
+        await managerWorkflow.setRecommendOnly('Omar Section Editor');
 
         // Control: before the recommendation is recorded, the deciding
         // editor's screen shows no "Recommendation" box (the status box of
@@ -899,6 +960,22 @@ test.describe('review stage & rounds', () => {
         await expect(soleWorkflow.statusBox('Round 1 Status')).not.toContainText(
             'Awaiting recommendations from editors.'
         );
+
+        // A recommendation on a round with no reviewer: the recommending
+        // editor's box reads the waiting sentence; once their "Accept
+        // Submission" recommendation is recorded, the deciding editor's box
+        // reads the all-recommendations-in sentence, which takes precedence
+        // over the reviewer sentences.
+        await omarWorkflow.gotoEditorial(noReviewerId);
+        await expect(omarWorkflow.decisionButton('Recommend Accept')).toBeVisible();
+        await expect(omarWorkflow.statusLines('Round 1 Status')).toHaveText([WAITING]);
+        await omarWorkflow.decisionButton('Recommend Accept').click();
+        const noReviewerDecision = new DecisionPage(omarPage);
+        await noReviewerDecision.expectOpen('Recommend Accept');
+        await noReviewerDecision.completeAll();
+        await workflow.gotoEditorial(noReviewerId);
+        await expect(recommendationBox(editorPage)).toContainText('Accept Submission');
+        await expect(workflow.statusLines('Round 1 Status')).toHaveText([ALL_RECOMMENDATIONS]);
     });
 
     test('S12: author reads an open review', async ({asUser, ojsApi}, testInfo) => {
@@ -991,6 +1068,7 @@ test.describe('review stage & rounds', () => {
         // (Its attachments section: register A3, not asserted.)
         const readModal = await authorWorkflow.openAuthorReadReview('Julia Reviewer');
         await expect(readModal.getByRole('heading', {name: `Review: Submission ${tag}`, exact: true})).toBeVisible();
+        await expect(readModal.getByRole('heading', {name: 'Julia Reviewer', exact: true})).toBeVisible();
         await expect(readModal).toContainText(/Completed:\s*\d{4}-\d{2}-\d{2}/);
         await expect(readModal).toContainText(/Recommendation:\s*Accept Submission/);
         await expect(readModal).toContainText(
@@ -1010,11 +1088,16 @@ test.describe('review stage & rounds', () => {
         await confirmReview(editorPage, editorWindow);
 
         // Author: the review stage lists the reviewer with "Read Review"
-        // exactly as before the editor confirmed.
+        // exactly as before the editor confirmed, and no panel for a
+        // response to the reviews appears (positive control: the stage's
+        // own panel headings render on the same read).
         await authorWorkflow.gotoAuthor(submissionId);
         await expect(reviewerRow.getByRole('button', {name: 'Read Review', exact: true})).toBeVisible();
         await expect(reviewerRow).toHaveText(rowBefore, {useInnerText: true});
         await expect(readReview).toHaveCount(1);
+        await expect(authorPage.getByRole('heading', {name: 'Revisions Uploaded'})).toBeVisible();
+        await expect(authorPage.getByRole('heading', {name: /respon/i})).toHaveCount(0);
+        await expect(authorPage.getByRole('button', {name: /respon/i})).toHaveCount(0);
 
         // The decision letter sits under "Notifications" as a subject line
         // and a date, and opens read-only. (The subject anchors carry no

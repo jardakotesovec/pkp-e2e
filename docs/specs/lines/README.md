@@ -1,13 +1,13 @@
 # Differences on 3.5 (pilot notes)
 
-The two files under `stable-3_5_0/` list what OJS 3.5 does differently
-from `main`'s spec for "Review stage & rounds" (U26) and "Tasks &
-discussions" (U37). They come from the pilot's first shape, which kept
-only the differences per version.
+The file under `stable-3_5_0/` lists what OJS 3.5 does differently from
+`main`'s spec for "Tasks & discussions" (U37). It comes from the pilot's
+first shape, which kept only the differences per version. (The one for
+"Review stage & rounds" went when that feature's 3.5 spec was built.)
 
 The model now is a whole spec per version, in `lines/<branch>/docs/specs/`
-(`lines/README.md`). These two files are the notes for building the 3.5
-specs of those two features and are deleted once the specs exist.
+(`lines/README.md`). The file is the notes for building that feature's
+3.5 spec and is deleted once the spec exists.
 
 Reading one: the headings are the spec's own, and only the ones where
 something differs appear. An entry is **not here** (the spec has it, 3.5
@@ -18,7 +18,7 @@ walked on 3.5 and what was only compared in the code.
 
 ## What a "Seen on" cell says
 
-Each file ends with "Findings on 3.5": `main`'s register entries with
+The file ends with "Findings on 3.5": `main`'s register entries with
 the versions the pilot's walk saw them on, and the entries only 3.5
 shows.
 
