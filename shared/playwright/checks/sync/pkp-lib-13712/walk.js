@@ -18,7 +18,10 @@
 //   3 `dbarnes`: the reviewer's row › "Read Review" › "Mark as Complete";
 //   4 the author again, the same four reads.
 // After 2 and after 4, another reviewer of the submission (`agallego` /
-// `alzacharia`) reads the same API record (s2r, s4r).
+// `alzacharia`) reads the same API record (s2r, s4r); before 3, `dbarnes`
+// reads it too (s2e). pkp-lib#13790 (the "main API fix", 2026-11-12) blanks
+// `reviewerRecommendationId` and `reviewerRecommendationType` wherever the
+// reviewer fields are blanked: null in s2 and s2r, set in s2e, s4, s4r.
 // The base (the apps' tips) shows the review at 2; the PR head must hide
 // it at 2 and show it at 4.
 //
@@ -98,12 +101,12 @@ async function authorReads(page, app, c) {
     return out;
 }
 
-/** Another reviewer of the same submission: the submissions API's record of the review. */
+/** Another reviewer (or the editor): the submissions API's record of the review. */
 async function otherReviewerReads(page, app, c) {
     const api = await page.request.get(app.url(`/index.php/${app.contextPath}/api/v1/submissions/${c.id}`));
     const j = await api.json().catch(() => null);
     const ra = j && (j.reviewAssignments || []).find((x) => x.id === c.reviewId);
-    return {status: api.status(), record: ra ? {reviewerFullName: ra.reviewerFullName, reviewerUserName: ra.reviewerUserName, reviewerId: ra.reviewerId, dateConsidered: ra.dateConsidered} : 'no record'};
+    return {status: api.status(), record: ra ? {reviewerFullName: ra.reviewerFullName, reviewerUserName: ra.reviewerUserName, reviewerId: ra.reviewerId, dateConsidered: ra.dateConsidered, reviewerRecommendationId: ra.reviewerRecommendationId, reviewerRecommendationType: ra.reviewerRecommendationType} : 'no record'};
 }
 
 /** The editor's "Read Review" › "Mark as Complete" (OMP's confirmReviewAsEditor, on the page). */
@@ -146,6 +149,7 @@ forEachApp(async (app) => {
         await step('s2r', () => otherReviewerReads(page, app, c));
         await signOut(page);
         await signIn(page, 'dbarnes');
+        await step('s2e', () => otherReviewerReads(page, app, c));
         await step('s3', async () => { await L.openEditorial(page, app, c.id); return confirm(page, c); });
         o.state3 = state(app, c);
         await signOut(page);
