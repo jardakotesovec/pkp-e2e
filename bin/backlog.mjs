@@ -4,12 +4,14 @@
 // works it (MAINTENANCE "The housekeeping session"). Nothing here is kept by
 // hand, so the queue cannot drift from the specs and tracking files.
 // run: npm run backlog [-- --all]   (--all lists every item, not the first few)
+//      npm run backlog -- --items U10   (a spec's ready Planned items, the revision sheet's rows)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const all = process.argv.includes('--all');
+const itemsOf = process.argv.includes('--items') ? process.argv[process.argv.indexOf('--items') + 1] : null;
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
 const exists = (p) => fs.existsSync(path.join(root, p));
 
@@ -134,6 +136,12 @@ for (const f of specFiles) {
         // the team shipped, a guard whose bug is now fixed, a coverage request.
         const first = readyItems.filter((i) => ['upstream', 'report', 'request'].includes(tag(i)[1]));
         const oldest = (list) => list.map((i) => tag(i)[2] || '0000').sort()[0];
+        if (itemsOf === spec) {
+            const show = (list) => list.map((i) => `  - ${i.trim().replace(/\n\s+/g, ' ')}\n`).join('');
+            process.stdout.write(`${spec}: ${readyItems.length} ready\n${show(readyItems)}`
+                + `waiting (${items.length - readyItems.length}):\n${show(items.filter((i) => !readyItems.includes(i)))}`);
+            process.exit(0);
+        }
         if (items.length) {
             planned.push({ spec, file: f, n: readyItems.length, waiting: items.length - readyItems.length,
                 first: first.length, firstOldest: oldest(first), oldest: oldest(readyItems) });

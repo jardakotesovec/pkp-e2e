@@ -749,7 +749,7 @@ script.
 
 ### The run record
 
-`run-<app>-<HHMMSS>.json`, one per process, keeps URL, method, status and
+`run[-<PROBE_RUN>]-<app>-<HHMMSS>.json`, one per process, keeps URL, method, status and
 size (never a body) of every `/api/` and legacy `$$$call$$$` request (a
 legacy save answers 200 even when it refuses), with `override` on a call
 the Vue forms tunnel as a POST; every response of 400 or more; the

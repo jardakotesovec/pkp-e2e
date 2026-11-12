@@ -298,7 +298,7 @@ const dialogsSaid = new Map(); // run record → the dialog count flush() last p
 
 /**
  * Every process of an agent keeps its own files: the run record is
- * `run-<app>-<HHMMSS>.json` (HHMMSS from startedAt; `-<pid>` added when
+ * `run[-<PROBE_RUN>]-<app>-<HHMMSS>.json` (HHMMSS from startedAt; `-<pid>` added when
  * another process of the same second wrote that name first) and the
  * locator rows are appended to locators.md under a dated heading, so a
  * script run in phases, one process each, loses nothing from the earlier
@@ -314,10 +314,11 @@ function flush() {
             record.endedAt = new Date().toISOString();
             if (!runFiles.has(record.app)) {
                 const stamp = record.startedAt.slice(11, 19).replace(/:/g, '');
-                const taken = path.join(dir, `run-${record.app}-${stamp}.json`);
+                const run = process.env.PROBE_RUN ? `run-${process.env.PROBE_RUN}` : 'run';
+                const taken = path.join(dir, `${run}-${record.app}-${stamp}.json`);
                 runFiles.set(
                     record.app,
-                    fs.existsSync(taken) ? path.join(dir, `run-${record.app}-${stamp}-${process.pid}.json`) : taken,
+                    fs.existsSync(taken) ? path.join(dir, `${run}-${record.app}-${stamp}-${process.pid}.json`) : taken,
                 );
             }
             const file = runFiles.get(record.app);
