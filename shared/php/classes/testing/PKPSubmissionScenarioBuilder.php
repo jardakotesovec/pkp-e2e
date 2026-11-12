@@ -1021,12 +1021,13 @@ abstract class PKPSubmissionScenarioBuilder
                     ->filter(fn ($publication) => $publication->getData('status') !== \PKP\submission\PKPSubmission::STATUS_PUBLISHED)
                     ->reduce(fn ($a, $b) => $a && $a->getId() > $b->getId() ? $a : $b)
                     ?->getId();
-                // main ties a round to a publication; stable-3_5_0's build() takes no publication id.
-                $buildArgs = [$submissionId, $plan['stageId'], $roundNumber, ReviewRound::REVIEW_ROUND_STATUS_PENDING_REVIEWERS];
-                if ((new \ReflectionMethod($reviewRoundDao, 'build'))->getNumberOfParameters() > 4) {
-                    array_splice($buildArgs, 1, 0, [$publicationId]);
-                }
-                $round = $reviewRoundDao->build(...$buildArgs);
+                $round = $reviewRoundDao->build(
+                    $submissionId,
+                    $publicationId,
+                    $plan['stageId'],
+                    $roundNumber,
+                    ReviewRound::REVIEW_ROUND_STATUS_PENDING_REVIEWERS
+                );
                 $notificationCount = Notification::withAssoc(Application::ASSOC_TYPE_REVIEW_ROUND, $round->getId())
                     ->withType(Notification::NOTIFICATION_TYPE_REVIEW_ROUND_STATUS)
                     ->withContextId($submission->getData('contextId'))
