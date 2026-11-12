@@ -50,6 +50,7 @@ const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmi
 const {EditorialDashboardPage} = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
 const {SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
 const {openAddReviewerModal, searchReviewerList} = require('../pages/ReviewStagePages.js');
+const {closeMenu} = require('../../../../shared/playwright/support/menus.js');
 const {
     ReviewerSuggestionStep,
     ReviewerRequestWindow,
@@ -886,7 +887,7 @@ test.describe('reviewer-suggestions', () => {
             const items = await panel.openMenu(fullName(person));
             await expect(items).toHaveCount(1);
             await expect(items).toHaveText('Add Reviewer');
-            await page.keyboard.press('Escape');
+            await closeMenu(page);
             await expect(items).toHaveCount(0);
         }
         await expect(page.getByRole('dialog', {name: 'Error', exact: true})).toHaveCount(0);
