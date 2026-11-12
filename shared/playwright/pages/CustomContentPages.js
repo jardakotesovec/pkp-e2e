@@ -21,8 +21,10 @@
  *   plugin's row, its category's heading, its "Enabled" box and the links
  *   under its arrow; the page's top tabs.
  * - BlockManager / BlockWindow — the "Custom Block Manager" window, its
- *   "Custom Blocks" list, and the block window ("Block Name", "Content",
- *   "Show Name", "Save", "Cancel").
+ *   "Custom Blocks" list with a row's "Edit" and "Delete" (the "Delete"
+ *   window), and the block window ("Block Name", "Content", "Show Name",
+ *   "Save", "Cancel", the shaded page beside it, the initials button's
+ *   "Edit Profile" in its top bar).
  * - SidebarSetup — Settings › Website › "Appearance" › "Setup", the
  *   "Sidebar" boxes and "Save".
  * - StaticPagesTab / StaticPageWindow {OJS OMP} — the "Static Pages" tab,
@@ -606,16 +608,58 @@ class BlockManager extends BasePage {
         return this.openBlockWindowBy(this.addLink);
     }
 
-    /** A block row's "Edit", its arrow pressed first. */
-    async editBlock(name) {
+    /** A block row's arrow pressed, then the link under it ("Edit", "Delete"), shown. */
+    async rowControl(name, linkName) {
         const row = this.row(name);
         await expect(row).toHaveCount(1, {timeout: T});
         const id = await row.getAttribute('id');
         const controls = this.page.locator(`[id="${id}-control-row"]`);
         await row.locator('a.show_extras').click();
-        const edit = controls.getByRole('link', {name: 'Edit', exact: true});
-        await expect(edit).toBeVisible({timeout: T});
-        return this.openBlockWindowBy(edit);
+        const link = controls.getByRole('link', {name: linkName, exact: true});
+        await expect(link).toBeVisible({timeout: T});
+        return link;
+    }
+
+    /** A block row's "Edit", its arrow pressed first. */
+    async editBlock(name) {
+        return this.openBlockWindowBy(await this.rowControl(name, 'Edit'));
+    }
+
+    /** A block row's "Delete", its arrow pressed first: the "Delete" window, shown. */
+    async openDelete(name) {
+        const link = await this.rowControl(name, 'Delete');
+        await link.click();
+        await expect(this.deleteDialog()).toBeVisible({timeout: T});
+        await waitForJQueryIdle(this.page);
+        return this.deleteDialog();
+    }
+
+    /** The "Delete" window (Rule 14's question). */
+    deleteDialog() {
+        return this.page
+            .locator('[role="dialog"]:visible, [role="alertdialog"]:visible, [data-cy="dialog"]:visible')
+            .filter({hasText: 'Are you sure you wish to delete this item?'})
+            .last();
+    }
+
+    /** The "Delete" window's heading. */
+    deleteDialogHeading() {
+        return this.deleteDialog().locator('h1, h2, .ui-dialog-title').first();
+    }
+
+    /** "OK" or "Cancel" in the "Delete" window, a button or a link. */
+    deleteDialogButton(name) {
+        const dialog = this.deleteDialog();
+        return dialog.getByRole('button', {name, exact: true}).or(dialog.getByRole('link', {name, exact: true})).first();
+    }
+
+    /** "OK" in the "Delete" window: the delete's answer status, the grid settled. */
+    async confirmDelete() {
+        const answer = this.page.waitForResponse((r) => /delete-?custom-?block/i.test(r.url()) && r.request().method() === 'POST', {timeout: T});
+        await this.deleteDialogButton('OK').click();
+        const r = await answer;
+        await waitForJQueryIdle(this.page);
+        return r.status();
     }
 
     async openBlockWindowBy(link) {
@@ -720,6 +764,35 @@ class BlockWindow extends BasePage {
     /** "Cancel". */
     async cancel() {
         await this.cancelLink.click();
+    }
+
+    /**
+     * A press on the page beside the window, shaded while it is open: the
+     * top shade (`div.DialogOverlay`, one per stacked window) at the left
+     * edge, where neither window's panel lies (screen notes ccI09). A
+     * question the browser asks is the caller's to answer.
+     */
+    async pressShade() {
+        const viewport = this.page.viewportSize() || {width: 1280, height: 720};
+        await this.page.locator('.DialogOverlay').last().click({position: {x: 10, y: Math.round(viewport.height / 2)}});
+    }
+
+    /** The initials button of the top bar the window carries, named by the signed-in username. */
+    userMenuButton(username) {
+        return this.root.getByRole('button', {name: username}).first();
+    }
+
+    /**
+     * "Edit Profile" in the initials button's menu at the window's top. The
+     * page-leave question it may raise is the caller's to answer; the
+     * profile's address is waited for at commit.
+     */
+    async editProfile(username) {
+        await this.userMenuButton(username).click();
+        const link = this.root.getByRole('link', {name: 'Edit Profile', exact: true}).or(this.root.getByRole('menuitem', {name: 'Edit Profile', exact: true})).first();
+        await expect(link).toBeVisible({timeout: T});
+        await link.click();
+        await this.page.waitForURL(/\/user\/profile/, {waitUntil: 'commit', timeout: T});
     }
 }
 

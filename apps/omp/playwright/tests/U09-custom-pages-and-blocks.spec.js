@@ -51,6 +51,7 @@ const zlib = require('zlib');
 const {test: base, expect} = require('../support/fixtures.js');
 const {NavigationTab, PublicChrome, whole} = require('../../../../shared/playwright/pages/NavigationChromePages.js');
 const {unordered} = require('../../../../shared/playwright/support/order.js');
+const {waitForJQueryIdle} = require('../../../../shared/playwright/support/legacy.js');
 const {
     CustomPageWindow,
     PluginsTab,
@@ -129,6 +130,75 @@ async function expectBare404(page, url) {
     expect(response && response.status()).toBe(404);
     await expect(page.locator('body')).toHaveText(/^\s*404 Not Found\s*$/);
     await expect(page.locator('header.pkp_structure_head')).toHaveCount(0);
+}
+
+/**
+ * Run an action that raises one browser question, answer it, and return
+ * its type and words, or null when none came (the action is started
+ * before the question is awaited: a native question holds the page until
+ * it is answered).
+ */
+async function answerWhile(page, answer, action) {
+    const asked = page.waitForEvent('dialog', {timeout: T}).catch(() => null);
+    const acting = action();
+    const dialog = await asked;
+    if (!dialog) {
+        await acting;
+        return null;
+    }
+    const seen = {type: dialog.type(), message: dialog.message()};
+    await (answer === 'accept' ? dialog.accept() : dialog.dismiss());
+    await acting;
+    return seen;
+}
+
+/**
+ * A press on the shaded page beside the open side windows: the left edge
+ * of the side menu, where the top window's shade lies (screen notes ccI09).
+ */
+async function pressShade(page) {
+    const point = await page.evaluate(() => {
+        const y = Math.round(window.innerHeight / 2);
+        for (let x = 4; x < 120; x += 4) {
+            const top = document.elementFromPoint(x, y);
+            if (top && /DialogOverlay/.test(String(top.className))) return {x, y};
+        }
+        return null;
+    });
+    expect(point, 'a point of the shade beside the windows').not.toBeNull();
+    await page.mouse.click(point.x, point.y);
+}
+
+/** A link of the initials button's menu in a side window's own top bar ("Edit Profile"). */
+async function openUserMenuLink(page, root, username, name) {
+    await root.getByRole('button', {name: username}).first().click();
+    const link = page.getByRole('link', {name, exact: true}).filter({visible: true}).first();
+    await expect(link).toBeVisible({timeout: T});
+    return link;
+}
+
+/** A link under a block row's arrow ("Edit", "Delete"). */
+async function blockRowControl(page, blocks, name, link) {
+    const row = blocks.row(name);
+    await expect(row).toHaveCount(1, {timeout: T});
+    const id = await row.getAttribute('id');
+    await row.locator('a.show_extras').click();
+    const control = page.locator(`[id="${id}-control-row"]`).getByRole('link', {name: link, exact: true});
+    await expect(control).toBeVisible({timeout: T});
+    return control;
+}
+
+/** The "Delete" confirmation window. */
+function deleteDialog(page) {
+    return page
+        .locator('[role="dialog"]:visible, [role="alertdialog"]:visible, [data-cy="dialog"]:visible')
+        .filter({hasText: 'Are you sure you wish to delete this item?'})
+        .last();
+}
+
+/** "OK" or "Cancel" in a confirmation window, a button or a link. */
+function dialogButton(dialog, name) {
+    return dialog.getByRole('button', {name, exact: true}).or(dialog.getByRole('link', {name, exact: true})).first();
 }
 
 /** Wait for a notice at the top right that an action raises (armed before the action). */
@@ -450,6 +520,53 @@ test.describe('custom pages & blocks', () => {
         await expect(blocks.emptyRow).toHaveText(whole(NO_BLOCKS));
         await expect(blocks.rows).toHaveCount(0);
 
+        // Left by a press beside it: the press on the shaded page asks the
+        // form's question; "Cancel" keeps the window and "Draft"; a second
+        // press, "OK", closes the block window alone, the manager window
+        // open on its empty list (Rules 30, 30a). The box is left first (the
+        // heading pressed): with the caret still in it the press closes the
+        // window without a question (T-omp-1, rev 2026-11-12).
+        block = await blocks.addBlock();
+        await block.typeName('en', 'Draft');
+        await block.blur();
+        let question = await answerWhile(page, 'dismiss', () => pressShade(page));
+        expect(question).toEqual({type: 'confirm', message: CHANGED_QUESTION});
+        await expect(block.form).toBeVisible();
+        await expect(block.nameInput('en')).toHaveValue('Draft');
+        question = await answerWhile(page, 'accept', () => pressShade(page));
+        expect(question).toEqual({type: 'confirm', message: CHANGED_QUESTION});
+        await expect(block.form).toBeHidden();
+        await expect(blocks.grid).toBeVisible();
+        await expect(blocks.heading).toHaveText('Custom Block Manager');
+        await expect(blocks.emptyRow).toHaveText(whole(NO_BLOCKS));
+        await expect(blocks.rows).toHaveCount(0);
+
+        // Left by a reload, then by "Edit Profile": after a left "Block Name"
+        // change the browser asks its own page-leave question (a
+        // `beforeunload` dialog, no words of the application's); confirmed,
+        // nothing is stored (Rules 30b, 30c).
+        block = await blocks.addBlock();
+        await block.typeName('en', 'Draft');
+        await block.blur();
+        question = await answerWhile(page, 'accept', () => page.reload());
+        expect(question).toMatchObject({type: 'beforeunload'});
+        await expect(plugins.row('customblockmanagerplugin')).toBeVisible({timeout: T});
+        await waitForJQueryIdle(page);
+        blocks = await plugins.openBlockManager();
+        await expect(blocks.emptyRow).toHaveText(whole(NO_BLOCKS));
+        await expect(blocks.rows).toHaveCount(0);
+        block = await blocks.addBlock();
+        await block.typeName('en', 'Draft');
+        await block.blur();
+        const profileLink = await openUserMenuLink(page, block.root, manager, 'Edit Profile');
+        question = await answerWhile(page, 'accept', () => profileLink.click());
+        expect(question).toMatchObject({type: 'beforeunload'});
+        await page.waitForURL(/\/user\/profile/, {timeout: T});
+        await plugins.goto();
+        blocks = await plugins.openBlockManager();
+        await expect(blocks.emptyRow).toHaveText(whole(NO_BLOCKS));
+        await expect(blocks.rows).toHaveCount(0);
+
         // Added: the window closes, no notice at the top right (the plugin's
         // notice, read the same way, was the control), one row; the visitor's
         // home page shows no block yet (Rules 18, 18a).
@@ -509,11 +626,50 @@ test.describe('custom pages & blocks', () => {
         const names = await blocks.rowNames();
         expect(names).toContain('our-partners');
         expect(names.filter((n) => n !== 'our-partners')).toEqual([expect.stringMatching(/^our-partners[0-9a-z]+$/)]);
+        const second = names.find((n) => n !== 'our-partners');
+
+        // Deleted: the second block placed, the visitor reads "Second list."
+        // too; its "Delete" asks, "OK" takes the row, the visitor's sidebar
+        // keeps "Friends" alone, and "Sidebar" no longer lists it (Rules 14,
+        // 19, 20, 24).
+        await sidebar.goto();
+        await expect(sidebar.box(second)).not.toBeChecked();
+        await sidebar.place(second, true);
+        await home.goto(homeUrl);
+        await expect(home.blockContent(second)).toHaveText('Second list.');
+        await expect(home.blockHeading('our-partners')).toHaveText('Friends');
+        await plugins.goto();
+        blocks = await plugins.openBlockManager();
+        const deleteLink = await blockRowControl(page, blocks, second, 'Delete');
+        await deleteLink.click();
+        const dialog = deleteDialog(page);
+        await expect(dialog).toBeVisible({timeout: T});
+        await expect(dialog.locator('h1, h2, .ui-dialog-title').first()).toHaveText(/^\s*Delete\s*$/);
+        await expect(dialog).toContainText(DELETE_QUESTION);
+        await expect(dialogButton(dialog, 'Cancel')).toBeVisible();
+        const deleted = page.waitForResponse((r) => /delete-?custom-?block/i.test(r.url()) && r.request().method() === 'POST', {timeout: T});
+        await dialogButton(dialog, 'OK').click();
+        expect((await deleted).status()).toBe(200);
+        await expect(dialog).toBeHidden();
+        await expect(blocks.row(second)).toHaveCount(0);
+        await expect(blocks.rows).toHaveCount(1);
+        await expect(blocks.row('our-partners')).toHaveCount(1);
+        await home.goto(homeUrl);
+        await expect(home.blockHeading('our-partners')).toHaveText('Friends');
+        await expect(home.block(second)).toHaveCount(0);
+        await expect(home.sidebar).not.toContainText('Second list.');
+        await expect(home.customBlocks).toHaveCount(1);
+        await sidebar.goto();
+        await expect(sidebar.box('our-partners')).toHaveCount(1);
+        await expect(sidebar.box(second)).toHaveCount(0);
 
         // Control: unticked and saved, the visitor's home page shows no block
-        // (Rule 19).
-        await sidebar.goto();
-        await sidebar.place('our-partners', false);
+        // (Rule 19). The deleted block's stored place (A2) rides in this save.
+        await sidebar.box('our-partners').setChecked(false);
+        const saving = page.waitForResponse((r) => /\/api\/v1\/contexts\/\d+/.test(r.url()) && r.request().method() !== 'GET', {timeout: T});
+        await sidebar.saveButton.click();
+        expect((await saving).status()).toBe(200);
+        await expect(sidebar.saved).toBeVisible({timeout: T});
         await home.goto(homeUrl);
         await expect(home.customBlocks).toHaveCount(0);
         await expect(home.header).toBeVisible();

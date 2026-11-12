@@ -413,11 +413,14 @@ row's "Edit" (headed "Edit"), with "Save" and "Cancel" at its foot:
       same question as the static page window. A change made only in
       "Content" raises no question here either: the close control closes
       the window and the text is lost [A19](#a19). A press on the page
-      beside the window, which is shaded while the window is open, acts
-      as the close control does in both cases. It closes the block
-      window alone: the "Custom Block Manager" window under it stays
-      open until a second press. <sup>g</sup> <sup>td17</sup>
-      <sup>f-a19</sup>
+      beside the window, shaded while the window is open, acts as the
+      close control does but closes the block window alone: the "Custom
+      Block Manager" window under it stays open until a second press.
+      After a change to "Block Name" it asks only once that box has been
+      left (a press elsewhere in the window); with the caret still in the
+      box it closes the window at once, with no question, and the typed
+      name is lost ⚠ [A21](#a21). <sup>g</sup> <sup>td17</sup>
+      <sup>f-a19</sup> <sup>f-a21</sup>
     - 30b. **Leaving the page.** Opening another address in the browser
       raises the browser's own "Leave site?" question when either window
       holds a change to "Path", "Title" or "Block Name" whose box has
@@ -499,9 +502,8 @@ row's "Edit" (headed "Edit"), with "Save" and "Cancel" at its foot:
    Servers"; one journal on a fresh install, more once tests add scratch
    journals). With one journal the Site Settings have no "Site Setup" ›
    "Navigation", "Plugins" or "Appearance" tab, so the site has no custom
-   pages or blocks to manage (Rules 8, 27); this end is not seen on the
-   test installs, which always host many journals. *Site settings* owns
-   the rule. <sup>m</sup>
+   pages or blocks to manage (Rules 8, 27). *Site settings* owns the
+   rule. <sup>m</sup>
 
 ## Cross-feature interactions
 
@@ -637,6 +639,27 @@ the footnote. <sup>y</sup>
    - **Left with "Cancel"**: type "Draft" in "Block Name" and press
      "Cancel": the window closes at once, with no question, and the list
      still reads "No custom blocks have been created." (Rule 30a).
+   - **Left by a press beside it**: press "Add Block", type "Draft" in
+     "Block Name", press the window's heading "Add Block", so the box is
+     left, and press the page beside the window, shaded while the window
+     is open: the browser asks "The data on this form has changed.
+     Do you wish to continue without saving?"; press "Cancel": the block
+     window stays, "Draft" in "Block Name". Press the shaded page again,
+     then "OK": the block window closes, the "Custom Block Manager" window
+     stays open, and its list still reads "No custom blocks have been
+     created." (Rules 30, 30a).
+   - **Left by a reload, then by "Edit Profile"**: press "Add Block", type
+     "Draft" in "Block Name" and press the window's heading "Add Block",
+     so the box is left; reload the page: the browser asks its own
+     page-leave question; confirm it. Open "Manage Custom Blocks" on the
+     "Custom Block Manager" row of Settings › Website › "Plugins" ›
+     "Installed Plugins" again: the list still reads "No custom blocks
+     have been created.". Press "Add Block", type "Draft" in "Block Name",
+     press the heading "Add Block", then choose "Edit Profile" in the
+     initials button's menu at the window's top: the browser asks it
+     again; leave the page. Open "Manage Custom Blocks" the same
+     way: the list still reads "No custom blocks have been created."
+     (Rules 30b, 30c).
    - **Added**: press "Add Block", type "Our Partners" in "Block Name"
      and "Partner list. Write to {$contactName}." in "Content", and press
      "Save": the window closes, no message shows at the top right, and
@@ -661,6 +684,18 @@ the footnote. <sup>y</sup>
      "Block Name" and "Second list." in "Content", and press "Save": the
      list shows "our-partners" and a second "our-partners" followed by a
      run of letters and digits (Rule 23).
+   - **Deleted**: on Settings › Website › "Appearance" › "Setup" tick the
+     second block's entry under "Sidebar", the second "our-partners"
+     with its run of letters and digits and "(Custom Block)", and press
+     "Save". The visitor reloads: the sidebar shows "Second list." too
+     (Rules 19, 20). In "Manage Custom Blocks" press the arrow of the
+     second "our-partners" row, then "Delete": a window headed "Delete"
+     reads "Are you sure you wish to delete this item? This action cannot
+     be undone." with "OK" and "Cancel"; press "OK": the window closes and
+     the second row leaves the list, one row left. The visitor reloads:
+     "Second list." is gone and "Friends" still shows. Reload Settings ›
+     Website › "Appearance" › "Setup": "Sidebar" no longer lists the
+     second block (Rules 14, 24).
    - **Control**: untick "our-partners (Custom Block)" in "Sidebar" and
      press "Save": the visitor's reloaded home page shows no block (Rule
      19).
@@ -854,9 +889,6 @@ Left out of the scenarios above, by reason:
   - a picture over the server's file limit, and one over its request limit, chosen in "Insert/edit image": each refused with "Files larger than {size} can not be uploaded." and no server error (A18; the guard its two issue reports name) [report 2026-10-01]
   - a custom block listed in "Custom Blocks" and offered under "Sidebar" by its "Block Name", and by the new one after a rename (A1; the guard its issue report names; scenario 4's "Renamed, name shown" bullet, whose "Sidebar" label after the rename no suite asserts while A1 stands) [report 2026-10-01]
   - a custom block named with "&", and one named only in the primary language by a manager working in another, each opened with "Edit" and placed under "Sidebar" (A4, A13; the guard their issue report names) [report 2026-10-01]
-  - deleting a custom block: "OK" closing the window, the block gone from the Custom Block Manager's list, the public sidebar and "Sidebar" (Rule 24; A14, retired) [report 2026-10-01]
-  - a press on the shaded page beside the block window after a "Block Name" change: the question "The data on this form has changed. Do you wish to continue without saving?", "Cancel" keeping the window and the name, "OK" closing it with the "Custom Block Manager" window still open (Rule 30a) [report 2026-10-12]
-  - a reload, and "Edit Profile" at the block window's top, after a "Block Name" change, its box left: the "Leave site?" question (Rule 30c) [report 2026-10-12]
 - **Rarely met**:
   - "Static Pages Plugin" unticked with pages stored: every page answering "404 Not Found" and the tab gone, then the pages back when it is ticked again {OJS OMP} (Settings bullet 1; Rule 15)
   - "Custom Block Manager" unticked with a block placed: the block leaving the public pages and "Sidebar", then back at its place when it is ticked again (Settings bullet 2; Rule 25)
@@ -894,6 +926,7 @@ Left out of the scenarios above, by reason:
   - A18 (a picture over the server's upload limit getting a server error, or for a WEBP a refusal that does not say why, never the size message; Rule 29)
   - A19 (a change only in "Content" lost without a question, in the static page window {OJS OMP} on its back arrow and on leaving the page, and in the block window on its close control, on a press beside it and on leaving the page; Rules 30, 30a, 30b, 30c)
   - A20 (the first language's "Content" box left under a "Loading..." spinner when the second language's box loads last; Fields)
+  - A21 (a "Block Name" typed and the shaded page pressed with the caret still in the box: the block window closed without a question, the name lost; Rule 30a)
 - **No seed**:
   - another picture allowance: only the installation's configuration file sets it (Settings bullet 7; Rule 29a)
 - **Owned by another feature**:
@@ -922,6 +955,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A18](#a18) | A picture over the upload limit gets a server error or a vague refusal, never "Files larger than {size} can not be uploaded." | 🐞 | medium · crash: server | issues (claude), 2026-11-02 — re-verified |
 | [A19](#a19) | A reviewer's typed review, a profile's signature or bio, or a static page's text is lost without asking on leaving the form | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
 | [A20](#a20) | With two form languages, the first language's "Content" box can stay under a "Loading..." spinner for good | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
+| [A21](#a21) | A press beside the block window right after typing its name closes it without asking, and the name is lost | 🐞 | minor | — |
 | [A2](#a2) | A deleted custom block would keep its place in the sidebar, so a later block of the same name appears unplaced | ❓ | minor | — |
 | [A5](#a5) | Pictures named ".jpeg" are refused while ".jpg" is accepted | ❓ | user-visible | — |
 | [A6](#a6) | A static page and a "Custom Page" item can take the same path, and the static page is then unreachable | ❓ | minor | — |
@@ -1246,6 +1280,18 @@ a loaded machine. Run 35 times per app without anything holding the
 second box back, the same tests passed every time.
 Basis: probe, 2026-10-01. <sup>f-a20</sup>
 Report: none — pkp-e2e#376 closed 2026-10-14 at the merge of the fix, `pkp/pkp-lib#13490` (`689e7ec1a5`; 3.5 `pkp/pkp-lib#13491`, `4045d9241e`); the entry retires when the apps' `js/pkp.min.js` carries the guard and `checks/sync/pkp-lib-13490/stuck-editors.js` reads fixed at the tips with `enable_minified = On` (ci-triage Flake watch, the row on scenario 6's formatted box getting stuck) (2026-10-14)
+
+<a id="a21"></a>
+**A21 — A press beside the block window right after typing its name closes it without asking, and the name is lost** · 🐞 · minor.
+A Journal Manager types a name into "Block Name" in the "Add Block"
+window and, with the caret still in the box, presses the shaded page
+beside the window. The window closes at once, with no question, and the
+name is gone: the "Custom Block Manager" list behind it has no new row.
+Pressed in the same state, the window's close control first asks "The
+data on this form has changed. Do you wish to continue without
+saving?", and so does the press beside the window once the caret has
+left the box. A stray click right after typing loses the name.
+Basis: test run, 2026-11-12. <sup>f-a21</sup>
 
 ### Retired
 
@@ -1944,6 +1990,10 @@ the script raised no question: a text box sends the `change` event that
 address bar and reload key are out of the script's reach, so what a
 person gets with the caret still in the box was not seen, and Rule 30b
 claims the question only for a box that has been left.
+Test runs 2026-11-12 (Rule 30a; OJS, OMP, OPS): a press on the shade
+with the caret still in "Block Name" closed the block window with no
+question (note f-a21); with the heading pressed first it asked, as
+walked on 2026-10-09.
 
 <a id="fn-k"></a>
 **k** — No `NotificationManager`, mail or event-log call in
@@ -1988,7 +2038,9 @@ and makes the install a multi-journal site. The visitor is a second
 browser context, signed out. Recipes: 3 — `users[]` adds a `reader` and,
 on OJS and OMP, an `editor` with `roles: {editor: {permitSettings:
 false}}`; `plugins: {staticpagesplugin: {enabled: true}}` on OJS and
-OMP. 4 and 7 — nothing seeded: the plugin is ticked on screen. 5 — a
+OMP. 4 and 7 — nothing seeded: the plugin is ticked on screen; in 4
+the page-leave question is the browser's own (`beforeunload`)
+dialog, which carries no words of the application's (note td17). 5 — a
 fresh throwaway manager, so the whole 5000 KB allowance is free; the test
 makes the picture files, the big ones under the test installs' 2 MB
 upload limit (A18); the stored files stay on the install, as nothing
@@ -2328,6 +2380,28 @@ Fixed in pkp-lib by `pkp/pkp-lib#13490` (`689e7ec1a5`, `main`) and `pkp/pkp-lib#
 Read 2026-10-30 at the tips (ojs 0a00726121, omp fd4ea260c, ops d4e4d8737d, lib/pkp df42984b46): `lib/pkp/js/controllers/SiteHandler.js` carries the guard (`tinyMCEObject.target.initialized &&`); each app's committed `js/pkp.min.js` still has the unguarded handler (`deactivate",function(d){d.target.getContent().length||…`), so the entry stays. The test installs run `enable_minified = Off`, so they load the guarded source script and cannot show the fault; not driven.
 Read 2026-11-11 at the tips (ojs 99014b078f, omp 8f51061e8, ops 8f9b395427, lib/pkp e2078ce20e): `isIncomplete_()` now reads the textarea of an editor whose `initialized` is false (`pkp/pkp-lib#13381` for `pkp/pkp-lib#13180`; `ore` `5c3c5f9505`, the same patch); the committed `js/pkp.min.js` is still the 2026-08-27 build on `main` and `ore`, which serve it only with `enable_minified = On` (`main`'s `config.TEMPLATE.inc.php` ships `Off`). `stable-3_5_0` rebuilt its `js/pkp.min.js` on 2026-11-10 (ojs `8ef49167e2`, omp `7d6a4ae3a0`, ops `a257612bd8`) with both guards.
 Issue report: [pkp-e2e#376](https://github.com/jardakotesovec/pkp-e2e/issues/376), closed 2026-10-14 at that merge; the report and its walk were deleted then (in git before that commit).
+
+<a id="fn-f-a21"></a>
+**f-a21** — Test runs 2026-11-12 (Rule 30a; scenario 4; OJS, OMP, OPS on
+`main`, scratch journals, a throwaway Journal Manager): "Draft" typed in
+"Block Name" on "Add Block", the caret left in the box, then a press on
+the shade at the left edge of the page beside the windows: no question
+within 30 s, the block window closed, the "Custom Block Manager" window
+open on "No custom blocks have been created.". With the heading "Add
+Block" pressed first, the same press asked "The data on this form has
+changed. Do you wish to continue without saving?"; "Cancel" kept the
+window with "Draft", "OK" closed it with the manager window open and
+its list empty. Probed the same day (OJS): the same with "Draft" typed
+key by key or filled at once; with the caret still in the box, the
+window's close control asked the question. Read in the code, not
+traced (ui-library 51f9eaa1): the box sends the `change` event
+`FormHandler` listens for only when it loses the focus (note td17),
+and `SideModalBody.vue`'s `DialogContent` (reka-ui) closes on
+`pointer-down-outside`, before the press on the shade moves the focus
+out of the box, so `containerCloseHandler()` finds no change recorded;
+a press on the close control takes the focus first. Not driven: Escape
+with the caret in the box, "Edit" of a saved block, and the static page
+window's "Path" and "Title".
 
 ## Reference — entry points & surfaces
 

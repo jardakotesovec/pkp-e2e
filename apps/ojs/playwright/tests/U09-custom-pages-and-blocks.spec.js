@@ -25,7 +25,9 @@
  *   left unsaved).
  * - A11 🐞: S7's refused saves come after its last successful one, and no
  *   notice is read after them.
- * - A2, A5, A6, A8, A9 ❓: not driven.
+ * - A2 ❓: S4 deletes a placed block but never reads the place it leaves
+ *   nor adds a block of its name again.
+ * - A5, A6, A8, A9 ❓: not driven.
  *
  * Seeding: scenario endpoints only. Every scenario runs on a scratch
  * journal with a throwaway Journal Manager (footnote y): S3 adds a Reader
@@ -138,6 +140,28 @@ async function withNoticeFetch(page, action) {
     const result = await action();
     await fetched;
     return result;
+}
+
+/**
+ * Run an action with the browser's own questions (confirm, beforeunload)
+ * answered in turn from `answers` ('accept' or 'dismiss'), and wait until
+ * that many were asked; the questions are returned as {type, message}.
+ */
+async function questionsDuring(page, answers, action) {
+    const asked = [];
+    const queue = [...answers];
+    const handler = (dialog) => {
+        asked.push({type: dialog.type(), message: dialog.message()});
+        (queue.shift() === 'accept' ? dialog.accept() : dialog.dismiss()).catch(() => {});
+    };
+    page.on('dialog', handler);
+    try {
+        await action();
+        await expect.poll(() => asked.length, {timeout: T}).toBeGreaterThanOrEqual(answers.length);
+    } finally {
+        page.off('dialog', handler);
+    }
+    return asked;
 }
 
 /** Wait for a notice at the top right that an action raises (armed before the action). */
@@ -459,6 +483,51 @@ test.describe('custom pages & blocks', () => {
         await expect(blocks.emptyRow).toHaveText(whole(NO_BLOCKS));
         await expect(blocks.rows).toHaveCount(0);
 
+        // Left by a press beside it: "Draft" typed and the box left (the
+        // heading pressed: with the caret still in the box the press closes
+        // the window without asking, T-ojs-1), a press on the shaded page
+        // asks the question; "Cancel" keeps the window and the name, "OK"
+        // closes the block window alone, the manager's list still empty
+        // (Rules 30, 30a).
+        block = await blocks.addBlock();
+        await block.typeName('en', 'Draft');
+        await block.blur();
+        let questions = await questionsDuring(page, ['dismiss'], () => block.pressShade());
+        expect(questions).toEqual([{type: 'confirm', message: CHANGED_QUESTION}]);
+        await expect(block.form).toBeVisible();
+        await expect(block.nameInput('en')).toHaveValue('Draft');
+        questions = await questionsDuring(page, ['accept'], () => block.pressShade());
+        expect(questions).toEqual([{type: 'confirm', message: CHANGED_QUESTION}]);
+        await expect(block.form).toBeHidden();
+        await expect(blocks.grid).toBeVisible();
+        await expect(blocks.heading).toHaveText('Custom Block Manager');
+        await expect(blocks.emptyRow).toHaveText(whole(NO_BLOCKS));
+        await expect(blocks.rows).toHaveCount(0);
+
+        // Left by a reload, then by "Edit Profile": "Draft" typed and the box
+        // left (the heading pressed), each asks the browser's own page-leave
+        // question (a beforeunload dialog: its type is asserted, never its
+        // words); left, the list reopened still empty (Rules 30b, 30c).
+        block = await blocks.addBlock();
+        await block.typeName('en', 'Draft');
+        await block.blur();
+        questions = await questionsDuring(page, ['accept'], () => page.reload());
+        expect(questions.map((q) => q.type)).toEqual(['beforeunload']);
+        await plugins.goto();
+        blocks = await plugins.openBlockManager();
+        await expect(blocks.emptyRow).toHaveText(whole(NO_BLOCKS));
+        await expect(blocks.rows).toHaveCount(0);
+        block = await blocks.addBlock();
+        await block.typeName('en', 'Draft');
+        await block.blur();
+        questions = await questionsDuring(page, ['accept'], () => block.editProfile(manager));
+        expect(questions.map((q) => q.type)).toEqual(['beforeunload']);
+        await expect(page).toHaveURL(/\/user\/profile/);
+        await plugins.goto();
+        blocks = await plugins.openBlockManager();
+        await expect(blocks.emptyRow).toHaveText(whole(NO_BLOCKS));
+        await expect(blocks.rows).toHaveCount(0);
+
         // Added: the window closes, no notice at the top right (the plugin's
         // notice, read the same way, was the control), one row; the visitor's
         // home page shows no block yet (Rules 18, 18a).
@@ -517,11 +586,47 @@ test.describe('custom pages & blocks', () => {
         const names = await blocks.rowNames();
         expect(names).toContain('our-partners');
         expect(names.filter((n) => n !== 'our-partners')).toEqual([expect.stringMatching(/^our-partners[0-9a-z]+$/)]);
+        const second = names.find((n) => n !== 'our-partners');
 
-        // Control: unticked and saved, the visitor's home page shows no block
-        // (Rule 19).
+        // Deleted: the second block placed shows in the sidebar; its "Delete"
+        // asks in a window headed "Delete" with "OK" and "Cancel"; "OK"
+        // closes it and takes the row out of the list, the block out of the
+        // visitor's sidebar ("Friends" stays) and out of "Sidebar" (Rules 14,
+        // 19, 20, 24). The block is found by the name the save made, never by
+        // the words shown for it (A1).
         await sidebar.goto();
-        await sidebar.place('our-partners', false);
+        await expect(sidebar.box(second)).toHaveCount(1);
+        await expect(sidebar.box(second)).not.toBeChecked();
+        expect(await sidebar.place(second, true)).toBe(200);
+        await home.goto(homeUrl);
+        await expect(home.blockContent(second)).toHaveText('Second list.');
+        await expect(home.blockHeading('our-partners')).toHaveText('Friends');
+        await plugins.goto();
+        blocks = await plugins.openBlockManager();
+        await expect(blocks.rows).toHaveCount(2);
+        await blocks.openDelete(second);
+        await expect(blocks.deleteDialogHeading()).toHaveText('Delete');
+        await expect(blocks.deleteDialog()).toContainText(DELETE_QUESTION);
+        await expect(blocks.deleteDialogButton('OK')).toBeVisible();
+        await expect(blocks.deleteDialogButton('Cancel')).toBeVisible();
+        expect(await blocks.confirmDelete()).toBe(200);
+        await expect(blocks.deleteDialog()).toBeHidden();
+        await expect(blocks.rows).toHaveCount(1);
+        await expect(blocks.row(second)).toHaveCount(0);
+        await expect(blocks.row('our-partners')).toHaveCount(1);
+        await home.goto(homeUrl);
+        await expect(home.blockHeading('our-partners')).toHaveText('Friends');
+        await expect(home.block(second)).toHaveCount(0);
+        await expect(home.sidebar.getByText('Second list.')).toHaveCount(0);
+        await expect(home.customBlocks).toHaveCount(1);
+        await sidebar.goto();
+        await expect(sidebar.box('our-partners')).toBeChecked();
+        await expect(sidebar.box(second)).toHaveCount(0);
+
+        // Control: unticked and saved (the first "Appearance" › "Setup" save
+        // after the delete, the deleted block's place still stored, A2), the
+        // visitor's home page shows no block (Rule 19).
+        expect(await sidebar.place('our-partners', false)).toBe(200);
         await home.goto(homeUrl);
         await expect(home.customBlocks).toHaveCount(0);
         await expect(home.header).toBeVisible();
