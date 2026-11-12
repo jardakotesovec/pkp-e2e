@@ -17,9 +17,12 @@
  *   never read.
  * - A7 🐞: no list order is read before an order is saved; S2 reads the
  *   order it finds on entering ordering mode and moves from there.
+ * - A8 🐞: the red notice a refused "URL Path" leaves (S1, S2) is never
+ *   read as the contract.
  * - A4, A6, OJS1: not on these scenarios' paths (S3 deletes the new
  *   version's copy, never the published galley, and changes no file
- *   there). OPS1–OPS3: the preprint server's, in that tree.
+ *   there). A9: the 3.5 line's. OJS2, OJS3: not on these scenarios'
+ *   paths. OPS1–OPS3: the preprint server's, in that tree.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1 runs on publicknowledge on its own scratch submission
@@ -172,6 +175,24 @@ test.describe('galleys', () => {
         await expect(win.labelBox()).toHaveValue('Draft');
         await win.cancel();
         expect(dialogs.messages.slice(askedBefore)).toEqual([TEXT.formChanged]);
+        await expect(galleys.noItems()).toHaveText(TEXT.noItems);
+
+        // "Close" after a refused "Save": "123" refused under "URL Path" in
+        // place of its help line, the window and both boxes kept; the
+        // header "Close" then closes without asking, "No Items" still
+        // (Rules 5, 6a). The question the changed "Draft" raised above is
+        // the control; the red notice that follows is A8's, unread.
+        win = await galleys.openCreate();
+        await win.type(win.labelBox(), 'Draft');
+        await win.type(win.urlPathBox(), '123');
+        await win.saveRefused();
+        await expect(win.form()).toContainText(TEXT.urlPathNumber);
+        await expect(win.form()).not.toContainText(TEXT.urlPathHelp);
+        await expect(win.labelBox()).toHaveValue('Draft');
+        await expect(win.urlPathBox()).toHaveValue('123');
+        const askedAtRefusal = dialogs.messages.length;
+        await win.close();
+        expect(dialogs.messages.slice(askedAtRefusal)).toEqual([]);
         await expect(galleys.noItems()).toHaveText(TEXT.noItems);
 
         // "Galley Label" left empty: refused under the box, nothing sent,

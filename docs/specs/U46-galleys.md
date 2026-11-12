@@ -361,6 +361,15 @@ accounts, passwords, mail catcher's address and tooling recipe. <sup>s</sup>
      the window stays, "Draft" still typed. Press the form's "Cancel":
      the window closes without asking, and the list still reads "No
      Items" (Rules 2a, 6a).
+   - **"Close" after a refused "Save"**: press "Add galley", type
+     "Draft" in "Galley Label" and "123" in "URL Path", and press "Save":
+     "The URL path can not be a number." shows under "URL Path" in place
+     of its help line, the window stays open, and the boxes still read
+     "Draft" and "123". Press the window's header "Close" with nothing
+     changed since: the window closes without asking, and the list still
+     reads "No Items" (Rules 5, 6a). The red notice repeating that
+     refusal, which shows at the top right later in the scenario, is
+     [A8](#a8), neither a pass nor a fail here.
    - **"Galley Label" left empty**: press "Add galley", then "Save" with
      the label empty: "This field is required." shows under the box and
      the window stays open (Fields).
@@ -661,12 +670,12 @@ Left out of the scenarios above, by reason:
     `docs/issues/U09-A11-static-page-refusal-repeated-after-save.md`):
     after two refused "URL Path" values in a galley's "Edit" window, the
     save of a good one shows no notice at the top right [report 2026-10-12]
-  - the header "Close" pressed straight after a refused "Save" in a
-    galley's "Edit" or "Create New Galley" window closes it without
-    asking (Rule 6a) [report 2026-10-12]
 - **Nothing new to test**:
   - a new galley's place in the list, before and after a saved order
     (Rule 8d)
+  - the header "Close" straight after a refused "Save" in a galley's
+    "Edit" window, which closes it without asking as "Create New
+    Galley"'s does in scenario 1 (Rule 6a)
   - the unsaved-changes question on a switch to the "Identifiers" tab,
     which needs galley identifiers switched on (Rule 6a; Settings
     bullets 1 and 2)

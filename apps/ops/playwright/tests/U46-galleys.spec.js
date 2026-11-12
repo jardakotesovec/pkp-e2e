@@ -21,6 +21,8 @@
  *   never read.
  * - A7 🐞: no list order is read before an order is saved; S2 reads the
  *   order it finds on entering ordering mode and moves from there.
+ * - A8 🐞: the red notice S1's refused "URL Path" shows later is read
+ *   neither way.
  * - OPS2 🐞: S7's Moderator without "Permissions" is read on the "Edit"
  *   window only; "Add galley", "Save Order", "Delete" and "Change File"
  *   are never pressed there.
@@ -28,7 +30,7 @@
  *   uploaded; no seeded galley's "Change File" is pressed by an Author.
  * - A4, A6: not on these scenarios' paths (S3 deletes the new version's
  *   copy, never the published galley, and changes no file there). OJS1:
- *   the journal's, in that tree.
+ *   the journal's, in that tree. A9: 3.5's, not this line's.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1 and S6 run on publicknowledge on their own scratch
@@ -189,6 +191,29 @@ test.describe('galleys', () => {
         await win.cancel();
         expect(dialogs.messages.slice(askedBefore)).toEqual([TEXT.formChanged]);
         await expect(galleys.noItems()).toHaveText(TEXT.noItems);
+
+        // "Close" after a refused "Save": "123" in "URL Path" is refused in
+        // place of the help line, the window and both boxes kept; the header
+        // "Close", nothing changed since, closes without asking (the
+        // question above is the control, read off the same recorder) and
+        // the list still reads "No Items" (Rules 5, 6a). The red notice the
+        // refusal shows later is A8's, read neither way.
+        win = await galleys.openCreate();
+        await expect(win.form()).toContainText(TEXT.urlPathHelp);
+        await win.type(win.labelBox(), 'Draft');
+        await win.type(win.urlPathBox(), '123');
+        await win.saveRefused();
+        await expect(win.form()).toContainText(TEXT.urlPathNumber);
+        await expect(win.form()).not.toContainText(TEXT.urlPathHelp);
+        await expect(win.dialog()).toBeVisible();
+        await expect(win.labelBox()).toHaveValue('Draft');
+        await expect(win.urlPathBox()).toHaveValue('123');
+        const askedAtRefusal = dialogs.messages.length;
+        await win.close();
+        expect(dialogs.messages.slice(askedAtRefusal)).toEqual([]);
+        await expect(galleys.addButton()).toBeVisible();
+        await expect(galleys.noItems()).toHaveText(TEXT.noItems);
+        await expect(galleys.rows()).toHaveCount(0);
 
         // "Galley Label" left empty: refused under the box, nothing sent,
         // the window stays (Fields).
