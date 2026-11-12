@@ -3,7 +3,7 @@
  * @file playwright/tests/U47-media-files.spec.js
  *
  * Media files — OMP suite, one test per canonical scenario the spec runs on
- * a press (S1–S6 common; S7 {OJS OMP}; S8 {OMP}), in the press's own
+ * a press (S1–S6 common; S7 {OJS OMP}; S8 and S9 {OMP}), in the press's own
  * words: the Press Manager, a monograph, "HTML Stylesheet" where a journal
  * uses "Multimedia" (a new press has no Multimedia component), the Series
  * Editor, the book page and its "HTML" publication format.
@@ -25,8 +25,10 @@
  * scratch presses with throwaway accounts (the username twice as
  * password), as footnote t says: `mediaFiles[]` (names, media types,
  * resolutions, pairs), `components` (S6, on "HTML Stylesheet"), `roles`
- * with `participants[]` (S4, S8), `decisions`, `publicationFormats[]` (S7),
- * `published` (S5, S7). No key makes a second version: S5 uses "Create New
+ * with `participants[]` (S4, its second Layout Editor with
+ * `canChangeMetadata: false`; S8), `decisions`, `publicationFormats[]`
+ * (S7, S9), `published` (S5, S7, S9), `plugins` (S9, "HTML Monograph
+ * File" off). No key makes a second version: S5 uses "Create New
  * Version" (U49's opener). S7's reader reads the format signed in (the
  * HTML plugin's anonymous page cache, OJS1's mechanism).
  *
@@ -39,6 +41,7 @@
  * headless, ccK1). Waits are web-first or bounded by the screen's own
  * answer (A5). Everything runs in the parallel `omp` project.
  */
+const fs = require('fs');
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
@@ -198,6 +201,16 @@ async function figureWidth(page) {
         }
         return el.complete ? el.naturalWidth : -1;
     });
+}
+
+/**
+ * Assert a row's "…" menu holds exactly `items` (web-first, so a menu
+ * still filling is not read short), the menu closed again.
+ */
+async function expectMenuOnly(media, name, items) {
+    await media.openMenu(name);
+    await expect(media.menuItems()).toHaveText(items, {timeout: 30_000});
+    await media.closeMenu(name);
 }
 
 test.describe('media files', () => {
@@ -644,11 +657,13 @@ test.describe('media files', () => {
         const tag = makeTag('s4', testInfo);
         const seriesEditor = `${tag}se`;
         const layoutEditor = `${tag}le`;
+        const layoutEditorNoPerm = `${tag}lx`;
         const {author} = await seedPress(ompApi, tag, {
             roles: {layoutEditor: {permitMetadataEdit: true}},
             extra: [
                 user(seriesEditor, 'Sara', 'Series', ['sectionEditor']),
                 user(layoutEditor, 'Leo', 'Layout', ['layoutEditor']),
+                user(layoutEditorNoPerm, 'Lena', 'Layout', ['layoutEditor']),
             ],
         });
         const submission = await ompApi.createSubmission({
@@ -659,6 +674,7 @@ test.describe('media files', () => {
             participants: [
                 {username: seriesEditor, role: 'sectionEditor'},
                 {username: layoutEditor, role: 'layoutEditor'},
+                {username: layoutEditorNoPerm, role: 'layoutEditor', canChangeMetadata: false},
             ],
             mediaFiles: [{file: 'figure.png'}],
         });
@@ -688,6 +704,21 @@ test.describe('media files', () => {
         await link.choose('profile-image-400.png');
         await link.submit();
         await le.media.expectPair('figure.png', 'profile-image-400.png');
+
+        // The Layout Editor without "Permissions": the pair, no "Add Media
+        // File" and no "Batch Link Media", each row's "…" holding only
+        // "More Information" (Actors row 2; Rule 7; Settings bullet 4). The
+        // positive control is the Layout Editor's page just above, read the
+        // same way, which showed both buttons and the full menu.
+        const lx = await pageAs(asUser, layoutEditorNoPerm, tag);
+        await lx.frame.gotoEditorial(submission.submissionId);
+        await lx.media.openFromMenu();
+        await lx.media.expectNames(['figure.png', 'profile-image-400.png']);
+        await lx.media.expectPair('figure.png', 'profile-image-400.png');
+        await expect(lx.media.batchButton()).toHaveCount(0);
+        await expect(lx.media.addButton()).toHaveCount(0);
+        await expectMenuOnly(lx.media, 'figure.png', ['More Information']);
+        await expectMenuOnly(lx.media, 'profile-image-400.png', ['More Information']);
 
         // The Author, from "View" on My Submissions: the pair, with no
         // buttons and no "…" on any row (Actors rows 1–2).
@@ -1018,5 +1049,57 @@ test.describe('media files', () => {
         await expect(ce.frame.publicationGroup()).toBeVisible();
         await expect(ce.frame.versionNodes()).toHaveCount(0);
         await expect(ce.media.table()).toHaveCount(0);
+    });
+
+    test('S9: an HTML file with "HTML Monograph File" off', async ({asUser, ompApi}, testInfo) => {
+        test.setTimeout(180_000);
+        const tag = makeTag('s9', testInfo);
+        const reader = `${tag}rd`;
+        const {manager, author} = await seedPress(ompApi, tag, {
+            extra: [user(reader, 'Rhea', 'Reader', ['reader'])],
+            plugins: {htmlmonographfileplugin: {enabled: false}},
+        });
+        const submission = await ompApi.createSubmission({
+            tag,
+            context: tag,
+            submitter: author,
+            decisions: PRODUCTION,
+            publicationFormats: [{name: 'HTML', file: 'article.html'}],
+            mediaFiles: [{file: 'figure.png'}],
+            published: true,
+        });
+
+        // The book page's "HTML" link: the Reader, signed in, presses it;
+        // the browser downloads the HTML file and stays on the book page,
+        // with no frame showing the file, so "figure.png" is shown nowhere
+        // (Settings bullet 6; Side effects). The download is the press's
+        // own answer, which bounds the absence read after it.
+        const rd = await pageAs(asUser, reader, tag);
+        const bookPath = `/index.php/${tag}/catalog/book/${submission.submissionId}`;
+        await rd.page.goto(bookPath);
+        const formatLink = rd.page.locator(`a[href*="/catalog/view/${submission.submissionId}/"]`);
+        await expect(formatLink).toHaveCount(1, {timeout: 30_000});
+        await expect(formatLink).toContainText('HTML');
+        const answered = rd.page.waitForResponse((r) => r.url().includes(`/catalog/view/${submission.submissionId}/`), {timeout: 30_000});
+        const downloaded = rd.page.waitForEvent('download', {timeout: 30_000});
+        await formatLink.click();
+        const [response, download] = await Promise.all([answered, downloaded]);
+        expect(response.status()).toBe(200);
+        expect(response.headers()['content-disposition']).toMatch(/^attachment/);
+        expect(download.suggestedFilename()).toBe('article.html');
+        const saved = await download.path();
+        expect(fs.readFileSync(saved).equals(fs.readFileSync(fixture('article.html'))), 'the download is the HTML file').toBe(true);
+        await expect(rd.page).toHaveURL(new RegExp(`${bookPath}$`));
+        await expect(formatLink).toBeVisible();
+        await expect(rd.page.locator('iframe')).toHaveCount(0);
+
+        // Control: the Press Manager's "Media" page of the published
+        // version lists "figure.png", "Image" without "High resolution"
+        // (Fields; Rule 8).
+        const jm = await pageAs(asUser, manager, tag);
+        await jm.frame.gotoEditorial(submission.submissionId);
+        await jm.media.openFromMenu();
+        await jm.media.expectNames(['figure.png']);
+        await jm.media.expectType('figure.png', [IMAGE]);
     });
 });

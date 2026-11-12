@@ -3,7 +3,7 @@
  * @file playwright/tests/U47-media-files.spec.js
  *
  * Media files — OJS suite, one test per canonical scenario the spec runs on
- * OJS (S1–S6 common; S7 {OJS OMP}; S8 is the press's, in the OMP tree).
+ * OJS (S1–S6 common; S7 {OJS OMP}; S8 and S9 are the press's, in the OMP tree).
  * Spec: docs/specs/U47-media-files.md
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
@@ -24,7 +24,8 @@
  * scratch journals with throwaway accounts (the username twice as
  * password), as footnote t says: `mediaFiles[]` (names, media types,
  * resolutions, pairs), `components` (S6), `roles` with
- * `participants[]` (S4), `decisions`, `galleys[]` (S7), `published` with
+ * `participants[]` (S4, the second Layout Editor with
+ * `canChangeMetadata: false`), `decisions`, `galleys[]` (S7), `published` with
  * the journal's `issues[]` (S5, S7). No key makes a second version: S5 uses
  * "Create New Version" (U49's opener). S7's reader reads the galley signed
  * in (OJS1).
@@ -594,11 +595,13 @@ test.describe('media files', () => {
         const tag = makeTag('s4', testInfo);
         const sectionEditor = `${tag}se`;
         const layoutEditor = `${tag}le`;
+        const viewer = `${tag}lv`;
         const {author} = await seedJournal(ojsApi, tag, {
             roles: {layoutEditor: {permitMetadataEdit: true}},
             extra: [
                 user(sectionEditor, 'Sara', 'Section', ['sectionEditor']),
                 user(layoutEditor, 'Leo', 'Layout', ['layoutEditor']),
+                user(viewer, 'Lena', 'Layout', ['layoutEditor']),
             ],
         });
         const submission = await ojsApi.createSubmission({
@@ -609,6 +612,7 @@ test.describe('media files', () => {
             participants: [
                 {username: sectionEditor, role: 'sectionEditor'},
                 {username: layoutEditor, role: 'layoutEditor'},
+                {username: viewer, role: 'layoutEditor', canChangeMetadata: false},
             ],
             mediaFiles: [{file: 'figure.png'}],
         });
@@ -639,6 +643,22 @@ test.describe('media files', () => {
         await link.submit();
         await le.media.expectPair('figure.png', 'profile-image-400.png');
 
+        // The Layout Editor without "Permissions": the pair, no buttons, and
+        // each row's "…" holds only "More Information" (Actors row 2; Rule 7;
+        // Settings bullet 4). The loaded pair is the control for the
+        // buttons' absence; the Section Editor's full menu above is the
+        // control for the short one.
+        const lv = await pageAs(asUser, viewer, tag);
+        await lv.frame.gotoEditorial(submission.submissionId);
+        await lv.media.openFromMenu();
+        await lv.media.expectNames(['figure.png', 'profile-image-400.png']);
+        await lv.media.expectPair('figure.png', 'profile-image-400.png');
+        await expect(lv.media.menuButton('figure.png')).toHaveCount(1);
+        await expect(lv.media.batchButton()).toHaveCount(0);
+        await expect(lv.media.addButton()).toHaveCount(0);
+        expect(await lv.media.menuOffers('figure.png')).toEqual([TEXT.menuFull[0]]);
+        expect(await lv.media.menuOffers('profile-image-400.png')).toEqual([TEXT.menuFull[0]]);
+
         // The Author, from "View" on My Submissions: the pair, with no
         // buttons and no "…" on any row (Actors rows 1–2).
         const au = await pageAs(asUser, author, tag);
@@ -660,8 +680,8 @@ test.describe('media files', () => {
         expect(got.status).toBe(200);
         expect(got.disposition).toMatch(/attachment/);
 
-        // Control: the Section Editor's page, opened the same way, shows
-        // both buttons and each row's "…" (Actors row 2).
+        // Control: the Section Editor reopens the page: both buttons and
+        // each row's "…" are there (Actors row 2).
         await se.frame.gotoEditorial(submission.submissionId);
         await se.media.openFromMenu();
         await se.media.expectNames(['figure.png', 'profile-image-400.png']);

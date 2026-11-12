@@ -570,8 +570,8 @@ mail catcher's address and tooling recipe. <sup>t</sup>
 
    - **"Edit Metadata" on an image**: open the article's workflow and
      note the Tasks bell's number, then side menu "Publication"
-     ("Preprint" on a preprint server) › the version › "Media", and on the "figure.png" row press "…" › "Edit
-     Metadata": a window titled "Edit Metadata" holds "Name of the file"
+     ("Preprint" on a preprint server) › the version › "Media", and on
+     the "figure.png" row press "…" › "Edit Metadata": a window titled "Edit Metadata" holds "Name of the file"
      with the help "(e.g., Manuscript; Table 1)", reading "figure.png",
      then "Caption", "Credit", "Copyright Owner" and "Permission Terms",
      each empty (Fields, the "Edit Metadata" window).
@@ -632,8 +632,9 @@ mail catcher's address and tooling recipe. <sup>t</sup>
    Given: a Section Editor and, on a journal or press, a Layout Editor
    whose role has "Permit submission metadata edit." ticked, both
    assigned to a scratch article in Production on a scratch journal with
-   the assignment's "Permissions" box ticked, and the article's Author;
-   the article carries an "Image" media file "figure.png" at "Web
+   the assignment's "Permissions" box ticked, a second Layout Editor
+   assigned to it with that box unticked, and the article's Author; the
+   article carries an "Image" media file "figure.png" at "Web
    resolution".
 
    - **The Section Editor**: open the article's workflow, then side menu
@@ -650,20 +651,25 @@ mail catcher's address and tooling recipe. <sup>t</sup>
      "figure.png" row press "…" › "Manually Link Media", choose
      "profile-image-400.png" and press "Link Media": the two rows share
      one "ID" cell, "figure.png" first (Actors row 2; Settings bullet 4).
+   - **The Layout Editor without "Permissions"** {OJS OMP}: the second
+     Layout Editor opens the same page: the list shows "figure.png" and
+     "profile-image-400.png" sharing one "ID" cell, with no "Add Media
+     File" and no "Batch Link Media", and each row's "…" menu holds only
+     "More Information" (Actors row 2; Rule 7; Settings bullet 4).
    - **The Author**: the Author opens the article with "View" on My
-     Submissions, then side menu "Publication" › the version › "Media":
-     the list shows "figure.png" and "profile-image-400.png" (as a pair,
-     on a journal or press), with no "Batch Link Media", no "Add Media
-     File" and no "…" button on any row (Actors rows 1–2).
+     Submissions, then side menu "Publication" ("Preprint" on a preprint
+     server) › the version › "Media": the list shows "figure.png" and
+     "profile-image-400.png" (a pair; each alone on a preprint server),
+     with no "Batch Link Media", no "Add Media File" and no "…" button on
+     any row (Actors rows 1–2).
    - **The Author's download**: press "figure.png": a new, empty tab
      opens and the browser downloads the file (Actors row 1; Fields,
      File Name).
-   - **Control**: the Section Editor's page, opened the same way, showed
-     "Batch Link Media", "Add Media File" and each row's "…" button
-     (Actors row 2). <sup>t</sup>
+   - **Control**: the Section Editor reopens the page: "Batch Link
+     Media", "Add Media File" and each row's "…" button are there (Actors
+     row 2). <sup>t</sup>
 
-   On a preprint server there is no Layout Editor; the Section Editor's
-   steps are the scenario there.
+   On a preprint server every bullet without {OJS OMP} runs.
 
 5. **A published version's media files and a new version**
 
@@ -800,6 +806,29 @@ mail catcher's address and tooling recipe. <sup>t</sup>
      its side menu's "Publication" heading has nothing under it (Actors
      row 2). <sup>t</sup>
 
+9. **An HTML file with "HTML Monograph File" off** {OMP}
+
+   Given: a Press Manager and a Reader, on a scratch press whose "HTML
+   Monograph File" plugin is off, with a published scratch monograph
+   whose publication format "HTML" has an HTML file that shows an image
+   named "figure.png", and one media file, an "Image" named "figure.png"
+   at "Web resolution".
+
+   - **The book page's "HTML" link**: the Reader, signed in, opens the
+     book's page on the press's public site and presses its "HTML"
+     link: the browser downloads the HTML file instead of showing a
+     page, so the image "figure.png" is shown nowhere (Settings bullet
+     6; Side effects).
+   - **Control**: the Press Manager opens the monograph's workflow, then
+     side menu "Publication" › the published version › "Media": the
+     list shows "figure.png" with "Image" and without "High resolution"
+     (Fields; Rule 8). <sup>t</sup>
+
+   On a journal the same end of the "HTML Article Galley" plugin is
+   *[Article landing page & reading](U13-article-landing-page-and-reading.md)*'s;
+   on a preprint server no page shows an HTML galley [OPS1](#ops1), so
+   the scenario has no analogue there.
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -808,9 +837,7 @@ Left out of the scenarios above, by reason:
   - the guard for A5 (issue report `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`): change a media file's "Name of the file" in "Edit Metadata", leave with "Cancel" › "Yes", and check the row and the reopened box show the saved name, and that a "Save" of another field does not store the abandoned one. [report 2026-10-02]
   - the guard for A3 (issue report `docs/issues/U47-A3-media-upload-window-hidden-drop-button.md`): on the empty "Upload Media File" window, check that the buttons in the accessibility tree are the side window's top bar, "Close" and "Click to upload files", and that Tab from "Click to upload files" lands on a control on screen. [report 2026-10-02]
   - the guard for OMP2 (issue report `docs/issues/U47-OMP2-press-copyeditor-media-download-refused.md`): on a press, a Copyeditor assigned to a monograph in Copyediting is not offered "Media" in the side menu, while a Layout Editor in Production keeps the page and the download. [report 2026-10-02]
-  - an assigned Layout Editor without "Permissions" sees the "Media" list with no "Add Media File" or "Batch Link Media" and only "More Information" in a row's "…" menu, while an editor whose assignment allows changes keeps every action (Actors row 2; Rule 7; A1 retired). [other 2026-11-06]
   - the guard for A6 (issue report `docs/issues/U47-A6-media-jats-upload-server-log-warning.md`): on a version's "Media" page, add a media file through "Add Media File" and "Upload Files" (Rule 2), and check that the web server's error log, which no screen shows, holds no PHP warning for that upload (A6 quotes the warning; where the log is and how to read it is in the footnote). <sup>f-a6</sup> [report 2026-10-07]
-  - {OMP} "HTML Monograph File" off, the book page's link to an HTML file: the browser downloads the file and stays on the book page, so no media file is shown (Settings bullet 6; OMP1 retired). [upstream 2026-10-05]
 - **Rarely met**:
   - no component marked as a dependent file, where "Upload Media File"
     holds only "No media types are configured. Please contact the
@@ -1331,14 +1358,16 @@ the dialog nor a refused request.
 **t** — Scenario seeding. Scenarios 1 and 2 run on the seeded journal,
 press and preprint server (`publicknowledge`) as `manager.maya`
 (password as users.md gives it), on a scratch submission of that
-context from `POST scenarios/submission`. Scenarios 3 to 8 run on their
+context from `POST scenarios/submission`. Scenarios 3 to 9 run on their
 own scratch context from `POST scenarios/context`, with throwaway
 `users[]` (password: the username twice): `manager` everywhere, plus
 `author` (the submitter), `sectionEditor` (the Moderator on OPS) and,
 on OJS and OMP, `layoutEditor` in scenario 4, with `roles:
 {layoutEditor: {permitMetadataEdit: true}}` so that `participants[]`
 (both roles, `canChangeMetadata` left to the role) arrives with
-"Permissions" ticked (Settings bullet 4); `reader` in scenario 7;
+"Permissions" ticked (Settings bullet 4), plus a second `layoutEditor`
+account in `participants[]` with `canChangeMetadata: false`, which
+leaves its box unticked; `reader` in scenarios 7 and 9;
 `funding`, `copyeditor` and `marketing` in scenario 8, each in
 `participants[]` of both monographs. Scenario 6 seeds `components:
 {Multimedia: {fileVariants: true, metadata: 'supplementary'}}` (OMP:
@@ -1347,7 +1376,9 @@ on OJS and OMP, `layoutEditor` in scenario 4, with `roles:
 OPS; the Production stage on OJS `['sendExternalReview', 'accept',
 'sendToProduction']`, on OMP `['skipExternalReview',
 'sendToProduction']`, none on OPS; scenario 8 `['sendExternalReview']`
-and `['skipExternalReview']`. Scenarios 5 and 7 add `published: true`.
+and `['skipExternalReview']`. Scenarios 5, 7 and 9 add `published: true`;
+scenario 9 (OMP only) seeds its press with `plugins:
+{htmlmonographfileplugin: {enabled: false}}`.
 Media files come from `mediaFiles[]`, `genre` "Image" and `resolution`
 web unless stated: scenario 2 `figure.png` and `not-an-image.png` named
 `fig1-web.png` and `fig2-web.png`, `profile-image-400.png` and
@@ -1362,8 +1393,9 @@ scenario 3 `{file: 'not-an-image.txt', genre: 'HTML Stylesheet', name:
 'Multimedia' (OMP 'HTML Stylesheet'), name: 'clip-web.pdf'}` and
 `{file: 'profile-image-400.png', resolution: 'high_resolution', name:
 'figure-large.png'}`; scenario 7 `{file: 'profile-image-400.png',
-resolution: 'high_resolution', name: 'figure.png'}`. Scenario 7's reader
-file is the fixture `article.html`, which names `figure.png`: on OJS
+resolution: 'high_resolution', name: 'figure.png'}`; scenario 9
+`{file: 'figure.png'}`. The reader file of scenarios 7 and 9 is the
+fixture `article.html`, which names `figure.png`: on OJS
 `galleys: [{label: 'HTML', locale: 'en', file: 'article.html'}]`, on
 OMP `publicationFormats: [{name: 'HTML', file: 'article.html'}]`. All
 entries of one seed share their upload second, so no scenario reads the
