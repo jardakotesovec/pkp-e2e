@@ -95,13 +95,16 @@ that fails validation keeps the panel open with the error on the field and
 
 **The data citation panel** ("Add Data Citation", "Edit Data Citation") is
 the same form for adding and editing. A refused save keeps the panel
-open, as above. With both required boxes filled, a save refused for a
-wrong "Year", "URL" or ORCID iD also shows, at the page's top right, the
-notice "The form was not saved because {n} error(s) were encountered.
-Please correct these errors and try again.", {n} counting the refused
-fields. A save with nothing filled shows none. Not seen: a wrong value
-beside an empty required box, and a refused "Identifier type" or
-"Identifier". Each message stands under its box but is not tied to it,
+open, as above, and grays out "Save" until every box it refused has been
+changed: a change clears that box's message alone (the "Creators" table
+counts as one box), and a refused box left as it was keeps its message
+and keeps "Save" grayed out. With both required boxes filled, a save
+refused for a wrong "Year", "URL" or ORCID iD also shows, at the
+page's top right, the notice "The form was not saved because {n}
+error(s) were encountered. Please correct these errors and try again.",
+{n} counting the refused fields. A save with nothing filled shows
+none. Not seen: a wrong value beside an empty required box, and a
+refused "Identifier type" or "Identifier". Each message stands under its box but is not tied to it,
 so a screen reader that lands on a refused box reads it as invalid
 without the reason ⚠ [A24](#a24). After a refused save the foot also
 holds a "Jump to next error" button beside "Please correct {n} errors."
@@ -639,8 +642,9 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      alone. Press the box's "Clear search phrase" (×): all three rows are
      back (Rule 8).
    - **The Author's read-only page** (journal, press): the submission's
-     Author: open the same page of their own submission: the three rows are listed, **Add** and "Delete all
-     references" are grayed out, and the rows carry no "…" menu; type
+     Author: open the same page of their own submission: the three rows
+     are listed, **Add** and "Delete all references" are grayed out, and
+     the rows carry no "…" menu; type
      "Delta paper 2023" in the "Add" box: the box takes it, but **Add**
      stays grayed out; type "gamma" in the search box and press Enter:
      the table lists "Gamma report 2022" alone (Rule 9).
@@ -681,8 +685,24 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
    - **On "Review"**: press "Continue" on each following step until
      "Review": its "Details" section lists under "References" "Beta trial
      2021", "Alpha study 2020" and "Beta trial 2021", one per line, the
-     repeated line kept; complete the submission with "Submit" ›
-     "Submit" (Rule 16).
+     repeated line kept (Rule 16).
+   - **"Save for Later"**: open "Details" from the step rail, add a
+     fourth line, "Delta paper 2023", and press the footer's "Save for
+     Later": the "Saved for Later" screen shows. Open the unfinished
+     submission again and press "Continue" on each step until "Review":
+     its "Details" section lists the four lines under "References",
+     "Delta paper 2023" last (Rule 16).
+   - **The footer's "Back"**: open "Details" from the step rail, replace
+     "Delta paper 2023" with "Epsilon note 2024" and press the footer's
+     "Back": "Upload Files" shows. Press "Review" in the step rail: its
+     "Details" section lists "Epsilon note 2024" last under "References"
+     (Rule 16).
+   - **The step rail to "Review"**: open "Details" from the step rail,
+     replace "Epsilon note 2024" with a line of three spaces and press
+     "Review" in the step rail: its "Details" section lists "Beta trial
+     2021", "Alpha study 2020" and "Beta trial 2021" under "References"
+     and nothing for the line of spaces; complete the submission with
+     "Submit" › "Submit" (Rule 16).
    - **The Journal Manager's list**: Journal Manager: open the new
      submission's workflow, then its Publication area, then
      "References": the rows read "Beta trial 2021", "Alpha study 2020"
@@ -695,8 +715,10 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
    Given: Reader, on the seeded journal, with a published scratch
    submission whose references are "Zulu report 2019" and "Alpha study
-   2020 https://example.org/alpha", in that order, and a second published
-   scratch submission with no references.
+   2020 https://example.org/alpha", in that order, a second published
+   scratch submission with no references, and a third whose references
+   are "Kappa survey 2018 https://example.org/kappa." and "Quote study
+   2013 https://example.org/a"b".
 
    - **The "References" block**: open the first item's landing page (an
      article's page; on a press the catalog's book page, on a preprint
@@ -705,6 +727,13 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      paragraph each, in list order (Rule 27).
    - **The linked address**: "https://example.org/alpha" is a link, and
      it opens in a new tab (Rule 27).
+   - **An address followed by a full stop**: open the third item's
+     landing page: "Kappa survey 2018 https://example.org/kappa." shows
+     as written, and its link covers "https://example.org/kappa" without
+     the full stop and opens "https://example.org/kappa" (Rule 27a).
+   - **An address with a double quote**: on the same page, "Quote study
+     2013 https://example.org/a"b" shows whole, and its link opens
+     "https://example.org/a" in a new tab (Rule 27a).
    - **Control**: the second item's page has no "References" block at
      all: no "References" heading and no reference text (Rule 27).
      <sup>s</sup>
@@ -713,8 +742,10 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
    Given: Journal Manager and an Author, on a scratch journal at the
    install defaults, with a published scratch submission whose one
-   reference is "Alpha study 2020" and the Author's own unfinished
-   submission carrying its file.
+   reference is "Alpha study 2020", the Author's own unfinished
+   submission carrying its file, and a submitted scratch submission whose
+   one reference, typed in the wizard's References box, is "Alpha study
+   2020. https://doi.org/10.1234/abcd".
 
    - **"Do not request…"**: open Settings › Workflow › Submission ›
      "Metadata"; under "References" the box "Enable references metadata"
@@ -728,10 +759,10 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      metadata": the "References Metadata Lookup" box disappears; save.
      The published submission's Publication area lists no "References"
      entry. Author: the unfinished submission's "Details" step still has
-     no References box. Open the published item's landing page (an article's page; on a
-     press the catalog's book page, on a preprint server the preprint's
-     page): its "References" block still lists "Alpha study 2020"
-     (Rules 2, 27; Settings bullets 1, 2).
+     no References box. Open the published item's landing page (an
+     article's page; on a press the catalog's book page, on a preprint
+     server the preprint's page): its "References" block still lists
+     "Alpha study 2020" (Rules 2, 27; Settings bullets 1, 2).
    - **"Require…"**: tick "Enable references metadata" again, choose
      "Require the author to provide references before accepting their
      submission." and save. Author: open the unfinished submission again
@@ -746,6 +777,43 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      until "Review", then "Submit" › "Submit": the submission completes.
      Journal Manager: the new submission's "References" page lists "Gamma
      report 2022" (Rule 16).
+   - **References added with lookup off**: Journal Manager: open the
+     workflow of the submission whose reference is "Alpha study 2020.
+     https://doi.org/10.1234/abcd", then its Publication area, then
+     "References"; type these eight lines in the "Add" box and press
+     **Add**: "Bravo letter 2019 (doi:10.1234/bravo).", "Charlie note
+     2018, doi:10.1234/charlie, p. 4", "Delta paper 2017
+     https://dx.doi.org/10.1234/delta", "Echo report 2016
+     hdl:10419/12345. Accessed 2020-01-01.", "Foxtrot thesis 2015
+     urn:nbn:de:1234-5678, 2015.", "Golf data 2014
+     http://example.org/set/", "Hotel preprint 2021 arxiv:2101.12345v2"
+     and "Quote study 2013 https://example.org/a"b". The table lists the
+     nine references, each row showing its text (Rules 4, 5).
+   - **Lookup switched on**: on Settings › Workflow › Submission ›
+     "Metadata" tick "Enable references structuring and metadata lookup"
+     and save. Open that submission's "References" page again:
+     no "Processing references" box stands under the "Add" box, since no
+     lookup was asked for any of its references (Rule 13). The row of
+     "Alpha study 2020. https://doi.org/10.1234/abcd" shows the DOI
+     "10.1234/abcd" as a link opening doi.org, and its "Edit" shows
+     "10.1234/abcd" in "DOI" (Rule 17).
+   - **Identifiers read from the text**: open the "Edit" of each of the
+     eight rows added in turn and close it with "Close": Bravo's "DOI"
+     holds "10.1234/bravo",
+     Charlie's "DOI" "10.1234/charlie", Delta's "DOI" "10.1234/delta",
+     Echo's "Handle" "10419/12345", Foxtrot's "URN"
+     "urn:nbn:de:1234-5678" with no comma, Golf's "URL"
+     "http://example.org/set/" as written, Hotel's "Arxiv"
+     "2101.12345v2", and Quote's "URL" "https://example.org/a". The
+     rows link those DOIs, the handle, the arXiv ID and both web
+     addresses, Quote's link opening "https://example.org/a", and
+     Foxtrot's row shows "urn: urn:nbn:de:1234-5678" as plain text
+     (Rules 11 step 1, 12, 17).
+   - **"Add" with lookup on**: type "Mike memo 2011" and "November
+     review 2012" on two lines in the "Add" box and press **Add**: a box
+     under the "Add" box reads "Processing references - 0/2", counting
+     the two references just added and none of the nine before them
+     (Rule 13).
    - **Control**: before the first change, the Author's "Details" step
      showed the References box with no required mark, and the published
      submission's Publication area listed "References" (Rules 2, 16).
@@ -755,7 +823,8 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
    Given: Journal Manager, on a scratch journal with "References Metadata
    Lookup" switched on, with a scratch submission whose one reference is
-   "Alpha study 2020".
+   "Alpha study 2020" and a second whose one reference, "Delta paper
+   2023", has had its lookup fail for good.
 
    - **The page with lookup on**: open the submission's workflow, then
      its Publication area, then "References": above the "Add" box stand
@@ -799,13 +868,68 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      to "Alpha study 2020, revised" and press "Save": the row still shows
      the DOI link and the title "Alpha study", and its details now show
      "Alpha study 2020, revised" in small print (Rule 14).
+   - **"Arxiv" in its three forms**: press "Edit", type "2101.12345v2"
+     in "Arxiv" and press "Save": the row shows the arXiv ID
+     "2101.12345v2" as a link; press "Edit" again: "Arxiv" holds
+     "2101.12345v2". Replace it with "arxiv:2101.12345v2" and save, then
+     with "https://arxiv.org/abs/2101.12345v2" and save: each time the
+     reopened "Edit" holds "2101.12345v2" (Rule 12;
+     [Fields & validation](#fields)).
+   - **An author's ORCID iD**: press "Edit"; in the "Lovelace" row under
+     "Author Information" type "https://example.com/0000-0002-1825-0097"
+     in "ORCID iD" and press "Save": "The ORCID iD you specified is
+     invalid. Please include the full URI (e.g.
+     "https://orcid.org/0000-0002-1825-0097")." shows under that box and
+     the panel stays open. Replace it with "javascript:alert(1)" and
+     press "Save": the same message. Press "Close": the row's details
+     list "Lovelace Ada" with no ORCID link. Press "Edit" again, type
+     "https://orcid.org/0000-0002-1825-0097" in Ada's "ORCID iD", press
+     "Add" under "Author Information" twice, and type "Charles",
+     "Babbage" and "https://sandbox.orcid.org/0000-0002-1825-0097" in the
+     first new row and "Mary" and "Somerville" in the second, leaving its
+     "ORCID iD" empty; press "Save": the panel closes, and the row's
+     details list "Lovelace Ada" and "Babbage Charles", each with an
+     ORCID link to the address typed, and "Somerville Mary" with none
+     (Rule 12; [Fields & validation](#fields)).
+   - **"Add" with lookup on**: type "Beta trial 2021
+     https://doi.org/10.1234/efgh" and "Gamma report 2022" on two lines
+     in the "Add" box and press **Add**: both are listed after the
+     "Alpha study" row, and the box under the "Add" box reads
+     "Processing references - 0/3" (Rules 5, 13).
+   - **The lookup's first step**: let the site's background jobs run
+     once (Rule 14a) and reload the page: the "Beta trial 2021" row shows
+     the DOI "10.1234/efgh" as a link opening doi.org (Rules 11, 12).
+   - **DOIs typed by hand**: press "Edit" on the "Beta trial 2021" row,
+     replace its "DOI" with "10.5678/hand" and press "Save": the row
+     links "10.5678/hand". Press "Edit" on "Gamma report 2022", type
+     "10.5678/gamma" in "DOI" and press "Save": the row links
+     "10.5678/gamma" (Rule 14). Both are typed after the first step has
+     run; [A25](#a25) records a DOI typed before it.
+   - **"Reprocess all references"**: press it: a confirmation headed
+     "Reprocess all references" reads "This will reprocess all references
+     currently listed. You'll need to re-enter your manual changes again
+     if you continue."; press "OK". Let the site's background jobs run
+     once and reload the page: the "Beta trial 2021" row links
+     "10.1234/efgh" again and its "Edit" shows "10.1234/efgh" in "DOI";
+     the "Gamma report 2022" row still links "10.5678/gamma"; the "Alpha
+     study" row still shows the DOI link "10.1234/abcd" and the title
+     "Alpha study" (Rules 14a, 15).
+   - **A lookup failed for good**: open the second submission's
+     "References" page: the "Delta paper 2023" row carries the badge
+     "Metadata lookup failed" under its text, and its "…" menu offers
+     "Reprocess"; the box under the "Add" box reads "0 of 1 references
+     processed, 1 failed" with "The metadata lookup could not be
+     completed for some references, usually because an external service
+     was temporarily unavailable. They are marked below - you can edit
+     them by hand, or use Reprocess to try again." (Rules 12, 13).
    - **Control**: on Settings › Workflow › Submission › "Metadata"
      untick "Enable references structuring and metadata lookup" and
-     save: the "References" page shows no lookup heading or text, no
-     "Reprocess all references", no "Expand All" and no progress box; the
-     row shows only "Alpha study 2020, revised", and "Edit" offers the
-     "Edit Raw Citation" box alone. Tick the box again and save: the row
-     shows its DOI link and title again (Settings bullet 2; Rules 3, 6).
+     save: the first submission's "References" page shows no lookup
+     heading or text, no "Reprocess all references", no "Expand All" and
+     no progress box; the first row shows only "Alpha study 2020,
+     revised", and its "Edit" offers the "Edit Raw Citation" box alone.
+     Tick the box again and save: that row shows its DOI link and title
+     again (Settings bullet 2; Rules 3, 6).
      <sup>s</sup>
 
 6. **Maintain data citations**
@@ -826,6 +950,12 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      Citation" panel opens; press "Save" with nothing filled: the panel
      stays open with "This field is required." under "Title" and an error
      under "Relationship type" ([Fields & validation](#fields)).
+   - **The foot after a refused save**: the panel's foot reads "Please
+     correct 2 errors." with a "Jump to next error" button beside it, and
+     holds, for a screen reader only, a "Go to Title: This field is
+     required." button and a "Go to Relationship type: …" button; no
+     notice shows at the page's top right
+     ([Fields & validation](#fields)).
    - **Refused values**: type "Ocean temperature records" in "Title",
      choose "Supporting data that were generated for the study
      (generated)." as "Relationship type" and "DOI" as "Identifier type",
@@ -838,7 +968,28 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      iD, and press "Save": "The ORCID iD you specified is invalid. Please
      include the full URI (e.g. "https://orcid.org/0000-0002-1825-0097")."
      ([Fields & validation](#fields)).
-   - **The saved data citation**: replace the ORCID iD with
+   - **The page notice**: type "20a4" in "Year" and "example" in "URL":
+     "Save" stays grayed out, because Ada's refused ORCID iD box has not
+     changed. Type "0000-0002-1825-0097" again in Ada's ORCID iD box and
+     press "Save": "This is not a valid integer." and "This must be 4
+     digits long." show under "Year", "This is not a valid URL." under
+     "URL", and the ORCID iD message again under Ada's row; the foot
+     reads "Please correct 3 errors.", and at the page's top right the
+     notice reads "The form was not saved because 3 error(s) were
+     encountered. Please correct these errors and try again.". Replace
+     the year with "2024" and empty "URL"
+     ([Fields & validation](#fields)).
+   - **Two creators refused**: under "Creators" press "Add" and type
+     "Charles" as Given Name, "Babbage" as Family Name and
+     "0000-0002-1825-0097" as ORCID iD; press "Save": the ORCID iD
+     message shows under both rows' ORCID iD boxes, the foot reads
+     "Please correct one error." and the notice "The form was not saved
+     because 1 error(s) were encountered. Please correct these errors
+     and try again.". Replace Babbage's ORCID iD with
+     "https://orcid.org/0000-0002-1825-0097": the message is gone from
+     both rows; press "Save": it shows again under Ada's row alone
+     ([Fields & validation](#fields), "Creators").
+   - **The saved data citation**: replace Ada's ORCID iD with
      "https://orcid.org/0000-0002-1825-0097" and press "Save": the panel
      closes and the table's row shows "10.1234/abcd" above "Ocean
      temperature records" (Rules 19, 21).
@@ -849,6 +1000,15 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      change "Title" to "Ocean temperature records, revised" and press
      "Save": the row shows the new title (Rules 20, 21;
      [Fields & validation](#fields)).
+   - **Identifier types "ARXIV", "URI" and "PURL"**: press "Edit" on the
+     row, choose "ARXIV" as "Identifier type", replace "Identifier" with
+     "https://arxiv.org/abs/1234.12345v2" and press "Save": the row shows
+     "1234.12345v2" above the title. Edit it again with "3456.34567v4" as
+     "Identifier": the row shows "3456.34567v4". Again with "URI" and
+     "http://example.org/data": the row shows "http://example.org/data".
+     Again with "PURL" and "http://purl.org/dc/elements/1.1/": the row
+     shows "http://purl.org/dc/elements/1.1/", as typed (Rule 19;
+     [Fields & validation](#fields), "Identifier").
    - **Ordering**: add two more data citations the same way, "Dataset B"
      and then "Dataset C", each with "Supporting data without specifying
      whether they were generated or analyzed (supporting)." as
@@ -865,10 +1025,10 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
      This action cannot be undone."; press "Cancel": the row stays;
      delete it again and press "OK": it is gone (Rule 22).
    - **The Author's view** (journal, press): the submission's Author:
-     open the same "Data" page of their own submission: the table lists "Dataset C" and "Ocean temperature
-     records, revised" with no line under its heading, no "Order" and no
-     "Add Data Citation", and each row's "…" menu offers "View" alone
-     (Rule 20).
+     open the same "Data" page of their own submission: the table lists
+     "Dataset C" and "Ocean temperature records, revised" with no line
+     under its heading, no "Order" and no "Add Data Citation", and each
+     row's "…" menu offers "View" alone (Rule 20).
    - **Nothing else happens**: the submission's Activity Log gained no
      line from these adds, edits, moves and deletes, and no email about
      them reached the mail catcher (Side effects).
@@ -905,16 +1065,23 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 
 8. **A new version copies both lists**
 
-   Given: Journal Manager, on a scratch journal with data citations
-   switched on, with a published scratch submission whose references are
-   "Alpha study 2020" and "Beta trial 2021" and whose one data citation
-   is "Ocean temperature records".
+   Given: Journal Manager, on a scratch journal with data citations and
+   "References Metadata Lookup" switched on, with a published scratch
+   submission whose references are "Alpha study 2020" and "Beta trial
+   2021" and whose one data citation is "Ocean temperature records".
 
+   - **Lookups under way**: open the submission's workflow, then its
+     Publication area, then "References": a box under the "Add" box
+     reads "Processing references - 0/2", both references' lookups being
+     under way (Rule 13).
    - **The new version**: create a new version of the submission (see
      *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*):
      the new version's "References" page lists "Alpha study 2020" and
      "Beta trial 2021", and its "Data" page lists "Ocean temperature
      records" (Rule 26).
+   - **The copies' lookups**: the new version's "References" page reads
+     "Processing references - 0/2" under the "Add" box, counting the
+     lookups the two copies got of their own (Rules 13, 26).
    - **Changes on the new version**: on the new version, delete "Beta
      trial 2021" with "…" › "Delete" › "OK", add "Gamma report 2022"
      through the "Add" box, and delete "Ocean temperature records" the
@@ -953,10 +1120,6 @@ The accounts, passwords and tooling recipe are in the footnote. <sup>s</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - a References change carried to "Review" by the step rail, listed
-    there and submitted (Rule 16; A18 retired) [incidental 2026-09-29]
-  - a References change saved by the footer's "Back" to "Upload Files"
-    or by "Save for Later" (Rule 16) [incidental 2026-09-29]
   - the guard for A19 (issue report
     `docs/issues/U46-A5-ordering-arrows-unnamed.md`): in ordering mode each
     data citation row's up and down arrows carry names that say the
@@ -967,58 +1130,6 @@ Left out of the scenarios above, by reason:
   - the guard for A2 (issue report `docs/issues/U42-A2-pasted-repeat-reference-dropped-saved.md`): "Add" with a paste that repeats a listed reference keeps the repeated line in the box and says it was skipped, while the new lines are added [report 2026-10-04]
   - the guard for A3 (issue report `docs/issues/U42-A3-reference-search-keeps-rows-without-word.md`): "Search references here" with a word or a digit no row shows (such as "false", or "5" on a list of five references without a 5) keeps no row, and a word a row shows keeps that row [report 2026-10-04]
   - the guard for A15 (issue report `docs/issues/U42-A15-data-citation-identifier-cannot-be-removed.md`): on "Edit Data Citation", choosing the empty "Identifier type" and clearing "Identifier" removes the identifier, and a cleared "Repository", "Year" or "URL" is gone on the next "Edit" [report 2026-10-04]
-  - a reference whose lookup failed for good (Rules 12, 13; A5
-    retired): its row's "Metadata lookup failed" badge, the box counting
-    it finished, and "{processed} of {total} references processed,
-    {failed} incomplete" once the others finish (no retry runs out on a
-    test install, so the stored status stands in for it) [upstream 2026-10-06]
-  - a reference typed with its DOI into the wizard's box with lookup off
-    (Rule 17; A7 retired): the DOI kept as the reference's DOI, a link and
-    the "DOI" box of "Edit" once lookup is switched on [upstream 2026-10-06]
-  - a new version taken while its references are being looked up (Rule
-    26; A23 retired): the copies get lookups of their own, and the new
-    version's box counts them [upstream 2026-10-06]
-  - a wizard box saved again unchanged, one of its lines spaces only
-    (Rule 16): the references kept as they are, not deleted and added
-    again [upstream 2026-10-06]
-  - an arXiv ID entered with its version ([Fields & validation](#fields);
-    A12 retired): "Edit citation" keeps it in each of the three forms, the
-    lookup picks it out of a reference's text with it, and a data citation
-    of type "ARXIV" saves it, typed bare or as its address [upstream 2026-10-13]
-  - a reference author's ORCID iD in "Edit citation" ([Fields &
-    validation](#fields); A22 retired): another website's address and a
-    `javascript:` link refused under the row's box with nothing saved; a
-    full, a sandbox and an empty box saved, and only the first two linked
-    from the expanded row (owed once OJS's, OMP's and OPS's `lib/pkp`
-    carry pkp/pkp-lib#13502) [upstream 2026-10-13]
-  - identifiers read out of a reference's text (Rule 11, step 1): a DOI
-    followed by a comma or a closing bracket, a dx.doi.org address, a
-    handle followed by a sentence and a URN followed by a comma, each
-    shown whole and alone in its "Edit citation" box; a web address
-    written with "http://" or a closing "/" shown as written, there and
-    as a "URI" or "PURL" data citation [upstream 2026-10-13]
-  - the guard for A6 (retired; pkp-e2e#883): with "References Metadata Lookup" on, "Add" of new references shows "Processing references - 0/n" counting every reference added, and switching the lookup on over existing references shows no box [upstream 2026-10-07]
-  - a refused data citation save's page notice "The form was not saved
-    because {n} error(s) were encountered…" and its count, none for an
-    empty required box; two creator rows refused counted as one error,
-    and their messages cleared together by typing in one
-    ([Fields & validation](#fields), the data citation panel and
-    "Creators") [incidental 2026-10-07]
-  - the DOI written in a reference's text put back over one typed by
-    hand after "Reprocess all references" › "OK", once the lookup's
-    first step has run (Rule 14a), and a DOI typed on a reference whose
-    text holds none kept (Rule 15) [incidental 2026-10-07]
-  - a refused data citation save's foot: "Jump to next error" beside
-    "Please correct {n} errors." and, for a screen reader, one "Go to
-    {field}: {message}" button per refused field
-    ([Fields & validation](#fields), the data citation panel) [upstream 2026-10-13]
-  - a reference whose web address is followed by a full stop, read on
-    the published page: the full stop outside the address's link, which
-    opens the address shown (Rule 27a) [incidental 2026-10-21]
-  - a reference whose web address holds a double quote mark: shown
-    whole on the published page, its link opening the address up to the
-    quote in a new tab, and the same cut address linked from its row on
-    the References page with lookup on (Rules 11 step 1, 27a) [incidental 2026-10-23]
 - **Rarely met**:
   - "Data Citations" at "Do not request data citation metadata from the
     author during submission.": the "Data" page without the wizard's
@@ -1027,8 +1138,12 @@ Left out of the scenarios above, by reason:
     hidden on the "Data" page, in the wizard and in the Reviewer's
     window, and listed again once switched back on (Rule 18)
 - **Nothing new to test**:
-  - "Reprocess" and "Reprocess all references", their confirmations,
-    "OK" and "Cancel" (Rule 15)
+  - a row's "Reprocess", its confirmation, and "Cancel" on either
+    confirmation (Rule 15): "Reprocess" sends the reference through the
+    same chain as "Reprocess all references" › "OK" in scenario 5
+  - a wizard box saved again unchanged keeping its references rather
+    than deleting them and adding them again (Rule 16): "Review" and the
+    References page read the same either way, as scenario 2 reads them
   - a reference structured by hand keeping its DOI link, title and
     expander in a new version (Rule 26)
   - typing dropped without a question on "Close" or on leaving the page
@@ -2390,6 +2505,17 @@ to next error", "Save", and on the three refused values "Please correct
 not a valid integer.", "Go to Creators: The ORCID iD you specified is
 invalid. …", "Jump to next error", "Save"; the "Go to" buttons pressed
 from the keyboard: note f-a27.
+Test run 2026-11-12 (the grayed "Save" after a refused save; scenario
+6's "The page notice"), all three apps: after the save that refused
+Ada's bare iD, "20a4" typed in "Year" and "example" in "URL" left
+`button "Save" [disabled]`, the foot "Please correct one error." with
+"Go to Creators: The ORCID iD you specified is invalid. …" and the
+ORCID iD message under Ada's row; pressing "Save" timed out on "element
+is not enabled". With the same bare iD typed again in Ada's box,
+"Save" was offered and the save gave the three messages, "Please
+correct 3 errors." and the 3-error notice. `FormPage.vue` disables the
+button on the last page while `errors` holds any key, and
+`Form.vue` `fieldChanged` drops only the changed field's error.
 
 <a id="fn-q25"></a>
 **q25** — Live-probed 2026-10-07 (Rules 14a, 15; A25, A26), all three apps,
@@ -2500,8 +2626,8 @@ off. Accounts and passwords: `docs/process/users.md`; scratch journals come
 from `POST scenarios/context`, whose `metadata` key sets `citations` and
 `dataCitations` and whose `citationsMetadataLookup` key the lookup; a
 scratch submission's `citationsRaw` seeds its references (through the
-wizard's save, so with lookup off no DOI is kept) and `dataCitations[]` its
-data citations. Live-probed 2026-09-24: all three keys seeded scratch
+wizard's save, so with lookup off the identifiers in the text are kept,
+Rule 17) and `dataCitations[]` its data citations. Live-probed 2026-09-24: all three keys seeded scratch
 contexts and submissions on the three apps. A test install runs no job
 runner and has no outbound connections, so with lookup on every reference
 stays unprocessed, one structured by hand in "Edit" too (scenario 5's
@@ -2509,7 +2635,8 @@ stays unprocessed, one structured by hand in "Edit" too (scenario 5's
 jobs when asked (Rule 14a) is `runJobs()`
 (`shared/playwright/support/jobs.js`, the app's
 `php lib/pkp/tools/jobs.php run`), so a test that does it belongs in the
-serial project; one pass runs the lookup's step 1 alone (note h). Mail is read in the mail catcher
+serial project; one pass runs the lookup's step 1 alone (note h): that is
+scenario 5's "let the site's background jobs run once". Mail is read in the mail catcher
 (Mailpit, `http://127.0.0.1:8025`), scoped by the scenario's own
 addresses; a test install queues the app's email as jobs that never run,
 so the "Nothing else happens" bullets rest on the submission's Activity
@@ -2524,29 +2651,42 @@ Scenario 1: `manager.maya`; one submitted scratch submission by
 `author.alex` with no `citationsRaw`, any stage before publication.
 Scenario 2: `author.alex`'s draft (`submitted: false`) carrying its file,
 since "Submit" needs the main file (seed-facts); it reopens on "Upload
-Files", and "Continue" reaches "Details"; `manager.maya` reads the rows.
+Files", and "Continue" reaches "Details"; after "Save for Later" it is
+reopened from My Submissions; `manager.maya` reads the rows.
 Scenario 3: two scratch submissions with `published: true`, the first
 with `citationsRaw: ['Zulu report 2019', 'Alpha study 2020
-https://example.org/alpha']`; read signed out (the article page, the
+https://example.org/alpha']`, the third with `citationsRaw: ['Kappa
+survey 2018 https://example.org/kappa.', 'Quote study 2013
+https://example.org/a"b']`; read signed out (the article page, the
 catalog book page, the preprint page). Note f-a20 has the control's read
 on a book page and a preprint page (2026-10-09).
 Scenario 4: a scratch context with no `metadata` key (references at
 `request`), a throwaway manager and author in `users[]`; one published
-submission with `citationsRaw: 'Alpha study 2020'` and one draft of the
-throwaway author carrying its file. A scratch context because the
+submission with `citationsRaw: 'Alpha study 2020'`, one draft of the
+throwaway author carrying its file, and one submitted submission with
+`citationsRaw: 'Alpha study 2020. https://doi.org/10.1234/abcd'`, seeded
+while lookup is off; the lookup is switched on on screen. A scratch context because the
 scenario changes the setting (scenarios.md "The base context has plain
 defaults"); on OJS the publish needs no issue (seed-facts).
 Scenario 5: a scratch context with `citationsMetadataLookup: true` and a
 throwaway manager; one submission with `citationsRaw: 'Alpha study
-2020'`. The page refreshes itself every 7 s while the box shows (note i),
-so each read waits for the page to settle.
+2020'`, and a second with `citationsRaw: 'Delta paper 2023'` and
+`citationsLookup: 'failed'`, which ends its reference's lookup failed
+for good (FAILED, -1, note h; scenarios.md "`citationsLookup`"), since
+no retry runs out within a run on a test install. The page refreshes
+itself every 7 s while the box shows (note i), so each read waits for
+the page to settle. The scenario runs `runJobs()` twice, so its test
+belongs in the serial project, and it runs alone (`@solo`) in every
+app: the failed-lookup seed adds a row to Administration › Jobs › "View
+Failed Jobs", whose total *System administration*'s serial tests count
+before and after their own actions (harness.md "Project chain").
 Scenario 6: a scratch context with `metadata: {dataCitations: 'request'}`,
 a throwaway manager and author; one submitted submission of the author
 with no `dataCitations[]`.
 Scenario 7: the same context shape; a draft of the throwaway author
 carrying its file; the manager reads the "Data" page.
-Scenario 8: a scratch context with `metadata: {dataCitations: 'request'}`
-and a throwaway manager; one published submission with `citationsRaw:
+Scenario 8: a scratch context with `metadata: {dataCitations: 'request'}`,
+`citationsMetadataLookup: true` and a throwaway manager; one published submission with `citationsRaw:
 ['Alpha study 2020', 'Beta trial 2021']` and `dataCitations: [{title:
 'Ocean temperature records', relationshipType: 'generated'}]`; the new
 version is created on screen (*Publish, schedule & versions*).

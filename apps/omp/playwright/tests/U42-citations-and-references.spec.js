@@ -4,40 +4,35 @@
  *
  * Citations & references — OMP suite, one test per canonical scenario the
  * spec runs on a press (S1–S8 common; S9 {OJS OMP}), in the press's own
- * words: the Press Manager, a monograph, the catalog's book page. The press
- * markers ride inside the common tests: the lookup text is read by its
- * opening words only (S5, A4), the wizard's Data Citations table is read
- * after a reload (S7, A10).
+ * words: the Press Manager, a monograph, the catalog's book page. S5 runs
+ * the site's background jobs, so it lives in the serial project
+ * (tests/serial/U42-citations-and-references.spec.js); every other test
+ * runs in the parallel `omp` project. The press markers ride inside the
+ * common tests: the lookup text is read by its opening words only (S5,
+ * A4), the wizard's Data Citations table is read after a reload (S7, A10).
  * Spec: docs/specs/U42-citations-and-references.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
- * spec's Coverage section is the record of everything else left out):
+ * Deliberately NOT covered, by register ID (a 🐞 is never asserted as the
+ * contract, a ❓ is parked; the spec's Coverage section is the record of
+ * everything else left out):
  * - A2 🐞, A17 ❓: no line typed into "Add" repeats one already listed, and
  *   no "Edit" saves another row's text.
  * - A3 🐞: every search word is one the matching row's own text carries.
- * - A4 🐞: S5 reads the lookup text by its opening words ("Structuring and
- *   Metadata Lookup is enabled"), never the word "Journal" in it.
- * - A6 ✅ (retired 2026-10-06 at the PR heads of pkp/pkp-lib#13308: the
- *   box counts the references a lookup was asked for): S5 reads
- *   "Processing references - 0/1" over its one reference.
- * - A7 ✅ (retired 2026-10-06 at the PR heads of pkp/pkp-lib#13308): no
- *   wizard reference carries a DOI; the kept DOI is a Planned item.
- * - A9 🐞: no scenario here sets data citations to "Require".
- * - A10 🐞: S7 reloads the wizard after its add and reads the table and the
- *   Review step only then; the stale table is never read either way.
+ * - A4 🐞: the lookup text is read by its opening words, never "Journal".
+ * - A8 🐞: S6 reads the three data citations in any order before an order
+ *   is saved, and adds none after it.
+ * - A9 🐞, A11 ❓, A15 🐞: no scenario here requires data citations, reads
+ *   them on the book page, or clears a saved identifier.
+ * - A10 🐞: S7 reloads the wizard after its add before reading the table.
  * - A13 🐞: every author row added in "Edit citation" is filled and saved.
- * - A14 🐞, A19 🐞: the author boxes and the ordering arrows are reached
- *   by their `name` attribute and by position; nothing asserts their
- *   accessible names.
+ * - A14 🐞, A19 🐞, A24 🐞, A27 ❓: the author boxes and the ordering arrows
+ *   are reached by their `name` attribute and by position, the messages by
+ *   their place under a box; the foot's buttons are counted, never pressed.
  * - A16 🐞: S5 presses a structured row's expander by its current name
- *   and only with the mouse; the zero-size ones are never touched.
- * - A18 ✅ (retired 2026-09-29: every step change saves): every References
- *   change is still carried by "Continue"; the step rail only goes back.
- * - A20 ✅ (retired 2026-10-09 at the PR head of pkp/omp#2502): S3's
- *   control reads that the book with no references has no "References"
- *   block.
- * - A8, A11, A12, A15: not on these scenarios' OMP paths.
+ *   and only with the mouse.
+ * - A25 🐞, A26 ❓: S5 types its DOIs after the lookup's first step ran.
+ * - A29 🐞, A30 🐞: no address here holds an apostrophe, and none on a
+ *   book page stands in brackets.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1–S3 run on publicknowledge on their own scratch
@@ -47,20 +42,20 @@
  * S4–S9 run on scratch presses with throwaway accounts, as footnote s
  * says: `metadata`, `citationsMetadataLookup` and `review` on the context,
  * `citationsRaw` and `dataCitations[]` on the submission, `files[]` for a
- * draft's main file. S4 and S5 change the References settings on the
- * Settings screen because that screen is what the scenarios test. The
- * mailbox control is a discussion a scratch press's own Press Manager
- * opens with the spare account on the spare's monograph there (U43's OMP
- * control; never `manager.maya`, whose Tasks number other suites read).
+ * draft's main file. S4 changes the References settings on the Settings
+ * screen because that screen is what the scenario tests. The mailbox
+ * control is a discussion a scratch press's own Press Manager opens with
+ * the spare account on the spare's monograph there (U43's OMP control;
+ * never `manager.maya`, whose Tasks number other suites read).
  *
- * Lookup on (S5): no job runner and no outbound connection, so a
+ * Lookup on (S4, S8): no job runner and no outbound connection, so a
  * reference's lookup never finishes and the References page refetches
- * every 7 s while the progress box shows; every read after that
- * is a web-first assertion (it rides out a refetch), and row menus are
- * retried once when a refetch detaches their items (CitationsPages).
- * Every absence is read settled and paired with a positive control taken
- * the same way (M4, M6). Waits are web-first or bounded by the screen's
- * own API answer. Everything runs in the parallel `omp` project.
+ * every 7 s while the progress box counts below its total; every read
+ * after that is a web-first assertion (it rides out a refetch), and row
+ * menus are retried once when a refetch detaches their items
+ * (CitationsPages). Every absence is read settled and paired with a
+ * positive control taken the same way (M4, M6). Waits are web-first or
+ * bounded by the screen's own API answer.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {unordered} = require('../../../../shared/playwright/support/order.js');
@@ -86,16 +81,36 @@ const {
     expectStep,
     gotoStep,
     continueTo,
+    backTo,
     openReview,
     confirmSubmit,
+    saveForLater,
     submitButton,
 } = require('../pages/SubmissionWizardPages.js');
+const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 
 const PRESS = 'publicknowledge';
 /** publicknowledge is bilingual, so its public and wizard addresses carry the locale. */
 const PRESS_PREFIX = '/en';
 const MANAGER = 'manager.maya';
 const AUTHOR = 'author.alex';
+/** S4's reference typed in the wizard's box (footnote s). */
+const TYPED_DOI_REFERENCE = 'Alpha study 2020. https://doi.org/10.1234/abcd';
+/**
+ * S4's eight lines added with lookup off: the "Edit citation" box each
+ * identifier is read from, its value there, and the row link it shows
+ * (Rule 11 step 1; the URN is plain text).
+ */
+const IDENTIFIER_LINES = [
+    {line: 'Bravo letter 2019 (doi:10.1234/bravo).', field: 'DOI', value: '10.1234/bravo', link: '10.1234/bravo'},
+    {line: 'Charlie note 2018, doi:10.1234/charlie, p. 4', field: 'DOI', value: '10.1234/charlie', link: '10.1234/charlie'},
+    {line: 'Delta paper 2017 https://dx.doi.org/10.1234/delta', field: 'DOI', value: '10.1234/delta', link: '10.1234/delta'},
+    {line: 'Echo report 2016 hdl:10419/12345. Accessed 2020-01-01.', field: 'Handle', value: '10419/12345', link: '10419/12345'},
+    {line: 'Foxtrot thesis 2015 urn:nbn:de:1234-5678, 2015.', field: 'URN', value: 'urn:nbn:de:1234-5678', link: null},
+    {line: 'Golf data 2014 http://example.org/set/', field: 'URL', value: 'http://example.org/set/', link: 'http://example.org/set/'},
+    {line: 'Hotel preprint 2021 arxiv:2101.12345v2', field: 'Arxiv', value: '2101.12345v2', link: '2101.12345v2'},
+    {line: 'Quote study 2013 https://example.org/a"b', field: 'URL', value: 'https://example.org/a', link: 'https://example.org/a'},
+];
 const VERSION_1 = 'Version of Record 1.0';
 const VERSION_2 = 'Version of Record 1.1';
 
@@ -165,6 +180,46 @@ async function openData({page, frame}, submissionId, {author = false} = {}) {
     await data.open();
     await expect(data.table()).toBeVisible({timeout: 30_000});
     return data;
+}
+
+/**
+ * A side panel's form foot after a refused save (`.pkpFormErrors`): "Please
+ * correct {n} errors.", "Jump to next error" and the screen reader's
+ * "Go to {field}: {message}" buttons (proposed shared method:
+ * `DataCitationPanel.errorFoot()`).
+ */
+function formFoot(panel) {
+    return panel.dialog().locator('.pkpFormErrors');
+}
+
+/**
+ * The page notice of a refused form at the top right, a toast of about
+ * five seconds (proposed shared: `DataCitationPanel.notSavedNotice(n)`);
+ * with no count, any such notice.
+ */
+function notSavedNotice(page, count = null) {
+    const text =
+        count === null
+            ? /The form was not saved because/
+            : `The form was not saved because ${count} error(s) were encountered. Please correct these errors and try again.`;
+    return page.locator('.app__notifications').getByText(text);
+}
+
+/** A data citation panel's messages under one text box (proposed shared: `DataCitationPanel.fieldErrors(label)`). */
+function panelFieldErrors(panel, label) {
+    return panel
+        .dialog()
+        .locator('.pkpFormField')
+        .filter({has: panel.page.getByRole('textbox', {name: label, exact: true})})
+        .locator('.pkpFieldError');
+}
+
+/** The data citation panel's save answering with `status` (a refused save is a 400). */
+function panelSaveAnswer(page, status) {
+    return page.waitForResponse(
+        (r) => /\/dataCitations(\/\d+)?$/.test(r.url().split('?')[0]) && r.request().method() === 'POST' && r.status() === status,
+        {timeout: 30_000}
+    );
 }
 
 /** Settings › Workflow › Submission › "Metadata", loaded. */
@@ -558,12 +613,49 @@ test.describe('citations and references', () => {
         await cit.referencesBox().fill('Beta trial 2021\nAlpha study 2020\nBeta trial 2021');
         await continueToReview(authorPage);
 
-        // On "Review": the three lines, the repeat kept; submit (Rule 16).
-        await expect(cit.reviewEntries('References')).toHaveText([
-            'Beta trial 2021',
-            'Alpha study 2020',
-            'Beta trial 2021',
-        ]);
+        // On "Review": the three lines, the repeat kept (Rule 16).
+        const three = ['Beta trial 2021', 'Alpha study 2020', 'Beta trial 2021'];
+        await expect(cit.reviewEntries('References')).toHaveText(three);
+
+        // "Save for Later": a fourth line typed on Details, the footer's
+        // "Save for Later" saves the step before its screen shows; the
+        // draft reopened from My Submissions resumes at the furthest step
+        // it reached, here "Review" (a draft that never got past Details
+        // resumes there and is walked on), whose "Details" section lists
+        // the four, "Delta paper 2023" last (Rule 16).
+        await gotoStep(authorPage, STEPS.details);
+        await cit.referencesBox().fill([...three, 'Delta paper 2023'].join('\n'));
+        await saveForLater(authorPage);
+        const mine = new MySubmissionsPage(authorPage, PRESS);
+        await mine.goto();
+        await mine.completeSubmissionButton(await mine.findRowByTag(tag)).click();
+        await expectWizardOpen(authorPage);
+        expect(authorPage.url()).toContain(`id=${submissionId}`);
+        await expect(currentRailStep(authorPage)).toHaveText(/(Details|Review)\s*$/, {timeout: 30_000});
+        if ((await currentRailStep(authorPage).textContent())?.includes(STEPS.details)) {
+            await continueToReview(authorPage);
+        }
+        await expectStep(authorPage, STEPS.review);
+        await expect(authorPage.locator('.submissionWizard__loadingReview')).toHaveCount(0, {timeout: 30_000});
+        await expect(cit.reviewEntries('References')).toHaveText([...three, 'Delta paper 2023'], {timeout: 30_000});
+
+        // The footer's "Back": "Delta" replaced by "Epsilon" on Details,
+        // "Back" lands on "Upload Files"; "Review" from the step rail lists
+        // "Epsilon note 2024" last (Rule 16).
+        await gotoStep(authorPage, STEPS.details);
+        await cit.referencesBox().fill([...three, 'Epsilon note 2024'].join('\n'));
+        await backTo(authorPage, STEPS.files);
+        await openReview(authorPage, {viaRail: true});
+        await expect(cit.reviewEntries('References')).toHaveText([...three, 'Epsilon note 2024']);
+
+        // The step rail to "Review": "Epsilon" replaced by a line of three
+        // spaces; "Review" from the rail lists the three lines and nothing
+        // for the spaces; submitted (Rule 16).
+        await gotoStep(authorPage, STEPS.details);
+        await cit.referencesBox().fill([...three, '   '].join('\n'));
+        await openReview(authorPage, {viaRail: true});
+        await expect(cit.reviewEntries('References')).toHaveText(three);
+        await expect(cit.reviewValue('References')).not.toContainText('Epsilon note 2024');
         await confirmSubmit(authorPage);
 
         // The Press Manager's list: the same three rows in order, and no
@@ -578,7 +670,7 @@ test.describe('citations and references', () => {
     test('S3: read a published book\'s references', async ({ompApi, page}, testInfo) => {
         const tag = makeTag('s3', testInfo);
         const published = {decisions: ['skipExternalReview', 'sendToProduction'], published: true};
-        const [withRefs, noRefs] = await Promise.all([
+        const [withRefs, noRefs, addresses] = await Promise.all([
             ompApi.createSubmission({
                 tag,
                 context: PRESS,
@@ -592,6 +684,14 @@ test.describe('citations and references', () => {
                 context: PRESS,
                 submitter: AUTHOR,
                 title: `Submission ${tag}c`,
+                ...published,
+            }),
+            ompApi.createSubmission({
+                tag: `${tag}t`,
+                context: PRESS,
+                submitter: AUTHOR,
+                title: `Submission ${tag}t`,
+                citationsRaw: ['Kappa survey 2018 https://example.org/kappa.', 'Quote study 2013 https://example.org/a"b'],
                 ...published,
             }),
         ]);
@@ -612,6 +712,27 @@ test.describe('citations and references', () => {
         await expect(link).toHaveAttribute('target', '_blank');
         await expect(landing.paragraphs.nth(0).getByRole('link')).toHaveCount(0);
 
+        // An address followed by a full stop: the reference shows as
+        // written; its link covers the address without the full stop and
+        // opens it (Rule 27a).
+        await page.goto(bookUrl(PRESS, addresses.submissionId));
+        const third = landingReferences(page);
+        await expect(third.paragraphs).toHaveText(
+            ['Kappa survey 2018 https://example.org/kappa.', 'Quote study 2013 https://example.org/a"b'],
+            {timeout: 30_000}
+        );
+        const kappa = third.paragraphs.nth(0).getByRole('link');
+        await expect(kappa).toHaveCount(1);
+        await expect(kappa).toHaveText('https://example.org/kappa');
+        await expect(kappa).toHaveAttribute('href', 'https://example.org/kappa');
+
+        // An address with a double quote: the reference shows whole; its
+        // link opens the address up to the quote, in a new tab (Rule 27a).
+        const quote = third.paragraphs.nth(1).getByRole('link');
+        await expect(quote).toHaveCount(1);
+        await expect(quote).toHaveAttribute('href', 'https://example.org/a');
+        await expect(quote).toHaveAttribute('target', '_blank');
+
         // Control: the book with no references has no "References" block,
         // read once its page has rendered its title (Rule 27).
         await page.goto(bookUrl(PRESS, noRefs.submissionId));
@@ -622,10 +743,10 @@ test.describe('citations and references', () => {
 
     test('S4: the press\'s References setting', async ({asUser, ompApi, page}, testInfo) => {
         test.slow();
-        test.setTimeout(420_000);
+        test.setTimeout(600_000);
         const tag = makeTag('s4', testInfo);
         const {manager, author} = await seedPress(ompApi, tag);
-        const [pub, draft] = await Promise.all([
+        const [pub, draft, typed] = await Promise.all([
             ompApi.createSubmission({
                 tag: `${tag}p`,
                 context: tag,
@@ -642,6 +763,15 @@ test.describe('citations and references', () => {
                 title: `Submission ${tag}d`,
                 submitted: false,
                 files: [{file: 'article.pdf'}],
+            }),
+            // Typed in the wizard's References box while lookup is off
+            // (footnote s: `citationsRaw` saves the way that box saves).
+            ompApi.createSubmission({
+                tag: `${tag}w`,
+                context: tag,
+                submitter: author,
+                title: `Submission ${tag}w`,
+                citationsRaw: TYPED_DOI_REFERENCE,
             }),
         ]);
 
@@ -728,149 +858,73 @@ test.describe('citations and references', () => {
         await confirmSubmit(authorPage);
         const refs = await openReferences(mgr, draft.submissionId);
         await expect(refs.rowCells()).toHaveText(['Gamma report 2022'], {timeout: 30_000});
-    });
 
-    test('S5: metadata lookup switched on', async ({asUser, ompApi}, testInfo) => {
-        test.slow();
-        test.setTimeout(360_000);
-        const tag = makeTag('s5', testInfo);
-        const {manager, author} = await seedPress(ompApi, tag, {citationsMetadataLookup: true});
-        const {submissionId} = await ompApi.createSubmission({
-            tag: `${tag}s`,
-            context: tag,
-            submitter: author,
-            title: `Submission ${tag}s`,
-            citationsRaw: 'Alpha study 2020',
-        });
+        // References added with lookup off: the eight lines through "Add"
+        // on the monograph whose reference was typed in the wizard; the
+        // table lists the nine, each row its text (Rules 4, 5).
+        let typedRefs = await openReferences(mgr, typed.submissionId);
+        await expect(typedRefs.rowCells()).toHaveText([TYPED_DOI_REFERENCE], {timeout: 30_000});
+        await typedRefs.add(IDENTIFIER_LINES.map(({line}) => line));
+        await expect(typedRefs.rowCells()).toHaveText(
+            [TYPED_DOI_REFERENCE, ...IDENTIFIER_LINES.map(({line}) => line)],
+            {timeout: 30_000}
+        );
 
-        const mgr = await pageAs(asUser, manager, tag);
-        let refs = await openReferences(mgr, submissionId);
-
-        // The page with lookup on: the lookup heading and text above the
-        // "Add" box, the text read by its opening words on a press (A4),
-        // "Reprocess all references" beside "Delete all references",
-        // "Expand All" heading the second column (Rule 10).
-        await expect(refs.structuredHeadings()).toHaveCount(2);
-        await expect(refs.lookupText()).toContainText(TEXT.lookupTextStart);
-        await expectTopToBottom([refs.lookupHeading(), refs.lookupText(), refs.addBox()]);
-        await expect(refs.reprocessAllButton()).toBeVisible();
-        await expect(refs.deleteAllButton()).toBeVisible();
-        await expect(refs.secondColumnHeader().getByRole('button', {name: 'Expand All', exact: true})).toBeVisible();
-        // The progress box counts every reference, the plain one whose
-        // lookup waits included (Rule 13).
-        await expect(refs.progressTitle()).toHaveText('Processing references - 0/1', {timeout: 30_000});
-
-        // "Expand All" with nothing structured toggles its label only
-        // (Rule 10).
-        await refs.expandAllButton().click();
-        await expect(refs.expandAllButton()).toHaveText('Collapse All');
-        await refs.expandAllButton().click();
-        await expect(refs.expandAllButton()).toHaveText('Expand All');
-        await expect(refs.rowCells()).toHaveText(['Alpha study 2020']);
-
-        // A plain row: its text, and "Edit", "Delete", "Reprocess"
-        // (Rules 4, 12, 15).
-        let items = await refs.openRowMenu('Alpha study 2020');
-        await expect(items).toHaveText(['Edit', 'Delete', 'Reprocess']);
-        await refs.closeRowMenu('Alpha study 2020');
-
-        // An empty "Edit Raw Citation": the structured form, the box
-        // marked required; emptied, "Save" is refused in place; "Close"
-        // leaves the row as it was (Fields & validation).
-        let panel = await refs.edit('Alpha study 2020');
-        await expect(panel.field('DOI')).toBeVisible();
-        await expect(panel.rawRequiredMark()).toBeVisible();
-        await panel.rawBox().fill('');
-        await panel.saveRefused(TEXT.required);
-        await panel.close();
-        await expect(refs.rowCells()).toHaveText(['Alpha study 2020'], {timeout: 30_000});
-
-        // Structured by hand: DOI, title, source, volume and one author
-        // saved; the row shows the DOI link, then the title with an
-        // expander; "Reprocess" is gone; the progress box reads 0/1
-        // (Rules 11–15).
-        panel = await refs.edit('Alpha study 2020');
-        await panel.field('DOI').fill('10.1234/abcd');
-        await panel.field('Title').fill('Alpha study');
-        await panel.field('Source Name').fill('Journal of Tests');
-        await panel.field('Volume').fill('12');
-        await panel.addAuthor({givenName: 'Ada', familyName: 'Lovelace'});
-        await panel.save();
-        const row = refs.rows().first();
-        const doiLink = row.getByRole('link', {name: '10.1234/abcd', exact: true});
-        await expect(doiLink).toHaveAttribute('href', 'https://doi.org/10.1234/abcd', {timeout: 30_000});
-        await expect(row.locator('td').first()).toContainText('Alpha study');
-        await expect(row.getByRole('button', {name: 'Collapse'})).toBeVisible();
-        await expectTopToBottom([doiLink, row.getByText('Alpha study', {exact: true})]);
-        await expect(refs.progressTitle()).toHaveText('Processing references - 0/1', {timeout: 30_000});
-        items = await refs.openRowMenu('Alpha study');
-        await expect(items).toHaveText(['Edit', 'Delete']);
-        await refs.closeRowMenu('Alpha study');
-
-        // The details: the author, the source, "Volume: 12" and the raw
-        // text in small print (Rule 12).
-        await expect(row.getByText('Lovelace Ada')).toHaveCount(0);
-        await row.getByRole('button', {name: 'Collapse'}).click();
-        await expect(row.getByText('Lovelace Ada')).toBeVisible({timeout: 30_000});
-        await expect(row).toContainText('Journal of Tests');
-        await expect(row).toContainText(/Volume:\s*12/);
-        await expect(refs.rowSmallPrint('Alpha study')).toHaveText('Alpha study 2020');
-
-        // Only the text edited: the structured details stay; the small
-        // print reads the new text (Rule 14).
-        panel = await refs.edit('Alpha study');
-        await expect(panel.field('DOI')).toHaveValue('10.1234/abcd');
-        await panel.rawBox().fill('Alpha study 2020, revised');
-        await panel.save();
-        await expect(doiLink).toBeVisible({timeout: 30_000});
-        await expect(row.getByText('Alpha study', {exact: true})).toBeVisible();
-        // The list refetches after the save, and every 7 s while the edited
-        // reference is looked up again (citationManagerStore), so one read
-        // of the row's state can be stale: open it and read until the text
-        // holds (.reports/flake-s26/fixC/diagnosis.md).
-        await expect(async () => {
-            if (!(await refs.rowSmallPrint('Alpha study').isVisible())) {
-                await row.getByRole('button', {name: 'Collapse'}).click({timeout: 5_000});
-            }
-            await expect(refs.rowSmallPrint('Alpha study')).toHaveText('Alpha study 2020, revised', {timeout: 5_000});
-        }).toPass({timeout: 30_000});
-
-        // Control: lookup switched off: no lookup heading or text, no
-        // "Reprocess all references", no "Expand All", no progress box;
-        // the row shows its text alone; "Edit" offers the text box alone
-        // (Settings bullet 2; Rules 3, 6).
-        const settings = referencesSettings(mgr.page);
+        // Lookup switched on: the References page again holds no progress
+        // box, read once the rows show their lookup-on links (no lookup was
+        // asked for any of them; the box's positive control is the "Add"
+        // below); the wizard-typed reference links its DOI to doi.org, and
+        // its "Edit" holds it in "DOI" (Rules 13, 17).
         await openMetadataSettings(mgr.page, tag);
-        await expect(settings.lookup).toBeChecked();
-        await settings.lookup.uncheck();
-        await saveMetadataSettings(mgr.page);
-        refs = await openReferences(mgr, submissionId);
-        await expect(refs.rowCells()).toHaveText(['Alpha study 2020, revised'], {timeout: 30_000});
-        await expect(refs.structuredHeadings()).toHaveCount(1);
-        await expect(refs.lookupText()).toHaveCount(0);
-        await expect(refs.reprocessAllButton()).toHaveCount(0);
-        await expect(refs.deleteAllButton()).toBeVisible();
-        await expect(refs.expandAllButton()).toHaveCount(0);
-        await expect(refs.progressTitle()).toHaveCount(0);
-        await expect(refs.rows().first().getByRole('link')).toHaveCount(0);
-        panel = await refs.edit('Alpha study 2020, revised');
-        await expect(panel.textboxes()).toHaveCount(1);
-        await expect(panel.rawBox()).toHaveValue('Alpha study 2020, revised');
-        await panel.close();
-
-        // Ticked again: the DOI link and the title are back.
-        await openMetadataSettings(mgr.page, tag);
+        await expect(settings.lookup).not.toBeChecked();
         await settings.lookup.check();
         await saveMetadataSettings(mgr.page);
-        refs = await openReferences(mgr, submissionId);
-        const back = refs.rows().first();
-        await expect(back.getByRole('link', {name: '10.1234/abcd', exact: true})).toBeVisible({timeout: 30_000});
-        await expect(back.getByText('Alpha study', {exact: true})).toBeVisible();
+        typedRefs = await openReferences(mgr, typed.submissionId);
+        const typedDoi = typedRefs.rowDoiLink(TYPED_DOI_REFERENCE, '10.1234/abcd');
+        await expect(typedDoi).toHaveAttribute('href', 'https://doi.org/10.1234/abcd', {timeout: 30_000});
+        await expect(typedRefs.expandAllButton()).toBeVisible();
+        await expect(typedRefs.progressTitle()).toHaveCount(0);
+        let panel = await typedRefs.edit(TYPED_DOI_REFERENCE);
+        await expect(panel.field('DOI')).toHaveValue('10.1234/abcd');
+        await panel.close();
+
+        // Identifiers read from the text: each row's "Edit" holds its
+        // identifier whole and alone, closed with "Close"; the rows link the
+        // DOIs, the handle, the arXiv ID and both web addresses (Quote's
+        // opening the address cut at the quote), and Foxtrot's URN is plain
+        // text (Rules 11 step 1, 12, 17).
+        for (const {line, field, value} of IDENTIFIER_LINES) {
+            panel = await typedRefs.edit(line);
+            await expect(panel.field(field), `"${field}" of "${line}"`).toHaveValue(value);
+            await panel.close();
+        }
+        for (const {line, link} of IDENTIFIER_LINES.filter((entry) => entry.link)) {
+            await expect(typedRefs.row(line).getByRole('link', {name: link, exact: true}), `the link of "${line}"`).toBeVisible();
+        }
+        for (const doi of ['10.1234/bravo', '10.1234/charlie', '10.1234/delta']) {
+            await expect(typedRefs.table().getByRole('link', {name: doi, exact: true})).toHaveAttribute(
+                'href',
+                `https://doi.org/${doi}`
+            );
+        }
+        await expect(
+            typedRefs.row('Quote study 2013').getByRole('link', {name: 'https://example.org/a', exact: true})
+        ).toHaveAttribute('href', 'https://example.org/a');
+        const foxtrot = typedRefs.row('Foxtrot thesis 2015');
+        await expect(foxtrot.getByText('urn: urn:nbn:de:1234-5678', {exact: true})).toBeVisible();
+        await expect(foxtrot.getByRole('link', {name: /urn:nbn/})).toHaveCount(0);
+        await expect(typedRefs.progressTitle()).toHaveCount(0);
+
+        // "Add" with lookup on: the box under "Add" counts the two
+        // references just added and none of the nine before (Rule 13).
+        await typedRefs.add(['Mike memo 2011', 'November review 2012']);
+        await expect(typedRefs.progressTitle()).toHaveText('Processing references - 0/2', {timeout: 30_000});
+        await expectTopToBottom([typedRefs.addBox(), typedRefs.progressTitle()]);
     });
 
     test('S6: maintain data citations', async ({asUser, ompApi, pkpMail}, testInfo) => {
         test.slow();
-        test.setTimeout(420_000);
+        test.setTimeout(540_000);
         const tag = makeTag('s6', testInfo);
         const {manager, author, spare} = await seedPress(ompApi, tag, {
             spare: true,
@@ -904,6 +958,20 @@ test.describe('citations and references', () => {
         await expect(add.titleErrors()).toHaveText([TEXT.required]);
         await expect(add.relationshipErrors()).not.toHaveCount(0);
 
+        // The foot after a refused save: "Please correct 2 errors." beside
+        // "Jump to next error", and a screen reader's "Go to" button per
+        // refused field; no page notice (Fields & validation). The empty
+        // save is refused before any request leaves, so the notice's
+        // absence is settled once the messages show; its positive control
+        // is "The page notice" below, read the same way.
+        const foot = formFoot(add);
+        await expect(foot).toContainText('Please correct 2 errors.');
+        await expect(foot.getByRole('button', {name: 'Jump to next error', exact: true})).toBeVisible();
+        await expect(foot.getByRole('button', {name: /^Go to /})).toHaveCount(2);
+        await expect(foot.getByRole('button', {name: `Go to Title: ${TEXT.required}`, exact: true})).toHaveCount(1);
+        await expect(foot.getByRole('button', {name: /^Go to Relationship type: ./})).toHaveCount(1);
+        await expect(notSavedNotice(mgr.page)).toHaveCount(0);
+
         // Refused values: an invalid DOI, a three-digit year, a bare ORCID
         // iD, each refused with its message (Fields & validation).
         await add.fill({
@@ -918,6 +986,54 @@ test.describe('citations and references', () => {
         await add.fill({year: '2024'});
         await add.addCreator({givenName: 'Ada', familyName: 'Lovelace', orcid: '0000-0002-1825-0097'});
         await add.saveRefused(TEXT.orcidInvalid);
+
+        // The page notice: a year with letters and a URL that is none,
+        // saved: both year messages, the URL's, Ada's ORCID iD message
+        // still there; "Please correct 3 errors." and the notice counting 3
+        // (Fields & validation).
+        // "Save" stays grayed out after the ORCID iD refusal until Ada's iD
+        // is typed again (the button shown, its presence the control); Ada's
+        // bare iD is typed again, unchanged, and the save is pressed.
+        await add.fill({year: '20a4', url: 'example'});
+        await expect(add.saveButton()).toBeVisible();
+        await expect(add.saveButton()).toBeDisabled();
+        const adaOrcid = add.creatorRows().nth(0).locator('input[name="orcid"]');
+        await adaOrcid.fill('');
+        await adaOrcid.fill('0000-0002-1825-0097');
+        await expect(add.saveButton()).toBeEnabled({timeout: 10_000});
+        // The earlier refusals' notices expire first (each lives about five
+        // seconds), so the one read next is this save's own.
+        await expect(notSavedNotice(mgr.page)).toHaveCount(0, {timeout: 30_000});
+        await add.saveButton().click();
+        await expect(notSavedNotice(mgr.page, 3)).toBeVisible({timeout: 30_000});
+        // (One message element under the box holds both lines.)
+        await expect(panelFieldErrors(add, 'Year')).toHaveText([/^\s*This is not a valid integer\.\s*This must be 4 digits long\.\s*$/]);
+        await expect(panelFieldErrors(add, 'URL')).toHaveText(['This is not a valid URL.']);
+        await expect(add.creatorRows().nth(0).locator('.pkpFieldError')).toHaveText([TEXT.orcidInvalid]);
+        await expect(foot).toContainText('Please correct 3 errors.');
+        await add.fill({year: '2024', url: ''});
+
+        // Two creators refused: a second bare ORCID iD; the message under
+        // both rows' boxes, the table counted as one error at the foot and
+        // in the notice. Typing a valid iD in Babbage's row clears both
+        // rows' messages; the next save brings back Ada's alone
+        // (Fields & validation, "Creators").
+        await add.addCreator({givenName: 'Charles', familyName: 'Babbage', orcid: '0000-0002-1825-0097'});
+        await expect(add.saveButton()).toBeEnabled({timeout: 10_000});
+        await expect(notSavedNotice(mgr.page)).toHaveCount(0, {timeout: 30_000});
+        await add.saveButton().click();
+        await expect(notSavedNotice(mgr.page, 1)).toBeVisible({timeout: 30_000});
+        await expect(add.creatorRows().nth(0).locator('.pkpFieldError')).toHaveText([TEXT.orcidInvalid]);
+        await expect(add.creatorRows().nth(1).locator('.pkpFieldError')).toHaveText([TEXT.orcidInvalid]);
+        await expect(foot).toContainText(TEXT.oneError);
+        await add.creatorRows().nth(1).locator('input[name="orcid"]').fill('https://orcid.org/0000-0002-1825-0097');
+        await expect(add.creatorsField().locator('.pkpFieldError')).toHaveCount(0);
+        const refusedAgain = panelSaveAnswer(mgr.page, 400);
+        await expect(add.saveButton()).toBeEnabled({timeout: 10_000});
+        await add.saveButton().click();
+        await refusedAgain;
+        await expect(add.creatorRows().nth(0).locator('.pkpFieldError')).toHaveText([TEXT.orcidInvalid]);
+        await expect(add.creatorRows().nth(1).locator('.pkpFieldError')).toHaveCount(0);
 
         // The saved data citation: the row shows the bare DOI above the
         // title (Rules 19, 21).
@@ -952,6 +1068,27 @@ test.describe('citations and references', () => {
         await edit.fill({title: 'Ocean temperature records, revised'});
         await edit.save();
         await expect(data.row('Ocean temperature records, revised')).toBeVisible({timeout: 30_000});
+
+        // Identifier types "ARXIV", "URI" and "PURL": the row shows the
+        // identifier above the title, an arXiv address saved bare with its
+        // version, a bare ID and both addresses as typed (Rule 19;
+        // Fields & validation, "Identifier").
+        for (const {type, typedAs, shown} of [
+            {type: 'ARXIV', typedAs: 'https://arxiv.org/abs/1234.12345v2', shown: '1234.12345v2'},
+            {type: 'ARXIV', typedAs: '3456.34567v4', shown: '3456.34567v4'},
+            {type: 'URI', typedAs: 'http://example.org/data', shown: 'http://example.org/data'},
+            {type: 'PURL', typedAs: 'http://purl.org/dc/elements/1.1/', shown: 'http://purl.org/dc/elements/1.1/'},
+        ]) {
+            const typedEdit = await data.edit('Ocean temperature records, revised');
+            await typedEdit.fill({identifierType: type, identifier: typedAs});
+            await typedEdit.save();
+            const revised = data.row('Ocean temperature records, revised');
+            await expect(revised.getByText(shown, {exact: true}), `${type} "${typedAs}"`).toBeVisible({timeout: 30_000});
+            await expectTopToBottom([
+                revised.getByText(shown, {exact: true}),
+                revised.getByText('Ocean temperature records, revised', {exact: true}),
+            ]);
+        }
 
         // Ordering: two more; the table lists the three in no fixed order
         // until an order is saved (A8); "Order" swaps the menus for arrows
@@ -1084,7 +1221,10 @@ test.describe('citations and references', () => {
         test.slow();
         test.setTimeout(300_000);
         const tag = makeTag('s8', testInfo);
-        const {manager, author} = await seedPress(ompApi, tag, {metadata: {dataCitations: 'request'}});
+        const {manager, author} = await seedPress(ompApi, tag, {
+            metadata: {dataCitations: 'request'},
+            citationsMetadataLookup: true,
+        });
         const {submissionId} = await ompApi.createSubmission({
             tag: `${tag}p`,
             context: tag,
@@ -1096,8 +1236,11 @@ test.describe('citations and references', () => {
             published: true,
         });
 
+        // Lookups under way: the published version's box counts both
+        // references (Rule 13).
         const mgr = await pageAs(asUser, manager, tag);
-        await mgr.frame.gotoEditorial(submissionId);
+        const published = await openReferences(mgr, submissionId);
+        await expect(published.progressTitle()).toHaveText('Processing references - 0/2', {timeout: 30_000});
         await createNewVersion(mgr.page);
         await expect(mgr.frame.menu().getByRole('treeitem', {name: VERSION_2, exact: true})).toBeVisible({
             timeout: 30_000,
@@ -1112,9 +1255,14 @@ test.describe('citations and references', () => {
         await data.openInVersion(VERSION_2);
         await expect(data.rowCells()).toHaveText([/Ocean temperature records$/], {timeout: 30_000});
 
+        // The copies' lookups: the new version's box counts the two copies'
+        // own lookups (Rules 13, 26).
+        await refs.openInVersion(VERSION_2);
+        await expect(refs.progressTitle()).toHaveText('Processing references - 0/2', {timeout: 30_000});
+        await expectTopToBottom([refs.addBox(), refs.progressTitle(), refs.table()]);
+
         // Changes on the new version: "Beta" deleted, "Gamma" added, the
         // data citation deleted (Rules 5, 7, 22, 26).
-        await refs.openInVersion(VERSION_2);
         await refs.deleteRow('Beta trial 2021');
         await refs.add('Gamma report 2022');
         await expect(refs.rowCells()).toHaveText(['Alpha study 2020', 'Gamma report 2022'], {timeout: 30_000});
