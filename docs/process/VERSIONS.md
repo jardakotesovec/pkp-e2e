@@ -66,10 +66,18 @@ order.
 
 1. **Claim.** As step 1; the row is the progress file's.
 2. **Fleet prep.** As step 2, on the version:
-   `PKP_E2E_LINE=<branch> npm run fleet-prep -- --feature U<nn>`.
+   `PKP_E2E_LINE=<branch> npm run fleet-prep -- --feature U<nn>-<branch>`.
+   `U<nn>-<branch>` is the build's token: it fills the `{{feature}}`
+   slot of every brief, so the scratch folder is
+   `.reports/U<nn>-<branch>/` and a kept script sits under
+   `lines/<branch>/shared/playwright/checks/U<nn>-<branch>/<chunk>/`,
+   and nothing mixes with a session working the same feature on `main`.
 3. **Copy and draft.** `node bin/line-cut.js <branch> --feature U<nn>`
    copies `main`'s spec, tests and page objects for the feature; a file
-   the folder already holds is kept. The copy's frontmatter goes to
+   the folder already holds is kept. The spec's links to what exists
+   once (the glossary, issue reports) are pointed at the root; its links
+   to other specs stay beside it and resolve as those features are
+   built. The copy's frontmatter goes to
    `status: draft`. A spec author (`briefs/spec-author.md`, situation "a
    copy of `main`'s spec, to be made true for the version") then reads
    the version's code against `main`'s for everything the spec's
@@ -93,8 +101,9 @@ order.
    `fixtures/bootstrap.js`). The feature's kept scripts at the root run
    on the version's fleet first and their outputs are the `{{rerun}}`
    material: a checker judges from them and drives what they do not
-   settle. A script written for the version is kept under
-   `lines/<branch>/shared/playwright/checks/U<nn>/<chunk>/`.
+   settle. The chunks cover the body and the register; the copied
+   scenarios belong to no chunk, since step 6 brings them in line and
+   step 8's tests check them.
 6. **Scenarios.** As a revision's step 2 (`briefs/scenario-writer.md`,
    situation "revision"): the scenarios exist, and each is brought in
    line with the folded body. The numbers stay `main`'s: a scenario the

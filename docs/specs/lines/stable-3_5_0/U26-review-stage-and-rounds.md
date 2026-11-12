@@ -174,7 +174,7 @@ Coordinator. <sup>s</sup>
 ## Footnotes — evidence
 
 <a id="fn-a"></a>**a** — Walked 2026-11-11, runs `s1` and `s2`, part
-`s12` of `lines/stable-3_5_0/shared/playwright/checks/U26/W1/walk.js`.
+`s12` of `lines/stable-3_5_0/shared/playwright/checks/U26-stable-3_5_0/W1/walk.js`.
 Test: "S12: author reads an open review" in
 `lines/stable-3_5_0/apps/ojs/playwright/tests/U26-review-stage-and-rounds.spec.js`.
 Snapshots in `.reports/lines35/u26/`: `s12-au-open-underway` (no list),
@@ -276,7 +276,7 @@ them, for the build-out's register read (`docs/process/VERSIONS.md` step
 **v35** — The "Seen on" column, 3.5 (pilot, `docs/specs/lines/README.md`).
 Read 2026-11-11 on OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`,
 ui-library `fd00e45f`); every walked answer was seen in two runs of
-`lines/stable-3_5_0/shared/playwright/checks/U26/W1/walk.js`. A1, A9, A10,
+`lines/stable-3_5_0/shared/playwright/checks/U26-stable-3_5_0/W1/walk.js`. A1, A9, A10,
 A13 and A14: the "Affects" bullet of their issue reports in
 `docs/issues/` (A1, A10 and A13 also seen on the walk). A2: the author's
 box equals the editor's at five states (parts `s2`, `s3`). A4: part

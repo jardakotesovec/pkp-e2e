@@ -100,8 +100,24 @@ function copy(file) {
         return;
     }
     fs.mkdirSync(path.dirname(target), {recursive: true});
-    fs.copyFileSync(path.join(REPO_ROOT, file), target);
+    if (/^docs\/specs\/[^/]+\.md$/.test(file)) {
+        fs.writeFileSync(target, relinked(fs.readFileSync(path.join(REPO_ROOT, file), 'utf8')));
+    } else {
+        fs.copyFileSync(path.join(REPO_ROOT, file), target);
+    }
     copied.push(file);
+}
+
+/**
+ * A copied spec's links to what exists once (the glossary, issue reports,
+ * process and tracking files) are pointed back at the root; its links to
+ * other specs stay beside it, where the version's own copies are or will be.
+ */
+function relinked(text) {
+    const up = '../../../../docs/';
+    return text
+        .replace(/\]\((GLOSSARY\.md(?:#[^)]*)?)\)/g, `](${up}specs/$1)`)
+        .replace(/\]\(\.\.\/(issues|process|tracking|reports)\//g, `](${up}$1/`);
 }
 
 function link(file) {

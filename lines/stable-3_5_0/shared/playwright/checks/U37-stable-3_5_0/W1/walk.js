@@ -5,7 +5,7 @@
 // and touches nothing else; the 3.5 probe server must be up, harness.md "The stable lines"):
 //
 //   PKP_E2E_LINE=stable-3_5_0 PROBE_FEATURE=lines35 PROBE_AGENT=<id> PROBE_RUN=s1 \
-//     node bin/probe.js ojs lines/stable-3_5_0/shared/playwright/checks/U37/W1/walk.js <part>
+//     node bin/probe.js ojs lines/stable-3_5_0/shared/playwright/checks/U37-stable-3_5_0/W1/walk.js <part>
 //
 // Run every part twice (PROBE_RUN=s1, then s2) before writing a difference down. No assertions: each
 // screen is saved with screen() as <part>-<nn>-<name>-<run>-ojs.json, and what the part read is in

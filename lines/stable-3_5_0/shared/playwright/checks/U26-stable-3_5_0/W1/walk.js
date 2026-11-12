@@ -10,7 +10,7 @@
 // Run (the 3.5 install must be up: PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature lines35 --apps ojs):
 //
 //   PKP_E2E_LINE=stable-3_5_0 PROBE_FEATURE=lines35 PROBE_AGENT=u26 PROBE_RUN=s1 PARTS=s1,s2,s3 \
-//       node bin/probe.js ojs lines/stable-3_5_0/shared/playwright/checks/U26/W1/walk.js
+//       node bin/probe.js ojs lines/stable-3_5_0/shared/playwright/checks/U26-stable-3_5_0/W1/walk.js
 //
 // PROBE_RUN names the run (s1, then s2: every difference is read twice, each run on its own scratch
 // journals). PARTS picks the parts (default: all of them, about five minutes; two or three parts

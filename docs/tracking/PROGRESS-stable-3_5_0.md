@@ -12,8 +12,8 @@ local final run (`VERSIONS.md` step 8).
 
 | Row | Feature | Apps | Scenarios | Status | Note |
 |---|---|---|---|---|---|
-| U26 | Review stage & rounds | OJS OMP | | pending | OJS: 13 tests and the page objects adapted from a walk of the scenarios, green. Not through the loop yet: no spec in the folder, OMP not started. Notes: `docs/specs/lines/stable-3_5_0/U26-review-stage-and-rounds.md`; walk `lines/stable-3_5_0/shared/playwright/checks/U26/W1/`. |
-| U37 | Tasks & discussions | OJS OMP OPS | | pending | Nothing built. `main`'s 11 OJS tests all fail on 3.5 (the feature was rebuilt on `main`). Notes: `docs/specs/lines/stable-3_5_0/U37-tasks-and-discussions.md`; walk `lines/stable-3_5_0/shared/playwright/checks/U37/W1/`. |
+| U26 | Review stage & rounds | OJS OMP | | pending | OJS: 13 tests and the page objects adapted from a walk of the scenarios, green. Not through the loop yet: no spec in the folder, OMP not started. Notes: `docs/specs/lines/stable-3_5_0/U26-review-stage-and-rounds.md`; walk `lines/stable-3_5_0/shared/playwright/checks/U26-stable-3_5_0/W1/`. |
+| U37 | Tasks & discussions | OJS OMP OPS | | pending | Nothing built. `main`'s 11 OJS tests all fail on 3.5 (the feature was rebuilt on `main`). Notes: `docs/specs/lines/stable-3_5_0/U37-tasks-and-discussions.md`; walk `lines/stable-3_5_0/shared/playwright/checks/U37-stable-3_5_0/W1/`. |
 | U01 | Login & sessions | OJS OMP OPS | | pending |  |
 | U02 | Registration & account validation | OJS OMP OPS | | pending |  |
 | U03 | User profile | OJS OMP OPS | | pending |  |

@@ -233,7 +233,12 @@ let ok = true;
         }
 
         const setupLog = path.join(reportDir, `setup-${name}.log`);
-        const setupArgs = ['playwright', 'test', '-c', `configs/${name}.config.js`, '--project=setup', '--reporter=list'];
+        // A stable version with a folder of its own (docs/process/VERSIONS.md)
+        // is set up from that folder's config: its seed roster, its test library.
+        const lineConfig = `lines/${process.env.PKP_E2E_LINE}/${name}.config.js`;
+        const config =
+            process.env.PKP_E2E_LINE && fs.existsSync(path.join(REPO_ROOT, lineConfig)) ? lineConfig : `configs/${name}.config.js`;
+        const setupArgs = ['playwright', 'test', '-c', config, '--project=setup', '--reporter=list'];
         let code = runLogged(`${name} setup`, 'npx', setupArgs, setupLog);
         if (code !== 0) {
             console.log(`fleet-prep: ${name} setup: retrying once (webServer start race after a reset is known)`);

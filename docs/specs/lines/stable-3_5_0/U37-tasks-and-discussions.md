@@ -789,7 +789,7 @@ Files 3.5 has and `main` no longer has.
 ## Footnotes — evidence
 
 Every footnote's walk is the kept script
-`lines/stable-3_5_0/shared/playwright/checks/U37/W1/walk.js` (helpers in
+`lines/stable-3_5_0/shared/playwright/checks/U37-stable-3_5_0/W1/walk.js` (helpers in
 `lib.js` beside it), run on 2026-11-11, each part twice on fresh scratch
 data as `PROBE_RUN=s1` and `s2`. Part `s1` ran a third time (`s3`): two
 of its steps were added after its first run, so its snapshot names below
@@ -958,7 +958,7 @@ Basis: probe, 2026-11-11 (OJS 3.5). <sup>[f-a42](#fn-a42)</sup>
 
 <a id="fn-a37"></a>
 **f-a37** — OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`), 2026-11-11.
-Part `s2` of `lines/stable-3_5_0/shared/playwright/checks/U37/W1/walk.js`,
+Part `s2` of `lines/stable-3_5_0/shared/playwright/checks/U37-stable-3_5_0/W1/walk.js`,
 runs `s1` and `s2`: on an untouched window, a changed one and one whose
 "OK" was just refused (`s2-04-cancel-untouched`, `s2-06-cancel-changed`,
 `s2-08-cancel-after-refusal`, `s2-10-empty-row-strip`). "Cancel" sends
@@ -1007,7 +1007,7 @@ report's "Affects" bullet in `docs/issues/` where one exists, 3.5's
 code otherwise). Walked on 3.5 and not seen: A3, A36 and OMP1 (their
 issue reports), A19 (five viewers each read the manager's assigned
 role). Walked and seen, twice, with
-`lines/stable-3_5_0/shared/playwright/checks/U37/W1/register/walk.js`: A14
+`lines/stable-3_5_0/shared/playwright/checks/U37-stable-3_5_0/W1/register/walk.js`: A14
 (a reviewer on an "Anonymous Reviewer/Disclosed Author" review is
 offered the Author; the save is refused, in 3.5's own wording) and A20
 (a rename is refused once only one participant can be ticked). A12: read in 3.5's code only
