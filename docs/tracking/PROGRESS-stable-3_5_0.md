@@ -7,8 +7,9 @@ session takes rows from the top. Status is pending / in_progress / done
 until the feature is built. Finding detail lives in each spec's
 register, never here.
 
-The 3.5 suite does not run in CI yet: a feature's second green is the
-local final run (`VERSIONS.md` step 8).
+The 3.5 suite runs in CI on request, with no nightly and no hook on
+the app repos: a feature's second green is that run (`VERSIONS.md` step
+8).
 
 | Row | Feature | Apps | Scenarios | Status | Note |
 |---|---|---|---|---|---|

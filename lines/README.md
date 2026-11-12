@@ -11,14 +11,14 @@ The links in a folder (`bin`, `shared/playwright/probe` and the
 top-level files of `shared/playwright/`) point at what exists once at
 the repo root.
 
-## State of the pilot (`stable-3_5_0`, branch `lines-pilot`)
+## What is here
 
-- The folder's base is in place for OJS, OMP and OPS: the glossary, the
-  test library, the seeding code and a config per app.
-- "Review stage & rounds" (U26) is built for all three apps through the
-  build-out, the first feature and its shakedown: the spec, 13 OJS, 14
-  OMP and 1 OPS tests, and the claim check's kept scripts.
-- `docs/specs/lines/stable-3_5_0/` holds one list of differences (U37)
-  from the pilot's first shape: notes for building that spec, deleted
-  once it exists.
-- The 3.5 suite does not run in CI yet.
+- `stable-3_5_0/`: OJS, OMP and OPS on 3.5. Built feature by feature;
+  `docs/tracking/PROGRESS-stable-3_5_0.md` says which features it holds.
+- `ore/`: OJS on pkp/ojs `ore`, every feature, copied from the pkp-e2e
+  branch that held its suite until 2026-11-12 (its last commit there:
+  `918eeb34`). MAINTENANCE "The ore version".
+
+`docs/specs/lines/stable-3_5_0/` holds one list of differences (U37)
+from the pilot's first shape: notes for building that feature's 3.5
+spec, deleted once it exists.

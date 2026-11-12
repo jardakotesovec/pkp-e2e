@@ -132,9 +132,9 @@ order.
    function is renamed when the screen's own words differ. Green once
    per app, run from the version's config
    (`npx playwright test -c lines/<branch>/<app>.config.js --project=<app>`).
-   The second green is the version's whole suite on a reset install,
-   one app at a time:
-   `PKP_E2E_LINE=<branch> npm run test:final -- --feature U<nn>-<branch>`.
+   The second green is CI's, the version's whole suite on fresh boxes:
+   `node bin/ci.js dispatch --line <branch> --apps ojs,omp,ops --ojs-ref <branch> --omp-ref <branch> --ops-ref <branch>`
+   from the pushed build branch.
    Gate: the green logs, `lint-spec.mjs --tests` zero on the version's
    spec, `npm run lint:suite` clean.
 9. **Progress.** The spec to `status: verified`; the row in the version's
