@@ -29,6 +29,17 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const dirs = ['apps/ojs/playwright', 'apps/omp/playwright', 'apps/ops/playwright', 'shared/playwright'];
+// The stable versions' folders (lines/<branch>/, docs/process/VERSIONS.md)
+// hold the same two kinds of directory; their links to what exists once
+// are skipped below.
+const linesDir = path.join(root, 'lines');
+if (fs.existsSync(linesDir)) {
+    for (const line of fs.readdirSync(linesDir, {withFileTypes: true})) {
+        if (!line.isDirectory()) continue;
+        for (const app of ['ojs', 'omp', 'ops']) dirs.push(`lines/${line.name}/apps/${app}/playwright`);
+        dirs.push(`lines/${line.name}/shared/playwright`);
+    }
+}
 const skip = /[\\/](checks|node_modules|test-results|\.server-logs|timings)[\\/]/;
 
 const rules = [
@@ -55,6 +66,7 @@ function* files(dir) {
     for (const entry of fs.readdirSync(dir, {withFileTypes: true})) {
         const full = path.join(dir, entry.name);
         if (skip.test(full + path.sep)) continue;
+        if (entry.isSymbolicLink()) continue;
         if (entry.isDirectory()) yield* files(full);
         else if (entry.name.endsWith('.js')) yield full;
     }

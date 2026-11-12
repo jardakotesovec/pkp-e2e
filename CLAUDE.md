@@ -7,6 +7,12 @@ not here. `docs/README.md` is the map of the documentation.
 - **Start every feature session with `docs/process/RUNBOOK.md`** (the loop,
   what goes where, model discipline) **and `docs/tracking/PROGRESS.md`**
   (live state and the mode banner). Never re-derive the process from memory.
+- **A build-out session** builds a stable version's features: a request
+  such as "start the build-out for 3.5 for 3 specs". It reads
+  `docs/process/VERSIONS.md` and the version's progress file
+  (`docs/tracking/PROGRESS-stable-3_5_0.md`) beside the RUNBOOK, and
+  works in the version's folder, `lines/<branch>/`, never in `main`'s
+  specs or suites.
 - **Maintenance sessions** (the resident QA agent) are two, each with
   its own list in `docs/process/MAINTENANCE.md`: the **upstream session**
   (the daily session) also reads `docs/tracking/upstream-sync.md`,
@@ -66,8 +72,10 @@ Operational facts:
   `dispatch`, harness.md "CI"), never on the VM by default.
 - A second set of checkouts on `stable-3_5_0` lives in
   `checkouts/stable-3_5_0/<app>` (ports 9000/9100/9200, DBs
-  `<app>_test_3_5`), for regression reads and side-by-side drives only:
-  no suite or spec follows it. `PKP_E2E_LINE=stable-3_5_0` in front of a
+  `<app>_test_3_5`), for regression reads, side-by-side drives and the
+  3.5 specs and suites in `lines/stable-3_5_0/`
+  (`docs/process/VERSIONS.md`): the specs and suites at the repo root
+  never describe it. `PKP_E2E_LINE=stable-3_5_0` in front of a
   harness command selects it; `npm run fetch-apps -- --line stable-3_5_0`
   provisions it (harness.md "The stable lines"). `stable-3_4_0` and
   `stable-3_3_0` lines (ports 10000… / 11000…, PHP 8.2) exist the same

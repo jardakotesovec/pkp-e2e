@@ -132,11 +132,19 @@ branch. `stable-3_5_0` serves the daily regression hunt on that branch
 maintainer asks to walk a particular issue on 3.4 or 3.3 ("walk this
 issue on 3.3"); no session drives them as a standing step, and an issue
 report's "Affects" for those versions is read from the code otherwise.
-No suite is meant to run on any of the three lines.
+
+`stable-3_5_0` also has a folder of its own, `lines/stable-3_5_0/`, with
+the specs, suites, test library and seeding code of the features built
+for it (`VERSIONS.md`). `PKP_E2E_LINE=stable-3_5_0 node bin/mount.js`
+copies the folder's seeding code into the line's checkouts,
+`PKP_E2E_LINE=stable-3_5_0 npm run test:<app>` (and `test:final`) runs
+the folder's suite, and one file runs with
+`npx playwright test -c lines/stable-3_5_0/<app>.config.js`.
+`node bin/line-cut.js` fills the folder. No suite runs on 3.4 or 3.3.
 
 | Line | Checkouts | Base ports ojs/omp/ops (slot 0) | Test DBs | PHP | Node (JS build) | Overlays |
 |---|---|---|---|---|---|---|
-| `stable-3_5_0` | `checkouts/stable-3_5_0/<app>` | 9000/9100/9200 | `<app>_test_3_5` | system `php` (8.3) | system (22) | the `main` set, guarded |
+| `stable-3_5_0` | `checkouts/stable-3_5_0/<app>` | 9000/9100/9200 | `<app>_test_3_5` | system `php` (8.3) | system (22) | the line folder's own copy (`lines/stable-3_5_0/`) |
 | `stable-3_4_0` | `checkouts/stable-3_4_0/<app>` | 10000/10100/10200 | `<app>_test_3_4` | `/usr/bin/php8.2` | 16.20.2 | install and user tools only |
 | `stable-3_3_0` | `checkouts/stable-3_3_0/<app>` | 11000/11100/11200 | `<app>_test_3_3` | `/usr/bin/php8.2` | 12.22.12 | install and user tools only |
 

@@ -36,7 +36,8 @@ const APPS = {
 // once to checkouts/runtimes/node-v<version>-linux-x64); on a Mac it builds on
 // the system Node with --openssl-legacy-provider instead. The harness itself,
 // Playwright included, stays on the system Node. `overlays` says which PHP
-// overlays mount copies: 'main' (the full set, guarded for 3.5) or 'install'
+// overlays mount copies: 'main' (the full set: the copy in lines/<line>/
+// where the line has a folder, docs/process/VERSIONS.md, else main's) or 'install'
 // (only tools/installTest.php from shared/php-lines/<line>/, harness.md "The
 // stable lines").
 const LINES = {

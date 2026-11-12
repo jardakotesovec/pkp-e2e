@@ -6,8 +6,6 @@ status: verified
 # Review stage & rounds {OJS OMP}
 
 > Conventions (markers, badges, footnotes): [Reading a spec](GLOSSARY.md#reading-a-spec).
->
-> Differs on: [3.5](lines/stable-3_5_0/U26-review-stage-and-rounds.md).
 
 ## Purpose
 
@@ -744,28 +742,26 @@ Left out of the scenarios above, by reason:
 Verdicts are the author's judgment (claude, 2026-07-31), unreviewed unless an
 entry notes otherwise; the team settles them on spec review. The summary is
 sorted 🐞 → ❓ → ✅ and the entries below are the source; badges, Impact and
-Basis: [Reading a spec](GLOSSARY.md#reading-a-spec). "Versions" names the
-versions that show the finding
-([how to read it](lines/README.md#what-a-versions-cell-says)). <sup>[v35](#fn-v35)</sup>
+Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 
-| ID | Finding (one line, symptom) | Bug? | Impact | Versions | Review |
-|----|-----------------------------|------|--------|----------|--------|
-| [A1](#a1) | After "Resubmit for Review", the Author's "Upload revisions" button disappears with their first file | 🐞 | low | main 3.5 | issues (claude), 2026-10-02 — re-verified |
-| [A9](#a9) | Deleting the only revised file flips the status back but never returns the author's revisions task | 🐞 | low | main 3.5 | issues (claude), 2026-10-04 — re-verified |
-| [A10](#a10) | The review round's "Revisions Uploaded" list says revisions were requested on rounds where none were | 🐞 | low | main 3.5 | issues (claude), 2026-10-04 — re-verified |
-| [A13](#a13) | After "Resubmit for Review", the author's "Resubmit for review." task stays once they upload their revisions | 🐞 | low | main 3.5 | issues (claude), 2026-10-19 — re-verified |
-| [A14](#a14) | With two authors on a submission, a revised file clears only one author's "Revision required." task | 🐞 | low | main 3.5 | issues (claude), 2026-10-19 — re-verified |
-| [A2](#a2) | The author sees the editor's status wording; the author-tailored wording exists but is never shown | ❓ | user-visible | main 3.5 | — |
-| [A3](#a3) | What the read-review window's attachments section lists: observation recorded privately with the maintainer pending a fix | ❓ | latent | main; 3.5 not checked | — |
-| [A4](#a4) | A round whose only reviewers declined reports "All reviews are confirmed and a decision is needed." | ❓ | user-visible | main 3.5 | — |
-| [A5](#a5) | No screen path assigns a production assistant to the review stage; one assigned elsewhere is refused entry | ❓ | minor | main 3.5 | — |
-| [A6](#a6) | After a round is cancelled, the restored round's status box no longer mentions its unresolved revision request | ❓ | user-visible | main 3.5 | — |
-| [A7](#a7) | Unticking a file in the review-files dialog changes nothing the editor can see, and the checkboxes do not mirror the panel | ❓ | minor | main 3.5 | — |
-| [A8](#a8) | A past round's panels still act: a reviewer added or a file uploaded there lands in the closed round | ❓ | user-visible | main 3.5 | — |
-| [A11](#a11) | The upload window's "Cancel" link removes the attached file, but the "Revised Version Uploaded" email already sent to the editors stands | ❓ | minor | main 3.5 | — |
-| [OMP2](#omp2) | A press collects no reviewer recommendation (intended, confirmed upstream 2026-08-25), and the decision letter still prints "Recommendation:" with nothing after it | ❓ | user-visible | main; 3.5 not checked | rebase check (claude), 2026-08-25 — form-field half intended |
-| [OMP3](#omp3) | On a press the fresh revisions task reads "Revisions to consider in External Review.", not the journal's "Revision required."; with two authors on the stage, each author gets a different wording | ❓ | minor | main; 3.5 not checked | — |
-| [OMP1](#omp1) | Presses run an additional Internal Review stage before External Review | ✅ | — | main 3.5 (code) | — |
+| ID | Finding (one line, symptom) | Bug? | Impact | Review |
+|----|-----------------------------|------|--------|--------|
+| [A1](#a1) | After "Resubmit for Review", the Author's "Upload revisions" button disappears with their first file | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [A9](#a9) | Deleting the only revised file flips the status back but never returns the author's revisions task | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
+| [A10](#a10) | The review round's "Revisions Uploaded" list says revisions were requested on rounds where none were | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
+| [A13](#a13) | After "Resubmit for Review", the author's "Resubmit for review." task stays once they upload their revisions | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
+| [A14](#a14) | With two authors on a submission, a revised file clears only one author's "Revision required." task | 🐞 | low | issues (claude), 2026-10-19 — re-verified |
+| [A2](#a2) | The author sees the editor's status wording; the author-tailored wording exists but is never shown | ❓ | user-visible | — |
+| [A3](#a3) | What the read-review window's attachments section lists: observation recorded privately with the maintainer pending a fix | ❓ | latent | — |
+| [A4](#a4) | A round whose only reviewers declined reports "All reviews are confirmed and a decision is needed." | ❓ | user-visible | — |
+| [A5](#a5) | No screen path assigns a production assistant to the review stage; one assigned elsewhere is refused entry | ❓ | minor | — |
+| [A6](#a6) | After a round is cancelled, the restored round's status box no longer mentions its unresolved revision request | ❓ | user-visible | — |
+| [A7](#a7) | Unticking a file in the review-files dialog changes nothing the editor can see, and the checkboxes do not mirror the panel | ❓ | minor | — |
+| [A8](#a8) | A past round's panels still act: a reviewer added or a file uploaded there lands in the closed round | ❓ | user-visible | — |
+| [A11](#a11) | The upload window's "Cancel" link removes the attached file, but the "Revised Version Uploaded" email already sent to the editors stands | ❓ | minor | — |
+| [OMP2](#omp2) | A press collects no reviewer recommendation (intended, confirmed upstream 2026-08-25), and the decision letter still prints "Recommendation:" with nothing after it | ❓ | user-visible | rebase check (claude), 2026-08-25 — form-field half intended |
+| [OMP3](#omp3) | On a press the fresh revisions task reads "Revisions to consider in External Review.", not the journal's "Revision required."; with two authors on the stage, each author gets a different wording | ❓ | minor | — |
+| [OMP1](#omp1) | Presses run an additional Internal Review stage before External Review | ✅ | — | — |
 
 ### All apps
 
@@ -1873,21 +1869,6 @@ stage, one 0x1000016 row and no decision row; with two, one 0x1000016 row
 for the author added in Participants and one 0x1000010 row ("Revision
 required.") for the submitter — the delegates act on one author only
 (note f-a14).
-
-<a id="fn-v35"></a>
-**v35** — The "Versions" column, 3.5 (pilot, `docs/specs/lines/README.md`).
-Read 2026-11-11 on OJS `stable-3_5_0` `7cf6c9c60f` (pkp-lib `5af8e67ab4`,
-ui-library `fd00e45f`); every walked answer was seen in two runs of
-`shared/playwright/checks/lines/stable-3_5_0/U26/walk.js`. A1, A9, A10,
-A13 and A14: the "Affects" bullet of their issue reports in
-`docs/issues/` (A1, A10 and A13 also seen on the walk). A2: the author's
-box equals the editor's at five states (parts `s2`, `s3`). A4: part
-`s8`. A7: part `s1`. A5, A6, A8, A11: part `reg`. A3: not read on this
-walk. OMP2, OMP3: OMP was not read. OMP1: read in OMP 3.5's code
-(`classes/core/Application.php`,
-`classes/decision/types/SkipInternalReview.php`). Retired A12: its fix
-(pkp/ui-library#853) is in 3.5's history, and the walk lists the file
-with no reload.
 
 ## Reference — entry points & surfaces
 

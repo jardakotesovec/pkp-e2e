@@ -20,6 +20,9 @@ in git history. The parity ledger and app-changes are the exception: they
 record changes still in effect; so is regression-metrics, the weekly count's
 history.
 
+- `docs/tracking/PROGRESS-stable-3_5_0.md`: the same for the stable
+  version 3.5, whose specs and tests live in `lines/stable-3_5_0/`; it is
+  also the queue of the version's build-out (`docs/process/VERSIONS.md`).
 - `docs/tracking/PROGRESS.md`: one row per feature with its status, test
   counts and a short note; the banner names the mode.
 - `docs/tracking/FEATURE-MAP.md`: the 75 features and the screens and
@@ -76,6 +79,8 @@ Read in this order:
    each kind of finding goes. `docs/process/briefs/` holds the brief
    template for each subagent role plus the shared Frame (`frame.md`) and
    digest block (`digest-block.md`); the orchestrator fills the slots.
+   `docs/process/VERSIONS.md`: how a stable version gets specs and tests
+   of its own in `lines/<branch>/`, through the same loop.
 2. `docs/process/TEMPLATE.md`: how a spec is written, section by section;
    `docs/process/REPORT.md`: how a regression or defect report, or a
    GitHub issue, handed to the team is written, and the severity and effort scales.

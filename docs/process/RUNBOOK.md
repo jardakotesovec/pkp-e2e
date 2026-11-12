@@ -12,7 +12,9 @@ This file and `docs/tracking/PROGRESS.md` are the source of truth; a session
 becomes correct by reading them, never by memory. A session is either a
 FEATURE session (one feature, then stop for the maintainer's review) or a
 MAINTENANCE session (`MAINTENANCE.md`, with this loop binding underneath:
-the housekeeping session builds pending rows and revisions through it);
+the housekeeping session builds pending rows and revisions through it)
+or a BUILD-OUT session (a stable version's features through this loop,
+`VERSIONS.md`);
 the PROGRESS banner says whether the resident agent is active. Paths are
 relative to the repo root; `../pkp-e2e-sec/` is the private security repo,
 and its `security_policy.md` the rule for anything security-shaped.

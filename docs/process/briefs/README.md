@@ -8,9 +8,9 @@ the issue reporter (`issue-report.md`, MAINTENANCE "Issue reports") and its two 
 reads of a written report (`issue-read.md`, developer and triage), one for a
 flake class's diagnostician (`flake-diagnosis.md`, MAINTENANCE "Standing
 duties"), two for a plugin review's reader and drive (`plugin-read.md`,
-`plugin-drive.md`, MAINTENANCE "Plugin review"), plus two
-shared blocks the templates point at or take as a slot (`frame.md`,
-`digest-block.md`). The orchestrator
+`plugin-drive.md`, MAINTENANCE "Plugin review"), plus three
+shared blocks the templates point at, take as a slot or get appended
+(`frame.md`, `digest-block.md`, `version.md`). The orchestrator
 renders a brief by copying the role's template and filling its slots. It
 never writes a brief from scratch, and it never writes rules into one.
 
@@ -40,3 +40,6 @@ never writes a brief from scratch, and it never writes rules into one.
    the verified meaning" in the rewrite and fold templates.
 5. The "Return (short)" block is what the agent sends back: pointers and
    counts, never findings. Do not widen it.
+6. In a build-out for a stable version (`VERSIONS.md`), fill the path
+   slots with the version's files (`lines/<branch>/…`) and append the
+   version block (`version.md`) to the brief, its two slots filled.

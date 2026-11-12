@@ -194,7 +194,7 @@ function refuseSoloBesideOthersWithoutDeps(appName, argv = process.argv.slice(2)
     }
 }
 
-function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
+function definePkpConfig({appName, appRoot, suiteDir, sharedTestDir, basePort}) {
     refuseSoloBesideOthersWithoutDeps(appName);
     // One slot's runs at a time on this machine (test-lock.js); a no-op in
     // workers, under test-app/test-final/fleet-prep (they hold it) and on CI.
@@ -225,7 +225,9 @@ function definePkpConfig({appName, appRoot, suiteDir, basePort}) {
         process.env.PLAYWRIGHT_WORKERS || String(detectWorkers()),
         10,
     );
-    const sharedTestDir = path.join(__dirname, 'tests');
+    // A stable version's suite brings its own copy of the shared tests
+    // (line-config.js); main's are the ones beside this file.
+    sharedTestDir = sharedTestDir || path.join(__dirname, 'tests');
     const appTestDir = path.join(suiteDir, 'tests');
 
     const serverEnv = phpServerEnv({

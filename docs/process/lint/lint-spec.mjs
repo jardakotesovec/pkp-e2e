@@ -322,6 +322,10 @@ function checkLinks(doc, out) {
             if (filePart) {
                 resolved = path.resolve(path.dirname(doc.file), filePart);
                 exists = fs.existsSync(resolved);
+                // A stable version's spec (lines/<branch>/docs/specs/) may link a feature the
+                // version's folder does not hold yet: main's spec stands in until it is built.
+                const inLine = !exists && resolved.match(/^(.*)[\\/]lines[\\/][^\\/]+([\\/]docs[\\/].+)$/);
+                if (inLine && fs.existsSync(inLine[1] + inLine[2])) { resolved = inLine[1] + inLine[2]; exists = true; }
                 if (!exists) out.push({ line: i + 1, check: 'links', msg: `link target missing: ${target}` });
             }
             if (exists && anchorPart && !anchorsOf(resolved).has(anchorPart))
@@ -596,11 +600,14 @@ function checkTests(file, root = APPS_ROOT) {
     return out.sort((a, b) => (a.file === b.file ? a.line - b.line : a.file === file ? -1 : b.file === file ? 1 : a.file.localeCompare(b.file)));
 }
 
-function runTests(files, root = APPS_ROOT) {
+// A stable version's spec (lines/<branch>/docs/specs/, docs/process/VERSIONS.md) is checked against that version's suites.
+const appsRootOf = (file) => { const m = path.resolve(file).match(/^(.*[\\/]lines[\\/][^\\/]+)[\\/]docs[\\/]specs[\\/]/); return m ? path.join(m[1], 'apps') : APPS_ROOT; };
+
+function runTests(files, root) {
     let total = 0;
     const rel = (f) => { const r = path.relative(process.cwd(), f); return !r || r.startsWith('..') ? f : r; };
     for (const file of files) {
-        const findings = checkTests(file, root);
+        const findings = checkTests(file, root || appsRootOf(file));
         total += findings.length;
         for (const f of findings) console.log(`${rel(f.file)}:${f.line} — tests — ${excerpt(f.msg, 160)}`);
     }

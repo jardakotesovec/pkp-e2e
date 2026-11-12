@@ -60,7 +60,7 @@ function overlayFiles(appName) {
     };
     const appPhp = own('apps', appName, 'php');
     const sharedPhp = own('shared', 'php');
-    const fixtures = path.join(REPO_ROOT, 'apps', appName, 'playwright', 'fixtures', 'files');
+    const fixtures = own('apps', appName, 'playwright', 'fixtures', 'files');
     walk(appPhp, appPhp, '');
     walk(sharedPhp, sharedPhp, path.join('lib', 'pkp'));
     // The suite's fixture files, so a builder can store one the way an

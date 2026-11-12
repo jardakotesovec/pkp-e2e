@@ -675,9 +675,16 @@ The team ships 3.5 fixes from `stable-3_5_0`, most of them backports of
 what `main` already received. The daily session hunts regressions there
 too, and does nothing else there: of the
 sync loop it runs steps 1, 2, 5 and 6, never 3 or 4. The specs and the
-suites describe `main`, and 3.5 has diverged too far for them to mean
-anything on it. So no suite runs on the line, no spec follows it, no CI backs it,
-and a red suite there is not evidence of anything.
+suites at the repo root describe `main`, and 3.5 has diverged too far
+for them to mean anything on it.
+
+The features built for 3.5 have specs and suites of their own in
+`lines/stable-3_5_0/` (`VERSIONS.md`;
+`docs/tracking/PROGRESS-stable-3_5_0.md` lists them). When a backport
+changes what one of those specs or suites states, the daily session
+accommodates it there, as `main`'s accommodation was (`VERSIONS.md`
+"After a feature is built"). For every other feature the line has no
+spec and no suite. No CI backs the line yet.
 
 The line has its own checkouts beside the `main` ones, so both can be
 read and driven side by side (harness.md "The fleets"):

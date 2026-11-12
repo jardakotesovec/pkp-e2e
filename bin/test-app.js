@@ -64,7 +64,13 @@ if (!appName || !APPS[appName]) {
 // All three passes under one hold of the machine's test lock, so another
 // slot never runs between them (shared/playwright/test-lock.js).
 require('../shared/playwright/test-lock.js').acquire(`test:${appName} ${callerArgs.join(' ')}`);
-const config = `configs/${appName}.config.js`;
+// A stable version with a suite of its own (lines/<branch>/, selected by
+// PKP_E2E_LINE) runs from its folder's config.
+const lineConfig = `lines/${process.env.PKP_E2E_LINE}/${appName}.config.js`;
+const config =
+    process.env.PKP_E2E_LINE && require('fs').existsSync(path.join(REPO_ROOT, lineConfig))
+        ? lineConfig
+        : `configs/${appName}.config.js`;
 
 // Ctrl-C reaches the running pass through the terminal's process group;
 // the runner outlives it, so the pass shuts down with its output intact,

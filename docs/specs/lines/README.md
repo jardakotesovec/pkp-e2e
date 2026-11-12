@@ -16,11 +16,11 @@ does not), **different here** (written out whole as 3.5 has it) or
 listed was assumed the same; the file's "Basis" line says what was
 walked on 3.5 and what was only compared in the code.
 
-## What a "Versions" cell says
+## What a "Seen on" cell says
 
-The registers of `main`'s U26 and U37 specs carry a "Versions" column
-from the same first shape. It goes with these files, once each version's
-spec has its own register.
+Each file ends with "Findings on 3.5": `main`'s register entries with
+the versions the pilot's walk saw them on, and the entries only 3.5
+shows.
 
 - `main 3.5`: seen on both.
 - `main`: seen on `main`; walked on 3.5 and not there, or 3.5 has no
