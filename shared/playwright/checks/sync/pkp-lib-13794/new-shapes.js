@@ -16,7 +16,8 @@
 //   renamed   legacy "<t> Former Name", no plugin ROR; stored: [R2], as the upgrade left it when R2
 //             was still called that; R2's cached name differs today (ROR renamed it, the cache keeps
 //             ror_display and label names only). Expected by the issue's rules: listed (the ROR was
-//             derived from the name). PR head a3da55ce64: no line.
+//             derived from the name). PR head a3da55ce64: no line; bb17ba1380 (round 2): review,
+//             "ROR not explained by the legacy data" (reads fixed).
 //
 // Fleet: a stable-3_5_0 dataset fleet, freshly reset (the first five authors are rewritten):
 //   PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature <f> --dataset <n> --reset --apps ojs

@@ -71,26 +71,40 @@ function parseCsv(text) {
 
 /**
  * `php lib/pkp/tools/repairRorAffiliations.php [args]` from the app root, as an administrator runs
- * it, with this fleet's config; the CSV and SQL files go to the run's output folder.
+ * it, with this fleet's config; the CSV and SQL files go to the run's output folder. A tool without
+ * `--out` (pkp/pkp-lib#13794 from `bb17ba1380` on writes to files_dir) gets none; the files it
+ * names are then moved into the run's output folder, their mode recorded in `modes`.
  * REPAIR_TOOL=<path> runs another copy instead (a fix tried outside the checkout; its bootstrap
  * `require` must then name the app root, e.g. `getcwd() . '/tools/bootstrap.php'`).
  */
 function runTool(app, args = []) {
     const out = path.dirname(outFile('x.csv'));
     const tool = process.env.REPAIR_TOOL ? abs(process.env.REPAIR_TOOL) : 'lib/pkp/tools/repairRorAffiliations.php';
+    const hasOut = fs.readFileSync(path.isAbsolute(tool) ? tool : path.join(abs(app.root), tool), 'utf8').includes("'--out='");
     let code = 0;
     let text;
     try {
-        text = execFileSync('php', [tool, `--out=${out}`, ...args], {
+        text = execFileSync('php', [tool, ...(hasOut ? [`--out=${out}`] : []), ...args], {
             cwd: abs(app.root), env: {...process.env, PKP_CONFIG_FILE: abs(app.configFile)}, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
         });
     } catch (e) {
         code = e.status;
         text = `${e.stdout || ''}${e.stderr || ''}`;
     }
+    const modes = {};
+    const written = [...text.matchAll(/(?:Report|Rollback SQL): (\S+)/g)].map((x) => x[1]);
+    const moved = Object.fromEntries(written.map((f) => {
+        if (hasOut) return [f, f];
+        modes[path.basename(f)] = {dir: path.dirname(f), mode: (fs.statSync(f).mode & 0o777).toString(8)};
+        const to = path.join(out, path.basename(f));
+        fs.copyFileSync(f, to);
+        fs.unlinkSync(f);
+        return [f, to];
+    }));
     const m = /Report: (\S+)/.exec(text);
-    const csv = m ? fs.readFileSync(m[1], 'utf8') : null;
-    return {tool: process.env.REPAIR_TOOL || null, args, code, out: text.trim().split('\n'), csvFile: m ? path.relative(REPO_ROOT, m[1]) : null, rows: csv ? parseCsv(csv) : []};
+    const csvPath = m ? moved[m[1]] : null;
+    const csv = csvPath ? fs.readFileSync(csvPath, 'utf8') : null;
+    return {tool: process.env.REPAIR_TOOL || null, args, code, out: text.trim().split('\n'), csvFile: csvPath ? path.relative(REPO_ROOT, csvPath) : null, modes, rows: csv ? parseCsv(csv) : []};
 }
 
 /** An author's stored affiliations: [{id, ror, names: {locale: name}}]. */
