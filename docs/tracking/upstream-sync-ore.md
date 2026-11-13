@@ -14,8 +14,8 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `9dffdeb147` | 2026-11-13 | claude (daily maintenance session, VM s0: the pointer bump for pkp/pkp-lib#13602's `ore` cherry-pick) |
-| pkp-lib | `356d223ea0` (the branch tip, pkp/pkp-lib#13602's `ore` cherry-pick; ojs at it); ui-library `3f904483` (the branch tip; ojs at it) | 2026-11-13 | claude (daily maintenance session, VM s0: `=main`) |
+| ojs | `27f8c99480` | 2026-11-13 | claude (maintenance session, VM s1: the pointer bump for pkp/pkp-lib#13803's `ore` port, pkp/ojs#6081) |
+| pkp-lib | `1a48c2f5b9` (the branch tip, pkp/pkp-lib#13809, the `ore` port for pkp/pkp-lib#13803; ojs at its head `9ef8d877b6`, the same tree); ui-library `3f904483` (the branch tip; ojs at it) | 2026-11-13 | claude (maintenance session, VM s1: `=main`) |
 
 The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U14 A6 retired, U30 and U26 follow pkp/ui-library#981), its specs brought to the present template by script: the Planned lists dropped, retired entries one line. CI from the folder at the same OJS commit as the branch's last run, the same counts (run 43259507107 against 43211539187: 543 + 38 + 33 passed, 1 skipped).
 
@@ -29,6 +29,13 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
   `checkouts/ore/ojs` as a line (harness.md "The stable lines").
 
 ## Read log
+
+- **2026-11-13 (merge step asked in the thread, VM s1) — pkp/pkp-lib#13803's `ore` port: pkp-lib `ore` `356d223ea0..1a48c2f5b9` (2: `71039b4cf5`, the branch commit of pkp/pkp-lib#13602 read this morning as its PR head `356d223ea0`, the same tree; `1a48c2f5b9`, pkp/pkp-lib#13809, ewhanson); ojs `ore` `9dffdeb147..27f8c99480` (1: pkp/ojs#6081, the pointer bump to `9ef8d877b6`, the PR head, the same tree as `1a48c2f5b9`); ui-library `3f904483` unchanged. Not PR-reviewed before the merge; it is `main`'s patch. Read in full; baselines advanced.**
+  - pkp-lib `1a48c2f5b9` (`=main e9d749cb30`, pkp/pkp-lib#13804; same patch-id): `returnToDone` guarded by `DecisionWritePolicy` for `RETURN_TO_DONE` in place of `DecisionAllowedPolicy`. `main` filed the fault as U24 A15 and retired it the same day (`10b1c51b`); the ore copy of U24 never carried A15 (filed after the branch point), so nothing retires there: note m gains the `ore` fix sentence.
+  - Carried: `main`'s `3340e905` (U24 S8 gains the assigned Section Editor's round trip; `WorkflowPage` `returnToWorkflow()`/`returnToDone()` return the POST) by `git apply --3way --directory=lines/ore`; `WorkflowPage.js` clean; conflicts resolved to ore's suite header (no A15 there), ore's empty Left-out Planned list (a version spec carries none), `main`'s S8 Given, and note s ore's text plus `main`'s 2026-11-13 seed sentence only. Lint (`lint:suite`, `lint-spec` and `--tests` on U24) clean.
+  - Local, ore fleet at OJS `27f8c99480` (reset first): U24 13/13 green; control, S8 with `lib/pkp` at `71039b4cf5`: red at the Section Editor's "Return to Done" POST, 401 (pointer restored after).
+  - Gate: pkp-e2e `main` `99055a1c` pushed, `node bin/ci.js dispatch --line ore --apps ojs --ojs-ref ore` run [43511544308](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43511544308) at OJS `ore` `27f8c99480`: 3/3 green.
+  - Regression none, security none.
 
 - **2026-11-13 (daily session, VM s0) — ojs `ore` `1fedf73275..9dffdeb147` (1, pointer bump); pkp-lib `ore` `9ca248495e..356d223ea0` (1); ui-library `ore` `3f904483`: no commits. Read in full; baselines advanced.**
   - pkp-lib `356d223ea0` (`=main 3e078689a5`, pkp/pkp-lib#13602 "Update API callers", the cherry-pick of pkp/pkp-lib#13790; `git range-diff`: the same patch, the cherry-pick line only) → `main`'s merge read of 2026-11-12 stands (no regression, security none). Carried: `main`'s U22 fn h and U26 fn j sentences (`3d34611f`) into `lines/ore/` by hand, naming the `ore` commits (`fce22a85`; U26's copy did not take the patch).
