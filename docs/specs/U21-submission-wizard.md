@@ -158,13 +158,33 @@ itself enforces before submission is Rule 13.
    Author entry, and leaves the Contributors list empty (Rule 12b). The
    button shows a spinner while the wizard loads. <sup>e</sup>
 6. **A draft persists until submitted or cancelled.** The draft appears on
-   the author's My Submissions list as an incomplete submission (see *My
-   Submissions*), and its wizard address can be bookmarked and reopened.
-   An unfinished draft reopens the wizard **at the step recorded by "Save
-   for Later"** (Rule 10). Moving between steps does not record the step
-   reached, so a draft never saved for later reopens at the first step. A
-   submitted submission's wizard address shows the "Submission complete" screen
-   instead (Rule 15). <sup>f</sup>
+   the author's My Submissions list as an incomplete submission, with
+   "Complete submission" in its row (see *My Submissions*). On a preprint
+   server the row's stage reads "Production", not "Incomplete"
+   ⚠ [→ My Submissions OPS1](U22-my-submissions.md#ops1). "Complete
+   submission" opens the draft's wizard address, which has no "#…" part.
+   The link on the Saved for Later screen and in its email (Rule 10) is
+   the same address, and can be bookmarked from there. A submitted submission's wizard
+   address shows the "Submission complete" screen instead (Rule 15).
+   <sup>f</sup>
+6a. **Where a draft reopens.** The wizard address opens an unfinished
+    draft at the step "Save for Later" last recorded:
+    - "Save for Later" records the furthest step the draft had reached,
+      whichever step it is pressed on. A draft that reached "Review" and
+      was saved from "Details" reopens on "Review".
+    - A wizard reopened at the recorded step counts every step up to it
+      as reached, so "Save for Later" pressed on "Upload Files" in that
+      visit records the same step again ("Review" in the example above).
+    - Moving between steps does not record the step reached, so a draft
+      never saved for later reopens at the first step, "Upload Files".
+    - Inside the wizard the address bar ends in the open step
+      ("…#contributors"). Loading an address with that "#…" part, by a
+      reload or from a bookmark taken from the address bar, opens
+      "Upload Files" whatever step the draft recorded, with every later
+      step unreached in the step rail. "Save for Later" pressed after
+      that records "Upload Files", and the draft reopens there from then
+      on ⚠ [A24](#a24).
+    <sup>f</sup>
 7. <a id="steps"></a>**The steps.** The wizard's step rail shows, in order:
    **Upload Files**, **Details**, **Contributors**, **For the Editors**
    (titled **For Readers** on a preprint server [OPS1](#ops1)), and
@@ -220,8 +240,9 @@ itself enforces before submission is Rule 13.
    Back button also steps backwards through the wizard. Editing just the
    "#…" part of the address on an open wizard, though, opens any step, even
    ahead of progress. The submission check (Rule 12) runs only when Review
-   opens this way. Pasting a wizard address into a new tab, or reloading,
-   always ignores the "#…" part and reopens as Rule 6 describes. <sup>h</sup>
+   opens this way. Reloading, or pasting an address with a "#…" part into
+   a new tab, opens "Upload Files" instead, whatever step the "#…" part
+   names (Rule 6a) [A24](#a24). <sup>h</sup>
 8a. **A narrow window.** In a window too narrow for the full step rail
     (narrower than about 1070 pixels), the rail should collapse to
     "{n}/{total} steps" with a "Show all steps" control. Narrowing a
@@ -301,8 +322,9 @@ itself enforces before submission is Rule 13.
       made after the refusal, and "Yes" sends them.
     <sup>[fn-a19](#fn-a19)</sup>
 10. **Save for Later.** "Save for Later" is offered in the header and the
-    footer. It finishes any saves in flight, records the step reached, and
-    lands on the **Saved for Later** screen. That screen shows a link back
+    footer. It finishes any saves in flight, records the furthest step the
+    draft has reached (Rule 6a), and lands on the **Saved for Later**
+    screen. That screen shows a link back
     into the wizard, labeled with the draft's contributors and title, and
     the note "We have emailed a copy of this link to you at {email}." The
     email with the resume link goes to the signed-in user who pressed the
@@ -686,7 +708,8 @@ recipe are in the footnote. <sup>s</sup>
 
 3. **Save for later and resume**
 
-   Given: Author, on the "Details" step of their own draft.
+   Given: Author, on the "Details" step of their own draft, no later step
+   reached yet.
 
    - **Autosave**: straight after opening the wizard, type Autosave check
      in "Title" and stop: the footer, which already reads "Last saved…" on
@@ -708,8 +731,8 @@ recipe are in the footnote. <sup>s</sup>
    - **Signed out**: sign out and open the emailed link: the Login page
      shows.
    - **Resume**: sign in and follow the emailed link, or reopen the draft
-     from My Submissions: the wizard reopens on "Details", the step you
-     left, with "Autosave check" in "Title".
+     from My Submissions: the wizard reopens on "Details", the furthest
+     step the draft had reached, with "Autosave check" in "Title".
    - **Control**: a second draft, moved to "Details" by "Continue" and never
      saved for later, reopens from My Submissions at "Upload Files".
      <sup>j</sup>
@@ -1075,13 +1098,14 @@ Left out of the scenarios above, by reason:
   - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names) [report 2026-10-01]
   - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names) [report 2026-10-01]
   - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names) [report 2026-10-01]
+  - a draft walked to "Review", saved for later from "Details", reopening from My Submissions on "Review", and saved again from "Upload Files" in that visit, still reopening on "Review" (Rule 6a) [incidental 2026-11-13]
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold
   - a Section Editor already on the draft emailed at the submit (Side effects, "Editors already on the submission are emailed too"): a Journal Manager seldom adds an editor before the author has submitted
 - **Nothing new to test**:
   - old bookmarked wizard addresses forwarding to the current wizard (Rule 1): a bookmark from an earlier version is one few authors keep
-  - editing the "#…" part of the address to open a step ahead, and a reload ignoring it (Rule 8): an author does not edit the address by hand
+  - editing the "#…" part of the address to open a step ahead (Rule 8): an author does not edit the address by hand
   - the "Disconnected" dialog when a save fails (Rule 10): a failed save is the dropped connection above
   - a change saved by a step change straight after typing (Rule 9): scenario 3 reads the timer's save, and the move's save is the same request
   - Site Administrator opening any draft and offered "Cancel" (Actors rows 3–4; the Journal Manager's offer, scenario 4)
@@ -1104,6 +1128,7 @@ Left out of the scenarios above, by reason:
   - A21 (the order of the "Submit As" roles, and so the role preselected)
   - A22 (the start screen's "Title" box at phone width)
   - A23 (a user with no submitting role starting a submission after the Author role was edited, and "OK" with nothing changed leaving "Author" in place)
+  - A24 (a reload, or a bookmark taken from the address bar, opening a saved draft on "Upload Files", and "Save for Later" pressed there)
   - OMP2 (a second copy address on a press)
   - OMP4 (a submission made as "Chapter Author" on a press, its refused saves and the hang)
   - OPS4 (a manager reading another author's completion screen)
@@ -1140,7 +1165,7 @@ Left out of the scenarios above, by reason:
 ## Findings register
 
 Verdicts are the author's judgment (claude, 2026-08-25; additions
-2026-08-26, 2026-09-07, 2026-09-28, 2026-09-30, 2026-10-01, 2026-10-05, 2026-10-19 and 2026-10-21), unreviewed unless an entry notes otherwise; the team settles
+2026-08-26, 2026-09-07, 2026-09-28, 2026-09-30, 2026-10-01, 2026-10-05, 2026-10-19, 2026-10-21 and 2026-11-13), unreviewed unless an entry notes otherwise; the team settles
 them on spec review. The summary is sorted 🐞 → ❓ → ✅ and the entries below
 are the source; badges, Impact and Basis:
 [Reading a spec](GLOSSARY.md#reading-a-spec).
@@ -1161,6 +1186,7 @@ are the source; badges, Impact and Basis:
 | [A21](#a21) | "Submit As" preselects another role for an editor who is also an author once their editorial role is saved | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A22](#a22) | On a phone, "Make a Submission" squeezes the "Title" box to nothing, so no submission can be started | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A23](#a23) | Once a manager edits the Author role, a user with no role who starts a submission is made "Translator" on a journal, "Chapter Author" on a press | 🐞 | minor | — |
+| [A24](#a24) | Reloading the submission wizard opens "Upload Files" with the later steps locked, and "Save for Later" there loses the step the draft had reached | 🐞 | minor | — |
 | [OMP2](#omp2) | A press refuses the comma-separated "Notify Anyone" list its own help text asks for | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP4](#omp4) | On a press, a submission made as "Chapter Author" cannot be saved: the title is lost, every save is refused and the wizard hangs | 🐞 | user-visible · crash: script | — |
 | [OPS3](#ops3) | A preprint author cannot delete their own draft: the wizard's "Cancel" does nothing and My Submissions refuses it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -1546,6 +1572,20 @@ database tried, a role saved again moves to the end of its table. A
 preprint server has a single author-role group, so it is not affected.
 Basis: probe, 2026-10-19. <sup>[fn-a23](#fn-a23)</sup>
 Report: paused — written 2026-10-21, held until a related item is settled before it is published (2026-10-21)
+
+<a id="a24"></a>
+**A24 — Reloading the submission wizard opens "Upload Files" with the later steps locked, and "Save for Later" there loses the step the draft had reached** · 🐞 · minor.
+Inside the wizard the address bar ends in the open step, for example
+"…#contributors". An author who reloads the page, or opens such an
+address from a bookmark, expects the step it names. The wizard opens on
+"Upload Files" instead, whatever step the draft had recorded with "Save
+for Later", and every later step in the step rail is unreached, so it
+cannot be clicked. If the author then presses "Save for Later", the
+draft records "Upload Files": from then on "Complete submission" on My
+Submissions reopens it there too, and the step it had reached is lost.
+Only an address without the "#…" part ("Complete submission", the Saved
+for Later screen's link, the emailed link) reopens at the recorded step.
+Basis: probe, 2026-11-13. <sup>[fn-a24](#fn-a24)</sup>
 
 ### OMP
 
@@ -1957,10 +1997,33 @@ where the "Participants / Assign" panel's legacy "Assign Participant"
 modal (role filter, name search, per-user radio) assigned the Section
 Editor to the draft.
 Resume step: `SubmissionWizardPage.vue` `created()` opens the step matching
-`submission.submissionProgress` — which only `saveForLater` updates
-(note j). Live-probed 2026-08-25: pressing Continue fires no write (request
+`submission.submissionProgress`, which only `saveForLater` updates
+(note j), when the address carries no hash; with one it opens Upload
+Files (note fn-a24). `saveForLater()` sends the last entry of
+`startedSteps`: the `currentStepIndex` watcher adds every step up to the
+one opened, so that entry is the furthest step opened since the page
+loaded, and a wizard opened at the recorded step starts with every step
+up to it. Live-probed 2026-08-25: pressing Continue fires no write (request
 log empty across two step advances), and a plain reload reopened the
 wizard at Upload Files with the later steps no longer marked reached.
+Live-probed 2026-11-13 (Rules 6, 6a, 10; OJS, OMP, OPS, two runs each,
+scratch contexts, as the submitting Author): the My Submissions row read
+"{id} Author — {title} Incomplete Complete submission" on OJS and OMP and
+"{id} Author — {title} Production Complete submission" on OPS, and
+"Complete submission" opened the bare wizard address in the same tab.
+Saved from "Details" after reaching "Review", the PUT carried
+`step=review` and the draft reopened on "Review" (My Submissions and the
+bare address); reopened there and saved again from "Upload Files",
+still `step=review`, reopening on "Review". Walked to "For the Editors"
+("For Readers" on OPS), "Back" twice to "Details", a new Title typed and
+the footer "Save for Later" pressed at once: `step=editors`, reopening
+on that step with the new Title kept. Saved on "Contributors" as the
+furthest step: `step=contributors`, reopening on "Contributors" from My
+Submissions, the bare address, the Saved for Later link and the mail
+link. Walked to "Contributors" by Continue and left for My Submissions,
+never saved: reopened on "Upload Files", the later rail entries plain
+text. A seeded submitted submission's wizard address, bare and with
+`#details`, showed "Submission complete" and no step rail.
 
 <a id="fn-g"></a>
 **g** — Steps. `PKPSubmissionHandler::getSteps()`: files, details,
@@ -2026,9 +2089,13 @@ change; no Back button on step 1. Unreached rail entries render as plain
 text (no button) and clicking them does nothing; a fragment-only address
 edit on the open wizard fires `hashchange` and opens any step id — earlier
 steps then show as completed, and validation runs only when the opened
-step is Review — while every full page load rewrites the typed hash to the
-resume step, `#review` included (`created()` opens the resume step and the
-step watcher rewrites `location.hash` before `openUrlHash()` reads it).
+step is Review — while a full page load with any hash opens Upload Files
+and rewrites the hash to `#files`, `#review` included (`created()` opens
+`steps[0]` whenever `location.hash` is set, and the step watcher rewrites
+it before `openUrlHash()` reads it). The 2026-08-25 probe read that as
+the resume step, which it is for a draft never saved for later;
+re-probed 2026-11-13 on a draft with a recorded step, the load opened
+Upload Files too (A24, note fn-a24).
 Tab title: `submission.wizard.titleWithStep`. Narrow-window collapse
 (Rule 8a, A10) live-probed 2026-08-26, fresh browser contexts sized
 before load: a fresh load at 480px or 375px renders no collapse and the
@@ -2131,6 +2198,24 @@ Manager run the same day (A2): the manager saving another author's draft
 got the sole email, the author got none, and the screen's note read "We
 have emailed a copy of this link to you at {the manager's address}." while
 its link named the author.
+Re-probed 2026-11-13 on OJS, OMP and OPS, two runs each (scratch
+contexts): two enabled "Save for Later" buttons on every step, one in
+the header and one in the footer, each landing on
+`…/submission/saved?id={id}` (the same after a reload); the screen read
+"Your submission details have been saved in our system, but it has not
+yet been submitted for consideration. You can return to complete your
+submission at any time by following the link below.", one link
+"Author — {title}" to the bare wizard address, and "We have emailed a
+copy of this link to you at {the presser's address}.", identically on
+all three. A Title typed on "Details" and the footer button pressed at
+once: the link already named the new title. The A2 split held (the
+Journal Manager saving the Author's draft got the one mail, the Author
+none; the Author's "Complete submission" then reopened at the step the
+manager recorded). With the `…/saveForLater` request aborted, a
+"Disconnected" dialog read "An error was encountered and we were unable
+to save your submission. You may have been disconnected." with one
+"OK"; after it the wizard stayed on its step, both buttons enabled, and
+the draft had recorded nothing.
 
 <a id="fn-k"></a>
 **k** — Reconfigure. "Change" opens `ReconfigureSubmissionModal` (VUE-081,
@@ -2777,6 +2862,27 @@ fallback pick from a server's one author-role group (code read).
 walked. A21's issue report names this fallback under its Reach and
 leaves it out of its fix
 ([docs/issues/U21-A21-submit-as-role-order-not-fixed.md](../issues/U21-A21-submit-as-role-order-not-fixed.md)).
+
+<a id="fn-a24"></a>
+**fn-a24** — `SubmissionWizardPage.vue` `created()` opens the step
+matching `submission.submissionProgress` only when `window.location.hash`
+is empty; with any hash it opens `steps[0]`. The `currentStepIndex`
+watcher then rewrites the hash to `#files` (`addHistory()`) and fills
+`startedSteps` up to that step alone, so `saveForLater()` sends
+`step=files`. OMP's and OPS's `SubmissionWizardPageOMP.vue` /
+`SubmissionWizardPageOPS.vue` extend it. Live-probed 2026-11-13 on OJS,
+OMP and OPS, two runs each, scratch contexts, as the submitting Author:
+a draft saved for later on "Contributors" (`step=contributors`), opened
+at its bare address (landing on "…#contributors"), then reloaded: "Upload
+Files", the only reached entry in the rail. The same draft opened at its
+address plus `#details`, reloaded, then opened plus `#review`: "Upload
+Files" each time, the hash rewritten to `#files`. The header "Save for
+Later" pressed there sent `step=files` (answered 200), and My
+Submissions' "Complete submission" and the bare address then reopened
+on "Upload Files", the later rail entries plain text. Before that,
+"Complete submission", the Saved for Later screen's link and the mail's
+link each opened the bare address and reopened on "Contributors". No
+response of 500 or more and no page error in any run.
 
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
