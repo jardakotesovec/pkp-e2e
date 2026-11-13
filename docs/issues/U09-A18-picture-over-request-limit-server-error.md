@@ -1,25 +1,24 @@
-# An upload larger than the server's request limit fails with a server error instead of the size limit
+# An upload or Body Text larger than the server's request limit fails with a server error instead of the size limit
 
 - **Severity** medium
 - **Effort** medium
 - **Kind** regression
 - **Crash** server
 - **Affects**
-  - main: OJS, OMP, OPS (the exact-limit submission file: OJS, OMP)
-  - 3.5: OJS, OMP, OPS (the picture; the exact-limit file: OJS, OMP; no "Media" page)
+  - main: OJS, OMP, OPS (picture, media file, unknown route: all three; exact-limit file: OJS, OMP; Body Text: OJS)
+  - 3.5: OJS, OMP, OPS (picture: all three; exact-limit file: OJS, OMP; unknown route: walked on OJS; no "Media" or "Body Text" page)
   - 3.4: none (code; refused without a server error)
   - 3.3: none (code; refused without a server error)
 - **Introduced** `pkp/pkp-lib#9176` for `pkp/pkp-lib#7698` · [71e79e31e3](https://github.com/pkp/pkp-lib/commit/71e79e31e3d5c827e4bfa2443bbe81e5ec4c1dba) · 2023-10-13 · Touhidur Rahman (touhidurabir)
-- **Upstream** none found (2026-10-02)
-- **Tracked in** spec U09 [A18](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U09-custom-pages-and-blocks.md#a18); spec U17 [A10](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U17-sections.md#a10); spec U47 [A4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U47-media-files.md#a4); spec U36 [A21](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U36-submission-files.md#a21) (the server error; the exact-limit file passing the size check is [U36-A21-exact-limit-file-passes-size-check-then-refused](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U36-A21-exact-limit-file-passes-size-check-then-refused.md)); pictures over the per-file limit but under this one are [U09-A18-picture-over-upload-limit-server-error](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U09-A18-picture-over-upload-limit-server-error.md)
-- **Checked** 2026-11-02 (the picture), 2026-10-02 (the other steps), each branch's tip (the commits in Evidence)
+- **Upstream** none found (2026-11-13)
+- **Tracked in** spec U09 [A18](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U09-custom-pages-and-blocks.md#a18); spec U17 [A10](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U17-sections.md#a10); spec U47 [A4](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U47-media-files.md#a4); spec U48 [A26](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U48-jats-and-body-text.md#a26); spec U36 [A21](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U36-submission-files.md#a21) (the server error; the exact-limit file passing the size check is [U36-A21-exact-limit-file-passes-size-check-then-refused](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U36-A21-exact-limit-file-passes-size-check-then-refused.md)); pictures over the per-file limit but under this one are [U09-A18-picture-over-upload-limit-server-error](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U09-A18-picture-over-upload-limit-server-error.md)
+- **Checked** 2026-11-13 (the Body Text), 2026-11-02 (the picture), 2026-10-02 (the other steps), each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 
 Update 2026-11-02: the picture's steps walked again on `main` and
-`stable-3_5_0`, on PHP 8.3, with the same result; the walks of
-2026-10-01 ran on PHP 8.4, which the walking machine no longer has.
-Observed now quotes the server log's start-up warning as PHP 8.3 writes
-it, and gives the PHP 8.4 form beside it.
+`stable-3_5_0`, with the same result.
+
+Update 2026-11-13: the Body Text page (spec U48 A26) joins.
 
 ## Summary
 
@@ -35,33 +34,42 @@ for files over the per-file limit ("Files larger than 2MB can not be
 uploaded."). The message gives no limit, and it reads as a fault of the
 site rather than of the picture.
 
-Two other uploads end in the same error and message. On a publication's
-"Media" page, "Upload Media File" sends any file, so a figure or video
-over the request limit fails on its card. In the submission wizard's
-"Upload Files", a file the size check lets through, at exactly the
-per-file limit, fails in its row when the server's two limits are
-equal. An API address that matches no route, such as a non-numeric
-section id, answers a server error from the same code.
+Three other actions end in the same error and message. On a
+publication's "Media" page, "Upload Media File" sends any file, so a
+figure or video over the request limit fails on its card. In the
+submission wizard's "Upload Files", the browser's size check lets
+through a file of exactly the per-file limit; when the server's request
+limit is the same size, that upload fails in its row. On a version's
+"Body Text" page, a Body Text too large for the server fails on "Save"
+with "The POST data is too large.", and the text is not saved; "Export
+to HTML" fails the same way.
+
+An API address that matches no route, such as a non-numeric section
+id, answers a server error from the same code.
 
 ## Impact
 
-- **Lost**: no content; the upload fails and nothing is stored or
-  inserted. The message does not say how large a file may be.
+- **Lost**: pictures and files are refused, not lost; they can be sent
+  again, smaller. A Body Text that fails to save stays in the editor,
+  marked "Unsaved Changes", once the error window is closed, and is
+  gone when the page is left or reloaded. No message says how large a file or text
+  may be.
 - **Who**: managers, and editors whose role may change settings,
   wherever a formatted text box has a picture button (custom pages,
   custom blocks, static pages, announcements, the masthead,
   information, privacy and appearance texts); editors and production
   staff adding a media file over the request limit; authors and
   editors submitting a file of exactly the per-file limit on a server
-  whose two limits are equal. Each such upload fails, every time.
-- **Way round**: a smaller file, or the server's administrator raises
-  `post_max_size` (and `upload_max_filesize`), which for a video is the
-  only realistic one.
+  whose two limits are equal; editors and production staff saving a
+  Body Text whose saved form, the editor's serialized document, is over
+  8 MB. Each such upload or save fails, every time.
+- **Way round**: a smaller file or a shorter text. For a video, the
+  only realistic way round is for the server's administrator to raise
+  `post_max_size` (and `upload_max_filesize`).
 
-Medium: uploads the screen offers fail with a server error and a
-message without the limit, including a submission file inside the
-limit the screen states and media files such as videos, which often
-exceed PHP's default 8 MB; the files are refused, not lost.
+Medium: the upload or save fails as a server error with a message that
+gives no limit and reads as a fault of the site, and an unsaved Body
+Text can be lost; a smaller file or a shorter text gets past it.
 
 ## Steps to reproduce
 
@@ -110,9 +118,8 @@ PHP Warning:  POST Content-Length of 9183349 bytes exceeds the limit of 8388608 
 production.ERROR: The POST data is too large. {"exception":"[object] (Illuminate\\Http\\Exceptions\\PostTooLargeException(code: 0): The POST data is too large. at …/lib/pkp/lib/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php:24)
 ```
 
-That is PHP 8.3's form; on PHP 8.4 (walked 2026-10-01) the first line reads `PHP Warning:  PHP Request Startup: POST Content-Length of …`.
-On `stable-3_5_0` the second line is PHP's own form of the same
-exception:
+The first line is PHP 8.3's. On `stable-3_5_0` the second line is
+PHP's own form of the same exception:
 
 ```
 Illuminate\Http\Exceptions\PostTooLargeException: The POST data is too large. in …/lib/pkp/lib/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php:24
@@ -156,8 +163,8 @@ POST /index.php/publicknowledge/api/v1/temporaryFiles
 → 500 {"error":"The POST data is too large."}
 ```
 
-The server log has the same two lines as the picture's (`POST
-Content-Length of 9183467 bytes exceeds the limit of 8388608 bytes`).
+The server log has the same two lines as the picture's
+(`POST Content-Length of 9183467 bytes exceeds the limit of 8388608 bytes`).
 
 **A submission file of exactly the per-file limit** (spec U36 A21; OJS
 and OMP, whose wizard has the "Files" list):
@@ -175,25 +182,74 @@ Steps:
 
 1. Sign in as `zzedd` (password `zzeddzzedd`), an author.
 2. Open `/index.php/publicknowledge/en/submission` ("Make a
-   Submission"), type a title, tick the required boxes and press "Begin
-   Submission". [3.5: the wizard opens on "Details"; press "Continue".]
+   Submission") and type a title. Under "Section" choose "Articles"
+   (OJS; OMP has no "Section", and "Submission Type" is already set),
+   and under "Submission Language" choose "English". Tick "Yes, my
+   submission meets all of these requirements." and the "Privacy
+   Consent" box, and press "Begin Submission". [3.5: the wizard opens on
+   "Details"; press "Continue".]
 3. On "Upload Files", press "Add File" and choose the file.
 4. Read the file's row.
 
 **Expected**: whatever the limit, a refusal carries the size message
 ("Files larger than 8MB can not be uploaded."), not a server error.
-That the browser's check lets this file through at all, where it
-refuses a file of 9 MiB ("File is too big (9MiB). Max filesize:
-8MiB."), is the fault of
-[U36-A21-exact-limit-file-passes-size-check-then-refused](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U36-A21-exact-limit-file-passes-size-check-then-refused.md).
+(A file of 9 MiB is refused in the browser: "File is too big (9MiB).
+Max filesize: 8MiB.")
 
 **Observed**: the row fills to "Uploading 100% complete" and then reads
 "The POST data is too large."; nothing is stored. The upload answers
-500 `{"error":"The POST data is too large."}` to `POST
-/index.php/publicknowledge/api/v1/submissions/{id}/files`, and the
-server log reads `POST Content-Length of 8389029 bytes exceeds the
-limit of 8388608 bytes`, then the same `PostTooLargeException` (in
-each line's form for `main` and `stable-3_5_0`, as above).
+500 `{"error":"The POST data is too large."}` to
+`POST /index.php/publicknowledge/api/v1/submissions/{id}/files`, and
+the server log reads
+`POST Content-Length of 8389029 bytes exceeds the limit of 8388608 bytes`,
+then the same `PostTooLargeException` (in each line's form for `main`
+and `stable-3_5_0`, as above).
+
+**A Body Text over the request limit** (spec U48 A26; OJS `main`, the
+one app and version with a "Body Text" page):
+
+Preconditions:
+
+- PKP's default test dataset for OJS `main`.
+- The web server's PHP as in the picture's steps: `upload_max_filesize = 2M`,
+  `post_max_size = 8M`, `display_errors = Off`.
+- A plain text of about 9 MB copied to the clipboard (the walk used 900
+  lines of 10,000 characters each).
+
+Steps:
+
+1. Sign in as `dbarnes` (password `dbarnesdbarnes`), the editor.
+2. Open "Hansen & Pinto: Reason Reclaimed" (submission 9, in
+   Production):
+   `/index.php/publicknowledge/en/dashboard/editorial?workflowSubmissionId=9`.
+3. In the side menu, under "Publication" › "Unassigned version (…)",
+   choose "Body Text".
+4. Click in the editor and paste the text. Wait until it shows.
+5. Press "Save".
+6. Read the window that opens, and press "OK".
+7. Press "Export" › "Export to HTML", read the window, and press "OK".
+8. Reload the browser page.
+
+**Expected**: no server error. "Save" and the export are refused with a
+message that says the text is too large and how large it may be (the
+server takes 8 MB in one request), and "Unsaved Changes" stays.
+
+**Observed**: after "Save" the window reads "Error" / "The POST data is
+too large." / "OK", and "Unsaved Changes" stays. The export shows the
+same window and adds no galley. After the reload the editor is empty.
+
+```
+POST /index.php/publicknowledge/api/v1/submissions/9/publications/10/bodyText
+     (X-Http-Method-Override: PUT, multipart, 9101067 bytes)
+→ 500 {"error":"The POST data is too large."}
+```
+
+The export's `POST …/bodyText` (the HTML as the request body) answers
+the same 500. The server log has the same two lines as the picture's
+(`POST Content-Length of 9101067 bytes exceeds the limit of 8388608 bytes`).
+
+A text of about 3 MB, over the per-file limit, saves ("Saved") and is
+there after the reload.
 
 **An API address that matches no route** (spec U17 A10):
 
@@ -233,7 +289,9 @@ request's length with that limit and throws a `PostTooLargeException`,
 an `HttpException` whose status is 413.
 
 Laravel's routing pipeline catches every exception thrown inside it
-(`Pipeline::prepareDestination()` and `carry()`) and hands it to
+(`prepareDestination()` and `carry()` of the base
+`Illuminate\Pipeline\Pipeline`; the routing subclass supplies
+`handleException()`) and hands it to
 `PKPExceptionHandler::render()` (pkp-lib
 `classes/core/PKPExceptionHandler.php`, lines 69–76). `render()`
 answers with the exception's message and picks the status from
@@ -270,9 +328,27 @@ Reach:
 - The wizard's files list (walked on OJS and OMP, `main` and
   `stable-3_5_0`). Its check lets a file of exactly
   `upload_max_filesize` through, and with `post_max_size` equal to it
-  the request goes over the limit and meets this `render()`. Why the
-  check lets it through is the cause of
-  U36-A21-exact-limit-file-passes-size-check-then-refused.
+  the request goes over the limit and meets this `render()`.
+- The Body Text page (OJS `main`; 3.5 has none). It posts three times,
+  and none of them checks a size first:
+  - "Save": `BodyTextEditor.vue` `persistDocument()` posts the
+    serialized editor document as the form field `bodyText` (`PUT`
+    override, multipart). `useFetch` shows the answer's `error` in the
+    "Error" window (`modalStore.openDialogNetworkError()`). Walked.
+  - "Export to HTML": `useBodyTextConversion.js` `exportHTML()` posts
+    the HTML as the request body (`text/html`) through `saveGalley()`,
+    whose own `onError` keeps the error; `showExportError()` (lines
+    26–33) shows it in the "Error" window. Walked.
+  - "Preview: PDF", then "Create PDF": `savePDF()` posts the generated
+    PDF as the body to `…/bodyText/pdf` through the same `saveGalley()`,
+    and on a failure `WorkflowPublicationBodyTextPDF.vue` shows "Unable
+    to generate or save the PDF galley. Please try again." under the
+    preview. A PDF over the request limit meets the same 500 (read in
+    the code, not walked).
+
+  A form field is held to `post_max_size` only, not to
+  `upload_max_filesize`, so a 3 MB text saves. The page came with
+  `pkp/pkp-lib#11994`.
 - Unknown routes and wrong methods. The router's
   `NotFoundHttpException` and `MethodNotAllowedHttpException` are
   thrown inside the same pipeline and reach `render()` too: the global
@@ -341,9 +417,12 @@ three apps, and the 8 MiB submission file's row "Files larger than 8MB
 can not be uploaded." (413) on OJS and OMP. With the fix in and out, a
 1 MB media file is still stored, a 3 MB one still gets the same message
 with 400, a 9 MiB submission file is still refused in the browser, and
-a 1 MiB one is still stored. The 8 MiB file is refused only after it
-has been sent, and with a limit it does not exceed; U36-A21-exact-limit-file-passes-size-check-then-refused
-fixes that.
+a 1 MiB one is still stored.
+
+On OJS `main` (2026-11-13), the 9 MB Body Text's "Save" and "Export to
+HTML" answer 413 with the window "Files larger than 2MB can not be
+uploaded." and no server error, and "Unsaved Changes" stays. With the
+fix in and out, a 3 MB Body Text still saves.
 
 **Alternatives**
 
@@ -383,8 +462,27 @@ fixes that.
 - `report()` still logs a refused request as an error; leaving HTTP
   exceptions below 500 out of the log is optional.
 - The message names `upload_max_filesize`, which can be more than the
-  request limit lets through; U36-A21-exact-limit-file-passes-size-check-then-refused
-  makes `getReadableMaxFileSize()` name the smaller.
+  request limit lets through; the exact-limit file's own report (in
+  Tracked in) makes `getReadableMaxFileSize()` name the smaller.
+- The Body Text (tried): the branch's message speaks of files and names
+  `upload_max_filesize` (2MB). A Body Text is a form field, held to
+  `post_max_size` only, and a 3 MB text saves, so the message gives an
+  editor the wrong limit and the wrong kind of thing. A message for the
+  request as a whole, naming `post_max_size` (a new locale key), would
+  read right there. Two places could choose it:
+  - `render()`, by the request's path (`…/bodyText` and
+    `…/bodyText/pdf`). Nothing else is left to tell by: PHP has dropped
+    the body, and `ValidatePostSize` runs before `PolicyAuthorizer`
+    looks the route up, so no route is matched yet. The Content-Type
+    does not do it alone: the export (`text/html`) and the PDF
+    (`application/pdf`) differ from an upload, but the save is
+    multipart like one.
+  - The Body Text page, on a 413, in its three handlers:
+    `persistDocument()`, and `saveGalley()`'s callers for the export
+    and the PDF.
+
+  Which is the team's choice, with the new key's text; neither is in
+  the diff, and neither was tried.
 - "Upload Media File": with this fix a file over `post_max_size` is
   refused with the size message, but only once it has been sent in
   full. Passing `maxFilesize` would refuse it in the browser first, as
@@ -416,6 +514,32 @@ answer built from an HTTP exception, which REST clients see.
   `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/picture-over-request-limit-server-error/walk.js`,
   with `PKP_E2E_LINE=stable-3_5_0` in front for 3.5. The fix:
   `node bin/try-fix.js apply shared/playwright/checks/issues/picture-over-request-limit-server-error/fix.diff ojs omp ops`.
+- The Body Text steps (spec U48 A26):
+  [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/body-text-over-request-limit-server-error/walk.js)
+  with its [lib.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/body-text-over-request-limit-server-error/lib.js);
+  `MODE=nb` walks the control alone (a 3 MB text, "Save", the reload),
+  with the fix in and out. On an install freshly loaded from the default
+  dataset, from a pkp-e2e checkout:
+  `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js ojs shared/playwright/checks/issues/body-text-over-request-limit-server-error/walk.js`;
+  the fix as above, with `ojs` alone. Walked 2026-11-13 on OJS `main`
+  3c99722dc8 with lib/pkp ad75b174f0 and ui-library 51f9eaa1, PHP
+  8.3.36 (`upload_max_filesize` 2M, `post_max_size` 8M,
+  `display_errors` and `display_startup_errors` Off, the host's php.ini),
+  PostgreSQL, pkp/datasets d141ec4b. The walk pasted with the clipboard
+  (`navigator.clipboard.writeText()`, then Ctrl+V). Not walked on 3.5:
+  `stable-3_5_0` (OJS 7cf6c9c60f, lib/pkp 5af8e67ab4) has no
+  `api/v1/bodyText` and no Body Text page; nor have 3.4 (lib/pkp
+  `origin/stable-3_4_0` 2dd24cc5ae) and 3.3 (`origin/stable-3_3_0`
+  df738d3a66) (code). Code reads on `main`:
+  `PKPBodyTextController::save()` reads `$_POST['bodyText']` (line
+  161), `BodyTextEditor.vue` `persistDocument()` (lines 473–492),
+  `useFetch.js` (line 182) and `modalStore.js` `openDialogNetworkError()`
+  (lines 49–63) for "Save"; `useBodyTextConversion.js` `saveGalley()`,
+  `showExportError()` (lines 26–33), `exportHTML()` and `savePDF()`, and
+  `WorkflowPublicationBodyTextPDF.vue` (lines 94–96,
+  `publication.bodyText.pdf.failed`) for the export and the PDF; the
+  controller came with 21585b09ab (2025-12-10, `pkp/pkp-lib#11994`).
+  "Preview: PDF" › "Create PDF" over the limit was not walked.
 - The unknown-route steps (spec U17 A10) are step 4 of
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/sections-interface-site-address-server-error/walk.js)
   of U17-A10-sections-interface-site-address-server-error, walked on OJS `main`
@@ -445,20 +569,17 @@ answer built from an HTTP exception, which REST clients see.
   `api.files.400.noUpload` (line 271), no server error.
 - The picture walked on OJS, OMP and OPS, `main` and `stable-3_5_0`, on
   PostgreSQL: 2026-10-01 on PHP 8.4.11 (with the fix trial), and again
-  2026-11-02 on PHP 8.3.36 (the walking machine now has PHP 8.2 and 8.3
-  only), where the host's php.ini also raises the limits; the script serves the same install through a second `php -S`
+  2026-11-02 on PHP 8.3.36, where the host's php.ini also raises the
+  limits; the script serves the same install through a second `php -S`
   with
   `-d upload_max_filesize=2M -d post_max_size=8M -d display_errors=Off`.
   The fault does not touch the database. Datasets: pkp/datasets c657990
   (2026-10-01), c1a3abcd (2026-11-01).
-- The warning's two forms, read in php-src `main/rfc1867.c`: PHP-8.3
-  emits it through `sapi_module.sapi_error()` (no prefix), PHP-8.4
-  through `php_error_docref()`, which names the start-up phase
-  "PHP Request Startup" (`main/main.c`).
-- The fix trial (2026-10-01) stands for today's tips: neither
+- The fix trial of 2026-10-01 stands for today's tips: neither
   `PKPExceptionHandler.php` nor `PKPRoutingProvider.php` has a commit
-  since on `main`, nor `PKPContainer.php` on `stable-3_5_0` (read
-  2026-11-02). Not tried again.
+  since on `main` (read 2026-11-13; the diff applies as it stands), nor
+  `PKPContainer.php` on `stable-3_5_0` (read 2026-11-02). Tried again on
+  OJS `main` only for the Body Text, 2026-11-13.
 - Unverified: with `display_errors = On`, what the picture window shows
   after the script error (one walk on OJS `main` recorded the 500 and
   the error, not the window). The 405 with the fix is read in the
@@ -468,7 +589,7 @@ answer built from an HTTP exception, which REST clients see.
   middleware and `app('router')->dispatch()` through
   `Illuminate\Routing\Pipeline`, whose `handleException()` calls the
   handler's `report()` and `render()`. The uploaders' limits:
-  `PKPSubmissionHandler` (line 585), `FieldUpload` (line 46),
+  `PKPSubmissionHandler` (line 586), `FieldUpload` (line 46),
   `fileAttachers/Upload` (line 54), `UploaderHandler.js` (line 263);
   `WorkflowPublicationJats.vue` passes no options to `FileUploader`.
   3.5: the same middleware list and render code (`PKPContainer.php`
@@ -485,7 +606,12 @@ answer built from an HTTP exception, which REST clients see.
   response from server", "POST Content-Length", "exceeds the limit",
   `maxFilesize`, `FileMediaUploader`, "media file upload size". Read and not
   the same fault: `pkp/pkp-lib#9478`, and `pkp/pkp-lib#12262` (the media
-  window's QA list, which has no size case).
+  window's QA list, which has no size case). Again 2026-11-13, adding
+  the Body Text: "POST data is too large", `PostTooLargeException`,
+  "post_max_size", "body text save too large", "bodyText large
+  document", `BodyTextEditor`, "PKPExceptionHandler render status", and
+  "HTTP exception status code 500 api"; nothing on this fault
+  (`pkp/pkp-lib#11994`, the Body Text API's issue, has no size case).
 - Tips of the picture walks of 2026-11-02: `main` OJS bc4a83e9db, OMP
   853bf3b05 and OPS fd893a8c92, each with lib/pkp 442148e14e;
   `stable-3_5_0` OJS 0f2de4ff3f, OMP 9e2a7fd00 and OPS d4a7e97a55, each

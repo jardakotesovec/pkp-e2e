@@ -980,7 +980,7 @@ entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | On a subscription journal, the article page's "JATS XML" gives the article's text to visitors its galleys refuse | 🐞 | high | issues (claude), 2026-10-05 — re-verified |
 | [A23](#a23) | Exports of one version's Body Text sent at the same moment each make a galley, so the version gets duplicate "HTML" or "PDF" galleys | 🐞 | low | — |
 | [A24](#a24) | The Body Text's HTML export stops with an error when run outside a web request; the PDF export works | 🐞 | low | — |
-| [A26](#a26) | A Body Text too large for the server fails on "Save" with "The POST data is too large.", and the text is not saved | 🐞 | minor · crash: server | — |
+| [A26](#a26) | A Body Text too large for the server fails on "Save" with "The POST data is too large.", and the text is not saved | 🐞 | medium · crash: server | issues (claude), 2026-11-13 — re-verified |
 | [A3](#a3) | A published version's Body Text stays editable | ❓ | minor | — |
 | [A4](#a4) | A new version starts with an empty Body Text, though its JATS file and media are copied | ❓ | user-visible | — |
 | [A5](#a5) | The saved Body Text reaches readers and the JATS XML only through "Export" | ❓ | user-visible | — |
@@ -1309,14 +1309,16 @@ file, but two galleys of one label leave readers to guess.
 Since: 2026-11-07 (pkp/pkp-lib#13543) · Basis: probe, 2026-11-11. <sup>f-a25</sup>
 
 <a id="a26"></a>
-**A26 — A Body Text too large for the server fails on "Save"** · 🐞 · minor · crash: server.
+**A26 — A Body Text too large for the server fails on "Save"** · 🐞 · medium · crash: server.
 "Save" on a Body Text larger than the server accepts (8 MB on a test
 install) fails on the server. A window "Error" reads "The POST data is
 too large." with "OK", "Unsaved Changes" stays, and the text is gone
 after a reload. The message tells the person neither that their text is
 what is too large nor how large it may be; the save should be refused
-with that, not fail.
-Basis: probe, 2026-11-11. <sup>f-a26</sup>
+with that, not fail. "Export to HTML" on the same text fails the same
+way, and no galley is added. The same fault shows for uploads over the
+server's limit elsewhere (*Custom pages & blocks* [A18](U09-custom-pages-and-blocks.md#a18)).
+Basis: probe, 2026-11-13. <sup>f-a26</sup>
 
 ### Retired
 
@@ -1595,7 +1597,7 @@ Report: `docs/reports/2026-10-16-pkp-lib-13545.md` (finding 2; temporary, delete
 **f-a25** — Rule 24b, note d32: `PKP\bodyText\Repository::createGalleyFile()` looks for the version's galley whose `generatedFrom` is "editor" and revises it, else adds one, so a galley uploaded on "Galleys" under the same label is left as it is (by the code an uploaded "HTML" galley the same; only "PDF" driven). Probe: d33, 2026-11-11, two runs: on published submission 17 with the dataset's uploaded "PDF", "Create PDF" left the list "PDF", "HTML Generated from text editor Revision 2", "PDF Generated from text editor", and the signed-out article page's "Downloads" "PDF", "HTML", "PDF".
 
 <a id="fn-f-a26"></a>
-**f-a26** — Rule 15. Live-probed 2026-11-11, OJS, two runs, `dbarnes` on submission 9: 901 paragraphs (about 9 MB) pasted with the clipboard, "Save": the page's `POST …/api/v1/submissions/9/publications/10/bodyText` (`X-Http-Method-Override: PUT`, multipart, 9,092,967 bytes, its `bodyText` part present) answered 500, the window read "Error" / "The POST data is too large." / "OK", the badge stayed, and the reload showed an empty editor. Server log: "PHP Warning: POST Content-Length of 9092967 bytes exceeds the limit of 8388608 bytes" and `Illuminate\Http\Exceptions\PostTooLargeException` "The POST data is too large." (PHP's `post_max_size`, 8M on the test installs). Probe: d33.
+**f-a26** — Rule 15. Live-probed 2026-11-11, OJS, two runs, `dbarnes` on submission 9: 901 paragraphs (about 9 MB) pasted with the clipboard, "Save": the page's `POST …/api/v1/submissions/9/publications/10/bodyText` (`X-Http-Method-Override: PUT`, multipart, 9,092,967 bytes, its `bodyText` part present) answered 500, the window read "Error" / "The POST data is too large." / "OK", the badge stayed, and the reload showed an empty editor. Server log: "PHP Warning: POST Content-Length of 9092967 bytes exceeds the limit of 8388608 bytes" and `Illuminate\Http\Exceptions\PostTooLargeException` "The POST data is too large." (PHP's `post_max_size`, 8M on the test installs). Probe: d33. Re-walked 2026-11-13 on OJS `main` `3c99722dc8` (lib/pkp `ad75b174f0`) on the default dataset, "Save" and "Export to HTML" both 500. Issue report: [pkp-e2e#373](https://github.com/jardakotesovec/pkp-e2e/issues/373) ([docs/issues/U09-A18-picture-over-request-limit-server-error.md](../issues/U09-A18-picture-over-request-limit-server-error.md)).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — Note b and note p: before the fix, OMP's navigation config had no `bodyText` item, so `navigateToMenu('publication_{id}_bodyText')` found no entry after the version form's POST/PUT had run; the address kept `importFileUrl` and `importFileName` (live-probed 2026-10-02). At the PR head `e28a1de30d` (ui-library#979), before its merge, 2026-10-12, `useFileManagerConfig.js` `getManagerConfig()` drops `Actions.FILE_SEND_TO_EDITOR` from every file list's available actions unless `useApp().isOJS()` (`pkp.context.app === 'ojs2'`), so OMP and OPS offer it on no row, for any role; the author ruled (@jarda.kotesovec, 2026-10-12, in the review thread) that a press should not have the action at all. Probe: d28.
