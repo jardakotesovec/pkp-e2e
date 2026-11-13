@@ -145,7 +145,7 @@ async function readSitemap(page, url) {
 /**
  * Read one context's sitemap in two languages as one snapshot: both lists
  * are read again, together, until the second's addresses with `second`
- * put back to `first` equal the first's, in order. Parallel tests publish
+ * put back to `first` equal the first's, as sets. Parallel tests publish
  * on the seeded contexts, so a work published between two single reads
  * lists in one and not the other (flake-s26 fixAD, OMP U20 S4); a pair
  * read with no publish between them agrees, and a real difference between
@@ -164,8 +164,11 @@ async function readSitemapPair(page, contextPath, {first = 'en', second = 'fr_CA
         const a = await readSitemap(page, `${base}/${first}/sitemap`);
         const b = await readSitemap(page, `${base}/${second}/sitemap`);
         pair = [a, b];
+        // Compared as sets: each language orders a context's categories
+        // by its own names (the category Collector), so the two lists'
+        // orders may differ (OMP on MariaDB) while the addresses agree.
         const back = b.paths.map((path) => path.replace(`${base}/${second}`, `${base}/${first}`));
-        expect(back, `the ${second} sitemap lists the ${first} one's addresses in ${second}`).toEqual(a.paths);
+        expect([...back].sort(), `the ${second} sitemap lists the ${first} one's addresses in ${second}`).toEqual([...a.paths].sort());
     }).toPass({timeout});
     return pair;
 }

@@ -175,8 +175,13 @@ test.describe('Internal Review stage (U71)', () => {
         await ed.stage.expectActionButtons(ROUND_DECISIONS);
 
         // ── "Assign" (Actors row 1; Settings bullet 6) ────────────────────
+        // The spec says which roles, not their order: the window lists the
+        // groups by role id alone (`getUserGroupsByStage()`'s
+        // `orderByRoleId()`), so Author, Volume editor and Translator, one
+        // role id, come in the database's order (MariaDB: Author after
+        // Volume editor).
         const assign = await ed.stage.participants.openAssign();
-        await expect.poll(() => assign.roleOptions(), {timeout: 30_000}).toEqual(ASSIGN_ROLES);
+        await expect.poll(async () => (await assign.roleOptions()).sort(), {timeout: 30_000}).toEqual([...ASSIGN_ROLES].sort());
         await assign.cancel();
 
         // ── "Add Reviewer" (Rules 3, 4) ───────────────────────────────────
