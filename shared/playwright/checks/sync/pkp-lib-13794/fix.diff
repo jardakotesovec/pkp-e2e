@@ -1,0 +1,20 @@
+--- a/tools/repairRorAffiliations.php
++++ b/tools/repairRorAffiliations.php
+@@ -245,13 +245,16 @@
+                 $guessed = array_diff($matchedRors, [$plugInRor]);
+                 $stillGuessed = array_intersect($guessed, $currentRors);
+                 $plugInRorMissing = $rorIsKnown && !in_array($plugInRor, $currentRors, true);
+-                if (empty($stillGuessed) && !$plugInRorMissing) {
++                // a ROR the legacy data no longer explains: matched by a name ROR has changed since the upgrade, or chosen later
++                $unexplained = array_diff(array_filter($currentRors), $matchedRors, [$plugInRor]);
++                if (empty($stillGuessed) && !$plugInRorMissing && empty($unexplained)) {
+                     continue;
+                 }
+                 $action = 'review';
+                 $reasons = array_filter([
+                     !empty($stillGuessed) ? 'name-derived ROR still present' : null,
+                     $plugInRorMissing ? 'ROR plugin ROR missing' : null,
++                    !empty($unexplained) ? 'ROR not found from the legacy data' : null,
+                 ]);
+             }
+ 

@@ -1,0 +1,24 @@
+--- a/tools/repairRorAffiliations.php
++++ b/tools/repairRorAffiliations.php
+@@ -17,6 +17,7 @@
+ 
+ require(dirname(__FILE__, 4) . '/tools/bootstrap.php');
+ 
++use APP\core\Application;
+ use Illuminate\Support\Collection;
+ use Illuminate\Support\Facades\DB;
+ use Illuminate\Support\Facades\Schema;
+@@ -78,6 +79,13 @@
+ 
+     public function execute(): void
+     {
++        // the tool knows 3.5's author data only: 3.6 stores an organization contributor's own ROR in author_settings 'rorId'
++        $version = Application::get()->getCurrentVersion();
++        if ($version->getMajor() !== 3 || $version->getMinor() !== 5) {
++            fwrite(STDERR, 'This tool is for 3.5 installations; this one is ' . $version->getVersionString() . ".\n");
++            exit(1);
++        }
++
+         if (!Schema::hasTable('author_affiliations') || !Schema::hasTable('rors')) {
+             fwrite(STDERR, "The author_affiliations or rors table does not exist; is this a 3.5 installation?\n");
+             exit(1);
