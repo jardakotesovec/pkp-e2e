@@ -10,7 +10,7 @@
  * Spec: docs/specs/U53-users-management.md
  *
  * Deliberately NOT covered (register IDs): A1 🐞, A2 🐞, A3 ❓, A7 🐞,
- * A8 ❓, A13 🐞.
+ * A8 ❓.
  *
  * Every test seeds its own scratch preprint server with throwaway accounts
  * (the seeded roster and publicknowledge stay untouched); the Site

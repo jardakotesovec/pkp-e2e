@@ -97,7 +97,9 @@ some installs (the install, not a setting, decides; see
 its A19), and one search form, which opens from the "Search" link above
 the list. The "Roles" column names the user's
 roles in this journal, empty for a user whose roles here have all
-ended; the Site Administrator's row shows none ⚠ [A13](#a13). <sup>i</sup>
+ended; a role with no start date is named like any other, such as the
+manager role the Site Administrator holds in a journal they created and
+every role carried over from before an upgrade to 3.5. <sup>i</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
@@ -822,12 +824,15 @@ Left out of the scenarios above, by reason:
     account: the merge completes with a message, the merged account is gone
     and cannot sign in, and the discussion names the chosen account as its
     creator [report 2026-10-02]
-  - the guard for A13 (issue report
+  - the Site Administrator opens the Settings wizard's "Users" grid and
+    the "Merge user" window: the administrator's row names the manager
+    role under "Roles", and so does the row of a user whose role has no
+    start date (Fields; A13 retired with pkp/pkp-lib#13552)
+    [upstream 2026-11-13]
+  - the guard for A17 (issue report
     `docs/issues/U53-A13-A17-users-grid-roles-admin-empty-ended-listed.md`):
-    the Site Administrator opens the Settings wizard's "Users" grid and the
-    "Merge user" window: the administrator's row names the manager role
-    under "Roles"; after "Edit User" ends a role, the refreshed row no
-    longer lists it [report 2026-10-02]
+    after "Edit User" ends a role on the Settings wizard's "Users" grid,
+    the refreshed row no longer lists it [report 2026-10-02]
   - the guard for A6 (issue report
     `docs/issues/U53-A6-disable-window-lists-ended-roles.md`): a manager
     opens "Disable User" on a user one of whose roles has ended: the
@@ -888,8 +893,6 @@ Left out of the scenarios above, by reason:
   - OPS1 (the list in the French interface; Rule 25)
   - A12 (the ORCID and disabled icons unnamed to a screen reader; Fields
     "Name")
-  - A13 (the Site Administrator's empty "Roles" cell in the "Merge user"
-    window and on the older grid; Fields)
   - A15 (merging an account that opened a discussion; Rule 17)
   - A16 ("Generate Password" unticked again, "Notify User" left locked;
     Rule 23)
@@ -952,7 +955,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Users & Roles: the reason typed when enabling a user is shown to them when disabled again | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A9](#a9) | Merging a section editor's account silently drops them from their sections instead of moving them | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | Users & Roles: the ORCID and "disabled" icons after a user's name have no name for screen readers | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A13](#a13) | The "Merge user" window and the older grid show nothing under "Roles" for the Site Administrator | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A14](#a14) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A15](#a15) | Merging an account that opened a discussion fails without a message and leaves the account behind | 🐞 | high · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A16](#a16) | On "Add User", unticking "Generate Password" leaves "Notify User" greyed out, so no welcome email can be chosen | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
@@ -1105,19 +1107,6 @@ where other rows offer "Disable User". The ORCID icon shows for any
 ORCID iD stored on the account, verified or not. Basis: probe,
 2026-10-02. <sup>f-a12</sup>
 
-<a id="a13"></a>
-**A13 — The older lists show no role for the Site Administrator** · 🐞 · medium.
-In the "Merge user" window and on the Settings wizard's "Users" grid the
-Site Administrator's row shows nothing under "Roles", while the Users &
-Roles list names their manager role ("Journal manager", "Press manager",
-"Preprint Server manager") with an empty "Start Date". The grid still
-offers "Remove" on that row. The same cells are empty for every role
-with no start date, so on an install upgraded from 3.4 they are empty
-for every role held from before the upgrade, in the window where a
-manager picks the account to merge. The lists should agree on the roles
-an account holds.
-Basis: probe, 2026-10-02. <sup>f-a13</sup>
-
 <a id="a14"></a>
 **A14 — On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody** · 🐞 · medium · crash: server.
 On a press or preprint server, the app fails on the server when a
@@ -1179,6 +1168,7 @@ Only reloading the page shows "Reader" alone, and a reload made the
 moment the save ends can still list both. The Site Administrator is shown
 a role that has already ended as if it were current.
 Basis: probe, 2026-10-02. <sup>f-a17</sup>
+Report: refresh owed — pkp/pkp-lib#13552 (#13555 `main`, #13554 3.5) made `UserUserGroup::scopeWithActiveAndActiveInFuture()` accept a role with no start date, which retires A13, the report's other half; the `date_end >=` comparison this entry rests on is unchanged, so the report narrows to A17 (2026-11-13)
 
 <a id="a18"></a>
 **A18 — "Roles" goes by the end date, not by whether the role is held today** · ❓ · minor.
@@ -1256,6 +1246,9 @@ Basis: probe, 2026-10-01. <sup>f-ops1</sup>
 
 <a id="a11"></a>
 **A11 — In French (Canada), the Users & Roles "Users" tab and the role invitation pages show codes instead of labels** · ✅ · retired. Overturned: a missing translation is no finding.
+
+<a id="a13"></a>
+**A13 — The older lists show no role for the Site Administrator** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13552).
 
 ---
 
@@ -1580,7 +1573,7 @@ Columns (`UserGridHandler::initialize()`): `user.givenName` "Given Name",
 "Roles" (active and future roles in this context), `user.email`. Filter:
 `loadData()` — role, search phrase (the collector's `searchPhrase`), and
 the context restriction unless the box is ticked. Live-probed 2026-09-25
-(Rule 16; Fields, the shared search form; A13), all three apps, in the
+(Rule 16; Fields, the shared search form), all three apps, in the
 "Merge user" window and on the Settings wizard's "Users" tab: the search
 form hidden until the "Search" link above the list was pressed; the text
 box found by family name and by email; the role select arrived on "All
@@ -1590,6 +1583,20 @@ narrowed the list; the box "Include users with no roles in this journal."
 here was listed only with the box ticked; users whose roles here had all
 ended were listed without it, their "Roles" cell empty. The window's list
 is headed "Merge into this User"; the merged account's row has no arrow.
+A role with no start date (`date_start` NULL: the manager role
+`PKPContextService::add()` gives a journal's creator, and every role the
+3.5 upgrade `I9462_UserUserGroupsStartEndDate` carried over) is named in
+the column since pkp/pkp-lib#13552, whose
+`UserUserGroup::scopeWithActiveAndActiveInFuture()` accepts it as begun:
+live-probed 2026-11-13 at the PR heads `31dc56d2e5` (`main`, #13555) and
+`f5bb086166` (3.5, #13554), before their merge, as GitHub's merge onto
+pkp-lib's tips, all three apps on both lines
+(`shared/playwright/checks/sync/pkp-lib-13552/walk.js`): the
+administrator's row read "Journal manager" ("Press manager", "Preprint
+Server manager") on the wizard grid and in "Merge user", and a user given
+a role with no start date, one not begun, one ended with no start date
+and one dated and ended was listed with the first two only; at the
+apps' pointers both cells left out the role with no start date.
 Live-probed 2026-10-13 (Rule 16a; Fields, the shared list; scenario 6),
 three apps, two runs, as the Site Administrator, a Journal (Press,
 Preprint Server) Manager, a manager of two journals, and on OJS and OMP
@@ -2133,16 +2140,6 @@ read the name, then an image with no name. The icons
 (`UserAccessManagerCellName.vue`, note g) carry no `aria-label` and no
 `aria-hidden`.
 Issue report: [pkp-e2e#452](https://github.com/jardakotesovec/pkp-e2e/issues/452) ([docs/issues/U53-A12-users-list-status-icons-unnamed.md](../issues/U53-A12-users-list-status-icons-unnamed.md)).
-
-<a id="fn-f-a13"></a>
-**f-a13** — Live-probed 2026-09-25, all three apps: the "Merge user"
-window and the Settings wizard's grid read the administrator's row "admin
-| admin | admin | | admin@mail.test", while Users & Roles showed "Journal
-manager" ("Press manager", "Preprint Server manager") with no start date.
-The grids' "Roles" column lists active and future roles (note i), and the
-manager enrolment a new journal gives the Site Administrator has no start
-date, which fits the empty cell.
-Issue report: [pkp-e2e#450](https://github.com/jardakotesovec/pkp-e2e/issues/450) ([docs/issues/U53-A13-A17-users-grid-roles-admin-empty-ended-listed.md](../issues/U53-A13-A17-users-grid-roles-admin-empty-ended-listed.md)).
 
 <a id="fn-f-a14"></a>
 **f-a14** — Live-probed 2026-09-25, OMP and OPS: after "Confirm" on a

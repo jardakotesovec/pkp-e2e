@@ -8,7 +8,7 @@
  *
  * Deliberately NOT covered (the spec's Findings register; a 🐞 is never
  * asserted as the contract, a ❓ is parked, not a gap): A1 🐞, A2 🐞, A3 ❓,
- * A7 🐞, A8 ❓, A13 🐞. The spec's Coverage section records the rest.
+ * A7 🐞, A8 ❓. The spec's Coverage section records the rest.
  *
  * Every test seeds its own scratch journal with throwaway accounts (the
  * seeded roster and publicknowledge stay untouched); the Site Administrator

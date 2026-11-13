@@ -10,7 +10,7 @@
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register —
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A3 ❓, A4 🐞, A7 🐞, A8 ❓, A13 🐞. Where a test passes through one
+ * A2 🐞, A3 ❓, A4 🐞, A7 🐞, A8 ❓. Where a test passes through one
  * (S4 reads the menus of rows outside the manager's reach, S3 opens "Enable
  * User", S5 reaches the removed user's roles page through her row, S7 reads
  * the grid's rows, S1 finds the search box by the start of its name, whose
