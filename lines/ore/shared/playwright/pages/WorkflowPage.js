@@ -821,26 +821,43 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
 
     /**
      * Press a header button that opens one of the frame's dialogs and answer
-     * it. Resolves once the dialog has closed.
+     * it. Resolves once the dialog has closed: with the POST its "Confirm"
+     * sent (`responsePath`, matched against the request URL), or null on
+     * "Cancel".
      */
-    async _answerHeaderDialog(buttonLabel, kind, confirm) {
+    async _answerHeaderDialog(buttonLabel, kind, confirm, responsePath) {
         await this.headerButton(buttonLabel).click();
         const dialog = this.confirmDialog(kind);
         await expect(dialog).toBeVisible({timeout: 30_000});
+        const response = confirm
+            ? this.page.waitForResponse(
+                (r) => r.request().method() === 'POST' && responsePath.test(new URL(r.url()).pathname),
+                {timeout: 30_000}
+            )
+            : null;
         await dialog
             .getByRole('button', {name: confirm ? 'Confirm' : 'Cancel', exact: true})
             .click();
         await expect(dialog).toHaveCount(0, {timeout: 30_000});
+        return response ? await response : null;
     }
 
-    /** "Return to Workflow" (Rule 18a): open the dialog and confirm or cancel it. */
+    /**
+     * "Return to Workflow" (Rule 18a): open the dialog and confirm or cancel
+     * it. On "Confirm" resolves with the decision POST's response (a refusal
+     * raises the "Error" dialog, `errorDialog()`).
+     */
     async returnToWorkflow({confirm = true} = {}) {
-        await this._answerHeaderDialog('Return to Workflow', 'returnToWorkflow', confirm);
+        return await this._answerHeaderDialog(
+            'Return to Workflow', 'returnToWorkflow', confirm, /\/submissions\/\d+\/decisions$/
+        );
     }
 
-    /** "Return to Done" (Rule 18b). */
+    /** "Return to Done" (Rule 18b); on "Confirm" resolves with its POST's response. */
     async returnToDone({confirm = true} = {}) {
-        await this._answerHeaderDialog('Return to Done', 'returnToDone', confirm);
+        return await this._answerHeaderDialog(
+            'Return to Done', 'returnToDone', confirm, /\/submissions\/\d+\/returnToDone$/
+        );
     }
 
     /** The stage's "Delete" button and its dialog (Rule 19). */
