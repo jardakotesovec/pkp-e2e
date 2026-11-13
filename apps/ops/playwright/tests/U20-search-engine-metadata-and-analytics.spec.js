@@ -30,7 +30,7 @@
  *   paragraph.
  * - A3 ❓, A4 ❓: the site's own Plugins list is never opened; S1 reads the
  *   server's listing pages as the spec lists them.
- * - OJS1, OJS2 🐞, OMP1–OMP5 🐞: a journal's and a press's, in those suites.
+ * - OJS1 🐞, OMP3, OMP5, OMP7 🐞: a journal's and a press's, in those suites.
  *
  * Seeding: scenario endpoints only, as footnote s says; publicknowledge and
  * the seeded roster are only read (S4, signed out). Every other scenario
@@ -202,13 +202,14 @@ test.describe('Search-engine metadata & analytics', () => {
         expect(sitemap.body).not.toMatch(/<lastmod|<priority|<changefreq/);
 
         // Its entries, in order: home, "Register", "Login", "Submissions",
-        // "Contact", then a preprint server's "Search" (Rules 2, 3; Fields,
-        // "What the sitemap lists").
+        // "Editorial Masthead", "Contact", then a preprint server's "Search"
+        // (Rules 2, 3; Fields, "What the sitemap lists").
         expect(sitemap.paths).toEqual([
             at(tag),
             at(tag, '/user/register'),
             at(tag, '/login'),
             at(tag, '/about/submissions'),
+            at(tag, '/about/editorialMasthead'),
             at(tag, '/about/contact'),
             at(tag, '/search'),
         ]);

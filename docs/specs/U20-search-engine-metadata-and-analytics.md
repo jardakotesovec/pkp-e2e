@@ -127,14 +127,16 @@ address}` is the journal's home page address, such as
 | "Announcements", then each announcement's page | while "Enable announcements" is ticked (Rule 3); an expired announcement too [A5](#a5) | OJS OMP OPS <sup>q5</sup> |
 | "About the Journal" | while its text is not empty (Rule 3) | OJS OMP OPS <sup>q5</sup> |
 | the "Submissions" page of About | always | OJS OMP OPS <sup>q2</sup> |
+| "Editorial Masthead" | always | OJS OMP OPS <sup>q26</sup> |
 | "Contact" | always (Rule 3) | OJS OMP OPS <sup>q5</sup> |
 | each "Custom Page" item's page | always (Rule 3) | OJS OMP OPS <sup>q5</sup> |
 | "Search" | always; a press lists no Search page ⚠ [A4](#a4) | OJS OPS <sup>q2</sup> |
-| "Current" and "Archive" | unless "Publishing Mode" says the journal does not publish online (Rule 2b) | OJS <sup>q4</sup> |
-| each published issue's page | the same (Rule 2b); no article or galley page is ever listed (Rule 2a) [OJS2](#ojs2) | OJS <sup>q2</sup> <sup>q3</sup> |
-| "Catalog", then each published book's page, followed by its chapters' pages and its files' pages | always; a chapter while "Show this chapter on its own page…" is ticked for it; a file while its format is approved and available and the file is open access or priced; once "Create New Version" is pressed, each chapter at an address that answers "404 Not Found" (Rule 2c) [OMP4](#omp4) | OMP <sup>q2</sup> |
+| "Current" and "Archive" | once an issue is published, unless "Publishing Mode" says the journal does not publish online (Rule 2b) | OJS <sup>q4</sup> <sup>q26</sup> |
+| each published issue's page | the same (Rule 2b) | OJS <sup>q2</sup> |
+| each published article's page, followed by its galleys: a PDF galley at its download address, any other at its view page | while the article is published, in a published issue or with "Don't Assign To An Issue" (Rule 2a) | OJS <sup>q3</sup> <sup>q26</sup> |
+| "Catalog", then each published book's page, followed by its chapters' pages and its files: a PDF file at its download address, any other at its view page | always; a chapter while "Show this chapter on its own page…" is ticked for it, at the address the book's page links to (Rule 2c); a file while its format is approved and available and the file is open access or priced | OMP <sup>q2</sup> <sup>q26</sup> |
 | "New Releases", each series' page, each category's page | always; no category page on a journal or a preprint server [A4](#a4) | OMP <sup>q2</sup> |
-| each posted preprint's page | always | OPS <sup>q2</sup> <sup>q6</sup> |
+| each posted preprint's page, followed by its galleys: a PDF galley at its download address, any other at its view page | always | OPS <sup>q2</sup> <sup>q6</sup> <sup>q26</sup> |
 
 **What "Google Scholar Indexing Plugin" writes** on a published item's
 page (Rule 12). Each line is a tag named as below whose content is the
@@ -161,8 +163,8 @@ value described. <sup>h</sup> <sup>q14</sup>
 | "citation_abstract" | the abstract in the submission's language, its formatting removed; an "&" arrives as "&amp;" ⚠ [A7](#a7) | OJS OMP OPS <sup>q14</sup> |
 | "citation_keywords" | one per subject, then one per keyword, in the submission's language | OJS OMP OPS <sup>q14</sup> |
 | "citation_isbn" | each ISBN of the formats whose files are the whole book | OMP <sup>q14</sup> |
-| "citation_pdf_url" | for each PDF galley, its download address; on a press, for a PDF file of the book ⚠ [OMP2](#omp2) | OJS OMP OPS <sup>q14</sup> |
-| "citation_fulltext_html_url" | for each HTML galley, its view address (on a preprint with a "URL Path", an address that ends on "404 Not Found" ⚠ [OPS1](#ops1)); on a press, for the last file of the book that is not a PDF, whatever its type ⚠ [OMP1](#omp1) | OJS OMP OPS <sup>q14</sup> |
+| "citation_pdf_url" | for each PDF galley, its download address; on a press, one for each PDF file of the book (of the chapter, on a chapter's page), its download address | OJS OMP OPS <sup>q14</sup> <sup>q26</sup> |
+| "citation_fulltext_html_url" | for each HTML galley, its view address (on a preprint with a "URL Path", an address that ends on "404 Not Found" ⚠ [OPS1](#ops1)); on a press, one for each HTML or XML file of the book (of the chapter, on a chapter's page), its download address | OJS OMP OPS <sup>q14</sup> <sup>q26</sup> |
 | "citation_reference" | one per reference of the version | OJS OMP OPS <sup>q14</sup> |
 
 **What "Dublin Core Indexing Plugin" writes** {OJS OMP} on a published
@@ -214,20 +216,23 @@ in. <sup>i</sup> <sup>q14</sup>
    one and another journal's work never appear. A newly published book
    or preprint is listed at the next load; an unpublished one is gone
    from it. <sup>e</sup> <sup>q2</sup>
-   - 2a. {OJS} No article is listed. The sitemap lists each published
-     issue's page and no article or galley page, whether the article
-     sits in a published issue or was published with "Don't Assign To An
-     Issue", so publishing or unpublishing an article leaves the sitemap
-     as it was ⚠ [OJS2](#ojs2). <sup>q3</sup>
-   - 2b. {OJS} With "Publishing Mode" set to "OJS will not be used to
-     publish the journal's contents online." the sitemap lists no
-     "Current", "Archive" or issue page. <sup>q4</sup>
-   - 2c. {OMP} Once "Create New Version" is pressed on a published book,
-     the sitemap lists each of its chapter pages at an address that
-     answers "404 Not Found", in place of the address the book's page
-     links to, which still opens the chapter. Publishing the new version
-     leaves these entries as they are. The book's own entry and its file
-     entries do not change ⚠ [OMP4](#omp4). <sup>q2</sup>
+   - 2a. {OJS} Every published article is listed, whether it sits in a
+     published issue or was published with "Don't Assign To An Issue",
+     each followed by its galleys; an article scheduled in an issue that
+     is not yet published, or unpublished, is not. <sup>q3</sup>
+     <sup>q26</sup>
+   - 2b. {OJS} "Current" and "Archive" are listed once the journal has a
+     published issue. With "Publishing Mode" set to "OJS will not be
+     used to publish the journal's contents online." the sitemap lists
+     no "Current", "Archive" or issue page. <sup>q4</sup> <sup>q26</sup>
+   - 2c. {OMP} A chapter page is listed at the address the book's page
+     links to, which stays the same in every version of the book: after
+     "Create New Version", and once the new version is published, the
+     entry still opens the chapter. <sup>q26</sup>
+   - 2d. An item with several versions is listed as its published
+     version reads: its "URL Path", its galleys, chapters and files. A
+     new version still in the workflow changes nothing until it is
+     published. <sup>q26</sup>
 3. **Entries other settings decide.** <sup>e</sup> <sup>q5</sup>
    - "Register" leaves the list while "User Registration" is set to "The
      Journal Manager will register all user accounts. …".
@@ -241,13 +246,16 @@ in. <sup>i</sup> <sup>q14</sup>
      nothing.
    - Every "Custom Page" item of the journal's Navigation is listed,
      whether or not a menu shows it.
-4. **The addresses.** A book's entry, and its chapters' and files',
-   use its "URL Path" when one is set; a preprint's entry uses its
-   number even then, an address that leads on to the preprint's page.
-   On a journal with two
-   or more interface languages, every address carries the language the
-   sitemap was read in (such as "/en/" after the journal's address), and
-   no other language's addresses are listed. <sup>e</sup> <sup>q6</sup>
+4. **The addresses.** An item's entry, and its galleys', chapters' and
+   files', use its "URL Path" when one is set, as do a galley's, a
+   format's and a file's own (a file's "Publisher ID"). A PDF is listed
+   at the download address its page's "citation_pdf_url" names (Rule
+   12), which carries no language and leads on to the file in the
+   visit's language. On a journal with two or more interface languages,
+   every other address carries the language the sitemap was read in
+   (such as "/en/" after the journal's address), and no other
+   language's addresses are listed. <sup>e</sup> <sup>q6</sup>
+   <sup>q26</sup>
 5. **The site's index.** The site's own address {site address}/index/sitemap
    (`{site address}` being the part before the journal's path, such as
    `https://example.org/index.php`) lists the sitemap address of every
@@ -317,7 +325,7 @@ in. <sup>i</sup> <sup>q14</sup>
     is a file for sale ("Direct Sales"): its address sends a signed-out
     visitor or search engine to the Login page, as the file's own link
     on the book's page does ([Monograph landing
-    page](U69-monograph-landing-page.md), its Rule 14) [OMP2](#omp2).
+    page](U69-monograph-landing-page.md), its Rule 14).
     <sup>h</sup> <sup>i</sup> <sup>q14</sup>
 13. **Earlier versions and galleys.** The page of an earlier version
     (its link in the item page's "Versions" list) carries neither
@@ -599,10 +607,11 @@ the tooling recipe are in the footnote. <sup>s</sup>
      holding one address and nothing else, with no date and no priority
      (Rule 1).
    - **Its entries**: the list holds, in this order, the home page,
-     "Register", "Login", the "Submissions" page of About and "Contact";
-     then, on a journal, "Search", "Current" and "Archive"; on a press
-     "Catalog" and "New Releases" [A4](#a4); on a preprint server
-     "Search" (Rules 2, 3; Fields, "What the sitemap lists").
+     "Register", "Login", the "Submissions" page of About, "Editorial
+     Masthead" and "Contact"; then, on a journal and on a preprint
+     server, "Search", a journal with no published issue listing no
+     "Current" or "Archive"; on a press "Catalog" and "New Releases"
+     [A4](#a4) (Rules 2, 2b, 3; Fields, "What the sitemap lists").
    - **Control**: the list holds no "About the Journal" entry, since a
      new journal's "About the Journal" text is empty (Rule 3; Settings
      bullet 11). <sup>s</sup>
@@ -631,12 +640,13 @@ the tooling recipe are in the footnote. <sup>s</sup>
      Papers". Follow that entry: it opens the announcement "Call for
      Papers" (Rule 3; Settings bullet 9).
    - **Published work**: on a journal, the page of Vol. 1 No. 1 follows
-     "Archive" (Rule 2a; [OJS2](#ojs2)). On a press, the book's page of
-     "Tidal Patterns" follows "Catalog", followed by one chapter page,
-     then the page of its "PDF" file; after "New Releases" come the page
-     of "Sea Series", then the page of "Cat One". On a preprint server,
-     the last entry opens the preprint's page of "Tidal Patterns" (Rules
-     2, 4; Fields, "What the sitemap lists").
+     "Archive", and the list holds the article's page of "Tidal
+     Patterns" (Rules 2a, 2b). On a press, the book's page of "Tidal
+     Patterns" follows "Catalog", followed by one chapter page, then the
+     download address of its "PDF" file; after "New Releases" come the
+     page of "Sea Series", then the page of "Cat One". On a preprint
+     server, the last entry opens the preprint's page of "Tidal
+     Patterns" (Rules 2, 4; Fields, "What the sitemap lists").
    - **A chapter on its own page** {OMP}: follow the chapter page's
      entry: it opens the page of "Chapter One Tides", the one chapter
      listed; "Chapter Two Calm", whose box is unticked, has no entry
@@ -707,11 +717,12 @@ the tooling recipe are in the footnote. <sup>s</sup>
 
    - **The English sitemap**: open {journal address}/en/sitemap,
      {journal address} being the address of the seeded journal's home
-     page with no language in it: every address listed carries "/en/"
-     after the journal's address, and none carries "/fr_CA/" (Rule 4;
-     Settings bullet 14).
+     page with no language in it: every address listed but a PDF's
+     download address carries "/en/" after the journal's address, and
+     none carries "/fr_CA/" (Rule 4; Settings bullet 14).
    - **The French sitemap**: open {journal address}/fr_CA/sitemap: every
-     address listed carries "/fr_CA/", and none carries "/en/" (Rule 4).
+     address listed but a PDF's download address carries "/fr_CA/", and
+     none carries "/en/" (Rule 4).
    - **The alternate links**: open the home page in English,
      {journal address}/en, and view its source: it carries one
      "alternate" link per language, English and French, each pointing to
@@ -828,7 +839,7 @@ the tooling recipe are in the footnote. <sup>s</sup>
    - **A file for sale** {OMP}: the visitor opens the book's page of
      "Sale Tides" and views its source: it carries one
      "citation_pdf_url". Open the address it gives: the Login page opens
-     (Rule 12; [OMP2](#omp2)).
+     (Rule 12).
    - **The book's file page** {OMP}: on the book's page, press the "PDF"
      format's link: the file's page opens; its source
      carries "DC." tags and no "citation_" tag, and its "DC.Identifier"
@@ -1025,8 +1036,8 @@ Left out of the scenarios above, by reason:
     the issue pages out of the sitemap (Settings bullet 13; Rule 2b): a
     journal that does not publish online is rare, and chooses so once
 - **Nothing new to test**:
-  - {OPS} a preprint with a "URL Path", listed in the sitemap by its
-    number (Rule 4)
+  - {OMP OPS} a book or a preprint with a "URL Path", listed in the
+    sitemap by it (Rule 4)
   - a version's other languages in the Dublin Core tags, and "DC.Rights"
     read on a French page (Rule 14)
   - "Description" and "Custom Tags" in a second form language, and a
@@ -1057,13 +1068,6 @@ Left out of the scenarios above, by reason:
     language; Fields, "citation_author")
   - A7 (an "&" in the abstract; Fields, "citation_abstract")
   - OJS1 {OJS} ("DC.Source.URI"; Fields)
-  - OJS2 {OJS} (published articles, in an issue or without one, missing
-    from the sitemap; Rule 2a; scenario 2 passes it)
-  - OMP1, OMP2 {OMP} (a book's files that are not PDFs, and a second
-    PDF, which may be a file for sale; Fields,
-    "citation_fulltext_html_url", "citation_pdf_url"; Rule 12)
-  - OMP4 {OMP} (a new version of a published book: the chapter entries;
-    Rule 2c)
   - OMP7 {OMP} (a URN assigned to a book file: its view page's
     "DC.Identifier.URN"; Rule 17)
   - OPS1 {OPS} (a preprint with a "URL Path": the HTML full-text tag;
@@ -1112,11 +1116,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A6](#a6) | An author submitting in a language their account has no name in is published under the given name alone | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A7](#a7) | Reference managers and indexes get an abstract's "&" and "<" as "&amp;" and "&lt;" | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OJS1](#ojs1) | "DC.Source.URI" points to an address that does not exist instead of the journal's home page | 🐞 | minor | — |
-| [OJS2](#ojs2) | A journal's sitemap lists no article at all, only the issues' pages | 🐞 | user-visible | — |
-| [OMP1](#omp1) | A book page tells Google Scholar its EPUB, or any file that is not a PDF, is HTML full text | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
-| [OMP2](#omp2) | A book with two PDF files for the whole book announces only one of them to Google Scholar | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
 | [OMP3](#omp3) | A press's chapter pages tell indexes they are books, and whole-book file pages that they are chapters | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [OMP4](#omp4) | After "Create New Version", a press's sitemap lists the book's chapter pages at addresses that answer "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OMP5](#omp5) | A press's book file view page names the book's page as its address in Dublin Core tags | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP7](#omp7) | A press's book file view page never names the URN assigned to the file in its Dublin Core tags | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS1](#ops1) | A preprint with a "URL Path" announces an HTML full-text address that ends on "404 Not Found" | 🐞 | high | issues (claude), 2026-10-01 — re-verified |
@@ -1246,55 +1246,7 @@ path repeated after it, such as
 Found". A press's tag gives its home page correctly.
 Since: 2024-04-16 · Basis: probe, 2026-09-26. <sup>f-ojs1</sup>
 
-<a id="ojs2"></a>
-**OJS2 — A journal's sitemap lists no article** · 🐞 · user-visible.
-A journal expects its sitemap to list each published article and its
-galleys under their issue. It lists each published issue's page and
-nothing under it, whether the article sits in a published issue or was
-published with "Don't Assign To An Issue", so search engines learn of
-articles only by following the issue and archive pages' links. The
-sitemap listed them until February 2026: a regression, not a choice.
-Since: 2026-02-17 · Basis: probe, 2026-09-26. <sup>f-ojs2</sup>
-
 ### OMP
-
-<a id="omp1"></a>
-**OMP1 — A book page tells Google Scholar its EPUB, or any file that is not a PDF, is HTML full text** · 🐞 · medium.
-A press offers a book as an EPUB, or as any other file that is neither a
-PDF nor HTML. Its book page then tells Google Scholar that this file is
-the book's full text in HTML: the "citation_fulltext_html_url" tag names
-the EPUB's download address. A chapter's page does the same with the
-chapter's files.
-
-When the book also has a real HTML file, only one of the two gets the
-tag: the file uploaded first (between files with the same upload time,
-the database decides which). If the press uploaded the EPUB first, its
-HTML full text is left out. Nothing on screen shows this. The only way
-round is to make the EPUB format "Not Available", which also takes the
-EPUB away from readers.
-
-It applies to any format marked "Available" whose file has its terms
-set, on any press where the Google Scholar plugin is on, as it is by
-default.
-Basis: probe, 2026-10-03. <sup>f-omp1</sup>
-
-<a id="omp2"></a>
-**OMP2 — A book with two PDF files for the whole book announces only one of them to Google Scholar** · 🐞 · medium.
-A book that offers two PDF files for the whole book, in one publication
-format or in two, announces only one of them to Google Scholar. The book
-page carries a single "citation_pdf_url" tag, for the file uploaded
-first; between files with the same upload time, the database decides
-which. The same holds for two HTML files, and for two files of one kind
-on a chapter's page.
-
-The page itself offers both files to readers, so only the search index
-misses one. The press is not told. When the file the tag names is for
-sale ("Direct Sales"), a search engine following the tag lands on the
-Login page, and no tag points it to the book's free file.
-
-It happens when the formats carry no ISBN, as in PKP's own test data.
-When every such format carries an ISBN, both files are announced.
-Basis: probe, 2026-10-07. <sup>f-omp2</sup>
 
 <a id="omp3"></a>
 **OMP3 — A press's chapter pages tell indexes they are books, and whole-book file pages that they are chapters** · 🐞 · low.
@@ -1310,23 +1262,6 @@ The book's page ("Text.Book") and a chapter file's view page
 not told. "Dublin Core Indexing Plugin" writes these tags and is enabled
 on every new press.
 Basis: probe, 2026-10-03. <sup>f-omp3</sup>
-
-<a id="omp4"></a>
-**OMP4 — After "Create New Version", a press's sitemap lists the book's chapter pages at addresses that answer "404 Not Found"** · 🐞 · medium.
-A press that starts a new version of a published book expects its
-sitemap to go on listing the book's chapter pages at the addresses the
-book's page links to. From "Create New Version" on, the sitemap lists
-each chapter page at another address, which answers "404 Not Found".
-The address the book's page links to still opens the chapter. It is no
-longer in the sitemap.
-
-Each version keeps its own copy of a chapter, and the sitemap writes
-the copy's number, while a chapter page is addressed by the chapter's
-number in the book's first version. So the listed address matches no
-chapter page, before the new version is published and after.
-
-The book's own entry and its file entries stay right.
-Basis: probe, 2026-10-03. <sup>f-omp4</sup>
 
 <a id="omp5"></a>
 **OMP5 — A press's book file view page names the book's page as its address in Dublin Core tags** · 🐞 · low.
@@ -1369,6 +1304,18 @@ Basis: probe, 2026-10-01. <sup>f-ops1</sup>
 
 ### Retired
 
+<a id="ojs2"></a>
+**OJS2 — A journal's sitemap lists no article** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13789).
+
+<a id="omp1"></a>
+**OMP1 — A book page tells Google Scholar its EPUB, or any file that is not a PDF, is HTML full text** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13789).
+
+<a id="omp2"></a>
+**OMP2 — A book with two PDF files for the whole book announces only one of them to Google Scholar** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13789).
+
+<a id="omp4"></a>
+**OMP4 — After "Create New Version", a press's sitemap lists the book's chapter pages at addresses that answer "404 Not Found"** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13789).
+
 <a id="omp6"></a>
 **OMP6 — Every book file address in the tags fails** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13444).
 
@@ -1404,13 +1351,13 @@ OMP's own code.
 **d** — `GoogleAnalyticsPlugin::getActions()` adds the `settings` `LinkAction` (`manager.plugins.settings` "Settings", `AjaxModal` titled `getDisplayName()`) only while `getEnabled()`. `manage()` with `verb=settings` builds `GoogleAnalyticsSettingsForm($this, $context->getId())`, with `$context = $request->getContext()`; on the site's Plugins tab no "Settings" was offered at all (A3, note f-a3). The form: `settingsForm.tpl` with `plugins.generic.googleAnalytics.manager.settings.description` (two paragraphs, the second on the "'Check Status' function"), `fbvElement type="text" id="googleAnalyticsSiteId"` labelled `…settings.googleAnalyticsSiteId` "Account number" with no `required` flag (the box carries the class `required`, which the page's own form check reads: an empty box is refused in the browser with "This field is required." and nothing is sent, while a box of spaces passes it and meets the server's check), `{fbvFormButtons}` ("OK", "Cancel") and `common.requiredField`; checks `FormValidator` required (`…googleAnalyticsSiteIdRequired` "Please enter an account number."), `FormValidatorPost`, `FormValidatorCSRF`; `execute()` tidies the value before storing it (note q22), and a value left with nothing is stored empty, which `registerScript()` treats as no number. On success `manage()` returns `JSONMessage(true)` with no `createTrivialNotification()`, unlike the Web Feed plugin's window. Live-probed 2026-09-26 (Actors rows 5, 6; the window; Rules 20, 21; Setting 6): notes q22, q23.
 
 <a id="fn-e"></a>
-**e** — `PKP\pages\sitemap\PKPSitemapHandler::index()` (no `authorize()` override, so `PKPHandler::authorize()` applies the site-access checks, and `PKPPageRouter::route()` those for a context that is not enabled, Rule 6): with no context `_createSitemapIndex()` lists `$request->url($context->getPath(), 'sitemap')` for `getContextDAO()->getAll(true)` (enabled contexts); with a context `_createContextSitemap()`, served `application/xml`, `Content-Disposition: inline; filename=sitemap.xml`, each entry `_createUrlTree()` with `loc` only. Shared entries in order: context home; `user/register` unless `disableUserReg`; `login`; `announcement` and `announcement/view/{id}` for every announcement of the context (`Announcement::withContextIds`, no date filter) when `enableAnnouncements`; `about` when `about` is not empty; `about/submissions`; `about/contact` when `mailingAddress` or `contactName`; `{path}` for each `NavigationMenuItem::NMI_TYPE_CUSTOM` item. Subclasses (`APP\pages\sitemap\SitemapHandler`, each overriding `_createContextSitemap()` and calling the parent first): OJS adds `search`, and unless `publishingMode == PUBLISHING_MODE_NONE` `issue/current`, `issue/archive`, then per published issue (`ORDERBY_PUBLISHED_ISSUES`) `issue/view/{id}`, its submissions `filterByIssueIds()` + `filterByLatestPublished(true)` as `article/view/{bestId}` and each current-publication galley `article/view/{bestId}/{bestGalleyId}`, then hook `SitemapHandler::createJournalSitemap`; OMP adds `catalog`, each `STATUS_PUBLISHED` book `catalog/book/{bestId}`, its chapters with `isPageEnabled()` `catalog/book/{bestId}/chapter/{id}`, files of approved (`getApprovedByPublicationId`) and available formats with a direct sales price not null `catalog/view/{bestId}/{formatBestId}/{fileBestId}`, then `catalog/newReleases`, each series `catalog/series/{path}` and each category `catalog/category/{path}`, hook `…createPressSitemap`; OPS adds `search` and each `STATUS_PUBLISHED` preprint `preprint/view/{submissionId}` (the number, not `getBestId()`), hook `…createServerSitemap`. `$request->url()` leaves `urlLocaleForPage` null, so `PKPPageRouter::url()` inserts the request's locale for a context with more than one locale (`_getLocaleForUrl()`). Chapter box `publication.chapter.hasLandingPage`. Registration labels `manager.setup.userRegistration`, `…enableUserRegistration`, `…disableUserRegistration` (app locale files). Live-probed 2026-09-26 (Rules 1–6): notes q2–q8.
+**e** — `PKP\pages\sitemap\PKPSitemapHandler::index()` (no `authorize()` override, so `PKPHandler::authorize()` applies the site-access checks, and `PKPPageRouter::route()` those for a context that is not enabled, Rule 6): with no context `_createSitemapIndex()` lists `$request->url($context->getPath(), 'sitemap')` for `getContextDAO()->getAll(true)` (enabled contexts); with a context `_createContextSitemap()`, served `application/xml`, `Content-Disposition: inline; filename=sitemap.xml`, each entry `_createUrlTree()` with `loc` only. Shared entries in order: context home; `user/register` unless `disableUserReg`; `login`; `announcement` and `announcement/view/{id}` for every announcement of the context (`Announcement::withContextIds`, no date filter) when `enableAnnouncements`; `about` when `about` is not empty; `about/submissions`; `about/contact` when `mailingAddress` or `contactName`; `{path}` for each `NavigationMenuItem::NMI_TYPE_CUSTOM` item. Subclasses (`APP\pages\sitemap\SitemapHandler`, each overriding `_createContextSitemap()` and calling the parent first): OJS adds `search`, and unless `publishingMode == PUBLISHING_MODE_NONE`, once `filterByPublished(true)` finds an issue, `issue/current` and `issue/archive`, then per published issue (`ORDERBY_PUBLISHED_ISSUES`) `issue/view/{id}`, then every submission with `filterByCurrentPublicationStatus([STATUS_PUBLISHED])` (`getIds()`, read in batches of `SUBMISSIONS_PER_BATCH` 1000 with one query on `submissions`/`publications` for the current `url_path`, and one on the galleys joined to `files` for the mimetype) as `article/view/{bestId}` followed by each current-publication galley, `article/download/{bestId}/{bestGalleyId}` built with `urlLocaleForPage: ''` for `application/pdf`, else `article/view/{bestId}/{bestGalleyId}`, then hook `SitemapHandler::createJournalSitemap` (3.5: the submissions per issue, `filterByIssueIds()` + `filterByStatus([STATUS_PUBLISHED])`); OMP adds `catalog`, each book with `filterByCurrentPublicationStatus([STATUS_PUBLISHED])` (3.5: `filterByStatus`), in the same batches, `catalog/book/{bestId}`, the current publication's chapters whose `isPageEnabled` setting or DOI is set as `catalog/book/{bestId}/chapter/{sourceChapterId ?: chapterId}` (the id `CatalogBookHandler::setChapter()` looks up with `getBySourceChapterId()`), files of approved and available formats with a direct sales price not null, `catalog/download/{bestId}/{formatBestId}/{fileBestId}` (`urlLocaleForPage: ''`) for `application/pdf`, else `catalog/view/…`, the file's best id its `pub-id::publisher-id` when the schema has it, then `catalog/newReleases`, each series `catalog/series/{path}` and each category `catalog/category/{path}`, hook `…createPressSitemap`; OPS adds `search` and each preprint with `filterByCurrentPublicationStatus([STATUS_PUBLISHED])` (3.5: `filterByStatus`), as OJS does its articles, `preprint/view/{bestId}` and its galleys, hook `…createServerSitemap`. pkp-lib `PKPSitemapHandler` adds `about/editorialMasthead` after `about/submissions`. The sitemap as of pkp/pkp-lib#13789 (main pkp-lib#13796, ojs#6077, omp#2577, ops#1508; 3.5 pkp-lib#13802, ojs#6078, omp#2578, ops#1509), read at the PR heads before their merge. `$request->url()` leaves `urlLocaleForPage` null, so `PKPPageRouter::url()` inserts the request's locale for a context with more than one locale (`_getLocaleForUrl()`). Chapter box `publication.chapter.hasLandingPage`. Registration labels `manager.setup.userRegistration`, `…enableUserRegistration`, `…disableUserRegistration` (app locale files). Live-probed 2026-09-26 (Rules 1–6): notes q2–q8.
 
 <a id="fn-g"></a>
 **g** — `PKPTemplateManager::initialize()` (`Application::isInstalled()`): `addHeader('searchDescription', '<meta name="description" content="' . $currentContext->getLocalizedData('searchDescription') . '" />')` when the requested page is `''` or `index` and the text is not empty, with no escaping (A1); `addHeader('generator', …)` with contexts `frontend` and `backend`, `__($application->getNameKey())` ("Open Journal Systems", "Open Monograph Press", "Open Preprint Systems") and `getCurrentVersion()->getVersionString(false)` (3.6.0.0 at these tips); `addHeader('customHeaders', $currentContext->getLocalizedData('customHeaders'))` when a context is set; with more than one of the context's (else the site's) supported locales, `language-{locale}` `<link rel='alternate' hreflang='…'>` per locale and `language-xdefault` (`urlLocaleForPage: ''`); with a context that is not enabled, `noindex` `<meta name="robots" content="noindex,nofollow" />` for `frontend` and `backend`. `addHeader()` defaults to the `frontend` context; `frontend/components/headerHead.tpl` prints `{load_header context="frontend"}`, `layouts/backend.tpl` `{load_header context="backend"}`. `getLocalizedData()` falls back through `getBestLocalizedData()` (the requested locale, then the primary one, then the first). Live-probed 2026-09-26 (Rules 7–11): notes q9–q13.
 
 <a id="fn-h"></a>
-**h** — Google Scholar: OJS and OPS `GoogleScholarPlugin::submissionView()` on `ArticleHandler::view` and `PreprintHandler::view` (the landing page only, with no galley), returning early when the second request argument is `version`; tags as the Fields table, from `$submission->getCurrentPublication()` and its `locale`: `citation_journal_title`, `citation_journal_abbrev` (`abbreviation`, else `acronym`, primary locale), `citation_issn` (`onlineIssn`, `printIssn`, `issn`) for `ojs2`; `citation_publisher` for `ops`; `citation_author` / `citation_author_institution` per `getAffiliations()` name; `citation_title` `getLocalizedFullTitle($publicationLocale)`; `citation_language`; OJS `citation_date` (`Y/m/d` of `datePublished` unless the issue's year differs, else the issue year, else the issue's date), `citation_volume` / `citation_issue` by `getShowVolume()` / `getShowNumber()`, `citation_firstpage` / `citation_lastpage` from `getStartingPage()` / `getEndingPage()` when `pages`, else `articleNumber` as first page (OJS only); OPS `citation_online_date`; `citation_doi`; `citation_{pubIdType}` per `pubIdPlugins`; `citation_abstract_html_url` (`urlPath ?? id`, `urlLocaleForPage: ''`); `citation_abstract`; `citation_keywords` for `subjects` then `keywords` of the publication locale; per galley file `citation_pdf_url` (`application/pdf`, `…/download/{id}/{galley}`) or `citation_fulltext_html_url` (`text/html`, `…/view/{id}/{galley}`); `citation_reference` per `citations` (hook `GoogleScholarPlugin::references`). OMP `GoogleScholarPlugin::monographView()` on `CatalogBookHandler::book` (book and chapter pages), skipping any request whose arguments contain `version`: `citation_title` (chapter's on a chapter page), `citation_language`, `citation_publication_date` (`Y-m-d`; the chapter's date when `getEnableChapterPublicationDates()`), authors (`chapterAuthors` on a chapter page) with institutions, `citation_abstract`, `citation_doi` (the publication's), keywords, then for each of `availableFiles` matched to its format: on the book page files with no chapter, `citation_isbn` per identification code `02`/`15`, and `_setFileUrl()`; on a chapter page that chapter's files; then `citation_publisher`, `citation_issn` (series online ISSN), `citation_reference`. `_setFileUrl()` switches on the mimetype with `case 'application/pdf'` and `case 'text/xml' or 'text/html'`, which PHP reads as `case true`, so every other mimetype takes the second branch (OMP1); it receives `$i` by value, so the header names `googleScholarPdfUrl{$i}` / `googleScholarHtmlUrl{$i}` repeat when no ISBN moved `$i`, and `addHeader()` keeps the last written (OMP2). `availableFiles` comes from the submission file `Collector`, ordered by `created_at` descending, so the last written is the file uploaded first; files sharing a `created_at` come in the database's order. `CatalogBookHandler::book()` puts every format file with a direct-sales price set ("Open Access" or "Direct Sales") in `availableFiles`, so a priced file takes part like a free one. OMP writes no `citation_{pubIdType}` tag (the Identifiers spec, "citation_urn" absent on a book page). Live-probed 2026-09-26 (Rules 12, 14, 16; the Google Scholar table): notes q14, q16, q18.
+**h** — Google Scholar: OJS and OPS `GoogleScholarPlugin::submissionView()` on `ArticleHandler::view` and `PreprintHandler::view` (the landing page only, with no galley), returning early when the second request argument is `version`; tags as the Fields table, from `$submission->getCurrentPublication()` and its `locale`: `citation_journal_title`, `citation_journal_abbrev` (`abbreviation`, else `acronym`, primary locale), `citation_issn` (`onlineIssn`, `printIssn`, `issn`) for `ojs2`; `citation_publisher` for `ops`; `citation_author` / `citation_author_institution` per `getAffiliations()` name; `citation_title` `getLocalizedFullTitle($publicationLocale)`; `citation_language`; OJS `citation_date` (`Y/m/d` of `datePublished` unless the issue's year differs, else the issue year, else the issue's date), `citation_volume` / `citation_issue` by `getShowVolume()` / `getShowNumber()`, `citation_firstpage` / `citation_lastpage` from `getStartingPage()` / `getEndingPage()` when `pages`, else `articleNumber` as first page (OJS only); OPS `citation_online_date`; `citation_doi`; `citation_{pubIdType}` per `pubIdPlugins`; `citation_abstract_html_url` (`$submission->getBestId()`, `urlLocaleForPage: ''`); `citation_abstract`; `citation_keywords` for `subjects` then `keywords` of the publication locale; per galley file `citation_pdf_url` (`application/pdf`, `…/download/{id}/{galley}`) or `citation_fulltext_html_url` (`text/html`, `…/view/{id}/{galley}`); `citation_reference` per `citations` (hook `GoogleScholarPlugin::references`). OMP `GoogleScholarPlugin::monographView()` on `CatalogBookHandler::book` (book and chapter pages), skipping any request whose arguments contain `version`: `citation_title` (chapter's on a chapter page), `citation_language`, `citation_publication_date` (`Y-m-d`; the chapter's date when `getEnableChapterPublicationDates()`), authors (`chapterAuthors` on a chapter page) with institutions, `citation_abstract`, `citation_doi` (the publication's), keywords, then for each of `availableFiles` matched to its format: on the book page files with no chapter, `citation_isbn` per identification code `02`/`15`, and `_setFileUrl()`; on a chapter page that chapter's files; then `citation_publisher`, `citation_issn` (series online ISSN), `citation_reference`. `_setFileUrl()` builds `catalog/download/{submission bestId}/{format bestId}/{file bestId}` (`urlLocaleForPage: ''`) and switches on the mimetype: `application/pdf` writes `citation_pdf_url`, `text/xml` and `text/html` `citation_fulltext_html_url`, any other none; it takes `$i` by reference, so each file gets a header name of its own (googleScholar pkp/googleScholar#42, omp#2577, as of pkp/pkp-lib#13789; before it, `case 'text/xml' or 'text/html'` read as `case true` and `$i` by value let one file of a kind win). `availableFiles` comes from the submission file `Collector`, ordered by `created_at` descending, so the last written is the file uploaded first; files sharing a `created_at` come in the database's order. `CatalogBookHandler::book()` puts every format file with a direct-sales price set ("Open Access" or "Direct Sales") in `availableFiles`, so a priced file takes part like a free one. OMP writes no `citation_{pubIdType}` tag (the Identifiers spec, "citation_urn" absent on a book page). Live-probed 2026-09-26 (Rules 12, 14, 16; the Google Scholar table): notes q14, q16, q18.
 
 <a id="fn-i"></a>
 **i** — Dublin Core: OJS `DublinCoreMetaPlugin::articleView()` on `ArticleHandler::view` (skipping `version` requests): `schema.DC` link; `DC.Contributor.Sponsor` (`supportingAgencies` per locale), `DC.Coverage`, `DC.Creator.PersonalName` (`getFullName(false, false, $publicationLocale)`), `DC.Date.created` (`datePublished`), `DC.Date.dateSubmitted`, `DC.Date.issued` (issue's `getDatePublished()`), `DC.Date.modified` (`lastModified`), `DC.Description` (abstract per locale, `strip_tags`), `DC.Format` (galley file mimetype), `DC.Identifier` (`urlPath` else id), `DC.Identifier.pageNumber`, `DC.Identifier.articleNumber`, `DC.Identifier.DOI`, `DC.Identifier.{pubIdType}`, `DC.Identifier.URI`, `DC.Language` (`rfc5646`), `DC.Rights` (`submission.copyrightStatement` "Copyright (c) {$copyrightYear} {$copyrightHolder}" when both, and `licenseUrl`), `DC.Source` (name, primary locale), `DC.Source.ISSN`, `DC.Source.Issue` / `DC.Source.Volume`, `DC.Source.URI` (OJS1), `DC.Subject` (subjects, keywords per locale), `DC.Title`, `DC.Title.Alternative`, `DC.Type` `Text.Serial.Journal` and `type` per locale, `DC.Type.articleType` (section title, primary locale). No tag reads `disciplines`, `rights` or `source`. OMP `monographView()` on `CatalogBookHandler::book` (book and chapter pages): the same set without the issue, format, pages, article number, ISSN and article-type tags, chapter values on a chapter page (`chapterAuthors`, chapter abstract, chapter DOI and pub IDs, chapter title), `DC.Source.URI` `url(…, ROUTE_PAGE, $press->getPath())`, `DC.Type` `Text.Book`. OMP `monographFileView()` on `CatalogBookHandler::view` (the inline viewer path of `CatalogBookHandler::download(…, true)`, reached before `PdfJsViewerPlugin`, which registers `Hook::SEQUENCE_LATE`): skips a format of another publication; `DC.Identifier` `{bestId}/{formatId}/{fileId}`, `DC.Identifier.pageNumber` (chapter's or publication's `pages`), `DC.Identifier.DOI` (`$submissionFile->getDoi() ?? ($chapter ? $chapter->getDoi() : $publication->getDoi())`), `DC.Identifier.ISBN` per format code `02`/`15`, `DC.Identifier.{pubIdType}` over `pubIdPlugins` (never assigned on this path, OMP7), `DC.Identifier.URI` `catalog/book/{bestId}/{formatId}/{fileId}`, `DC.Language` scheme `ISO639-1`, `DC.Source.ISSN` (`$series->getOnlineISSN()` only), `DC.Type` `Text.Chapter` always (OMP3); the view page's own address (`templates/frontend/components/downloadLink.tpl`) takes the book's, the format's and the file's `getBestId()`, while `DC.Identifier` uses `$publicationFormat->getId()`. Live-probed 2026-09-26 (Rules 12, 14, 16, 17; the Dublin Core table): notes q14, q16, q18, q19.
@@ -1425,10 +1372,10 @@ OMP's own code.
 **q1** — Live-probed 2026-09-26 (Purpose, the absence paragraph; the plugins table), all three apps, on a new scratch context of each, as its manager: under "Generic Plugins" OJS and OMP listed "Dublin Core Indexing Plugin" ticked (OJS "…in article views…", OMP "…in monograph views…"); every app listed "Google Scholar Indexing Plugin" ticked and "Google Analytics Plugin" unticked, with the descriptions the table quotes; OPS listed no Dublin Core row. Signed out, a posted preprint's page source held no "DC." tag and no Dublin Core schema link, and seven "citation_" tags; an OJS article page held 17 "DC." tags, an OMP book page 13.
 
 <a id="fn-q2"></a>
-**q2** — Live-probed 2026-09-26 (Rules 1, 2, 2c; the sitemap table), all three apps, signed out: `{journal address}/sitemap` answered `application/xml`, shown inline, Chromium printing "This XML file does not appear to have any style information associated with it. The document tree is shown below." above the tree; each entry held its address alone; the entries came in the table's order on every read, on contexts made with nothing enabled too. A submitted item, a scheduled one and a second context's item never appeared. On a press and a preprint server "Unpublish" ("Unpost") on the workflow removed the item at the next load and publishing again restored it; on a journal publishing, unpublishing and republishing an article changed nothing (OJS2). A scan of 14 other editorial, administration and public pages found no other link to the sitemap. OMP: a chapter with "Show this chapter on its own page…" ticked was listed and an unticked one was not; "Not Available" on the format, or "Not Available" in the file's terms, removed the file's entry and "Available" or "Open Access" restored it (the priced end not driven); a file still "Awaiting Approval" on its own row was listed. After "Create New Version" on a published book the entry `catalog/book/sea-study/chapter/1` gave way to `…/chapter/3`, which answered "404 Not Found", while the book read "Status: Unpublished" for the new version (OMP4). The seeded press listed "New Releases", both series and all seven categories; the seeded journal and server, holding the same categories, listed none. OPS listed both posted preprints and not the submitted or scheduled one. Walked again 2026-10-03 (Rule 2c; OMP4), OMP `main` and `stable-3_5_0`, on PKP's default test dataset (`shared/playwright/checks/issues/sitemap-new-version-chapter-pages-404/walk.js`): signed out, the sitemap listed book 14's chapter 1 as `…/catalog/book/14/chapter/54`, which opened "Chapter 1: Mind Control—Internal or External?"; after "Create New Version" it listed `…/catalog/book/14/chapter/72` instead, which answered "404 Not Found", and still did after the new version was published, while the book's page linked the chapter as `…/chapter/54`, which opened it, before and after; the book and file entries stayed. Test run 2026-11-12 (scenario 2, "A series"), OMP `main`, signed out, on a scratch press: the sitemap's entry after "New Releases", `{journal address}/catalog/series/sea-series`, opened a page at that address whose `h1` and last trail step were empty and whose `<title>` read "| {press name}", above "0 Titles", the heading "All Books" and "No titles have been published yet."; a series holding a published book showed the same empty heading and title above "1 Titles" and the book (the fault of [Sections](U17-sections.md#omp9)).
+**q2** — Live-probed 2026-09-26 (Rules 1, 2; the sitemap table), all three apps, signed out: `{journal address}/sitemap` answered `application/xml`, shown inline, Chromium printing "This XML file does not appear to have any style information associated with it. The document tree is shown below." above the tree; each entry held its address alone; the entries came in the table's order on every read, on contexts made with nothing enabled too. A submitted item, a scheduled one and a second context's item never appeared. On a press and a preprint server "Unpublish" ("Unpost") on the workflow removed the item at the next load and publishing again restored it. A scan of 14 other editorial, administration and public pages found no other link to the sitemap. OMP: a chapter with "Show this chapter on its own page…" ticked was listed and an unticked one was not; "Not Available" on the format, or "Not Available" in the file's terms, removed the file's entry and "Available" or "Open Access" restored it (the priced end not driven); a file still "Awaiting Approval" on its own row was listed. The seeded press listed "New Releases", both series and all seven categories; the seeded journal and server, holding the same categories, listed none. OPS listed both posted preprints and not the submitted or scheduled one. Test run 2026-11-12 (scenario 2, "A series"), OMP `main`, signed out, on a scratch press: the sitemap's entry after "New Releases", `{journal address}/catalog/series/sea-series`, opened a page at that address whose `h1` and last trail step were empty and whose `<title>` read "| {press name}", above "0 Titles", the heading "All Books" and "No titles have been published yet."; a series holding a published book showed the same empty heading and title above "1 Titles" and the book (the fault of [Sections](U17-sections.md#omp9)).
 
 <a id="fn-q3"></a>
-**q3** — Live-probed 2026-09-26 (Rule 2a; OJS2), OJS: on a scratch journal with a published issue holding two published articles and a third article published with "Don't Assign To An Issue" ("This will be published immediately without any issue association."), the sitemap listed the issue's page (`issue/view/7`) and none of the three articles or their galleys, while the issue page linked the articles and their galleys; the same on two other scratch journals and on `publicknowledge`.
+**q3** — Live-probed 2026-11-13 (Rule 2a) on PKP's default test dataset (`shared/playwright/checks/sync/pkp-lib-13789/walk.js`), OJS `main` with pkp/pkp-lib#13796, pkp/ojs#6077 and pkp/googleScholar#42 at their heads, before their merge: the sitemap listed both published articles of Vol. 1 No. 1, submission 1 by its "URL Path" `mwandenga-signalling-theory` (its second version, in the workflow with the path `mwandenga`, not), each followed by its PDF galley's download address; after submission 15 was published with no issue it was listed as `article/view/15`, and after submission 17 was unpublished it was gone. At the tip (ojs `3c99722dc8`, the same database) the sitemap listed the issue's page and no article or galley, as on 2026-09-26 on scratch journals and `publicknowledge`. OJS 3.5 with pkp/ojs#6078 lists the articles through their published issues, and refuses publishing with no issue ("The publication must be assigned to an issue").
 
 <a id="fn-q4"></a>
 **q4** — Live-probed 2026-09-26 (Rule 2b; Settings bullet 13), OJS: Settings › Distribution › "Access" offered "The journal will provide open access to its contents.", "The journal will require subscriptions to access some or all of its contents." and "OJS will not be used to publish the journal's contents online.", none selected on a new journal; the third saved removed "Current", "Archive" and the issue's page at the next load, and the first restored them.
@@ -1437,7 +1384,7 @@ OMP's own code.
 **q5** — Live-probed 2026-09-26 (Rule 3; Settings bullets 9–12; A5), all three apps, the sitemap read signed out after each save: "Enable announcements" ticked with a current announcement and one that expired on 2020-01-31 listed "Announcements" and both, the expired one's address landing on the "Announcements" list; unticked, all three left. "The Journal Manager will register all user accounts. …" removed "Register", and "Visitors can register…" restored it. A text saved in "About the Journal" added its entry, and the text emptied and saved removed it. A "Custom Page" item placed in no menu was listed after "Contact", and its page opened. "Contact" was listed on every context; Settings › Journal › "Contact" with "Name" emptied refused "Save" with "This field is required." and "Please correct one error.", sending nothing, and a "Mailing Address" saved left the sitemap unchanged.
 
 <a id="fn-q6"></a>
-**q6** — Live-probed 2026-09-26 (Rule 4), OMP and OPS: with "URL Path" `sea-study` saved on a book and the book published, its entry and its chapter's and file's entries used `sea-study`; a preprint with the same "URL Path" was listed by its number (`preprint/view/5`), which led on to `preprint/view/sea-study`. A journal lists no article (OJS2). On `publicknowledge` (English and French), all three apps: `{journal address}/en/sitemap` listed only "/en/" addresses and `/fr_CA/sitemap` only "/fr_CA/" ones; the address with no language led to the visit's language; a one-language scratch context's addresses carried none.
+**q6** — Live-probed 2026-09-26 (Rule 4), OMP and OPS: with "URL Path" `sea-study` saved on a book and the book published, its entry and its chapter's and file's entries used `sea-study`; a preprint with the same "URL Path" was listed by its number (`preprint/view/5`), which led on to `preprint/view/sea-study`; listed by its "URL Path" since pkp/pkp-lib#13789 (note q26). On `publicknowledge` (English and French), all three apps: `{journal address}/en/sitemap` listed only "/en/" addresses and `/fr_CA/sitemap` only "/fr_CA/" ones; the address with no language led to the visit's language; a one-language scratch context's addresses carried none.
 
 <a id="fn-q7"></a>
 **q7** — Live-probed 2026-09-26 (Rule 5; Settings bullet 8), all three apps: `{site address}/index/sitemap` (served as `sitemap_index.xml`) listed one sitemap address per enabled context and left out a context not enabled; after the Site Administrator unticked "Enable this journal to appear publicly on the site" ("Enable this press…", "Enable this preprint server…") on "Hosted Journals" › "Edit" and saved, that context's entry left at the next load. A context with "Users must be registered and log in to view the journal site." saved stayed listed.
@@ -1496,6 +1443,9 @@ OMP's own code.
 <a id="fn-q25"></a>
 **q25** — Live-probed 2026-09-26 (Actors preamble, rows 3, 4; Fields, the tab; Rule 24; Side effects), all three apps: the heading, text and help texts as quoted, the "sitemap" link opening `{journal address}/en/sitemap` in a new tab. Distribution's tabs: OJS "License", "DOIs", "Search Indexing", "Payments", "Statistics", "Access", "Archiving"; OMP the first five; OPS "License", "DOIs", "Search Indexing", "Access", "Statistics". Every save showed "Saving" and then "Saved", one save storing both boxes; empty boxes, quote marks, markup and plain words were saved as typed. With English and French, "French" and "English" buttons sat above the form, "French" showing "Description in French" and "Custom Tags in French", each field reading "0/2 languages completed". A change typed and not saved survived a switch to another Distribution tab and back, and was dropped with no question on leaving or reloading the page. The Settings Wizard (Administration › "Hosted Journals", the row's arrow › "Settings wizard"; top tabs "Journal Settings" / "Setup" / "Server Settings", "Plugins", "Users"; side tab "Search Indexing") arrived with the journal's values; its "Save" gave "Saved", and the journal's own tab and home page showed the change. The journal's manager got the access-denied page at the wizard's address. At the tab's address the Site Administrator, the Journal Manager and the Editor (OJS, OMP) opened it; the Section Editor, an assistant, the Reviewer, the Author and the Reader got "The current role does not have access to this operation"; signed out, Login. A Site Administrator whose manager role was removed (the Reader role kept) opened the tab on OJS and got the access-denied page on OMP and OPS, while the wizard's "Save" worked on all three. No email reached the mail catcher, and no notification or activity-log entry followed a save.
 
+<a id="fn-q26"></a>
+**q26** — Live-probed 2026-11-13 at the heads of pkp/pkp-lib#13789's PRs, before their merge (`main`: pkp-lib#13796 `f897174fcf`, ojs#6077 `5cc7399191`, omp#2577 `26529ef4f`, ops#1508 `1c9b69faaf`, googleScholar#42 `b645175e70`; `stable-3_5_0`: pkp-lib#13802 `0e516aa368`, ojs#6078 `83dbc2ed20`, omp#2578 `dca7536625`, ops#1509 `beacc5fe51`, googleScholar#43 `efc2c086be`), all three apps, on PKP's default test dataset, signed out (`shared/playwright/checks/sync/pkp-lib-13789/walk.js`): every app's sitemap listed `about/editorialMasthead` after `about/submissions`; every entry answered 200, a PDF entry `application/pdf` after a 302 from its address with no language to the visit's language; every "citation_pdf_url" of every listed item page was in the sitemap. OJS: see note q3. OMP: after "Create New Version" on book 14 and the version published, its chapter entry stayed `catalog/book/14/chapter/54` and opened the chapter (the tip listed `…/chapter/72`, "404 Not Found"), the files listed at `catalog/download/14/4/{file}`; the book page tagged both whole-book PDFs (the tip one); the kept walks of the retired OMP1 and OMP2 showed an EPUB untagged beside the HTML file tagged, and two "citation_pdf_url", the file for sale included. OPS: preprint 19's new version published with "URL Path" `nineteen-v2` was listed as `preprint/view/nineteen-v2` followed by `preprint/download/nineteen-v2/21`; every preprint was followed by its PDF galley (the tip: the numbers alone, no galley). The suites' S1 on all three apps, OMP S2 and OJS S4 went red at the heads as these notes say, and green with this spec's tests (CI dispatch at the heads).
+
 <a id="fn-s"></a>
 **s** — Seeding for the scenarios. Scenarios 1 to 8 run on OJS, OMP and OPS and scenario 9 on OMP alone, each on scratch contexts of its own from `POST scenarios/context` (`docs/process/scenarios.md`), with throwaway `users[]` (password: the username twice, `docs/process/users.md`): a `manager` (the Journal Manager, Press Manager or Preprint Server Manager) in scenarios 1, 2 and 5 to 8, an `author` (`givenName` "Ada", `familyName` "Author") who submits every item, and in scenario 3 a `reader` and a `manager`; the Site Administrator of scenario 5 is the installer's `admin` (password `admin`), whom every scratch context enrols as a manager; the visitor is a second browser context, signed out. Items come from `POST scenarios/submission` by the `author`, `published: true`. No scenario passes `plugins`: every context has its plugins as a new context has them (`docs/process/seed-facts.md`: the two indexing plugins ticked, no Dublin Core row on a preprint server, "Google Analytics Plugin" unticked), and scenarios 6 and 8 change them on screen; "Description", "Custom Tags" and the Google Analytics window are typed on their own screens. Scenario 1: the context alone (a scratch context's "About the Journal" text is empty and its principal contact is "Site Admin", seed-facts). Scenario 2: `enableAnnouncements: true` with `announcements: [{title: "Call for Papers"}]`; "Tidal Patterns" published and "Draft Study" `submitted: true`; on OJS `issues: [{volume: 1, number: 1, year: 2024, published: true}, {volume: 1, number: 2, year: 2026}]`, "Tidal Patterns" with `issue` Vol. 1 No. 1, and "Future Tides" `published: true` with `issue` Vol. 1 No. 2, which leaves it scheduled; on OMP `categories: [{path: "cat-one", title: "Cat One"}]`, `series: [{path: "sea-series", title: "Sea Series"}]` and, on "Tidal Patterns", `publicationFormats: [{name: "PDF", file: "article.pdf"}]`, which the key builds approved and available with its file open access, and `chapters: [{title: "Chapter One Tides", page: true}, {title: "Chapter Two Calm"}]`; a second context with "Elsewhere" published (on OJS into its own `issues: [{volume: 1, number: 1, year: 2024, published: true}]`); the unpublish and the second publish are the screens'. Scenario 3: three contexts, `name` "Open Waters", "Members Only" with `restrictSiteAccess: true` and the `reader`, and "Hidden Bay" with `context.enabled: false` and the `manager`. Scenario 4: `publicknowledge`, read signed out (English and French are its interface languages, seed-facts), and a scratch context with its primary language alone. Scenario 5: a scratch context with its primary language alone and "Tidal Patterns" published. Scenario 6: `context` `name` "Sea Letters", `acronym` "SL"; "Tidal Patterns" with `abstract` "Tides follow the moon.", `citationsRaw` of two lines and `datePublished` `2024-03-05`, in the context's own first section ("Articles" on a journal); on OJS and OPS `keywords: ["tides"]` and `galleys: [{label: "PDF", file: "article.pdf"}]` (OPS `preprint.pdf`), on OJS with `issue` into `issues: [{volume: 1, number: 1, year: 2024, published: true}]`; on OMP `publicationFormats: [{name: "PDF", file: "article.pdf"}]` (a press refuses `keywords`), and a second book "Sale Tides" with `publicationFormats: [{name: "PDF", file: "article.pdf", price: "25"}]`, the file's terms "Direct Sales". Scenario 7: "Tidal Patterns" published, on OMP with the "PDF" format of scenario 6; no key makes a second version, so the new version is the screens' ("Create New Version"). Scenario 8: "Tidal Patterns" published. Scenario 9: no `manager`; `series: [{path: "print-series", title: "Print Series", printIssn: "0317-8471"}, {path: "online-series", title: "Online Series", onlineIssn: "1234-5679"}]` (`series[]` in `docs/process/scenarios.md`); "Tidal Patterns" with `series` "print-series", `urlPath` "sea-study", `abstract` "Tides follow the moon.", `contributors: [{givenName: "Ben", familyName: "Writer", email: …}]`, `publicationFormats: [{name: "PDF", file: "article.pdf", urlPath: "pdf"}, {name: "Chapter PDF", file: "article.pdf"}]` (`publicationFormats[]`, the same file) and `chapters: [{title: "Chapter One Tides", abstract: "Tides turn twice a day.", page: true, authors: [the `author`'s username], files: ["publicationFormats.1"]}]`; "Coastal Notes" with `series` "online-series" and the "PDF" format. The mail catcher is not read: nothing is emailed (Side effects).
 
@@ -1528,24 +1478,9 @@ Issue report: [docs/issues/U20-A7-abstract-symbols-reach-search-tags-as-codes.md
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — Note i: OJS `DublinCoreMetaPlugin` builds `DC.Source.URI` with `$request->getDispatcher()->url($request, ROUTE_PAGE, null, $journal->getPath(), urlLocaleForPage: '')`, the journal's path in the handler slot, so the address is `{journal address}/{journal path}`. Before commit `2c65b53000` "Show locale in url in multilingual contexts" (2024-04-16) it was `$request->url($journal->getPath())`, the home page; OMP's copy passes the path as the context. Live-probed 2026-09-26: the tag read `…/index.php/{path}/{path}` and answered 404; OMP's named the press's home page, 200 (note q14). Written up for the team in `docs/reports/2026-09-26-ojs-dc-source-uri-404.md`.
 
-<a id="fn-f-ojs2"></a>
-**f-ojs2** — Note e: OJS `SitemapHandler::_createContextSitemap()` reaches articles only through the published issues, with `filterByIssueIds([$issue->getId()])` and, since ojs `da7c68874e` "pkp/pkp-lib#12245 Review and fix use of PKPSubmission::STATUS_..." (2026-02-17), `filterByLatestPublished(true)` in place of `filterByStatus([Submission::STATUS_PUBLISHED])`; the two filters together keep no article of a published issue. `stable-3_5_0`'s `SitemapHandler` still filters by status (code read, not driven). The "Don't Assign To An Issue" publish (the Publish, schedule & versions spec, Rule 15 and its issue table) leaves the article outside every issue, so the sitemap never reached it, before the change or after. Live-probed 2026-09-26: note q3. Written up for the team in `docs/reports/2026-09-26-ojs-sitemap-lists-no-article.md`.
-
-<a id="fn-f-omp1"></a>
-**f-omp1** — Note h: `case 'text/xml' or 'text/html':` evaluates to `case true:`, which `switch` matches for any mimetype that is not `application/pdf`; the header name `googleScholarHtmlUrl{$i}` repeats as for OMP2, so the last such file written wins: the file uploaded first, or between files sharing an upload time the database's order (note h). Live-probed 2026-09-26: the "HTML" file (`text/html`) got no tag and the "Notes" file (`text/markdown`) the one "citation_fulltext_html_url" (note q14). Live-probed 2026-10-05 on OMP `main` at omp `8c807c919`, two runs, signed out, on a book with "PDF", "HTML", "Other", "Supp" (notes.md), "SuppPdf" and a priced "Sale" PDF: the one "citation_fulltext_html_url" named the notes.md file, whose address downloaded notes.md (98 bytes); the "HTML" file had no tag, nor had an "EPUB" file added later through the workflow screens.
-Issue report: [docs/issues/U20-OMP1-book-epub-announced-as-html.md](../issues/U20-OMP1-book-epub-announced-as-html.md), filed as [pkp-e2e#664](https://github.com/jardakotesovec/pkp-e2e/issues/664).
-
-<a id="fn-f-omp2"></a>
-**f-omp2** — Note h: `_setFileUrl()` takes `$i` by value; with no identification code between two files, both write the header `googleScholarPdfUrl0`, and `addHeader()` keeps the second; an ISBN on the first format moves `$i` only after that format's file. The files reach the loop newest first, so the second written, which `addHeader()` keeps, is the file uploaded first; files sharing an upload time come in the database's order (note h). Live-probed 2026-09-26: one "citation_pdf_url", the "PDF Two" file's, with no ISBN and with an ISBN-13 on "PDF" alone (note q14). Live-probed 2026-10-05 on OMP `main` at omp `8c807c919`, two runs, signed out, on a book whose PDF files were "PDF", "SuppPdf" and "Sale" on "Direct Sales" at 25 USD ("25 Purchase Sale (25 USD)" on the book's page): the one "citation_pdf_url" named the "Sale" file (`…/catalog/download/98/187/475`, the highest-numbered of the files a script had created), and opening it answered 302 to `login?source=…catalog%2Fdownload%2F98%2F187%2F475`, the Login page; "PDF" and "SuppPdf" had no tag. Whether the script's files shared an upload time was not read.
-Issue report: [docs/issues/U20-OMP2-book-page-announces-one-pdf.md](../issues/U20-OMP2-book-page-announces-one-pdf.md), filed as [pkp-e2e#665](https://github.com/jardakotesovec/pkp-e2e/issues/665).
-
 <a id="fn-f-omp3"></a>
 **f-omp3** — Note i: `monographFileView()` always adds `DC.Type` `Text.Chapter`, while `monographView()` adds `Text.Book` on the book's page and on a chapter's page alike (it reads `isChapterRequest` for the other chapter tags). Live-probed 2026-09-26: notes q18, q19. Walked 2026-10-03, OMP `main` and `stable-3_5_0`, on PKP's default test dataset (`shared/playwright/checks/issues/book-file-page-type-chapter/walk.js`): book 14's chapter 1 page (`…/catalog/book/14/chapter/54`) carried "DC.Title" "Chapter 1: Mind Control—Internal or External?" and "DC.Type" "Text.Book"; the whole-book file's view page (`…/catalog/view/14/3/108`) carried the book's title and authors and "DC.Type" "Text.Chapter"; the book's page read "Text.Book" and the chapter file's view page "Text.Chapter".
 Issue report: [docs/issues/U20-OMP3-book-file-page-type-chapter.md](../issues/U20-OMP3-book-file-page-type-chapter.md), filed as [pkp-e2e#669](https://github.com/jardakotesovec/pkp-e2e/issues/669).
-
-<a id="fn-f-omp4"></a>
-**f-omp4** — Note e: OMP's `SitemapHandler::_createContextSitemap()` takes a book's chapters from `getLatestPublication()` (its formats from `getCurrentPublication()`) and writes each chapter copy's own `getId()`, while a chapter page is addressed by the first version's number: `CatalogBookHandler::setChapter()` looks it up with `ChapterDAO::getBySourceChapterId()`, and the book's page links `getSourceChapterId()`. A new version copies every chapter under a new id, so the listed address matches no chapter page, before the version is published and after. A chapter is listed when `Chapter::isPageEnabled()` is true, which a chapter DOI also makes true (read in the code, not driven). Live-probed 2026-09-26 and walked 2026-10-03: note q2.
-Issue report: [docs/issues/U20-OMP4-sitemap-new-version-chapter-pages-404.md](../issues/U20-OMP4-sitemap-new-version-chapter-pages-404.md), filed as [pkp-e2e#670](https://github.com/jardakotesovec/pkp-e2e/issues/670).
 
 <a id="fn-f-omp5"></a>
 **f-omp5** — Note i: `monographFileView()` builds `DC.Identifier.URI` as `catalog/book/{bestId}/{formatId}/{fileId}`, an address `CatalogBookHandler::book()` answers with the book's page, where the file view is `catalog/view/…`. Live-probed 2026-09-26: note q19.
