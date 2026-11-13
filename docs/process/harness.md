@@ -704,8 +704,9 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   SessionStart hook pulls it when it is clean and says so; a session
   pulls with `--rebase` before writing there and pushes before it ends,
   staging its own paths by name (never `git add -A`: another slot's file
-  may sit in the tree, not yet verified);
-  a slot is freed only when this clone is clean too. If the hook reports it
+  may sit in the tree, not yet verified). Another session's files there
+  are left alone, and they never block a slot: the slot's own work in
+  this repo is what is checked. If the hook reports it
   missing, clone it there (the VM's GitHub token reaches it).
 - **Kept checks** name their database `dbName(app.name)` (`bin/apps.js`) or
   the probe kit's `app.db`, never a literal `<app>_test`, which is slot 0's.
@@ -741,8 +742,8 @@ Mailpit and API key. Only Postgres, the cores and `origin` are shared.
   app checkouts do not count). Otherwise it stays **blocked** for that
   thread and the bot mentions the owner there; the slot frees when the
   thread resumes and finishes, or with `node bin/slot.js free <n>`. A
-  session that cannot leave this clone or `../pkp-e2e-sec` clean at its
-  end says in its thread what is left and why, tagging the thread's
+  session that cannot leave this clone, or its own work in
+  `../pkp-e2e-sec`, committed and pushed at its end says in its thread what is left and why, tagging the thread's
   owner, as the bot does, and also @blessie while @jarda.kotesovec is
   away. A
   resumed thread returns to its own slot, or, when another session holds
