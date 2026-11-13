@@ -200,8 +200,8 @@ instead).
       test as parallel lesson 2 says.
     - **14d. A legacy modal form refused by its own validation** shows its
       page notice late, with the next action or when the window closes.
-      Read the refusal in the form: a field's error or the in-form
-      `.notifyFormError`.
+      Read the refusal in the form (a field's error, `.notifyFormError`);
+      both exist hidden in every legacy form, so read them `:visible`.
 15. **`getByRole` name strings are substring matches.** `{name: 'View'}`
     matches "Assign Re**view**ers". Use `exact: true` or an anchored regex for
     short common words. The wizard rail is the standing trap: a "wait until

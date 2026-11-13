@@ -28,7 +28,8 @@ never writes a brief from scratch, and it never writes rules into one.
    on the way out, a wait that hangs) belongs in
    `.reports/<feature>/screen-notes.md`, never in a brief; the template
    already points the agent there.
-3. The orchestrator adds no rule when rendering. The templates themselves
+3. The orchestrator adds no rule when rendering, nor in the prompt that
+   launches the agent. The templates themselves
    carry each role's operating rules, under maintainer review; a missing
    rule is fixed in the template, never patched into a brief.
 4. Keep the verbatim blocks as they are: the Frame (`frame.md`, filled into

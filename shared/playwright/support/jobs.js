@@ -19,7 +19,9 @@
 const {execFileSync} = require('child_process');
 
 /**
- * Run the queue worker to completion on this fleet's app root. Failing jobs
+ * Run the queue worker to completion on this fleet's app root. A failing job
+ * is released for its next try, not run again, so one with `$tries` 3 and
+ * `$backoff` 5 reaches "Failed Jobs" only after three calls 5 s apart. Failing jobs
  * (e.g. an egress-firewalled ORCID deposit left behind by a parallel spec)
  * must not abort the drain: the worker's output is returned either way and
  * callers assert on the observable outcome (Mailpit), not the exit code.

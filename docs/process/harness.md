@@ -950,11 +950,12 @@ files dir it must carry:
   says; the generator refuses an absolute `TEST_PUBLIC_FILES_DIR`, which
   breaks picture uploads through a formatted-text box. A suite that
   reads the value from the config resolves it against `PKP_APP_ROOT`.
-- `enable_minified = On`. Backend pages then load `js/pkp.min.js` instead of
-  about 107 separate scripts. The bundle is committed in the app. When its
-  sources change, recompile it with the Closure minify pass in
-  `lib/pkp/tools/buildjs.sh`. That script's lint gate blocks on long-standing
-  style nits, so run the final compile step directly.
+- `enable_minified = On`. Backend pages then load the app's committed
+  `js/pkp.min.js` instead of about 107 separate scripts, so a `lib/pkp/js/`
+  fix reaches the fleets and CI only once that bundle is rebuilt with it (a
+  dataset fleet on `main` runs the sources). To rebuild, run the final
+  compile step of `lib/pkp/tools/buildjs.sh` directly; its lint gate blocks
+  on old style nits.
 
 Never delete `config.test.inc.php` on its own, because the template resets
 `installed=Off`. `npm run reset:<app>` is the sanctioned way to wipe an
@@ -1041,14 +1042,16 @@ because filtered runs are the ones that share a fleet (a test author
 beside the harness agent); `--no-reset` skips them on a whole-suite run
 too. Two runs of one app at once share its worker servers as well, and
 the run that started them stops them when it ends, so the other fails
-mid-run ("An unexpected error has occurred"): one app's runs go one at
-a time. The app pass's database is gone after the run; its error contexts
+mid-run ("An unexpected error has occurred"): the test lock queues a
+slot's second run of an app until the first ends, so just start it. The app pass's database is gone after the run; its error contexts
 and traces stay in `<out>/app`.
 
-A run longer than about four minutes outlives the prompt cache of the agent
-waiting on it, and whole-suite runs are CI's (`node bin/ci.js`, "CI"): the
-VM's `npm run test:<app>` and `test:final` remain for work about the local
-runtime itself (MAINTENANCE "Session hygiene").
+Start every run in the background with its output in a file, never under
+a shell `timeout` or a `tail` pipe: a run may first wait in the test lock
+("Slots"), and its four-minute budget (the waiting agent's prompt cache)
+starts at its first test. Whole-suite runs are CI's (`node bin/ci.js`,
+"CI"); `test:<app>` and `test:final` serve work on the local runtime
+itself (MAINTENANCE "Session hygiene").
 
 In a plain `npx playwright test` command:
 

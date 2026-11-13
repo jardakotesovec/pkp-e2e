@@ -160,6 +160,13 @@ function acquire(label = process.argv.slice(1).join(' '), {app = null} = {}) {
     writeJsonAtomic(ownerFile, me);
     // Another active run of the same app in this slot (the worker servers are per app).
     const sameAppBusy = () => app && liveOwners(slot).some((o) => o.pid !== me.pid && o.app === app && o.state === 'active');
+    // For the waiting line: the same-app run being waited for, and how many asked before this one.
+    const sameAppQueue = () => {
+        const others = liveOwners(slot).filter((o) => o.pid !== me.pid && o.app === app);
+        const running = others.filter((o) => o.state === 'active').map((o) => `pid ${o.pid} ${o.cmd}`.slice(0, 140) + ` (asked ${o.since.slice(11, 16)})`);
+        const ahead = others.filter((o) => o.state === 'queued' && o.since < me.since).length;
+        return `running ${running.join('; ') || 'none'}; ${ahead} more ${app} run(s) queued ahead of this one`;
+    };
     process.env.PKP_E2E_LOCK_OWNER = String(process.pid);
 
     // First report after 3 s: an uncontended acquire takes about a second.
@@ -179,7 +186,7 @@ function acquire(label = process.argv.slice(1).join(' '), {app = null} = {}) {
         if (Date.now() - lastReport >= WAIT_REPORT_MS) {
             const who = h ? describeHolder(h) : 'nobody yet (the lock is being taken)';
             console.error(h && h.slot === slot && sameAppBusy()
-                ? `test-lock: slot ${slot} waiting for its other ${app} run to end (one run per app at a time: they share the worker servers)`
+                ? `test-lock: slot ${slot} waiting for its other ${app} run to end (one run per app at a time: they share the worker servers): ${sameAppQueue()}`
                 : `test-lock: slot ${slot} waiting for the machine's test lock, held by ${who}`);
             lastReport = Date.now();
         }
