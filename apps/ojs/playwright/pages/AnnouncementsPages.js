@@ -896,12 +896,12 @@ exports.expectPageNotice = async function expectPageNotice(page, text) {
 exports.primaryNavItems = async function primaryNavItems(page) {
     const nav = page.locator('#navigationPrimary');
     await expect(nav).toBeVisible({timeout: T});
-    return nav.locator('> li > a').allInnerTexts().then((items) => items.map((s) => s.replace(/\s+/g, ' ').trim()));
+    return nav.locator('> li > :is(a, button)').allInnerTexts().then((items) => items.map((s) => s.replace(/\s+/g, ' ').trim()));
 };
 
 /** The header's "Announcements" item. */
 exports.primaryNavItem = function primaryNavItem(page, name) {
-    return page.locator('#navigationPrimary > li > a').filter({hasText: new RegExp(`^\\s*${name}\\s*$`)});
+    return page.locator('#navigationPrimary > li > :is(a, button)').filter({hasText: new RegExp(`^\\s*${name}\\s*$`)});
 };
 
 /** The "Skip to announcements" link of the skip links. */

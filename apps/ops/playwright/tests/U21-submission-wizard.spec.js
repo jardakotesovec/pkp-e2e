@@ -1700,7 +1700,7 @@ test.describe('Submission wizard (U21)', () => {
         // …and the reader site's sidebar offers no such block; positive
         // control: the site's navigation rendered.
         await mayaPage.goto(`/index.php/${PK}${PK_PREFIX}`);
-        await expect(mayaPage.getByRole('link', {name: 'About', exact: true}).first()).toBeVisible({
+        await expect(mayaPage.getByRole('button', {name: 'About', exact: true}).first()).toBeVisible({
             timeout: 20_000,
         });
         await expect(mayaPage.getByRole('heading', {name: 'Latest preprints'})).toBeVisible();

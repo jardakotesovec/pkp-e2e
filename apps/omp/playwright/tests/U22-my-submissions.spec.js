@@ -152,7 +152,7 @@ async function expectPressHome(page, contextPath, username) {
     await expect(page.getByRole('heading', {level: 1, name: `Scratch context ${contextPath}`, exact: true})).toBeVisible({
         timeout: 30_000,
     });
-    await expect(page.getByRole('link', {name: username, exact: true})).toBeVisible();
+    await expect(page.getByRole('button', {name: username, exact: true})).toBeVisible();
     await expect(sideNav(page)).toHaveCount(0);
 }
 
@@ -864,7 +864,7 @@ test.describe('My submissions (U22)', () => {
                     waitUntil: 'commit',
                 });
                 await expectAccessDenied(page, ROLE_DENIED);
-                await expect(page.getByRole('link', {name: username, exact: true})).toBeVisible();
+                await expect(page.getByRole('button', {name: username, exact: true})).toBeVisible();
             } finally {
                 await page.context().close();
             }

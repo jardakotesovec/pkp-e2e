@@ -1009,13 +1009,13 @@ exports.PublicAnnouncements = class PublicAnnouncements {
 
     /** The header's primary menu items, in order (top level only). */
     async headerItems() {
-        const items = await this.page.locator('#navigationPrimary > li > a').allInnerTexts();
+        const items = await this.page.locator('#navigationPrimary > li > :is(a, button)').allInnerTexts();
         return items.map((item) => item.replace(/\s+/g, ' ').trim());
     }
 
     /** The header's "Announcements" item. */
     headerItem(name) {
-        return this.page.locator('#navigationPrimary > li > a').filter({hasText: new RegExp(`^\\s*${name}\\s*$`)});
+        return this.page.locator('#navigationPrimary > li > :is(a, button)').filter({hasText: new RegExp(`^\\s*${name}\\s*$`)});
     }
 
     /** The page's skip links. */

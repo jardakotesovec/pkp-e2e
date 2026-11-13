@@ -94,7 +94,7 @@ test.describe('Issues', () => {
         // so the read is settled.
         const chrome = new PublicChrome(visitor, PRESS, {locale: LOCALE});
         await chrome.goto();
-        await expect(chrome.primaryTopLinks).toHaveText([whole('Catalog'), whole('About')]);
+        await expect(chrome.primaryTopLinks).toHaveText([whole('Home'), whole('Catalog'), whole('About')]);
         await expect(chrome.topLink('primary', 'Current')).toHaveCount(0);
         await expect(chrome.header.getByRole('link', {name: 'Current', exact: true})).toHaveCount(0);
 

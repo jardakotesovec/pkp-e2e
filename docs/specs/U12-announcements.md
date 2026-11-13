@@ -238,11 +238,12 @@ discards the changes. <sup>g</sup>
     [OMP2](#omp2). <sup>q</sup>
 12. **The header item.** A fresh journal's primary navigation menu carries
     an "Announcements" item (after "Archives" on a journal, after
-    "Catalog" on a press, first on a preprint server), shown only while
-    announcements are on; it opens the Announcements page. The menu's
-    editor warns "This link will only be displayed if you have enabled
-    announcements under Settings > Website." on that item. The item's
-    place and removal are *Navigation menus & site chrome*'s. <sup>e</sup>
+    "Catalog" on a press, right after "Home" on a preprint server), shown
+    only while announcements are on; it opens the Announcements page. The
+    menu's editor warns "This link will only be displayed if you have
+    enabled announcements under Settings > Website." on that item. The
+    item's place and removal are *Navigation menus & site chrome*'s.
+    <sup>e</sup>
 13. **Types.** The "Announcement Types" tab shows a table headed
     "Announcement Types" with a "Name" column and "Add Announcement Type"
     above it; empty, it reads "No announcement types have been created.".
@@ -1593,8 +1594,11 @@ redirects to `announcement` (the list) when the id is unknown, belongs to
 another context or has a `dateExpire` before now. The header item is the
 default primary menu's `NMI_TYPE_ANNOUNCEMENTS` item
 (`registry/navigationMenus.xml`, title `manager.announcements`
-"Announcements", third on OJS after Current and Archives, second on OMP
-after Catalog, first on OPS), which
+"Announcements", after Home, Current and Archives on OJS, after Home and
+Catalog on OMP, after Home on OPS; the `NMI_TYPE_HOME` item "Home" heads
+the menu since pkp/pkp-lib#12654, driven 2026-11-13 at its PRs' heads,
+before their merge: pkp-lib#13431 `254b15b320`, ojs#5887 `e4b040f6e4`,
+omp#2575 `bbea2619c9`, ops#1506 `12e8fc55d9`), which
 `PKPNavigationMenuService::getDisplayStatus()` shows only while
 `enableAnnouncements` is set on the context, or on the site for a
 site-level menu; its url is `announcement`. The Navigation settings print

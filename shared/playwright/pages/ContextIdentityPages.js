@@ -95,7 +95,7 @@ exports.AboutPages = class AboutPages extends BasePage {
         this.editLink = this.main.locator('a.cmp_edit_link');
         this.headerTitle = page.locator('.pkp_site_name');
         this.primaryNav = page.locator('#navigationPrimary');
-        this.aboutToggle = this.primaryNav.locator('> li > a[data-toggle="dropdown"]').filter({hasText: whole('About')});
+        this.aboutToggle = this.primaryNav.locator('> li > button[data-toggle="dropdown"]').filter({hasText: whole('About')});
         this.aboutItems = this.aboutToggle.locator('xpath=following-sibling::ul[1]').locator('> li > a');
         this.footerLogoLink = page.locator('.pkp_brand_footer a').filter({has: page.locator('img')});
         this.infoBlock = page.locator('.pkp_structure_sidebar .block_information');

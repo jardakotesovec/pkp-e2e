@@ -221,7 +221,7 @@ test.describe('Announcements (U12)', () => {
         // "Announcements" (Rule 2).
         await pub.expectNotFound(PublicAnnouncements.listUrl(tag));
         await pub.gotoHome(tag);
-        expect(await pub.headerItems()).toEqual(['Catalog', 'About']);
+        expect(await pub.headerItems()).toEqual(['Home', 'Catalog', 'About']);
 
         // The side menu while off: no "Announcements" entry; "Settings" is
         // there (Rule 2).
@@ -298,7 +298,7 @@ test.describe('Announcements (U12)', () => {
         // home page carries no block and no "Skip to announcements" (the
         // other skip links are the control) (Rules 2, 9, 11, 12).
         await pub.gotoHome(tag);
-        expect(await pub.headerItems()).toEqual(['Catalog', 'Announcements', 'About']);
+        expect(await pub.headerItems()).toEqual(['Home', 'Catalog', 'Announcements', 'About']);
         await expect(pub.homeBlock()).toHaveCount(0);
         await expect(pub.skipToAnnouncements()).toHaveCount(0);
         await expect(pub.skipLinks()).toHaveText(['Skip to main content', 'Skip to main navigation menu', 'Skip to site footer']);

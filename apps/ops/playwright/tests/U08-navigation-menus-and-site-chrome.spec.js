@@ -63,7 +63,7 @@ const T = 30_000;
 const SERVER = 'publicknowledge';
 const SERVER_NAME = 'Public Knowledge Preprint Server';
 const ABOUT_ITEMS = ['About the Server', 'Submissions', 'Editorial Masthead', 'Privacy Statement', 'Contact'];
-const PRIMARY_OUTLINE = ['Announcements', 'Archives', 'About', ...ABOUT_ITEMS.map((t) => `> ${t}`)];
+const PRIMARY_OUTLINE = ['Home', 'Announcements', 'Archives', 'About', ...ABOUT_ITEMS.map((t) => `> ${t}`)];
 const USER_ITEMS = (username) => ['Register', 'Login', username, 'Dashboard', 'View Profile', 'Administration', 'Logout'];
 const ALL_ITEMS = (username) => [...PRIMARY_OUTLINE.map((t) => t.replace(/^> /, '')), ...USER_ITEMS(username), 'Search'];
 const FOOTER_ALT = 'More information about this system, Platform and Workflow by OPS/PKP.';
@@ -227,8 +227,12 @@ test.describe('navigation menus & site chrome', () => {
         await expect(chrome.siteNameLink).toHaveText(whole(SERVER_NAME));
         await expect(chrome.siteNameLink).toHaveClass(/\bis_text\b/);
         expect(flat(await chrome.siteNameLink.getAttribute('href'))).toMatch(new RegExp(`/index\\.php/${SERVER}/en(/index)?$`));
-        await expect(chrome.primaryTopLinks).toHaveText([whole('Archives'), whole('About')]);
+        await expect(chrome.primaryTopLinks).toHaveText([whole('Home'), whole('Archives'), whole('About')]);
         await expect(chrome.topLink('primary', 'Announcements')).toHaveCount(0);
+        // "Home" is marked as the current page; "About" is a button
+        // (Rules 15c, 16).
+        await expect(chrome.topLink('primary', 'Home')).toHaveAttribute('aria-current', 'page');
+        await expect(chrome.primaryMenu.getByRole('button', {name: 'About', exact: true})).toBeVisible();
         await expect(chrome.searchLink).toHaveText(whole('Search'));
         await expect(chrome.userTopLinks).toHaveText([whole('Register'), whole('Login')]);
         const box = async (loc) => (await loc.boundingBox()) || {x: -1, y: -1};
@@ -274,6 +278,10 @@ test.describe('navigation menus & site chrome', () => {
         await chrome.submenuLink('primary', 'About', 'About the Server').click();
         await expect(chrome.heading).toHaveText(whole('About the Server'));
         expect(await chrome.trail()).toEqual(['Home', 'About the Server']);
+        // In the header, "About the Server" is marked as the current page, "Home"
+        // no longer (Rule 15c).
+        await expect(chrome.submenuLink('primary', 'About', 'About the Server')).toHaveAttribute('aria-current', 'page');
+        await expect(chrome.topLink('primary', 'Home')).not.toHaveAttribute('aria-current', 'page');
         await expect(chrome.breadcrumbs.locator('li').last().getByRole('link')).toHaveCount(0);
         await expect(chrome.crumbLink('Home')).toHaveCount(1);
         const aboutPage = {name: flat(await chrome.siteNameLink.textContent()), primary: await chrome.topTitles('primary'), user: await chrome.topTitles('user')};
@@ -512,7 +520,7 @@ test.describe('navigation menus & site chrome', () => {
         expect(menus).toEqual([
             {
                 title: 'Primary Navigation Menu',
-                items: 'Announcements, About the Server, Submissions, Archives, About, Editorial Masthead, Privacy Statement, Contact'.split(', ').sort(),
+                items: 'Home, Announcements, About the Server, Submissions, Archives, About, Editorial Masthead, Privacy Statement, Contact'.split(', ').sort(),
             },
             {
                 title: 'User Navigation Menu',
@@ -520,11 +528,11 @@ test.describe('navigation menus & site chrome', () => {
             },
         ]);
 
-        // The items table: "Add item" above it, sixteen items: every item
+        // The items table: "Add item" above it, seventeen items: every item
         // of the two menus, the username item as manager.maya, and "Search"
         // (Rules 2, 10).
         await expect(tab.addItemLink).toBeVisible();
-        await expect(tab.rows('items')).toHaveCount(16);
+        await expect(tab.rows('items')).toHaveCount(17);
         const items = await tab.rowTitles('items');
         expect([...items].sort()).toEqual([...ALL_ITEMS('manager.maya')].sort());
 
@@ -611,7 +619,7 @@ test.describe('navigation menus & site chrome', () => {
         await stubOutside(visitor.context(), /^https:\/\/pkp\.sfu\.ca\//);
         const header = new PublicChrome(visitor, tag);
         await header.goto();
-        await expect(header.primaryTopLinks).toHaveText([whole('Archives'), whole('About')]);
+        await expect(header.primaryTopLinks).toHaveText([whole('Home'), whole('Archives'), whole('About')]);
 
         // The item: "Add item" opens "Add item" with "Save" and no "Cancel";
         // "Our news", "Remote URL", https://pkp.sfu.ca, "Save": the window
@@ -637,7 +645,7 @@ test.describe('navigation menus & site chrome', () => {
         // Two levels at most: "Our news" onto "Archives" sits under it;
         // "Search" onto "Our news" does not; "About" onto "Announcements"
         // does not take its items under "Announcements" (Rules 5, 5a).
-        const nested = ['Announcements', 'Archives', '> Our news', 'About', ...ABOUT_ITEMS.map((t) => `> ${t}`)];
+        const nested = ['Home', 'Announcements', 'Archives', '> Our news', 'About', ...ABOUT_ITEMS.map((t) => `> ${t}`)];
         await win.drag('unassigned', 'Our news', {panel: 'assigned', item: 'Archives'});
         await expect.poll(() => outline(win, 'assigned')).toEqual(nested);
         await win.drag('unassigned', 'Search', {panel: 'assigned', item: 'Our news'});
@@ -686,7 +694,7 @@ test.describe('navigation menus & site chrome', () => {
         // Control: after "No" and before "Save", the visitor's reloaded home
         // page shows "Archives" with no list and no "Our news" (Rule 6).
         await header.goto();
-        await expect(header.primaryTopLinks).toHaveText([whole('Archives'), whole('About')]);
+        await expect(header.primaryTopLinks).toHaveText([whole('Home'), whole('Archives'), whole('About')]);
         await expect(header.submenu('primary', 'Archives')).toHaveCount(0);
         await expect(visitor.getByRole('link', {name: 'Our news', exact: true})).toHaveCount(0);
 
@@ -810,7 +818,7 @@ test.describe('navigation menus & site chrome', () => {
         const visitor = await signedOutPage(browser, baseURL);
         const header = new PublicChrome(visitor, tag);
         await header.goto();
-        await expect(header.primaryTopLinks).toHaveText([whole('Archives'), whole('About')]);
+        await expect(header.primaryTopLinks).toHaveText([whole('Home'), whole('Archives'), whole('About')]);
         await tab.goto();
         const allItems = await tab.rowTitles('items');
 
@@ -859,7 +867,7 @@ test.describe('navigation menus & site chrome', () => {
         await expect(tab.row('menus', 'Footer links')).toHaveCount(1);
         expect((await tab.menus()).find((m) => m.title === 'Footer links').items).toBe('Search');
         await header.goto();
-        await expect(header.primaryTopLinks).toHaveText([whole('Archives'), whole('About')]);
+        await expect(header.primaryTopLinks).toHaveText([whole('Home'), whole('Archives'), whole('About')]);
         await expect(visitor.getByRole('link', {name: 'Search', exact: true})).toHaveCount(1);
 
         // "Remove", then "Cancel": the window "Remove" with "OK" and
@@ -905,7 +913,7 @@ test.describe('navigation menus & site chrome', () => {
         // menu (Rule 1).
         const seeded = new PublicChrome(visitor, SERVER, {locale: 'en'});
         await seeded.goto();
-        await expect(seeded.primaryTopLinks).toHaveText([whole('Archives'), whole('About')]);
+        await expect(seeded.primaryTopLinks).toHaveText([whole('Home'), whole('Archives'), whole('About')]);
     });
 
     test('S7: remove an item that has items under it', async ({browser, baseURL, asUser, opsApi}, testInfo) => {
@@ -935,7 +943,7 @@ test.describe('navigation menus & site chrome', () => {
         // The menu window: "Announcements" and "Archives" assigned, the five
         // former sub-items among the unassigned (Rule 13).
         const win = await tab.openMenu('Primary Navigation Menu');
-        await expect.poll(() => outline(win, 'assigned')).toEqual(['Announcements', 'Archives']);
+        await expect.poll(() => outline(win, 'assigned')).toEqual(['Home', 'Announcements', 'Archives']);
         const unassigned = await outline(win, 'unassigned');
         for (const title of ABOUT_ITEMS) {
             expect(unassigned, title).toContain(title);
@@ -945,7 +953,7 @@ test.describe('navigation menus & site chrome', () => {
 
         // The visitor's header: "Archives" alone, no "About" and no list (Rule 13).
         await header.goto();
-        await expect(header.primaryTopLinks).toHaveText([whole('Archives')]);
+        await expect(header.primaryTopLinks).toHaveText([whole('Home'), whole('Archives')]);
         await expect(header.submenu('primary', 'Archives')).toHaveCount(0);
         await expect(visitor.getByRole('link', {name: 'About the Server', exact: true})).toHaveCount(0);
 
@@ -1142,7 +1150,7 @@ test.describe('navigation menus & site chrome', () => {
         // has no "Open Preprint Systems" link; the page itself is there,
         // its primary menu read (Rule 21).
         await on.goto();
-        await expect(on.primaryTopLinks).toHaveText([whole('Archives'), whole('About')]);
+        await expect(on.primaryTopLinks).toHaveText([whole('Home'), whole('Archives'), whole('About')]);
         await expect(on.developedByLink('Open Preprint Systems')).toHaveCount(0);
         await expect(visitor.getByRole('link', {name: 'Open Preprint Systems', exact: true})).toHaveCount(0);
 

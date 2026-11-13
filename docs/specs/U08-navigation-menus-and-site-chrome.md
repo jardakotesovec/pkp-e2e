@@ -106,6 +106,7 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
 
 | Type | The item opens | The item shows | Notice in the menu window |
 |------|----------------|----------------|---------------------------|
+| "Home" | the journal's home page | always | — |
 | "Custom Page" | the item's own page, at the journal's address followed by the "Path" | always | — |
 | "Remote URL" | the typed "URL", in the same browser tab | always | — |
 | "About" | the "About the Journal" page | always, even with the "About the Journal" text empty | "This link will only be displayed if you have filled out the About the Journal section under Settings > Journal." ⚠ [A5](#a5) |
@@ -150,22 +151,26 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
        ⚠ [A4](#a4). <sup>td9</sup>
      - The item window works as on a journal. It offers the journal's
        types, including those the site has no page for ⚠ [A14](#a14).
-2. **What a new journal has.** Two menus and the items below (seventeen
-   on a journal, sixteen on a press or preprint server), each under its
+2. **What a new journal has.** Two menus and the items below (eighteen
+   on a journal, seventeen on a press or preprint server), each under its
    installed title in the visitor's language while that language is one
    of the journal's "Forms" languages (Rule 12): <sup>n</sup> <sup>td4</sup>
    - "Primary Navigation Menu", in the area "primary": on a journal
-     "Current", "Archives", "Announcements", "About"; on a press "Catalog",
-     "Announcements", "About"; on a preprint server "Announcements",
-     "Archives", "About". Under "About": "About the Journal", "Submissions",
-     "Editorial Masthead", "Privacy Statement", "Contact".
+     "Home", "Current", "Archives", "Announcements", "About"; on a press
+     "Home", "Catalog", "Announcements", "About"; on a preprint server
+     "Home", "Announcements", "Archives", "About". Under "About": "About
+     the Journal", "Submissions", "Editorial Masthead", "Privacy
+     Statement", "Contact". <sup>td22</sup>
    - "User Navigation Menu", in the area "user": "Register", "Login" and
      an item titled with the signed-in user's username, with "Dashboard",
      "View Profile", "Administration" and "Logout" under it.
    - "Search", held by no menu.
 
    The site starts with the "User Navigation Menu" and its seven items
-   alone: no primary menu and no "Search" item.
+   alone: no primary menu and no "Search" item. A journal that existed
+   before an upgrade keeps the menus and items it had: the upgrade adds no
+   "Home", which a manager can add as any other item (Rule 10).
+   <sup>td22</sup>
 
 **Menus**
 
@@ -176,13 +181,14 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
      and with nothing to show which item sits under which; the username
      item reads as the viewing manager's own username. On a new journal
      the cells name these items, separated by commas:
-     - "Primary Navigation Menu": "Current", "About the Journal",
-       "Submissions", "Archives", "Announcements", "Editorial Masthead",
-       "Privacy Statement", "About", "Contact" (press: "Catalog", "About
-       the Press", "Submissions", "Announcements", "About", "Editorial
-       Masthead", "Privacy Statement", "Contact"; server:
-       "Announcements", "About the Server", "Submissions", "Archives",
-       "About", "Editorial Masthead", "Privacy Statement", "Contact").
+     - "Primary Navigation Menu": "Home", "Current", "About the
+       Journal", "Submissions", "Archives", "Announcements", "Editorial
+       Masthead", "Privacy Statement", "About", "Contact" (press: "Home",
+       "Catalog", "About the Press", "Submissions", "Announcements",
+       "About", "Editorial Masthead", "Privacy Statement", "Contact";
+       server: "Home", "Announcements", "About the Server", "Submissions",
+       "Archives", "About", "Editorial Masthead", "Privacy Statement",
+       "Contact").
      - "User Navigation Menu": "Dashboard", "Register", "View Profile",
        "Login", {username}, "Administration", "Logout".
    - 3b. **Stale until reloaded.** After an item is saved with a new
@@ -334,14 +340,23 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
     - 15b. **Narrow windows.** In a narrow browser window the menus fold
       behind a button labelled "Open Menu", which shows and hides them.
       The label reads "Open Menu" in every language ⚠ [A7](#a7).
-16. **Submenus.** A top-level item with shown items under it opens their
-    list when pointed at, pressed or given Enter; focus alone does not
-    open it, and Tab moves past a closed list. The item itself opens no
-    page. Pointed at, the list shows only while the pointer stays on the
-    item or the list. Pressed, it opens and stays open after the pointer
-    leaves, until the visitor presses the item again, presses elsewhere
-    or presses Escape. In a narrow window every list is shown open and the item goes
-    nowhere. <sup>q</sup>
+    - 15c. **The current page.** In both menus, a link that leads to the
+      page shown is marked as the current page for screen readers:
+      "Home" on the journal's home page, at its address with or without
+      "/index", "About the Journal" on that page, also when the address
+      carries a query ("?…"). A page no item leads to, such as the Search
+      page, marks none. <sup>td22</sup>
+16. **Submenus.** A top-level item with shown items under it is a button
+    (a screen reader announces it as one, with its list collapsed or
+    expanded) that opens their list when pointed at, pressed or given
+    Enter; focus alone does not open it, and Tab moves past a closed
+    list. The item itself opens no page. Pointed at, the list shows only
+    while the pointer stays on the item or the list. Pressed, it opens
+    and stays open after the pointer leaves, until the visitor presses
+    the item again, presses elsewhere or presses Escape. In a narrow
+    window every list is shown open and the item is a link to its own
+    page: "About" opens "About the Journal", the username what
+    "Dashboard" opens (Rule 19) ⚠ [A28](#a28). <sup>q</sup> <sup>td22</sup>
     - 16a. **Two levels.** The header shows two levels: an item placed
       deeper than that (possible only when the installation's
       configuration file allows deeper menus, which no screen changes;
@@ -361,7 +376,8 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
     Administrator only) and "Logout".
     While impersonating, "Logout" reads "Logout as {username}" ([Login &
     sessions](U01-login-and-sessions.md), Rule 15). Pressing the username
-    opens that list; it leads nowhere itself. <sup>e</sup>
+    opens that list; it leads nowhere itself, except in a narrow window
+    (Rule 16). <sup>e</sup>
     - 18a. **"Administration".** It opens the
       [Administration page](U61-system-administration.md#administration-page)
       in the language of the page it was pressed on. From a journal with
@@ -768,11 +784,12 @@ are in the footnote. <sup>y</sup>
 
    - **The header**: across the top, left to right: the journal's name
      as text, a link to this home page; the primary menu, on a journal
-     "Current", "Archives" and "About", on a press "Catalog" and "About",
-     on a preprint server "Archives" and "About", with no
-     "Announcements", announcements being off; "Search"; and at the top
-     right "Register" and "Login" (Rules 2, 15, 15a, 17, 18; item types
-     table).
+     "Home", "Current", "Archives" and "About", on a press "Home",
+     "Catalog" and "About", on a preprint server "Home", "Archives" and
+     "About", with no "Announcements", announcements being off; "Search";
+     and at the top right "Register" and "Login" (Rules 2, 15, 15a, 17,
+     18; item types table). "Home" is marked as the current page, and
+     "About" is a button (Rules 15c, 16).
    - **The "About" list**: point at "About": a list opens under it with
      "About the Journal" ("About the Press", "About the Server"),
      "Submissions", "Editorial Masthead", "Privacy Statement" and
@@ -782,7 +799,9 @@ are in the footnote. <sup>y</sup>
      (Rules 2, 16).
    - **A page and its trail**: choose "About the Journal" in that list:
      under the header the trail reads "Home / About the Journal", and
-     "About the Journal" in it is not a link; press "Home": the home page
+     "About the Journal" in it is not a link; in the header's "About"
+     list, "About the Journal" is marked as the current page and "Home"
+     no longer is (Rule 15c); press "Home" in the trail: the home page
      opens, with no trail (Rule 23).
    - **The skip links**: on "About the Journal", press Tab: "Skip to main
      content" shows; press Tab again: "Skip to main navigation menu";
@@ -875,19 +894,19 @@ are in the footnote. <sup>y</sup>
      "Navigation": two tables, "Navigation" above "Navigation Menu Items".
      "Navigation", with "Add Menu" above it, lists "Primary Navigation
      Menu" and "User Navigation Menu", in either order. The primary menu's
-     "Navigation Menu Items" cell names, in any order, "Current", "About
-     the Journal", "Submissions", "Archives", "Announcements", "Editorial
-     Masthead", "Privacy Statement", "About" and "Contact" (on a press
-     "Catalog", "About the Press", "Submissions", "Announcements",
-     "About", "Editorial Masthead", "Privacy Statement" and "Contact"; on
-     a preprint server "Announcements", "About the Server",
-     "Submissions", "Archives", "About", "Editorial Masthead", "Privacy
-     Statement" and "Contact"); the user menu's names, in any order,
+     "Navigation Menu Items" cell names, in any order, "Home", "Current",
+     "About the Journal", "Submissions", "Archives", "Announcements",
+     "Editorial Masthead", "Privacy Statement", "About" and "Contact" (on
+     a press "Home", "Catalog", "About the Press", "Submissions",
+     "Announcements", "About", "Editorial Masthead", "Privacy Statement"
+     and "Contact"; on a preprint server "Home", "Announcements", "About
+     the Server", "Submissions", "Archives", "About", "Editorial
+     Masthead", "Privacy Statement" and "Contact"); the user menu's names, in any order,
      "Dashboard", "Register", "View Profile", "Login", the Journal
      Manager's own username, "Administration" and "Logout" (Rules 2, 3,
      3a).
    - **The items table**: "Navigation Menu Items", with "Add item" above
-     it, lists seventeen items (sixteen on a press or a preprint server):
+     it, lists eighteen items (seventeen on a press or a preprint server):
      every item the two menus hold, the username item under the Journal
      Manager's username, and "Search" (Rules 2, 10).
    - **A row's arrow**: press the "Settings" arrow at the left of the
@@ -897,9 +916,10 @@ are in the footnote. <sup>y</sup>
      window headed "Edit" opens from the right, with the "i" icon, the
      Tasks bell and the initials in a strip at its top (Rule 27). "Title"
      reads "Primary Navigation Menu" and "Active Theme Navigation Areas"
-     "primary". "Assigned Menu Items" holds "Current", "Archives",
-     "Announcements" and "About" (on a press "Catalog", "Announcements",
-     "About"; on a preprint server "Announcements", "Archives", "About"),
+     "primary". "Assigned Menu Items" holds "Home", "Current", "Archives",
+     "Announcements" and "About" (on a press "Home", "Catalog",
+     "Announcements", "About"; on a preprint server "Home",
+     "Announcements", "Archives", "About"),
      with "About the Journal", "Submissions", "Editorial Masthead",
      "Privacy Statement" and "Contact" under "About"; "Unassigned Menu
      Items" holds "Register", "Login", the username item, "Dashboard",
@@ -908,8 +928,8 @@ are in the footnote. <sup>y</sup>
      the Journal" ("About the Press", "About the Server"), "Privacy
      Statement", "Contact", "Register", "Login", the username item,
      "Dashboard", "View Profile", "Administration" and
-     "Logout"; "Current", "Archives", "Catalog", "Submissions", "Editorial
-     Masthead" and "Search" carry none. Press the eye on "Announcements":
+     "Logout"; "Home", "Current", "Archives", "Catalog", "Submissions",
+     "Editorial Masthead" and "Search" carry none. Press the eye on "Announcements":
      a window headed "Notice" reads "This link will only be displayed if
      you have enabled announcements under Settings > Website." with an
      "OK" button, which closes it (Rules 7, 7a; item types table).
@@ -1078,14 +1098,16 @@ are in the footnote. <sup>y</sup>
      top right and "About" leaves the table (Rule 13); the "Navigation"
      table's cell still names it until the page is reloaded [A15](#a15).
    - **The menu window**: press the title "Primary Navigation Menu":
-     "Assigned Menu Items" holds "Current", "Archives" and "Announcements"
-     (on a press "Catalog" and "Announcements"; on a preprint server
-     "Announcements" and "Archives"), and "About the Journal",
-     "Submissions", "Editorial Masthead", "Privacy Statement" and "Contact"
-     are among "Unassigned Menu Items" (Rule 13); press "Cancel".
+     "Assigned Menu Items" holds "Home", "Current", "Archives" and
+     "Announcements" (on a press "Home", "Catalog" and "Announcements"; on
+     a preprint server "Home", "Announcements" and "Archives"), and "About
+     the Journal", "Submissions", "Editorial Masthead", "Privacy
+     Statement" and "Contact" are among "Unassigned Menu Items" (Rule 13);
+     press "Cancel".
    - **The visitor's header**: the visitor reloads: the primary menu reads
-     "Current" and "Archives" ("Catalog" on a press, "Archives" on a
-     preprint server), with no "About" and no list (Rule 13).
+     "Home", "Current" and "Archives" ("Home" and "Catalog" on a press,
+     "Home" and "Archives" on a preprint server), with no "About" and no
+     list (Rule 13).
    - **Control**: the other items stay in "Navigation Menu Items", "About
      the Journal" and "Contact" among them (Rule 13).
 
@@ -1344,6 +1366,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | The site's "Add item" offers types the site has no page for | ❓ | minor | — |
 | [A25](#a25) | The editorial header's initials menu stays open when Escape is pressed | ❓ | minor | — |
 | [A27](#a27) | On the site's pages the Site Administrator's "Dashboard" shows a task count but opens the Profile page | ❓ | minor | — |
+| [A28](#a28) | In a narrow window "About" and the username open a page instead of only their list | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server's side menu has no "Content" group while public comments are off {OPS} | ✅ | minor | — |
 
 ### All apps
@@ -1643,6 +1666,18 @@ page? Lean: yes, unintended; the change that sent the item to the
 Profile page left the number in place, and every other user's item that
 opens the Profile page has none.
 Since: 2026-10-22 · Basis: probe, 2026-10-29. <sup>f-a27</sup>
+
+<a id="a28"></a>
+**A28 — In a narrow window "About" and the username open a page instead of only their list** · ❓ · minor.
+In a narrow window, as on a phone, every list of the public header
+shows open under its item. Pressing "About" now opens the "About the
+Journal" page, and pressing the username opens what "Dashboard" opens;
+before pkp/pkp-lib#12654 both stayed on the page. In a wide window the
+same items are buttons that only open their list (Rule 16).
+Question: should the top-level items lead to their own page in a narrow
+window? Lean: intended; each opens the same page as the first entry of
+its list, which the visitor sees right under it, so nothing is lost.
+Since: pkp/pkp-lib#12654, not yet merged (PR heads, 2026-11-13) · Basis: probe. <sup>f-a28</sup>
 
 ### OJS
 
@@ -2693,6 +2728,34 @@ scratch journal's address opened "Institutions" and "Journal Settings"
 access-denied page with "The current role does not have access to this
 operation." and a signed-out visitor that journal's Login page.
 
+<a id="fn-td22"></a>
+**td22** — pkp/pkp-lib#12654 (main only), driven 2026-11-13 at its PRs'
+heads, before their merge: pkp-lib#13431 `254b15b320`, ojs#5887
+`e4b040f6e4`, omp#2575 `bbea2619c9`, ops#1506 `12e8fc55d9`
+(`shared/playwright/checks/sync/pkp-lib-13431/walk.js`, all three
+apps, the before read at the tips ojs `3c99722dc8`, omp `61df357b9`,
+ops `c74e5bf190` with lib/pkp `ad75b174f0`). Each app's
+`registry/navigationMenus.xml` opens the primary menu with
+`navigation.home` of type `NMI_TYPE_HOME`, whose URL
+`PKPNavigationMenuService::getDisplayStatus()` sets to the context's
+`index` page; the seeded context held it at `seq` 0. No migration adds
+it to an existing context. `PKPTemplateManager::smartyLoadNavigationMenuArea()`
+assigns `navigationMenuCurrentUrl` (the request URL, or the `index`
+URL when the requested page is `''` or `index`), and
+`navigationMenu.tpl` writes `aria-current="page"` on every link whose
+URL, cut at its first `?` or `#`, equals it. Read: "Home" current at
+`…/en` and `…/en/index`; "About the Journal" current at `…/about` and
+`…/about?x=1`; "Submissions" at `…/about/submissions`; none on the
+Search page. The default theme's `js/main.js`, above 992 px, puts a
+`button` (`type="button"`, `data-toggle="dropdown"`,
+`aria-haspopup="true"`, `aria-expanded="false"`) with the link's
+content in place of each top-level link that has a list (the link
+detached, put back below 992 px); pressed or given Enter it opened the list (`aria-expanded` "true")
+with the address unchanged, and Escape closed it. Loaded at 800 px the
+served links stay: "About" at `…/about`, the username at
+`…/dashboard/editorial` for `admin`; pressed, each opened that page.
+At the tips both were `href="#"` at every width and opened nothing (A28).
+
 <a id="fn-td15"></a>
 **td15** — Live-probed 2026-09-23 (Rule 27; A1; all three apps): the
 header's left part, the "i" icon's documentation link in a new tab, its
@@ -3058,6 +3121,13 @@ open; at 375 px with "Open Menu" pressed it rendered "Dashboard 1",
 marked read), visible; pressed at either width it opened
 `index/en/user/profile`; `dbarnes` read "Dashboard" with no number at
 both widths; the username carried none at either width.
+
+<a id="fn-f-a28"></a>
+**f-a28** — Note td22. ojs#5887 (and omp#2575, ops#1506)
+`plugins/themes/default/js/main.js` `toggleDropdowns()`: below 992 px
+it puts back the link kept in the button's `pkpNavLink` data, or, on a
+page loaded narrow, leaves the served link untouched, where the code
+before set `href="#"` on it at either width.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `NavigationMenuService` gives `NMI_TYPE_SUBSCRIPTIONS`

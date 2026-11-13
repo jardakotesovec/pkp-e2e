@@ -89,14 +89,14 @@ const WARNING_NOTICE =
 
 /** The installed items of a journal (Rule 2): the primary menu, the user menu, "Search". */
 const ABOUT_CHILDREN = ['About the Journal', 'Submissions', 'Editorial Masthead', 'Privacy Statement', 'Contact'];
-const PRIMARY_TOP = ['Current', 'Archives', 'Announcements', 'About'];
+const PRIMARY_TOP = ['Home', 'Current', 'Archives', 'Announcements', 'About'];
 const PRIMARY_OUTLINE = [...PRIMARY_TOP, ...ABOUT_CHILDREN.map((t) => `  ${t}`)];
-const PRIMARY_CELL = 'Current, About the Journal, Submissions, Archives, Announcements, Editorial Masthead, Privacy Statement, About, Contact';
+const PRIMARY_CELL = 'Home, Current, About the Journal, Submissions, Archives, Announcements, Editorial Masthead, Privacy Statement, About, Contact';
 const userItems = (username) => ['Register', 'Login', username, 'Dashboard', 'View Profile', 'Administration', 'Logout'];
 const userCell = (username) => `Dashboard, Register, View Profile, Login, ${username}, Administration, Logout`;
 const allItems = (username) => [...PRIMARY_TOP, ...ABOUT_CHILDREN, ...userItems(username), 'Search'];
 /** The visitor's primary menu on a journal with announcements off. */
-const VISITOR_PRIMARY = ['Current', 'Archives', 'About'];
+const VISITOR_PRIMARY = ['Home', 'Current', 'Archives', 'About'];
 
 /** The Journal Manager's side menu on the seeded journal (Rule 30). */
 const MANAGER_SIDE = ['Editor Dashboard', 'Start A New Submission', 'DOIs', 'Settings', 'Content', 'Statistics', 'Tools'];
@@ -184,7 +184,7 @@ test.describe('navigation menus & site chrome', () => {
         await chrome.goto();
 
         // The header, left to right: the name as a text link home, the
-        // primary menu "Current", "Archives", "About" without
+        // primary menu "Home", "Current", "Archives", "About" without
         // "Announcements", "Search", then "Register" and "Login" (Rules 2,
         // 15, 15a, 17, 18).
         await expect(chrome.siteNameLink).toHaveText(whole(JOURNAL_NAME));
@@ -192,6 +192,10 @@ test.describe('navigation menus & site chrome', () => {
         await expect(chrome.siteNameLink).toHaveAttribute('href', new RegExp(`/index\\.php/${JOURNAL}/en/index\\s*$`));
         await expect(chrome.primaryTopLinks).toHaveText(VISITOR_PRIMARY.map(whole));
         await expect(chrome.topLink('primary', 'Announcements')).toHaveCount(0);
+        // "Home" is marked as the current page; "About" is a button
+        // (Rules 15c, 16).
+        await expect(chrome.topLink('primary', 'Home')).toHaveAttribute('aria-current', 'page');
+        await expect(chrome.primaryMenu.getByRole('button', {name: 'About', exact: true})).toBeVisible();
         await expect(chrome.searchLink).toHaveText(whole('Search'));
         await expect(chrome.userTopLinks).toHaveText([whole('Register'), whole('Login')]);
         const order = await visitor.evaluate(() => {
@@ -232,6 +236,10 @@ test.describe('navigation menus & site chrome', () => {
         await chrome.submenuLink('primary', 'About', 'About the Journal').click();
         await expect(chrome.heading).toHaveText(whole('About the Journal'));
         expect(await chrome.trail()).toEqual(['Home', 'About the Journal']);
+        // In the header, "About the Journal" is marked as the current page, "Home"
+        // no longer (Rule 15c).
+        await expect(chrome.submenuLink('primary', 'About', 'About the Journal')).toHaveAttribute('aria-current', 'page');
+        await expect(chrome.topLink('primary', 'Home')).not.toHaveAttribute('aria-current', 'page');
         await expect(chrome.currentCrumb).toHaveText(whole('About the Journal'));
         await expect(chrome.breadcrumbs.getByRole('link', {name: 'About the Journal'})).toHaveCount(0);
         await expect(chrome.crumbLink('Home')).toBeVisible();
@@ -495,12 +503,12 @@ test.describe('navigation menus & site chrome', () => {
         expect(await nav.menuItemsSet('User Navigation Menu')).toEqual(userCell('manager.maya').split(', ').sort());
 
         // The items table: "Navigation Menu Items" with "Add item",
-        // seventeen items: those of both menus, the username item under the
+        // eighteen items: those of both menus, the username item under the
         // manager's username, and "Search" (Rules 2, 10).
         await expect(nav.tableHeading('items')).toHaveText(whole('Navigation Menu Items'));
         await expect(nav.addItemLink).toBeVisible();
         await expect.poll(async () => sorted(await nav.rowTitles('items'))).toEqual(sorted(allItems('manager.maya')));
-        expect(allItems('manager.maya')).toHaveLength(17);
+        expect(allItems('manager.maya')).toHaveLength(18);
 
         // A row's arrow: "Edit" and "Remove" under the row (Fields).
         const controls = await nav.openRowControls('menus', 'Primary Navigation Menu');
@@ -525,7 +533,7 @@ test.describe('navigation menus & site chrome', () => {
         expect(sorted(withEye)).toEqual(
             sorted(['Announcements', 'About', 'About the Journal', 'Privacy Statement', 'Contact', ...userItems('manager.maya')])
         );
-        for (const none of ['Current', 'Archives', 'Submissions', 'Editorial Masthead', 'Search']) {
+        for (const none of ['Home', 'Current', 'Archives', 'Submissions', 'Editorial Masthead', 'Search']) {
             expect(withEye).not.toContain(none);
         }
         await win.eyeIcon('assigned', 'Announcements').click();
@@ -592,7 +600,7 @@ test.describe('navigation menus & site chrome', () => {
         // "Search" onto "Our news" does not sit under it; "About" onto
         // "Announcements" does not go under it (Rules 5, 5a).
         await win.drag('unassigned', 'Our news', {panel: 'assigned', item: 'Archives'});
-        await expect.poll(async () => (await win.outline('assigned')).slice(0, 3)).toEqual(['Current', 'Archives', '  Our news']);
+        await expect.poll(async () => (await win.outline('assigned')).slice(0, 4)).toEqual(['Home', 'Current', 'Archives', '  Our news']);
         await win.drag('unassigned', 'Search', {panel: 'assigned', item: 'Our news'});
         await expect
             .poll(async () => {
@@ -640,14 +648,14 @@ test.describe('navigation menus & site chrome', () => {
         // "Our news" under "Archives", no red warning on "Archives" (Rules
         // 6, 7b).
         await win.drag('unassigned', 'Our news', {panel: 'assigned', item: 'Archives'});
-        await expect.poll(async () => (await win.outline('assigned')).slice(0, 3)).toEqual(['Current', 'Archives', '  Our news']);
+        await expect.poll(async () => (await win.outline('assigned')).slice(0, 4)).toEqual(['Home', 'Current', 'Archives', '  Our news']);
         await win.cancelButton.click();
         await expect(win.warningDialog).toBeVisible();
         await expect(win.warningDialog).toContainText(CHANGED_QUESTION);
         await win.warningDialog.getByRole('button', {name: 'No', exact: true}).click();
         await expect(win.warningDialog).toBeHidden();
         await expect(win.editor).toBeVisible();
-        expect((await win.outline('assigned')).slice(0, 3)).toEqual(['Current', 'Archives', '  Our news']);
+        expect((await win.outline('assigned')).slice(0, 4)).toEqual(['Home', 'Current', 'Archives', '  Our news']);
         await expect(win.warningIcon('assigned', 'Archives')).toHaveCount(0);
         await expect(win.warningIcon('assigned', 'About')).toBeVisible();
 
@@ -664,7 +672,7 @@ test.describe('navigation menus & site chrome', () => {
         await expect(nav.notice(MENU_UPDATED)).toBeVisible();
         await expect.poll(() => nav.menuItemsCell('Primary Navigation Menu')).toContain('Our news');
         win = await nav.openMenu('Primary Navigation Menu');
-        await expect.poll(() => win.outline('assigned')).toEqual(['Current', 'Archives', '  Our news', ...PRIMARY_OUTLINE.slice(2)]);
+        await expect.poll(() => win.outline('assigned')).toEqual(['Home', 'Current', 'Archives', '  Our news', ...PRIMARY_OUTLINE.slice(3)]);
         await expect(win.warningIcon('assigned', 'Archives')).toBeVisible();
         await win.cancelButton.click();
         await expect(win.editor).toBeHidden();
@@ -910,7 +918,7 @@ test.describe('navigation menus & site chrome', () => {
         // The menu window: "Current", "Archives" and "Announcements"
         // assigned; the five former sub-items among the unassigned (Rule 13).
         const win = await nav.openMenu('Primary Navigation Menu');
-        await expect.poll(() => win.outline('assigned')).toEqual(['Current', 'Archives', 'Announcements']);
+        await expect.poll(() => win.outline('assigned')).toEqual(['Home', 'Current', 'Archives', 'Announcements']);
         const unassigned = await win.titles('unassigned');
         for (const child of ABOUT_CHILDREN) expect(unassigned).toContain(child);
         await win.cancelButton.click();
@@ -919,7 +927,7 @@ test.describe('navigation menus & site chrome', () => {
         // The visitor's header: "Current" and "Archives", no "About", no
         // list (Rule 13).
         await home.reload();
-        await expect(home.primaryTopLinks).toHaveText([whole('Current'), whole('Archives')]);
+        await expect(home.primaryTopLinks).toHaveText([whole('Home'), whole('Current'), whole('Archives')]);
         await expect(home.topLink('primary', 'About')).toHaveCount(0);
         await expect(home.primaryMenu.locator('ul')).toHaveCount(0);
 

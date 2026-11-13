@@ -91,14 +91,14 @@ const publicUserMenu = (page) => page.locator('#navigationUser');
 
 /**
  * Press "Logout" in the public pages' user menu: the Login page, signed out.
- * The name is a plain link until the theme's script turns it into a
- * drop-down (`data-toggle="dropdown"`, default theme `js/main.js`); a press
- * before that follows the link and the menu never opens (CI 37724191553),
- * so the press waits for the marker.
+ * The name is a plain link until the theme's script swaps it for a
+ * drop-down button (`data-toggle="dropdown"`, default theme `js/main.js`,
+ * pkp-lib#12654); a press before that follows the link and the menu never
+ * opens (CI 37724191553), so the press waits for the button.
  */
 async function logoutFromPublicMenu(page, username) {
     const menu = publicUserMenu(page);
-    const name = menu.getByRole('link', {name: new RegExp(`^${username}`)}).first();
+    const name = menu.getByRole('button', {name: new RegExp(`^${username}`)}).first();
     await expect(name).toHaveAttribute('data-toggle', 'dropdown');
     await name.click();
     await menu.getByRole('link', {name: 'Logout', exact: true}).click();

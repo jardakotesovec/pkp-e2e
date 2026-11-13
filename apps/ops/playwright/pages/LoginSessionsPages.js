@@ -451,17 +451,18 @@ exports.PublicUserMenu = class PublicUserMenu extends BasePage {
 
     /** The username's top item (its count badge, if any, after it). */
     userItem(username) {
-        return this.root.locator('> li > a').filter({hasText: new RegExp(`^\\s*${username}\\b`)});
+        return this.root.locator('> li > :is(a, button)').filter({hasText: new RegExp(`^\\s*${username}\\b`)});
     }
 
     /**
      * Press the username, then "Logout" in its list, and wait for the
-     * Login page (Rule 6). The theme turns the item into a toggle ("#")
-     * once its script has run; a press before that follows the address.
+     * Login page (Rule 6). The theme swaps the item for a toggle button
+     * once its script has run (pkp-lib#12654); a press before that follows
+     * the address.
      */
     async logout(username) {
         const item = this.userItem(username);
-        await expect(item).toHaveAttribute('href', '#');
+        await expect(item).toHaveAttribute('data-toggle', 'dropdown');
         await item.click();
         const logout = item.locator('xpath=following-sibling::ul[1]').getByRole('link', {name: 'Logout', exact: true});
         await expect(logout).toBeVisible();

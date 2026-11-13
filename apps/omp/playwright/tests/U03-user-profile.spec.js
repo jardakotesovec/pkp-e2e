@@ -543,7 +543,7 @@ test.describe('user profile', () => {
             // its header as well (Rule 4).
             await page.goto(`/index.php/${tag}`);
             await expect(
-                page.getByRole('banner').getByRole('link', {name: new RegExp(`^${username}`)})
+                page.getByRole('banner').getByRole('button', {name: new RegExp(`^${username}`)})
             ).toBeVisible();
             await expect(page.getByRole('banner')).not.toContainText(preferredName);
         } finally {
