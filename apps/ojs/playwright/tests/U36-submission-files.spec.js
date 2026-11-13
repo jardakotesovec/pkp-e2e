@@ -13,9 +13,10 @@
  *   reads it on the file an editor uploaded.
  * - A3 🐞: S6 reads that the Copyeditor's window opens on "History"; nothing
  *   waits for that tab to load.
- * - A7 🐞: S7 reads that no "Upload revisions" button shows on a round that
- *   asks for none and that "Revisions Uploaded" reads "No Items"; nothing
- *   reads or presses the "Upload" above it.
+ * - A7 🐞: on the round that asks for no revisions S7 reads that no "Upload
+ *   revisions" button shows and that "Revisions Uploaded" reads "No Items";
+ *   it neither reads nor presses the "Upload" above that list there. It
+ *   presses that "Upload" only on the accepted round, where it works.
  * - A11 🐞: S9 chooses the component before "Save" in "Edit notes.md".
  * - A12 🐞: S4 and S7 read the zip's name as the submission's number, then
  *   hyphens, then "submission-files.zip", without fixing their count.
@@ -53,6 +54,7 @@
 const path = require('path');
 const {test, expect} = require('../support/fixtures.js');
 const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
+const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 const {ReviewWizardPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
 const {SubmissionWizardPage} = require('../pages/SubmissionWizardPage.js');
 const {
@@ -745,6 +747,10 @@ test.describe('submission files', () => {
             participants: [{username: 'sectioneditor.ravi', role: 'sectionEditor'}],
             files: [{file: 'article.pdf'}, {file: 'notes.md', uploader: 'sectioneditor.ravi'}],
         });
+        const acceptedTag = `${tag}a`;
+        const {submissionId: acceptedId} = await seed(ojsApi, acceptedTag, {
+            decisions: ['sendExternalReview', 'accept'],
+        });
 
         // "Submission Files" in the author view: both files, no "Upload".
         const page = await (await asUser(AUTHOR)).newPage();
@@ -779,7 +785,40 @@ test.describe('submission files', () => {
         await expect(revisions.noItems()).toBeVisible({timeout: 30_000});
         await expect(frame.dialog().getByRole('button', {name: 'Upload revisions', exact: true})).toHaveCount(0);
 
-        // Control: the Journal Manager's "Upload" and "More Information" / "Delete".
+        // "Revisions Uploaded" after "Accept Submission": the second
+        // submission, opened from My Submissions. The round's status box and
+        // the "Upload" above the list are the positive controls of the
+        // missing "Upload revisions".
+        const mine = new MySubmissionsPage(page, JOURNAL);
+        await mine.goto();
+        await frame.openFromRow(await mine.findRowByTag(acceptedTag), acceptedId);
+        await frame.selectRound(1);
+        const accepted = new FileList(page, frame, REVISIONS_UPLOADED);
+        await expect(frame.anyStatusBox()).toContainText('The submission is currently in the Copyediting stage.');
+        await expect(accepted.noItems()).toBeVisible({timeout: 30_000});
+        await expect(accepted.uploadButton()).toBeVisible();
+        await expect(frame.dialog().getByRole('button', {name: 'Upload revisions', exact: true})).toHaveCount(0);
+        await accepted.uploadButton().click();
+        const wizard = new UploadWizard(page, UPLOAD_REVIEW_FILE);
+        await wizard.expectOpen();
+        await expect(wizard.steps()).toHaveText(WIZARD_STEPS);
+        await wizard.chooseComponent(MAIN);
+        await wizard.attach(fx('notes.md'), 'notes.md');
+        await wizard.continueTo(WIZARD_STEPS[1]);
+        await wizard.continueTo(WIZARD_STEPS[2]);
+        await wizard.complete();
+        await mine.goto();
+        await frame.openFromRow(await mine.findRowByTag(acceptedTag), acceptedId);
+        await frame.selectRound(1);
+        await accepted.expectNames(['notes.md']);
+
+        // The Journal Manager on the accepted round: the Author's file.
+        const {page: aPage, frame: aFrame} = await openWorkflow(asUser, MANAGER, acceptedId);
+        await aFrame.selectRound(1);
+        await new FileList(aPage, aFrame, REVISIONS_UPLOADED).expectNames(['notes.md']);
+
+        // Control: the Journal Manager on the first submission: "Upload" and
+        // "More Information" / "Delete".
         const {page: mPage, frame: mFrame} = await openWorkflow(asUser, MANAGER, submissionId, {stage: 'submission'});
         const mList = new FileList(mPage, mFrame, SUBMISSION_FILES);
         await mList.expectNames(['Manuscript', 'notes.md']);

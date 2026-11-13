@@ -14,13 +14,15 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - A2 🐞: S7 reads the Author's menu on the file they uploaded; nothing
- *   reads it on the file an editor uploaded.
+ * - A2 🐞: S7 reads the Author's whole menu on the file they uploaded; on
+ *   the file an editor uploaded it reads only that "More Information" and
+ *   "Delete" are absent, never the "Update File Details" entry.
  * - A3 🐞: S6 reads that the Copyeditor's window opens on "History"; nothing
  *   waits for that tab to load.
- * - A7 🐞: S7 reads that no "Upload revisions" button shows on a round that
- *   asks for none and that "Revisions Uploaded" reads "No Items"; nothing
- *   reads or presses the "Upload" above it.
+ * - A7 🐞: on the round with no decision S7 reads that no "Upload
+ *   revisions" button shows and that "Revisions Uploaded" reads "No Items";
+ *   it neither reads nor presses the "Upload" above that list. It presses
+ *   "Upload" only on the accepted round, where the upload works.
  * - A11 🐞: S9 chooses the component before "Save" in "Edit notes.md".
  * - A12 🐞: S4 and S7 read the zip's name as the submission's number, then
  *   hyphens, then "submission-files.zip", without fixing their count.
@@ -784,6 +786,10 @@ test.describe('submission files', () => {
             participants: [{username: 'sectioneditor.ravi', role: 'sectionEditor'}],
             files: [{file: 'article.pdf'}, {file: 'notes.md', uploader: 'sectioneditor.ravi'}],
         });
+        // The second submission, accepted on its review round (footnote s0, recipe 7).
+        const {submissionId: acceptedId} = await seed(ompApi, `${tag}a`, {
+            decisions: ['sendExternalReview', 'accept'],
+        });
 
         // "Submission Files" in the author view: both files, no "Upload".
         const page = await (await asUser(AUTHOR)).newPage();
@@ -795,8 +801,15 @@ test.describe('submission files', () => {
         await expect(list.downloadAllButton()).toBeVisible();
         await expect(list.uploadButton()).toHaveCount(0);
 
-        // The row menu on their own file: "Update File Details" alone.
+        // The row menu on their own file: "Update File Details" alone. On the
+        // file the Series editor uploaded, neither "More Information" nor
+        // "Delete" (the Press Manager's menu on the same row, read the same
+        // way, is the control below); the "Update File Details" entry there is
+        // A2's and is not read.
         expect(await list.menuEntries(list.row('article.pdf'))).toEqual(['Update File Details']);
+        const othersMenu = await list.menuEntries(list.row('notes.md'));
+        expect(othersMenu, 'the Author\'s menu on notes.md').not.toContain('More Information');
+        expect(othersMenu, 'the Author\'s menu on notes.md').not.toContain('Delete');
 
         // Renaming their own file.
         await list.choose(list.row('article.pdf'), 'Update File Details');
@@ -818,7 +831,32 @@ test.describe('submission files', () => {
         await expect(revisions.noItems()).toBeVisible({timeout: 30_000});
         await expect(frame.dialog().getByRole('button', {name: 'Upload revisions', exact: true})).toHaveCount(0);
 
-        // Control: the Press Manager's "Upload" and "More Information" / "Delete".
+        // "Revisions Uploaded" after "Accept Submission": the round's status
+        // names Copyediting, no "Upload revisions", and the "Upload" above the
+        // list opens the three-step window and adds the file.
+        await frame.gotoAuthor(acceptedId);
+        await frame.selectRound(1);
+        await frame.expectStatus('The submission is currently in the Copyediting stage.');
+        const accepted = new FileList(page, frame, REVISIONS_UPLOADED);
+        await expect(accepted.uploadButton()).toBeVisible({timeout: 30_000});
+        await expect(frame.dialog().getByRole('button', {name: 'Upload revisions', exact: true})).toHaveCount(0);
+        await accepted.uploadButton().click();
+        const wizard = new UploadWizard(page, UPLOAD_REVIEW_FILE);
+        await wizard.expectOpen();
+        await expect(wizard.steps()).toHaveText(WIZARD_STEPS);
+        await expect(wizard.dialog()).toContainText(COMPONENT_LABEL);
+        await wizard.uploadOne({component: MAIN, file: fx('notes.md'), name: 'notes.md'});
+        await frame.gotoAuthor(acceptedId);
+        await frame.selectRound(1);
+        await accepted.expectNames(['notes.md']);
+
+        // The Press Manager on the accepted round: "notes.md" is listed.
+        const {page: aPage, frame: aFrame} = await openWorkflow(asUser, appContext, MANAGER, acceptedId);
+        await aFrame.selectRound(1);
+        await new FileList(aPage, aFrame, REVISIONS_UPLOADED).expectNames(['notes.md']);
+
+        // Control: the Press Manager's "Upload" and "More Information" / "Delete"
+        // on the first submission.
         const {page: mPage, frame: mFrame} = await openWorkflow(asUser, appContext, MANAGER, submissionId, {stage: 'submission'});
         const mList = new FileList(mPage, mFrame, SUBMISSION_FILES);
         await mList.expectNames(['Manuscript', 'notes.md']);

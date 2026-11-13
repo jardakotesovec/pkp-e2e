@@ -834,13 +834,14 @@ tooling recipe are in the footnote. <sup>s0</sup>
    Given: Author, on My Submissions, with their own submission in review,
    its round asking for no revisions, whose "Submission Files" list holds
    "article.pdf", which they uploaded, and "notes.md", which a Section
-   Editor uploaded.
+   Editor uploaded, and a second submission of theirs accepted with
+   "Accept Submission" on its review round.
 
    - **"Submission Files"**: open the submission and select "Submission":
      the list shows both files, with no "Upload" above it (Actors row 2).
    - **The row menu**: "More Actions" on "article.pdf" offers "Update File
      Details", and neither "More Information" nor "Delete" (Actors rows
-     3–5); "notes.md" offers the entry too [A2](#a2).
+     3–5); "notes.md" offers the same menu [A2](#a2).
    - **Renaming their own file**: choose "Update File Details" on
      "article.pdf": the "Edit a file" window opens; type "Manuscript" in
      place of "article.pdf" and press "Save": the list shows "Manuscript"
@@ -854,7 +855,22 @@ tooling recipe are in the footnote. <sup>s0</sup>
      Uploaded" [A7](#a7); press it: the window "Upload Review File" reads
      only "You are not allowed to add and edit these files." with
      "Close", and the list stays "No Items" (Actors row 2; Rule 5).
-   - **Control**: Journal Manager: on the same submission "Upload" stands
+   - **"Revisions Uploaded" after "Accept Submission"**: open the second
+     submission from My Submissions and select its review round in the
+     workflow menu: the status beside the round reads "The submission is
+     currently in the Copyediting stage.", and no "Upload revisions"
+     button shows; press "Upload" above "Revisions Uploaded": the window
+     "Upload Review File" opens on the steps "1. Upload File", "2. Review
+     Details" and "3. Confirm"; choose "Article Text" in "Article
+     Component" ("Book Manuscript" in "Submission Component" on a press),
+     attach "notes.md", press "Continue", "Continue", then "Complete": the
+     window closes; open the submission again from My Submissions and
+     select the review round: "Revisions Uploaded" lists "notes.md"
+     (Actors row 2; Rules 5, 5c).
+   - **The Journal Manager on the accepted round**: Journal Manager: on
+     the second submission's review round, "Revisions Uploaded" lists
+     "notes.md" (Actors row 1). <sup>s0</sup>
+   - **Control**: Journal Manager: on the first submission "Upload" stands
      above "Submission Files", and each row's "More Actions" offers "More
      Information" and "Delete" (Actors rows 2, 4–5).
 
@@ -1035,7 +1051,6 @@ Left out of the scenarios above, by reason:
   - step 1 of the upload wizard before a component is chosen: the upload box absent from the accessibility snapshot, and each drop-down found by its role and label ([A9](#a9)): the guards the two issue reports propose [report 2026-10-02]
   - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes [report 2026-10-02]
   - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes [incidental 2026-10-05]
-  - the Author on a round after "Accept Submission": "Upload" above "Revisions Uploaded" opens the three-step upload window, the file is listed there after reopening the submission, the status beside the round reads "The submission is currently in the Copyediting stage.", and no "Upload revisions" shows (Actors row 2; [A7](#a7)'s boundary) [incidental 2026-11-13]
 - **Nothing new to test**:
   - "Cancel" after revising a file renamed since its last upload: the previous file back, its rename kept, and no line of the cancelled upload in its "History" (Rule 9)
   - the header "Close" after a revision: the new file kept, the earlier version a "Download" in "History" (Rule 9)
@@ -2543,8 +2558,9 @@ admin"), `participants: [{username: 'copyeditor.carla', role:
 'copyeditor'}]`; "Draft Files" starts empty since seeded submissions carry no
 Copyediting files. 7 — `decisions: ['sendExternalReview']`, `participants:
 [{username: 'sectioneditor.ravi', role: 'sectionEditor'}]`, `files: [{file:
-'article.pdf'}, {file: 'notes.md', uploader: 'sectioneditor.ravi'}]`, read as
-`author.alex`, the control as `manager.maya`. 8 — `decisions:
+'article.pdf'}, {file: 'notes.md', uploader: 'sectioneditor.ravi'}]`, and a
+second seed with `decisions: ['sendExternalReview', 'accept']` and no `files`,
+read as `author.alex`, the last two bullets as `manager.maya`. 8 — `decisions:
 ['sendExternalReview']`, `reviewRounds: [{files: [{file: 'article.pdf'}],
 reviewers: [{username: 'reviewer.julia', status: 'accepted'}]}]` on
 `publicknowledge`, whose "Default Review Mode" is "Anonymous
