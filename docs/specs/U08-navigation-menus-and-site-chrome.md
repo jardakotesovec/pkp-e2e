@@ -354,9 +354,12 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
     while the pointer stays on the item or the list. Pressed, it opens
     and stays open after the pointer leaves, until the visitor presses
     the item again, presses elsewhere or presses Escape. In a narrow
-    window every list is shown open and the item is a link to its own
-    page: "About" opens "About the Journal", the username what
-    "Dashboard" opens (Rule 19) ⚠ [A28](#a28). <sup>q</sup> <sup>td22</sup>
+    window ("Open Menu" shown, Rule 15b) every list is shown open and the
+    item is a plain link, announced as a link, not a button: pressed, it
+    opens its own page, "About" the "About the Journal" page and the
+    username what "Dashboard" opens (Rule 19) ⚠ [A28](#a28). On that
+    page Rule 15c marks both "About" and "About the Journal" as the
+    current page, since both lead to it. <sup>q</sup> <sup>td22</sup>
     - 16a. **Two levels.** The header shows two levels: an item placed
       deeper than that (possible only when the installation's
       configuration file allows deeper menus, which no screen changes;
@@ -1670,14 +1673,14 @@ Since: 2026-10-22 · Basis: probe, 2026-10-29. <sup>f-a27</sup>
 <a id="a28"></a>
 **A28 — In a narrow window "About" and the username open a page instead of only their list** · ❓ · minor.
 In a narrow window, as on a phone, every list of the public header
-shows open under its item. Pressing "About" now opens the "About the
-Journal" page, and pressing the username opens what "Dashboard" opens;
-before pkp/pkp-lib#12654 both stayed on the page. In a wide window the
-same items are buttons that only open their list (Rule 16).
+shows open under its item. Pressing "About" opens the "About the
+Journal" page, and pressing the username opens what "Dashboard" opens.
+In a wide window the same items are buttons that only open their list
+(Rule 16).
 Question: should the top-level items lead to their own page in a narrow
 window? Lean: intended; each opens the same page as the first entry of
 its list, which the visitor sees right under it, so nothing is lost.
-Since: pkp/pkp-lib#12654, not yet merged (PR heads, 2026-11-13) · Basis: probe. <sup>f-a28</sup>
+Since: 2026-11-13 · Basis: probe. <sup>f-a28</sup>
 
 ### OJS
 
@@ -3127,7 +3130,9 @@ both widths; the username carried none at either width.
 `plugins/themes/default/js/main.js` `toggleDropdowns()`: below 992 px
 it puts back the link kept in the button's `pkpNavLink` data, or, on a
 page loaded narrow, leaves the served link untouched, where the code
-before set `href="#"` on it at either width.
+before set `href="#"` on it at either width, so both items stayed on
+the page; the change came with pkp/pkp-lib#12654, driven at its PRs'
+heads before their merge.
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — OJS `NavigationMenuService` gives `NMI_TYPE_SUBSCRIPTIONS`
