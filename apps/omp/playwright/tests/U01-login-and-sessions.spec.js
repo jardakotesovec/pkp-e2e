@@ -971,7 +971,7 @@ test.describe('Login & sessions (U1)', () => {
         await expect(reviewerPage.getByText(scratchPressName(tag))).toBeVisible();
         await expect(reviewerPage.getByText('Public Knowledge Press')).toBeVisible();
         await expect(
-            publicUserMenu(reviewerPage).getByRole('link', {name: new RegExp(`^${orin.username}`)})
+            publicUserMenu(reviewerPage).getByRole('button', {name: new RegExp(`^${orin.username}`)})
         ).toBeVisible();
         await expect(changePasswordForm(reviewerPage)).toHaveCount(0);
         await expect(reviewerPage).not.toHaveURL(/dashboard/);
@@ -1392,7 +1392,7 @@ test.describe('Login & sessions (U1)', () => {
         await expect(page.getByText(scratchPressName(tag))).toBeVisible();
         await expect(page.getByText('Public Knowledge Press')).toBeVisible();
         await expect(
-            publicUserMenu(page).getByRole('link', {name: new RegExp(`^${other.username}`)})
+            publicUserMenu(page).getByRole('button', {name: new RegExp(`^${other.username}`)})
         ).toBeVisible();
         await expect(page.locator('form#login')).toHaveCount(0);
         await expect(page).not.toHaveURL(/mySubmissions|dashboard/);
@@ -1497,9 +1497,7 @@ test.describe('Login & sessions (U1)', () => {
         await unticked.goto(pressHomeUrl(tag));
         await expect(publicUserMenu(unticked).getByRole('link', {name: 'Register', exact: true})).toBeVisible();
         await expect(publicUserMenu(unticked).getByRole('link', {name: 'Login', exact: true})).toBeVisible();
-        await expect(
-            publicUserMenu(unticked).getByRole('link', {name: new RegExp(`^${manager.username}`)})
-        ).toHaveCount(0);
+        await expect(publicUserMenu(unticked)).not.toContainText(manager.username);
 
         expect(failures, 'no request failed on the server and no page script failed').toEqual([]);
     });
