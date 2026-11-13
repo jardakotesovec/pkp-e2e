@@ -1629,7 +1629,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A24](#a24) | Paging the export list, the dashboard or a preprint server's archive repeats some submissions and skips others | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A25](#a25) | Native XML import: a file over the upload limit is refused with "File size error." and no limit named | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A26](#a26) | A published article, book or preprint imported with the Native XML Plugin is missing from the Dashboard's "Published" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
-| [A27](#a27) | "OK" in "Export All Users" downloads the file but leaves the "Confirm" window open over the list | 🐞 | minor | — |
+| [A27](#a27) | "OK" in "Export All Users" downloads the users file but leaves the "Confirm" window open over the list | 🐞 | low | issues (claude), 2026-11-13 — re-verified |
 | [OJS1](#ojs1) | DOAJ export list's issue link opens the issue's window headed "DOI Plugin Settings" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | With "DOAJ Plugin" switched off, the Plugins list still shows its export tool as on | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Where NLM's site cannot be reached, every PubMed export fails with a "Validation errors:" page | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1939,14 +1939,17 @@ imported this way is left off, for every Dashboard user.
 Basis: probe, 2026-10-21. <sup>f-a26</sup>
 
 <a id="a27"></a>
-**A27 — "OK" in "Export All Users" downloads the file but leaves the "Confirm" window open over the list** · 🐞 · minor.
+**A27 — "OK" in "Export All Users" downloads the users file but leaves the "Confirm" window open over the list** · 🐞 · low.
 A manager presses "Export All Users" on the Users XML Plugin's "Export
 Users" tab and answers "OK" in the "Confirm" window that asks "Are you
 sure you wish to export all users?". The file downloads, and the window
-should close. Instead it stays open, still asking the question, and the
-list behind it cannot be used until the manager presses the window's
-"Cancel", which reads as calling the export off. {OJS OMP}
-Basis: test run, 2026-11-11. <sup>f-a27</sup>
+should close. Instead it stays open over the list, still asking the
+question.
+The manager's next press on the list only closes the window, and the
+press after it does what was meant. Escape closes the window too. On
+3.5 the window's "OK" and "Cancel" are greyed out after "OK", but the
+same press or Escape still closes it. {OJS OMP}
+Basis: test run + probe, 2026-11-13. <sup>f-a27</sup>
 
 ### OJS
 
@@ -3736,6 +3739,7 @@ to export all users?" with "OK" and "Cancel", was still open 30 s later
 tick boxes from being pressed for 300 s (OJS); "Cancel" then closed it
 (OMP). Scenario 6 leaves the page for journal B after "OK" and does not
 read the window.
+Issue report: docs/issues/U63-A27-export-all-users-confirm-stays-open.md
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `ExportPublishedSubmissionsListGridCellProvider::getCellActions()`

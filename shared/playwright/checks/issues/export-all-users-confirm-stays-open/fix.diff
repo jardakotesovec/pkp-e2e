@@ -1,0 +1,11 @@
+--- a/lib/pkp/js/controllers/modal/RedirectConfirmationModalHandler.js
++++ b/lib/pkp/js/controllers/modal/RedirectConfirmationModalHandler.js
+@@ -92,5 +92,8 @@
+ 			modalConfirm = function(dialogElement, event) {
+ 
+ 		document.location = this.remoteUrl_;
++		// The address may answer with a download, which leaves the page in
++		// place: close the dialog as the other confirmation handlers do.
++		this.modalClose(dialogElement);
+ 	};
+ }(jQuery));
