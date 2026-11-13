@@ -850,7 +850,7 @@ exports.CatalogBookPage = class CatalogBookPage extends BasePage {
 
     /** The signed-in name in the reader-facing header (the user menu's toggle). */
     signedInName(username) {
-        return this.page.locator('#navigationUserWrapper').getByRole('link', {name: new RegExp(`^\\s*${escapeRegExp(username)}`)});
+        return this.page.locator('#navigationUserWrapper').getByRole('button', {name: new RegExp(`^\\s*${escapeRegExp(username)}`)});
     }
 
     /** The header's "Login" link (signed out). */

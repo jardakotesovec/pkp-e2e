@@ -45,8 +45,9 @@
  *   page has no form and the same address (wait on the POST, not the URL);
  * - a broken footer link answers the bare page `<h1>404 Not Found</h1>`,
  *   no title, no journal header (probed 2026-09-13, `.reports/U05/tojs`);
- * - the reader-side user menu is `#navigationUserWrapper > ul > li > a`
- *   (the name, `data-toggle="dropdown"`) holding `span.task_count` for the
+ * - the reader-side user menu is `#navigationUserWrapper > ul > li > button`
+ *   (the name, `data-toggle="dropdown"`, which the theme's script puts in
+ *   place of the served link at desktop width, pkp-lib#12654) holding `span.task_count` for the
  *   roles Rule 4 names, and under it a hidden `ul.dropdown-menu` whose
  *   entries are links ("Dashboard" with its own `span.task_count` where the
  *   name has one, "View Profile", "Logout"); the entries are in the DOM but
@@ -65,8 +66,9 @@
  *   (probed 2026-10-28, `.reports/U05/tojs` n1);
  * - below 992 px the reader-facing header loads with a `button` "Open
  *   Menu" (`button.pkp_site_nav_toggle`) and the user menu is NOT turned
- *   into a dropdown: the name is `#navigationUser > li > a` with no
- *   `data-toggle` and its `span.task_count` hidden, the entries are
+ *   into a dropdown: the name is `#navigationUser > li > a` (the served
+ *   link to the Dashboard, pkp-lib#12654) with no `data-toggle` and its
+ *   `span.task_count` hidden, the entries are
  *   `#navigationUser > li > ul a` with no `dropdown-menu` class, listed
  *   under the name once "Open Menu" is pressed, the "Dashboard" entry's
  *   `span.task_count` displayed (probed 2026-10-28, n1). The theme picks
@@ -591,7 +593,7 @@ exports.ReaderHeader = class ReaderHeader extends BasePage {
     constructor(page) {
         super(page);
         this.wrapper = page.locator('#navigationUserWrapper');
-        this.toggle = this.wrapper.locator('> ul > li > a[data-toggle="dropdown"]');
+        this.toggle = this.wrapper.locator('> ul > li > button[data-toggle="dropdown"]');
         this.menu = this.wrapper.locator('ul.dropdown-menu');
     }
 
@@ -645,9 +647,9 @@ exports.ReaderHeader = class ReaderHeader extends BasePage {
         return this.page.getByRole('button', {name: 'Open Menu', exact: true});
     }
 
-    /** The signed-in name at any width (`#navigationUser > li > a`; a dropdown toggle only at desktop width). */
+    /** The signed-in name at any width (a `button` toggle at desktop width, the served `a` below 992 px). */
     nameLink() {
-        return this.wrapper.locator('#navigationUser > li > a');
+        return this.wrapper.locator('#navigationUser > li > :is(a, button)');
     }
 
     /** The entries under the name at any width (`#navigationUser > li > ul a`). */

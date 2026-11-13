@@ -250,14 +250,15 @@ test.describe('announcements', () => {
         expect(labels.indexOf('Announcements')).toBeGreaterThanOrEqual(0);
         expect(labels.indexOf('Announcements')).toBeLessThan(labels.indexOf('DOIs'));
 
-        // The public side on: the header carries "Announcements" first, on
-        // a preprint server; pressed, the Announcements page opens with its
+        // The public side on: the header carries "Announcements" right
+        // after "Home", on a preprint server; pressed, the Announcements page opens with its
         // breadcrumb, heading and the introduction, then an empty list; the
         // home page carries no block (Rules 2, 9, 11, 12).
         await gotoHome(visitor, tag);
         items = await primaryNavItems(visitor);
-        expect(items.indexOf('Announcements')).toBe(0);
-        expect(items.indexOf('Archives')).toBe(1);
+        expect(items.indexOf('Home')).toBe(0);
+        expect(items.indexOf('Announcements')).toBe(1);
+        expect(items.indexOf('Archives')).toBe(2);
         await expect(home.section).toHaveCount(0);
         await expect(skipToAnnouncements(visitor)).toHaveCount(0);
         await primaryNavItem(visitor, 'Announcements').click();

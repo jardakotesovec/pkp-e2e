@@ -254,20 +254,21 @@ exports.SiteUserMenu = class SiteUserMenu extends BasePage {
     }
 
     /**
-     * The menu's own link: the signed-in username, followed by the count of
-     * the account's unread tasks for an editorial role (a Journal Manager's
-     * reads "{username} 0").
+     * The menu's own toggle: the signed-in username, followed by the count
+     * of the account's unread tasks for an editorial role (a Journal
+     * Manager's reads "{username} 0"). At desktop width the theme's script
+     * swaps the served link for a button (pkp-lib#12654).
      */
     toggle(username) {
-        return this.root.getByRole('link', {name: new RegExp(`^${escapeRegExp(username)}(\\s+\\d+)?$`)});
+        return this.root.getByRole('button', {name: new RegExp(`^${escapeRegExp(username)}(\\s+\\d+)?$`)});
     }
 
     /**
      * Open the menu and press "Logout"; lands on the Login page (Rule 6).
-     * The name is a plain link until the theme's script turns it into a
-     * drop-down (`data-toggle="dropdown"`, default theme `js/main.js`); a
-     * press before that follows the link and the menu never opens (seen on
-     * the OMP suite, CI 37724191553), so the press waits for the marker.
+     * The name is a plain link until the theme's script swaps it for a
+     * drop-down button (`data-toggle="dropdown"`, default theme `js/main.js`);
+     * a press before that follows the link and the menu never opens (seen on
+     * the OMP suite, CI 37724191553), so the press waits for the button.
      */
     async logout(username) {
         await expect(this.toggle(username)).toHaveAttribute('data-toggle', 'dropdown');

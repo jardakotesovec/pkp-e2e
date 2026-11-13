@@ -584,10 +584,10 @@ class PublicChrome extends BasePage {
         this.header = page.locator('header.pkp_structure_head');
         this.siteNameLink = page.locator('.pkp_site_name a');
         this.primaryMenu = page.locator('#navigationPrimary');
-        this.primaryTopLinks = page.locator('#navigationPrimary > li > a');
+        this.primaryTopLinks = page.locator('#navigationPrimary > li > :is(a, button)');
         this.userMenu = page.locator('#navigationUser');
         this.userMenuWrapper = page.locator('#navigationUserWrapper');
-        this.userTopLinks = page.locator('#navigationUser > li > a');
+        this.userTopLinks = page.locator('#navigationUser > li > :is(a, button)');
         this.searchLink = page.locator('.pkp_navigation_search_wrapper a');
         this.skipLinks = page.locator('.cmp_skip_to_content a');
         this.main = page.locator('.pkp_structure_main');
@@ -634,13 +634,15 @@ class PublicChrome extends BasePage {
 
     /**
      * A top-level item with a list, once the theme's script has made it a
-     * toggle (it turns the served address into "#"; a press before that
-     * follows the served address, screen-notes ccK3).
+     * toggle: at desktop width it swaps the served link for a `button`
+     * (`data-toggle="dropdown"`; pkp-lib#12654); a press before that follows
+     * the served address (screen-notes ccK3).
      */
     async toggleReady(menu, title) {
-        const link = this.topLink(menu, title);
-        await expect(link).toHaveAttribute('href', '#', {timeout: T});
-        return link;
+        const toggle = this.topLink(menu, title);
+        await expect(toggle).toHaveAttribute('data-toggle', 'dropdown', {timeout: T});
+        await expect(toggle).toHaveJSProperty('tagName', 'BUTTON');
+        return toggle;
     }
 
     /** Press a top-level item that has a list (it opens or closes the list, never a page). */

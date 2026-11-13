@@ -1466,7 +1466,7 @@ test.describe('Login & sessions (U1)', () => {
         // same way in the unticked browser below is the positive control.
         await ticked.goto(pressHomeUrl(tag));
         await expect(
-            publicUserMenu(ticked).getByRole('link', {name: new RegExp(`^${manager.username}`)})
+            publicUserMenu(ticked).getByRole('button', {name: new RegExp(`^${manager.username}`)})
         ).toBeVisible();
         await expect(publicUserMenu(ticked).getByRole('link', {name: 'Register', exact: true})).toHaveCount(0);
         await expect(publicUserMenu(ticked).getByRole('link', {name: 'Login', exact: true})).toHaveCount(0);
