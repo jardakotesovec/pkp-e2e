@@ -992,8 +992,10 @@ its own checks are triaged:
    statement in (`git log -S`, `git blame`), or says how far back it
    goes when the history does not show a start. It is filed at once
    (`npm run hk -- file <report> --post`) and posted in the session's
-   thread with the issue's link, tagging @beaug and the developer who
-   made that change ("Who is tagged"). The fault gets a row in
+   thread as a message of its own, one per issue, with the issue's
+   link and two or three sentences on what a user sees, tagging @beaug
+   and the developer who made that change ("Who is tagged"); the
+   session's summary names the issues without tags. The fault gets a row in
    ci-triage "Open — red on a configuration only" (`C-<feature>-<n>`)
    linking the issue and the kept script. The test stays red on that
    configuration until the fix lands, as a known red on `main` does,
