@@ -121,16 +121,20 @@ session, scheduled through claude-threads. Its queue is
 `npm run backlog`, which reads every kind of work from where it lives
 (the registers, the reports, the tracking files) and prints it in the
 order of the steps below. The steps run in the order written, and the
-order is the priority. Two rules hold through the morning:
+order is by importance: first that the suites can be trusted and that
+nothing started stays unfinished, then what reaches the team (security
+findings, the team's own moves on filed issues, new reports), then
+the search for drift and the tidying. Two rules hold through the
+morning:
 
 - **About four hours.** After about four hours the session starts
-  nothing new and goes to step 11. Whatever it has started (a report,
+  nothing new and goes to step 12. Whatever it has started (a report,
   a fold, a build or revision, a sweep) it finishes first, however
   long that takes. What is left, the next morning picks up from the
   files.
 - **Coverage is never left for another day.** A step that finds
   coverage owing on a shipped spec writes it down as a **Planned**
-  item in that spec, and step 11 writes the tests before the session
+  item in that spec, and step 12 writes the tests before the session
   ends, past the four hours when it has to. Every other session does
   the same (RUNBOOK "Revising a shipped feature").
 
@@ -141,31 +145,26 @@ order is the priority. Two rules hold through the morning:
    code and reset the databases ("Session hygiene"). Check the latest
    `e2e-tests.yml` run on each app's `main`: a red that is new goes
    first ("Keep `main` green").
-2. **Filed issues.** See what the team did with the issues already
-   filed: a label changed, a copy made on a pkp repo, a fix merged. A
-   fix that shows on `main` retires its entry and closes its issue
-   ("Filed issues" below).
-3. **Report refreshes**, every one the backlog lists: a filed report
-   whose entry changed, or that the team asked on Mattermost to change.
-   Those issues are already in the team's hands, so they come before new
-   work. A header fix (the backlog marks it: an entry joining a report,
-   an entry its footnote says a report covers but the report's "Tracked
-   in" lacks) is edited in the report and the issue
-   (`npm run hk -- file <report> --post`), the `Report:` line deleted.
-   One needing a walk or a rewrite goes through "Issue reports" as its
-   own unit.
-4. **Security refinement.** Up to three `new` findings of
-   `../pkp-e2e-sec`, oldest first, one at a time ("Security refinement"
-   below).
-5. **What was left over.** A build or revision left mid-way is resumed
+2. **What was left over.** A build or revision left mid-way is resumed
    from its `phase-status.md` and run to its end (RUNBOOK "Resuming a
    feature mid-flight"). A ready **Planned** item the backlog lists was
    left behind by a session that was cut off: its spec is revised now,
-   as step 11 says. Most mornings there is neither.
+   as "Write the coverage" says. Most mornings there is neither.
+3. **Flakes.** Diagnose the flake classes whose watch condition has
+   tripped ("Keep the flake rate down"); a flake that reds CI on the
+   day is the upstream session's interrupt, its diagnosis this
+   session's. Most mornings none has.
+4. **Security refinement.** Up to three `new` findings of
+   `../pkp-e2e-sec`, oldest first, one at a time ("Security refinement"
+   below).
+5. **Filed issues.** See what the team did with the issues already
+   filed: a label changed, a copy made on a pkp repo, a fix merged. A
+   fix that shows on `main` retires its entry and closes its issue
+   ("Filed issues" below).
 6. **A new feature to build**, when PROGRESS has a `pending` row (the
    upstream sync adds these): the oldest, built through the RUNBOOK
    loop like any feature. A build is the morning's main work, so steps
-   7 and 8 wait for the next morning.
+   7 to 9 wait for the next morning.
 7. **Incidentals.** Every row of `incidentals.md` whose feature has a
    shipped spec, oldest first: a sighting the spec already states is
    deleted, the rest are driven and folded into their specs
@@ -176,20 +175,25 @@ order is the priority. Two rules hold through the morning:
    four hours. On a morning with no incidental and no report owed, one
    entry of `docs/tracking/UNASSIGNED.md` is worked instead ("An
    UNASSIGNED entry" below).
-9. **Upkeep.**
-   - Friction: fold `docs/tracking/friction.md` and delete every row
-     ("Friction" below).
-   - Flakes: diagnose the flake classes whose watch condition has
-     tripped ("Keep the flake rate down"); a flake that reds CI on the
-     day is the upstream session's interrupt, its diagnosis this
-     session's.
-   - Stale artifacts and CI balance: fix what the day's work showed
-     stale, and refresh the shard timings when they drifted ("Keep CI
-     balanced").
+9. **Report refreshes**, every one the backlog lists: a filed report
+   whose entry changed since. A header fix (the backlog marks it: an
+   entry joining a report, an entry its footnote says a report covers
+   but the report's "Tracked in" lacks) is edited in the report and the
+   issue (`npm run hk -- file <report> --post`), the `Report:` line
+   deleted. One needing a walk or a rewrite goes through "Issue
+   reports" as its own unit. A change the team asks for on Mattermost
+   does not wait for this step: the session that receives it makes it
+   ("Feedback on a filed issue").
 10. **Drift sweep of one spec**, when the four hours allow: the one
    step that looks for statements in a spec that have gone wrong
    unnoticed ("The drift sweep" below).
-11. **Write the coverage.** Every spec that gained a ready **Planned**
+11. **Upkeep**, when the four hours allow.
+   - Friction: fold `docs/tracking/friction.md` and delete every row
+     ("Friction" below).
+   - Stale artifacts and CI balance: fix what the day's work showed
+     stale, and refresh the shard timings when they drifted ("Keep CI
+     balanced").
+12. **Write the coverage.** Every spec that gained a ready **Planned**
    item this morning (from an incidental's fold, a retired entry, the
    sweep) goes through RUNBOOK "Revising a shipped feature" with all
    its ready items: its own sheet, writer, reader and test authors, so
@@ -199,19 +203,19 @@ order is the priority. Two rules hold through the morning:
    carries the change (`VERSIONS.md` "After a feature is built"). A
    guard whose bug is still open waits, and so does an item that says
    what else it waits for.
-12. **End pushed.** Commit and push to pkp-e2e `main`, and post a
+13. **End pushed.** Commit and push to pkp-e2e `main`, and post a
    one-paragraph summary to the channel, in the order of the steps:
+   what was left over and is now finished; flake classes diagnosed; the
+   security findings refined and whether they wait for the maintainer;
    filed issues closed, relabelled or newly tracked upstream, fixes
-   merged upstream that still show, and anything step 2 left to the
-   maintainer; reports refreshed and written, each with its severity
-   and effort, the critical and high first; the security findings
-   refined and whether they wait for the maintainer; the build or
-   revision worked (feature, gate reached); incidentals worked (deleted
-   as already stated, folded with the spec and IDs, not reproduced);
-   the UNASSIGNED entry's outcome; friction folded, flake classes
-   diagnosed, artifacts fixed; the spec swept and what drifted; the
-   coverage written (the scenario numbers and tests added); and what
-   `npm run backlog` still lists.
+   merged upstream that still show, and anything "Filed issues" left to
+   the maintainer; the build worked (feature, gate reached);
+   incidentals worked (deleted as already stated, folded with the spec
+   and IDs, not reproduced); reports written and refreshed, each with
+   its severity and effort, the critical and high first; the
+   UNASSIGNED entry's outcome; the spec swept and what drifted;
+   friction folded, artifacts fixed; the coverage written (the scenario
+   numbers and tests added); and what `npm run backlog` still lists.
 
 The housekeeping session never runs the sync loop, the stable line or a
 companion, and leaves a revision queue to the maintainer.
@@ -312,7 +316,7 @@ driven the same way: when it holds, the fold retires the entry
 (TEMPLATE "Findings register"); when the entry still shows, the row is
 deleted and the entry stays where the backlog lists it. Every worked
 row is deleted from `incidentals.md`. Coverage a fold leaves as a
-**Planned** item is written in step 11.
+**Planned** item is written in "Write the coverage".
 
 ### Friction
 
@@ -362,8 +366,8 @@ and the suites) judges the snapshots against the spec lines each
 chunk owns, drives what the checks no longer reach, and reads each
 suite against the scenarios for a bullet no test asserts.
 Drift folds as "Fix stale artifacts as you go" says, the tests with it; a bullet without its
-assertion becomes a **Planned** item for step 11. The PROGRESS note
-ends with
+assertion becomes a **Planned** item for "Write the coverage". The
+PROGRESS note ends with
 "Swept <date>.", replacing the previous one.
 
 ### An UNASSIGNED entry
@@ -371,8 +375,8 @@ ends with
 The top entry of `docs/tracking/UNASSIGNED.md`, driven by a checker.
 Live behavior on a shipped spec's
 screens folds into that spec (a claim with its footnote, the
-coverage as a **Planned** item for step 11) and the entry goes; dead code keeps
-its entry with the evidence; one that looks out of scope or like a
+coverage as a **Planned** item for "Write the coverage") and the
+entry goes; dead code keeps its entry with the evidence; one that looks out of scope or like a
 new feature goes to the maintainer.
 
 ## Issue reports
@@ -384,7 +388,8 @@ proposed fix. Every 🐞 entry in the registers gets one, and every report
 is held to `docs/process/REPORT.md`. The ❓ and ✅ entries stay out: a
 question needs a ruling, not a fix.
 
-The housekeeping session writes them (its steps 3 and 8), from the
+The housekeeping session writes them ("Reports owed" and "Report
+refreshes" in its list), from the
 backlog: a refresh is a unit of its own, and owed reports go spec by
 spec. A maintainer's own session may work a spec too: it first gives
 the entries it takes a `Report: paused — taken in the maintainer's
@@ -537,7 +542,7 @@ and it says what its register entries say. When the issue closes, the
 report and its kept script are deleted; git and the closed issue keep
 the history. The register entry follows the reason: fixed, the entry
 retires with the fixing PR as its reason once a walk on the apps' `main`
-shows the fix (housekeeping step 2, or the sync), and when the report's
+shows the fix (housekeeping "Filed issues", or the sync), and when the report's
 severity is medium or higher the session looks for the fix in every
 stable version with a folder (the version's sync log,
 `git merge-base --is-ancestor` or `git cherry` in its checkout): a
@@ -570,7 +575,7 @@ session that makes it:
   class or method the report rests on that the change touched (the
   report's backticked names against the change's file list), not only
   the sentence first noticed. The backlog lists it and
-  housekeeping step 3 works it. On a companion branch the line rides with the branch and
+  the housekeeping session's "Report refreshes" works it. On a companion branch the line rides with the branch and
   lands when it merges, since the issue describes `main`.
 
 The same `Report:` line holds an entry's other states the backlog reads:
@@ -1016,7 +1021,7 @@ decide deliberately. This decision is how the suite stays organised.
   that no row claims (a new workflow, a new settings area, a new plugin).
   Add a FEATURE-MAP row for it with the next U-number, the surface
   described there, and a `pending` PROGRESS row, and name it in the day's
-  summary; the housekeeping session builds it (its step 8) and the sync
+  summary; the housekeeping session builds it ("A new feature to build") and the sync
   leaves it alone until then. A change to a pending feature's surface that a
   shipped spec points at is the previous case, limited to the pointer.
   The atlas is never extended (FEATURE-MAP's header says why).

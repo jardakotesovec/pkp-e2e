@@ -285,7 +285,7 @@ two ways:
   🐞's fix, and any other item that cannot be written yet says what it
   waits for, in the words "waits for …". A ready item that was left
   behind all the same shows in `npm run backlog`, and the housekeeping
-  session writes it first (MAINTENANCE housekeeping step 5).
+  session writes it first (MAINTENANCE housekeeping, "What was left over").
 - **A rule change.** A new coverage or scenario rule leaves shipped specs
   behind. The maintainer opens the queue `docs/tracking/coverage-revision.md`,
   one row per spec, deleted when it empties, and launches each revision

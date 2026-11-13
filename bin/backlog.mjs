@@ -174,18 +174,15 @@ const section = (title, count, body) => { out += `\n${title} (${count})\n${body}
 // A header fix needs no walk: a join, or a "Tracked in" that lacks the entry.
 const header = (i) => /^joins |"Tracked in" lacks/.test(i.why);
 refreshes.sort((a, b) => header(b) - header(a));
-section('1. Report refreshes, every one', `${refreshes.filter(header).length} header fixes, `
-    + `${refreshes.filter((i) => !header(i)).length} needing a walk`,
-    cap(refreshes).map((i) => `  ${i.spec} ${i.id}${header(i) ? ' [header]' : ''}: ${i.why}\n`).join('') + more(refreshes));
 // Specs with first-class items lead, the oldest such item first; then the rest, oldest first.
 const ready = planned.filter((s) => s.n).sort((a, b) => (b.first > 0) - (a.first > 0)
     || (a.first ? a.firstOldest : a.oldest).localeCompare(b.first ? b.firstOldest : b.oldest)
     || b.first - a.first || a.spec.localeCompare(b.spec));
-// A ready item dated today is this morning's own, owed to step 11, not left over.
+// A ready item dated today is this morning's own, owed to "Write the coverage", not left over.
 const today = new Date().toISOString().slice(0, 10);
 const ownToday = ready.filter((s) => s.oldest >= today && (!s.first || s.firstOldest >= today));
 const leftBehind = ready.filter((s) => !ownToday.includes(s));
-section('2. Left over, finished first',
+section('1. Left over, finished first',
     `${midway.length} builds and ${sheets.length} revisions mid-way; ${leftBehind.reduce((n, s) => n + s.n, 0)} ready Planned items in ${leftBehind.length} specs; `
     + `${planned.reduce((n, s) => n + s.waiting, 0)} items wait, nearly all guards for their bug's fix`,
     midway.map((r) => `  ${r[0]} ${r[1]}: build mid-way\n`).join('')
@@ -193,24 +190,28 @@ section('2. Left over, finished first',
     + cap(leftBehind).map((s) => `  ${s.spec}: ${s.n}`
         + (s.first ? `, ${s.first} from upstream, a fixed bug or a request (oldest ${s.firstOldest})` : ` (oldest ${s.oldest})`)
         + `${s.waiting ? ` (+${s.waiting} waiting)` : ''}\n`).join('') + more(leftBehind)
-    + (ownToday.length ? `  written down today, for step 11: ${ownToday.map((s) => s.spec).join(', ')}\n` : ''));
-section('3. New features to build, oldest first', pending.length,
+    + (ownToday.length ? `  written down today, for "Write the coverage": ${ownToday.map((s) => s.spec).join(', ')}\n` : ''));
+section('2. New features to build, oldest first', pending.length,
     pending.map((r) => `  ${r[0]} ${r[1]}\n`).join(''));
-section('4. Incidentals, oldest first', incidentals.length,
+section('3. Incidentals, oldest first', incidentals.length,
     cap(incidentals).map((r) => `  ${r[0]}: ${r[1].slice(0, 90)}\n`).join('') + more(incidentals));
-section('5. Reports owed, one spec at a time', `${owed.length} entries in ${owedSpecs.length} specs`,
+section('4. Reports owed, one spec at a time', `${owed.length} entries in ${owedSpecs.length} specs`,
     cap(owedSpecs).map((s) => `  ${s.spec}: ${s.items.map((i) => `${i.id} [${i.impact}]`).join(', ')}\n`).join('')
     + more(owedSpecs)
     + (!held.length ? '' : all
         ? held.map((i) => `  held: ${i.spec} ${i.id}, ${i.why}\n`).join('')
         : `  held, skipped: ${held.length} (--all)\n`));
+section('5. Report refreshes, every one', `${refreshes.filter(header).length} header fixes, `
+    + `${refreshes.filter((i) => !header(i)).length} needing a walk`,
+    cap(refreshes).map((i) => `  ${i.spec} ${i.id}${header(i) ? ' [header]' : ''}: ${i.why}\n`).join('') + more(refreshes));
 // Every session writes its own coverage before it ends, so what is listed here was
-// left over and is finished first (MAINTENANCE "The housekeeping session", step 5).
+// left over and is finished first (MAINTENANCE "The housekeeping session", "What was left over").
 const leftOver = midway.length + sheets.length + leftBehind.length;
-out = 'In this order: report refreshes (1)'
-    + (leftOver ? ', what was left over (2)' : '')
-    + (pending.length ? ', the new feature to build (3), which takes the morning' : ', incidentals and reports owed (4, 5)')
-    + ', friction (6), the day\'s drift sweep when the four hours allow (`npm run hk -- swept` names the spec),'
+out = 'In this order, after flakes, security and filed issues: '
+    + (leftOver ? 'what was left over (1) before anything else; ' : '')
+    + (pending.length ? 'the new feature to build (2), which takes the morning'
+        : 'incidentals (3), reports owed (4), report refreshes (5)')
+    + '; when the four hours allow, the day\'s drift sweep (`npm run hk -- swept` names the spec) and friction (6);'
     + ' then the tests for the coverage the morning found owing.\n'
     + out;
 section('6. Friction rows to fold', friction.length, '');

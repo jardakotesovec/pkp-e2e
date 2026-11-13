@@ -1,5 +1,5 @@
 // U49 claim check H21 (housekeeping 2026-10-21, cc21b): three incidentals rows, all REST API or plain-address
-// requests, no screen sends them (MAINTENANCE housekeeping step 7). On PKP's default test dataset (a dataset
+// requests, no screen sends them (MAINTENANCE housekeeping, "Incidentals"). On PKP's default test dataset (a dataset
 // fleet), as the manager `rvaca`, from a signed-in settings page (the session's CSRF token):
 //
 //   PHASE=stage     U49 row: POST {ctx}/api/v1/submissions/{id}/publications (a new version) on a published
