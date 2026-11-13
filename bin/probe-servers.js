@@ -32,7 +32,7 @@
 const fs = require('fs');
 const path = require('path');
 const {spawn} = require('child_process');
-const {APPS, REPO_ROOT, resolveLine} = require('./apps.js');
+const {APPS, REPO_ROOT, resolveLine, configuredApps} = require('./apps.js');
 const {resolveProbeApp, PROBE_PORT_OFFSET} = require('../shared/playwright/probe/index.js');
 const {phpServerCommand, phpServerEnv, phpServerStatus} = require('../shared/playwright/php-server.js');
 const {parseDatasetFlag, DATASET_PORT_OFFSET} = require('../shared/playwright/dataset.js');
@@ -55,7 +55,9 @@ const PID_DIR = path.join(REPO_ROOT, '.reports', LINE ? `servers-${LINE.name}` :
 const USAGE = 'usage: node bin/probe-servers.js --start|--stop|--status [--app ojs|omp|ops] [--dataset [n]]';
 
 function parseArgs(argv) {
-    const options = {action: null, apps: Object.keys(APPS)};
+    // On a line, only the apps it has a checkout of (the `mysql` and `mariadb`
+    // lines are provisioned app by app); --app still names one outright.
+    const options = {action: null, apps: resolveLine() ? configuredApps() : Object.keys(APPS)};
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i];
         if (arg === '--start' || arg === '--stop' || arg === '--status') {

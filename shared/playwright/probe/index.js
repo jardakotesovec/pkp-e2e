@@ -1092,7 +1092,10 @@ const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * One SQL statement on the app's own fleet database (`app.db`, slot and
  * line aware), through psql: the rows as text, one per line, columns
- * joined by `|`, trimmed. It throws on an SQL error. The context tables
+ * joined by `|`, trimmed. On the `mysql` and `mariadb` lines it goes to
+ * that line's server instead (bin/db-server.js), in the same shape but
+ * for a NULL, which reads "NULL" there and empty on PostgreSQL; the
+ * statement has to be one that database accepts. It throws on an SQL error. The context tables
  * differ per app; `app.contextTables` names them ({table, id, settings}:
  * journals / journal_id / journal_settings on OJS, presses and servers on
  * OMP and OPS).
@@ -1101,6 +1104,11 @@ const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * @param {string} query
  */
 function sql(app, query) {
+    const line = resolveLine();
+    if (line && line.db) {
+        return execFileSync('node', [path.join(REPO_ROOT, 'bin', 'db-server.js'), 'sql', line.db, query, app.db], {encoding: 'utf8'})
+            .trim().replace(/\t/g, '|');
+    }
     return execFileSync('psql', ['-X', '-d', app.db, '-tA', '-F', '|', '-c', query], {encoding: 'utf8'}).trim();
 }
 

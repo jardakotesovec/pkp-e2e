@@ -186,11 +186,18 @@ function failures(runId, jobs = []) {
     let read = 0;
     for (const job of jobs) {
         if (job.status !== 'completed' || job.conclusion === 'skipped') continue;
+        // gh 2.103 and later refuse to print a log's escape sequences without
+        // the flag; earlier versions do not know the flag.
+        const endpoint = `repos/{owner}/{repo}/actions/jobs/${job.databaseId}/logs`;
         let text;
         try {
-            text = gh(['api', '--allow-escape-sequences', `repos/{owner}/{repo}/actions/jobs/${job.databaseId}/logs`]);
+            text = gh(['api', '--allow-escape-sequences', endpoint]);
         } catch {
-            continue;
+            try {
+                text = gh(['api', endpoint]);
+            } catch {
+                continue;
+            }
         }
         read++;
         const j = (perJob[job.name] = fresh());

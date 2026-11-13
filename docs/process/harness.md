@@ -339,6 +339,11 @@ machine what that run shows:
   `npm run fetch-apps -- --line mysql <app> [--update]` to provision
   one or move it. Provision the app a reproduction needs when it needs
   it, and bring it to the commit the red run tested.
+  `probe-servers` starts only the apps the line has a checkout of. A
+  probe on these lines takes a feature name of its own
+  (`PROBE_FEATURE=cfg-mysql`), because `sync` is often a dataset fleet
+  of `main` in the slot and one feature name is one fleet. The kit's
+  `sql()` reads the line's own database.
 - **The servers** are containers, on docker or podman, whichever
   answers (`PKP_E2E_CONTAINER` names one): one per database for the
   whole machine, the slots told apart by their database names.
