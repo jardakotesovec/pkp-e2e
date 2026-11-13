@@ -250,7 +250,9 @@ Comments page is refused (Rule 2b).
     Comments page with that panel open (Rule 16). A number no comment has
     (a deleted comment's, for instance) opens the page on "All" under the
     dialog "Error" reading "The requested resource was not found." with
-    "OK". Closing the panel drops the number from the address. The table
+    "OK". Pressing "OK" leaves the number in the address, so reloading
+    the page brings the same dialog back. Closing the panel drops the
+    number from the address. The table
     behind it reloads only when something changed in the panel, a report
     deleted from it for instance; a panel only viewed and then closed does
     not reload the table. The right-hand note
@@ -373,6 +375,11 @@ Comments page is refused (Rule 2b).
   deleted, or the reporter when a report is acted on. <sup>l</sup>
 - **No activity log entry.** Comments, reports and moderation leave no
   line in the submission's activity log. <sup>a</sup>
+- **Warnings in the server's error log** (the PHP error log the web
+  server writes; no screen shows it). Every load of an article's landing
+  page writes two warnings for each comment the visitor may see there
+  ⚠ [A24](#a24). Every press of "Approve Comment" or "Hide Comment"
+  writes two ⚠ [A25](#a25). <sup>f-a24</sup> <sup>f-a25</sup>
 
 ## Settings that modify behavior
 
@@ -949,6 +956,7 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A14 (issue report `docs/issues/U14-A14-refused-comment-report-loses-reason.md`): once fixed, a reader whose report is refused because the session ended keeps "Report Comment" open with the typed reason under the "Error" window, and a report on a comment hidden meanwhile drops the comment from the list. [report 2026-10-26]
   - the Comments page's browser tab reading "Comments | {journal}" on each of its lists and after a reload (Rule 10; A13) [report 2026-10-04]
+  - after "OK" on the "Error" dialog of a number no comment has, the number still in the page's address and a reload bringing the dialog back (Rule 12); scenario 4's noted address takes it [incidental 2026-11-13]
 - **Rarely met**:
   - an Editor whose role does not permit settings changes, refused the "Comments" tab and still opening the Comments page {OJS OMP} (Actors rows 5 and 6; a preprint server has no second manager-level role to untick): unticking "Permit changes to Settings" on a role is a setup few journals make, not a state an editor meets in an ordinary week
   - a Site Administrator holding no manager role in the journal, with no task row in their Tasks panel (Actors row 7): the state needs the Site Administrator's manager role ended on their own edit page, a setup no journal makes in an ordinary week
@@ -968,6 +976,8 @@ Left out of the scenarios above, by reason:
   - A8 (closing the report panel clearing both numbers from the address; Rule 15; scenario 3 marks it)
   - A9 (the Site Administrator with Reader as their only journal role: the "Error" dialog over the Comments page, and the page working after "OK"; Rule 17b)
   - A15 (the verified and the unverified ORCID icon under a comment sharing one name and no text; Rule 6b)
+  - A24 (the two warnings per comment in the server's error log on each load of an article's landing page; Side effects)
+  - A25 (the two warnings in the server's error log on each "Approve Comment" or "Hide Comment"; Side effects)
   - OMP1 and OPS1 (the Site Administrator holding no manager role: the Comments page open on a journal, refused on a press and a preprint server; Rules 17a, 17c)
 - **Owned by another feature**:
   - the Tasks panel's own controls on a comment task, Mark Read and Delete (Cross-feature interactions; *Notifications center & email preferences*, scenario 2)
@@ -991,6 +1001,8 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A10](#a10) | A comment deleted with its article or its writer's merged account leaves blank, dead rows in every moderator's Tasks | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A13](#a13) | On the editorial Comments page, the browser tab shows only the journal's name, not "Comments" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A14](#a14) | A reader's comment report the server refuses closes the "Report Comment" window and loses the typed reason | 🐞 | low | @jarda.kotesovec 2026-10-22 · handled separately; issues (claude), 2026-10-26 — re-verified |
+| [A24](#a24) | Every load of an article's landing page writes two PHP warnings to the server's error log for each comment the visitor may see | 🐞 | invisible | — |
+| [A25](#a25) | Every "Approve Comment" or "Hide Comment" writes two PHP warnings to the server's error log | 🐞 | invisible | — |
 | [A1](#a1) | A hidden comment reads to its writer exactly like one awaiting approval | ❓ | minor | — |
 | [A2](#a2) | Approving or hiding a comment leaves every moderator's "pending review" task in place | ❓ | minor | — |
 | [A3](#a3) | The report dialog neither refuses an empty reason with a message nor confirms a filed report, and the same person can report the same comment again | ❓ | minor | — |
@@ -1187,6 +1199,34 @@ over to the chosen account? Lean: oversight; the merge hands over
 everything else the account wrote, and two accounts merged are usually
 one person's, whose public comments should survive it.
 Basis: probe, 2026-10-04; code for what the merge hands over. <sup>f-a16</sup>
+
+<a id="a24"></a>
+**A24 — An article's landing page logs two PHP warnings per comment on every load** {OJS} · 🐞 · invisible.
+With public comments on, each load of an article's landing page writes
+"Undefined property: stdClass::$user_comment_id" twice to the server's
+error log for every comment the visitor may see there: the approved ones
+and, for a signed-in visitor, their own pending or hidden ones. A
+visitor who may see two comments leaves four warnings per load. The page
+and its counts show correctly, and no screen shows the warnings, since
+PKP ships with PHP's error display off. A page with no comment the
+visitor may see writes none, and so does every article's page while
+comments are off. The
+cause: the page counts the comments without reading each one's number,
+which the step that loads a comment's settings then looks for. Expected
+a clean log; observed two warnings per comment on every load.
+Basis: probe, 2026-11-13. <sup>f-a24</sup>
+
+<a id="a25"></a>
+**A25 — Approving or hiding a comment logs two PHP warnings** · 🐞 · invisible.
+Each press of "Approve Comment" or "Hide Comment" in the comment panel
+writes two warnings to the server's error log: "The setting approvedAt
+doesn't have a defined type, using string instead" and the same for
+approvedByUserId. The change is stored and shows as Rule 13 says, and no
+screen shows the warnings. The cause: the comment declares no type for
+the two settings that record who approved it and when. Opening the
+Comments page, its panels and its reports, and deleting a report, write
+none. Expected a clean log; observed two warnings per press.
+Basis: probe, 2026-11-13. <sup>f-a25</sup>
 
 ### OMP
 
@@ -1410,14 +1450,16 @@ three apps, as the manager, a Section Editor and the Site Administrator
 with the setting on and off: as Rule 3c.
 
 <a id="fn-e"></a>
-**e — who sees which comment.** `UserCommentController::getManyPublicComments()`
+**e — who sees which comment.** `UserCommentController::getManyPublic()`
 (route `comments/public`, no `has.user` middleware) filters
 `withContextIds([current])->withIsApproved(true)` and, when a user is
 signed in, `orWhere(user_id = me AND is_approved = false)`, then
 `withPublicationIds([...])` — the last scope wraps the earlier OR in one
 group before the publication filter (Eloquent's scope grouping), so a
 signed-in user gets this publication's approved comments plus their own
-unapproved ones and nothing from other publications. Order:
+unapproved ones and nothing from other publications. The counts in the
+version headings and the sidebar are worked out on the server when the
+page loads, by `UserCommentComponent` (A24). Order:
 `Repository::getPaginatedData()` sorts `created_at DESC` and pages by
 `itemsPerPage`. Per comment the resource `UserCommentResource` carries
 `userName` (`getFullName()`, which prefers the preferred public name),
@@ -1714,6 +1756,17 @@ network). On 2026-11-12 OMP and OPS `main` still pinned lib/ui-library
 server the unverified link keeps the suffixed address until their next
 submodule update; those apps have no comment box, so it shows there only
 on comments and reports the tooling makes.
+Live-probed 2026-11-13 on OJS `main` `3c99722dc8` (lib/pkp `ad75b174f0`)
+on a freshly reset dataset, twice (Rule 12, the number no comment has):
+`…/userComments?commentId=999999` opened on "All" under the "Error"
+dialog; after "OK" the address still read `?commentId=999999`, and a
+reload showed "Error" / "The requested resource was not found." / "OK"
+again. `userCommentStore.js`'s `onMounted` reads `commentId` from the
+query string, opening no panel when the fetch fails, and only a panel's
+`onClose` (`commentView()`, `reportView()`) removes it; the file is
+the same in OMP's and OPS's lib/ui-library (`55ec62ee`), not driven
+there. The same runs read the comment panel's iD line for a verified, an
+unverified and no iD, with and without an affiliation, as Fields says.
 
 <a id="fn-k"></a>
 **k — reports.** `UserCommentReportsTable.vue`: label
@@ -1749,10 +1802,14 @@ from the panel and from the row with the dialog as stated, the notice
 "The report has been deleted successfully." and the table reloaded; the
 last deletion took the comment off "Reported" with "Approved" under "All"
 and the approval note unchanged; a reporter with a verified iD and an
-affiliation shown in the report panel as in the comment panel (the
-unverified end was not driven in the report panel); at "Items per page"
-5, six reports paged "Showing 1 to 5 of 6". The reporters' mail stayed
-at zero.
+affiliation shown in the report panel as in the comment panel; at
+"Items per page" 5, six reports paged "Showing 1 to 5 of 6". The reporters' mail stayed
+at zero. Live-probed 2026-11-13 on OJS `main` `3c99722dc8` (lib/pkp
+`ad75b174f0`) on a freshly reset dataset, twice (Fields, the report
+panel's unverified end): a reporter whose iD is not verified showed the
+hollow icon and `https://orcid.org/0000-0001-5109-3700 (unauthenticated)`,
+the link's address the bare iD, opening it in a new tab; no line above
+the panel's title.
 
 <a id="fn-l"></a>
 **l — the moderators' tasks.** `UserCommentController::notifyModerators()`
@@ -2347,6 +2404,51 @@ they have no comment box. The A10 issue report
 ([pkp-e2e#904](https://github.com/jardakotesovec/pkp-e2e/issues/904))
 names this question and leaves it out; its fix for the blank tasks is
 needed either way.
+
+<a id="fn-f-a24"></a>
+**f-a24 — A24.** `UserCommentComponent::__construct()` (built only by
+`ojs/pages/article/ArticleHandler::view()`, and only while
+`enablePublicComments` is on) counts the comments with
+`UserComment::withPublicationIds(...)->where(is_approved OR user_id = me)->select(['publication_id', 'is_approved'])->get()`;
+`UserComment` uses settings, so `get()` runs through
+`SettingsBuilder::getModels()` → `getModelWithSettings()`, which reads
+the primary key `user_comment_id` from every row (the `array_map` that
+collects the ids and the `$rowIndexesById` loop), a column the narrowed
+select left out: each of the two reads warns once per row. The narrowed
+select came with
+pkp/pkp-lib#12420 (2026-03-12). The log lines name
+`lib/pkp/classes/core/SettingsBuilder.php` lines 341 and 348 (lib/pkp
+`ad75b174f0`), on the request `GET …/article/view/{id}`. Live-probed
+2026-11-13 on OJS `main` `3c99722dc8` (lib/pkp `ad75b174f0`) on a freshly
+reset dataset, twice, reading the server's error log per step; the
+article's page answered 200 and its HTML carried no warning text, with
+"All Comments (2)" or "All Comments (1)" as expected. Warnings per load: signed out
+with comments off, 0; zzedd with no comment written, 0; ccorino while
+only zzedd's pending comment existed, 0; zzedd with his pending comment
+and ccorino's approved one, 4; signed out and rvaca (Journal Manager)
+with the one approved comment, 2 each; signed out with two approved, 4;
+zzedd with comments switched off and two comments kept, 0. The hidden
+end is read from the code (`user_id = me` takes every comment of the
+viewer's). The Comments page, every comment-panel and report-panel open,
+the panel's address opened directly, writing a comment, filing a report
+and deleting one logged nothing. OMP and OPS build no comment block.
+PKP's `config.TEMPLATE.inc.php` ships `[debug] display_errors = Off`.
+
+<a id="fn-f-a25"></a>
+**f-a25 — A25.** `UserComment::getSettings()` names `approvedAt` and
+`approvedByUserId`, but `UserComment::casts()` lists neither;
+`UserCommentController::setApproval()` sets both and calls `save()`, and
+`SettingsBuilder::update()` raises `E_USER_WARNING` "The setting {name}
+doesn't have a defined type, using string instead" for each setting
+with no cast (the log names `SettingsBuilder.php` line 104 at lib/pkp
+`ad75b174f0`), on the request `PUT …/api/v1/comments/{id}/setApproval`.
+Live-probed 2026-11-13 on a freshly reset dataset, twice per app, reading
+the server's error log per step: on OJS `main` `3c99722dc8`, "Approve
+Comment" on ccorino's and on zzedd's comment and "Hide Comment" on
+zzedd's, two warnings each, the request answering 200 and the notice
+"The comment has been updated successfully." showing; on OMP and OPS
+`main`, "Approve Comment" and "Hide Comment" on a comment the tooling
+wrote (those apps have no comment box), two each.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1.** Footnote m: `omp/pages/management/SettingsHandler::__construct()`

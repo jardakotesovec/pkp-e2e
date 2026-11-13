@@ -1307,7 +1307,7 @@ three apps, as the manager, a Section Editor and the Site Administrator
 with the setting on and off: as Rule 3c.
 
 <a id="fn-e"></a>
-**e — who sees which comment.** `UserCommentController::getManyPublicComments()`
+**e — who sees which comment.** `UserCommentController::getManyPublic()`
 (route `comments/public`, no `has.user` middleware) filters
 `withContextIds([current])->withIsApproved(true)` and, when a user is
 signed in, `orWhere(user_id = me AND is_approved = false)`, then
