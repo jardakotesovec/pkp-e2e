@@ -16,7 +16,7 @@
  * heading with no node), A3 ❓, A4 ❓, A5 🐞, A6 🐞, A7 ❓, A8 ❓, A9 🐞,
  * A11 🐞, A12 🐞 and A13 🐞 (S12 opens the manager-Author's own monograph at
  * the Submission stage only, never on a round, and presses no decision),
- * A14 🐞, A15 🐞, OMP1 ✅, OMP2 ❓, OMP3 🐞, OPS1 ✅, OPS2 ❓, OPS3 🐞, OPS4 ❓,
+ * A14 🐞, OMP1 ✅, OMP2 ❓, OMP3 🐞, OPS1 ✅, OPS2 ❓, OPS3 🐞, OPS4 ❓,
  * OPS5 ❓, OPS6 🐞. The spec's Coverage section records everything else left
  * out.
  *
@@ -33,7 +33,8 @@
  * from the other suites' declined seeds (a scratch press takes no
  * `series[]`, so its monographs are opened by address, never from "Assigned
  * to me"). Assignments (S3 Copyeditor, S4 and S9 Funding Coordinator, S8
- * Layout Editor, S12 Layout Editor, S13 Series editor) are seeded as
+ * Layout Editor and Series editor, S12 Layout Editor, S13 Series editor)
+ * are seeded as
  * `participants[]`, the row the Assign Participant form writes. The mailbox
  * reads (S8, S14) are before/after counts scoped to the submitter's
  * address (and the seed tag on the roster address), the "after" taken
@@ -674,7 +675,10 @@ test.describe('workflow screen & stage access', () => {
         const directTag = makeTag('s8d', testInfo);
         const {submissionId} = await seed(ompApi, tag, inProduction({
             published: true,
-            participants: [{username: 'layouteditor.leo', role: 'layoutEditor'}],
+            participants: [
+                {username: 'layouteditor.leo', role: 'layoutEditor'},
+                {username: 'sectioneditor.ana', role: 'sectionEditor'},
+            ],
         }));
         const {submissionId: directId} = await seed(ompApi, directTag, {published: true});
         const authorMailbox = {to: getEmail('author.alex'), contains: tag};
@@ -775,10 +779,38 @@ test.describe('workflow screen & stage access', () => {
         await manager.workflow.closeActivityLog();
         expect(await pkpMail.count(authorMailbox)).toBe(mailBefore);
 
-        // "Unpublish" from Done: the submission leaves Done by itself — the
-        // bubble reads "Production", the entry is striped, the header offers
-        // "Preview" and no "Return to Done"; reopened, the panel lands on
-        // "Production" (Rules 11, 18, 18b).
+        // The assigned Series editor's round trip (Actors rows "Return to
+        // Workflow" and "Return to Done"; Rules 6, 18a, 18b): a deciding
+        // editor's assignment (no recommend-only limit) returns the
+        // monograph to Production and back to Done. Each "Confirm" is read
+        // settled: its POST answered (the page object resolves with it),
+        // the bubble moved, and no "Error" window over the panel (the refusal A15 recorded before
+        // pkp/pkp-lib#13804).
+        const series = await workflowAs(asUser, appContext, 'sectioneditor.ana');
+        await series.workflow.gotoEditorial(submissionId);
+        await series.workflow.expectStage('Published');
+        await expect(series.workflow.headerButton('View')).toBeVisible();
+        await expect(series.workflow.headerButton('Return to Workflow')).toBeVisible();
+        const toWorkflow = await series.workflow.returnToWorkflow();
+        expect(toWorkflow.status(), toWorkflow.url()).toBeLessThan(400);
+        await series.workflow.expectStage('Production');
+        await expect(series.workflow.errorDialog()).toHaveCount(0);
+        await expect(series.workflow.headerButton('Preview')).toBeVisible();
+        await expect(series.workflow.headerButton('Return to Done')).toBeVisible();
+        const toDone = await series.workflow.returnToDone();
+        expect(toDone.status(), toDone.url()).toBeLessThan(400);
+        await series.workflow.expectStage('Published');
+        await expect(series.workflow.errorDialog()).toHaveCount(0);
+        await expect(series.workflow.headerButton('View')).toBeVisible();
+        await expect(series.workflow.headerButton('Return to Workflow')).toBeVisible();
+
+        // "Unpublish" from Done, back as the Press Manager (the panel
+        // reopened on the state the Series editor left): the submission
+        // leaves Done by itself — the bubble reads "Production", the entry
+        // is striped, the header offers "Preview" and no "Return to Done";
+        // reopened, the panel lands on "Production" (Rules 11, 18, 18b).
+        await manager.workflow.gotoEditorial(submissionId);
+        await manager.workflow.expectStage('Published');
         await manager.workflow.selectPage('Title & Abstract');
         await unpublishFromWorkflow(manager.page);
         await manager.workflow.expectStage('Production');

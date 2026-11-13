@@ -436,7 +436,12 @@ test.describe('workflow screen & stage access', () => {
         test.slow();
         const tag = makeTag('s8', testInfo);
         const title = `Preprint ${tag}`;
-        const {submissionId} = await seed(opsApi, tag, {published: true});
+        // The Moderator is seeded as a deciding editor on the preprint
+        // (fn-s, revision seeds 2026-11-13; no `recommendOnly`).
+        const {submissionId} = await seed(opsApi, tag, {
+            published: true,
+            participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}],
+        });
         // The author's mailbox, read before anything is pressed (A8): the
         // roster recipient's count and a title-scoped count (zero after a
         // mail-faked seed) that the catcher's cap cannot move.
@@ -539,10 +544,35 @@ test.describe('workflow screen & stage access', () => {
         expect(await pkpMail.count({to: mailTo, contains: title})).toBe(0);
         expect(await pkpMail.count({to: mailTo})).toBeLessThanOrEqual(mailBefore);
 
-        // "Unpost" from Done (Rules 11, 18, 18b; Side effects): on "Title &
-        // Abstract" press "Unpost" and confirm the dialog (U49's): the
-        // preprint leaves Done by itself: bubble "Production", the entry
-        // striped, "Preview" in the header and no "Return to Done".
+        // The assigned Moderator's round trip (Actors rows "Return to
+        // Workflow" and "Return to Done"; Rules 6, 18a, 18b): "Published",
+        // "Return to Workflow" › "Confirm" lands on "Production" with
+        // "Preview" and "Return to Done"; "Return to Done" › "Confirm" is
+        // back on "Published" with "View" and "Return to Workflow". Neither
+        // "Confirm" ends on the "Error" window, read once the bubble has
+        // moved (the positive control).
+        const moderator = await workflowAs(asUser, appContext, 'sectioneditor.ana');
+        await moderator.workflow.gotoEditorial(submissionId);
+        await moderator.workflow.expectStage('Published');
+        await moderator.workflow.returnToWorkflow();
+        await moderator.workflow.expectStage('Production');
+        await expect(moderator.workflow.headerButton('Preview')).toBeVisible();
+        await expect(moderator.workflow.headerButton('Return to Done')).toBeVisible();
+        await expect(moderator.workflow.errorDialog()).toHaveCount(0);
+        await moderator.workflow.returnToDone();
+        await moderator.workflow.expectStage('Published');
+        await expect(moderator.workflow.headerButton('View')).toBeVisible();
+        await expect(moderator.workflow.headerButton('Return to Workflow')).toBeVisible();
+        await expect(moderator.workflow.errorDialog()).toHaveCount(0);
+
+        // "Unpost" from Done (Rules 11, 18, 18b; Side effects), back as the
+        // manager, whose panel is reopened on the state the Moderator left:
+        // on "Title & Abstract" press "Unpost" and confirm the dialog
+        // (U49's): the preprint leaves Done by itself: bubble "Production",
+        // the entry striped, "Preview" in the header and no "Return to
+        // Done".
+        await manager.workflow.gotoEditorial(submissionId);
+        await manager.workflow.expectStage('Published');
         await manager.workflow.selectPage('Title & Abstract');
         await unpostPreprint(manager.page);
         await manager.workflow.expectStage('Production');
