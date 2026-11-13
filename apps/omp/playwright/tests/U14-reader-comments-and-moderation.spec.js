@@ -16,7 +16,7 @@
  * Spec: docs/specs/U14-reader-comments-and-moderation.md
  *
  * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
- * contract, a ❓ is parked, not a gap): A10 🐞, A13 🐞, A14 🐞,
+ * contract, a ❓ is parked, not a gap): A10 🐞, A13 🐞, A14 🐞, A25 🐞,
  * A1 ❓, A3 ❓, A7 ❓, A9 ❓, A15 ❓, A16 ❓, OMP1 ❓, OPS1 ❓. Where a
  * scenario marks a ❓ (A2, A5, A8) the test asserts that bullet's own
  * sentence alone.
@@ -714,8 +714,10 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(comments.row(plainText)).toHaveCount(0);
         await expect(comments.rows()).toHaveCount(2);
 
-        // From the panel: the noted address, "Delete Comment", "Delete":
-        // the notice, the panel closes, the row is gone from every tab.
+        // From the panel: under "All", "…" › "View Comment"; the noted
+        // address, "Delete Comment", "Delete": the notice, the panel
+        // closes, the row is gone from every tab.
+        await comments.expectSelectedTab('All');
         await comments.viewComment(comments.row(reportedText));
         await expect(page).toHaveURL(new RegExp(`commentId=${reportedId}\\b`));
         const noted = page.url();
@@ -742,6 +744,16 @@ test.describe('Reader comments & moderation (U14)', () => {
         await expect(error.getByText(NOT_FOUND)).toBeVisible();
         await expect(error.getByRole('button', {name: 'OK', exact: true})).toBeVisible();
         await expect(comments.tab('All')).toHaveAttribute('aria-selected', 'true');
+
+        // After "OK": the address still carries the comment's number, and
+        // a reload brings the same "Error" dialog back (Rule 12).
+        await error.getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(error).toBeHidden();
+        await expect(page).toHaveURL(new RegExp(`commentId=${reportedId}\\b`));
+        await page.reload();
+        await expect(error).toBeVisible({timeout: 30_000});
+        await expect(error.getByText(NOT_FOUND)).toBeVisible();
+        await expect(error.getByRole('button', {name: 'OK', exact: true})).toBeVisible();
         await error.getByRole('button', {name: 'OK', exact: true}).click();
         await expect(error).toBeHidden();
 

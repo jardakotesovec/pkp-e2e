@@ -650,7 +650,9 @@ test.describe('reader comments & moderation', () => {
         await expect(comments.row(plainText)).toHaveCount(0);
         await expect(comments.rows()).toHaveCount(2);
 
-        // From the panel: the noted address, "Delete Comment", the panel closed.
+        // From the panel: under "All", "…" › "View Comment"; the noted address,
+        // "Delete Comment", the panel closed.
+        await comments.expectTab('All');
         await comments.viewComment(comments.row(reportedText));
         await expect(manager).toHaveURL(/\?commentId=\d+/);
         const noted = manager.url();
@@ -668,6 +670,18 @@ test.describe('reader comments & moderation', () => {
         await comments.errorDialog().getByRole('button', {name: 'OK', exact: true}).click();
         await expect(comments.errorDialog()).toHaveCount(0);
         await comments.expectTab('All');
+
+        // After "OK": the address still carries the comment's number; a reload
+        // brings the same "Error" dialog back.
+        const commentId = new URL(noted).searchParams.get('commentId');
+        expect(commentId).toMatch(/^\d+$/);
+        await expect(manager).toHaveURL(new RegExp(`[?&]commentId=${commentId}(?:[&#]|$)`));
+        await manager.reload();
+        await expect(comments.errorDialog()).toBeVisible({timeout: 30_000});
+        await expect(comments.errorDialog()).toContainText(NOT_FOUND_MESSAGE);
+        await expect(comments.errorDialog().getByRole('button', {name: 'OK', exact: true})).toBeVisible();
+        await comments.errorDialog().getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(comments.errorDialog()).toHaveCount(0);
 
         // The landing page, signed out: no comment, "(0)", "All Comments (0)".
         const landing = new ArticleCommentsPage(page, tag);

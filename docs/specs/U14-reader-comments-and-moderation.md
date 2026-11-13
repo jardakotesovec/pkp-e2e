@@ -606,14 +606,17 @@ scenario's footnote. <sup>s0</sup>
      "Delete" and "Cancel"; press "Delete": the notice "The comment has
      been deleted successfully." shows and the table reloads without the
      row.
-   - **From the panel**: open the reported comment's panel and note the
-     page's address, which carries the comment's number; press "Delete
-     Comment" and then "Delete": the notice shows, the panel closes and the
-     table reloads without the row; the comment is on no tab and "Reported"
-     reads "No Items".
+   - **From the panel**: under "All" press the reported comment's "…" ›
+     "View Comment"; note the address, with the comment's number; press
+     "Delete Comment", then "Delete": the notice shows, the panel closes,
+     the table reloads without the row; the comment is on no tab and
+     "Reported" reads "No Items".
    - **The noted address**: open it: the page opens on "All" under the
      dialog "Error" reading "The requested resource was not found." with
      "OK".
+   - **After "OK"**: press "OK": the page's address still carries the
+     comment's number; reload the page: the same dialog "Error" reading
+     "The requested resource was not found." shows again.
    - **The landing page** {OJS}: signed out, the article's page lists no
      comment; the version's heading reads "{version} (0)" and the sidebar
      "All Comments (0)".
@@ -956,7 +959,6 @@ Left out of the scenarios above, by reason:
 - **Planned**:
   - the guard for A14 (issue report `docs/issues/U14-A14-refused-comment-report-loses-reason.md`): once fixed, a reader whose report is refused because the session ended keeps "Report Comment" open with the typed reason under the "Error" window, and a report on a comment hidden meanwhile drops the comment from the list. [report 2026-10-26]
   - the Comments page's browser tab reading "Comments | {journal}" on each of its lists and after a reload (Rule 10; A13) [report 2026-10-04]
-  - after "OK" on the "Error" dialog of a number no comment has, the number still in the page's address and a reload bringing the dialog back (Rule 12); scenario 4's noted address takes it [incidental 2026-11-13]
 - **Rarely met**:
   - an Editor whose role does not permit settings changes, refused the "Comments" tab and still opening the Comments page {OJS OMP} (Actors rows 5 and 6; a preprint server has no second manager-level role to untick): unticking "Permit changes to Settings" on a role is a setup few journals make, not a state an editor meets in an ordinary week
   - a Site Administrator holding no manager role in the journal, with no task row in their Tasks panel (Actors row 7): the state needs the Site Administrator's manager role ended on their own edit page, a setup no journal makes in an ordinary week
