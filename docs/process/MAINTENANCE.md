@@ -241,7 +241,9 @@ What is left, the next morning picks up from the files.
    driven the same way: when it holds, the fold retires the entry
    (TEMPLATE "Findings register"); when the entry still shows, the row is
    deleted and the entry stays where the backlog lists it. Every worked
-   row is deleted from `incidentals.md`.
+   row is deleted from `incidentals.md`. Coverage a fold leaves as a
+   **Planned** item is written before the session ends (the revision
+   of step 8), never left for another morning.
 7. **Reports owed** (odd days), spec by spec, the backlog's top spec
    first: every
    🐞 entry no report covers is written up and filed through "Issue
