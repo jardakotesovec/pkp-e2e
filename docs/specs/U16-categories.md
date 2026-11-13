@@ -1302,6 +1302,7 @@ category is listed and opens. A press's lists come from the same code
 ci-triage C-U16-1). `main` only: 3.5 orders categories by their place in
 the tree, not by name.
 Since: 2025-05-12 (pkp/pkp-lib#10404) · Basis: probe, 2026-11-13 (MySQL 8.0, MariaDB 10.11). <sup>f-a26</sup>
+Report: refresh owed — written by the upstream session itself on 2026-11-13, without a reporter and without the developer and triage reads of MAINTENANCE "Issue reports" step 3; the whole report is read as a new one would be (2026-11-13)
 
 ### OMP
 

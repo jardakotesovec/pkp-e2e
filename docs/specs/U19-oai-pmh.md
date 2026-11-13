@@ -1828,6 +1828,7 @@ receives such an article after its first full harvest. PostgreSQL
 installs are not affected (Rule 5 holds there). Red on the
 configurations run (S3, S5; ci-triage C-U19-1).
 Since: 2025-08-06 (pkp/pkp-lib#9295) · Basis: probe, 2026-11-13 (MySQL 8.0, MariaDB 10.11). <sup>f-a26</sup>
+Report: refresh owed — written by the upstream session itself on 2026-11-13, without a reporter and without the developer and triage reads of MAINTENANCE "Issue reports" step 3; the whole report is read as a new one would be (2026-11-13)
 
 ### OMP
 

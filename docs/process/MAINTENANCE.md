@@ -982,13 +982,18 @@ its own checks are triaged:
    not show it. Nothing unconfirmed reaches a report or a tag.
 4. **File it as an issue**, the same day. The fault becomes a 🐞 entry
    in the owning spec's register, naming the databases or PHP versions
-   that show it, and an issue report under `docs/issues/` written as
-   "Issue reports" below says (`briefs/issue-report.md`), with these
-   differences: its walks run on the `mysql` or `mariadb` line from a
-   reset install, since the dataset fleets are PostgreSQL only; its
-   header carries the **Environment** bullet (REPORT.md "The header"),
-   which gives the issue the label `environment-specific`; and its
-   **Introduced** line names the commit or PR that brought the
+   that show it, and that entry gets its issue report the way any
+   spec's finding does: through "Issue reports" above, steps 2 to 6,
+   none left out. A reporter rendered from `briefs/issue-report.md`
+   writes it (the session never writes a report itself), the session
+   reads it against `REPORT.md`, and the developer and triage reads
+   come before it is accepted. Three things differ, and the brief's
+   "An environment-specific unit" tells the reporter: its walks run on
+   the `mysql` and `mariadb` lines from a reset install, with
+   PostgreSQL as the control, since the dataset fleets are PostgreSQL
+   only; its header carries the **Environment** bullet (REPORT.md "The
+   header"), which gives the issue the label `environment-specific`;
+   and its **Introduced** line names the commit or PR that brought the
    statement in (`git log -S`, `git blame`), or says how far back it
    goes when the history does not show a start. It is filed at once
    (`npm run hk -- file <report> --post`) and posted in the session's

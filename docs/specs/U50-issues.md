@@ -1523,6 +1523,7 @@ among themselves in whatever order the database returns. A manager who
 wants another place drags it there. Red on the configurations run (S5;
 ci-triage C-U50-1).
 Basis: probe, 2026-11-13 (MySQL 8.0, MariaDB 10.11). <sup>f-a23</sup>
+Report: refresh owed — written by the upstream session itself on 2026-11-13, without a reporter and without the developer and triage reads of MAINTENANCE "Issue reports" step 3; the whole report is read as a new one would be (2026-11-13)
 
 ### Retired
 
