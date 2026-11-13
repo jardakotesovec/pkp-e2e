@@ -3739,7 +3739,7 @@ to export all users?" with "OK" and "Cancel", was still open 30 s later
 tick boxes from being pressed for 300 s (OJS); "Cancel" then closed it
 (OMP). Scenario 6 leaves the page for journal B after "OK" and does not
 read the window.
-Issue report: docs/issues/U63-A27-export-all-users-confirm-stays-open.md
+Issue report: [pkp-e2e#1095](https://github.com/jardakotesovec/pkp-e2e/issues/1095) ([docs/issues/U63-A27-export-all-users-confirm-stays-open.md](../issues/U63-A27-export-all-users-confirm-stays-open.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `ExportPublishedSubmissionsListGridCellProvider::getCellActions()`
