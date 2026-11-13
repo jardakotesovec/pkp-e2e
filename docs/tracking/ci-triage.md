@@ -36,6 +36,9 @@ each red test as `U<nn> S<n>`, and Apps names the apps.
 
 | ID | Signature (what the run shows) | Apps | Configurations | Issue and reproduction | First seen / last confirmed |
 |----|--------------------------------|------|----------------|-------------------------|-----------------------------|
+| C-U19-1 | U19 S3 (Identify's "Earliest Datestamp" later than the older record's), U19 S5 (`from` today lists nothing): an article published in no issue takes the request's moment as its OAI datestamp | OJS | PHP 8.2 MySQL 8.0, PHP 8.2 MariaDB 10.11, PHP 8.3 MySQL 8.0 | [pkp-e2e#1096](https://github.com/jardakotesovec/pkp-e2e/issues/1096) (U19 A26); `shared/playwright/checks/sync/cfg-oai-datestamp-no-issue/walk.js` | 2026-11-12 / 2026-11-13 (run 43340246182; `mysql` and `mariadb` lines) |
+| C-U50-1 | U50 S5 (Vol. 4 first in "Back Issues"): an issue published after the order was saved goes to the top | OJS | PHP 8.2 MySQL 8.0, PHP 8.2 MariaDB 10.11, PHP 8.3 MySQL 8.0 | [pkp-e2e#1097](https://github.com/jardakotesovec/pkp-e2e/issues/1097) (U50 A23); `shared/playwright/checks/sync/cfg-back-issues-order/walk.js` | 2026-11-12 / 2026-11-13 (run 43340246182; `mysql` and `mariadb` lines) |
+| C-U16-1 | U16 S7 ("Mathematics" first in the French "Browse" block): a category with no name in the page's language is listed first | OJS OPS | PHP 8.2 MySQL 8.0, PHP 8.2 MariaDB 10.11, PHP 8.3 MySQL 8.0 | [pkp-e2e#1098](https://github.com/jardakotesovec/pkp-e2e/issues/1098) (U16 A26); `shared/playwright/checks/sync/cfg-category-order/walk.js` | 2026-11-12 / 2026-11-13 (run 43340246182; `mysql` and `mariadb` lines) |
 
 ## Open regressions — confirmed upstream regressions awaiting a fix
 
