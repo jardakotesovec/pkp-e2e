@@ -124,16 +124,14 @@ order of the steps below, so the order is the priority. Every morning
 works steps 1 to 5; then the day of the month decides the main work,
 so neither side starves the other: an **odd day** works incidentals
 and reports owed (steps 6 and 7), an **even day** builds a pending
-feature (step 8). Planned coverage (step 8) follows on every weekday,
-so the suites keep up with what the team ships, and steps 9 to 12
-after it. **While the backlog's section 5 lists ready items in more
-than three specs, Planned coverage goes first**: straight after step 5,
-as many specs as the four hours allow, and the odd or even day's work
-takes what is left. With three specs or fewer listed, the order above
-holds again. The day's drift sweep (step 12) comes after the Planned
-coverage: the backlog goes first, and once it is worked down the sweep
-is each morning's standing work, the one step that looks for
-statements in a spec that have gone wrong unnoticed. After about
+feature (step 8). Steps 9 to 12 follow on every weekday, and the last
+of them is the day's drift sweep, the one step that looks for
+statements in a spec that have gone wrong unnoticed. **Coverage is
+never left for another day.** Every session, this one included, writes
+the coverage it finds owing before it ends (RUNBOOK "Revising a
+shipped feature"). So a revision left mid-way, or a ready **Planned**
+item the backlog still lists in the morning, is overdue and goes
+first, straight after step 5 (step 8). After about
 four hours the session starts nothing new, but whatever it started
 (a report, a fold, a build or revision, a sweep) it finishes in the
 same session, however long that takes, and then ends pushed (step 13).
@@ -249,34 +247,27 @@ What is left, the next morning picks up from the files.
    🐞 entry no report covers is written up and filed through "Issue
    reports". A spec is worked whole; the next starts only inside the
    four hours.
-8. **Builds and Planned coverage.** In this order, each run to its
+8. **Coverage left over, and builds.** In this order, each run to its
    end:
-   - a build or revision left mid-way, on any day, resumed from its
-     `phase-status.md` (RUNBOOK "Resuming a feature mid-flight");
+   - a build or revision left mid-way, on any day, straight after
+     step 5, resumed from its `phase-status.md` (RUNBOOK "Resuming a
+     feature mid-flight");
+   - the ready **Planned** items the backlog's section 5 lists, on any
+     day, straight after step 5 too. Most mornings it lists none,
+     since every session writes its own coverage before it ends; what
+     it does list is an item a session left behind, an item a merged
+     companion brought, or a guard whose bug has been fixed since.
+     Each spec goes through RUNBOOK "Revising a shipped feature" with
+     all its ready items: its own sheet, writer, reader and test
+     authors, so its scenarios stay one coherent set, and the specs of
+     one morning share one branch and one CI run (RUNBOOK "Several
+     specs in one morning"). An item is written for a stable version
+     too when the version carries the change (`VERSIONS.md` "After a
+     feature is built"). A guard whose bug is still open waits, and so
+     does an item that says what else it waits for;
    - on an even day, a `pending` PROGRESS row, oldest first, built
      through the RUNBOOK loop like any feature (the upstream sync adds
-     these; a build is the fullest coverage work there is, so it goes
-     before a revision);
-   - every weekday, the specs whose "Left out" lists hold **Planned**
-     items ready to write, up to three a morning (as many as the four
-     hours allow while their backlog is being cleared, above), in the
-     order of the backlog's section 5. Every session now writes its own
-     coverage at once (RUNBOOK "Revising a shipped feature"), so this
-     list is what was owed before that rule plus a guard whose bug has
-     since been fixed; when it is empty the step has nothing to do. That order puts first what keeps the suites in step
-     with the apps (behavior the team shipped, a guard whose bug is now
-     fixed, a coverage request), the oldest such item first; a guard
-     whose bug is still open waits. Each spec goes through RUNBOOK
-     "Revising a shipped feature" with all its ready items: its own
-     sheet, writer, reader and test authors, so its scenarios stay one
-     coherent set. An item that came from upstream after a stable
-     version's copy of the feature was made is written for that
-     version too when it carries the change, in its folder
-     (`VERSIONS.md` "After a feature is built"); the backlog older
-     than the copies is `main`'s alone. The specs of one
-     morning share one branch and one CI run (RUNBOOK "Several specs in
-     one morning"). A second and a third
-     spec start only inside the four hours.
+     these).
 9. **Friction.** Fold `docs/tracking/friction.md` and delete every row.
    Most rows earn nothing, and that is the expected outcome: a retry or
    a wrong first guess is the ordinary cost of driving a screen, and
@@ -308,8 +299,8 @@ What is left, the next morning picks up from the files.
    stale, and refresh the shard timings when they drifted ("Keep CI
    balanced").
 12. **Drift sweep, and quiet mornings.**
-   - **Drift sweep of one spec, every weekday the four hours allow**,
-     started once the morning's Planned coverage is done: the one whose
+   - **Drift sweep of one spec, every weekday the four hours
+     allow**: the one whose
      PROGRESS note carries the oldest "Swept" date (`npm run hk -- swept`
      names it: none counts as oldest, and among the never swept a spec
      with no kept build-time claim check goes first). Only the specs at
@@ -328,7 +319,8 @@ What is left, the next morning picks up from the files.
      chunk owns, drives what the checks no longer reach, and reads each
      suite against the scenarios for a bullet no test asserts.
      Drift folds as "Fix stale artifacts as you go" says, the tests with it; a bullet without its
-     assertion becomes a **Planned** item. The PROGRESS note ends with
+     assertion becomes a **Planned** item, written before the session
+     ends. The PROGRESS note ends with
      "Swept <date>.", replacing the previous one.
    - **One UNASSIGNED entry** (`docs/tracking/UNASSIGNED.md`), top
      first, on a morning whose other steps left nothing open: a checker
@@ -1216,7 +1208,8 @@ merge.
    scenario; a footnote cites the drive "at the PR head `<sha>`, before
    its merge". New behavior is spent as sync loop step 4 says:
    a bullet one scenario plainly takes, with its assertions, now;
-   anything more a **Planned** item. A change that outdates no spec
+   anything more a **Planned** item, which rides on the companion
+   and is written once it has merged. A change that outdates no spec
    span and no test needs no companion at all. Push it, and when it
    changed a test, dispatch once more with `--ref <companion>`; the app
    PR's own check picks the companion up by name on its next run.

@@ -124,7 +124,9 @@ for (const f of specFiles) {
         // An ID linked into another spec (`U28-….md#omp2`) is read in that spec's register.
         const linked = (i) => [...i.matchAll(/\((U\d+-[\w-]+\.md)#([a-z]{1,4}\d+)\)/g)]
             .some(([, other, id]) => specFiles.includes(other) && openBugs(other).has(id.toUpperCase()));
-        const waits = (i) => (/guard|issue report|docs\/issues\/|once fixed/i.test(i)
+        // An item that says "waits for …" (TEMPLATE "Coverage") waits for something
+        // outside the registers, such as a rebuild upstream.
+        const waits = (i) => /\bwaits\s+for\b/i.test(i) || (/guard|issue report|docs\/issues\/|once fixed/i.test(i)
             && ([...i.matchAll(/(?<![#\w])((?:A|OJS|OMP|OPS)\d+)\b/g)].some(([, id]) => open.has(id)) || linked(i)))
             || [...i.matchAll(/\bonce ((?:A|OJS|OMP|OPS)\d+) is settled\b/g)].some(([, id]) => question.has(id));
         // Each item ends "[<source> <date>]" (lint-spec checks it). A report's guard
@@ -185,19 +187,18 @@ section('4. Builds and revisions', builds.length,
 const ready = planned.filter((s) => s.n).sort((a, b) => (b.first > 0) - (a.first > 0)
     || (a.first ? a.firstOldest : a.oldest).localeCompare(b.first ? b.firstOldest : b.oldest)
     || b.first - a.first || a.spec.localeCompare(b.spec));
-// While ready items sit in more than three specs, Planned coverage goes first (MAINTENANCE "The housekeeping session").
-const clearing = ready.length > 3;
+// Every session writes its own coverage before it ends, so a ready Planned item
+// listed here was left over and goes first (MAINTENANCE "The housekeeping session").
 const main = day % 2 ? 'incidentals and reports owed (2, 3)' : 'builds (4)';
 out = `Today (day ${day}, ${day % 2 ? 'odd' : 'even'}): refreshes, then `
-    + (clearing
-        ? `Planned coverage first (5: ${ready.length} specs wait, as many as the four hours allow), then ${main}`
-        : `${main}, then Planned coverage (5)`)
+    + (ready.length ? `the Planned coverage left over (5: ${ready.length} spec${ready.length > 1 ? 's' : ''}), then ` : '')
+    + main
     + ', then friction, then the day\'s drift sweep when the four hours allow (`npm run hk -- swept` names the spec).\n'
     + out;
-section('5. Planned coverage, up to three specs a morning in this order',
+section('5. Planned coverage left over, every spec, in this order',
     `${ready.reduce((n, s) => n + s.n, 0)} items ready in ${ready.length} specs, `
     + `${ready.reduce((n, s) => n + s.first, 0)} of them first: from upstream, a fixed bug or a request; `
-    + `${planned.reduce((n, s) => n + s.waiting, 0)} guards wait for their bug's fix`,
+    + `${planned.reduce((n, s) => n + s.waiting, 0)} items wait, nearly all guards for their bug's fix`,
     cap(ready).map((s) => `  ${s.spec}: ${s.n}`
         + (s.first ? `, ${s.first} first (oldest ${s.firstOldest})` : ` (oldest ${s.oldest})`)
         + `${s.waiting ? ` (+${s.waiting} waiting)` : ''}\n`).join('') + more(ready));

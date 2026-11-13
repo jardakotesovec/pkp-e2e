@@ -280,10 +280,12 @@ two ways:
   session that wrote it**: the session that adds one revises the spec
   for it before it ends, every ready item of the spec in one pass. A
   session that has to end first leaves the revision mid-way with its
-  sheet, and the next session resumes it before anything new. The one
-  item that stays is a guard that waits for an open 🐞's fix. What was
-  owed before this rule is the housekeeping session's to clear
-  (MAINTENANCE housekeeping step 8).
+  sheet, and the next session resumes it before anything new. The
+  items that stay are the ones that wait: a guard waits for an open
+  🐞's fix, and any other item that cannot be written yet says what it
+  waits for, in the words "waits for …". A ready item that was left
+  behind all the same shows in `npm run backlog`, and the housekeeping
+  session writes it first (MAINTENANCE housekeeping step 8).
 - **A rule change.** A new coverage or scenario rule leaves shipped specs
   behind. The maintainer opens the queue `docs/tracking/coverage-revision.md`,
   one row per spec, deleted when it empties, and launches each revision
@@ -325,8 +327,8 @@ The writer spends the table as "What the scenarios cover" says.
    `node docs/process/lint/lint-spec.mjs --tests <spec>` zero.
 5. **Progress, commit and push, report** as steps 9 to 11: the PROGRESS row in the
    fixed shape with the scenario count; the sheet deleted, with its queue
-   row when it has one, and no Planned item left in the spec but the
-   guards that wait for an open 🐞's fix.
+   row when it has one, and no Planned item left in the spec but
+   those that wait.
 
 **Several specs in one morning.** Up to three revisions may share one
 branch (named `rev-<date>`, no `/`) and one CI run. Each spec is claimed

@@ -1128,11 +1128,11 @@ Left out of the scenarios above, by reason:
     (`docs/issues/U03-OPS3-server-roles-save-erases-interests.md`)
     proposes, once fixed [report 2026-10-15]
   - scenario 5's "No script error while "Signature" is slow" as a check
-    that fails the suites on an error: the suites serve each
-    application's minified scripts, which still log the retired
-    [A24](#a24)'s error three times (at the tab's opening, after the
-    save, after "Cancel") until each application rebuilds them with the
-    fix, so for now the suites only record the errors [report 2026-11-12]
+    that fails the suites on an error: waits for each application to
+    rebuild its minified scripts with the fix, since the suites serve
+    those and they still log the retired [A24](#a24)'s error three
+    times (at the tab's opening, after the save, after "Cancel"); until
+    then the suites only record the errors [report 2026-11-12]
   - after a password change in one browser, a tab press and a "Save" in
     the other browser's Profile page landing on the Login page with no
     script error ([A25](#a25); Rule 10b): the check the issue report
