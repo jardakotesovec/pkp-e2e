@@ -798,6 +798,11 @@ Left out of the scenarios above, by reason:
     `docs/issues/U54-OPS1-ops-open-access-sign-in-box-not-kept.md`): a
     preprint server's "Site Access Options" offering "Site Access" and
     "User Registration" only [report 2026-10-02]
+  - the guard for A15 (issue report
+    `docs/issues/U54-A15-role-save-stops-editing-published-submissions.md`):
+    "OK" in the "Section editor" window with nothing changed, then an
+    assigned Section editor's "Save" on a published submission's "Title &
+    Abstract" still answering "Your changes have been saved." [report 2026-11-13]
   - the guard for A14 (issue report
     `docs/issues/U54-A14-users-tab-keeps-renamed-role-old-name.md`): a
     role renamed on the "Roles" tab, then the "Users" tab read without a
@@ -918,7 +923,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A11](#a11) | "OK" in an Editor's own role window takes the Settings pages away from every holder of the role | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A13](#a13) | Roles list: a saved role jumps to the end, and its pages can repeat one role and skip another | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A14](#a14) | Users & Roles: after a role is renamed, the "Users" tab shows its old name until a reload | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A15](#a15) | "OK" in a role's window, even with nothing changed, takes away the Done stage of a role the journal was created with, and no screen shows it | 🐞 | invisible | — |
+| [A15](#a15) | Saving a role's window, even unchanged, stops its members saving a published submission's metadata | 🐞 | medium | issues (claude), 2026-11-13 — re-verified |
 | [OPS1](#ops1) | A preprint server's "View Preprint Content" sign-in box says "Saved" but keeps nothing, so files stay open | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | A preprint server in French names its Moderator permission level "Éditeur-trice de série" (Series Editor) | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | A role anyone has ever held can never be removed | ❓ | minor | — |
@@ -1164,23 +1169,24 @@ A reload shows the new name.
 Basis: test run; probe, 2026-10-02. <sup>f-a14</sup>
 
 <a id="a15"></a>
-**A15 — "OK" in a role's window, even with nothing changed, takes away the Done stage of a role the journal was created with** · 🐞 · invisible.
-Every role a new journal, press or preprint server is created with
-whose row has its "Production" box ticked is stored as working in Done
-as well: on a journal ten of its eighteen roles, on a press eleven of
-nineteen, on a preprint server three of five. No column of the "Roles"
-list and no box of the role window shows Done. "OK" in a role's "Edit"
-window stores only the stage boxes the window shows, so after any save
-of the window, one option changed or nothing changed, the role no
-longer works in Done. A manager-level role, given every other stage by
-the same save ([A3](#a3)), loses Done too. Nothing on screen says so:
-the only notice is "Your changes have been saved.", the row's boxes and
-the window's boxes read as before, on the same page and after a reload,
-and no screen can give Done back. The role's members see a published
-submission's screens as before the save. The same save
-also stores the recommend-only option, unticked, for a role that had
-never stored it; the window showed that box unticked before as well.
-Basis: probe, 2026-11-11. <sup>f-a15</sup>
+**A15 — Saving a role's window, even unchanged, stops its members saving a published submission's metadata** · 🐞 · medium.
+Roles hold a "Done" stage that no screen shows. It is what lets a
+role's members edit a submission once it is published. When a manager
+presses "OK" in a role's window under Settings › Users & Roles ›
+"Roles", the role loses the Done stage, even if nothing in the window
+was changed. The save answers "Your changes have been saved.", and the
+role's row and window read as before.
+From then on, a member assigned in that role can no longer save a
+published submission's metadata, and nobody is told why. "Save" on
+"Title & Abstract" answers "An unexpected error has occurred. Please
+reload the page and try again." A user in a manager-level role, such as
+"Journal editor", can still make the change. No screen gives the role
+its Done stage back. A fix to the code alone does not give it back
+either. The same save's other effect on a manager-level role is
+[A3](#a3). The save also stores the recommend-only option, unticked,
+for a role that had never stored it; the window showed that box
+unticked before as well.
+Basis: probe, 2026-11-13. <sup>f-a15</sup>
 
 ### OPS
 
@@ -2002,7 +2008,8 @@ entry ("Submission published.", "Production Ready Files", "Production
 Tasks & Discussions", "Participants") read the same. PKP's default
 dataset already carries one such save: OMP's "Volume editor" holds
 stages 1–5 and `recommendOnly` 0, where a new press's holds 1–6 and no
-row. Kept script: `shared/playwright/checks/U54/I32/i32.js`.
+row. Kept script: `shared/playwright/checks/U54/I32/i32.js`. Walked 2026-11-13 (issue report, PKP's default dataset, OJS, OMP, OPS `main`): after the role save, "Save" on a published submission's "Title & Abstract" answers 401 `user.authorization.accessibleWorkflowStage` and the page shows "An unexpected error has occurred. Please reload the page and try again."; before it, the save works; `stable-3_5_0` keeps Done (walked).
+Issue report: docs/issues/U54-A15-role-save-stops-editing-published-submissions.md
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP's `locale/fr_CA/submission.po` leaves

@@ -1,0 +1,16 @@
+--- a/lib/pkp/controllers/grid/settings/roles/form/UserGroupForm.php
++++ b/lib/pkp/controllers/grid/settings/roles/form/UserGroupForm.php
+@@ -353,10 +353,12 @@
+         // Current existing workflow stages.
+         $stages = WorkflowStageDAO::getWorkflowStageTranslationKeys();
+ 
+-        // Remove all existing stage assignments for this user group
++        // Remove the user group's assignments to the stages this form offers. Stages it
++        // does not offer (Done, see Application::getNonWorkflowStages()) are kept.
+         UserGroupStage::query()
+             ->withContextId($contextId)
+             ->withUserGroupId($userGroupId)
++            ->withStageIds(array_keys($stages))
+             ->delete();
+ 
+         // Assign new stages
