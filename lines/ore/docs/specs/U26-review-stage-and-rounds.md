@@ -1353,6 +1353,14 @@ read as at round 4 on fresh datasets, OJS and OMP.
 On `ore` the port merged the same day (pkp-lib#13748 `5598f13905`,
 ui-library#1048 `113f3fa269`, ojs#6044 `12b95257bc` and `fd1fb1521a`),
 each `=` its reviewed head and `=` `main`'s twin by `git range-diff`.
+The "`main` API fix" (pkp/pkp-lib#13790, merged on `main` 2026-11-12 as
+`3e078689a5`; on `ore` the cherry-pick `356d223ea0`, `=main`, OJS
+`9dffdeb147` points at it) also blanks the API's
+`reviewerRecommendationId` and `reviewerRecommendationType` where the
+reviewer fields are blanked, so the author no longer reads the
+recommendation before the confirmation (the editor still does), and the
+old author grid lists only confirmed open reviews: `walk.js` at `main`'s
+merged tips, OJS.
 
 <a id="fn-k"></a>
 **k** — `WorkflowListingEmails.vue` (AFFW-350/351): fetches

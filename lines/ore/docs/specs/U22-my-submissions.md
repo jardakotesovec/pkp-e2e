@@ -880,7 +880,11 @@ and blank fields until "Mark as Complete", then the avatar and the name.
 Round 3 (pkp-lib `13d982d9f4`, ui-library `255c839533`, 2026-11-05) reads
 the confirmation as `isConfirmedByEditor` (`dateConsidered` or
 `dateAcknowledged`, and not unconsidered) in the cell and the API; the same
-walks give the same results.
+walks give the same results. Since pkp/pkp-lib#13790 (merged on `main`
+2026-11-12 as `3e078689a5`; on `ore` the cherry-pick `356d223ea0`,
+`=main`, OJS `9dffdeb147` points at it) the API blanks the review's
+recommendation for the same readers until the same confirmation
+(`walk.js` at `main`'s merged tips, OJS).
 
 <a id="fn-i"></a>
 **i — draft deletion.** `useDashboardBulkDelete.js`: availability =
