@@ -30,6 +30,9 @@
  * - A8 (🐞): S11's auto-assignment half runs on the seeded press — the
  *   install's oldest context, where assignment works; nothing is asserted
  *   about auto-assignment on scratch presses.
+ * - A24 (🐞): S3 reopens its drafts only through My Submissions' "Complete
+ *   submission" (and the emailed link), never by a reload or a typed
+ *   "#…" address, which open "Upload Files".
  *
  * Seeding: scenario endpoints only. Drafts (`submitted: false`) on the
  * read-only `publicknowledge` press for author-only flows; scratch presses
@@ -62,6 +65,7 @@ const {
     backButton,
     backTo,
     expectStep,
+    currentRailStep,
     gotoStep,
     expectWizardOpen,
     fillStartForm,
@@ -303,6 +307,10 @@ test.describe('Submission wizard (U21)', () => {
             context: press.path,
             submitter: author.username,
         });
+        const third = await seedDraft(ompApi, `${tag}c`, {
+            context: press.path,
+            submitter: author.username,
+        });
 
         const page = await (await asUser(author.username)).newPage();
         await page.goto(wizardUrl(press.path, seeded.submissionId));
@@ -441,6 +449,10 @@ test.describe('Submission wizard (U21)', () => {
             submitter: author.username,
         });
         const second = await seedDraft(ompApi, `${tag}b`, {
+            context: press.path,
+            submitter: author.username,
+        });
+        const third = await seedDraft(ompApi, `${tag}c`, {
             context: press.path,
             submitter: author.username,
         });
@@ -603,18 +615,54 @@ test.describe('Submission wizard (U21)', () => {
         await expectStep(page, STEPS.details);
         await expect(richTextBody(page, CONTROLS.title)).toContainText('Autosave check');
 
-        // Control: the second draft, moved to "Details" by "Continue" and
-        // never saved for later, reopens from My Submissions at "Upload
-        // Files" (Rule 6).
+        // Saved from an earlier step (Rule 6a): a second, fresh draft is
+        // walked by "Continue" to "Review", "Details" is reopened from the
+        // rail and "Save for Later" pressed there. My Submissions, opened
+        // from the Saved for Later screen's sidebar, reopens it through
+        // the row's "Complete submission" on "Review", the furthest step
+        // reached, not on "Details". Saved again from "Upload Files" in
+        // that visit, it still reopens on "Review". Only "Complete
+        // submission" reopens it: a reload or a typed "#…" address opens
+        // "Upload Files" (A24).
+        const mySub = new MySubmissionsPage(page, press.path);
+        const reviewStep = new RegExp(`(^|\\s)${STEPS.review}\\s*$`);
+        const reopenFromMySubmissions = async (draft, draftTag) => {
+            await mySub.openView('Active submissions');
+            const row = await mySub.findRowByTag(draftTag);
+            await mySub.completeSubmissionButton(row).click();
+            await expectWizardOpen(page);
+            expect(page.url()).toContain(`id=${draft.submissionId}`);
+        };
         await page.goto(wizardUrl(press.path, second.submissionId));
         await expectWizardOpen(page);
+        await expectStep(page, STEPS.files);
         await continueTo(page, STEPS.details);
-        const mySub = new MySubmissionsPage(page, press.path);
+        await continueTo(page, STEPS.contributors);
+        await continueTo(page, STEPS.editors);
+        await openReview(page);
+        await gotoStep(page, STEPS.details);
+        await saveForLater(page);
+        await reopenFromMySubmissions(second, `${tag}b`);
+        await expect(currentRailStep(page)).toHaveText(reviewStep, {timeout: 20_000});
+        await expect(currentRailStep(page)).not.toContainText(STEPS.details);
+        // Saved again from "Upload Files", reopened the same way.
+        await gotoStep(page, STEPS.files);
+        await saveForLater(page);
+        await reopenFromMySubmissions(second, `${tag}b`);
+        await expect(currentRailStep(page)).toHaveText(reviewStep, {timeout: 20_000});
+        await expect(currentRailStep(page)).not.toContainText(STEPS.files);
+
+        // Control: a third draft, moved to "Details" by "Continue" and
+        // never saved for later, reopens from My Submissions at "Upload
+        // Files" (Rule 6).
+        await page.goto(wizardUrl(press.path, third.submissionId));
+        await expectWizardOpen(page);
+        await continueTo(page, STEPS.details);
         await mySub.goto();
-        const row = await mySub.findRowByTag(`${tag}b`);
+        const row = await mySub.findRowByTag(`${tag}c`);
         await mySub.completeSubmissionButton(row).click();
         await expectWizardOpen(page);
-        expect(page.url()).toContain(`id=${second.submissionId}`);
+        expect(page.url()).toContain(`id=${third.submissionId}`);
         await expectStep(page, STEPS.files);
     });
 

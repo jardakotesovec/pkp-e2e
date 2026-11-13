@@ -727,13 +727,21 @@ recipe are in the footnote. <sup>s</sup>
      link back into the wizard, labeled with the draft's contributors and
      title, and the note "We have emailed a copy of this link to you at
      {email}."
-   - **Mailbox**: the email with the resume link arrives.
+   - **Mailbox**: the email with that link arrives. <sup>s</sup>
    - **Signed out**: sign out and open the emailed link: the Login page
      shows.
-   - **Resume**: sign in and follow the emailed link, or reopen the draft
-     from My Submissions: the wizard reopens on "Details", the furthest
+   - **Resume**: sign in <sup>s</sup> and open the emailed link or the
+     draft from My Submissions: the wizard reopens on "Details", the furthest
      step the draft had reached, with "Autosave check" in "Title".
-   - **Control**: a second draft, moved to "Details" by "Continue" and never
+   - **Saved from an earlier step**: on a second, fresh draft, press
+     "Continue" until "Review", reopen "Details" from the step rail and
+     press "Save for Later". Open My Submissions from the sidebar and
+     press the draft's "Complete submission": the wizard reopens on
+     "Review", the furthest step the draft had reached, not on
+     "Details". Reopen "Upload Files" from the step rail, press "Save for
+     Later" again and reopen the draft from My Submissions the same way:
+     it reopens on "Review" again.
+   - **Control**: a third draft, moved to "Details" by "Continue" and never
      saved for later, reopens from My Submissions at "Upload Files".
      <sup>j</sup>
 
@@ -1098,7 +1106,6 @@ Left out of the scenarios above, by reason:
   - a preprint draft reloaded with a galley: "Review" listing it, and a second galley uploading to its end {OPS} (OPS8, OPS9; the guard their issue report names) [report 2026-10-01]
   - scenario 11's automatic assignment on a journal, press or server other than the install's first, its configured editor assigned and emailed and no needs-an-editor alert (A8; the guard its issue report names) [report 2026-10-01]
   - an author's plain language summary over the section's word limit saved on "Details" and reported on "Review", with "Submit" disabled until it is shortened (A16; the guard its issue report names) [report 2026-10-01]
-  - a draft walked to "Review", saved for later from "Details", reopening from My Submissions on "Review", and saved again from "Upload Files" in that visit, still reopening on "Review" (Rule 6a) [incidental 2026-11-13]
 - **Rarely met**:
   - a lost connection ("Reconnecting", the disabled "Save for Later" and "Submit", the retry, the "Unsaved Changes" dialog; Rule 9a): a dropped connection is an accident, not a state an author meets in an ordinary week of submitting
   - Submit As offered to a user with two submitting roles, with the editorial-role hint, and a submission made in an editorial role: its only participant, the Contributors note, the editor-assigned email to the submitter (Rules 4a, 5, 12b; Side effects): a second role with submission access is a grant few authors hold
@@ -3087,7 +3094,10 @@ the copy in the mail catcher; 2's log bullet reads the activity log there.
 its between-saves bullet runs on the page's own clock (installed before
 the wizard loads), moved to 40 seconds after the first save before the
 typing and on from there, so the save is read against the last save and
-not against the typing. 4
+not against the typing. 3's saved-from-an-earlier-step bullet walks a
+second scratch draft through the UI and reopens it only through My
+Submissions' "Complete submission", never by a reload or a typed "#…"
+address, which open "Upload Files" (A24). 4
 needs `sectioneditor.ana` assigned to the draft's submission for the
 control (the scenario builder's `participants[]` passthrough, or manually
 as `manager.maya` through the workflow screen's Participants panel — note

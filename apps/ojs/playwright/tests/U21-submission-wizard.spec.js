@@ -9,7 +9,7 @@
  *
  * Deliberately NOT covered (register IDs; OMP* and OPS* are the press's
  * and the server's): A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A12, A14,
- * A15, A16, A17, A18, A19, A21, A22, A23.
+ * A15, A16, A17, A18, A19, A21, A22, A23, A24.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (journal-level state runs on scratch journals with throwaway
@@ -150,6 +150,22 @@ async function addContributor(page, email, {givenName = 'Cora', familyName = 'Co
     await modal.getByRole('checkbox', {name: 'Author', exact: true}).check();
     await modal.getByRole('button', {name: 'Save', exact: true}).click();
     await expect(page.getByText(`${givenName} ${familyName}`).first()).toBeVisible({timeout: 30_000});
+}
+
+/**
+ * Open My Submissions from the backend sidebar (its "Active submissions"
+ * view under "My Submissions as Author") and press the draft row's
+ * "Complete submission": the wizard opens at the draft's address (Rule
+ * 6), on the step "Save for Later" recorded (Rule 6a).
+ */
+async function reopenFromMySubmissions(mySubmissions, wizard, rowText, submissionId) {
+    await expect(mySubmissions.menuGroupLink()).toBeVisible({timeout: 30_000});
+    await mySubmissions.openView('Active submissions');
+    const row = mySubmissions.row(rowText);
+    await expect(row).toBeVisible({timeout: 30_000});
+    await mySubmissions.completeSubmissionButton(row).click();
+    await wizard.expectLoaded();
+    expect(new URL(wizard.page.url()).searchParams.get('id')).toBe(String(submissionId));
 }
 
 /** The dashboard submissions-table search box (scoped by accessible name). */
@@ -566,9 +582,37 @@ test.describe('submission wizard', () => {
         await wizard.expectStep('Details');
         await expect(wizard.titleEditorBody()).toContainText(newTitle);
 
-        // Control: a second draft moved to Details by "Continue" and never
+        // Saved from an earlier step (Rule 6a): a second, fresh draft walked
+        // by "Continue" to Review, the rail back to Details, "Save for Later"
+        // there. My Submissions, opened from the sidebar, reopens it through
+        // "Complete submission" on Review, the furthest step reached, not on
+        // Details. In that visit the rail back to Upload Files and "Save for
+        // Later" again: it still reopens on Review. The draft is reopened
+        // only through "Complete submission" (the bare wizard address, Rule
+        // 6), never by a reload or a typed "#…" address, which open Upload
+        // Files (register 🐞 A24, not asserted).
+        const earlier = await seedDraft(ojsApi, `${tag}c`, journal.path, journal.author);
+        const mySubmissions = new MySubmissionsPage(page, journal.path);
+        await wizard.goto(earlier.submissionId);
+        await wizard.expectStep('Upload Files');
+        await wizard.continueTo('Details');
+        await wizard.continueTo('Contributors');
+        await wizard.continueTo('For the Editors');
+        await wizard.continueToReview(earlier.submissionId);
+        await wizard.gotoStep('Details');
+        await wizard.saveForLater();
+        await reopenFromMySubmissions(mySubmissions, wizard, `${tag}c`, earlier.submissionId);
+        await wizard.expectStep('Review');
+        await expect(wizard.currentStepLabel()).not.toContainText('Details');
+        await wizard.gotoStep('Upload Files');
+        await wizard.saveForLater();
+        await reopenFromMySubmissions(mySubmissions, wizard, `${tag}c`, earlier.submissionId);
+        await wizard.expectStep('Review');
+        await expect(wizard.currentStepLabel()).not.toContainText('Upload Files');
+
+        // Control: a third draft moved to Details by "Continue" and never
         // saved for later reopens from My Submissions at Upload Files
-        // (Rule 6).
+        // (Rule 6a).
         await wizard.goto(control.submissionId);
         await wizard.continueTo('Details');
         await page.goto(`/index.php/${journal.path}/dashboard/mySubmissions`);
