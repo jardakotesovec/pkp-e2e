@@ -55,7 +55,12 @@ function table(p) {
 const incidentals = table('docs/tracking/incidentals.md');
 const friction = read('docs/tracking/friction.md').split('\n').filter((l) => /^\d{4}-\d{2}-\d{2} · /.test(l));
 const progress = table('docs/tracking/PROGRESS.md').filter((r) => /^U\d{2}$/.test(r[0]));
-const builds = progress.filter((r) => r.some((c) => /^(pending|in_progress)$/.test(c)));
+const midway = progress.filter((r) => r.includes('in_progress'));
+const pending = progress.filter((r) => r.includes('pending'));
+// A revision left mid-way keeps its sheet (RUNBOOK "Revising a shipped feature").
+const sheets = exists('docs/tracking/coverage-revision')
+    ? fs.readdirSync(path.join(root, 'docs/tracking/coverage-revision')).filter((f) => /^U\d{2}\.md$/.test(f)).map((f) => f.slice(0, 3))
+    : [];
 
 const refreshes = []; const owed = []; const held = []; const planned = [];
 // The open 🐞 IDs of a spec's register, from its text or its file name.
@@ -163,7 +168,6 @@ const owedSpecs = [...bySpec.entries()]
 
 const cap = (list) => (all ? list : list.slice(0, 5));
 const more = (list) => (!all && list.length > 5 ? `  … ${list.length - 5} more (--all)\n` : '');
-const day = new Date().getDate();
 let out = '';
 const section = (title, count, body) => { out += `\n${title} (${count})\n${body}`; };
 
@@ -173,34 +177,41 @@ refreshes.sort((a, b) => header(b) - header(a));
 section('1. Report refreshes, every one', `${refreshes.filter(header).length} header fixes, `
     + `${refreshes.filter((i) => !header(i)).length} needing a walk`,
     cap(refreshes).map((i) => `  ${i.spec} ${i.id}${header(i) ? ' [header]' : ''}: ${i.why}\n`).join('') + more(refreshes));
-section('2. Incidentals, oldest first', incidentals.length,
+// Specs with first-class items lead, the oldest such item first; then the rest, oldest first.
+const ready = planned.filter((s) => s.n).sort((a, b) => (b.first > 0) - (a.first > 0)
+    || (a.first ? a.firstOldest : a.oldest).localeCompare(b.first ? b.firstOldest : b.oldest)
+    || b.first - a.first || a.spec.localeCompare(b.spec));
+// A ready item dated today is this morning's own, owed to step 11, not left over.
+const today = new Date().toISOString().slice(0, 10);
+const ownToday = ready.filter((s) => s.oldest >= today && (!s.first || s.firstOldest >= today));
+const leftBehind = ready.filter((s) => !ownToday.includes(s));
+section('2. Left over, finished first',
+    `${midway.length} builds and ${sheets.length} revisions mid-way; ${leftBehind.reduce((n, s) => n + s.n, 0)} ready Planned items in ${leftBehind.length} specs; `
+    + `${planned.reduce((n, s) => n + s.waiting, 0)} items wait, nearly all guards for their bug's fix`,
+    midway.map((r) => `  ${r[0]} ${r[1]}: build mid-way\n`).join('')
+    + sheets.map((u) => `  ${u}: revision mid-way (docs/tracking/coverage-revision/${u}.md)\n`).join('')
+    + cap(leftBehind).map((s) => `  ${s.spec}: ${s.n}`
+        + (s.first ? `, ${s.first} from upstream, a fixed bug or a request (oldest ${s.firstOldest})` : ` (oldest ${s.oldest})`)
+        + `${s.waiting ? ` (+${s.waiting} waiting)` : ''}\n`).join('') + more(leftBehind)
+    + (ownToday.length ? `  written down today, for step 11: ${ownToday.map((s) => s.spec).join(', ')}\n` : ''));
+section('3. New features to build, oldest first', pending.length,
+    pending.map((r) => `  ${r[0]} ${r[1]}\n`).join(''));
+section('4. Incidentals, oldest first', incidentals.length,
     cap(incidentals).map((r) => `  ${r[0]}: ${r[1].slice(0, 90)}\n`).join('') + more(incidentals));
-section('3. Reports owed, one spec at a time', `${owed.length} entries in ${owedSpecs.length} specs`,
+section('5. Reports owed, one spec at a time', `${owed.length} entries in ${owedSpecs.length} specs`,
     cap(owedSpecs).map((s) => `  ${s.spec}: ${s.items.map((i) => `${i.id} [${i.impact}]`).join(', ')}\n`).join('')
     + more(owedSpecs)
     + (!held.length ? '' : all
         ? held.map((i) => `  held: ${i.spec} ${i.id}, ${i.why}\n`).join('')
         : `  held, skipped: ${held.length} (--all)\n`));
-section('4. Builds and revisions', builds.length,
-    builds.map((r) => `  ${r[0]} ${r[1]}\n`).join(''));
-// Specs with first-class items lead, the oldest such item first; then the rest, oldest first.
-const ready = planned.filter((s) => s.n).sort((a, b) => (b.first > 0) - (a.first > 0)
-    || (a.first ? a.firstOldest : a.oldest).localeCompare(b.first ? b.firstOldest : b.oldest)
-    || b.first - a.first || a.spec.localeCompare(b.spec));
-// Every session writes its own coverage before it ends, so a ready Planned item
-// listed here was left over and goes first (MAINTENANCE "The housekeeping session").
-const main = day % 2 ? 'incidentals and reports owed (2, 3)' : 'builds (4)';
-out = `Today (day ${day}, ${day % 2 ? 'odd' : 'even'}): refreshes, then `
-    + (ready.length ? `the Planned coverage left over (5: ${ready.length} spec${ready.length > 1 ? 's' : ''}), then ` : '')
-    + main
-    + ', then friction, then the day\'s drift sweep when the four hours allow (`npm run hk -- swept` names the spec).\n'
+// Every session writes its own coverage before it ends, so what is listed here was
+// left over and is finished first (MAINTENANCE "The housekeeping session", step 5).
+const leftOver = midway.length + sheets.length + leftBehind.length;
+out = 'In this order: report refreshes (1)'
+    + (leftOver ? ', what was left over (2)' : '')
+    + (pending.length ? ', the new feature to build (3), which takes the morning' : ', incidentals and reports owed (4, 5)')
+    + ', friction (6), the day\'s drift sweep when the four hours allow (`npm run hk -- swept` names the spec),'
+    + ' then the tests for the coverage the morning found owing.\n'
     + out;
-section('5. Planned coverage left over, every spec, in this order',
-    `${ready.reduce((n, s) => n + s.n, 0)} items ready in ${ready.length} specs, `
-    + `${ready.reduce((n, s) => n + s.first, 0)} of them first: from upstream, a fixed bug or a request; `
-    + `${planned.reduce((n, s) => n + s.waiting, 0)} items wait, nearly all guards for their bug's fix`,
-    cap(ready).map((s) => `  ${s.spec}: ${s.n}`
-        + (s.first ? `, ${s.first} first (oldest ${s.firstOldest})` : ` (oldest ${s.oldest})`)
-        + `${s.waiting ? ` (+${s.waiting} waiting)` : ''}\n`).join('') + more(ready));
 section('6. Friction rows to fold', friction.length, '');
 process.stdout.write(out);

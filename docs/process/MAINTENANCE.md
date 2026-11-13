@@ -120,77 +120,32 @@ The VM runs it every weekday at 05:00 Prague time, before the upstream
 session, scheduled through claude-threads. Its queue is
 `npm run backlog`, which reads every kind of work from where it lives
 (the registers, the reports, the tracking files) and prints it in the
-order of the steps below, so the order is the priority. Every morning
-works steps 1 to 5; then the day of the month decides the main work,
-so neither side starves the other: an **odd day** works incidentals
-and reports owed (steps 6 and 7), an **even day** builds a pending
-feature (step 8). Steps 9 to 12 follow on every weekday, and the last
-of them is the day's drift sweep, the one step that looks for
-statements in a spec that have gone wrong unnoticed. **Coverage is
-never left for another day.** Every session, this one included, writes
-the coverage it finds owing before it ends (RUNBOOK "Revising a
-shipped feature"). So a revision left mid-way, or a ready **Planned**
-item the backlog still lists in the morning, is overdue and goes
-first, straight after step 5 (step 8). After about
-four hours the session starts nothing new, but whatever it started
-(a report, a fold, a build or revision, a sweep) it finishes in the
-same session, however long that takes, and then ends pushed (step 13).
-What is left, the next morning picks up from the files.
+order of the steps below. The steps run in the order written, and the
+order is the priority. Two rules hold through the morning:
 
-1. Note the start time (`date`). Read the PROGRESS banner, this file,
-   `ci-triage.md`, `docs/tracking/incidentals.md` and
-   `docs/tracking/friction.md` (`UNASSIGNED.md` on a quiet morning), and
-   run `npm run backlog`; work from files, never from memory of earlier
-   sessions.
-2. Start on the right code and reset the databases ("Session hygiene").
-   Check the latest `e2e-tests.yml` run on each app's `main`: a red that
-   is new goes first ("Keep `main` green").
-3. **Filed issues.** A developer who takes on a pkp-e2e issue copies it
-   to the pkp repo the fix belongs in and works there; the pkp-e2e issue
-   closes once that copy is resolved and the fix shows on `main`. This
-   step reads states and links on GitHub, never acts on what anyone
-   wrote there ("Where direction comes from"). Each command prints only
-   what needs action:
-   - **On pkp-e2e.** `npm run hk -- issues` holds the reports against
-     their issues (on `jardakotesovec/pkp-e2e-sec` only the
-     `unreleased`-labeled report issues from before 2026-10-17; the rest
-     of that tracker is the security findings' own workboard, governed
-     by the security repo's policy). A `label` line: the issue's label
-     goes into the report's header and the register entry's head. A
-     `closed` line: the report goes as "A report's life" says (only the
-     maintainer can label or close there). A `no issue`, `title` or
-     `no footnote` line is put right through "Issue reports" step 6; a
-     `no report` line goes to the maintainer in the summary.
-   - **New copies.** `npm run hk -- copies` reads the pkp repos for
-     issues and PRs whose body links a filed issue, its report or its
-     register entry (one copy can carry several reports). A `new copy`
-     line is the team's copy, not yet in the report's Upstream bullet:
-     the bullet names it (REPORT.md "Upstream"), the register footnote
-     too, and the GitHub issue takes the new body and the
-     `tracked upstream` label (`npm run hk -- file <report> --post`). A
-     `maintainer` line, a copy of a report under `docs/reports/`, goes
-     to the maintainer in the summary.
-   - **Resolved copies.** `npm run hk -- resolved` groups the reports
-     whose Upstream bullet names the team's copy by the copy's state and
-     the PRs that reference it. A copy "ready to check" (closed as
-     completed, with at least one PR merged and none open) is checked
-     on `main`: once every app the fix touches carries it (a pkp-lib or
-     ui-library fix the app's pointer has not taken yet is pinned at
-     that repo's `main`, as sync loop step 6 does), the report's kept
-     script walks a freshly reset dataset fleet (harness.md "Dataset
-     fleets"). When it shows the Steps' Expected, a fold agent
-     (`briefs/fold.md`) retires the entry with the merged PRs as its
-     reason (TEMPLATE "Findings register", the Retired block; its
-     coverage as sync loop step 4 says), and "A report's life" deletes
-     the report and closes the issue. When
-     the fault still shows, the issue stays open, the entry gets a
-     `Report: refresh owed` line ("fix merged in `pkp/pkp-lib#<n>`, the
-     Steps still show it"; "Keeping a report in step"), and the summary
-     tells the maintainer. A copy "to the maintainer" (closed as not
-     planned, closed with no merged PR, an open PR on a closed copy)
-     goes to the maintainer in the summary and changes nothing here: a
-     ruling comes on Mattermost. A copy still open needs nothing.
-4. **Report refreshes**, every one the backlog lists: a filed report
+- **About four hours.** After about four hours the session starts
+  nothing new and goes to step 11. Whatever it has started (a report,
+  a fold, a build or revision, a sweep) it finishes first, however
+  long that takes. What is left, the next morning picks up from the
+  files.
+- **Coverage is never left for another day.** A step that finds
+  coverage owing on a shipped spec writes it down as a **Planned**
+  item in that spec, and step 11 writes the tests before the session
+  ends, past the four hours when it has to. Every other session does
+  the same (RUNBOOK "Revising a shipped feature").
+
+1. **Start.** Note the time (`date`). Read the PROGRESS banner, this
+   section, `ci-triage.md`, `docs/tracking/incidentals.md` and
+   `docs/tracking/friction.md`, and run `npm run backlog`; work from
+   files, never from memory of earlier sessions. Start on the right
+   code and reset the databases ("Session hygiene"). Check the latest
+   `e2e-tests.yml` run on each app's `main`: a red that is new goes
+   first ("Keep `main` green").
+2. **Filed issues.** See what the team did with the issues already
+   filed: a label changed, a copy made on a pkp repo, a fix merged. A
+   fix that shows on `main` retires its entry and closes its issue
+   ("Filed issues" below).
+3. **Report refreshes**, every one the backlog lists: a filed report
    whose entry changed, or that the team asked on Mattermost to change.
    Those issues are already in the team's hands, so they come before new
    work. A header fix (the backlog marks it: an entry joining a report,
@@ -199,153 +154,226 @@ What is left, the next morning picks up from the files.
    (`npm run hk -- file <report> --post`), the `Report:` line deleted.
    One needing a walk or a rewrite goes through "Issue reports" as its
    own unit.
-5. **Security refinement**, every morning. Pull `../pkp-e2e-sec` and
-   list its `new` findings (`grep -l 'status:\*\* new' ../pkp-e2e-sec/findings/sec-*.md`
-   — the status line reads `- **status:** new`). Refine **up to three
-   per session** (as many as are there), oldest first, by that repo's
-   `CLAUDE.md` process, one at a time (serial: never parallel helpers
-   on the shared apps). What follows
-   depends on the release state (the security repo's policy, "Is it
-   released?"): an `unreleased` finding's issue is posted right after
-   (`bin/post-issue.mjs`, labels checked with `--dry-run` first); one in
-   released code stays at `refined`, ready for the maintainer to check
-   and say "post sec-NNN" — never posted unasked. Say in the summary
-   what was refined and whether it waits for the maintainer. A
-   refinement started is finished in the same session, like any unit
-   here. While there, reconcile the tracker: one
-   `gh issue list -R jardakotesovec/pkp-e2e-sec --state open --json number,labels`
-   against the findings' header bullets — a label the team changed on an
-   issue (severity above all) is copied into its finding's header line,
-   marked as the team's call with the date; the finding never argues
-   back. Commit what changed with the repo's other updates.
-6. **Incidentals** (odd days). Every row whose feature has a shipped spec (PROGRESS
-   `done`), oldest first; rows against pending features stay for their
-   spec author (RUNBOOK step 3). First grep the spec for each row, its
-   register entries and their reports for the row's mechanism, and
-   ci-triage "Open regressions" for its screen: a
-   sighting the spec already states is deleted without a drive, and a
-   matching entry or regression row is named in the checker's triage
-   plan. The rest
-   are driven, grouped by feature, by fresh checkers rendered from
-   `briefs/claim-check.md` (the rows are the chunk, each named by the
-   register IDs and rule numbers it bears on, never spec line numbers,
-   which the morning's folds move; one or two checkers
-   at a time on the fleets). A row that reproduces goes into its spec
-   through a fold agent (`briefs/fold.md`): a register entry, or a
-   corrected claim with a dated footnote, the reader on the rewritten
-   spans and lint zero, as "Fix stale artifacts as you go" says; when it
-   changes a claim a test asserts, the test changes with it and that
-   suite runs green once. A row that does not reproduce is deleted; one
-   that stays unclear becomes that spec's ❓ entry with a lean. A row
-   that says an entry no longer shows (from a reporter) is
-   driven the same way: when it holds, the fold retires the entry
-   (TEMPLATE "Findings register"); when the entry still shows, the row is
-   deleted and the entry stays where the backlog lists it. Every worked
-   row is deleted from `incidentals.md`. Coverage a fold leaves as a
-   **Planned** item is written before the session ends (the revision
-   of step 8), never left for another morning.
-7. **Reports owed** (odd days), spec by spec, the backlog's top spec
-   first: every
+4. **Security refinement.** Up to three `new` findings of
+   `../pkp-e2e-sec`, oldest first, one at a time ("Security refinement"
+   below).
+5. **What was left over.** A build or revision left mid-way is resumed
+   from its `phase-status.md` and run to its end (RUNBOOK "Resuming a
+   feature mid-flight"). A ready **Planned** item the backlog lists was
+   left behind by a session that was cut off: its spec is revised now,
+   as step 11 says. Most mornings there is neither.
+6. **A new feature to build**, when PROGRESS has a `pending` row (the
+   upstream sync adds these): the oldest, built through the RUNBOOK
+   loop like any feature. A build is the morning's main work, so steps
+   7 and 8 wait for the next morning.
+7. **Incidentals.** Every row of `incidentals.md` whose feature has a
+   shipped spec, oldest first: a sighting the spec already states is
+   deleted, the rest are driven and folded into their specs
+   ("Incidentals" below).
+8. **Reports owed**, spec by spec, the backlog's top spec first: every
    🐞 entry no report covers is written up and filed through "Issue
    reports". A spec is worked whole; the next starts only inside the
-   four hours.
-8. **Coverage left over, and builds.** In this order, each run to its
-   end:
-   - a build or revision left mid-way, on any day, straight after
-     step 5, resumed from its `phase-status.md` (RUNBOOK "Resuming a
-     feature mid-flight");
-   - the ready **Planned** items the backlog's section 5 lists, on any
-     day, straight after step 5 too. Most mornings it lists none,
-     since every session writes its own coverage before it ends; what
-     it does list is an item a session left behind, an item a merged
-     companion brought, or a guard whose bug has been fixed since.
-     Each spec goes through RUNBOOK "Revising a shipped feature" with
-     all its ready items: its own sheet, writer, reader and test
-     authors, so its scenarios stay one coherent set, and the specs of
-     one morning share one branch and one CI run (RUNBOOK "Several
-     specs in one morning"). An item is written for a stable version
-     too when the version carries the change (`VERSIONS.md` "After a
-     feature is built"). A guard whose bug is still open waits, and so
-     does an item that says what else it waits for;
-   - on an even day, a `pending` PROGRESS row, oldest first, built
-     through the RUNBOOK loop like any feature (the upstream sync adds
-     these).
-9. **Friction.** Fold `docs/tracking/friction.md` and delete every row.
-   Most rows earn nothing, and that is the expected outcome: a retry or
-   a wrong first guess is the ordinary cost of driving a screen, and
-   every sentence added is one every later agent reads. A row earns a
-   change only when all of these hold: the next agent would not notice
-   the problem by itself (a silent failure, not an error that names its
-   cause); agents on other features will meet it, and they are the ones
-   who read the file the change goes into; the docs do not already say
-   it (grep first); and it is not one screen's fact or general
-   Playwright knowledge. Then take the first of these that fits:
-   - **A tool fix.** When a script, a kit helper, a default, an error
-     message or a lint rule can carry the lesson, change that and write
-     at most one sentence. Prose that teaches agents to work around a
-     tool is the last resort.
-   - **A rewrite of the entry it belongs to**, so the entry still reads
-     as one rule and is no longer than before. Never append a clause to
-     a passage about something else; an unrelated fact gets a short
-     entry of its own under a title that names it.
-   The text says what holds now. The feature, the date and the story of
-   how it was found go in the commit message, never in the doc. A
-   harness key a row asks for is listed under scenarios.md "Field shapes
-   not built yet", not built. A row whose fact one closer read of the
-   spec or the brief would have given, or whose fix the session that
-   wrote it already made, earns nothing. When in doubt, delete.
-10. **Flakes.** Diagnose the flake classes whose watch condition has
-   tripped ("Keep the flake rate down"); a flake that reds CI on the day
-   is the upstream session's interrupt, its diagnosis this session's.
-11. **Stale artifacts and CI balance.** Fix what the day's work showed
-   stale, and refresh the shard timings when they drifted ("Keep CI
-   balanced").
-12. **Drift sweep, and quiet mornings.**
-   - **Drift sweep of one spec, every weekday the four hours
-     allow**: the one whose
-     PROGRESS note carries the oldest "Swept" date (`npm run hk -- swept`
-     names it: none counts as oldest, and among the never swept a spec
-     with no kept build-time claim check goes first). Only the specs at
-     the repo root, which follow `main`, are swept. Its kept checks
-     (`shared/playwright/checks/<feature>/`) run twice at the tips on
-     reset databases, under `PROBE_RUN` r1 and r2, since a fact one run
-     shows is undetermined; a check whose header has a `RESEED` switch
-     takes `RESEED=1` on both runs. Each run's summary is read for dead
-     phases, because a kept check exits 0 when a phase dies, and a dead
-     check is fixed first. The kept walks of the spec's filed reports
-     (`shared/playwright/checks/issues/<report>/`) run the same way,
-     twice each on a dataset fleet reset before every run (a walk that
-     starts a server of its own is left out). One fresh checker
-     (`briefs/claim-check.md`, `{{rerun}}` naming the outputs, the walks
-     and the suites) judges the snapshots against the spec lines each
-     chunk owns, drives what the checks no longer reach, and reads each
-     suite against the scenarios for a bullet no test asserts.
-     Drift folds as "Fix stale artifacts as you go" says, the tests with it; a bullet without its
-     assertion becomes a **Planned** item, written before the session
-     ends. The PROGRESS note ends with
-     "Swept <date>.", replacing the previous one.
-   - **One UNASSIGNED entry** (`docs/tracking/UNASSIGNED.md`), top
-     first, on a morning whose other steps left nothing open: a checker
-     drives it. Live behavior on a shipped spec's
-     screens folds into that spec (a claim with its footnote, the
-     coverage as a **Planned** item) and the entry goes; dead code keeps
-     its entry with the evidence; one that looks out of scope or like a
-     new feature goes to the maintainer.
-13. End pushed: commit and push to pkp-e2e `main`, and post a
-   one-paragraph summary to the channel: filed issues closed, relabelled
-   or newly tracked upstream, fixes merged upstream that still show,
-   and anything step 3 left to the maintainer; reports refreshed and
-   written, each with its severity and effort, the critical and high
-   first; the head of `npm run backlog` and what the four hours left;
-   incidentals worked (deleted as
-   already stated, folded with the spec and IDs, not reproduced), what
-   is left, the build or revision worked (feature, gate reached, and on
-   a finished revision the scenario numbers and tests added),
-   the spec swept and what drifted, the UNASSIGNED entry's outcome,
-   friction folded, flake classes diagnosed, artifacts fixed.
+   four hours. On a morning with no incidental and no report owed, one
+   entry of `docs/tracking/UNASSIGNED.md` is worked instead ("An
+   UNASSIGNED entry" below).
+9. **Upkeep.**
+   - Friction: fold `docs/tracking/friction.md` and delete every row
+     ("Friction" below).
+   - Flakes: diagnose the flake classes whose watch condition has
+     tripped ("Keep the flake rate down"); a flake that reds CI on the
+     day is the upstream session's interrupt, its diagnosis this
+     session's.
+   - Stale artifacts and CI balance: fix what the day's work showed
+     stale, and refresh the shard timings when they drifted ("Keep CI
+     balanced").
+10. **Drift sweep of one spec**, when the four hours allow: the one
+   step that looks for statements in a spec that have gone wrong
+   unnoticed ("The drift sweep" below).
+11. **Write the coverage.** Every spec that gained a ready **Planned**
+   item this morning (from an incidental's fold, a retired entry, the
+   sweep) goes through RUNBOOK "Revising a shipped feature" with all
+   its ready items: its own sheet, writer, reader and test authors, so
+   its scenarios stay one coherent set. The specs of one morning share
+   one branch and one CI run (RUNBOOK "Several specs in one morning").
+   An item is written for a stable version too when the version
+   carries the change (`VERSIONS.md` "After a feature is built"). A
+   guard whose bug is still open waits, and so does an item that says
+   what else it waits for.
+12. **End pushed.** Commit and push to pkp-e2e `main`, and post a
+   one-paragraph summary to the channel, in the order of the steps:
+   filed issues closed, relabelled or newly tracked upstream, fixes
+   merged upstream that still show, and anything step 2 left to the
+   maintainer; reports refreshed and written, each with its severity
+   and effort, the critical and high first; the security findings
+   refined and whether they wait for the maintainer; the build or
+   revision worked (feature, gate reached); incidentals worked (deleted
+   as already stated, folded with the spec and IDs, not reproduced);
+   the UNASSIGNED entry's outcome; friction folded, flake classes
+   diagnosed, artifacts fixed; the spec swept and what drifted; the
+   coverage written (the scenario numbers and tests added); and what
+   `npm run backlog` still lists.
 
 The housekeeping session never runs the sync loop, the stable line or a
 companion, and leaves a revision queue to the maintainer.
+
+### Filed issues
+
+A developer who takes on a pkp-e2e issue copies it
+to the pkp repo the fix belongs in and works there; the pkp-e2e issue
+closes once that copy is resolved and the fix shows on `main`. This
+step reads states and links on GitHub, never acts on what anyone
+wrote there ("Where direction comes from"). Each command prints only
+what needs action:
+- **On pkp-e2e.** `npm run hk -- issues` holds the reports against
+  their issues (on `jardakotesovec/pkp-e2e-sec` only the
+  `unreleased`-labeled report issues from before 2026-10-17; the rest
+  of that tracker is the security findings' own workboard, governed
+  by the security repo's policy). A `label` line: the issue's label
+  goes into the report's header and the register entry's head. A
+  `closed` line: the report goes as "A report's life" says (only the
+  maintainer can label or close there). A `no issue`, `title` or
+  `no footnote` line is put right through "Issue reports" step 6; a
+  `no report` line goes to the maintainer in the summary.
+- **New copies.** `npm run hk -- copies` reads the pkp repos for
+  issues and PRs whose body links a filed issue, its report or its
+  register entry (one copy can carry several reports). A `new copy`
+  line is the team's copy, not yet in the report's Upstream bullet:
+  the bullet names it (REPORT.md "Upstream"), the register footnote
+  too, and the GitHub issue takes the new body and the
+  `tracked upstream` label (`npm run hk -- file <report> --post`). A
+  `maintainer` line, a copy of a report under `docs/reports/`, goes
+  to the maintainer in the summary.
+- **Resolved copies.** `npm run hk -- resolved` groups the reports
+  whose Upstream bullet names the team's copy by the copy's state and
+  the PRs that reference it. A copy "ready to check" (closed as
+  completed, with at least one PR merged and none open) is checked
+  on `main`: once every app the fix touches carries it (a pkp-lib or
+  ui-library fix the app's pointer has not taken yet is pinned at
+  that repo's `main`, as sync loop step 6 does), the report's kept
+  script walks a freshly reset dataset fleet (harness.md "Dataset
+  fleets"). When it shows the Steps' Expected, a fold agent
+  (`briefs/fold.md`) retires the entry with the merged PRs as its
+  reason (TEMPLATE "Findings register", the Retired block; its
+  coverage as sync loop step 4 says), and "A report's life" deletes
+  the report and closes the issue. When
+  the fault still shows, the issue stays open, the entry gets a
+  `Report: refresh owed` line ("fix merged in `pkp/pkp-lib#<n>`, the
+  Steps still show it"; "Keeping a report in step"), and the summary
+  tells the maintainer. A copy "to the maintainer" (closed as not
+  planned, closed with no merged PR, an open PR on a closed copy)
+  goes to the maintainer in the summary and changes nothing here: a
+  ruling comes on Mattermost. A copy still open needs nothing.
+
+### Security refinement
+
+Pull `../pkp-e2e-sec` and
+list its `new` findings (`grep -l 'status:\*\* new' ../pkp-e2e-sec/findings/sec-*.md`
+— the status line reads `- **status:** new`). Refine **up to three
+per session** (as many as are there), oldest first, by that repo's
+`CLAUDE.md` process, one at a time (serial: never parallel helpers
+on the shared apps). What follows
+depends on the release state (the security repo's policy, "Is it
+released?"): an `unreleased` finding's issue is posted right after
+(`bin/post-issue.mjs`, labels checked with `--dry-run` first); one in
+released code stays at `refined`, ready for the maintainer to check
+and say "post sec-NNN" — never posted unasked. Say in the summary
+what was refined and whether it waits for the maintainer. A
+refinement started is finished in the same session, like any unit
+here. While there, reconcile the tracker: one
+`gh issue list -R jardakotesovec/pkp-e2e-sec --state open --json number,labels`
+against the findings' header bullets — a label the team changed on an
+issue (severity above all) is copied into its finding's header line,
+marked as the team's call with the date; the finding never argues
+back. Commit what changed with the repo's other updates.
+
+### Incidentals
+
+Every row whose feature has a shipped spec (PROGRESS
+`done`), oldest first; rows against pending features stay for their
+spec author (RUNBOOK step 3). First grep the spec for each row, its
+register entries and their reports for the row's mechanism, and
+ci-triage "Open regressions" for its screen: a
+sighting the spec already states is deleted without a drive, and a
+matching entry or regression row is named in the checker's triage
+plan. The rest
+are driven, grouped by feature, by fresh checkers rendered from
+`briefs/claim-check.md` (the rows are the chunk, each named by the
+register IDs and rule numbers it bears on, never spec line numbers,
+which the morning's folds move; one or two checkers
+at a time on the fleets). A row that reproduces goes into its spec
+through a fold agent (`briefs/fold.md`): a register entry, or a
+corrected claim with a dated footnote, the reader on the rewritten
+spans and lint zero, as "Fix stale artifacts as you go" says; when it
+changes a claim a test asserts, the test changes with it and that
+suite runs green once. A row that does not reproduce is deleted; one
+that stays unclear becomes that spec's ❓ entry with a lean. A row
+that says an entry no longer shows (from a reporter) is
+driven the same way: when it holds, the fold retires the entry
+(TEMPLATE "Findings register"); when the entry still shows, the row is
+deleted and the entry stays where the backlog lists it. Every worked
+row is deleted from `incidentals.md`. Coverage a fold leaves as a
+**Planned** item is written in step 11.
+
+### Friction
+
+Fold `docs/tracking/friction.md` and delete every row.
+Most rows earn nothing, and that is the expected outcome: a retry or
+a wrong first guess is the ordinary cost of driving a screen, and
+every sentence added is one every later agent reads. A row earns a
+change only when all of these hold: the next agent would not notice
+the problem by itself (a silent failure, not an error that names its
+cause); agents on other features will meet it, and they are the ones
+who read the file the change goes into; the docs do not already say
+it (grep first); and it is not one screen's fact or general
+Playwright knowledge. Then take the first of these that fits:
+- **A tool fix.** When a script, a kit helper, a default, an error
+  message or a lint rule can carry the lesson, change that and write
+  at most one sentence. Prose that teaches agents to work around a
+  tool is the last resort.
+- **A rewrite of the entry it belongs to**, so the entry still reads
+  as one rule and is no longer than before. Never append a clause to
+  a passage about something else; an unrelated fact gets a short
+  entry of its own under a title that names it.
+The text says what holds now. The feature, the date and the story of
+how it was found go in the commit message, never in the doc. A
+harness key a row asks for is listed under scenarios.md "Field shapes
+not built yet", not built. A row whose fact one closer read of the
+spec or the brief would have given, or whose fix the session that
+wrote it already made, earns nothing. When in doubt, delete.
+
+### The drift sweep
+
+One spec every weekday the four hours allow: the one whose
+PROGRESS note carries the oldest "Swept" date (`npm run hk -- swept`
+names it: none counts as oldest, and among the never swept a spec
+with no kept build-time claim check goes first). Only the specs at
+the repo root, which follow `main`, are swept. Its kept checks
+(`shared/playwright/checks/<feature>/`) run twice at the tips on
+reset databases, under `PROBE_RUN` r1 and r2, since a fact one run
+shows is undetermined; a check whose header has a `RESEED` switch
+takes `RESEED=1` on both runs. Each run's summary is read for dead
+phases, because a kept check exits 0 when a phase dies, and a dead
+check is fixed first. The kept walks of the spec's filed reports
+(`shared/playwright/checks/issues/<report>/`) run the same way,
+twice each on a dataset fleet reset before every run (a walk that
+starts a server of its own is left out). One fresh checker
+(`briefs/claim-check.md`, `{{rerun}}` naming the outputs, the walks
+and the suites) judges the snapshots against the spec lines each
+chunk owns, drives what the checks no longer reach, and reads each
+suite against the scenarios for a bullet no test asserts.
+Drift folds as "Fix stale artifacts as you go" says, the tests with it; a bullet without its
+assertion becomes a **Planned** item for step 11. The PROGRESS note
+ends with
+"Swept <date>.", replacing the previous one.
+
+### An UNASSIGNED entry
+
+The top entry of `docs/tracking/UNASSIGNED.md`, driven by a checker.
+Live behavior on a shipped spec's
+screens folds into that spec (a claim with its footnote, the
+coverage as a **Planned** item for step 11) and the entry goes; dead code keeps
+its entry with the evidence; one that looks out of scope or like a
+new feature goes to the maintainer.
 
 ## Issue reports
 
@@ -356,7 +384,7 @@ proposed fix. Every 🐞 entry in the registers gets one, and every report
 is held to `docs/process/REPORT.md`. The ❓ and ✅ entries stay out: a
 question needs a ruling, not a fix.
 
-The housekeeping session writes them (its steps 4 and 7), from the
+The housekeeping session writes them (its steps 3 and 8), from the
 backlog: a refresh is a unit of its own, and owed reports go spec by
 spec. A maintainer's own session may work a spec too: it first gives
 the entries it takes a `Report: paused — taken in the maintainer's
@@ -509,7 +537,7 @@ and it says what its register entries say. When the issue closes, the
 report and its kept script are deleted; git and the closed issue keep
 the history. The register entry follows the reason: fixed, the entry
 retires with the fixing PR as its reason once a walk on the apps' `main`
-shows the fix (housekeeping step 3, or the sync), and when the report's
+shows the fix (housekeeping step 2, or the sync), and when the report's
 severity is medium or higher the session looks for the fix in every
 stable version with a folder (the version's sync log,
 `git merge-base --is-ancestor` or `git cherry` in its checkout): a
@@ -542,7 +570,7 @@ session that makes it:
   class or method the report rests on that the change touched (the
   report's backticked names against the change's file list), not only
   the sentence first noticed. The backlog lists it and
-  housekeeping step 4 works it. On a companion branch the line rides with the branch and
+  housekeeping step 3 works it. On a companion branch the line rides with the branch and
   lands when it merges, since the issue describes `main`.
 
 The same `Report:` line holds an entry's other states the backlog reads:
@@ -1097,7 +1125,9 @@ sync loop's critical triage, on one PR:
    repo's baseline in `upstream-sync.md` past the merged commit, with a
    one-line log entry, only when the commit had sync loop step 5's read
    (a PR review's did; the diagnosis of a red did not, and the daily
-   sync reads it then). Delete the companion row. The merge is manual
+   sync reads it then). Delete the companion row. A ready **Planned**
+   item the companion brought to `main` is written by this session
+   before it ends (RUNBOOK "Revising a shipped feature"). The merge is manual
    and happens on request; a companion waiting more than a few weeks gets a
    nudge in the PR's thread, because its base drifts.
 
@@ -1211,7 +1241,8 @@ merge.
    its merge". New behavior is spent as sync loop step 4 says:
    a bullet one scenario plainly takes, with its assertions, now;
    anything more a **Planned** item, which rides on the companion
-   and is written once it has merged. A change that outdates no spec
+   and is written by the session that merges it. A change that
+   outdates no spec
    span and no test needs no companion at all. Push it, and when it
    changed a test, dispatch once more with `--ref <companion>`; the app
    PR's own check picks the companion up by name on its next run.

@@ -308,7 +308,7 @@ function cmdFile() {
 
 // --- swept -----------------------------------------------------------------
 
-// The day's drift sweep (MAINTENANCE housekeeping step 12): the shipped spec whose PROGRESS note has
+// The day's drift sweep (MAINTENANCE housekeeping step 10): the shipped spec whose PROGRESS note has
 // the oldest "Swept <date>." mark, none counting as oldest. Among the never swept, a spec with no kept
 // build-time claim check (no shared/playwright/checks/<row>/K*) goes first: nothing drove its every
 // line under the present rules.

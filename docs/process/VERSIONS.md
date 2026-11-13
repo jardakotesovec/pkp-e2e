@@ -194,7 +194,7 @@ version's folder dispatches its run as the gate.
 
 A version's specs and tests are kept on par with `main`'s for everything
 that changes them as it happens. Only the searching stays `main`'s: the
-drift sweep (MAINTENANCE housekeeping step 12), new coverage for
+drift sweep (MAINTENANCE housekeeping step 10), new coverage for
 long-standing behavior, and the hunt for bugs.
 
 - **A port that changes what the version's spec or tests state** is
