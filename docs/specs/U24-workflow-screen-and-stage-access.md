@@ -1148,6 +1148,14 @@ App-specific:
 Left out of the scenarios above, by reason:
 
 - **Planned**:
+  - the guard for A14 (issue report
+    `docs/issues/U24-A14-recommending-editor-return-to-workflow-refused.md`):
+    a recommending editor opening a published submission offered no
+    "Return to Workflow" [report 2026-11-13]
+  - the guard for A15 (issue report
+    `docs/issues/U24-A15-assigned-editor-return-to-done-refused.md`):
+    an assigned editor pressing "Return to Workflow", then "Return to
+    Done", and the submission back in Done [report 2026-11-13]
   - a manager assigned to a submission only as its author, opening the
     editorial dashboard's address for it, sent to their own view of the
     submission under My Submissions ([A12](#a12), [A13](#a13),
@@ -1276,8 +1284,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A11](#a11) | In French the workflow screen names a staged version by a raw code, and a preprint server's "Preprint" heading, status line and "Post" and "Unpost" buttons show raw codes | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A manager who is the submission's Author gets an "Error" dialog, "You are not allowed to access these files.", over its review round | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A13](#a13) | A manager who is the submission's Author is offered its decision buttons, and the decision is then refused | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
-| [A14](#a14) | A recommending editor is offered "Return to Workflow" on a submission in Done, and "Confirm" is refused | 🐞 | minor | — |
-| [A15](#a15) | An editor assigned to a returned submission is offered "Return to Done", and "Confirm" is refused | 🐞 | user-visible | — |
+| [A14](#a14) | An editor limited to recommendations is offered "Return to Workflow" on a published submission, and "Confirm" is refused | 🐞 | low | issues (claude), 2026-11-13 — re-verified |
+| [A15](#a15) | An editor assigned to a returned submission presses "Return to Done" and is refused: "The current role does not have access to this operation." | 🐞 | medium | issues (claude), 2026-11-13 — re-verified |
 | [OMP3](#omp3) | On a press, disabling the URN plugin leaves URNs on public book pages and an empty "Identifiers" workflow page | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [OPS3](#ops3) | A preprint server labels an unfinished submission "Production", not "Incomplete", in the lists and the workflow header | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OPS6](#ops6) | "Post the preprint" does nothing for a manager who is the preprint's Author | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
@@ -1521,34 +1529,41 @@ reader [OPS6](#ops6).
 Basis: probe, 2026-10-21. <sup>[f-a13](#fn-a13)</sup>
 
 <a id="a14"></a>
-**A14 — A recommending editor is offered "Return to Workflow", and "Confirm" is refused** · 🐞 · minor.
+**A14 — An editor limited to recommendations is offered "Return to Workflow" on a published submission, and "Confirm" is refused** · 🐞 · low.
 A Section Editor whose assignment to a submission is limited to
 recommendations (a recommending editor) sees "Return to Workflow" in
-the header while the submission rests in Done, as a deciding editor
-does. The dialog opens as Rule 18a describes and "Cancel" changes
-nothing, but "Confirm" brings up an "Error" window reading "You do not
-have permission to record this decision on this submission." with
-"OK". The submission stays in Done, and after a reload the button is
-still offered. Expected: the button only for an editor whose "Confirm"
-moves the submission, as "Return to Done" is already withheld from a
-recommending editor. Seen on a journal; not tried on a press or a
-preprint server.
-Basis: probe, 2026-11-11. <sup>[f-a14](#fn-a14)</sup>
+the header of a published submission, as a deciding editor does. (On
+`main` a published submission rests in the Done stage, which is what
+the button leaves.) The dialog opens and "Cancel" changes nothing, but
+"Confirm" brings up an "Error" window reading "You do not have
+permission to record this decision on this submission." with "OK".
+The submission stays where it was, and after a reload the button is
+still offered.
+The recommending editor is offered an action they can never complete,
+and nothing on the screen says why until they try. On a press the same
+holds for a Series Editor limited to recommendations. A preprint
+server does not show it: there the limited Moderator's workflow of a
+posted preprint fails to load before any button is drawn.
+No release carries the fault: it is on `main` only, since 2026-06-09,
+and ships with the next release unless fixed.
+Basis: probe, 2026-11-13. <sup>[f-a14](#fn-a14)</sup>
 
 <a id="a15"></a>
-**A15 — An editor assigned to a returned submission is offered "Return to Done", and "Confirm" is refused** · 🐞 · user-visible.
-Once a published submission has been returned to the workflow (Rule
-18a), every deciding editor sees "Return to Done" and its dialog. For
-an editor assigned to the submission (the Editor or a Section Editor;
-on a preprint server the Moderator, who is assigned to every preprint
-in their section), "Confirm" brings up an "Error" window reading "The
+**A15 — An editor assigned to a returned submission presses "Return to Done" and is refused: "The current role does not have access to this operation."** · 🐞 · medium.
+An editor who returns a published submission to the workflow with
+"Return to Workflow" is then offered "Return to Done", to move it back.
+Anyone assigned to the submission in an editorial role that works on
+its current stage gets, on "Confirm", an "Error" window reading "The
 current role does not have access to this operation." with "OK". The
 submission stays in its stage, and after a reload the button is still
-offered. A Journal Manager who is not assigned to the submission moves
-it back as Rule 18b describes, so an assigned editor who returned a
-submission cannot undo the return without one. Expected: "Confirm"
-moves the submission back to Done for every editor offered the button.
-Basis: probe, 2026-11-11. <sup>[f-a15](#fn-a15)</sup>
+offered.
+So the editor who handled the submission cannot undo their own return:
+the published submission stays in the active queue, in Production,
+until a manager-level user who is not assigned to it presses the
+button.
+No release carries the fault: it is on `main` only, since 2026-06-09,
+and ships with the next release unless fixed.
+Basis: probe, 2026-11-13. <sup>[f-a15](#fn-a15)</sup>
 
 ### OMP
 
@@ -1804,9 +1819,11 @@ Issue report: [pkp-e2e#1041](https://github.com/jardakotesovec/pkp-e2e/issues/10
 
 <a id="fn-a14"></a>
 **f-a14** — Live-probed 2026-11-11 (Actors row "Return to Workflow", Rule 18a; OJS, PKP's default dataset as installed, two runs on a reset install): `sberardo`, assigned to submission 1 (resting in Done) as Section editor with "Only allowed to recommend", was offered "View", "Activity Log", "Library", "Return to Workflow"; the dialog read "Return to Workflow" / "Return this submission to the workflow stage it occupied before it was moved to Done." with "Confirm" then "Cancel"; "Cancel" changed nothing (same header and stage after a reload); "Confirm" sent `POST api/v1/submissions/1/decisions` `{"decision":34}`, answered 401 `editor.submission.workflowDecision.disallowedDecision` (the key `DecisionAllowedPolicy` denies with, note f-a13), shown as the "Error" window "You do not have permission to record this decision on this submission." with one "OK"; after "OK" the header was unchanged, the stage stayed 6 (Done) with no decision recorded, and after a reload the bubble read "Published" with "Return to Workflow" still offered. No server error: the server log holds the 401 line only. Controls on the same submission: `dbuskins` (Section editor, no limit) and `dbarnes` (Journal editor) returned it (200, stage 6 → 5); `sberardo` then saw "Preview", "Activity Log", "Library" and no "Return to Done". The button follows the Done branch of `Schema::getAvailableEditorialDecisions()` (note m). Not tried on OMP or OPS: OMP's default data holds one recommend-only assignment (`minoue` on book 6, in Internal Review) and OPS's none, so neither has one on a published item.
+Issue report: docs/issues/U24-A14-recommending-editor-return-to-workflow-refused.md
 
 <a id="fn-a15"></a>
 **f-a15** — Live-probed 2026-11-11 (Actors row "Return to Done", Rule 18b; PKP's default dataset as installed, two runs per app on a reset install): after an assigned editor's "Return to Workflow" (stage 5, the published version still published) every deciding editor driven was offered "Return to Done" and its dialog ("Return to Done" / "Return this submission to the Done stage.", "Confirm" then "Cancel"). "Confirm" by an editor assigned to the submission (OJS `dbarnes` Journal editor and `dbuskins` Section editor on submission 1, OMP `dbarnes` Press editor on book 14, OPS `dbuskins` Moderator on preprint 2) sent `POST api/v1/submissions/{id}/returnToDone`, answered 401 `user.authorization.roleBasedAccessDenied`, shown as the "Error" window "The current role does not have access to this operation." with "OK"; the stage stayed 5 with no decision recorded, and the bubble "Production" and "Return to Done" were unchanged after "OK" and after a reload. "Confirm" by the unassigned Journal manager `rvaca` answered 200 on all three apps: stage 6, bubble "Published", header "View", "Activity Log", "Library", "Return to Workflow" (OMP adds "Monograph"), the same after a reload. No server error: the server log holds the 401 line only. Mechanism (read, not driven): `PKPSubmissionController::authorize()` guards `returnToDone` with `DecisionAllowedPolicy` but not with the `DecisionTypeRequiredPolicy` that supplies the decision type (since pkp/pkp-lib#12799, lib/pkp `d52aa4c84b`); for a user with an editorial stage assignment on the current stage the policy reads the absent decision type and throws, and `PolicyAuthorizer` answers the exception as a 401 carrying the last authorization message; a manager-level user (Journal Manager or Editor) with no assignment on that stage leaves the policy before that point, so an unassigned Editor is allowed by the same branch as `rvaca` (not driven). The suites' scenario 8 runs as the unassigned `manager.maya`.
+Issue report: docs/issues/U24-A15-assigned-editor-return-to-done-refused.md
 
 <a id="fn-omp2"></a>
 **f-omp2** — Note h: `useWorkflowNavigationConfigOMP.js::getPublicationItemsEditorial()` pushes `media` before the settings-gated pages and outside the `permissions.canAccessProduction` block; `…OJS.js` and `…OPS.js` push it inside that block. Live-probed 2026-09-02: `assistant.rita` as Funding Coordinator on a monograph in External Review Round 1 saw "Title & Abstract", "Contributors", "Chapters", "Metadata", "Publication Formats", "Media", "References", "Funding" and no "Catalog Entry" or "Permissions & Disclosure"; the same role on a journal article in Review Round 1 saw "Title & Abstract", "Contributors", "Metadata", "References", "Funding", "JATS XML" and no "Media".

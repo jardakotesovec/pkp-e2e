@@ -1,0 +1,18 @@
+--- a/lib/pkp/api/v1/submissions/PKPSubmissionController.php
++++ b/lib/pkp/api/v1/submissions/PKPSubmissionController.php
+@@ -72,6 +72,7 @@
+ use PKP\security\authorization\ContextAccessPolicy;
+ use PKP\security\authorization\DecisionWritePolicy;
+ use PKP\security\authorization\internal\DecisionAllowedPolicy;
++use PKP\security\authorization\internal\DecisionTypeRequiredPolicy;
+ use PKP\security\authorization\internal\SubmissionCompletePolicy;
+ use PKP\security\authorization\PublicationAccessPolicy;
+ use PKP\security\authorization\PublicationWritePolicy;
+@@ -428,6 +429,7 @@
+ 
+         if ($actionName === 'returnToDone') {
+             $this->addPolicy(new SubmissionCompletePolicy($request, $args));
++            $this->addPolicy(new DecisionTypeRequiredPolicy($request, $args, Decision::RETURN_TO_DONE));
+             $this->addPolicy(new DecisionAllowedPolicy($request->getUser()));
+         }
+ 

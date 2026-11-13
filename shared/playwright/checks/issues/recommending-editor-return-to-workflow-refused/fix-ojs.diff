@@ -1,0 +1,19 @@
+--- a/classes/submission/maps/Schema.php
++++ b/classes/submission/maps/Schema.php
+@@ -114,12 +114,14 @@
+         $permissions = $this->checkDecisionPermissions($stageId, $submission, $user, $request->getContext()->getId());
+         $userHasAccessibleRoles = $user->hasRole([Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN, Role::ROLE_ID_ASSISTANT], $request->getContext()->getId());
+ 
+-        // Done has no stage assignments, so checkDecisionPermissions returns false for canMakeDecision
+-        // for assigned sub-editors. Grant decision access to any editor assigned to this submission.
++        // Grant decision access at Done to an editor assigned to this submission whom
++        // checkDecisionPermissions did not find able to decide, unless the assignment is
++        // limited to recommendations.
+         if ($stageId === WORKFLOW_STAGE_ID_DONE && !$permissions['canMakeDecision']) {
+             $isAssignedEditor = StageAssignment::withSubmissionIds([$submission->getId()])
+                 ->withUserId($user->getId())
+                 ->withRoleIds([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR])
++                ->withRecommendOnly(false)
+                 ->exists();
+             if ($isAssignedEditor) {
+                 $permissions['canMakeDecision'] = true;
