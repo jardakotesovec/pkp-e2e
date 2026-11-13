@@ -253,7 +253,9 @@ function knownRows() {
         const cells = line.split('|').map((c) => c.trim());
         if (cells.length < 5 || !/^C-/.test(cells[1])) continue;
         const tests = [...cells[2].matchAll(/\b(U\d+) (S\d+)\b/g)].map((m) => `${m[1]} ${m[2]}`);
-        rows.push({id: cells[1], tests, apps: cells[3].toLowerCase()});
+        const issue = (cells[5] || '').match(/\[([^\]]+)\]\((https:[^)]+)\)/);
+        const since = ((cells[6] || '').match(/20\d\d-\d\d-\d\d/) || [])[0] || null;
+        rows.push({id: cells[1], tests, apps: cells[3].toLowerCase(), configurations: cells[4], issue: issue ? `${issue[1]} ${issue[2]}` : cells[5], since});
     }
     return rows;
 }
@@ -325,6 +327,14 @@ function matrix(ids) {
     if (known.length) {
         console.log(`  known (ci-triage "Open — red on a configuration only"): ${known.length}`);
         known.forEach((t) => console.log(`    ${knownRow(t, rows).id}  ${t}\n        on ${[...failed.get(t)].sort().join(', ')}`));
+    }
+    // The day's reminder (MAINTENANCE "The configurations run", step 6): one line per open issue.
+    const open = rows.filter((r) => known.some((t) => knownRow(t, rows) === r));
+    if (open.length && !ids.length) {
+        const days = (d) => (d ? Math.max(0, Math.floor((Date.now() - Date.parse(`${d}T00:00:00Z`)) / 86400000)) : null);
+        console.log(`  to post, tagging @beaug: the configurations run is still red, ${known.length} test${known.length > 1 ? 's' : ''} from ${open.length} open issue${open.length > 1 ? 's' : ''}`);
+        open.forEach((r) => console.log(`    ${r.id}  ${r.issue}: ${r.tests.join(', ')} (${r.apps.toUpperCase()}) on ${r.configurations}`
+            + (r.since ? `; red since ${r.since}, ${days(r.since)} day${days(r.since) === 1 ? '' : 's'}` : '')));
     }
     const quiet = rows.filter((r) => !known.some((t) => knownRow(t, rows) === r));
     if (quiet.length && !ids.length) {

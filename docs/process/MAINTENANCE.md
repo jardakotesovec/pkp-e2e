@@ -1012,6 +1012,17 @@ its own checks are triaged:
    on: `node bin/ci.js dispatch --apps <app> --php 8.2 --database mysql`
    (`e2e.yml` takes one configuration; the push run covers the usual
    one).
+6. **Say so every day the run is red.** The goal is the whole run
+   green, and a test never goes quiet because its fault is filed. On
+   every day a row stands in "Open — red on a configuration only", the
+   session posts one message of its own in its thread, tagging @beaug,
+   who can set the priority of these bugs: how many tests are red and
+   on which databases, then one line per open issue with its title,
+   its link, the tests it keeps red and the days since it was first
+   seen (`node bin/ci.js matrix` prints those lines under "to post").
+   The developers tagged when an issue was filed are not tagged again.
+   On the first night the whole run is green the message says so, and
+   after that there is nothing to post.
 
 ## Triage: where does a change land?
 
