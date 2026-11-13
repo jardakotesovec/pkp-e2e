@@ -295,21 +295,22 @@ test.describe('announcements (queued email; the site)', () => {
             expect(await pkpMail.count({to: mailOf(username), subject: 'Board meeting'}), `no "Board meeting" mail to ${username}`).toBe(0);
         }
 
-        // The deleted announcement's job: no email titled "Cancelled
+        // The deleted announcement's jobs: no email titled "Cancelled
         // meeting" for anyone, read after the Reader's arrived (the
         // Reader, the manager and the Site Administrator, who are mailed
         // for "Call for papers", are its positive controls); as the Site
-        // Administrator, Administration › "View Failed Jobs" lists the
-        // job, "Failed At" the time the jobs ran, in a row naming no
-        // announcement; the row count (two, Side effects) is a Planned item, not read.
+        // Administrator, Administration › "View Failed Jobs" lists its two
+        // jobs (the Section Editor's, notified alone, and the emailed
+        // users'), each in a row naming no announcement, "Failed At" the
+        // time of the last run (Side effects).
         await pkpMail.find({to: ADMIN_MAIL, subject: 'Call for papers', contains: tag});
         for (const address of [mailOf(manager), mailOf(reader), mailOf(author), mailOf(sectionEditor), ADMIN_MAIL]) {
             expect(await pkpMail.count({to: address, subject: 'Cancelled meeting', contains: tag}), `no "Cancelled meeting" mail to ${address}`).toBe(0);
         }
-        // The job is tried three times, five seconds apart, before it
+        // Each job is tried three times, five seconds apart, before it
         // fails (lib/pkp BaseJob $tries 3, $backoff 5), and one drain
-        // leaves it released for its next try (T-ojs-1): the jobs run
-        // again after each delay until the Failed Jobs page lists it.
+        // leaves it released for its next try: the jobs run again after
+        // each delay until the Failed Jobs page lists both.
         const adminPage = await (await asUser('admin')).newPage();
         const administration = new AdministrationPage(adminPage);
         await administration.goto();
@@ -321,7 +322,7 @@ test.describe('announcements (queued email; the site)', () => {
         await expect
             .poll(
                 async () => {
-                    if (ours.length === 0) {
+                    if (ours.length < 2) {
                         runJobs();
                         lastDrainEnd = Date.now();
                         await failed.goto();
@@ -329,11 +330,13 @@ test.describe('announcements (queued email; the site)', () => {
                     }
                     return ours.length;
                 },
-                {message: `the deleted announcement ${cancelledId}'s job is listed`, intervals: [5_500], timeout: 90_000}
+                {message: `the deleted announcement ${cancelledId}'s two jobs are listed`, intervals: [5_500], timeout: 90_000}
             )
-            .toBeGreaterThan(0);
+            .toBeGreaterThanOrEqual(2);
         await administration.goto();
         await failed.openFromAdministration();
+        ours = (await failed.allRows()).filter((row) => announcementOfJob(row) === cancelledId);
+        expect(ours.length, `exactly two rows name the deleted announcement ${cancelledId}'s jobs`).toBe(2);
         for (const job of ours) {
             const row = await failed.findRow(job.id);
             expect(row, `failed job ${job.id} on screen`).not.toBeNull();

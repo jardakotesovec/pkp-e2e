@@ -21,9 +21,10 @@
  *   footnote s4 drains and reads (that reading would need `@solo`);
  * - S4's "Cancelled meeting" is read as listed and then gone, never as
  *   the first row (it may share a posted second with the add before it);
- *   its failed job is told on Administration › "View Failed Jobs" by the
- *   announcement's number in the payload the page's own list load
- *   carries, and the number of such rows (two, Side effects) is a Planned item, not read;
+ *   its two failed jobs are told on Administration › "View Failed Jobs"
+ *   by the announcement's number in the payload the page's own list load
+ *   carries, the jobs run again after each five-second pause until both
+ *   rows are listed;
  * - the "New Announcement" email's "full announcement" link carries the
  *   config `base_url` host (worker 0's port, seed-facts), so S4 opens the
  *   link's path on its own origin;
@@ -278,14 +279,15 @@ test.describe('announcements (queued email; the site)', () => {
             expect(await pkpMail.count({to: mailOf(username), subject: 'Board meeting'}), `no "Board meeting" mail to ${username}`).toBe(0);
         }
 
-        // The deleted announcement's job: as the Site Administrator,
-        // Administration › "View Failed Jobs" lists it, "Failed At" the
-        // time the jobs ran, in a row naming no announcement. The job is
-        // told by the announcement's number in the payload the page's own
-        // list load carries; how many rows it leaves (two) is a Planned item, not read.
-        // The job is tried three times, five seconds apart, before it is
-        // listed (T-ops-1), so the jobs are run again, after each pause,
-        // until it is (Side effects).
+        // The deleted announcement's jobs: as the Site Administrator,
+        // Administration › "View Failed Jobs" lists its two jobs (the one
+        // for the Moderator, notified alone, and the one for the users
+        // emailed), each in a row naming no announcement, "Failed At" the
+        // time of the last run. The jobs are told by the announcement's
+        // number in the payload the page's own list load carries. Each is
+        // tried three times, five seconds apart, before it is listed
+        // (footnote s4), so the jobs are run again, after each pause, until
+        // both rows are (Side effects).
         const adminPage = await (await asUser('admin')).newPage();
         await new AdministrationPage(adminPage).goto();
         const failed = new FailedJobsPage(adminPage);
@@ -300,7 +302,7 @@ test.describe('announcements (queued email; the site)', () => {
         await expect
             .poll(
                 async () => {
-                    if (!forIt.length) {
+                    if (forIt.length < 2) {
                         runJobs();
                         lastDrainEnded = Date.now();
                         await failed.reload();
@@ -308,9 +310,10 @@ test.describe('announcements (queued email; the site)', () => {
                     }
                     return forIt.length;
                 },
-                {message: `a failed job of announcement ${cancelledId} is listed`, timeout: 90_000, intervals: [1_000, 2_000, 5_000]}
+                {message: `the two failed jobs of announcement ${cancelledId} are listed`, timeout: 90_000, intervals: [1_000, 2_000, 5_000]}
             )
-            .toBeGreaterThan(0);
+            .toBeGreaterThanOrEqual(2);
+        expect(forIt.length, `exactly two rows name announcement ${cancelledId}'s jobs`).toBe(2);
         for (const job of forIt) {
             expect(job.displayName).toBe(NOTIFY_JOB);
             expect(await failed.findRow(job.id), `failed job ${job.id} on screen`).not.toBeNull();
@@ -320,8 +323,9 @@ test.describe('announcements (queued email; the site)', () => {
             const failedAt = (await cells.nth(4).innerText()).trim();
             const m = failedAt.match(FAILED_AT);
             expect(m, `"Failed At" reads a time: ${failedAt}`).not.toBeNull();
-            const at = Date.parse(`${m ? m[1].replace(' ', 'T') : ''}Z`);
-            expect(at, '"Failed At" is a time the jobs ran').toBeGreaterThanOrEqual(Math.floor(drainStarted / 1000) * 1000 - 1000);
+            // The page prints the hour without a leading zero ("0:00:02").
+            const at = m ? Date.parse(`${m[1].replace(/ (\d):/, ' 0$1:').replace(' ', 'T')}Z`) : NaN;
+            expect(at, '"Failed At" is the time of a run of the jobs').toBeGreaterThanOrEqual(Math.floor(drainStarted / 1000) * 1000 - 1000);
             expect(at).toBeLessThanOrEqual(lastDrainEnded + 1000);
             await expect(failed.row(job.id)).not.toContainText('Cancelled meeting');
         }

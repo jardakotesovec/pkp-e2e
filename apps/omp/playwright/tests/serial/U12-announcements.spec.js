@@ -26,9 +26,9 @@
  *
  * Not asserted here, by register ID: A9 🐞 (no edit ticks the email box),
  * A14 🐞 (the press's primary language is English, so the email's sentence
- * is the English one either way). Not read either: how many failed rows the deleted
- * announcement's jobs leave (two, Side effects; a Planned item): S4 asserts at least one. S4's Notifications-row givens for the
- * Author and the Series editor are set through Profile › Notifications by
+ * is the English one either way). S4 reads the deleted announcement's two
+ * failed rows (A23 retired: each job leaves its own). S4's
+ * Notifications-row givens for the Author and the Series editor are set through Profile › Notifications by
  * the test, as footnote s4 says (the tab is *Notifications center & email
  * preferences*'; there is no seed key for it).
  *
@@ -266,15 +266,17 @@ test.describe('Announcements (U12), queued email and the site', () => {
             await pkpMail.expectNone({to: user.email, subject: 'Board meeting', afterControl: control});
         }
 
-        // The deleted announcement's job: no email titled "Cancelled
+        // The deleted announcement's jobs: no email titled "Cancelled
         // meeting" for anyone of the press (the Site Administrator, a
         // manager there, read by the press's path in the link, against his
         // "Call for papers" read the same way); as the Site Administrator,
-        // Administration › "View Failed Jobs" lists its job, "Failed At" the
-        // time the jobs ran (their last run, T-omp-1), in a row naming no
-        // announcement; the job is told by the announcement's number in the
-        // payload the page's own list load carries. How many rows (one or
-        // two, Side effects) is a Planned item, not asserted.
+        // after the jobs have been run again past each five-second pause,
+        // Administration › "View Failed Jobs" lists the announcement's two
+        // jobs (the Series editor's, notified alone, and the emailed
+        // users'), each in a row naming no announcement, "Failed At" the
+        // time of the last run (Side effects). A job is told by the
+        // announcement's number in the payload the page's own list load
+        // carries.
         for (const user of [manager, reader, author, seriesEditor]) {
             await pkpMail.expectNone({to: user.email, subject: CANCELLED, afterControl: control});
         }
@@ -289,9 +291,9 @@ test.describe('Announcements (U12), queued email and the site', () => {
         await new AdministrationPage(adminPage).goto();
         const failedJobs = new FailedJobsPage(adminPage);
         await failedJobs.openFromAdministration();
-        // The job is tried three times, at least five seconds apart, before
+        // Each job is tried three times, at least five seconds apart, before
         // it is listed (T-omp-1): the jobs are run again, after each pause,
-        // and the page reloaded, until a row names it.
+        // and the page reloaded, until both rows are there; then exactly two.
         const jobsOfCancelled = async () =>
             (await failedJobs.allRows()).filter((row) => namesAnnouncement(row, cancelled.id));
         let ours = await jobsOfCancelled();
@@ -299,7 +301,7 @@ test.describe('Announcements (U12), queued email and the site', () => {
         await expect
             .poll(
                 async () => {
-                    if (!ours.length) {
+                    if (ours.length < 2) {
                         runJobs();
                         lastDrainEnd = Date.now();
                         await failedJobs.reload();
@@ -309,7 +311,8 @@ test.describe('Announcements (U12), queued email and the site', () => {
                 },
                 {message: 'failed jobs naming the deleted announcement', timeout: 90_000, intervals: [1_000, 2_000, 5_000]}
             )
-            .toBeGreaterThan(0);
+            .toBeGreaterThanOrEqual(2);
+        expect(ours.length, 'failed rows naming the deleted announcement').toBe(2);
         for (const job of ours) {
             const row = await failedJobs.findRow(job.id);
             expect(row, `failed job ${job.id} on the page`).not.toBeNull();

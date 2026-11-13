@@ -1006,7 +1006,6 @@ Left out of the scenarios above, by reason:
   - the guard for A3 (issue report `docs/issues/U12-A3-announcement-expiry-date-refused-on-edit.md`): an unchanged "Save" on "Edit Announcement" keeps the expiry date, with another "Date (Short)" and with a browser west of the install's time zone. [report 2026-10-03]
   - the guard for A12 (issue report `docs/issues/U12-A12-announcement-image-files-left-behind.md`): deleting an announcement with a picture, and replacing its picture with one of another type, leave no file behind: the picture's earlier address no longer opens it ([Rule 15](#kept-file)), on a context and on the site. [report 2026-10-03]
   - the guard for A22, once fixed (Rules 15, 16): a site announcement with a picture, the newest of the site's: the site's home page, the site's Announcements page and the announcement's own page open for a signed-out visitor and for the Site Administrator after signing in, each showing the picture, on OJS, OMP and OPS. [incidental 2026-10-29]
-  - the number of rows on "View Failed Jobs" for scenario 4's deleted announcement: two, one per job (Side effects); the suites read every row that names its jobs but not how many. [report 2026-11-12]
 - **Nothing new to test**:
   - an unsaved tick on the settings tab kept across a tab switch and
     lost on leaving the page (Fields)
@@ -2286,8 +2285,8 @@ released back to the queue for five seconds (`BaseJob` `$tries` 3,
 `$backoff` 5, note f), and the `_test/jobs` count it waits on leaves
 out jobs not yet available, so the suite runs `runJobs()` again after
 each pause until the page lists the announcement's rows; each row is
-read by its payload's announcement, and the suite reads one or more
-rows, not how many.
+found by its payload's announcement number in the page's own list
+data, and the suite reads exactly two rows, one per job.
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** `POST scenarios/context` with
