@@ -14,9 +14,8 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
- * - OJS2 🐞: S2 reads the published issue's entry and never whether an
- *   article is listed; no list of a journal with published work is
- *   compared whole.
+ * - No list of a journal with published work is compared whole: S2 reads
+ *   the issue's entry and the article's, not the galleys' (Rule 2a).
  * - OJS1 🐞: no "DC.Source.URI" is read.
  * - A1 🐞, A5 🐞, A6 🐞, A7 🐞: no description with a quote mark or
  *   markup, no expired announcement, no contributor without names in the
@@ -25,7 +24,7 @@
  *   only, never the "OJS" of another app nor the "Check Status" paragraph.
  * - A3 ❓, A4 ❓: the site's own Plugins list is never opened; S1 reads the
  *   journal's listing pages as the spec lists them.
- * - OMP1–OMP5 🐞, OPS1 🐞: a press's and a preprint server's, in those suites.
+ * - OMP3, OMP5, OMP7 🐞, OPS1 🐞: a press's and a preprint server's, in those suites.
  *
  * Seeding: scenario endpoints only, as footnote s says; publicknowledge and
  * the seeded roster are only read (S4, signed out). Every other scenario
@@ -213,17 +212,17 @@ test.describe('Search-engine metadata & analytics', () => {
         expect(sitemap.body).not.toMatch(/<lastmod|<priority|<changefreq/);
 
         // Its entries, in order: home, "Register", "Login", "Submissions",
-        // "Contact", then a journal's "Search", "Current" and "Archive"
-        // (Rules 2, 3; Fields, "What the sitemap lists").
+        // "Editorial Masthead", "Contact", then a journal's "Search"; with no
+        // published issue, no "Current" or "Archive" (Rules 2, 2b, 3; Fields,
+        // "What the sitemap lists").
         expect(sitemap.paths).toEqual([
             at(tag),
             at(tag, '/user/register'),
             at(tag, '/login'),
             at(tag, '/about/submissions'),
+            at(tag, '/about/editorialMasthead'),
             at(tag, '/about/contact'),
             at(tag, '/search'),
-            at(tag, '/issue/current'),
-            at(tag, '/issue/archive'),
         ]);
 
         // Control: no "About the Journal" entry, beside the About pages
@@ -246,7 +245,7 @@ test.describe('Search-engine metadata & analytics', () => {
         });
         const [issue1, issue2] = context.issues;
         const announcementId = context.announcements[0].id;
-        await seedArticle(ojsApi, tag, 'Tidal Patterns', {published: true, issue: {volume: 1, number: 1, year: 2024}});
+        const tidalId = await seedArticle(ojsApi, tag, 'Tidal Patterns', {published: true, issue: {volume: 1, number: 1, year: 2024}});
         const draftId = await seedArticle(ojsApi, tag, 'Draft Study');
         const futureId = await seedArticle(ojsApi, tag, 'Future Tides', {published: true, issue: {volume: 1, number: 2, year: 2026}});
         const otherContext = await seedJournal(ojsApi, other, {manager: false, issues: [{volume: 1, number: 1, year: 2024, published: true}]});
@@ -266,11 +265,12 @@ test.describe('Search-engine metadata & analytics', () => {
         await visitor.goto(sitemap.paths[login + 2]);
         await expect(visitor.getByRole('heading', {name: 'Call for Papers', level: 1})).toBeVisible({timeout: 30_000});
 
-        // Published work: the page of Vol. 1 No. 1 follows "Archive" (Rule
-        // 2a; OJS2 leaves the articles out, not asserted).
+        // Published work: the page of Vol. 1 No. 1 follows "Archive", and
+        // the article's page of "Tidal Patterns" is listed (Rules 2a, 2b).
         const archive = sitemap.paths.indexOf(at(tag, '/issue/archive'));
         expect(archive).toBeGreaterThan(0);
         expect(sitemap.paths[archive + 1]).toBe(at(tag, `/issue/view/${issue1.id}`));
+        expect(sitemap.paths).toContain(articlePath(tag, tidalId));
 
         // Not in the sitemap: no entry opens "Draft Study" or "Future
         // Tides", none is the page of Vol. 1 No. 2, and none lies under the
@@ -378,7 +378,10 @@ test.describe('Search-engine metadata & analytics', () => {
         const [english, french] = await readSitemapPair(visitor, pk);
         expect(english.status).toBe(200);
         expect(english.paths.length).toBeGreaterThan(3);
+        // A PDF's download address carries no language (Rule 4).
+        const pdf = new RegExp(`^/index\\.php/${pk}/article/download/`);
         for (const path of english.paths) {
+            if (pdf.test(path)) continue;
             expect(path).toMatch(new RegExp(`^/index\\.php/${pk}/en(/|$)`));
             expect(path).not.toContain('/fr_CA');
         }
@@ -387,6 +390,7 @@ test.describe('Search-engine metadata & analytics', () => {
         expect(french.status).toBe(200);
         expect(french.paths.length).toBe(english.paths.length);
         for (const path of french.paths) {
+            if (pdf.test(path)) continue;
             expect(path).toMatch(new RegExp(`^/index\\.php/${pk}/fr_CA(/|$)`));
             expect(path).not.toMatch(/\/en(\/|$)/);
         }

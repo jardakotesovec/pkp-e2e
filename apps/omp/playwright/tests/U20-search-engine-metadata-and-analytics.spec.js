@@ -22,9 +22,9 @@
  * spec's Coverage section is the record of everything else left out):
  * - OMP3 🐞, OMP5 🐞: no page's "DC.Type" is read but the book's
  *   ("Text.Book"), and no file view page's "DC.Identifier.URI".
- * - OMP4 🐞: S7 never reads the sitemap after "Create New Version".
- * - OMP1 🐞, OMP2 🐞: no book page's "citation_pdf_url" is read where the
- *   book has two PDF files outside its chapters.
+ * - The sitemap after "Create New Version" (Rule 2c), a book with two PDF
+ *   files outside its chapters, and an EPUB beside an HTML file (the
+ *   Google Scholar table): Planned in the spec's Coverage.
  * - OMP7 🐞: no URN is assigned.
  * - A1 🐞, A5 🐞, A6 🐞, A7 🐞: no description with a quote mark or
  *   markup, no expired announcement, no contributor without names in the
@@ -34,7 +34,7 @@
  * - A3 ❓: the site's own Plugins list is never opened. A4 ❓ is read where
  *   S1 and S2 state it (a press lists "Catalog", "New Releases" and its
  *   category pages).
- * - OJS1 🐞, OJS2 🐞, OPS1 🐞: a journal's and a preprint server's, in
+ * - OJS1 🐞, OPS1 🐞: a journal's and a preprint server's, in
  *   those suites.
  *
  * Seeding: scenario endpoints only, as footnote s says; publicknowledge and
@@ -178,6 +178,11 @@ function bookPath(contextPath, submissionId) {
 /** A book file's view page (path): the book's, the format's and the file's numbers. */
 function filePath(contextPath, submissionId, format) {
     return at(contextPath, `/catalog/view/${submissionId}/${format.id}/${format.submissionFileId}`);
+}
+
+/** A book file's download address (path), as "citation_pdf_url" names a PDF: no language in it. */
+function fileDownloadPath(contextPath, submissionId, format) {
+    return at(contextPath, `/catalog/download/${submissionId}/${format.id}/${format.submissionFileId}`);
 }
 
 /**
@@ -337,13 +342,14 @@ test.describe('Search-engine metadata & analytics', () => {
         expect(sitemap.body).not.toMatch(/<lastmod|<priority|<changefreq/);
 
         // Its entries, in order: home, "Register", "Login", "Submissions",
-        // "Contact", then a press's "Catalog" and "New Releases" (Rules 2,
-        // 3; Fields, "What the sitemap lists"; A4).
+        // "Editorial Masthead", "Contact", then a press's "Catalog" and "New
+        // Releases" (Rules 2, 3; Fields, "What the sitemap lists"; A4).
         expect(sitemap.paths).toEqual([
             at(tag),
             at(tag, '/user/register'),
             at(tag, '/login'),
             at(tag, '/about/submissions'),
+            at(tag, '/about/editorialMasthead'),
             at(tag, '/about/contact'),
             at(tag, '/catalog'),
             at(tag, '/catalog/newReleases'),
@@ -396,7 +402,8 @@ test.describe('Search-engine metadata & analytics', () => {
         await expect(visitor.getByRole('heading', {name: 'Call for Papers', level: 1})).toBeVisible({timeout: 30_000});
 
         // Published work: the book's page follows "Catalog", then one
-        // chapter page, then the page of its "PDF" file; after "New
+        // chapter page, then the download address of its "PDF" file (Rule
+        // 4); after "New
         // Releases" the page of "Sea Series", then that of "Cat One" (Rules
         // 2, 4; Fields, "What the sitemap lists"). The file entry is read,
         // never followed.
@@ -405,7 +412,7 @@ test.describe('Search-engine metadata & analytics', () => {
         expect(sitemap.paths.slice(catalog + 1, catalog + 4)).toEqual([
             bookPath(tag, tidalId),
             chapterPath,
-            filePath(tag, tidalId, pdf),
+            fileDownloadPath(tag, tidalId, pdf),
         ]);
         const releases = sitemap.paths.indexOf(at(tag, '/catalog/newReleases'));
         expect(releases).toBeGreaterThan(catalog);
@@ -789,7 +796,7 @@ test.describe('Search-engine metadata & analytics', () => {
 
         // A file for sale: the book's page of "Sale Tides" carries one
         // "citation_pdf_url"; its address lands the visitor on Login, where
-        // the open-access one above saved the file (Rule 12; OMP2).
+        // the open-access one above saved the file (Rule 12).
         const saleSource = await readSource(visitor, bookPath(tag, sale.submissionId));
         expect(saleSource.status).toBe(200);
         expect(metaContents(saleSource, 'citation_title')).toEqual(['Sale Tides']);
