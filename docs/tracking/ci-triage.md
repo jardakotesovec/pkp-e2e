@@ -50,6 +50,7 @@ line's fleet.
 
 | Commit / PR | Surface | Apps | Reproduction | Reported | Note (one line) |
 |-------------|---------|------|--------------|----------|-----------------|
+| pkp/pkp-lib#13788 for pkp/pkp-lib#13459 (`e0c5c49af6`, merge `c09ff30833`, 2026-11-13; 3.5 twin `c79dddb5e6`, pkp/pkp-lib#13787; no app `main` pointer yet, OJS 3.5 `53530611fe`) | `tools/repairRorAffiliations.php`: (1) an ORGANIZATION contributor's own `rorId` is taken for the old plugin's and `--commit` makes it its own affiliation (`main`); (2) authors left one row per language by 3.5.0-0/-1 are skipped, unlisted and unrepaired (`main`, 3.5) | OJS OMP OPS, `stable-3_5_0` (finding 2) | `shared/playwright/checks/sync/pkp-lib-13788/` (`org-ror.js`, `split-rows.js`; `fix.diff`) | [2026-11-13-pkp-lib-13788.md](../reports/2026-11-13-pkp-lib-13788.md), posted 2026-11-13 (@beaug, @bozana) | intention gap, medium, small; a CLI tool, so no suite reds; re-run both scripts when the tool changes |
 | pkp/pkp-lib#11699 (`aff80d393e`, 2025-08-21, `I11702_ExtendTasks`; on `ore` too) | The 3.6 upgrade keeps `edit_tasks.status` (smallint, not null, default 1) that a fresh install lacks: `Blueprint::removeColumn('status')` drops nothing. No screen differs; upgraded and fresh schemas part | OJS OMP OPS · ore (code) | `checks/sync/pkp-lib-11699/check.sh <app> <n>` after a 3.5-dataset upgrade on a dataset fleet | 2026-11-09, [report](../reports/2026-11-09-pkp-lib-11699.md), posted in the daily thread | From the housekeeping Lead of 2026-11-09 (U12 sweep NOTE); fixed when both DBs print "absent" |
 | pkp/pkp-lib#13545 for pkp/pkp-lib#13543 (pkp-lib `85e618b07f` lock removed and `d830a2a01b` map without context, Vitaliy-1, 2026-10-20; merged 2026-11-07 as `b793c1688b`, tree `6035a6fed8`; OJS `9cab42ec39` pkp/ojs#5946; `main` only) | Body Text "Export" (`PKP\bodyText\Repository::createGalleyFile()`): (1) exports of one version sent at the same moment each add a galley (four at once: 3 "HTML", 2 "PDF"); (2) `createHtmlFile()` without a journal in the request (CLI, job) throws `TypeError … Schema::__construct(): Argument #4 ($context) … null given` at `classes/bodyText/Repository.php:407`, the PDF export works | OJS (walked at the merged tip) · OMP, OPS: no Body Text API (code) · not ore, 3.5, 3.4, 3.3 (code) | `checks/sync/pkp-lib-13545/race.js` (dataset fleet; fixed when R1 and R2 each list one galley) + `cli.php` (`PKP_CONFIG_FILE=<ojs>/config.test.ds1.inc.php php …/cli.php <ojs root>`; fixed when H1, H2, N3 store an "HTML" galley) | 2026-11-09 (thread, @beaug) | Report: `docs/reports/2026-10-16-pkp-lib-13545.md` (moved up from pr-review at the merge); U48 A23, A24. Low, low. Fixes tried during the review: `lock-fix.diff`, `context-fix.diff` (both apply to `main`). |
 | pkp/pkp-lib#9469 for pkp/pkp-lib#8887 (`aafa2d56e5`, `0a492918f1`, merged 2023-11-13; in every release from 3.5.0) | Editorial dashboard: the "Declined" view's role list (`Repository::mapDashboardViews()`, `TYPE_DECLINED`) leaves out `ROLE_ID_SUB_EDITOR` and `ROLE_ID_ASSISTANT`, so a section editor, series editor, moderator or assistant has no "Declined" entry and their declined assigned submissions drop out of every view; 3.4's "Archived" tab listed them. `main`'s "Search submissions" still finds them, 3.5 has no such box | OJS OMP OPS · stable-3_5_0 too (walked on all three) · ore by code · 3.4, 3.3 not affected (code) | `checks/sync/pkp-lib-8887/declined-view.js` on a dataset fleet; fixed when `dbuskins 1 views` lists "Declined" and `dbuskins 2 views listing <id>` names "Declined (1)", while `minoue`'s Declined view lists no row | 2026-10-28 (thread, untagged: asked in the channel) | Report: `docs/reports/2026-10-28-pkp-lib-8887.md`; U23 A1. Medium. Upstream `pkp/pkp-lib#13347` (open, Triage). Fix (`fix.diff`: the two roles added) tried on `main` OJS, OMP, OPS: assigned editor and assistant get "Declined (1)", an unassigned editor "Declined 0". |
@@ -1067,6 +1068,37 @@ trips.
   of the last 40 runs per repo also counts one U13 S2 red each on OJS
   and OPS on 2026-10-25 (the f1813 branches' mass red, not this
   class). **Watch condition**: a second sighting on CI.
+
+- **A serial file's seeding deadlocks on MySQL and MariaDB** (the
+  configurations run). `POST …/_test/scenarios/context` answered 500
+  with `SQLSTATE[40001] … 1213 Deadlock found when trying to get lock`
+  in the first try of a serial file's seed, green on the retry: OJS U04
+  S8 and OMP U04 S11 (PHP 8.2 MariaDB) and OPS U12 S4 (PHP 8.2
+  MariaDB), run [43340246182](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43340246182)
+  (2026-11-13); again OMP U04 S11 in the PHP 8.2 MariaDB dispatch
+  [43423348613](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43423348613)
+  the same day. The run's "Database log" step holds both sides of each
+  deadlock. **Watch condition**: a red on both tries, or a sighting on
+  the usual configuration.
+
+- **OPS U12 S4 reads another announcement's mail** (OPS, serial, PHP 8.2
+  MySQL, run 43340246182, 2026-11-13; green on the retry). The
+  manager's mail subject expected "Call for papers", received
+  "Cancelled meeting" (`apps/ops/playwright/tests/serial/U12-announcements.spec.js:252`).
+  **Watch condition**: a second sighting.
+
+- **OPS U35 S6 "Notify" message read before the template fills it**
+  (OPS, PHP 8.3 MySQL, run 43340246182, 2026-11-13; green on the
+  retry). After choosing the "Discussion" template the message read ""
+  instead of "Please enter your message."
+  (`apps/ops/playwright/tests/U35-stage-participants.spec.js:613`).
+  **Watch condition**: a second sighting.
+
+- **OPS U41 S7 contributor "Save" answer not seen in 30 s** (OPS, PHP 8.2
+  MariaDB, run 43340246182, 2026-11-13; green on the retry).
+  `ContributorsScreen.saveForm`'s `waitForResponse` for the POST to
+  `/contributors` timed out (`apps/ops/playwright/pages/ContributorPages.js:425`,
+  from the spec's line 1327). **Watch condition**: a second sighting.
 
 ## Companion branches — pkp-e2e branches waiting on app PRs
 

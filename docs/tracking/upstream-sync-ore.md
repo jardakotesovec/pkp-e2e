@@ -14,8 +14,8 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `1fedf73275` | 2026-11-12 | claude (daily maintenance session, VM s0, the ore worktree: pkp/pkp-lib#13468's OJS commit, `=main 7fc2376322`) |
-| pkp-lib | `9ca248495e` (the branch tip, pkp/pkp-lib#13468; ojs at it); ui-library `3f904483` (the branch tip, pkp/ui-library#1014; ojs at it) | 2026-11-12 | claude (daily maintenance session, VM s0: all `=main`) |
+| ojs | `9dffdeb147` | 2026-11-13 | claude (daily maintenance session, VM s0: the pointer bump for pkp/pkp-lib#13602's `ore` cherry-pick) |
+| pkp-lib | `356d223ea0` (the branch tip, pkp/pkp-lib#13602's `ore` cherry-pick; ojs at it); ui-library `3f904483` (the branch tip; ojs at it) | 2026-11-13 | claude (daily maintenance session, VM s0: `=main`) |
 
 The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U14 A6 retired, U30 and U26 follow pkp/ui-library#981), its specs brought to the present template by script: the Planned lists dropped, retired entries one line. CI from the folder at the same OJS commit as the branch's last run, the same counts (run 43259507107 against 43211539187: 543 + 38 + 33 passed, 1 skipped).
 
@@ -29,6 +29,11 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
   `checkouts/ore/ojs` as a line (harness.md "The stable lines").
 
 ## Read log
+
+- **2026-11-13 (daily session, VM s0) — ojs `ore` `1fedf73275..9dffdeb147` (1, pointer bump); pkp-lib `ore` `9ca248495e..356d223ea0` (1); ui-library `ore` `3f904483`: no commits. Read in full; baselines advanced.**
+  - pkp-lib `356d223ea0` (`=main 3e078689a5`, pkp/pkp-lib#13602 "Update API callers", the cherry-pick of pkp/pkp-lib#13790; `git range-diff`: the same patch, the cherry-pick line only) → `main`'s merge read of 2026-11-12 stands (no regression, security none). Carried: `main`'s U22 fn h and U26 fn j sentences (`3d34611f`) into `lines/ore/` by hand, naming the `ore` commits (`fce22a85`; U26's copy did not take the patch).
+  - Runs: pkp/ojs `ore` hook [43357007125](https://github.com/pkp/ojs/actions/runs/43357007125) at `9dffdeb147` green; nightly `ojs-ore` of [43358808069](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43358808069) 3/3 green. Since then `lines/ore/` changed by spec text only (a footnote each, `346365e1`, `fce22a85`), so no dispatch.
+  - Carried findings: pkp/pkp-lib#13788 (today's report) is not on `ore` (no tool). Open regression rows: no code moved.
 
 - **2026-11-12 (daily session, VM s0, the ore worktree) — ojs `ore` `81b4b1f5fc..1fedf73275` (1); pkp-lib `ore` `5c3c5f9505..9ca248495e` (1); ui-library `ore` `ebf241be..3f904483` (2). Read in full; baselines advanced; pkp-e2e `ore` `34731c21..918eeb34`.**
   - Runs (step 0): the pkp/ojs `ore` hook at `1fedf73275` ([43084275791](https://github.com/pkp/ojs/actions/runs/43084275791), 2026-11-11 19:07, after pkp-e2e `ore` `34731c21`): green.

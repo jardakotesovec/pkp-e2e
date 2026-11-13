@@ -1,0 +1,61 @@
+--- a/lib/pkp/tools/repairRorAffiliations.php
++++ b/lib/pkp/tools/repairRorAffiliations.php
+@@ -105,12 +105,16 @@
+             ->groupBy('author_id')
+             ->map(fn (Collection $rows) => $rows->pluck('ror')->all());
+ 
+-        $authorIds = DB::table('author_settings')
+-            ->whereIn('setting_name', ['affiliation', 'rorId'])
+-            ->whereNotNull('setting_value')
++        $authorIds = DB::table('author_settings as aus')
++            ->whereIn('aus.setting_name', ['affiliation', 'rorId'])
++            ->whereNotNull('aus.setting_value')
++            // from 3.6 on, rorId is also an ORGANIZATION contributor's own ROR ID, not data of the old ROR plugin
++            ->when(Schema::hasColumn('authors', 'contributor_type'), fn ($query) => $query
++                ->join('authors as a', 'a.author_id', '=', 'aus.author_id')
++                ->where('a.contributor_type', '<>', 'ORGANIZATION'))
+             ->distinct()
+-            ->orderBy('author_id')
+-            ->pluck('author_id')
++            ->orderBy('aus.author_id')
++            ->pluck('aus.author_id')
+             ->all();
+ 
+         $csvFile = "{$this->outDir}/repairRorAffiliations-{$this->stamp}.csv";
+@@ -206,9 +210,15 @@
+             $matchedRors = $nameMatches->get($authorId, []);
+             $plugInRor = $plugInRors->get($authorId);
+ 
+-            $buggy = $matchedRors
+-                ? array_map(fn ($ror) => ['ror' => $ror, 'name' => []], $matchedRors)
+-                : [['ror' => null, 'name' => $affiliationRows->pluck('setting_value', 'locale')->all()]];
++            $legacyNames = $affiliationRows->pluck('setting_value', 'locale')->all();
++            $buggyShapes = $matchedRors
++                ? [array_map(fn ($ror) => ['ror' => $ror, 'name' => []], $matchedRors)]
++                : [
++                    // 3.5.0-2 to 3.5.0-5: one affiliation holding every language
++                    [['ror' => null, 'name' => $legacyNames]],
++                    // 3.5.0-0 and 3.5.0-1: one affiliation per language (pkp/pkp-lib#11675)
++                    array_map(fn ($locale, $name) => ['ror' => null, 'name' => [$locale => $name]], array_keys($legacyNames), $legacyNames),
++                ];
+ 
+             // the same rules as I7135_CreateNewRorRegistryCacheTables::migrateAffiliations()
+             $ror = $plugInRor;
+@@ -218,7 +228,7 @@
+             }
+             $repaired = [['ror' => $ror, 'name' => $rorIsKnown ? [] : $affiliationRows->pluck('setting_value', 'locale')->all()]];
+ 
+-            $buggy = $this->canonical($buggy);
++            $buggyShapes = array_map(fn (array $shape) => $this->canonical($shape), $buggyShapes);
+             $repaired = $this->canonical($repaired);
+             $currentRows = $current->get($authorId, []);
+             $currentCanonical = $this->canonical($currentRows);
+@@ -227,7 +237,7 @@
+                 continue;
+             }
+ 
+-            if ($currentCanonical === $buggy) {
++            if (in_array($currentCanonical, $buggyShapes, true)) {
+                 $action = 'repair';
+             } else {
+                 // edited since the upgrade: only report it if a name-derived ROR is still there
