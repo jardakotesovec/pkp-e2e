@@ -188,7 +188,7 @@ function failures(runId, jobs = []) {
         if (job.status !== 'completed' || job.conclusion === 'skipped') continue;
         let text;
         try {
-            text = gh(['api', `repos/{owner}/{repo}/actions/jobs/${job.databaseId}/logs`]);
+            text = gh(['api', '--allow-escape-sequences', `repos/{owner}/{repo}/actions/jobs/${job.databaseId}/logs`]);
         } catch {
             continue;
         }
