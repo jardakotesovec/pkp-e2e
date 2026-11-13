@@ -2009,7 +2009,7 @@ Tasks & Discussions", "Participants") read the same. PKP's default
 dataset already carries one such save: OMP's "Volume editor" holds
 stages 1–5 and `recommendOnly` 0, where a new press's holds 1–6 and no
 row. Kept script: `shared/playwright/checks/U54/I32/i32.js`. Walked 2026-11-13 (issue report, PKP's default dataset, OJS, OMP, OPS `main`): after the role save, "Save" on a published submission's "Title & Abstract" answers 401 `user.authorization.accessibleWorkflowStage` and the page shows "An unexpected error has occurred. Please reload the page and try again."; before it, the save works; `stable-3_5_0` keeps Done (walked).
-Issue report: docs/issues/U54-A15-role-save-stops-editing-published-submissions.md
+Issue report: [pkp-e2e#1092](https://github.com/jardakotesovec/pkp-e2e/issues/1092) ([docs/issues/U54-A15-role-save-stops-editing-published-submissions.md](../issues/U54-A15-role-save-stops-editing-published-submissions.md)).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — OMP's `locale/fr_CA/submission.po` leaves

@@ -106,12 +106,17 @@ of *Editorial decision recording*, the file panel's upload wizard belongs to
    [→ the Delete dialog](U24-workflow-screen-and-stage-access.md#delete-dialog).
    After the delete, the submission's dashboard address (a stale bookmark
    to the open panel, say) opens the dashboard with an explicit error
-   dialog: "Error" / "Invalid submission." / "OK"; the older typed
-   workflow addresses answer with a bare page instead
-   ([→ that finding](U24-workflow-screen-and-stage-access.md#a9)). So the reader is told the
-   submission is gone. Behind the error, the workflow panel itself stays
-   open, empty but for the submission's number in its header
-   ⚠ [A3](#a3). <sup>f</sup>
+   dialog: "Error" / "Invalid submission." / "OK". So the reader is told
+   the submission is gone. Behind the error, the workflow panel itself
+   stays open, empty but for the submission's number in its header
+   ⚠ [A3](#a3). The older typed workflow addresses
+   (`…/workflow/access/<number>`, and the old author-dashboard address of
+   Rule 11) answer with a bare "404 Not Found" page instead
+   ([→ that finding](U24-workflow-screen-and-stage-access.md#a9)). One
+   that also names a stage (`…/workflow/index/<number>/<stage>`) shows a
+   blank page, the app failing on the server
+   ([→ the blank-page finding](U24-workflow-screen-and-stage-access.md#a5)).
+   <sup>f</sup>
 7. <a id="schedule"></a> **The Schedule For Publication shortcut** {OJS}.
    At the top of the Submission stage a journal also shows a "Schedule For
    Publication" button. It records no decision. It opens the submission's
@@ -432,6 +437,9 @@ Left out of the scenarios above, by reason:
   - a deleted submission's stale dashboard address answering "Error" /
     "Invalid submission." (Rule 6; *Workflow screen & stage access*,
     scenario 14)
+  - a deleted submission's older typed workflow addresses answering
+    "404 Not Found" or a blank page (Rule 6; *Workflow screen & stage
+    access*, its findings A9 and A5)
   - the old author-dashboard address forwarding the Author to the panel
     (Rule 11; *Workflow screen & stage access*, scenario 6; *My
     Submissions*, scenario 1)
@@ -504,15 +512,19 @@ stale bookmark, a link in an old email) does get an answer: the dashboard opens
 with an error dialog reading "Error" / "Invalid submission." / "OK", so the
 reader is told the submission is gone. What remains is cosmetic. The error
 arrives stacked over a lingering, essentially empty workflow dialog. That
-dialog shows only the submission's number and a raw placeholder code where its
-help link should be. It should have closed instead, or the listing itself
-should have noted that the submission is gone.
-Question: should the empty workflow dialog close (and its placeholder render
-as a real label) when the error reports the submission invalid? Lean: tidy
-it. The explicit error dialog is arguably correct behavior; the leftover shell
-behind it just reads as unfinished.
+dialog shows only the submission's number, under the top bar every workflow
+dialog has (the "Help" link, "Tasks" and the user menu) and beside its back
+arrow, "Close". It stays open after "OK" and after a reload, which brings the
+error back; only its own "Close" closes it. It should have closed instead, or
+the listing itself should have noted that the submission is gone.
+Question: should the empty workflow dialog close when the error reports the
+submission invalid? Lean: tidy it. The explicit error dialog is arguably
+correct behavior; the leftover shell behind it just reads as unfinished.
 Basis: observed on a running site (2026-08-02, journal and press, every role
-and address form tried; identical end state each time).
+and address form tried; identical end state each time); re-observed
+2026-11-13 on a journal, a press and a preprint server, as the Journal
+Manager, an Editor, the assigned Section Editor, the Site Administrator and
+the Author.
 <sup>[f-a3](#fn-a3)</sup>
 
 ### OMP
@@ -702,7 +714,17 @@ Press editor, a `ROLE_ID_MANAGER` group, so it passes the
 delete this submission?" dialog, and "Cancel" kept the panel and the button;
 `sectioneditor.ana` (assigned Section editor) was offered "Revert Decline"
 only. The browser sends the delete as `POST …/api/v1/_submissions/{id}` (the
-DELETE route by method override), answered 200.
+DELETE route by method override), answered 200. Live-probed 2026-11-13
+(OJS, OMP, OPS, three runs; a scratch Journal Manager and the Site
+Administrator each deleting a submission declined at Submission on screen,
+from `workflow_1` on OJS and OMP and `workflow_5` on OPS): confirming closed
+the panel, dropped `workflowSubmissionId` from the address and removed the
+title from the list, before and after a reload. Then, as the Journal Manager
+and as the Author, `{context}/workflow/access/{id}` and
+`{context}/authorDashboard/submission/{id}` answered HTTP 404 with the bare
+body "404 Not Found" and no title, and `{context}/workflow/index/{id}/{stage}`
+(stage 1 on OJS and OMP, 5 on OPS) answered HTTP 500 with an empty document
+(U24 A5's crash), on every app and run.
 
 <a id="fn-a3"></a>
 **f-a3** — Live-observed 2026-08-02 (OJS and OMP, identical terminal state;
@@ -710,12 +732,24 @@ driven as Journal Manager, Section Editor and Site Administrator on the
 editorial address and as the author on My Submissions): after the delete, the
 old workflow address opens the populated dashboard with an error dialog —
 heading "Error", message "Invalid submission.", button "OK" — stacked over a
-lingering workflow dialog that contains only the submission's id and a raw
-`##common.help##` locale key in place of its help link (the link reads
-"Help" since `pkp/ui-library#1046`, 2026-11-10). The empty shell also
-paints alone for ~200 ms (warm; longer cold) before the error dialog attaches
-— the transient state an earlier probe recorded as a silent empty page
-(finding A3).
+lingering workflow dialog that contains only the submission's id, under the
+frame's strip (help link; Tasks; user menu) and Close. The help link then
+showed a raw `##common.help##` locale key; it reads "Help" since
+`pkp/ui-library#1046` (2026-11-10). Live-probed 2026-11-13 (OJS, OMP, OPS,
+three runs; a scratch Journal Manager and the Site Administrator each
+deleting on screen, then they, a Journal/Press editor (OJS, OMP) and the
+assigned Section editor/Moderator on the editorial address with and without
+`workflowMenuKey`, the Author on My Submissions'
+`dashboard/mySubmissions?workflowSubmissionId={id}`): the same "Error" /
+"Invalid submission." / "OK" dialog over the same shell, whose
+`GET api/v1/submissions/{id}` answered 404; the shell's header holds only the
+number (empty `h1` and `p`, no menu); its strip is the one a live
+submission's dialog shows, with the help link named "Help" (targets the
+app's `docs.pkp.sfu.ca` learning guide), "Tasks" (opening the "Tasks" side
+panel over the shell) and the initials avatar; `rawKeys()` empty. After "OK"
+the shell stays; a reload shows the shell and the error again; the shell's
+Close closes it, drops `workflowSubmissionId` from the address and shows
+the list, with no notice.
 
 <a id="fn-g"></a>
 **g** — `workflowConfigEditorialOJS.js` `[WORKFLOW_STAGE_ID_SUBMISSION].
