@@ -70,10 +70,6 @@ of a static page and of a custom block is the application's
 formatted-text editor, a bar of buttons above a writing area, one box per
 form language (Settings bullet 4). Pictures: Rule 29; tags: Rule 4.
 <sup>j</sup> <sup>td28</sup>
-With two or more form languages, the first language's "Content" box
-(the English one, on a journal in English and French) of the "Custom
-Page" item window or of the block window can stay under a "Loading..."
-spinner and take no click ⚠ [A20](#a20). <sup>f-a20</sup>
 
 | Box | Buttons on its bar | "Insert Tag" offers |
 |-----|--------------------|---------------------|
@@ -478,7 +474,7 @@ row's "Edit" (headed "Edit"), with "Save" and "Cancel" at its foot:
    & theming* owns the list. <sup>h</sup>
 4. **"Forms"** column (Settings › Website › "Setup" › "Languages"; the
    primary language alone). Each language ticked adds that language's
-   boxes to "Title", "Content" and "Block Name" (Fields) [A20](#a20); a
+   boxes to "Title", "Content" and "Block Name" (Fields); a
    visitor reads the texts of their language (Rules 3, 21). *Languages &
    locales* owns it. <sup>d</sup> <sup>g</sup>
 5. **The principal contact and the technical support contact** (Settings
@@ -882,7 +878,7 @@ Left out of the scenarios above, by reason:
   - a BMP dropped and one pasted into a custom page's "Content": each refused with its notice and gone from the box, the saved page holding no embedded picture (A17; the guard its issue report names) [report 2026-10-01]
   - a change made only in "Content" of the static page window and of the block window, then the back arrow: the question "The data on this form has changed. Do you wish to continue without saving?" (A19; the guard its issue report names) [report 2026-10-01]
   - a static page and a "Custom Page" item saved at "dot.only" and "deep/Mixed_1.x", each opening at its address (A10; the guard its issue report names) [report 2026-10-01]
-  - with two form languages and the second language's editor held back, the first language's "Content" box in the block and item windows taking the click and the text, no spinner left (A20; the guard its issue report names) [report 2026-10-01]
+  - with English and French as form languages and the French "Content" box slow to start, the English "Content" box taking the click and the text with no "Loading..." spinner left over it, in the block window, the "Custom Page" item window (from "Add item" and from "Edit") and the static page window {OJS OMP} (the guard of the retired [A20](#a20); Settings bullet 4): waits for each application to rebuild its minified scripts with the fix, since the suites serve those, and with them the box still stays under the spinner [report 2026-10-01]
   - "Add Static Page" on the tab left open after "Static Pages Plugin" is unticked: no server error {OJS OMP} (A12; the guard its issue report names) [report 2026-10-01]
   - a placed custom block's "Custom Block Manager" unticked, then a "Page Footer" saved on "Appearance" › "Setup" without a refusal (A15; the guard its issue report names) [report 2026-10-01]
   - a preview's address typed by a section editor, an author or a signed-out visitor: the access-denied page, or Login (A7; the guard its issue report names) [report 2026-10-01]
@@ -925,7 +921,6 @@ Left out of the scenarios above, by reason:
   - A17 (a refused pasted or dropped picture kept in the text, embedded; Rule 29c)
   - A18 (a picture over the server's upload limit getting a server error, or for a WEBP a refusal that does not say why, never the size message; Rule 29)
   - A19 (a change only in "Content" lost without a question, in the static page window {OJS OMP} on its back arrow and on leaving the page, and in the block window on its close control, on a press beside it and on leaving the page; Rules 30, 30a, 30b, 30c)
-  - A20 (the first language's "Content" box left under a "Loading..." spinner when the second language's box loads last; Fields)
   - A21 (a "Block Name" typed and the shaded page pressed with the caret still in the box: the block window closed without a question, the name lost; Rule 30a)
 - **No seed**:
   - another picture allowance: only the installation's configuration file sets it (Settings bullet 7; Rule 29a)
@@ -954,7 +949,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | A dropped or pasted picture the site refuses stays in the text, embedded, and is saved | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A18](#a18) | A picture over the upload limit gets a server error or a vague refusal, never "Files larger than {size} can not be uploaded." | 🐞 | medium · crash: server | issues (claude), 2026-11-02 — re-verified |
 | [A19](#a19) | A reviewer's typed review, a profile's signature or bio, or a static page's text is lost without asking on leaving the form | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
-| [A20](#a20) | With two form languages, the first language's "Content" box can stay under a "Loading..." spinner for good | 🐞 | medium · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A21](#a21) | A press beside the block window right after typing its name closes it without asking, and the name is lost | 🐞 | minor | — |
 | [A2](#a2) | A deleted custom block would keep its place in the sidebar, so a later block of the same name appears unplaced | ❓ | minor | — |
 | [A5](#a5) | Pictures named ".jpeg" are refused while ".jpg" is accepted | ❓ | user-visible | — |
@@ -1261,26 +1255,6 @@ its text too. The lost text cannot be brought back; the only way round
 is to press "Save for Later", "Save" or send before leaving.
 Basis: probe, 2026-10-12. <sup>f-a19</sup>
 
-<a id="a20"></a>
-**A20 — With two form languages, the first language's "Content" box can stay under a "Loading..." spinner for good** · 🐞 · medium · crash: script.
-On a journal whose form languages are English and French, a manager
-opens the custom block window ("Add Block") or the "Custom Page" item
-window. Each has a "Content" box per language. Now and then the page's
-script fails as the window opens, and a "Loading..." spinner covers the
-"Content" box of the first form language (here English) for as long as
-the window is open. That box takes no click, and typing already begun
-stops reaching it. Nothing says why.
-The manager loses the "Content" box of that window, and any letters
-typed before the spinner came. Reloading the page and opening the
-window again gets round it in the usual case: the fault is a race, and
-a fresh load normally comes out in the safe order.
-It happens only when the second language's box is slow to start. In
-pkp-e2e's test runs it came up once on its own, in a full suite run on
-a loaded machine. Run 35 times per app without anything holding the
-second box back, the same tests passed every time.
-Basis: probe, 2026-10-01. <sup>f-a20</sup>
-Report: none — pkp-e2e#376 closed 2026-10-14 at the merge of the fix, `pkp/pkp-lib#13490` (`689e7ec1a5`; 3.5 `pkp/pkp-lib#13491`, `4045d9241e`); the entry retires when the apps' `js/pkp.min.js` carries the guard and `checks/sync/pkp-lib-13490/stuck-editors.js` reads fixed at the tips with `enable_minified = On` (ci-triage Flake watch, the row on scenario 6's formatted box getting stuck) (2026-10-14)
-
 <a id="a21"></a>
 **A21 — A press beside the block window right after typing its name closes it without asking, and the name is lost** · 🐞 · minor.
 A Journal Manager types a name into "Block Name" in the "Add Block"
@@ -1297,6 +1271,9 @@ Basis: test run, 2026-11-12. <sup>f-a21</sup>
 
 <a id="a14"></a>
 **A14 — A custom block could not be deleted on PostgreSQL** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13692, for pkp/pkp-lib#13690).
+
+<a id="a20"></a>
+**A20 — With two form languages, the first language's "Content" box could stay under a "Loading..." spinner for good** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13490, for pkp/pkp-lib#13489).
 
 ---
 
@@ -2047,7 +2024,27 @@ upload limit (A18); the stored files stay on the install, as nothing
 removes them. 6 — `context.supportedLocales` and
 `context.supportedFormLocales` `['en', 'fr_CA']`, `plugins:
 {customblockmanagerplugin: {enabled: true}}`; the French page is the
-page's address with the `fr_CA` segment. Each block scenario has a
+page's address with the `fr_CA` segment. The test installs and CI serve
+each app's committed `js/pkp.min.js` (`enable_minified = On`,
+`shared/playwright/make-test-config.js`), on `main` still the
+2026-08-27 build, without the guard `pkp/pkp-lib#13490` (`689e7ec1a5`)
+put into `lib/pkp/js/controllers/SiteHandler.js`; a default `main`
+install loads that source script instead (`config.TEMPLATE.inc.php`
+ships `enable_minified = Off`). So the retired [A20](#a20) can still
+come up in 6. Test runs 2026-11-13 (OJS, OMP, OPS on `main`, two runs
+each; scratch journals in English and French; the French editor's
+frame held 3 s as by the harness lever `PLAYWRIGHT_IFRAME_HOLD='-fr_CA-'`;
+`shared/playwright/checks/U09/K13a/k13a.js`): with the bundle, the
+English "Content" box stayed under the "Loading..." spinner, the press
+on it intercepted and "Cannot read properties of undefined (reading
+'serialize')" logged twice as a page error, in 4 of 4 held openings of
+the block window, the "Custom Page" item window from "Add item" and
+from "Edit", and the static page window (OJS, OMP); with the source
+scripts (a dataset fleet), none of the 264 openings of a run, over the
+three apps, held, CPU-slowed or not, stuck or logged an error. The
+suites take no workaround: a stuck box fails its test with a message
+naming it.
+Each block scenario has a
 scratch journal of its own, a choice made while a custom block, once
 made, could not be deleted on the test installs (A14, fixed upstream
 2026-11-04). Live-probed 2026-09-24 (three
@@ -2336,50 +2333,6 @@ same runs "Block Name" typed instead raised the question each time
 another address, was seen again the same day (OJS, OMP): no question,
 the list empty afterwards.
 Issue report: [pkp-e2e#375](https://github.com/jardakotesovec/pkp-e2e/issues/375) ([docs/issues/U09-A19-static-page-content-change-lost-on-close.md](../issues/U09-A19-static-page-content-change-lost-on-close.md)).
-
-<a id="fn-f-a20"></a>
-**f-a20** — `Handler.js::initializeTinyMCE()` renders one TinyMCE 7.9.3
-editor per language box of a legacy form, the first form language
-first; `EditorManager.add()` makes each new editor the active one, so
-the last rendered is active. When the first editor's content style
-sheets are in before the later editor's iframe has run its set-up,
-`initEditor()` sets `initialized = true` and focuses the first editor;
-`setActive()` sends `deactivate` to the later one, and pkp's handler for
-it (`SiteHandler.js`, `tinyMCEObject.target.getContent().length`, there
-only to show a placeholder) reads an editor with no `serializer` yet:
-"Cannot read properties of undefined (reading 'serialize')". TinyMCE's
-event dispatch does not catch it, so the throw ends the first editor's
-start-up before `cancelProgress()`, and the progress timer shows the
-throbber (`.tox-throbber`, `aria-busy="true"`, the spinner's label
-"Loading...") for good; TinyMCE's focus handling then moves the focus to
-the throbber. `MultilingualInputHandler.isIncomplete_()` throws the same
-error on its 500 ms timer. The proposed fix: skip an editor whose
-`initialized` is false in both. The Vue forms' `FieldRichTextarea.vue`
-carries no such handler. Live-probed 2026-09-28 (Fields; three apps),
-on a scratch journal in English and French with "Custom Block Manager"
-on, "Add Block" opened in a fresh browser each time, the French
-editor's set-up held 3 s by a page script: the English box was
-initialized with its throbber shown and busy, and a click on it was
-intercepted by the "Loading..." spinner, 12 of 12 windows (4 per app),
-each logging the error twice; with no hold, 0 of 12; with the hold and
-the fix in the page, 0 of 12. Test runs 2026-09-28 (scenario 6,
-three apps, the same hold, harness lever `PLAYWRIGHT_IFRAME_HOLD='-fr_CA-'`
-with `PLAYWRIGHT_IFRAME_HOLD_MS=3000`): every run that got past setting up
-the journal failed at the item window's English "Content" box: the
-click intercepted, or on OJS once the focus taken from the box, or on
-OPS once "Welc" left of "Welcome.". First seen
-unforced in a full OPS run on 2026-09-27, at the block window's English
-"Content": the spinner covered the box about three minutes, until
-the test gave up. The order that triggers it needs a busy browser
-(there, a full run on a loaded machine); without the hold the U09 file
-passed 35 of 35 runs per app. Not driven: the static page window, whose
-language boxes are built the same way, and whether closing and
-reopening the window clears it. The suites take no workaround; a stuck
-box fails its test with a message naming it.
-Fixed in pkp-lib by `pkp/pkp-lib#13490` (`689e7ec1a5`, `main`) and `pkp/pkp-lib#13491` (`4045d9241e`, 3.5), merged 2026-10-14 for `pkp/pkp-lib#13489`: the `deactivate` handler skips an editor whose `initialized` is false. Driven at the PR heads on the default dataset (PR review 2026-10-14, `checks/sync/pkp-lib-13490/`): fixed with the source scripts in OJS, OMP and OPS; still stuck with `enable_minified = On` until each app rebuilds its committed `js/pkp.min.js`. `isIncomplete_()` keeps its throw (`pkp/pkp-lib#13180`).
-Read 2026-10-30 at the tips (ojs 0a00726121, omp fd4ea260c, ops d4e4d8737d, lib/pkp df42984b46): `lib/pkp/js/controllers/SiteHandler.js` carries the guard (`tinyMCEObject.target.initialized &&`); each app's committed `js/pkp.min.js` still has the unguarded handler (`deactivate",function(d){d.target.getContent().length||…`), so the entry stays. The test installs run `enable_minified = Off`, so they load the guarded source script and cannot show the fault; not driven.
-Read 2026-11-11 at the tips (ojs 99014b078f, omp 8f51061e8, ops 8f9b395427, lib/pkp e2078ce20e): `isIncomplete_()` now reads the textarea of an editor whose `initialized` is false (`pkp/pkp-lib#13381` for `pkp/pkp-lib#13180`; `ore` `5c3c5f9505`, the same patch); the committed `js/pkp.min.js` is still the 2026-08-27 build on `main` and `ore`, which serve it only with `enable_minified = On` (`main`'s `config.TEMPLATE.inc.php` ships `Off`). `stable-3_5_0` rebuilt its `js/pkp.min.js` on 2026-11-10 (ojs `8ef49167e2`, omp `7d6a4ae3a0`, ops `a257612bd8`) with both guards.
-Issue report: [pkp-e2e#376](https://github.com/jardakotesovec/pkp-e2e/issues/376), closed 2026-10-14 at that merge; the report and its walk were deleted then (in git before that commit).
 
 <a id="fn-f-a21"></a>
 **f-a21** — Test runs 2026-11-12 (Rule 30a; scenario 4; OJS, OMP, OPS on

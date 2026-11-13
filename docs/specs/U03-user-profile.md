@@ -2607,9 +2607,9 @@ step (`window.__u03HeldFrames` rose each time). Until each app's `main`
 bundle is rebuilt with the guard, the suites attach those errors as an
 `app-defect` annotation instead of failing, the hold's controls still
 asserted; `stable-3_5_0` rebuilt its bundles with the guard on
-2026-11-10. The same unrebuilt bundle keeps
-[Custom pages & blocks A20](U09-custom-pages-and-blocks.md#a20) open
-(`pkp/pkp-lib#13490`).
+2026-11-10. The same unrebuilt bundle still lacks the guard of
+[Custom pages & blocks A20](U09-custom-pages-and-blocks.md#a20)
+(`pkp/pkp-lib#13490`), retired on `main`'s source scripts.
 Scenario 6: a scratch user seeded `roles: ['reader']` in the first scratch
 context, then a second `POST scenarios/context` naming the same username with
 `roles: ['reader']`, which enrols it there too (seed-facts, 2026-09-04); the
