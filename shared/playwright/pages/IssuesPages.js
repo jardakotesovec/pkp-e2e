@@ -1056,9 +1056,14 @@ class IssueReader extends BasePage {
         await expect(this.page.locator('.pkp_structure_main')).toBeVisible({timeout: T});
     }
 
-    /** A header link ("Current", "Archives"). */
+    /**
+     * A header item ("Current", "Archives"), a link, or a top-level item with
+     * a list ("About"), which the theme makes a button at desktop width
+     * (pkp-lib#12654).
+     */
     headerLink(name) {
-        return this.page.locator('.pkp_navigation_primary').getByRole('link', {name, exact: true});
+        const nav = this.page.locator('.pkp_navigation_primary');
+        return nav.getByRole('link', {name, exact: true}).or(nav.getByRole('button', {name, exact: true}));
     }
 
     /** The header's links (all of them, a locator for a positive control). */
