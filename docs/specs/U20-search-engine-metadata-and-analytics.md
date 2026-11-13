@@ -254,7 +254,8 @@ in. <sup>i</sup> <sup>q14</sup>
    visit's language. On a journal with two or more interface languages,
    every other address carries the language the sitemap was read in
    (such as "/en/" after the journal's address), and no other
-   language's addresses are listed. <sup>e</sup> <sup>q6</sup>
+   language's addresses are listed; the sitemap's own address with no
+   language leads on to the sitemap in the visit's language. <sup>e</sup> <sup>q6</sup>
    <sup>q26</sup>
 5. **The site's index.** The site's own address {site address}/index/sitemap
    (`{site address}` being the part before the journal's path, such as
@@ -645,8 +646,9 @@ the tooling recipe are in the footnote. <sup>s</sup>
      Patterns" follows "Catalog", followed by one chapter page, then the
      download address of its "PDF" file; after "New Releases" come the
      page of "Sea Series", then the page of "Cat One". On a preprint
-     server, the last entry opens the preprint's page of "Tidal
-     Patterns" (Rules 2, 4; Fields, "What the sitemap lists").
+     server, where "Tidal Patterns" has no galley, the last entry opens
+     the preprint's page of "Tidal Patterns" (Rules 2, 4; Fields, "What
+     the sitemap lists").
    - **A chapter on its own page** {OMP}: follow the chapter page's
      entry: it opens the page of "Chapter One Tides", the one chapter
      listed; "Chapter Two Calm", whose box is unticked, has no entry
