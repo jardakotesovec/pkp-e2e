@@ -1,0 +1,42 @@
+diff -ru a/lib/ui-library/src/components/BodyTextEditor/citationMarkerFeature.js b/lib/ui-library/src/components/BodyTextEditor/citationMarkerFeature.js
+--- a/lib/ui-library/src/components/BodyTextEditor/citationMarkerFeature.js	2026-11-13 16:56:25.657237362 +0000
++++ b/lib/ui-library/src/components/BodyTextEditor/citationMarkerFeature.js	2026-11-13 16:56:25.695738880 +0000
+@@ -137,6 +137,9 @@
+ 			node.textContent,
+ 			node.attrs.source,
+ 			numbers,
++			// A citation to a reference deleted on "References" (the export
++			// refuses it) must not keep a number that now belongs to another.
++			'?',
+ 		);
+ 		if (replacements.length) {
+ 			const segments = textSegments(node, position + 1);
+diff -ru a/lib/ui-library/src/components/BodyTextEditor/citationMarker.js b/lib/ui-library/src/components/BodyTextEditor/citationMarker.js
+--- a/lib/ui-library/src/components/BodyTextEditor/citationMarker.js	2026-11-13 16:56:25.657134076 +0000
++++ b/lib/ui-library/src/components/BodyTextEditor/citationMarker.js	2026-11-13 16:56:25.695628714 +0000
+@@ -127,12 +127,22 @@
+ 		: false;
+ }
+ 
+-/** Calculate replacements only for previously recorded generated characters. */
+-export function citationMarkerReplacements(marker, text, source, numbers) {
++/**
++ * Calculate replacements only for previously recorded generated characters.
++ * `missing`, when given, replaces the number of a reference that is no longer
++ * in the list, so the editor never shows a number another reference now has.
++ */
++export function citationMarkerReplacements(
++	marker,
++	text,
++	source,
++	numbers,
++	missing = null,
++) {
+ 	if (!isCitationMarker(marker) || marker.content !== text) return [];
+ 	const ids = citationReferenceIds(source);
+ 	return marker.tokens.flatMap((token) => {
+-		const number = numbers.get(token.id);
++		const number = numbers.get(token.id) ?? missing;
+ 		if (
+ 			!ids.includes(token.id) ||
+ 			!Number.isInteger(token.from) ||

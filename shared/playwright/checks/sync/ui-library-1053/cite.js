@@ -19,6 +19,9 @@
 // R3 "[id, p. 5]" set in "Selected Element"; R4 Alpha dropped at a sentence's end, then End and " More text 2020." typed;
 // R5 Alpha dropped onto a custom "(2021)" (SciFlow merges). Exported at the round-3 heads: "(2021)", "(2022)",
 // "[id, p. 5]" (the database id), R4 typed into the citation and exported with the id, R5 "(2; 1)".
+// Round 4 (heads ui-library 1eaf184462, pkp-lib a51aced400, ojs f06b9bea63; run r4head): the editor shows list numbers
+// ("[2]", "[4]"); R3 "[4, p. 5]" and R4 "[1] More text 2020." (the link on "[1]" only) exported as typed; C2's stored
+// "(2021)" still "(2)"; C5's refusal names id 9 while the editor shows Delta's citations as "[4]". markers.js holds the rest.
 const fs = require('fs');
 const path = require('path');
 const {forEachApp, launch, signIn, record, sql, outDir, tag} = require('../../../probe');
