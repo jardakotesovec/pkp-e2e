@@ -391,7 +391,8 @@ page reads "View {issue name}" ⚠ [A7](#a7). <sup>v</sup>
     first. "Order" lets the published issues be dragged into any order,
     with "Done" and "Cancel ordering". Once an order is saved, the
     archive follows it (Rule 25a), and an issue published later joins at
-    the bottom of both lists, even as the current issue. <sup>u</sup>
+    the bottom of both lists, even as the current issue (at the top on
+    MySQL and MariaDB ⚠ [A23](#a23)). <sup>u</sup>
     <sup>td13</sup>
 
 ### What readers see
@@ -1243,6 +1244,7 @@ settles them on spec review.
 | [A18](#a18) | On such an article, "Remove" leaves it in the issue and unpublishes its earlier version, the one the issue published | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A19](#a19) | Saving an issue's "Issue Data" drops it below the other issues published the same day on "Back Issues" | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A21](#a21) | An issue's saved section order changes when a manager reorders the journal's sections | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
+| [A23](#a23) | On MySQL and MariaDB, an issue published after "Back Issues" was ordered goes to the top of "Back Issues" and "Archives", not the bottom | 🐞 | low | — |
 | [A3](#a3) | "Delete" takes an issue's published articles offline behind a generic confirmation | ❓ | user-visible | — |
 | [A7](#a7) | On "Archives", a cover with no alternate text is a link with no name | ❓ | minor | — |
 | [A15](#a15) | On a journal that does not publish online, "Publish Issue" still offers its email, ticked, and sends nothing | ❓ | user-visible | — |
@@ -1509,6 +1511,19 @@ order they were scheduled in, before anyone orders them? Lean: yes;
 a published table of contents should not reshuffle for readers.
 Basis: probe, 2026-10-08. <sup>f-a22</sup>
 
+<a id="a23"></a>
+**A23 — On MySQL and MariaDB, an issue published after "Back Issues" was ordered goes to the top of "Back Issues" and "Archives"** · 🐞 · low.
+A Journal Manager orders "Back Issues" ("Order", drag, "Done"), then
+publishes another issue. On an install whose database is MySQL or
+MariaDB the new issue goes to the top of "Back Issues" and of the
+journal's "Archives" page, above the order just saved; on PostgreSQL it
+goes to the bottom (Rule 20). The saved order of the other issues is
+kept on both. Two or more issues published after the last ordering sort
+among themselves in whatever order the database returns. A manager who
+wants another place drags it there. Red on the configurations run (S5;
+ci-triage C-U50-1).
+Basis: probe, 2026-11-13 (MySQL 8.0, MariaDB 10.11). <sup>f-a23</sup>
+
 ### Retired
 
 <a id="a9"></a>
@@ -1762,6 +1777,9 @@ Issue report: [pkp-e2e#995](https://github.com/jardakotesovec/pkp-e2e/issues/995
 
 <a id="fn-f-a22"></a>
 **f-a22** — Live-probed 2026-10-08 (Rule 10; A22), the drive of td18, OJS `main` on PostgreSQL; not driven on MySQL. A never-ordered issue's "Articles" section read differently at two reads between which only other issues' orders and the journal's "Sections" list were saved: "Vol. 1 No. 4 (2026)" in one run (second, first, third article as seeded, then first, third, second), "Vol. 1 No. 1 (2026)" in the other (first, second, third, then second, third, first), and "Vol. 1 No. 3 (2026)" in both. The tab and the issue's page agreed at each read. After one "Done" on the issue (with a section dragged, or after a drag that left the list as it stood) every later load of the tab and the page gave the same order. Never-ordered articles share `seq` 0 and `ORDERBY_SEQUENCE` has no tie-breaker (note m); what decides the order among them was not established. The current-issue web feeds show the same looseness ([Web feeds](U18-web-feeds.md), its Rule 5).
+
+<a id="fn-f-a23"></a>
+**f-a23** — Live-probed 2026-11-13 on the `mysql` line (MySQL 8.0.46, PHP 8.3; OJS `3c99722dc8`) and the `mariadb` line (MariaDB 10.11), each from a reset install, with `shared/playwright/checks/sync/cfg-back-issues-order/walk.js`: a scratch journal with Vol. 1 (2024), Vol. 2 (2025), Vol. 3 (2026) published and Vol. 4 (2027) not; "Order", Vol. 1 dragged to the top, "Done" (Vol. 1, 3, 2); Vol. 4 published. "Back Issues" and "Archives" both read Vol. 4, 1, 3, 2 (PostgreSQL: 1, 3, 2, 4). The configurations run [43340246182](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43340246182) reds U50 S5 the same way on PHP 8.2 MySQL, PHP 8.2 MariaDB and PHP 8.3 MySQL. Code: `APP\issue\DAO::resequenceCustomIssueOrders()` (called on every issue insert, update and delete once a custom order exists) renumbers the published issues in `orderBy('o.seq')` over `leftJoin('custom_issue_orders as o', …)`; the issue just published has no row, so its `o.seq` is NULL, which MySQL and MariaDB sort first, PostgreSQL last. In this form since `88aaa6b49f` (pkp/pkp-lib#7129, 2021-07-14); 3.5 and 3.4 the same (code), `ore` too. Fix tried on the `mysql` line (`fix.diff` beside the script: rows with no `o.seq` last, then by date published and ID): Vol. 1, 3, 2, 4 in both lists; U50 S5 passes.
 
 ## Reference — entry points & surfaces
 

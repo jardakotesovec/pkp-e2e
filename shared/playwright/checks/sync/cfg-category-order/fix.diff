@@ -1,0 +1,14 @@
+--- a/lib/pkp/classes/category/Collector.php
++++ b/lib/pkp/classes/category/Collector.php
+@@ -186,7 +186,10 @@
+                 ->where('category_settings.locale', '=', $locale)
+         );
+ 
+-        $qb->orderByRaw('COALESCE(category_settings.setting_value) ASC');
++        // A category with no name in this language goes last on every database (MySQL and
++        // MariaDB sort NULL first, PostgreSQL last).
++        $qb->orderByRaw('CASE WHEN category_settings.setting_value IS NULL THEN 1 ELSE 0 END')
++            ->orderBy('category_settings.setting_value');
+ 
+         if (isset($this->count)) {
+             $qb->limit($this->count);

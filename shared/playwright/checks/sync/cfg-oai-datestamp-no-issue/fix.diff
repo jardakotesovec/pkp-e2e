@@ -1,0 +1,54 @@
+--- a/classes/oai/ojs/OAIDAO.php
++++ b/classes/oai/ojs/OAIDAO.php
+@@ -294,7 +294,7 @@
+         // Records for the current publication (journals without per-version OAI records).
+         $query = DB::table('submissions AS a')
+             ->select([
+-                DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified) AS last_modified'),
++                DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified) AS last_modified'),
+                 'a.submission_id AS submission_id',
+                 'i.issue_id',
+                 DB::raw('NULL AS tombstone_id'),
+@@ -327,14 +327,14 @@
+             })
+             ->when($from, function ($query, $from) {
+                 return $query->whereDate(
+-                    DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified)'),
++                    DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified)'),
+                     '>=',
+                     DateTime::createFromFormat('U', $from)
+                 );
+             })
+             ->when($until, function ($query, $until) {
+                 return $query->whereDate(
+-                    DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified)'),
++                    DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified)'),
+                     '<=',
+                     DateTime::createFromFormat('U', $until)
+                 );
+@@ -352,7 +352,7 @@
+         if (!empty($versioningJournalIds)) {
+             $versionQuery = DB::table('submissions AS a')
+                 ->select([
+-                    DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified) AS last_modified'),
++                    DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified) AS last_modified'),
+                     'a.submission_id AS submission_id',
+                     'i.issue_id',
+                     DB::raw('NULL AS tombstone_id'),
+@@ -393,14 +393,14 @@
+                 })
+                 ->when($from, function ($query, $from) {
+                     return $query->whereDate(
+-                        DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified)'),
++                        DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified)'),
+                         '>=',
+                         DateTime::createFromFormat('U', $from)
+                     );
+                 })
+                 ->when($until, function ($query, $until) {
+                     return $query->whereDate(
+-                        DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified)'),
++                        DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified)'),
+                         '<=',
+                         DateTime::createFromFormat('U', $until)
+                     );

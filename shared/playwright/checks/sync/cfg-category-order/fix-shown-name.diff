@@ -1,0 +1,32 @@
+--- a/lib/pkp/classes/category/Collector.php
++++ b/lib/pkp/classes/category/Collector.php
+@@ -14,6 +14,7 @@
+ 
+ namespace PKP\category;
+ 
++use APP\core\Application;
+ use Illuminate\Database\Query\Builder;
+ use Illuminate\Database\Query\JoinClause;
+ use Illuminate\Support\Collection;
+@@ -186,7 +187,20 @@
+                 ->where('category_settings.locale', '=', $locale)
+         );
+ 
+-        $qb->orderByRaw('COALESCE(category_settings.setting_value) ASC');
++        // A category with no name in this language is listed under the name it is shown with,
++        // its context's primary language's (left NULL, it would sort first on MySQL and MariaDB,
++        // last on PostgreSQL).
++        $contextDao = Application::getContextDAO();
++        $qb->leftJoin($contextDao->tableName . ' as category_context', 'category_context.' . $contextDao->primaryKeyColumn, '=', 'c.context_id');
++        $qb->leftJoin(
++            'category_settings as category_settings_pl',
++            fn (JoinClause $join) => $join->on('category_settings_pl.category_id', '=', 'c.category_id')
++                ->on('category_settings_pl.locale', '=', 'category_context.primary_locale')
++                ->where('category_settings_pl.setting_name', '=', 'title')
++                ->where('category_settings_pl.setting_value', '!=', '')
++        );
++
++        $qb->orderByRaw('COALESCE(category_settings.setting_value, category_settings_pl.setting_value) ASC');
+ 
+         if (isset($this->count)) {
+             $qb->limit($this->count);

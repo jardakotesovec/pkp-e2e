@@ -1,0 +1,15 @@
+--- a/classes/issue/DAO.php
++++ b/classes/issue/DAO.php
+@@ -184,7 +184,12 @@
+             // TODO: Previous behaviour would resequence all issues, including those that haven't been published (cont.)
+             // artificially giving them a position in the custom_issue_orders table before they've been published.
+             ->where('i.published', '=', 1)
++            // Issues published since the order was saved have no row yet: they follow the ordered
++            // ones, oldest first, on every database (MySQL and MariaDB sort NULL first).
++            ->orderByRaw('CASE WHEN o.seq IS NULL THEN 1 ELSE 0 END')
+             ->orderBy('o.seq')
++            ->orderBy('i.date_published')
++            ->orderBy('i.issue_id')
+             ->select('i.issue_id')
+             ->get();
+         $results->each(function ($item, $key) use ($contextId) {

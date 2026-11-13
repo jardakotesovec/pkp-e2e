@@ -367,8 +367,10 @@ message. <sup>m</sup>
      `until` do not limit the deleted records: the section's deleted
      records are listed whatever the dates say ⚠ [A20](#a20).
    - 9e. {OJS} On an install whose database is MySQL or MariaDB, an
-     article published in no issue may get no datestamp, and so be left
-     out of every list given `from` or `until` ⚠ [A26](#a26). <sup>v</sup>
+     article published in no issue takes the moment of each request as
+     its datestamp, is left out of every list given `from` or `until`,
+     and Identify's "Earliest Datestamp" reads the moment of the request
+     ⚠ [A26](#a26). <sup>v</sup>
 10. **Formats.** ListMetadataFormats lists the formats the address
     offers (the table "The formats"), the same for every record when an
     `identifier` is given. A ListRecords, ListIdentifiers or GetRecord in
@@ -1408,8 +1410,6 @@ Left out of the scenarios above, by reason:
     Rule 20)
   - A23, A24 {OJS} (a `driver` member with no galley; the set's "Resume"
     repeating records; Rules 23, 23a; scenario 10 passes A24)
-  - A26 {OJS} (an article in no issue on MySQL or MariaDB, left out of
-    lists with `from` or `until`; Rule 9e)
   - OMP2 (a press with no "Enable OAI"; Rule 17)
   - OMP3 (a press given a set it does not have; Rule 8)
   - OMP6 (a series with no prefix; Rule 7b)
@@ -1470,11 +1470,11 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS1](#ops1) | A preprint server's OAI-PMH lists answer a server error whenever the harvester gives an "until" date | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OPS4](#ops4) | Removing a preprint server leaves no deleted records for its posted preprints at the site-wide OAI address | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OPS5](#ops5) | A posted preprint returned to the workflow is reported to harvesters as deleted | 🐞 | user-visible | — |
+| [A26](#a26) | On MySQL and MariaDB, an article published in no issue takes the moment of each request as its OAI-PMH datestamp and is left out of every list with "from" or "until" {OJS} | 🐞 | medium | — |
 | [A6](#a6) | "Supporting Agencies", "Rights" and "Source" reach no record | ❓ | minor | — |
 | [A9](#a9) | A journal that does not publish online still hands out records, the MARC ones with the article's address {OJS} | ❓ | minor | — |
 | [A14](#a14) | "Language" writes a galley's language with an underscore {OJS OPS} | ❓ | minor | — |
 | [A21](#a21) | A section has one set identifier per language {OJS OPS} | ❓ | minor | — |
-| [A26](#a26) | On MySQL or MariaDB, an article in no issue may get no datestamp and be left out of lists with "from" or "until" {OJS} | ❓ | user-visible | — |
 | [A27](#a27) | An earlier version's OAI record gives the article's address, which shows the current version {OJS} | ❓ | minor | — |
 | [OMP2](#omp2) | A press cannot withhold its records: it has no "Enable OAI" | ❓ | minor | — |
 | [OMP7](#omp7) | A book's new version changes its format identifiers without leaving deleted records | ❓ | minor | — |
@@ -1812,22 +1812,22 @@ that.
 Basis: probe, 2026-10-01. <sup>f-a24</sup>
 
 <a id="a26"></a>
-**A26 — On MySQL or MariaDB, an article in no issue may get no datestamp and be left out of lists with "from" or "until"** {OJS} · ❓ · user-visible.
+**A26 — On MySQL and MariaDB, an article published in no issue takes the moment of each request as its OAI-PMH datestamp and is left out of every list with "from" or "until"** {OJS} · 🐞 · medium.
 A harvester that asks a journal for the records changed since its last
 visit expects an article published in no issue ("Don't Assign To An
 Issue") among them when it changed in that time. On an install whose
-database is MySQL or MariaDB, such an article may get no datestamp, and
-every list given `from` or `until` would then leave it out. The test
-installs run PostgreSQL, so this has not been seen either way.
-Question: on MySQL or MariaDB, does an article in no issue get a
-datestamp, and do `from` and `until` list it? Lean: no datestamp, so
-left out; a journal's datestamp is the latest change of the article, its
-version and its issue (Rule 5), and on those databases a missing issue
-makes that latest change empty, where PostgreSQL skips it.
-One walk settles it: on a MySQL or MariaDB install, publish an article
-in no issue, then read ListIdentifiers with `from` set to today and the
-datestamp of its record in the list without dates.
-Basis: code. <sup>f-a26</sup>
+database is MySQL or MariaDB, such an article has no datestamp of its
+own: every list gives it the moment of the request instead, so the same
+record reads a new datestamp at each visit (13:41:37, then 13:41:40,
+three seconds apart). Every ListRecords and ListIdentifiers given
+`from` or `until` leaves it out, today's `from` included, while the
+article published in an issue beside it is listed; and Identify's
+"Earliest Datestamp" reads the moment of the request rather than the
+journal's oldest record. A harvester that harvests by date never
+receives such an article after its first full harvest. PostgreSQL
+installs are not affected (Rule 5 holds there). Red on the
+configurations run (S3, S5; ci-triage C-U19-1).
+Since: 2025-08-06 (pkp/pkp-lib#9295) · Basis: probe, 2026-11-13 (MySQL 8.0, MariaDB 10.11). <sup>f-a26</sup>
 
 ### OMP
 
@@ -2068,7 +2068,7 @@ Code read 2026-09-26 at the checkouts: ojs `71bb244152` (the working tree) and `
 **u** — Language: every localized value is written per locale (`addLocalizedElements`), `xml:lang` from the locale key. `Locale::getLocale()` (the request's locale: the URL's segment, pkp/pkp-lib#13124) decides `getLocalizedName()` (Repository Name, journal set names), `getLocalizedAbbrev()` and `getLocalizedTitle()` (section sets) and the `metadata.pkp.peerReviewed` / `rt.metadata.pkp.dctype` words. Upstream sync (rr4, 2026-09-10/11, the pkp/pkp-lib#12375 matrix on the three apps): the bare OAI address answered one hop to `/en/`, and `/en/` and `/fr_CA/` answered in place, without a cookie. The app keeps the last language segment of a request in a `currentLocale` cookie and sends the bare address there next time (Rule 19a). Live-probed 2026-09-26 (Rules 19, 19a; the two addresses): note q19.
 
 <a id="fn-v"></a>
-**v** — Not run, read from the code (Rule 9e): the test installs run PostgreSQL only, and no MySQL or MariaDB install was at hand on 2026-10-05. OJS's datestamp takes the latest of the article's, its version's and its issue's last change, and MySQL's and MariaDB's `GREATEST` answers NULL when the article has no issue (note e; note f-a26).
+**v** — Live-probed 2026-11-13 on the `mysql` and `mariadb` lines (Rule 9e; note f-a26): the suite's S3 and S5 check Rules 5 and 9 as written, so on the daily configurations run they are red on MySQL and MariaDB until A26 is fixed (ci-triage C-U19-1). OJS's datestamp takes the latest of the article's, its version's and its issue's last change, and MySQL's and MariaDB's `GREATEST` answers NULL when the article has no issue (note e).
 
 <a id="fn-q1"></a>
 **q1** — Live-probed 2026-09-26 (Actors preamble, rows 1–3; Rule 18), all three apps, two runs each: on a scratch context the signed-out answer and the Journal (Press, Preprint Server) Manager's, the Reader's and the Section Editor's were the same apart from the response date. With "Users must be registered and log in to view the journal site." ticked and saved on screen, a signed-out ListRecords or ListSets answered 302 to `{journal}/login?source=…`; signed in as the Manager, the Editor (OJS, OMP), the Section Editor, the Author, the Reader, the Site Administrator or a user with no role in that journal, the list answered. On a context created not enabled, signed out went to `{journal}/login`; signed in, every level got "No matching records in this repository" (OJS: the first journal's deleted records), while ListSets and Identify named the context. The Manager, the Editor and the Site Administrator opened Settings › Distribution; the Section Editor, the Author, the Reader and an Editor whose role had "Permit changes to Settings" unticked (OJS, OMP) got "The current role does not have access to this operation.".
@@ -2232,7 +2232,7 @@ Issue report: [pkp-e2e#340](https://github.com/jardakotesovec/pkp-e2e/issues/340
 Issue report: [pkp-e2e#341](https://github.com/jardakotesovec/pkp-e2e/issues/341) ([docs/issues/U19-A24-oai-driver-list-says-more-results.md](../issues/U19-A24-oai-driver-list-says-more-results.md)).
 
 <a id="fn-f-a26"></a>
-**f-a26** — Not run: the test installs, and every install the campaign drives, run PostgreSQL; no MySQL or MariaDB was at hand on 2026-10-05. Code: note e; OJS `APP\oai\ojs\OAIDAO::getRecordsRecordSetQuery()` writes the datestamp as `GREATEST(a.last_modified, i.last_modified, p.last_modified)` over `leftJoin('issues AS i', …)`, so for an article in no issue `i.last_modified` is NULL; MySQL's and MariaDB's `GREATEST` returns NULL when any argument is NULL, PostgreSQL's ignores NULL arguments. Read 2026-10-01 for the issue report of A18 (its Cause and "Unverified", [docs/issues/U19-A18-oai-datestamp-stays-after-edit-republish.md](../issues/U19-A18-oai-datestamp-stays-after-edit-republish.md)), which does not copy the expression into its fix. What the record's datestamp then reads in a list without dates was not followed. The question and lean are judgment.
+**f-a26** — Live-probed 2026-11-13 on the `mysql` line (MySQL 8.0.46, PHP 8.3; OJS `3c99722dc8`, pkp-lib `ad75b174f0`) and the `mariadb` line (MariaDB 10.11), each from a reset install, with `shared/playwright/checks/sync/cfg-oai-datestamp-no-issue/walk.js`: a scratch journal, "Nowhere Article" published in no issue, "Issue Article" published in a published issue. ListIdentifiers read twice, 3 s apart, gave "Nowhere Article" the datestamp of each request (`2026-11-13T13:41:37Z`, then `…:40Z`) and "Issue Article" its own (`…:35Z`) both times; `from=` and `until=` today listed "Issue Article" alone; Identify's `earliestDatestamp` was the request's moment. The configurations run [43340246182](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43340246182) reds U19 S3 (Identify's "Earliest Datestamp" later than the older record's) and S5 (`from` today lists nothing) on PHP 8.2 MySQL, PHP 8.2 MariaDB and PHP 8.3 MySQL. Code: OJS `APP\oai\ojs\OAIDAO::getRecordsRecordSetQuery()` selects and filters on `GREATEST(a.last_modified, i.last_modified, p.last_modified)` (six places) over `leftJoin('issues AS i', …)`; with no issue `i.last_modified` is NULL, and MySQL's and MariaDB's `GREATEST` answers NULL when any argument is (PostgreSQL's skips NULLs). `PKPOAIDAO::doCommonOAIFromRowOperations()` turns the NULL into `OAIUtils::UTCDate(strtotime(null))`, `UTCDate(false)`, which is `gmdate()` of now; `whereDate(NULL, …)` holds for no date; `getEarliestDatestamp()` takes the first row by `last_modified`, NULLs first on MySQL. The left join came with `1fb080776e` (pkp/pkp-lib#9295, 2025-08-06; 3.5 joins `issues` inner, so no article without an issue reaches its lists); on `ore` too (`9dffdeb147`). Fix tried on the `mysql` line: `COALESCE(i.last_modified, a.last_modified)` inside the `GREATEST`, the six places (`fix.diff` beside the script); with it the datestamp holds, both dated lists hold both articles, and U19 S3 and S5 pass.
 
 <a id="fn-f-a27"></a>
 **f-a27** — Live-probed 2026-10-16 at pkp/ojs#5947's head (note q20a), OJS: the earlier version's record gave `…/article/view/17` as its only "Resource Identifier"; that page showed version 2.0. Code: `APP\oai\ojs\OAIDAO::setOAIData()` points the submission's `currentPublicationId` at the rendered version, while `plugins/metadata/dc11/filter/Dc11SchemaArticleAdapter.php` writes "Resource Identifier" as `article/view/{getBestId()}` (line 172), with no version. Not the PR's: the per-version records came with `pkp/ojs#5674`, and the PR only reorders the UNION.
