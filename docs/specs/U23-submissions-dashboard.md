@@ -1143,12 +1143,12 @@ and a decision is needed." above the cancelled reviewer's icon, though
 no review exists and none was confirmed. Expected, by Rule 9e: the
 per-reviewer indicators alone. A round whose reviewers all declined
 takes the same sentence, as on the review stage ([Review stage & rounds
-A4](U26-review-stage-and-rounds.md#a4)). Seen on a press; not seen on a
-journal, whose dashboard picks the sentence the same way.
+A4](U26-review-stage-and-rounds.md#a4)). Seen on a press and on a
+journal.
 Question: what should the cell say for a round whose reviewers were all
 cancelled or declined? Lean: as for A4 of the review stage, "a decision
 is needed" can stand, "all reviews are confirmed" is wrong.
-Basis: test run + code, 2026-11-12. <sup>a20</sup>
+Basis: test run + probe + code, 2026-11-12 and 2026-11-13. <sup>a20</sup>
 
 ### OMP
 
@@ -2247,9 +2247,13 @@ declined case). Seen 2026-11-12 in scenario 9's OMP run (scratch Press
 Manager, one run): after "Cancel Reviewer" on the round's single
 accepted reviewer, the row's Editorial Activity cell read "All reviews
 are confirmed and a decision is needed." above the "Review request
-cancelled by editor" indicator. Not driven on OJS; the declined-only
-round not driven on the dashboard. The suites do not assert the
-sentence either way.
+cancelled by editor" indicator. Probed again 2026-11-13 on OJS and OMP
+`main` (scratch journal and press, two runs each, claim check K13a of
+*Review stage & rounds*): after "Cancel Reviewer" on the round's single
+accepted reviewer, the row read "All reviews are confirmed and a
+decision is needed." above "Review request cancelled by editor" on both.
+The declined-only round not driven on the dashboard. The suites do not
+assert the sentence either way.
 
 <a id="fn-omp1"></a>
 **omp1 — OMP1 evidence.** OMP's

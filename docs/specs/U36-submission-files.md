@@ -72,7 +72,7 @@ record what each role is offered once the list is on screen. <sup>b</sup>
 | Action | Who may, and when |
 |--------|--------------------|
 | **See a workflow file list** (Rule 1) | • The stage's team, on every list of the stage<br>• Author: "Submission Files", "Revisions Uploaded" and "Copyedited Files" of their own submission, in the author view of each stage (the stage specs above)<br>• On a preprint server: nobody; there are no workflow lists [OPS1](#ops1) <sup>b</sup> |
-| **Add a file to a list** ("Upload" or "Upload/Select Files" above it; Rules 2, 5, 15) | • The stage's team: "Upload" on "Submission Files", "Revisions Uploaded" and "Production Ready Files"; "Upload/Select Files" on "Files for Review", "Draft Files" and "Copyedited Files"<br>• Author: "Upload" on "Revisions Uploaded" and the "Upload revisions" button under the round, while the round asks for revisions ([→ Revisions Uploaded](U26-review-stage-and-rounds.md#revisions)). "Upload revisions" shows only then; "Upload" shows on every round, and before revisions are requested its window refuses them ⚠ [A7](#a7)<br>• Author: never on "Submission Files" once the submission is submitted: before that, the submission wizard's "Files" panel is their upload (Actors row 9) <sup>c</sup> |
+| **Add a file to a list** ("Upload" or "Upload/Select Files" above it; Rules 2, 5, 15) | • The stage's team: "Upload" on "Submission Files", "Revisions Uploaded" and "Production Ready Files"; "Upload/Select Files" on "Files for Review", "Draft Files" and "Copyedited Files"<br>• Author: "Upload" on "Revisions Uploaded" and the "Upload revisions" button beside the round, while the round asks for revisions ([→ Revisions Uploaded](U26-review-stage-and-rounds.md#revisions)). "Upload revisions" shows only then; "Upload" shows on every round, and its window refuses the upload until the round has a "Request Revisions", "Resubmit for Review" or "Accept Submission" decision ⚠ [A7](#a7)<br>• Author, after "Accept Submission": "Upload" opens the upload window and the file is listed under "Revisions Uploaded", while the status beside the round reads "The submission is currently in the Copyediting stage." and no "Upload revisions" shows<br>• Author: never on "Submission Files" once the submission is submitted: before that, the submission wizard's "Files" panel is their upload (Actors row 9) <sup>c</sup> |
 | **"Update File Details"** (a row's "More Actions" menu; Rule 10) | • The stage's team, on every list<br>• Author: on "Submission Files" and "Revisions Uploaded", for files they uploaded themselves. The entry is offered on every row of those lists, and on a file somebody else uploaded the window refuses them ⚠ [A2](#a2)<br>• Author: never on "Copyedited Files" <sup>d</sup> <sup>d1</sup> |
 | **"More Information"** (row menu; Rules 13–14) | • The stage's team, on every list. For the assistant roles the window opens with two browser alerts, "The current role does not have access to this operation." and then one reading only "undefined" ⚠ [A27](#a27), and its "History" tab never loads: it keeps showing "Loading" ⚠ [A3](#a3)<br>• Adding a note: everybody the window opens for<br>• Deleting a note: a Journal Manager, Editor, Production editor, Section Editor or Guest Editor {OJS}, any note, whoever wrote it; never an assistant role, not even on their own note<br>• Author: never; the menu has no such entry for them <sup>e</sup> <sup>d2</sup> |
 | **"Delete"** (row menu; Rule 4) | • The stage's team, on every list<br>• Author: on "Revisions Uploaded" only <sup>g</sup> |
@@ -850,7 +850,7 @@ tooling recipe are in the footnote. <sup>s0</sup>
      3).
    - **"Revisions Uploaded" before revisions are requested**: select the
      review round in the workflow menu: no "Upload revisions" button
-     shows under the round, and "Upload" stands above "Revisions
+     shows beside the round, and "Upload" stands above "Revisions
      Uploaded" [A7](#a7); press it: the window "Upload Review File" reads
      only "You are not allowed to add and edit these files." with
      "Close", and the list stays "No Items" (Actors row 2; Rule 5).
@@ -1035,6 +1035,7 @@ Left out of the scenarios above, by reason:
   - step 1 of the upload wizard before a component is chosen: the upload box absent from the accessibility snapshot, and each drop-down found by its role and label ([A9](#a9)): the guards the two issue reports propose [report 2026-10-02]
   - "2. Review Details" reopened from "3. Confirm": the button reads "Continue", and one "Complete" on step 3 closes the window ([A15](#a15)): the guard the issue report proposes [report 2026-10-02]
   - step 1 of the upload wizard with a component chosen: Tab stops on "Upload File", and Enter opens the computer's file picker ([A26](#a26)): the guard the issue report proposes [incidental 2026-10-05]
+  - the Author on a round after "Accept Submission": "Upload" above "Revisions Uploaded" opens the three-step upload window, the file is listed there after reopening the submission, the status beside the round reads "The submission is currently in the Copyediting stage.", and no "Upload revisions" shows (Actors row 2; [A7](#a7)'s boundary) [incidental 2026-11-13]
 - **Nothing new to test**:
   - "Cancel" after revising a file renamed since its last upload: the previous file back, its rename kept, and no line of the cancelled upload in its "History" (Rule 9)
   - the header "Close" after a revision: the new file kept, the earlier version a "Download" in "History" (Rule 9)
@@ -1054,7 +1055,7 @@ Left out of the scenarios above, by reason:
   - A4 ("Show events from prior versions" changing nothing, and hidden behind "Search" again after the reload; Rule 13b)
   - A5 (a galley's "Change File" naming no current file; Rule 9a)
   - A6 (every row's menu button named "More Actions" alone; Rule 2)
-  - A7 (the Author's "Upload" above "Revisions Uploaded" offered on a round that asks for no revisions; Actors row 2; scenario 7 marks it)
+  - A7 (the Author's "Upload" above "Revisions Uploaded" offered, then refused, on a round with no "Request Revisions", "Resubmit for Review" or "Accept Submission" decision; Actors row 2; scenario 7 marks it)
   - A8 (the revise list naming files by name alone; Fields)
   - A9 (step 1's hidden upload box read by a screen reader, its drop-downs unnamed; Fields)
   - A10 (an empty note posted; Rule 14)
@@ -1231,8 +1232,9 @@ Basis: probe. <sup>[f-a6](#fn-a6)</sup>
 <a id="a7"></a>
 **A7 — An Author is offered "Upload" above "Revisions Uploaded" before revisions are requested, then refused** · 🐞 · low.
 Above "Revisions Uploaded" on a review round, the Author sees "Upload"
-whether or not an editor has requested revisions. Before revisions are
-requested, pressing it opens "Upload Review File" reading only "You are
+whether or not an editor has requested revisions. Until the round has a
+"Request Revisions", "Resubmit for Review" or "Accept Submission"
+decision, pressing it opens "Upload Review File" reading only "You are
 not allowed to add and edit these files." with "Close". The "Upload
 revisions" button beside the round shows only once revisions are
 requested.
@@ -1240,12 +1242,13 @@ requested.
 No file is uploaded and the list stays "No Items". The refusal does not
 say that uploading opens once revisions are requested.
 
-The "Upload" button shows on every review round on which no editor has
-requested revisions. The two open pkp issues about it want opposite
-outcomes: one asks that the upload be allowed, the other that the button
-be hidden. This report proposes hiding it, as the "Upload revisions"
+The refused "Upload" shows on every review round that has none of those
+decisions; on an accepted round it works (Actors row 2). The two open
+pkp issues about it want opposite outcomes: one asks that the upload
+be allowed, the other that the button be hidden. This report proposes hiding it, as the "Upload revisions"
 button already is; the team has to choose.
-Basis: probe, 2026-10-02. <sup>[f-a7](#fn-a7)</sup>
+Basis: probe, 2026-10-02 and 2026-11-13. <sup>[f-a7](#fn-a7)</sup>
+Report: refresh owed — the 2026-11-13 claim check (K13a) narrowed the entry's reach: the refusal holds until the round has a "Request Revisions", "Resubmit for Review" or "Accept Submission" decision, and on an accepted round "Upload" works; the report's title, Summary ("Before revisions are requested…", "every review round on which no editor has requested revisions") and Expected still say every round that asks for no revisions, while its Cause › Reach already names the accepted round (`SubmissionFileStageAccessPolicy::effect()`, its accept branch); no class or method changed (2026-11-13)
 
 <a id="a8"></a>
 **A8 — The revise list shows file names only** · ❓ · minor.
@@ -2650,7 +2653,14 @@ round awaiting reviewers ("Awaiting responses from reviewers.") the Author had
 "Upload" above "Revisions Uploaded" and no "Upload revisions"; "Upload" opened
 "Upload Review File" with "You are not allowed to add and edit these files."
 and "Close" alone, and the list stayed "No Items". Seen again from the review
-stage's side the same day.
+stage's side the same day. Probed again 2026-11-13 on OJS and OMP `main`
+(scratch journal and press, two runs each, claim check K13a of *Review stage
+& rounds*): the refusal on a round with no reviewer and on one whose reviewer
+had completed with no decision (`start-wizard?fileStage=15…` answered 200 with
+the refusal, the list still "No Items"); after "Accept Submission" the same
+"Upload" opened the three-step wizard and the file completed into "Revisions
+Uploaded" (a stored row in file stage 15 uploaded by the Author), listed in
+the editor's view of the round too, while "Upload revisions" stayed absent.
 Issue report: [pkp-e2e#534](https://github.com/jardakotesovec/pkp-e2e/issues/534) ([docs/issues/U36-A7-author-revisions-upload-offered-then-refused.md](../issues/U36-A7-author-revisions-upload-offered-then-refused.md)).
 
 <a id="fn-a8"></a>
