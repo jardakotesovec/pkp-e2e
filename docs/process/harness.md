@@ -353,6 +353,12 @@ machine what that run shows:
   for instance, and says how many; `--force` stops anyway.
   `npm run db -- sql mysql "<statement>" [<database>]` runs a statement
   as root, for a look at a table or at `SHOW ENGINE INNODB STATUS`.
+  On the VM the bot's service may not start a container itself (it
+  runs with "no new privileges", which rootless podman cannot work
+  under), so each server is a system service there, `pkp-e2e-mysql`
+  and `pkp-e2e-mariadb`, which user e2e may start and stop. The same
+  `npm run db` commands drive them, so a session does nothing
+  differently; never call `podman` from a session on the VM.
 - **PHP.** `PKP_E2E_PHP=php8.2` in front of a harness command runs the
   app on that PHP, on any line and on `main`, the way a line's own
   `php` does ("The stable lines", "Runtimes"). PHP 8.2 with MySQL is
