@@ -231,7 +231,12 @@ Nothing on either page is required, and neither page has a form-level
     with "Unsaved Changes" already showing ⚠ [A14](#a14). Nothing is saved
     until "Save" is pressed; on a version whose Body Text was never saved,
     "Insert" › "Figure" first saves the text as it stands (Rule 22).
-    <sup>g</sup> <sup>n</sup> <sup>d16</sup>
+    A saved Body Text the editor cannot read (not a document, or holding
+    an element the editor does not know) opens no editor: the line
+    "Unable to load the document." shows, "Save" is greyed, and "Export
+    to HTML" and "Preview: PDF" are greyed under "Export". No screen
+    saves such a text; only a request to the Body Text's address does.
+    <sup>g</sup> <sup>n</sup> <sup>d16</sup> <sup>d35</sup>
 15. **"Save" and "Unsaved Changes".** Any change in the editor shows the
     "Unsaved Changes" badge; undoing back to the saved text hides it
     again. "Save" stores the whole text, hides the badge and reads "Saved"
@@ -252,6 +257,17 @@ Nothing on either page is required, and neither page has a form-level
     reference into the text inserts an in-text citation to it. The
     references cited in the text, or in the part selected with the mouse,
     are highlighted in the list. <sup>o</sup> <sup>d18</sup>
+    - 17a. **The citation's number.** A citation reads the reference's
+      place in the list, in brackets: "[2]" for the second reference.
+      Beside each reference the list shows its record's number instead
+      ("14"), which is not the number the citation reads. When the list
+      changes, the citations change with it: after the second of four
+      references is deleted on "References", a citation to the third
+      reads "[2]", and a citation to the deleted one reads "[?]" (a
+      citation to several, "[2, ?]"). Text typed into a citation, in
+      "Selected Element" or on from its end, is kept as typed: "[4, p.
+      5]" or "(2021)" keep their text when the list changes, and only the
+      number the editor wrote is renumbered. <sup>d35</sup>
 18. **"Fullscreen".** It makes the editor and its panel fill the browser
     window and the button reads "Exit fullscreen"; that button or the
     Escape key restores the page. <sup>g</sup> <sup>d19</sup>
@@ -359,6 +375,28 @@ Nothing on either page is required, and neither page has a form-level
       Run by a command-line tool or a queued job, with no journal in the
       request, it makes the "PDF" galley but stops with an error for the
       "HTML" one ⚠ [A24](#a24). <sup>d34</sup>
+    - 24f. **Citations.** In both exports each in-text citation links to
+      the reference it cites, in a section headed "References" that the
+      export adds at the end of the text. The section lists only the
+      cited references, in the order of the side panel's "References",
+      each with its place in that list ("2. Beta, B. (2021). …"), the
+      uncited references counted too. A citation keeps the text the
+      editor shows (Rule 17a): "[2]", "[4, p. 5]", "(2021)". Where text
+      was typed on after a citation, the link covers the citation's own
+      part, "[1]", and not the words after it. A reference dragged onto a
+      citation already in the text joins that citation ("[2, 4]"); in the
+      exports such a citation keeps its text and is followed by one link
+      per reference, "(Reference 2; Reference 4)" ⚠ [A28](#a28). While
+      the text holds a citation to a reference since deleted on
+      "References" (one that reads "[?]"), "Export to HTML" and "Preview:
+      PDF" stop: a window "Error" reads "Unable to export references.
+      Missing reference IDs: N. Citations with invalid or empty sources:
+      0." with "OK", where N is the deleted reference's record number,
+      which the page no longer shows anywhere, and no galley changes ⚠
+      [A27](#a27). After an "Export to HTML", the "JATS XML" page's
+      generated XML (Rule 23) ends its body with the heading "References"
+      and the cited references, which its reference list holds too.
+      <sup>d35</sup>
 
 ## Side effects
 
@@ -871,7 +909,18 @@ Left out of the scenarios above, by reason:
   - the guard for A15 (issue report `docs/issues/U48-A15-body-text-leaving-loses-text-unasked.md`): with unsaved text on "Body Text", choosing another side-menu entry asks "The data on this form has changed. Do you wish to continue without saving?", and "Cancel" keeps the text. [report 2026-10-02]
   - the guard for A23 (Rule 24b): two exports of one version sent at the
     same moment leave one galley, the later one a revision [upstream 2026-11-09]
+  - citations in the export (Rules 17a, 24f, footnote d35;
+    pkp/pkp-lib#13767): Beta and Delta of a version's four references
+    dragged into the text read "[2]" and "[4]"; "Export to HTML" makes
+    an "HTML" galley whose two citations link to a "References" section
+    holding "2. Beta …" and "4. Delta …" only; after Beta is deleted on
+    "References", the citations read "[?]" and "[3]", and "Export to
+    HTML" stops with the window "Error" and the galley is unchanged
+    [upstream 2026-11-15]
 - **Nothing new to test**:
+  - a saved Body Text the editor cannot read (Rule 14): no screen saves
+    one; the check is read in the code and driven through the Body
+    Text's address (footnote d35)
   - a second "Upload" on a version that already has a file, which
     becomes a revision of that one file, listed in its "History"
     (Rule 4)
@@ -987,6 +1036,8 @@ entry notes otherwise; the team settles them on spec review.
 | [A10](#a10) | "Upload" on "JATS XML" accepts a text file or a PDF as the article's JATS XML | ❓ | minor | — |
 | [A19](#a19) | Signed in for the "JATS XML" download, the visitor is left on the Login page | ❓ | minor | — |
 | [A25](#a25) | "Create PDF" on a version with an uploaded "PDF" galley adds a second "PDF", and readers see "PDF" twice | ❓ | user-visible | — |
+| [A27](#a27) | A citation to a reference deleted on "References" stops every export of the Body Text, and the error names a number the page does not show | ❓ | user-visible | — |
+| [A28](#a28) | A citation to several references is exported with "(Reference 2; Reference 4)" written after it | ❓ | user-visible | — |
 
 ### All apps
 
@@ -1320,6 +1371,36 @@ way, and no galley is added. The same fault shows for uploads over the
 server's limit elsewhere (*Custom pages & blocks* [A18](U09-custom-pages-and-blocks.md#a18)).
 Basis: probe, 2026-11-13. <sup>f-a26</sup>
 
+<a id="a27"></a>
+**A27 — A citation to a deleted reference stops every export** · ❓ · user-visible.
+When a reference cited in the Body Text is deleted on "References", its
+citation stays in the text and reads "[?]", and "Export to HTML" and
+"Preview: PDF" both stop with a window "Error": "Unable to export
+references. Missing reference IDs: 14. Citations with invalid or empty
+sources: 0.", until the citation is deleted from the text or changed.
+The number in the message is the deleted reference's record number,
+which the page does not show anywhere once the reference is gone; the
+citation to look for is the one that reads "?". Before the citations
+were linked, the export kept such a citation as text.
+Question: should a citation to a missing reference stop the export, or
+be exported as text without a link, with a warning? Lean: export with a
+warning, or keep the refusal and have it say to look for the citations
+that read "[?]"; the error stops the whole galley over one citation.
+Since: the PR review of pkp/pkp-lib#13767 (ui-library#1053, not merged) · Basis: probe, 2026-11-15. <sup>d35</sup>
+
+<a id="a28"></a>
+**A28 — A citation to several references gets "(Reference 2; Reference 4)" after it** · ❓ · user-visible.
+A reference dragged onto a citation already in the text joins that
+citation. In both exports, such a citation to two references or more
+keeps its own text, "[2, 4]", and is followed by a smaller "(Reference
+2; Reference 4)", one link per reference, so readers see the numbers
+twice.
+Question: should the numbers inside the citation be the links instead
+("[<u>2</u>, <u>4</u>]"), as the issue's example links the marker
+itself? Lean: link the numbers in place where the text is numbers alone,
+and keep the trailing links only for text that names no number.
+Since: the PR review of pkp/pkp-lib#13767 (ui-library#1053, not merged) · Basis: probe, 2026-11-15. <sup>d35</sup>
+
 ### Retired
 
 <a id="a18"></a>
@@ -1480,6 +1561,9 @@ d6, d20, d28).
 
 <a id="fn-d34"></a>
 **d34** — Rule 24e: no screen reaches the export outside a web request; only the page's "Export" menu calls it, and its requests carry the journal. Probed 2026-11-09 with a command-line tool (note f-a24); not driven on a screen 2026-11-11 (note d33).
+
+<a id="fn-d35"></a>
+**d35** — Rules 14 (the load check), 17a and 24f, at the PR heads, before their merge (round 5 of the PR review): ui-library `d20333a447` (`pkp/ui-library#1053`, five commits on `836c01b500`), pkp-lib `050d69e8ad` (`pkp/pkp-lib#13776`, the English strings `publication.bodyText.error.unresolvedReferences` and `publication.bodyText.error.loadFailed`), ojs `9f9bb8793e` (`pkp/ojs#6060`, the pointers), for `pkp/pkp-lib#13767`. Rule 17a: `citationMarkerFeature.js` gives SciFlow's citation node an `ojsCitationMarker` attribute recording which characters of its text the editor wrote and which reference each stands for; `citationMarkerTransaction()` (on load, on edits, and from `refreshCitationMarkers()` when `publication.citations` changes) rewrites only those characters, to the reference's 1-based place in the list or to `?` for a reference no longer in it (`citationMarkerReplacements(…, {missingReferenceText: '?'})`); a list that has not arrived (`citations` null) renumbers nothing. The side panel's number is `sciflow-reference-list`'s `.reference-id`, the reference's id. Rule 24f: `BodyTextEditor.vue::getHTML()` (the one source of "Export to HTML", "Preview: PDF" and "Create PDF") runs `bodyTextReferenceExport.js::exportBodyTextReferences()` on the serialized HTML: a cited id that is neither a reference of the version nor a `[data-type="reference"]` entry of the document, or a source that does not decode, throws `ReferenceExportError`, shown as `unresolvedReferences` with the ids; the cited references, in the panel's order, are appended as `<p data-type="reference" id="body-text-ref-<id>">` with their list number, under `<section class="body-text-references">` and an `<h2>` "References"; a citation to one reference gets `<a href="#body-text-ref-<id>" aria-label="Reference N">` around the editor-written part (the whole text when nothing was recorded), one to several a `span.body-text-citation-targets` " (…; …)" after it. Rule 14: `loadDocument()` parses the stored `bodyTextContent` and checks it against the configured schema (`buildSchemaFromFeatures()`, `nodeFromJSON()`, `check()`) before handing it to the editor; on failure `documentReady` stays false, `publication.bodyText.error.loadFailed` shows in a `role="alert"` line, and "Save" (`:is-disabled`), the export items (`canConvert`) and `getHTML()` refuse; the server's default for a never-saved version (`{"type":"doc","content":[]}`, `BodyTextFile::getDefaultContent()`) passes. Driven 2026-11-15 on OJS, freshly reset, tagged Production submissions in `publicknowledge` as `manager.maya` (`shared/playwright/checks/sync/ui-library-1053/`): `cite.js` (run `r5head`, references 13–16, Alpha to Delta): the editor read "[2]", "[4]", "(2021)", "(2022)", "[4, p. 5]", "[1] More text 2020.", "(2; 1)", "[2, 4]"; the "HTML" galley and the preview the same, "[1]" alone linked in "[1] More text 2020.", "[2, 4]" and "(2; 1)" followed by "(Reference 2; Reference 4)" and "(Reference 2; Reference 1)", entries "1. Alpha …" to "4. Delta …", the first link scrolling to "2. Beta …"; "Create PDF" a PDF with 11 link annotations; Delta deleted (`DELETE …/citations/16`): the citations read "[2]", "[?]", "(2021)", "(2022)", "[?, p. 5]", …, "[2, ?]", and both "Export to HTML" and "Preview: PDF" opened "Unable to export references. Missing reference IDs: 16. Citations with invalid or empty sources: 0.", sending no request. `markers.js` (run `r5m`): Beta and Gamma cited and saved ("[2]", "[3]"), Beta deleted on "References": "[?]" and "[2]", the same after a reload, the panel listing "4", "6", "7"; the export's error named 5. `load.js` (run `r5l`): a never-saved version opened, took typed text, saved and reloaded it; a stored one-paragraph document and an empty `{"type":"doc","content":[]}` loaded; a stored document with an unknown node type, and a stored text that is not JSON, each showed "Unable to load the document." with no editor, "Save" greyed and both export items greyed. Earlier rounds (2026-11-11 to -13, heads `aa2485f872` to `1eaf184462`) found the defects since fixed; their write-up is `docs/reports/pr-review/2026-11-11-ui-library-1053.md`. At the base (each repo's `main` before the PRs, 2026-11-11) the galley and the preview held the editor's text as it was, the reference ids ("[35]"), with no link and no "References" section, and an export with a deleted reference cited went through.
 
 <a id="fn-s"></a>
 **s** — `SubmissionFile\Repository::add()` logs `SUBMISSION_LOG_FILE_UPLOAD` on the file (`submission.event.fileUploaded` "A file "{$filename}" was uploaded for submission {$submissionId} by {$username}.") and `SUBMISSION_LOG_FILE_REVISION_UPLOAD` on the submission (`submission.event.fileRevised` "Revision "{$filename}" was uploaded for file {$submissionFileId}."); `edit()` with a new `fileId` logs `submission.event.revisionUploaded` "A file revision "{$filename}" was uploaded for submission {$submissionId} by {$username}." on both; `delete()` logs `submission.event.fileDeleted` "A file "{$filename}" was deleted for submission {$submissionId} by {$username}." on both. Neither controller sends mail or creates notifications.
