@@ -1,4 +1,4 @@
-# An Author is offered "Upload" above "Revisions Uploaded" before revisions are requested, then refused
+# An Author's "Upload" above "Revisions Uploaded" is refused until revisions are requested or the submission is accepted
 
 - **Severity** low
 - **Effort** medium
@@ -9,35 +9,40 @@
   - 3.4: OJS, OMP (code; the older "Revisions" grid)
   - 3.3: OJS, OMP (code; the older "Revisions" grid)
 - **Introduced** not traced; the older grid offered the upload on every round since at least [baad1adb92](https://github.com/pkp/pkp-lib/commit/baad1adb92d3c7924f2529af9fc4b939a0cc6330) (2016-03-07). The table that carries it on `main` and 3.5 came with `pkp/ui-library#386` for `pkp/pkp-lib#7495` · [6e950268](https://github.com/pkp/ui-library/commit/6e95026819e8a3d0852f2168341b8675807d1b1a) · 2024-07-18 · Jarda Kotěšovec (jardakotesovec)
-- **Upstream** `pkp/pkp-lib#13048` (open), covering this as its part 3, whose reporter wants the upload allowed (its parts 1 and 2 are other refusals, not covered here); `pkp/pkp-lib#8976` (open), covering it on 3.4 as the first of three remarks, whose reporter suggests hiding the button
+- **Upstream** `pkp/pkp-lib#13048` (open) reports this as the third of three refusals (the other two are not covered here) and asks that the upload be allowed; `pkp/pkp-lib#8976` (open) reports it on 3.4 as the first of three remarks and suggests hiding the button
 - **Tracked in** spec U36 [A7](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U36-submission-files.md#a7)
-- **Checked** 2026-10-02, each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-16, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-11-16: the refusal holds until the round has a "Request
+Revisions", "Resubmit for Review" or "Accept Submission" decision; on
+an accepted round "Upload" works. The proposed fix now also keeps
+"Upload" on a press's round accepted straight from internal review.
 
 ## Summary
 
 Above "Revisions Uploaded" on a review round, the Author sees "Upload"
-whether or not an editor has requested revisions. Before revisions are
-requested, pressing it opens "Upload Review File" reading only "You are
+whether or not an editor has requested revisions. Until an editor
+records "Request Revisions", "Resubmit for Review" or "Accept
+Submission" on the latest round, pressing it opens "Upload Review File" reading only "You are
 not allowed to add and edit these files." with "Close". The "Upload
 revisions" button beside the round shows only once revisions are
-requested.
+requested. The refusal does not say that uploading opens then.
 
-No file is uploaded and the list stays "No Items". The refusal does not
-say that uploading opens once revisions are requested.
-
-The "Upload" button shows on every review round on which no editor has
-requested revisions. The two open pkp issues about it want opposite
-outcomes: one asks that the upload be allowed, the other that the button
-be hidden. This report proposes hiding it, as the "Upload revisions"
-button already is; the team has to choose.
+The refused "Upload" shows on a round still waiting for a decision,
+which is the usual state of a round, on a declined round, and on a
+round an editor has followed with a new one. On an accepted round
+"Upload" works: the server lets the Author add a revised file after an
+acceptance, as after a revisions request. This report proposes hiding
+the button where it would be refused; the team has to choose between
+that and allowing the upload.
 
 ## Impact
 
 - **Lost** Nothing.
-- **Who** Every Author who opens their submission while it is in review
-  and no revisions have been requested, which is the usual state of a
-  review round.
+- **Who** Every Author who opens a review round that is still waiting for
+  a decision, was declined, or was followed by a new round. A preprint
+  server has no review rounds.
 - **Way round** None is needed. Once an editor requests revisions,
   "Upload" and "Upload revisions" both open the upload window.
 
@@ -48,8 +53,8 @@ Low: no task fails; a button is offered where it cannot work.
 Preconditions:
 
 - The default dataset, OJS `main`. Submission 7, "Developing efficacy
-  beliefs in the classroom", is in review and no revisions have been
-  requested.
+  beliefs in the classroom", is in review, and no editor has recorded a
+  decision on its round.
 
 Steps:
 
@@ -62,9 +67,10 @@ Steps:
    Uploaded".
 4. Press "Upload" above "Revisions Uploaded".
 
-**Expected** No upload is offered on a round that asks for no revisions:
-neither "Upload revisions" beside the round nor "Upload" above "Revisions
-Uploaded".
+**Expected** No upload is offered on a round that would refuse it: until
+the round has a "Request Revisions", "Resubmit for Review" or "Accept
+Submission" decision, neither "Upload revisions" beside the round nor
+"Upload" above "Revisions Uploaded".
 
 **Observed** No "Upload revisions" button shows, but "Upload" stands
 above "Revisions Uploaded". Pressing it opens a window titled "Upload
@@ -83,11 +89,20 @@ Perspectives on an Imagined Region" (external review), and as `msmith`
 on submission 17, "Open Development: Networked Innovations in
 International Development" (internal review).
 
-Control: on submission 13, "Hydrologic Connectivity in the Edwards
-Aquifer between San Marcos Springs and Barton Springs during 2009
-Drought Conditions" (author `lkumiega`), whose round asks for revisions
-in the dataset, "Upload revisions" shows and "Upload" opens step 1 of
-the upload window.
+Controls, with the same steps:
+
+- On submission 13, "Hydrologic Connectivity in the Edwards Aquifer
+  between San Marcos Springs and Barton Springs during 2009 Drought
+  Conditions" (author `lkumiega`), whose round asks for revisions in the
+  dataset, "Upload revisions" shows and "Upload" opens step 1 of the
+  upload window.
+- On an accepted round, "Upload" opens step 1 of the upload window and
+  no "Upload revisions" shows: OJS submission 3, "The Facets Of Job
+  Satisfaction: A Nine-Nation Comparative Study Of Construct
+  Equivalence" (author `ckwantes`), and OMP submission 7, "Accessible
+  Elements: Teaching Science Online and at a Distance" (author
+  `dkennepohl`), both in copyediting, with their review round chosen in
+  the workflow menu. The round's status reads "Submission accepted.".
 
 ## Cause
 
@@ -109,7 +124,10 @@ latest round of that review stage has a decision to accept, to request
 revisions, to resubmit for review or to open a new round. Otherwise
 `start-wizard` answers `status: false` with
 `api.submissionFiles.403.unauthorizedFileStageIdWrite`, the text the
-window shows.
+window shows. The new-round decision never opens it in practice:
+`NewExternalReviewRound::runAdditionalActions()` records it on the
+current round and then creates the next round, which becomes the
+latest and has no decision yet; so three decisions open the upload.
 
 The author's workflow config does use the round: `getActionItems()` in
 `workflowConfigAuthorOJS.js` and `workflowConfigAuthorOMP.js` adds
@@ -132,14 +150,24 @@ Reach:
   (on screen, `main`: submission 11 as `jlockehart`).
 - An accepted external review round: the policy counts the accept, so
   "Upload" opens the upload window there, and "Upload revisions" does
-  not show (on screen, `main`: submission 3 as `ckwantes`). This works
-  today and the fix below keeps it.
-- An earlier round after a new round was opened: the policy reads the
-  latest round only, so both buttons would be refused on the earlier
-  round if its status still asks for revisions (code; not walked).
-- Editors are not affected: the upload their entry in
-  `WORKFLOW_REVIEW_REVISIONS` lists is one the policy allows them (on
-  screen: `dbarnes`).
+  not show (on screen, `main` and 3.5: OJS submission 3 as `ckwantes`,
+  OMP submission 7 as `dkennepohl`).
+- On a press, an internal round accepted straight from internal review:
+  OMP's `AcceptFromInternal` records `Decision::ACCEPT_INTERNAL`, which
+  the policy counts, so "Upload" opens the upload window there (on
+  screen, `main`: submission 12 as `lelder`, after "Accept Submission"
+  by `dbarnes`).
+- A declined round: `Decline` sets `REVIEW_ROUND_STATUS_DECLINED` and
+  records `Decision::DECLINE`, which the policy does not count, so
+  "Upload" is offered and refused there (on screen, `main`: OJS
+  submission 2 as `ccorino`, after "Decline Submission" by `dbarnes`).
+- A round followed by a new one: after "Create New Review Round", both
+  the new round and the earlier one show "Upload" and refuse it, since
+  the policy reads the latest round only (on screen, `main`: OJS
+  submission 13 as `lkumiega`). The earlier round's status then reads
+  reviews completed, so "Upload revisions" does not show there.
+- Editors are not affected: the server grants them the upload their own
+  entry in `WORKFLOW_REVIEW_REVISIONS` offers (on screen: `dbarnes`).
 - The reverse mismatch, "Upload revisions" disappearing after a
   resubmission's first file while "Upload" still works, is a wrong
   status list in the author configs and has its own report:
@@ -164,8 +192,8 @@ The change is in ui-library alone:
 
 - `fileManagerStore.js` passes the `reviewRoundId` prop to
   `getManagerConfig()`.
-- `getManagerConfig()` looks the round up in the submission and hands it
-  to the config function:
+- `getManagerConfig()` looks the round up in the submission and hands it,
+  with the submission's rounds, to the config function:
 
 ```diff
  		const config = FileManagerConfigurations[namespace.value]({
@@ -173,36 +201,46 @@ The change is in ui-library alone:
 +			reviewRound: submission.value?.reviewRounds?.find(
 +				(reviewRound) => reviewRound.id === reviewRoundId?.value,
 +			),
++			reviewRounds: submission.value?.reviewRounds,
  		});
 ```
 
 - `WORKFLOW_REVIEW_REVISIONS` lists the author's `FILE_UPLOAD` only when
-  the round's status says revisions were requested or submitted (with or
-  without a new round), or when it is an accepted external review round:
+  the round's status says revisions were requested or submitted, after
+  "Request Revisions" or "Resubmit for Review", or when the round was
+  accepted:
 
 ```diff
  				roles: [pkp.const.ROLE_ID_AUTHOR],
  				actions: [
  					Actions.FILE_LIST,
 -					Actions.FILE_UPLOAD,
-+					...(canAuthorUploadRevisions({stageId, reviewRound})
++					...(canAuthorUploadRevisions({stageId, reviewRound, reviewRounds})
 +						? [Actions.FILE_UPLOAD]
 +						: []),
  					Actions.FILE_EDIT,
  					Actions.FILE_DELETE,
 ```
 
-The accepted branch is tied to the external stage because a press's
-internal round reads accepted after `Decision::EXTERNAL_REVIEW`, which
-the policy does not count.
+A press's internal round has the status accepted in two cases, and the
+rounds tell them apart. Sent on to external review, its decision is
+`Decision::EXTERNAL_REVIEW`, which the policy does not count, and the
+submission has an external round. Accepted straight from internal
+review (`AcceptFromInternal`, `Decision::ACCEPT_INTERNAL`), the policy
+counts it, and the submission has no external round. So an accepted
+internal round keeps "Upload" only when the submission has no external
+round.
 
 Tried on `main`, OJS and OMP. With it, the Steps show no "Upload" on the
-three rounds, and the control still opens the upload window. An Author
+three rounds, and both controls still open the upload window. An Author
 still uploads through "Upload" on a round that asks for revisions,
 before and after the first file and after a "Resubmit for Review"
-decision; "Upload" still works on the accepted round; the editor's
-"Upload" still opens the window. A press's internal round sent on to
-external review no longer offers "Upload".
+decision; "Upload" still opens the window on the accepted external
+rounds and on OMP submission 12 accepted from internal review; the
+editor's "Upload" still opens the window. "Upload" no longer shows on a
+press's internal round sent on to external review, nor on either round
+of OJS submission 13 after "Create New Review Round". The declined round
+was walked without the fix only; its status is not in the fix's list.
 
 **Alternatives**
 
@@ -217,7 +255,7 @@ external review no longer offers "Upload".
   rule the policy holds. A status only approximates that rule: the
   policy counts decisions on the latest round, so a round later declined
   or returned to review still takes uploads while its status no longer
-  says so, and an earlier round never does. A flag is exact there, and
+  says so, and an earlier round never takes them, whatever its status. A flag is exact there, and
   costs a change in pkp-lib and one in ui-library.
 - Pass the component's existing `readOnly` prop from the author config.
   It also removes "Update File Details" and "Delete" from the Author's
@@ -226,7 +264,8 @@ external review no longer offers "Upload".
 **What goes with it**
 
 - No stored data is involved and no API changes. `getManagerConfig()`
-  gains an optional `reviewRoundId`. Its only other caller,
+  gains an optional `reviewRoundId`, and the config functions an optional
+  `reviewRound` and `reviewRounds`. Its only other caller,
   `getPermittedNamespacesForStage()`, passes none; it reads the
   `_SELECT` namespaces, whose permissions hold no author entry, so
   nothing changes for it.
@@ -234,12 +273,12 @@ external review no longer offers "Upload".
   through which a plugin can open file stages to a user. A status check
   in ui-library cannot follow that: an upload a plugin allows on another
   round would have no button. Only the server flag above can.
-- The accepted round is kept because it works today. If an accepted
-  round should be closed to the Author, drop that branch and narrow the
-  policy with it.
+- The accepted rounds keep "Upload" because the server takes the upload
+  there. If an accepted round should be closed to the Author, drop that
+  branch and narrow the policy with it.
 - The status list is the one "Upload revisions" should use; when the
-  fix of the report on that button lands too, the two can share one
-  exported list.
+  fix for that button (U26-A1, linked in the Cause) lands too, the two
+  can share one exported list.
 - Backport: `useFileManagerConfig.js` and `fileManagerStore.js` differ
   on 3.5 (no `readOnly`), so the same change is made by hand there (not
   tried). 3.4 and 3.3 would need a condition on the grid's
@@ -248,9 +287,11 @@ external review no longer offers "Upload".
   scenario 7) reads the round before revisions are requested and would
   assert that no "Upload" shows.
 
-Medium: the change itself is a few lines in two files of one repo, but
-two open issues ask for opposite outcomes and the team has to choose
-before it is merged.
+Medium: hiding the button, as recommended, is a few lines in two
+ui-library files with a rule that copies the server's, and a test, on
+`main`; the 3.5 backport is not counted. Allowing the upload instead
+would be a pkp-lib change after a product ruling, and the team has to
+choose between the two before either is merged.
 
 ## Evidence
 
@@ -258,30 +299,34 @@ before it is merged.
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/author-revisions-upload-offered-then-refused/walk.js)
   (helpers in
   [lib.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/author-revisions-upload-offered-then-refused/lib.js))
-  takes steps 1 to 4 on OJS (submission 7, and the control on 13) and on
-  OMP (submissions 2 and 17), opening each submission by its address. It
+  takes steps 1 to 4 on OJS (submission 7, the control on 13 and the
+  accepted round of 3) and on OMP (submissions 2 and 17, and the accepted
+  round of 7), opening each submission by its address. It
   records which of the two buttons show, the window "Upload" opens with
   its request and answer, and each round's `statusId` from the
-  submission API's answer. `MODE=nb` is the
-  neighbour run of the fix trial: OJS 13 (an upload on a round asking
-  for revisions), OJS 10 (a "Resubmit for Review" decision by `dbarnes`,
-  then the Author's upload), OJS 3 (an accepted round), OMP 16 ("Request
-  Revisions" by `dbarnes`), OMP 11 (the internal round after external
-  review began) and the editor's "Upload" on OJS 7 and OMP 2. Each run
+  submission API's answer. `MODE=nb` walks the neighbouring cases the
+  fix must leave working or change on purpose, with the fix in and out:
+  OJS 13 (an upload on a round asking for revisions, then "Create New
+  Review Round" by `dbarnes` and both rounds), OJS 10 (a "Resubmit for
+  Review" decision by `dbarnes`, then the Author's upload), OJS 3 (an
+  accepted round), OJS 2 ("Decline Submission" by `dbarnes`), OMP 12 ("Accept Submission" from internal
+  review by `dbarnes`), OMP 16 ("Request Revisions" by `dbarnes`), OMP
+  11 (the internal round after external review began) and the editor's
+  "Upload" on OJS 7 and OMP 2. Each run
   starts from an install freshly loaded from the default dataset:
   `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js ojs,omp shared/playwright/checks/issues/author-revisions-upload-offered-then-refused/walk.js`
   (`PKP_E2E_LINE=stable-3_5_0` in front for 3.5).
 - The fix trial: `node bin/try-fix.js apply <fix.diff> ojs omp`, then
   the walk and `MODE=nb` on `main`, and `MODE=nb` again with the fix
-  out. A preprint server has no review rounds and was not walked.
-- The walks ran on PostgreSQL. Datasets: pkp/datasets c657990
-  (2026-10-01). `main` and 3.5 gave the same result on OJS and OMP.
-- Branch tips. `main`: OJS b84f8e2e44, OMP 3b0ecf794; pkp-lib
-  ddd8ab243a (OJS) and 3dc90c81a6 (OMP); ui-library 64d67363 (OJS) and
-  280f98c5 (OMP). 3.5: OJS 091fb65453, OMP 9c5e24246; pkp-lib
-  cf3f984335; ui-library d4e01883. 3.4: OJS 75cc2d488b, OMP 0aec65441;
-  pkp-lib 32b0f4b4af. 3.3: OJS ac77c9fb35, OMP 8e72fc883; pkp-lib
-  f6ab331645.
+  out; the declined round with the fix out only (`MODE=declined`). A preprint server has no review rounds and was not walked.
+- The walks ran on PostgreSQL. Datasets: pkp/datasets 961a9871
+  (2026-11-15). `main` and 3.5 gave the same result on OJS and OMP, the
+  accepted rounds included.
+- Branch tips. `main`: OJS 925ed49f3b, OMP 92dd31031; pkp-lib
+  3ed5d1c3b3; ui-library 836c01b5. 3.5: OJS 6cfc46e6fc, OMP 3f0fd0a7d;
+  pkp-lib bb17ba1380 (OJS) and 5af8e67ab4 (OMP); ui-library fd00e45f.
+  3.4: OJS 61835656a2, OMP 98db039f2; pkp-lib 2dd24cc5ae. 3.3: OJS
+  b83fb9e44d, OMP 31f5c517e; pkp-lib df738d3a66.
 - Code reads. 3.5: the author entry of `WORKFLOW_REVIEW_REVISIONS`, the
   status list in both author configs and the policy's block are as on
   `main`. 3.4 and 3.3: `templates/authorDashboard/reviewRoundInfo.tpl`
@@ -301,6 +346,6 @@ before it is merged.
 - Upstream searches (pkp/pkp-lib, pkp/ojs, pkp/omp, pkp/ui-library): the
   refusal's text, the Author's upload of revisions before a decision,
   "Revisions Uploaded", `SubmissionFileStageAccessPolicy`,
-  `WORKFLOW_REVIEW_REVISIONS`.
+  `WORKFLOW_REVIEW_REVISIONS` (2026-10-02 and 2026-11-16).
 - Not looked at: a round returned to review after an accept; the two
   server-side alternatives.

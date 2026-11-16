@@ -1,11 +1,91 @@
 // Helpers of walk.js (U36 A7: the Author's "Upload" above "Revisions Uploaded" on a round that asks
 // for no revisions; docs/issues/U36-A7-author-revisions-upload-offered-then-refused.md).
-// Requiring this file runs nothing. The upload wizard's helpers are
-// ../change-file-keeps-first-upload/lib.js's, the row and window helpers
-// ../author-update-file-details-offered-then-refused/lib.js's.
+// Requiring this file runs nothing. Self-contained: the upload wizard's helpers were copied from
+// ../change-file-keeps-first-upload/lib.js, the window and file helpers from
+// ../author-update-file-details-offered-then-refused/lib.js.
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const {idle, sql, settled} = require('../../../probe');
-const W = require('../change-file-keeps-first-upload/lib.js');
-const L = require('../author-update-file-details-offered-then-refused/lib.js');
+
+const T = 30_000;
+const flat = (s, n = 600) => (s == null ? s : String(s).replace(/\s+/g, ' ').trim().slice(0, n));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** A small text file under `name` in a temp folder: {path, name}. */
+function smallFile(name) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'u36n16h-'));
+    const p = path.join(dir, name);
+    fs.writeFileSync(p, 'u36n16h notes\n');
+    return {path: p, name};
+}
+
+/** The top visible window. */
+const topWindow = (page) => page.locator('[role="dialog"]:visible').last();
+
+/** Open a submission's workflow by address (the dashboard's "View"), optionally on a side-menu page. */
+async function openWorkflowAt(page, app, id, menuKey, view = 'editorial') {
+    const locale = app.line === 'stable-3_4_0' || app.line === 'stable-3_3_0' ? '' : '/en';
+    await page.goto(app.url(`/index.php/${app.contextPath}${locale}/dashboard/${view}?workflowSubmissionId=${id}${menuKey ? `&workflowMenuKey=${menuKey}` : ''}`));
+    await idle(page);
+}
+
+/** The table named `title` in the workflow. */
+const tableNamed = (page, title) => page.getByRole('table', {name: title, exact: true});
+
+/** The rows of the list `title`, each as its flat text; waits for the table to show. */
+async function listRows(page, title) {
+    const table = tableNamed(page, title);
+    await table.first().waitFor({state: 'visible', timeout: T});
+    await idle(page);
+    const rows = table.first().locator('tbody tr').filter({has: page.getByRole('rowheader')});
+    return (await rows.allInnerTexts()).map((t) => flat(t, 200));
+}
+
+/** "Upload" above the list `title`. */
+function uploadButtonOf(page, title) {
+    return page.locator('div')
+        .filter({has: page.getByRole('heading', {name: title, exact: true, level: 3})})
+        .filter({has: tableNamed(page, title)})
+        .last()
+        .getByRole('button', {name: /^Upload( File)?$/});
+}
+
+/** The open upload wizard (whatever its title) and its upload box. */
+const wizard = (page) => page.getByRole('dialog').filter({has: page.locator('.pkp_controller_fileUpload')}).last();
+const uploadBox = (page) => wizard(page).locator('.pkp_controller_fileUpload').first();
+
+/** Choose `file` in the upload box and wait for its upload's answer and for the box to name it. */
+async function pick(page, file) {
+    const answered = page.waitForResponse((r) => /upload-file/.test(r.url()) && r.request().method() === 'POST', {timeout: 60_000});
+    await wizard(page).locator('input[type="file"]').first().setInputFiles(file.path);
+    const r = await answered;
+    const body = await r.json().catch(() => null);
+    await uploadBox(page).getByText(file.name).first().waitFor({state: 'visible', timeout: T}).catch(() => {});
+    await idle(page);
+    return body && body.uploadedFile ? body.uploadedFile : body;
+}
+
+/** "Continue", "Continue", "Complete"; returns the step names passed and whether the window closed. */
+async function finish(page) {
+    const w = wizard(page);
+    const passed = [];
+    const current = async () => flat(await page.getByRole('dialog').last().locator('[role="tab"][aria-selected="true"]').first().innerText().catch(() => null), 40);
+    for (const next of ['2. Review Details', '3. Confirm']) {
+        const dlg = page.getByRole('dialog').filter({has: page.getByRole('tab', {name: next, exact: true})}).last();
+        await dlg.getByRole('button', {name: 'Continue', exact: true}).click();
+        await dlg.getByRole('tab', {name: next, exact: true}).and(page.locator('[aria-selected="true"]')).waitFor({timeout: T});
+        await idle(page);
+        passed.push(await current());
+    }
+    const dlg = page.getByRole('dialog').filter({has: page.getByRole('tab', {name: '3. Confirm', exact: true})}).last();
+    const confirm = flat(await dlg.innerText().catch(() => null), 300);
+    await dlg.getByRole('button', {name: 'Complete', exact: true}).click();
+    await dlg.waitFor({state: 'hidden', timeout: T}).catch(() => {});
+    await idle(page);
+    await sleep(600); // the closed window's slot (patterns.md pitfall 4)
+    return {passed, confirm, closed: !(await w.isVisible().catch(() => false))};
+}
 
 const LIST = 'Revisions Uploaded';
 const REFUSAL = 'You are not allowed to add and edit these files.';
@@ -41,7 +121,7 @@ function storedRounds(app, submissionId) {
  */
 async function openWorkflow(page, app, id, {author = false, round = null} = {}) {
     await page.goto('about:blank');
-    await W.openWorkflow(page, app, id, round ? `workflow_${round.stageId}_${round.id}` : undefined, author ? 'mySubmissions' : 'editorial');
+    await openWorkflowAt(page, app, id, round ? `workflow_${round.stageId}_${round.id}` : undefined, author ? 'mySubmissions' : 'editorial');
     await page.locator('[data-cy="sidemodal-header"]').first().waitFor({timeout: 60_000});
     await listTable(page).first().waitFor({state: 'visible', timeout: 60_000});
     await idle(page);
@@ -51,8 +131,8 @@ async function openWorkflow(page, app, id, {author = false, round = null} = {}) 
 async function offers(page) {
     return {
         uploadRevisions: await page.getByRole('button', {name: /^Upload revisions$/i}).first().isVisible().catch(() => false),
-        upload: await W.uploadButton(page, LIST).first().isVisible().catch(() => false),
-        rows: await W.listRows(page, LIST).catch((e) => `threw ${L.flat(e.message, 120)}`),
+        upload: await uploadButtonOf(page, LIST).first().isVisible().catch(() => false),
+        rows: await listRows(page, LIST).catch((e) => `threw ${flat(e.message, 120)}`),
     };
 }
 
@@ -65,22 +145,22 @@ async function press(page, button) {
     const requests = [];
     const onResponse = async (r) => {
         if (!/\$\$\$call\$\$\$/.test(r.url())) return;
-        requests.push({method: r.request().method(), url: r.url().replace(/^https?:\/\/[^/]+/, '').replace(/csrfToken=[^&]*/, 'csrfToken=…').slice(0, 260), status: r.status(), body: L.flat(await r.text().catch(() => null), 260)});
+        requests.push({method: r.request().method(), url: r.url().replace(/^https?:\/\/[^/]+/, '').replace(/csrfToken=[^&]*/, 'csrfToken=…').slice(0, 260), status: r.status(), body: flat(await r.text().catch(() => null), 260)});
     };
     page.on('response', onResponse);
     await button.first().click();
     const box = page.locator('.pkp_controller_fileUpload');
     const refusal = page.getByText(REFUSAL);
-    await box.or(refusal).first().waitFor({state: 'attached', timeout: W.T}).catch(() => {});
+    await box.or(refusal).first().waitFor({state: 'attached', timeout: T}).catch(() => {});
     await idle(page);
-    const win = L.topWindow(page);
+    const win = topWindow(page);
     await settled(page, win);
     const kind = (await refusal.count()) ? 'refused' : (await box.count()) ? 'wizard' : 'other';
     const out = {
         kind,
-        title: L.flat(await win.locator('h1, h2').first().innerText().catch(() => null), 80),
-        text: L.flat(await win.innerText().catch(() => null), 400),
-        buttons: (await win.locator('button:visible, a.cancelButton:visible').allInnerTexts()).map((x) => L.flat(x, 40)).filter(Boolean),
+        title: flat(await win.locator('h1, h2').first().innerText().catch(() => null), 80),
+        text: flat(await win.innerText().catch(() => null), 400),
+        buttons: (await win.locator('button:visible, a.cancelButton:visible').allInnerTexts()).map((x) => flat(x, 40)).filter(Boolean),
         requests,
     };
     page.off('response', onResponse);
@@ -93,11 +173,11 @@ const uploadRevisionsButton = (page) => page.getByRole('button', {name: /^Upload
 /** Press `button`, then take `file` through the upload window: the component, the file, "Continue", "Continue", "Complete". */
 async function uploadThrough(page, button, component, file) {
     await button.first().click();
-    await W.uploadBox(page).waitFor({state: 'attached', timeout: W.T});
+    await uploadBox(page).waitFor({state: 'attached', timeout: T});
     await idle(page);
-    await W.wizard(page).locator('select[id^="genreId"]').selectOption({label: component});
-    const uploaded = await W.pick(page, file);
-    const done = await W.finish(page);
+    await wizard(page).locator('select[id^="genreId"]').selectOption({label: component});
+    const uploaded = await pick(page, file);
+    const done = await finish(page);
     return {uploaded: uploaded && (uploaded.id || uploaded.submissionFileId || uploaded), ...done};
 }
 
@@ -107,12 +187,12 @@ async function tasks(page, app) {
     await page.goto(app.url(`/index.php/${app.contextPath}/en/dashboard/mySubmissions`));
     await idle(page);
     const button = page.getByRole('button', {name: /^Tasks/}).first();
-    const header = L.flat(await button.innerText().catch(() => null), 30);
+    const header = flat(await button.innerText().catch(() => null), 30);
     await button.click();
     await idle(page);
-    const panel = L.topWindow(page);
+    const panel = topWindow(page);
     await settled(page, panel);
-    return {header, panel: L.flat(await panel.innerText().catch(() => null), 500)};
+    return {header, panel: flat(await panel.innerText().catch(() => null), 500)};
 }
 
-module.exports = {uploadRevisionsButton, uploadThrough, tasks, LIST, REFUSAL, watchRounds, storedRounds, openWorkflow, offers, press, uploadButton: (page) => W.uploadButton(page, LIST), listTable};
+module.exports = {T, flat, smallFile, topWindow, uploadRevisionsButton, uploadThrough, tasks, LIST, REFUSAL, watchRounds, storedRounds, openWorkflow, offers, press, uploadButton: (page) => uploadButtonOf(page, LIST), listTable};

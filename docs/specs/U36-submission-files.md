@@ -1116,7 +1116,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | A Copyeditor, Layout Editor or Proofreader opening a file's "More Information" gets two alerts and a "History" tab stuck on "Loading" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A4](#a4) | A file's "History" tab: ticking "Show events from prior versions" reloads the same rows | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | A galley's "Change File" shows the heading "Current file" with no file name under it | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A7](#a7) | An Author is offered "Upload" above "Revisions Uploaded" before revisions are requested, then refused | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [A7](#a7) | An Author's "Upload" above "Revisions Uploaded" is refused until revisions are requested or the submission is accepted | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A9](#a9) | In the upload window, a screen reader reads the hidden "Upload File" box before a component is chosen | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A10](#a10) | "Add Note" with an empty box posts a note with no text, on a file's "Notes" and in "Activity Log & Notes" | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | Submission wizard: "Save" in a file's "Edit" panel with no component chosen shows "An unexpected error has occurred" | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
@@ -1245,25 +1245,22 @@ heading, so the fix is cheap.
 Basis: probe. <sup>[f-a6](#fn-a6)</sup>
 
 <a id="a7"></a>
-**A7 — An Author is offered "Upload" above "Revisions Uploaded" before revisions are requested, then refused** · 🐞 · low.
+**A7 — An Author's "Upload" above "Revisions Uploaded" is refused until revisions are requested or the submission is accepted** · 🐞 · low.
 Above "Revisions Uploaded" on a review round, the Author sees "Upload"
-whether or not an editor has requested revisions. Until the round has a
-"Request Revisions", "Resubmit for Review" or "Accept Submission"
-decision, pressing it opens "Upload Review File" reading only "You are
+whether or not an editor has requested revisions. Until an editor
+records "Request Revisions", "Resubmit for Review" or "Accept
+Submission" on the latest round, pressing it opens "Upload Review File" reading only "You are
 not allowed to add and edit these files." with "Close". The "Upload
 revisions" button beside the round shows only once revisions are
-requested.
-
-No file is uploaded and the list stays "No Items". The refusal does not
-say that uploading opens once revisions are requested.
-
-The refused "Upload" shows on every review round that has none of those
-decisions; on an accepted round it works (Actors row 2). The two open
-pkp issues about it want opposite outcomes: one asks that the upload
-be allowed, the other that the button be hidden. This report proposes hiding it, as the "Upload revisions"
-button already is; the team has to choose.
-Basis: probe, 2026-10-02 and 2026-11-13. <sup>[f-a7](#fn-a7)</sup>
-Report: refresh owed — the 2026-11-13 claim check (K13a) narrowed the entry's reach: the refusal holds until the round has a "Request Revisions", "Resubmit for Review" or "Accept Submission" decision, and on an accepted round "Upload" works; the report's title, Summary ("Before revisions are requested…", "every review round on which no editor has requested revisions") and Expected still say every round that asks for no revisions, while its Cause › Reach already names the accepted round (`SubmissionFileStageAccessPolicy::effect()`, its accept branch); no class or method changed (2026-11-13)
+requested. The refusal does not say that uploading opens then.
+The refused "Upload" shows on a round still waiting for a decision,
+which is the usual state of a round, on a declined round, and on a
+round an editor has followed with a new one. On an accepted round
+"Upload" works: the server lets the Author add a revised file after an
+acceptance, as after a revisions request. This report proposes hiding
+the button where it would be refused; the team has to choose between
+that and allowing the upload.
+Basis: probe, 2026-10-02 and 2026-11-16. <sup>[f-a7](#fn-a7)</sup>
 
 <a id="a8"></a>
 **A8 — The revise list shows file names only** · ❓ · minor.
