@@ -1614,7 +1614,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A47](#a47) | A late, unanswered re-sent review request is not marked "Overdue" and offers no "Send Reminder" | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A49](#a49) | Both XML entries of "Download Review Form" open a "not authorized" page until a review PDF is downloaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A50](#a50) | An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
-| [A51](#a51) | An assistant-level participant's "Add Reviewer" search, filters and further pages answer "The current role does not have access to this operation." | 🐞 | user-visible | — |
+| [A51](#a51) | A Funding coordinator's search, filters and "Next" in the Add Reviewer window are refused | 🐞 | medium | issues (claude), 2026-11-16 — re-verified |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -2170,29 +2170,22 @@ written is lost with it.
 Basis: probe, 2026-10-23. <sup>[f-a50](#fn-a50)</sup>
 
 <a id="a51"></a>
-**A51 — An assistant-level participant's "Add Reviewer" search, filters and further pages answer "The current role does not have access to this operation."** · 🐞 · user-visible.
-A Funding Coordinator assigned to the review stage gets the Add Reviewer
-window with its search box, "Filters" and, past 30 reviewers, the "View
-additional pages" bar. A reviewer selected from the list as it opens is
-added ("{name} was assigned to review this submission and sent an email
-notification."). Every way of changing the list answers "Error" / "The
-current role does not have access to this operation." / "OK": Enter in
-"Search", "Clear search phrase", "Add filter: Rated at least" and its
-"Clear filter", and "Next". The same happens on a past round and, on a
-press, on Internal Review. After "OK" the window's controls no longer
-match its list:
-- the search box keeps the typed name, while the list is still the one
-  the window opened with;
-- the filter shows as on ("Clear filter: Rated at least"), while the
-  list stays unfiltered;
-- after "Next" the bar reads page 2 ("Previous" enabled, "Next"
-  disabled), while the list still shows page 1's 30 entries.
-
-So a Funding Coordinator cannot reach the 31st reviewer of a journal by
-any means on the screen. The add itself is open to them; only the list
-the window reads is refused. Expected: the search, the filters and the
-further pages work for a role that may add a reviewer, or are not offered to it.
-"Modify Review" has the same offered-then-refused shape [A31](#a31).
+**A51 — A Funding coordinator's search, filters and "Next" in the Add Reviewer window are refused** · 🐞 · medium.
+A Funding coordinator assigned to a submission is offered "Add
+Reviewer", and a reviewer chosen from the list the window first shows
+is added. Every way of changing that list is refused with "Error" /
+"The current role does not have access to this operation." / "OK":
+Enter in "Search", "Clear search phrase", a filter's "Add filter" and
+"Clear filter" buttons, and "Next". After "OK" the controls no longer
+match the list: the box keeps the typed name, the filter button still
+shows the filter as applied, and the page bar reads page 2, over the
+list the window first showed.
+So the coordinator can choose only among the first 30 entries, the
+reviewers with the oldest accounts; anyone registered later cannot be
+reached on screen.
+It happens on every review round, past rounds included, and on a
+press's Internal Review, for any assistant role with review-stage
+access; Funding coordinator is the one default role of that kind.
 Since: 2018-01 (the same on 3.5, 3.4 and 3.3) · Basis: probe, 2026-11-16. <sup>[f-a51](#fn-a51)</sup>
 
 ### OMP
@@ -4157,6 +4150,7 @@ script `shared/playwright/checks/U27/K16a/k16a.js` (parts `add`, `past`,
 `page`, `int`); the 2026-11-13 sighting's script
 `shared/playwright/checks/U26/K13b/k13b.js` (part `fc`) ran twice per app
 the same day with the same result.
+Issue report: [docs/issues/U27-A51-assistant-add-reviewer-search-refused.md](../issues/U27-A51-assistant-add-reviewer-search-refused.md).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only

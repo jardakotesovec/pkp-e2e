@@ -1,0 +1,77 @@
+--- a/lib/pkp/api/v1/users/PKPUserController.php
++++ b/lib/pkp/api/v1/users/PKPUserController.php
+@@ -37,6 +37,7 @@
+ use PKP\security\authorization\CanAccessSettingsPolicy;
+ use PKP\security\authorization\ContextAccessPolicy;
+ use PKP\security\authorization\UserRolesRequiredPolicy;
++use PKP\security\authorization\WorkflowStageAccessPolicy;
+ use PKP\security\Role;
+ use PKP\security\Validation;
+ use PKP\userGroup\relationships\UserUserGroup;
+@@ -75,16 +76,27 @@
+      */
+     public function getGroupRoutes(): void
+     {
++        // The Add Reviewer window's list. Assistants may add reviewers (PKPReviewerGridHandler),
++        // so they may list them too, for a submission whose review stage they hold (authorize())
+         Route::middleware([
+             self::roleAuthorizer([
+                 Role::ROLE_ID_SITE_ADMIN,
+                 Role::ROLE_ID_MANAGER,
+                 Role::ROLE_ID_SUB_EDITOR,
++                Role::ROLE_ID_ASSISTANT,
+             ])
+         ])->group(function () {
+             Route::get('reviewers', $this->getReviewers(...))
+                 ->name('user.getReviewers');
++        });
+ 
++        Route::middleware([
++            self::roleAuthorizer([
++                Role::ROLE_ID_SITE_ADMIN,
++                Role::ROLE_ID_MANAGER,
++                Role::ROLE_ID_SUB_EDITOR,
++            ])
++        ])->group(function () {
+             Route::get('report', $this->getReport(...))
+                 ->name('user.getReport');
+ 
+@@ -129,10 +141,38 @@
+             $this->addPolicy(new CanAccessSettingsPolicy());
+         }
+ 
++        // An assistant lists reviewers only for the review stage of a submission they are
++        // assigned to, the request the Add Reviewer window sends (submissionId, reviewStage)
++        if ($actionName === 'getReviewers' && !$this->isReviewManager($request)) {
++            $this->addPolicy(new WorkflowStageAccessPolicy(
++                $request,
++                $args,
++                $roleAssignments,
++                'submissionId',
++                (int) $illuminateRequest->query('reviewStage'),
++                Application::WORKFLOW_TYPE_EDITORIAL
++            ));
++        }
++
+         return parent::authorize($request, $args, $roleAssignments);
+     }
+ 
+     /**
++     * Whether the current user holds a role that lists reviewers in the whole context
++     */
++    protected function isReviewManager(PKPRequest $request): bool
++    {
++        $user = $request->getUser();
++        $context = $request->getContext();
++        if (!$user || !$context) {
++            return false;
++        }
++
++        return $user->hasRole([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR], $context->getId())
++            || $user->hasRole([Role::ROLE_ID_SITE_ADMIN], Application::SITE_CONTEXT_ID);
++    }
++
++    /**
+      * Get a single user
+      */
+     public function get(Request $request): JsonResponse
