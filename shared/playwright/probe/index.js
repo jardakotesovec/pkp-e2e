@@ -418,6 +418,14 @@ async function withApp(name, fn) {
     const app = resolveProbeApp(name);
     require('../mailpit.js').ensureMailpit();
     outDir();
+    // A stopped probe server otherwise surfaces as ECONNREFUSED mid-drive.
+    try {
+        await fetch(app.baseURL, {redirect: 'manual', signal: AbortSignal.timeout(30_000)});
+    } catch (error) {
+        const how = error.cause?.code || error.name;
+        throw new Error(`the probe server ${app.baseURL} does not answer (${how}): stopped, not a finding. `
+            + 'The session restarts it (`npm run probe-servers -- --status`, then `--start`); an agent reports it and waits');
+    }
     process.env.PKP_APP_NAME = app.name;
     process.env.PKP_APP_ROOT = app.root;
     process.env.PKP_SUITE_DIR = app.suiteDir;

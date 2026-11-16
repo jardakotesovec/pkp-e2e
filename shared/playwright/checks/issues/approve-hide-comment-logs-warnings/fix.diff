@@ -1,0 +1,11 @@
+--- a/lib/pkp/classes/userComment/UserComment.php
++++ b/lib/pkp/classes/userComment/UserComment.php
+@@ -53,6 +53,8 @@
+             'isApproved' => 'boolean',
+             'createdAt' => 'datetime',
+             'updatedAt' => 'datetime',
++            'approvedAt' => 'datetime',
++            'approvedByUserId' => 'int',
+         ];
+     }
+ 

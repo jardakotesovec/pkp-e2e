@@ -1,0 +1,62 @@
+--- a/lib/pkp/classes/core/SettingsBuilder.php
++++ b/lib/pkp/classes/core/SettingsBuilder.php
+@@ -282,6 +282,16 @@
+     }
+ 
+     /**
++     * Whether the columns are a plain list of column names, i.e. not "*", an expression or an alias
++     */
++    protected function isColumnProjection(array $columns): bool
++    {
++        return !empty($columns) && collect($columns)->every(
++            fn (mixed $column) => is_string($column) && preg_match('/^\w+(\.\w+)?$/', $column)
++        );
++    }
++
++    /**
+      * @see \PKP\core\traits\EntityUpdate::getSettingsTable()
+      */
+     public function getSettingsTable(): ?string
+@@ -329,7 +339,25 @@
+         // First, get all Model columns from the main table
+         $primaryKey = $this->model->getKeyName();
+ 
+-        $collection = $this->query->get();
++        // The columns set with select() take precedence, the same as in the query builder
++        $selectedColumns = Arr::wrap($this->query->columns ?? $columns);
++        $settingColumns = null;
++
++        $query = clone $this->query;
++        if ($this->isColumnProjection($selectedColumns)) {
++            // Only the columns of the main table can be selected from it,
++            // the primary key is needed to attach the settings to the rows
++            $columns = array_map(fn (string $column) => Arr::last(explode('.', $column)), $selectedColumns);
++            [$settingColumns, $primaryColumns] = collect($columns)->partition(
++                fn (string $column) => $this->isSetting($column)
++            );
++            if (!$primaryColumns->contains($primaryKey)) {
++                $primaryColumns->push($primaryKey);
++            }
++            $query->columns = $primaryColumns->values()->all();
++        }
++
++        $collection = $query->get();
+         if ($collection->isEmpty()) {
+             return $collection->all();
+         }
+@@ -348,9 +376,12 @@
+             $rowIndexesById[$row->{$primaryKey}][] = $index;
+         }
+ 
+-        $settings = DB::table($this->model->getSettingsTable())
+-            ->whereIn($primaryKey, $uniqueIds)
+-            ->get();
++        // Don't get the settings that weren't selected
++        $settingsQuery = DB::table($this->model->getSettingsTable())->whereIn($primaryKey, $uniqueIds);
++        if ($settingColumns) {
++            $settingsQuery->whereIn('setting_name', $settingColumns->values()->all());
++        }
++        $settings = $settingColumns?->isEmpty() ? collect() : $settingsQuery->get();
+ 
+         $settings->each(function (stdClass $setting) use (&$rows, $rowIndexesById, $primaryKey) {
+             $settingModelId = $setting->{$primaryKey};

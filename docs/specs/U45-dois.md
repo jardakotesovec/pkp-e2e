@@ -5699,7 +5699,7 @@ Written up for the team in
 titles). A press has no
 agency plugin. The DOIs page's own rendering of the same title is
 [A24](#a24).
-Issue report: [pkp-e2e#979](https://github.com/jardakotesovec/pkp-e2e/issues/979) ([docs/issues/U45-A30-crossref-title-ampersand-italic-codes.md](../issues/U45-A30-crossref-title-ampersand-italic-codes.md)).
+Issue report: [pkp-e2e#979](https://github.com/jardakotesovec/pkp-e2e/issues/979) ([docs/issues/U45-A30-crossref-title-ampersand-italic-codes.md](../issues/U45-A30-crossref-title-ampersand-italic-codes.md)); the team's copy is `pkp/pkp-lib#13807` (open, 2026-11-13).
 
 <a id="fn-f-a25"></a>
 **f-a25** — At the PR heads of `pkp/pkp-lib#13460` (`246e5387f6`, with

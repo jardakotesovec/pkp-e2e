@@ -9,7 +9,7 @@
   - 3.4: OJS, OPS (code)
   - 3.3: none (code; plain-text "Title" and "Subtitle" boxes)
 - **Introduced** `pkp/crossref-ojs#25` and `pkp/crossref-ops#22` for `pkp/pkp-lib#2564` · [a1a8d53](https://github.com/pkp/crossref-ojs/commit/a1a8d53754171df2eb40c7e582b731e96ef3e4c8) and [1211f41](https://github.com/pkp/crossref-ops/commit/1211f411995fe30e4d8da22961bfd0bf30172d9d) · 2023-02-16 · Touhidur Rahman (touhidurabir); the "&" escaped twice (`&amp;amp;` in the file) since `pkp/crossref-ojs#49` and `pkp/crossref-ops#39` for `pkp/pkp-lib#9959` · [56a573f](https://github.com/pkp/crossref-ojs/commit/56a573f6f085fd30d66d00d7a038635f72b4da7c) and [9ceff74](https://github.com/pkp/crossref-ops/commit/9ceff74577db4298f7683668efe80d9a33d37575) · 2024-05-22 · Bozana Bokan (bozana)
-- **Upstream** none found (2026-10-15)
+- **Upstream** `pkp/pkp-lib#13807` (open), the team's copy of this issue (2026-11-13). Before it: none found (2026-10-15)
 - **Tracked in** spec U45 [A30](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U45-dois.md#a30)
 - **Checked** 2026-10-15, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5

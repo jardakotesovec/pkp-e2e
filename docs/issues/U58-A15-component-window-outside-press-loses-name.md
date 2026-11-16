@@ -10,9 +10,13 @@
   - 3.3: OJS, OMP, OPS (code; Escape only)
 - **Introduced** for the click beside the window: `pkp/ui-library#668` (3.5) and `pkp/ui-library#671` (main) for `pkp/pkp-lib#11258` · [c5f8466652](https://github.com/pkp/ui-library/commit/c5f8466652b3de58c8310ae5ddf6073b2cd5c385) (2025-07-17) and [39ebe864f9](https://github.com/pkp/ui-library/commit/39ebe864f98f11b81e9baddfc50cd11032eed723) (2025-07-22) · Jarda Kotěšovec (jardakotesovec). For Escape: not traced; present since at least [3cdf1f20b7](https://github.com/pkp/pkp-lib/commit/3cdf1f20b7e2fe8ee4a48ce1b9ec5eb9b537d425) (2015-08-05)
 - **Upstream** `pkp/pkp-lib#10217` (open), a design issue asking that a click outside a window or Escape close it only when nothing was edited and ask otherwise; it does not name this fault
-- **Tracked in** spec U58 [A15](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U58-submission-intake-configuration.md#a15)
-- **Checked** 2026-10-21, each branch's tip (the commits in Evidence)
+- **Tracked in** spec U58 [A15](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U58-submission-intake-configuration.md#a15),
+  spec U09 [A21](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U09-custom-pages-and-blocks.md#a21)
+- **Checked** 2026-10-21; the custom block window 2026-11-16; each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-11-16: the custom block window has the same fault and
+joins the report (steps 10 to 14, spec U09 A21).
 
 ## Summary
 
@@ -25,21 +29,25 @@ The typed name is lost, and the list has no new row. The next reload of
 the page then raises the browser's leave-page question, though no
 window is open and nothing is left to lose.
 
-Before 3.5.0-2 the click beside the window asked, as "Close" does.
-Escape with the cursor in the box has closed such windows without
-asking on every version.
+Before 3.5.0-2 the click beside the window asked, as "Close" does, so
+only the click is a regression. Escape with the cursor in the box has
+closed such windows without asking on every version.
 
 The same happens in every window drawn by the server's older forms,
 whenever the box being typed in is the only change: among them "Create
 New Role" and a role's "Edit" on Users & Roles › "Roles", "Edit User"
 and "Disable" on "Users", a component's "Edit", the file windows of
-Settings › Workflow › "Library", and the review forms and their items
-(journals and presses).
+Settings › Workflow › "Library", and the custom block window ("Add
+Block" in Settings › Website › "Plugins" › "Custom Block Manager"),
+in all three apps; and the review forms and their items, which a
+preprint server does not have. All of them close through the older
+forms' one shared closing step (`FormHandler.containerCloseHandler()`),
+so one change there fixes every window, for the click and for Escape.
 
 ## Impact
 
 - **Lost:** what was typed into the box that holds the cursor, for
-  good. The window closes, but nothing says the entry was not saved.
+  good, and nothing says so.
 - **Who:** managers in the windows above, on any journal, press or
   server.
 - **Way round:** press "Save" first, or Tab out of the box before
@@ -97,6 +105,35 @@ Control: with "h21v close" typed in "Name" the same way, the window's
 the name, and
 the reload after "OK" asks nothing.
 
+The custom block window (the "Custom Block Manager" plugin is off in
+the dataset; step 10 turns it on):
+
+10. Open Settings › Website, tab "Plugins", and tick "Custom Block
+    Manager". On its row press the arrow, then "Manage Custom Blocks".
+    The "Custom Block Manager" window says "No custom blocks have been
+    created."
+11. Press "Add Block". Click in "Block Name" and type "u09n16c block".
+    Leave the cursor in the box.
+12. Click the dimmed page to the left of the two windows.
+13. Press "Add Block" again, click in "Block Name", type "u09n16c
+    escape", leave the cursor in the box, and press Escape.
+14. Reload the page, choosing "Reload" if the browser asks.
+
+**Expected:** steps 12 and 13 ask the same question as steps 5 and 8.
+Its "Cancel" keeps the "Add Block" window with the typed name; its "OK"
+closes the "Add Block" window and leaves the "Custom Block Manager"
+window open. Step 14 reloads without a question.
+
+**Observed:** steps 12 and 13 close the "Add Block" window at once, with
+no question. The "Custom Block Manager" window behind it stays open and
+still says "No custom blocks have been created.". Step 14 raises the
+browser's leave-page question.
+
+Control, after step 14: reopen the window from the "Custom Block
+Manager" row's arrow › "Manage Custom Blocks" (the plugin stays on),
+press "Add Block", type "u09n16c close" the same way, and press the
+"Add Block" window's own "Close" (its back arrow): it asks the question.
+
 ## Cause
 
 `$.pkp.controllers.form.FormHandler` (lib/pkp
@@ -126,8 +163,7 @@ the flag still unset and permits the close.
 The box loses the focus a moment later, while the window is fading
 out. Its `change` reaches `formChange()`, which registers the form for
 the leave-page question; the form is gone, so nothing clears it, and
-the next reload asks. That stray question is part of this fault, and
-the same fix removes it. Escape never moves the focus, on any version
+the next reload asks. Escape never moves the focus, on any version
 (`keydown` in reka-ui and Headless UI, `keyup` in 3.4's jQuery modal),
 so it closes the window silently in the same way.
 
@@ -137,10 +173,16 @@ Reach:
   is shared and `CancelActionAjaxFormHandler`, its one override, calls
   it: "Create New Role" on Users & Roles › "Roles" closed at the same
   click without a question (walked on `main`, three apps).
+- The custom block window: the `customBlockManager` plugin's
+  `editCustomBlockForm.tpl` is an `AjaxFormHandler` form, opened as an
+  `AjaxModal` from the "Custom Block Manager" side window; a block's
+  "Edit" opens the same form (in the code).
 - 3.4 and 3.3: the jQuery `ModalHandler.handleWrapperEvents()` closes on
   the backdrop's `click`, after the focus moved, so the click beside
   asks there; it closes on Escape's `keyup` with the box still focused,
-  so Escape closes unasked (in the code).
+  so Escape closes unasked (in the code). The jQuery modals are
+  appended to the page body side by side, so in the custom block
+  window Escape reaches the "Add Block" window alone.
 - A reload with the window open and the cursor still in "Name" gives
   no leave-page question either: `SiteHandler.pageUnloadHandler_()`
   reads the list of changed forms, which the box has not joined yet
@@ -154,8 +196,10 @@ Reach:
 Take the focus out of the form's focused field at the start of
 `containerCloseHandler()`, so that its `change` runs `formChange()`
 before the flag is read, and give it back when the question is answered
-"Cancel" and the window stays
-([fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/component-window-outside-press-loses-name/fix.diff)):
+"Cancel" and the window stays. An excerpt of
+[fix.diff](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/component-window-outside-press-loses-name/fix.diff),
+which holds the whole hunk (it goes on with the existing
+`closePermitted = false` lines):
 
 ```diff
 -		var $form = $(this.getHtmlElement());
@@ -224,6 +268,12 @@ The fix was tried on OJS, OMP and OPS `main`:
   click without a question; a "Name" left with Tab asked at the click;
   the form's own "Cancel" button closed the window without a question,
   and the reload after asked nothing.
+- The custom block window (tried 2026-11-16): steps 12 and 13 asked.
+  The question's "Cancel" kept the "Add Block" window with the name and
+  the cursor back in "Block Name". Its "OK" closed the "Add Block"
+  window and left the "Custom Block Manager" window open. Step 14
+  reloaded without a question. The neighbours above behaved the same
+  here, with the fix in and out.
 
 **Alternatives:**
 
@@ -263,7 +313,7 @@ handler. On 3.3 the hunk needs its context adjusted by hand (the
   box. `neighbour` takes the untouched window, the "Name" left with Tab,
   the form's own "Cancel" and the cleared "Name" of "Article Text";
   `reach` takes "Create New Role" and the reload with the window open.
-  No server error and no page script error in any run.
+  No server error and no page script error in any run of either script.
 - `main`, walked on OJS, OMP and OPS: as Observed.
 - 3.5, walked on OJS, OMP and OPS: as Observed. Its `FormHandler.js` is
   `main`'s (one whitespace difference), and its `SideModal.vue`,
@@ -283,8 +333,28 @@ handler. On 3.3 the hunk needs its context adjusted by hand (the
   `node_modules`) dismisses on `pointerdown`. Escape: `git blame` on
   3.3's `opt_event.which == 27` line gives 3cdf1f20b7, a linting change;
   older history not traced.
-- Tips: `main` ojs 3109a59114, omp 5777025be, ops f048e747b4, with
-  lib/pkp f37a174626 (OJS) and 042726ebf6 (OMP, OPS) and lib/ui-library
+- The custom block window (steps 10–14), kept script
+  [block.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/component-window-outside-press-loses-name/block.js)
+  with its helpers in
+  [lib.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/component-window-outside-press-loses-name/lib.js),
+  run on installs freshly loaded from PKP's default test dataset
+  (pkp/datasets 961a9871, 2026-11-15), PostgreSQL:
+  `node bin/probe.js all shared/playwright/checks/issues/component-window-outside-press-loses-name/block.js [neighbour]`.
+  Tips:
+  `main` ojs 925ed49f3b, omp 92dd31031, ops d75f514776, with lib/pkp
+  3ed5d1c3b3 and lib/ui-library 836c01b5; `stable-3_5_0` ojs 6cfc46e6fc,
+  omp 3f0fd0a7d, ops e290d8d8af, with lib/pkp bb17ba1380 (OJS) and
+  5af8e67ab4 (OMP, OPS) and lib/ui-library fd00e45f;
+  `customBlockManager` 1f8d452 on `main`, 87092d8 on 3.5, and on 3.4
+  and 3.3 (the app's gitlink) 343f732568 and 60eb4f04fe, which draw the
+  same form in an `AjaxModal`. On `main` and 3.5
+  `containerCloseHandler()` is unchanged since 2026-10-21, and
+  `SideModalBody.vue` dismisses on `pointer-down-outside` as reka-ui
+  does by default (since 39ebe864). Its two exemptions do not reach
+  these windows: afb42906a (`pkp/pkp-lib#11693`) skips TinyMCE's
+  popups, and a36dc7fe (`pkp/pkp-lib#13188`) the notices.
+- Tips on 2026-10-21: `main` ojs 3109a59114, omp 5777025be, ops
+  f048e747b4, with lib/pkp f37a174626 (OJS) and 042726ebf6 (OMP, OPS) and lib/ui-library
   99abe252; `stable-3_5_0` ojs 1e78ca0c2b, omp cce424e5e, ops
   5eca7fd603, with lib/pkp 68512b5fda and lib/ui-library 2576e00a; 3.4
   read at lib/pkp 85f47442cf, 3.3 at lib/pkp 867ce82d8e.
@@ -295,10 +365,7 @@ handler. On 3.3 the hunk needs its context adjusted by hand (the
   fix in; `neighbour` and `reach` with it out), then with the focus
   given back at once, then with the focus given back after the press
   (the diff as filed; default and `neighbour` with the fix in,
-  `neighbour` with it out). With the focus given back at once, Escape
-  left the focus in "Name" but the click beside left it on the page
-  body, since the press's own `mousedown` moves it after the handler
-  returns.
+  `neighbour` with it out).
 - Unverified:
   - the touch case (reka-ui waits for the `click` there, so a tap
     beside may ask);
@@ -306,6 +373,6 @@ handler. On 3.3 the hunk needs its context adjusted by hand (the
   - the moment the box's late `change` fires (during the window's
     close, per the code); the walk shows its result, the question at
     the next reload, and the trial shows it gone;
-  - the other windows the Summary names, beyond "Create New Role" and
-    a component's "Edit" (in the code: each is a `FormHandler` form in
-    an `AjaxModal`).
+  - the other windows the Summary names, beyond "Create New Role", a
+    component's "Edit" and the custom block window's "Add Block" (in
+    the code: each is a `FormHandler` form in an `AjaxModal`).

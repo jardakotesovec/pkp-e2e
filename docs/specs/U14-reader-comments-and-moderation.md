@@ -1003,8 +1003,8 @@ Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A10](#a10) | A comment deleted with its article or its writer's merged account leaves blank, dead rows in every moderator's Tasks | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A13](#a13) | On the editorial Comments page, the browser tab shows only the journal's name, not "Comments" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A14](#a14) | A reader's comment report the server refuses closes the "Report Comment" window and loses the typed reason | 🐞 | low | @jarda.kotesovec 2026-10-22 · handled separately; issues (claude), 2026-10-26 — re-verified |
-| [A24](#a24) | Every load of an article's landing page writes two PHP warnings to the server's error log for each comment the visitor may see | 🐞 | invisible | — |
-| [A25](#a25) | Every "Approve Comment" or "Hide Comment" writes two PHP warnings to the server's error log | 🐞 | invisible | — |
+| [A24](#a24) | Each load of an article's page writes two PHP warnings to the error log per comment shown | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
+| [A25](#a25) | A moderator's "Approve Comment" or "Hide Comment" writes two PHP warnings to the server's error log | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A1](#a1) | A hidden comment reads to its writer exactly like one awaiting approval | ❓ | minor | — |
 | [A2](#a2) | Approving or hiding a comment leaves every moderator's "pending review" task in place | ❓ | minor | — |
 | [A3](#a3) | The report dialog neither refuses an empty reason with a message nor confirms a filed report, and the same person can report the same comment again | ❓ | minor | — |
@@ -1203,32 +1203,30 @@ one person's, whose public comments should survive it.
 Basis: probe, 2026-10-04; code for what the merge hands over. <sup>f-a16</sup>
 
 <a id="a24"></a>
-**A24 — An article's landing page logs two PHP warnings per comment on every load** {OJS} · 🐞 · invisible.
-With public comments on, each load of an article's landing page writes
+**A24 — Each load of an article's page writes two PHP warnings to the error log per comment shown** {OJS} · 🐞 · low.
+With public comments on, each load of an article's page writes
 "Undefined property: stdClass::$user_comment_id" twice to the server's
 error log for every comment the visitor may see there: the approved ones
-and, for a signed-in visitor, their own pending or hidden ones. A
-visitor who may see two comments leaves four warnings per load. The page
-and its counts show correctly, and no screen shows the warnings, since
-PKP ships with PHP's error display off. A page with no comment the
-visitor may see writes none, and so does every article's page while
-comments are off. The
+and, for a signed-in visitor, their own comments awaiting approval.
+The page and its counts show correctly, and no screen shows the
+warnings, since PKP ships with PHP's error display off. The
 cause: the page counts the comments without reading each one's number,
 which the step that loads a comment's settings then looks for. Expected
 a clean log; observed two warnings per comment on every load.
-Basis: probe, 2026-11-13. <sup>f-a24</sup>
+Basis: probe, 2026-11-16. <sup>f-a24</sup>
 
 <a id="a25"></a>
-**A25 — Approving or hiding a comment logs two PHP warnings** · 🐞 · invisible.
+**A25 — A moderator's "Approve Comment" or "Hide Comment" writes two PHP warnings to the server's error log** · 🐞 · low.
 Each press of "Approve Comment" or "Hide Comment" in the comment panel
-writes two warnings to the server's error log: "The setting approvedAt
-doesn't have a defined type, using string instead" and the same for
-approvedByUserId. The change is stored and shows as Rule 13 says, and no
+on the Comments page writes two warnings to the server's PHP error log:
+"The setting approvedAt doesn\'t have a defined type, using string
+instead" (the backslash is in the logged text) and the same for
+approvedByUserId. The change is stored and shows as expected, and no
 screen shows the warnings. The cause: the comment declares no type for
 the two settings that record who approved it and when. Opening the
 Comments page, its panels and its reports, and deleting a report, write
 none. Expected a clean log; observed two warnings per press.
-Basis: probe, 2026-11-13. <sup>f-a25</sup>
+Basis: probe, 2026-11-16. <sup>f-a25</sup>
 
 ### OMP
 
@@ -2435,6 +2433,7 @@ viewer's). The Comments page, every comment-panel and report-panel open,
 the panel's address opened directly, writing a comment, filing a report
 and deleting one logged nothing. OMP and OPS build no comment block.
 PKP's `config.TEMPLATE.inc.php` ships `[debug] display_errors = Off`.
+Issue report: docs/issues/U14-A24-landing-page-logs-warnings-per-comment.md.
 
 <a id="fn-f-a25"></a>
 **f-a25 — A25.** `UserComment::getSettings()` names `approvedAt` and
@@ -2451,6 +2450,7 @@ zzedd's, two warnings each, the request answering 200 and the notice
 "The comment has been updated successfully." showing; on OMP and OPS
 `main`, "Approve Comment" and "Hide Comment" on a comment the tooling
 wrote (those apps have no comment box), two each.
+Issue report: docs/issues/U14-A25-approve-hide-comment-logs-warnings.md.
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1.** Footnote m: `omp/pages/management/SettingsHandler::__construct()`

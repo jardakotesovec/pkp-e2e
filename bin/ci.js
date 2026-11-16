@@ -14,7 +14,8 @@
  *                           [--ojs-repo <owner/name>] (same for omp, ops)
  *                           [--pkp-lib-ref <sha|pull/<n>/head>] [--ui-library-ref <…>]
  *                           [--php-ini-values <a=b,c=d>] [--no-wait]
- *                           [--line <branch>]   a stable version's suite, from lines/<branch>/
+ *                           [--line <branch>]   a stable version's suite, from lines/<branch>/;
+ *                                               an app ref not given defaults to <branch>
  *                           [--php 8.2] [--database mysql|mariadb|pgsql]   another configuration
  *       e2e.yml's workflow_dispatch from --ref (default: the current branch,
  *       which must be pushed), then waits for it
@@ -84,8 +85,14 @@ function dispatch(opts) {
     for (const key of ['ojs-ref', 'omp-ref', 'ops-ref', 'pkp-lib-ref', 'ui-library-ref']) {
         if (/^[0-9a-f]{7,39}$/i.test(opts[key] || '')) throw new Error(`--${key} ${opts[key]}: a commit is named by its full 40-character sha (git rev-parse ${opts[key]})`);
     }
+    if (opts.line) {
+        const lacking = (opts.apps ? opts.apps.split(',') : ['ojs', 'omp', 'ops'])
+            .filter((app) => !fs.existsSync(path.join(REPO_ROOT, 'lines', opts.line, `${app}.config.js`)));
+        if (lacking.length) throw new Error(`--line ${opts.line} has no suite for ${lacking.join(', ')}: name --apps`);
+    }
     for (const app of ['ojs', 'omp', 'ops']) {
-        add(`${app}_ref`, opts[`${app}-ref`]);
+        // A line's suite against the app's `main` fails at the build: an app not named takes the line's branch.
+        add(`${app}_ref`, opts[`${app}-ref`] || (opts.line && !opts[`${app}-repo`] ? opts.line : ''));
         add(`${app}_repo`, opts[`${app}-repo`]);
     }
     add('pkp_lib_ref', opts['pkp-lib-ref']);

@@ -968,7 +968,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A9](#a9) | In French (Canada) a preprint server's "Components" list names seven components by internal text codes | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | A component name of only spaces is refused with a raw text key | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A refused component delete leaves its confirmation window spinning | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A15](#a15) | A click beside the "Add a Component" window, or Escape, closes it without asking while the cursor is still in "Name" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
+| [A15](#a15) | A click beside the "Add a Component" window, or Escape, closes it without asking while the cursor is still in "Name" | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [OJS1](#ojs1) | LOCKSS and CLOCKSS pages show the "Copyright" row only when an unrelated Copyright Notice is set | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A1](#a1) | A new component lands at the top of the list, sharing first place with the first component | ❓ | minor | — |
 | [A3](#a3) | A deleted component keeps its key and can come back, though the confirmation says the delete cannot be undone | ❓ | minor | — |
@@ -1133,18 +1133,24 @@ A manager types a name in the "Add a Component" window (Settings ›
 Workflow › "Submission" › "Components") and, with the cursor still in
 "Name", clicks the dimmed page beside the window or presses Escape. The
 window closes at once, without the question its "Close" asks ("The data
-on this form has changed. Do you wish to continue without saving?"). The
-typed name is lost, and the list has no new row. The next reload of the
-page then raises the browser's leave-page question, though no window is
-open and nothing is left to lose. Before 3.5.0-2 the click beside the
-window asked, as "Close" does. Escape with the cursor in the box has
-closed such windows without asking on every version. The same happens in
-every window drawn by the server's older forms, whenever the box being
-typed in is the only change: among them "Create New Role" and a role's
-"Edit" on Users & Roles › "Roles", "Edit User" and "Disable" on "Users",
-a component's "Edit", the file windows of Settings › Workflow ›
-"Library", and the review forms and their items (journals and presses).
-Basis: probe, 2026-10-21. <sup>f-a15</sup>
+on this form has changed. Do you wish to continue without saving?").
+The typed name is lost, and the list has no new row. The next reload of
+the page then raises the browser's leave-page question, though no
+window is open and nothing is left to lose.
+Before 3.5.0-2 the click beside the window asked, as "Close" does, so
+only the click is a regression. Escape with the cursor in the box has
+closed such windows without asking on every version.
+The same happens in every window drawn by the server's older forms,
+whenever the box being typed in is the only change: among them "Create
+New Role" and a role's "Edit" on Users & Roles › "Roles", "Edit User"
+and "Disable" on "Users", a component's "Edit", the file windows of
+Settings › Workflow › "Library", and the custom block window ("Add
+Block" in Settings › Website › "Plugins" › "Custom Block Manager"),
+in all three apps; and the review forms and their items, which a
+preprint server does not have. All of them close through the older
+forms' one shared closing step (`FormHandler.containerCloseHandler()`),
+so one change there fixes every window, for the click and for Escape.
+Basis: probe, 2026-11-16. <sup>f-a15</sup>
 
 ### OJS
 

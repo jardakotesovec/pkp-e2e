@@ -949,7 +949,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A17](#a17) | A dropped or pasted picture the site refuses stays in the text, embedded, and is saved | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A18](#a18) | A picture over the upload limit gets a server error or a vague refusal, never "Files larger than {size} can not be uploaded." | 🐞 | medium · crash: server | issues (claude), 2026-11-02 — re-verified |
 | [A19](#a19) | A reviewer's typed review, a profile's signature or bio, or a static page's text is lost without asking on leaving the form | 🐞 | medium | issues (claude), 2026-10-12 — re-verified |
-| [A21](#a21) | A press beside the block window right after typing its name closes it without asking, and the name is lost | 🐞 | minor | — |
+| [A21](#a21) | A press beside the block window, or Escape, right after typing its name closes it without asking, and the name is lost | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A2](#a2) | A deleted custom block would keep its place in the sidebar, so a later block of the same name appears unplaced | ❓ | minor | — |
 | [A5](#a5) | Pictures named ".jpeg" are refused while ".jpg" is accepted | ❓ | user-visible | — |
 | [A6](#a6) | A static page and a "Custom Page" item can take the same path, and the static page is then unreachable | ❓ | minor | — |
@@ -1256,16 +1256,18 @@ is to press "Save for Later", "Save" or send before leaving.
 Basis: probe, 2026-10-12. <sup>f-a19</sup>
 
 <a id="a21"></a>
-**A21 — A press beside the block window right after typing its name closes it without asking, and the name is lost** · 🐞 · minor.
+**A21 — A press beside the block window, or Escape, right after typing its name closes it without asking, and the name is lost** · 🐞 · low.
 A Journal Manager types a name into "Block Name" in the "Add Block"
 window and, with the caret still in the box, presses the shaded page
-beside the window. The window closes at once, with no question, and the
+beside the window or presses Escape. The window closes at once, with no question, and the
 name is gone: the "Custom Block Manager" list behind it has no new row.
 Pressed in the same state, the window's close control first asks "The
 data on this form has changed. Do you wish to continue without
 saving?", and so does the press beside the window once the caret has
-left the box. A stray click right after typing loses the name.
-Basis: test run, 2026-11-12. <sup>f-a21</sup>
+left the box. A stray click or key right after typing loses the name. The same
+fault closes every window of the older forms (*Submission intake
+configuration*, [A15](U58-submission-intake-configuration.md#a15)).
+Basis: probe, 2026-11-16. <sup>f-a21</sup>
 
 ### Retired
 
@@ -2355,6 +2357,7 @@ out of the box, so `containerCloseHandler()` finds no change recorded;
 a press on the close control takes the focus first. Not driven: Escape
 with the caret in the box, "Edit" of a saved block, and the static page
 window's "Path" and "Title".
+Issue report: [pkp-e2e#1056](https://github.com/jardakotesovec/pkp-e2e/issues/1056) ([docs/issues/U58-A15-component-window-outside-press-loses-name.md](../issues/U58-A15-component-window-outside-press-loses-name.md)).
 
 ## Reference — entry points & surfaces
 

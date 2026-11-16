@@ -111,6 +111,12 @@ function withIssues(list) {
     const issues = { [REPO]: issueList(REPO) };
     if (list.some((r) => r.repo === SEC)) {
         try { issues[SEC] = issueList(SEC, '', '--label', 'unreleased'); } catch { console.error(`cannot read ${SEC}: its reports are skipped`); }
+        // A report's issue keeps its place there after the maintainer drops `unreleased`.
+        for (const r of list.filter((x) => x.repo === SEC)) {
+            const link = links.get(r.file);
+            if (!issues[SEC] || !link || link.repo !== SEC || issues[SEC].some((i) => i.number === link.number)) continue;
+            try { issues[SEC].push(ghJson('issue', 'view', String(link.number), '-R', SEC, '--json', 'number,title,state,stateReason,labels')); } catch { /* reported as not found */ }
+        }
     }
     for (const r of list) {
         const link = links.get(r.file);
