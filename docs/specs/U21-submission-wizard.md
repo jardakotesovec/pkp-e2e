@@ -2893,7 +2893,7 @@ on "Upload Files", the later rail entries plain text. Before that,
 "Complete submission", the Saved for Later screen's link and the mail's
 link each opened the bare address and reopened on "Contributors". No
 response of 500 or more and no page error in any run.
-Issue report: [docs/issues/U21-A24-wizard-reload-opens-first-step.md](../issues/U21-A24-wizard-reload-opens-first-step.md).
+Issue report: [pkp-e2e#1101](https://github.com/jardakotesovec/pkp-e2e/issues/1101) ([docs/issues/U21-A24-wizard-reload-opens-first-step.md](../issues/U21-A24-wizard-reload-opens-first-step.md)).
 
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds

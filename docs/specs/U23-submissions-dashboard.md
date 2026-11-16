@@ -2236,7 +2236,7 @@ Manager) held "Loaded" after signing in, at the bare
 and stayed empty in every read (12 to 15 reads over about 2 s) at
 `?currentViewId=active`. OJS was not driven. Scenario 1's leg reads the
 region after the sign-in landing, which announces, and stays green.
-Issue report: [docs/issues/U23-A19-dashboard-loaded-announced-before-list.md](../issues/U23-A19-dashboard-loaded-announced-before-list.md).
+Issue report: [pkp-e2e#1102](https://github.com/jardakotesovec/pkp-e2e/issues/1102) ([docs/issues/U23-A19-dashboard-loaded-announced-before-list.md](../issues/U23-A19-dashboard-loaded-announced-before-list.md)).
 
 <a id="fn-a20"></a>
 **a20 — A20 evidence.** lib/pkp `ReviewRound::determineStatus()` skips

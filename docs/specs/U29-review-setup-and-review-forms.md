@@ -2339,7 +2339,7 @@ with its menu until a reload (finding A11). The stored rows were the same
 before and after; after a reload both tabs showed the stored title with
 no menu. No response of 500 or more and no page error in any run. Kept
 script `shared/playwright/checks/U29/I33/i33.js` (phase `race`).
-Issue report: [docs/issues/U29-A15-recommendation-in-use-edit-delete-unexplained.md](../issues/U29-A15-recommendation-in-use-edit-delete-unexplained.md).
+Issue report: [pkp-e2e#1103](https://github.com/jardakotesovec/pkp-e2e/issues/1103) ([docs/issues/U29-A15-recommendation-in-use-edit-delete-unexplained.md](../issues/U29-A15-recommendation-in-use-edit-delete-unexplained.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — The public review data is `GET
