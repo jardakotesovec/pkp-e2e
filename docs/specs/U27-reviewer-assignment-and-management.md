@@ -4150,7 +4150,7 @@ script `shared/playwright/checks/U27/K16a/k16a.js` (parts `add`, `past`,
 `page`, `int`); the 2026-11-13 sighting's script
 `shared/playwright/checks/U26/K13b/k13b.js` (part `fc`) ran twice per app
 the same day with the same result.
-Issue report: [docs/issues/U27-A51-assistant-add-reviewer-search-refused.md](../issues/U27-A51-assistant-add-reviewer-search-refused.md).
+Issue report: [pkp-e2e#1105](https://github.com/jardakotesovec/pkp-e2e/issues/1105) ([docs/issues/U27-A51-assistant-add-reviewer-search-refused.md](../issues/U27-A51-assistant-add-reviewer-search-refused.md)).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
