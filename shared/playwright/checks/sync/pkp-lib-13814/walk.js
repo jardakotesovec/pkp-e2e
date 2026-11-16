@@ -11,9 +11,13 @@
 //             submissions/{id}): status, the submission, comment and task rows left
 //   delCtx    a second scratch journal with a commented article, deleted by admin
 //             (DELETE /index/api/v1/contexts/{id}): status, the context row left
+//   delCtx0   the same with a journal whose article has no comment (round 2: the guard dropped)
+//   cliDel    `php tools/deleteSubmissions.php <id>` on an article with no comment (no context
+//             in a CLI request): exit, output, the submission row left; cliDelC the same with a comment
 // Each phase records the HTTP status, the server log's new error lines and the rows.
 //   PROBE_FEATURE=sync PROBE_AGENT=<id> node bin/probe.js ojs shared/playwright/checks/sync/pkp-lib-13814/walk.js
 const path = require('path');
+const {spawnSync} = require('child_process');
 const ROOT = path.resolve(__dirname, '../../../../..');
 const {forEachApp, launch, signIn, signOut, record, tag, sql, apiAs, serverLog} = require('../../../probe');
 
@@ -132,6 +136,31 @@ forEachApp(async (app) => {
             contextLeft: sql(app, `select count(*) from journals where journal_id = ${id2}`),
             submissionLeft: sql(app, `select count(*) from submissions where submission_id = ${s.submissionId}`),
             commentLeft: sql(app, `select count(*) from user_comments where user_comment_id = ${c}`)};
+    });
+
+    await phase('delCtx0', async () => {
+        const T3 = `${T}z`;
+        await mkCtx(T3);
+        const id3 = Number(sql(app, `select journal_id from journals where path = '${T3}'`));
+        const s = await app.api.createSubmission({tag: `${T3}s`, context: T3, submitter: `${T3}au`, title: `Plain ${T3}`, published: true});
+        await page.goto('/index.php/index/admin/contexts');
+        const csrf = await page.evaluate(() => (window.pkp && pkp.currentUser && pkp.currentUser.csrfToken) || null);
+        const res = await page.request.fetch(`/index.php/index/api/v1/contexts/${id3}`, {method: 'DELETE', headers: {'X-Csrf-Token': csrf}, failOnStatusCode: false});
+        return {status: res.status(), body: (await res.text()).slice(0, 200),
+            contextLeft: sql(app, `select count(*) from journals where journal_id = ${id3}`),
+            submissionLeft: sql(app, `select count(*) from submissions where submission_id = ${s.submissionId}`),
+            publicationsLeft: sql(app, `select count(*) from publications where submission_id = ${s.submissionId}`)};
+    });
+
+    for (const [name, withComment] of [['cliDel', false], ['cliDelC', true]]) await phase(name, async () => {
+        const s = await app.api.createSubmission({tag: `${T}${withComment ? 'd' : 'c'}`, context: T, submitter: `${T}au`, title: `CLI ${T}`, published: true,
+            ...(withComment ? {userComments: [{user: ra, text: `CLI comment ${T}.`, approved: true}]} : {})});
+        const r = spawnSync('php', ['tools/deleteSubmissions.php', String(s.submissionId)],
+            {cwd: path.resolve(ROOT, app.root), env: {...process.env, PKP_CONFIG_FILE: app.configFile}, encoding: 'utf8', timeout: 120000});
+        const o = `${r.stdout || ''}${r.stderr || ''}`.trim();
+        return {exit: r.status, error: (o.match(/(PHP )?Fatal error:.*|Uncaught .*/) || [o.slice(0, 200)])[0].slice(0, 300),
+            submissionLeft: sql(app, `select count(*) from submissions where submission_id = ${s.submissionId}`),
+            publicationsLeft: sql(app, `select count(*) from publications where submission_id = ${s.submissionId}`)};
     });
 
     out.contextId = ctxId;
