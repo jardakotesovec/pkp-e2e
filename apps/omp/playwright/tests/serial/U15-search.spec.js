@@ -11,9 +11,14 @@
  * Scenarios 8 and 9 are OJS-only, 10 is OPS-only.
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): OMP1, OMP3, A1, A2, A3, A4, A5, A6, A7,
- * A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, OJS1, OJS2,
- * OJS3, OJS4, OPS1, OPS2, OPS3, OPS4.
+ * of everything else left out): OMP1, OMP3, A1, A2, A3, A4, A6, A7, A8,
+ * A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, OJS1, OJS2, OJS3,
+ * OJS4, OPS1, OPS2, OPS3, OPS4.
+ *
+ * By database (PRINCIPLES D8): S2's steps whose answer Rule 4 gives per
+ * database (A5) read `onPostgres` for the answer to expect, and its "ox"
+ * step runs on MySQL and MariaDB only; those ends run in CI's daily
+ * configurations run and on the `mysql` and `mariadb` lines.
  *
  * Serial project, on purpose (PRINCIPLES A9, patterns.md parallel lesson
  * 7): publishing queues the index refresh (Rule 12) and the fleets run with
@@ -193,45 +198,64 @@ test.describe('Search — the press Search page', () => {
         const used = new Set();
         const wordA = makeWord(used);
         const wordB = makeWord(used);
+        const wordC = makeWord(used);
         const wordAbstract = makeWord(used);
         const wordFamily = makeWord(used);
         const wordFrench = makeWord(used);
         const titleA = `The publications of children about ${wordA}`;
         const titleAFrench = `Les publications des enfants sur ${wordFrench}`;
         const titleB = `The ${wordB} study`;
+        const titleC = `The ${wordC}-harbour survey`;
         // A press reading in English and French, so the first book carries
         // a French title beside its English one (fn-s2).
-        const {one, two} = await seedPress(
+        const {one, two, three} = await seedPress(
             ompApi,
             tag,
             [
                 {key: 'one', givenName: 'Ada', familyName: capitalize(wordFamily)},
                 {key: 'two', givenName: 'Sam', familyName: 'Smith'},
+                {key: 'three', givenName: 'Lee', familyName: 'Jones'},
             ],
             {supportedLocales: ['en', 'fr_CA'], supportedSubmissionLocales: ['en', 'fr_CA']}
         );
+        // Only the first book holds "and" (and "ox"); only the third holds
+        // "harbour" (fn-s2's seeded abstracts).
         await seedBook(ompApi, {
             tag,
             submitter: one,
             title: {en: titleA, fr_CA: titleAFrench},
-            abstract: `An abstract about ${wordAbstract} and its measurement.`,
+            abstract: `An abstract about ${wordAbstract} and its measurement by ox cart.`,
         });
-        await seedBook(ompApi, {tag, submitter: two, title: titleB, abstract: 'A plain abstract about a periodical.'});
+        await seedBook(ompApi, {tag, submitter: two, title: titleB, abstract: 'A plain abstract about a regional periodical.'});
+        await seedBook(ompApi, {tag, submitter: three, title: titleC, abstract: 'A brief abstract on a coastal periodical.'});
         runJobs();
 
         const search = new PressSearchPage(page, tag);
-        /** The first book alone is listed; the second (Control) is absent. */
-        const expectFirstAlone = async (words) => {
+        /**
+         * Exactly one book is listed. Control: the second book, which
+         * carries none of the searched words, is absent from every list,
+         * and the third from every list but the hyphenated pair's.
+         */
+        const expectAlone = async (words, title) => {
             await search.search(words);
-            await search.expectOnly(titleA);
+            await search.expectOnly(title);
             await search.expectAbsent(titleB);
+            if (title !== titleC) await search.expectAbsent(titleC);
         };
-        /** Nothing is listed: the not-found line (Control: the second book absent too). */
+        const expectFirstAlone = (words) => expectAlone(words, titleA);
+        /** Nothing is listed: the not-found line (Control: the second and third books absent too). */
         const expectNothing = async (words) => {
             await search.search(words);
             await search.expectNone(words);
             await search.expectAbsent(titleB);
+            await search.expectAbsent(titleC);
         };
+        /**
+         * A step whose answer Rule 4 gives per database (fn-s2): the first
+         * book alone where `listsFirst` is true, the not-found line where
+         * it is false.
+         */
+        const expectByDatabase = (words, listsFirst) => (listsFirst ? expectFirstAlone(words) : expectNothing(words));
 
         // A word in the abstract (Rule 3).
         await expectFirstAlone(wordAbstract);
@@ -244,30 +268,43 @@ test.describe('Search — the press Search page', () => {
         await expectFirstAlone(wordFrench);
 
         // Whole words (Rule 4): "publi" finds nothing although the title
-        // holds "publications"; "publication" finds it; "child" finds
-        // nothing although the title holds "children"; "children" finds it.
+        // holds "publications"; "publication" finds it on PostgreSQL and
+        // nothing on MySQL or MariaDB; "child" finds nothing although the
+        // title holds "children"; "children" finds it.
         await expectNothing('publi');
-        // A word's other forms and a hyphenated pair are matched as the
-        // database's own full-text search matches them (Rule 4 states
-        // PostgreSQL's): asked on PostgreSQL only.
-        if (onPostgres) {
-            await expectFirstAlone('publication');
-        }
+        await expectByDatabase('publication', onPostgres);
         await expectNothing('child');
         await expectFirstAlone('children');
 
-        // Common words (Rule 4): "the" alone finds nothing although both
-        // titles hold it; "the" beside the title word changes nothing.
+        // Common words (Rule 4): "the" alone finds nothing although every
+        // title holds it; "the" beside the title word changes nothing; "and"
+        // alone finds nothing on PostgreSQL, and on MySQL or MariaDB lists
+        // the first book, the only one holding it.
         await expectNothing('the');
         await expectFirstAlone(`the ${wordA}`);
+        await expectByDatabase('and', !onPostgres);
 
         // Punctuation and syntax (Rule 4): quotation marks and "AND" change
-        // nothing; a hyphenated pair finds nothing although both words are
-        // in the title.
+        // nothing (on MySQL or MariaDB "AND" adds the books holding "and",
+        // the first alone); the title word and "children" joined by a
+        // hyphen, and by a full stop, find nothing on PostgreSQL although
+        // both words are in the title, and list the first book on MySQL or
+        // MariaDB.
         await expectFirstAlone(`"${wordA}"`);
         await expectFirstAlone(`${wordA} AND children`);
-        if (onPostgres) {
-            await expectNothing(`${wordA}-children`);
+        await expectByDatabase(`${wordA}-children`, !onPostgres);
+        await expectByDatabase(`${wordA}.children`, !onPostgres);
+
+        // A hyphenated pair: the third book's word and "harbour" joined by
+        // a hyphen, as its title holds them, list exactly the third book
+        // (Rule 4), on every database.
+        await expectAlone(`${wordC}-harbour`, titleC);
+
+        // On a MySQL or MariaDB site: "ox" finds nothing although the first
+        // book's abstract holds it, the word being shorter than three
+        // letters (Rule 4, A5); Rule 4 states no PostgreSQL answer for it.
+        if (!onPostgres) {
+            await expectNothing('ox');
         }
     });
 

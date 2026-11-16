@@ -16,8 +16,8 @@
  * Deliberately NOT covered (the spec's Findings register; a 🐞 is never
  * asserted as the contract, a ❓ is parked, not a gap): A1 🐞, A2 ❓, A3 🐞,
  * A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A9 🐞, A10 ❓, A11 🐞, A12 🐞, A13 🐞,
- * A14 ❓, A15 ❓, A16 ❓, A17 🐞, A18 🐞, A19 🐞, OJS1 🐞, OJS2 🐞, OJS3 ❓,
- * OJS4 🐞. The spec's Coverage section records the rest.
+ * A14 ❓, A15 ❓, A16 ❓, A17 🐞, A18 🐞, A19 🐞, A20 ❓, OJS1 🐞, OJS2 🐞,
+ * OJS3 ❓, OJS4 🐞. The spec's Coverage section records the rest.
  *
  * Seeding: scenario endpoints only, on scratch journals with throwaway
  * users; publicknowledge is never touched. The made-up search words are
@@ -32,7 +32,11 @@
  * state, so it is the visitor of every scenario; signed-in actors come
  * from `asUser`. Mailpit is one shared instance, so S1's mail read is
  * scoped to this scratch journal's throwaway addresses. The suite runs
- * with TZ=UTC, the PHP servers' clock (S6's "current year").
+ * with TZ=UTC, the PHP servers' clock (S6's "current year"). S2's steps
+ * whose answer Rule 4 gives per database read `onPostgres` for the answer
+ * to expect, and its "ox" step runs on MySQL and MariaDB only (fn-s2,
+ * PRINCIPLES D8): CI's daily configurations run and the `mysql` and
+ * `mariadb` lines run them there.
  */
 const {test, expect} = require('../../support/fixtures.js');
 const {
@@ -190,7 +194,7 @@ test.describe('Search (queue-drained index)', () => {
     test('S2: Abstract and contributor names are searched too', async ({page, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s2', testInfo);
-        const [titleWord, abstractWord, nameWord, frenchWord, controlWord] = makeWords(5);
+        const [titleWord, abstractWord, nameWord, frenchWord, controlWord, hyphenWord] = makeWords(6);
         const familyName = capitalize(nameWord);
         const authorA = `auta${tag}`;
         const authorB = `autb${tag}`;
@@ -203,30 +207,52 @@ test.describe('Search (queue-drained index)', () => {
                 {username: authorB, givenName: 'Sam', familyName: 'Smith'},
             ],
         });
+        // The seeded abstracts and titles of fn-s2: only the first article
+        // holds "and" (and "ox"), only the third holds "harbour", and none
+        // but the first holds "children".
         const titleA = `The publications of children about ${titleWord}`;
         const titleAFrench = `Les publications des enfants sur ${frenchWord}`;
         const titleB = `The ${controlWord} study`;
+        const titleC = `The ${hyphenWord}-harbour survey`;
         await ojsApi.createSubmission({
             tag, context: tag, submitter: authorA,
             title: {en: titleA, fr_CA: titleAFrench},
             published: true,
-            abstract: `An abstract about ${abstractWord} and its measurement.`,
+            abstract: `An abstract about ${abstractWord} and its measurement by ox cart.`,
         });
         await ojsApi.createSubmission({
             tag, context: tag, submitter: authorB, title: titleB, published: true,
             abstract: 'A plain abstract about a regional periodical.',
+        });
+        await ojsApi.createSubmission({
+            tag, context: tag, submitter: authorB, title: titleC, published: true,
+            abstract: 'A plain abstract.',
         });
         runJobs();
 
         const search = new SearchPage(page, tag);
         await search.goto();
 
-        // Exactly the first article, and the second (Control) absent from
-        // the list.
-        const expectFirstOnly = async () => {
-            const found = await search.expectOnlyResult(titleA);
-            await expect(search.resultByTitle(titleB)).toHaveCount(0);
+        // Exactly the one article, and the others absent from the list
+        // (Control: the second is absent from every list, the third from
+        // every list but the hyphenated pair's).
+        const expectOnly = async (title, absent) => {
+            const found = await search.expectOnlyResult(title);
+            for (const other of absent) {
+                await expect(search.resultByTitle(other)).toHaveCount(0);
+            }
             return found;
+        };
+        const expectFirstOnly = () => expectOnly(titleA, [titleB, titleC]);
+
+        // A step whose answer Rule 4 gives per database (fn-s2: PRINCIPLES
+        // D8): the first article alone on one end, "No Results" on the other.
+        const expectFirstOnlyWhere = async (listedOnPostgres) => {
+            if (listedOnPostgres === onPostgres) {
+                await expectFirstOnly();
+            } else {
+                await search.expectNoResults();
+            }
         };
 
         // A word that appears only in the abstract.
@@ -246,39 +272,68 @@ test.describe('Search (queue-drained index)', () => {
         await search.search(frenchWord);
         await expectFirstOnly();
 
-        // Whole words (Rule 4): a fragment finds nothing, the word does;
-        // an irregular form does not find its plural.
+        // Whole words (Rule 4): a fragment finds nothing; "publication"
+        // finds "publications" on PostgreSQL only (MySQL and MariaDB: a
+        // word finds only itself); an irregular form does not find its
+        // plural; the word itself does.
         await search.search('publi');
         await search.expectNoResults();
-        // A word's other forms and a hyphenated pair are matched as the
-        // database's own full-text search matches them (Rule 4 states
-        // PostgreSQL's): asked on PostgreSQL only.
-        if (onPostgres) {
-            await search.search('publication');
-            await expectFirstOnly();
-        }
+        await search.search('publication');
+        await expectFirstOnlyWhere(true);
         await search.search('child');
         await search.expectNoResults();
         await search.search('children');
         await expectFirstOnly();
 
         // Common words (Rule 4): "the" alone finds nothing; beside the title
-        // word it changes nothing.
+        // word it changes nothing; "and" alone finds nothing on PostgreSQL
+        // and lists the first article, the only one holding it, on MySQL
+        // and MariaDB.
         await search.search('the');
         await search.expectNoResults();
         await search.search(`the ${titleWord}`);
         await expectFirstOnly();
+        await search.search('and');
+        await expectFirstOnlyWhere(false);
 
-        // Punctuation and syntax (Rule 4): quotation marks and "AND" are
-        // ignored; a hyphenated pair finds nothing.
+        // Punctuation and syntax (Rule 4): quotation marks and "AND" leave
+        // the one article (on MySQL and MariaDB because only it holds
+        // "and"); the word and "children" joined by a hyphen, or by a full
+        // stop, find nothing on PostgreSQL and the first article on MySQL
+        // and MariaDB, which split them into two words.
         await search.search(`"${titleWord}"`);
         await expectFirstOnly();
         await search.search(`${titleWord} AND children`);
         await expectFirstOnly();
-        if (onPostgres) {
-            await search.search(`${titleWord}-children`);
+        await search.search(`${titleWord}-children`);
+        await expectFirstOnlyWhere(false);
+        await search.search(`${titleWord}.children`);
+        await expectFirstOnlyWhere(false);
+
+        // A hyphenated pair (Rule 4): the third article's word and
+        // "harbour" joined as its title holds them list exactly that
+        // article, on every database (its positive control for the
+        // absences above).
+        await search.search(`${hyphenWord}-harbour`);
+        await expectOnly(titleC, [titleA, titleB]);
+
+        // On a MySQL or MariaDB site, "ox" finds nothing although the first
+        // article's abstract holds it (Rule 4, A5); Rule 4 states no
+        // PostgreSQL answer, so the step runs there only (fn-s2). Its
+        // control: "cart", a word of the same abstract four letters long,
+        // lists the first article.
+        if (!onPostgres) {
+            await search.search('ox');
             await search.expectNoResults();
+            await search.search('cart');
+            await expectFirstOnly();
         }
+
+        // Control: the second article is in the index, so its absence from
+        // every list above is the search's, not the seed's: its own title
+        // word lists it.
+        await search.search(controlWord);
+        await expectOnly(titleB, [titleA, titleC]);
     });
 
     test('S3: Nothing found', async ({page, ojsApi}, testInfo) => {

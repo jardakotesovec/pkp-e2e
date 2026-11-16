@@ -110,25 +110,41 @@ shared. <sup>b</sup>
    subjects, section names and funders are not searched by the box (but
    see Rule 14). <sup>c</sup>
 4. **How words match.** Matching is on words, not fragments: "publi" does
-   not find "Publications" and "quarterl" does not find "quarterly". A word
-   does find its regular other forms: "public", "publication" and
-   "publications" find each other, as do "study", "studies" and "studied",
-   and "note" and "notes"; an irregular form does not: "child" does not
-   find "Children". Very common words ("the", "of", "and", "or") are
-   dropped: typed alone they find nothing, although every title holds them,
-   and typed beside another word they change nothing. Capitalisation does
-   not matter. There is no phrase search, no wildcard and no AND/OR/NOT
-   syntax: "AND" or "OR" typed between two words changes nothing (they are
-   common words, dropped like any other). Quotation marks, commas, full
-   stops, brackets, "!", "&" and an apostrophe-s are ignored, but a hyphen
-   is not: a hyphenated pair such as "harbour-children" finds nothing even
-   when both words are in the title, so type the words with a space.
-   How several words combine depends on the
-   database the site runs on: on a PostgreSQL site every typed word must be
-   found (in any of the searched texts of the same article), on a MySQL or
-   MariaDB site an article matching any of the words is listed
-   ⚠ [A5](#a5). The test installs run on PostgreSQL, so on them every
-   typed word must be found. <sup>d</sup>
+   not find "Publications" and "quarterl" does not find "quarterly". An
+   irregular form does not find another: "child" does not find
+   "Children". Capitalisation does not matter. There is no wildcard
+   ("publi*" finds nothing), and "OR", "NOT", "+" and "-" typed before or
+   between words change nothing. Quotation marks, commas, full stops,
+   brackets, "!", "&" and an apostrophe-s around a single word are
+   ignored. The rest depends on the database the site runs on (Settings
+   that modify behavior) ⚠ [A5](#a5). The test installs run on
+   PostgreSQL, so scenario 2's steps on word matching give the PostgreSQL
+   answers. <sup>d</sup>
+   - **On a PostgreSQL site** a word finds its regular other forms:
+     "public", "publication" and "publications" find each other, as do
+     "study", "studies" and "studied", and "note" and "notes". Very common
+     words ("the", "of", "and", "or") are dropped: typed alone they find
+     nothing, although every title holds them, and typed beside another
+     word they change nothing, so "AND" between two words changes nothing
+     either. Quotation marks around several words change nothing. Every
+     typed word must be found, in any of the searched texts of the same
+     article. A hyphenated pair such as "harbour-children" finds only an
+     article whose text holds the same hyphenated pair: it finds nothing
+     when the title holds the two words apart, so type them with a space.
+     Two words joined by a full stop with no space find nothing either,
+     even when both are in the article's title. <sup>d</sup>
+   - **On a MySQL or MariaDB site** a word finds only itself:
+     "publication" does not find "publications", and "study" does not
+     find "studies". An article matching any one of the typed words is
+     listed. Common English words such as "the", "of" and "or" are
+     dropped (typed alone they find nothing), and so is any word shorter
+     than three letters: "ox" finds nothing, although an abstract holds
+     it. "and" is not dropped: typed alone it lists every article holding
+     "and", and "AND" typed between two words adds those articles to the
+     list. A hyphen or a full stop between two words splits them into two
+     words, each found on its own. Words inside quotation marks are a
+     phrase: only an article holding them together, in that order, is
+     listed. <sup>d</sup>
 5. **The bare Search page.** Opening the Search page, or pressing "Search"
    with the box empty (or holding only spaces) and no filter set, lists every published article of
    the journal, paged like any result list, on a journal or a preprint
@@ -360,6 +376,11 @@ configuration file (config.inc.php), search section; no screen shows them.
   refinements (Rule 14) accept several values. Everything else in this
   spec describes the database driver, which is what the test installs use.
   <sup>n</sup>
+- **The site's database.** With the database driver, the database the
+  site is installed on (PostgreSQL, MySQL or MariaDB, named in the
+  configuration file's database section) decides how words match and
+  combine: word forms, common and short words, hyphens, quotation marks
+  and several words (Rule 4, [A5](#a5)). <sup>d</sup>
 - **The index name** used by an OpenSearch server ("submissions" unless
   changed). <sup>n</sup>
 - **Converters for non-text galleys.** One line per file type names a
@@ -458,13 +479,17 @@ jobs are run are in the footnote. <sup>s</sup>
 
 2. **Abstract and contributor names are searched too**
 
-   Given: a visitor, on a scratch journal holding two published articles,
-   each with its own made-up word in its title; the first article is
-   titled "The publications of children about {its made-up word}", its
-   abstract holds a second made-up word that appears nowhere else, one of
-   its contributors has a made-up family name, and its title in French
+   Given: a visitor, on a scratch journal of a site running on PostgreSQL
+   (on MySQL or MariaDB for the bullet that names them) holding three
+   published articles, each with its own made-up word in its title; the
+   first article is titled "The publications of children about {its
+   made-up word}", its abstract holds a second made-up word that appears
+   nowhere else, the word "and" and the two-letter word "ox", one of its
+   contributors has a made-up family name, and its title in French
    carries a made-up word its English title lacks; the second article is
-   titled "The {its made-up word} study".
+   titled "The {its made-up word} study"; the third is titled "The {its
+   made-up word}-harbour survey"; only the first article holds "and", and
+   only the third holds "harbour".
 
    - **A word in the abstract**: type the first article's abstract word and
      press "Search": exactly that article is listed.
@@ -481,16 +506,31 @@ jobs are run are in the footnote. <sup>s</sup>
      listed; type "child": "No Results", although its title holds
      "children"; type "children": the first article is listed (Rule 4).
    - **Common words**: type "the" alone and press "Search": "No Results",
-     although both titles hold it; type "the", a space and the first
-     article's title word: the same one article as the word alone
-     (Rule 4).
+     although every title holds it; type "the", a space and the first
+     article's title word: the same one article as the word alone; type
+     "and" alone: "No Results", although the first article's abstract holds
+     it (Rule 4).
    - **Punctuation and syntax**: type the first article's title word
      between quotation marks and press "Search": the same one article; type
      the word and "children" with "AND" between them, spaces around it: the
      same one article; type the word and "children" joined by a hyphen, no
-     spaces: "No Results", although both words are in the title (Rule 4).
+     spaces: "No Results", although both words are in the title; type the
+     word and "children" joined by a full stop, no spaces: "No Results"
+     as well (Rule 4).
+   - **A hyphenated pair**: type the third article's made-up word and
+     "harbour" joined by a hyphen, no spaces, as its title holds them, and
+     press "Search": exactly the third article is listed (Rule 4).
+   - **On a MySQL or MariaDB site**: the steps above list the same
+     articles, except that "publication" gives "No Results"; the first
+     article's title word and "children" joined by a hyphen, and joined by
+     a full stop, each list the first article; and "and" alone lists the
+     first article, the only one holding it, which is also why "AND"
+     between the title word and "children" still lists that one article.
+     Then type "ox" and press "Search": "No Results", although the first
+     article's abstract holds it (Rule 4, [A5](#a5)).
    - **Control**: the second article, which carries none of the searched
-     words, is absent from every list. <sup>s2</sup>
+     words, is absent from every list, and the third is absent from every
+     list but the hyphenated pair's. <sup>s2</sup>
 
 3. **Nothing found**
 
@@ -751,7 +791,9 @@ Left out of the scenarios above, by reason:
     and re-indexing every one; Side effects)
   - A11 (galley text never searched, and the galley converters having no
     reachable effect; Rule 3, Settings)
-  - A5 (several words all matching on PostgreSQL, any one on MySQL; Rule 4)
+  - A5 (words matching and combining differently by database: several
+    words all matching on PostgreSQL, any one on MySQL and MariaDB, and
+    quotation marks a phrase there; Rule 4, Settings)
   - A6 (the bare Search page listing every article on a journal or server
     and nothing on a press; Rule 5)
   - OJS1 and OPS1 (the screen-reader count with several hits; Rule 7)
@@ -850,7 +892,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [OPS4](#ops4) | Returning a posted preprint to the workflow takes its page offline for readers, while Search still links to it | 🐞 | high | issues (claude), 2026-10-03 — re-verified |
 | [A2](#a2) | "Published Before" leaves out the chosen day itself | ❓ | minor | — |
 | [A4](#a4) | Results come in no particular order | ❓ | user-visible | — |
-| [A5](#a5) | Whether several words must all match or any one may depends on the site's database | ❓ | user-visible | — |
+| [A5](#a5) | How typed words match and combine depends on the site's database | ❓ | user-visible | — |
 | [A6](#a6) | The bare Search page lists every published article on a journal or server, and nothing on a press | ❓ | user-visible | — |
 | [A7](#a7) | Words from an article's superseded versions still find it | ❓ | latent | — |
 | [A8](#a8) | The page honours refinements that no control on it offers | ❓ | latent | — |
@@ -928,14 +970,23 @@ the database's and a reader cannot count on it between visits.
 Basis: probe; the change between visits seen once, 2026-10-15. <sup>f-a4</sup>
 
 <a id="a5"></a>
-**A5 — Several words mean different things on different databases** · ❓ · user-visible.
+**A5 — Typed words match and combine differently on different databases** · ❓ · user-visible.
 On a PostgreSQL site, typing two words finds only articles containing both;
-on a MySQL or MariaDB site it finds articles containing either. The page
-gives no hint which applies, and the old search-syntax help is gone.
-Question: which combination is intended, and should the page say so?
-Lean: "all words" is the more useful default and the one to document;
-either way the behavior should not depend on the database.
-Basis: probe for the PostgreSQL side, judgment for MySQL and MariaDB.
+on a MySQL or MariaDB site it finds articles containing either, and words
+in quotation marks must stand together in that order, while on PostgreSQL
+quotation marks change nothing. Single words differ too. On MySQL and
+MariaDB "publication" does not find "publications", a word shorter than
+three letters finds nothing, and "and" is searched like any other word,
+so "AND" between two words adds the articles holding "and". A
+hyphenated pair such as "harbour-children" finds an article whose title
+holds the two words apart on MySQL and MariaDB, and nothing on
+PostgreSQL (Rule 4). The page gives no hint which applies, and the old
+search-syntax help is gone.
+Question: which matching is intended, and should the page say so?
+Lean: "all words", with a word's regular other forms found, is the more
+useful default and the one to document; either way the behavior should
+not depend on the database.
+Basis: probe on PostgreSQL, MySQL 8.0 and MariaDB 10.11, 2026-11-16.
 <sup>f-a5</sup>
 
 <a id="a6"></a>
@@ -1440,15 +1491,28 @@ does with a file was not observed.
 
 <a id="fn-d"></a>
 **d — word matching.** `DatabaseEngine::buildQuery()` applies
-`whereFullText(['title','abstract','body','authors'], $query)`. Laravel's
-grammar renders that as `MATCH (…) AGAINST (? IN NATURAL LANGUAGE MODE)` on
-MySQL/MariaDB (any-word, ranked but the ranking is discarded by the
-`GROUP BY` + `pluck`) and as `to_tsvector('english', …) @@
-plainto_tsquery('english', ?)` on PostgreSQL (all words, English stemming,
-stop words dropped, punctuation ignored). The fleets are PostgreSQL
-(harness.md), so live evidence covers the all-words side only. No syntax
-layer exists anymore (the `searchSyntaxInstructions` template block is
-empty). Live-probed 2026-09-02, identical on OJS, OMP and OPS, against
+`whereFullText(['title','abstract','body','authors'], $query)` with no
+options. Laravel's grammar renders that as `MATCH (…) AGAINST (? IN
+NATURAL LANGUAGE MODE)` on MySQL/MariaDB (`MariaDbGrammar` extends
+`MySqlGrammar`; any-word, ranked but the ranking is discarded by the
+`GROUP BY` + `pluck`; no stemming; a double-quoted phrase honoured;
+`+`, `-` and `*`, boolean-mode operators, ignored) and as
+`to_tsvector('english', …) @@ plainto_tsquery('english', ?)` on
+PostgreSQL (all words, English stemming, stop words dropped, punctuation
+ignored). So the word forms, stop words, phrase quoting, hyphen and
+short-word behavior of Rule 4 are each database's own full-text search,
+not the application's. On MySQL and MariaDB `submissions_fulltext` is
+InnoDB; their built-in InnoDB stop-word lists are identical and hold
+"the", "or", "of" and "about" but not "and"; `innodb_ft_enable_stopword`
+is ON and `innodb_ft_min_token_size` is 3 on both lines, so a word of one
+or two letters is never indexed. The fleets are PostgreSQL (harness.md);
+the MySQL and MariaDB side was probed on the `mysql` and `mariadb` lines
+(below). The CI configurations runs 43276275521 and 43276302266 had
+reported S2's word-form step as a database fact and its hyphen step as
+read in the code only; both are now seen on screen, and S2 asks the two
+steps on PostgreSQL only (fn-s2). No syntax layer exists anymore (the
+`searchSyntaxInstructions` template block is empty). Live-probed
+2026-09-02, identical on OJS, OMP and OPS, against
 "Publications quarterly of brenthollow", "The vintrofal study" and three
 "Notes on …" titles: "publication", "publications" and "public" each
 listed the quarterly; "publi" and "quarterl" listed nothing ("No Results";
@@ -1476,6 +1540,47 @@ uckasubtok` "No Results"; `???` "No Results". Mechanism: PostgreSQL's
 `plainto_tsquery('english', …)` drops English stop words, and parses a
 hyphenated pair into the whole plus its two parts, all of which must
 match, so it finds only text that was hyphenated the same way.
+Live-probed 2026-11-16 (Rule 4; A5) on OJS, OMP and OPS, each on
+PostgreSQL, MySQL 8.0.46 and MariaDB 10.11.19, every fact in two runs on
+a scratch context per app holding eight published items with made-up
+words, searched as a visitor through the page's box (the context's Reader
+and Journal Manager got the same lists for "publication", a hyphenated
+pair, two words, "and" and "publi"). On all three databases: "publi",
+"quarterl", "stud" and a made-up word's first six letters listed nothing,
+and six letters plus `*` nothing; "child" nothing, "children" and
+"Children" the one title holding "children"; a title word in capitals,
+`"word"`, `word,` `word.` `(word)` `[word]` `word!` `word's`
+`word & children`, `word&children` and `word,children` each the one
+article. PostgreSQL: "public", "publication" and "publications" each
+listed both the "publications" and the "public" title; "study",
+"studies", "studied" both their titles; "note", "notes" all five;
+"the", "of", "and", "or", "the of" nothing, and each beside the title
+word the one article; two words each in its own "Notes on …" title and
+both in a third listed only the third, typed plain, in quotation marks
+either way round, or with `AND`, `OR`, `NOT`, `+…+` or `-` between them;
+title word plus abstract word, and title word plus family name, the one
+article, while two words from two different articles listed nothing;
+`word.children` and `word-children` nothing although both words are in
+the title; "{word}-harbour" listed the article titled "The
+{word}-harbour survey", and so did {word} and "harbour" alone; "ox" (in
+an abstract, "…by ox cart.") listed it. MySQL and MariaDB, identical:
+"public" listed only the "public" title, "publication" nothing,
+"publications" only its own title; "study" only the "study" title,
+"studies" and "studied" only the one holding both; "note" one, "notes"
+four; "the", "of", "or", "the of" nothing; "and" listed the two articles
+holding "and" (one in its abstract, one in its title), as did "and"
+beside the title word; the two "Notes" words listed all three articles,
+typed plain or with `OR`, `NOT`, `+…+` or `-`, and with `AND` also the
+article whose abstract holds "and"; `"word1 and word2"`, `"children
+about {word}"` and `"notes on {word}"` listed only the article holding
+the words in that order, while `"word1 word2"`, `"word2 word1"`,
+`"{word} children"` and `"{word} notes"` listed nothing; `word.children`,
+`word-children` and `children-word` the article; a pair of words from
+two articles joined by a hyphen both articles; "ox" nothing, "cart" the
+article. Once, on MySQL in a run sharing the database with another,
+`"children about {word}"` listed nothing on OJS while every other run
+found it; not taken as behavior. The page's text held no word on how
+words match or combine on any app or database.
 
 <a id="fn-e"></a>
 **e — the bare page.** `SearchHandler::search()` always runs the builder;
@@ -1875,7 +1980,22 @@ French-title probe of 2026-09-02). The real words "The", "publications",
 "of", "children" in the first title and "The … study" in the second carry
 the whole-word, common-word and punctuation steps, each of which fn-d
 probed on 2026-09-02 ("publi", "publication", "child", "children", "the",
-quotation marks, "AND", the hyphen). Strings as fn-s3.
+quotation marks, "AND", the hyphen). The seeded abstracts: the first
+`An abstract about {abstractToken} and its measurement by ox cart.`, the
+second `A plain abstract about a regional periodical.`; the third
+article, titled `The {token}-harbour survey` as the 2026-11-16 probe's
+"{word}-harbour" title (fn-d), carries an abstract with no "and",
+"children" or "harbour". Only the first holding "and" is what keeps the
+"AND" step at one article on MySQL and MariaDB (live-probed 2026-11-16,
+fn-d). Every step runs on every database; the steps whose answer Rule 4
+gives per database ("publication", "and" alone, the hyphen and
+full-stop joins) read `onPostgres`
+(`shared/playwright/support/database.js`, PRINCIPLES D8) for which
+answer to expect, and the "ox" step runs on MySQL and MariaDB only,
+Rule 4 stating no PostgreSQL answer for it. Every push, PR and local
+fleet runs PostgreSQL; the MySQL and MariaDB bullet runs in CI's daily
+configurations run (`e2e-matrix.yml`) and on the `mysql` and `mariadb`
+lines. Strings as fn-s3.
 
 <a id="fn-s3"></a>
 **s3** — Strings: `search.noResults` "No Results" (OJS/OPS);
@@ -2022,9 +2142,13 @@ of a freshly reset dataset read before and after another context gains
 published items (fn-j: no `ORDER BY` without a sort).
 
 <a id="fn-f-a5"></a>
-**f-a5** — fn-d. The PostgreSQL side live-probed 2026-09-02 (all words
-required; quotes, AND and OR change nothing); the MySQL/MariaDB side is
-judgment from Laravel's `whereFullText` grammar.
+**f-a5** — fn-d. Live-probed 2026-11-16 on PostgreSQL, MySQL 8.0 and
+MariaDB 10.11, OJS, OMP and OPS: two made-up words, each in its own
+title and both in a third, listed only the third on PostgreSQL and all
+three on MySQL and MariaDB; words in quotation marks are a phrase on
+MySQL and MariaDB and change nothing on PostgreSQL; the word-form,
+"and", short-word and hyphen differences as fn-d. The PostgreSQL side was
+first probed 2026-09-02.
 
 <a id="fn-f-a6"></a>
 **f-a6** — fn-e. Live-probed 2026-09-02 on all three apps.

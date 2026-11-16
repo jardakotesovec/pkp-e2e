@@ -202,11 +202,12 @@ test.describe('Search (U15)', () => {
     test('S2: abstract and contributor names are searched too', async ({page, opsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s2', testInfo);
-        const [wordTitle, wordAbstract, wordFamily, wordFrench, wordOther] = makeWords(5);
+        const [wordTitle, wordAbstract, wordFamily, wordFrench, wordOther, wordHarbour] = makeWords(6);
         const familyName = wordFamily[0].toUpperCase() + wordFamily.slice(1);
         const titleA = `The publications of children about ${wordTitle}`;
         const titleAFrench = `Les publications des enfants sur ${wordFrench}`;
         const titleB = `The ${wordOther} study`;
+        const titleC = `The ${wordHarbour}-harbour survey`;
         // French beside English as UI and submission language, so the first
         // preprint's title can carry a French version (fn-s2).
         await opsApi.createContext({
@@ -223,12 +224,14 @@ test.describe('Search (U15)', () => {
                 },
             ],
         });
+        // The seeded abstracts (fn-s2): only the first holds "and" and "ox";
+        // the third's holds no "and", "children" or "harbour".
         await opsApi.createSubmission({
             tag: `${tag}a`,
             context: tag,
             submitter: `${tag}au`,
             title: {en: titleA, fr_CA: titleAFrench},
-            abstract: `A seeded abstract that mentions ${wordAbstract} once.`,
+            abstract: `An abstract about ${wordAbstract} and its measurement by ox cart.`,
             published: true,
         });
         await opsApi.createSubmission({
@@ -236,6 +239,15 @@ test.describe('Search (U15)', () => {
             context: tag,
             submitter: `${tag}bu`,
             title: titleB,
+            abstract: 'A plain abstract about a regional periodical.',
+            published: true,
+        });
+        await opsApi.createSubmission({
+            tag: `${tag}c`,
+            context: tag,
+            submitter: `${tag}bu`,
+            title: titleC,
+            abstract: 'A short abstract on a coastal periodical.',
             published: true,
         });
         runJobs();
@@ -244,12 +256,24 @@ test.describe('Search (U15)', () => {
         const search = new SearchPage(page, tag);
         await search.goto();
 
-        // Exactly the first preprint, and the second (Control, carrying none
-        // of the searched words) absent from the list.
+        // Exactly the first preprint; the second (carrying none of the
+        // searched words) and the third (Control) absent from the list.
         const expectFirstOnly = async () => {
             const found = await search.expectOnlyResult(titleA);
             await expect(search.result(titleB)).toHaveCount(0);
+            await expect(search.result(titleC)).toHaveCount(0);
             return found;
+        };
+
+        // The steps whose answer Rule 4 gives per database read which
+        // database the site runs on (fn-s2, PRINCIPLES D8): on PostgreSQL
+        // the answer the step names, on MySQL or MariaDB that bullet's.
+        const expectFirstOnlyOnMySQL = async () => {
+            if (onPostgres) {
+                await search.expectNoResults();
+            } else {
+                await expectFirstOnly();
+            }
         };
 
         // A word that appears only in one preprint's abstract (Rule 3).
@@ -269,38 +293,65 @@ test.describe('Search (U15)', () => {
         await search.search(wordFrench);
         await expectFirstOnly();
 
-        // Whole words (Rule 4): a fragment finds nothing, the word does; an
-        // irregular form does not find its plural.
+        // Whole words (Rule 4): a fragment finds nothing; "publication"
+        // finds "publications" on PostgreSQL and nothing on MySQL or
+        // MariaDB, where a word finds only itself; an irregular form does
+        // not find its plural, the word itself does.
         await search.search('publi');
         await search.expectNoResults();
-        // A word's other forms and a hyphenated pair are matched as the
-        // database's own full-text search matches them (Rule 4 states
-        // PostgreSQL's): asked on PostgreSQL only.
+        await search.search('publication');
         if (onPostgres) {
-            await search.search('publication');
             await expectFirstOnly();
+        } else {
+            await search.expectNoResults();
         }
         await search.search('child');
         await search.expectNoResults();
         await search.search('children');
         await expectFirstOnly();
 
-        // Common words (Rule 4): "the" alone finds nothing, although both
-        // titles hold it; beside the title word it changes nothing.
+        // Common words (Rule 4): "the" alone finds nothing, although every
+        // title holds it; beside the title word it changes nothing. "and"
+        // alone finds nothing on PostgreSQL, although the first abstract
+        // holds it; on MySQL or MariaDB it is not dropped and lists the
+        // first preprint, the only one holding it.
         await search.search('the');
         await search.expectNoResults();
         await search.search(`the ${wordTitle}`);
         await expectFirstOnly();
+        await search.search('and');
+        await expectFirstOnlyOnMySQL();
 
-        // Punctuation and syntax (Rule 4): quotation marks and "AND" are
-        // ignored; a hyphenated pair finds nothing, although both words are
-        // in the title.
+        // Punctuation and syntax (Rule 4): quotation marks around the word
+        // and "AND" between the word and "children" list the same one
+        // preprint (on MySQL or MariaDB "AND" adds the preprints holding
+        // "and", the first alone). The word and "children" joined by a
+        // hyphen, and by a full stop, no spaces: nothing on PostgreSQL,
+        // although both words are in the title; on MySQL or MariaDB the
+        // join splits them and the first preprint is listed.
         await search.search(`"${wordTitle}"`);
         await expectFirstOnly();
         await search.search(`${wordTitle} AND children`);
         await expectFirstOnly();
-        if (onPostgres) {
-            await search.search(`${wordTitle}-children`);
+        await search.search(`${wordTitle}-children`);
+        await expectFirstOnlyOnMySQL();
+        await search.search(`${wordTitle}.children`);
+        await expectFirstOnlyOnMySQL();
+
+        // A hyphenated pair (Rule 4): the third preprint's word and
+        // "harbour" joined by a hyphen, as its title holds them, list exactly
+        // the third preprint on every database (Control: the first and the
+        // second absent).
+        await search.search(`${wordHarbour}-harbour`);
+        await search.expectOnlyResult(titleC);
+        await expect(search.result(titleA)).toHaveCount(0);
+        await expect(search.result(titleB)).toHaveCount(0);
+
+        // On MySQL or MariaDB only (Rule 4 states no PostgreSQL answer): a
+        // word shorter than three letters is dropped, so "ox" finds
+        // nothing, although the first abstract holds it.
+        if (!onPostgres) {
+            await search.search('ox');
             await search.expectNoResults();
         }
     });
