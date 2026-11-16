@@ -1,0 +1,22 @@
+--- a/lib/pkp/plugins/importexport/users/PKPUserImportExportPlugin.php
++++ b/lib/pkp/plugins/importexport/users/PKPUserImportExportPlugin.php
+@@ -158,6 +158,8 @@
+                 }
+                 $templateMgr->assign('users', $users);
+                 $json = new JSONMessage(true, $templateMgr->fetch($this->getTemplateResource('results.tpl')));
++                // Redraw the "Export Users" list of the same page, which would otherwise not show the imported users
++                $json->setGlobalEvent('usersImported');
+                 header('Content-Type: application/json');
+                 return $json->getString();
+             case 'export':
+--- a/plugins/importexport/users/templates/index.tpl
++++ b/plugins/importexport/users/templates/index.tpl
+@@ -71,7 +71,7 @@
+ 				{csrf}
+ 				{fbvFormArea id="exportForm"}
+ 					{capture assign=usersGridUrl}{url router=PKP\core\PKPApplication::ROUTE_COMPONENT component="grid.users.exportableUsers.ExportableUsersGridHandler" pluginName="UserImportExportPlugin" op="fetchGrid" escape=false}{/capture}
+-					{load_url_in_div id="usersGridContainer" url=$usersGridUrl}
++					{load_url_in_div id="usersGridContainer" url=$usersGridUrl refreshOn="usersImported"}
+ 					{fbvFormButtons submitText="plugins.importexport.users.export.exportUsers" hideCancel="true"}
+ 				{/fbvFormArea}
+ 			</form>

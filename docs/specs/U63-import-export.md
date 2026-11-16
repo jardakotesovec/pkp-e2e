@@ -1642,7 +1642,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OMP4](#omp4) | A press's command-line CSV import stops with a fatal error, imports nothing and leaves an empty submission | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OMP5](#omp5) | A press importing an OMP Native XML export is warned "Unknown element sequence" for every book in a series | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OMP6](#omp6) | From the command line, a press's Native XML import fails on any book with a publication format, and so does the export once the ONIX details are filled | 🐞 | medium · crash: server | issues (claude), 2026-10-21 — re-verified |
-| [OMP7](#omp7) | A press's "Export Users" list leaves out the accounts an import on the same page has just made | 🐞 | minor | — |
+| [OMP7](#omp7) | Users XML Plugin: after "Import Users", the "Export Users" list leaves out the accounts just imported | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A14](#a14) | "Export Users" with no row ticked ends on a blank page: the server fails | ❓ | minor · crash: server | — |
 | [A22](#a22) | "Export Users" leaves out an account whose only role starts on a later date | ❓ | minor | — |
 | [OJS8](#ojs8) | DOAJ "Register" checks nothing, "Validate XML before the export and registration." ticked or not | ❓ | minor | — |
@@ -2176,15 +2176,17 @@ server allows. One change in OMP fixes both.
 Basis: probe, 2026-10-21. <sup>f-omp6</sup>
 
 <a id="omp7"></a>
-**OMP7 — A press's "Export Users" list leaves out the accounts an import on the same page has just made** · 🐞 · minor.
-A press manager imports a users file on the Users XML Plugin's "Import
-Users" tab, reads the success sentence, and presses the "Export Users"
-tab of the same page. "Current Users" should list the new accounts.
-Instead it is the list the page opened with: none of them is there to
-tick, and the manager may take the import for a failure. Opening the
-tool again lists them. A journal's tool page is built the same way but
-was not driven.
-Basis: test run, 2026-11-11. <sup>f-omp7</sup>
+**OMP7 — Users XML Plugin: after "Import Users", the "Export Users" list leaves out the accounts just imported** · 🐞 · low.
+A press or journal manager imports a users file on the Users XML
+Plugin's "Import Users" tab, reads the success sentence, and presses the
+"Export Users" tab of the same page. "Current Users" should list the new
+accounts. Instead it is the list the page opened with: the same count,
+and none of the new accounts is there to tick.
+Nothing is lost, but the manager may take the import for a failure.
+Importing the file again changes nothing, and the list still leaves the
+accounts out. Searching the list for the new names, or opening the tool
+again, shows them.
+Basis: test run, 2026-11-16. <sup>f-omp7</sup>
 
 ### Retired
 
@@ -4012,6 +4014,7 @@ template with the same two lines; not driven there. Test run
 twice with a file creating quill, sage and tern, the "Export Users" tab
 of the same page held no row for any of them; the press's tool opened
 afresh listed all three.
+Issue report: [docs/issues/U63-OMP7-export-users-list-misses-imported-accounts.md](../issues/U63-OMP7-export-users-list-misses-imported-accounts.md).
 
 ## Reference — entry points & surfaces
 
