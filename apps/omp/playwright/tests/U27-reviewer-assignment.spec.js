@@ -12,7 +12,8 @@
  * recommendation surfaces on a press — OMP1 ✅). Scenario 15 is OPS-only.
  * S21's scratch press gets its "Competing Interests" policy through the
  * same `review` passthrough, and the scenario's own step empties it on
- * screen. The editor-side read window is the Vue "Review Details" modal with its
+ * screen; its fourth reviewer's "Save for Later" draft is made in that
+ * reviewer's own wizard (no scenario key seeds a draft). The editor-side read window is the Vue "Review Details" modal with its
  * "Modify Review" partner (pkp/pkp-lib#13156 — Rules 14a/14b). S20's
  * scratch press is created with the context's `review` passthrough (the
  * press's Settings › Workflow › Review, never driven on screen).
@@ -20,8 +21,8 @@
  * Not covered, by register ID (the spec's Coverage section is the record of
  * everything else left out; 🐞 findings are never asserted as contract):
  * A1, A2, A4, A6, A7, A12, A13, A15, A16, A17, A18, A19, A21, A22, A23,
- * A26, A28, A29, A30, A31, A32, A36, A37, A38, A39, A41, A42, A43, A44,
- * A45, A46, A47, A48, A49, A50, A51, OMP2, OMP6.
+ * A26, A28, A29, A30, A31, A32, A36, A37, A38, A39, A42, A43, A44,
+ * A45, A46, A47, A48, A49, A50, A51, A52, A53, OMP2, OMP6.
  *
  * Seeding: scenario endpoints only. Tests that read a server-fed notice
  * ("{name} was assigned…", "Reviewer removed.") or a reviewer's mailbox or
@@ -2373,10 +2374,12 @@ test.describe('Reviewer assignment & management (U27)', () => {
         // "Reviewer Guidance", never driven to set it): the first reviewer's
         // `completed` review records "I do not have any competing
         // interests" (scenarios.md `reviewRounds[]`); the second and third
-        // requests are unanswered.
+        // requests are unanswered; the fourth reviewer's request is seeded
+        // unanswered and answered on screen below (no key seeds a draft).
         const answered = `rva${tag}`;
         const unanswered = `rvb${tag}`;
         const third = `rvc${tag}`;
+        const drafter = `rvd${tag}`;
         const {manager, seeded} = await seedScratchPress(
             ompApi,
             tag,
@@ -2384,18 +2387,36 @@ test.describe('Reviewer assignment & management (U27)', () => {
                 {username: answered, roles: ['externalReviewer'], givenName: `Ans${tag}`, familyName: 'Reviewer'},
                 {username: unanswered, roles: ['externalReviewer'], givenName: `Una${tag}`, familyName: 'Reviewer'},
                 {username: third, roles: ['externalReviewer'], givenName: `Thr${tag}`, familyName: 'Reviewer'},
+                {username: drafter, roles: ['externalReviewer'], givenName: `Drf${tag}`, familyName: 'Reviewer'},
             ],
             [
                 {username: answered, status: 'completed'},
                 {username: unanswered, status: 'invited'},
                 {username: third, status: 'invited'},
+                {username: drafter, status: 'invited'},
             ],
             {context: {review: {competingInterests: {en: `Disclose any relationship with the authors ${tag}.`}}}}
         );
         const answeredName = `Ans${tag} Reviewer`;
         const unansweredName = `Una${tag} Reviewer`;
         const thirdName = `Thr${tag} Reviewer`;
+        const drafterName = `Drf${tag} Reviewer`;
         const managerName = `Mgr${tag} Manager`;
+        const draft = 'The methods need a second look.';
+
+        // The fourth reviewer, signed in, accepts the request answering "I
+        // do not have any competing interests" on step 1, types the draft
+        // into "For author and editor" on step 3 and presses "Save for
+        // Later" (the Given, driven in the reviewer's own wizard).
+        const reviewerPage = await (await asUser(drafter)).newPage();
+        const wizard = new ReviewWizardPage(reviewerPage, tag, {privateBoxLabel: 'For editor only'});
+        await wizard.goto(seeded.submissionId);
+        await wizard.expectStep(1);
+        await wizard.noCompetingInterestsRadio.check();
+        await wizard.accept();
+        await wizard.continueToStep3();
+        await wizard.typeComments(draft);
+        await wizard.saveForLater();
 
         const page = await (await asUser(manager)).newPage();
         let modal = await openEditorial(page, tag, seeded.submissionId);
@@ -2449,30 +2470,74 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await expect(log).toBeHidden({timeout: 20_000});
 
         // {OMP} A press's unanswered request: "Save Changes" with nothing
-        // entered closes the window and leaves the row "Request Sent" (no
-        // review submitted for the reviewer: retired A40/OMP5's guard);
-        // the same with a declared statement keeps "Request Sent" and adds
-        // the badge.
+        // entered closes the window and submits the review for the
+        // reviewer (Rule 14d, since pkp/pkp-lib#13653): reopened, the row
+        // reads "Review Submitted" with "Read Review" and no badge. (A
+        // declaration-only save is register A52 ❓, parked.)
         modal = await openEditorial(page, tag, seeded.submissionId);
         let thirdRow = reviewerRow(modal, thirdName);
-        await expect(thirdRow).toContainText('Request Sent');
+        await expect(statusTitle(thirdRow, 'Request Sent')).toBeVisible();
         readModal = await openRowReviewDetails(page, thirdRow);
         editModal = await openModifyReviewWindow(page, readModal);
         await saveModifyReview(editModal);
         await cancelReviewDetails(readModal);
-        await expect(statusTitle(thirdRow, 'Request Sent')).toBeVisible({timeout: 20_000});
-        await expect(competingInterestsBadge(thirdRow)).toHaveCount(0);
         modal = await openEditorial(page, tag, seeded.submissionId);
         thirdRow = reviewerRow(modal, thirdName);
-        await expect(statusTitle(thirdRow, 'Request Sent')).toBeVisible();
-        readModal = await openRowReviewDetails(page, thirdRow);
-        editModal = await openModifyReviewWindow(page, readModal);
-        await declarationRadio(editModal, 'I may have competing interests (Specify below)').check();
-        await typeCompetingInterests(page, editModal, statement);
-        await saveModifyReview(editModal);
+        await expect(statusTitle(thirdRow, 'Review Submitted')).toBeVisible({timeout: 20_000});
+        await expect(thirdRow.getByRole('button', {name: 'Read Review'})).toBeVisible();
+        await expect(competingInterestsBadge(thirdRow)).toHaveCount(0);
+
+        // A reviewer's saved draft: the fourth reviewer's "Review Details"
+        // (row "Request Accepted") shows the draft as the review: the dated
+        // line "Request Accepted: {date and time}", "For author and editor"
+        // reading the draft, the "Declaration" reading "I do not have any
+        // competing interests", and "Mark as Complete" disabled beside the
+        // incomplete line. "Modify Review" opens on the draft and the
+        // ticked answer; "Save Changes" with nothing changed submits it:
+        // the view window reads "Last modified by {the Press Manager}" over
+        // "Review Submitted: {date and time}", and the row, reopened,
+        // "Review Submitted" with "Read Review". (No activity-log row for
+        // that save: register ❓, unasserted.)
+        let draftRow = reviewerRow(modal, drafterName);
+        await expect(statusTitle(draftRow, 'Request Accepted')).toBeVisible({timeout: 20_000});
+        await expect(statusTitle(draftRow, 'Review Submitted')).toHaveCount(0);
+        readModal = await openRowReviewDetails(page, draftRow);
+        await datedLine(readModal, 'Request Accepted');
+        await expect(readModal.getByRole('heading', {name: 'Review Submitted:'})).toHaveCount(0);
+        const draftComments = readModal.getByRole('group', {name: 'Reviewer Comments', exact: true});
+        await expect(draftComments).toContainText(
+            /For author and editor\s*The methods need a second look\.\s*For editor only\s*-/
+        );
+        group = competingInterestsGroup(readModal);
+        await expect(group).toHaveText(/Declaration\s*I do not have any competing interests\s*$/);
+        await expect(
+            readModal.getByRole('button', {name: 'Mark as Complete', exact: true})
+        ).toBeDisabled();
+        await expect(
+            readModal.getByText('This review is incomplete and cannot be marked as complete yet.', {exact: true})
+        ).toBeVisible();
+        const {editModal: draftEdit, commentBody: draftBody} = await openModifyReview(page, readModal, draft);
+        await expect(draftBody).toHaveText(draft);
+        await expect(
+            draftEdit.getByRole('group', {name: 'Reviewer Comments', exact: true})
+        ).toContainText('For author and editor');
+        await expect(declarationRadio(draftEdit, 'I do not have any competing interests')).toBeChecked();
+        await expect(declarationRadio(draftEdit, 'I may have competing interests (Specify below)')).not.toBeChecked();
+        await saveModifyReview(draftEdit);
+        await expect(readModal.getByText(`Last modified by ${managerName}`, {exact: true})).toBeVisible({timeout: 20_000});
+        await datedLine(readModal, 'Review Submitted');
+        const submittedView = await reviewDetailsText(readModal);
+        expect(submittedView.indexOf(`Last modified by ${managerName}`)).toBeGreaterThanOrEqual(0);
+        expect(submittedView.indexOf('Review Submitted:')).toBeGreaterThan(
+            submittedView.indexOf(`Last modified by ${managerName}`)
+        );
+        await expect(readModal.getByRole('heading', {name: 'Request Accepted:'})).toHaveCount(0);
         await cancelReviewDetails(readModal);
-        await expect(competingInterestsBadge(thirdRow)).toBeVisible({timeout: 20_000});
-        await expect(statusTitle(thirdRow, 'Request Sent')).toBeVisible();
+        modal = await openEditorial(page, tag, seeded.submissionId);
+        draftRow = reviewerRow(modal, drafterName);
+        await expect(statusTitle(draftRow, 'Review Submitted')).toBeVisible({timeout: 20_000});
+        await expect(draftRow.getByRole('button', {name: 'Read Review'})).toBeVisible();
+        await expect(statusTitle(draftRow, 'Request Accepted')).toHaveCount(0);
 
         // The unanswered request: the second reviewer's "Review Details"
         // shows the group with "Declaration" reading "-".

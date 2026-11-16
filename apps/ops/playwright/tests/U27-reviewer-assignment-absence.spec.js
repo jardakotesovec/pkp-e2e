@@ -13,17 +13,9 @@
  * Moderator-role search returns users; the server's own templates list).
  * The spec's Coverage section is the record of everything else left out.
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register;
- * a 🐞 is never asserted as contract, a ❓ is parked, not a gap):
- * - A1 🐞, A2 🐞, A7 🐞, A8 🐞, A12 🐞, A13 🐞, A15 🐞, A16 🐞, A18 🐞,
- *   A19 🐞, A21 🐞, A22 🐞, A30 🐞, A31 🐞, OMP2 🐞, OMP4 🐞, OMP6 🐞
- *   (journal and press reviewer surfaces that do not exist on a preprint
- *   server).
- * - A4 ❓, A6 ❓, A17 ❓, A23 ❓, A29 ❓, OMP5 ❓, A24 ✅, A33 ✅, A34 ✅, A35 ✅, A3 ✅, A5 ✅, A9 ✅,
- *   A10 ✅, A11 ✅,
- *   A14 ✅, A20 ✅, A25 ✅, OMP1 ✅, OPS1 ✅ (nothing to assert or park
- *   here; OPS1 is the retired "missing unassign template" reading, whose
- *   baseline fact this test's email-templates read states).
+ * Deliberately NOT covered: every register entry of the spec (they name
+ * journal and press reviewer surfaces, which a preprint server does not
+ * have).
  *
  * Seeding: a scratch preprint server (throwaway manager/moderator/author) +
  * one submitted preprint via the scenario endpoints. `publicknowledge` and

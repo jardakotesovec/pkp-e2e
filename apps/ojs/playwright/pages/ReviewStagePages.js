@@ -1919,5 +1919,66 @@ exports.reviewItemBlock = function reviewItemBlock(modal, question) {
     return modal.getByRole('heading', {name: question, exact: true}).locator('xpath=..');
 };
 
+// ---------------------------------------------------------------------------
+// The "Modify Review" window on a request whose review is not submitted:
+// the recommendation select, the comment box, the refusal and the view
+// window's attribution line (U27 revision, pkp/pkp-lib#13653, 2026-11-16)
+// ---------------------------------------------------------------------------
+
+/**
+ * The "Modify Review" window's required "Recommendation" select (a
+ * journal only), inside its "Reviewer Recommendation" group.
+ *
+ * @param {import('@playwright/test').Locator} editModal from openModifyReview
+ */
+exports.modifyReviewRecommendation = function modifyReviewRecommendation(editModal) {
+    return exports.recommendationSection(editModal).getByRole('combobox');
+};
+
+/**
+ * The body of the "Modify Review" window's "For author and editor" box (the
+ * TinyMCE `reviewDetailsForm-comments-control`); reads its text once the
+ * editor has put it in.
+ *
+ * @param {import('@playwright/test').Locator} editModal from openModifyReview
+ */
+exports.modifyReviewCommentsBody = function modifyReviewCommentsBody(editModal) {
+    return editModal.frameLocator('iframe[id^="reviewDetailsForm-comments-control"]').locator('body');
+};
+
+/**
+ * The window's "Reviewer Comments" group: "For author and editor" with the
+ * shared comment, then "For editor" with the editor-only one ("-" when
+ * empty).
+ *
+ * @param {import('@playwright/test').Locator} modal the Review Details window
+ */
+exports.reviewerCommentsGroup = function reviewerCommentsGroup(modal) {
+    return modal.getByRole('group', {name: 'Reviewer Comments'});
+};
+
+/**
+ * The form's refusal summary (FormErrors, `.pkpFormErrors`) as the "Modify
+ * Review" window shows it after a refused "Save Changes", read whole:
+ * "Please correct one error.", one "Go to {field}: {message}" button per
+ * error (screen-reader list) and "Jump to next error".
+ *
+ * @param {import('@playwright/test').Locator} editModal from openModifyReview
+ */
+exports.modifyReviewErrorSummary = function modifyReviewErrorSummary(editModal) {
+    return editModal.locator('.pkpFormErrors');
+};
+
+/**
+ * The Review Details window's attribution paragraph under its heading
+ * ("Last modified by {full name}"), shown once an editor saved "Modify
+ * Review".
+ *
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ */
+exports.lastModifiedLine = function lastModifiedLine(modal) {
+    return modal.getByText(/^Last modified by /);
+};
+
 module.exports.waitForJQueryIdle = waitForJQueryIdle;
 module.exports.waitForLegacyFormSettled = waitForLegacyFormSettled;

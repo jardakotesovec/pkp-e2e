@@ -12,7 +12,7 @@
  * the record of everything else left out):
  * - 🐞 A1, A2, A7, A12, A13, A15, A16, A18, A19, A21, A22, A26, A30, A31,
  *   A32, A36, A37, A39, A43, A44, A45, A46, A47, A49, A50, A51.
- * - ❓ A4, A6, A17, A23, A28, A29, A38, A41, A42, A48.
+ * - ❓ A4, A6, A17, A23, A28, A29, A38, A42, A48, A52, A53.
  *
  * Seeding: scenario endpoints only; publicknowledge and the 18 seeded users
  * are read-only. Tests that mutate roles/accounts (S2–S4), need a private
@@ -78,6 +78,13 @@ const {
     declareCompetingInterests,
     saveModifyReview,
     statusCell,
+    recommendationSection,
+    recommendationValue,
+    modifyReviewRecommendation,
+    modifyReviewCommentsBody,
+    modifyReviewErrorSummary,
+    reviewerCommentsGroup,
+    lastModifiedLine,
     waitForJQueryIdle,
     waitForLegacyFormSettled,
 } = require('../pages/ReviewStagePages.js');
@@ -2217,20 +2224,28 @@ test.describe('reviewer-assignment', () => {
 
     test('S21: a journal that asks about competing interests', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
-        test.setTimeout(300_000);
+        test.setTimeout(420_000);
         const tag = makeTag('s21', testInfo);
         const manager = `mgr${tag}`;
         const managerName = `Mgr${tag} Manager`;
         const author = `au${tag}`;
         const reviewer = `rev${tag}`;
         const unanswered = `revb${tag}`;
+        const third = `revc${tag}`;
+        const drafter = `revd${tag}`;
         const policy = `Disclose any competing interests ${tag}.`;
         const statement = 'I co-authored a paper with the author.';
+        const draftComment = 'The methods need a second look.';
+        const draftRecommendation = 'Revisions Required';
         const ciLogLine = 'The following was modified in this review: Reviewer Competing Interests.';
+        const recLogLine = 'The following was modified in this review: Reviewer Recommendation.';
+        const commentsLogLine = 'The following was modified in this review: Comments.';
         // Scratch journal with a "Competing Interests" policy (the `review`
         // passthrough); the seeded `completed` review records "I do not have
-        // any competing interests", the second request stays unanswered.
-        // The policy is emptied on screen, as the scenario does.
+        // any competing interests", the second and third requests stay
+        // unanswered, and the fourth Reviewer's request is accepted and
+        // drafted on screen below (no scenario key seeds a "Save for Later"
+        // draft). The policy is emptied on screen, as the scenario does.
         await ojsApi.createContext({
             tag,
             users: [
@@ -2238,6 +2253,8 @@ test.describe('reviewer-assignment', () => {
                 {username: author, roles: ['author']},
                 {username: reviewer, roles: ['externalReviewer']},
                 {username: unanswered, roles: ['externalReviewer']},
+                {username: third, roles: ['externalReviewer']},
+                {username: drafter, roles: ['externalReviewer']},
             ],
             review: {competingInterests: {en: policy}},
         });
@@ -2247,14 +2264,33 @@ test.describe('reviewer-assignment', () => {
             reviewers: [
                 {username: reviewer, status: 'completed'},
                 {username: unanswered, status: 'invited'},
+                {username: third, status: 'invited'},
+                {username: drafter, status: 'invited'},
             ],
         });
+
+        // The fourth Reviewer, signed in: step 1 answers "I do not have any
+        // competing interests" and accepts; step 3 takes the comment for
+        // author and editor and a "Recommendation", then "Save for Later".
+        const drafterPage = await (await asUser(drafter)).newPage();
+        const wizard = new ReviewWizardPage(drafterPage, tag);
+        await wizard.goto(submissionId);
+        await wizard.expectStep(1);
+        await wizard.noCompetingInterestsRadio.check();
+        await expect(wizard.noCompetingInterestsRadio).toBeChecked();
+        await wizard.accept();
+        await wizard.continueToStep3();
+        await wizard.typeComments(draftComment);
+        await wizard.chooseRecommendation(draftRecommendation);
+        await wizard.saveForLater();
 
         const managerPage = await (await asUser(manager)).newPage();
         const workflow = new WorkflowPage(managerPage, tag);
         await workflow.gotoEditorial(submissionId);
         const row = workflow.panelRow('Reviewers', reviewer);
         const secondRow = workflow.panelRow('Reviewers', unanswered);
+        const thirdRow = workflow.panelRow('Reviewers', third);
+        const draftRow = workflow.panelRow('Reviewers', drafter);
         const badge = (r) => statusCell(r).getByText('Competing Interests', {exact: true});
         const ciLogRows = (log) => log.getByRole('row').filter({hasText: ciLogLine});
 
@@ -2313,6 +2349,125 @@ test.describe('reviewer-assignment', () => {
         await expect(ciLogRows(log)).toHaveCount(1);
         await expect(ciLogRows(log).first()).toContainText(managerName);
         await closeSideWindow(log);
+
+        // A journal's unanswered request, a recommendation alone: the third
+        // Reviewer's "Review Details" › "Modify Review": no "Submitted
+        // recommendation:" line (the window's own "You are modifying a
+        // submitted review." the positive read) and an empty select.
+        await expect(statusTitle(thirdRow)).toHaveText('Request Sent');
+        const thirdModal = await openReviewDetailsFromMenu(managerPage, thirdRow);
+        const thirdEdit = await openModifyReview(managerPage, thirdModal);
+        const thirdSelect = modifyReviewRecommendation(thirdEdit);
+        await expect(thirdEdit.getByText('You are modifying a submitted review.', {exact: false})).toBeVisible();
+        await expect(thirdSelect).toBeVisible({timeout: 30_000});
+        await expect(thirdEdit.getByText('Submitted recommendation:', {exact: false})).toHaveCount(0);
+        await expect(thirdSelect).toHaveValue('');
+        // "Save Changes" refused in the window: "This field is required."
+        // under the select, the summary with its "Go to Recommendation"
+        // entry, no review save sent, the window still open, and "Save
+        // Changes" disabled until the select changes.
+        const reviewSaves = [];
+        const onReviewSave = (r) => {
+            if (/\/reviewAssignments\/\d+\/review$/.test(r.url().split('?')[0]) && r.method() === 'POST') {
+                reviewSaves.push(r.url());
+            }
+        };
+        managerPage.on('request', onReviewSave);
+        const thirdSave = thirdEdit.getByRole('button', {name: 'Save Changes', exact: true});
+        await expect(thirdSave).toBeEnabled();
+        await thirdSave.click();
+        await expect(
+            recommendationSection(thirdEdit).getByText('This field is required.', {exact: true})
+        ).toBeVisible({timeout: 30_000});
+        await expect(modifyReviewErrorSummary(thirdEdit)).toHaveText(
+            /^\s*Please correct one error\.\s*Go to Recommendation: This field is required\.\s*Jump to next error\s*$/
+        );
+        await expect(
+            modifyReviewErrorSummary(thirdEdit).getByRole('button', {
+                name: 'Go to Recommendation: This field is required.',
+                exact: true,
+            })
+        ).toHaveCount(1);
+        await expect(thirdSave).toBeDisabled();
+        await expect(thirdEdit).toBeVisible();
+        managerPage.off('request', onReviewSave);
+        expect(reviewSaves).toEqual([]);
+        // A "Recommendation" picked: "Save Changes" enabled again; pressed
+        // with nothing else entered, the window closes.
+        await thirdSelect.selectOption({label: 'Accept Submission'});
+        await expect(thirdSave).toBeEnabled();
+        await saveModifyReview(managerPage, thirdEdit);
+        // "Cancel": the row reads "Review Submitted" with the recommendation
+        // and "Read Review".
+        await closeReviewDetails(managerPage, thirdModal);
+        await expect(statusTitle(thirdRow)).toHaveText('Review Submitted', {timeout: 30_000});
+        await expect(statusCell(thirdRow)).toContainText('Accept Submission');
+        await expect(thirdRow.getByRole('button', {name: 'Read Review', exact: true})).toBeVisible();
+        // The activity log: one "Reviewer Recommendation." row under the
+        // Journal Manager's name, and no "Comments." row (the recommendation
+        // row read in the same settled log is the positive control).
+        const recLog = await openActivityLog(managerPage);
+        const recRows = recLog.getByRole('row').filter({hasText: recLogLine});
+        await expect(recRows).toHaveCount(1);
+        await expect(recRows.first()).toContainText(managerName);
+        await expect(recLog.getByRole('row').filter({hasText: commentsLogLine})).toHaveCount(0);
+        await closeSideWindow(recLog);
+
+        // A reviewer's saved draft: the fourth Reviewer's "Review Details"
+        // reads "Request Accepted: {date and time}", the draft's comment,
+        // recommendation and declaration, and "Mark as Complete" disabled
+        // beside the incomplete message.
+        await expect(statusTitle(draftRow)).toHaveText('Request Accepted');
+        const draftModal = await openReviewDetailsFromMenu(managerPage, draftRow);
+        await expect(datedLine(draftModal, 'Request Accepted')).toHaveText(
+            new RegExp(`^Request Accepted:\\s*${DATE_TIME}$`)
+        );
+        await expect(reviewerCommentsGroup(draftModal)).toContainText(
+            new RegExp(`For author and editor\\s*${draftComment.replace('.', '\\.')}`)
+        );
+        await expect(recommendationValue(draftModal)).toHaveText(draftRecommendation);
+        await expect(competingInterestsGroup(draftModal)).toHaveText(
+            /^\s*Competing Interests\s*Declaration\s*I do not have any competing interests\s*$/
+        );
+        await expect(draftModal.getByRole('button', {name: 'Mark as Complete', exact: true})).toBeDisabled();
+        await expect(
+            draftModal.getByText('This review is incomplete and cannot be marked as complete yet.')
+        ).toBeVisible();
+        // "Modify Review": the window opens with the draft's comment, the
+        // declaration ticked and the recommendation selected.
+        const draftEdit = await openModifyReview(managerPage, draftModal);
+        await expect(modifyReviewCommentsBody(draftEdit)).toHaveText(draftComment, {timeout: 30_000});
+        await expect(
+            competingInterestsGroup(draftEdit).getByRole('radio', {
+                name: 'I do not have any competing interests',
+                exact: true,
+            })
+        ).toBeChecked();
+        await expect(modifyReviewRecommendation(draftEdit).locator('option:checked')).toHaveText(
+            draftRecommendation
+        );
+        // "Save Changes" with nothing changed: the view window reads "Review
+        // Submitted: {date and time}" under "Last modified by {the Journal
+        // Manager's name}".
+        await saveModifyReview(managerPage, draftEdit);
+        const draftSubmitted = datedLine(draftModal, 'Review Submitted');
+        await expect(draftSubmitted).toHaveText(new RegExp(`^Review Submitted:\\s*${DATE_TIME}$`), {
+            timeout: 30_000,
+        });
+        const draftModified = lastModifiedLine(draftModal);
+        await expect(draftModified).toHaveText(`Last modified by ${managerName}`);
+        expect(
+            await draftModified.evaluate(
+                (line, other) => Boolean(line.compareDocumentPosition(other) & Node.DOCUMENT_POSITION_FOLLOWING),
+                await draftSubmitted.elementHandle()
+            )
+        ).toBe(true);
+        // "Cancel": the row reads "Review Submitted" with the recommendation
+        // and "Read Review".
+        await closeReviewDetails(managerPage, draftModal);
+        await expect(statusTitle(draftRow)).toHaveText('Review Submitted', {timeout: 30_000});
+        await expect(statusCell(draftRow)).toContainText(draftRecommendation);
+        await expect(draftRow.getByRole('button', {name: 'Read Review', exact: true})).toBeVisible();
 
         // The unanswered request: its "Review Details" group reads
         // "Declaration" over "-" (the window's "Request Sent:" line the
