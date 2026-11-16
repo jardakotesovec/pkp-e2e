@@ -492,12 +492,14 @@ async function completeStandaloneUploadWizard(page, fileName) {
  * the Copyediting stage, U32); choosing one fetches the template's body
  * into the message box, so the save waits for the editor to hold it (an
  * empty box after a fetch posts no message). Without it the box is left
- * as it arrives, empty.
+ * as it arrives, empty. `settled` waits for the people grid's reload after
+ * "Search" and picks the named person's row (U26 S4; opt-in while the U28
+ * flake diagnosis runs on the old path).
  */
 async function assignParticipant(
     page,
     modal,
-    {group, query, resultName, recommendOnly = false, template = null}
+    {group, query, resultName, recommendOnly = false, template = null, settled = false}
 ) {
     await modal
         .locator('[data-cy="participant-manager"]')
@@ -509,9 +511,31 @@ async function assignParticipant(
     });
     await dlg.getByRole('combobox').first().selectOption({label: group});
     await dlg.getByRole('textbox', {name: 'Search User By Name'}).fill(query);
-    await dlg.getByRole('button', {name: 'Search', exact: true}).click();
-    await expect(dlg.getByText(resultName)).toBeVisible({timeout: 20_000});
-    await dlg.getByRole('radio').first().check();
+    if (settled) {
+        // The people grid reloads after "Search": a radio picked in the
+        // list shown before the reload is lost with it, and "OK" then saves
+        // nothing (U26 S4, 2026-11-16: two Press editors listed, the window
+        // still open after "OK"). Wait for the reload, then pick the named
+        // person's own row (a click, as StageParticipantsPages.choosePerson).
+        await waitForJQueryIdle(page);
+        const fetched = page.waitForResponse((r) => r.url().includes('fetch-grid'), {timeout: 30_000});
+        await dlg.getByRole('button', {name: 'Search', exact: true}).click();
+        await fetched;
+        await waitForJQueryIdle(page);
+        const person = dlg
+            .locator('tr')
+            .filter({has: page.locator('input[name="userId"]')})
+            .filter({hasText: resultName})
+            .locator('input[name="userId"]');
+        await expect(person).toHaveCount(1, {timeout: 20_000});
+        await person.click();
+        await waitForJQueryIdle(page);
+        await expect(person).toBeChecked();
+    } else {
+        await dlg.getByRole('button', {name: 'Search', exact: true}).click();
+        await expect(dlg.getByText(resultName)).toBeVisible({timeout: 20_000});
+        await dlg.getByRole('radio').first().check();
+    }
     if (recommendOnly) {
         await dlg.locator('#recommendOnly').check();
     }
@@ -548,6 +572,46 @@ async function openTasksPanel(page) {
         timeout: 20_000,
     });
     return panel;
+}
+
+/**
+ * The author's revisions task as a press words it after an in-round
+ * "Request Revisions" for a sole author (Side effects; OMP3).
+ */
+const REVISIONS_TASK = 'Revisions to consider in External Review.';
+
+/**
+ * The Tasks panel's row(s) carrying `text` (a task sentence, a submission
+ * title or both), read in the panel `openTasksPanel` resolved.
+ */
+function tasksRow(panel, text) {
+    return panel.locator('tr.gridRow').filter({hasText: text});
+}
+
+/**
+ * Assert the "Round {N} Status" box reads exactly `lines` under its
+ * heading (one sentence, or the minimum line and its sentence), and
+ * nothing else: a settled read that retries until the box agrees.
+ */
+async function expectRoundStatusLines(modal, round, lines) {
+    await expect(roundStatusBox(modal, round).getByText(lines[lines.length - 1], {exact: true})).toBeVisible({
+        timeout: 15_000,
+    });
+    await expect(async () => {
+        expect(await roundStatusLines(modal, round)).toEqual(lines);
+    }).toPass({timeout: 15_000});
+}
+
+/**
+ * A recommending editor's recommendation (Rule 13): press `label`
+ * ("Recommend Accept", …) among the round's buttons and walk the wizard
+ * to its completion panel (the wizard belongs to Editorial decision
+ * recording).
+ */
+async function recordRecommendation(page, modal, label) {
+    await actionsRegion(modal).getByRole('button', {name: label, exact: true}).click();
+    await expect(page.getByRole('heading', {level: 1, name: new RegExp(label)})).toBeVisible({timeout: 15_000});
+    await walkDecisionWizard(page);
 }
 
 /**
@@ -1180,6 +1244,10 @@ module.exports = {
     completeStandaloneUploadWizard,
     assignParticipant,
     openTasksPanel,
+    REVISIONS_TASK,
+    tasksRow,
+    expectRoundStatusLines,
+    recordRecommendation,
     closeTopModal,
     openReviewFilesDialog,
     showAllStageFiles,

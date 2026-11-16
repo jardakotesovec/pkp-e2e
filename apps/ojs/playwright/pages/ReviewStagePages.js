@@ -662,23 +662,28 @@ async function attachInWizard(dialog, {genre, file}) {
 /**
  * Attach a file in the already-open upload wizard's first step, then close
  * the window without finishing, through the side modal's own "Close" (the
- * Side-effects claim: the upload stands from the first step). The wizard's
- * bottom "Cancel" link is a different path: the wizard's cancel handler
- * deletes the file it uploaded (FileUploadWizardHandler.wizardCancelRequested),
- * so it is not "closing without finishing".
+ * Side-effects claim: the upload stands from the first step), answering
+ * the browser's leave-without-saving question ("The data on this form has
+ * changed. Do you wish to continue without saving?") with "OK". The
+ * wizard's own "Cancel" link is a different path: the wizard's cancel
+ * handler deletes the file it uploaded
+ * (FileUploadWizardHandler.wizardCancelRequested), so it is not "closing
+ * without finishing".
+ *
+ * Returns the question's text, or null when the window closed without
+ * asking (bounded by the window going, which an unanswered question
+ * would prevent).
  *
  * @param {import('@playwright/test').Page} page
  * @param {{genre?: string, file?: string | {name: string, mimeType: string, buffer: Buffer}}} options
+ * @returns {Promise<string | null>}
  */
 exports.uploadFirstStepOnly = async function uploadFirstStepOnly(page, {genre = 'Article Text', file = FIXTURE_PDF} = {}) {
     const dialog = uploadWizardDialog(page);
     await attachInWizard(dialog, {genre, file});
-    // A browser confirm() on the way out would be dismissed by default,
-    // which keeps the window open; accept one if the screen asks.
-    page.once('dialog', (d) => d.accept().catch(() => {}));
-    await dialog.getByRole('button', {name: 'Close', exact: true}).click();
-    await expect(dialog).toHaveCount(0, {timeout: 30_000});
+    const question = await exports.closeWindowAsking(page, dialog, {answer: 'accept'});
     await waitForJQueryIdle(page);
+    return question;
 };
 
 /**

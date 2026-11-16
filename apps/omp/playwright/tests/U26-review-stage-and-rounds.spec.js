@@ -15,15 +15,14 @@
  *
  * Not covered, by register ID (the spec's Coverage section is the record
  * of everything else left out): A1, A2, A3, A4, A5, A6, A7, A8, A9, A10,
- * A14, OMP2, OMP3 (the press's read-review window shows the shared remark,
- * which S12 asserts as the working path); U27's A21/A22
- * (the "Review Details" window's rating race and guidance paragraph).
+ * A11, A13, A14, OMP2, OMP3; U27's A21, A22.
  *
  * Seeding: scenario endpoints only; scratch submissions ride the read-only
  * `publicknowledge` press (series `monographs` auto-assigns the seeded
  * deciding editors on submit); scenario 4 uses a scratch press with
- * throwaway users because its mail assertion needs a unique throwaway
- * recipient (Mailpit is shared across fleets — never cleared, every mail
+ * throwaway users (a Press editor, a Series editor, a Funding coordinator,
+ * an unassigned Press editor and the author) because its mail assertions
+ * need unique throwaway recipients (Mailpit is shared across fleets — never cleared, every mail
  * claim scoped by recipient address naming app + test); S11's second
  * submission sits on a scratch press too (a Series Editor who is the only
  * editorial participant, which the seeded press's auto-assignment forbids);
@@ -54,6 +53,10 @@ const {
     completeUploadWizard,
     assignParticipant,
     openTasksPanel,
+    REVISIONS_TASK,
+    tasksRow,
+    expectRoundStatusLines,
+    recordRecommendation,
     closeTopModal,
     openReviewFilesDialog,
     showAllStageFiles,
@@ -281,17 +284,19 @@ test.describe('Review stage & rounds (U26)', () => {
         const modal2 = await openEditorial(page, PK, seeded.submissionId);
         await expectRoundStatus(modal2, 1, STATUS.revisionsRequested);
 
-        // The author's task list holds a revisions task for this submission…
+        // The author's task list holds the press's revisions task for this
+        // submission ("Revisions to consider in External Review.", OMP3)…
         const authorPage = await (await asUser('author.alex')).newPage();
         await authorPage.goto(`/index.php/${PK}/en/dashboard/mySubmissions`);
         const tasks = await openTasksPanel(authorPage);
-        await expect(tasks.getByText(`Submission ${tag}`)).toBeVisible();
+        await expect(tasksRow(tasks, `Submission ${tag}`).filter({hasText: REVISIONS_TASK})).toHaveCount(1);
         await closeTopModal(authorPage);
 
-        // …and their review stage offers the bottom "Upload revisions" button.
+        // …and their review stage offers "Upload revisions" in the column to
+        // the right of the round (its action items, at the column's top).
         const authorModal = await openAuthorView(authorPage, PK, seeded.submissionId);
         await expect(
-            authorModal.getByRole('button', {name: 'Upload revisions'})
+            actionsRegion(authorModal).getByRole('button', {name: 'Upload revisions'})
         ).toBeVisible();
     });
 
@@ -303,21 +308,30 @@ test.describe('Review stage & rounds (U26)', () => {
         const manager = `mgr${tag}`;
         const editor = `ed${tag}`;
         const otherEditor = `ed2${tag}`;
+        const seriesEditor = `se${tag}`;
+        const funding = `fc${tag}`;
         const author = `au${tag}`;
         const editorEmail = `${tag}ed@mail.test`;
         const otherEditorEmail = `${tag}ed2@mail.test`;
+        const seriesEditorEmail = `${tag}se@mail.test`;
+        const fundingEmail = `${tag}fc@mail.test`;
         const authorEmail = `${tag}au@mail.test`;
         const NOTICE = 'Revised Version Uploaded';
 
-        // Scratch press: the revised-version notice must land in a unique
-        // throwaway mailbox (the roster's addresses are shared). A second
-        // Series Editor of the press is never assigned to the stage.
+        // Scratch press: the revised-version notice must land in unique
+        // throwaway mailboxes (the roster's addresses are shared). The Press
+        // editor is assigned to the stage on screen below; the Series editor
+        // and the Funding coordinator ride `participants[]` and never sign
+        // in; a second Press editor of the press is never assigned (a press
+        // has no Guest editor group; footnote s).
         await ompApi.createContext({
             tag,
             users: [
                 {username: manager, roles: ['manager'], givenName: `Mgr${tag}`, familyName: 'Manager'},
-                {username: editor, roles: ['sectionEditor'], givenName: `Ed${tag}`, familyName: 'Editor', email: editorEmail},
-                {username: otherEditor, roles: ['sectionEditor'], givenName: `Other${tag}`, familyName: 'Editor', email: otherEditorEmail},
+                {username: editor, roles: ['editor'], givenName: `Ed${tag}`, familyName: 'Editor', email: editorEmail},
+                {username: otherEditor, roles: ['editor'], givenName: `Other${tag}`, familyName: 'Editor', email: otherEditorEmail},
+                {username: seriesEditor, roles: ['sectionEditor'], givenName: `Se${tag}`, familyName: 'Serieseditor', email: seriesEditorEmail},
+                {username: funding, roles: ['funding'], givenName: `Fc${tag}`, familyName: 'Funder', email: fundingEmail},
                 {username: author, roles: ['author'], givenName: `Au${tag}`, familyName: 'Author', email: authorEmail},
             ],
         });
@@ -327,16 +341,21 @@ test.describe('Review stage & rounds (U26)', () => {
             submitter: author,
             decisions: ['skipInternalReview', 'requestRevisions'],
             reviewRounds: [{stage: 'external'}],
+            participants: [
+                {username: seriesEditor, role: 'sectionEditor'},
+                {username: funding, role: 'funding'},
+            ],
         });
 
         // Scratch presses auto-assign no editor on submit (spec footnote s):
-        // assign the throwaway editor to the stage through the screens.
+        // assign the throwaway Press editor to the stage through the screens.
         const mgrPage = await (await asUser(manager)).newPage();
         const mgrModal = await openEditorial(mgrPage, tag, seeded.submissionId);
         await assignParticipant(mgrPage, mgrModal, {
-            group: 'Series editor',
+            group: 'Press editor',
             query: `Ed${tag}`,
             resultName: `Ed${tag} Editor`,
+            settled: true,
         });
 
         // The Editor's screen is read by the assigned Editor in a session
@@ -347,11 +366,12 @@ test.describe('Review stage & rounds (U26)', () => {
         const edModal = await openEditorial(edPage, tag, seeded.submissionId);
         await expectRoundStatus(edModal, 1, STATUS.revisionsRequested);
 
-        // The author holds a revisions task (control for its later removal).
+        // The author holds scenario 3's revisions task, in the press's
+        // wording (control for its later removal).
         const authorPage = await (await asUser(author)).newPage();
         await authorPage.goto(`/index.php/${tag}/en/dashboard/mySubmissions`);
         const tasksBefore = await openTasksPanel(authorPage);
-        await expect(tasksBefore.getByText(`Submission ${tag}`)).toBeVisible();
+        await expect(tasksRow(tasksBefore, `Submission ${tag}`).filter({hasText: REVISIONS_TASK})).toHaveCount(1);
         await closeTopModal(authorPage);
 
         // "Upload revisions", first step only: attach the file, then close
@@ -381,16 +401,29 @@ test.describe('Review stage & rounds (U26)', () => {
         await expect(edModal2.getByRole('heading', {name: /^Workflow:/}).first()).toBeVisible({timeout: 20_000});
         await expectRoundStatus(edModal2, 1, STATUS.revisionsSubmitted);
 
-        // The author's task is gone (the panel's own answer bounds the read).
+        // The author's revisions task is gone (the panel's own grid bounds
+        // the read; the same read above held it).
         await authorPage.goto(`/index.php/${tag}/en/dashboard/mySubmissions`);
         const tasksAfter = await openTasksPanel(authorPage);
-        await expect(tasksAfter.getByText(`Submission ${tag}`)).toHaveCount(0);
+        await expect(tasksRow(tasksAfter, REVISIONS_TASK)).toHaveCount(0);
+        await expect(tasksRow(tasksAfter, `Submission ${tag}`)).toHaveCount(0);
 
         // Mailbox: the assigned editor's notice, sent under the author's
         // own name and address (the abandoned wizard recalled nothing).
         const notice = await pkpMail.find({to: editorEmail, subject: NOTICE});
         expect(notice.From.Address).toBe(authorEmail);
         expect(notice.From.Name).toContain(`Au${tag}`);
+
+        // The other participants' mailboxes: the assigned Series editor has
+        // the same notice, from the author; the assigned Funding coordinator
+        // has none (bounded by the Series editor's, read the same way).
+        const seNotice = await pkpMail.find({to: seriesEditorEmail, subject: NOTICE});
+        expect(seNotice.From.Address).toBe(authorEmail);
+        await pkpMail.expectNone({
+            to: fundingEmail,
+            subject: NOTICE,
+            afterControl: {to: seriesEditorEmail, subject: NOTICE},
+        });
 
         // A second upload the same day: both files listed, and no second
         // notice. The notice goes out inside the upload's own request
@@ -418,7 +451,7 @@ test.describe('Review stage & rounds (U26)', () => {
             .poll(() => pkpMail.count({to: editorEmail, subject: NOTICE}), {timeout: 20_000})
             .toBe(2);
 
-        // Control: the Series Editor not assigned to the stage has no notice
+        // Control: the Press editor not assigned to the stage has no notice
         // (bounded by the assigned editor's, read the same way).
         await pkpMail.expectNone({
             to: otherEditorEmail,
@@ -453,8 +486,9 @@ test.describe('Review stage & rounds (U26)', () => {
         await expectRoundStatus(modal3, 1, STATUS.resubmitSubmitted);
 
         // Working path after the first upload (A1's register entry owns the
-        // vanished bottom button): the Revisions Uploaded panel's own
-        // "Upload" control still opens the upload wizard.
+        // vanished "Upload revisions" button of the right-hand column): the
+        // Revisions Uploaded panel's own "Upload" control still opens the
+        // upload wizard.
         await primaryRegion(authorModal)
             .getByRole('button', {name: 'Upload', exact: true})
             .first()
@@ -802,11 +836,7 @@ test.describe('Review stage & rounds (U26)', () => {
         await expect(decisionButton(raviModal, DECISIONS.decline)).toHaveCount(0);
 
         // They record "Accept Submission" as a recommendation.
-        await actionsRegion(raviModal).getByRole('button', {name: 'Recommend Accept'}).click();
-        await expect(
-            raviPage.getByRole('heading', {level: 1, name: /Recommend Accept/})
-        ).toBeVisible({timeout: 15_000});
-        await walkDecisionWizard(raviPage);
+        await recordRecommendation(raviPage, raviModal, 'Recommend Accept');
 
         // The deciding editor sees the Recommendation box and the closing
         // recommendation sentence.
@@ -819,6 +849,33 @@ test.describe('Review stage & rounds (U26)', () => {
             secondaryRegion(mayaModal2).getByRole('heading', {name: 'Recommendation'})
         ).toBeVisible();
         await expect(recommendationBox.getByText('Accept Submission')).toBeVisible();
+
+        // A pending recommendation beside a review underway, then beside an
+        // unread review (Rule 6b): the same two editors on a third and a
+        // fourth submission of the seeded press. While the recommendation is
+        // pending the box reads the reviewer sentence alone; once recorded,
+        // the recommendation sentence alone.
+        for (const [suffix, reviewer, pending] of [
+            ['c', {username: 'reviewer.julia', status: 'accepted'}, STATUS.awaitingResponses],
+            ['d', {username: 'reviewer.paul', status: 'completed'}, STATUS.newReviews],
+        ]) {
+            const seededN = await seedInExternalReview(ompApi, `${tag}${suffix}`, {reviewers: [reviewer]});
+            const mayaModalN = await openEditorial(mayaPage, PK, seededN.submissionId);
+            await assignParticipant(mayaPage, mayaModalN, {
+                group: 'Series editor',
+                query: 'ravi',
+                resultName: 'Ravi Section Editor',
+                recommendOnly: true,
+            });
+            const raviModalN = await openEditorial(raviPage, PK, seededN.submissionId);
+            await expect(
+                actionsRegion(raviModalN).getByRole('button', {name: 'Recommend Accept'})
+            ).toBeVisible();
+            await expectRoundStatusLines(raviModalN, 1, [pending]);
+            await recordRecommendation(raviPage, raviModalN, 'Recommend Accept');
+            const mayaModalN2 = await openEditorial(mayaPage, PK, seededN.submissionId);
+            await expectRoundStatusLines(mayaModalN2, 1, [STATUS.recommendationsIn]);
+        }
 
         // Sole recommending editor: on a scratch press a throwaway Series
         // Editor, limited the same way, is the only editorial participant

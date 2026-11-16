@@ -10,12 +10,9 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
- * - A1 🐞, A9 🐞, A10 🐞, A14 🐞.
- * - A2 ❓, A3 ❓ (spec instruction: no assertion touches the read-review
- *   window's attachments section), A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓.
- * - U27-register A21 🐞 / A22 🐞 / A23 ❓ / A24 ❓ (the Vue "Review Details"
- *   window): S2 drives only Read Review → "Mark as Complete", waiting for
- *   the window's load-settled signal instead of racing A21's rating click.
+ * - A1 🐞, A9 🐞, A10 🐞, A13 🐞, A14 🐞.
+ * - A2 ❓, A3 ❓, A4 ❓, A5 ❓, A6 ❓, A7 ❓, A8 ❓, A11 ❓.
+ * - U27 register: A21 🐞, A22 🐞, A23 ❓.
  *
  * Seeding: scenario endpoints only. publicknowledge and the seeded roster are
  * read-only (scratch submissions are the isolation unit; journal-level or
@@ -59,6 +56,8 @@ const SOLE_RECOMMENDER_TEXT =
 const AWAITING_RESPONSES = 'Awaiting responses from reviewers.';
 const NEW_REVIEWS = 'New reviews have been submitted.';
 const ALL_CONFIRMED = 'All reviews are confirmed and a decision is needed.';
+const AWAITING_RECOMMENDATIONS = 'Awaiting recommendations from editors.';
+const ALL_RECOMMENDATIONS = 'All recommendations are in and a decision is needed.';
 /** The status box's first line on a journal whose minimum of confirmed reviews is 2 (S15). */
 const MINIMUM_LINE = 'Minimum number of confirmed reviews required: 2.';
 const MINIMUM_LINE_PREFIX = 'Minimum number of confirmed reviews required';
@@ -334,6 +333,12 @@ test.describe('review stage & rounds', () => {
         const editor = `edi${tag}`;
         const otherEditor = `edo${tag}`;
         const author = `au${tag}`;
+        // Assigned to the stage through participants[] and never signed in
+        // (footnote s): the Section Editor and the Guest Editor get the
+        // notice, the Funding Coordinator does not (Side effects).
+        const sectionEditor = `se${tag}`;
+        const guestEditor = `ge${tag}`;
+        const funding = `fc${tag}`;
         const title = `Submission ${tag}`;
         const fileOne = inMemoryFile(`${tag}-rev1.txt`);
         const fileTwo = inMemoryFile(`${tag}-rev2.txt`);
@@ -349,6 +354,9 @@ test.describe('review stage & rounds', () => {
             users: [
                 {username: editor, roles: ['editor']},
                 {username: otherEditor, roles: ['editor']},
+                {username: sectionEditor, roles: ['sectionEditor']},
+                {username: guestEditor, roles: ['guestEditor']},
+                {username: funding, roles: ['funding']},
                 {username: author, roles: ['author']},
             ],
         });
@@ -356,6 +364,11 @@ test.describe('review stage & rounds', () => {
             context: tag,
             submitter: author,
             decisions: ['sendExternalReview', 'requestRevisions'],
+            participants: [
+                {username: sectionEditor, role: 'sectionEditor'},
+                {username: guestEditor, role: 'guestEditor'},
+                {username: funding, role: 'funding'},
+            ],
         });
 
         const editorPage = await (await asUser(editor)).newPage();
@@ -376,7 +389,8 @@ test.describe('review stage & rounds', () => {
         await before.tasks.close();
 
         // "Upload revisions", first step only: attach a file, close the
-        // window through its header "Close" without finishing. Without
+        // window through its header "Close" without finishing, answering the
+        // browser's leave-without-saving question with "OK". Without
         // reloading, the "Revisions Uploaded" panel behind the window lists
         // the file as the window closes (the panel is read empty of it
         // first, and no page load happens between the close and the read).
@@ -388,7 +402,8 @@ test.describe('review stage & rounds', () => {
         const countLoad = () => authorLoads++;
         authorPage.on('load', countLoad);
         await authorPage.getByRole('button', {name: 'Upload revisions', exact: true}).click();
-        await uploadFirstStepOnly(authorPage, {file: fileOne});
+        const leaveQuestion = await uploadFirstStepOnly(authorPage, {file: fileOne});
+        expect(leaveQuestion).toBe('The data on this form has changed. Do you wish to continue without saving?');
         await expect(authorWorkflow.panelRow('Revisions Uploaded', fileOne.name)).toBeVisible();
         authorPage.off('load', countLoad);
         expect(authorLoads).toBe(0);
@@ -409,6 +424,20 @@ test.describe('review stage & rounds', () => {
         // under the author's own name and address.
         const notice = await pkpMail.find({to: `${editor}@mail.test`, subject: REVISED_SUBJECT});
         expect(notice.From.Address).toBe(`${author}@mail.test`);
+
+        // The other participants' mailboxes: the assigned Section Editor and
+        // Guest Editor have the same notice; the assigned Funding Coordinator
+        // has none, bounded by the Section Editor's notice taken the same way.
+        for (const recipient of [sectionEditor, guestEditor]) {
+            const copy = await pkpMail.find({to: `${recipient}@mail.test`, subject: REVISED_SUBJECT});
+            expect(copy.Subject).toBe(notice.Subject);
+            expect(copy.From.Address).toBe(`${author}@mail.test`);
+        }
+        await pkpMail.expectNone({
+            to: `${funding}@mail.test`,
+            subject: REVISED_SUBJECT,
+            afterControl: {to: `${sectionEditor}@mail.test`, subject: REVISED_SUBJECT},
+        });
 
         // A second upload the same day: the panel lists both files, and no
         // second notice reaches the same editor. The notice is sent at the
@@ -482,7 +511,8 @@ test.describe('review stage & rounds', () => {
 
         // The documented working path after the first upload: the Revisions
         // Uploaded panel's own Upload control still opens the same wizard
-        // (the bottom button's fate is register A1, asserted neither way).
+        // (the "Upload revisions" button's fate after this upload is register
+        // A1, asserted neither way).
         await authorPage.reload();
         await authorWorkflow.expectOpen();
         await authorWorkflow
@@ -786,12 +816,22 @@ test.describe('review stage & rounds', () => {
 
     test('S11: recommend-only round', async ({asUser, ojsApi}, testInfo) => {
         test.slow();
-        test.setTimeout(300_000);
+        test.setTimeout(420_000);
         const tag = makeTag('s11', testInfo);
         // A declined reviewer is reviewer record enough for the recommendation
         // sentences to engage (Rule 6).
         const {submissionId} = await seedInReview(ojsApi, tag, {
             reviewRounds: [{reviewers: [{username: 'reviewer.paul', status: 'declined'}]}],
+        });
+        // The third and fourth submissions, on the seeded journal like the
+        // first: one reviewer who accepted and has not submitted, one whose
+        // submitted review no editor has confirmed (Rule 6b's pending
+        // recommendation below the reviewer facts).
+        const {submissionId: underwayId} = await seedInReview(ojsApi, `${tag}c`, {
+            reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}]}],
+        });
+        const {submissionId: unreadId} = await seedInReview(ojsApi, `${tag}d`, {
+            reviewRounds: [{reviewers: [{username: 'reviewer.amara', status: 'completed'}]}],
         });
         // The second submission: a scratch journal whose one throwaway Section
         // Editor is the only editorial participant (a scratch journal's
@@ -835,6 +875,11 @@ test.describe('review stage & rounds', () => {
             timeout: 30_000,
         });
         await waitForJQueryIdle(managerPage);
+        // The third and fourth submissions' Omar is limited the same way.
+        for (const id of [underwayId, unreadId]) {
+            await managerWorkflow.gotoEditorial(id);
+            await managerWorkflow.setRecommendOnly('Omar Section Editor');
+        }
 
         // Control: before the recommendation is recorded, the deciding
         // editor's screen shows no "Recommendation" box (the status box of
@@ -842,7 +887,7 @@ test.describe('review stage & rounds', () => {
         const editorPage = await (await asUser('sectioneditor.ana')).newPage();
         const workflow = new WorkflowPage(editorPage, JOURNAL);
         await workflow.gotoEditorial(submissionId);
-        await workflow.expectStatus('Round 1 Status', 'Awaiting recommendations from editors.');
+        await workflow.expectStatus('Round 1 Status', AWAITING_RECOMMENDATIONS);
         await expect(recommendationBox(editorPage)).toHaveCount(0);
 
         // The recommending editor sees recommendation controls, not decisions.
@@ -855,7 +900,7 @@ test.describe('review stage & rounds', () => {
         for (const label of DECISION_BUTTONS) {
             await expect(omarWorkflow.decisionButton(label)).toHaveCount(0);
         }
-        await omarWorkflow.expectStatus('Round 1 Status', 'Awaiting recommendations from editors.');
+        await omarWorkflow.expectStatus('Round 1 Status', AWAITING_RECOMMENDATIONS);
 
         // They record "Accept Submission" as a recommendation.
         await omarWorkflow.decisionButton('Recommend Accept').click();
@@ -868,7 +913,29 @@ test.describe('review stage & rounds', () => {
         await editorPage.reload();
         await workflow.expectOpen();
         await expect(recommendationBox(editorPage)).toContainText('Accept Submission');
-        await workflow.expectStatus('Round 1 Status', 'All recommendations are in and a decision is needed.');
+        await workflow.expectStatus('Round 1 Status', ALL_RECOMMENDATIONS);
+
+        // A pending recommendation sits below the reviewer facts: with a
+        // review underway the recommending editor's box reads the reviewer
+        // sentence, and with an unread review that one; once the
+        // recommendation is recorded the deciding editor's box reads the
+        // all-recommendations sentence either way.
+        for (const {id, sentence} of [
+            {id: underwayId, sentence: AWAITING_RESPONSES},
+            {id: unreadId, sentence: NEW_REVIEWS},
+        ]) {
+            await omarWorkflow.gotoEditorial(id);
+            await omarWorkflow.expectStatus('Round 1 Status', sentence);
+            await expect(omarWorkflow.statusBox('Round 1 Status')).not.toContainText(AWAITING_RECOMMENDATIONS);
+            await omarWorkflow.decisionButton('Recommend Accept').click();
+            const pending = new DecisionPage(omarPage);
+            await pending.expectOpen('Recommend Accept');
+            await pending.completeAll();
+
+            await workflow.gotoEditorial(id);
+            await workflow.expectStatus('Round 1 Status', ALL_RECOMMENDATIONS);
+            await expect(workflow.statusBox('Round 1 Status')).not.toContainText(sentence);
+        }
 
         // Sole recommending editor: assigned as the only editorial
         // participant, limited to recommendations, they get no buttons of
@@ -897,7 +964,7 @@ test.describe('review stage & rounds', () => {
         // which carried the recommendation sentence on its declined reviewer).
         await soleWorkflow.expectStatus('Round 1 Status', 'Waiting for reviewers to be assigned.');
         await expect(soleWorkflow.statusBox('Round 1 Status')).not.toContainText(
-            'Awaiting recommendations from editors.'
+            AWAITING_RECOMMENDATIONS
         );
     });
 

@@ -426,9 +426,9 @@ and the reviewer forms to *Reviewer assignment & management*.
 ## Canonical scenarios
 
 Scenarios 4, 7 and 15, and the second submission of scenario 11, run on
-separate scratch journals with throwaway accounts: an editor whose mailbox
-scenario 4 reads, a reviewer whose assignment lists scenario 7 reads, and a
-Section Editor as the only editorial participant; scenario 15's journal
+separate scratch journals with throwaway accounts: the accounts whose
+mailboxes scenario 4 reads, a reviewer whose assignment lists scenario 7
+reads, and a Section Editor as the only editorial participant; scenario 15's journal
 alone has "Minimum Confirmed Reviews Required" set to 2 (the others keep the
 default of 0). Scenario 14 runs on a scratch preprint server with a
 throwaway Preprint Server Manager and Author. Every other scenario runs on
@@ -499,8 +499,9 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
 4. **Author uploads a revision**
 
    Given: Author, on a round that reads "Revisions have been requested.",
-   with one Editor assigned to the stage and a second Editor not assigned
-   to it.
+   with one Editor, a Section Editor, a Funding Coordinator and, on a
+   journal, a Guest Editor assigned to the stage, and a second Editor not
+   assigned to it.
 
    - **"Upload revisions", first step only**: press "Upload revisions",
      attach a file in the upload window's first step, then close the
@@ -512,11 +513,14 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **The Editor's screen**: the assigned Editor, in a session opened
      before the upload, reloading without signing in: the box reads
      "Revisions have been submitted and a decision is needed."
-   - **Tasks**: Author: the "Revision required." task is gone from the
+   - **Tasks**: Author: scenario 3's revisions task is gone from the
      header's Tasks panel.
    - **Mailbox**: the assigned Editor has an email with the subject
      "Revised Version Uploaded", sent under the Author's own name and
      address.
+   - **The other participants' mailboxes**: the assigned Section Editor has
+     the same "Revised Version Uploaded" email, and on a journal so has the
+     assigned Guest Editor; the assigned Funding Coordinator has none.
    - **A second upload the same day**: Author: press "Upload revisions"
      again and complete the upload: the panel lists both files, and the
      assigned Editor gets no second notice.
@@ -584,8 +588,9 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
 8. **Cancelling is blocked once a review is in**
 
    Given: Editor, on the current round of a submission whose one reviewer
-   completed a review, and a second submission whose round's only reviewer
-   declined the request.
+   completed a review, a second submission whose round's only reviewer
+   declined the request, and a third whose round holds one reviewer who
+   declined the request and one who accepted it.
 
    - **The buttons**: "Cancel Review Round" is not among the decision
      buttons and nothing stands in its place; "Request Revisions", "Accept
@@ -593,26 +598,26 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      offered.
    - **A declined reviewer**: on the second submission's round, "Cancel
      Review Round" is absent equally.
-   - **A declined reviewer beside an accepted one**: on a third submission
-     whose round holds one reviewer who declined the request and one who
-     accepted it, the box reads "Awaiting responses from reviewers.": the
-     declined reviewer is not counted in the status. "Cancel Review Round"
-     is absent here too.
+   - **A declined reviewer beside an accepted one**: on the third
+     submission's round, the box reads "Awaiting responses from
+     reviewers.": the declined reviewer is not counted in the status.
+     "Cancel Review Round" is absent here too.
    - **Control**: on a round whose only reviewer has not yet responded,
      "Cancel Review Round" is offered (scenario 7). <sup>s</sup>
 
 9. **Accept out of review**
 
-   Given: Editor, on the current round of a submission in review.
+   Given: Editor, on the current round of a submission in review, and a
+   second submission that went through two rounds and was accepted from
+   Round 2.
 
    - **"Accept Submission"**: press it (the highlighted button) and
      complete the wizard: the submission moves to the Copyediting stage.
    - **The review stage afterwards**: select "Review" › "Review Round 1":
      the round is still listed and the box reads "The submission is
      currently in the Copyediting stage."
-   - **A past round after acceptance**: on a second submission that went
-     through two rounds and was accepted from Round 2, select "Review" ›
-     "Review Round 1": the box, headed plain "Status", reads "The
+   - **A past round after acceptance**: on the second submission, select
+     "Review" › "Review Round 1": the box, headed plain "Status", reads "The
      submission advanced to the next review round, was accepted, and is
      currently in the Copyediting stage."
    - **Control**: on the first submission the box is headed plain "Status",
@@ -640,11 +645,14 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
     Given: a Section Editor assigned to the stage and limited to
     recommendations, alongside a deciding Editor, on the current round of
     a submission whose one reviewer declined the request (a declined
-    reviewer counts as a reviewer record); and a second submission where
-    such a Section Editor is the only editorial participant.
+    reviewer counts as a reviewer record); a second submission where such
+    a Section Editor is the only editorial participant; and the same two
+    editors on a third submission whose one reviewer accepted the request
+    and has not submitted a review, and on a fourth whose one reviewer
+    submitted a review no editor has confirmed yet.
 
     - **The recommending editor's screen**: Section Editor: open the
-      current round: there are no decision buttons; the buttons read
+      first submission's current round: there are no decision buttons; the buttons read
       "Recommend Revisions", "Recommend Accept", "Recommend Decline", and
       the box reads "Awaiting recommendations from editors."
     - **Recording**: record "Accept Submission" as a recommendation (the
@@ -652,6 +660,16 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
     - **The deciding Editor's screen**: Editor: the "Recommendation" box
       lists "Accept Submission", and the status box reads "All
       recommendations are in and a decision is needed."
+    - **A pending recommendation beside a review underway**: Section
+      Editor: open the third submission's round: the box reads "Awaiting
+      responses from reviewers."; record "Accept Submission" as a
+      recommendation. Editor: the status box reads "All recommendations are
+      in and a decision is needed."
+    - **A pending recommendation beside an unread review**: Section Editor:
+      open the fourth submission's round: the box reads "New reviews have
+      been submitted."; record "Accept Submission" as a recommendation.
+      Editor: the status box reads "All recommendations are in and a
+      decision is needed."
     - **Sole recommending editor**: Section Editor: open the second
       submission's round: no buttons of either kind; the "Recommendation"
       box reads "You can not make a recommendation until an editor is
@@ -766,9 +784,6 @@ Left out of the scenarios above, by reason:
   - after "Request Revisions", the author's only revised file deleted: the revisions task back in the author's Tasks panel ([A9](#a9)): the guard the issue report proposes [report 2026-10-04]
   - on a round with no revision request, the "Revisions Uploaded" description makes no claim about a request ([A10](#a10)): the guard the issue report proposes [report 2026-10-04]
   - after "Resubmit for Review" and the Author's first uploaded file: "Upload revisions" still offered ([A1](#a1)): the guard the issue report proposes [other 2026-10-02]
-  - after "Accept Submission", with no revision requested: the Author's "Upload" above "Revisions Uploaded" opening the upload window and the file listed there, while the box reads "The submission is currently in the Copyediting stage." and no "Upload revisions" shows (Rule 9; Actors row 4) [incidental 2026-11-13]
-  - a recommend-only Section Editor beside a deciding Editor, on a round with a review underway: "Awaiting responses from reviewers." while the recommendation is pending, "All recommendations are in and a decision is needed." once it is recorded; on a round with an unread review, "New reviews have been submitted." and then the same (Rule 6b) [incidental 2026-11-13]
-  - the "Revised Version Uploaded" recipients beyond the Editor: an assigned Section Editor gets it, and on a journal an assigned Guest Editor; an assigned Funding Coordinator does not (Side effects) [incidental 2026-11-13]
 - **Rarely met**:
   - "Returned back to review." after "Move to Review" on a round whose every review was confirmed before the return, and the reviewer sentences after a return with a review still unconfirmed (Rules 5, 6c; Cross-feature): sending a submission back from Copyediting is not an ordinary week's action
   - deleting the only revised file flipping the status back to "requested" (Rule 7): an author seldom deletes their only revised file; the task half of the path is A9
@@ -807,6 +822,7 @@ Left out of the scenarios above, by reason:
   - "The {stage} stage has not yet been initiated." before the stage starts or on a submission that skipped it (Rule 4; *Workflow screen & stage access*, scenario 2)
   - the "Delete" dialog, its "Cancel" and its "Confirm" (Rule 11; *Workflow screen & stage access*, scenario 14)
   - the Author's "Upload" above "Revisions Uploaded" on a round with no decision yet, opening "Upload Review File" with "You are not allowed to add and edit these files." (Rule 9; *Submission files*, scenario 7)
+  - the Author's "Upload" above "Revisions Uploaded" after "Accept Submission" with no revision requested, opening the upload window and the file listed there, while the box reads "The submission is currently in the Copyediting stage." and no "Upload revisions" shows (Rule 9; Actors row 4; *Submission files*, scenario 7)
   - the cancelled round's files staying in the submission's records, which no screen of this stage lists once the round is gone (Rule 12; *Submission files*)
   - the author response panel once a response is requested, never on a press (Rule 14; *Author response to reviews*, scenario 4)
   - the Discussions panel in both views (Rule 14; *Tasks & discussions*)
@@ -1847,7 +1863,10 @@ and 5 seed an `accepted` reviewer and record the decision on screen. 4
 runs on a scratch journal with a throwaway `editor`, a second `editor` for
 the control and an `author`, seeded `decisions: ['sendExternalReview',
 'requestRevisions']`; the first editor is assigned to the stage through the
-Participants panel (the "Journal editor" group), the second never. 6
+Participants panel (the "Journal editor" group), the second never; throwaway
+`sectionEditor`, `funding` and (OJS only, a press has no Guest Editor group)
+`guestEditor` accounts are assigned to the stage through `participants[]`
+and never sign in. 6
 continues 5's state, or seeds `decisions: ['sendExternalReview',
 'resubmit']` and uploads the revised file as the author. 7: a scratch
 journal with throwaway `manager`, `author` and `externalReviewer`; two
@@ -1866,7 +1885,10 @@ limitation is set on screen in the Participants panel's "Edit" window for
 deciding editor being the auto-assigned `editor.diana`; the second
 submission sits on a scratch journal with one throwaway `sectionEditor` as
 its only participant, limited the same way, and its round seeds no
-reviewer (`reviewers: []`). 12: `author.bea` submits both;
+reviewer (`reviewers: []`); the third and fourth submissions sit on the
+seeded journal like the first, with `sectioneditor.ana` limited the same
+way, and seed one reviewer each, `status: 'accepted'` and `status:
+'completed'`. 12: `author.bea` submits both;
 the open reviewer (`reviewer.julia`) is added on screen with "Review Type"
 "Open" (a seeded reviewer carries the journal's default type, anonymous)
 and accepts on screen before the author's first step; the letter comes from
