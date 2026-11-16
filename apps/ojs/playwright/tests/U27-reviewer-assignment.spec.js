@@ -11,7 +11,7 @@
  * Deliberately NOT covered (register IDs; the spec's Coverage section is
  * the record of everything else left out):
  * - 🐞 A1, A2, A7, A12, A13, A15, A16, A18, A19, A21, A22, A26, A30, A31,
- *   A32, A36, A37, A39, A43, A44, A45, A46, A47, A49, A50.
+ *   A32, A36, A37, A39, A43, A44, A45, A46, A47, A49, A50, A51.
  * - ❓ A4, A6, A17, A23, A28, A29, A38, A41, A42, A48.
  *
  * Seeding: scenario endpoints only; publicknowledge and the 18 seeded users
@@ -1357,9 +1357,31 @@ test.describe('reviewer-assignment', () => {
         await expect(formSelect.locator('option', {hasText: formTitle})).toHaveCount(1);
         await closeSideWindow(editUnanswered);
 
-        // The second reviewer's review: they accept the request and submit;
-        // the Editor reads that row as "Review Submitted".
+        // Review Details on the unanswered request: "More Actions" ›
+        // "Review Details"; the dated line reads "Request Sent: {date and
+        // time}" and "Mark as Complete" sits disabled beside the incomplete
+        // message ("Modify Review", enabled, is the same footer's positive
+        // read). "Cancel": the row still reads "Request Sent".
+        const unansweredDetails = await openReviewDetailsFromMenu(managerPage, unansweredRow);
+        await expect(datedLine(unansweredDetails, 'Request Sent')).toHaveText(
+            new RegExp(`^Request Sent:\\s*${DATE_TIME}$`)
+        );
+        await expect(unansweredDetails.getByRole('button', {name: 'Modify Review', exact: true})).toBeEnabled();
+        await expect(unansweredDetails.getByRole('button', {name: 'Mark as Complete', exact: true})).toBeDisabled();
+        await expect(
+            unansweredDetails.getByText('This review is incomplete and cannot be marked as complete yet.')
+        ).toBeVisible();
+        await closeReviewDetails(managerPage, unansweredDetails);
+        await expect(statusTitle(unansweredRow)).toHaveText('Request Sent');
+
+        // The second reviewer's review: signed in, their request for the
+        // submission still offers "Respond to request"; they accept the
+        // request and submit; the Editor reads that row as "Review
+        // Submitted".
         const secondPage = await (await asUser(unanswered)).newPage();
+        const secondList = new ReviewerAssignmentsPage(secondPage, tag);
+        await secondList.goto();
+        await expect(secondList.rowAction(secondList.row(title), 'Respond to request')).toBeVisible();
         await performReview(secondPage, tag, submissionId, {
             comments: `Second comment ${tag}`,
         });
@@ -1977,12 +1999,15 @@ test.describe('reviewer-assignment', () => {
         await expect(editorPage.getByRole('button', {name: 'Add Reviewer', exact: true})).toBeVisible();
     });
 
-    test("S18: an assistant-level participant's panel", async ({asUser, ojsApi}, testInfo) => {
+    test("S18: an assistant-level participant's panel", async ({asUser, ojsApi, pkpMail}, testInfo) => {
         test.slow();
         test.setTimeout(240_000);
         const tag = makeTag('s18', testInfo);
+        const title = `Submission ${tag}`;
         // The Funding Coordinator is assigned to the stage through the
-        // scenario's participants (the Assign Participant row, no email).
+        // scenario's participants (the Assign Participant row, no email);
+        // reviewer.paul is kept out of the seed as the second Reviewer the
+        // Coordinator adds from the opening list.
         const {submissionId} = await seedInReview(ojsApi, tag, {
             reviewers: [{username: 'reviewer.julia', status: 'invited'}],
             participants: [{username: 'assistant.rita', role: 'funding'}],
@@ -2012,6 +2037,27 @@ test.describe('reviewer-assignment', () => {
         await expect(ritaMenu.getByRole('menuitem', {name: 'Email Reviewer'})).toBeVisible();
         await expect(ritaMenu.getByRole('menuitem', {name: 'Editorial Notes'})).toHaveCount(0);
         await closeRowMenu(ritaPage, ritaRow);
+
+        // The add from the opening list: "Add Reviewer" again and, without
+        // searching, "Select Reviewer" on the second Reviewer's entry in the
+        // list as it opens, then "Add Reviewer": the notice names them and
+        // the email. (This role's search, filters and further pages are
+        // refused, register A51 — never touched here.) After a reload the
+        // row reads "Request Sent" and the request is in their mailbox.
+        const addModal = await openAddReviewerModal(ritaPage);
+        await selectReviewer(ritaPage, addModal, 'Paul Reviewer', {search: false});
+        await addModal.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
+        await expect(
+            notice(ritaPage, 'Paul Reviewer was assigned to review this submission and sent an email notification.')
+        ).toBeVisible({timeout: 30_000});
+        await expect(addModal).toHaveCount(0, {timeout: 30_000});
+        await waitForJQueryIdle(ritaPage);
+        await ritaPage.reload();
+        await ritaWorkflow.expectOpen();
+        await expect(ritaWorkflow.panelRow('Reviewers', 'Paul Reviewer')).toContainText('Request Sent', {
+            timeout: 30_000,
+        });
+        await pkpMail.find({to: 'reviewer.paul@mail.test', subject: 'Invitation to review', contains: title});
 
         // Control: the Editor's window offers both links and the row's menu
         // "Editorial Notes".

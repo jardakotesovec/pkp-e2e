@@ -1088,12 +1088,26 @@ exports.pickDate = async function pickDate(page, scope, fieldPrefix, date) {
 };
 
 /**
+ * Wait out the modal store's 450 ms close slot (patterns.md pitfall 4f)
+ * with a page timer longer than the app's.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+exports.pastSideModalCloseWindow = async function pastSideModalCloseWindow(page) {
+    await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 500)));
+};
+
+/**
  * The Add Reviewer window (legacy form around the Vue search panel), opened
  * from the Reviewers panel's top button.
  *
  * @param {import('@playwright/test').Page} page
  */
 exports.openAddReviewerModal = async function openAddReviewerModal(page) {
+    // A window closed just before keeps the modal store's slot for 450 ms,
+    // and the opener pressed inside it opens nothing (patterns.md pitfall
+    // 4f): wait it out with a later page timer, never a test-side sleep.
+    await exports.pastSideModalCloseWindow(page);
     await page.getByRole('button', {name: 'Add Reviewer', exact: true}).click();
     const modal = page
         .getByRole('dialog')

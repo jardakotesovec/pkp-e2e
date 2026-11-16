@@ -68,7 +68,7 @@ list of completed reviews appears is owned by
 |--------|--------------------|
 | **See the Reviewers panel and its rows** | • Review managers and assistant-level participants: every round of the stage<br>• Author: no panel while reviews are underway. Any reduced list of completed reviews belongs to the neighboring feature (see the preamble) <sup>a</sup> |
 | **See declined and cancelled rows** | • Review managers only. An assistant-level participant's table silently omits those rows ⚠ [A6](#a6) <sup>a</sup> |
-| **Add a reviewer** (search & select, "Add Reviewer") | • Review managers and assistant-level participants: any round, including past rounds. The past-round oddity is recorded with the [→ round machinery](U26-review-stage-and-rounds.md#rounds) <sup>a</sup> |
+| **Add a reviewer** (search & select, "Add Reviewer") | • Review managers: on any round, including past rounds, using the search, the filters, the list's further pages and the selection<br>• Assistant-level participants: on any round, including past rounds, but only by selecting from the list as the window opens. The search, the filters and the list's further pages answer "Error" / "The current role does not have access to this operation." / "OK" ⚠ [A51](#a51)<br>• The past-round oddity is recorded with the [→ round machinery](U26-review-stage-and-rounds.md#rounds) <sup>a</sup> |
 | **"Create New Reviewer" / "Enroll Existing User"** | • Journal Manager, Editor, assigned Section Editor and Guest Editor: the two links inside the Add Reviewer window. A Site Administrator's access runs through such a journal role (see the preamble)<br>• Assistant-level participants: the two links never appear <sup>a</sup> |
 | **Manage an assignment** (row actions: "Read Review", "Send Reminder", "Thank Reviewer", "Revert Decision", and the menu's "Review Details", "Edit", "Unassign Reviewer"/"Cancel Reviewer", "Email Reviewer", "History", "Resend Review Request", "Log Response", "Reinstate Reviewer") | • Review managers and assistant-level participants, depending on the assignment's state. Rule 3 says when each action appears and in which order the menu lists them; the operations are Rules 12–21; the Email Reviewer window is described under Fields<br>• Inside the Review Details window (Rules 14a–14d): the rating stars and "Mark as Complete" work for both groups. Saving in "Modify Review" is a review manager's. An assistant-level participant is offered the button, its dialog and the edit window all the same, but "Save Changes" answers "Error" / "The current role does not have access to this operation." / "OK" and nothing is saved ⚠ [A31](#a31) <sup>a</sup> |
 | **"Editorial Notes"** | • Site Administrator, Journal Manager, Editor, Section Editor, Guest Editor: about a user holding a Reviewer role. They never meet their own row, because a reviewer of the submission is kept off its stages (see the preamble)<br>• Assistant-level participants: the entry is absent <sup>l</sup> |
@@ -291,7 +291,10 @@ under the prompt "Record the response on behalf of the reviewer". Submit
    disabled until its per-filter enable button is pressed; pressing the same
    button again clears the filter and disables the slider. While "Reviews
    completed" is enabled, a name search for a reviewer never assigned
-   answers "No items found." ⚠ [A28](#a28). Above the list,
+   answers "No items found." ⚠ [A28](#a28). Who may use the search,
+   the filters and the "View additional pages" bar of Rule 5 is Actors
+   row 3; an assistant-level participant is refused all three
+   [A51](#a51). Above the list,
    the submission's author names with affiliations are shown so the editor
    can spot conflicts: the first four in bold, the rest collapsed behind a
    "Show All {N} Authors" / "Show Less" toggle. A reviewer whose affiliation
@@ -405,8 +408,8 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     the window is still marking the review viewed is saved, toast
     included, but the stars can then fall back to "No rating" until the
     window is opened again ⚠ [A21](#a21).
-    On a submitted review "Mark as Complete" is enabled; the two messages
-    that keep it disabled belong to a request with no review (Rule 14c).
+    On a submitted review "Mark as Complete" is enabled; the message that
+    keeps it disabled belongs to a request with no review (Rule 14c).
     Pressing it asks "Mark this review as complete?" with the text "You can
     still modify this review after marking it as complete. You will have
     the opportunity to thank the reviewer in the next step.". When the
@@ -517,19 +520,13 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     "Download Review Form" menu, the rating row and the three footer
     buttons are all there, and a star saves with "Reviewer rating saved"
     although nothing was reviewed. "Modify Review" is enabled in each of
-    these states (Rule 14d). "Mark as Complete" depends on the app:
-    - {OJS} It sits disabled beside "A recommendation is required before
-      this review can be marked as complete." in all three states, because
-      a review nobody submitted carries no recommendation.
-    - With a review form it sits disabled while a required question of
-      the form is unanswered. A press shows "This review is incomplete and
-      cannot be marked as complete yet." beside it; a journal shows the
-      recommendation message there, since such a request carries no
-      recommendation either.
-    - {OMP} A press has no recommendation gate [OMP1](#omp1). On a request
-      without a review form the button is enabled, and confirming it
-      records a completed review nobody wrote ⚠ [OMP4](#omp4).
-      <sup>i</sup>
+    these states (Rule 14d). On an unanswered or accepted request without
+    a review form, "Mark as Complete" sits disabled beside "This review is
+    incomplete and cannot be marked as complete yet.", because nothing was
+    submitted. The reviewer's request stays open: signed in, the reviewer
+    still finds it with "Respond to request" (unanswered) or "Finish
+    review" (accepted). {OMP} A press shows it with a review form too.
+    <sup>i</sup>
 14d. <a id="submit-for-reviewer"></a> **Submitting a review for the
     reviewer.** On a request whose review is not submitted, "Modify Review"
     is how an editor submits the review for the reviewer. The dialog
@@ -600,13 +597,13 @@ under the prompt "Record the response on behalf of the reviewer". Submit
     sent to reviewer." or "Review marked as acknowledged. Email not sent.".
     "Revert Decision" asks "Unconsider this Review". Confirming returns a
     "Complete" row to "Review Submitted" and a "Reviewer Thanked" row to
-    "Review Viewed", with no notice shown either way, so the review can be
-    re-examined. The acknowledgement itself survives the revert: "Mark as
-    Complete" on that "Review Viewed" row turns it "Reviewer Thanked"
-    straight away, with "Revert Decision" alone and no second "Thank
-    Reviewer": the thank already went out, and the revert takes back only
-    the completion ([A27](#a27), retired). The review content is untouched and the revert
-    is logged. <sup>j</sup>
+    "Review Viewed", with no notice either way. The acknowledgement itself
+    survives the revert: "Mark as Complete" on that "Review Viewed" row
+    turns it "Reviewer Thanked" straight away, with "Revert Decision" alone
+    and no second "Thank Reviewer": the revert takes back only the
+    completion ([A27](#a27), retired). The review content is untouched; the
+    activity log gains "{editor} has marked the round {n} review for
+    submission {number} as unconsidered.". <sup>j</sup>
 17. <a id="unassign"></a> **Unassign vs Cancel.** While the request is
     unanswered, the entry reads "Unassign Reviewer", and removing them
     deletes the row outright. The notice reads "Reviewer removed." and
@@ -714,12 +711,12 @@ under the prompt "Record the response on behalf of the reviewer". Submit
   log. A reviewer response resets the reminder bookkeeping. That is the
   same reset that erases the History "Reviewer Reminded" milestone
   ⚠ [A15](#a15). <sup>h</sup>
-- **Marking a review complete** (Rule 14a) → the completion is logged in
-  the submission's activity log, and the review is deposited to the
-  reviewer's ORCID record when one is authenticated (the deposit consent
-  flow is the *ORCID integration* feature). The reviewer's "Review
-  pending." task is already gone by then: their own submit clears it
-  (*Reviewer's review*). <sup>i</sup>
+- **Marking a review complete** (Rule 14a) → the submission's activity
+  log gains "Editor {editor} has confirmed a review for the round {n}
+  review for submission {number}.", and the review is deposited to the
+  reviewer's authenticated ORCID record, if any (the consent flow belongs
+  to *ORCID integration*). The reviewer's submit already cleared their "Review
+  pending." task (*Reviewer's review*). <sup>i</sup>
 - **Modifying a review** (Rule 14b) → each save leaves one attributed
   activity-log row per part it changed: "The following was modified in this
   review: Comments.", {OJS} "…Reviewer Recommendation." and, for a
@@ -1070,7 +1067,8 @@ are in the footnote. <sup>s</sup>
 
    Given: Editor, on a round of a journal with an active review form, where
    one Reviewer has submitted a review with both comment blocks and a second
-   Reviewer's request is unanswered; both Reviewers are ready to sign in.
+   Reviewer's request, with no review form, is unanswered; both Reviewers
+   are ready to sign in.
 
    - **"Read Review"**: the row reads "Review Submitted". Press "Read
      Review": the "Review Details: {submission title}" window opens and
@@ -1081,13 +1079,19 @@ are in the footnote. <sup>s</sup>
      click a star under "Reviewer rating": the toast "Reviewer rating
      saved" appears.
    - **The row after the window closes**: press "Cancel": the row reads
-     "Review Viewed" ⚠ [A32](#a32), and still does after a reload of the
-     page. Press "Read Review" again: the star is still selected.
+     "Review Viewed" ⚠ [A32](#a32), also after a page reload. Press "Read
+     Review" again: the star is still selected.
    - **"Edit" after submission**: open the row's "Edit": the window offers
      no "Review Form" select.
    - **The unanswered row**: the second reviewer's row ("Request Sent") has
      no button where the first row shows "Read Review"; its "Edit" still
      offers the "Review Form" select.
+   - **Review Details on the unanswered request**: open the second
+     reviewer's "More Actions" › "Review Details": the dated line reads
+     "Request Sent: {date and time}", and "Mark as Complete" sits disabled
+     beside "This review is incomplete and cannot be marked as complete
+     yet.". Press "Cancel": the second reviewer's row still reads "Request
+     Sent".
    - **"Mark as Complete"**: in "Read Review" press it and confirm "Mark
      this review as complete?": the toast "The review has been marked as
      complete." appears; in the still-open window "Mark as Complete" is
@@ -1096,7 +1100,7 @@ are in the footnote. <sup>s</sup>
    - **Review Details on "Complete"**: press "Cancel" in the window, then
      open the row's "More Actions" › "Review Details": the dated line reads
      "Review Completed: {date and time}". Press "Cancel": the submission's
-     activity log records the completion.
+     activity log lists "…has confirmed a review…".
    - **The reviewer's side**: Reviewer: sign in: the Tasks panel holds no
      "Review pending." for the submission.
    - **"Thank Reviewer"**: Editor: press it, then "Thank Reviewer" in the
@@ -1111,7 +1115,7 @@ are in the footnote. <sup>s</sup>
    - **"Revert Decision"**: press it and confirm "Unconsider this Review":
      the row returns to "Review Viewed" with no notice. "Read Review" shows
      the comments unchanged and the dated line "Review Submitted: {date
-     and time}", and the activity log records the revert. The row's
+     and time}", and the activity log lists "…as unconsidered.". The row's
      "History" ends at "Review Submitted", with no "Review Completed" and
      no "Reviewer Thanked" line.
    - **Marked complete again**: press "Read Review", then "Mark as
@@ -1121,8 +1125,9 @@ are in the footnote. <sup>s</sup>
      dated line reads "Reviewer Thanked:" with the date and time noted
      before the revert. The row's "History" lists that "Reviewer Thanked"
      date again, followed by the new "Review Completed" one.
-   - **The second reviewer's review**: Reviewer (the second): accept the
-     request and submit a review.
+   - **The second reviewer's review**: Reviewer (the second): sign in: their
+     request for the submission still offers "Respond to request". Accept
+     the request and submit a review.
    - **"Revert Decision" on "Complete"**: Editor: that row reads "Review
      Submitted". Press its "Read Review", then "Mark as Complete" and
      confirm: the row reads "Complete". Press "Revert Decision" and confirm
@@ -1315,7 +1320,9 @@ App-specific:
 18. **An assistant-level participant's panel**
 
     Given: Funding Coordinator, assigned to the review stage of a
-    submission whose round has one reviewer invited.
+    submission whose round has one reviewer invited, with a second Reviewer
+    of the journal not yet invited; the journal's four reviewers are too
+    few to page the opening list (Rule 5).
 
     - **The panel**: the "Reviewers" panel lists the row with its five
       columns: "Reviewer", "Reviewer status", "Type", "Actions" and "More
@@ -1325,6 +1332,15 @@ App-specific:
       User" link.
     - **The row menu**: open the row's "More Actions" menu: it holds no
       "Editorial Notes" entry.
+    - **The add from the opening list**: press "Add Reviewer" again and,
+      without searching, press "Select Reviewer" on the second Reviewer's
+      entry in the list as it opens, then press "Add Reviewer": the notice
+      reads "{name} was assigned to review this submission and sent an
+      email notification.". Reload the page: the second Reviewer's row
+      reads "Request Sent", and their mailbox holds the request email
+      ("Invitation to review" {OJS} / "Manuscript Review Request" {OMP}).
+      The pick is made from the opening list because this role's search,
+      filters and further pages are refused ⚠ [A51](#a51).
     - **Control**: Editor: on the same submission the Add Reviewer window
       offers both links and the row's menu offers "Editorial Notes".
       <sup>s</sup>
@@ -1471,18 +1487,18 @@ Left out of the scenarios above, by reason:
     Review Details window of a "Request Declined" row shows "Modify Review"
     disabled with the reason beside it, and a Funding coordinator assigned
     to the stage is not shown "Modify Review" [report 2026-10-03]
-  - the guard for OMP4 (issue report
-    `docs/issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md`):
-    on a press, "Mark as Complete" on an unanswered request with no review
-    stays blocked with its message, and the request stays open [report 2026-10-03]
   - the guard for A13 (issue report
     `docs/issues/U27-A13-email-reviewer-sends-empty-body.md`):
     "Email Reviewer" sent with a Subject and an empty Body is refused with
     "Please provide the email body text.", and no email reaches the
     reviewer [report 2026-10-03]
+  - the guard for A51: an assigned Funding Coordinator's search in the Add
+    Reviewer window lists the matching reviewer, or the window offers that
+    role no search, filters or further pages (Actors row 3, Rules 5, 6):
+    waits for the fix [incidental 2026-11-16]
 - **Rarely met**:
   - submitting a review for the reviewer: "Save Changes" in "Modify Review" on an unanswered, an accepted or a "Request Resent" row, with the row, its menu, the reviewer's side and the missing acceptance email after it, and {OJS} the save refused without a "Recommendation" (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
-  - the Review Details window on a request with no review: "Request Sent:", "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", the empty blocks, and "Mark as Complete" disabled beside its recommendation message {OJS} or, with a review form, its incomplete-review message (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
+  - the Review Details window on a reminded, an accepted or a declined request with no review: "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", and the empty blocks (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
   - "Save changes to this review?" before modifying a complete review whose assignment has "Publicly Show Reviewer Comments" ticked, and the sentence the same box adds to "Mark this review as complete?" (Rules 14a, 14b): an editor completes or modifies a publicly shown review in a rare week
   - "Send Review To ORCID" with "Send this review to the reviewer's ORCID?" for a reviewer with an authenticated iD (Rules 3, 23): met only on a journal with ORCID enabled and a reviewer who linked an iD
   - the one-click placeholder in the editor's preview and a fresh keyed link per reminder (Settings, Rule 13): one-click access is off by default, and an editor with it on reads past the placeholder and never compares two reminders' links
@@ -1501,6 +1517,7 @@ Left out of the scenarios above, by reason:
   - "View changes" opened to its "View Review" window (Side effects): scenario 16 reads the action, not the window behind it
   - "Cancel" in the Add Reviewer window with a reviewer chosen, and in the "Edit Review" window with a due date changed, closing without a question (Fields): a close control
   - the second ends of covered controls: an edit changing only the review type (Rule 12), the XML exports (Rule 15), a logged decline (Rule 20)
+  - "Mark as Complete" disabled beside "This review is incomplete and cannot be marked as complete yet." on an accepted request with no review, its reviewer still offered "Finish review" (Rule 14c): the same message and the same open request scenario 9 reads on an unanswered one
   - "Resend Review Request" accepting a review due date equal to the response due date (Rule 9): the same date rule scenario 5 presses in "Add Reviewer"
   - the press's Internal Review stage running scenarios 1–12 as External Review does (Purpose; scenario 13 covers what differs)
 - **Register carries it**:
@@ -1526,7 +1543,6 @@ Left out of the scenarios above, by reason:
   - A30 ("Modify Review" offered on a declined request and its save refused; Rule 14d)
   - A31 (an assistant-level participant offered "Modify Review" and refused on "Save Changes"; Actors row 5)
   - A32 (a Review Details window closed within a moment of opening, before the mark is saved, leaving the row "Review Submitted"; Rule 14a)
-  - OMP4 (a press's "Mark as Complete" enabled on a request with no review; Rule 14c)
   - OMP6 (the review-form block saying "this journal" on a press; Rule 14b)
   - A36 (a reviewer assigned today reading "Yesterday" in the reviewer search; Rule 5)
   - A37 (the resend's activity-log line printing "{$submissionid}"; Side effects)
@@ -1539,6 +1555,7 @@ Left out of the scenarios above, by reason:
   - A48 (a review-form answer written as markup in the "View changes" window of a review-form change; Side effects)
   - A49 (both XML exports leading to an error page and no file until Rule 15's first download or upload; Rule 15)
   - A50 (the "No Matches" suggestion picked in "Enroll Existing User" and "Add Reviewer" failing on the server, the window hanging on a spinner; Fields)
+  - A51 (an assistant-level participant's search, filters and further pages refused in the Add Reviewer window; Actors row 3)
 - **No seed**:
   - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reviewer Reminded" and log stamps (Rule 13, Side effects, Settings)
   - a section's default "Review Form" preselected in the Add Reviewer window (Rule 10, Settings): the seed sets no default review form on a section
@@ -1585,7 +1602,6 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A26](#a26) | A reviewer removed with "Unassign Reviewer" gets the email under the subject "Your review … has been cancelled" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A30](#a30) | "Modify Review" is offered on a "Request Declined" row, and its "Save Changes" is refused with "This review not editable because it was declined." | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A31](#a31) | An assistant-level participant is offered "Modify Review", and "Save Changes" answers "The current role does not have access to this operation." | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [OMP4](#omp4) | {OMP} On a press, "Mark as Complete" closes a review request that has no review, leaving the reviewer nothing to press | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [OMP6](#omp6) | {OMP} On a press, the Review Details windows introduce a review form with "The questions this journal asks reviewers to answer." | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A32](#a32) | A Review Details window closed within a moment of opening, before its mark as viewed is saved, can leave the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | @blessie 2026-09-24 · risk accepted, not fixing |
 | [A36](#a36) | "Add Reviewer" list says "Yesterday" for a reviewer who was sent a request today | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1598,6 +1614,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A47](#a47) | A late, unanswered re-sent review request is not marked "Overdue" and offers no "Send Reminder" | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A49](#a49) | Both XML entries of "Download Review Form" open a "not authorized" page until a review PDF is downloaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A50](#a50) | An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
+| [A51](#a51) | An assistant-level participant's "Add Reviewer" search, filters and further pages answer "The current role does not have access to this operation." | 🐞 | user-visible | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -1887,11 +1904,12 @@ error summary "Please correct one error. Go to error: This review not
 editable because it was declined.". There is nothing to correct. Nothing is
 saved, the window stays open, the row stays "Request Declined", and leaving
 asks the unsaved-changes warning (Rule 14b). The button should sit disabled
-with that reason beside it, as "Mark as Complete" does on a journal, or the
-message should name the way forward: once the request is re-sent with
-"Resend Review Request", the same save goes through.
+with that reason beside it, as "Mark as Complete" does on an unanswered
+request (Rule 14c), or the message should name the way forward: once the
+request is re-sent with "Resend Review Request", the same save goes through.
 Since: 2026-08-29 (the modify-reviews rework) · Basis: probe, 2026-10-03.
 <sup>[f-a30](#fn-a30)</sup>
+Report: refresh owed — pkp/pkp-lib#13653 (pkp/ui-library#1036, pkp/pkp-lib#13664) gave the window's `confirmBlockedMessage` in `useReviewDetails.js` a first check, so on an unanswered or accepted request "Mark as Complete" now sits disabled beside "This review is incomplete and cannot be marked as complete yet." in both apps: the Expected's comparison with the journal's "A recommendation is required before this review can be marked as complete." no longer matches the screen, and the Proposed fix's `useReviewDetails.js` hunk is to be re-read against the changed file (2026-11-16)
 
 <a id="a31"></a>
 **A31 — An assistant-level participant is offered a "Modify Review" they cannot save** · 🐞 · low.
@@ -1905,6 +1923,7 @@ warning (Rule 14b). The refusal is right and the offer is not: the button
 should not be shown to a role that may not save.
 Since: 2026-08-29 (the modify-reviews rework) · Basis: probe, 2026-10-03.
 <sup>[f-a31](#fn-a31)</sup>
+Report: refresh owed — the 2026-11-16 drive found a second operation offered to the Funding Coordinator and refused, the Add Reviewer window's search, filters and further pages (A51, behind `PKPUserController::getGroupRoutes()`, which admits the reviewers listing for manager, sub-editor and site admin only): the report's Cause › Reach bullet "Assistants: in the Reviewers table, saving a modified review is the only operation offered to them that the server refuses", which rests on `PKPReviewerGridHandler`'s assistant operations, no longer holds; no class or method changed (2026-11-16)
 
 <a id="a32"></a>
 **A32 — A review window closed quickly can leave the review unread on screen** · 🐞 · minor.
@@ -2152,6 +2171,32 @@ The editor has to leave the window, and a request letter they had already
 written is lost with it.
 Basis: probe, 2026-10-23. <sup>[f-a50](#fn-a50)</sup>
 
+<a id="a51"></a>
+**A51 — An assistant-level participant's "Add Reviewer" search, filters and further pages answer "The current role does not have access to this operation."** · 🐞 · user-visible.
+A Funding Coordinator assigned to the review stage gets the Add Reviewer
+window with its search box, "Filters" and, past 30 reviewers, the "View
+additional pages" bar. A reviewer selected from the list as it opens is
+added ("{name} was assigned to review this submission and sent an email
+notification."). Every way of changing the list answers "Error" / "The
+current role does not have access to this operation." / "OK": Enter in
+"Search", "Clear search phrase", "Add filter: Rated at least" and its
+"Clear filter", and "Next". The same happens on a past round and, on a
+press, on Internal Review. After "OK" the window's controls no longer
+match its list:
+- the search box keeps the typed name, while the list is still the one
+  the window opened with;
+- the filter shows as on ("Clear filter: Rated at least"), while the
+  list stays unfiltered;
+- after "Next" the bar reads page 2 ("Previous" enabled, "Next"
+  disabled), while the list still shows page 1's 30 entries.
+
+So a Funding Coordinator cannot reach the 31st reviewer of a journal by
+any means on the screen. The add itself is open to them; only the list
+the window reads is refused. Expected: the search, the filters and the
+further pages work for a role that may add a reviewer, or are not offered to it.
+"Modify Review" has the same offered-then-refused shape [A31](#a31).
+Since: 2018-01 (the same on 3.5, 3.4 and 3.3) · Basis: probe, 2026-11-16. <sup>[f-a51](#fn-a51)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -2164,8 +2209,7 @@ External Reviewer. The window's opening, unsearched list does not yet apply
 that split; that defect is OMP2. A press's review also collects no reviewer
 recommendation, so the status cell's recommendation line and the Review
 Details windows' recommendation displays and select simply do not exist
-there. Nor does the recommendation gate on "Mark as Complete"; the
-review-form gate is the same on both apps (Rule 14c). The author-facing side of that
+there. The author-facing side of that
 same absence is recorded with the review stage (its finding "No reviewer
 recommendation on a press").
 Basis: live probe (the searched pool split, with positive and negative
@@ -2194,22 +2238,6 @@ the round, sent the request and given the round's files, and nothing
 warns the editor. The press's split between its internal and external
 reviewers does not hold. Searching instead of picking avoids it. Basis:
 probe, 2026-10-03. <sup>[f-omp2](#fn-omp2)</sup>
-
-<a id="omp4"></a>
-**OMP4 — On a press, "Mark as Complete" closes a review request that has no review, leaving the reviewer nothing to press** · 🐞 · medium.
-On a press, an editor opens "Review Details" on a review request the
-reviewer has not answered yet, or has accepted but not yet submitted.
-"Mark as Complete" is enabled. The dialog it opens, "Mark this review as
-complete?", does not say that the reviewer has submitted nothing.
-Confirming shows "The review has been marked as complete." and records a
-completed review with nothing in it; the row turns "Complete". The
-reviewer's request is closed. Their list reads "Review submitted on
-{date}", and "View" opens the step they had reached ("1. Request" or "2.
-Guidelines") with its only button disabled. An accepted reviewer's
-acceptance date is replaced by the moment of the click. The editor
-cannot reopen the request or send the same reviewer a new one in this
-round. Since: 2026-08-29 (the modify-reviews rework opened the window on
-every row) · Basis: probe, 2026-10-03. <sup>[f-omp4](#fn-omp4)</sup>
 
 <a id="omp6"></a>
 **OMP6 — On a press, the Review Details windows introduce a review form with "The questions this journal asks reviewers to answer."** · 🐞 · low.
@@ -2279,6 +2307,9 @@ manager types one. Basis: probe, 2026-10-03.
 
 <a id="omp3"></a>
 **OMP3 — A press's reviewer removal and cancel emails print "{$journalName}" where the press's name belongs** · ✅ · retired. Fixed upstream (pkp/omp#2563, for pkp/pkp-lib#13646).
+
+<a id="omp4"></a>
+**OMP4 — On a press, "Mark as Complete" closed a review request that had no review** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13653: pkp/pkp-lib#13664, pkp/ui-library#1036, pkp/pkp-lib#13665, pkp/ui-library#1037, pkp/ojs#6010).
 
 ---
 
@@ -2352,7 +2383,17 @@ unanswered request both apps' rows offered "Cancel Reviewer" and no "Log
 Response". Inside the Review Details window the Funding Coordinator's star
 saved with its toast and their "Mark as Complete" on a submitted review
 turned the row "Complete"; their "Modify Review" save was refused (finding
-A31, note f-a31). Still undriven: a Guest Editor
+A31, note f-a31). Driven 2026-11-16 (Actors row 3; OJS + OMP, two runs
+each, note f-a51): the assigned Section Editor (Series Editor) and the
+Journal editor (Press editor) searched (200, the one match listed), filtered
+and paged the Add Reviewer list and added a reviewer, with the notice and
+the row after a reload, on the current round, on round 1 of a submission
+on round 2 and on OMP's Internal Review; the Funding Coordinator added only
+by selecting from the opening list (finding A51), and their window carried
+no "Create New Reviewer" and no "Enroll Existing User". OPS, the same day:
+a manager's workflow of a preprint lists "Workflow", "Production",
+"Preprint" and the publication entries, no review entry and no "Add
+Reviewer". Still undriven: a Guest Editor
 actor, a Section Editor completing create/enroll (the links are offered;
 completion was probed as a manager), and a cancelled row viewed as a
 Section Editor (code lean: the same visibility branch admits sub-editors).
@@ -2821,7 +2862,24 @@ on screen with no request sent; a successful save shows no notice. Rule
 14c: the window opened from the "Review Details" entry of an unanswered, an
 accepted and a declined request, "Notified:" / "Confirmed:" / "Confirmed:",
 both comment blocks "-", "No Items", {OJS} "Recommendation -", a star
-saving with its toast, the row unchanged on close. Rule 14d: after "Save
+saving with its toast, the row unchanged on close. Driven again
+2026-11-16 after pkp/pkp-lib#13653 (pkp/ui-library#1036, pkp/pkp-lib#13664,
+pkp/ui-library#1037, pkp/pkp-lib#13665, pkp/ojs#6010; pkp-lib `3ed5d1c3b3`,
+ui-library `836c01b5`), two runs per app on a freshly reset copy of PKP's
+default test dataset, OJS submission 12 and OMP submission 17, no review
+form: on Paul Hudson's unanswered request and Julie Janssen's accepted one
+both apps' footers showed "Mark as Complete" disabled beside "This review
+is incomplete and cannot be marked as complete yet." (OJS too, where the
+recommendation message stood before), the row and the stored assignment
+unchanged, and each reviewer's list still offered "Respond to request" /
+"Finish review", with nothing under "Completed". `useReviewDetails.js`
+(`confirmBlockedMessage`) now answers `editor.review.confirmReview.incomplete`
+for any assignment without `dateCompleted`, before the {OJS}
+`missingRecommendation` check and the review-form check. Not driven after
+the change: a declined request and a journal's request carrying a review
+form (the code gives both the same message), and where the recommendation
+message still shows (the code: a completed review with no recommendation,
+OJS only). Rule 14d: after "Save
 Changes" on an unanswered request the assignment the window refetches read
 `dateConfirmed` = `dateCompleted` = the save's second and `step` 4 (before:
 null, null, 1), the row and menu as written, the same for the Section
@@ -3202,7 +3260,8 @@ the accepted one past response and review dates the same way. 8: a
 roster reviewer seeded `invited`. 9: a
 scratch journal with `reviewForms[]` holding one active form, a throwaway
 reviewer seeded `accepted` who submits the review on their own screen with
-both comment blocks, and a second throwaway reviewer seeded `invited`. 10
+both comment blocks, and a second throwaway reviewer seeded `invited`
+without a review form, whose request's Review Details is opened. 10
 and 16: a roster reviewer seeded `completed` with `comments`. 11: a
 scratch journal with two throwaway reviewers, one seeded `invited`, the
 other holding `['externalReviewer', 'funding']`, seeded `accepted` and
@@ -3214,7 +3273,8 @@ unread review opened from the dashboard); the press control
 on a monograph with a `completed` reviewer. 15: any seeded preprint. 17:
 `author.alex` submits, `reviewer.julia` seeded `invited`. 18:
 `assistant.rita` assigned through `participants[]` as `funding`,
-`reviewer.julia` seeded `invited`. 19: `reviewer.julia` seeded `completed`
+`reviewer.julia` seeded `invited`, `reviewer.paul` kept out of the seed
+as the second Reviewer the Coordinator adds from the opening list. 19: `reviewer.julia` seeded `completed`
 on Round 1, "Mark as Complete" pressed in her Review Details window and
 "Create New Review Round" recorded on screen (the wizard belongs to
 *Review stage & rounds*); `reviewer.paul` is the never-assigned control.
@@ -3582,7 +3642,8 @@ original acceptance date, no acceptance email goes to the editor, and a
 change to an already submitted review affects none of this. Retired
 2026-09-17 as the designed behavior, which Rule 14d now states (evidence in
 note i); what the screens leave open is findings A29, A30, OMP4 and OMP5
-(OMP5 retired 2026-10-07 by pkp/pkp-lib#13467).
+(OMP5 retired 2026-10-07 by pkp/pkp-lib#13467, OMP4 2026-11-16 by
+pkp/pkp-lib#13653).
 
 <a id="fn-a26"></a>
 **f-a26** — Test run 2026-09-12 (OJS and OMP, scenario 11): the message
@@ -4054,6 +4115,51 @@ panel, no "Add Reviewer" on a preprint). Kept script
 `shared/playwright/checks/U27/I23A/i23a.js`.
 Issue report: [pkp-e2e#1068](https://github.com/jardakotesovec/pkp-e2e/issues/1068) ([docs/issues/U27-A50-enroll-reviewer-no-matches-hangs.md](../issues/U27-A50-enroll-reviewer-no-matches-hangs.md)).
 
+<a id="fn-a51"></a>
+**f-a51** — Driven 2026-11-16 (OJS and OMP `main`, pkp-lib `3ed5d1c3b3`,
+ojs `925ed49f3b`, omp `92dd31031`, ui-library `836c01b5`; two independent
+runs per app, each on its own scratch journal or press). Accounts: a
+throwaway Funding Coordinator assigned to the stage, the one default
+assistant-level group the stage's "Assign" roster offers (OJS: "Journal
+editor", "Section editor", "Guest editor", "Funding coordinator",
+"Translator", "Author"; OMP: "Press editor", "Series editor", "Funding
+coordinator", "Author", "Volume editor", "Translator"; a Copyeditor, Layout
+Editor or Proofreader placed on the submission is refused the stage), with
+an assigned Section Editor (Series Editor) and a Journal editor (Press
+editor) as the controls. On the current round, on round 1 of a submission
+on round 2 (opened by its `workflowMenuKey=workflow_3_<round 1 id>`
+address, heading "Workflow: Review (Round 1)" / "Workflow: External Review
+(Round 1)") and on OMP's Internal Review round, the Coordinator's Enter in
+"Search" sent `GET api/v1/users/reviewers?…searchPhrase=<name>…`, which
+answered 401 and opened the "Error" dialog; so did "Clear search phrase"
+(`searchPhrase` empty), "Add filter: Rated at least" (`reviewerRating=3`),
+its "Clear filter", and "Next" on a context with 31 spare reviewers
+(`offset=30`). A name typed without Enter sent nothing and left the list
+as it was. After "OK" the search box held the typed name over the opening
+list; after "Next" the bar read "2" current, "Previous" enabled, "Next"
+disabled, over Pat01–Pat30 Pagerly; the filter's state was read from the
+page (`Clear filter: Rated at least`), the snapshot under the open dialog
+carrying nothing of the window behind it. A reviewer selected from the
+opening list, then "Add Reviewer": the legacy `update-reviewer` POST
+answered 200 with the notice, and after a reload the row read "Request
+Sent", on all three round kinds. Controls, the same steps for the Section
+Editor and the Journal editor: 200 throughout, the search listing the one
+match, "Rated at least" reading "No items found." for never-rated
+reviewers and "Clear filter" restoring the list, "Next" showing the 31st
+entry. The run records hold six 401s on the reviewers listing per OJS run
+and seven per OMP run (the Internal Review search), all the
+Coordinator's, no 5xx and no page error. Mechanism:
+`PKPUserController::getGroupRoutes()` (lib/pkp `api/v1/users/`) admits
+`reviewers` only for `ROLE_ID_SITE_ADMIN`, `ROLE_ID_MANAGER` and
+`ROLE_ID_SUB_EDITOR`, since the listing was added in 2018-01, the same on
+`stable-3_5_0` and in `PKPUserHandler` on `stable-3_4_0` and
+`stable-3_3_0` (code read 2026-11-16); `PKPReviewerGridHandler` gives
+`ROLE_ID_ASSISTANT` the add operations, since 2015 (note a). Kept
+script `shared/playwright/checks/U27/K16a/k16a.js` (parts `add`, `past`,
+`page`, `int`); the 2026-11-13 sighting's script
+`shared/playwright/checks/U26/K13b/k13b.js` (part `fc`) ran twice per app
+the same day with the same result.
+
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
 by `ojs-main DashboardHandler`; the authoritative per-app switch is
@@ -4114,39 +4220,6 @@ no `{$journalName}`; a fresh install takes the new text. PKP's `main`
 dataset dump was built before the fix, so a fleet loaded from it still
 stores the old text until PKP rebuilds the dump.
 Issue report: [pkp-e2e#690](https://github.com/jardakotesovec/pkp-e2e/issues/690), retired with the fix; the report and its walk deleted. The team's copy `pkp/pkp-lib#13646` (2026-10-28).
-
-<a id="fn-omp4"></a>
-**f-omp4** — Driven 2026-09-17 (OMP, three runs; OJS as the control): on
-an unanswered, an accepted and a declined request with no review form
-"Mark as Complete" was enabled; confirming "Mark this review as complete?"
-showed the notice, and the assignment read `dateCompleted` and
-`dateConfirmed` = the click's second with `step` left at 1 — the accepted
-reviewer's own acceptance date overwritten, which the "Save Changes" path
-guards (note f-a24). Unanswered and accepted rows read "Complete" with
-"Thank Reviewer" and "Revert Decision" and the menu of an answered row; the
-declined row stayed "Request Declined" with the button disabled afterwards;
-all three windows read "Review Submitted: …" over "-" and "-". Both
-reviewers, signed in: nothing under "Action Required by me", "Review
-submitted on {date}" with "View" under "All assignments" and "Completed",
-the review page on "1. Request" with tabs 2 to 4 disabled and one disabled
-"Save and continue". OJS control: the same three windows showed the button
-disabled beside the recommendation message, and the unanswered reviewer's
-page still offered the accept and the decline. Mechanism: the `…/consider`
-PUT behind the button sets `dateConfirmed` and `dateCompleted` together
-whenever the assignment carries no `dateCompleted` (its own comment:
-"Editor completes the review."), without the guard on an existing
-`dateConfirmed` and without `step`; the button's guards are the
-recommendation ({OJS}) and the review form alone. The guidance the entry
-cites is `editor.review.readConfirmation` (finding A22). Since
-pkp/ui-library#987 with pkp/pkp-lib#13346 (issue pkp/pkp-lib#13263) the
-window's dated line follows Rule 14a's order, and the button also stamps
-the consideration date, so these windows would now read "Review
-Completed: …" (code-read 2026-09-24, not driven on OMP); the entry names
-only the moment, which both labels carry. The same code reading raises an
-unprobed side: History would now show "Request Accepted" and "Review
-Submitted" for the editor's click, where it read "Confirm" and
-"Completed" before.
-Issue report: [pkp-e2e#719](https://github.com/jardakotesovec/pkp-e2e/issues/719) ([docs/issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md](../issues/U27-OMP4-press-mark-complete-closes-unreviewed-request.md)). The team's copy is `pkp/pkp-lib#13653` (2026-10-30).
 
 <a id="fn-omp5"></a>
 **f-omp5** — Driven 2026-09-17 (OMP, three runs): "Save Changes" pressed
