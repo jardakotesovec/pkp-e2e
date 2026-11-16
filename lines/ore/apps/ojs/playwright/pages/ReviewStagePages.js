@@ -1738,5 +1738,32 @@ exports.reviewItemBlock = function reviewItemBlock(modal, question) {
     return modal.getByRole('heading', {name: question, exact: true}).locator('xpath=..');
 };
 
+/**
+ * The Review Details window's dated line (Rule 14a): the `h2` "{step}:"
+ * with the date and time beside it, read whole ("Review Completed:
+ * 2026-11-12 04:07 AM").
+ *
+ * @param {import('@playwright/test').Locator} modal from reviewDetailsModal
+ * @param {string} step "Review Submitted", "Review Completed", "Reviewer Thanked", …
+ */
+exports.datedLine = function datedLine(modal, step) {
+    return modal.getByRole('heading', {name: `${step}:`, exact: true}).locator('xpath=..');
+};
+
+/**
+ * Open a row's "More Actions" › "Review Details" (the menu's way into the
+ * window the "Read Review" button opens) and return the window settled.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} row the reviewer's panel row
+ */
+exports.openReviewDetailsFromMenu = async function openReviewDetailsFromMenu(page, row) {
+    await exports.clickRowAction(page, row, 'Review Details');
+    const modal = exports.reviewDetailsModal(page);
+    await expect(modal).toBeVisible({timeout: 30_000});
+    await exports.awaitReviewDetailsSettled(modal);
+    return modal;
+};
+
 module.exports.waitForJQueryIdle = waitForJQueryIdle;
 module.exports.waitForLegacyFormSettled = waitForLegacyFormSettled;

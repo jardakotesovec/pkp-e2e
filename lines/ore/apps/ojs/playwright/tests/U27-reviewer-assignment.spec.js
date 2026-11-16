@@ -85,13 +85,17 @@ const {
     cancelModifyReview,
     waitForJQueryIdle,
     waitForLegacyFormSettled,
+    datedLine,
+    openReviewDetailsFromMenu,
 } = require('../pages/ReviewStagePages.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
+const {ReviewerAssignmentsPage} = require('../../../../shared/playwright/pages/ReviewerPages.js');
 
 const JOURNAL = 'publicknowledge';
 const REVIEW_PENDING = 'Review pending.';
 const ASSIGNMENT_UPDATED = 'Review assignment updated.';
 const DATE_RULE = 'Review due date must be greater or equal to response due date.';
+const DATE_TIME = '\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2} [AP]M';
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
 function makeTag(scenario, testInfo) {
@@ -1195,9 +1199,31 @@ test.describe('reviewer-assignment', () => {
         await expect(formSelect.locator('option', {hasText: formTitle})).toHaveCount(1);
         await closeSideWindow(editUnanswered);
 
-        // The second reviewer's review: they accept the request and submit;
-        // the Editor reads that row as "Review Submitted".
+        // Review Details on the unanswered request: "More Actions" ›
+        // "Review Details"; the dated line reads "Request Sent: {date and
+        // time}" and "Mark as Complete" sits disabled beside the incomplete
+        // message ("Modify Review", enabled, is the same footer's positive
+        // read). "Cancel": the row still reads "Request Sent".
+        const unansweredDetails = await openReviewDetailsFromMenu(managerPage, unansweredRow);
+        await expect(datedLine(unansweredDetails, 'Request Sent')).toHaveText(
+            new RegExp(`^Request Sent:\\s*${DATE_TIME}$`)
+        );
+        await expect(unansweredDetails.getByRole('button', {name: 'Modify Review', exact: true})).toBeEnabled();
+        await expect(unansweredDetails.getByRole('button', {name: 'Mark as Complete', exact: true})).toBeDisabled();
+        await expect(
+            unansweredDetails.getByText('This review is incomplete and cannot be marked as complete yet.')
+        ).toBeVisible();
+        await closeReviewDetails(managerPage, unansweredDetails);
+        await expect(statusTitle(unansweredRow)).toHaveText('Request Sent');
+
+        // The second reviewer's review: signed in, their request for the
+        // submission still offers "Respond to request"; they accept the
+        // request and submit; the Editor reads that row as "Review
+        // Submitted".
         const secondPage = await (await asUser(unanswered)).newPage();
+        const secondList = new ReviewerAssignmentsPage(secondPage, tag);
+        await secondList.goto();
+        await expect(secondList.rowAction(secondList.row(title), 'Respond to request')).toBeVisible();
         await performReview(secondPage, tag, submissionId, {
             comments: `Second comment ${tag}`,
         });
