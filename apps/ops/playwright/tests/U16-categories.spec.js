@@ -36,6 +36,10 @@
  * scenarios/submission` by a throwaway Author (`…au`; S3 with a Moderator
  * `…se` in `participants[]`, S4 a `submitted: false` draft). S1 and S7
  * seed English and French (`supportedLocales`, `supportedFormLocales`).
+ * S1's letter-case steps take their answer by database (`onPostgres`,
+ * shared/playwright/support/database.js; Rule 5a, footnote s): PostgreSQL
+ * on every push and local fleet, MySQL and MariaDB on the daily
+ * configurations run and the `mysql` and `mariadb` lines.
  * The "Categories" wizard setting of S4 and the plugin and sidebar box of
  * S7 are changed on screen, as the scenarios say. The category picture is
  * the fixture `profile-image-400.png`. The signed-out visitor is a second
@@ -207,16 +211,30 @@ test.describe('categories', () => {
         await saveAndClose(page, tab, window);
         await expect(tab.row('Arts')).toBeVisible({timeout: T});
 
-        // A path in capitals saves beside "arts" (Fields, "Path").
+        // A path in capitals: on PostgreSQL "ARTS" saves beside "arts"
+        // (Fields, "Path"; Rule 5a). The same path on MySQL or MariaDB:
+        // refused as taken under "Path", the window open, then saved with
+        // "crafts", and the visitor's "category/ARTS" opens "Arts"
+        // (Fields, the category window and "Path"; Rules 4, 5a).
         window = await tab.openAdd();
         await window.nameBox().fill('Crafts');
-        // MySQL and MariaDB compare paths without regard to case and refuse
-        // "ARTS" beside "arts" as taken, so there "Crafts" takes a path of
-        // its own and the address in capitals is not asked.
-        await window.pathBox().fill(onPostgres ? 'ARTS' : 'crafts');
-        await saveAndClose(page, tab, window);
+        await window.pathBox().fill('ARTS');
+        if (onPostgres) {
+            await saveAndClose(page, tab, window);
+        } else {
+            expect((await window.save()).status()).toBe(400);
+            await expect(window.fieldErrors('Path')).toHaveText('The category path already exists. Please enter a unique path.');
+            await expect(window.root()).toBeVisible();
+            await window.pathBox().fill('crafts');
+            await saveAndClose(page, tab, window);
+        }
         await expect(tab.row('Crafts')).toBeVisible({timeout: T});
         await expect(tab.row('Arts')).toBeVisible();
+        if (!onPostgres) {
+            const capitals = new CategoryPage(visitor, tag, WORD);
+            await capitals.goto('ARTS');
+            await expect(capitals.heading()).toHaveText('Arts');
+        }
 
         // Sub-categories: the row menu, a window naming no parent, the parent
         // row opened on the new row (Rules 1, 3).
@@ -290,8 +308,30 @@ test.describe('categories', () => {
         await category.expectBareNotFound('science');
         await category.goto('arts');
         await expect(category.heading()).toHaveText('Arts');
-        await category.goto(onPostgres ? 'ARTS' : 'crafts');
-        await expect(category.heading()).toHaveText('Crafts');
+        // "category/ARTS": "Crafts" on PostgreSQL; "Arts" on MySQL and
+        // MariaDB, which match the address without regard to case (Rule 5a).
+        await category.goto('ARTS');
+        await expect(category.heading()).toHaveText(onPostgres ? 'Crafts' : 'Arts');
+
+        // A path changed only in letter case, and an address in other
+        // capitals (Rules 4, 5, 5a, 13): "natural-science" to
+        // "NATURAL-SCIENCE" saves; the new address opens "Science"; the old
+        // address and "category/Arts" answer per database.
+        window = await tab.openEdit('Science');
+        await expect(window.pathBox()).toHaveValue('natural-science');
+        await window.pathBox().fill('NATURAL-SCIENCE');
+        await saveAndClose(page, tab, window);
+        await category.goto('NATURAL-SCIENCE');
+        await expect(category.heading()).toHaveText('Science');
+        if (onPostgres) {
+            await category.expectBareNotFound('natural-science');
+            await category.expectBareNotFound('Arts');
+        } else {
+            await category.goto('natural-science');
+            await expect(category.heading()).toHaveText('Science');
+            await category.goto('Arts');
+            await expect(category.heading()).toHaveText('Arts');
+        }
 
         // Control: the "Preprint entry" page, reloaded, now holds
         // "Categories" under "Placement" (Fields, the picker).

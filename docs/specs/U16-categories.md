@@ -64,18 +64,25 @@ holds one form with "Save" at its foot. A save the form refuses behaves as
 on Settings › Journal: "This field is required." under each empty required
 box, the error count and "Go to" links beside "Save" (see
 [Journal identity & about pages](U07-journal-identity-and-about-pages.md),
-Fields). The window's "Close", and Escape, shut it without a question,
-whatever was typed ⚠ [A16](#a16). A journal with a second form language
+Fields). A path refused once "Save" is pressed (one already taken) is
+shown as Settings › Journal shows a value the journal's records refuse:
+the message under "Path"; beside "Save", "Please correct one error." with
+"Go to Path: The category path already exists. Please enter a unique
+path." and "Jump to next error"; and a notice reading "The form was not
+saved because 1 error(s) were encountered. Please correct these errors
+and try again." "Save" stays grayed out until "Path" changes. The
+window's "Close", and Escape, shut it without a question, whatever was
+typed ⚠ [A16](#a16). A journal with a second form language
 shows that language's button ("French") at the top and, under "Name" and
 "Description", the line "0/2 languages completed"; pressing "French" adds
 "Name in French" and "Description in French" under the English boxes.
 "Path", "Order of articles" and "Cover Image" have one box. The fields,
-top to bottom: <sup>d</sup> <sup>td1</sup>
+top to bottom: <sup>d</sup> <sup>td1</sup> <sup>td17</sup>
 
 | Field (UI label) | Required? | Rules |
 |------------------|-----------|-------|
 | "Name" | yes, in the primary language | Plain text, per language. What the tab, the category's page, the "Browse" block and the pickers show. Two categories may share a name <sup>d</sup> |
-| "Path" | yes | Under it: "The category's URL will be: {address}", the journal's address followed by "catalog/category/path" ("preprints/category/path" on a preprint server): the last word stays "path" whatever the box holds, also in "Edit Category" for a saved category ⚠ [A21](#a21). Letters, digits, "-", "_", "." and "/" are accepted; anything else is refused with "The category path must consist of only letters and numbers." ⚠ [A9](#a9). A path another category of the journal already has is refused with "The category path already exists. Please enter a unique path." A path that differs from another only in letter case is accepted ("ARTS" beside "arts"), and each address opens its own category. A path containing "/" is saved, and every link prints it ("sci%2Fphys"), but following one opens the page of the category whose path is the part before the "/" ("Slashed", path "sci/phys", opens "Science"), or the not-found page of Rule 13 when there is none ⚠ [A8](#a8). What the path does: Rule 5 <sup>d</sup> <sup>td2</sup> |
+| "Path" | yes | Under it: "The category's URL will be: {address}", the journal's address followed by "catalog/category/path" ("preprints/category/path" on a preprint server): the last word stays "path" whatever the box holds, also in "Edit Category" for a saved category ⚠ [A21](#a21). Letters, digits, "-", "_", "." and "/" are accepted; anything else is refused with "The category path must consist of only letters and numbers." ⚠ [A9](#a9). A path another category of the journal already has is refused with "The category path already exists. Please enter a unique path." Whether a path that differs from another only in letter case counts as taken depends on the site's database: on PostgreSQL it is accepted ("ARTS" beside "arts"), and each address opens its own category; on MySQL and MariaDB it is refused with the same message (Rule 5a). A path containing "/" is saved, and every link prints it ("sci%2Fphys"), but following one opens the page of the category whose path is the part before the "/" ("Slashed", path "sci/phys", opens "Science"), or the not-found page of Rule 13 when there is none ⚠ [A8](#a8). What the path does: Rule 5 <sup>d</sup> <sup>td2</sup> <sup>td17</sup> |
 | "Description" | no | Formatted text per language with the buttons "Bold", "Italic", "Superscript", "Subscript", "Insert/edit link" and "Blockquote". Shown on the category's page (Rule 9) <sup>d</sup> |
 | "Order of articles" ("Order of monographs" on a press, "Order of preprints" on a preprint server) | always has a value | A list under "Choose how to order articles in this category." ("…books…", "…preprints…"): "Title (A-Z)", "Title (Z-A)", "Publication date (oldest first)" and "Publication date (newest first)", the last preselected on a new category; a press adds "Series position (lowest first)" and "Series position (highest first)". What it changes: Rule 10 <sup>d</sup> |
 | "Cover Image" | no | An upload box for a .jpg, .png or .gif picture, with its "Alternate text" box once a picture is in; the box works as the upload boxes of [Appearance & theming](U10-appearance-and-theming.md) (Fields) describe. A file of another type is refused as it is dropped ("You can't upload files of this type."); a file named as a picture but holding none is refused at "Save" with "An invalid image was uploaded. Accepted formats are .png, .gif, or .jpg.", after leaving a broken preview ⚠ [A17](#a17). A picture whose data is damaged uploads like a sound one, and "Save" then fails with "An unexpected error has occurred. Please reload the page and try again.": a new category is created without the picture ⚠ [A24](#a24). Shown on the category's page (Rule 12) <sup>d</sup> |
@@ -178,8 +185,26 @@ cannot be reached by heading ⚠ [OMP3](#omp3). <sup>h</sup>
    ("preprints/category/" on a preprint server). A path is unique within
    the journal; another journal may use the same one. Changing the path
    moves the page: the old address then answers the not-found page of
-   Rule 13, and every link the site prints follows the new path.
+   Rule 13 (on MySQL and MariaDB not when only the letter case changed,
+   Rule 5a), and every link the site prints follows the new path.
    <sup>g</sup>
+   - 5a. **Letter case.** Whether letter case tells two paths apart
+     depends on the database the site runs on. The test installs run on
+     PostgreSQL, so scenario 1's steps on a path in capitals give the
+     PostgreSQL answers. <sup>d</sup> <sup>td17</sup>
+     - **On a PostgreSQL site** a path is matched letter for letter.
+       "ARTS" beside "arts" saves (Fields, "Path"), and each address opens
+       its own category. An address that matches a path only when letter
+       case is ignored ("category/Arts" while the paths are "arts" and
+       "ARTS") answers the not-found page of Rule 13. A path changed only
+       in letter case ("science" to "SCIENCE") moves the page like any
+       other change.
+     - **On a MySQL or MariaDB site** letter case is ignored. "ARTS"
+       beside "arts" is refused as taken (Fields, "Path"). A category's
+       address opens it in any capitals: "category/ARTS", "category/Arts"
+       and "category/aRtS" all open the category whose path is "arts". A
+       path changed only in letter case ("science" to "SCIENCE") saves,
+       and the old address still opens the category.
 6. **Editing.** "Edit" opens the category's window filled with its saved
    values, its editors ticked. Everything the window holds can change;
    the category's place in the tree cannot (Rule 1). <sup>d</sup>
@@ -266,8 +291,10 @@ cannot be reached by heading ⚠ [OMP3](#omp3). <sup>h</sup>
 13. **An unknown path.** A category address whose path no category of the
     journal has answers a bare page reading "404 Not Found", with no
     header and no links, as an unknown article's or preprint's address
-    does.
-    <sup>g</sup>
+    does. Letter case counts on PostgreSQL only: there "category/Arts" for
+    a category with the path "arts" answers this page, while on MySQL and
+    MariaDB it opens that category (Rule 5a).
+    <sup>g</sup> <sup>td17</sup>
 
 **The "Browse" block**
 
@@ -522,7 +549,16 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      numbers." [A9](#a9). Change "Path" to "arts" and press "Save": the
      tab lists "Arts" (Fields, "Path"; Rule 4).
    - **A path in capitals**: add "Crafts" with the path "ARTS" the same
-     way: it saves, beside "Arts" with its path "arts" (Fields, "Path").
+     way: on a PostgreSQL site, the test installs' database, it saves,
+     beside "Arts" with its path "arts" (Fields, "Path"; Rule 5a).
+   - **The same path on MySQL or MariaDB**: on a MySQL or MariaDB site,
+     "Crafts" with the path "ARTS" is refused instead, with "The category
+     path already exists. Please enter a unique path." under "Path", and
+     the window stays open. Change "Path" to "crafts" and press "Save":
+     the tab lists "Crafts". The visitor opens the journal's address
+     followed by "catalog/category/ARTS" ("preprints/category/ARTS" on a
+     preprint server): the page headed "Arts" opens (Fields, the category
+     window and "Path"; Rules 4, 5a).
    - **Sub-categories**: on the "Science" row press "More Actions": the
      menu reads "Add", "Edit" and "Delete Category". Press "Add": the
      window is titled "Add Category" and names no parent. Type "Physics"
@@ -537,13 +573,13 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      the "Physics" row: "Optics" shows. Press the arrow on the "Science"
      row: "Physics" and "Optics" are hidden. Press it again: "Physics"
      shows, and "Optics" still shows under it (Rules 2, 3).
-   - **Edit**: on the "Science" row press "More Actions" › "Edit": a
-     window titled "Edit Category" holds "Science" in "Name", "Sciences"
-     in "Name in French", "science" in "Path" and, on a journal or press,
-     "Assign Eve Editor as Journal editor" ("…as Press editor") ticked.
-     Type "Work in the natural sciences." in "Description", upload a
-     400 × 400 PNG in "Cover Image", change "Path" to "natural-science"
-     and press "Save": "Category saved" shows (Rules 4, 6).
+   - **Edit**: on the "Science" row press "More Actions" › "Edit": the
+     "Edit Category" window holds "Science" in "Name", "science" in "Path"
+     and, on a journal or press, "Assign Eve Editor as Journal editor"
+     ("…as Press editor") ticked; press "French": "Name in French" holds
+     "Sciences". Type "Work in the natural sciences." in "Description",
+     upload a 400 × 400 PNG in "Cover Image", change "Path" to
+     "natural-science" and save: "Category saved" shows (Rules 4, 6).
    - **The visitor's page, with its description and picture**: the visitor
      opens the journal's address followed by
      "catalog/category/natural-science" ("preprints/category/" on a preprint
@@ -559,8 +595,20 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **The old address and the address in capitals**: the address ending
      in "category/science" shows a bare page reading "404 Not Found",
      with no header and no links. The address ending in "category/arts"
-     opens the page headed "Arts", and the one ending in "category/ARTS"
-     the page headed "Crafts" (Rules 5, 13; Fields, "Path").
+     opens the page headed "Arts", and, on PostgreSQL, the one ending in
+     "category/ARTS" the page headed "Crafts" (Rules 5, 5a, 13; Fields,
+     "Path").
+   - **A path changed only in letter case, and an address in other
+     capitals** (Journal Manager): on the "Science" row press "More
+     Actions" › "Edit", change "Path" from "natural-science" to
+     "NATURAL-SCIENCE" and press "Save": "Category saved" shows. The
+     visitor opens the address ending in "category/NATURAL-SCIENCE": the
+     page headed "Science" opens. On a PostgreSQL site the old address,
+     ending in "category/natural-science", and the address ending in
+     "category/Arts" each show the bare page reading "404 Not Found"; on
+     a MySQL or MariaDB site the one ending in "category/natural-science"
+     opens the page headed "Science" and the one ending in
+     "category/Arts" the page headed "Arts" (Rules 4, 5, 5a, 13).
    - **Control**: the article's "Publication Settings" page ("Catalog
      Entry", "Preprint entry"), reloaded, now holds "Categories" under
      "Placement", with "Selected: None" and the button "Select
@@ -932,6 +980,11 @@ Left out of the scenarios above, by reason:
     shared seeded one, which the scenarios only read, and every other
     journal assigns nobody (A13)
 - **Owned by another feature**:
+  - a save refused after the press, with its "Go to" link, "Jump to next
+    error", "Save" grayed out and the notice "The form was not saved…"
+    (Fields, the category window; scenario 1 reads the message under
+    "Path"; *[Journal identity & about
+    pages](U07-journal-identity-and-about-pages.md)*, scenario 3)
   - the roles without the Settings pages refused the "Categories" tab
     (Actors row 1; *[Journal identity & about
     pages](U07-journal-identity-and-about-pages.md)*, scenario 2)
@@ -1496,14 +1549,20 @@ options `Repo::submission()->getSortSelectOptions()`: lib/pkp
 `catalog.sortBy.titleAsc` / `titleDesc` / `datePublishedAsc` /
 `datePublishedDesc`, OMP's override adds `seriesPositionAsc` /
 `seriesPositionDesc`; value `getDefaultSortOption()`
-`datePublished-desc`), `image` `category.coverImage` "Cover Image"
+`datePublished-DESC`, from `Collector::ORDER_DIR_DESC`, the value every
+save answers), `image` `category.coverImage` "Cover Image"
 (`FieldUploadImage`, `acceptedFiles` image/jpeg, png, gif, jpg; alt text
 `common.altText` "Alternate text"). Validation:
 `PKP\category\Repository::validate()` — schema-required `path`, `title`
 (primary locale); `CATEGORY_PATH_REGEX` `/^[a-zA-Z0-9\/._-]+$/` else
 `grid.category.pathAlphaNumeric`; a path held by another category of the
-context (`filterByPaths`, compared with the edited category's own path)
-`grid.category.pathExists`; an uploaded image not .jpg/.png/.gif
+context (`filterByPaths`, `whereIn('c.path', …)`, compared with the
+edited category's own path) `grid.category.pathExists`, the comparison the
+database's own: exact on PostgreSQL, without regard to case on MySQL and
+MariaDB, whose `categories.path` column has the collation
+`utf8mb3_general_ci` (the database created `DEFAULT CHARACTER SET utf8`,
+as PKP's CI does), as has the unique index `category_path` (context_id,
+path) (note td17); an uploaded image not .jpg/.png/.gif
 `form.invalidImage`. No uniqueness rule on the title. Save:
 `CategoryCategoryController::saveCategory()` (POST, or PUT
 `categories/{id}`), then `categorySaved()` notifies
@@ -1524,7 +1583,8 @@ in from the right with "Save" at its foot; empty "Name" and "Path" gave
 these errors and try again."; "my path" and "café" were refused with the
 letters-and-numbers message, "a-b_c.d" and "sci/phys" saved; "arts" was
 refused with the taken-path message, "ARTS" beside it saved and each
-address opened its own category; "Twin" saved twice (paths twin1, twin2); a
+address opened its own category (PostgreSQL; MySQL and MariaDB: note
+td17); "Twin" saved twice (paths twin1, twin2); a
 French-only name was refused. The toolbar: "Bold", "Italic", "Superscript",
 "Subscript", "Insert/edit link", "Blockquote". "Cover Image" refused a .txt
 as it was dropped ("You can't upload files of this type.") and a text file
@@ -1612,7 +1672,8 @@ for scenario 3.
 
 <a id="fn-g"></a>
 **g** — The page: `PKPCatalogHandler::category()` finds the category by
-`filterByPaths([$args[0]])` in the context (none: `NotFoundHttpException`),
+`filterByPaths([$args[0]])` in the context (none: `NotFoundHttpException`;
+letter case as note d's taken-path check, note td17),
 builds `SubmissionSearchResult::builderFromRequest()` with
 `whereIn('categoryIds', [id])` (OMP adds `orderBy('featured')`), and
 paginates with `getRangeInfo($request, 'category')` (the context's
@@ -1832,6 +1893,16 @@ set `[queues] job_runner = Off`, so no page load runs them. Scenario 1:
 by `decisions` (OJS `['sendExternalReview', 'accept',
 'sendToProduction']`, OMP `['skipExternalReview', 'sendToProduction']`,
 none on OPS); the picture is the fixture `profile-image-400.png`.
+Scenario 1 runs on PostgreSQL on every push, PR and local fleet, and on
+MySQL 8.0 and MariaDB 10.11 in the daily configurations run
+(`e2e-matrix.yml`) and on the `mysql` and `mariadb` lines
+(`PKP_E2E_LINE`); the suites ask `onPostgres`
+(`shared/playwright/support/database.js`) and run the database's own
+end of "A path in capitals" / "The same path on MySQL or MariaDB", of
+the "category/ARTS" read in "The old address and the address in
+capitals", and of "A path changed only in letter case, and an address
+in other capitals" (Rule 5a, note td17). Off PostgreSQL "Crafts" ends
+with the path "crafts".
 Scenario 2: the tree `history` › `modern-history` › `cold-war` and
 `arts`; "Empires" in `history`, "Wall Posters" in `cold-war` and `arts`;
 the mail catcher read for the manager's and the author's addresses.
@@ -2081,6 +2152,34 @@ page links; OMP "1 Titles" and "All Books", nothing under it. No request
 failed and the server logs stayed empty. A category of several pages was
 not typed past its end, the walk was not repeated at the 2026-10-07
 tips, and stable-3_5_0 was not driven.
+
+<a id="fn-td17"></a>
+**td17** — Live-probed 2026-11-16 (Fields, the category window and "Path";
+Rules 5, 5a, 13; scenario 1), OJS, OMP and OPS, each on PostgreSQL (two
+runs), MySQL 8.0.46 (the `mysql` line, two runs) and MariaDB 10.11.19
+(the `mariadb` line, two runs), with `shared/playwright/checks/U16/K16c/k16c.js`
+on scratch contexts as a throwaway manager; addresses read signed out and
+as that manager, the same. PostgreSQL: "Crafts" with "ARTS" and "Weaving"
+with "Arts" both saved beside "Arts" (path "arts"), "Edit Category"
+reopened "ARTS", and `…/category/arts`, `ARTS` and `Arts` opened "Arts",
+"Crafts" and "Weaving"; `aRtS`, `crafts`, `CRAFTS`, `weaving`, `WEAVING`
+and `Science` answered the bare 404 page. MySQL and MariaDB: both saves
+answered 400 `POST …/api/v1/categories?parentCategoryId=undefined` with
+the body
+`{"path":["The category path already exists. Please enter a unique path."]}`;
+the message under "Path" (box invalid), the footer "Please
+correct one error." with "Go to Path: The category path already exists.
+Please enter a unique path." and "Jump to next error", "Save" disabled
+until "Path" changed, the notice "The form was not saved because 1
+error(s) were encountered. Please correct these errors and try again.",
+the window open; with "crafts" (and "weaving") the save went through.
+`ARTS`, `Arts` and `aRtS` opened "Arts", `CRAFTS` "Crafts". Every
+database: "Science" (path "science") edited to "SCIENCE" saved (200,
+"Category saved", reopened "SCIENCE"); then on PostgreSQL `science` and
+`Science` answered 404 and `SCIENCE` opened "Science", on MySQL and
+MariaDB all three opened "Science". An unknown path answered the bare
+404 page on every database. The "Go to Path" and "Jump to next error"
+buttons were not pressed; links after a case-only change were not read.
 
 <a id="fn-f-a1"></a>
 **f-a1** — `catalogCategory.tpl` (all three apps) tests `{if

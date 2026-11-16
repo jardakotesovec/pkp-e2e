@@ -242,16 +242,31 @@ test.describe('Categories', () => {
         await expect(win.root()).toHaveCount(0);
         await expect(tab.row('Arts')).toBeVisible();
 
-        // A path in capitals: "Crafts" with "ARTS" saves beside "Arts".
+        // A path in capitals: on PostgreSQL "Crafts" with "ARTS" saves
+        // beside "Arts". The same path on MySQL or MariaDB: refused as
+        // taken, the window open; "crafts" saves, and the visitor's
+        // "category/ARTS" opens "Arts" (Fields, "Path"; Rules 4, 5a;
+        // footnote s: the database's own end).
+        const cat = new CategoryPage(visitor, tag);
         win = await tab.openAdd();
         await win.nameBox('en').fill('Crafts');
-        // MySQL and MariaDB compare paths without regard to case and refuse
-        // "ARTS" beside "arts" as taken, so there "Crafts" takes a path of
-        // its own and the address in capitals is not asked.
-        await win.pathBox().fill(onPostgres ? 'ARTS' : 'crafts');
-        expect((await win.save()).status()).toBe(200);
+        await win.pathBox().fill('ARTS');
+        if (onPostgres) {
+            expect((await win.save()).status()).toBe(200);
+        } else {
+            expect((await win.save()).status()).toBe(400);
+            await expect(win.fieldErrors('Path').first()).toHaveText('The category path already exists. Please enter a unique path.');
+            await expect(win.heading()).toBeVisible();
+            await win.pathBox().fill('crafts');
+            expect((await win.save()).status()).toBe(200);
+        }
         await expect(win.root()).toHaveCount(0);
         await expect(tab.row('Crafts')).toBeVisible();
+        await expect(tab.row('Arts')).toBeVisible();
+        if (!onPostgres) {
+            await cat.goto('ARTS');
+            await expect(cat.heading()).toHaveText('Arts');
+        }
 
         // Sub-categories: the row menu, its "Add" window naming no parent,
         // the parent's row opened on the new row, indented (Rules 1, 3).
@@ -308,7 +323,6 @@ test.describe('Categories', () => {
 
         // The visitor's page: breadcrumb, heading, the small picture, the
         // description, "Subcategories" with "Physics" alone (Rules 11, 12).
-        const cat = new CategoryPage(visitor, tag);
         await cat.goto('natural-science');
         expect(await cat.crumbs()).toEqual(['Home', 'Science']);
         await expect(cat.crumbLinks()).toHaveText(['Home']);
@@ -330,13 +344,39 @@ test.describe('Categories', () => {
         await expect(cat.count()).toHaveText('0 Items');
         await expect(cat.items()).toHaveCount(0);
 
-        // The old address answers the bare not-found page; "arts" and
-        // "ARTS" open their own categories (Rules 5, 13).
+        // The old address answers the bare not-found page; "arts" opens
+        // "Arts", and on PostgreSQL "ARTS" opens "Crafts" (Rules 5, 5a, 13).
         await cat.expectBareNotFound('science');
         await cat.goto('arts');
         await expect(cat.heading()).toHaveText('Arts');
-        await cat.goto(onPostgres ? 'ARTS' : 'crafts');
-        await expect(cat.heading()).toHaveText('Crafts');
+        if (onPostgres) {
+            await cat.goto('ARTS');
+            await expect(cat.heading()).toHaveText('Crafts');
+        }
+
+        // A path changed only in letter case, and an address in other
+        // capitals: "natural-science" to "NATURAL-SCIENCE" saves and the new
+        // address opens "Science"; the old address and "category/Arts" read
+        // per database, the bare not-found page on PostgreSQL, the
+        // category's page on MySQL and MariaDB (Rules 4, 5, 5a, 13).
+        await expect(tab.savedNotice()).toHaveCount(0, {timeout: 15_000});
+        win = await tab.openEdit('Science');
+        await expect(win.pathBox()).toHaveValue('natural-science');
+        await win.pathBox().fill('NATURAL-SCIENCE');
+        expect((await win.save()).status()).toBe(200);
+        await expect(win.root()).toHaveCount(0);
+        await expect(tab.savedNotice()).toBeVisible();
+        await cat.goto('NATURAL-SCIENCE');
+        await expect(cat.heading()).toHaveText('Science');
+        if (onPostgres) {
+            await cat.expectBareNotFound('natural-science');
+            await cat.expectBareNotFound('Arts');
+        } else {
+            await cat.goto('natural-science');
+            await expect(cat.heading()).toHaveText('Science');
+            await cat.goto('Arts');
+            await expect(cat.heading()).toHaveText('Arts');
+        }
 
         // Control: "Publication Settings", reloaded, now holds "Categories"
         // under "Placement", "Selected: None" and "Select Categories".
