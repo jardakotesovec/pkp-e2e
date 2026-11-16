@@ -2433,7 +2433,7 @@ viewer's). The Comments page, every comment-panel and report-panel open,
 the panel's address opened directly, writing a comment, filing a report
 and deleting one logged nothing. OMP and OPS build no comment block.
 PKP's `config.TEMPLATE.inc.php` ships `[debug] display_errors = Off`.
-Issue report: docs/issues/U14-A24-landing-page-logs-warnings-per-comment.md.
+Issue report: [pkp-e2e#1099](https://github.com/jardakotesovec/pkp-e2e/issues/1099) ([docs/issues/U14-A24-landing-page-logs-warnings-per-comment.md](../issues/U14-A24-landing-page-logs-warnings-per-comment.md)).
 
 <a id="fn-f-a25"></a>
 **f-a25 — A25.** `UserComment::getSettings()` names `approvedAt` and
@@ -2450,7 +2450,7 @@ zzedd's, two warnings each, the request answering 200 and the notice
 "The comment has been updated successfully." showing; on OMP and OPS
 `main`, "Approve Comment" and "Hide Comment" on a comment the tooling
 wrote (those apps have no comment box), two each.
-Issue report: docs/issues/U14-A25-approve-hide-comment-logs-warnings.md.
+Issue report: [pkp-e2e#1100](https://github.com/jardakotesovec/pkp-e2e/issues/1100) ([docs/issues/U14-A25-approve-hide-comment-logs-warnings.md](../issues/U14-A25-approve-hide-comment-logs-warnings.md)).
 
 <a id="fn-f-omp1"></a>
 **f-omp1 — OMP1.** Footnote m: `omp/pages/management/SettingsHandler::__construct()`
