@@ -1800,9 +1800,10 @@ version), re-links authors through the old-to-new author map built by
 position, and re-points `chapterId` only on the files it copies itself,
 the publication formats' files (`$newSubmissionFiles`); every other file
 keeps the old chapter's id, which `ChapterForm::fetch()` then treats as
-held by another chapter. Each re-linked author takes the old chapter's
-own `submission_chapter_authors` `seq`
-(`Repo::author()->getChapterAuthorSequences()`, pkp/pkp-lib#10570), with
+held by another chapter. The re-linked authors are numbered from 0 in
+the order the old chapter reads (its `submission_chapter_authors` `seq`,
+then `author_id`; pkp/pkp-lib#10570, omp#2523 `fb4f63b15a`, which the
+Native XML export's `<chapterAuthor seq>` numbers the same way), with
 `primary_contact` false, as every other writer of the table sets it
 (nothing reads it). Live-probed
 2026-09-28 (Rule 15): note td15; the author order, note td22.
