@@ -358,6 +358,8 @@ machine what that run shows:
   for instance, and says how many; `--force` stops anyway.
   `npm run db -- sql mysql "<statement>" [<database>]` runs a statement
   as root, for a look at a table or at `SHOW ENGINE INNODB STATUS`.
+  Two runs that seed articles into one line's database at once can
+  disturb its full-text index: run full-text checks there one at a time.
   On the VM the bot's service may not start a container itself (it
   runs with "no new privileges", which rootless podman cannot work
   under), so each server is a system service there, `pkp-e2e-mysql`
@@ -441,6 +443,7 @@ roles, submissions), generated from the dumps. Opt-in: the suites, CI,
 npm run fetch-datasets [-- --update]                     # checkouts/datasets/: main + stable-3_5_0, pgsql only
 npm run fetch-datasets -- --line stable-3_4_0 [--line stable-3_3_0]   # add an old line's dumps (kept on later --update)
 npm run fleet-prep -- --feature issues --dataset --reset            # main: load, then the server; .reports/issues/fleet.json
+#   a number another feature prepared last (under 4 h ago) is refused: take another, or --take once its agent is done
 PKP_E2E_LINE=stable-3_5_0 npm run fleet-prep -- --feature issues-3_5 --dataset --reset
 PROBE_FEATURE=issues PROBE_AGENT=ir1 node bin/probe.js all my-walk.js   # fleet.json says dataset: the script drives it
 npm run reset:ojs -- --dataset [n]                      # reload one app's dataset fleet (no server start)

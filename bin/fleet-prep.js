@@ -40,7 +40,7 @@ const {APPS, REPO_ROOT} = require('./apps.js');
 const {resolveProbeApp} = require('../shared/playwright/probe/index.js');
 const {parseDatasetFlag, resetDataset, datasetFleet, query} = require('../shared/playwright/dataset.js');
 
-const USAGE = 'usage: node bin/fleet-prep.js --feature <id> [--dataset [n]] [--notes <spec id>] [--reset] [--apps ojs,omp,ops]';
+const USAGE = 'usage: node bin/fleet-prep.js --feature <id> [--dataset [n] [--take]] [--notes <spec id>] [--reset] [--apps ojs,omp,ops]';
 
 function parseArgs(allArgs) {
     const {n: dataset, rest: argv} = parseDatasetFlag(allArgs);
@@ -51,6 +51,8 @@ function parseArgs(allArgs) {
             options.feature = argv[++i];
         } else if (arg === '--reset') {
             options.reset = true;
+        } else if (arg === '--take') {
+            options.take = true;
         } else if (arg === '--notes') {
             options.notes = argv[++i];
         } else if (arg === '--apps') {
@@ -105,7 +107,7 @@ function runLogged(label, command, args, logFile) {
     return code;
 }
 
-const {feature, reset, apps, dataset, notes} = parseArgs(process.argv.slice(2));
+const {feature, reset, apps, dataset, notes, take} = parseArgs(process.argv.slice(2));
 // The previous fleet.json of the feature, or null (none, unreadable or malformed).
 const previousFleet = (() => {
     try {
@@ -124,6 +126,28 @@ if (dataset && previousFleet && !previousFleet.dataset && Object.keys(previousFl
     process.exit(1);
 }
 const lineName = process.env.PKP_E2E_LINE && process.env.PKP_E2E_LINE !== 'main' ? process.env.PKP_E2E_LINE : 'main';
+// One dataset fleet is one set of databases: a reset under another feature drops the
+// databases an agent of that feature is walking. When the feature that prepared the
+// number last (in the last four hours) is another one, the reset is refused unless
+// --take says its agent is done.
+if (dataset && reset && !take) {
+    const reports = path.join(REPO_ROOT, '.reports');
+    let last = null;
+    for (const other of fs.readdirSync(reports)) {
+        const file = path.join(reports, other, 'fleet.json');
+        let held;
+        try { held = JSON.parse(fs.readFileSync(file, 'utf8')); } catch { continue; }
+        if (held.dataset !== dataset || (held.line || 'main') !== lineName) continue;
+        const mtime = fs.statSync(file).mtimeMs;
+        if (!last || mtime > last.mtime) last = {other, mtime};
+    }
+    const age = last ? (Date.now() - last.mtime) / 60000 : Infinity;
+    if (last && last.other !== feature && age < 240) {
+        console.error(`fleet-prep: dataset fleet ${dataset} (${lineName}) was last prepared for ${last.other} ${Math.round(age)} min ago; ` +
+            'take another number (1-9), or --take once its agent is done');
+        process.exit(1);
+    }
+}
 if (dataset) {
     // The kit's bag and the probe-servers child follow it.
     process.env.PKP_E2E_DATASET = String(dataset);
