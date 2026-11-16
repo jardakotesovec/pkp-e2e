@@ -27,6 +27,7 @@
 const {expect} = require('@playwright/test');
 const {BasePage} = require('./BasePage.js');
 const {LoginPage} = require('./LoginPage.js');
+const {pastLegacyModalCleanup} = require('../support/legacy.js');
 
 /** The six sidebar views, by their `currentViewId` (Rule 2's order). */
 const REVIEWER_VIEWS = {
@@ -462,7 +463,12 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
         return dialog;
     }
 
-    /** Close a legacy in-page dialog by its "OK" or "Close" control. */
+    /**
+     * Close a legacy in-page dialog by its "OK" or "Close" control, and
+     * return once its teardown has run: 300 ms after the close it puts the
+     * focus back on the link that opened it, scrolling the page there, and
+     * a press or typing in that time is lost (`pastLegacyModalCleanup`).
+     */
     async closeDialog(dialog) {
         const ok = dialog.getByRole('button', {name: 'OK', exact: true});
         if (await ok.count()) {
@@ -471,6 +477,7 @@ exports.ReviewWizardPage = class ReviewWizardPage extends BasePage {
             await dialog.getByRole('button', {name: 'Close', exact: true}).click();
         }
         await expect(dialog).toBeHidden({timeout: 30_000});
+        await pastLegacyModalCleanup(this.page);
     }
 
     /**

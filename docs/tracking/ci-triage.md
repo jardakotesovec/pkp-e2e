@@ -865,9 +865,18 @@ trips.
   of pkp/pkp-lib#13543, OMP at its tip `9f4393633e` with the pkp-lib and
   ui-library PR heads, which touch nothing the review wizard runs),
   shard 2/3, the same dialog locator at line 650, green on its retry.
-  The watch condition is met: the trace (artifact
-  `playwright-artifacts-omp-2` of that run) is owed to the next
-  housekeeping session; not read in the review.
+  **Third sighting 2026-11-13** (pkp/omp hook run 43473074974, branch
+  `a11y-issue-12585`, shard 2/3, green on its retry). **Diagnosed and
+  hardened 2026-11-16** (housekeeping): a race in the test's own flow.
+  The "Review Guidelines" window's legacy teardown runs on a 300 ms
+  timer whose `focus()` scrolls the page back; landing between the
+  "Submit Review" press's button-down and button-up, it loses the click
+  (patterns.md pitfall 4g). `ReviewWizardPage.closeDialog()`
+  (`shared/playwright/pages/ReviewerPages.js`) now returns after
+  `pastLegacyModalCleanup()` (`support/legacy.js`); under an
+  order-keeping lever 10/10 red before, 0/10 after; OMP and OJS U28
+  ×5 at eight workers green (160/160). Watch: a sighting after the fix
+  lands → read that attempt's `error-context.md`.
 - **OJS U30 S3's "Submit Response" still disabled after the answer is
   typed** (OJS, once, pkp-e2e push run 37723842236 on `main` 0a3ac1a3,
   2026-10-08, shard 2/3, green on its retry; found by the CI tally of

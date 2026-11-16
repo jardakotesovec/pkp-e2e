@@ -108,6 +108,14 @@ instead).
      `ReaderCommentsPages.js` files), or waits on the row locator itself.
      A probe counts a leave-page prompt as real only if it is still there
      2 s after the close.
+   - **4g. A closed legacy window still moves the page for 300 ms.** A
+     window a jQuery link action opened ("Review Guidelines", "About Due
+     Dates", an AjaxModal) hides at once, but `ModalHandler.modalClose`
+     tears it down on a 300 ms timer whose `focus()` on the opener scrolls
+     the page back and takes the keys typed meanwhile; a press in that
+     time can be lost without a sound, since Playwright checks the target
+     on the button-down only. A page object that closes such a window
+     returns after `pastLegacyModalCleanup(page)` (`support/legacy.js`).
 
 5. **The side-modal outer wrapper reports `visibility: hidden`** while it
    opens, and permanently on some wrappers. Anchor `toBeVisible()` on inner
@@ -211,6 +219,9 @@ instead).
     - **15a. A `hasText` filter on a number** also matches digits in the
       row's other cells (a seed tag, a date, another id): match a number
       through its own cell, exact.
+    - **15b. `exact: true` misses a name that carries a count.** The
+      workflow frame's Tasks button reads "Tasks 31" for an account with
+      unread tasks and "Tasks" otherwise: match `/^Tasks( \d+)?$/`.
 16. **Legacy grid control links carry padding in their text.** A row's
     "Edit" link reads " Edit " to `hasText`, so an anchored regex
     (`filter({hasText: /^Edit$/})`) never matches. Read them by role and
@@ -729,7 +740,7 @@ script.
   `.reports/<feature>/screen-locators.md` under the agent's id: a file to
   grep by screen or element, never to read whole.
 - `note(text)`: appends one line to `.reports/<feature>/screen-notes.md`
-  at once, for what a locator row cannot carry: a dialog on the way out
+  at once, the agent id put in front of it by the kit, for what a locator row cannot carry: a dialog on the way out
   of a screen, a premise that proved wrong, a wait that hangs.
 - `tag(prefix)`: a scratch tag that follows the tag conventions above.
 - `signIn(page, user)`: uses the roster password rule, so it works for

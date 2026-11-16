@@ -87,4 +87,27 @@ async function legacyAnswerApplied(page, formId) {
     );
 }
 
-module.exports = {waitForJQueryIdle, waitForLegacyFormSettled, legacyAnswerApplied};
+/**
+ * Wait out a just-closed legacy window's cleanup. A window a jQuery link
+ * action opened (`ModalRequest`: a confirmation such as the reviewer
+ * wizard's "Review Guidelines" or "About Due Dates", an AjaxModal) is hidden
+ * at once by `ModalHandler.modalClose`, which tears it down on a 300 ms page
+ * timer; that teardown's `ModalRequest.finish` calls a plain `focus()` on the
+ * opener, so the page scrolls back to the opener and keys typed meanwhile
+ * go to it. A press made inside those 300 ms can lose its click without a
+ * sound: Playwright checks a click's target on the button-down only, the
+ * scroll between the down and the up sends the up elsewhere, and no click
+ * reaches the button (OMP U28 S15's "Submit Review" after the guidelines
+ * dialog, `.reports/flake-1116/u28s15-submit-dialog/diagnosis.md`). A page
+ * timer started after the close falls due after the app's and runs after
+ * it, however loaded the page is. Windows opened from a Vue menu
+ * (`openSideModal`) have no such teardown; the modal store's own 450 ms
+ * close slot is patterns.md pitfall 4f.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+async function pastLegacyModalCleanup(page) {
+    await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 350)));
+}
+
+module.exports = {waitForJQueryIdle, waitForLegacyFormSettled, legacyAnswerApplied, pastLegacyModalCleanup};
