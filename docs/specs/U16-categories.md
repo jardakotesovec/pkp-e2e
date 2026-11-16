@@ -1032,7 +1032,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A23](#a23) | A category page number typed past the last page opens an empty page instead of "404 Not Found" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A24](#a24) | A damaged PNG as a category's "Cover Image" fails "Save" halfway, with "An unexpected error has occurred"; a new category is saved without the picture | 🐞 | medium · crash: server | — |
 | [A25](#a25) | A category's picture is stored as a file with no ending ("8-category", not "8-category.png"), and the full-size picture is offered under that name | 🐞 | minor | — |
-| [A26](#a26) | On MySQL and MariaDB, a category with no name in the page's language comes first in every category list, not last {OJS OMP OPS} | 🐞 | low | — |
+| [A26](#a26) | On MySQL and MariaDB, a category with no name in the reader's language heads every category list {OJS OMP OPS} | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [OMP2](#omp2) | A press's "Browse" block lists sub-categories in one alphabetical run, not under their parents | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP3](#omp3) | A press's "Browse" block title is not a heading, so screen-reader users cannot reach it by heading | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [OMP4](#omp4) | A press's "Browse" block with nothing to list still shows as an empty box | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
@@ -1342,20 +1342,20 @@ ending.
 Since: 2026-10-16 (pkp/pkp-lib#13512) · Basis: probe, 2026-10-19. <sup>f-a25</sup>
 
 <a id="a26"></a>
-**A26 — On MySQL and MariaDB, a category with no name in the page's language comes first in every category list** {OJS OMP OPS} · 🐞 · low.
-A visitor reads a journal or preprint server in a language one of its
-categories has no name in, French for one. On an install whose database
-is MySQL or MariaDB, that category, shown under its English name, comes
-first in the "Browse" block, above the French names in alphabetical
-order ("Mathematics", then "Animaux", "Beaux-arts", "Sciences"); a
-category page's "Subcategories" puts such a subcategory first the same
-way. On PostgreSQL it comes last (Rule 2). Nothing is lost: every
-category is listed and opens. A press's lists come from the same code
-(not walked). Red on the configurations run (OJS and OPS S7;
-ci-triage C-U16-1). `main` only: 3.5 orders categories by their place in
-the tree, not by name.
-Since: 2025-05-12 (pkp/pkp-lib#10404) · Basis: probe, 2026-11-13 (MySQL 8.0, MariaDB 10.11). <sup>f-a26</sup>
-Report: refresh owed — written by the upstream session itself on 2026-11-13, without a reporter and without the developer and triage reads of MAINTENANCE "Issue reports" step 3; the whole report is read as a new one would be (2026-11-13)
+**A26 — On MySQL and MariaDB, a category with no name in the reader's language heads every category list** {OJS OMP OPS} · 🐞 · low.
+On a journal, press or preprint server whose database is MySQL or
+MariaDB, a category with no name in the language a page is read in
+comes first in every category list. In French, for one, an
+English-only "Mathematics" heads the "Browse" block and the manager's
+Categories settings tab, above "Animaux", "Beaux-arts" and "Sciences";
+an English-only subcategory heads its parent's "Subcategories" the same
+way. The expected order is the one PostgreSQL gives: the named
+categories alphabetically, then the unnamed ones.
+A site reaches this state easily: the category form requires a name in
+the primary language only. Every category is still listed and opens.
+The fix is a few lines in the one shared query that orders every
+category list, hence small.
+Since: 2025-05-12 (pkp/pkp-lib#10404) · Basis: probe, 2026-11-16 (MySQL 8.0, MariaDB 10.11). <sup>f-a26</sup>
 
 ### OMP
 
@@ -2524,7 +2524,7 @@ Issue report: [pkp-e2e#607](https://github.com/jardakotesovec/pkp-e2e/issues/607
 Issue report: [pkp-e2e#594](https://github.com/jardakotesovec/pkp-e2e/issues/594) ([docs/issues/U16-OPS1-preprint-category-offers-no-moderator.md](../issues/U16-OPS1-preprint-category-offers-no-moderator.md)).
 
 <a id="fn-f-a26"></a>
-**f-a26** — Live-probed 2026-11-13 on the `mysql` line (MySQL 8.0.46, PHP 8.3; OJS `3c99722dc8`, OPS `c74e5bf190`, pkp-lib `ad75b174f0`) and the `mariadb` line (MariaDB 10.11), each from a reset install, with `shared/playwright/checks/sync/cfg-category-order/walk.js` on OJS and OPS: a scratch context with English and French, "Arts"/"Beaux-arts", "Zoology"/"Animaux", "Science"/"Sciences" (under it "Physics"/"Physique", "Botany"/"Botanique", "Topology" in English only) and "Mathematics" in English only; "Browse Block" enabled and placed in the sidebar. In French the block read "Mathematics", "Animaux", "Beaux-arts", "Sciences" and the "Sciences" page's "Subcategories" "Topology", "Botanique", "Physique" (PostgreSQL: "Mathematics" and "Topology" last). The configurations run [43340246182](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43340246182) reds OJS and OPS U16 S7 the same way on PHP 8.2 MySQL, PHP 8.2 MariaDB and PHP 8.3 MySQL. Code: `PKP\category\Collector::getQueryBuilder()` left-joins the `title` setting in `Locale::getLocale()` only and orders by `COALESCE(category_settings.setting_value) ASC`, a COALESCE of one argument (no fallback), so a category with no name in that language sorts as NULL: first on MySQL and MariaDB, last on PostgreSQL (note i). Since `198595800a` (pkp/pkp-lib#10404, 2025-05-12); on `ore` too (pkp-lib `356d223ea0`); 3.5 and 3.4 order by `seq` and the tree (code). OMP by code: its lists use the same Collector. Two fixes tried on the `mysql` line (beside the script): `fix.diff`, a category with no name in the language last, which makes every database list as PostgreSQL does (OJS and OPS U16 S7 pass); `fix-shown-name.diff`, sorted by the name shown (the primary language's where the page's is missing), which places "Mathematics" alphabetically on every database and so changes Rule 2 on PostgreSQL too.
+**f-a26** — Live-probed 2026-11-13 on the `mysql` line (MySQL 8.0.46, PHP 8.3; OJS `3c99722dc8`, OPS `c74e5bf190`, pkp-lib `ad75b174f0`) and the `mariadb` line (MariaDB 10.11), each from a reset install, with `shared/playwright/checks/issues/category-without-translation-listed-first-mysql/walk.js` on OJS and OPS: a scratch context with English and French, "Arts"/"Beaux-arts", "Zoology"/"Animaux", "Science"/"Sciences" (under it "Physics"/"Physique", "Botany"/"Botanique", "Topology" in English only) and "Mathematics" in English only; "Browse Block" enabled and placed in the sidebar. In French the block read "Mathematics", "Animaux", "Beaux-arts", "Sciences" and the "Sciences" page's "Subcategories" "Topology", "Botanique", "Physique" (PostgreSQL: "Mathematics" and "Topology" last). The configurations run [43340246182](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43340246182) reds OJS and OPS U16 S7 the same way on PHP 8.2 MySQL, PHP 8.2 MariaDB and PHP 8.3 MySQL. Code: `PKP\category\Collector::getQueryBuilder()` left-joins the `title` setting in `Locale::getLocale()` only and orders by `COALESCE(category_settings.setting_value) ASC`, a COALESCE of one argument (no fallback), so a category with no name in that language sorts as NULL: first on MySQL and MariaDB, last on PostgreSQL (note i). Since `198595800a` (pkp/pkp-lib#10404, 2025-05-12); on `ore` too (pkp-lib `356d223ea0`); 3.5 and 3.4 order by `seq` and the tree (code). OMP by code: its lists use the same Collector. Two fixes tried on the `mysql` line (beside the script): `fix.diff`, a category with no name in the language last, which makes every database list as PostgreSQL does (OJS and OPS U16 S7 pass); `fix-shown-name.diff`, sorted by the name shown (the primary language's where the page's is missing), which places "Mathematics" alphabetically on every database and so changes Rule 2 on PostgreSQL too.
 Issue report: [pkp-e2e#1098](https://github.com/jardakotesovec/pkp-e2e/issues/1098) ([docs/issues/U16-A26-category-without-translation-listed-first-mysql.md](../issues/U16-A26-category-without-translation-listed-first-mysql.md)).
 
 ## Reference — entry points & surfaces
