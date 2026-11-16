@@ -8,15 +8,9 @@
  * "Internal Reviewer" and "External Reviewer").
  * Spec: docs/specs/U53-users-management.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 🐞,
- * A2 🐞, A3 ❓, A4 🐞, A7 🐞, A8 ❓. Where a test passes through one
- * (S4 reads the menus of rows outside the manager's reach, S3 opens "Enable
- * User", S5 reaches the removed user's roles page through her row, S7 reads
- * the grid's rows, S1 finds the search box by the start of its name, whose
- * example role is A4's) it asserts the effect the spec states and leaves
- * the finding's own claim unasserted either way.
- * The spec's Coverage section records everything else left out.
+ * Deliberately NOT covered (the spec's Findings register; a 🐞 is never
+ * asserted as the contract, a ❓ is parked, not a gap): A1 🐞, A2 🐞, A3 ❓,
+ * A4 🐞, A7 🐞, A8 ❓. The spec's Coverage section records the rest.
  *
  * Every test seeds its own scratch press with throwaway accounts (the
  * seeded roster and publicknowledge stay untouched); the Site Administrator
@@ -471,6 +465,11 @@ test.describe('users management', () => {
             expect(await merge.grid.actionLabels(address)).toContain('Merge into this User');
         }
 
+        // The Site Administrator's row in the window: "Press manager", the
+        // role with no start date, named like any other (Fields, the shared list).
+        await expect(merge.grid.row('admin@mail.test')).toHaveCount(1);
+        await expect(merge.grid.rolesCell('admin@mail.test')).toHaveText(MANAGER_ROLE);
+
         // The search form (Fields, the shared search form).
         await merge.grid.openSearchForm();
         await expect(merge.grid.searchInput).toHaveValue('');
@@ -726,6 +725,12 @@ test.describe('users management', () => {
             await expect(grid.addUserLink()).toBeVisible();
             expect(await grid.pagingLine()).toMatch(/^Items per page: 10 25 50 75 100 /);
             await expect(grid.pageLinks().filter({hasText: /^\s*2\s*$/})).toBeVisible();
+
+            // The Site Administrator's own row on the grid: "Press manager",
+            // the role with no start date, named like any other (Fields, the
+            // shared list).
+            await expect(grid.row('admin@mail.test')).toHaveCount(1);
+            await expect(grid.rolesCell('admin@mail.test')).toHaveText(MANAGER_ROLE);
         });
     });
 });

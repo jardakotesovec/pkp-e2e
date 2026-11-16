@@ -476,6 +476,13 @@ test.describe('users management', () => {
             expect(await merge.grid.actionLabels(address)).toContain('Merge into this User');
         }
 
+        // The Site Administrator's row in the window: the manager role the
+        // journal gave it, with no start date, is named like any other;
+        // control, the Journal Manager's own dated manager role (Fields, the
+        // shared list).
+        await expect(merge.grid.rolesCell(mail(manager))).toHaveText(MANAGER_ROLE);
+        await expect(merge.grid.rolesCell('admin@mail.test')).toHaveText(MANAGER_ROLE);
+
         // The search form (Fields, the shared search form).
         await merge.grid.openSearchForm();
         await expect(merge.grid.searchInput).toHaveValue('');
@@ -726,6 +733,15 @@ test.describe('users management', () => {
             await expect(grid.addUserLink()).toBeVisible();
             expect(await grid.pagingLine()).toMatch(/^Items per page: 10 25 50 75 100 /);
             await expect(grid.pageLinks().filter({hasText: /^\s*2\s*$/})).toBeVisible();
+
+            // The Site Administrator's own row on the grid: the manager role
+            // the journal gave it, with no start date, is named like any
+            // other; control, Quinn Ashdown's dated Author role (Fields, the
+            // shared list).
+            await expect(grid.row(mail(quinn))).toHaveCount(1);
+            await expect(grid.rolesCell(mail(quinn))).toHaveText('Author');
+            await expect(grid.row('admin@mail.test')).toHaveCount(1);
+            await expect(grid.rolesCell('admin@mail.test')).toHaveText(MANAGER_ROLE);
         });
     });
 });

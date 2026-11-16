@@ -537,6 +537,10 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      address"), "Search" and
      "Add User" above it, and under it a line beginning "Items per page:
      10 25 50 75 100" with page links (Rule 19).
+   - **The Site Administrator's own row on the grid**: it names "Journal
+     manager" ("Press manager", "Preprint Server manager") under "Roles",
+     the manager role the journal gave the Site Administrator with no
+     start date being named like any other (Fields, the shared list).
    - **Control**: on the Users & Roles list, the "…" of Quinn Ashdown's
      row offers "Remove User", "Disable User" and "Merge user" beside
      "Edit" and "Email" (Rule 7). <sup>s</sup>
@@ -605,7 +609,8 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
    - **Quinn signs in again**: the sign-in succeeds (Rule 12).
    - **Control**: the Journal Manager presses Quinn's "Disable User"
      once more: "Reason for disabling user" is empty, since the box was
-     emptied on enabling (Rule 12). Press "Cancel". <sup>s</sup>
+     emptied on enabling (Rule 12), and the Journal Manager presses
+     "Cancel". <sup>s</sup>
 
 4. **Users outside the manager's reach**
 
@@ -677,6 +682,10 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      have no arrow and offer nothing, Lena holding a role in a journal
      this Journal Manager does not manage (Rules 16, 16a; Fields, the
      shared list).
+   - **The Site Administrator's row in the window**: it names "Journal
+     manager" ("Press manager", "Preprint Server manager") under "Roles",
+     the manager role the journal gave the Site Administrator with no
+     start date being named like any other (Fields, the shared list).
    - **The search form**: press the "Search" link above the list: the
      form opens with the box "Search", the role select on "All Roles"
      and "Include users with no roles in this journal." unticked. Type
@@ -824,11 +833,6 @@ Left out of the scenarios above, by reason:
     account: the merge completes with a message, the merged account is gone
     and cannot sign in, and the discussion names the chosen account as its
     creator [report 2026-10-02]
-  - the Site Administrator opens the Settings wizard's "Users" grid and
-    the "Merge user" window: the administrator's row names the manager
-    role under "Roles", and so does the row of a user whose role has no
-    start date (Fields; A13 retired with pkp/pkp-lib#13552)
-    [upstream 2026-11-13]
   - the guard for A17 (issue report
     `docs/issues/U53-A13-A17-users-grid-roles-admin-empty-ended-listed.md`):
     after "Edit User" ends a role on the Settings wizard's "Users" grid,
@@ -874,6 +878,11 @@ Left out of the scenarios above, by reason:
     "Merge User", which do what the Users list's actions in scenarios 2,
     3, 5 and 6 do, only the disable and enable windows' headings
     differing (Rule 20)
+  - the row of a user other than the Site Administrator whose role has
+    no start date, such as a role carried over from before an upgrade to
+    3.5, on the older grid and in the "Merge user" window: named under
+    "Roles" as the Site Administrator's manager role is in scenarios 1
+    and 6 (Fields, the shared list)
 - **Register carries it**:
   - A1 ("Disable User" and "Enable User" refused inside the window on the
     rows of users outside the manager's reach; Rule 13; scenario 4
@@ -2018,8 +2027,9 @@ twice; email `<username>@mail.test`). The context factory enrols `admin`
 scratch context, with no start date. Scenarios 1 to 6 sign in as the
 first `users[]` entry, `roles: ['manager']` (the Journal Manager, Press
 Manager, Preprint Server Manager), whose row therefore follows `admin`'s;
-scenarios 7 and 8, scenario 1's grid bullet and scenario 6's Site
-Administrator bullet sign in as `admin`.
+scenarios 7 and 8, scenario 1's two grid bullets and scenario 6's Site
+Administrator bullet sign in as `admin`; scenario 6's bullet on the Site
+Administrator's row in the window is the Journal Manager's read.
 Scenario 1: after the manager, Quinn Ashdown `author` with
 `affiliation: 'Harbour University'` and an `orcid` iD
 (`orcidIsVerified: false`), Nova Reyes `reader` with `pastRoles:

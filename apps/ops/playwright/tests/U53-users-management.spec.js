@@ -96,6 +96,7 @@ function recordQuestions(page) {
     return questions;
 }
 
+
 /** The answer the Users list fetches after a change, armed before the action. */
 function listRefresh(page) {
     return page.waitForResponse((r) => /\/api\/v1\/users\?/.test(r.url()) && r.request().method() === 'GET', {
@@ -463,6 +464,12 @@ test.describe('users management', () => {
         // (Rules 16, 16a; pkp/pkp-lib#13494).
         await expect(merge.grid.arrow('admin@mail.test')).toHaveCount(0);
         await expect(merge.grid.arrow(mail(lena))).toHaveCount(0);
+        // The Site Administrator's row in the window: the manager role the
+        // server gave her with no start date is named like any other
+        // (Fields, the shared list; pkp/pkp-lib#13552). Control: Quinn
+        // Ashdown's row, read the same way.
+        await expect(merge.grid.rolesCell('admin@mail.test')).toHaveText(MANAGER_ROLE);
+        await expect(merge.grid.rolesCell(mail(ashdown))).toHaveText('Author');
         for (const address of [mail(ashdown), mail(manager)]) {
             expect(await merge.grid.actionLabels(address)).toContain('Merge into this User');
         }
@@ -721,6 +728,13 @@ test.describe('users management', () => {
             await expect(grid.addUserLink()).toBeVisible();
             expect(await grid.pagingLine()).toMatch(/^Items per page: 10 25 50 75 100 /);
             await expect(grid.pageLinks().filter({hasText: /^\s*2\s*$/})).toBeVisible();
+
+            // The Site Administrator's own row on the grid: the manager role
+            // the server gave her with no start date is named like any other
+            // (Fields, the shared list; pkp/pkp-lib#13552). Control: Quinn
+            // Ashdown's row, read the same way on the same page (oldest first).
+            await expect(grid.rolesCell('admin@mail.test')).toHaveText(MANAGER_ROLE);
+            await expect(grid.rolesCell(mail(quinn))).toHaveText('Author');
         });
     });
 });

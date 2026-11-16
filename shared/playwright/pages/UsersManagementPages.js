@@ -511,6 +511,14 @@ class UserGrid extends BasePage {
         return (await cells.allInnerTexts()).map(flat).map((c) => c.replace(/^Settings\s*/, ''));
     }
 
+    /**
+     * A row's "Roles" cell (the fourth: Given Name, Family Name, Username,
+     * Roles, Email), its roles comma-separated.
+     */
+    rolesCell(text) {
+        return this.row(text).first().locator('td').nth(3);
+    }
+
     /** The row's arrow ("Settings" to a screen reader). */
     arrow(text) {
         return this.row(text).first().locator('a.show_extras, a.hide_extras');
