@@ -4014,7 +4014,7 @@ template with the same two lines; not driven there. Test run
 twice with a file creating quill, sage and tern, the "Export Users" tab
 of the same page held no row for any of them; the press's tool opened
 afresh listed all three.
-Issue report: [docs/issues/U63-OMP7-export-users-list-misses-imported-accounts.md](../issues/U63-OMP7-export-users-list-misses-imported-accounts.md).
+Issue report: [pkp-e2e#1104](https://github.com/jardakotesovec/pkp-e2e/issues/1104) ([docs/issues/U63-OMP7-export-users-list-misses-imported-accounts.md](../issues/U63-OMP7-export-users-list-misses-imported-accounts.md)).
 
 ## Reference — entry points & surfaces
 
