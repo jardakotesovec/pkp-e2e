@@ -1600,8 +1600,8 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A22](#a22) | The Review Details window tells the editor to "upload the file below", but it has no upload control | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OMP2](#omp2) | {OMP} A press's "Add Reviewer" list opens with both review stages' reviewers, and the other stage's reviewer can be added | 🐞 | medium | issues (claude), 2026-10-03 — re-verified |
 | [A26](#a26) | A reviewer removed with "Unassign Reviewer" gets the email under the subject "Your review … has been cancelled" | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A30](#a30) | "Modify Review" is offered on a "Request Declined" row, and its "Save Changes" is refused with "This review not editable because it was declined." | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
-| [A31](#a31) | An assistant-level participant is offered "Modify Review", and "Save Changes" answers "The current role does not have access to this operation." | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
+| [A30](#a30) | "Modify Review" is offered on a "Request Declined" row, and its "Save Changes" is refused with "This review not editable because it was declined." | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
+| [A31](#a31) | An assistant-level participant is offered "Modify Review", and "Save Changes" answers "The current role does not have access to this operation." | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [OMP6](#omp6) | {OMP} On a press, the Review Details windows introduce a review form with "The questions this journal asks reviewers to answer." | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [A32](#a32) | A Review Details window closed within a moment of opening, before its mark as viewed is saved, can leave the row "Review Submitted", and the dashboard's "View unread recommendation", until a page reload | 🐞 | minor | @blessie 2026-09-24 · risk accepted, not fixing |
 | [A36](#a36) | "Add Reviewer" list says "Yesterday" for a reviewer who was sent a request today | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
@@ -1909,7 +1909,6 @@ request (Rule 14c), or the message should name the way forward: once the
 request is re-sent with "Resend Review Request", the same save goes through.
 Since: 2026-08-29 (the modify-reviews rework) · Basis: probe, 2026-10-03.
 <sup>[f-a30](#fn-a30)</sup>
-Report: refresh owed — pkp/pkp-lib#13653 (pkp/ui-library#1036, pkp/pkp-lib#13664) gave the window's `confirmBlockedMessage` in `useReviewDetails.js` a first check, so on an unanswered or accepted request "Mark as Complete" now sits disabled beside "This review is incomplete and cannot be marked as complete yet." in both apps: the Expected's comparison with the journal's "A recommendation is required before this review can be marked as complete." no longer matches the screen, and the Proposed fix's `useReviewDetails.js` hunk is to be re-read against the changed file (2026-11-16)
 
 <a id="a31"></a>
 **A31 — An assistant-level participant is offered a "Modify Review" they cannot save** · 🐞 · low.
@@ -1923,7 +1922,6 @@ warning (Rule 14b). The refusal is right and the offer is not: the button
 should not be shown to a role that may not save.
 Since: 2026-08-29 (the modify-reviews rework) · Basis: probe, 2026-10-03.
 <sup>[f-a31](#fn-a31)</sup>
-Report: refresh owed — the 2026-11-16 drive found a second operation offered to the Funding Coordinator and refused, the Add Reviewer window's search, filters and further pages (A51, behind `PKPUserController::getGroupRoutes()`, which admits the reviewers listing for manager, sub-editor and site admin only): the report's Cause › Reach bullet "Assistants: in the Reviewers table, saving a modified review is the only operation offered to them that the server refuses", which rests on `PKPReviewerGridHandler`'s assistant operations, no longer holds; no class or method changed (2026-11-16)
 
 <a id="a32"></a>
 **A32 — A review window closed quickly can leave the review unread on screen** · 🐞 · minor.
@@ -2052,7 +2050,7 @@ counts text typed into a box with formatting buttons as a change; the
 same loss in the static page, custom block and issue windows, on the
 Profile page and in a reviewer's own review is reported with it
 ([Custom pages & blocks A19](U09-custom-pages-and-blocks.md#a19)).
-Basis: probe, 2026-10-01. <sup>[f-a43](#fn-a43)</sup>
+Basis: probe, 2026-11-16. <sup>[f-a43](#fn-a43)</sup>
 
 <a id="a44"></a>
 **A44 — The "Resend Review Request" email gives the reviewer the old response date, not the one the editor just picked** · 🐞 · medium.

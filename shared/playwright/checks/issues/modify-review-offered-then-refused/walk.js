@@ -30,7 +30,7 @@ const {forEachApp, launch, signIn, screen, shot, record, idle} = require('../../
 const H = require('./lib.js');
 
 const MODE = process.env.MODE || 'walk';
-const TAG = 'u27k9';
+const TAG = 'u27n16i';
 
 forEachApp(async (app) => {
     const c = H.CASES[app.name];
@@ -90,14 +90,12 @@ forEachApp(async (app) => {
             });
             await step('nbProductionRole', async () => {
                 await signIn(page, 'admin');
-                const R = require('../manager-level-role-save-ticks-every-stage/lib.js');
-                await R.giveRoleAsAdmin(page, app, {username: 'gcox', role: 'Production editor'});
+                await H.giveRoleAsAdmin(page, app, {username: 'gcox', role: 'Production editor'});
                 return {given: 'Production editor'};
             });
             await step('nbProductionAssign', async () => {
                 await signIn(page, 'dbarnes');
-                const R = require('../manager-level-role-save-ticks-every-stage/lib.js');
-                return R.assignAs(page, app, c.production.id, {role: 'Production editor', personName: 'Graham Cox'});
+                return H.assignAs(page, app, c.production.id, {role: 'Production editor', personName: 'Graham Cox'});
             });
             await step('nbProduction', async () => {
                 await signIn(page, 'gcox');
@@ -112,14 +110,12 @@ forEachApp(async (app) => {
             });
             await step('nbDecline', async () => {
                 await signIn(page, c.declined.user);
-                const D = require('../unanswered-reviewer-row-response-due-line/lib.js');
-                return D.decline(page, app, c.declined.id);
+                return H.decline(page, app, c.declined.id);
             });
             await step('nbResent', async () => {
                 await signIn(page, 'dbarnes');
-                const D = require('../unanswered-reviewer-row-response-due-line/lib.js');
                 const modal = await H.openWorkflow(page, app, c.declined.id);
-                const resent = await D.resend(page, modal, c.declined.name, D.day(14), D.day(42));
+                const resent = await H.resend(page, modal, c.declined.name, H.day(14), H.day(42));
                 await H.openWorkflow(page, app, c.declined.id);
                 const row = await H.readRow(page, c.declined.name);
                 const opened = await H.openDetailsFromMenu(page, c.declined.name);
@@ -135,8 +131,7 @@ forEachApp(async (app) => {
             // A30: a declined request
             await step('a30Decline', async () => {                                     // 1-2
                 await signIn(page, c.declined.user);
-                const D = require('../unanswered-reviewer-row-response-due-line/lib.js');
-                return D.decline(page, app, c.declined.id);
+                return H.decline(page, app, c.declined.id);
             });
             await step('a30Row', async () => {                                         // 3-5
                 await signIn(page, 'dbarnes');
@@ -157,14 +152,12 @@ forEachApp(async (app) => {
             // A31: an assistant-level participant
             await step('a31Role', async () => {                                        // 1
                 await signIn(page, 'admin');
-                const R = require('../manager-level-role-save-ticks-every-stage/lib.js');
-                await R.giveRoleAsAdmin(page, app, {username: 'svogt', role: 'Funding coordinator'});
+                await H.giveRoleAsAdmin(page, app, {username: 'svogt', role: 'Funding coordinator'});
                 return {given: 'Funding coordinator'};
             });
             await step('a31Assign', async () => {                                      // 2-4
                 await signIn(page, 'dbarnes');
-                const R = require('../manager-level-role-save-ticks-every-stage/lib.js');
-                return R.assignAs(page, app, c.submitted.id, {role: 'Funding coordinator', personName: 'Sarah Vogt'});
+                return H.assignAs(page, app, c.submitted.id, {role: 'Funding coordinator', personName: 'Sarah Vogt'});
             });
             await step('a31Row', async () => {                                         // 5-7
                 await signIn(page, 'svogt');

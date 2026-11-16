@@ -248,4 +248,96 @@ function stored(app, id, username, tag) {
     return {reviewId: Number(reviewId), declined, completed, lastModified: lastModified || null, commentsWithTag: Number(comments)};
 }
 
-module.exports = {T, sleep, flat, CASES, details, editWin, openWorkflow, openRound, openDetailsFromDashboard, readRow, openDetailsFromMenu, openDetailsFromReadReview, footer, openModify, enterReview, pressSave, okDialog, leaveWindows, stored};
+// The helpers below were copied from other reports' folders (manager-level-role-save-ticks-every-stage,
+// permissions-tick-carries-to-other-role, unanswered-reviewer-row-response-due-line), so this
+// folder stays self-contained when those reports go.
+
+const HOSTED = {ojs: 'Hosted Journals', omp: 'Hosted Presses'};
+
+/**
+ * As the site administrator: Administration > Hosted Journals (Presses), the context's
+ * "Settings wizard", tab "Users", search the username, "Edit User", tick the role, "OK".
+ */
+async function giveRoleAsAdmin(page, app, {username, role}) {
+    const {HostedContextsPage, UserDetailsWindow} = require('../../../pages/UsersManagementPages.js');
+    const hosted = new HostedContextsPage(page, {hostedLabel: HOSTED[app.name]});
+    await hosted.gotoFromAdministration();
+    await hosted.openSettingsWizard(app.contextPath);
+    const grid = await hosted.openWizardTab('Users');
+    await grid.search({text: username});
+    await grid.chooseAction(username, 'Edit User');
+    const win = new UserDetailsWindow(page, 'Edit User');
+    await win.expectOpen();
+    await win.roleBox(role).check();
+    await win.pressOk();
+    await win.expectClosed();
+    await idle(page);
+}
+
+/** The submission's workflow, "Assign": the role, "Search", the person, "OK"; returns the post's answer. */
+async function assignAs(page, app, id, {role, personName}) {
+    const {ParticipantsPanel} = require('../../../pages/StageParticipantsPages.js');
+    const participants = new ParticipantsPanel(page, app.contextPath);
+    await page.goto('about:blank');
+    await page.goto(app.url(`/index.php/${app.contextPath}/en/dashboard/editorial?workflowSubmissionId=${id}`));
+    await participants.heading().waitFor({timeout: 60_000});
+    await idle(page);
+    const win = await participants.openAssign();
+    await idle(page);
+    await win.chooseRole(role);
+    await win.search();
+    await win.choosePerson(personName);
+    const asked = page.waitForRequest((r) => r.url().includes('save-participant'), {timeout: T});
+    const answered = page.waitForResponse((r) => r.url().includes('save-participant'), {timeout: T});
+    await win.root.getByRole('button', {name: 'OK', exact: true}).click();
+    const post = new URLSearchParams((await asked).postData() || '');
+    const response = await answered;
+    await win.expectClosed();
+    await idle(page);
+    return {status: response.status(), userGroupId: post.get('userGroupId'), userId: post.get('userId')};
+}
+
+/** Today plus n days, at noon local time. */
+function day(n) {
+    const d = new Date();
+    d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() + n);
+    return d;
+}
+
+/** The signed-in reviewer opens the review request and declines it ("Decline Review Request", twice). */
+async function decline(page, app, id) {
+    const {ReviewWizardPage} = require('../../../pages/ReviewerPages.js');
+    await page.goto(app.url(`/index.php/${app.contextPath}/en/reviewer/submission/${id}`));
+    await page.getByRole('heading', {level: 1}).first().waitFor({timeout: T});
+    await idle(page);
+    const w = new ReviewWizardPage(page, app.contextPath);
+    await w.decline();
+    await idle(page);
+    return {declined: true, landed: page.url().replace(/^https?:\/\/[^/]+/, '')};
+}
+
+/**
+ * "More Actions" > "Resend Review Request" on the row: pick both dates, press the window's
+ * "Resend Review Request". Returns the save's status and the notices it raised.
+ */
+async function resend(page, modal, name, response, review) {
+    const R = require('../../../../../apps/omp/playwright/pages/ReviewerAssignmentPages.js');
+    const menu = await R.openRowMenu(page, R.reviewerRow(modal, name).first());
+    await R.menuEntry(menu, 'Resend Review Request').click();
+    const win = page.locator('[data-cy="active-modal"]').filter({has: page.locator('form#resendRequestReviewerForm')}).last();
+    await win.locator('form#resendRequestReviewerForm').waitFor({timeout: T});
+    await R.awaitTinyMce(page, 'personalMessage');
+    await R.pickDate(page, win, 'responseDueDate', response);
+    await R.pickDate(page, win, 'reviewDueDate', review);
+    const saved = page.waitForResponse((r) => /resend/i.test(r.url()) && r.request().method() === 'POST', {timeout: T}).catch(() => null);
+    await win.locator('form#resendRequestReviewerForm').getByRole('button', {name: 'Resend Review Request', exact: true}).click();
+    const s = await saved;
+    await win.locator('form#resendRequestReviewerForm').waitFor({state: 'hidden', timeout: T}).catch(() => {});
+    await idle(page);
+    const notice = flat(await page.locator('.app__notifications .pkpNotification').allInnerTexts().catch(() => []).then((a) => a.join(' | ')), 300);
+    await sleep(600);
+    return {http: s ? s.status() : null, notice};
+}
+
+module.exports = {T, sleep, flat, CASES, details, editWin, openWorkflow, openRound, openDetailsFromDashboard, readRow, openDetailsFromMenu, openDetailsFromReadReview, footer, openModify, enterReview, pressSave, okDialog, leaveWindows, stored, giveRoleAsAdmin, assignAs, day, decline, resend};
