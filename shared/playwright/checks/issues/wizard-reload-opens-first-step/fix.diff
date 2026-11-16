@@ -1,0 +1,44 @@
+--- a/lib/ui-library/src/components/Container/SubmissionWizardPage.vue
++++ b/lib/ui-library/src/components/Container/SubmissionWizardPage.vue
+@@ -276,16 +276,32 @@
+ 	},
+ 	created() {
+ 		/**
+-		 * Open the correct step when the page is loaded
++		 * Count every step up to the one recorded by "Save for Later"
++		 * as started, whichever step is opened, so that the step rail
++		 * and the next "Save for Later" keep the progress
+ 		 */
+-		if (!window.location.hash) {
+-			const newStep = this.steps.find(
+-				(step) => step.id === this.submission.submissionProgress,
+-			);
+-			this.openStep(newStep ? newStep.id : this.steps[0].id);
+-		} else {
+-			this.openStep(this.steps[0].id);
+-		}
++		const progressIndex = this.steps.findIndex(
++			(step) => step.id === this.submission.submissionProgress,
++		);
++		this.steps.forEach((step, i) => {
++			if (i <= progressIndex) {
++				this.startedSteps.push(step.id);
++			}
++		});
++
++		/**
++		 * Open the correct step when the page is loaded: the step
++		 * named by the URL #hash, otherwise the recorded step.
++		 *
++		 * The step must be opened here and not left to openUrlHash(),
++		 * because the currentStepIndex watcher runs before mounted()
++		 * and rewrites the #hash to the step opened here.
++		 */
++		const hashStepId = window.location.hash.replace('#', '');
++		const newStep =
++			this.steps.find((step) => hashStepId && step.id === hashStepId) ||
++			this.steps[progressIndex];
++		this.openStep(newStep ? newStep.id : this.steps[0].id);
+ 
+ 		/**
+ 		 * Regularly update the last saved message

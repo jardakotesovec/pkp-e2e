@@ -1,0 +1,36 @@
+--- a/api/v1/reviewers/recommendations/ReviewerRecommendationController.php
++++ b/api/v1/reviewers/recommendations/ReviewerRecommendationController.php
+@@ -164,8 +164,8 @@
+ 
+         if (!$recommendation->removable) {
+             return response()->json([
+-                'error' => __('api.406.notAcceptable'),
+-            ], Response::HTTP_NOT_ACCEPTABLE);
++                'error' => __('api.reviewerRecommendations.403.cantEditInUse'),
++            ], Response::HTTP_FORBIDDEN);
+         }
+ 
+         if (!$recommendation->update($validated)) {
+@@ -208,8 +208,8 @@
+ 
+         if (!$recommendation->removable) {
+             return response()->json([
+-                'error' => __('api.406.notAcceptable'),
+-            ], Response::HTTP_NOT_ACCEPTABLE);
++                'error' => __('api.reviewerRecommendations.403.cantDeleteInUse'),
++            ], Response::HTTP_FORBIDDEN);
+         }
+ 
+         $recommendation->delete();
+--- a/locale/en/api.po
++++ b/locale/en/api.po
+@@ -81,3 +81,9 @@
+ 
+ msgid "api.submission.400.inactiveSection"
+ msgstr "This section is no longer receiving submissions."
++
++msgid "api.reviewerRecommendations.403.cantEditInUse"
++msgstr "A review uses this recommendation, so it cannot be edited. It can still be deactivated."
++
++msgid "api.reviewerRecommendations.403.cantDeleteInUse"
++msgstr "A review uses this recommendation, so it cannot be deleted. It can still be deactivated."

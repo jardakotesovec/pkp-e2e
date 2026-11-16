@@ -1,0 +1,46 @@
+--- a/lib/ui-library/src/pages/dashboard/dashboardPageStore.js
++++ b/lib/ui-library/src/pages/dashboard/dashboardPageStore.js
+@@ -295,10 +295,23 @@
+ 		});
+ 
+ 		function fetchSubmissions(updateViewCount = true) {
+-			_fetchSubmissions();
++			const fetched = _fetchSubmissions();
+ 			if (updateViewCount) {
+ 				appStore.triggerReloadViewsCount(dashboardPage);
+ 			}
++			return fetched;
++		}
++
++		// Loads the list and tells screen readers when it starts and once its rows are in.
++		// A load can be cut short by a newer one (debounced or aborted), so only the latest says "Loaded".
++		let latestLoad = 0;
++		async function loadSubmissions(updateViewCount = true) {
++			const load = ++latestLoad;
++			announce(t('common.loading'));
++			await fetchSubmissions(updateViewCount);
++			if (load === latestLoad) {
++				announce(t('common.loaded'));
++			}
+ 		}
+ 
+ 		watch(
+@@ -312,16 +325,13 @@
+ 					return;
+ 				}
+ 
+-				announce(t('common.loading'));
+-
+-				await fetchSubmissions({clearData: true});
+-				announce(t('common.loaded'));
++				await loadSubmissions();
+ 			},
+ 			{immediate: false},
+ 		);
+ 		// initial fetchSubmission should not trigger the view count reload as thats being
+ 		// already trigger by SideNav to get initial values for all dashboards
+-		fetchSubmissions(false);
++		loadSubmissions(false);
+ 
+ 		const reviewerManagerActions = useReviewerManagerActions(props);
+ 		const participantManagerActions = useParticipantManagerActions(props);

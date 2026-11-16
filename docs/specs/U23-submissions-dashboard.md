@@ -936,7 +936,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
 | [A17](#a17) | With strict mode on, every search from the sidebar's "Search submissions" box fails and shows "Search Results (0)" | 🐞 | low · crash: server | — |
 | [A1](#a1) | Section Editors and assistants have no "Declined" view, so a declined submission they are assigned to drops out of every view; on 3.5 nothing on the dashboard brings it back | 🐞 | medium | upstream sync (claude), 2026-10-28 — regression report |
-| [A19](#a19) | A screen reader hears "Loaded" before the list has loaded, and nothing when the page opens at an address naming its view, as on every reload | 🐞 | minor | — |
+| [A19](#a19) | On the submissions dashboard a screen reader hears "Loaded" before the list arrives, and nothing on a reload | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A2](#a2) | Editors are offered "Complete submission" on other people's incomplete submissions, landing them in the author's wizard | ❓ | minor | — |
 | [A3](#a3) | The author/reviewer conflict notice always says "as a Journal Manager", whoever is looking, on presses and preprint servers too | ❓ | minor | — |
 | [A7](#a7) | Declined and cancelled reviewers show no activity indicator at all to assigned Section Editors and assistants | ❓ | minor | — |
@@ -1123,17 +1123,19 @@ submissions the person did not ask for.
 Basis: probe, 2026-10-05. <sup>a18</sup>
 
 <a id="a19"></a>
-**A19 — "Loaded" comes before the list, and never on a reload** · 🐞 · minor.
+**A19 — On the submissions dashboard a screen reader hears "Loaded" before the list arrives, and nothing on a reload** · 🐞 · low.
 A screen-reader user expects to hear "Loaded" once the list's rows are
 on screen. After a search, a sort or a view chosen in the sidebar, the
 page says "Loaded" the moment it asks for the new list, before the rows
 arrive, so the user is told the list is ready while it is still
-loading. When the page opens at an address that already names its view,
-as every reload and every bookmarked view does, nothing is said once the
-list arrives. Of the ways to open the page, only the address with no
-view, where signing in lands, gets "Loaded". Seen on a press and a
-preprint server; a journal runs the same page.
-Basis: test run + code, 2026-11-12. <sup>a19</sup>
+loading.
+When the page opens at an address that already names its view, as every
+reload and every bookmarked view does, nothing is said once the list
+arrives. Of the ways to open the page, only the address with no view,
+where signing in lands, gets "Loaded", and there too before the rows.
+The same holds for an author's and a reviewer's lists, which are built
+on the same page.
+Basis: test run + code, 2026-11-16. <sup>a19</sup>
 
 <a id="a20"></a>
 **A20 — A round with only cancelled reviewers claims confirmed reviews** · ❓ · user-visible.
@@ -2234,6 +2236,7 @@ Manager) held "Loaded" after signing in, at the bare
 and stayed empty in every read (12 to 15 reads over about 2 s) at
 `?currentViewId=active`. OJS was not driven. Scenario 1's leg reads the
 region after the sign-in landing, which announces, and stays green.
+Issue report: [docs/issues/U23-A19-dashboard-loaded-announced-before-list.md](../issues/U23-A19-dashboard-loaded-announced-before-list.md).
 
 <a id="fn-a20"></a>
 **a20 — A20 evidence.** lib/pkp `ReviewRound::determineStatus()` skips

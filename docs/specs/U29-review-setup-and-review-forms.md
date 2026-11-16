@@ -1015,7 +1015,7 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | On "Reviewer Recommendations", a screen reader announces the "Activate" tick boxes and the status dropdown without a name | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A13](#a13) | A Section Editor, or an editor without settings access, can change and switch off a journal's reviewer recommendations | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
 | [OJS1](#ojs1) | A review made public gives anyone, without signing in, the review form answers meant for the editor only | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
-| [A15](#a15) | A "Reviewer Recommendations" table left open while a reviewer submits with one of its entries still offers that entry's "Edit" and "Delete", and both then fail with an unexplained error | 🐞 | minor | — |
+| [A15](#a15) | A Journal Manager editing or deleting a reviewer recommendation a reviewer has just used gets an error that does not say why | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A2](#a2) | A form in use can still be deactivated, although the activation confirmation promises it cannot | ❓ | minor | — |
 | [A3](#a3) | A deadline saved as 0 or left empty makes Add Reviewer preset three weeks for the response but four for the review | ❓ | minor | — |
 | [A4](#a4) | A reload on a "Review" side tab lands on "Submission" › "Disable Submissions", although the address names the side tab and a pressed "Submission" side tab survives a reload | ❓ | minor | — |
@@ -1227,21 +1227,18 @@ entry and an edit or a delete would change or remove what the reviewer
 picked. Basis: probe, 2026-10-07. <sup>f-a14</sup>
 
 <a id="a15"></a>
-**A15 — A "Reviewer Recommendations" table left open while a reviewer submits with one of its entries still offers that entry's "Edit" and "Delete", and both then fail with an unexplained error** · 🐞 · minor.
-A Journal Manager has "Reviewer Recommendations" open while a reviewer
-submits a review choosing one of its entries. The table does not change:
-the row keeps its "More Actions" menu with "Edit" and "Delete" until the
-page is reloaded, although the entry can no longer be edited or deleted
-(Rule 18). "Save" in "Edit Recommendation" then leaves the window open
-and shows the page notice "An unexpected error has occurred. Please
-reload the page and try again."; closed with "Close", the window leaves
-the new title on the row until a reload [A11](#a11). "Yes" on "Delete
-Recommendation" opens a window headed "Error" that reads only
-"##api.406.notAcceptable##", with "OK", and the row then shows without
-its menu. Nothing is changed: a reload shows the entry with its stored
-title and no menu. Neither message tells the manager that the entry is
-now in use, which is why it can no longer be changed.
-Basis: probe, 2026-11-11. <sup>f-a15</sup>
+**A15 — A Journal Manager editing or deleting a reviewer recommendation a reviewer has just used gets an error that does not say why** · 🐞 · low.
+A Journal Manager has the "Reviewer Recommendations" table open while a
+reviewer picks one of the listed recommendations on a review, submitted
+or only saved for later. The row keeps its "More Actions" menu with
+"Edit" and "Delete" until the page is reloaded, although an entry a
+review uses can no longer be edited or deleted.
+"Save" in "Edit Recommendation" then shows the page notice "An
+unexpected error has occurred. Please reload the page and try again."
+"Yes" on "Delete Recommendation" opens a window headed "Error" that
+reads only "##api.406.notAcceptable##". Neither tells the manager that
+the entry is now in use.
+Basis: probe, 2026-11-16. <sup>f-a15</sup>
 
 ### OJS
 
@@ -2342,6 +2339,7 @@ with its menu until a reload (finding A11). The stored rows were the same
 before and after; after a reload both tabs showed the stored title with
 no menu. No response of 500 or more and no page error in any run. Kept
 script `shared/playwright/checks/U29/I33/i33.js` (phase `race`).
+Issue report: [docs/issues/U29-A15-recommendation-in-use-edit-delete-unexplained.md](../issues/U29-A15-recommendation-in-use-edit-delete-unexplained.md).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — The public review data is `GET

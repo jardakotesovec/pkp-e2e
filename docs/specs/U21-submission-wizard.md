@@ -1193,7 +1193,7 @@ are the source; badges, Impact and Basis:
 | [A21](#a21) | "Submit As" preselects another role for an editor who is also an author once their editorial role is saved | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
 | [A22](#a22) | On a phone, "Make a Submission" squeezes the "Title" box to nothing, so no submission can be started | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A23](#a23) | Once a manager edits the Author role, a user with no role who starts a submission is made "Translator" on a journal, "Chapter Author" on a press | 🐞 | minor | — |
-| [A24](#a24) | Reloading the submission wizard opens "Upload Files" with the later steps locked, and "Save for Later" there loses the step the draft had reached | 🐞 | minor | — |
+| [A24](#a24) | Submission wizard: a reload opens a draft on its first step with the later steps locked, and "Save for Later" there forgets the step reached | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [OMP2](#omp2) | A press refuses the comma-separated "Notify Anyone" list its own help text asks for | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP4](#omp4) | On a press, a submission made as "Chapter Author" cannot be saved: the title is lost, every save is refused and the wizard hangs | 🐞 | user-visible · crash: script | — |
 | [OPS3](#ops3) | A preprint author cannot delete their own draft: the wizard's "Cancel" does nothing and My Submissions refuses it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -1581,18 +1581,21 @@ Basis: probe, 2026-10-19. <sup>[fn-a23](#fn-a23)</sup>
 Report: paused — written 2026-10-21, held until a related item is settled before it is published (2026-10-21)
 
 <a id="a24"></a>
-**A24 — Reloading the submission wizard opens "Upload Files" with the later steps locked, and "Save for Later" there loses the step the draft had reached** · 🐞 · minor.
-Inside the wizard the address bar ends in the open step, for example
-"…#contributors". An author who reloads the page, or opens such an
-address from a bookmark, expects the step it names. The wizard opens on
-"Upload Files" instead, whatever step the draft had recorded with "Save
-for Later", and every later step in the step rail is unreached, so it
-cannot be clicked. If the author then presses "Save for Later", the
-draft records "Upload Files": from then on "Complete submission" on My
-Submissions reopens it there too, and the step it had reached is lost.
-Only an address without the "#…" part ("Complete submission", the Saved
-for Later screen's link, the emailed link) reopens at the recorded step.
-Basis: probe, 2026-11-13. <sup>[fn-a24](#fn-a24)</sup>
+**A24 — Submission wizard: a reload opens a draft on its first step with the later steps locked, and "Save for Later" there forgets the step reached** · 🐞 · low.
+Inside the submission wizard the address bar ends in the open step, for
+example "…#contributors". When an author reloads the page, or opens
+such an address from a bookmark, the wizard opens on its first step
+("Upload Files") instead of the step the address names, even when that
+is the step the draft reached. Every later step in the step rail is
+plain text that cannot be clicked.
+If the author then presses "Save for Later", the draft records the
+first step, and "Complete submission" on My Submissions reopens it
+there from then on. The draft's files and fields are kept. The
+browser's Back button, or "Continue" up to the step, gets the author
+back, and a "Save for Later" from there records it again.
+"Complete submission" opens the wizard without a step in its address,
+so it reopens at the recorded step.
+Basis: probe, 2026-11-16. <sup>[fn-a24](#fn-a24)</sup>
 
 ### OMP
 
@@ -2890,6 +2893,7 @@ on "Upload Files", the later rail entries plain text. Before that,
 "Complete submission", the Saved for Later screen's link and the mail's
 link each opened the bare address and reopened on "Contributors". No
 response of 500 or more and no page error in any run.
+Issue report: [docs/issues/U21-A24-wizard-reload-opens-first-step.md](../issues/U21-A24-wizard-reload-opens-first-step.md).
 
 <a id="fn-omp1"></a>
 **fn-omp1** — OMP divergence points: `StartSubmission` (OMP) adds
