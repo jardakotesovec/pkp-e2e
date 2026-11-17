@@ -31,8 +31,10 @@ this journal on which this account is assigned as an author. A **draft**,
 also called an *incomplete submission*, counts from the moment it is started
 (see *[Submission wizard](U21-submission-wizard.md)*). Holding other roles
 alongside Author changes nothing here. A Journal Manager who also authors
-sees their authored submissions on this list like any author. The one
-exception is the Filters panel, which follows the account's roles (Rule 5).
+sees their authored submissions on this list like any author. The two
+exceptions follow the account's roles: the Filters panel (Rule 5), and the
+old author-dashboard link, which opens another author's submission for a
+Journal Manager who also holds Author (Rule 3).
 What a row *offers* depends on the submission's state (Rules 6–8), not on
 the author's other roles.
 
@@ -76,11 +78,17 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
 
    "Active submissions" holds every submission still awaiting an outcome,
    drafts included. The other views slice by what happened: revisions asked
-   for or delivered, not yet finished, scheduled into an issue {OJS},
-   published, or declined. One submission can appear in several views. On a
-   press or preprint server, no route was found that places anything under
-   "Scheduled for publication". That view was only ever seen empty
-   ⚠ [A3](#a3).
+   for or delivered, not yet finished, scheduled for publication,
+   published, or declined. One submission can appear in several views. On
+   a journal a submission is scheduled by publishing it into an issue not
+   yet published (Rule 7d). On a press or preprint server it is scheduled
+   by a future "Date Published" (the press's Catalog Entry page) or "Date
+   Posted" (the preprint server's Preprint Entry page), saved before
+   "Publish" or "Post" is pressed
+   ([Publish, schedule & versions](U49-publish-schedule-and-versions.md),
+   Rule 6). Its row then sits under "Scheduled for publication" and no
+   longer under "Active submissions", with the "Scheduled" bubble and an
+   empty Editorial Activity cell (Rule 7e).
 3. <a id="landing"></a> **Landing.** An account whose only role in the journal is Author lands on
    My Submissions after signing in on the journal's own login page. On a
    multi-journal site, the site-wide login page leads to the site index
@@ -101,18 +109,34 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
    older versions (`{journal path}/submissions`) forwards the same way for an account holding Author, an
    editorial role or Reviewer, and for a Site Administrator. Any other
    account, one holding only Reader-level roles or no role in the
-   journal, gets the access-denied page at that address. An old
-   bookmarked author-dashboard link for a specific submission
-   lands the submission's own author on My Submissions with that
-   submission's workflow panel already open. Any other signed-in user
-   following the same link gets an access-denied page instead. The same
-   forward works for a link to a still-incomplete draft, and opens a
-   workflow panel the list itself never offers for a draft ⚠ [A5](#a5).
-   <sup>c</sup>
+   journal, gets the access-denied page at that address.
+
+   An old bookmarked author-dashboard link for a specific submission
+   (the address itself: [→ workflow addresses](U24-workflow-screen-and-stage-access.md#workflow-addresses))
+   leads, depending on who follows it:
+   - the submission's own author: to My Submissions with that
+     submission's workflow panel already open;
+   - another author: to an access-denied page reading "You don't
+     currently have access to that stage of the workflow.";
+   - an account without the Author role: to an access-denied page reading
+     "You do not currently have sufficient privileges to view the
+     submission. Please edit your profile to ensure that you have been
+     granted the appropriate roles under "Register As".";
+   - a Journal Manager who also holds Author: to their own My Submissions
+     with that submission's workflow panel open, though they are not its
+     author.
+
+   The same forward works for the author's link to a still-incomplete
+   draft. It opens a workflow panel the list itself never offers for a
+   draft, and the panel's "Title & Abstract" page answers with an "Error"
+   dialog ⚠ [A5](#a5). <sup>c</sup>
 4. **The row.** The columns are **ID** (sortable), **Submissions** (the
    authors-and-title line), **Stage**, **Editorial Activity** (Rules 6–8),
-   and **Actions**. The Stage column shows the submission's current stage in
-   a colored bubble, or its outcome, for example "Declined". A draft's bubble
+   and **Actions**. The Stage column shows, in a colored bubble, the
+   submission's current stage ("Submission", the review stage with its
+   round such as "Review (Round 1)", on a press "Internal Review (Round 1)"
+   or "External Review (Round 1)", "Copyediting", "Production") or its
+   outcome ("Scheduled", "Published", "Declined"). A draft's bubble
    reads "Incomplete", except on a preprint server, where it reads
    "Production" [OPS1](#ops1). Sorting, paging and the empty view
    ("No Items") are the shared table behavior of *Submissions dashboard*.
@@ -160,9 +184,9 @@ revision upload it can open is owned by *[Review stage & rounds](U26-review-stag
    - 7b. **Under review, nothing asked** {OJS OMP}: the cell shows the
      review progress counter, "Review update {completed}/{total}": the
      current round's submitted reviews, marked complete by an editor or
-     not, over its reviewers minus declined and cancelled requests
-     ⚠ [A1](#a1). Each *open* review an editor has confirmed ("Read
-     Review" › "Mark as Complete") adds its reviewer's avatar to a
+     not, over its reviewers, a declined request not counted ⚠ [A1](#a1).
+     Each *open* review an editor has confirmed ("Read Review" › "Mark as
+     Complete") adds its reviewer's avatar to a
      "Reviewers assigned:" row; the avatar's popover names the reviewer and
      the review type. A submitted open review not yet confirmed, and other
      review types, never show a reviewer here
@@ -284,7 +308,8 @@ footnote.
      panel already open (Rule 3).
    - **The same link in a second author's browser**: a second account
      holding only the Author role, signed in, opens it: an access-denied
-     page (Rule 3).
+     page reading "You don't currently have access to that stage of the
+     workflow." (Rule 3).
    - **Control**: a signed-in account holding no Author role, a Journal
      Manager who does not author, types the list's address
      `{journal path}/dashboard/mySubmissions`: the access-denied page
@@ -343,8 +368,7 @@ footnote.
      Uploaded: 0" (Rules 2, 7c).
    - **"Scheduled for publication"** {OJS}: the submission scheduled into
      an issue is listed here, its Editorial Activity cell reading "To be
-     published in issue {issue}" (Rules 2, 7d). On a press or preprint
-     server nothing feeds the view [A3](#a3).
+     published in issue {issue}" (Rules 2, 7d).
    - **"Published"**: the two published submissions are listed here
      (Rule 2).
    - **"Declined"**: the declined submission is listed here with its
@@ -448,6 +472,26 @@ App-specific:
 
 Left out of the scenarios above, by reason:
 
+- **Planned**:
+  - on a press or preprint server, a submission scheduled by a future
+    "Date Published" or "Date Posted" and then "Publish" or "Post": listed
+    under "Scheduled for publication" with the "Scheduled" bubble and an
+    empty Editorial Activity cell, and no longer under "Active
+    submissions" (Rule 2; replaces the retired A3) {OMP OPS} [report 2026-11-17]
+  - the old author-dashboard link followed by an account without the
+    Author role (the access-denied page reading "You do not currently have
+    sufficient privileges to view the submission…") and by a Journal
+    Manager who also holds Author (the panel opening on a submission they
+    are not the author of) (Rule 3) [sweep 2026-11-17]
+  - a row under review showing its round in the Stage bubble, "Review
+    (Round 1)" (Rule 4; scenario 4's rows, whose bubble the OJS suite does
+    not read) {OJS} [sweep 2026-11-17]
+  - on a press, scenario 3's "Filters" panel offering "Days since last
+    activity" alone, with no section, series or issue filter (Rule 5; the
+    OMP suite asserts only that the categories filter is absent) {OMP} [sweep 2026-11-17]
+  - on a press, scenario 4's avatar popover naming the review type "Open"
+    as its own text, apart from the reviewer's name (Rule 7b; the OMP
+    suite's check is met by the name alone) {OMP} [sweep 2026-11-17]
 - **Rarely met**:
   - a change someone else makes showing on the list only after a workflow
     panel closes or the page reloads, and not after pressing the open
@@ -474,12 +518,11 @@ Left out of the scenarios above, by reason:
 - **Register carries it**:
   - A2 (a submission declined during review keeping the review counter;
     Rule 7e)
-  - A3 (nothing feeding "Scheduled for publication" on a press or preprint
-    server; Rule 2; scenario 3 marks it)
   - A4 (the editors' assignment filter on the own list of a Journal Manager
     or Site Administrator who also authors; Rule 5)
   - A5 (an old link to a draft opening the workflow panel the list never
-    offers; Rule 3)
+    offers, its "Title & Abstract" page answering with an "Error" dialog;
+    Rule 3)
   - A7 (an account holding two Reader-level roles, or on a journal a
     Subscription Manager alone, landing on the access-denied page after
     sign-in; Rule 3)
@@ -520,10 +563,9 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A8](#a8) | Deleting an unpublished submission through the REST API answers a server error, though it is deleted | 🐞 | low · crash: server | issues (claude), 2026-10-21 — re-verified |
 | [A1](#a1) | The author sees the review progress count ("Review update 1/2") for their submission under review | ❓ | user-visible | — |
 | [A2](#a2) | A declined submission's row keeps showing the review progress counter | ❓ | minor | — |
-| [A3](#a3) | On a press or preprint server, nothing was found that feeds the "Scheduled for publication" view | ❓ | minor | — |
 | [OPS1](#ops1) | A preprint server author gets no "Incomplete submissions" view; drafts hide inside "Active submissions" labeled "Production" | ❓ | minor | — |
 | [A4](#a4) | A Journal Manager or Site Administrator who also authors gets the editors' assignment filter on their personal list | ❓ | minor | — |
-| [A5](#a5) | An old author-dashboard link to a still-incomplete draft opens the draft's workflow panel, a screen the list never offers for a draft | ❓ | minor | — |
+| [A5](#a5) | An old author-dashboard link to a still-incomplete draft opens the draft's workflow panel, a screen the list never offers for a draft, whose "Title & Abstract" page answers with an "Error" dialog | ❓ | minor | — |
 | [OMP1](#omp1) | A press author cannot filter the list by series, even when the press has several | ❓ | minor | — |
 
 ### All apps
@@ -553,19 +595,6 @@ Lean: oversight. The editorial list's equivalent cell has a declined state,
 and this one does not.
 Basis: probe. <sup>a2</sup>
 
-<a id="a3"></a>
-**A3 — "Scheduled for publication" has no feeder on OMP/OPS** · ❓ · minor.
-The view exists for authors on all three apps. On OMP and OPS, however, the
-publish flows offer no date control, so nothing could be scheduled rather
-than published outright through the screens. The author's "Scheduled for
-publication" view was only ever seen empty there. On OJS it fills normally
-through issue scheduling (Rule 7d).
-Question: is any screen route meant to produce a scheduled (future-dated)
-publication on these two apps, or is the view vestigial there?
-Lean: vestigial. The view comes from shared code whose feeder these apps do
-not expose.
-Basis: probe. <sup>a3</sup>
-
 <a id="a4"></a>
 **A4 — Editors' filter on the manager-author's own list** · ❓ · minor.
 An account holding Journal Manager (or Site Administrator) alongside Author
@@ -584,11 +613,18 @@ minor.
 Following an old author-dashboard link that points at a still-incomplete
 draft lands its author on My Submissions with the draft's workflow panel
 open. The list never offers that panel for a draft, because a draft row has
-no "View" (Rule 6). Any other signed-in account gets the access-denied page
-first.
+no "View" (Rule 6). The panel is only partly usable: its "Title & Abstract"
+page answers with an "Error" dialog reading "Workflow access for incomplete
+submission is restricted." On a journal or press the panel opens on the
+Submission stage and the dialog comes when the author presses "Title &
+Abstract"; on a preprint server the panel opens on "Title & Abstract", so
+the dialog comes at once
+(*[Workflow screen & stage access](U24-workflow-screen-and-stage-access.md#ops4)*
+describes the panel). Another author following the link gets the
+access-denied page.
 Question: should the forward refuse, or hand off to the wizard, for a
-submission that was never submitted? Lean: oversight, harmless. Only the
-draft's own author can reach it.
+submission that was never submitted? Lean: oversight, harmless. An author
+following another author's draft link is refused.
 Basis: probe. <sup>a5</sup>
 
 <a id="a7"></a>
@@ -667,6 +703,9 @@ Basis: probe, 2026-10-04. <sup>ops2</sup>
 
 ### Retired
 
+<a id="a3"></a>
+**A3 — "Scheduled for publication" has no feeder on a press or preprint server** · ✅ · retired. Overturned: a future publication date feeds the view (Rule 2).
+
 <a id="a6"></a>
 **A6 — In French the review counter and the "…" button show raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
@@ -696,8 +735,9 @@ the app has no reviewer role). A Site Administrator whose only role in the
 journal is Reader, typing the address, gets the same page (2026-09-28, all
 three apps). A signed-out visitor typing the list's
 address is sent to the login page with the list carried as the return
-destination (probed 2026-08-26, OJS; the return trip after logging in was
-not probed).
+destination (probed 2026-08-26, OJS). The return trip probed 2026-11-17
+(all three apps, two runs): `login?source=…/dashboard/mySubmissions`, and
+signing in there landed on `dashboard/mySubmissions?currentViewId=active`.
 
 <a id="fn-b"></a>
 **b — the view roster.** `PKP\submission\Repository::mapDashboardViews()`;
@@ -720,6 +760,22 @@ keeps the in-page search box. "Assigned as an author" is wider than the
 submitter: a co-author account holding an author assignment on the
 submission — not the account that started it — sees it on their own list
 with "View" (probed 2026-08-26, OJS).
+Scheduling on a press or preprint server:
+`APP\publication\Repository::setStatusOnPublish` on OMP and OPS sets
+`STATUS_SCHEDULED` for a future `datePublished` (mechanism owned by
+*[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*).
+Live-probed 2026-11-17 (OMP and OPS, two runs, scratch press and server):
+the Press Manager (OMP) or Preprint Server Manager (OPS) saved 2030-01-01 in "Date Published" on the
+Catalog Entry page (OMP) or "Date Posted" on the Preprint Entry page
+(OPS), the save answering 200; "Publish" opened the window "Schedule For
+Publication" ("…Are you sure you want to make this catalog entry
+public?"), "Post" the window "Post the preprint" ("…Are you sure you want
+to post this?"), neither with a date input; confirming answered 200 and
+the publication read "Status: Scheduled" with "Unschedule". The author's
+sidebar then read "1 Scheduled for publication", the view "Scheduled for
+publication (1)" listed the item with cells "Scheduled" · empty · "View",
+and it was listed under neither "Active submissions" nor "Published". The
+journal's issue route: fn-f.
 
 <a id="fn-c"></a>
 **c — landing and forwards.** `PKPPageRouter::getHomeUrl()` reads only the
@@ -772,7 +828,27 @@ apps: the submission's own author lands with the workflow panel already
 open; a different signed-in author following the same link gets the
 authorization-denied page, verbatim "You don't currently have access to
 that stage of the workflow." The store auto-opens the panel for a
-`workflowSubmissionId` URL param (`dashboardPageStore.js`). Further combos
+`workflowSubmissionId` URL param (`dashboardPageStore.js`). Who passes:
+the handler's role assignment admits only `ROLE_ID_AUTHOR`
+(`SubmissionAccessPolicy`, refused with
+`user.authorization.authorRoleMissing`); an Author holder then needs to be
+the submission's author or to have any accessible workflow stage on it
+(`SubmissionAuthorPolicy` / `UserAccessibleWorkflowStageRequiredPolicy`,
+also in `AuthorDashboardAccessPolicy`), refused otherwise with
+`user.authorization.accessibleWorkflowStage`; a Journal Manager has every
+stage of every submission. Re-driven 2026-11-17 (all three apps, two runs,
+scratch journal, an author-only account's submitted submission): another
+author and a co-author of a different submission got
+`user/authorizationDenied?message=user.authorization.accessibleWorkflowStage`,
+"You don't currently have access to that stage of the workflow."; a
+Journal Manager, a Section Editor and a Reader, none holding Author, got
+`…?message=user.authorization.authorRoleMissing`, "You do not currently
+have sufficient privileges to view the submission. Please edit your
+profile to ensure that you have been granted the appropriate roles under
+"Register As"."; a Journal Manager + Author account landed on
+`dashboard/mySubmissions?workflowSubmissionId={id}&currentViewId=active`
+with the panel open ("WORKFLOW: SUBMISSION"; OPS "PREPRINT: TITLE &
+ABSTRACT") on that submission, which it is not an author of. Further combos
 probed 2026-08-26 (OJS, scratch journal): Manager+Author and
 Author+Copyeditor (an Assistant role) both land on the editorial
 dashboard, the author group still in the sidebar. The landing claim is
@@ -791,7 +867,12 @@ Submissions · Stage · Editorial Activity · Actions on all three apps (OMP
 included — no longer only the ui-library-pin inference); a
 draft's Stage bubble reads "Incomplete" on OJS/OMP but "Production" on OPS
 (every preprint, drafts included, sits at the Production stage —
-fn-ops1); an empty view renders one full-width "No Items" row. ID sorting
+fn-ops1); an empty view renders one full-width "No Items" row. Stage
+bubbles read 2026-11-17 (all three apps, two runs, the author's rows in
+every view): "Submission", "Review (Round 1)" (OJS), "External Review
+(Round 1)" and "Internal Review (Round 1)" (OMP), "Copyediting" (OJS
+OMP), "Production" (OMP; OPS, drafts included), "Scheduled", "Published",
+"Declined", "Incomplete" (OJS OMP). ID sorting
 probed live 2026-08-26 (OJS): each header click toggles the direction, the
 address gains `sortColumn=id&sortDirection=…`, the rows reorder, and a URL
 carrying the sort parameters is honored on load. Table
@@ -884,7 +965,11 @@ no internal-stage resubmit decision, so that combination cannot arise.
 statuses (`useSubmission.js::CompletedReviewAssignmentStatuses`: received,
 viewed, complete, thanked, so a submitted review counts before an editor
 marks it complete; read 2026-09-30), total = active (declined/cancelled
-excluded).
+excluded). The declined end re-driven 2026-11-17 (OJS and OMP, two runs):
+one accepted, one completed and one declined request read "Review update
+1/2". A cancelled request on screen (an editor's "Cancel Reviewer", which
+no seed key builds) was not driven, so Rule 7b states only the declined
+end.
 `DashboardCellSubmissionActivityReviewsOpen.vue`: renders only completed
 assignments whose `reviewMethod` is `SUBMISSION_REVIEW_METHOD_OPEN`,
 avatar popover = reviewer full name + review method. Live-probed
@@ -1029,7 +1114,7 @@ activity cell stays clear of A2's counter: probed 2026-08-26, OJS, stage
 bubble "Declined" and an empty cell), on OJS and OMP one in Copyediting
 (`decisions: ['skipExternalReview']`, no copyedited file uploaded, hence
 "0"), and on OJS one scheduled into the unpublished issue Vol 2 No 1
-(2015) (`published: true` with that `issue`: fn-a3's control, the row
+(2015) (`published: true` with that `issue`: fn-f, the row
 reading "To be published in issue Vol. 2 No. 1 (2015)"). The other
 author's submission is one submitted by `author.alex` on `publicknowledge`
 or by a second throwaway author on the scratch context. Two published rows
@@ -1106,17 +1191,6 @@ reviewers assigned, none completed) shows, on the "Declined" view, stage
 bubble "Declined" with activity cell "Review update 0/2". Cell logic
 shared by OJS and OMP (same pinned ui-library, fn-d).
 
-<a id="fn-a3"></a>
-**a3 — A3 evidence.** Probed 2026-08-26 through the screens: OMP's
-"Schedule For Publication" flow (Publication tab → "Publish" confirm) and
-OPS's "Post the preprint" flow offer no date control anywhere;
-`APP\publication\Repository::setStatusOnPublish` on both apps sets
-`STATUS_SCHEDULED` only for a future `datePublished`, so confirming
-publishes immediately. No other feeder was found; the OPS/OMP author
-"Scheduled for publication" views stayed at "(0)" throughout. OJS control:
-publishing into an unpublished issue produced a scheduled row ("To be
-published in issue…", fn-f).
-
 <a id="fn-a4"></a>
 **a4 — A4 evidence.** `PKPSubmissionFilters::addAssignedTo()` is gated by
 `isManagerOrAdmin()` — a role check with no page condition and no app
@@ -1131,8 +1205,12 @@ the journal, Journal Manager ended, found the field on their own My
 Submissions beside "Days since last activity", labelled "Assigned To
 Editor" on OJS and OMP and "Assigned to Moderator" on OPS (the Journal
 Manager's dashboard panel carries the same OPS label); author-only accounts
-never got it. The Manager+Author combination itself was probed on OJS only;
-the gate is the same shared role check.
+never got it. Live-probed 2026-11-17 (all three apps, two runs, scratch
+journals): a Journal Manager + Author account's own My Submissions Filters
+offered "Assigned To Editor" ("Assigned to Moderator" on OPS) and "Days
+since last activity" (on the OJS journal, which had issues, "Issues" too);
+a Section Editor + Author account on the same journal did not get the
+field.
 
 <a id="fn-a5"></a>
 **a5 — A5 evidence.** The forward and the panel auto-open are fn-c's
@@ -1140,8 +1218,17 @@ shared chain; nothing in it checks `submissionProgress`. Live-probed
 2026-08-26 (OJS): the draft's own author following the old
 author-dashboard address for their draft landed on the list with the
 draft's workflow panel open (full stage menu and publication tabs); a
-different signed-in author got the authorization-denied page. Not probed
-on OMP/OPS.
+different signed-in author got the authorization-denied page. Live-probed
+2026-11-17 (all three apps, two runs each): on OJS and OMP the
+draft's panel opened on the Submission stage ("WORKFLOW: SUBMISSION",
+address `workflowMenuKey=workflow_1`), and pressing "Title & Abstract"
+opened "PUBLICATION: TITLE & ABSTRACT" with an "Error" dialog on top,
+"Workflow access for incomplete submission is restricted." / "OK", its
+request `GET submissions/{id}/publications/{id}/_components/titleAbstract`
+answering 401 (`SubmissionCompletePolicy`,
+`user.authorization.submission.incomplete.workflowAccessRestrict`); on OPS
+the panel opened on "PREPRINT: TITLE & ABSTRACT" with the same dialog and
+the same 401 at once. No server error or page error.
 
 <a id="fn-a7"></a>
 **a7 — A7 evidence.** `PKPPageRouter::getHomeUrl()` returns the journal's
