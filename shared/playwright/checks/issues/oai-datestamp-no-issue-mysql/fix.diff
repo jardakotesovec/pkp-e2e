@@ -5,7 +5,7 @@
          $query = DB::table('submissions AS a')
              ->select([
 -                DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified) AS last_modified'),
-+                DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified) AS last_modified'),
++                DB::raw('GREATEST(COALESCE(a.last_modified, p.last_modified), COALESCE(p.last_modified, a.last_modified), COALESCE(i.last_modified, a.last_modified, p.last_modified)) AS last_modified'),
                  'a.submission_id AS submission_id',
                  'i.issue_id',
                  DB::raw('NULL AS tombstone_id'),
@@ -14,7 +14,7 @@
              ->when($from, function ($query, $from) {
                  return $query->whereDate(
 -                    DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified)'),
-+                    DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified)'),
++                    DB::raw('GREATEST(COALESCE(a.last_modified, p.last_modified), COALESCE(p.last_modified, a.last_modified), COALESCE(i.last_modified, a.last_modified, p.last_modified))'),
                      '>=',
                      DateTime::createFromFormat('U', $from)
                  );
@@ -22,7 +22,7 @@
              ->when($until, function ($query, $until) {
                  return $query->whereDate(
 -                    DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified)'),
-+                    DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified)'),
++                    DB::raw('GREATEST(COALESCE(a.last_modified, p.last_modified), COALESCE(p.last_modified, a.last_modified), COALESCE(i.last_modified, a.last_modified, p.last_modified))'),
                      '<=',
                      DateTime::createFromFormat('U', $until)
                  );
@@ -31,7 +31,7 @@
              $versionQuery = DB::table('submissions AS a')
                  ->select([
 -                    DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified) AS last_modified'),
-+                    DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified) AS last_modified'),
++                    DB::raw('GREATEST(COALESCE(a.last_modified, p.last_modified), COALESCE(p.last_modified, a.last_modified), COALESCE(i.last_modified, a.last_modified, p.last_modified)) AS last_modified'),
                      'a.submission_id AS submission_id',
                      'i.issue_id',
                      DB::raw('NULL AS tombstone_id'),
@@ -40,7 +40,7 @@
                  ->when($from, function ($query, $from) {
                      return $query->whereDate(
 -                        DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified)'),
-+                        DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified)'),
++                        DB::raw('GREATEST(COALESCE(a.last_modified, p.last_modified), COALESCE(p.last_modified, a.last_modified), COALESCE(i.last_modified, a.last_modified, p.last_modified))'),
                          '>=',
                          DateTime::createFromFormat('U', $from)
                      );
@@ -48,7 +48,7 @@
                  ->when($until, function ($query, $until) {
                      return $query->whereDate(
 -                        DB::raw('GREATEST(a.last_modified, i.last_modified, p.last_modified)'),
-+                        DB::raw('GREATEST(a.last_modified, COALESCE(i.last_modified, a.last_modified), p.last_modified)'),
++                        DB::raw('GREATEST(COALESCE(a.last_modified, p.last_modified), COALESCE(p.last_modified, a.last_modified), COALESCE(i.last_modified, a.last_modified, p.last_modified))'),
                          '<=',
                          DateTime::createFromFormat('U', $until)
                      );
