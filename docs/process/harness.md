@@ -427,6 +427,14 @@ node bin/try-fix.js status [ojs] [omp] [ops]    # exits 1 while a named app (def
   created after the apply. A migration's fix shows on an older dataset
   loaded with `PKP_E2E_DATASET_BRANCH`, which runs the upgrade ("Dataset
   fleets", the reset).
+- A diff's unit test (REPORT.md "Proposed fix", the guard) runs in the
+  app checkout against a dataset fleet's install:
+  `PKP_CONFIG_FILE=$PWD/config.test.ds<n>.inc.php php lib/pkp/lib/vendor/bin/phpunit -c lib/pkp/tests/phpunit.xml --do-not-cache-result --filter <Test> <file>`
+  (`--do-not-cache-result` keeps the checkout clean). The result line
+  comes first; a fatal at shutdown reading `config.inc.php` after it is
+  the queue provider's, not the test's. To show the test fails on
+  today's code, apply the diff and put the code file back from
+  `git show HEAD:<path>` for that run, all under the exclusive lock.
 
 ### Dataset fleets
 
