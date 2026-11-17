@@ -29,6 +29,9 @@
 // and head on all three lines: the book page reads Dawson, Dupuis; the new version and the
 // re-import read Dupuis, Dawson (report docs/reports/pr-review/2026-11-05-pkp-lib-10570.md); with
 // the report's proposed fix both read Dawson, Dupuis and sorted/ties stay true.
+// 2026-11-17 (round 4, the copies and the exported places numbered from 0 in the chapter's read
+// order: #2523 191a2ab544 on main 92dd31031b, #2582 91fdb9198b on stable-3_5_0 3f0fd0a7d,
+// #2521 f14a51dd8d on stable-3_4_0 e92ae5b6d0): chapterties, sorted and ties true at each head.
 const fs = require('fs');
 const path = require('path');
 const {execFileSync} = require('child_process');

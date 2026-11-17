@@ -1802,7 +1802,7 @@ the publication formats' files (`$newSubmissionFiles`); every other file
 keeps the old chapter's id, which `ChapterForm::fetch()` then treats as
 held by another chapter. The re-linked authors are numbered from 0 in
 the order the old chapter reads (its `submission_chapter_authors` `seq`,
-then `author_id`; pkp/pkp-lib#10570, omp#2523 `fb4f63b15a`, which the
+then `author_id`; pkp/pkp-lib#10570, omp#2523 `191a2ab544`, which the
 Native XML export's `<chapterAuthor seq>` numbers the same way), with
 `primary_contact` false, as every other writer of the table sets it
 (nothing reads it). Live-probed
@@ -1849,8 +1849,13 @@ bases too. With the Contributors list ordered Dupuis, then Dawson, the
 new version's copy and the re-import read Dupuis, then Dawson, at base
 and head on all three lines: the copy keeps the shared place and the new
 ids follow the Contributors list
-(`docs/reports/pr-review/2026-11-05-pkp-lib-10570.md`).
-`checks/sync/pkp-lib-10570/walk.js`.
+(`docs/reports/pr-review/2026-11-05-pkp-lib-10570.md`). Round 4 on
+2026-11-17 (#2523 `191a2ab544` on the `main` tip `92dd31031b`, #2582
+`91fdb9198b` on `stable-3_5_0`, #2521 `f14a51dd8d`) numbers the copies
+and the exported places from 0 in the chapter's read order: that chapter
+reads Dawson, then Dupuis, in the new version, the export and the
+re-import on all three lines, and the sorted and shared cases read as
+in round 2. `checks/sync/pkp-lib-10570/walk.js`.
 
 <a id="fn-td18"></a>
 **td18** — Live-probed 2026-09-28 (Fields, the Review panel; Rule 16;
