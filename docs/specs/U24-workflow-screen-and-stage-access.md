@@ -142,13 +142,15 @@ from the menu belongs to its own feature.
    - 2b. The **old author-dashboard address**,
      `…/authorDashboard/submission/<number>`, forwards the submission's own
      Author to My Submissions with that submission's workflow open. On a
-     preprint server the panel opens on the preprint's pages (Rule 11). The
-     forward is for the Author only. Any other signed-in role, including an
-     Author who is not this submission's, gets the access-denied page
+     preprint server the panel opens on the preprint's pages (Rule 11). A
+     Journal Manager who also holds Author is forwarded the same way,
+     to their own My Submissions with the panel open, though they are not
+     the submission's author (*[My Submissions](U22-my-submissions.md)*,
+     Rule 3). Any other signed-in role gets the access-denied page
      instead ("You do not currently have sufficient privileges to view the
      submission." for anyone who is not an Author: editorial roles,
      Reviewer and Reader alike; "You don't currently have access to that
-     stage of the workflow." for a stranger Author).
+     stage of the workflow." for a stranger Author). <sup>u22sw</sup>
    - 2c. The **dashboard address itself** (the address Rule 1 produces) can
      be typed or bookmarked. It opens the panel for any submission the
      signed-in role may see, including an incomplete one, which the
@@ -1650,9 +1652,10 @@ panel (by its My Submissions address, or an old author-dashboard link) gets
 the panel, landing on "Preprint: Title & Abstract", with an "Error" dialog
 over it reading "Workflow access for incomplete submission is restricted."
 and an "OK" button; after "OK" the panel stays open on the same, empty
-page. On a journal or press the same author's draft opens cleanly, on the
-Submission stage. The list itself never offers "View" for a draft, so only
-a typed or old address reaches this.
+page. On a journal or press the same author's draft opens on the
+Submission stage without the dialog, but its "Title & Abstract" page
+raises the same "Error" dialog when pressed. The list itself never offers
+"View" for a draft, so only a typed or old address reaches this.
 Question: the same as [A3](#a3), asked for the author: should a draft's
 panel open at all? Lean: refuse the draft cleanly at the door on every app,
 or let it open without the error; the half-open panel is the worst of the
@@ -1820,6 +1823,9 @@ Issue report: [docs/issues/U24-OMP3-press-identifiers-page-stays-after-plugin-of
 <a id="fn-ops3"></a>
 **f-ops3** — Note e: `getExtendedStage()` returns "Incomplete" only for `stageId === SUBMISSION && submissionProgress`; OPS creates every submission at `WORKFLOW_STAGE_ID_PRODUCTION`, so a preprint draft falls through to the Production label. Live-probed 2026-09-02 (OPS, `manager.maya` by the dashboard address, `author.alex` on My Submissions, `submitted: false` seed): bubble "Production" with the production colour, header "Preview", "Activity Log", "Library"; the editor's and the author's list rows read "… / Production / Complete submission"; the same seed on OJS and OMP read "Incomplete" in bubble and rows.
 Issue report: [docs/issues/U24-OPS3-preprint-draft-labelled-production.md](../issues/U24-OPS3-preprint-draft-labelled-production.md), filed as [pkp-e2e#577](https://github.com/jardakotesovec/pkp-e2e/issues/577).
+
+<a id="fn-u22sw"></a>
+**u22sw** — The *My Submissions* drift sweep of 2026-11-17 (claim check ccSW17, `shared/playwright/checks/U22/SW17/sw17.js`, PART=roles and draftlink; OJS, OMP, OPS on `main`, two runs): a scratch journal's Journal Manager who also holds Author, opening `…/authorDashboard/submission/<number>` of another author's submission, landed on their own `dashboard/mySubmissions?workflowSubmissionId=<number>` with that submission's panel open (`roles.ma.oldLinkQueued`); the author's own unfinished draft opened by the same address on OJS and OMP showed the panel on the Submission stage, and pressing "Title & Abstract" there raised the "Error" dialog "Workflow access for incomplete submission is restricted." (`draftlink.titleAbstract`).
 
 <a id="fn-ops4"></a>
 **f-ops4** — Note b (the OPS author's draft) and note i (the OPS author always lands on "Title & Abstract", whose form is served by a publication component route guarded by `SubmissionCompletePolicy`); on a journal or press the author's draft lands on the Submission stage entry, whose panels make no guarded request. Live-probed 2026-09-02 (OPS, `author.alex`, `dashboard/mySubmissions?workflowSubmissionId={draft}`): panel with bubble "Production", heading "Preprint: Title & Abstract" and the author's page list, an "Error" dialog "Workflow access for incomplete submission is restricted." / "OK" on top, the page's own request answering 401; after "OK" the panel stayed on the same heading. The Journal Manager opening the same draft on OPS, and the author opening theirs on OJS and OMP, got no dialog. The old author-dashboard link reaches the same panel (*[My Submissions](U22-my-submissions.md#a5)*).
