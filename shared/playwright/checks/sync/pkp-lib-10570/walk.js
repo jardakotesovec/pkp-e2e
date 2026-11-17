@@ -32,6 +32,8 @@
 // 2026-11-17 (round 4, the copies and the exported places numbered from 0 in the chapter's read
 // order: #2523 191a2ab544 on main 92dd31031b, #2582 91fdb9198b on stable-3_5_0 3f0fd0a7d,
 // #2521 f14a51dd8d on stable-3_4_0 e92ae5b6d0): chapterties, sorted and ties true at each head.
+// Merged 2026-11-17 (main aeba2fee09, stable-3_5_0 0a7e68eafa, stable-3_4_0 5b4b9142af): the same
+// at the merged tips.
 const fs = require('fs');
 const path = require('path');
 const {execFileSync} = require('child_process');
