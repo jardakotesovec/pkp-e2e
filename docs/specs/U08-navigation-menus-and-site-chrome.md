@@ -2732,7 +2732,10 @@ access-denied page with "The current role does not have access to this
 operation." and a signed-out visitor that journal's Login page.
 
 <a id="fn-td22"></a>
-**td22** — pkp/pkp-lib#12654 (main only), driven 2026-11-13 at its PRs'
+**td22** — pkp/pkp-lib#12654 (main only), merged 2026-11-17 (pkp-lib
+`f532a2de91`, ojs `26fea6d1b5`, omp `85b485cce`, ops `f66ff088c7`, each
+app's diff the reviewed head's, pkp-lib's but for a Cypress selector),
+re-walked at those tips that day as below; driven 2026-11-13 at its PRs'
 heads, before their merge: pkp-lib#13431 `254b15b320`, ojs#5887
 `e4b040f6e4`, omp#2575 `bbea2619c9`, ops#1506 `12e8fc55d9`
 (`shared/playwright/checks/sync/pkp-lib-13431/walk.js`, all three
