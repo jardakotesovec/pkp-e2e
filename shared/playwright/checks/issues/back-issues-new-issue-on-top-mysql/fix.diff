@@ -1,0 +1,44 @@
+--- a/classes/issue/DAO.php
++++ b/classes/issue/DAO.php
+@@ -180,11 +180,19 @@
+ 
+         $results = DB::table($this->table, 'i')
+             ->leftJoin('custom_issue_orders as o', 'o.issue_id', '=', 'i.issue_id')
++            ->leftJoin('journals as j', 'j.current_issue_id', '=', 'i.issue_id')
+             ->where('i.journal_id', '=', $contextId)
+             // TODO: Previous behaviour would resequence all issues, including those that haven't been published (cont.)
+             // artificially giving them a position in the custom_issue_orders table before they've been published.
+             ->where('i.published', '=', 1)
++            // Issues without a place (just published, or left at the top by "Done") come first, current issue
++            // first, then newest first, as "Back Issues" lists them by default; on every database (MySQL and
++            // MariaDB sort NULL first, PostgreSQL last).
++            ->orderByRaw('CASE WHEN o.seq IS NULL THEN 0 ELSE 1 END')
+             ->orderBy('o.seq')
++            ->orderByRaw('CASE WHEN j.current_issue_id IS NOT NULL THEN 0 ELSE 1 END')
++            ->orderByDesc('i.date_published')
++            ->orderByDesc('i.issue_id')
+             ->select('i.issue_id')
+             ->get();
+         $results->each(function ($item, $key) use ($contextId) {
+--- a/controllers/grid/issues/BackIssueGridHandler.php
++++ b/controllers/grid/issues/BackIssueGridHandler.php
+@@ -73,6 +73,19 @@
+     }
+ 
+     /**
++     * @copydoc GridHandler::saveSequence()
++     *
++     * "Done" stores only the places that changed, so the current issue left at the top of a first
++     * ordering gets none: renumber, so that every published issue has a place.
++     */
++    public function saveSequence($args, $request)
++    {
++        $result = parent::saveSequence($args, $request);
++        Repo::issue()->dao->resequenceCustomIssueOrders($request->getContext()->getId());
++        return $result;
++    }
++
++    /**
+      * @copydoc GridHandler::setDataElementSequence()
+      */
+     public function setDataElementSequence($request, $rowId, $gridDataElement, $newSequence)
