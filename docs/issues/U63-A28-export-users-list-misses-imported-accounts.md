@@ -10,7 +10,7 @@
   - 3.3: OJS, OMP (code)
 - **Introduced** no PR (pkp bug 8463) · [f7a84c2975](https://github.com/pkp/omp/commit/f7a84c297515c4b5bf7b782cb44187cf39669110) · 2013-12-18 · Jason Nugent (jnugent); OJS's copy of the page, no PR (pkp bug 8582) · [9d883aabe6](https://github.com/pkp/ojs/commit/9d883aabe6ca8b6f8f4c812ea1f353d17624886e) · 2014-02-27 · Jason Nugent (jnugent)
 - **Upstream** none found (2026-11-16)
-- **Tracked in** U63 [OMP7](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U63-import-export.md#omp7)
+- **Tracked in** U63 [A28](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U63-import-export.md#a28)
 - **Checked** 2026-11-16, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
 

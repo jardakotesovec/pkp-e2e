@@ -1088,7 +1088,7 @@ test.describe('Import & export', () => {
         // file uploaded on "Import Users": a new "Results" tab with the
         // success sentence; quill's roles page lists each role once (Rules
         // 8, 24). The page opened afresh is also what lets "Export Users"
-        // list the accounts the first import made (OMP7).
+        // list the accounts the first import made (A28).
         await users.goto();
         await users.expectSelected('Import Users');
         await users.upload(first);

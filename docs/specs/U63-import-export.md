@@ -516,9 +516,10 @@ Sync", "Error"), and a "Search" button. That "Search" narrows the list
     Nor is one whose only role starts on a later date (given by an
     invitation or a users import), and "Search" does not find it,
     though Settings › Users & Roles › "Users" lists it ⚠ [A22](#a22).
-    On a press, the list is the one the page opened with: accounts that
-    an import on the same page has just made are missing from it until
-    the page is opened again ⚠ [OMP7](#omp7). "Search" at the
+    After an import on the same page, the list is still the one the page
+    opened with: the accounts that import has just made are missing from
+    it until the list is searched for them or the page is opened again
+    ⚠ [A28](#a28). "Search" at the
     list's top right shows the filter of Fields; "Search" there narrows
     the list to the accounts in which every word typed appears in the
     name, username, email or affiliation, or in the name of a role the
@@ -1544,6 +1545,8 @@ Left out of the scenarios above, by reason:
     Dashboard's lists; Rule 10)
   - A27 (the "Confirm" window of "Export All Users" left open after
     "OK"; Rule 27; scenario 12 marks it)
+  - A28 (the "Export Users" list read on the page of the import that
+    made its accounts; Rule 26)
   - OJS1 (the DOAJ list's issue window heading; Rule 36)
   - OJS2 (the "DOAJ Export Plugin" row kept on the Plugins list while
     "DOAJ Plugin" is off; Rule 3)
@@ -1569,8 +1572,6 @@ Left out of the scenarios above, by reason:
     10a)
   - OMP6 (a press's Native XML import from the command line, and its
     export there with the ONIX details filled; Rule 20b)
-  - OMP7 (the "Export Users" list read on the page of the import that
-    made its accounts; Rule 26)
 - **No seed**:
   - the PubMed file downloading, and the journal title it carries: the
     journal's name before "NLM Title Abbreviation" is saved and after it
@@ -1630,6 +1631,7 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A25](#a25) | Native XML import: a file over the upload limit is refused with "File size error." and no limit named | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A26](#a26) | A published article, book or preprint imported with the Native XML Plugin is missing from the Dashboard's "Published" | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A27](#a27) | "OK" in "Export All Users" downloads the users file but leaves the "Confirm" window open over the list | 🐞 | low | issues (claude), 2026-11-13 — re-verified |
+| [A28](#a28) | Users XML Plugin: after "Import Users", the "Export Users" list leaves out the accounts just imported | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [OJS1](#ojs1) | DOAJ export list's issue link opens the issue's window headed "DOI Plugin Settings" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS2](#ojs2) | With "DOAJ Plugin" switched off, the Plugins list still shows its export tool as on | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | Where NLM's site cannot be reached, every PubMed export fails with a "Validation errors:" page | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1642,7 +1644,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [OMP4](#omp4) | A press's command-line CSV import stops with a fatal error, imports nothing and leaves an empty submission | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [OMP5](#omp5) | A press importing an OMP Native XML export is warned "Unknown element sequence" for every book in a series | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OMP6](#omp6) | From the command line, a press's Native XML import fails on any book with a publication format, and so does the export once the ONIX details are filled | 🐞 | medium · crash: server | issues (claude), 2026-10-21 — re-verified |
-| [OMP7](#omp7) | Users XML Plugin: after "Import Users", the "Export Users" list leaves out the accounts just imported | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A14](#a14) | "Export Users" with no row ticked ends on a blank page: the server fails | ❓ | minor · crash: server | — |
 | [A22](#a22) | "Export Users" leaves out an account whose only role starts on a later date | ❓ | minor | — |
 | [OJS8](#ojs8) | DOAJ "Register" checks nothing, "Validate XML before the export and registration." ticked or not | ❓ | minor | — |
@@ -1951,6 +1952,19 @@ press after it does what was meant. Escape closes the window too. On
 same press or Escape still closes it. {OJS OMP}
 Basis: test run + probe, 2026-11-13. <sup>f-a27</sup>
 
+<a id="a28"></a>
+**A28 — Users XML Plugin: after "Import Users", the "Export Users" list leaves out the accounts just imported** · 🐞 · low · {OJS OMP}.
+A press or journal manager imports a users file on the Users XML
+Plugin's "Import Users" tab, reads the success sentence, and presses the
+"Export Users" tab of the same page. "Current Users" should list the new
+accounts. Instead it is the list the page opened with: the same count,
+and none of the new accounts is there to tick.
+Nothing is lost, but the manager may take the import for a failure.
+Importing the file again changes nothing, and the list still leaves the
+accounts out. Searching the list for the new names, or opening the tool
+again, shows them.
+Basis: test run, 2026-11-16. <sup>f-a28</sup>
+
 ### OJS
 
 <a id="ojs1"></a>
@@ -2175,19 +2189,6 @@ tab, with its formats; that is the way round, within the upload size the
 server allows. One change in OMP fixes both.
 Basis: probe, 2026-10-21. <sup>f-omp6</sup>
 
-<a id="omp7"></a>
-**OMP7 — Users XML Plugin: after "Import Users", the "Export Users" list leaves out the accounts just imported** · 🐞 · low.
-A press or journal manager imports a users file on the Users XML
-Plugin's "Import Users" tab, reads the success sentence, and presses the
-"Export Users" tab of the same page. "Current Users" should list the new
-accounts. Instead it is the list the page opened with: the same count,
-and none of the new accounts is there to tick.
-Nothing is lost, but the manager may take the import for a failure.
-Importing the file again changes nothing, and the list still leaves the
-accounts out. Searching the list for the new names, or opening the tool
-again, shows them.
-Basis: test run, 2026-11-16. <sup>f-omp7</sup>
-
 ### Retired
 
 <a id="a2"></a>
@@ -2207,6 +2208,9 @@ Basis: test run, 2026-11-16. <sup>f-omp7</sup>
 
 <a id="a5"></a>
 **A5 — The daily DOAJ deposit sent other journals' "Needs Sync" articles and unpublished versions to DOAJ** · ✅ · retired. Fixed upstream (pkp/ojs#5907, for pkp/pkp-lib#13469).
+
+<a id="omp7"></a>
+**OMP7 — Users XML Plugin: after "Import Users", the "Export Users" list leaves out the accounts just imported** · ✅ · retired. Duplicate of A28.
 
 ---
 
@@ -3743,6 +3747,25 @@ tick boxes from being pressed for 300 s (OJS); "Cancel" then closed it
 read the window.
 Issue report: [pkp-e2e#1095](https://github.com/jardakotesovec/pkp-e2e/issues/1095) ([docs/issues/U63-A27-export-all-users-confirm-stays-open.md](../issues/U63-A27-export-all-users-confirm-stays-open.md)).
 
+<a id="fn-f-a28"></a>
+**f-a28** — Note m. OMP's `plugins/importexport/users/templates/index.tpl`
+loads the users grid once, as the page opens
+(`{load_url_in_div id="usersGridContainer"}`), with the page's tabs'
+`cache` on, and
+nothing reloads it after "Import Users". OJS has its own copy of the
+template with the same two lines. OPS has no Users XML Plugin. Test run
+2026-11-11, OMP (Rule 26; scenario 12): after "Import Users" pressed
+twice with a file creating quill, sage and tern, the "Export Users" tab
+of the same page held no row for any of them; the press's tool opened
+afresh listed all three.
+Walked 2026-11-16 by the issue report's script (OJS and OMP on `main`
+and `stable-3_5_0`, PKP's default test dataset, the manager `rvaca`):
+after "Import Users" with the Steps' file, the "Export Users" tab of the
+same page read "1 - 25 of 39 items" on OJS and "1 - 25 of 38 items" on
+OMP, the counts the page opened with; the tool opened again from
+"Tools" read 41 and 40.
+Issue report: [pkp-e2e#1104](https://github.com/jardakotesovec/pkp-e2e/issues/1104) ([docs/issues/U63-A28-export-users-list-misses-imported-accounts.md](../issues/U63-A28-export-users-list-misses-imported-accounts.md)).
+
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `ExportPublishedSubmissionsListGridCellProvider::getCellActions()`
 `issue`: `AjaxModal(…BackIssueGridHandler/editIssue…,
@@ -4002,19 +4025,6 @@ pkp/pkp-lib#12956 (open, reported on 3.4) names the import and the
 same two lines; the export half has no upstream issue found. Kept
 script: `shared/playwright/checks/U63/H19/h19.js`.
 Issue report: [pkp-e2e#1033](https://github.com/jardakotesovec/pkp-e2e/issues/1033) ([docs/issues/U63-OMP6-command-line-native-import-export-formats-fail.md](../issues/U63-OMP6-command-line-native-import-export-formats-fail.md)).
-
-<a id="fn-f-omp7"></a>
-**f-omp7** — Note m. OMP's `plugins/importexport/users/templates/index.tpl`
-loads the users grid once, as the page opens
-(`{load_url_in_div id="usersGridContainer"}`), with the page's tabs'
-`cache` on, and
-nothing reloads it after "Import Users". OJS has its own copy of the
-template with the same two lines; not driven there. Test run
-2026-11-11, OMP (Rule 26; scenario 12): after "Import Users" pressed
-twice with a file creating quill, sage and tern, the "Export Users" tab
-of the same page held no row for any of them; the press's tool opened
-afresh listed all three.
-Issue report: [pkp-e2e#1104](https://github.com/jardakotesovec/pkp-e2e/issues/1104) ([docs/issues/U63-OMP7-export-users-list-misses-imported-accounts.md](../issues/U63-OMP7-export-users-list-misses-imported-accounts.md)).
 
 ## Reference — entry points & surfaces
 

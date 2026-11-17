@@ -203,6 +203,15 @@ function fetchApp(name) {
     }
     const uiMoved = !fresh && update && uiRev() !== uiBefore;
     if (uiMoved) console.log('  lib/ui-library moved: the UI bundle will be rebuilt');
+    // A bundle older than the lib/ui-library commit it should carry is stale
+    // even when this run did not move the pointer (an earlier session did).
+    const bundle = path.join(dir, 'js', 'build.js');
+    let bundleStale = false;
+    try {
+        const uiTime = Number(execFileSync('git', ['log', '-1', '--format=%ct'], {cwd: path.join(dir, 'lib', 'ui-library'), stdio: ['ignore', 'pipe', 'ignore']}).toString().trim()) * 1000;
+        bundleStale = !uiMoved && fs.existsSync(bundle) && fs.statSync(bundle).mtimeMs < uiTime;
+    } catch {}
+    if (bundleStale) console.log('  js/build.js is older than lib/ui-library\'s commit: the UI bundle will be rebuilt');
 
     // Submodule origins point at pkp remotes (.gitmodules) — disable pushes.
     run(dir, 'git', [
@@ -240,10 +249,10 @@ function fetchApp(name) {
     } else {
         console.log('  npm ci: node_modules present, skipping (--rebuild forces)');
     }
-    if (rebuild || uiMoved || !fs.existsSync(path.join(dir, 'js', 'build.js'))) {
+    if (rebuild || uiMoved || bundleStale || !fs.existsSync(bundle)) {
         run(dir, 'npm', ['run', 'build'], {env});
     } else {
-        console.log('  UI build: js/build.js present, skipping (--rebuild forces; --update rebuilds when lib/ui-library moved)');
+        console.log('  UI build: js/build.js present and newer than lib/ui-library, skipping (--rebuild forces)');
     }
 
     // Runtime wiring: env file, files dir, test DB, test config.

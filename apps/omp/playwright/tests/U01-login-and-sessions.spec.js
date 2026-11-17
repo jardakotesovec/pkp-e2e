@@ -230,6 +230,11 @@ const test = baseTest.extend({
                 storageState: {cookies: [], origins: []},
             });
             contexts.push(context);
+            // Deep enough stacks to name the PKP script a page error came
+            // from (watchFailures, app-changes row 24).
+            await context.addInitScript(() => {
+                Error.stackTraceLimit = 50;
+            });
             if (cookies.length) {
                 await context.addCookies(cookies);
             }
@@ -500,14 +505,38 @@ async function endSession(context) {
  * Collect what fails on the server (a 5xx answer) or in the page's own
  * script (an uncaught error) while the page is open; each is a finding of
  * its own, whether or not the screen shows anything.
+ *
+ * App defect worked around (app-changes row 24): the served
+ * `js/pkp.min.js` (2026-08-27) predates the TinyMCE guards of
+ * pkp/pkp-lib#13381 and #13490, which `lib/pkp`'s source carries, so a
+ * rich-text box that starts late on "Edit Profile" can throw "Cannot read
+ * properties of undefined (reading 'serialize')" from that bundle (twice
+ * on CI, 2026-11-13, S12's first browser). That one error is recorded as
+ * an `app-defect` annotation with its stack, not as a failure, until each
+ * app's bundle is rebuilt; then this exception goes.
  */
-function watchFailures(page, label, failures) {
+const STALE_BUNDLE_ERROR = "Cannot read properties of undefined (reading 'serialize')";
+
+function watchFailures(page, label, failures, testInfo) {
     page.on('response', (response) => {
         if (response.status() >= 500) {
             failures.push(`${label}: ${response.status()} ${response.request().method()} ${response.url()}`);
         }
     });
-    page.on('pageerror', (error) => failures.push(`${label}: page error ${error.message}`));
+    page.on('pageerror', (error) => {
+        if (testInfo && error.message === STALE_BUNDLE_ERROR && /\/js\/pkp\.min\.js/.test(error.stack || '')) {
+            testInfo.annotations.push({
+                type: 'app-defect',
+                description: `app-changes 24: ${label}, "${error.message}" on ${page.url()}, from the unrebuilt bundle: ${(error.stack || '')
+                    .split('\n')
+                    .filter((line) => /\/js\/pkp\.min\.js/.test(line))
+                    .map((line) => line.trim())
+                    .join(' | ')}`,
+            });
+            return;
+        }
+        failures.push(`${label}: page error ${error.message}`);
+    });
     return page;
 }
 
@@ -1431,8 +1460,8 @@ test.describe('Login & sessions (U1)', () => {
         // logged in" ticked in the first browser, unticked in the second;
         // each lands on the Dashboard, settled before the session ends.
         const failures = [];
-        const ticked = watchFailures(await freshPage(), 'ticked browser', failures);
-        const unticked = watchFailures(await freshPage(), 'unticked browser', failures);
+        const ticked = watchFailures(await freshPage(), 'ticked browser', failures, testInfo);
+        const unticked = watchFailures(await freshPage(), 'unticked browser', failures, testInfo);
         await signInKept(ticked, manager, {remember: true});
         await expectEditorialDashboard(ticked);
         await signInKept(unticked, manager, {remember: false});
@@ -1531,9 +1560,9 @@ test.describe('Login & sessions (U1)', () => {
         // browsers, on "Edit Profile" in both; the Press Manager signed in
         // in a third.
         const failures = [];
-        const first = watchFailures(await freshPage(), 'first browser', failures);
-        const second = watchFailures(await freshPage(), 'second browser', failures);
-        const third = watchFailures(await freshPage(), 'manager browser', failures);
+        const first = watchFailures(await freshPage(), 'first browser', failures, testInfo);
+        const second = watchFailures(await freshPage(), 'second browser', failures, testInfo);
+        const third = watchFailures(await freshPage(), 'manager browser', failures, testInfo);
         await signInKept(first, author, {remember: true});
         await signInKept(second, author, {remember: true});
         await signInKept(third, manager, {remember: true});

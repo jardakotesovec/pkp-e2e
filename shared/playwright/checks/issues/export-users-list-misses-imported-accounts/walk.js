@@ -1,4 +1,4 @@
-// Issue report docs/issues/U63-OMP7-export-users-list-misses-imported-accounts.md (U63 OMP7) {OJS OMP}: its Steps
+// Issue report docs/issues/U63-A28-export-users-list-misses-imported-accounts.md (U63 A28) {OJS OMP}: its Steps
 // to reproduce, walked through the screens on PKP's default test dataset (a dataset fleet, harness.md "Dataset fleets").
 //
 //   walk (default): as rvaca (the Press / Journal manager): left menu "Tools" › "Users XML Plugin"; "Export Users"

@@ -405,8 +405,11 @@ row's "Edit" (headed "Edit"), with "Save" and "Cancel" at its foot:
     window closes without a question. <sup>f</sup> <sup>td17</sup>
     - 30a. **Leaving the block window unsaved.** The block window's
       "Cancel" closes it at once, without a question, and stores nothing.
-      Its close control and Escape after a change to "Block Name" ask the
-      same question as the static page window. A change made only in
+      Its close control after a change to "Block Name" asks the same
+      question as the static page window, and so does Escape once that
+      box has been left; Escape with the caret still in the box closes the
+      window at once, with no question, and the typed name is lost
+      ⚠ [A21](#a21). A change made only in
       "Content" raises no question here either: the close control closes
       the window and the text is lost [A19](#a19). A press on the page
       beside the window, shaded while the window is open, acts as the
@@ -898,7 +901,7 @@ Left out of the scenarios above, by reason:
   - a static page listed by its primary-language title for a manager working in another language {OJS OMP} (Rule 10)
   - the static page window's line on a journal with more than one language under "UI", its address carrying "/en/" {OJS OMP} (Fields)
   - an item at "search" taking the header's "Search", "search/search" still opening the Search page (Rules 6, 6a)
-  - the block window's close control and Escape asking after a "Block Name" change (Rule 30a)
+  - the block window's close control asking after a "Block Name" change, and Escape asking once that box has been left (Rule 30a)
   - the browser's "Leave site?" question when another address is opened with a changed "Path", "Title" or "Block Name", or with "Show Name" ticked (Rule 30b)
   - a pasted or dropped picture stored as "mceclip{n}.png" (Rule 29c)
   - the Editor and the Production Editor on the Settings pages: the same items, plugins, static pages, blocks and "Sidebar" as the Journal Manager in scenarios 1 to 7 (Actors rows 1, 5, 6, 7)
@@ -2354,9 +2357,15 @@ traced (ui-library 51f9eaa1): the box sends the `change` event
 and `SideModalBody.vue`'s `DialogContent` (reka-ui) closes on
 `pointer-down-outside`, before the press on the shade moves the focus
 out of the box, so `containerCloseHandler()` finds no change recorded;
-a press on the close control takes the focus first. Not driven: Escape
-with the caret in the box, "Edit" of a saved block, and the static page
-window's "Path" and "Title".
+a press on the close control takes the focus first. Walked 2026-11-16
+by the issue report's script (OJS, OMP, OPS on `main` and
+`stable-3_5_0`, PKP's default test dataset, the manager `rvaca`):
+"u09n16c escape" typed in "Block Name" on "Add Block", the caret left
+in the box, then Escape: no question, the block window closed, the
+"Custom Block Manager" window open on "No custom blocks have been
+created."; "u09n16c close" typed the same way, then the window's back
+arrow: the question. Not driven: "Edit" of a saved block, and the
+static page window's "Path" and "Title".
 Issue report: [pkp-e2e#1056](https://github.com/jardakotesovec/pkp-e2e/issues/1056) ([docs/issues/U58-A15-component-window-outside-press-loses-name.md](../issues/U58-A15-component-window-outside-press-loses-name.md)).
 
 ## Reference — entry points & surfaces
