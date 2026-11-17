@@ -967,7 +967,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | On a press or preprint server, a member's masthead change ends in an "Error" and emails nobody | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A15](#a15) | Merging an account that opened a discussion fails without a message and leaves the account behind | 🐞 | high · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A16](#a16) | On "Add User", unticking "Generate Password" leaves "Notify User" greyed out, so no welcome email can be chosen | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A17](#a17) | After "Edit User" ends a role, the grid's row still lists it until the page is reloaded | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
+| [A17](#a17) | The Settings wizard's "Users" grid still lists a role the Site Administrator just removed | 🐞 | low | issues (claude), 2026-11-17 — re-verified |
 | [A19](#a19) | "Remove User" keeps a role that starts on a later date, and removing the user again fails | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A21](#a21) | Site Administrator's "Merge user" on another Site Administrator hangs on "Confirm" with no message | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [OPS1](#ops1) | On a French preprint server the "Roles" column prints raw codes for two roles | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
@@ -1168,16 +1168,18 @@ adds people by "Invite to a role" and does not have this window. Basis:
 probe, 2026-10-02. <sup>f-a16</sup>
 
 <a id="a17"></a>
-**A17 — The grid's row still lists a role just ended** · 🐞 · medium.
-On the Settings wizard's "Users" tab, the Site Administrator unticks
-"Author" and ticks "Reader" on "Edit User" and presses "OK". Both changes
-are saved and "User edited." shows, but the user's row, which the grid
-refreshes, lists both "Author" and "Reader" under "Roles" and keeps doing so.
-Only reloading the page shows "Reader" alone, and a reload made the
-moment the save ends can still list both. The Site Administrator is shown
-a role that has already ended as if it were current.
-Basis: probe, 2026-10-02. <sup>f-a17</sup>
-Report: refresh owed — pkp/pkp-lib#13552 (#13555 `main`, #13554 3.5) made `UserUserGroup::scopeWithActiveAndActiveInFuture()` accept a role with no start date, which retires A13, the report's other half; the `date_end >=` comparison this entry rests on is unchanged, so the report narrows to A17 (2026-11-13)
+**A17 — The Settings wizard's "Users" grid still lists a role the Site Administrator just removed** · 🐞 · low.
+On the "Users" tab of a journal's, press's or server's Settings wizard
+(Administration), the Site Administrator unticks a role on a user's
+"Edit User" and presses "OK". "User edited." shows, but the user's
+refreshed row can still list the removed role beside the others.
+Settings › Users & Roles, the users list managers work in every day,
+is not affected.
+Nothing is stored wrong: the role has ended, "Edit User" shows it
+unticked, and the row reads right after a reload. The row is wrong
+only when the grid's refresh comes in the same second as the save,
+which happened in five of seven tries.
+Basis: probe, 2026-11-17. <sup>f-a17</sup>
 
 <a id="a18"></a>
 **A18 — "Roles" goes by the end date, not by whether the role is held today** · ❓ · minor.
@@ -2200,6 +2202,13 @@ role whose `date_end >= now` at one-second precision, while
 own second, so the refresh after "OK", or a reload within that second,
 still lists the ended role; the Users & Roles list's `withActive`
 compares with `>` and does not.
+Re-walked 2026-11-17 by the issue report's script (OJS, OMP, OPS on
+`main` and `stable-3_5_0`, PKP's default test dataset, `admin`): the
+refreshed row listed the removed role whenever the grid's `fetch-row`
+answered in the second `endAssignments()` stamped as the role's
+`date_end` (`UserUserGroup::scopeWithActiveAndActiveInFuture()` keeps a
+`date_end >=` now), and read "Reader" when it came a second later; the
+report's guard test fails 3 of 3 on `main` and passes with the fix.
 Issue report: [pkp-e2e#450](https://github.com/jardakotesovec/pkp-e2e/issues/450) ([docs/issues/U53-A13-A17-users-grid-roles-admin-empty-ended-listed.md](../issues/U53-A13-A17-users-grid-roles-admin-empty-ended-listed.md)).
 
 <a id="fn-f-a18"></a>

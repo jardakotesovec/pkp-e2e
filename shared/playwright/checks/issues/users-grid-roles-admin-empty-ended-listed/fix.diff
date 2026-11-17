@@ -1,21 +1,24 @@
 --- a/lib/pkp/classes/userGroup/relationships/UserUserGroup.php
 +++ b/lib/pkp/classes/userGroup/relationships/UserUserGroup.php
-@@ -123,20 +123,17 @@
+@@ -123,23 +123,17 @@
              ->orderBy('user_user_groups.date_start', 'asc');
      }
  
 +    /**
-+     * The assignments that are active now or will start in the future: the union of
-+     * scopeWithActive() and scopeWithActiveInFuture(), so that an assignment without a start
-+     * date counts as started and one ended this second counts as ended, as everywhere else.
++     * The assignments that are active now or start in the future: scopeWithActive() or
++     * scopeWithActiveInFuture(), so that an assignment without a start date counts as started
++     * and one whose end is now counts as ended, as everywhere else.
 +     */
      public function scopeWithActiveAndActiveInFuture(Builder $query): Builder
      {
 -        $currentDateTime = Core::getCurrentDate();
--        return $query->whereNotNull('user_user_groups.date_start')
+-        return $query
 -            ->where(function ($q) use ($currentDateTime) {
 -                $q->where(function ($q) use ($currentDateTime) {
--                    $q->where('user_user_groups.date_start', '<=', $currentDateTime) // Active ones
+-                    $q->where(
+-                        fn ($q) => $q->whereNull('user_user_groups.date_start') // No start date means assigned before 3.5
+-                            ->orWhere('user_user_groups.date_start', '<=', $currentDateTime) // Active ones
+-                    )
 -                        ->where(function ($q) use ($currentDateTime) {
 -                            $q->whereNull('user_user_groups.date_end') // No end date means still active
 -                                ->orWhere('user_user_groups.date_end', '>=', $currentDateTime); // End date in the future
@@ -30,3 +33,26 @@
              ->orderBy('user_user_groups.date_start', 'asc');
      }
  }
+--- a/lib/pkp/tests/classes/userGroup/UserUserGroupTest.php
++++ b/lib/pkp/tests/classes/userGroup/UserUserGroupTest.php
+@@ -18,6 +18,7 @@
+ 
+ use Illuminate\Support\Facades\DB;
+ use PHPUnit\Framework\Attributes\CoversClass;
++use PKP\core\Core;
+ use PKP\tests\DatabaseTestCase;
+ use PKP\userGroup\relationships\UserUserGroup;
+ 
+@@ -56,9 +57,11 @@
+         $future = $insert('2999-01-01 00:00:00', null);
+         $ended = $insert('2000-01-01 00:00:00', '2001-01-01 00:00:00');
+         $endedNoStartDate = $insert(null, '2001-01-01 00:00:00');
++        // Ended by "Edit User" this second: Repo::userGroup()->endAssignments() stamps date_end with now
++        $endedNow = $insert('2000-01-01 00:00:00', Core::getCurrentDate());
+ 
+         $found = UserUserGroup::query()
+-            ->whereIn('user_user_group_id', [$noStartDate, $active, $future, $ended, $endedNoStartDate])
++            ->whereIn('user_user_group_id', [$noStartDate, $active, $future, $ended, $endedNoStartDate, $endedNow])
+             ->withActiveAndActiveInFuture()
+             ->pluck('user_user_group_id')
+             ->map(fn ($id) => (int) $id)
