@@ -277,8 +277,8 @@ menu entry and the journal's intake gates belong to *[Submission wizard](U21-sub
 
 Scenario 1 runs on the seeded journal as a ready account holding only the
 Author role, with scratch submissions; scenarios 2, 4 and 5 run on
-scratch journals of their own with throwaway accounts, and scenario 3 with a
-throwaway author, on the seeded journal where its issues are needed {OJS}
+scratch journals of their own with throwaway accounts, and scenario 3 with
+throwaway accounts, on the seeded journal where its issues are needed {OJS}
 and on a scratch journal otherwise. The accounts, the submissions' titles,
 the mail catcher's address and the tooling recipe are in each scenario's
 footnote.
@@ -310,6 +310,11 @@ footnote.
      holding only the Author role, signed in, opens it: an access-denied
      page reading "You don't currently have access to that stage of the
      workflow." (Rule 3).
+   - **The same link for an account without the Author role**: a Journal
+     Manager who does not author, signed in, opens it: an access-denied
+     page reading "You do not currently have sufficient privileges to view
+     the submission. Please edit your profile to ensure that you have been
+     granted the appropriate roles under "Register As"." (Rule 3).
    - **Control**: a signed-in account holding no Author role, a Journal
      Manager who does not author, types the list's address
      `{journal path}/dashboard/mySubmissions`: the access-denied page
@@ -357,8 +362,11 @@ footnote.
 
    Given: an account holding only the Author role with two published
    submissions, one declined at the Submission stage, one in Copyediting
-   {OJS OMP} and one scheduled into an issue {OJS}, beside another
-   author's submitted submission on the same journal. <sup>s3</sup>
+   {OJS OMP}, one scheduled into an issue {OJS} and one at Production
+   {OMP OPS}, beside another author's submitted submission on the same
+   journal, which on a press holds no categories {OMP}, and the press's
+   Press Manager (the preprint server's Preprint Server Manager)
+   {OMP OPS}. <sup>s3</sup>
 
    - **The sidebar's view entries**: walk them: each opens the list under
      that view's heading with its count, and the entry's badge carries the
@@ -381,13 +389,35 @@ footnote.
      submission's title (the footnote names the titles): the list narrows
      to that submission alone, and the heading count follows, "Published
      (1)" (Rule 5).
-   - **"Filters"**: press it: the panel offers the days-since-last-activity
-     filter and, only as Rule 5 allows, the section {OJS OPS},
-     categories and issue {OJS} filters (a press offers no series filter
-     [OMP1](#omp1)); "Assigned To Editor" ("Assigned to Moderator" on a
-     preprint server) is not among them (Rule 5).
+   - **"Filters"**: press it: on the journal, which has more than one
+     section, categories and issues, the panel offers the
+     days-since-last-activity, section, categories and issue filters
+     {OJS}; on the preprint server, which has one section and no
+     categories, the days-since-last-activity filter alone {OPS} (a
+     press: the next bullet). "Assigned To Editor" ("Assigned to
+     Moderator" on a preprint server) is not among them (Rule 5).
+   - **"Filters" on a press** {OMP}: the same panel offers "Days since last
+     activity" alone: no section, series, issue or categories filter
+     (Rule 5) [OMP1](#omp1).
    - **The author's mailbox**: no email has arrived through any of the
      above: the list sends nothing (Side effects).
+   - **The submission at Production** {OMP OPS}: under "Active
+     submissions" the author's submission at Production is listed with
+     the "Production" stage bubble (Rules 2, 4).
+   - **The Press Manager schedules it** {OMP OPS}: the Press Manager (on
+     a preprint server, the Preprint Server Manager) opens the
+     submission's workflow from the Dashboard, types 2030-01-01 in "Date
+     Published" on its
+     Catalog Entry page ("Date Posted" on its Preprint Entry page),
+     presses "Save", then presses "Publish" ("Post") and confirms in the
+     window that opens
+     ([Publish, schedule & versions](U49-publish-schedule-and-versions.md),
+     Rule 6).
+   - **"Scheduled for publication" after the future date** {OMP OPS}: the
+     author reloads My Submissions: the submission is listed under
+     "Scheduled for publication" with the "Scheduled" stage bubble and an
+     empty Editorial Activity cell, and "Active submissions" no longer
+     lists it (Rules 2, 10).
    - **Control**: the other author's submission is listed under none of
      the views, and searching its title on "Active submissions" finds no
      row (Actors row 2, Rule 5).
@@ -409,6 +439,12 @@ App-specific:
    - **"Revisions requested"**: the submission is listed here; its row's
      Editorial Activity cell reads "Revision requested" with "Submit
      revisions" (Rules 2, 7a).
+   - **The Stage bubble under review**: that row's bubble reads the review
+     stage with its round, "Review (Round 1)"; on a press "External Review
+     (Round 1)" or "Internal Review (Round 1)", by the review stage the
+     submission is in. The second submission's row under "Active
+     submissions" and, on a press, the further submission's row read the
+     same way (Rule 4).
    - **"Submit revisions"**: press it: the upload dialog opens directly,
      with three steps, "Upload File", "Review Details" and "Confirm", and
      no title of its own; upload a file (the footnote names it) through
@@ -429,8 +465,10 @@ App-specific:
    - **A confirmed open review**: on the journal whose default review type
      is Open, its editor confirms the submission's completed review ("Read
      Review" › "Mark as Complete"); the author's cell then reads "Review
-     update 1/1" with a "Reviewers assigned:" row of one avatar; the
-     avatar's popover names the reviewer and the review type (Rule 7b).
+     update 1/1" with a "Reviewers assigned:" row of one avatar (Rule 7b).
+   - **The avatar's popover**: open it: it names the reviewer and, in a
+     label of its own whose whole text is "Open", the review type, so the
+     reviewer's name alone does not satisfy it (Rule 7b).
    - **Control**: the delivered submission's row no longer offers "Submit
      revisions", which shows only while the round awaits the author's
      revisions (Rule 7a).
@@ -442,11 +480,12 @@ App-specific:
 
 5. **Landing for an account holding other roles too** {OJS OMP OPS}
 
-   Given: a scratch journal with three throwaway accounts holding two roles
-   each, Author and Reviewer {OJS OMP}, Author and Section Editor, and
-   Section Editor and Reviewer {OJS OMP}, a fourth holding only the Reader
-   role, a fifth only the Author role and a sixth no role in the journal,
-   each on the journal's login page. <sup>s5</sup>
+   Given: a scratch journal with four throwaway accounts holding two roles
+   each, Author and Reviewer {OJS OMP}, Author and Section Editor, Section
+   Editor and Reviewer {OJS OMP}, and Journal Manager and Author, a fifth
+   holding only the Reader role, a sixth only the Author role, with one
+   submitted submission, and a seventh no role in the journal, each on
+   the journal's login page. <sup>s5</sup>
 
    - **Author and Reviewer** {OJS OMP}: sign in: the browser lands on the
      reviewer dashboard, with the "My Submissions as Author" group still in
@@ -462,6 +501,11 @@ App-specific:
    - **No role in the journal**: sign in: the browser lands on the
      journal's home page (Rule 3). Open `{journal path}/submissions`: the
      access-denied page (Rule 3).
+   - **Journal Manager and Author, the old author-dashboard link**: sign
+     in, then open `{journal path}/authorDashboard/submission/{id}` with
+     the ID of the Author-only account's submission: the account's own My
+     Submissions opens with that submission's workflow panel open, though
+     the account is not its author (Rule 3).
    - **Control**: the Author-only account signs in: the browser lands on
      My Submissions (Rule 3).
 
@@ -472,26 +516,6 @@ App-specific:
 
 Left out of the scenarios above, by reason:
 
-- **Planned**:
-  - on a press or preprint server, a submission scheduled by a future
-    "Date Published" or "Date Posted" and then "Publish" or "Post": listed
-    under "Scheduled for publication" with the "Scheduled" bubble and an
-    empty Editorial Activity cell, and no longer under "Active
-    submissions" (Rule 2; replaces the retired A3) {OMP OPS} [report 2026-11-17]
-  - the old author-dashboard link followed by an account without the
-    Author role (the access-denied page reading "You do not currently have
-    sufficient privileges to view the submission…") and by a Journal
-    Manager who also holds Author (the panel opening on a submission they
-    are not the author of) (Rule 3) [sweep 2026-11-17]
-  - a row under review showing its round in the Stage bubble, "Review
-    (Round 1)" (Rule 4; scenario 4's rows, whose bubble the OJS suite does
-    not read) {OJS} [sweep 2026-11-17]
-  - on a press, scenario 3's "Filters" panel offering "Days since last
-    activity" alone, with no section, series or issue filter (Rule 5; the
-    OMP suite asserts only that the categories filter is absent) {OMP} [sweep 2026-11-17]
-  - on a press, scenario 4's avatar popover naming the review type "Open"
-    as its own text, apart from the reviewer's name (Rule 7b; the OMP
-    suite's check is met by the name alone) {OMP} [sweep 2026-11-17]
 - **Rarely met**:
   - a change someone else makes showing on the list only after a workflow
     panel closes or the page reloads, and not after pressing the open
@@ -1071,7 +1095,9 @@ one scratch submission from `POST scenarios/submission` (`submitted` at its
 default, no decisions: the Submission stage keeps the activity cell empty,
 Rule 7e; on OPS the preprint sits at Production, fn-d). The second author
 is `author.bea` (Author only); the control's Journal Manager is
-`manager.maya` (Journal Manager only, fn-a's manager-only probe).
+`manager.maya` (Journal Manager only, fn-a's manager-only probe), who also
+follows the old author-dashboard link as the account without the Author
+role.
 Addresses: the list `{journal path}/dashboard/mySubmissions`; the retired
 list address `{journal path}/submissions` (the suites reach the landing
 through it, since the sign-in fixture caches cookies at the site login and
@@ -1079,7 +1105,8 @@ asserts nothing about where sign-in lands); the old author-dashboard link
 `{journal path}/authorDashboard/submission/{id}`. Denial wording per fn-a
 (the address, "The current role does not have access to this operation.")
 and fn-c (the other author's link, "You don't currently have access to that
-stage of the workflow.").
+stage of the workflow."; the Journal Manager's, "You do not currently have
+sufficient privileges to view the submission. …").
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** A scratch journal from `POST scenarios/context`
@@ -1115,19 +1142,28 @@ bubble "Declined" and an empty cell), on OJS and OMP one in Copyediting
 (`decisions: ['skipExternalReview']`, no copyedited file uploaded, hence
 "0"), and on OJS one scheduled into the unpublished issue Vol 2 No 1
 (2015) (`published: true` with that `issue`: fn-f, the row
-reading "To be published in issue Vol. 2 No. 1 (2015)"). The other
+reading "To be published in issue Vol. 2 No. 1 (2015)"), and on OMP and
+OPS one at Production, not published (on OMP
+`decisions: ['skipExternalReview', 'sendToProduction']`; on OPS a plain
+submitted seed, every preprint sitting at Production, fn-d). The other
 author's submission is one submitted by `author.alex` on `publicknowledge`
 or by a second throwaway author on the scratch context. Two published rows
 make the search step's narrowing observable ("Published (2)" → "Published
 (1)"); the titles carry the run's tag, the first published one being the
-search term. The empty view: "Revisions requested" on OJS and OMP, "Active
-submissions" on OPS. The Filters panel on `publicknowledge` (OJS) offers
-Section, Issues, Categories and "Days since last activity" (fn-j); a
-scratch context carries its one default section and no categories (no key
-seeds them), so on OMP and OPS the panel is expected to offer "Days since
-last activity" alone. The mail catcher, Mailpit at
-`http://127.0.0.1:8025`, is read for the author's address before and after
-the walk.
+search term. The empty view: "Revisions requested" on OJS and OMP,
+"Scheduled for publication" on OPS (read before the scheduling leg; the
+submission at Production fills "Active submissions"). The Filters panel
+on `publicknowledge` (OJS) offers Section, Issues, Categories and "Days
+since last activity" (fn-j); a scratch context carries its one default
+section and no categories (the request seeds none), so on OMP and OPS the
+panel is expected to offer "Days since last activity" alone. The mail
+catcher, Mailpit at `http://127.0.0.1:8025`, is read for the author's
+address before and after the walk, before the scheduling leg. The
+scheduling leg runs on screen: a throwaway `manager` on the scratch
+context (Press Manager on OMP, Preprint Server Manager on OPS) saves
+2030-01-01 in "Date Published" (Catalog Entry, OMP) or "Date Posted"
+(Preprint Entry, OPS), then presses "Publish" / "Post" and confirms in the
+window (fn-b); the author's list is read after a reload (Rule 10).
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** {OJS OMP} A scratch journal from `POST
@@ -1151,15 +1187,22 @@ stamped from the context's default at assignment time (scenarios.md), which
 is why the open and the anonymous completed reviews sit on different
 journals. The uploaded file is a small text file named after the run's
 tag, walked through the shared three-step upload helper. Counter and
-popover wording per fn-h.
+popover wording per fn-h; stage bubbles per fn-d (OMP: the revision-request
+submission and the under-review one in External Review, the further one in
+Internal Review).
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** A scratch journal from `POST scenarios/context`
-with five throwaway accounts: `roles: ['author', 'externalReviewer']`,
+with six throwaway accounts: `roles: ['author', 'externalReviewer']`,
 `['author', 'sectionEditor']`, `['sectionEditor', 'externalReviewer']`,
-`['reader']` and `['author']` (the control); on OPS, which has no
-reviewer key, the `['author', 'sectionEditor']` account (its Section Editor
-is the Moderator group), the `['reader']` account and the control. The
+`['manager', 'author']`, `['reader']` and `['author']` (the control); on
+OPS, which has no reviewer key, the `['author', 'sectionEditor']` account
+(its Section Editor is the Moderator group), the `['manager', 'author']`
+account, the `['reader']` account and the control. The control holds one
+submission from `POST scenarios/submission` (`submitted` at its default),
+whose ID the `['manager', 'author']` account's old author-dashboard link
+`{journal path}/authorDashboard/submission/{id}` carries (forward per
+fn-c, 2026-11-17 probe). The
 account with no role in the journal is a throwaway minted with
 `roles: ['reader']` in a helper context from a second
 `POST scenarios/context` and never enrolled in the scratch journal (fn-c's
