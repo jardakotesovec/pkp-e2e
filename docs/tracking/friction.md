@@ -13,3 +13,4 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
+2026-11-17 · sync · PR review merge (VM s1, pkp-lib#13562) · after the developer rebased the app PRs, their e2e hooks ran the companion `13562` (279 commits behind `main`, carrying only a kept walk, no spec change) and went red on OJS and OMP in tests `main` had already accommodated for pkp-lib#13653; diagnosing it cost a log read, a local rerun and a line-number comparison · a companion that holds no spec or test change should not exist as a branch the hooks pick up (keep the walk on `main` at verdict time), or the hook should print "companion found, N commits behind main" when it picks one

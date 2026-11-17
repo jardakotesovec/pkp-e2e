@@ -27,6 +27,15 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
   the ten open regressions marked for it. The ore worktrees beside
   the slot clones went with the switch of 2026-11-12: each slot has
   `checkouts/ore/ojs` as a line (harness.md "The stable lines").
+- pkp/pkp-lib#13562 (I9707 maps `supportedDefaultSubmissionLocale`
+  by the first context only; the 3.5 repair migration) merged on
+  `main` (pkp-lib `91bc3cbb59`, ojs `86b993554f`) and `stable-3_5_0`
+  on 2026-11-17 with no `ore` PR. `ore` has the same I9707 block: the
+  `main` diffs (pkp-lib#13742, ojs#6041 without the pointer) applied
+  cleanly there on 2026-11-06 and read fixed with
+  `checks/sync/pkp-lib-13562/walk.js`. When an `ore` port lands, read
+  it as `=main`; until then `ore` carries the bug (asked of the
+  developer in the thread 2026-11-17).
 
 ## Read log
 
