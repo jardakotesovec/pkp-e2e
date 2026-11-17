@@ -250,6 +250,23 @@ test.describe('navigation menus & site chrome', () => {
         await expect(chrome.main).toBeVisible();
         await expect(chrome.breadcrumbs).toHaveCount(0);
 
+        // A narrow window: "Open Menu" shows the menus; "About" is a link
+        // with its list open under it; pressed, it opens "About the Journal",
+        // where "About" and "About the Journal" are both marked as the current
+        // page (Rules 15b, 15c, 16; A28).
+        const wideWindow = visitor.viewportSize();
+        await visitor.setViewportSize({width: 800, height: 900});
+        await chrome.goto();
+        await visitor.getByRole('button', {name: 'Open Menu', exact: true}).click();
+        const narrowAbout = chrome.primaryMenu.getByRole('link', {name: 'About', exact: true});
+        await expect(narrowAbout).toBeVisible();
+        await expect(chrome.submenu('primary', 'About')).toBeVisible();
+        await narrowAbout.click();
+        await expect(chrome.heading).toHaveText(whole('About the Journal'));
+        await expect(chrome.topLink('primary', 'About')).toHaveAttribute('aria-current', 'page');
+        await expect(chrome.submenuLink('primary', 'About', 'About the Journal')).toHaveAttribute('aria-current', 'page');
+        await visitor.setViewportSize(wideWindow);
+
         // The skip links, on "About the Journal": Tab shows each in turn;
         // Enter on "Skip to site footer", then Tab: the focus is in the
         // footer (Rule 22).
@@ -330,6 +347,16 @@ test.describe('navigation menus & site chrome', () => {
             seenUserLists.manager = await chrome.submenuLinks('user', top).allInnerTexts();
             await chrome.submenuLink('user', top, /^\s*Dashboard\b/).click();
             await expect(page).toHaveURL(/\/dashboard\/editorial/);
+            // In a narrow window the username is a link: after "Open Menu",
+            // pressed, it opens the Dashboard (Rule 16; A28).
+            const wideS2 = page.viewportSize();
+            await page.setViewportSize({width: 800, height: 900});
+            await chrome.goto();
+            await page.getByRole('button', {name: 'Open Menu', exact: true}).click();
+            await chrome.userMenu.getByRole('link', {name: /^manager\.maya\b/}).click();
+            await expect(page).toHaveURL(/\/dashboard\/editorial/);
+            await page.setViewportSize(wideS2);
+            await page.reload();
 
             // The editorial header: the first Tab shows the two skip links;
             // the journal's name at the left; the "i" icon, Tasks and the

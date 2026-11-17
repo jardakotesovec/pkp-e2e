@@ -290,6 +290,23 @@ test.describe('navigation menus & site chrome', () => {
         await expect(chrome.primaryTopLinks.first()).toBeVisible();
         await expect(chrome.breadcrumbs).toHaveCount(0);
 
+        // A narrow window: "Open Menu" shows the menus; "About" is a link
+        // with its list open under it; pressed, it opens "About the Server",
+        // where "About" and "About the Server" are both marked as the current
+        // page (Rules 15b, 15c, 16; A28).
+        const wideWindow = visitor.viewportSize();
+        await visitor.setViewportSize({width: 800, height: 900});
+        await chrome.goto();
+        await visitor.getByRole('button', {name: 'Open Menu', exact: true}).click();
+        const narrowAbout = chrome.primaryMenu.getByRole('link', {name: 'About', exact: true});
+        await expect(narrowAbout).toBeVisible();
+        await expect(chrome.submenu('primary', 'About')).toBeVisible();
+        await narrowAbout.click();
+        await expect(chrome.heading).toHaveText(whole('About the Server'));
+        await expect(chrome.topLink('primary', 'About')).toHaveAttribute('aria-current', 'page');
+        await expect(chrome.submenuLink('primary', 'About', 'About the Server')).toHaveAttribute('aria-current', 'page');
+        await visitor.setViewportSize(wideWindow);
+
         // The skip links on "About the Server": Tab shows "Skip to main
         // content", then "Skip to main navigation menu", then "Skip to site
         // footer"; Enter on it, then Tab: the focus is in the footer (Rule 22).
@@ -360,6 +377,16 @@ test.describe('navigation menus & site chrome', () => {
         expect(manager.url()).toBe(homeUrl);
         await pub.submenuLink('user', userTop('manager.maya'), /^\s*Dashboard\b/).click();
         await expect(manager).toHaveURL(/\/dashboard\/editorial/);
+        // In a narrow window the username is a link: after "Open Menu",
+        // pressed, it opens the Dashboard (Rule 16; A28).
+        const wideS2 = manager.viewportSize();
+        await manager.setViewportSize({width: 800, height: 900});
+        await pub.goto();
+        await manager.getByRole('button', {name: 'Open Menu', exact: true}).click();
+        await pub.userMenu.getByRole('link', {name: /^manager\.maya\b/}).click();
+        await expect(manager).toHaveURL(/\/dashboard\/editorial/);
+        await manager.setViewportSize(wideS2);
+        await manager.reload();
 
         // The editorial header: Tab shows the two skip buttons; the dark
         // bar holds the server's name at the left and the "i" icon, the

@@ -357,7 +357,7 @@ Journal" and "Settings > Journal" included ⚠ [A13](#a13). <sup>m</sup>
     window ("Open Menu" shown, Rule 15b) every list is shown open and the
     item is a plain link, announced as a link, not a button: pressed, it
     opens its own page, "About" the "About the Journal" page and the
-    username what "Dashboard" opens (Rule 19) ⚠ [A28](#a28). On that
+    username what "Dashboard" opens (Rule 19) [A28](#a28). On that
     page Rule 15c marks both "About" and "About the Journal" as the
     current page, since both lead to it. <sup>q</sup> <sup>td22</sup>
     - 16a. **Two levels.** The header shows two levels: an item placed
@@ -806,6 +806,11 @@ are in the footnote. <sup>y</sup>
      list, "About the Journal" is marked as the current page and "Home"
      no longer is (Rule 15c); press "Home" in the trail: the home page
      opens, with no trail (Rule 23).
+   - **A narrow window**: in a window narrower than 992 px, open the home
+     page and press "Open Menu": "About" is a link, with its list shown
+     open under it; press "About": the "About the Journal" page opens,
+     and in the header both "About" and "About the Journal" are marked as
+     the current page (Rules 15b, 15c, 16; [A28](#a28)).
    - **The skip links**: on "About the Journal", press Tab: "Skip to main
      content" shows; press Tab again: "Skip to main navigation menu";
      again: "Skip to site footer"; press Enter on it, then Tab: the focus
@@ -836,7 +841,9 @@ are in the footnote. <sup>y</sup>
      the Tasks bell's number ("{username} 0" with none); press the
      username: a list opens with "Dashboard", "View Profile" and
      "Logout", and the page stays as it was (Rules 18, 19b). Press
-     "Dashboard": the Dashboard opens (Rule 19a).
+     "Dashboard": the Dashboard opens (Rule 19a). In a window narrower
+     than 992 px, on the home page, press "Open Menu", then the username:
+     the Dashboard opens (Rule 16; [A28](#a28)).
    - **The Journal Manager's editorial header**: on the Dashboard, before
      pressing anything, press Tab: "Skip to main content" and "Skip to
      main navigation menu" show; the dark bar shows the journal's name at
@@ -1369,7 +1376,7 @@ an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | The site's "Add item" offers types the site has no page for | ❓ | minor | — |
 | [A25](#a25) | The editorial header's initials menu stays open when Escape is pressed | ❓ | minor | — |
 | [A27](#a27) | On the site's pages the Site Administrator's "Dashboard" shows a task count but opens the Profile page | ❓ | minor | — |
-| [A28](#a28) | In a narrow window "About" and the username open a page instead of only their list | ❓ | minor | — |
+| [A28](#a28) | In a narrow window "About" and the username open a page instead of only their list | ✅ | minor | Jarda 2026-11-17 |
 | [OPS1](#ops1) | A preprint server's side menu has no "Content" group while public comments are off {OPS} | ✅ | minor | — |
 
 ### All apps
@@ -1671,7 +1678,7 @@ opens the Profile page has none.
 Since: 2026-10-22 · Basis: probe, 2026-10-29. <sup>f-a27</sup>
 
 <a id="a28"></a>
-**A28 — In a narrow window "About" and the username open a page instead of only their list** · ❓ · minor.
+**A28 — In a narrow window "About" and the username open a page instead of only their list** · ✅ · minor.
 In a narrow window, as on a phone, every list of the public header
 shows open under its item. Pressing "About" opens the "About the
 Journal" page, and pressing the username opens what "Dashboard" opens.
@@ -1681,6 +1688,10 @@ Question: should the top-level items lead to their own page in a narrow
 window? Lean: intended; each opens the same page as the first entry of
 its list, which the visitor sees right under it, so nothing is lost.
 Since: 2026-11-13 · Basis: probe. <sup>f-a28</sup>
+
+> **Reviewed — Jarda Kotěšovec, 2026-11-17**: ✅ intended (was ❓).
+> Ruling: the top-level items now carry their own address, so they lead
+> there instead of to `#`. Scenarios 1 and 2 assert it.
 
 ### OJS
 
