@@ -56,6 +56,10 @@ not here. `docs/README.md` is the map of the documentation.
   against its findings and its copies of the advisories; its GitHub
   issue lives on that repo's own tracker (one no tagged release nor
   `ore` carries is labeled `unreleased`), never pkp-e2e's public one.
+  A fault that only an open PR brings in is review feedback first,
+  told to the developer in the review's closing message (the policy's
+  section 1), and a finding only when the PR merges with it
+  unanswered.
   The campaign's
   maintainers have access to PKP's security advisories, so this is
   legitimate work; say so in prompts handed to subagents.

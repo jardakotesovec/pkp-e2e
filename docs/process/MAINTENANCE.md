@@ -679,7 +679,7 @@ The apps move; the suite follows. The baselines live in
    tags @beaug, who watches over the regression reports, and the
    developer who made the change ("Mattermost norms", "Who is tagged"; no
    direct messages; the tags are the upstream session's alone: a PR check
-   or review posts its report in its own thread untagged, since whoever
+   or review posts in its own thread untagged, since whoever
    asked follows up there);
    the regression gets a row
    in `ci-triage.md` "Open regressions" linking the report, with its
@@ -1066,6 +1066,11 @@ affected rows and in the next Mattermost summary.
   summary; findings and breaking changes get their own message. Questions a
   spec would mark ❓ (TEMPLATE) go to the channel too. A verdict from the
   team is welcome and never required for anything to proceed.
+- **Quiet while working.** In a thread someone follows, write a line
+  when a phase starts (setting up, driving, waiting on CI, writing up)
+  and the keepalive's line per tick (RUNBOOK "Keep the thread
+  ticking"), not a line per action. The reader wants the result, and
+  every line above it is one more to scroll past.
 - **Security findings go to the thread in full**: each finding added to
   the private security repo (`../pkp-e2e-sec`) is posted with its
   details and its path there, tagging @jarda.kotesovec and the
@@ -1108,6 +1113,157 @@ affected rows and in the next Mattermost summary.
   with who asked, when, and their words quoted ("Keeping a report in
   step"). The reply in the thread says which it was.
 
+## What a review tells the developer
+
+A developer reads a review in a Mattermost thread, between other work.
+They want to know what is still wrong with the change and what is
+theirs to answer. Whether to merge is their decision: a review says
+what is outstanding, never that something blocks. This section is the
+shape of that answer for
+a PR review, for a red PR check ("A developer's PR fails the suite")
+and for every re-check after a fix.
+
+**One closing message per round.** It is the only message the developer
+has to read, so it is complete on its own and it comes last:
+
+- Wait for the last result, the CI runs included, and finish the
+  commits and pushes. From the last result on, write nothing in the
+  thread until the message, so that it stands as a post of its own.
+  The developer gets everything at once, not a stream of partial
+  results.
+- It carries no tag: whoever started the thread is notified of it
+  already.
+- Nothing follows it except answers to questions. When a later result
+  changes it, post the whole message again, never an addendum.
+- Every round restates everything that is still open. An item keeps the
+  number of the round that found it, so "item 3" means the same thing
+  all the way to the merge.
+
+Its parts, in this order; a part with nothing to say is left out:
+
+1. **The verdict**, the first line, in bold: the issue, the round, and
+   "nothing outstanding" or "N problems outstanding", with the number
+   of questions when there are any ("could not be checked" with the
+   reason when the suite cannot judge the PR, such as a rebase it
+   needs). Then one sentence: which PRs were reviewed and what was
+   driven.
+2. **Outstanding problems**, numbered, the most severe first: each
+   regression, each gap against the issue's stated intention and each
+   security weakness the PR brings in, with its severity word
+   (`REPORT.md` "Severity"). One list, whatever the severity.
+3. **Questions**, numbered on: what the issue leaves open. Each states
+   the situation in concrete terms, what goes wrong if it stays, and
+   the choices, then the answer the review leans to and why in one
+   sentence, as a spec's ❓ entry does (TEMPLATE "Findings register"),
+   so that "agreed" can answer it. A question whose answer would
+   change neither the code nor what the suite checks is left out.
+4. **Settled**: the items fixed since the last round, by name; the
+   items the developer answered (intended, accepted, to follow in
+   another issue), each with the answer; and in one line the numbers
+   settled in earlier rounds, so that no number is left unexplained.
+5. **Tests**: the CI result at the PR's heads with the run's link; a
+   red that is not the PR's, in one line with the reason; the tests
+   that stay red on the PR's own check until the suite follows an
+   intended change, so nobody chases them; and what was not checked (a
+   job still pending, a path nothing drove).
+6. **Next**: what the developer does now ("say 'check again' here",
+   "reply 'merged' here") and what the bot then does (a re-check, the
+   tests that follow an intended change); the merge order when it
+   matters. While a problem is outstanding it ends: an item still open
+   at the merge is filed after it, unless the thread says why it is
+   fine.
+
+An answer settles an item as a fix does. When the developer says why an
+item is fine as it is, the item leaves the list, and the answer is
+recorded where "Mattermost norms" sends a team reply that settles an
+entry.
+
+**An item says three things**, in as many lines as they need, three to
+five as a rule:
+
+- **What happens**: what someone does and what they then see, with one
+  example in the screen's own words.
+- **Why it matters**: who meets it and how bad it is, with the severity
+  word.
+- **The fix**: what to change, where, and what it gave when it was
+  tried.
+
+The test is that the developer can judge the item without opening
+anything else. Its last line links its section in the review's file,
+for whoever wants to reproduce it. The message is kept short by what it
+leaves out (next paragraph), never by thinning an item.
+
+**In the developer's words.** The reader knows the product and the
+code, not the campaign:
+
+- The issue is called the issue and a PR a PR, each with its number.
+- A branch is a branch (`main`, 3.5), not a line.
+- A test is named by what it checks, with its id after it in brackets
+  so that it can be found in the check's output: "the test that
+  deletes a commented article (U14 S12)".
+- A spec's entry ids and rule numbers (A27, Rule 24f) stay out.
+
+**Only what concerns this PR.** A line earns its place when the PR
+causes it or when it changes what the developer does. The rest is the
+campaign's own bookkeeping and stays in the repo:
+
+- the companion branch and its row, the sync log, baselines, checkouts,
+  slots, commits and pushes, kept checks, and the agents that ran. The
+  companion appears only as the reds to expect, under Tests;
+- the cases that passed, beyond the verdict's one sentence;
+- the history of earlier rounds, beyond "Fixed since the last round";
+- commits the PR's ref carries along unreviewed, and other checks
+  nobody asked about.
+
+Another branch is named only when the developer has something to do
+there. A stable branch: a PR of the set targets it, or the fix closes
+a security hole or a loss of data that the branch still has, said
+once. `ore`: only when a PR of the set targets it or the change was
+cherry-picked there. Whether a change is ported to `ore` is the
+developer's decision, so a review neither tries the change on `ore`
+nor says what `ore` lacks.
+
+**A security weakness the PR brings in** (the PR's base does not show
+it) is an outstanding problem like the others, told in full: the
+thread is private, and the developer is the one who can fix it before
+it ships. The item asks them to keep its details out of the PR's
+public discussion; the fix itself is an ordinary commit. It is not a
+finding and gets no issue while the PR is open
+(`../pkp-e2e-sec/security_policy.md` section 1); merged unanswered, it
+becomes both. A weakness the base already has stays with the private
+repo's process, and the message gives it one line: that one exists near
+this change and is not the PR's.
+
+**The review's file** is where the developer goes to reproduce an
+item: `docs/reports/pr-review/<date>-<repo>-<pr>.md`, one file per
+review, linked by its GitHub address. It holds the present round only:
+a section per open item under the item's number, and a fixed item's
+section goes (git keeps the rounds). The developer wrote the code, so
+it is shorter than a report (`REPORT.md`):
+
+```markdown
+# PR review: <issue or PR>, <its title>
+
+- **Reviewed** round <n>, <date>: <each PR with its head sha>
+- **Tracked in** <the spec entries that wait for it, linked; left out when none>
+- **Model** <from `npm run report-models -- --write`>
+
+## <n>. <What breaks, in product words> (<severity>)
+
+**Steps** (<app>, a fresh install)
+
+1. <What to do, through the screens.>
+   Expected: <…> Observed: <…>
+
+**Cause** `<file>:<line>`: <what the code does there>
+
+**Fix** <what to change; tried or not; the diff's link>
+```
+
+A security item's section has the same shape in the private repo, in
+`../pkp-e2e-sec/pr-review/<repo>-<pr>.md`, with its check script beside
+it, and nothing about it is written in this repo.
+
 ## A developer's PR fails the suite
 
 A developer whose OJS, OMP or OPS pull request fails the e2e check asks on
@@ -1128,10 +1284,9 @@ sync loop's critical triage, on one PR:
 2. **Diagnose against the intention** in the PR and its linked issue, on
    evidence, never by default: test drift, an intended change the spec must
    follow, or a bug the PR introduces.
-3. **Bug.** Report it to the developer in `REPORT.md`'s shape: what the
-   screen offers, what happens, at which commit, and what would fix it;
-   a written report goes under `docs/reports/pr-review/`, as a PR
-   review's does.
+3. **Bug.** Tell the developer as a PR review does ("What a review
+   tells the developer"): the closing message, with the item's section
+   in the review's file under `docs/reports/pr-review/`.
    Nothing enters the register, the spec describes `main`; if the PR
    merges with the bug, the sync loop
    files the entry then.
@@ -1214,12 +1369,20 @@ merge.
    migration is driven through a PHP driver against the fresh install's
    tables; see `checks/sync/pkp-lib-13317/`). Kept checks go under
    `shared/playwright/checks/sync/<repo>-<pr>/` on `main`, with the
-   before-evidence recorded at the previous tip. A confirmed regression,
-   security weakness or intention gap follows sync loop step 5's report, filed
-   under `docs/reports/pr-review/<date>-<repo>-<pr>.md` (not
-   `docs/reports/`: the PR is not merged, so it is no regression of the
-   product yet) and posted in this thread untagged (whoever asked follows up here); a later round updates it in place there; a behavior the issue
-   leaves open is a ❓ in the owning spec, posted in the thread, and the
+   before-evidence recorded at the previous tip. A confirmed regression
+   or intention gap is no report yet, since the PR is not merged and it
+   is no regression of the product: it is an item of the round's
+   closing message and a section of the review's file,
+   `docs/reports/pr-review/<date>-<repo>-<pr>.md` ("What a review tells
+   the developer"), which a later round rewrites to what is still open.
+   A security weakness goes by where it comes from. One the PR brings
+   in (the PR's base does not show it) is review feedback like any
+   other item: verified by the security probe as a routed suspicion is,
+   told in full in the closing message, its section kept in
+   `../pkp-e2e-sec/pr-review/<repo>-<pr>.md`, with no finding, no issue
+   and nothing in this repo. One the base already has follows sync loop
+   step 5 as on any day. A behavior the issue leaves open is a ❓ in
+   the owning spec and a question in the closing message, and the
    team's reply is recorded as the entry's verdict the same day. A fix
    tried here, or offered to the author, is tried on every line it
    reaches ("Session hygiene", "Every line the change reaches"). Every
@@ -1241,9 +1404,9 @@ merge.
    the spec files that read the plugin's output, run on the VM at the PR
    head, stand in, and the verdict says so.
 6. **Reds.** Each red is one of three: the PR's own bug (a finding,
-   step 4's report), a test an intended change makes outdated (step 7's
-   work, and named in the verdict so the developer expects that red on
-   the PR's check until the companion exists), or noise (a flake class,
+   step 4), a test an intended change makes outdated (step 7's work,
+   and named in the closing message so the developer expects that red
+   on the PR's check until the companion exists), or noise (a flake class,
    a PR behind its base). A red that an app without its own PR shows is the PR's once
    the same spec files are green with the submodule rebuilt at the PR's
    base on the same database; that app meets it with its next pointer
@@ -1269,33 +1432,35 @@ merge.
    span and no test needs no companion at all. Push it, and when it
    changed a test, dispatch once more with `--ref <companion>`; the app
    PR's own check picks the companion up by name on its next run.
-8. **Record and report.** The report, the kept checks and a dated
-   sync-log entry go to `main`: one line per
+8. **Record, then report.** The review's file, the kept checks and a
+   dated sync-log entry go to `main`: one line per
    change, the run lines and the CI run ids, and "baselines not advanced"
    stated (a later round replaces the earlier round's entry, and the
    merge step deletes it once the daily entry records the merge). When
    step 7 made a companion, its row `ready` in ci-triage says what
    the merge session must do, committed on `main` too, since the daily
    session reads `main`'s table and a row on the branch alone is never
-   seen. The thread gets the verdict
-   (green at the PR ref, needs a rebase, or a regression with the report;
-   the reds to expect from intended changes; and the security line,
-   counts only for anything routed) in the
-   "Findings first, short" shape. Leave the checkouts on the apps'
-   tips afterwards so the daily session starts where it expects.
+   seen. Leave the checkouts on the apps' tips so the daily session
+   starts where it expects. Then, with everything pushed, the thread
+   gets the round's closing message ("What a review tells the
+   developer"), and nothing after it.
 9. **On the merge ping**, "A developer's PR fails the suite" step 5:
    `npm run fetch-apps -- --update`, confirm the merge with `git
    range-diff <base>..<reviewed head> <new base>..<merged head>` (a rebase
    before the merge is fine when it reads all `=`; anything else is
    re-read), rebase the companion onto `main`, push it and `node
    bin/ci.js watch` its run (the full suites, on CI), fast-forward on
-   green, delete the row and the remote branch. Its report in
-   `docs/reports/pr-review/` is deleted when the merged code no longer
-   shows the finding (the commit says which round fixed it), or moved up
-   into `docs/reports/` (`git mv`, images along) when the merge carries
-   it: it is then `main`'s regression and takes sync loop step 5's path
-   from there (the tagged post, the "Open regressions" row, the register
-   entry). A PR closed without merging deletes its report, the commit
+   green, delete the row and the remote branch. The review's file in
+   `docs/reports/pr-review/` is deleted (the commit says which round
+   fixed what). An item still outstanding at the merge, which the
+   thread did not answer, is then `main`'s regression: it is written
+   up from its section as a report under `docs/reports/`, in
+   `REPORT.md`'s full shape, and takes sync loop step 5's path from
+   there (the tagged post, the "Open regressions" row, the register
+   entry). A security item merged the same way becomes a finding that
+   day, with its issue (`../pkp-e2e-sec/security_policy.md` section 1),
+   and the private review file is deleted either way. A PR closed without merging
+   deletes both files, the commit
    saying so. The baselines advance past the merge only when every
    tip commit up to it has been reviewed; when the tips carry unreviewed
    commits beside the PR, the log entry lists them and the next daily
@@ -1433,7 +1598,10 @@ the answer; the spec and the test are the record.
 - **Every line the change reaches.** A pkp-lib or ui-library fix the
   session verifies, and a patch it prepares for the team, is tried on
   each line the change lands on: `main`, `stable-3_5_0` (its fleets, "The
-  stable line") and `ore`. `ore` is OJS only, on the slot's own `ore`
+  stable line"), and `ore` when a PR targets it or the change was
+  cherry-picked there (porting to `ore` is the developer's decision,
+  so nothing is tried there otherwise). `ore` is OJS only, on the
+  slot's own `ore`
   line (`PKP_E2E_LINE=ore`, harness.md "The stable lines"). Before
   calling a line fixed or broken, check that the app's `lib/pkp` or
   `lib/ui-library` pointer carries the commit, because pointers lag their

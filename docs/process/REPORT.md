@@ -10,12 +10,13 @@ under `docs/reports/` as `<date>-<repo>-<pr>.md` (or
 team the same day, and is deleted once the team has acted on it; the
 tracking row or the register footnote keeps the pointer (RUNBOOK "What
 goes where"). A finding in a PR that is not merged yet (a PR review's,
-or a developer's PR that fails the suite) lives apart, under
-`docs/reports/pr-review/` with the same name, since it is not in the
-product yet and the weekly regression count leaves it out; at the merge
-it is deleted when the PR's last round fixed it, or moved up into
-`docs/reports/` when the merge carries it (MAINTENANCE "PR review" step
-9). An **issue report** is the backlog kind: a defect in a
+or a developer's PR that fails the suite) is not a report yet: it is
+not in the product, the weekly regression count leaves it out, and its
+reader wrote the code. It is a section of the review's file under
+`docs/reports/pr-review/`, in the shorter shape of MAINTENANCE "What a
+review tells the developer". At the merge that file is deleted, and an
+item the merge carries is written up as a report here (MAINTENANCE "PR
+review" step 9). An **issue report** is the backlog kind: a defect in a
 spec's register, written up under `docs/issues/` by the housekeeping
 session (MAINTENANCE "Issue reports"), filed as a GitHub issue on pkp-e2e
 ("As a GitHub issue" below) and deleted when the issue closes. Research write-ups (a performance round, a

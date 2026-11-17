@@ -60,8 +60,9 @@ history.
 - `docs/tracking/UNASSIGNED.md` and `docs/tracking/atlas/`: the inventory
   of every screen and action in the apps, and the leftovers no spec claims.
 - `docs/reports/`: regression and defect write-ups handed to the team,
-  deleted once acted on. `docs/reports/pr-review/` holds the ones found
-  in PRs not merged yet, until the merge deletes them or moves them up;
+  deleted once acted on. `docs/reports/pr-review/` holds one shorter
+  file per PR review, for what was found in PRs not merged yet; the
+  merge deletes it, and what the merge carries becomes a report;
   `docs/reports/ore/` the ones only `ore` shows.
 - `docs/issues/`: the specs' defects written up for the team, one file
   per GitHub issue on pkp-e2e, kept in step with its register entries
