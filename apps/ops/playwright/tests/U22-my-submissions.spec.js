@@ -11,15 +11,19 @@
  * Spec: docs/specs/U22-my-submissions.md
  *
  * Deliberately NOT covered (Findings register IDs): OPS2 🐞, A7 🐞, A8 🐞,
- * OPS1 ❓, A1 ❓, A2 ❓, A3 ❓, A4 ❓, A5 ❓, OMP1 ❓. The spec's Coverage
- * section records everything else left out.
+ * OPS1 ❓, A1 ❓, A2 ❓, A4 ❓, A5 ❓, OMP1 ❓. The spec's Coverage section
+ * records everything else left out.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1 and the absence test ride author.alex's own rows in
  * publicknowledge, scoped by tag search (S1 signs author.bea and
- * manager.maya in through the fixture for its two denial legs); S2, S3 and
- * S5 isolate on scratch preprint servers with throwaway accounts (sidebar
- * badge counts and landings need a list only the test controls). S2 seeds
+ * manager.maya in through the fixture for its denial legs: the old
+ * author-dashboard link for both, the list's address for the manager);
+ * S2, S3 and S5 isolate on scratch preprint servers with throwaway
+ * accounts (sidebar badge counts and landings need a list only the test
+ * controls). S3's scheduling leg is on screen: the scratch server's
+ * throwaway Preprint Server Manager saves a future "Date Posted" on the
+ * preprint's "Preprint entry" page and posts it (fn-s3). S2 seeds
  * its resume step through the wizard's own "Save for Later" (spec fn-s2:
  * the wizard resumes only at a SAVED step, and the scenario API has no
  * saved-step key). The sign-in fixture caches cookies at the site login and
@@ -50,6 +54,14 @@ const {
 // A fresh, unshared context signed in on a server's own login page (the
 // sign-in fixture caches its sessions at the site login).
 const {freshLogin} = require('../pages/LoginSessionsPages.js');
+// The Preprint entry page's "Date Posted" and the "Post" window (S3's
+// scheduling leg).
+const {
+    PublicationScreen,
+    saveDatePosted,
+    postPreprint,
+    statusReadout,
+} = require('../pages/PublicationPages.js');
 
 const SERVER = 'publicknowledge';
 const DAYS_FILTER = 'Days since last activity';
@@ -144,11 +156,21 @@ test.describe('my submissions', () => {
         await expect(beaSub.workflowNavEntry()).toHaveCount(0);
         await expect(beaPage.getByRole('dialog')).toHaveCount(0);
 
-        // Control: a Preprint Server Manager who does not author types the
-        // list's address: the access-denied page, no list, no sidebar
-        // (Actors row 1; the author's list above is the positive control).
+        // The same link for an account without the Author role: a Preprint
+        // Server Manager who does not author gets the access-denied page
+        // naming the missing role, and no workflow panel (Rule 3, fn-c; the
+        // owner's open panel above is the positive control).
         const managerPage = await (await asUser('manager.maya')).newPage();
         const managerSub = new MySubmissionsPage(managerPage, SERVER);
+        await managerSub.gotoOldAuthorDashboardLink(submissionId);
+        await expect(managerSub.authorRoleMissingDenied()).toBeVisible({timeout: 30_000});
+        await expect(managerSub.workflowAccessDenied()).toHaveCount(0);
+        await expect(managerSub.workflowNavEntry()).toHaveCount(0);
+        await expect(managerPage.getByRole('dialog')).toHaveCount(0);
+
+        // Control: the same Preprint Server Manager types the list's
+        // address: the access-denied page, no list, no sidebar (Actors row
+        // 1; the author's list above is the positive control).
         await managerPage.goto(managerSub.url());
         await expect(managerSub.accessDenied()).toBeVisible({timeout: 30_000});
         await expect(managerPage.getByRole('heading', {name: /^Active submissions/})).toHaveCount(0);
@@ -294,19 +316,24 @@ test.describe('my submissions', () => {
         test.slow();
         const tag = makeTag('s3', testInfo);
         // A scratch preprint server (badge counts need a list only this test
-        // feeds) with a throwaway author: two posted preprints and one
-        // declined (the decline is the whole OPS decision roster's negative
-        // outcome; continuous posting needs no issue), beside a second
-        // throwaway author's submitted preprint as the control (fn-s3). The
-        // Copyediting and issue-scheduled rows are {OJS OMP} / {OJS}.
+        // feeds) with a throwaway author: two posted preprints, one declined
+        // (the decline is the whole OPS decision roster's negative outcome;
+        // continuous posting needs no issue) and one at Production, not
+        // posted (a plain submitted seed: every preprint sits at
+        // Production, fn-d), beside a second throwaway author's submitted
+        // preprint as the control and the server's throwaway Preprint
+        // Server Manager for the scheduling leg (fn-s3). The Copyediting
+        // and issue-scheduled rows are {OJS OMP} / {OJS}.
         const author = `${tag}au`;
         const mailTo = `${author}@mail.test`;
         const other = `${tag}bu`;
+        const manager = `${tag}mg`;
         await opsApi.createContext({
             tag,
             users: [
                 user(author, 'Vera', 'Views', ['author']),
                 user(other, 'Otto', 'Other', ['author']),
+                user(manager, 'Mona', 'Manager', ['manager']),
             ],
         });
         await opsApi.createSubmission({
@@ -318,6 +345,10 @@ test.describe('my submissions', () => {
         await opsApi.createSubmission({
             tag, context: tag, submitter: author, title: `decl${tag}`,
             decisions: ['decline'],
+        });
+        const prodTitle = `prod${tag}`;
+        await opsApi.createSubmission({
+            tag, context: tag, submitter: author, title: prodTitle,
         });
         const otherTitle = `other${tag}`;
         await opsApi.createSubmission({
@@ -336,7 +367,7 @@ test.describe('my submissions', () => {
         // other author's preprint is absent, read once the view's own rows
         // (or its "No Items") are on screen (Actors row 2).
         const views = [
-            ['Active submissions', 0, null],
+            ['Active submissions', 1, prodTitle],
             ['Scheduled for publication', 0, null],
             ['Published', 2, `puba${tag}`],
             ['Declined', 1, `decl${tag}`],
@@ -371,9 +402,11 @@ test.describe('my submissions', () => {
         await expect(mySub.activityCell(declRow)).toHaveText(/^\s*$/);
 
         // A view holding nothing shows "No Items" (Rule 4; fn-s3 names
-        // "Active submissions" on a preprint server after this seeding).
-        await mySub.openView('Active submissions');
-        await mySub.expectViewHeading('Active submissions', 0);
+        // "Scheduled for publication" on a preprint server, read before the
+        // scheduling leg: the preprint at Production fills "Active
+        // submissions").
+        await mySub.openView('Scheduled for publication');
+        await mySub.expectViewHeading('Scheduled for publication', 0);
         await expect(mySub.emptyState()).toBeVisible();
 
         // Search narrows the current view to the typed title; the heading
@@ -405,14 +438,62 @@ test.describe('my submissions', () => {
         await mySub.closeFilters();
 
         // The author's mailbox: nothing arrived through any of the above
-        // (Side effects): the count is the one taken before the walk.
+        // (Side effects): the count is the one taken before the walk, read
+        // before the scheduling leg (fn-s3).
         expect(await pkpMail.count({to: mailTo})).toBe(mailBefore);
+
+        // The submission at Production: under "Active submissions" the
+        // author's unposted preprint is listed with the "Production" stage
+        // bubble (Rules 2, 4).
+        await mySub.openView('Active submissions');
+        await mySub.expectViewHeading('Active submissions', 1);
+        const prodRow = mySub.row(prodTitle);
+        await expect(prodRow).toBeVisible({timeout: 30_000});
+        await expect(mySub.stageCell(prodRow)).toHaveText(/^\s*Production\s*$/);
+
+        // The Preprint Server Manager schedules it: from the Dashboard's
+        // "Active submissions" the preprint's workflow opens through its
+        // row's "View"; on its "Preprint entry" page "Date Posted" gets
+        // 2030-01-01 and "Save", then "Post" and the window's "Post"
+        // (fn-s3, Rule 6 of Publish, schedule & versions): the header then
+        // reads "Status: Scheduled" with "Unschedule" offered.
+        const managerPage = await (await asUser(manager)).newPage();
+        const dash = new EditorialDashboardPage(managerPage, tag);
+        await dash.gotoView('active');
+        const dashRow = await dash.findRowByTag(prodTitle);
+        await dash.viewButton(dashRow).click();
+        await dash.expectWorkflowOpen();
+        const screen = new PublicationScreen(managerPage);
+        await screen.openPage('Preprint entry');
+        await saveDatePosted(screen, '2030-01-01');
+        await postPreprint(managerPage, {after: 'Unschedule'});
+        await expect(statusReadout(managerPage)).toContainText('Scheduled', {timeout: 30_000});
+
+        // "Scheduled for publication" after the future date: the author
+        // reloads My Submissions; the preprint is listed there with the
+        // "Scheduled" stage bubble and an empty Editorial Activity cell, and
+        // "Active submissions" no longer lists it, its count down to 0
+        // (Rules 2, 10; the stage text is the positive control for the
+        // empty cell, the row's presence here for its absence there).
+        await page.reload();
+        await mySub.expectViewHeading('Active submissions');
+        await mySub.openView('Scheduled for publication');
+        await mySub.expectViewHeading('Scheduled for publication', 1);
+        await mySub.expectViewCount('Scheduled for publication', 1);
+        const schedRow = mySub.row(prodTitle);
+        await expect(schedRow).toBeVisible({timeout: 30_000});
+        await expect(mySub.stageCell(schedRow)).toHaveText(/^\s*Scheduled\s*$/);
+        await expect(mySub.activityCell(schedRow)).toHaveText(/^\s*$/);
+        await mySub.openView('Active submissions');
+        await mySub.expectViewHeading('Active submissions', 0);
+        await mySub.expectViewCount('Active submissions', 0);
+        await expect(mySub.emptyState()).toBeVisible({timeout: 30_000});
+        await expect(mySub.row(prodTitle)).toHaveCount(0);
 
         // Control: the other author's preprint is listed under none of the
         // views (the walk above), and searching its title on "Active
         // submissions" finds no row (Actors row 2, Rule 5; the search of the
         // author's own posted title above is the positive control).
-        await mySub.openView('Active submissions');
         await mySub.searchFor(otherTitle);
         await mySub.expectViewHeading('Active submissions', 0);
         await expect(mySub.emptyState()).toBeVisible({timeout: 30_000});
@@ -464,14 +545,16 @@ test.describe('my submissions', () => {
         test.slow();
         const tag = makeTag('s5', testInfo);
         const helperTag = makeTag('s5h', testInfo);
-        // A scratch preprint server with the one two-role account a
+        // A scratch preprint server with the two two-role accounts a
         // preprint server can hold — Author and Section Editor, OPS's
-        // `sectionEditor` key being the Moderator group — a Reader-only
-        // account and the author-only control; the account with no role in
+        // `sectionEditor` key being the Moderator group, and Preprint Server
+        // Manager and Author — a Reader-only account and the author-only
+        // control with one submitted preprint; the account with no role in
         // the server is minted with `reader` in a helper server and never
         // enrolled in this one (fn-s5; the two Reviewer combinations are
         // {OJS OMP}: OPS has no reviewer key).
         const authorModerator = `${tag}am`;
+        const managerAuthor = `${tag}ma`;
         const authorOnly = `${tag}ao`;
         const readerOnly = `${tag}rd`;
         const noRole = `${helperTag}nr`;
@@ -479,6 +562,7 @@ test.describe('my submissions', () => {
             tag,
             users: [
                 user(authorModerator, 'Abe', 'Authormod', ['author', 'sectionEditor']),
+                user(managerAuthor, 'Max', 'Managauth', ['manager', 'author']),
                 user(authorOnly, 'Ada', 'Authonly', ['author']),
                 user(readerOnly, 'Rhea', 'Readonly', ['reader']),
             ],
@@ -486,6 +570,10 @@ test.describe('my submissions', () => {
         await opsApi.createContext({
             tag: helperTag,
             users: [user(noRole, 'Nora', 'Norole', ['reader'])],
+        });
+        const controlTitle = `ctl${tag}`;
+        const control = await opsApi.createSubmission({
+            tag, context: tag, submitter: authorOnly, title: controlTitle,
         });
 
         // Author and Section Editor (Moderator): the browser lands on the
@@ -501,21 +589,49 @@ test.describe('my submissions', () => {
         await amDash.expectLanded(0);
         await expect(amSub.menuGroupLink()).toBeVisible();
 
+        // Preprint Server Manager and Author, the old author-dashboard link
+        // carrying the author-only control's preprint: the account's own My
+        // Submissions opens with that preprint's workflow panel open, though
+        // the account is not its author — no refusal of either kind (Rule 3,
+        // fn-c). Closed, the panel leaves the account's own list: "Active
+        // submissions (0)", the control's row not on it (the open panel
+        // naming the preprint is the positive control).
+        const maPage = await (await asUser(managerAuthor)).newPage();
+        const maSub = new MySubmissionsPage(maPage, tag);
+        await maSub.gotoOldAuthorDashboardLink(control.submissionId);
+        await maPage.waitForURL(
+            (url) =>
+                url.pathname.includes('/dashboard/mySubmissions') &&
+                url.searchParams.get('workflowSubmissionId') === String(control.submissionId),
+            {waitUntil: 'commit', timeout: 30_000}
+        );
+        await maSub.expectWorkflowOpen();
+        await expect(maSub.workflowDialog()).toContainText(controlTitle);
+        await expect(maSub.workflowAccessDenied()).toHaveCount(0);
+        await expect(maSub.authorRoleMissingDenied()).toHaveCount(0);
+        await expect(maSub.menuGroupLink()).toBeVisible();
+        await maSub.closeWorkflow();
+        await maSub.expectViewHeading('Active submissions', 0);
+        await expect(maSub.emptyState()).toBeVisible({timeout: 30_000});
+        await expect(maSub.row(controlTitle)).toHaveCount(0);
+
         // Control: the author-only account, signed in on the server's own
         // login page, lands on My Submissions, as in scenario 1 (Rule 3) —
         // its sidebar carries the author group and no "Editor Dashboard"
         // group (the two-role sidebar above is the positive control for
-        // that absence). The retired list address forwards it to the same
-        // list: the positive control for the two refusals below.
+        // that absence); its list holds its one preprint. The retired list
+        // address forwards it to the same list: the positive control for
+        // the two refusals below.
         const ao = await freshLogin(browser, baseURL, authorOnly, {contextPath: tag});
         try {
             const aoSub = new MySubmissionsPage(ao.page, tag);
             const aoDash = new EditorialDashboardPage(ao.page, tag);
-            await aoSub.expectLanded(0);
+            await aoSub.expectLanded(1);
+            await expect(aoSub.row(controlTitle)).toBeVisible({timeout: 30_000});
             await expect(aoDash.menuGroupLink()).toHaveCount(0);
             await expect(aoSub.sideNav()).not.toContainText('Editor Dashboard');
             await aoSub.gotoRetiredListAddress();
-            await aoSub.expectLanded(0);
+            await aoSub.expectLanded(1);
             await expect(aoSub.accessDenied()).toHaveCount(0);
         } finally {
             await ao.context.close();

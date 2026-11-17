@@ -50,6 +50,9 @@
  *   suggestion list (`keywordsField`, `typeKeywordForSuggestions`,
  *   `clearKeywordBox`; Rule 7b), each read bounded by the list's own
  *   `api/v1/vocabs` fetch.
+ * - Added 2026-11-17 (U22's revision): `saveDatePosted` ("Date Posted"
+ *   on "Preprint entry", saved) and `postPreprint`'s `after` option, for
+ *   the author list's scheduling leg.
  *
  * Labels are the live locale strings (ops + lib/pkp locale/en/*.po at the
  * pinned commits); DOM shapes from lib/ui-library WorkflowPublicationForm /
@@ -321,11 +324,13 @@ exports.PublicationScreen = class PublicationScreen {
  * modal wrapping the OPS PublishForm ("All requirements have been met. Are
  * you sure you want to post this?"), whose submit button reads "Post".
  * Bounded by the publish API answering OK and the header's "Unpost"
- * control appearing.
+ * control appearing ("Unschedule" for a future "Date Posted": pass
+ * `{after: 'Unschedule'}`, U22 S3).
  *
  * @param {import('@playwright/test').Page} page
+ * @param {{after?: string}} [options] the header control the post leaves
  */
-async function postPreprint(page) {
+async function postPreprint(page, {after = 'Unpost'} = {}) {
     const stageAction = page.getByRole('button', {
         name: 'Post the preprint',
         exact: true,
@@ -348,11 +353,33 @@ async function postPreprint(page) {
     await confirm.getByRole('button', {name: 'Post', exact: true}).last().click();
     await posted;
     await expect(
-        page.getByRole('button', {name: 'Unpost', exact: true})
+        page.getByRole('button', {name: after, exact: true})
     ).toBeVisible({timeout: 30_000});
 }
 
 exports.postPreprint = postPreprint;
+
+/**
+ * Type a date into "Date Posted" on the OPEN "Preprint entry" page and
+ * press its "Save" (the form is `issueEntry`; a future date is what
+ * schedules the preprint once posted — Publish, schedule & versions Rule
+ * 6; U22 S3). The field is read by its control id and its wrapper's label
+ * is checked, so a renamed field fails here rather than saving another.
+ *
+ * @param {PublicationScreen} screen the open workflow's publication screen
+ * @param {string} date YYYY-MM-DD
+ */
+async function saveDatePosted(screen, date) {
+    await expect(screen.fieldWrapper('issueEntry', 'datePublished')).toContainText('Date Posted', {
+        timeout: 30_000,
+    });
+    const input = screen.input('issueEntry', 'datePublished');
+    await expect(input).toBeVisible({timeout: 30_000});
+    await input.fill(date);
+    await screen.save();
+}
+
+exports.saveDatePosted = saveDatePosted;
 
 /**
  * Unpost the open workflow's posted preprint: a posted preprint's workflow

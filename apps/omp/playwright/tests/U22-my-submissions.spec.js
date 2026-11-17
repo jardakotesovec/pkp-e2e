@@ -6,13 +6,13 @@
  * docs/specs/U22-my-submissions.md). One test per canonical scenario the
  * spec runs on a press, in OMP vocabulary (press, monograph, series, Press
  * Manager, Series Editor): the common scenarios 1–3 and 5, and scenario 4
- * {OJS OMP} with its {OMP} bullet (the Internal Review round). OJS's
- * issue-scheduling feeder for "Scheduled for publication" has no press
- * analogue; S3 walks that view at zero and asserts nothing about why.
+ * {OJS OMP} with its {OMP} bullet (the Internal Review round). A press
+ * schedules by a future "Date Published" on the Catalog Entry page, which
+ * S3's Press Manager saves before "Publish" (U49 Rule 6).
  *
  * Not covered, by register ID (the spec's Coverage section is the record
- * of everything else left out): A1, A2, A3, A4, A5, A7, A8, OMP1, OPS1 and
- * OPS2.
+ * of everything else left out): A2, A4, A5, A7, A8, OPS1 and OPS2. A1 and
+ * OMP1 are read only as scenarios 4 and 3 state them.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S1 rides publicknowledge as author.alex (with author.bea
@@ -24,7 +24,8 @@
  * the scratch press's own login form in a fresh browser context (the
  * fixture's cached session is a site login, which decides no landing), the
  * no-role account minted in a second, helper press and never enrolled in
- * the first (fn-s5). Mailpit reads (S2, S3) are scoped by the throwaway
+ * the first (fn-s5); its Press Manager and Author account follows the old
+ * author-dashboard link to the control's monograph. Mailpit reads (S2, S3) are scoped by the throwaway
  * author's address (PRINCIPLES A8) and taken as a before/after count
  * settled by the scenario's own list read. Waits are event-based
  * (auto-wait on rows, headings, badges, dialogs and the landing URL) — no
@@ -32,6 +33,8 @@
  */
 const {test, expect} = require('../support/fixtures.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
+const {EditorialDashboardPage} = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
+const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const {
@@ -43,10 +46,14 @@ const {
     saveForLater,
 } = require('../pages/SubmissionWizardPages.js');
 const {completeStandaloneUploadWizard, oldAuthorDashboardUrl, openEditorial, confirmReviewAsEditor} = require('../pages/ReviewStagePages.js');
+const {saveCatalogEntryDatePublished, scheduleShownVersion} = require('../pages/PublicationPages.js');
 
 const PRESS = 'publicknowledge';
 const ROLE_DENIED = 'The current role does not have access to this operation.';
 const STAGE_DENIED = "You don't currently have access to that stage of the workflow.";
+const AUTHOR_ROLE_MISSING =
+    'You do not currently have sufficient privileges to view the submission. Please edit your profile ' +
+    'to ensure that you have been granted the appropriate roles under "Register As".';
 const DAYS_FILTER = 'Days since last activity';
 const EDITOR_FILTER = 'Assigned To Editor';
 const VIEWS = [
@@ -222,9 +229,22 @@ test.describe('My submissions (U22)', () => {
         await beaPage.goto(oldAuthorDashboardUrl(PRESS, submissionId));
         await expectAccessDenied(beaPage, STAGE_DENIED);
 
+        // The same link for an account without the Author role: a Press
+        // Manager who does not author gets the access-denied page with the
+        // missing-role sentence (Rule 3; fn-c's wording). The second
+        // author's stage sentence above is the other refusal, and neither
+        // page opens a workflow panel.
+        const managerPage = await (await asUser('manager.maya')).newPage();
+        await managerPage.goto(oldAuthorDashboardUrl(PRESS, submissionId));
+        await managerPage.waitForURL((url) => url.pathname.includes('/user/authorizationDenied'), {
+            waitUntil: 'commit',
+        });
+        await expectAccessDenied(managerPage, AUTHOR_ROLE_MISSING);
+        await expect(managerPage.getByText(STAGE_DENIED)).toHaveCount(0);
+        await expect(beaPage.getByText(AUTHOR_ROLE_MISSING)).toHaveCount(0);
+
         // Control: a Press Manager who does not author types the list's
         // address: the access-denied page (Actors row 1; fn-a's wording).
-        const managerPage = await (await asUser('manager.maya')).newPage();
         await managerPage.goto(`/index.php/${PRESS}/dashboard/mySubmissions`);
         await expectAccessDenied(managerPage, ROLE_DENIED);
         await expect(managerPage.getByRole('heading', {name: /^Active submissions/})).toHaveCount(0);
@@ -379,21 +399,23 @@ test.describe('My submissions (U22)', () => {
 
     test('S3: browse the views and search', async ({asUser, ompApi, pkpMail}, testInfo) => {
         const tag = makeTag('s3', testInfo);
-        // A scratch press with a throwaway author holding two published
-        // monographs, one declined from the Submission stage (fn-s3: pre-
-        // review, so its cell stays clear of A2's counter) and one in
-        // Copyediting, beside a second throwaway author's submitted
-        // monograph as the control. No press route feeds "Scheduled for
-        // publication" (A3); "Revisions requested" is the empty-view
-        // control the footnote names.
+        // A scratch press (no categories: the request seeds none) with a
+        // throwaway author holding two published monographs, one declined
+        // from the Submission stage (fn-s3: pre-review, so its cell stays
+        // clear of A2's counter), one in Copyediting and one at Production,
+        // beside a second throwaway author's submitted monograph as the
+        // control, and the press's own Press Manager for the scheduling
+        // leg. "Revisions requested" is the empty view the footnote names.
         const author = `${tag}au`;
         const authorEmail = `${author}@mail.test`;
         const other = `${tag}bu`;
+        const manager = `${tag}mg`;
         await ompApi.createContext({
             tag,
             users: [
                 user(author, 'Vera', 'Views', ['author']),
                 user(other, 'Otto', 'Other', ['author']),
+                user(manager, 'Mona', 'Manager', ['manager']),
             ],
         });
         const toProduction = ['skipExternalReview', 'sendToProduction'];
@@ -413,6 +435,10 @@ test.describe('My submissions (U22)', () => {
             tag, context: tag, submitter: author, title: `copy${tag}`,
             decisions: ['skipExternalReview'],
         });
+        const {submissionId: prodId} = await ompApi.createSubmission({
+            tag, context: tag, submitter: author, title: `prod${tag}`,
+            decisions: toProduction,
+        });
         await ompApi.createSubmission({
             tag, context: tag, submitter: other, title: `other${tag}`,
         });
@@ -426,7 +452,7 @@ test.describe('My submissions (U22)', () => {
         // heading with its count, and the badge carries the same number
         // (Rules 1, 2). The other author's monograph counts nowhere.
         const expectedCounts = {
-            'Active submissions': 1,
+            'Active submissions': 2,
             'Revisions requested': 0,
             'Revisions submitted': 0,
             'Incomplete submissions': 0,
@@ -443,7 +469,7 @@ test.describe('My submissions (U22)', () => {
         // "Active submissions": the monograph in Copyediting, its cell
         // reading "Copyedited Files Uploaded: 0" (Rules 2, 7c).
         await mySub.openView('Active submissions');
-        await mySub.expectViewHeading('Active submissions', 1);
+        await mySub.expectViewHeading('Active submissions', 2);
         const copyRow = mySub.row(`copy${tag}`);
         await expect(copyRow).toBeVisible();
         await expect(stageCell(copyRow)).toHaveText('Copyediting');
@@ -481,27 +507,70 @@ test.describe('My submissions (U22)', () => {
         await expect(mySub.row(`pubb${tag}`)).toHaveCount(0);
         await mySub.expectViewHeading('Published', 1);
 
-        // "Filters": the panel offers the days-since-last-activity filter;
-        // a scratch press has no categories, and "Assigned To Editor" is not
-        // among the fields (Rule 5; the present field is the control).
+        // "Filters" on a press {OMP}: the panel offers "Days since last
+        // activity" alone, no section, series, issue or categories filter,
+        // and "Assigned To Editor" is not among them (Rule 5, OMP1; the
+        // present field is the control, and the panel's labels are read
+        // whole, so any other field would show in the list).
         const filters = await openFilters(page);
         await expect(filters.getByText(DAYS_FILTER, {exact: true})).toBeVisible();
         await expect(filters.getByRole('slider', {name: DAYS_FILTER})).toBeVisible();
-        await expect(filters.getByText(EDITOR_FILTER)).toHaveCount(0);
+        await expect(filters.locator('legend, label.pkpFormFieldLabel').filter({visible: true})).toHaveText([DAYS_FILTER]);
+        for (const absent of ['Section', 'Series', 'Issues', 'Issue', 'Categories', EDITOR_FILTER]) {
+            await expect(filters.getByText(absent, {exact: true})).toHaveCount(0);
+        }
         await expect(filters.getByRole('combobox', {name: EDITOR_FILTER})).toHaveCount(0);
-        await expect(filters.getByText('Categories')).toHaveCount(0);
         await closeFilters(page);
 
         // The author's mailbox: nothing has arrived through any of the
         // above (Side effects; the count is settled by the list reads).
         expect(await pkpMail.count({to: authorEmail})).toBe(mailBefore);
 
+        // The submission at Production {OMP}: under "Active submissions"
+        // with the "Production" stage bubble (Rules 2, 4).
+        await mySub.goto();
+        await mySub.expectViewHeading('Active submissions', 2);
+        const prodRow = mySub.row(`prod${tag}`);
+        await expect(prodRow).toBeVisible();
+        await expect(stageCell(prodRow)).toHaveText('Production');
+        await mySub.expectViewCount('Scheduled for publication', 0);
+
+        // The Press Manager schedules it {OMP}: from the Dashboard, the
+        // monograph's workflow, "Date Published" 2030-01-01 saved on its
+        // Catalog Entry page, then "Publish" confirmed in the window that
+        // opens (U49 Rule 6; the helper waits for "Unschedule").
+        const managerPage = await (await asUser(manager)).newPage();
+        const dashboard = new EditorialDashboardPage(managerPage, tag);
+        await dashboard.gotoView('active');
+        const managerRow = await dashboard.findRowByTag(`prod${tag}`);
+        await new WorkflowPage(managerPage, tag).openFromRow(managerRow, prodId);
+        await saveCatalogEntryDatePublished(managerPage, '2030-01-01');
+        await scheduleShownVersion(managerPage);
+
+        // "Scheduled for publication" after the future date {OMP}: the
+        // author reloads; the monograph is listed there with the
+        // "Scheduled" bubble and an empty Editorial Activity cell, and
+        // "Active submissions" no longer lists it (Rules 2, 10; the
+        // Copyediting row still under "Active submissions" is the control).
+        await page.reload();
+        await mySub.expectViewHeading('Active submissions', 1);
+        await mySub.expectViewCount('Scheduled for publication', 1);
+        await mySub.expectViewCount('Active submissions', 1);
+        await mySub.openView('Scheduled for publication');
+        await mySub.expectViewHeading('Scheduled for publication', 1);
+        const schedRow = mySub.row(`prod${tag}`);
+        await expect(schedRow).toBeVisible();
+        await expect(stageCell(schedRow)).toHaveText('Scheduled');
+        await expect(activityCell(schedRow)).toHaveText(/^\s*$/);
+        await mySub.openView('Active submissions');
+        await mySub.expectViewHeading('Active submissions', 1);
+        await expect(mySub.row(`copy${tag}`)).toBeVisible();
+        await expect(mySub.row(`prod${tag}`)).toHaveCount(0);
+
         // Control: the other author's monograph is listed under none of the
         // views (the counts above sum without it), and searching its title
         // on "Active submissions" finds no row (Actors row 2, Rule 5; the
         // search of the author's own title above is the positive control).
-        await mySub.goto();
-        await mySub.expectViewHeading('Active submissions', 1);
         await mySub.searchFor(`other${tag}`);
         await mySub.expectViewHeading('Active submissions', 0);
         await expect(mySub.row(`other${tag}`)).toHaveCount(0);
@@ -678,14 +747,17 @@ test.describe('My submissions (U22)', () => {
         const popover = activityPopover(openRow);
         await expect(popover).toBeVisible({timeout: 30_000});
         await expect(popover).toContainText('Omar Openreviewer');
-        await expect(popover).toContainText('Open');
+        // The review type is a label of its own whose whole text is "Open":
+        // the reviewer's name (which carries "Open") does not satisfy it.
+        await expect(popover.getByText('Open', {exact: true})).toBeVisible();
+        await expect(popover.getByText('Open', {exact: true})).toHaveCount(1);
     });
 
     test('S5: landing for an account holding other roles too', async ({asUser, ompApi, browser, baseURL}, testInfo) => {
         const tag = makeTag('s5', testInfo);
-        // A scratch press with the three two-role accounts, the author-only
-        // control and the Reader-only account (fn-s5; OMP's `sectionEditor`
-        // is the Series Editor group). The fixture caches each two-role and
+        // A scratch press with the four two-role accounts, the author-only
+        // control with one submitted monograph and the Reader-only account
+        // (fn-s5; OMP's `sectionEditor` is the Series Editor group). The fixture caches each two-role and
         // control session at the site login, so those landings are read
         // through the retired list address, which forwards the same way
         // (Rule 3); the Reader-only and no-role accounts, which that address
@@ -693,6 +765,7 @@ test.describe('My submissions (U22)', () => {
         const authorReviewer = `${tag}ar`;
         const authorEditor = `${tag}as`;
         const editorReviewer = `${tag}sr`;
+        const managerAuthor = `${tag}ma`;
         const authorOnly = `${tag}ao`;
         const readerOnly = `${tag}rd`;
         const noRole = `${tag}nr`;
@@ -702,6 +775,7 @@ test.describe('My submissions (U22)', () => {
                 user(authorReviewer, 'Ann', 'Authrev', ['author', 'externalReviewer']),
                 user(authorEditor, 'Bo', 'Authed', ['author', 'sectionEditor']),
                 user(editorReviewer, 'Cy', 'Edrev', ['sectionEditor', 'externalReviewer']),
+                user(managerAuthor, 'Gil', 'Manauth', ['manager', 'author']),
                 user(authorOnly, 'Di', 'Authonly', ['author']),
                 user(readerOnly, 'Ed', 'Readonly', ['reader']),
             ],
@@ -711,6 +785,9 @@ test.describe('My submissions (U22)', () => {
         await ompApi.createContext({
             tag: `${tag}h`,
             users: [user(noRole, 'Flo', 'Norole', ['reader'])],
+        });
+        const {submissionId: controlId} = await ompApi.createSubmission({
+            tag, context: tag, submitter: authorOnly, title: `ctrl${tag}`,
         });
 
         // Author and Reviewer: the reviewer dashboard, with the "My
@@ -749,10 +826,30 @@ test.describe('My submissions (U22)', () => {
         const aoPage = await (await asUser(authorOnly)).newPage();
         await landThrough(aoPage, tag, '/dashboard/mySubmissions');
         const mySub = new MySubmissionsPage(aoPage, tag);
-        await mySub.expectViewHeading('Active submissions', 0);
+        await mySub.expectViewHeading('Active submissions', 1);
+        await expect(mySub.row(`ctrl${tag}`)).toBeVisible();
         await expect(mySub.menuGroupLink()).toBeVisible();
         await expect(sideNav(aoPage)).not.toContainText('Editor Dashboard');
         await expect(sideNav(aoPage)).not.toContainText('My Assignments as Reviewer');
+
+        // Press Manager and Author, the old author-dashboard link: the
+        // account's own My Submissions opens with the control's monograph's
+        // workflow panel open, though the account is not its author (Rule
+        // 3, fn-c). Closing the panel shows the account's own list, which
+        // does not hold that monograph (the control's list above does).
+        const maPage = await (await asUser(managerAuthor)).newPage();
+        await maPage.goto(oldAuthorDashboardUrl(tag, controlId));
+        await maPage.waitForURL((url) => url.pathname.includes('/dashboard/mySubmissions'), {
+            waitUntil: 'commit',
+        });
+        const maSub = new MySubmissionsPage(maPage, tag);
+        await maSub.expectWorkflowOpen();
+        await new WorkflowPage(maPage, tag).expectOpen(controlId);
+        expect(new URL(maPage.url()).searchParams.get('workflowSubmissionId')).toBe(String(controlId));
+        await maSub.closeWorkflow();
+        await maSub.expectViewHeading('Active submissions', 0);
+        await expect(maSub.menuGroupLink()).toBeVisible();
+        await expect(maSub.row(`ctrl${tag}`)).toHaveCount(0);
 
         // Reader only, then no role in the press: signed in on the press's
         // own login page, each lands on the press's home page; the retired

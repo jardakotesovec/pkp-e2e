@@ -18,8 +18,8 @@
  * - the "More Actions" → "Delete Incomplete Submissions" selection mode and
  *   its confirm dialog;
  * - the ways in and the refusals (U22 Rules 1, 3 and the Actors table): the
- *   retired submission-list address, the old author-dashboard link, and
- *   the two access-denied sentences;
+ *   retired submission-list address, the old author-dashboard link (and
+ *   the panel it opens), and the three access-denied sentences;
  * - a row's Stage and Editorial Activity cells, the review progress
  *   counter and the "Reviewers assigned:" avatars with their popover (U22
  *   Rules 4, 7);
@@ -102,6 +102,35 @@ exports.MySubmissionsPage = class MySubmissionsPage extends BasePage {
      */
     workflowAccessDenied() {
         return this.page.getByText("You don't currently have access to that stage of the workflow.", {exact: true});
+    }
+
+    /**
+     * The author-role refusal, the answer to the old author-dashboard link
+     * followed by an account without the Author role (Rule 3, fn-c:
+     * `user.authorization.authorRoleMissing`), its whole text.
+     */
+    authorRoleMissing() {
+        return this.page.getByText(
+            'You do not currently have sufficient privileges to view the submission. ' +
+                'Please edit your profile to ensure that you have been granted the ' +
+                'appropriate roles under "Register As".',
+            {exact: true}
+        );
+    }
+
+    /**
+     * The old author-dashboard link's forward has landed on this list with
+     * the given submission's workflow panel open (Rule 3, fn-c): the
+     * address records the submission, and the panel's heading is up.
+     */
+    async expectForwardedToPanel(submissionId) {
+        await this.page.waitForURL(
+            (url) =>
+                url.pathname.includes('/dashboard/mySubmissions') &&
+                url.searchParams.get('workflowSubmissionId') === String(submissionId),
+            {waitUntil: 'commit', timeout: 30_000}
+        );
+        await this.expectWorkflowOpen();
     }
 
     /** The "Start A New Submission" sidebar entry beside the menu group (Rule 1). */

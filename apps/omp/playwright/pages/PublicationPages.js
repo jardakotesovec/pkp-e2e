@@ -8,7 +8,9 @@
  * Done by itself), and the "Permissions & Disclosure" license boxes typed
  * and saved (U72 S8's given), and "Create New Version" (U73 S9), a version retitled and a shown version
  * published (U69 S6, S7), and the "Metadata" page's Keywords box typed
- * without Enter to read its suggestion list (U40 S2). The frame itself (header, menu, status box, the return
+ * without Enter to read its suggestion list (U40 S2), and a future "Date
+ * Published" saved on "Catalog Entry" and then published, which schedules
+ * the monograph (U22 S3). The frame itself (header, menu, status box, the return
  * and delete dialogs) is the shared `WorkflowPage`.
  */
 const {expect} = require('@playwright/test');
@@ -217,4 +219,56 @@ async function clearKeywordBox(page) {
     await expect(field.getByRole('option')).toHaveCount(0, {timeout: 30_000});
 }
 
-module.exports = {UNPUBLISH_QUESTION, unpublishFromWorkflow, saveLicenseFields, createNewVersion, retitleVersion, publishShownVersion, keywordsField, typeKeywordForSuggestions, clearKeywordBox};
+/**
+ * On an open workflow, open the shown version's "Catalog Entry" page from
+ * the side menu, type `value` (YYYY-MM-DD) into its "Date Published" box
+ * and press that form's "Save", bounded by the publication's write
+ * answering OK. A future date saved here is what schedules a press item
+ * when "Publish" is pressed next (U49 Rule 6). Added for U22 S3 (U49's
+ * `saveDatePublished` shape, kept local there).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} value
+ */
+async function saveCatalogEntryDatePublished(page, value) {
+    const frame = new WorkflowPage(page, null);
+    const entry = await frame.revealPublicationEntry('Catalog Entry');
+    await entry.click();
+    await expect(page.getByRole('heading', {name: 'Publication: Catalog Entry'})).toBeVisible({timeout: 30_000});
+    const field = page
+        .locator('.pkpFormField')
+        .filter({has: page.locator('label.pkpFormFieldLabel').filter({hasText: /^Date Published/})});
+    const box = field.locator('input').first();
+    await expect(box).toBeEditable({timeout: 30_000});
+    await box.fill(value);
+    const saved = page.waitForResponse(
+        (r) => /\/submissions\/\d+\/publications\/\d+$/.test(new URL(r.url()).pathname) && r.request().method() === 'POST',
+        {timeout: 30_000}
+    );
+    await field.locator('xpath=ancestor::form[1]').getByRole('button', {name: 'Save', exact: true}).click();
+    const response = await saved;
+    expect(response.ok(), `the Catalog Entry save answered ${response.status()}`).toBe(true);
+}
+
+/**
+ * Publish the shown version after a future "Date Published" was saved: the
+ * header's "Publish", its "Schedule For Publication" window and that
+ * window's "Publish", bounded by the publish call and the "Unschedule"
+ * that replaces the button (U49 Rule 6: the status turns "Scheduled").
+ * Added for U22 S3.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+async function scheduleShownVersion(page) {
+    const controls = page.locator('[data-cy="workflow-controls-right"]');
+    await controls.getByRole('button', {name: 'Publish', exact: true}).click();
+    const modal = page.getByRole('dialog', {name: /Schedule For Publication/});
+    await expect(modal).toBeVisible({timeout: 30_000});
+    const published = page.waitForResponse((r) => /\/publish$/.test(new URL(r.url()).pathname), {timeout: 30_000});
+    await modal.getByRole('button', {name: 'Publish', exact: true}).click();
+    const response = await published;
+    expect(response.ok(), `the publish call answered ${response.status()}`).toBe(true);
+    await expect(controls.getByRole('button', {name: 'Unschedule', exact: true})).toBeVisible({timeout: 30_000});
+}
+
+module.exports = {UNPUBLISH_QUESTION, unpublishFromWorkflow, saveLicenseFields, createNewVersion, retitleVersion, publishShownVersion, saveCatalogEntryDatePublished, scheduleShownVersion, keywordsField, typeKeywordForSuggestions, clearKeywordBox};

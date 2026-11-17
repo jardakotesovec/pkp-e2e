@@ -74,6 +74,22 @@ exports.MySubmissionsPage = class MySubmissionsPage extends withOpsWorkflowPanel
     }
 
     /**
+     * The refusal an account WITHOUT the Author role gets at the old
+     * author-dashboard link (U22 Rule 3, fn-c:
+     * `user.authorization.authorRoleMissing`), the whole sentence the page
+     * shows. The other author's refusal is the shared
+     * `workflowAccessDenied()`.
+     */
+    authorRoleMissingDenied() {
+        return this.page.getByText(
+            'You do not currently have sufficient privileges to view the submission. ' +
+                'Please edit your profile to ensure that you have been granted the ' +
+                'appropriate roles under "Register As".',
+            {exact: true}
+        );
+    }
+
+    /**
      * Every editors'-assignment label the Filters panel could carry on a
      * preprint server: the lib/pkp wording and OPS's override. Both are
      * absent for an author-only account; the days filter beside them is

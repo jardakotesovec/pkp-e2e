@@ -9,8 +9,8 @@
  * Spec: docs/specs/U22-my-submissions.md
  *
  * Deliberately NOT covered (register IDs; the spec's Coverage section
- * records the rest): A1 ❓, A2 ❓, A3 ❓, A4 ❓, A5 ❓, A7 🐞, A8 🐞, OMP1 ❓,
- * OPS1 ❓, OPS2 🐞.
+ * records the rest): A1 ❓, A2 ❓, A4 ❓, A5 ❓, A7 🐞, A8 🐞, OMP1 ❓, OPS1 ❓,
+ * OPS2 🐞.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. S2, S4 and S5 isolate on scratch journals with throwaway
@@ -101,13 +101,7 @@ test.describe('my submissions', () => {
         // The old author-dashboard link: My Submissions opens with that
         // submission's workflow panel already open (Rule 3).
         await mySub.gotoOldAuthorDashboardLink(submissionId);
-        await page.waitForURL(
-            (url) =>
-                url.pathname.includes('/dashboard/mySubmissions') &&
-                url.searchParams.get('workflowSubmissionId') === String(submissionId),
-            {waitUntil: 'commit', timeout: 30_000}
-        );
-        await mySub.expectWorkflowOpen();
+        await mySub.expectForwardedToPanel(submissionId);
         await expect(mySub.workflowDialog()).toContainText(`arta${tag}`);
         await expect(mySub.workflowDialog()).toContainText(String(submissionId));
         await expect(mySub.workflowAccessDenied()).toHaveCount(0);
@@ -123,11 +117,22 @@ test.describe('my submissions', () => {
         await expect(beaPage.getByRole('heading', {name: WORKFLOW_HEADING})).toHaveCount(0);
         await expect(beaPage.getByRole('dialog')).toHaveCount(0);
 
-        // Control: a Journal Manager who does not author types the list's
-        // address: the access-denied page, no list, no sidebar (Actors row
-        // 1; the author's list above is the positive control).
+        // The same link for an account without the Author role: a Journal
+        // Manager who does not author gets the access-denied page reading
+        // the author-role sentence, and no workflow panel (Rule 3; the
+        // owner's open panel above is the positive control, the other
+        // author's stage sentence the contrast).
         const managerPage = await (await asUser('manager.maya')).newPage();
         const managerSub = new MySubmissionsPage(managerPage, JOURNAL);
+        await managerSub.gotoOldAuthorDashboardLink(submissionId);
+        await expect(managerSub.authorRoleMissing()).toBeVisible({timeout: 30_000});
+        await expect(managerSub.workflowAccessDenied()).toHaveCount(0);
+        await expect(managerPage.getByRole('heading', {name: WORKFLOW_HEADING})).toHaveCount(0);
+        await expect(managerPage.getByRole('dialog')).toHaveCount(0);
+
+        // Control: the same Journal Manager types the list's address: the
+        // access-denied page, no list, no sidebar (Actors row 1; the
+        // author's list above is the positive control).
         await managerPage.goto(managerSub.url());
         await expect(managerSub.accessDenied()).toBeVisible({timeout: 30_000});
         await expect(managerPage.getByRole('heading', {name: /^Active submissions/})).toHaveCount(0);
@@ -527,6 +532,11 @@ test.describe('my submissions', () => {
         await expect(mySub.activityCell(row)).toContainText('Revision requested');
         await expect(mySub.submitRevisionsButton(row)).toBeVisible();
 
+        // The Stage bubble under review reads the review stage with its
+        // round, "Review (Round 1)" (Rule 4); the second submission's row
+        // under "Active submissions" is read the same way below.
+        await expect(mySub.stageCell(row)).toHaveText(/^\s*Review \(Round 1\)\s*$/);
+
         // "Submit revisions" opens the upload dialog directly: three steps,
         // "Upload File", "Review Details" and "Confirm", and no title of its
         // own (the step tabs are the positive control that the dialog's
@@ -566,6 +576,7 @@ test.describe('my submissions', () => {
         await mySub.openView('Active submissions');
         const underReview = mySub.row(`Underreview ${tag}`);
         await expect(underReview).toBeVisible();
+        await expect(mySub.stageCell(underReview)).toHaveText(/^\s*Review \(Round 1\)\s*$/);
         await expect(mySub.reviewCounter(underReview)).toHaveText(/Review update 1\/2/);
         await expect(mySub.reviewersAssignedLabel(underReview)).toHaveCount(0);
         await expect(mySub.reviewerAvatars(underReview)).toHaveCount(0);
@@ -592,8 +603,9 @@ test.describe('my submissions', () => {
     test('S5: landing for an account holding other roles too', async ({asUser, browser, baseURL, ojsApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s5', testInfo);
-        // A scratch journal with five throwaway accounts: three holding two
-        // roles each, one holding only Reader and the author-only control;
+        // A scratch journal with six throwaway accounts: four holding two
+        // roles each, one holding only Reader and the author-only control,
+        // who holds one submitted submission;
         // the account with no role in the journal is minted with Reader in
         // a helper context and never enrolled in the scratch journal
         // (fn-s5). The sign-in fixture caches cookies at the site login, so
@@ -605,6 +617,7 @@ test.describe('my submissions', () => {
         const authorReviewer = `${tag}ar`;
         const authorEditor = `${tag}ae`;
         const editorReviewer = `${tag}er`;
+        const managerAuthor = `${tag}ma`;
         const readerOnly = `${tag}rd`;
         const authorOnly = `${tag}au`;
         const noRole = `${tag}nr`;
@@ -614,9 +627,13 @@ test.describe('my submissions', () => {
                 {username: authorReviewer, givenName: 'Ann', familyName: 'Authorreviewer', roles: ['author', 'externalReviewer']},
                 {username: authorEditor, givenName: 'Abe', familyName: 'Authoreditor', roles: ['author', 'sectionEditor']},
                 {username: editorReviewer, givenName: 'Eve', familyName: 'Editorreviewer', roles: ['sectionEditor', 'externalReviewer']},
+                {username: managerAuthor, givenName: 'Max', familyName: 'Managerauthor', roles: ['manager', 'author']},
                 {username: readerOnly, givenName: 'Rea', familyName: 'Reader', roles: ['reader']},
                 {username: authorOnly, givenName: 'Ada', familyName: 'Author', roles: ['author']},
             ],
+        });
+        const {submissionId: controlId} = await ojsApi.createSubmission({
+            tag, context: tag, submitter: authorOnly, title: `ctrl${tag}`,
         });
         await ojsApi.createContext({
             tag: `${tag}h`,
@@ -650,14 +667,35 @@ test.describe('my submissions', () => {
         await expect(erPage).toHaveURL(/\/dashboard\/editorial/);
         await expect(erPage.getByRole('heading', {level: 1})).toHaveText(/Assigned to me/);
 
+        // Journal Manager and Author, the old author-dashboard link: with
+        // the author-only account's submission ID, the account's own My
+        // Submissions opens with that submission's workflow panel open,
+        // though the account is not its author (Rule 3, fn-c); no refusal
+        // sentence. Closed, the list behind it is the account's own, which
+        // holds none of its rows (the author's own list below, which does,
+        // is the positive control).
+        const maPage = await (await asUser(managerAuthor)).newPage();
+        const maSub = new MySubmissionsPage(maPage, tag);
+        await maSub.gotoOldAuthorDashboardLink(controlId);
+        await maSub.expectForwardedToPanel(controlId);
+        await expect(maSub.workflowDialog()).toContainText(`ctrl${tag}`);
+        await expect(maSub.workflowDialog()).toContainText(String(controlId));
+        await expect(maSub.workflowAccessDenied()).toHaveCount(0);
+        await expect(maSub.authorRoleMissing()).toHaveCount(0);
+        await maSub.closeWorkflow();
+        await maSub.expectViewHeading('Active submissions', 0);
+        await expect(maSub.emptyState()).toBeVisible({timeout: 30_000});
+        await expect(maSub.row(`ctrl${tag}`)).toHaveCount(0);
+
         // Control: the author-only account lands on My Submissions, as in
-        // scenario 1 (Rule 3); its list and sidebar are the positive
-        // control of the two refusals below.
+        // scenario 1 (Rule 3), its own submission listed; its list and
+        // sidebar are the positive control of the two refusals below.
         const auPage = await (await asUser(authorOnly)).newPage();
         const auSub = new MySubmissionsPage(auPage, tag);
         await auSub.gotoRetiredListAddress();
         await expect(auPage).toHaveURL(/\/dashboard\/mySubmissions/);
-        await auSub.expectViewHeading('Active submissions');
+        await auSub.expectViewHeading('Active submissions', 1);
+        await expect(auSub.row(`ctrl${tag}`)).toBeVisible({timeout: 30_000});
         await expect(auSub.sideNav()).toBeVisible();
         await expect(auSub.menuGroupLink()).toBeVisible();
 
