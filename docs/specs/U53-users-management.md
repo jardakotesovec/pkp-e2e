@@ -385,7 +385,8 @@ The Site Administrator's "Add User" (step 1) and "Edit User" windows
     saves, closes the window and shows "User edited." A role ticked here
     is granted at once and a role unticked ends at once, with no
     invitation and no email. The user's row, as the grid shows it after
-    "OK", still lists the role just ended until the page is reloaded
+    "OK", can still list the role just ended, until the page is reloaded,
+    when the grid's refresh comes in the same second as the save
     ⚠ [A17](#a17). Unticking every role is refused with step 2's message.
     A new password typed here ends the user's open sessions. <sup>m</sup>
 
@@ -807,9 +808,9 @@ passwords and the tooling recipe are in the footnote. <sup>s</sup>
      to select at least one role to be associated with this user." (Rule
      24).
    - **Roles changed**: tick "Reader" and press "OK": the window closes
-     and "User edited." shows, while Lena's row still lists "Author"
-     beside "Reader" [A17](#a17). Reload the page and open the tab
-     "Users" again: her row reads "Reader" under "Roles" (Rule 24).
+     and "User edited." shows; Lena's row may still list "Author" beside
+     "Reader" [A17](#a17). Reload the page and open the tab "Users"
+     again: her row reads "Reader" under "Roles" (Rule 24).
    - **Lena's mailbox**: holds no email about either change (Rule 24;
      Side effects).
    - **Users & Roles**: Settings › Users & Roles of the journal lists Lena
