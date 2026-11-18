@@ -80,9 +80,15 @@ list of completed reviews appears is owned by
 **Add Reviewer window** (title "Add Reviewer"; opened by the panel's "Add
 Reviewer" button). Its upper half is the reviewer search (Rules 5–8). Once a
 reviewer is chosen, the name and email address are shown with a "Change" link
-back to the search. The window's "Cancel", and the "Close" in its top
-bar, close it at once, even with a reviewer chosen: nothing asks and no
-reviewer is added.
+back to the search. The window's "Cancel" closes it at once, even with a
+reviewer chosen and the "Review Due Date" changed: nothing asks and no
+reviewer is added. The "Close" in its top bar does the same with only a
+reviewer chosen. After a change to the "Review Due Date" (no other field
+tried), "Close" first asks "The data on this form has changed. Do you wish
+to continue without saving?". Answered "Cancel", the question leaves the
+window open with the changed date. Answered "OK", it closes the window,
+and the Reviewers panel, on the page and after a reload, shows no row for
+that reviewer. <sup>d</sup>
 The lower half holds the request form shared by all three add modes:
 
 | Field (UI label) | Required? | Rules |
@@ -91,7 +97,7 @@ The lower half holds the request form shared by all three add modes:
 | "Choose a predefined message to use, or fill out the form below." | no | Email template chooser. It renders on every add, even with no alternate request templates to offer, as a one-option select ("Review Request") ⚠ [A19](#a19). When alternates do exist, all of them are listed ([A5](#a5), retired; the access check it questioned was reverted upstream) <sup>d</sup> |
 | "Email to be sent to reviewer" | no | Rich-text request letter, prefilled from the chosen template. Placeholders for name, deadlines and the review link are filled at send time. Effectively required: submitting with the letter emptied fails with no on-screen feedback of any kind, yet still creates the assignment and never sends the request email ⚠ [A18](#a18) <sup>d</sup> |
 | "Do not send email to Reviewer." | no | Checkbox. Skips the request email; the assignment is still created <sup>d</sup> |
-| "Response Due Date" / "Review Due Date" (under "Important Dates") | yes | Date pickers, prefilled per the journal's review setup (Rule 9). The permanent guidance "Review due date must be greater or equal to response due date." shows here and in the Edit window. Inverted dates are refused with a notice at the top right, "There was an error adding the reviewer as review due date must be equal or greater than responde due date." ⚠ [A45](#a45), gone by itself within seconds; the window stays open and nothing is added. The pickers, shared with the Edit and Resend windows, take calendar picks or a date typed in the YYYY-MM-DD format (e.g. 2026-08-02). A date typed in another format looks accepted, but the date the box held before is silently saved ("11/12/2030" shows as "11122030"). In the Edit window's "Review Due Date" an impossible date is saved as its text read one key earlier, whatever the box held: "2030-02-30" as 2030-02-03 ⚠ [A16](#a16). They also accept past dates without any warning ⚠ [A17](#a17) <sup>f</sup> |
+| "Response Due Date" / "Review Due Date" (under "Important Dates") | yes | Date pickers, prefilled per the journal's review setup (Rule 9). The permanent guidance "Review due date must be greater or equal to response due date." shows here and in the Edit window. Inverted dates are refused with a notice at the top right, "There was an error adding the reviewer as review due date must be equal or greater than responde due date." ⚠ [A45](#a45), gone by itself within seconds; the window stays open and nothing is added. The pickers, shared with the Edit and Resend windows, take calendar picks or a date typed in the YYYY-MM-DD format (e.g. 2026-08-02). Of the windows holding these dates ("Add Reviewer", a reviewer row's "Edit", and "Edit Due Date" in a dashboard indicator's popover), the first opened on a page lets a screen reader reach the calendar; in every later one opened on the same page without a reload, in any order, the calendar is hidden from screen readers, though the date box stays reachable ⚠ [A54](#a54). The Resend window's pickers were not read for this. A date typed in another format looks accepted, but the date the box held before is silently saved ("11/12/2030" shows as "11122030"). In the Edit window's "Review Due Date" an impossible date is saved as its text read one key earlier, whatever the box held: "2030-02-30" as 2030-02-03 ⚠ [A16](#a16). They also accept past dates without any warning ⚠ [A17](#a17) <sup>f</sup> |
 | "Files To Be Reviewed" | no | Collapsed file list with one checkbox per file of the round, all ticked by default. The inline warning "No Files Selected" appears here only when the round has no files at all. Unticking every box triggers no warning in this window (Rule 11) <sup>d</sup> |
 | "Review Type" | yes | Radio group "Anonymous Reviewer/Anonymous Author", "Anonymous Reviewer/Disclosed Author", "Open". Preselected per the journal's review setup <sup>d</sup> |
 | "Public Visibility" | no | Checkbox "Publicly Show Reviewer Comments". Preselected per the journal's public-visibility default. Ticked, it adds a sentence to the "Mark this review as complete?" dialog (Rule 14a) and a confirmation before a completed review is modified (Rule 14b) <sup>d</sup> |
@@ -1558,6 +1564,11 @@ Left out of the scenarios above, by reason:
     Reviewer window lists the matching reviewer, or the window offers that
     role no search, filters or further pages (Actors row 3, Rules 5, 6):
     waits for the fix [incidental 2026-11-16]
+  - the Add Reviewer window's top "Close" after a change to "Review Due
+    Date": it asks "The data on this form has changed. Do you wish to
+    continue without saving?", "Cancel" keeps the window with the changed
+    date, and "OK" closes it with no reviewer added, on the page or after
+    a reload (Fields, "Add Reviewer window") [incidental 2026-11-18]
 - **Rarely met**:
   - submitting a review for the reviewer on a "Request Resent" row, on an accepted row holding no draft, or with a comment entered, and the row's menu, the reviewer's side and the missing acceptance email after any such save (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a reminded, an accepted or a declined request with no review: "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", and the empty blocks (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -1577,7 +1588,7 @@ Left out of the scenarios above, by reason:
   - a file added through "Upload" in "Modify Review", kept and logged without a save (Rule 14b, Side effects): an editor attaches a file for a reviewer in a rare week
   - the unsaved-changes "Warning" on leaving "Modify Review" with something typed (Rule 14b): a close control
   - "View changes" opened to its "View Review" window (Side effects): scenario 16 reads the action, not the window behind it
-  - "Cancel" in the Add Reviewer window with a reviewer chosen, and in the "Edit Review" window with a due date changed, closing without a question (Fields): a close control
+  - "Cancel" in the Add Reviewer window with a reviewer chosen and its "Review Due Date" changed, and in the "Edit Review" window with a due date changed, closing without a question (Fields): a close control
   - the second ends of covered controls: an edit changing only the review type (Rule 12), the XML exports (Rule 15), a logged decline (Rule 20)
   - "Mark as Complete" disabled beside "This review is incomplete and cannot be marked as complete yet." on a declined, a re-sent or a review-form request with no review, and an accepted request's reviewer still offered "Finish review" (Rule 14c): the same message and the same open request scenarios 9 and 21 read on an unanswered and an accepted one
   - "Resend Review Request" accepting a review due date equal to the response due date (Rule 9): the same date rule scenario 5 presses in "Add Reviewer"
@@ -1621,6 +1632,7 @@ Left out of the scenarios above, by reason:
   - A42 (a re-sent request's window naming the first request's date; Rule 14c)
   - A52 (a press's save recording only the competing-interests answer submitting an empty review; Rule 14d)
   - A53 (a review submitted for the reviewer with nothing changed leaving no activity-log row; Side effects)
+  - A54 (the due-date calendar hidden from screen readers from the second date window opened on one page; Fields)
 - **No seed**:
   - the automatic reminder emails from the principal contact at the configured day-offsets, with their "Reviewer Reminded" and log stamps (Rule 13, Side effects, Settings)
   - a section's default "Review Form" preselected in the Add Reviewer window (Rule 10, Settings): the seed sets no default review form on a section
@@ -1680,6 +1692,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A49](#a49) | Both XML entries of "Download Review Form" open a "not authorized" page until a review PDF is downloaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A50](#a50) | An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A51](#a51) | A Funding coordinator's search, filters and "Next" in the Add Reviewer window are refused | 🐞 | medium | issues (claude), 2026-11-16 — re-verified |
+| [A54](#a54) | From the second due-date window opened on one page, the calendar is hidden from screen readers | 🐞 | minor | — |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -2277,6 +2290,24 @@ Question: should a review submitted on the reviewer's behalf be logged as
 such? Lean: yes; the review changed hands, which is what the log is for.
 Since: 2026-11-14 (pkp/pkp-lib#13653) · Basis: probe, 2026-11-16. <sup>[f-a53](#fn-a53)</sup>
 
+<a id="a54"></a>
+**A54 — From the second due-date window opened on one page, the calendar is hidden from screen readers** · 🐞 · minor.
+A Journal Manager or an assigned Section Editor opens a window holding
+"Response Due Date" and "Review Due Date": "Add Reviewer", "Edit" in a reviewer row's "More Actions", or
+"Edit Due Date" in the popover of a
+[→ review activity indicator](U23-submissions-dashboard.md#review-indicators)
+on the submissions dashboard. They close it and open another such window,
+of the same kind or another, on the same page without reloading (the
+Resend window was not read). In the first window, a screen reader
+reaches the calendar that opens under a date box: its days, "Prev",
+"Next" and the "Select month" and "Select year" lists. In the second
+window and every later one, the same calendar is hidden from screen
+readers, though it still takes a mouse click. The date box itself stays
+reachable and takes a date typed as YYYY-MM-DD, so someone using a
+screen reader can still set the date, but only by typing it in that format
+([A16](#a16)).
+Basis: probe, 2026-11-18. <sup>[f-a54](#fn-a54)</sup>
+
 ### OMP
 
 <a id="omp1"></a>
@@ -2660,7 +2691,18 @@ window's top-bar "Close" closed it at once, with no browser dialog, no
 question and no notice. OMP was not driven (the searched reviewer was
 already on the round); both apps run the same lib/pkp and ui-library
 commits (`b17fadae59`, `47b565cb`) for this window. Kept script
-`shared/playwright/checks/U27/H15/h15.js`, phase `rawkey`.
+`shared/playwright/checks/U27/H15/h15.js`, phase `rawkey`. Driven
+2026-11-18 (OJS and OMP `main`, scratch contexts, the Journal Manager or
+Press Manager and an assigned Section Editor or Series Editor, two runs
+per app; kept script `shared/playwright/checks/U27/I18/i18.js`): with a
+reviewer picked alone, the top "Close" closed the window with no dialog.
+With a reviewer picked and "Review Due Date" moved by a calendar pick
+from 2026-12-16 to 2026-12-28, "Close" raised the browser's own
+`confirm()` with the text of `form.dataHasChanged`, as the Edit window's
+"Close" does (note g); dismissed, the window stayed
+open with 2026-12-28; accepted, it closed. "Cancel" after the same change
+closed the window with no dialog. After each, the picked reviewer had no
+row on the page or after a reload.
 
 <a id="fn-e"></a>
 **e** — `CreateReviewerForm`: validators quoted in Fields (username unique +
@@ -4317,6 +4359,39 @@ a log row only inside each field's own change check (comments,
 recommendation, competing interests, review-form answers); its completion
 branch logs nothing. Controls the same day: every save that changed a
 field left that field's row (note i).
+
+<a id="fn-a54"></a>
+**f-a54** — Live-probed 2026-11-18 (OJS and OMP `main`, scratch contexts,
+the Journal Manager or Press Manager and an assigned Section Editor or
+Series Editor, two runs per app; kept script
+`shared/playwright/checks/U27/I18/i18.js`). Each level opened windows
+one after another on one page, each closed by "Cancel" or by "Close"
+answered "OK", in three sequences: "Edit Due Date" three times from the
+dashboard popover; on the workflow, the row's "Edit" twice, then "Add
+Reviewer"; on a fresh workflow page, "Add Reviewer", then the row's
+"Edit". In the first window of each page `#ui-datepicker-div` had
+no `aria-hidden` and exposed 31 day links, "Prev"/"Next" and the
+comboboxes "Select month"/"Select year" (Chromium's accessibility tree:
+33 links, 2 comboboxes, a table). In every later window it carried
+`aria-hidden="true"` and `data-aria-hidden="true"`: an empty
+`ariaSnapshot()`, pruned from the accessibility tree (`ariaHiddenElement`,
+a day `ariaHiddenSubtree`), while the date box read as textbox "Response
+Due Date" / "Review Due Date". The mark was gone after each close and
+back at the next open. A day clicked in the hidden calendar still set the
+visible box and the posted field (2026-12-16 to 2026-12-27 or
+2026-12-28); the first such click logged Chromium's console warning
+"Blocked aria-hidden on an element because its descendant retained
+focus…" (a warning, no page error; no response of 400 or more in any
+run). The windows were left unsaved and the rows kept 2026-12-16.
+Mechanism: the page holds one jQuery UI calendar, `#ui-datepicker-div`,
+appended to the body when the page's first date box is set up
+(`$.pkp.controllers.form.FormHandler`, its `.datepicker` init), which
+happens only once the first window is open. Each side window
+(`lib/ui-library/src/components/Modal/SideModal.vue`, reka-ui
+`DialogRoot`) marks every body child outside itself `aria-hidden` with
+`data-aria-hidden` when it opens, and lifts the mark when it closes; from
+the second window on, the calendar is one of those children. The
+"Resend Review Request" window's pickers were not driven.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
