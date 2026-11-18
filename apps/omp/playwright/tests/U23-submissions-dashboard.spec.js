@@ -13,8 +13,8 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
- * - A1 🐞, A10 🐞, A15 🐞, A16 🐞, A17 🐞; A2 ❓, A3 ❓, A7 ❓, A8 ❓, A9 ❓,
- *   A11 ❓, A14 ❓, A18 ❓, OMP1 ❓.
+ * - A1 🐞, A10 🐞, A15 🐞, A16 🐞, A17 🐞, A19 🐞; A2 ❓, A3 ❓, A7 ❓, A8 ❓,
+ *   A9 ❓, A18 ❓, A20 ❓, A21 ❓, OMP1 ❓.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (S6 and S16 ride publicknowledge, S6 with its own tagged
@@ -1542,7 +1542,7 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(mgDash.activityCell(row)).toHaveText(/^\s*Declined during the Submission stage\.\s*$/);
         await expect(mgDash.viewButton(row)).toBeVisible();
 
-        // Series Editor: their group has no "Declined" entry (register ❓
+        // Series Editor: their group has no "Declined" entry (register 🐞
         // A1's plain claim) and no "Needs editor" entry, and the monograph
         // is gone from every one of their views (Rule 2; the other
         // assigned one is the positive control)…

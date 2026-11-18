@@ -32,15 +32,16 @@ specified there, not here.
 
 **The editorial roles** on this page are **Site Administrator**, **Journal
 Manager**, **Section Editor**, and the assistant-level roles (**Copyeditor**,
-**Layout Editor**, **Proofreader**, **Funding Coordinator**, called "an
-assistant" below). Two scopes run through everything (Rule 3). Journal
+**Layout Editor**, **Proofreader**, **Funding Coordinator**; on a preprint
+server, which has none of these, **Editorial Board Member**), called "an
+assistant" below. Two scopes run through everything (Rule 3). Journal
 Managers work **journal-wide**: they see every submission in the journal.
 A Site Administrator works journal-wide only while also holding Journal
 Manager there (otherwise, Rule 3). Section Editors and assistants work
 **assigned-only**: they see and search only the submissions they are
 assigned to through one of these roles. Holding Author or Reviewer alongside an
 editorial role changes nothing here, except for the conflict rows of
-Rule 9a.
+Rule 9a. <sup>b</sup> <sup>c</sup>
 
 | Action | Who may — and when |
 |--------|--------------------|
@@ -118,8 +119,10 @@ the account's roles, never on which dashboard page it opens from:
    see only submissions where they are listed as a participant through
    that editorial role, and so does a Site Administrator whose editorial
    roles there are only these, with no "Needs editor" or "Declined" view.
-   With Reader alone the page lists nothing; Author or Reviewer alone is
-   open [A9](#a9). An assignment
+   A Site Administrator left with Reader alone, or with Reviewer alone
+   {OJS OMP}, gets a page that lists nothing under an "Error" dialog;
+   left with Author alone, one that lists nothing and shows no message
+   [A9](#a9). An assignment
    as Author or Reviewer does not surface a submission on *this* dashboard;
    it surfaces on My Submissions or the reviewer's list instead. The scope
    applies uniformly to views, search and counts. <sup>c</sup>
@@ -145,7 +148,9 @@ the account's roles, never on which dashboard page it opens from:
    while the list loads. The columns are **ID** (sortable), **Submissions**
    (the authors-and-title line), **Stage** (the current stage, or the
    outcome such as "Declined", named in plain text with a small colored dot
-   beside it), **Days** (days since the submission's last activity;
+   beside it; a review stage adds its round: "Review (Round 1)" on a
+   journal, "External Review (Round 1)" or "Internal Review (Round 1)" on
+   a press), **Days** (days since the submission's last activity;
    sortable), **Editorial Activity** (Rule 9) and **Actions** ("View",
    Rule 11). An incomplete submission's Stage cell reads "Incomplete". The
    exception is a preprint server, which has no "Incomplete" label: there
@@ -212,9 +217,13 @@ the account's roles, never on which dashboard page it opens from:
    "Close" at its top, the Fields table's fields, and "Clear Filters" and
    "Apply Filters" at its foot. <sup>i</sup>
    - 8a. **Applying.** "Apply Filters" closes the panel, narrows the
-     current view, and puts one chip per active filter above the table,
-     each with an X to drop just that filter ⚠ [A11](#a11). Reopening
-     "Filters" shows the applied choices in their fields. Filters combine
+     current view, and puts one chip per chosen value above the table,
+     each with an X that drops that value alone. Two sections ticked list
+     the submissions of both under two chips, "Section: Archive" and
+     "Section: Main"; pressing the X on "Section: Archive" leaves only the
+     "Section: Main" chip, and the list narrows to that section's
+     submissions. Reopening "Filters" shows the applied choices in their
+     fields. Filters combine
      with the search phrase. Switching views clears them.
    - 8b. **Clearing and closing.** The panel's own "Clear Filters" only
      empties its fields: the panel stays open, and the list keeps its
@@ -239,10 +248,14 @@ the account's roles, never on which dashboard page it opens from:
      reviewer; the notice then points to "Review Assignments" instead
      {OJS OMP}. Only journal-wide accounts ever see these rows (Rule 3).
      <sup>j</sup>
-   - 9b. **Declined**: "Declined during the {stage} stage." The stage is
-     named plainly: a review-stage decline reads "Review", not "External
-     Review". This shows on the "Declined" view, and the row keeps its
-     "View". <sup>j</sup>
+   - 9b. **Declined**: "Declined during the {stage} stage." A decline on
+     the Submission stage reads "Declined during the Submission stage."
+     On a preprint server, where the decline is taken on Production, it
+     reads "Declined during the Production stage." A review-stage decline
+     reads "Declined during the Review stage." on a
+     journal, and "Declined during the External Review stage." or
+     "Declined during the Internal Review stage." on a press. This shows
+     on the "Declined" view, and the row keeps its "View". <sup>j</sup>
    - 9c. **Incomplete submission**: a **"Complete submission"** button. It
      takes the editor into the *author's* submission wizard for that draft
      ⚠ [A2](#a2). The row has no "View". What follows is owned by
@@ -272,14 +285,22 @@ the account's roles, never on which dashboard page it opens from:
        review ⚠ [A20](#a20);
      - otherwise: the per-reviewer indicators alone.
    - 9f. **In review, with recommending editors on board** {OJS OMP},
-     checked before 9e. Instead of 9e's "Assign Reviewers" and
-     all-confirmed lines, a deciding editor reads "Recommending Editors
-     are tasked to advise the next steps for this submission",
-     then "An editorial recommendation has been received" / "All editorial
-     recommendations have been received, and a decision is required." as
-     recommendations land. A recommending editor who has recorded theirs
-     reads "Recommendation has been made by you." ⚠ [A14](#a14)
-     ([→ recording one](U26-review-stage-and-rounds.md#recommendations)). <sup>j</sup>
+     checked before 9e.
+     - A deciding editor assigned to the submission reads "Recommending
+       Editors are tasked to advise the next steps for this submission"
+       where 9e would show "Assign Reviewers", the reviewers' indicators
+       or the all-confirmed sentence; then "An editorial recommendation has been received" /
+       "All editorial recommendations have been received, and a decision
+       is required." as recommendations land.
+     - A Journal Manager not assigned to the submission reads
+       "Recommending Editors are tasked to advise the next steps for this
+       submission" too, also with no indicators, once the round has a
+       reviewer. While it has none, their cell offers "Assign Reviewers".
+     - A recommending editor reads the round as 9e until they record
+       theirs: "Assign Reviewers" while it has no reviewers, the
+       reviewers' indicators otherwise. Once they have recorded it, the
+       cell reads "Recommendation has been made by you."
+       ([→ recording one](U26-review-stage-and-rounds.md#recommendations)). <sup>j</sup>
    - 9g. **In copyediting** {OJS OMP}: "Copyedited Files Uploaded: {count}".
    - 9h. **Scheduled into an issue** {OJS}: "To be published in issue
      {issue}".
@@ -293,7 +314,7 @@ the account's roles, never on which dashboard page it opens from:
     ongoing reviews it is a countdown ring with the days left (or overdue),
     colored to flag overdue ones. The days are calendar days in the site's
     time zone: a date due tomorrow reads 1 at any hour of today, whatever
-    the browser's time zone. Once there is an outcome (submitted,
+    the browser's time zone ⚠ [A21](#a21). Once there is an outcome (submitted,
     confirmed, declined, cancelled) it is an icon. Clicking one opens a
     popover with the reviewer's name, the review type, a status sentence,
     and up to three buttons: <sup>k</sup>
@@ -311,9 +332,10 @@ the account's roles, never on which dashboard page it opens from:
 
     On a journal the completed-review popover also names the reviewer's
     recommendation. A press shows the completed sentence without one.
-    An assigned Section Editor or assistant gets the same popovers with the
-    same working buttons, but declined and cancelled reviewers show no
-    indicator at all for them ⚠ [A7](#a7).
+    An assigned Section Editor gets the same indicators, popovers and
+    working buttons as a Journal Manager. An assigned assistant gets the
+    same popovers and buttons, but declined and cancelled reviewers show
+    no indicator at all for them ⚠ [A7](#a7).
     Every button opens the same window it would open from the workflow's
     Reviewers panel, and the list refreshes afterwards. The flows
     themselves are owned by *[Reviewer assignment & management](U27-reviewer-assignment-and-management.md)*
@@ -344,7 +366,8 @@ the account's roles, never on which dashboard page it opens from:
     confirm to proceed.") with **"Confirm"** and **"Cancel"**. Confirm
     deletes the ticked submissions permanently. Cancel, in the dialog or
     above the list, leaves selection mode with nothing deleted. Changing
-    the view, search or filters also drops the selection. The same
+    the view, the search or the filters leaves selection mode too: the
+    checkboxes and both buttons go, and nothing is deleted. The same
     machinery serves the author's own list with its own permissions
     ([→ deleting drafts](U22-my-submissions.md)). <sup>m</sup>
 13. **Counts stay current.** The sidebar badges and the heading's total
@@ -391,7 +414,11 @@ the account's roles, never on which dashboard page it opens from:
 - **Notification opt-out**: each editor can block the monthly
   outstanding-tasks email in their profile's notification settings. The
   control there is labelled "Weekly email of outstanding tasks", though the
-  email is monthly ⚠ [A8](#a8). The email's unsubscribe link does the same.
+  email is monthly; a preprint server offers the same control, yet sends
+  no such email ⚠ [A8](#a8). <sup>a8</sup>
+
+  The email's own unsubscribe link does the same; no screen sends that
+  email on demand. <sup>n</sup>
 - **Journal setup**: whether sections, categories and issues exist decides
   which filter fields appear (Fields table). Disabling submissions hides
   the neighboring "Start A New Submission" entry (owned by
@@ -881,35 +908,49 @@ Left out of the scenarios above, by reason:
     (`docs/issues/U23-A15-dashboard-sorted-header-not-announced.md`)
     proposes, once fixed [report 2026-10-21]
   - the guard for A10 (issue report `docs/issues/U23-A10-pager-next-lacks-spoken-label.md`): on a list with two pages, every pager button carries a "Go to …" name, "Go to Next" included [report 2026-10-04]
+  - a review row's Stage cell naming its round: "Review (Round 1)" on a journal, "External Review (Round 1)" and "Internal Review (Round 1)" on a press (Rule 5) [sweep 2026-11-18]
+  - two sections, or two categories, applied at once giving one chip each, and one chip's X dropping its value alone (Rule 8a) [report 2026-11-18]
+  - a decline taken on a review stage: "Declined during the Review stage." on a journal, "Declined during the External Review stage." and "Declined during the Internal Review stage." on a press (Rule 9b) [sweep 2026-11-18]
+  - a recommending editor's row before they record theirs, reading as Rule 9e: "Assign Reviewers" on a round with no reviewers, the reviewers' indicators otherwise {OJS OMP} (Rule 9f) [report 2026-11-18]
+  - with recommending editors on board, the deciding editor's "Recommending Editors are tasked to advise the next steps for this submission" with no indicators, and an unassigned Journal Manager's cell: the same sentence once the round has a reviewer, "Assign Reviewers" before {OJS OMP} (Rule 9f) [sweep 2026-11-18]
+  - "Reviews overdue" (Rule 2) and the "Review Request overdue by {days} days" and "Review overdue by {days} days" popovers with their buttons (Rule 10), reached by setting a past date through the popover's "Edit Due Date" [sweep 2026-11-18]
+  - a countdown ring reading 1 for a response due tomorrow, set through "Edit Due Date" (Rule 10; the late hour and other browser time zones: [A21](#a21)) [sweep 2026-11-18]
+  - the "Categories" filter narrowing to a submission in a category (Fields), on a scratch journal given categories and a submission put in one [sweep 2026-11-18]
+  - a view switch or a new search in selection mode ending it: no checkbox and no "Delete Incomplete Submissions" button left, nothing deleted (Rule 12; scenario 12 reads only that no row stays ticked) [sweep 2026-11-18]
+  - scenario 6, "Close": the list reloading as the panel closes; and on a press and a preprint server, "Reload": the panel reopening on the same submission, not merely on one (Rule 11) [sweep 2026-11-18]
+  - scenario 9, every indicator its bullets name read as a countdown ring or an icon, on a press as on a journal; on a press, "Assign Reviewers" read before it is pressed, the window it opens read by its "Add Reviewer" heading, and "Reviews submitted" opened rather than read from its badge (Rule 10) [sweep 2026-11-18]
+  - scenario 8, "Back on the list": the heading total moving in place, by assigning the editor from the "Needs editor" view, whose total falls from 1 to 0 (Rule 13) [sweep 2026-11-18]
+  - scenario 7 on a preprint server: "Days" clicked twice with the address following each click, and the control comparing the whole order after a reload of a sorted address, on preprints that do not share one submission date and time (Rule 5, A16) [sweep 2026-11-18]
+  - scenario 1, "Control": exactly one "No Items" row, on a journal and a preprint server [sweep 2026-11-18]
+  - scenario 3, "The search box": the box's full label, on a press [sweep 2026-11-18]
+  - scenario 10, "My Submissions as Author": the sidebar group itself listing the submission, on a press [sweep 2026-11-18]
+  - scenario 13, "The scheduled row": "To be published in issue {issue}" read in the activity cell, not anywhere on the row [sweep 2026-11-18]
+  - scenario 15, "The sidebar": the group holding six entries in all, not only the six named [sweep 2026-11-18]
 - **Nothing new to test**:
   - the "Showing {first} to {last} of {total}" line under the list, and "Previous" and "Next" that cannot be pressed at the ends of the pager (Rule 5)
   - Site Administrator holding Journal Manager in the journal, journal-wide like the Journal Manager (Actors row 2; the Journal Manager's views, scenario 2)
   - a Site Administrator whose editorial roles in the journal are only Section Editor ones, assigned-only like the Section Editor (Rule 3; the Section Editor's views, scenario 2)
-  - assistants, assigned-only like the Section Editor (Actors row 2; the Section Editor's views, scenario 2)
-  - an assigned Section Editor getting the same popovers and buttons (Rule 10; the Journal Manager's, scenario 9)
+  - assistants, a preprint server's Editorial Board Member included, assigned-only like the Section Editor (Actors row 2; the Section Editor's views, scenario 2)
+  - an assigned Section Editor getting the same indicators, popovers and buttons (Rule 10; the Journal Manager's, scenario 9)
   - "Loaded" heard after a search, a sort or a view chosen in the sidebar (Rule 5; the same word in the same place as on the landing, scenario 1)
 - **Register carries it**:
   - A2 ("Complete submission" landing the editor in the author's wizard)
   - A3 (the conflict notice saying "Journal Manager" whoever is looking)
-  - A7 (no indicator for declined and cancelled reviewers)
-  - A8 (the opt-out labelled "Weekly email of outstanding tasks")
-  - A9 (a Site Administrator without Journal Manager in the journal)
+  - A7 (an assigned assistant seeing no indicator for declined and cancelled reviewers)
+  - A8 (the opt-out labelled "Weekly email of outstanding tasks", and offered on a preprint server)
+  - A9 (a Site Administrator without Journal Manager in the journal, left with Reader, Reviewer, Author or Section Editor)
   - A10 (the pager's "Next" announced as plain "Next")
-  - A14 (a recommending editor's row before recording; Rule 9f)
   - A15 (no sort state told to a screen reader; Rule 5)
   - A16 (paging repeats and skips submissions sharing one date and time; Rule 5)
   - A17 (strict mode on: the sidebar's search failing; Rule 7, Settings bullet 4)
   - A18 (a search address with no view, or one the account lacks, opening "Assigned to me" without its search; Rule 4)
   - A19 ("Loaded" heard before the rows arrive, and not at all at an address naming its view; Rule 5)
   - A20 (a round whose every reviewer was cancelled or declined reading "All reviews are confirmed and a decision is needed."; Rule 9e)
+  - A21 (a countdown ring's days late in the site's day, or read from a browser in another time zone; Rule 10)
   - OMP1 (no series filter on a press)
 - **No seed**:
-  - "Reviews overdue" (Rule 2) and the "Review Request overdue by {days} days" popover (Rule 10): no seed backdates a request or a review deadline
-  - the "Review overdue by {days} days" popover of an accepted review past its deadline, with "Edit Due Date", "View details" and "Cancel Reviewer" (Rule 10): no seed backdates a review deadline
-  - a countdown ring reading 1 for a response due tomorrow, at any hour of today (Rule 10): no seed sets a due date to a chosen day
   - "Author revisions submitted" (Rule 2), "Revisions submitted" and "New review round to be created" (Rule 9e): no seed uploads the author's revisions
-  - the "Categories" filter narrowing to a submission in a category (Fields): no seed puts a submission in a category, and a scratch journal gets no categories
-  - recommending editors on board: the three recommendation messages {OJS OMP} (Rule 9f)
+  - "An editorial recommendation has been received", "All editorial recommendations have been received, and a decision is required." and "Recommendation has been made by you." {OJS OMP} (Rule 9f): no seed records a recommendation
   - the monthly "Outstanding editorial tasks for {journal}" email: its recipients, up to 20 items, links and in-app notification {OJS OMP} (Actors row 8, Side effects)
   - nothing sent to editors with nothing outstanding, to opted-out or removed accounts, to assistants or to Site Administrators (Side effects, Settings)
   - a preprint server sending no monthly email (Side effects)
@@ -935,17 +976,16 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A15](#a15) | A screen reader is never told which column the submissions list is sorted by, or in which direction | 🐞 | low | issues (claude), 2026-10-21 — re-verified |
 | [A16](#a16) | Paging a view whose submissions share a submission date and time shows some on several pages and others on none | 🐞 | medium | — |
 | [A17](#a17) | With strict mode on, every search from the sidebar's "Search submissions" box fails and shows "Search Results (0)" | 🐞 | low · crash: server | — |
-| [A1](#a1) | Section Editors and assistants have no "Declined" view, so a declined submission they are assigned to drops out of every view; on 3.5 nothing on the dashboard brings it back | 🐞 | medium | upstream sync (claude), 2026-10-28 — regression report |
+| [A1](#a1) | Section Editors and assistants have no "Declined" view, so a declined submission they are assigned to drops out of every view; in the 3.5 release nothing on the dashboard brings it back | 🐞 | medium | upstream sync (claude), 2026-10-28 — regression report |
 | [A19](#a19) | On the submissions dashboard a screen reader hears "Loaded" before the list arrives, and nothing on a reload | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A2](#a2) | Editors are offered "Complete submission" on other people's incomplete submissions, landing them in the author's wizard | ❓ | minor | — |
 | [A3](#a3) | The author/reviewer conflict notice always says "as a Journal Manager", whoever is looking, on presses and preprint servers too | ❓ | minor | — |
-| [A7](#a7) | Declined and cancelled reviewers show no activity indicator at all to assigned Section Editors and assistants | ❓ | minor | — |
-| [A8](#a8) | The profile's opt-out for the monthly outstanding-tasks email is labelled "Weekly email of outstanding tasks" | ❓ | minor | — |
-| [A9](#a9) | A Site Administrator without Journal Manager in the journal is let in but listed by their journal role: with Reader only, an "Error" dialog over an empty list | ❓ | minor | — |
-| [A11](#a11) | Two values chosen in one filter field: one chip or two? | ❓ | minor | — |
-| [A14](#a14) | A recommending editor's row before recording; never seen on screen | ❓ | minor | — |
+| [A7](#a7) | Declined and cancelled reviewers show no activity indicator at all to assigned assistants | ❓ | minor | — |
+| [A8](#a8) | The profile's opt-out for the monthly outstanding-tasks email is labelled "Weekly email of outstanding tasks", and a preprint server, which sends no such email, offers it too | ❓ | minor | — |
+| [A9](#a9) | A Site Administrator without Journal Manager in the journal is let in but listed by their journal role: with Reader or Reviewer only, an "Error" dialog over an empty list; with Author only, an empty list and no message | ❓ | minor | — |
 | [A18](#a18) | An address with a search phrase but no view, or a view the account lacks, opens "Assigned to me" with the phrase and filters dropped | ❓ | minor | — |
 | [A20](#a20) | A round whose every reviewer was cancelled or declined reads "All reviews are confirmed and a decision is needed." on the dashboard row | ❓ | user-visible | — |
+| [A21](#a21) | A countdown ring's days late in the site's day, or from a browser in another time zone, not read since the rule's change merged | ❓ | minor | — |
 | [OMP1](#omp1) | A press's filter panel never offers a series filter, however many series exist | ❓ | minor | — |
 
 ### All apps
@@ -957,9 +997,9 @@ The "Declined" view exists only for journal-wide accounts (Rule 3). A
 Section Editor (series editor, moderator) or assistant whose assigned
 submission is declined loses it from every view on their dashboard, and
 the decision's confirmation tells the manager it was "sent to the
-archives". On `main` their global search still finds it (Rule 7), but
-nothing tells them so; 3.5 has no such search box, so nothing on the
-dashboard brings it back. Until 3.4 the "Archived" tab listed it for
+archives". Their sidebar search still finds it (Rule 7), but nothing
+tells them so. In the 3.5 release, whose dashboard has no sidebar
+search box, nothing on the dashboard brings it back. Until 3.4 the "Archived" tab listed it for
 them, and `pkp/pkp-lib#8887`, which introduced the views, scopes every
 view but "Assigned to Me" to the editor's own assignments: regression,
 not choice (it was a ❓ leaning "intended" until 2026-10-28). The fix
@@ -992,26 +1032,31 @@ Basis: probe + code. <sup>a3</sup>
 
 <a id="a7"></a>
 **A7 — Declined and cancelled reviewers vanish for assistants** · ❓ · minor.
-On the same submission at the same moment, a Journal Manager's row shows an
-indicator for every reviewer on the round, declined and cancelled ones
-included. An assigned Section Editor or assistant sees indicators only for
-the others, and nothing marks the omission. The popovers they do get carry
-the editor's full working buttons.
-Question: is the reduced indicator set for assigned (non-manager) users
-intended? Lean: an omission. The list assigned users receive simply leaves
-declined and cancelled reviewers out, while every other part of the cell
-matches the manager's.
+On the same submission at the same moment, a Journal Manager's row and an
+assigned Section Editor's show an indicator for every reviewer on the
+round, declined and cancelled ones included. An assigned assistant sees
+indicators only for the others, and nothing marks the omission. On a
+round whose only reviewer declined or was cancelled, the assistant's cell
+reads "All reviews are confirmed and a decision is needed." with nothing
+beneath it ([A20](#a20)). The popovers they do
+get carry the editor's full working buttons.
+Question: is the reduced indicator set for assistants intended? Lean: an
+omission. The list an assistant receives leaves declined and cancelled
+reviewers out, while every other part of the cell matches the Section
+Editor's.
 Basis: probe. <sup>a7</sup>
 
 <a id="a8"></a>
-**A8 — The outstanding-tasks opt-out says "Weekly"** {OJS OMP} · ❓ · minor.
+**A8 — The outstanding-tasks opt-out says "Weekly"** · ❓ · minor.
 The profile's notification settings name the opt-out for the
 outstanding-tasks email "Weekly email of outstanding tasks", but the email
 goes out monthly (Side effects), and nothing else on screen calls it
-weekly.
+weekly. A preprint server, which never sends the email, offers the same
+opt-out to its Preprint Server Manager and Moderator.
 Question: which is wrong, the label or the schedule? Lean: the label. The
 task is deliberately registered to run monthly on the 1st, so the label
-reads like a leftover from an earlier cadence.
+reads like a leftover from an earlier cadence; on a preprint server the
+control opts out of nothing.
 Basis: probe + code. <sup>a8</sup>
 
 <a id="a9"></a>
@@ -1022,9 +1067,13 @@ the journal. With Reader as their only role there, the page opens under an
 operation.", "OK") over "Search Results (0)" and one "No Items" row, and
 the sidebar's "Editor Dashboard" group lists no views; every view's
 address, and one that opens a workflow panel, does the same, and no panel
-opens. With Section Editor left instead, "More Actions" and the "Assigned
-To Editor" filter stay over an assigned-only list (Rule 3). Author or
-Reviewer alone is untried. The same
+opens. With Reviewer as their only role {OJS OMP}, the page opens the same
+way as with Reader. With Author as their only role, it opens "Search
+Results (0)" with one "No Items" row and no message, "More Actions" and
+"Filters" still offered, and an "Editor Dashboard" group with no entries
+beside "My Submissions as Author". With
+Section Editor left instead, "More Actions" and the "Assigned To Editor"
+filter stay over an assigned-only list (Rule 3). The same
 "Error" follows the Reader-only administrator onto every editorial page
 that carries the side menu, since it comes from the "Editor Dashboard"
 entry's count ([Reader comments & moderation
@@ -1048,21 +1097,6 @@ Jobs, Statistics, DOIs, Announcements, Institutions, the press's
 Catalog, "Add Reviewer" and Comments. The editorial dashboard shows it
 past 30 submissions, the Users list past 25 users.
 Basis: probe + code, 2026-10-04. <sup>a10</sup>
-
-<a id="a11"></a>
-**A11 — One chip per field, or per value?** · ❓ · minor.
-Two values in one filter field were never applied: one chip or two,
-and what an X drops, is open.
-Question: one chip per value, each X dropping its own? Lean: yes; a chip
-names one value ("Section: Shut") and its X removes it.
-Basis: code. <sup>a11</sup>
-
-<a id="a14"></a>
-**A14 — A recommending editor's row before they record** · ❓ · minor.
-Before a recommending editor records theirs, their row (Rule 9f) was
-never seen on screen.
-Question: does it read as Rule 9e? Lean: yes, per the code.
-Basis: code. <sup>a14</sup>
 
 <a id="a15"></a>
 **A15 — A screen reader is never told which column the submissions list is sorted by, or in which direction** · 🐞 · low.
@@ -1150,7 +1184,20 @@ journal.
 Question: what should the cell say for a round whose reviewers were all
 cancelled or declined? Lean: as for A4 of the review stage, "a decision
 is needed" can stand, "all reviews are confirmed" is wrong.
-Basis: test run + probe + code, 2026-11-12 and 2026-11-13. <sup>a20</sup>
+Basis: test run + probe + code, 2026-11-12, 2026-11-13 and 2026-11-18. <sup>a20</sup>
+
+<a id="a21"></a>
+**A21 — A countdown ring's days late in the day or from another time zone, unread since the change** · ❓ · minor.
+Rule 10 says a request or review due tomorrow reads 1 on its countdown
+ring at any hour of the site's today, whatever the browser's time zone.
+Since the change merged, the ring has been read only early in the site's day, from a browser
+in the site's own time zone: a response due tomorrow read 1. Late in the
+site's day, and from a browser many hours ahead of or behind the site,
+it was last read on the change that brought the rule, before its merge.
+Question: does the ring still read 1 for tomorrow late in the site's day
+and from a browser in another time zone? Lean: yes, as the reads at the
+change itself found.
+Basis: probe, 2026-10-08 and 2026-11-18. <sup>a21</sup>
 
 ### OMP
 
@@ -1182,6 +1229,12 @@ Basis: probe + code. <sup>omp1</sup>
 
 <a id="a13"></a>
 **A13 — The recommending editors' line may read a code in French** · ✅ · retired. Overturned: a missing translation is no finding.
+
+<a id="a11"></a>
+**A11 — One chip per field, or per value?** · ✅ · retired. Settled on screen: one chip per value, each X dropping its own.
+
+<a id="a14"></a>
+**A14 — A recommending editor's row before they record** · ✅ · retired. Settled on screen: it reads as Rule 9e.
 
 ---
 
@@ -1260,6 +1313,17 @@ reviews" keeps a submission while a submitted review awaits confirmation
 and drops it only once reviews are confirmed; "Awaiting reviews" lists
 only outstanding requests; a required-reviews setting of 0 behaves as a
 floor of one.
+Live-probed 2026-11-18 (OPS `main`, two runs, a scratch server; Actors
+preamble): an Editorial Board Member (an assistant-level group, role id
+`ROLE_ID_ASSISTANT`, the preprint server's only one in
+`registry/userGroups.xml`, with no workflow stage of its own) landed on
+`dashboard/editorial?currentViewId=assigned-to-me` with the group
+"Assigned to me", "Active submissions", "All in production stage",
+"Scheduled for publication" and "Published", each "(0)" with one "No
+Items" row (it was assigned to nothing); its "Filters" panel held "Days
+since last activity" alone; "More Actions" was absent; a typed
+`?currentViewId=needs-editor` or `declined` opened "Assigned to me (0)".
+The server's manager had the same five plus "Declined".
 
 <a id="fn-c"></a>
 **c — scope.** `getDashboardViews()` computes
@@ -1351,7 +1415,11 @@ on ID and Days only; the heading carried its count ("Active submissions
 row; a 31-row view showed "Previous / 1 / 2 / Next" pager buttons while a
 1-row view showed none. The Stage cell of an incomplete submission read
 "Incomplete" (OJS + OMP, live-probed 2026-08-26); OPS has no "Incomplete"
-label — an incomplete preprint's read "Production". Sort-cycle and paging address behavior: fn-a5 and
+label — an incomplete preprint's read "Production". A review row's Stage
+cell read "Review (Round 1)" (OJS) and "External Review (Round 1)" /
+"Internal Review (Round 1)" (OMP), live-probed 2026-11-18 (two runs,
+scratch journal and press).
+Sort-cycle and paging address behavior: fn-a5 and
 the Rule 4 exceptions (paging XHR carries `offset`/`page` params; the URL
 never does). The line under the list is `TablePagination.vue`
 (`common.showingXofX`), and the pager (`Pagination.vue`, nav label
@@ -1510,6 +1578,17 @@ search alone did not show; pressing that "Clear Filters" gave "Active
 submissions (31)" with the "Search: Filler" chip alone, the address
 keeping `searchPhrase=Filler` and losing `daysInactive`; a reload read
 the same.
+Two values in one field (Rule 8a; formerly A11): `DashboardActiveFilters.vue`
+renders one chip per entry of `activeFiltersList` (field label plus value
+label), its X emitting `removeFilter(name, value)`. Live-probed 2026-11-18
+(two runs, scratch contexts, the Journal Manager): "Archive" and "Main"
+ticked in "Section" (OJS, OPS) read "Active submissions (3)" with the
+chips "Section: Archive" and "Section: Main" (their X named "Clear filter:
+Section: Archive" and "Clear filter: Section: Main") and both `sectionIds`
+in the address; the X of "Section: Archive" left "Active submissions (2)",
+the two "Main" submissions, the chip "Section: Main" alone and one
+`sectionIds`. "Cat One" and "Cat Two" picked in "Categories" (all three
+apps) gave the two chips "Categories: Cat One" and "Categories: Cat Two".
 
 <a id="fn-j"></a>
 **j — the activity cell.**
@@ -1534,7 +1613,9 @@ completed / overdue reviews, returned to review) to
 `PENDING_RECOMMENDATIONS`, an alert with no indicators, ahead of the 9e
 branches (revision statuses unmapped); recommend-only
 branches per `currentUserCanRecommendOnly` / `currentUserRecommendation`
-(fn-a14);
+(a recommend-only editor without their own recommendation gets the
+recommendation round statuses mapped back to reviews-completed or
+pending-reviews, so the 9e branches render; code read 2026-09-30);
 `WORKFLOW_STAGE_ID_EDITING` → `dashboard.copyEditedFilesUploaded`;
 Production + scheduled + issue label → `dashboard.toBePublishedInIssue`
 (the issue condition makes 9h OJS-only in practice); else empty. The
@@ -1542,8 +1623,8 @@ conflict branches suppress "View" and the cell's action buttons alike
 (`DashboardCellSubmissionActions.vue::showButton` — editorial page only).
 Live-probed 2026-08-26, branch by branch: conflict rows rendered both
 fixed sentences verbatim, press included, with no buttons on the row
-(OJS + OMP, author and reviewer variants; the Site-Administrator-as-author
-wording leg rests on the shared string — fn-a3); "Complete submission"
+(OJS + OMP, author and reviewer variants; the Site Administrator's
+rows: fn-a3); "Complete submission"
 entered the author's wizard (fn-a2); "Assign Editor" opened the "Assign
 Participant" window, and after assigning, the cell went quiet, the row
 left "Needs editor" and its count dropped (OJS + OMP), while a fresh
@@ -1563,6 +1644,24 @@ copyediting rows counted uploads (OJS + OMP); a scheduled OJS row read
 longer listed under "Active submissions"; production and published rows
 on OMP and OPS kept an empty cell (no scheduled state is reachable
 through a press's publish screens).
+Live-probed 2026-11-18 (two runs each, scratch journals, presses and
+servers). Rule 9b: a decline seeded on the review stage read "Declined
+during the Review stage." (OJS) and "Declined during the External Review
+stage." (OMP), one seeded on OMP's internal review "Declined during the
+Internal Review stage."; Submission-stage declines read "Declined during
+the Submission stage." (OJS, OMP) and the preprint server's "Declined
+during the Production stage."; every declined row kept "View". Rule 9f
+(OJS, OMP; three submissions in review, each with an assigned deciding
+Section Editor and a recommending Section Editor seeded through
+`participants[].recommendOnly`, none recorded: "Recommend bare study" with
+no reviewers, "Recommend pending study" with one open request, "Recommend
+done study" with one completed review): the deciding Section Editor's
+cell read "Recommending Editors are tasked to advise the next steps for
+this submission", no indicator, on all three; the recommending one's read
+"Assign Reviewers", one "Awaiting Response from the reviewer" ring and
+one "Review completed on {date}" icon (formerly A14); an unassigned
+Journal Manager's read "Assign Reviewers" on the first and the sentence,
+no indicator, on the other two.
 
 <a id="fn-k"></a>
 **k — review activity indicators.**
@@ -1634,6 +1733,20 @@ tomorrow read 1 at the heads and 0 at the bases, one due on the site's
 today 0 at both, one due on the site's yesterday "overdue by 1 days" at
 both. The dashboard's "Days" column calls the function without the
 option and is unchanged.
+Live-probed 2026-11-18 (OJS and OMP `main`, two runs, a scratch journal
+and press, the Journal Manager): the popover's "Edit Due Date" opened
+"Edit Review", which took past dates. A response due date set to
+tomorrow read 1 on the ring (fn-a21). A response date set to yesterday
+gave "Review Request overdue by 1 days" ("This reviewer has not
+responded to the review request. A response was due on {date}", "Edit
+Due Date" · "View details" · "Unassign"); a review date set to yesterday
+on an accepted request gave "Review overdue by 1 days" ("This reviewer
+has not completed their review. The review was due on {date}.", "Edit Due
+Date" · "View details" · "Cancel Reviewer"); both rings read -1 in the
+attention color, and both submissions listed under "Reviews overdue",
+its badge at 2. The assigned Section Editor's row carried an indicator
+for every reviewer, declined and cancelled ones included; the assigned
+Funding Coordinator's did not (fn-a7).
 
 <a id="fn-l"></a>
 **l — open in place.** `dashboardPageStore.js::openWorkflowModal()`: side
@@ -1671,7 +1784,12 @@ selection; the Confirm leg deleted on OMP and on OPS (the preprint-server
 manager's delete succeeded, as the role-only branch predicts); a Section
 Editor's and an assistant's dashboards rendered no "More Actions" button
 at all (OJS + OMP, with the button row's neighboring controls as positive
-controls). The single-row delete endpoint on the
+controls). Live-probed 2026-11-18 (all three apps, two runs): in
+selection mode, opening "Published" and returning to "Active submissions
+(3)", or committing a search that listed the two drafts, left no checkbox
+on any row and no "Delete Incomplete Submissions" button, with both
+drafts still listed. The filters leg rests on the 2026-08-26 drive and the same
+watcher. The single-row delete endpoint on the
 same API is not offered by this page's screens.
 
 <a id="fn-n"></a>
@@ -1691,19 +1809,20 @@ production idle > 30 days. Mailable `PKP\mail\mailables\EditorialReminder`
 for {$contextName}", body listing the tasks with links to
 `dashboard/editorial`, from the context's principal contact, with an
 unsubscribe link (`allowUnsubscribe`) and a paired in-app notification.
-Sent only when at least one line exists. Not screen-reachable to trigger;
-claims here rest on this code path (no probe item — see the probe-list
-note).
+Sent only when at least one line exists. No screen triggers the task or
+sends the email, so every claim resting on this footnote is read from the
+code, the unsubscribe link included.
 
 <a id="fn-o"></a>
 **o — the read-and-launch claim.** The send-nothing leg live-probed
 2026-08-26 (OJS): the Mailpit total stood at 500 before, during and after
 a full session of listing, searching and filtering — nothing sent. The
-log-nothing leg has not been checked on a log surface; it rests on the
-code path — the listing ops are read-only queries on the backend
-submissions API (fn-a, fn-m) with no logging step. One before/after look
-at a listed submission's activity log (or the journal's event log) around
-a listing/search/filter pass would settle it; lean: holds.
+listing ops are read-only queries on the backend submissions API (fn-a,
+fn-m) with no logging step. Live-probed 2026-11-18 (all three apps, two
+runs, a scratch context): the context's `event_log` rows for the listed
+submissions stood at 14 before and after a pass of search, the search
+chip's X, a filter, a view switch and an in-page search, and
+Mailpit held nothing new for the Journal Manager or the author.
 
 <a id="fn-s1"></a>
 **s1 — scenario 1 seeding.** A scratch journal (the suites' choice, so every
@@ -1916,7 +2035,14 @@ produces the publish-immediately confirmation instead of the schedule one
 territory, no spec yet). To seed the scheduled state, pick "Assign To
 Future Issue and Publish Immediately" first, then switch to "…Schedule
 Only": the confirmation then reads "This will be published when {issue}
-is published…" and the row schedules correctly.
+is published…" and the row schedules correctly. The suites seed the
+scheduled article through the scenario tooling instead: `published: true`
+into an unpublished issue reaches the scheduled row only with `decisions:
+['skipExternalReview', 'sendToProduction']`. Without them it lists under
+"Scheduled for publication" with Stage "Submission" and, with no editor
+assigned, "Assign Editor" in its activity cell (live-probed 2026-11-18,
+two runs: with the decisions, Stage "Scheduled" and "To be published in
+issue Vol. 9 No. 2 (2026)").
 
 <a id="fn-s14"></a>
 **s14 — scenario 14 seeding.** {OMP} A scratch press; two monographs: one
@@ -2002,9 +2128,14 @@ journal-wide accounts (fn-c), so the misnaming shows to Site
 Administrators and to OMP/OPS managers. Live-probed 2026-08-26 (OJS +
 OMP, author and reviewer variants): both sentences rendered verbatim —
 "as a Journal Manager" on the press too — with no trailing period and no
-buttons on the row. The Site-Administrator-as-author rendering rests on
-the shared string alone: an admin-authored submission was not
-constructible without mutating the shared seeded account.
+buttons on the row. Live-probed 2026-11-18 (two runs, `admin` holding
+Journal Manager and Author, or Journal Manager and Reviewer, in a scratch
+journal, press or server): the Site Administrator's own row read "You
+cannot access this submission as a Journal Manager since you are the
+author. To view it, go to "My Submissions"" (OJS, OMP, OPS) and the
+reviewer variant "You cannot access this submission as a Journal Manager
+since you are the reviewer. To view it, go to "Review Assignments"" (OJS,
+OMP), with no button on the row.
 
 <a id="fn-a5"></a>
 **a5 — A5 evidence.** Live-probed 2026-08-26 (OJS, manager, 31-row view;
@@ -2056,7 +2187,16 @@ assigned-user op (`_submissions/assigned`) returns the same item with the
 declined and cancelled assignments omitted server-side. The assistant's
 popovers offered exactly the editor's button sets, and "Edit Due Date"
 opened the full "Edit Review" window live (open only; no assistant-side
-save probed).
+save probed). Live-probed 2026-11-18 (OJS and OMP `main`, two runs, a
+scratch journal and press, the same submissions read by the Journal
+Manager, an assigned Section Editor and an assigned Funding Coordinator):
+the Section Editor's row carried every indicator the manager's did
+("Pending study" 3, a round whose single reviewer declined 1, a round
+whose single reviewer was cancelled 1); the Funding Coordinator's carried
+2, 0 and 0, the last two reading "All reviews are confirmed and a
+decision is needed." alone (A20). Both got the editor's popover buttons.
+The Section Editor's list comes from the same assigned-user request
+(fn-c), so the omission follows the assistant's role (code not re-read).
 
 <a id="fn-a8"></a>
 **a8 — A8 evidence.** Live-probed 2026-08-26 (OJS seeded, an editor's
@@ -2065,8 +2205,12 @@ email of outstanding tasks" with the "Enable these types of
 notifications." / "Do not send me an email for these types of
 notifications." checkboxes — the opt-out surface behind fn-n's blocked
 list. The schedule is `monthlyOn(1)` (fn-n). The {OJS OMP} scope follows
-the email's own; the label was observed on OJS — the OMP leg rests on the
-shared notification machinery, not separately probed.
+the email's own; the label was observed on OJS. Live-probed 2026-11-18
+(OJS, OMP and OPS `main`, two runs, a scratch context's manager and
+Section Editor, Series Editor or Moderator): Profile › Notifications
+listed "Weekly email of outstanding tasks" on all three apps, the
+preprint server included, whose scheduler never registers the task
+(fn-n).
 
 <a id="fn-a9"></a>
 **a9 — A9 evidence.** The page gate admits `ROLE_ID_SITE_ADMIN` (fn-a),
@@ -2095,6 +2239,19 @@ delete then reaches incomplete submissions the account cannot list was
 not driven. Control: the same journals before the role was ended,
 "Active submissions (2)", every request 200. No response of 500 or more
 and no page error in any run.
+Live-probed 2026-11-18 (two runs each; Author leg OJS, OMP and OPS,
+Reviewer leg OJS and OMP; `admin` given Author or Reviewer in a scratch
+context, Journal Manager then ended on their edit page, signed in afresh,
+then `{journal}/dashboard/editorial` typed): with Author left,
+`_submissions/assigned` answered 200 and the page read "Search Results
+(0)", one "No Items" row and no dialog, with "More Actions" and "Filters"
+present, the "Editor Dashboard" group empty and "My Submissions as
+Author" beside it (sign-in had landed on My Submissions). With Reviewer
+left, `_submissions/assigned` answered 401 and the "Error" dialog read
+"The current role does not have access to this operation." with "OK"
+over "Search Results (0)", beside "My Assignments as Reviewer" (sign-in
+had landed on the reviewer's list); the console logged the failed 401
+load and no script error.
 
 <a id="fn-a10"></a>
 **a10 — A10 evidence.** The shared `Pagination.vue` gives "Previous" and
@@ -2106,21 +2263,6 @@ held buttons named "Go to Previous", "Go to Page 1", "Go to Page 2"
 Next" matched nothing. The same component pages the backend's other
 tables.
 Issue report: [pkp-e2e#901](https://github.com/jardakotesovec/pkp-e2e/issues/901) ([docs/issues/U23-A10-pager-next-lacks-spoken-label.md](../issues/U23-A10-pager-next-lacks-spoken-label.md)).
-
-<a id="fn-a11"></a>
-**a11 — A11 evidence.** `DashboardActiveFilters.vue` renders one chip per
-entry of `activeFiltersList` (keyed field label + value label), its X
-emitting `removeFilter(name, value)`. The 2026-09-29 probes (fn-i) applied
-one value per field only.
-
-<a id="fn-a14"></a>
-**a14 — A14 evidence.** In `useDashboardConfigEditorialActivity.js`, a
-recommend-only editor without their own `currentUserRecommendation` has
-the recommendation round statuses mapped back to reviews-completed (every
-active review confirmed) or pending-reviews, so the 9e branches render
-(code read 2026-09-30). Not driven: no seed puts recommending editors on a
-round. It is settled by reading that editor's dashboard row on a round
-under review before they record a recommendation.
 
 <a id="fn-a15"></a>
 **a15 — A15 evidence.** The shared table's `TableColumn.vue` binds
@@ -2184,6 +2326,10 @@ and "Canada" on OMP; the kept script
 with `nb`): "Search Results (0)" and "No Items", no message; with
 `Application::ASSOC_TYPE_PUBLICATION` in that line, the same search
 listed its matches. The in-page search box was not tried.
+Walked again 2026-11-18 (drift sweep; the same script with `nb` on a
+dataset fleet reset before each of two runs, OJS, OMP and OPS `main`):
+the list request answered 500 with the same message, and the page read
+"Search Results (0)" and "No Items" on all three apps in both runs.
 Issue report: [pkp-e2e#698](https://github.com/jardakotesovec/pkp-e2e/issues/698) ([docs/issues/U39-A5-library-delete-strict-mode-error.md](../issues/U39-A5-library-delete-strict-mode-error.md)), tracked in *[Submission & Publisher Libraries](U39-submission-and-publisher-libraries.md#a5)* A5.
 
 <a id="fn-a18"></a>
@@ -2255,8 +2401,23 @@ cancelled by editor" indicator. Probed again 2026-11-13 on OJS and OMP
 *Review stage & rounds*): after "Cancel Reviewer" on the round's single
 accepted reviewer, the row read "All reviews are confirmed and a
 decision is needed." above "Review request cancelled by editor" on both.
-The declined-only round not driven on the dashboard. The suites do not
-assert the sentence either way.
+Live-probed 2026-11-18 (OJS and OMP `main`, scratch journal and press,
+two runs): a round whose single reviewer declined read the sentence above
+"Review Request declined on {date}" for the Journal Manager and the
+assigned Section Editor; the assigned Funding Coordinator read the
+sentence alone, with no indicator (A7), on that round and on the
+cancelled one. The suites do not assert the sentence either way.
+
+<a id="fn-a21"></a>
+**a21 — A21 evidence.** The rule rests on pkp/ui-library#1012, driven at
+its heads on 2026-10-08 before the merge (fn-k): a response due tomorrow
+read 1 from browsers set to UTC+14 and UTC-11, and on a site a day
+ahead of the machine. Live-probed 2026-11-18 (OJS and OMP `main`, two
+runs, a scratch journal and press, browser and site on UTC): a response
+due date set to tomorrow through "Edit Due Date" at about 05:05 UTC read
+1 on the ring. The late hour of the site's day and a browser in another
+time zone were not driven on `main`. Settled by the same read from a
+browser set to UTC+14 and to UTC-11, late in the site's day.
 
 <a id="fn-omp1"></a>
 **omp1 — OMP1 evidence.** OMP's

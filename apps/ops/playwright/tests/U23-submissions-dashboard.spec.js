@@ -15,8 +15,8 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
- * - A1 🐞, A2 ❓, A3 ❓, A9 ❓, A10 🐞, A11 ❓, A15 🐞, A17 🐞, A18 ❓
- *   (A7, A8, A14, A16 and OMP1 are journal or press only).
+ * - A1 🐞, A2 ❓, A3 ❓, A8 ❓, A9 ❓, A10 🐞, A15 🐞, A17 🐞, A18 ❓, A19 🐞
+ *   (A7, A16, A20, A21 and OMP1 are journal or press only).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. Tests that assert counts or sidebar badges isolate on
