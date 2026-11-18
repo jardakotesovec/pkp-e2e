@@ -707,6 +707,12 @@ script.
   `notices`, the page notices shown since the page's last `screen()`.
   `text` follows CSS `text-transform`, so an upper-cased heading there is
   not the source text.
+- `axExposure(page, selector)`: what Chromium's accessibility tree
+  exposes under an element (pruned, ignored, the roles of its exposed
+  descendants), for a claim about what a screen reader reaches, which an
+  aria snapshot cannot tell from absence. Read it before any mouse press
+  inside the element: a press inside an `aria-hidden` subtree makes
+  Chromium lift the `aria-hidden` for the rest of the page.
 - `settled(page, locator)`: waits, after `idle()`, until the locator's
   text (an input's value) is non-empty and the same across two reads, and
   returns it. For what fills after `idle()` returns: a Composer page, a

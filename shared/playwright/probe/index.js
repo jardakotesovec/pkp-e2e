@@ -1098,6 +1098,48 @@ async function idle(page) {
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
+ * What Chromium's accessibility tree exposes under the first element matching
+ * `selector` (what a screen reader reaches; an aria snapshot cannot tell an
+ * aria-hidden subtree from an absent one): `{found: false}`; `{found: true,
+ * inTree: false}` when the element is pruned from the tree; otherwise
+ * `{found, inTree: true, ignored, reasons, exposed: {<role>: count}, ignoredCount}`,
+ * `ignored`/`reasons` for the element itself and `exposed` counting the roles
+ * of its non-ignored descendants. Read it before any mouse press inside the
+ * element: a press inside an aria-hidden subtree makes Chromium lift the
+ * aria-hidden for the rest of the page ("Blocked aria-hidden … retained focus").
+ */
+async function axExposure(page, selector) {
+    const cdp = await page.context().newCDPSession(page);
+    try {
+        const {root} = await cdp.send('DOM.getDocument', {depth: 0});
+        const {nodeId} = await cdp.send('DOM.querySelector', {nodeId: root.nodeId, selector});
+        if (!nodeId) return {found: false};
+        const {node} = await cdp.send('DOM.describeNode', {nodeId});
+        const {nodes} = await cdp.send('Accessibility.getFullAXTree');
+        const byId = new Map(nodes.map((n) => [n.nodeId, n]));
+        const top = nodes.find((n) => n.backendDOMNodeId === node.backendNodeId);
+        if (!top) return {found: true, inTree: false};
+        const out = {found: true, inTree: true, ignored: !!top.ignored,
+            reasons: (top.ignoredReasons || []).map((r) => r.name), exposed: {}, ignoredCount: 0};
+        const walk = (n) => {
+            for (const id of n.childIds || []) {
+                const k = byId.get(id);
+                if (!k) continue;
+                if (k.ignored) out.ignoredCount++;
+                else if (k.role && k.role.value && !/^(generic|none|StaticText|InlineTextBox)$/.test(k.role.value)) {
+                    out.exposed[k.role.value] = (out.exposed[k.role.value] || 0) + 1;
+                }
+                walk(k);
+            }
+        };
+        walk(top);
+        return out;
+    } finally {
+        await cdp.detach().catch(() => {});
+    }
+}
+
+/**
  * One SQL statement on the app's own fleet database (`app.db`, slot and
  * line aware), through psql: the rows as text, one per line, columns
  * joined by `|`, trimmed. On the `mysql` and `mariadb` lines it goes to
@@ -1453,6 +1495,7 @@ module.exports = {
     drainJobs,
     apiAs,
     sql,
+    axExposure,
     serverLog,
     usageLog,
     tag,
