@@ -204,6 +204,15 @@ if real, their specs' own probes will resurface them.)
   the OMP drops. Moved here from FEATURE-MAP's out-of-scope list by the
   2026-09-27 scope extension. Code-verified 2026-09-27 (checkout ojs
   `3162c105bf`).
+- Evidence (housekeeping, code-read 2026-11-18): at OJS `main`
+  `0b12d7646e` (lib/pkp `2f2c07fea7`) and `stable-3_5_0` `4032f3dd7d`
+  (lib/pkp `ab7f581349`) the ten names appear only in
+  `classes/notification/Notification.php` (lines 22–31, `0x3000001` …
+  `0x300000A`) and `NotificationManager.php` (their titles, lines 66–75,
+  and `getStyleClass()`, lines 98–107); no file creates a notification
+  of these types, no bundled plugin is named `booksForReview`, and no
+  locale file defines a `plugins.generic.booksForReview.*` key, so a
+  title would show as the raw key. OMP and OPS name none of them.
 - Resolves: maintainer confirmation as dead code (removal candidates).
 
 ### PLUG-024 — OPS `preprintToJournal` (journal relay)
