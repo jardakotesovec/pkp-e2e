@@ -22,7 +22,7 @@
  * everything else left out; 🐞 findings are never asserted as contract):
  * A1, A2, A4, A6, A7, A12, A13, A15, A16, A17, A18, A19, A21, A22, A23,
  * A26, A28, A29, A30, A31, A32, A36, A37, A38, A39, A42, A43, A44,
- * A45, A46, A47, A48, A49, A50, A51, A52, A53, OMP2, OMP6.
+ * A45, A46, A47, A48, A49, A50, A51, A52, A53, A54, OMP2, OMP6.
  *
  * Seeding: scenario endpoints only. Tests that read a server-fed notice
  * ("{name} was assigned…", "Reviewer removed.") or a reviewer's mailbox or
@@ -100,6 +100,7 @@ const {
     isoDate,
     daysFromNow,
     pickDate,
+    typeDate,
     dateAltField,
     completeReview,
     awaitTinyMce,
@@ -304,8 +305,10 @@ test.describe('Reviewer assignment & management (U27)', () => {
         // (the panel's own "Add Reviewer" is the positive control for the
         // row read); then "Add Reviewer" again and the first reviewer
         // selected.
+        const addWindow = page.getByRole('dialog', {name: 'Add Reviewer', exact: true});
+        await expect(addWindow).toBeVisible();
         const asked = await pressTopClose(page, addModal, 'dismiss');
-        await expect(addModal.getByRole('heading', {name: 'Locate a Reviewer'})).toBeHidden({timeout: 20_000});
+        await expect(addWindow).toHaveCount(0, {timeout: 20_000});
         expect(asked).toEqual([]);
         await expect(
             reviewerPanel(modal).getByRole('button', {name: 'Add Reviewer', exact: true})
@@ -316,9 +319,50 @@ test.describe('Reviewer assignment & management (U27)', () => {
         await searchReviewerList(page, addModal, `First${tag}`);
         await selectReviewerAndAwaitForm(page, addModal, `First${tag} Reviewer`);
 
+        // "Close" after a date change: "Review Due Date" set a week after
+        // its preset date, typed as YYYY-MM-DD (the step does not check
+        // the calendar's screen-reader exposure, which this second window
+        // lacks, register finding A54). The top "Close" asks the changed-form question;
+        // "Cancel" keeps the window with the changed date; "Close" again
+        // and "OK" close it, and the Reviewers panel shows no row for the
+        // reviewer, on the page and after a reload (the panel's own "Add
+        // Reviewer" is the positive control for both row reads). Then
+        // "Add Reviewer" again and the first reviewer selected.
+        const changedDate = isoDate(daysFromNow(35));
+        await typeDate(addModal, 'reviewDueDate', daysFromNow(35));
+        const changedQuestion = 'The data on this form has changed. Do you wish to continue without saving?';
+        const keptAsked = await pressTopClose(page, addModal, 'dismiss');
+        expect(keptAsked).toEqual([changedQuestion]);
+        await expect(addWindow).toBeVisible();
+        await expect(addWindow.getByText(firstEmail)).toBeVisible();
+        await expect(addWindow.getByText('Change', {exact: true})).toBeVisible();
+        await expect(dateAltField(addModal, 'reviewDueDate')).toHaveValue(changedDate);
+        await expect(
+            addModal.locator('input[name="reviewDueDate-removed"]')
+        ).toHaveValue(changedDate);
+        const closedAsked = await pressTopClose(page, addModal, 'accept');
+        expect(closedAsked).toEqual([changedQuestion]);
+        await expect(addWindow).toHaveCount(0, {timeout: 20_000});
+        await expect(
+            reviewerPanel(modal).getByRole('button', {name: 'Add Reviewer', exact: true})
+        ).toBeVisible();
+        await expect(reviewerRow(modal, `First${tag} Reviewer`)).toHaveCount(0);
+        await page.reload();
+        await expect(
+            modal.getByRole('heading', {name: /^Workflow:/}).first()
+        ).toBeVisible({timeout: 20_000});
+        await expect(
+            reviewerPanel(modal).getByRole('button', {name: 'Add Reviewer', exact: true})
+        ).toBeVisible({timeout: 20_000});
+        await expect(reviewerRow(modal, `First${tag} Reviewer`)).toHaveCount(0);
+        addModal = await openAddReviewer(page, modal);
+        await searchReviewerList(page, addModal, `First${tag}`);
+        await selectReviewerAndAwaitForm(page, addModal, `First${tag} Reviewer`);
+
         // The add: the notice, the "Request Sent" row (its "Response due:"
         // line is register finding A7, unasserted), the request email
-        // under the manager's name, and the activity-log entry.
+        // under the manager's name with the letter's text in its body,
+        // and the activity-log entry.
         await addModal
             .getByRole('button', {name: 'Add Reviewer', exact: true})
             .click();
@@ -335,6 +379,10 @@ test.describe('Reviewer assignment & management (U27)', () => {
             subject: 'Manuscript Review Request',
         });
         expect(request.From.Name).toBe(`Mgr${tag} Manager`);
+        const requestBody = await pkpMail.fullMessage(request.ID);
+        expect(
+            `${requestBody.Text || ''} ${requestBody.HTML || ''}`.replace(/\s+/g, ' ')
+        ).toContain('I believe that you would serve as an excellent reviewer');
         const log = await openActivityLog(page);
         await expect(
             activityLogRow(log, 'has been assigned to review submission')

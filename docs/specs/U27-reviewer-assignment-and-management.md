@@ -95,7 +95,7 @@ The lower half holds the request form shared by all three add modes:
 |------------------|-----------|-------|
 | Reviewer selection | yes | The request form below, and its submit button, stay hidden until a reviewer is chosen. The window offers no way to submit without one <sup>d</sup> |
 | "Choose a predefined message to use, or fill out the form below." | no | Email template chooser. It renders on every add, even with no alternate request templates to offer, as a one-option select ("Review Request") ⚠ [A19](#a19). When alternates do exist, all of them are listed ([A5](#a5), retired; the access check it questioned was reverted upstream) <sup>d</sup> |
-| "Email to be sent to reviewer" | no | Rich-text request letter, prefilled from the chosen template. Placeholders for name, deadlines and the review link are filled at send time. Effectively required: submitting with the letter emptied fails with no on-screen feedback of any kind, yet still creates the assignment and never sends the request email ⚠ [A18](#a18) <sup>d</sup> |
+| "Email to be sent to reviewer" | no | Rich-text request letter, prefilled from the chosen template. Placeholders for name, deadlines and the review link are filled at send time. Effectively required: submitting with the letter emptied fails with no on-screen feedback of any kind, yet still creates the assignment and sends the reviewer the request email with a subject and no text ⚠ [A18](#a18) <sup>d</sup> |
 | "Do not send email to Reviewer." | no | Checkbox. Skips the request email; the assignment is still created <sup>d</sup> |
 | "Response Due Date" / "Review Due Date" (under "Important Dates") | yes | Date pickers, prefilled per the journal's review setup (Rule 9). The permanent guidance "Review due date must be greater or equal to response due date." shows here and in the Edit window. Inverted dates are refused with a notice at the top right, "There was an error adding the reviewer as review due date must be equal or greater than responde due date." ⚠ [A45](#a45), gone by itself within seconds; the window stays open and nothing is added. The pickers, shared with the Edit and Resend windows, take calendar picks or a date typed in the YYYY-MM-DD format (e.g. 2026-08-02). Of the windows holding these dates ("Add Reviewer", a reviewer row's "Edit", and "Edit Due Date" in a dashboard indicator's popover), the first opened on a page lets a screen reader reach the calendar; in every later one opened on the same page without a reload, in any order, the calendar is hidden from screen readers, though the date box stays reachable ⚠ [A54](#a54). The Resend window's pickers were not read for this. A date typed in another format looks accepted, but the date the box held before is silently saved ("11/12/2030" shows as "11122030"). In the Edit window's "Review Due Date" an impossible date is saved as its text read one key earlier, whatever the box held: "2030-02-30" as 2030-02-03 ⚠ [A16](#a16). They also accept past dates without any warning ⚠ [A17](#a17) <sup>f</sup> |
 | "Files To Be Reviewed" | no | Collapsed file list with one checkbox per file of the round, all ticked by default. The inline warning "No Files Selected" appears here only when the round has no files at all. Unticking every box triggers no warning in this window (Rule 11) <sup>d</sup> |
@@ -899,15 +899,26 @@ are in the footnote. <sup>s</sup>
    - **"Close" with a reviewer picked**: press "Close" in the window's top
      bar: the window closes at once, nothing asks, and no row is added.
      Press "Add Reviewer" again and select the first reviewer.
+   - **"Close" after a date change**: set "Review Due Date" a week after
+     its preset date, by the calendar or by typing it as YYYY-MM-DD in the
+     date box (this step does not check the calendar's screen-reader
+     exposure, which this second window on the page lacks ⚠ [A54](#a54)). Press the window's
+     top "Close": it asks "The data on this form has changed. Do you wish
+     to continue without saving?". Press "Cancel": the window stays open
+     with the changed date. Press "Close" again, then "OK": the window
+     closes and the Reviewers panel shows no row for the reviewer, also
+     after a page reload. Press "Add Reviewer" again and select the first
+     reviewer.
    - **The add**: press "Add Reviewer": the notice reads "{name} was
      assigned to review this submission and sent an email notification."
      and the row reads "Request Sent" (its "Response due:" line is missing
      ⚠ [A7](#a7)). The reviewer's mailbox holds the request email
      ("Invitation to review" {OJS} / "Manuscript Review Request" {OMP}),
      sent under the Editor's name, and the submission's activity log
-     records the assignment. Verify the email arrived: a request submitted
-     with the letter emptied creates the row without any feedback and sends
-     nothing ⚠ [A18](#a18).
+     records the assignment. Verify that the email's body holds the
+     letter's text: a request submitted with the letter emptied creates
+     the row without any feedback and sends an email with a subject and no
+     text ⚠ [A18](#a18).
    - **"Editorial Notes"**: open the row's "More Actions" menu: it lists,
      in order, only "Review Details", "Edit", "Unassign Reviewer", "Email
      Reviewer", "History", "Login As", "Editorial Notes" and "Log Response".
@@ -1564,11 +1575,6 @@ Left out of the scenarios above, by reason:
     Reviewer window lists the matching reviewer, or the window offers that
     role no search, filters or further pages (Actors row 3, Rules 5, 6):
     waits for the fix [incidental 2026-11-16]
-  - the Add Reviewer window's top "Close" after a change to "Review Due
-    Date": it asks "The data on this form has changed. Do you wish to
-    continue without saving?", "Cancel" keeps the window with the changed
-    date, and "OK" closes it with no reviewer added, on the page or after
-    a reload (Fields, "Add Reviewer window") [incidental 2026-11-18]
 - **Rarely met**:
   - submitting a review for the reviewer on a "Request Resent" row, on an accepted row holding no draft, or with a comment entered, and the row's menu, the reviewer's side and the missing acceptance email after any such save (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a reminded, an accepted or a declined request with no review: "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", and the empty blocks (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -3683,6 +3689,10 @@ the template into the letter's TinyMCE client-side, and a press before
 that editor has initialised, 60–177 ms after the search box shows, leaves
 the letter empty for good; a press after it filled the letter 8 times of
 8 per app. No person presses that fast.
+The issue report's walk (2026-10-03, OJS and OMP, `main` and
+`stable-3_5_0`, PKP's default test dataset) found the reviewer's mailbox
+holding the request email with an empty body (HTML `" \r\n"`, no text
+part); the 2026-08-02 read of zero request mails is superseded.
 Issue report: [pkp-e2e#685](https://github.com/jardakotesovec/pkp-e2e/issues/685) ([docs/issues/U27-A18-emptied-request-letter-half-adds-reviewer.md](../issues/U27-A18-emptied-request-letter-half-adds-reviewer.md)).
 
 <a id="fn-a19"></a>

@@ -1088,6 +1088,30 @@ exports.pickDate = async function pickDate(page, scope, fieldPrefix, date) {
 };
 
 /**
+ * Type a date into a jQuery UI datepicker field's box in the YYYY-MM-DD
+ * format the box takes (the way a keyboard or screen-reader user sets it,
+ * also where the calendar is hidden from screen readers, register A54 of
+ * the reviewer-assignment spec). Real key presses, because the widget
+ * copies the typed date into its hidden altField on keyup; Tab then closes
+ * the calendar and leaves the box, which fires the form's change. Returns
+ * once the altField carries the date.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {import('@playwright/test').Locator} scope the form/modal holding the field
+ * @param {string} fieldPrefix 'responseDueDate' | 'reviewDueDate'
+ * @param {string} ymd the date as YYYY-MM-DD
+ */
+exports.typeDate = async function typeDate(page, scope, fieldPrefix, ymd) {
+    const input = scope.locator(`input.datepicker[id^="${fieldPrefix}"]`);
+    await input.click();
+    await input.press('ControlOrMeta+a');
+    await input.pressSequentially(ymd);
+    await input.press('Tab');
+    await expect(page.locator('#ui-datepicker-div')).toBeHidden({timeout: 30_000});
+    await expect(scope.locator(`input[id^="${fieldPrefix}"][id$="-altField"]`)).toHaveValue(ymd);
+};
+
+/**
  * Wait out the modal store's 450 ms close slot (patterns.md pitfall 4f)
  * with a page timer longer than the app's.
  *

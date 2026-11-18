@@ -11,7 +11,7 @@
  * Deliberately NOT covered (register IDs; the spec's Coverage section is
  * the record of everything else left out):
  * - 🐞 A1, A2, A7, A12, A13, A15, A16, A18, A19, A21, A22, A26, A30, A31,
- *   A32, A36, A37, A39, A43, A44, A45, A46, A47, A49, A50, A51.
+ *   A32, A36, A37, A39, A43, A44, A45, A46, A47, A49, A50, A51, A54.
  * - ❓ A4, A6, A17, A23, A28, A29, A38, A42, A48, A52, A53.
  *
  * Seeding: scenario endpoints only; publicknowledge and the 18 seeded users
@@ -32,6 +32,7 @@ const {
     performReview,
     legacyModal,
     pickDate,
+    typeDate,
     inMemoryFile,
     openAddReviewerModal,
     searchReviewerList,
@@ -252,6 +253,30 @@ test.describe('reviewer-assignment', () => {
         const reviewers = editorPage.getByRole('table', {name: 'Reviewers', exact: true});
         await expect(reviewers).toContainText('No Items');
         await expect(workflow.panelRow('Reviewers', firstName)).toHaveCount(0);
+        const changed = await openAddReviewerModal(editorPage);
+        await selectReviewer(editorPage, changed, firstName);
+
+        // "Close" after a date change: "Review Due Date" typed a week after
+        // its preset (the date box, reachable in this second window on the
+        // page, where the calendar's hiding from screen readers is register
+        // A54, asserted neither way). The top "Close" asks; "Cancel" keeps
+        // the window with the changed date; "Close" again and "OK" closes
+        // it, and no row is added, on the page and after a reload.
+        const changedDue = ymd(daysFromNow(5 * 7));
+        await expect(dueDateValue(changed, 'reviewDueDate')).toHaveValue(ymd(daysFromNow(4 * 7)));
+        await typeDate(editorPage, changed, 'reviewDueDate', changedDue);
+        expect(await closeWindowAsking(editorPage, changed, {answer: 'dismiss'})).toBe(FORM_CHANGED);
+        await expect(changed.locator('#regularReviewerForm')).toBeVisible();
+        await expect(changed.locator('[id^="selectedReviewerName"]')).toHaveText(firstName);
+        await expect(changed.locator('input.datepicker[id^="reviewDueDate"]')).toHaveValue(changedDue);
+        await expect(dueDateValue(changed, 'reviewDueDate')).toHaveValue(changedDue);
+        expect(await closeWindowAsking(editorPage, changed, {answer: 'accept'})).toBe(FORM_CHANGED);
+        await expect(reviewers).toContainText('No Items');
+        await expect(workflow.panelRow('Reviewers', firstName)).toHaveCount(0);
+        await editorPage.reload();
+        await workflow.expectOpen();
+        await expect(reviewers).toContainText('No Items', {timeout: 30_000});
+        await expect(workflow.panelRow('Reviewers', firstName)).toHaveCount(0);
         const reopened = await openAddReviewerModal(editorPage);
         await selectReviewer(editorPage, reopened, firstName);
 
@@ -275,6 +300,13 @@ test.describe('reviewer-assignment', () => {
             subject: 'Invitation to review',
         });
         expect(request.From?.Name).toBe(editorName);
+        // The email's body holds the letter's text (an emptied letter's
+        // email carries a subject and no text, A18): the prefilled letter's
+        // sentence read above in the window, and the submission's title.
+        const requestBody = (await pkpMail.fullMessage(request.ID)).Text ?? '';
+        expect(requestBody.trim()).not.toBe('');
+        expect(requestBody).toContain('you would serve as an excellent reviewer');
+        expect(requestBody).toContain(`Submission ${tag}`);
 
         // The submission's activity log records the assignment.
         const log = await openActivityLog(editorPage);

@@ -11,10 +11,12 @@
  * [data-cy="active-modal"] wrapper computes visibility:hidden, so topModal's
  * visibility assertions would never pass against them).
  *
- * Date entry is CALENDAR PICKS ONLY by design of these tests: the pickers
- * discard typed dates (register finding A16), so pickDate() drives the
- * jQuery UI datepicker the way a user does and verifies the hidden altField
- * received the ISO date.
+ * Date entry is a calendar pick where the calendar is reachable: pickDate()
+ * drives the jQuery UI datepicker the way a user does and verifies the
+ * hidden altField received the ISO date. In a window whose calendar is
+ * hidden from screen readers (the second due-date window on a page,
+ * register finding A54) typeDate() types the date as YYYY-MM-DD into the
+ * box, which the spec's Fields say the box takes.
  */
 const {expect} = require('../support/fixtures.js');
 const {topModal} = require('./ReviewStagePages.js');
@@ -261,6 +263,22 @@ async function pickDate(page, scope, fieldName, date) {
     await expect(
         scope.locator(`input[type="hidden"][name="${fieldName}"]`).first()
     ).toHaveValue(isoDate(date));
+}
+
+/**
+ * Type a date as YYYY-MM-DD into an fbv datepicker field's visible box
+ * (scope = the legacy form/modal containing it) and leave the box with Tab,
+ * so the form's change tracking sees it (the form notices a change on
+ * blur). Verifies the hidden altField holds the typed date afterwards.
+ */
+async function typeDate(scope, fieldName, date) {
+    const box = scope.locator(`input[name="${fieldName}-removed"]`).first();
+    await box.click();
+    await box.press('ControlOrMeta+a');
+    await box.pressSequentially(isoDate(date), {delay: 20});
+    await box.press('Tab');
+    await expect(box).toHaveValue(isoDate(date));
+    await expect(dateAltField(scope, fieldName)).toHaveValue(isoDate(date));
 }
 
 /** The hidden (submitted) value of a datepicker field. */
@@ -1190,6 +1208,7 @@ module.exports = {
     isoDate,
     daysFromNow,
     pickDate,
+    typeDate,
     dateAltField,
     completeReview,
     awaitTinyMce,
