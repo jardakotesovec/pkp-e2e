@@ -311,10 +311,14 @@ the account's roles, never on which dashboard page it opens from:
 10. **Per-reviewer activity indicators** {OJS OMP}. Wherever Rule 9e shows
     them, the cell carries one small round indicator per reviewer on the
     current round, declined and cancelled ones included. For requests and
-    ongoing reviews it is a countdown ring with the days left (or overdue),
-    colored to flag overdue ones. The days are calendar days in the site's
-    time zone: a date due tomorrow reads 1 at any hour of today, whatever
-    the browser's time zone ⚠ [A21](#a21). Once there is an outcome (submitted,
+    ongoing reviews it is a countdown ring with the days left (or overdue).
+    An overdue request's ring turns the attention color, the one the
+    "Reviews overdue" badge carries (Rule 1); an overdue review shows
+    instead as a disc filled with that color, its days inside. The days
+    are calendar days in the site's time zone, the one the installation's
+    configuration file sets (no screen shows or changes it): a date due
+    tomorrow reads 1 at any hour of today, whatever the browser's time
+    zone ⚠ [A21](#a21). Once there is an outcome (submitted,
     confirmed, declined, cancelled) it is an icon. Clicking one opens a
     popover with the reviewer's name, the review type, a status sentence,
     and up to three buttons: <sup>k</sup>
@@ -582,7 +586,8 @@ scenario's starting state are in its footnote.
    submission has been idle for 30 days or more and the others are fresh,
    with three sections {OJS OPS}: the default one, "Archive", marked
    inactive and holding one submission, and "Editorials", restricted to
-   editors; a Section Editor of the same journal, assigned to one
+   editors; two categories, "Cat One" and "Cat Two", each holding one
+   submission; a Section Editor of the same journal, assigned to one
    submission.
 
    - **"Filters"**: press it: a side panel titled "Filters" opens with
@@ -600,6 +605,14 @@ scenario's starting state are in its footnote.
      "Section" and press "Apply Filters": the list narrows to the
      submission in that section, with a chip for the filter above the
      table; press "Clear Filters".
+   - **"Categories"**: press "Filters", pick "Cat One" in "Categories" and
+     press "Apply Filters": the list narrows to the submission in that
+     category, with a chip for it above the table.
+   - **Two values in one field**: press "Filters", pick "Cat Two" as well,
+     and press "Apply Filters": the submissions of both categories are
+     listed, under two chips, one per category; press the X on the "Cat
+     One" chip: the "Cat Two" chip alone stays, and the list narrows to
+     the submission in "Cat Two"; press "Clear Filters".
    - **"Assigned To Editor"**: the manager's panel lists the field (labelled
      "Assigned to Moderator" on a preprint server); its suggest list offers
      nothing until a name is typed; type the Section Editor's name, pick
@@ -654,41 +667,50 @@ scenario's starting state are in its footnote.
      the address no longer records it but keeps the view; reload: the rows
      stand in the default order, the one the view showed before the first
      click.
-   - **"Days"**: click it: the address follows the same way; every row
-     reads 0 days, so order is not judged.
+   - **"Days"**: click it twice: the address follows each click as it did
+     for "ID", descending, then ascending; every row reads 0 days, so
+     order is not judged.
    - **Paging**: pager controls sit under the list; page 2 reads "Showing
      31 to {last} of {total}" (which rows: [A16](#a16)); the address does
      not record the page.
-   - **Control**: reloading the sorted address brings the rows back in the
-     same order. <sup>s7</sup>
+   - **Control**: click "ID" until the rows stand by ID, highest first,
+     with the address recording the sort, and reload: the rows come back
+     in the same order. <sup>s7</sup>
 
 8. **Triage a new submission** {OJS OMP}
 
-   Given: Journal Manager, with a fresh submission nobody is assigned to.
+   Given: Journal Manager, on a journal whose only submission is a fresh
+   one nobody is assigned to.
 
-   - **"Needs editor"**: the submission lists there and under "All in
-     submission stage".
-   - **"Assign Editor"**: its activity cell offers the button; press it:
-     the "Assign Participant" window opens; assign a Section Editor through
-     it and confirm.
-   - **Back on the list**: the button is gone and the cell is empty, the
-     row has left "Needs editor", and the "Needs editor" badge and the
-     heading total moved without a reload.
+   - **"Needs editor"**: the submission lists there, "Needs editor (1)",
+     and under "All in submission stage".
+   - **"Assign Editor"**: on "Needs editor", the row's activity cell offers
+     the button; press it: the "Assign Participant" window opens; assign a
+     Section Editor through it and confirm.
+   - **Back on the list**: the row has left "Needs editor", whose heading
+     reads "Needs editor (0)" and whose badge has moved with it, without a
+     reload.
+   - **The assigned row**: on "All in submission stage", the row's
+     "Assign Editor" button is gone and its activity cell is empty.
    - **Control**: the row still lists under "Active submissions" and "All
      in submission stage". <sup>s8</sup>
 
 9. **Review activity at a glance** {OJS OMP}
 
-   Given: Journal Manager, on "Active submissions"; five submissions in
-   review: "Bare study", whose round has no reviewers yet; "Pending
-   study", whose round has two review requests out, unanswered, and a
-   third reviewer who declined; "Revise study", whose author was asked
-   for revisions this round; "Resubmit study", asked for revisions to be
-   taken to a new review round; "Accepted study", whose single reviewer
-   has accepted.
+   Given: Journal Manager, on "Active submissions"; six submissions in
+   review, each in its first round: "Bare study", whose round has no
+   reviewers yet; "Pending study", whose round has two review requests
+   out, unanswered, and a third reviewer who declined; "Revise study",
+   whose author was asked for revisions this round; "Resubmit study",
+   asked for revisions to be taken to a new review round; "Accepted
+   study", whose single reviewer has accepted; "Overdue study", whose
+   round has one review request out, unanswered, and one reviewer who has
+   accepted.
 
    - **No reviewers yet**: "Bare study"'s cell offers "Assign Reviewers";
      press it: the Add Reviewer window opens; close it.
+   - **The Stage cell**: "Bare study"'s Stage cell names its round,
+     "Review (Round 1)" ("External Review (Round 1)" on a press).
    - **Two requests out**: "Pending study"'s cell shows two countdown
      indicators and an icon for the declined reviewer, and the submission
      lists under "Awaiting reviews".
@@ -698,21 +720,22 @@ scenario's starting state are in its footnote.
    - **The declined reviewer's popover**: click the icon: "Review Request
      declined on {date}", with "Resend Review Request", "View details" and
      "Cancel Reviewer".
-   - **"View details"**: press it: the window the workflow's Reviewers
-     panel opens for that reviewer appears; close it.
+   - **"View details"**: press it: the "Review Details: {title}" window
+     opens, the one the workflow's Reviewers panel opens for that
+     reviewer; close it.
    - **Reviewer**: one of the two accepts the request.
    - **The accepted request**: back on the list, that reviewer's indicator
      is still a countdown ring; its popover reads "Ongoing review - request
      accepted", with "Edit Due Date", "View details" and "Cancel Reviewer".
    - **Reviewer**: the same reviewer submits their review.
-   - **The completed review**: that reviewer's indicator is now a done
-     mark; its popover reads "Review completed on {date}" (on a journal it
+   - **The completed review**: that reviewer's indicator is now an icon;
+     its popover reads "Review completed on {date}" (on a journal it
      also names the reviewer's recommendation; a press shows the sentence
      without one) with "View unread recommendation"; press it, read the
      review in the window that opens, and close it: reopened, the
      popover offers "View recommendation" ⚠ [→ Reviewer assignment &
      management](U27-reviewer-assignment-and-management.md#a32).
-     The submission now lists under "Reviews submitted" too.
+     Open "Reviews submitted": the submission now lists there too.
    - **Revisions asked**: "Revise study"'s cell reads "Revisions requested
      from author" and "Resubmit study"'s "Revisions requested from the
      author to be taken to a new review round".
@@ -727,6 +750,27 @@ scenario's starting state are in its footnote.
      "Review request cancelled by editor" with "Reinstate Reviewer" as its
      only action; press it: the window the Reviewers panel's "Reinstate
      Reviewer" opens appears; close it.
+   - **Due tomorrow**: on "Overdue study", click the unanswered request's
+     countdown ring and press "Edit Due Date": the window the workflow's
+     Reviewers panel opens for editing that reviewer's assignment appears
+     ([→ deadlines](U27-reviewer-assignment-and-management.md#due-dates));
+     set its "Response Due Date" to tomorrow's date in the site's time
+     zone (Rule 10) and save: back on the
+     list, the ring reads 1 (late in the site's day, or from a browser in
+     another time zone: [A21](#a21)).
+   - **A request overdue**: click that ring again, press "Edit Due Date",
+     set "Response Due Date" to yesterday's date and save: the ring turns
+     the attention color, the one the "Reviews overdue" badge carries, and
+     its popover reads "Review Request overdue by {days} days", with "Edit
+     Due Date", "View details" and "Unassign".
+   - **A review overdue**: on "Overdue study", click the accepted
+     reviewer's countdown ring: its popover reads "Ongoing review - request
+     accepted"; press "Edit Due Date", set both "Response Due Date" and
+     "Review Due Date" to yesterday's date and save: the indicator turns
+     into a disc filled with the attention color, its days inside, and its
+     popover reads "Review overdue by {days} days", with "Edit Due Date",
+     "View details" and "Cancel Reviewer".
+   - **"Reviews overdue"**: open it: "Overdue study" is listed.
    - **Control**: on "Pending study", the other reviewer's indicator is
      still a countdown ring whose popover reads "Awaiting Response from the
      reviewer".
@@ -743,8 +787,8 @@ scenario's starting state are in its footnote.
       access this submission as a Journal Manager since you are the author.
       To view it, go to \"My Submissions\"" [A3](#a3), and the row offers no
       button at all: no "View" and no "Assign Editor".
-    - **"My Submissions as Author"**: the same submission sits normally
-      under that sidebar group.
+    - **"My Submissions as Author"**: that sidebar group lists the same
+      submission.
     - **The submission they review** {OJS OMP}: its activity cell carries
       a conflict notice that sends them to "Review Assignments"; judge it
       by that phrase. The row offers no button either.
@@ -754,22 +798,30 @@ scenario's starting state are in its footnote.
 11. **Declined out of editors' sight**
 
     Given: Journal Manager, and a Section Editor assigned to one submission
-    titled "Declined study".
+    titled "Declined study"; on a journal or press, a second submission,
+    "Review declined study", declined on its review stage (on a press, on
+    External Review, beside a third, "Internal declined study", declined
+    on Internal Review).
 
-    - **Journal Manager**: on "Active submissions", press "View" on the
-      row and decline the submission from its stage inside the panel (the
+    - **Journal Manager**: on "Active submissions", press "View" on
+      "Declined study"'s row and decline the submission from its stage inside the panel (the
       decision belongs to the stage features); close the panel: the
       heading total and the "Declined" badge move without a reload; open
       "Declined": the row is listed with its Stage cell reading "Declined"
       and its activity cell "Declined during the {stage} stage.", and it
       keeps "View".
+    - **Declined on a review stage** {OJS OMP}: on "Declined", "Review
+      declined study"'s activity cell reads "Declined during the Review
+      stage." on a journal, "Declined during the External Review stage."
+      on a press, and on a press "Internal declined study"'s reads
+      "Declined during the Internal Review stage."; both rows keep "View".
     - **Section Editor**: their "Editor Dashboard" group has no "Declined"
       entry [A1](#a1) and, on a journal or press, no "Needs editor" entry
       either; the submission is gone from every one of their views.
     - **Their global search**: type Declined study into "Search
       submissions" and submit: "Search Results (1)" lists it, with "View".
     - **Deleted inside the panel**: Journal Manager: on "Declined", press
-      "View" on the row, press its stage's "Delete" and confirm (the dialog
+      "View" on "Declined study"'s row, press its stage's "Delete" and confirm (the dialog
       belongs to
       [→ the workflow screen](U24-workflow-screen-and-stage-access.md#delete-dialog)):
       the panel closes on the refreshed list, from which the row is gone,
@@ -781,8 +833,8 @@ scenario's starting state are in its footnote.
 12. **Bulk-delete incomplete submissions**
 
     Given: Journal Manager, on "Active submissions" of a journal holding
-    two incomplete submissions by two different authors and one submitted
-    one.
+    two incomplete submissions by two different authors, titled "Draft
+    one" and "Draft two", and one submitted one.
 
     - **The incomplete rows**: both sit beside the submitted one; each has
       its Stage cell reading "Incomplete" ("Production" on a preprint
@@ -799,8 +851,16 @@ scenario's starting state are in its footnote.
       press "Delete Incomplete Submissions" and then "Cancel" in the
       dialog: the same.
     - **A view switch in selection mode**: choose "Delete Incomplete
-      Submissions" once more, tick one row, open "Published" and return to
-      "Active submissions": no row is ticked and nothing was deleted.
+      Submissions" once more, tick one row and open "Published": selection
+      mode has ended, with neither the "Delete Incomplete Submissions" nor
+      the "Cancel" button above the list; return to "Active submissions":
+      no checkbox shows, so no row is ticked, and both incomplete rows are
+      still listed: nothing was deleted.
+    - **A new search in selection mode**: choose "Delete Incomplete
+      Submissions" again, tick one row, type Draft into the search box and
+      press Enter: the list holds "Draft one" and "Draft two" with no
+      checkbox, and neither button shows above it: nothing was deleted;
+      press the search chip's X.
     - **Delete**: choose "Delete Incomplete Submissions" again, tick both
       and press "Delete Incomplete Submissions": the
       "Confirm Delete of Incomplete Submissions" dialog reads "Are you sure
@@ -829,10 +889,12 @@ App-specific:
     - **"Issues"**: on "Active submissions", press "Filters", tick the
       issue in "Issues" and press "Apply Filters": the active submission,
       in no issue, drops out ("Active submissions (0)") under the issue's
-      chip; on "Scheduled for publication" with the same filter, the
+      chip. Open "Scheduled for publication", where the view switch has
+      cleared the filter, and apply the same issue filter there: the
       scheduled submission stays listed.
-    - **Control**: press "Clear Filters" on "Active submissions": the
-      active submission is back. <sup>s13</sup>
+    - **Control**: back on "Active submissions", apply the issue filter
+      again, then press "Clear Filters" beside its chip: the active
+      submission is back. <sup>s13</sup>
 
 14. **One review view, two review stages** {OMP}
 
@@ -842,6 +904,9 @@ App-specific:
     - **"All in review stage"**: lists both.
     - **The internal one's activity cell**: offers "Assign Reviewers", like
       the external one's.
+    - **The Stage cells**: the internal one's names its stage and round,
+      "Internal Review (Round 1)", and the external one's "External Review
+      (Round 1)".
     - **Control**: the sidebar offers no separate entry for either review
       stage. <sup>s14</sup>
 
@@ -897,6 +962,30 @@ App-specific:
       longer lists the submission once its review is confirmed.
       <sup>s17</sup>
 
+18. **Recommending editors on board** {OJS OMP}
+
+    Given: a Journal Manager assigned to neither of two submissions in
+    review, each with an assigned deciding Section Editor and an assigned
+    recommending Section Editor who has recorded nothing: "Recommend bare
+    study", whose round has no reviewers, and "Recommend pending study",
+    whose round has one review request out, unanswered.
+
+    - **The recommending editor**: signed in as the recommending Section
+      Editor, on "Assigned to me": "Recommend bare study"'s activity cell
+      offers "Assign Reviewers", and "Recommend pending study"'s shows the
+      reviewer's countdown ring, whose popover reads "Awaiting Response
+      from the reviewer".
+    - **The deciding editor**: signed in as the deciding Section Editor,
+      on "Assigned to me": both activity cells read "Recommending Editors
+      are tasked to advise the next steps for this submission", with no
+      "Assign Reviewers" button and no indicator.
+    - **The Journal Manager**: on "Active submissions", "Recommend pending
+      study"'s activity cell reads "Recommending Editors are tasked to
+      advise the next steps for this submission" too, with no indicator.
+    - **Control**: on the same view, "Recommend bare study"'s activity
+      cell offers the Journal Manager "Assign Reviewers", its round having
+      no reviewer yet. <sup>s18</sup>
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -908,24 +997,6 @@ Left out of the scenarios above, by reason:
     (`docs/issues/U23-A15-dashboard-sorted-header-not-announced.md`)
     proposes, once fixed [report 2026-10-21]
   - the guard for A10 (issue report `docs/issues/U23-A10-pager-next-lacks-spoken-label.md`): on a list with two pages, every pager button carries a "Go to …" name, "Go to Next" included [report 2026-10-04]
-  - a review row's Stage cell naming its round: "Review (Round 1)" on a journal, "External Review (Round 1)" and "Internal Review (Round 1)" on a press (Rule 5) [sweep 2026-11-18]
-  - two sections, or two categories, applied at once giving one chip each, and one chip's X dropping its value alone (Rule 8a) [report 2026-11-18]
-  - a decline taken on a review stage: "Declined during the Review stage." on a journal, "Declined during the External Review stage." and "Declined during the Internal Review stage." on a press (Rule 9b) [sweep 2026-11-18]
-  - a recommending editor's row before they record theirs, reading as Rule 9e: "Assign Reviewers" on a round with no reviewers, the reviewers' indicators otherwise {OJS OMP} (Rule 9f) [report 2026-11-18]
-  - with recommending editors on board, the deciding editor's "Recommending Editors are tasked to advise the next steps for this submission" with no indicators, and an unassigned Journal Manager's cell: the same sentence once the round has a reviewer, "Assign Reviewers" before {OJS OMP} (Rule 9f) [sweep 2026-11-18]
-  - "Reviews overdue" (Rule 2) and the "Review Request overdue by {days} days" and "Review overdue by {days} days" popovers with their buttons (Rule 10), reached by setting a past date through the popover's "Edit Due Date" [sweep 2026-11-18]
-  - a countdown ring reading 1 for a response due tomorrow, set through "Edit Due Date" (Rule 10; the late hour and other browser time zones: [A21](#a21)) [sweep 2026-11-18]
-  - the "Categories" filter narrowing to a submission in a category (Fields), on a scratch journal given categories and a submission put in one [sweep 2026-11-18]
-  - a view switch or a new search in selection mode ending it: no checkbox and no "Delete Incomplete Submissions" button left, nothing deleted (Rule 12; scenario 12 reads only that no row stays ticked) [sweep 2026-11-18]
-  - scenario 6, "Close": the list reloading as the panel closes; and on a press and a preprint server, "Reload": the panel reopening on the same submission, not merely on one (Rule 11) [sweep 2026-11-18]
-  - scenario 9, every indicator its bullets name read as a countdown ring or an icon, on a press as on a journal; on a press, "Assign Reviewers" read before it is pressed, the window it opens read by its "Add Reviewer" heading, and "Reviews submitted" opened rather than read from its badge (Rule 10) [sweep 2026-11-18]
-  - scenario 8, "Back on the list": the heading total moving in place, by assigning the editor from the "Needs editor" view, whose total falls from 1 to 0 (Rule 13) [sweep 2026-11-18]
-  - scenario 7 on a preprint server: "Days" clicked twice with the address following each click, and the control comparing the whole order after a reload of a sorted address, on preprints that do not share one submission date and time (Rule 5, A16) [sweep 2026-11-18]
-  - scenario 1, "Control": exactly one "No Items" row, on a journal and a preprint server [sweep 2026-11-18]
-  - scenario 3, "The search box": the box's full label, on a press [sweep 2026-11-18]
-  - scenario 10, "My Submissions as Author": the sidebar group itself listing the submission, on a press [sweep 2026-11-18]
-  - scenario 13, "The scheduled row": "To be published in issue {issue}" read in the activity cell, not anywhere on the row [sweep 2026-11-18]
-  - scenario 15, "The sidebar": the group holding six entries in all, not only the six named [sweep 2026-11-18]
 - **Nothing new to test**:
   - the "Showing {first} to {last} of {total}" line under the list, and "Previous" and "Next" that cannot be pressed at the ends of the pager (Rule 5)
   - Site Administrator holding Journal Manager in the journal, journal-wide like the Journal Manager (Actors row 2; the Journal Manager's views, scenario 2)
@@ -1670,8 +1741,10 @@ no indicator, on the other two.
 → `ReviewActivityIndicator` + `ReviewActivityIndicatorPopover.vue`;
 config per reviewer status in
 `useDashboardConfigReviewActivity.js::ConfigPerStatus` — indicator
-variant (progress ring with day count vs icon; attention color for the
-two overdue statuses, negative for declined/cancelled, success for
+variant (`displayVariant`: `progress`, a ring with the day count; `fill`,
+a filled disc with the day count, for `REVIEW_ASSIGNMENT_STATUS_REVIEW_OVERDUE`
+alone; or an icon; `colorVariant` `attention` for the two overdue
+statuses, negative for declined/cancelled, success for
 received/viewed/complete/thanked), popover title/description keys
 (`dashboard.reviewAssignment.status*`), and the three button slots
 mapped to Reviewer-manager actions (resend request, edit due date, review
@@ -1742,9 +1815,14 @@ responded to the review request. A response was due on {date}", "Edit
 Due Date" · "View details" · "Unassign"); a review date set to yesterday
 on an accepted request gave "Review overdue by 1 days" ("This reviewer
 has not completed their review. The review was due on {date}.", "Edit Due
-Date" · "View details" · "Cancel Reviewer"); both rings read -1 in the
+Date" · "View details" · "Cancel Reviewer"); both read -1 in the
 attention color, and both submissions listed under "Reviews overdue",
-its badge at 2. The assigned Section Editor's row carried an indicator
+its badge at 2. Test run 2026-11-18 (OMP, scenario 9): the overdue
+request's ring carried the attention color on its stroke, while the
+overdue review's indicator, its day count inside, carried no ring
+stroke in that color (no `stroke-attention`); the run went green once it
+accepted `fill-attention` as well, the `fill` variant above. The mapping
+file is identical in OJS's and OMP's lib/ui-library. The assigned Section Editor's row carried an indicator
 for every reviewer, declined and cancelled ones included; the assigned
 Funding Coordinator's did not (fn-a7).
 
@@ -1915,7 +1993,13 @@ active. The panel leg applies the "Assigned To Editor" filter again on
 "Active submissions" and reads the panel, the chip and the heading count
 after each press (fn-i, 2026-09-29); "not at 30" is the slider's value
 read on reopening. The Section Editor's control leg reuses the same
-account.
+account. The "Categories" legs (all three apps) seed the context's
+two categories as
+`categories: [{path: 'catone', title: 'Cat One'}, {path: 'cattwo', title: 'Cat Two'}]`
+(scenarios.md `categories[]`) and place one fresh submission in each
+through the submission's `categories` key, a list of category paths
+(scenarios.md, the publication keys); the two chips read "Categories:
+Cat One" and "Categories: Cat Two" (fn-i, 2026-11-18).
 
 <a id="fn-s6"></a>
 **s6 — scenario 6 seeding.** The seeded journal: a scratch submission by
@@ -1935,13 +2019,19 @@ not observable — the test may limit the Days assertion to the address
 recording the sort and the list refetching, as the paging leg may be
 dropped. The third-click leg reads the address (`currentViewId` alone,
 no `sortColumn` or `sortDirection`) and, after a reload, compares the
-rows with the order read on arrival (fn-a5).
+rows with the order read on arrival (fn-a5). The "Days" leg reads the
+address after each of its two clicks. The control re-sorts by "ID",
+descending, and compares the whole row order before and after the
+reload, on submissions seeded so that no two share a submission date and
+time (A16).
 
 <a id="fn-s8"></a>
 **s8 — scenario 8 seeding.** {OJS OMP} A scratch journal; one submission
 submitted with no participants beyond the author (`participants: []`), and
 a throwaway Section Editor to assign. On OMP the submission stage precedes
-internal review as on OJS.
+internal review as on OJS. "Assign Editor" is pressed on "Needs editor",
+whose heading total is read in place, 1 then 0; the empty cell is read on
+"All in submission stage", where the row stays listed.
 
 <a id="fn-s9"></a>
 **s9 — scenario 9 seeding.** {OJS OMP} Five submissions moved to review
@@ -1974,6 +2064,17 @@ sentence after the cancel is A20's (fn-a20) and is not asserted.
 The reviewer accepts and later completes through their own wizard
 ([reviewer flows](U28-reviewers-review.md)), the list reloaded after
 each.
+"Overdue study" holds one reviewer `invited` and one `accepted` (OJS:
+`reviewer.paul` and `reviewer.adam`, each also on another submission of
+the scenario; OMP: two more throwaway reviewers). No key seeds a due
+date (`responseDue` and `reviewDue` are not built, scenarios.md), so the
+editor sets the dates on screen in the "Edit Review" window the
+popover's "Edit Due Date" opens (fn-k), typed as YYYY-MM-DD relative to
+the site's today; the review due date may not precede the response due
+date ([→ deadlines](U27-reviewer-assignment-and-management.md#due-dates)),
+so the review-overdue leg moves both. The overdue legs, the ring at 1
+and "Reviews overdue" were live-probed 2026-11-18 (fn-k); the round in
+the Stage cell the same day (fn-f).
 
 <a id="fn-s10"></a>
 **s10 — scenario 10 seeding.** A scratch journal; a Manager+Author combo
@@ -2003,7 +2104,12 @@ found via global search. The delete leg presses the declined stage's
 "Delete" inside the panel and confirms the "Delete" dialog (fn-d,
 live-probed 2026-09-02 on all three apps): the count reload runs through
 a five-second trailing throttle, so the badge read allows up to five
-seconds and never reloads the page.
+seconds and never reloads the page. The review-stage declines are
+seeded by the author (OJS and OMP): "Review declined study" with
+`decisions: ['sendExternalReview', 'decline']` (OMP
+`['skipInternalReview', 'decline']`) and, on OMP, "Internal declined
+study" with `decisions: ['sendInternalReview', 'decline']`, the decline
+resolved to the stage it is taken on (live-probed 2026-11-18, fn-j).
 
 <a id="fn-s12"></a>
 **s12 — scenario 12 seeding.** A scratch journal; two incomplete
@@ -2015,7 +2121,9 @@ with a positive control. The two "Cancel" legs and the view-switch leg
 (fn-m, live-probed 2026-08-26: dialog-Cancel exits selection mode
 entirely; a view change drops the selection) run before the delete, each
 re-entering selection mode through "More Actions"; after each, both
-incomplete rows are asserted still listed. The grayed entry is read by
+incomplete rows are asserted still listed. The view-switch and search
+legs also read the checkboxes and both buttons gone (fn-m, live-probed
+2026-11-18); the two drafts' titles are the ones the search leg types. The grayed entry is read by
 reopening "More Actions" on the same page after the deletion. The Section Editor negative leg asserts the "More
 Actions" button itself is absent — count 0, not a menu missing one entry
 (positive control: the same account sees the button row's other
@@ -2084,6 +2192,23 @@ behaves as a floor of one), but that is a footnote fact the body does not
 state, so no scenario relies on it. Message strings: fn-j (the
 minimum-required sentence replaced the all-confirmed one once a minimum
 was set, OJS + OMP).
+
+<a id="fn-s18"></a>
+**s18 — scenario 18 seeding.** {OJS OMP} A scratch journal (OMP: press)
+with a throwaway Journal Manager, Author and `externalReviewer`, and two
+throwaway Section Editors (Series Editors on OMP) holding no section
+assignment, so a submit auto-assigns nobody. Two submissions by the
+author, moved to review (`decisions: ['sendExternalReview']`; on OMP
+`skipInternalReview`), each with
+`participants: [{username: <decider>, role: 'sectionEditor'}, {username: <recommender>, role: 'sectionEditor', recommendOnly: true}]`
+(scenarios.md `participants[]`: the Participants panel then reads "Only
+allowed to recommend an editorial decision" under the recommender's
+role): "Recommend bare study" with `reviewRounds: [{reviewers: []}]`,
+"Recommend pending study" with the reviewer `status: 'invited'`. Neither
+editor records a recommendation. Each account signs in on the journal's
+own login page; the Journal Manager reads "Active submissions". The
+three reads were live-probed 2026-11-18 on OJS and OMP (fn-j), with a
+third submission holding a completed review that read the same way.
 
 <a id="fn-a1"></a>
 **a1 — A1 evidence.** `TYPE_DECLINED`'s role list is

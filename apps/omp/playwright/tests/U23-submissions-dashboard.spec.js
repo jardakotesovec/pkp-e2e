@@ -5,10 +5,10 @@
  * U23 — Submissions dashboard (editorial), OMP suite (spec:
  * docs/specs/U23-submissions-dashboard.md). One test per canonical scenario
  * a press runs, in OMP vocabulary (press, monograph, series, Press Manager,
- * Series Editor — glossary substitution): common scenarios 1–12, 16 and 17
- * plus the OMP-specific scenario 14 (one review view over the two review
- * stages). Scenario 13 is OJS-only (issues), scenario 15 OPS-only. What the
- * scenarios leave out is the spec's Coverage section.
+ * Series Editor — glossary substitution): common scenarios 1–12, 16, 17
+ * and 18 plus the OMP-specific scenario 14 (one review view over the two
+ * review stages). Scenario 13 is OJS-only (issues), scenario 15 OPS-only.
+ * What the scenarios leave out is the spec's Coverage section.
  *
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
@@ -22,7 +22,11 @@
  * users, since view counts and sidebar badges need a list only the test
  * controls (S17 on two presses, one per end of the press's "Reviews
  * required" setting, seeded through the context's `review` passthrough
- * key). Mailpit reads (S3, S12) are scoped by the throwaway addresses
+ * key; S5's two categories through the context's `categories[]` and the
+ * submission's `categories`; S18's recommending Series Editor through
+ * `participants[].recommendOnly`). The due dates of S9's "Overdue study"
+ * have no seed key and are set on screen through the popover's "Edit Due
+ * Date", the leg under test. Mailpit reads (S3, S12) are scoped by the throwaway addresses
  * (PRINCIPLES A8) and settled by the scenario's own list read. The decline
  * of S11 and the review confirmation of S17 are driven on screen (the
  * Submission stage's "Decline Submission" wizard, the "Review Details"
@@ -40,7 +44,10 @@ const {WorkflowPage} = require('../../../../shared/playwright/pages/WorkflowPage
 const {LoginPage} = require('../../../../shared/playwright/pages/LoginPage.js');
 const {getPassword} = require('../../../../shared/playwright/data/users.js');
 const {topModal, walkDecisionWizard} = require('../pages/ReviewStagePages.js');
-const {reviewDetailsModal, markReviewComplete} = require('../pages/ReviewerAssignmentPages.js');
+const {
+    reviewDetailsModal, markReviewComplete, saveEditReview, daysFromNow, isoDate,
+} = require('../pages/ReviewerAssignmentPages.js');
+const {waitForLegacyFormSettled} = require('../../../../shared/playwright/support/legacy.js');
 const {waitForEditorReady, editorIdOf} = require('../../../../shared/playwright/support/richtext.js');
 
 const PK = 'publicknowledge';
@@ -50,6 +57,10 @@ const EDITOR_FILTER = 'Assigned To Editor';
 const BULK_DELETE_CONFIRM =
     'Are you sure you want to delete the selected items? This action cannot be undone. Please confirm to proceed.';
 const AWAITING = /Awaiting Response from the reviewer/;
+const ONGOING = /Ongoing review - request accepted/;
+const RECOMMENDING =
+    'Recommending Editors are tasked to advise the next steps for this submission';
+const IN_PAGE_SEARCH_LABEL = 'Search submissions, ID, authors, keywords, etc.';
 const ATTENTION = /\bbg-attention\b/;
 
 /** Unique per-run tag: single alphanumeric token, app + scenario + worker. */
@@ -188,11 +199,72 @@ function panelClearFilters(dash) {
     return dash.filtersModal().getByRole('button', {name: 'Clear Filters', exact: true});
 }
 
-/** A suggest-list pick shown inside the open Filters panel's field, the
- * "Remove {name}" button (Rule 8a; proposed shared name:
- * `EditorialDashboardPage.filterPick(name)`). */
-function panelPick(dash, name) {
-    return dash.filtersModal().getByRole('button', {name: `Remove ${name}`, exact: true});
+/** Every reviewer indicator of a row, whatever its status (the popover
+ * buttons of the activity cell; proposed shared name:
+ * `EditorialDashboardPage.allActivityIndicators(row)`). */
+function allIndicators(row) {
+    return row.locator('button[id^="headlessui-popover-button"]');
+}
+
+/** The legacy "Edit Review" window (form#editReviewForm) a popover's "Edit
+ * Due Date" opens, the window the workflow's Reviewers panel opens for
+ * editing the assignment (proposed shared name:
+ * `EditorialDashboardPage.editReviewWindow()`). */
+function editReviewWindow(page) {
+    return page.getByRole('dialog').filter({has: page.locator('form#editReviewForm')});
+}
+
+/**
+ * Calendar-pick a date into one of the "Edit Review" window's date boxes
+ * and check the hidden value the form posts. The day is found by CSS, not
+ * by role: from the second such window on one page the shared jQuery
+ * calendar carries `aria-hidden="true"` (the side modal hides what lies
+ * outside it), so `pickDate()`'s role lookup finds no day link there
+ * (proposed: `ReviewerAssignmentPages.pickDate` gains this fallback).
+ */
+async function pickCalendarDate(page, scope, fieldName, date) {
+    await scope.locator(`input[name="${fieldName}-removed"]`).first().click();
+    const dp = page.locator('#ui-datepicker-div');
+    await expect(dp).toBeVisible({timeout: 10_000});
+    await dp.locator('select.ui-datepicker-year').selectOption(String(date.getFullYear()));
+    await dp.locator('select.ui-datepicker-month').selectOption(String(date.getMonth()));
+    await dp
+        .locator(`td:not(.ui-datepicker-other-month) a[data-date="${date.getDate()}"]`)
+        .click({timeout: 20_000});
+    await expect(
+        scope.locator(`input[type="hidden"][name="${fieldName}"]`).first()
+    ).toHaveValue(isoDate(date));
+}
+
+/**
+ * Press "Edit Due Date" in the row's open popover, move the named due
+ * dates (`responseDueDate`, `reviewDueDate`) by a calendar pick and save;
+ * resolves once the window has closed and the list has refetched (Rule 10:
+ * "the list refreshes afterwards").
+ */
+async function editDueDates(dash, row, dates) {
+    const page = dash.page;
+    await dash.activityPopover(row).getByRole('button', {name: 'Edit Due Date', exact: true}).click();
+    const window = editReviewWindow(page);
+    await expect(window.locator('form#editReviewForm')).toBeVisible({timeout: 30_000});
+    await waitForLegacyFormSettled(page, window);
+    for (const [field, date] of dates) {
+        await pickCalendarDate(page, window, field, date);
+    }
+    const reloaded = dash.listReload();
+    await saveEditReview(window);
+    await reloaded;
+    await expect(window).toHaveCount(0, {timeout: 30_000});
+    await dash.closeActivityPopover(row);
+}
+
+/** The "My Submissions as Author" group's view entry in the sidebar, scoped
+ * by its dashboard/mySubmissions href (the editorial group carries
+ * namesakes; proposed shared name: `MySubmissionsPage.groupViewLink(name)`). */
+function authorViewLink(page, name) {
+    return page
+        .locator('#app-nav a[href*="dashboard/mySubmissions"]')
+        .filter({has: page.getByText(name, {exact: true})});
 }
 
 /** `YYYY-MM-DD`, `days` days before today (the seed's `dateSubmitted`). */
@@ -470,9 +542,15 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await dash.openView('Active submissions');
         await dash.expectViewHeading('Active submissions', 3);
 
-        // The search box narrows the current view; the heading keeps the
-        // view's name and the count follows; the phrase shows as a chip
-        // (Rule 6).
+        // The search box, labelled "Search submissions, ID, authors,
+        // keywords, etc." in full (read while empty: a typed phrase adds
+        // its clear control to the name), narrows the current view; the
+        // heading keeps the view's name and the count follows; the phrase
+        // shows as a chip (Rule 6).
+        await expect(
+            page.getByRole('searchbox', {name: IN_PAGE_SEARCH_LABEL, exact: true})
+        ).toBeVisible();
+        await expect(dash.searchBox()).toHaveCount(1);
         await dash.searchFor(`finda${tag}`);
         await dash.expectViewHeading('Active submissions', 1);
         await expect(dash.row(`finda${tag}`)).toBeVisible();
@@ -708,6 +786,9 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
                 {path: 'archive', title: 'Archive', isInactive: true},
                 {path: 'editorials', title: 'Editorials', editorRestricted: true},
             ],
+            // The given's two categories, each holding one monograph
+            // (fn-s5).
+            categories: [{path: 'catone', title: 'Cat One'}, {path: 'cattwo', title: 'Cat Two'}],
         });
         // The Series Editor assigned to one monograph, a second active one
         // nobody is assigned to (so the editor filter's narrowing is
@@ -723,16 +804,23 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await ompApi.createSubmission({
             tag, context: tag, submitter: `${tag}au`, title: `pub${tag}`, published: true,
         });
+        // One fresh monograph in each category (fn-s5).
+        await ompApi.createSubmission({
+            tag, context: tag, submitter: `${tag}au`, title: `cone${tag}`, categories: ['catone'],
+        });
+        await ompApi.createSubmission({
+            tag, context: tag, submitter: `${tag}au`, title: `ctwo${tag}`, categories: ['cattwo'],
+        });
+        const ALL = 4;
 
         const page = await (await asUser(mg)).newPage();
         const dash = new EditorialDashboardPage(page, tag);
         await dash.goto();
         await dash.openView('Active submissions');
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ALL);
 
         // "Filters": a side panel titled "Filters" with "Days since last
-        // activity", "Clear Filters" and "Apply Filters" (Rule 8; this
-        // scratch press has no categories). Set the slider to 30 and
+        // activity", "Clear Filters" and "Apply Filters" (Rule 8). Set the slider to 30 and
         // apply: the panel closes, the fresh monographs (0 idle days) drop
         // out, the heading count follows, and the filter's chip shows with
         // "Clear Filters" beside it (fn-s5).
@@ -750,10 +838,49 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
 
         // "Clear Filters" restores the view.
         await dash.clearFiltersButton().click();
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ALL);
         await expect(dash.row(`days${tag}`)).toBeVisible();
         await expect(dash.row(`other${tag}`)).toBeVisible();
         await expect(dash.filterChip(`${DAYS_FILTER}:`)).toHaveCount(0);
+
+        // "Categories": pick "Cat One" and apply: the list narrows to the
+        // monograph in that category, under its chip (Fields table, Rule
+        // 8a; the chip reads "Categories: Cat One", fn-s5).
+        const pickCategory = (name) => dash.pickFilterSuggestion('Categories', 'Cat', name);
+        await dash.openFilters();
+        await pickCategory('Cat One');
+        await dash.applyFilters();
+        await expect(dash.filterChip('Categories: Cat One')).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`cone${tag}`)).toBeVisible();
+        await expect(dash.row(`ctwo${tag}`)).toHaveCount(0);
+        await expect(dash.row(`days${tag}`)).toHaveCount(0);
+
+        // Two values in one field: pick "Cat Two" as well and apply: the
+        // monographs of both categories, under two chips, one per
+        // category; the X on "Cat One" leaves the "Cat Two" chip alone and
+        // the list narrows to its monograph; "Clear Filters" (Rule 8a).
+        await dash.openFilters();
+        await expect(dash.filterChoice('Cat One')).toBeVisible();
+        await pickCategory('Cat Two');
+        await dash.applyFilters();
+        await expect(dash.filterChip('Categories: Cat One')).toBeVisible();
+        await expect(dash.filterChip('Categories: Cat Two')).toBeVisible();
+        await expect(dash.filterChipButton('Categories:')).toHaveCount(2);
+        await dash.expectViewHeading('Active submissions', 2);
+        await expect(dash.row(`cone${tag}`)).toBeVisible();
+        await expect(dash.row(`ctwo${tag}`)).toBeVisible();
+        await expect(dash.row(`days${tag}`)).toHaveCount(0);
+        await dash.filterChipButton('Categories: Cat One').click();
+        await expect(dash.filterChip('Categories: Cat One')).toHaveCount(0);
+        await expect(dash.filterChip('Categories: Cat Two')).toBeVisible();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`ctwo${tag}`)).toBeVisible();
+        await expect(dash.row(`cone${tag}`)).toHaveCount(0);
+        await dash.clearFiltersButton().click();
+        await dash.expectViewHeading('Active submissions', ALL);
+        await expect(dash.filterChip('Categories:')).toHaveCount(0);
+        await expect(dash.row(`cone${tag}`)).toBeVisible();
 
         // "Assigned To Editor": the manager's panel lists the field; its
         // suggest list offers nothing until a name is typed (Fields table);
@@ -806,7 +933,7 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         // (Rules 8a–8c, fn-s5): back on "Active submissions", the editor
         // filter applied again shows chosen when "Filters" reopens.
         await dash.openView('Active submissions');
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ALL);
         await dash.openFilters();
         await dash.filterSuggestField(EDITOR_FILTER).click();
         await dash.filterSuggestField(EDITOR_FILTER).pressSequentially('Sana', {delay: 25});
@@ -815,11 +942,11 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(dash.filterChip(editorChip)).toBeVisible();
         await dash.expectViewHeading('Active submissions', 1);
         await dash.openFilters();
-        await expect(panelPick(dash, 'Sana Series')).toBeVisible();
+        await expect(dash.filterChoice('Sana Series')).toBeVisible();
         // The panel's "Clear Filters" empties the field only: the panel
         // stays open, and the list behind it keeps its chip and its count.
         await panelClearFilters(dash).click();
-        await expect(panelPick(dash, 'Sana Series')).toHaveCount(0);
+        await expect(dash.filterChoice('Sana Series')).toHaveCount(0);
         await expect(dash.filterSuggestField(EDITOR_FILTER)).toBeVisible();
         await expect(panelClearFilters(dash)).toBeVisible();
         await expect(dash.filterChip(editorChip)).toBeVisible();
@@ -831,7 +958,7 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await dash.expectViewHeading('Active submissions', 1);
         await expect(dash.row(`days${tag}`)).toBeVisible();
         await dash.openFilters();
-        await expect(panelPick(dash, 'Sana Series')).toBeVisible();
+        await expect(dash.filterChoice('Sana Series')).toBeVisible();
         // Unapplied changes: the slider set to 30, then "Close": nothing
         // asks (no browser dialog), the list stays as it was with the
         // editor's chip alone, and the panel reopens with the slider not
@@ -849,15 +976,15 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(dash.row(`days${tag}`)).toBeVisible();
         await expect(page).not.toHaveURL(/daysInactive=/);
         await dash.openFilters();
-        await expect(panelPick(dash, 'Sana Series')).toBeVisible();
+        await expect(dash.filterChoice('Sana Series')).toBeVisible();
         await expect(dash.filtersModal().getByRole('slider')).toHaveAttribute('aria-valuenow', '0');
         expect(dialogs).toEqual([]);
         // The panel's "Clear Filters", then "Apply Filters": the chip goes
         // and the full view is back.
         await panelClearFilters(dash).click();
-        await expect(panelPick(dash, 'Sana Series')).toHaveCount(0);
+        await expect(dash.filterChoice('Sana Series')).toHaveCount(0);
         await dash.applyFilters();
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ALL);
         await expect(dash.filterChip(editorChip)).toHaveCount(0);
         await expect(dash.clearFiltersButton()).toHaveCount(0);
         await expect(dash.row(`other${tag}`)).toBeVisible();
@@ -894,13 +1021,21 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         expect(page.url()).toContain(`workflowSubmissionId=${submissionId}`);
         const urlOpen = page.url();
 
-        // Reload: the recorded address reopens the panel (Rule 11).
+        // Reload: the recorded address reopens the panel on the same
+        // monograph, its number in the panel's header (Rule 11).
+        const workflow = new WorkflowPage(page, PK);
+        await workflow.expectOpen(submissionId);
         await page.goto(urlOpen);
         await dash.expectWorkflowOpen();
+        await workflow.expectOpen(submissionId);
+        expect(page.url()).toContain(`workflowSubmissionId=${submissionId}`);
 
-        // Close: the list is back as it was left, at the address it had
-        // before "View".
+        // Close: the list is back as it was left, reloaded (its submissions
+        // fetch answers as the panel closes), at the address it had before
+        // "View".
+        const reloaded = dash.listReload();
         await dash.closeWorkflow();
+        expect((await reloaded).ok()).toBe(true);
         await expect(dash.row(tag)).toBeVisible();
         expect(page.url()).toBe(urlBefore);
 
@@ -997,8 +1132,9 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(dash.dataRows()).toHaveCount(30);
         await expect.poll(order, {timeout: 30_000}).toEqual(defaultFirstPage);
 
-        // "Days": the address follows the same way; every row reads 0 days,
-        // so the order is not judged (fn-s7).
+        // "Days", clicked twice: the address follows each click as it did
+        // for "ID", descending, then ascending; every row reads 0 days, so
+        // the order is not judged (fn-s7).
         await dash.sortButton('Days').click();
         await expect(page).toHaveURL(/sortColumn=lastActivity/);
         await expect(page).toHaveURL(/sortDirection=descending/);
@@ -1031,13 +1167,16 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(dash.dataRows()).toHaveCount(30);
         await expect(showing).toHaveText(/Showing 1 to 30 of 31/);
 
-        // Control: reloading the sorted address brings the rows back in the
-        // same order (descending by ID: "idc" first, "ida" on page 2).
+        // Control: "ID" clicked until the rows stand by ID, highest first,
+        // with the address recording the sort (above), and reloaded: the
+        // whole first page comes back in the same order ("idc" first, "ida"
+        // on page 2); no two monographs share a submission date (A16).
         const sorted = await order();
         expect(sorted[0]).toBe(`idc${tag}`);
         await page.goto(page.url());
         await dash.expectViewHeading('Active submissions', ROWS);
         await expect(page).toHaveURL(/sortColumn=id/);
+        await expect(page).toHaveURL(/sortDirection=descending/);
         await expect(dash.dataRows()).toHaveCount(30);
         await expect.poll(order, {timeout: 30_000}).toEqual(sorted);
     });
@@ -1062,22 +1201,24 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         const dash = new EditorialDashboardPage(page, tag);
         await dash.goto();
 
-        // "Needs editor": the fresh monograph lists there and under "All in
-        // submission stage", with an "Assign Editor" button in its activity
-        // cell (Rules 2, 9d).
+        // "Needs editor": the fresh monograph lists there, "Needs editor
+        // (1)", and under "All in submission stage" (Rule 2).
         await dash.expectViewCount('Needs editor', 1);
         await dash.expectViewCount('All in submission stage', 1);
-        await dash.openView('Needs editor');
-        await expect(dash.row(`tri${tag}`)).toBeVisible();
-        await expect(dash.assignEditorButton(dash.row(`tri${tag}`))).toBeVisible();
         await dash.openView('All in submission stage');
+        await dash.expectViewHeading('All in submission stage', 1);
         await expect(dash.row(`tri${tag}`)).toBeVisible();
-
-        // "Assign Editor": assign a Series Editor through the "Assign
-        // Participant" window (opened from the row on "Active submissions",
-        // where the row stays listed afterwards).
-        await dash.openView('Active submissions');
+        await dash.openView('Needs editor');
+        await dash.expectViewHeading('Needs editor', 1);
         const row = dash.row(`tri${tag}`);
+        await expect(row).toBeVisible();
+
+        // "Assign Editor": on "Needs editor", the row's activity cell offers
+        // the button (Rule 9d); press it: the "Assign Participant" window
+        // opens; assign a Series Editor through it and confirm.
+        await expect(dash.assignEditorButton(row)).toBeVisible();
+        // A mark on the open document: a reload would drop it.
+        await page.evaluate(() => { window.u23NoReload = true; });
         await dash.assignEditorButton(row).click();
         const dlg = topModal(page);
         await expect(dlg.getByText('Assign Participant').first()).toBeVisible({
@@ -1091,16 +1232,24 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await dlg.getByRole('radio').first().check();
         await dlg.getByRole('button', {name: 'OK', exact: true}).click();
 
-        // Back on the list: the button is gone and the cell is empty (Rules
-        // 9d, 9i), the row keeps its place here, and the "Needs editor"
-        // badge and the heading total moved in place (Rule 13).
-        await expect(dash.assignEditorButton(row)).toHaveCount(0, {timeout: 30_000});
-        await expect(row).toBeVisible();
-        await expect(dash.activityCell(row)).toHaveText(/^\s*$/);
-        await dash.expectViewCount('Needs editor', 0);
-        await dash.openView('Needs editor');
+        // Back on the list: without a reload (no navigation is made), the
+        // row has left "Needs editor", whose heading reads "Needs editor
+        // (0)" and whose badge has moved with it (Rule 13).
+        await expect(row).toHaveCount(0, {timeout: 30_000});
         await dash.expectViewHeading('Needs editor', 0);
-        await expect(dash.row(`tri${tag}`)).toHaveCount(0);
+        await dash.expectViewCount('Needs editor', 0);
+        await expect(dash.emptyState()).toBeVisible();
+        expect(await page.evaluate(() => window.u23NoReload === true)).toBe(true);
+
+        // The assigned row: on "All in submission stage", the "Assign
+        // Editor" button is gone and the activity cell is empty (Rules 9d,
+        // 9i; the row's "View" is the positive control for the read).
+        await dash.openView('All in submission stage');
+        await dash.expectViewHeading('All in submission stage', 1);
+        await expect(row).toBeVisible();
+        await expect(dash.viewButton(row)).toBeVisible();
+        await expect(dash.assignEditorButton(row)).toHaveCount(0);
+        await expect(dash.activityCell(row)).toHaveText(/^\s*$/);
 
         // Control: the row still lists under "Active submissions" and "All
         // in submission stage".
@@ -1121,6 +1270,8 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         const r2 = `${tag}rb`;
         const r3 = `${tag}rc`;
         const r4 = `${tag}rd`;
+        const r5 = `${tag}re`;
+        const r6 = `${tag}rf`;
         await ompApi.createContext({
             tag,
             users: [
@@ -1130,9 +1281,11 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
                 user(r2, 'Rein', 'Remo', ['externalReviewer']),
                 user(r3, 'Dana', 'Dekl', ['externalReviewer']),
                 user(r4, 'Cora', 'Canc', ['externalReviewer']),
+                user(r5, 'Olga', 'Ovreq', ['externalReviewer']),
+                user(r6, 'Otto', 'Ovrev', ['externalReviewer']),
             ],
         });
-        // Five monographs in external review round 1 (fn-s9): "Bare study"
+        // Six monographs in external review round 1 (fn-s9): "Bare study"
         // with no reviewers yet…
         await ompApi.createSubmission({
             tag, context: tag, submitter: `${tag}au`, title: `rva${tag}`,
@@ -1170,26 +1323,47 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
             decisions: ['skipInternalReview'],
             reviewRounds: [{stage: 'external', reviewers: [{username: r4, status: 'accepted'}]}],
         });
+        // …and "Overdue study", with one request out, unanswered, and one
+        // reviewer who has accepted; their dates are moved on screen below
+        // (no seed key carries a due date, fn-s9).
+        await ompApi.createSubmission({
+            tag, context: tag, submitter: `${tag}au`, title: `rvf${tag}`,
+            decisions: ['skipInternalReview'],
+            reviewRounds: [{
+                stage: 'external',
+                reviewers: [
+                    {username: r5, status: 'invited'},
+                    {username: r6, status: 'accepted'},
+                ],
+            }],
+        });
+        const IN_REVIEW = 6;
 
         const page = await (await asUser(mg)).newPage();
         const dash = new EditorialDashboardPage(page, tag);
         await dash.goto();
         await dash.openView('All in review stage');
-        await dash.expectViewHeading('All in review stage', 5);
+        await dash.expectViewHeading('All in review stage', IN_REVIEW);
         /** Re-list the review view after the reviewer acted in their own
          * session: a fresh page load, because clicking the view already
          * open refetches nothing. */
         const relist = async () => {
             await dash.goto();
             await dash.openView('All in review stage');
-            await dash.expectViewHeading('All in review stage', 5);
+            await dash.expectViewHeading('All in review stage', IN_REVIEW);
         };
 
-        // No reviewers yet: the first row's cell offers "Assign Reviewers",
-        // which opens the Add Reviewer window; close it (Rule 9e).
+        // No reviewers yet: the first row's cell offers "Assign Reviewers"
+        // (read before it is pressed), which opens the Add Reviewer window,
+        // read by its "Add Reviewer" heading; close it (Rule 9e).
         const bare = dash.row(`rva${tag}`);
+        await expect(dash.assignReviewersButton(bare)).toBeVisible();
+        await expect(allIndicators(bare)).toHaveCount(0);
         await dash.assignReviewersButton(bare).click();
         const addModal = topModal(page);
+        await expect(
+            addModal.getByRole('heading', {name: 'Add Reviewer'})
+        ).toBeVisible({timeout: 20_000});
         await expect(
             addModal.getByRole('heading', {name: 'Locate a Reviewer'})
         ).toBeVisible({timeout: 20_000});
@@ -1197,6 +1371,10 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(
             page.getByRole('heading', {name: 'Locate a Reviewer'})
         ).toHaveCount(0, {timeout: 20_000});
+
+        // The Stage cell: "Bare study"'s names its stage and round,
+        // "External Review (Round 1)" (Rule 5).
+        await expect(dash.stageCell(bare)).toHaveText(/^\s*External Review \(Round 1\)\s*$/);
 
         // Two requests out: the second row's cell shows two countdown
         // indicators and an icon for the declined reviewer, and the
@@ -1208,12 +1386,20 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(dash.activityIndicator(bare, AWAITING)).toHaveCount(0);
         const declined = dash.activityIndicator(busy, /Review Request declined on/);
         await expect(declined).toHaveCount(1);
+        await expect(allIndicators(busy)).toHaveCount(3);
+        // Two countdown rings with their days, one icon (Rule 10).
+        for (const ring of [awaiting.first(), awaiting.last()]) {
+            await expect(dash.indicatorRingDays(ring)).toHaveText(/^\s*-?\d+\s*$/);
+            await expect(dash.indicatorIcon(ring)).toHaveCount(0);
+        }
+        await expect(dash.indicatorIcon(declined)).toHaveCount(1);
+        await expect(dash.indicatorRingDays(declined)).toHaveCount(0);
         await dash.expectViewCount('Reviews submitted', 0);
         await dash.openView('Awaiting reviews');
         await expect(dash.row(`rvb${tag}`)).toBeVisible();
         await expect(dash.row(`rva${tag}`)).toHaveCount(0); // no reviewers, nothing awaited
         await dash.openView('All in review stage');
-        await dash.expectViewHeading('All in review stage', 5);
+        await dash.expectViewHeading('All in review stage', IN_REVIEW);
 
         // A popover: it names the reviewer, the review type and the status,
         // with "Edit Due Date", "View details" and "Unassign" (Rule 10).
@@ -1251,7 +1437,7 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         let reloaded = dash.listReload();
         await closeReviewDetails(details);
         await reloaded;
-        await dash.expectViewHeading('All in review stage', 5);
+        await dash.expectViewHeading('All in review stage', IN_REVIEW);
         await expect(dash.activityIndicator(dash.row(`rvb${tag}`), AWAITING)).toHaveCount(2);
         await dash.closeActivityPopover(dash.row(`rvb${tag}`));
 
@@ -1270,6 +1456,8 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         const accepted = dash.activityIndicator(busyAccepted, /Ongoing review - request accepted/);
         await expect(accepted).toHaveCount(1);
         await expect(dash.activityIndicator(busyAccepted, AWAITING)).toHaveCount(1);
+        await expect(dash.indicatorRingDays(accepted)).toHaveText(/^\s*-?\d+\s*$/);
+        await expect(dash.indicatorIcon(accepted)).toHaveCount(0);
         await accepted.click();
         const acceptedPopover = dash.activityPopover(busyAccepted);
         await expect(acceptedPopover).toContainText('Ongoing review - request accepted');
@@ -1283,17 +1471,16 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         // Reviewer: the same reviewer submits their review.
         await submitAcceptedReview(reviewerPage, tag, withReviewers.submissionId, `Review comment ${tag}`);
 
-        // The completed review: that reviewer's indicator is now a done
-        // mark whose popover reads "Review completed on {date}" — on a
-        // press without a recommendation (the popover's own completion
-        // sentence is the positive control) — with "View unread
-        // recommendation"; the submission now lists under "Reviews
-        // submitted" too.
+        // The completed review: that reviewer's indicator is now an icon
+        // whose popover reads "Review completed on {date}" — on a press
+        // without a recommendation (the popover's own completion sentence
+        // is the positive control) — with "View unread recommendation".
         await relist();
-        await dash.expectViewCount('Reviews submitted', 1);
         const busyAfter = dash.row(`rvb${tag}`);
         const done = dash.activityIndicator(busyAfter, /Review completed on/);
         await expect(done).toHaveCount(1);
+        await expect(dash.indicatorIcon(done)).toHaveCount(1);
+        await expect(dash.indicatorRingDays(done)).toHaveCount(0);
         await expect(dash.activityIndicator(busyAfter, /Ongoing review - request accepted/)).toHaveCount(0);
         await done.click();
         let completedPopover = dash.activityPopover(busyAfter);
@@ -1335,6 +1522,16 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         ).toHaveCount(0);
         await dash.closeActivityPopover(busyAfter);
 
+        // Open "Reviews submitted": the monograph now lists there too (the
+        // other rows, with no review in, are the control).
+        await dash.expectViewCount('Reviews submitted', 1);
+        await dash.openView('Reviews submitted');
+        await dash.expectViewHeading('Reviews submitted', 1);
+        await expect(dash.row(`rvb${tag}`)).toBeVisible();
+        await expect(dash.row(`rva${tag}`)).toHaveCount(0);
+        await dash.openView('All in review stage');
+        await dash.expectViewHeading('All in review stage', IN_REVIEW);
+
         // Revisions asked: the third row's cell reads "Revisions requested
         // from author" and the fourth's "Revisions requested from the
         // author to be taken to a new review round" (Rule 9e).
@@ -1356,6 +1553,8 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         const acceptedRow = dash.row(`rve${tag}`);
         const ongoing = dash.activityIndicator(acceptedRow, /Ongoing review - request accepted/);
         await expect(ongoing).toHaveCount(1);
+        await expect(dash.indicatorRingDays(ongoing)).toHaveText(/^\s*-?\d+\s*$/);
+        await expect(dash.indicatorIcon(ongoing)).toHaveCount(0);
         await ongoing.click();
         const ongoingPopover = dash.activityPopover(acceptedRow);
         await expect(ongoingPopover).toContainText('Ongoing review - request accepted');
@@ -1375,6 +1574,8 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         const cancelled = dash.activityIndicator(acceptedRow, /Review request cancelled by editor/);
         await expect(cancelled).toHaveCount(1, {timeout: 30_000});
         await expect(ongoing).toHaveCount(0);
+        await expect(dash.indicatorIcon(cancelled)).toHaveCount(1);
+        await expect(dash.indicatorRingDays(cancelled)).toHaveCount(0);
         await cancelled.click();
         const cancelledPopover = dash.activityPopover(acceptedRow);
         await expect(cancelledPopover).toContainText('Review request cancelled by editor');
@@ -1398,10 +1599,93 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await dash.closeActivityPopover(acceptedRow);
         await expect(cancelled).toHaveCount(1);
 
+        // Due tomorrow: on "Overdue study", the unanswered request's ring
+        // opens its popover; "Edit Due Date" opens the "Edit Review" window
+        // of the workflow's Reviewers panel (U27); its "Response Due Date"
+        // set to tomorrow and saved, the list refetches and the ring reads
+        // 1 (Rule 10; the late hour and other browser time zones: A21).
+        const overdueRow = dash.row(`rvf${tag}`);
+        const request = dash.activityIndicator(overdueRow, AWAITING);
+        await expect(request).toHaveCount(1);
+        await expect(allIndicators(overdueRow)).toHaveCount(2);
+        await request.click();
+        await expect(dash.activityPopover(overdueRow)).toContainText('Ovreq');
+        await editDueDates(dash, overdueRow, [['responseDueDate', daysFromNow(1)]]);
+        await expect(request).toHaveCount(1);
+        await expect(dash.indicatorRingDays(request)).toHaveText(/^\s*1\s*$/);
+        await expect(dash.indicatorOverdueColor(request)).toHaveCount(0);
+
+        // A request overdue: "Edit Due Date" again, "Response Due Date" set
+        // to yesterday: the ring takes the overdue color, and its popover
+        // reads "Review Request overdue by {days} days" with "Edit Due
+        // Date", "View details" and "Unassign".
+        await request.click();
+        await editDueDates(dash, overdueRow, [['responseDueDate', daysFromNow(-1)]]);
+        const lateRequest = dash.activityIndicator(overdueRow, /Review Request overdue by/);
+        await expect(lateRequest).toHaveCount(1);
+        await expect(request).toHaveCount(0);
+        await expect(dash.indicatorRingDays(lateRequest)).toHaveText(/^\s*-?\d+\s*$/);
+        await expect(dash.indicatorOverdueRing(lateRequest).first()).toBeAttached();
+        await lateRequest.click();
+        const latePopover = dash.activityPopover(overdueRow);
+        await expect(latePopover).toContainText(/Review Request overdue by \d+ days/);
+        await expect(latePopover).toContainText('Ovreq');
+        await expect(latePopover.getByRole('button', {name: 'Edit Due Date', exact: true})).toBeVisible();
+        await expect(latePopover.getByRole('button', {name: 'View details', exact: true})).toBeVisible();
+        await expect(latePopover.getByRole('button', {name: 'Unassign', exact: true})).toBeVisible();
+        await expect(latePopover.getByRole('button', {name: 'Cancel Reviewer', exact: true})).toHaveCount(0);
+        await dash.closeActivityPopover(overdueRow);
+
+        // A review overdue: the accepted reviewer's ring opens "Ongoing
+        // review - request accepted" (its ring not yet in the overdue
+        // color, the control for the color read); both dates set to
+        // yesterday: the indicator takes the overdue color (a disc filled
+        // with it, its days inside, where an overdue request's ring is
+        // stroked with it), and its popover reads "Review overdue by
+        // {days} days" with "Edit Due Date",
+        // "View details" and "Cancel Reviewer".
+        const underway = dash.activityIndicator(overdueRow, ONGOING);
+        await expect(underway).toHaveCount(1);
+        await expect(dash.indicatorOverdueColor(underway)).toHaveCount(0);
+        await underway.click();
+        await expect(dash.activityPopover(overdueRow)).toContainText('Ongoing review - request accepted');
+        await expect(dash.activityPopover(overdueRow)).toContainText('Ovrev');
+        await editDueDates(dash, overdueRow, [
+            ['responseDueDate', daysFromNow(-1)],
+            ['reviewDueDate', daysFromNow(-1)],
+        ]);
+        const lateReview = dash.activityIndicator(overdueRow, /Review overdue by/);
+        await expect(lateReview).toHaveCount(1);
+        await expect(underway).toHaveCount(0);
+        await expect(dash.indicatorRingDays(lateReview)).toHaveText(/^\s*-?\d+\s*$/);
+        await expect(dash.indicatorOverdueDisc(lateReview).first()).toBeAttached();
+        await expect(dash.indicatorOverdueRing(lateReview)).toHaveCount(0);
+        await lateReview.click();
+        const lateReviewPopover = dash.activityPopover(overdueRow);
+        await expect(lateReviewPopover).toContainText(/Review overdue by \d+ days/);
+        await expect(lateReviewPopover).toContainText('Ovrev');
+        await expect(lateReviewPopover.getByRole('button', {name: 'Edit Due Date', exact: true})).toBeVisible();
+        await expect(lateReviewPopover.getByRole('button', {name: 'View details', exact: true})).toBeVisible();
+        await expect(lateReviewPopover.getByRole('button', {name: 'Cancel Reviewer', exact: true})).toBeVisible();
+        await expect(lateReviewPopover.getByRole('button', {name: 'Unassign', exact: true})).toHaveCount(0);
+        await dash.closeActivityPopover(overdueRow);
+
+        // "Reviews overdue": open it: "Overdue study" is listed (the
+        // other rows, none overdue, are the control).
+        await dash.expectViewCount('Reviews overdue', 1);
+        await dash.openView('Reviews overdue');
+        await dash.expectViewHeading('Reviews overdue', 1);
+        await expect(dash.row(`rvf${tag}`)).toBeVisible();
+        await expect(dash.row(`rvb${tag}`)).toHaveCount(0);
+        await dash.openView('All in review stage');
+        await dash.expectViewHeading('All in review stage', IN_REVIEW);
+
         // Control: the other reviewer's indicator is still a countdown ring
         // whose popover reads "Awaiting Response from the reviewer".
         const stillAwaiting = dash.activityIndicator(busyAfter, AWAITING);
         await expect(stillAwaiting).toHaveCount(1);
+        await expect(dash.indicatorRingDays(stillAwaiting)).toHaveText(/^\s*-?\d+\s*$/);
+        await expect(dash.indicatorIcon(stillAwaiting)).toHaveCount(0);
         await stillAwaiting.click();
         await expect(dash.activityPopover(busyAfter)).toContainText('Awaiting Response from the reviewer');
         await expect(dash.activityPopover(busyAfter)).toContainText('Rana');
@@ -1467,13 +1751,24 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(dash.viewButton(oth)).toBeVisible();
         await expect(dash.assignEditorButton(oth)).toBeVisible();
 
-        // The same monograph sits normally under "My Submissions as
-        // Author" (scenario 10).
+        // "My Submissions as Author": that sidebar group lists the same
+        // monograph: its "Active submissions" entry, reached from the
+        // sidebar (not by address), counts one and opens the author's
+        // list holding it, with "View" (the other author's monograph stays
+        // out of it, the control).
         const mySub = new MySubmissionsPage(page, tag);
-        await mySub.goto();
-        await mySub.expectViewHeading('Active submissions');
+        await expect(mySub.menuGroupLink()).toBeVisible();
+        const authorActive = authorViewLink(page, 'Active submissions');
+        if (!(await authorActive.isVisible())) {
+            await mySub.menuGroupLink().click();
+        }
+        await expect(authorActive).toHaveText(/^\s*1\s*Active submissions\s*$/, {timeout: 30_000});
+        await authorActive.click();
+        await expect(page).toHaveURL(/\/dashboard\/mySubmissions/, {timeout: 30_000});
+        await mySub.expectViewHeading('Active submissions', 1);
         await expect(mySub.row(`own${tag}`)).toBeVisible();
         await expect(mySub.viewButton(mySub.row(`own${tag}`))).toBeVisible();
+        await expect(mySub.row(`oth${tag}`)).toHaveCount(0);
     });
 
     test("S11: declined out of the Series Editor's sight", async ({asUser, ompApi}, testInfo) => {
@@ -1499,6 +1794,17 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
             tag, context: tag, submitter: `${tag}au`, title: `live${tag}`,
             participants: [{username: se, role: 'sectionEditor'}],
         });
+        // "Review declined study", declined on External Review, and
+        // "Internal declined study", declined on Internal Review, the
+        // decline resolved to the stage it is taken on (fn-s11).
+        await ompApi.createSubmission({
+            tag, context: tag, submitter: `${tag}au`, title: `xrej${tag}`,
+            decisions: ['skipInternalReview', 'decline'],
+        });
+        await ompApi.createSubmission({
+            tag, context: tag, submitter: `${tag}au`, title: `irej${tag}`,
+            decisions: ['sendInternalReview', 'decline'],
+        });
 
         // Press Manager: on "Active submissions", press "View" on the row
         // and decline the monograph from its Submission stage inside the
@@ -1508,7 +1814,7 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         const mgPage = await (await asUser(mg)).newPage();
         const mgDash = new EditorialDashboardPage(mgPage, tag);
         await mgDash.goto();
-        await mgDash.expectViewCount('Declined', 0);
+        await mgDash.expectViewCount('Declined', 2);
         await mgDash.openView('Active submissions');
         await mgDash.expectViewHeading('Active submissions', 2);
         await mgDash.expectViewCount('Active submissions', 2);
@@ -1526,7 +1832,7 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await mgDash.expectWorkflowOpen();
         await mgDash.closeWorkflow();
         await mgDash.expectViewHeading('Active submissions', 1);
-        await mgDash.expectViewCount('Declined', 1);
+        await mgDash.expectViewCount('Declined', 3);
         await mgDash.expectViewCount('Active submissions', 1);
         await expect(mgDash.row(`live${tag}`)).toBeVisible();
         await expect(mgDash.row(`dcl${tag}`)).toHaveCount(0);
@@ -1535,12 +1841,27 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         // "Declined", its activity cell naming the stage by its plain name,
         // and the row keeping "View" (Rules 2, 9b).
         await mgDash.openView('Declined');
-        await mgDash.expectViewHeading('Declined', 1);
+        await mgDash.expectViewHeading('Declined', 3);
         const row = mgDash.row(`dcl${tag}`);
         await expect(row).toBeVisible();
         await expect(mgDash.stageCell(row)).toHaveText(/^\s*Declined\s*$/);
         await expect(mgDash.activityCell(row)).toHaveText(/^\s*Declined during the Submission stage\.\s*$/);
         await expect(mgDash.viewButton(row)).toBeVisible();
+
+        // Declined on a review stage: on "Declined", "Review declined
+        // study"'s activity cell reads "Declined during the External Review
+        // stage." and "Internal declined study"'s "Declined during the
+        // Internal Review stage."; both rows keep "View" (Rule 9b).
+        const extRow = mgDash.row(`xrej${tag}`);
+        const intRow = mgDash.row(`irej${tag}`);
+        await expect(mgDash.activityCell(extRow)).toHaveText(
+            /^\s*Declined during the External Review stage\.\s*$/
+        );
+        await expect(mgDash.activityCell(intRow)).toHaveText(
+            /^\s*Declined during the Internal Review stage\.\s*$/
+        );
+        await expect(mgDash.viewButton(extRow)).toBeVisible();
+        await expect(mgDash.viewButton(intRow)).toBeVisible();
 
         // Series Editor: their group has no "Declined" entry (register 🐞
         // A1's plain claim) and no "Needs editor" entry, and the monograph
@@ -1578,15 +1899,15 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         // through a five-second trailing throttle, fn-d: the reads below
         // are auto-waited, never a reload).
         await mgDash.openView('Declined');
-        await mgDash.expectViewHeading('Declined', 1);
+        await mgDash.expectViewHeading('Declined', 3);
         const workflow = new WorkflowPage(mgPage, tag);
         await workflow.openFromRow(mgDash.row(`dcl${tag}`));
         await workflow.deleteSubmission({confirm: true});
         await expect(mgDash.workflowDialog()).toHaveCount(0);
         await expect(mgDash.row(`dcl${tag}`)).toHaveCount(0);
-        await expect(mgPage.getByText('No Items')).toBeVisible();
-        await mgDash.expectViewCount('Declined', 0);
-        await mgDash.expectViewHeading('Declined', 0);
+        await expect(mgDash.row(`xrej${tag}`)).toBeVisible();
+        await mgDash.expectViewCount('Declined', 2);
+        await mgDash.expectViewHeading('Declined', 2);
 
         // Control: the Press Manager's own group offers "Declined" and
         // "Needs editor".
@@ -1609,12 +1930,14 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
                 user(ab, 'Bea', 'Author', ['author']),
             ],
         });
-        // Two incomplete monographs by different authors + one submitted.
+        // Two incomplete monographs by different authors, titled as the
+        // given has them (the scratch press isolates the titles, and the
+        // search leg types "Draft"), + one submitted.
         await ompApi.createSubmission({
-            tag, context: tag, submitter: aa, title: `bda${tag}`, submitted: false,
+            tag, context: tag, submitter: aa, title: 'Draft one', submitted: false,
         });
         await ompApi.createSubmission({
-            tag, context: tag, submitter: ab, title: `bdb${tag}`, submitted: false,
+            tag, context: tag, submitter: ab, title: 'Draft two', submitted: false,
         });
         await ompApi.createSubmission({
             tag, context: tag, submitter: aa, title: `bdc${tag}`,
@@ -1629,8 +1952,8 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         // The incomplete rows: each has its Stage cell reading "Incomplete",
         // offers "Complete submission" (Rule 9c; register ❓ A2, offered but
         // never pressed) and has no "View"; the submitted row has "View".
-        const rowA = dash.row(`bda${tag}`);
-        const rowB = dash.row(`bdb${tag}`);
+        const rowA = dash.row('Draft one');
+        const rowB = dash.row('Draft two');
         const submitted = dash.row(`bdc${tag}`);
         for (const row of [rowA, rowB]) {
             await expect(dash.stageCell(row)).toHaveText(/Incomplete/);
@@ -1688,17 +2011,54 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await expect(page.getByRole('checkbox')).toHaveCount(0);
         await expectNothingDeleted();
 
+        /** The selection-mode "Cancel" above the list, by name (the
+         * sibling locator `bulkDeleteCancelButton()` hangs on the delete
+         * button, so it cannot read the pair's absence). */
+        const cancelAbove = dash.selectionCancelButton();
+
         // A view switch in selection mode: choose "Delete Incomplete
-        // Submissions" once more, tick one row, open "Published" and return
-        // to "Active submissions": no row is ticked and nothing was deleted.
+        // Submissions" once more, tick one row and open "Published":
+        // selection mode has ended, with neither the "Delete Incomplete
+        // Submissions" nor the "Cancel" button above the list; return to
+        // "Active submissions": no checkbox shows, so no row is ticked,
+        // and both incomplete rows are still listed (Rule 12).
         await dash.enterBulkDeleteSelection();
         await dash.checkRowCheckbox(rowA);
         await expect(rowA.getByRole('checkbox')).toBeChecked(); // positive control for the tick
+        await expect(cancelAbove).toBeVisible(); // positive control for the pair's absence
         await dash.openView('Published');
         await dash.expectViewHeading('Published', 0);
+        await expect(dash.emptyState()).toBeVisible();
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(cancelAbove).toHaveCount(0);
+        await expect(dash.moreActionsButton()).toBeVisible();
         await dash.openView('Active submissions');
         await expectNothingDeleted();
-        await expect(page.getByRole('checkbox', {checked: true})).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(cancelAbove).toHaveCount(0);
+
+        // A new search in selection mode: choose "Delete Incomplete
+        // Submissions" again, tick one row, type Draft into the search box
+        // and press Enter: the list holds "Draft one" and "Draft two" with
+        // no checkbox, and neither button shows above it: nothing was
+        // deleted; press the search chip's X (Rule 12).
+        await dash.enterBulkDeleteSelection();
+        await dash.checkRowCheckbox(rowA);
+        await expect(rowA.getByRole('checkbox')).toBeChecked();
+        await expect(cancelAbove).toBeVisible();
+        await dash.searchFor('Draft');
+        await dash.expectViewHeading('Active submissions', 2);
+        await expect(dash.searchChip('Draft')).toBeVisible();
+        await expect(rowA).toBeVisible();
+        await expect(rowB).toBeVisible();
+        await expect(submitted).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(cancelAbove).toHaveCount(0);
+        await dash.searchChipClearButton().click();
+        await expectNothingDeleted();
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
 
         // Delete: choose "Delete Incomplete Submissions" again, tick both
         // and press the button: the confirm dialog reads its sentence;
@@ -1736,11 +2096,11 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await mySub.expectViewCount('Incomplete submissions', 0);
         await mySub.openView('Incomplete submissions');
         await mySub.expectViewHeading('Incomplete submissions', 0);
-        await expect(mySub.row(`bda${tag}`)).toHaveCount(0);
+        await expect(mySub.row('Draft one')).toHaveCount(0);
         await mySub.openView('Active submissions');
         await mySub.expectViewHeading('Active submissions', 1);
         await expect(mySub.row(`bdc${tag}`)).toBeVisible();
-        await expect(mySub.row(`bda${tag}`)).toHaveCount(0);
+        await expect(mySub.row('Draft one')).toHaveCount(0);
         expect(await pkpMail.count({to: `${aa}@mail.test`})).toBe(0);
         expect(await pkpMail.count({to: `${ab}@mail.test`})).toBe(0);
 
@@ -1781,15 +2141,20 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await dash.goto();
 
         // "All in review stage" spans both review stages (Rule 2 /
-        // scenario 14) — one entry, both monographs, each with its stage
-        // in the Stage cell.
+        // scenario 14) — one entry, both monographs.
         await dash.expectViewCount('All in review stage', 2);
         await dash.openView('All in review stage');
         await dash.expectViewHeading('All in review stage', 2);
         const internal = dash.row(`int${tag}`);
         const external = dash.row(`ext${tag}`);
-        await expect(dash.stageCell(internal)).toHaveText(/Internal Review/);
-        await expect(dash.stageCell(external)).toHaveText(/External Review/);
+        await expect(internal).toBeVisible();
+        await expect(external).toBeVisible();
+
+        // The Stage cells: the internal one's names its stage and round,
+        // "Internal Review (Round 1)", and the external one's "External
+        // Review (Round 1)" (Rule 5).
+        await expect(dash.stageCell(internal)).toHaveText(/^\s*Internal Review \(Round 1\)\s*$/);
+        await expect(dash.stageCell(external)).toHaveText(/^\s*External Review \(Round 1\)\s*$/);
 
         // The internal one's activity cell offers "Assign Reviewers", like
         // the external one's (Rule 9e).
@@ -1964,5 +2329,104 @@ test.describe('Submissions dashboard — editorial (U23)', () => {
         await withMinimum.dash.openView('Reviews submitted');
         await withMinimum.dash.expectViewHeading('Reviews submitted', 1);
         await expect(withMinimum.dash.row(`done${withMinimum.tag}`)).toBeVisible();
+    });
+    test('S18: recommending editors on board', async ({asUser, ompApi}, testInfo) => {
+        const tag = makeTag('s18', testInfo);
+        const mg = `${tag}mg`;
+        const de = `${tag}de`;
+        const rc = `${tag}rc`;
+        const rv = `${tag}rv`;
+        // A scratch press with a Press Manager assigned to nothing, and two
+        // Series Editors holding no series assignment, so a submit
+        // auto-assigns nobody: the deciding one and the recommending one
+        // (fn-s18).
+        await ompApi.createContext({
+            tag,
+            users: [
+                user(mg, 'Mira', 'Manager', ['manager']),
+                user(de, 'Dora', 'Decider', ['sectionEditor']),
+                user(rc, 'Remy', 'Recommender', ['sectionEditor']),
+                user(rv, 'Rita', 'Rana', ['externalReviewer']),
+                user(`${tag}au`, 'Ada', 'Author', ['author']),
+            ],
+        });
+        // Two monographs in external review, each with the deciding Series
+        // Editor and the recommend-only one assigned, neither having
+        // recorded anything: "Recommend bare study", no reviewers, and
+        // "Recommend pending study", one request out, unanswered.
+        const team = [
+            {username: de, role: 'sectionEditor'},
+            {username: rc, role: 'sectionEditor', recommendOnly: true},
+        ];
+        await ompApi.createSubmission({
+            tag, context: tag, submitter: `${tag}au`, title: 'Recommend bare study',
+            decisions: ['skipInternalReview'],
+            participants: team,
+        });
+        await ompApi.createSubmission({
+            tag, context: tag, submitter: `${tag}au`, title: 'Recommend pending study',
+            decisions: ['skipInternalReview'],
+            participants: team,
+            reviewRounds: [{stage: 'external', reviewers: [{username: rv, status: 'invited'}]}],
+        });
+
+        // The recommending editor, on "Assigned to me": "Recommend bare
+        // study"'s cell offers "Assign Reviewers", and "Recommend pending
+        // study"'s shows the reviewer's countdown ring, whose popover reads
+        // "Awaiting Response from the reviewer" (Rule 9f, read as 9e).
+        const rcPage = await (await asUser(rc)).newPage();
+        const rcDash = new EditorialDashboardPage(rcPage, tag);
+        await rcDash.goto();
+        await rcDash.expectViewHeading('Assigned to me', 2);
+        const rcBare = rcDash.row('Recommend bare study');
+        const rcPending = rcDash.row('Recommend pending study');
+        await expect(rcDash.assignReviewersButton(rcBare)).toBeVisible();
+        await expect(rcDash.activityCell(rcBare)).not.toContainText(RECOMMENDING);
+        const rcRing = rcDash.activityIndicator(rcPending, AWAITING);
+        await expect(rcRing).toHaveCount(1);
+        await expect(allIndicators(rcPending)).toHaveCount(1);
+        await expect(rcDash.indicatorRingDays(rcRing)).toHaveText(/^\s*-?\d+\s*$/);
+        await expect(rcDash.indicatorIcon(rcRing)).toHaveCount(0);
+        await expect(rcDash.activityCell(rcPending)).not.toContainText(RECOMMENDING);
+        await rcRing.click();
+        await expect(rcDash.activityPopover(rcPending)).toContainText('Awaiting Response from the reviewer');
+        await expect(rcDash.activityPopover(rcPending)).toContainText('Rana');
+        await rcDash.closeActivityPopover(rcPending);
+
+        // The deciding editor, on "Assigned to me": both cells read the
+        // recommending sentence, with no "Assign Reviewers" button and no
+        // indicator (each row's "View" is the positive control for the
+        // row's buttons being read).
+        const dePage = await (await asUser(de)).newPage();
+        const deDash = new EditorialDashboardPage(dePage, tag);
+        await deDash.goto();
+        await deDash.expectViewHeading('Assigned to me', 2);
+        for (const title of ['Recommend bare study', 'Recommend pending study']) {
+            const row = deDash.row(title);
+            await expect(deDash.activityCell(row)).toHaveText(new RegExp(`^\\s*${RECOMMENDING}\\s*$`));
+            await expect(deDash.viewButton(row)).toBeVisible();
+            await expect(deDash.assignReviewersButton(row)).toHaveCount(0);
+            await expect(allIndicators(row)).toHaveCount(0);
+        }
+
+        // The Press Manager, on "Active submissions": "Recommend pending
+        // study"'s cell reads the same sentence, with no indicator.
+        const mgPage = await (await asUser(mg)).newPage();
+        const mgDash = new EditorialDashboardPage(mgPage, tag);
+        await mgDash.goto();
+        await mgDash.expectViewHeading('Assigned to me', 0);
+        await mgDash.openView('Active submissions');
+        await mgDash.expectViewHeading('Active submissions', 2);
+        const mgPending = mgDash.row('Recommend pending study');
+        await expect(mgDash.activityCell(mgPending)).toHaveText(new RegExp(`^\\s*${RECOMMENDING}\\s*$`));
+        await expect(allIndicators(mgPending)).toHaveCount(0);
+        await expect(mgDash.assignReviewersButton(mgPending)).toHaveCount(0);
+
+        // Control: on the same view, "Recommend bare study"'s cell offers
+        // the Press Manager "Assign Reviewers", its round having no
+        // reviewer yet.
+        const mgBare = mgDash.row('Recommend bare study');
+        await expect(mgDash.assignReviewersButton(mgBare)).toBeVisible();
+        await expect(mgDash.activityCell(mgBare)).not.toContainText(RECOMMENDING);
     });
 });

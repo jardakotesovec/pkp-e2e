@@ -15,8 +15,8 @@
  * Deliberately NOT covered (register IDs from the spec's Findings register;
  * a 🐞 is never asserted as contract, a ❓ is parked, not a gap; the spec's
  * Coverage section is the record of everything else left out):
- * - A1 🐞, A2 ❓, A3 ❓, A8 ❓, A9 ❓, A10 🐞, A15 🐞, A17 🐞, A18 ❓, A19 🐞
- *   (A7, A16, A20, A21 and OMP1 are journal or press only).
+ * - A1 🐞, A2 ❓, A3 ❓, A8 ❓, A9 ❓, A10 🐞, A15 🐞, A16 🐞, A17 🐞, A18 ❓,
+ *   A19 🐞 (A7, A20, A21 and OMP1 are journal or press only).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only. Tests that assert counts or sidebar badges isolate on
@@ -234,7 +234,8 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(dash.row(`puba${tag}`)).toHaveCount(0);
         await dash.openView('Scheduled for publication');
         await dash.expectViewHeading('Scheduled for publication', 0);
-        await expect(page.getByText('No Items')).toBeVisible();
+        await expect(dash.noItemsRow()).toBeVisible();
+        await expect(dash.dataRows()).toHaveCount(1);
         await dash.openView('Published');
         await dash.expectViewHeading('Published', 1);
         await expect(dash.row(`puba${tag}`)).toBeVisible();
@@ -242,10 +243,16 @@ test.describe('submissions dashboard (editorial)', () => {
         await dash.openView('Declined');
         await dash.expectViewHeading('Declined', 1);
         await expect(dash.row(`decl${tag}`)).toBeVisible();
-        // Control: the landing view's badge reads 0 and it shows "No Items".
+        // Control: the landing view's badge reads 0 and it shows a single
+        // "No Items" row under its heading: one data row, that one, and the
+        // words once on the page (fn-s1).
         await dash.openView('Assigned to me');
         await dash.expectViewHeading('Assigned to me', 0);
-        await expect(page.getByText('No Items')).toBeVisible();
+        await dash.expectViewCount('Assigned to me', 0);
+        await expect(dash.noItemsRow()).toBeVisible();
+        await expect(dash.dataRows()).toHaveCount(1);
+        await expect(dash.dataRows()).toHaveText([/^\s*No Items\s*$/]);
+        await expect(page.getByText('No Items', {exact: true})).toHaveCount(1);
         await expect(dash.row(`acta${tag}`)).toHaveCount(0);
     });
 
@@ -583,9 +590,11 @@ test.describe('submissions dashboard (editorial)', () => {
         // section; "Archive" inactive, "Editorials" restricted to editors,
         // both through the context's section keys, scenarios.md
         // "sections[]"; fn-s5) with the Moderator assigned to one preprint
-        // and a second preprint in "Archive"; both fresh (the idle one
-        // cannot be seeded: a 30-day floor leaves nothing, fn-s5), plus one
-        // posted, so "Published" has a full list after the view switch.
+        // and a second preprint in "Archive"; two categories, "Cat One" and
+        // "Cat Two", each holding one more preprint (fn-s5); all four fresh
+        // (the idle one cannot be seeded: a 30-day floor leaves nothing,
+        // fn-s5), plus one posted, so "Published" has a full list after the
+        // view switch.
         const mgr = `${tag}mg`;
         const mod = `${tag}md`;
         await opsApi.createContext({
@@ -595,6 +604,7 @@ test.describe('submissions dashboard (editorial)', () => {
                 {abbrev: 'ARC', title: 'Archive', isInactive: true},
                 {abbrev: 'EDI', title: 'Editorials', editorRestricted: true},
             ],
+            categories: [{path: 'catone', title: 'Cat One'}, {path: 'cattwo', title: 'Cat Two'}],
             users: [
                 user(mgr, 'Greta', 'Manager', ['manager']),
                 user(mod, 'Mira', 'Moderator', ['sectionEditor']),
@@ -606,7 +616,10 @@ test.describe('submissions dashboard (editorial)', () => {
             participants: [{username: mod, role: 'sectionEditor'}],
         });
         await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `actb${tag}`, section: 'ARC'});
+        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `cata${tag}`, categories: ['catone']});
+        await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `catb${tag}`, categories: ['cattwo']});
         await opsApi.createSubmission({tag, context: tag, submitter: `${tag}au`, title: `pubs${tag}`, published: true});
+        const ACTIVE = 4;
 
         const page = await (await asUser(mgr)).newPage();
         const dash = new EditorialDashboardPage(page, tag);
@@ -616,7 +629,7 @@ test.describe('submissions dashboard (editorial)', () => {
             dialog.dismiss().catch(() => {});
         });
         await dash.goto('?currentViewId=active');
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ACTIVE);
 
         // "Filters": a side panel titled "Filters" with "Days since last
         // activity", "Clear Filters" and "Apply Filters" (Rule 8).
@@ -626,8 +639,8 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(modal.getByRole('button', {name: 'Clear Filters', exact: true})).toBeVisible();
         await expect(modal.getByRole('button', {name: 'Apply Filters', exact: true})).toBeVisible();
 
-        // Applying a Days value closes the panel, narrows the view (both
-        // rows are fresh, so nothing stays), the count follows, and a chip
+        // Applying a Days value closes the panel, narrows the view (every
+        // row is fresh, so nothing stays), the count follows, and a chip
         // shows above the table with "Clear Filters" beside it.
         await dash.setDaysSinceLastActivity(30);
         await dash.applyFilters();
@@ -638,7 +651,7 @@ test.describe('submissions dashboard (editorial)', () => {
 
         // "Clear Filters" restores the view.
         await dash.clearFiltersButton().click();
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ACTIVE);
         await expect(dash.row(`actb${tag}`)).toBeVisible();
         await expect(dash.filterChip(DAYS_FILTER)).toHaveCount(0);
 
@@ -658,7 +671,7 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(modal).toContainText('Archive');
         await expect(modal).not.toContainText(/inactive|restricted|editors only|moderators only/i);
         await dash.closeFilters();
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ACTIVE);
 
         // "Section": tick "Archive" and apply: the list narrows to the
         // preprint in that section, with a chip for the filter above the
@@ -671,9 +684,52 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(dash.row(`actb${tag}`)).toBeVisible();
         await expect(dash.row(`acta${tag}`)).toHaveCount(0);
         await dash.clearFiltersButton().click();
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ACTIVE);
         await expect(dash.filterChip('Section:')).toHaveCount(0);
         await expect(dash.row(`acta${tag}`)).toBeVisible();
+
+        // "Categories": pick "Cat One" and apply: the list narrows to the
+        // preprint in that category, with a chip for it above the table
+        // (Fields table; the chip reads "Categories: Cat One", fn-s5).
+        const catChips = page.getByRole('button', {name: /^Clear filter: Categories: /});
+        await dash.openFilters();
+        await dash.pickFilterSuggestion('Categories', 'Cat', 'Cat One');
+        await dash.applyFilters();
+        await expect(dash.filterChip('Categories: Cat One')).toBeVisible();
+        await expect(dash.filterChipButton('Categories: Cat One')).toBeVisible();
+        await expect(catChips).toHaveCount(1);
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(dash.row(`cata${tag}`)).toBeVisible();
+        await expect(dash.row(`catb${tag}`)).toHaveCount(0);
+        await expect(dash.row(`acta${tag}`)).toHaveCount(0);
+
+        // Two values in one field: pick "Cat Two" as well and apply: the
+        // preprints of both categories are listed under two chips, one per
+        // category; the "Cat One" chip's X leaves the "Cat Two" chip alone
+        // and the list narrows to its preprint (Rule 8a); "Clear Filters".
+        await dash.openFilters();
+        await expect(dash.filterChoice('Cat One')).toBeVisible(); // the applied pick, shown in the field
+        await dash.pickFilterSuggestion('Categories', 'Cat', 'Cat Two');
+        await dash.applyFilters();
+        await dash.expectViewHeading('Active submissions', 2);
+        await expect(dash.row(`cata${tag}`)).toBeVisible();
+        await expect(dash.row(`catb${tag}`)).toBeVisible();
+        await expect(dash.row(`acta${tag}`)).toHaveCount(0);
+        await expect(dash.row(`actb${tag}`)).toHaveCount(0);
+        await expect(catChips).toHaveCount(2);
+        await expect(dash.filterChip('Categories: Cat One')).toHaveCount(1);
+        await expect(dash.filterChip('Categories: Cat Two')).toHaveCount(1);
+        await dash.filterChipButton('Categories: Cat One').click();
+        await dash.expectViewHeading('Active submissions', 1);
+        await expect(catChips).toHaveCount(1);
+        await expect(dash.filterChip('Categories: Cat Two')).toBeVisible();
+        await expect(dash.filterChip('Categories: Cat One')).toHaveCount(0);
+        await expect(dash.row(`catb${tag}`)).toBeVisible();
+        await expect(dash.row(`cata${tag}`)).toHaveCount(0);
+        await dash.clearFiltersButton().click();
+        await dash.expectViewHeading('Active submissions', ACTIVE);
+        await expect(catChips).toHaveCount(0);
+        await expect(dash.row(`cata${tag}`)).toBeVisible();
 
         // "Assigned to Moderator" (the OPS label of "Assigned To Editor"):
         // the manager's panel lists the field, and its suggest list offers
@@ -732,7 +788,7 @@ test.describe('submissions dashboard (editorial)', () => {
         // (Rules 8b, 8c): back on "Active submissions" with the Moderator
         // filter applied again, the panel shows the Moderator chosen.
         await dash.openView('Active submissions');
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ACTIVE);
         await applyModeratorFilter();
         modal = await dash.openFilters();
         await expect(modal.getByText('Mira Moderator')).toBeVisible();
@@ -774,7 +830,7 @@ test.describe('submissions dashboard (editorial)', () => {
         await panelClearFilters(dash).click();
         await dash.applyFilters();
         await expect(dash.filterChip(moderatorChip)).toHaveCount(0);
-        await dash.expectViewHeading('Active submissions', 2);
+        await dash.expectViewHeading('Active submissions', ACTIVE);
         await expect(dash.row(`actb${tag}`)).toBeVisible();
         await expect(dash.clearFiltersButton()).toHaveCount(0);
         expect(dialogs).toEqual([]);
@@ -788,7 +844,8 @@ test.describe('submissions dashboard (editorial)', () => {
         await expect(modPanel.getByText(DAYS_FILTER)).toBeVisible();
         await expect(modPanel.getByText(ASSIGNED_FILTER)).toHaveCount(0);
         await expect(modDash.filterSuggestField(ASSIGNED_FILTER)).toHaveCount(0);
-        await expect(modPanel.getByRole('combobox')).toHaveCount(0);
+        await expect(modDash.filterSuggestField('Assigned To Editor')).toHaveCount(0);
+        await expect(modDash.filterSuggestField('Categories')).toBeVisible(); // positive control for the suggest-field read
     });
     test('S6: "View" opens the workflow in place and the address follows', async ({asUser, opsApi}, testInfo) => {
         test.slow();
@@ -805,17 +862,28 @@ test.describe('submissions dashboard (editorial)', () => {
         const urlBefore = page.url();
 
         // "View" opens the workflow as a panel over the list; the address
-        // records which submission is open (Rule 11).
+        // records which submission is open (Rule 11). The panel's header
+        // names the submission by its ID and title.
         await dash.viewButton(row).click();
         await dash.expectWorkflowOpen();
         expect(page.url()).toContain(`workflowSubmissionId=${submissionId}`);
+        await expect(dash.workflowPanelHeader()).toContainText(`open${tag}`);
+        await expect(dash.workflowPanelHeader()).toContainText(String(submissionId));
+        const openUrl = page.url();
 
-        // Reloading that address reopens the panel.
+        // Reloading that address reopens the panel on the same submission:
+        // the same address, the same ID and title in its header.
         await page.reload();
         await dash.expectWorkflowOpen();
+        expect(page.url()).toBe(openUrl);
+        await expect(dash.workflowPanelHeader()).toContainText(`open${tag}`);
+        await expect(dash.workflowPanelHeader()).toHaveText(new RegExp(`^\\s*${submissionId}\\b`));
 
-        // Closing returns to the list at the exact address it left.
+        // Closing returns to the list, reloaded (its submissions fetch
+        // answers after the press), at the exact address it left.
+        const reloaded = dash.listReload();
         await dash.closeWorkflow();
+        expect((await reloaded).ok()).toBe(true);
         await expect(dash.row(tag)).toBeVisible();
         expect(page.url()).toBe(urlBefore);
 
@@ -838,16 +906,25 @@ test.describe('submissions dashboard (editorial)', () => {
             ],
         });
         // 31 preprints: one over the 30-row page size (Rule 5). The paging
-        // leg rides the same seeding as the sort legs.
+        // leg rides the same seeding as the sort legs. Each is received on
+        // its own day (`dateSubmitted`, i days back), so no two share a
+        // submission date and time (fn-s7, A16) and every order read below
+        // is a whole order; the last activity stays today, so every "Days"
+        // cell still reads 0.
+        const DAY = 24 * 60 * 60 * 1000;
+        const today = Date.now();
         const seeded = [];
         for (let i = 1; i <= 31; i++) {
+            const dateSubmitted = new Date(today - i * DAY).toISOString().slice(0, 10);
             const {submissionId} = await opsApi.createSubmission({
-                tag, context: tag, submitter: `${tag}au`, title: `t${i}x${tag}`,
+                tag, context: tag, submitter: `${tag}au`, title: `t${i}x${tag}`, dateSubmitted,
             });
             seeded.push({submissionId, title: `t${i}x${tag}`});
         }
-        const byIdMax = seeded.reduce((a, b) => (a.submissionId > b.submissionId ? a : b));
-        const byIdMin = seeded.reduce((a, b) => (a.submissionId < b.submissionId ? a : b));
+        const idsDescending = seeded.map((s) => s.submissionId).sort((a, b) => b - a);
+        const idsAscending = [...idsDescending].reverse();
+        const byIdMax = seeded.find((s) => s.submissionId === idsDescending[0]);
+        const byIdMin = seeded.find((s) => s.submissionId === idsAscending[0]);
 
         const page = await (await asUser(mgr)).newPage();
         const dash = new EditorialDashboardPage(page, tag);
@@ -855,27 +932,18 @@ test.describe('submissions dashboard (editorial)', () => {
         await dash.expectViewHeading('Active submissions', 31);
         await expect(dash.dataRows()).toHaveCount(30);
         // The default order, read on arrival, for the third click's reload.
-        const arrivalOrder = await columnTexts(page, 'ID');
+        const arrivalOrder = await dash.rowIds();
+        expect(arrivalOrder).toHaveLength(30);
 
         // Click "ID": rows order descending and the address records the sort
-        // (Rule 4/5).
-        await dash.sortButton('ID').click();
-        await page.waitForURL(
-            (url) =>
-                url.searchParams.get('sortColumn') === 'id' &&
-                url.searchParams.get('sortDirection') === 'descending',
-            {waitUntil: 'commit'}
-        );
+        // (Rules 4–5).
+        await dash.sortBy('ID', 'id', 'descending');
+        await dash.expectRowIds(idsDescending.slice(0, 30));
         await expect(dash.dataRows().first()).toContainText(byIdMax.title);
 
         // Click again: the sort flips to ascending, address following.
-        await dash.sortButton('ID').click();
-        await page.waitForURL(
-            (url) =>
-                url.searchParams.get('sortColumn') === 'id' &&
-                url.searchParams.get('sortDirection') === 'ascending',
-            {waitUntil: 'commit'}
-        );
+        await dash.sortBy('ID', 'id', 'ascending');
+        await dash.expectRowIds(idsAscending.slice(0, 30));
         await expect(dash.dataRows().first()).toContainText(byIdMin.title);
 
         // A third click on "ID" switches the sort off: the address no longer
@@ -893,42 +961,40 @@ test.describe('submissions dashboard (editorial)', () => {
         await page.reload();
         await dash.expectViewHeading('Active submissions', 31);
         await expect(dash.dataRows()).toHaveCount(30);
-        expect(await columnTexts(page, 'ID')).toEqual(arrivalOrder);
+        await dash.expectRowIds(arrivalOrder);
         expect(new URL(page.url()).searchParams.has('sortColumn')).toBe(false);
 
-        // "Days": the address follows the same way; every row reads 0 days,
-        // so the order is not judged (fn-s7).
-        await dash.sortButton('Days').click();
-        await page.waitForURL(
-            (url) => url.searchParams.get('sortColumn') === 'lastActivity',
-            {waitUntil: 'commit'}
-        );
+        // "Days", clicked twice: the address follows each click as it did
+        // for "ID", descending, then ascending, the view kept; every row
+        // reads 0 days, so the order is not judged (fn-s7).
+        await dash.sortBy('Days', 'lastActivity', 'descending');
+        expect(new URL(page.url()).searchParams.get('currentViewId')).toBe('active');
+        await dash.sortBy('Days', 'lastActivity', 'ascending');
+        expect(new URL(page.url()).searchParams.get('currentViewId')).toBe('active');
+        await dash.expectViewHeading('Active submissions', 31);
         await expect(dash.dataRows()).toHaveCount(30);
         const days = await columnTexts(page, 'Days');
         expect(days).toHaveLength(30);
         expect(days.every((d) => d === '0'), `Days cells: ${JSON.stringify(days)}`).toBe(true);
 
-        // Back to the ID sort for a deterministic page split.
-        await dash.sortButton('ID').click();
-        await page.waitForURL(
-            (url) =>
-                url.searchParams.get('sortColumn') === 'id' &&
-                url.searchParams.get('sortDirection') === 'descending',
-            {waitUntil: 'commit'}
-        );
-
-        // Control: reloading the sorted address brings the rows back in the
-        // same order.
+        // Control: click "ID" until the rows stand by ID, highest first, with
+        // the address recording the sort, and reload: the rows come back in
+        // the same whole order (fn-s7).
+        await dash.sortBy('ID', 'id', 'descending');
+        await dash.expectRowIds(idsDescending.slice(0, 30));
+        const sortedOrder = await dash.rowIds();
+        const sortedUrl = page.url();
         await page.reload();
         await dash.expectViewHeading('Active submissions', 31);
-        await expect(dash.dataRows().first()).toContainText(byIdMax.title);
+        await expect(dash.dataRows()).toHaveCount(30);
+        expect(page.url()).toBe(sortedUrl);
+        await dash.expectRowIds(sortedOrder);
 
         // 31 rows page at 30, with pager controls under the list; page 2
         // shows the rest — and which page is showing is never part of the
         // address (Rule 4; the sort clicks above are the positive control
         // for the address otherwise following the list state).
         await expect(dash.pager()).toBeVisible();
-        await expect(dash.dataRows()).toHaveCount(30);
         await expect(page.getByText(/Showing 1 to 30 of 31/)).toBeVisible();
         const urlBeforePaging = page.url();
         await dash.pager().getByRole('button', {name: /Next/}).click();
@@ -1109,8 +1175,11 @@ test.describe('submissions dashboard (editorial)', () => {
     test('S12: bulk-delete incomplete preprints; no "More Actions" for Moderators', async ({asUser, opsApi, pkpMail}, testInfo) => {
         test.slow();
         const tag = makeTag('s12', testInfo);
-        // Two incomplete preprints by different authors plus one submitted
-        // control (fn-s12; the manager's Confirm leg succeeds on OPS, fn-m).
+        // Two incomplete preprints by different authors, "Draft one" and
+        // "Draft two" (the titles the search leg types), plus one submitted
+        // control whose title holds no "Draft" (fn-s12; the manager's
+        // Confirm leg succeeds on OPS, fn-m). A scratch server, so the plain
+        // titles are this test's own.
         const mgr = `${tag}mg`;
         const mod = `${tag}md`;
         const authorA = `${tag}aa`;
@@ -1124,10 +1193,13 @@ test.describe('submissions dashboard (editorial)', () => {
                 user(authorB, 'Bo', 'Author', ['author']),
             ],
         });
-        await opsApi.createSubmission({tag, context: tag, submitter: authorA, title: `drafta${tag}`, submitted: false});
-        await opsApi.createSubmission({tag, context: tag, submitter: authorB, title: `draftb${tag}`, submitted: false});
+        const DRAFT_ONE = 'Draft one';
+        const DRAFT_TWO = 'Draft two';
+        const SUBMITTED = 'Submitted study';
+        await opsApi.createSubmission({tag, context: tag, submitter: authorA, title: DRAFT_ONE, submitted: false});
+        await opsApi.createSubmission({tag, context: tag, submitter: authorB, title: DRAFT_TWO, submitted: false});
         await opsApi.createSubmission({
-            tag, context: tag, submitter: authorA, title: `subm${tag}`,
+            tag, context: tag, submitter: authorA, title: SUBMITTED,
             participants: [{username: mod, role: 'sectionEditor'}],
         });
 
@@ -1140,9 +1212,9 @@ test.describe('submissions dashboard (editorial)', () => {
         // (a preprint server has no "Incomplete" label, Rule 5), offers
         // "Complete submission" (A2: presence only) and has no "View"; the
         // submitted row has "View" (Rule 9c).
-        const rowA = dash.row(`drafta${tag}`);
-        const rowB = dash.row(`draftb${tag}`);
-        const rowKeep = dash.row(`subm${tag}`);
+        const rowA = dash.row(DRAFT_ONE);
+        const rowB = dash.row(DRAFT_TWO);
+        const rowKeep = dash.row(SUBMITTED);
         for (const row of [rowA, rowB]) {
             await expect(dash.stageCell(row)).toHaveText(/^\s*Production\s*$/);
             await expect(dash.completeSubmissionButton(row)).toBeVisible();
@@ -1202,16 +1274,46 @@ test.describe('submissions dashboard (editorial)', () => {
         await expectNothingDeleted();
 
         // A view switch in selection mode: choose "Delete Incomplete
-        // Submissions" once more, tick one row, open "Published" and return
-        // to "Active submissions": no row is ticked and nothing was deleted.
+        // Submissions" once more, tick one row and open "Published":
+        // selection mode has ended, with neither the "Delete Incomplete
+        // Submissions" nor the "Cancel" button above the list; return to
+        // "Active submissions": no checkbox shows, so no row is ticked, and
+        // both incomplete rows are still listed (fn-s12, fn-m).
         await dash.enterBulkDeleteSelection();
+        await expect(dash.selectionCancelButton()).toBeVisible(); // positive control for the button reads
         await dash.checkRowCheckbox(rowA);
         await expect(rowA.getByRole('checkbox')).toBeChecked(); // positive control for the tick
         await dash.openView('Published');
         await dash.expectViewHeading('Published', 0);
+        await expect(dash.noItemsRow()).toBeVisible();
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(dash.selectionCancelButton()).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
         await dash.openView('Active submissions');
         await expectNothingDeleted();
-        await expect(page.getByRole('checkbox', {checked: true})).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+
+        // A new search in selection mode: choose "Delete Incomplete
+        // Submissions" again, tick one row, type Draft into the search box
+        // and press Enter: the list holds "Draft one" and "Draft two" with
+        // no checkbox, and neither button shows above it: nothing was
+        // deleted; the search chip's X brings the full view back.
+        await dash.enterBulkDeleteSelection();
+        await dash.checkRowCheckbox(rowA);
+        await expect(rowA.getByRole('checkbox')).toBeChecked(); // positive control for the tick
+        await dash.searchFor('Draft');
+        await dash.expectViewHeading('Active submissions', 2);
+        await expect(dash.searchChip('Draft')).toBeVisible();
+        await expect(rowA).toBeVisible();
+        await expect(rowB).toBeVisible();
+        await expect(rowKeep).toHaveCount(0);
+        await expect(page.getByRole('checkbox')).toHaveCount(0);
+        await expect(dash.bulkDeleteButton()).toHaveCount(0);
+        await expect(dash.selectionCancelButton()).toHaveCount(0);
+        await dash.clearSearchChip();
+        await expect(dash.searchChip()).toHaveCount(0);
+        await expectNothingDeleted();
 
         // Delete: choose "Delete Incomplete Submissions" again, tick both
         // and press the button: the confirm dialog reads its sentence;
@@ -1248,8 +1350,8 @@ test.describe('submissions dashboard (editorial)', () => {
         await mySub.goto();
         await mySub.openView('Active submissions');
         await mySub.expectViewHeading('Active submissions', 1);
-        await expect(mySub.row(`subm${tag}`)).toBeVisible();
-        await expect(mySub.row(`drafta${tag}`)).toHaveCount(0);
+        await expect(mySub.row(SUBMITTED)).toBeVisible();
+        await expect(mySub.row(DRAFT_ONE)).toHaveCount(0);
         expect(await pkpMail.count({to: `${authorA}@mail.test`})).toBe(0);
         expect(await pkpMail.count({to: `${authorB}@mail.test`})).toBe(0);
 
@@ -1279,13 +1381,15 @@ test.describe('submissions dashboard (editorial)', () => {
         const dash = new EditorialDashboardPage(page, SERVER);
         await dash.goto();
 
-        // The sidebar group offers exactly the six OPS views (positive
-        // controls, asserted first so the absences are bounded by a rendered
-        // menu)…
+        // The sidebar group offers exactly the six OPS views: each named
+        // entry is there (positive controls, asserted first so the absences
+        // are bounded by a rendered menu), and the group holds six entries
+        // in all, nothing beside them…
         await expect(dash.menuGroupLink()).toBeVisible();
         for (const name of OPS_EDITORIAL_VIEWS) {
             await expect(dash.viewLink(name)).toBeVisible();
         }
+        await expect(dash.editorialViewLinks()).toHaveCount(OPS_EDITORIAL_VIEWS.length);
         // …and none of the review, copyediting or needs-editor views a
         // journal's manager would have (Rule 2).
         for (const name of ABSENT_VIEWS) {

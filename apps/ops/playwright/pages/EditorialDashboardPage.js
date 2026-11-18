@@ -14,7 +14,10 @@
  * window: the role select, the user grid, the "Choose a predefined message"
  * select) is here too, read-only, for the absence tests that assert which
  * roles and messages a preprint server offers (U32 S10); the OJS
- * counterpart is `ReviewStagePages.completeAssignParticipantForm`.
+ * counterpart is `ReviewStagePages.completeAssignParticipantForm`. The
+ * U23 2026-11-18 revision adds the sidebar group's view links, the panel
+ * header a reload is read against, and the sort clicks with the row
+ * order they leave.
  * Feature spec: docs/specs/U23-submissions-dashboard.md.
  */
 const {expect} = require('@playwright/test');
@@ -79,6 +82,56 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends withOpsWor
         const form = this.assignParticipantForm();
         await form.getByRole('link', {name: /^\s*Cancel\s*$/}).last().click();
         await expect(form).toHaveCount(0, {timeout: 30_000});
+    }
+
+    /**
+     * Every view entry of the sidebar's "Editor Dashboard" group: the links
+     * to a `dashboard/editorial` view (the group's own toggle is a `#` link
+     * and stays out). A preprint server's manager has six (U23 Rule 2,
+     * scenario 15).
+     */
+    editorialViewLinks() {
+        return this.sideNav().locator('a[href*="dashboard/editorial"]');
+    }
+
+    /**
+     * The open workflow panel's header: the submission's ID, contributors,
+     * title and stage, then "Preview", "Activity Log", "Library" (OPS; U23
+     * Rule 11 reads which submission the panel is on from it).
+     */
+    workflowPanelHeader() {
+        return this.workflowDialog().locator('[data-cy="sidemodal-header"]');
+    }
+
+    /**
+     * Click a sortable column's header ('ID' or 'Days') and wait for the
+     * address to record the sort: `sortColumn` (`id`, `lastActivity`) and
+     * `sortDirection` (`descending`, `ascending`), the view kept (U23
+     * Rules 4–5).
+     */
+    async sortBy(columnName, sortColumn, direction) {
+        await this.sortButton(columnName).click();
+        await this.page.waitForURL(
+            (url) =>
+                url.searchParams.get('sortColumn') === sortColumn &&
+                url.searchParams.get('sortDirection') === direction,
+            {waitUntil: 'commit'}
+        );
+    }
+
+    /** The ID cell of every data row, in row order (a one-shot read; use
+     * `expectRowIds()` to wait for an order). */
+    async rowIds() {
+        return this.dataRows().evaluateAll((rows) =>
+            rows.map((r) => (r.children[0] ? r.children[0].innerText.trim() : ''))
+        );
+    }
+
+    /** Wait until the rows stand in exactly this ID order (the whole page). */
+    async expectRowIds(ids) {
+        await expect
+            .poll(() => this.rowIds(), {timeout: 30_000})
+            .toEqual(ids.map(String));
     }
 
     async _optionLabels(select) {

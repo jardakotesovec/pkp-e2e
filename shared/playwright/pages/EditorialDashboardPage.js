@@ -28,7 +28,11 @@
  * - the column headers and a row's Stage / Editorial Activity cells (U23
  *   Rule 5), the Filters panel's suggest-list and checkbox fields, the
  *   pager's page buttons, the sidebar badges' color variant (U23 Rule 1)
- *   and the "More Actions" menu's grayed state (U23 Rule 12).
+ *   and the "More Actions" menu's grayed state (U23 Rule 12);
+ * - a typed suggest-list pick and its chosen chip ("Categories", U23 Rule
+ *   8a), the empty list's "No Items" row (Rule 5), an activity cell's
+ *   buttons (Rule 9f), an indicator read as countdown ring or icon with its
+ *   overdue color (Rule 10), and selection mode's "Cancel" (Rule 12).
  */
 const {expect} = require('@playwright/test');
 const {MySubmissionsPage} = require('./MySubmissionsPage.js');
@@ -249,6 +253,88 @@ exports.EditorialDashboardPage = class EditorialDashboardPage extends MySubmissi
      */
     filterCheckbox(label) {
         return this.filtersModal().getByRole('checkbox', {name: label, exact: true});
+    }
+
+    /**
+     * Pick an option of a suggest-list field of the open Filters panel by
+     * typing into it ("Categories": three letters bring the list): types
+     * `typed`, clicks the option reading `optionText`, and waits for the pick
+     * to show inside the field as its "Remove {optionText}" chip. The list
+     * is not waited closed (Categories may leave it open); never press
+     * Escape after a pick, which closes the whole panel (U23 ccI29 notes).
+     */
+    async pickFilterSuggestion(label, typed, optionText) {
+        const field = this.filterSuggestField(label);
+        await field.click();
+        await field.fill('');
+        await field.pressSequentially(typed, {delay: 25});
+        const option = this.page
+            .locator('[role="listbox"]:visible [role="option"]')
+            .filter({hasText: optionText});
+        await expect(option.first()).toBeVisible({timeout: 30_000});
+        await option.first().click();
+        await expect(this.filterChoice(optionText)).toBeVisible({timeout: 30_000});
+    }
+
+    /** A suggest-list field's chosen value inside the open Filters panel,
+     * its "Remove {name}" chip button. */
+    filterChoice(name) {
+        return this.filtersModal().getByRole('button', {
+            name: new RegExp(`^Remove ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`),
+        });
+    }
+
+    /** The empty list's single "No Items" row (U23 Rule 5). Read beside
+     * `dataRows()` for "a single row". */
+    noItemsRow() {
+        return this.dataRows().filter({hasText: 'No Items'});
+    }
+
+    /**
+     * Every button of a row's Editorial Activity cell: its action
+     * ("Assign Editor", "Assign Reviewers", "Complete submission") and its
+     * per-reviewer indicators. Count 0 is a cell offering neither (U23 Rule
+     * 9f's sentence). Read with every popover of the row closed: an open
+     * one renders its own buttons inside the cell.
+     */
+    activityCellButtons(row) {
+        return this.activityCell(row).getByRole('button');
+    }
+
+    /** A reviewer indicator's day count, the number inside a countdown ring
+     * (U23 Rule 10); an outcome icon has none. */
+    indicatorRingDays(indicator) {
+        return indicator.locator('span[aria-hidden="true"]');
+    }
+
+    /** A reviewer indicator's outcome icon (submitted, confirmed, declined,
+     * cancelled; U23 Rule 10); a countdown ring has none. */
+    indicatorIcon(indicator) {
+        return indicator.locator('span.absolute:has(svg)');
+    }
+
+    /** The attention color a countdown ring takes when overdue (a request's
+     * ring `stroke-attention`, a review's `fill-attention`; U23 Rule 10).
+     * Count 0 on a ring still in time. */
+    indicatorOverdueColor(indicator) {
+        return indicator.locator('[class*="stroke-attention"], [class*="fill-attention"]');
+    }
+
+    /** An overdue request's ring, drawn in the attention color (U23 Rule 10). */
+    indicatorOverdueRing(indicator) {
+        return indicator.locator('[class*="stroke-attention"]');
+    }
+
+    /** An overdue review's disc, filled with the attention color, its days
+     * inside, and no ring drawn in that color (U23 Rule 10). */
+    indicatorOverdueDisc(indicator) {
+        return indicator.locator('[class*="fill-attention"]');
+    }
+
+    /** The selection mode's "Cancel" above the list (U23 Rule 12), read by
+     * name inside the content area: count 0 once selection mode has ended. */
+    selectionCancelButton() {
+        return this.contentArea().getByRole('button', {name: 'Cancel', exact: true});
     }
 
     /** The pager's button for page `n` (accessible name "Go to Page n"). */
