@@ -1,0 +1,175 @@
+// PR review check — pkp/pkp-lib#13593 on `main`: pkp-lib#13620 + ojs#5985. The PR adds
+//   GET {submissionId}/{reviewRoundId}/authorResponse/{responseId}             (assigned authors and editors, managers, admins)
+//   PUT {submissionId}/{reviewRoundId}/authorResponse/{responseId}/confirmation {markAs: confirmed|reverted} (assigned editors, managers, admins)
+// on the journal's `reviews` API, `dateConfirmed`, `dateReverted` and `confirmationChangedByUser` in the response's data,
+// and lists a round's response in the open peer review record (`peerReviews/open/submissions/{id}`) only when it
+// is public and confirmed (U30 A10's fix rides along: a response that is not public stays out). Round 2 (head
+// b0145df8f5): "completed" became "confirmed"; confirming a confirmed response and reverting a reverted one
+// answer 200 and change nothing; reverting one never confirmed answers 422. Round 1 (head d7c6c3bc06) had
+// `/completion` and `completed`.
+//
+// On PKP's default test dataset (a dataset fleet, freshly reset before each run), OJS only. The round is set up on
+// screen with the kept walk of U30 A10 (its lib.js): on submission 1's Review round 1 the editor dbarnes makes the
+// reviews public (MODE=public: all three; MODE=mixed: Aisla McCrae's only), the three reviewers submit, dbarnes marks
+// them complete, requests the response, amwandenga submits it. Then, by API with each user's session:
+//   12 the record signed out (not confirmed yet)
+//   13 GET as dbarnes (manager), dbuskins (assigned section editor), amwandenga (assigned author), minoue (section
+//      editor not assigned), ccorino (author of another submission), amccrae (reviewer), signed out; mismatched ids
+//   14 PUT confirmation refused: amwandenga, minoue, a bad markAs, another submission's round, a revert of a
+//      response never confirmed
+//   15 PUT confirmed by dbuskins; the record; GET as amwandenga; confirmed again by dbarnes (nothing changes)
+//   16 PUT reverted by dbarnes; the record; reverted again by dbuskins (nothing changes)
+//   17 PUT confirmed again by dbarnes; the record
+//   17r the listed response's keys signed out and signed in, and the submissions API's as reviewer, author, manager
+//   18 (MODE=public) dbarnes edits the confirmed response; the record and the row after
+// Merged 2026-11-17 as lib/pkp 2f2c07fea7 (ojs 0b12d7646e): the three confirmation keys go only to those who may
+// confirm (manager, admin, assigned section editor); the author's GET and the record carry the other seven. A dataset
+// older than the merge lacks the columns: run add-columns.php first (header there). Regression read rr13593, 2026-11-18.
+// At the PR base the two routes do not exist (the requests answer 404) and the record lists the response from step 12.
+// Facts go to <MODE>-<app>.json; no assertions.
+//
+//   npm run fleet-prep -- --feature pr13593 --dataset 1 --reset --apps ojs
+//   PROBE_FEATURE=pr13593 PROBE_AGENT=<id> MODE=public|mixed node bin/probe.js ojs \
+//       shared/playwright/checks/sync/pkp-lib-13620/completion.js
+const {request: pwRequest} = require('@playwright/test');
+const {forEachApp, launch, signIn, signOut, record, serverLog, sql} = require('../../../probe');
+const L = require('../../issues/public-review-data-unpublic-author-response/lib');
+
+const MODE = process.env.MODE || 'public';
+const SUB = 1, ROUND = 1, OTHER_SUB = 2;
+const AUTHOR = {user: 'amwandenga', name: 'Alan Mwandenga'};
+const REVIEWERS = [
+    {user: 'amccrae', name: 'Aisla McCrae', comment: 'pr13593 public review by Aisla McCrae'},
+    {user: 'jjanssen', name: 'Julie Janssen', comment: 'pr13593 review by Julie Janssen'},
+    {user: 'agallego', name: 'Adela Gallego', comment: 'pr13593 review by Adela Gallego'},
+];
+const RESPONSE = 'pr13593 our response to the three reviews';
+
+forEachApp(async (app) => {
+    if (app.name !== 'ojs') { console.log(`[c] ${app.name}: OJS only`); return; }
+    const out = {app: app.name, dataset: app.dataset, mode: MODE, startedAt: new Date().toISOString(), steps: {}};
+    const {page, close} = await launch(app);
+    const log = serverLog(app);
+    async function step(name, fn) {
+        const from = log.mark();
+        try { out.steps[name] = await fn(); }
+        catch (e) { out.steps[name] = {failed: L.flat(e.stack || e.message, 900)}; }
+        const errs = log.since(from);
+        if (errs.length) out.steps[name] = {...out.steps[name], serverErrors: errs.slice(0, 5).map((x) => L.flat(x, 400))};
+        console.log(`[c] ${name}:`, JSON.stringify(out.steps[name]).slice(0, 700));
+        return out.steps[name];
+    }
+    // Every API call runs with the session of the user signed in on `page` (or none).
+    async function api(user, method, p, data) {
+        let ctx = null, csrf = null;
+        if (user) {
+            await signIn(page, user, {contextPath: app.contextPath});
+            await page.goto(app.url(`/index.php/${app.contextPath}/en/dashboard`));
+            csrf = await page.evaluate(() => window.pkp && pkp.currentUser && pkp.currentUser.csrfToken).catch(() => null);
+        } else {
+            ctx = await pwRequest.newContext({baseURL: app.baseURL});
+        }
+        const req = user ? page.request : ctx;
+        const url = user ? app.url(`/index.php/${app.contextPath}/api/v1/${p}`) : `/index.php/${app.contextPath}/api/v1/${p}`;
+        const r = await req.fetch(url, {method, data, headers: csrf ? {'X-Csrf-Token': csrf} : {}});
+        const text = await r.text();
+        let json = null;
+        try { json = JSON.parse(text); } catch (_) { /* not json */ }
+        if (ctx) await ctx.dispose();
+        if (user) await signOut(page);
+        const keep = json && typeof json === 'object' && 'id' in json
+            ? {id: json.id, reviewRoundId: json.reviewRoundId, isPublic: json.isPublic, dateConfirmed: json.dateConfirmed,
+                dateReverted: json.dateReverted, confirmationChangedByUser: json.confirmationChangedByUser, response: json.response && L.plain(Object.values(json.response)[0])}
+            : (json || L.flat(text, 200));
+        return {as: user || 'signed out', request: `${method} ${p}`, status: r.status(), body: keep};
+    }
+    async function openRecord() {
+        const res = await L.signedOutGet(app, `api/v1/peerReviews/open/submissions/${SUB}`);
+        const rounds = (res.json && res.json.reviewRounds) || [];
+        return {status: res.status, rounds: rounds.map((r) => ({roundId: r.roundId, reviews: (r.reviews || []).length,
+            authorResponse: r.authorResponse ? {id: r.authorResponse.id, isPublic: r.authorResponse.isPublic,
+                dateConfirmed: r.authorResponse.dateConfirmed, dateReverted: r.authorResponse.dateReverted,
+                confirmationChangedByUser: r.authorResponse.confirmationChangedByUser, response: L.plain(Object.values(r.authorResponse.response || {})[0])} : null}))};
+    }
+
+    try {
+        const rid = L.roundId(app, SUB, ROUND);
+        const otherRid = L.roundId(app, OTHER_SUB, 1);
+        out.ids = {rid, otherRid};
+        const publicOnes = MODE === 'mixed' ? REVIEWERS.slice(0, 1) : REVIEWERS;
+        await signIn(page, 'dbarnes', {contextPath: app.contextPath});
+        for (const r of publicOnes) await step(`2 public ${r.user}`, () => L.makePublic(page, app, SUB, rid, r.name).then((x) => ({checked: x.publicBoxChecked})));
+        await signOut(page);
+        for (const r of REVIEWERS) {
+            await signIn(page, r.user, {contextPath: app.contextPath});
+            await step(`3 review ${r.user}`, () => L.submitReview(page, app, SUB, r.comment).then(() => ({submitted: true})));
+            await signOut(page);
+        }
+        await signIn(page, 'dbarnes', {contextPath: app.contextPath});
+        for (const r of REVIEWERS) await step(`4 complete ${r.user}`, () => L.readAndComplete(page, app, SUB, rid, r.name).then(() => ({done: true})));
+        await step('5 request', async () => { await L.openRound(page, app, SUB, rid); return L.sendRequest(page, app).then((x) => ({post: x.post})); });
+        await signOut(page);
+        await signIn(page, AUTHOR.user, {contextPath: app.contextPath});
+        await step('6 respond', () => L.respond(page, app, SUB, rid, AUTHOR.name, RESPONSE).then((x) => ({post: x.post})));
+        await signOut(page);
+        const resp = Number(sql(app, `SELECT response_id FROM review_round_author_responses WHERE review_round_id = ${rid}`));
+        out.ids.response = resp;
+        const base = `reviews/${SUB}/${rid}/authorResponse/${resp}`;
+
+        await step('12 record, not confirmed', openRecord);
+        for (const u of ['dbarnes', 'dbuskins', AUTHOR.user, 'minoue', 'ccorino', 'amccrae', null]) await step(`13 GET ${u || 'signed out'}`, () => api(u, 'GET', base));
+        await step('13 GET other submission round', () => api('dbarnes', 'GET', `reviews/${SUB}/${otherRid}/authorResponse/${resp}`));
+        await step('13 GET round under other submission', () => api('dbarnes', 'GET', `reviews/${OTHER_SUB}/${rid}/authorResponse/${resp}`));
+        await step('14 PUT author', () => api(AUTHOR.user, 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
+        await step('14 PUT minoue', () => api('minoue', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
+        await step('14 PUT bad markAs', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'published'}));
+        await step('14 PUT other round', () => api('dbarnes', 'PUT', `reviews/${SUB}/${otherRid}/authorResponse/${resp}/confirmation`, {markAs: 'confirmed'}));
+        await step('14 PUT revert never confirmed', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'reverted'}));
+        await step('14 record after refusals', openRecord);
+        await step('15 PUT confirmed dbuskins', () => api('dbuskins', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
+        await step('15 record', openRecord);
+        await step('15 GET author', () => api(AUTHOR.user, 'GET', base));
+        await step('15 db row', async () => ({rows: sql(app, `SELECT response_id, date_confirmed, date_reverted FROM review_round_author_responses WHERE response_id = ${resp}`)}));
+        await step('15 PUT confirmed again dbarnes', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
+        await step('16 PUT reverted dbarnes', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'reverted'}));
+        await step('16 record', openRecord);
+        await step('16 PUT reverted again dbuskins', () => api('dbuskins', 'PUT', `${base}/confirmation`, {markAs: 'reverted'}));
+        await step('16 db row', async () => ({rows: sql(app, `SELECT response_id, date_confirmed, date_reverted FROM review_round_author_responses WHERE response_id = ${resp}`)}));
+        await step('17 PUT confirmed dbarnes', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
+        await step('17 record', openRecord);
+        // rr13593 additions (merged 2f2c07fea7): raw keys of the listed response, signed out (SEC-187) and signed in
+        const keysOf = (o) => (o && typeof o === 'object' ? Object.keys(o) : o);
+        await step('17r record raw keys signed out', async () => {
+            const res = await L.signedOutGet(app, `api/v1/peerReviews/open/submissions/${SUB}`);
+            const ar = res.json && res.json.reviewRounds && res.json.reviewRounds[0] && res.json.reviewRounds[0].authorResponse;
+            return {status: res.status, keys: keysOf(ar)};
+        });
+        async function rawAs(user, p, pick) {
+            await signIn(page, user, {contextPath: app.contextPath});
+            await page.goto(app.url(`/index.php/${app.contextPath}/en/dashboard`));
+            const r = await page.request.get(app.url(`/index.php/${app.contextPath}/api/v1/${p}`));
+            let json = null; try { json = await r.json(); } catch (_) { /* not json */ }
+            await signOut(page);
+            return {as: user, status: r.status(), picked: pick(json)};
+        }
+        const recordAr = (j) => { const ar = j && j.reviewRounds && j.reviewRounds[0] && j.reviewRounds[0].authorResponse; return {keys: keysOf(ar), editor: ar && ar.confirmationChangedByUser}; };
+        const mapAr = (j) => { const rr = (j && j.reviewRounds) || []; const ar = rr.map((x) => x.authorResponse).find(Boolean); return {rounds: rr.length, keys: keysOf(ar), editor: ar && ar.confirmationChangedByUser}; };
+        await step('17r record signed in ccorino', () => rawAs('ccorino', `peerReviews/open/submissions/${SUB}`, recordAr));
+        await step('17r record signed in dbarnes', () => rawAs('dbarnes', `peerReviews/open/submissions/${SUB}`, recordAr));
+        await step('17r submissions map amccrae (reviewer)', () => rawAs('amccrae', `submissions/${SUB}`, mapAr));
+        await step('17r submissions map amwandenga (author)', () => rawAs(AUTHOR.user, `submissions/${SUB}`, mapAr));
+        await step('17r submissions map dbarnes', () => rawAs('dbarnes', `submissions/${SUB}`, mapAr));
+        // S1: edit a confirmed response as the editor
+        if (MODE === 'public') {
+            const authorIds = sql(app, `SELECT author_id FROM review_round_author_response_authors WHERE response_id = ${resp}`).split('\n').filter(Boolean).map(Number);
+            await step('18 db row before edit', async () => ({authorIds, rows: sql(app, `SELECT response_id, date_confirmed, date_reverted, updated_at FROM review_round_author_responses WHERE response_id = ${resp}`)}));
+            await step('18 PUT edit dbarnes', () => api('dbarnes', 'PUT', base, {authorResponse: {en: '<p>rr13593 EDITED after confirmation</p>'}, associatedAuthorIds: authorIds}));
+            await step('18 record after edit', openRecord);
+            await step('18 db row after edit', async () => ({rows: sql(app, `SELECT response_id, date_confirmed, date_reverted, updated_at FROM review_round_author_responses WHERE response_id = ${resp}`)}));
+        }
+    } finally {
+        out.finishedAt = new Date().toISOString();
+        record(MODE, out);
+        await close();
+    }
+});

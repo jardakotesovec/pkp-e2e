@@ -61,6 +61,8 @@ stage spec's row "Open the review stage". <sup>a</sup>
 | **Read a submitted response** | • Assigned author, the submitter or another: "View Submitted Response" on the card (Rule 9)<br>• Editorial roles; Funding Coordinator: row action "View" on the row of the author who submitted it (Rule 10) <sup>k</sup> |
 | **Edit a submitted response** | • Editorial roles: "Save" in the "Author Response to Reviews" window (Rule 10)<br>• Author: never; the window says so (Rule 9)<br>• Funding Coordinator: the window opens with the editors' note, but in place of "Save" it shows a "Submit Response" button that stays greyed [A3](#a3) <sup>k</sup> |
 | **Delete a submitted response** | • Editorial roles: row action "Delete" (Rule 11)<br>• Funding Coordinator: the action is offered like everyone else's, but "OK" in its dialog is refused with the dialog "Error" / "The current role does not have access to this operation." and the response stays [A3](#a3) <sup>l</sup> |
+| **Confirm a response, or revert the confirmation** (no screen yet; the review API) | • Journal Manager, Editor, Site Administrator, and a Section or Guest Editor assigned to the review stage (Rule 15)<br>• Everyone else, the assigned author and the Funding Coordinator included: refused <sup>t</sup> |
+| **Read one response by its id** (the review API) | • Journal Manager, Editor, Site Administrator, a Section or Guest Editor assigned to the review stage, and the assigned authors (Rule 15)<br>• Everyone else, a reviewer and an unassigned Section Editor included: refused <sup>t</sup> |
 | **Open the request page by its address** | • Editorial roles who may open the submission: the page opens for any of its rounds (Rule 14)<br>• Everyone else (an unassigned Section Editor or Guest Editor, Funding Coordinator, Author, Reviewer, Reader): the access-denied page (Rule 14) <sup>o</sup> |
 
 ## Fields & validation
@@ -311,6 +313,27 @@ form.
     dialog's control reads "View Submission" and does nothing
     ⚠ [A4](#a4). <sup>o</sup>
 
+<a id="confirmation"></a>
+15. **Confirmation.** An editor confirms a response before it may be
+    published with the article, and may revert that. No screen offers it
+    yet: the confirmation step comes with pkp/pkp-lib#13524, and until
+    then only the review API does it (the Actors rows; its addresses,
+    and where a response's id is read, are in the footnote). Confirming
+    records the date, clears any earlier revert date, and names the
+    editor; reverting clears the confirmation date, records the revert
+    date, and names the editor who did. Confirming a confirmed response,
+    or reverting a reverted one, changes nothing, the date and the editor
+    named included. A response never confirmed (and so never reverted)
+    cannot be reverted: "Only confirmed author responses can be
+    reverted.". The confirmation date, the revert date and that editor's
+    name come with the response only for those who may confirm it (the
+    Journal Manager, Editor, Site Administrator and an assigned Section
+    or Guest Editor): the assigned author reading it by its id, a
+    reviewer reading the submission's data, and the open peer review
+    record get the response without them. A response submitted, edited or kept from before the
+    step existed counts as not confirmed, and editing a confirmed
+    response keeps it confirmed. <sup>t</sup>
+
 ## Side effects
 
 - **The request email** "Request For Author Response To Reviewer Feedback"
@@ -354,10 +377,11 @@ form.
   display of the peer reviews (*Article landing page & reading*); nothing
   on the workflow screen shows the flag. A published article's open peer
   review record (its public reviews, round by round, as data anyone can
-  read at the record's own address without signing in; no screen shows
-  it) carries the response whether or not it is marked public, as soon as
-  one review of the round is public and stands "Complete" ⚠ [A10](#a10).
-  <sup>q</sup>
+  read at the record's own address without signing in, given in the
+  footnote; no screen shows it) carries the response only when it is marked public and an editor
+  has confirmed it (Rule 15); reverted, it leaves the record again. A
+  response that is not public stays out even when confirmed.
+  <sup>q</sup> <sup>t</sup>
 
 ## Settings that modify behavior
 
@@ -747,6 +771,12 @@ Left out of the scenarios above, by reason:
     once the team rules that presses get author responses: the "Author
     Response" table and card on both of a press's review stages, and the
     decision email's button opening the response form [report 2026-10-04]
+  - the confirmation step (Rule 15), which waits for its screen
+    (pkp/pkp-lib#13524): the editor confirms a public response and the
+    published article's open peer review record lists it; reverted, the
+    record drops it; confirmed again, the revert date is cleared; a
+    response that is not public stays out of the record when confirmed
+    (A10's guard, retired) [upstream 2026-11-18]
 - **Nothing new to test**:
   - Site Administrator (the Journal Manager's offer, scenarios 1 and 3)
   - Guest Editor (the Section Editor's gate, scenario 6)
@@ -761,7 +791,6 @@ Left out of the scenarios above, by reason:
   - A4 (the request page by typed address on a round that is not ready or holds a response)
   - A7 (revisions uploaded before responding)
   - A8 (a cancelled request beside a completed review)
-  - A10 (a response not marked public, read in the article's open peer review record)
 - **No seed**:
   - "Notify All Authors" at its default, the copy to other contributors (needs a contributor with an email and no account)
   - "Notify All Authors" off (no scenario key)
@@ -781,7 +810,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A3](#a3) | A Funding coordinator is offered "Request Response" and "Delete" on "Author Response", then refused | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | "Request Author Response" page opened by its address: "Cancel" and the sent dialog lead to "404 Not Found" | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A7](#a7) | Author who uploads revisions first can no longer respond to the reviewers, as the decision email asks | 🐞 | medium | issues (claude), 2026-11-12 — re-verified |
-| [A10](#a10) | Anyone, without signing in, can read an author's response that also answers reviews the editor kept private | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [OMP1](#omp1) | Press author's "Submit Author Response" email button opens a review round with nothing to respond in | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A2](#a2) | Nobody is told when the author's response arrives | ❓ | user-visible | — |
 | [A6](#a6) | Under a minimum, the request email says every review is in while one is still due | ❓ | minor | — |
@@ -897,25 +925,6 @@ request of such a round leave the cell at "Ready to invite author" and the
 request page with one reviewer block? Lean: yes; the app drops a cancelled
 request wherever it drops a declined one. Basis: code. <sup>f-a8</sup>
 
-<a id="a10"></a>
-**A10 — Anyone, without signing in, can read an author's response that also answers reviews the editor kept private** · 🐞 · medium.
-The editor decides, review by review, which reviews are published with
-the article ("Publicly Show Reviewer Comments"). Once the article is
-published, the journal's open peer review API, which anyone may call
-without signing in, lists each public review the editor has marked
-complete ("Mark as Complete"). It also gives the author's response to
-that review round in full, even when other reviews of the round are not
-public. The author wrote that response to every reviewer, so whatever
-it repeats or answers of the private reviews goes out with it.
-
-The author is not told that the response may be published: the window
-they write it in says it "will be shared with the editorial team and
-may be sent back to reviewers if needed". No page of the journal
-requests this data today. An editor who knows can prevent it only by
-making every review of a round public, or none.
-Security: unreleased.
-Since: 2026-02-03 (pkp/pkp-lib#12294) · Basis: probe, 2026-10-15. <sup>f-a10</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -945,8 +954,14 @@ Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-omp1<
 <a id="a9"></a>
 **A9 — In French the Author Response screens show raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
+<a id="a10"></a>
+**A10 — Anyone, without signing in, could read an author's response that also answers reviews the editor kept private** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13620, for pkp/pkp-lib#13593).
+
 <a id="a11"></a>
 **A11 — A Section Editor could delete, and another journal's manager delete or rewrite, an author's response to reviews** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13510, for pkp/pkp-lib#13509).
+
+<a id="a12"></a>
+**A12 — Confirming a response again clears the date its confirmation was reverted** · ✅ · retired. Ruled intended.
 
 ---
 
@@ -1002,10 +1017,13 @@ Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-omp1<
 **p** — `NotifyAuthors::sendAuthorEmail()` logs the mailable with `Repo::emailLogEntry()->logMailable(SubmissionEmailLogEventType::EDITOR_NOTIFY_AUTHOR, …)`, the event type `WorkflowListingEmails.vue` lists (review stage spec note k). No `Notification`, no `EventLog` row and no mailable is created by `submitAuthorResponse()`, `editAuthorResponse()` or `deleteAuthorResponse()`, and none by `requestAuthorResponse()` beyond the email log (grep of `lib/pkp/classes/notification`, `classes/log`, `classes/observers` for `authorResponse`: nothing). Live-probed 2026-09-06 (Side effects bullets 1, 4, 5; A1, A2): the author's "Notifications" list holds one `listitem` per send, each opening the "Notifications" window with the email and its link; "Activity Log & Notes" › History gains "An email has been sent: Request For Author Response To Reviewer Feedback" per send and nothing for the submit, edit, delete or re-submit; "Tasks" reads "No Items" and the dashboard row is unchanged for `editor.diana`; Mailpit counts for `editor.diana` and `sectioneditor.ana` on the title stayed 0 through every author action.
 
 <a id="fn-q"></a>
-**q** — `AuthorResponse::isPublic()`: true when the round's non-declined, non-cancelled `review_assignments` rows all have `is_review_publicly_visible` set; surfaced in `ReviewRoundAuthorResponseResource` as `isPublic` and consumed by `lib/ui-library/src/frontend/components/PkpOpenReview/PkpOpenReviewAuthorResponseContent.vue`. `AuthorResponse` also carries a `doiId` whose settings form fields are commented out in `ojs classes/components/forms/context/DoiSetupSettingsForm.php` ("Functionality for author response DOIs exists but is not currently supported"), so no screen sets it. No screen in this feature shows either. The open peer review record is `GET api/v1/peerReviews/open/submissions/{submissionId}` (OJS only, signed out); live-probed 2026-10-13 (Side effects bullet 6; A10): a round with one public review of three carried the response with `isPublic` false, note f-a10.
+**q** — `AuthorResponse::isPublic()`: true when the round's non-declined, non-cancelled `review_assignments` rows all have `is_review_publicly_visible` set; surfaced in `ReviewRoundAuthorResponseResource` as `isPublic` and consumed by `lib/ui-library/src/frontend/components/PkpOpenReview/PkpOpenReviewAuthorResponseContent.vue`. `AuthorResponse` also carries a `doiId` whose settings form fields are commented out in `ojs classes/components/forms/context/DoiSetupSettingsForm.php` ("Functionality for author response DOIs exists but is not currently supported"), so no screen sets it. No screen in this feature shows either. The open peer review record is `GET api/v1/peerReviews/open/submissions/{submissionId}` (OJS only, signed out); `SubmissionPeerReviewResource` adds the round's response only when it is `isPublic` and confirmed (note t).
 
 <a id="fn-s"></a>
 **s** — Scenario tooling. Ready accounts: `editor.diana` (Editor; manager level), `manager.maya` (Journal Manager), `sectioneditor.ana` (Section Editor of "Articles"), `assistant.rita` (Funding Coordinator, review-stage access), `reviewer.julia` and `reviewer.paul` (Reviewers), `author.alex` (submitter) and `author.bea` (co-author with an account, never a contributor); passwords per `docs/process/users.md`. A submission in review: `POST scenarios/submission` `{submitter: 'author.alex', decisions: ['sendExternalReview'], reviewRounds: [{reviewers: [{username: 'reviewer.julia', status: 'accepted'}]}], participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]}`. A review that is in: `status: 'completed'`, with the optional `recommendation` (OJS only: `accept` by default, `pendingRevisions` = "Revisions Required") and `comments` (the "For author and editor" text; default "Seeded review comments for {tag}."); the seed runs the reviewer wizard's own steps, so the app's "Review complete…" and "Thank you for your submission…" emails go out and a mailbox count is matched by the submission title. The round id for a typed address comes from the seed response (`reviewRounds[].id`). Scenario 1: two submissions, one `accepted`, one `completed` with `recommendation: 'pendingRevisions', comments: 'The method needs a control group.'` beside `{username: 'reviewer.paul', status: 'declined'}` in the same `reviewers[]`; the seeded journal's review mode is anonymous, so the email's heading reads "Reviewer 1:"; a test waits for the composer (the iframe present and "Loading" gone) before "Submit Request", and reads the sent email by the submission title in `author.alex`'s mailbox; each press with an emptied field is answered with that field's error and sends no email (note f-a5), and the mailbox is counted by the submission title after that bullet's "Cancel". Scenario 2: scenario 1's ready submission after one request; the signed-out click on the email's button is a fresh browser context opening the href; `editor.diana`'s mailbox is counted by the submission title before and after. Scenario 3: scenario 2's state (the request sent and `author.alex`'s response submitted through the window); after "Delete" › "OK" a test polls the table for "Ready to invite author" (note l). Scenario 4: `decisions: ['sendExternalReview']` with the reviewer `completed` and `{username: 'author.bea', role: 'author'}` in `participants`, then the Request Revisions decision recorded by `manager.maya` through the wizard, as scenario 7's press decision is, which sends the decision email the Author's bullet reads in `author.alex`'s mailbox by the submission title (a seeded `requestRevisions` sends none); the co-author opens the round from My Submissions; the co-author is a stage assignment, not a contributor, so the "Authors" boxes show one name. Scenario 5: `POST scenarios/context` with `review: {numReviewsPerSubmission: 1, defaultReviewMode: 'open'}` and `users[]` holding a `manager`, two `externalReviewer`s and an `author`, then a submission with the first reviewer `completed` (`recommendation: 'pendingRevisions', comments: 'Shorten the introduction.'`) and the second `accepted`; a submission seeded after the mode is set carries open as its assignments' review type (seed-facts 2026-09-05), so the email's block is headed with the first reviewer's full name and no colon (note g); a roster reviewer named on a scratch context is assigned but not enrolled (seed-facts 2026-09-05), hence the throwaway reviewers. Scenario 6: scenario 1's ready shape without the declined reviewer (section "Articles", `sectioneditor.ana` assigned) plus `{username: 'assistant.rita', role: 'funding'}` and `{username: 'author.bea', role: 'author'}` in `participants`; the one request email is found in `author.alex`'s and `author.bea`'s mailboxes by the submission title (both addresses sit in its To header, note n); the wrong-round address uses `reviewRoundId=99999`; the second submission is `author.alex`'s, seeded like the first with `reviewer.paul` `completed`, its request sent by `manager.maya` through "Request Response" › "Submit Request" and `author.alex`'s response written through the window with the one box ticked; the scratch journal is `POST scenarios/context` with `users[]` holding an `externalReviewer` and an `author`, a submission by that author with the reviewer `completed`, its request sent by `admin` (a manager in every scratch context) through the page and its author's response written through the window; the six requests are sent from the signed-in page's console with the page's CSRF token, `DELETE` and `PUT reviews/{submissionId}/{reviewRoundId}/authorResponse/{responseId}` (notes l, k; the `PUT` body `{authorResponse: {en: 'Rewritten from another submission.'}, associatedAuthorIds: [the other submission's author]}`, note b) and `POST reviews/{submissionId}/{reviewRoundId}/authorResponse/requestResponse` (`{subject, body, locale}`, note f), with scenario 6's submission id and the other round's id and response id from the seed and the other submission's `reviewRounds[]` (note h), read as `admin`; a test counts any answer outside 2xx as refused, and the mailboxes by the other submissions' titles; the Journal Manager's real-round address is opened without `ret`, hence the A4 aside. Scenario 7: OMP `decisions: ['sendExternalReview']` with `reviewRounds: [{stage: 'external', reviewers: [{username: 'reviewer.julia', status: 'completed'}]}]` (no `recommendation` on a press) and the Request Revisions decision recorded by `editor.diana` through the wizard ("Require New Review Round" › "Next", "Notify Authors", "Notify Reviewers", "Record Decision"), which sends the decision email the scenario reads; OPS a plain submitted preprint (OPS refuses `reviewRounds`), with `manager.maya` as Preprint Server Manager, `sectioneditor.ana` as Moderator and `author.alex` as its Author, the address typed with `stageId=3&reviewRoundId=1`. Scenario 8: `decisions: ['sendExternalReview']` with two `reviewRounds[]` entries, `[{reviewers: [{username: 'reviewer.julia', status: 'completed'}]}, {reviewers: [{username: 'reviewer.paul', status: 'accepted'}]}]`: the decision seeds the first entry into round 1 and the entry left over builds round 2 (the shape note m relies on; seed-facts 2026-09-06), so round 1 is the past round and round 2 the current one; the response is written through the window on round 1, never seeded; the request email is read in `author.alex`'s mailbox by the submission title. Emails are read in Mailpit by recipient address (PRINCIPLES A8; the roster mailboxes are shared, so a test matches the submission title in the subject line's body or uses a throwaway author). The request page's address: `…/reviewResponse/requestAuthorResponse?stageId=3&reviewRoundId={id}&submissionId={id}` (on a press `stageId=3` is External Review).
+
+<a id="fn-t"></a>
+**t** — pkp/pkp-lib#13620 (for pkp/pkp-lib#13593), merged 2026-11-17 as lib/pkp `2f2c07fea7`, with pkp/ojs#5985 `0b12d7646e`, OMP `5b348c3f3` and OPS `79f7713367` (each adding `I13593_AddDateConfirmedAndDateRevertedToReviewRoundAuthorResponses` to `upgrade.xml`). Routes in `PKPReviewController::getGroupRoutes()`: `GET {submissionId}/{reviewRoundId}/authorResponse/{responseId}` (`getAuthorResponse()`; role gate manager, site admin, sub editor, author, then `ReviewRound::canUserAccessAuthorResponses($user, [ROLE_ID_SUB_EDITOR, ROLE_ID_AUTHOR], $context)`: the manager role in the context or site admin, or a `StageAssignment` with one of the roles on the round's stage in the context) and `PUT …/{responseId}/confirmation` (`EditAuthorReviewResponseConfirmation`: role gate manager, site admin, sub editor; `markAs` `confirmed` or `reverted`; the round must belong to the submission of the request's context and hold the response; then `canUserAccessAuthorResponses(…, [ROLE_ID_SUB_EDITOR], …)`, else 403; a revert of a response neither confirmed nor reverted answers 422 `api.reviewRound.422.authorResponse.revert`). `editAuthorResponseConfirmation()` returns the response unchanged when confirming a confirmed one or reverting a reverted one, else writes `dateConfirmed` now and `dateReverted` null, or the reverse, and the setting `confirmationChangedByUserId`. `ReviewRoundAuthorResponseResource` adds `dateConfirmed`, `dateReverted` and `confirmationChangedByUser` (`userId`, `fullName`) only when the signed-in user passes `canUserAccessAuthorResponses(…, [ROLE_ID_SUB_EDITOR], …)`. `SubmissionPeerReviewResource` lists `authorResponse` only when `isPublic && isConfirmed`; the JATS template plugin's `PeerReview` builds on it. `editAuthorResponse()` leaves the confirmation as it is. Columns `date_confirmed`, `date_reverted` on `review_round_author_responses` (install migration; the upgrade above, run on PKP's 3.5 dataset for OMP and OPS on 2026-11-18: both columns present). Walked 2026-11-18 at the merged tips on PKP's default dataset, OJS, each run from a fresh reset (`shared/playwright/checks/sync/pkp-lib-13620/completion.js`; regression read rr13593): with one public review of three, the signed-out record's `authorResponse` stays null before and after `dbarnes` confirms, reverts and confirms again; with all three public, null until confirmed, listed after (`isPublic` true, keys `id`, `reviewRoundId`, `response`, `associatedAuthors`, `submittedByUser`, `isPublic`, `createdAt`), null after the revert. The submissions API gives the assigned author `amwandenga` and the reviewer `amccrae` the same seven keys, `dbarnes` also the three confirmation keys. The same walk drove the refusals: the GET answers 200 to `dbarnes`, `dbuskins` (assigned Section Editor) and `amwandenga` (assigned author, without the three confirmation keys), 401 "The current role does not have access to this operation." to `minoue` (unassigned Section Editor), `ccorino` (another submission's author) and `amccrae` (reviewer), 401 signed out, 404 with another submission's round either way; the PUT answers 401 to the author and to `minoue`, 422 to a `markAs` other than the two ("The selected mark as is invalid.") and to another submission's round, and 422 "Only confirmed author responses can be reverted." to a revert of a response never confirmed; `dbuskins` confirms (200), `dbarnes` confirms again (200, the same date and editor), reverts, `dbuskins` reverts again (200, unchanged), `dbarnes` confirms again (revert date cleared). The PR review drove the same at the heads `d7c6c3bc06` and `b0145df8f5` (2026-10-26, 2026-10-27), where the author's read still carried the confirmation keys.
 
 <a id="fn-f-a1"></a>
 **f-a1** — Note e: neither `AuthorResponseRequestManagerCellStatus.vue` nor `canRequestReviewRoundAuthorResponse` reads `isAuthorResponseRequested`, and `PKPReviewController::requestAuthorResponse()` refuses only when a response exists, so a second `POST …/requestResponse` sends a second email and sets the flag again. The author's config (note c) does read the flag. Live-probed 2026-09-06: three sends on one round, each `POST …/requestResponse` 200, three Mailpit messages, three "Notifications" rows and three "An email has been sent" log rows, the table unchanged throughout.
@@ -1035,10 +1053,6 @@ Issue report: [pkp-e2e#816](https://github.com/jardakotesovec/pkp-e2e/issues/816
 
 <a id="fn-f-a8"></a>
 **f-a8** — Note e: `getActiveReviewAssignments()` drops declined and cancelled assignments alike, and `ReviewerComments::setupReviewerCommentsVariable()` iterates the completed assignments only, so a cancelled request should count like a declined one on both the cell and the email. Not driven: the scenario API seeds no `cancelled` reviewer status. The settling read: on a round with one completed review and one accepted request, the editor takes the accepted reviewer's "…" › "Cancel Reviewer", then reads the cell (expected "Ready to invite author", "Request Response" enabled) and opens the request page (expected one reviewer block).
-
-<a id="fn-f-a10"></a>
-**f-a10** — Note q. `GET api/v1/peerReviews/open/submissions/{submissionId}` (and the list form `open/submissions?submissionIds=…`), `PKP\API\v1\peerReviews\PeerReviewController` behind `PublicAccessPolicy`, OJS only (`lib/pkp/api/v1/peerReviews/`; `stable-3_5_0` has no such directory, so the fault is main-only). `SubmissionPeerReviewResource::toArray()` keeps a round of a published publication (`getPublicReviewRounds()`) when it holds at least one accepted, publicly visible review confirmed by the editor (`dateConsidered` or `dateAcknowledged` set), then adds `authorResponse` as the full `ReviewRoundAuthorResponseResource` (`response`, `associatedAuthors` with `fullName`, `givenName`, `familyName`, `preferredPublicName`, `orcid`, `hasVerifiedOrcid`, `submittedByUser` with `id` and `fullName`, and `isPublic` as a plain field) whenever the round has a response, with no `isPublic` check. `AuthorResponse::isPublic()` is true only when every non-declined, non-cancelled assignment of the round is publicly visible; the JATS template plugin's `PeerReview::createAuthorComment()` returns nothing unless `isPublic`, the API does not. The response entered the record with lib/pkp bd0db45a05 (2026-02-03, `pkp/pkp-lib#12294`); the `isPublic` flag followed with 8f3a560193 (2026-02-09, `pkp/pkp-lib#12319`) and the record never read it. Fix: add `authorResponse` only when `isPublic`. Live-probed 2026-10-13 on OJS `main` (ojs `7c6fba2064`, lib/pkp `f4c2578c94`), two runs, each from a reset of the dataset fleet: published submission 1, round 1 with three non-declined, non-cancelled assignments, one publicly visible (the box set through the reviewer's "Edit" window, the review submitted in the review wizard and marked "Complete" in Read Review by the editor), two not; the response requested by the editor (`POST …/authorResponse/requestResponse` 200) and submitted by the author `amwandenga` (`POST …/authorResponse` 200); signed out, the record answered 200 in both runs with `reviewRounds[0].authorResponse` non-null: `response.en` the submitted text, one associated author, `submittedByUser` present, `isPublic` false. No response of 500 or more in either run.
-Issue report: [pkp-e2e-sec#14](https://github.com/jardakotesovec/pkp-e2e-sec/issues/14) ([docs/issues/U30-A10-public-review-data-unpublic-author-response.md](../issues/U30-A10-public-review-data-unpublic-author-response.md)).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — Note a for the missing components; note h for the shared `DecisionRequestRevisionsNotifyAuthor` and template. Seen 2026-07-31 on a press during the review-stage probes (recorded in the review stage spec's note a: no Author Response panel in either view, console clean, while the author still received the letter inviting a response). Re-observed 2026-09-06 on the current build: no table on `workflow_3_{round}` or `workflow_2_{round}`; the typed page renders, `POST …/requestResponse` 200, the email's anchor `…mySubmissions?workflowSubmissionId={id}&workflowMenuKey=workflow_3_{round}&reviewResponseAction=respond`; the Request Revisions wizard's "Notify Authors" message and the "Your submission has been reviewed and we encourage you to submit revisions" email carry the same anchor; the author lands on External Review with the headings "Round 1 Status", "Notifications", "Revisions Uploaded", "Review Tasks & Discussions", no "Author Response" and no window, console clean (own console listeners; the kit's `screen()` does not capture it).
