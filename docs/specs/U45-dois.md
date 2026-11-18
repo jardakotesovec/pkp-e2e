@@ -704,11 +704,20 @@ links under the list. <sup>g</sup>
       carries a DOI, the newest first, so a DOI that two posted versions
       share (1.0 and 1.1, or 2.0 and 2.1) is listed twice
       ⚠ [OPS6](#ops6); a posted version without a DOI is left out.
-    - **Its title and subtitle**, as plain text: an "&" or a word in
-      italics typed into the "Title" or "Subtitle" box reaches Crossref
-      as the codes `&amp;` and `<i>…</i>` ⚠ [A30](#a30). A preprint
-      server's file puts the title again where the subtitle belongs
-      ⚠ [OPS7](#ops7).
+    - **Its title and subtitle**, each in its own element, with the
+      formatting the "Title" and "Subtitle" boxes allow written as
+      Crossref's own markup elements (bold `<b>`, italic `<i>`,
+      underline `<u>`, superscript `<sup>`, subscript `<sub>`) and
+      every other character as typed, an "&" written once as `&amp;`
+      as XML requires: "hkrb forest trees & *shrubs*" with the subtitle
+      "rocks & sand" is written
+      `<title>hkrb forest trees &amp; <i>shrubs</i></title>` and
+      `<subtitle>rocks &amp; sand</subtitle>`. The file never holds
+      `&amp;amp;` or `&lt;i&gt;` for a typed "&" or a word in italics.
+      A "Prefix" leads the title as typed (`L'`); angle brackets typed
+      as text are written `&lt;` and `&gt;` (`a <b> c` as
+      `a &lt;b&gt; c`); a work without a subtitle gets no `<subtitle>`.
+      <sup>q54</sup>
 30. **The agency panel.** With an agency configured, an item's expanded
     view ends with a box naming the agency, a sentence and buttons:
     <sup>m</sup> <sup>q20</sup>
@@ -2464,12 +2473,10 @@ Left out of the scenarios above, by reason:
   - OJS8 ("Deposit All" and "Deposit DOIs" on a DataCite journal under "DOI Versioning" "Yes" marking an earlier major version's DOIs "Submitted"; Rules 29, 29a)
   - OJS13 ("Export DOIs" and "Deposit DOIs" on a DataCite journal failing for a work whose supplementary galley file has a "Subject"; Rule 29)
   - A24 (a formatted title's codes in a row's name; Rule 16)
-  - A30 (a typed "&" or italic word reaching Crossref as codes; Rule 29b)
   - OJS10 (a cancelled review's DOI kept on the DOIs page and in the exports and deposits; Rule 7b)
   - OPS6 (a DOI listed once per posted version that shares it in a preprint server's Crossref file; Rule 29b)
   - OJS11 (two published major versions sharing a DOI both written to a journal's Crossref file, the older first; Rule 29b)
   - OJS12 ("DOI Versioning" "Yes" saved while Crossref's "Update Policy DOI" is empty; Rule 38)
-  - OPS7 (the title in a preprint's subtitle place in the Crossref file; Rule 29b)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
   - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
@@ -2516,7 +2523,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A22](#a22) | The DOIs page's "Bulk Actions" menu stays open over the list when an action is confirmed at once | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A24](#a24) | The DOIs page's rows show a title's italic word as `<i>…</i>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A29](#a29) | A journal upgraded from 3.3 can come out with an old leftover DOI prefix, and new DOIs are made with it | 🐞 | user-visible | — |
-| [A30](#a30) | Crossref receives a title or subtitle typed with "&" or an italic word as the codes `&amp;` and `<i>…</i>` | 🐞 | high | issues (claude), 2026-10-15 — re-verified |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered" | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OJS5](#ojs5) | DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI | 🐞 | medium · crash: server | issues (claude), 2026-10-15 — re-verified |
@@ -2530,7 +2536,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [OPS1](#ops1) | A preprint server's "DOIs" settings box is labelled "Allow … (DOIs) to assigned to works …" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS3](#ops3) | A preprint server's Crossref "Username" help reads "see the advise above" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OPS6](#ops6) | A preprint server's Crossref deposit names a DOI once per posted version that shares it | 🐞 | medium | issues (claude), 2026-10-20 — re-verified |
-| [OPS7](#ops7) | A preprint server's Crossref file repeats the preprint's title where its subtitle belongs | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A1](#a1) | A new journal arrives in a DOI state its own Setup tab refuses to save | ❓ | minor | — |
 | [A5](#a5) | The Registration tab keeps a new agency even when its fields are refused | ❓ | minor | — |
 | [A6](#a6) | Choosing an agency silently unticks the kinds it does not accept | ❓ | minor | — |
@@ -2931,22 +2936,6 @@ That is `main`, and 3.5 since 3.5.0-2. An upgrade from 3.3 to 3.4
 stops on such an install with a database error instead.
 Since: 2026-10-09 (pkp/pkp-lib#13481; on 3.5 pkp/pkp-lib#12082) · Basis: probe, 2026-10-09. <sup>f-a29</sup>
 
-<a id="a30"></a>
-**A30 — Crossref receives a title or subtitle typed with "&" or an italic word as the codes `&amp;` and `<i>…</i>`** · 🐞 · high.
-A title saved in the "Title" box as "hkrb forest trees & *shrubs*",
-with the subtitle "rocks & sand", goes into the Crossref file escaped
-twice: the file holds `hkrb forest trees &amp;amp; &lt;i&gt;shrubs&lt;/i&gt;`
-and `rocks &amp;amp; sand`. Crossref therefore receives the text
-`hkrb forest trees &amp; <i>shrubs</i>` and `rocks &amp; sand`: the
-characters "&amp;" and "<i>" in the title, instead of an "&" and an
-italic word.
-
-The "Title" and "Subtitle" boxes save every typed "&" as `&amp;`, so
-any title or subtitle with an "&" is hit, not only a formatted one.
-"Export DOIs" and every deposit send the same file. The work's own page
-shows the title right, and the file passes Crossref's schema check, so
-nothing warns the manager. The DOIs page's rows show the same codes ([A24](#a24)).
-Basis: probe, 2026-10-15. <sup>f-a30</sup>
 
 ### OJS
 
@@ -3320,18 +3309,6 @@ switched to "Yes": two major versions on one DOI. `main` has that case
 too, and the open fix `pkp/crossref-ops#67` leaves it.
 Basis: probe, 2026-10-20. <sup>f-ops6</sup>
 
-<a id="ops7"></a>
-**OPS7 — A preprint server's Crossref file repeats the preprint's title where its subtitle belongs** · 🐞 · medium.
-A preprint's "Subtitle" is missing from the Crossref file, its title
-standing in its place: for "The influence of lactation on the quantity
-and quality of cashmere production" with the subtitle "hkrb a plain
-subtitle", the file's `<subtitle>` reads "The influence of lactation on
-the quantity and quality of cashmere production".
-
-"Export DOIs" and every deposit send the same file, and it passes
-Crossref's schema check, so nothing warns the manager. A preprint
-without a subtitle gets no `<subtitle>` in the file.
-Basis: probe, 2026-10-15. <sup>f-ops7</sup>
 
 ### Retired
 
@@ -3350,6 +3327,9 @@ Basis: probe, 2026-10-15. <sup>f-ops7</sup>
 <a id="a28"></a>
 **A28 — On a journal and a preprint server, "Mark DOIs Registered" also marks an unpublished new version's DOIs, which then never reach the agency** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447, pkp/pkp-lib#13460).
 
+<a id="a30"></a>
+**A30 — Crossref receives a title or subtitle typed with "&" or an italic word as the codes `&amp;` and `<i>…</i>`** · ✅ · retired. Fixed upstream (pkp/crossref-ojs#121, pkp/crossref-ops#78, for pkp/pkp-lib#13807).
+
 <a id="ojs2"></a>
 **OJS2 — On a DataCite journal, "Export DOIs" on an issue downloads nothing and "Deposit All" never sends it** · ✅ · retired. Fixed upstream (pkp/ojs#5935, for pkp/pkp-lib#13519).
 
@@ -3364,6 +3344,9 @@ Basis: probe, 2026-10-15. <sup>f-ops7</sup>
 
 <a id="ops4"></a>
 **OPS4 — On a preprint server, a minor version's galleys get new DOIs instead of keeping their source's** · ✅ · retired. Fixed upstream (pkp/ops#1435, pkp/pkp-lib#13460).
+
+<a id="ops7"></a>
+**OPS7 — A preprint server's Crossref file repeats the preprint's title where its subtitle belongs** · ✅ · retired. Fixed upstream (pkp/crossref-ops#78, for pkp/pkp-lib#13807).
 
 ---
 
@@ -3961,6 +3944,43 @@ create a new version?", "Yes") kept the DOI, and every file held one
 row read "Unregistered" with no "View all". Each run's record held only
 the known Plugin Gallery error and the "Export DOIs" schema-fetch
 refusals.
+
+<a id="fn-q54"></a>
+**q54** — Walked 2026-11-18 (Rule 29b; the retired A30 and OPS7) at
+the PR heads of pkp/pkp-lib#13807, before their merge, each on its
+branch's tip: on `main` crossref-ojs#121 `d255dbcbc5` with ojs#6100
+`c7da9ea765`, and crossref-ops#78 `e22df9d3b5` with ops#1518
+`af3f73c40e`; on `stable-3_5_0` crossref-ojs#122 `b7f01459ab` with
+ojs#6098 `0682631c96`, and crossref-ops#79 `989056a986` with ops#1519
+`a94e19122d`. `checks/issues/crossref-title-ampersand-italic-codes/walk.js`
+on PKP's default test dataset, freshly loaded per run, signed in as
+`dbarnes`. The steps: OJS article 5 and OPS preprint 1, "Title"
+retyped `hkrb forest trees & shrubs` with "shrubs" in italics (Ctrl+I),
+"Subtitle" `rocks & sand`, each "Save" answering "Saved"; published
+into Vol. 1 No. 2 (2014) (OPS: posted); "Assign DOIs"; "Export DOIs"
+answered the standing schema-fetch "Error" window (q49), so the file
+was built on the server with the plugin's own export, format check off,
+then checked against Crossref's 5.4.0 schema: valid on every run. Both
+apps' files read `<title>hkrb forest trees &amp; <i>shrubs</i></title>`
+and `<subtitle>rocks &amp; sand</subtitle>`, the preprint's subtitle
+now its own. On `main`, the walk's neighbour run: the "Title"
+`hkrb a <b> c plain` ("plain" in italics) with the "Prefix" `L'` is
+written `<title>L' hkrb a &lt;b&gt; c <i>plain</i></title>`, and the
+work's page heading reads the same. The dataset's "Hansen & Pinto:
+Reason Reclaimed" (stored with a bare "&") and a plain title (OJS 17,
+OPS 2) read as before the change. At the bases the same steps wrote
+`hkrb forest trees &amp;amp; &lt;i&gt;shrubs&lt;/i&gt;` and
+`rocks &amp;amp; sand`, and OPS's `<subtitle>` held the title (walked
+2026-10-15, q51). On `stable-3_4_0`, which the walk does not drive,
+`checks/sync/pkp-lib-13807/drive.php` stored the same title and
+subtitle (OJS 1, OPS 3) and built the files at crossref-ojs#123
+`201e9980c7` and crossref-ops#80 `7b7a2bfa34`, then at their bases
+`f073a208eb` and `50cef72474`: `&amp;` and `<i>` at the heads,
+`&amp;amp;` and `&lt;i&gt;` at the bases, and the "Prefix" `L'` read
+`L'` at the head and `L&amp;#039;` at the base. Code-read and the PRs'
+unit tests (`TitleFaceMarkupTest`): `<strong>` and `<em>` are written
+`<b>` and `<i>`, and a tag a site's `allowed_title_html` lets through
+beyond the five is dropped with its text kept.
 
 <a id="fn-m"></a>
 **m** — `components/ListPanel/doi/DoiListItem.vue`: tick box, title link
@@ -5694,13 +5714,6 @@ Written up for the team in
 [docs/reports/2026-10-09-pkp-lib-13481.md](../reports/2026-10-09-pkp-lib-13481.md)
 (the PR review of pkp/pkp-lib#13481, posted in the channel on 2026-10-09).
 
-<a id="fn-f-a30"></a>
-**f-a30** — Live-probed 2026-10-15, OJS and OPS, two runs (note q51,
-titles). A press has no
-agency plugin. The DOIs page's own rendering of the same title is
-[A24](#a24).
-Issue report: [pkp-e2e#979](https://github.com/jardakotesovec/pkp-e2e/issues/979) ([docs/issues/U45-A30-crossref-title-ampersand-italic-codes.md](../issues/U45-A30-crossref-title-ampersand-italic-codes.md)); the team's copy is `pkp/pkp-lib#13807` (open, 2026-11-13).
-
 <a id="fn-f-a25"></a>
 **f-a25** — At the PR heads of `pkp/pkp-lib#13460` (`246e5387f6`, with
 `pkp/ojs#5903` `2f8c53b706` and `pkp/omp#2495` `e1464b9228`), before
@@ -6291,13 +6304,6 @@ a journal and a press listed no draft.
 versions). What Crossref answers to one file
 naming a DOI twice was not tried: the test installs reach no agency.
 Issue report: [pkp-e2e#980](https://github.com/jardakotesovec/pkp-e2e/issues/980) ([docs/issues/U45-OPS6-preprint-crossref-file-doi-twice.md](../issues/U45-OPS6-preprint-crossref-file-doi-twice.md)).
-
-<a id="fn-f-ops7"></a>
-**f-ops7** — Live-probed 2026-10-15, OPS, two runs (note q51,
-titles): OPS `PreprintCrossrefXmlFilter`
-`createPostedContentNode()`; OJS `ArticleCrossrefXmlFilter` writes the
-subtitle itself.
-Issue report: [pkp-e2e#981](https://github.com/jardakotesovec/pkp-e2e/issues/981) ([docs/issues/U45-OPS7-preprint-crossref-subtitle-repeats-title.md](../issues/U45-OPS7-preprint-crossref-subtitle-repeats-title.md)).
 
 ## Reference — entry points & surfaces
 

@@ -30,7 +30,7 @@
  * - A14 🐞: the "stale" sentence of "Mark DOIs Needs Sync" (S9).
  * - A17 🐞: 1.0's block after a major version is posted (S11, S22).
  * - OPS5 ❓: a draft listed or not (S4, S20 read "DOI Assigned" alone).
- * - OPS6 🐞, OPS7 🐞, A18 🐞, A30 🐞: what a deposit sends.
+ * - OPS6 🐞, A18 🐞: what a deposit sends.
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch preprint server

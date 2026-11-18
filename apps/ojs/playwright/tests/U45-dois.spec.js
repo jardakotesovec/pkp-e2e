@@ -15,9 +15,9 @@
  * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
  * contract, a ❓ is parked; the spec's Coverage section is the record of
  * everything else): A2, A3, A4, A7, A8, A9, A10, A11, A12, A14, A15, A16,
- * A17, A18, A19, A20, A21, A22, A23, A24, A29, A30, OJS1, OJS3, OJS4,
+ * A17, A18, A19, A20, A21, A22, A23, A24, A29, OJS1, OJS3, OJS4,
  * OJS5, OJS8, OJS9, OJS10, OJS11, OJS12, OJS13; OMP1–OMP3, OPS1–OPS3,
- * OPS5–OPS7 are the press's and the preprint server's.
+ * OPS5, OPS6 are the press's and the preprint server's.
  *
  * Seeding: scenario endpoints only; publicknowledge is read, never
  * changed (S1). Every other scenario seeds its own scratch journal with
