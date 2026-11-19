@@ -1,0 +1,82 @@
+diff --git a/classes/core/SettingsBuilder.php b/classes/core/SettingsBuilder.php
+index 66abe2add6..c406ec9a8b 100644
+--- a/classes/core/SettingsBuilder.php
++++ b/classes/core/SettingsBuilder.php
+@@ -170,13 +170,19 @@ class SettingsBuilder extends Builder
+         // Delete the child settings rows first, then the main row. Child-before-parent
+         // is the correct relational-integrity discipline: it works on any schema,
+         // cascade or not, and doesn't depend on the FK constraint as a safety net.
++        // Resolve the models first: re-running the query after the settings are gone
++        // would no longer match the rows a where() on a setting selected
++        $count = 0;
+         foreach (array_chunk($this->getTargetModelIds(), static::ID_CHUNK_SIZE) as $modelIds) {
+             DB::table($this->getSettingsTable())
+                 ->whereIn($this->getPrimaryKeyName(), $modelIds)
+                 ->delete();
++            $count += DB::table($this->model->getTable())
++                ->whereIn($this->getPrimaryKeyName(), $modelIds)
++                ->delete();
+         }
+ 
+-        return parent::delete();
++        return $count;
+     }
+ 
+     /**
+@@ -307,7 +313,7 @@ class SettingsBuilder extends Builder
+ 
+         return array_map(
+             intval(...),
+-            (clone $this)->pluck($this->getPrimaryKeyName())->all()
++            (clone $this)->pluck($this->model->getQualifiedKeyName())->all()
+         );
+     }
+ 
+@@ -378,13 +384,17 @@ class SettingsBuilder extends Builder
+             // Only the columns of the main table can be selected from it,
+             // the primary key is needed to attach the settings to the rows
+             $columns = array_map(fn (string $column) => Arr::last(explode('.', $column)), $selectedColumns);
+-            [$settingColumns, $primaryColumns] = collect($columns)->partition(
+-                fn (string $column) => $this->isSetting($column)
+-            );
+-            if (!$primaryColumns->contains($primaryKey)) {
+-                $primaryColumns->push($primaryKey);
++            $settingColumns = collect($columns)->filter(fn (string $column) => $this->isSetting($column))->values();
++            // Keep the primary columns as given, a join can need the table name
++            $primaryColumns = collect($selectedColumns)
++                ->reject(fn (string $column) => $this->isSetting(Arr::last(explode('.', $column))))
++                ->values();
++            // The primary key is only needed to attach selected settings; adding it otherwise
++            // would change the result of distinct() and break groupBy()
++            if ($settingColumns->isNotEmpty() && !in_array($primaryKey, $columns)) {
++                $primaryColumns->push($this->model->getQualifiedKeyName());
+             }
+-            $query->columns = $primaryColumns->values()->all();
++            $query->columns = $primaryColumns->all();
+         }
+ 
+         $collection = $query->get();
+@@ -394,6 +404,14 @@ class SettingsBuilder extends Builder
+ 
+         $rows = $collection->all();
+ 
++        // No setting was selected: nothing to attach
++        if ($settingColumns?->isEmpty()) {
++            foreach ($rows as $row) {
++                $this->filterRow($row, $columns);
++            }
++            return $rows;
++        }
++
+         // the main query may return multiple rows per primary key. map settings to all rows sharing the same primary key.
+         $ids = array_map(
+             fn ($row) => $row->{$primaryKey},
+@@ -411,7 +429,7 @@ class SettingsBuilder extends Builder
+         if ($settingColumns) {
+             $settingsQuery->whereIn('setting_name', $settingColumns->values()->all());
+         }
+-        $settings = $settingColumns?->isEmpty() ? collect() : $settingsQuery->get();
++        $settings = $settingsQuery->get();
+ 
+         $settings->each(function (stdClass $setting) use (&$rows, $rowIndexesById, $primaryKey) {
+             $settingModelId = $setting->{$primaryKey};

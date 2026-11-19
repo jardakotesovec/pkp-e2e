@@ -1,0 +1,10 @@
+{"case":"delete where title","result":{"returned":1,"state":[{"id":20,"row":false,"title":null},{"id":21,"row":true,"title":"Y"}]},"warnings":[]}
+{"case":"delete whereKey","result":{"returned":1,"state":[{"id":22,"row":false,"title":null},{"id":23,"row":true,"title":"Y"}]},"warnings":[]}
+{"case":"update whereKey title","error":"TypeError: PKP\\core\\SettingsBuilder::updateSettings(): Argument #2 ($modelId) must be of type int, null given, called in /home/e2e/pkp-e2e-s1/checkouts/ojs/lib/pkp/classes/core/SettingsBuilder.php on line 114","warnings":[]}
+{"case":"update where title, title and type_id","error":"TypeError: PKP\\core\\SettingsBuilder::updateSettings(): Argument #2 ($modelId) must be of type int, null given, called in /home/e2e/pkp-e2e-s1/checkouts/ojs/lib/pkp/classes/core/SettingsBuilder.php on line 114","warnings":[]}
+{"case":"select title","error":"Illuminate\\Database\\QueryException: SQLSTATE[42703]: Undefined column: 7 ERROR:  column \"title\" does not exist","warnings":[]}
+{"case":"select type_id distinct","result":[{"type_id":4,"description":[],"descriptionShort":[],"title":[]},{"type_id":3,"description":[],"descriptionShort":[],"title":[]}],"warnings":["Undefined property: stdClass::$announcement_id"]}
+{"case":"select type_id groupBy","result":[{"type_id":4,"description":[],"descriptionShort":[],"title":[]},{"type_id":3,"description":[],"descriptionShort":[],"title":[]}],"warnings":["Undefined property: stdClass::$announcement_id"]}
+{"case":"join, qualified select","error":"Illuminate\\Database\\QueryException: SQLSTATE[42703]: Undefined column: 7 ERROR:  column \"title\" does not exist","warnings":[]}
+{"case":"join, delete","result":{"returned":1,"state":[{"id":37,"row":false,"title":null},{"id":38,"row":true,"title":"Y"}]},"warnings":[]}
+{"case":"join, qualified select of primary columns","result":[["announcement_id","type_id","title","description","descriptionShort"]],"warnings":[]}
