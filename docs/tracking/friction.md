@@ -13,3 +13,4 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
+2026-11-19 · plugin-review · drive agent (pre-review drive) · `page.request` / `context.request` in a `newGuardedContext` context sends every call to the dead proxy (ECONNREFUSED 127.0.0.1:9, the bypass list does not apply to the APIRequestContext), so API calls had to be rewritten as in-page `fetch`; also the 3.5 file-list action menu is cut off in crops near the viewport bottom at 1000 px · a line in the drive-guard.js header saying to use in-page `fetch` (`page.evaluate`) for API calls, and a taller default viewport (1800) in the drive brief for crops of workflow menus
