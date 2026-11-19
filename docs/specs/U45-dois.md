@@ -3977,10 +3977,20 @@ subtitle (OJS 1, OPS 3) and built the files at crossref-ojs#123
 `201e9980c7` and crossref-ops#80 `7b7a2bfa34`, then at their bases
 `f073a208eb` and `50cef72474`: `&amp;` and `<i>` at the heads,
 `&amp;amp;` and `&lt;i&gt;` at the bases, and the "Prefix" `L'` read
-`L'` at the head and `L&amp;#039;` at the base. Code-read and the PRs'
-unit tests (`TitleFaceMarkupTest`): `<strong>` and `<em>` are written
-`<b>` and `<i>`, and a tag a site's `allowed_title_html` lets through
-beyond the five is dropped with its text kept.
+`L'` at the head and `L&amp;#039;` at the base. Round 2, walked 2026-11-19 the same way (3.4 by
+`drive.php`) at the updated heads, after the team's review: on `main`
+crossref-ojs#121 `08da83b189` with ojs#6100 `42599f3cdf`, and
+crossref-ops#78 `0bcf460c28` with ops#1518 `bea1f3e488`; on
+`stable-3_5_0` #122 `622a14df8d` with ojs#6098 `27cd3919a7`, and #79
+`e72c479a64` with ops#1519 `bd61e06407`; on `stable-3_4_0` #123
+`865f6f70d9` with ojs#6099 `45fb4a7342`, and #80 `e374ea3234` with
+ops#1520 `2f1acb7008`. Every file read as in round 1, valid. Round 2
+runs the stored HTML through the site's HTML filter first
+(`stripUnsafeHtml()`, `allowed_html`). Code-read and the PRs' unit
+tests (`TitleFaceMarkupTest`): `<strong>` and `<em>` are written as
+themselves (Crossref 5.3.1 and 5.4.0 accept both), a line break as a
+space, a script's content is dropped, and any other tag a site's
+`allowed_title_html` lets through is dropped with its text kept.
 
 <a id="fn-m"></a>
 **m** — `components/ListPanel/doi/DoiListItem.vue`: tick box, title link
