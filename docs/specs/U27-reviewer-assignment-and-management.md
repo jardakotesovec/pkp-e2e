@@ -4415,7 +4415,7 @@ happens only once the first window is open. Each side window
 `data-aria-hidden` when it opens, and lifts the mark when it closes; from
 the second window on, the calendar is one of those children. The
 "Resend Review Request" window's pickers were not driven.
-Issue report: docs/issues/U27-A54-later-date-window-calendar-hidden-screen-reader.md.
+Issue report: [pkp-e2e#1106](https://github.com/jardakotesovec/pkp-e2e/issues/1106) ([docs/issues/U27-A54-later-date-window-calendar-hidden-screen-reader.md](../issues/U27-A54-later-date-window-calendar-hidden-screen-reader.md)).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only
