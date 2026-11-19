@@ -8,6 +8,33 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const flat = (s, n = 400) => (s == null ? s : String(s).replace(/\s+/g, ' ').trim().slice(0, n));
 const rel = (u) => (u == null ? u : String(u).replace(/^https?:\/\/[^/]+/, ''));
 
+/**
+ * OMP: "Add publication format" with `name`, its file through "Change File", "Open Access" and
+ * "Available"; returns what the format's and the file's rows show.
+ */
+async function addFormatWithFile(page, app, formats, name, filePath) {
+    const {SALES} = require(path.join(app.suiteDir, 'pages', 'PublicationFormatPages.js'));
+    const fileName = path.basename(filePath);
+    const add = await formats.openAdd();
+    await add.typeName(name);
+    await add.ok();
+    await formats.formatRow(name).waitFor({state: 'visible', timeout: T});
+    await formats.uploadWithChangeFile(name, filePath);
+    const terms = await formats.openTerms(name, fileName);
+    await terms.choose(SALES.openAccess);
+    await terms.save();
+    await idle(page);
+    await formats.rowLink(formats.fileRow(name, fileName), 'Open Access').waitFor({state: 'visible', timeout: T});
+    await (await formats.openStatus(formats.formatRow(name), 'Not Available', 'Format Availability')).ok();
+    await formats.rowLink(formats.formatRow(name), 'Available').waitFor({state: 'visible', timeout: T});
+    await sleep(500);
+    return {
+        format: (await formats.formatLabel(name).innerText()).replace(/\s+/g, ' ').trim(),
+        formatState: (await formats.formatRow(name).locator('a').allInnerTexts()).map((t) => t.trim()).filter(Boolean),
+        file: (await formats.fileRow(name, fileName).locator('a').allInnerTexts()).map((t) => t.trim()).filter(Boolean),
+    };
+}
+
 /** The galley files beside this script. */
 const FILES = {
     steps: path.join(__dirname, 'u15a-galley.html'),
@@ -39,7 +66,6 @@ async function snap(page, name) {
  */
 async function addHtmlRepresentation(page, app, submissionId, file) {
     if (app.name === 'omp') {
-        const {addFormatWithFile} = require('../book-epub-announced-as-html/lib');
         // "Publication" › "Publication Formats" (the U20 helper waits for a row; a book may have none).
         const {WorkflowPage} = require('../../../pages/WorkflowPage.js');
         const {PublicationFormatsPage} = require(path.join(app.suiteDir, 'pages', 'PublicationFormatPages.js'));
