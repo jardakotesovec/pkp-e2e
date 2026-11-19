@@ -18,3 +18,6 @@ crossref-ops#78/#79/#80 and the pointer bumps ojs#6100/#6098/#6099, ops#1518/#15
   `<`) and prints what each becomes; run from any OJS or OPS root on any line (the command is in its
   header). A stored bare `<` followed by a letter (`x<y and a < b`) loses the rest of the title, as the
   work's own page already does (HTMLPurifier reads it the same way); `n<50` and `p < 0.05` stay text.
+- From round 2 (`stripUnsafeHtml()` in the helper) both tests read the config, and PKPTestCase points it at
+  `<app root>/config.inc.php`: link it to `config.test.inc.php` for the run
+  (`ln -s config.test.inc.php config.inc.php`) and remove the link after.
