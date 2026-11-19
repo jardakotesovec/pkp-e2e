@@ -22,14 +22,16 @@ case "${PKP_E2E_LINE:-main}" in main|"") ;; *) dir=$dir/$PKP_E2E_LINE;; esac
 mkdir -p "$dir"
 flag=-s; [ "$mode" = exclusive ] && flag=-x
 echo "[applock] $mode $apps: asked $(date +%T)" >&2
-# A waiter is told who holds an app exclusively and since when: a fix trial over three apps
-# held every walk 27-29 minutes on 2026-11-03 with nothing saying so (friction, U06, U17).
+# A waiter is told who holds an app and since when, exclusive and shared holders alike
+# ($a.holder, $a.shared.<pid>), so a queue reads as a queue and not as a hang.
 for a in ojs omp ops; do
   case ",$apps," in *",$a,"*)
-    # The holder's pid leads the line; a killed trial leaves its line, which kill -0 skips.
-    if [ -s "$dir/$a.holder" ] && read -r hpid hrest < "$dir/$a.holder" && kill -0 "$hpid" 2>/dev/null; then
-      echo "[applock] $a held: $hrest" >&2
-    fi;;
+    # The holder's pid leads the line; a killed caller leaves its file, which kill -0 skips.
+    for hf in "$dir/$a.holder" "$dir/$a".shared.*; do
+      if [ -s "$hf" ] && read -r hpid hrest < "$hf" && kill -0 "$hpid" 2>/dev/null; then
+        echo "[applock] $a held: $hrest" >&2
+      fi
+    done;;
   esac
 done
 # Each wait runs in the background so a signal reaches this script while it waits, and the
@@ -48,11 +50,12 @@ for g in "${gates[@]}"; do flock -u "$g"; eval "exec $g>&-"; done
 trap - TERM INT HUP
 echo "[applock] $mode $apps: holds $(date +%T)" >&2
 held=()
-if [ "$mode" = exclusive ]; then
-  for a in ojs omp ops; do
-    case ",$apps," in *",$a,"*) echo "$$ exclusive since $(date +%T) by ${PROBE_AGENT:-pid $$}: ${*:1:4}" > "$dir/$a.holder"; held+=("$dir/$a.holder");; esac
-  done
-fi
+for a in ojs omp ops; do
+  case ",$apps," in *",$a,"*)
+    hf="$dir/$a.holder"; [ "$mode" = exclusive ] || hf="$dir/$a.shared.$$"
+    echo "$$ $mode since $(date +%T) by ${PROBE_AGENT:-pid $$}: ${*:1:4}" > "$hf"; held+=("$hf");;
+  esac
+done
 # The command runs without the lock descriptors, so a server it starts cannot keep a lock.
 ( for fd in "${fds[@]}"; do eval "exec $fd>&-"; done; exec "$@" ) && rc=0 || rc=$?
 for h in "${held[@]}"; do rm -f "$h"; done

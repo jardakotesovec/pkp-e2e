@@ -1575,6 +1575,12 @@ Left out of the scenarios above, by reason:
     Reviewer window lists the matching reviewer, or the window offers that
     role no search, filters or further pages (Actors row 3, Rules 5, 6):
     waits for the fix [incidental 2026-11-16]
+  - the guard for A54 (issue report
+    `docs/issues/U27-A54-later-date-window-calendar-hidden-screen-reader.md`):
+    two date windows opened one after another on one page ("Edit" twice, the
+    first closed without its calendar opened; then "Add Reviewer"), and the
+    calendar's days, "Prev", "Next" and the month and year lists are in each
+    window's accessibility tree: waits for the fix [report 2026-11-19]
 - **Rarely met**:
   - submitting a review for the reviewer on a "Request Resent" row, on an accepted row holding no draft, or with a comment entered, and the row's menu, the reviewer's side and the missing acceptance email after any such save (Rule 14d, Side effects): an editor enters a review on a reviewer's behalf in a rare week
   - the Review Details window on a reminded, an accepted or a declined request with no review: "Reviewer Reminded:", "Request Accepted:" or "Request Declined:", and the empty blocks (Rule 14c): an editor opens the window to read a review, and on a request that has none only in a rare week
@@ -1698,7 +1704,7 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A49](#a49) | Both XML entries of "Download Review Form" open a "not authorized" page until a review PDF is downloaded | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A50](#a50) | An editor who picks "No Matches" in "Enroll Existing User" gets a server error and a window stuck on a spinner | 🐞 | medium · crash: server | issues (claude), 2026-10-23 — re-verified |
 | [A51](#a51) | A Funding coordinator's search, filters and "Next" in the Add Reviewer window are refused | 🐞 | medium | issues (claude), 2026-11-16 — re-verified |
-| [A54](#a54) | From the second due-date window opened on one page, the calendar is hidden from screen readers | 🐞 | minor | — |
+| [A54](#a54) | From the second date window opened on a page, screen readers cannot reach the date calendar | 🐞 | medium | issues (claude), 2026-11-19 — re-verified |
 | [A4](#a4) | Editorial Notes are one shared note per reviewer; editing them on one submission silently rewrites them everywhere | ❓ | user-visible | — |
 | [A6](#a6) | Declined and cancelled rows are silently hidden from assistant-level participants, so the same table shows different reviewers per role | ❓ | minor | — |
 | [A17](#a17) | The due-date pickers accept dates already past without any warning | ❓ | minor | — |
@@ -2297,22 +2303,29 @@ such? Lean: yes; the review changed hands, which is what the log is for.
 Since: 2026-11-14 (pkp/pkp-lib#13653) · Basis: probe, 2026-11-16. <sup>[f-a53](#fn-a53)</sup>
 
 <a id="a54"></a>
-**A54 — From the second due-date window opened on one page, the calendar is hidden from screen readers** · 🐞 · minor.
-A Journal Manager or an assigned Section Editor opens a window holding
-"Response Due Date" and "Review Due Date": "Add Reviewer", "Edit" in a reviewer row's "More Actions", or
-"Edit Due Date" in the popover of a
-[→ review activity indicator](U23-submissions-dashboard.md#review-indicators)
-on the submissions dashboard. They close it and open another such window,
-of the same kind or another, on the same page without reloading (the
-Resend window was not read). In the first window, a screen reader
-reaches the calendar that opens under a date box: its days, "Prev",
-"Next" and the "Select month" and "Select year" lists. In the second
-window and every later one, the same calendar is hidden from screen
-readers, though it still takes a mouse click. The date box itself stays
-reachable and takes a date typed as YYYY-MM-DD, so someone using a
-screen reader can still set the date, but only by typing it in that format
-([A16](#a16)).
-Basis: probe, 2026-11-18. <sup>[f-a54](#fn-a54)</sup>
+**A54 — From the second date window opened on a page, screen readers cannot reach the date calendar** · 🐞 · medium.
+A Journal Manager or an assigned Section Editor opens a window with a
+date box: "Add Reviewer", "Edit" in a reviewer row's "More Actions", or
+"Edit Due Date" in the popover of a review activity indicator on the
+submissions dashboard. They close it and open another such window on the
+same page without reloading. In the first window, a screen reader
+reaches the calendar that opens under a date box. In the second window
+and every later one, the calendar is hidden from screen readers, though
+it is on screen and takes a mouse click.
+The page has one calendar for all its date boxes, so any date window
+opened later on the page loses it, not only the reviewer windows: in
+OJS also the issue's "Date published" and the subscription dates, in OMP
+a chapter's "Date published". The "Resend Review Request" window uses
+the same calendar but was not checked on screen.
+A screen-reader user can still type the date into the box, which is
+announced as "Response Due Date" with its current value ("2026-12-16")
+and nothing about the format. A date typed in another format is
+silently dropped and the box's earlier date is saved. A keyboard user
+without a screen reader is not affected: the calendar's keys (Ctrl with
+the arrow keys moves the day, Enter picks it) work from the date box in
+every window.
+The silently dropped date is [A16](#a16).
+Since: 2025-07 (`main`, and 3.5 from 3.5.0-2; not 3.4 or 3.3) · Basis: probe, 2026-11-19. <sup>[f-a54](#fn-a54)</sup>
 
 ### OMP
 
@@ -4402,6 +4415,7 @@ happens only once the first window is open. Each side window
 `data-aria-hidden` when it opens, and lifts the mark when it closes; from
 the second window on, the calendar is one of those children. The
 "Resend Review Request" window's pickers were not driven.
+Issue report: docs/issues/U27-A54-later-date-window-calendar-hidden-screen-reader.md.
 
 <a id="fn-omp1"></a>
 **f-omp1** — Mechanism in notes b, i, o: recommendation roster passed only

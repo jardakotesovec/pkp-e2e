@@ -1,0 +1,25 @@
+--- a/lib/pkp/js/controllers/form/FormHandler.js
++++ b/lib/pkp/js/controllers/form/FormHandler.js
+@@ -69,7 +69,21 @@
+ 				altField: '#' + $this.prop('id') + '-altField',
+ 				altFormat: 'yy-mm-dd',
+ 				dateFormat: $('#' + $this.prop('id') + '-altField')
+-						.attr('data-date-format')
++						.attr('data-date-format'),
++				// The page has one calendar for all its date boxes, which jQuery UI
++				// appends to the body. A side modal hides every body child outside
++				// itself from assistive technology while it is open (aria-hidden),
++				// so show the calendar inside the window that holds the date box,
++				// without the marks a window may have set while it sat in the body.
++				beforeShow: function(input, inst) {
++					var $dialog = $(input).closest('[role="dialog"]');
++					if ($dialog.length) {
++						inst.dpDiv.appendTo($dialog)
++								.removeAttr('aria-hidden data-aria-hidden');
++					} else {
++						inst.dpDiv.appendTo(document.body);
++					}
++				}
+ 			});
+ 
+ 			$this.prop('name', $this.prop('name') + '-removed');
