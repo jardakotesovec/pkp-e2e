@@ -15,14 +15,15 @@
 // submissions, one per state, and their panel's bubble must read as before.
 // WALK=act (OPS only) answers what the manager can do with a draft's panel:
 // after steps 1-2, dbarnes opens the panel and presses "Post the preprint";
-// the window that opens, its buttons and, when "Post" is offered and pressed,
-// the bubble afterwards are recorded.
+// the address and the page heading it leads to, the window that opens, its
+// buttons and, when "Post" is offered and pressed, the bubble afterwards are
+// recorded.
 //
 //   PROBE_FEATURE=issues-u24d PROBE_AGENT=u24d node bin/probe.js all \
 //     shared/playwright/checks/issues/preprint-draft-labelled-production/walk.js
 'use strict';
 const {forEachApp, launch, signIn, signOut, screen, shot, record, idle} = require('../../../probe');
-const {beginSubmission, flat, T} = require('../wizard-refused-save-hangs-saving/lib.js');
+const {beginSubmission, flat, T} = require('./lib.js');
 
 const MODE = process.env.WALK || 'steps';
 const TITLE = 'u24d draft';
@@ -105,9 +106,13 @@ forEachApp(async (app) => {
             const dlg0 = page.getByRole('dialog').first();
             facts.offered = (await dlg0.getByRole('button').allInnerTexts()).map((x) => flat(x)).filter(Boolean);
             const publish = page.waitForResponse((r) => /\/publications\/\d+\/publish/.test(r.url()), {timeout: 20_000}).catch(() => null);
+            facts.menuKeyBefore = new URL(page.url()).searchParams.get('workflowMenuKey');
             await dlg0.getByRole('button', {name: 'Post the preprint', exact: true}).click({timeout: T});
             await idle(page);
             await page.waitForTimeout(2000);
+            facts.menuKeyAfter = new URL(page.url()).searchParams.get('workflowMenuKey');
+            facts.headingsAfter = (await dlg0.getByRole('heading').allInnerTexts().catch(() => [])).map((x) => flat(x, 120)).filter(Boolean);
+            facts.dialogsAfter = await page.getByRole('dialog').count();
             const top = page.getByRole('dialog').last();
             facts.postWindow = flat(await top.innerText(), 900);
             facts.postWindowButtons = (await top.getByRole('button').allInnerTexts()).map((x) => flat(x)).filter(Boolean);
