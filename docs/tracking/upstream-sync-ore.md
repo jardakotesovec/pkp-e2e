@@ -39,6 +39,9 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
 
 ## Read log
 
+- **2026-11-19 — PR review of the `ore` port of pkp/pkp-lib#13789 (asked in the thread, VM s2: "I have forgotten to port it to ore branch"): pkp-lib#13841 `b1a1545571`, ojs#6101 `0a3aabcca6` (googleScholar to `f92570ef41`, the merge of #42), on the `ore` tips. No finding; companion `13789-ore` ready (ci-triage). Baselines not advanced.**
+  - The same code as `main`'s merged review (three rounds, `upstream-sync.md` 2026-11-19): the pkp-lib diff byte-identical to #13796, the OJS `SitemapHandler` identical to `main`'s `70e1551fa3`. Walked on an `ore` dataset fleet from `main`'s dataset: the merged `main` tip's entries exactly, the `ore` tip none of the articles. CI unedited [44586917301](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44586917301) red on U20 S1 only (intended), the companion [44587339940](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44587339940) green.
+
 - **2026-11-19 (daily session, VM s2) — ojs `ore` `37103b950c`, pkp-lib `ore` `5795cb49a3`, ui-library `ore` `b48195c3`: no commits since the 2026-11-18 baselines (`git ls-remote` against pkp). Baselines stay.**
   - Runs: pkp/ojs `ore` hook [44145502210](https://github.com/pkp/ojs/actions/runs/44145502210) at `37103b950c` green; the nightly `ojs-ore` job of [44451259836](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44451259836) 3/3 green at the same OJS tip and pkp-e2e `821c48b5` (no `lines/ore/` change since), so no dispatch.
   - Carried findings: no regression confirmed on `main` today; pkp/pkp-lib#13593 and #13562 still have no `ore` port. Security: none routed.
