@@ -8,24 +8,18 @@
  * "Preprint" group, Moderator and Preprint Server Manager as the editorial
  * roles, since OPS enrols no Editor account; no Reviewer, so S11 runs the
  * Reader and the Editorial Board Member only) and the OPS-specific
- * scenario 10. S2, S3, S4, S9, S12 and S13 name their absence or analogue
- * on a preprint server in their last sentence (register OPS1 ✅), so the
- * suite carries no absence test for them.
+ * scenario 10, and the common S16 on a scratch preprint server seeded
+ * with its metadata options. S2, S3, S4, S9, S12 and S13 name their
+ * absence or analogue on a preprint server in their last sentence
+ * (register OPS1 ✅), so the suite carries no absence test for them; S15
+ * names a journal's alone.
  * Spec: docs/specs/U24-workflow-screen-and-stage-access.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): OPS3 🐞
- * (S6 opens the Editor's dashboard address for a draft and asserts the panel
- * and its bubble are there, never the bubble's text), OPS2 ❓ (S10 and S14
- * assert the spec's current OPS text — a declined preprint landing on
- * "Preprint: Title & Abstract" — and move with the spec if the ruling
- * flips), OPS4 ❓ (no author's draft is typed at any door), A1 ❓, A3 ❓,
- * A5 🐞 (S6 types the plain `workflow/access` address only, never a
- * stage-naming one), A8 ❓ (the seeded `admin` holds a role everywhere),
- * A9 ❓ (S14 follows the dashboard and My Submissions addresses of the
- * deleted preprint, never an old-shape one), A2 ❓, A4 ❓, A6 🐞, A7 ❓
- * (journal and press states). The spec's Coverage section records
- * everything else left out.
+ * Deliberately NOT covered (register IDs from the spec's Findings register;
+ * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
+ * spec's Coverage section is the record of everything else left out):
+ * A5, A6, A9, A11, A12, A13, A14, OPS3, OPS6 (🐞); A1, A2, A3, A4, A7, A8,
+ * OPS2, OPS4, OPS5 (❓); OMP2, OMP3 (no preprint-server surface).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only (A1, A7). Every test seeds its own preprint with a unique
@@ -36,8 +30,9 @@
  * the Reader and `assistant.rita` the Editorial Board Member. A queued
  * preprint is a plain submitted seed (OPS creates every submission at
  * Production); the declined one is `decisions: ['decline']`; the Done state
- * is `published: true`; the draft `submitted: false`. S14 alone runs on a
- * scratch preprint server with a throwaway Manager and Author: its "Declined"
+ * is `published: true`; the draft `submitted: false`. S14 and S16 run on
+ * a scratch preprint server with a throwaway Manager and Author (S16's
+ * seeded through the `metadata` key, fn-s 2026-11-19). S14's "Declined"
  * count is read from the side menu, and publicknowledge's count moves under
  * other suites' declined seeds (U49, this suite's S10), so the list must be
  * one the test alone feeds (the U22/U23 precedent; fn-s names
@@ -79,6 +74,31 @@ const AUTHOR_PAGES = [
     'Metadata',
     'References',
     'Funding',
+    'Galleys',
+    'Media',
+    'Production Tasks & Discussions',
+];
+
+/**
+ * The two rosters on a server whose metadata options turn references and
+ * funders off and the data availability statement on (S16, Rule 10):
+ * "Data" right after "Metadata", no "References", no "Funding".
+ */
+const DATA_EDITORIAL_PAGES = [
+    'Title & Abstract',
+    'Contributors',
+    'Metadata',
+    'Data',
+    'Galleys',
+    'Media',
+    'Permissions & Disclosure',
+    'Preprint entry',
+];
+const DATA_AUTHOR_PAGES = [
+    'Title & Abstract',
+    'Contributors',
+    'Metadata',
+    'Data',
     'Galleys',
     'Media',
     'Production Tasks & Discussions',
@@ -796,5 +816,74 @@ test.describe('workflow screen & stage access', () => {
         await expect(author.workflow.titleLine()).toHaveText(secondTitle);
         await expect(author.workflow.contributorsLine()).toBeVisible();
         await expect(author.workflow.errorDialog()).toHaveCount(0);
+    });
+
+    test('S16: the publication pages follow the metadata options', async ({asUser, opsApi, appContext}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s16', testInfo);
+        // A scratch preprint server whose metadata options have references
+        // and funders off and the data availability statement on, with a
+        // throwaway Manager and the Author's submitted preprint (fn-s,
+        // 2026-11-19); the control is a submitted seed on publicknowledge,
+        // whose options are the install defaults.
+        const managerName = `${tag}mg`;
+        const authorName = `${tag}au`;
+        await opsApi.createContext({
+            tag,
+            users: [
+                user(managerName, 'Mira', 'Manager', ['manager']),
+                user(authorName, 'Ada', 'Author', ['author']),
+            ],
+            metadata: {citations: 'off', funders: 'off', dataAvailability: 'request'},
+        });
+        const title = `Preprint ${tag}`;
+        const [{submissionId}, control] = await Promise.all([
+            opsApi.createSubmission({tag: `${tag}s`, context: tag, submitter: authorName, title}),
+            seed(opsApi, `${tag}c`),
+        ]);
+
+        // The Journal Manager's version node (Rule 10; Settings, "Workflow >
+        // Submission > Metadata"): opened from the editorial dashboard and
+        // expanded, it lists "Data" right after "Metadata", and neither
+        // "References" nor "Funding" ("Data" is the positive control of the
+        // settled read the two absences are taken from).
+        const manager = await workflowAs(asUser, appContext, managerName, tag);
+        const dash = new EditorialDashboardPage(manager.page, tag);
+        await dash.gotoView('active');
+        await manager.workflow.openFromRow(await dash.findRowByTag(tag), submissionId);
+        await expect(manager.workflow.titleLine()).toHaveText(title);
+        await expect
+            .poll(() => manager.workflow.pagesUnderLatestVersion(), {timeout: 30_000})
+            .toEqual(DATA_EDITORIAL_PAGES);
+        await expect(manager.workflow.pageLink('Data')).toBeVisible();
+        await expect(manager.workflow.pageLink('References')).toHaveCount(0);
+        await expect(manager.workflow.pageLink('Funding')).toHaveCount(0);
+
+        // The Author's view (Rule 10): from My Submissions, the version node
+        // lists "Data" in the same place, and neither "References" nor
+        // "Funding".
+        const author = await workflowAs(asUser, appContext, authorName, tag);
+        const mySub = new MySubmissionsPage(author.page, tag);
+        await mySub.goto();
+        await author.workflow.openFromRow(await mySub.findRowByTag(tag), submissionId);
+        await author.workflow.expectPageHeading('Title & Abstract');
+        await expect
+            .poll(() => author.workflow.pagesUnderLatestVersion(), {timeout: 30_000})
+            .toEqual(DATA_AUTHOR_PAGES);
+        await expect(author.workflow.pageLink('Data')).toBeVisible();
+        await expect(author.workflow.pageLink('References')).toHaveCount(0);
+        await expect(author.workflow.pageLink('Funding')).toHaveCount(0);
+
+        // Control: on publicknowledge, whose metadata options are the
+        // install defaults, the Manager's version node for a submitted
+        // preprint lists "References" and "Funding" and no "Data".
+        const maya = await workflowAs(asUser, appContext, 'manager.maya');
+        await maya.workflow.gotoEditorial(control.submissionId);
+        await expect
+            .poll(() => maya.workflow.pagesUnderLatestVersion(), {timeout: 30_000})
+            .toEqual(EDITORIAL_PAGES);
+        await expect(maya.workflow.pageLink('References')).toBeVisible();
+        await expect(maya.workflow.pageLink('Funding')).toBeVisible();
+        await expect(maya.workflow.pageLink('Data')).toHaveCount(0);
     });
 });

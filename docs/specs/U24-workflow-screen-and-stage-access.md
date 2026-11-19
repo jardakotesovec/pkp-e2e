@@ -142,17 +142,16 @@ from the menu belongs to its own feature.
      stage is refused, but it is not carried into the screen: the workflow
      opens at its usual landing entry, not at the named stage, even for a
      stage the submission has not reached ⚠ [A1](#a1). These addresses
-     admit editorial roles only, and a Journal Manager or Editor assigned
-     to the submission only as its Author counts as its Author there. An
-     Author, a Reviewer or a Reader typing one, and such a manager typing
-     one for their own submission (every stage's address alike), are
-     turned away with the access-denied page reading "You don't currently have
-     access to that stage of the workflow."; the dashboard address opens
-     that submission for the manager (Rule 20). The stage-naming addresses
-     (both shapes) additionally refuse an incomplete submission ("Workflow
-     access for incomplete submission is restricted."); the plain editorial
-     workflow address forwards a draft like the dashboard address does
-     [A3](#a3).
+     forward only editorial roles that may open the submission (Actors
+     row 1); a Journal Manager or Editor who is only its Author counts as
+     Author. Everyone else, such a manager and an unassigned Section
+     Editor or assistant included, gets at every stage's address the
+     access-denied page "You don't currently have access to that stage of
+     the workflow."; the dashboard address opens it for the manager
+     (Rule 20). The stage-naming addresses (both shapes) additionally
+     refuse an incomplete submission ("Workflow access for incomplete
+     submission is restricted."); the plain editorial workflow address
+     forwards a draft like the dashboard address does [A3](#a3).
    - 2b. The **old author-dashboard address**,
      `…/authorDashboard/submission/<number>`, forwards the submission's own
      Author to My Submissions with that submission's workflow open. On a
@@ -682,11 +681,13 @@ from the menu belongs to its own feature.
 
 ## Canonical scenarios
 
-Every scenario but 12 runs on the seeded journal with ready accounts; the
-submissions and their assignments are scratch. Scenario 12 runs on a
-scratch journal with throwaway accounts, and so does scenario 14 on a
-press or preprint server. The accounts, their passwords, the mail
-catcher's address and the tooling recipe are in the footnote.
+Every scenario but 12, 15 and 16 runs on the seeded journal with ready
+accounts; the submissions and their assignments are scratch. Scenarios
+12, 15 and 16 run on a scratch journal with throwaway accounts, and so do
+scenario 14 on a press or preprint server, scenario 3's change to the
+Copyeditor's stages and scenario 11's Editorial Board Member on a journal
+or press. The accounts, their passwords, the mail catcher's address and
+the tooling recipe are in the footnote.
 <sup>s</sup>
 
 1. **Open a submission's workflow from the editorial dashboard**
@@ -756,7 +757,8 @@ catcher's address and the tooling recipe are in the footnote.
 3. **A stage outside the role's stage set** {OJS OMP}
 
    Given: Copyeditor, assigned to a submission in Review, with a second
-   submission in Review to which nobody assigned them.
+   submission in Review to which nobody assigned them, and a Journal
+   Manager.
 
    - **The landing entry**: open the assigned submission from the
      dashboard: the panel lands on "Review Round 1" and the main column is
@@ -779,8 +781,22 @@ catcher's address and the tooling recipe are in the footnote.
      operation." with an "OK" button; behind the shell the list shows its
      "Assigned to me" view (Rule 3).
    - **The other submission's older address**: type its
-     `…/workflow/access/<number>` address: an access-denied page, no panel
-     (Rule 2a; Actors row 1).
+     `…/workflow/access/<number>`: "You don't currently have access to that
+     stage of the workflow.", no panel (Rule 2a).
+   - **"Review" added to the Copyeditor's stages**: the Journal Manager
+     presses the "Review" box ("External Review" on a press) in the
+     "Copyeditor" row of Settings › Users & Roles › "Roles" (the screen is
+     *[Roles configuration](U54-roles-configuration.md)*'s); the
+     Copyeditor opens the assigned submission again: the panel lands on
+     "Review Round 1", which now begins with "Current Submission Language:
+     English" and a box headed "Round 1 Status" above the round's panels,
+     and the box "You don't currently have access to that stage of the
+     workflow." is gone (Settings, "Roles configuration"; Actors row 2;
+     Rules 11, 13, 14, 15c).
+   - **"Review" taken away again**: the Journal Manager presses the same
+     box again; the Copyeditor opens the submission once more: the main
+     column is again the one box "You don't currently have access to that
+     stage of the workflow." (Settings, "Roles configuration"; Rule 13).
    - **Control**: an Editor on the assigned submission sees the review
      round's panels and a version node with pages (Rules 9, 13).
 
@@ -997,7 +1013,7 @@ catcher's address and the tooling recipe are in the footnote.
 
 App-specific:
 
-9. **{OMP} The press's five-stage menu**
+9. **The press's five-stage menu** {OMP}
 
    Given: Press Editor, with a monograph in External Review Round 1.
 
@@ -1016,7 +1032,7 @@ App-specific:
      still sees "Media" (and the "Marketing" group) but not "Catalog
      Entry" or "Permissions & Disclosure" [OMP2](#omp2) (Rule 10).
 
-10. **{OPS} The single-stage preprint workflow**
+10. **The single-stage preprint workflow** {OPS}
 
     Given: Moderator, with a queued preprint and a declined preprint in
     their section.
@@ -1041,8 +1057,8 @@ App-specific:
 11. **Refused at every door** {OJS OMP OPS}
 
     Given: a Reviewer assigned to a submitted article, their review
-    accepted {OJS OMP}, a Reader, and on a preprint server an Editorial
-    Board Member, each signed in on the journal.
+    accepted {OJS OMP}, a Reader and an Editorial Board Member, each
+    signed in on the journal.
 
     - **The Reviewer at the dashboard address** {OJS OMP}: type the
       submission's dashboard address: the access-denied page "The current
@@ -1057,10 +1073,16 @@ App-specific:
     - **The Reader at the three addresses**: type the same three
       addresses: the same three answers, in the same order (Rules 2a, 2b,
       3).
-    - **The Editorial Board Member at the dashboard address** {OPS}: type
-      it: the panel opens with only the submission number in its header
-      and an "Error" dialog reading "The current role does not have access
-      to this operation." with "OK" (Rule 3) [OPS1](#ops1).
+    - **The Editorial Board Member at the dashboard address**: type the
+      submission's dashboard address: the panel opens with only the submission number in its header and
+      an "Error" dialog reading "The current role does not have access to
+      this operation." with "OK" (Actors, "Terms used below"; Rule 3)
+      [OPS1](#ops1).
+    - **The Editorial Board Member at the older addresses** {OJS OMP}:
+      type `…/workflow/access/<number>`: "You don't currently have access
+      to that stage of the workflow.", no panel; then
+      `…/authorDashboard/submission/<number>`: "You do not currently have
+      sufficient privileges to view the submission." (Rules 2a, 2b).
     - **Control**: an Editor typing the submission's dashboard address
       gets the panel with the submission's header (Rule 2c).
 
@@ -1073,7 +1095,9 @@ App-specific:
     Layout Editor and Author roles, assigned as Layout Editor to a
     submission in Review Round 1, with a second submission in Review
     Round 1 to which they are not assigned and a third, freshly submitted
-    by the account itself, to which they are assigned only as its Author.
+    by the account itself, to which they are assigned only as its Author;
+    and a Production editor, a second account, assigned as Production
+    editor to the first submission and to nothing else.
 
     - **The landing entry**: open the assigned submission: the panel lands
       on "Review Round 1" and the main column is the one box "You don't
@@ -1121,7 +1145,25 @@ App-specific:
       turned away with the access-denied page reading "You don't
       currently have access to that stage of the workflow." (Rules 2a,
       20d).
-    - **Control**: the same account opens the second submission:
+    - **The Production editor on the first submission**: the Production
+      editor opens it: the panel lands on "Review Round 1" and the main
+      column is the one box "You don't currently have access to that
+      stage of the workflow."; "Submission" ("Internal Review" too on a
+      press) shows the same box; "Copyediting" and "Production" each
+      begin with "Current Submission Language: English" and read "The
+      Copyediting stage has not yet been initiated." or "The Production
+      stage has not yet been initiated.", with the "Participants" list and
+      no panels (Actors, "Terms used below" and row 2; Rules 11, 13, 14,
+      15a, 16).
+    - **The Production editor on the second submission**: the Production
+      editor opens the submission nobody assigned it to: the header offers
+      "Activity Log" and "Library"; "Submission", "Review Round 1",
+      "Copyediting" and "Production" each open without the box "You don't
+      currently have access to that stage of the workflow."; the
+      version node lists the production-only pages too ("Publication
+      Settings" on a journal, "Catalog Entry" on a press), and "Create New
+      Version" follows it (Actors, "Terms used below"; Rules 9, 10, 13).
+    - **Control**: the three-role account opens the second submission:
       "Submission", "Review Round 1", "Copyediting" and "Production" each
       open without the box, and the header offers "Activity Log" (Actors
       rows 2, 7). Its `…/workflow/access/<number>` and
@@ -1185,6 +1227,52 @@ App-specific:
     - **Control**: the Author types the My Submissions address for their
       second submission: the panel opens with its header (Rule 2c).
 
+15. **Submission payments in the header** {OJS}
+
+    Given: a Journal Manager, a Copyeditor assigned to a submission in
+    Copyediting, and that submission's Author, on a scratch journal with
+    submission payments enabled, manual payment set up with its
+    instructions filled in, and an Article Processing Charge of 50.
+
+    - **The Journal Manager's header**: open the submission from the
+      editorial dashboard: the header offers, left to right, "Payments",
+      "Preview", "Activity Log" and "Library" (Rule 6; Settings,
+      "Submission payments").
+    - **The Copyeditor's header**: the Copyeditor opens the same
+      submission: the header offers "Payments", "Preview" and "Library",
+      and no "Activity Log" (Actors rows "Payments", "View" / "Preview"
+      and "Activity Log").
+    - **The Author's header**: the Author opens it from My Submissions:
+      the header offers "Library" and nothing else, no "Payments" (Actors
+      row "Payments"; Rule 6).
+    - **Control**: on a second scratch journal set up the same way but
+      with an Article Processing Charge of 0, the Journal Manager's header
+      for a submission in Copyediting offers "Preview", "Activity Log" and
+      "Library", and no "Payments" (Settings, "Submission payments").
+
+    The "Payments" dropdown is a journal's alone (Actors), so a press and
+    a preprint server have no analogue.
+
+16. **The publication pages follow the metadata options**
+
+    Given: a Journal Manager and an Author with the Author's submitted
+    article, on a scratch journal whose metadata options (Workflow >
+    Submission > Metadata) have "References" and funders turned off and
+    "Data availability statement" turned on.
+
+    - **The Journal Manager's version node**: open the submission from
+      the editorial dashboard and expand the node: it lists "Data", right
+      after "Metadata" (on a press after "Media"), and neither
+      "References" nor "Funding" (Rule 10; Settings, "Workflow >
+      Submission > Metadata").
+    - **The Author's view**: the Author opens the submission from My
+      Submissions: the version node lists "Data" in the same place, and
+      neither "References" nor "Funding" (Rule 10).
+    - **Control**: on the seeded journal, whose metadata options are the
+      install defaults, the Journal Manager's version node for a submitted
+      article lists "References" and "Funding" and no "Data" (Settings,
+      "Workflow > Submission > Metadata"; Rule 10).
+
 ## Coverage
 
 Left out of the scenarios above, by reason:
@@ -1205,14 +1293,8 @@ Left out of the scenarios above, by reason:
   - an older workflow address (`…/workflow/access/<id>`) to a deleted submission, and a reader address that names nothing, answering "404 Not Found" inside the site's own header and menus with status 404 ([A9](#a9); Rules 2a, 3): the guard the issue report proposes, once fixed [report 2026-10-02]
   - a stage-naming address typed without a submission number, or with a number no submission has, answering "404 Not Found" for an editor and an author ([A5](#a5); Rule 2d): the guard the issue report proposes, once fixed [report 2026-10-02]
   - the review stage's own entry ("Review"; "Internal Review" or "External Review" on a press) only folding and unfolding its rounds, the selected round's page staying, for the editor and the author ([A6](#a6); Rules 8a, 8b): the guard the issue report proposes, once fixed [report 2026-10-02]
-  - a Production editor {OJS OMP}: on a submission in review it is not assigned to, the Journal Manager's screen ("Activity Log", every stage's panels, "Create New Version"); on one it is assigned to as Production editor, the no-access box on "Submission" and the review entries and "not yet been initiated" on "Copyediting" and "Production" (Actors, Terms and row "Open a stage's panels") [sweep 2026-11-19]
-  - a journal's or press's Editorial Board Member at the three addresses: the empty panel and "Error" dialog at the dashboard address, "You don't currently have access to that stage of the workflow." at `…/workflow/access/<number>`, "You do not currently have sufficient privileges to view the submission." at the old author-dashboard address (Actors, Terms; Rules 2a, 2b, 3); scenario 11 runs the Editorial Board Member on a preprint server only [sweep 2026-11-19]
   - scenario 4's version node on a press listing "Media" for the Funding Coordinator ([OMP2](#omp2); Rule 10) {OMP}: the press's suite leaves "Media" out of the list it compares; waits for OMP2's ruling [sweep 2026-11-19]
   - scenario 9's Control, the Funding Coordinator still seeing "Media" on a press ([OMP2](#omp2); Rule 10) {OMP}: unasserted for the same reason; waits for OMP2's ruling [sweep 2026-11-19]
-  - scenario 14's "Delete" dialog offering "Confirm" and then "Cancel" in red (Rule 19) {OJS}: the journal's suite reads the dialog's text but not the buttons' order or colour, which the press's and preprint server's suites assert [sweep 2026-11-19]
-  - the "Payments" dropdown once submission payments are set up with a fee above zero, for the Journal Manager and an assigned Copyeditor, absent at a fee of zero and for the Author (Actors row 5; Settings) {OJS} [sweep 2026-11-19]
-  - the "References", "Data" and "Funding" pages following the journal's metadata options, in the editorial and the author's view (Settings; Rule 10) [sweep 2026-11-19]
-  - a role group's stage set changed on the Roles screen (the Copyeditor's "Review" box ticked): the assigned Copyeditor's next open of a submission in review shows the round's panels, and the no-access box again once it is unticked (Settings; Actors row 2) {OJS OMP} [sweep 2026-11-19]
 - **Rarely met**:
   - the language line gone once a second version exists (Rule 17): a
     second version comes from "Create New Version"
@@ -1249,6 +1331,8 @@ Left out of the scenarios above, by reason:
   - a press's work-type control reading "Edited Volume" on an edited
     volume (Rule 6): a wording variant of the "Monograph" control the
     scenarios read
+  - data citations turned on in place of the data availability
+    statement (Settings): they add the same "Data" page scenario 16 reads
 - **Register carries it**:
   - A1 (a stage-naming address forwarding to the usual landing entry,
     not the named stage; Rule 2a)
@@ -1323,14 +1407,14 @@ Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | ID | Finding (one line, symptom) | Bug? | Impact | Review |
 |----|-----------------------------|------|--------|--------|
 | [A5](#a5) | A workflow stage address typed without a submission number, or with an unknown one, shows a blank page | 🐞 | low · crash: server | issues (claude), 2026-10-02 — re-verified |
-| [A6](#a6) | Pressing "Review" in the workflow's side menu opens a page with no round: wrong status, no reviewers, "Add Reviewer" refused | 🐞 | medium · crash: script | issues (claude), 2026-10-02 — re-verified |
+| [A6](#a6) | Pressing "Review" in the workflow's side menu opens a page with no round: wrong status, no reviewers, "Add Reviewer" refused | 🐞 | medium · crash: script | issues (claude), 2026-11-19 — re-verified |
 | [A9](#a9) | Any dead link, reader pages and old workflow links alike, shows a bare "404 Not Found" page | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A11](#a11) | In French the workflow screen names a staged version by a raw code, and a preprint server's "Preprint" heading, status line and "Post" and "Unpost" buttons show raw codes | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A12](#a12) | A manager who is the submission's Author gets an "Error" dialog, "You are not allowed to access these files.", over its review round | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A13](#a13) | A manager who is the submission's Author is offered its decision buttons, and the decision is then refused | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A14](#a14) | An editor limited to recommendations is offered "Return to Workflow" on a published submission, and "Confirm" is refused | 🐞 | low | issues (claude), 2026-11-13 — re-verified |
 | [OMP3](#omp3) | On a press, disabling the URN plugin leaves URNs on public book pages and an empty "Identifiers" workflow page | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
-| [OPS3](#ops3) | A preprint server labels an unfinished submission "Production", not "Incomplete", in the lists and the workflow header | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
+| [OPS3](#ops3) | A preprint server labels an unfinished submission "Production", not "Incomplete", in the lists and the workflow header | 🐞 | low | issues (claude), 2026-11-19 — re-verified |
 | [OPS6](#ops6) | "Post the preprint" does nothing for a manager who is the preprint's Author | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
 | [A1](#a1) | A bookmarked stage address opens the workflow at its usual landing entry, not at the stage the address names | ❓ | minor | — |
 | [A2](#a2) | An assigned assistant off the active stage, or a manager who is the submission's Author, sees the "Publication" heading with nothing under it | ❓ | minor | — |
@@ -1442,9 +1526,10 @@ and still active. There are no decision buttons, "Reviewers" reads "No
 Items" although reviewers are assigned, and "Add Reviewer" opens a
 window reading only "Invalid review round.".
 
-The author sees the heading change to "Workflow: Review" over the
-round's page, which stays as it was; after a reload the heading stands
-over an empty page.
+The author sees the heading change to "Workflow: Review" over the page
+the stage's name was pressed from, which stays as it was: the round's
+page, or a later stage's "The Production stage has not yet been
+initiated." box; after a reload the heading stands over an empty page.
 
 The page opens only when someone presses the stage's name; the app
 never opens it by itself. It does so for every submission with a
@@ -1453,8 +1538,7 @@ review round, and has since 3.5.0, the first release with this menu.
 Re-checked: claim check (claude), 2026-09-28 — was ❓ (which of the two
 the entry should do); a defect either way, since its "Add Reviewer" and the
 page's script fail.
-Basis: probe, 2026-10-02. <sup>[f-a6](#fn-a6)</sup>
-Report: refresh owed — drift sweep 2026-11-19: the Summary's first sentence now says the page's script also fails in a journal's editorial view (Observed already logs the `authorResponse` and `publicationId` errors there: `AuthorResponseRequestManager`, `useReviewRoundAuthorResponseConfig.js`); and the author's view keeps whichever page the line was pressed from, a later stage's "The Production stage has not yet been initiated." box included, with the same `TypeError … (reading 'id')` from `getPrimaryItems()` (`workflowConfigAuthorOJS.js`, `workflowConfigAuthorOMP.js`), a reach the Steps and Reach do not name (2026-11-19)
+Basis: probe, 2026-11-19. <sup>[f-a6](#fn-a6)</sup>
 
 <a id="a7"></a>
 **A7 — Skipped stages show no status after a direct publish** · ❓ · minor.
@@ -1684,14 +1768,13 @@ of the author's My Submissions and of the editorial dashboard, and in
 the bubble under the title of the workflow panel. A journal or press
 labels such a submission "Incomplete".
 
-Nothing is lost: the row still offers "Complete submission" and the
+No work is lost: the row still offers "Complete submission" and the
 wizard reopens from it. That button is the only thing that tells a
 draft from a submitted preprint in a list, and the workflow panel's
 header gives no sign at all.
 
 The list side is *[My Submissions](U22-my-submissions.md#ops1)*' finding.
-Basis: probe, 2026-10-02. <sup>[f-ops3](#fn-ops3)</sup>
-Report: refresh owed — drift sweep 2026-11-19: [OPS5](#ops5), which the report's Impact and Steps quote, was corrected: "Post the preprint" on a draft opens the draft's "Preprint: Title & Abstract" page, and that page raises the "Error" window "Workflow access for incomplete submission is restricted." (the decision itself is never reached); the report's sentences that "Post the preprint" answers the error follow it (2026-11-19)
+Basis: probe, 2026-11-19. <sup>[f-ops3](#fn-ops3)</sup>
 
 <a id="ops4"></a>
 **OPS4 — An author's draft opens with an error on top** · ❓ · minor.
@@ -1813,7 +1896,7 @@ Basis: probe, 2026-10-21. <sup>[f-ops6](#fn-ops6)</sup>
 **q** — OMP: `omp/classes/core/Application::getApplicationStages()` adds `WORKFLOW_STAGE_ID_INTERNAL_REVIEW` (= 2); `useWorkflowNavigationConfigOMP.js` pushes the five stage items, a `marketing` group (`settings.libraryFiles.category.marketing` "Marketing"; `audience`, `representatives`, `publicationDates`) for the editorial dashboard only, and the `chapters` / `publicationFormats` pages in both rosters; `omp/pages/workflow/WorkflowHandler.php` adds the `internalReview` op. All belong to *Internal Review stage*, *Chapters & work type*, *Publication formats & proof terms* and [ONIX metadata & export](U74-onix-metadata-export.md). Live-probed 2026-09-02: the five entries, the "Marketing" group ("Audience", "Representatives", "Publication Dates") for the Press Editor, an assigned Funding Coordinator and an assigned Copyeditor alike, absent for the Author; "Chapters" and "Publication Formats" in both rosters.
 
 <a id="fn-s"></a>
-**s** — Seeding uses the seeded test journal/press/server (`publicknowledge`) and roster accounts (passwords = username doubled), scratch submissions via the scenario submission endpoint, submitter `author.alex`. Scenario 1: `editor.diana` (OPS: `manager.maya`, since OPS enrols no Editor), a fresh `submitted: true` submission. 2: `decisions: ['sendExternalReview']` and one `reviewRounds` entry (OMP: the external stage; add `sendInternalReview` seeds for the press's other stage). 3: the scenario-2 shape plus `participants: [{username: 'copyeditor.carla', role: 'copyeditor'}]` (the seed writes the assignment row the Assign form would; the group's stage set, Copyediting only, drives the gate); control `editor.diana`. 4: the scenario-2 shape plus `participants: [{username: 'assistant.rita', role: 'funding'}]` (Funding Coordinator: stages Submission and Review on OJS/OMP); control `manager.maya`; OPS has no `funding` key. 5–6: `editor.diana` and `author.alex` on the scenario-1 submission; the typed addresses are `{journal}/workflow/access/{id}` and `{journal}/authorDashboard/submission/{id}`. 7: `author.alex` on a submission at Copyediting (`['sendExternalReview','accept']`); control `editor.diana`. 8: `manager.maya` on `decisions: ['sendExternalReview','accept','sendToProduction']`, one `reviewRounds` entry and `published: true` (OJS: `issue` = Vol 1 No 2); the seed rests in Done on every app straight away, and because it passed through Production "Return to Workflow" lands it on "Production" (a `published: true` seed without decisions returns to "Submission" instead); control `layouteditor.leo` seeded as `participants` role `layoutEditor` (OJS/OMP; on OPS the control is the Author). 9: OMP fleet, `editor.diana`, `decisions: ['sendExternalReview']`, one external round; control `assistant.rita` as `funding`. 10: OPS fleet, `sectioneditor.ana` (Moderator); the declined preprint via `decisions: ['decline']`. Never mutate a shared roster submission. Press seeds pass `series: 'monographs'`: a monograph seeded without a series auto-assigns no Series editor (unlike a journal, where section editors are auto-assigned), so the Editor's "Assigned to me" list omits it and an "assigned Series editor" needs an explicit `participants` entry. Revision seeds, 2026-09-13, in the same scheme: 1 reads the header buttons on its seed. 2 adds a second seed with two rounds, `decisions: ['sendExternalReview']` and two `reviewRounds` entries (the second entry builds Round 2; OMP: both external). 3 adds a second scenario-2-shape seed without the `participants` entry, typed at `{journal}/dashboard/editorial?workflowSubmissionId={id}` and `{journal}/workflow/access/{id}`. 4 reads the header and "Title & Abstract" on its seed. 5 rewrites the address's `workflowMenuKey` to `nonsense`. 6 adds `author.bea` as the stranger Author, with nothing seeded for her: she types `{journal}/authorDashboard/submission/{id}` for `author.alex`'s submission only; `author.alex` at `{journal}/dashboard/editorial?workflowSubmissionId={id}`, and a draft (`submitted: false`, submitter `author.alex`) typed by the Editor at that dashboard address. 7 adds `author.bea`'s `submitted: true` submission, typed by `author.alex` at `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`; the copied entry is the Editor's `workflowMenuKey=publication_{publicationId}_license`; OPS: `author.alex` on a plain `submitted: true` preprint, control `manager.maya`. 8 adds a seed `published: true` without decisions (OJS `issue` Vol 1 No 2; OJS and OMP) and, on OJS, the scheduled seed `decisions: ['sendExternalReview','accept','sendToProduction']` with one `reviewRounds` entry beside `published: true` and `issue` Vol 2 No 1 (2015), the unpublished issue, which lists the article as scheduled (the shape *My Submissions*' scenario 3 seeds); `published: true` alone with that issue leaves the bubble "Submission" and the panel on the Submission stage; the unpublish is driven on "Title & Abstract" through the "Unpublish" ("Unpost") dialog, and the mailbox read is `author.alex`'s address in the mail catcher, Mailpit at `http://127.0.0.1:8025`. 10 reads "Title & Abstract" on the queued preprint. 11: the scenario-2 seed, whose `reviewRounds` entry seeds `reviewer.julia` at `status: 'accepted'` (OJS, OMP); `reader.rosa` on every app; OPS `assistant.rita` (Editorial Board Member) on a `submitted: true` preprint; the doors are `{journal}/dashboard/editorial?workflowSubmissionId={id}`, `{journal}/workflow/access/{id}` and `{journal}/authorDashboard/submission/{id}`; control `editor.diana` (OPS `manager.maya`). 12: OJS and OMP fleets, a scratch journal from the context scenario with `users`: one account `roles: ['manager', 'layoutEditor']`, one `roles: ['author']` as submitter and one `roles: ['externalReviewer']` for the round; two submissions of the scenario-2 shape, one with `participants: [{username: <the two-role account>, role: 'layoutEditor'}]`. 13: `participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]` on `decisions: ['sendExternalReview', 'accept', 'sendToProduction']` with one `reviewRounds` entry (press: `series: 'monographs'`); control `manager.maya`. 14: `manager.maya` on `decisions: ['decline']` (OPS: the same on the preprint), submitter `author.alex`, plus a second `submitted: true` submission of `author.alex`; the Author types `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`; the mailbox read is `author.alex`'s address in the mail catcher, Mailpit as in 8. 14 on OJS runs on `publicknowledge` as above; on OMP and OPS it runs on a scratch press / preprint server from the context scenario with `users` `roles: ['manager']` and `roles: ['author']`, the throwaway Manager and Author standing in for `manager.maya` and `author.alex`, so the "Declined" count and the mailbox are the test's own (the seeded context's "Declined" count moves under other suites' declined seeds). Revision seeds, 2026-11-12, in the same scheme: 12 gives the two-role account `'author'` as well (`roles: ['manager', 'layoutEditor', 'author']`; an author-editor state needs the global Author role and the submitter, scenarios.md) and adds a third `submitted: true` submission with that account as `submitter` and no `participants` entry, so its one assignment is the automatic Author one (a scratch context auto-assigns no editor); the account types `{journal}/dashboard/editorial?workflowSubmissionId={id}`, `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`, `{journal}/authorDashboard/submission/{id}`, `{journal}/workflow/access/{id}`, `{journal}/workflow/index/{id}/{n}` for every stage the app has, and `{journal}/workflow/{submission|externalReview|editorial|production}/{id}` (OMP also `internalReview`) for it; the control types `{journal}/workflow/access/{id}` and `{journal}/workflow/index/{id}/5` for the second submission. Revision seeds, 2026-11-13, in the same scheme: 8 adds `participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]` to the seed that passed through Production (beside `layouteditor.leo` on OJS and OMP; on OPS the entry seeds the Moderator), without `recommendOnly`, so the assignment is a deciding editor's; `sectioneditor.ana` signs in after the manager's "Activity Log" read and before the unpublish.
+**s** — Seeding uses the seeded test journal/press/server (`publicknowledge`) and roster accounts (passwords = username doubled), scratch submissions via the scenario submission endpoint, submitter `author.alex`. Scenario 1: `editor.diana` (OPS: `manager.maya`, since OPS enrols no Editor), a fresh `submitted: true` submission. 2: `decisions: ['sendExternalReview']` and one `reviewRounds` entry (OMP: the external stage; add `sendInternalReview` seeds for the press's other stage). 3: the scenario-2 shape plus `participants: [{username: 'copyeditor.carla', role: 'copyeditor'}]` (the seed writes the assignment row the Assign form would; the group's stage set, Copyediting only, drives the gate); control `editor.diana`. 4: the scenario-2 shape plus `participants: [{username: 'assistant.rita', role: 'funding'}]` (Funding Coordinator: stages Submission and Review on OJS/OMP); control `manager.maya`; OPS has no `funding` key. 5–6: `editor.diana` and `author.alex` on the scenario-1 submission; the typed addresses are `{journal}/workflow/access/{id}` and `{journal}/authorDashboard/submission/{id}`. 7: `author.alex` on a submission at Copyediting (`['sendExternalReview','accept']`); control `editor.diana`. 8: `manager.maya` on `decisions: ['sendExternalReview','accept','sendToProduction']`, one `reviewRounds` entry and `published: true` (OJS: `issue` = Vol 1 No 2); the seed rests in Done on every app straight away, and because it passed through Production "Return to Workflow" lands it on "Production" (a `published: true` seed without decisions returns to "Submission" instead); control `layouteditor.leo` seeded as `participants` role `layoutEditor` (OJS/OMP; on OPS the control is the Author). 9: OMP fleet, `editor.diana`, `decisions: ['sendExternalReview']`, one external round; control `assistant.rita` as `funding`. 10: OPS fleet, `sectioneditor.ana` (Moderator); the declined preprint via `decisions: ['decline']`. Never mutate a shared roster submission. Press seeds pass `series: 'monographs'`: a monograph seeded without a series auto-assigns no Series editor (unlike a journal, where section editors are auto-assigned), so the Editor's "Assigned to me" list omits it and an "assigned Series editor" needs an explicit `participants` entry. Revision seeds, 2026-09-13, in the same scheme: 1 reads the header buttons on its seed. 2 adds a second seed with two rounds, `decisions: ['sendExternalReview']` and two `reviewRounds` entries (the second entry builds Round 2; OMP: both external). 3 adds a second scenario-2-shape seed without the `participants` entry, typed at `{journal}/dashboard/editorial?workflowSubmissionId={id}` and `{journal}/workflow/access/{id}`. 4 reads the header and "Title & Abstract" on its seed. 5 rewrites the address's `workflowMenuKey` to `nonsense`. 6 adds `author.bea` as the stranger Author, with nothing seeded for her: she types `{journal}/authorDashboard/submission/{id}` for `author.alex`'s submission only; `author.alex` at `{journal}/dashboard/editorial?workflowSubmissionId={id}`, and a draft (`submitted: false`, submitter `author.alex`) typed by the Editor at that dashboard address. 7 adds `author.bea`'s `submitted: true` submission, typed by `author.alex` at `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`; the copied entry is the Editor's `workflowMenuKey=publication_{publicationId}_license`; OPS: `author.alex` on a plain `submitted: true` preprint, control `manager.maya`. 8 adds a seed `published: true` without decisions (OJS `issue` Vol 1 No 2; OJS and OMP) and, on OJS, the scheduled seed `decisions: ['sendExternalReview','accept','sendToProduction']` with one `reviewRounds` entry beside `published: true` and `issue` Vol 2 No 1 (2015), the unpublished issue, which lists the article as scheduled (the shape *My Submissions*' scenario 3 seeds); `published: true` alone with that issue leaves the bubble "Submission" and the panel on the Submission stage; the unpublish is driven on "Title & Abstract" through the "Unpublish" ("Unpost") dialog, and the mailbox read is `author.alex`'s address in the mail catcher, Mailpit at `http://127.0.0.1:8025`. 10 reads "Title & Abstract" on the queued preprint. 11: the scenario-2 seed, whose `reviewRounds` entry seeds `reviewer.julia` at `status: 'accepted'` (OJS, OMP); `reader.rosa` on every app; OPS `assistant.rita` (Editorial Board Member) on a `submitted: true` preprint; the doors are `{journal}/dashboard/editorial?workflowSubmissionId={id}`, `{journal}/workflow/access/{id}` and `{journal}/authorDashboard/submission/{id}`; control `editor.diana` (OPS `manager.maya`). 12: OJS and OMP fleets, a scratch journal from the context scenario with `users`: one account `roles: ['manager', 'layoutEditor']`, one `roles: ['author']` as submitter and one `roles: ['externalReviewer']` for the round; two submissions of the scenario-2 shape, one with `participants: [{username: <the two-role account>, role: 'layoutEditor'}]`. 13: `participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]` on `decisions: ['sendExternalReview', 'accept', 'sendToProduction']` with one `reviewRounds` entry (press: `series: 'monographs'`); control `manager.maya`. 14: `manager.maya` on `decisions: ['decline']` (OPS: the same on the preprint), submitter `author.alex`, plus a second `submitted: true` submission of `author.alex`; the Author types `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`; the mailbox read is `author.alex`'s address in the mail catcher, Mailpit as in 8. 14 on OJS runs on `publicknowledge` as above; on OMP and OPS it runs on a scratch press / preprint server from the context scenario with `users` `roles: ['manager']` and `roles: ['author']`, the throwaway Manager and Author standing in for `manager.maya` and `author.alex`, so the "Declined" count and the mailbox are the test's own (the seeded context's "Declined" count moves under other suites' declined seeds). Revision seeds, 2026-11-12, in the same scheme: 12 gives the two-role account `'author'` as well (`roles: ['manager', 'layoutEditor', 'author']`; an author-editor state needs the global Author role and the submitter, scenarios.md) and adds a third `submitted: true` submission with that account as `submitter` and no `participants` entry, so its one assignment is the automatic Author one (a scratch context auto-assigns no editor); the account types `{journal}/dashboard/editorial?workflowSubmissionId={id}`, `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`, `{journal}/authorDashboard/submission/{id}`, `{journal}/workflow/access/{id}`, `{journal}/workflow/index/{id}/{n}` for every stage the app has, and `{journal}/workflow/{submission|externalReview|editorial|production}/{id}` (OMP also `internalReview`) for it; the control types `{journal}/workflow/access/{id}` and `{journal}/workflow/index/{id}/5` for the second submission. Revision seeds, 2026-11-13, in the same scheme: 8 adds `participants: [{username: 'sectioneditor.ana', role: 'sectionEditor'}]` to the seed that passed through Production (beside `layouteditor.leo` on OJS and OMP; on OPS the entry seeds the Moderator), without `recommendOnly`, so the assignment is a deciding editor's; `sectioneditor.ana` signs in after the manager's "Activity Log" read and before the unpublish. Revision seeds, 2026-11-19, in the same scheme: 3's two stage-set bullets run on a scratch journal from the context scenario (OJS, OMP), not on `publicknowledge`, since the change reaches every Copyeditor of the context at once: `users` `roles: ['manager']`, `roles: ['copyeditor']` and `roles: ['author']` as submitter, a scenario-2-shape seed with `participants: [{username: <the Copyeditor>, role: 'copyeditor'}]`; the throwaway Manager presses the box on Settings › Users & Roles › "Roles" (`{journal}/management/settings/access`, tab "Roles"), and the Copyeditor's next open of the seed is read after each press. 11 adds, on OJS and OMP, where no seeded account holds Editorial Board Member, a scratch journal from the context scenario with `users` `roles: ['editorialBoardMember']` and `roles: ['author']` as submitter and one `submitted: true` submission, typed by that account at the three doors as above; on OPS the Editorial Board Member stays `assistant.rita`. 12 adds a fourth account `roles: ['productionEditor']`, given to the first submission as `participants: [{username: <that account>, role: 'productionEditor'}]` beside the two-role account, and assigned to nothing else. 15: OJS fleet, a scratch journal from the context scenario with `payments: {enabled: true, currency: 'USD', paymentPluginName: 'ManualPayment', manualInstructions: <any text>, publicationFee: 50}` and `users` `roles: ['manager']`, `roles: ['copyeditor']` and `roles: ['author']` as submitter, the seed `decisions: ['sendExternalReview', 'accept']` (Copyediting) with `participants: [{username: <the Copyeditor>, role: 'copyeditor'}]`; the Author opens it at `{journal}/dashboard/mySubmissions?workflowSubmissionId={id}`; the control is a second scratch journal of the same shape with `publicationFee: 0` (the manual method counts as set up only with its instructions, scenarios.md `payments`). 16: every fleet, a scratch journal from the context scenario with `metadata: {citations: 'off', funders: 'off', dataAvailability: 'request'}` and `users` `roles: ['manager']` and `roles: ['author']` as submitter, one `submitted: true` seed; the control is `manager.maya` on a `submitted: true` seed on `publicknowledge`, whose metadata options are the fresh context's (`keywords`, `citations` and `funders` at `request`, the rest off).
 
 <a id="fn-a1"></a>
 **f-a1** — `PKPWorkflowHandler::index()` and `access()` redirect to `dashboard/editorial` with `workflowSubmissionId` only; the stage id that `identifyStageId()` resolved and `WorkflowStageAccessPolicy` checked is dropped. `useWorkflowMenu.js` would honour a `workflowMenuKey=workflow_{stageId}` if one were appended. Live-probed 2026-09-02 (OJS, OMP): `workflow/index/{id}/4`, `/5`, `workflow/editorial/{id}`, `workflow/production/{id}` (and on OMP `workflow/internalReview/{id}` on a monograph with no internal round) on a submission in Review Round 1 all landed on "Review Round 1" (`workflowMenuKey=workflow_3_{round}`); OPS has one stage, so the landing and the named stage coincide.

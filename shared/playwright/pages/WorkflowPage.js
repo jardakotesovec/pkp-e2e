@@ -17,6 +17,8 @@
  * "Error" dialog over the empty shell (Rule 3), the publication page's
  * "Status:" line, the "Activity Log" window's rows, the version-node labels,
  * the public page's preview notice, and the Cancel legs of the dialogs.
+ * The revision of 2026-11-19 added the status box read above the panels
+ * and the entry after the newest version node.
  * Feature spec: docs/specs/U24-workflow-screen-and-stage-access.md.
  *
  * What lives elsewhere: what each stage entry shows once open (decision
@@ -529,6 +531,22 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
         return out;
     }
 
+    /**
+     * The label of the menu entry that follows the newest version node and
+     * its pages ("Create New Version" where offered), or null when the node
+     * ends the menu (unfolds the node first; Rule 9).
+     */
+    async entryAfterLatestVersion() {
+        await this.expandLatestVersionNode();
+        const entries = await this.menuEntries();
+        const nodes = entries
+            .map((e, i) => ({...e, i}))
+            .filter((e) => e.level === 2 && VERSION_NODE_PATTERN.test(e.label));
+        if (!nodes.length) return null;
+        const after = entries.slice(nodes[nodes.length - 1].i + 1).find((e) => e.level <= 2);
+        return after ? after.label : null;
+    }
+
     /** Unfold the newest version node when its pages are hidden. */
     async expandLatestVersionNode() {
         const node = this.latestVersionNode();
@@ -730,6 +748,18 @@ exports.WorkflowPage = class WorkflowPage extends BasePage {
         await expect(next.getByRole('table', {name: panelTitle, exact: true})).toBeVisible({
             timeout: 30_000,
         });
+    }
+
+    /**
+     * The status box headed `heading` shows and sits directly above the
+     * stage's panels: its next sibling in the main column holds a panel
+     * table (the round's "Revisions Uploaded" first, U24 S3), whatever the
+     * box's sentence.
+     */
+    async expectStatusAbovePanels(heading = 'Status') {
+        await expect(this.statusBox(heading)).toBeVisible({timeout: 30_000});
+        const next = this.statusBox(heading).locator('xpath=following-sibling::*[1]');
+        await expect(next.getByRole('table').first()).toBeVisible({timeout: 30_000});
     }
 
     /** Every level-3 heading of the open panel, top to bottom: the status box's "Status", the main-column panels, then the right-hand column's ("Participants", "Reviewers Suggested by Author"). Read as text content, so a CSS uppercase leaves it alone. */

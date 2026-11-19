@@ -3,40 +3,41 @@
  * @file playwright/tests/U24-workflow-screen-and-stage-access.spec.js
  *
  * Workflow screen & stage access — OJS suite, one test per canonical
- * scenario the spec runs on OJS (S1, S5–S8, S11 and S14 common; S2–S4, S12
- * and S13 OJS/OMP; scenario 9 is OMP-only, 10 OPS-only).
+ * scenario the spec runs on OJS (S1, S5–S8, S11, S14 and S16 common; S2–S4,
+ * S12 and S13 OJS/OMP; S15 OJS-only; scenario 9 is OMP-only, 10 OPS-only).
  * Spec: docs/specs/U24-workflow-screen-and-stage-access.md
  *
- * Deliberately NOT covered (register IDs from the spec's Findings register —
- * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap): A1 ❓,
- * A2 ❓ (S3 and S12 assert only what Rules 9 and 20b state as built: the
- * heading with no node), A3 ❓, A4 ❓, A5 🐞, A6 🐞 (S8 selects "Review" only
- * on a stage the submission has left), A7 ❓, A8 ❓, A9 🐞 (S14 follows the
- * stale dashboard and My Submissions addresses only), A11 🐞, A12 🐞 and
- * A13 🐞 (S12 opens the manager's own submission on its Submission stage,
- * never a round, and records no decision), A14 🐞, OMP1 ✅, OMP2 ❓,
- * OMP3 🐞, OPS1 ✅, OPS2 ❓, OPS3 🐞, OPS4 ❓, OPS5 ❓, OPS6 🐞.
+ * Deliberately NOT covered (Findings register IDs; a 🐞 is never asserted
+ * as the contract, a ❓ is parked, not a gap): A1 ❓, A2 ❓, A3 ❓, A4 ❓,
+ * A5 🐞, A6 🐞, A7 ❓, A8 ❓, A9 🐞, A11 🐞, A12 🐞, A13 🐞, A14 🐞, OMP1 ✅,
+ * OMP2 ❓, OMP3 🐞, OPS1 ✅, OPS2 ❓, OPS3 🐞, OPS4 ❓, OPS5 ❓, OPS6 🐞.
  * The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster are
  * read-only (A1, A7). Every test seeds its own submissions with unique tags
- * (M5) and drives roster accounts through `asUser`; S12 isolates on a scratch
- * journal with throwaway accounts (a two-role account cannot be arranged on
- * the roster, A7). Assignments (S3 Copyeditor, S4 Funding Coordinator, S8
- * Layout Editor and Section Editor, S12 Layout Editor, S13 Section Editor) are seeded as
- * `participants[]`, the row the Assign Participant form writes. The mailbox
- * reads (S8, S14) are before/after counts on the submitter's roster address
- * scoped by the seed tag, the "after" bounded by the response that would
- * have carried the mail (A8). Every refusal is read at the page or in the
- * "Error" dialog and paired with a positive control on the same page (M4,
- * M6). Waits are web-first (A5). Everything runs in the parallel `ojs`
- * project.
+ * (M5) and drives roster accounts through `asUser`. Scratch journals with
+ * throwaway accounts carry what the roster cannot or must not: S3's
+ * stage-set change on the Roles screen (it reaches every Copyeditor of the
+ * journal at once), S11's Editorial Board Member (no roster account holds
+ * it on OJS), S12's two-role account and Production editor (A7), S14's
+ * journal-wide "Declined" count, and the settings S15 (`payments`) and S16
+ * (`metadata`) seed through their passthrough keys (fn-s). Assignments (S3
+ * Copyeditor, S4 Funding Coordinator, S8 Layout Editor and Section Editor,
+ * S12 Layout Editor and Production editor, S13 Section Editor, S15
+ * Copyeditor) are seeded as `participants[]`, the row the Assign
+ * Participant form writes. The mailbox reads (S8, S14) are before/after
+ * counts on the submitter's address scoped by the seed tag, the "after"
+ * bounded by the response that would have carried the mail (A8). Every
+ * refusal is read at the page or in the "Error" dialog and paired with a
+ * positive control on the same page (M4, M6). Waits are web-first (A5).
+ * Everything runs in the parallel `ojs` project.
  */
 const {test, expect} = require('../support/fixtures.js');
 const {WorkflowPage, ACCESS_DENIED} = require('../../../../shared/playwright/pages/WorkflowPage.js');
 const {EditorialDashboardPage} = require('../../../../shared/playwright/pages/EditorialDashboardPage.js');
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 const {PublicationScreen} = require('../pages/PublicationMetadataPages.js');
+const {RolesTab} = require('../../../../shared/playwright/pages/RolesConfigurationPages.js');
 const {getEmail} = require('../../../../shared/playwright/data/users.js');
 
 const JOURNAL = 'publicknowledge';
@@ -295,6 +296,64 @@ test.describe('workflow screen & stage access', () => {
         // The other submission's older address: an access-denied page, no
         // panel (Rule 2a; Actors row 1).
         await workflow.expectAccessDeniedPage(workflow.workflowAccessUrl(otherId), ACCESS_DENIED.stage);
+
+        // The stage-set change and its undo run on a scratch journal: the
+        // Roles screen's box reaches every Copyeditor of the journal at once
+        // (fn-s, revision seeds 2026-11-19).
+        const ctx = `${tag}x`;
+        const ctxManager = `${ctx}mg`;
+        const ctxCopyeditor = `${ctx}ce`;
+        await ojsApi.createContext({
+            tag: ctx,
+            users: [
+                {username: ctxManager, roles: ['manager']},
+                {username: ctxCopyeditor, roles: ['copyeditor']},
+                {username: `${ctx}au`, roles: ['author']},
+            ],
+        });
+        const {submissionId: scratchId} = await ojsApi.createSubmission({
+            tag: `${ctx}a`,
+            context: ctx,
+            submitter: `${ctx}au`,
+            title: `Submission ${ctx}a`,
+            decisions: ['sendExternalReview'],
+            reviewRounds: [{reviewers: []}],
+            participants: [{username: ctxCopyeditor, role: 'copyeditor'}],
+        });
+        const copyeditor = await workflowAs(asUser, appContext, ctxCopyeditor, ctx);
+        const managerPage = await (await asUser(ctxManager)).newPage();
+        const roles = new RolesTab(managerPage, ctx, {stages: OJS_STAGES});
+
+        // Before: the scratch Copyeditor meets the same box on the round.
+        await copyeditor.workflow.gotoEditorial(scratchId);
+        await copyeditor.workflow.expectSelected('Review Round 1');
+        await copyeditor.workflow.expectNoAccessOnly();
+
+        // "Review" added to the Copyeditor's stages on the Roles screen: the
+        // next open lands on the round, which begins with the language line
+        // and a "Round 1 Status" box above the round's panels; the no-access
+        // box is gone (Settings, "Roles configuration"; Actors row 2; Rules
+        // 11, 13, 14, 15c).
+        await roles.goto();
+        const added = await roles.pressStageBox('Copyeditor', 'Review');
+        expect(added.status(), 'assign-stage').toBe(200);
+        expect(added.url()).toMatch(/\/assign-stage/);
+        await copyeditor.workflow.gotoEditorial(scratchId);
+        await copyeditor.workflow.expectSelected('Review Round 1');
+        await copyeditor.workflow.expectStageHeading('Review (Round 1)');
+        await expect(copyeditor.workflow.languageLine()).toHaveText(LANGUAGE_LINE);
+        await copyeditor.workflow.expectStatusAbovePanels('Round 1 Status');
+        await expect(copyeditor.workflow.noAccessBox()).toHaveCount(0);
+
+        // "Review" taken away again: the next open is the one box once more
+        // (Settings, "Roles configuration"; Rule 13).
+        await roles.goto();
+        const removed = await roles.pressStageBox('Copyeditor', 'Review');
+        expect(removed.status(), 'unassign-stage').toBe(200);
+        expect(removed.url()).toMatch(/\/unassign-stage/);
+        await copyeditor.workflow.gotoEditorial(scratchId);
+        await copyeditor.workflow.expectSelected('Review Round 1');
+        await copyeditor.workflow.expectNoAccessOnly();
     });
 
     test('S4: the production-only pages', async ({asUser, ojsApi, appContext}, testInfo) => {
@@ -746,6 +805,39 @@ test.describe('workflow screen & stage access', () => {
             await workflow.expectAccessDeniedPage(workflow.authorDashboardUrl(submissionId), ACCESS_DENIED.notAuthor);
         }
 
+        // The Editorial Board Member, on a scratch journal (no roster account
+        // holds the role on OJS; fn-s, revision seeds 2026-11-19): at the
+        // dashboard address the panel opens with only the number and the
+        // "Error" dialog (Actors, "Terms used below"; Rule 3); at
+        // `workflow/access` the stage gate's page, at the author-dashboard
+        // address the privileges text, neither with a panel (Rules 2a, 2b).
+        const ctx = `${tag}x`;
+        const board = `${ctx}eb`;
+        await ojsApi.createContext({
+            tag: ctx,
+            users: [
+                {username: board, roles: ['editorialBoardMember']},
+                {username: `${ctx}au`, roles: ['author']},
+            ],
+        });
+        const {submissionId: boardSubId} = await ojsApi.createSubmission({
+            tag: `${ctx}a`,
+            context: ctx,
+            submitter: `${ctx}au`,
+            title: `Submission ${ctx}a`,
+        });
+        const boardView = await workflowAs(asUser, appContext, board, ctx);
+        await boardView.page.goto(boardView.workflow.editorialUrl(boardSubId));
+        await boardView.workflow.expectErrorShell(boardSubId, ACCESS_DENIED.role);
+        await boardView.workflow.expectAccessDeniedPage(
+            boardView.workflow.workflowAccessUrl(boardSubId),
+            ACCESS_DENIED.stage
+        );
+        await boardView.workflow.expectAccessDeniedPage(
+            boardView.workflow.authorDashboardUrl(boardSubId),
+            ACCESS_DENIED.notAuthor
+        );
+
         // Control: an Editor typing the dashboard address gets the panel
         // with the submission's header (Rule 2c).
         const editor = await workflowAs(asUser, appContext, 'editor.diana');
@@ -760,6 +852,7 @@ test.describe('workflow screen & stage access', () => {
         const twoRole = `${tag}ml`;
         const author = `${tag}au`;
         const reviewer = `${tag}rv`;
+        const production = `${tag}pe`;
         await ojsApi.createContext({
             tag,
             users: [
@@ -768,6 +861,9 @@ test.describe('workflow screen & stage access', () => {
                 {username: twoRole, roles: ['manager', 'layoutEditor', 'author']},
                 {username: author, roles: ['author']},
                 {username: reviewer, roles: ['externalReviewer']},
+                // The Production editor, a manager-level group, assigned as
+                // such to the first submission only (fn-s, 2026-11-19).
+                {username: production, roles: ['productionEditor']},
             ],
         });
         const round = [{reviewers: [{username: reviewer, status: 'accepted'}]}];
@@ -782,7 +878,10 @@ test.describe('workflow screen & stage access', () => {
                 ...extra,
             });
         const {submissionId} = await seedOn(`${tag}a`, {
-            participants: [{username: twoRole, role: 'layoutEditor'}],
+            participants: [
+                {username: twoRole, role: 'layoutEditor'},
+                {username: production, role: 'productionEditor'},
+            ],
         });
         const {submissionId: otherId} = await seedOn(`${tag}b`);
         // The third: freshly submitted by the two-role account itself, its
@@ -905,6 +1004,53 @@ test.describe('workflow screen & stage access', () => {
             await expect.poll(() => currentViewId(workflow.page), {timeout: 30_000}).toBe('assigned-to-me');
             expect(workflow.submissionIdFromUrl()).toBe(String(otherId));
         }
+
+        // The Production editor on the first submission, assigned as such:
+        // held to that group's stage set (Actors, "Terms used below" and row
+        // 2) — the landing round and "Submission" the no-access box alone;
+        // "Copyediting" and "Production" the language line, the
+        // not-yet-reached box and the Participants list, no panels (Rules
+        // 11, 13, 14, 15a, 16).
+        const pe = await workflowAs(asUser, appContext, production, tag);
+        await pe.workflow.gotoEditorial(submissionId);
+        await pe.workflow.expectSelected('Review Round 1');
+        await pe.workflow.expectNoAccessOnly();
+        await pe.workflow.select('Submission');
+        await pe.workflow.expectSelected('Submission');
+        await pe.workflow.expectNoAccessOnly();
+        for (const stage of ['Copyediting', 'Production']) {
+            await pe.workflow.selectStage(stage);
+            await expect(pe.workflow.languageLine()).toHaveText(LANGUAGE_LINE);
+            await pe.workflow.expectStatus(`The ${stage} stage has not yet been initiated.`);
+            await expect(pe.workflow.participantsHeading()).toBeVisible();
+            await expect(pe.workflow.panelTables()).toHaveCount(0);
+        }
+
+        // The Production editor on the second submission, assigned to
+        // nothing there: the manager's screen — "Activity Log" and "Library",
+        // every stage open without the box, the version node with the
+        // production-only pages, "Create New Version" after it (Actors,
+        // "Terms used below"; Rules 9, 10, 13).
+        await pe.workflow.gotoEditorial(otherId);
+        await pe.workflow.expectHeaderButtons(['Activity Log', 'Library']);
+        await pe.workflow.selectStage('Submission');
+        await expectStageOpen(pe.workflow);
+        await pe.workflow.selectRound(1);
+        await expectStageOpen(pe.workflow);
+        await pe.workflow.selectStage('Copyediting');
+        await expectStageOpen(pe.workflow);
+        await pe.workflow.selectStage('Production');
+        await expectStageOpen(pe.workflow);
+        expect(await pe.workflow.pagesUnderLatestVersion()).toEqual([
+            'Title & Abstract',
+            'Contributors',
+            'Metadata',
+            'References',
+            'Funding',
+            'JATS XML',
+            ...PRODUCTION_PAGES,
+        ]);
+        expect(await pe.workflow.entryAfterLatestVersion()).toBe('Create New Version');
     });
 
     test('S13: an assigned Section Editor\'s header and publication controls', async ({asUser, ojsApi, appContext}, testInfo) => {
@@ -997,8 +1143,16 @@ test.describe('workflow screen & stage access', () => {
         // The Manager's side menu: "Declined" counts the one submission.
         await dash.expectViewCount('Declined', 1);
 
-        // "Delete", then "Cancel": the panel and the button stay (Rule 19).
-        await workflow.deleteSubmission({confirm: false});
+        // "Delete", then "Cancel" (Rule 19): the dialog titled "Delete"
+        // with its verbatim question, "Confirm" and then "Cancel" in red;
+        // "Cancel" keeps the panel and the button.
+        await workflow.actionButton('Delete').click();
+        const dialog = workflow.confirmDialog('delete');
+        await expect(dialog).toBeVisible({timeout: 30_000});
+        await expect(dialog.getByRole('button')).toHaveText(['Confirm', 'Cancel']);
+        await expect(dialog.getByRole('button', {name: 'Cancel', exact: true})).toHaveClass(/text-negative/);
+        await dialog.getByRole('button', {name: 'Cancel', exact: true}).click();
+        await expect(dialog).toHaveCount(0, {timeout: 30_000});
         await workflow.expectOpen(submissionId);
         await expect(workflow.actionButton('Delete')).toBeVisible();
         expect(page.url()).toBe(staleAddress);
@@ -1040,5 +1194,127 @@ test.describe('workflow screen & stage access', () => {
         await authorView.workflow.gotoAuthor(secondId);
         await expect(authorView.workflow.titleLine()).toHaveText(`Submission ${secondTag}`);
         await expect(authorView.workflow.errorDialog()).toHaveCount(0);
+    });
+
+    test('S15: submission payments in the header', async ({asUser, ojsApi, appContext}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s15', testInfo);
+
+        /**
+         * A scratch journal with submission payments set up (manual payment
+         * with its instructions) at the given Article Processing Charge, and
+         * a submission in Copyediting with its Copyeditor (fn-s, scenario 15).
+         */
+        async function paymentsJournal(ctx, publicationFee) {
+            await ojsApi.createContext({
+                tag: ctx,
+                payments: {
+                    enabled: true,
+                    currency: 'USD',
+                    paymentPluginName: 'ManualPayment',
+                    manualInstructions: `Pay by bank transfer, quoting ${ctx}.`,
+                    publicationFee,
+                },
+                users: [
+                    {username: `${ctx}mg`, roles: ['manager']},
+                    {username: `${ctx}ce`, roles: ['copyeditor']},
+                    {username: `${ctx}au`, roles: ['author']},
+                ],
+            });
+            const {submissionId} = await ojsApi.createSubmission({
+                tag: `${ctx}a`,
+                context: ctx,
+                submitter: `${ctx}au`,
+                title: `Submission ${ctx}a`,
+                decisions: ['sendExternalReview', 'accept'],
+                participants: [{username: `${ctx}ce`, role: 'copyeditor'}],
+            });
+            return {submissionId, manager: `${ctx}mg`, copyeditor: `${ctx}ce`, author: `${ctx}au`};
+        }
+
+        const fee = `${tag}f`;
+        const free = `${tag}z`;
+        const charged = await paymentsJournal(fee, 50);
+        const unpaid = await paymentsJournal(free, 0);
+
+        // The Journal Manager's header: "Payments", "Preview", "Activity
+        // Log", "Library", left to right (Rule 6; Settings, "Submission
+        // payments").
+        const manager = await workflowAs(asUser, appContext, charged.manager, fee);
+        await manager.workflow.gotoEditorial(charged.submissionId);
+        await manager.workflow.expectStage('Copyediting');
+        await manager.workflow.expectHeaderButtons(['Payments', 'Preview', 'Activity Log', 'Library']);
+
+        // The assigned Copyeditor's header: "Payments", "Preview", "Library",
+        // no "Activity Log" (Actors rows "Payments", "View" / "Preview" and
+        // "Activity Log").
+        const copyeditor = await workflowAs(asUser, appContext, charged.copyeditor, fee);
+        await copyeditor.workflow.gotoEditorial(charged.submissionId);
+        await copyeditor.workflow.expectStage('Copyediting');
+        await copyeditor.workflow.expectHeaderButtons(['Payments', 'Preview', 'Library']);
+
+        // The Author's header from My Submissions: "Library" and nothing
+        // else, no "Payments" (Actors row "Payments"; Rule 6).
+        const author = await workflowAs(asUser, appContext, charged.author, fee);
+        await author.workflow.gotoAuthor(charged.submissionId);
+        await author.workflow.expectStage('Copyediting');
+        await author.workflow.expectHeaderButtons(['Library']);
+
+        // Control: the same set-up at an Article Processing Charge of 0 —
+        // the Journal Manager's header has no "Payments" (Settings,
+        // "Submission payments").
+        const freeManager = await workflowAs(asUser, appContext, unpaid.manager, free);
+        await freeManager.workflow.gotoEditorial(unpaid.submissionId);
+        await freeManager.workflow.expectStage('Copyediting');
+        await freeManager.workflow.expectHeaderButtons(['Preview', 'Activity Log', 'Library']);
+    });
+
+    test('S16: the publication pages follow the metadata options', async ({asUser, ojsApi, appContext}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s16', testInfo);
+        await ojsApi.createContext({
+            tag,
+            metadata: {citations: 'off', funders: 'off', dataAvailability: 'request'},
+            users: [
+                {username: `${tag}mg`, roles: ['manager']},
+                {username: `${tag}au`, roles: ['author']},
+            ],
+        });
+        const {submissionId} = await ojsApi.createSubmission({
+            tag: `${tag}a`,
+            context: tag,
+            submitter: `${tag}au`,
+            title: `Submission ${tag}a`,
+        });
+        const {submissionId: seededId} = await seed(ojsApi, `${tag}k`);
+
+        /** "Data" right after "Metadata", neither "References" nor "Funding" (Rule 10). */
+        function expectMetadataOptionsFollowed(pages) {
+            expect(pages).toContain('Metadata');
+            expect(pages[pages.indexOf('Metadata') + 1]).toBe('Data');
+            expect(pages).not.toContain('References');
+            expect(pages).not.toContain('Funding');
+        }
+
+        // The Journal Manager's version node (Rule 10; Settings, "Workflow >
+        // Submission > Metadata").
+        const manager = await workflowAs(asUser, appContext, `${tag}mg`, tag);
+        await manager.workflow.gotoEditorial(submissionId);
+        expectMetadataOptionsFollowed(await manager.workflow.pagesUnderLatestVersion());
+
+        // The Author's view from My Submissions: "Data" in the same place,
+        // neither "References" nor "Funding" (Rule 10).
+        const author = await workflowAs(asUser, appContext, `${tag}au`, tag);
+        await author.workflow.gotoAuthor(submissionId);
+        expectMetadataOptionsFollowed(await author.workflow.pagesUnderLatestVersion());
+
+        // Control: on the seeded journal, at the install's metadata options,
+        // the Journal Manager's node lists "References" and "Funding" and no
+        // "Data" (Settings, "Workflow > Submission > Metadata"; Rule 10).
+        const seeded = await workflowAs(asUser, appContext, 'manager.maya');
+        await seeded.workflow.gotoEditorial(seededId);
+        const seededPages = await seeded.workflow.pagesUnderLatestVersion();
+        expect(seededPages).toEqual(expect.arrayContaining(['Metadata', 'References', 'Funding']));
+        expect(seededPages).not.toContain('Data');
     });
 });

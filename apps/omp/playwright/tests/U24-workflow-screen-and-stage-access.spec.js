@@ -3,8 +3,9 @@
  * @file playwright/tests/U24-workflow-screen-and-stage-access.spec.js
  *
  * Workflow screen & stage access — OMP suite, one test per canonical
- * scenario the spec runs on a press (S1, S5–S8, S11 and S14 common; S2–S4,
- * S12 and S13 OJS/OMP; S9 OMP-only; scenario 10 is OPS-only), in the
+ * scenario the spec runs on a press (S1, S5–S8, S11, S14 and S16 common;
+ * S2–S4, S12 and S13 OJS/OMP; S9 OMP-only; scenarios 10 and 15 are OPS- and
+ * OJS-only), in the
  * press's own context: Press Editor, monograph, series, the five-stage
  * menu with "Internal Review" skipped, the "Marketing" group, the press
  * page roster and the header's "Monograph" work-type control.
@@ -28,13 +29,17 @@
  * External Review (`sendExternalReview` from the Submission stage, external
  * rounds only), so Internal Review is the skipped stage scenario 2
  * describes. S12 isolates on a scratch press with throwaway accounts (a
- * two-role account cannot be arranged on the roster, A7); S14 too, so that
- * the "Declined" count and the mailbox it reads are the test's own, safe
- * from the other suites' declined seeds (a scratch press takes no
- * `series[]`, so its monographs are opened by address, never from "Assigned
- * to me"). Assignments (S3 Copyeditor, S4 and S9 Funding Coordinator, S8
- * Layout Editor and Series editor, S12 Layout Editor, S13 Series editor)
- * are seeded as
+ * two-role account and a Production editor cannot be arranged on the
+ * roster, A7); S14 too, so that the "Declined" count and the mailbox it
+ * reads are the test's own, safe from the other suites' declined seeds; so
+ * do S3's change to the Copyeditor's stages on the Roles screen (it reaches
+ * every Copyeditor of the press at once), S11's Editorial Board Member (no
+ * roster account holds the role on a press) and S16's metadata options,
+ * seeded through the context scenario's `metadata` key (a scratch press
+ * takes no `series[]`, so its monographs are opened by address, never from
+ * "Assigned to me"). Assignments (S3 Copyeditor, S4 and S9 Funding
+ * Coordinator, S8 Layout Editor and Series editor, S12 Layout Editor and
+ * Production editor, S13 Series editor) are seeded as
  * `participants[]`, the row the Assign Participant form writes. The mailbox
  * reads (S8, S14) are before/after counts scoped to the submitter's
  * address (and the seed tag on the roster address), the "after" taken
@@ -49,6 +54,7 @@ const {EditorialDashboardPage} = require('../../../../shared/playwright/pages/Ed
 const {MySubmissionsPage} = require('../../../../shared/playwright/pages/MySubmissionsPage.js');
 const {getEmail} = require('../../../../shared/playwright/data/users.js');
 const {unpublishFromWorkflow} = require('../pages/PublicationPages.js');
+const {RolesTab} = require('../../../../shared/playwright/pages/RolesConfigurationPages.js');
 
 const PRESS = 'publicknowledge';
 
@@ -349,6 +355,7 @@ test.describe('workflow screen & stage access', () => {
 
     test('S3: a stage outside the role\'s stage set', async ({asUser, ompApi, appContext}, testInfo) => {
         test.slow();
+        test.setTimeout(300_000);
         const tag = makeTag('s3', testInfo);
         const tag2 = makeTag('s3b', testInfo);
         const {submissionId} = await seed(
@@ -427,6 +434,80 @@ test.describe('workflow screen & stage access', () => {
         // The other monograph's older address: an access-denied page, no
         // panel (Rule 2a; Actors row 1).
         await workflow.expectAccessDeniedPage(workflow.workflowAccessUrl(otherId), ACCESS_DENIED.stage);
+
+        // "External Review" added to the Copyeditor's stages, then taken
+        // away again (Settings, "Roles configuration"; Actors row 2): on a
+        // scratch press, since the change reaches every Copyeditor of the
+        // press at once (fn-s, revision seeds 2026-11-19). A throwaway Press
+        // Manager presses the box in the "Copyeditor" row of Settings ›
+        // Users & Roles › "Roles"; the assigned Copyeditor's next open of
+        // the monograph is read after each press.
+        const press = makeTag('s3p', testInfo);
+        const pressManager = `${press}mg`;
+        const pressCopyeditor = `${press}ce`;
+        const pressAuthor = `${press}au`;
+        await ompApi.createContext({
+            tag: press,
+            users: [
+                user(pressManager, 'Mira', 'Manager', ['manager']),
+                user(pressCopyeditor, 'Cole', 'Copyeditor', ['copyeditor']),
+                user(pressAuthor, 'Ada', 'Author', ['author']),
+            ],
+        });
+        const {submissionId: scratchId} = await ompApi.createSubmission({
+            tag: `${press}r`,
+            context: press,
+            submitter: pressAuthor,
+            title: `Submission ${press}r`,
+            decisions: ['sendExternalReview'],
+            reviewRounds: [{stage: 'external', reviewers: []}],
+            participants: [{username: pressCopyeditor, role: 'copyeditor'}],
+        });
+
+        // Before the change: the same no-access box alone on the landing
+        // round (the state the press moves).
+        const scratchCe = await workflowAs(asUser, appContext, pressCopyeditor, press);
+        await scratchCe.workflow.gotoEditorial(scratchId);
+        await scratchCe.workflow.expectSelected('Review Round 1');
+        await scratchCe.workflow.expectNoAccessOnly();
+
+        // The Press Manager presses the Copyeditor's "External Review" box
+        // (it answers `assign-stage`).
+        const managerPage = await (await asUser(pressManager)).newPage();
+        const roles = new RolesTab(managerPage, press, {stages: OMP_STAGES});
+        await roles.goto();
+        await expect(roles.stageBox('Copyeditor', 'Copyediting')).toBeChecked();
+        await expect(roles.stageBox('Copyeditor', 'External Review')).not.toBeChecked();
+        const ticked = await roles.pressStageBox('Copyeditor', 'External Review');
+        expect(ticked.status()).toBe(200);
+        expect(ticked.url()).toMatch(/user-group-grid\/assign-stage/);
+
+        // The Copyeditor opens the monograph again: it lands on "Review
+        // Round 1", which now begins with the language line and a box
+        // headed "Round 1 Status" above the round's panels; the no-access
+        // box is gone (Rules 11, 13, 14, 15c).
+        await scratchCe.workflow.gotoEditorial(scratchId);
+        await scratchCe.workflow.expectSelected('Review Round 1');
+        await scratchCe.workflow.expectStageHeading('External Review (Round 1)');
+        await expectStageBegunWithLanguageLine(scratchCe.workflow);
+        await expect(scratchCe.workflow.statusBox('Round 1 Status')).toBeVisible();
+        await expect(scratchCe.workflow.panel('Reviewers')).toBeVisible();
+        await expect
+            .poll(async () => (await scratchCe.workflow.panelHeadingLabels())[0], {timeout: 30_000})
+            .toBe('Round 1 Status');
+        await expect(scratchCe.workflow.noAccessBox()).toHaveCount(0);
+
+        // "External Review" taken away again: the same box pressed (it
+        // answers `unassign-stage`); the Copyeditor's next open is again
+        // the one no-access box (Rule 13).
+        await roles.goto();
+        await expect(roles.stageBox('Copyeditor', 'External Review')).toBeChecked();
+        const unticked = await roles.pressStageBox('Copyeditor', 'External Review');
+        expect(unticked.status()).toBe(200);
+        expect(unticked.url()).toMatch(/user-group-grid\/unassign-stage/);
+        await scratchCe.workflow.gotoEditorial(scratchId);
+        await scratchCe.workflow.expectSelected('Review Round 1');
+        await scratchCe.workflow.expectNoAccessOnly();
     });
 
     test('S4: the production-only pages', async ({asUser, ompApi, appContext}, testInfo) => {
@@ -893,6 +974,41 @@ test.describe('workflow screen & stage access', () => {
             await workflow.expectAccessDeniedPage(workflow.authorDashboardUrl(submissionId), ACCESS_DENIED.notAuthor);
         }
 
+        // The Editorial Board Member, on a scratch press (no roster account
+        // holds the role on a press; fn-s, revision seeds 2026-11-19), at
+        // the press's submitted monograph: the dashboard address opens the
+        // panel with only the number in its header and the "Error" dialog
+        // (Actors, "Terms used below"; Rule 3); the editorial workflow
+        // address and the old author-dashboard address are refused at the
+        // page, no panel (Rules 2a, 2b).
+        const board = makeTag('s11b', testInfo);
+        const boardMember = `${board}eb`;
+        const boardAuthor = `${board}au`;
+        await ompApi.createContext({
+            tag: board,
+            users: [
+                user(boardMember, 'Elsa', 'Board', ['editorialBoardMember']),
+                user(boardAuthor, 'Ada', 'Author', ['author']),
+            ],
+        });
+        const {submissionId: boardSubmissionId} = await ompApi.createSubmission({
+            tag: `${board}s`,
+            context: board,
+            submitter: boardAuthor,
+            title: `Submission ${board}s`,
+        });
+        const member = await workflowAs(asUser, appContext, boardMember, board);
+        await member.page.goto(member.workflow.editorialUrl(boardSubmissionId));
+        await member.workflow.expectErrorShell(boardSubmissionId, ACCESS_DENIED.role);
+        await member.workflow.expectAccessDeniedPage(
+            member.workflow.workflowAccessUrl(boardSubmissionId),
+            ACCESS_DENIED.stage
+        );
+        await member.workflow.expectAccessDeniedPage(
+            member.workflow.authorDashboardUrl(boardSubmissionId),
+            ACCESS_DENIED.notAuthor
+        );
+
         // Control: the Press Editor typing the dashboard address gets the
         // panel with the monograph's header (Rule 2c).
         const editor = await workflowAs(asUser, appContext, 'editor.diana');
@@ -904,22 +1020,26 @@ test.describe('workflow screen & stage access', () => {
 
     test('S12: a manager assigned in another role', async ({asUser, ompApi, appContext}, testInfo) => {
         test.slow();
-        test.setTimeout(300_000);
+        test.setTimeout(420_000);
         const tag = makeTag('s12', testInfo);
         const twoRole = `${tag}ml`;
         const author = `${tag}au`;
         const reviewer = `${tag}rv`;
+        const productionEditor = `${tag}pe`;
         // A scratch press (no `series[]`: its monographs are opened by
         // address) with a Press Manager + Layout Editor account that also
         // holds Author (fn-s, revision seeds 2026-11-12: an author-editor
         // state needs the global Author role and the submitter), a
-        // throwaway Author and an external reviewer for the round.
+        // throwaway Author, an external reviewer for the round and a
+        // Production editor (revision seeds 2026-11-19), assigned as such
+        // to the first monograph and to nothing else.
         await ompApi.createContext({
             tag,
             users: [
                 user(twoRole, 'Mila', 'Manager', ['manager', 'layoutEditor', 'author']),
                 user(author, 'Ada', 'Author', ['author']),
                 user(reviewer, 'Rex', 'Reviewer', ['externalReviewer']),
+                user(productionEditor, 'Pia', 'Production', ['productionEditor']),
             ],
         });
         const round = [{stage: 'external', reviewers: [{username: reviewer, status: 'accepted'}]}];
@@ -934,7 +1054,10 @@ test.describe('workflow screen & stage access', () => {
                 ...extra,
             });
         const {submissionId} = await seedOn(`${tag}a`, {
-            participants: [{username: twoRole, role: 'layoutEditor'}],
+            participants: [
+                {username: twoRole, role: 'layoutEditor'},
+                {username: productionEditor, role: 'productionEditor'},
+            ],
         });
         const {submissionId: otherId} = await seedOn(`${tag}b`);
         // The third monograph, freshly submitted by the two-role account
@@ -1065,6 +1188,58 @@ test.describe('workflow screen & stage access', () => {
             expect(workflow.submissionIdFromUrl()).toBe(String(otherId));
             await expect(workflow.titleLine()).toHaveText(`Submission ${tag}b`);
         }
+
+        // The Production editor on the first monograph, where it is
+        // assigned as Production editor: held to that group's stage set
+        // (Copyediting and Production). The landing round, "Submission" and
+        // "Internal Review" are the one no-access box; "Copyediting" and
+        // "Production" begin with the language line and read their
+        // not-yet-reached box above the "Participants" list, with no panels
+        // (Actors, "Terms used below" and row 2; Rules 11, 13, 14, 15a, 16).
+        const pe = await workflowAs(asUser, appContext, productionEditor, tag);
+        await pe.workflow.gotoEditorial(submissionId);
+        await pe.workflow.expectSelected('Review Round 1');
+        await pe.workflow.expectNoAccessOnly();
+        for (const stage of ['Submission', 'Internal Review']) {
+            await pe.workflow.select(stage);
+            await pe.workflow.expectSelected(stage);
+            await pe.workflow.expectNoAccessOnly();
+        }
+        for (const stage of ['Copyediting', 'Production']) {
+            await pe.workflow.selectStage(stage);
+            await expectStageBegunWithLanguageLine(pe.workflow);
+            await pe.workflow.expectStatus(`The ${stage} stage has not yet been initiated.`);
+            await expect(pe.workflow.participantsHeading()).toBeVisible();
+            await expect(pe.workflow.panelTables()).toHaveCount(0);
+        }
+
+        // The Production editor on the second monograph, assigned to
+        // nothing there: the Press Manager's screen. The header offers
+        // "Activity Log" and "Library" (with the work-type control); every
+        // stage opens without the no-access box; the version node lists the
+        // production-only pages too, and "Create New Version" follows it
+        // (Actors, "Terms used below"; Rules 9, 10, 13).
+        await pe.workflow.gotoEditorial(otherId);
+        await pe.workflow.expectHeaderButtons(['Activity Log', 'Library', WORK_TYPE]);
+        await pe.workflow.selectStage('Submission');
+        await expectStageOpen(pe.workflow);
+        await pe.workflow.selectStage('Internal Review');
+        await expectStageOpen(pe.workflow);
+        await pe.workflow.selectRound(1);
+        await expectStageOpen(pe.workflow);
+        await pe.workflow.selectStage('Copyediting');
+        await expectStageOpen(pe.workflow);
+        await pe.workflow.selectStage('Production');
+        await expectStageOpen(pe.workflow);
+        const pePages = await pe.workflow.pagesUnderLatestVersion();
+        expect(pePages[0]).toBe('Title & Abstract');
+        for (const gated of PRODUCTION_PAGES) {
+            expect(pePages).toContain(gated);
+        }
+        await expect(pe.workflow.createNewVersionLink()).toBeVisible();
+        const peMenu = (await pe.workflow.menuEntries()).map((e) => e.label);
+        expect(peMenu[peMenu.length - 1]).toBe('Create New Version');
+        expect(peMenu[peMenu.length - 2]).toBe(pePages[pePages.length - 1]);
     });
 
     test('S13: an assigned Series editor\'s header and publication controls', async ({asUser, ompApi, appContext}, testInfo) => {
@@ -1210,5 +1385,72 @@ test.describe('workflow screen & stage access', () => {
         await expect(author.workflow.titleLine()).toHaveText(secondTitle);
         await expect(author.workflow.contributorsLine()).toBeVisible();
         await expect(author.workflow.errorDialog()).toHaveCount(0);
+    });
+
+    test('S16: the publication pages follow the metadata options', async ({asUser, ompApi, appContext}, testInfo) => {
+        test.slow();
+        const tag = makeTag('s16', testInfo);
+        const controlTag = makeTag('s16c', testInfo);
+        const managerName = `${tag}mg`;
+        const authorName = `${tag}au`;
+        // A scratch press whose metadata options (Workflow > Submission >
+        // Metadata) have "References" and funders off and "Data
+        // availability statement" on (fn-s, 2026-11-19: the context
+        // scenario's `metadata` key), with a throwaway Press Manager and
+        // the Author's submitted monograph; the control is a submitted
+        // monograph on the seeded press, at the install defaults.
+        await ompApi.createContext({
+            tag,
+            metadata: {citations: 'off', funders: 'off', dataAvailability: 'request'},
+            users: [
+                user(managerName, 'Mira', 'Manager', ['manager']),
+                user(authorName, 'Ada', 'Author', ['author']),
+            ],
+        });
+        const [{submissionId}, {submissionId: controlId}] = await Promise.all([
+            ompApi.createSubmission({
+                tag: `${tag}s`,
+                context: tag,
+                submitter: authorName,
+                title: `Submission ${tag}s`,
+            }),
+            seed(ompApi, controlTag),
+        ]);
+
+        /** "Data" right after "Media" on a press, no "References" or "Funding" (Rule 10). */
+        const expectMetadataOptionPages = (pages) => {
+            expect(pages[0]).toBe('Title & Abstract');
+            expect(pages).toContain('Media');
+            expect(pages).toContain('Data');
+            expect(pages.indexOf('Data')).toBe(pages.indexOf('Media') + 1);
+            expect(pages).not.toContain('References');
+            expect(pages).not.toContain('Funding');
+        };
+
+        // The Press Manager's version node, opened on the editorial
+        // dashboard (Rule 10; Settings, "Workflow > Submission > Metadata").
+        const manager = await workflowAs(asUser, appContext, managerName, tag);
+        await manager.workflow.gotoEditorial(submissionId);
+        const managerPages = await manager.workflow.pagesUnderLatestVersion();
+        expectMetadataOptionPages(managerPages);
+
+        // The Author's view, from My Submissions: "Data" in the same place,
+        // neither "References" nor "Funding" (Rule 10).
+        const author = await workflowAs(asUser, appContext, authorName, tag);
+        await author.workflow.gotoAuthor(submissionId);
+        await expect(author.page).toHaveURL(/\/dashboard\/mySubmissions/);
+        const authorPages = await author.workflow.pagesUnderLatestVersion();
+        expectMetadataOptionPages(authorPages);
+
+        // Control: on the seeded press, at the install defaults, the Press
+        // Manager's version node lists "References" and "Funding" and no
+        // "Data" (Settings, "Workflow > Submission > Metadata"; Rule 10).
+        const control = await workflowAs(asUser, appContext, 'manager.maya');
+        await control.workflow.gotoEditorial(controlId);
+        const controlPages = await control.workflow.pagesUnderLatestVersion();
+        expect(controlPages).toContain('Media');
+        expect(controlPages).toContain('References');
+        expect(controlPages).toContain('Funding');
+        expect(controlPages).not.toContain('Data');
     });
 });
