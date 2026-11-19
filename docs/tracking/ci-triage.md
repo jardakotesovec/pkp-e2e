@@ -840,6 +840,14 @@ trips.
   **Watch condition**: a second sighting; then read its error context
   (whether the tab is missing or late) and wait on the tab's own name
   before reading the list.
+  **Tripped 2026-11-19** (upstream session, s2): twice in one night at
+  the same line with the same read ("tabs: Users, Roles, Site Access
+  Options, ORCID", received -1), each green on its retry: the pkp-e2e
+  nightly [44451259836](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44451259836)
+  (`821c48b5`, omp 1/3, the usual configuration) and the configurations
+  run [44432262811](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44432262811)
+  (PHP 8.2 MariaDB, omp 1/3). Left for the housekeeping session's
+  diagnostician.
 
 - **OPS U42 S5's metadata settings save not answered in 30 s** (OPS,
   once, pkp-e2e push run 37763083478 on the branch `11718-main` at
@@ -1100,7 +1108,12 @@ trips.
   MariaDB), run [43340246182](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43340246182)
   (2026-11-13); again OMP U04 S11 in the PHP 8.2 MariaDB dispatch
   [43423348613](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43423348613)
-  the same day. The run's "Database log" step holds both sides of each
+  the same day; again in the configurations run
+  [44432262811](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44432262811)
+  (2026-11-19, PHP 8.2 MariaDB, all green on the retry): OJS U04 S11
+  and OMP U04 S12 (serial), OPS U12 S4 (serial) and, outside a serial
+  file, OJS U65 S1 (`U65-editorial-statistics.spec.js:236`), each the
+  same 1213 deadlock. The run's "Database log" step holds both sides of each
   deadlock. **Watch condition**: a red on both tries, or a sighting on
   the usual configuration.
 

@@ -39,6 +39,10 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
 
 ## Read log
 
+- **2026-11-19 (daily session, VM s2) — ojs `ore` `37103b950c`, pkp-lib `ore` `5795cb49a3`, ui-library `ore` `b48195c3`: no commits since the 2026-11-18 baselines (`git ls-remote` against pkp). Baselines stay.**
+  - Runs: pkp/ojs `ore` hook [44145502210](https://github.com/pkp/ojs/actions/runs/44145502210) at `37103b950c` green; the nightly `ojs-ore` job of [44451259836](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44451259836) 3/3 green at the same OJS tip and pkp-e2e `821c48b5` (no `lines/ore/` change since), so no dispatch.
+  - Carried findings: no regression confirmed on `main` today; pkp/pkp-lib#13593 and #13562 still have no `ore` port. Security: none routed.
+
 - **2026-11-18 (daily session, VM s1) — ojs `ore` `4359df21be..37103b950c` (1, pointer bump); pkp-lib `ore` `9353b8232f..5795cb49a3` (1: `=main f74e5044c4`, uploader names include disabled users, same `git patch-id`); ui-library `ore` `b48195c3`: no commits. Read in full; baselines advanced.**
   - Runs: pkp/ojs `ore` hook [44145502210](https://github.com/pkp/ojs/actions/runs/44145502210) at `37103b950c` green; the nightly `ojs-ore` job of [44230290411](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44230290411) 3/3 green at the same OJS tip and pkp-e2e `239e013ee5` (no `lines/ore/` change since), so no dispatch.
   - `5795cb49a3` → `main`'s read of today stands; `main` accommodated nothing for it, so nothing to carry.
@@ -113,7 +117,3 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
   - Runs: pkp/ojs `ore` hook [41842958121](https://github.com/pkp/ojs/actions/runs/41842958121) at `ad3042f92f` green (after the pkp-e2e `ore` push of `7bb51210`); pkp-e2e `ore` push [41838980941](https://github.com/jardakotesovec/pkp-e2e/actions/runs/41838980941) at `7bb51210` green: the current pair ran, no dispatch.
   - The Open item (S4 once `ore` takes PDF.js 6): `ore` points pdfJsViewer at `b7e5188047` since `137493ebb1`. `viewer-browsers.js` run from the ore worktree on its fleet (`RUN=ore1105`): PDF.js 6.4.299; S4's control and the emulated browsers without `getOrInsertComputed`, `URL.parse` or `RegExp.escape` each load "of 1" with no page error, S1–S3 as on `main`: reads fixed, item closed. A CSP console line on every load went to `incidentals.md` (U13).
   - Carried over: no regression confirmed on `main` today. pkp/pkp-lib#13644 (U18 A7, webFeed) still not on `ore` (webFeed `7436935`).
-- **2026-11-04 (daily session, VM s2, the ore worktree) — ojs `ore` `00f3da7536`, pkp-lib `ore` `f1585093d5` and ui-library `ore` `a457c277`: no commits since the 2026-11-03 baselines. Baselines unchanged; pkp-e2e `ore` stays at `d4bb1f5a`.**
-  - Runs: pkp/ojs `ore` hook [41507347844](https://github.com/pkp/ojs/actions/runs/41507347844) at `00f3da7536` green; pkp-e2e `ore` push [41627047305](https://github.com/jardakotesovec/pkp-e2e/actions/runs/41627047305) at `d4bb1f5a` (after the OJS tip) green: the current pair ran, no dispatch.
-  - Carried over: no regression confirmed on `main` today. pkp/pkp-lib#13644 (U18 A7, webFeed) is not on `ore`: OJS `ore` points webFeed at `7436935`, so the feeds still read "Array" there until a bump carries webFeed `bd2efa8`.
-  - Security: none routed.
