@@ -13,10 +13,11 @@ and no CI follows this branch. `main`'s baselines are in
 | ojs | `4032f3dd7d` | 2026-11-18 | claude (daily upstream session, VM s1) |
 | omp | `496c501886` | 2026-11-18 | claude (daily upstream session, VM s1) |
 | ops | `db404286fe` | 2026-11-18 | claude (daily upstream session, VM s1) |
-| pkp-lib | `d08b5760d6` (the branch tip; ojs, omp and ops at `ab7f581349`, its second parent) | 2026-11-18 | claude (daily upstream session, VM s1); ui-library `fd00e45f` (ojs, omp, ops; 2026-11-11, daily maintenance session); ojs `plugins/generic/jatsTemplate` `fc51429cd4` (2026-10-26, the merge of pkp/jatsTemplate#125, the tree of `96eacdab48`, the pointer of pkp/ojs#5921, 2026-10-12); ojs and ops `plugins/generic/pdfJsViewer` `ce6a128` (2026-10-26, the legacy build); ojs `plugins/generic/oaiJats` `96221e3f4a` (2026-10-26, pkp/oaiJats#89); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
+| pkp-lib | `bbe791fdd4` (the branch tip, the merge of pkp/pkp-lib#13783; ojs, omp and ops still at `ab7f581349`) | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13779, VM s0); ui-library `fd00e45f` (ojs, omp, ops; 2026-11-11, daily maintenance session); ojs `plugins/generic/jatsTemplate` `fc51429cd4` (2026-10-26, the merge of pkp/jatsTemplate#125, the tree of `96eacdab48`, the pointer of pkp/ojs#5921, 2026-10-12); ojs and ops `plugins/generic/pdfJsViewer` `ce6a128` (2026-10-26, the legacy build); ojs `plugins/generic/oaiJats` `96221e3f4a` (2026-10-26, pkp/oaiJats#89); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
 
 ## Read log
 
+- **2026-11-19 — Merge of the PR review of pkp/pkp-lib#13779, the 3.5 half (asked in the thread, VM s0; `main`'s and 3.4's in `upstream-sync.md`): pkp/pkp-lib#13783 merged as `bbe791fdd4` (head `714f40bf6a`, the reviewed commit itself; the merge onto `d08b5760d6` adds that patch and nothing else). pkp/ojs#6065, pkp/omp#2572, pkp/ops#1503 closed unmerged: the apps still pin `ab7f581349`. Baseline: pkp-lib advanced to `bbe791fdd4`; ojs, omp, ops: no commits, stay. Security: none routed.**
 - **2026-11-19 (daily session, VM s2) — ojs `4032f3dd7d`, omp `496c501886`, ops `db404286fe`, pkp-lib `d08b5760d6`, ui-library `fd00e45f`: no commits on `stable-3_5_0` since the 2026-11-18 baselines (`git ls-remote` against pkp). Baselines stay.**
   - Carried from `main`: no `main` range today, no regression confirmed. Open stable-line rows: no tip moved; none re-run. Security: none routed.
 
