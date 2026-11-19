@@ -13,4 +13,3 @@ Facts only, the same quarantine as everywhere else (nothing
 security-shaped, no credentials).
 
 ## Entries
-2026-11-18 · sync · regression reader rr13593 · the brief named neither the PR review of the same PR (report `.reports/pr13593/`, kept checks only on the companion branch `i13593-main`, SEC-187) nor that its kept check runs on a dataset fleet, which needs its own `--feature` (fleet-prep would overwrite `.reports/sync/fleet.json`) and so a `PROBE_FEATURE` other than `sync`; found by search and a mid-task message · a brief for a merged PR that had a PR review names its report, its kept checks with the branch they live on, their fleet kind and the `--feature`/`PROBE_FEATURE` to use
