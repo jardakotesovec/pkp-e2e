@@ -1,10 +1,10 @@
-{"case":"delete where title","result":{"returned":1,"state":[{"id":79,"row":false,"title":null},{"id":80,"row":true,"title":"Y"}]},"warnings":[]}
-{"case":"delete whereKey","result":{"returned":1,"state":[{"id":81,"row":false,"title":null},{"id":82,"row":true,"title":"Y"}]},"warnings":[]}
-{"case":"update whereKey title","result":{"returned":1,"state":[{"id":83,"row":true,"title":"X2"},{"id":84,"row":true,"title":"Y"}]},"warnings":[]}
-{"case":"update where title, title and type_id","result":{"returned":1,"state":[{"id":85,"row":true,"title":"X2"},{"id":86,"row":true,"title":"Y"}],"types":[9,null]},"warnings":[]}
+{"case":"delete where title","result":{"returned":1,"state":[{"id":123,"row":false,"title":null},{"id":124,"row":true,"title":"Y"}]},"warnings":[]}
+{"case":"delete whereKey","result":{"returned":1,"state":[{"id":125,"row":false,"title":null},{"id":126,"row":true,"title":"Y"}]},"warnings":[]}
+{"case":"update whereKey title","result":{"returned":1,"state":[{"id":127,"row":true,"title":"X2"},{"id":128,"row":true,"title":"Y"}]},"warnings":[]}
+{"case":"update where title, title and type_id","result":{"returned":1,"state":[{"id":129,"row":true,"title":"X2"},{"id":130,"row":true,"title":"Y"}],"types":[13,null]},"warnings":[]}
 {"case":"select title","result":{"title":{"en":"X"}},"warnings":[]}
-{"case":"select type_id distinct","result":[{"type_id":10},{"type_id":9}],"warnings":[]}
-{"case":"select type_id groupBy","result":[{"type_id":10},{"type_id":9}],"warnings":[]}
-{"case":"join, qualified select","result":[{"announcement_id":95,"type_id":9,"title":{"en":"X"}}],"warnings":[]}
+{"case":"select type_id distinct","result":[{"type_id":13},{"type_id":14}],"warnings":[]}
+{"case":"select type_id groupBy","result":[{"type_id":13},{"type_id":14}],"warnings":[]}
+{"case":"join, qualified select","result":[{"announcement_id":139,"type_id":13,"title":{"en":"X"}}],"warnings":[]}
 {"case":"join, qualified select of primary columns","result":[["announcement_id","type_id"]],"warnings":[]}
-{"case":"join, delete","result":{"returned":1,"state":[{"id":97,"row":false,"title":null},{"id":98,"row":true,"title":"Y"}]},"warnings":[]}
+{"case":"join, delete","result":{"returned":1,"state":[{"id":141,"row":false,"title":null},{"id":142,"row":true,"title":"Y"}]},"warnings":[]}
