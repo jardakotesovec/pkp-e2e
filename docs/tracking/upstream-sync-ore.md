@@ -14,8 +14,8 @@ below) plus the U03 S4 skip of `68975b4f`. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `37103b950c` | 2026-11-18 | claude (daily upstream session, VM s1) |
-| pkp-lib | `5795cb49a3` (the branch tip, `=main f74e5044c4`; ojs at it); ui-library `b48195c3` (the branch tip, pkp/ui-library#1037; ojs at it) | 2026-11-18 | claude (daily upstream session, VM s1: `=main`) |
+| ojs | `df1583e5f3` | 2026-11-19 | claude (merge of the PR review of the `ore` port of pkp/pkp-lib#13789, VM s2) |
+| pkp-lib | `4b60635195` (the branch tip, the merge of pkp/pkp-lib#13841; ojs at its head `b1a1545571`); ui-library `b48195c3` (the branch tip, pkp/ui-library#1037; ojs at it) | 2026-11-18 | claude (daily upstream session, VM s1: `=main`) |
 
 The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U14 A6 retired, U30 and U26 follow pkp/ui-library#981), its specs brought to the present template by script: the Planned lists dropped, retired entries one line. CI from the folder at the same OJS commit as the branch's last run, the same counts (run 43259507107 against 43211539187: 543 + 38 + 33 passed, 1 skipped).
 
@@ -39,8 +39,9 @@ The folder was copied from the pkp-e2e `ore` branch at `918eeb34` (2026-11-12, U
 
 ## Read log
 
-- **2026-11-19 — PR review of the `ore` port of pkp/pkp-lib#13789 (asked in the thread, VM s2: "I have forgotten to port it to ore branch"): pkp-lib#13841 `b1a1545571`, ojs#6101 `0a3aabcca6` (googleScholar to `f92570ef41`, the merge of #42), on the `ore` tips. No finding; companion `13789-ore` ready (ci-triage). Baselines not advanced.**
-  - The same code as `main`'s merged review (three rounds, `upstream-sync.md` 2026-11-19): the pkp-lib diff byte-identical to #13796, the OJS `SitemapHandler` identical to `main`'s `70e1551fa3`. Walked on an `ore` dataset fleet from `main`'s dataset: the merged `main` tip's entries exactly, the `ore` tip none of the articles. CI unedited [44586917301](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44586917301) red on U20 S1 only (intended), the companion [44587339940](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44587339940) green.
+- **2026-11-19 — Merge of the PR review of the `ore` port of pkp/pkp-lib#13789 (asked in the thread, VM s2: "merged"): pkp-lib#13841 as `4b60635195`, ojs#6101 as `df1583e5f3` (googleScholar `f92570ef41`), each the merge of the reviewed head on the old `ore` tip, trees equal. Baselines advanced (ojs, pkp-lib): no other `ore` commit since.**
+  - The review: the same code as `main`'s merged review (`upstream-sync.md` 2026-11-19), no finding; the unedited `ore` suite red only on U20 S1 at the heads, intended.
+  - At the merged `ore` tip, an `ore` dataset fleet from `main`'s dataset: `checks/sync/pkp-lib-13789/walk.js` gave the heads' entries exactly (14 fresh, 13 after `MODE=change`), every entry 200. Companion `13789-ore` (`lines/ore/` U20 spec and OJS test as `main`'s merged companion) fast-forwarded into pkp-e2e `main` after [44602872541](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44602872541) at the merged `ore` tip, 3/3 green; `lines/ore/` U20 OJS2 retired with it.
 
 - **2026-11-19 (daily session, VM s2) — ojs `ore` `37103b950c`, pkp-lib `ore` `5795cb49a3`, ui-library `ore` `b48195c3`: no commits since the 2026-11-18 baselines (`git ls-remote` against pkp). Baselines stay.**
   - Runs: pkp/ojs `ore` hook [44145502210](https://github.com/pkp/ojs/actions/runs/44145502210) at `37103b950c` green; the nightly `ojs-ore` job of [44451259836](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44451259836) 3/3 green at the same OJS tip and pkp-e2e `821c48b5` (no `lines/ore/` change since), so no dispatch.
