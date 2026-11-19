@@ -1,5 +1,5 @@
 <?php
-// Read-only helper of walk.js (issue report docs/issues/U45-A30-crossref-title-ampersand-italic-codes.md).
+// Read-only helper of walk.js (U45 A30, retired by pkp/pkp-lib#13807).
 // "Export DOIs" downloads the file the Crossref plugin builds for the ticked works. The test installs cannot
 // reach crossref.org (the server's HTTP goes to a dead proxy), so there the export stops at the schema check;
 // this builds the same file with the plugin's own exportXML() and its submission filter, validation off, and

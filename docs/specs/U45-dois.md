@@ -3952,7 +3952,7 @@ branch's tip: on `main` crossref-ojs#121 `d255dbcbc5` with ojs#6100
 `c7da9ea765`, and crossref-ops#78 `e22df9d3b5` with ops#1518
 `af3f73c40e`; on `stable-3_5_0` crossref-ojs#122 `b7f01459ab` with
 ojs#6098 `0682631c96`, and crossref-ops#79 `989056a986` with ops#1519
-`a94e19122d`. `checks/issues/crossref-title-ampersand-italic-codes/walk.js`
+`a94e19122d`. `checks/sync/pkp-lib-13807/walk.js`
 on PKP's default test dataset, freshly loaded per run, signed in as
 `dbarnes`. The steps: OJS article 5 and OPS preprint 1, "Title"
 retyped `hkrb forest trees & shrubs` with "shrubs" in italics (Ctrl+I),

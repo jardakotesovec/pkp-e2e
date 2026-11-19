@@ -10,12 +10,14 @@ and no CI follows this branch. `main`'s baselines are in
 
 | Repo | Last-read commit | Date | Read by |
 |------|------------------|------|---------|
-| ojs | `c14180c798` | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13789, VM s2) |
+| ojs | `7f23f05a93` | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13807, VM s0) |
 | omp | `272333e34f` | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13789, VM s2) |
-| ops | `dd15d1dab6` | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13789, VM s2) |
+| ops | `dab4680e67` | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13807, VM s0) |
 | pkp-lib | `b0f7eaecc2` (the branch tip, the merge of pkp/pkp-lib#13802; ojs, omp and ops at its head `9295edd4f0`) | 2026-11-19 | claude (merge of the PR review of pkp/pkp-lib#13789, VM s2); ui-library `fd00e45f` (ojs, omp, ops; 2026-11-11, daily maintenance session); ojs `plugins/generic/jatsTemplate` `fc51429cd4` (2026-10-26, the merge of pkp/jatsTemplate#125, the tree of `96eacdab48`, the pointer of pkp/ojs#5921, 2026-10-12); ojs and ops `plugins/generic/pdfJsViewer` `ce6a128` (2026-10-26, the legacy build); ojs `plugins/generic/oaiJats` `96221e3f4a` (2026-10-26, pkp/oaiJats#89); `plugins/generic/citationStyleLanguage` `0150021249` (ojs, omp, ops, 2026-10-08) |
 
 ## Read log
+
+- **2026-11-19 — Merge of the PR review of pkp/pkp-lib#13807 on `stable-3_5_0` (VM s0; `main`'s and 3.4's in `upstream-sync.md`)**: crossref-ojs#122 as merge `2a00606745` (tree = the reviewed head `622a14df8d`), crossref-ops#79 as `e8bf0fe1b6` (= `e72c479a64`), ojs#6098 as `7f23f05a93`, ops#1519 as `dab4680e67`, each a pointer bump to the reviewed plugin head on `c14180c798` / `dd15d1dab6` (the #13789 merges, already read). At the merged tips: `checks/sync/pkp-lib-13807/walk.js`, fresh datasets, OJS and OPS: the title and subtitle as Crossref face markup, valid. Baselines advanced.
 
 - **2026-11-19 — Merge of the PR review of pkp/pkp-lib#13789 on `stable-3_5_0` (VM s2)**: pkp-lib#13802 `b0f7eaecc2`, googleScholar#43 `f6d5762eb9`, ojs#6078 `c14180c798`, omp#2578 `272333e34`, ops#1509 `dd15d1dab6`, each the merge of the reviewed round-3 head. Read in the PR review (`upstream-sync.md`, 2026-11-19); at the merged tips the sitemap walk gives the review's entries and U20 OMP4's walk its Expected. No 3.5 spec covers it (no U20 in `lines/stable-3_5_0/`). Baselines advanced.
 

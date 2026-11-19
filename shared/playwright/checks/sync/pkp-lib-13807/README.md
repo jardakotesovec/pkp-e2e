@@ -4,8 +4,8 @@ Crossref title and subtitle written as Crossref face markup: crossref-ojs#121/#1
 crossref-ops#78/#79/#80 and the pointer bumps ojs#6100/#6098/#6099, ops#1518/#1519/#1520
 (MarkusMachel; `main`, `stable-3_5_0`, `stable-3_4_0`). U45 A30 and OPS7.
 
-- The walk on `main` and 3.5 is the issue's own:
-  `checks/issues/crossref-title-ampersand-italic-codes/walk.js` (steps, and `neighbour` on `main`),
+- The walk on `main` and 3.5 is the issue's own, moved here from `checks/issues/` at the merge:
+  `walk.js` with `read.php` and `validate.php` (steps, and `neighbour` on `main`),
   on dataset fleets (`--feature pr13807`, `pr13807-35`), the checkouts at the app PR heads.
 - `drive.php` stands in on `stable-3_4_0`, which the walk does not drive: on a dataset fleet it turns
   DOIs on with Crossref, stores a work's title, subtitle and prefix as the rich-text boxes save them,

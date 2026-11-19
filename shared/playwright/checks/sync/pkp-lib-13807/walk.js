@@ -1,4 +1,4 @@
-// Issue report docs/issues/U45-A30-crossref-title-ampersand-italic-codes.md (U45 A30): a title typed
+// U45 A30 (retired: fixed by pkp/pkp-lib#13807, crossref-ojs#121 and crossref-ops#78; this walk was its issue report's, moved here at the merge): a title typed
 // with "&" and an italic word, and a subtitle with "&", go into the Crossref file as the text
 // `hkrb forest trees &amp; <i>shrubs</i>` and `rocks &amp; sand`. Takes the report's Steps through the
 // screens on a dataset fleet freshly reset to PKP's default test dataset, as the dataset's `dbarnes` on
@@ -24,9 +24,8 @@
 //
 // Reset first:  npm run fleet-prep -- --feature <feature> --dataset <n> --reset
 // Run (main):   PROBE_FEATURE=<feature> PROBE_AGENT=k5 node bin/probe.js <ojs|ops|all> \
-//                 shared/playwright/checks/issues/crossref-title-ampersand-italic-codes/walk.js [neighbour]
+//                 shared/playwright/checks/sync/pkp-lib-13807/walk.js [neighbour]
 // Run (3.5):    PKP_E2E_LINE=stable-3_5_0 in front of both, the line fleet's feature, PROBE_RUN=r35.
-// The fix:      node bin/try-fix.js apply …/fix-ojs.diff ojs; …/fix-ops.diff ops (PROBE_RUN=fix, nb-in, nb-out)
 // Facts: .reports/<feature>/k5/a30-facts-<mode>[-<run>]-<app>.json; files a30-<mode>-<work>[-<run>]-<app>.xml
 const fs = require('fs');
 const path = require('path');

@@ -1,6 +1,6 @@
 <?php
 // PR review of pkp/pkp-lib#13807 (crossref-ojs#123, crossref-ops#80 on stable-3_4_0, where walk.js of
-// checks/issues/crossref-title-ampersand-italic-codes does not drive the screens). On a dataset fleet: turns
+// walk.js does not drive the screens). On a dataset fleet: turns
 // DOIs on (prefix 10.1234, articles/preprints, agency Crossref, the Crossref plugin enabled with a depositor),
 // stores each work's "Title", "Subtitle" and "Prefix" as the rich-text boxes save them, assigns its DOI and
 // builds the Crossref file with the plugin's own exportXML() (validation off). Prints one JSON line: per work
