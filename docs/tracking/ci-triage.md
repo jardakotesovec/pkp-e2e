@@ -1123,6 +1123,17 @@ trips.
   `/contributors` timed out (`apps/ops/playwright/pages/ContributorPages.js:425`,
   from the spec's line 1327). **Watch condition**: a second sighting.
 
+- **OMP U53 S6's Site Administrator row reads "Production editor"** (OMP,
+  once, pkp-e2e branch `rev-2026-11-19` run
+  [44479869721](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44479869721),
+  2026-11-19, omp 3/3; green on the retry). In the "Merge user" window of
+  S6's own scratch press, `rolesCell('admin@mail.test')` expected
+  "Press manager" and received "Production editor"
+  (`apps/omp/playwright/tests/U53-users-management.spec.js`, S6); the
+  branch's change (U24's suites) seeds nothing in that press. **Watch
+  condition**: a second sighting; then a diagnostician (which of the
+  administrator's groups in a new press the cell shows, and in what order).
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull

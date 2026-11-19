@@ -1,26 +1,41 @@
 // Helpers of walk.js (U71 OMP7 with U24 A6: the review stage's own side-menu entry opens a page
 // that belongs to no round; docs/issues/U71-OMP7-review-stage-entry-page-of-no-round.md).
-// Requiring this file runs nothing. The workflow's address is
-// ../change-file-keeps-first-upload/lib.js's, the heading read
-// ../author-revision-filed-on-earlier-internal-round/lib.js's.
+// Requiring this file runs nothing. Self-contained: `flat` and `openWorkflow` were copied from
+// ../change-file-keeps-first-upload/lib.js, `workflowHeading` from
+// ../author-revision-filed-on-earlier-internal-round/lib.js.
 const {idle, sql, settled} = require('../../../probe');
-const W = require('../change-file-keeps-first-upload/lib.js');
-const D = require('../author-revision-filed-on-earlier-internal-round/lib.js');
 
 const T = 60_000;
+
+/** One line of text, at most `n` characters. */
+const flat = (s, n = 600) => (s == null ? s : String(s).replace(/\s+/g, ' ').trim().slice(0, n));
+const W = {flat};
+
+/** Open a submission's workflow by address (the dashboard's "View"), optionally on a side-menu page. */
+async function openWorkflow(page, app, id, menuKey, view = 'editorial') {
+    const locale = app.line === 'stable-3_4_0' || app.line === 'stable-3_3_0' ? '' : '/en';
+    await page.goto(app.url(`/index.php/${app.contextPath}${locale}/dashboard/${view}?workflowSubmissionId=${id}${menuKey ? `&workflowMenuKey=${menuKey}` : ''}`));
+    await idle(page);
+}
+
+/** The open workflow's "Workflow: …" heading. */
+const workflowHeading = async (page) => {
+    const h = page.locator('[role="dialog"]:visible').first().getByRole('heading', {name: /^Workflow:/}).first();
+    return flat(await h.innerText().catch(() => null), 120);
+};
 
 /** Collect the page's console errors and uncaught errors; `take()` returns those since the last take. */
 function watchErrors(page) {
     let seen = [];
-    page.on('console', (m) => { if (m.type() === 'error') seen.push(W.flat(m.text(), 260)); });
-    page.on('pageerror', (e) => seen.push(`pageerror: ${W.flat(e.message, 260)}`));
+    page.on('console', (m) => { if (m.type() === 'error') seen.push(W.flat(m.text(), 2000)); });
+    page.on('pageerror', (e) => seen.push(`pageerror: ${W.flat(e.stack || e.message, 2000)}`));
     return {take: () => { const out = seen; seen = []; return out; }};
 }
 
 /** Open the submission's workflow from the dashboard's address ("My Submissions" for an author), on `key` when given. */
 async function open(page, app, id, {author = false, key} = {}) {
     await page.goto('about:blank');
-    await W.openWorkflow(page, app, id, key, author ? 'mySubmissions' : 'editorial');
+    await openWorkflow(page, app, id, key, author ? 'mySubmissions' : 'editorial');
     await page.locator('[data-cy="sidemodal-header"]').first().waitFor({timeout: T});
     await idle(page);
     await page.waitForTimeout(700);
@@ -88,7 +103,7 @@ async function state(page) {
     const lines = (await win.locator('[data-cy="workflow-primary-items"]').first().innerText().catch(() => '')).split('\n').map((l) => l.trim()).filter(Boolean);
     const at = lines.findIndex((l) => /^(round \d+ )?status$/i.test(l));
     return {
-        heading: await D.workflowHeading(page),
+        heading: await workflowHeading(page),
         key: new URL(page.url()).searchParams.get('workflowMenuKey'),
         status: at < 0 ? null : `${lines[at]} / ${lines[at + 1] || ''}`,
         panels: await texts('[data-cy="workflow-primary-items"] h3:visible'),
@@ -125,4 +140,4 @@ function rounds(app, submissionId) {
     return out ? out.split('\n').map((l) => { const [id, stageId, round] = l.split('|').map(Number); return {id, stageId, round}; }) : [];
 }
 
-module.exports = {T, watchErrors, open, reload, menu, pressEntry, rows, state, addReviewer, rounds};
+module.exports = {T, flat, openWorkflow, workflowHeading, watchErrors, open, reload, menu, pressEntry, rows, state, addReviewer, rounds};

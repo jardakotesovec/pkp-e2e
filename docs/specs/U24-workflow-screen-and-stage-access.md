@@ -1516,9 +1516,10 @@ Basis: probe, 2026-10-02. <sup>[f-a5](#fn-a5)</sup>
 **A6 — Pressing "Review" in the workflow's side menu opens a page with no round: wrong status, no reviewers, "Add Reviewer" refused** · 🐞 · medium · crash: script.
 Pressing the stage's name in the workflow's side menu opens a review
 page with no round selected, and the page's script fails in the
-browser: in the author's view, and on a journal in the editorial view
-too. The stage's name is the line the review rounds are listed under:
-"Review" on a journal, "Internal Review" or "External Review" on a press.
+browser: in the author's view, and, on a journal's `main` branch, in
+the editorial view too. The stage's name is the side-menu entry the
+review rounds are listed under: "Review" on a journal, "Internal
+Review" or "External Review" on a press.
 
 The editor sees a "Status" box reading "The submission has been
 advanced to the next round of review" while Round 1 is the only round
@@ -1531,9 +1532,11 @@ the stage's name was pressed from, which stays as it was: the round's
 page, or a later stage's "The Production stage has not yet been
 initiated." box; after a reload the heading stands over an empty page.
 
-The page opens only when someone presses the stage's name; the app
-never opens it by itself. It does so for every submission with a
-review round, and has since 3.5.0, the first release with this menu.
+On a journal's `main` the editor's "Author Response" panel goes wrong
+as well: it keeps the round's row and "Request Response" button, or
+is missing when the page is opened from another page. Nothing else
+shows the script errors. The page opens for every submission with a
+review round, and only when someone presses the stage's name.
 
 Re-checked: claim check (claude), 2026-09-28 — was ❓ (which of the two
 the entry should do); a defect either way, since its "Add Reviewer" and the

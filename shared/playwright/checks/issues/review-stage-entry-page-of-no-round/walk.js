@@ -6,8 +6,9 @@
 //
 // MODE=walk (default), per case (OJS 12 "Review"; OMP 17 "Internal Review", OMP 2 "External Review"):
 //   1 sign in as dbarnes, open the submission from the dashboard; 2 press the stage's entry;
-//   3 "Add Reviewer"; 4 sign in as the author, open it from My Submissions; 5 press the entry;
-//   6 reload the page.
+//   3 "Add Reviewer"; 4 press "Production"; 5 press the stage's entry again;
+//   6 sign in as the author, open it from My Submissions; 7 press the entry; 8 reload the page;
+//   9 press "Production"; 10 press the stage's entry again.
 // MODE=nb, the neighbour alone (with a fix in and out), every step recorded, none throwing:
 //   a review stage without a round (OJS 4 "Review", OMP 16 "Internal Review"), editor and author:
 //     the entry is still a page of its own;
@@ -21,8 +22,8 @@
 // Run (3.5):    PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 in front, with the 3.5 fleet's feature.
 // Facts: .reports/<feature>/<id>/entry-facts-<mode>[-<run>]-<app>.json
 const {forEachApp, launch, signIn, screen, shot, record, idle} = require('../../../probe');
-const W = require('../change-file-keeps-first-upload/lib.js');
 const H = require('./lib.js');
+const W = {flat: H.flat};
 
 const MODE = process.env.MODE || 'walk';
 const CASES = {
@@ -82,11 +83,15 @@ forEachApp(async (app) => {
                 await step(`${c.key}-1-editorOpens`, () => H.open(page, app, c.id));                 // 1
                 await step(`${c.key}-2-editorPresses`, () => H.pressEntry(page, c.entry));           // 2
                 await step(`${c.key}-3-addReviewer`, () => H.addReviewer(page));                     // 3
+                await step(`${c.key}-4-editorPressesLater`, () => H.pressEntry(page, 'Production')); // 4
+                await step(`${c.key}-5-editorPressesAgain`, () => H.pressEntry(page, c.entry));      // 5
                 await signIn(page, c.author);
                 errors.take();
-                await step(`${c.key}-4-authorOpens`, () => H.open(page, app, c.id, {author: true})); // 4
-                await step(`${c.key}-5-authorPresses`, () => H.pressEntry(page, c.entry));           // 5
-                await step(`${c.key}-6-authorReloads`, () => H.reload(page));                        // 6
+                await step(`${c.key}-6-authorOpens`, () => H.open(page, app, c.id, {author: true})); // 6
+                await step(`${c.key}-7-authorPresses`, () => H.pressEntry(page, c.entry));           // 7
+                await step(`${c.key}-8-authorReloads`, () => H.reload(page));                        // 8
+                await step(`${c.key}-9-authorPressesLater`, () => H.pressEntry(page, 'Production')); // 9
+                await step(`${c.key}-10-authorPressesAgain`, () => H.pressEntry(page, c.entry));     // 10
                 continue;
             }
             for (const who of c.both ? ['dbarnes', c.author] : ['dbarnes']) {
