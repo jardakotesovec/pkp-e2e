@@ -1,0 +1,14 @@
+diff --git a/src/pages/workflow/components/publication/WorkflowPublicationBodyTextPDFMetadata.js b/src/pages/workflow/components/publication/WorkflowPublicationBodyTextPDFMetadata.js
+index d455ca46..bd671745 100644
+--- a/src/pages/workflow/components/publication/WorkflowPublicationBodyTextPDFMetadata.js
++++ b/src/pages/workflow/components/publication/WorkflowPublicationBodyTextPDFMetadata.js
+@@ -53,7 +53,8 @@ function renderCitation({publication, journalTitle, issue, localize, t}) {
+ function renderTitle({publication, localize}) {
+ 	const title = localize(publication.fullTitle) || localize(publication.title);
+ 	if (!title?.trim()) return '';
+-	return `<h1 class="publication-pdf-title">${escapeHTML(title)}</h1>`;
++	// Titles may carry inline HTML (<i>, <b>, <sup>, <sub>); the shared PDF pipeline sanitizes it.
++	return `<h1 class="publication-pdf-title">${title}</h1>`;
+ }
+ 
+ function renderAuthors({publication, localize, t}) {
