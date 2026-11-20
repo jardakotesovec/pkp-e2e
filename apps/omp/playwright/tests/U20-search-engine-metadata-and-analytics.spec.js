@@ -9,8 +9,9 @@
  * inline ("Catalog", "New Releases", the series and category pages in the
  * sitemap, the book's chapter page and "PDF" file entries, the unpublish
  * and publish-again reads of S2, "citation_publisher" and
- * "citation_publication_date", the file for sale and the book's file page
- * in S6 and the earlier version's file page in S7), and S9 {OMP}, a
+ * "citation_publication_date", the file for sale, the book's several
+ * files and the book's file page in S6, the earlier version's file page
+ * and the chapter in the sitemap in S7), and S9 {OMP}, a
  * chapter's page and the book's file view pages. The
  * {OJS} bullets (issues, "Search", "Current", "Archive", the journal's
  * issue, section and keyword tags) and the {OPS} one (no Dublin Core
@@ -22,9 +23,6 @@
  * spec's Coverage section is the record of everything else left out):
  * - OMP3 🐞, OMP5 🐞: no page's "DC.Type" is read but the book's
  *   ("Text.Book"), and no file view page's "DC.Identifier.URI".
- * - The sitemap after "Create New Version" (Rule 2c), a book with two PDF
- *   files outside its chapters, and an EPUB beside an HTML file (the
- *   Google Scholar table): Planned in the spec's Coverage.
  * - OMP7 🐞: no URN is assigned.
  * - A1 🐞, A5 🐞, A6 🐞, A7 🐞: no description with a quote mark or
  *   markup, no expired announcement, no contributor without names in the
@@ -111,6 +109,13 @@ const WIZARD_FIRST_TAB = 'Setup';
 const GENERATOR = /^Open Monograph Press \d+\.\d+\.\d+\.\d+$/;
 const CUSTOM_TAG = '<meta name="u20-check" content="custom">';
 const PDF_FORMAT = [{name: 'PDF', file: 'article.pdf'}];
+/** S6's "Tide Tables": two PDF files, an HTML file and a Markdown file, each open access, no ISBN. */
+const TABLES_FORMATS = [
+    {name: 'PDF', file: 'article.pdf'},
+    {name: 'PDF Two', file: 'replacement.pdf'},
+    {name: 'HTML', file: 'article.html'},
+    {name: 'Notes', file: 'notes.md'},
+];
 
 /** A visitor's page: a second browser context with no session at all (parallel lesson 8). */
 const test = base.extend({
@@ -738,6 +743,10 @@ test.describe('Search-engine metadata & analytics', () => {
             published: true,
             publicationFormats: [{name: 'PDF', file: 'article.pdf', price: '25'}],
         });
+        const tables = await seedBook(ompApi, tag, 'Tide Tables', {
+            published: true,
+            publicationFormats: TABLES_FORMATS,
+        });
         const page = await actorPage(asUser, `${tag}mg`);
         const dublinCore = new PluginRow(page, tag, PLUGIN_IDS.dublinCore);
         const scholar = new PluginRow(page, tag, PLUGIN_IDS.googleScholar);
@@ -806,6 +815,47 @@ test.describe('Search-engine metadata & analytics', () => {
         await visitor.goto(pathOf(salePdf[0]));
         await expect(visitor).toHaveURL(new RegExp(`/index\\.php/${tag}/login\\?source=`));
         await expect(new LoginPage(visitor).form).toBeVisible({timeout: 30_000});
+
+        // A book's several files: the book's page of "Tide Tables" carries
+        // two "citation_pdf_url", each a different address, the download
+        // addresses of "PDF" and "PDF Two", and one
+        // "citation_fulltext_html_url", that of "HTML"; opened, the two PDF
+        // addresses save article.pdf and replacement.pdf, one each, and the
+        // HTML one opens article.html (T-omp-1, below). No
+        // tag leads to the "Notes" format's notes.md, beside the "Notes"
+        // link the same page shows (Rule 12; Fields, "citation_pdf_url",
+        // "citation_fulltext_html_url").
+        const tablesId = tables.submissionId;
+        const tablesFormat = (name) => tables.publicationFormats.find((f) => f.name === name);
+        const tablesSource = await readSource(visitor, bookPath(tag, tablesId));
+        expect(tablesSource.status).toBe(200);
+        expect(metaContents(tablesSource, 'citation_title')).toEqual(['Tide Tables']);
+        const tablesPdfs = metaContents(tablesSource, 'citation_pdf_url').map(pathOf);
+        const tablesHtml = metaContents(tablesSource, 'citation_fulltext_html_url').map(pathOf);
+        expect(tablesPdfs).toHaveLength(2);
+        expect(new Set(tablesPdfs).size).toBe(2);
+        expect([...tablesPdfs].sort()).toEqual(
+            [fileDownloadPath(tag, tablesId, tablesFormat('PDF')), fileDownloadPath(tag, tablesId, tablesFormat('PDF Two'))].sort()
+        );
+        expect(tablesHtml).toEqual([fileDownloadPath(tag, tablesId, tablesFormat('HTML'))]);
+        const notesPath = fileDownloadPath(tag, tablesId, tablesFormat('Notes'));
+        await expect(formatLink(visitor, 'Notes')).toHaveCount(1);
+        await expect(formatLink(visitor, 'Notes')).toHaveAttribute('href', new RegExp(`/${tablesFormat('Notes').id}/${tablesFormat('Notes').submissionFileId}$`));
+        expect([...tablesPdfs, ...tablesHtml]).not.toContain(notesPath);
+        const savedPdfs = [];
+        for (const address of tablesPdfs) {
+            const {download} = await captureDownload(visitor, () => visitor.goto(address).catch(() => {}));
+            savedPdfs.push(download.suggestedFilename());
+        }
+        expect(savedPdfs.sort()).toEqual(['article.pdf', 'replacement.pdf']);
+        // The HTML address shows the HTML file in the browser rather than
+        // saving it ("HTML Monograph File" serves it; T-omp-1's reading,
+        // .reports/U20/test-omp-findings.md, pending the fold).
+        const shownHtml = await readSource(visitor, tablesHtml[0]);
+        expect(shownHtml.status).toBe(200);
+        expect(pathOf(shownHtml.url)).toBe(tablesHtml[0]);
+        await expect(visitor.getByRole('heading', {name: 'Article', level: 1})).toBeVisible({timeout: 30_000});
+        await expect(visitor.getByText('A small HTML file for the "Dependent Files" scenario (U36).')).toBeVisible();
         await visitor.goto(bookPage);
 
         // The book's file page: the "PDF" format's link on the book's page
@@ -872,7 +922,13 @@ test.describe('Search-engine metadata & analytics', () => {
         test.setTimeout(300_000);
         const tag = makeTag('s7', testInfo);
         await seedPress(ompApi, tag);
-        const {submissionId: bookId} = await seedBook(ompApi, tag, 'Tidal Patterns', {published: true, publicationFormats: PDF_FORMAT});
+        const book = await seedBook(ompApi, tag, 'Tidal Patterns', {
+            published: true,
+            publicationFormats: PDF_FORMAT,
+            chapters: [{title: 'Chapter One Tides', page: true}],
+        });
+        const bookId = book.submissionId;
+        const chapterPath = bookPath(tag, bookId) + `/chapter/${book.chapters[0].id}`;
         const bookPage = bookPath(tag, bookId);
         const page = await actorPage(asUser, `${tag}mg`);
 
@@ -927,6 +983,27 @@ test.describe('Search-engine metadata & analytics', () => {
         expect(metaContents(oldFile, 'generator')).toHaveLength(1);
         expect(metasMatching(oldFile, /^DC\./)).toEqual([]);
         expect(metaContents(oldFile, 'robots')).toEqual([]);
+
+        // The chapter in the sitemap: the book's page follows "Catalog", and
+        // the entry after it is the address "Chapter One Tides" in the book
+        // page's table of contents leads to, the one it had before the new
+        // version; followed, it opens the chapter's page (Rule 2c; Fields,
+        // "What the sitemap lists").
+        const sitemap = await readSitemap(visitor, sitemapPath(tag));
+        expect(sitemap.status).toBe(200);
+        const catalog = sitemap.paths.indexOf(at(tag, '/catalog'));
+        expect(catalog).toBeGreaterThan(0);
+        expect(sitemap.paths[catalog + 1]).toBe(bookPage);
+        await visitor.goto(bookPage);
+        const tocLink = visitor.getByRole('link', {name: 'Chapter One Tides', exact: true});
+        await expect(tocLink).toHaveCount(1, {timeout: 30_000});
+        const tocPath = pathOf(new URL((await tocLink.getAttribute('href')) || '', visitor.url()).href);
+        expect(tocPath).toBe(chapterPath);
+        expect(sitemap.paths[catalog + 2]).toBe(tocPath);
+        const chapterPage = await readSource(visitor, sitemap.paths[catalog + 2]);
+        expect(chapterPage.status).toBe(200);
+        await expect(visitor.getByRole('heading', {name: 'Chapter One Tides', level: 1})).toBeVisible({timeout: 30_000});
+        expect(pathOf(chapterPage.url)).toBe(chapterPath);
     });
 
     test('S8: "Google Analytics Plugin": the number and the script', async ({asUser, ompApi, visitor}, testInfo) => {
