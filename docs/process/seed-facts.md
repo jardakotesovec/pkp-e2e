@@ -715,7 +715,7 @@ validation-variant server (harness.md) covers the config-file settings.
   Discussions. OJS and OMP.
 - A seeded submission's contributor has no Country, so the workflow's
   Contributors › "Edit" refuses "Save" until one is picked (a Bio Statement
-  too needs it first). OJS and OPS.
+  too needs it first). OJS, OMP and OPS.
 - {OMP} A book seeded with the Press manager as `submitter` has no contributor
   (its Contributors page reads "No items found."), so its "How to Cite" opens
   with the title.

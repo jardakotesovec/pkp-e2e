@@ -45,9 +45,9 @@ always editable there. <sup>a</sup> <sup>b</sup>
 | **See the Contributors list (workflow)** | • any role whose workflow view includes the Publication area: Journal Manager, Editor, Site Administrator, and assigned Section Editors, Guest Editors, Assistants and the submission's Author. The "Contributors" entry is always present, and no setting removes it. Which roles reach the workflow screen at all is the workflow screen's own rule ([→ stage access](U24-workflow-screen-and-stage-access.md#stage-access)); whether the Publication area shows is [→ the Publication tabs](U24-workflow-screen-and-stage-access.md#publication-tabs). <sup>a</sup> |
 | **Add / edit / delete / reorder contributors, set the primary contact** | • whoever may currently edit the publication's metadata ([→ edit gate](U40-publication-metadata.md#edit-gate)). Everyone else sees the read-only list (Rule 9).<br>• on a preprint server, that includes the submitting author on their own not-yet-posted preprint. On a journal or press the author's workflow list is read-only [OPS1](#ops1). <sup>b</sup> |
 | **Edit contributors while submitting (wizard)** | • the submitting author. The wizard's Contributors step is always present and always editable. The step's place in the flow and its submit gates belong to the *[Submission wizard](U21-submission-wizard.md)*. <sup>i</sup> |
-| **Manage the journal's contributor roles** | • Journal Manager, and a Site Administrator working in the journal, on the "Contributor Roles" settings screen (Rule 12). <sup>e</sup> |
+| **Manage the journal's contributor roles** | • Journal Manager, Editor, and a Site Administrator working in the journal, on the "Contributor Roles" settings screen (Rule 12).<br>• an assigned Section Editor who opens that screen gets the access-denied page. <sup>e</sup> |
 | **See contributors on reader pages** | • any reader, on a published item's landing page and in the listing pages' author lines (Rules 14–15). <sup>h</sup> |
-| **Require competing-interest statements** | • Journal Manager, and a Site Administrator working in the journal, on the workflow settings' Metadata screen (Settings that modify behavior). <sup>j</sup> |
+| **Require competing-interest statements** | • Journal Manager, Editor, and a Site Administrator working in the journal, on the workflow settings' Metadata screen (Settings that modify behavior). <sup>j</sup> |
 
 ## Fields & validation
 
@@ -63,12 +63,16 @@ Only the submission language's copy is ever required. A save with a
 required field missing never leaves the form. **"This field is required."**
 appears in red under the field. The form's foot shows **"Please correct one
 error."**, or **"Please correct {n} errors."** when there are several, with
-a **"Jump to next error"** link until every error is fixed. After a refused
-save, Save stays disabled until no flagged field carries its error;
-editing a flagged field clears that field's message alone. The server
-can also refuse a save the form itself let through. The same foot then counts and lists the server's reasons as
-"Go to {Field}: {message}" buttons, and the page shows "The form was not saved because {n}
-error(s) were encountered. Please correct these errors and try again." Where a
+a **"Jump to next error"** link until every error is fixed. The foot
+also holds a list of the errors that a screen reader reads and the
+screen does not show, naming each as "Go to {Field}: {message}" ("Go to
+Given Name: This field is required."). After a refused save, Save stays
+disabled until no flagged field carries its error; editing a flagged
+field clears that field's message alone. The server can also refuse a
+save the form itself let through. The same foot then counts the
+server's reasons, its screen-reader list names them the same way, and
+the page shows "The form was not saved because {n} error(s) were
+encountered. Please correct these errors and try again." Where a
 "Forms" language is not a metadata language (Settings that modify
 behavior), the reasons can name fields the chosen type lacks, for a
 Person "Go to Organization Name: This language is not accepted.", which
@@ -89,9 +93,9 @@ nothing typed into its own fields clears, so Save stays disabled
 | **ORCID iD** | No | Person only. Present only while the journal has ORCID enabled. The field's states, its "Request verification" flow and iD removal are owned by *[ORCID integration](U04-orcid-integration.md)*. |
 | **Competing Interests** | Yes, when shown | Rich text, multilingual. Present only when the journal requires competing-interest statements (Settings that modify behavior). Guidance: "Please disclose any competing interests this author may have with the research subject." Saving it empty is stopped as a missing required field (the refusal described above this table). On a preprint server the field's label renders as raw code-like text instead of the plain "Competing Interests" ⚠ [OPS2](#ops2). <sup>j</sup> |
 | **Bio Statement (e.g., department and rank)** | No | Rich text, multilingual. |
-| **Affiliations** | No | The contributor's institution list, any number of entries. Guidance: 'Enter the full name of the institution below, avoiding any acronyms. Select the name from the dropdown and click "Add" to include the affiliation in your profile (e.g. "Simon Fraser University")'. Typing under "Type the institution name in {language}" queries the public ROR registry as you type, from four characters on, straight from your own browser. Each suggestion shows the institution's name, country, the ROR mark and a link to its registry record. You can also pick your typed text itself, offered first as a bare label, to record a hand-typed institution. "Add" appears only once a suggestion is picked. There is no Add button before that, and text typed but never picked is silently dropped when the form is saved ⚠ [A8](#a8). "Add" puts the institution at the end of the list. The list keeps the order of adding and has no control to change it; the reader's page does not always follow it ⚠ [A26](#a26). While a picked entry sits under "Selected", the search box is disabled: add or remove the entry before typing a new query. A registry-backed entry's identity is fixed. Its row links to the registry record, its name comes from the registry, and its only action is "Remove institution". A typed entry carries one name box per submission language ("Type the institution name in {language}"). A screen reader announces those boxes wrongly ⚠ [A10](#a10). It also shows a completeness status: "{count} of {total} languages completed" while incomplete, "All translations available" once every language is filled. That total may follow the publication's own language set rather than the journal's ⚠ [A17](#a17). A typed entry offers both "Edit institution name" and "Remove institution"; the two actions sit behind the row's expander button, named "Click to edit or delete". A save without the submission language's name is refused with "Please provide affiliation name in the submission primary locale." under the field and "Please correct one error." at the form's foot. The foot's error list, which only a screen reader reads, names that refusal "Go to Affiliations: [object Object]" ⚠ [A7](#a7). A refused "Edit" saves nothing. A refused "Add Contributor" has already added the contributor, without the institution, so the corrected save adds the same contributor a second time ⚠ [A24](#a24). A program that edits the contributor without resending the list removes every entry ([A30](#a30), Rule 4a). A typed entry's name saved in a language that is later unticked under "Metadata" (Settings that modify behavior) loses its box. On a submission with no other text in that language, "Save" in that contributor's "Edit" is then refused, even with nothing changed, and no field shows a reason ⚠ [A28](#a28). Removing asks "Are you sure?" with "The affiliation {name} will be deleted." (Yes/No). When a registry search fails, an "ROR API Error" dialog explains why. There are three distinct messages (rate-limited, unavailable or deprecated), each dismissed with "OK", and the text just searched is left pre-picked as a typed entry. Registry suggestions do not come back after the dialog. They stay off until the Edit panel is closed and reopened, whatever the dialog's own advice says ⚠ [A11](#a11). Hand-typed entry keeps working throughout. <sup>d</sup> |
+| **Affiliations** | No | The contributor's institution list, any number of entries. Guidance: 'Enter the full name of the institution below, avoiding any acronyms. Select the name from the dropdown and click "Add" to include the affiliation in your profile (e.g. "Simon Fraser University")'. Typing under "Type the institution name in {language}" queries the public ROR registry as you type, from four characters on, straight from your own browser. Each suggestion shows the institution's name, country, the ROR mark and a link to its registry record. You can also pick your typed text itself, offered first as a bare label, to record a hand-typed institution. "Add" appears only once a suggestion is picked. There is no Add button before that, and text typed but never picked is silently dropped when the form is saved ⚠ [A8](#a8). "Add" puts the institution at the end of the list. The list keeps the order of adding and has no control to change it; the reader's page does not always follow it ⚠ [A26](#a26). While a picked entry sits under "Selected", the search box is disabled: add or remove the entry before typing a new query. A registry-backed entry's identity is fixed. Its row links to the registry record, its name comes from the registry, and its only action is "Remove institution". A typed entry carries one name box, "Type the institution name in {language}", per language ticked under "Metadata" on the journal's "Languages" tab. A screen reader announces those boxes wrongly ⚠ [A10](#a10). It also shows a completeness status: "{count} of {total} languages completed" while incomplete, "All translations available" once every language is filled. The total counts those same languages, whatever languages the submission itself holds: a fresh entry reads "1 of 2 languages completed" on a journal with two, and "All translations available" on a journal with English alone. A typed entry offers both "Edit institution name" and "Remove institution"; the two actions sit behind the row's expander button, named "Click to edit or delete". A save without the submission language's name is refused with "Please provide affiliation name in the submission primary locale." under the field and "Please correct one error." at the form's foot. The foot's error list, which only a screen reader reads, names that refusal "Go to Affiliations: [object Object]" ⚠ [A7](#a7). A refused "Edit" saves nothing. A refused "Add Contributor" has already added the contributor, without the institution, so the corrected save adds the same contributor a second time ⚠ [A24](#a24). A program that edits the contributor without resending the list removes every entry ([A30](#a30), Rule 4a). A typed entry's name saved in a language that is later unticked under "Metadata" (Settings that modify behavior) loses its box. On a submission with no other text in that language, "Save" in that contributor's "Edit" is then refused, even with nothing changed, and no field shows a reason ⚠ [A28](#a28). Removing asks "Are you sure?" with "The affiliation {name} will be deleted." (Yes/No). When a registry search fails, an "ROR API Error" dialog explains why, in one of three messages: "Too many requests have been sent to the ROR API. Please wait a moment before continuing to search.", "The ROR API service is currently unavailable. Please refresh the page or try again later." or "The ROR API service in this installation is deprecated. Please contact your system administrator." Each is dismissed with "OK". The text just searched is then left picked under "Selected" as a typed entry, and the search box stays disabled until that entry's "Remove {text}" is pressed. Registry suggestions do not come back after the dialog. They stay off until the Edit panel is closed and reopened, whatever the dialog's own advice says ⚠ [A11](#a11). Hand-typed entry keeps working throughout. <sup>d</sup> |
 | **Contributor Roles** | Yes | One checkbox per role the journal defines (Rule 11). At least one must be ticked; a save with none is stopped as a missing required field (the refusal described above this table). When the journal has exactly one role, the field disappears. Every contributor save from the form then fails, leaving role-less contributors behind ⚠ [A14](#a14). <sup>c</sup> |
-| **CRediT roles and the degrees of contribution** | No | Guidance: "Select the CRediT roles of the contributor and the degrees of contribution." A table with one row per role, empty ("No Items") until "Add Another Role" is pressed. Each row has a "Select a new role (required)" drop-down of the standard CRediT taxonomy, a "Degree" drop-down ("Lead", "Equal", "Supporting") and "Remove Role". A new row arrives on the list's first role, "Conceptualization", with "Degree" empty, even beside another "Conceptualization" row. Saved with "Degree" still empty, the contributor keeps the role with no degree; what "Save" does with two rows on one role was not seen. Every row's list grays out a role any row shows. From the second row on, the drop-downs are not tied to their labels: a click on a label lands in the first row ⚠ [A25](#a25). Shown on the landing page (Rule 14). The form offers no degree but those three or none; a program that saves a contributor through the install's programming interface (the one programs outside the apps call) with any other degree gets a server error, and part of its change is kept ⚠ [A29](#a29). <sup>c</sup> |
+| **CRediT roles and the degrees of contribution** | No | Guidance: "Select the CRediT roles of the contributor and the degrees of contribution." A table with one row per role, empty ("No Items") until "Add Another Role" is pressed. Each row has a "Select a new role (required)" drop-down of the standard CRediT taxonomy, a "Degree" drop-down ("Lead", "Equal", "Supporting") and "Remove Role". A new row arrives on the list's first role, "Conceptualization", with "Degree" empty, even beside another "Conceptualization" row. Saved with "Degree" still empty, the contributor keeps the role with no degree. Two rows left on the same role save without a word, and the reopened form holds that role once. Every row's list grays out a role any row shows. From the second row on, the drop-downs are not tied to their labels: a click on a label lands in the first row ⚠ [A25](#a25). Shown on the landing page (Rule 14). The form offers no degree but those three or none; a program that saves a contributor through the install's programming interface (the one programs outside the apps call) with any other degree gets a server error, and part of its change is kept ⚠ [A29](#a29). <sup>c</sup> |
 | **Publication Lists** | No | One checkbox, ticked by default: "Include this contributor when identifying authors in lists of publications." (Rule 8, and its limits in practice, ⚠ [A3](#a3)). |
 
 **The "Add Role" / "Edit Role" panel** (the Contributor Roles settings
@@ -123,8 +127,10 @@ screen, Rule 12): <sup>e</sup>
    **"Delete"**. An Anonymous contributor's row is titled with the literal
    word **"Anonymous"**. That word serves as the name in every place the
    list feeds: the Delete confirmation's "{name}", the three Preview
-   formats (Rule 7), and the reader pages' credits and author lines
-   (Rules 14–15). Nothing there distinguishes the entry from a person
+   formats (Rule 7), the reader pages' credits and author lines
+   (Rules 14–15), and the search-engine tags of the item's page
+   (*[Search-engine metadata & analytics](U20-search-engine-metadata-and-analytics.md)*).
+   Nothing there distinguishes the entry from a person
    actually named Anonymous. The row never shows the contributor's
    affiliations, although the list reserves a line under the name for
    exactly that ⚠ [A1](#a1). <sup>a</sup>
@@ -177,7 +183,8 @@ screen, Rule 12): <sup>e</sup>
    any warning or replacement ⚠ [A2](#a2). <sup>f</sup>
 6. **Ordering.** "Order" puts the list in ordering mode. "Preview" and
    "Add Contributor" give way to a **"Cancel"** button, "Order" itself is
-   relabeled **"Save Order"**, and each row shows up/down arrows. For
+   relabeled **"Save Order"**, and each row shows up/down arrows in
+   place of its buttons and its "Primary Contact" badge. For
    assistive technology the arrows are named "Increase position of
    {name}" and "Decrease position of {name}". "Save Order" saves the
    sequence everywhere the list appears. "Cancel" restores the order from
@@ -222,7 +229,10 @@ screen, Rule 12): <sup>e</sup>
    who leads the author line. <sup>a</sup> <sup>h</sup>
 9. **Read-only presentation.** Some viewers may not edit the publication
    (Actors & permissions). On a journal or press the submission's own
-   Author is such a viewer. For them the same list shows only the rows,
+   Author is such a viewer. So is, at the install defaults, an assigned
+   Guest Editor on a journal, and an assigned Copyeditor on a journal or
+   press once the item is published. For them the same list shows only
+   the rows,
    with names and role badges, and the "Preview" button. "Order", "Add
    Contributor" and every row action are absent. The "Primary Contact"
    badge disappears with them, so a read-only viewer cannot tell which
@@ -241,14 +251,19 @@ screen, Rule 12): <sup>e</sup>
     preprint server starts with two: "Author" (identifier AUTHOR) and
     "Translator" (identifier TRANSLATOR). A new press starts with four:
     those two plus "Chapter Author" (also identifier AUTHOR) and "Volume
-    editor" (identifier EDITOR). Each arrives named in the journal's
-    primary language only: its box for any other "Forms" language is
-    empty ⚠ [A21](#a21). The submitting author's auto-created
-    contributor gets the journal's first AUTHOR-identifier role. A
-    journal or press upgraded from version 3.5 holds the same roles as a
-    new one. A preprint server upgraded from 3.5 holds "Author" alone, so
-    its contributor form cannot save until a second role is added
-    ([A14](#a14)). <sup>e</sup>
+    editor" (identifier EDITOR). On a new journal each arrives named in
+    the journal's primary language only: its box for any other "Forms"
+    language is empty ⚠ [A21](#a21). The submitting author's
+    auto-created contributor gets the journal's first AUTHOR-identifier
+    role. A journal or press upgraded from version 3.5 holds the same
+    roles, each named in every language that 3.5 named the role of the
+    same name in (Users & Roles › "Roles"). A journal whose roles had
+    French names there offers "Auteur-e" and "Traducteur-trice" as the
+    French names, and a press also "Auteur du chapitre" and
+    "Rédacteur/Rédactrice en chef du volume". A preprint
+    server upgraded from 3.5 holds "Author" alone ("Auteur-e" in
+    French), so its contributor form cannot save until a second role is
+    added ([A14](#a14)). <sup>e</sup>
 12. **The Contributor Roles screen.** Settings → Workflow → Submission →
     **"Contributor Roles"**. It is a table of **"Role Name"** and **"Role
     Identifier"**, with **"Add Role"** above it and "Edit" / "Delete Role"
@@ -260,8 +275,10 @@ screen, Rule 12): <sup>e</sup>
     the stored names. Before a reload, though, a changed name stays:
     "Edit" reopens the window with it, and a changed primary-language
     name shows on the row and is stored by the role's next "Save"
-    ⚠ [A22](#a22). "Add Role" was not tried.
-    <sup>e</sup>
+    ⚠ [A22](#a22). "Add Role" opens the same window empty, with
+    "0/{total} languages completed" under the name box, and its "Save"
+    adds the new row at the end of the table, with the same "Contributor
+    role saved" notice. <sup>e</sup>
 13. **Deleting a role.** "Delete Role" opens a type-to-confirm dialog:
     'Are you absolutely sure you want to delete "{identifier}" role?' Its
     warning lists the two preconditions: at least one AUTHOR role must
@@ -286,8 +303,8 @@ screen, Rule 12): <sup>e</sup>
     names (in the reader's language, Rule 15a), ORCID iD, and any CRediT
     roles, each followed by its degree in parentheses ("Conceptualization
     (Lead)"). The CRediT roles are in no released version yet, and their
-    degree words exist only in English, so
-    a journal's French article page prints the degree as a raw code,
+    degree words exist only in English, so a French landing page
+    (article, book or preprint) prints the degree as a raw code,
     "Conceptualisation
     (##submission.submit.creditRoles.degrees.lead##)"; why a missing
     translation shows as a code is
@@ -319,11 +336,11 @@ screen, Rule 12): <sup>e</sup>
     press's catalog, a preprint server's archive), each contributor role
     is named in the language the reader is browsing in. A role whose
     name is empty in that language (Fields, "Role Name") is named in the
-    journal's primary language instead. Every role arrives with its
-    French name empty ([A21](#a21)). So on a journal whose primary
-    language is English, a reader browsing in French sees "Author"
-    beside each contributor on the landing page and "{name} (Author)" in
-    the author lines. Once a Journal Manager saves "Auteur-e" as the
+    journal's primary language instead. Every role of a new journal
+    arrives with its French name empty ([A21](#a21)). So on such a
+    journal whose primary language is English, a reader browsing in
+    French sees "Author" beside each contributor on the landing page and
+    "{name} (Author)" in the author lines. Once a Journal Manager saves "Auteur-e" as the
     role's French name in its "Edit Role" window (Rule 12), the French
     pages read "Auteur-e" and "{name} (Auteur-e)", and the English pages
     still read "Author". <sup>h</sup>
@@ -331,9 +348,10 @@ screen, Rule 12): <sup>e</sup>
     either registry-backed or typed by hand. A typed one has per-language
     names (Fields & validation). A registry-backed one is identified by
     its ROR record. Its name, in every registry language, is read from
-    the install's own copy of the registry, downloaded at install and
-    refreshed monthly from the public registry data set. Registry search
-    runs from the user's own browser against the public registry.
+    the install's own copy of the registry.
+    No screen shows that copy, which is downloaded when the application is installed and refreshed monthly from the public registry data set.
+    Registry search runs from the user's own browser against the public
+    registry.
     Pressing "Add" on an institution the copy lacks has the journal's
     server fetch its record into the copy. When the server cannot reach
     the registry, "Add" raises an error dialog and the entry is added
@@ -367,13 +385,14 @@ screen, Rule 12): <sup>e</sup>
 - The one email in the flow: requesting a contributor's ORCID
   verification from the form sends that contributor the verification
   email. That email is owned by *[ORCID integration](U04-orcid-integration.md)*.
-- Adding a registry-backed affiliation that the install's registry copy
-  lacks stores the institution's record in that copy, with
-  names in all registry languages, invisibly to users (Rule 16).
-- Contributor data travels outward with the publication's metadata. DOI
-  registration, metadata export and citation displays carry the names,
-  roles, affiliations and ORCID iDs. Those surfaces belong to their own
-  features.
+- Adding a registry-backed affiliation the install's registry copy lacks stores that institution's record in the copy, which no screen shows;
+  the record, as read from the code, carries its names in all registry languages (Rule 16).
+- Contributor data travels outward with the publication's metadata: DOI
+  registration, metadata exports and the search-engine tags of the
+  item's page draw on the list. What each carries belongs to its own
+  feature (*[Identifiers](U44-identifiers.md)*,
+  *[Import & export](U63-import-export.md)*,
+  *[Search-engine metadata & analytics](U20-search-engine-metadata-and-analytics.md)*). <sup>h</sup>
 - Changing the submission language copies contributor names, and typed
   affiliation names, into the new language. The change-language flow
   belongs to *[Publication metadata](U40-publication-metadata.md)*.
@@ -555,9 +574,10 @@ footnote.
      "et al.", and "Full" as both names, each followed by "(Author)" and
      separated by a semicolon (Rules 6, 7).
    - **Save Order**: close it and press "Order": up/down arrows replace
-     the row buttons; move the second contributor up and press "Save
-     Order"; reload the page: the order holds, and "Abbreviated" in
-     Preview now names the other family name (Rule 6).
+     the row buttons and the "Primary Contact" badge; move the second
+     contributor up and press "Save Order"; reload the page: the order
+     holds, and "Abbreviated" in Preview now names the other family name
+     (Rule 6).
    - **Cancel**: press "Order" again, move a row and press "Cancel": the
      saved order is back (Rule 6).
    - **A new version**: open the first contributor's "Edit", under
@@ -602,11 +622,13 @@ footnote.
      public?"); the missing contact is never mentioned (⚠ [A2](#a2));
      back out with "Close": the window's only other button is "Publish",
      no Cancel. Nothing is published. On a journal the header's status
-     may no longer read "Unscheduled" and the Activity Log holds a second
+     then reads "Unpublished" and the Activity Log holds a second
      "Submission metadata updated" entry: the earlier "Confirm" recorded
      the version choice, a save on the publication itself, so both are
      expected, not a failure. On a preprint server the button reads
-     "Post" and opens "Post the preprint"; that window's own mechanics,
+     "Post" and opens "Post the preprint", which reads "All requirements
+     have been met." with no mention of the missing contact either; back
+     out with "Close" and nothing is posted. That window's own mechanics,
      like the journal's and the press's, belong to
      *[Publish, schedule & versions](U49-publish-schedule-and-versions.md)*.
    - **The last contributor**: press "Delete" on the remaining row and
@@ -972,6 +994,76 @@ Left out of the scenarios above, by reason:
   - a contributor whose hand-entered institution is named in a language
     then unticked under "Metadata" saved with nothing changed, the save
     going through ([A28](#a28)): the guard the issue report proposes [report 2026-10-13]
+  - a fresh hand-entered institution's completeness status counting the
+    journal's metadata languages: "1 of 2 languages completed" on a
+    journal with two, "All translations available" on a journal with
+    English alone (Fields "Affiliations"; A17 retired) [report 2026-11-20]
+  - scenario 9's read-only list seen by an assigned Guest Editor on a
+    journal, and by an assigned Copyeditor on a journal's or a press's
+    published item: the rows with their role badges and "Preview" alone
+    (Rule 9; Actors row 2) [sweep 2026-11-20]
+  - the "Contributor Roles" screen and the competing-interests checkbox
+    reached by the Editor on a journal and a press, and the assigned
+    Section Editor sent to the access-denied page from the "Contributor
+    Roles" address (Actors rows 4 and 6) [sweep 2026-11-20]
+  - scenario 1's empty save, its screen-reader error list naming the
+    four errors ("Go to Given Name: This field is required." and the
+    other three) while the screen does not show it (Fields) [sweep 2026-11-20]
+  - scenario 1's CRediT table saved with two rows left on
+    "Conceptualization", the reopened form holding the role once
+    (Fields "CRediT roles and the degrees of contribution") [sweep 2026-11-20]
+  - a failed registry search: each of the three "ROR API Error"
+    messages, dismissed with "OK", the searched text left under
+    "Selected" and the search box disabled until its "Remove {text}" is
+    pressed (Fields "Affiliations"), the browser's registry answers
+    built as scenario 4 builds its suggestion [sweep 2026-11-20]
+  - a journal or press upgraded from 3.5 offering its roles' French
+    names ("Auteur-e", "Traducteur-trice", on a press also "Auteur du
+    chapitre" and "Rédacteur/Rédactrice en chef du volume") (Rule 11);
+    waits for a seed of a context upgraded from 3.5 [sweep 2026-11-20]
+  - scenario 3's publish window on a preprint server: "Post" opens
+    "Post the preprint", reading "All requirements have been met.", and
+    nothing is posted after "Close" (the preprint server's suite) [sweep 2026-11-20]
+  - the journal's suite, parts of bullets it does not assert yet:
+    scenario 1 "An empty save" (the other messages, and Save still
+    disabled after "Alan"); scenario 2 "Save Order" (the arrows in place
+    of the row buttons and the "Primary Contact" badge, Rule 6);
+    scenario 3 "Deleting the primary contact" (nothing warned), "The
+    publish dialog" ("Status: Unscheduled" before, nothing published)
+    and "Control" (the two entries after the publish step); scenario 4
+    "An empty primary-language name" ("Please correct one error." at the
+    foot); scenario 5 "Add Role" ("Fill name in all of the
+    languages."); scenario 6 "The landing page" (the first
+    contributor's "Author"); scenario 8 "An empty statement" (the
+    message under the field) [sweep 2026-11-20]
+  - the press's suite, parts of bullets it does not assert yet:
+    scenario 1 "An empty save" (Country and Contributor Roles after
+    "Alan") and "A bad Email and Homepage URL" (the messages under the
+    fields); scenario 2 "Save Order" (the arrows in place of the row
+    buttons and the badge); scenario 3 "Deleting the primary contact"
+    (nothing warned), "The publish dialog" ("Are you sure you want to
+    make this catalog entry public?", no "Review Publishing Details",
+    nothing published) and "Control" (the read after the first delete);
+    scenario 4 "The per-language names" (the box labels), "An empty
+    primary-language name" (the foot line and the message under the
+    field) and "A refused "Edit" saves nothing" (the message under the
+    field); scenario 5 "Add Role" (identifier EDITOR, "Contributor role
+    saved", the guidance), "Edit Role" (EDITOR alone) and "The role in
+    use" (the "Error" title); scenario 6 "Author Biography" ("{name},
+    {affiliation}" as one line) and "A book with five contributors"
+    (an affiliated contributor among the five, so the line is read
+    without that affiliation, ROR marks or role names; the dangling
+    comma is A1's and stays unasserted) [sweep 2026-11-20]
+  - the preprint server's suite, parts of bullets it does not assert
+    yet: scenario 1 "An empty save" (the reads after "Alan") and
+    "Delete" (the "Delete Contributor" title); scenario 2 "Save Order"
+    (the arrows in place of the row buttons and the badge); scenario 3
+    "Deleting the primary contact" (nothing warned) and "Control" (the
+    read after the first delete); scenario 4 "The per-language names"
+    (the second box's label) and "An empty primary-language name" (the
+    foot line); scenario 5 "The role in use" and "The last AUTHOR role"
+    (the "Error" title); scenario 6 "Author Biography" ("{name},
+    {affiliation}" as one line) [sweep 2026-11-20]
 - **Nothing new to test**:
   - Preferred Public Name (Fields): another text box on the form
     scenario 1 fills
@@ -1007,16 +1099,14 @@ Left out of the scenarios above, by reason:
     Settings)
   - A16 (the auto-created contributor without a Country, every edit
     refused until one is chosen; Fields)
-  - A17 (the "{count} of {total} languages" total following the
-    publication's languages; Fields)
   - A18 (an Anonymous save with Email and Country empty accepted;
     Fields)
   - A19 (the email field labeled "Email" or "Email address" by the
     install; Fields)
   - A20 (the workflow's "Add Contributor" refused where a "Forms"
     language is not a metadata language; Fields; Settings)
-  - A21 (contributor roles arriving named in the primary language
-    only; Rule 11)
+  - A21 (a new journal's contributor roles arriving named in the
+    primary language only; Rule 11)
   - A22 (a role name closed without saving shown on the row and in the
     reopened "Edit Role", and stored by the role's next "Save"; Rule 12)
   - A24 (a refused "Add Contributor" still adding the contributor, and
@@ -1043,8 +1133,6 @@ Left out of the scenarios above, by reason:
   - OPS2 (the Competing Interests label rendering raw on a preprint
     server; Fields)
 - **No seed**:
-  - a failed registry search: the "ROR API Error" dialog and the text
-    left as a typed entry (Fields)
   - the install storing a picked institution's registry record, and the
     monthly self-update (Rule 16; Side effects)
   - a registry-backed affiliation's ROR mark linking to its record on
@@ -1065,8 +1153,10 @@ Left out of the scenarios above, by reason:
   - the ORCID iD icon on the landing page (Rule 14; *ORCID integration*)
   - the ORCID verification email (Side effects; *ORCID integration*)
   - a section hiding author lines (Rule 15; *Sections*)
-  - contributor data travelling outward: DOI registration, export and
-    citation displays (Side effects; *Identifiers*, *Import & export*)
+  - contributor data travelling outward: DOI registration, exports and
+    the item page's search-engine tags, an Anonymous contributor's
+    "Anonymous" among them (Side effects; Rule 3; *Identifiers*,
+    *Import & export*, *Search-engine metadata & analytics*)
   - changing the submission language copying names and typed
     affiliation names (Side effects; *Publication metadata*, its
     scenario 6)
@@ -1117,10 +1207,9 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A8](#a8) | Institution text typed but never picked is silently dropped on save | ❓ | minor | — |
 | [A11](#a11) | After a registry-error dialog the institution search stays dead until the Edit panel is reopened | ❓ | minor | — |
 | [A13](#a13) | A contributor role's name saves with a language left empty, despite the required marker | ❓ | minor | — |
-| [A17](#a17) | The typed affiliation's "{count} of {total} languages" total may follow the publication's languages, not the journal's | ❓ | minor | — |
 | [A18](#a18) | An Anonymous contributor's Email and Country are marked "* Required" but save empty | ❓ | minor | — |
 | [A19](#a19) | The contributor form's email field is labeled "Email" on one install and "Email address" on another, and the error summary's "Go to …:" link follows the label | ❓ | minor | — |
-| [A21](#a21) | Contributor roles arrive named in the primary language only, so readers in another language see "Author" | ❓ | minor | — |
+| [A21](#a21) | A new journal's contributor roles arrive named in the primary language only, so readers in another language see "Author" | ❓ | minor | — |
 | [OMP1](#omp1) | A book with five or more contributors compacts to bare name-and-affiliation lines | ✅ | user-visible | — |
 | [OMP2](#omp2) | An Edited Volume's book page credits volume editors instead of the contributor list | ✅ | user-visible | — |
 | [OPS1](#ops1) | The submitting author edits their own unposted preprint's contributors | ✅ | user-visible | — |
@@ -1133,9 +1222,10 @@ A submission's "Contributors" list, in the workflow and in the
 submission wizard, keeps a line under each contributor's name for their
 affiliation. That line is always empty, even when the contributor's
 "Edit" window lists an affiliation, typed or chosen from the registry.
-The wizard's "Review" step lists each contributor by name alone, where
-it is built to show "name, affiliation". An editor or author checking
-the contributors must open each "Edit" window to see an affiliation.
+The wizard's "Review" step lists each contributor by name with its role
+badges, and the primary contact with "Primary Contact", but never with
+the affiliation. An editor or author checking the contributors must
+open each "Edit" window to see an affiliation.
 The affiliations are stored and reach the reader pages, with one
 exception on a press, from a fault of its own: a book page that lists
 five or more names in one compact byline ([OMP1](#omp1)) shows every
@@ -1143,6 +1233,7 @@ affiliated contributor as "{name}, ;", the comma with nothing after it.
 That holds for a book's contributors, a chapter page's authors and an
 edited volume's volume editors.
 Basis: code reading + probe, 2026-10-03. <sup>f-a1</sup>
+Report: refresh owed — drift sweep 2026-11-20: the wizard's "Review" step lists each contributor with its role badges and "Primary Contact" ("Ada Author Primary Contact Author Wendy Wizard Author"), not "by name alone" as the report's Summary and Observed say (`lib/pkp/templates/submission/review-contributors.tpl`, `SubmissionWizardPage.vue::getAuthorName()`) (2026-11-20)
 
 <a id="a2"></a>
 **A2 — Deleting the primary contact leaves none** · ❓ · user-visible.
@@ -1369,20 +1460,6 @@ form's assumption is broken only by the administrator-created account
 path.
 Basis: probe + code reading. <sup>f-a16</sup>
 
-<a id="a17"></a>
-**A17 — The affiliation completeness total may follow the publication's languages** · ❓ · minor.
-On one journal, a fresh typed affiliation reported "All translations
-available" on one submission but "1 of 2 languages completed" on
-another. This suggests that the typed entry's per-language name boxes,
-and their "{count} of {total} languages completed" total, follow the
-publication's own language set rather than the journal's.
-Question: does the box count follow the publication's languages or the
-journal's? Lean: the publication's. The two submissions differed in
-nothing else observed. Settling it needs two publications on one journal
-with differing language sets, comparing each typed entry's box count and
-total.
-Basis: probe (single observation). <sup>f-a17</sup>
-
 <a id="a18"></a>
 **A18 — Anonymous's required markers on Email and Country do not bind** · ❓ · minor.
 With "Anonymous" picked as the contributor type, the form marks Email,
@@ -1403,7 +1480,9 @@ The contributor form's email field is labeled "Email" on one install and
 "Email address" on another, with no setting behind the difference. The
 refused form's error summary follows suit: "Go to Email: This is not a
 valid email address." on the one, "Go to Email address: This is not a
-valid email address." on the other. Seen on a press; the form is shared,
+valid email address." on the other. "Email" was seen on one press
+install only; every other install read, a journal, a press and a
+preprint server among them, shows "Email address". The form is shared,
 so a journal and a preprint server are expected to split the same way.
 This spec names the field "Email", the reading both labels contain.
 Question: which label should the form carry, "Email" or "Email address"?
@@ -1429,11 +1508,12 @@ contributor and adding one in the submission wizard still save.
 Since: 2025-11-11 (10½ months) · Basis: probe, 2026-10-03. <sup>f-a20</sup>
 
 <a id="a21"></a>
-**A21 — Contributor roles arrive named in the primary language only** · ❓ · minor.
-A journal's contributor roles arrive named in its primary language
+**A21 — A new journal's contributor roles arrive named in the primary language only** · ❓ · minor.
+A new journal's contributor roles arrive named in its primary language
 alone: "Author" and "Translator", and on a press also "Chapter Author"
-and "Volume editor" (Rule 11). On a journal with French ticked under
-"Forms", each role's "Edit Role" window shows the French box empty,
+and "Volume editor" (Rule 11). A journal upgraded from version 3.5
+keeps its roles' names in every language instead (Rule 11). On a new
+journal with French ticked under "Forms", each role's "Edit Role" window shows the French box empty,
 with "1/2 languages completed". A reader browsing in French therefore
 sees "Author" on every landing page and author line (Rule 15a) until a
 Journal Manager types each role's French name, although the
@@ -1528,10 +1608,15 @@ and MARC records served over OAI-PMH, and the DOAJ, PubMed, ONIX and
 native XML exports. Every affiliation is still there.
 
 It shows on PostgreSQL, on PKP's test dataset from three contributors on
-a journal and by four on a press or a preprint server, and a page that
-shows it shows it on every load. It is on `main` only, so it ships in
-the next release if left alone.
+a journal and by four on a press or a preprint server. On items made
+fresh, two contributors are enough: a contributor's two affiliations
+printed reversed on a two-contributor article, book and preprint, while
+on another item of the same shape they kept their order, and which
+items showed it changed from one run to the next. A page that shows it
+shows it on every load. It is on `main` only, so it ships in the next
+release if left alone.
 Basis: probe + code reading, 2026-10-13. <sup>f-a26</sup>
+Report: refresh owed — drift sweep 2026-11-20: on items made fresh, two contributors are enough for the reversed order (article, book and preprint), and which items show it changes between runs, where the report's Summary and Steps start at three contributors on a journal and four on a press or a preprint server (`PKP\affiliation\Collector::getQueryBuilder()`, its unordered query, unchanged) (2026-11-20)
 
 <a id="a27"></a>
 **A27 — A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ"** · 🐞 · low.
@@ -1592,10 +1677,10 @@ every affiliation of the contributor when the request does not include
 the affiliations, and answers success. Every other field the request
 leaves out is kept, so a program that corrects one field, such as a
 given name, expects the institutions to stay. The loss is silent and can
-only be undone by adding each institution again. It hits programs
-written for 3.4, where the same edit kept the affiliation, and programs
-that follow the API's own schema, which marks the affiliations as read-
-only. On a published version the institutions disappear from the public
+only be undone by adding each institution again.
+It hits programs written for 3.4, where the same edit kept the affiliation (read from the code),
+and programs that follow the API's own schema, which marks the affiliations as read-only (read from the code).
+On a published version the institutions disappear from the public
 page too.
 Basis: probe, 2026-10-21. <sup>f-a30</sup>
 
@@ -1609,12 +1694,12 @@ the "Bio Statement", the "Homepage URL" and every affiliation are
 blanked, even when the request resends the affiliations. The new value
 the request sends is not saved either.
 The Contributors list then shows a row with no name, and on a published
-item the public page lists an author without a name. Every script
-written for 3.5, which has no contributor types, sends exactly such
-edits, so on 3.6 (the release `main` becomes) it erases each
-contributor it touches. The values are gone from the edited version:
-they can be copied back by hand from an earlier version of the
-submission where one exists, and otherwise only typed in again.
+item the public page lists an author without a name.
+Every script written for 3.5, which has no contributor types (read from the code), sends exactly such edits,
+so on 3.6 (the release `main` becomes) it erases each contributor it touches; no screen sends such an edit.
+The values are gone from the edited version: they can be copied back
+by hand from an earlier version of the submission where one exists,
+and otherwise only typed in again.
 Basis: probe, 2026-10-21; issue report refresh walk, 2026-10-29. <sup>f-a31</sup>
 
 <a id="a32"></a>
@@ -1626,10 +1711,9 @@ contributor roles as whole records, and the edit takes only their
 numbers. Sent with the numbers, the edit is refused with "This field
 must be true or false.": the read gives the field that says whether
 ORCID verification was requested as empty, and the edit does not take
-an empty value there. In version 3.5, whose record carries no
-contributor roles, the record as read is refused at once for that
-field, and on a press for the volume-editor field too, with the same
-message for each. Nothing is changed in any of these cases. Sent
+an empty value there.
+In version 3.5, whose record carries no contributor roles, the record as read is refused at once for that field, and on a press for the volume-editor field too, with the same message for each; no screen sends that edit there either.
+Nothing is changed in any of these cases. Sent
 without those empty fields, and on `main` with the roles as numbers,
 the record saves and nothing is lost.
 Basis: probe, 2026-10-21. <sup>f-a32</sup>
@@ -1648,7 +1732,8 @@ Instead (PostgreSQL; MySQL not driven) the edit fails with a server
 error. The change it sent is not
 saved, and the names, email, country, "Bio Statement" and "Homepage
 URL" stay as they were, but every affiliation is deleted, even when the
-request resends them. Version 3.5 has no contributor types.
+request resends them.
+Version 3.5 has no contributor types (read from the code).
 Basis: probe, 2026-10-29; issue report walk, 2026-10-29. <sup>f-a33</sup>
 
 ### OMP
@@ -1690,10 +1775,13 @@ Basis: probe. <sup>f-ops1</sup>
 On a preprint server that requires competing-interest statements, the
 contributor form's "Competing Interests" field is labelled with raw
 code-like text instead of the plain "Competing Interests" a journal or
-press shows. The label reads `Competing interests <a target="_new"
-class="action" href="{$competingInterestGuidelinesUrl}">CI Policy</a>`,
+press shows. The label reads
+`Competing interests <a target="_new" class="action" href="{$competingInterestGuidelinesUrl}">CI Policy</a>`,
 with an unfilled placeholder and visible link markup. It is an old
-label that OPS's own language files still carry for this field.
+label that OPS's own language files still carry for this field. The
+same text names the field in the error list a screen reader reads after
+an empty save:
+`Go to Competing interests <a target="_new" class="action" href="{$competingInterestGuidelinesUrl}">CI Policy</a>: This field is required.`
 
 The field's guidance, its required mark and saving all work, so the
 statement is filled in and saved as usual; only the field's name is
@@ -1701,11 +1789,15 @@ wrong. A French interface shows the same markup in French. Readers never
 see it: the public preprint page shows no competing-interests
 statement.
 Basis: probe + code reading, 2026-10-03. <sup>f-ops2</sup>
+Report: refresh owed — drift sweep 2026-11-20: the screen reader's error list after an empty save was read and names the field with the same raw text (`Go to Competing interests <a target="_new" …>CI Policy</a>: This field is required.`), where the report's Reach lists the error list as unverified, read in the code only (`FormErrors.vue`, `author.competingInterests`) (2026-11-20)
 
 ### Retired
 
 <a id="a15"></a>
 **A15 — A new contributor can land at the top of the list, varying between loads** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13003).
+
+<a id="a17"></a>
+**A17 — The affiliation completeness total may follow the publication's languages** · ✅ · retired. Not reproduced.
 
 <a id="a23"></a>
 **A23 — A CRediT role's degree prints as a raw code on a French landing page** · ✅ · retired. Overturned: not a bug.
@@ -1799,6 +1891,16 @@ both saved with no further warning — warn-but-editable, identical to
 the neighboring Title & Abstract and Metadata pages — for the Journal
 Manager and (rendering checked) for an Assistant holding the
 metadata-edit permission.
+Drift sweep, live-probed 2026-11-20 (Actors rows 1–2, Rule 9; OJS, OMP
+and OPS on `main`, two runs each, on scratch contexts at the install
+defaults; kept script `shared/playwright/checks/U41/SW20/sw20.js`, part `access`): on a submitted and on a published item, the
+Journal Manager, the Editor (OJS, OMP), the assigned Section Editor and
+the Site Administrator had "Order", "Preview", "Add Contributor" and
+every row's "Edit", "Delete" and "Set Primary Contact"; the submitter
+(OJS, OMP), an assigned Guest Editor (OJS, the only app that installs
+one) and an assigned Copyeditor on the published item (OJS, OMP) had the
+rows with their role badges and "Preview" alone, with no "Primary
+Contact" badge.
 
 <a id="fn-c"></a>
 **c — the contributor form.** `PKP\components\forms\publication\ContributorForm`
@@ -1872,8 +1974,12 @@ opened as a table headed "Role" / "Degree" reading "No Items", with
 "Supporting") and a "Remove Role" button, the second press too while
 row 1 still read "Conceptualization"; with row 2 moved to
 "Investigation", both rows' lists showed "Conceptualization" and
-"Investigation" disabled. Not driven: a "Save" with two rows on one
-role. A "Save" with a "Degree" left empty, live-probed 2026-10-15 (OJS
+"Investigation" disabled. A "Save" with two rows on one role,
+live-probed 2026-11-20 (OJS, OMP and OPS on `main`, two runs each, a
+scratch context; kept script `shared/playwright/checks/U41/SW20/sw20.js`,
+part `form`): two rows left on "Conceptualization" saved and closed the
+panel with no notice, the reopened form held one row, and the
+contributor had one stored CRediT role. A "Save" with a "Degree" left empty, live-probed 2026-10-15 (OJS
 `main`, PKP's dataset, `dbarnes` on `publicknowledge`, submission 6's
 contributor Dana Phillips, two runs on fresh resets; OMP and OPS by the
 shared form and endpoint, not driven): "Edit" › "Add Another Role" ›
@@ -1886,6 +1992,18 @@ panels) and the Escape key (the workflow's "Edit") shut the panel with
 no browser dialog and no notice, and no CRediT role was stored. "Close"
 after a refused save asked nothing either, and a refused "Edit" left by
 it showed the old name after a reload (f-a24).
+The foot's error list, live-probed 2026-11-20 (Fields preamble; same
+runs and script, parts `form` and `affil`): an empty "Add Contributor"
+save showed "Please correct 4 errors." and "Jump to next error", and
+the accessibility tree held under them the buttons "Go to Given Name:
+This field is required.", "Go to Email address: This field is
+required.", "Go to Country: This field is required." and "Go to
+Contributor Roles: This field is required.", none drawn on screen; an
+Anonymous empty save held "Go to Contributor Roles: …" alone; a bad
+Email and Homepage URL went to the server, which answered 400 with
+"This is not a valid email address." and "This is not a valid URL.",
+shown under both fields, with "Please correct 2 errors." at the foot
+and the page notice "The form was not saved because 2 error(s) …".
 
 <a id="fn-d"></a>
 **d — affiliations.** Model `PKP\affiliation\*` + `author_affiliations`
@@ -1964,6 +2082,24 @@ copied name in the new language like any typed institution, by design:
 picked from the registry or entered by hand, joined at the end of the
 form's list, the save sent the two in that order, and the table offers
 no ordering control; what the reader's page prints is f-a26.
+Drift sweep, live-probed 2026-11-20 (Fields "Affiliations"; OJS, OMP
+and OPS on `main`, two runs each, scratch contexts; kept script
+`shared/playwright/checks/U41/SW20/sw20.js`, parts `affil` and `rorerr`).
+The browser's own registry queries answered 429, 503 and 410 by the
+script raised the three "ROR API Error" dialogs with the three messages
+as quoted in fn d's 2026-08-28 probe, each with "OK"; after "OK" the
+searched text sat under "Selected" with "Remove {text}" and the search
+box disabled; once it was removed, a new query sent no registry request,
+at once or after a 4-second wait, and offered the typed text alone; a
+reopened panel sent one and showed the suggestion again (A11). The
+completeness total: on a journal with English and French (Canada) as
+metadata languages, a fresh typed entry read "1 of 2 languages
+completed" on a submission titled in English alone and on one titled in
+both; on a journal with English alone it read "All translations
+available"; on PKP's default test dataset with Central Kurdish added to
+the metadata languages, "University of Bologna 1 of 3 languages
+completed". The 2026-08-28 observation of two totals on one journal
+(A17, retired) was not reproduced.
 
 <a id="fn-e"></a>
 **e — contributor roles.** Records: `contributor_roles` per context,
@@ -2019,6 +2155,28 @@ no language button and no French box. Saving "Auteur-e" as the French
 name answered 200 with "Contributor role saved", and the box still read
 "Auteur-e" after a reload. "Close" is the window's one control besides
 "Save" (A22).
+Drift sweep, live-probed 2026-11-20 (Actors row 4; Rules 11, 12; OJS,
+OMP and OPS on `main`, two runs each, scratch contexts with English and
+French; kept script `shared/playwright/checks/U41/SW20/sw20.js`, part
+`roles`): Settings › Workflow › "Contributor Roles" showed the table
+("Author AUTHOR", "Translator TRANSLATOR", on a press also "Chapter
+Author AUTHOR" and "Volume editor EDITOR") to the Journal Manager, the
+Editor (OJS, OMP; OPS installs none) and the Site Administrator; the
+assigned Section Editor (OMP Series editor, OPS Moderator) typing the
+same address landed on the access-denied page. "Add Role" opened with
+the ten identifiers, the English box empty and "0/2 languages
+completed" under it; "French" showed "Role Name in French"; "Save" with
+"Handling editor" in English alone (identifier EDITOR) answered 200,
+showed "Contributor role saved", and the table ended "Handling editor
+EDITOR". The roles of a context upgraded from 3.5, same date: PKP's 3.5
+default dataset loaded and upgraded to `main` (two loads, part
+`upgraded`), the stored role names read, the journal: AUTHOR "Author" /
+"Auteur-e", TRANSLATOR "Translator" / "Traducteur-trice"; the press
+also AUTHOR "Chapter Author" / "Auteur du chapitre" and EDITOR "Volume
+editor" / "Rédacteur/Rédactrice en chef du volume"; the preprint server
+AUTHOR "Author" / "Auteur-e" alone, its contributor form with no
+"Contributor Roles" field (A14); the upgrade step creates each role
+from a user group (fn f-a14), and these names are that group's.
 
 <a id="fn-f"></a>
 **f — delete, order, silence.** Delete dialog: title + confirm
@@ -2067,6 +2225,12 @@ while "Set Primary Contact" alone added exactly one history row,
 which logs a metadata update without naming the actual change. The
 journal's "Review Publishing Details" Confirm is a save on the same
 publication and logs the same line (s3).
+Ordering mode, live-probed 2026-11-20 (Rule 6; OJS, OMP and OPS on
+`main`, two runs each, a scratch context; kept script `shared/playwright/checks/U41/SW20/sw20.js`, part `order`): the
+header read "Save Order" and "Cancel", and each row kept its name and
+role badge with the two arrow buttons alone, with no "Edit", "Delete",
+"Set Primary Contact" or "Primary Contact" badge; "Save Order" sent the
+new order and answered 200.
 
 <a id="fn-g"></a>
 **g — versioning.** `PKP\publication\Repository::version()` clones every
@@ -2125,6 +2289,15 @@ takes each role's `getLocalizedData('name')`, whose locale precedence
 (`LocalizedData::getBestLocalizedData()`) passes over an empty
 visitor-locale value to the next locale holding one, on a
 one-language role its primary-locale name.
+The item page's search-engine tags, live-probed 2026-11-20 (Rule 3;
+Side effects; OJS, OMP and OPS on `main`, two runs each, signed out, a
+published scratch item; kept script `shared/playwright/checks/U41/SW20/sw20.js`, parts `reader` and `extra`): one
+`citation_author` per contributor in list order and one
+`citation_author_institution` after each affiliation (OJS and OMP also
+`DC.Creator.PersonalName` per contributor), no tag naming a role; with
+an Anonymous contributor added, its `citation_author` read "Anonymous".
+The DOI deposits and the JATS and other exports were not read for
+roles.
 
 <a id="fn-i"></a>
 **i — the wizard mount.** `PKPSubmissionHandler::getSteps()` pushes the
@@ -2160,6 +2333,11 @@ f-ops2). Live-probed 2026-08-28 (OJS + OMP scratch contexts):
 setting placement, field position and required marker as described; a
 saved statement survived the setting's untick/re-tick round trip, the
 field simply vanishing while the setting was off.
+Live-probed 2026-11-20 (Actors row 6; OJS, OMP and OPS on `main`, two
+runs each, a scratch context; kept script `shared/playwright/checks/U41/SW20/sw20.js`, part `ci`): the Site Administrator
+reached the checkbox on Settings › Workflow › Metadata, and the Editor
+(OJS, OMP) the same Settings › Workflow page; the setting's on, off and
+on-again ends as described.
 
 <a id="fn-k"></a>
 **k — the registry cache.** Table `rors` + `ror_settings`
@@ -2371,7 +2549,14 @@ opened the "Schedule For Publication" window at once, its text "All
 publication requirements have been met. Are you sure you want to make
 this catalog entry public?" with a "Publish" button and the header's
 "Close", and the closing read stayed at the move's one row; the OPS
-suite leaves the publish step to *Publish, schedule & versions*.
+suite leaves the publish step to *Publish, schedule & versions*. Drift
+sweep, live-probed 2026-11-20 (OJS, OMP and OPS on `main`, two runs
+each, a scratch context; kept script
+`shared/playwright/checks/U41/SW20/sw20.js`, part `primary`): on OPS
+"Post" opened "Post the preprint" ("All requirements have been met. Are
+you sure you want to post this? …"), with no mention of the missing
+contact, and after "Close" nothing was posted; on OJS, after "Close",
+the header read "Status: Unpublished"; OJS and OMP as above.
 
 <a id="fn-s4"></a>
 **s4 — scenario 4 seeding.** The multilingual leg needs a scratch
@@ -2527,6 +2712,12 @@ captures the names into `$authorAffiliations` and passes
 (`17f2661a46`, 2025-01-30) renamed the capture and left the `translate`
 line. The chapter page and an edited volume's editors run the same
 branch (code read).
+Drift sweep, live-probed 2026-11-20 (OJS, OMP and OPS on `main`, two
+runs each, a scratch context; kept script `shared/playwright/checks/U41/SW20/sw20.js`, part `access`): the
+wizard's "Review" step read "Contributors Edit Ada Author Primary
+Contact Author Wendy Wizard Author", Wendy Wizard holding "Wizard
+Institute" in her "Edit" window; the workflow and wizard rows' subtitle
+line was present and empty for every affiliated contributor.
 Issue report: [pkp-e2e#756](https://github.com/jardakotesovec/pkp-e2e/issues/756) ([docs/issues/U41-A1-contributor-rows-no-affiliation.md](../issues/U41-A1-contributor-rows-no-affiliation.md)).
 Issue report: [pkp-e2e#758](https://github.com/jardakotesovec/pkp-e2e/issues/758) ([docs/issues/U41-A1-book-page-long-credits-dangling-comma.md](../issues/U41-A1-book-page-long-credits-dangling-comma.md)).
 
@@ -2737,14 +2928,6 @@ country, so test installs hit this on every seeded submission — the
 observed frequency is fixture-inflated, but the administrator-created
 path is real product surface.
 
-<a id="fn-f-a17"></a>
-**f-a17 — A17 evidence.** Observed 2026-08-28 (OJS, one journal, fresh
-typed entries): "All translations available" on one submission, "1 of 2
-languages completed" on another, same journal languages. The form's
-locale list is driven by the publication's languages
-(`getPublicationLanguages()`), which would explain the difference;
-unsettled pending the two-publication comparison the entry names.
-
 <a id="fn-f-a18"></a>
 **f-a18 — A18 evidence.** Live-probed 2026-08-28 (OJS; shared form):
 Save on an all-empty Anonymous form was refused client-side with a
@@ -2775,6 +2958,12 @@ loads last supplies the string. The duplicate dates from the .po merge
 of 2023-02-16 (pkp-lib `4ad3d52ba2`, pkp/pkp-lib#8598). Not read on
 OJS or OPS. The test now reads the label as `/Email( address)?/`
 (`.reports/U41/test-omp-fix-green.log`).
+Drift sweep, live-probed 2026-11-20 (OJS, OMP and OPS on `main`, two
+runs each, scratch contexts and PKP's default test dataset; kept script `shared/playwright/checks/U41/SW20/sw20.js`,
+part `form`): the field read "Email address * Required" everywhere, and
+"Go to Email address: …" in the error list; the "Email" label was not
+met. Settled by the same form read on an install that shows "Email",
+as CI's fresh box did.
 
 <a id="fn-f-a20"></a>
 **f-a20 — A20 evidence.** Live-probed 2026-09-28 (Fields preamble;
@@ -2840,6 +3029,11 @@ when a form language is added. lib/pkp `locale/fr_CA/default.po` has
 `default.groups.name.author` "Auteur-e" and `.translator`
 "Traducteur-trice"; OMP `locale/fr_CA/default.po` has `.chapterAuthor`
 "Auteur du chapitre".
+Scope, live-probed 2026-11-20 (fn e): a journal, press or preprint
+server upgraded from 3.5 holds its roles named in every language its
+user groups had (French "Auteur-e", "Traducteur-trice", "Auteur du
+chapitre", "Rédacteur/Rédactrice en chef du volume"), so the entry is a
+new context's.
 
 <a id="fn-f-a22"></a>
 **f-a22 — A22 evidence.** Live-probed 2026-09-29 (OJS and OPS three
@@ -2878,8 +3072,11 @@ the CRediT role "Conceptualization" at "Lead" read "Conceptualisation
 `submission.submit.creditRoles.degrees.lead` / `.equal` /
 `.supporting` ("Lead", "Equal", "Supporting"); lib/pkp
 `locale/fr_CA/` has none of the three, in all three apps' checkouts.
-Not read on a press or a preprint server: no French item read there
-carried a CRediT role. Code read 2026-10-03 (issues session; no walk):
+Read on a press and a preprint server too, live-probed 2026-11-20 (OJS,
+OMP and OPS on `main`, two runs each, a scratch context with French;
+kept script `shared/playwright/checks/U41/SW20/sw20.js`, part `french`): the French
+article, book and preprint pages read "Conceptualisation
+(##submission.submit.creditRoles.degrees.lead##)". Code read 2026-10-03 (issues session; no walk):
 the degree texts came with lib/pkp `036af20d17` (2025-07-07,
 pkp/pkp-lib#857 "Credit Roles"), on `main` only — `stable-3_5_0` has no
 CRediT roles, no `classes/author/creditRole` and no `creditRoles` key in
@@ -3000,6 +3197,17 @@ after `ANALYZE author_affiliations`, would settle it. `stable-3_5_0`
 not driven: its `Collector` has no ordering either, and its article
 template prints the list the same way (code read). The contributors'
 own order had the same kind of fault until 2026-09-03 (A15, retired).
+Drift sweep, re-walked 2026-11-20 (the `l43` phase of the same kept
+script, OJS, OMP and OPS on `main`, runs r1 and r2, the published pages
+read four times each, signed out): with the second contributor added
+before the second affiliation, the two affiliations printed new one
+first on OJS and OPS in both runs and on OMP in r2 only; with the
+second affiliation saved first, they printed reversed once the second
+contributor joined on OJS in r1 and on OPS in both runs, and stayed as
+added on OJS r2 (registry variant) and OMP r1. Each page's four reads
+agreed. The issue report's walk on PKP's default test dataset
+(three contributors on a journal, four on a press or a preprint server)
+showed the reversal in both runs, on every load.
 Issue report: [pkp-e2e#956](https://github.com/jardakotesovec/pkp-e2e/issues/956) ([docs/issues/U41-A26-affiliations-print-out-of-order.md](../issues/U41-A26-affiliations-print-out-of-order.md)).
 
 <a id="fn-f-a27"></a>
@@ -3250,13 +3458,20 @@ and OMP author lists are read-only.
 
 <a id="fn-f-ops2"></a>
 **f-ops2 — OPS2 evidence.** Observed 2026-08-28 (OPS test authoring):
-the field's label renders as the literal text `Competing interests <a
-target="_new" class="action" href="{$competingInterestGuidelinesUrl}">CI
-Policy</a>`. Mechanism: OPS's app-level `locale/en/author.po` overrides
+the field's label renders as the literal text
+`Competing interests <a target="_new" class="action" href="{$competingInterestGuidelinesUrl}">CI Policy</a>`.
+Mechanism: OPS's app-level `locale/en/author.po` overrides
 lib/pkp's `author.competingInterests` key with a legacy pre-Vue string
 carrying markup and a template placeholder, and the Vue form renders
 field labels as plain text. OJS and OMP take lib/pkp's plain "Competing
 Interests" (live-probed 2026-08-28, fn j).
+Drift sweep, live-probed 2026-11-20 (OJS, OMP and OPS on `main`, two
+runs each, scratch contexts; kept script
+`shared/playwright/checks/U41/SW20/sw20.js`, part `ci`): on OPS the
+empty save's error list, read in the accessibility tree, held the button
+`Go to Competing interests <a target="_new" class="action" href="{$competingInterestGuidelinesUrl}">CI Policy</a>: This field is required.`
+beside "Jump to next error"; on OJS and OMP it read "Go to Competing
+Interests: This field is required.".
 Issue report: [pkp-e2e#765](https://github.com/jardakotesovec/pkp-e2e/issues/765) ([docs/issues/U41-OPS2-competing-interests-label-raw-markup.md](../issues/U41-OPS2-competing-interests-label-raw-markup.md)).
 
 ## Reference — entry points & surfaces
