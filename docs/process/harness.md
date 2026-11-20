@@ -1072,7 +1072,9 @@ and traces stay in `<out>/app`.
 Start every run in the background with its output in a file, never under
 a shell `timeout` or a `tail` pipe: a run may first wait in the test lock
 ("Slots"), and its four-minute budget (the waiting agent's prompt cache)
-starts at its first test. Whole-suite runs are CI's (`node bin/ci.js`,
+starts at its first test. Wait on the background task's own completion
+notice or poll the file for the summary line, never `pgrep -f` on a string
+the waiting loop's own command line carries. Whole-suite runs are CI's (`node bin/ci.js`,
 "CI"); `test:<app>` and `test:final` serve work on the local runtime
 itself (MAINTENANCE "Session hygiene").
 

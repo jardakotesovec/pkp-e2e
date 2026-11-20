@@ -708,6 +708,21 @@ test.describe('workflow screen & stage access', () => {
         await expect(member.page).toHaveURL(/\/dashboard\/editorial/);
         await expect(member.page.getByText(/^Assigned to me \(\d+\)/)).toBeVisible();
 
+        // The Editorial Board Member at the older addresses (Rules 2a, 2b):
+        // the stage gate's page at the editorial workflow address, then the
+        // non-Author sentence at the old author-dashboard address; no panel
+        // at either.
+        await expectDeniedPage(
+            member.workflow,
+            member.workflow.workflowAccessUrl(submissionId),
+            NO_ACCESS_TEXT
+        );
+        await expectDeniedPage(
+            member.workflow,
+            member.workflow.authorDashboardUrl(submissionId),
+            ACCESS_DENIED.notAuthor
+        );
+
         // Control: the Manager typing the dashboard address gets the panel
         // with the preprint's header (Rule 2c) and no "Error" dialog.
         const manager = await workflowAs(asUser, appContext, 'manager.maya');
