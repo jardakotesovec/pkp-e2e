@@ -481,11 +481,12 @@ screen, Rule 12): <sup>e</sup>
 ## Canonical scenarios
 
 Scenarios 1–3, 6, 7, 9, 10 and 12 run on the seeded journal with ready
-accounts and scratch submissions; scenarios 4, 5, 8, 11 and 13 run on a
-scratch journal with throwaway accounts, because each needs the journal
-set up differently (a second submission language, added contributor
-roles, the competing-interests requirement, a review type, French as a
-form language). Each
+accounts and scratch submissions; scenarios 4, 5, 8, 11 and 13, and
+scenario 9's Guest Editor and Copyeditor, run on a scratch journal with
+throwaway accounts, because each needs the journal set up differently
+(a second submission language, added contributor roles, the
+competing-interests requirement, a review type, French as a form
+language, a Guest Editor account). Each
 scenario's accounts, seeding and the mail catcher's address are in its
 footnote.
 
@@ -505,8 +506,11 @@ footnote.
      "This field is required." appears in red under Given Name, Email,
      Country and Contributor Roles, the foot reads "Please correct 4
      errors." with "Jump to next error", and Save stays disabled while
-     any of them is still empty; type "Alan" as Given Name and only its
-     message goes, with Save still disabled (Fields).
+     any of them is still empty; a screen reader also reads at the foot
+     a list the screen does not show, naming each of the four errors as
+     "Go to {Field}: This field is required.", Given Name's as "Go to
+     Given Name: This field is required."; type "Alan" as Given Name
+     and only its message goes, with Save still disabled (Fields).
    - **A bad Email and Homepage URL**: type "not-an-address" as Email
      and "not a web address" as Homepage URL, pick "Canada" as Country,
      tick "Author" and press Save: the save is refused and the panel
@@ -541,6 +545,11 @@ footnote.
      in the first row, ⚠ [A25](#a25)); press "Remove Role" on the second
      row and press Save; reopen "Edit": the table holds the one row,
      "Conceptualization", with "Degree" still empty (Fields).
+   - **Two rows on one role**: open the person's "Edit" again and press
+     "Add Another Role": a second row arrives on "Conceptualization"
+     beside the first; press Save without changing either row: the
+     panel closes with no message; reopen "Edit": the table holds
+     "Conceptualization" once (Fields).
    - **An Anonymous contributor**: press "Add Contributor" and choose
      "Anonymous": there are no name fields, ROR ID, Homepage URL, Bio
      Statement or Affiliations, only Email, Country, Contributor Roles,
@@ -645,9 +654,12 @@ footnote.
 4. **Record affiliations, typed and registry-backed**
 
    Given: Journal Manager, on a scratch journal with a second submission
-   language, editing a contributor of a scratch submission; a registry
-   search for "Simon Fraser University" finds that one institution, in
-   Canada.
+   language (ticked under "Submissions", and so under "Metadata", on its
+   "Languages" tab), editing a contributor of a scratch submission; a
+   registry search for "Simon Fraser University" finds that one
+   institution, in Canada, and the scenario's footnote says how to make
+   a registry search fail in three ways: too many requests, the service
+   unavailable, the service deprecated.
 
    - **A typed institution**: under "Affiliations", type "Probe
      Institute" (four or more characters), pick the typed text from the
@@ -656,7 +668,9 @@ footnote.
      row-expander button ("Click to edit or delete") (Fields).
    - **The per-language names**: "Edit institution name" opens one name
      box per language, "Type the institution name in {language}", with a
-     "{count} of {total} languages completed" status (Fields).
+     "{count} of {total} languages completed" status; on this fresh
+     entry it reads "1 of 2 languages completed", the total counting the
+     journal's two languages ticked under "Metadata" (Fields).
    - **An empty primary-language name**: clear the submission language's
      box and press Save: the save is refused with "Please provide
      affiliation name in the submission primary locale." under the
@@ -686,6 +700,23 @@ footnote.
    - **Removing one**: press "Remove institution" on "Probe Institute":
      "Are you sure?" asks "The affiliation Probe Institute will be
      deleted."; "Yes" removes it (Fields).
+   - **A failed registry search**: in the same "Edit", with the registry
+     failing for too many requests, paste "Busy Institute" into the
+     search box under "Affiliations": an "ROR API Error" dialog reads
+     "Too many requests have been sent to the ROR API. Please wait a
+     moment before continuing to search."; press "OK": "Busy Institute"
+     is left picked under "Selected" and the search box is disabled;
+     press "Remove Busy Institute": the search box takes text again.
+     Registry suggestions stay off until the panel is closed and
+     reopened (⚠ [A11](#a11)), so press "Close" and reopen the
+     contributor's "Edit" before each of the other two failures: with
+     the service unavailable, "Down Institute" brings "The ROR API
+     service is currently unavailable. Please refresh the page or try
+     again later."; with the service deprecated, "Gone Institute" brings
+     "The ROR API service in this installation is deprecated. Please
+     contact your system administrator."; each is dismissed with "OK",
+     leaves its text under "Selected" with the search box disabled, and
+     is removed with its own "Remove {text}" (Fields). Press "Close".
    - **Control**: the second language's name box stayed empty throughout
      and no save was refused for it: only the submission language's copy
      is ever required (Fields). <sup>s4</sup>
@@ -693,12 +724,17 @@ footnote.
 5. **Manage the journal's contributor roles**
 
    Given: Journal Manager, on a scratch journal with a scratch submission
-   whose contributor holds the "Author" role.
+   whose contributor holds the "Author" role and to which a Section
+   Editor is assigned.
 
    - **The Contributor Roles screen**: Settings → Workflow → Submission →
      "Contributor Roles": the table lists "Author" (AUTHOR) and
      "Translator" (TRANSLATOR); on a press it also lists "Chapter Author"
      and "Volume editor" (Rule 11).
+   - **The assigned Section Editor**: copy the screen's address from the
+     browser's address bar, sign in as the Section Editor and open that
+     address: the access-denied page shows, not the table (Actors row
+     4); sign in as the Journal Manager again.
    - **Add Role**: press "Add Role", pick identifier EDITOR, type
      "Handling editor" as the Role Name in every language ("Fill name in
      all of the languages.") and Save: "Contributor role saved" appears
@@ -816,7 +852,9 @@ footnote.
 
    Given: Author, on the seeded journal, with the Author's own submitted
    scratch submission carrying a second contributor, and a second, not
-   yet submitted draft of the same Author.
+   yet submitted draft of the same Author; then a Guest Editor and a
+   Copyeditor, both assigned to a published scratch submission on a
+   scratch journal at the install defaults.
 
    - **The Author's list**: open your own submission's Publication area,
      then "Contributors": the rows show names and role badges, and the
@@ -836,7 +874,18 @@ footnote.
      instead: "Order", "Preview" and "Add Contributor" above the rows,
      and "Primary Contact" or "Set Primary Contact", "Edit" and "Delete"
      on each row ([OPS1](#ops1)) (Actors row 2).
-   - **Control**: the Journal Manager's "Contributors" on the same
+   - **An assigned Guest Editor, on a journal**: signed in as the Guest
+     Editor, open the published submission's workflow, then the
+     Publication area, then "Contributors": the rows show names and
+     role badges, and the "Preview" button is there; "Order", "Add
+     Contributor", "Set Primary Contact", "Edit" and "Delete" are
+     absent, and no row carries the "Primary Contact" badge (⚠ [A6](#a6))
+     (Rule 9).
+   - **An assigned Copyeditor, on a journal or press**: signed in as the
+     Copyeditor, the same published submission's "Contributors" shows
+     the same: the rows with their role badges and "Preview" alone, no
+     "Primary Contact" badge (Rule 9).
+   - **Control**: the Journal Manager's "Contributors" on the Author's
      submission shows "Order", "Preview" and "Add Contributor" above the
      rows, and each row's "Primary Contact" or "Set Primary Contact",
      "Edit" and "Delete" (Rules 2, 3). <sup>s9</sup>
@@ -994,77 +1043,19 @@ Left out of the scenarios above, by reason:
   - a contributor whose hand-entered institution is named in a language
     then unticked under "Metadata" saved with nothing changed, the save
     going through ([A28](#a28)): the guard the issue report proposes [report 2026-10-13]
-  - a fresh hand-entered institution's completeness status counting the
-    journal's metadata languages: "1 of 2 languages completed" on a
-    journal with two, "All translations available" on a journal with
-    English alone (Fields "Affiliations"; A17 retired) [report 2026-11-20]
-  - scenario 9's read-only list seen by an assigned Guest Editor on a
-    journal, and by an assigned Copyeditor on a journal's or a press's
-    published item: the rows with their role badges and "Preview" alone
-    (Rule 9; Actors row 2) [sweep 2026-11-20]
-  - the "Contributor Roles" screen and the competing-interests checkbox
-    reached by the Editor on a journal and a press, and the assigned
-    Section Editor sent to the access-denied page from the "Contributor
-    Roles" address (Actors rows 4 and 6) [sweep 2026-11-20]
-  - scenario 1's empty save, its screen-reader error list naming the
-    four errors ("Go to Given Name: This field is required." and the
-    other three) while the screen does not show it (Fields) [sweep 2026-11-20]
-  - scenario 1's CRediT table saved with two rows left on
-    "Conceptualization", the reopened form holding the role once
-    (Fields "CRediT roles and the degrees of contribution") [sweep 2026-11-20]
-  - a failed registry search: each of the three "ROR API Error"
-    messages, dismissed with "OK", the searched text left under
-    "Selected" and the search box disabled until its "Remove {text}" is
-    pressed (Fields "Affiliations"), the browser's registry answers
-    built as scenario 4 builds its suggestion [sweep 2026-11-20]
   - a journal or press upgraded from 3.5 offering its roles' French
     names ("Auteur-e", "Traducteur-trice", on a press also "Auteur du
     chapitre" and "Rédacteur/Rédactrice en chef du volume") (Rule 11);
     waits for a seed of a context upgraded from 3.5 [sweep 2026-11-20]
-  - scenario 3's publish window on a preprint server: "Post" opens
-    "Post the preprint", reading "All requirements have been met.", and
-    nothing is posted after "Close" (the preprint server's suite) [sweep 2026-11-20]
-  - the journal's suite, parts of bullets it does not assert yet:
-    scenario 1 "An empty save" (the other messages, and Save still
-    disabled after "Alan"); scenario 2 "Save Order" (the arrows in place
-    of the row buttons and the "Primary Contact" badge, Rule 6);
-    scenario 3 "Deleting the primary contact" (nothing warned), "The
-    publish dialog" ("Status: Unscheduled" before, nothing published)
-    and "Control" (the two entries after the publish step); scenario 4
-    "An empty primary-language name" ("Please correct one error." at the
-    foot); scenario 5 "Add Role" ("Fill name in all of the
-    languages."); scenario 6 "The landing page" (the first
-    contributor's "Author"); scenario 8 "An empty statement" (the
-    message under the field) [sweep 2026-11-20]
-  - the press's suite, parts of bullets it does not assert yet:
-    scenario 1 "An empty save" (Country and Contributor Roles after
-    "Alan") and "A bad Email and Homepage URL" (the messages under the
-    fields); scenario 2 "Save Order" (the arrows in place of the row
-    buttons and the badge); scenario 3 "Deleting the primary contact"
-    (nothing warned), "The publish dialog" ("Are you sure you want to
-    make this catalog entry public?", no "Review Publishing Details",
-    nothing published) and "Control" (the read after the first delete);
-    scenario 4 "The per-language names" (the box labels), "An empty
-    primary-language name" (the foot line and the message under the
-    field) and "A refused "Edit" saves nothing" (the message under the
-    field); scenario 5 "Add Role" (identifier EDITOR, "Contributor role
-    saved", the guidance), "Edit Role" (EDITOR alone) and "The role in
-    use" (the "Error" title); scenario 6 "Author Biography" ("{name},
-    {affiliation}" as one line) and "A book with five contributors"
-    (an affiliated contributor among the five, so the line is read
-    without that affiliation, ROR marks or role names; the dangling
-    comma is A1's and stays unasserted) [sweep 2026-11-20]
-  - the preprint server's suite, parts of bullets it does not assert
-    yet: scenario 1 "An empty save" (the reads after "Alan") and
-    "Delete" (the "Delete Contributor" title); scenario 2 "Save Order"
-    (the arrows in place of the row buttons and the badge); scenario 3
-    "Deleting the primary contact" (nothing warned) and "Control" (the
-    read after the first delete); scenario 4 "The per-language names"
-    (the second box's label) and "An empty primary-language name" (the
-    foot line); scenario 5 "The role in use" and "The last AUTHOR role"
-    (the "Error" title); scenario 6 "Author Biography" ("{name},
-    {affiliation}" as one line) [sweep 2026-11-20]
 - **Nothing new to test**:
+  - a fresh hand-entered institution's status on a journal with English
+    alone under "Metadata", "All translations available" (Fields
+    "Affiliations"): a wording variant of the status scenario 4 reads,
+    "1 of 2 languages completed"
+  - the Editor and a Site Administrator working in the journal, on the
+    "Contributor Roles" screen and the competing-interests checkbox
+    (Actors rows 4 and 6): the same offer as the Journal Manager's,
+    which scenarios 5 and 8 drive
   - Preferred Public Name (Fields): another text box on the form
     scenario 1 fills
   - the search box disabled while a picked entry sits under "Selected"
@@ -2515,7 +2506,11 @@ The log is the submission's Activity Log & Notes → History. The
 "Close" and Escape reads and the CRediT table run on the "Alan
 Mwandenga" contributor, through the panel (no seed key exists for
 CRediT roles, scenarios.md "Field shapes not built yet"); the reload
-after "Close" and Escape is the page's own.
+after "Close" and Escape is the page's own. The screen-reader list is
+the foot's "Go to …" buttons in the accessibility tree, none drawn on
+screen (fn c, 2026-11-20; the email field's own label is A19's). The
+two-row save leaves both rows on "Conceptualization" and reads the
+reopened "Edit" (fn c, 2026-11-20).
 
 <a id="fn-s2"></a>
 **s2 — scenario 2 seeding.** A scratch submission of its own (the
@@ -2580,14 +2575,25 @@ institution name in {language}" box under "Edit institution name"
 before Save (fn d). The refused "Edit" is a second edit of the same
 contributor after "Both saved", so "Probe Institute" is stored before
 the refusal; the read after "Close" and the reload is that contributor's
-"Edit" › "Edit institution name".
+"Edit" › "Edit institution name". The second submission language is
+`supportedSubmissionLocales` (scenarios.md "`context`"), which keeps the
+metadata languages in step, so the fresh entry's total is 2 (fn d,
+2026-11-20). The failure leg answers the browser's registry queries
+itself the same way, 429, 503 and 410 for the three messages (fn d,
+2026-11-20); the suites fill the box in one step, as a paste does, so
+the text searched is the whole name. Each failure is raised in a freshly opened "Edit" (A11 is a 🐞,
+so no suite asserts that suggestions stay off, PRINCIPLES M3).
 
 <a id="fn-s5"></a>
 **s5 — scenario 5 seeding.** Scratch journal (roles are mutated); one
 scratch submission with a contributor to hold the new role for the
 in-use refusal. The "Edit Role" read opens "Edit" behind the new row's
 "…" menu and reads the Role Identifier drop-down (fn e: the select
-collapses to the role's own value).
+collapses to the role's own value). The Section Editor is a throwaway
+`sectionEditor` in the context's `users[]` (a Series Editor on a press,
+a Moderator on a preprint server), assigned to the submission through
+`participants[]`; the address is the Contributor Roles screen's, as the
+Journal Manager's browser showed it (fn e, 2026-11-20).
 
 <a id="fn-s6"></a>
 **s6 — scenario 6 seeding.** One published scratch submission per app
@@ -2626,7 +2632,16 @@ drive this leg. The wizard leg is a second submission of the same Author
 with `submitted: false` (scenarios.md: a wizard-resumable draft, listed
 under the author's Incomplete list). The preprint-server leg is the same
 seed on the seeded preprint server with `published: false` (the OPS1
-test; fn b, f-ops1).
+test; fn b, f-ops1). The Guest Editor and Copyeditor legs: the seeded
+journal has no Guest Editor account, so a scratch context from
+`POST scenarios/context` at the install defaults, with throwaway
+accounts (a manager, an author as `submitter`, a `guestEditor` on OJS,
+a `copyeditor` on OJS and OMP; users.md: a press installs no Guest
+Editor, a preprint server neither role); one submission seeded
+`published: true` (OMP: after
+`decisions: ['skipExternalReview', 'sendToProduction']`) with both in
+`participants[]` (`role: 'guestEditor'`, `role: 'copyeditor'`). The
+preprint server's suite has no leg here (fn b, 2026-11-20).
 
 <a id="fn-s10"></a>
 **s10 — scenario 10 seeding.** Seeded press; `POST scenarios/submission`
