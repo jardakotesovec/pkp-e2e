@@ -641,7 +641,8 @@ node bin/plugin-sandbox.js canary                     # the acceptance test of t
 - **Core's own traffic.** OJS itself looks up `download.db-ip.com` (the
   usage statistics' geo database) and `pkp.sfu.ca`: every Administration
   page runs the version check (`AdminHandler::initialize` →
-  `VersionCheck`, `ojs-version.xml`), with "Failed to retrieve the latest
+  `VersionCheck`, `ojs-version.xml`), and so does Settings › Journal
+  (`ManagementHandler.php:177`), with "Failed to retrieve the latest
   version info" in the PHP log at the same second. Both stay dropped and
   are reported as
   core's, not the plugin's. So are `setup.sh`'s self-test drops (1.1.1.1:443,
