@@ -1123,6 +1123,22 @@ trips.
   condition**: a second sighting; then a diagnostician (which of the
   administrator's groups in a new press the cell shows, and in what order).
 
+- **OJS U40 S2's term suggestions still open after the typed text is
+  cleared** (OJS, once, pkp-e2e push run
+  [44697518662](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44697518662)
+  on the branch `rev-2026-11-20b` at the main tips, 2026-11-20, shard
+  2/3, green on its retry). `clearTypedTerm()`
+  (`apps/ojs/playwright/pages/PublicationMetadataPages.js:428`, from
+  `U40-publication-metadata.spec.js:382`, "S2: the Metadata page follows
+  the journal's metadata setup"): the field read empty, and one
+  suggestion stayed in the listbox for 30 s (expected 0, received 1). The
+  branch changes only U24's OPS suite and the harness doc. The helper's
+  comment names the fear (a late answer to an earlier lookup refilling
+  the list); the error context was not read. No earlier sighting at that
+  line. **Watch condition**: a second sighting; then read its error
+  context for which term the option holds and the lookup requests'
+  order.
+
 ## Companion branches — pkp-e2e branches waiting on app PRs
 
 One row per branch prepared for a developer's open OJS, OMP or OPS pull
