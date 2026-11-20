@@ -241,12 +241,9 @@ until their specs exist. Do not force-claim the defects themselves.
 5. **`api/v1/sections` mount gap** — resolved 2026-09-25: the Sections spec's register
    [A5](../specs/U17-sections.md#a5) carries it.
 6. **OMP "Request Revisions" author email invites a response OMP cannot
-   collect** — attached to **U30** (author response) / mail templates. The
-   press email asks the author to "submit your response" but OMP mounts no
-   Author Response panel (the shipped review-stage spec's register documents
-   the panel absence; the template mismatch is U30's / the mail templates').
-   Resolves: U30 spec-time register entry; reconcile template with the press
-   roster.
+   collect** — resolved 2026-11-20: the Author response spec's register
+   [OMP1](../specs/U30-author-response-to-reviews.md#omp1) carries it (Rule 6
+   there; issue report `docs/issues/U30-OMP1-press-author-response-button-leads-nowhere.md`).
 7. **AFFW-068 dead-in-context** — attached to **U21** (claimed; the
    submission-wizard spec's footnote a + Reference row document the verdict).
    The legacy `SubmissionsListPanel` "New Submission" button renders on none
