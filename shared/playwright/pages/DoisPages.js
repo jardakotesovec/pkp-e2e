@@ -29,8 +29,10 @@
  *   with their boxes and badges, "Edit" / "Save", "There are {count}
  *   versions." with "View all", the agency panel), the action windows
  *   ("Assign DOIs", "Mark DOIs …", "Export DOIs", "Deposit DOIs",
- *   "Deposit all DOIs"), "DOI Updates Failed", the "DOIs for all versions"
- *   side window and the top-right notices.
+ *   "Deposit all DOIs"), "DOI Updates Failed", an "Error" DOI's "View
+ *   Error" (its table row's and the agency panel's) with the window
+ *   "Registration Error Message", the "DOIs for all versions" side window
+ *   and the top-right notices.
  * - The reader side: the "DOI:" line of a work's page and an issue's page,
  *   a book page's format DOI rows, and the article page's Crossmark button.
  *   A book's table of contents and a chapter's page are
@@ -125,6 +127,10 @@ const DOIS_TEXT = {
     columns: ['Type', 'DOIs', 'Status', 'Actions'],
     chapterPageNote: 'Chapters without a landing page cannot have a DOI.',
     disableQuestion: 'Are you sure you want to disable this plugin?',
+    hasErrorFilter: 'Has Error',
+    viewError: 'View Error',
+    errorWindowTitle: 'Registration Error Message',
+    depositFailed: (agency) => `The deposit to ${agency} failed. The details below explain the cause of the error:`,
 };
 exports.DOIS_TEXT = DOIS_TEXT;
 
@@ -830,6 +836,34 @@ class DoisPage extends BasePage {
 
     agencyButtons(row) {
         return this.agencyPanel(row).locator('.doiListItem__depositorActions').getByRole('button');
+    }
+
+    /** A DOI table row's "View Error" link (on screen while that DOI reads "Error", Rule 33). */
+    rowViewError(row, type) {
+        return this.doiRow(row, type).getByRole('button', {name: DOIS_TEXT.viewError, exact: true});
+    }
+
+    /** The agency panel's "View Error" button (on screen while the item reads "Error", Rule 30). */
+    agencyViewError(row) {
+        return this.agencyPanel(row).locator('.doiListItem__depositorActions').getByRole('button', {name: DOIS_TEXT.viewError, exact: true});
+    }
+
+    /** The "Registration Error Message" window ("View Error"'s; the agency's preamble over the stored message). */
+    errorMessageWindow() {
+        return this.dialog(DOIS_TEXT.errorWindowTitle);
+    }
+
+    /** Press a "View Error" (`rowViewError` or `agencyViewError`); returns its window, open. */
+    async openErrorMessage(button) {
+        await button.click();
+        await expect(this.errorMessageWindow()).toBeVisible({timeout: T});
+        return this.errorMessageWindow();
+    }
+
+    /** Close the "Registration Error Message" window with its "OK". */
+    async closeErrorMessage() {
+        await this.errorMessageWindow().getByRole('button', {name: 'OK', exact: true}).click();
+        await expect(this.errorMessageWindow()).toBeHidden({timeout: T});
     }
 
     /** Press "Edit": the boxes turn editable and the button reads "Save". */

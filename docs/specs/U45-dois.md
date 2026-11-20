@@ -450,7 +450,7 @@ links under the list. <sup>g</sup>
     name}", and its chapter and format rows come between the work's and
     the files' (Rule 45) <sup>q27</sup>. Each row shows its DOI (empty while it has none), its status
     badge (Rule 31) and, while that status is "Error", a "View Error"
-    link (Rule 33 [A18](#a18)). <sup>m</sup>
+    link (Rule 33). <sup>m</sup>
 18. **Typing, changing and clearing a DOI by hand.** "Edit" makes the
     boxes of the expanded view editable and turns into "Save". On "Save",
     each changed box is stored on its own: a typed DOI on an item without
@@ -725,15 +725,14 @@ links under the list. <sup>g</sup>
     | The item | Sentence | Buttons |
     |----------|----------|---------|
     | not published | "This item cannot be deposited until it has been published." | none |
-    | published, "Unregistered", "Needs Sync" or "Error" | "The metadata for this item has not been submitted to {agency}.", for a "Needs Sync" item too, although it was deposited or registered before ⚠ [A16](#a16) | "Deposit DOI(s)", which opens "Deposit DOIs" for this item alone; "View Error" too while "Error" (Rule 33) |
-    | "Registered" through the agency | "The metadata for this item has been submitted to {agency}." | "View Record" once the agency's answer is stored (Rule 33 [A18](#a18)) |
+    | published, "Unregistered", "Needs Sync" or "Error" | "The metadata for this item has not been submitted to {agency}.", for a "Needs Sync" item too, although it was deposited or registered before ⚠ [A16](#a16) | "Deposit DOI(s)", which opens "Deposit DOIs" for this item alone; "View Error" too while "Error" (Rule 33 [A31](#a31)) |
+    | "Registered" through the agency | "The metadata for this item has been submitted to {agency}." | "View Record" once the agency's answer (Rule 32) is stored |
     | "Registered" by "Mark DOIs Registered" | "This item has been manually registered with a registration agency." | none |
 
     A "Submitted" item reads "This item has been manually registered with
-    a registration agency." at once after its deposit, after a reload,
-    and still after the background deposit has run and failed
-    ⚠ [A4](#a4). While the item is being edited the buttons are greyed
-    out. <sup>q20</sup>
+    a registration agency." at once after its deposit and after a reload,
+    for as long as it reads "Submitted" ⚠ [A4](#a4). While the item is
+    being edited the buttons are greyed out. <sup>q20</sup>
 
 **Statuses and deposits**
 
@@ -778,12 +777,30 @@ links under the list. <sup>g</sup>
     deposited. Validation errors:" over the check's list; a work deposited
     in the same action whose file passes is sent as usual. When the
     install cannot fetch Crossref's format, the file is sent unchecked
-    and Crossref checks it. A deposit that cannot reach the agency never
-    gets there: its background job fails, is tried twice more and is
-    dropped, and the DOI stays "Submitted" with nothing on the DOIs page
-    to show it ⚠ [A18](#a18). The test installs reach no agency, so
-    every deposit there stays "Submitted".
-    <sup>r</sup> <sup>q22</sup> <sup>f-a13</sup>
+    and Crossref checks it. When the install cannot reach the agency,
+    the DOI reads "Error" once the background deposit has run, and "View
+    Error" opens the same window over the connection error: with no
+    connection, from Crossref "cURL error 7: Failed to connect to
+    api.crossref.org port 443 …", from DataCite "cURL error 7: Failed to
+    connect to mds.datacite.org port 443 …"; with a proxy whose name does
+    not resolve, from Crossref "cURL error 5: …". Rule 33a says where the
+    message is lost. "Has Error" lists the item, and Administration ›
+    "Failed Jobs" gains no entry. The test installs reach no agency and
+    run no background deposit by themselves: a deposit there reads
+    "Submitted" until its background deposit is run, and "Error" after it.
+    <sup>r</sup> <sup>q22</sup> <sup>q53</sup> <sup>f-a13</sup>
+
+33a. **Deposits run by the job tool.** An install runs its background
+    jobs, deposits included, at the end of page loads by default, or with
+    its command-line job tool, as a worker or a cron job its host sets up
+    (Settings bullet 15); the test installs use the tool. Run by the tool,
+    a deposit that cannot reach the agency still reads "Error" and "Has
+    Error" lists it. With Crossref on a journal, "View Error" shows the
+    connection error as Rule 33 says. With Crossref on a preprint server,
+    and with DataCite, the message is lost: the row's "View Error" opens
+    the window with its first sentence and nothing under it, and the
+    agency panel has no "View Error" ⚠ [A31](#a31).
+    <sup>q53</sup> <sup>f-a31</sup>
 
 <a id="agencies"></a>
 **Registration agencies**
@@ -1202,6 +1219,13 @@ differs. <sup>z1</sup>
     unticked, with no DOI yet, its row on the DOIs page is greyed and
     nothing gives it one (Rule 47). <sup>z4</sup>
 
+15. **How background jobs run** (the install's configuration file, no
+    screen; at the end of page loads). Run by the command-line job tool
+    instead, as a worker or a cron job: a deposit is sent at the tool's
+    next run, and with Crossref on a preprint server or with DataCite a
+    deposit that fails keeps no message (Rule 33a [A31](#a31)).
+    <sup>q53</sup>
+
 ## Cross-feature interactions
 
 - **[Navigation menus & site chrome](U08-navigation-menus-and-site-chrome.md)**:
@@ -1265,7 +1289,8 @@ differs. <sup>z1</sup>
 
 Scenario 1 only reads, on the seeded journal with ready accounts; every
 other scenario runs on a scratch journal, press or preprint server with
-throwaway accounts. <sup>sc</sup>
+throwaway accounts, scenario 13 also with the Site Administrator.
+<sup>sc</sup>
 
 1. **Who opens the DOIs page, on a journal without a prefix**
 
@@ -1879,12 +1904,12 @@ throwaway accounts. <sup>sc</sup>
 
 13. **Deposit DOIs with Crossref** {OJS OPS}
 
-    Given: a Journal Manager, on a scratch journal with the prefix
-    "10.1234" and Crossref chosen and configured (its depositor fields
-    saved; on a journal its "Publisher" and "Online ISSN" saved), holding
-    three published works carrying DOIs, "Axolotl limb memory",
-    "Tardigrade desiccation" and "Coral spawning", all "Unregistered", and
-    "Moss regrowth" in Production, unpublished.
+    Given: a Journal Manager and the Site Administrator, on a scratch
+    journal with the prefix "10.1234" and Crossref chosen and configured
+    (its depositor fields saved; on a journal its "Publisher" and "Online
+    ISSN" saved), holding three published works carrying DOIs, "Axolotl
+    limb memory", "Tardigrade desiccation" and "Coral spawning", all
+    "Unregistered", and "Moss regrowth" in Production, unpublished.
 
     - **What the page offers**: open "DOIs": the list header carries
       "Deposit All", and "Bulk Actions" lists "Export DOIs", "Mark DOIs
@@ -1923,8 +1948,32 @@ throwaway accounts. <sup>sc</sup>
       deposit", and "Coral spawning" reads "Submitted" (Rules 29, 29a).
     - **No mail**: no email about the deposits has reached the mail
       catcher (Side effects).
-    - **Control**: after "Deposit All", "Tardigrade desiccation" still
-      reads "Registered" and "Moss regrowth" "Unpublished" (Rules 16,
+    - **The background deposits run**: as the Site Administrator open
+      Administration › "Failed Jobs" and note the jobs it lists. Then run
+      the site's background jobs, which the test installs never run by
+      themselves (the footnote says how) (Rule 33).
+    - **"Error" after the run**: as the Journal Manager reload "DOIs":
+      "Axolotl limb memory" and "Coral spawning" read "Error", and each
+      one's "Article" ("Preprint") row reads "Error" with a "View Error"
+      link (Rules 17, 31, 33). Expand "Axolotl limb memory": its Crossref
+      box reads "The metadata for this item has not been submitted to
+      Crossref.", with "Deposit DOI(s)" and "View Error" (Rule 30). Press
+      the row's "View Error": the window "Registration Error Message"
+      reads "The deposit to Crossref failed. The details below explain
+      the cause of the error:" over "cURL error 7: Failed to connect to
+      api.crossref.org port 443 …". Close it and press the box's "View
+      Error": the same window (Rule 33). On a preprint server the box
+      offers "Deposit DOI(s)" alone, so there is no second window to
+      open, and the row's window shows nothing under its first sentence
+      [A31](#a31) (Rule 33a).
+    - **"Has Error"**: press "Has Error": "Axolotl limb memory" and "Coral
+      spawning" are listed, and "Tardigrade desiccation" and "Moss
+      regrowth" are not; press "Has Error" again to lift it (Rules 22,
+      33).
+    - **The Site Administrator's "Failed Jobs"**: reload "Failed Jobs":
+      it lists no job it did not list before the run (Rule 33).
+    - **Control**: after "Deposit All", "Tardigrade desiccation"'s badge
+      reads "Registered" and "Moss regrowth"'s "Unpublished" (Rules 16,
       29a). <sup>sc</sup>
 
 14. **Crossref's requirements on a journal** {OJS}
@@ -2029,6 +2078,15 @@ throwaway accounts. <sup>sc</sup>
       Are you sure you want to deposit these records?"; press "Deposit
       DOIs": "Items successfully submitted for deposit", and the row reads
       "Submitted" (Rules 29, 30).
+    - **The background deposit run**: run the site's background jobs,
+      which the test installs never run by themselves (the footnote says
+      how), and reload "DOIs": "Axolotl limb memory"'s "Article" row reads
+      "Error" with a "View Error" link, and its DataCite box reads "The
+      metadata for this item has not been submitted to DataCite.", with
+      "Deposit DOI(s)" but no "View Error" [A31](#a31) (Rules 17, 30,
+      33a). Press the row's "View Error": the window "Registration Error
+      Message" opens with "The deposit to DataCite failed. The details
+      below explain the cause of the error:" (Rule 33).
     - **An article registered before galley DOIs**: tick "Tardigrade
       desiccation" and run "Mark DOIs Registered": "Items successfully
       marked registered", and its "Article" row reads "Registered"
@@ -2045,7 +2103,7 @@ throwaway accounts. <sup>sc</sup>
       DOIs Unregistered": its "PDF" row reads "Unregistered". Press
       "Deposit All" and "Deposit all DOIs": the "PDF" row reads
       "Submitted" (Rules 27, 29a).
-    - **Control**: before DataCite was saved, the DOIs page had no
+    - **Control**: opened before "DataCite" is chosen, "DOIs" has no
       "Deposit All" (Rule 36). <sup>sc</sup>
 
 17. **Peer-review DOIs** {OJS}
@@ -2368,10 +2426,6 @@ Left out of the scenarios above, by reason:
     journal and a preprint server with the galley kind ticked before a
     kept kind choose Crossref and save; the Setup tab then shows the kept
     kinds ticked and the DOIs page lists its items {OJS OPS} [report 2026-10-01]
-  - the guard for A18 (Rule 33; issue report
-    `docs/issues/U45-A18-deposit-unreachable-agency-stays-submitted.md`):
-    a deposit the test install cannot send to the agency turns the item
-    "Error" with "View Error", and "Has Error" lists it {OJS OPS} [report 2026-10-01]
   - the guard for OMP1 (Rules 4, 22; issue report
     `docs/issues/U45-OMP1-file-dois-ignored-on-dois-page.md`): a press
     with "Files" alone ticked listing its books on the DOIs page, and a
@@ -2451,6 +2505,7 @@ Left out of the scenarios above, by reason:
   - the "Registration" filters on a press counting chapter and format DOIs whether or not their kind is ticked, and never a file's (Rule 51)
   - the "Custom pattern" "Chapters" and "Publication Formats" boxes and their "%c", "%f" and "%x" symbols {OMP} (Rule 49)
   - a publish under "Never" adding no "Submission metadata updated": no DOI is made, as in the saves of scenarios 5 and 7 that add no line (Side effects)
+  - a review's "Error" DOI kept through "Public Visibility" unticked: the same kept status as the "Registered" review DOI scenario 23 unticks {OJS} (Rule 7b)
   - "Immediately…" and new versions: under "No" the new version sharing its source's DOIs, under "Yes" a "Major Revision" getting its own at once and a "Minor Revision" sharing them, the same DOIs scenarios 10 and 11 show under the installed choice (Rules 5a, 11, 12, 50)
 - **Register carries it**:
   - A2 (a made DOI under "None", and a peer review's under "Custom pattern", reading the prefix and a bare "/", a press's chapters and formats included; Rules 6b, 49)
@@ -2478,8 +2533,8 @@ Left out of the scenarios above, by reason:
   - OJS11 (two published major versions sharing a DOI both written to a journal's Crossref file, the older first; Rule 29b)
   - OJS12 ("DOI Versioning" "Yes" saved while Crossref's "Update Policy DOI" is empty; Rule 38)
   - OJS4 ("Deposit DOIs" on the "Issues" tab leaving the issues' status; Rules 29, 32)
-  - A18 (a deposit that cannot reach the agency staying "Submitted"; Rule 33)
   - A4 (a deposited item's agency panel; Rule 30; scenario 13 passes it)
+  - A31 (a failed deposit run by the job tool keeping no message, with Crossref on a preprint server and with DataCite; Rule 33a; scenarios 13 and 16 pass it)
   - A16 (a "Needs Sync" item's agency panel; Rule 30)
   - OPS2 ("Automatic Deposit" on a preprint server; Rule 41)
   - OMP1 ("Files" alone listing nothing, and "Needs DOI" ignoring a missing file DOI; Rules 4, 22)
@@ -2492,8 +2547,9 @@ Left out of the scenarios above, by reason:
 - **No seed**:
   - the "Export DOIs" download, "Items successfully exported" and what the file holds: the test installs cannot reach the agency's site (Rules 29, 29b; Side effects)
   - the reviews file of a work whose review was taken out of public view, which leaves that review out: no screen shows the file the deposit sends (Rules 29, 29b)
-  - a deposit the agency answers with an error: "Error", "View Error" and the "Registration Error Message" window, and a review's "Error" DOI kept through "Public Visibility" unticked (Rules 7b, 17, 33)
-  - a deposit the agency accepted: the panel's "Registered" through the agency and "View Record" (Rules 30, 33)
+  - a deposit the agency itself answers with an error, and the agency's message in the "Registration Error Message" window (Rule 33)
+  - a deposit the agency accepted: the panel's "Registered" through the agency and "View Record" (Rules 30, 32)
+  - a deposit run at the end of a page load, the install default: the test installs run their background jobs with the job tool alone (Rule 33a; Settings bullet 15)
 - **Owned by another feature**:
   - an unsaved change on the "Setup" or "Registration" tab lost on leaving the page (Fields; *Journal identity & about pages*, Rule 5)
   - an older version's chapter page under "DOI Versioning" "No", meant to show the current version's chapter DOI, answering a server error {OMP} (Rule 54; *Monograph landing page*, its A19)
@@ -2516,13 +2572,13 @@ an entry notes otherwise; the team settles them on spec review.
 | [A14](#a14) | The "Mark DOIs Needs Sync" window on the DOIs page asks to mark the records "as stale" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A15](#a15) | "Deposit DOIs" on a published work with no DOI reports success, and nothing is deposited | 🐞 | medium · crash: server | issues (claude), 2026-10-12 — re-verified |
 | [A17](#a17) | With "DOI Versioning" "Yes", publishing a new major version leaves the earlier version's DOI "Registered" instead of "Needs Sync" | 🐞 | low | issues (claude), 2026-10-12 — re-verified |
-| [A18](#a18) | A DOI deposit that cannot connect to Crossref or DataCite reads "Submitted" for good, with no error | 🐞 | high · crash: server | issues (claude), 2026-10-01 — re-verified |
 | [A19](#a19) | Saving a DOI registration agency can untick every DOI kind and leave the DOIs page blank | 🐞 | high · crash: script | issues (claude), 2026-10-01 — re-verified |
 | [A20](#a20) | The Crossref and DataCite pages under Tools open with an empty heading and an unnamed browser tab | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A21](#a21) | "Save" on the DOI "Registration" tab with no agency plugin enabled logs a PHP "Undefined array key" warning | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A22](#a22) | The DOIs page's "Bulk Actions" menu stays open over the list when an action is confirmed at once | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A24](#a24) | The DOIs page's rows show a title's italic word as `<i>…</i>` and "&" as `&amp;` | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [A29](#a29) | A journal upgraded from 3.3 can come out with an old leftover DOI prefix, and new DOIs are made with it | 🐞 | user-visible | — |
+| [A31](#a31) | A failed deposit run by the job tool reads "Error" with no message, with Crossref on a preprint server and with DataCite | 🐞 | user-visible | — |
 | [OJS3](#ojs3) | A journal's publish window lists the missing-ISSN warning for Crossref twice | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | "Deposit DOIs" on the "Issues" tab queues the issues' deposits but they still read "Unregistered" | 🐞 | low | issues (claude), 2026-10-09 — re-verified |
 | [OJS5](#ojs5) | DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI | 🐞 | medium · crash: server | issues (claude), 2026-10-15 — re-verified |
@@ -2606,13 +2662,14 @@ marked it registered. Nothing is lost: the badge, the deposit and the
 stored status are right, and the box picks the wrong one of two
 sentences. The sentence is wrong for as long as the item reads
 "Submitted". That is seconds where queued jobs run on web requests (the
-default), and until the worker's or cron's next run otherwise. When the
-deposit cannot connect to the agency, the item stays "Submitted" (a
-separate fault, [A18](#a18)) and the sentence stays with it. It needs
-Crossref or DataCite configured, which a press cannot have. It shows on
-an item whose DOI no agency has registered before; an item deposited
-again after an agency registered it reads the right sentence.
+default), and until the worker's or cron's next run otherwise; a
+deposit that cannot connect to the agency is no exception, since the
+item then reads "Error". It needs Crossref or DataCite configured,
+which a press cannot have. It shows on an item whose DOI no agency has
+registered before; an item deposited again after an agency registered
+it reads the right sentence.
 Basis: probe, 2026-10-01. <sup>f-a4</sup>
+Report: refresh owed — pkp/crossref-ojs#117, pkp/crossref-ops#74 and pkp/ojs#5977 (for pkp/pkp-lib#13591, on both apps' `main` by 2026-11-20) record a deposit that cannot connect as "Error", so the report's Summary sentence "the item stays "Submitted" … and the sentence stays with it" no longer holds, and its step 8 (waiting for "Failed Jobs" to list `PKP\jobs\doi\DepositSubmission`) now ends at "Error" with no failed job (`CrossrefExportPlugin.php`, `DataciteExportPlugin.php`, `updateDepositStatus()`) (2026-11-20)
 
 <a id="a5"></a>
 **A5 — The Registration tab keeps a new agency even when its fields are refused** · ❓ · minor.
@@ -2793,30 +2850,6 @@ Assignment" is "Never"; with no new DOI the earlier version's record
 has nothing new to name.
 Basis: probe, 2026-10-12. <sup>f-a17</sup>
 
-<a id="a18"></a>
-**A18 — A DOI deposit that cannot connect to Crossref or DataCite reads "Submitted" for good, with no error** · 🐞 · high · crash: server.
-After "Deposit DOIs" or "Deposit All" the DOI reads "Submitted". When
-the background deposit cannot connect to the registration agency
-(Crossref or DataCite), it fails on the server. It is tried twice more,
-about five seconds apart, and then given up and recorded as a failed
-job, all within seconds. The DOI stays "Submitted": no "Error" badge or
-"View Error" appears. Nothing on the DOIs page tells the manager that
-the deposit never arrived or that it should be sent again, and nothing
-points the site administrator to Administration › "Failed Jobs". The DOI
-is never registered, so it does not resolve, while the DOIs page reports
-it as sent. A stuck "Submitted" looks the same as a deposit still
-waiting its turn. "Deposit All" and "Automatic Deposit" never send a
-"Submitted" DOI again, so it is registered only if a manager deposits
-the item again by hand. The trigger is a deposit that gets no answer: no
-connection, a failed name lookup, a failed TLS handshake, a timeout or
-an empty reply. This covers an outage at the agency and a server whose
-outbound connections are blocked, where every deposit is lost this way.
-An agency that answers with an HTTP error is recorded as "Error", as it
-should be. With Crossref, a transfer error of another kind that brings
-no answer leaves "Submitted" too; that case was read in the code and not
-reproduced.
-Basis: probe, 2026-10-01. <sup>f-a18</sup>
-
 <a id="a19"></a>
 **A19 — Saving a DOI registration agency can untick every DOI kind and leave the DOIs page blank** · 🐞 · high · crash: script.
 A journal manager chooses Crossref or DataCite as the registration
@@ -2936,6 +2969,21 @@ That is `main`, and 3.5 since 3.5.0-2. An upgrade from 3.3 to 3.4
 stops on such an install with a database error instead.
 Since: 2026-10-09 (pkp/pkp-lib#13481; on 3.5 pkp/pkp-lib#12082) · Basis: probe, 2026-10-09. <sup>f-a29</sup>
 
+<a id="a31"></a>
+**A31 — A failed deposit run by the job tool reads "Error" with no message, with Crossref on a preprint server and with DataCite** · 🐞 · user-visible.
+On an install that runs its background jobs with the command-line job
+tool (Rule 33a), a preprint server's Crossref deposit that cannot reach
+Crossref reads "Error", and "Has Error" lists it. The manager expects
+"View Error" to say what went wrong. Instead the "Preprint" row's "View
+Error" opens "Registration Error Message" with its first sentence and
+nothing under it, and the Crossref box offers "Deposit DOI(s)" without
+"View Error". No screen tells the manager why the deposit failed, so an
+outage cannot be told from a refused record. On a journal, DataCite's
+box lacked "View Error" too in the one run that read it, and no message
+was kept; a journal's Crossref deposit keeps its message. Installs
+that run their jobs at the end of page loads (the default) keep it too.
+Basis: test run, 2026-11-20. <sup>f-a31</sup>
+
 
 ### OJS
 
@@ -2985,15 +3033,12 @@ which sends the agency the same record again.
 
 It shows where a worker or a cron job runs the queue, until the next
 run. On the default setting, where queued jobs run at the end of page
-loads, the deposit is tried within a page load, and "Unregistered" stays
-only when that try cannot connect to the agency. There "Unregistered" is
-the true status and "Deposit All" takes the issue again, while an
-article in the same case is left "Submitted" for good, a fault of its
-own
-([A18](#a18)).
-Marking the issue "Submitted" would leave it stuck the same way, so this
-fix belongs with or after that one.
+loads, the deposit is tried within a page load, and the issue reads
+"Unregistered" only until it is. A try that cannot connect to the agency
+then sets "Error", as for an article; for an issue that was read in the
+code, not walked.
 Basis: probe, 2026-10-09. <sup>f-ojs4</sup>
+Report: refresh owed — pkp/crossref-ojs#117 and pkp/ojs#5977 (for pkp/pkp-lib#13591, on OJS `main` by 2026-11-20) record a deposit that cannot connect as "Error", so the report's reach ("Unregistered" stays on the default setting only when the deposit cannot connect, A18) and its order of fixes (after OJS2 and A18, both now fixed) no longer hold (`CrossrefExportPlugin::depositXML()`, `DataciteExportPlugin::depositXML()`, `CrossrefExportPlugin::updateDepositStatus()`) (2026-11-20)
 
 <a id="ojs5"></a>
 **OJS5 — DataCite deposits leave a galley DOI "Submitted" and unsent when its article has no DOI** · 🐞 · medium · crash: server.
@@ -3066,10 +3111,10 @@ Instead the deposit is given the current version only, 2.0's article
 and galleys: 1.0's DOIs are never sent, no error is recorded, and
 "Deposit All" skips them from then on because they read "Submitted".
 Once DataCite has answered, 2.0's rows read "Registered" and 1.0's stay
-"Submitted". The test installs reach no agency, so there every row
-stays "Submitted" (Rule 33) and the DOIs page looks the same as on a
-Crossref journal. "Deposit All" marks 1.0's rows since it follows "DOI
-Versioning" (Rule 29a); before, it left them "Unregistered".
+"Submitted". On the test installs every row reads "Submitted" until the
+background deposit is run (Rule 33), and until then the DOIs page looks
+the same as on a Crossref journal. "Deposit All" marks 1.0's rows since
+it follows "DOI Versioning" (Rule 29a); before, it left them "Unregistered".
 "Automatic Deposit" marks the same DOIs.
 Basis: probe, 2026-10-08, at the round-8 PR heads of `pkp/pkp-lib#13447` before their merge. <sup>f-ojs8</sup>
 Report: none — DataCite with a DOI per version is not implemented yet and is tracked upstream in `pkp/pkp-lib#11591` (@bozana, 2026-10-08)
@@ -3314,6 +3359,9 @@ Basis: probe, 2026-10-20. <sup>f-ops6</sup>
 
 <a id="a13"></a>
 **A13 — A bulk action the server refuses on the DOIs page closes its window and shows no message** · ✅ · retired. Fixed upstream (pkp/ui-library#1016, for pkp/pkp-lib#13507).
+
+<a id="a18"></a>
+**A18 — A DOI deposit that cannot connect to Crossref or DataCite reads "Submitted" for good, with no error** · ✅ · retired. Fixed upstream (pkp/crossref-ojs#117, pkp/crossref-ops#74, pkp/ojs#5977, for pkp/pkp-lib#13591).
 
 <a id="a25"></a>
 **A25 — Under "Immediately", declining a submission deletes the DOI its published version shows** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13447, pkp/pkp-lib#13460).
@@ -4708,7 +4756,67 @@ connection ("cURL error 7: Failed to connect to …"), was retried twice
 and landed among the failed jobs; every deposited item still read
 "Submitted", with no "View Error" in the row or the panel. The
 "Registration Error Message" window was therefore not seen; its wording
-is code-read.
+is code-read. That was before the fix of pkp/pkp-lib#13591; since it, a
+deposit that cannot connect reads "Error" and the window shows (note
+q53).
+
+<a id="fn-q53"></a>
+**q53** — Walked 2026-11-05 (Rule 33) at the PR heads of
+pkp/pkp-lib#13591, before their merge: crossref-ojs#117 `8a2335c21b`,
+crossref-ops#74 `3535d54844`, ojs#5977 `49f80fec9a` (DataCite, and the
+crossref pointer) and ops#1481 `85500f3837`, each app merged locally onto
+its `main` tip (OJS `1e12158722`, OPS `0acd73102d`), with
+`checks/issues/deposit-unreachable-agency-stays-submitted/walk.js` on
+dataset fleets freshly loaded per run, the second, undeposited item as
+control. Crossref (OJS, OPS) and DataCite (OJS) behind the dead-port
+proxy (`cURL error 7`), and Crossref behind a proxy whose name does not
+resolve (`cURL error 5`, a transfer error without a response): every
+deposited item read "Error" with "View Error" in the row and the panel,
+the window "Registration Error Message" read "The deposit to Crossref
+failed. The details below explain the cause of the error:" over the cURL
+message, "Has Error" listed it, no failed job was recorded, and the
+control stayed "Unregistered". At the tips the same runs left every item
+"Submitted" (the `cURL error 5` case with no failed job either). A
+timeout raises the same `ConnectException` as a refused connection
+(Guzzle `CurlFactory`), code-read.
+Round 2, walked 2026-11-09 the same way at the PR heads before their
+merge, each app merged locally onto its tip: on `main`, ops#1494
+`cbfe5ed95e` (crossref-ops#77 `937286a8ac`, which carries the merged
+#74) on OPS `40f33453f0` turned the preprint's "Submitted" (with a failed
+job) into "Error" with "View Error"; OJS `407246bb8e` already read
+"Error" at its tip and still did with ojs#6047 `acc4948fa2`
+(crossref-ojs#120 `14e6c5f16f`). On `stable-3_4_0`, crossref-ojs#119
+`26049c17e4`, crossref-ops#76 `a7c14f5670`, ojs#6046 `406fb9cf43`
+(DataCite) and ops#1493 `b53787e36f` on OJS `61835656a2` and OPS
+`d406378b01`: "Submitted" with a failed job at the tips (Crossref on both,
+DataCite on OJS), "Error" with "View Error" in the agency panel at the
+heads, the control "Unregistered" throughout.
+Walked 2026-11-20 at the tips, once the fix had reached both apps: OJS
+`main` `1e1d3fc49b` (crossref-ojs#117 and ojs#5977) and OPS `main`
+`69d3cf6bad` (its crossref plugin at `0bcf460`, which carries
+crossref-ops#74), the same walk on dataset fleets reset first, `[proxy]`
+at a dead port, one run per app and agency: Crossref on OJS and OPS,
+DataCite on OJS. "Deposit DOIs" answered "Items successfully submitted
+for deposit"; after one reload (about 15 s, no job left in the queue)
+the badge and the "Article" / "Preprint" row read "Error" with "View
+Error", and the panel "The metadata for this item has not been submitted
+to Crossref." ("… to DataCite.") with "Deposit DOI(s)" and "View Error".
+The window read "The deposit to Crossref failed. The details below
+explain the cause of the error:" over "cURL error 7: Failed to connect to
+api.crossref.org port 443 … for https://api.crossref.org/v2/deposits"
+(DataCite: "The deposit to DataCite failed. …" over "cURL error 7: Failed
+to connect to mds.datacite.org port 443 … for
+https://mds.datacite.org/metadata"); "Has Error" listed the item;
+Administration › "Failed Jobs" read "There's a total of 0 failed
+job(s)."; the DOI's status was 4 (error), its message stored in
+`crossrefplugin_failedMsg` / `dataciteplugin_failedMsg`
+(`CrossrefExportPlugin::depositXML()`, `DataciteExportPlugin::depositXML()`
+catch the `TransferException` and call `updateDepositStatus()` with
+error). The dataset fleets run `[queues] job_runner = On`, so the
+deposit ran on the reload; the test installs run `job_runner = Off`, so
+there it runs only when the queue is run by hand (the suites' `runJobs()`),
+and there a preprint server's Crossref and a journal's DataCite keep no
+message (A31, note f-a31).
 
 <a id="fn-s"></a>
 **s** — `isPluginConfigured()`: OJS `CrossrefPlugin` (the schema's
@@ -5372,10 +5480,16 @@ formats can change order after any save (seed-facts), so the row order
 is read in scenario 4 only, before "EPUB" is added. "Harbours"'
 "Chapter Page" (scenarios 4, 5) and scenario 4's "EPUB" are set on
 screen.
-Queued deposits are never drained: their jobs fail at connection on
-the test installs (seed-facts), so no scenario reads a status after
-them. Scenarios 1–11 run on all three apps, 12 and 13 on OJS and OPS,
-14–18 on OJS, 19 on OMP, 20 and 21 on all three, 22 on OJS and OPS and
+Scenarios 13 and 16 run the site's background jobs once, after their
+deposits, with `runJobs()` (`shared/playwright/support/jobs.js`, which
+runs `php lib/pkp/tools/jobs.php run` and waits for the queue to empty;
+the serial project only), and read "Error" after it (Rule 33, note
+q53), OPS's Crossref and OJS's DataCite with no message (Rule 33a, note
+f-a31); every other deposit in the scenarios is read before any run,
+"Submitted". Scenario 13's Site Administrator is the installer's
+`admin` (`docs/process/users.md`); "Failed Jobs" lists every job of the
+fleet, other tests' included. Scenarios 1–11 run on all three apps,
+12 and 13 on OJS and OPS, 14–18 on OJS, 19 on OMP, 20 and 21 on all three, 22 on OJS and OPS and
 23 on OJS. In the scenarios {its number} is the number
 the item's row shows, the submission's. Live-probed 2026-09-26: these
 keys seeded every scratch journal, press and preprint server of the
@@ -5604,15 +5718,6 @@ three apps, one run each. Still shows at the round-8 PR heads of
 "Deposit All" then left it so.
 Issue report: [pkp-e2e#229](https://github.com/jardakotesovec/pkp-e2e/issues/229) ([docs/issues/U45-A17-major-version-earlier-doi-stays-registered.md](../issues/U45-A17-major-version-earlier-doi-stays-registered.md)).
 
-<a id="fn-f-a18"></a>
-**f-a18** — Live-probed 2026-09-26 (q22): `PKP\jobs\doi\DepositSubmission`
-failed with `GuzzleHttp\Exception\ConnectException` (three attempts),
-every deposit, OJS and OPS; the DOI status stayed 2 (submitted) and no
-error message was stored. Nothing on the DOIs page lists failed jobs.
-Issue report: [pkp-e2e#210](https://github.com/jardakotesovec/pkp-e2e/issues/210) (closed 2026-11-06, fixed by `pkp/pkp-lib#13591`: `pkp/crossref-ojs#117`, `pkp/crossref-ops#74` and `pkp/ojs#5977` on `main`, #118, #75 and #5978 on `stable-3_5_0`, merged 2026-11-05); the report was deleted then (git history keeps it).
-The entry stays until OPS `main` points its crossref submodule at the
-fix (`pkp/ops#1494`; upstream-sync Leads).
-
 <a id="fn-f-a19"></a>
 **f-a19** — `editDoiRegistrationAgencyPlugin()`'s `array_intersect()`
 keeps the kept kinds' positions in the stored list of kinds (the
@@ -5723,6 +5828,46 @@ suites' reach (an install is never upgraded in a test run).
 Written up for the team in
 [docs/reports/2026-10-09-pkp-lib-13481.md](../reports/2026-10-09-pkp-lib-13481.md)
 (the PR review of pkp/pkp-lib#13481, posted in the channel on 2026-10-09).
+
+<a id="fn-f-a31"></a>
+**f-a31** — Test runs 2026-11-20 (Rule 33a; scenarios 13 and 16), the
+deposits run with `runJobs()` (`php lib/pkp/tools/jobs.php run`; the
+test installs run `[queues] job_runner = Off`). OPS `main` `69d3cf6bad`
+(crossref plugin `0bcf460`), two runs, a probe on a one-preprint server
+and scenario 13's: both deposited preprints and their "Preprint" rows
+read "Error" with "View Error", "Has Error" listed them alone and
+"Failed Jobs" gained no entry, but the Crossref box's buttons were
+"Deposit DOI(s)" alone and the row's window read "Registration Error
+Message", "The deposit to Crossref failed. The details below explain
+the cause of the error:", "OK" and nothing else; `doi_settings` held no
+row for those DOIs (status 4), and a command-line read of the DOI
+schema (`app()->get('schema')->get('doi')`) had no
+`crossrefplugin_failedMsg`. OJS `main` `1e1d3fc49b`, scenario 16, one
+run: "Axolotl limb memory" read "Error" with "View Error" in its
+"Article" row, its DataCite box "Deposit DOI(s)" alone; its DataCite DOI
+read status 4 with no `dataciteplugin_failedMsg`, while scenario 13's
+Crossref DOIs on the same install, run the same way, kept
+`crossrefplugin_failedMsg` "cURL error 7: Failed to connect to
+api.crossref.org port 443 …" and showed it in both windows. Cause,
+code-read: OPS `CrossrefPlugin::register()` and OJS
+`DatacitePlugin::register()` add their `Schema::get::doi` hook
+(`addToSchema()`, which adds the message settings to the DOI schema) only
+in `_pluginInitialization()`, run only when `getEnabled($mainContextId)`
+holds, and the job tool runs with no context. DataCite's fallback in
+`_getExportPlugin()`, which would initialise the plugin from the command
+line, never runs, because `register()` has already put the export plugin
+in the registry. So `updateDepositStatus()` passes the message to
+`Repo::doi()->edit()`, which keeps the status and drops the setting the
+schema lacks. OJS `CrossrefPlugin::register()` adds the hook whatever the
+context, so a journal's Crossref keeps its message. Also code-read: on
+OPS the Crossref batch ID and success message are dropped the same way,
+and so is any message an agency's refusal brings, on both. Where jobs
+run on web requests (`job_runner = On`), the hooks are registered and
+the message is kept (note q53). Scenario 16's journal deposits with
+"Testing" ticked, so once its message is kept the window should name
+DataCite's test address, `mds.test.datacite.org`
+(`DataciteExportPlugin::depositXML()` posts to `DATACITE_API_URL_TEST`
+when `isTestMode()`), code-read, not seen.
 
 <a id="fn-f-a25"></a>
 **f-a25** — At the PR heads of `pkp/pkp-lib#13460` (`246e5387f6`, with

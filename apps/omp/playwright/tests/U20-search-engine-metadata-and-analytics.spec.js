@@ -568,7 +568,10 @@ test.describe('Search-engine metadata & analytics', () => {
         const [english, french] = await readSitemapPair(visitor, pk);
         expect(english.status).toBe(200);
         expect(english.paths.length).toBeGreaterThan(3);
+        // A PDF's download address carries no language (Rule 4).
+        const pdf = new RegExp(`^/index\\.php/${pk}/catalog/download/`);
         for (const path of english.paths) {
+            if (pdf.test(path)) continue;
             expect(path).toMatch(new RegExp(`^/index\\.php/${pk}/en(/|$)`));
             expect(path).not.toContain('/fr_CA');
         }
@@ -577,6 +580,7 @@ test.describe('Search-engine metadata & analytics', () => {
         expect(french.status).toBe(200);
         expect(french.paths.length).toBe(english.paths.length);
         for (const path of french.paths) {
+            if (pdf.test(path)) continue;
             expect(path).toMatch(new RegExp(`^/index\\.php/${pk}/fr_CA(/|$)`));
             expect(path).not.toMatch(/\/en(\/|$)/);
         }

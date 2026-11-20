@@ -3,19 +3,21 @@
  * @file playwright/tests/U45-dois.spec.js
  *
  * DOIs — OJS suite, one test per canonical scenario the spec runs on OJS
- * in the parallel `ojs` project (S1–S10, S20, S21 common, S12–S13 {OJS
- * OPS}, S14, S16–S18, S23 {OJS}). S11, S15 and S22 put a journal on "DOI
+ * in the parallel `ojs` project (S1–S10, S20, S21 common, S12 {OJS OPS},
+ * S14, S17, S18, S23 {OJS}). S11, S15 and S22 put a journal on "DOI
  * Versioning" "Yes", which on an OJS head older than the U19 A22 fix
  * (pkp/ojs#5947, which most open app PRs predate) makes every OJS OAI
- * request of the install answer 500 while it lasts, so they run in the
- * `ojs-serial` project, after this one: `tests/serial/U45-dois.spec.js`.
- * S19 is the press's.
+ * request of the install answer 500 while it lasts, and S13 and S16 run
+ * the site's background jobs after their deposits (`runJobs()`, serial
+ * only), so the five run after this project, in
+ * `tests/serial/U45-dois.spec.js` (S13, S16 and S22 `@solo`, that file's
+ * header says why). S19 is the press's.
  * Spec: docs/specs/U45-dois.md
  *
  * Deliberately NOT covered (register IDs; a 🐞 is never asserted as the
  * contract, a ❓ is parked; the spec's Coverage section is the record of
  * everything else): A2, A3, A4, A7, A8, A9, A10, A11, A12, A14, A15, A16,
- * A17, A18, A19, A20, A21, A22, A23, A24, A29, OJS1, OJS3, OJS4,
+ * A17, A19, A20, A21, A22, A23, A24, A29, A31, OJS1, OJS3, OJS4,
  * OJS5, OJS8, OJS9, OJS10, OJS11, OJS12, OJS13; OMP1–OMP3, OPS1–OPS3,
  * OPS5, OPS6 are the press's and the preprint server's.
  *
@@ -38,9 +40,10 @@
  * ("10.1234/e2e-a1-{tag}"): a typed DOI must be unused on the whole
  * install (Rule 9), and the fleet's database outlives a run.
  *
- * Deposits are never drained (outbound HTTP is dead on the test installs:
- * a deposit stays "Submitted", "Export DOIs" answers 400), so no test reads
- * a status after a background job. Every absence is read settled (the
+ * Deposits are never drained here (the test installs run no background
+ * job by themselves and reach no agency: a deposit reads "Submitted" until
+ * its job runs, "Export DOIs" answers 400), so no test of this file reads
+ * a status after a background job; S13 and S16 do, in the serial file. Every absence is read settled (the
  * list's own fetch, the action's answer) and paired with a positive
  * control taken the same way (M4, M6); the mail catcher's silence is
  * bounded by a password-reset message sent to the journal's own manager
@@ -101,7 +104,6 @@ const ISSUE_3 = 'Vol. 1 No. 3 (2026)';
 const GALLEYS = 'Article galleys, such as a published PDF';
 const KINDS = ['Articles', 'Issues', GALLEYS, 'Peer Review'];
 const CROSSREF_KINDS = ['Articles', 'Issues', 'Peer Review'];
-const DATACITE_KINDS = ['Articles', 'Issues', GALLEYS];
 const ENABLE_SENTENCE = 'Allow Digital Object Identifiers (DOIs) to be assigned to work published in this journal.';
 const IMMEDIATELY = TEXT.immediately;
 const COPYEDIT = 'Upon reaching the copyediting stage';
@@ -1371,118 +1373,6 @@ test.describe('DOIs', () => {
         expect(await settings.kinds()).toEqual(KINDS.map((label) => ({label, checked: label === 'Articles'})));
     });
 
-    test('S13: deposit DOIs with Crossref', async ({browser, baseURL, asUser, ojsApi, pkpMail}, testInfo) => {
-        test.setTimeout(300_000);
-        const tag = makeTag('s13', testInfo);
-        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {
-            doiPrefix: PREFIX,
-            plugins: {crossrefplugin: {enabled: true, settings: DEPOSITOR}},
-            registrationAgency: 'crossrefplugin',
-            publisherInstitution: 'Public Knowledge Project',
-            onlineIssn: '1234-5679',
-        });
-        const axolotl = await seedWork(ojsApi, tag, 'ax', ada, AXOLOTL, {published: true});
-        const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE, {published: true});
-        const coral = await seedWork(ojsApi, tag, 'co', mary, CORAL, {published: true});
-        const moss = await seedWork(ojsApi, tag, 'mo', ada, MOSS, {decisions: TO_PRODUCTION});
-        const page = await pageAs(asUser, manager);
-        const dois = new DoisPage(page, tag);
-        const axRow = dois.row(axolotl.submissionId);
-        const taRow = dois.row(tardigrade.submissionId);
-        const coRow = dois.row(coral.submissionId);
-        const moRow = dois.row(moss.submissionId);
-
-        // What the page offers (Rules 24, 36).
-        await dois.goto();
-        await expect(dois.depositAllButton()).toBeVisible();
-        expect(await dois.bulkLabels()).toEqual([
-            'Select All',
-            'Expand all',
-            'Export DOIs',
-            'Mark DOIs Registered',
-            'Mark DOIs Unregistered',
-            'Mark DOIs Needs Sync',
-            'Assign DOIs',
-            'Deposit DOIs',
-        ]);
-        await dois.closeBulkActions();
-        for (const r of [axRow, taRow, coRow]) await expect(dois.rowBadge(r)).toHaveText('Unregistered');
-
-        // The agency panel (Rule 30).
-        await dois.expand(moRow, moss.submissionId);
-        await expect(dois.agencyName(moRow)).toHaveText('Crossref');
-        await expect(dois.agencySentence(moRow)).toHaveText(TEXT.notPublished);
-        await expect(dois.agencyButtons(moRow)).toHaveCount(0);
-        await dois.expand(axRow, axolotl.submissionId);
-        await expect(dois.agencyName(axRow)).toHaveText('Crossref');
-        await expect(dois.agencySentence(axRow)).toHaveText(TEXT.notSubmitted('Crossref'));
-        await expect(dois.agencyButtons(axRow)).toHaveText(['Deposit DOI(s)']);
-
-        // Registered by hand: "manually registered", no button (Rule 30).
-        await dois.runBulk('Mark DOIs Registered', [tardigrade.submissionId]);
-        await expect(dois.rowBadge(taRow)).toHaveText('Registered');
-        await dois.expand(taRow, tardigrade.submissionId);
-        await expect(dois.agencySentence(taRow)).toHaveText(TEXT.manuallyRegistered);
-        await expect(dois.agencyButtons(taRow)).toHaveCount(0);
-
-        // "Export DOIs" with an unpublished work: the question; the "Error"
-        // window with the server's reason; nothing downloads (Rule 29).
-        /** @type {string[]} */
-        const downloads = [];
-        page.on('download', (d) => downloads.push(d.suggestedFilename()));
-        await dois.tick([axolotl.submissionId, moss.submissionId]);
-        const exporting = await dois.chooseBulkAction('Export DOIs');
-        await expect(exporting).toContainText(TEXT.exportQuestion(2, 'Crossref'));
-        const exported = await dois.confirmAction(exporting, 'Export DOIs');
-        expect(exported.status(), 'the export is refused').toBe(400);
-        expect(exported.headers()['content-disposition'] || '').not.toContain('attachment');
-        await expect(dois.errorDialog()).toContainText(TEXT.invalidObjects);
-        await dois.closeErrorDialog();
-        expect(downloads).toEqual([]);
-
-        // "Deposit DOIs" with an unpublished work: the question; the "Error"
-        // window with the server's reason; nothing marked (Rule 29).
-        await dois.tick([axolotl.submissionId, moss.submissionId]);
-        const depositing = await dois.chooseBulkAction('Deposit DOIs');
-        await expect(depositing).toContainText(TEXT.depositQuestion(2, 'Crossref'));
-        const refused = await dois.confirmAction(depositing, 'Deposit DOIs');
-        expect(refused.status(), 'the deposit is refused').toBe(400);
-        await expect(dois.errorDialog()).toContainText(TEXT.invalidObjects);
-        await dois.closeErrorDialog();
-        await expect(dois.rowBadge(axRow)).toHaveText('Unregistered');
-        await expect(dois.rowBadge(moRow)).toHaveText('Unpublished');
-
-        // "Deposit DOIs": "Submitted" at once, "Edit" greyed (Rules 19, 29,
-        // 32; A4 not asserted).
-        const deposited = await dois.runBulk('Deposit DOIs', [axolotl.submissionId]);
-        expect(deposited.status()).toBe(200);
-        await dois.expectNotice(TEXT.depositQueued);
-        await expect(dois.rowBadge(axRow)).toHaveText('Submitted');
-        await dois.expand(axRow, axolotl.submissionId);
-        await expect(dois.doiBadge(axRow, ARTICLE)).toHaveText('Submitted');
-        await expect(dois.editButton(axRow)).toBeDisabled();
-
-        // "Deposit All" (Rule 29).
-        await expect(dois.rowBadge(coRow)).toHaveText('Unregistered');
-        await dois.depositAllButton().click();
-        const all = dois.dialog(TEXT.depositAllTitle);
-        await expect(all).toBeVisible();
-        await expect(all).toContainText(TEXT.depositAllQuestion('Crossref'));
-        await expect(all.getByRole('button', {name: TEXT.depositAllTitle, exact: true})).toBeVisible();
-        await expect(all.getByRole('button', {name: 'Cancel', exact: true})).toBeVisible();
-        const depositedAll = await dois.confirmAction(all, TEXT.depositAllTitle);
-        expect(depositedAll.status()).toBe(200);
-        await dois.expectNotice(TEXT.depositQueued);
-        await expect(dois.rowBadge(coRow)).toHaveText('Submitted');
-
-        // Control: "Registered" and "Unpublished" untouched (Rules 16, 29).
-        await expect(dois.rowBadge(taRow)).toHaveText('Registered');
-        await expect(dois.rowBadge(moRow)).toHaveText('Unpublished');
-
-        // No mail about the deposits (Side effects), bounded by the control.
-        await expectNoMailBesidesControl(browser, baseURL, pkpMail, tag, manager, [`${tag}al`, `${tag}ma`]);
-    });
-
     test('S14: Crossref\'s requirements on a journal', async ({asUser, ojsApi}, testInfo) => {
         test.setTimeout(300_000);
         const tag = makeTag('s14', testInfo);
@@ -1563,115 +1453,6 @@ test.describe('DOIs', () => {
         await expect(page.getByRole('button', {name: 'Unpublish', exact: true})).toBeVisible({timeout: 30_000});
         await dois.goto();
         await expect(dois.rowBadge(row)).toHaveText('Unregistered');
-    });
-
-    test('S16: DataCite', async ({asUser, ojsApi}, testInfo) => {
-        test.setTimeout(240_000);
-        const tag = makeTag('s16', testInfo);
-        const {manager, ada, mary} = await seedJournal(ojsApi, tag, {
-            doiPrefix: PREFIX,
-            plugins: {dataciteplugin: {enabled: true}},
-        });
-        const axolotl = await seedWork(ojsApi, tag, 'ax', ada, AXOLOTL, {published: true});
-        const tardigrade = await seedWork(ojsApi, tag, 'ta', mary, TARDIGRADE, {published: true, galleys: [{label: 'PDF', file: 'article.pdf'}]});
-        const page = await pageAs(asUser, manager);
-        const dois = new DoisPage(page, tag);
-        const settings = new DoiSettings(page, tag);
-        const row = dois.row(axolotl.submissionId);
-        const taRow = dois.row(tardigrade.submissionId);
-
-        // Control: before DataCite is saved, no "Deposit All" (Rule 36).
-        await dois.goto();
-        await expect(dois.bulkActionsButton()).toBeVisible();
-        await expect(dois.depositAllButton()).toHaveCount(0);
-
-        // DataCite chosen: its block (Fields, the DataCite block).
-        await settings.goto('Registration');
-        expect((await settings.agencyState()).value).toBe('');
-        await settings.chooseAgency('DataCite');
-        await expect(settings.registrationText('DataCite Settings')).toBeVisible();
-        await expect(settings.registration).toContainText(TEXT.dataciteIntro);
-        for (const name of ['username', 'password', 'testUsername', 'testPassword', 'testDOIPrefix']) {
-            await expect(settings.field(name), name).toBeVisible();
-        }
-        await expect(settings.testingBox('Use the DataCite test system')).toBeVisible();
-
-        // "Testing" without a test prefix refused; then saved (Fields; A5).
-        await settings.testingBox('Use the DataCite test system').check();
-        await settings.saveRefused(settings.registration, settings.field('testDOIPrefix'), TEXT.testDoiPrefixRequired);
-        await settings.field('testDOIPrefix').fill('10.5072');
-        await settings.save(settings.registration);
-
-        // The "Setup" tab: DataCite's kinds, no "Peer Review" (Rule 35).
-        await settings.goto('Setup');
-        expect((await settings.kinds()).map((k) => k.label)).toEqual(DATACITE_KINDS);
-        await expect(settings.kindBox('Peer Review')).toHaveCount(0);
-
-        // The DOIs page: "Deposit All", the agency's actions and panel
-        // (Rules 30, 36).
-        await dois.goto();
-        await expect(dois.depositAllButton()).toBeVisible();
-        await dois.openBulkActions();
-        await expect(dois.bulkItem('Export DOIs')).toBeVisible();
-        await expect(dois.bulkItem('Deposit DOIs')).toBeVisible();
-        await dois.closeBulkActions();
-        await dois.expand(row, axolotl.submissionId);
-        await expect(dois.agencyName(row)).toHaveText('DataCite');
-        await expect(dois.agencySentence(row)).toHaveText(TEXT.notSubmitted('DataCite'));
-        await expect(dois.agencyButtons(row)).toHaveText(['Deposit DOI(s)']);
-
-        // "Deposit DOI(s)": the window for this item; "Submitted" (Rules 29, 30).
-        await dois.agencyButtons(row).click();
-        const deposit = dois.dialog('Deposit DOIs');
-        await expect(deposit).toBeVisible();
-        await expect(deposit).toContainText(TEXT.depositQuestion(1, 'DataCite'));
-        const deposited = await dois.confirmAction(deposit, 'Deposit DOIs');
-        expect(deposited.status()).toBe(200);
-        await dois.expectNotice(TEXT.depositQueued);
-        await dois.expand(row, axolotl.submissionId);
-        await expect(dois.doiBadge(row, ARTICLE)).toHaveText('Submitted');
-
-        // An article registered before galley DOIs: "Mark DOIs Registered"
-        // (Rule 26); the galley box ticked and saved, "Assign DOIs" gives
-        // the "PDF" row a DOI, "Unregistered" (Rules 4, 25).
-        await dois.runBulk('Mark DOIs Registered', [tardigrade.submissionId]);
-        await dois.expectNotice(TEXT.markedRegistered);
-        await dois.expand(taRow, tardigrade.submissionId);
-        expect(await dois.doiTypes(taRow)).toEqual([ARTICLE]);
-        await expect(dois.doiBadge(taRow, ARTICLE)).toHaveText('Registered');
-        await settings.goto('Setup');
-        await settings.kindBox(GALLEYS).check();
-        await settings.save(settings.setup);
-        await dois.goto();
-        await dois.runBulk('Assign DOIs', [tardigrade.submissionId]);
-        await dois.expectNotice(TEXT.assigned);
-        await dois.expand(taRow, tardigrade.submissionId);
-        expect(await dois.doiTypes(taRow)).toEqual([ARTICLE, 'PDF']);
-        await expect(dois.doiBox(taRow, 'PDF')).toHaveValue(MADE);
-        await expect(dois.doiBadge(taRow, 'PDF')).toHaveText('Unregistered');
-        await expect(dois.doiBadge(taRow, ARTICLE)).toHaveText('Registered');
-
-        // "Deposit All" takes the galley's DOI: the "PDF" row "Submitted",
-        // the "Article" row keeps "Registered" (Rule 29a).
-        await depositAll(dois);
-        await dois.expand(taRow, tardigrade.submissionId);
-        await expect(dois.doiBadge(taRow, 'PDF')).toHaveText('Submitted');
-        await expect(dois.doiBadge(taRow, ARTICLE)).toHaveText('Registered');
-
-        // Galleys without "Articles": "Mark DOIs Unregistered" turns the
-        // "PDF" row "Unregistered"; "Deposit All" turns it "Submitted"
-        // (Rules 27, 29a).
-        await settings.goto('Setup');
-        await settings.kindBox('Articles').uncheck();
-        await settings.save(settings.setup);
-        await dois.goto();
-        await dois.runBulk('Mark DOIs Unregistered', [tardigrade.submissionId]);
-        await dois.expectNotice(TEXT.markedUnregistered);
-        await dois.expand(taRow, tardigrade.submissionId);
-        await expect(dois.doiBadge(taRow, 'PDF')).toHaveText('Unregistered');
-        await depositAll(dois);
-        await dois.expand(taRow, tardigrade.submissionId);
-        await expect(dois.doiBadge(taRow, 'PDF')).toHaveText('Submitted');
     });
 
     test('S17: peer-review DOIs', async ({asUser, ojsApi}, testInfo) => {

@@ -75,6 +75,7 @@ const {
     siteIndexPath,
     pathOf,
     readSitemap,
+    readSitemapPair,
     readSource,
     sourceOf,
     metaContents,
@@ -373,21 +374,29 @@ test.describe('Search-engine metadata & analytics', () => {
         await seedServer(opsApi, tag, {manager: false});
         const pk = 'publicknowledge';
 
-        // The English sitemap: every address carries "/en/" after the
-        // server's address, none "/fr_CA/" (Rule 4; Settings bullet 14).
-        const english = await readSitemap(visitor, at(pk, '/en/sitemap'));
+        // The English sitemap: every address but a PDF's download address
+        // carries "/en/" after the server's address, none "/fr_CA/" (Rule 4;
+        // Settings bullet 14). Both languages are read as one snapshot, the
+        // French list the English one's addresses in French: parallel tests
+        // post on the seeded server between two single reads
+        // (readSitemapPair).
+        const [english, french] = await readSitemapPair(visitor, pk);
         expect(english.status).toBe(200);
         expect(english.paths.length).toBeGreaterThan(3);
+        // A PDF's download address carries no language (Rule 4).
+        const pdf = new RegExp(`^/index\\.php/${pk}/preprint/download/`);
         for (const path of english.paths) {
+            if (pdf.test(path)) continue;
             expect(path).toMatch(new RegExp(`^/index\\.php/${pk}/en(/|$)`));
             expect(path).not.toContain('/fr_CA');
         }
 
-        // The French sitemap: every address carries "/fr_CA/", none "/en/" (Rule 4).
-        const french = await readSitemap(visitor, at(pk, '/fr_CA/sitemap'));
+        // The French sitemap: every address but a PDF's download address
+        // carries "/fr_CA/", none "/en/" (Rule 4).
         expect(french.status).toBe(200);
-        expect(french.paths.length).toBeGreaterThan(3);
+        expect(french.paths.length).toBe(english.paths.length);
         for (const path of french.paths) {
+            if (pdf.test(path)) continue;
             expect(path).toMatch(new RegExp(`^/index\\.php/${pk}/fr_CA(/|$)`));
             expect(path).not.toMatch(/\/en(\/|$)/);
         }

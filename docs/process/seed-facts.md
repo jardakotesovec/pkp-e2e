@@ -137,8 +137,12 @@ validation-variant server (harness.md) covers the config-file settings.
   server-side external call fails fast (ORCID, reCAPTCHA, DOI registration,
   update checks); Mailpit and other `127.0.0.1` traffic are unaffected
   (harness.md "config.test.inc.php"). What the screens show of it: a DOI
-  deposit queues its job, the job fails at connection and the DOI stays
-  "Submitted", never "Error" (a DOAJ "Register" the same); every "Export DOIs"
+  deposit queues its job (`[queues] job_runner = Off`, so the DOI reads
+  "Submitted" until the job is run with `runJobs()`), the job fails at
+  connection and the DOI reads "Error" (pkp/pkp-lib#13591, U45 Rule 33;
+  run by `runJobs()`, only OJS's Crossref keeps the cURL message for "View
+  Error": a DataCite or OPS Crossref deposit stores none, U45 S13 and S16; a DOAJ "Register" still stays
+  "Submitted" until pkp/ojs#6047 merges, U63 OJS9); every "Export DOIs"
   answers 400 "An XML validation error occurred and the XML could not be
   exported." because the agency's schema is fetched from the web, and an OJS
   PubMed export or a DOAJ "Export" with validation ticked answers 500 with a
