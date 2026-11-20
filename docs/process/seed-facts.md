@@ -735,8 +735,9 @@ validation-variant server (harness.md) covers the config-file settings.
   rounds, so the new round's id is read from the workflow's own
   `GET submissions/{id}` `reviewRounds[]`. OMP.
 - Some roles `participants[]` accepts cannot open the workflow: an Editorial
-  Board Member on OPS and OMP (the "Error" window "The current role does not
-  have access to this operation.") and, on a press, an assistant whose role
+  Board Member on all three apps (the "Error" window "The current role does
+  not have access to this operation.", though the submission is listed under
+  their "Assigned to me") and, on a press, an assistant whose role
   takes no part in the book's stage (a Marketing and sales coordinator at
   Production). A drive that needs an assistant with Production access seeds a
   Layout Editor.
