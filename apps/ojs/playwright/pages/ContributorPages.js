@@ -34,7 +34,9 @@
  * records). requestInSession sends a program's request in the page
  * user's signed-in session (spec Rule 4a). Revised 2026-11-12: the
  * CRediT rows, the registry pick, the Escape key, the "Edit Role"
- * window's language button and boxes.
+ * window's language button and boxes. Revised 2026-11-20: the foot's
+ * screen-reader error list, the registry stub's failing answers and the
+ * search box's picked text, "Add Role" opened on its own (openAddRole).
  */
 const {expect} = require('@playwright/test');
 
@@ -601,6 +603,78 @@ exports.ContributorsPanel = class ContributorsPanel {
         return items;
     }
 
+    /**
+     * The foot's error list a screen reader reads (FormErrors.vue: a
+     * `ul.-screenReader` of buttons named "Go to {Field}: {message}"),
+     * one button per refused field.
+     */
+    screenReaderErrors(dialog) {
+        return dialog.locator('.pkpFormErrors').getByRole('button', {name: /^Go to /});
+    }
+
+    /** One entry of that list, by its whole name (a string or a pattern). */
+    screenReaderError(dialog, name) {
+        return dialog
+            .locator('.pkpFormErrors')
+            .getByRole('button', typeof name === 'string' ? {name, exact: true} : {name});
+    }
+
+    /** The foot's "Jump to next error" button (drawn on screen). */
+    jumpToNextError(dialog) {
+        return dialog.getByRole('button', {name: 'Jump to next error', exact: true});
+    }
+
+    /**
+     * Whether an element is drawn on screen: false when it sits in a
+     * screen-reader-only box (`.-screenReader`: 1px, clipped to nothing)
+     * or is itself no bigger than a pixel. Read once the element is
+     * attached (the caller's assertion waits for it).
+     *
+     * @param {import('@playwright/test').Locator} locator
+     */
+    async drawnOnScreen(locator) {
+        return locator.first().evaluate((el) => {
+            const box = el.closest('.-screenReader') || el;
+            const rect = box.getBoundingClientRect();
+            const style = getComputedStyle(box);
+            return rect.width > 1 && rect.height > 1 && style.clip !== 'rect(0px, 0px, 0px, 0px)';
+        });
+    }
+
+    /** The Affiliations search box ("Type the institution name in {language}"). */
+    affiliationSearchBox(dialog) {
+        return this.affiliationsField(dialog).locator('input.pkpAutosuggest__input');
+    }
+
+    /**
+     * Put a query into the Affiliations search box in one step, as a paste
+     * does, so the registry is asked for the whole text once (fn s4).
+     */
+    async pasteIntoAffiliationSearch(dialog, text) {
+        const search = this.affiliationSearchBox(dialog);
+        await search.click();
+        await search.fill(text);
+    }
+
+    /** The text picked under "Selected" in the search box (a badge with its own "Remove {text}"). */
+    affiliationSelection(dialog, text) {
+        return this.affiliationsField(dialog).locator('.pkpAutosuggest__selection').filter({hasText: text});
+    }
+
+    /** A picked text's "Remove {text}" button. */
+    affiliationDeselectButton(dialog, text) {
+        return this.affiliationsField(dialog).getByRole('button', {name: `Remove ${text}`, exact: true});
+    }
+
+    /** The "ROR API Error" dialog a failed registry search raises. */
+    registryErrorDialog() {
+        return this.page.getByRole('dialog', {name: 'ROR API Error', exact: true});
+    }
+
+    /** The page's notices area (the Vue notifications a save would raise). */
+    notices() {
+        return this.page.locator('.app__notifications .pkpNotification');
+    }
 };
 
 /**
@@ -615,9 +689,23 @@ exports.ContributorsPanel = class ContributorsPanel {
  *
  * @param {import('@playwright/test').Page} page
  * @param {Array<{ror: string, name: string, country: string}>} records
+ * @returns {Promise<{failWith: (status: number) => void, answerRecords: () => void}>}
+ *   a switch that makes the stub answer with a failing status instead
+ *   (spec Fields "Affiliations", the "ROR API Error" dialog; fn s4)
  */
 exports.stubRegistryRecords = async function stubRegistryRecords(page, records) {
+    // The registry's answer: the records (`'records'`) or a failing status
+    // (429, 503, 410: the three "ROR API Error" messages the field maps).
+    let mode = 'records';
     await page.route('https://api.ror.org/**', (route) => {
+        if (typeof mode === 'number') {
+            return route.fulfill({
+                status: mode,
+                contentType: 'application/json',
+                headers: {'Access-Control-Allow-Origin': '*'},
+                body: '{}',
+            });
+        }
         const query = decodeURIComponent(route.request().url()).toLowerCase();
         const items = records
             .filter((record) => query.includes(record.name.toLowerCase().split(' ')[0]))
@@ -634,6 +722,16 @@ exports.stubRegistryRecords = async function stubRegistryRecords(page, records) 
             body: JSON.stringify({items}),
         });
     });
+    return {
+        /** Answer every later registry query with this failing status (429, 503 or 410). */
+        failWith(status) {
+            mode = status;
+        },
+        /** Answer with the records again. */
+        answerRecords() {
+            mode = 'records';
+        },
+    };
 };
 
 /**
@@ -704,16 +802,26 @@ exports.ContributorRolesScreen = class ContributorRolesScreen {
         return this.page.getByRole('button', {name: 'Add Role', exact: true});
     }
 
-    /**
-     * Add a role through the panel; identifier is the enum code
-     * ("EDITOR"), names keyed by locale ({en: '…'}).
-     *
-     * @param {{identifier: string, names: Record<string, string>}} role
-     */
-    async addRole({identifier, names}) {
+    /** Press "Add Role" and return its window, open and empty. */
+    async openAddRole() {
         await this.addRoleButton().click();
         const dialog = this.page.getByRole('dialog', {name: 'Add Role'});
-        await expect(dialog).toBeVisible({timeout: 30_000});
+        await expect(dialog.locator('select[name="contributorRoleIdentifier"]')).toBeVisible({timeout: 30_000});
+        return dialog;
+    }
+
+    /**
+     * Add a role through the panel; identifier is the enum code
+     * ("EDITOR"), names keyed by locale ({en: '…'}). An "Add Role" window
+     * the caller already opened (openAddRole) is filled in place.
+     *
+     * @param {{identifier: string, names: Record<string, string>}} role
+     * @param {import('@playwright/test').Locator} [dialog]
+     */
+    async addRole({identifier, names}, dialog = undefined) {
+        if (!dialog) {
+            dialog = await this.openAddRole();
+        }
         await dialog
             .locator('select[name="contributorRoleIdentifier"]')
             .selectOption(identifier);

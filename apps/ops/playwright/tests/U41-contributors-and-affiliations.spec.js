@@ -18,8 +18,8 @@
  * Deliberately NOT covered (register IDs; the spec's Coverage section
  * records everything else left out): A1, A3, A5, A7, A9, A10, A12, A14, A20,
  * A22, A24, A25, A26, A27, A28, A29, A30, A31, A32, A33, OPS2 (🐞, never
- * asserted either way); A2, A4, A6, A8, A11, A13, A16, A17, A18, A19 (❓,
- * only the scenario's own sentence); OMP1, OMP2 (no OPS surface).
+ * asserted either way); A2, A4, A6, A8, A11, A13, A16, A18, A19 (❓, only
+ * the scenario's own sentence); OMP1, OMP2 (no OPS surface).
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
  * are read-only at the server level — S1, S2, S3, S7 and S9 mutate only
@@ -27,7 +27,10 @@
  * account created on a scratch server, for the mailbox read's scoping);
  * every settings or server-level mutation (S4's second submission
  * language, S5's roles, S6's clean archive, S8's setting, S13's French
- * role name) runs on a scratch preprint server with throwaway users.
+ * role name) runs on a scratch preprint server with throwaway users (S5's
+ * assigned Moderator among them). S4's registry answers, the record and
+ * the three failures (429, 503, 410), are the test's own, given to the
+ * browser's search (footnote s4); the public registry is never reached.
  * Contributors beyond the auto-created submitter are recorded through the
  * panel, the surface under test, except S12's, seeded with
  * `contributors[]`; S12's edits are sent in the Journal Manager's signed-in
@@ -51,6 +54,7 @@ const {
     saveSettingsPanel,
     activityLogCounts,
     sendMailControl,
+    statusReadout,
 } = require('../pages/PublicationPages.js');
 const {
     STEPS,
@@ -205,7 +209,10 @@ test.describe('Contributors & affiliations (U41)', () => {
         // "An empty save": the panel opens on "Person"; Save with nothing
         // filled: "This field is required." under Given Name, Email, Country
         // and Contributor Roles, "Please correct 4 errors." with "Jump to
-        // next error", and Save disabled until one of them is edited
+        // next error", and Save disabled while any of them is still empty;
+        // the foot's screen-reader list names the four errors as "Go to
+        // {Field}: This field is required." without being drawn; "Alan"
+        // typed as Given Name: only its message goes, Save still disabled
         // (Fields).
         let panel = await screen.openAddPanel();
         await expect(screen.typeRadio(panel, 'Person')).toBeChecked();
@@ -221,10 +228,33 @@ test.describe('Contributors & affiliations (U41)', () => {
         await expect(screen.errorSummary(panel)).toHaveText(/Please correct 4 errors\./);
         await expect(screen.jumpToNextErrorButton(panel)).toBeVisible();
         await expect(screen.saveButton(panel)).toBeDisabled();
-        // Save stayed disabled with Given Name alone edited (T-ops-1 in the
-        // findings file: the spec's "until one of them is edited"); it is
-        // read as enabled once the flagged fields are edited, below.
+        // The screen-reader list: four "Go to …" buttons, Given Name's,
+        // Country's and Contributor Roles' named in full (the email field's
+        // own label is A19's, so its entry is read by the message alone);
+        // the list is a 1px box clipped to nothing, where the foot's "Jump
+        // to next error" beside it is drawn (the positive control).
+        const goTo = screen.screenReaderErrorButtons(panel);
+        await expect(goTo).toHaveCount(4);
+        for (const field of ['Given Name', 'Country', 'Contributor Roles']) {
+            await expect(
+                panel.getByRole('button', {name: `Go to ${field}: ${REQUIRED}`, exact: true})
+            ).toHaveCount(1);
+        }
+        await expect(goTo.filter({hasText: /^\s*Go to Email.*: This field is required\.\s*$/})).toHaveCount(1);
+        const srList = screen.screenReaderErrorList(panel);
+        await expect(srList).toHaveCount(1);
+        await expect(srList).toHaveCSS('clip', 'rect(0px, 0px, 0px, 0px)');
+        await expect(srList).toHaveCSS('width', '1px');
+        const jumpBox = await screen.jumpToNextErrorButton(panel).boundingBox();
+        expect(jumpBox && jumpBox.width).toBeGreaterThan(1);
+        // "Alan" as Given Name: only its message goes (the other three stay,
+        // the positive control), and Save stays disabled.
         await screen.input('givenName', 'en').fill('Alan');
+        await expect(screen.fieldError(panel, 'email')).toHaveText(REQUIRED);
+        await expect(screen.fieldError(panel, 'country')).toHaveText(REQUIRED);
+        await expect(screen.fieldError(panel, 'contributorRoles')).toContainText(REQUIRED);
+        await expect(screen.fieldError(panel, 'givenName', 'en')).toHaveCount(0);
+        await expect(screen.saveButton(panel)).toBeDisabled();
 
         // "A bad Email and Homepage URL": the save is refused, the panel
         // stays open with an error under Email and under Homepage URL (the
@@ -358,6 +388,37 @@ test.describe('Contributors & affiliations (U41)', () => {
         ).toHaveValue('');
         await screen.closePanel(panel);
 
+        // "Two rows on one role": the person's "Edit" again, "Add Another
+        // Role": a second row arrives on "Conceptualization" beside the
+        // first; Save with neither row changed: the panel closes with no
+        // message (no notice and no form error, bounded by the save's own
+        // answer); reopened, the table holds "Conceptualization" once
+        // (Fields).
+        panel = await screen.openEditPanel('Alan Mwandenga');
+        await expect(screen.creditRoleRows(panel)).toHaveCount(1, {timeout: 30_000});
+        await screen.pressAddAnotherRole(panel);
+        await expect(screen.creditRoleRows(panel)).toHaveCount(2);
+        for (const n of [0, 1]) {
+            await expect(
+                screen.creditRoleSelect(screen.creditRoleRows(panel).nth(n))
+            ).toHaveValue(/conceptualization/);
+        }
+        await screen.saveForm(panel);
+        await expect(page.locator('.app__notifications')).toBeAttached();
+        await expect(page.locator('.app__notifications .pkpNotification')).toHaveCount(0);
+        // The one dialog left is the workflow page itself (a window opened
+        // over it would take it out of the accessibility tree).
+        await expect(page.getByRole('dialog')).toHaveCount(1);
+        await expect(
+            page.getByRole('dialog').getByRole('heading', {name: 'Preprint: Contributors'})
+        ).toBeVisible();
+        panel = await screen.openEditPanel('Alan Mwandenga');
+        await expect(screen.creditRoleRows(panel)).toHaveCount(1, {timeout: 30_000});
+        await expect(
+            screen.creditRoleSelect(screen.creditRoleRows(panel).nth(0))
+        ).toHaveValue(/conceptualization/);
+        await screen.closePanel(panel);
+
         // "An Anonymous contributor": the "Person" form shows the name
         // fields, Homepage URL, Bio Statement and Affiliations, the
         // organization form the ROR ID box (the positive controls); under
@@ -406,6 +467,8 @@ test.describe('Contributors & affiliations (U41)', () => {
         await screen.rowDeleteButton('Probe Org').click();
         const confirm = screen.deleteContributorDialog();
         await expect(confirm).toBeVisible({timeout: 30_000});
+        await expect(confirm).toHaveAccessibleName('Delete Contributor');
+        await expect(confirm.getByRole('heading', {name: 'Delete Contributor'})).toBeVisible();
         await expect(confirm).toContainText(
             'Are you sure you want to remove Probe Org as a contributor? This action can not be undone.'
         );
@@ -513,6 +576,17 @@ test.describe('Contributors & affiliations (U41)', () => {
         await expect(screen.cancelOrderButton()).toBeVisible();
         await expect(screen.addContributorButton()).toHaveCount(0);
         await expect(screen.previewButton()).toHaveCount(0);
+        // Up/down arrows replace the row buttons and the "Primary Contact"
+        // badge: each row's arrows are drawn (the positive control), and no
+        // row keeps "Edit", "Delete", "Set Primary Contact" or the badge.
+        for (const name of ['Alex Author', 'Greta Zeta']) {
+            await expect(screen.moveUpButton(name)).toBeVisible({timeout: 10_000});
+            await expect(screen.moveDownButton(name)).toBeVisible();
+            await expect(screen.rowEditButton(name)).toHaveCount(0);
+            await expect(screen.rowDeleteButton(name)).toHaveCount(0);
+            await expect(screen.setPrimaryContactButton(name)).toHaveCount(0);
+            await expect(screen.primaryContactBadge(name)).toHaveCount(0);
+        }
         // Content-verified reorder (campaign workaround): the screen can
         // remount mid-flow on the async publication refresh after a
         // contributor save, dropping Order mode or resetting the rows right
@@ -671,8 +745,10 @@ test.describe('Contributors & affiliations (U41)', () => {
         await expect(screen.setPrimaryContactButton('Ada Author')).toBeVisible();
 
         // "Deleting the primary contact": the remaining row still shows only
-        // "Set Primary Contact" (Rules 5, 10; whether anything warned is A2,
-        // not read; the publish dialog after it is A2's too).
+        // "Set Primary Contact": the submission has no primary contact, and
+        // nothing warned about it: no notice and no window beyond the
+        // workflow page itself, read once the delete's own answer is in and
+        // the row is gone (Rules 5, 10).
         await screen.rowDeleteButton('Greta Zeta').click();
         await expect(screen.deleteContributorDialog()).toBeVisible({timeout: 30_000});
         await screen.confirmDelete('Greta Zeta');
@@ -681,6 +757,50 @@ test.describe('Contributors & affiliations (U41)', () => {
         });
         await expect(screen.primaryContactBadge('Ada Author')).toHaveCount(0);
         await expect(screen.rows()).toHaveCount(1);
+        await expect(screen.deleteContributorDialog()).toHaveCount(0);
+        await expect(page.getByRole('dialog')).toHaveCount(1);
+        await expect(
+            page.getByRole('dialog').getByRole('heading', {name: 'Preprint: Contributors'})
+        ).toBeVisible();
+        await expect(page.locator('.app__notifications')).toBeAttached();
+        await expect(page.locator('.app__notifications .pkpNotification')).toHaveCount(0);
+
+        // "Control", its first read: after the first delete the Activity Log
+        // still holds the move's one "Submission metadata updated" entry
+        // (Side effects).
+        const logAfterFirstDelete = await activityLogCounts(page);
+        expect(logAfterFirstDelete).toEqual(logAfterMove);
+
+        // "The publish dialog", on a preprint server: the header's "Post"
+        // (beside "Status: Unposted") opens "Post the preprint", which reads
+        // "All requirements have been met." with no mention of the missing
+        // contact; backed out with "Close" (its "Post" left unpressed),
+        // nothing is posted: no publish request went out, and after
+        // a reload the header still reads "Status: Unposted" with "Post"
+        // offered.
+        const publishRequests = [];
+        const onRequest = (request) => {
+            if (/\/publications\/\d+\/publish/.test(request.url())) {
+                publishRequests.push(request.url());
+            }
+        };
+        page.on('request', onRequest);
+        await expect(statusReadout(page)).toContainText('Status: Unposted', {timeout: 30_000});
+        await screen.postButton().click();
+        const postWindow = screen.postWindow();
+        await expect(postWindow).toBeVisible({timeout: 30_000});
+        await expect(postWindow).toContainText('Post the preprint');
+        await expect(postWindow).toContainText('All requirements have been met.');
+        await expect(postWindow).not.toContainText(/primary contact/i);
+        await expect(postWindow.getByRole('button', {name: 'Post', exact: true})).toBeVisible();
+        await postWindow.getByRole('button', {name: 'Close', exact: true}).last().click();
+        await expect(postWindow).toHaveCount(0, {timeout: 30_000});
+        await screen.reload();
+        await expect(statusReadout(page)).toContainText('Status: Unposted', {timeout: 30_000});
+        await expect(screen.postButton()).toBeVisible();
+        page.off('request', onRequest);
+        expect(publishRequests).toEqual([]);
+        const logAfterPublishStep = await activityLogCounts(page);
 
         // "The last contributor": "Delete" on the remaining row: "No items
         // found." beneath the unchanged "Order", "Preview" and "Add
@@ -701,11 +821,11 @@ test.describe('Contributors & affiliations (U41)', () => {
         }
         await screen.closePreview();
 
-        // "Control": the deletes wrote nothing: the Activity Log still holds
-        // the one "Submission metadata updated" entry from the move (Side
-        // effects).
+        // "Control": the deletes wrote nothing: the first read above held
+        // the move's one entry, and the last delete added none to the count
+        // the publish step left (Side effects).
         const logAfterDeletes = await activityLogCounts(page);
-        expect(logAfterDeletes).toEqual(logAfterMove);
+        expect(logAfterDeletes).toEqual(logAfterPublishStep);
 
         // The mailbox: no email arrived for the Author or the moved contact
         // (Side effects), bounded by a mail this test causes the same way
@@ -777,8 +897,12 @@ test.describe('Contributors & affiliations (U41)', () => {
 
         // "The per-language names": "Edit institution name" opens one name
         // box per language, "Type the institution name in {language}", with
-        // a "{count} of {total} languages completed" status (Fields; the
-        // boxes' announced labels are A10's).
+        // a "{count} of {total} languages completed" status; on this fresh
+        // entry it reads "1 of 2 languages completed", the total counting
+        // the server's two metadata languages (the second submission
+        // language seeded keeps them in step, footnote s4) (Fields; the
+        // boxes' announced labels are A10's, so the labels are read as
+        // drawn).
         const rowA = screen.affiliationRowAt(panel, 0);
         await expect(rowA).toContainText(instA);
         await expect(rowA.getByText('1 of 2 languages completed')).toBeVisible();
@@ -790,17 +914,22 @@ test.describe('Contributors & affiliations (U41)', () => {
         await expect(englishBox).toHaveValue(instA, {timeout: 10_000});
         await expect(frenchBox).toBeVisible();
         await expect(frenchBox).toHaveValue('');
+        await expect(screen.affiliationNameBoxes(rowA)).toHaveCount(2);
+        await expect(screen.affiliationNameBoxLabel(rowA, 'English')).toBeVisible();
+        await expect(screen.affiliationNameBoxLabel(rowA, 'French (Canada)')).toBeVisible();
 
         // "An empty primary-language name": the submission language's box
         // cleared and Save pressed: refused with "Please provide affiliation
-        // name in the submission primary locale." under the field (the
-        // foot's error list is A7's); the name typed back (Fields).
+        // name in the submission primary locale." under the field and
+        // "Please correct one error." at the foot (the foot's screen-reader
+        // list is A7's); the name typed back (Fields).
         await englishBox.fill('');
         await screen.saveButton(panel).click();
         await expect(screen.affiliationError(panel)).toHaveText(
             new RegExp(escapeRegExp(PRIMARY_LOCALE_NAME)),
             {timeout: 30_000}
         );
+        await expect(screen.errorSummary(panel)).toHaveText(/Please correct one error\./);
         await expect(panel).toBeVisible();
         await screen.affiliationNameBox(rowA, 'English').fill(instA);
         await expect(rowA).toContainText(instA);
@@ -894,6 +1023,71 @@ test.describe('Contributors & affiliations (U41)', () => {
             timeout: 10_000,
         });
         await expect(screen.registryAffiliationRow(panel, sfu.ror)).toBeVisible();
+
+        // "A failed registry search": in the same "Edit", the registry
+        // failing for too many requests (the browser's query answered 429,
+        // footnote s4), "Busy Institute" pasted into the search box: an "ROR
+        // API Error" dialog reads the too-many-requests message; "OK": the
+        // text is left picked under "Selected" and the search box is
+        // disabled; "Remove Busy Institute": the box takes text again. The
+        // other two failures are each raised in a freshly reopened "Edit"
+        // (whether suggestions come back without the reopen is A11's):
+        // "Down Institute" with the service unavailable (503), "Gone
+        // Institute" with the service deprecated (410), each dismissed with
+        // "OK", left under "Selected" with the box disabled, and removed
+        // with its own "Remove {text}" (Fields). "Close" at the end.
+        const failures = [
+            {
+                status: 429,
+                text: 'Busy Institute',
+                message:
+                    'Too many requests have been sent to the ROR API. Please wait a moment before continuing to search.',
+            },
+            {
+                status: 503,
+                text: 'Down Institute',
+                message:
+                    'The ROR API service is currently unavailable. Please refresh the page or try again later.',
+            },
+            {
+                status: 410,
+                text: 'Gone Institute',
+                message:
+                    'The ROR API service in this installation is deprecated. Please contact your system administrator.',
+            },
+        ];
+        const registry = await ContributorsScreen.stubRegistryFailure(page);
+        const rorError = screen.registryErrorDialog();
+        for (const [n, failure] of failures.entries()) {
+            if (n > 0) {
+                await screen.closePanel(panel);
+                panel = await screen.openEditPanel('Ada Author');
+                await expect(screen.registryAffiliationRow(panel, sfu.ror)).toBeVisible({
+                    timeout: 30_000,
+                });
+            }
+            const search = screen.affiliationSearchBox(panel);
+            await expect(search).toBeEnabled();
+            registry.fail(failure.status);
+            await search.fill(failure.text);
+            await expect(rorError).toBeVisible({timeout: 30_000});
+            await expect(rorError).toContainText(failure.message);
+            await rorError.getByRole('button', {name: 'OK', exact: true}).click();
+            await expect(rorError).toHaveCount(0, {timeout: 30_000});
+            registry.clear();
+            const removePick = screen.affiliationPickRemoveButton(panel, failure.text);
+            await expect(removePick).toBeVisible();
+            await expect(screen.affiliationsField(panel)).toContainText(
+                new RegExp(`Selected\\s*${escapeRegExp(failure.text)}`)
+            );
+            await expect(search).toBeDisabled();
+            await removePick.click();
+            await expect(removePick).toHaveCount(0);
+            await expect(search).toBeEnabled();
+            // One character: below the four that start a registry query.
+            await search.fill('x');
+            await expect(search).toHaveValue('x');
+        }
         await screen.closePanel(panel);
     });
 
@@ -902,13 +1096,29 @@ test.describe('Contributors & affiliations (U41)', () => {
         test.setTimeout(300_000);
         const tag = makeTag('s5', testInfo);
         // Roles are server records (Rule 11) — scratch server, with one
-        // submission whose contributor will hold the new role.
-        await opsApi.createContext({tag, users: contextUsers(tag)});
+        // submission whose contributor will hold the new role, and a
+        // throwaway Moderator (the `sectionEditor` key) assigned to it
+        // (footnote s5).
+        const moderator = `${tag}se`;
+        await opsApi.createContext({
+            tag,
+            users: [
+                ...contextUsers(tag),
+                {
+                    username: moderator,
+                    givenName: 'Sam',
+                    familyName: 'Moderator',
+                    email: mailOf(moderator),
+                    roles: ['sectionEditor'],
+                },
+            ],
+        });
         const {submissionId} = await opsApi.createSubmission({
             tag: `${tag}s`,
             context: tag,
             submitter: `${tag}au`,
             title: `Submission ${tag}`,
+            participants: [{username: moderator, role: 'sectionEditor'}],
         });
         const roleName = `Handling Editor ${tag}`;
 
@@ -923,6 +1133,23 @@ test.describe('Contributors & affiliations (U41)', () => {
         await expect(
             settings.locator('tr').filter({hasText: 'TRANSLATOR'})
         ).toContainText('Translator');
+
+        // "The assigned Section Editor": the screen's address as the
+        // manager's browser shows it, opened by the assigned Moderator: the
+        // access-denied page, not the table (Actors row 4); the manager's
+        // table above is the positive control.
+        const rolesAddress = page.url();
+        const moderatorPage = await (await asUser(moderator)).newPage();
+        await moderatorPage.goto(rolesAddress);
+        await expect(moderatorPage).toHaveURL(/\/user\/authorizationDenied/, {timeout: 30_000});
+        await expect(
+            moderatorPage.getByText('The current role does not have access to this operation.')
+        ).toBeVisible();
+        await expect(moderatorPage.locator('#contributorRoles')).toHaveCount(0);
+        await expect(
+            moderatorPage.getByRole('button', {name: 'Add Role', exact: true})
+        ).toHaveCount(0);
+        await moderatorPage.close();
 
         // "Add Role": pick identifier EDITOR, name it ("Fill name in all
         // of the languages."), Save — "Contributor role saved" and the
@@ -1014,9 +1241,10 @@ test.describe('Contributors & affiliations (U41)', () => {
         await confirmButton.click();
         await inUseAttempt;
         const inUseError = page
-            .getByRole('dialog')
+            .getByRole('dialog', {name: 'Error', exact: true})
             .filter({hasText: 'One or more contributors are using this role'});
         await expect(inUseError).toBeVisible({timeout: 30_000});
+        await expect(inUseError.getByRole('heading', {name: 'Error', exact: true})).toBeVisible();
         await expect(inUseError).toContainText(
             'One or more contributors are using this role. Change the role to another before delete.'
         );
@@ -1095,9 +1323,10 @@ test.describe('Contributors & affiliations (U41)', () => {
         };
         await attemptAuthorDelete();
         const bothApplyError = page
-            .getByRole('dialog')
+            .getByRole('dialog', {name: 'Error', exact: true})
             .filter({hasText: 'One or more contributors are using this role'});
         await expect(bothApplyError).toBeVisible({timeout: 30_000});
+        await expect(bothApplyError).not.toContainText('Last AUTHOR role cannot be deleted.');
         await bothApplyError.getByRole('button', {name: 'OK', exact: true}).click();
         await expect(bothApplyError).toHaveCount(0, {timeout: 30_000});
 
@@ -1116,9 +1345,10 @@ test.describe('Contributors & affiliations (U41)', () => {
         settings = await openContributorRolesSettings(page, tag);
         await attemptAuthorDelete();
         const authorError = page
-            .getByRole('dialog')
+            .getByRole('dialog', {name: 'Error', exact: true})
             .filter({hasText: 'Last AUTHOR role cannot be deleted.'});
         await expect(authorError).toBeVisible({timeout: 30_000});
+        await expect(authorError.getByRole('heading', {name: 'Error', exact: true})).toBeVisible();
         await authorError.getByRole('button', {name: 'OK', exact: true}).click();
         await expect(settings.locator('tr').filter({hasText: 'AUTHOR'}).first()).toBeVisible();
     });
@@ -1198,12 +1428,16 @@ test.describe('Contributors & affiliations (U41)', () => {
         );
         await expect(authorItems.nth(1)).not.toContainText('Conceptualization');
 
-        // "Author Biography": "{name}, {affiliations}" above the statement
-        // (Rule 14 — one biography, singular heading).
+        // "Author Biography": "{name}, {affiliation}" as one line above the
+        // statement, headed in the singular because only one contributor
+        // has a Bio Statement (Rule 14).
         const bios = page.locator('.item.author_bios');
-        await expect(bios.getByRole('heading', {name: 'Author Biography'})).toBeVisible();
-        await expect(bios.locator('div.label')).toContainText('Ada Author,');
-        await expect(bios.locator('div.label')).toContainText(instName);
+        await expect(
+            bios.getByRole('heading', {name: 'Author Biography', exact: true})
+        ).toBeVisible();
+        await expect(bios.getByRole('heading', {name: 'Author Biographies'})).toHaveCount(0);
+        await expect(bios.locator('div.label')).toHaveCount(1);
+        await expect(bios.locator('div.label')).toHaveText(`Ada Author, ${instName}`);
         await expect(bios).toContainText(bioText);
 
         // "No contact mark" on the landing page (Rule 10): neither

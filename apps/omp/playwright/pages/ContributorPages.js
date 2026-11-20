@@ -24,11 +24,14 @@
  *   (Autosuggest `allowCustom`), so the hand-typed path is unchanged.
  * - stubRegistryRecords — the same query answered with given records,
  *   for a registry pick (S4); the server-side record fetch "Add" makes
- *   stays unstubbed.
+ *   stays unstubbed. Its controller's failWith(status) makes the search
+ *   fail instead (S4's "ROR API Error" leg).
  *
  * Revised 2026-11-12: the CRediT rows by position, Escape on the panel,
  * the page's own reload, the affiliation row's menu read, the registry
- * pick.
+ * pick. Revised 2026-11-20: the foot's screen-reader error list, a
+ * message under a field, the ordering arrows, the registry's error
+ * window and the picked text under "Selected".
  *
  * Note on request bounding: the panel writes ride POST with
  * X-Http-Method-Override (jQuery in the panel, useFetch elsewhere), so
@@ -57,7 +60,17 @@ exports.stubRegistrySearch = stubRegistrySearch;
  * @param {{ror: string, name: string, country: string}[]} records
  */
 exports.stubRegistryRecords = async function stubRegistryRecords(page, records) {
+    /** @type {number | null} an HTTP status the registry answers with instead, while set */
+    let failure = null;
     await page.route('https://api.ror.org/**', (route) => {
+        if (failure !== null) {
+            return route.fulfill({
+                status: failure,
+                contentType: 'application/json',
+                headers: {'Access-Control-Allow-Origin': '*'},
+                body: '{}',
+            });
+        }
         const query = decodeURIComponent(route.request().url()).toLowerCase();
         const items = records
             .filter((record) => query.includes(record.name.toLowerCase().split(' ')[0]))
@@ -74,6 +87,18 @@ exports.stubRegistryRecords = async function stubRegistryRecords(page, records) 
             body: JSON.stringify({items}),
         });
     });
+    return {
+        /**
+         * Make the registry fail every later search with `status` (429 too
+         * many requests, 503 unavailable, 410 deprecated: spec fn s4), or
+         * answer with the records again with `null`.
+         *
+         * @param {number | null} status
+         */
+        failWith(status) {
+            failure = status;
+        },
+    };
 };
 
 exports.ContributorsScreen = class ContributorsScreen {
@@ -189,6 +214,16 @@ exports.ContributorsScreen = class ContributorsScreen {
 
     previewButton() {
         return this.panel().getByRole('button', {name: 'Preview', exact: true});
+    }
+
+    /** A row's ordering-mode arrow, "Increase position of {name}". */
+    increasePositionButton(name) {
+        return this.panel().getByRole('button', {name: `Increase position of ${name}`, exact: true});
+    }
+
+    /** A row's ordering-mode arrow, "Decrease position of {name}". */
+    decreasePositionButton(name) {
+        return this.panel().getByRole('button', {name: `Decrease position of ${name}`, exact: true});
     }
 
     addContributorButton() {
@@ -316,6 +351,53 @@ exports.ContributorsScreen = class ContributorsScreen {
     jumpLink(dialog, fieldLabel) {
         const label = fieldLabel instanceof RegExp ? fieldLabel.source : fieldLabel;
         return dialog.getByText(new RegExp(`^Go to ${label}:`));
+    }
+
+    /**
+     * A message shown under a field (the field by its label), such as the
+     * server's "This is not a valid email address.".
+     */
+    fieldError(dialog, labelRe, message) {
+        return this.field(dialog, labelRe).getByText(message, {exact: true});
+    }
+
+    /**
+     * The foot's error list a screen reader reads ("Go to {Field}:
+     * {message}" buttons), by the whole button name.
+     */
+    screenReaderError(dialog, name) {
+        return dialog.getByRole('button', {name, exact: typeof name === 'string'});
+    }
+
+    /** Every "Go to …" button of the foot's screen-reader list. */
+    screenReaderErrors(dialog) {
+        return dialog.getByRole('button', {name: /^Go to /});
+    }
+
+    /**
+     * The drawn size of the foot's screen-reader list (the box holding the
+     * "Go to …" buttons), read once a "Go to …" button is in the tree. A
+     * list the screen does not show is drawn at most one pixel square.
+     *
+     * @returns {Promise<{width: number, height: number}>}
+     */
+    async screenReaderListBox(dialog) {
+        const first = this.screenReaderErrors(dialog).first();
+        await expect(first).toBeAttached({timeout: 30_000});
+        return first.evaluate((button) => {
+            const list = button.closest('ul') || button;
+            const box = list.getBoundingClientRect();
+            return {width: box.width, height: box.height};
+        });
+    }
+
+    /** The drawn size of an element, for the control beside screenReaderListBox. */
+    async drawnBox(locator) {
+        await expect(locator).toBeVisible({timeout: 30_000});
+        return locator.evaluate((node) => {
+            const box = node.getBoundingClientRect();
+            return {width: box.width, height: box.height};
+        });
     }
 
     /** The "Jump to next error" control the refused form offers. */
@@ -536,6 +618,39 @@ exports.ContributorsScreen = class ContributorsScreen {
         );
         await input.click();
         await input.pressSequentially(name, {delay: 15});
+    }
+
+    /** The institution search box ("Type the institution name in {language}"). */
+    affiliationSearchBox(dialog) {
+        return this.affiliationsField(dialog).locator('input.pkpAutosuggest__input');
+    }
+
+    /**
+     * Put `text` into the search box in one step, as a paste does, and
+     * wait for the browser's registry query it sends (whatever the answer).
+     */
+    async pasteInstitution(dialog, text) {
+        const box = this.affiliationSearchBox(dialog);
+        await expect(box).toBeEnabled({timeout: 30_000});
+        const queried = this.page.waitForResponse(
+            (r) => r.url().startsWith('https://api.ror.org/'),
+            {timeout: 30_000}
+        );
+        await box.fill(text);
+        return queried;
+    }
+
+    /** The "ROR API Error" window a failed registry search raises. */
+    registryErrorDialog() {
+        return this.page.getByRole('dialog', {name: 'ROR API Error'});
+    }
+
+    /** The "Remove {text}" button of the entry picked under "Selected". */
+    selectedEntryRemoveButton(dialog, text) {
+        return this.affiliationsField(dialog).getByRole('button', {
+            name: `Remove ${text}`,
+            exact: true,
+        });
     }
 
     /** The suggestion list's entry carrying the given text. */

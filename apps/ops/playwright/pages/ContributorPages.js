@@ -64,6 +64,15 @@
  * contributor edit a program sends (Rule 4a, fn o), sent in the signed-in
  * page's own session with its CSRF token (`readContributorThroughApi`,
  * `editContributorThroughApi`).
+ *
+ * Added 2026-11-20 (the third revision, S1/S3/S4): the foot's screen-reader
+ * error list (`screenReaderErrorButtons`, `screenReaderErrorList`); a typed
+ * entry's name-box label (`affiliationNameBoxLabel`); the registry search's
+ * failures (`stubRegistryFailure`, `registryErrorDialog`,
+ * `affiliationSearchBox`, `affiliationPickRemoveButton`: after an "ROR API
+ * Error" the searched text stays picked under "Selected" and the box is
+ * disabled until its "Remove {text}" is pressed); the header's "Post" and
+ * its "Post the preprint" window (`postButton`, `postWindow`).
  */
 const {expect} = require('@playwright/test');
 const {waitForEditorReady} = require('../../../../shared/playwright/support/richtext.js');
@@ -304,6 +313,20 @@ exports.ContributorsScreen = class ContributorsScreen {
         return panel.getByRole('button', {name: 'Jump to next error', exact: true});
     }
 
+    /** The foot's error list a screen reader reads: one "Go to {Field}:
+     * {message}" button per error (FormErrors.vue). */
+    screenReaderErrorButtons(panel) {
+        return panel.getByRole('button', {name: /^Go to .+: /});
+    }
+
+    /** The list holding those buttons, drawn off screen (class
+     * `-screenReader`: a 1px box clipped to nothing). */
+    screenReaderErrorList(panel) {
+        return panel
+            .locator('.pkpFormErrors ul')
+            .filter({has: this.page.getByRole('button', {name: /^Go to .+: /})});
+    }
+
     /** The "CRediT roles and the degrees of contribution" table. */
     creditRolesTable(panel) {
         return panel.locator('#contributor-creditRoles');
@@ -518,10 +541,70 @@ exports.ContributorsScreen = class ContributorsScreen {
         return row.locator('input[name="name"]');
     }
 
+    /** The visible label above a typed entry's name box ("Type the
+     * institution name in {language}", the primary language's followed by
+     * its "Required" mark); the label element, not the box's accessible
+     * name, which is A10's. */
+    affiliationNameBoxLabel(row, language) {
+        const escaped = language.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return row
+            .locator('label')
+            .filter({hasText: new RegExp(`^\\s*Type the institution name in ${escaped}[\\s*]*(Required)?\\s*$`)});
+    }
+
     /** The Affiliations field's inline error ("Please provide affiliation
      * name in the submission primary locale."). */
     affiliationError(panel) {
         return this.affiliationsField(panel).locator('.pkpFieldError');
+    }
+
+    /** The Affiliations field's registry search box. */
+    affiliationSearchBox(panel) {
+        return this.affiliationsField(panel).locator('input.pkpAutosuggest__input');
+    }
+
+    /** The "Remove {text}" button of a text left picked under "Selected"
+     * in the Affiliations search. */
+    affiliationPickRemoveButton(panel, text) {
+        return this.affiliationsField(panel).getByRole('button', {name: `Remove ${text}`, exact: true});
+    }
+
+    /** The registry's error dialog ("ROR API Error", one "OK"). */
+    registryErrorDialog() {
+        return this.page.getByRole('dialog', {name: 'ROR API Error', exact: true});
+    }
+
+    /**
+     * Make the browser-side registry search fail on demand: `fail(status)`
+     * answers every registry query with that status (429, 503, 410, the
+     * three the field names) until `clear()`, which passes queries on to
+     * the earlier routes again. Registered after the record and empty
+     * stubs, so it is asked first.
+     *
+     * @param {import('@playwright/test').Page} page
+     * @returns {Promise<{fail: (status: number) => void, clear: () => void}>}
+     */
+    static async stubRegistryFailure(page) {
+        let status = 0;
+        await page.route('https://api.ror.org/**', (route) => {
+            if (!status) {
+                return route.fallback();
+            }
+            return route.fulfill({
+                status,
+                contentType: 'application/json',
+                headers: {'Access-Control-Allow-Origin': '*'},
+                body: '{}',
+            });
+        });
+        return {
+            fail: (code) => {
+                status = code;
+            },
+            clear: () => {
+                status = 0;
+            },
+        };
     }
 
     /**
@@ -703,6 +786,26 @@ exports.ContributorsScreen = class ContributorsScreen {
         return this.page
             .getByRole('dialog')
             .filter({hasText: 'as a contributor?'});
+    }
+
+    // ------------------------------------------------------------------
+    // The publication header's "Post" (spec scenario 3, the preprint
+    // server's publish window)
+
+    /** The header's "Post" control (beside "Preview": never `.first()`). */
+    postButton() {
+        return this.page
+            .locator('[data-cy="workflow-controls-right"]')
+            .getByRole('button', {name: 'Post', exact: true});
+    }
+
+    /** The "Post the preprint" window "Post" opens. */
+    postWindow() {
+        return this.page
+            .getByRole('dialog')
+            .filter({hasText: 'Post the preprint'})
+            .filter({hasText: 'Are you sure you want to post this?'})
+            .last();
     }
 
     /**
