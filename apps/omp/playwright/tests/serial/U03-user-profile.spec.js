@@ -16,6 +16,14 @@
  * network (the installs carry no local list; spec footnote g, seed-facts),
  * so the run needs the network the VM and CI have.
  *
+ * Alone, `@solo` (harness.md "Project chain"): every Site Settings "Save"
+ * writes the whole site record back as its request read it
+ * (`PKPSiteService::edit`, then `SiteDAO::updateObject`, no lock, no
+ * transaction), so a save beside the serial project's `bulkEmails` seeds
+ * writes a just-ticked scratch press's id out (U55 S1 read no "Notify"
+ * tab, ci-triage "Flake watch") and a seed's own save can write this
+ * test's tick or untick out.
+ *
  * Deliberately NOT covered (register IDs): A7, A11, A22.
  *
  * Seeding (fn-s): a scratch press from `POST scenarios/context` with a
@@ -43,7 +51,7 @@ function makeTag(scenario, testInfo) {
 }
 
 test.describe('user profile (serial)', () => {
-    test('S13: a leaked password refused on the Password tab', async ({browser, baseURL, asUser, ompApi}, testInfo) => {
+    test('S13: a leaked password refused on the Password tab @solo', async ({browser, baseURL, asUser, ompApi}, testInfo) => {
         test.slow();
         const tag = makeTag('s13', testInfo);
         const username = `${tag}au`;

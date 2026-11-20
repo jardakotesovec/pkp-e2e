@@ -415,6 +415,14 @@ over.
     collide on the site-wide email data. The seed and `LanguagesPages`
     already do; a new page object that ticks a language or saves "Install
     Locale" does the same. A serial group or a retry is not the fix.
+18. **A Site Settings save is a whole-record write.** Every "Save" on
+    Administration › Site Settings (any tab) and every `putSite` writes
+    back every site setting as its request read it, with no lock, so a
+    seed that changes the site beside it (`bulkEmails`, `POST site`,
+    `usage[]`) can lose its value, or the save its own. A test that saves
+    a Site Settings tab or sends `putSite` carries `@solo`; the serial
+    project alone is not enough, since its four workers' `bulkEmails`
+    seeds are site writes.
 
 ## Tag conventions
 

@@ -738,7 +738,7 @@
   "ojs › lines/ore/apps/ojs/playwright/tests/U69-monograph-landing-page.spec.js › Monograph landing page › S10: no book's page on a journal": 3.8,
   "ojs › lines/ore/apps/ojs/playwright/tests/U72-chapters-work-type.spec.js › Chapters & work type › S11: no chapters on a journal": 6.1,
   "ojs › lines/ore/apps/ojs/playwright/tests/U75-preprint-relations.spec.js › preprint relations › S7: no preprint relations on a journal": 8.3,
-  "ojs-serial › apps/ojs/playwright/tests/serial/U03-user-profile.spec.js › user profile (serial) › S13: a leaked password refused on the Password tab": 12.1,
+  "ojs-solo › apps/ojs/playwright/tests/serial/U03-user-profile.spec.js › user profile (serial) › S13: a leaked password refused on the Password tab @solo": 12.1,
   "ojs-serial › apps/ojs/playwright/tests/serial/U04-orcid-integration.spec.js › ORCID integration (queued email) › S11: a contributor verified under the public API is asked to re-authorize": 15.3,
   "ojs-serial › apps/ojs/playwright/tests/serial/U04-orcid-integration.spec.js › ORCID integration (queued email) › S12: what an Assistant may do with a contributor's iD": 12.9,
   "ojs-serial › apps/ojs/playwright/tests/serial/U04-orcid-integration.spec.js › ORCID integration (queued email) › S8: accepting a submission emails contributors only while the toggle is on": 28.8,

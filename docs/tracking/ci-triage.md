@@ -81,8 +81,6 @@ trips.
 
 - **U15 S1 the search label measured below the box's top** (OJS, serial). `SearchPage.expectLabelAboveBox()` (`apps/ojs/playwright/pages/SearchPages.js:129`) read the label's bottom at 426.9 against the box's top + 1 at 409.9, green on retry (9.2 s): a layout read before the page settled. Sighted once: pkp-e2e dispatch [43469962200](https://github.com/jardakotesovec/pkp-e2e/actions/runs/43469962200) (2026-11-13, the PR review of pkp/pkp-lib#13552, which touches only the users grid's role filter), ojs 3/3. Watch: a second sighting → wait for the label and box to hold still (two equal reads) before comparing.
 
-- **U03 S13 "a leaked password refused" keeps the box ticked** (OPS, serial). After the Site Administrator unticks "Check passwords against compromised password databases" and saves (the site API answers 200, 15:45:45 in the server log), the leaked password is still refused one second later (`apps/ops/playwright/tests/serial/U03-user-profile.spec.js:122`, no "Your changes have been saved."), and the retry finds the box ticked at its start (`:80`) with no site save in between, so the untick was never stored. Sighted once: pkp-e2e dispatch 42387087096 (2026-11-07, the PR review of pkp/pkp-lib#13543 round 6, which touches neither the Security form nor the site API), shard 1/3, both attempts; 4/4 green alone on the VM at the same OPS head (`8d1c3ea59a`, `--project=ops-serial --no-deps`). Not diagnosed: whether the Security form's save sends the stale value or a parallel worker overwrites the site row. Watch: a second sighting, then capture the site POST body.
-
 - **U11 S4 "highlights in a second language" reads another highlight's title** (OJS). The assertion on the French titles (`apps/ojs/playwright/tests/U11-highlights.spec.js:542`) expected `["Call for papers", "Appel à contributions"]` and received `["Call for papers", "Second call"]`; green on retry. Sighted once: pkp/ojs `main` hook run 41257374494 (2026-11-01, `bc4a83e9db`, shard 2/3). Not diagnosed. **Watch condition**: a second sighting on CI; then a diagnostician (a list read before the second language's save landed, or another test's highlight in the same journal).
 
 - **U06 S1 "Enter details" text between two sends** (OJS). S1 compares the invitation wizard's "Enter details" step text on a second send to the same address with the first (`expect(second.detailsText).toBe(first.detailsText)`); run 41104707295 (2026-10-30, the PR review of pkp/pkp-lib#13659, which touches no role list) listed "Journal editor" at another place in the role list on the second send, green on retry. Watch: a second sighting → compare the role list as a set and the rest as text. **Tripped 2026-11-02**: run 41404043658 (branch `hk1102`, the French-race harness fix, which touches no invitation code), ojs 2/3, "Journal editor" last in the second send's role list, green on retry (five more sightings on 2026-11-02, all OJS, the same move: runs 41404043658, 41445429220, 41449420785, 41477171269, 41493964988). **Hardened 2026-11-03** (housekeeping): `readDetailsStep()` in the OJS and OPS `UserInvitationPages.js` writes the role drop-down's options in sorted order, the rest of the step still compared as text; S1 green twice on OJS and OPS, the U06 files green once (12 OJS, 13 OPS). Watch: one more sighting of a different difference → read that diff before widening the set.
@@ -826,28 +824,6 @@ trips.
   **Watch condition**: a second sighting at that line; then gate the
   first-tab press on the tab's own panel being shown, as `selectTab`
   reads do.
-
-- **OMP U55 S1's Users & Roles tabs read without "Notify"** (OMP, once,
-  pkp-e2e branch run 39721397031 on `U01` at 3d344f0b, 2026-10-22, shard
-  2/3, `omp-serial`, green on its retry). "S1: send an email to one role,
-  then to two with a copy" (`serial/U55-notify-users.spec.js:150`):
-  `notify.settings.topTabNames()` right after `notify.gotoPage()` read
-  "Users, Roles, Site Access Options, ORCID", so `indexOf('Notify')` was
-  -1; the tab list is read once, with no wait for the "Notify" tab (the
-  manager's role was seeded just before). The branch changes only U01's
-  suite and the harness's config variants. No earlier sighting at that
-  line on any app; found by the housekeeping session's CI watch.
-  **Watch condition**: a second sighting; then read its error context
-  (whether the tab is missing or late) and wait on the tab's own name
-  before reading the list.
-  **Tripped 2026-11-19** (upstream session, s2): twice in one night at
-  the same line with the same read ("tabs: Users, Roles, Site Access
-  Options, ORCID", received -1), each green on its retry: the pkp-e2e
-  nightly [44451259836](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44451259836)
-  (`821c48b5`, omp 1/3, the usual configuration) and the configurations
-  run [44432262811](https://github.com/jardakotesovec/pkp-e2e/actions/runs/44432262811)
-  (PHP 8.2 MariaDB, omp 1/3). Left for the housekeeping session's
-  diagnostician.
 
 - **OPS U42 S5's metadata settings save not answered in 30 s** (OPS,
   once, pkp-e2e push run 37763083478 on the branch `11718-main` at

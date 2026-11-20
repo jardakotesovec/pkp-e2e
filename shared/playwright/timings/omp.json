@@ -537,7 +537,7 @@
   "omp › apps/omp/playwright/tests/U74-onix-metadata-export.spec.js › ONIX metadata & export (U74) › S8: The trade data imported on another press": 16.1,
   "omp › apps/omp/playwright/tests/U74-onix-metadata-export.spec.js › ONIX metadata & export (U74) › S9: No ONIX on a journal or a preprint server: the absence, its press control": 7.7,
   "omp › apps/omp/playwright/tests/U75-preprint-relations.spec.js › preprint relations › S7: no preprint relations on a press": 6.9,
-  "omp-serial › apps/omp/playwright/tests/serial/U03-user-profile.spec.js › user profile (serial) › S13: a leaked password refused on the Password tab": 19.2,
+  "omp-solo › apps/omp/playwright/tests/serial/U03-user-profile.spec.js › user profile (serial) › S13: a leaked password refused on the Password tab @solo": 19.2,
   "omp-serial › apps/omp/playwright/tests/serial/U04-orcid-integration.spec.js › ORCID integration (queued email) › S11 (absence): a press publishing for a contributor verified under the public API sends no re-authorization request": 17.9,
   "omp-serial › apps/omp/playwright/tests/serial/U04-orcid-integration.spec.js › ORCID integration (queued email) › S12: an Assistant with the Permissions box requests and deletes a contributor's iD; one without is offered no Edit": 10.9,
   "omp-serial › apps/omp/playwright/tests/serial/U04-orcid-integration.spec.js › ORCID integration (queued email) › S8: accepting a submission emails contributors only while the toggle is on": 25.3,

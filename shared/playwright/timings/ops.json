@@ -376,7 +376,7 @@
   "ops › apps/ops/playwright/tests/U75-preprint-relations.spec.js › preprint relations › S4: each answer before posting: the preview and \"Post the preprint\"": 17.5,
   "ops › apps/ops/playwright/tests/U75-preprint-relations.spec.js › preprint relations › S5: the Review step reads the answer": 7.6,
   "ops › apps/ops/playwright/tests/U75-preprint-relations.spec.js › preprint relations › S6: each version keeps its own relation": 13.1,
-  "ops-serial › apps/ops/playwright/tests/serial/U03-user-profile.spec.js › user profile (serial) › S13: a leaked password refused on the Password tab": 11.9,
+  "ops-solo › apps/ops/playwright/tests/serial/U03-user-profile.spec.js › user profile (serial) › S13: a leaked password refused on the Password tab @solo": 11.9,
   "ops-serial › apps/ops/playwright/tests/serial/U04-orcid-integration.spec.js › ORCID integration (queued email) › S11: a contributor verified under the public API is asked to re-authorize": 13.2,
   "ops-serial › apps/ops/playwright/tests/serial/U04-orcid-integration.spec.js › ORCID integration (queued email) › S12: what an Assistant may do with a contributor's iD": 13.4,
   "ops-serial › apps/ops/playwright/tests/serial/U12-announcements.spec.js › announcements (queued email; the site) › S4: the email and who gets it": 31.3,

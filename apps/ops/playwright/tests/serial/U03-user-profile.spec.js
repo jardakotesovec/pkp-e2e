@@ -18,6 +18,14 @@
  * password, with the check ticked" block, `@solo`); both run in the serial
  * chain, one at a time.
  *
+ * Alone, `@solo` (harness.md "Project chain"): every Site Settings "Save"
+ * writes the whole site record back as its request read it
+ * (`PKPSiteService::edit`, then `SiteDAO::updateObject`, no lock, no
+ * transaction), so a save beside the serial project's `bulkEmails` seeds
+ * writes a just-ticked scratch server's id out (U55 S1 read no "Notify"
+ * tab, ci-triage "Flake watch") and a seed's own save can write this
+ * test's tick or untick out.
+ *
  * The ticked check asks Have I Been Pwned over the network: the installs
  * carry no local list (seed-facts; spec footnote s, note g), so this test
  * needs the network, which the VM and CI have. `qwerty123456` is the leaked
@@ -50,7 +58,7 @@ function makeTag(scenario, testInfo) {
 }
 
 test.describe('user profile (serial)', () => {
-    test('S13: a leaked password refused on the Password tab', async ({browser, baseURL, opsApi, asUser}, testInfo) => {
+    test('S13: a leaked password refused on the Password tab @solo', async ({browser, baseURL, opsApi, asUser}, testInfo) => {
         test.slow();
         const tag = makeTag('s13', testInfo);
         const username = `${tag}au`;
