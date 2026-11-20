@@ -12,7 +12,10 @@
  *   const context = await newGuardedContext(browser, '<repo>/.reports/plugin-review/pg-<PR>/drive/outside.log');
  *
  * `allow` adds hosts the review's request allowed (host or host:port);
- * other options go to `browser.newContext()`.
+ * other options go to `browser.newContext()`. API calls go through the
+ * page (`page.evaluate(() => fetch(…))`): `page.request` and
+ * `context.request` ignore the bypass list and fail on the dead proxy
+ * (ECONNREFUSED 127.0.0.1:9) for every host, the pod's included.
  *
  * Two layers. The context's proxy is a dead port with only the open hosts
  * bypassed (and `<-loopback>`, so other loopback ports, the slots' apps
