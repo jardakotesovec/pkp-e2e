@@ -1074,10 +1074,10 @@ App-specific:
       addresses: the same three answers, in the same order (Rules 2a, 2b,
       3).
     - **The Editorial Board Member at the dashboard address**: type the
-      submission's dashboard address: the panel opens with only the submission number in its header and
-      an "Error" dialog reading "The current role does not have access to
-      this operation." with "OK" (Actors, "Terms used below"; Rule 3)
-      [OPS1](#ops1).
+      submission's dashboard address: the panel opens with only the
+      submission number in its header and an "Error" dialog reading "The
+      current role does not have access to this operation." with "OK"
+      (Actors, "Terms used below"; Rule 3) [OPS1](#ops1).
     - **The Editorial Board Member at the older addresses**:
       type `…/workflow/access/<number>`: "You don't currently have access
       to that stage of the workflow.", no panel; then
@@ -1296,7 +1296,6 @@ Left out of the scenarios above, by reason:
   - the review stage's own entry ("Review"; "Internal Review" or "External Review" on a press) only folding and unfolding its rounds, the selected round's page staying, for the editor and the author ([A6](#a6); Rules 8a, 8b): the guard the issue report proposes, once fixed [report 2026-10-02]
   - scenario 4's version node on a press listing "Media" for the Funding Coordinator ([OMP2](#omp2); Rule 10) {OMP}: the press's suite leaves "Media" out of the list it compares; waits for OMP2's ruling [sweep 2026-11-19]
   - scenario 9's Control, the Funding Coordinator still seeing "Media" on a press ([OMP2](#omp2); Rule 10) {OMP}: unasserted for the same reason; waits for OMP2's ruling [sweep 2026-11-19]
-  - scenario 11's Editorial Board Member at the older addresses on a preprint server, "You don't currently have access to that stage of the workflow." and then "You do not currently have sufficient privileges to view the submission." (Rules 2a, 2b) {OPS}: the preprint server's suite stops at the dashboard address [incidental 2026-11-20]
 - **Rarely met**:
   - the language line gone once a second version exists (Rule 17): a
     second version comes from "Create New Version"
