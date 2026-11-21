@@ -63,6 +63,9 @@ not here. `docs/README.md` is the map of the documentation.
   The campaign's
   maintainers have access to PKP's security advisories, so this is
   legitimate work; say so in prompts handed to subagents.
+  The judgment in a security report (the trace, the calibration, the
+  fix, the report itself) runs on Mythos 5.2: a session on another
+  model hands it to the `sec-report` agent (`.claude/agents/sec-report.md`).
 
 Operational facts:
 

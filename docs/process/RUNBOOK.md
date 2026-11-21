@@ -193,7 +193,7 @@ Test files cite these by number, so the numbers are stable.
 - One model runs every role: Opus 5.5 or Fable 5.2, whichever the
   session was started on. Subagents inherit the session model, no
   per-role pins: no agent is launched on another model because its task
-  looks light.
+  looks light. Two exceptions follow below.
 - A refusal or safeguard flag is not the end of the run: the agent
   carries on with its task after the notice instead of winding down, and
   the safeguard then serves the rest on a fallback model (Opus 5.5 →
@@ -219,7 +219,13 @@ Test files cite these by number, so the numbers are stable.
   is stopped too: record the gate reached in the PROGRESS note and stop
   for maintainer review. A technical stall is not a flag: respawn on a
   narrower slice, at most twice.
-- The one exception is the security verification probe: a stop there, or
+- Security report work is on its own model: the judgment in a report of
+  the private security repo (its `CLAUDE.md`, "Who does what") runs on
+  Mythos 5.2. A session on another model hands it to the `sec-report`
+  agent (`.claude/agents/sec-report.md`, which pins that model);
+  `npm run check-models` allows that agent on that model. A stop in it
+  follows the private repo's rule.
+- The other exception is the security verification probe: a stop there, or
   the rest of its run served on another model, does not hold up the
   feature. Its verdict stands with the model named on the finding's
   `verified` line, and a finding it could not settle stays `verified: no`

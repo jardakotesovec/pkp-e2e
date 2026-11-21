@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // check-models.mjs — the RUNBOOK step 10 model gate: did every agent of this
 // Claude Code session run on the session's own model, with no safety-classifier
-// stop? Two exceptions are allowed (RUNBOOK "Model discipline"): the security
+// stop? Three exceptions are allowed (RUNBOOK "Model discipline"): the `sec-report`
+// agent (.claude/agents/sec-report.md) runs on Mythos 5.2 by its definition, in a
+// session on any model; the security
 // verification probe may be stopped, or finished on another model, without
 // holding up the feature; and an agent described "(narrow rerun)", "(Sonnet
 // fallback)" or "(Fable fallback)", the narrow rerun of a piece a false-positive
@@ -37,6 +39,9 @@ const STOP = 'Your response above was stopped by a safety classifier';
 const SECURITY = /security\b.*verif/i;
 const FALLBACK = /\((?:narrow rerun|sonnet fallback|fable fallback)\)\s*$/i;
 const DOWNGRADED = /\(downgraded finish\)\s*$/i;
+// The agent type that does the judgment of a security report, and the model its definition pins.
+const SEC_REPORT = 'sec-report';
+const SEC_REPORT_MODEL = 'claude-mythos-5-2';
 
 function scan(jsonl) {
     const models = new Map();
@@ -61,7 +66,7 @@ for (const f of fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWit
     const metaFile = path.join(dir, f.replace(/\.jsonl$/, '.meta.json'));
     const meta = fs.existsSync(metaFile) ? JSON.parse(fs.readFileSync(metaFile, 'utf8')) : {};
     const s = scan(path.join(dir, f));
-    agents.push({ name: meta.description || f, security: SECURITY.test(meta.description || ''), fallback: FALLBACK.test(meta.description || ''), downgraded: DOWNGRADED.test(meta.description || ''), ...s });
+    agents.push({ name: meta.description || f, secReport: meta.agentType === SEC_REPORT, security: SECURITY.test(meta.description || ''), fallback: FALLBACK.test(meta.description || ''), downgraded: DOWNGRADED.test(meta.description || ''), ...s });
 }
 const sessionStops = agents.reduce((n, a) => n + a.stops, 0);
 // A stop the session answered with a narrow fallback that ran through is handled, not a block.
@@ -74,6 +79,8 @@ let blocked = 0;
 for (const a of agents) {
     const other = [...a.models].filter(([m]) => m !== sessionModel);
     if (!other.length && !a.stops) continue;
+    // The sec-report agent on its pinned model is on-model; anything else it was served, or a stop, is judged like any agent's.
+    if (a.secReport && !a.stops && other.every(([m]) => m === SEC_REPORT_MODEL)) { console.log(`allowed  ${a.name}: served ${SEC_REPORT_MODEL} (the sec-report agent, on the model its definition pins)`); continue; }
     const what = [a.stops && `${a.stops} classifier stop(s)`, other.length && `served ${other.map(([m, n]) => `${m} ×${n}`).join(', ')}`].filter(Boolean).join('; ');
     if (a.security) console.log(`allowed  ${a.name}: ${what} (security probe: its verified-by line names the model that finished it, or the entry stays unverified)`);
     else if (a.fallback && sessionStops && !a.stops) console.log(`allowed  ${a.name}: ${what} (the narrow rerun after a safety flag)`);
