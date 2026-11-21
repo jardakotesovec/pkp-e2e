@@ -219,9 +219,10 @@ Test files cite these by number, so the numbers are stable.
   is stopped too: record the gate reached in the PROGRESS note and stop
   for maintainer review. A technical stall is not a flag: respawn on a
   narrower slice, at most twice.
-- Security report work is on its own model: the judgment in a report of
-  the private security repo (its `CLAUDE.md`, "Who does what") runs on
-  Mythos 5.2. A session on another model hands it to the `sec-report`
+- Security report work is on its own model: a report of the private
+  security repo (its `CLAUDE.md`, "Who does what") is worked on Mythos
+  5.2, the judgment and the live checks alike. A session on another
+  model hands both to the `sec-report`
   agent (`.claude/agents/sec-report.md`, which pins that model);
   `npm run check-models` allows that agent on that model. A stop in it
   follows the private repo's rule.
