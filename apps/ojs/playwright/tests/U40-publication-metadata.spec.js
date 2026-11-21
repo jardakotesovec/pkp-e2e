@@ -17,7 +17,7 @@
  * - A8 ❓: S3 and S12 read Save disabled and nothing kept, never the
  *   fields' look.
  * - A11 ❓: the automatic holder's description is read up to the name.
- * - A12 ❓, A18 ❓, A19 🐞, A21 🐞, A22 🐞: no test reaches those states.
+ * - A12 ❓, A18 ❓, A19 🐞, A22 🐞: no test reaches those states.
  * - A13 🐞: S7 reloads after Cancel instead of reading the button.
  * - A14 ❓: S6's refused Confirm is read as the scenario words it.
  * - A15 🐞: S6 waits for the language panel to load before picking.

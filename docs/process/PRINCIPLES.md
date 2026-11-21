@@ -90,9 +90,10 @@ are the authoring conventions:
   same key in all three `app.context.js` files.
 - **M3 — Never write a test that asserts a 🐞 finding** (that freezes the
   defect as the contract), and **never a test that demonstrates a potential
-  security concern**. These repos are public; the finding goes to the
+  security concern**. This repo is public; the finding goes to the
   private security repo (RUNBOOK "What goes where") and the suite stays
-  silent until the fix ships. A claim parked on an open ❓ is not a coverage
+  silent until the finding there is `fixed`: the fix is in every
+  released line that carried the fault, `ore` included. A claim parked on an open ❓ is not a coverage
   gap. Each suite's file header says what it deliberately does not cover.
 - **M4 — Absence tests** assert that the surface is not offered AND pair
   every negative with a positive control taken the same way. An absence

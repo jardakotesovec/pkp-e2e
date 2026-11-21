@@ -42,10 +42,6 @@ Editor and Site Administrator count without an assignment. **May edit
 the publication** is the publication's edit gate
 ([→ edit gate](U40-publication-metadata.md#edit-gate)): every change
 the page sends is checked against it again.
-The server does not ask for the Production role the page goes by, only
-for a role on the stage the submission is in now, so a Copyeditor whose
-assignment carries the "Permissions" box can change the media files
-during Copyediting, though no page offers them the set ⚠ [A8](#a8).
 <sup>a</sup> <sup>b</sup> <sup>c</sup>
 
 | Action | Who may, and when |
@@ -852,7 +848,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A4](#a4) | A file over the request limit fails with a server error; its card gives no size limit | 🐞 | medium · crash: server | issues (claude), 2026-10-02 — re-verified |
 | [A5](#a5) | A name typed in "Edit Metadata" and left with "Yes" shows in the list, and the next "Save" stores it | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A6](#a6) | Each media file added leaves a warning in the server's log | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A8](#a8) | Outside Production, a copyeditor allowed to edit a version can change its media files, which no screen offers them | 🐞 | low | issues (claude), 2026-10-07 — re-verified |
 | [OMP2](#omp2) | On a press, the Copyeditor is offered the "Media" page, and pressing a file name shows a raw refusal | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A2](#a2) | The "ID" column shows a pair's number for linked files and another kind of number for the rest | ❓ | minor | — |
 | [OJS1](#ojs1) | A reader who is not signed in sees a media change on an HTML galley up to a day late | ❓ | user-visible | — |
@@ -928,28 +923,6 @@ warns through the same step ([JATS XML & body
 text](U48-jats-and-body-text.md#a20)).
 Basis: test run, 2026-10-02. <sup>f-a6</sup>
 
-<a id="a8"></a>
-**A8 — Outside Production, a copyeditor allowed to edit a version can change its media files, which no screen offers them** · 🐞 · low.
-A version's media files (the images and style sheets its HTML galley
-shows) are production material. The "Media" page offers to add, rename,
-relink and delete them only to a role assigned on the submission's
-Production stage: a journal does not list "Media" in a copyeditor's
-side menu, and a press shows them the files with no buttons.
-The server checks something else: a section editor or assistant role on
-the stage the submission is in now, and an assignment whose box "Allow
-this person to make changes to the publication, …" is ticked. So a
-copyeditor with that box, while the submission is in Copyediting, can
-add, rename, relink and delete the version's media files, the
-production team's included, by sending the page's requests. Once the
-submission is in Production the same requests are refused.
-The copyeditor may already change the version's metadata at that
-stage; what they gain is write access to another stage's files, which
-the file rules otherwise keep from them, and nobody is told of a change
-beyond the activity log. The proposed fix adds the Production check to
-the server and leaves the page as it is.
-The OJS "Body Text" route takes the same check ([JATS XML & body text](U48-jats-and-body-text.md)).
-Since: 2026-09-17 · Basis: probe, 2026-10-07. <sup>f-a8</sup>
-
 ### OJS
 <a id="ojs1"></a>
 **OJS1 — Media changes reach readers who are not signed in up to a day late** · ❓ · user-visible.
@@ -1004,6 +977,9 @@ Basis: probe, 2026-09-24 (the download); code (the download address).
 
 <a id="a1"></a>
 **A1 — A Layout Editor is offered every action on the "Media" page, and each change is refused** · ✅ · retired. Fixed upstream (pkp/ui-library#1030, for pkp/pkp-lib#13647).
+
+<a id="a8"></a>
+**A8 — Withdrawn from this register** · ✅ · retired. Kept outside this repo.
 
 ---
 
@@ -1770,60 +1746,6 @@ lines written since a mark with the kit's `serverLog(app)`, and the
 upload's request is the `POST …/publications/{id}/mediaFiles` line,
 the warning the "PHP Warning: foreach() …" line right before it.
 Issue report: [pkp-e2e#494](https://github.com/jardakotesovec/pkp-e2e/issues/494) ([docs/issues/U47-A6-media-jats-upload-server-log-warning.md](../../../../docs/issues/U47-A6-media-jats-upload-server-log-warning.md)).
-
-<a id="fn-f-a8"></a>
-**f-a8** — Notes b and c. On `main`, lib/pkp
-`api/v1/submissions/MediaFilesController.php:132-134` and
-`api/v1/bodyText/PKPBodyTextController.php:102-105` guard every write
-with `PublicationWritePolicy` alone, whose `StageRolePolicy([SUB_EDITOR,
-ASSISTANT, AUTHOR])` takes no stage id
-(`classes/security/authorization/PublicationWritePolicy.php:42`), so it
-checks the submission's current stage, not Production; the page's offer
-(note b) and OJS's side menu, which lists Body Text and Media only with
-an editorial role in Production, go by Production. Brought by
-pkp/pkp-lib#12702 (PR #13054, Touhidur Rahman; lib/pkp `c967e34ba4`,
-`2b13599365`, `462d628de3`, on `main` 2026-09-17), which dropped
-`SubmissionFileStageAccessPolicy` from these routes so assigned Section
-Editors could upload JATS; media `add` had no stage check from the
-start (pkp/pkp-lib#12251, Erik Hanson, `f4eccf8b9f`, on `main`
-2026-04-30). The old check was no clean Production rule either: it took
-the file stage from the request (Body Text save passed with
-`fileStage=9`) and refused every assigned participant's Body Text and
-JATS saves, the #12702 bug. Live-probed 2026-09-30, OJS and OMP `main`
-(lib/pkp `fab29cfeca`), standard test data, "Permit submission metadata
-edit" ticked by `dbarnes` on the assignments and unticked afterwards:
-Copyeditor `mfritz` on OJS submission 3 (Copyediting): media add, edit,
-link and delete, body text save and delete, all 200; Copyeditor
-`svogt` on OMP submission 1 (Copyediting): media add, edit, link and
-delete, all 200. Refused 401: the box unticked, a Copyeditor not
-assigned, the same Copyeditor with the submission in Production (OJS 5,
-OMP 4, `accessibleWorkflowStage`), the Author `ckwantes`. Accepted as
-intended: Section Editor `dbuskins`, managers `dbarnes` and `rvaca`,
-Layout Editor `gcox` with the box in Production. Code only: the Funding
-Coordinator (Submission, Review) and the Marketing and Sales
-Coordinator (Copyediting) stand as the Copyeditor; OPS has the route,
-but a preprint is always in Production, so it cannot meet this. A1 was
-the reverse case (offered, refused; retired 2026-11-06, fixed by
-`pkp/ui-library#1030`) and OMP2 is the press's download link; both are
-separate faults. Proposed fix, if the page's rule is the
-intended one: on both controllers' write actions add
-`StageRolePolicy([Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT],
-WORKFLOW_STAGE_ID_PRODUCTION)` after `PublicationWritePolicy`; tried
-live 2026-09-30 on OJS and reverted: the Copyeditor's Body Text, media
-add and batch link refused 401, JATS still accepted, Section Editor,
-managers and Layout Editor in Production still accepted. If the team
-keeps the server's rule, the page and the side menu should offer Body
-Text and Media to whoever may edit the publication at the current
-stage. 3.5 has only the JATS route, whose server rule matches its page,
-and 3.4 and 3.3 have none of these routes: not affected.
-Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
-Re-verified end to end 2026-10-07 on OJS and OMP `main` (maintainer's
-request): the report's fix keeps `StageRolePolicy`'s default
-`allowRecommendOnly`, since `false` would refuse a manager assigned in
-another role (the `pkp/pkp-lib#12702` fault) and "recommend only"
-Section Editors, whom the page offers the actions; tried with the media
-routes refused for the Copyeditor and the controls unchanged.
-Issue report: [pkp-e2e#926](https://github.com/jardakotesovec/pkp-e2e/issues/926) ([docs/issues/U47-A8-copyeditor-changes-media-outside-production.md](../../../../docs/issues/U47-A8-copyeditor-changes-media-outside-production.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — Note q29. `HtmlArticleGalleyPlugin`, the galley view: a

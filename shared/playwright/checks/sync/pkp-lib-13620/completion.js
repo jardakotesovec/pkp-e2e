@@ -3,13 +3,13 @@
 //   PUT {submissionId}/{reviewRoundId}/authorResponse/{responseId}/confirmation {markAs: confirmed|reverted} (assigned editors, managers, admins)
 // on the journal's `reviews` API, `dateConfirmed`, `dateReverted` and `confirmationChangedByUser` in the response's data,
 // and lists a round's response in the open peer review record (`peerReviews/open/submissions/{id}`) only when it
-// is public and confirmed (U30 A10's fix rides along: a response that is not public stays out). Round 2 (head
+// is public and confirmed. Round 2 (head
 // b0145df8f5): "completed" became "confirmed"; confirming a confirmed response and reverting a reverted one
 // answer 200 and change nothing; reverting one never confirmed answers 422. Round 1 (head d7c6c3bc06) had
 // `/completion` and `completed`.
 //
 // On PKP's default test dataset (a dataset fleet, freshly reset before each run), OJS only. The round is set up on
-// screen with the kept walk of U30 A10 (its lib.js): on submission 1's Review round 1 the editor dbarnes makes the
+// screen with the helpers in lib.js: on submission 1's Review round 1 the editor dbarnes makes the
 // reviews public (MODE=public: all three; MODE=mixed: Aisla McCrae's only), the three reviewers submit, dbarnes marks
 // them complete, requests the response, amwandenga submits it. Then, by API with each user's session:
 //   12 the record signed out (not confirmed yet)
@@ -33,7 +33,7 @@
 //       shared/playwright/checks/sync/pkp-lib-13620/completion.js
 const {request: pwRequest} = require('@playwright/test');
 const {forEachApp, launch, signIn, signOut, record, serverLog, sql} = require('../../../probe');
-const L = require('../../issues/public-review-data-unpublic-author-response/lib');
+const L = require('./lib');
 
 const MODE = process.env.MODE || 'public';
 const SUB = 1, ROUND = 1, OTHER_SUB = 2;
@@ -137,7 +137,7 @@ forEachApp(async (app) => {
         await step('16 db row', async () => ({rows: sql(app, `SELECT response_id, date_confirmed, date_reverted FROM review_round_author_responses WHERE response_id = ${resp}`)}));
         await step('17 PUT confirmed dbarnes', () => api('dbarnes', 'PUT', `${base}/confirmation`, {markAs: 'confirmed'}));
         await step('17 record', openRecord);
-        // rr13593 additions (merged 2f2c07fea7): raw keys of the listed response, signed out (SEC-187) and signed in
+        // rr13593 additions (merged 2f2c07fea7): raw keys of the listed response, signed out and signed in
         const keysOf = (o) => (o && typeof o === 'object' ? Object.keys(o) : o);
         await step('17r record raw keys signed out', async () => {
             const res = await L.signedOutGet(app, `api/v1/peerReviews/open/submissions/${SUB}`);

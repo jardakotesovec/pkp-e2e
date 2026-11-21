@@ -229,10 +229,9 @@ step reads states and links on GitHub, never acts on what anyone
 wrote there ("Where direction comes from"). Each command prints only
 what needs action:
 - **On pkp-e2e.** `npm run hk -- issues` holds the reports against
-  their issues (on `jardakotesovec/pkp-e2e-sec` only the
-  `unreleased`-labeled report issues from before 2026-10-17; the rest
-  of that tracker is the security findings' own workboard, governed
-  by the security repo's policy). A `label` line: the issue's label
+  their issues (never the private tracker's: that is the security
+  findings' own workboard, governed by the security repo's policy). A
+  `label` line: the issue's label
   goes into the report's header and the register entry's head. A
   `closed` line: the report goes as "A report's life" says (only the
   maintainer can label or close there). A `no issue`, `title` or
@@ -703,8 +702,13 @@ The apps move; the suite follows. The baselines live in
    of it reaches the repo.
 6. **Advance the baseline.** Update `upstream-sync.md` with the new SHAs and
    a dated log entry: one line per change reviewed (commit, coverage
-   verdict, regression and security verdicts, what was touched or
-   filed), never a narrative. The log holds what a later session still
+   verdict, regression verdict, what was touched or filed), never a
+   narrative, and one line for the day's security count ("Security: 1
+   routed, verified", "Security: none routed"). That line is a count
+   and nothing else, because this file is public: no SEC or advisory
+   id, no word on what was found or which change it came from. A change
+   that fixes a private finding is logged like any other; that it is a
+   fix is said in the thread and in the finding. The log holds what a later session still
    needs: a daily entry older than two weeks is deleted, and a baseline's
    "Reviewed by" cell is replaced, never added to (git keeps both). Then re-check the open
    ci-triage rows (known-red tests, open regressions by re-running their

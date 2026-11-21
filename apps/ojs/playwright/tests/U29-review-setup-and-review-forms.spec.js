@@ -21,11 +21,9 @@
  * A8 ❓ (no declined request is seeded), A10 ❓ (S2 reads "Save" greyed out
  * and never what gives it back), A11 🐞 (no test opens "Edit
  * Recommendation"), A12 🐞 (the ticks are read by row, never by their
- * name), A13 🐞 (no Section Editor opens the recommendations), A14 ❓ (no
- * test reads the "More Actions" menu of a recommendation a reviewer has
- * only saved for later), A15 🐞 (S10 loads the table after the reviews),
- * OJS1 🐞 (no review is made public), OMP1–OMP4 ✅/🐞 (press-only, in the
- * OMP tree). The spec's Coverage section records everything else left out.
+ * name), A14 ❓ (no test reads the "More Actions" menu of a recommendation
+ * a reviewer has only saved for later), A15 🐞 (S10 loads the table after
+ * the reviews), OMP1–OMP4 ✅/🐞 (press-only, in the OMP tree). The spec's Coverage section records everything else left out.
  *
  * Seeding: scenario endpoints only. S1–S10 and S13 run on their own scratch
  * journal (`POST scenarios/context`, install defaults unless a `review` /

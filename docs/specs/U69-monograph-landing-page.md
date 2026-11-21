@@ -76,7 +76,7 @@ Proofreader and Editorial Board Member. <sup>c</sup>
 | Action | Who may, and when |
 |--------|--------------------|
 | **Read a published book's page and its chapter pages** (the current version, or an older one at its own address) | • anyone, signed in or not (Rules 1–4) <sup>c</sup> |
-| **Open an unpublished version's page** (the preview) | • the Press manager, Press editor, Production editor, Series editor and the assistant roles, assigned or not, and the Site Administrator, under the preview notice (a Series editor or assistant role not assigned to the book is meant to open it once the book has reached copyediting or production, but it opens for them at every earlier stage too, a declined book included ⚠ [A27](#a27)), and its chapter pages too, though a new version's fail on a "DOI Versioning" "No" press [A19](#a19) (Rule 5); the workflow's "Preview" opens it for those it is offered to ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md), its Rule 6)<br>• the book's Author, by typing the page's address<br>• anyone else gets the "404 Not Found" page (Rule 3): a visitor, a Reader, a Reviewer, and an Author, Volume editor, Chapter Author or Translator of the press who is not on the book<br>• a submission its author never finished answers "404 Not Found" to everyone, the Press manager, the Site Administrator and its own Author included <sup>c</sup> <sup>td5</sup> |
+| **Open an unpublished version's page** (the preview) | • the Press manager, Press editor, Production editor, Series editor and the assistant roles, assigned or not, and the Site Administrator, under the preview notice (for a Series editor or assistant role not assigned to the book, once the book has reached copyediting or production), and its chapter pages too, though a new version's fail on a "DOI Versioning" "No" press [A19](#a19) (Rule 5); the workflow's "Preview" opens it for those it is offered to ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md), its Rule 6)<br>• the book's Author, by typing the page's address<br>• anyone else gets the "404 Not Found" page (Rule 3): a visitor, a Reader, a Reviewer, and an Author, Volume editor, Chapter Author or Translator of the press who is not on the book<br>• a submission its author never finished answers "404 Not Found" to everyone, the Press manager, the Site Administrator and its own Author included <sup>c</sup> <sup>td5</sup> |
 | **Open a free file** ("Open Access" terms) | • anyone who may read the page (Rule 13)<br>• on a preview, no one: every file's link opens the "404 Not Found" page (Rule 5c) [A24](#a24)<br>• on a press with "Users must be registered and log in to view open access content." ticked (Settings bullet 6): signed-in users only; a visitor who presses a free file's link gets the Login page first, and once signed in there the file's view page <sup>j</sup> <sup>td13</sup> |
 | **Buy a file for sale** ("Direct Sales" terms) | • a signed-in user, whatever the role (the press's own staff and the Site Administrator too), on a press whose payment method is set up and that has a currency (Rule 14)<br>• a visitor gets the Login page first, and once signed in there not the payment page but the page an ordinary sign-in opens for their role, and a newcomer who registers from that Login page "Registration complete" (Rule 14) [A18](#a18) <sup>k</sup> <sup>td14</sup> |
 | **Receive the "Manual Payment Notification"** | • the press's principal contact, when a buyer presses "Send notification of payment" (Side effects) <sup>q</sup> |
@@ -1348,7 +1348,6 @@ an entry notes otherwise; the team settles them on spec review.
 | [A23](#a23) | A press's PDF view page fails in its own script, "PDFJS is not defined", every time it opens | 🐞 | low · crash: script | upstream sync (claude), 2026-10-05 — re-verified |
 | [A25](#a25) | A book's HTML file that links another book shows with every "omp://" link dead | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A26](#a26) | A review made public never shows on the published book's page | 🐞 | medium | issues (claude), 2026-11-10 — re-verified |
-| [A27](#a27) | A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [A24](#a24) | On a press, every file link on a book's preview opens "404 Not Found" | 🐞 | medium | issues (claude), 2026-10-13 — re-verified |
 | [A11](#a11) | A buyer who pays by hand never gets the file | ❓ | user-visible | — |
 | [A2](#a2) | A book published only as an Author's Original has no page | ❓ | minor | — |
@@ -1718,11 +1717,6 @@ a different fix
 ([pkp-e2e#218](https://github.com/jardakotesovec/pkp-e2e/issues/218)).
 Basis: probe, 2026-11-10. <sup>f-a26</sup>
 
-<a id="a27"></a>
-**A27 — A Series editor or assistant role not assigned to a book reads its unpublished page at every stage, declined books included** · 🐞 · medium.
-An unassigned Series editor or assistant role opens an unpublished book's page by its address while the book is still in submission or review, or after it was declined, as on an article's page, where the full entry stands ([→ Article landing page & reading, A16](U13-article-landing-page-and-reading.md#a16)).
-Since: 2026-02-18 · Basis: probe, 2026-10-05. <sup>f-a27</sup>
-
 <a id="a28"></a>
 **A28 — A screen reader meets two "Downloads" headings, the chart's with nothing to read under it** · ❓ · minor.
 With a chart chosen (Settings bullet 5), a book's page carries two
@@ -1750,6 +1744,9 @@ Basis: probe, 2026-10-27. <sup>f-a28</sup>
 
 <a id="a9"></a>
 **A9 — On a press, a reader who opens a book's PDF gets an empty viewer, and no download saves the file** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13444).
+
+<a id="a27"></a>
+**A27 — Withdrawn from this register** · ✅ · retired. Kept outside this repo.
 
 ---
 
@@ -2083,10 +2080,6 @@ Issue report: [pkp-e2e#284](https://github.com/jardakotesovec/pkp-e2e/issues/284
 <a id="fn-f-a26"></a>
 **f-a26** — Note t: OMP never prepares or mounts the display; OJS's `ArticleHandler::view()` prepares it and its template never mounts it (U13 OJS12). The OJS12 issue report ([pkp-e2e#218](https://github.com/jardakotesovec/pkp-e2e/issues/218), [docs/issues/U13-OJS12-public-review-never-shown.md](../issues/U13-OJS12-public-review-never-shown.md)) found the OMP twin in the code and proposes a fix for the article page's template only, which does not reach a book's page. OMP `stable-3_5_0`: not driven; OJS 3.5 has no "Publicly Show Reviewer Comments" (that report's Affects). Live-probed 2026-10-05 (two runs): note t.
 Issue report: [pkp-e2e#962](https://github.com/jardakotesovec/pkp-e2e/issues/962) ([docs/issues/U69-A26-book-page-public-review-never-shown.md](../issues/U69-A26-book-page-public-review-never-shown.md)).
-
-<a id="fn-f-a27"></a>
-**f-a27** — Note c: the same `canPreview()` role shortcut as U13 A16, with no stage check on `main` since pkp/pkp-lib#12245 (`768b0a3991`, Alec Smecher, 2026-02-18); the fix, the release check (3.5, 3.4 and 3.3 do not have it) and the evidence are there. Live-probed 2026-09-30, OMP `main`, seeded data: unassigned `mfritz` (Copyeditor) and `cturner` (Proofreader) opened books 3, 6 and 18, before copyediting. Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
-Issue report (with U13 A16): [pkp-e2e-sec#1](https://github.com/jardakotesovec/pkp-e2e-sec/issues/1) ([docs/issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md](../issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md)).
 
 <a id="fn-f-a28"></a>
 **f-a28** — `monograph_full.tpl`: `.item.downloads_chart` with `h2.label` (`plugins.themes.default.displayStats.downloads`) and `<canvas class="usageStatsGraph">`, with no `role`, `aria-label`, `aria-labelledby`, `aria-describedby`, `title` or fallback content; `.item.files` with `h2.pkp_screen_reader` (`submission.downloads`). Live-probed 2026-10-27 (td27; OMP `main` and `stable-3_5_0`, two runs each, signed out): book 14, with chapter files and two supplementary files ("Table", "Other") in its side column, read in heading order "Chapters" (screen reader), "Downloads" (the chart's), the button "All time" (`main` only), "Downloads" (screen reader, over the files), "Published"; the accessibility tree had no node for the chart. Book 5, whose only file belongs to a chapter, had one "Downloads". The article page's twin: Article landing page & reading, its A17.

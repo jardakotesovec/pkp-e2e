@@ -27,7 +27,7 @@
  *   links another book.
  * - A28 🐞: S2 reads the chart's own "Downloads" heading, never the count
  *   of headings a screen reader meets.
- * - A1, A2, A4, A8, A11–A13, A15–A17, A19–A21, A24, A26, A27: no scenario
+ * - A1, A2, A4, A8, A11–A13, A15–A17, A19–A21, A24, A26: no scenario
  *   reaches those states.
  *
  * Seeding: scenario endpoints only, as footnote s says: every press is a

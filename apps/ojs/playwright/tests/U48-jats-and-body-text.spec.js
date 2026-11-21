@@ -29,7 +29,7 @@
  * - A23 🐞: S6 and S10 export one at a time, each export awaited.
  * - A3, A4, A5 ❓: parked (S6's given exports on a published version and
  *   S10's "JATS XML" reads an exported body, as the scenarios say). A6,
- *   A8–A10, A13, A15, A17, A22, A24–A26: not on these scenarios' paths.
+ *   A8–A10, A13, A15, A17, A24–A26: not on these scenarios' paths.
  *   OMP1: the press's, in that tree.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster

@@ -18,7 +18,7 @@ and no CI follows this branch. `main`'s baselines are in
 ## Read log
 
 - **2026-11-20 (daily session, VM s1) — ops `dab4680e67..5a7aec98df` (1); ojs `7f23f05a93`, omp `272333e34f`, pkp-lib `b0f7eaecc2`, ui-library `fd00e45f`: no commits (`bin/line-range.js`, `git ls-remote`). Read in full; ops baseline advanced.**
-  - ops `5a7aec98df` `~main b5b78cf3a8` (pkp/pkp-lib#13622, asmecher, a direct commit: OPS's section window "Assign {name} as {role}" label escapes the name) → `main`'s read of 2026-10-27 stands for the name (`form/checkbox.tpl` prints a `translate=false` label raw, so the name is escaped once); `git range-diff` shows the backport escapes `$username` only, where `main` escapes `$role` too: the role is a user group name only a manager sets, already recorded in the security repo's existing finding for this label. Only caller `sectionForm.tpl`; no 3.5 spec covers it. Trivial: no regression, no new security question.
+  - ops `5a7aec98df` `~main b5b78cf3a8` (pkp/pkp-lib#13622, asmecher, a direct commit: OPS's section window "Assign {name} as {role}" label escapes the name) → `main`'s read of 2026-10-27 stands for the name (`form/checkbox.tpl` prints a `translate=false` label raw, so the name is escaped once); `git range-diff`: an adapted backport of the same change. Only caller `sectionForm.tpl`; no 3.5 spec covers it. Trivial: no regression, no new security question.
   - Carried from `main`: no `main` range today, no regression confirmed. Open stable-line rows: no code they rest on moved; none re-run.
   - Security: 1 read (the backport above), 0 reproduced, 0 routed.
 

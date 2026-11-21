@@ -1,7 +1,7 @@
 // U24 claim check, chunk H19 (housekeeping 2026-10-19, incidentals row): the workflow page of a
 // submission opened by its address by its own author who also holds a manager-level role
 // ("Journal editor", OMP "Press editor", OPS "Preprint Server manager") but is not assigned to it as
-// editor. Source: U38 A12 reporter k26's control (an "Error: You are not allowed to access these
+// editor. Source: an issue reporter's control (an "Error: You are not allowed to access these
 // files." dialog beside "You don't currently have access to that stage of the workflow.").
 //
 // On PKP's default test dataset (a dataset fleet, harness.md "Dataset fleets"), `publicknowledge`.
@@ -421,7 +421,7 @@ forEachApp(async (app) => {
 /**
  * Settings › Users & Roles › Users › "Invite to a role": search the address, choose the role in the
  * new role row (start today, on the masthead), "Save And Continue", subject tagged, "Invite user to
- * the role". (After U38 A12's walk lib.)
+ * the role".
  */
 async function inviteToRole(page, app, {email, role, subject}) {
     const out = {};

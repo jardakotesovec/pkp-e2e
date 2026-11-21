@@ -17,8 +17,8 @@
  * a 🐞 is never asserted as the contract, a ❓ is parked, not a gap; the
  * spec's Coverage section is the record of everything else left out):
  * - A1 🐞, A2 ❓, A3 ❓, A4 ❓, A5 🐞, A8 ❓, A9 🐞, A10 ❓, OMP3 🐞.
- * - A6, A7, A11–A15, OJS1: all on a journal's "Reviewer Recommendations"
- *   or its public review, which a press does not have.
+ * - A6, A7, A11, A12, A14, A15: all on a journal's "Reviewer
+ *   Recommendations", which a press does not have.
  * - OMP4 ✅ retired.
  *
  * Seeding: scenario endpoints only. S1–S8 and S13 run on their own scratch

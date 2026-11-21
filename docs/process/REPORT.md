@@ -113,10 +113,7 @@ read; a label changed on GitHub is copied back into the header.
 - A fault that could plausibly be a security weakness never gets a
   report, whatever branch carries it: it is a finding in the private
   security repo, and its GitHub issue lives on that repo's tracker
-  (RUNBOOK "What goes where"). Reports filed
-  before 2026-10-17 with a `- **Security** unreleased` bullet stay on the
-  private tracker as they are, labeled `unreleased`, until their issues
-  close.
+  (RUNBOOK "What goes where").
 - **Affects**, **Introduced**, **Upstream**: below.
 - **Tracked in** links each register entry (or names the tracking row),
   and **Checked** dates the walks; the branch tips they ran on are
@@ -444,11 +441,8 @@ that is not wastes the time the label was meant to save.
 ## As a GitHub issue
 
 An issue report under `docs/issues/` is written to be filed from the
-file, on pkp-e2e's tracker (`jardakotesovec/pkp-e2e`). (The security
-reports filed before 2026-10-17 live the same way on the private tracker,
-`jardakotesovec/pkp-e2e-sec`, their register footnotes reading
-`pkp-e2e-sec#<n>`; a new security fault never becomes an issue report —
-"The header" above.) The filing:
+file, on pkp-e2e's tracker (`jardakotesovec/pkp-e2e`). (A security
+fault never becomes an issue report: "The header" above.) The filing:
 
 - The title is the report's title. The labels are read off the header:
   `severity: <word>`, `effort: <word>`, the kind (`regression`,

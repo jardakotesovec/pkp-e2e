@@ -1,5 +1,5 @@
-// Helpers of the kept walk for docs/issues/U30-A10-public-review-data-unpublic-author-response.md (spec U30,
-// register A10). Requiring this file runs nothing. Every helper drives the screens a person uses: the editor's
+// Helpers of completion.js: a review round with public reviews and an author response, set up on screen.
+// Requiring this file runs nothing. Every helper drives the screens a person uses: the editor's
 // review round ("Reviewers" row "Edit" and "Read Review", the "Author Response" table, "Request Response" and the
 // "Request Author Response" page), the reviewer's review wizard, and the author's "Author Response" card and
 // window; the one exception is signedOutGet(), the open peer review record, which no screen requests.

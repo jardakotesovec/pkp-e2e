@@ -776,7 +776,7 @@ Left out of the scenarios above, by reason:
     published article's open peer review record lists it; reverted, the
     record drops it; confirmed again, the revert date is cleared; a
     response that is not public stays out of the record when confirmed
-    (A10's guard, retired) [upstream 2026-11-18]
+    [upstream 2026-11-18]
 - **Nothing new to test**:
   - Site Administrator (the Journal Manager's offer, scenarios 1 and 3)
   - Guest Editor (the Section Editor's gate, scenario 6)
@@ -955,7 +955,7 @@ Since: 2026-01-23 (pkp/ui-library#767) · Basis: probe, 2026-10-04. <sup>f-omp1<
 **A9 — In French the Author Response screens show raw codes** · ✅ · retired. Overturned: a missing translation is no finding.
 
 <a id="a10"></a>
-**A10 — Anyone, without signing in, could read an author's response that also answers reviews the editor kept private** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13620, for pkp/pkp-lib#13593).
+**A10 — Withdrawn from this register** · ✅ · retired. Kept outside this repo.
 
 <a id="a11"></a>
 **A11 — A Section Editor could delete, and another journal's manager delete or rewrite, an author's response to reviews** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13510, for pkp/pkp-lib#13509).
@@ -1078,7 +1078,7 @@ Issue report: [pkp-e2e#817](https://github.com/jardakotesovec/pkp-e2e/issues/817
 
 ## Reference — code anchors
 
-- `lib/pkp/api/v1/reviews/PKPReviewController.php` (`getGroupRoutes()`, `requestAuthorResponse()`, `submitAuthorResponse()`, `editAuthorResponse()`, `deleteAuthorResponse()`); `formRequests/AddResponse.php`, `EditResponse.php`, `RequestAuthorResponse.php`, `ReviewRoundAuthorResponseCommonValidator.php`; `resources/ReviewRoundAuthorResponseResource.php`; `lib/pkp/api/v1/peerReviews/PeerReviewController.php`, `resources/SubmissionPeerReviewResource.php` (the open peer review record, A10); `plugins/generic/jatsTemplate/classes/PeerReview.php` (`createAuthorComment()`) · `ojs api/v1/reviews/index.php`, `omp api/v1/reviews/index.php` (no OPS file)
+- `lib/pkp/api/v1/reviews/PKPReviewController.php` (`getGroupRoutes()`, `requestAuthorResponse()`, `submitAuthorResponse()`, `editAuthorResponse()`, `deleteAuthorResponse()`); `formRequests/AddResponse.php`, `EditResponse.php`, `RequestAuthorResponse.php`, `ReviewRoundAuthorResponseCommonValidator.php`; `resources/ReviewRoundAuthorResponseResource.php`; `lib/pkp/api/v1/peerReviews/PeerReviewController.php`, `resources/SubmissionPeerReviewResource.php` (the open peer review record); `plugins/generic/jatsTemplate/classes/PeerReview.php` (`createAuthorComment()`) · `ojs api/v1/reviews/index.php`, `omp api/v1/reviews/index.php` (no OPS file)
 - `lib/pkp/pages/reviewResponse/ReviewResponseHandler.php`, `index.php`; `lib/pkp/classes/components/RequestReviewResponsePage.php`; `lib/pkp/templates/reviewResponse/requestAuthorResponse.tpl`
 - `lib/pkp/classes/submission/reviewRound/authorResponse/AuthorResponse.php`, `AuthorResponseManager.php`; `lib/pkp/classes/submission/reviewRound/ReviewRound.php` (`getAuthorResponse()`), `ReviewRoundDAO.php` (`isAuthorResponseRequested`); `lib/pkp/classes/submission/maps/Schema.php` (`getPropertyReviewRounds()`); `lib/pkp/classes/migration/install/ReviewRoundAuthorResponse.php`
 - `lib/pkp/classes/mail/mailables/RequestReviewRoundAuthorResponse.php`, `DecisionRequestRevisionsNotifyAuthor.php`; `lib/pkp/classes/mail/traits/ReviewRoundAuthorResponse.php`, `ReviewerComments.php`; `lib/pkp/classes/decision/types/traits/NotifyAuthors.php`; `lib/pkp/locale/en/emails.po` (`emails.reviewRound.requestAuthorResponse.*`), `submission.po` (`submission.reviewRound.*`, `editor.submission.reviewRound.*`)

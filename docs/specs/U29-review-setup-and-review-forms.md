@@ -52,7 +52,7 @@ some reviewer has chosen on a submitted review (Rule 18). <sup>c</sup>
 | **Save "Setup" and "Reviewer Guidance"** | • Manager roles and the Site Administrator: the tab's "Save" <sup>c</sup> |
 | **Create, edit, copy, preview, order, activate and deactivate review forms** | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a form not in use (Rule 12); "Copy", "Preview" and the "Active" tick are offered on every form <sup>c</sup> |
 | **Add, edit, delete and order a form's items** | • Manager roles and the Site Administrator, only while the form is not in use (Rule 12): the "Form Items" tab is greyed out for a form in use <sup>c</sup> |
-| **Add, edit, delete, activate and deactivate a reviewer recommendation** {OJS} | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a recommendation that was not in use when the table was loaded (Rule 18); the "Activate" tick is offered on every row<br>• Section Editor, and a role at the Journal Manager level whose settings access is switched off: no screen of theirs offers it, but the app accepts the same changes when they are sent to it directly ⚠ [A13](#a13) <sup>c</sup> |
+| **Add, edit, delete, activate and deactivate a reviewer recommendation** {OJS} | • Manager roles and the Site Administrator. "Edit" and "Delete" are offered only on a recommendation that was not in use when the table was loaded (Rule 18); the "Activate" tick is offered on every row<br>• Section Editor, and a role at the Journal Manager level whose settings access is switched off: no screen of theirs offers it <sup>c</sup> |
 
 ## Fields & validation
 
@@ -362,14 +362,7 @@ and "Save" is greyed out until the boxes are filled: <sup>g</sup>
     an editor copies into a decision email (*Editorial decision recording*)
     and the author's own reading of an open review
     ([→ reading reviews as the author](U26-review-stage-and-rounds.md#author-read-review));
-    the editor still reads it in full. On a journal, once the article is
-    published, the public review data of a review the editor has made
-    public, which anyone may request
-    without signing in (no screen shows it), lists the unticked item and
-    its answer all the same ⚠ [OJS1](#ojs1). A press gives out the same
-    data at the same address, which no screen calls either; its former
-    address `api/v1/publicationPeerReviews` answers "The requested URL
-    was not recognized." <sup>f</sup>
+    the editor still reads it in full. <sup>f</sup>
 
 16. **Languages.** A journal with more than one form language gives every
     multilingual box in this spec a version per language, shown in two
@@ -873,10 +866,6 @@ recipe are in the footnote. <sup>s0</sup>
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for A13 {OJS} (issue report
-    `docs/issues/U29-A13-section-editor-changes-reviewer-recommendations.md`): the
-    reviewer recommendation writes sent as a Section Editor and as a
-    manager-level role without settings access, each refused [report 2026-10-05]
   - the guard for A11 {OJS} (Rule 18; issue report
     `docs/issues/U66-A2-unsaved-name-kept-after-closing-edit-panel.md`): a
     changed "Review Recommendations" closed with "Close", then "Edit"
@@ -954,8 +943,6 @@ Left out of the scenarios above, by reason:
     unsaved title on the row for the next "Save" to store; Rule 18)
   - A12 (the "Activate" tick boxes and the "Active Upon Saving" list
     without a name for a screen reader; Fields "Reviewer Recommendations")
-  - A13 (a Section Editor, or a manager-level role without settings
-    access, changing the recommendations without the screen; Actors row 6)
   - A14 (whether a recommendation a reviewer has only saved for later is
     already in use, its "More Actions" menu gone; Rule 18)
   - A15 (a table left open while a reviewer submits with an entry still
@@ -963,8 +950,6 @@ Left out of the scenarios above, by reason:
     raw "##api.406.notAcceptable##"; Rule 18)
   - OMP3 (the "Internal Review Guidelines" toolbar without quote and list
     buttons; Fields)
-  - OJS1 (a public review's unticked items and their answers in the
-    public review data anyone may request without signing in; Rule 15)
 - **No seed**:
   - the automatic reminder email, the "Reminder" date and the activity-log
     row (Rule 9; Side effects): the test installs' daily clock is off
@@ -1013,8 +998,6 @@ and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A9](#a9) | Saving a reviewer's "Edit" window silently takes a deactivated review form off the review | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
 | [A11](#a11) | A recommendation title abandoned in "Edit Recommendation" stays on the row and is stored by the next "Save" | 🐞 | medium | — |
 | [A12](#a12) | On "Reviewer Recommendations", a screen reader announces the "Activate" tick boxes and the status dropdown without a name | 🐞 | low | issues (claude), 2026-10-15 — re-verified |
-| [A13](#a13) | A Section Editor, or an editor without settings access, can change and switch off a journal's reviewer recommendations | 🐞 | medium | issues (claude), 2026-10-07 — re-verified |
-| [OJS1](#ojs1) | A review made public gives anyone, without signing in, the review form answers meant for the editor only | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A15](#a15) | A Journal Manager editing or deleting a reviewer recommendation a reviewer has just used gets an error that does not say why | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
 | [A2](#a2) | A form in use can still be deactivated, although the activation confirmation promises it cannot | ❓ | minor | — |
 | [A3](#a3) | A deadline saved as 0 or left empty makes Add Reviewer preset three weeks for the response but four for the review | ❓ | minor | — |
@@ -1194,23 +1177,6 @@ the keyboard.
 The same mistake as the DOIs page's row tick boxes ([→ DOIs A8](U45-dois.md#a8)).
 Basis: probe, 2026-10-15. <sup>f-a12</sup>
 
-<a id="a13"></a>
-**A13 — A Section Editor, or an editor without settings access, can change and switch off a journal's reviewer recommendations** · 🐞 · medium.
-A Section Editor, and an editor whose role has "Permit changes to
-Settings" unticked, are refused Settings › Workflow and its "Reviewer
-Recommendations" tab. Yet the journal accepts the tab's requests from
-them when they are sent directly: they can add recommendations, rename or
-delete one no review has chosen, and deactivate or reactivate any of them.
-A deactivated recommendation disappears from every reviewer's
-"Recommendation" list. With all of them deactivated, the list is empty and
-no reviewer who has not yet chosen can submit a review: "Submit Review"
-answers "This field is required.". Nobody is told.
-A review that already chose a deactivated recommendation keeps that
-choice. The editor's "Read Review" window still names it at the top,
-but the window's "Reviewer Recommendation" section shows "-" until
-the recommendation is reactivated.
-Since: 2025-04-29 (a year and a half) · Basis: probe, 2026-10-07. <sup>f-a13</sup>
-
 <a id="a14"></a>
 **A14 — Whether a recommendation a reviewer has only saved for later is already in use** · ❓ · minor.
 A reviewer can pick a recommendation on the wizard's step 3 and press
@@ -1239,32 +1205,6 @@ unexpected error has occurred. Please reload the page and try again."
 reads only "##api.406.notAcceptable##". Neither tells the manager that
 the entry is now in use.
 Basis: probe, 2026-11-16. <sup>f-a15</sup>
-
-### OJS
-
-<a id="ojs1"></a>
-**OJS1 — A review made public gives anyone, without signing in, the review form answers meant for the editor only** · 🐞 · medium.
-A journal's review form can hold items with "Included in message to
-author" unticked: questions whose answers only the editor is meant to
-read, which the decision email and the author's own reading of the
-review leave out. But once the editor makes a review on such a form
-public ("Publicly Show Reviewer Comments") and the article is
-published, the journal's open peer review API, which anyone may call
-without signing in, returns every item of the reviewer's form with its
-answer, the editor-only ones included. A review written without a form
-keeps its "For editor" comments out, as it should.
-
-No page of the journal requests that data, and nothing tells the editor
-or the reviewer what it gives away. An editor who knows can avoid it
-only by keeping such reviews private.
-
-It needs a review form with an editor-only item and a public review:
-ticked on that review, or set as the journal's default under Settings ›
-Workflow › Review › "Setup", which applies to reviewers assigned after
-it is set.
-No screen of the journal shows that data (the article page shows no reviews, [→ Article landing page & reading's OJS12](U13-article-landing-page-and-reading.md#ojs12)).
-Security: unreleased.
-Since: 2025-10-15 (a year) · Basis: probe, 2026-10-15. <sup>f-ojs1</sup>
 
 ### OMP
 
@@ -1305,6 +1245,12 @@ pasting a list from another document works round it. Basis: probe,
 
 <a id="omp4"></a>
 **OMP4 — Every request to a press's public peer-review API address fails with a server error** · ✅ · retired. Fixed upstream (pkp/pkp-lib#13729, pkp/omp#2552).
+
+<a id="a13"></a>
+**A13 — Withdrawn from this register** · ✅ · retired. Kept outside this repo.
+
+<a id="ojs1"></a>
+**OJS1 — Withdrawn from this register** · ✅ · retired. Kept outside this repo.
 
 ---
 
@@ -1399,9 +1345,7 @@ ReviewFormGridRow::initialize()` adds them only when
 recommendation manager (`ReviewerRecommendationManager.vue`) renders the
 row menu only for `item.removable`, and the OJS API
 (`api/v1/reviewers/recommendations/ReviewerRecommendationController.php`)
-refuses `edit` and `delete` on a non-removable entry with 406; that API
-has no settings-access check and admits Section Editors too (A13,
-footnote f-a13). Live-probed
+refuses `edit` and `delete` on a non-removable entry with 406. Live-probed
 2026-09-06 (Actors rows 1–5; OJS, OMP and OPS, one account per level:
 `manager.maya`, `editor.diana`, `admin`, `sectioneditor.ana`,
 `assistant.rita`, `reviewer.julia`, `author.alex`, `reader.rosa`): the three
@@ -2246,57 +2190,6 @@ First noted 2026-10-01 in the code by the DOIs page's A8 write-up, which
 names it as outside that fix (`docs/issues/U45-A8-doi-page-controls-unnamed.md`).
 Issue report: [pkp-e2e#991](https://github.com/jardakotesovec/pkp-e2e/issues/991) ([docs/issues/U29-A12-recommendations-controls-unnamed.md](../issues/U29-A12-recommendations-controls-unnamed.md)).
 
-<a id="fn-f-a13"></a>
-**f-a13** — OJS `main`
-`api/v1/reviewers/recommendations/ReviewerRecommendationController.php`:
-`getRouteGroupMiddleware()` (:52-57) admits `ROLE_ID_SITE_ADMIN`,
-`ROLE_ID_MANAGER` and `ROLE_ID_SUB_EDITOR` on every route, and
-`authorize()` (:64-82) adds only `UserRolesRequiredPolicy`,
-`ContextAccessPolicy` and, on the single-entry routes,
-`RecommendationAccessPolicy` (the entry belongs to this journal); there is
-no `CanAccessSettingsPolicy`, which gates the page itself (footnote c). No
-Section Editor screen calls the API: the dashboard and the reviewer's form
-read the entries from the database, and the only caller is the settings
-tab's `reviewerRecommendationManagerStore.js`. Since: Touhidur Rahman's
-pkp/pkp-lib#1660 work wrote the role list in lib/pkp `d4f7d18e50`
-(2024-11-06), before Alec Smecher's pkp/pkp-lib#5504 (`1330ac1283`,
-2024-11-18, PR #10380) brought `permitSettings` and
-`CanAccessSettingsPolicy`, so the controller never got the policy; it moved
-into OJS in `b14943ce19` (2025-03-03) with the same list and reached `main`
-with OJS PR #4505 and pkp-lib PR #10583, merged 2025-04-29. Live-probed
-2026-09-30 on OJS `main` (`9d9f116f38`, lib/pkp `fab29cfeca`) on PKP's
-default test dataset: Section Editors `dbuskins`, `minoue` and `sberardo`,
-and a throwaway user holding only a manager-level role created with
-"Permit changes to Settings" unticked, were each sent to the access-denied
-page by Settings › Workflow and each listed, created, renamed, deactivated
-and deleted a throwaway entry through the API (200 each); `rvaca`, `dbarnes`
-and `admin` likewise (by design); `mfritz`, `jjanssen` and `ccorino` were
-refused (401); another journal's entry id was refused (401). A new entry
-appeared in `amccrae`'s step-3 list. On a scratch journal a Section Editor
-renamed the starting "Accept Submission", deleted "Resubmit Elsewhere" and
-deactivated every entry. On entries in use (one on a saved draft review,
-one on a submitted review) rename and delete answered 406 and deactivate
-200; the submitted review's line in the editor's reviewer grid then read
-"Recommendation: " with no text until the entry was reactivated. From the
-code only: with every entry inactive, a reviewer who has not chosen yet
-gets an empty list and cannot submit (`ReviewerReviewStep3Form`). The API
-keeps no record of who changed what. Proposed fix: drop
-`Role::ROLE_ID_SUB_EDITOR` from the role list and add
-`$this->addPolicy(new CanAccessSettingsPolicy());` to `authorize()`, as the
-contexts, email-templates, categories, contributor-roles and
-task-template controllers do; tried on the probe install, it refused the
-Section Editor and the restricted role (401) and kept the Journal Manager,
-Journal Editor and Site Administrator working, the tab's list still
-loading. OMP and OPS `main` have no such API
-(`hasCustomizableReviewerRecommendation()` false; the route 404s), and
-OJS 3.5, 3.4 and 3.3 have no recommendations API at all, so no release
-carries it. Security-shaped and unreleased: its issue report carries
-"- **Security** unreleased" (REPORT.md). Re-verified end to end on
-OJS main 2026-10-07 (maintainer's request): the report now recommends
-`CanAccessSettingsPolicy` on the four writes only, leaving the reads to
-`pkp/pkp-lib#13298`, which plans to open them to reviewers.
-Issue report: [pkp-e2e-sec#2](https://github.com/jardakotesovec/pkp-e2e-sec/issues/2) ([docs/issues/U29-A13-section-editor-changes-reviewer-recommendations.md](../issues/U29-A13-section-editor-changes-reviewer-recommendations.md)).
-
 <a id="fn-f-a14"></a>
 **f-a14** — Footnote g: the row menu shows only for `item.removable`, and
 `ReviewerRecommendation::removable()` (lib/pkp
@@ -2311,7 +2204,7 @@ ont été enregistrés.", no email); the Journal Manager's table then listed
 that entry ticked with no "More Actions" menu, like "Revisions Required"
 (chosen on a submitted review), while the five other entries kept theirs.
 The table was read once, just before both rows were unticked, and on no
-second journal. The 2026-09-30 walk of footnote f-a13 saw a rename and a
+second journal. A walk on 2026-09-30 saw a rename and a
 delete of an entry on a saved draft review refused (406) when sent
 directly. Kept script `shared/playwright/checks/U29/I07b/i07b.js` (phases
 `rev2save`, `deact`).
@@ -2340,61 +2233,6 @@ before and after; after a reload both tabs showed the stored title with
 no menu. No response of 500 or more and no page error in any run. Kept
 script `shared/playwright/checks/U29/I33/i33.js` (phase `race`).
 Issue report: [pkp-e2e#1103](https://github.com/jardakotesovec/pkp-e2e/issues/1103) ([docs/issues/U29-A15-recommendation-in-use-edit-delete-unexplained.md](../issues/U29-A15-recommendation-in-use-edit-delete-unexplained.md)).
-
-<a id="fn-f-ojs1"></a>
-**f-ojs1** — The public review data is `GET
-/index.php/{journal}/api/v1/peerReviews/open/submissions/{submissionId}`
-(lib/pkp `api/v1/peerReviews/PeerReviewController.php`,
-`getSubmissionPeerReview()`), registered only by `ojs
-api/v1/peerReviews/index.php`; the controller adds `PublicAccessPolicy`
-and no role gate, so it answers without a session. Its
-`SubmissionPeerReviewResource` lists the publicly visible, accepted and
-confirmed (considered or acknowledged) reviews of each round, and
-`getReviewFormQuestions()` walks every element of the review's form with
-no `getIncluded()` check, returning `{question, responses}` for each
-answered element. The editor-side and email paths skip such elements
-(footnote f: `getReviewFormResponses()` `authorFriendly`,
-`reviewDownload.tpl`, and `PKP\mail\traits\ReviewerComments`, which
-`continue`s on `!getIncluded()`). Fix: skip elements whose
-`getIncluded()` is false in `getReviewFormQuestions()`. The review form
-answers came with the API's first version (`pkp/pkp-lib#11922`,
-`222d16a881`, 2025-10-15). OMP served it from pkp/omp#2552 on, at the
-same `api/v1/peerReviews` (before, its `publicationPeerReviews` entry
-point named a controller class absent from lib/pkp and every request
-failed on the server, [OMP4](#omp4)); the resource is app-neutral, so a
-press's record carries the same unticked items (code-read). OPS has no
-review stage, so it does not serve this data. OJS `stable-3_5_0` has no `api/v1/peerReviews/` (main only, so the
-finding is an ordinary one with "Security: unreleased", no private
-routing; both of its review addresses answered 404 on 2026-11-05).
-On OJS `main`, `api/v1/peerReviews` with no sub-path (with or without
-`?submissionIds=`) answers 500 with
-`{"error":"The route publicknowledge/api/v1/peerReviews could not be found."}`,
-the same unmatched-route answer as
-[*Sections*' A10](U17-sections.md#a10) (signed out and as `rvaca`, two
-runs, 2026-11-05; kept script
-`shared/playwright/checks/U62/I05B/i05b.js`, part `api`). The article page never
-calls this data (*Article landing page & reading*, OJS12):
-`ArticleHandler::view()` builds the same resource into
-`openReviewConfig` through `OpenReviewComponent`, but no template prints
-that variable, so the page's source does not carry the answers either
-(code, read on `main` 2026-10-13). Live-probed
-2026-10-13 on OJS `main` (ojs `7c6fba2064`, lib/pkp `f4c2578c94`), two
-runs, each from a fresh reset of the dataset fleet, all preconditions
-made through the app: a review form built under Settings › Workflow ›
-Review › "Review Forms" with one item ticked "Included in message to
-author" and one unticked, activated, and attached in the reviewer row's
-"Edit" window of a published article's first round with "Publicly Show
-Reviewer Comments" ticked; the review submitted through the wizard with
-an answer to each item; the editor's "Read Review" window listed both
-items with their answers, and "Mark as Complete" confirmed the review.
-Signed out, the request answered 200 with one round and one review whose
-`reviewForm.questions` held both items, the unticked one with its
-answer; the review's other keys carry the reviewer's name, affiliation
-and ORCID as the review mode allows (`pkp/pkp-lib#12045`). No server
-error in either run. Kept script
-`shared/playwright/checks/U27/S13/api-rows.js` (phase `api62`; its other
-phases belong to other features).
-Issue report: [pkp-e2e-sec#12](https://github.com/jardakotesovec/pkp-e2e-sec/issues/12) ([docs/issues/U29-OJS1-public-review-data-editor-only-answers.md](../issues/U29-OJS1-public-review-data-editor-only-answers.md)).
 
 <a id="fn-f-omp1"></a>
 **f-omp1** — Footnote b (`hasCustomizableReviewerRecommendation()`); the
@@ -2441,7 +2279,7 @@ Issue report: [pkp-e2e#907](https://github.com/jardakotesovec/pkp-e2e/issues/907
 | OMP legacy preview template (not rendered) | — | AFFW-669 |
 | "Review" › "Reviewer Recommendations" {OJS} | same page, side tab; `api/v1/reviewers/recommendations` | VUE-047 · VUE-069 · API-054 · AFFM-078 (Add), AFFM-079 (Activate tick), AFFM-080 (Edit), AFFM-081 (Delete) |
 | Automatic reminder clock | daily scheduled task, no screen | JOB-054 |
-| Public review data {OJS OMP} (where Rule 15's unticked items leak, OJS1) | `api/v1/peerReviews/open/submissions/{submissionId}`, read without a session; no screen calls it | API-030 · API-062 |
+| Public review data {OJS OMP} | `api/v1/peerReviews/open/submissions/{submissionId}`, read without a session; no screen calls it | API-030 · API-062 |
 
 ## Reference — code anchors
 
@@ -2453,7 +2291,7 @@ Issue report: [pkp-e2e#907](https://github.com/jardakotesovec/pkp-e2e/issues/907
 - `lib/pkp/controllers/listbuilder/settings/reviewForms/ReviewFormElementResponseItemListbuilderHandler.php`, `lib/pkp/controllers/listbuilder/settings/SetupListbuilderHandler.php`
 - `lib/pkp/templates/manager/reviewForms/` (`reviewFormForm.tpl`, `reviewFormElementForm.tpl`, `previewReviewForm.tpl`), `lib/pkp/templates/controllers/grid/settings/reviewForms/editReviewForm.tpl`, `lib/pkp/templates/reviewer/review/reviewFormResponse.tpl`, `lib/pkp/templates/controllers/grid/common/cell/selectStatusCell.tpl`
 - `lib/pkp/classes/reviewForm/` — `ReviewForm.php`, `ReviewFormDAO.php`, `ReviewFormElement.php`, `ReviewFormElementDAO.php`
-- `lib/pkp/api/v1/peerReviews/PeerReviewController.php`, `resources/SubmissionPeerReviewResource.php` (`getReviewFormQuestions()`) — the public review data's form answers (OJS1); `omp api/v1/peerReviews/index.php` — the press's entry point (named `publicationPeerReviews` with a missing class before pkp/omp#2552, OMP4); `lib/pkp/classes/mail/traits/ReviewerComments.php` — the decision email's form block, which honours "Included in message to author"
+- `lib/pkp/api/v1/peerReviews/PeerReviewController.php`, `resources/SubmissionPeerReviewResource.php` (`getReviewFormQuestions()`) — the public review data's form answers; `omp api/v1/peerReviews/index.php` — the press's entry point (named `publicationPeerReviews` with a missing class before pkp/omp#2552, OMP4); `lib/pkp/classes/mail/traits/ReviewerComments.php` — the decision email's form block, which honours "Included in message to author"
 - `lib/pkp/controllers/grid/users/reviewer/form/ReviewerForm.php`, `EditReviewForm.php`, `traits/HasReviewDueDate.php` — where the defaults land
 - `lib/pkp/classes/submission/reviewer/recommendation/` — `ReviewerRecommendation.php`, `Repository.php`, `enums/ReviewerRecommendationType.php`; `ojs api/v1/reviewers/recommendations/ReviewerRecommendationController.php` and its `formRequests/`; `ojs classes/components/forms/context/ReviewerRecommendationForm.php`, `ojs classes/components/listPanels/ReviewerRecommendationsListPanel.php`; `ojs classes/services/ContextService.php` (default entries); lib/ui-library `managers/ReviewerRecommendationManager/`
 - `lib/pkp/classes/task/ReviewReminder.php`, `lib/pkp/jobs/email/ReviewReminder.php`, `lib/pkp/classes/mail/mailables/ReviewRemindAuto.php`, `ReviewResponseRemindAuto.php`, `ojs classes/scheduler/Scheduler.php`, `omp classes/scheduler/Scheduler.php`

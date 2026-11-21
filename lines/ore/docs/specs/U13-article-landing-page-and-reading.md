@@ -56,7 +56,7 @@ what a visitor may open is *Subscriptions & open access control*'s.
 | Action | Who may, and when |
 |--------|--------------------|
 | **Read a published version's page** (the current version, or an older one at its own address) | • anyone, signed in or not (Rules 1, 2) <sup>b</sup> <sup>q1</sup> |
-| **Open an unpublished version's page** | • the Journal Manager, the Site Administrator and a Section Editor assigned to the submission, whose workflow offers "Preview" ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md), Rule 6), under the preview notice (Rule 4)<br>• the submission's Author, by typing the page's address; the Author's workflow offers no "Preview"<br>• a Section Editor, a Subscription Manager, or a Copyeditor, Layout Editor, Proofreader or other assistant role of the journal not assigned to the submission, by typing the page's address, once the submission has reached copyediting or production; it opens for them at every earlier stage too, a declined submission included ⚠ [A16](#a16)<br>• a visitor, a Reader and a Reviewer get the "404 Not Found" page (Rule 3) <sup>b</sup> <sup>q3</sup> |
+| **Open an unpublished version's page** | • the Journal Manager, the Site Administrator and a Section Editor assigned to the submission, whose workflow offers "Preview" ([Workflow screen & stage access](U24-workflow-screen-and-stage-access.md), Rule 6), under the preview notice (Rule 4)<br>• the submission's Author, by typing the page's address; the Author's workflow offers no "Preview"<br>• a Section Editor, a Subscription Manager, or a Copyeditor, Layout Editor, Proofreader or other assistant role of the journal not assigned to the submission, by typing the page's address, once the submission has reached copyediting or production<br>• a visitor, a Reader and a Reviewer get the "404 Not Found" page (Rule 3) <sup>b</sup> <sup>q3</sup> |
 | **Open or download a galley** | • anyone who may read the page, on a journal whose content is open and on every preprint server (Rules 10, 11)<br>• on a journal with subscriptions, *Subscriptions & open access control* decides <sup>b</sup> |
 | **Show the citation in another format; download a citation** | • anyone who may read the page, while the "Citation Style Language" plugin is on (Rule 15) <sup>h</sup> |
 | **Configure "How to Cite" and the journal's extra blocks** (the plugins' "Settings" windows, the chart choice) | • whoever opens the Settings pages ([→ settings access](U07-journal-identity-and-about-pages.md#settings-access)), on Settings › Website › "Plugins" and "Appearance" (Rules 16, 17, 19, 20) <sup>i</sup> |
@@ -1230,7 +1230,6 @@ Verdicts are the author's judgment (claude, 2026-09-24; additions
 | [A10](#a10) | A reference's web address written in parentheses becomes a link that includes the closing ")" | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A11](#a11) | Keywords on an article, book or preprint page can appear in another order than the editor typed | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [A13](#a13) | The PDF or HTML reader opened from a new version's preview calls that version outdated | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A16](#a16) | Section editors and assistants not assigned to a submission open its article or book landing page before acceptance | 🐞 | medium | issues (claude), 2026-10-05 — re-verified |
 | [OJS2](#ojs2) | Publication Facts Label settings always warn "Funding Plugin Not Present", for a plugin that no longer exists | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OJS3](#ojs3) | In French (Canada) and every other language without its own labels, article pages show no "Publication Facts" panel | 🐞 | medium | issues (claude), 2026-10-01 — re-verified |
 | [OJS4](#ojs4) | With "Recommend Articles by Author" on, article pages never show "Most read articles by the same author(s)" | 🐞 | medium · crash: server | issues (claude), 2026-10-01 — re-verified |
@@ -1472,32 +1471,6 @@ Question: is "ABNT" meant to follow the 2002 edition? Lean: no (🐞); a
 refresh of every style file swapped in a different style that shared the
 old file's name, and nothing chose it.
 Basis: probe, 2026-10-01. <sup>[f-a14](#fn-f-a14)</sup>
-
-<a id="a16"></a>
-**A16 — Section editors and assistants not assigned to a submission open its article or book landing page before acceptance** · 🐞 · medium.
-On a journal, some staff can read a submission they are not assigned
-to on its article landing page. This applies to a Section Editor, a
-Subscription Manager and the assistant roles (Copyeditor, Layout
-Editor, Proofreader and the like). They type the page's address,
-`article/view/<n>` with the submission's ID, and see its title,
-abstract, authors and affiliations. This works while the submission is
-still in the Submission or Review stage, and after it was declined.
-On a press, a Series editor and the assistant roles do the same on the
-book landing page, `catalog/book/<n>`. Their dashboard does not list
-the submission and its workflow refuses them. The page should answer
-"404 Not Found" to them until the submission reaches copyediting.
-A staff member who also reviews the submission double-anonymously sees
-on that page the authors' names the review screens hide. On a journal,
-once an editor ticks "Make available with publication" on the
-version's "JATS XML", the page's "JATS XML" link downloads the XML,
-author names included, for the same staff. Nothing can be changed
-through the page.
-The change behind it (`pkp/pkp-lib#12245`, the workflow for versions
-published while still under review) lets submissions be previewed
-before copyediting. The proposed fix keeps that for managers and for
-everyone assigned to the submission. It closes the page before
-copyediting only to staff who are not assigned.
-Since: 2026-02-18 (the earlier-stage preview change) · Basis: probe, 2026-10-05. <sup>[f-a16](#fn-f-a16)</sup>
 
 ### OJS
 
@@ -1851,6 +1824,9 @@ Basis: probe, 2026-10-01. <sup>[f-ops9](#fn-f-ops9)</sup>
 
 <a id="a2"></a>
 **A2 — An older version's PDF opens a reader with no document, and its "Download" gets no file** · ✅ · retired. Fixed upstream (pkp/pdfJsViewer#83, for pkp/pkp-lib#13694).
+
+<a id="a16"></a>
+**A16 — Withdrawn from this register** · ✅ · retired. Kept outside this repo.
 
 ---
 
@@ -2981,55 +2957,6 @@ Knowledge, v. 1, n. 2, 30 Sept.2026.". The earlier file's output rests
 on the plugin's history and was not walked. Raised for the team in A7's
 issue report:
 [pkp-e2e#241](https://github.com/jardakotesovec/pkp-e2e/issues/241) ([docs/issues/U13-A7-abnt-citation-runs-text-together.md](../../../../docs/issues/U13-A7-abnt-citation-runs-text-together.md)).
-
-<a id="fn-f-a16"></a>
-**f-a16** — Note b: on `main`, `Repo::submission()->canPreview()`
-(lib/pkp `classes/submission/Repository.php:580-603`) returns true
-through `_roleCanPreview()` (`:1530-1551`) for any user holding
-`ROLE_ID_MANAGER`, `ROLE_ID_SUB_EDITOR`, `ROLE_ID_ASSISTANT` or
-`ROLE_ID_SUBSCRIPTION_MANAGER` in the context, reading no assignment and
-no stage; the workflow's `SubmissionAccessPolicy` admits sub-editors and
-assistants only when assigned. Callers: OJS `ArticleHandler` (page and
-galley download), OPS `PreprintHandler`, OMP `CatalogBookHandler`, and
-`PKPJatsController::publicDownload()`
-(`submissions/{id}/publications/{pid}/jats/download`, a route new on
-`main`, pkp/pkp-lib#10405). Introduced by pkp/pkp-lib#12245 (PR #12247,
-`768b0a3991`, Alec Smecher, 2026-02-18), which deleted the stage limit
-so that assigned editors could preview earlier stages; the role
-shortcut lost it too. `b4ef319c72` (2026-05-14) only excludes incomplete
-submissions. Proposed fix: managers, the Site Administrator and anyone
-assigned to the submission preview it at every stage; the role shortcut
-alone keeps the stage limit (`WORKFLOW_STAGE_ID_EDITING`,
-`WORKFLOW_STAGE_ID_PRODUCTION` and `WORKFLOW_STAGE_ID_DONE`, where
-published submissions sit). Patched into OJS and OMP `main` 2026-09-30
-and reverted: the unassigned Layout Editor, Section Editor and
-Proofreader got "404 Not Found" before copyediting and kept the
-copyediting preview, the assigned Section Editor, the manager and the
-Author were unchanged, and the JATS download answered 403 to the
-unassigned. Restoring the old check at the top of `canPreview()` instead
-breaks #12245: the assigned Section Editor and the Author lose the
-early preview, and the manager loses a published article's unpublished
-version 2. Releases: `stable-3_5_0` and `stable-3_4_0` `canPreview()`
-return false outside copyediting and production, OJS `stable-3_3_0`
-`IssueAction::allowedPrePublicationAccess()` refuses before
-`WORKFLOW_STAGE_ID_EDITING`, and the public JATS download does not exist
-before `main`: 3.5, 3.4 and 3.3 do not have the fault. Live-probed
-2026-09-30, OJS, OMP and OPS `main`, seeded data: unassigned `gcox`
-(Layout Editor), `svogt` (Copyeditor) and `minoue` (Section Editor)
-opened OJS submissions 4 (Submission), 20 (Review, double-anonymous) and
-18 (declined), each read with the submission API answering 401;
-`cturner` (Proofreader, double-anonymous reviewer of 20) saw "Zayan
-Zedd; Nargis Parvin" on 20's page while the review API gave an empty
-`authorsString`; `amccrae` (Reviewer only), `zwoods` (another Author)
-and signed out got 404. With 20's JATS public visibility ticked by
-`dbarnes` (reset after), `cturner`, `gcox` and `minoue` downloaded its
-XML naming the authors (200); `amccrae`, `zwoods` and signed out got
-403. OMP: `mfritz` (Copyeditor) and `cturner` opened books 3, 6 and 18
-before copyediting. OPS: only preprints 1 and 4, in production, were
-walked; earlier stages by the code. The Subscription Manager: by the
-code. Security-shaped and unreleased: its issue report carries
-"- **Security** unreleased" (REPORT.md).
-Issue report: [pkp-e2e#921](https://github.com/jardakotesovec/pkp-e2e/issues/921) ([docs/issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md](../../../../docs/issues/U13-A16-unassigned-staff-read-pre-acceptance-pages.md)).
 
 <a id="fn-f-ojs1"></a>
 **f-ojs1** — `CitationStyleLanguagePlugin::getTemplateData()` passes

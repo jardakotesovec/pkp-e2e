@@ -52,7 +52,7 @@ and every assistant role). <sup>c</sup>
 | **"Make available with publication"** (Rule 9) | • Offered to everyone who opens the page, on every version, published ones included<br>• Saved for whoever may edit the publication; for anyone else "Confirm" is refused and the box keeps showing the unsaved state ⚠ [A1](#a1) <sup>c</sup> <sup>d2</sup> |
 | **Write in the "Body Text" editor and press "Save"** (Rules 14–16) | • Offered to everyone who opens the page, on every version, published ones included (Rule 21)<br>• Saved for whoever may edit the publication; for anyone else "Save" is refused ⚠ [A2](#a2) <sup>c</sup> <sup>d3</sup> |
 | **Send a file to the "Body Text" editor** ("Send to Text Editor" on a Word file's row) | • Who is offered it, and on which files, is [Submission files](U36-submission-files.md#row-menu) (Site Administrator, Journal Manager, Editor, Production Editor); its window is [Publish, schedule & versions](U49-publish-schedule-and-versions.md) (its Rule 16). What arrives on "Body Text" is Rule 20 here <sup>c</sup> <sup>d20</sup> |
-| **Download the published JATS XML** (the article page's "JATS XML" link; Rules 10–12) | • Anyone who opens the article's page, signed out included, while the version's box is ticked and the version is published. On a journal that requires subscriptions this holds in a restricted issue too: a visitor its galleys refuse ([Subscriptions](U51-subscriptions.md), its Rule 12) still downloads the XML ⚠ [A22](#a22)<br>• With "Users must be registered and log in to view open access content." on, signed-in visitors only (Settings bullet 2)<br>• Before the version is published: those offered the workflow header's "Preview", and the submitting author by the link's address (Rule 11) <sup>e</sup> <sup>d13</sup> |
+| **Download the published JATS XML** (the article page's "JATS XML" link; Rules 10–12) | • Anyone who opens the article's page, signed out included, while the version's box is ticked and the version is published.<br>• With "Users must be registered and log in to view open access content." on, signed-in visitors only (Settings bullet 2)<br>• Before the version is published: those offered the workflow header's "Preview", and the submitting author by the link's address (Rule 11) <sup>e</sup> <sup>d13</sup> |
 | **Turn the "JATS Template Plugin" on or off** | • Journal Manager, Editor and Site Administrator: on Settings › Website › "Plugins", the plugin row's box (*Plugins management*; Settings bullet 1). Ticking it shows "The plugin "JATS Template Plugin" has been enabled."; unticking asks "Are you sure you want to disable this plugin?" with "OK" and "Cancel", then shows "The plugin "JATS Template Plugin" has been disabled."<br>• A Section Editor who opens Settings › Website reads "The current role does not have access to this operation." <sup>d29</sup> |
 | **"Export to HTML" and "Preview: PDF" › "Create PDF"** on "Body Text" (Rule 24) | • Offered to everyone who opens "Body Text", and carried out for each of them. That includes a Layout Editor or other assistant whose assignment has "Permissions" unticked, whose "Save" on the same page is refused ([A2](#a2))<br>• The Author: the author view has no "Body Text", and the export is refused for the Author too <sup>d32</sup> <sup>d33</sup> |
 
@@ -852,11 +852,6 @@ passwords, mail catcher's address and tooling recipe are in the footnote. <sup>v
 Left out of the scenarios above, by reason:
 
 - **Planned**:
-  - the guard for A22 {OJS} (issue report
-    `docs/issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md`):
-    an article in a restricted issue with "Make available with publication"
-    ticked: its "JATS XML" refused signed out and for a reader without a
-    subscription, served to a subscriber [report 2026-10-05]
   - the guard for A20 (issue report `docs/issues/U47-A6-media-jats-upload-server-log-warning.md`): upload a JATS file on "JATS XML" and check the server log holds no PHP warning for the request. [report 2026-10-02]
   - the guard for A12 (issue report `docs/issues/U48-A12-published-jats-upload-delete-offered.md`): a published version's "JATS XML" page offers neither "Upload" nor "Delete" to an editor who may edit the publication. [report 2026-10-02]
   - the guard for A11 (issue report `docs/issues/U48-A11-jats-download-saves-refusal-json.md`): a Copyeditor's "Download" of the uploaded JATS file on "JATS XML" saves the XML. [report 2026-10-02]
@@ -977,7 +972,6 @@ entry notes otherwise; the team settles them on spec review.
 | [A16](#a16) | "Body Text": the "Cite" button beside each reference is never enabled | 🐞 | medium | issues (claude), 2026-10-02 — re-verified |
 | [A17](#a17) | On "Body Text", pressing a closed side section closes the open one and leaves the pressed one closed | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
 | [A20](#a20) | Each JATS "Upload" leaves a warning in the server's log | 🐞 | low | issues (claude), 2026-10-02 — re-verified |
-| [A22](#a22) | On a subscription journal, the article page's "JATS XML" gives the article's text to visitors its galleys refuse | 🐞 | high | issues (claude), 2026-10-05 — re-verified |
 | [A23](#a23) | Exports of one version's Body Text sent at the same moment each make a galley, so the version gets duplicate "HTML" or "PDF" galleys | 🐞 | low | — |
 | [A24](#a24) | The Body Text's HTML export stops with an error when run outside a web request; the PDF export works | 🐞 | low | — |
 | [A26](#a26) | A Body Text too large for the server fails on "Save" with "The POST data is too large.", and the text is not saved | 🐞 | medium · crash: server | issues (claude), 2026-11-13 — re-verified |
@@ -1254,26 +1248,6 @@ file was stored. Adding a media file warns through the same step ([Media
 files](U47-media-files.md#a6)).
 Basis: test run, 2026-10-02. <sup>f-a20</sup>
 
-<a id="a22"></a>
-**A22 — On a subscription journal, the article page's "JATS XML" gives the article's text to visitors its galleys refuse** · 🐞 · high.
-Each article version has a "JATS XML" page in the editorial workflow
-(Publication › "JATS XML"). Its tick box "Make available with
-publication" is off by default. An editor who ticks it puts a "JATS
-XML" link beside the galleys on the article's page once the version is
-published.
-On a journal that requires subscriptions, that link downloads for a
-signed-out visitor and for a reader with no subscription, even in a
-restricted issue whose galleys send them to the Login or
-"Subscriptions" page. The XML carries the article's text whenever there
-is text to carry: an uploaded JATS file in full, or a body generated
-from an HTML galley. The link should show and download only for those
-who may open the galleys.
-The only way to close it is to untick the box. The "Enable JATS XML
-Download" window that confirms the tick says only that the file becomes
-available "for public download when the publication is published", not
-that this bypasses subscriptions.
-Since: 2026-02-13 · Basis: probe, 2026-10-05. <sup>f-a22</sup>
-
 <a id="a23"></a>
 **A23 — Simultaneous exports of one version's Body Text make duplicate galleys** · 🐞 · low.
 An editor exports a version's Body Text with "Export to HTML" or "Create
@@ -1330,6 +1304,9 @@ Basis: probe, 2026-11-13. <sup>f-a26</sup>
 
 <a id="omp1"></a>
 **OMP1 — A press's editor is offered "Send to Text Editor" on a file, and confirming it imports nothing** · ✅ · retired. Fixed upstream (pkp/ui-library#979).
+
+<a id="a22"></a>
+**A22 — Withdrawn from this register** · ✅ · retired. Kept outside this repo.
 
 ---
 
@@ -1579,11 +1556,6 @@ Issue report: [pkp-e2e#566](https://github.com/jardakotesovec/pkp-e2e/issues/566
 <a id="fn-f-a20"></a>
 **f-a20** — Test run 2026-09-25, OJS, scenario 1 in the green run and a rerun of scenarios 1, 3 and 6: the screen showed the upload as Rule 3 says (the toast, the uploaded XML, the line), and the worker servers' logs (`apps/ojs/playwright/.server-logs/server-<port>.log`, one per worker port; `docs/process/harness.md` "Server output") held "PHP Warning: foreach() argument must be of type array|object, string given in …/lib/pkp/classes/core/PKPBaseController.php on line 428" right before the upload's `POST …/submissions/{n}/publications/{m}/jats` (200), once per run and on no other request; no 5xx. A seeded `jats.file` (scenarios 3 and 6) logged none. Code: `PKPJatsController::add()` runs `convertStringsToSchema(SCHEMA_SUBMISSION_FILE, …)` on the upload's form fields, and a field the submission-file schema declares multilingual arrives as a plain string, which `convertStringsToSchema()` walks as a locale map. The same class as U47 A6 (note f-a6 there).
 Issue report: [pkp-e2e#494](https://github.com/jardakotesovec/pkp-e2e/issues/494) ([docs/issues/U47-A6-media-jats-upload-server-log-warning.md](../issues/U47-A6-media-jats-upload-server-log-warning.md)).
-
-<a id="fn-f-a22"></a>
-**f-a22** — Note e: `PKPJatsController::publicDownload()` (lib/pkp `api/v1/jats/PKPJatsController.php:280-353` on `main`) checks only `jatsPublicVisibility` and, for an unpublished version, `Repo::submission()->canPreview()`, behind the `restrictArticleAccess` middleware of Settings bullet 2. It never makes the subscription decision of OJS `ArticleHandler::userCanViewGalley()` (`IssueAction::subscriptionRequired()`, the publication's `accessStatus`, `subscribedUser()`, `subscribedDomain()`, a purchased issue or article), and `ArticleHandler::view()` assigns `jatsDownloadUrl` on the visibility alone; OJS only registers the route (`api/v1/submissions/index.php`). The generated body is the `jatsTemplate` plugin's `ArticleBody::create()`, from the first galley it can read: HTML first, a PDF only with a `[search] index[application/pdf]` text helper configured (commented out by default). Introduced by pkp-lib `5f5066e1f6` and ojs `5f24ac954d` (Touhidur Rahman, 2026-02-13, `pkp/pkp-lib#10405`, from `pkp/pkp-lib#10436`); `pkp/pkp-lib#12728` (same author, `3ce03ceafe` 2026-05-13 and `7bec8ae39e` 2026-07-07) later made the download respect Settings bullet 2 and left subscriptions out. Live-probed 2026-09-30 (A22; Actors row 7), OJS `main` at `9d9f116f38`, lib/pkp `fab29cfeca`, as `dbarnes`: "Publishing Mode" set to subscriptions, Vol. 1 No. 2 "Access status" "Subscription", an active individual subscription for `zwoods`; two articles in that issue each given a new version, one with an HTML galley, one with an uploaded JATS file with a `<body>`, box ticked, published. Signed out and as `ddiouf` (Reader, no subscription): the galley answered 302 (to the Login page with "subscription required", to `about/subscriptions`), `…/jats/download` answered 200 with the article's text in `<body>`, and the article page listed "JATS XML" beside the galley marked restricted; `zwoods` and `dbarnes` got 200 on both. A PDF-only version gave a JATS with no `<body>`. Not tried live: institutional subscriptions, purchases, delayed open access. Proposed fix: before serving a published version, apply the galley's access decision (an OJS subclass of the controller or a hook, since `IssueAction` is OJS code), refusing with 403 or redirecting like the galley; send `Cache-Control: private` whenever the answer depends on the requester, not `public, no-cache`; show the link in `ArticleHandler::view()` / `article_details.tpl` only when `$hasAccess`. Patched temporarily and reverted: hiding the link alone left the address serving the text; the controller check with the link hidden answered 403 signed out and for `ddiouf`, 200 with `Cache-Control: no-store, private` for `zwoods` and `dbarnes`, and an article set to open access opened to all. Release check: 3.5, 3.4 and 3.3 do not have it; `stable-3_5_0`'s `PKPJatsController` has only the role-gated get, add and delete routes and no `jatsPublicVisibility`, and 3.4 and 3.3 have no JATS files. OMP and OPS do not register the route and have no subscriptions.
-Security-shaped and unreleased: its issue report carries "- **Security** unreleased" (REPORT.md).
-Issue report: [pkp-e2e-sec#3](https://github.com/jardakotesovec/pkp-e2e-sec/issues/3) ([docs/issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md](../issues/U48-A22-subscription-jats-xml-served-to-refused-visitors.md)).
 
 <a id="fn-f-a23"></a>
 **f-a23** — Rule 24, note d32. `PKP\bodyText\Repository::createGalleyFile()` looks for the version's generated galley inside `DB::transaction()` and adds one when none is found, with no lock: the publication-row `lockForUpdate()` ("Serialize concurrent exports so they cannot create duplicate galleys") of `0d1717f2d4` and `d830a2a01b` was removed by `85e618b07f` (Vitaliy, 2026-10-20, `pkp/pkp-lib#13545` for `pkp/pkp-lib#13543`, merged 2026-11-07). Probe 2026-11-09, OJS `407246bb8e`, lib/pkp `6035a6fed8`, dataset fleet freshly reset, `race.js` (a second PHP server with `PHP_CLI_SERVER_WORKERS=4`, `dbarnes`): four simultaneous HTML exports of submission 15 / publication 16 answered 201 with galley ids 6, 4, 5, 4 and left HTML galleys 4, 5, 6 (files 48, 49, 47); four PDF exports of submission 5 / publication 6 answered 8, 7, 7, 7 and left PDF galleys 7, 8. Two or three galleys of four in each of eight runs since 2026-10-23. The lock restored (`lock-fix.diff` in the kit) left one galley each, tried at the PR's rounds 3 and 4.

@@ -18,7 +18,7 @@
  * Not covered, by register ID (the spec's Coverage section is the record of
  * everything else left out; 🐞 findings are never asserted as contract,
  * PRINCIPLES M3, and a claim parked on an open ❓ is not a coverage gap):
- * A2, A13, A15, A19, A21, A22, OJS1, OMP5, OPS3 (🐞); A3, A5, A6, A8, A11,
+ * A2, A13, A15, A19, A22, OJS1, OMP5, OPS3 (🐞); A3, A5, A6, A8, A11,
  * A12, A14, A17, A18, A20, OJS2, OMP3, OPS2 (❓). Retired: A1, A10.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster

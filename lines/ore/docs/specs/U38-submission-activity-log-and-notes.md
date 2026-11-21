@@ -236,9 +236,7 @@ preprint server an Editorial Board Member). <sup>c</sup>
    - a file a reviewer uploaded has its line read "Anonymous Reviewer",
      with no file name and no "Download";
    - review-change lines offer no "View changes", whatever the review
-     type. The link's own address (…/view-review-change?submissionId={n}&logEntryId={n},
-     note td14), typed into the browser's address bar unchanged, still
-     shows this reader the change ⚠ [A12](#a12);
+     type;
    - the line of an editor's "Revert Decision" ("{editor} has marked the
      round {n} review for submission {number} as unconsidered.") reads
      "Anonymous Reviewer" under "User", whatever the review type.
@@ -532,7 +530,6 @@ Left out of the scenarios above, by reason:
   - the Editor and the Production editor {OJS OMP}, and the Guest Editor {OJS} (Actors row 1): the Journal Manager's and the Section Editor's offer, which scenario 1 reads
 - **Register carries it**:
   - A2 (an empty note; Rule 10a)
-  - A12 (the author-editor opening a review change from the "View changes" address; Rule 9)
 - **No seed**:
   - a Site Administrator whose journal roles are all assistant roles: "Notes" alone, no "Delete" (Actors rows 1, 2, 4, 5; A4)
   - a reviewer's file line read by the author-editor: "Anonymous Reviewer", no file name, no "Download" (Rule 9)
@@ -557,7 +554,6 @@ unless an entry notes otherwise; the team settles them on spec review.
 | [A7](#a7) | Activity Log file lines show an empty file name when read in a language other than the submission's | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A9](#a9) | After closing drops a typed note, the next page change asks "Leave site?" with nothing typed | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A10](#a10) | After a switch to "History" discarded a typed note, "Close" asks again whether to continue without saving | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
-| [A12](#a12) | An editor who is also the submission's author is offered no "View changes", but the link's address shows them the edited review's old and new text | 🐞 | user-visible | — |
 | [OMP1](#omp1) | A press's activity log prints "{$formatName}" instead of the format's name when a publication format is created or deleted | 🐞 | low | issues (claude), 2026-10-04 — re-verified |
 | [A4](#a4) | A Site Administrator whose journal roles are all assistant roles gets "Notes" alone | ❓ | latent | — |
 | [A8](#a8) | An "Open" review's assignment line reads "Anonymous Reviewer" for an editor who is also the author | ❓ | minor | — |
@@ -688,25 +684,6 @@ rightly asks nothing. A user asked twice cannot tell whether the text
 was kept.
 Basis: probe, 2026-10-04. <sup>[f-a10](#fn-a10)</sup>
 
-<a id="a12"></a>
-**A12 — An editor who is also the submission's author is offered no "View changes", but the link's address shows them the edited review's old and new text** {OJS OMP} · 🐞 · user-visible.
-A person who is one of a submission's authors and is also assigned to it
-as its Section Editor (Series Editor on a press) sees the line "The
-following was modified in this review: Comments. Select "View changes"
-to see a detailed summary of all modifications." on its "History", with
-no arrow and no "View changes" (Rule 9). The link's own address (note
-td14), typed in the browser's address bar, all the same shows them the
-change: the tab
-shows a line of raw text holding "Updated Comments" with the editor's
-new text and "Previous Comments" with the text the reviewer wrote. The
-address is expected to refuse this reader, as the list does. The
-reviewer is not named. An Author who holds no editor role on the
-submission is refused ("The current role does not have access to this
-operation."), and the submission's other editors read the change through
-the link as before.
-Security: unreleased.
-Since: 2026-08-20 · Basis: probe, 2026-10-13. <sup>[f-a12](#fn-a12)</sup>
-
 ### OMP
 
 <a id="omp1"></a>
@@ -740,6 +717,9 @@ Basis: probe, 2026-10-04. <sup>[f-omp1](#fn-omp1)</sup>
 
 <a id="a11"></a>
 **A11 — A submission's activity log "View changes" opens any edited review on the site by its number, not only the submission's own** {OJS OMP} · ✅ · retired. Fixed upstream (pkp/pkp-lib#13465).
+
+<a id="a12"></a>
+**A12 — Withdrawn from this register** · ✅ · retired. Kept outside this repo.
 
 ---
 
@@ -1371,8 +1351,7 @@ and never checked that the entry belonged to the request's
 `submissionId`; the role and workflow checks (managers, site
 administrators, sub-editors) cover only that `submissionId`. The grid's
 own list, `SubmissionEventLogGridHandler::getReviewChangeEntries()`, was
-scoped correctly, and `EventLogGridRow` hides the action from an assigned
-author, but the endpoint checked neither. Entries carry `assocType` review
+scoped correctly, but the endpoint did not apply that scope. Entries carry `assocType` review
 assignment (517) or submission review comment (1048595), so the
 `assocType`/`assocId` check the "View Email" fix uses would have refused
 every legitimate "View changes" too. Introduced by pkp/pkp-lib#13192
@@ -1447,57 +1426,9 @@ Not driven on 2026-10-09: the review-form and competing-interests lines
 (their write sites carry the same added `submissionId`), the read from
 another journal (the dataset holds one journal per app; submission
 numbers run across the site and the entry must name the request's own
-submission), an editor who is also an author of the submission asking by
-the address for one of its own lines (the list offers them no link, Rule
-9; `viewReviewChange()` does not read `_isCurrentUserAssignedAuthor`),
-and OPS (no reviews). The author-editor's case was driven 2026-10-13
-and answers the change (A12, f-a12); the same day's walk on OJS `main`
+submission), and OPS (no reviews). A walk on 2026-10-13 on OJS `main`
 (ojs `7c6fba2064`) saw the 2026-10-09 refusals and controls unchanged.
 Issue report: [pkp-e2e#925](https://github.com/jardakotesovec/pkp-e2e/issues/925) (filed as "- **Security** unreleased", REPORT.md), closed 2026-10-09 with the fix; the report and its tried fix deleted (git keeps them), its walk kept under `shared/playwright/checks/issues/activity-log-view-changes-reads-any-review/`.
-
-<a id="fn-a12"></a>
-**f-a12** — Notes f, m and td14. `EventLogGridRow` withholds
-`ReviewChangeLinkAction` when `_isCurrentUserAssignedAuthor` is set (by
-`SubmissionEventLogGridHandler::authorize()`, which
-`SubmissionReviewEventLogGridHandler` inherits), but
-`SubmissionReviewEventLogGridHandler::viewReviewChange()` never reads the
-flag: it checks only the role assignment (manager, site administrator,
-sub-editor) and, since pkp/pkp-lib#13465 (f-a11), that the entry's stored
-`submissionId` is the request's submission. `formatReviewChange()` serves
-the recommendation, review-form and competing-interests changes the same
-way (read in the code, not driven). Proposed fix: answer
-`viewReviewChange` with a refusal when `_isCurrentUserAssignedAuthor`.
-Since 2026-08-20: the op came with pkp/pkp-lib#13192 (f-a11), and until
-pkp/pkp-lib#13465 this reader's case was part of A11. 3.5, 3.4 and 3.3
-have neither the review-change lines nor the op (f-a11).
-Live-probed 2026-10-13, OJS `main` (ojs `7c6fba2064`, lib/pkp
-`f4c2578c94`) and OMP `main` (omp `eb9381314`, the same lib/pkp), PKP's
-default test dataset freshly loaded, two runs per app, kept script
-`shared/playwright/checks/U27/S13/row55.js`: `dbarnes` changed the
-comments of a review in "Modify Review" and saved (OJS submission 10,
-entry 347; OMP submission 16, entry 641). The submission's own author
-account (OJS `jnovak`, OMP `mpower`) was given the Section editor
-group and a Section editor assignment on that submission, set directly
-in the database of the disposable dataset (its stage roles then
-Sub-editor and Author); with the journal role alone the submission
-answered "You don't currently have access to that stage of the
-workflow.". Signed in as that account, "Activity Log" listed the
-review-change line with no arrow; `…/$$$call$$$/grid/event-log/submission-review-event-log-grid/view-review-change?submissionId=10&logEntryId=347`
-(OMP `submissionId=16&logEntryId=641`) typed into the address bar
-answered 200 with the tab
-`{"status":true,"content":"<form class=\"pkp_form\"><div><h3>Updated Comments</h3>…`
-holding the editor's new text and, under "Previous Comments", the
-reviewer's original text. No server error in any run. Controls the same
-day, OJS: `zwoods` (Author of submission 19, no editor role) on its own
-submission's address and `svogt` (Copyeditor) were refused with "The
-current role does not have access to this operation."; `dbarnes` read
-the change through the link. Not driven: the route a team would take to
-the dual role (Users & Roles, then Participants › "Assign" › Section
-editor on that account; scenario 4's recipe, s0, builds the same reader
-through the scenario API), the recommendation, review-form and
-competing-interests changes, and OPS (no reviews). Security-shaped and
-unreleased: its issue report will carry "- **Security** unreleased"
-(REPORT.md).
 
 <a id="fn-omp1"></a>
 **f-omp1** — Note o. Live-probed 2026-09-23 (the submission-files claim

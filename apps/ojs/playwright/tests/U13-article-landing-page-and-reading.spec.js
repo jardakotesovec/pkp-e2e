@@ -19,7 +19,7 @@
  * - A11 🐞: S1's keywords are read in either order.
  * - OJS6 🐞: the PDF reader's arrow is named on an article in no issue only.
  * - OJS11 ❓: S6's primary IEEE citation is read as containing the chosen one.
- * - A1, A4, A7, A9, A10, A12, A13, A14, A16, OJS2–OJS5, OJS7–OJS10,
+ * - A1, A4, A7, A9, A10, A12, A13, A14, OJS2–OJS5, OJS7–OJS10,
  *   OJS12–OJS15: not on these scenarios' paths. OPS1–OPS9: the OPS tree.
  *
  * Seeding: scenario endpoints only; publicknowledge and the seeded roster
