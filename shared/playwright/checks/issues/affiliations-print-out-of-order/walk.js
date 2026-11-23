@@ -1,9 +1,10 @@
 // Kept walk of issue report docs/issues/U41-A26-affiliations-print-out-of-order.md (U41 A26): on a
-// published item, a contributor's second affiliation is added, contributors are added until the item
-// has four, and the item's page is read; "Edit" is read at the end. On PKP's default test dataset.
+// published item, a contributor's second affiliation is added and the item's page read; then, on OMP
+// and OPS, contributors are added until the item has four and the page is read again; "Edit" is read
+// at the end. On PKP's default test dataset.
 //
 // Modes (argv[2]):
-//   steps   (default) the report's Steps 1-7, and the reads beside them: the publication the
+//   steps   (default) the report's Steps 1-8, and the reads beside them: the publication the
 //           workflow page fetched, the stored rows by id, the page's citation_author_institution tags.
 //   nb      the neighbour check, read only: items that already have several contributors with one
 //           affiliation each (OJS 1, OMP 14, OPS 7): each contributor's page line against the
@@ -12,7 +13,7 @@
 // Run (main):  PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/affiliations-print-out-of-order/walk.js [steps|nb]
 // Run (3.5):   PKP_E2E_LINE=stable-3_5_0 and PROBE_RUN=r35 in front, the line's feature. Where "Add Contributor"
 //              cannot be pressed on the published version, the walk unpublishes first and publishes again
-//              after step 5; OJS is skipped there (3.5's side menu has no version entries for step 3).
+//              after step 6; OJS is skipped there (3.5's side menu has no version entries for step 3).
 // Fix trial:   PROBE_RUN=fix (steps), nb-in / nb-out (nb), with fix.diff applied or not.
 // Facts:       .reports/<feature>/<id>/a26-<mode>[-<run>]-<app>.json
 const {forEachApp, launch, signIn, screen, shot, record, sql} = require('../../../probe');
@@ -68,19 +69,25 @@ forEachApp(async (app) => {
         fact('4 stored rows (id, name)', L.storedAffiliations(app, sql, c.id, family));
         fact('4 publication the workflow fetched', seen.last);
         // step 5
-        for (let i = 0; i < c.add; i++) fact(`5 add contributor ${L.PEOPLE[i].given}`, await L.addContributor(page, L.PEOPLE[i]));
-        fact('5 publication the workflow fetched', seen.last);
-        if (unpublished) fact('5b publish again (3.5)', await L.republish(page, app, c.id));
+        fact('5 item page (contributors as in the dataset)', await L.readItemPage(page, app, c.page));
+        record(`${run}-5`, await screen(page));
+        if (!old) fact('5 query plan (beside)', L.collectorPlan(app, sql, c.id)); // main's query; 3.5 reads one contributor at a time
         // step 6
-        fact('6 item page', await L.readItemPage(page, app, c.page));
-        record(`${run}-6`, await screen(page));
-        await shot(page, `${run}-6`);
-        fact('6 item page, reloaded', await L.readItemPage(page, app, c.page));
+        if (c.add) await L.openContributors(page, wf, c.id, c.version);
+        for (let i = 0; i < c.add; i++) fact(`6 add contributor ${L.PEOPLE[i].given}`, await L.addContributor(page, L.PEOPLE[i]));
+        if (c.add) fact('6 publication the workflow fetched', seen.last);
+        if (unpublished) fact('6b publish again (3.5)', await L.republish(page, app, c.id));
         // step 7
+        fact('7 item page', await L.readItemPage(page, app, c.page));
+        record(`${run}-7`, await screen(page));
+        await shot(page, `${run}-7`);
+        fact('7 item page, reloaded', await L.readItemPage(page, app, c.page));
+        // step 8
         await L.openContributors(page, wf, c.id, c.version);
-        fact('7 Edit lists', await L.readEdit(page, wf, c).catch((e) => `not read: ${L.flat(e.message, 200)}`));
-        fact('7 publication the workflow fetched', seen.last);
-        fact('7 stored rows (id, name)', L.storedAffiliations(app, sql, c.id, family));
+        fact('8 Edit lists', await L.readEdit(page, wf, c).catch((e) => `not read: ${L.flat(e.message, 200)}`));
+        fact('8 publication the workflow fetched', seen.last);
+        fact('8 stored rows (id, name)', L.storedAffiliations(app, sql, c.id, family));
+        if (!old) fact('8 query plan (beside)', L.collectorPlan(app, sql, c.id));
     } finally {
         record(run, facts);
         await close();

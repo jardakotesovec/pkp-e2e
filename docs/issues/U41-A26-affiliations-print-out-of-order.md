@@ -5,41 +5,53 @@
 - **Kind** regression
 - **Affects**
   - main: OJS, OMP, OPS
-  - 3.5: none; OMP and OPS walked, OJS read in the code
+  - 3.5: none (no reversal seen; OMP and OPS walked, OJS read in the code)
   - 3.4: none (code; one affiliation per contributor)
   - 3.3: none (code; one affiliation per contributor)
 - **Introduced** `pkp/pkp-lib#13003`, pushed to `main` without a PR · [5f62747939](https://github.com/pkp/pkp-lib/commit/5f627479391ae83503b970e4430cf99fd72efe6e) (one query for all contributors) and [a91a65ee20](https://github.com/pkp/pkp-lib/commit/a91a65ee20892ffe6cb109df28f10db8864952ed) (its joins) · 2026-08-27 · Alec Smecher (asmecher)
-- **Upstream** none found (2026-10-13)
+- **Upstream** none found (2026-11-23)
 - **Tracked in** spec U41 [A26](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U41-contributors-and-affiliations.md#a26)
-- **Checked** 2026-10-13, each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-23, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-11-23: a number of contributors does not decide it. The
+order follows the database's query plan, which also changes with the
+tables' statistics, so the report no longer gives a contributor count
+as the threshold; the Cause now reads the contributor list each page
+sends, and the proposed test asserts the order in the query. Walked
+again on `main` and 3.5.
 
 ## Summary
 
 On a published item with several contributors, a contributor's
 affiliations print on the article, book or preprint page in the reverse
-of the order the contributor's "Edit" window lists them: the
-institution added last comes first. Nobody is told, and the form has
-no control to set the order.
+of the order they were added in, which is the order the contributor's
+"Edit" window lists them: the institution added last comes first.
+Nobody is told, and the form has no control to set the order.
 
 The reversed order also reaches the page's Google Scholar tags, the
 REST API and, by the code, the DOI deposits (Crossref, DataCite), the
 JATS and MARC records served over OAI-PMH, and the DOAJ, PubMed, ONIX
 and native XML exports. Every affiliation is still there.
 
-It shows on PostgreSQL, on PKP's test dataset from three contributors
-on a journal and by four on a press or a preprint server, and a page
-that shows it shows it on every load. It is on `main` only, so it ships
-in the next release if left alone.
+Any item with two or more contributors can show it, and which items do
+cannot be told in advance: an item that prints the order right today
+can print it reversed later, when the database refreshes its
+statistics as its tables grow. A page that shows it shows it on every
+load until then. It was seen on PostgreSQL; MySQL and MariaDB were not
+tried, and what their query planners do with the same query is not
+known. It is on `main` only, so it ships in the next release if left
+alone.
 
 ## Impact
 
 - **Lost**: the order of a contributor's affiliations in the public
   record: the item page, its citation tags, the REST API and the
   exports and deposits.
-- **Who**: readers, indexes and DOI agencies, for published items where
-  a contributor has two or more affiliations and the item has enough
-  contributors. Editors and authors do not see it in the workflow.
+- **Who**: readers, indexes and DOI agencies, for published items with
+  two or more contributors where one has two or more affiliations;
+  which of those items show it cannot be told in advance and can change
+  over time. Editors and authors do not see it in the workflow.
 - **Way round**: none. Entering the affiliations in reverse would print
   right only while the database keeps reversing them.
 
@@ -53,10 +65,15 @@ because a deposit already sent keeps the wrong order after a fix.
 Preconditions:
 
 - PKP's default test dataset for `main`, freshly loaded into
-  **PostgreSQL** (the walks ran on PostgreSQL 18.6, with the tables not
-  ANALYZEd after the load). MySQL was not tried: without an `ORDER BY`
-  its order depends on MySQL's own plan, so a MySQL install that keeps
-  the order does not prove the fault absent.
+  **PostgreSQL** (the walks ran on PostgreSQL 18.6, with no `ANALYZE`
+  run by hand). MySQL and MariaDB were not tried: without an
+  `ORDER BY` their order depends on their own plans, so an install
+  that keeps the order does not prove the fault absent.
+- What step 5 shows depends on the tables' statistics. Run nothing
+  extra to see what is written below; or, after step 4, run
+  `ANALYZE author_affiliations, authors, publications, submissions;`
+  in `psql`, after which, by the database reads in the Cause, OMP and
+  OPS show the reversed order at step 5 already.
 - Each app has a published item with several contributors, the first
   of whom has one affiliation:
   - OJS submission 1, "Signalling Theory Dividends", its published
@@ -81,38 +98,45 @@ Steps:
    version has been published. Editing it may impact the published
    content."
 4. Press "Edit" on the first contributor. Under "Affiliations", type
-   "Second Institute u41h13j", choose that typed text in the list (the
+   "Second Institute u41n23e", choose that typed text in the list (the
    entry without the ROR mark), press "Add", then "Save".
-5. OMP and OPS only (OJS's three contributors are enough): press "Add
-   Contributor", choose "Person", type the given name "Lea", the family
-   name "u41h13j", the email `lea.u41h13j@mailinator.com`, choose the
-   country "Canada", tick "Author", press "Save". On OPS add a second
-   one the same way ("Max", `max.u41h13j@mailinator.com`), so both items
-   have four contributors.
-6. Open the item's page (the header's "View", or the address above).
-7. Back on "Contributors", press "Edit" on the first contributor and
+5. Open the item's page (the header's "View", or the address above).
+6. OMP and OPS only (OJS's three contributors are enough): back on
+   "Contributors", press "Add Contributor", choose "Person", type the
+   given name "Lea", the family name "u41n23e", the email
+   `lea.u41n23e@mailinator.com`, choose the country "Canada", tick
+   "Author", press "Save". On OPS add a second one the same way ("Max",
+   `max.u41n23e@mailinator.com`), so both items have four contributors.
+7. Open the item's page again, and reload it.
+8. Back on "Contributors", press "Edit" on the first contributor and
    read "Affiliations".
 
-**Expected**: the page lists the first contributor's affiliations in
-the order "Edit" does: "University of Cape Town, Second Institute
-u41h13j" (OMP "University of Alberta, …", OPS "Indiana University,
-…").
+**Expected**: at steps 5 and 7 the page lists the first contributor's
+affiliations in the order they were added, as "Edit" does: "University of Cape Town, Second
+Institute u41n23e" (OMP "University of Alberta, …", OPS "Indiana
+University, …").
 
-**Observed**: the page reads
+**Observed**: on OJS the page at step 5 already reads
 
 ```
 Alan Mwandenga
-Second Institute u41h13j , University of Cape Town
+Second Institute u41n23e , University of Cape Town
 ```
 
-(OMP "Second Institute u41h13j , University of Alberta", OPS "Second
-Institute u41h13j , Indiana University"; the space before the comma is
+and step 7 reads the same. On OMP and OPS step 5 still lists them in
+the order added ("University of Alberta , Second Institute u41n23e",
+"Indiana University , Second Institute u41n23e"); at step 7, with four
+contributors, they read "Second Institute u41n23e , University of
+Alberta" and "Second Institute u41n23e , Indiana University" (the space
+before the comma is
 [a separate fault](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U41-A27-affiliations-space-before-comma.md)).
-A reload reads the same. The page's `citation_author_institution` tags
-and that contributor's `affiliations` in the publication the workflow
-page loads (`GET /api/v1/submissions/<id>/publications/<publicationId>`)
-are in the same reversed order. "Edit" at step 7 lists "University of
-Cape Town" first.
+A reload reads the same. Each reversed page's
+`citation_author_institution` tags and that contributor's
+`affiliations` in the publication the workflow page loads
+(`GET /api/v1/submissions/<id>/publications/<publicationId>`) are in
+the same reversed order. "Edit" at step 8 lists the institution added
+first ("University of Cape Town", "University of Alberta", "Indiana
+University") first.
 
 ## Cause
 
@@ -129,7 +153,7 @@ Two commits of `pkp/pkp-lib#13003` (reader performance) made that gap
 visible:
 
 - 5f62747939 made `PKP\author\DAO::fromRow()` load the affiliations of
-  all of a publication's contributors in one query
+  every contributor in the batch being loaded in one query
   (`Repo::affiliation()->getByAuthorIds($ids)`, a
   `whereIn('a.author_id', …)`) and group them by contributor in PHP,
   keeping the rows' order.
@@ -137,12 +161,28 @@ visible:
   that query, to read the submission's language without loading the
   contributor again.
 
-On PostgreSQL the planner picks the join plan from the number of
-contributor ids in the list. Each hash join hands back the rows of its
-hashed side that have the same `author_id` in the reverse of the order
-it read them, so an odd number of hash joins reverses a contributor's
-affiliations and an even number cancels out. On the OJS test install
-(tables not ANALYZEd):
+The batch is wider than one item's contributors. The submission DAO
+loads all of a submission's versions together
+(`PKP\submission\DAO::fromRow()`, `getData('publications')`), the
+publication DAO loads the contributors of all of them in one
+collector call, and the author DAO passes all of those ids to the
+affiliation query. The item pages reach the publication they show
+through `getData('publications')` (OJS `ArticleHandler`, OMP
+`CatalogBookHandler`, OPS `PreprintHandler`), so the query covers every
+version's contributors: for OJS submission 1, versions 1.0 and 1.1,
+`IN (1, 2, 4, 5, 6, 7)`. The workflow's load of one publication
+(`GET …/publications/{id}`) sends that version's contributors only
+(`IN (1, 2, 4)`).
+
+On PostgreSQL each hash join hands back the rows of its hashed side
+that share a key in the reverse of the order it read them, so a plan
+with an odd number of hash joins over the affiliation rows reverses a
+contributor's affiliations, and an even number cancels out. The
+planner picks the plan from its estimates of each table's size and of
+how many rows the list of ids matches, and those estimates change when
+a table is analyzed. Nothing in the query fixes the order, and no
+number of contributor ids in a batch decides it on every install.
+The query, with the ids of the lists the pages send:
 
 ```sql
 EXPLAIN (COSTS OFF)
@@ -151,29 +191,31 @@ FROM author_affiliations AS a
 JOIN authors AS au ON a.author_id = au.author_id
 JOIN publications AS p ON au.publication_id = p.publication_id
 JOIN submissions AS s ON p.submission_id = s.submission_id
-WHERE a.author_id IN (1, 2, 4);   -- then IN (1, 2)
+WHERE a.author_id IN (1, 2, 4, 5, 6, 7);
 ```
 
-```
-IN (1, 2, 4): three hash joins, order reversed
-Hash Join (s.submission_id = p.submission_id)
-  -> Hash -> Hash Join (p.publication_id = au.publication_id)
-       -> Hash -> Hash Join (au.author_id = a.author_id)
-            -> Hash -> Seq Scan on author_affiliations a
+Its joins on the dataset after step 4, with no `ANALYZE` and with an
+`ANALYZE` of the four tables after step 4:
 
-IN (1, 2): two hash joins and a nested loop, order kept
-Hash Join (s.submission_id = p.submission_id)
-  -> Hash -> Nested Loop
-       -> Hash Join (au.author_id = a.author_id)
-            -> Hash -> Seq Scan on author_affiliations a
-       -> Index Scan using publications_pkey on publications p
-```
+| Page's list | No `ANALYZE` | `ANALYZE` after step 4 |
+| --- | --- | --- |
+| OJS step 5 and 7, `IN (1, 2, 4, 5, 6, 7)` | 3 hash joins, reversed | 3 hash joins, reversed |
+| OMP step 5, `IN (45, 46, 47)` | 2 hash joins and a nested loop, kept | 3 hash joins, reversed |
+| OMP step 7, `IN (45, 46, 47, 60)` | 3 hash joins, reversed | (not read) |
+| OPS step 5, `IN (12, 13)` | 2 hash joins and a nested loop, kept | 3 hash joins, reversed |
+| OPS step 7, `IN (12, 13, 27, 28)` | 3 hash joins, reversed | (not read) |
 
-With `ORDER BY a.author_affiliation_id` both return the rows as
-stored. The plan stays the same from load to load; a change in the
-contributor count or in the tables' statistics can change it. "Edit"
-loads one contributor (`GET …/contributors/{id}`), a list of one id,
-which keeps the stored order.
+The left column matches what the walk's pages showed at each step.
+With its default settings PostgreSQL's autovacuum analyzes a table
+once 50 rows plus a tenth of the table have changed, so on a live
+install the plan, and with it the order, can change as the tables grow.
+With `ORDER BY a.author_affiliation_id` the rows come back as stored.
+
+"Edit" loads one contributor (`GET …/contributors/{id}`), the same
+query for a list of one id, and 3.5 loads each contributor's
+affiliations on their own with no join (`getByAuthorId()`). Both
+returned the order added in every run, but with no `ORDER BY`
+PostgreSQL does not promise that either; the fix orders them too.
 
 Reach:
 
@@ -183,6 +225,11 @@ Reach:
   `getLocalizedAffiliationNamesAsString(null, ', ')` (code).
 - The Google Scholar tags (`citation_author_institution`) and the REST
   API's publication (walked).
+- By the code, OJS's Articles report and OMP's Monograph Report, which
+  load all of the context's submissions in one collector call, so one
+  affiliation query covers every contributor of the journal or press,
+  and print `getLocalizedAffiliationNamesAsString()` per contributor.
+  OPS has no such report.
 - By the code, the exports that read `$publication->getData('authors')`
   and loop `getAffiliations()`: the Crossref and DataCite deposits, the
   JATS template (also what OAI-PMH serves as JATS), PubMed, ONIX,
@@ -224,7 +271,9 @@ the page, the tags, the API, the exports and a new version's copy all
 follow. It keeps both purposes of `#13003`: one query per publication,
 and the submission's language from the join.
 
-Tried on OJS, OMP and OPS `main`: after the Steps each page, its tags
+Tried on OJS, OMP and OPS `main` (2026-10-13; the collector is
+unchanged since, and the diff applies to today's tip as it stands):
+after the Steps each page, its tags
 and the workflow's load of the publication listed the first
 contributor's affiliations in the order added. Pages whose contributors
 have one affiliation each read the same with the fix in and out, each
@@ -246,17 +295,24 @@ contributor with their own institution and in the contributors' order.
 - The CRediT roles are loaded the same way, in the same
   `PKP\author\DAO::fromRow()`:
   `creditContributorRole\Repository::getCreditRolesGroupedByContributorIds()`
-  is a `whereIn` with a join and no order, so a contributor's CRediT
-  roles may print reversed too (code, not walked; not in this diff). I
+  is a `whereIn` with a join (`withCreditRoles()`) and no order, so a
+  contributor's CRediT roles may print reversed too (code, not walked;
+  not in this diff). It is the only other batched loader there without
+  an order: `getContributorRolesGroupedByContributorIds()` orders by
+  `contributor_role_id`. I
   recommend ordering that query in the same PR, after a check that it
   shows; the team decides.
 - No data repair: no release carries the batched query. Only installs
   that run `main` can hold a new version made since 2026-08-27 with
   reversed rows (by the code).
 - Backport: none needed (3.5 is not affected).
-- Guard: a unit test of `getByAuthorIds()` over several contributors,
-  each with two affiliations, or a check that a page with four
-  contributors lists a contributor's affiliations as "Edit" does.
+- Guard: a unit test that the collector's query names the order,
+  since a test of the returned rows passes or fails with the plan:
+  `Repo::affiliation()->getCollector()->filterByAuthorIds([1, 2])->getQueryBuilder()->orders`
+  holds `a.author_affiliation_id` (or, for a test of the rows, one
+  that runs with `SET enable_nestloop = off` and `enable_mergejoin = off`
+  on PostgreSQL, which forces the three hash joins that reverse them:
+  a database read on OPS's two-contributor list confirmed it).
 
 Small: one line in the shared collector, and a test.
 
@@ -264,34 +320,68 @@ Small: one line in the shared collector, and a test.
 
 - Kept script:
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/affiliations-print-out-of-order/walk.js)
-  (helpers in `lib.js` beside it). It takes the Steps (on OJS it also
-  added one contributor at step 5) and reads, beside them, the
-  publication the workflow page loads, the page's
-  `citation_author_institution` tags and the stored rows
-  (`author_affiliations` by id). Its `nb` mode (the neighbour check)
-  reads the same three pages, unchanged, against the stored rows. Run:
+  (helpers in `lib.js` beside it, which holds everything it needs). It
+  takes the Steps and reads, beside them, the publication the workflow
+  page loads, the page's `citation_author_institution` tags, the stored
+  rows (`author_affiliations` by id) and, at steps 5 and 8, the plan and
+  rows of the collector's query for the contributor ids the item page
+  sends (every version's). Its `nb`
+  mode (the neighbour check) reads the same three pages, unchanged,
+  against the stored rows. Run:
   `PROBE_FEATURE=<feature> PROBE_AGENT=<id> node bin/probe.js all shared/playwright/checks/issues/affiliations-print-out-of-order/walk.js [steps|nb]`.
-- Walked on `main`, OJS, OMP and OPS, on PostgreSQL 18.6, with
-  pkp/datasets 384e28b (2026-10-12). MySQL not tried.
+- Walked 2026-11-23 on `main`, OJS, OMP and OPS, on PostgreSQL 18.6,
+  with pkp/datasets abdb5d17 (2026-11-22), no `ANALYZE` run by hand.
+  The plan read beside each page matched it: three hash joins where the
+  page was reversed (OJS steps 5 and 7, OMP and OPS step 7), two hash
+  joins and a nested loop where it kept the order (OMP and OPS step 5).
+  On OJS that walk's read used the published version's ids
+  (`IN (1, 2, 4)`, the same three hash joins); `lib.js` now builds the
+  page's list, every version's ids. MySQL and MariaDB not tried.
+- The plan table in the Cause: database reads on copies of the same
+  dataset loaded beside the fleet, each in a transaction rolled back
+  afterwards: the step 4 affiliation inserted as the form stores it
+  (a new `author_affiliations` row, the highest id), the step 6
+  contributors as `authors` rows, then `EXPLAIN` and the rows of the
+  collector's query for the page's list, with no `ANALYZE` and with an
+  `ANALYZE` of the four tables after the inserts. The pages themselves
+  were not read in the analyzed state.
+- The earlier finding that two contributors are enough on items made
+  fresh comes from walks on the campaign's own test installs (spec U41
+  [A26](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U41-contributors-and-affiliations.md#a26),
+  its evidence footnote), not from PKP's dataset.
 - 3.5: the Steps walked on OMP and OPS `stable-3_5_0` (the published
   version is editable there too, under the same warning) kept the order
-  added. OJS is read in the code, because 3.5's side menu has no
-  version entries for step 3: 3.5's lib/pkp (OJS f4f8fcdbc0, OMP and
-  OPS 8094f06bf5, the same `Collector`) reads `author_affiliations`
-  alone, one contributor at a time (`PKP\author\DAO::fromRow()` calls
-  `getByAuthorId()`), with no join and no order, which returns the
-  table's stored order.
-- Tips: `main` OJS 7c6fba2064, OMP eb93813147, OPS 1bc3f78888 (lib/pkp
-  f4c2578c94 in all three); `stable-3_5_0` OJS 5fc74d6213, OMP
-  486cbf9eb0, OPS 399c4ebca3.
-- 3.4 and 3.3 (code): lib/pkp `stable-3_4_0` 55c8e406b3 and
-  `stable-3_3_0` 5e84acd11b have no `classes/affiliation/`, and their
+  added at steps 5 and 7 (the script's plan read is `main`'s query and
+  is skipped there). OJS is read in the code, because 3.5's side
+  menu has no version entries for step 3: 3.5's lib/pkp (9295edd4f0 in
+  all three, the same `Collector`) reads `author_affiliations` alone,
+  `where('a.author_id', '=', …)` for one contributor at a time
+  (`PKP\author\DAO::fromRow()` calls `getByAuthorId()`), with no join
+  and no order; in these walks it returned the stored order, which
+  PostgreSQL does not promise.
+- Tips: `main` OJS 1e1d3fc49b, OMP bdfae3fe79, OPS 69d3cf6bad (lib/pkp
+  3ea73a1a7e in all three); `stable-3_5_0` OJS 7f23f05a93, OMP
+  272333e34f, OPS 5a7aec98df.
+- 3.4 and 3.3 (code): lib/pkp `stable-3_4_0` 1310f00fed and
+  `stable-3_3_0` cb68f48e99 have no `classes/affiliation/`, and their
   `schemas/author.json` holds one multilingual `affiliation` string.
 - Introduced: `git blame` on `getQueryBuilder()` gives d7c67a46fe
   (`pkp/pkp-lib#7135`, 2025) for the query without an order, and the
   two `#13003` commits for the `whereIn` and the joins; both are on
-  `main`'s first-parent line.
-- Upstream: `pkp/pkp-lib#13003` (open) is the performance work, and
-  names no ordering of affiliations.
+  `main`'s first-parent line. The collector's query is unchanged since
+  a91a65ee20. `PKP\author\DAO::fromRow()`'s affiliation loader was
+  edited later in `#13003` (d9f2b97af0 collects the lazy collection
+  before grouping, becef1b706 keeps the rows keyed by id); neither adds
+  an order.
+- Upstream (2026-11-23): searched pkp/pkp-lib, pkp/ojs, pkp/omp, pkp/ops
+  and pkp/ui-library for the symptom's words and for `getByAuthorIds`
+  and the collector's `orderBy`; no issue or PR is about the order of
+  affiliations. `pkp/pkp-lib#13003` (the performance work, now closed)
+  names none.
+- Fix trial: run 2026-10-13 on OJS, OMP and OPS `main`
+  (`node bin/try-fix.js apply shared/playwright/checks/issues/affiliations-print-out-of-order/fix.diff ojs omp ops`,
+  the script's `steps` under `PROBE_RUN=fix`, `nb` under `nb-in` and,
+  after the revert, `nb-out`). Not run again: the collector is
+  unchanged, and the diff applies to today's tips (`patch --dry-run`).
 - Not driven: an affiliation picked from the registry, "Create New
   Version", the exports and the CRediT roles (code only, as above).

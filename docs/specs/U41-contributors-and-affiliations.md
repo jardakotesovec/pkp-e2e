@@ -1184,7 +1184,7 @@ badges, Impact and Basis: [Reading a spec](GLOSSARY.md#reading-a-spec).
 | [A12](#a12) | The button that deletes a contributor role is labelled with a warning question, not the action | 🐞 | low | issues (claude), 2026-10-03 — re-verified |
 | [OPS2](#ops2) | On a preprint server, the contributor form labels "Competing Interests" with raw link markup | 🐞 | low | issues (claude), 2026-11-23 — re-verified |
 | [A25](#a25) | A contributor's later CRediT rows have unnamed drop-downs, and a click on their labels edits the first row | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
-| [A26](#a26) | On an article, book or preprint page with several contributors, a contributor's affiliations print in reverse order | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
+| [A26](#a26) | On an article, book or preprint page with several contributors, a contributor's affiliations print in reverse order | 🐞 | low | issues (claude), 2026-11-23 — re-verified |
 | [A27](#a27) | A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ" | 🐞 | low | issues (claude), 2026-10-13 — re-verified |
 | [A29](#a29) | A program saving a contributor with an unknown CRediT degree gets a server error, and part of the change is kept | 🐞 | low · crash: server | issues (claude), 2026-10-29 — re-verified |
 | [A30](#a30) | A program that changes one field of a contributor through the REST API silently removes all their affiliations | 🐞 | medium | issues (claude), 2026-10-21 — re-verified |
@@ -1588,25 +1588,24 @@ Basis: probe, 2026-10-13. <sup>f-a25</sup>
 **A26 — On an article, book or preprint page with several contributors, a contributor's affiliations print in reverse order** · 🐞 · low.
 On a published item with several contributors, a contributor's
 affiliations print on the article, book or preprint page in the reverse
-of the order the contributor's "Edit" window lists them: the institution
-added last comes first. Nobody is told, and the form has no control to
-set the order.
+of the order they were added in, which is the order the contributor's
+"Edit" window lists them: the institution added last comes first.
+Nobody is told, and the form has no control to set the order.
 
-The reversed order also reaches the page's Google Scholar tags, the REST
-API and, by the code, the DOI deposits (Crossref, DataCite), the JATS
-and MARC records served over OAI-PMH, and the DOAJ, PubMed, ONIX and
-native XML exports. Every affiliation is still there.
+The reversed order also reaches the page's Google Scholar tags, the
+REST API and, by the code, the DOI deposits (Crossref, DataCite), the
+JATS and MARC records served over OAI-PMH, and the DOAJ, PubMed, ONIX
+and native XML exports. Every affiliation is still there.
 
-It shows on PostgreSQL, on PKP's test dataset from three contributors on
-a journal and by four on a press or a preprint server. On items made
-fresh, two contributors are enough: a contributor's two affiliations
-printed reversed on a two-contributor article, book and preprint, while
-on another item of the same shape they kept their order, and which
-items showed it changed from one run to the next. A page that shows it
-shows it on every load. It is on `main` only, so it ships in the next
-release if left alone.
-Basis: probe + code reading, 2026-10-13. <sup>f-a26</sup>
-Report: refresh owed — drift sweep 2026-11-20: on items made fresh, two contributors are enough for the reversed order (article, book and preprint), and which items show it changes between runs, where the report's Summary and Steps start at three contributors on a journal and four on a press or a preprint server (`PKP\affiliation\Collector::getQueryBuilder()`, its unordered query, unchanged) (2026-11-20)
+Any item with two or more contributors can show it, and which items do
+cannot be told in advance: an item that prints the order right today
+can print it reversed later, when the database refreshes its
+statistics as its tables grow. A page that shows it shows it on every
+load until then. It was seen on PostgreSQL; MySQL and MariaDB were not
+tried, and what their query planners do with the same query is not
+known. It is on `main` only, so it ships in the next release if left
+alone.
+Basis: probe + code reading, 2026-11-23. <sup>f-a26</sup>
 
 <a id="a27"></a>
 **A27 — A contributor's affiliations on an article, book or preprint page read "First Univ , Second Univ"** · 🐞 · low.
