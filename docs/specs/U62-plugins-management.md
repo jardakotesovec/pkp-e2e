@@ -1918,7 +1918,7 @@ New Plugin" of another plugin ran 1.0.1.0's `up()` from its own
 made the table, and ran none of `upgrade.xml`'s steps. Kept script
 `shared/playwright/checks/U62/I62/i62.js` (parts `web`, `cli`). No
 pkp/pkp-lib issue found by search (2026-11-23).
-Issue report: docs/issues/U62-A14-plugin-upgrade-runs-replaced-install-step.md.
+Issue report: [pkp-e2e#1108](https://github.com/jardakotesovec/pkp-e2e/issues/1108) ([docs/issues/U62-A14-plugin-upgrade-runs-replaced-install-step.md](../issues/U62-A14-plugin-upgrade-runs-replaced-install-step.md)).
 
 <a id="fn-f-a15"></a>
 **f-a15** — Live-probed 2026-11-23 (Rule 18; Side effects bullet 2;
