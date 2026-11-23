@@ -1,0 +1,23 @@
+--- a/lib/pkp/pages/submission/PKPSubmissionHandler.php
++++ b/lib/pkp/pages/submission/PKPSubmissionHandler.php
+@@ -661,6 +661,20 @@
+             ? $query->withRoleIds([Role::ROLE_ID_MANAGER, Role::ROLE_ID_SITE_ADMIN])->get()
+             : $query->withStageIds([WORKFLOW_STAGE_ID_SUBMISSION])->get(); // For non-admin users, query for the groups tht give them access to the submission stage
+ 
++        // A manager whose role holds no stage row ("Journal manager" as installed) reaches every
++        // stage of a submission made in that role (Repo::user()->getAccessibleWorkflowStages()),
++        // and PKPSubmissionController::add() accepts it, so the author roles' self-registration
++        // does not decide whether they may start one
++        if ($userGroups->isEmpty()) {
++            $userGroups = UserGroup::query()->withContextIds([$context->getId()])
++                ->withRoleIds([Role::ROLE_ID_MANAGER])
++                ->whereDoesntHave('userGroupStages')
++                ->whereHas('userUserGroups', function (EloquentBuilder $query) use ($user) {
++                    $query->withUserId($user->getId())->withActive();
++                })
++                ->get();
++        }
++
+         // Users without a submitting role or access to submission stage can submit as an
+         // author role that allows self registration.
+         // They are also assigned the author role

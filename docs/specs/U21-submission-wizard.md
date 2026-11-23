@@ -1216,7 +1216,7 @@ are the source; badges, Impact and Basis:
 | [A22](#a22) | On a phone, "Make a Submission" squeezes the "Title" box to nothing, so no submission can be started | 🐞 | medium | issues (claude), 2026-10-15 — re-verified |
 | [A23](#a23) | Once a manager edits the Author role, a user with no role who starts a submission is made "Translator" on a journal, "Chapter Author" on a press | 🐞 | minor | — |
 | [A24](#a24) | Submission wizard: a reload opens a draft on its first step with the later steps locked, and "Save for Later" there forgets the step reached | 🐞 | low | issues (claude), 2026-11-16 — re-verified |
-| [A25](#a25) | On a journal or press with self-registration off on every author role, a Journal Manager is turned away from "Make a Submission" as if they were an unregistered author | 🐞 | minor | — |
+| [A25](#a25) | A journal or press manager is turned away from "Make a Submission" once no author role allows self-registration | 🐞 | medium | issues (claude), 2026-11-23 — re-verified |
 | [OMP2](#omp2) | A press refuses the comma-separated "Notify Anyone" list its own help text asks for | 🐞 | low | issues (claude), 2026-10-01 — re-verified |
 | [OMP4](#omp4) | On a press, a submission made as "Chapter Author" cannot be saved: the title is lost, every save is refused and the wizard hangs | 🐞 | user-visible · crash: script | — |
 | [OPS3](#ops3) | A preprint author cannot delete their own draft: the wizard's "Cancel" does nothing and My Submissions refuses it | 🐞 | medium | issues (claude), 2026-10-04 — re-verified |
@@ -1623,20 +1623,24 @@ so it reopens at the recorded step.
 Basis: probe, 2026-11-16. <sup>[fn-a24](#fn-a24)</sup>
 
 <a id="a25"></a>
-**A25 — A Journal Manager is told "authors must be registered by the editorial staff" and turned away from "Make a Submission"** · 🐞 · minor.
+**A25 — A journal or press manager is turned away from "Make a Submission" once no author role allows self-registration** · 🐞 · medium.
 On a journal or press where "Allow user self-registration" is off on
-every author-role group ("Author"; on a press "Author" and "Chapter
-Author"), a Journal Manager with no other role who opens "Make a
-Submission" gets the "Not Allowed" page: "You are not allowed to submit
-to this journal because authors must be registered by the editorial
-staff. If you believe this is an error, please contact {contact}."
-("press" on a press). The dashboard sidebar still offers "Start A New
-Submission", and it leads to the same page. Yet the manager may submit:
-a start form they opened before the change still creates the
-submission, made in the manager role, with no author role added.
-An Editor, a Section Editor and an Author still get the start form, and
-a Preprint Server Manager is not affected.
-Basis: probe, 2026-11-23. <sup>[fn-a25](#fn-a25)</sup>
+every author role, a Journal Manager (Press Manager) with no other role
+who opens "Make a Submission" gets the "Not Allowed" page: "You are not
+allowed to submit to this journal because authors must be registered by
+the editorial staff." The dashboard's "Start A New Submission" still
+leads there.
+
+The manager is allowed to submit: a start form they loaded before the
+change still creates the submission, in the manager role. Giving the
+manager the Author role lets them in, as an author. Ticking
+self-registration on an author role again does too, but while it is on,
+any registered user can start a submission.
+
+Editors, Section Editors, Authors and every other role that works in the
+submission stage still get the form, and so does a site administrator
+who is a manager there. A preprint server's manager is not affected.
+Basis: probe + walk, 2026-11-23. <sup>[fn-a25](#fn-a25)</sup>
 
 <a id="a26"></a>
 **A26 — A draft reads as submitted from the moment it was started** · ❓ · minor.
@@ -3032,6 +3036,7 @@ offered "Start A New Submission", which landed on the same page, its
 links "Contact" and the contact's mail address. The Preprint Server
 manager got the form at both ends. No response of 500 or more and no
 page error in any run.
+Issue report: docs/issues/U21-A25-manager-turned-away-from-make-submission.md.
 
 <a id="fn-a26"></a>
 **fn-a26** — A26. Mechanism: note e (`Repo::submission()->add()`'s
