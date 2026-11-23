@@ -1223,8 +1223,7 @@ five or more names in one compact byline ([OMP1](#omp1)) shows every
 affiliated contributor as "{name}, ;", the comma with nothing after it.
 That holds for a book's contributors, a chapter page's authors and an
 edited volume's volume editors.
-Basis: code reading + probe, 2026-10-03. <sup>f-a1</sup>
-Report: refresh owed — drift sweep 2026-11-20: the wizard's "Review" step lists each contributor with its role badges and "Primary Contact" ("Ada Author Primary Contact Author Wendy Wizard Author"), not "by name alone" as the report's Summary and Observed say (`lib/pkp/templates/submission/review-contributors.tpl`, `SubmissionWizardPage.vue::getAuthorName()`) (2026-11-20)
+Basis: code reading + probe, 2026-11-23. <sup>f-a1</sup>
 
 <a id="a2"></a>
 **A2 — Deleting the primary contact leaves none** · ❓ · user-visible.

@@ -9,19 +9,24 @@
   - 3.4: none (code)
   - 3.3: none (code; no contributor list or wizard of this kind)
 - **Introduced** `pkp/pkp-lib#10880` (with `pkp/ui-library#507`) for `pkp/pkp-lib#7135` · [d7c67a46fe](https://github.com/pkp/pkp-lib/commit/d7c67a46fee724dfc003eb4b650021b5edb8e915) · 2025-02-06 · Bozana Bokan (bozana), commit by GaziYucel
-- **Upstream** none found (2026-10-03)
+- **Upstream** none found (2026-11-23)
 - **Tracked in** spec U41 [A1](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/specs/U41-contributors-and-affiliations.md#a1) (the workflow and wizard half; the press book page half is [its own report](https://github.com/jardakotesovec/pkp-e2e/blob/main/docs/issues/U41-A1-book-page-long-credits-dangling-comma.md))
-- **Checked** 2026-10-03, each branch's tip (the commits in Evidence)
+- **Checked** 2026-11-23, each branch's tip (the commits in Evidence)
 - **Model** claude-opus-5-5
+
+Update 2026-11-23: the wizard's "Review" step, read row by row, shows
+each contributor's name followed by the "Primary Contact" and role
+badges, not the name alone as this report first said. The affiliation
+is still missing from every row, on `main` and 3.5.
 
 ## Summary
 
 A submission's "Contributors" list, in the workflow and in the
 submission wizard, keeps a line under each contributor's name for their
 affiliation. That line is always empty, even when the contributor's
-"Edit" window lists an affiliation. The wizard's "Review" step lists
-each contributor by name alone, where it is built to show "name,
-affiliation".
+"Edit" window lists an affiliation. The wizard's "Review" step shows
+each contributor's name and role badges but never the affiliation,
+which it is built to show after the name.
 
 The affiliations are stored and reach the reader pages; only these two
 displays miss them. An editor checking who the contributors are, and
@@ -72,7 +77,8 @@ Wizard:
    Submission".
 7. Press "Continue" until "Contributors". Press "Edit" on your own row,
    read "Affiliations", close the window.
-8. Press "Continue" until "Review" and read its "Contributors" section.
+8. Press "Continue" until "Review" and read each row of its
+   "Contributors" section: the name, then the badges after it.
 
 **Expected**: each row shows the contributor's affiliation on the line
 under the name: OJS "University of Alberta" and "University of
@@ -80,12 +86,15 @@ Victoria"; OMP "University of British Columbia", "University of
 Alberta", "Athabasca University", "University of Calgary"; OPS
 "University of Bologna". These are the institutions the "Edit" windows
 list. At step 7 the row shows "University of Bologna" (OMP "University
-of Calgary"), and Review lists "Carlo Corino, University of Bologna"
-(OMP "Arthur Clark, University of Calgary").
+of Calgary"), and Review's row reads "Carlo Corino, University of
+Bologna", then the badges "Primary Contact" and "Author" (OMP "Arthur
+Clark, University of Calgary", then the same badges).
 
 **Observed**: the line under every name is empty, in the workflow and
-in the wizard, while each "Edit" window lists the affiliation. Review
-lists "Carlo Corino" (OMP "Arthur Clark") with no affiliation.
+in the wizard, while each "Edit" window lists the affiliation. Review's
+row reads "Carlo Corino Primary Contact Author" (OMP "Arthur Clark
+Primary Contact Author"): the name, the "Primary Contact" badge and the
+role badge, with no affiliation.
 
 ## Cause
 
@@ -103,12 +112,13 @@ Two readers in ui-library were left on the old property:
   the `#item-subtitle` slot: `{{ localize(item.affiliation) }}`.
 - `src/components/Container/SubmissionWizardPage.vue`
   `getAuthorName()`: `this.localize(author.affiliation)`, which
-  `lib/pkp/templates/submission/review-contributors.tpl` calls for each
-  name on the Review step.
+  `lib/pkp/templates/submission/review-contributors.tpl` calls for the
+  name of each Review row.
 
 `localize()` of `undefined` returns `''` (`src/utils/i18n.js`), so
-both fail silently. The same PR changed, in this panel, only the code
-that loads `affiliations` into the edit form (ui-library 682f8e94).
+both fail silently. In this panel, `pkp/ui-library#507` (682f8e94),
+which went with that change, changed only the code that loads
+`affiliations` into the edit form.
 The mocks still use the old shape (`src/mocks/authors.js`,
 `src/mocks/contributor.js`, and the `ContributorsListPanel.stories.js`
 items), so the Storybook story shows the line filled.
@@ -199,8 +209,8 @@ Read `affiliations` in both places and join the localized names.
 ```
 
 Tried on OJS, OMP and OPS `main`: every row showed its affiliation, and
-Review listed "Carlo Corino, University of Bologna" (OMP "Arthur Clark,
-University of Calgary"). With a second affiliation, "Second Institute",
+Review's row read "Carlo Corino, University of Bologna" (OMP "Arthur
+Clark, University of Calgary") before its badges. With a second affiliation, "Second Institute",
 added in the "Edit" window (type the name, choose the typed text,
 "Add", "Save"), the row read "University of Bologna, Second Institute"
 and Review "Carlo Corino, University of Bologna; Second Institute". On
@@ -224,7 +234,11 @@ submission 1, OMP 2, OPS 2), the rows without one stayed blank.
   shape, so the stories show what the app sends.
 - No data repair and no API change.
 - Backport: the same diff applies to `stable-3_5_0`'s ui-library
-  unchanged (checked with a dry run). 3.4 needs nothing.
+  (a dry run only; not tried there). 3.5 then needs the app's
+  JavaScript build, since its generated
+  `registry/uiLocaleKeysBackend.json` lacks
+  `common.semicolonListSeparator` until the build extracts it. 3.4
+  needs nothing.
 - Guard: a check that a contributor row shows the affiliation its
   "Edit" window lists.
 
@@ -234,27 +248,40 @@ Small: two short joins in two ui-library components.
 
 - Kept script:
   [walk.js](https://github.com/jardakotesovec/pkp-e2e/blob/main/shared/playwright/checks/issues/contributor-rows-no-affiliation/walk.js)
-  (helpers in `lib.js` beside it). It takes the Steps and reads each
-  contributor's stored affiliations (`author_affiliations`), which
-  match the "Edit" windows. `MODE=two` adds the second affiliation in
-  steps 4 and 7; `MODE=neighbour` reads the mixed lists.
-  The walks gave the new submission another title; the title plays no
-  part.
-- Walked on `main` and `stable-3_5_0`, OJS, OMP and OPS, on PostgreSQL,
-  with pkp/datasets 566bb1f (2026-10-03). 3.5's ui-library d4e01883 has
-  the same two reads (`ContributorsListPanel.vue` line 58,
-  `SubmissionWizardPage.vue` line 380), and 3.5's `author.json` has
-  only `affiliations`.
-- Tips: `main` OJS ff004d0973 (lib/pkp 987776cd04, ui-library
-  64d67363), OMP 3b0ecf794c and OPS c8af945bb7 (lib/pkp 3dc90c81a6,
-  ui-library 280f98c5; both ui-library commits hold the two files
-  byte for byte the same); `stable-3_5_0` OJS c1cee76b95 (lib/pkp
-  771474347e), OMP 9c5e24246c and OPS 38b61882d3 (lib/pkp cf3f984335),
-  ui-library d4e01883 in all three.
-- 3.4 (code): lib/pkp `stable-3_4_0` 767353f4fe still defines
+  (helpers in `lib.js` beside it), run with
+  `PROBE_FEATURE=<feature> PROBE_AGENT=<agent> node bin/probe.js all shared/playwright/checks/issues/contributor-rows-no-affiliation/walk.js`
+  on an install freshly reset to the default dataset. It takes the
+  Steps, reads each Review row both as its name alone and whole (name
+  and badges), and reads each contributor's stored affiliations
+  (`author_affiliations`), which match the "Edit" windows. `MODE=two`
+  adds the second affiliation in steps 4 and 7; `MODE=neighbour` reads
+  the mixed lists.
+- Walked 2026-11-23 on `main` and `stable-3_5_0`, OJS, OMP and OPS, on
+  PostgreSQL, with pkp/datasets abdb5d17 (2026-11-22): the same rows and
+  the same Review text on both lines. The one request answering an
+  error was the wizard's check of the incomplete submission on reaching
+  "Review" (`PUT …/submissions/<id>/submit`, 400, "There are one or
+  more problems that need to be fixed"), which the Steps expect, since
+  they upload no file.
+- Tips: `main` OJS 1e1d3fc49b, OMP bdfae3fe7 and OPS 69d3cf6bad, with
+  lib/pkp 3ea73a1a7e and ui-library 836c01b5 in all three;
+  `stable-3_5_0` OJS 7f23f05a93, OMP 272333e34 and OPS 5a7aec98df,
+  with lib/pkp 9295edd4f0 and ui-library fd00e45f in all three.
+- Code read on both lines: `author.json` has only `affiliations`; the
+  two reads are `ContributorsListPanel.vue` line 61 and
+  `SubmissionWizardPage.vue` line 401 on `main`, lines 58 and 380 on
+  3.5. On `main`, neither component nor `src/utils/i18n.js` changed
+  between the trial's ui-library 64d67363 and today's 836c01b5.
+- Fix trial (2026-10-03, `main`, OJS, OMP and OPS):
+  `node bin/try-fix.js apply shared/playwright/checks/issues/contributor-rows-no-affiliation/fix.diff ojs,omp,ops`,
+  then the script in the default mode, `MODE=two` and
+  `MODE=neighbour`, then revert and `MODE=neighbour` again. The diff
+  still applies to today's `main` without offset and to
+  `stable-3_5_0` with offsets (`patch --dry-run -p1`, 2026-11-23).
+- 3.4 (code): lib/pkp `stable-3_4_0` 1310f00fed still defines
   `affiliation` in `schemas/author.json`, and ui-library `stable-3_4_0`
   ee684b34 reads it in the same two places, so the line is filled
-  there. 3.3 (code): lib/pkp `stable-3_3_0` ac3fa73402 also defines
+  there. 3.3 (code): lib/pkp `stable-3_3_0` cb68f48e99 also defines
   `affiliation`, and ui-library `stable-3_3_0` 96959f9e has neither
   `ContributorsListPanel.vue` nor `SubmissionWizardPage.vue`
   (contributors are a legacy grid there).
@@ -265,8 +292,10 @@ Small: two short joins in two ui-library components.
   (682f8e94) and `pkp/omp#1819`. `git blame` on the two reads gives
   older commits (`pkp/pkp-lib#6850` and `#7191`, 2021 and 2022),
   written when the property existed.
-- Upstream: `pkp/pkp-lib#10451` (closed) is about long affiliations
-  overflowing this same line in 3.4, where it was still filled: a
-  different fault, and a sign the line worked before `#7135`.
+- Upstream (searched again 2026-11-23, pkp/pkp-lib and pkp/ui-library,
+  by the symptom's words and by `getAuthorName`): `pkp/pkp-lib#10451`
+  (closed) is about long affiliations overflowing this same line in
+  3.4, where it was still filled: a different fault, and a sign the
+  line worked before `#7135`.
 - Not driven: an affiliation chosen from the registry (ROR); its
   `name` comes from the same map as a typed one (code).

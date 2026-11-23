@@ -1,14 +1,15 @@
 // Issue report docs/issues/U41-A1-contributor-rows-no-affiliation.md (U41 A1): the report's Steps to
 // reproduce, walked through the screens on PKP's default test dataset (a dataset fleet, harness.md
-// "Dataset fleets"). The kit builds nothing; the one submission the steps begin is titled "u41a wizard".
+// "Dataset fleets"). The kit builds nothing; the one submission the steps begin is titled
+// "Affiliation check u41n23b".
 //
 // Steps (default mode):
 //   1-3  dbarnes: the workflow's Publication › "Contributors" of OJS 4 / OMP 4 / OPS 1; each row's
 //        title and the line under it
 //   4    "Edit" on the first contributor: the window's "Affiliations"; "Close"
-//   5-6  the author (ccorino, OMP aclark) begins a submission "u41a wizard"
+//   5-6  the author (ccorino, OMP aclark) begins a submission "Affiliation check u41n23b"
 //   7    "Continue" to "Contributors": the own row's line; "Edit": "Affiliations"; "Close"
-//   8    "Continue" to "Review": the names its "Contributors" section lists
+//   8    "Continue" to "Review": its "Contributors" rows, the name alone and the row whole (badges)
 //   Besides the screens it reads the contributors' stored affiliations (author_affiliations).
 // MODE=neighbour (the neighbour check for fix.diff): dbarnes opens a list that mixes contributors
 //   with and without an affiliation (OJS 1, OMP 2, OPS 2): those without must keep an empty line,
@@ -17,15 +18,15 @@
 //   Institute" typed and added in step 4's and step 7's "Edit" windows ("Add", "Save"), so the rows
 //   and Review show a contributor with two affiliations.
 //
-// Reset first:  PATH=/Applications/Postgres.app/Contents/Versions/latest/bin:$PATH npm run fleet-prep -- --feature issues-u41a --dataset 5 --reset
-// Run (main):   PROBE_FEATURE=issues-u41a PROBE_AGENT=u41a node bin/probe.js all shared/playwright/checks/issues/contributor-rows-no-affiliation/walk.js
-// Neighbour:    MODE=neighbour PROBE_RUN=nb-out PROBE_FEATURE=issues-u41a PROBE_AGENT=u41a node bin/probe.js all …/walk.js
-// Run (3.5):    PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=issues-u41a-3_5 PROBE_AGENT=u41a node bin/probe.js all …/walk.js
-// Facts: .reports/<feature>/u41a/walk[-<run>]-<app>.json, screens NN-<name>[-<run>]-<app>.json
+// Reset first:  npm run fleet-prep -- --feature <feature> --dataset <n> --reset
+// Run (main):   PROBE_FEATURE=<feature> PROBE_AGENT=<agent> node bin/probe.js all shared/playwright/checks/issues/contributor-rows-no-affiliation/walk.js
+// Neighbour:    MODE=neighbour PROBE_RUN=nb-out PROBE_FEATURE=<feature> PROBE_AGENT=<agent> node bin/probe.js all …/walk.js
+// Run (3.5):    PKP_E2E_LINE=stable-3_5_0 PROBE_RUN=r35 PROBE_FEATURE=<feature>-3_5 PROBE_AGENT=<agent> node bin/probe.js all …/walk.js
+// Facts: .reports/<feature>/<agent>/walk[-<run>]-<app>.json, screens NN-<name>[-<run>]-<app>.json
 const {forEachApp, launch, signIn, signOut, screen, shot, record, sql, idle} = require('../../../probe');
 const L = require('./lib');
-const C = require('../one-role-journal-contributor-save-fails/lib.js');
-const W = require('../wizard-refused-save-hangs-saving/lib.js');
+const C = L; // the helpers once required from other reports' folders now live in lib.js
+const W = L;
 
 const MODE = process.env.MODE || 'steps';
 const SUB = {
@@ -81,7 +82,7 @@ forEachApp(async (app) => {
         // 5-6: the author begins a submission
         await signOut(page);
         await signIn(page, AUTHOR[app.name]);
-        const id = await step('wizard-begin', () => W.beginSubmission(page, app, {title: 'u41a wizard', section: SECTION[app.name]}));
+        const id = await step('wizard-begin', () => W.beginSubmission(page, app, {title: 'Affiliation check u41n23b', section: SECTION[app.name]}));
         fact('wizardSubmission', id);
         if (!id) return;
 
@@ -106,6 +107,7 @@ forEachApp(async (app) => {
         }
         fact('wizardStep', await W.currentStep(page));
         fact('reviewContributors', await L.reviewContributorNames(page));
+        fact('reviewContributorRows', await L.reviewContributorRows(page));
         await snap('wizard-review');
         fact('wizardStored', sql(app, `select publication_id from publications where submission_id = ${id}`).trim().split('\n')
             .map((p) => stored(Number(p))));
